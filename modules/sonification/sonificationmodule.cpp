@@ -22,20 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/sonification/sonificationmodule.h>
-#include <openspace/engine/globals.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/util/camera.h>
-#include <glm/gtx/vector_angle.hpp>
-#include <glm/gtx/projection.hpp>
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/interaction/orbitalnavigator.h>
-#include <openspace/util/timemanager.h>
-#include <openspace/scripting/scriptengine.h>
-#include <openspace/engine/windowdelegate.h>
+#include "modules/sonification/sonificationmodule.h"
 
- //Debug purposes
-#include <iostream>
+#include "glm/gtx/projection.hpp"
+#include "glm/gtx/vector_angle.hpp"
+#include "openspace/engine/globals.h"
+#include "openspace/engine/windowdelegate.h"
+#include "openspace/interaction/navigationhandler.h"
+#include "openspace/interaction/orbitalnavigator.h"
+#include "openspace/rendering/renderengine.h"
+#include "openspace/scripting/scriptengine.h"
+#include "openspace/util/camera.h"
+#include "openspace/util/timemanager.h"
 
 //Output to SuperCollider (SC)
 #define SC_IP_ADDRESS "127.0.0.1"
@@ -53,7 +51,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnableAllInfo = {
         "EnabledallInfo",
         "All",
-        "Play sonification for all planets. Only works if the sun IS in focus."
+        "Play sonification for all planets in the solar view. "
+        "Only works if the sun IS in focus."
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableMercuryInfo = {
@@ -127,43 +126,50 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo CompareAllInfo = {
         "CompareAllInfo",
         "All",
-        "Play all sonifications for all the selected planets or turn it off. Only works if the sun IS in focus."
+        "Play all sonifications for all the selected planets or turn it off. "
+        "Only works if the sun IS in focus."
     };
 
     constexpr openspace::properties::Property::PropertyInfo CompareSizeDayInfo = {
         "CompareSizeDayInfo",
         "Size/Day",
-        "Play Size/Day sonification for all the selected planets or turn it off. Only works if the sun IS in focus."
+        "Play Size/Day sonification for all the selected planets or turn it off. "
+        "Only works if the sun IS in focus."
     };
 
     constexpr openspace::properties::Property::PropertyInfo CompareGravityInfo = {
         "CompareGravityInfo",
         "Gravity",
-        "Play Gravity sonification for all the selected planets or turn it off. Only works if the sun IS in focus."
+        "Play Gravity sonification for all the selected planets or turn it off. "
+        "Only works if the sun IS in focus."
     };
 
     constexpr openspace::properties::Property::PropertyInfo CompareTemperatureInfo = {
         "CompareTemperatureInfo",
         "Temperature",
-        "Play Temperature sonification for all the selected planets or turn it off. Only works if the sun IS in focus."
+        "Play Temperature sonification for all the selected planets or turn it off. "
+        "Only works if the sun IS in focus."
     };
 
     constexpr openspace::properties::Property::PropertyInfo CompareAtmosphereInfo = {
         "CompareAtmosphereInfo",
         "Atmosphere",
-        "Play Atmosphere sonification for all the selected planets or turn it off. Only works if the sun IS in focus."
+        "Play Atmosphere sonification for all the selected planets or turn it off. "
+        "Only works if the sun IS in focus."
     };
 
     constexpr openspace::properties::Property::PropertyInfo CompareMoonsInfo = {
         "CompareMoonsInfo",
         "Moons",
-        "Play Moons sonification for all the selected planets or turn it off. Only works if the sun IS in focus."
+        "Play Moons sonification for all the selected planets or turn it off. "
+        "Only works if the sun IS in focus."
     };
 
     constexpr openspace::properties::Property::PropertyInfo CompareRingsInfo = {
         "CompareRingssInfo",
         "Rings",
-        "Play Rings sonification for all the selected planets or turn it off. Only works if the sun IS in focus."
+        "Play Rings sonification for all the selected planets or turn it off. "
+        "Only works if the sun IS in focus."
     };
 
 
@@ -171,37 +177,43 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnableAllPlanetsInfo = {
         "EnableAllPlanetsInfo",
         "All",
-        "Play all sonifications for all the planets or turn it off. Only works if the sun is NOT in focus."
+        "Play all sonifications for all the planets or turn it off. "
+        "Only works if the sun is NOT in focus."
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableInfo = {
         "EnabledInfo",
         "All",
-        "Play all sonifications for the planet or turn it off. Only works if the sun is NOT in focus."
+        "Play all sonifications for the planet or turn it off. "
+        "Only works if the sun is NOT in focus."
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeDayInfo = {
         "SizeDayInfo",
         "Size/Day",
-        "Play Size/Day sonification or turn it off. Only works if the sun is NOT in focus."
+        "Play Size/Day sonification or turn it off. "
+        "Only works if the sun is NOT in focus."
     };
 
     constexpr openspace::properties::Property::PropertyInfo GravityInfo = {
         "GravityInfo",
         "Gravity",
-        "Play Gravity sonification or turn it off. Only works if the sun is NOT in focus."
+        "Play Gravity sonification or turn it off. "
+        "Only works if the sun is NOT in focus."
     };
 
     constexpr openspace::properties::Property::PropertyInfo TemperatureInfo = {
         "TemperatureInfo",
         "Temperature",
-        "Play Temperature sonification or turn it off. Only works if the sun is NOT in focus."
+        "Play Temperature sonification or turn it off. "
+        "Only works if the sun is NOT in focus."
     };
 
     constexpr openspace::properties::Property::PropertyInfo AtmosphereInfo = {
         "AtmosphereInfo",
         "Atmosphere",
-        "Play Atmosphere sonification or turn it off. Only works if the sun is NOT in focus."
+        "Play Atmosphere sonification or turn it off. "
+        "Only works if the sun is NOT in focus."
     };
 
     constexpr openspace::properties::Property::PropertyInfo MoonsInfo = {
@@ -221,7 +233,7 @@ namespace {
 namespace openspace {
 
 SonificationModule::SonificationModule()
-    : OpenSpaceModule("Sonification")
+    : OpenSpaceModule("Sonification"), _socket(IpEndpointName(SC_IP_ADDRESS, SC_PORT))
 {
     //Create buffer and stream to send to SuperCollider
     _buffer = new char[BUFFER_SIZE];
@@ -280,94 +292,160 @@ SonificationModule::SonificationModule()
     }
 
     //Add onChange for the properties
-    _everythingEnabled.onChange([this]() { onEverythingChanged(_everythingEnabled.value()); });
+    _everythingEnabled.onChange([this]() {
+        onEverythingChanged(_everythingEnabled.value()); });
 
     //Solar
-    _solarProperty.allEnabled.onChange([this]() { onSolarAllEnabledChanged(_solarProperty.allEnabled.value()); });
-    _solarProperty.mercuryEnabled.onChange([this]() { onSolarMercuryEnabledChanged(_solarProperty.mercuryEnabled.value()); });
-    _solarProperty.venusEnabled.onChange([this]() { onSolarVenusEnabledChanged(_solarProperty.venusEnabled.value()); });
-    _solarProperty.earthEnabled.onChange([this]() { onSolarEarthEnabledChanged(_solarProperty.earthEnabled.value()); });
-    _solarProperty.marsEnabled.onChange([this]() { onSolarMarsEnabledChanged(_solarProperty.marsEnabled.value()); });
-    _solarProperty.jupiterEnabled.onChange([this]() { onSolarJupiterEnabledChanged(_solarProperty.jupiterEnabled.value()); });
-    _solarProperty.saturnEnabled.onChange([this]() { onSolarSaturnEnabledChanged(_solarProperty.saturnEnabled.value()); });
-    _solarProperty.uranusEnabled.onChange([this]() { onSolarUranusEnabledChanged(_solarProperty.uranusEnabled.value()); });
-    _solarProperty.neptuneEnabled.onChange([this]() { onSolarNeptuneEnabledChanged(_solarProperty.neptuneEnabled.value()); });
+    _solarProperty.allEnabled.onChange([this]() {
+        onSolarAllEnabledChanged(_solarProperty.allEnabled.value()); });
+    _solarProperty.mercuryEnabled.onChange([this]() {
+        onSolarMercuryEnabledChanged(_solarProperty.mercuryEnabled.value()); });
+    _solarProperty.venusEnabled.onChange([this]() {
+        onSolarVenusEnabledChanged(_solarProperty.venusEnabled.value()); });
+    _solarProperty.earthEnabled.onChange([this]() {
+        onSolarEarthEnabledChanged(_solarProperty.earthEnabled.value()); });
+    _solarProperty.marsEnabled.onChange([this]() {
+        onSolarMarsEnabledChanged(_solarProperty.marsEnabled.value()); });
+    _solarProperty.jupiterEnabled.onChange([this]() {
+        onSolarJupiterEnabledChanged(_solarProperty.jupiterEnabled.value()); });
+    _solarProperty.saturnEnabled.onChange([this]() {
+        onSolarSaturnEnabledChanged(_solarProperty.saturnEnabled.value()); });
+    _solarProperty.uranusEnabled.onChange([this]() {
+        onSolarUranusEnabledChanged(_solarProperty.uranusEnabled.value()); });
+    _solarProperty.neptuneEnabled.onChange([this]() {
+        onSolarNeptuneEnabledChanged(_solarProperty.neptuneEnabled.value()); });
 
     //Compare
-    _compareProperty.firstPlanet.onChange([this]() { onFirstCompareChanged(_compareProperty.firstPlanet.option()); });
-    _compareProperty.secondPlanet.onChange([this]() { onSecondCompareChanged(_compareProperty.secondPlanet.option()); });
-    _compareProperty.allEnabled.onChange([this]() { onCompareAllChanged(_compareProperty.allEnabled.value()); });
-    _compareProperty.sizeDayEnabled.onChange([this]() { onCompareSizeDayChanged(_compareProperty.sizeDayEnabled.value()); });
-    _compareProperty.gravityEnabled.onChange([this]() { onCompareGravityChanged(_compareProperty.gravityEnabled.value()); });
-    _compareProperty.temperatureEnabled.onChange([this]() { onCompareTemperatureChanged(_compareProperty.temperatureEnabled.value()); });
-    _compareProperty.atmosphereEnabled.onChange([this]() { onCompareAtmosphereChanged(_compareProperty.atmosphereEnabled.value()); });
-    _compareProperty.moonsEnabled.onChange([this]() { onCompareMoonsChanged(_compareProperty.moonsEnabled.value()); });
-    _compareProperty.ringsEnabled.onChange([this]() { onCompareRingsChanged(_compareProperty.ringsEnabled.value()); });
+    _compareProperty.firstPlanet.onChange([this]() {
+        onFirstCompareChanged(_compareProperty.firstPlanet.option()); });
+    _compareProperty.secondPlanet.onChange([this]() {
+        onSecondCompareChanged(_compareProperty.secondPlanet.option()); });
+    _compareProperty.allEnabled.onChange([this]() {
+        onCompareAllChanged(_compareProperty.allEnabled.value()); });
+    _compareProperty.sizeDayEnabled.onChange([this]() {
+        onCompareSizeDayChanged(_compareProperty.sizeDayEnabled.value()); });
+    _compareProperty.gravityEnabled.onChange([this]() {
+        onCompareGravityChanged(_compareProperty.gravityEnabled.value()); });
+    _compareProperty.temperatureEnabled.onChange([this]() {
+        onCompareTemperatureChanged(_compareProperty.temperatureEnabled.value()); });
+    _compareProperty.atmosphereEnabled.onChange([this]() {
+        onCompareAtmosphereChanged(_compareProperty.atmosphereEnabled.value()); });
+    _compareProperty.moonsEnabled.onChange([this]() {
+        onCompareMoonsChanged(_compareProperty.moonsEnabled.value()); });
+    _compareProperty.ringsEnabled.onChange([this]() {
+        onCompareRingsChanged(_compareProperty.ringsEnabled.value()); });
 
     //Planetary View
-    _planetsProperty.allEnabled.onChange([this]() { onAllEnabledChanged(_planetsProperty.allEnabled.value()); });
+    _planetsProperty.allEnabled.onChange([this]() {
+        onAllEnabledChanged(_planetsProperty.allEnabled.value()); });
 
     //Mercury
-    _planetsProperty.mercuryProperty.enabled.onChange([this]() { onMercuryEnabledChanged(_planetsProperty.mercuryProperty.enabled.value()); } );
-    _planetsProperty.mercuryProperty.sizeDayEnabled.onChange([this]() { onMercurySizeDayChanged(_planetsProperty.mercuryProperty.sizeDayEnabled.value()); } );
-    _planetsProperty.mercuryProperty.gravityEnabled.onChange([this]() { onMercuryGravityChanged(_planetsProperty.mercuryProperty.gravityEnabled.value()); } );
-    _planetsProperty.mercuryProperty.temperatureEnabled.onChange([this]() { onMercuryTemperatureChanged(_planetsProperty.mercuryProperty.temperatureEnabled.value()); } );
+    _planetsProperty.mercuryProperty.enabled.onChange([this]() {
+        onMercuryEnabledChanged(_planetsProperty.mercuryProperty.enabled.value()); } );
+    _planetsProperty.mercuryProperty.sizeDayEnabled.onChange([this]() {
+        onMercurySizeDayChanged(_planetsProperty.mercuryProperty.sizeDayEnabled.value()); } );
+    _planetsProperty.mercuryProperty.gravityEnabled.onChange([this]() {
+        onMercuryGravityChanged(_planetsProperty.mercuryProperty.gravityEnabled.value()); } );
+    _planetsProperty.mercuryProperty.temperatureEnabled.onChange([this]() {
+        onMercuryTemperatureChanged(_planetsProperty.mercuryProperty.temperatureEnabled.value()); } );
 
     //Venus
-    _planetsProperty.venusProperty.enabled.onChange([this]() { onVenusEnabledChanged(_planetsProperty.venusProperty.enabled.value()); });
-    _planetsProperty.venusProperty.sizeDayEnabled.onChange([this]() { onVenusSizeDayChanged(_planetsProperty.venusProperty.sizeDayEnabled.value()); });
-    _planetsProperty.venusProperty.gravityEnabled.onChange([this]() { onVenusGravityChanged(_planetsProperty.venusProperty.gravityEnabled.value()); });
-    _planetsProperty.venusProperty.temperatureEnabled.onChange([this]() { onVenusTemperatureChanged(_planetsProperty.venusProperty.temperatureEnabled.value()); });
-    _planetsProperty.venusProperty.atmosphereEnabled.onChange([this]() { onVenusAtmosphereChanged(_planetsProperty.venusProperty.atmosphereEnabled.value()); });
+    _planetsProperty.venusProperty.enabled.onChange([this]() {
+        onVenusEnabledChanged(_planetsProperty.venusProperty.enabled.value()); });
+    _planetsProperty.venusProperty.sizeDayEnabled.onChange([this]() {
+        onVenusSizeDayChanged(_planetsProperty.venusProperty.sizeDayEnabled.value()); });
+    _planetsProperty.venusProperty.gravityEnabled.onChange([this]() {
+        onVenusGravityChanged(_planetsProperty.venusProperty.gravityEnabled.value()); });
+    _planetsProperty.venusProperty.temperatureEnabled.onChange([this]() {
+        onVenusTemperatureChanged(_planetsProperty.venusProperty.temperatureEnabled.value()); });
+    _planetsProperty.venusProperty.atmosphereEnabled.onChange([this]() {
+        onVenusAtmosphereChanged(_planetsProperty.venusProperty.atmosphereEnabled.value()); });
 
     //Earth
-    _planetsProperty.earthProperty.enabled.onChange([this]() { onEarthEnabledChanged(_planetsProperty.earthProperty.enabled.value()); });
-    _planetsProperty.earthProperty.sizeDayEnabled.onChange([this]() { onEarthSizeDayChanged(_planetsProperty.earthProperty.sizeDayEnabled.value()); });
-    _planetsProperty.earthProperty.gravityEnabled.onChange([this]() { onEarthGravityChanged(_planetsProperty.earthProperty.gravityEnabled.value()); });
-    _planetsProperty.earthProperty.temperatureEnabled.onChange([this]() { onEarthTemperatureChanged(_planetsProperty.earthProperty.temperatureEnabled.value()); });
-    _planetsProperty.earthProperty.atmosphereEnabled.onChange([this]() { onEarthAtmosphereChanged(_planetsProperty.earthProperty.atmosphereEnabled.value()); });
-    _planetsProperty.earthProperty.moonsEnabled.onChange([this]() { onEarthMoonsChanged(_planetsProperty.earthProperty.moonsEnabled.value()); });
+    _planetsProperty.earthProperty.enabled.onChange([this]() {
+        onEarthEnabledChanged(_planetsProperty.earthProperty.enabled.value()); });
+    _planetsProperty.earthProperty.sizeDayEnabled.onChange([this]() {
+        onEarthSizeDayChanged(_planetsProperty.earthProperty.sizeDayEnabled.value()); });
+    _planetsProperty.earthProperty.gravityEnabled.onChange([this]() {
+        onEarthGravityChanged(_planetsProperty.earthProperty.gravityEnabled.value()); });
+    _planetsProperty.earthProperty.temperatureEnabled.onChange([this]() {
+        onEarthTemperatureChanged(_planetsProperty.earthProperty.temperatureEnabled.value()); });
+    _planetsProperty.earthProperty.atmosphereEnabled.onChange([this]() {
+        onEarthAtmosphereChanged(_planetsProperty.earthProperty.atmosphereEnabled.value()); });
+    _planetsProperty.earthProperty.moonsEnabled.onChange([this]() {
+        onEarthMoonsChanged(_planetsProperty.earthProperty.moonsEnabled.value()); });
 
     //Mars
-    _planetsProperty.marsProperty.enabled.onChange([this]() { onMarsEnabledChanged(_planetsProperty.marsProperty.enabled.value()); });
-    _planetsProperty.marsProperty.sizeDayEnabled.onChange([this]() { onMarsSizeDayChanged(_planetsProperty.marsProperty.sizeDayEnabled.value()); });
-    _planetsProperty.marsProperty.gravityEnabled.onChange([this]() { onMarsGravityChanged(_planetsProperty.marsProperty.gravityEnabled.value()); });
-    _planetsProperty.marsProperty.temperatureEnabled.onChange([this]() { onMarsTemperatureChanged(_planetsProperty.marsProperty.temperatureEnabled.value()); });
-    _planetsProperty.marsProperty.atmosphereEnabled.onChange([this]() { onMarsAtmosphereChanged(_planetsProperty.marsProperty.atmosphereEnabled.value()); });
-    _planetsProperty.marsProperty.moonsEnabled.onChange([this]() { onMarsMoonsChanged(_planetsProperty.marsProperty.moonsEnabled.value()); });
+    _planetsProperty.marsProperty.enabled.onChange([this]() {
+        onMarsEnabledChanged(_planetsProperty.marsProperty.enabled.value()); });
+    _planetsProperty.marsProperty.sizeDayEnabled.onChange([this]() {
+        onMarsSizeDayChanged(_planetsProperty.marsProperty.sizeDayEnabled.value()); });
+    _planetsProperty.marsProperty.gravityEnabled.onChange([this]() {
+        onMarsGravityChanged(_planetsProperty.marsProperty.gravityEnabled.value()); });
+    _planetsProperty.marsProperty.temperatureEnabled.onChange([this]() {
+        onMarsTemperatureChanged(_planetsProperty.marsProperty.temperatureEnabled.value()); });
+    _planetsProperty.marsProperty.atmosphereEnabled.onChange([this]() {
+        onMarsAtmosphereChanged(_planetsProperty.marsProperty.atmosphereEnabled.value()); });
+    _planetsProperty.marsProperty.moonsEnabled.onChange([this]() {
+        onMarsMoonsChanged(_planetsProperty.marsProperty.moonsEnabled.value()); });
 
     //Jupiter
-    _planetsProperty.jupiterProperty.enabled.onChange([this]() { onJupiterEnabledChanged(_planetsProperty.jupiterProperty.enabled.value()); });
-    _planetsProperty.jupiterProperty.sizeDayEnabled.onChange([this]() { onJupiterSizeDayChanged(_planetsProperty.jupiterProperty.sizeDayEnabled.value()); });
-    _planetsProperty.jupiterProperty.gravityEnabled.onChange([this]() { onJupiterGravityChanged(_planetsProperty.jupiterProperty.gravityEnabled.value()); });
-    _planetsProperty.jupiterProperty.temperatureEnabled.onChange([this]() { onJupiterTemperatureChanged(_planetsProperty.jupiterProperty.temperatureEnabled.value()); });
-    _planetsProperty.jupiterProperty.atmosphereEnabled.onChange([this]() { onJupiterAtmosphereChanged(_planetsProperty.jupiterProperty.atmosphereEnabled.value()); });
-    _planetsProperty.jupiterProperty.moonsEnabled.onChange([this]() { onJupiterMoonsChanged(_planetsProperty.jupiterProperty.moonsEnabled.value()); });
+    _planetsProperty.jupiterProperty.enabled.onChange([this]() {
+        onJupiterEnabledChanged(_planetsProperty.jupiterProperty.enabled.value()); });
+    _planetsProperty.jupiterProperty.sizeDayEnabled.onChange([this]() {
+        onJupiterSizeDayChanged(_planetsProperty.jupiterProperty.sizeDayEnabled.value()); });
+    _planetsProperty.jupiterProperty.gravityEnabled.onChange([this]() {
+        onJupiterGravityChanged(_planetsProperty.jupiterProperty.gravityEnabled.value()); });
+    _planetsProperty.jupiterProperty.temperatureEnabled.onChange([this]() {
+        onJupiterTemperatureChanged(_planetsProperty.jupiterProperty.temperatureEnabled.value()); });
+    _planetsProperty.jupiterProperty.atmosphereEnabled.onChange([this]() {
+        onJupiterAtmosphereChanged(_planetsProperty.jupiterProperty.atmosphereEnabled.value()); });
+    _planetsProperty.jupiterProperty.moonsEnabled.onChange([this]() {
+        onJupiterMoonsChanged(_planetsProperty.jupiterProperty.moonsEnabled.value()); });
 
     //Saturn
-    _planetsProperty.saturnProperty.enabled.onChange([this]() { onSaturnEnabledChanged(_planetsProperty.saturnProperty.enabled.value()); });
-    _planetsProperty.saturnProperty.sizeDayEnabled.onChange([this]() { onSaturnSizeDayChanged(_planetsProperty.saturnProperty.sizeDayEnabled.value()); });
-    _planetsProperty.saturnProperty.gravityEnabled.onChange([this]() { onSaturnGravityChanged(_planetsProperty.saturnProperty.gravityEnabled.value()); });
-    _planetsProperty.saturnProperty.temperatureEnabled.onChange([this]() { onSaturnTemperatureChanged(_planetsProperty.saturnProperty.temperatureEnabled.value()); });
-    _planetsProperty.saturnProperty.atmosphereEnabled.onChange([this]() { onSaturnAtmosphereChanged(_planetsProperty.saturnProperty.atmosphereEnabled.value()); });
-    _planetsProperty.saturnProperty.moonsEnabled.onChange([this]() { onSaturnMoonsChanged(_planetsProperty.saturnProperty.moonsEnabled.value()); });
-    _planetsProperty.saturnProperty.ringsEnabled.onChange([this]() { onSaturnRingsChanged(_planetsProperty.saturnProperty.ringsEnabled.value()); });
+    _planetsProperty.saturnProperty.enabled.onChange([this]() {
+        onSaturnEnabledChanged(_planetsProperty.saturnProperty.enabled.value()); });
+    _planetsProperty.saturnProperty.sizeDayEnabled.onChange([this]() {
+        onSaturnSizeDayChanged(_planetsProperty.saturnProperty.sizeDayEnabled.value()); });
+    _planetsProperty.saturnProperty.gravityEnabled.onChange([this]() {
+        onSaturnGravityChanged(_planetsProperty.saturnProperty.gravityEnabled.value()); });
+    _planetsProperty.saturnProperty.temperatureEnabled.onChange([this]() {
+        onSaturnTemperatureChanged(_planetsProperty.saturnProperty.temperatureEnabled.value()); });
+    _planetsProperty.saturnProperty.atmosphereEnabled.onChange([this]() {
+        onSaturnAtmosphereChanged(_planetsProperty.saturnProperty.atmosphereEnabled.value()); });
+    _planetsProperty.saturnProperty.moonsEnabled.onChange([this]() {
+        onSaturnMoonsChanged(_planetsProperty.saturnProperty.moonsEnabled.value()); });
+    _planetsProperty.saturnProperty.ringsEnabled.onChange([this]() {
+        onSaturnRingsChanged(_planetsProperty.saturnProperty.ringsEnabled.value()); });
 
     //Uranus
-    _planetsProperty.uranusProperty.enabled.onChange([this]() { onUranusEnabledChanged(_planetsProperty.uranusProperty.enabled.value()); });
-    _planetsProperty.uranusProperty.sizeDayEnabled.onChange([this]() { onUranusSizeDayChanged(_planetsProperty.uranusProperty.sizeDayEnabled.value()); });
-    _planetsProperty.uranusProperty.gravityEnabled.onChange([this]() { onUranusGravityChanged(_planetsProperty.uranusProperty.gravityEnabled.value()); });
-    _planetsProperty.uranusProperty.temperatureEnabled.onChange([this]() { onUranusTemperatureChanged(_planetsProperty.uranusProperty.temperatureEnabled.value()); });
-    _planetsProperty.uranusProperty.atmosphereEnabled.onChange([this]() { onUranusAtmosphereChanged(_planetsProperty.uranusProperty.atmosphereEnabled.value()); });
-    _planetsProperty.uranusProperty.moonsEnabled.onChange([this]() { onUranusMoonsChanged(_planetsProperty.uranusProperty.moonsEnabled.value()); });
+    _planetsProperty.uranusProperty.enabled.onChange([this]() {
+        onUranusEnabledChanged(_planetsProperty.uranusProperty.enabled.value()); });
+    _planetsProperty.uranusProperty.sizeDayEnabled.onChange([this]() {
+        onUranusSizeDayChanged(_planetsProperty.uranusProperty.sizeDayEnabled.value()); });
+    _planetsProperty.uranusProperty.gravityEnabled.onChange([this]() {
+        onUranusGravityChanged(_planetsProperty.uranusProperty.gravityEnabled.value()); });
+    _planetsProperty.uranusProperty.temperatureEnabled.onChange([this]() {
+        onUranusTemperatureChanged(_planetsProperty.uranusProperty.temperatureEnabled.value()); });
+    _planetsProperty.uranusProperty.atmosphereEnabled.onChange([this]() {
+        onUranusAtmosphereChanged(_planetsProperty.uranusProperty.atmosphereEnabled.value()); });
+    _planetsProperty.uranusProperty.moonsEnabled.onChange([this]() {
+        onUranusMoonsChanged(_planetsProperty.uranusProperty.moonsEnabled.value()); });
 
     //Neptune
-    _planetsProperty.neptuneProperty.enabled.onChange([this]() { onNeptuneEnabledChanged(_planetsProperty.neptuneProperty.enabled.value()); });
-    _planetsProperty.neptuneProperty.sizeDayEnabled.onChange([this]() { onNeptuneSizeDayChanged(_planetsProperty.neptuneProperty.sizeDayEnabled.value()); });
-    _planetsProperty.neptuneProperty.gravityEnabled.onChange([this]() { onNeptuneGravityChanged(_planetsProperty.neptuneProperty.gravityEnabled.value()); });
-    _planetsProperty.neptuneProperty.temperatureEnabled.onChange([this]() { onNeptuneTemperatureChanged(_planetsProperty.neptuneProperty.temperatureEnabled.value()); });
-    _planetsProperty.neptuneProperty.atmosphereEnabled.onChange([this]() { onNeptuneAtmosphereChanged(_planetsProperty.neptuneProperty.atmosphereEnabled.value()); });
-    _planetsProperty.neptuneProperty.moonsEnabled.onChange([this]() { onNeptuneMoonsChanged(_planetsProperty.neptuneProperty.moonsEnabled.value()); });
+    _planetsProperty.neptuneProperty.enabled.onChange([this]() {
+        onNeptuneEnabledChanged(_planetsProperty.neptuneProperty.enabled.value()); });
+    _planetsProperty.neptuneProperty.sizeDayEnabled.onChange([this]() {
+        onNeptuneSizeDayChanged(_planetsProperty.neptuneProperty.sizeDayEnabled.value()); });
+    _planetsProperty.neptuneProperty.gravityEnabled.onChange([this]() {
+        onNeptuneGravityChanged(_planetsProperty.neptuneProperty.gravityEnabled.value()); });
+    _planetsProperty.neptuneProperty.temperatureEnabled.onChange([this]() {
+        onNeptuneTemperatureChanged(_planetsProperty.neptuneProperty.temperatureEnabled.value()); });
+    _planetsProperty.neptuneProperty.atmosphereEnabled.onChange([this]() {
+        onNeptuneAtmosphereChanged(_planetsProperty.neptuneProperty.atmosphereEnabled.value()); });
+    _planetsProperty.neptuneProperty.moonsEnabled.onChange([this]() {
+        onNeptuneMoonsChanged(_planetsProperty.neptuneProperty.moonsEnabled.value()); });
 
     //Add the properties
     addProperty(_everythingEnabled);
@@ -379,7 +457,7 @@ SonificationModule::SonificationModule()
 //Turn on/off everything
 void SonificationModule::onEverythingChanged(bool value) {
 
-    if (_GUIState == SonificationModule::Solar) {
+    if (_GUIState == SonificationModule::GUIMode::Solar) {
         //Set all the solar settings
         setAllSolarProperties(value);
 
@@ -388,7 +466,7 @@ void SonificationModule::onEverythingChanged(bool value) {
         _compareProperty.allEnabled = false;
     }
 
-    else if (_GUIState == SonificationModule::Compare) {
+    else if (_GUIState == SonificationModule::GUIMode::Compare) {
         //Set all the compare settings
         _compareProperty.allEnabled = value;
     }
@@ -401,7 +479,7 @@ void SonificationModule::onEverythingChanged(bool value) {
 
 //Solar View
 void SonificationModule::onSolarAllEnabledChanged(bool value) {
-    if (_GUIState == SonificationModule::Planetary && value) {
+    if (_GUIState == SonificationModule::GUIMode::Planetary && value) {
         _solarProperty.allEnabled = false;
         return;
     }
@@ -437,7 +515,7 @@ void SonificationModule::onSolarAllEnabledChanged(bool value) {
 }
 
 void SonificationModule::onSolarMercuryEnabledChanged(bool value) {
-    if (_GUIState == SonificationModule::Planetary && value) {
+    if (_GUIState == SonificationModule::GUIMode::Planetary && value) {
         _solarProperty.mercuryEnabled = false;
         return;
     }
@@ -456,16 +534,14 @@ void SonificationModule::onSolarMercuryEnabledChanged(bool value) {
     _solarSettings[0] = value;
 
     std::string label = "/Sun";
-    UdpTransmitSocket socket = UdpTransmitSocket(
-        IpEndpointName(SC_IP_ADDRESS, SC_PORT));
     _stream.Clear();
     osc::Blob settingsBlob = osc::Blob(_solarSettings, NUM_PLANETS);
     _stream << osc::BeginMessage(label.c_str()) << settingsBlob << osc::EndMessage;
-    socket.Send(_stream.Data(), _stream.Size());
+    _socket.Send(_stream.Data(), _stream.Size());
 }
 
 void SonificationModule::onSolarVenusEnabledChanged(bool value) {
-    if (_GUIState == SonificationModule::Planetary && value) {
+    if (_GUIState == SonificationModule::GUIMode::Planetary && value) {
         _solarProperty.venusEnabled = false;
         return;
     }
@@ -484,16 +560,14 @@ void SonificationModule::onSolarVenusEnabledChanged(bool value) {
     _solarSettings[1] = value;
 
     std::string label = "/Sun";
-    UdpTransmitSocket socket = UdpTransmitSocket(
-        IpEndpointName(SC_IP_ADDRESS, SC_PORT));
     _stream.Clear();
     osc::Blob settingsBlob = osc::Blob(_solarSettings, NUM_PLANETS);
     _stream << osc::BeginMessage(label.c_str()) << settingsBlob << osc::EndMessage;
-    socket.Send(_stream.Data(), _stream.Size());
+    _socket.Send(_stream.Data(), _stream.Size());
 }
 
 void SonificationModule::onSolarEarthEnabledChanged(bool value) {
-    if (_GUIState == SonificationModule::Planetary && value) {
+    if (_GUIState == SonificationModule::GUIMode::Planetary && value) {
         _solarProperty.earthEnabled = false;
         return;
     }
@@ -512,16 +586,14 @@ void SonificationModule::onSolarEarthEnabledChanged(bool value) {
     _solarSettings[2] = value;
 
     std::string label = "/Sun";
-    UdpTransmitSocket socket = UdpTransmitSocket(
-        IpEndpointName(SC_IP_ADDRESS, SC_PORT));
     _stream.Clear();
     osc::Blob settingsBlob = osc::Blob(_solarSettings, NUM_PLANETS);
     _stream << osc::BeginMessage(label.c_str()) << settingsBlob << osc::EndMessage;
-    socket.Send(_stream.Data(), _stream.Size());
+    _socket.Send(_stream.Data(), _stream.Size());
 }
 
 void SonificationModule::onSolarMarsEnabledChanged(bool value) {
-    if (_GUIState == SonificationModule::Planetary && value) {
+    if (_GUIState == SonificationModule::GUIMode::Planetary && value) {
         _solarProperty.marsEnabled = false;
         return;
     }
@@ -540,16 +612,14 @@ void SonificationModule::onSolarMarsEnabledChanged(bool value) {
     _solarSettings[3] = value;
 
     std::string label = "/Sun";
-    UdpTransmitSocket socket = UdpTransmitSocket(
-        IpEndpointName(SC_IP_ADDRESS, SC_PORT));
     _stream.Clear();
     osc::Blob settingsBlob = osc::Blob(_solarSettings, NUM_PLANETS);
     _stream << osc::BeginMessage(label.c_str()) << settingsBlob << osc::EndMessage;
-    socket.Send(_stream.Data(), _stream.Size());
+    _socket.Send(_stream.Data(), _stream.Size());
 }
 
 void SonificationModule::onSolarJupiterEnabledChanged(bool value) {
-    if (_GUIState == SonificationModule::Planetary && value) {
+    if (_GUIState == SonificationModule::GUIMode::Planetary && value) {
         _solarProperty.jupiterEnabled = false;
         return;
     }
@@ -568,16 +638,14 @@ void SonificationModule::onSolarJupiterEnabledChanged(bool value) {
     _solarSettings[4] = value;
 
     std::string label = "/Sun";
-    UdpTransmitSocket socket = UdpTransmitSocket(
-        IpEndpointName(SC_IP_ADDRESS, SC_PORT));
     _stream.Clear();
     osc::Blob settingsBlob = osc::Blob(_solarSettings, NUM_PLANETS);
     _stream << osc::BeginMessage(label.c_str()) << settingsBlob << osc::EndMessage;
-    socket.Send(_stream.Data(), _stream.Size());
+    _socket.Send(_stream.Data(), _stream.Size());
 }
 
 void SonificationModule::onSolarSaturnEnabledChanged(bool value) {
-    if (_GUIState == SonificationModule::Planetary && value) {
+    if (_GUIState == SonificationModule::GUIMode::Planetary && value) {
         _solarProperty.saturnEnabled = false;
         return;
     }
@@ -596,16 +664,14 @@ void SonificationModule::onSolarSaturnEnabledChanged(bool value) {
     _solarSettings[5] = value;
 
     std::string label = "/Sun";
-    UdpTransmitSocket socket = UdpTransmitSocket(
-        IpEndpointName(SC_IP_ADDRESS, SC_PORT));
     _stream.Clear();
     osc::Blob settingsBlob = osc::Blob(_solarSettings, NUM_PLANETS);
     _stream << osc::BeginMessage(label.c_str()) << settingsBlob << osc::EndMessage;
-    socket.Send(_stream.Data(), _stream.Size());
+    _socket.Send(_stream.Data(), _stream.Size());
 }
 
 void SonificationModule::onSolarUranusEnabledChanged(bool value) {
-    if (_GUIState == SonificationModule::Planetary && value) {
+    if (_GUIState == SonificationModule::GUIMode::Planetary && value) {
         _solarProperty.uranusEnabled = false;
         return;
     }
@@ -624,16 +690,14 @@ void SonificationModule::onSolarUranusEnabledChanged(bool value) {
     _solarSettings[6] = value;
 
     std::string label = "/Sun";
-    UdpTransmitSocket socket = UdpTransmitSocket(
-        IpEndpointName(SC_IP_ADDRESS, SC_PORT));
     _stream.Clear();
     osc::Blob settingsBlob = osc::Blob(_solarSettings, NUM_PLANETS);
     _stream << osc::BeginMessage(label.c_str()) << settingsBlob << osc::EndMessage;
-    socket.Send(_stream.Data(), _stream.Size());
+    _socket.Send(_stream.Data(), _stream.Size());
 }
 
 void SonificationModule::onSolarNeptuneEnabledChanged(bool value) {
-    if (_GUIState == SonificationModule::Planetary && value) {
+    if (_GUIState == SonificationModule::GUIMode::Planetary && value) {
         _solarProperty.neptuneEnabled = false;
         return;
     }
@@ -652,18 +716,17 @@ void SonificationModule::onSolarNeptuneEnabledChanged(bool value) {
     _solarSettings[7] = value;
 
     std::string label = "/Sun";
-    UdpTransmitSocket socket = UdpTransmitSocket(
-        IpEndpointName(SC_IP_ADDRESS, SC_PORT));
     _stream.Clear();
     osc::Blob settingsBlob = osc::Blob(_solarSettings, NUM_PLANETS);
     _stream << osc::BeginMessage(label.c_str()) << settingsBlob << osc::EndMessage;
-    socket.Send(_stream.Data(), _stream.Size());
+    _socket.Send(_stream.Data(), _stream.Size());
 }
 
 
 //Compare
-void SonificationModule::onFirstCompareChanged(properties::OptionProperty::Option value) {
-    if (_GUIState == SonificationModule::Planetary && value.value != 0) {
+void SonificationModule::onFirstCompareChanged(properties::OptionProperty::Option value)
+{
+    if (_GUIState == SonificationModule::GUIMode::Planetary && value.value != 0) {
         _compareProperty.firstPlanet.setValue(0);
         return;
     }
@@ -677,15 +740,16 @@ void SonificationModule::onFirstCompareChanged(properties::OptionProperty::Optio
         }
     }
 
-    if (value.value != 0 && value.value == _compareProperty.secondPlanet.option().value) {
+    if (value.value != 0 && value.value == _compareProperty.secondPlanet.option().value)
+    {
         _compareProperty.firstPlanet.setValue(0);
         return;
     }
 
-    if (oldCompareFirst != "") {
+    if (_oldCompareFirst != "") {
         global::scriptEngine.queueScript(
             "openspace.setPropertyValue('Scene." +
-            oldCompareFirst + ".Scale.Scale', 1);",
+            _oldCompareFirst + ".Scale.Scale', 1);",
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
@@ -696,22 +760,22 @@ void SonificationModule::onFirstCompareChanged(properties::OptionProperty::Optio
             value.description + ".Scale.Scale', 2000);",
             scripting::ScriptEngine::RemoteScripting::Yes
         );
-        oldCompareFirst = value.description;
+        _oldCompareFirst = value.description;
     }
     else
-        oldCompareFirst = "";
+        _oldCompareFirst = "";
 
     std::string label = "/Compare";
-    UdpTransmitSocket socket = UdpTransmitSocket(
-        IpEndpointName(SC_IP_ADDRESS, SC_PORT));
     _stream.Clear();
     osc::Blob settingsBlob = osc::Blob(_compareSettings, NUM_PLANETARY_SETTINGS);
-    _stream << osc::BeginMessage(label.c_str()) << value.value << _compareProperty.secondPlanet.value() << settingsBlob << osc::EndMessage;
-    socket.Send(_stream.Data(), _stream.Size());
+    _stream << osc::BeginMessage(label.c_str()) << value.value
+        << _compareProperty.secondPlanet.value() << settingsBlob << osc::EndMessage;
+    _socket.Send(_stream.Data(), _stream.Size());
 }
 
-void SonificationModule::onSecondCompareChanged(properties::OptionProperty::Option value) {
-    if (_GUIState == SonificationModule::Planetary && value.value != 0) {
+void SonificationModule::onSecondCompareChanged(properties::OptionProperty::Option value)
+{
+    if (_GUIState == SonificationModule::GUIMode::Planetary && value.value != 0) {
         _compareProperty.secondPlanet.setValue(0);
         return;
     }
@@ -730,10 +794,10 @@ void SonificationModule::onSecondCompareChanged(properties::OptionProperty::Opti
         return;
     }
 
-    if (oldCompareSecond != "") {
+    if (_oldCompareSecond != "") {
         global::scriptEngine.queueScript(
             "openspace.setPropertyValue('Scene." +
-            oldCompareSecond + ".Scale.Scale', 1);",
+            _oldCompareSecond + ".Scale.Scale', 1);",
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
@@ -744,22 +808,21 @@ void SonificationModule::onSecondCompareChanged(properties::OptionProperty::Opti
             value.description + ".Scale.Scale', 2000);",
             scripting::ScriptEngine::RemoteScripting::Yes
         );
-        oldCompareSecond = value.description;
+        _oldCompareSecond = value.description;
     }
     else
-        oldCompareSecond = "";
+        _oldCompareSecond = "";
 
     std::string label = "/Compare";
-    UdpTransmitSocket socket = UdpTransmitSocket(
-        IpEndpointName(SC_IP_ADDRESS, SC_PORT));
     _stream.Clear();
     osc::Blob settingsBlob = osc::Blob(_compareSettings, NUM_PLANETARY_SETTINGS);
-    _stream << osc::BeginMessage(label.c_str()) << _compareProperty.firstPlanet.value() << value.value << settingsBlob << osc::EndMessage;
-    socket.Send(_stream.Data(), _stream.Size());
+    _stream << osc::BeginMessage(label.c_str()) << _compareProperty.firstPlanet.value()
+        << value.value << settingsBlob << osc::EndMessage;
+    _socket.Send(_stream.Data(), _stream.Size());
 }
 
 void SonificationModule::onCompareAllChanged(bool value) {
-    if (_GUIState == SonificationModule::Planetary && value) {
+    if (_GUIState == SonificationModule::GUIMode::Planetary && value) {
         _compareProperty.allEnabled = false;
         return;
     }
@@ -787,7 +850,7 @@ void SonificationModule::onCompareAllChanged(bool value) {
 }
 
 void SonificationModule::onCompareSizeDayChanged(bool value) {
-    if (_GUIState == SonificationModule::Planetary && value) {
+    if (_GUIState == SonificationModule::GUIMode::Planetary && value) {
         _compareProperty.sizeDayEnabled = false;
         return;
     }
@@ -802,16 +865,15 @@ void SonificationModule::onCompareSizeDayChanged(bool value) {
     _compareSettings[0] = value;
 
     std::string label = "/Compare";
-    UdpTransmitSocket socket = UdpTransmitSocket(
-        IpEndpointName(SC_IP_ADDRESS, SC_PORT));
     _stream.Clear();
     osc::Blob settingsBlob = osc::Blob(_compareSettings, NUM_PLANETARY_SETTINGS);
-    _stream << osc::BeginMessage(label.c_str()) << _compareProperty.firstPlanet.value() << _compareProperty.secondPlanet.value() << settingsBlob << osc::EndMessage;
-    socket.Send(_stream.Data(), _stream.Size());
+    _stream << osc::BeginMessage(label.c_str()) << _compareProperty.firstPlanet.value()
+        << _compareProperty.secondPlanet.value() << settingsBlob << osc::EndMessage;
+    _socket.Send(_stream.Data(), _stream.Size());
 }
 
 void SonificationModule::onCompareGravityChanged(bool value) {
-    if (_GUIState == SonificationModule::Planetary && value) {
+    if (_GUIState == SonificationModule::GUIMode::Planetary && value) {
         _compareProperty.gravityEnabled = false;
         return;
     }
@@ -826,16 +888,15 @@ void SonificationModule::onCompareGravityChanged(bool value) {
     _compareSettings[1] = value;
 
     std::string label = "/Compare";
-    UdpTransmitSocket socket = UdpTransmitSocket(
-        IpEndpointName(SC_IP_ADDRESS, SC_PORT));
     _stream.Clear();
     osc::Blob settingsBlob = osc::Blob(_compareSettings, NUM_PLANETARY_SETTINGS);
-    _stream << osc::BeginMessage(label.c_str()) << _compareProperty.firstPlanet.value() << _compareProperty.secondPlanet.value() << settingsBlob << osc::EndMessage;
-    socket.Send(_stream.Data(), _stream.Size());
+    _stream << osc::BeginMessage(label.c_str()) << _compareProperty.firstPlanet.value()
+        << _compareProperty.secondPlanet.value() << settingsBlob << osc::EndMessage;
+    _socket.Send(_stream.Data(), _stream.Size());
 }
 
 void SonificationModule::onCompareTemperatureChanged(bool value) {
-    if (_GUIState == SonificationModule::Planetary && value) {
+    if (_GUIState == SonificationModule::GUIMode::Planetary && value) {
         _compareProperty.temperatureEnabled = false;
         return;
     }
@@ -850,16 +911,15 @@ void SonificationModule::onCompareTemperatureChanged(bool value) {
     _compareSettings[2] = value;
 
     std::string label = "/Compare";
-    UdpTransmitSocket socket = UdpTransmitSocket(
-        IpEndpointName(SC_IP_ADDRESS, SC_PORT));
     _stream.Clear();
     osc::Blob settingsBlob = osc::Blob(_compareSettings, NUM_PLANETARY_SETTINGS);
-    _stream << osc::BeginMessage(label.c_str()) << _compareProperty.firstPlanet.value() << _compareProperty.secondPlanet.value() << settingsBlob << osc::EndMessage;
-    socket.Send(_stream.Data(), _stream.Size());
+    _stream << osc::BeginMessage(label.c_str()) << _compareProperty.firstPlanet.value()
+        << _compareProperty.secondPlanet.value() << settingsBlob << osc::EndMessage;
+    _socket.Send(_stream.Data(), _stream.Size());
 }
 
 void SonificationModule::onCompareAtmosphereChanged(bool value) {
-    if (_GUIState == SonificationModule::Planetary && value) {
+    if (_GUIState == SonificationModule::GUIMode::Planetary && value) {
         _compareProperty.atmosphereEnabled = false;
         return;
     }
@@ -874,16 +934,15 @@ void SonificationModule::onCompareAtmosphereChanged(bool value) {
     _compareSettings[3] = value;
 
     std::string label = "/Compare";
-    UdpTransmitSocket socket = UdpTransmitSocket(
-        IpEndpointName(SC_IP_ADDRESS, SC_PORT));
     _stream.Clear();
     osc::Blob settingsBlob = osc::Blob(_compareSettings, NUM_PLANETARY_SETTINGS);
-    _stream << osc::BeginMessage(label.c_str()) << _compareProperty.firstPlanet.value() << _compareProperty.secondPlanet.value() << settingsBlob << osc::EndMessage;
-    socket.Send(_stream.Data(), _stream.Size());
+    _stream << osc::BeginMessage(label.c_str()) << _compareProperty.firstPlanet.value()
+        << _compareProperty.secondPlanet.value() << settingsBlob << osc::EndMessage;
+    _socket.Send(_stream.Data(), _stream.Size());
 }
 
 void SonificationModule::onCompareMoonsChanged(bool value) {
-    if (_GUIState == SonificationModule::Planetary && value) {
+    if (_GUIState == SonificationModule::GUIMode::Planetary && value) {
         _compareProperty.moonsEnabled = false;
         return;
     }
@@ -898,16 +957,15 @@ void SonificationModule::onCompareMoonsChanged(bool value) {
     _compareSettings[4] = value;
 
     std::string label = "/Compare";
-    UdpTransmitSocket socket = UdpTransmitSocket(
-        IpEndpointName(SC_IP_ADDRESS, SC_PORT));
     _stream.Clear();
     osc::Blob settingsBlob = osc::Blob(_compareSettings, NUM_PLANETARY_SETTINGS);
-    _stream << osc::BeginMessage(label.c_str()) << _compareProperty.firstPlanet.value() << _compareProperty.secondPlanet.value() << settingsBlob << osc::EndMessage;
-    socket.Send(_stream.Data(), _stream.Size());
+    _stream << osc::BeginMessage(label.c_str()) << _compareProperty.firstPlanet.value()
+        << _compareProperty.secondPlanet.value() << settingsBlob << osc::EndMessage;
+    _socket.Send(_stream.Data(), _stream.Size());
 }
 
 void SonificationModule::onCompareRingsChanged(bool value) {
-    if (_GUIState == SonificationModule::Planetary && value) {
+    if (_GUIState == SonificationModule::GUIMode::Planetary && value) {
         _compareProperty.ringsEnabled = false;
         return;
     }
@@ -922,18 +980,17 @@ void SonificationModule::onCompareRingsChanged(bool value) {
     _compareSettings[5] = value;
 
     std::string label = "/Compare";
-    UdpTransmitSocket socket = UdpTransmitSocket(
-        IpEndpointName(SC_IP_ADDRESS, SC_PORT));
     _stream.Clear();
     osc::Blob settingsBlob = osc::Blob(_compareSettings, NUM_PLANETARY_SETTINGS);
-    _stream << osc::BeginMessage(label.c_str()) << _compareProperty.firstPlanet.value() << _compareProperty.secondPlanet.value() << settingsBlob << osc::EndMessage;
-    socket.Send(_stream.Data(), _stream.Size());
+    _stream << osc::BeginMessage(label.c_str()) << _compareProperty.firstPlanet.value()
+        << _compareProperty.secondPlanet.value() << settingsBlob << osc::EndMessage;
+    _socket.Send(_stream.Data(), _stream.Size());
 }
 
 
 //Planetart View
 void SonificationModule::onAllEnabledChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.allEnabled = false;
         return;
     }
@@ -944,7 +1001,7 @@ void SonificationModule::onAllEnabledChanged(bool value) {
 
 //Mercury
 void SonificationModule::onMercuryEnabledChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.mercuryProperty.enabled = false;
         return;
     }
@@ -960,7 +1017,7 @@ void SonificationModule::onMercuryEnabledChanged(bool value) {
 }
 
 void SonificationModule::onMercurySizeDayChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.mercuryProperty.sizeDayEnabled = false;
         return;
     }
@@ -970,7 +1027,7 @@ void SonificationModule::onMercurySizeDayChanged(bool value) {
 }
 
 void SonificationModule::onMercuryGravityChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.mercuryProperty.gravityEnabled = false;
         return;
     }
@@ -980,7 +1037,7 @@ void SonificationModule::onMercuryGravityChanged(bool value) {
 }
 
 void SonificationModule::onMercuryTemperatureChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.mercuryProperty.temperatureEnabled = false;
         return;
     }
@@ -991,7 +1048,7 @@ void SonificationModule::onMercuryTemperatureChanged(bool value) {
 
 //Venus
 void SonificationModule::onVenusEnabledChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.venusProperty.enabled = false;
         return;
     }
@@ -1009,7 +1066,7 @@ void SonificationModule::onVenusEnabledChanged(bool value) {
 }
 
 void SonificationModule::onVenusSizeDayChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.venusProperty.sizeDayEnabled = false;
         return;
     }
@@ -1019,7 +1076,7 @@ void SonificationModule::onVenusSizeDayChanged(bool value) {
 }
 
 void SonificationModule::onVenusGravityChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.venusProperty.gravityEnabled = false;
         return;
     }
@@ -1029,7 +1086,7 @@ void SonificationModule::onVenusGravityChanged(bool value) {
 }
 
 void SonificationModule::onVenusTemperatureChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.venusProperty.temperatureEnabled = false;
         return;
     }
@@ -1039,7 +1096,7 @@ void SonificationModule::onVenusTemperatureChanged(bool value) {
 }
 
 void SonificationModule::onVenusAtmosphereChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.venusProperty.atmosphereEnabled = false;
         return;
     }
@@ -1051,7 +1108,7 @@ void SonificationModule::onVenusAtmosphereChanged(bool value) {
 
 //Earth
 void SonificationModule::onEarthEnabledChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.earthProperty.enabled = false;
         return;
     }
@@ -1071,7 +1128,7 @@ void SonificationModule::onEarthEnabledChanged(bool value) {
 }
 
 void SonificationModule::onEarthSizeDayChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.earthProperty.sizeDayEnabled = false;
         return;
     }
@@ -1081,7 +1138,7 @@ void SonificationModule::onEarthSizeDayChanged(bool value) {
 }
 
 void SonificationModule::onEarthGravityChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.earthProperty.gravityEnabled = false;
         return;
     }
@@ -1091,7 +1148,7 @@ void SonificationModule::onEarthGravityChanged(bool value) {
 }
 
 void SonificationModule::onEarthTemperatureChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.earthProperty.temperatureEnabled = false;
         return;
     }
@@ -1101,7 +1158,7 @@ void SonificationModule::onEarthTemperatureChanged(bool value) {
 }
 
 void SonificationModule::onEarthAtmosphereChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.earthProperty.atmosphereEnabled = false;
         return;
     }
@@ -1111,7 +1168,7 @@ void SonificationModule::onEarthAtmosphereChanged(bool value) {
 }
 
 void SonificationModule::onEarthMoonsChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.earthProperty.moonsEnabled = false;
         return;
     }
@@ -1123,7 +1180,7 @@ void SonificationModule::onEarthMoonsChanged(bool value) {
 
 //Mars
 void SonificationModule::onMarsEnabledChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.marsProperty.enabled = false;
         return;
     }
@@ -1143,7 +1200,7 @@ void SonificationModule::onMarsEnabledChanged(bool value) {
 }
 
 void SonificationModule::onMarsSizeDayChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.marsProperty.sizeDayEnabled = false;
         return;
     }
@@ -1153,7 +1210,7 @@ void SonificationModule::onMarsSizeDayChanged(bool value) {
 }
 
 void SonificationModule::onMarsGravityChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.marsProperty.gravityEnabled = false;
         return;
     }
@@ -1163,7 +1220,7 @@ void SonificationModule::onMarsGravityChanged(bool value) {
 }
 
 void SonificationModule::onMarsTemperatureChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.marsProperty.temperatureEnabled = false;
         return;
     }
@@ -1173,7 +1230,7 @@ void SonificationModule::onMarsTemperatureChanged(bool value) {
 }
 
 void SonificationModule::onMarsAtmosphereChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.marsProperty.atmosphereEnabled = false;
         return;
     }
@@ -1183,7 +1240,7 @@ void SonificationModule::onMarsAtmosphereChanged(bool value) {
 }
 
 void SonificationModule::onMarsMoonsChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.marsProperty.moonsEnabled = false;
         return;
     }
@@ -1195,7 +1252,7 @@ void SonificationModule::onMarsMoonsChanged(bool value) {
 
 //Jupiter
 void SonificationModule::onJupiterEnabledChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.jupiterProperty.enabled = false;
         return;
     }
@@ -1215,7 +1272,7 @@ void SonificationModule::onJupiterEnabledChanged(bool value) {
 }
 
 void SonificationModule::onJupiterSizeDayChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.jupiterProperty.sizeDayEnabled = false;
         return;
     }
@@ -1225,7 +1282,7 @@ void SonificationModule::onJupiterSizeDayChanged(bool value) {
 }
 
 void SonificationModule::onJupiterGravityChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.jupiterProperty.gravityEnabled = false;
         return;
     }
@@ -1235,7 +1292,7 @@ void SonificationModule::onJupiterGravityChanged(bool value) {
 }
 
 void SonificationModule::onJupiterTemperatureChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.jupiterProperty.temperatureEnabled = false;
         return;
     }
@@ -1245,7 +1302,7 @@ void SonificationModule::onJupiterTemperatureChanged(bool value) {
 }
 
 void SonificationModule::onJupiterAtmosphereChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.jupiterProperty.atmosphereEnabled = false;
         return;
     }
@@ -1255,7 +1312,7 @@ void SonificationModule::onJupiterAtmosphereChanged(bool value) {
 }
 
 void SonificationModule::onJupiterMoonsChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.jupiterProperty.moonsEnabled = false;
         return;
     }
@@ -1267,7 +1324,7 @@ void SonificationModule::onJupiterMoonsChanged(bool value) {
 
 //Saturn
 void SonificationModule::onSaturnEnabledChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.saturnProperty.enabled = false;
         return;
     }
@@ -1289,7 +1346,7 @@ void SonificationModule::onSaturnEnabledChanged(bool value) {
 }
 
 void SonificationModule::onSaturnSizeDayChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.saturnProperty.sizeDayEnabled = false;
         return;
     }
@@ -1299,7 +1356,7 @@ void SonificationModule::onSaturnSizeDayChanged(bool value) {
 }
 
 void SonificationModule::onSaturnGravityChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.saturnProperty.gravityEnabled = false;
         return;
     }
@@ -1309,7 +1366,7 @@ void SonificationModule::onSaturnGravityChanged(bool value) {
 }
 
 void SonificationModule::onSaturnTemperatureChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.saturnProperty.temperatureEnabled = false;
         return;
     }
@@ -1319,7 +1376,7 @@ void SonificationModule::onSaturnTemperatureChanged(bool value) {
 }
 
 void SonificationModule::onSaturnAtmosphereChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.saturnProperty.atmosphereEnabled = false;
         return;
     }
@@ -1329,7 +1386,7 @@ void SonificationModule::onSaturnAtmosphereChanged(bool value) {
 }
 
 void SonificationModule::onSaturnMoonsChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.saturnProperty.moonsEnabled = false;
         return;
     }
@@ -1339,7 +1396,7 @@ void SonificationModule::onSaturnMoonsChanged(bool value) {
 }
 
 void SonificationModule::onSaturnRingsChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.saturnProperty.ringsEnabled = false;
         return;
     }
@@ -1351,7 +1408,7 @@ void SonificationModule::onSaturnRingsChanged(bool value) {
 
 //Uranus
 void SonificationModule::onUranusEnabledChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.uranusProperty.enabled = false;
         return;
     }
@@ -1371,7 +1428,7 @@ void SonificationModule::onUranusEnabledChanged(bool value) {
 }
 
 void SonificationModule::onUranusSizeDayChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.uranusProperty.sizeDayEnabled = false;
         return;
     }
@@ -1381,7 +1438,7 @@ void SonificationModule::onUranusSizeDayChanged(bool value) {
 }
 
 void SonificationModule::onUranusGravityChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.uranusProperty.gravityEnabled = false;
         return;
     }
@@ -1391,7 +1448,7 @@ void SonificationModule::onUranusGravityChanged(bool value) {
 }
 
 void SonificationModule::onUranusTemperatureChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.uranusProperty.temperatureEnabled = false;
         return;
     }
@@ -1401,7 +1458,7 @@ void SonificationModule::onUranusTemperatureChanged(bool value) {
 }
 
 void SonificationModule::onUranusAtmosphereChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.uranusProperty.atmosphereEnabled = false;
         return;
     }
@@ -1411,7 +1468,7 @@ void SonificationModule::onUranusAtmosphereChanged(bool value) {
 }
 
 void SonificationModule::onUranusMoonsChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.uranusProperty.moonsEnabled = false;
         return;
     }
@@ -1423,7 +1480,7 @@ void SonificationModule::onUranusMoonsChanged(bool value) {
 
 //Neptune
 void SonificationModule::onNeptuneEnabledChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.neptuneProperty.enabled = false;
         return;
     }
@@ -1443,7 +1500,7 @@ void SonificationModule::onNeptuneEnabledChanged(bool value) {
 }
 
 void SonificationModule::onNeptuneSizeDayChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.neptuneProperty.sizeDayEnabled = false;
         return;
     }
@@ -1453,7 +1510,7 @@ void SonificationModule::onNeptuneSizeDayChanged(bool value) {
 }
 
 void SonificationModule::onNeptuneGravityChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.neptuneProperty.gravityEnabled = false;
         return;
     }
@@ -1463,7 +1520,7 @@ void SonificationModule::onNeptuneGravityChanged(bool value) {
 }
 
 void SonificationModule::onNeptuneTemperatureChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.neptuneProperty.temperatureEnabled = false;
         return;
     }
@@ -1473,7 +1530,7 @@ void SonificationModule::onNeptuneTemperatureChanged(bool value) {
 }
 
 void SonificationModule::onNeptuneAtmosphereChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.neptuneProperty.atmosphereEnabled = false;
         return;
     }
@@ -1483,7 +1540,7 @@ void SonificationModule::onNeptuneAtmosphereChanged(bool value) {
 }
 
 void SonificationModule::onNeptuneMoonsChanged(bool value) {
-    if (_GUIState != SonificationModule::Planetary && value) {
+    if (_GUIState != SonificationModule::GUIMode::Planetary && value) {
         _planetsProperty.neptuneProperty.moonsEnabled = false;
         return;
     }
@@ -1513,7 +1570,8 @@ SonificationModule::PlanetProperty::PlanetProperty(
     //Unique
     if(planetInfo.identifier.compare("Mercury") != 0)
         addProperty(atmosphereEnabled);
-    if(planetInfo.identifier.compare("Mercury") != 0 && planetInfo.identifier.compare("Venus") != 0)
+    if(planetInfo.identifier.compare("Mercury") != 0
+        && planetInfo.identifier.compare("Venus") != 0)
         addProperty(moonsEnabled);
     if (planetInfo.identifier.compare("Saturn") == 0)
         addProperty(ringsEnabled);
@@ -1603,16 +1661,16 @@ SonificationModule::PlanetHeadProperty::PlanetHeadProperty(
     properties::PropertyOwner::PropertyOwnerInfo saturnInfo,
     properties::PropertyOwner::PropertyOwnerInfo uranusInfo,
     properties::PropertyOwner::PropertyOwnerInfo neptuneInfo)
-        : properties::PropertyOwner(planetHeadInfo),
-    allEnabled(EnableAllPlanetsInfo, false),
-    mercuryProperty(SonificationModule::PlanetProperty(mercuryInfo)),
-    venusProperty(SonificationModule::PlanetProperty(venusInfo)),
-    earthProperty(SonificationModule::PlanetProperty(earthInfo)),
-    marsProperty(SonificationModule::PlanetProperty(marsInfo)),
-    jupiterProperty(SonificationModule::PlanetProperty(jupiterInfo)),
-    saturnProperty(SonificationModule::PlanetProperty(saturnInfo)),
-    uranusProperty(SonificationModule::PlanetProperty(uranusInfo)),
-    neptuneProperty(SonificationModule::PlanetProperty(neptuneInfo))
+        : properties::PropertyOwner(planetHeadInfo)
+        , allEnabled(EnableAllPlanetsInfo, false)
+        , mercuryProperty(SonificationModule::PlanetProperty(mercuryInfo))
+        , venusProperty(SonificationModule::PlanetProperty(venusInfo))
+        , earthProperty(SonificationModule::PlanetProperty(earthInfo))
+        , marsProperty(SonificationModule::PlanetProperty(marsInfo))
+        , jupiterProperty(SonificationModule::PlanetProperty(jupiterInfo))
+        , saturnProperty(SonificationModule::PlanetProperty(saturnInfo))
+        , uranusProperty(SonificationModule::PlanetProperty(uranusInfo))
+        , neptuneProperty(SonificationModule::PlanetProperty(neptuneInfo))
 {
     addProperty(allEnabled);
     addPropertySubOwner(mercuryProperty);
@@ -1628,18 +1686,22 @@ SonificationModule::PlanetHeadProperty::PlanetHeadProperty(
 void SonificationModule::setAllSolarProperties(bool value) {
     std::vector<properties::Property*> solarProperties = _solarProperty.properties();
 
-    for (std::vector<properties::Property*>::iterator i = solarProperties.begin(); i < solarProperties.end(); ++i) {
+    for (std::vector<properties::Property*>::iterator i = solarProperties.begin();
+        i < solarProperties.end(); ++i) {
         (*i)->set(value);
     }
 }
 
 void SonificationModule::setAllPlanetaryProperties(bool value) {
-    std::vector<properties::PropertyOwner*> planetOwners = _planetsProperty.propertySubOwners();
+    std::vector<properties::PropertyOwner*> planetOwners =
+        _planetsProperty.propertySubOwners();
 
-    for (std::vector<properties::PropertyOwner*>::iterator owner = planetOwners.begin(); owner < planetOwners.end(); ++owner) {
+    for (std::vector<properties::PropertyOwner*>::iterator owner = planetOwners.begin();
+        owner < planetOwners.end(); ++owner) {
         std::vector<properties::Property*> planetProperties = (*owner)->properties();
 
-        for (std::vector<properties::Property*>::iterator i = planetProperties.begin(); i < planetProperties.end(); ++i) {
+        for (std::vector<properties::Property*>::iterator i = planetProperties.begin();
+            i < planetProperties.end(); ++i) {
             (*i)->set(value);
         }
     }
@@ -1651,14 +1713,11 @@ void SonificationModule::checkTimeSpeed(double& ts) {
         ts = timeSpeed;
 
         std::string label = "/Time";
-        UdpTransmitSocket socket = UdpTransmitSocket(
-            IpEndpointName(SC_IP_ADDRESS, SC_PORT));
         _stream.Clear();
         _stream << osc::BeginMessage(label.c_str()) << ts << osc::EndMessage;
-        socket.Send(_stream.Data(), _stream.Size());
+        _socket.Send(_stream.Data(), _stream.Size());
     }
 }
-
 
 //Extract the data from the given identifier
 //NOTE: The identifier must start with capital letter,
@@ -1688,32 +1747,33 @@ void SonificationModule::extractData(const std::string& identifier, int i,
                 //Project v down to the camera plane, Pplane(v)
                 //Pn(v) is v projected on the normal n of the plane
                 //Pplane(v) = v - Pn(v)
-                glm::dvec3 cameraToProjectedNode = cameraToNode - glm::proj(cameraToNode, cameraUpVector);
+                glm::dvec3 cameraToProjectedNode = cameraToNode -
+                    glm::proj(cameraToNode, cameraUpVector);
 
                 angle = glm::orientedAngle(glm::normalize(cameraDirection),
-                    glm::normalize(cameraToProjectedNode),
-                    glm::normalize(cameraUpVector));
+                                           glm::normalize(cameraToProjectedNode),
+                                           glm::normalize(cameraUpVector));
 
                 //If this planet is in focus then calculate the angle from
                 //the planet to its moons and send them too
                 for (int m = 0; m < _planets[i].moons.size(); ++m) {
-                    SceneGraphNode* moon = scene->sceneGraphNode(_planets[i].moons[m].first);
+                    SceneGraphNode* moon =
+                        scene->sceneGraphNode(_planets[i].moons[m].first);
                     if (moon) {
                         glm::dvec3 planetToMoon = moon->worldPosition() - nodePosition;
-                        glm::dvec3 planetToProjectedMoon = planetToMoon - glm::proj(planetToMoon, cameraUpVector);
+                        glm::dvec3 planetToProjectedMoon = planetToMoon -
+                            glm::proj(planetToMoon, cameraUpVector);
 
-                        //Easy switch between different angles
                         //Angle from planet to moon with respect to camera
-                        //NOTE: This might not work if the camera is looking straight down on the planet,
-                        //weired behaviour when switching from upside to downside vice versa
-                        double moonAngle = glm::orientedAngle(glm::normalize(cameraDirection),
-                            glm::normalize(planetToProjectedMoon), glm::normalize(cameraUpVector));
+                        //NOTE: This might not work if the camera is looking straight
+                        //down on the planet
+                        double moonAngle =
+                            glm::orientedAngle(glm::normalize(cameraDirection),
+                                               glm::normalize(planetToProjectedMoon),
+                                               glm::normalize(cameraUpVector));
 
-                        //Angle from camera to the moon projected on camera plane
-                        //glm::dvec3 cameraToProjectedMoon = (moon->worldPosition() - glm::proj(moon->worldPosition() - cameraPosition, cameraUpVector)) - cameraPosition;
-                        //double moonAngle = glm::orientedAngle(glm::normalize(cameraDirection), glm::normalize(cameraToProjectedMoon), glm::normalize(cameraUpVector));
-
-                        if (abs(_planets[i].moons[m].second - moonAngle) > _anglePrecision) {
+                        if (abs(_planets[i].moons[m].second-moonAngle) > _anglePrecision)
+                        {
                             updateMoons = true;
                             _planets[i].moons[m].second = moonAngle;
                         }
@@ -1721,20 +1781,13 @@ void SonificationModule::extractData(const std::string& identifier, int i,
                 }
             }
             else {
-                //Solar view, calculate angle from sun (origin) to node, 
-                //with x axis as forward and y axis as upwards 
-                //NOTE: Does not take into accoutnt the cameras position
-                //Angle from Sun
-                //angle = glm::orientedAngle(glm::normalize(nodePosition), glm::normalize(glm::dvec3(1.0, 0.0, 0.0)), glm::normalize(glm::dvec3(0.0, 1.0, 0.0)));
-
+                //Solar view, calculate angle from sun (origin) to node,
+                //with camera forward as forward and camera up axis as upwards
                 //angle from sun with respect to the camera
                 angle = glm::orientedAngle(glm::normalize(cameraDirection),
-                    glm::normalize(nodePosition - glm::proj(nodePosition, cameraUpVector)),
-                    glm::normalize(cameraUpVector));
-
-                //Angle from camera
-                //glm::dvec3 cameraToProjectedNode = (nodePosition - glm::proj(cameraToNode, cameraUpVector)) - cameraPosition;
-                //angle = glm::orientedAngle(glm::normalize(cameraDirection), glm::normalize(cameraToProjectedNode), glm::normalize(cameraUpVector));
+                                           glm::normalize(nodePosition -
+                                               glm::proj(nodePosition, cameraUpVector)),
+                                           glm::normalize(cameraUpVector));
             }
             
             //Check if this data is new, otherwise dont send the data
@@ -1750,11 +1803,11 @@ void SonificationModule::extractData(const std::string& identifier, int i,
                 //NOTE: Socket cannot be saved in class, it does not work then,
                 //dont know why. Only works if the socket is recreated
                 std::string label = "/" + identifier;
-                UdpTransmitSocket socket = UdpTransmitSocket(
-                    IpEndpointName(SC_IP_ADDRESS, SC_PORT));
                 _stream.Clear();
-                osc::Blob settingsBlob = osc::Blob(_planets[i].settings, NUM_PLANETARY_SETTINGS);
-                _stream << osc::BeginMessage(label.c_str()) << distance << angle << settingsBlob;
+                osc::Blob settingsBlob =
+                    osc::Blob(_planets[i].settings, NUM_PLANETARY_SETTINGS);
+                _stream << osc::BeginMessage(label.c_str()) << distance << angle
+                    << settingsBlob;
 
                 //Add the information of the moons if any
                 for (int m = 0; m < _planets[i].moons.size(); ++m) {
@@ -1762,7 +1815,7 @@ void SonificationModule::extractData(const std::string& identifier, int i,
                 }
 
                 _stream << osc::EndMessage;
-                socket.Send(_stream.Data(), _stream.Size());
+                _socket.Send(_stream.Data(), _stream.Size());
                 _planets[i].update = false;
             }
         }
@@ -1793,25 +1846,16 @@ void SonificationModule::threadMain(std::atomic<bool>& isRunning) {
                 if (cameraPosition != glm::dvec3(1.0, 1.0, 1.0)) {
                     
                     //Which node is in focus?
-                    focusNode = global::navigationHandler.orbitalNavigator().anchorNode();
+                    focusNode =
+                        global::navigationHandler.orbitalNavigator().anchorNode();
                     if (!focusNode) continue;
                     
                     //Check if focus has changed
                     if (!previousFocusNode || previousFocusNode->identifier()
-                        .compare(focusNode->identifier()) != 0) 
+                        .compare(focusNode->identifier()) != 0)
                     {                        
                         //Update
                         previousFocusNode = focusNode;
-
-                        //Let the sonification know which node is in focus,
-                        //is used to switch different sonifications
-                        UdpTransmitSocket socket = UdpTransmitSocket(
-                            IpEndpointName(SC_IP_ADDRESS, SC_PORT));
-                        _stream.Clear();
-                        std::string focusLabel = "/focus";
-                        _stream << osc::BeginMessage(focusLabel.c_str()) << 
-                            focusNode->identifier().c_str() << osc::EndMessage;
-                        socket.Send(_stream.Data(), _stream.Size());
 
                         //If focus is on the sun, switch sonification view
                         if (focusNode->identifier().compare("Sun") == 0) {
@@ -1845,7 +1889,8 @@ void SonificationModule::threadMain(std::atomic<bool>& isRunning) {
                         
                         //Only send data if something new has happened
                         //If the node is in focus, increase sensitivity
-                        if (focusNode->identifier().compare(_planets[i].identifier) == 0) {
+                        if (focusNode->identifier().compare(_planets[i].identifier) == 0)
+                        {
                             _anglePrecision = 0.05;
                             _distancePrecision = 1000.0;
                         }
@@ -1874,7 +1919,6 @@ void SonificationModule::internalInitialize(const ghoul::Dictionary&)
 
 void SonificationModule::internalDeinitialize() {
     //Turn off the sonification in SuperCollider
-    UdpTransmitSocket socket = UdpTransmitSocket(IpEndpointName(SC_IP_ADDRESS, SC_PORT));
     std::string label = "";
 
     for (int i = 0; i < NUM_PLANETS; ++i) {
@@ -1895,7 +1939,7 @@ void SonificationModule::internalDeinitialize() {
         }
 
         _stream << osc::EndMessage;
-        socket.Send(_stream.Data(), _stream.Size());
+        _socket.Send(_stream.Data(), _stream.Size());
     }
 
     for (int s = 0; s < NUM_PLANETS; ++s) {
@@ -1906,7 +1950,7 @@ void SonificationModule::internalDeinitialize() {
     _stream.Clear();
     osc::Blob solarSettingsBlob = osc::Blob(_solarSettings, NUM_PLANETS);
     _stream << osc::BeginMessage(label.c_str()) << solarSettingsBlob << osc::EndMessage;
-    socket.Send(_stream.Data(), _stream.Size());
+    _socket.Send(_stream.Data(), _stream.Size());
 
     _compareProperty.firstPlanet.setValue(0);
     _compareProperty.secondPlanet.setValue(0);
@@ -1914,8 +1958,10 @@ void SonificationModule::internalDeinitialize() {
     label = "/Compare";
     _stream.Clear();
     osc::Blob compareSettingsBlob = osc::Blob(_compareSettings, NUM_PLANETARY_SETTINGS);
-    _stream << osc::BeginMessage(label.c_str()) << _compareProperty.firstPlanet.value() << _compareProperty.secondPlanet.value() << compareSettingsBlob << osc::EndMessage;
-    socket.Send(_stream.Data(), _stream.Size());
+    _stream << osc::BeginMessage(label.c_str()) << _compareProperty.firstPlanet.value()
+        << _compareProperty.secondPlanet.value() << compareSettingsBlob
+        << osc::EndMessage;
+    _socket.Send(_stream.Data(), _stream.Size());
 
     //Clear data
     delete[] _buffer;

@@ -25,30 +25,29 @@
 #ifndef __OPENSPACE_MODULE_SONIFICATION___SONIFICATIONMODULE___H__
 #define __OPENSPACE_MODULE_SONIFICATION___SONIFICATIONMODULE___H__
 
-#include "modules/sonification/ext/osc/ip/UdpSocket.h"
-#include "modules/sonification/ext/osc/osc/OscOutboundPacketStream.h"
-#include <string>
-#include <thread>
-#include <atomic>
-#include <ghoul/glm.h>
-#include <openspace/scene/scene.h>
-#include <vector>
-#include <utility>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/optionproperty.h>
-
 #define NUM_PLANETS 8
 #define NUM_SEC_PER_DAY 86400.0
 #define NUM_PLANETARY_SETTINGS 6
 
-#include <openspace/util/openspacemodule.h>
+#include "modules/sonification/ext/osc/ip/UdpSocket.h"
+#include "modules/sonification/ext/osc/osc/OscOutboundPacketStream.h"
+#include "openspace/properties/scalar/boolproperty.h"
+#include "openspace/properties/optionproperty.h"
+#include "openspace/scene/scene.h"
+#include "openspace/util/openspacemodule.h"
+#include "ghoul/glm.h"
+#include <atomic>
+#include <string>
+#include <thread>
+#include <utility>
+#include <vector>
 
 namespace openspace {
 
 class SonificationModule : public OpenSpaceModule {
 public:
-    enum GUIMode {
-        Solar,
+    enum class GUIMode {
+        Solar = 0,
         Planetary,
         Compare
     };
@@ -57,8 +56,6 @@ public:
     ~SonificationModule();
 
     //Extract the data from the given identifier
-    //NOTE: The identifier must start with capital letter,
-    //otherwise no match will be found
     void extractData(const std::string& identifier, int i, const Scene * const scene,
         const glm::dvec3& cameraPosition, const glm::dvec3& cameraDirection,
         const glm::dvec3& cameraUpVector);
@@ -70,8 +67,12 @@ protected:
 private:
     //Main function for _thread
     void threadMain(std::atomic<bool>& isRunning);
+
+    //Property functions
     void setAllSolarProperties(bool value);
     void setAllPlanetaryProperties(bool value);
+
+    //Check the speed of the simulated time
     void checkTimeSpeed(double& ts);
 
     //On change methods for each property
@@ -192,14 +193,16 @@ private:
         double distance;
         double angle;
         std::vector<std::pair<std::string, double>> moons;
-        //Settings for each planet
+        //Sonification settings for each planet
         //[0] size/day enabled, [1] gravity enabled, [2] temperature enabled,
         //[3] atmosphere enabled, [4] moons enabled, [5] rings enabled
-        bool settings[NUM_PLANETARY_SETTINGS] = {false, false, false, false, false, false};
+        bool settings[NUM_PLANETARY_SETTINGS] =
+            {false, false, false, false, false, false};
         bool update;
     };
 
     char* _buffer;
+    UdpTransmitSocket _socket;
     osc::OutboundPacketStream _stream;
     std::thread _thread;
     std::atomic<bool> _isRunning;
@@ -209,14 +212,20 @@ private:
     double _timePrecision;
     Planet _planets[NUM_PLANETS];
     GUIMode _GUIState;
-    std::string oldCompareFirst;
-    std::string oldCompareSecond;
+    std::string _oldCompareFirst;
+    std::string _oldCompareSecond;
 
     //Settings for each planet
     //[0] mercury enabled, [1] venus enabled, [2] earth enabled, [3] mars enabled,
     //[4] jupiter enabled, [5] saturn enabled, [6] uranus enabled, [7] neptuen enabled
-    bool _solarSettings[NUM_PLANETS] = { false, false, false, false, false, false, false, false};
-    bool _compareSettings[NUM_PLANETARY_SETTINGS] = { false, false, false, false, false, false};
+    bool _solarSettings[NUM_PLANETS] =
+        {false, false, false, false, false, false, false, false};
+
+    //Settings of which parameters to compare between the selected planets
+    //[0] size/day, [1] gravity, [2] temperature,
+    //[3] atmosphere, [4] moons, [5] rings
+    bool _compareSettings[NUM_PLANETARY_SETTINGS] =
+        {false, false, false, false, false, false};
 
     //Properties
     //Planetary View
@@ -319,7 +328,8 @@ private:
     };
 
     PlanetHeadProperty _planetsProperty = PlanetHeadProperty(_PlanetsInfo, _MercuryInfo,
-        _VenusInfo, _EarthInfo, _MarsInfo, _JupiterInfo, _SaturnInfo, _UranusInfo, _NeptuneInfo);
+        _VenusInfo, _EarthInfo, _MarsInfo, _JupiterInfo, _SaturnInfo, _UranusInfo,
+        _NeptuneInfo);
 
     //Solar View
     struct SolarProperty : properties::PropertyOwner {
@@ -355,7 +365,8 @@ private:
     };
 
     CompareProperty _compareProperty = CompareProperty();
-    properties::BoolProperty _everythingEnabled = properties::BoolProperty(_EverythingInfo, false);
+    properties::BoolProperty _everythingEnabled =
+        properties::BoolProperty(_EverythingInfo, false);
 };
 
 } // namespace openspace
