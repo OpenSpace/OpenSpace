@@ -45,3 +45,18 @@ local object = {
 
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+
+
+asset.meta = {
+    Name = "Exoplanets",
+    Version = "1.0",
+    Description = [[Census: 4,055 planets in 3,023 systems. DU Version 20.11. Extrasolar
+    planets, or exoplanets, are a relatively new phenomenon in astronomy. While many
+    astronomers believed in their existence, no observational evidence was available until
+    1995. Since that time, scientists have discovered thousands of systems consisting of
+    one or more planets around a host star.(Description from URL) <br><br> Data Reference:
+    NASA Exoplanet Archive (CalTech/NASA)]],
+    Author = "Brian Abbott (AMNH)",
+    URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+    License = "AMNH Digital Universe"
+}

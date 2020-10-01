@@ -33,3 +33,13 @@ local object = {
 
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+
+
+asset.meta = {
+    Name = "Star Labels",
+    Version = "2.0",
+    Description = [[Labels for stars in the Milky Way. See 'Stars' asset for more info.]],
+    Author = "Brian Abbott (AMNH)",
+    URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+    License = "AMNH Digital Universe"
+}

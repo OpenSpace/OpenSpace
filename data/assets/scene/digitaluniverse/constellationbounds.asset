@@ -43,3 +43,14 @@ local object = {
 
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+
+
+asset.meta = {
+    Name = "Constellation Bounds",
+    Version = "1.0",
+    Description = [[A Spherical mesh dividing the sky into regions that fit the
+        constellations.]],
+    Author = "Brian Abbott (AMNH)",
+    URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+    License = "AMNH Digital Universe"
+}

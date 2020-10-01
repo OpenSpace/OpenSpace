@@ -41,6 +41,10 @@ local object = {
     }
 }
 
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+
+
 asset.meta = {
     Name = "2MASS Galaxies",
     Version = "1.0",
@@ -50,10 +54,8 @@ asset.meta = {
     from this survey is starlight. In visible light, clouds of gas and dust
     obscure our view. However, in infrared, the longer wavelengths of light can
     penetrate these clouds without being scattered, thereby revealing stars
-    that would normally be hidden to our eye. ]],
-    Author = "AMNH Digital Universe",
+    that would normally be hidden to our eye. (Description from URL)]],
+    Author = "Brian Abbott (AMNH)",
     URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-    License = "custom"
+    License = "AMNH Digital Universe"
 }
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })

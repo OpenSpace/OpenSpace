@@ -67,3 +67,18 @@ local sunstar = {
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { stars, sunstar })
+
+
+asset.meta = {
+    Name = "Stars",
+    Version = "2.0",
+    Description = [[Census:  117,003 stars with 321 labels. DU Version 7.8. This star
+        catalog is a combination of all available star catalogs, wherein we choose the
+        best distance available to place the stars around the Sun as accurately as is
+        possible. (Description from URL) <br><br> Data Reference: XHIP: An Extended
+        Hipparcos Compilation (Anderson E., Francis C. 2012); Hipparcos Catalog
+        (European Space Agency 1997); Gliese Catalog (Gliese and Jahriess 1991)]],
+    Author = "Brian Abbott (AMNH)",
+    URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+    License = "AMNH Digital Universe"
+}

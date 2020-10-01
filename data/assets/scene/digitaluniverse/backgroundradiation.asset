@@ -89,6 +89,7 @@ local planck = {
         FadeInThreshold = 0.4
     },
     GUI = {
+        Name = "Planck",
         Path = "/Universe/Cosmic Microwave Background"
     }
 }
@@ -246,3 +247,17 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
     wmap, cbe, planck, multiverse_planck_1, multiverse_planck_2, multiverse_planck_3,
     multiverse_planck_4, Halpha
 })
+
+
+asset.meta = {
+    Name = "Background Radiation",
+    Version = "2.0",
+    Description = [[Various AllSky images for the Milky Way and observable Universe.
+        Included: Wilkinson Microwave Anisotropy Probe (WMAP), Cosmic Background Explorer,
+        Planck, Planck Multiverse 1-4, and H Alpha <br><br> Data Reference: Planck/ESA and
+        the Planck Collaboration, Wilkinson Microwave Anisotropy Probe/NASA, Doug
+        Finkbeiner (Princeton)]],
+    Author = "Brian Abbott (AMNH), OpenSpace Team",
+    URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+    License = "AMNH Digital Universe"
+}

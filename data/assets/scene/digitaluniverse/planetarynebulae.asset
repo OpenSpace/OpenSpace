@@ -45,3 +45,19 @@ local object = {
 
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+
+
+asset.meta = {
+    Name = "Planetary Nebulae",
+    Version = "2.0",
+    Description = [[Census: 283 nebulae. DU Version 2.8. A planetary nebula is an
+    expanding shell of gas ejected from a star late in its life cycle. Appearing like
+    greenish disks to a telescopic observer, planetary nebulae received their name from
+    their resemblance to the gaseous planets of our solar system. In no way are they
+    related to planets, rather, they are products of dying stars. (Description from URL)
+    <br><br> Data Reference: Planetary Nebulae distances in Gaia DR2 (Kimeswenger+, 2018),
+    Strasbourg-ESO Catalog of Planetary Nebulae (Acker+ 1992)]],
+    Author = "Brian Abbott (AMNH)",
+    URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+    License = "AMNH Digital Universe"
+}
