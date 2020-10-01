@@ -103,14 +103,15 @@ void properties::listItemAdded(void) {
          // remaining item being removed.
          _data.at(0) = kBlank;
          ui->list->item(0)->setText("  (Enter details below & click 'Save')");
+         ui->list->setCurrentRow(0);
+         transitionToEditMode();
      }
      else {
          _data.push_back(kBlank);
          ui->list->addItem(new QListWidgetItem("  (Enter details below & click 'Save')"));
+         //Scroll down to that blank line highlighted
+         ui->list->setCurrentRow(ui->list->count() - 1);
      }
-
-    //Scroll down to that blank line highlighted
-    ui->list->setCurrentRow(ui->list->count() - 1);
 
     //Blank-out the 2 text fields, set combo box to index 0
     ui->combo_command->setCurrentIndex(0);
@@ -208,6 +209,9 @@ void properties::transitionToEditMode(void) {
     ui->button_save->setDisabled(true);
     ui->buttonBox->setDisabled(true);
 
+    ui->label_command->setText("<font color='black'>Property Set Command</font>");
+    ui->label_property->setText("<font color='black'>Property</font>");
+    ui->label_value->setText("<font color='black'>Value to set</font>");
     editBoxDisabled(false);
 }
 
@@ -219,9 +223,10 @@ void properties::transitionFromEditMode(void) {
     ui->button_save->setDisabled(false);
     ui->buttonBox->setDisabled(false);
 
+    ui->label_command->setText("<font color='light gray'>Property Set Command</font>");
+    ui->label_property->setText("<font color='light gray'>Property</font>");
+    ui->label_value->setText("<font color='light gray'>Value to set</font>");
     editBoxDisabled(true);
-    ui->label_property->setText("<font color='black'>Property</font>");
-    ui->label_value->setText("<font color='black'>Value to set</font>");
 }
 
 void properties::editBoxDisabled(bool disabled) {
@@ -235,35 +240,6 @@ void properties::editBoxDisabled(bool disabled) {
     ui->button_save->setDisabled(disabled);
 }
 
-/*void properties::resizeEvent(QResizeEvent* event)
-{
-    int sideMargin = 10;
-    int windowWidth = event->size().width();
-    //QRect qr(sideMargin, 10, windowWidth - (sideMargin * 2), 320);
-    //ui->verticalLayout->setGeometry(qr);
-
-    ui->list->setGeometry(
-        sideMargin,
-        ui->list->y(),
-        windowWidth - (sideMargin * 2),
-        ui->list->height()
-    );
-
-    ui->line_property->setGeometry(
-        sideMargin,
-        ui->line_property->y(),
-        windowWidth - (sideMargin * 2),
-        ui->line_property->height()
-    );
-
-    ui->line_value->setGeometry(
-        sideMargin,
-        ui->line_value->y(),
-        windowWidth > 400 ? 400 : windowWidth - (sideMargin * 2),
-        ui->line_value->height()
-    );
-}*/
-
 void properties::parseSelections() {
     //Handle case with only one remaining but empty line
     if ((_data.size() == 1) && (_data.at(0).name.compare("") == 0)) {
@@ -274,9 +250,6 @@ void properties::parseSelections() {
 }
 
 properties::~properties() {
-    for (size_t i = 0; i < ui->list->count(); ++i) {
-        delete ui->list->takeItem(i);
-    }
     delete ui;
 }
 
@@ -291,8 +264,8 @@ void properties::keyPressEvent(QKeyEvent *evt)
     else if(evt->key() == Qt::Key_Escape) {
         if (_editModeNewItem) {
             listItemCancelSave();
+            return;
         }
-        return;
     }
     QDialog::keyPressEvent(evt);
 }

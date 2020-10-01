@@ -29,68 +29,152 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QDialog>
 #include <QtWidgets/QDialogButtonBox>
+#include <QtWidgets/QFrame>
+#include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QListWidget>
 #include <QtWidgets/QPushButton>
+#include <QtWidgets/QSpacerItem>
+#include <QtWidgets/QVBoxLayout>
 
 QT_BEGIN_NAMESPACE
 
 class Ui_deltaTimes
 {
 public:
-    QDialogButtonBox *buttonBox;
-    QLabel *label_module;
+    QVBoxLayout *verticalLayout;
     QListWidget *listWidget;
-    QLabel *label_adjust;
-    QPushButton *button_save;
-    QPushButton *button_cancel;
+    QHBoxLayout *horizontalLayout;
     QPushButton *button_add;
     QPushButton *button_remove;
+    QSpacerItem *horizontalSpacer_2;
+    QLabel *label_adjust;
     QLineEdit *line_seconds;
+    QHBoxLayout *horizontalLayout_2;
+    QPushButton *button_save;
+    QPushButton *button_cancel;
+    QSpacerItem *horizontalSpacer;
+    QFrame *line;
+    QHBoxLayout *hLay_bottom_buttonBox;
+    QLabel *label_error;
+    QDialogButtonBox *buttonBox;
 
     void setupUi(QDialog *deltaTimes)
     {
         if (deltaTimes->objectName().isEmpty())
             deltaTimes->setObjectName(QString::fromUtf8("deltaTimes"));
         deltaTimes->resize(531, 439);
-        buttonBox = new QDialogButtonBox(deltaTimes);
-        buttonBox->setObjectName(QString::fromUtf8("buttonBox"));
-        buttonBox->setGeometry(QRect(170, 390, 341, 32));
-        buttonBox->setOrientation(Qt::Horizontal);
-        buttonBox->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
-        label_module = new QLabel(deltaTimes);
-        label_module->setObjectName(QString::fromUtf8("label_module"));
-        label_module->setGeometry(QRect(20, 20, 141, 20));
-        QFont font;
-        font.setFamily(QString::fromUtf8("Arial"));
-        font.setPointSize(12);
-        label_module->setFont(font);
+        deltaTimes->setMinimumSize(QSize(350, 300));
+        deltaTimes->setMaximumSize(QSize(550, 800));
+        verticalLayout = new QVBoxLayout(deltaTimes);
+        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
         listWidget = new QListWidget(deltaTimes);
         listWidget->setObjectName(QString::fromUtf8("listWidget"));
-        listWidget->setGeometry(QRect(20, 50, 381, 171));
         listWidget->setAutoScroll(true);
         listWidget->setLayoutMode(QListView::SinglePass);
-        label_adjust = new QLabel(deltaTimes);
-        label_adjust->setObjectName(QString::fromUtf8("label_adjust"));
-        label_adjust->setGeometry(QRect(20, 284, 421, 20));
-        label_adjust->setFont(font);
-        button_save = new QPushButton(deltaTimes);
-        button_save->setObjectName(QString::fromUtf8("button_save"));
-        button_save->setGeometry(QRect(20, 354, 71, 25));
-        button_cancel = new QPushButton(deltaTimes);
-        button_cancel->setObjectName(QString::fromUtf8("button_cancel"));
-        button_cancel->setGeometry(QRect(120, 354, 71, 25));
+
+        verticalLayout->addWidget(listWidget);
+
+        horizontalLayout = new QHBoxLayout();
+        horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
         button_add = new QPushButton(deltaTimes);
         button_add->setObjectName(QString::fromUtf8("button_add"));
-        button_add->setGeometry(QRect(20, 230, 151, 25));
+        button_add->setMinimumSize(QSize(100, 0));
+        button_add->setMaximumSize(QSize(120, 16777215));
+
+        horizontalLayout->addWidget(button_add);
+
         button_remove = new QPushButton(deltaTimes);
         button_remove->setObjectName(QString::fromUtf8("button_remove"));
-        button_remove->setGeometry(QRect(190, 230, 151, 25));
+        button_remove->setMinimumSize(QSize(160, 0));
+        button_remove->setMaximumSize(QSize(180, 16777215));
+        QFont font;
+        font.setFamily(QString::fromUtf8("Arial"));
+        button_remove->setFont(font);
+
+        horizontalLayout->addWidget(button_remove);
+
+        horizontalSpacer_2 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+        horizontalLayout->addItem(horizontalSpacer_2);
+
+
+        verticalLayout->addLayout(horizontalLayout);
+
+        label_adjust = new QLabel(deltaTimes);
+        label_adjust->setObjectName(QString::fromUtf8("label_adjust"));
+        label_adjust->setMaximumSize(QSize(250, 16777215));
+        QFont font1;
+        font1.setFamily(QString::fromUtf8("Arial"));
+        font1.setPointSize(12);
+        label_adjust->setFont(font1);
+
+        verticalLayout->addWidget(label_adjust);
+
         line_seconds = new QLineEdit(deltaTimes);
         line_seconds->setObjectName(QString::fromUtf8("line_seconds"));
-        line_seconds->setGeometry(QRect(20, 310, 191, 31));
-        line_seconds->setFont(font);
+        line_seconds->setMaximumSize(QSize(200, 16777215));
+        line_seconds->setFont(font1);
+
+        verticalLayout->addWidget(line_seconds);
+
+        horizontalLayout_2 = new QHBoxLayout();
+        horizontalLayout_2->setObjectName(QString::fromUtf8("horizontalLayout_2"));
+        button_save = new QPushButton(deltaTimes);
+        button_save->setObjectName(QString::fromUtf8("button_save"));
+        button_save->setMinimumSize(QSize(80, 0));
+        button_save->setMaximumSize(QSize(120, 16777215));
+        button_save->setFont(font);
+
+        horizontalLayout_2->addWidget(button_save);
+
+        button_cancel = new QPushButton(deltaTimes);
+        button_cancel->setObjectName(QString::fromUtf8("button_cancel"));
+        button_cancel->setMinimumSize(QSize(80, 0));
+        button_cancel->setMaximumSize(QSize(120, 16777215));
+
+        horizontalLayout_2->addWidget(button_cancel);
+
+        horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+        horizontalLayout_2->addItem(horizontalSpacer);
+
+
+        verticalLayout->addLayout(horizontalLayout_2);
+
+        line = new QFrame(deltaTimes);
+        line->setObjectName(QString::fromUtf8("line"));
+        line->setFrameShape(QFrame::HLine);
+        line->setFrameShadow(QFrame::Sunken);
+
+        verticalLayout->addWidget(line);
+
+        hLay_bottom_buttonBox = new QHBoxLayout();
+        hLay_bottom_buttonBox->setObjectName(QString::fromUtf8("hLay_bottom_buttonBox"));
+
+        QFont fontE;
+        fontE.setFamily(QString::fromUtf8("Arial"));
+        label_error = new QLabel(deltaTimes);
+        label_error->setObjectName(QString::fromUtf8("label_error"));
+        QSizePolicy sizePolicy3(QSizePolicy::Preferred, QSizePolicy::Preferred);
+        sizePolicy3.setHorizontalStretch(0);
+        sizePolicy3.setVerticalStretch(0);
+        sizePolicy3.setHeightForWidth(label_error->sizePolicy().hasHeightForWidth());
+        label_error->setSizePolicy(sizePolicy3);
+        label_error->setMinimumSize(QSize(200, 40));
+        label_error->setMaximumSize(QSize(800, 40));
+        label_error->setFont(fontE);
+        label_error->setWordWrap(true);
+        hLay_bottom_buttonBox->addWidget(label_error);
+
+        buttonBox = new QDialogButtonBox(deltaTimes);
+        buttonBox->setObjectName(QString::fromUtf8("buttonBox"));
+        buttonBox->setOrientation(Qt::Horizontal);
+        buttonBox->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
+
+        hLay_bottom_buttonBox->addWidget(buttonBox);
+        verticalLayout->addLayout(hLay_bottom_buttonBox);
 
         retranslateUi(deltaTimes);
         //QObject::connect(buttonBox, SIGNAL(accepted()), deltaTimes, SLOT(accept()));
@@ -101,20 +185,16 @@ public:
 
     void retranslateUi(QDialog *deltaTimes)
     {
-        deltaTimes->setWindowTitle(QCoreApplication::translate("deltaTimes",
-            "Delta Time Steps", nullptr));
-        label_module->setText(QCoreApplication::translate("deltaTimes",
-            "Delta Times", nullptr));
-        label_adjust->setText(QCoreApplication::translate("deltaTimes",
-            "Set Delta Time", nullptr));
-        button_save->setText(QCoreApplication::translate("deltaTimes",
-            "Save", nullptr));
-        button_cancel->setText(QCoreApplication::translate("deltaTimes",
-            "Cancel", nullptr));
-        button_add->setText(QCoreApplication::translate("deltaTimes",
-            "Add New Entry", nullptr));
-        button_remove->setText(QCoreApplication::translate("deltaTimes",
-            "Remove Last Entry", nullptr));
+        deltaTimes->setWindowTitle(QCoreApplication::translate("deltaTimes", "Delta Time Steps", nullptr));
+        button_add->setText(QCoreApplication::translate("deltaTimes", "Add Entry", nullptr));
+        button_remove->setText(QCoreApplication::translate("deltaTimes", "Remove Last Entry", nullptr));
+        label_adjust->setText(QCoreApplication::translate("deltaTimes", "Set Delta Time for key", nullptr));
+#if QT_CONFIG(tooltip)
+        line_seconds->setToolTip(QCoreApplication::translate("deltaTimes", "<html><head/><body><p>Enter number of simulated seconds to elapse per actual second for the particular delta time</p></body></html>", nullptr));
+#endif // QT_CONFIG(tooltip)
+        button_save->setText(QCoreApplication::translate("deltaTimes", "Save", nullptr));
+        button_cancel->setText(QCoreApplication::translate("deltaTimes", "Cancel", nullptr));
+        label_error->setText(QCoreApplication::translate("deltaTimes", "", nullptr));
     } // retranslateUi
 
 };

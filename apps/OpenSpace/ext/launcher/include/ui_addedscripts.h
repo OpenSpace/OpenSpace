@@ -29,41 +29,83 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QDialog>
 #include <QtWidgets/QDialogButtonBox>
+#include <QtWidgets/QFrame>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QTextEdit>
+#include <QtWidgets/QVBoxLayout>
 
 QT_BEGIN_NAMESPACE
 
 class Ui_addedScripts
 {
 public:
-    QDialogButtonBox *buttonBox;
+    QVBoxLayout *verticalLayout;
     QLabel *label_module;
     QTextEdit *text_scripts;
+    QFrame *line;
+    QHBoxLayout *hLay_bottom_buttonBox;
+    QLabel *label_error;
+    QDialogButtonBox *buttonBox;
 
     void setupUi(QDialog *addedScripts)
     {
         if (addedScripts->objectName().isEmpty())
             addedScripts->setObjectName(QString::fromUtf8("addedScripts"));
         addedScripts->resize(591, 469);
-        buttonBox = new QDialogButtonBox(addedScripts);
-        buttonBox->setObjectName(QString::fromUtf8("buttonBox"));
-        buttonBox->setGeometry(QRect(240, 430, 341, 32));
-        buttonBox->setOrientation(Qt::Horizontal);
-        buttonBox->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
+        addedScripts->setMinimumSize(QSize(400, 400));
+        addedScripts->setMaximumSize(QSize(900, 900));
+        verticalLayout = new QVBoxLayout(addedScripts);
+        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
         label_module = new QLabel(addedScripts);
         label_module->setObjectName(QString::fromUtf8("label_module"));
-        label_module->setGeometry(QRect(20, 20, 357, 20));
         QFont font;
         font.setFamily(QString::fromUtf8("Arial"));
         font.setPointSize(12);
         label_module->setFont(font);
+
+        verticalLayout->addWidget(label_module);
+
         text_scripts = new QTextEdit(addedScripts);
         text_scripts->setObjectName(QString::fromUtf8("text_scripts"));
-        text_scripts->setGeometry(QRect(20, 50, 551, 371));
+
+        verticalLayout->addWidget(text_scripts);
+
+        line = new QFrame(addedScripts);
+        line->setObjectName(QString::fromUtf8("line"));
+        line->setFrameShape(QFrame::HLine);
+        line->setFrameShadow(QFrame::Sunken);
+
+        verticalLayout->addWidget(line);
+
+        hLay_bottom_buttonBox = new QHBoxLayout();
+        hLay_bottom_buttonBox->setObjectName(QString::fromUtf8("hLay_bottom_buttonBox"));
+
+        QFont fontE;
+        fontE.setFamily(QString::fromUtf8("Arial"));
+        label_error = new QLabel(addedScripts);
+        label_error->setObjectName(QString::fromUtf8("label_error"));
+        QSizePolicy sizePolicy1(QSizePolicy::Preferred, QSizePolicy::Preferred);
+        sizePolicy1.setHorizontalStretch(0);
+        sizePolicy1.setVerticalStretch(0);
+        sizePolicy1.setHeightForWidth(label_error->sizePolicy().hasHeightForWidth());
+        label_error->setSizePolicy(sizePolicy1);
+        label_error->setMinimumSize(QSize(200, 40));
+        label_error->setMaximumSize(QSize(800, 40));
+        label_error->setFont(fontE);
+        label_error->setWordWrap(true);
+        hLay_bottom_buttonBox->addWidget(label_error);
+
+        buttonBox = new QDialogButtonBox(addedScripts);
+        buttonBox->setObjectName(QString::fromUtf8("buttonBox"));
+        buttonBox->setOrientation(Qt::Horizontal);
+        buttonBox->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
+
+        hLay_bottom_buttonBox->addWidget(buttonBox);
+        verticalLayout->addLayout(hLay_bottom_buttonBox);
+
 
         retranslateUi(addedScripts);
-        QObject::connect(buttonBox, SIGNAL(accepted()), addedScripts, SLOT(accept()));
+        //QObject::connect(buttonBox, SIGNAL(accepted()), addedScripts, SLOT(accept()));
         QObject::connect(buttonBox, SIGNAL(rejected()), addedScripts, SLOT(reject()));
 
         QMetaObject::connectSlotsByName(addedScripts);
@@ -71,10 +113,9 @@ public:
 
     void retranslateUi(QDialog *addedScripts)
     {
-        addedScripts->setWindowTitle(QCoreApplication::translate("addedScripts",
-            "Additional Scripts", nullptr));
-        label_module->setText(QCoreApplication::translate("addedScripts",
-            "Additional Lua Scripts for Configuration", nullptr));
+        addedScripts->setWindowTitle(QCoreApplication::translate("addedScripts", "Additional Scripts", nullptr));
+        label_module->setText(QCoreApplication::translate("addedScripts", "Additional Lua Scripts for Configuration", nullptr));
+        label_error->setText(QCoreApplication::translate("addedScripts", "", nullptr));
     } // retranslateUi
 
 };

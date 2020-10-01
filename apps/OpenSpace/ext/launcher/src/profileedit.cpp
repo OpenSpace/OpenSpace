@@ -27,6 +27,7 @@
 #include "./ui_profileedit.h"
 #include "filesystemaccess.h"
 #include <QKeyEvent>
+#include <iostream>
 
 template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
 template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
@@ -63,12 +64,7 @@ ProfileEdit::~ProfileEdit() {
 }
 
 void ProfileEdit::initSummaryTextForEachCategory() {
-    ui->text_meta->setText(summarizeText_meta());
-    ui->text_meta->setReadOnly(true);
-
     labelText(_pData, _pData->modules().size(), "Modules", ui->label_modules);
-    ui->text_modules->setText(summarizeText_modules());
-    ui->text_modules->setReadOnly(true);
 
     labelText(_pData, _pData->assets().size(), "Assets", ui->label_assets);
     ui->text_assets->setText(summarizeText_assets());
@@ -82,24 +78,13 @@ void ProfileEdit::initSummaryTextForEachCategory() {
     ui->text_keybindings->setText(summarizeText_keybindings());
     ui->text_keybindings->setReadOnly(true);
 
-    ui->text_time->setText(summarizeText_time());
-    ui->text_time->setReadOnly(true);
-
     labelText(_pData, _pData->deltaTimes().size(), "Delta Times", ui->label_deltatimes);
-    ui->text_deltatimes->setText(summarizeText_deltaTimes());
-    ui->text_deltatimes->setReadOnly(true);
-
-    ui->text_camera->setText(summarizeText_camera());
-    ui->text_camera->setReadOnly(true);
-
     labelText(_pData, _pData->markNodes().size(), "Mark Interesting Nodes",
-        ui->label_marknodes
-    );
-    ui->text_marknodes->setText(summarizeText_markNodes());
-    ui->text_marknodes->setReadOnly(true);
-
-    ui->text_additionalscripts->setText(summarizeText_addedScripts());
-    ui->text_additionalscripts->setReadOnly(true);
+        ui->label_marknodes);
+    labelText(_pData, 0, "Camera", ui->label_camera);
+    labelText(_pData, 0, "Time", ui->label_time);
+    labelText(_pData, 0, "Meta", ui->label_meta);
+    labelText(_pData, 0, "Additional Scripts", ui->label_additionalscripts);
 }
 
 void ProfileEdit::setProfileName(QString profileToSet) {
@@ -110,7 +95,6 @@ void ProfileEdit::openMeta() {
     if (_pData) {
        _meta = new meta(_pData);
        _meta->exec();
-       ui->text_meta->setText(summarizeText_meta());
        delete _meta;
     }
 }
@@ -120,7 +104,6 @@ void ProfileEdit::openModules() {
         _modules = new osmodules(_pData);
         _modules->exec();
         labelText(_pData, _pData->modules().size(), "Modules", ui->label_modules);
-        ui->text_modules->setText(summarizeText_modules());
         delete _modules;
     }
 }
@@ -154,7 +137,7 @@ void ProfileEdit::openAssets() {
         _assets = new assets(_pData, _reportedAssets);
         _assets->exec();
         labelText(_pData, _pData->assets().size(), "Assets", ui->label_assets);
-        ui->text_assets->setText(summarizeText_assets());
+        ui->text_assets->setText(_assets->createTextSummary());
         delete _assets;
     }
 }
@@ -163,7 +146,6 @@ void ProfileEdit::openTime() {
     if (_pData) {
         _time = new ostime(_pData);
         _time->exec();
-        ui->text_time->setText(summarizeText_time());
         delete _time;
     }
 }
@@ -175,7 +157,6 @@ void ProfileEdit::openDeltaTimes() {
         labelText(_pData, _pData->deltaTimes().size(), "Delta Times",
             ui->label_deltatimes
         );
-        ui->text_deltatimes->setText(summarizeText_deltaTimes());
         delete _deltaTimes;
     }
 }
@@ -184,7 +165,6 @@ void ProfileEdit::openAddedScripts() {
     if (_pData) {
         _addedScripts = new addedScripts(_pData);
         _addedScripts->exec();
-        ui->text_additionalscripts->setText(summarizeText_addedScripts());
         delete _addedScripts;
     }
 }
@@ -193,7 +173,6 @@ void ProfileEdit::openCamera() {
     if (_pData) {
         _camera = new camera(_pData);
         _camera->exec();
-        ui->text_camera->setText(summarizeText_camera());
         delete _camera;
     }
 }
@@ -205,7 +184,6 @@ void ProfileEdit::openMarkNodes() {
         labelText(_pData, _pData->markNodes().size(), "Mark Interesting Nodes",
             ui->label_marknodes
         );
-        ui->text_marknodes->setText(summarizeText_markNodes());
         delete _markNodes;
     }
 }
@@ -297,13 +275,9 @@ QString ProfileEdit::summarizeText_keybindings() {
 }
 
 QString ProfileEdit::summarizeText_assets() {
-    if (_pData == nullptr) {
-        return "";
-    }
     QString results;
     for (openspace::Profile::Asset a : _pData->assets()) {
-        results += QString(a.path.c_str()) + "    ";
-        results += QString(a.name.c_str()) + "\n";
+        results += QString(a.path.c_str()) + "\n"; //"    ";
     }
     return results;
 }

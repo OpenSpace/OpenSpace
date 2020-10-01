@@ -31,13 +31,12 @@
 
 struct importElement
 {
-    importElement(std::string l, int lev, bool chk, std::string vname)
-        : line(l), level(lev), checked(chk), varname(vname) {}
+    importElement(std::string l, int lev, bool chk)
+        : line(l), level(lev), checked(chk) {}
     std::string line;
     int level = -1;
     bool checked = false;
     bool existsInFilesystem = true;
-    std::string varname;
 };
 
 class assetTreeModel : public QAbstractItemModel
@@ -45,7 +44,7 @@ class assetTreeModel : public QAbstractItemModel
     Q_OBJECT
 
 public:
-    explicit assetTreeModel(QString header1, QString header2, QString header3,
+    explicit assetTreeModel(QString header1, QString header2,
         QObject* parent = nullptr);
     ~assetTreeModel();
 
@@ -148,9 +147,21 @@ public:
     /**
       * Returns a vector of all #Assets selected in the tree view
       *
-      * \return vector of #openspace::Profile::Asset objects, each of which are selected
+      * \param outputPaths vector of #openspace::Profile::Asset objects,
+      *                    each of which are selected
+      * \param outputItems vector of #assetTreeItem * objects,
+      *                    each of which are selected
       */
-    std::vector<openspace::Profile::Asset> selectedAssets();
+    void selectedAssets(std::vector<openspace::Profile::Asset>& outputPaths,
+        std::vector<assetTreeItem*>& outputItems);
+
+    /**
+      * Returns a vector of all assets selected in the tree view, but in the form of
+      * #assetTreeItem pointers
+      *
+      * \return vector of #assetTreeItem * objects, each of which are selected
+      */
+    std::vector<openspace::Profile::Asset> selectedAssetsDetailed();
 
     /**
       * Imports asset tree data for this model. The import text format is unique to
@@ -243,28 +254,13 @@ public:
       */
     void setExistenceInFilesystem(QModelIndex& index, bool fileExists);
 
-    /**
-      * Returns the variable name of the asset (variable name is optional)
-      *
-      * \param index location of the item to set
-      * \return string of the variable name (may be empty)
-      */
-    QString varName(const QModelIndex& index) const;
-
-    /**
-      * Sets the optional variable name
-      *
-      * \param index location of the item to set
-      * \param varName The variable name to set
-      */
-    void setVarName(QModelIndex& index, QString varName);
-
 private:
     std::string headerTitle;
     assetTreeItem *getItem(const QModelIndex &index) const;
     assetTreeItem *rootItem;
     void parseChildrenForSelected(assetTreeItem* item,
-        std::vector<openspace::Profile::Asset>& output, std::string pathPrefix);
+        std::vector<openspace::Profile::Asset>& outputPaths,
+        std::vector<assetTreeItem*>& outputItems, std::string pathPrefix);
     void importInsertItem(std::istringstream& iss, assetTreeItem* parent,
         importElement& elem, int level);
     bool importGetNextLine(importElement& elem, std::istringstream& iss);

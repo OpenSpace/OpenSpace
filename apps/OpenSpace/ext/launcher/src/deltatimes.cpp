@@ -245,6 +245,7 @@ void deltaTimes::transitionToEditMode(void) {
     ui->buttonBox->setDisabled(true);
 
     ui->line_seconds->setFocus(Qt::OtherFocusReason);
+    ui->label_adjust->setText("<font color='black'>Set Delta Time</font>");
     editBoxDisabled(false);
 }
 
@@ -258,11 +259,10 @@ void deltaTimes::transitionFromEditMode(void) {
 
     ui->button_add->setFocus(Qt::OtherFocusReason);
     editBoxDisabled(true);
-    ui->label_adjust->setText("<font color='black'>Set Delta Time</font>");
+    ui->label_adjust->setText("<font color='light gray'>Set Delta Time</font>");
 }
 
 void deltaTimes::editBoxDisabled(bool disabled) {
-    //ui->label_module->setDisabled(disabled);
     ui->label_adjust->setDisabled(disabled);
     ui->line_seconds->setDisabled(disabled);
 }
@@ -286,9 +286,6 @@ void deltaTimes::parseSelections() {
 }
 
 deltaTimes::~deltaTimes() {
-    for (size_t i = 0; i < ui->listWidget->count(); ++i) {
-        delete ui->listWidget->takeItem(i);
-    }
     delete ui;
 }
 
@@ -306,8 +303,8 @@ void deltaTimes::keyPressEvent(QKeyEvent *evt)
     else if(evt->key() == Qt::Key_Escape) {
         if (_editModeNewItem) {
             cancelDeltaTimeValue();
+            return;
         }
-        return;
     }
     QDialog::keyPressEvent(evt);
 }

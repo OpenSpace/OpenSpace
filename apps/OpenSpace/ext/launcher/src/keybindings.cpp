@@ -84,7 +84,7 @@ QString keybindings::createOneLineSummary(openspace::Profile::Keybinding k) {
     summary += truncateString(k.name) + " (";
     summary += truncateString(k.documentation) + ") @ ";
     summary += truncateString(k.guiPath) + " ";
-    summary += (k.isLocal) ? "local" : "not local";
+    summary += (k.isLocal) ? "local" : "remote";
     summary += " `" + truncateString(k.script) + "`";
 
     return QString(summary.c_str());
@@ -168,14 +168,14 @@ void keybindings::listItemAdded(void) {
          // remaining item being removed.
          _data.at(0) = kBlank;
          ui->list->item(0)->setText("  (Enter details below & click 'Save')");
+         transitionToEditMode();
      }
      else {
         _data.push_back(kBlank);
         ui->list->addItem(new QListWidgetItem("  (Enter details below & click 'Save')"));
+        //Scroll down to that blank line highlighted
+        ui->list->setCurrentRow(ui->list->count() - 1);
      }
-
-    //Scroll down to that blank line highlighted
-    ui->list->setCurrentRow(ui->list->count() - 1);
 
     //Blank-out the 2 text fields, set combo box to index 0
     ui->line_name->setText(QString(_data.back().name.c_str()));
@@ -286,6 +286,12 @@ void keybindings::transitionToEditMode(void) {
     ui->button_save->setDisabled(true);
     ui->button_cancel->setDisabled(true);
     ui->buttonBox->setDisabled(true);
+    ui->label_key->setText("<font color='black'>Key</font>");
+    ui->label_keyMod->setText("<font color='black'>Key Modifier</font>");
+    ui->label_name->setText("<font color='black'>Name</font>");
+    ui->label_script->setText("<font color='black'>Script</font>");
+    ui->label_guiPath->setText("<font color='black'>GUI Path</font>");
+    ui->label_documentation->setText("<font color='black'>Documentation</font>");
 
     editBoxDisabled(false);
 }
@@ -298,10 +304,13 @@ void keybindings::transitionFromEditMode(void) {
     ui->button_cancel->setDisabled(false);
     ui->buttonBox->setDisabled(false);
 
+    ui->label_key->setText("<font color='light gray'>Key</font>");
+    ui->label_keyMod->setText("<font color='light gray'>Key Modifier</font>");
+    ui->label_name->setText("<font color='light gray'>Name</font>");
+    ui->label_script->setText("<font color='light gray'>Script</font>");
+    ui->label_guiPath->setText("<font color='light gray'>GUI Path</font>");
+    ui->label_documentation->setText("<font color='light gray'>Documentation</font>");
     editBoxDisabled(true);
-    ui->label_key->setText("<font color='black'>Key</font>");
-    ui->label_name->setText("<font color='black'>Name</font>");
-    ui->label_script->setText("<font color='black'>Script</font>");
 }
 
 void keybindings::editBoxDisabled(bool disabled) {
@@ -331,9 +340,6 @@ void keybindings::parseSelections() {
 }
 
 keybindings::~keybindings() {
-    for (size_t i = 0; i < ui->list->count(); ++i) {
-        delete ui->list->takeItem(i);
-    }
     delete ui;
 }
 
@@ -344,8 +350,8 @@ void keybindings::keyPressEvent(QKeyEvent *evt)
     else if(evt->key() == Qt::Key_Escape) {
         if (_editModeNewItem) {
             listItemCancelSave();
+            return;
         }
-        return;
     }
     QDialog::keyPressEvent(evt);
 }

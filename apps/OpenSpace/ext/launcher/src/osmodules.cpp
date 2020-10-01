@@ -27,6 +27,7 @@
 #include "./ui_osmodules.h"
 #include <qevent.h>
 #include <QKeyEvent>
+#include <iostream>
 
 osmodules::osmodules(openspace::Profile* imported, QWidget *parent)
     : QDialog(parent)
@@ -105,14 +106,15 @@ void osmodules::listItemAdded(void) {
         // remaining item being removed.
         _data.at(0) = kBlank;
         ui->list->item(0)->setText("  (Enter details below & click 'Save')");
+        ui->list->setCurrentRow(0);
+        transitionToEditMode();
     }
     else {
         _data.push_back(kBlank);
         ui->list->addItem(new QListWidgetItem("  (Enter details below & click 'Save')"));
+        //Scroll down to that blank line highlighted
+        ui->list->setCurrentRow(ui->list->count() - 1);
     }
-
-    //Scroll down to that blank line highlighted
-    ui->list->setCurrentRow(ui->list->count() - 1);
 
     //Blank-out the 2 text fields, set combo box to index 0
     ui->line_module->setText(QString(_data.back().name.c_str()));
@@ -187,6 +189,9 @@ void osmodules::transitionToEditMode(void) {
     ui->button_save->setDisabled(true);
     ui->buttonBox->setDisabled(true);
 
+    ui->label_module->setText("<font color='black'>Module</font>");
+    ui->label_loaded->setText("<font color='black'>Command if Module is Loaded</font>");
+    ui->label_notLoaded->setText("<font color='black'>Command if Module is NOT Loaded</font>");
     editBoxDisabled(false);
 }
 
@@ -199,7 +204,9 @@ void osmodules::transitionFromEditMode(void) {
     ui->buttonBox->setDisabled(false);
 
     editBoxDisabled(true);
-    ui->label_module->setText("<font color='black'>Module</font>");
+    ui->label_module->setText("<font color='light gray'>Module</font>");
+    ui->label_loaded->setText("<font color='light gray'>Command if Module is Loaded</font>");
+    ui->label_notLoaded->setText("<font color='light gray'>Command if Module is NOT Loaded</font>");
     //ui->list->clearSelection();
 }
 
@@ -224,9 +231,6 @@ void osmodules::parseSelections() {
 }
 
 osmodules::~osmodules() {
-    for (size_t i = 0; i < ui->list->count(); ++i) {
-        delete ui->list->takeItem(i);
-    }
     delete ui;
 }
 
@@ -241,8 +245,8 @@ void osmodules::keyPressEvent(QKeyEvent *evt)
     else if(evt->key() == Qt::Key_Escape) {
         if (_editModeNewItem) {
             listItemCancelSave();
+            return;
         }
-        return;
     }
     QDialog::keyPressEvent(evt);
 }

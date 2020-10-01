@@ -37,7 +37,7 @@ assets::assets(openspace::Profile* imported, const std::string reportAssets,
     : QDialog(parent)
     , ui(new Ui::assets)
     , _imported(imported)
-    , _assetTreeModel(tr("Asset"), tr("Enabled"), tr("Variable Name"))
+    , _assetTreeModel(tr("Asset"), tr("Enabled"))
 {
     ui->setupUi(this);
 
@@ -45,42 +45,42 @@ assets::assets(openspace::Profile* imported, const std::string reportAssets,
 
     ui->treeView->setModel(&_assetTreeModel);
     ui->treeView->setRootIndex(_assetTreeModel.index(-1, 0));
-    ui->treeView->setColumnWidth(0, ui->treeView->width() * 0.63);
-    ui->treeView->setColumnWidth(1, ui->treeView->width() * 0.12);
-    ui->treeView->setColumnWidth(2, ui->treeView->width() * 0.25);
+    //ui->treeView->setColumnWidth(0, ui->treeView->width() * 0.9);
+    ui->treeView->setColumnWidth(1, 60);//ui->treeView->width() * 0.1);
+    ui->treeView->setColumnWidth(0, ui->treeView->width() - 60);
     ui->treeView->setAnimated(true);
     ui->treeView->setSortingEnabled(false);
     ui->treeView->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->textEdit->setReadOnly(true);
 
     compareFilesystemWithProfileAssets();
 
     int nRows = _assetTreeModel.rowCount(_assetTreeModel.index(-1, 0));
     traverseToExpandSelectedItems(nRows, _assetTreeModel.index(-1, 0));
+    ui->textEdit->setText(createTextSummary());
 
     connect(ui->treeView,
             SIGNAL(clicked(const QModelIndex&)),
             this,
             SLOT(selected(const QModelIndex&))
     );
-    connect(ui->varName, SIGNAL(clicked()), this, SLOT(setVarName()));
     connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(parseSelections()));
     connect(ui->buttonBox, SIGNAL(rejected()), this, SLOT(cancel()));
 }
 
 void assets::compareFilesystemWithProfileAssets() {
     for (openspace::Profile::Asset a : _imported->assets()) {
-        findPathMatch(a.path, a.name);
+        findPathMatch(a.path);
     }
 }
 
-void assets::findPathMatch(std::string& path, std::string& varName) {
+void assets::findPathMatch(std::string& path) {
     QModelIndex parent = _assetTreeModel.index(-1, 0);
     int nRows = _assetTreeModel.rowCount(parent);
-    traverseToFindFilesystemMatch(parent, nRows, path, varName);
+    traverseToFindFilesystemMatch(parent, nRows, path);
 }
 
-void assets::traverseToFindFilesystemMatch(QModelIndex parent, int nRows,
-                                           std::string path, std::string varName)
+void assets::traverseToFindFilesystemMatch(QModelIndex parent, int rows, std::string path)
 {
     size_t slash = path.find_first_of('/', 0);
     bool endOfPath = (slash == std::string::npos);
@@ -90,14 +90,14 @@ void assets::traverseToFindFilesystemMatch(QModelIndex parent, int nRows,
         std::string nextPath = (slash == std::string::npos) ? path :
             path.substr(slash + 1);
         bool foundDirMatch = false;
-        for (int r = 0; r < nRows; r++) {
+        for (int r = 0; r < rows; r++) {
             QModelIndex idx = _assetTreeModel.index(r, 0, parent);
             std::string assetName = _assetTreeModel.name(idx).toUtf8().constData();
             if (!_assetTreeModel.isAsset(idx)) {
                 if (firstDir.compare(assetName) == 0) {
                     int nChildRows = _assetTreeModel.childCount(idx);
                     foundDirMatch = true;
-                    traverseToFindFilesystemMatch(idx, nChildRows, nextPath, varName);
+                    traverseToFindFilesystemMatch(idx, nChildRows, nextPath);
                     break;
                 }
             }
@@ -107,42 +107,40 @@ void assets::traverseToFindFilesystemMatch(QModelIndex parent, int nRows,
         }
         if (!foundDirMatch) {
             //Insert missing directory here with name and exists=false condition
-            _assetTreeModel.assetItem(parent)->insertChildren(nRows, 1, 3);
-            QModelIndex idx = _assetTreeModel.index(nRows, 0, parent);
+            _assetTreeModel.assetItem(parent)->insertChildren(rows, 1, 3);
+            QModelIndex idx = _assetTreeModel.index(rows, 0, parent);
             _assetTreeModel.setName(idx, QString(firstDir.c_str()));
             _assetTreeModel.setExistenceInFilesystem(idx, false);
-            traverseToFindFilesystemMatch(idx, 0, nextPath, varName);
+            traverseToFindFilesystemMatch(idx, 0, nextPath);
         }
     }
     else {
         bool foundFileMatch = false;
-        for (int r = 0; r < nRows; r++) {
+        for (int r = 0; r < rows; r++) {
             QModelIndex idx = _assetTreeModel.index(r, 0, parent);
             std::string assetName = _assetTreeModel.name(idx).toUtf8().constData();
 
             if (path.compare(assetName) == 0) {
                 foundFileMatch = true;
                 _assetTreeModel.setChecked(idx, true);
-                _assetTreeModel.setVarName(idx, QString(varName.c_str()));
                 break;
             }
         }
         if (!foundFileMatch) {
             //Insert missing file here with name and exists=false condition
-            _assetTreeModel.assetItem(parent)->insertChildren(nRows, 1, 3);
-            QModelIndex idx = _assetTreeModel.index(nRows, 0, parent);
+            _assetTreeModel.assetItem(parent)->insertChildren(rows, 1, 3);
+            QModelIndex idx = _assetTreeModel.index(rows, 0, parent);
             _assetTreeModel.setName(idx, QString(path.c_str()));
             _assetTreeModel.setChecked(idx, true);
-            _assetTreeModel.setVarName(idx, QString(varName.c_str()));
             _assetTreeModel.setExistenceInFilesystem(idx, false);
         }
     }
 }
 
-bool assets::traverseToExpandSelectedItems(int nRows, QModelIndex parent) {
+bool assets::traverseToExpandSelectedItems(int rows, QModelIndex parent) {
     bool isExpanded = false;
 
-    for (int r = 0; r < nRows; r++) {
+    for (int r = 0; r < rows; r++) {
         QModelIndex idx = _assetTreeModel.index(r, 0, parent);
 
         if (!_assetTreeModel.isAsset(idx)) {
@@ -159,33 +157,41 @@ bool assets::traverseToExpandSelectedItems(int nRows, QModelIndex parent) {
     return isExpanded;
 }
 
-std::string assets::createTextSummary() {
-    std::string summary;
-    for (openspace::Profile::Asset sel : _assetTreeModel.selectedAssets()) {
-        summary += sel.path + "  " + sel.name + "\n";
+QString assets::createTextSummary() {
+    //compareFilesystemWithProfileAssets();
+    std::vector<openspace::Profile::Asset> summaryPaths;
+    std::vector<assetTreeItem*> summaryItems;
+    _assetTreeModel.selectedAssets(summaryPaths, summaryItems);
+
+    if (summaryPaths.size() != summaryItems.size()) {
+        return "";
+    }
+    QString summary;
+    for (int i = 0; i < summaryItems.size(); ++i) {
+        bool existsInFilesystem = summaryItems.at(i)->doesExistInFilesystem();
+        std::string s = fmt::format("<font color='{}'>{}</font><br>",
+            (existsInFilesystem ? "black" : "red"),
+            summaryPaths.at(i).path
+        );
+        summary += QString(s.c_str());
     }
     return summary;
 }
 
 void assets::parseSelections() {
     _imported->clearAssets();
-    for (openspace::Profile::Asset sel : _assetTreeModel.selectedAssets()) {
+    std::vector<openspace::Profile::Asset> summaryPaths;
+    std::vector<assetTreeItem*> summaryItems;
+    _assetTreeModel.selectedAssets(summaryPaths, summaryItems);
+
+    for (openspace::Profile::Asset sel : summaryPaths) {
         _imported->addAsset(sel.path, sel.name);
     }
     accept();
 }
 
 void assets::selected(const QModelIndex& sel) {
-    _selectedIdx = sel;
-    QString existingVarName = _assetTreeModel.varName(_selectedIdx);
-    ui->lineEdit->setText(existingVarName);
-}
-
-void assets::setVarName() {
-    _assetTreeModel.setVarName(_selectedIdx, ui->lineEdit->text());
-    ui->treeView->reset();
-    int nRows = _assetTreeModel.rowCount(_assetTreeModel.index(-1, 0));
-    traverseToExpandSelectedItems(nRows, _assetTreeModel.index(-1, 0));
+    ui->textEdit->setText(createTextSummary());
 }
 
 assets::~assets() {
@@ -200,4 +206,10 @@ void assets::keyPressEvent(QKeyEvent *evt)
     if(evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return)
         return;
     QDialog::keyPressEvent(evt);
+}
+
+void assets::resizeEvent(QResizeEvent* event)
+{
+    int assetColumnWidth = ui->treeView->width() - 90;
+    ui->treeView->setColumnWidth(0, assetColumnWidth);
 }

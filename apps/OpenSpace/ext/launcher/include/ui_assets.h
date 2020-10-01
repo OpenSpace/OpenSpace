@@ -29,55 +29,95 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QDialog>
 #include <QtWidgets/QDialogButtonBox>
-#include <QtWidgets/QHeaderView>
+#include <QtWidgets/QFrame>
 #include <QtWidgets/QLabel>
-#include <QtWidgets/QLineEdit>
-#include <QtWidgets/QPushButton>
+#include <QtWidgets/QHeaderView>
+#include <QtWidgets/QTextEdit>
 #include <QtWidgets/QTreeView>
+#include <QtWidgets/QVBoxLayout>
 
 QT_BEGIN_NAMESPACE
 
 class Ui_assets
 {
 public:
-    QDialogButtonBox *buttonBox;
+    QVBoxLayout *verticalLayout;
     QTreeView *treeView;
-    QPushButton *varName;
-    QLineEdit *lineEdit;
-    QLabel *label;
+    QTextEdit *textEdit;
+    QFrame *line;
+    QDialogButtonBox *buttonBox;
+    QLabel *label_selection;
+    QLabel *label_summary;
+    QHBoxLayout *hLay_bottom_buttonBox;
+    QLabel *label_error;
 
     void setupUi(QDialog *assets)
     {
         if (assets->objectName().isEmpty())
             assets->setObjectName(QString::fromUtf8("assets"));
         assets->resize(610, 479);
-        buttonBox = new QDialogButtonBox(assets);
-        buttonBox->setObjectName(QString::fromUtf8("buttonBox"));
-        buttonBox->setGeometry(QRect(240, 430, 341, 32));
-        buttonBox->setOrientation(Qt::Horizontal);
-        buttonBox->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
-        treeView = new QTreeView(assets);
-        treeView->setObjectName(QString::fromUtf8("treeView"));
-        treeView->setGeometry(QRect(20, 20, 571, 351));
-        QFont font;
-        font.setFamily(QString::fromUtf8("Arial"));
-        treeView->setFont(font);
-        treeView->setAlternatingRowColors(false);
-        treeView->setAnimated(false);
-        varName = new QPushButton(assets);
-        varName->setObjectName(QString::fromUtf8("varName"));
-        varName->setGeometry(QRect(380, 390, 121, 25));
-        lineEdit = new QLineEdit(assets);
-        lineEdit->setObjectName(QString::fromUtf8("lineEdit"));
-        lineEdit->setGeometry(QRect(160, 390, 181, 25));
-        label = new QLabel(assets);
-        label->setObjectName(QString::fromUtf8("label"));
-        label->setGeometry(QRect(30, 390, 141, 31));
+        assets->setMinimumSize(QSize(400, 400));
+        assets->setMaximumSize(QSize(1600, 950));
+        label_selection= new QLabel(assets);
+        label_selection->setObjectName(QString::fromUtf8("label_selection"));
+        label_summary = new QLabel(assets);
+        label_summary->setObjectName(QString::fromUtf8("label_summary"));
         QFont font1;
         font1.setFamily(QString::fromUtf8("Arial"));
         font1.setPointSize(12);
-        label->setFont(font1);
-        label->setWordWrap(true);
+        label_selection->setFont(font1);
+        label_summary->setFont(font1);
+        verticalLayout = new QVBoxLayout(assets);
+        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
+        treeView = new QTreeView(assets);
+        treeView->setObjectName(QString::fromUtf8("treeView"));
+        QFont font;
+        font.setFamily(QString::fromUtf8("Arial"));
+        treeView->setFont(font);
+        //treeView->setStyleSheet(QString::fromUtf8("background-color: rgb(85, 87, 83);"));
+        treeView->setAlternatingRowColors(false);
+        treeView->setAnimated(false);
+        verticalLayout->addWidget(label_selection);
+        verticalLayout->addWidget(treeView);
+
+        textEdit = new QTextEdit(assets);
+        textEdit->setObjectName(QString::fromUtf8("textEdit"));
+
+        verticalLayout->addWidget(label_summary);
+        verticalLayout->addWidget(textEdit);
+
+        line = new QFrame(assets);
+        line->setObjectName(QString::fromUtf8("line"));
+        line->setFrameShape(QFrame::HLine);
+        line->setFrameShadow(QFrame::Sunken);
+
+        verticalLayout->addWidget(line);
+
+        hLay_bottom_buttonBox = new QHBoxLayout();
+        hLay_bottom_buttonBox->setObjectName(QString::fromUtf8("hLay_bottom_buttonBox"));
+
+        QFont fontE;
+        fontE.setFamily(QString::fromUtf8("Arial"));
+        label_error = new QLabel(assets);
+        label_error->setObjectName(QString::fromUtf8("label_error"));
+        QSizePolicy sizePolicy1(QSizePolicy::Preferred, QSizePolicy::Preferred);
+        sizePolicy1.setHorizontalStretch(0);
+        sizePolicy1.setVerticalStretch(0);
+        sizePolicy1.setHeightForWidth(label_error->sizePolicy().hasHeightForWidth());
+        label_error->setSizePolicy(sizePolicy1);
+        label_error->setMinimumSize(QSize(200, 40));
+        label_error->setMaximumSize(QSize(800, 40));
+        label_error->setFont(fontE);
+        label_error->setWordWrap(true);
+        hLay_bottom_buttonBox->addWidget(label_error);
+
+        buttonBox = new QDialogButtonBox(assets);
+        buttonBox->setObjectName(QString::fromUtf8("buttonBox"));
+        buttonBox->setOrientation(Qt::Horizontal);
+        buttonBox->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
+
+        hLay_bottom_buttonBox->addWidget(buttonBox);
+        verticalLayout->addLayout(hLay_bottom_buttonBox);
 
         retranslateUi(assets);
         //QObject::connect(buttonBox, SIGNAL(accepted()), assets, SLOT(accept()));
@@ -88,17 +128,13 @@ public:
 
     void retranslateUi(QDialog *assets)
     {
-        assets->setWindowTitle(QCoreApplication::translate("assets",
-            "Select assets to include", nullptr));
+        assets->setWindowTitle(QCoreApplication::translate("assets", "Dialog", nullptr));
+        label_selection->setText(QCoreApplication::translate("assets", "Select Assets from /data/assets:", nullptr));
+        label_summary->setText(QCoreApplication::translate("assets", "Selection summary:", nullptr));
+        label_error->setText(QCoreApplication::translate("assets", "", nullptr));
 #if QT_CONFIG(tooltip)
-        treeView->setToolTip(QCoreApplication::translate("assets", "<html><head/><body>"
-            "<p>Expand arrow entries to browse assets in this OpenSpace installation. "
-            "Enable checkbox to include an asset. Those assets highlighted in red are "
-            "present in the profile but do not exist in this OpenSpace installation."
-            "</p></body></html>", nullptr));
+        treeView->setToolTip(QCoreApplication::translate("assets", "<html><head/><body><p>Expand arrow entries to browse assets in this OpenSpace installation. Enable checkbox to include an asset. Those assets highlighted in red are present in the profile but do not exist in this OpenSpace installation.</p></body></html>", nullptr));
 #endif // QT_CONFIG(tooltip)
-        varName->setText(QCoreApplication::translate("assets", "Modify Name", nullptr));
-        label->setText(QCoreApplication::translate("assets", "Variable Name", nullptr));
     } // retranslateUi
 
 };

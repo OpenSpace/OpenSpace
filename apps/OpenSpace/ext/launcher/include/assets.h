@@ -46,7 +46,6 @@ public slots:
     void cancel();
     void parseSelections();
     void selected(const QModelIndex&);
-    void setVarName();
 
 public:
     /**
@@ -72,7 +71,7 @@ public:
      *
      * \return the #std::string summary
      */
-    std::string createTextSummary();
+    QString createTextSummary();
 
     /**
      * Handles keypress while the Qt dialog window is open
@@ -82,14 +81,14 @@ public:
     void keyPressEvent(QKeyEvent *evt);
 
 protected:
-    //void resizeEvent(QResizeEvent* event);
+    void resizeEvent(QResizeEvent* event);
 
 private:
     void compareFilesystemWithProfileAssets();
     bool traverseToExpandSelectedItems(int nRows, QModelIndex parent);
-    void findPathMatch(std::string& path, std::string& varName);
+    void findPathMatch(std::string& path);
     void traverseToFindFilesystemMatch(QModelIndex parent, int nRows,
-        std::string dirname, std::string varName);
+        std::string dirname);
     Ui::assets *ui;
     QWidget* _parent;
     openspace::Profile* _imported;

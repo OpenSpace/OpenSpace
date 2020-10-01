@@ -27,13 +27,12 @@
 #include <sstream>
 #include <QColor>
 
-assetTreeModel::assetTreeModel(QString header1, QString header2, QString header3,
-                               QObject* parent)
+assetTreeModel::assetTreeModel(QString header1, QString header2, QObject* parent)
     : QAbstractItemModel(parent),
       headerTitle(header1.toUtf8().constData())
 {
     QVector<QVariant> rootData;
-    rootItem = new assetTreeItem({header1, header2, header3});
+    rootItem = new assetTreeItem({header1, header2});
 }
 
 assetTreeModel::~assetTreeModel() {
@@ -42,7 +41,7 @@ assetTreeModel::~assetTreeModel() {
 
 void assetTreeModel::importModelData(const std::string contents) {
     std::istringstream iss(contents.c_str());
-    importElement rootElem = {"", 0, false, ""};
+    importElement rootElem = {"", 0, false};
 
     if (importGetNextLine(rootElem, iss)) {
         importInsertItem(iss, rootItem, rootElem, 0);
@@ -64,7 +63,6 @@ void assetTreeModel::importInsertItem(std::istringstream& iss, assetTreeItem* pa
             bool shouldMakeElemChecked = (elem.checked || !elem.existsInFilesystem);
             Qt::CheckState check = (shouldMakeElemChecked) ? Qt::Checked : Qt::Unchecked;
             parent->child(nChildInsert)->setData(1, check);
-            parent->child(nChildInsert)->setData(2, "");
             parent->child(nChildInsert)->setExistsInFilesystem(elem.existsInFilesystem);
             continueToNextLine = importGetNextLine(elem, iss);
         }
@@ -144,14 +142,6 @@ int assetTreeModel::childCount(QModelIndex& index) const {
 
 QString assetTreeModel::name(QModelIndex& index) const {
     return getItem(index)->name();
-}
-
-QString assetTreeModel::varName(const QModelIndex& index) const {
-    return getItem(index)->varName();
-}
-
-void assetTreeModel::setVarName(QModelIndex& index, QString varName) {
-    getItem(index)->setData(2, varName);
 }
 
 void assetTreeModel::setName(QModelIndex& index, QString name) {
@@ -295,24 +285,25 @@ QVariant assetTreeModel::headerData(int section, Qt::Orientation orientation,
     return QVariant();
 }
 
-std::vector<openspace::Profile::Asset> assetTreeModel::selectedAssets() {
-    std::vector<openspace::Profile::Asset> output;
-    parseChildrenForSelected(rootItem, output, "");
-    return output;
+void assetTreeModel::selectedAssets(std::vector<openspace::Profile::Asset>& outputPaths,
+                                    std::vector<assetTreeItem*>& outputItems)
+{
+    parseChildrenForSelected(rootItem, outputPaths, outputItems, "");
 }
 
 void assetTreeModel::parseChildrenForSelected(assetTreeItem* item,
-                                           std::vector<openspace::Profile::Asset>& output,
+                                       std::vector<openspace::Profile::Asset>& outputPaths,
+                                              std::vector<assetTreeItem*>& outputItems,
                                               std::string pathPrefix)
 {
     std::string itemName = item->data(0).toString().toUtf8().constData();
-    std::string varName = item->data(2).toString().toUtf8().constData();
     bool isPathPrefix = ((pathPrefix.length()) == 0 && (itemName == headerTitle));
 
     if (item->isAsset()) {
         if (item->isChecked()) {
             std::string path = pathPrefix + itemName;
-            output.push_back(openspace::Profile::Asset({path, varName}));
+            outputItems.push_back(item);
+            outputPaths.push_back(openspace::Profile::Asset({path, itemName}));
         }
     }
     else {
@@ -321,7 +312,7 @@ void assetTreeModel::parseChildrenForSelected(assetTreeItem* item,
             pathPrefix += "/";
         }
         for (int i = 0; i < item->childCount(); ++i) {
-            parseChildrenForSelected(item->child(i), output, pathPrefix);
+            parseChildrenForSelected(item->child(i), outputPaths, outputItems, pathPrefix);
         }
     }
 }

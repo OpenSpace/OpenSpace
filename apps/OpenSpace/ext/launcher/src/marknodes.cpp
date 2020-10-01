@@ -97,9 +97,6 @@ void markNodes::parseSelections() {
 }
 
 markNodes::~markNodes() {
-    for (auto n : _markedNodesListItems) {
-        delete n;
-    }
     delete ui;
 }
 
