@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 #ifndef __OPENSPACE_MODULE_EXOPLENETS___RENDERABLEORBITDISC___H__
-#define __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__
+#define __OPENSPACE_MODULE_EXOPLENETS___RENDERABLEORBITDISC___H__
 
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>

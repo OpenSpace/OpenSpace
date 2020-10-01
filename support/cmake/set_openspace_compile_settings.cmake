@@ -111,7 +111,6 @@ function (set_openspace_compile_settings project)
             ${project}
             PRIVATE
             "-stdlib=libc++"
-            "-std=gnu++17"
             "-Wall"
             "-Wextra"
             "-Wabstract-vbase-init"
@@ -200,8 +199,7 @@ function (set_openspace_compile_settings project)
         target_compile_options(
             ${project}
             PRIVATE
-            "-stdlib=libstdc++"
-            "-std=gnu++17"
+            "-stdlib=libc++"
             "-Wall"
             "-Wextra"
             "-Wabstract-vbase-init"
@@ -282,6 +280,9 @@ function (set_openspace_compile_settings project)
             "-Wzero-length-array"
             "-Wno-missing-braces"
         )
+
+        target_link_libraries(openspace-core PUBLIC "-lc++" "-lc++abi" "-lc++experimental")
+
     elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         target_compile_options(
             ${project}
