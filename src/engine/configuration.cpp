@@ -92,6 +92,7 @@ namespace {
 
     constexpr const char* KeySgctConfigNameInitialized = "sgctconfiginitializeString";
     constexpr const char* KeyReadOnlyProfiles = "ProfilesReadOnly";
+    constexpr const char* KeyBypassLauncher = "BypassLauncher";
 
     template <typename T>
     void getValue(ghoul::lua::LuaState& L, const char* name, T& value) {
@@ -310,6 +311,7 @@ void parseLuaState(Configuration& configuration) {
 
     getValue(s, KeySgctConfigNameInitialized, c.sgctConfigNameInitialized);
     getValue(s, KeyReadOnlyProfiles, c.profilesReadOnly);
+    getValue(s, KeyBypassLauncher, c.bypassLauncher);
 }
 
 std::string findConfiguration(const std::string& filename) {

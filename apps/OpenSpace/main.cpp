@@ -1168,7 +1168,7 @@ int main(int argc, char** argv) {
     QApplication* qaobj = nullptr;
     LauncherWindow* launchwin = nullptr;
     bool skipLauncherSinceProfileAndWindowAreConfiguredInCli =
-        (haveCliProfile && haveCliSGCTConfig);
+        (haveCliProfile && haveCliSGCTConfig) || global::configuration.bypassLauncher;
 
     if (!skipLauncherSinceProfileAndWindowAreConfiguredInCli) {
         int qac = 0;
