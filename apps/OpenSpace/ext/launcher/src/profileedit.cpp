@@ -43,6 +43,7 @@ ProfileEdit::ProfileEdit(openspace::Profile* profile, const std::string reported
     ui->setupUi(this);
     if (_pData != nullptr) {
         initSummaryTextForEachCategory();
+        connect(ui->duplicate_profile, SIGNAL(clicked()), this, SLOT(duplicateProfile()));
         connect(ui->edit_meta, SIGNAL(clicked()), this, SLOT(openMeta()));
         connect(ui->edit_properties, SIGNAL(clicked()), this, SLOT(openProperties()));
         connect(ui->edit_modules, SIGNAL(clicked()), this, SLOT(openModules()));
@@ -89,6 +90,25 @@ void ProfileEdit::initSummaryTextForEachCategory() {
 
 void ProfileEdit::setProfileName(QString profileToSet) {
     ui->line_profile->setText(profileToSet);
+}
+
+void ProfileEdit::duplicateProfile() {
+    QString currentProfile = ui->line_profile->text();
+    if (currentProfile != "") {
+        QString duplicatedName = currentProfile + "_1";
+        if ((currentProfile.length() > 2)
+            && (currentProfile.midRef(currentProfile.length() - 2, 1) == "_"))
+        {
+            QStringRef num = currentProfile.midRef(currentProfile.length() - 1, 1);
+            bool validConversion = false;
+            int val = num.toInt(&validConversion, 10);
+            if (validConversion && val < 9) {
+                duplicatedName = currentProfile.left(currentProfile.length() - 2)
+                    + "_" + QString::number(val + 1);
+            }
+        }
+        ui->line_profile->setText(duplicatedName);
+    }
 }
 
 void ProfileEdit::openMeta() {

@@ -52,6 +52,7 @@ class ProfileEdit : public QDialog
     Q_OBJECT
 
 public slots:
+    void duplicateProfile();
     void openMeta();
     void openProperties();
     void openModules();
