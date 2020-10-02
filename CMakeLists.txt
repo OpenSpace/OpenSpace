@@ -275,4 +275,13 @@ add_custom_command(
 # Manage the CPack packaging
 include(${OPENSPACE_CMAKE_EXT_DIR}/packaging.cmake)
 
+# if (UNIX AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+#     message("----------------- Changes for Clang in OpenSpace CMakeLists -------------------")
+#     #target_link_libraries(OpenSpace Xcursor Xinerama X11 "-lc++" "-lc++abi" "-stdlib=libc++")
+#     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+#     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lc++ -lc++abi -stdlib=libc++")
+#     message("----------------- Changes for Clang in CMAKE_EXE_LINKER_FLAGS -------------------")
+#     message(STATUS ${CMAKE_EXE_LINKER_FLAGS})
+# endif()
+
 end_header("End: Configuring OpenSpace project")

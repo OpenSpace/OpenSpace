@@ -191,7 +191,7 @@ function (set_openspace_compile_settings project)
             "-Wzero-length-array"
             "-Wno-missing-braces"
         )
-    elseif (LINUX AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    elseif (UNIX AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         if (OPENSPACE_WARNINGS_AS_ERRORS)
             target_compile_options(${project} PRIVATE "-Werror")
         endif ()
@@ -281,8 +281,8 @@ function (set_openspace_compile_settings project)
             "-Wno-missing-braces"
         )
 
-        target_link_libraries(openspace-core PUBLIC "-lc++" "-lc++abi" "-lc++experimental")
-
+        target_link_libraries(${project} PRIVATE "c++" "c++abi")
+        
     elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         target_compile_options(
             ${project}
