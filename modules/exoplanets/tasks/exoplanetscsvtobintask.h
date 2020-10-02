@@ -22,22 +22,35 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___MEMORYMANAGER___H__
-#define __OPENSPACE_CORE___MEMORYMANAGER___H__
+#ifndef __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSCSVTOBINTASK___H__
+#define __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSCSVTOBINTASK___H__
 
-#include <ghoul/misc/memorypool.h>
+#include <openspace/properties/vector/vec3property.h>
+#include <openspace/util/task.h>
+#include <string>
 
-namespace openspace {
+namespace openspace::exoplanets {
 
-class MemoryManager {
+class ExoplanetsCsvToBinTask : public Task {
 public:
-    ghoul::MemoryPool<8 * 1024 * 1024, false> PersistentMemory;
+    ExoplanetsCsvToBinTask(const ghoul::Dictionary& dictionary);
+    std::string description() override;
+    void perform(const Task::ProgressCallback& progressCallback) override;
+    static documentation::Documentation documentation();
 
-    // This should be replaced with a std::pmr::memory_resource wrapper around our own
-    // Memory pool so that we can get a high-water mark out of it
-    ghoul::MemoryPool<100 * 4096, false> TemporaryMemory;
+private:
+    std::string _inputCsvPath;
+    std::string _inputSpeckPath;
+    std::string _outputBinPath;
+    std::string _outputLutPath;
+    std::string _teffToBvFilePath;
+
+    glm::vec3 starPosition(const std::string& starName);
+
+    // Compute b-v color from teff value using a conversion file
+    float bvFromTeff(float teff);
 };
 
-} // namespace openspace
+} // namespace openspace::exoplanets
 
-#endif // __OPENSPACE_CORE___MEMORYMANAGER___H__
+#endif // __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSCSVTOBINTASK___H__

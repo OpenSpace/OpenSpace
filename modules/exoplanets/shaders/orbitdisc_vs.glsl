@@ -22,22 +22,23 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___MEMORYMANAGER___H__
-#define __OPENSPACE_CORE___MEMORYMANAGER___H__
+#version __CONTEXT__
 
-#include <ghoul/misc/memorypool.h>
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-namespace openspace {
+layout(location = 0) in vec2 in_position;
+layout(location = 1) in vec2 in_st;
 
-class MemoryManager {
-public:
-    ghoul::MemoryPool<8 * 1024 * 1024, false> PersistentMemory;
+out vec2 vs_st;
+out vec4 vs_position;
 
-    // This should be replaced with a std::pmr::memory_resource wrapper around our own
-    // Memory pool so that we can get a high-water mark out of it
-    ghoul::MemoryPool<100 * 4096, false> TemporaryMemory;
-};
+uniform mat4 modelViewProjectionTransform;
 
-} // namespace openspace
+void main() {
+    vs_st = in_st;
+    vs_position = z_normalization(
+        modelViewProjectionTransform * vec4(in_position, 0.0, 1.0)
+    );
 
-#endif // __OPENSPACE_CORE___MEMORYMANAGER___H__
+    gl_Position = vs_position;
+}

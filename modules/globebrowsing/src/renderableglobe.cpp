@@ -51,7 +51,14 @@
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <numeric>
 #include <queue>
+#ifndef __APPLE__
 #include <memory_resource>
+#else
+#include <experimental/memory_resource>
+namespace std {
+    using namespace experimental;
+} // namespace std
+#endif // __APPLE__
 
 namespace {
     // Global flags to modify the RenderableGlobe
@@ -261,14 +268,22 @@ const Chunk& findChunkNode(const Chunk& node, const Geodetic2& location) {
     return *n;
 }
 
-std::pmr::vector<std::pair<ChunkTile, const LayerRenderSettings*>>
-tilesAndSettingsUnsorted(const LayerGroup& layerGroup, const TileIndex& tileIndex)
+#ifndef __APPLE__
+using ChunkTileVector = std::pmr::vector<std::pair<ChunkTile, const LayerRenderSettings*>>;
+#else // __APPLE__
+using ChunkTileVector = std::vector<std::pair<ChunkTile, const LayerRenderSettings*>>;
+#endif // __APPLE__
+
+ChunkTileVector tilesAndSettingsUnsorted(const LayerGroup& layerGroup,
+                                         const TileIndex& tileIndex)
 {
     ZoneScoped
 
-    std::pmr::vector<std::pair<ChunkTile, const LayerRenderSettings*>> tilesAndSettings(
-        &global::memoryManager.TemporaryMemory
-    );
+#ifndef __APPLE__
+    ChunkTileVector tilesAndSettings(&global::memoryManager.TemporaryMemory);
+#else // __APPLE__
+    ChunkTileVector tilesAndSettings;
+#endif // __APPLE__
     for (Layer* layer : layerGroup.activeLayers()) {
         if (layer->tileProvider()) {
             tilesAndSettings.emplace_back(
@@ -294,8 +309,10 @@ BoundingHeights boundingHeightsForChunk(const Chunk& chunk, const LayerManager& 
     const size_t HeightChannel = 0;
     const LayerGroup& heightmaps = lm.layerGroup(layergroupid::GroupID::HeightLayers);
 
-    std::pmr::vector<ChunkTileSettingsPair> chunkTileSettingPairs =
-        tilesAndSettingsUnsorted(heightmaps, chunk.tileIndex);
+    ChunkTileVector chunkTileSettingPairs = tilesAndSettingsUnsorted(
+        heightmaps,
+        chunk.tileIndex
+    );
 
     bool lastHadMissingData = true;
     for (const ChunkTileSettingsPair& chunkTileSettingsPair : chunkTileSettingPairs) {

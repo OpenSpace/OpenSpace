@@ -22,22 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___MEMORYMANAGER___H__
-#define __OPENSPACE_CORE___MEMORYMANAGER___H__
+#ifndef __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSMODULE___H__
+#define __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSMODULE___H__
 
-#include <ghoul/misc/memorypool.h>
+#include <openspace/util/openspacemodule.h>
+
+#include <openspace/documentation/documentation.h>
 
 namespace openspace {
 
-class MemoryManager {
+class ExoplanetsModule : public OpenSpaceModule {
 public:
-    ghoul::MemoryPool<8 * 1024 * 1024, false> PersistentMemory;
+    constexpr static const char* Name = "Exoplanets";
 
-    // This should be replaced with a std::pmr::memory_resource wrapper around our own
-    // Memory pool so that we can get a high-water mark out of it
-    ghoul::MemoryPool<100 * 4096, false> TemporaryMemory;
+    ExoplanetsModule();
+    virtual ~ExoplanetsModule() = default;
+
+    scripting::LuaLibrary luaLibrary() const override;
+    std::vector<documentation::Documentation> documentations() const override;
+
+protected:
+    void internalInitialize(const ghoul::Dictionary&) override;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___MEMORYMANAGER___H__
+#endif // __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSMODULE___H__

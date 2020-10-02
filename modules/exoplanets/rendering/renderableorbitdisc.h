@@ -22,22 +22,61 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___MEMORYMANAGER___H__
-#define __OPENSPACE_CORE___MEMORYMANAGER___H__
+#ifndef __OPENSPACE_MODULE_EXOPLENETS___RENDERABLEORBITDISC___H__
+#define __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__
 
-#include <ghoul/misc/memorypool.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec2property.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/util/updatestructures.h>
+#include <ghoul/opengl/uniformcache.h>
+
+namespace ghoul::filesystem { class File; }
+namespace ghoul::opengl {
+    class ProgramObject;
+    class Texture;
+} // namespace ghoul::opengl
 
 namespace openspace {
 
-class MemoryManager {
-public:
-    ghoul::MemoryPool<8 * 1024 * 1024, false> PersistentMemory;
+namespace documentation { struct Documentation; }
 
-    // This should be replaced with a std::pmr::memory_resource wrapper around our own
-    // Memory pool so that we can get a high-water mark out of it
-    ghoul::MemoryPool<100 * 4096, false> TemporaryMemory;
+class RenderableOrbitDisc : public Renderable {
+public:
+    RenderableOrbitDisc(const ghoul::Dictionary& dictionary);
+
+    void initializeGL() override;
+    void deinitializeGL() override;
+
+    bool isReady() const override;
+
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
+    void update(const UpdateData& data) override;
+
+    static documentation::Documentation Documentation();
+
+private:
+    void loadTexture();
+    void createPlane();
+
+    properties::StringProperty _texturePath;
+    properties::FloatProperty _size;
+    properties::FloatProperty _eccentricity;
+    properties::Vec2Property _offset;
+
+    std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
+    UniformCache(modelViewProjection, textureOffset, opacity,
+         texture, eccentricity, semiMajorAxis) _uniformCache;
+    std::unique_ptr<ghoul::opengl::Texture> _texture = nullptr;
+    std::unique_ptr<ghoul::filesystem::File> _textureFile;
+
+    bool _textureIsDirty = false;
+    bool _planeIsDirty = false;
+    GLuint _quad = 0;
+    GLuint _vertexPositionBuffer = 0;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___MEMORYMANAGER___H__
+#endif // __OPENSPACE_MODULE_EXOPLENETS___RENDERABLEORBITDISC___H__
