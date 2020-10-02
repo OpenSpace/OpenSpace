@@ -51,6 +51,7 @@ class deltaTimes : public QDialog
 
 public slots:
     void listItemSelected();
+    void valueChanged(const QString& text);
     void saveDeltaTimeValue();
     void cancelDeltaTimeValue();
     void addDeltaTimeValue();
@@ -83,11 +84,10 @@ public:
      * Returns a text summary of the delta time list for display purposes
      *
      * \param idx index in dt list
-     * \param dt the value in sec/sec
      * \param forListView true if this summary is for the Qt list view, false if
      *                    it is used for a different display mode
      */
-    QString createSummaryForDeltaTime(size_t idx, int dt, bool forListView);
+    QString createSummaryForDeltaTime(size_t idx, bool forListView);
 
     /**
      * Handles keypress while the Qt dialog window is open
@@ -98,13 +98,17 @@ public:
 
     /**
      * Called to transition to editing a particular dt value (gui settings)
+     *
+     * \param index index in dt list
      */
-    void transitionToEditMode();
+    void transitionToEditMode(int index);
 
     /**
      * Called to transition from editing a particular dt value (gui settings)
+     *
+     * \param index index in dt list
      */
-    void transitionFromEditMode();
+    void transitionFromEditMode(int index);
 
     /**
      * Called to enable/disable edit GUI elements
@@ -130,7 +134,7 @@ private:
     QString timeDescription(int value);
     bool checkForTimeDescription(QString& description, QString unit,
         int interval, int value);
-    QString createTextLabelForKey(int index);
+    void setLabelForKey(int index, bool editMode, QString color);
     QString checkForTimeDescription(int intervalIndex, int value);
     int lastSelectableItem();
     bool isNumericalValue(QLineEdit* le);

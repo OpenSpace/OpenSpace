@@ -79,7 +79,8 @@ void ProfileEdit::initSummaryTextForEachCategory() {
     ui->text_keybindings->setText(summarizeText_keybindings());
     ui->text_keybindings->setReadOnly(true);
 
-    labelText(_pData, _pData->deltaTimes().size(), "Delta Times", ui->label_deltatimes);
+    labelText(_pData, _pData->deltaTimes().size(), "Simulation Time Increments",
+        ui->label_deltatimes);
     labelText(_pData, _pData->markNodes().size(), "Mark Interesting Nodes",
         ui->label_marknodes);
     labelText(_pData, 0, "Camera", ui->label_camera);
@@ -174,7 +175,7 @@ void ProfileEdit::openDeltaTimes() {
     if (_pData) {
         _deltaTimes = new deltaTimes(_pData);
         _deltaTimes->exec();
-        labelText(_pData, _pData->deltaTimes().size(), "Delta Times",
+        labelText(_pData, _pData->deltaTimes().size(), "Simulation Time Increments",
             ui->label_deltatimes
         );
         delete _deltaTimes;
@@ -317,19 +318,6 @@ QString ProfileEdit::summarizeText_time() {
             results = "Relative time: ";
         }
         results += QString(_pData->time().value().time.c_str());
-    }
-    return results;
-}
-
-QString ProfileEdit::summarizeText_deltaTimes() {
-    if (_pData == nullptr) {
-        return "";
-    }
-    QString results;
-    for (size_t i = 0; i < _pData->deltaTimes().size(); ++i) {
-        results += _deltaTimes->createSummaryForDeltaTime(i,
-            _pData->deltaTimes().at(i), false);
-        results += "\t" + QString::number(_pData->deltaTimes().at(i)) + "\n";
     }
     return results;
 }

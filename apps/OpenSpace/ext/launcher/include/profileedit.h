@@ -123,7 +123,6 @@ private:
     QString summarizeText_assets();
     QString summarizeText_properties();
     QString summarizeText_keybindings();
-    QString summarizeText_deltaTimes();
     QString summarizeText_time();
     QString summarizeText_camera();
     QString summarizeText_markNodes();

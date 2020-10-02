@@ -58,6 +58,8 @@ public:
     QFrame *line;
     QHBoxLayout *hLay_bottom_buttonBox;
     QLabel *label_error;
+    QLabel *label_value;
+    QHBoxLayout *hLay_value;
     QDialogButtonBox *buttonBox;
 
     void setupUi(QDialog *deltaTimes)
@@ -95,7 +97,8 @@ public:
 
         horizontalLayout->addWidget(button_remove);
 
-        horizontalSpacer_2 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+        horizontalSpacer_2 = new QSpacerItem(40, 20, QSizePolicy::Expanding,
+            QSizePolicy::Minimum);
 
         horizontalLayout->addItem(horizontalSpacer_2);
 
@@ -104,7 +107,8 @@ public:
 
         label_adjust = new QLabel(deltaTimes);
         label_adjust->setObjectName(QString::fromUtf8("label_adjust"));
-        label_adjust->setMaximumSize(QSize(250, 16777215));
+        label_adjust->setMinimumSize(QSize(200, 16777215));
+        label_adjust->setMaximumSize(QSize(400, 16777215));
         QFont font1;
         font1.setFamily(QString::fromUtf8("Arial"));
         font1.setPointSize(12);
@@ -117,7 +121,19 @@ public:
         line_seconds->setMaximumSize(QSize(200, 16777215));
         line_seconds->setFont(font1);
 
-        verticalLayout->addWidget(line_seconds);
+        label_value = new QLabel(deltaTimes);
+        label_value->setObjectName(QString::fromUtf8("label_value"));
+        label_value->setMinimumSize(QSize(120, 20));
+        label_value->setMaximumSize(QSize(300, 16777215));
+        label_value->setFont(font1);
+
+        hLay_value = new QHBoxLayout();
+        hLay_value->setObjectName(QString::fromUtf8("hLay_value"));
+
+        hLay_value->addWidget(line_seconds);
+        hLay_value->addWidget(label_value);
+
+        verticalLayout->addLayout(hLay_value);
 
         horizontalLayout_2 = new QHBoxLayout();
         horizontalLayout_2->setObjectName(QString::fromUtf8("horizontalLayout_2"));
@@ -136,7 +152,8 @@ public:
 
         horizontalLayout_2->addWidget(button_cancel);
 
-        horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+        horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding,
+            QSizePolicy::Minimum);
 
         horizontalLayout_2->addItem(horizontalSpacer);
 
@@ -185,15 +202,23 @@ public:
 
     void retranslateUi(QDialog *deltaTimes)
     {
-        deltaTimes->setWindowTitle(QCoreApplication::translate("deltaTimes", "Delta Time Steps", nullptr));
-        button_add->setText(QCoreApplication::translate("deltaTimes", "Add Entry", nullptr));
-        button_remove->setText(QCoreApplication::translate("deltaTimes", "Remove Last Entry", nullptr));
-        label_adjust->setText(QCoreApplication::translate("deltaTimes", "Set Delta Time for key", nullptr));
+        deltaTimes->setWindowTitle(QCoreApplication::translate("deltaTimes",
+            "Simulation Time Increments", nullptr));
+        button_add->setText(QCoreApplication::translate("deltaTimes", "Add Entry",
+            nullptr));
+        button_remove->setText(QCoreApplication::translate("deltaTimes",
+            "Remove Last Entry", nullptr));
+        label_adjust->setText(QCoreApplication::translate("deltaTimes",
+            "Set Simulation Time Increment for key", nullptr));
+        label_value->setText(QCoreApplication::translate("deltaTimes", "", nullptr));
 #if QT_CONFIG(tooltip)
-        line_seconds->setToolTip(QCoreApplication::translate("deltaTimes", "<html><head/><body><p>Enter number of simulated seconds to elapse per actual second for the particular delta time</p></body></html>", nullptr));
+        line_seconds->setToolTip(QCoreApplication::translate("deltaTimes",
+            "<html><head/><body><p>Enter number of simulated seconds to elapse per "
+            "actual second for the particular delta time</p></body></html>", nullptr));
 #endif // QT_CONFIG(tooltip)
         button_save->setText(QCoreApplication::translate("deltaTimes", "Save", nullptr));
-        button_cancel->setText(QCoreApplication::translate("deltaTimes", "Cancel", nullptr));
+        button_cancel->setText(QCoreApplication::translate("deltaTimes", "Cancel",
+            nullptr));
         label_error->setText(QCoreApplication::translate("deltaTimes", "", nullptr));
     } // retranslateUi
 

@@ -41,28 +41,29 @@ deltaTimes::deltaTimes(openspace::Profile* imported, QWidget *parent)
     }
 
     for (size_t d = 0; d < _data.size(); ++d) {
-        QString summary = createSummaryForDeltaTime(d, _data.at(d), true);
+        QString summary = createSummaryForDeltaTime(d, true);
         ui->listWidget->addItem(new QListWidgetItem(summary));
     }
     connect(ui->listWidget, SIGNAL(itemSelectionChanged()), this,
         SLOT(listItemSelected()));
+    connect(ui->line_seconds, &QLineEdit::textChanged, this, &deltaTimes::valueChanged);
     connect(ui->button_save, SIGNAL(clicked()), this, SLOT(saveDeltaTimeValue()));
     connect(ui->button_cancel, SIGNAL(clicked()), this, SLOT(cancelDeltaTimeValue()));
     connect(ui->button_add, SIGNAL(clicked()), this, SLOT(addDeltaTimeValue()));
     connect(ui->button_remove, SIGNAL(clicked()), this, SLOT(removeDeltaTimeValue()));
     connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(parseSelections()));
-    transitionFromEditMode();
+    transitionFromEditMode(ui->listWidget->count() - 1);
 }
 
-QString deltaTimes::createSummaryForDeltaTime(size_t idx, int dt, bool forListView) {
+QString deltaTimes::createSummaryForDeltaTime(size_t idx, bool forListView) {
     std::string s;
     int k = (idx%10 == 9) ? 0 : idx%10 + 1;
     k = (idx == 0) ? 1 : k;
     if (idx >= 20) {
-        s = "shift + " + std::to_string(k);
+        s = "ctrl + " + std::to_string(k);
     }
     else if (idx >= 10) {
-        s = "ctrl + " + std::to_string(k);
+        s = "shift + " + std::to_string(k);
     }
     else {
         s = std::to_string(k);
@@ -71,13 +72,10 @@ QString deltaTimes::createSummaryForDeltaTime(size_t idx, int dt, bool forListVi
         }
     }
 
-    if (dt != 0) {
-        s += (forListView) ? "\t" + std::to_string(dt) : "";
-    }
-
     if (forListView) {
+        s += "\t" + std::to_string(_data.at(idx));
         s += "\t";
-        s += timeDescription(dt).toUtf8().constData();
+        s += timeDescription(_data.at(idx)).toUtf8().constData();
     }
     return QString(s.c_str());
 }
@@ -87,14 +85,10 @@ void deltaTimes::listItemSelected() {
     int index = ui->listWidget->row(item);
 
     if (index < (static_cast<int>(_data.size()) - 1)) {
-        //if (index > lastSelectableItem() + 1) {
-        //    index = lastSelectableItem() + 1;
         ui->listWidget->setCurrentRow(index);
-        //}
     }
 
     if (_data.size() > 0) {
-        ui->label_adjust->setText(createTextLabelForKey(index));
         if (_data.at(index) == 0) {
             ui->line_seconds->setText("");
         }
@@ -103,14 +97,20 @@ void deltaTimes::listItemSelected() {
         }
     }
     _editModeNewItem = true;
-    transitionToEditMode();
+    transitionToEditMode(index);
 }
 
-QString deltaTimes::createTextLabelForKey(int index) {
-    QString labelS = "Set Delta Time for key ";
-    labelS += createSummaryForDeltaTime(index, _data.at(index), false);
-    labelS += " :";
-    return labelS;
+void deltaTimes::setLabelForKey(int index, bool editMode, QString color) {
+    QString labelS = "Set Simulation Time Increment for key";
+    if (index >= _data.size()) {
+        index = _data.size() - 1;
+    }
+    if (editMode) {
+        labelS += " '";
+        labelS += createSummaryForDeltaTime(index, false);
+        labelS += "':";
+    }
+    ui->label_adjust->setText("<font color='" + color + "'>" + labelS + "</font>");
 }
 
 QString deltaTimes::timeDescription(int value) {
@@ -129,8 +129,25 @@ QString deltaTimes::timeDescription(int value) {
     return checkForTimeDescription(i, value);
 }
 
+void deltaTimes::valueChanged(const QString& text) {
+    if (ui->line_seconds->text() == "") {
+        ui->label_value->setText("");
+    }
+    else if (!isNumericalValue(ui->line_seconds)) {
+        ui->label_value->setText("<font color='red'>Not an integer value</font>");
+    }
+    else {
+        int value = ui->line_seconds->text().toInt();
+        if (value != 0) {
+            ui->label_value->setText("<font color='black'>" +
+                timeDescription(ui->line_seconds->text().toInt()) + "</font>");
+        }
+    }
+}
+
 QString deltaTimes::checkForTimeDescription(int intervalIndex, int value) {
-    int amount = value /_timeIntervals[intervalIndex].secondsPerInterval;
+    double amount = static_cast<double>(value)
+        /_timeIntervals[intervalIndex].secondsPerInterval;
     QString description = QString::number(amount, 'g', 2);
     return description += " " + _timeIntervals[intervalIndex].intervalName + "/sec";
 }
@@ -178,22 +195,18 @@ void deltaTimes::saveDeltaTimeValue() {
                 int value = ui->line_seconds->text().toInt();
                 if (value != 0) {
                     _data.at(index) = value;
-                    QString summary = createSummaryForDeltaTime(index, _data.at(index),
-                        true);
+                    QString summary = createSummaryForDeltaTime(index, true);
                     ui->listWidget->item(index)->setText(summary);
-                    ui->label_adjust->setText("<font color='black'>" +
-                        createTextLabelForKey(index) + "</font>");
-                    transitionFromEditMode();
+                    setLabelForKey(index, true, "black");
+                    transitionFromEditMode(index);
                     _editModeNewItem = false;
                 }
                 else {
-                    ui->label_adjust->setText("<font color='red'>" +
-                        createTextLabelForKey(index) + "</font>");
+                    setLabelForKey(index, true, "red");
                 }
             }
             else {
-                ui->label_adjust->setText("<font color='red'>" +
-                    createTextLabelForKey(index) + "</font>");
+                setLabelForKey(index, true, "red");
             }
         }
     }
@@ -201,7 +214,7 @@ void deltaTimes::saveDeltaTimeValue() {
 
 void deltaTimes::cancelDeltaTimeValue(void) {
     listItemSelected();
-    transitionFromEditMode();
+    transitionFromEditMode(ui->listWidget->count() - 1);
     if (_editModeNewItem) {
         if (_data.size() > 0) {
             if (_data.back() == 0) {
@@ -233,10 +246,10 @@ void deltaTimes::removeDeltaTimeValue() {
         }
     }
     ui->listWidget->clearSelection();
-    transitionFromEditMode();
+    transitionFromEditMode(ui->listWidget->count() - 1);
 }
 
-void deltaTimes::transitionToEditMode(void) {
+void deltaTimes::transitionToEditMode(int index) {
     ui->listWidget->setDisabled(true);
     ui->button_add->setDisabled(true);
     ui->button_remove->setDisabled(true);
@@ -245,11 +258,11 @@ void deltaTimes::transitionToEditMode(void) {
     ui->buttonBox->setDisabled(true);
 
     ui->line_seconds->setFocus(Qt::OtherFocusReason);
-    ui->label_adjust->setText("<font color='black'>Set Delta Time</font>");
+    setLabelForKey(index, true, "black");
     editBoxDisabled(false);
 }
 
-void deltaTimes::transitionFromEditMode(void) {
+void deltaTimes::transitionFromEditMode(int index) {
     ui->listWidget->setDisabled(false);
     ui->button_add->setDisabled(false);
     ui->button_remove->setDisabled(false);
@@ -259,7 +272,8 @@ void deltaTimes::transitionFromEditMode(void) {
 
     ui->button_add->setFocus(Qt::OtherFocusReason);
     editBoxDisabled(true);
-    ui->label_adjust->setText("<font color='light gray'>Set Delta Time</font>");
+    setLabelForKey(index, false, "light gray");
+    ui->label_value->setText("");
 }
 
 void deltaTimes::editBoxDisabled(bool disabled) {
