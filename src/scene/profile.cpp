@@ -685,19 +685,19 @@ std::string Profile::serialize() const {
             overloaded {
                 [](const CameraNavState& camera) {
                     std::string position = fmt::format(
-                        "{}, {}, {}",
+                        "{:.18e}, {:.18e}, {:.18e}",
                         camera.position.x, camera.position.y, camera.position.z
                     );
                     std::string up = camera.up.has_value() ?
                         fmt::format(
-                            "{}, {}, {}", camera.up->x, camera.up->y, camera.up->z
+                            "{:.18e}, {:.18e}, {:.18e}", camera.up->x, camera.up->y, camera.up->z
                         ) :
                         "";
                     std::string yaw = camera.yaw.has_value() ?
-                        fmt::format("{}", *camera.yaw) :
+                        fmt::format("{:.18e}", *camera.yaw) :
                         "";
                     std::string pitch = camera.pitch.has_value() ?
-                        fmt::format("{}", *camera.pitch) :
+                        fmt::format("{:.18e}", *camera.pitch) :
                         "";
 
                     return fmt::format(
@@ -710,7 +710,7 @@ std::string Profile::serialize() const {
                 [](const Profile::CameraGoToGeo& camera) {
                     if (camera.altitude.has_value()) {
                         return fmt::format(
-                            "{}\t{}\t{}\t{}\t{}\n",
+                            "{}\t{}\t{:.18e}\t{:.18e}\t{:.18e}\n",
                             CameraGoToGeo::Type,
                             camera.anchor, camera.latitude, camera.longitude,
                             *camera.altitude
@@ -718,7 +718,7 @@ std::string Profile::serialize() const {
                     }
                     else {
                         return fmt::format(
-                            "{}\t{}\t{}\t{}\t\n",
+                            "{}\t{}\t{:.18e}\t{:.18e}\t\n",
                             CameraGoToGeo::Type,
                             camera.anchor, camera.latitude, camera.longitude
                         );
