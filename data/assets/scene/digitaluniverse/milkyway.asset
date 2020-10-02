@@ -1,20 +1,6 @@
 local assetHelper = asset.require('util/asset_helper')
 
-
-
-local planeTextures = asset.syncedResource({
-    Name = "Milky Way Plane Textures",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_milkyway_textures",
-    Version = 2
-})
-
-local planeSpeck = asset.syncedResource({
-    Name = "Milky Way Plane Speck",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_milkyway_speck",
-    Version = 1
-})
+local dataPaths = asset.require("milkyway_data")
 
 local plane = {
     Identifier = "MilkyWayGalaxyImage",
@@ -25,8 +11,8 @@ local plane = {
         Color = { 1.0, 1.0, 1.0 },
         Opacity = 0.99,
         ScaleFactor = 2.8,
-        File = planeSpeck .. "/galaxy.speck",
-        TexturePath = planeTextures,
+        File = dataPaths.SpeckPath .. "/galaxy.speck",
+        TexturePath = dataPaths.TexturesPath,
         Luminosity = "size",
         ScaleLuminosity = 1.0,
         FadeInDistances = { 3000.0, 50000.0 },

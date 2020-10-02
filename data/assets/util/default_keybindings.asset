@@ -141,20 +141,7 @@ openspace.setPropertyValueSingle("RenderEngine.ShowCamera", not isEnabled)]],
         Documentation = "Immediately set the simulation speed to the previous delta time step, if one exists.",
         GuiPath = "/Simulation Speed",
         Local = true
-    },
-    {
-        Key = "R",
-        Name = "toggle radiosphere opacity",
-        Command = "local FADETIME = 2.5;" ..
-            "local PROPTOFADE = 'Scene.RadioSphere.Renderable.Opacity';" ..
-            "local currentOpacity = openspace.getPropertyValue(PROPTOFADE); " ..
-            "if (currentOpacity == 0.0) then " ..
-            "openspace.setPropertyValueSingle(PROPTOFADE, 1.0, FADETIME);else "..
-            "openspace.setPropertyValueSingle(PROPTOFADE, 0, FADETIME);end",
-        Documentation = "Fade in and out the radio sphere.",
-        GuiPath = "/General",
-        Local = true
-    },
+    }
 }
 
 local DeltaTimeKeys

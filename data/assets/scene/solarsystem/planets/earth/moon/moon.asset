@@ -57,6 +57,9 @@ local Moon = {
     }
 }
 
+assetHelper.registerSceneGraphNodesAndExport(asset, { Moon })
+
+
 asset.meta = {
     Name = "Moon",
     Version = "1.0",
@@ -65,5 +68,3 @@ asset.meta = {
     URL = "http://openspaceproject.com",
     License = "MIT license"
 }
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { Moon })

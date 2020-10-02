@@ -20,7 +20,6 @@ asset.require(colorLayersPath .. "/ctx_mosaic_sweden")
 asset.require(colorLayersPath .. "/ctx_blended_01")
 
 -- Height layers
-asset.require(heightLayersPath .. "/mola")
 asset.require(heightLayersPath .. "/mola_europe")
 local heightLayer = asset.require(heightLayersPath .. "/mola_utah")
 
