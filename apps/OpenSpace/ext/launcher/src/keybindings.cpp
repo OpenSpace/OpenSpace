@@ -217,27 +217,26 @@ void keybindings::listItemSave(void) {
 
 bool keybindings::areRequiredFormsFilled() {
     bool requiredFormsFilled = true;
+    QString errors;
     if (ui->combo_key->currentIndex() < 0) {
-        ui->label_key->setText("<font color='red'>Key</font>");
+        errors += "Missing key";
         requiredFormsFilled = false;
-    }
-    else {
-        ui->label_key->setText("<font color='black'>Key</font>");
     }
     if (ui->line_name->text().length() == 0) {
-        ui->label_name->setText("<font color='red'>Name</font>");
+        if (errors.length() > 0) {
+            errors += ", ";
+        }
+        errors += "Missing keybinding name";
         requiredFormsFilled = false;
-    }
-    else {
-        ui->label_name->setText("<font color='black'>Name</font>");
     }
     if (ui->text_script->toPlainText().length() == 0) {
-        ui->label_script->setText("<font color='red'>Script</font>");
+        if (errors.length() > 0) {
+            errors += ", ";
+        }
+        errors += "Missing script";
         requiredFormsFilled = false;
     }
-    else {
-        ui->label_script->setText("<font color='black'>Script</font>");
-    }
+    ui->label_error->setText("<font color='red'>" + errors + "</font>");
     return requiredFormsFilled;
 }
 
@@ -294,6 +293,7 @@ void keybindings::transitionToEditMode(void) {
     ui->label_documentation->setText("<font color='black'>Documentation</font>");
 
     editBoxDisabled(false);
+    ui->label_error->setText("");
 }
 
 void keybindings::transitionFromEditMode(void) {
@@ -311,6 +311,7 @@ void keybindings::transitionFromEditMode(void) {
     ui->label_guiPath->setText("<font color='light gray'>GUI Path</font>");
     ui->label_documentation->setText("<font color='light gray'>Documentation</font>");
     editBoxDisabled(true);
+    ui->label_error->setText("");
 }
 
 void keybindings::editBoxDisabled(bool disabled) {

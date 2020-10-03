@@ -131,16 +131,18 @@ QString deltaTimes::timeDescription(int value) {
 
 void deltaTimes::valueChanged(const QString& text) {
     if (ui->line_seconds->text() == "") {
-        ui->label_value->setText("");
+        ui->label_error->setText("");
     }
     else if (!isNumericalValue(ui->line_seconds)) {
-        ui->label_value->setText("<font color='red'>Not an integer value</font>");
+        ui->label_error->setText("<font color='red'>Not an integer value</font>");
+        ui->label_value->setText("");
     }
     else {
         int value = ui->line_seconds->text().toInt();
         if (value != 0) {
             ui->label_value->setText("<font color='black'>" +
                 timeDescription(ui->line_seconds->text().toInt()) + "</font>");
+            ui->label_error->setText("");
         }
     }
 }
@@ -197,16 +199,16 @@ void deltaTimes::saveDeltaTimeValue() {
                     _data.at(index) = value;
                     QString summary = createSummaryForDeltaTime(index, true);
                     ui->listWidget->item(index)->setText(summary);
-                    setLabelForKey(index, true, "black");
+                    //setLabelForKey(index, true, "black");
                     transitionFromEditMode(index);
                     _editModeNewItem = false;
                 }
                 else {
-                    setLabelForKey(index, true, "red");
+                ui->label_error->setText("<font color='red'>Not an integer value</font>");
                 }
             }
             else {
-                setLabelForKey(index, true, "red");
+                ui->label_error->setText("<font color='red'>Not an integer value</font>");
             }
         }
     }
@@ -260,6 +262,7 @@ void deltaTimes::transitionToEditMode(int index) {
     ui->line_seconds->setFocus(Qt::OtherFocusReason);
     setLabelForKey(index, true, "black");
     editBoxDisabled(false);
+    ui->label_error->setText("");
 }
 
 void deltaTimes::transitionFromEditMode(int index) {
@@ -274,6 +277,7 @@ void deltaTimes::transitionFromEditMode(int index) {
     editBoxDisabled(true);
     setLabelForKey(index, false, "light gray");
     ui->label_value->setText("");
+    ui->label_error->setText("");
 }
 
 void deltaTimes::editBoxDisabled(bool disabled) {

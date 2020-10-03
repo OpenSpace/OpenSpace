@@ -114,6 +114,7 @@ void osmodules::listItemAdded(void) {
         ui->list->addItem(new QListWidgetItem("  (Enter details below & click 'Save')"));
         //Scroll down to that blank line highlighted
         ui->list->setCurrentRow(ui->list->count() - 1);
+        ui->label_error->setText("");
     }
 
     //Blank-out the 2 text fields, set combo box to index 0
@@ -126,7 +127,8 @@ void osmodules::listItemAdded(void) {
 
 void osmodules::listItemSave(void) {
     if (ui->line_module->text().length() == 0) {
-        ui->label_module->setText("<font color='red'>Module</font>");
+        //ui->label_module->setText("<font color='red'>Module</font>");
+        ui->label_error->setText("<font color='red'>Missing module name</font>");
         return;
     }
 
@@ -146,7 +148,6 @@ void osmodules::listItemSave(void) {
 }
 
 void osmodules::listItemCancelSave(void) {
-    //listItemSelected();
     transitionFromEditMode();
     if (_editModeNewItem) {
         if (_data.size() > 0) {
@@ -193,6 +194,7 @@ void osmodules::transitionToEditMode(void) {
     ui->label_loaded->setText("<font color='black'>Command if Module is Loaded</font>");
     ui->label_notLoaded->setText("<font color='black'>Command if Module is NOT Loaded</font>");
     editBoxDisabled(false);
+    ui->label_error->setText("");
 }
 
 void osmodules::transitionFromEditMode(void) {
@@ -207,7 +209,7 @@ void osmodules::transitionFromEditMode(void) {
     ui->label_module->setText("<font color='light gray'>Module</font>");
     ui->label_loaded->setText("<font color='light gray'>Command if Module is Loaded</font>");
     ui->label_notLoaded->setText("<font color='light gray'>Command if Module is NOT Loaded</font>");
-    //ui->list->clearSelection();
+    ui->label_error->setText("");
 }
 
 void osmodules::editBoxDisabled(bool disabled) {

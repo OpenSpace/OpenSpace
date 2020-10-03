@@ -73,14 +73,12 @@ public:
     void keyPressEvent(QKeyEvent *evt);
 
 private:
+    bool isEmpty(QLineEdit* le);
     bool isNumericalValue(QLineEdit* le);
     bool inNumericalRange(QLineEdit* le, float min, float max);
+    void addErrorMsg(const QString& errorDescription);
     bool areRequiredFormsFilledAndValid();
     void setErrorTextFormat(QLabel* label, const QString& labelTxt, bool setErrorFormat);
-    void checkFormFilled(QLabel* label, QLineEdit* value, const QString& labelTxt,
-        bool& allFormsValid, bool isNumber, bool isRequiredValue);
-    void checkFormRange(QLabel* label, QLineEdit* value, const QString& labelTxt,
-        float min, float max, bool& allFormsValid, bool isRequiredValue);
     bool isUpVectorValid();
 
     Ui::camera *ui;

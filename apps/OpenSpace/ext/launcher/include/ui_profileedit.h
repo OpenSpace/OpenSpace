@@ -537,7 +537,7 @@ public:
         sizePolicy1.setVerticalStretch(0);
         sizePolicy1.setHeightForWidth(label_error->sizePolicy().hasHeightForWidth());
         label_error->setSizePolicy(sizePolicy1);
-        label_error->setMinimumSize(QSize(200, 40));
+        label_error->setMinimumSize(QSize(320, 40));
         label_error->setMaximumSize(QSize(800, 40));
         label_error->setFont(font2);
         label_error->setWordWrap(true);

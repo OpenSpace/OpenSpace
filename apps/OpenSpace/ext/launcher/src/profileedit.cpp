@@ -110,9 +110,11 @@ void ProfileEdit::duplicateProfile() {
         }
         ui->line_profile->setText(duplicatedName);
     }
+    ui->label_error->setText("");
 }
 
 void ProfileEdit::openMeta() {
+    ui->label_error->setText("");
     if (_pData) {
        _meta = new meta(_pData);
        _meta->exec();
@@ -121,6 +123,7 @@ void ProfileEdit::openMeta() {
 }
 
 void ProfileEdit::openModules() {
+    ui->label_error->setText("");
     if (_pData) {
         _modules = new osmodules(_pData);
         _modules->exec();
@@ -130,6 +133,7 @@ void ProfileEdit::openModules() {
 }
 
 void ProfileEdit::openProperties() {
+    ui->label_error->setText("");
     if (_pData) {
         _properties = new properties(_pData);
         _properties->exec();
@@ -142,6 +146,7 @@ void ProfileEdit::openProperties() {
 }
 
 void ProfileEdit::openKeybindings() {
+    ui->label_error->setText("");
     if (_pData) {
         _keybindings = new keybindings(_pData);
         _keybindings->exec();
@@ -154,6 +159,7 @@ void ProfileEdit::openKeybindings() {
 }
 
 void ProfileEdit::openAssets() {
+    ui->label_error->setText("");
     if (_pData) {
         _assets = new assets(_pData, _reportedAssets);
         _assets->exec();
@@ -164,6 +170,7 @@ void ProfileEdit::openAssets() {
 }
 
 void ProfileEdit::openTime() {
+    ui->label_error->setText("");
     if (_pData) {
         _time = new ostime(_pData);
         _time->exec();
@@ -172,6 +179,7 @@ void ProfileEdit::openTime() {
 }
 
 void ProfileEdit::openDeltaTimes() {
+    ui->label_error->setText("");
     if (_pData) {
         _deltaTimes = new deltaTimes(_pData);
         _deltaTimes->exec();
@@ -183,6 +191,7 @@ void ProfileEdit::openDeltaTimes() {
 }
 
 void ProfileEdit::openAddedScripts() {
+    ui->label_error->setText("");
     if (_pData) {
         _addedScripts = new addedScripts(_pData);
         _addedScripts->exec();
@@ -191,6 +200,7 @@ void ProfileEdit::openAddedScripts() {
 }
 
 void ProfileEdit::openCamera() {
+    ui->label_error->setText("");
     if (_pData) {
         _camera = new camera(_pData);
         _camera->exec();
@@ -199,6 +209,7 @@ void ProfileEdit::openCamera() {
 }
 
 void ProfileEdit::openMarkNodes() {
+    ui->label_error->setText("");
     if (_pData) {
         _markNodes = new markNodes(_pData);
         _markNodes->exec();
@@ -408,13 +419,18 @@ void ProfileEdit::approved() {
     QString profileName = ui->line_profile->text();
     if ((profileName.length() > 0) && !isReadOnly(profileName.toUtf8().constData())) {
         _saveSelected = true;
+        ui->label_error->setText("");
         accept();
     }
     else {
-        QString formatText = "<font color='red'>";
-        formatText += ui->label_profile->text();
-        formatText += "</font>";
-        ui->label_profile->setText(formatText);
+        //QString formatText = "<font color='red'>";
+        //formatText += ui->label_profile->text();
+        //formatText += "</font>";
+        //ui->label_profile->setText(formatText);
+        QString errorLabel = "<font color='red'>";
+        errorLabel += "This is a read-only profile. Click 'duplicate' or rename & save.";
+        errorLabel += "</font>";
+        ui->label_error->setText(errorLabel);
     }
 }
 

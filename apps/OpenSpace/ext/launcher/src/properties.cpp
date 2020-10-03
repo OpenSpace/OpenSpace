@@ -148,20 +148,19 @@ void properties::listItemSave(void) {
 
 bool properties::areRequiredFormsFilled() {
     bool requiredFormsFilled = true;
+    QString errors;
     if (ui->line_property->text().length() == 0) {
-        ui->label_property->setText("<font color='red'>Property</font>");
+        errors += "Missing property name";
         requiredFormsFilled = false;
-    }
-    else {
-        ui->label_property->setText("<font color='black'>Property</font>");
     }
     if (ui->line_value->text().length() == 0) {
-        ui->label_value->setText("<font color='red'>Value to set</font>");
+        if (errors.length() > 0) {
+            errors += ", ";
+        }
+        errors += "Missing value";
         requiredFormsFilled = false;
     }
-    else {
-        ui->label_value->setText("<font color='black'>Value to set</font>");
-    }
+    ui->label_error->setText("<font color='red'>" + errors + "</font>");
     return requiredFormsFilled;
 }
 
@@ -213,6 +212,7 @@ void properties::transitionToEditMode(void) {
     ui->label_property->setText("<font color='black'>Property</font>");
     ui->label_value->setText("<font color='black'>Value to set</font>");
     editBoxDisabled(false);
+    ui->label_error->setText("");
 }
 
 void properties::transitionFromEditMode(void) {
@@ -227,6 +227,7 @@ void properties::transitionFromEditMode(void) {
     ui->label_property->setText("<font color='light gray'>Property</font>");
     ui->label_value->setText("<font color='light gray'>Value to set</font>");
     editBoxDisabled(true);
+    ui->label_error->setText("");
 }
 
 void properties::editBoxDisabled(bool disabled) {

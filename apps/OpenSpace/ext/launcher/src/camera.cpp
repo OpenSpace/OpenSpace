@@ -131,6 +131,10 @@ bool camera::inNumericalRange(QLineEdit* le, float min, float max) {
     return true;
 }
 
+bool camera::isEmpty(QLineEdit* textLine) {
+    return (textLine->text().length() == 0);
+}
+
 camera::~camera() {
     delete ui;
 }
@@ -141,76 +145,123 @@ void camera::cancel() {
 
 bool camera::areRequiredFormsFilledAndValid() {
     bool allFormsOk = true;
+    ui->label_error->setText("");
 
     if (ui->tabWidget->currentIndex() == static_cast<int>(cameraTypeTab::Nav)) {
-        checkFormFilled(ui->label_anchorNav, ui->line_anchorNav, "Anchor:", allFormsOk,
-            false, true);
-        checkFormFilled(ui->label_posX, ui->line_posX, "X", allFormsOk, true, true);
-        checkFormFilled(ui->label_posY, ui->line_posY, "Y", allFormsOk, true, true);
-        checkFormFilled(ui->label_posZ, ui->line_posZ, "Z", allFormsOk, true, true);
-        checkFormFilled(ui->label_upX, ui->line_upX, "X", allFormsOk, true, false);
-        checkFormFilled(ui->label_upY, ui->line_upY, "Y", allFormsOk, true, false);
-        checkFormFilled(ui->label_upZ, ui->line_upZ, "Z", allFormsOk, true, false);
-        checkFormFilled(ui->label_yaw, ui->line_yaw, "Yaw angle:", allFormsOk,
-            true, false);
-        checkFormFilled(ui->label_pitch, ui->line_pitch, "Pitch angle:", allFormsOk,
-            true, false);
-        checkFormRange(ui->label_yaw, ui->line_yaw, "Yaw angle:", -360.0, 360.0,
-            allFormsOk, false);
-        checkFormRange(ui->label_pitch, ui->line_pitch, "Pitch angle:", -360.0, 360.0,
-            allFormsOk, false);
+        if (isEmpty(ui->line_anchorNav)) {
+            allFormsOk = false;
+            addErrorMsg("Anchor is empty");
+        }
+        if (isEmpty(ui->line_posX)) {
+            allFormsOk = false;
+            addErrorMsg("Position X is empty");
+        }
+        else if (!isNumericalValue(ui->line_posX)) {
+            allFormsOk = false;
+            addErrorMsg("Position X is not a number");
+        }
+        if (isEmpty(ui->line_posY)) {
+            allFormsOk = false;
+            addErrorMsg("Position Y is empty");
+        }
+        else if (!isNumericalValue(ui->line_posY)) {
+            allFormsOk = false;
+            addErrorMsg("Position Y is not a number");
+        }
+        if (isEmpty(ui->line_posZ)) {
+            allFormsOk = false;
+            addErrorMsg("Position Z is empty");
+        }
+        else if (!isNumericalValue(ui->line_posZ)) {
+            allFormsOk = false;
+            addErrorMsg("Position Z is not a number");
+        }
+        int upVectorCount = 0;
+        if (!isEmpty(ui->line_upX)) {
+            upVectorCount++;
+            if (!isNumericalValue(ui->line_upX)) {
+                allFormsOk = false;
+                addErrorMsg("Up X is not a number");
+            }
+        }
+        if (!isEmpty(ui->line_upY)) {
+            upVectorCount++;
+            if (!isNumericalValue(ui->line_upY)) {
+                allFormsOk = false;
+                addErrorMsg("Up Y is not a number");
+            }
+        }
+        if (!isEmpty(ui->line_upZ)) {
+            upVectorCount++;
+            if (!isNumericalValue(ui->line_upZ)) {
+                allFormsOk = false;
+                addErrorMsg("Up Z is not a number");
+            }
+        }
+        if (!(upVectorCount == 0 || upVectorCount == 3)) {
+            allFormsOk = false;
+            addErrorMsg("Up vector is incomplete");
+        }
+        if (!isEmpty(ui->line_yaw)) {
+            if (!isNumericalValue(ui->line_yaw)) {
+                allFormsOk = false;
+                addErrorMsg("Yaw value is not a number");
+            }
+            else if (!inNumericalRange(ui->line_yaw, -360.0, 360.0)) {
+                allFormsOk = false;
+                addErrorMsg("Yaw value is not in +/- 360.0 range");
+            }
+        }
+        if (!isEmpty(ui->line_pitch)) {
+            if (!isNumericalValue(ui->line_pitch)) {
+                allFormsOk = false;
+                addErrorMsg("Pitch value is not a number");
+            }
+            else if (!inNumericalRange(ui->line_pitch, -360.0, 360.0)) {
+                allFormsOk = false;
+                addErrorMsg("Pitch value is not in +/- 360.0 range");
+            }
+        }
     }
 
     if (ui->tabWidget->currentIndex() == static_cast<int>(cameraTypeTab::Geo)) {
-        checkFormFilled(ui->label_anchorGeo, ui->line_anchorGeo, "Anchor:", allFormsOk,
-            false, true);
-        checkFormFilled(ui->label_lat, ui->line_lat, "Latitude:", allFormsOk,
-            true, true);
-        checkFormFilled(ui->label_long, ui->line_long, "Longitude:", allFormsOk,
-            true, true);
-        checkFormFilled(ui->label_altitude, ui->line_altitude, "Altitude:", allFormsOk,
-            true, false);
-        checkFormRange(ui->label_lat, ui->line_lat, "Latitude:", -90.0, 90.0,
-            allFormsOk, true);
-        checkFormRange(ui->label_long, ui->line_long, "Longitude:", -180.0, 180.0,
-            allFormsOk, true);
+        if (isEmpty(ui->line_anchorGeo)) {
+            allFormsOk = false;
+            addErrorMsg("Anchor is empty");
+        }
+        if (!isNumericalValue(ui->line_lat)) {
+            allFormsOk = false;
+            addErrorMsg("Latitude value is not a number");
+        }
+        else if (!inNumericalRange(ui->line_lat, -90.0, 90.0)) {
+            allFormsOk = false;
+            addErrorMsg("Latitude value is not in +/- 90.0 range");
+        }
+        if (!isNumericalValue(ui->line_long)) {
+            allFormsOk = false;
+            addErrorMsg("Longitude value is not a number");
+        }
+        else if (!inNumericalRange(ui->line_long, -180.0, 180.0)) {
+            allFormsOk = false;
+            addErrorMsg("Longitude value is not in +/- 180.0 range");
+        }
+        if (!isEmpty(ui->line_altitude)) {
+            if (!isNumericalValue(ui->line_altitude)) {
+                allFormsOk = false;
+                addErrorMsg("Altitude value is not a number");
+            }
+        }
     }
     return allFormsOk;
 }
-void camera::checkFormFilled(QLabel* label, QLineEdit* value, const QString& labelTxt,
-                             bool& allFormsOk, bool isNumber, bool isRequiredValue)
-{
-    bool isThisFormValid = true;
-    if (value->text().length() == 0 && isRequiredValue) {
-        isThisFormValid = false;
-    }
-    if (value->text().length() > 0 && isNumber && !isNumericalValue(value)) {
-        isThisFormValid = false;
-    }
-    setErrorTextFormat(label, labelTxt, !isThisFormValid);
-    if (!isThisFormValid) {
-        allFormsOk = false;
-    }
-}
 
-void camera::checkFormRange(QLabel* label, QLineEdit* value, const QString& labelTxt,
-                            float min, float max, bool& allFormsOk, bool isRequiredValue)
-{
-    if (value->text().length() == 0 && !isRequiredValue) {
-        setErrorTextFormat(label, labelTxt, false);
-        return;
+void camera::addErrorMsg(const QString& errorDescription) {
+    QString contents = ui->label_error->text();
+    if (contents.length() > 0) {
+        contents += ", ";
     }
-    bool isThisFormValid = true;
-    checkFormFilled(label, value, labelTxt, isThisFormValid, true, isRequiredValue);
-    if (isThisFormValid) {
-        if (!inNumericalRange(value, min, max)) {
-            isThisFormValid = false;
-        }
-    }
-    setErrorTextFormat(label, labelTxt, !isThisFormValid);
-    if (!isThisFormValid && (isRequiredValue || value->text().length() > 0)) {
-        allFormsOk = false;
-    }
+    contents += errorDescription;
+    ui->label_error->setText("<font color='red'>" + contents + "</font>");
 }
 
 void camera::setErrorTextFormat(QLabel* label, const QString& labelTxt,
@@ -282,6 +333,7 @@ bool camera::isUpVectorValid() {
 }
 
 void camera::tabSelect(int tabIndex) {
+    ui->label_error->setText("");
     if (tabIndex == 0) {
         ui->line_anchorNav->setFocus(Qt::OtherFocusReason);
     }
