@@ -165,6 +165,7 @@ void ProfileEdit::openAssets() {
         _assets->exec();
         labelText(_pData, _pData->assets().size(), "Assets", ui->label_assets);
         ui->text_assets->setText(_assets->createTextSummary());
+        ui->text_assets->setText(summarizeText_assets());
         delete _assets;
     }
 }
