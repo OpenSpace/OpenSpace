@@ -53,7 +53,8 @@ asset.meta = {
         1950 JAN 01 00:00:00 to 2100 JAN 01 00:00:00. Data from JPL Horizons']],
     Author = "OpenSpace Team",
     URL = "https://ssd.jpl.nasa.gov/horizons.cgi",
-    License = "NASA"
+    License = "NASA",
+    Identifiers = "C2019Y4AtlasPosition,C2019Y4AtlasTrail"
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {

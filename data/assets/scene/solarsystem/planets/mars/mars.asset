@@ -81,5 +81,6 @@ asset.meta = {
     Description = [[ Mars globe, and main globe label.]],
     Author = "OpenSpace Team",
     URL = "http://openspaceproject.com",
-    License = "MIT license"
+    License = "MIT license",
+    Identifiers = "Mars,MarsLabel"
 }

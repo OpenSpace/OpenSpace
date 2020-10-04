@@ -35,6 +35,7 @@ asset.meta = {
     Author = "USGS",
     URL = "https://astrogeology.usgs.gov/search/map/Mars/GlobalSurveyor/MOLA/" ..
         "Mars_MO_THEMIS-IR-Mars_MGS_MOLA_ClrShade_merge_global_463m",
-    License = "NASA/PDS"
+    License = "NASA/PDS",
+    Identifiers = "MOLA_Pseudo_Color_Utah"
 }
 

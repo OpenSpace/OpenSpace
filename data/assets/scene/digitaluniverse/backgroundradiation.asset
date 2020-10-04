@@ -259,5 +259,7 @@ asset.meta = {
         Finkbeiner (Princeton)]],
     Author = "Brian Abbott (AMNH), OpenSpace Team",
     URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-    License = "AMNH Digital Universe"
+    License = "AMNH Digital Universe",
+    Identifiers = "WMAP,CBE,Planck,PlanckMultiverse1,PlanckMultiverse2" ..
+        "PlanckMultiverse3,PlanckMultiverse4,HAlpha"
 }

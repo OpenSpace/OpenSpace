@@ -63,5 +63,6 @@ asset.meta = {
     Properties of Galactic Globular Clusters, C. Francis+ (U Cambridge)]],
     Author = "Brian Abbott (AMNH)",
     URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-    License = "AMNH Digital Universe"
+    License = "AMNH Digital Universe",
+    Identifiers = "GlobularClusters"
 }

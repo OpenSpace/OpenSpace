@@ -66,5 +66,6 @@ asset.meta = {
         from URL) <br><br> Data Reference: New List of OB Associations (Melnik+)]],
     Author = "Brian Abbott (AMNH)",
     URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-    License = "AMNH Digital Universe"
+    License = "AMNH Digital Universe",
+    Identifiers = "OBAssociations"
 }

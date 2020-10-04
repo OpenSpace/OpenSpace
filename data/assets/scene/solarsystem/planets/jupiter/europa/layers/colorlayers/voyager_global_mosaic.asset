@@ -30,6 +30,7 @@ asset.meta = {
     Author = "USGS",
     URL = "https://astrogeology.usgs.gov/search/map/Europa/Voyager-Galileo/" ..
         "Europa_Voyager_GalileoSSI_global_mosaic_500m",
-    License = "NASA/PDS"
+    License = "NASA/PDS",
+    Identifiers = "Voyager_Global_Mosaic"
 }
 

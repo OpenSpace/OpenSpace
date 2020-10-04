@@ -38,5 +38,6 @@ asset.meta = {
         to prevent misinterpretation. (Description from URL) This map is hosted by ESRI]],
     Author = "Caltech Murray Lab",
     URL = "http://murray-lab.caltech.edu/CTX/",
-    License = "Esri Master License Agreement"
+    License = "Esri Master License Agreement",
+    Identifiers = "CTX_blended_01"
 }

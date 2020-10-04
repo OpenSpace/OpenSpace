@@ -75,7 +75,8 @@ asset.meta = {
     Description = [[ Venus globe with labels, and main planet label.]],
     Author = "OpenSpace Team",
     URL = "http://openspaceproject.com",
-    License = "MIT license"
+    License = "MIT license",
+    Identifiers = "Venus,VenusLabel"
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Venus, VenusLabel })

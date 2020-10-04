@@ -42,5 +42,6 @@ asset.meta = {
         Observatory]],
     Author = "Brian Abbott, Carter Emmart (AMNH)",
     URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-    License = "AMNH Digital Universe"
+    License = "AMNH Digital Universe",
+    Identifiers = "MilkyWayGalaxyImage"
 }

@@ -27,5 +27,6 @@ asset.meta = {
     Author = "USGS",
     URL = "https://astrogeology.usgs.gov/search/map/Enceladus/Cassini/" ..
         "Enceladus_Cassini_ISS_Global_Mosaic_100m_HPF",
-    License = "NASA/PDS"
+    License = "NASA/PDS",
+    Identifiers = "Global_Mosaic_100m_HPF"
 }

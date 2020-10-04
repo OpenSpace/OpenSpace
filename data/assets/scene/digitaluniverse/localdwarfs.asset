@@ -63,5 +63,6 @@ asset.meta = {
         galaxies in the Local Group (McConnachie+, 2012)]],
     Author = "Brian Abbott (AMNH)",
     URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-    License = "AMNH Digital Universe"
+    License = "AMNH Digital Universe",
+    Identifiers = "LocalDwarfGalaxies"
 }

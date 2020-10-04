@@ -29,5 +29,6 @@ asset.meta = {
         ~1:280 scale. (Description from URL)]],
     Author = "ESRI",
     URL = "https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9",
-    License = "Esri Master License Agreement"
+    License = "Esri Master License Agreement",
+    Identifiers = "ESRI_World_Imagery"
 }

@@ -74,5 +74,6 @@ asset.meta = {
     Description = [[ Atmosphere of Mars.]],
     Author = "OpenSpace Team",
     URL = "http://openspaceproject.com",
-    License = "MIT license"
+    License = "MIT license",
+    Identifiers = "MarsAtmosphere"
 }

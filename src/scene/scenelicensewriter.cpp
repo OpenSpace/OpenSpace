@@ -82,6 +82,7 @@ std::string SceneLicenseWriter::generateJson() const {
         json << fmt::format(replStr, "url", escapedJson(meta->url));
         //json << fmt::format(replStr2, "licenseText", escapedJson(license.licenseText));
         json << fmt::format(replStr, "license", escapedJson(meta->license));
+        json << fmt::format(replStr, "identifiers", escapedJson(meta->identifiers));
         json << fmt::format(replStr2, "path", escapedJson(asset->assetFilePath()));
         json << "}";
 

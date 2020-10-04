@@ -57,5 +57,6 @@ asset.meta = {
     that would normally be hidden to our eye. (Description from URL)]],
     Author = "Brian Abbott (AMNH)",
     URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-    License = "AMNH Digital Universe"
+    License = "AMNH Digital Universe",
+    Identifiers = "2MASS"
 }

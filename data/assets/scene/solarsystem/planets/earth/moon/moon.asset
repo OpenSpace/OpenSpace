@@ -66,5 +66,6 @@ asset.meta = {
     Description = [[ Moon globe with labels. ]],
     Author = "OpenSpace Team",
     URL = "http://openspaceproject.com",
-    License = "MIT license"
+    License = "MIT license",
+    Identifiers = "Moon"
 }

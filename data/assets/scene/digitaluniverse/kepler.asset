@@ -58,5 +58,6 @@ asset.meta = {
         (CalTech/NASA)]],
     Author = "Brian Abbott, Emily Rice, and Jason No (AMNH)",
     URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-    License = "AMNH Digital Universe"
+    License = "AMNH Digital Universe",
+    Identifiers = "KeplerPlanetaryCandidates"
 }

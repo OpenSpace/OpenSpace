@@ -32,5 +32,6 @@ asset.meta = {
     Description = [[ Earth marker with name, sized for Solar System view]],
     Author = "OpenSpace Team",
     URL = "http://openspaceproject.com",
-    License = "MIT license"
+    License = "MIT license",
+    Identifiers = "EarthMarker"
 }

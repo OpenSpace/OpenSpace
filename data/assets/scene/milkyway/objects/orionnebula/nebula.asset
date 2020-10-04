@@ -153,5 +153,7 @@ think of an HII region as a sort of tremendous explosion, taking place over mill
 and the bow shocks are part of the outward rush of material. ]],
     Author = "AMNH Digital Universe",
     URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-    License = "custom"
+    License = "AMNH Digital Universe",
+    Identifiers = "OrionNebulaModel,OrionNebulaModel,OrionNebulaProplydsModel,"..
+        "OrionNebulaShocksModel"
 }

@@ -37,5 +37,6 @@ asset.meta = {
         A blank globe and SPICE trail are generated for the moon.]],
     Author = "OpenSpace Team",
     URL = "http://openspaceproject.com",
-    License = "MIT license"
+    License = "MIT license",
+    Identifiers = "Triton"
 }

@@ -37,7 +37,8 @@ asset.meta = {
     Description = [[ Sun glare effect. Enabled by default instead of sun orb.]],
     Author = "OpenSpace Team",
     URL = "http://openspaceproject.com",
-    License = "MIT license"
+    License = "MIT license",
+    Identifiers = "SunGlare"
 }
 
 

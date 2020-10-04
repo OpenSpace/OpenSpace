@@ -24,7 +24,8 @@ asset.meta = {
     Description = [[ Venus Barycenter transform]],
     Author = "OpenSpace Team",
     URL = "http://openspaceproject.com",
-    License = "MIT license"
+    License = "MIT license",
+    Identifiers = "VenusBarycenter"
 }
 
 

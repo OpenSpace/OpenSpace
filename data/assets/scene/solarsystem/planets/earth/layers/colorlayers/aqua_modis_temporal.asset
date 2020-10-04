@@ -36,5 +36,6 @@ asset.meta = {
      and the temporal resolution is daily. (Description from NASA Worldview)]],
     Author = "NASA EOSDIS Global Imagery Browse Services",
     URL = "https://earthdata.nasa.gov/eosdis/science-system-description/eosdis-components/gibs",
-    License = "NASA"
+    License = "NASA",
+    Identifiers = "Aqua_Modis_Temporal"
 }

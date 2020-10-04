@@ -21,5 +21,6 @@ asset.meta = {
     URL = "https://ssd.jpl.nasa.gov/sbdb_query.cgi",
     License = [[JPL-authored documents are sponsored by NASA under Contract NAS7-030010.
         All documents available from this server may be protected under the U.S. and
-        Foreign Copyright Laws.]]
+        Foreign Copyright Laws.]],
+    Identifiers = "sssb_sssb_data_aten_asteroid"
 }

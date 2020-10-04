@@ -111,5 +111,6 @@ asset.meta = {
     Description = [[ Atmosphere of Earth.]],
     Author = "OpenSpace Team",
     URL = "http://openspaceproject.com",
-    License = "MIT license"
+    License = "MIT license",
+    Identifiers = "EarthAtmosphere"
 }

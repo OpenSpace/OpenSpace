@@ -23,5 +23,6 @@ asset.meta = {
         in this global view. ]],
     Author = "OpenSpace Team",
     URL = "https://visibleearth.nasa.gov/images/79765/night-lights-2012-map",
-    License = "NASA"
+    License = "NASA",
+    Identifiers = "Earth_at_Night_2012"
 }

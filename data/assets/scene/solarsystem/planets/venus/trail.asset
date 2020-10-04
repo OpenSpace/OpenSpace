@@ -33,7 +33,8 @@ asset.meta = {
         base spice asset)]],
     Author = "OpenSpace Team",
     URL = "http://openspaceproject.com",
-    License = "MIT license"
+    License = "MIT license",
+    Identifiers = "VenusTrail"
 }
 
 

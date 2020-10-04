@@ -15,5 +15,6 @@ asset.meta = {
     Description = [[ Earth image from Blue Marble Next Generation ]],
     Author = "OpenSpace Team",
     URL = "https://visibleearth.nasa.gov/collection/1484/blue-marble",
-    License = "NASA"
+    License = "NASA",
+    Identifiers = "Blue_Marble"
 }

@@ -75,5 +75,6 @@ asset.meta = {
     Description = [[ Mercury globe with labels, and main planet label.]],
     Author = "OpenSpace Team",
     URL = "http://openspaceproject.com",
-    License = "MIT license"
+    License = "MIT license",
+    Identifiers = "Mercury,MercuryLabel"
 }

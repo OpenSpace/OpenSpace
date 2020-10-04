@@ -36,5 +36,6 @@ asset.meta = {
     Author = "USGS",
     URL = "https://astrogeology.usgs.gov/search/map/Mars/GlobalSurveyor/MOLA/" ..
         "Mars_MGS_MOLA_DEM_mosaic_global_463m",
-    License = "NASA/PDS"
+    License = "NASA/PDS",
+    Identifiers = "Mola_Utah"
 }

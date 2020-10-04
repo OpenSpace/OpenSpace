@@ -31,5 +31,6 @@ asset.meta = {
     Author = "USGS",
     URL = "https://astrogeology.usgs.gov/search/map/Mars/Odyssey/THEMIS-IR-Mosaic-ASU/" ..
         "Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12",
-    License = "NASA/PDS"
+    License = "NASA/PDS",
+    Identifiers = "Themis_IR_Day_Sweden"
 }

@@ -59,5 +59,6 @@ asset.meta = {
     Strasbourg-ESO Catalog of Planetary Nebulae (Acker+ 1992)]],
     Author = "Brian Abbott (AMNH)",
     URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-    License = "AMNH Digital Universe"
+    License = "AMNH Digital Universe",
+    Identifiers = "PlanetaryNebulae"
 }

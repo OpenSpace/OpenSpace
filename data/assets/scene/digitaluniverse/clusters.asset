@@ -41,7 +41,7 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { object })
 
 
 asset.meta = {
-    Name = "Stars Labels - Alternate",
+    Name = "Galaxy Clusters Labels",
     Version = "1.0",
     Description = [[Census 15 galaxy cluster labels. DU Version 1.2. The Galaxy Clusters
     dataset is a series of labels that mark where the large clusters of galaxies are in
@@ -49,5 +49,6 @@ asset.meta = {
     group.(Description from URL) <br><br> Data Reference: Brian Abbott (AMNH)]],
     Author = "Brian Abbott (AMNH)",
     URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-    License = "AMNH Digital Universe"
+    License = "AMNH Digital Universe",
+    Identifiers = "GalaxyClusterLabels"
 }

@@ -19,5 +19,5 @@ asset.meta = {
     Description = [[ Default jpg texture for Callisto]],
     Author = "OpenSpace Team",
     URL = "http://openspaceproject.com",
-    License = "MIT license"
+    License = "MIT license",
 }

@@ -59,5 +59,6 @@ asset.meta = {
     Description = [[ Iapetus globe with labels.]],
     Author = "OpenSpace Team",
     URL = "http://openspaceproject.com",
-    License = "MIT license"
+    License = "MIT license",
+    Identifiers = "Iapetus"
 }

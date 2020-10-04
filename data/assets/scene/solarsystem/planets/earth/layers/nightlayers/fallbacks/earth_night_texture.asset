@@ -1,7 +1,7 @@
 local texturesPath = asset.require("./../../../earth_textures").TexturesPath
 
 local layer = {
-    Identifier = "Earth_Night Texture",
+    Identifier = "Earth_Night_Texture",
     Name = "Earth Night Texture",
     FilePath = texturesPath .. "/earth_night.jpg",
 }
@@ -14,5 +14,6 @@ asset.meta = {
     Description = [[ Earth's city lights are clearly visible from space ]],
     Author = "OpenSpace Team",
     URL = "https://visibleearth.nasa.gov/collection/1484/blue-marble",
-    License = "NASA"
+    License = "NASA",
+    Identifiers = "Earth_Night_Texture"
 }

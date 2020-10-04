@@ -67,5 +67,6 @@ asset.meta = {
     Brent Tully (U Hawaii), Stuart Levy (NCSA/UIUC)]],
     Author = "Stuart Levy (NCSA/UIUC), Brian Abbott (AMNH)",
     URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-    License = "AMNH Digital Universe"
+    License = "AMNH Digital Universe",
+    Identifiers = "Abell"
 }

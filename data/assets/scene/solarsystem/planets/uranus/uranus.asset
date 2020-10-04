@@ -55,5 +55,6 @@ asset.meta = {
     Description = [[ Uranus globe, and main planet label.]],
     Author = "OpenSpace Team",
     URL = "http://openspaceproject.com",
-    License = "MIT license"
+    License = "MIT license",
+    Identifiers = "Uranus,UranusLabel"
 }

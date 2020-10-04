@@ -3,14 +3,6 @@ local assetHelper = asset.require('util/asset_helper')
 local kernels = asset.require('../mar097').Kernels
 
 
--- local textures = asset.syncedResource({
---     Name = "Mars Textures",
---     Type = "HttpSynchronization",
---     Identifier = "mars_textures",
---     Version = 1
--- })
-
-
 local Deimos = {
     Identifier = "Deimos",
     Parent = transforms.MarsBarycenter.Identifier,
