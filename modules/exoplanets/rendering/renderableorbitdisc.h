@@ -31,11 +31,12 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <ghoul/opengl/texture.h>
+
 
 namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl {
     class ProgramObject;
-    class Texture;
 } // namespace ghoul::opengl
 
 namespace openspace {
