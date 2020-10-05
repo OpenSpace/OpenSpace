@@ -26,6 +26,7 @@
 
 #include <modules/exoplanets/rendering/renderableorbitdisc.h>
 #include <modules/exoplanets/tasks/exoplanetscsvtobintask.h>
+#include <modules/exoplanets/tasks/exoplanetsdatapreparationtask.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/interaction/navigationhandler.h>
@@ -81,12 +82,14 @@ void ExoplanetsModule::internalInitialize(const ghoul::Dictionary&) {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fTask, "No task factory existed");
     fTask->registerClass<ExoplanetsCsvToBinTask>("ExoplanetsCsvToBinTask");
+    fTask->registerClass<ExoplanetsDataPreparationTask>("ExoplanetsDataPreparationTask");
     fRenderable->registerClass<RenderableOrbitDisc>("RenderableOrbitDisc");
 }
 
 std::vector<documentation::Documentation> ExoplanetsModule::documentations() const {
     return {
-        ExoplanetsCsvToBinTask::documentation()
+        ExoplanetsCsvToBinTask::documentation(),
+        ExoplanetsDataPreparationTask::documentation()
     };
 }
 
