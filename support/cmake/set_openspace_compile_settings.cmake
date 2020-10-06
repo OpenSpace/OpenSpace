@@ -200,6 +200,7 @@ function (set_openspace_compile_settings project)
             ${project}
             PRIVATE
             "-stdlib=libc++"
+            "-std=c++17"
             "-Wall"
             "-Wextra"
             "-Wabstract-vbase-init"
