@@ -32,8 +32,6 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/uniformcache.h>
-#include <ghoul/opengl/texture.h>
-
 
 namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl {
