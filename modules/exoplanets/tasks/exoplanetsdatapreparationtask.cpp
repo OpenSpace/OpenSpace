@@ -111,21 +111,31 @@ void ExoplanetsDataPreparationTask::perform(const Task::ProgressCallback& progre
     LINFO(fmt::format("Loading {} exoplanets", total));
 
     auto readFloatData = [](const std::string& str) -> float {
+    #ifdef WIN32
         float result;
         auto [p, ec] = std::from_chars(str.data(), str.data() + str.size(), result);
         if (ec == std::errc()) {
             return result;
         }
         return NAN;
+    #else
+        // clang is missing float support for std::from_chars
+        return !str.empty() ? std::stof(str.c_str(), nullptr) : NAN;
+    #endif
     };
 
     auto readDoubleData = [](const std::string& str) -> double {
+    #ifdef WIN32
         double result;
         auto [p, ec] = std::from_chars(str.data(), str.data() + str.size(), result);
         if (ec == std::errc()) {
             return result;
         }
         return NAN;
+    #else
+        // clang is missing double support for std::from_chars
+        return !str.empty() ? std::stod(str.c_str(), nullptr) : NAN;
+    #endif
     };
 
     auto readIntegerData = [](const std::string& str) -> int {
