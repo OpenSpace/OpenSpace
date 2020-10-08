@@ -39,7 +39,7 @@ public:
 
     enum class MessageType : uint32_t {
         Connection = 0,
-        ReadBinaryData,
+        ReadPointData,
         AddSceneGraphNode,
         RemoveSceneGraphNode,
         Color,

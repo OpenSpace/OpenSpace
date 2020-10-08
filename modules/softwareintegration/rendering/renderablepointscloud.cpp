@@ -41,6 +41,7 @@ namespace {
     constexpr const char* ProgramName = "shaderProgram";
     constexpr const char* _loggerCat = "PointsCloud";
     constexpr const char* KeyFile = "File";
+    constexpr const char* KeyData = "Data";
 
     constexpr int8_t CurrentCacheVersion = 1;
 
@@ -142,6 +143,11 @@ namespace openspace {
         _color.setViewOption(properties::Property::ViewOptions::Color);
         addProperty(_color);
 
+        if (dictionary.hasKey(KeyData)) {
+            _pointData = dictionary.value<std::vector<std::vector<float>>>(KeyData);
+            _hasPointData = true;
+        }
+
         if (dictionary.hasKey(KeyFile)) {
             _speckFile = absPath(dictionary.value<std::string>(KeyFile));
             _hasSpeckFile = true;
@@ -162,7 +168,10 @@ namespace openspace {
         if (dictionary.hasKey(ToggleVisibilityInfo.identifier)) {
             _toggleVisibility = dictionary.value<bool>(ToggleVisibilityInfo.identifier);
         }
-        _toggleVisibility.onChange([&]() { _hasSpeckFile = !_hasSpeckFile; });
+        _toggleVisibility.onChange([&]() {
+            _hasSpeckFile = !_hasSpeckFile;
+            _hasPointData = !_hasPointData; 
+            });
         addProperty(_toggleVisibility);
     }
 
@@ -171,7 +180,7 @@ namespace openspace {
     }
 
     void RenderablePointsCloud::initialize() {
-        const bool isSuccessful = loadData();
+        bool isSuccessful = loadData();
         if (!isSuccessful) {
             throw ghoul::RuntimeError("Error loading data");
         }
@@ -202,7 +211,10 @@ namespace openspace {
         if (_fullData.empty()) {
             return;
         }
-        if (_hasSpeckFile && _toggleVisibility) {
+
+        bool isSpeckData = _hasSpeckFile && _toggleVisibility;
+        bool isPointData = _hasPointData && _toggleVisibility; 
+        if (isSpeckData || isPointData) {
             _shaderProgram->activate();
 
             glm::dmat4 modelTransform =
@@ -240,11 +252,12 @@ namespace openspace {
         }
     }
 
-    void RenderablePointsCloud::update(const UpdateData&) {
+    void RenderablePointsCloud::update(const UpdateData&) {        
         if (!_isDirty) {
             return;
         }
-        if (_hasSpeckFile) {
+
+        if (_hasPointData) {
             LDEBUG("Regenerating data");
 
             createDataSlice();
@@ -281,6 +294,44 @@ namespace openspace {
                 nullptr
             );
         }
+
+        if (_hasSpeckFile) {
+            LDEBUG("Regenerating data");
+
+            createDataSlice();
+
+            int size = static_cast<int>(_slicedData.size());
+
+            if (_vertexArrayObjectID == 0) {
+                glGenVertexArrays(1, &_vertexArrayObjectID);
+                LDEBUG(fmt::format("Generating Vertex Array id '{}'", _vertexArrayObjectID));
+            }
+            if (_vertexBufferObjectID == 0) {
+                glGenBuffers(1, &_vertexBufferObjectID);
+                LDEBUG(fmt::format("Generating Vertex Buffer Object id '{}'", _vertexBufferObjectID));
+            }
+            
+            glBindVertexArray(_vertexArrayObjectID);
+            glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferObjectID);
+            glBufferData(
+                GL_ARRAY_BUFFER,
+                size * sizeof(float),
+                _slicedData.data(),
+                GL_STATIC_DRAW
+            );
+
+            GLint positionAttribute = _shaderProgram->attributeLocation("in_position");
+            
+            glEnableVertexAttribArray(positionAttribute);
+            glVertexAttribPointer(
+                positionAttribute,
+                4,
+                GL_FLOAT,
+                GL_FALSE,
+                0,
+                nullptr
+            );
+        }
         
         glBindVertexArray(0);
 
@@ -292,13 +343,39 @@ namespace openspace {
         _slicedData.clear();
         _fullData.clear();
 
-        isSuccessful &= loadSpeckData();
+        isSuccessful &= readPointData();
+        if (!isSuccessful) {
+            return false;
+        }
 
-        if (!_hasSpeckFile) {
+        if (!_hasPointData) {
             isSuccessful = true;
         }
 
         return isSuccessful;
+    }
+
+    bool RenderablePointsCloud::readPointData() {
+        if (!_hasPointData) {
+            LERROR("No point data found");
+            return false;
+        }
+
+        _nValuesPerPoints = 3;
+
+        int dataSize = _pointData.size();
+        std::vector<float> values(_nValuesPerPoints);
+
+        for (int i = 0; i < dataSize; i++) {
+
+            for (int j = 0; j < _nValuesPerPoints; j++) {
+                values.push_back(_pointData[i][j]);
+            }
+        }
+
+        _fullData.insert(_fullData.end(), values.begin(), values.end());
+
+        return true;
     }
 
     bool RenderablePointsCloud::loadSpeckData() {

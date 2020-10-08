@@ -121,7 +121,7 @@ namespace openspace {
         if (type == "CONN")
             return Message(MessageType::Connection, messageBuffer);
         if (type == "DATA")
-            return Message(MessageType::ReadBinaryData, messageBuffer);
+            return Message(MessageType::ReadPointData, messageBuffer);
         else if( type == "ASGN")
             return Message(MessageType::AddSceneGraphNode, messageBuffer);
         else if (type == "RSGN")

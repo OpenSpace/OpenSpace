@@ -160,7 +160,7 @@ namespace openspace {
             return;
         }
         std::shared_ptr<Peer>& peer = it->second;
-
+        
         const SoftwareConnection::MessageType messageType = peerMessage.message.type;
         std::vector<char>& message = peerMessage.message.content;
         switch (messageType) {
@@ -169,13 +169,22 @@ namespace openspace {
             LINFO(fmt::format("OpenSpace has connected with {} through socket.", software));
             break;
         } 
-        case SoftwareConnection::MessageType::ReadBinaryData: {
-            std::string binarydata(message.begin(), message.end());
-            LERROR(fmt::format("Binary data recieved {}", binarydata));
+        case SoftwareConnection::MessageType::ReadPointData: {
+            messageOffset = 0; // Resets message offset 
 
             std::vector<float> xCoordinates = readData(message);
             std::vector<float> yCoordinates = readData(message);
             std::vector<float> zCoordinates = readData(message);
+
+            int size = xCoordinates.size();
+            
+            for (int i = 0; i < size; i++) {
+                float x = xCoordinates[i];
+                float y = yCoordinates[i];
+                float z = zCoordinates[i];
+
+                pointData.push_back({ x, y, z });
+            }
 
             break;
         }
@@ -190,7 +199,8 @@ namespace openspace {
             ghoul::Dictionary renderable = {
                 { "Type", "RenderablePointsCloud"s },
                 { "Color", static_cast<glm::dvec3>(color)},
-                { "File", file },
+                { "Data", pointData },
+                //{ "File", file },
                 { "Opacity", static_cast<double>(opacity) },
                 { "Size", static_cast<double>(size)}
             };
@@ -229,42 +239,60 @@ namespace openspace {
         }
         case SoftwareConnection::MessageType::RemoveSceneGraphNode: {
             std::string identifier(message.begin(), message.end());
-            LINFO(fmt::format("Scengraph {} removed.", identifier));
 
             openspace::global::scriptEngine.queueScript(
                 "openspace.removeSceneGraphNode('" + identifier + "');",
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
+            LINFO(fmt::format("Scengraph {} removed.", identifier));
             break;
         }
         case SoftwareConnection::MessageType::Color: {
             std::string identifier = readIdentifier(message);
             glm::vec3 color = readColor(message);
 
-            // Update color of renderable
+            // Get color of renderable
             const Renderable* myRenderable = renderable(identifier);
             properties::Property* colorProperty = myRenderable->property("Color");
-            colorProperty->set(color); 
+            auto propertyAny = colorProperty->get();
+            glm::vec3 propertyColor = std::any_cast<glm::vec3>(propertyAny);
+            bool isUpdated = (propertyColor != color);
+
+            // Update color of renderable
+            if (isUpdated)
+                colorProperty->set(color);
             break;
         }
         case SoftwareConnection::MessageType::Opacity: {
             std::string identifier = readIdentifier(message);
             float opacity = readFloatValue(message);
 
-            // Update opacity of renderable
+            // Get opacity of renderable
             const Renderable* myRenderable = renderable(identifier);
             properties::Property* opacityProperty = myRenderable->property("Opacity");
-            opacityProperty->set(opacity);
+            auto propertyAny = opacityProperty->get();
+            float propertyOpacity = std::any_cast<float>(propertyAny);
+            bool isUpdated = (propertyOpacity != opacity);
+
+            // Update opacity of renderable
+            if (isUpdated)
+                opacityProperty->set(opacity);
             break;
         }
         case SoftwareConnection::MessageType::Size: {
             std::string identifier = readIdentifier(message);
             float size = readFloatValue(message);
 
-            // Update size of renderable
+            // Get size of renderable
             const Renderable* myRenderable = renderable(identifier);
             properties::Property* sizeProperty = myRenderable->property("Size");
-            sizeProperty->set(size);
+            auto propertyAny = sizeProperty->get();
+            float propertySize = std::any_cast<float>(propertyAny);
+            bool isUpdated = (propertySize != size);
+
+            // Update size of renderable
+            if (isUpdated)
+                sizeProperty->set(size);
             break;
         }
         case SoftwareConnection::MessageType::Visibility: {
@@ -399,14 +427,65 @@ namespace openspace {
         return floatValue;
     }
 
+    glm::vec3 SoftwareIntegrationModule::readColor(std::vector<char>& message) {
+        std::string lengthOfColor; // Not used for now, but sent in message
+        lengthOfColor.push_back(message[messageOffset]);
+        messageOffset++;
+        lengthOfColor.push_back(message[messageOffset]);
+        messageOffset++;
+
+        // Color is sent in format (redValue, greenValue, blueValue)
+        // Therefor, we have to iterate through the message and ignore characters
+        // "( , )" and separate the values in the string
+        std::string red;
+        while (message[messageOffset] != ',')
+        {
+            if (message[messageOffset] == '(')
+                messageOffset++;
+            else {
+                red.push_back(message[messageOffset]);
+                messageOffset++;
+            }
+        }
+
+        std::string green;
+        messageOffset++;
+        while (message[messageOffset] != ',')
+        {
+            green.push_back(message[messageOffset]);
+            messageOffset++;
+        }
+
+        std::string blue;
+        messageOffset++;
+        while (message[messageOffset] != ')')
+        {
+            blue.push_back(message[messageOffset]);
+            messageOffset++;
+        }
+        messageOffset++;
+
+        // Convert red, green, blue strings to floats
+        float r = std::stof(red);
+        float g = std::stof(green);
+        float b = std::stof(blue);
+        glm::vec3 color(r, g, b);
+
+        return color;
+    }
+
     std::vector<float> SoftwareIntegrationModule::readData(std::vector<char>& message) {
         std::string length;
-        for(int i = 0; i <= 8; i++)
-         length.push_back(message[i]);
+        int lengthOffset = messageOffset + 9;
 
+        for (int i = messageOffset; i < lengthOffset; i++)
+        {
+            length.push_back(message[i]);
+            messageOffset++;
+        }
+           
         int lengthOfData = stoi(length);
         int counter = 0;
-        messageOffset = 9; // Resets messageOffset
 
         std::vector< float > data;
         std::string value;
@@ -468,53 +547,6 @@ namespace openspace {
         }
 
         return name;
-    }
-
-    glm::vec3 SoftwareIntegrationModule::readColor(std::vector<char>& message) {
-        std::string lengthOfColor; // Not used for now, but sent in message
-        lengthOfColor.push_back(message[messageOffset]);
-        messageOffset++;
-        lengthOfColor.push_back(message[messageOffset]);
-        messageOffset++;
-
-        // Color is sent in format (redValue, greenValue, blueValue)
-        // Therefor, we have to iterate through the message and ignore characters
-        // "( , )" and separate the values in the string
-        std::string red;
-        while (message[messageOffset] != ',')
-        {
-            if (message[messageOffset] == '(')
-                messageOffset++;
-            else {
-                red.push_back(message[messageOffset]);
-                messageOffset++;
-            }
-        }
-
-        std::string green;
-        messageOffset++;
-        while (message[messageOffset] != ',')
-        {
-            green.push_back(message[messageOffset]);
-            messageOffset++;
-        }
-
-        std::string blue;
-        messageOffset++;
-        while (message[messageOffset] != ')')
-        {
-            blue.push_back(message[messageOffset]);
-            messageOffset++;
-        }
-        messageOffset++;
-
-        // Convert red, green, blue strings to floats
-        float r = std::stof(red);
-        float g = std::stof(green);
-        float b = std::stof(blue);
-        glm::vec3 color(r, g, b);
-
-        return color;
     }
 
     size_t SoftwareIntegrationModule::nConnections() const {
