@@ -191,16 +191,14 @@ namespace openspace {
         case SoftwareConnection::MessageType::AddSceneGraphNode: {
             std::string identifier = readIdentifier(message);
             glm::vec3 color = readColor(message);
-            std::string file = readString(message);
             float opacity = readFloatValue(message);
             float size = readFloatValue(message);
-            std::string guiName = readString(message);
+            std::string guiName = readGUI(message);
 
             ghoul::Dictionary renderable = {
                 { "Type", "RenderablePointsCloud"s },
                 { "Color", static_cast<glm::dvec3>(color)},
                 { "Data", pointData },
-                //{ "File", file },
                 { "Opacity", static_cast<double>(opacity) },
                 { "Size", static_cast<double>(size)}
             };
@@ -528,8 +526,7 @@ namespace openspace {
         return identifier;
     }
 
-    // Read File path or GUI Name
-    std::string SoftwareIntegrationModule::readString(std::vector<char>& message) {
+    std::string SoftwareIntegrationModule::readGUI(std::vector<char>& message) {
         std::string length;
         length.push_back(message[messageOffset]);
         messageOffset++;

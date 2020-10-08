@@ -56,18 +56,10 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
-    struct Vertex {
-        float location[3];
-    };
     void createDataSlice();
     bool loadData();
-    bool loadSpeckData();
-    bool readSpeckFile();
     bool readPointData();
-    bool loadCachedFile(const std::string& file);
-    bool saveCachedFile(const std::string& file) const;
 
-    bool _hasSpeckFile = false;
     bool _hasPointData = false;
     bool _isDirty = true;
 
@@ -78,11 +70,9 @@ protected:
     properties::FloatProperty _size;
     properties::Vec3Property _color;
 
-    std::string _speckFile;
     std::vector<std::vector<float>> _pointData;
     std::vector<float> _fullData;
     std::vector<float> _slicedData;
-    std::vector<Vertex> _vertexArray;
 
     int _nValuesPerPoints = 0;
 

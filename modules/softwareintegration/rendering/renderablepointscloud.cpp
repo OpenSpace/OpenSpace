@@ -40,7 +40,6 @@
 namespace {
     constexpr const char* ProgramName = "shaderProgram";
     constexpr const char* _loggerCat = "PointsCloud";
-    constexpr const char* KeyFile = "File";
     constexpr const char* KeyData = "Data";
 
     constexpr int8_t CurrentCacheVersion = 1;
@@ -89,13 +88,6 @@ namespace openspace {
                     new DoubleVector3Verifier,
                     Optional::Yes,
                     ColorInfo.description
-                },
-                {
-                    KeyFile,
-                    new StringVerifier,
-                    Optional::Yes,
-                    "The path to the SPECK file that contains information about the "
-                    "astronomical object being rendered."
                 },
                 {
                     OpacityInfo.identifier,
@@ -148,11 +140,6 @@ namespace openspace {
             _hasPointData = true;
         }
 
-        if (dictionary.hasKey(KeyFile)) {
-            _speckFile = absPath(dictionary.value<std::string>(KeyFile));
-            _hasSpeckFile = true;
-        }
-
         if (dictionary.hasKey(OpacityInfo.identifier)) {
             _opacity = static_cast<float>(
                 dictionary.value<double>(OpacityInfo.identifier));
@@ -168,10 +155,7 @@ namespace openspace {
         if (dictionary.hasKey(ToggleVisibilityInfo.identifier)) {
             _toggleVisibility = dictionary.value<bool>(ToggleVisibilityInfo.identifier);
         }
-        _toggleVisibility.onChange([&]() {
-            _hasSpeckFile = !_hasSpeckFile;
-            _hasPointData = !_hasPointData; 
-            });
+        _toggleVisibility.onChange([&]() { _hasPointData = !_hasPointData; });
         addProperty(_toggleVisibility);
     }
 
@@ -212,9 +196,7 @@ namespace openspace {
             return;
         }
 
-        bool isSpeckData = _hasSpeckFile && _toggleVisibility;
-        bool isPointData = _hasPointData && _toggleVisibility; 
-        if (isSpeckData || isPointData) {
+        if (_hasPointData && _toggleVisibility) {
             _shaderProgram->activate();
 
             glm::dmat4 modelTransform =
@@ -294,44 +276,6 @@ namespace openspace {
                 nullptr
             );
         }
-
-        if (_hasSpeckFile) {
-            LDEBUG("Regenerating data");
-
-            createDataSlice();
-
-            int size = static_cast<int>(_slicedData.size());
-
-            if (_vertexArrayObjectID == 0) {
-                glGenVertexArrays(1, &_vertexArrayObjectID);
-                LDEBUG(fmt::format("Generating Vertex Array id '{}'", _vertexArrayObjectID));
-            }
-            if (_vertexBufferObjectID == 0) {
-                glGenBuffers(1, &_vertexBufferObjectID);
-                LDEBUG(fmt::format("Generating Vertex Buffer Object id '{}'", _vertexBufferObjectID));
-            }
-            
-            glBindVertexArray(_vertexArrayObjectID);
-            glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferObjectID);
-            glBufferData(
-                GL_ARRAY_BUFFER,
-                size * sizeof(float),
-                _slicedData.data(),
-                GL_STATIC_DRAW
-            );
-
-            GLint positionAttribute = _shaderProgram->attributeLocation("in_position");
-            
-            glEnableVertexAttribArray(positionAttribute);
-            glVertexAttribPointer(
-                positionAttribute,
-                4,
-                GL_FLOAT,
-                GL_FALSE,
-                0,
-                nullptr
-            );
-        }
         
         glBindVertexArray(0);
 
@@ -376,200 +320,6 @@ namespace openspace {
         _fullData.insert(_fullData.end(), values.begin(), values.end());
 
         return true;
-    }
-
-    bool RenderablePointsCloud::loadSpeckData() {
-        if (!_hasSpeckFile) {
-            LERROR(fmt::format("No speckFile found"));
-            return true;
-        }
-        if (!FileSys.fileExists(absPath(_speckFile))) {
-            LERROR(fmt::format("No path to speckFile found {}", _speckFile));
-            return false;
-        };
-
-        bool isSuccessful = true;
-        std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-            _speckFile,
-            ghoul::filesystem::CacheManager::Persistent::Yes
-        );
-
-        const bool hasCachedFile = FileSys.fileExists(cachedFile);
-        if (hasCachedFile) {
-            LINFO(fmt::format(
-                "Cached file '{}' used for Speck file '{}'",
-                cachedFile, _speckFile
-            ));
-
-            isSuccessful = loadCachedFile(cachedFile);
-            if (isSuccessful) {
-                return true;
-            }
-            else {
-                FileSys.cacheManager()->removeCacheFile(_speckFile);
-                // Intentional fall-through to the 'else' to generate the cache
-                // file for the next run
-            }
-        }
-        else {
-            LINFO(fmt::format("Cache for Speck file '{}' not found", _speckFile));
-        }
-        LINFO(fmt::format("Loading Speck file '{}'", _speckFile));
-
-        isSuccessful = readSpeckFile();
-        if (!isSuccessful) {
-            return false;
-        }
-
-        LINFO("Saving cache");
-        isSuccessful &= saveCachedFile(cachedFile);
-        return isSuccessful;
-    }
-
-    bool RenderablePointsCloud::readSpeckFile() {
-        std::ifstream file(_speckFile);
-        if (!file.good()) {
-            LERROR(fmt::format("Failed to open Speck file '{}'", _speckFile));
-            return false;
-        }
-
-        _nValuesPerPoints = 0;
-
-        // The beginning of the speck file has a header that either contains comments
-        // (signaled by a preceding '#') or information about the structure of the file
-        // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
-        std::string line;
-        while (true) {
-            std::getline(file, line);
-
-            // Guard against wrong line endings (copying files from Windows to Mac) causes
-            // lines to have a final \r
-            if (!line.empty() && line.back() == '\r') {
-                line = line.substr(0, line.length() - 1);
-            }
-
-            if (line.empty() || line[0] == '#') {
-                continue;
-            }
-
-            if (line.substr(0, 7) != "datavar")
-            {
-                // Started reading data
-                break;
-            }
-
-            if (line.substr(0, 7) == "datavar") {
-                // datavar lines are structured as follows:
-                // datavar # description
-                // where # is the index of the data variable; so if we repeatedly overwrite
-                // the 'nValues' variable with the latest index, we will end up with the total
-                // number of values (+3 since X Y Z are not counted in the Speck file index)
-                std::stringstream str(line);
-
-                std::string dummy;
-                str >> dummy; // command
-                str >> _nValuesPerPoints; // variable index
-                dummy.clear();
-                str >> dummy; // variable name
-
-                // We want the number, but the index is 0 based
-                _nValuesPerPoints += 1;
-            }
-        }
-
-        _nValuesPerPoints += 3; // X Y Z are not counted in the Speck file indices
-
-        do {
-            // Guard against wrong line endings (copying files from Windows to Mac) causes
-            // lines to have a final \r
-            if (!line.empty() && line.back() == '\r') {
-                line = line.substr(0, line.length() - 1);
-            }
-
-            if (line.empty()) {
-                std::getline(file, line);
-                continue;
-            }
-            else if (line[0] == '#') {
-                std::getline(file, line);
-                continue;
-            }
-
-            std::stringstream str(line);
-            std::vector<float> values(_nValuesPerPoints);
-
-            for (int i = 0; i < _nValuesPerPoints; ++i) {
-                str >> values[i];
-            }
-
-            _fullData.insert(_fullData.end(), values.begin(), values.end());
-
-            // reads new line
-            std::getline(file, line);
-        } while (!file.eof());
-
-        return true;
-    }
-
-    bool RenderablePointsCloud::loadCachedFile(const std::string& file) {
-        std::ifstream fileStream(file, std::ifstream::binary);
-        if (!fileStream.good()) {
-            LERROR(fmt::format("Error opening file '{}' for loading cache file", file));
-            return false;
-        }
-        int8_t version = 0;
-        fileStream.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
-        if (version != CurrentCacheVersion) {
-            LINFO("The format of the cached file has changed: deleting old cache");
-            fileStream.close();
-            FileSys.deleteFile(file);
-            return false;
-        }
-
-        int32_t nValues = 0;
-        fileStream.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
-        fileStream.read(
-            reinterpret_cast<char*>(&_nValuesPerPoints),
-            sizeof(int32_t)
-        );
-
-        _fullData.resize(nValues);
-        fileStream.read(
-            reinterpret_cast<char*>(&_fullData[0]),
-            nValues * sizeof(_fullData[0])
-        );
-
-        bool isSuccessful = fileStream.good();
-        return isSuccessful;
-    }
-
-    bool RenderablePointsCloud::saveCachedFile(const std::string& file) const {
-        std::ofstream fileStream(file, std::ofstream::binary);
-        if (!fileStream.good()) {
-            LERROR(fmt::format("Error opening file '{}' for save cache file", file));
-            return false;
-        }
-        fileStream.write(reinterpret_cast<const char*>(&CurrentCacheVersion), sizeof(int8_t));
-
-        int32_t nValues = static_cast<int32_t>(_fullData.size());
-        if (nValues == 0) {
-            LERROR("Error writing cache: No values were loaded");
-            return false;
-        }
-        fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
-
-        int32_t nValuesPerPoints = static_cast<int32_t>(
-            _nValuesPerPoints
-            );
-        fileStream.write(
-            reinterpret_cast<const char*>(&nValuesPerPoints),
-            sizeof(int32_t)
-        );
-
-        size_t nBytes = nValues * sizeof(_fullData[0]);
-        fileStream.write(reinterpret_cast<const char*>(&_fullData[0]), nBytes);
-
-        return fileStream.good();
     }
 
     void RenderablePointsCloud::createDataSlice() {

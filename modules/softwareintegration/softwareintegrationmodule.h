@@ -50,10 +50,6 @@ public:
     std::vector<documentation::Documentation> documentations() const override;
 
 private:
-    struct Vertex {
-        float location[3];
-    };
-
     struct Peer {
         size_t id;
         std::string name;
@@ -85,7 +81,7 @@ private:
     glm::vec3 readColor(std::vector<char>& message);
     std::vector<float> readData(std::vector<char>& message);
     std::string readIdentifier(std::vector<char>& message);
-    std::string readString(std::vector<char>& message);
+    std::string readGUI(std::vector<char>& message);
 
     std::vector<std::vector<float>> pointData;
     std::unordered_map<size_t, std::shared_ptr<Peer>> _peers;
