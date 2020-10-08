@@ -25,19 +25,16 @@
 #include <modules/softwareintegration/rendering/renderablepointscloud.h>
 
 #include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/distanceconstants.h>
-#include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/documentation/verifier.h>
-#include <ghoul/misc/csvreader.h>
-#include <ghoul/glm.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
+
 #include <fstream>
 
 namespace {
@@ -50,19 +47,20 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "TODO"
+        "The color of the points."
     };
 
     constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
         "Opacity",
         "Opacity",
-        "TODO"
+        "Determines the transparency of the points, where 1 is completely opaque "
+        "and 0 fully transparent."
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
-        "TODO"
+        "The size of the points."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ToggleVisibilityInfo = {
@@ -81,6 +79,11 @@ namespace openspace {
             "softwareintegration_renderable_pointscloud",
             {
                 {
+                    "Type",
+                    new StringEqualVerifier("RenderablePointsCloud"),
+                    Optional::No
+                },
+                {
                     ColorInfo.identifier,
                     new DoubleVector3Verifier,
                     Optional::Yes,
@@ -90,7 +93,8 @@ namespace openspace {
                     KeyFile,
                     new StringVerifier,
                     Optional::Yes,
-                    "TODO"
+                    "The path to the SPECK file that contains information about the "
+                    "astronomical object being rendered."
                 },
                 {
                     OpacityInfo.identifier,
@@ -167,7 +171,7 @@ namespace openspace {
     }
 
     void RenderablePointsCloud::initialize() {
-        bool isSuccessful = loadData();
+        const bool isSuccessful = loadData();
         if (!isSuccessful) {
             throw ghoul::RuntimeError("Error loading data");
         }
