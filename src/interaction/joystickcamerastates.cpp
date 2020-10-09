@@ -31,8 +31,6 @@
 #include <cmath>
 #include <utility>
 
-#include <cmath>
-
 namespace openspace::interaction {
 
 JoystickCameraStates::JoystickCameraStates(double sensitivity, double velocityScaleFactor)

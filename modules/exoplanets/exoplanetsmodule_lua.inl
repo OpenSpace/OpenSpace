@@ -40,11 +40,11 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/transform.hpp>
+#include <cfloat>
+#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <cmath>
-#include <cfloat>
 
 namespace {
     constexpr const char* _loggerCat = "ExoplanetsModule";

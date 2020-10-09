@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_EXOPLENETS___RENDERABLEORBITDISC___H__
-#define __OPENSPACE_MODULE_EXOPLENETS___RENDERABLEORBITDISC___H__
+#ifndef __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__
+#define __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__
 
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -79,4 +79,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_EXOPLENETS___RENDERABLEORBITDISC___H__
+#endif // __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__

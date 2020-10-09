@@ -41,7 +41,6 @@ namespace {
     constexpr const char* ProgramName = "EphemerisProgram";
     constexpr const char* KeyTranslation = "Translation";
 
-
 #ifdef __APPLE__
     constexpr const std::array<const char*, 12> UniformNames = {
         "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
