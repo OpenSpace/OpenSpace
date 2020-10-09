@@ -26,8 +26,10 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
@@ -44,8 +46,9 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
         "Opacity",
-        "Transparency",
-        "This value determines the transparency of this object."
+        "Opacity",
+        "This value determines the opacity of this renderable. A value of 0 means "
+        "completely transparent."
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderableTypeInfo = {
@@ -97,7 +100,7 @@ documentation::Documentation Renderable::Documentation() {
     };
 }
 
-std::unique_ptr<Renderable> Renderable::createFromDictionary(
+ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "Renderable");
@@ -106,8 +109,12 @@ std::unique_ptr<Renderable> Renderable::createFromDictionary(
 
     auto factory = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(factory, "Renderable factory did not exist");
-    std::unique_ptr<Renderable> result = factory->create(renderableType, dictionary);
-    return result;
+    Renderable* result = factory->create(
+        renderableType,
+        dictionary,
+        &global::memoryManager.PersistentMemory
+    );
+    return ghoul::mm_unique_ptr<Renderable>(result);
 }
 
 
@@ -228,6 +235,10 @@ bool Renderable::isEnabled() const {
     return _enabled;
 }
 
+bool Renderable::shouldUpdateIfDisabled() const {
+    return _shouldUpdateIfDisabled;
+}
+
 void Renderable::onEnabledChange(std::function<void(bool)> callback) {
     _enabled.onChange([this, c = std::move(callback)]() {
         c(isEnabled());
@@ -235,21 +246,25 @@ void Renderable::onEnabledChange(std::function<void(bool)> callback) {
 }
 
 void Renderable::setRenderBinFromOpacity() {
-    if (_opacity > 0.f && _opacity < 1.f) {
-        setRenderBin(Renderable::RenderBin::Transparent);
-    }
-    else {
-        setRenderBin(Renderable::RenderBin::Opaque);
+    if (_renderBin != Renderable::RenderBin::PostDeferredTransparent) {
+        if (_opacity >= 0.f && _opacity < 1.f) {
+            setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
+        }
+        else {
+            setRenderBin(Renderable::RenderBin::Opaque);
+        }
     }
 }
 
 void Renderable::registerUpdateRenderBinFromOpacity() {
     _opacity.onChange([this](){
-        if (_opacity > 0.f && _opacity < 1.f) {
-            setRenderBin(Renderable::RenderBin::Transparent);
-        }
-        else {
-            setRenderBin(Renderable::RenderBin::Opaque);
+        if (_renderBin != Renderable::RenderBin::PostDeferredTransparent) {
+            if (_opacity >= 0.f && _opacity < 1.f) {
+                setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
+            }
+            else {
+                setRenderBin(Renderable::RenderBin::Opaque);
+            }
         }
     });
 }

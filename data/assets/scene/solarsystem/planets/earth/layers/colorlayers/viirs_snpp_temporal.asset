@@ -1,0 +1,21 @@
+local globeIdentifier = asset.require("./../../earth").Earth.Identifier
+
+local layer = {
+    Identifier = "VIIRS_SNPP_Temporal",
+    Name = "VIIRS SNPP (Temporal)",
+    Type = "TemporalTileLayer",
+    FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
+        "VIIRS_SNPP_CorrectedReflectance_TrueColor",
+        "2015-11-24",
+        "Yesterday",
+        "1d",
+        "250m",
+        "jpg"
+    )
+}
+
+asset.onInitialize(function () 
+    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)

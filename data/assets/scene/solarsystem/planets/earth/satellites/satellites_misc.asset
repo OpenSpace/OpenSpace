@@ -1,4 +1,4 @@
-asset.request('./misc/military')
-asset.request('./misc/radar')
-asset.request('./misc/cubesats')
-asset.request('./misc/other')
+asset.require('./misc/military')
+asset.require('./misc/radar')
+asset.require('./misc/cubesats')
+asset.require('./misc/other')

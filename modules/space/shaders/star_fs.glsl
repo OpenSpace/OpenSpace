@@ -36,7 +36,7 @@ uniform sampler1D colorTexture;
 uniform sampler2D psfTexture;
 uniform float alphaValue;
 
-uniform vec4 fixedColor;
+uniform vec3 fixedColor;
 
 uniform int colorOption;
 
@@ -93,17 +93,13 @@ Fragment getFragment() {
             }
             break;
         case COLOROPTION_FIXEDCOLOR:
-            color = fixedColor;
+            color = vec4(fixedColor, 1.0);
             break;
     }
 
     vec4 textureColor = texture(psfTexture, 0.5 * psfCoords + 0.5);
     vec4 fullColor = vec4(color.rgb, textureColor.a);
     fullColor.a *= alphaValue;
-
-    if (colorOption == COLOROPTION_FIXEDCOLOR) {
-        fullColor.a *= fixedColor.a;
-    }
     
     if (fullColor.a == 0) {
         discard;

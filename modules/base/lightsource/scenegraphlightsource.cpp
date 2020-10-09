@@ -30,6 +30,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/misc/profiling.h>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo IntensityInfo = {
@@ -115,6 +116,8 @@ SceneGraphLightSource::SceneGraphLightSource(const ghoul::Dictionary& dictionary
 }
 
 bool SceneGraphLightSource::initialize() {
+    ZoneScoped
+
     _sceneGraphNode =
         global::renderEngine.scene()->sceneGraphNode(_sceneGraphNodeReference);
     return _sceneGraphNode != nullptr;

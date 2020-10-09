@@ -176,6 +176,7 @@ void openspace::properties::TemplateProperty<T>::setValue(T val) {
     if (val != _value) {
         _value = std::move(val);
         notifyChangeListeners();
+        _isValueDirty = true;
     }
 }
 
@@ -196,6 +197,7 @@ void TemplateProperty<T>::set(std::any value) {
     if (v != _value) {
         _value = std::move(v);
         notifyChangeListeners();
+        _isValueDirty = true;
     }
 }
 

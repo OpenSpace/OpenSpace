@@ -26,12 +26,13 @@
 #define __OPENSPACE_CORE___MESSAGESTRUCTURES___H__
 
 #include <ghoul/glm.h>
+#include <algorithm>
 #include <cstring>
-#include <string>
-#include <vector>
 #include <fstream>
 #include <iomanip>
-#include <algorithm>
+#include <sstream>
+#include <string>
+#include <vector>
 
 namespace openspace::datamessagestructures {
 
@@ -42,18 +43,18 @@ enum class Type : uint32_t {
 };
 
 struct CameraKeyframe {
-    CameraKeyframe() {}
-    CameraKeyframe(const std::vector<char> &buffer) {
+    CameraKeyframe() = default;
+    CameraKeyframe(const std::vector<char>& buffer) {
         deserialize(buffer);
     }
 
     glm::dvec3 _position = glm::dvec3(0.0);
     glm::dquat _rotation = glm::dquat(1.0, 0.0, 0.0, 0.0);
-    bool _followNodeRotation;
+    bool _followNodeRotation = false;
     std::string _focusNode;
-    float _scale;
+    float _scale = 0.f;
 
-    double _timestamp;
+    double _timestamp = 0.0;
 
     void serialize(std::vector<char> &buffer) const {
         // Add position
@@ -106,28 +107,28 @@ struct CameraKeyframe {
         );
     };
 
-    size_t deserialize(const std::vector<char> &buffer, size_t offset = 0) {
+    size_t deserialize(const std::vector<char>& buffer, size_t offset = 0) {
         int size = 0;
 
         // Position
         size = sizeof(_position);
-        memcpy(&_position, buffer.data() + offset, size);
+        std::memcpy(&_position, buffer.data() + offset, size);
         offset += size;
 
         // Orientation
         size = sizeof(_rotation);
-        memcpy(&_rotation, buffer.data() + offset, size);
+        std::memcpy(&_rotation, buffer.data() + offset, size);
         offset += size;
 
         // Follow focus node rotation?
         size = sizeof(_followNodeRotation);
-        memcpy(&_followNodeRotation, buffer.data() + offset, size);
+        std::memcpy(&_followNodeRotation, buffer.data() + offset, size);
         offset += size;
 
         // Focus node
         int nodeNameLength;
         size = sizeof(int);
-        memcpy(&nodeNameLength, buffer.data() + offset, size);
+        std::memcpy(&nodeNameLength, buffer.data() + offset, size);
         offset += size;
         size = nodeNameLength;
         _focusNode = std::string(buffer.data() + offset, buffer.data() + offset + size);
@@ -135,29 +136,20 @@ struct CameraKeyframe {
 
         // Scale
         size = sizeof(_scale);
-        memcpy(&_scale, buffer.data() + offset, size);
+        std::memcpy(&_scale, buffer.data() + offset, size);
         offset += size;
 
         // Timestamp
         size = sizeof(_timestamp);
-        memcpy(&_timestamp, buffer.data() + offset, size);
+        std::memcpy(&_timestamp, buffer.data() + offset, size);
         offset += size;
 
         return offset;
     };
 
     void write(std::ostream& out) const {
-        // Write position
-        out.write(
-            reinterpret_cast<const char*>(&_position),
-            sizeof(_position)
-        );
-
-        // Write orientation
-        out.write(
-            reinterpret_cast<const char*>(&_rotation),
-            sizeof(_rotation)
-        );
+        out.write(reinterpret_cast<const char*>(&_position), sizeof(_position));
+        out.write(reinterpret_cast<const char*>(&_rotation), sizeof(_rotation));
 
         // Write follow focus node rotation?
         out.write(
@@ -168,26 +160,14 @@ struct CameraKeyframe {
         int nodeNameLength = static_cast<int>(_focusNode.size());
 
         // Write focus node
-        out.write(
-            reinterpret_cast<const char*>(&nodeNameLength),
-            sizeof(nodeNameLength)
-        );
-        out.write(
-            _focusNode.c_str(),
-            _focusNode.size()
-        );
+        out.write(reinterpret_cast<const char*>(&nodeNameLength), sizeof(nodeNameLength));
+        out.write(_focusNode.c_str(), _focusNode.size());
 
-        //Write scale
-        out.write(
-            reinterpret_cast<const char*>(&_scale),
-            sizeof(_scale)
-        );
+        // Write scale
+        out.write(reinterpret_cast<const char*>(&_scale), sizeof(_scale));
 
         // Write timestamp
-        out.write(
-            reinterpret_cast<const char*>(&_timestamp),
-            sizeof(_timestamp)
-        );
+        out.write(reinterpret_cast<const char*>(&_timestamp), sizeof(_timestamp));
     };
 
     void write(std::stringstream& out) const {
@@ -212,48 +192,30 @@ struct CameraKeyframe {
 
     void read(std::istream* in) {
         // Read position
-        in->read(
-            reinterpret_cast<char*>(&_position),
-            sizeof(_position)
-        );
+        in->read(reinterpret_cast<char*>(&_position), sizeof(_position));
 
         // Read orientation
-        in->read(
-            reinterpret_cast<char*>(&_rotation),
-            sizeof(_rotation)
-        );
+        in->read(reinterpret_cast<char*>(&_rotation), sizeof(_rotation));
 
         // Read follow focus node rotation
         unsigned char b;
-        in->read(
-            reinterpret_cast<char*>(&b),
-            sizeof(unsigned char)
-        );
+        in->read(reinterpret_cast<char*>(&b), sizeof(unsigned char));
         _followNodeRotation = (b == 1);
 
         // Read focus node
         int nodeNameLength = static_cast<int>(_focusNode.size());
-        in->read(
-            reinterpret_cast<char*>(&nodeNameLength),
-            sizeof(nodeNameLength)
-        );
-        std::vector<char> temp(nodeNameLength + 1);
+        in->read(reinterpret_cast<char*>(&nodeNameLength), sizeof(nodeNameLength));
+        std::vector<char> temp(static_cast<size_t>(nodeNameLength) + 1);
         in->read(temp.data(), nodeNameLength);
 
         temp[nodeNameLength] = '\0';
         _focusNode = temp.data();
 
         // Read scale
-        in->read(
-            reinterpret_cast<char*>(&_scale),
-            sizeof(_scale)
-        );
+        in->read(reinterpret_cast<char*>(&_scale), sizeof(_scale));
 
         // Read timestamp
-        in->read(
-            reinterpret_cast<char*>(&_timestamp),
-            sizeof(_timestamp)
-        );
+        in->read(reinterpret_cast<char*>(&_timestamp), sizeof(_timestamp));
     };
 
     void read(std::istringstream& iss) {
@@ -274,18 +236,18 @@ struct CameraKeyframe {
 };
 
 struct TimeKeyframe {
-    TimeKeyframe() {}
-    TimeKeyframe(const std::vector<char> &buffer) {
+    TimeKeyframe() = default;
+    TimeKeyframe(const std::vector<char>& buffer) {
         deserialize(buffer);
     }
 
-    double _time;
-    double _dt;
-    bool _paused;
-    bool _requiresTimeJump;
-    double _timestamp;
+    double _time = 0.0;
+    double _dt = 0.0;
+    bool _paused = false;
+    bool _requiresTimeJump = false;
+    double _timestamp = 0.0;
 
-    void serialize(std::vector<char> &buffer) const {
+    void serialize(std::vector<char>& buffer) const {
         buffer.insert(
             buffer.end(),
             reinterpret_cast<const char*>(this),
@@ -293,17 +255,14 @@ struct TimeKeyframe {
         );
     };
 
-    size_t deserialize(const std::vector<char> &buffer, size_t offset = 0){
+    size_t deserialize(const std::vector<char>& buffer, size_t offset = 0) {
         *this = *reinterpret_cast<const TimeKeyframe*>(buffer.data() + offset);
         offset += sizeof(TimeKeyframe);
         return offset;
     };
 
     void write(std::ostream* out) const {
-        out->write(
-            reinterpret_cast<const char*>(this),
-            sizeof(TimeKeyframe)
-        );
+        out->write(reinterpret_cast<const char*>(this), sizeof(TimeKeyframe));
     };
 
     void write(std::stringstream& out) const {
@@ -323,10 +282,7 @@ struct TimeKeyframe {
     };
 
     void read(std::istream* in) {
-        in->read(
-            reinterpret_cast<char*>(this),
-            sizeof(TimeKeyframe)
-        );
+        in->read(reinterpret_cast<char*>(this), sizeof(TimeKeyframe));
     };
 
     void read(std::istringstream& iss) {
@@ -341,15 +297,15 @@ struct TimeKeyframe {
 };
 
 struct TimeTimeline {
-    TimeTimeline() {}
-    TimeTimeline(const std::vector<char> &buffer) {
+    TimeTimeline() = default;
+    TimeTimeline(const std::vector<char>& buffer) {
         deserialize(buffer);
     }
 
     bool _clear = true;
     std::vector<TimeKeyframe> _keyframes;
 
-    void serialize(std::vector<char> &buffer) const {
+    void serialize(std::vector<char>& buffer) const {
         buffer.insert(
             buffer.end(),
             reinterpret_cast<const char*>(&_clear),
@@ -362,73 +318,61 @@ struct TimeTimeline {
             reinterpret_cast<const char*>(&nKeyframes),
             reinterpret_cast<const char*>(&nKeyframes) + sizeof(int64_t)
         );
-        for (const auto& k : _keyframes) {
+        for (const TimeKeyframe& k : _keyframes) {
             k.serialize(buffer);
         }
     };
 
-    size_t deserialize(const std::vector<char> &buffer, size_t offset = 0) {
+    size_t deserialize(const std::vector<char>& buffer, size_t offset = 0) {
         int size = 0;
 
         size = sizeof(_clear);
-        memcpy(&_clear, buffer.data() + offset, size);
+        std::memcpy(&_clear, buffer.data() + offset, size);
         offset += size;
 
         int64_t nKeyframes = _keyframes.size();
         size = sizeof(nKeyframes);
-        memcpy(&nKeyframes, buffer.data() + offset, size);
+        std::memcpy(&nKeyframes, buffer.data() + offset, size);
         offset += size;
 
         _keyframes.resize(nKeyframes);
-        for (auto& k : _keyframes) {
+        for (TimeKeyframe& k : _keyframes) {
             offset = k.deserialize(buffer, offset);
         }
         return offset;
     };
 
     void write(std::ostream* out) const {
-        out->write(
-            reinterpret_cast<const char*>(&_clear),
-            sizeof(bool)
-        );
+        out->write(reinterpret_cast<const char*>(&_clear), sizeof(bool));
 
         int64_t nKeyframes = _keyframes.size();
-        out->write(
-            reinterpret_cast<const char*>(&nKeyframes),
-            sizeof(int64_t)
-        );
-        for (const auto& k : _keyframes) {
+        out->write(reinterpret_cast<const char*>(&nKeyframes), sizeof(int64_t));
+        for (const TimeKeyframe& k : _keyframes) {
             k.write(out);
         }
     };
 
     void read(std::istream* in) {
-        in->read(
-            reinterpret_cast<char*>(&_clear),
-            sizeof(bool)
-        );
+        in->read(reinterpret_cast<char*>(&_clear), sizeof(bool));
 
         int64_t nKeyframes = _keyframes.size();
-        in->read(
-            reinterpret_cast<char*>(&nKeyframes),
-            sizeof(int64_t)
-        );
-        for (auto& k : _keyframes) {
+        in->read(reinterpret_cast<char*>(&nKeyframes), sizeof(int64_t));
+        for (TimeKeyframe& k : _keyframes) {
             k.read(in);
         }
     };
 };
 
 struct ScriptMessage {
-    ScriptMessage() {}
-    ScriptMessage(const std::vector<char> &buffer) {
+    ScriptMessage() = default;
+    ScriptMessage(const std::vector<char>& buffer) {
         deserialize(buffer);
     }
 
     std::string _script;
-    double _timestamp;
+    double _timestamp = 0.0;
 
-    void serialize(std::vector<char> &buffer) const {
+    void serialize(std::vector<char>& buffer) const {
         size_t strLen = _script.size();
         size_t writeSize_bytes = sizeof(size_t);
 
@@ -438,7 +382,7 @@ struct ScriptMessage {
         buffer.insert(buffer.end(), _script.begin(), _script.end());
     };
 
-    void deserialize(const std::vector<char> &buffer) {
+    void deserialize(const std::vector<char>& buffer) {
         _script.assign(buffer.begin(), buffer.end());
     };
 

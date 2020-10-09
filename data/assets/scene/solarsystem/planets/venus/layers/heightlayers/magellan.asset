@@ -1,0 +1,19 @@
+local mapServiceConfigs = asset.localResource("./../../map_service_configs")
+local globeIdentifier = asset.require("./../../venus").Venus.Identifier
+
+local layer = {
+    Identifier = "Magellan",
+    Name = "Magellan Elevation [Utah]",
+    FilePath = mapServiceConfigs .. "/Utah/MagellanDEM.wms",
+    TilePixelSize = 64,
+    Settings = {
+        Gamma = 1.72,
+        Multiplier = 1.1
+    }
+}
+
+asset.onInitialize(function () 
+    openspace.globebrowsing.addLayer(globeIdentifier, "HeightLayers", layer)
+end)
+
+asset.export("layer", layer)

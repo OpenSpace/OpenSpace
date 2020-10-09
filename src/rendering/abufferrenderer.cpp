@@ -585,7 +585,8 @@ void ABufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor)
     // Render the scene to the fragment buffer. Collect renderer tasks (active raycasters)
     int renderBinMask = static_cast<int>(Renderable::RenderBin::Background) |
         static_cast<int>(Renderable::RenderBin::Opaque) |
-        static_cast<int>(Renderable::RenderBin::Transparent) |
+        static_cast<int>(Renderable::RenderBin::PreDeferredTransparent) |
+        static_cast<int>(Renderable::RenderBin::PostDeferredTransparent) |
         static_cast<int>(Renderable::RenderBin::Overlay);
 
     Time time = global::timeManager.time();

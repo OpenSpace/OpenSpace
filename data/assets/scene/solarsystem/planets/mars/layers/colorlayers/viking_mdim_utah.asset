@@ -1,0 +1,14 @@
+local mapServiceConfigs = asset.localResource("./../../map_service_configs")
+local globeIdentifier = asset.require("./../../mars").Mars.Identifier
+
+local layer = {
+    Identifier = "Viking_MDIM_Utah",
+    Name = "Viking MDIM [Utah]",
+    FilePath = mapServiceConfigs .. "/Utah/Mdim.wms"
+}
+
+asset.onInitialize(function () 
+    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)

@@ -34,13 +34,13 @@ out vec4 vs_positionScreenSpace;
 
 uniform mat4 modelViewProjectionTransform;
 
-uniform vec4 defaultColorStart;
-uniform vec4 defaultColorEnd;
-uniform vec4 activeColor;
-uniform vec4 targetInFieldOfViewColor;
-uniform vec4 intersectionStartColor;
-uniform vec4 intersectionEndColor;
-uniform vec4 squareColor;
+uniform vec3 defaultColorStart;
+uniform vec3 defaultColorEnd;
+uniform vec3 activeColor;
+uniform vec3 targetInFieldOfViewColor;
+uniform vec3 intersectionStartColor;
+uniform vec3 intersectionEndColor;
+uniform vec3 squareColor;
 uniform float interpolation;
 
 // This needs to be synced with the RenderableFov header
@@ -60,29 +60,31 @@ void main() {
     vs_positionScreenSpace = z_normalization(positionClipSpace);
     gl_Position = vs_positionScreenSpace;
 
+    vec3 color;
     switch (colorInformation) { 
         case VertexColorTypeDefaultStart:
-            vs_color = defaultColorStart;
+            color = defaultColorStart;
             break;
         case VertexColorTypeDefaultEnd:
-            vs_color = defaultColorEnd;
+            color = defaultColorEnd;
             break;
         case VertexColorTypeInFieldOfView:
-            vs_color = activeColor * interpolation + targetInFieldOfViewColor * (1 - interpolation);
+            color = activeColor * interpolation + targetInFieldOfViewColor * (1 - interpolation);
             break;
         case VertexColorTypeActive:
-            vs_color = activeColor;
+            color = activeColor;
             break;
         case VertexColorTypeIntersectionStart:
-            vs_color = intersectionStartColor;
+            color = intersectionStartColor;
             break;
         case VertexColorTypeIntersectionEnd:
-            vs_color = activeColor * interpolation + intersectionEndColor * (1 - interpolation);
+            color = activeColor * interpolation + intersectionEndColor * (1 - interpolation);
             break;
         case VertexColorTypeSquare:
-            vs_color = activeColor * interpolation + squareColor * (1 - interpolation);
+            color = activeColor * interpolation + squareColor * (1 - interpolation);
             break;
         default:
-            vs_color = vec4(1.0, 0.0, 1.0, 1.0);
+            color = vec3(1.0, 0.0, 1.0);
     }
+    vs_color = vec4(color, 1.0);
 }

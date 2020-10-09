@@ -1,0 +1,15 @@
+local mapServiceConfigs = asset.localResource("./../../map_service_configs")
+local globeIdentifier = asset.require("./../../mercury").Mercury.Identifier
+
+local layer = {
+    Identifier = "Messenger_BDR_Sweden",
+    Name = "Messenger BDR [Sweden]",
+    FilePath = mapServiceConfigs .. "/LiU/Messenger_BDR.wms",
+    TilePixelSize = 360,
+}
+
+asset.onInitialize(function () 
+    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)

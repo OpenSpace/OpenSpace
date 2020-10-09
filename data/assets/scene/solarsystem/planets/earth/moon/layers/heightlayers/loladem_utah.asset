@@ -1,0 +1,16 @@
+local mapServiceConfigs = asset.localResource("./../../map_service_configs")
+local globeIdentifier = asset.require("./../../moon").Moon.Identifier
+
+local layer = {
+    Identifier = "LolaDem_Utah",
+    Name = "Lola DEM [Utah]",
+    FilePath = mapServiceConfigs .. "/Utah/LolaDem.wms",
+    TilePixelSize = 64,
+    Settings = { Multiplier = 0.5 }
+}
+
+asset.onInitialize(function () 
+    openspace.globebrowsing.addLayer(globeIdentifier, "HeightLayers", layer)
+end)
+
+asset.export("layer", layer)

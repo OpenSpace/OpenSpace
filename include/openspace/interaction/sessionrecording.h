@@ -27,6 +27,7 @@
 
 #include <openspace/interaction/externinteraction.h>
 #include <openspace/interaction/keyframenavigator.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/scripting/lualibrary.h>
 #include <vector>
 
@@ -94,6 +95,12 @@ public:
      * If in playback state, the next keyframe will be used (if it is time to do so).
      */
     void preSynchronization();
+
+    /**
+     * If enabled, calling this function will render information about the session
+     * recording that is currently taking place to the screen.
+     */
+    void render();
 
     /**
      * Current time based on playback mode
@@ -428,6 +435,8 @@ public:
     static bool hasFileExtension(std::string filename, std::string extension);
 
 private:
+    properties::BoolProperty _renderPlaybackInformation;
+
     enum class RecordedType {
         Camera = 0,
         Time,

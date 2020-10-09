@@ -75,7 +75,6 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/layer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/layeradjustment.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/layergroup.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/layergroupid.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/layermanager.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/layerrendersettings.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/memoryawaretilecache.cpp

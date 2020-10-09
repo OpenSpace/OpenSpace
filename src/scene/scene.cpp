@@ -57,9 +57,12 @@ namespace {
             return "Opaque";
         }
         else if (renderBin == 4) {
-            return "Transparent";
+            return "PreDeferredTransparent";
         }
         else if (renderBin == 8) {
+            return "PostDeferredTransparent";
+        }
+        else if (renderBin == 16) {
             return "Overlay";
         }
         else {
@@ -87,11 +90,11 @@ Scene::~Scene() {
     _rootDummy.setScene(nullptr);
 }
 
-void Scene::attachNode(std::unique_ptr<SceneGraphNode> node) {
+void Scene::attachNode(ghoul::mm_unique_ptr<SceneGraphNode> node) {
     _rootDummy.attachChild(std::move(node));
 }
 
-std::unique_ptr<SceneGraphNode> Scene::detachNode(SceneGraphNode& node) {
+ghoul::mm_unique_ptr<SceneGraphNode> Scene::detachNode(SceneGraphNode& node) {
     return _rootDummy.detachChild(node);
 }
 
@@ -300,11 +303,11 @@ void Scene::update(const UpdateData& data) {
     ZoneScoped
 
     std::vector<SceneGraphNode*> initializedNodes = _initializer->takeInitializedNodes();
-
     for (SceneGraphNode* node : initializedNodes) {
         try {
             node->initializeGL();
-        } catch (const ghoul::RuntimeError& e) {
+        }
+        catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.message);
         }
     }
@@ -313,9 +316,7 @@ void Scene::update(const UpdateData& data) {
     }
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {
-            LTRACE("Scene::update(begin '" + node->identifier() + "')");
             node->update(data);
-            LTRACE("Scene::update(end '" + node->identifier() + "')");
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.what());
@@ -332,9 +333,7 @@ void Scene::render(const RenderData& data, RendererTasks& tasks) {
 
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {
-            LTRACE("Scene::render(begin '" + node->identifier() + "')");
             node->render(data, tasks);
-            LTRACE("Scene::render(end '" + node->identifier() + "')");
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.what());
@@ -342,20 +341,19 @@ void Scene::render(const RenderData& data, RendererTasks& tasks) {
         if (global::callback::webBrowserPerformanceHotfix) {
             (*global::callback::webBrowserPerformanceHotfix)();
         }
+    }
 
-        {
-            ZoneScopedN("Get Error Hack")
+    {
+        ZoneScopedN("Get Error Hack")
 
-            // @TODO(abock 2019-08-19) This glGetError call is a hack to prevent the GPU
-            // thread and the CPU thread from diverging too much, particularly the
-            // uploading of a lot of textures for the globebrowsing planets can cause a
-            // hard stuttering effect. Asking for a glGetError after every rendering call
-            // will force the threads to implicitly synchronize and thus prevent the
-            // stuttering.  The better solution would be to reduce the number of uploads
-            // per frame, use a staggered buffer, or something else like that preventing a
-            // large spike in uploads
-            glGetError();
-        }
+        // @TODO(abock 2019-08-19) This glGetError call is a hack to prevent the GPU
+        // thread and the CPU thread from diverging too much, particularly the uploading
+        // of a lot of textures for the globebrowsing planets can cause a hard stuttering
+        // effect. Asking for a glGetError after every rendering call will force the
+        // threads to implicitly synchronize and thus prevent the stuttering.  The better
+        // solution would be to reduce the number of uploads per frame, use a staggered
+        // buffer, or something else like that preventing a large spike in uploads
+        glGetError();
     }
 }
 
@@ -416,7 +414,7 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
         }
     }
 
-    std::unique_ptr<SceneGraphNode> node = SceneGraphNode::createFromDictionary(
+    ghoul::mm_unique_ptr<SceneGraphNode> node = SceneGraphNode::createFromDictionary(
         nodeDictionary
     );
     if (!node) {
@@ -607,19 +605,19 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "to match the type that the property (or properties) expect. If the "
                 "third is not present or is '0', the value changes instantly, otherwise "
                 "the change will take that many seconds and the value is interpolated at "
-                "each steap in between. The fourth parameter is an optional easing "
+                "each step in between. The fourth parameter is an optional easing "
                 "function if a 'duration' has been specified. If 'duration' is 0, this "
                 "parameter value is ignored. Otherwise, it can be one of many supported "
                 "easing functions. See easing.h for available functions. The fifth "
-                "argument must be either empty, 'regex', or 'single'. If the last "
+                "argument must be either empty, 'regex', or 'single'. If the fifth"
                 "argument is empty (the default), the URI is interpreted using a "
                 "wildcard in which '*' is expanded to '(.*)' and bracketed components "
                 "'{ }' are interpreted as group tag names. Then, the passed value will "
                 "be set on all properties that fit the regex + group name combination. "
-                "If the third argument is 'regex' neither the '*' expansion, nor the "
+                "If the fifth argument is 'regex' neither the '*' expansion, nor the "
                 "group tag expansion is performed and the first argument is used as an "
                 "ECMAScript style regular expression that matches against the fully "
-                "qualified IDs of properties. If the third arugment is 'single' no "
+                "qualified IDs of properties. If the fifth argument is 'single' no "
                 "substitutions are performed and exactly 0 or 1 properties are changed."
             },
             {
@@ -631,7 +629,7 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "second argument can be any type, but it has to match the type that the "
                 "property expects. If the third is not present or is '0', the value "
                 "changes instantly, otherwise the change will take that many seconds and "
-                "the value is interpolated at each steap in between. The fourth "
+                "the value is interpolated at each step in between. The fourth "
                 "parameter is an optional easing function if a 'duration' has been "
                 "specified. If 'duration' is 0, this parameter value is ignored. "
                 "Otherwise, it has to be 'linear', 'easein', 'easeout', or 'easeinout'. "

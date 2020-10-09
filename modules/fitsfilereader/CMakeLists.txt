@@ -53,9 +53,11 @@ set(MODULE_NAME openspace-module-fitsfilereader)
 # CCfits is dependent on cfitsio, let it handle the internal linking
 add_subdirectory(${CFITSIO_ROOT_DIR})
 set_folder_location(cfitsio "External")
+set(cfitsio_BUILD_SHARED_LIBS OFF)
 
 add_subdirectory(${CCFITS_ROOT_DIR})
 set_folder_location(CCfits "External")
+set(CCfits_BUILD_SHARED_LIBS OFF)
 
 if (GHOUL_DISABLE_EXTERNAL_WARNINGS)
     disable_external_warnings(cfitsio)

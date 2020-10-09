@@ -94,9 +94,9 @@ local MessengerProbeBlack = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/MessengerProbe_black.obj"
+            GeometryFile = models .. "/MessengerProbe_black.obj",
+            ColorTexture = models .. "/Tex_black.png"
         },
-        ColorTexture = models .. "/Tex_black.png",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -113,9 +113,9 @@ local MessengerProbeFoil = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/MessengerProbe_foil.obj"
+            GeometryFile = models .. "/MessengerProbe_foil.obj",
+            ColorTexture = models .. "/foil_n2.png"
         },
-        ColorTexture = models .. "/foil_n2.png",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -132,9 +132,9 @@ local MessengerProbeHeatShield = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/MessengerProbe_heatShield.obj"
+            GeometryFile = models .. "/MessengerProbe_heatShield.obj",
+            ColorTexture = models .. "/AO_heatshield4.png"
         },
-        ColorTexture = models .. "/AO_heatshield4.png",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -151,9 +151,9 @@ local MessengerProbeMetal = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/MessengerProbe_metal.obj"
+            GeometryFile = models .. "/MessengerProbe_metal.obj",
+            ColorTexture = models .. "/Tex_grey.png"
         },
-        ColorTexture = models .. "/Tex_grey.png",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -171,9 +171,9 @@ local MessengerProbePanels = {
         Type = "RenderableModel",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/MessengerProbe_panels.obj"
+            GeometryFile = models .. "/MessengerProbe_panels.obj",
+            ColorTexture = models .. "/Messenger_tex.png"
         },
-        ColorTexture = models .. "/Messenger_tex.png",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },

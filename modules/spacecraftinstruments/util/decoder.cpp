@@ -36,8 +36,8 @@ std::unique_ptr<Decoder> Decoder::createFromDictionary(
                                                                   const std::string& type)
 {
     ghoul::TemplateFactory<Decoder>* factory = FactoryManager::ref().factory<Decoder>();
-    std::unique_ptr<Decoder> result = factory->create(type, dictionary);
-    return result;
+    Decoder* result = factory->create(type, dictionary);
+    return std::unique_ptr<Decoder>(result);
 }
 
 } // namespace openspace

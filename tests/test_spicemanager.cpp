@@ -376,7 +376,6 @@ TEST_CASE("SpiceManager: Transform matrix", "[spicemanager]") {
 
    double et;
    double state[6];
-   double state_t[6];
    double lt;
    double referenceMatrix[6][6];
 

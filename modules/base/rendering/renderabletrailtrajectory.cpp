@@ -227,8 +227,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             const glm::vec3 p = _translation->position({
                 {},
                 Time(_start + i * totalSampleInterval),
-                Time(0.0),
-                false
+                Time(0.0)
             });
             _vertexArray[i] = { p.x, p.y, p.z };
         }

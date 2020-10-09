@@ -35,6 +35,7 @@
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/misc/profiling.h>
 #include <chrono>
 
 namespace {
@@ -178,6 +179,8 @@ DashboardItemInstruments::DashboardItemInstruments(const ghoul::Dictionary& dict
 }
 
 void DashboardItemInstruments::render(glm::vec2& penPosition) {
+    ZoneScoped
+
     double currentTime = global::timeManager.time().j2000Seconds();
 
     if (!ImageSequencer::ref().isReady()) {
@@ -227,7 +230,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
             ghoul::fontrendering::CrDirection::Down
         );
 
-        std::string str = SpiceManager::ref().dateFromEphemerisTime(
+        std::string_view str = SpiceManager::ref().dateFromEphemerisTime(
             sequencer.nextCaptureTime(global::timeManager.time().j2000Seconds()),
             "YYYY MON DD HR:MN:SC"
         );
@@ -332,28 +335,25 @@ glm::vec2 DashboardItemInstruments::size() const {
 
     if (remaining > 0) {
         using FR = ghoul::fontrendering::FontRenderer;
-        FR& renderer = FR::defaultRenderer();
         std::string progress = progressToStr(25, t);
 
         size = addToBoundingbox(
             size,
-            renderer.boundingBox(*_font, "Next instrument activity:").boundingBox
+            _font->boundingBox("Next instrument activity:")
         );
 
         size = addToBoundingbox(
             size,
-            renderer.boundingBox(
-                *_font,
+            _font->boundingBox(
                 fmt::format("{:.0f} s {:s} {:.1f} %", remaining, progress, t * 100.f)
-            ).boundingBox
+            )
         );
 
         size = addToBoundingbox(
             size,
-            renderer.boundingBox(
-                *_font,
+            _font->boundingBox(
                 fmt::format("Data acquisition time: {}", str)
-            ).boundingBox
+            )
         );
     }
     std::pair<double, std::string> nextTarget = sequencer.nextTarget(currentTime);
@@ -362,9 +362,6 @@ glm::vec2 DashboardItemInstruments::size() const {
     if (currentTarget.first <= 0.0) {
         return size;
     }
-
-    using FR = ghoul::fontrendering::FontRenderer;
-    FR& renderer = FR::defaultRenderer();
 
     const int timeleft = static_cast<int>(nextTarget.first - currentTime);
 
@@ -393,20 +390,16 @@ glm::vec2 DashboardItemInstruments::size() const {
 
     size = addToBoundingbox(
         size,
-        renderer.boundingBox(
-            *_font,
+        _font->boundingBox(
             fmt::format("Data acquisition adjacency: [{}:{}:{}]", hh, mm, ss)
-        ).boundingBox
+        )
     );
 
     size.y += _font->height();
 
     size = addToBoundingbox(
         size,
-        ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-            *_font,
-            "Active Instruments:"
-        ).boundingBox
+        _font->boundingBox("Active Instruments:")
     );
     return size;
 }

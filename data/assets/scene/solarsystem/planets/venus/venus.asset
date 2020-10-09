@@ -1,53 +1,8 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
 asset.require("spice/base")
-asset.request('./trail')
+asset.require('./trail')
 local labelsPath = asset.require('./venus_globelabels').LabelsPath
-
-local mapServiceConfigs = asset.localResource("map_service_configs")
-
-local textures = asset.syncedResource({
-    Name = "Venus Textures",
-    Type = "HttpSynchronization",
-    Identifier = "venus_textures",
-    Version = 1
-})
-
-local color_layers = {
-    {
-        Identifier = "Texture",
-        FilePath = textures .. "/venus.jpg",
-        Enabled = true,
-        Settings = {
-            Opacity = 0.48,
-            Gamma = 0.48
-        }
-    },
-    {
-        Identifier = "Magellan_Mosaic_Utah",
-        Name = "Magellan Mosaic [Utah]",
-        FilePath = mapServiceConfigs .. "/Utah/MagellanMosaic.vrt",
-        BlendMode = "Color",
-        Settings = {
-            Gamma = 2.0
-        },
-        Enabled = true
-    },
-}
-
-local height_layers = {
-    {
-        Identifier = "Magellan",
-        Name = "Magellan Elevation [Utah]",
-        FilePath = mapServiceConfigs .. "/Utah/MagellanDEM.wms",
-        TilePixelSize = 64,
-        Settings = {
-            Gamma = 1.72,
-            Multiplier = 1.1
-        },
-        Enabled = true
-    }
-}
 
 local Venus = {
     Identifier = "Venus",
@@ -69,10 +24,7 @@ local Venus = {
         --Radii = { 6051900.0, 6051900.0, 6051800.0 },
         Radii = { 6051900.0, 6051900.0, 6051900.0 },
         SegmentsPerPatch = 64,
-        Layers = {
-            ColorLayers = color_layers,
-            HeightLayers = height_layers
-        },
+        Layers = {},
         Labels = {
             Enable = false,
             FileName = labelsPath .. "/venus.labels",
@@ -87,7 +39,7 @@ local Venus = {
             FadeOutStartingDistance = 1000000.0,
             LabelsForceDomeRendering = true,
             LabelsDistanceEPS = 3500000.0,
-            LabelsColor = {1.0, 1.0, 0.0, 1.0}
+            LabelsColor = { 1.0, 1.0, 0.0 }
         }
     },
     Tag = { "planet_solarSystem", "planet_terrestrial" },

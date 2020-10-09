@@ -73,6 +73,7 @@ private:
     properties::StringProperty _fontName;
     properties::FloatProperty _fontSize;
 
+    std::vector<char> _buffer;
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 };
 

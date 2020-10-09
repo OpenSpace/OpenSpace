@@ -30,7 +30,7 @@ local Phobos = {
     },
     Renderable = {
         Type = "RenderableGlobe",
-        Radii = { 27, 22, 18 },
+        Radii = { 27000, 22000, 18000 },
         SegmentsPerPatch = 90,
         Layers = {
         }

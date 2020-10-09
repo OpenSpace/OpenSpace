@@ -40,6 +40,7 @@
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
@@ -52,7 +53,7 @@ namespace {
     constexpr const char* _loggerCat = "RingsComponent";
 
     constexpr const std::array<const char*, 9> UniformNames = {
-        "modelViewProjectionMatrix", "textureOffset", "transparency", "_nightFactor",
+        "modelViewProjectionMatrix", "textureOffset", "colorFilterValue", "_nightFactor",
         "sunPosition", "ringTexture", "shadowMatrix", "shadowMapTexture",
         "zFightingPercentage"
     };
@@ -91,11 +92,11 @@ namespace {
         "of the night side occurs."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TransparencyInfo = {
-        "Transparency",
-        "Transparency",
-        "This value determines the transparency of part of the rings depending on the "
-        "color values. For this value v, the transparency is equal to length(color) / v."
+    constexpr openspace::properties::Property::PropertyInfo ColorFilterInfo = {
+        "ColorFilter",
+        "Color Filter",
+        "This value affects the filtering out of part of the rings depending on the "
+        "color values of the texture. The higher value, the more rings are filtered out."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ZFightingPercentageInfo = {
@@ -146,10 +147,10 @@ documentation::Documentation RingsComponent::Documentation() {
                 NightFactorInfo.description
             },
             {
-                TransparencyInfo.identifier,
+                ColorFilterInfo.identifier,
                 new DoubleVerifier,
                 Optional::Yes,
-                TransparencyInfo.description
+                ColorFilterInfo.description
             },
             {
                 ZFightingPercentageInfo.identifier,
@@ -173,7 +174,7 @@ RingsComponent::RingsComponent(const ghoul::Dictionary& dictionary)
     , _size(SizeInfo, 1.f, 0.f, 1e25f)
     , _offset(OffsetInfo, glm::vec2(0.f, 1.f), glm::vec2(0.f), glm::vec2(1.f))
     , _nightFactor(NightFactorInfo, 0.33f, 0.f, 1.f)
-    , _transparency(TransparencyInfo, 0.15f, 0.f, 1.f)
+    , _colorFilter(ColorFilterInfo, 0.15f, 0.f, 1.f)
     , _enabled({ "Enabled", "Enabled", "Enable/Disable Rings" }, true)
     , _zFightingPercentage(ZFightingPercentageInfo, 0.995f, 0.000001f, 1.f)
     , _nShadowSamples(NumberShadowSamplesInfo, 2, 1, 7)
@@ -197,6 +198,8 @@ RingsComponent::RingsComponent(const ghoul::Dictionary& dictionary)
 }
 
 void RingsComponent::initialize() {
+    ZoneScoped
+
     using ghoul::filesystem::File;
 
     addProperty(_enabled);
@@ -228,9 +231,9 @@ void RingsComponent::initialize() {
     }
     addProperty(_nightFactor);
 
-    if (_ringsDictionary.hasKeyAndValue<double>(TransparencyInfo.identifier)) {
-        _transparency = static_cast<float>(
-            _ringsDictionary.value<double>(TransparencyInfo.identifier)
+    if (_ringsDictionary.hasKeyAndValue<double>(ColorFilterInfo.identifier)) {
+        _colorFilter = static_cast<float>(
+            _ringsDictionary.value<double>(ColorFilterInfo.identifier)
         );
     }
 
@@ -248,7 +251,7 @@ void RingsComponent::initialize() {
     _nShadowSamples.onChange([this]() { compileShadowShader(); });
     addProperty(_nShadowSamples);
 
-    addProperty(_transparency);
+    addProperty(_colorFilter);
 }
 
 bool RingsComponent::isReady() const {
@@ -256,6 +259,8 @@ bool RingsComponent::isReady() const {
 }
 
 void RingsComponent::initializeGL() {
+    ZoneScoped
+
     compileShadowShader();
 
     try {
@@ -327,7 +332,7 @@ void RingsComponent::draw(const RenderData& data,
             modelViewProjectionTransform
         );
         _shader->setUniform(_uniformCache.textureOffset, _offset);
-        _shader->setUniform(_uniformCache.transparency, _transparency);
+        _shader->setUniform(_uniformCache.colorFilterValue, _colorFilter);
         _shader->setUniform(_uniformCache.nightFactor, _nightFactor);
         _shader->setUniform(_uniformCache.sunPosition, _sunPosition);
         _shader->setUniform(_uniformCache.zFightingPercentage, _zFightingPercentage);
@@ -379,6 +384,8 @@ void RingsComponent::draw(const RenderData& data,
 }
 
 void RingsComponent::update(const UpdateData& data) {
+    ZoneScoped
+
     if (_shader && _shader->isDirty()) {
         compileShadowShader();
     }

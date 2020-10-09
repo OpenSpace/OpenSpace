@@ -1,0 +1,13 @@
+local texturesPath = asset.require("./../../mimas_textures").TexturesPath
+local globeIdentifier = asset.require("./../../mimas").Mimas.Identifier
+
+local layer = {
+    Identifier = "Texture",
+    FilePath = texturesPath .. "/mimas.jpg",
+}
+
+asset.onInitialize(function () 
+    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)

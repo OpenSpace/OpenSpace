@@ -1,3 +1,3 @@
-asset.request('./inner_moons')
-asset.request('./irregular_prograde_moons')
-asset.request('./irregular_retrograde_moons')
+asset.require('./inner_moons')
+asset.require('./irregular_prograde_moons')
+asset.require('./irregular_retrograde_moons')
