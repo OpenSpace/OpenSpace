@@ -170,6 +170,7 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/util/blockplaneintersectiongeometry.cpp
   ${OPENSPACE_BASE_DIR}/src/util/boxgeometry.cpp
   ${OPENSPACE_BASE_DIR}/src/util/camera.cpp
+  ${OPENSPACE_BASE_DIR}/src/util/coordinateconversion.cpp
   ${OPENSPACE_BASE_DIR}/src/util/distanceconversion.cpp
   ${OPENSPACE_BASE_DIR}/src/util/factorymanager.cpp
   ${OPENSPACE_BASE_DIR}/src/util/httprequest.cpp
@@ -357,6 +358,7 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/util/concurrentjobmanager.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/util/concurrentqueue.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/concurrentqueue.inl
+  ${OPENSPACE_BASE_DIR}/include/openspace/util/coordinateconversion.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/distanceconstants.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/distanceconversion.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/factorymanager.h

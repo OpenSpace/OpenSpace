@@ -27,6 +27,7 @@
 #include <modules/exoplanets/exoplanetshelper.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/util/coordinateconversion.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/fmt.h>
 #include <ghoul/glm.h>
@@ -295,25 +296,10 @@ void ExoplanetsDataPreparationTask::perform(const Task::ProgressCallback& progre
         bool hasIcrsCoords = !std::isnan(ra) && !std::isnan(dec) && hasDistance;
 
         if (!foundPositionFromSpeck && hasIcrsCoords) {
-            // Convert ICRS Equatorial Ra and Dec to Galactic
-            const glm::mat3 conversionMatrix = glm::mat3(
-                // Col 0
-                glm::vec3(-0.0548755604162154, 0.4941094278755837, -0.8676661490190047),
-                // Col 1
-                glm::vec3(-0.8734370902348850, -0.4448296299600112, -0.1980763734312015),
-                // Col 2
-                glm::vec3(-0.4838350155487132, 0.7469822444972189, 0.4559837761750669)
-            );
-
-            glm::vec3 rICRS = glm::vec3(
-                cos(glm::radians(ra)) * cos(glm::radians(dec)),
-                sin(glm::radians(ra)) * cos(glm::radians(dec)),
-                sin(glm::radians(dec))
-            );
-            glm::vec3 rGalactic = conversionMatrix * rICRS;
-            p.positionX = distanceInParsec * rGalactic.x;
-            p.positionY = distanceInParsec * rGalactic.y;
-            p.positionZ = distanceInParsec * rGalactic.z;
+            glm::dvec3 pos = icrsToGalacticCartesian(ra, dec, distanceInParsec);
+            p.positionX = static_cast<float>(pos.x);
+            p.positionY = static_cast<float>(pos.y);
+            p.positionZ = static_cast<float>(pos.z);
         }
 
         // Create look-up table
