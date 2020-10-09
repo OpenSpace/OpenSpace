@@ -37,7 +37,9 @@ local homeLabel = {
     },
     GUI = {
         Name = "Home Label",
-        Path = "/Universe/Galaxies"
+        Path = "/Universe/Galaxies",
+        Description = [[Label for the Milky Way titled "Home", sided for the galactic
+            level]],
     }
 }
 

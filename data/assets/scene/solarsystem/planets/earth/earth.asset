@@ -48,7 +48,7 @@ local Earth = {
     GUI = {
         Name = "Earth",
         Path = "/Solar System/Planets/Earth",
-        Description = "Earth Globe"
+        Description = "Third rock from the Sun"
     }
 }
 

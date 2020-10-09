@@ -21,7 +21,15 @@ local plane = {
     },
     GUI = {
         Name = "Milky Way Galaxy Image",
-        Path = "/Universe/Galaxies"
+        Path = "/Universe/Galaxies",
+        Description = [[Census: 1 image. DU Version 2.2. <br> The exterior view of the
+            Milky Way is simply a two-dimensional image. The image is that of NGC 1232, a
+            galaxy thought to resemble our Milky Way. The image has been properly sized
+            and approximately oriented to function as a placeholder, allowing one to see
+            the context of the Galaxy relative to other data in the atlas. The features
+            you see in the image, of course, do not represent our Galaxy, per se, but
+            resemble similar features found in our Galaxy.(Description from URL)
+            <br><br> Data Reference: European Southern Observatory]]
     }
 }
 
@@ -32,14 +40,8 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { plane })
 asset.meta = {
     Name = "MilkyWay Galaxy",
     Version = "2.0",
-    Description = [[Census: 1 image. DU Version 2.2. The exterior view of the Milky Way is
-        simply a two-dimensional image. The image is that of NGC 1232, a galaxy thought to
-        resemble our Milky Way. The image has been properly sized and approximately
-        oriented to function as a placeholder, allowing one to see the context of the
-        Galaxy relative to other data in the atlas. The features you see in the image, of
-        course, do not represent our Galaxy, per se, but resemble similar features found
-        in our Galaxy.(Description from URL) <br><br> Data Reference: European Southern
-        Observatory]],
+    Description = [[Digital Universe asset containt 2D image of the MilkyWay. For
+        extragalactic viewing]],
     Author = "Brian Abbott, Carter Emmart (AMNH)",
     URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
     License = "AMNH Digital Universe",

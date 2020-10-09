@@ -29,7 +29,7 @@ local layer =  {
         available from the Visible Infrared Imaging Radiometer Suite (VIIRS) on the joint
         NASA/NOAA Suomi National Polar orbiting Partnership (Suomi NPP) satellite.
         The sensor resolution is 750 m at nadir, imagery resolution is 500 m, and the
-        temporal resolution is daily.]],
+        temporal resolution is daily. (Description from NASA Worldview)]],
 }
 
 asset.onInitialize(function () 
@@ -40,12 +40,12 @@ asset.export("layer", layer)
 
 
 asset.meta = {
-    Name = "Earth at Night 2012",
+    Name = "Earth at Night (Temporal)",
     Version = "1.0",
-    Description = [[May layer for earth with daily night image. This layer is a GIBS
+    Description = [[Temporal layer for earth with daily night image. This layer is a GIBS
         hosted layer created with openspace.globebrowsing.createTemporalGibsGdalXml ]],
     Author = "OpenSpace Team",
-    URL = "https://visibleearth.nasa.gov/images/79765/night-lights-2012-map",
+    URL = "https://worldview.earthdata.nasa.gov/?l=VIIRS_SNPP_DayNightBand_ENCC",
     License = "NASA",
     Identifiers = "Earth_at_Night_Temporal"
 }

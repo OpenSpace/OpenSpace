@@ -43,7 +43,19 @@ local object = {
     },
     GUI = {
         Name = "Abell Galaxy Clusters",
-        Path = "/Universe/Galaxies"
+        Path = "/Universe/Galaxies",
+        Description = [[Census 2,246 galaxies. DU Version 1.4. <br> The Abell catalog
+            includes all the nearby, and not so nearby, galaxy clusters. The northern
+            hemisphere survey, published in 1958, was compiled by George Abell (1927–1983)
+            from the Palomar Sky Survey plates. A subsequent southern hemisphere catalog
+            was published posthumously in 1989. Further analysis by Brent Tully determined
+            their distance and three-dimensional distribution. Each point in this data set
+            represents a cluster of tens to hundreds (possibly even thousands) of
+            galaxies, similar to the Virgo or Fornax Clusters. You will notice some points
+            are assigned colors while most are gray. The data set also has an arbitrary
+            cut-off for completeness, resulting in the rectangular shape of the data set.
+            (Description from URL) <br><br> Data Reference: Abell Clusters of Rich
+            Galaxies, Brent Tully (U Hawaii), Stuart Levy (NCSA/UIUC)]],
     }
 }
 
@@ -54,17 +66,7 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { object })
 asset.meta = {
     Name = "Abell Galaxy Clusters",
     Version = "2.0",
-    Description = [[Census 2,246 galaxies. DU Version 1.4. The Abell catalog includes all
-    the nearby, and not so nearby, galaxy clusters. The northern hemisphere survey,
-    published in 1958, was compiled by George Abell (1927–1983) from the Palomar Sky
-    Survey plates. A subsequent southern hemisphere catalog was published posthumously in
-    1989. Further analysis by Brent Tully determined their distance and three-dimensional
-    distribution. Each point in this data set represents a cluster of tens to hundreds
-    (possibly even thousands) of galaxies, similar to the Virgo or Fornax Clusters. You
-    will notice some points are assigned colors while most are gray. The data set also has
-    an arbitrary cut-off for completeness, resulting in the rectangular shape of the data
-    set. (Description from URL) <br><br> Data Reference: Abell Clusters of Rich Galaxies,
-    Brent Tully (U Hawaii), Stuart Levy (NCSA/UIUC)]],
+    Description = [[Digital Universe asset for The Abell catalog]],
     Author = "Stuart Levy (NCSA/UIUC), Brian Abbott (AMNH)",
     URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
     License = "AMNH Digital Universe",

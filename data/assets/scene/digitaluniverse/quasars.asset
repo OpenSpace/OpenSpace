@@ -36,7 +36,15 @@ local object = {
     },
     GUI = {
         Name = "Quasars",
-        Path = "/Universe"
+        Path = "/Universe",
+        Description = [[Census: 569,442 quasars. DU Version 2.2. <br>
+            Quasars are the most distant objects we can see. They are extremely active
+            galaxies that contain supermassive black holes which are gobbling up material
+            at a furious rate. The Million Quasars Catalogue is an aggregate catalog of
+            several surveys, including 2dF and Sloan. So, it should not be surprising that
+            the shape of these data mimic the shape of the Sloan and 2dF galaxy surveys,
+            with large parts of the sky unobserved.(Description from URL) <br><br> Data
+            Reference: The Million Quasars catalog (Flesch, 2017)]]
     }
 }
 
@@ -48,13 +56,7 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { object })
 asset.meta = {
     Name = "Quasars",
     Version = "2.0",
-    Description = [[Census: 569,442 quasars. DU Version 2.2. Quasars are the most distant
-        objects we can see. They are extremely active galaxies that contain supermassive
-        black holes which are gobbling up material at a furious rate. The Million Quasars
-        Catalogue is an aggregate catalog of several surveys, including 2dF and Sloan. So,
-        it should not be surprising that the shape of these data mimic the shape of the
-        Sloan and 2dF galaxy surveys, with large parts of the sky unobserved.(Description
-        from URL) <br><br> Data Reference: The Million Quasars catalog (Flesch, 2017)]],
+    Description = [[Digital Universe asset for Quasars.]],
     Author = "Brian Abbott (AMNH)",
     URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
     License = "AMNH Digital Universe",

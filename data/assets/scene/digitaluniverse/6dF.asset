@@ -35,7 +35,18 @@ local object = {
     },
     GUI = {
         Name = "6dF Galaxies",
-        Path = "/Universe/Galaxies"
+        Path = "/Universe/Galaxies",
+        Description = [[Census 109,569 galaxies. DU Version 1.4.<br> The Six-degree Field
+            (6dF) Galaxy Survey mapped nearly half the sky from the Anglo-Australian
+            Observatory. Unlike previous datasets, this one is not all-sky, meaning there
+            are patches of sky that are not covered. In this case, the entire northern
+            hemisphere has no coverage at all. This catalog overlaps with the Tully
+            dataset, and there is a noticeable difference in the quality of these
+            datasets. Tully is much tighter and the structure is more apparent, while the
+            6dF data are more spread out. This is because of local motions within galaxy
+            clusters have not been corrected in these data. (Description from URL)
+            <br><br> Data Reference: The 6dF Galaxy Survey Redshift Catalogue
+            (Jones+, 2009)]]
     }
 }
 
@@ -46,15 +57,7 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { object })
 asset.meta = {
     Name = "6dF Galaxies",
     Version = "2.0",
-    Description = [[Census 109,569 galaxies. DU Version 1.4. The Six-degree Field (6dF)
-    Galaxy Survey mapped nearly half the sky from the Anglo-Australian Observatory. Unlike
-    previous datasets, this one is not all-sky, meaning there are patches of sky that are
-    not covered. In this case, the entire northern hemisphere has no coverage at all. This
-    catalog overlaps with the Tully dataset, and there is a noticeable difference in the
-    quality of these datasets. Tully is much tighter and the structure is more apparent,
-    while the 6dF data are more spread out. This is because of local motions within galaxy
-    clusters have not been corrected in these data. (Description from URL) <br><br> Data
-    Reference: The 6dF Galaxy Survey Redshift Catalogue (Jones+, 2009)]],
+    Description = [[Digital Universe asset for The Six-degree Field (6dF) Galaxy Survey]],
     Author = "Brian Abbott (AMNH)",
     URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
     License = "AMNH Digital Universe",

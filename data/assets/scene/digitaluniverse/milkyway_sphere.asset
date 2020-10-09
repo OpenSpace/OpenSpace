@@ -32,7 +32,9 @@ local sphere = {
     },
     GUI = {
         Name = "Milky Way Sphere",
-        Path = "/Milky Way"
+        Path = "/Milky Way",
+        Description = [[All sky image of the Milky Way that is visible when inside. Fades
+            out when zooming away from the Milky Way]],
     }
 }
 
@@ -43,8 +45,7 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { sphere })
 asset.meta = {
     Name = "Milky Way Galaxy Sphere",
     Version = "2.0",
-    Description = [[All sky image of the Milky Way that is visible when inside. Fades out
-        when zooming away from the Milky Way]],
+    Description = [[All sky image of the Milky Way]],
     Author = "OpenSpace Team",
     URL = "http://openspaceproject.com",
     License = "MIT license",

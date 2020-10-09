@@ -38,7 +38,19 @@ local object = {
     },
     GUI = {
         Name = "Pulsars",
-        Path = "/Milky Way"
+        Path = "/Milky Way",
+        Description = [[Census: 2,498 pulsars. DU Version 5.6. <br> Upon death, stars
+            leave behind one of three possible remnants: a white dwarf, a neutron star, or
+            a black hole. Stars that are more massive than the sun will often become
+            neutron stars in a violent explosion called a supernova. During a supernova,
+            the core of the star collapses under such high pressure that the electrons,
+            which normally remain outside the atomic nucleus, are forced to combine with
+            the protons in the nucleus. Atomic nuclei break apart, producing what is
+            called a degenerate state of matter. The collapse is halted when the material
+            cannot be packed any tighter. At this point, the star has a radius of about
+            10-15 kilometers. The density of this material is so high that a teaspoonful
+            would weigh about 100 million tons on Earth. (Description from URL) <br><br>
+            Data Reference: ATNF Pulsar Catalogue, (Manchester+, 2005)]],
     }
 }
 
@@ -50,18 +62,7 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { object })
 asset.meta = {
     Name = "Pulsars",
     Version = "2.0",
-    Description = [[Census: 2,498 pulsars. DU Version 5.6. Upon death, stars leave behind
-        one of three possible remnants: a white dwarf, a neutron star, or a black hole.
-        Stars that are more massive than the sun will often become neutron stars in a
-        violent explosion called a supernova. During a supernova, the core of the star
-        collapses under such high pressure that the electrons, which normally remain
-        outside the atomic nucleus, are forced to combine with the protons in the nucleus.
-        Atomic nuclei break apart, producing what is called a degenerate state of matter.
-        The collapse is halted when the material cannot be packed any tighter. At this
-        point, the star has a radius of about 10-15 kilometers. The density of this
-        material is so high that a teaspoonful would weigh about 100 million tons on
-        Earth. (Description from URL) <br><br> Data Reference: ATNF Pulsar Catalogue,
-        (Manchester+, 2005)]],
+    Description = [[Digital Universe asset for Pulsars.]],
     Author = "Brian Abbott (AMNH)",
     URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
     License = "AMNH Digital Universe",
