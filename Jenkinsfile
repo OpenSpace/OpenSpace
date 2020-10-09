@@ -82,7 +82,7 @@ parallel tools: {
   node('tools') {
     stage('tools/scm') {
       deleteDir();
-      gitHelper.checkoutGit(url, branch);
+      gitHelper.checkoutGit(url, branch, false);
       helper.createDirectory('build');
     }
     stage('tools/cppcheck') {
@@ -126,7 +126,7 @@ linux_clang: {
       deleteDir()
       gitHelper.checkoutGit(url, branch);
     }
-    stage('linux-gclangcc/build(make)') {
+    stage('linux-clang/build(make)') {
         def cmakeBuildingOptionLinux = moduleMakeFlags()
         cmakeBuildingOptionLinux += '-DMAKE_BUILD_TYPE=Release'
         // Not sure why the linking of OpenSpaceTest takes so long
@@ -170,7 +170,7 @@ macos: {
       gitHelper.checkoutGit(url, branch);
     }
     stage('macos/build(make)') {
-        compileHelper.build(compileHelper.Xcode(), compileHelper.Clang(), moduleCMakeFlags(), '', 'build-make');
+        compileHelper.build(compileHelper.Make(), compileHelper.Clang(), moduleCMakeFlags(), '', 'build-make');
     }
     stage('macos/build(xcode)') {
         compileHelper.build(compileHelper.Xcode(), compileHelper.Xcode(), moduleCMakeFlags(), '', 'build-xcode');
