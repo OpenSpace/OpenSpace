@@ -109,7 +109,7 @@ std::string_view Time::ISO8601() const {
 
     SpiceManager::ref().dateFromEphemerisTime(_time, b, S, Format);
  
-    return std::string_view(b, S-1);
+    return std::string_view(b, S);
 }
 
 void Time::ISO8601(char* buffer) const {
