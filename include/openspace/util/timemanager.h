@@ -120,6 +120,7 @@ public:
     void removeDeltaTimeChangeCallback(CallbackHandle handle);
     void removeDeltaTimeStepsChangeCallback(CallbackHandle handle);
     void triggerPlaybackStart();
+    void stopPlayback();
     void removeTimeJumpCallback(CallbackHandle handle);
     void removeTimelineChangeCallback(CallbackHandle handle);
 

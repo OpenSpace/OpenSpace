@@ -22,44 +22,47 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifndef __OPENSPACE_CORE___CONVERTRECFORMATTASK___H__
+#define __OPENSPACE_CORE___CONVERTRECFORMATTASK___H__
+
+#include <openspace/util/task.h>
+#include <openspace/interaction/sessionrecording.h>
+
+#include <ghoul/glm.h>
+
+#include <string>
+
+
+
 namespace openspace::interaction {
 
-template <class T>
-T nextKeyframeObj(unsigned int index, const std::vector<T>& keyframeContainer,
-                  std::function<void()> finishedCallback)
-{
-    if (index >= (keyframeContainer.size() - 1)) {
-        if (index == (keyframeContainer.size() - 1)) {
-            finishedCallback();
-        }
-        return keyframeContainer.back();
-    }
-    else if (index < keyframeContainer.size()) {
-        return keyframeContainer[index];
-    }
-    else {
-        return keyframeContainer.back();
-    }
-}
+class ConvertRecFormatTask : public Task {
+public:
+    enum class ConversionDirection {
+        ToAscii = 0,
+        ToBinary
+    };
+    ConvertRecFormatTask(const ghoul::Dictionary& dictionary);
+    ~ConvertRecFormatTask();
+    std::string description() override;
+    void perform(const Task::ProgressCallback& progressCallback) override;
+    static documentation::Documentation documentation();
+    void convert();
 
-template <class T>
-T prevKeyframeObj(unsigned int index, const std::vector<T>& keyframeContainer) {
-    if (index >= keyframeContainer.size()) {
-        return keyframeContainer.back();
-    }
-    else if (index > 0) {
-        return keyframeContainer[index - 1];
-    }
-    else {
-        return keyframeContainer.front();
-    }
-}
+private:
+    void convertToAscii();
+    void convertToBinary();
+    void determineFormatType();
+    std::string addFileSuffix(const std::string& filePath, const std::string& suffix);
+    std::string _inFilePath;
+    std::string  _outFilePath;
+    std::ifstream _iFile;
+    std::ofstream _oFile;
+    SessionRecording::DataMode _fileFormatType;
 
-template <typename T>
-T readFromPlayback(std::ifstream& stream) {
-    T res;
-    stream.read(reinterpret_cast<char*>(&res), sizeof(T));
-    return res;
-}
+    std::string _valueFunctionLua;
+};
 
 } // namespace openspace::interaction
+
+#endif //__OPENSPACE_CORE___CONVERTRECFORMATTASK___H__
