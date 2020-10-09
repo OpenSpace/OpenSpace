@@ -29,6 +29,7 @@
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/util/keys.h>
+#include <ghoul/misc/exception.h>
 #include <optional>
 #include <string>
 #include <variant>
@@ -40,6 +41,14 @@ namespace scripting { struct LuaLibrary; }
 
 class Profile {
 public:
+    struct ParsingError : public ghoul::RuntimeError {
+        enum class Severity { Info, Warning, Error };
+
+        explicit ParsingError(Severity severity, std::string msg);
+
+        Severity severity;
+    };
+
     // Version
     struct Version {
         int major = 0;
@@ -47,21 +56,18 @@ public:
     };
     struct Module {
         std::string name;
-        std::string loadedInstruction;
-        std::string notLoadedInstruction;
+        std::optional<std::string> loadedInstruction;
+        std::optional<std::string> notLoadedInstruction;
     };
     struct Meta {
-        std::string name;
-        std::string version;
-        std::string description;
-        std::string author;
-        std::string url;
-        std::string license;
+        std::optional<std::string> name;
+        std::optional<std::string> version;
+        std::optional<std::string> description;
+        std::optional<std::string> author;
+        std::optional<std::string> url;
+        std::optional<std::string> license;
     };
-    struct Asset {
-        std::string path;
-        std::string name;
-    };
+
     struct Property {
         enum class SetType {
             SetPropertyValue,
@@ -87,13 +93,13 @@ public:
         };
 
         Type type;
-        std::string time;
+        std::string value;
     };
     struct CameraNavState {
         static constexpr const char* Type = "setNavigationState";
 
         std::string anchor;
-        std::string aim;
+        std::optional<std::string> aim;
         std::string referenceFrame;
         glm::dvec3 position;
         std::optional<glm::dvec3> up;
@@ -109,21 +115,9 @@ public:
         std::optional<double> altitude;
     };
     using CameraType = std::variant<CameraNavState, CameraGoToGeo>;
-    struct ParsingError : public ghoul::RuntimeError {
-        explicit ParsingError(std::string msg)
-            : ghoul::RuntimeError(std::move(msg), "profileFile")
-        {}
-
-        ParsingError(unsigned int lineNum, std::string msg)
-            : ghoul::RuntimeError(
-                fmt::format("Error @ line {}: {}", lineNum, std::move(msg)),
-                "profileFile"
-            )
-        {}
-    };
 
     Profile() = default;
-    Profile(const std::vector<std::string>& content);
+    explicit Profile(const std::string& content);
     std::string serialize() const;
 
     std::string convertToScene() const;
@@ -141,7 +135,7 @@ public:
     void setIgnoreUpdates(bool ignoreUpdates);
 
     /// Adds a new asset and checks for duplicates
-    void addAsset(const std::string& path, const std::string& varName = "");
+    void addAsset(const std::string& path);
 
     /// Removes an asset
     void removeAsset(const std::string& path);
@@ -152,7 +146,7 @@ public:
     Version version() const;
     std::vector<Module> modules() const;
     std::optional<Meta> meta() const;
-    std::vector<Asset> assets() const;
+    std::vector<std::string> assets() const;
     std::vector<Property> properties() const;
     std::vector<Keybinding> keybindings() const;
     std::optional<Time> time() const;
@@ -176,6 +170,7 @@ public:
     void setMarkNodes(std::vector<std::string>& n);
     void setAdditionalScripts(std::vector<std::string>& s);
 
+
     /**
      * Returns the Lua library that contains all Lua functions available to provide
      * profile functionality.
@@ -189,7 +184,7 @@ private:
     Version _version = CurrentVersion;
     std::vector<Module> _modules;
     std::optional<Meta> _meta;
-    std::vector<Asset> _assets;
+    std::vector<std::string> _assets;
     std::vector<Property> _properties;
     std::vector<Keybinding> _keybindings;
     std::optional<Time> _time;

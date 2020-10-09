@@ -43,6 +43,14 @@ namespace {
 
 namespace openspace::interaction {
 
+KeyframeNavigator::CameraPose::CameraPose(datamessagestructures::CameraKeyframe&& kf)
+    : position(std::move(kf._position))
+    , rotation(std::move(kf._rotation))
+    , focusNode(std::move(kf._focusNode))
+    , scale(std::move(kf._scale))
+    , followFocusNodeRotation(std::move(kf._followNodeRotation))
+{}
+
 bool KeyframeNavigator::updateCamera(Camera& camera, bool ignoreFutureKeyframes) {
     double now = currentTime();
     bool foundPrevKeyframe = false;

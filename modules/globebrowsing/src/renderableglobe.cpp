@@ -51,14 +51,16 @@
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <numeric>
 #include <queue>
-#ifndef __APPLE__
-#include <memory_resource>
-#else
+#include <vector>
+
+#if defined(__APPLE__) || (defined(__linux__) && defined(__clang__))
 #include <experimental/memory_resource>
 namespace std {
     using namespace experimental;
 } // namespace std
-#endif // __APPLE__
+#else
+#include <memory_resource>
+#endif
 
 namespace {
     // Global flags to modify the RenderableGlobe
@@ -268,22 +270,22 @@ const Chunk& findChunkNode(const Chunk& node, const Geodetic2& location) {
     return *n;
 }
 
-#ifndef __APPLE__
-using ChunkTileVector = std::pmr::vector<std::pair<ChunkTile, const LayerRenderSettings*>>;
-#else // __APPLE__
+#if defined(__APPLE__) || (defined(__linux__) && defined(__clang__))
 using ChunkTileVector = std::vector<std::pair<ChunkTile, const LayerRenderSettings*>>;
-#endif // __APPLE__
+#else
+using ChunkTileVector = std::pmr::vector<std::pair<ChunkTile, const LayerRenderSettings*>>;
+#endif
 
 ChunkTileVector tilesAndSettingsUnsorted(const LayerGroup& layerGroup,
                                          const TileIndex& tileIndex)
 {
     ZoneScoped
 
-#ifndef __APPLE__
-    ChunkTileVector tilesAndSettings(&global::memoryManager.TemporaryMemory);
-#else // __APPLE__
+#if defined(__APPLE__) || (defined(__linux__) && defined(__clang__))
     ChunkTileVector tilesAndSettings;
-#endif // __APPLE__
+#else
+    ChunkTileVector tilesAndSettings(&global::memoryManager.TemporaryMemory);
+#endif
     for (Layer* layer : layerGroup.activeLayers()) {
         if (layer->tileProvider()) {
             tilesAndSettings.emplace_back(

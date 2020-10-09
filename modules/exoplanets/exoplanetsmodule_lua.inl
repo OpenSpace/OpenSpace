@@ -40,6 +40,8 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/transform.hpp>
+#include <cfloat>
+#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -211,7 +213,7 @@ int addExoplanetSystem(lua_State* L) {
         );
     }
 
-    bool notEnoughData = isnan(p.positionX) || isnan(p.a) || isnan(p.per);
+    bool notEnoughData = std::isnan(p.positionX) || std::isnan(p.a) || std::isnan(p.per);
 
     if (notEnoughData) {
         return ghoul::lua::luaError(
@@ -264,7 +266,7 @@ int addExoplanetSystem(lua_State* L) {
     // Star renderable globe, if we have a radius
     std::string starGlobeRenderableString;
     const float starRadius = p.rStar;
-    if (!isnan(starRadius)) {
+    if (!std::isnan(starRadius)) {
         std::ifstream colorMap(absPath(BvColormapPath), std::ios::in);
 
         if (!colorMap.good()) {
@@ -329,21 +331,21 @@ int addExoplanetSystem(lua_State* L) {
         Exoplanet planet = planetSystem[i];
         const std::string planetName = planetNames[i];
 
-        if (isnan(planet.ecc)) {
+        if (std::isnan(planet.ecc)) {
             planet.ecc = 0.f;
         }
-        if (isnan(planet.i)) {
+        if (std::isnan(planet.i)) {
             planet.i = 90.f;
         }
-        if (isnan(planet.bigOm)) {
+        if (std::isnan(planet.bigOm)) {
             planet.bigOm = 180.f;
         }
-        if (isnan(planet.om)) {
+        if (std::isnan(planet.om)) {
             planet.om = 90.f;
         }
         Time epoch;
         std::string sEpoch;
-        if (!isnan(planet.tt)) {
+        if (!std::isnan(planet.tt)) {
             epoch.setTime("JD " + std::to_string(planet.tt));
             sEpoch = std::string(epoch.ISO8601());
         }
@@ -358,8 +360,8 @@ int addExoplanetSystem(lua_State* L) {
         const float solarRadius = static_cast<float>(distanceconstants::SolarRadius);
         const float jupiterRadius = static_cast<float>(distanceconstants::JupiterRadius);
 
-        if (isnan(planet.r)) {
-            if (isnan(planet.rStar)) {
+        if (std::isnan(planet.r)) {
+            if (std::isnan(planet.rStar)) {
                 planetRadius = planet.a * 0.001f * astronomicalUnit;
             }
             else {
@@ -446,8 +448,8 @@ int addExoplanetSystem(lua_State* L) {
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
 
-        bool hasUpperAUncertainty = !isnan(planet.aUpper);
-        bool hasLowerAUncertainty = !isnan(planet.aLower);
+        bool hasUpperAUncertainty = !std::isnan(planet.aUpper);
+        bool hasLowerAUncertainty = !std::isnan(planet.aLower);
 
         if (hasUpperAUncertainty && hasLowerAUncertainty) {
             // Get the orbit plane of the planet trail orbit from the KeplerTranslation
