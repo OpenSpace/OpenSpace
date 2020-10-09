@@ -22,19 +22,62 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___DISTANCECONSTANTS___H__
-#define __OPENSPACE_CORE___DISTANCECONSTANTS___H__
+#ifndef __OPENSPACE_MODULE_EXOPLENETS___RENDERABLEORBITDISC___H__
+#define __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__
 
-namespace openspace::distanceconstants {
-    constexpr double EarthRadius = 6371;
-    constexpr double JupiterRadius = 7.1492E7;
-    constexpr double SolarRadius = 6.95700E8;
-    constexpr double LightYear = 9.4607304725808E15;
-    constexpr double LightMonth = LightYear / 12;
-    constexpr double LightDay = LightYear / 365;
-    constexpr double LightHour = LightDay / 24;
-    constexpr double AstronomicalUnit = 1.495978707E11;
-    constexpr double Parsec = 3.0856776E16;
-} // openspace::distanceconstants
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec2property.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/util/updatestructures.h>
+#include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/uniformcache.h>
 
-#endif // __OPENSPACE_CORE___DISTANCECONSTANTS___H__
+namespace ghoul::filesystem { class File; }
+namespace ghoul::opengl {
+    class ProgramObject;
+    class Texture;
+} // namespace ghoul::opengl
+
+namespace openspace {
+
+namespace documentation { struct Documentation; }
+
+class RenderableOrbitDisc : public Renderable {
+public:
+    RenderableOrbitDisc(const ghoul::Dictionary& dictionary);
+
+    void initializeGL() override;
+    void deinitializeGL() override;
+
+    bool isReady() const override;
+
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
+    void update(const UpdateData& data) override;
+
+    static documentation::Documentation Documentation();
+
+private:
+    void loadTexture();
+    void createPlane();
+
+    properties::StringProperty _texturePath;
+    properties::FloatProperty _size;
+    properties::FloatProperty _eccentricity;
+    properties::Vec2Property _offset;
+
+    std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
+    UniformCache(modelViewProjection, textureOffset, opacity,
+         texture, eccentricity, semiMajorAxis) _uniformCache;
+    std::unique_ptr<ghoul::opengl::Texture> _texture = nullptr;
+    std::unique_ptr<ghoul::filesystem::File> _textureFile;
+
+    bool _textureIsDirty = false;
+    bool _planeIsDirty = false;
+    GLuint _quad = 0;
+    GLuint _vertexPositionBuffer = 0;
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_EXOPLENETS___RENDERABLEORBITDISC___H__
