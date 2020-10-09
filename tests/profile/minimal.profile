@@ -1,2 +1,3 @@
-#Version
-12.13
+{
+  "version": { "major": 12, "minor": 13 }
+}

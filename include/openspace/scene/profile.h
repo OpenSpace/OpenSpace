@@ -29,6 +29,7 @@
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/util/keys.h>
+#include <ghoul/misc/exception.h>
 #include <optional>
 #include <string>
 #include <variant>
@@ -40,6 +41,14 @@ namespace scripting { struct LuaLibrary; }
 
 class Profile {
 public:
+    struct ParsingError : public ghoul::RuntimeError {
+        enum class Severity { Info, Warning, Error };
+
+        explicit ParsingError(Severity severity, std::string msg);
+
+        Severity severity;
+    };
+
     // Version
     struct Version {
         int major = 0;
@@ -47,20 +56,16 @@ public:
     };
     struct Module {
         std::string name;
-        std::string loadedInstruction;
-        std::string notLoadedInstruction;
+        std::optional<std::string> loadedInstruction;
+        std::optional<std::string> notLoadedInstruction;
     };
     struct Meta {
-        std::string name;
-        std::string version;
-        std::string description;
-        std::string author;
-        std::string url;
-        std::string license;
-    };
-    struct Asset {
-        std::string path;
-        std::string name;
+        std::optional<std::string> name;
+        std::optional<std::string> version;
+        std::optional<std::string> description;
+        std::optional<std::string> author;
+        std::optional<std::string> url;
+        std::optional<std::string> license;
     };
     struct Property {
         enum class SetType {
@@ -87,13 +92,13 @@ public:
         };
 
         Type type;
-        std::string time;
+        std::string value;
     };
     struct CameraNavState {
         static constexpr const char* Type = "setNavigationState";
 
         std::string anchor;
-        std::string aim;
+        std::optional<std::string> aim;
         std::string referenceFrame;
         glm::dvec3 position;
         std::optional<glm::dvec3> up;
@@ -109,9 +114,9 @@ public:
         std::optional<double> altitude;
     };
     using CameraType = std::variant<CameraNavState, CameraGoToGeo>;
-
+  
     Profile() = default;
-    Profile(const std::vector<std::string>& content);
+    explicit Profile(const std::string& content);
     std::string serialize() const;
 
     std::string convertToScene() const;
@@ -147,7 +152,7 @@ private:
     Version version = CurrentVersion;
     std::vector<Module> modules;
     std::optional<Meta> meta;
-    std::vector<Asset> assets;
+    std::vector<std::string> assets;
     std::vector<Property> properties;
     std::vector<Keybinding> keybindings;
     std::optional<Time> time;
