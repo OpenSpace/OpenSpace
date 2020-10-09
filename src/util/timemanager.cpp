@@ -458,17 +458,17 @@ void TimeManager::addDeltaTimesKeybindings() {
     const int nSteps = static_cast<int>(steps.size());
     const int maxIterations = (nSteps >= nKeys) ? nKeys : nSteps;
 
-    const char* guiPath = DeltaTimeStepsKeybindsGuiPath;
-
-    auto addDeltaTimeKeybind = [&guiPath, this](Key key, KeyModifier mod, double step) {
+    auto addDeltaTimeKeybind = [this](Key key, KeyModifier mod, double step) {
         const std::string s = fmt::format("{:.0f}", step);
         global::keybindingManager.bindKeyLocal(
             key,
             mod,
-            "openspace.time.interpolateDeltaTime(" + s + ")",
-            "Setting the simulation speed to " + s + " seconds per realtime second",
-            "Set Simulation Speed: " + s,
-            guiPath
+            fmt::format("openspace.time.interpolateDeltaTime({})", s),
+            fmt::format(
+                "Setting the simulation speed to {} seconds per realtime second", s
+            ),
+            fmt::format("Set Simulation Speed: {}", s),
+            DeltaTimeStepsKeybindsGuiPath
         );
         _deltaTimeStepKeybindings.push_back(KeyWithModifier{ key, mod });
     };
@@ -504,8 +504,7 @@ void TimeManager::addDeltaTimesKeybindings() {
             "Error settings delta time keys: Too many delta times, so not all could be "
             "mapped to a key. Total: {} steps, which is {} more than the number of "
             "available keybindings.",
-            nSteps,
-            nSteps - maxKeyBinds
+            nSteps, nSteps - maxKeyBinds
         ));
     }
 }

@@ -27,8 +27,8 @@
 
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/util/syncdata.h>
 #include <openspace/util/keys.h>
+#include <openspace/util/syncdata.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timeline.h>
 #include <functional>
