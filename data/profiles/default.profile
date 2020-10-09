@@ -26,7 +26,7 @@
     "longitude": 16.1924,
     "altitude": 20000000
   },
-  "mark_nodes": [ "Earth", "Mars", "Moon", "Sun" ], 
+  "mark_nodes": [ "Earth", "Mars", "Moon", "Sun" ],
   "delta_times": [
     1,
     2,
@@ -60,4 +60,3 @@
     1576800000
   ]
 }
-
