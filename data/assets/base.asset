@@ -23,6 +23,8 @@ asset.require('scene/milkyway/milkyway/volume')
 asset.require('scene/milkyway/constellations/constellation_art')
 asset.require('scene/milkyway/constellations/constellation_keybinds')
 
+assetHelper.requireAll(asset, 'scene/milkyway/exoplanets')
+
 assetHelper.requireAll(asset, 'scene/digitaluniverse')
 
 -- Load default key bindings applicable to most scenes

@@ -318,12 +318,10 @@ void OpenSpaceEngine::initialize() {
                 );
             }
 
-            std::vector<std::string> content;
-            std::string line;
-            while (std::getline(inFile, line)) {
-                content.push_back(std::move(line));
-            }
-
+            std::string content(
+                (std::istreambuf_iterator<char>(inFile)),
+                std::istreambuf_iterator<char>()
+            );
             global::profile = Profile(content);
 
             // Then save the profile to a scene so that we can load it with the
