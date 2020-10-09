@@ -27,7 +27,6 @@
 #include <modules/exoplanets/exoplanetshelper.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/json.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/fmt.h>
 #include <ghoul/glm.h>
@@ -35,9 +34,6 @@
 #include <ghoul/misc/dictionary.h>
 #include <charconv>
 #include <fstream>
-
- // TEST: do not optimise for now
-#pragma optimize("", off)
 
 namespace {
     constexpr const char* KeyInputDataFile = "InputDataFile";
@@ -50,8 +46,6 @@ namespace {
 } // namespace
 
 namespace openspace::exoplanets {
-
-using json = nlohmann::json;
 
 ExoplanetsDataPreparationTask::ExoplanetsDataPreparationTask(const ghoul::Dictionary& dictionary) {
     openspace::documentation::testSpecificationAndThrow(
@@ -69,9 +63,10 @@ ExoplanetsDataPreparationTask::ExoplanetsDataPreparationTask(const ghoul::Dictio
 
 std::string ExoplanetsDataPreparationTask::description() {
     return fmt::format(
-        "Extract metadata from file '{}' and write as bin to '{}'", // TODO: update description
-        _inputDataPath,
-        _outputBinPath
+        "Extract data about exoplanets from file '{}' and write as bin to '{}'. The data "
+        "file should be a csv version of the Planetary Systems Composite Data from the "
+        "NASA exoplanets archive (https://exoplanetarchive.ipac.caltech.edu/).",
+        _inputDataPath, _outputBinPath
     );
 }
 
@@ -91,7 +86,7 @@ void ExoplanetsDataPreparationTask::perform(const Task::ProgressCallback& progre
     std::string planetRow;
     getline(inputDataFile, planetRow); // The first line, containing the data names
 
-    // read column names into a vector, for access later
+    // Read column names into a vector, for later access
     std::vector<std::string> columnNames;
     std::stringstream sStream(planetRow);
     std::string colName;
@@ -99,7 +94,7 @@ void ExoplanetsDataPreparationTask::perform(const Task::ProgressCallback& progre
         columnNames.push_back(colName);
     }
 
-    // read total number of items
+    // Read total number of items
     int total = 0;
     while (getline(inputDataFile, planetRow)) {
         ++total;
@@ -149,7 +144,6 @@ void ExoplanetsDataPreparationTask::perform(const Task::ProgressCallback& progre
 
     auto readStringData = [](const std::string& str) -> std::string {
         std::string result = str;
-        // remove quotes, if any
         result.erase(std::remove(result.begin(), result.end(), '\"'), result.end());
         return result;
     };
@@ -163,6 +157,10 @@ void ExoplanetsDataPreparationTask::perform(const Task::ProgressCallback& progre
 
         std::string component;
         std::string speckStarname;
+
+        float ra = NAN;     // decimal degrees
+        float dec = NAN;    // decimal degrees
+        float distanceInParsec = NAN;
 
         std::istringstream lineStream(planetRow);
         int columnIndex = 0;
@@ -252,6 +250,15 @@ void ExoplanetsDataPreparationTask::perform(const Task::ProgressCallback& progre
                 p.positionY = position[1];
                 p.positionZ = position[2];
             }
+            else if (column == "ra") {
+                ra = readFloatData(data);
+            }
+            else if (column == "dec") {
+                dec = readFloatData(data);
+            }
+            else if (column == "sy_dist") {
+                distanceInParsec = readFloatData(data);
+            }
             // Star radius
             else if (column == "st_rad") {
                 p.rStar = readFloatData(data);
@@ -283,12 +290,37 @@ void ExoplanetsDataPreparationTask::perform(const Task::ProgressCallback& progre
         p.bigOmegaUpper = NAN;
         p.bigOmegaLower = NAN;
 
-        // create look-up table
+        bool foundPositionFromSpeck = !std::isnan(p.positionX);
+        bool hasDistance = !std::isnan(distanceInParsec);
+        bool hasIcrsCoords = !std::isnan(ra) && !std::isnan(dec) && hasDistance;
+
+        if (!foundPositionFromSpeck && hasIcrsCoords) {
+            // Convert ICRS Equatorial Ra and Dec to Galactic
+            const glm::mat3 conversionMatrix = glm::mat3(
+                // Col 0
+                glm::vec3(-0.0548755604162154, 0.4941094278755837, -0.8676661490190047),
+                // Col 1
+                glm::vec3(-0.8734370902348850, -0.4448296299600112, -0.1980763734312015),
+                // Col 2
+                glm::vec3(-0.4838350155487132, 0.7469822444972189, 0.4559837761750669)
+            );
+
+            glm::vec3 rICRS = glm::vec3(
+                cos(glm::radians(ra)) * cos(glm::radians(dec)),
+                sin(glm::radians(ra)) * cos(glm::radians(dec)),
+                sin(glm::radians(dec))
+            );
+            glm::vec3 rGalactic = conversionMatrix * rICRS;
+            p.positionX = distanceInParsec * rGalactic.x;
+            p.positionY = distanceInParsec * rGalactic.y;
+            p.positionZ = distanceInParsec * rGalactic.z;
+        }
+
+        // Create look-up table
         long pos = static_cast<long>(binFile.tellp());
         std::string planetName = speckStarname + " " + component;
         lutFile << planetName << "," << pos << std::endl;
 
-        // Write to binary data file
         binFile.write(reinterpret_cast<char*>(&p), sizeof(Exoplanet));
     }
 
