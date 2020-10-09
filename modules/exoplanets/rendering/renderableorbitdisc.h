@@ -30,6 +30,7 @@
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/uniformcache.h>
 
 namespace ghoul::filesystem { class File; }
