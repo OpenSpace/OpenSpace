@@ -102,11 +102,11 @@ local Voyager2Antenna = {
     Parent = Voyager2.Identifier,
     Renderable = {
         Type = "RenderableModel",
-        Geometry = {
+        Geometry = {{
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/voyager-antenna.obj",
             ColorTexture = models .. "/voyager-antenna.png"
-        },
+        }},
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },

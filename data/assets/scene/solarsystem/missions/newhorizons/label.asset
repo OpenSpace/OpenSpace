@@ -14,11 +14,11 @@ local Labels = {
     Renderable = {
         Type = "RenderableModel",
         Body = "NEW HORIZONS",
-        Geometry = {
+        Geometry = {{
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/Labels.obj",
             ColorTexture =  textures .. "/labels.png"
-        }, 
+        }},
         AmbientIntensity = 0.8
     },
     GUI = {
