@@ -1167,9 +1167,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
         );
     }
 
-    if (!global::windowDelegate.isMaster()) {
-        global::renderEngine.updateScene();
-    }
+    global::renderEngine.updateScene();
     global::renderEngine.updateRenderer();
     global::renderEngine.updateScreenSpaceRenderables();
     global::renderEngine.updateShaderPrograms();
