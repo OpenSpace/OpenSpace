@@ -5,7 +5,7 @@ local images = asset.syncedResource({
     Name = "Constellation Images",
     Type = "HttpSynchronization",
     Identifier = "constellation_images",
-    Version = 1
+    Version = 2
 })
 
 --function that reads the file
