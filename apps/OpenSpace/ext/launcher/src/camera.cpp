@@ -43,7 +43,7 @@ camera::camera(openspace::Profile* imported, QWidget *parent)
             [&] (const openspace::Profile::CameraNavState& nav) {
                 ui->tabWidget->setCurrentIndex(static_cast<int>(cameraTypeTab::Nav));
                 ui->line_anchorNav->setText(QString(nav.anchor.c_str()));
-                ui->line_aim->setText(QString(nav.aim.c_str()));
+                ui->line_aim->setText(QString(nav.aim->c_str()));
                 ui->line_referenceFrame->setText(QString(nav.referenceFrame.c_str()));
                 ui->line_posX->setText(QString::number(nav.position.x));
                 ui->line_posY->setText(QString::number(nav.position.y));

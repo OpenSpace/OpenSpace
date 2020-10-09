@@ -35,7 +35,7 @@ addedScripts::addedScripts(openspace::Profile* imported, QWidget *parent)
     , _imported(imported)
 {
     ui->setupUi(this);
-    for (std::string s : _imported->additionalScripts()) {
+    for (std::string s : imported->additionalScripts()) {
         _data += s + "\n";
     }
     ui->text_scripts->setText(QString(_data.c_str()));

@@ -227,12 +227,12 @@ QString ProfileEdit::summarizeText_meta() {
     }
     QString s;
     if (_pData->meta().has_value()) {
-        s += QString(_pData->meta().value().name.c_str());
-        s += ", " + QString(_pData->meta().value().version.c_str());
-        s += ", " + QString(_pData->meta().value().description.c_str());
-        s += ", " + QString(_pData->meta().value().author.c_str());
-        s += ", " + QString(_pData->meta().value().url.c_str());
-        s += ", " + QString(_pData->meta().value().license.c_str());
+        s += QString(_pData->meta().value().name->c_str());
+        s += ", " + QString(_pData->meta().value().version->c_str());
+        s += ", " + QString(_pData->meta().value().description->c_str());
+        s += ", " + QString(_pData->meta().value().author->c_str());
+        s += ", " + QString(_pData->meta().value().url->c_str());
+        s += ", " + QString(_pData->meta().value().license->c_str());
     }
 
     return s;
@@ -264,13 +264,13 @@ QString ProfileEdit::summarizeText_modules() {
     QString results;
     for (openspace::Profile::Module m : _pData->modules()) {
         results += QString(m.name.c_str());
-        if (m.loadedInstruction.size() > 0 && m.notLoadedInstruction.size() > 0) {
+        if (m.loadedInstruction->size() > 0 && m.notLoadedInstruction->size() > 0) {
             results += "(has commands for both loaded & non-loaded conditions)";
         }
-        else if (m.loadedInstruction.size() > 0) {
+        else if (m.loadedInstruction->size() > 0) {
             results += "(has command for loaded condition)";
         }
-        else if (m.notLoadedInstruction.size() > 0) {
+        else if (m.notLoadedInstruction->size() > 0) {
             results += "(has command for non-loaded condition)";
         }
         results += "\n";
@@ -309,8 +309,8 @@ QString ProfileEdit::summarizeText_keybindings() {
 
 QString ProfileEdit::summarizeText_assets() {
     QString results;
-    for (openspace::Profile::Asset a : _pData->assets()) {
-        results += QString(a.path.c_str()) + "\n"; //"    ";
+    for (std::string a : _pData->assets()) {
+        results += QString(a.c_str()) + "\n"; //"    ";
     }
     return results;
 }
@@ -329,7 +329,7 @@ QString ProfileEdit::summarizeText_time() {
         {
             results = "Relative time: ";
         }
-        results += QString(_pData->time().value().time.c_str());
+        results += QString(_pData->time().value().value.c_str());
     }
     return results;
 }
@@ -356,7 +356,7 @@ QString ProfileEdit::summarizeText_camera() {
             [&] (const openspace::Profile::CameraNavState& nav) {
                 results = "setNavigationState: ";
                 results += QString(nav.anchor.c_str()) + " ";
-                results += QString(nav.aim.c_str()) + " ";
+                results += QString(nav.aim->c_str()) + " ";
                 results += QString(nav.referenceFrame.c_str()) + " ";
                 results += "Pos=" + QString::number(nav.position.x) + ",";
                 results += QString::number(nav.position.y) + ",";

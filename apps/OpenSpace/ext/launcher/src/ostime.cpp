@@ -40,8 +40,8 @@ ostime::ostime(openspace::Profile* imported, QWidget *parent)
     if (_imported->time().has_value()) {
         _data = _imported->time().value();
         if (_data.type == openspace::Profile::Time::Type::Relative) {
-            if (_data.time == "") {
-                _data.time = "now";
+            if (_data.value == "") {
+                _data.value = "now";
             }
             ui->line_relative->setSelection(0, ui->line_relative->text().length());
         }
@@ -51,7 +51,7 @@ ostime::ostime(openspace::Profile* imported, QWidget *parent)
     }
     else {
         _data.type = openspace::Profile::Time::Type::Relative;
-        _data.time = "now";
+        _data.value = "now";
     }
     _initializedAsAbsolute = (_data.type == openspace::Profile::Time::Type::Absolute);
     enableAccordingToType(static_cast<int>(_data.type));
@@ -74,15 +74,15 @@ void ostime::enableAccordingToType(int idx) {
             ui->line_relative->setText("now");
         }
         else {
-            ui->line_relative->setText(QString(_data.time.c_str()));
+            ui->line_relative->setText(QString(_data.value.c_str()));
         }
         ui->line_relative->setFocus(Qt::OtherFocusReason);
     }
     else {
         ui->label_relative->setText("<font color='gray'>Relative Time:</font>");
-        size_t tIdx = _data.time.find_first_of('T', 0);
-        QString importDate = QString(_data.time.substr(0, tIdx).c_str());
-        QString importTime = QString(_data.time.substr(tIdx + 1).c_str());
+        size_t tIdx = _data.value.find_first_of('T', 0);
+        QString importDate = QString(_data.value.substr(0, tIdx).c_str());
+        QString importTime = QString(_data.value.substr(tIdx + 1).c_str());
         ui->dateTimeEdit->setDate(QDate::fromString(importDate, Qt::DateFormat::ISODate));
         ui->dateTimeEdit->setTime(QTime::fromString(importTime));
         ui->line_relative->setText("");
@@ -115,7 +115,7 @@ void ostime::approved() {
         else {
             openspace::Profile::Time t;
             t.type = openspace::Profile::Time::Type::Relative;
-            t.time = ui->line_relative->text().toUtf8().constData();
+            t.value = ui->line_relative->text().toUtf8().constData();
             _imported->setTime(t);
         }
     }
@@ -124,7 +124,7 @@ void ostime::approved() {
         t.type = openspace::Profile::Time::Type::Absolute;
         QString res = ui->dateTimeEdit->date().toString("yyyy-MM-dd") +
             "T" + ui->dateTimeEdit->time().toString();
-        t.time = res.toUtf8().constData();
+        t.value = res.toUtf8().constData();
         _imported->setTime(t);
     }
     accept();

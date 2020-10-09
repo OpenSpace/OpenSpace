@@ -55,8 +55,8 @@ osmodules::osmodules(openspace::Profile* imported, QWidget *parent)
 
 QString osmodules::createOneLineSummary(openspace::Profile::Module m) {
     QString summary = QString(m.name.c_str());
-    bool hasCommandForLoaded = (m.loadedInstruction.length() > 0);
-    bool hasCommandForNotLoaded = (m.notLoadedInstruction.length() > 0);
+    bool hasCommandForLoaded = (m.loadedInstruction->length() > 0);
+    bool hasCommandForNotLoaded = (m.notLoadedInstruction->length() > 0);
 
     if (hasCommandForLoaded && hasCommandForNotLoaded) {
         summary += " (commands set for both loaded & not-loaded conditions)";
@@ -80,8 +80,8 @@ void osmodules::listItemSelected(void) {
     if (_data.size() > 0) {
         openspace::Profile::Module& m = _data[index];
         ui->line_module->setText(QString(m.name.c_str()));
-        ui->line_loaded->setText(QString(m.loadedInstruction.c_str()));
-        ui->line_notLoaded->setText(QString(m.notLoadedInstruction.c_str()));
+        ui->line_loaded->setText(QString(m.loadedInstruction->c_str()));
+        ui->line_notLoaded->setText(QString(m.notLoadedInstruction->c_str()));
     }
     transitionToEditMode();
 }
@@ -119,8 +119,8 @@ void osmodules::listItemAdded(void) {
 
     //Blank-out the 2 text fields, set combo box to index 0
     ui->line_module->setText(QString(_data.back().name.c_str()));
-    ui->line_loaded->setText(QString(_data.back().loadedInstruction.c_str()));
-    ui->line_notLoaded->setText(QString(_data.back().notLoadedInstruction.c_str()));
+    ui->line_loaded->setText(QString(_data.back().loadedInstruction->c_str()));
+    ui->line_notLoaded->setText(QString(_data.back().notLoadedInstruction->c_str()));
     ui->line_module->setFocus(Qt::OtherFocusReason);
     _editModeNewItem = true;
 }

@@ -285,14 +285,14 @@ QVariant assetTreeModel::headerData(int section, Qt::Orientation orientation,
     return QVariant();
 }
 
-void assetTreeModel::selectedAssets(std::vector<openspace::Profile::Asset>& outputPaths,
+void assetTreeModel::selectedAssets(std::vector<std::string>& outputPaths,
                                     std::vector<assetTreeItem*>& outputItems)
 {
     parseChildrenForSelected(rootItem, outputPaths, outputItems, "");
 }
 
 void assetTreeModel::parseChildrenForSelected(assetTreeItem* item,
-                                       std::vector<openspace::Profile::Asset>& outputPaths,
+                                       std::vector<std::string>& outputPaths,
                                               std::vector<assetTreeItem*>& outputItems,
                                               std::string pathPrefix)
 {
@@ -303,7 +303,7 @@ void assetTreeModel::parseChildrenForSelected(assetTreeItem* item,
         if (item->isChecked()) {
             std::string path = pathPrefix + itemName;
             outputItems.push_back(item);
-            outputPaths.push_back(openspace::Profile::Asset({path, itemName}));
+            outputPaths.push_back(path);
         }
     }
     else {

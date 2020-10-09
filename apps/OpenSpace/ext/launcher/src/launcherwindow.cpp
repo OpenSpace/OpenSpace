@@ -189,7 +189,7 @@ void LauncherWindow::saveProfileToFile(const std::string& path, openspace::Profi
 
 bool LauncherWindow::loadProfileFromFile(openspace::Profile*& p, std::string filename) {
     bool successfulLoad = true;
-    std::vector<std::string> content;
+    std::string content;
     if (filename.length() > 0) {
         std::ifstream inFile;
         try {
@@ -204,7 +204,7 @@ bool LauncherWindow::loadProfileFromFile(openspace::Profile*& p, std::string fil
         }
         std::string line;
         while (std::getline(inFile, line)) {
-            content.push_back(std::move(line));
+            content += line;
         }
     }
     try {

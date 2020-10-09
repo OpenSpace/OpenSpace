@@ -36,14 +36,14 @@ meta::meta(openspace::Profile* imported, QWidget *parent)
     ui->setupUi(this);
 
     if (_imported->meta().has_value()) {
-        ui->line_name->setText(QString(_imported->meta().value().name.c_str()));
-        ui->line_version->setText(QString(_imported->meta().value().version.c_str()));
+        ui->line_name->setText(QString(_imported->meta().value().name->c_str()));
+        ui->line_version->setText(QString(_imported->meta().value().version->c_str()));
         ui->text_description->setText(
-            QString(_imported->meta().value().description.c_str())
+            QString(_imported->meta().value().description->c_str())
         );
-        ui->line_author->setText(QString(_imported->meta().value().author.c_str()));
-        ui->line_url->setText(QString(_imported->meta().value().url.c_str()));
-        ui->line_license->setText(QString(_imported->meta().value().license.c_str()));
+        ui->line_author->setText(QString(_imported->meta().value().author->c_str()));
+        ui->line_url->setText(QString(_imported->meta().value().url->c_str()));
+        ui->line_license->setText(QString(_imported->meta().value().license->c_str()));
     }
     else {
         ui->line_name->setText("");

@@ -69,8 +69,8 @@ assets::assets(openspace::Profile* imported, const std::string reportAssets,
 }
 
 void assets::compareFilesystemWithProfileAssets() {
-    for (openspace::Profile::Asset a : _imported->assets()) {
-        findPathMatch(a.path);
+    for (std::string a : _imported->assets()) {
+        findPathMatch(a);
     }
 }
 
@@ -159,7 +159,7 @@ bool assets::traverseToExpandSelectedItems(int rows, QModelIndex parent) {
 
 QString assets::createTextSummary() {
     //compareFilesystemWithProfileAssets();
-    std::vector<openspace::Profile::Asset> summaryPaths;
+    std::vector<std::string> summaryPaths;
     std::vector<assetTreeItem*> summaryItems;
     _assetTreeModel.selectedAssets(summaryPaths, summaryItems);
 
@@ -171,7 +171,7 @@ QString assets::createTextSummary() {
         bool existsInFilesystem = summaryItems.at(i)->doesExistInFilesystem();
         std::string s = fmt::format("<font color='{}'>{}</font><br>",
             (existsInFilesystem ? "black" : "red"),
-            summaryPaths.at(i).path
+            summaryPaths.at(i)
         );
         summary += QString(s.c_str());
     }
@@ -180,12 +180,12 @@ QString assets::createTextSummary() {
 
 void assets::parseSelections() {
     _imported->clearAssets();
-    std::vector<openspace::Profile::Asset> summaryPaths;
+    std::vector<std::string> summaryPaths;
     std::vector<assetTreeItem*> summaryItems;
     _assetTreeModel.selectedAssets(summaryPaths, summaryItems);
 
-    for (openspace::Profile::Asset sel : summaryPaths) {
-        _imported->addAsset(sel.path, sel.name);
+    for (std::string sel : summaryPaths) {
+        _imported->addAsset(sel);
     }
     accept();
 }

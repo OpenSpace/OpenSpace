@@ -152,7 +152,7 @@ public:
       * \param outputItems vector of #assetTreeItem * objects,
       *                    each of which are selected
       */
-    void selectedAssets(std::vector<openspace::Profile::Asset>& outputPaths,
+    void selectedAssets(std::vector<std::string>& outputPaths,
         std::vector<assetTreeItem*>& outputItems);
 
     /**
@@ -161,7 +161,7 @@ public:
       *
       * \return vector of #assetTreeItem * objects, each of which are selected
       */
-    std::vector<openspace::Profile::Asset> selectedAssetsDetailed();
+    std::vector<std::string> selectedAssetsDetailed();
 
     /**
       * Imports asset tree data for this model. The import text format is unique to
@@ -259,7 +259,7 @@ private:
     assetTreeItem *getItem(const QModelIndex &index) const;
     assetTreeItem *rootItem;
     void parseChildrenForSelected(assetTreeItem* item,
-        std::vector<openspace::Profile::Asset>& outputPaths,
+        std::vector<std::string>& outputPaths,
         std::vector<assetTreeItem*>& outputItems, std::string pathPrefix);
     void importInsertItem(std::istringstream& iss, assetTreeItem* parent,
         importElement& elem, int level);
