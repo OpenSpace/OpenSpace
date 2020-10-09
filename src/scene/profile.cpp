@@ -140,7 +140,7 @@ void from_json(const nlohmann::json& j, Profile::Module& v) {
     checkValue(j, "notLoadedInstruction", &nlohmann::json::is_string, "module", true);
     checkExtraKeys(j, "module", { "name", "loadedInstruction", "notLoadedInstruction" });
 
-    j.at("name").get_to(v.name);
+    j["name"].get_to(v.name);
     if (j.find("loadedInstruction") != j.end()) {
         v.loadedInstruction = j["loadedInstruction"].get<std::string>();
     }
@@ -226,8 +226,7 @@ void from_json(const nlohmann::json& j, Profile::Property::SetType& v) {
     }
     else {
         throw Profile::ParsingError(
-            Profile::ParsingError::Severity::Error,
-            "Unknown property set type"
+            Profile::ParsingError::Severity::Error, "Unknown property set type"
         );
     }
 }
@@ -244,9 +243,9 @@ void from_json(const nlohmann::json& j, Profile::Property& v) {
     checkValue(j, "value", &nlohmann::json::is_string, "property", false);
     checkExtraKeys(j, "property", { "type", "name", "value" });
 
-    j.at("type").get_to(v.setType);
-    j.at("name").get_to(v.name);
-    j.at("value").get_to(v.value);
+    j["type"].get_to(v.setType);
+    j["name"].get_to(v.name);
+    j["value"].get_to(v.value);
 }
 
 void to_json(nlohmann::json& j, const Profile::Keybinding& v) {
@@ -272,22 +271,19 @@ void from_json(const nlohmann::json& j, Profile::Keybinding& v) {
     );
 
     v.key = stringToKey(j.at("key").get<std::string>());
-    j.at("documentation").get_to(v.documentation);
-    j.at("name").get_to(v.name);
-    j.at("gui_path").get_to(v.guiPath);
-    j.at("is_local").get_to(v.isLocal);
-    j.at("script").get_to(v.script);
+    j["documentation"].get_to(v.documentation);
+    j["name"].get_to(v.name);
+    j["gui_path"].get_to(v.guiPath);
+    j["is_local"].get_to(v.isLocal);
+    j["script"].get_to(v.script);
 }
 
 void to_json(nlohmann::json& j, const Profile::Time::Type& v) {
     j = [](Profile::Time::Type t) {
         switch (t) {
-            case Profile::Time::Type::Absolute:
-                return "absolute";
-            case Profile::Time::Type::Relative:
-                return "relative";
-            default:
-                throw ghoul::MissingCaseException();
+            case Profile::Time::Type::Absolute: return "absolute";
+            case Profile::Time::Type::Relative: return "relative";
+            default:                            throw ghoul::MissingCaseException();
         }
     }(v);
 }
@@ -302,8 +298,7 @@ void from_json(const nlohmann::json& j, Profile::Time::Type& v) {
     }
     else {
         throw Profile::ParsingError(
-            Profile::ParsingError::Severity::Error,
-            "Unknown time type"
+            Profile::ParsingError::Severity::Error, "Unknown time type"
         );
     }
 }
@@ -318,8 +313,8 @@ void from_json(const nlohmann::json& j, Profile::Time& v) {
     checkValue(j, "value", &nlohmann::json::is_string, "time", false);
     checkExtraKeys(j, "time", { "type", "value" });
 
-    j.at("type").get_to(v.type);
-    j.at("value").get_to(v.value);
+    j["type"].get_to(v.type);
+    j["value"].get_to(v.value);
 }
 
 void to_json(nlohmann::json& j, const Profile::CameraNavState& v) {
@@ -329,14 +324,14 @@ void to_json(nlohmann::json& j, const Profile::CameraNavState& v) {
         j["aim"] = *v.aim;
     }
     j["frame"] = v.referenceFrame;
-    nlohmann::json p{
+    nlohmann::json p {
         { "x", v.position.x },
         { "y", v.position.y },
         { "z", v.position.z }
     };
     j["position"] = p;
     if (v.up.has_value()) {
-        nlohmann::json u{
+        nlohmann::json u {
             { "x", v.up->x },
             { "y", v.up->y },
             { "z", v.up->z }
@@ -380,31 +375,31 @@ void from_json(const nlohmann::json& j, Profile::CameraNavState& v) {
         { "type", "anchor", "aim", "frame", "position", "up", "yaw", "pitch" }
     );
 
-    j.at("anchor").get_to(v.anchor);
+    j["anchor"].get_to(v.anchor);
     if (j.find("aim") != j.end()) {
         v.aim = j["aim"].get<std::string>();
     }
-    j.at("frame").get_to(v.referenceFrame);
-    nlohmann::json p = j.at("position");
-    p.at("x").get_to(v.position.x);
-    p.at("y").get_to(v.position.y);
-    p.at("z").get_to(v.position.z);
+    j["frame"].get_to(v.referenceFrame);
+    nlohmann::json p = j["position"];
+    p["x"].get_to(v.position.x);
+    p["y"].get_to(v.position.y);
+    p["z"].get_to(v.position.z);
 
     if (j.find("up") != j.end()) {
-        nlohmann::json u = j.at("up");
+        nlohmann::json u = j["up"];
         glm::dvec3 up;
-        u.at("x").get_to(up.x);
-        u.at("y").get_to(up.y);
-        u.at("z").get_to(up.z);
+        u["x"].get_to(up.x);
+        u["y"].get_to(up.y);
+        u["z"].get_to(up.z);
         v.up = up;
     }
 
     if (j.find("yaw") != j.end()) {
-        v.yaw = j.at("yaw").get<double>();
+        v.yaw = j["yaw"].get<double>();
     }
 
     if (j.find("pitch") != j.end()) {
-        v.pitch = j.at("pitch").get<double>();
+        v.pitch = j["pitch"].get<double>();
     }
 }
 
@@ -434,12 +429,12 @@ void from_json(const nlohmann::json& j, Profile::CameraGoToGeo& v) {
         { "type", "anchor", "latitude", "longitude", "altitude" }
     );
 
-    j.at("anchor").get_to(v.anchor);
-    j.at("latitude").get_to(v.latitude);
-    j.at("longitude").get_to(v.longitude);
+    j["anchor"].get_to(v.anchor);
+    j["latitude"].get_to(v.latitude);
+    j["longitude"].get_to(v.longitude);
 
     if (j.find("altitude") != j.end()) {
-        v.altitude = j.at("altitude").get<double>();
+        v.altitude = j["altitude"].get<double>();
     }
 }
 
@@ -607,7 +602,7 @@ Profile::Profile(const std::string& content) {
 
         profile.at("version").get_to(version);
         if (profile.find("modules") != profile.end()) {
-            profile.at("modules").get_to(modules);
+            profile["modules"].get_to(modules);
         }
         if (profile.find("meta") != profile.end()) {
             meta = profile.at("meta").get<Meta>();
