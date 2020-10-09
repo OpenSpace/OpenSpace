@@ -774,12 +774,14 @@ std::string Profile::convertToScene() const {
                 [](const CameraNavState& camera) {
                     std::string result;
                     result += "openspace.navigation.setNavigationState({";
-                    result += fmt::format("Anchor = {}, ", camera.anchor);
+                    result += fmt::format("Anchor = [[{}]], ", camera.anchor);
                     if (camera.aim.has_value()) {
-                        result += fmt::format("Aim = {}, ", *camera.aim);
+                        result += fmt::format("Aim = [[{}]], ", *camera.aim);
                     }
                     if (!camera.referenceFrame.empty()) {
-                        result += fmt::format("ReferenceFrame = {}, ", camera.referenceFrame);
+                        result += fmt::format(
+                            "ReferenceFrame = [[{}]], ", camera.referenceFrame
+                        );
                     }
                     result += fmt::format(
                         "Position = {{ {}, {}, {} }}, ",
@@ -803,13 +805,13 @@ std::string Profile::convertToScene() const {
                 [](const CameraGoToGeo& camera) {
                     if (camera.altitude.has_value()) {
                         return fmt::format(
-                            "openspace.globebrowsing.goToGeo({}, {}, {}, {});\n",
+                            "openspace.globebrowsing.goToGeo([[{}]], {}, {}, {});\n",
                             camera.anchor, camera.latitude, camera.longitude, *camera.altitude
                         );
                     }
                     else {
                         return fmt::format(
-                            "openspace.globebrowsing.goToGeo({}, {}, {});\n",
+                            "openspace.globebrowsing.goToGeo([[{}]], {}, {});\n",
                             camera.anchor, camera.latitude, camera.longitude
                         );
                     }
