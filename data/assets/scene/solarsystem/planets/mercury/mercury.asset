@@ -62,7 +62,7 @@ local MercuryLabel = {
     Tag = { "solarsystem_labels" },
     GUI = {
         Name = "Mercury Label",
-        Path = "/Solar System/Planets/Mercury"
+        Path = "/Solar System/Planets/Mercury",
     }
 }
 

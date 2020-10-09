@@ -57,7 +57,8 @@ local Atmosphere = {
     },
     GUI = {
         Name = "Venus Atmosphere",
-        Path = "/Solar System/Planets/Venus"
+        Path = "/Solar System/Planets/Venus",
+        Description = "Simulation of Venus' Atmosphere"
     }
 }
 

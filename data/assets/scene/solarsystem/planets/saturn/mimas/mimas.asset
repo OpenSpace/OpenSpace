@@ -44,7 +44,9 @@ local Mimas = {
     },
     Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
     GUI = {
-        Path = "/Solar System/Planets/Saturn/Moons"
+        Name = "Mimas",
+        Path = "/Solar System/Planets/Saturn/Moons",
+        Description = [[That's no moon...]]
     }
 }
 

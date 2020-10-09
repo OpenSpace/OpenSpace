@@ -1,0 +1,43 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('scene/solarsystem/sun/transforms')
+local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
+asset.require("spice/base")
+
+
+
+local JupiterTrailEarth = {
+    Identifier = "JupiterTrailEarth",
+    Parent = earthTransforms.EarthBarycenter.Identifier,
+    Renderable = {
+        Type = "RenderableTrailOrbit",
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "JUPITER BARYCENTER",
+            Observer = "EARTH"
+        },
+        Color = { 1.0, 0.5, 0.2 },
+        Period = 224.695,
+        Resolution = 1000,
+        Enabled = false
+    },
+    Tag = { "planetTrail_solarSystem_alt", "planetTrail_terrestrial_alt" },
+    GUI = {
+        Name = "Jupiter trail from Earth",
+        Path = "/Solar System/Planets/Jupiter",
+        Hidden = false
+    }
+}
+
+asset.meta = {
+    Name = "Jupiter Trail from Earth",
+    Version = "1.0",
+    Description = [[ Trail of Jupiter as observed by the Earth. Data from NASA
+        SPICE (see base spice asset)]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = "VenusTrailEarth"
+}
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { JupiterTrailEarth })

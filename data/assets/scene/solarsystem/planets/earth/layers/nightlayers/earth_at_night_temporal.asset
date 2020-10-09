@@ -11,19 +11,7 @@ local layer =  {
         "1d",
         "500m",
         "png"
-    )
-}
-
-asset.onInitialize(function () 
-    openspace.globebrowsing.addLayer(globeIdentifier, "NightLayers", layer)
-end)
-
-asset.export("layer", layer)
-
-
-asset.meta = {
-    Name = "Earth at Night 2012",
-    Version = "1.0",
+    ),
     Description = [[ The VIIRS Nighttime Imagery (Day/Night Band, Enhanced Near Constant
         Contrast) layer shows the Earth's surface and atmosphere using a sensor designed
         to capture low-light emission sources, under varying illumination conditions. It
@@ -42,6 +30,20 @@ asset.meta = {
         NASA/NOAA Suomi National Polar orbiting Partnership (Suomi NPP) satellite.
         The sensor resolution is 750 m at nadir, imagery resolution is 500 m, and the
         temporal resolution is daily.]],
+}
+
+asset.onInitialize(function () 
+    openspace.globebrowsing.addLayer(globeIdentifier, "NightLayers", layer)
+end)
+
+asset.export("layer", layer)
+
+
+asset.meta = {
+    Name = "Earth at Night 2012",
+    Version = "1.0",
+    Description = [[May layer for earth with daily night image. This layer is a GIBS
+        hosted layer created with openspace.globebrowsing.createTemporalGibsGdalXml ]],
     Author = "OpenSpace Team",
     URL = "https://visibleearth.nasa.gov/images/79765/night-lights-2012-map",
     License = "NASA",

@@ -1,6 +1,6 @@
 local assetHelper = asset.require('util/asset_helper')
 
-local dataPaths = asset.require("milkyway_data")
+local dataPaths = asset.require("scene/digitaluniverse/milkyway_data")
 
 local plane = {
     Identifier = "MilkyWayGalaxyImage",

@@ -21,7 +21,9 @@ local MarsTrail = {
     Tag = { "planetTrail_solarSystem", "planetTrail_terrestrial" },
     GUI = {
         Name = "Mars Trail",
-        Path = "/Solar System/Planets/Mars"
+        Path = "/Solar System/Planets/Mars",
+        Description = [[ Trail of Mars as observed by the Sun. Data from NASA Spice (see
+            base spice asset)]],
     }
 }
 
@@ -33,8 +35,7 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { MarsTrail })
 asset.meta = {
     Name = "Mars Trail",
     Version = "1.0",
-    Description = [[ Trail of Mars as observed by the Sun. Data from NASA Spice (see
-        base spice asset)]],
+    Description = [[ Main Mars trail from SPICE.]],
     Author = "OpenSpace Team",
     URL = "http://openspaceproject.com",
     License = "MIT license",

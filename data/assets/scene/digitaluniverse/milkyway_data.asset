@@ -12,5 +12,5 @@ local planeSpeck = asset.syncedResource({
     Version = 1
 })
 
-asset.export(planeTextures, TexturesPath)
-asset.export(planeSpeck, SpeckPath)
+asset.export("TexturesPath", planeTextures)
+asset.export("SpeckPath", planeSpeck)

@@ -40,7 +40,9 @@ local TeslaPosition = {
     },
     GUI = {
         Name = "Tesla Roadster",
-        Path = "/Solar System/SSSB"
+        Path = "/Solar System/SSSB",
+        Description = [[Position and Trail of Tesla Roadster from 2018 FEB 8
+        to 2022 FEB 7 00:00:00. Data from JPL Horizons.]]
     }
 }
 

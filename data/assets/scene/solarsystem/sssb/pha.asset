@@ -11,16 +11,20 @@ object.Renderable.Enabled = false
 object.Renderable.SegmentQuality = 3
 object.Renderable.TrailFade = 17
 
+object.GUI.Description = [[ Asteroids that are deemed potentially hazardous to Earth
+    based on their close approaches. All asteroids with an Earth Minimum Orbit
+    Intersection Distance (MOID) of 0.05 au or less, and with an absolute magnitude (H)
+    of 22.0 or less. ]]
+
+
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })
 
 
 asset.meta = {
     Name = "Potentially-Hazardous Asteroids",
     Version = "1.0",
-    Description = [[ Asteroids that are deemed potentially hazardous to Earth
-        based on their close approaches. All asteroids with an Earth Minimum
-        Orbit Intersection Distance (MOID) of 0.05 au or less, and with an
-        absolute magnitude (H) of 22.0 or less. ]],
+    Description = [[ RenderableSmallBody asset with data from from JPL Horizons
+        contiaining Potentially Hazardous group. ]],
     Author = [[JPL Small-Body Database hosted by California Institute of
         Technology]],
     URL = "https://ssd.jpl.nasa.gov/sbdb_query.cgi",

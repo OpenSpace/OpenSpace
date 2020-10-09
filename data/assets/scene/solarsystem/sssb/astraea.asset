@@ -1,0 +1,60 @@
+local assetHelper = asset.require('util/asset_helper')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+
+local trajectory = asset.syncedResource({
+    Name = "5 Astraea Trajectory",
+    Type = "HttpSynchronization",
+    Identifier = "astraea_horizons",
+    Version = 1
+ })
+
+local AstraeaTrail = {
+    Identifier = "AstraeaTrail",
+    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+    Renderable = {
+        Type = "RenderableTrailTrajectory",
+        Translation = {
+            Type = "HorizonsTranslation",
+            HorizonsTextFile = trajectory .. "/horizons_astraea.dat"
+        },
+        Color = { 0.9, 0.9, 0.0 },
+        StartTime = "2014 JAN 01 00:00:00",
+        EndTime = "2023 JAN 01 00:00:00",
+        SampleInterval = 7000,
+        TimeStampSubsampleFactor = 1
+    },
+    GUI = {
+        Name = "5 Astraea Trail",
+        Path = "/Solar System/Interstellar"
+    }
+}
+
+local AstraeaPosition = {
+    Identifier = "AstraeaPosition",
+    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+    Transform = {
+        Translation = {
+            Type = "HorizonsTranslation",
+            HorizonsTextFile = trajectory .. "/horizons_astraea.dat"
+        },
+    },
+    GUI = {
+        Name = "5 Astraea",
+        Path = "/Solar System/Interstellar"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { AstraeaPosition, AstraeaTrail })
+
+asset.meta = {
+    Name = "5 Astraea",
+    Version = "1.0",
+    Description = [[ This asset contains the trail
+        and position of 5 Astraea from 2014 JAN 01 00:00:00
+        to 2023 JAN 01 00:00:00. Data from JPL Horizons']],
+    Author = "Zach Shaffer",
+    URL = "https://ssd.jpl.nasa.gov/horizons.cgi",
+    License = [[ JPL-authored documents are sponsored by NASA under Contract
+        NAS7-030010. All documents available from this server may be protected
+        under the U.S. and Foreign Copyright Laws."]]
+}

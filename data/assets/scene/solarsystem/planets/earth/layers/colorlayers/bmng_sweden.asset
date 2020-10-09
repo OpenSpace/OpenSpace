@@ -4,7 +4,9 @@ local globeIdentifier = asset.require("./../../earth").Earth.Identifier
 local layer = {
     Identifier = "BMNG_Sweden",
     Name = "BMNG [Sweden]",
-    FilePath = mapServiceConfigsPath .. "/LiU/Bmng.wms"
+    FilePath = mapServiceConfigsPath .. "/LiU/Bmng.wms",
+    Description = [[ Web loaded full resolution map of Blue Marble Next Generation.
+        This map is hosted on the OpenSpace servers in Sweden]],
 }
 
 asset.onInitialize(function () 
@@ -17,7 +19,7 @@ asset.meta = {
     Name = "Blue Marble Next Generation (Sweden)",
     Version = "1.0",
     Description = [[ Web loaded full resolution map of Blue Marble Next Generation.
-        Hosted at LiU for Europe access]],
+        This map is hosted on the OpenSpace servers in Sweden]],
     Author = "OpenSpace Team",
     URL = "https://visibleearth.nasa.gov/collection/1484/blue-marble",
     License = "NASA",

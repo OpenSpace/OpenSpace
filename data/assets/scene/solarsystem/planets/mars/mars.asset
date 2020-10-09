@@ -41,7 +41,9 @@ local Mars = {
     },
     Tag = { "planet_solarSystem", "planet_terrestrial" },
     GUI = {
-        Path = "/Solar System/Planets/Mars"
+        Name = "Mars",
+        Path = "/Solar System/Planets/Mars",
+        Description = [[ Main globe for Mars with labels and map layers.]]
     }
 }
 
@@ -68,7 +70,8 @@ local MarsLabel = {
     Tag = { "solarsystem_labels" },
     GUI = {
         Name = "Mars Label",
-        Path = "/Solar System/Planets/Mars"
+        Path = "/Solar System/Planets/Mars",
+        Description = [[ Main label for Mars]]
     }
 }
 

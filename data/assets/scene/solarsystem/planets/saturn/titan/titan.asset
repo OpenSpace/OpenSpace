@@ -44,7 +44,9 @@ local Titan = {
     },
     Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
     GUI = {
-        Path = "/Solar System/Planets/Saturn/Moons"
+        Name = "Titan",
+        Path = "/Solar System/Planets/Saturn/Moons",
+        Description = [[Largest moon of Saturn.]]
     }
 }
 
@@ -59,5 +61,6 @@ asset.meta = {
     Description = [[ Titan globe with labels.]],
     Author = "OpenSpace Team",
     URL = "http://openspaceproject.com",
-    License = "MIT license"
+    License = "MIT license",
+    Identifiers = "Titan"
 }

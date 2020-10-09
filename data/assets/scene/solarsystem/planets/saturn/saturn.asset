@@ -37,7 +37,9 @@ local Saturn = {
     },
     Tag = { "planet_solarSystem", "planet_giants" },
     GUI = {
-        Path = "/Solar System/Planets/Saturn"
+        Name = "Saturn",
+        Path = "/Solar System/Planets/Saturn",
+        Description = [[Saturn globe.]]
     }
 }
 
@@ -58,7 +60,8 @@ local SaturnLabel = {
     Tag = { "solarsystem_labels" },
     GUI = {
         Name = "Saturn Label",
-        Path = "/Solar System/Planets/Saturn"
+        Path = "/Solar System/Planets/Saturn",
+        Description = [[ Main planet label for Saturn.]],
     }
 }
 

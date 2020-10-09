@@ -1,13 +1,12 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('scene/solarsystem/sun/transforms')
+local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
 asset.require("spice/base")
 
 
-local etransforms = asset.require('scene/solarsystem/planets/earth/transforms')
-
 local VenusTrailEarth = {
     Identifier = "VenusTrailEarth",
-    Parent = etransforms.EarthBarycenter.Identifier,
+    Parent = earthTransforms.EarthBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailOrbit",
         Translation = {
@@ -24,6 +23,7 @@ local VenusTrailEarth = {
     GUI = {
         Name = "Venus trail from Earth",
         Path = "/Solar System/Planets/Venus",
+        Description = "Alternate trail for Venus, showing Venus as observed from Earth.",
         Hidden = false
     }
 }

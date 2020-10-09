@@ -22,7 +22,8 @@ local MimasTrail = {
     Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_saturn" },
     GUI = {
         Name = "Mimas Trail",
-        Path = "/Solar System/Planets/Saturn/Moons"
+        Path = "/Solar System/Planets/Saturn/Moons",
+        Description = [[ Trail of Saturn's moon Mimas as observed by Saturn.]],
     }
 }
 
@@ -34,8 +35,7 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { MimasTrail })
 asset.meta = {
     Name = "Mimas Trail",
     Version = "1.0",
-    Description = [[ Trail of Saturn's moon Mimas as observed by Saturn. Data from NASA
-        Spice (see base spice asset)]],
+    Description = [[ Main trail for Mimas. Data from NASA Spice (see base spice asset)]],
     Author = "OpenSpace Team",
     URL = "http://openspaceproject.com",
     License = "MIT license",

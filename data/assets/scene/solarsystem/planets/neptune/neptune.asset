@@ -21,7 +21,9 @@ local Neptune = {
     },
     Tag = { "planet_solarSystem", "planet_giants" },
     GUI = {
-        Path = "/Solar System/Planets/Neptune"
+        Name = "Neptune",
+        Path = "/Solar System/Planets/Neptune",
+        Description = [[Neptune globe]]
     }
 }
 
@@ -42,7 +44,8 @@ local NeptuneLabel = {
     Tag = { "solarsystem_labels" },
     GUI = {
         Name = "Neptune Label",
-        Path = "/Solar System/Planets/Neptune"
+        Path = "/Solar System/Planets/Neptune",
+        Description = [[ Main planet label for Neptune.]],
     }
 }
 

@@ -14,14 +14,16 @@ local VenusBarycenter = {
     },
     GUI = {
         Name = "Venus Barycenter",
-        Path = "/Solar System/Planets/Venus"
+        Path = "/Solar System/Planets/Venus",
+        Hidden = true,
+        Description = "Position for Venus Barycenter"
     }
 }
 
 asset.meta = {
     Name = "Venus Transforms",
     Version = "1.0",
-    Description = [[ Venus Barycenter transform]],
+    Description = [[ Spice translation for Venus Barycenter]],
     Author = "OpenSpace Team",
     URL = "http://openspaceproject.com",
     License = "MIT license",

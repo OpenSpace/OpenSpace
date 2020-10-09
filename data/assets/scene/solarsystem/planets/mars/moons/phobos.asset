@@ -29,7 +29,9 @@ local Phobos = {
     },
     Tag = { "moon_solarSystem", "moon_terrestrial", "moon_mars" },
     GUI = {
-        Path = "/Solar System/Planets/Mars"
+        Name = "Phobos",
+        Path = "/Solar System/Planets/Mars",
+        Description = [[One of two moons of Mars.]]
     }
 }
 
@@ -50,10 +52,22 @@ local PhobosTrail = {
     Tag = { "moonTrail_solarSystem", "moonTrail_terrestrial", "moonTrail_mars" },
     GUI = {
         Name = "Phobos Trail",
-        Path = "/Solar System/Planets/Mars"
+        Path = "/Solar System/Planets/Mars",
+        Description = [[Trail for Phobos.]]
     }
 }
 
 
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Phobos, PhobosTrail })
+
+
+asset.meta = {
+    Name = "Phobos",
+    Version = "1.0",
+    Description = [[ RenderableGlobe and Trail for Phobos.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = "Phobos,PhobosTrail"
+}

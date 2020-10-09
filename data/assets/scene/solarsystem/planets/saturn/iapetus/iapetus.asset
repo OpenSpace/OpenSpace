@@ -44,7 +44,9 @@ local Iapetus = {
     },
     Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
     GUI = {
-        Path = "/Solar System/Planets/Saturn/Moons"
+        Name = "Iapetus",
+        Path = "/Solar System/Planets/Saturn/Moons",
+        Description = [[Third largest moon of Saturn. ]]
     }
 }
 

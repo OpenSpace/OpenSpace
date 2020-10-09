@@ -15,7 +15,8 @@ local NeptuneBarycenter = {
     GUI = {
         Name = "Neptune Barycenter",
         Path = "/Solar System/Planets/Neptune",
-        Hidden = true
+        Hidden = true,
+        Description = [[ Neptune Barycenter position]],
     }
 }
 

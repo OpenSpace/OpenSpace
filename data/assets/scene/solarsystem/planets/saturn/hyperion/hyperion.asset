@@ -44,6 +44,7 @@ local Hyperion = {
     },
     Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
     GUI = {
+        Name = "Hyperion",
         Path = "/Solar System/Planets/Saturn/Moons"
     }
 }

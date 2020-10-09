@@ -44,7 +44,9 @@ local Enceladus = {
     },
     Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
     GUI = {
-        Path = "/Solar System/Planets/Saturn/Moons"
+        Name = "Enceladus",
+        Path = "/Solar System/Planets/Saturn/Moons",
+        Description = [[ Enceladus globe with labels]],
     }
 }
 
@@ -56,7 +58,7 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { Enceladus })
 asset.meta = {
     Name = "Enceladus",
     Version = "1.0",
-    Description = [[ Enceladus globe with labels]],
+    Description = [[ Enceladus globe with labels and map layers]],
     Author = "OpenSpace Team",
     URL = "http://openspaceproject.com",
     License = "MIT license",

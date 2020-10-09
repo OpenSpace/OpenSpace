@@ -44,7 +44,9 @@ local Rhea = {
     },
     Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
     GUI = {
-        Path = "/Solar System/Planets/Saturn/Moons"
+        Name = "Rhea",
+        Path = "/Solar System/Planets/Saturn/Moons",
+        Description = [[Second largest moon of Saturn.]]
     }
 }
 

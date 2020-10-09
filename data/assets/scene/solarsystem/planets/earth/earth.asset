@@ -46,7 +46,9 @@ local Earth = {
     },
     Tag = { "planet_solarSystem", "planet_terrestrial" },
     GUI = {
-        Path = "/Solar System/Planets/Earth"
+        Name = "Earth",
+        Path = "/Solar System/Planets/Earth",
+        Description = "Earth Globe"
     }
 }
 
@@ -74,7 +76,8 @@ local EarthLabel = {
     Tag = { "solarsystem_labels" },
     GUI = {
         Name = "Earth Label",
-        Path = "/Solar System/Planets/Earth"
+        Path = "/Solar System/Planets/Earth",
+        Description = "Main label for Earth"
     }
 }
 

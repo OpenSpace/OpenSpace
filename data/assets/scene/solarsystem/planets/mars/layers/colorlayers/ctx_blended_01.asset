@@ -9,18 +9,7 @@ local layer = {
     Settings = {
         Gamma = 2.14,
         Multiplier = 1.54
-    }
-}
-
-asset.onInitialize(function () 
-    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-end)
-
-asset.export("layer", layer)
-
-asset.meta = {
-    Name = "CTX Blended beta01",
-    Version = "1.0",
+    },
     Description = [[This product contains CTX data through MRO release 45, CTX mission
         phase J21 (December 1, 2017). The mosaic is comprised of 74,196 separate CTX
         images out of 95,106 available (78.0%). Orbits not included were either (1) low
@@ -35,7 +24,20 @@ asset.meta = {
         pixel-for-pixel spatial documentation of image seams, to prevent misinterpretation
         of seams as possible landforms and to provide instant access to original data. A
         completely seamless CTX mosaic is currently infeasible, so seam-maps are required
-        to prevent misinterpretation. (Description from URL) This map is hosted by ESRI]],
+        to prevent misinterpretation. (Description from URL)]],
+}
+
+asset.onInitialize(function () 
+    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
+asset.meta = {
+    Name = "CTX Blended beta01",
+    Version = "1.0",
+    Description = [[New blended CTX map for Mars from CalTech Murray lab. This map is
+        hosted by ESRI.]],
     Author = "Caltech Murray Lab",
     URL = "http://murray-lab.caltech.edu/CTX/",
     License = "Esri Master License Agreement",

@@ -9,13 +9,17 @@ object.Renderable.Enabled = false
 object.Renderable.SegmentQuality = 9
 object.Renderable.TrailFade = 18
 
+object.GUI.Description = [[ Periodic comets with an orbital period between 20 and 200
+    years. ]]
+
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })
 
 
 asset.meta = {
     Name = "Halley-Type Comets",
     Version = "1.0",
-    Description = [[ Periodic comets with an orbital period between 20 and 200 years. ]],
+    Description = [[ RenderableSmallBody asset with data from from JPL Horizons
+        contiaining the Halley-Type group.]],
     Author = "JPL Small-Body Database hosted by California Institute of Technology",
     URL = "https://ssd.jpl.nasa.gov/sbdb_query.cgi",
     License = [[JPL-authored documents are sponsored by NASA under Contract NAS7-030010.

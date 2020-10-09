@@ -29,7 +29,9 @@ local Deimos = {
     },
     Tag = { "moon_solarSystem", "moon_terrestrial", "moon_mars" },
     GUI = {
-        Path = "/Solar System/Planets/Mars"
+        Name = "Deimos",
+        Path = "/Solar System/Planets/Mars",
+        Description = [[One of two moons of Mars.]]
     }
 }
 
@@ -50,10 +52,22 @@ local DeimosTrail = {
     Tag = { "moonTrail_solarSystem", "moonTrail_terrestrial", "moonTrail_mars" },
     GUI = {
         Name = "Deimos Trail",
-        Path = "/Solar System/Planets/Mars"
+        Path = "/Solar System/Planets/Mars",
+        Description = [[Trail for Deimos]]
     }
 }
 
 
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Deimos, DeimosTrail })
+
+
+asset.meta = {
+    Name = "Deimos",
+    Version = "1.0",
+    Description = [[ RenderableGlobe and Trail for Deimos.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = "Deimos,DeimosTrail"
+}
