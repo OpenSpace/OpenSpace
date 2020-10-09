@@ -50,26 +50,13 @@ public:
 
     struct CameraPose {
         glm::dvec3 position = glm::dvec3(0.0);
-        glm::quat rotation = glm::quat(1.f, 0.f, 0.f, 0.f);
+        glm::quat rotation = glm::quat(0.f, 0.f, 0.f, 0.f);
         std::string focusNode;
-        float scale;
-        bool followFocusNodeRotation;
+        float scale = 1.f;
+        bool followFocusNodeRotation = false;
 
-        CameraPose() {
-            position = {0., 0., 0.};
-            rotation = {0., 0., 0., 0.};
-            focusNode = "";
-            scale = 1.0;
-            followFocusNodeRotation = false;
-        };
-
-        CameraPose(const openspace::datamessagestructures::CameraKeyframe& kf) {
-            position = kf._position;
-            rotation = kf._rotation;
-            focusNode = kf._focusNode;
-            scale = kf._scale;
-            followFocusNodeRotation = kf._followNodeRotation;
-        };
+        CameraPose() = default;
+        CameraPose(datamessagestructures::CameraKeyframe&& kf);
     };
 
     /**

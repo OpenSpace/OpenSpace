@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,6 +34,11 @@
 
 namespace {
     constexpr const char* _loggerCat = "ConvertRecFormatTask";
+
+    constexpr const char* KeyConvertToAscii = "ConvertToAscii";
+    constexpr const char* KeyConvertToBinary = "ConvertToBinary";
+    constexpr const char* KeyInFilePath = "InputFilePath";
+    constexpr const char* KeyOutFilePath = "OutputFilePath";
 } // namespace
 
 namespace openspace::interaction {
@@ -65,10 +70,10 @@ ConvertRecFormatTask::~ConvertRecFormatTask() {
 
 std::string ConvertRecFormatTask::description() {
     std::string description = "Convert session recording file '" + _inFilePath + "' ";
-    if (_fileFormatType == SessionRecordingDataMode::Ascii) {
+    if (_fileFormatType == SessionRecording::DataMode::Ascii) {
         description += "(ascii format) ";
     }
-    else if (_fileFormatType == SessionRecordingDataMode::Binary) {
+    else if (_fileFormatType == SessionRecording::DataMode::Binary) {
         description += "(binary format) ";
     }
     else {
@@ -85,15 +90,15 @@ void ConvertRecFormatTask::perform(const Task::ProgressCallback& progressCallbac
 void ConvertRecFormatTask::convert() {
     std::string expectedFileExtension_in, expectedFileExtension_out;
     std::string currentFormat;
-    if (_fileFormatType == SessionRecordingDataMode::Binary) {
+    if (_fileFormatType == SessionRecording::DataMode::Binary) {
         currentFormat = "binary";
-        expectedFileExtension_in = SessionRecordingFileExtensionBinary;
-        expectedFileExtension_out = SessionRecordingFileExtensionAscii;
+        expectedFileExtension_in = SessionRecording::FileExtensionBinary;
+        expectedFileExtension_out = SessionRecording::FileExtensionAscii;
     }
-    else if (_fileFormatType == SessionRecordingDataMode::Ascii) {
+    else if (_fileFormatType == SessionRecording::DataMode::Ascii) {
         currentFormat = "ascii";
-        expectedFileExtension_in = SessionRecordingFileExtensionAscii;
-        expectedFileExtension_out = SessionRecordingFileExtensionBinary;
+        expectedFileExtension_in = SessionRecording::FileExtensionAscii;
+        expectedFileExtension_out = SessionRecording::FileExtensionBinary;
     }
 
     if (!SessionRecording::hasFileExtension(_inFilePath, expectedFileExtension_in)) {
@@ -115,22 +120,26 @@ void ConvertRecFormatTask::convert() {
         _outFilePath += expectedFileExtension_out;
     }
 
-    if (_fileFormatType == SessionRecordingDataMode::Ascii) {
+    if (_fileFormatType == SessionRecording::DataMode::Ascii) {
         _oFile.open(_outFilePath);
     }
-    else if (_fileFormatType == SessionRecordingDataMode::Binary) {
+    else if (_fileFormatType == SessionRecording::DataMode::Binary) {
         _oFile.open(_outFilePath, std::ios::binary);
     }
-    _oFile.write(SessionRecordingFileHeaderTitle.c_str(),
-        SessionRecordingFileHeaderTitle.length());
-    _oFile.write(SessionRecording::FileHeaderVersion,
-        SessionRecording::FileHeaderVersionLength);
+    _oFile.write(
+        SessionRecording::FileHeaderTitle.c_str(),
+        SessionRecording::FileHeaderTitle.length()
+    );
+    _oFile.write(
+        SessionRecording::FileHeaderVersion,
+        SessionRecording::FileHeaderVersionLength
+    );
     _oFile.close();
 
-    if (_fileFormatType == SessionRecordingDataMode::Ascii) {
+    if (_fileFormatType == SessionRecording::DataMode::Ascii) {
         convertToBinary();
     }
-    else if (_fileFormatType == SessionRecordingDataMode::Binary) {
+    else if (_fileFormatType == SessionRecording::DataMode::Binary) {
         convertToAscii();
     }
     else {
@@ -140,14 +149,14 @@ void ConvertRecFormatTask::convert() {
 }
 
 void ConvertRecFormatTask::determineFormatType() {
-    _fileFormatType = SessionRecordingDataMode::Unknown;
+    _fileFormatType = SessionRecording::DataMode::Unknown;
     std::string line;
 
     line = SessionRecording::readHeaderElement(_iFile,
-        SessionRecordingFileHeaderTitle.length());
+        SessionRecording::FileHeaderTitle.length());
 
-    if (line.substr(0, SessionRecordingFileHeaderTitle.length())
-        != SessionRecordingFileHeaderTitle)
+    if (line.substr(0, SessionRecording::FileHeaderTitle.length())
+        != SessionRecording::FileHeaderTitle)
     {
         LERROR(fmt::format("Session recording file {} does not have expected header.",
             _inFilePath));
@@ -160,16 +169,16 @@ void ConvertRecFormatTask::determineFormatType() {
         SessionRecording::readHeaderElement(_iFile, 1);
 
         if (line.at(0) == SessionRecording::DataFormatAsciiTag) {
-            _fileFormatType = SessionRecordingDataMode::Ascii;
+            _fileFormatType = SessionRecording::DataMode::Ascii;
         }
         else if (line.at(0) == SessionRecording::DataFormatBinaryTag) {
-            _fileFormatType = SessionRecordingDataMode::Binary;
+            _fileFormatType = SessionRecording::DataMode::Binary;
         }
     }
 }
 
 void ConvertRecFormatTask::convertToAscii() {
-    SessionRecording::timestamps times;
+    SessionRecording::Timestamps times;
     datamessagestructures::CameraKeyframe ckf;
     datamessagestructures::TimeKeyframe   tkf;
     datamessagestructures::ScriptMessage  skf;
@@ -195,21 +204,21 @@ void ConvertRecFormatTask::convertToAscii() {
 
         std::stringstream keyframeLine = std::stringstream();
         keyframeLine.str(std::string());
-        if (frameType == SessionRecordingHeaderCameraBinary) {
+        if (frameType == SessionRecording::HeaderCameraBinary) {
             SessionRecording::readCameraKeyframeBinary(times, ckf, _iFile, lineNum);
-            SessionRecording::saveHeaderAscii(times, SessionRecordingHeaderCameraAscii,
+            SessionRecording::saveHeaderAscii(times, SessionRecording::HeaderCameraAscii,
                 keyframeLine);
             ckf.write(keyframeLine);
         }
-        else if (frameType == SessionRecordingHeaderTimeBinary) {
+        else if (frameType == SessionRecording::HeaderTimeBinary) {
             SessionRecording::readTimeKeyframeBinary(times, tkf, _iFile, lineNum);
-            SessionRecording::saveHeaderAscii(times, SessionRecordingHeaderTimeAscii,
+            SessionRecording::saveHeaderAscii(times, SessionRecording::HeaderTimeAscii,
                 keyframeLine);
             tkf.write(keyframeLine);
         }
-        else if (frameType == SessionRecordingHeaderScriptBinary) {
+        else if (frameType == SessionRecording::HeaderScriptBinary) {
             SessionRecording::readScriptKeyframeBinary(times, skf, _iFile, lineNum);
-            SessionRecording::saveHeaderAscii(times, SessionRecordingHeaderScriptAscii,
+            SessionRecording::saveHeaderAscii(times, SessionRecording::HeaderScriptAscii,
                 keyframeLine);
             skf.write(keyframeLine);
         }
@@ -227,7 +236,7 @@ void ConvertRecFormatTask::convertToAscii() {
 }
 
 void ConvertRecFormatTask::convertToBinary() {
-    SessionRecording::timestamps times;
+    SessionRecording::Timestamps times;
     datamessagestructures::CameraKeyframe ckf;
     datamessagestructures::TimeKeyframe   tkf;
     datamessagestructures::ScriptMessage  skf;
@@ -253,22 +262,22 @@ void ConvertRecFormatTask::convertToBinary() {
             break;
         }
 
-        if (entryType == SessionRecordingHeaderCameraAscii) {
+        if (entryType == SessionRecording::HeaderCameraAscii) {
             SessionRecording::readCameraKeyframeAscii(times, ckf, lineContents, lineNum);
             SessionRecording::saveCameraKeyframeBinary(times, ckf, keyframeBuffer,
             _oFile);
         }
-        else if (entryType == SessionRecordingHeaderTimeAscii) {
+        else if (entryType == SessionRecording::HeaderTimeAscii) {
             SessionRecording::readTimeKeyframeAscii(times, tkf, lineContents, lineNum);
             SessionRecording::saveTimeKeyframeBinary(times, tkf, keyframeBuffer,
             _oFile);
         }
-        else if (entryType == SessionRecordingHeaderScriptAscii) {
+        else if (entryType == SessionRecording::HeaderScriptAscii) {
             SessionRecording::readScriptKeyframeAscii(times, skf, lineContents, lineNum);
             SessionRecording::saveScriptKeyframeBinary(times, skf, keyframeBuffer,
             _oFile);
         }
-        else if (entryType.substr(0, 1) == SessionRecordingHeaderCommentAscii) {
+        else if (entryType.substr(0, 1) == SessionRecording::HeaderCommentAscii) {
             continue;
         }
         else {

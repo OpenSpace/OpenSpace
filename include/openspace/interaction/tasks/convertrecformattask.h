@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2019                                                               *
+ * Copyright (c) 2014-2020                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,12 +32,7 @@
 
 #include <string>
 
-namespace {
-    constexpr const char* KeyConvertToAscii = "ConvertToAscii";
-    constexpr const char* KeyConvertToBinary = "ConvertToBinary";
-    constexpr const char* KeyInFilePath = "InputFilePath";
-    constexpr const char* KeyOutFilePath = "OutputFilePath";
-}
+
 
 namespace openspace::interaction {
 
@@ -63,7 +58,7 @@ private:
     std::string  _outFilePath;
     std::ifstream _iFile;
     std::ofstream _oFile;
-    SessionRecordingDataMode _fileFormatType;
+    SessionRecording::DataMode _fileFormatType;
 
     std::string _valueFunctionLua;
 };
