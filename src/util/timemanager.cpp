@@ -436,11 +436,7 @@ void TimeManager::addDeltaTimesKeybindings() {
         Key::Num0
     };
 
-    // First, clear any previous keybinds
-    for (const KeyWithModifier& kb : _deltaTimeStepKeybindings) {
-        global::keybindingManager.removeKeyBinding(kb);
-    }
-    _deltaTimeStepKeybindings.clear();
+    clearDeltaTimesKeybindings();
     _deltaTimeStepKeybindings.reserve(_deltaTimeSteps.size());
 
     // Find positive delta time steps
@@ -507,6 +503,26 @@ void TimeManager::addDeltaTimesKeybindings() {
             nSteps, nSteps - maxKeyBinds
         ));
     }
+}
+
+void TimeManager::clearDeltaTimesKeybindings() {
+    for (const KeyWithModifier& kb : _deltaTimeStepKeybindings) {
+        // Check if there are multiple keys bound to the same key
+        auto bindings = global::keybindingManager.keyBinding(kb);
+        if (bindings.size() > 1) {
+            std::string names;
+            for (auto& b : bindings) {
+                names += fmt::format("'{}' ", b.second.name);
+            }
+            LWARNING(fmt::format(
+                "Updating keybindings for new delta time steps: More than one action "
+                "was bound to key '{}'. The following keybindings are removed: {}",
+                ghoul::to_string(kb), names
+            ));
+        }
+        global::keybindingManager.removeKeyBinding(kb);
+    }
+    _deltaTimeStepKeybindings.clear();
 }
 
 size_t TimeManager::nKeyframes() const {

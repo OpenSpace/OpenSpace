@@ -67,6 +67,9 @@ public:
     std::vector<std::pair<KeyWithModifier, KeyInformation>> keyBinding(
         const std::string& key) const;
 
+    std::vector<std::pair<KeyWithModifier, KeyInformation>> keyBinding(
+        const KeyWithModifier& key) const;
+
     static scripting::LuaLibrary luaLibrary();
 
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);

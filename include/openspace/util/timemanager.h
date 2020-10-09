@@ -125,6 +125,7 @@ private:
         const Keyframe<TimeKeyframeData>& future, double time);
 
     void addDeltaTimesKeybindings();
+    void clearDeltaTimesKeybindings();
 
     Timeline<TimeKeyframeData> _timeline;
     SyncData<Time> _currentTime;

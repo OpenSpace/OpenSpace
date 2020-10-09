@@ -157,10 +157,16 @@ void KeybindingManager::removeKeyBinding(const KeyWithModifier& key) {
 std::vector<std::pair<KeyWithModifier, KeybindingManager::KeyInformation>>
 KeybindingManager::keyBinding(const std::string& key) const
 {
+    KeyWithModifier k = stringToKey(key);
+    return keyBinding(k);
+}
+
+std::vector<std::pair<KeyWithModifier, KeybindingManager::KeyInformation>>
+KeybindingManager::keyBinding(const KeyWithModifier& key) const
+{
     std::vector<std::pair<KeyWithModifier, KeyInformation>> result;
 
-    KeyWithModifier k = stringToKey(key);
-    auto itRange = _keyLua.equal_range(k);
+    auto itRange = _keyLua.equal_range(key);
     for (auto it = itRange.first; it != itRange.second; ++it) {
         result.emplace_back(it->first, it->second);
     }
