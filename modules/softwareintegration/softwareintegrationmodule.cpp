@@ -93,7 +93,10 @@ namespace openspace {
             std::unique_ptr<ghoul::io::TcpSocket> socket =
                 _socketServer.awaitPendingTcpSocket();
 
-            socket->startStreams();
+            if (socket != nullptr)
+                socket->startStreams();
+            else
+                return;
 
             const size_t id = _nextConnectionId++;
             std::shared_ptr<Peer> p = std::make_shared<Peer>(Peer{
@@ -177,7 +180,8 @@ namespace openspace {
             std::vector<float> zCoordinates = readData(message);
 
             int size = xCoordinates.size();
-            
+            pointData.clear();
+
             for (int i = 0; i < size; i++) {
                 float x = xCoordinates[i];
                 float y = yCoordinates[i];
@@ -185,7 +189,6 @@ namespace openspace {
 
                 pointData.push_back({ x, y, z });
             }
-
             break;
         }
         case SoftwareConnection::MessageType::AddSceneGraphNode: {
@@ -246,6 +249,8 @@ namespace openspace {
             break;
         }
         case SoftwareConnection::MessageType::Color: {
+            std::string msg(message.begin(), message.end());
+            LERROR(fmt::format("Message recieved: {}", msg));
             std::string identifier = readIdentifier(message);
             glm::vec3 color = readColor(message);
 
@@ -262,6 +267,8 @@ namespace openspace {
             break;
         }
         case SoftwareConnection::MessageType::Opacity: {
+            std::string msg(message.begin(), message.end());
+            LERROR(fmt::format("Message recieved: {}", msg));
             std::string identifier = readIdentifier(message);
             float opacity = readFloatValue(message);
 
@@ -278,6 +285,8 @@ namespace openspace {
             break;
         }
         case SoftwareConnection::MessageType::Size: {
+            std::string msg(message.begin(), message.end());
+            LERROR(fmt::format("Message recieved: {}", msg));
             std::string identifier = readIdentifier(message);
             float size = readFloatValue(message);
 
@@ -294,6 +303,8 @@ namespace openspace {
             break;
         }
         case SoftwareConnection::MessageType::Visibility: {
+            std::string msg(message.begin(), message.end());
+            LERROR(fmt::format("Message recieved: {}", msg));
             std::string identifier = readIdentifier(message);
             std::string visibility;
             visibility.push_back(message[messageOffset]);
@@ -445,17 +456,17 @@ namespace openspace {
                 messageOffset++;
             }
         }
+        messageOffset++;
 
         std::string green;
-        messageOffset++;
         while (message[messageOffset] != ',')
         {
             green.push_back(message[messageOffset]);
             messageOffset++;
         }
+        messageOffset++;
 
         std::string blue;
-        messageOffset++;
         while (message[messageOffset] != ')')
         {
             blue.push_back(message[messageOffset]);
@@ -474,7 +485,7 @@ namespace openspace {
 
     std::vector<float> SoftwareIntegrationModule::readData(std::vector<char>& message) {
         std::string length;
-        int lengthOffset = messageOffset + 9;
+        int lengthOffset = messageOffset + 9; // 9 first bytes is the length of the data
 
         for (int i = messageOffset; i < lengthOffset; i++)
         {
@@ -533,17 +544,17 @@ namespace openspace {
         length.push_back(message[messageOffset]);
         messageOffset++;
 
-        int lengthOfString = stoi(length);
-        std::string name;
+        int lengthOfGUI = stoi(length);
+        std::string GUI;
         int counter = 0;
-        while (counter != lengthOfString)
+        while (counter != lengthOfGUI)
         {
-            name.push_back(message[messageOffset]);
+            GUI.push_back(message[messageOffset]);
             messageOffset++;
             counter++;
         }
 
-        return name;
+        return GUI;
     }
 
     size_t SoftwareIntegrationModule::nConnections() const {
