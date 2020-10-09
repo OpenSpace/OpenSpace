@@ -111,7 +111,6 @@ function (set_openspace_compile_settings project)
             ${project}
             PRIVATE
             "-stdlib=libc++"
-            "-std=gnu++17"
             "-Wall"
             "-Wextra"
             "-Wabstract-vbase-init"
@@ -192,7 +191,7 @@ function (set_openspace_compile_settings project)
             "-Wzero-length-array"
             "-Wno-missing-braces"
         )
-    elseif (LINUX AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    elseif (UNIX AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         if (OPENSPACE_WARNINGS_AS_ERRORS)
             target_compile_options(${project} PRIVATE "-Werror")
         endif ()
@@ -200,8 +199,8 @@ function (set_openspace_compile_settings project)
         target_compile_options(
             ${project}
             PRIVATE
-            "-stdlib=libstdc++"
-            "-std=gnu++17"
+            "-stdlib=libc++"
+            "-std=c++17"
             "-Wall"
             "-Wextra"
             "-Wabstract-vbase-init"
@@ -282,6 +281,9 @@ function (set_openspace_compile_settings project)
             "-Wzero-length-array"
             "-Wno-missing-braces"
         )
+
+        target_link_libraries(${project} PRIVATE "c++" "c++abi")
+        
     elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         target_compile_options(
             ${project}
