@@ -199,13 +199,37 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
 {
     dictionary.getValue("VolumeRenderingEnabled", _volumeRenderingEnabled);
     dictionary.getValue("StarRenderingEnabled", _starRenderingEnabled);
-    dictionary.getValue("StepSize", _stepSize);
-    dictionary.getValue("AbsorptionMultiply", _absorptionMultiply);
-    dictionary.getValue("EmissionMultiply", _emissionMultiply);
+    {
+        double stepSize;
+        dictionary.getValue("StepSize", stepSize);
+        _stepSize = static_cast<float>(stepSize);
+    }
+    {
+        double absorptionMultiply = _absorptionMultiply;
+        dictionary.getValue("AbsorptionMultiply", absorptionMultiply);
+        _absorptionMultiply = static_cast<float>(absorptionMultiply);
+    }
+    {
+        double emissionMultiply = _emissionMultiply;
+        dictionary.getValue("EmissionMultiply", emissionMultiply);
+        _emissionMultiply = static_cast<float>(emissionMultiply);
+    }
     dictionary.getValue("StarRenderingMethod", _starRenderingMethod);
-    dictionary.getValue("EnabledPointsRatio", _enabledPointsRatio);
-    dictionary.getValue("Translation", _translation);
-    dictionary.getValue("Rotation", _rotation);
+    {
+        double enabledPointsRatio = _enabledPointsRatio;
+        dictionary.getValue("EnabledPointsRatio", enabledPointsRatio);
+        _enabledPointsRatio = static_cast<float>(enabledPointsRatio);
+    }
+    {
+        glm::dvec3 translation = glm::vec3(_translation);
+        dictionary.getValue("Translation", translation);
+        _translation = glm::vec3(translation);
+    }
+    {
+        glm::dvec3 rotation = glm::vec3(_rotation);
+        dictionary.getValue("Rotation", rotation);
+        _rotation = glm::vec3(rotation);
+    }
 
     if (dictionary.hasKeyAndValue<bool>(VolumeRenderingEnabledInfo.identifier)) {
         _volumeRenderingEnabled = dictionary.value<bool>(

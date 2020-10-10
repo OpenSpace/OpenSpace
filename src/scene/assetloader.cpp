@@ -43,7 +43,6 @@ namespace {
     constexpr const char* AssetGlobalVariableName = "asset";
 
     constexpr const char* RequireFunctionName = "require";
-    constexpr const char* RequestFunctionName = "request";
     constexpr const char* ExistsFunctionName = "exists";
     constexpr const char* ExportFunctionName = "export";
 

@@ -35,8 +35,6 @@
 namespace {
     constexpr const char* _loggerCat = "ConvertRecFormatTask";
 
-    constexpr const char* KeyConvertToAscii = "ConvertToAscii";
-    constexpr const char* KeyConvertToBinary = "ConvertToBinary";
     constexpr const char* KeyInFilePath = "InputFilePath";
     constexpr const char* KeyOutFilePath = "OutputFilePath";
 } // namespace
