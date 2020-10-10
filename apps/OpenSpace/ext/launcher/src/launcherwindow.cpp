@@ -32,6 +32,7 @@
 #include <openspace/engine/configuration.h>
 #include <sstream>
 #include <iostream>
+#include <random>
 
 LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
                                openspace::configuration::Configuration& globalConfig,
@@ -50,9 +51,9 @@ LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
     , _globalConfig(globalConfig)
 {
     ui->setupUi(this);
-    QString logoPath = _basePath + "/data/openspace-horiz-logo.png";
-    QPixmap pix(logoPath);
-    ui->logolabel->setPixmap(pix.scaled(600, 240, Qt::KeepAspectRatio));
+    QString logoPath = _basePath + "/data/images/openspace-horiz-logo-small.png";
+     QPixmap pix(logoPath);
+    ui->logolabel->setPixmap(pix);
     connect(ui->qBtn_start, SIGNAL(released()), this, SLOT(startOpenSpace()));
     connect(ui->newButton, SIGNAL(released()), this, SLOT(openWindow_new()));
     connect(ui->editButton, SIGNAL(released()), this, SLOT(openWindow_edit()));
@@ -63,6 +64,15 @@ LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
     populateWindowConfigsList(QString(sgctConfigName.c_str()));
     ui->comboBoxWindowConfigs->setDisabled(!_sgctConfigChangeAllowed);
     _fullyConfiguredViaCliArgs = (!profileEnabled && !sgctConfigEnabled);
+
+    std::random_device rd;
+    std::mt19937 rng(rd());
+    std::uniform_int_distribution<int> uni(0, 4);
+    auto random_integer = uni(rng);
+    QString filename = QString::fromStdString("/data/images/profile" + std::to_string(random_integer) + ".png");
+    QString bgpath = QDir::fromNativeSeparators(_basePath)+ filename;
+    QPixmap bgpix(bgpath);
+    ui->backgroundImage->setPixmap(bgpix);
 }
 
 void LauncherWindow::populateProfilesList(QString preset) {
