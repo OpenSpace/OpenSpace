@@ -22,10 +22,19 @@ local DioneTrail = {
     Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_saturn" },
     GUI = {
         Name = "Dione Trail",
-        Path = "/Solar System/Planets/Saturn/Moons"
+        Path = "/Solar System/Planets/Saturn/Moons",
+        Description = [[ Trail of Saturn's moon Dione as observed by Saturn]],
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { DioneTrail })
+
+
+asset.meta = {
+    Name = "Dione Trail",
+    Version = "1.0",
+    Description = [[ Trail for Dione. Data from NASA Spice (see base spice asset)]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

@@ -1,12 +1,16 @@
 asset.require('./mercury/mercury')
 
 asset.require('./venus/venus')
+asset.require('./venus/trail')
+asset.require('./venus/trail_earth')
 asset.require('./venus/atmosphere')
 
 asset.require('./earth/earth')
+asset.require('./earth/trail')
 asset.require('./earth/atmosphere')
 asset.require('./earth/markers')
 asset.require('./earth/moon/moon')
+asset.require('./earth/moon/trail')
 
 asset.require('./mars/mars')
 asset.require('./mars/atmosphere')

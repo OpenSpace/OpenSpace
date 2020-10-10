@@ -87,6 +87,7 @@ private:
     properties::BoolProperty _enabled;
     properties::TriggerProperty _reset;
     properties::TriggerProperty _remove;
+    properties::StringProperty _guiDescription;
 
     layergroupid::TypeID _type;
     std::unique_ptr<tileprovider::TileProvider> _tileProvider;

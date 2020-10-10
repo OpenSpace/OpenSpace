@@ -47,6 +47,7 @@ namespace {
     constexpr const char* KeyGuiName = "GUI.Name";
     constexpr const char* KeyGuiPath = "GUI.Path";
     constexpr const char* KeyGuiHidden = "GUI.Hidden";
+    constexpr const char* KeyGuiDescription = "GUI.Description";
 
     constexpr const char* KeyTransformTranslation = "Transform.Translation";
     constexpr const char* KeyTransformRotation = "Transform.Rotation";
@@ -120,6 +121,14 @@ namespace {
         openspace::properties::Property::Visibility::Hidden
     };
 
+    constexpr openspace::properties::Property::PropertyInfo GuiDescriptionInfo = {
+        "GuiDescription",
+        "Gui Description",
+        "This is the description for the scene graph node to be shown in the gui "
+        "example: Earth is a special place",
+        openspace::properties::Property::Visibility::Hidden
+    };
+
     constexpr openspace::properties::Property::PropertyInfo GuiHiddenInfo = {
         "GuiHidden",
         "Gui Hidden",
@@ -159,6 +168,12 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         result->setGuiName(dictionary.value<std::string>(KeyGuiName));
         result->_guiDisplayName = result->guiName();
         result->addProperty(result->_guiDisplayName);
+    }
+
+    if (dictionary.hasKey(KeyGuiDescription)) {
+        result->setDescription(dictionary.value<std::string>(KeyGuiDescription));
+        result->_guiDescription = result->description();
+        result->addProperty(result->_guiDescription);
     }
 
     if (dictionary.hasKey(KeyGuiHidden)) {
@@ -314,6 +329,7 @@ SceneGraphNode::SceneGraphNode()
     , _guiHidden(GuiHiddenInfo)
     , _guiPath(GuiPathInfo)
     , _guiDisplayName(GuiNameInfo)
+    , _guiDescription(GuiDescriptionInfo)
     , _transform {
         ghoul::mm_unique_ptr<Translation>(
             global::memoryManager.PersistentMemory.alloc<StaticTranslation>()

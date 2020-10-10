@@ -1,11 +1,17 @@
 local assetHelper = asset.require('util/asset_helper')
 local sharedSssb = asset.require('./sssb_shared')
 
-local filepath = sharedSssb.downloadSssbDatabaseFile(asset, 'chiron-type_comet', 'sssb_data_chiron-type_comet')
-local object = sharedSssb.createSssbGroupObject('sssb_data_chiron-type_comet.csv', "Chiron-type Comets", filepath, { 0.15 ,0.1 ,1.0 })
+local filepath = sharedSssb.downloadSssbDatabaseFile(asset, 'chiron-type_comet',
+    'sssb_data_chiron-type_comet')
+local object = sharedSssb.createSssbGroupObject('sssb_data_chiron-type_comet.csv',
+    "Chiron-type Comets", filepath, { 0.15 ,0.1 ,1.0 })
 object.Renderable.Enabled = false
 object.Renderable.SegmentQuality = 10
 object.Renderable.TrailFade = 25
+
+object.GUI.Description = [[ Comets with a Tisserand's parameter with respect to Jupiter of
+    greater than 3 and a semi-major axis greater than that of Jupiter. ]]
+
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })
 
@@ -13,8 +19,12 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { object })
 asset.meta = {
     Name = "Chiron-Type Comets",
     Version = "1.0",
-    Description = [[ Comets with a Tisserand's parameter with respect to Jupiter of greater than 3 and a semi-major axis greater than that of Jupiter. ]],
+    Description = [[ RenderableSmallBody asset with data from from JPL Horizons
+        contiaining the Chiron-Type group.]],
     Author = "JPL Small-Body Database hosted by California Institute of Technology",
     URL = "https://ssd.jpl.nasa.gov/sbdb_query.cgi",
-    License = "JPL-authored documents are sponsored by NASA under Contract NAS7-030010. All documents available from this server may be protected under the U.S. and Foreign Copyright Laws."
+    License = [[JPL-authored documents are sponsored by NASA under Contract NAS7-030010.
+        All documents available from this server may be protected under the U.S. and
+        Foreign Copyright Laws.]],
+    Identifiers = "sssb_sssb_data_chiron-type_comet"
 }

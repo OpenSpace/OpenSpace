@@ -32,10 +32,20 @@ local NeptuneTrail = {
     Tag = { "planetTrail_solarSystem", "planetTrail_giants" },
     GUI = {
         Name = "Neptune Trail",
-        Path = "/Solar System/Planets/Neptune"
+        Path = "/Solar System/Planets/Neptune",
+        Description = [[ Trail of Neptune as observed by the Sun.]]
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { NeptuneTrail })
+
+
+asset.meta = {
+    Name = "Neptune Trail",
+    Version = "1.0",
+    Description = [[ Main trail of Neptune. Data from NASA Spice (see base spice asset)]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = "NeptuneTrail"
+}
