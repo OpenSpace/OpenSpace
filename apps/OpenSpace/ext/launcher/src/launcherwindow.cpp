@@ -65,12 +65,31 @@ LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
     ui->comboBoxWindowConfigs->setDisabled(!_sgctConfigChangeAllowed);
     _fullyConfiguredViaCliArgs = (!profileEnabled && !sgctConfigEnabled);
 
-    std::random_device rd;
-    std::mt19937 rng(rd());
-    std::uniform_int_distribution<int> uni(0, 4);
-    auto random_integer = uni(rng);
-    QString filename = QString::fromStdString("/data/images/profile" + std::to_string(random_integer) + ".png");
-    QString bgpath = QDir::fromNativeSeparators(_basePath)+ filename;
+    bool hasSyncFiles = false;
+    QString syncFilePath = QString(globalConfig.pathTokens["SYNC"].c_str()) + "/http/launcher_images/1/profile1.png";
+    QFileInfo check_file(syncFilePath);
+    // check if file exists and if yes: Is it really a file and no directory?
+    if (check_file.exists() && check_file.isFile()) {
+        hasSyncFiles = true;
+    }
+
+
+    QString filename;
+    QString bgpath;
+    if (hasSyncFiles) {
+        std::random_device rd;
+        std::mt19937 rng(rd());
+        std::uniform_int_distribution<int> uni(0, 4);
+        auto random_integer = uni(rng);
+        filename = QString::fromStdString("/http/launcher_images/1/profile" + std::to_string(random_integer) + ".png");
+        bgpath = QString(globalConfig.pathTokens["SYNC"].c_str()) + filename;
+    }
+    else {
+        filename = QString::fromStdString("/data/images/profile0.png");
+        bgpath = QDir::fromNativeSeparators(_basePath) + filename;
+    }
+
+
     QPixmap bgpix(bgpath);
     ui->backgroundImage->setPixmap(bgpix);
 }
