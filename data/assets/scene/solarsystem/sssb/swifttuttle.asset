@@ -43,6 +43,11 @@ local SwiftTuttlePosition = {
     }
 }
 
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+    SwiftTuttlePosition, SwiftTuttleTrail 
+})
+
+
 asset.meta = {
     Name = "Swift Tuttle",
     Version = "1.0",
@@ -55,8 +60,3 @@ asset.meta = {
     under the U.S. and Foreign Copyright Laws."]],
     Identifiers = "SwiftTuttlePosition,SwiftTuttleTrail"
 }
-
-
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-    SwiftTuttlePosition, SwiftTuttleTrail 
-})

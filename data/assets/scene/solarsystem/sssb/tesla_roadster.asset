@@ -46,6 +46,9 @@ local TeslaPosition = {
     }
 }
 
+assetHelper.registerSceneGraphNodesAndExport(asset, { TeslaPosition, TeslaRoadsterTrail })
+
+
 asset.meta = {
     Name = "Tesla Roadster",
     Version = "1.0",
@@ -58,5 +61,3 @@ asset.meta = {
     under the U.S. and Foreign Copyright Laws.]],
     Identifiers = "TeslaPosition,TeslaRoadsterTrail"
 }
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { TeslaPosition, TeslaRoadsterTrail })

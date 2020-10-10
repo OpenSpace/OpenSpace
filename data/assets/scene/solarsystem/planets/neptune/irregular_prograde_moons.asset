@@ -57,7 +57,7 @@ local irregularProgradeMoons = {
         Tags = tags,
         GUI = {
             Path = "/Solar System/Planets/Neptune/Moons/Irregular Prograde Moons"
-        },
+    },
         TrailColor = trailColor,
         OrbitPeriod = 9740.73,
         Kernels = kernel086
