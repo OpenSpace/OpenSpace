@@ -153,6 +153,9 @@ void LayerGroup::deleteLayer(const std::string& layerName) {
          ++it)
     {
         if (it->get()->identifier() == layerName) {
+            // we need to make a copy as the layername is only a reference
+            // which will no longer be valid once it is deleted
+            std::string name = layerName;
             removePropertySubOwner(it->get());
             (*it)->deinitialize();
             _layers.erase(it);
@@ -160,7 +163,7 @@ void LayerGroup::deleteLayer(const std::string& layerName) {
             if (_onChangeCallback) {
                 _onChangeCallback(nullptr);
             }
-            LINFO("Deleted layer " + layerName);
+            LINFO("Deleted layer " + name);
 
             if (_layers.empty()) {
                 _levelBlendingEnabled.setVisibility(
