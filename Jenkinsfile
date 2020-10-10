@@ -104,14 +104,14 @@ linux_gcc: {
       gitHelper.checkoutGit(url, branch);
     }
     stage('linux-gcc/build(make)') {
-        def cmakeCompileOptions = moduleMakeFlags();
+        def cmakeCompileOptions = moduleCMakeFlags();
         cmakeCompileOptions += ' -DMAKE_BUILD_TYPE=Release';
         // Not sure why the linking of OpenSpaceTest takes so long
         compileHelper.build(compileHelper.Make(), compileHelper.Gcc(), cmakeCompileOptions, 'OpenSpace', 'build-make');
         compileHelper.recordCompileIssues(compileHelper.Gcc());
     }
     stage('linux-gcc/build(ninja)') {
-        def cmakeCompileOptions = moduleMakeFlags();
+        def cmakeCompileOptions = moduleCMakeFlags();
         cmakeCompileOptions += '-DMAKE_BUILD_TYPE=Release';
         // Not sure why the linking of OpenSpaceTest takes so long
         compileHelper.build(compileHelper.Ninja(), compileHelper.Gcc(), cmakeCompileOptions, 'OpenSpace', 'build-ninja');
@@ -128,14 +128,14 @@ linux_clang: {
       gitHelper.checkoutGit(url, branch);
     }
     stage('linux-clang/build(make)') {
-        def cmakeCompileOptions = moduleMakeFlags()
+        def cmakeCompileOptions = moduleCMakeFlags()
         cmakeCompileOptions += ' -DMAKE_BUILD_TYPE=Release'
         // Not sure why the linking of OpenSpaceTest takes so long
         compileHelper.build(compileHelper.Make(), compileHelper.Clang(), cmakeCompileOptions, 'OpenSpace', 'build-make');
         compileHelper.recordCompileIssues(compileHelper.Clang());
     }
     stage('linux-clang/build(ninja)') {
-        def cmakeCompileOptions = moduleMakeFlags()
+        def cmakeCompileOptions = moduleCMakeFlags()
         cmakeCompileOptions += '-DMAKE_BUILD_TYPE=Release'
         // Not sure why the linking of OpenSpaceTest takes so long
         compileHelper.build(compileHelper.Ninja(), compileHelper.Clang(), cmakeCompileOptions, 'OpenSpace', 'build-ninja');
