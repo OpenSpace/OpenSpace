@@ -850,7 +850,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     if (_hasPolygon) {
         glBindTexture(GL_TEXTURE_2D, _pTexture);
     }
-    else {
+    else if (_spriteTexture) {
         _spriteTexture->bind();
     }
     _program->setUniform(_uniformCache.spriteTexture, textureUnit);
@@ -867,7 +867,6 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
 
     global::renderEngine.openglStateCache().resetBlendState();
     global::renderEngine.openglStateCache().resetDepthState();
-
 }
 
 void RenderableBillboardsCloud::renderLabels(const RenderData& data,
@@ -902,7 +901,7 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data,
     }
 
     glm::vec4 textColor = glm::vec4(
-        glm::vec3(_textColor), 
+        glm::vec3(_textColor),
         _textOpacity * fadeInVariable
     );
 

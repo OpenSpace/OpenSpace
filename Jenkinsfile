@@ -100,8 +100,10 @@ linux: {
       gitHelper.checkoutGit(url, branch);
     }
     stage('linux/build') {
+        def cmakeBuildingOptionLinux = moduleMakeFlags()
+        cmakeBuildingOptionLinux += '-DMAKE_BUILD_TYPE=Release'
         // Not sure why the linking of OpenSpaceTest takes so long
-        compileHelper.build(compileHelper.Make(), compileHelper.Gcc(), moduleCMakeFlags(), 'OpenSpace', 'build-all');
+        compileHelper.build(compileHelper.Make(), compileHelper.Gcc(), cmakeBuildingOptionLinux, 'OpenSpace', 'build-all');
     }
     stage('linux/warnings') {
       // compileHelper.recordCompileIssues(compileHelper.Gcc());

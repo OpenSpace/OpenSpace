@@ -27,9 +27,13 @@
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/properties/property.h>
 #include <openspace/properties/propertyowner.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/fmt.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/misc.h>
 #include <ghoul/misc/profiling.h>
+#include <json/json.hpp>
+#include <set>
 
 #include "profile_lua.inl"
 
@@ -37,35 +41,10 @@ namespace openspace {
 
 namespace {
     constexpr const char* _loggerCat = "Profile";
-    
-    constexpr const char* headerVersion = "#Version";
-    constexpr const char* headerMeta = "#Meta";
-    constexpr const char* headerModule = "#Module";
-    constexpr const char* headerAsset = "#Asset";
-    constexpr const char* headerProperty = "#Property";
-    constexpr const char* headerKeybinding = "#Keybinding";
-    constexpr const char* headerTime = "#Time";
-    constexpr const char* headerDeltaTimes = "#DeltaTimes";
-    constexpr const char* headerCamera = "#Camera";
-    constexpr const char* headerMarkNodes = "#MarkNodes";
-    constexpr const char* headerAdditionalScripts = "#AdditionalScripts";
 
     // Helper structs for the visitor pattern of the std::variant
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
     template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
-
-    struct ProfileParsingError : public ghoul::RuntimeError {
-        explicit ProfileParsingError(std::string msg)
-            : ghoul::RuntimeError(std::move(msg), "profileFile")
-        {}
-
-        ProfileParsingError(unsigned int lineNum, std::string msg)
-            : ghoul::RuntimeError(
-                fmt::format("Error @ line {}: {}", lineNum, std::move(msg)),
-                "profileFile"
-            )
-        {}
-    };
 
     std::vector<properties::Property*> changedProperties(
                                                       const properties::PropertyOwner& po)
@@ -83,390 +62,386 @@ namespace {
         return res;
     }
 
-    enum class Section {
-        None,
-        Version,
-        Meta,
-        Module,
-        Asset,
-        Property,
-        Keybinding,
-        Time,
-        DeltaTimes,
-        Camera,
-        MarkNodes,
-        AdditionalScripts
-    };
-
-    Section parseSection(const std::string& line, int lineNumber) {
-        if (line == headerVersion) { return Section::Version; }
-        if (line == headerMeta) { return Section::Meta; }
-        if (line == headerModule) { return Section::Module; }
-        if (line == headerAsset) { return Section::Asset; }
-        if (line == headerProperty) { return Section::Property; }
-        if (line == headerKeybinding) { return Section::Keybinding; }
-        if (line == headerTime) { return Section::Time; }
-        if (line == headerDeltaTimes) { return Section::DeltaTimes; }
-        if (line == headerCamera) { return Section::Camera; }
-        if (line == headerMarkNodes) { return Section::MarkNodes; }
-        if (line == headerAdditionalScripts) { return Section::AdditionalScripts; }
-
-        throw ProfileParsingError(
-            lineNumber,
-            fmt::format("Invalid section header: {}", line)
-        );
-    }
-
-    [[ nodiscard ]] Profile::Version parseVersion(const std::string& line, int lineNumber)
+    void checkValue(const nlohmann::json& j, const std::string& key,
+        bool (nlohmann::json::*checkFunc)() const, std::string_view keyPrefix,
+        bool isOptional)
     {
-        std::vector<std::string> parts = ghoul::tokenizeString(line, '.');
-        if (parts.size() > 2) {
-            throw ProfileParsingError(
-                lineNumber,
-                fmt::format("Expected 1-2 version components, got {}", parts.size())
-            );
-        }
-
-        try {
-            Profile::Version version;
-            if (parts.empty()) {
-                version.major = std::stoi(line);
+        if (j.find(key) == j.end()) {
+            if (!isOptional) {
+                throw Profile::ParsingError(
+                    Profile::ParsingError::Severity::Error,
+                    fmt::format("'{}.{}' field is missing", keyPrefix, key)
+                );
             }
-            else {
-                version.major = std::stoi(parts[0]);
-            }
-            if (parts.size() > 1) {
-                version.minor = std::stoi(parts[1]);
-            }
-            return version;
-        }
-        catch (const std::invalid_argument&) {
-            throw ProfileParsingError(
-                lineNumber,
-                "Error parsing Version. Version number is not a number"
-            );
-        }
-    }
-
-    [[ nodiscard ]] Profile::Module parseModule(const std::string& line, int lineNumber) {
-        std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
-        if (fields.size() != 3) {
-            throw ProfileParsingError(
-                lineNumber,
-                fmt::format("Expected 3 fields in a Module entry, got {}", fields.size())
-            );
-        }
-        Profile::Module m;
-        m.name = fields[0];
-        m.loadedInstruction = fields[1];
-        m.notLoadedInstruction = fields[2];
-        return m;
-    }
-
-    enum class MetaLineType {
-        Name,
-        Version,
-        Description,
-        Author,
-        URL,
-        License
-    };
-
-    [[ nodiscard ]] std::pair<MetaLineType, std::string> parseMeta(
-                                                                   const std::string& line,
-                                                                           int lineNumber)
-    {
-        std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
-        if (fields.size() < 2) {
-            throw ProfileParsingError(
-                lineNumber,
-                fmt::format("Expected 2 fields in a Meta line, got {}", fields.size())
-            );
-        }
-
-        const std::string type = fields[0];
-
-        // Users are allowed to use \t in their lines, meaning that the fields could
-        // contain more than the 2 elements that we expected
-        fields.erase(fields.begin());
-        const std::string content = ghoul::join(fields, "\t");
-
-        if (type == "Name") {
-            return { MetaLineType::Name, content };
-        }
-        else if (type == "Version") {
-            return { MetaLineType::Version, content };
-        }
-        else if (type == "Description") {
-            return { MetaLineType::Description, content };
-        }
-        else if (type == "Author") {
-            return { MetaLineType::Author, content };
-        }
-        else if (type == "URL") {
-            return { MetaLineType::URL, content };
-        }
-        else if (type == "License") {
-            return { MetaLineType::License, content };
         }
         else {
-            throw ProfileParsingError(
-                lineNumber,
-                fmt::format("Unknown meta line type '{}'", type)
-            );
-        }
-    }
-
-    [[ nodiscard ]] Profile::Asset parseAsset(const std::string& line, int lineNumber) {
-        std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
-        if (fields.size() != 2) {
-            throw ProfileParsingError(
-                lineNumber,
-                fmt::format("Expected 2 fields in an Asset entry, got {}", fields.size())
-            );
-        }
-
-        Profile::Asset a;
-        a.path = fields[0];
-        a.name = fields[1];
-        return a;
-    }
-
-    [[ nodiscard ]] Profile::Property parseProperty(const std::string& line, int lineNumber) {
-        std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
-        if (fields.size() != 3) {
-            throw ProfileParsingError(
-                lineNumber,
-                fmt::format("Expected 3 fields in Property entry, got {}", fields.size())
-            );
-        }
-        Profile::Property p;
-        p.setType = [&](const std::string& type) -> Profile::Property::SetType {
-            if (type == "setPropertyValue") {
-                return Profile::Property::SetType::SetPropertyValue;
-            }
-            if (type == "setPropertyValueSingle") {
-                return Profile::Property::SetType::SetPropertyValueSingle;
-            }
-            throw ProfileParsingError(
-                lineNumber,
-                fmt::format(
-                    "Expected property set type 'setPropertyValue' or "
-                    "'setPropertyValueSingle', got '{}'",
-                    type
-                )
-            );
-        }(fields[0]);
-        p.name = fields[1];
-        p.value = fields[2];
-        return p;
-    }
-
-    [[ nodiscard ]] Profile::Keybinding parseKeybinding(const std::string& line, int lineNumber) {
-        std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
-        if (fields.size() != 6) {
-            throw ProfileParsingError(
-                lineNumber,
-                fmt::format("Expected 6 fields in Keybinding entry, got {}", fields.size())
-            );
-        }
-        Profile::Keybinding kb;
-        try {
-            kb.key = stringToKey(fields[0]);
-        }
-        catch (const ghoul::RuntimeError& e) {
-            throw ProfileParsingError(lineNumber, e.what());
-        }
-        kb.documentation = fields[1];
-        kb.name = fields[2];
-        kb.guiPath = fields[3];
-        kb.isLocal = [&](const std::string& local) -> bool {
-            if (local == "false") {
-                return false;
-            }
-            if (local == "true") {
-                return true;
-            }
-            throw ProfileParsingError(
-                lineNumber,
-                fmt::format("Expected 'false' or 'true' for the local path, got {}", local)
-            );
-        }(fields[4]);
-        kb.script = fields[5];
-        return kb;
-    }
-
-    [[ nodiscard ]] Profile::Time parseTime(const std::string& line, int lineNumber) {
-        std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
-        if (fields.size() != 2) {
-            throw ProfileParsingError(
-                lineNumber,
-                fmt::format("Expected 2 fields in Time entry, got {}", fields.size())
-            );
-        }
-        Profile::Time time;
-        time.type = [&](const std::string& type) -> Profile::Time::Type {
-            if (type == "absolute") {
-                return Profile::Time::Type::Absolute;
-            }
-            if (type == "relative") {
-                return Profile::Time::Type::Relative;
-            }
-            throw ProfileParsingError(
-                lineNumber,
-                fmt::format("Expected 'absolute' or 'relative' for the type, got {}", type)
-            );
-        }(fields[0]);
-        time.time = fields[1];
-        return time;
-    }
-
-    [[ nodiscard ]] double parseDeltaTime(const std::string& line, int lineNumber) {
-        try {
-            return std::stod(line);
-        }
-        catch (const std::invalid_argument&) {
-            throw ProfileParsingError(
-                lineNumber,
-                fmt::format("Expected a number for delta time entry, got '{}'", line)
-            );
-        }
-    }
-
-    [[ nodiscard ]] Profile::CameraType parseCamera(const std::string& line, int lineNumber) {
-        std::vector<std::string> fields = ghoul::tokenizeString(line, '\t');
-        Profile::CameraType camera = [&](const std::string& type) ->
-            std::variant<Profile::CameraNavState, Profile::CameraGoToGeo>
-        {
-            if (type == Profile::CameraNavState::Type) {
-                if (fields.size() != 8) {
-                    throw ProfileParsingError(
-                        lineNumber,
-                        fmt::format(
-                            "Expected 8 fields in the Camera entry, got {}", fields.size()
-                        )
-                    );
-                }
-
-                Profile::CameraNavState camera;
-                camera.anchor = fields[1];
-                camera.aim = fields[2];
-                camera.referenceFrame = fields[3];
-
-                std::vector<std::string> position = ghoul::tokenizeString(fields[4], ' ');
-                if (position.size() != 3) {
-                    throw ProfileParsingError(
-                        lineNumber,
-                        fmt::format(
-                            "Expected 3 fields for the camera's position, got {}",
-                            position.size()
-                        )
-                    );
-                }
-                try {
-                    camera.position = glm::dvec3(
-                        std::stod(position[0]),
-                        std::stod(position[1]),
-                        std::stod(position[2])
-                    );
-                }
-                catch (const std::invalid_argument&) {
-                    throw ProfileParsingError(
-                        lineNumber,
-                        "Camera's position components must be numbers"
-                    );
-                }
-
-                std::vector<std::string> up = ghoul::tokenizeString(fields[5], ' ');
-                if (up.size() != 0 && up.size() != 3) {
-                    throw ProfileParsingError(
-                        lineNumber,
-                        fmt::format(
-                            "Expected 0 or 3 fields for the camera's up vector, got {}",
-                            up.size()
-                        )
-                    );
-                }
-                if (up.size() == 3) {
-                    try {
-                        camera.up = glm::dvec3(
-                            std::stod(up[0]),
-                            std::stod(up[1]),
-                            std::stod(up[2])
-                        );
+            const nlohmann::json value = j[key];
+            if (!(value.*checkFunc)()) {
+                std::string type = [](auto c) {
+                    if (c == &nlohmann::json::is_string) { return "a string"; }
+                    else if (c == &nlohmann::json::is_number) { return "a number"; }
+                    else if (c == &nlohmann::json::is_object) { return "an object"; }
+                    else if (c == &nlohmann::json::is_array) { return "an array"; }
+                    else if (c == &nlohmann::json::is_boolean) { return "a boolean"; }
+                    else {
+                        throw ghoul::MissingCaseException();
                     }
-                    catch (const std::invalid_argument&) {
-                        throw ProfileParsingError(
-                            lineNumber,
-                            "Camera's up vector components must be numbers"
-                        );
-                    }
-                }
+                }(checkFunc);
 
-                if (!fields[6].empty()) {
-                    try {
-                        camera.yaw = std::stod(fields[6]);
-                    }
-                    catch (const std::invalid_argument&) {
-                        throw ProfileParsingError(
-                            lineNumber,
-                            "Camera's yaw value must be a number"
-                        );
-                    }
-                }
-
-                if (!fields[7].empty()) {
-                    try {
-                        camera.pitch = std::stod(fields[7]);
-                    }
-                    catch (const std::invalid_argument&) {
-                        throw ProfileParsingError(
-                            lineNumber,
-                            "Camera's pitch value must be a number"
-                        );
-                    }
-                }
-                return camera;
+                throw Profile::ParsingError(
+                    Profile::ParsingError::Severity::Error,
+                    fmt::format("'{}.{}' must be {}", keyPrefix, key, type)
+                );
             }
-            if (type == Profile::CameraGoToGeo::Type) {
-                if (fields.size() != 5) {
-                    throw ProfileParsingError(
-                        lineNumber,
-                        fmt::format(
-                            "Expected 5 fields in the Camera entry, got {}", fields.size()
-                        )
-                    );
-                }
-
-                Profile::CameraGoToGeo camera;
-                camera.anchor = fields[1];
-                camera.latitude = std::stod(fields[2]);
-                camera.longitude = std::stod(fields[3]);
-                if (!fields[4].empty()) {
-                    camera.altitude = std::stod(fields[4]);
-                }
-                return camera;
-            }
-            throw ProfileParsingError(
-                lineNumber,
-                fmt::format(
-                    "Expected 'setNavigationState' or 'goToGeo' for the type, got {}",
-                    fields[0]
-                )
-            );
-        }(fields[0]);
-
-        return camera;
+        }
     }
 
-    [[ nodiscard ]] std::string parseMarkNodes(const std::string& line, int) {
-        return line;
-    }
-
-    [[ nodiscard ]] std::string parseAdditionalScript(const std::string& line, int) {
-        return line;
+    void checkExtraKeys(const nlohmann::json& j, std::string_view prefix,
+                        const std::set<std::string>& allowedKeys)
+    {
+        for (auto& [key, _] : j.items()) {
+            if (allowedKeys.find(key) == allowedKeys.end()) {
+                LINFOC(
+                    "Profile",
+                    fmt::format("Key '{}' not supported in '{}'", key, prefix)
+                );
+            }
+        }
     }
 } // namespace
+
+void to_json(nlohmann::json& j, const Profile::Version& v) {
+    j["major"] = v.major;
+    j["minor"] = v.minor;
+}
+
+void from_json(const nlohmann::json& j, Profile::Version& v) {
+    checkValue(j, "major", &nlohmann::json::is_number, "version", false);
+    checkValue(j, "minor", &nlohmann::json::is_number, "version", false);
+    checkExtraKeys(j, "version", { "major", "minor" });
+
+    j["major"].get_to(v.major);
+    j["minor"].get_to(v.minor);
+}
+
+void to_json(nlohmann::json& j, const Profile::Module& v) {
+    j["name"] = v.name;
+    if (v.loadedInstruction.has_value()) {
+        j["loadedInstruction"] = *v.loadedInstruction;
+    }
+    if (v.notLoadedInstruction.has_value()) {
+        j["notLoadedInstruction"] = *v.notLoadedInstruction;
+    }
+}
+
+void from_json(const nlohmann::json& j, Profile::Module& v) {
+    checkValue(j, "name", &nlohmann::json::is_string, "module", false);
+    checkValue(j, "loadedInstruction", &nlohmann::json::is_string, "module", true);
+    checkValue(j, "notLoadedInstruction", &nlohmann::json::is_string, "module", true);
+    checkExtraKeys(j, "module", { "name", "loadedInstruction", "notLoadedInstruction" });
+
+    j["name"].get_to(v.name);
+    if (j.find("loadedInstruction") != j.end()) {
+        v.loadedInstruction = j["loadedInstruction"].get<std::string>();
+    }
+    if (j.find("notLoadedInstruction") != j.end()) {
+        v.notLoadedInstruction = j["notLoadedInstruction"].get<std::string>();
+    }
+}
+
+void to_json(nlohmann::json& j, const Profile::Meta& v) {
+    if (v.name.has_value()) {
+        j["name"] = *v.name;
+    }
+    if (v.version.has_value()) {
+        j["version"] = *v.version;
+    }
+    if (v.description.has_value()) {
+        j["description"] = *v.description;
+    }
+    if (v.author.has_value()) {
+        j["author"] = *v.author;
+    }
+    if (v.url.has_value()) {
+        j["url"] = *v.url;
+    }
+    if (v.license.has_value()) {
+        j["license"] = *v.license;
+    }
+}
+
+void from_json(const nlohmann::json& j, Profile::Meta& v) {
+    checkValue(j, "name", &nlohmann::json::is_string, "meta", true);
+    checkValue(j, "version", &nlohmann::json::is_string, "meta", true);
+    checkValue(j, "description", &nlohmann::json::is_string, "meta", true);
+    checkValue(j, "author", &nlohmann::json::is_string, "meta", true);
+    checkValue(j, "url", &nlohmann::json::is_string, "meta", true);
+    checkValue(j, "license", &nlohmann::json::is_string, "meta", true);
+    checkExtraKeys(
+        j,
+        "meta",
+        { "name", "version", "description", "author", "url", "license" }
+    );
+
+    if (j.find("name") != j.end()) {
+        v.name = j["name"].get<std::string>();
+    }
+    if (j.find("version") != j.end()) {
+        v.version = j["version"].get<std::string>();
+    }
+    if (j.find("description") != j.end()) {
+        v.description = j["description"].get<std::string>();
+    }
+    if (j.find("author") != j.end()) {
+        v.author = j["author"].get<std::string>();
+    }
+    if (j.find("url") != j.end()) {
+        v.url = j["url"].get<std::string>();
+    }
+    if (j.find("license") != j.end()) {
+        v.license = j["license"].get<std::string>();
+    }
+}
+
+void to_json(nlohmann::json& j, const Profile::Property::SetType& v) {
+    j = [](Profile::Property::SetType t) {
+        switch (t) {
+            case Profile::Property::SetType::SetPropertyValue:
+                return "setPropertyValue";
+            case Profile::Property::SetType::SetPropertyValueSingle:
+                return "setPropertyValueSingle";
+            default:
+                throw ghoul::MissingCaseException();
+        }
+    }(v);
+}
+
+void from_json(const nlohmann::json& j, Profile::Property::SetType& v) {
+    std::string value = j.get<std::string>();
+    if (value == "setPropertyValue") {
+        v = Profile::Property::SetType::SetPropertyValue;
+    }
+    else if (value == "setPropertyValueSingle") {
+        v = Profile::Property::SetType::SetPropertyValueSingle;
+    }
+    else {
+        throw Profile::ParsingError(
+            Profile::ParsingError::Severity::Error, "Unknown property set type"
+        );
+    }
+}
+
+void to_json(nlohmann::json& j, const Profile::Property& v) {
+    j["type"] = v.setType;
+    j["name"] = v.name;
+    j["value"] = v.value;
+}
+
+void from_json(const nlohmann::json& j, Profile::Property& v) {
+    checkValue(j, "type", &nlohmann::json::is_string, "property", false);
+    checkValue(j, "name", &nlohmann::json::is_string, "property", false);
+    checkValue(j, "value", &nlohmann::json::is_string, "property", false);
+    checkExtraKeys(j, "property", { "type", "name", "value" });
+
+    j["type"].get_to(v.setType);
+    j["name"].get_to(v.name);
+    j["value"].get_to(v.value);
+}
+
+void to_json(nlohmann::json& j, const Profile::Keybinding& v) {
+    j["key"] = ghoul::to_string(v.key);
+    j["documentation"] = v.documentation;
+    j["name"] = v.name;
+    j["gui_path"] = v.guiPath;
+    j["is_local"] = v.isLocal;
+    j["script"] = v.script;
+}
+
+void from_json(const nlohmann::json& j, Profile::Keybinding& v) {
+    checkValue(j, "key", &nlohmann::json::is_string, "keybinding", false);
+    checkValue(j, "documentation", &nlohmann::json::is_string, "keybinding", false);
+    checkValue(j, "name", &nlohmann::json::is_string, "keybinding", false);
+    checkValue(j, "gui_path", &nlohmann::json::is_string, "keybinding", false);
+    checkValue(j, "is_local", &nlohmann::json::is_boolean, "keybinding", false);
+    checkValue(j, "script", &nlohmann::json::is_string, "keybinding", false);
+    checkExtraKeys(
+        j,
+        "keybinding",
+        { "key", "documentation", "name", "gui_path", "is_local", "script" }
+    );
+
+    v.key = stringToKey(j.at("key").get<std::string>());
+    j["documentation"].get_to(v.documentation);
+    j["name"].get_to(v.name);
+    j["gui_path"].get_to(v.guiPath);
+    j["is_local"].get_to(v.isLocal);
+    j["script"].get_to(v.script);
+}
+
+void to_json(nlohmann::json& j, const Profile::Time::Type& v) {
+    j = [](Profile::Time::Type t) {
+        switch (t) {
+            case Profile::Time::Type::Absolute: return "absolute";
+            case Profile::Time::Type::Relative: return "relative";
+            default:                            throw ghoul::MissingCaseException();
+        }
+    }(v);
+}
+
+void from_json(const nlohmann::json& j, Profile::Time::Type& v) {
+    std::string value = j.get<std::string>();
+    if (value == "absolute") {
+        v = Profile::Time::Type::Absolute;
+    }
+    else if (value == "relative") {
+        v = Profile::Time::Type::Relative;
+    }
+    else {
+        throw Profile::ParsingError(
+            Profile::ParsingError::Severity::Error, "Unknown time type"
+        );
+    }
+}
+
+void to_json(nlohmann::json& j, const Profile::Time& v) {
+    j["type"] = v.type;
+    j["value"] = v.value;
+}
+
+void from_json(const nlohmann::json& j, Profile::Time& v) {
+    checkValue(j, "type", &nlohmann::json::is_string, "time", false);
+    checkValue(j, "value", &nlohmann::json::is_string, "time", false);
+    checkExtraKeys(j, "time", { "type", "value" });
+
+    j["type"].get_to(v.type);
+    j["value"].get_to(v.value);
+}
+
+void to_json(nlohmann::json& j, const Profile::CameraNavState& v) {
+    j["type"] = Profile::CameraNavState::Type;
+    j["anchor"] = v.anchor;
+    if (v.aim.has_value()) {
+        j["aim"] = *v.aim;
+    }
+    j["frame"] = v.referenceFrame;
+    nlohmann::json p {
+        { "x", v.position.x },
+        { "y", v.position.y },
+        { "z", v.position.z }
+    };
+    j["position"] = p;
+    if (v.up.has_value()) {
+        nlohmann::json u {
+            { "x", v.up->x },
+            { "y", v.up->y },
+            { "z", v.up->z }
+        };
+        j["up"] = u;
+    }
+    if (v.yaw.has_value()) {
+        j["yaw"] = *v.yaw;
+    }
+    if (v.pitch.has_value()) {
+        j["pitch"] = *v.pitch;
+    }
+}
+
+void from_json(const nlohmann::json& j, Profile::CameraNavState& v) {
+    ghoul_assert(
+        j.at("type").get<std::string>() == Profile::CameraNavState::Type,
+        "Wrong type for Camera"
+    );
+
+    checkValue(j, "anchor", &nlohmann::json::is_string, "camera", false);
+    checkValue(j, "aim", &nlohmann::json::is_string, "camera", true);
+    checkValue(j, "frame", &nlohmann::json::is_string, "camera", false);
+    checkValue(j, "position", &nlohmann::json::is_object, "camera", false);
+    checkValue(j["position"], "x", &nlohmann::json::is_number, "camera.position", false);
+    checkValue(j["position"], "y", &nlohmann::json::is_number, "camera.position", false);
+    checkValue(j["position"], "z", &nlohmann::json::is_number, "camera.position", false);
+    checkExtraKeys(j["position"], "camera.position", { "x", "y", "z" });
+    checkValue(j, "up", &nlohmann::json::is_object, "camera", true);
+    if (j.find("up") != j.end()) {
+        checkValue(j["up"], "x", &nlohmann::json::is_number, "camera.up", false);
+        checkValue(j["up"], "y", &nlohmann::json::is_number, "camera.up", false);
+        checkValue(j["up"], "z", &nlohmann::json::is_number, "camera.up", false);
+        checkExtraKeys(j["up"], "camera.up", { "x", "y", "z" });
+    }
+    checkValue(j, "yaw", &nlohmann::json::is_number, "camera", true);
+    checkValue(j, "pitch", &nlohmann::json::is_number, "camera", true);
+    checkExtraKeys(
+        j,
+        "camera",
+        { "type", "anchor", "aim", "frame", "position", "up", "yaw", "pitch" }
+    );
+
+    j["anchor"].get_to(v.anchor);
+    if (j.find("aim") != j.end()) {
+        v.aim = j["aim"].get<std::string>();
+    }
+    j["frame"].get_to(v.referenceFrame);
+    nlohmann::json p = j["position"];
+    p["x"].get_to(v.position.x);
+    p["y"].get_to(v.position.y);
+    p["z"].get_to(v.position.z);
+
+    if (j.find("up") != j.end()) {
+        nlohmann::json u = j["up"];
+        glm::dvec3 up;
+        u["x"].get_to(up.x);
+        u["y"].get_to(up.y);
+        u["z"].get_to(up.z);
+        v.up = up;
+    }
+
+    if (j.find("yaw") != j.end()) {
+        v.yaw = j["yaw"].get<double>();
+    }
+
+    if (j.find("pitch") != j.end()) {
+        v.pitch = j["pitch"].get<double>();
+    }
+}
+
+void to_json(nlohmann::json& j, const Profile::CameraGoToGeo& v) {
+    j["type"] = Profile::CameraGoToGeo::Type;
+    j["anchor"] = v.anchor;
+    j["latitude"] = v.latitude;
+    j["longitude"] = v.longitude;
+    if (v.altitude.has_value()) {
+        j["altitude"] = *v.altitude;
+    }
+}
+
+void from_json(const nlohmann::json& j, Profile::CameraGoToGeo& v) {
+    ghoul_assert(
+        j.at("type").get<std::string>() == Profile::CameraGoToGeo::Type,
+        "Wrong type for Camera"
+    );
+
+    checkValue(j, "anchor", &nlohmann::json::is_string, "camera", false);
+    checkValue(j, "latitude", &nlohmann::json::is_number, "camera", false);
+    checkValue(j, "longitude", &nlohmann::json::is_number, "camera", false);
+    checkValue(j, "altitude", &nlohmann::json::is_number, "camera", true);
+    checkExtraKeys(
+        j,
+        "camera",
+        { "type", "anchor", "latitude", "longitude", "altitude" }
+    );
+
+    j["anchor"].get_to(v.anchor);
+    j["latitude"].get_to(v.latitude);
+    j["longitude"].get_to(v.longitude);
+
+    if (j.find("altitude") != j.end()) {
+        v.altitude = j["altitude"].get<double>();
+    }
+}
+
+Profile::ParsingError::ParsingError(Severity severity_, std::string msg)
+    : ghoul::RuntimeError(std::move(msg), "profileFile")
+    , severity(severity_)
+{}
 
 void Profile::saveCurrentSettingsToProfile(const properties::PropertyOwner& rootOwner,
                                            std::string currentTime,
@@ -491,9 +466,9 @@ void Profile::saveCurrentSettingsToProfile(const properties::PropertyOwner& root
     // add current time to profile file
     //
     Time t;
-    t.time = std::move(currentTime);
+    t.value = std::move(currentTime);
     t.type = Time::Type::Absolute;
-    time = std::move(t);
+    time = t;
 
     // Delta times
     std::vector<double> dts = global::timeManager.deltaTimeSteps();
@@ -523,20 +498,14 @@ void Profile::addAsset(const std::string& path) {
         return;
     }
 
-    const auto it = std::find_if(
-        assets.begin(),
-        assets.end(),
-        [path](const Asset& a) { return a.path == path; }
-    );
+    const auto it = std::find(assets.cbegin(), assets.cend(), path);
 
     if (it != assets.end()) {
         // Asset already existed, so nothing to do here
         return;
     }
 
-    Asset a;
-    a.path = path;
-    assets.push_back(std::move(a));
+    assets.push_back(path);
 }
 
 void Profile::removeAsset(const std::string& path) {
@@ -546,11 +515,7 @@ void Profile::removeAsset(const std::string& path) {
         return;
     }
 
-    const auto it = std::find_if(
-        assets.cbegin(),
-        assets.cend(),
-        [path](const Asset& a) { return a.path == path; }
-    );
+    const auto it = std::find(assets.cbegin(), assets.cend(), path);
 
     if (it == assets.end()) {
         throw ghoul::RuntimeError(fmt::format(
@@ -585,358 +550,105 @@ scripting::LuaLibrary Profile::luaLibrary() {
 }
 
 std::string Profile::serialize() const {
-    std::string output;
-    output += fmt::format("{}\n", headerVersion);
-    output += fmt::format("{}.{}\n", version.major, version.minor);
-
-    if (meta.has_value()) {
-        output += fmt::format("\n{}\n", headerMeta);
-        if (!meta->name.empty()) {
-            output += fmt::format("Name\t{}\n", meta->name);
-        }
-        if (!meta->version.empty()) {
-            output += fmt::format("Version\t{}\n", meta->version);
-        }
-        if (!meta->description.empty()) {
-            output += fmt::format("Description\t{}\n", meta->description);
-        }
-        if (!meta->author.empty()) {
-            output += fmt::format("Author\t{}\n", meta->author);
-        }
-        if (!meta->url.empty()) {
-            output += fmt::format("URL\t{}\n", meta->url);
-        }
-        if (!meta->license.empty()) {
-            output += fmt::format("License\t{}\n", meta->license);
-        }
-    }
-
+    nlohmann::json r;
+    r["version"] = version;
     if (!modules.empty()) {
-        output += fmt::format("\n{}\n", headerModule);
-        for (const Module& m : modules) {
-            output += fmt::format(
-                "{}\t{}\t{}\n",
-                m.name, m.loadedInstruction, m.notLoadedInstruction
-            );
-        }
+        r["modules"] = modules;
     }
-
+    if (meta.has_value()) {
+        r["meta"] = *meta;
+    }
     if (!assets.empty()) {
-        output += fmt::format("\n{}\n", headerAsset);
-        for (const Asset& a : assets) {
-            output += fmt::format("{}\t{}\n", a.path, a.name);
-        }
+        r["assets"] = assets;
     }
-
     if (!properties.empty()) {
-        output += fmt::format("\n{}\n", headerProperty);
-        for (const Property& p : properties) {
-            const std::string type = [](Property::SetType t) {
-                switch (t) {
-                    case Property::SetType::SetPropertyValue:
-                        return "setPropertyValue";
-                    case Property::SetType::SetPropertyValueSingle:
-                        return "setPropertyValueSingle";
-                    default:
-                        throw ghoul::MissingCaseException();
-                }
-            }(p.setType);
-            output += fmt::format("{}\t{}\t{}\n", type, p.name, p.value);
-        }
+        r["properties"] = properties;
     }
-
     if (!keybindings.empty()) {
-        output += fmt::format("\n{}\n", headerKeybinding);
-        for (const Keybinding& k : keybindings) {
-            const std::string key = ghoul::to_string(k.key);
-            const std::string local = k.isLocal ? "true" : "false";
-            output += fmt::format(
-                "{}\t{}\t{}\t{}\t{}\t{}\n",
-                key, k.documentation, k.name, k.guiPath, local, k.script
-            );
-        }
+        r["keybindings"] = keybindings;
     }
-    
     if (time.has_value()) {
-        output += fmt::format("\n{}\n", headerTime);
-        {
-            const std::string type = [](Time::Type t) {
-                switch (t) {
-                    case Time::Type::Absolute: return "absolute";
-                    case Time::Type::Relative: return "relative";
-                    default: throw ghoul::MissingCaseException();
-                }
-            }(time->type);
-            output += fmt::format("{}\t{}\n", type, time->time);
-        }
+        r["time"] = *time;
     }
-
     if (!deltaTimes.empty()) {
-        output += fmt::format("\n{}\n", headerDeltaTimes);
-        for (const double d : deltaTimes) {
-            output += fmt::format("{}\n", d);
-        }
+        r["delta_times"] = deltaTimes;
     }
-
     if (camera.has_value()) {
-        output += fmt::format("\n{}\n", headerCamera);
-        output += std::visit(
+        r["camera"] = std::visit(
             overloaded {
                 [](const CameraNavState& camera) {
-                    std::string position = fmt::format(
-                        "{}, {}, {}",
-                        camera.position.x, camera.position.y, camera.position.z
-                    );
-                    std::string up = camera.up.has_value() ?
-                        fmt::format(
-                            "{}, {}, {}", camera.up->x, camera.up->y, camera.up->z
-                        ) :
-                        "";
-                    std::string yaw = camera.yaw.has_value() ?
-                        fmt::format("{}", *camera.yaw) :
-                        "";
-                    std::string pitch = camera.pitch.has_value() ?
-                        fmt::format("{}", *camera.pitch) :
-                        "";
-
-                    return fmt::format(
-                        "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n",
-                        CameraNavState::Type,
-                        camera.anchor, camera.aim, camera.referenceFrame, position, up,
-                        yaw, pitch
-                    );
+                    return nlohmann::json(camera);
                 },
                 [](const Profile::CameraGoToGeo& camera) {
-                    if (camera.altitude.has_value()) {
-                        return fmt::format(
-                            "{}\t{}\t{}\t{}\t{}\n",
-                            CameraGoToGeo::Type,
-                            camera.anchor, camera.latitude, camera.longitude,
-                            *camera.altitude
-                        );
-                    }
-                    else {
-                        return fmt::format(
-                            "{}\t{}\t{}\t{}\t\n",
-                            CameraGoToGeo::Type,
-                            camera.anchor, camera.latitude, camera.longitude
-                        );
-                    }
+                    return nlohmann::json(camera);
                 }
             },
             *camera
         );
     }
-
     if (!markNodes.empty()) {
-        output += fmt::format("\n{}\n", headerMarkNodes);
-        for (const std::string& n : markNodes) {
-            output += fmt::format("{}\n", n);
-        }
+        r["mark_nodes"] = markNodes;
     }
-
     if (!additionalScripts.empty()) {
-        output += fmt::format("\n{}\n", headerAdditionalScripts);
-        for (const std::string& s : additionalScripts) {
-            output += fmt::format("{}\n", s);
-        }
+        r["additional_scripts"] = additionalScripts;
     }
 
-    return output;
+    return r.dump(2);
 }
 
-Profile::Profile(const std::vector<std::string>& content) {
-    Section currentSection = Section::None;
-    bool foundVersion = false;
-    bool foundMeta = false;
-    bool foundTime = false;
-    bool foundCamera = false;
+Profile::Profile(const std::string& content) {
+    try {
+        nlohmann::json profile = nlohmann::json::parse(content);
 
-    for (int lineNum = 1; lineNum <= static_cast<int>(content.size()); ++lineNum) {
-        std::string line = content[lineNum - 1];
-        if (std::all_of(line.begin(), line.end(), ::isspace)) {
-            currentSection = Section::None;
-            continue;
+        profile.at("version").get_to(version);
+        if (profile.find("modules") != profile.end()) {
+            profile["modules"].get_to(modules);
         }
-
-        if (currentSection != Section::None && line[0] == '#') {
-            throw ProfileParsingError(
-                lineNum,
-                "Sections in profile must be separated by empty lines"
-            );
+        if (profile.find("meta") != profile.end()) {
+            meta = profile.at("meta").get<Meta>();
         }
-
-        switch (currentSection) {
-            case Section::None:
-                currentSection = parseSection(line, lineNum);
-
-                if (!foundVersion && currentSection != Section::Version) {
-                    throw ProfileParsingError(
-                        lineNum,
-                        fmt::format(
-                            "First header in the file must be Version, but got {}", line
-                        )
-                    );
-                }
-
-                if (currentSection == Section::Meta && foundMeta) {
-                    throw ProfileParsingError(
-                        lineNum,
-                        "Meta section can only appear once per profile"
-                    );
-                }
-                break;
-            case Section::Version:
-                if (foundVersion) {
-                    throw ProfileParsingError(
-                        lineNum,
-                        "Version section can only appear once per profile"
-                    );
-                }
-
-                version = parseVersion(line, lineNum);
-                foundVersion = true;
-                break;
-            case Section::Meta:
-            {
-                if (!meta.has_value()) {
-                    meta = Meta();
-                }
-
-                std::pair<MetaLineType, std::string> m = parseMeta(line, lineNum);
-                switch (m.first) {
-                    case MetaLineType::Name:
-                        if (!meta->name.empty()) {
-                            throw ProfileParsingError(
-                                lineNum,
-                                "Meta information 'Name' specified twice"
-                            );
-                        }
-                        meta->name = m.second;
-                        break;
-                    case MetaLineType::Version:
-                        if (!meta->version.empty()) {
-                            throw ProfileParsingError(
-                                lineNum,
-                                "Meta information 'Version' specified twice"
-                            );
-                        }
-                        meta->version = m.second;
-                        break;
-                    case MetaLineType::Description:
-                        if (!meta->description.empty()) {
-                            throw ProfileParsingError(
-                                lineNum,
-                                "Meta information 'Description' specified twice"
-                            );
-                        }
-                        meta->description = m.second;
-                        break;
-                    case MetaLineType::Author:
-                        if (!meta->author.empty()) {
-                            throw ProfileParsingError(
-                                lineNum,
-                                "Meta information 'Author' specified twice"
-                            );
-                        }
-                        meta->author = m.second;
-                        break;
-                    case MetaLineType::URL:
-                        if (!meta->url.empty()) {
-                            throw ProfileParsingError(
-                                lineNum,
-                                "Meta information 'URL' specified twice"
-                            );
-                        }
-                        meta->url = m.second;
-                        break;
-                    case MetaLineType::License:
-                        if (!meta->license.empty()) {
-                            throw ProfileParsingError(
-                                lineNum,
-                                "Meta information 'License' specified twice"
-                            );
-                        }
-                        meta->license = m.second;
-                        break;
-                    default:
-                        throw ghoul::MissingCaseException();
-                }
-                foundMeta = true;
-                break;
+        if (profile.find("assets") != profile.end()) {
+            profile.at("assets").get_to(assets);
+        }
+        if (profile.find("properties") != profile.end()) {
+            profile.at("properties").get_to(properties);
+        }
+        if (profile.find("keybindings") != profile.end()) {
+            profile.at("keybindings").get_to(keybindings);
+        }
+        if (profile.find("time") != profile.end()) {
+            time = profile.at("time").get<Time>();
+        }
+        if (profile.find("delta_times") != profile.end()) {
+            profile.at("delta_times").get_to(deltaTimes);
+        }
+        if (profile.find("camera") != profile.end()) {
+            nlohmann::json c = profile.at("camera");
+            if (c.at("type") == CameraNavState::Type) {
+                camera = c.get<CameraNavState>();
             }
-            case Section::Module:
-            {
-                Module m = parseModule(line, lineNum);
-                modules.push_back(std::move(m));
-                break;
+            else if (c.at("type") == CameraGoToGeo::Type) {
+                camera = c.get<CameraGoToGeo>();
             }
-            case Section::Asset:
-            {
-                Asset a = parseAsset(line, lineNum);
-                assets.push_back(std::move(a));
-                break;
+            else {
+                throw Profile::ParsingError(
+                    Profile::ParsingError::Severity::Error,
+                    "Unknown camera type"
+                );
             }
-            case Section::Property:
-            {
-                Property p = parseProperty(line, lineNum);
-                properties.push_back(std::move(p));
-                break;
-            }
-            case Section::Keybinding:
-            {
-                Keybinding kb = parseKeybinding(line, lineNum);
-                keybindings.push_back(std::move(kb));
-                break;
-            }
-            case Section::Time:
-                if (foundTime) {
-                    throw ProfileParsingError(
-                        lineNum,
-                        "Time section can only appear once per profile"
-                    );
-                }
-
-                time = parseTime(line, lineNum);
-                foundTime = true;
-                break;
-            case Section::DeltaTimes:
-            {
-                const double d = parseDeltaTime(line, lineNum);
-                deltaTimes.push_back(d);
-                break;
-            }
-            case Section::Camera:
-                if (foundCamera) {
-                    throw ProfileParsingError(
-                        lineNum,
-                        "Camera section can only appear once per profile"
-                    );
-                }
-
-                camera = parseCamera(line, lineNum);
-                foundCamera = true;
-                break;
-            case Section::MarkNodes:
-            {
-                std::string m = parseMarkNodes(line, lineNum);
-                markNodes.push_back(std::move(m));
-                break;
-            }
-            case Section::AdditionalScripts:
-            {
-                std::string a = parseAdditionalScript(line, lineNum);
-                additionalScripts.push_back(std::move(a));
-                break;
-            }
-            default:
-                throw ghoul::MissingCaseException();
+        }
+        if (profile.find("mark_nodes") != profile.end()) {
+            profile.at("mark_nodes").get_to(markNodes);
+        }
+        if (profile.find("additional_scripts") != profile.end()) {
+            profile.at("additional_scripts").get_to(additionalScripts);
         }
     }
-
-    if (!foundVersion) {
-        throw ghoul::RuntimeError(
-            "Did not find Version information when loading profile"
+    catch (const nlohmann::json::exception& e) {
+        std::string err = e.what();
+        throw Profile::ParsingError(
+            Profile::ParsingError::Severity::Error,
+            err
         );
     }
 }
@@ -948,23 +660,23 @@ std::string Profile::convertToScene() const {
 
     if (meta.has_value()) {
         output += "asset.meta = {";
-        if (!meta->name.empty()) {
-            output += fmt::format("  Name = {},", meta->name);
+        if (meta->name.has_value()) {
+            output += fmt::format("  Name = {},", *meta->name);
         }
-        if (!meta->version.empty()) {
-            output += fmt::format("  Version = {},", meta->version);
+        if (meta->version.has_value()) {
+            output += fmt::format("  Version = {},", *meta->version);
         }
-        if (!meta->description.empty()) {
-            output += fmt::format("  Description = {},", meta->description);
+        if (meta->description.has_value()) {
+            output += fmt::format("  Description = {},", *meta->description);
         }
-        if (!meta->author.empty()) {
-            output += fmt::format("  Author = {},", meta->author);
+        if (meta->author.has_value()) {
+            output += fmt::format("  Author = {},", *meta->author);
         }
-        if (!meta->url.empty()) {
-            output += fmt::format("  URL = {},", meta->url);
+        if (meta->url.has_value()) {
+            output += fmt::format("  URL = {},", *meta->url);
         }
-        if (!meta->license.empty()) {
-            output += fmt::format("  License = {},", meta->license);
+        if (meta->license.has_value()) {
+            output += fmt::format("  License = {},", *meta->license);
         }
 
         output += "}";
@@ -974,18 +686,13 @@ std::string Profile::convertToScene() const {
     for (const Module& m : modules) {
         output += fmt::format(
             "if openspace.modules.isLoaded(\"{}\") then {} else {} end\n",
-            m.name, m.loadedInstruction, m.notLoadedInstruction
+            m.name, *m.loadedInstruction, *m.notLoadedInstruction
         );
     }
 
     // Assets
-    for (const Asset& a : assets) {
-        if (a.name.empty()) {
-            output += fmt::format("asset.require(\"{}\");\n", a.path);
-        }
-        else {
-            output += fmt::format("local {} = asset.require(\"{}\");\n", a.name, a.path);
-        }
+    for (const std::string& asset : assets) {
+        output += fmt::format("asset.require(\"{}\");\n", asset);
     }
 
     output += "asset.onInitialize(function()\n";
@@ -1004,12 +711,12 @@ std::string Profile::convertToScene() const {
     // Time
     switch (time->type) {
         case Time::Type::Absolute:
-            output += fmt::format("openspace.time.setTime(\"{}\")\n", time->time);
+            output += fmt::format("openspace.time.setTime(\"{}\")\n", time->value);
             break;
         case Time::Type::Relative:
             output += "local now = openspace.time.currentWallTime();\n";
             output += fmt::format(
-                "local prev = openspace.time.advancedTime(now, \"{}\");\n", time->time
+                "local prev = openspace.time.advancedTime(now, \"{}\");\n", time->value
             );
             output += "openspace.time.setTime(prev);\n";
             break;
@@ -1062,12 +769,14 @@ std::string Profile::convertToScene() const {
                 [](const CameraNavState& camera) {
                     std::string result;
                     result += "openspace.navigation.setNavigationState({";
-                    result += fmt::format("Anchor = {}, ", camera.anchor);
-                    if (!camera.aim.empty()) {
-                        result += fmt::format("Aim = {}, ", camera.aim);
+                    result += fmt::format("Anchor = [[{}]], ", camera.anchor);
+                    if (camera.aim.has_value()) {
+                        result += fmt::format("Aim = [[{}]], ", *camera.aim);
                     }
                     if (!camera.referenceFrame.empty()) {
-                        result += fmt::format("ReferenceFrame = {}, ", camera.referenceFrame);
+                        result += fmt::format(
+                            "ReferenceFrame = [[{}]], ", camera.referenceFrame
+                        );
                     }
                     result += fmt::format(
                         "Position = {{ {}, {}, {} }}, ",
@@ -1091,13 +800,13 @@ std::string Profile::convertToScene() const {
                 [](const CameraGoToGeo& camera) {
                     if (camera.altitude.has_value()) {
                         return fmt::format(
-                            "openspace.globebrowsing.goToGeo({}, {}, {}, {});\n",
+                            "openspace.globebrowsing.goToGeo([[{}]], {}, {}, {});\n",
                             camera.anchor, camera.latitude, camera.longitude, *camera.altitude
                         );
                     }
                     else {
                         return fmt::format(
-                            "openspace.globebrowsing.goToGeo({}, {}, {});\n",
+                            "openspace.globebrowsing.goToGeo([[{}]], {}, {});\n",
                             camera.anchor, camera.latitude, camera.longitude
                         );
                     }
@@ -1115,6 +824,5 @@ std::string Profile::convertToScene() const {
 
     return output;
 }
-
 
 }  // namespace openspace
