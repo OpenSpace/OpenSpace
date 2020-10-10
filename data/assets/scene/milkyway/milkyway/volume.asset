@@ -53,6 +53,7 @@ local MilkyWayVolumeGalaxy = {
 local objects = { MilkyWayVolumeGalaxy }
 assetHelper.registerSceneGraphNodesAndExport(asset, objects)
 
+
 asset.meta = {
     Name = "Milky Way Volume",
     Version = "1.0",

@@ -25,8 +25,6 @@ local EarthTrail = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { EarthTrail })
 
 

@@ -104,12 +104,12 @@ asset.onInitialize(function ()
 
 end)
 
-
 asset.onDeinitialize(function ()
   for _, node in ipairs(nodes) do
     openspace.removeSceneGraphNode(node)
   end  
 end)
+
 
 asset.meta = {
     Name = "Terra",

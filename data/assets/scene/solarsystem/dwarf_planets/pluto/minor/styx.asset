@@ -46,8 +46,6 @@ local StyxTrail = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Styx, StyxTrail })
 
 

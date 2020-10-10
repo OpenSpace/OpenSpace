@@ -93,11 +93,11 @@ local majorMoons = {
     }
 }
 
-
 assetHelper.registerSceneGraphNodesAndExport(
     asset,
     proceduralGlobes.createGlobes(majorMoons)
 )
+
 
 asset.meta = {
     Name = "Uranus Marjor Moons",

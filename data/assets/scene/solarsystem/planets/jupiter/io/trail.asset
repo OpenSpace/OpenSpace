@@ -27,8 +27,6 @@ local IoTrail = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { IoTrail })
 
 

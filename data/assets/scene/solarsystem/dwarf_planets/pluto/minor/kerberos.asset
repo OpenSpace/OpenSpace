@@ -46,8 +46,6 @@ local KerberosTrail = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Kerberos, KerberosTrail })
 
 

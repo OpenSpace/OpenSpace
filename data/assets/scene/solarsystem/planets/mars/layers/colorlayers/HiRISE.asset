@@ -1,6 +1,7 @@
 --todo add hirise through asset file like we do for ctx_blended.
 --curretly added via globebrowsing customization
 
+
 asset.meta = {
     Name = "HiRISE Local Set",
     Version = "1.0",

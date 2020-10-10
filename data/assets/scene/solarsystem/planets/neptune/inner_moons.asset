@@ -129,8 +129,6 @@ local innerMoons = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(
     asset,
     proceduralGlobes.createGlobes(innerMoons)

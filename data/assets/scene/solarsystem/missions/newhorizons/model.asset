@@ -50,8 +50,6 @@ local NewHorizons = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { NewHorizons })
 asset.export("NewHorizonsTextures", textures)
 asset.export("NewHorizonsModels", models)

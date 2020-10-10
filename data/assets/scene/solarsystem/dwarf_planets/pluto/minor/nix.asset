@@ -46,8 +46,6 @@ local NixTrail = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Nix, NixTrail })
 
 

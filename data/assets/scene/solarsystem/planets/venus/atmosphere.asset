@@ -61,6 +61,8 @@ local Atmosphere = {
         Description = "Simulation of Venus' Atmosphere"
     }
 }
+assetHelper.registerSceneGraphNodesAndExport(asset, { Atmosphere })
+
 
 asset.meta = {
     Name = "Venus Atmosphere",
@@ -71,5 +73,3 @@ asset.meta = {
     License = "MIT license",
     Identifiers = "VenusAtmosphere"
 }
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { Atmosphere })

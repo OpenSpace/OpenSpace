@@ -29,6 +29,9 @@ local UranusTrailEarth = {
     }
 }
 
+assetHelper.registerSceneGraphNodesAndExport(asset, { UranusTrailEarth })
+
+
 asset.meta = {
     Name = "Uranus Trail from Earth",
     Version = "1.0",
@@ -39,6 +42,3 @@ asset.meta = {
     License = "MIT license",
     Identifiers = "VenusTrailEarth"
 }
-
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { UranusTrailEarth })

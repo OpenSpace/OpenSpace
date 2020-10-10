@@ -27,8 +27,6 @@ local RheaTrail = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { RheaTrail })
 
 

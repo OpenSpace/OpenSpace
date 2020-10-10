@@ -50,8 +50,6 @@ local Mimas = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Mimas })
 
 

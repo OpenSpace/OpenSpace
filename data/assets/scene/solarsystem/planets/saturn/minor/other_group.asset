@@ -223,7 +223,6 @@ local otherGroup = {
     }
 }
 
-
 assetHelper.registerSceneGraphNodesAndExport(
     asset,
     proceduralGlobes.createGlobes(otherGroup)

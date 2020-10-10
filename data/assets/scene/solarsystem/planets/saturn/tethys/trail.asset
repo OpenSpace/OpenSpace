@@ -27,8 +27,6 @@ local TethysTrail = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { TethysTrail })
 
 

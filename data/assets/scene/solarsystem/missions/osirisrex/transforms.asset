@@ -21,6 +21,4 @@ local BennuBarycenter = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { BennuBarycenter })

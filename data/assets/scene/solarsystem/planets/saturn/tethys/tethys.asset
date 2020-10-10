@@ -48,8 +48,6 @@ local Tethys = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Tethys })
 
 

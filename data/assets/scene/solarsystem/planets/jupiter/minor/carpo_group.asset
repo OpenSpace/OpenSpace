@@ -29,8 +29,6 @@ local carpoGroup = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(
     asset,
     proceduralGlobes.createGlobes(carpoGroup)

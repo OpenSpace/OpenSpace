@@ -325,8 +325,6 @@ local VoyagerTrailCruiseNeptuneInf = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     Voyager2,
     Voyager2Main,

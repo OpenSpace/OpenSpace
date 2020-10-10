@@ -48,8 +48,6 @@ local Dione = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Dione })
 
 

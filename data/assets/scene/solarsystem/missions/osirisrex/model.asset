@@ -334,8 +334,6 @@ local RexisFov = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     OsirisRex,
     PolyCam,

@@ -22,8 +22,6 @@ local PlutoBarycenter = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { PlutoBarycenter })
 
 

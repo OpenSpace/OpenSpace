@@ -8,6 +8,7 @@ asset.onInitialize(function ()
     openspace.setPropertyValueSingle("Scene.Tethys.Renderable.Layers.ColorLayers." .. colorLayer.layer.Identifier .. ".Enabled", true)
 end)
 
+
 asset.meta = {
     Name = "Default Tethys Layers",
     Version = "1.0",

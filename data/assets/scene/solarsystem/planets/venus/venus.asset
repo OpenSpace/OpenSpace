@@ -72,6 +72,9 @@ local VenusLabel = {
     }
 }
 
+assetHelper.registerSceneGraphNodesAndExport(asset, { Venus, VenusLabel })
+
+
 asset.meta = {
     Name = "Venus",
     Version = "1.0",
@@ -81,5 +84,3 @@ asset.meta = {
     License = "MIT license",
     Identifiers = "Venus,VenusLabel"
 }
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { Venus, VenusLabel })

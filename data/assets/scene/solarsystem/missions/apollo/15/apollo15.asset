@@ -110,6 +110,4 @@ for k,v in pairs(model_part) do
     table.insert(list, v)
 end
 
-
 assetHelper.registerSceneGraphNodesAndExport(asset, list)
-

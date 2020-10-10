@@ -39,5 +39,4 @@ asset.meta = {
     Identifiers = "VenusTrailEarth"
 }
 
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { JupiterTrailEarth })

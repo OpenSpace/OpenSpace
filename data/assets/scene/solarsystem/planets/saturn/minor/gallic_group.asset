@@ -77,8 +77,6 @@ local gallicGroup = {
     },
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(
     asset,
     proceduralGlobes.createGlobes(gallicGroup)

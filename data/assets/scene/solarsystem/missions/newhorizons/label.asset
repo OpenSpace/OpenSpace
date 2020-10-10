@@ -26,6 +26,4 @@ local Labels = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Labels })

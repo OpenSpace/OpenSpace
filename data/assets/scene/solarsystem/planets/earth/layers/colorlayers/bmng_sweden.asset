@@ -15,6 +15,7 @@ end)
 
 asset.export("layer", layer)
 
+
 asset.meta = {
     Name = "Blue Marble Next Generation (Sweden)",
     Version = "1.0",

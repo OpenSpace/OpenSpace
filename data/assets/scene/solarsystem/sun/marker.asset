@@ -24,6 +24,9 @@ local SunMarker = {
     }
 }
 
+assetHelper.registerSceneGraphNodesAndExport(asset, { SunMarker })
+
+
 asset.meta = {
     Name = "Sun marker",
     Version = "1.0",
@@ -33,6 +36,3 @@ asset.meta = {
     License = "MIT license",
     Identifiers = "SunMarker"
 }
-
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { SunMarker })

@@ -94,8 +94,6 @@ local himaliaGroup = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(
     asset,
     proceduralGlobes.createGlobes(himaliaGroup)

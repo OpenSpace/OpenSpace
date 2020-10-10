@@ -26,6 +26,9 @@ asset.onInitialize(function ()
     openspace.globebrowsing.addLayer(globeIdentifier, "HeightLayers", layer)
 end)
 
+asset.export("layer", layer)
+
+
 asset.meta = {
     Name = "Venus Magellan DEM",
     Version = "1.0",
@@ -37,5 +40,3 @@ asset.meta = {
     License = "NASA/PDS",
     Identifiers = "Magellan"
 }
-
-asset.export("layer", layer)

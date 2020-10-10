@@ -340,8 +340,6 @@ local pasiphaeGroup = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(
     asset,
     proceduralGlobes.createGlobes(pasiphaeGroup)

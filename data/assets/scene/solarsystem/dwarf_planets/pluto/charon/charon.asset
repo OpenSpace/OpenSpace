@@ -50,8 +50,6 @@ local Charon = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Charon })
 
 

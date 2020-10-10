@@ -291,6 +291,7 @@ asset.onInitialize(function ()
   openspace.setPropertyValueSingle("Scene.ISSparentNode.Rotation.yAxis-InvertObject", true)
 end)
 
+
 asset.meta = {
     Name = "ISS",
     Version = "1.0",

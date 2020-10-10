@@ -23,8 +23,6 @@ local CharonTrailBarycentric = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { CharonTrailBarycentric })
 
 

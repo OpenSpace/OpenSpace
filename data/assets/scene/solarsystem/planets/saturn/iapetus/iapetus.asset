@@ -50,8 +50,6 @@ local Iapetus = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Iapetus })
 
 

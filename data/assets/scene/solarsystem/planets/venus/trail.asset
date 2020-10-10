@@ -27,6 +27,9 @@ local VenusTrail = {
     }
 }
 
+assetHelper.registerSceneGraphNodesAndExport(asset, { VenusTrail })
+
+
 asset.meta = {
     Name = "Venus Trail",
     Version = "1.0",
@@ -37,6 +40,3 @@ asset.meta = {
     License = "MIT license",
     Identifiers = "VenusTrail"
 }
-
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { VenusTrail })

@@ -27,8 +27,6 @@ local MimasTrail = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { MimasTrail })
 
 

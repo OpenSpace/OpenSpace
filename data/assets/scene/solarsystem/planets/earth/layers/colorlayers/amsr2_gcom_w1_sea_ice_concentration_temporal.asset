@@ -26,6 +26,7 @@ end)
 
 asset.export("layer", layer)
 
+
 asset.meta = {
     Name = "AMSR2 GCOM W1 Sea Ice Concentration (Temporal)",
     Version = "1.0",

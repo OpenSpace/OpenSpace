@@ -29,6 +29,7 @@ local OrionClusterStars = {
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { OrionClusterStars })
 
+
 asset.meta = {
     Name = "Orion Nebula Star Cluster",
     Version = "1.0",

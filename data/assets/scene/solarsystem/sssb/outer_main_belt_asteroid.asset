@@ -18,7 +18,6 @@ object.Renderable.TrailFade = 2
 
 object.GUI.Description = [[ Asteroids with a semi-major axis of between 3.2 and 4.6 au. ]]
 
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })
 
 

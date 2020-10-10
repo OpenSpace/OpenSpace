@@ -197,6 +197,4 @@ local JunoTrail = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Juno, JunoTrail })

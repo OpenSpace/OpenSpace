@@ -20,6 +20,9 @@ local VenusBarycenter = {
     }
 }
 
+assetHelper.registerSceneGraphNodesAndExport(asset, { VenusBarycenter })
+
+
 asset.meta = {
     Name = "Venus Transforms",
     Version = "1.0",
@@ -29,6 +32,3 @@ asset.meta = {
     License = "MIT license",
     Identifiers = "VenusBarycenter"
 }
-
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { VenusBarycenter })

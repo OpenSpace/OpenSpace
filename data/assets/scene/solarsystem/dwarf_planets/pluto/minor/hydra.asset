@@ -46,8 +46,6 @@ local HydraTrail = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Hydra, HydraTrail })
 
 

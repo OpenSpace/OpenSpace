@@ -29,6 +29,9 @@ local MarsTrailEarth = {
     }
 }
 
+assetHelper.registerSceneGraphNodesAndExport(asset, { MarsTrailEarth })
+
+
 asset.meta = {
     Name = "Mars Trail from Earth",
     Version = "1.0",
@@ -39,6 +42,3 @@ asset.meta = {
     License = "MIT license",
     Identifiers = "MarsTrailEarth"
 }
-
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { MarsTrailEarth })

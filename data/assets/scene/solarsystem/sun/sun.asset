@@ -49,6 +49,9 @@ local SunLabel = {
     }
 }
 
+assetHelper.registerSceneGraphNodesAndExport(asset, { Sun, SunLabel })
+
+
 asset.meta = {
     Name = "Sun",
     Version = "1.0",
@@ -58,6 +61,3 @@ asset.meta = {
     License = "MIT license",
     Identifiers = "Sun,SunLabel"
 }
-
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { Sun, SunLabel })

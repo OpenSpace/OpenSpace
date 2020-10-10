@@ -44,6 +44,9 @@ local OumuamuaPosition = {
     }
 }
 
+assetHelper.registerSceneGraphNodesAndExport(asset, { OumuamuaPosition, OumuamuaTrail })
+
+
 asset.meta = {
     Name = "'Oumuamua",
     Version = "1.0",
@@ -53,5 +56,3 @@ asset.meta = {
     URL = "https://ssd.jpl.nasa.gov/horizons.cgi",
     License = "NASA"
 }
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { OumuamuaPosition, OumuamuaTrail })

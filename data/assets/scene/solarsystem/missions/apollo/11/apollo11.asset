@@ -220,7 +220,6 @@ local Apollo11LemLandedModel = {
     }
 }
 
-
 local exportList = {
     Apollo11Position,
     Apollo11LemPosition,

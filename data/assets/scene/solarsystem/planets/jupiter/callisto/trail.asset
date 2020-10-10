@@ -27,8 +27,6 @@ local CallistoTrail = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { CallistoTrail })
 
 

@@ -38,7 +38,6 @@ local sphere = {
     }
 }
 
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { sphere })
 
 

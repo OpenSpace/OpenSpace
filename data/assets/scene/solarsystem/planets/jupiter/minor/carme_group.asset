@@ -255,8 +255,6 @@ local carmeGroup = {
     },
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(
     asset,
     proceduralGlobes.createGlobes(carmeGroup)

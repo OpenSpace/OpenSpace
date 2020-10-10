@@ -18,6 +18,7 @@ end)
 
 asset.export("layer", layer)
 
+
 asset.meta = {
     Name = "Earth at Night 2012",
     Version = "1.0",

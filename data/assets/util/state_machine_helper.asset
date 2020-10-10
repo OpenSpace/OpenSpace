@@ -55,5 +55,4 @@ local createStateMachine = function (states)
     return machine
 end
 
-
 asset.export('createStateMachine', createStateMachine)

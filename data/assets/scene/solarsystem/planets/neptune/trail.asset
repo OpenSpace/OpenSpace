@@ -37,8 +37,6 @@ local NeptuneTrail = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { NeptuneTrail })
 
 

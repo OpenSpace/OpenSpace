@@ -5,6 +5,9 @@ local TexturesPath = asset.syncedResource({
     Version = 4
 })
 
+asset.export("TexturesPath", TexturesPath)
+
+
 asset.meta = {
     Name = "Sun Textures",
     Version = "4.0",
@@ -13,5 +16,3 @@ asset.meta = {
     URL = "http://openspaceproject.com",
     License = "MIT license"
 }
-
-asset.export("TexturesPath", TexturesPath)

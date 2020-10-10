@@ -10,6 +10,7 @@ asset.onInitialize(function ()
         colorLayer.layer.Identifier .. ".Enabled", true)
 end)
 
+
 asset.meta = {
     Name = "Default Titan Layers",
     Version = "1.0",

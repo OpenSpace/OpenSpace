@@ -93,8 +93,6 @@ local inuitGroup = {
     },
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(
     asset,
     proceduralGlobes.createGlobes(inuitGroup)

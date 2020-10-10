@@ -46,6 +46,7 @@ local AstraeaPosition = {
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { AstraeaPosition, AstraeaTrail })
 
+
 asset.meta = {
     Name = "5 Astraea",
     Version = "1.0",

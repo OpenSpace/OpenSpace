@@ -149,8 +149,6 @@ local otherGroups = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(
     asset,
     proceduralGlobes.createGlobes(otherGroups)

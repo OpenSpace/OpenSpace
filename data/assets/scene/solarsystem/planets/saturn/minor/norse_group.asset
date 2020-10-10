@@ -488,13 +488,10 @@ local norseGroup = {
     },
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(
     asset,
     proceduralGlobes.createGlobes(norseGroup)
 )
-
 
 
 asset.meta = {

@@ -136,5 +136,4 @@ local VestaTrail = {
     }
 }
 
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Vesta, VestaTrail })

@@ -50,8 +50,6 @@ local Ganymede = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Ganymede })
 
 

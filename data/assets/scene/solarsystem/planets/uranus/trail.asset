@@ -25,7 +25,6 @@ local UranusTrail = {
     }
 }
 
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { UranusTrail })
 
 

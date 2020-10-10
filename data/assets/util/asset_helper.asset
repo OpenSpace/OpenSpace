@@ -180,8 +180,6 @@ local createModelPart = function (parent, sunLightSourceNode, models, geometry, 
     }
 end
 
-
-
 asset.export("registerSceneGraphNodes", registerSceneGraphNodes)
 asset.export("registerSceneGraphNodesAndExport", registerSceneGraphNodesAndExport)
 asset.export("registerScreenSpaceRenderables", registerScreenSpaceRenderables)

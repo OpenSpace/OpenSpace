@@ -15,6 +15,7 @@ asset.onInitialize(function ()
     openspace.setPropertyValueSingle("Scene.Venus.Renderable.Layers.HeightLayers." .. heightLayer.layer.Identifier .. ".Enabled", true)
 end)
 
+
 asset.meta = {
     Name = "Default Venus Layers",
     Version = "1.0",

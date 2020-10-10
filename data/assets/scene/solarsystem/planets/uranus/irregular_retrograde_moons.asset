@@ -141,8 +141,6 @@ local irregularMoons = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(
     asset,
     proceduralGlobes.createGlobes(irregularMoons)

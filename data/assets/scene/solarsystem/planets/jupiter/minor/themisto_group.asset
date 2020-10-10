@@ -29,8 +29,6 @@ local themistoGroup = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(
     asset,
     proceduralGlobes.createGlobes(themistoGroup)

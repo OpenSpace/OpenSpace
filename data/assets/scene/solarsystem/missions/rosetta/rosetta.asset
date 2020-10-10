@@ -513,8 +513,6 @@ local PhilaeTrail = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     Rosetta,
     RosettaModel,

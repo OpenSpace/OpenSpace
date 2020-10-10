@@ -27,8 +27,6 @@ local EnceladusTrail = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { EnceladusTrail })
 
 

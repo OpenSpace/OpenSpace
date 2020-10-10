@@ -22,7 +22,6 @@ local EarthMarker = {
     }
 }
 
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { EarthMarker })
 
 

@@ -27,8 +27,6 @@ local MarsTrail = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { MarsTrail })
 
 

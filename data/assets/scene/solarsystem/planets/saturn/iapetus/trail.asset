@@ -27,8 +27,6 @@ local IapetusTrail = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { IapetusTrail })
 
 

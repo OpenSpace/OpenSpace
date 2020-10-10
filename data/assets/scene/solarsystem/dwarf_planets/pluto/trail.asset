@@ -27,8 +27,6 @@ local PlutoBarycenterTrail = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { PlutoBarycenterTrail })
 
 

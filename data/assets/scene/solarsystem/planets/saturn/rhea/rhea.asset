@@ -50,8 +50,6 @@ local Rhea = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Rhea })
 
 

@@ -27,7 +27,6 @@ local TitanTrail = {
     }
 }
 
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { TitanTrail })
 
 

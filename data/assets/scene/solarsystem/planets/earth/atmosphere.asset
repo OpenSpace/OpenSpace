@@ -101,8 +101,6 @@ local Atmosphere = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Atmosphere })
 
 

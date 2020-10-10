@@ -29,8 +29,6 @@ local TrailAtPluto = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     TrailAtPluto
 })

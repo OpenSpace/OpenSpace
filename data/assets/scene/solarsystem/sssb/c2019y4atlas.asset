@@ -46,6 +46,11 @@ local C2019Y4AtlasPosition = {
     }
 }
 
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+    C2019Y4AtlasPosition, C2019Y4AtlasTrail
+})
+
+
 asset.meta = {
     Name = "C/2019 Y4 Atlas",
     Version = "1.0",
@@ -56,7 +61,3 @@ asset.meta = {
     License = "NASA",
     Identifiers = "C2019Y4AtlasPosition,C2019Y4AtlasTrail"
 }
-
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-    C2019Y4AtlasPosition, C2019Y4AtlasTrail
-})

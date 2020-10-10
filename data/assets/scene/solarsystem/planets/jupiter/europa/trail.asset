@@ -27,8 +27,6 @@ local EuropaTrail = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { EuropaTrail })
 
 

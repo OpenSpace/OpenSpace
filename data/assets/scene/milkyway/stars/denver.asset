@@ -40,6 +40,9 @@ local object = {
     }
 }
 
+assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+
+
 asset.meta = {
     Name = "Stars Denver",
     Version = "1.0",
@@ -49,6 +52,3 @@ asset.meta = {
     URL = "http://openspaceproject.com",
     License = "Creative Commons Attribution-Share Alike 3.0 Unported"
 }
-
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { object })

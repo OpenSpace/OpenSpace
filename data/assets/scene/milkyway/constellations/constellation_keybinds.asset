@@ -37,6 +37,7 @@ asset.onDeinitialize(function ()
   scene_helper.unbindKeys(Keybindings)
 end)
 
+
 asset.meta = {
     Name = "Constellation Image Keybinds",
     Version = "1.0",

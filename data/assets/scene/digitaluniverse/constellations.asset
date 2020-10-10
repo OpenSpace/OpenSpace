@@ -62,8 +62,6 @@ local constellations = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { constellationsExtragalactic, constellations })
 
 

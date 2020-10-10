@@ -135,6 +135,7 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
     OrionNebulaProplydsModel
 })
 
+
 asset.meta = {
     Name = "Orion Nebula Model",
     Version = "1.0",

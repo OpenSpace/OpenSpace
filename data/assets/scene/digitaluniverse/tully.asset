@@ -113,7 +113,6 @@ local tullyImages = {
     }
 }
 
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { tullyPoints, tullyImages })
 
 

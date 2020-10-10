@@ -57,8 +57,6 @@ local PhobosTrail = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Phobos, PhobosTrail })
 
 

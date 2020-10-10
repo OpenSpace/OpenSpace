@@ -27,8 +27,6 @@ local GanymedeTrail = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { GanymedeTrail })
 
 

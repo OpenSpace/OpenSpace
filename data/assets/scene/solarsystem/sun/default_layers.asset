@@ -8,6 +8,7 @@ asset.onInitialize(function ()
     openspace.setPropertyValueSingle("Scene.Sun.Renderable.Layers.ColorLayers." .. colorLayer.layer.Identifier .. ".Enabled", true)
 end)
 
+
 asset.meta = {
     Name = "Default Sun layers",
     Version = "1.0",

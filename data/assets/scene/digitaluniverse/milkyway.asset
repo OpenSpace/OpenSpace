@@ -33,7 +33,6 @@ local plane = {
     }
 }
 
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { plane })
 
 

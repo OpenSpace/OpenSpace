@@ -43,8 +43,6 @@ local homeLabel = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { homeLabel })
 
 

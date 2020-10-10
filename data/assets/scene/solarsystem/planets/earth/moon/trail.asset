@@ -25,6 +25,9 @@ local MoonTrail = {
     }
 }
 
+assetHelper.registerSceneGraphNodesAndExport(asset, { MoonTrail })
+
+
 asset.meta = {
     Name = "Moon Trail",
     Version = "1.0",
@@ -35,5 +38,3 @@ asset.meta = {
     License = "MIT license",
     Identifiers = "MoonTrail"
 }
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { MoonTrail })

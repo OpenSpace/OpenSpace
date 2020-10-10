@@ -57,8 +57,6 @@ local DeimosTrail = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Deimos, DeimosTrail })
 
 

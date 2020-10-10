@@ -43,6 +43,9 @@ local C2019Q4BorisovPosition = {
     }
 }
 
+assetHelper.registerSceneGraphNodesAndExport(asset, { C2019Q4BorisovPosition, C2019Q4BorisovTrail })
+
+
 asset.meta = {
     Name = "C/2019 Q4 Borisov",
     Version = "1.0",
@@ -55,5 +58,3 @@ asset.meta = {
         NAS7-030010. All documents available from this server may be protected
         under the U.S. and Foreign Copyright Laws."]]
 }
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { C2019Q4BorisovPosition, C2019Q4BorisovTrail })

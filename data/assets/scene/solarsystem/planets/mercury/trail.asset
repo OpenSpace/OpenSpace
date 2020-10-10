@@ -26,8 +26,6 @@ local MercuryTrail = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { MercuryTrail })
 
 

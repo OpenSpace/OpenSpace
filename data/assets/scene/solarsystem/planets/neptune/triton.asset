@@ -22,8 +22,6 @@ local Triton = {
     Kernels = kernel
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(
     asset,
     proceduralGlobes.createGlobes({ Triton })

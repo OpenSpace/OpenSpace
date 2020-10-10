@@ -16,6 +16,9 @@ local kernels = {
     syncedDirectory .. "/de430_1850-2150.bsp"
 }
 
+assetHelper.registerSpiceKernels(asset, kernels)
+
+
 asset.meta = {
     Name = "SPICE Base",
     Version = "1.0",
@@ -25,6 +28,3 @@ asset.meta = {
     URL = "https://naif.jpl.nasa.gov/naif/data_generic.html",
     License = "NASA"
 }
-
-
-assetHelper.registerSpiceKernels(asset, kernels)

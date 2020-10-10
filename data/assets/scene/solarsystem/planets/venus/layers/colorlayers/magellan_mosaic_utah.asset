@@ -31,6 +31,9 @@ asset.onInitialize(function ()
     openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
+asset.export("layer", layer)
+
+
 asset.meta = {
     Name = "Venus Magellan Mosaic",
     Version = "1.0",
@@ -42,6 +45,3 @@ asset.meta = {
     License = "NASA/PDS",
     Identifiers = "Magellan_Mosaic_Utah"
 }
-
-
-asset.export("layer", layer)

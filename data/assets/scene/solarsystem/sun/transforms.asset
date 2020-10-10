@@ -67,6 +67,9 @@ local SunECLIPJ2000 = {
     }
 }
 
+assetHelper.registerSceneGraphNodesAndExport(asset, { SolarSystemBarycenter, SunIAU, SunECLIPJ2000 })
+
+
 asset.meta = {
     Name = "Sun Transforms",
     Version = "1.0",
@@ -77,5 +80,3 @@ asset.meta = {
     License = "MIT license",
     Identifiers = "SolarSystemBarycenter,SunIAU,SunECLIPJ2000"
 }
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { SolarSystemBarycenter, SunIAU, SunECLIPJ2000 })
