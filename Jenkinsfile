@@ -67,7 +67,7 @@ def moduleCMakeFlags() {
 
   def flags = '';
   for (module in modules) {
-      flags += "-D OPENSPACE_MODULE_${module.toUpperCase()}=ON "
+      flags += "-DOPENSPACE_MODULE_${module.toUpperCase()}=ON "
   }
   return flags;
 }
