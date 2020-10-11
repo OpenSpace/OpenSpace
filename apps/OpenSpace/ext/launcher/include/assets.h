@@ -26,27 +26,17 @@
 #define __OPENSPACE_UI_LAUNCHER___ASSETS___H__
 
 #include <QDialog>
-#include <QWidget>
-#include <QListWidgetItem>
+
 #include "assettreemodel.h"
 #include "filesystemaccess.h"
-#include <openspace/scene/profile.h>
 
-QT_BEGIN_NAMESPACE
-namespace Ui {
-class assets;
-}
-QT_END_NAMESPACE
+namespace openspace { class Profile; }
 
-class assets : public QDialog
-{
-    Q_OBJECT
+class QTextEdit;
+class QTreeView;
 
-public slots:
-    void cancel();
-    void parseSelections();
-    void selected(const QModelIndex&);
-
+class Assets : public QDialog {
+Q_OBJECT
 public:
     /**
      * Constructor for assets class
@@ -56,15 +46,10 @@ public:
      * \param reportAssets A full summary of all assets and their respective paths in
      *                     a text format unique to this application (more details are
      *                     in class #assetTreeModel)
-     * \param parent Pointer to parent Qt widget (optional)
+     * \param parent Pointer to parent Qt widget
      */
-    explicit assets(openspace::Profile* imported, const std::string reportAssets,
-        QWidget *parent = nullptr);
-
-    /**
-     * Destructor for assets class
-     */
-    ~assets();
+    explicit Assets(openspace::Profile* imported, const std::string reportAssets,
+        QWidget* parent);
 
     /**
      * Creates a text summary of all assets and their paths
@@ -73,27 +58,15 @@ public:
      */
     QString createTextSummary();
 
-    /**
-     * Handles keypress while the Qt dialog window is open
-     *
-     * \param evt #QKeyEvent object for the key press event
-     */
-    void keyPressEvent(QKeyEvent *evt);
-
-protected:
-    void resizeEvent(QResizeEvent* event);
+public slots:
+    void parseSelections();
+    void selected(const QModelIndex&);
 
 private:
-    void compareFilesystemWithProfileAssets();
-    bool traverseToExpandSelectedItems(int nRows, QModelIndex parent);
-    void findPathMatch(std::string& path);
-    void traverseToFindFilesystemMatch(QModelIndex parent, int nRows,
-        std::string dirname);
-    Ui::assets *ui;
-    QWidget* _parent;
     openspace::Profile* _imported;
-    assetTreeModel _assetTreeModel;
-    QModelIndex _selectedIdx;
+    AssetTreeModel _assetTreeModel;
+    QTreeView* _assetTree = nullptr;
+    QTextEdit* _summary = nullptr;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___ASSETS___H__

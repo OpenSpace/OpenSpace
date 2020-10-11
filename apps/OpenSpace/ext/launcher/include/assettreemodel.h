@@ -26,27 +26,16 @@
 #define __OPENSPACE_UI_LAUNCHER___ASSETTREEMODEL___H__
 
 #include <QAbstractItemModel>
+
 #include "assettreeitem.h"
 #include "openspace/scene/profile.h"
+#include <memory>
 
-struct importElement
-{
-    importElement(std::string l, int lev, bool chk)
-        : line(l), level(lev), checked(chk) {}
-    std::string line;
-    int level = -1;
-    bool checked = false;
-    bool existsInFilesystem = true;
-};
-
-class assetTreeModel : public QAbstractItemModel
-{
+class AssetTreeModel : public QAbstractItemModel {
     Q_OBJECT
 
 public:
-    explicit assetTreeModel(QString header1, QString header2,
-        QObject* parent = nullptr);
-    ~assetTreeModel();
+    AssetTreeModel(QObject* parent = nullptr);
 
     /**
       * Returns the data contained at an index
@@ -56,7 +45,7 @@ public:
       *             function (can be multiple times)
       * \return QVariant data object
       */
-    QVariant data(const QModelIndex &index, int role) const override;
+    QVariant data(const QModelIndex& index, int role) const override;
 
     /**
       * Returns the header data of the tree view
@@ -79,7 +68,7 @@ public:
       * \return #QModelIndex index of the item at specified position
       */
     QModelIndex index(int row, int column,
-        const QModelIndex &parent = QModelIndex()) const override;
+        const QModelIndex& parent = QModelIndex()) const override;
 
     /**
       * Returns the index of the parent of the item specified by input param
@@ -87,7 +76,7 @@ public:
       * \param index of item that is a child of the parent
       * \return #QModelIndex index of the parent
       */
-    QModelIndex parent(const QModelIndex &index) const override;
+    QModelIndex parent(const QModelIndex& index) const override;
 
     /**
       * Returns the index of the parent of the item specified by the input params
@@ -106,7 +95,7 @@ public:
       * \param index of item that is a child of the parent
       * \return #assetTreeItem pointer to the item at the provided index
       */
-    assetTreeItem* assetItem(const QModelIndex &index);
+    AssetTreeItem* assetItem(const QModelIndex& index);
 
     /**
       * Returns number of children/rows of the parent
@@ -114,7 +103,7 @@ public:
       * \param parent #QModelIndex of the parent item
       * \return number of children/rows of this parent
       */
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 
     /**
       * Returns the number of columns of data in each item of the tree
@@ -122,7 +111,7 @@ public:
       * \param parent specified by the #QModelIndex index
       * \return the number of data columns
       */
-    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+    int columnCount(const QModelIndex& parent = QModelIndex()) const override;
 
     /**
       * Return the Qt flags of the item specified by index, which can include
@@ -131,7 +120,7 @@ public:
       * \param index specified by the #QModelIndex index
       * \return the Qt flags
       */
-    Qt::ItemFlags flags(const QModelIndex &index) const override;
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
 
     /**
       * Set data at index \p index
@@ -141,7 +130,7 @@ public:
       * \param role Qt-specific role to define context of the call
       * \return true if the data set was successful
       */
-    bool setData(const QModelIndex &index, const QVariant &value,
+    bool setData(const QModelIndex& index, const QVariant& value,
         int role = Qt::EditRole) override;
 
     /**
@@ -152,16 +141,8 @@ public:
       * \param outputItems vector of #assetTreeItem * objects,
       *                    each of which are selected
       */
-    void selectedAssets(std::vector<std::string>& outputPaths,
-        std::vector<assetTreeItem*>& outputItems);
-
-    /**
-      * Returns a vector of all assets selected in the tree view, but in the form of
-      * #assetTreeItem pointers
-      *
-      * \return vector of #assetTreeItem * objects, each of which are selected
-      */
-    std::vector<std::string> selectedAssetsDetailed();
+    void getSelectedAssets(std::vector<std::string>& outputPaths,
+        std::vector<AssetTreeItem*>& outputItems);
 
     /**
       * Imports asset tree data for this model. The import text format is unique to
@@ -180,7 +161,7 @@ public:
       *
       * \param contents asset recursive listing of directory in format described above
       */
-    void importModelData(const std::string contents);
+    void importModelData(const std::string& contents);
 
     /**
       * Returns bool for if item is checked/selected
@@ -220,7 +201,7 @@ public:
       * \param row the child number of the current item
       * \return assetTreeItem pointer to the child
       */
-    assetTreeItem* child(int row) const;
+    AssetTreeItem* child(int row) const;
 
     /**
       * Returns the asset name of the specified item
@@ -255,17 +236,9 @@ public:
     void setExistenceInFilesystem(QModelIndex& index, bool fileExists);
 
 private:
-    std::string headerTitle;
-    assetTreeItem *getItem(const QModelIndex &index) const;
-    assetTreeItem *rootItem;
-    void parseChildrenForSelected(assetTreeItem* item,
-        std::vector<std::string>& outputPaths,
-        std::vector<assetTreeItem*>& outputItems, std::string pathPrefix);
-    void importInsertItem(std::istringstream& iss, assetTreeItem* parent,
-        importElement& elem, int level);
-    bool importGetNextLine(importElement& elem, std::istringstream& iss);
-    void trimWhitespaceFromLine(std::string& line);
-    int getLevelFromLine(std::string line);
+    AssetTreeItem* getItem(const QModelIndex& index) const;
+
+    std::unique_ptr<AssetTreeItem> _rootItem;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___ASSETTREEMODEL___H__

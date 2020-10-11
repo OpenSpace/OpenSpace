@@ -27,7 +27,7 @@
 
 #include <QDialog>
 
-#include <openspace/scene/profile.h>
+namespace openspace { class Profile; }
 
 class QTextEdit;
 

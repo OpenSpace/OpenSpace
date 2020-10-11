@@ -25,12 +25,13 @@
 #ifndef __OPENSPACE_UI_LAUNCHER___ASSETTREEITEM___H__
 #define __OPENSPACE_UI_LAUNCHER___ASSETTREEITEM___H__
 
-#include <QVector>
 #include <QVariant>
+#include <vector>
 
-class assetTreeItem
-{
+class AssetTreeItem {
 public:
+    static constexpr const int CheckboxColumn = 1;
+
     /**
      * Constructor for assetTreeItem class
      *
@@ -38,13 +39,13 @@ public:
      * \param parentItem The parent that contains this (and possibly other) children
      *                   in the tree structure (optional).
      */
-    explicit assetTreeItem(const QVector<QVariant>& data,
-        assetTreeItem* parentItem = nullptr);
+    explicit AssetTreeItem(const std::vector<QVariant>& data,
+        AssetTreeItem* parentItem = nullptr);
 
     /**
      * Destructor for assetTreeItem class
      */
-    ~assetTreeItem();
+    ~AssetTreeItem();
 
     /**
       * Returns pointer to this tree item's child at position \p row.
@@ -54,7 +55,7 @@ public:
       *                   in the tree structure (optional).
       * \return pointer to the child #assetTreeItem
       */
-    assetTreeItem* child(int row);
+    AssetTreeItem* child(int row);
 
     /**
       * Returns the number of children this item has
@@ -103,7 +104,7 @@ public:
       *
       * \return pointer to the \p assetTreeItem parent
       */
-    assetTreeItem* parent();
+    AssetTreeItem* parent();
 
     /**
       * Returns the row number / child number of this item's parent
@@ -123,14 +124,6 @@ public:
     bool removeChildren(int position, int count);
 
     /**
-      * Returns the position number of the current item as a child of its parent,
-      * relative to the parent's other children.
-      *
-      * \return The position number of the current item with respect to its siblings
-      */
-    int childNumber() const;
-
-    /**
       * Set data at column \p column
       *
       * \param column The data column number to set
@@ -145,14 +138,14 @@ public:
       *
       * \return true if this item is checked
       */
-    bool isChecked() const { return _checked; }
+    bool isChecked() const;
 
     /**
       * Sets the checked state of this item (whether or not it is selected for a profile)
       *
       * \param set bool for whether or not this is checked
       */
-    void setChecked( bool set ) { _checked = set; }
+    void setChecked(bool set);
 
     /**
       * Returns a bool for whether or not this is an asset. If it is a file
@@ -193,21 +186,12 @@ public:
       */
     QString name() const;
 
-    /**
-      * Returns the asset's optional variable name
-      *
-      * \return The asset's variable name
-      */
-    QString varName() const;
-
-    static const int checkboxColumn = 1;
-
 private:
-    QVector<assetTreeItem*> _childItems;
-    QVector<QVariant> _itemData;
-    assetTreeItem* _parentItem;
-    bool _checked = false;
-    bool _existsInFilesystem = true;
+    std::vector<AssetTreeItem*> _childItems;
+    std::vector<QVariant> _itemData;
+    AssetTreeItem* _parentItem;
+    bool _isChecked = false;
+    bool _fileExists = true;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___ASSETTREEITEM___H__

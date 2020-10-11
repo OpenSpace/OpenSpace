@@ -169,7 +169,7 @@ void ProfileEdit::openKeybindings() {
 void ProfileEdit::openAssets() {
     ui->label_error->setText("");
     if (_pData) {
-        _assets = new assets(_pData, _reportedAssets);
+        _assets = new Assets(_pData, _reportedAssets, this);
         _assets->exec();
         labelText(_pData, _pData->assets().size(), "Assets", ui->label_assets);
         ui->text_assets->setText(_assets->createTextSummary());

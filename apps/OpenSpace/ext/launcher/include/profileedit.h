@@ -33,7 +33,7 @@
 #include "keybindings.h"
 #include "assets.h"
 #include "ostime.h"
-#include "addedscripts.h"
+#include "additionalscripts.h"
 #include "deltatimes.h"
 #include "camera.h"
 #include "marknodes.h"
@@ -136,7 +136,7 @@ private:
     properties* _properties;
     osmodules* _modules;
     keybindings* _keybindings;
-    assets* _assets;
+    Assets* _assets;
     ostime* _time;
     AdditionalScripts* _addedScripts;
     deltaTimes* _deltaTimes;

@@ -24,6 +24,7 @@
 
 #include "additionalscripts.h"
 
+#include <openspace/scene/profile.h>
 #include <QDialogButtonBox>
 #include <QHBoxLayout>
 #include <QLabel>

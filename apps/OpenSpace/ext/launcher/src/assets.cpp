@@ -23,145 +23,180 @@
  ****************************************************************************************/
 
 #include "assets.h"
-#include "./ui_assets.h"
-#include <qevent.h>
-#include <QFileSystemModel>
-#include <QScreen>
-#include <QKeyEvent>
-#include <sstream>
-#include <string>
+
 #include <openspace/scene/profile.h>
+#include <QDialogButtonBox>
+#include <QHeaderView>
+#include <QLabel>
+#include <QVBoxLayout>
+#include <QTextEdit>
+#include <QTreeView>
 
-assets::assets(openspace::Profile* imported, const std::string reportAssets,
-               QWidget *parent)
-    : QDialog(parent)
-    , ui(new Ui::assets)
-    , _imported(imported)
-    , _assetTreeModel(tr("Asset"), tr("Enabled"))
-{
-    ui->setupUi(this);
+namespace {
+    bool traverseToExpandSelectedItems(QTreeView& tree, AssetTreeModel& model,
+                                       int rows, QModelIndex parent)
+    {
+        bool isExpanded = false;
 
-    _assetTreeModel.importModelData(reportAssets);
-
-    ui->treeView->setModel(&_assetTreeModel);
-    ui->treeView->setRootIndex(_assetTreeModel.index(-1, 0));
-    //ui->treeView->setColumnWidth(0, ui->treeView->width() * 0.9);
-    ui->treeView->setColumnWidth(1, 60);//ui->treeView->width() * 0.1);
-    ui->treeView->setColumnWidth(0, ui->treeView->width() - 60);
-    ui->treeView->setAnimated(true);
-    ui->treeView->setSortingEnabled(false);
-    ui->treeView->setSelectionMode(QAbstractItemView::SingleSelection);
-    ui->textEdit->setReadOnly(true);
-
-    compareFilesystemWithProfileAssets();
-
-    int nRows = _assetTreeModel.rowCount(_assetTreeModel.index(-1, 0));
-    traverseToExpandSelectedItems(nRows, _assetTreeModel.index(-1, 0));
-    ui->textEdit->setText(createTextSummary());
-
-    connect(ui->treeView,
-            SIGNAL(clicked(const QModelIndex&)),
-            this,
-            SLOT(selected(const QModelIndex&))
-    );
-    connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(parseSelections()));
-    connect(ui->buttonBox, SIGNAL(rejected()), this, SLOT(cancel()));
-}
-
-void assets::compareFilesystemWithProfileAssets() {
-    for (std::string a : _imported->assets()) {
-        findPathMatch(a);
-    }
-}
-
-void assets::findPathMatch(std::string& path) {
-    QModelIndex parent = _assetTreeModel.index(-1, 0);
-    int nRows = _assetTreeModel.rowCount(parent);
-    traverseToFindFilesystemMatch(parent, nRows, path);
-}
-
-void assets::traverseToFindFilesystemMatch(QModelIndex parent, int rows, std::string path)
-{
-    size_t slash = path.find_first_of('/', 0);
-    bool endOfPath = (slash == std::string::npos);
-    std::string firstDir = endOfPath ? "" : path.substr(0, slash);
-
-    if (!endOfPath) {
-        std::string nextPath = (slash == std::string::npos) ? path :
-            path.substr(slash + 1);
-        bool foundDirMatch = false;
         for (int r = 0; r < rows; r++) {
-            QModelIndex idx = _assetTreeModel.index(r, 0, parent);
-            std::string assetName = _assetTreeModel.name(idx).toUtf8().constData();
-            if (!_assetTreeModel.isAsset(idx)) {
-                if (firstDir.compare(assetName) == 0) {
-                    int nChildRows = _assetTreeModel.childCount(idx);
-                    foundDirMatch = true;
-                    traverseToFindFilesystemMatch(idx, nChildRows, nextPath);
-                    break;
+            QModelIndex idx = model.index(r, 0, parent);
+
+            if (!model.isAsset(idx)) {
+                int nChildRows = model.childCount(idx);
+                if (traverseToExpandSelectedItems(tree, model, nChildRows, idx)) {
+                    tree.setExpanded(idx, true);
+                    isExpanded = true;
                 }
             }
-            else {
-                continue;
-            }
-        }
-        if (!foundDirMatch) {
-            //Insert missing directory here with name and exists=false condition
-            _assetTreeModel.assetItem(parent)->insertChildren(rows, 1, 3);
-            QModelIndex idx = _assetTreeModel.index(rows, 0, parent);
-            _assetTreeModel.setName(idx, QString(firstDir.c_str()));
-            _assetTreeModel.setExistenceInFilesystem(idx, false);
-            traverseToFindFilesystemMatch(idx, 0, nextPath);
-        }
-    }
-    else {
-        bool foundFileMatch = false;
-        for (int r = 0; r < rows; r++) {
-            QModelIndex idx = _assetTreeModel.index(r, 0, parent);
-            std::string assetName = _assetTreeModel.name(idx).toUtf8().constData();
-
-            if (path.compare(assetName) == 0) {
-                foundFileMatch = true;
-                _assetTreeModel.setChecked(idx, true);
-                break;
-            }
-        }
-        if (!foundFileMatch) {
-            //Insert missing file here with name and exists=false condition
-            _assetTreeModel.assetItem(parent)->insertChildren(rows, 1, 3);
-            QModelIndex idx = _assetTreeModel.index(rows, 0, parent);
-            _assetTreeModel.setName(idx, QString(path.c_str()));
-            _assetTreeModel.setChecked(idx, true);
-            _assetTreeModel.setExistenceInFilesystem(idx, false);
-        }
-    }
-}
-
-bool assets::traverseToExpandSelectedItems(int rows, QModelIndex parent) {
-    bool isExpanded = false;
-
-    for (int r = 0; r < rows; r++) {
-        QModelIndex idx = _assetTreeModel.index(r, 0, parent);
-
-        if (!_assetTreeModel.isAsset(idx)) {
-            int nChildRows = _assetTreeModel.childCount(idx);
-            if (traverseToExpandSelectedItems(nChildRows, idx)) {
-                ui->treeView->setExpanded(idx, true);
+            else if (model.isChecked(idx) || !model.inFilesystem(idx)) {
                 isExpanded = true;
             }
         }
-        else if (_assetTreeModel.isChecked(idx) || !_assetTreeModel.inFilesystem(idx)) {
-            isExpanded = true;
+        return isExpanded;
+    }
+
+    void traverseToFindFilesystemMatch(AssetTreeModel& model, QModelIndex parent,
+                                       int nRows, const std::string& path)
+    {
+        size_t slash = path.find_first_of('/', 0);
+        bool endOfPath = (slash == std::string::npos);
+        std::string firstDir = endOfPath ? "" : path.substr(0, slash);
+
+        if (!endOfPath) {
+            std::string nextPath = (slash == std::string::npos) ?
+                path :
+                path.substr(slash + 1);
+            bool foundDirMatch = false;
+            for (int r = 0; r < nRows; r++) {
+                QModelIndex idx = model.index(r, 0, parent);
+                std::string assetName = model.name(idx).toUtf8().constData();
+                if (!model.isAsset(idx)) {
+                    if (firstDir.compare(assetName) == 0) {
+                        int nChildRows = model.childCount(idx);
+                        foundDirMatch = true;
+                        traverseToFindFilesystemMatch(model, idx, nChildRows, nextPath);
+                        break;
+                    }
+                }
+                else {
+                    continue;
+                }
+            }
+            if (!foundDirMatch) {
+                //Insert missing directory here with name and exists=false condition
+                model.assetItem(parent)->insertChildren(nRows, 1, 3);
+                QModelIndex idx = model.index(nRows, 0, parent);
+                model.setName(idx, QString(firstDir.c_str()));
+                model.setExistenceInFilesystem(idx, false);
+                traverseToFindFilesystemMatch(model, idx, 0, nextPath);
+            }
+        }
+        else {
+            bool foundFileMatch = false;
+            for (int r = 0; r < nRows; r++) {
+                QModelIndex idx = model.index(r, 0, parent);
+                std::string assetName = model.name(idx).toUtf8().constData();
+
+                if (path.compare(assetName) == 0) {
+                    foundFileMatch = true;
+                    model.setChecked(idx, true);
+                    break;
+                }
+            }
+            if (!foundFileMatch) {
+                //Insert missing file here with name and exists=false condition
+                model.assetItem(parent)->insertChildren(nRows, 1, 3);
+                QModelIndex idx = model.index(nRows, 0, parent);
+                model.setName(idx, QString(path.c_str()));
+                model.setChecked(idx, true);
+                model.setExistenceInFilesystem(idx, false);
+            }
         }
     }
-    return isExpanded;
+} // namespace
+
+Assets::Assets(openspace::Profile* imported, const std::string reportAssets,
+               QWidget* parent)
+    : QDialog(parent)
+    , _imported(imported)
+{
+    setWindowTitle("Assets");
+
+    QBoxLayout* layout = new QVBoxLayout(this);
+    {
+        QLabel* heading = new QLabel("Select assets from /data/assets");
+        heading->setObjectName("heading");
+        layout->addWidget(heading);
+    }
+    {
+        _assetTreeModel.importModelData(reportAssets);
+
+        _assetTree = new QTreeView;
+        _assetTree->setToolTip(
+            "Expand arrow entries to browse assets in this OpenSpace installation. "
+            "Enable checkbox to include an asset. Those assets highlighted in red are "
+            "present in the profile but do not exist in this OpenSpace installation."
+        );
+        _assetTree->setAlternatingRowColors(true);
+        _assetTree->setModel(&_assetTreeModel);
+        _assetTree->setRootIndex(_assetTreeModel.index(-1, 0));
+        _assetTree->setColumnWidth(1, 60);
+        _assetTree->setColumnWidth(0, _assetTree->width() - 60);
+        _assetTree->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+        _assetTree->header()->setSectionResizeMode(1, QHeaderView::Fixed);
+        _assetTree->header()->setStretchLastSection(false);
+        _assetTree->setAnimated(true);
+        _assetTree->setSortingEnabled(false);
+        _assetTree->setSelectionMode(QAbstractItemView::SingleSelection);
+        connect(_assetTree, &QTreeView::clicked, this, &Assets::selected);
+
+
+        for (const std::string& a : _imported->assets()) {
+            QModelIndex parent = _assetTreeModel.index(-1, 0);
+            int nRows = _assetTreeModel.rowCount(parent);
+            traverseToFindFilesystemMatch(_assetTreeModel, parent, nRows, a);
+        }
+
+        int nRows = _assetTreeModel.rowCount(_assetTreeModel.index(-1, 0));
+        traverseToExpandSelectedItems(
+            *_assetTree,
+            _assetTreeModel,
+            nRows,
+            _assetTreeModel.index(-1, 0)
+        );
+        layout->addWidget(_assetTree);
+    }
+    {
+        QLabel* summaryHeading = new QLabel("Selection summary");
+        summaryHeading->setObjectName("heading");
+        layout->addWidget(summaryHeading);
+    }
+    {
+        _summary = new QTextEdit;
+        _summary->setReadOnly(true);
+        _summary->setText(createTextSummary());
+        layout->addWidget(_summary);
+    }
+    {
+        QFrame* line = new QFrame;
+        line->setFrameShape(QFrame::HLine);
+        line->setFrameShadow(QFrame::Sunken);
+        layout->addWidget(line);
+    }
+
+    {
+        QDialogButtonBox* buttons = new QDialogButtonBox;
+        buttons->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
+        connect(buttons, &QDialogButtonBox::accepted, this, &Assets::parseSelections);
+        connect(buttons, &QDialogButtonBox::rejected, this, &Assets::reject);
+        layout->addWidget(buttons);
+    }
 }
 
-QString assets::createTextSummary() {
-    //compareFilesystemWithProfileAssets();
+QString Assets::createTextSummary() {
     std::vector<std::string> summaryPaths;
-    std::vector<assetTreeItem*> summaryItems;
-    _assetTreeModel.selectedAssets(summaryPaths, summaryItems);
+    std::vector<AssetTreeItem*> summaryItems;
+    _assetTreeModel.getSelectedAssets(summaryPaths, summaryItems);
 
     if (summaryPaths.size() != summaryItems.size()) {
         return "";
@@ -178,38 +213,18 @@ QString assets::createTextSummary() {
     return summary;
 }
 
-void assets::parseSelections() {
+void Assets::parseSelections() {
     _imported->clearAssets();
     std::vector<std::string> summaryPaths;
-    std::vector<assetTreeItem*> summaryItems;
-    _assetTreeModel.selectedAssets(summaryPaths, summaryItems);
+    std::vector<AssetTreeItem*> summaryItems;
+    _assetTreeModel.getSelectedAssets(summaryPaths, summaryItems);
 
-    for (std::string sel : summaryPaths) {
+    for (const std::string& sel : summaryPaths) {
         _imported->addAsset(sel);
     }
     accept();
 }
 
-void assets::selected(const QModelIndex& sel) {
-    ui->textEdit->setText(createTextSummary());
-}
-
-assets::~assets() {
-    delete ui;
-}
-
-void assets::cancel() {
-}
-
-void assets::keyPressEvent(QKeyEvent *evt)
-{
-    if(evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return)
-        return;
-    QDialog::keyPressEvent(evt);
-}
-
-void assets::resizeEvent(QResizeEvent* event)
-{
-    int assetColumnWidth = ui->treeView->width() - 90;
-    ui->treeView->setColumnWidth(0, assetColumnWidth);
+void Assets::selected(const QModelIndex& sel) {
+    _summary->setText(createTextSummary());
 }

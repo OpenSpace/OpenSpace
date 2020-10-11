@@ -24,127 +24,138 @@
 
 #include "assettreeitem.h"
 
-assetTreeItem::assetTreeItem(const QVector<QVariant> &data, assetTreeItem* parentItem)
-    : _itemData(data), _parentItem(parentItem)
-{
-}
+AssetTreeItem::AssetTreeItem(const std::vector<QVariant>& data, AssetTreeItem* parentItem)
+    : _itemData(data)
+    , _parentItem(parentItem)
+{}
 
-assetTreeItem::~assetTreeItem()
-{
+AssetTreeItem::~AssetTreeItem() {
     qDeleteAll(_childItems);
 }
 
-assetTreeItem* assetTreeItem::child(int row)
-{
-    if (row < 0 || row >= _childItems.size())
+AssetTreeItem* AssetTreeItem::child(int row) {
+    if (row < 0 || row >= static_cast<int>(_childItems.size())) {
         return nullptr;
-    return _childItems.at(row);
+    }
+    else {
+        return _childItems.at(row);
+    }
 }
 
-int assetTreeItem::childCount() const
-{
-    return _childItems.count();
+int AssetTreeItem::childCount() const {
+    return static_cast<int>(_childItems.size());
 }
 
-int assetTreeItem::row() const
-{
-    if (_parentItem)
-        return _parentItem->_childItems.indexOf(const_cast<assetTreeItem*>(this));
-
-    return 0;
+int AssetTreeItem::row() const {
+    if (_parentItem) {
+        auto it = std::find(
+            _parentItem->_childItems.begin(),
+            _parentItem->_childItems.end(),
+            this
+        );
+        return std::distance(_parentItem->_childItems.begin(), it);
+    }
+    else {
+        return 0;
+    }
 }
 
-int assetTreeItem::columnCount() const
-{
-    return _itemData.count();
+int AssetTreeItem::columnCount() const {
+    return _itemData.size();
 }
 
-int assetTreeItem::childNumber() const
-{
-    if (_parentItem)
-        return _parentItem->_childItems.indexOf(const_cast<assetTreeItem*>(this));
-    return 0;
-}
-
-QVariant assetTreeItem::data(int column) const
-{
-    if (column < 0 || column >= _itemData.size())
+QVariant AssetTreeItem::data(int column) const {
+    if (column < 0 || column >= _itemData.size()) {
         return QVariant();
-    return _itemData.at(column);
+    }
+    else {
+        return _itemData.at(column);
+    }
 }
 
-bool assetTreeItem::setData(int column, const QVariant &value)
-{
-    if (column < 0 || column >= _itemData.size())
+bool AssetTreeItem::setData(int column, const QVariant& value) {
+    if (column < 0 || column >= _itemData.size()) {
         return false;
+    }
 
     _itemData[column] = value;
-    if (column == checkboxColumn) {
-        _checked = value.toBool();
+    if (column == CheckboxColumn) {
+        _isChecked = value.toBool();
     }
     return true;
 }
 
-bool assetTreeItem::isAsset() const {
+bool AssetTreeItem::isChecked() const {
+    return _isChecked;
+}
+
+void AssetTreeItem::setChecked(bool set) {
+    _isChecked = set;
+}
+
+bool AssetTreeItem::isAsset() const {
     return (childCount() == 0);
 }
 
-bool assetTreeItem::isCategory() const {
+bool AssetTreeItem::isCategory() const {
     return (childCount() > 0);
 }
 
-void assetTreeItem::setExistsInFilesystem(bool fileExists) {
-    _existsInFilesystem = fileExists;
+void AssetTreeItem::setExistsInFilesystem(bool fileExists) {
+    _fileExists = fileExists;
 }
 
-bool assetTreeItem::doesExistInFilesystem() const {
-    return _existsInFilesystem;
+bool AssetTreeItem::doesExistInFilesystem() const {
+    return _fileExists;
 }
 
-QString assetTreeItem::name() const {
+QString AssetTreeItem::name() const {
     return QString(data(0).toString());
 }
 
-bool assetTreeItem::insertChildren(int position, int count, int columns)
-{
-    if (position < 0 || position > _childItems.size())
+bool AssetTreeItem::insertChildren(int position, int count, int columns) {
+    if (position < 0 || position > _childItems.size()) {
         return false;
+    }
 
     for (int row = 0; row < count; ++row) {
-        QVector<QVariant> data(columns);
-        assetTreeItem *item = new assetTreeItem(data, this);
-        _childItems.insert(position, item);
+        std::vector<QVariant> data(columns);
+        AssetTreeItem*item = new AssetTreeItem(data, this);
+        _childItems.insert(_childItems.begin() + position, item);
     }
 
     return true;
 }
 
-bool assetTreeItem::removeChildren(int position, int count)
-{
-    if (position < 0 || position + count > _childItems.size())
+bool AssetTreeItem::removeChildren(int position, int count) {
+    if (position < 0 || position + count > _childItems.size()) {
         return false;
+    }
 
-    for (int row = 0; row < count; ++row)
-        delete _childItems.takeAt(position);
+    for (int row = 0; row < count; ++row) {
+        delete _childItems[position];
+        _childItems.erase(_childItems.begin() + position);
+    }
 
     return true;
 }
 
-bool assetTreeItem::insertColumns(int position, int columns)
-{
-    if (position < 0 || position > _itemData.size())
+bool AssetTreeItem::insertColumns(int position, int columns) {
+    if (position < 0 || position > _itemData.size()) {
         return false;
+    }
 
-    for (int column = 0; column < columns; ++column)
-        _itemData.insert(position, QVariant());
+    for (int column = 0; column < columns; ++column) {
+        _itemData.insert(_itemData.begin() + position, QVariant());
+    }
 
-    for (assetTreeItem *child : qAsConst(_childItems))
+    for (AssetTreeItem* child : qAsConst(_childItems)) {
         child->insertColumns(position, columns);
+    }
 
     return true;
 }
 
-assetTreeItem* assetTreeItem::parent()
-{
+AssetTreeItem* AssetTreeItem::parent() {
     return _parentItem;
 }

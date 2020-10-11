@@ -1,3 +1,13 @@
-AdditionalScripts  QLabel#title {
+/*
+ * General settings
+ */
+QLabel#heading {
     font-size: 12pt;
+}
+
+/*
+ * Assets
+ */
+Assets  QTreeView {
+  min-width: 40em;
 }
