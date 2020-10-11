@@ -32,6 +32,7 @@
 #include <openspace/engine/configuration.h>
 #include <sstream>
 #include <iostream>
+#include <QMessageBox>
 #include <random>
 
 LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
@@ -195,22 +196,26 @@ void LauncherWindow::saveProfileToFile(const std::string& path, openspace::Profi
         outFile.open(path, std::ofstream::out);
     }
     catch (const std::ofstream::failure& e) {
-        displayErrorDialog(fmt::format(
-            "Exception opening profile file {} for write: ({})",
-            path,
-            e.what()
-        ));
+        QMessageBox::critical(
+            this,
+            "Exception",
+            QString::fromStdString(fmt::format(
+                "Exception opening profile file {} for write: ({})", path, e.what()
+            ))
+        );
     }
 
     try {
         outFile << p->serialize();
     }
     catch (const std::ofstream::failure& e) {
-        displayErrorDialog(fmt::format(
-            "Data write error to file: {} ({})",
-            path,
-            e.what()
-        ));
+        QMessageBox::critical(
+            this,
+            "Exception",
+            QString::fromStdString(fmt::format(
+                "Data write error to file: {} ({})", path, e.what()
+            ))
+        );
     }
 
     outFile.close();
@@ -239,40 +244,28 @@ bool LauncherWindow::loadProfileFromFile(openspace::Profile*& p, std::string fil
     try {
         p = new openspace::Profile(content);
     }
-    catch (const ghoul::MissingCaseException& e) {
-        displayErrorDialog(fmt::format(
-            "Missing case exception in {}: {}",
-            filename,
-            e.what()
-        ));
-        successfulLoad = false;
-    }
     catch (const openspace::Profile::ParsingError& e) {
-        displayErrorDialog(fmt::format(
-            "ParsingError exception in {}: {}, {}",
-            filename,
-            e.component,
-            e.message
-        ));
+        QMessageBox::critical(
+            this,
+            "Exception",
+            QString::fromStdString(fmt::format(
+                "ParsingError exception in {}: {}, {}", filename, e.component, e.message
+            ))
+        );
         successfulLoad = false;
     }
     catch (const ghoul::RuntimeError& e) {
-        displayErrorDialog(fmt::format(
-            "RuntimeError exception in {}, component {}: {}",
-            filename,
-            e.component,
-            e.message
-        ));
+        QMessageBox::critical(
+            this,
+            "Exception",
+            QString::fromStdString(fmt::format(
+                "RuntimeError exception in {}, component {}: {}",
+                filename, e.component, e.message
+            ))
+        );
         successfulLoad = false;
     }
     return successfulLoad;
-}
-
-void LauncherWindow::displayErrorDialog(std::string msg) {
-    //New instance of info dialog window
-    _myDialog = new errordialog(QString(msg.c_str()));
-    _myDialog->exec();
-    delete _myDialog;
 }
 
 LauncherWindow::~LauncherWindow() {

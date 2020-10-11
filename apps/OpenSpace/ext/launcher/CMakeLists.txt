@@ -31,7 +31,6 @@ set(HEADER_FILES
   include/assettreemodel.h
   include/camera.h
   include/deltatimes.h
-  include/errordialog.h
   include/filesystemaccess.h
   include/keybindings.h
   include/launcherwindow.h
@@ -41,8 +40,6 @@ set(HEADER_FILES
   include/ostime.h
   include/profileedit.h
   include/properties.h
-  include/ui_deltatimes.h
-  include/ui_errordialog.h
   include/ui_keybindings.h
   include/ui_launcherwindow.h
   include/ui_marknodes.h
@@ -60,7 +57,6 @@ set(SOURCE_FILES
   src/assettreemodel.cpp
   src/camera.cpp
   src/deltatimes.cpp
-  src/errordialog.cpp
   src/filesystemaccess.cpp
   src/keybindings.cpp
   src/launcherwindow.cpp
@@ -82,7 +78,6 @@ qt5_wrap_cpp(
   include/assettreemodel.h
   include/camera.h
   include/deltatimes.h
-  include/errordialog.h
   include/keybindings.h
   include/launcherwindow.h
   include/marknodes.h

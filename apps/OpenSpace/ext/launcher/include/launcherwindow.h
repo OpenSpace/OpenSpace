@@ -104,11 +104,9 @@ private:
     void populateWindowConfigsList(QString preset);
     bool loadProfileFromFile(openspace::Profile*& p, std::string filename);
     void saveProfileToFile(const std::string& path, openspace::Profile* p);
-    void displayErrorDialog(std::string msg);
 
     Ui::LauncherWindow *ui;
     ProfileEdit* myEditorWindow;
-    errordialog* _myDialog;
     filesystemAccess _fileAccess_profiles;
     filesystemAccess _fileAccess_winConfigs;
     filesystemAccess _filesystemAccess;

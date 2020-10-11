@@ -39,7 +39,6 @@
 #include "marknodes.h"
 #include "ostime.h"
 #include <openspace/scene/profile.h>
-#include <errordialog.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
