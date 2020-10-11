@@ -669,22 +669,22 @@ std::string Profile::convertToScene() const {
         output += "asset.meta = {";
 
         if (_meta->name.has_value()) {
-            output += fmt::format("  Name = \"{}\",", *_meta->name);
+            output += fmt::format("  Name = [[{}]],", *_meta->name);
         }
         if (_meta->version.has_value()) {
-            output += fmt::format("  Version = {},", *_meta->version);
+            output += fmt::format("  Version = [[{}]],", *_meta->version);
         }
         if (_meta->description.has_value()) {
-            output += fmt::format("  Description = \"{}\",", *_meta->description);
+            output += fmt::format("  Description = [[{}]],", *_meta->description);
         }
         if (_meta->author.has_value()) {
-            output += fmt::format("  Author = \"{}\",", *_meta->author);
+            output += fmt::format("  Author = [[{}]],", *_meta->author);
         }
         if (_meta->url.has_value()) {
-            output += fmt::format("  URL = \"{}\",", *_meta->url);
+            output += fmt::format("  URL = [[{}]],", *_meta->url);
         }
         if (_meta->license.has_value()) {
-            output += fmt::format("  License = \"{}\",", *_meta->license);
+            output += fmt::format("  License = [[{}]],", *_meta->license);
         }
 
         output += "}";
