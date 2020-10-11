@@ -40,6 +40,14 @@ ProfileEdit::ProfileEdit(openspace::Profile* profile, const std::string reported
     , _pData(profile)
     , _profilesReadOnly(profilesReadOnly)
 {
+    Q_INIT_RESOURCE(resources);
+
+    QFile file(":/qss/launcher.qss");
+    file.open(QFile::ReadOnly);
+    QString styleSheet = QLatin1String(file.readAll());
+    setStyleSheet(styleSheet);
+
+
     ui->setupUi(this);
     if (_pData != nullptr) {
         initSummaryTextForEachCategory();
@@ -194,7 +202,7 @@ void ProfileEdit::openDeltaTimes() {
 void ProfileEdit::openAddedScripts() {
     ui->label_error->setText("");
     if (_pData) {
-        _addedScripts = new addedScripts(_pData);
+        _addedScripts = new AdditionalScripts(_pData, this);
         _addedScripts->exec();
         delete _addedScripts;
     }

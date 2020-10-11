@@ -30,13 +30,9 @@
 #include <QListWidgetItem>
 #include <openspace/scene/profile.h>
 
-QT_BEGIN_NAMESPACE
-namespace Ui {
-class addedScripts;
-}
-QT_END_NAMESPACE
+class QTextEdit;
 
-class addedScripts : public QDialog {
+class AdditionalScripts : public QDialog {
 Q_OBJECT
 public:
     /**
@@ -46,35 +42,14 @@ public:
      *                 new or imported profile.
      * \param parent Pointer to parent Qt widget (optional)
      */
-    explicit addedScripts(openspace::Profile* imported, QWidget* parent = nullptr);
-
-    /**
-     * Destructor for addedScripts class
-     */
-    ~addedScripts();
-
-    /**
-     * Sets the contents of the text editor window for script(s)
-     *
-     * \param s The string contents to set the editor with
-     */
-    void setScriptText(std::string s);
-
-    /**
-     * Handles keypress while the Qt dialog window is open
-     *
-     * \param evt #QKeyEvent object for the key press event
-     */
-    void keyPressEvent(QKeyEvent *evt);
+    explicit AdditionalScripts(openspace::Profile* imported, QWidget* parent = nullptr);
 
 public slots:
     void parseScript();
 
 private:
-    Ui::addedScripts* ui;
-    QWidget* _parent;
     openspace::Profile* _imported;
-    std::string _data;
+    QTextEdit* _textScripts = nullptr;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___ADDEDSCRIPTS___H__

@@ -138,7 +138,7 @@ private:
     keybindings* _keybindings;
     assets* _assets;
     ostime* _time;
-    addedScripts* _addedScripts;
+    AdditionalScripts* _addedScripts;
     deltaTimes* _deltaTimes;
     camera* _camera;
     markNodes* _markNodes;

@@ -1,0 +1,3 @@
+AdditionalScripts  QLabel#title {
+    font-size: 12pt;
+}

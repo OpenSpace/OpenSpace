@@ -23,36 +23,68 @@
  ****************************************************************************************/
 
 #include "addedscripts.h"
-#include "ui_addedscripts.h"
 
+#include <QDialogButtonBox>
 #include <QEvent>
+#include <QHBoxLayout>
 #include <QKeyEvent>
+#include <QLabel>
+#include <QTextEdit>
+#include <QVBoxLayout>
+
 #include <iostream>
 #include <sstream>
 
-addedScripts::addedScripts(openspace::Profile* imported, QWidget *parent)
+AdditionalScripts::AdditionalScripts(openspace::Profile* imported, QWidget *parent)
     : QDialog(parent)
-    , ui(new Ui::addedScripts)
     , _imported(imported)
 {
-    ui->setupUi(this);
-    for (std::string s : imported->additionalScripts()) {
-        _data += s + "\n";
-    }
-    ui->text_scripts->setText(QString(_data.c_str()));
+    setWindowTitle("Additional Scripts");
 
-    connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(parseScript()));
-}
-
-void addedScripts::setScriptText(std::string s) {
-    ui->text_scripts->setText(QString(s.c_str()));
-}
-
-void addedScripts::parseScript() {
-    std::vector<std::string> tmpMultilineStringToVector;
-    std::istringstream iss(ui->text_scripts->toPlainText().toUtf8().constData());
-    while (!iss.eof())
+    QBoxLayout* layout = new QVBoxLayout(this);
     {
+        QLabel* title = new QLabel("Addtional Lua Scripts for Configuration");
+        title->setObjectName("title");
+        layout->addWidget(title);
+    }
+
+    _textScripts = new QTextEdit;
+    layout->addWidget(_textScripts, 1);
+
+    {
+        QFrame* line = new QFrame;
+        line->setFrameShape(QFrame::HLine);
+        line->setFrameShadow(QFrame::Sunken);
+        layout->addWidget(line);
+    }
+
+    {
+        QDialogButtonBox* buttonBox = new QDialogButtonBox;
+        buttonBox->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
+        connect(
+            buttonBox, &QDialogButtonBox::accepted,
+            this, &AdditionalScripts::parseScript
+        );
+        connect(
+            buttonBox, &QDialogButtonBox::rejected,
+            this, &AdditionalScripts::reject
+        );
+        layout->addWidget(buttonBox);
+    }
+
+    std::vector<std::string> scripts = imported->additionalScripts();
+    std::string data = std::accumulate(
+        scripts.begin(), scripts.end(),
+        std::string(), [](std::string lhs, std::string rhs) { return lhs + rhs + '\n'; }
+    );
+    _textScripts->setText(QString::fromStdString(std::move(data)));
+    _textScripts->moveCursor(QTextCursor::MoveOperation::End);
+}
+
+void AdditionalScripts::parseScript() {
+    std::vector<std::string> tmpMultilineStringToVector;
+    std::istringstream iss(_textScripts->toPlainText().toUtf8().constData());
+    while (!iss.eof()) {
         std::string s;
         getline(iss, s);
         tmpMultilineStringToVector.push_back(s);
@@ -60,12 +92,3 @@ void addedScripts::parseScript() {
     _imported->setAdditionalScripts(tmpMultilineStringToVector);
     accept();
 }
-
-void addedScripts::keyPressEvent(QKeyEvent *evt)
-{
-    if(evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return)
-        return;
-    QDialog::keyPressEvent(evt);
-}
-
-addedScripts::~addedScripts() { }
