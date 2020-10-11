@@ -24,17 +24,16 @@
 
 #include "filesystemaccess.h"
 
-filesystemAccess::filesystemAccess(std::string fileExtension,
+FileSystemAccess::FileSystemAccess(std::string fileExtension,
                                    std::vector<std::string> approvedPaths,
                                    bool hideFileExtensions, bool useCheckboxes)
-    : _fileExtension(fileExtension)
-    , _approvedPaths(approvedPaths)
+    : _fileExtension(std::move(fileExtension))
+    , _approvedPaths(std::move(approvedPaths))
     , _hideFileExtensions(hideFileExtensions)
     , _useCheckboxes(useCheckboxes)
-{
-}
+{}
 
-std::string filesystemAccess::useQtFileSystemModelToTraverseDir(QString dir) {
+std::string FileSystemAccess::useQtFileSystemModelToTraverseDir(QString dir) {
     _filesystemModel.setRootPath(dir);
     QModelIndex index = _filesystemModel.index(_filesystemModel.rootPath());
     QFileInfo fileInfo = _filesystemModel.fileInfo(index);
@@ -42,13 +41,13 @@ std::string filesystemAccess::useQtFileSystemModelToTraverseDir(QString dir) {
     std::vector<std::string> out;
     parseChildDirElements(fileInfo, "", 0, dirsNested, out);
     std::string combined;
-    for (auto o : out) {
+    for (const std::string& o : out) {
         combined += o + "\n";
     }
     return combined;
 }
 
-void filesystemAccess::parseChildDirElements(QFileInfo fileInfo, std::string space,
+void FileSystemAccess::parseChildDirElements(QFileInfo fileInfo, std::string space,
                                          int level, std::vector<std::string>& dirNames,
                                          std::vector<std::string>& output)
 {
@@ -77,11 +76,11 @@ void filesystemAccess::parseChildDirElements(QFileInfo fileInfo, std::string spa
     }
 }
 
-bool filesystemAccess::isApprovedPath(std::string path) {
+bool FileSystemAccess::isApprovedPath(std::string path) {
     bool approvedMatch = false;
     path.erase(0, path.find_first_not_of(" "));
 
-    for (auto p : _approvedPaths) {
+    for (const std::string& p : _approvedPaths) {
         if (path.substr(0, p.length()).compare(p) == 0) {
             approvedMatch = true;
             break;
@@ -90,9 +89,9 @@ bool filesystemAccess::isApprovedPath(std::string path) {
     return approvedMatch;
 }
 
-void filesystemAccess::parseChildFile(std::string filename, bool& hasDirHeaderBeenAdded,
-                                  std::vector<std::string>& dirNames,
-                                  std::vector<std::string>& output)
+void FileSystemAccess::parseChildFile(std::string filename, bool& hasDirHeaderBeenAdded,
+                                      std::vector<std::string>& dirNames,
+                                      std::vector<std::string>& output)
 {
     std::string cbox = (_useCheckboxes) ? "0" : "";
     if (filename.length() <= _fileExtension.length()) {
@@ -107,7 +106,7 @@ void filesystemAccess::parseChildFile(std::string filename, bool& hasDirHeaderBe
     }
 
     if (!hasDirHeaderBeenAdded) {
-        for (auto d : dirNames) {
+        for (const std::string& d : dirNames) {
             if (d.length() > 0) {
                 output.push_back(cbox + d);
             }

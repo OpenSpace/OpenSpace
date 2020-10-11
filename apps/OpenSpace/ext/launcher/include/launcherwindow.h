@@ -107,9 +107,9 @@ private:
 
     Ui::LauncherWindow *ui;
     ProfileEdit* myEditorWindow;
-    filesystemAccess _fileAccess_profiles;
-    filesystemAccess _fileAccess_winConfigs;
-    filesystemAccess _filesystemAccess;
+    FileSystemAccess _fileAccessProfiles;
+    FileSystemAccess _fileAccessWinConfigs;
+    FileSystemAccess _filesystemAccess;
     std::string _reportAssetsInFilesystem;
     openspace::configuration::Configuration& _globalConfig;
     QString _basePath;

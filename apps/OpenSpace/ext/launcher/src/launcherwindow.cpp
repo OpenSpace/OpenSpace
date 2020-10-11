@@ -41,8 +41,8 @@ LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
                                QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::LauncherWindow)
-    , _fileAccess_profiles(".profile", {"./"}, true, false)
-    , _fileAccess_winConfigs(".xml", {"./"}, true, false)
+    , _fileAccessProfiles(".profile", { "./" }, true, false)
+    , _fileAccessWinConfigs(".xml", { "./" }, true, false)
     , _filesystemAccess(".asset",
                         {"scene", "global", "customization", "examples", "util"},
                         true, true)
@@ -99,7 +99,7 @@ void LauncherWindow::populateProfilesList(QString preset) {
     for (int i = 0; i < ui->comboBoxProfiles->count(); ++i) {
         ui->comboBoxProfiles->removeItem(i);
     }
-    std::string reportProfiles = _fileAccess_profiles.useQtFileSystemModelToTraverseDir(
+    std::string reportProfiles = _fileAccessProfiles.useQtFileSystemModelToTraverseDir(
         _basePath + "/data/profiles");
     std::stringstream instream(reportProfiles);
     std::string iline;
@@ -118,7 +118,7 @@ void LauncherWindow::populateProfilesList(QString preset) {
 }
 
 void LauncherWindow::populateWindowConfigsList(QString preset) {
-    std::string reportConfigs = _fileAccess_winConfigs.useQtFileSystemModelToTraverseDir(
+    std::string reportConfigs = _fileAccessWinConfigs.useQtFileSystemModelToTraverseDir(
         _basePath + "/config");
     std::stringstream instream(reportConfigs);
     std::string iline;
