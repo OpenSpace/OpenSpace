@@ -23,87 +23,118 @@
  ****************************************************************************************/
 
 #include "marknodes.h"
-#include "./ui_marknodes.h"
-#include <qevent.h>
-#include <iterator>
-#include <QKeyEvent>
 
-markNodes::markNodes(openspace::Profile* imported, QWidget *parent)
+#include <openspace/scene/profile.h>
+#include <QDialogButtonBox>
+#include <QEvent>
+#include <QKeyEvent>
+#include <QLabel>
+#include <QLineEdit>
+#include <QListWidget>
+#include <QPushButton>
+#include <QVBoxLayout>
+
+MarkNodes::MarkNodes(openspace::Profile* profile, QWidget* parent)
     : QDialog(parent)
-    , ui(new Ui::markNodes)
-    , _imported(imported)
-    , _data(imported->markNodes())
+    , _profile(profile)
+    , _data(_profile->markNodes())
 {
-    ui->setupUi(this);
+    QBoxLayout* layout = new QVBoxLayout(this);
+    _list = new QListWidget;
+    connect(
+        _list, &QListWidget::itemSelectionChanged,
+        this, &MarkNodes::listItemSelected
+    );
+    _list->setAlternatingRowColors(true);
+    _list->setMovement(QListView::Free);
+    _list->setResizeMode(QListView::Adjust);
 
     for (size_t i = 0; i < _data.size(); ++i) {
         _markedNodesListItems.push_back(
-            new QListWidgetItem(QString(_data[i].c_str()))
+            new QListWidgetItem(QString::fromStdString(_data[i]))
         );
-        ui->list->addItem(_markedNodesListItems[i]);
+        _list->addItem(_markedNodesListItems[i]);
     }
+    layout->addWidget(_list);
 
-    ui->line_node->setText("");
+    _removeButton = new QPushButton("Remove");
+    connect(_removeButton, &QPushButton::clicked, this, &MarkNodes::listItemRemove);
+    layout->addWidget(_removeButton);
 
-    connect(ui->list, SIGNAL(itemSelectionChanged()), this, SLOT(listItemSelected()));
-    connect(ui->button_add, SIGNAL(clicked()), this, SLOT(listItemAdded()));
-    connect(ui->button_remove, SIGNAL(clicked()), this, SLOT(listItemRemove()));
-    connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(parseSelections()));
+    {
+        QBoxLayout* box = new QHBoxLayout;
+        box->addWidget(new QLabel("Node to add:"));
+        _newNode = new QLineEdit;
+        _newNode->setToolTip(
+            "Name of scenegraph node to add to list of \"interesting\" nodes"
+        );
+        box->addWidget(_newNode);
+
+        QPushButton* addButton = new QPushButton("Add new");
+        connect(addButton, &QPushButton::clicked, this, &MarkNodes::listItemAdded);
+        box->addWidget(addButton);
+        layout->addLayout(box);
+    }
+    {
+        QDialogButtonBox* buttons = new QDialogButtonBox;
+        buttons->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
+        QObject::connect(
+            buttons, &QDialogButtonBox::accepted,
+            this, &MarkNodes::parseSelections
+        );
+        QObject::connect(buttons, &QDialogButtonBox::rejected, this, &MarkNodes::reject);
+        layout->addWidget(buttons);
+    }
 }
 
-void markNodes::listItemSelected(void) {
-    ui->button_remove->setDisabled(false);
+void MarkNodes::listItemSelected(void) {
+    _removeButton->setEnabled(true);
 }
 
-void markNodes::listItemAdded(void) {
-    if (ui->line_node->text().length() == 0) {
+void MarkNodes::listItemAdded(void) {
+    if (_newNode->text().isEmpty()) {
         return;
     }
 
-    std::string itemToAdd = ui->line_node->text().toUtf8().constData();
-    auto idx = std::find(_data.begin(), _data.end(), itemToAdd);
-    if (idx != _data.end()) {
-        ui->list->setCurrentRow(std::distance(_data.begin(), idx));
+    std::string itemToAdd = _newNode->text().toStdString();
+    const auto it = std::find(_data.cbegin(), _data.cend(), itemToAdd);
+    if (it != _data.end()) {
+        _list->setCurrentRow(std::distance(_data.cbegin(), it));
     }
     else {
         _data.push_back(itemToAdd);
-        _markedNodesListItems.push_back(new QListWidgetItem(ui->line_node->text()));
-        ui->list->addItem(_markedNodesListItems.back());
+        _markedNodesListItems.push_back(new QListWidgetItem(_newNode->text()));
+        _list->addItem(_markedNodesListItems.back());
 
-        //Scroll down to that blank line highlighted
-        ui->list->setCurrentItem(_markedNodesListItems.back());
+        // Scroll down to that blank line highlighted
+        _list->setCurrentItem(_markedNodesListItems.back());
     }
 
-    //Blank-out entry again
-    ui->line_node->setText("");
+    // Blank-out entry again
+    _newNode->clear();
 }
 
-void markNodes::listItemRemove(void) {
-    QListWidgetItem *item = ui->list->currentItem();
-    int index = ui->list->row(item);
+void MarkNodes::listItemRemove() {
+    QListWidgetItem* item = _list->currentItem();
+    int index = _list->row(item);
 
     if (index < 0 || index >= _markedNodesListItems.size()) {
         return;
     }
 
-    ui->list->takeItem(index);
+    _list->takeItem(index);
     _data.erase(_data.begin() + index);
     _markedNodesListItems.erase(_markedNodesListItems.begin() + index);
 }
 
-void markNodes::parseSelections() {
-    _imported->setMarkNodes(_data);
+void MarkNodes::parseSelections() {
+    _profile->setMarkNodes(_data);
     accept();
 }
 
-markNodes::~markNodes() {
-    delete ui;
-}
-
-void markNodes::keyPressEvent(QKeyEvent *evt)
-{
-    if(evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return) {
-        if (ui->line_node->text().length() > 0 && ui->line_node->hasFocus()) {
+void MarkNodes::keyPressEvent(QKeyEvent *evt) {
+   if (evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return) {
+        if (_newNode->text().length() > 0 && _newNode->hasFocus()) {
             listItemAdded();
             return;
         }

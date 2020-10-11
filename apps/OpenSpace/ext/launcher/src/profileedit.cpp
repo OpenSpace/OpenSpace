@@ -220,7 +220,7 @@ void ProfileEdit::openCamera() {
 void ProfileEdit::openMarkNodes() {
     ui->label_error->setText("");
     if (_pData) {
-        _markNodes = new markNodes(_pData);
+        _markNodes = new MarkNodes(_pData, this);
         _markNodes->exec();
         labelText(_pData, _pData->markNodes().size(), "Mark Interesting Nodes",
             ui->label_marknodes

@@ -140,7 +140,7 @@ private:
     AdditionalScripts* _addedScripts;
     DeltaTimes* _deltaTimes;
     Camera* _camera;
-    markNodes* _markNodes;
+    MarkNodes* _markNodes;
     openspace::Profile* _pData;
     const std::string _reportedAssets;
     bool _saveSelected = false;

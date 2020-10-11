@@ -26,19 +26,32 @@
 #define __OPENSPACE_UI_LAUNCHER___MARKNODES___H__
 
 #include <QDialog>
-#include <QWidget>
-#include <QListWidgetItem>
-#include <openspace/scene/profile.h>
 
-QT_BEGIN_NAMESPACE
-namespace Ui {
-class markNodes;
-}
-QT_END_NAMESPACE
+namespace openspace { class Profile; }
 
-class markNodes : public QDialog
-{
-    Q_OBJECT
+class QLineEdit;
+class QListWidget;
+class QListWidgetItem;
+class QPushButton;
+
+class MarkNodes : public QDialog {
+Q_OBJECT
+public:
+    /**
+     * Constructor for markNodes class
+     *
+     * \param imported The #openspace::Profile object containing all data of the
+     *                 new or imported profile.
+     * \param parent Pointer to parent Qt widget
+     */
+    MarkNodes(openspace::Profile* profile, QWidget* parent);
+
+    /**
+     * Handles keypress while the Qt dialog window is open
+     *
+     * \param evt #QKeyEvent object for the key press event
+     */
+    void keyPressEvent(QKeyEvent* evt);
 
 public slots:
     void listItemSelected();
@@ -46,34 +59,15 @@ public slots:
     void listItemRemove();
     void parseSelections();
 
-public:
-    /**
-     * Constructor for markNodes class
-     *
-     * \param imported The #openspace::Profile object containing all data of the
-     *                 new or imported profile.
-     * \param parent Pointer to parent Qt widget (optional)
-     */
-    explicit markNodes(openspace::Profile* imported, QWidget *parent = nullptr);
-
-    /**
-     * Destructor for markNodes class
-     */
-    ~markNodes();
-
-    /**
-     * Handles keypress while the Qt dialog window is open
-     *
-     * \param evt #QKeyEvent object for the key press event
-     */
-    void keyPressEvent(QKeyEvent *evt);
-
 private:
-    Ui::markNodes *ui;
-    QWidget* _parent;
     std::vector<QListWidgetItem*> _markedNodesListItems;
-    openspace::Profile* _imported;
+    openspace::Profile* _profile;
     std::vector<std::string> _data;
+
+    QListWidget* _list = nullptr;
+    QPushButton* _removeButton = nullptr;
+    QLineEdit* _newNode = nullptr;
+
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___MARKNODES___H__
