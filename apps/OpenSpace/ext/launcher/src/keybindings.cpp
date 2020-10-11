@@ -22,333 +22,468 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include "keybindings.h"
+
 #include <openspace/scene/profile.h>
 #include <openspace/util/keys.h>
-#include "keybindings.h"
-#include "./ui_keybindings.h"
 #include <qevent.h>
 #include <algorithm>
 #include <QKeyEvent>
+#include <QCheckBox>
+#include <QVBoxLayout>
+#include <QPushButton>
+#include <QLabel>
+#include <QComboBox>
+#include <QLineEdit>
+#include <QTextEdit>
+#include <QDialogButtonBox>
 
-keybindings::keybindings(openspace::Profile* imported, QWidget *parent)
-    : QDialog(parent)
-    , ui(new Ui::keybindings)
-    , _imported(imported)
-    , _data(imported->keybindings())
-{
-    ui->setupUi(this);
+namespace {
+    const openspace::Profile::Keybinding kBlank = {
+        { openspace::Key::Unknown, openspace::KeyModifier::NoModifier },
+        "",
+        "",
+        "",
+        true,
+        ""
+    };
 
-    for (size_t i = 0; i < _data.size(); ++i) {
-        ui->list->addItem(new QListWidgetItem(createOneLineSummary(_data[i])));
-    }
+    void replaceChars(std::string& src, const std::string& from, const std::string& to) {
+        std::string newString;
+        std::string::size_type found, last = 0;
 
-    QStringList comboModKeysStringList;
-    int modIdx = 0;
-    for (auto const& m : openspace::KeyModifierNames) {
-        comboModKeysStringList += QString(m.second.c_str());
-        _mapModKeyComboBoxIndexToKeyValue.push_back(modIdx++);
-    }
-    ui->combo_keyMod->addItems(comboModKeysStringList);
-
-    QStringList comboKeysStringList;
-    for (int i = 0; i < static_cast<int>(openspace::Key::Last); ++i) {
-        if (openspace::KeyNames.find(i) != openspace::KeyNames.end()) {
-            comboKeysStringList += QString(openspace::KeyNames.at(i).c_str());
-            //Create map to relate key combo box to actual integer value defined in Key
-            _mapKeyComboBoxIndexToKeyValue.push_back(i);
+        while ((found = src.find(from, last)) != std::string::npos)
+        {
+            newString.append(src, last, (found - last));
+            newString += to;
+            last = found + from.length();
         }
+        newString += src.substr(last);
+        src.swap(newString);
     }
-    ui->combo_key->addItems(comboKeysStringList);
 
-    connect(ui->list, SIGNAL(itemSelectionChanged()), this, SLOT(listItemSelected()));
-    connect(ui->button_add, SIGNAL(clicked()), this, SLOT(listItemAdded()));
-    connect(ui->button_save, SIGNAL(clicked()), this, SLOT(listItemSave()));
-    connect(ui->button_cancel, SIGNAL(clicked()), this, SLOT(listItemCancelSave()));
-    connect(ui->button_remove, SIGNAL(clicked()), this, SLOT(listItemRemove()));
-    connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(parseSelections()));
+    std::string truncateString(std::string& s) {
+        const size_t maxLength = 50;
+        replaceChars(s, "\n", ";");
+        if (s.length() > maxLength) {
+            s.resize(maxLength);
+            s += "...";
+        }
+        return s;
+    }
 
-    ui->text_script->setTabChangesFocus(true);
+    std::string createOneLineSummary(openspace::Profile::Keybinding k) {
+        std::string summary;
+
+        int keymod = static_cast<int>(k.key.modifier);
+        if (keymod != static_cast<int>(openspace::KeyModifier::NoModifier)) {
+            summary += openspace::KeyModifierNames.at(keymod) + " ";
+        }
+        int keyname = static_cast<int>(k.key.key);
+
+        summary += openspace::KeyNames.at(keyname) + "  ";
+        summary += truncateString(k.name) + " (";
+        summary += truncateString(k.documentation) + ") @ ";
+        summary += truncateString(k.guiPath) + " ";
+        summary += (k.isLocal) ? "local" : "remote";
+        summary += " `" + truncateString(k.script) + "`";
+
+        return summary;
+    }
+
+} // namespace
+
+Keybindings::Keybindings(openspace::Profile* profile, QWidget *parent)
+    : QDialog(parent)
+    , _profile(profile)
+    , _data(_profile->keybindings())
+{
+    setWindowTitle("Assign Keybindings");
+
+    QBoxLayout* layout = new QVBoxLayout(this);
+    {
+        _list = new QListWidget;
+        connect(
+            _list, &QListWidget::itemSelectionChanged,
+            this, &Keybindings::listItemSelected
+        );
+        _list->setAlternatingRowColors(true);
+        _list->setMovement(QListView::Free);
+        _list->setResizeMode(QListView::Adjust);
+
+        for (size_t i = 0; i < _data.size(); ++i) {
+            std::string summary = createOneLineSummary(_data[i]);
+            _list->addItem(new QListWidgetItem(QString::fromStdString(summary)));
+        }
+
+        layout->addWidget(_list);
+    }
+    {
+        QBoxLayout* box = new QHBoxLayout;
+        _addButton = new QPushButton("Add new");
+        connect(_addButton, &QPushButton::clicked, this, &Keybindings::listItemAdded);
+        box->addWidget(_addButton);
+
+        _removeButton = new QPushButton("Remove");
+        connect(_removeButton, &QPushButton::clicked, this, &Keybindings::listItemRemove);
+        box->addWidget(_removeButton);
+        box->addStretch();
+        layout->addLayout(box);
+    }
+    {
+        QFrame* line = new QFrame;
+        line->setFrameShape(QFrame::HLine);
+        line->setFrameShadow(QFrame::Sunken);
+        layout->addWidget(line);
+    }
+    {
+        QGridLayout* box = new QGridLayout;
+
+        _keyModLabel = new QLabel("Key Modifier");
+        box->addWidget(_keyModLabel, 0, 0);
+        _keyModCombo = new QComboBox;
+        _keyModCombo->setToolTip(
+            "Modifier keys to hold while key is pressed (blank means none)"
+        );
+
+        QStringList comboModKeysStringList;
+        int modIdx = 0;
+        for (const std::pair<const int, std::string>& m : openspace::KeyModifierNames) {
+            comboModKeysStringList += QString::fromStdString(m.second);
+            _mapModKeyComboBoxIndexToKeyValue.push_back(modIdx++);
+        }
+        _keyModCombo->addItems(comboModKeysStringList);
+        box->addWidget(_keyModCombo, 0, 1);
+
+
+        _keyLabel = new QLabel("Key");
+        box->addWidget(_keyLabel, 1, 0);
+        _keyCombo = new QComboBox;
+        _keyCombo->setToolTip("Key to press for this keybinding");
+
+        QStringList comboKeysStringList;
+        for (int i = 0; i < static_cast<int>(openspace::Key::Last); ++i) {
+            if (openspace::KeyNames.find(i) != openspace::KeyNames.end()) {
+                comboKeysStringList += QString(openspace::KeyNames.at(i).c_str());
+                // Create map to relate key combo box to integer value defined in Key
+                _mapKeyComboBoxIndexToKeyValue.push_back(i);
+            }
+        }
+        _keyCombo->addItems(comboKeysStringList);
+        box->addWidget(_keyCombo, 1, 1);
+
+
+        _nameLabel = new QLabel("Name:");
+        box->addWidget(_nameLabel, 2, 0);
+        _nameEdit = new QLineEdit;
+        _nameEdit->setToolTip("Name assigned to this keybinding");
+        box->addWidget(_nameEdit, 2, 1);
+
+
+        _guiPathLabel = new QLabel("GUI Path:");
+        box->addWidget(_guiPathLabel, 3, 0);
+        _guiPathEdit = new QLineEdit;
+        _guiPathEdit->setToolTip(
+            "[OPTIONAL] Path for where this keybinding appears in GUI menu"
+        );
+        box->addWidget(_guiPathEdit, 3, 1);
+
+
+        _documentationLabel = new QLabel("Documentation:");
+        box->addWidget(_documentationLabel, 4, 0);
+        _documentationEdit = new QLineEdit;
+        _documentationEdit->setToolTip(
+            "[OPTIONAL] Documentation entry for keybinding"
+        );
+        box->addWidget(_documentationEdit, 4, 1);
+
+
+        _localCheck = new QCheckBox("Local");
+        _localCheck->setToolTip(
+            "Determines whether the command, when executed, should be shared with "
+            "connected instances or only executed locally"
+        );
+        box->addWidget(_localCheck, 5, 0, 1, 2);
+
+
+        _scriptLabel = new QLabel("Script");
+        box->addWidget(_scriptLabel, 6, 0, 1, 2);
+        _scriptEdit = new QTextEdit;
+        _scriptEdit->setToolTip("Command(s) to execute at keypress event");
+        _scriptEdit->setTabChangesFocus(true);
+        box->addWidget(_scriptEdit, 7, 0, 1, 2);
+        box->setRowStretch(7, 1);
+
+        QBoxLayout* buttonBox = new QHBoxLayout;
+        _saveButton = new QPushButton("Save");
+        connect(_saveButton, &QPushButton::clicked, this, &Keybindings::listItemSave);
+        buttonBox->addWidget(_saveButton);
+
+        _cancelButton = new QPushButton("Cancel");
+        connect(
+            _cancelButton, &QPushButton::clicked,
+            this, &Keybindings::listItemCancelSave
+        );
+        buttonBox->addWidget(_cancelButton);
+        buttonBox->addStretch();
+        box->addLayout(buttonBox, 8, 1, 1, 2);
+        layout->addLayout(box);
+    }
+    {
+        QFrame* line = new QFrame;
+        line->setFrameShape(QFrame::HLine);
+        line->setFrameShadow(QFrame::Sunken);
+        layout->addWidget(line);
+    }
+    {
+        QBoxLayout* footerLayout = new QHBoxLayout;
+
+        _errorMsg = new QLabel;
+        _errorMsg->setObjectName("error-message");
+        _errorMsg->setWordWrap(true);
+        footerLayout->addWidget(_errorMsg);
+
+        _buttonBox = new QDialogButtonBox;
+        _buttonBox->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
+        QObject::connect(
+            _buttonBox, &QDialogButtonBox::accepted,
+            this, &Keybindings::parseSelections
+        );
+        QObject::connect(
+            _buttonBox, &QDialogButtonBox::rejected,
+            this, &Keybindings::reject
+        );
+        footerLayout->addWidget(_buttonBox);
+        layout->addLayout(footerLayout);
+    }
+
     transitionFromEditMode();
 }
 
-QString keybindings::createOneLineSummary(openspace::Profile::Keybinding k) {
-    std::string summary;
-
-    int keymod = static_cast<int>(k.key.modifier);
-    if (keymod != static_cast<int>(openspace::KeyModifier::NoModifier)) {
-        summary += openspace::KeyModifierNames.at(keymod) + " ";
-    }
-    int keyname = static_cast<int>(k.key.key);
-
-    summary += openspace::KeyNames.at(keyname) + "  ";
-    summary += truncateString(k.name) + " (";
-    summary += truncateString(k.documentation) + ") @ ";
-    summary += truncateString(k.guiPath) + " ";
-    summary += (k.isLocal) ? "local" : "remote";
-    summary += " `" + truncateString(k.script) + "`";
-
-    return QString(summary.c_str());
-}
-
-std::string keybindings::truncateString(std::string& s) {
-    const size_t maxLength = 50;
-    replaceChars(s, "\n", ";");
-    if (s.length() > maxLength) {
-        s.resize(maxLength);
-        s += "...";
-    }
-    return s;
-}
-
-void keybindings::replaceChars(std::string& src, const std::string& from,
-                               const std::string& to)
-{
-    std::string newString;
-    std::string::size_type found, last = 0;
-
-    while((found = src.find(from, last)) != std::string::npos)
-    {
-        newString.append(src, last, (found - last));
-        newString += to;
-        last = found + from.length();
-    }
-    newString += src.substr(last);
-    src.swap(newString);
-}
-
-void keybindings::listItemSelected(void) {
-    QListWidgetItem *item = ui->list->currentItem();
-    int index = ui->list->row(item);
+void Keybindings::listItemSelected(void) {
+    QListWidgetItem *item = _list->currentItem();
+    int index = _list->row(item);
 
     if (_data.size() > 0) {
         openspace::Profile::Keybinding& k = _data[index];
-        ui->combo_keyMod->setCurrentIndex(
+        _keyModCombo->setCurrentIndex(
             indexInKeyMapping(_mapModKeyComboBoxIndexToKeyValue,
-            static_cast<int>(k.key.modifier)));
-        ui->combo_key->setCurrentIndex(
+            static_cast<int>(k.key.modifier))
+        );
+        _keyCombo->setCurrentIndex(
             indexInKeyMapping(_mapKeyComboBoxIndexToKeyValue,
-            static_cast<int>(k.key.key)));
+            static_cast<int>(k.key.key))
+        );
 
-        //Do key here
-        ui->line_name->setText(QString(k.name.c_str()));
-        ui->line_documentation->setText(QString(k.documentation.c_str()));
-        ui->line_guiPath->setText(QString(k.guiPath.c_str()));
-        ui->text_script->setText(QString(k.script.c_str()));
-        ui->checkBox_local->setChecked(k.isLocal);
+        // Do key here
+        _nameEdit->setText(QString(k.name.c_str()));
+        _guiPathEdit->setText(QString(k.guiPath.c_str()));
+        _documentationEdit->setText(QString(k.documentation.c_str()));
+        _localCheck->setChecked(k.isLocal);
+        _scriptEdit->setText(QString(k.script.c_str()));
     }
     transitionToEditMode();
 }
 
-int keybindings::indexInKeyMapping(std::vector<int>& mapVector, int keyInt) {
-    auto it = std::find (
-        mapVector.begin(),
-        mapVector.end(),
-        keyInt
-    );
+int Keybindings::indexInKeyMapping(std::vector<int>& mapVector, int keyInt) {
+    auto it = std::find(mapVector.begin(), mapVector.end(), keyInt);
     return std::distance(mapVector.begin(), it);
 }
 
-bool keybindings::isLineEmpty(int index) {
+bool Keybindings::isLineEmpty(int index) {
     bool isEmpty = true;
-    if (ui->list->item(index)->text().compare("") != 0) {
+    if (!_list->item(index)->text().isEmpty()) {
         isEmpty = false;
     }
-    if ((_data.size() > 0) && (_data.at(0).name.compare("") != 0)) {
+    if (!_data.empty() && !_data.at(0).name.empty()) {
         isEmpty = false;
     }
     return isEmpty;
 }
 
-void keybindings::listItemAdded(void) {
-    int currentListSize = ui->list->count();
+void Keybindings::listItemAdded(void) {
+    int currentListSize = _list->count();
 
      if ((currentListSize == 1) && (isLineEmpty(0))) {
          //Special case where list is "empty" but really has one line that is blank.
          // This is done because QListWidget does not seem to like having its sole
          // remaining item being removed.
          _data.at(0) = kBlank;
-         ui->list->item(0)->setText("  (Enter details below & click 'Save')");
+         _list->item(0)->setText("  (Enter details below & click 'Save')");
          transitionToEditMode();
      }
      else {
         _data.push_back(kBlank);
-        ui->list->addItem(new QListWidgetItem("  (Enter details below & click 'Save')"));
+        _list->addItem(new QListWidgetItem("  (Enter details below & click 'Save')"));
         //Scroll down to that blank line highlighted
-        ui->list->setCurrentRow(ui->list->count() - 1);
+        _list->setCurrentRow(_list->count() - 1);
      }
 
     //Blank-out the 2 text fields, set combo box to index 0
-    ui->line_name->setText(QString(_data.back().name.c_str()));
-    ui->line_documentation->setText(QString(_data.back().documentation.c_str()));
-    ui->line_guiPath->setText(QString("/"));
-    ui->text_script->setText(QString(_data.back().script.c_str()));
+     _keyModCombo->setCurrentIndex(static_cast<int>(_data.back().key.modifier));
+     _keyCombo->setCurrentIndex(static_cast<int>(_data.back().key.key));
+     _keyModCombo->setFocus(Qt::OtherFocusReason);
+     _nameEdit->setText(QString::fromStdString(_data.back().name));
+    _guiPathEdit->setText("/");
+    _documentationEdit->setText(QString::fromStdString(_data.back().documentation));
+    _localCheck->setChecked(false);
+    _scriptEdit->setText(QString::fromStdString(_data.back().script));
 
-    ui->combo_keyMod->setCurrentIndex(static_cast<int>(_data.back().key.modifier));
-    ui->combo_key->setCurrentIndex(static_cast<int>(_data.back().key.key));
-    ui->combo_keyMod->setFocus(Qt::OtherFocusReason);
-
-    ui->checkBox_local->setChecked(false);
     _editModeNewItem = true;
 }
 
-void keybindings::listItemSave(void) {
+void Keybindings::listItemSave(void) {
     if (!areRequiredFormsFilled()) {
         return;
     }
 
-    QListWidgetItem *item = ui->list->currentItem();
-    int index = ui->list->row(item);
+    QListWidgetItem* item = _list->currentItem();
+    int index = _list->row(item);
 
-    if (_data.size() > 0) {
+    if (!_data.empty()) {
         int keyModIdx = _mapModKeyComboBoxIndexToKeyValue.at(
-            ui->combo_keyMod->currentIndex());
+            _keyModCombo->currentIndex());
         _data[index].key.modifier = static_cast<openspace::KeyModifier>(keyModIdx);
-        int keyIdx = _mapKeyComboBoxIndexToKeyValue.at(ui->combo_key->currentIndex());
+        int keyIdx = _mapKeyComboBoxIndexToKeyValue.at(_keyCombo->currentIndex());
         _data[index].key.key = static_cast<openspace::Key>(keyIdx);
-        _data[index].name = ui->line_name->text().toUtf8().constData();
-        _data[index].documentation = ui->line_documentation->text().toUtf8().constData();
-        _data[index].guiPath = ui->line_guiPath->text().toUtf8().constData();
-        _data[index].script = ui->text_script->toPlainText().toUtf8().constData();
-        _data[index].isLocal = (ui->checkBox_local->isChecked());
-        ui->list->item(index)->setText(createOneLineSummary(_data[index]));
+        _data[index].name = _nameEdit->text().toUtf8().constData();
+        _data[index].guiPath = _guiPathEdit->text().toUtf8().constData();
+        _data[index].documentation = _documentationEdit->text().toUtf8().constData();
+        _data[index].script = _scriptEdit->toPlainText().toUtf8().constData();
+        _data[index].isLocal = (_localCheck->isChecked());
+        std::string summary = createOneLineSummary(_data[index]);
+        _list->item(index)->setText(QString::fromStdString(summary));
     }
     transitionFromEditMode();
 }
 
-bool keybindings::areRequiredFormsFilled() {
+bool Keybindings::areRequiredFormsFilled() {
     bool requiredFormsFilled = true;
-    QString errors;
-    if (ui->combo_key->currentIndex() < 0) {
+    std::string errors;
+    if (_keyCombo->currentIndex() < 0) {
         errors += "Missing key";
         requiredFormsFilled = false;
     }
-    if (ui->line_name->text().length() == 0) {
+    if (_nameEdit->text().length() == 0) {
         if (errors.length() > 0) {
             errors += ", ";
         }
         errors += "Missing keybinding name";
         requiredFormsFilled = false;
     }
-    if (ui->text_script->toPlainText().length() == 0) {
+    if (_scriptEdit->toPlainText().length() == 0) {
         if (errors.length() > 0) {
             errors += ", ";
         }
         errors += "Missing script";
         requiredFormsFilled = false;
     }
-    ui->label_error->setText("<font color='red'>" + errors + "</font>");
+    _errorMsg->setText(QString::fromStdString(errors));
     return requiredFormsFilled;
 }
 
-void keybindings::listItemCancelSave(void) {
+void Keybindings::listItemCancelSave(void) {
     listItemSelected();
     transitionFromEditMode();
-    if (_editModeNewItem) {
-        if (_data.size() > 0) {
-            if(_data.back().name.length() == 0 ||
-               _data.back().script.length() == 0 ||
-               _data.back().key.key == openspace::Key::Unknown)
-            {
-                listItemRemove();
-            }
-        }
+    if (_editModeNewItem && !_data.empty() &&
+        (_data.back().name.length() == 0 || _data.back().script.length() == 0 ||
+        _data.back().key.key == openspace::Key::Unknown))
+    {
+        listItemRemove();
     }
     _editModeNewItem = false;
 }
 
-void keybindings::listItemRemove(void) {
-    if (ui->list->count() > 0) {
-        if (ui->list->count() == 1) {
-            //Special case where last remaining item is being removed (QListWidget does
+void Keybindings::listItemRemove(void) {
+    if (_list->count() > 0) {
+        if (_list->count() == 1) {
+            // Special case where last remaining item is being removed (QListWidget does
             // not like the final item being removed so instead clear it & leave it)
             _data.at(0) = kBlank;
-            ui->list->item(0)->setText("");
+            _list->item(0)->setText("");
         }
         else {
-            int index = ui->list->currentRow();
-            if (index >= 0 && index < ui->list->count()) {
-                ui->list->takeItem(index);
+            int index = _list->currentRow();
+            if (index >= 0 && index < _list->count()) {
+                _list->takeItem(index);
                 if (_data.size() > 0) {
                     _data.erase(_data.begin() + index);
                 }
             }
         }
     }
-    ui->list->clearSelection();
+    _list->clearSelection();
     transitionFromEditMode();
 }
 
-void keybindings::transitionToEditMode(void) {
-    ui->list->setDisabled(true);
-    ui->button_add->setDisabled(true);
-    ui->button_remove->setDisabled(true);
-    ui->button_save->setDisabled(true);
-    ui->button_cancel->setDisabled(true);
-    ui->buttonBox->setDisabled(true);
-    ui->label_key->setText("<font color='black'>Key</font>");
-    ui->label_keyMod->setText("<font color='black'>Key Modifier</font>");
-    ui->label_name->setText("<font color='black'>Name</font>");
-    ui->label_script->setText("<font color='black'>Script</font>");
-    ui->label_guiPath->setText("<font color='black'>GUI Path</font>");
-    ui->label_documentation->setText("<font color='black'>Documentation</font>");
+void Keybindings::transitionToEditMode() {
+    _list->setDisabled(true);
+    _addButton->setDisabled(true);
+    _removeButton->setDisabled(true);
+    _saveButton->setDisabled(true);
+    _cancelButton->setDisabled(true);
+    _buttonBox->setDisabled(true);
+    _keyLabel->setText("<font color='black'>Key</font>");
+    _keyModLabel->setText("<font color='black'>Key Modifier</font>");
+    _nameLabel->setText("<font color='black'>Name</font>");
+    _scriptLabel->setText("<font color='black'>Script</font>");
+    _guiPathLabel->setText("<font color='black'>GUI Path</font>");
+    _documentationLabel->setText("<font color='black'>Documentation</font>");
 
     editBoxDisabled(false);
-    ui->label_error->setText("");
+    _errorMsg->setText("");
 }
 
-void keybindings::transitionFromEditMode(void) {
-    ui->list->setDisabled(false);
-    ui->button_add->setDisabled(false);
-    ui->button_remove->setDisabled(false);
-    ui->button_save->setDisabled(false);
-    ui->button_cancel->setDisabled(false);
-    ui->buttonBox->setDisabled(false);
+void Keybindings::transitionFromEditMode(void) {
+    _list->setDisabled(false);
+    _addButton->setDisabled(false);
+    _removeButton->setDisabled(false);
+    _saveButton->setDisabled(false);
+    _cancelButton->setDisabled(false);
+    _buttonBox->setDisabled(false);
 
-    ui->label_key->setText("<font color='light gray'>Key</font>");
-    ui->label_keyMod->setText("<font color='light gray'>Key Modifier</font>");
-    ui->label_name->setText("<font color='light gray'>Name</font>");
-    ui->label_script->setText("<font color='light gray'>Script</font>");
-    ui->label_guiPath->setText("<font color='light gray'>GUI Path</font>");
-    ui->label_documentation->setText("<font color='light gray'>Documentation</font>");
+    _keyLabel->setText("<font color='light gray'>Key</font>");
+    _keyModLabel->setText("<font color='light gray'>Key Modifier</font>");
+    _nameLabel->setText("<font color='light gray'>Name</font>");
+    _scriptLabel->setText("<font color='light gray'>Script</font>");
+    _guiPathLabel->setText("<font color='light gray'>GUI Path</font>");
+    _documentationLabel->setText("<font color='light gray'>Documentation</font>");
     editBoxDisabled(true);
-    ui->label_error->setText("");
+    _errorMsg->setText("");
 }
 
-void keybindings::editBoxDisabled(bool disabled) {
-    ui->label_key->setDisabled(disabled);
-    ui->combo_key->setDisabled(disabled);
-    ui->combo_keyMod->setDisabled(disabled);
-    ui->label_name->setDisabled(disabled);
-    ui->line_name->setDisabled(disabled);
-    ui->label_documentation->setDisabled(disabled);
-    ui->line_documentation->setDisabled(disabled);
-    ui->label_guiPath->setDisabled(disabled);
-    ui->line_guiPath->setDisabled(disabled);
-    ui->checkBox_local->setDisabled(disabled);
-    ui->label_script->setDisabled(disabled);
-    ui->text_script->setDisabled(disabled);
-    ui->button_cancel->setDisabled(disabled);
-    ui->button_save->setDisabled(disabled);
+void Keybindings::editBoxDisabled(bool disabled) {
+    _keyLabel->setDisabled(disabled);
+    _keyCombo->setDisabled(disabled);
+    _keyModLabel->setDisabled(disabled);
+    _keyModCombo->setDisabled(disabled);
+    _nameLabel->setDisabled(disabled);
+    _nameEdit->setDisabled(disabled);
+    _guiPathLabel->setDisabled(disabled);
+    _guiPathEdit->setDisabled(disabled);
+    _documentationLabel->setDisabled(disabled);
+    _documentationEdit->setDisabled(disabled);
+    _localCheck->setDisabled(disabled);
+    _scriptLabel->setDisabled(disabled);
+    _scriptEdit->setDisabled(disabled);
+    _cancelButton->setDisabled(disabled);
+    _saveButton->setDisabled(disabled);
 }
 
-void keybindings::parseSelections() {
+void Keybindings::parseSelections() {
     //Handle case with only one remaining but empty line
-    if ((_data.size() == 1) && (_data.at(0).name.compare("") == 0)) {
+    if ((_data.size() == 1) && (_data.at(0).name.empty())) {
         _data.clear();
     }
-    _imported->setKeybindings(_data);
+    _profile->setKeybindings(_data);
     accept();
 }
 
-keybindings::~keybindings() {
-    delete ui;
-}
-
-void keybindings::keyPressEvent(QKeyEvent *evt)
-{
-    if(evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return)
+void Keybindings::keyPressEvent(QKeyEvent *evt) {
+    if (evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return) {
         return;
-    else if(evt->key() == Qt::Key_Escape) {
+    }
+    else if (evt->key() == Qt::Key_Escape) {
         if (_editModeNewItem) {
             listItemCancelSave();
             return;

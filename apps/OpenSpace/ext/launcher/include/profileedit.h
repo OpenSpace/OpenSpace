@@ -134,7 +134,7 @@ private:
     meta* _meta;
     properties* _properties;
     osmodules* _modules;
-    keybindings* _keybindings;
+    Keybindings* _keybindings;
     Assets* _assets;
     ostime* _time;
     AdditionalScripts* _addedScripts;

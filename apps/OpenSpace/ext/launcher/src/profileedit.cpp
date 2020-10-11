@@ -156,7 +156,7 @@ void ProfileEdit::openProperties() {
 void ProfileEdit::openKeybindings() {
     ui->label_error->setText("");
     if (_pData) {
-        _keybindings = new keybindings(_pData);
+        _keybindings = new Keybindings(_pData, this);
         _keybindings->exec();
         labelText(_pData, _pData->keybindings().size(), "Keybindings",
             ui->label_keybindings

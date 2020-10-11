@@ -31,15 +31,32 @@
 #include <QWidget>
 #include <QListWidgetItem>
 
-QT_BEGIN_NAMESPACE
-namespace Ui {
-class keybindings;
-}
-QT_END_NAMESPACE
+class QComboBox;
+class QCheckBox;
+class QTextEdit;
+class QDialogButtonBox;
+class QListWidget;
+class QLabel;
+class QPushButton;
 
-class keybindings : public QDialog
-{
-    Q_OBJECT
+class Keybindings : public QDialog {
+Q_OBJECT
+public:
+    /**
+     * Constructor for keybindings class
+     *
+     * \param imported The #openspace::Profile object containing all data of the
+     *                 new or imported profile.
+     * \param parent Pointer to parent Qt widget (optional)
+     */
+    Keybindings(openspace::Profile* profile, QWidget* parent);
+
+    /**
+     * Handles keypress while the Qt dialog window is open
+     *
+     * \param evt #QKeyEvent object for the key press event
+     */
+    void keyPressEvent(QKeyEvent *evt);
 
 public slots:
     void listItemSelected();
@@ -50,33 +67,7 @@ public slots:
     void transitionToEditMode();
     void parseSelections();
 
-public:
-    /**
-     * Constructor for keybindings class
-     *
-     * \param imported The #openspace::Profile object containing all data of the
-     *                 new or imported profile.
-     * \param parent Pointer to parent Qt widget (optional)
-     */
-    explicit keybindings(openspace::Profile* imported, QWidget *parent = nullptr);
-
-    /**
-     * Destructor for keybindings class
-     */
-    ~keybindings();
-
-    /**
-     * Handles keypress while the Qt dialog window is open
-     *
-     * \param evt #QKeyEvent object for the key press event
-     */
-    void keyPressEvent(QKeyEvent *evt);
-
-protected:
-    //void resizeEvent(QResizeEvent* event);
-
 private:
-    QString createOneLineSummary(openspace::Profile::Keybinding k);
     void transitionFromEditMode();
     void editBoxDisabled(bool disabled);
     int indexInKeyMapping(std::vector<int>& mapVector, int keyInt);
@@ -86,22 +77,34 @@ private:
         const std::string& to);
     bool isLineEmpty(int index);
 
-    Ui::keybindings *ui;
-    QWidget* _parent;
-    openspace::Profile* _imported;
+    openspace::Profile* _profile;
     std::vector<openspace::Profile::Keybinding> _data;
-    std::vector<QListWidgetItem*> _keybindingsListItems;
     std::vector<int> _mapModKeyComboBoxIndexToKeyValue;
     std::vector<int> _mapKeyComboBoxIndexToKeyValue;
     bool _editModeNewItem = false;
-    const openspace::Profile::Keybinding kBlank = {
-        {openspace::Key::Unknown, openspace::KeyModifier::NoModifier},
-        "",
-        "",
-        "",
-        true,
-        ""
-    };
+
+    QListWidget* _list = nullptr;
+    QLabel* _keyModLabel = nullptr;
+    QComboBox* _keyModCombo = nullptr;
+    QLabel* _keyLabel = nullptr;
+    QComboBox* _keyCombo = nullptr;
+    QLabel* _nameLabel = nullptr;
+    QLineEdit* _nameEdit = nullptr;
+    QLabel* _guiPathLabel = nullptr;
+    QLineEdit* _guiPathEdit = nullptr;
+    QLabel* _documentationLabel = nullptr;
+    QLineEdit* _documentationEdit = nullptr;
+    QCheckBox* _localCheck = nullptr;
+    QLabel* _scriptLabel = nullptr;
+    QTextEdit* _scriptEdit = nullptr;
+    
+    QPushButton* _addButton = nullptr;
+    QPushButton* _removeButton = nullptr;
+    QPushButton* _saveButton = nullptr;
+    QPushButton* _cancelButton = nullptr;
+    QDialogButtonBox* _buttonBox = nullptr;
+
+    QLabel* _errorMsg = nullptr;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___KEYBINDINGS___H__

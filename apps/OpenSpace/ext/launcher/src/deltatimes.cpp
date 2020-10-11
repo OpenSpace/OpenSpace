@@ -23,19 +23,20 @@
  ****************************************************************************************/
 
 #include "deltatimes.h"
-#include <qevent.h>
-#include <iostream>
-#include <QKeyEvent>
-#include <QListWidget>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QPushButton>
+
+#include <openspace/scene/profile.h>
 #include <QDialogButtonBox>
+#include <QDoubleValidator>
+#include <QEvent>
+#include <QKeyEvent>
+#include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
-#include <QDoubleValidator>
+#include <QListWidget>
+#include <QPushButton>
+#include <QVBoxLayout>
 #include <array>
-#include <openspace/scene/profile.h>
+#include <iostream>
 
 namespace {
     constexpr const int MaxNumberOfKeys = 30;

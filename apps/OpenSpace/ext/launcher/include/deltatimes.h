@@ -29,11 +29,11 @@
 
 namespace openspace { class Profile; }
 
+class QDialogButtonBox;
 class QLabel;
 class QListWidget;
 class QLineEdit;
 class QPushButton;
-class QDialogButtonBox;
 
 class DeltaTimes : public QDialog {
 Q_OBJECT
