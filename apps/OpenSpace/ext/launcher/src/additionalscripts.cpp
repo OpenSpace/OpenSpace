@@ -56,7 +56,7 @@ AdditionalScripts::AdditionalScripts(openspace::Profile* profile, QWidget *paren
 
     {
         QDialogButtonBox* buttons = new QDialogButtonBox;
-        buttons->setStandardButtons(QDialogButtonBox::Apply | QDialogButtonBox::Discard);
+        buttons->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
         connect(
             buttons, &QDialogButtonBox::accepted,
             this, &AdditionalScripts::parseScript

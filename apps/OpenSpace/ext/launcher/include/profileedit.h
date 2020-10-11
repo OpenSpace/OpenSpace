@@ -139,7 +139,7 @@ private:
     Assets* _assets;
     ostime* _time;
     AdditionalScripts* _addedScripts;
-    deltaTimes* _deltaTimes;
+    DeltaTimes* _deltaTimes;
     Camera* _camera;
     markNodes* _markNodes;
     openspace::Profile* _pData;

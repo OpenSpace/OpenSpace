@@ -26,38 +26,17 @@
 #define __OPENSPACE_UI_LAUNCHER___DELTATIMES___H__
 
 #include <QDialog>
-#include <QWidget>
-#include <QListWidgetItem>
-#include <openspace/scene/profile.h>
 
-QT_BEGIN_NAMESPACE
-namespace Ui {
-class deltaTimes;
-}
-QT_END_NAMESPACE
+namespace openspace { class Profile; }
 
-static const int _defaultDeltaTimes[30] = {
-    1, 2, 5, 10, 30,
-    60, 120, 300, 600, 1800,
-    3600, 7200, 10800, 21600, 43200,
-    86400, 172800, 345600, 604800, 1209600,
-    2592000, 5184000, 7776000, 15552000, 31536000,
-    63072000, 157680000, 315360000, 630720000, 1576800000
-};
+class QLabel;
+class QListWidget;
+class QLineEdit;
+class QPushButton;
+class QDialogButtonBox;
 
-class deltaTimes : public QDialog
-{
-    Q_OBJECT
-
-public slots:
-    void listItemSelected();
-    void valueChanged(const QString& text);
-    void saveDeltaTimeValue();
-    void cancelDeltaTimeValue();
-    void addDeltaTimeValue();
-    void removeDeltaTimeValue();
-    void parseSelections();
-
+class DeltaTimes : public QDialog {
+Q_OBJECT
 public:
     /**
      * Constructor for deltaTimes class
@@ -66,19 +45,7 @@ public:
      *                 new or imported profile.
      * \param parent Pointer to parent Qt widget (optional)
      */
-     explicit deltaTimes(openspace::Profile* _imported, QWidget *parent = nullptr);
-
-     /**
-       * Destructor for addedScripts class
-       */
-    ~deltaTimes();
-
-    /**
-     * Sets the full list of delta times (called when importing data)
-     *
-     * \param dt vector of delta time values
-     */
-    void setDeltaTimes(std::vector<double>& dt);
+    DeltaTimes(openspace::Profile* profile, QWidget* parent);
 
     /**
      * Returns a text summary of the delta time list for display purposes
@@ -87,7 +54,7 @@ public:
      * \param forListView true if this summary is for the Qt list view, false if
      *                    it is used for a different display mode
      */
-    QString createSummaryForDeltaTime(size_t idx, bool forListView);
+    std::string createSummaryForDeltaTime(size_t idx, bool forListView);
 
     /**
      * Handles keypress while the Qt dialog window is open
@@ -96,67 +63,46 @@ public:
      */
     void keyPressEvent(QKeyEvent *evt);
 
+
+public slots:
+    void listItemSelected();
+    void valueChanged(const QString& text);
+    void saveDeltaTimeValue();
+    void discardDeltaTimeValue();
+    void addDeltaTimeValue();
+    void removeDeltaTimeValue();
+    void parseSelections();
+
+private:
     /**
      * Called to transition to editing a particular dt value (gui settings)
      *
      * \param index index in dt list
+     * \param state \c true if the edit mode should be turned on, \c false otherwise
      */
-    void transitionToEditMode(int index);
+    void transitionEditMode(int index, bool state);
 
-    /**
-     * Called to transition from editing a particular dt value (gui settings)
-     *
-     * \param index index in dt list
-     */
-    void transitionFromEditMode(int index);
-
-    /**
-     * Called to enable/disable edit GUI elements
-     *
-     * \param disabled sets bool condition for enabling/disabling edit elements
-     */
-    void editBoxDisabled(bool disabled);
-
-    struct timeIntervals {
-        int index;
-        int secondsPerInterval;
-        QString intervalName;
-    };
-    int _maxSize = sizeof(_defaultDeltaTimes) / sizeof(int);
-    const int secondsPerYear = 31536000;
-    const int secondsPerMonth = 18144000;
-    const int secondsPerWeek = 604800;
-    const int secondsPerDay = 86400;
-    const int secondsPerHour = 3600;
-    const int secondsPerMinute = 60;
-
-private:
     QString timeDescription(int value);
-    bool checkForTimeDescription(QString& description, QString unit,
-        int interval, int value);
-    void setLabelForKey(int index, bool editMode, QString color);
+    void setLabelForKey(int index, bool editMode, std::string color);
     QString checkForTimeDescription(int intervalIndex, int value);
-    int lastSelectableItem();
-    bool isNumericalValue(QLineEdit* le);
     bool isLineEmpty(int index);
 
-    Ui::deltaTimes *ui;
-    QWidget* _parent;
-
-    openspace::Profile* _imported;
-    std::vector<int> _data;
-    std::vector<std::string> _deltaTimeStrings;
+    openspace::Profile* _profile;
+    std::vector<double> _data;
     bool _editModeNewItem = false;
 
-    std::vector<timeIntervals> _timeIntervals = {
-        {0, 31536000, "year"},
-        {1, 18144000, "month"},
-        {2, 604800,   "week"},
-        {3, 86400,    "day"},
-        {4, 3600,     "hour"},
-        {5, 60,       "minute"},
-        {6, 1,        "second"},
-    };
+    QListWidget* _listWidget = nullptr;
+    QLabel* _adjustLabel = nullptr;
+    QLineEdit* _seconds = nullptr;
+    QLabel* _value = nullptr;
+
+    QPushButton* _addButton = nullptr;
+    QPushButton* _removeButton = nullptr;
+    QPushButton* _saveButton = nullptr;
+    QPushButton* _discardButton = nullptr;
+    QDialogButtonBox* _buttonBox = nullptr;
+
+    QLabel* _errorMsg = nullptr;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___DELTATIMES___H__

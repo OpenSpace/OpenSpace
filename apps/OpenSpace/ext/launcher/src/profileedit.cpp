@@ -190,7 +190,7 @@ void ProfileEdit::openTime() {
 void ProfileEdit::openDeltaTimes() {
     ui->label_error->setText("");
     if (_pData) {
-        _deltaTimes = new deltaTimes(_pData);
+        _deltaTimes = new DeltaTimes(_pData, this);
         _deltaTimes->exec();
         labelText(_pData, _pData->deltaTimes().size(), "Simulation Time Increments",
             ui->label_deltatimes
