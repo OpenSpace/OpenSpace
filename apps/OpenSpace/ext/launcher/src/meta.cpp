@@ -22,91 +22,107 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/scene/profile.h>
 #include "meta.h"
-#include "./ui_meta.h"
-#include <algorithm>
+
+#include <openspace/scene/profile.h>
+#include <QDialogButtonBox>
 #include <QKeyEvent>
+#include <QLabel>
+#include <QLineEdit>
+#include <QTextEdit>
+#include <QVBoxLayout>
+#include <algorithm>
 
-meta::meta(openspace::Profile* imported, QWidget *parent)
+Meta::Meta(openspace::Profile* profile, QWidget *parent)
     : QDialog(parent)
-    , ui(new Ui::meta)
-    , _imported(imported)
+    , _profile(profile)
 {
-    ui->setupUi(this);
+    QBoxLayout* layout = new QVBoxLayout(this);
+    layout->addWidget(new QLabel("Name"));
+    _nameEdit = new QLineEdit;
+    layout->addWidget(_nameEdit);
 
-    if (_imported->meta().has_value()) {
-        ui->line_name->setText(QString(_imported->meta().value().name->c_str()));
-        ui->line_version->setText(QString(_imported->meta().value().version->c_str()));
-        ui->text_description->setText(
-            QString(_imported->meta().value().description->c_str())
-        );
-        ui->line_author->setText(QString(_imported->meta().value().author->c_str()));
-        ui->line_url->setText(QString(_imported->meta().value().url->c_str()));
-        ui->line_license->setText(QString(_imported->meta().value().license->c_str()));
-    }
-    else {
-        ui->line_name->setText("");
-        ui->line_version->setText("");
-        ui->text_description->setText("");
-        ui->line_author->setText("");
-        ui->line_url->setText("");
-        ui->line_license->setText("");
-    }
+    layout->addWidget(new QLabel("Version"));
+    _versionEdit = new QLineEdit;
+    layout->addWidget(_versionEdit);
 
-    ui->text_description->setTabChangesFocus(true);
-    connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(save()));
+    layout->addWidget(new QLabel("Description"));
+    _descriptionEdit = new QTextEdit;
+    _descriptionEdit->setTabChangesFocus(true);
+    layout->addWidget(_descriptionEdit);
+
+    layout->addWidget(new QLabel("Author"));
+    _authorEdit = new QLineEdit;
+    layout->addWidget(_authorEdit);
+    
+    layout->addWidget(new QLabel("URL"));
+    _urlEdit = new QLineEdit;
+    layout->addWidget(_urlEdit);
+
+    layout->addWidget(new QLabel("License"));
+    _licenseEdit = new QLineEdit;
+    layout->addWidget(_licenseEdit);
+
+    QDialogButtonBox* buttons = new QDialogButtonBox;
+    buttons->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
+    QObject::connect(buttons, &QDialogButtonBox::accepted, this, &Meta::save);
+    QObject::connect(buttons, &QDialogButtonBox::rejected, this, &Meta::reject);
+    layout->addWidget(buttons);
+
+
+    if (_profile->meta().has_value()) {
+        openspace::Profile::Meta meta = *_profile->meta();
+        if (meta.name.has_value()) {
+            _nameEdit->setText(QString::fromStdString(*meta.name));
+        }
+        if (meta.version.has_value()) {
+            _versionEdit->setText(QString::fromStdString(*meta.version));
+        }
+        if (meta.description.has_value()) {
+            _descriptionEdit->setText(QString::fromStdString(*meta.description));
+        }
+        if (meta.author.has_value()) {
+            _authorEdit->setText(QString::fromStdString(*meta.author));
+        }
+        if (meta.url.has_value()) {
+            _urlEdit->setText(QString::fromStdString(*meta.url));
+        }
+        if (meta.license.has_value()) {
+            _licenseEdit->setText(QString::fromStdString(*meta.license));
+        }
+    }
 }
 
-void meta::keyPressEvent(QKeyEvent *evt)
-{
-    if(evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return)
-        return;
-    QDialog::keyPressEvent(evt);
-}
+void Meta::save() {
+    const bool allEmpty =
+        _nameEdit->text().isEmpty() && _versionEdit->text().isEmpty() &&
+        _descriptionEdit->toPlainText().isEmpty() && _authorEdit->text().isEmpty() &&
+        _urlEdit->text().isEmpty() && _licenseEdit->text().isEmpty();
 
-void meta::save() {
-    if (!areAllEntriesBlank()) {
+    if (!allEmpty) {
         openspace::Profile::Meta m;
-        m.name = ui->line_name->text().toUtf8().constData();
-        m.version = ui->line_version->text().toUtf8().constData();
-        std::string desc = ui->text_description->toPlainText().toUtf8().constData();
-        std::replace(desc.begin(), desc.end(), '\n', ' ');
-        m.description = desc;
-        m.author = ui->line_author->text().toUtf8().constData();
-        m.url = ui->line_url->text().toUtf8().constData();
-        m.license = ui->line_license->text().toUtf8().constData();
-        _imported->setMeta(m);
+        if (!_nameEdit->text().isEmpty()) {
+            m.name = _nameEdit->text().toStdString();
+        }
+        if (!_versionEdit->text().isEmpty()) {
+            m.version = _versionEdit->text().toStdString();
+        }
+        if (!_descriptionEdit->toPlainText().isEmpty()) {
+            m.description = _descriptionEdit->toPlainText().toStdString();
+        }
+        if (!_authorEdit->text().isEmpty()) {
+            m.author = _authorEdit->text().toStdString();
+        }
+        if (!_urlEdit->text().isEmpty()) {
+            m.url = _urlEdit->text().toStdString();
+        }
+        if (!_licenseEdit->text().isEmpty()) {
+            m.license = _licenseEdit->text().toStdString();
+        }
+        _profile->setMeta(m);
     }
     else {
-        _imported->clearMeta();
+        _profile->clearMeta();
     }
     accept();
-}
-
-bool meta::areAllEntriesBlank() {
-    bool blank = true;
-    if (ui->line_name->text().length() > 0) {
-        blank = false;
-    }
-    if (ui->line_version->text().length() > 0) {
-        blank = false;
-    }
-    if (ui->text_description->toPlainText().length() > 0) {
-        blank = false;
-    }
-    if (ui->line_author->text().length() > 0) {
-        blank = false;
-    }
-    if (ui->line_url->text().length() > 0) {
-        blank = false;
-    }
-    if (ui->line_license->text().length() > 0) {
-        blank = false;
-    }
-    return blank;
-}
-
-meta::~meta() {
-    delete ui;
 }

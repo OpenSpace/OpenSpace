@@ -124,7 +124,7 @@ void ProfileEdit::duplicateProfile() {
 void ProfileEdit::openMeta() {
     ui->label_error->setText("");
     if (_pData) {
-       _meta = new meta(_pData);
+       _meta = new Meta(_pData, this);
        _meta->exec();
        delete _meta;
     }

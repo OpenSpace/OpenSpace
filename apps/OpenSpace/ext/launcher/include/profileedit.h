@@ -131,7 +131,7 @@ private:
 
     Ui::ProfileEdit *ui;
     QWidget* _parent;
-    meta* _meta;
+    Meta* _meta;
     properties* _properties;
     osmodules* _modules;
     Keybindings* _keybindings;

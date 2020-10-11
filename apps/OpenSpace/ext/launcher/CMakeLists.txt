@@ -40,10 +40,7 @@ set(HEADER_FILES
   include/ostime.h
   include/profileedit.h
   include/properties.h
-  include/ui_keybindings.h
   include/ui_launcherwindow.h
-  include/ui_marknodes.h
-  include/ui_meta.h
   include/ui_osmodules.h
   include/ui_ostime.h
   include/ui_profileedit.h

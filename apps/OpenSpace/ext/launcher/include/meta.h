@@ -25,24 +25,15 @@
 #ifndef __OPENSPACE_UI_LAUNCHER___META___H__
 #define __OPENSPACE_UI_LAUNCHER___META___H__
 
-#include <openspace/scene/profile.h>
 #include <QDialog>
-#include <QWidget>
-#include <optional>
 
-QT_BEGIN_NAMESPACE
-namespace Ui {
-class meta;
-}
-QT_END_NAMESPACE
+namespace openspace { class Profile; }
 
-class meta : public QDialog
-{
-    Q_OBJECT
+class QLineEdit;
+class QTextEdit;
 
-public slots:
-   void save();
-
+class Meta : public QDialog {
+Q_OBJECT
 public:
 
    /**
@@ -50,34 +41,22 @@ public:
     *
     * \param imported The #openspace::Profile object containing all data of the
     *                 new or imported profile.
-    * \param parent Pointer to parent Qt widget (optional)
+    * \param parent Pointer to parent Qt widget
     */
-    explicit meta(openspace::Profile* imported, QWidget *parent = nullptr);
+    explicit Meta(openspace::Profile* profile, QWidget* parent);
 
-    /**
-     * Destructor for meta class
-     */
-    ~meta();
-
-    /**
-     * Returns true if all entries in the meta window are blank
-     *
-     * \return true if all are blank
-     */
-
-    bool areAllEntriesBlank();
-
-    /**
-     * Handles keypress while the Qt dialog window is open
-     *
-     * \param evt #QKeyEvent object for the key press event
-     */
-    void keyPressEvent(QKeyEvent *evt);
+public slots:
+    void save();
 
 private:
-    Ui::meta *ui;
-    QWidget* _parent;
-    openspace::Profile* _imported;
+    openspace::Profile* _profile;
+
+    QLineEdit* _nameEdit = nullptr;
+    QLineEdit* _versionEdit = nullptr;
+    QTextEdit* _descriptionEdit = nullptr;
+    QLineEdit* _authorEdit = nullptr;
+    QLineEdit* _urlEdit = nullptr;
+    QLineEdit* _licenseEdit = nullptr;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___META___H__
