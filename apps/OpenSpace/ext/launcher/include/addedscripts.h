@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef ADDEDSCRIPTS_H
-#define ADDEDSCRIPTS_H
+#ifndef __OPENSPACE_UI_LAUNCHER___ADDEDSCRIPTS___H__
+#define __OPENSPACE_UI_LAUNCHER___ADDEDSCRIPTS___H__
 
 #include <QDialog>
 #include <QWidget>
@@ -36,13 +36,8 @@ class addedScripts;
 }
 QT_END_NAMESPACE
 
-class addedScripts : public QDialog
-{
-    Q_OBJECT
-
-public slots:
-    void parseScript();
-
+class addedScripts : public QDialog {
+Q_OBJECT
 public:
     /**
      * Constructor for addedScripts class
@@ -51,7 +46,7 @@ public:
      *                 new or imported profile.
      * \param parent Pointer to parent Qt widget (optional)
      */
-    explicit addedScripts(openspace::Profile* imported, QWidget *parent = nullptr);
+    explicit addedScripts(openspace::Profile* imported, QWidget* parent = nullptr);
 
     /**
      * Destructor for addedScripts class
@@ -72,11 +67,14 @@ public:
      */
     void keyPressEvent(QKeyEvent *evt);
 
+public slots:
+    void parseScript();
+
 private:
-    Ui::addedScripts *ui;
+    Ui::addedScripts* ui;
     QWidget* _parent;
     openspace::Profile* _imported;
     std::string _data;
 };
 
-#endif // ADDEDSCRIPTS_H
+#endif // __OPENSPACE_UI_LAUNCHER___ADDEDSCRIPTS___H__

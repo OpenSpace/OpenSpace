@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef PROPERTIES_H
-#define PROPERTIES_H
+#ifndef __OPENSPACE_UI_LAUNCHER___PROPERTIES___H__
+#define __OPENSPACE_UI_LAUNCHER___PROPERTIES___H__
 
 #include <QDialog>
 
@@ -91,4 +91,4 @@ private:
         = {openspace::Profile::Property::SetType::SetPropertyValue, "", ""};
 };
 
-#endif // PROPERTIES_H
+#endif // __OPENSPACE_UI_LAUNCHER___PROPERTIES___H__

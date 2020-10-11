@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef PROFILEEDIT_H
-#define PROFILEEDIT_H
+#ifndef __OPENSPACE_UI_LAUNCHER___PROFILEEDIT___H__
+#define __OPENSPACE_UI_LAUNCHER___PROFILEEDIT___H__
 
 #include <QDialog>
 #include <QWidget>
@@ -148,4 +148,4 @@ private:
     std::vector<std::string> _profilesReadOnly;
 };
 
-#endif // PROFILEEDIT_H
+#endif // __OPENSPACE_UI_LAUNCHER___PROFILEEDIT___H__

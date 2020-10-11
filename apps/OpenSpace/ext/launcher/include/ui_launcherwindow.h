@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef UI_LAUNCHERWINDOW_H
-#define UI_LAUNCHERWINDOW_H
+#ifndef __OPENSPACE_UI_LAUNCHER___UI_LAUNCHERWINDOW___H__
+#define __OPENSPACE_UI_LAUNCHER___UI_LAUNCHERWINDOW___H__
 
 #include <QtCore/QVariant>
 #include <QtWidgets/QAction>
@@ -203,4 +203,4 @@ namespace Ui {
 
 QT_END_NAMESPACE
 
-#endif // UI_LAUNCHERWINDOW_H
+#endif // __OPENSPACE_UI_LAUNCHER___UI_LAUNCHERWINDOW___H__

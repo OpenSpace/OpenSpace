@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef UI_PROFILEEDIT_H
-#define UI_PROFILEEDIT_H
+#ifndef __OPENSPACE_UI_LAUNCHER___UI_PROFILEEDIT___H__
+#define __OPENSPACE_UI_LAUNCHER___UI_PROFILEEDIT___H__
 
 #include <QtCore/QVariant>
 #include <QtWidgets/QApplication>
@@ -605,4 +605,4 @@ namespace Ui {
 
 QT_END_NAMESPACE
 
-#endif // UI_PROFILEEDIT_H
+#endif // __OPENSPACE_UI_LAUNCHER___UI_PROFILEEDIT___H__

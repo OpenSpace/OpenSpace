@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_LAUNCHER___FILESYSTEMACCESS___H__
-#define __OPENSPACE_LAUNCHER___FILESYSTEMACCESS___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___FILESYSTEMACCESS___H__
+#define __OPENSPACE_UI_LAUNCHER___FILESYSTEMACCESS___H__
 
 #include <QFileSystemModel>
 
@@ -72,4 +72,4 @@ private:
     bool _useCheckboxes = false;
 };
 
-#endif // __OPENSPACE_LAUNCHER___FILESYSTEMACCESS___H__
+#endif // __OPENSPACE_UI_LAUNCHER___FILESYSTEMACCESS___H__

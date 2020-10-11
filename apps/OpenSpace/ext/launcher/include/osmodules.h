@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef OSMODULES_H
-#define OSMODULES_H
+#ifndef __OPENSPACE_UI_LAUNCHER___OSMODULES___H__
+#define __OPENSPACE_UI_LAUNCHER___OSMODULES___H__
 
 #include <QDialog>
 
@@ -89,4 +89,4 @@ private:
     const openspace::Profile::Module kBlank = {"", "", ""};
 };
 
-#endif // OSMODULES_H
+#endif // __OPENSPACE_UI_LAUNCHER___OSMODULES___H__

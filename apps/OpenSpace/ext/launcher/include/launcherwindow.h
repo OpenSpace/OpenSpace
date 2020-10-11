@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef LAUNCHERWINDOW_H
-#define LAUNCHERWINDOW_H
+#ifndef __OPENSPACE_UI_LAUNCHER___LAUNCHERWINDOW___H__
+#define __OPENSPACE_UI_LAUNCHER___LAUNCHERWINDOW___H__
 
 #include <QMainWindow>
 #include <QString>
@@ -120,4 +120,4 @@ private:
     bool _profileChangeAllowed = true;
     bool _sgctConfigChangeAllowed = true;
 };
-#endif // LAUNCHERWINDOW_H
+#endif // __OPENSPACE_UI_LAUNCHER___LAUNCHERWINDOW___H__

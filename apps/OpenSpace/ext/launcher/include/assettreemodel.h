@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_LAUNCHER___ASSETTREEMODEL___H__
-#define __OPENSPACE_LAUNCHER___ASSETTREEMODEL___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___ASSETTREEMODEL___H__
+#define __OPENSPACE_UI_LAUNCHER___ASSETTREEMODEL___H__
 
 #include <QAbstractItemModel>
 #include "assettreeitem.h"
@@ -268,4 +268,4 @@ private:
     int getLevelFromLine(std::string line);
 };
 
-#endif // __OPENSPACE_LAUNCHER___ASSETTREEMODEL___H__
+#endif // __OPENSPACE_UI_LAUNCHER___ASSETTREEMODEL___H__

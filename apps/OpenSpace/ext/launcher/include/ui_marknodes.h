@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef UI_MARKNODES_H
-#define UI_MARKNODES_H
+#ifndef __OPENSPACE_UI_LAUNCHER___UI_MARKNODES___H__
+#define __OPENSPACE_UI_LAUNCHER___UI_MARKNODES___H__
 
 #include <QtCore/QVariant>
 #include <QtWidgets/QApplication>
@@ -177,4 +177,4 @@ namespace Ui {
 
 QT_END_NAMESPACE
 
-#endif // UI_MARKNODES_H
+#endif // __OPENSPACE_UI_LAUNCHER___UI_MARKNODES___H__

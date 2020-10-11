@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef ASSETS_H 
-#define ASSETS_H
+#ifndef __OPENSPACE_UI_LAUNCHER___ASSETS___H__
+#define __OPENSPACE_UI_LAUNCHER___ASSETS___H__
 
 #include <QDialog>
 #include <QWidget>
@@ -96,4 +96,4 @@ private:
     QModelIndex _selectedIdx;
 };
 
-#endif // ASSETS_H
+#endif // __OPENSPACE_UI_LAUNCHER___ASSETS___H__

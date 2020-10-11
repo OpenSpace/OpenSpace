@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef ERRORDIALOG_H
-#define ERRORDIALOG_H
+#ifndef __OPENSPACE_UI_LAUNCHER___ERRORDIALOG___H__
+#define __OPENSPACE_UI_LAUNCHER___ERRORDIALOG___H__
 
 #include <QDir>
 #include <QDialog>
@@ -60,4 +60,4 @@ private:
     QWidget* _parent;
 };
 
-#endif // ERRORDIALOG_H
+#endif // __OPENSPACE_UI_LAUNCHER___ERRORDIALOG___H__

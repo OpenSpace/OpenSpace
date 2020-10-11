@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_LAUNCHER___ASSETTREEITEM___H__
-#define __OPENSPACE_LAUNCHER___ASSETTREEITEM___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___ASSETTREEITEM___H__
+#define __OPENSPACE_UI_LAUNCHER___ASSETTREEITEM___H__
 
 #include <QVector>
 #include <QVariant>
@@ -210,4 +210,4 @@ private:
     bool _existsInFilesystem = true;
 };
 
-#endif // __OPENSPACE_LAUNCHER___ASSETTREEITEM___H__
+#endif // __OPENSPACE_UI_LAUNCHER___ASSETTREEITEM___H__

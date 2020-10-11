@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef CAMERA_H
-#define CAMERA_H
+#ifndef __OPENSPACE_UI_LAUNCHER___CAMERA___H__
+#define __OPENSPACE_UI_LAUNCHER___CAMERA___H__
 
 #include <QDialog>
 
@@ -89,4 +89,4 @@ private:
     openspace::Profile::CameraType _data;
 };
 
-#endif // CAMERA_H
+#endif // __OPENSPACE_UI_LAUNCHER___CAMERA___H__

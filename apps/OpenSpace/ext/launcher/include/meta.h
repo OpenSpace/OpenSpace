@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef META_H
-#define META_H
+#ifndef __OPENSPACE_UI_LAUNCHER___META___H__
+#define __OPENSPACE_UI_LAUNCHER___META___H__
 
 #include <openspace/scene/profile.h>
 #include <QDialog>
@@ -80,4 +80,4 @@ private:
     openspace::Profile* _imported;
 };
 
-#endif // META_H
+#endif // __OPENSPACE_UI_LAUNCHER___META___H__

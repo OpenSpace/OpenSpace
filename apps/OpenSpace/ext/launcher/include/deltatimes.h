@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef DELTATIMES_H
-#define DELTATIMES_H
+#ifndef __OPENSPACE_UI_LAUNCHER___DELTATIMES___H__
+#define __OPENSPACE_UI_LAUNCHER___DELTATIMES___H__
 
 #include <QDialog>
 #include <QWidget>
@@ -159,4 +159,4 @@ private:
     };
 };
 
-#endif // DELTATIMES_H
+#endif // __OPENSPACE_UI_LAUNCHER___DELTATIMES___H__

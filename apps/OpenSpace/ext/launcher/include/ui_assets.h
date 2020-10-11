@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef UI_ASSETS_H
-#define UI_ASSETS_H
+#ifndef __OPENSPACE_UI_LAUNCHER___UI_ASSETS___H__
+#define __OPENSPACE_UI_LAUNCHER___UI_ASSETS___H__
 
 #include <QtCore/QVariant>
 #include <QtWidgets/QApplication>
@@ -145,4 +145,4 @@ namespace Ui {
 
 QT_END_NAMESPACE
 
-#endif // UI_ASSETS_H
+#endif // __OPENSPACE_UI_LAUNCHER___UI_ASSETS___H__

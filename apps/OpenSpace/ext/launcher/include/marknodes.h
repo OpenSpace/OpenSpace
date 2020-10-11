@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef MARKNODES_H
-#define MARKNODES_H
+#ifndef __OPENSPACE_UI_LAUNCHER___MARKNODES___H__
+#define __OPENSPACE_UI_LAUNCHER___MARKNODES___H__
 
 #include <QDialog>
 #include <QWidget>
@@ -76,4 +76,4 @@ private:
     std::vector<std::string> _data;
 };
 
-#endif // MARKNODES_H
+#endif // __OPENSPACE_UI_LAUNCHER___MARKNODES___H__

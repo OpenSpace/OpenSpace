@@ -23,11 +23,12 @@
  ****************************************************************************************/
 
 #include "addedscripts.h"
-#include "./ui_addedscripts.h"
-#include <qevent.h>
+#include "ui_addedscripts.h"
+
+#include <QEvent>
+#include <QKeyEvent>
 #include <iostream>
 #include <sstream>
-#include <QKeyEvent>
 
 addedScripts::addedScripts(openspace::Profile* imported, QWidget *parent)
     : QDialog(parent)

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef OSTIME_H
-#define OSTIME_H
+#ifndef __OPENSPACE_UI_LAUNCHER___OSTIME___H__
+#define __OPENSPACE_UI_LAUNCHER___OSTIME___H__
 
 #include <QDialog>
 
@@ -72,4 +72,4 @@ private:
     bool _initializedAsAbsolute = true;
 };
 
-#endif // OSTIME_H
+#endif // __OPENSPACE_UI_LAUNCHER___OSTIME___H__

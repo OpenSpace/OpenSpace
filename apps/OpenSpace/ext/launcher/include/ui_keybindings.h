@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef UI_KEYBINDINGS_H
-#define UI_KEYBINDINGS_H
+#ifndef __OPENSPACE_UI_LAUNCHER___UI_KEYBINDINGS___H__
+#define __OPENSPACE_UI_LAUNCHER___UI_KEYBINDINGS___H__
 
 #include <QtCore/QVariant>
 #include <QtWidgets/QApplication>
@@ -381,4 +381,4 @@ namespace Ui {
 
 QT_END_NAMESPACE
 
-#endif // UI_KEYBINDINGS_H
+#endif // __OPENSPACE_UI_LAUNCHER___UI_KEYBINDINGS___H__
