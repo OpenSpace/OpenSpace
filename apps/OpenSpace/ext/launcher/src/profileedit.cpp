@@ -133,7 +133,7 @@ void ProfileEdit::openMeta() {
 void ProfileEdit::openModules() {
     ui->label_error->setText("");
     if (_pData) {
-        _modules = new osmodules(_pData);
+        _modules = new Modules(_pData, this);
         _modules->exec();
         labelText(_pData, _pData->modules().size(), "Modules", ui->label_modules);
         delete _modules;

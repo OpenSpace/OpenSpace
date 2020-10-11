@@ -36,12 +36,11 @@ set(HEADER_FILES
   include/launcherwindow.h
   include/marknodes.h
   include/meta.h
-  include/osmodules.h
+  include/modules.h
   include/ostime.h
   include/profileedit.h
   include/properties.h
   include/ui_launcherwindow.h
-  include/ui_osmodules.h
   include/ui_ostime.h
   include/ui_profileedit.h
   include/ui_properties.h
@@ -59,7 +58,7 @@ set(SOURCE_FILES
   src/launcherwindow.cpp
   src/marknodes.cpp
   src/meta.cpp
-  src/osmodules.cpp
+  src/modules.cpp
   src/ostime.cpp
   src/profileedit.cpp
   src/properties.cpp
@@ -79,7 +78,7 @@ qt5_wrap_cpp(
   include/launcherwindow.h
   include/marknodes.h
   include/meta.h
-  include/osmodules.h
+  include/modules.h
   include/ostime.h
   include/profileedit.h
   include/properties.h

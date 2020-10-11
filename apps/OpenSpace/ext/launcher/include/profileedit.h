@@ -29,7 +29,7 @@
 #include <QWidget>
 #include "meta.h"
 #include "properties.h"
-#include "osmodules.h"
+#include "modules.h"
 #include "keybindings.h"
 #include "assets.h"
 #include "ostime.h"
@@ -133,7 +133,7 @@ private:
     QWidget* _parent;
     Meta* _meta;
     properties* _properties;
-    osmodules* _modules;
+    Modules* _modules;
     Keybindings* _keybindings;
     Assets* _assets;
     ostime* _time;

@@ -22,24 +22,37 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___OSMODULES___H__
-#define __OPENSPACE_UI_LAUNCHER___OSMODULES___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___MODULES___H__
+#define __OPENSPACE_UI_LAUNCHER___MODULES___H__
 
 #include <QDialog>
 
 #include <openspace/scene/profile.h>
-#include <QWidget>
-#include <QListWidgetItem>
 
-QT_BEGIN_NAMESPACE
-namespace Ui {
-class osmodules;
-}
-QT_END_NAMESPACE
+class QDialogButtonBox;
+class QLabel;
+class QLineEdit;
+class QListWidget;
+class QPushButton;
 
-class osmodules : public QDialog
-{
-    Q_OBJECT
+class Modules : public QDialog {
+Q_OBJECT
+public:
+    /**
+     * Constructor for osmodules class
+     *
+     * \param imported The #openspace::Profile object containing all data of the
+     *                 new or imported profile.
+     * \param parent Pointer to parent Qt widget
+     */
+    Modules(openspace::Profile* profiles, QWidget* parent);
+
+    /**
+     * Handles keypress while the Qt dialog window is open
+     *
+     * \param evt #QKeyEvent object for the key press event
+     */
+    void keyPressEvent(QKeyEvent *evt);
 
 public slots:
     void listItemSelected();
@@ -50,43 +63,32 @@ public slots:
     void transitionToEditMode();
     void parseSelections();
 
-public:
-    /**
-     * Constructor for osmodules class
-     *
-     * \param imported The #openspace::Profile object containing all data of the
-     *                 new or imported profile.
-     * \param parent Pointer to parent Qt widget (optional)
-     */
-    explicit osmodules(openspace::Profile* imported, QWidget *parent = nullptr);
-
-    /**
-     * Destructor for osmodules class
-     */
-    ~osmodules();
-
-    /**
-     * Handles keypress while the Qt dialog window is open
-     *
-     * \param evt #QKeyEvent object for the key press event
-     */
-    void keyPressEvent(QKeyEvent *evt);
-
-protected:
-    //void resizeEvent(QResizeEvent* event);
-
 private:
     QString createOneLineSummary(openspace::Profile::Module m);
     void transitionFromEditMode();
     void editBoxDisabled(bool disabled);
     bool isLineEmpty(int index);
 
-    Ui::osmodules *ui;
-    QWidget* _parent;
-    openspace::Profile* _imported;
+    openspace::Profile* _profile;
     std::vector<openspace::Profile::Module> _data;
     bool _editModeNewItem = false;
     const openspace::Profile::Module kBlank = {"", "", ""};
+
+    QListWidget* _list = nullptr;
+    QLabel* _moduleLabel = nullptr;
+    QLineEdit* _moduleEdit = nullptr;
+    QLabel* _loadedLabel = nullptr;
+    QLineEdit* _loadedEdit = nullptr;
+    QLabel* _notLoadedLabel = nullptr;
+    QLineEdit* _notLoadedEdit = nullptr;
+    
+    QPushButton* _buttonAdd = nullptr;
+    QPushButton* _buttonRemove = nullptr;
+    QPushButton* _buttonSave = nullptr;
+    QPushButton* _buttonCancel = nullptr;
+    QDialogButtonBox* _buttonBox = nullptr;
+
+    QLabel* _errorMsg = nullptr;
 };
 
-#endif // __OPENSPACE_UI_LAUNCHER___OSMODULES___H__
+#endif // __OPENSPACE_UI_LAUNCHER___MODULES___H__
