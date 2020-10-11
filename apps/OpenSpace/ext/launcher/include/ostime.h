@@ -26,8 +26,12 @@
 #define OSTIME_H
 
 #include <QDialog>
+
+#include <openspace/scene/profile.h>
 #include <QWidget>
 #include <optional>
+
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui {

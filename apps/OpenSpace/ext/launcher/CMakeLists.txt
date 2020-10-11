@@ -1,24 +1,28 @@
-cmake_minimum_required(VERSION 3.10)
+##########################################################################################
+#                                                                                        #
+# OpenSpace                                                                              #
+#                                                                                        #
+# Copyright (c) 2014-2020                                                                #
+#                                                                                        #
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
+# software and associated documentation files (the "Software"), to deal in the Software  #
+# without restriction, including without limitation the rights to use, copy, modify,     #
+# merge, publish, distribute, sublicense, and/or sell copies of the Software, and to     #
+# permit persons to whom the Software is furnished to do so, subject to the following    #
+# conditions:                                                                            #
+#                                                                                        #
+# The above copyright notice and this permission notice shall be included in all copies  #
+# or substantial portions of the Software.                                               #
+#                                                                                        #
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,    #
+# INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A          #
+# PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT     #
+# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF   #
+# CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE   #
+# OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
+##########################################################################################
 
-project(profileGUIw LANGUAGES CXX)
-
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
-#set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOMOC ON)
-#set(CMAKE_AUTORCC ON)
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-find_package(Qt5 COMPONENTS Widgets REQUIRED)
-target_include_directories(
-  OpenSpace PRIVATE
-  ${Qt5_DIR}/../../../include
-  ${Qt5_DIR}/../../../include/QtWidgets
-  ${Qt5_DIR}/../../../include/QtCore
-  ${Qt5_DIR}/../../../include/QtGui
-)
+include(${OPENSPACE_CMAKE_EXT_DIR}/set_openspace_compile_settings.cmake)
 
 set(HEADER_FILES
   include/addedscripts.h
@@ -71,12 +75,29 @@ set(SOURCE_FILES
   src/properties.cpp
 )
 
-add_library(profileGUIw STATIC ${HEADER_FILES} ${SOURCE_FILES})
-target_include_directories(profileGUIw PRIVATE ${OPENSPACE_BASE_DIR}/include)
-target_include_directories(profileGUIw PRIVATE include)
-target_include_directories(profileGUIw PRIVATE ${OPENSPACE_BASE_DIR}/ext/ghoul/include)
-target_include_directories(profileGUIw PRIVATE ${OPENSPACE_BASE_DIR}/ext/ghoul/ext/glm)
-target_include_directories(profileGUIw PRIVATE ${OPENSPACE_BASE_DIR}/ext/ghoul/ext/cppformat/include)
-target_include_directories(profileGUIw PRIVATE ${OPENSPACE_BASE_DIR}/ext/ghoul/ext/lua/src)
-target_link_libraries(profileGUIw PUBLIC Qt5::Widgets)
+find_package(Qt5 COMPONENTS Widgets REQUIRED)
+
+set(MOC_FILES "")
+qt5_wrap_cpp(
+  MOC_FILES
+  include/addedscripts.h
+  include/assets.h
+  include/assettreemodel.h
+  include/camera.h
+  include/deltatimes.h
+  include/errordialog.h
+  include/keybindings.h
+  include/launcherwindow.h
+  include/marknodes.h
+  include/meta.h
+  include/osmodules.h
+  include/ostime.h
+  include/profileedit.h
+  include/properties.h
+)
+
+add_library(openspace-ui-launcher STATIC ${HEADER_FILES} ${SOURCE_FILES} ${MOC_FILES})
+set_openspace_compile_settings(openspace-ui-launcher)
+target_include_directories(openspace-ui-launcher PUBLIC include)
+target_link_libraries(openspace-ui-launcher PUBLIC Qt5::Core Qt5::Gui Qt5::Widgets openspace-core)
 

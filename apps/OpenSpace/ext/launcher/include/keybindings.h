@@ -26,6 +26,8 @@
 #define KEYBINDINGS_H
 
 #include <QDialog>
+
+#include <openspace/scene/profile.h>
 #include <QWidget>
 #include <QListWidgetItem>
 

@@ -341,7 +341,7 @@ QString ProfileEdit::summarizeText_addedScripts() {
     QString result;
     for (auto s : _pData->additionalScripts()) {
         result += QString(s.c_str());
-	result += "\n";
+    result += "\n";
     }
     return result;
 }

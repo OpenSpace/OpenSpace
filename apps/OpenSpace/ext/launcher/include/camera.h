@@ -26,6 +26,8 @@
 #define CAMERA_H
 
 #include <QDialog>
+
+#include <openspace/scene/profile.h>
 #include <QWidget>
 #include <QLineEdit>
 #include <QLabel>
