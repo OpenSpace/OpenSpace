@@ -22,12 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___ADDEDSCRIPTS___H__
-#define __OPENSPACE_UI_LAUNCHER___ADDEDSCRIPTS___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___ADDITIONALSCRIPTS___H__
+#define __OPENSPACE_UI_LAUNCHER___ADDITIONALSCRIPTS___H__
 
 #include <QDialog>
-#include <QWidget>
-#include <QListWidgetItem>
+
 #include <openspace/scene/profile.h>
 
 class QTextEdit;
@@ -40,9 +39,9 @@ public:
      *
      * \param imported The #openspace::Profile object containing all data of the
      *                 new or imported profile.
-     * \param parent Pointer to parent Qt widget (optional)
+     * \param parent Pointer to parent Qt widget
      */
-    explicit AdditionalScripts(openspace::Profile* imported, QWidget* parent = nullptr);
+    explicit AdditionalScripts(openspace::Profile* imported, QWidget* parent);
 
 public slots:
     void parseScript();
@@ -52,4 +51,4 @@ private:
     QTextEdit* _textScripts = nullptr;
 };
 
-#endif // __OPENSPACE_UI_LAUNCHER___ADDEDSCRIPTS___H__
+#endif // __OPENSPACE_UI_LAUNCHER___ADDITIONALSCRIPTS___H__

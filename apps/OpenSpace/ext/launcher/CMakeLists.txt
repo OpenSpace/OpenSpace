@@ -25,7 +25,7 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/set_openspace_compile_settings.cmake)
 
 set(HEADER_FILES
-  include/addedscripts.h
+  include/additionalscripts.h
   include/assets.h
   include/assettreeitem.h
   include/assettreemodel.h
@@ -56,7 +56,7 @@ set(HEADER_FILES
 )
 
 set(SOURCE_FILES
-  src/addedscripts.cpp
+  src/additionalscripts.cpp
   src/assets.cpp
   src/assettreeitem.cpp
   src/assettreemodel.cpp
@@ -79,7 +79,7 @@ find_package(Qt5 COMPONENTS Widgets REQUIRED)
 set(MOC_FILES "")
 qt5_wrap_cpp(
   MOC_FILES
-  include/addedscripts.h
+  include/additionalscripts.h
   include/assets.h
   include/assettreemodel.h
   include/camera.h

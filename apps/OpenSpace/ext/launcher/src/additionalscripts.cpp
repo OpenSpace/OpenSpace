@@ -22,18 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "addedscripts.h"
+#include "additionalscripts.h"
 
 #include <QDialogButtonBox>
-#include <QEvent>
 #include <QHBoxLayout>
-#include <QKeyEvent>
 #include <QLabel>
 #include <QTextEdit>
 #include <QVBoxLayout>
-
-#include <iostream>
-#include <sstream>
 
 AdditionalScripts::AdditionalScripts(openspace::Profile* imported, QWidget *parent)
     : QDialog(parent)
@@ -43,9 +38,9 @@ AdditionalScripts::AdditionalScripts(openspace::Profile* imported, QWidget *pare
 
     QBoxLayout* layout = new QVBoxLayout(this);
     {
-        QLabel* title = new QLabel("Addtional Lua Scripts for Configuration");
-        title->setObjectName("title");
-        layout->addWidget(title);
+        QLabel* heading = new QLabel("Addtional Lua Scripts for Configuration");
+        heading->setObjectName("heading");
+        layout->addWidget(heading);
     }
 
     _textScripts = new QTextEdit;
@@ -59,25 +54,25 @@ AdditionalScripts::AdditionalScripts(openspace::Profile* imported, QWidget *pare
     }
 
     {
-        QDialogButtonBox* buttonBox = new QDialogButtonBox;
-        buttonBox->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
+        QDialogButtonBox* buttons = new QDialogButtonBox;
+        buttons->setStandardButtons(QDialogButtonBox::Apply | QDialogButtonBox::Discard);
         connect(
-            buttonBox, &QDialogButtonBox::accepted,
+            buttons, &QDialogButtonBox::accepted,
             this, &AdditionalScripts::parseScript
         );
         connect(
-            buttonBox, &QDialogButtonBox::rejected,
+            buttons, &QDialogButtonBox::rejected,
             this, &AdditionalScripts::reject
         );
-        layout->addWidget(buttonBox);
+        layout->addWidget(buttons);
     }
 
     std::vector<std::string> scripts = imported->additionalScripts();
-    std::string data = std::accumulate(
+    std::string scpts = std::accumulate(
         scripts.begin(), scripts.end(),
         std::string(), [](std::string lhs, std::string rhs) { return lhs + rhs + '\n'; }
     );
-    _textScripts->setText(QString::fromStdString(std::move(data)));
+    _textScripts->setText(QString::fromStdString(std::move(scpts)));
     _textScripts->moveCursor(QTextCursor::MoveOperation::End);
 }
 
