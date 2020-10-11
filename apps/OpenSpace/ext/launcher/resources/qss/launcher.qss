@@ -5,9 +5,20 @@ QLabel#heading {
     font-size: 12pt;
 }
 
+QLabel#error-message {
+  color: #dd1111;
+}
+
 /*
  * Assets
  */
 Assets  QTreeView {
   min-width: 40em;
+}
+
+/*
+ * Camera
+ */
+Camera  QLabel#error-message {
+  min-width: 30em;
 }

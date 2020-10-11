@@ -211,7 +211,7 @@ void ProfileEdit::openAddedScripts() {
 void ProfileEdit::openCamera() {
     ui->label_error->setText("");
     if (_pData) {
-        _camera = new camera(_pData);
+        _camera = new Camera(_pData, this);
         _camera->exec();
         delete _camera;
     }

@@ -140,7 +140,7 @@ private:
     ostime* _time;
     AdditionalScripts* _addedScripts;
     deltaTimes* _deltaTimes;
-    camera* _camera;
+    Camera* _camera;
     markNodes* _markNodes;
     openspace::Profile* _pData;
     const std::string _reportedAssets;

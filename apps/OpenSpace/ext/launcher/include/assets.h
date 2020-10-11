@@ -41,14 +41,14 @@ public:
     /**
      * Constructor for assets class
      *
-     * \param imported The #openspace::Profile object containing all data of the
-     *                 new or imported profile.
+     * \param profile The #openspace::Profile object containing all data of the
+     *                new or imported profile.
      * \param reportAssets A full summary of all assets and their respective paths in
      *                     a text format unique to this application (more details are
      *                     in class #assetTreeModel)
      * \param parent Pointer to parent Qt widget
      */
-    explicit Assets(openspace::Profile* imported, const std::string reportAssets,
+    explicit Assets(openspace::Profile* profile, const std::string reportAssets,
         QWidget* parent);
 
     /**
@@ -58,12 +58,12 @@ public:
      */
     QString createTextSummary();
 
-public slots:
+private slots:
     void parseSelections();
     void selected(const QModelIndex&);
 
 private:
-    openspace::Profile* _imported;
+    openspace::Profile* _profile = nullptr;
     AssetTreeModel _assetTreeModel;
     QTreeView* _assetTree = nullptr;
     QTextEdit* _summary = nullptr;

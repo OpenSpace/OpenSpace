@@ -31,9 +31,9 @@
 #include <QTextEdit>
 #include <QVBoxLayout>
 
-AdditionalScripts::AdditionalScripts(openspace::Profile* imported, QWidget *parent)
+AdditionalScripts::AdditionalScripts(openspace::Profile* profile, QWidget *parent)
     : QDialog(parent)
-    , _imported(imported)
+    , _profile(profile)
 {
     setWindowTitle("Additional Scripts");
 
@@ -68,7 +68,7 @@ AdditionalScripts::AdditionalScripts(openspace::Profile* imported, QWidget *pare
         layout->addWidget(buttons);
     }
 
-    std::vector<std::string> scripts = imported->additionalScripts();
+    std::vector<std::string> scripts = _profile->additionalScripts();
     std::string scpts = std::accumulate(
         scripts.begin(), scripts.end(),
         std::string(), [](std::string lhs, std::string rhs) { return lhs + rhs + '\n'; }
@@ -85,6 +85,6 @@ void AdditionalScripts::parseScript() {
         getline(iss, s);
         tmpMultilineStringToVector.push_back(s);
     }
-    _imported->setAdditionalScripts(tmpMultilineStringToVector);
+    _profile->setAdditionalScripts(tmpMultilineStringToVector);
     accept();
 }

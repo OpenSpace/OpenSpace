@@ -41,8 +41,6 @@ set(HEADER_FILES
   include/ostime.h
   include/profileedit.h
   include/properties.h
-  include/ui_assets.h
-  include/ui_camera.h
   include/ui_deltatimes.h
   include/ui_errordialog.h
   include/ui_keybindings.h

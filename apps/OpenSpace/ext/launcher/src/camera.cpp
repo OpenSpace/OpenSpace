@@ -22,328 +22,405 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/scene/profile.h>
 #include "camera.h"
-#include "./ui_camera.h"
+
+#include <openspace/scene/profile.h>
+#include <QDialogButtonBox>
+#include <QDoubleValidator>
+#include <QFrame>
+#include <QGridLayout>
+#include <QLabel>
+#include <QLineEdit>
 #include <QKeyEvent>
+#include <QTabWidget> 
 
-template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
-template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
+namespace {
+    constexpr const int CameraTypeNav = 0;
+    constexpr const int CameraTypeGeo = 1;
 
-camera::camera(openspace::Profile* imported, QWidget *parent)
+    template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+    template <class... Ts> overloaded(Ts...)->overloaded<Ts...>;
+
+    bool inNumericalRange(QLineEdit* le, float min, float max) {
+        QString s = le->text();
+        bool validConversion = false;
+        float value = s.toFloat(&validConversion);
+        if (!validConversion) {
+            return false;
+        }
+        if (value < min || value > max) {
+            return false;
+        }
+        return true;
+    }
+} // namespace
+
+Camera::Camera(openspace::Profile* profile, QWidget *parent)
     : QDialog(parent)
-    , ui(new Ui::camera)
-    , _imported(imported)
+    , _profile(profile)
 {
-    ui->setupUi(this);
+    setWindowTitle("Set Camera Position");
 
-    if (_imported->camera().has_value()) {
-        _data = imported->camera().value();
+    QBoxLayout* layout = new QVBoxLayout(this);
+    _tabWidget = new QTabWidget;
+    connect(_tabWidget, &QTabWidget::tabBarClicked, this, &Camera::tabSelect);
+    _tabWidget->addTab(createNavStateWidget(), "Navigation State");
+    _tabWidget->addTab(createGeoWidget(), "Geo State");
+    layout->addWidget(_tabWidget);
+
+    {
+        QFrame* line = new QFrame;
+        line->setFrameShape(QFrame::HLine);
+        line->setFrameShadow(QFrame::Sunken);
+        layout->addWidget(line);
+    }
+
+    {
+        QWidget* footer = new QWidget;
+        QBoxLayout* footerLayout = new QHBoxLayout(footer);
+
+        _errorMsg = new QLabel;
+        _errorMsg->setObjectName("error-message");
+        _errorMsg->setWordWrap(true);
+        footerLayout->addWidget(_errorMsg);
+
+        QDialogButtonBox* buttons = new QDialogButtonBox;
+        buttons->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
+        connect(buttons, &QDialogButtonBox::accepted, this, &Camera::approved);
+        connect(buttons, &QDialogButtonBox::rejected, this, &Camera::reject);
+        footerLayout->addWidget(buttons);
+
+        layout->addWidget(footer);
+    }
+
+    if (_profile->camera().has_value()) {
+        openspace::Profile::CameraType type = _profile->camera().value();
         std::visit(overloaded {
-            [&] (const openspace::Profile::CameraNavState& nav) {
-                ui->tabWidget->setCurrentIndex(static_cast<int>(cameraTypeTab::Nav));
-                ui->line_anchorNav->setText(QString(nav.anchor.c_str()));
-                ui->line_aim->setText(QString(nav.aim->c_str()));
-                ui->line_referenceFrame->setText(QString(nav.referenceFrame.c_str()));
-                ui->line_posX->setText(QString::number(nav.position.x));
-                ui->line_posY->setText(QString::number(nav.position.y));
-                ui->line_posZ->setText(QString::number(nav.position.z));
+            [this](const openspace::Profile::CameraNavState& nav) {
+                _tabWidget->setCurrentIndex(CameraTypeNav);
+                _navState.anchor->setText(QString::fromStdString(nav.anchor));
+                _navState.aim->setText(QString::fromStdString(*nav.aim));
+                _navState.refFrame->setText(QString::fromStdString(nav.referenceFrame));
+                _navState.positionX->setText(QString::number(nav.position.x));
+                _navState.positionY->setText(QString::number(nav.position.y));
+                _navState.positionZ->setText(QString::number(nav.position.z));
                 if (nav.up.has_value()) {
-                    ui->line_upX->setText(QString::number(nav.up.value().x));
-                    ui->line_upY->setText(QString::number(nav.up.value().y));
-                    ui->line_upZ->setText(QString::number(nav.up.value().z));
+                    _navState.upX->setText(QString::number(nav.up.value().x));
+                    _navState.upY->setText(QString::number(nav.up.value().y));
+                    _navState.upZ->setText(QString::number(nav.up.value().z));
                 }
                 else {
-                    ui->line_upX->setText("");
-                    ui->line_upY->setText("");
-                    ui->line_upZ->setText("");
+                    _navState.upX->clear();
+                    _navState.upY->clear();
+                    _navState.upZ->clear();
                 }
                 if (nav.yaw.has_value()) {
-                    ui->line_yaw->setText(QString::number(nav.yaw.value()));
+                    _navState.yaw->setText(QString::number(*nav.yaw));
                 }
                 else {
-                    ui->line_yaw->setText("");
+                    _navState.yaw->clear();
                 }
                 if (nav.pitch.has_value()) {
-                    ui->line_pitch->setText(QString::number(nav.pitch.value()));
+                    _navState.pitch->setText(QString::number(*nav.pitch));
                 }
                 else {
-                    ui->line_pitch->setText("");
+                    _navState.pitch->clear();
                 }
-                tabSelect(0);
+                tabSelect(CameraTypeNav);
             },
-            [&] (const openspace::Profile::CameraGoToGeo& geo) {
-                ui->tabWidget->setCurrentIndex(static_cast<int>(cameraTypeTab::Geo));
-                ui->line_anchorGeo->setText(QString(geo.anchor.c_str()));
-                ui->line_lat->setText(QString::number(geo.latitude));
-                ui->line_long->setText(QString::number(geo.longitude));
+            [this](const openspace::Profile::CameraGoToGeo& geo) {
+                _tabWidget->setCurrentIndex(CameraTypeGeo);
+                _geoState.anchor->setText(QString::fromStdString(geo.anchor));
+                _geoState.latitude->setText(QString::number(geo.latitude));
+                _geoState.longitude->setText(QString::number(geo.longitude));
                 if (geo.altitude.has_value()) {
-                    ui->line_altitude->setText(QString::number(geo.altitude.value()));
+                    _geoState.altitude->setText(QString::number(*geo.altitude));
                 }
                 else {
-                    ui->line_altitude->setText("");
+                    _geoState.altitude->clear();
                 }
-                tabSelect(1);
+                tabSelect(CameraTypeGeo);
             }
-        }, _data);
+        }, type);
     }
     else {
-        ui->tabWidget->setCurrentIndex(static_cast<int>(cameraTypeTab::Nav));
-        ui->line_anchorNav->setText("");
-        ui->line_aim->setText("");
-        ui->line_referenceFrame->setText("");
-        ui->line_posX->setText("");
-        ui->line_posY->setText("");
-        ui->line_posZ->setText("");
-        ui->line_upX->setText("");
-        ui->line_upY->setText("");
-        ui->line_upZ->setText("");
-        ui->line_yaw->setText("");
-        ui->line_pitch->setText("");
-        ui->line_anchorGeo->setText("");
-        ui->line_lat->setText("");
-        ui->line_long->setText("");
-        ui->line_altitude->setText("");
+        _tabWidget->setCurrentIndex(CameraTypeNav);
+        _navState.anchor->clear();
+        _navState.aim->clear();
+        _navState.refFrame->clear();
+        _navState.positionX->clear();
+        _navState.positionY->clear();
+        _navState.positionZ->clear();
+        _navState.upX->clear();
+        _navState.upY->clear();
+        _navState.upZ->clear();
+        _navState.yaw->clear();
+        _navState.pitch->clear();
+
+        _geoState.anchor->clear();
+        _geoState.latitude->clear();
+        _geoState.longitude->clear();
+        _geoState.altitude->clear();
+    }
+}
+
+QWidget* Camera::createNavStateWidget() {
+    QWidget* box = new QWidget;
+    QGridLayout* layout = new QGridLayout(box);
+
+    layout->addWidget(new QLabel("Anchor:"), 0, 0);
+    _navState.anchor = new QLineEdit;
+    _navState.anchor->setToolTip("Anchor camera to this node");
+    layout->addWidget(_navState.anchor, 0, 1);
+
+    layout->addWidget(new QLabel("Aim:"), 1, 0);
+    _navState.aim = new QLineEdit;
+    _navState.aim->setToolTip(
+        "[OPTIONAL] If specified, camera will be aimed at this node while keeping the "
+        "anchor node in the same view location"
+    );
+    layout->addWidget(_navState.aim, 1, 1);
+
+    layout->addWidget(new QLabel("Reference Frame:"), 2, 0);
+    _navState.refFrame = new QLineEdit;
+    _navState.refFrame->setToolTip("[OPTIONAL] Camera location in reference to this frame");
+    layout->addWidget(_navState.refFrame, 2, 1);
+
+    layout->addWidget(new QLabel("Position:"), 3, 0);
+    {
+        QWidget* posBox = new QWidget;
+        QBoxLayout* posLayout = new QHBoxLayout(posBox);
+        posLayout->setContentsMargins(0, 0, 0, 0);
+        posLayout->addWidget(new QLabel("X"));
+        _navState.positionX = new QLineEdit;
+        _navState.positionX->setValidator(new QDoubleValidator);
+        _navState.positionX->setToolTip("Camera position vector (x)");
+        posLayout->addWidget(_navState.positionX);
+
+        posLayout->addWidget(new QLabel("Y"));
+        _navState.positionY = new QLineEdit;
+        _navState.positionY->setValidator(new QDoubleValidator);
+        _navState.positionY->setToolTip("Camera position vector (y)");
+        posLayout->addWidget(_navState.positionY);
+
+        posLayout->addWidget(new QLabel("Z"));
+        _navState.positionZ = new QLineEdit;
+        _navState.positionZ->setValidator(new QDoubleValidator);
+        _navState.positionZ->setToolTip("Camera position vector (z)");
+        posLayout->addWidget(_navState.positionZ);
+        layout->addWidget(posBox, 3, 1);
     }
 
-    connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(approved()));
-    connect(ui->buttonBox, SIGNAL(rejected()), this, SLOT(cancel()));
-    connect(ui->tabWidget, SIGNAL(tabBarClicked(int)), this, SLOT(tabSelect(int)));
-}
+    layout->addWidget(new QLabel("Up:"), 4, 0);
+    {
+        QWidget* upBox = new QWidget;
+        QBoxLayout* upLayout = new QHBoxLayout(upBox);
+        upLayout->setContentsMargins(0, 0, 0, 0);
+        upLayout->addWidget(new QLabel("X"));
+        _navState.upX = new QLineEdit;
+        _navState.upX->setValidator(new QDoubleValidator);
+        _navState.upX->setToolTip("[OPTIONAL] Camera up vector (x)");
+        upLayout->addWidget(_navState.upX);
 
-bool camera::isNumericalValue(QLineEdit* le) {
-    QString s = le->text();
-    bool validConversion = false;
-    s.toDouble(&validConversion);
-    return validConversion;
-}
+        upLayout->addWidget(new QLabel("Y"));
+        _navState.upY = new QLineEdit;
+        _navState.upY->setValidator(new QDoubleValidator);
+        _navState.upY->setToolTip("[OPTIONAL] Camera up vector (y)");
+        upLayout->addWidget(_navState.upY);
 
-bool camera::inNumericalRange(QLineEdit* le, float min, float max) {
-    QString s = le->text();
-    bool validConversion = false;
-    float value = s.toFloat(&validConversion);
-    if (!validConversion) {
-        return false;
+        upLayout->addWidget(new QLabel("Z"));
+        _navState.upZ = new QLineEdit;
+        _navState.upZ->setValidator(new QDoubleValidator);
+        _navState.upZ->setToolTip("[OPTIONAL] Camera up vector (z)");
+        upLayout->addWidget(_navState.upZ);
+        layout->addWidget(upBox, 4, 1);
     }
-    if (value < min || value > max) {
-        return false;
-    }
-    return true;
+
+    layout->addWidget(new QLabel("Yaw angle:"), 5, 0);
+    _navState.yaw = new QLineEdit;
+    _navState.yaw->setValidator(new QDoubleValidator);
+    _navState.yaw->setToolTip("[OPTIONAL] yaw angle +/- 360 degrees");
+    layout->addWidget(_navState.yaw, 5, 1);
+
+    layout->addWidget(new QLabel("Pitch angle:"), 6, 0);
+    _navState.pitch = new QLineEdit;
+    _navState.pitch->setValidator(new QDoubleValidator);
+    _navState.pitch->setToolTip("[OPTIONAL] pitch angle +/- 360 degrees");
+    layout->addWidget(_navState.pitch, 6, 1);
+
+    return box;
 }
 
-bool camera::isEmpty(QLineEdit* textLine) {
-    return (textLine->text().length() == 0);
+QWidget* Camera::createGeoWidget() {
+    QWidget* box = new QWidget;
+    QGridLayout* layout = new QGridLayout(box);
+
+    layout->addWidget(new QLabel("Anchor:"), 0, 0);
+    _geoState.anchor = new QLineEdit;
+    _geoState.anchor->setToolTip("Anchor camera to this globe (planet/moon)");
+    layout->addWidget(_geoState.anchor, 0, 1);
+
+    layout->addWidget(new QLabel("Latitude"), 1, 0);
+    _geoState.latitude = new QLineEdit;
+    _geoState.latitude->setValidator(new QDoubleValidator);
+    _geoState.latitude->setToolTip("Latitude of camera focus point (+/- 90 degrees)");
+    layout->addWidget(_geoState.latitude, 1, 1);
+
+    layout->addWidget(new QLabel("Longitude"), 2, 0);
+    _geoState.longitude = new QLineEdit;
+    _geoState.longitude->setValidator(new QDoubleValidator);
+    _geoState.longitude->setToolTip("Longitude of camera focus point (+/- 180 degrees)");
+    layout->addWidget(_geoState.longitude, 2, 1);
+
+    layout->addWidget(new QLabel("Altitude"), 3, 0);
+    _geoState.altitude = new QLineEdit;
+    _geoState.altitude->setValidator(new QDoubleValidator);
+    _geoState.altitude->setToolTip("[OPTIONAL] Altitude of camera (meters)");
+    //altitude->setPlaceholderText("optional");
+    layout->addWidget(_geoState.altitude, 3, 1);
+
+    return box;
 }
 
-camera::~camera() {
-    delete ui;
-}
-
-void camera::cancel() {
-
-}
-
-bool camera::areRequiredFormsFilledAndValid() {
+bool Camera::areRequiredFormsFilledAndValid() {
     bool allFormsOk = true;
-    ui->label_error->setText("");
+    _errorMsg->clear();
 
-    if (ui->tabWidget->currentIndex() == static_cast<int>(cameraTypeTab::Nav)) {
-        if (isEmpty(ui->line_anchorNav)) {
+    if (_tabWidget->currentIndex() == CameraTypeNav) {
+        if (_navState.anchor->text().isEmpty()) {
             allFormsOk = false;
             addErrorMsg("Anchor is empty");
         }
-        if (isEmpty(ui->line_posX)) {
+        if (_navState.positionX->text().isEmpty()) {
             allFormsOk = false;
             addErrorMsg("Position X is empty");
         }
-        else if (!isNumericalValue(ui->line_posX)) {
-            allFormsOk = false;
-            addErrorMsg("Position X is not a number");
-        }
-        if (isEmpty(ui->line_posY)) {
+        if (_navState.positionY->text().isEmpty()) {
             allFormsOk = false;
             addErrorMsg("Position Y is empty");
         }
-        else if (!isNumericalValue(ui->line_posY)) {
-            allFormsOk = false;
-            addErrorMsg("Position Y is not a number");
-        }
-        if (isEmpty(ui->line_posZ)) {
+        if (_navState.positionZ->text().isEmpty()) {
             allFormsOk = false;
             addErrorMsg("Position Z is empty");
         }
-        else if (!isNumericalValue(ui->line_posZ)) {
-            allFormsOk = false;
-            addErrorMsg("Position Z is not a number");
-        }
         int upVectorCount = 0;
-        if (!isEmpty(ui->line_upX)) {
-            upVectorCount++;
-            if (!isNumericalValue(ui->line_upX)) {
-                allFormsOk = false;
-                addErrorMsg("Up X is not a number");
-            }
-        }
-        if (!isEmpty(ui->line_upY)) {
-            upVectorCount++;
-            if (!isNumericalValue(ui->line_upY)) {
-                allFormsOk = false;
-                addErrorMsg("Up Y is not a number");
-            }
-        }
-        if (!isEmpty(ui->line_upZ)) {
-            upVectorCount++;
-            if (!isNumericalValue(ui->line_upZ)) {
-                allFormsOk = false;
-                addErrorMsg("Up Z is not a number");
-            }
-        }
-        if (!(upVectorCount == 0 || upVectorCount == 3)) {
+        if (_navState.upX->text().isEmpty()) {
             allFormsOk = false;
-            addErrorMsg("Up vector is incomplete");
+            addErrorMsg("Up X is empty");
         }
-        if (!isEmpty(ui->line_yaw)) {
-            if (!isNumericalValue(ui->line_yaw)) {
-                allFormsOk = false;
-                addErrorMsg("Yaw value is not a number");
-            }
-            else if (!inNumericalRange(ui->line_yaw, -360.0, 360.0)) {
+        if (_navState.upY->text().isEmpty()) {
+            allFormsOk = false;
+            addErrorMsg("Up Y is empty");
+        }
+        if (_navState.upZ->text().isEmpty()) {
+            allFormsOk = false;
+            addErrorMsg("Up Z is empty");
+        }
+        if (!_navState.yaw->text().isEmpty()) {
+            if (!inNumericalRange(_navState.yaw, -360.0, 360.0)) {
                 allFormsOk = false;
                 addErrorMsg("Yaw value is not in +/- 360.0 range");
             }
         }
-        if (!isEmpty(ui->line_pitch)) {
-            if (!isNumericalValue(ui->line_pitch)) {
-                allFormsOk = false;
-                addErrorMsg("Pitch value is not a number");
-            }
-            else if (!inNumericalRange(ui->line_pitch, -360.0, 360.0)) {
+        if (!_navState.pitch->text().isEmpty()) {
+            if (!inNumericalRange(_navState.pitch, -360.0, 360.0)) {
                 allFormsOk = false;
                 addErrorMsg("Pitch value is not in +/- 360.0 range");
             }
         }
     }
 
-    if (ui->tabWidget->currentIndex() == static_cast<int>(cameraTypeTab::Geo)) {
-        if (isEmpty(ui->line_anchorGeo)) {
+    if (_tabWidget->currentIndex() == CameraTypeGeo) {
+        if (_geoState.anchor->text().isEmpty()) {
             allFormsOk = false;
             addErrorMsg("Anchor is empty");
         }
-        if (!isNumericalValue(ui->line_lat)) {
-            allFormsOk = false;
-            addErrorMsg("Latitude value is not a number");
-        }
-        else if (!inNumericalRange(ui->line_lat, -90.0, 90.0)) {
+        if (!inNumericalRange(_geoState.latitude, -90.0, 90.0)) {
             allFormsOk = false;
             addErrorMsg("Latitude value is not in +/- 90.0 range");
         }
-        if (!isNumericalValue(ui->line_long)) {
-            allFormsOk = false;
-            addErrorMsg("Longitude value is not a number");
-        }
-        else if (!inNumericalRange(ui->line_long, -180.0, 180.0)) {
+        if (!inNumericalRange(_geoState.longitude, -180.0, 180.0)) {
             allFormsOk = false;
             addErrorMsg("Longitude value is not in +/- 180.0 range");
-        }
-        if (!isEmpty(ui->line_altitude)) {
-            if (!isNumericalValue(ui->line_altitude)) {
-                allFormsOk = false;
-                addErrorMsg("Altitude value is not a number");
-            }
         }
     }
     return allFormsOk;
 }
 
-void camera::addErrorMsg(const QString& errorDescription) {
-    QString contents = ui->label_error->text();
+void Camera::addErrorMsg(QString errorDescription) {
+    QString contents = _errorMsg->text();
     if (contents.length() > 0) {
         contents += ", ";
     }
     contents += errorDescription;
-    ui->label_error->setText("<font color='red'>" + contents + "</font>");
+    _errorMsg->setText(contents);
 }
 
-void camera::setErrorTextFormat(QLabel* label, const QString& labelTxt,
-                                bool setErrorFormat)
-{
-    QString formatText = "<font color='";
-    formatText += (setErrorFormat) ? "red" : "black";
-    formatText += "'>";
-    formatText += labelTxt;
-    formatText += "</font>";
-    label->setText(formatText);
-}
-
-void camera::approved() {
-    if (areRequiredFormsFilledAndValid()) {
-        if (ui->tabWidget->currentIndex() == static_cast<int>(cameraTypeTab::Nav)) {
-            openspace::Profile::CameraNavState nav;
-            nav.anchor = ui->line_anchorNav->text().toUtf8().constData();
-            nav.aim = ui->line_aim->text().toUtf8().constData();
-            nav.referenceFrame = ui->line_referenceFrame->text().toUtf8().constData();
-            nav.position.x = ui->line_posX->text().toDouble();
-            nav.position.y = ui->line_posY->text().toDouble();
-            nav.position.z = ui->line_posZ->text().toDouble();
-            if (isUpVectorValid()) {
-                glm::dvec3 u = {
-                    ui->line_upX->text().toDouble(),
-                    ui->line_upY->text().toDouble(),
-                    ui->line_upZ->text().toDouble()
-                };
-                nav.up = u;
-            }
-            else {
-                nav.up = std::nullopt;
-            }
-            if (ui->line_yaw->text().length() > 0) {
-                nav.yaw = ui->line_yaw->text().toDouble();
-            }
-            else {
-                nav.yaw = std::nullopt;
-            }
-            if (ui->line_pitch->text().length() > 0) {
-                nav.pitch = ui->line_pitch->text().toDouble();
-            }
-            else {
-                nav.pitch = std::nullopt;
-            }
-            _data = nav;
-        }
-        else if (ui->tabWidget->currentIndex() == static_cast<int>(cameraTypeTab::Geo)) {
-            openspace::Profile::CameraGoToGeo geo;
-            geo.anchor = ui->line_anchorGeo->text().toUtf8().constData();
-            geo.latitude = ui->line_lat->text().toDouble();
-            geo.longitude = ui->line_long->text().toDouble();
-            if (ui->line_altitude->text().length() > 0) {
-                geo.altitude = ui->line_altitude->text().toDouble();
-            }
-            _data = geo;
-        }
-
-        _imported->setCamera(_data);
-        accept();
+void Camera::approved() {
+    if (!areRequiredFormsFilledAndValid()) {
+        return;
     }
+
+    if (_tabWidget->currentIndex() == CameraTypeNav) {
+        openspace::Profile::CameraNavState nav;
+        nav.anchor = _navState.anchor->text().toUtf8().constData();
+        nav.aim = _navState.aim->text().toUtf8().constData();
+        nav.referenceFrame = _navState.refFrame->text().toUtf8().constData();
+        nav.position.x = _navState.positionX->text().toDouble();
+        nav.position.y = _navState.positionY->text().toDouble();
+        nav.position.z = _navState.positionZ->text().toDouble();
+        if (!_navState.upX->text().isEmpty() &&
+            !_navState.upY->text().isEmpty() &&
+            !_navState.upZ->text().isEmpty())
+        {
+            glm::dvec3 u = {
+                _navState.upX->text().toDouble(),
+                _navState.upY->text().toDouble(),
+                _navState.upZ->text().toDouble()
+            };
+            nav.up = u;
+        }
+        else {
+            nav.up = std::nullopt;
+        }
+        if (!_navState.yaw->text().isEmpty()) {
+            nav.yaw = _navState.yaw->text().toDouble();
+        }
+        else {
+            nav.yaw = std::nullopt;
+        }
+        if (!_navState.pitch->text().isEmpty()) {
+            nav.pitch = _navState.pitch->text().toDouble();
+        }
+        else {
+            nav.pitch = std::nullopt;
+        }
+        _profile->setCamera(nav);
+    }
+    else if (_tabWidget->currentIndex() == CameraTypeGeo) {
+        openspace::Profile::CameraGoToGeo geo;
+        geo.anchor = _geoState.anchor->text().toUtf8().constData();
+        geo.latitude = _geoState.latitude->text().toDouble();
+        geo.longitude = _geoState.longitude->text().toDouble();
+        if (!_geoState.altitude->text().isEmpty()) {
+            geo.altitude = _geoState.altitude->text().toDouble();
+        }
+        _profile->setCamera(geo);
+    }
+
+    accept();
 }
 
-bool camera::isUpVectorValid() {
-    return (isNumericalValue(ui->line_upX)
-            && isNumericalValue(ui->line_upY)
-            && isNumericalValue(ui->line_upZ));
-}
+void Camera::tabSelect(int tabIndex) {
+    _errorMsg->clear();
 
-void camera::tabSelect(int tabIndex) {
-    ui->label_error->setText("");
     if (tabIndex == 0) {
-        ui->line_anchorNav->setFocus(Qt::OtherFocusReason);
+        _navState.anchor->setFocus(Qt::OtherFocusReason);
     }
     else if (tabIndex == 1) {
-        ui->line_anchorGeo->setFocus(Qt::OtherFocusReason);
+        _geoState.anchor->setFocus(Qt::OtherFocusReason);
+    }
+    else {
+        throw std::logic_error("Unknown tab index");
     }
 }
-
-void camera::keyPressEvent(QKeyEvent *evt)
-{
-    QDialog::keyPressEvent(evt);
-}
-

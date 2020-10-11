@@ -37,17 +37,17 @@ public:
     /**
      * Constructor for addedScripts class
      *
-     * \param imported The #openspace::Profile object containing all data of the
-     *                 new or imported profile.
+     * \param profile The #openspace::Profile object containing all data of the
+     *                new or imported profile.
      * \param parent Pointer to parent Qt widget
      */
-    explicit AdditionalScripts(openspace::Profile* imported, QWidget* parent);
+    explicit AdditionalScripts(openspace::Profile* profile, QWidget* parent);
 
-public slots:
+private slots:
     void parseScript();
 
 private:
-    openspace::Profile* _imported;
+    openspace::Profile* _profile = nullptr;
     QTextEdit* _textScripts = nullptr;
 };
 

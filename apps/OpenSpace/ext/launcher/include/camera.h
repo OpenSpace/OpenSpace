@@ -27,66 +27,59 @@
 
 #include <QDialog>
 
-#include <openspace/scene/profile.h>
-#include <QWidget>
-#include <QLineEdit>
-#include <QLabel>
-#include <optional>
-#include <variant>
+namespace openspace { class Profile; }
 
-QT_BEGIN_NAMESPACE
-namespace Ui {
-class camera;
-}
-QT_END_NAMESPACE
+class QLabel;
+class QLineEdit;
+class QTabWidget;
 
-class camera: public QDialog
-{
-    Q_OBJECT
-
-public slots:
-    void cancel();
-    void approved();
-    void tabSelect(int);
-
+class Camera : public QDialog {
+Q_OBJECT
 public:
     /**
      * Constructor for camera gui class
      *
-     * \param imported The #openspace::Profile object containing all data of the
-     *                 new or imported profile.
+     * \param profile The #openspace::Profile object containing all data of the
+     *                new or imported profile.
      * \param parent Pointer to parent Qt widget (optional)
      */
-    explicit camera(openspace::Profile* imported, QWidget *parent = nullptr);
+    explicit Camera(openspace::Profile* profile, QWidget* parent);
 
-    /**
-     * Destructor for camera gui class
-     */
-    ~camera();
-    enum class cameraTypeTab : int {
-        Nav = 0,
-        Geo
-    };
-    /**
-     * Handles keypress while the Qt dialog window is open
-     *
-     * \param evt #QKeyEvent object for the key press event
-     */
-    void keyPressEvent(QKeyEvent *evt);
+private slots:
+    void approved();
+    void tabSelect(int);
 
 private:
-    bool isEmpty(QLineEdit* le);
-    bool isNumericalValue(QLineEdit* le);
-    bool inNumericalRange(QLineEdit* le, float min, float max);
-    void addErrorMsg(const QString& errorDescription);
-    bool areRequiredFormsFilledAndValid();
-    void setErrorTextFormat(QLabel* label, const QString& labelTxt, bool setErrorFormat);
-    bool isUpVectorValid();
+    QWidget* createNavStateWidget();
+    QWidget* createGeoWidget();
 
-    Ui::camera *ui;
-    QWidget* _parent;
-    openspace::Profile* _imported;
-    openspace::Profile::CameraType _data;
+    void addErrorMsg(QString errorDescription);
+    bool areRequiredFormsFilledAndValid();
+
+    openspace::Profile* _profile = nullptr;
+    QTabWidget* _tabWidget = nullptr;
+    struct {
+        QLineEdit* anchor = nullptr;
+        QLineEdit* aim = nullptr;
+        QLineEdit* refFrame = nullptr;
+        QLineEdit* positionX = nullptr;
+        QLineEdit* positionY = nullptr;
+        QLineEdit* positionZ = nullptr;
+        QLineEdit* upX = nullptr;
+        QLineEdit* upY = nullptr;
+        QLineEdit* upZ = nullptr;
+        QLineEdit* yaw = nullptr;
+        QLineEdit* pitch = nullptr;
+    } _navState;
+
+    struct {
+        QLineEdit* anchor = nullptr;
+        QLineEdit* latitude = nullptr;
+        QLineEdit* longitude = nullptr;
+        QLineEdit* altitude = nullptr;
+    } _geoState;
+
+    QLabel* _errorMsg = nullptr;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___CAMERA___H__
