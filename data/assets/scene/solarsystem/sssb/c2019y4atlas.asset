@@ -40,9 +40,24 @@ local C2019Y4AtlasPosition = {
         },
     },
     GUI = {
-        Name = "C 2019 Y4 Atlas",
-        Path = "/Solar System/Comets"
+        Name = "C/2019 Y4 Atlas",
+        Path = "/Solar System/Comets",
+        Description = 'This is the position for C/2019 Y4 Atlas'
     }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {C2019Y4AtlasPosition, C2019Y4AtlasTrail })
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+    C2019Y4AtlasPosition, C2019Y4AtlasTrail
+})
+
+
+asset.meta = {
+    Name = "C/2019 Y4 Atlas",
+    Version = "1.0",
+    Description = [[ This asset contains the trail  and position of C/2019 Y4 Atlas from
+        1950 JAN 01 00:00:00 to 2100 JAN 01 00:00:00. Data from JPL Horizons']],
+    Author = "OpenSpace Team",
+    URL = "https://ssd.jpl.nasa.gov/horizons.cgi",
+    License = "NASA",
+    Identifiers = "C2019Y4AtlasPosition,C2019Y4AtlasTrail"
+}

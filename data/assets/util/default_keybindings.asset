@@ -141,7 +141,7 @@ openspace.setPropertyValueSingle("RenderEngine.ShowCamera", not isEnabled)]],
         Documentation = "Immediately set the simulation speed to the previous delta time step, if one exists.",
         GuiPath = "/Simulation Speed",
         Local = true
-    },
+    }
 }
 
 local DeltaTimeKeys

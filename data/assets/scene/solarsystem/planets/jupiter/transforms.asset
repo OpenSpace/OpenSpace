@@ -22,3 +22,14 @@ local JupiterBarycenter = {
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { JupiterBarycenter })
+
+
+asset.meta = {
+    Name = "Jupiter Transforms",
+    Version = "1.0",
+    Description = [[ Jupiter Barycenter transform]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = "JupiterBarycenter"
+}

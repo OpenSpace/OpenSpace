@@ -29,6 +29,7 @@ local OrionClusterStars = {
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { OrionClusterStars })
 
+
 asset.meta = {
     Name = "Orion Nebula Star Cluster",
     Version = "1.0",
@@ -47,5 +48,6 @@ But the distance of each star has been derived from this educated-guess approach
 cluster distribution. ]],
     Author = "AMNH Digital Universe",
     URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-    License = "custom"
+    License = "AMNH Digital Universe",
+    Identifiers = "OrionClusterStars"
 }

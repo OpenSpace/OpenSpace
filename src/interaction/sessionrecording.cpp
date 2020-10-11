@@ -72,7 +72,7 @@ SessionRecording::SessionRecording()
     , _renderPlaybackInformation(RenderPlaybackInfo, false)
 {
     auto fTask = FactoryManager::ref().factory<Task>();
-    ghoul_assert(fRenderable, "No task factory existed");
+    ghoul_assert(fTask, "No task factory existed");
     fTask->registerClass<ConvertRecFormatTask>("ConvertRecFormatTask");
     addProperty(_renderPlaybackInformation);
 }

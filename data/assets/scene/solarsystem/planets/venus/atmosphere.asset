@@ -57,10 +57,19 @@ local Atmosphere = {
     },
     GUI = {
         Name = "Venus Atmosphere",
-        Path = "/Solar System/Planets/Venus"
+        Path = "/Solar System/Planets/Venus",
+        Description = "Simulation of Venus' Atmosphere"
     }
 }
-
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Atmosphere })
+
+
+asset.meta = {
+    Name = "Venus Atmosphere",
+    Version = "1.0",
+    Description = [[ Atmosphere of Venus.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = "VenusAtmosphere"
+}

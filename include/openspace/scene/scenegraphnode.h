@@ -159,6 +159,7 @@ private:
 
     properties::StringProperty _guiPath;
     properties::StringProperty _guiDisplayName;
+    properties::StringProperty _guiDescription;
 
     // Transformation defined by ephemeris, rotation and scale
     struct {

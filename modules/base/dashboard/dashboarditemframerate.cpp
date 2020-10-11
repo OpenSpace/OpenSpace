@@ -322,8 +322,8 @@ glm::vec2 DashboardItemFramerate::size() const {
     ZoneScoped
 
     const FrametimeType t = FrametimeType(_frametimeType.value());
-    format(_buffer, t, _minDeltaTimeCache, _maxDeltaTimeCache);
-    std::string_view output = _buffer.data();
+    char* end = format(_buffer, t, _minDeltaTimeCache, _maxDeltaTimeCache);
+    std::string_view output = std::string_view(_buffer.data(), end - _buffer.data());
 
     if (output.empty()) {
         return { 0.f, 0.f };
