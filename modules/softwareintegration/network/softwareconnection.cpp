@@ -53,11 +53,20 @@ namespace openspace {
     }
 
     bool SoftwareConnection::sendMessage(std::string message) {
-        if (!_socket->put<char>(message.data(), message.size())) {
+
+        if (_isListening == true)
+        {
+            if (!_socket->put<char>(message.data(), message.size())) {
+                return false;
+            }
+            LERROR(fmt::format("Message sent: {}", message));
+        }
+        else
+        {
+            _isListening = true;
             return false;
         }
-        LERROR(fmt::format("Message sent: {}", message));
-
+ 
         return true;
     }
 
@@ -127,14 +136,22 @@ namespace openspace {
             return Message(MessageType::AddSceneGraphNode, messageBuffer);
         else if (type == "RSGN")
             return Message(MessageType::RemoveSceneGraphNode, messageBuffer);
-        else if (type == "UPCO")
+        else if (type == "UPCO") {
+            _isListening = false;
             return Message(MessageType::Color, messageBuffer);
-        else if (type == "UPOP")
+        }
+        else if (type == "UPOP") {
+            _isListening = false;
             return Message(MessageType::Opacity, messageBuffer);
-        else if( type == "UPSI")
+        }
+        else if (type == "UPSI") {
+            _isListening = false;
             return Message(MessageType::Size, messageBuffer);
-        else if (type == "TOVI")
+        }
+        else if (type == "TOVI") {
+            _isListening = false;
             return Message(MessageType::Visibility, messageBuffer);
+        }
         else if (type == "DISC")
             return Message(MessageType::Disconnection, messageBuffer);
         else {

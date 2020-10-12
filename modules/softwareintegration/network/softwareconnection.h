@@ -72,6 +72,7 @@ public:
 
     SoftwareConnection::Message receiveMessage();
 
+    bool _isListening = true;
     static const unsigned int ProtocolVersion;
 
 private:
