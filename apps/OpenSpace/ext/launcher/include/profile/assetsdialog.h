@@ -22,33 +22,51 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___ADDITIONALSCRIPTS___H__
-#define __OPENSPACE_UI_LAUNCHER___ADDITIONALSCRIPTS___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___ASSETS___H__
+#define __OPENSPACE_UI_LAUNCHER___ASSETS___H__
 
 #include <QDialog>
+
+#include "assettreemodel.h"
+#include "filesystemaccess.h"
 
 namespace openspace { class Profile; }
 
 class QTextEdit;
+class QTreeView;
 
-class AdditionalScripts : public QDialog {
+class AssetsDialog : public QDialog {
 Q_OBJECT
 public:
     /**
-     * Constructor for addedScripts class
+     * Constructor for assets class
      *
      * \param profile The #openspace::Profile object containing all data of the
      *                new or imported profile.
+     * \param reportAssets A full summary of all assets and their respective paths in
+     *                     a text format unique to this application (more details are
+     *                     in class #assetTreeModel)
      * \param parent Pointer to parent Qt widget
      */
-    explicit AdditionalScripts(openspace::Profile* profile, QWidget* parent);
+    AssetsDialog(openspace::Profile* profile, const std::string reportAssets,
+        QWidget* parent);
+
+    /**
+     * Creates a text summary of all assets and their paths
+     *
+     * \return the #std::string summary
+     */
+    QString createTextSummary();
 
 private slots:
-    void parseScript();
+    void parseSelections();
+    void selected(const QModelIndex&);
 
 private:
     openspace::Profile* _profile = nullptr;
-    QTextEdit* _textScripts = nullptr;
+    AssetTreeModel _assetTreeModel;
+    QTreeView* _assetTree = nullptr;
+    QTextEdit* _summary = nullptr;
 };
 
-#endif // __OPENSPACE_UI_LAUNCHER___ADDITIONALSCRIPTS___H__
+#endif // __OPENSPACE_UI_LAUNCHER___ASSETS___H__

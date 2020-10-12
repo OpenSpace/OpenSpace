@@ -27,16 +27,16 @@
 
 #include <QDialog>
 #include <QWidget>
-#include "meta.h"
-#include "properties.h"
-#include "modules.h"
-#include "keybindings.h"
-#include "assets.h"
-#include "timedialog.h"
-#include "additionalscripts.h"
-#include "deltatimes.h"
-#include "camera.h"
-#include "marknodes.h"
+#include "profile/metadialog.h"
+#include "profile/propertiesdialog.h"
+#include "profile/modulesdialog.h"
+#include "profile/keybindingsdialog.h"
+#include "profile/assetsdialog.h"
+#include "profile/timedialog.h"
+#include "profile/additionalscriptsdialog.h"
+#include "profile/deltatimesdialog.h"
+#include "profile/cameradialog.h"
+#include "profile/marknodesdialog.h"
 #include <openspace/scene/profile.h>
 
 class ProfileEdit : public QDialog {
@@ -116,16 +116,16 @@ private:
     bool isReadOnly(std::string profileToSave);
 
     QWidget* _parent;
-    Meta* _meta;
-    Properties* _properties;
-    Modules* _modules;
-    Keybindings* _keybindings;
-    Assets* _assets;
-    Time* _time;
-    AdditionalScripts* _addedScripts;
-    DeltaTimes* _deltaTimes;
-    Camera* _camera;
-    MarkNodes* _markNodes;
+    MetaDialog* _meta;
+    PropertiesDialog* _properties;
+    ModulesDialog* _modules;
+    KeybindingsDialog* _keybindings;
+    AssetsDialog* _assets;
+    TimeDialog* _time;
+    AdditionalScriptsDialog* _addedScripts;
+    DeltaTimesDialog* _deltaTimes;
+    CameraDialog* _camera;
+    MarkNodesDialog* _markNodes;
     openspace::Profile* _pData;
     const std::string _reportedAssets;
     bool _saveSelected = false;

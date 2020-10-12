@@ -33,7 +33,7 @@ class QLabel;
 class QLineEdit;
 class QTabWidget;
 
-class Camera : public QDialog {
+class CameraDialog : public QDialog {
 Q_OBJECT
 public:
     /**
@@ -43,7 +43,7 @@ public:
      *                new or imported profile.
      * \param parent Pointer to parent Qt widget (optional)
      */
-    explicit Camera(openspace::Profile* profile, QWidget* parent);
+    CameraDialog(openspace::Profile* profile, QWidget* parent);
 
 private slots:
     void approved();

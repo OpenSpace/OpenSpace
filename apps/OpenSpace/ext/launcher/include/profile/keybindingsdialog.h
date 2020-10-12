@@ -22,32 +22,34 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___PROPERTIES___H__
-#define __OPENSPACE_UI_LAUNCHER___PROPERTIES___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___KEYBINDINGS___H__
+#define __OPENSPACE_UI_LAUNCHER___KEYBINDINGS___H__
 
 #include <QDialog>
 
 #include <openspace/scene/profile.h>
+#include <QWidget>
+#include <QListWidgetItem>
 
 class QComboBox;
+class QCheckBox;
+class QTextEdit;
 class QDialogButtonBox;
-class QLabel;
-class QLineEdit;
 class QListWidget;
+class QLabel;
 class QPushButton;
 
-class Properties : public QDialog {
+class KeybindingsDialog : public QDialog {
 Q_OBJECT
-
 public:
     /**
-     * Constructor for properties class
+     * Constructor for keybindings class
      *
      * \param imported The #openspace::Profile object containing all data of the
      *                 new or imported profile.
      * \param parent Pointer to parent Qt widget (optional)
      */
-    Properties(openspace::Profile* profile, QWidget* parent);
+    KeybindingsDialog(openspace::Profile* profile, QWidget* parent);
 
     /**
      * Handles keypress while the Qt dialog window is open
@@ -66,25 +68,38 @@ public slots:
     void parseSelections();
 
 private:
-    QString createOneLineSummary(openspace::Profile::Property p);
     void transitionFromEditMode();
     void editBoxDisabled(bool disabled);
+    int indexInKeyMapping(std::vector<int>& mapVector, int keyInt);
     bool areRequiredFormsFilled();
+    std::string truncateString(std::string& s);
+    void replaceChars(std::string& src, const std::string& from,
+        const std::string& to);
     bool isLineEmpty(int index);
 
     openspace::Profile* _profile;
-    std::vector<openspace::Profile::Property> _data;
+    std::vector<openspace::Profile::Keybinding> _data;
+    std::vector<int> _mapModKeyComboBoxIndexToKeyValue;
+    std::vector<int> _mapKeyComboBoxIndexToKeyValue;
     bool _editModeNewItem = false;
 
     QListWidget* _list = nullptr;
+    QLabel* _keyModLabel = nullptr;
+    QComboBox* _keyModCombo = nullptr;
+    QLabel* _keyLabel = nullptr;
+    QComboBox* _keyCombo = nullptr;
+    QLabel* _nameLabel = nullptr;
+    QLineEdit* _nameEdit = nullptr;
+    QLabel* _guiPathLabel = nullptr;
+    QLineEdit* _guiPathEdit = nullptr;
+    QLabel* _documentationLabel = nullptr;
+    QLineEdit* _documentationEdit = nullptr;
+    QCheckBox* _localCheck = nullptr;
+    QLabel* _scriptLabel = nullptr;
+    QTextEdit* _scriptEdit = nullptr;
+    
     QPushButton* _addButton = nullptr;
     QPushButton* _removeButton = nullptr;
-    QLabel* _commandLabel = nullptr;
-    QComboBox* _commandCombo = nullptr;
-    QLabel* _propertyLabel = nullptr;
-    QLineEdit* _propertyEdit = nullptr;
-    QLabel* _valueLabel = nullptr;
-    QLineEdit* _valueEdit = nullptr;
     QPushButton* _saveButton = nullptr;
     QPushButton* _cancelButton = nullptr;
     QDialogButtonBox* _buttonBox = nullptr;
@@ -92,4 +107,4 @@ private:
     QLabel* _errorMsg = nullptr;
 };
 
-#endif // __OPENSPACE_UI_LAUNCHER___PROPERTIES___H__
+#endif // __OPENSPACE_UI_LAUNCHER___KEYBINDINGS___H__

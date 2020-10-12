@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/scene/profile.h>
-#include "profileedit.h"
+#include "profile/profileedit.h"
 #include "filesystemaccess.h"
 #include <QKeyEvent>
 #include <iostream>
@@ -53,6 +53,7 @@ ProfileEdit::ProfileEdit(openspace::Profile* profile, const std::string reported
     {
         QBoxLayout* container = new QHBoxLayout;
         QLabel* profileLabel = new QLabel("Profile Name:");
+        profileLabel->setObjectName("profile");
         container->addWidget(profileLabel);
 
         _profileEdit = new QLineEdit;
@@ -309,7 +310,7 @@ ProfileEdit::ProfileEdit(openspace::Profile* profile, const std::string reported
         );
         connect(
             buttons, &QDialogButtonBox::rejected,
-            this, &DeltaTimes::reject
+            this, &ProfileEdit::reject
         );
         footer->addWidget(buttons);
         layout->addLayout(footer);
@@ -367,7 +368,7 @@ void ProfileEdit::duplicateProfile() {
 void ProfileEdit::openMeta() {
     _errorMsg->setText("");
     if (_pData) {
-       _meta = new Meta(_pData, this);
+       _meta = new MetaDialog(_pData, this);
        _meta->exec();
        delete _meta;
     }
@@ -376,7 +377,7 @@ void ProfileEdit::openMeta() {
 void ProfileEdit::openModules() {
     _errorMsg->setText("");
     if (_pData) {
-        _modules = new Modules(_pData, this);
+        _modules = new ModulesDialog(_pData, this);
         _modules->exec();
         labelText(_pData, _pData->modules().size(), "Modules", _modulesLabel);
         delete _modules;
@@ -386,7 +387,7 @@ void ProfileEdit::openModules() {
 void ProfileEdit::openProperties() {
     _errorMsg->setText("");
     if (_pData) {
-        _properties = new Properties(_pData, this);
+        _properties = new PropertiesDialog(_pData, this);
         _properties->exec();
         labelText(_pData, _pData->properties().size(), "Properties", _propertiesLabel);
         _propertiesEdit->setText(summarizeText_properties());
@@ -397,7 +398,7 @@ void ProfileEdit::openProperties() {
 void ProfileEdit::openKeybindings() {
     _errorMsg->setText("");
     if (_pData) {
-        _keybindings = new Keybindings(_pData, this);
+        _keybindings = new KeybindingsDialog(_pData, this);
         _keybindings->exec();
         labelText(_pData, _pData->keybindings().size(), "Keybindings",
             _keybindingsLabel
@@ -410,7 +411,7 @@ void ProfileEdit::openKeybindings() {
 void ProfileEdit::openAssets() {
     _errorMsg->setText("");
     if (_pData) {
-        _assets = new Assets(_pData, _reportedAssets, this);
+        _assets = new AssetsDialog(_pData, _reportedAssets, this);
         _assets->exec();
         labelText(_pData, _pData->assets().size(), "Assets", _assetsLabel);
         _assetsEdit->setText(_assets->createTextSummary());
@@ -422,7 +423,7 @@ void ProfileEdit::openAssets() {
 void ProfileEdit::openTime() {
     _errorMsg->setText("");
     if (_pData) {
-        _time = new Time(_pData, this);
+        _time = new TimeDialog(_pData, this);
         _time->exec();
         delete _time;
     }
@@ -431,7 +432,7 @@ void ProfileEdit::openTime() {
 void ProfileEdit::openDeltaTimes() {
     _errorMsg->setText("");
     if (_pData) {
-        _deltaTimes = new DeltaTimes(_pData, this);
+        _deltaTimes = new DeltaTimesDialog(_pData, this);
         _deltaTimes->exec();
         labelText(_pData, _pData->deltaTimes().size(), "Simulation Time Increments",
             _deltaTimesLabel
@@ -443,7 +444,7 @@ void ProfileEdit::openDeltaTimes() {
 void ProfileEdit::openAddedScripts() {
     _errorMsg->setText("");
     if (_pData) {
-        _addedScripts = new AdditionalScripts(_pData, this);
+        _addedScripts = new AdditionalScriptsDialog(_pData, this);
         _addedScripts->exec();
         delete _addedScripts;
     }
@@ -452,7 +453,7 @@ void ProfileEdit::openAddedScripts() {
 void ProfileEdit::openCamera() {
     _errorMsg->setText("");
     if (_pData) {
-        _camera = new Camera(_pData, this);
+        _camera = new CameraDialog(_pData, this);
         _camera->exec();
         delete _camera;
     }
@@ -461,7 +462,7 @@ void ProfileEdit::openCamera() {
 void ProfileEdit::openMarkNodes() {
     _errorMsg->setText("");
     if (_pData) {
-        _markNodes = new MarkNodes(_pData, this);
+        _markNodes = new MarkNodesDialog(_pData, this);
         _markNodes->exec();
         labelText(_pData, _pData->markNodes().size(), "Mark Interesting Nodes",
             _interestingNodesLabel

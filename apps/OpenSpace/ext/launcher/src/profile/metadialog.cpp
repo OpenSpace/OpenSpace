@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "meta.h"
+#include "profile/metadialog.h"
 
 #include <openspace/scene/profile.h>
 #include <QDialogButtonBox>
@@ -33,7 +33,7 @@
 #include <QVBoxLayout>
 #include <algorithm>
 
-Meta::Meta(openspace::Profile* profile, QWidget *parent)
+MetaDialog::MetaDialog(openspace::Profile* profile, QWidget *parent)
     : QDialog(parent)
     , _profile(profile)
 {
@@ -67,8 +67,8 @@ Meta::Meta(openspace::Profile* profile, QWidget *parent)
 
     QDialogButtonBox* buttons = new QDialogButtonBox;
     buttons->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
-    QObject::connect(buttons, &QDialogButtonBox::accepted, this, &Meta::save);
-    QObject::connect(buttons, &QDialogButtonBox::rejected, this, &Meta::reject);
+    QObject::connect(buttons, &QDialogButtonBox::accepted, this, &MetaDialog::save);
+    QObject::connect(buttons, &QDialogButtonBox::rejected, this, &MetaDialog::reject);
     layout->addWidget(buttons);
 
 
@@ -95,7 +95,7 @@ Meta::Meta(openspace::Profile* profile, QWidget *parent)
     }
 }
 
-void Meta::save() {
+void MetaDialog::save() {
     const bool allEmpty =
         _nameEdit->text().isEmpty() && _versionEdit->text().isEmpty() &&
         _descriptionEdit->toPlainText().isEmpty() && _authorEdit->text().isEmpty() &&

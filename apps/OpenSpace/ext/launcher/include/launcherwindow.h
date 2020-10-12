@@ -28,7 +28,7 @@
 #include <QMainWindow>
 
 #include <QString>
-#include "profileedit.h"
+#include "profile/profileedit.h"
 #include "filesystemaccess.h"
 #include <openspace/scene/profile.h>
 #include <openspace/engine/globals.h>

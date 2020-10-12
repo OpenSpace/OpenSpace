@@ -22,73 +22,33 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___MODULES___H__
-#define __OPENSPACE_UI_LAUNCHER___MODULES___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___ADDITIONALSCRIPTS___H__
+#define __OPENSPACE_UI_LAUNCHER___ADDITIONALSCRIPTS___H__
 
 #include <QDialog>
 
-#include <openspace/scene/profile.h>
+namespace openspace { class Profile; }
 
-class QDialogButtonBox;
-class QLabel;
-class QLineEdit;
-class QListWidget;
-class QPushButton;
+class QTextEdit;
 
-class Modules : public QDialog {
+class AdditionalScriptsDialog : public QDialog {
 Q_OBJECT
 public:
     /**
-     * Constructor for osmodules class
+     * Constructor for addedScripts class
      *
-     * \param imported The #openspace::Profile object containing all data of the
-     *                 new or imported profile.
+     * \param profile The #openspace::Profile object containing all data of the
+     *                new or imported profile.
      * \param parent Pointer to parent Qt widget
      */
-    Modules(openspace::Profile* profiles, QWidget* parent);
+    AdditionalScriptsDialog(openspace::Profile* profile, QWidget* parent);
 
-    /**
-     * Handles keypress while the Qt dialog window is open
-     *
-     * \param evt #QKeyEvent object for the key press event
-     */
-    void keyPressEvent(QKeyEvent *evt);
-
-public slots:
-    void listItemSelected();
-    void listItemAdded();
-    void listItemRemove();
-    void listItemSave();
-    void listItemCancelSave();
-    void transitionToEditMode();
-    void parseSelections();
+private slots:
+    void parseScript();
 
 private:
-    QString createOneLineSummary(openspace::Profile::Module m);
-    void transitionFromEditMode();
-    void editBoxDisabled(bool disabled);
-    bool isLineEmpty(int index);
-
-    openspace::Profile* _profile;
-    std::vector<openspace::Profile::Module> _data;
-    bool _editModeNewItem = false;
-    const openspace::Profile::Module kBlank = {"", "", ""};
-
-    QListWidget* _list = nullptr;
-    QLabel* _moduleLabel = nullptr;
-    QLineEdit* _moduleEdit = nullptr;
-    QLabel* _loadedLabel = nullptr;
-    QLineEdit* _loadedEdit = nullptr;
-    QLabel* _notLoadedLabel = nullptr;
-    QLineEdit* _notLoadedEdit = nullptr;
-    
-    QPushButton* _buttonAdd = nullptr;
-    QPushButton* _buttonRemove = nullptr;
-    QPushButton* _buttonSave = nullptr;
-    QPushButton* _buttonCancel = nullptr;
-    QDialogButtonBox* _buttonBox = nullptr;
-
-    QLabel* _errorMsg = nullptr;
+    openspace::Profile* _profile = nullptr;
+    QTextEdit* _textScripts = nullptr;
 };
 
-#endif // __OPENSPACE_UI_LAUNCHER___MODULES___H__
+#endif // __OPENSPACE_UI_LAUNCHER___ADDITIONALSCRIPTS___H__

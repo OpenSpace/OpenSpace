@@ -65,44 +65,48 @@ LauncherWindow  QPushButton#small {
  * ProfileEdit
  */
 ProfileEdit  QTextEdit {
-  min-width: 25em;
+  min-width: 30em;
 }
 
 ProfileEdit  QLabel {
   font-size: 14px;
 }
 
+ProfileEdit  QLabel#profile {
+  font-weight: bold;
+}
+
 /*
  * Properties
  */
-Properties  QListWidget {
+PropertiesDialog  QListWidget {
   min-width: 40em;
 }
 
 /*
  * Assets
  */
-Assets  QTreeView {
+AssetsDialog  QTreeView {
   min-width: 40em;
 }
 
 /*
  * Keybindings
  */
-Keybindings  QListWidget {
+KeybindingsDialog  QListWidget {
   min-width: 40em;
 }
 
 /*
  * DeltaTimes
  */
-DeltaTimes  QListWidget {
+DeltaTimesDialog  QListWidget {
   min-width: 40em;
 }
 
 /*
  * Camera
  */
- Camera  QLabel#error-message {
+ CameraDialog  QLabel#error-message {
   min-width: 10em;
 }

@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "marknodes.h"
+#include "profile/marknodesdialog.h"
 
 #include <openspace/scene/profile.h>
 #include <QDialogButtonBox>
@@ -34,7 +34,7 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
-MarkNodes::MarkNodes(openspace::Profile* profile, QWidget* parent)
+MarkNodesDialog::MarkNodesDialog(openspace::Profile* profile, QWidget* parent)
     : QDialog(parent)
     , _profile(profile)
     , _data(_profile->markNodes())
@@ -45,7 +45,7 @@ MarkNodes::MarkNodes(openspace::Profile* profile, QWidget* parent)
     _list = new QListWidget;
     connect(
         _list, &QListWidget::itemSelectionChanged,
-        this, &MarkNodes::listItemSelected
+        this, &MarkNodesDialog::listItemSelected
     );
     _list->setAlternatingRowColors(true);
     _list->setMovement(QListView::Free);
@@ -60,7 +60,7 @@ MarkNodes::MarkNodes(openspace::Profile* profile, QWidget* parent)
     layout->addWidget(_list);
 
     _removeButton = new QPushButton("Remove");
-    connect(_removeButton, &QPushButton::clicked, this, &MarkNodes::listItemRemove);
+    connect(_removeButton, &QPushButton::clicked, this, &MarkNodesDialog::listItemRemove);
     layout->addWidget(_removeButton);
 
     {
@@ -73,7 +73,10 @@ MarkNodes::MarkNodes(openspace::Profile* profile, QWidget* parent)
         box->addWidget(_newNode);
 
         QPushButton* addButton = new QPushButton("Add new");
-        connect(addButton, &QPushButton::clicked, this, &MarkNodes::listItemAdded);
+        connect(
+            addButton, &QPushButton::clicked,
+            this, &MarkNodesDialog::listItemAdded
+        );
         box->addWidget(addButton);
         layout->addLayout(box);
     }
@@ -82,18 +85,21 @@ MarkNodes::MarkNodes(openspace::Profile* profile, QWidget* parent)
         buttons->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
         QObject::connect(
             buttons, &QDialogButtonBox::accepted,
-            this, &MarkNodes::parseSelections
+            this, &MarkNodesDialog::parseSelections
         );
-        QObject::connect(buttons, &QDialogButtonBox::rejected, this, &MarkNodes::reject);
+        QObject::connect(
+            buttons, &QDialogButtonBox::rejected,
+            this, &MarkNodesDialog::reject
+        );
         layout->addWidget(buttons);
     }
 }
 
-void MarkNodes::listItemSelected(void) {
+void MarkNodesDialog::listItemSelected(void) {
     _removeButton->setEnabled(true);
 }
 
-void MarkNodes::listItemAdded(void) {
+void MarkNodesDialog::listItemAdded(void) {
     if (_newNode->text().isEmpty()) {
         return;
     }
@@ -116,7 +122,7 @@ void MarkNodes::listItemAdded(void) {
     _newNode->clear();
 }
 
-void MarkNodes::listItemRemove() {
+void MarkNodesDialog::listItemRemove() {
     QListWidgetItem* item = _list->currentItem();
     int index = _list->row(item);
 
@@ -129,12 +135,12 @@ void MarkNodes::listItemRemove() {
     _markedNodesListItems.erase(_markedNodesListItems.begin() + index);
 }
 
-void MarkNodes::parseSelections() {
+void MarkNodesDialog::parseSelections() {
     _profile->setMarkNodes(_data);
     accept();
 }
 
-void MarkNodes::keyPressEvent(QKeyEvent *evt) {
+void MarkNodesDialog::keyPressEvent(QKeyEvent *evt) {
    if (evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return) {
         if (_newNode->text().length() > 0 && _newNode->hasFocus()) {
             listItemAdded();

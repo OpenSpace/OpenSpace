@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "camera.h"
+#include "profile/cameradialog.h"
 
 #include <openspace/scene/profile.h>
 #include <QDialogButtonBox>
@@ -55,7 +55,7 @@ namespace {
     }
 } // namespace
 
-Camera::Camera(openspace::Profile* profile, QWidget *parent)
+CameraDialog::CameraDialog(openspace::Profile* profile, QWidget *parent)
     : QDialog(parent)
     , _profile(profile)
 {
@@ -63,7 +63,7 @@ Camera::Camera(openspace::Profile* profile, QWidget *parent)
 
     QBoxLayout* layout = new QVBoxLayout(this);
     _tabWidget = new QTabWidget;
-    connect(_tabWidget, &QTabWidget::tabBarClicked, this, &Camera::tabSelect);
+    connect(_tabWidget, &QTabWidget::tabBarClicked, this, &CameraDialog::tabSelect);
     _tabWidget->addTab(createNavStateWidget(), "Navigation State");
     _tabWidget->addTab(createGeoWidget(), "Geo State");
     layout->addWidget(_tabWidget);
@@ -85,8 +85,8 @@ Camera::Camera(openspace::Profile* profile, QWidget *parent)
 
         QDialogButtonBox* buttons = new QDialogButtonBox;
         buttons->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
-        connect(buttons, &QDialogButtonBox::accepted, this, &Camera::approved);
-        connect(buttons, &QDialogButtonBox::rejected, this, &Camera::reject);
+        connect(buttons, &QDialogButtonBox::accepted, this, &CameraDialog::approved);
+        connect(buttons, &QDialogButtonBox::rejected, this, &CameraDialog::reject);
         footerLayout->addWidget(buttons);
 
         layout->addLayout(footerLayout);
@@ -163,7 +163,7 @@ Camera::Camera(openspace::Profile* profile, QWidget *parent)
     }
 }
 
-QWidget* Camera::createNavStateWidget() {
+QWidget* CameraDialog::createNavStateWidget() {
     QWidget* box = new QWidget;
     QGridLayout* layout = new QGridLayout(box);
 
@@ -250,7 +250,7 @@ QWidget* Camera::createNavStateWidget() {
     return box;
 }
 
-QWidget* Camera::createGeoWidget() {
+QWidget* CameraDialog::createGeoWidget() {
     QWidget* box = new QWidget;
     QGridLayout* layout = new QGridLayout(box);
 
@@ -281,7 +281,7 @@ QWidget* Camera::createGeoWidget() {
     return box;
 }
 
-bool Camera::areRequiredFormsFilledAndValid() {
+bool CameraDialog::areRequiredFormsFilledAndValid() {
     bool allFormsOk = true;
     _errorMsg->clear();
 
@@ -346,7 +346,7 @@ bool Camera::areRequiredFormsFilledAndValid() {
     return allFormsOk;
 }
 
-void Camera::addErrorMsg(QString errorDescription) {
+void CameraDialog::addErrorMsg(QString errorDescription) {
     QString contents = _errorMsg->text();
     if (contents.length() > 0) {
         contents += ", ";
@@ -355,7 +355,7 @@ void Camera::addErrorMsg(QString errorDescription) {
     _errorMsg->setText(contents);
 }
 
-void Camera::approved() {
+void CameraDialog::approved() {
     if (!areRequiredFormsFilledAndValid()) {
         return;
     }
@@ -410,7 +410,7 @@ void Camera::approved() {
     accept();
 }
 
-void Camera::tabSelect(int tabIndex) {
+void CameraDialog::tabSelect(int tabIndex) {
     _errorMsg->clear();
 
     if (tabIndex == 0) {

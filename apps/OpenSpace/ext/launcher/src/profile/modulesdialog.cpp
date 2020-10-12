@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "modules.h"
+#include "profile/modulesdialog.h"
 
 #include <QDialogButtonBox>
 #include <QEvent>
@@ -33,7 +33,7 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
-Modules::Modules(openspace::Profile* profile, QWidget *parent)
+ModulesDialog::ModulesDialog(openspace::Profile* profile, QWidget *parent)
     : QDialog(parent)
     , _profile(profile)
     , _data(_profile->modules())
@@ -46,7 +46,7 @@ Modules::Modules(openspace::Profile* profile, QWidget *parent)
         _list = new QListWidget;
         connect(
             _list, &QListWidget::itemSelectionChanged,
-            this, &Modules::listItemSelected
+            this, &ModulesDialog::listItemSelected
         );
         _list->setAlternatingRowColors(true);
         _list->setMovement(QListView::Free);
@@ -60,11 +60,14 @@ Modules::Modules(openspace::Profile* profile, QWidget *parent)
     {
         QBoxLayout* box = new QHBoxLayout;
         _buttonAdd = new QPushButton("Add new");
-        connect(_buttonAdd, &QPushButton::clicked, this, &Modules::listItemAdded);
+        connect(_buttonAdd, &QPushButton::clicked, this, &ModulesDialog::listItemAdded);
         box->addWidget(_buttonAdd);
 
         _buttonRemove = new QPushButton("Remove");
-        connect(_buttonRemove, &QPushButton::clicked, this, &Modules::listItemRemove);
+        connect(
+            _buttonRemove, &QPushButton::clicked,
+            this, &ModulesDialog::listItemRemove
+        );
         box->addWidget(_buttonRemove);
 
         box->addStretch();
@@ -99,12 +102,15 @@ Modules::Modules(openspace::Profile* profile, QWidget *parent)
         QBoxLayout* box = new QHBoxLayout;
         _buttonSave = new QPushButton("Save");
         _buttonSave->setToolTip("Save module changes to the above list");
-        connect(_buttonSave, &QPushButton::clicked, this, &Modules::listItemSave);
+        connect(_buttonSave, &QPushButton::clicked, this, &ModulesDialog::listItemSave);
         box->addWidget(_buttonSave);
 
         _buttonCancel = new QPushButton("Cancel");
         _buttonCancel->setToolTip("Cancel adding this module to the above list");
-        connect(_buttonCancel, &QPushButton::clicked, this, &Modules::listItemCancelSave);
+        connect(
+            _buttonCancel, &QPushButton::clicked,
+            this, &ModulesDialog::listItemCancelSave
+        );
         box->addWidget(_buttonCancel);
 
         box->addStretch();
@@ -129,11 +135,11 @@ Modules::Modules(openspace::Profile* profile, QWidget *parent)
         _buttonBox->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
         QObject::connect(
             _buttonBox, &QDialogButtonBox::accepted,
-            this, &Modules::parseSelections
+            this, &ModulesDialog::parseSelections
         );
         QObject::connect(
             _buttonBox, &QDialogButtonBox::rejected,
-            this, &Modules::reject
+            this, &ModulesDialog::reject
         );
         footerLayout->addWidget(_buttonBox);
         layout->addLayout(footerLayout);
@@ -142,7 +148,7 @@ Modules::Modules(openspace::Profile* profile, QWidget *parent)
     transitionFromEditMode();
 }
 
-QString Modules::createOneLineSummary(openspace::Profile::Module m) {
+QString ModulesDialog::createOneLineSummary(openspace::Profile::Module m) {
     QString summary = QString(m.name.c_str());
     bool hasCommandForLoaded = (m.loadedInstruction->length() > 0);
     bool hasCommandForNotLoaded = (m.notLoadedInstruction->length() > 0);
@@ -162,7 +168,7 @@ QString Modules::createOneLineSummary(openspace::Profile::Module m) {
     return summary;
 }
 
-void Modules::listItemSelected() {
+void ModulesDialog::listItemSelected() {
     QListWidgetItem *item = _list->currentItem();
     int index = _list->row(item);
 
@@ -185,7 +191,7 @@ void Modules::listItemSelected() {
     transitionToEditMode();
 }
 
-bool Modules::isLineEmpty(int index) {
+bool ModulesDialog::isLineEmpty(int index) {
     bool isEmpty = true;
     if (!_list->item(index)->text().isEmpty()) {
         isEmpty = false;
@@ -196,7 +202,7 @@ bool Modules::isLineEmpty(int index) {
     return isEmpty;
 }
 
-void Modules::listItemAdded(void) {
+void ModulesDialog::listItemAdded(void) {
     int currentListSize = _list->count();
 
     if ((currentListSize == 1) && (isLineEmpty(0))) {
@@ -236,7 +242,7 @@ void Modules::listItemAdded(void) {
     _editModeNewItem = true;
 }
 
-void Modules::listItemSave(void) {
+void ModulesDialog::listItemSave(void) {
     if (_moduleEdit->text().isEmpty()) {
         //ui->label_module->setText("<font color='red'>Module</font>");
         _errorMsg->setText("Missing module name");
@@ -256,7 +262,7 @@ void Modules::listItemSave(void) {
     _editModeNewItem = false;
 }
 
-void Modules::listItemCancelSave(void) {
+void ModulesDialog::listItemCancelSave(void) {
     transitionFromEditMode();
     if (_editModeNewItem) {
         if (_data.size() > 0) {
@@ -268,7 +274,7 @@ void Modules::listItemCancelSave(void) {
     _editModeNewItem = false;
 }
 
-void Modules::listItemRemove(void) {
+void ModulesDialog::listItemRemove(void) {
     if (_list->count() > 0) {
         if (_list->currentRow() >= 0 && _list->currentRow() < _list->count()) {
             if (_list->count() == 1) {
@@ -291,7 +297,7 @@ void Modules::listItemRemove(void) {
     transitionFromEditMode();
 }
 
-void Modules::transitionToEditMode(void) {
+void ModulesDialog::transitionToEditMode(void) {
     _list->setDisabled(true);
     _buttonAdd->setDisabled(true);
     _buttonRemove->setDisabled(true);
@@ -306,7 +312,7 @@ void Modules::transitionToEditMode(void) {
     _errorMsg->setText("");
 }
 
-void Modules::transitionFromEditMode(void) {
+void ModulesDialog::transitionFromEditMode(void) {
     _list->setDisabled(false);
     _buttonAdd->setDisabled(false);
     _buttonRemove->setDisabled(false);
@@ -321,7 +327,7 @@ void Modules::transitionFromEditMode(void) {
     _errorMsg->setText("");
 }
 
-void Modules::editBoxDisabled(bool disabled) {
+void ModulesDialog::editBoxDisabled(bool disabled) {
     _moduleLabel->setDisabled(disabled);
     _moduleEdit->setDisabled(disabled);
     _loadedLabel->setDisabled(disabled);
@@ -332,7 +338,7 @@ void Modules::editBoxDisabled(bool disabled) {
     _buttonSave->setDisabled(disabled);
 }
 
-void Modules::parseSelections() {
+void ModulesDialog::parseSelections() {
     // Handle case with only one remaining but empty line
     if ((_data.size() == 1) && (_data.at(0).name.empty())) {
         _data.clear();
@@ -341,14 +347,14 @@ void Modules::parseSelections() {
     accept();
 }
 
-void Modules::keyPressEvent(QKeyEvent* evt) {
+void ModulesDialog::keyPressEvent(QKeyEvent* evt) {
     if (evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return) {
         if (_editModeNewItem) {
             listItemSave();
         }
         return;
     }
-    else if(evt->key() == Qt::Key_Escape) {
+    else if (evt->key() == Qt::Key_Escape) {
         if (_editModeNewItem) {
             listItemCancelSave();
             return;

@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "deltatimes.h"
+#include "profile/deltatimesdialog.h"
 
 #include <openspace/scene/profile.h>
 #include <QDialogButtonBox>
@@ -59,7 +59,7 @@ namespace {
 
 } // namespace
 
-DeltaTimes::DeltaTimes(openspace::Profile* profile, QWidget *parent)
+DeltaTimesDialog::DeltaTimesDialog(openspace::Profile* profile, QWidget *parent)
     : QDialog(parent)
     , _profile(profile)
 {
@@ -69,7 +69,7 @@ DeltaTimes::DeltaTimes(openspace::Profile* profile, QWidget *parent)
         _listWidget = new QListWidget;
         connect(
             _listWidget, &QListWidget::itemSelectionChanged,
-            this, &DeltaTimes::listItemSelected
+            this, &DeltaTimesDialog::listItemSelected
         );
         _listWidget->setAutoScroll(true);
         _listWidget->setLayoutMode(QListView::SinglePass);
@@ -79,13 +79,16 @@ DeltaTimes::DeltaTimes(openspace::Profile* profile, QWidget *parent)
     {
         QBoxLayout* buttonLayout = new QHBoxLayout;
         _addButton = new QPushButton("Add Entry");
-        connect(_addButton, &QPushButton::clicked, this, &DeltaTimes::addDeltaTimeValue);
+        connect(
+            _addButton, &QPushButton::clicked,
+            this, &DeltaTimesDialog::addDeltaTimeValue
+        );
         buttonLayout->addWidget(_addButton);
 
         _removeButton = new QPushButton("Remove LastEntry");
         connect(
             _removeButton, &QPushButton::clicked,
-            this, &DeltaTimes::removeDeltaTimeValue
+            this, &DeltaTimesDialog::removeDeltaTimeValue
         );
         buttonLayout->addWidget(_removeButton);
 
@@ -100,7 +103,7 @@ DeltaTimes::DeltaTimes(openspace::Profile* profile, QWidget *parent)
         QBoxLayout* box = new QHBoxLayout;
         _seconds = new QLineEdit;
         _seconds->setValidator(new QDoubleValidator);
-        connect(_seconds, &QLineEdit::textChanged, this, &DeltaTimes::valueChanged);
+        connect(_seconds, &QLineEdit::textChanged, this, &DeltaTimesDialog::valueChanged);
         box->addWidget(_seconds);
 
         _value = new QLabel;
@@ -113,14 +116,14 @@ DeltaTimes::DeltaTimes(openspace::Profile* profile, QWidget *parent)
         _saveButton = new QPushButton("Save");
         connect(
             _saveButton, &QPushButton::clicked,
-            this, &DeltaTimes::saveDeltaTimeValue
+            this, &DeltaTimesDialog::saveDeltaTimeValue
         );
         box->addWidget(_saveButton);
 
         _discardButton = new QPushButton("Discard");
         connect(
             _discardButton, &QPushButton::clicked,
-            this, &DeltaTimes::discardDeltaTimeValue
+            this, &DeltaTimesDialog::discardDeltaTimeValue
         );
         box->addWidget(_discardButton);
 
@@ -144,12 +147,9 @@ DeltaTimes::DeltaTimes(openspace::Profile* profile, QWidget *parent)
         _buttonBox->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
         connect(
             _buttonBox, &QDialogButtonBox::accepted,
-            this, &DeltaTimes::parseSelections
+            this, &DeltaTimesDialog::parseSelections
         );
-        connect(
-            _buttonBox, &QDialogButtonBox::rejected,
-            this, &DeltaTimes::reject
-        );
+        connect(_buttonBox, &QDialogButtonBox::rejected, this, &DeltaTimesDialog::reject);
         footer->addWidget(_buttonBox);
         layout->addLayout(footer);
     }
@@ -165,7 +165,7 @@ DeltaTimes::DeltaTimes(openspace::Profile* profile, QWidget *parent)
     transitionEditMode(_listWidget->count() - 1, false);
 }
 
-std::string DeltaTimes::createSummaryForDeltaTime(size_t idx, bool forListView) {
+std::string DeltaTimesDialog::createSummaryForDeltaTime(size_t idx, bool forListView) {
     int k = (idx%10 == 9) ? 0 : idx%10 + 1;
     k = (idx == 0) ? 1 : k;
     std::string key = std::to_string(k);
@@ -192,7 +192,7 @@ std::string DeltaTimes::createSummaryForDeltaTime(size_t idx, bool forListView) 
     return s;
 }
 
-void DeltaTimes::listItemSelected() {
+void DeltaTimesDialog::listItemSelected() {
     QListWidgetItem *item = _listWidget->currentItem();
     int index = _listWidget->row(item);
 
@@ -212,7 +212,7 @@ void DeltaTimes::listItemSelected() {
     transitionEditMode(index, true);
 }
 
-void DeltaTimes::setLabelForKey(int index, bool editMode, std::string color) {
+void DeltaTimesDialog::setLabelForKey(int index, bool editMode, std::string color) {
     std::string labelS = "Set Simulation Time Increment for key";
     if (index >= _data.size()) {
         index = _data.size() - 1;
@@ -227,7 +227,7 @@ void DeltaTimes::setLabelForKey(int index, bool editMode, std::string color) {
     ));
 }
 
-QString DeltaTimes::timeDescription(int value) {
+QString DeltaTimesDialog::timeDescription(int value) {
     if (value == 0) {
         return "";
     }
@@ -241,7 +241,7 @@ QString DeltaTimes::timeDescription(int value) {
     return checkForTimeDescription(i, value);
 }
 
-void DeltaTimes::valueChanged(const QString& text) {
+void DeltaTimesDialog::valueChanged(const QString& text) {
     if (_seconds->text() == "") {
         _errorMsg->setText("");
     }
@@ -255,14 +255,14 @@ void DeltaTimes::valueChanged(const QString& text) {
     }
 }
 
-QString DeltaTimes::checkForTimeDescription(int intervalIndex, int value) {
+QString DeltaTimesDialog::checkForTimeDescription(int intervalIndex, int value) {
     double amount = static_cast<double>(value)
         / TimeIntervals[intervalIndex].secondsPerInterval;
     QString description = QString::number(amount, 'g', 2);
     return description += " " + TimeIntervals[intervalIndex].intervalName + "/sec";
 }
 
-bool DeltaTimes::isLineEmpty(int index) {
+bool DeltaTimesDialog::isLineEmpty(int index) {
     bool isEmpty = true;
     if (!_listWidget->item(index)->text().isEmpty()) {
         isEmpty = false;
@@ -273,7 +273,7 @@ bool DeltaTimes::isLineEmpty(int index) {
     return isEmpty;
 }
 
-void DeltaTimes::addDeltaTimeValue() {
+void DeltaTimesDialog::addDeltaTimeValue() {
     int currentListSize = _listWidget->count();
     const QString messageAddValue = "  (Enter integer value below & click 'Save')";
 
@@ -296,7 +296,7 @@ void DeltaTimes::addDeltaTimeValue() {
     _editModeNewItem = true;
 }
 
-void DeltaTimes::saveDeltaTimeValue() {
+void DeltaTimesDialog::saveDeltaTimeValue() {
     QListWidgetItem *item = _listWidget->currentItem();
     if (item != nullptr) {
         int index = _listWidget->row(item);
@@ -311,7 +311,7 @@ void DeltaTimes::saveDeltaTimeValue() {
     }
 }
 
-void DeltaTimes::discardDeltaTimeValue(void) {
+void DeltaTimesDialog::discardDeltaTimeValue(void) {
     listItemSelected();
     transitionEditMode(_listWidget->count() - 1, false);
     if (_editModeNewItem && !_data.empty() && _data.back() == 0) {
@@ -320,7 +320,7 @@ void DeltaTimes::discardDeltaTimeValue(void) {
     _editModeNewItem = false;
 }
 
-void DeltaTimes::removeDeltaTimeValue() {
+void DeltaTimesDialog::removeDeltaTimeValue() {
     if (_listWidget->count() > 0) {
         if (_listWidget->count() == 1) {
             _data.at(0) = 0;
@@ -337,7 +337,7 @@ void DeltaTimes::removeDeltaTimeValue() {
     transitionEditMode(_listWidget->count() - 1, false);
 }
 
-void DeltaTimes::transitionEditMode(int index, bool state) {
+void DeltaTimesDialog::transitionEditMode(int index, bool state) {
     _listWidget->setEnabled(!state);
     _addButton->setEnabled(!state);
     _removeButton->setEnabled(!state);
@@ -361,7 +361,7 @@ void DeltaTimes::transitionEditMode(int index, bool state) {
     _errorMsg->clear();
 }
 
-void DeltaTimes::parseSelections() {
+void DeltaTimesDialog::parseSelections() {
     if ((_data.size() == 1) && (_data.at(0) == 0)) {
         _data.clear();
     }
@@ -379,7 +379,7 @@ void DeltaTimes::parseSelections() {
     accept();
 }
 
-void DeltaTimes::keyPressEvent(QKeyEvent* evt) {
+void DeltaTimesDialog::keyPressEvent(QKeyEvent* evt) {
     if (evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return) {
         if (_editModeNewItem) {
             saveDeltaTimeValue();

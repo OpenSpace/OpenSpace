@@ -22,52 +22,87 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___MARKNODES___H__
-#define __OPENSPACE_UI_LAUNCHER___MARKNODES___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___DELTATIMES___H__
+#define __OPENSPACE_UI_LAUNCHER___DELTATIMES___H__
 
 #include <QDialog>
 
 namespace openspace { class Profile; }
 
-class QLineEdit;
+class QDialogButtonBox;
+class QLabel;
 class QListWidget;
-class QListWidgetItem;
+class QLineEdit;
 class QPushButton;
 
-class MarkNodes : public QDialog {
+class DeltaTimesDialog : public QDialog {
 Q_OBJECT
 public:
     /**
-     * Constructor for markNodes class
+     * Constructor for deltaTimes class
      *
      * \param imported The #openspace::Profile object containing all data of the
      *                 new or imported profile.
-     * \param parent Pointer to parent Qt widget
+     * \param parent Pointer to parent Qt widget (optional)
      */
-    MarkNodes(openspace::Profile* profile, QWidget* parent);
+    DeltaTimesDialog(openspace::Profile* profile, QWidget* parent);
+
+    /**
+     * Returns a text summary of the delta time list for display purposes
+     *
+     * \param idx index in dt list
+     * \param forListView true if this summary is for the Qt list view, false if
+     *                    it is used for a different display mode
+     */
+    std::string createSummaryForDeltaTime(size_t idx, bool forListView);
 
     /**
      * Handles keypress while the Qt dialog window is open
      *
      * \param evt #QKeyEvent object for the key press event
      */
-    void keyPressEvent(QKeyEvent* evt);
+    void keyPressEvent(QKeyEvent *evt);
+
 
 public slots:
     void listItemSelected();
-    void listItemAdded();
-    void listItemRemove();
+    void valueChanged(const QString& text);
+    void saveDeltaTimeValue();
+    void discardDeltaTimeValue();
+    void addDeltaTimeValue();
+    void removeDeltaTimeValue();
     void parseSelections();
 
 private:
-    std::vector<QListWidgetItem*> _markedNodesListItems;
+    /**
+     * Called to transition to editing a particular dt value (gui settings)
+     *
+     * \param index index in dt list
+     * \param state \c true if the edit mode should be turned on, \c false otherwise
+     */
+    void transitionEditMode(int index, bool state);
+
+    QString timeDescription(int value);
+    void setLabelForKey(int index, bool editMode, std::string color);
+    QString checkForTimeDescription(int intervalIndex, int value);
+    bool isLineEmpty(int index);
+
     openspace::Profile* _profile;
-    std::vector<std::string> _data;
+    std::vector<double> _data;
+    bool _editModeNewItem = false;
 
-    QListWidget* _list = nullptr;
+    QListWidget* _listWidget = nullptr;
+    QLabel* _adjustLabel = nullptr;
+    QLineEdit* _seconds = nullptr;
+    QLabel* _value = nullptr;
+
+    QPushButton* _addButton = nullptr;
     QPushButton* _removeButton = nullptr;
-    QLineEdit* _newNode = nullptr;
+    QPushButton* _saveButton = nullptr;
+    QPushButton* _discardButton = nullptr;
+    QDialogButtonBox* _buttonBox = nullptr;
 
+    QLabel* _errorMsg = nullptr;
 };
 
-#endif // __OPENSPACE_UI_LAUNCHER___MARKNODES___H__
+#endif // __OPENSPACE_UI_LAUNCHER___DELTATIMES___H__

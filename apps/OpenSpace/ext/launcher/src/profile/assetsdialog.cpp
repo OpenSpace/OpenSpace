@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "assets.h"
+#include "profile/assetsdialog.h"
 
 #include <openspace/scene/profile.h>
 #include <QDialogButtonBox>
@@ -115,8 +115,8 @@ namespace {
     }
 } // namespace
 
-Assets::Assets(openspace::Profile* profile, const std::string reportAssets,
-               QWidget* parent)
+AssetsDialog::AssetsDialog(openspace::Profile* profile, const std::string reportAssets,
+                           QWidget* parent)
     : QDialog(parent)
     , _profile(profile)
 {
@@ -148,7 +148,7 @@ Assets::Assets(openspace::Profile* profile, const std::string reportAssets,
         _assetTree->setAnimated(true);
         _assetTree->setSortingEnabled(false);
         _assetTree->setSelectionMode(QAbstractItemView::SingleSelection);
-        connect(_assetTree, &QTreeView::clicked, this, &Assets::selected);
+        connect(_assetTree, &QTreeView::clicked, this, &AssetsDialog::selected);
 
 
         for (const std::string& a : _profile->assets()) {
@@ -187,13 +187,19 @@ Assets::Assets(openspace::Profile* profile, const std::string reportAssets,
     {
         QDialogButtonBox* buttons = new QDialogButtonBox;
         buttons->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
-        connect(buttons, &QDialogButtonBox::accepted, this, &Assets::parseSelections);
-        connect(buttons, &QDialogButtonBox::rejected, this, &Assets::reject);
+        connect(
+            buttons, &QDialogButtonBox::accepted,
+            this, &AssetsDialog::parseSelections
+        );
+        connect(
+            buttons, &QDialogButtonBox::rejected,
+            this, &AssetsDialog::reject
+        );
         layout->addWidget(buttons);
     }
 }
 
-QString Assets::createTextSummary() {
+QString AssetsDialog::createTextSummary() {
     std::vector<std::string> summaryPaths;
     std::vector<AssetTreeItem*> summaryItems;
     _assetTreeModel.getSelectedAssets(summaryPaths, summaryItems);
@@ -213,7 +219,7 @@ QString Assets::createTextSummary() {
     return summary;
 }
 
-void Assets::parseSelections() {
+void AssetsDialog::parseSelections() {
     _profile->clearAssets();
     std::vector<std::string> summaryPaths;
     std::vector<AssetTreeItem*> summaryItems;
@@ -225,6 +231,6 @@ void Assets::parseSelections() {
     accept();
 }
 
-void Assets::selected(const QModelIndex& sel) {
+void AssetsDialog::selected(const QModelIndex& sel) {
     _summary->setText(createTextSummary());
 }

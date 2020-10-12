@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "properties.h"
+#include "profile/propertiesdialog.h"
 
 #include <QComboBox>
 #include <QDialogButtonBox>
@@ -43,7 +43,7 @@ namespace {
     };
 } // namespace
 
-Properties::Properties(openspace::Profile* profile, QWidget *parent)
+PropertiesDialog::PropertiesDialog(openspace::Profile* profile, QWidget *parent)
     : QDialog(parent)
     , _profile(profile)
     , _data(_profile->properties())
@@ -55,7 +55,7 @@ Properties::Properties(openspace::Profile* profile, QWidget *parent)
         _list = new QListWidget;
         connect(
             _list, &QListWidget::itemSelectionChanged,
-            this, &Properties::listItemSelected
+            this, &PropertiesDialog::listItemSelected
         );
         for (size_t i = 0; i < _data.size(); ++i) {
             _list->addItem(new QListWidgetItem(createOneLineSummary(_data[i])));
@@ -65,11 +65,17 @@ Properties::Properties(openspace::Profile* profile, QWidget *parent)
     {
         QBoxLayout* box = new QHBoxLayout;
         _addButton = new QPushButton("Add New");
-        connect(_addButton, &QPushButton::clicked, this, &Properties::listItemAdded);
+        connect(
+            _addButton, &QPushButton::clicked,
+            this, &PropertiesDialog::listItemAdded
+        );
         box->addWidget(_addButton);
 
         _removeButton = new QPushButton("Remove");
-        connect(_removeButton, &QPushButton::clicked, this, &Properties::listItemRemove);
+        connect(
+            _removeButton, &QPushButton::clicked,
+            this, &PropertiesDialog::listItemRemove
+        );
         box->addWidget(_removeButton);
 
         box->addStretch();
@@ -104,13 +110,16 @@ Properties::Properties(openspace::Profile* profile, QWidget *parent)
         {
             QBoxLayout* box = new QHBoxLayout;
             _saveButton = new QPushButton("Save");
-            connect(_saveButton, &QPushButton::clicked, this, &Properties::listItemSave);
+            connect(
+                _saveButton, &QPushButton::clicked,
+                this, &PropertiesDialog::listItemSave
+            );
             box->addWidget(_saveButton);
 
             _cancelButton = new QPushButton("Cancel");
             connect(
                 _cancelButton, &QPushButton::clicked,
-                this, &Properties::listItemCancelSave
+                this, &PropertiesDialog::listItemCancelSave
             );
             box->addWidget(_cancelButton);
 
@@ -132,11 +141,11 @@ Properties::Properties(openspace::Profile* profile, QWidget *parent)
 
         connect(
             _buttonBox, &QDialogButtonBox::accepted,
-            this, &Properties::parseSelections
+            this, &PropertiesDialog::parseSelections
         );
-        QObject::connect(
+        connect(
             _buttonBox, &QDialogButtonBox::rejected,
-            this, &Properties::reject
+            this, &PropertiesDialog::reject
         );
         footerLayout->addWidget(_buttonBox);
         layout->addLayout(footerLayout);
@@ -145,7 +154,7 @@ Properties::Properties(openspace::Profile* profile, QWidget *parent)
     transitionFromEditMode();
 }
 
-QString Properties::createOneLineSummary(openspace::Profile::Property p) {
+QString PropertiesDialog::createOneLineSummary(openspace::Profile::Property p) {
     QString summary = QString(p.name.c_str());
     summary += " = ";
     summary += QString(p.value.c_str());
@@ -157,7 +166,7 @@ QString Properties::createOneLineSummary(openspace::Profile::Property p) {
     return summary;
 }
 
-void Properties::listItemSelected() {
+void PropertiesDialog::listItemSelected() {
     QListWidgetItem* item = _list->currentItem();
     int index = _list->row(item);
 
@@ -175,7 +184,7 @@ void Properties::listItemSelected() {
     transitionToEditMode();
 }
 
-bool Properties::isLineEmpty(int index) {
+bool PropertiesDialog::isLineEmpty(int index) {
     bool isEmpty = true;
     if (!_list->item(index)->text().isEmpty()) {
         isEmpty = false;
@@ -186,7 +195,7 @@ bool Properties::isLineEmpty(int index) {
     return isEmpty;
 }
 
-void Properties::listItemAdded(void) {
+void PropertiesDialog::listItemAdded(void) {
     int currentListSize = _list->count();
 
      if ((currentListSize == 1) && (isLineEmpty(0))) {
@@ -213,7 +222,7 @@ void Properties::listItemAdded(void) {
     _editModeNewItem = true;
 }
 
-void Properties::listItemSave(void) {
+void PropertiesDialog::listItemSave(void) {
     if (!areRequiredFormsFilled()) {
         return;
     }
@@ -238,7 +247,7 @@ void Properties::listItemSave(void) {
     _editModeNewItem = false;
 }
 
-bool Properties::areRequiredFormsFilled() {
+bool PropertiesDialog::areRequiredFormsFilled() {
     bool requiredFormsFilled = true;
     QString errors;
     if (_propertyEdit->text().length() == 0) {
@@ -256,7 +265,7 @@ bool Properties::areRequiredFormsFilled() {
     return requiredFormsFilled;
 }
 
-void Properties::listItemCancelSave(void) {
+void PropertiesDialog::listItemCancelSave(void) {
     listItemSelected();
     transitionFromEditMode();
     if (_editModeNewItem) {
@@ -269,7 +278,7 @@ void Properties::listItemCancelSave(void) {
     _editModeNewItem = false;
 }
 
-void Properties::listItemRemove(void) {
+void PropertiesDialog::listItemRemove(void) {
     if (_list->count() > 0) {
         if (_list->currentRow() >= 0 && _list->currentRow() < _list->count()) {
             if (_list->count() == 1) {
@@ -292,7 +301,7 @@ void Properties::listItemRemove(void) {
     transitionFromEditMode();
 }
 
-void Properties::transitionToEditMode(void) {
+void PropertiesDialog::transitionToEditMode(void) {
     _list->setDisabled(true);
     _addButton->setDisabled(true);
     _removeButton->setDisabled(true);
@@ -307,7 +316,7 @@ void Properties::transitionToEditMode(void) {
     _errorMsg->setText("");
 }
 
-void Properties::transitionFromEditMode(void) {
+void PropertiesDialog::transitionFromEditMode(void) {
     _list->setDisabled(false);
     _addButton->setDisabled(false);
     _removeButton->setDisabled(false);
@@ -322,7 +331,7 @@ void Properties::transitionFromEditMode(void) {
     _errorMsg->setText("");
 }
 
-void Properties::editBoxDisabled(bool disabled) {
+void PropertiesDialog::editBoxDisabled(bool disabled) {
     _commandLabel->setDisabled(disabled);
     _commandCombo->setDisabled(disabled);
     _propertyLabel->setDisabled(disabled);
@@ -333,7 +342,7 @@ void Properties::editBoxDisabled(bool disabled) {
     _cancelButton->setDisabled(disabled);
 }
 
-void Properties::parseSelections() {
+void PropertiesDialog::parseSelections() {
     // Handle case with only one remaining but empty line
     if ((_data.size() == 1) && (_data.at(0).name.compare("") == 0)) {
         _data.clear();
@@ -342,14 +351,14 @@ void Properties::parseSelections() {
     accept();
 }
 
-void Properties::keyPressEvent(QKeyEvent* evt) {
-    if(evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return) {
+void PropertiesDialog::keyPressEvent(QKeyEvent* evt) {
+    if (evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return) {
         if (_editModeNewItem) {
             listItemSave();
         }
         return;
     }
-    else if(evt->key() == Qt::Key_Escape) {
+    else if (evt->key() == Qt::Key_Escape) {
         if (_editModeNewItem) {
             listItemCancelSave();
             return;

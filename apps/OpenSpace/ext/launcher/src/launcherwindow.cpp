@@ -24,7 +24,6 @@
 
 #include <openspace/scene/profile.h>
 #include "launcherwindow.h"
-#include "profileedit.h"
 #include <QPixmap>
 #include <QKeyEvent>
 #include "filesystemaccess.h"

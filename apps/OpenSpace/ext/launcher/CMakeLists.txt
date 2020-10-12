@@ -25,39 +25,39 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/set_openspace_compile_settings.cmake)
 
 set(HEADER_FILES
-  include/additionalscripts.h
-  include/assets.h
-  include/assettreeitem.h
-  include/assettreemodel.h
-  include/camera.h
-  include/deltatimes.h
   include/filesystemaccess.h
-  include/keybindings.h
   include/launcherwindow.h
-  include/marknodes.h
-  include/meta.h
-  include/modules.h
-  include/timedialog.h
-  include/profileedit.h
-  include/properties.h
+  include/profile/additionalscriptsdialog.h
+  include/profile/assetsdialog.h
+  include/profile/assettreeitem.h
+  include/profile/assettreemodel.h
+  include/profile/cameradialog.h
+  include/profile/deltatimesdialog.h
+  include/profile/keybindingsdialog.h
+  include/profile/marknodesdialog.h
+  include/profile/metadialog.h
+  include/profile/modulesdialog.h
+  include/profile/timedialog.h
+  include/profile/profileedit.h
+  include/profile/propertiesdialog.h
 )
 
 set(SOURCE_FILES
-  src/additionalscripts.cpp
-  src/assets.cpp
-  src/assettreeitem.cpp
-  src/assettreemodel.cpp
-  src/camera.cpp
-  src/deltatimes.cpp
-  src/filesystemaccess.cpp
-  src/keybindings.cpp
   src/launcherwindow.cpp
-  src/marknodes.cpp
-  src/meta.cpp
-  src/modules.cpp
-  src/timedialog.cpp
-  src/profileedit.cpp
-  src/properties.cpp
+  src/filesystemaccess.cpp
+  src/profile/additionalscriptsdialog.cpp
+  src/profile/assetsdialog.cpp
+  src/profile/assettreeitem.cpp
+  src/profile/assettreemodel.cpp
+  src/profile/cameradialog.cpp
+  src/profile/deltatimesdialog.cpp
+  src/profile/keybindingsdialog.cpp
+  src/profile/marknodesdialog.cpp
+  src/profile/metadialog.cpp
+  src/profile/modulesdialog.cpp
+  src/profile/timedialog.cpp
+  src/profile/profileedit.cpp
+  src/profile/propertiesdialog.cpp
 )
 
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
@@ -65,19 +65,19 @@ find_package(Qt5 COMPONENTS Widgets REQUIRED)
 set(MOC_FILES "")
 qt5_wrap_cpp(
   MOC_FILES
-  include/additionalscripts.h
-  include/assets.h
-  include/assettreemodel.h
-  include/camera.h
-  include/deltatimes.h
-  include/keybindings.h
   include/launcherwindow.h
-  include/marknodes.h
-  include/meta.h
-  include/modules.h
-  include/timedialog.h
-  include/profileedit.h
-  include/properties.h
+  include/profile/additionalscriptsdialog.h
+  include/profile/assetsdialog.h
+  include/profile/assettreemodel.h
+  include/profile/cameradialog.h
+  include/profile/deltatimesdialog.h
+  include/profile/keybindingsdialog.h
+  include/profile/marknodesdialog.h
+  include/profile/metadialog.h
+  include/profile/modulesdialog.h
+  include/profile/timedialog.h
+  include/profile/profileedit.h
+  include/profile/propertiesdialog.h
 )
 
 set(RESOURCE_FILES "")

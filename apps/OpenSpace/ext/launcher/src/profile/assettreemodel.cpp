@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "assettreeitem.h"
-#include "assettreemodel.h"
+#include "profile/assettreeitem.h"
+#include "profile/assettreemodel.h"
 #include <sstream>
 #include <QColor>
 

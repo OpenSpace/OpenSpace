@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "keybindings.h"
+#include "profile/keybindingsdialog.h"
 
 #include <openspace/scene/profile.h>
 #include <openspace/util/keys.h>
@@ -93,7 +93,7 @@ namespace {
 
 } // namespace
 
-Keybindings::Keybindings(openspace::Profile* profile, QWidget *parent)
+KeybindingsDialog::KeybindingsDialog(openspace::Profile* profile, QWidget *parent)
     : QDialog(parent)
     , _profile(profile)
     , _data(_profile->keybindings())
@@ -105,7 +105,7 @@ Keybindings::Keybindings(openspace::Profile* profile, QWidget *parent)
         _list = new QListWidget;
         connect(
             _list, &QListWidget::itemSelectionChanged,
-            this, &Keybindings::listItemSelected
+            this, &KeybindingsDialog::listItemSelected
         );
         _list->setAlternatingRowColors(true);
         _list->setMovement(QListView::Free);
@@ -121,11 +121,17 @@ Keybindings::Keybindings(openspace::Profile* profile, QWidget *parent)
     {
         QBoxLayout* box = new QHBoxLayout;
         _addButton = new QPushButton("Add new");
-        connect(_addButton, &QPushButton::clicked, this, &Keybindings::listItemAdded);
+        connect(
+            _addButton, &QPushButton::clicked,
+            this, &KeybindingsDialog::listItemAdded
+        );
         box->addWidget(_addButton);
 
         _removeButton = new QPushButton("Remove");
-        connect(_removeButton, &QPushButton::clicked, this, &Keybindings::listItemRemove);
+        connect(
+            _removeButton, &QPushButton::clicked,
+            this, &KeybindingsDialog::listItemRemove
+        );
         box->addWidget(_removeButton);
         box->addStretch();
         layout->addLayout(box);
@@ -216,13 +222,16 @@ Keybindings::Keybindings(openspace::Profile* profile, QWidget *parent)
 
         QBoxLayout* buttonBox = new QHBoxLayout;
         _saveButton = new QPushButton("Save");
-        connect(_saveButton, &QPushButton::clicked, this, &Keybindings::listItemSave);
+        connect(
+            _saveButton, &QPushButton::clicked,
+            this, &KeybindingsDialog::listItemSave
+        );
         buttonBox->addWidget(_saveButton);
 
         _cancelButton = new QPushButton("Cancel");
         connect(
             _cancelButton, &QPushButton::clicked,
-            this, &Keybindings::listItemCancelSave
+            this, &KeybindingsDialog::listItemCancelSave
         );
         buttonBox->addWidget(_cancelButton);
         buttonBox->addStretch();
@@ -247,11 +256,11 @@ Keybindings::Keybindings(openspace::Profile* profile, QWidget *parent)
         _buttonBox->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
         QObject::connect(
             _buttonBox, &QDialogButtonBox::accepted,
-            this, &Keybindings::parseSelections
+            this, &KeybindingsDialog::parseSelections
         );
         QObject::connect(
             _buttonBox, &QDialogButtonBox::rejected,
-            this, &Keybindings::reject
+            this, &KeybindingsDialog::reject
         );
         footerLayout->addWidget(_buttonBox);
         layout->addLayout(footerLayout);
@@ -260,7 +269,7 @@ Keybindings::Keybindings(openspace::Profile* profile, QWidget *parent)
     transitionFromEditMode();
 }
 
-void Keybindings::listItemSelected(void) {
+void KeybindingsDialog::listItemSelected(void) {
     QListWidgetItem *item = _list->currentItem();
     int index = _list->row(item);
 
@@ -285,12 +294,12 @@ void Keybindings::listItemSelected(void) {
     transitionToEditMode();
 }
 
-int Keybindings::indexInKeyMapping(std::vector<int>& mapVector, int keyInt) {
+int KeybindingsDialog::indexInKeyMapping(std::vector<int>& mapVector, int keyInt) {
     auto it = std::find(mapVector.begin(), mapVector.end(), keyInt);
     return std::distance(mapVector.begin(), it);
 }
 
-bool Keybindings::isLineEmpty(int index) {
+bool KeybindingsDialog::isLineEmpty(int index) {
     bool isEmpty = true;
     if (!_list->item(index)->text().isEmpty()) {
         isEmpty = false;
@@ -301,7 +310,7 @@ bool Keybindings::isLineEmpty(int index) {
     return isEmpty;
 }
 
-void Keybindings::listItemAdded(void) {
+void KeybindingsDialog::listItemAdded(void) {
     int currentListSize = _list->count();
 
      if ((currentListSize == 1) && (isLineEmpty(0))) {
@@ -332,7 +341,7 @@ void Keybindings::listItemAdded(void) {
     _editModeNewItem = true;
 }
 
-void Keybindings::listItemSave(void) {
+void KeybindingsDialog::listItemSave(void) {
     if (!areRequiredFormsFilled()) {
         return;
     }
@@ -357,7 +366,7 @@ void Keybindings::listItemSave(void) {
     transitionFromEditMode();
 }
 
-bool Keybindings::areRequiredFormsFilled() {
+bool KeybindingsDialog::areRequiredFormsFilled() {
     bool requiredFormsFilled = true;
     std::string errors;
     if (_keyCombo->currentIndex() < 0) {
@@ -382,7 +391,7 @@ bool Keybindings::areRequiredFormsFilled() {
     return requiredFormsFilled;
 }
 
-void Keybindings::listItemCancelSave(void) {
+void KeybindingsDialog::listItemCancelSave(void) {
     listItemSelected();
     transitionFromEditMode();
     if (_editModeNewItem && !_data.empty() &&
@@ -394,7 +403,7 @@ void Keybindings::listItemCancelSave(void) {
     _editModeNewItem = false;
 }
 
-void Keybindings::listItemRemove(void) {
+void KeybindingsDialog::listItemRemove(void) {
     if (_list->count() > 0) {
         if (_list->count() == 1) {
             // Special case where last remaining item is being removed (QListWidget does
@@ -416,7 +425,7 @@ void Keybindings::listItemRemove(void) {
     transitionFromEditMode();
 }
 
-void Keybindings::transitionToEditMode() {
+void KeybindingsDialog::transitionToEditMode() {
     _list->setDisabled(true);
     _addButton->setDisabled(true);
     _removeButton->setDisabled(true);
@@ -434,7 +443,7 @@ void Keybindings::transitionToEditMode() {
     _errorMsg->setText("");
 }
 
-void Keybindings::transitionFromEditMode(void) {
+void KeybindingsDialog::transitionFromEditMode(void) {
     _list->setDisabled(false);
     _addButton->setDisabled(false);
     _removeButton->setDisabled(false);
@@ -452,7 +461,7 @@ void Keybindings::transitionFromEditMode(void) {
     _errorMsg->setText("");
 }
 
-void Keybindings::editBoxDisabled(bool disabled) {
+void KeybindingsDialog::editBoxDisabled(bool disabled) {
     _keyLabel->setDisabled(disabled);
     _keyCombo->setDisabled(disabled);
     _keyModLabel->setDisabled(disabled);
@@ -470,8 +479,8 @@ void Keybindings::editBoxDisabled(bool disabled) {
     _saveButton->setDisabled(disabled);
 }
 
-void Keybindings::parseSelections() {
-    //Handle case with only one remaining but empty line
+void KeybindingsDialog::parseSelections() {
+    // Handle case with only one remaining but empty line
     if ((_data.size() == 1) && (_data.at(0).name.empty())) {
         _data.clear();
     }
@@ -479,7 +488,7 @@ void Keybindings::parseSelections() {
     accept();
 }
 
-void Keybindings::keyPressEvent(QKeyEvent *evt) {
+void KeybindingsDialog::keyPressEvent(QKeyEvent* evt) {
     if (evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return) {
         return;
     }

@@ -22,69 +22,73 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "additionalscripts.h"
+#ifndef __OPENSPACE_UI_LAUNCHER___MODULES___H__
+#define __OPENSPACE_UI_LAUNCHER___MODULES___H__
+
+#include <QDialog>
 
 #include <openspace/scene/profile.h>
-#include <QDialogButtonBox>
-#include <QHBoxLayout>
-#include <QLabel>
-#include <QTextEdit>
-#include <QVBoxLayout>
 
-AdditionalScripts::AdditionalScripts(openspace::Profile* profile, QWidget *parent)
-    : QDialog(parent)
-    , _profile(profile)
-{
-    setWindowTitle("Additional Scripts");
+class QDialogButtonBox;
+class QLabel;
+class QLineEdit;
+class QListWidget;
+class QPushButton;
 
-    QBoxLayout* layout = new QVBoxLayout(this);
-    {
-        QLabel* heading = new QLabel("Addtional Lua Scripts for Configuration");
-        heading->setObjectName("heading");
-        layout->addWidget(heading);
-    }
+class ModulesDialog : public QDialog {
+Q_OBJECT
+public:
+    /**
+     * Constructor for osmodules class
+     *
+     * \param imported The #openspace::Profile object containing all data of the
+     *                 new or imported profile.
+     * \param parent Pointer to parent Qt widget
+     */
+    ModulesDialog(openspace::Profile* profiles, QWidget* parent);
 
-    _textScripts = new QTextEdit;
-    layout->addWidget(_textScripts, 1);
+    /**
+     * Handles keypress while the Qt dialog window is open
+     *
+     * \param evt #QKeyEvent object for the key press event
+     */
+    void keyPressEvent(QKeyEvent *evt);
 
-    {
-        QFrame* line = new QFrame;
-        line->setFrameShape(QFrame::HLine);
-        line->setFrameShadow(QFrame::Sunken);
-        layout->addWidget(line);
-    }
+public slots:
+    void listItemSelected();
+    void listItemAdded();
+    void listItemRemove();
+    void listItemSave();
+    void listItemCancelSave();
+    void transitionToEditMode();
+    void parseSelections();
 
-    {
-        QDialogButtonBox* buttons = new QDialogButtonBox;
-        buttons->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
-        connect(
-            buttons, &QDialogButtonBox::accepted,
-            this, &AdditionalScripts::parseScript
-        );
-        connect(
-            buttons, &QDialogButtonBox::rejected,
-            this, &AdditionalScripts::reject
-        );
-        layout->addWidget(buttons);
-    }
+private:
+    QString createOneLineSummary(openspace::Profile::Module m);
+    void transitionFromEditMode();
+    void editBoxDisabled(bool disabled);
+    bool isLineEmpty(int index);
 
-    std::vector<std::string> scripts = _profile->additionalScripts();
-    std::string scpts = std::accumulate(
-        scripts.begin(), scripts.end(),
-        std::string(), [](std::string lhs, std::string rhs) { return lhs + rhs + '\n'; }
-    );
-    _textScripts->setText(QString::fromStdString(std::move(scpts)));
-    _textScripts->moveCursor(QTextCursor::MoveOperation::End);
-}
+    openspace::Profile* _profile;
+    std::vector<openspace::Profile::Module> _data;
+    bool _editModeNewItem = false;
+    const openspace::Profile::Module kBlank = {"", "", ""};
 
-void AdditionalScripts::parseScript() {
-    std::vector<std::string> tmpMultilineStringToVector;
-    std::istringstream iss(_textScripts->toPlainText().toUtf8().constData());
-    while (!iss.eof()) {
-        std::string s;
-        getline(iss, s);
-        tmpMultilineStringToVector.push_back(s);
-    }
-    _profile->setAdditionalScripts(tmpMultilineStringToVector);
-    accept();
-}
+    QListWidget* _list = nullptr;
+    QLabel* _moduleLabel = nullptr;
+    QLineEdit* _moduleEdit = nullptr;
+    QLabel* _loadedLabel = nullptr;
+    QLineEdit* _loadedEdit = nullptr;
+    QLabel* _notLoadedLabel = nullptr;
+    QLineEdit* _notLoadedEdit = nullptr;
+    
+    QPushButton* _buttonAdd = nullptr;
+    QPushButton* _buttonRemove = nullptr;
+    QPushButton* _buttonSave = nullptr;
+    QPushButton* _buttonCancel = nullptr;
+    QDialogButtonBox* _buttonBox = nullptr;
+
+    QLabel* _errorMsg = nullptr;
+};
+
+#endif // __OPENSPACE_UI_LAUNCHER___MODULES___H__

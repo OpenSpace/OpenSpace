@@ -22,89 +22,45 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___KEYBINDINGS___H__
-#define __OPENSPACE_UI_LAUNCHER___KEYBINDINGS___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___OSTIME___H__
+#define __OPENSPACE_UI_LAUNCHER___OSTIME___H__
 
 #include <QDialog>
 
 #include <openspace/scene/profile.h>
-#include <QWidget>
-#include <QListWidgetItem>
 
 class QComboBox;
-class QCheckBox;
-class QTextEdit;
-class QDialogButtonBox;
-class QListWidget;
+class QDateTimeEdit;
 class QLabel;
-class QPushButton;
+class QLineEdit;
 
-class Keybindings : public QDialog {
+class TimeDialog : public QDialog {
 Q_OBJECT
 public:
     /**
-     * Constructor for keybindings class
+     * Constructor for ostime class
      *
      * \param imported The #openspace::Profile object containing all data of the
      *                 new or imported profile.
      * \param parent Pointer to parent Qt widget (optional)
      */
-    Keybindings(openspace::Profile* profile, QWidget* parent);
-
-    /**
-     * Handles keypress while the Qt dialog window is open
-     *
-     * \param evt #QKeyEvent object for the key press event
-     */
-    void keyPressEvent(QKeyEvent *evt);
+    TimeDialog(openspace::Profile* profile, QWidget* parent);
 
 public slots:
-    void listItemSelected();
-    void listItemAdded();
-    void listItemRemove();
-    void listItemSave();
-    void listItemCancelSave();
-    void transitionToEditMode();
-    void parseSelections();
+    void enableAccordingToType(int);
+    void approved();
 
 private:
-    void transitionFromEditMode();
-    void editBoxDisabled(bool disabled);
-    int indexInKeyMapping(std::vector<int>& mapVector, int keyInt);
-    bool areRequiredFormsFilled();
-    std::string truncateString(std::string& s);
-    void replaceChars(std::string& src, const std::string& from,
-        const std::string& to);
-    bool isLineEmpty(int index);
-
+    void enableFormatForAbsolute(bool enableAbs);
     openspace::Profile* _profile;
-    std::vector<openspace::Profile::Keybinding> _data;
-    std::vector<int> _mapModKeyComboBoxIndexToKeyValue;
-    std::vector<int> _mapKeyComboBoxIndexToKeyValue;
-    bool _editModeNewItem = false;
+    openspace::Profile::Time _data;
+    bool _initializedAsAbsolute = true;
 
-    QListWidget* _list = nullptr;
-    QLabel* _keyModLabel = nullptr;
-    QComboBox* _keyModCombo = nullptr;
-    QLabel* _keyLabel = nullptr;
-    QComboBox* _keyCombo = nullptr;
-    QLabel* _nameLabel = nullptr;
-    QLineEdit* _nameEdit = nullptr;
-    QLabel* _guiPathLabel = nullptr;
-    QLineEdit* _guiPathEdit = nullptr;
-    QLabel* _documentationLabel = nullptr;
-    QLineEdit* _documentationEdit = nullptr;
-    QCheckBox* _localCheck = nullptr;
-    QLabel* _scriptLabel = nullptr;
-    QTextEdit* _scriptEdit = nullptr;
-    
-    QPushButton* _addButton = nullptr;
-    QPushButton* _removeButton = nullptr;
-    QPushButton* _saveButton = nullptr;
-    QPushButton* _cancelButton = nullptr;
-    QDialogButtonBox* _buttonBox = nullptr;
-
-    QLabel* _errorMsg = nullptr;
+    QComboBox* _typeCombo = nullptr;
+    QLabel* _absoluteLabel = nullptr;
+    QDateTimeEdit* _absoluteEdit = nullptr;
+    QLabel* _relativeLabel = nullptr;
+    QLineEdit* _relativeEdit = nullptr;
 };
 
-#endif // __OPENSPACE_UI_LAUNCHER___KEYBINDINGS___H__
+#endif // __OPENSPACE_UI_LAUNCHER___OSTIME___H__

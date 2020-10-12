@@ -32,7 +32,7 @@ namespace openspace { class Profile; }
 class QLineEdit;
 class QTextEdit;
 
-class Meta : public QDialog {
+class MetaDialog : public QDialog {
 Q_OBJECT
 public:
 
@@ -43,7 +43,7 @@ public:
     *                 new or imported profile.
     * \param parent Pointer to parent Qt widget
     */
-    explicit Meta(openspace::Profile* profile, QWidget* parent);
+    MetaDialog(openspace::Profile* profile, QWidget* parent);
 
 public slots:
     void save();

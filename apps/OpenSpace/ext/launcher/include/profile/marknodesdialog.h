@@ -22,45 +22,52 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___OSTIME___H__
-#define __OPENSPACE_UI_LAUNCHER___OSTIME___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___MARKNODES___H__
+#define __OPENSPACE_UI_LAUNCHER___MARKNODES___H__
 
 #include <QDialog>
 
-#include <openspace/scene/profile.h>
+namespace openspace { class Profile; }
 
-class QComboBox;
-class QDateTimeEdit;
-class QLabel;
 class QLineEdit;
+class QListWidget;
+class QListWidgetItem;
+class QPushButton;
 
-class Time : public QDialog {
+class MarkNodesDialog : public QDialog {
 Q_OBJECT
 public:
     /**
-     * Constructor for ostime class
+     * Constructor for markNodes class
      *
      * \param imported The #openspace::Profile object containing all data of the
      *                 new or imported profile.
-     * \param parent Pointer to parent Qt widget (optional)
+     * \param parent Pointer to parent Qt widget
      */
-    Time(openspace::Profile* profile, QWidget* parent);
+    MarkNodesDialog(openspace::Profile* profile, QWidget* parent);
+
+    /**
+     * Handles keypress while the Qt dialog window is open
+     *
+     * \param evt #QKeyEvent object for the key press event
+     */
+    void keyPressEvent(QKeyEvent* evt);
 
 public slots:
-    void enableAccordingToType(int);
-    void approved();
+    void listItemSelected();
+    void listItemAdded();
+    void listItemRemove();
+    void parseSelections();
 
 private:
-    void enableFormatForAbsolute(bool enableAbs);
+    std::vector<QListWidgetItem*> _markedNodesListItems;
     openspace::Profile* _profile;
-    openspace::Profile::Time _data;
-    bool _initializedAsAbsolute = true;
+    std::vector<std::string> _data;
 
-    QComboBox* _typeCombo = nullptr;
-    QLabel* _absoluteLabel = nullptr;
-    QDateTimeEdit* _absoluteEdit = nullptr;
-    QLabel* _relativeLabel = nullptr;
-    QLineEdit* _relativeEdit = nullptr;
+    QListWidget* _list = nullptr;
+    QPushButton* _removeButton = nullptr;
+    QLineEdit* _newNode = nullptr;
+
 };
 
-#endif // __OPENSPACE_UI_LAUNCHER___OSTIME___H__
+#endif // __OPENSPACE_UI_LAUNCHER___MARKNODES___H__

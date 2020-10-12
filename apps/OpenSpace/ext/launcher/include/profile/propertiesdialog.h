@@ -22,39 +22,31 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___DELTATIMES___H__
-#define __OPENSPACE_UI_LAUNCHER___DELTATIMES___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___PROPERTIES___H__
+#define __OPENSPACE_UI_LAUNCHER___PROPERTIES___H__
 
 #include <QDialog>
 
-namespace openspace { class Profile; }
+#include <openspace/scene/profile.h>
 
+class QComboBox;
 class QDialogButtonBox;
 class QLabel;
-class QListWidget;
 class QLineEdit;
+class QListWidget;
 class QPushButton;
 
-class DeltaTimes : public QDialog {
+class PropertiesDialog : public QDialog {
 Q_OBJECT
 public:
     /**
-     * Constructor for deltaTimes class
+     * Constructor for properties class
      *
      * \param imported The #openspace::Profile object containing all data of the
      *                 new or imported profile.
      * \param parent Pointer to parent Qt widget (optional)
      */
-    DeltaTimes(openspace::Profile* profile, QWidget* parent);
-
-    /**
-     * Returns a text summary of the delta time list for display purposes
-     *
-     * \param idx index in dt list
-     * \param forListView true if this summary is for the Qt list view, false if
-     *                    it is used for a different display mode
-     */
-    std::string createSummaryForDeltaTime(size_t idx, bool forListView);
+    PropertiesDialog(openspace::Profile* profile, QWidget* parent);
 
     /**
      * Handles keypress while the Qt dialog window is open
@@ -63,46 +55,40 @@ public:
      */
     void keyPressEvent(QKeyEvent *evt);
 
-
 public slots:
     void listItemSelected();
-    void valueChanged(const QString& text);
-    void saveDeltaTimeValue();
-    void discardDeltaTimeValue();
-    void addDeltaTimeValue();
-    void removeDeltaTimeValue();
+    void listItemAdded();
+    void listItemRemove();
+    void listItemSave();
+    void listItemCancelSave();
+    void transitionToEditMode();
     void parseSelections();
 
 private:
-    /**
-     * Called to transition to editing a particular dt value (gui settings)
-     *
-     * \param index index in dt list
-     * \param state \c true if the edit mode should be turned on, \c false otherwise
-     */
-    void transitionEditMode(int index, bool state);
-
-    QString timeDescription(int value);
-    void setLabelForKey(int index, bool editMode, std::string color);
-    QString checkForTimeDescription(int intervalIndex, int value);
+    QString createOneLineSummary(openspace::Profile::Property p);
+    void transitionFromEditMode();
+    void editBoxDisabled(bool disabled);
+    bool areRequiredFormsFilled();
     bool isLineEmpty(int index);
 
     openspace::Profile* _profile;
-    std::vector<double> _data;
+    std::vector<openspace::Profile::Property> _data;
     bool _editModeNewItem = false;
 
-    QListWidget* _listWidget = nullptr;
-    QLabel* _adjustLabel = nullptr;
-    QLineEdit* _seconds = nullptr;
-    QLabel* _value = nullptr;
-
+    QListWidget* _list = nullptr;
     QPushButton* _addButton = nullptr;
     QPushButton* _removeButton = nullptr;
+    QLabel* _commandLabel = nullptr;
+    QComboBox* _commandCombo = nullptr;
+    QLabel* _propertyLabel = nullptr;
+    QLineEdit* _propertyEdit = nullptr;
+    QLabel* _valueLabel = nullptr;
+    QLineEdit* _valueEdit = nullptr;
     QPushButton* _saveButton = nullptr;
-    QPushButton* _discardButton = nullptr;
+    QPushButton* _cancelButton = nullptr;
     QDialogButtonBox* _buttonBox = nullptr;
 
     QLabel* _errorMsg = nullptr;
 };
 
-#endif // __OPENSPACE_UI_LAUNCHER___DELTATIMES___H__
+#endif // __OPENSPACE_UI_LAUNCHER___PROPERTIES___H__

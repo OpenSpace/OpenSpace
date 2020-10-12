@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "assettreeitem.h"
+#include "profile/assettreeitem.h"
 
 AssetTreeItem::AssetTreeItem(const std::vector<QVariant>& data, AssetTreeItem* parentItem)
     : _itemData(data)

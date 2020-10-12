@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "timedialog.h"
+#include "profile/timedialog.h"
 
 #include <QComboBox>
 #include <QDateTimeEdit>
@@ -36,7 +36,7 @@
 
 using namespace openspace;
 
-Time::Time(openspace::Profile* profile, QWidget* parent)
+TimeDialog::TimeDialog(openspace::Profile* profile, QWidget* parent)
     : QDialog(parent)
     , _profile(profile)
 {
@@ -50,7 +50,7 @@ Time::Time(openspace::Profile* profile, QWidget* parent)
         _typeCombo->setToolTip("Types: Absolute defined time or Relative to actual time");
         connect(
             _typeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged),
-            this, &Time::enableAccordingToType
+            this, &TimeDialog::enableAccordingToType
         );
         layout->addWidget(_typeCombo);
     }
@@ -81,8 +81,8 @@ Time::Time(openspace::Profile* profile, QWidget* parent)
         QDialogButtonBox* buttons = new QDialogButtonBox;
         buttons->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
 
-        connect(buttons, &QDialogButtonBox::accepted, this, &Time::approved);
-        QObject::connect(buttons, &QDialogButtonBox::rejected, this, &Time::reject);
+        connect(buttons, &QDialogButtonBox::accepted, this, &TimeDialog::approved);
+        QObject::connect(buttons, &QDialogButtonBox::rejected, this, &TimeDialog::reject);
         layout->addWidget(buttons);
     }
 
@@ -110,7 +110,7 @@ Time::Time(openspace::Profile* profile, QWidget* parent)
     enableAccordingToType(static_cast<int>(_data.type));
 }
 
-void Time::enableAccordingToType(int idx) {
+void TimeDialog::enableAccordingToType(int idx) {
     Profile::Time::Type comboIdx = static_cast<Profile::Time::Type>(idx);
     bool setFormatForAbsolute = (comboIdx == Profile::Time::Type::Absolute);
     enableFormatForAbsolute(setFormatForAbsolute);
@@ -137,14 +137,14 @@ void Time::enableAccordingToType(int idx) {
     }
 }
 
-void Time::enableFormatForAbsolute(bool enableAbs) {
+void TimeDialog::enableFormatForAbsolute(bool enableAbs) {
     _absoluteLabel->setEnabled(enableAbs);
     _absoluteEdit->setEnabled(enableAbs);
     _relativeLabel->setEnabled(!enableAbs);
     _relativeEdit->setEnabled(!enableAbs);
 }
 
-void Time::approved() {
+void TimeDialog::approved() {
     constexpr const int Relative = static_cast<int>(Profile::Time::Type::Relative);
     if (_typeCombo->currentIndex() == Relative) {
         if (_relativeEdit->text().isEmpty()) {
