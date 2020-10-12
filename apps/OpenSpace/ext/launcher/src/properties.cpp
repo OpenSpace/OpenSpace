@@ -22,38 +22,130 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/scene/profile.h>
 #include "properties.h"
-#include "./ui_properties.h"
-#include <qevent.h>
+
+#include <QComboBox>
+#include <QDialogButtonBox>
+#include <QEvent>
 #include <QKeyEvent>
+#include <QLabel>
+#include <QLineEdit>
+#include <QListWidget>
+#include <QPushButton>
+#include <QVBoxLayout>
 #include <iostream>
 
-properties::properties(openspace::Profile* imported, QWidget *parent)
-    : QDialog(parent)
-    , ui(new Ui::properties)
-    , _imported(imported)
-    , _data(imported->properties())
-{
-    ui->setupUi(this);
+namespace {
+    const openspace::Profile::Property kBlank {
+        openspace::Profile::Property::SetType::SetPropertyValue,
+        "",
+        ""
+    };
+}
 
-    for (size_t i = 0; i < _data.size(); ++i) {
-        ui->list->addItem(new QListWidgetItem(createOneLineSummary(_data[i])));
+Properties::Properties(openspace::Profile* profile, QWidget *parent)
+    : QDialog(parent)
+    , _profile(profile)
+    , _data(_profile->properties())
+{
+    setWindowTitle("Profile Editor");
+
+    QBoxLayout* layout = new QVBoxLayout(this);
+    {
+        _list = new QListWidget;
+        connect(
+            _list, &QListWidget::itemSelectionChanged,
+            this, &Properties::listItemSelected
+        );
+        for (size_t i = 0; i < _data.size(); ++i) {
+            _list->addItem(new QListWidgetItem(createOneLineSummary(_data[i])));
+        }
+        layout->addWidget(_list);
+    }
+    {
+        QBoxLayout* box = new QHBoxLayout;
+        _addButton = new QPushButton("Add New");
+        connect(_addButton, &QPushButton::clicked, this, &Properties::listItemAdded);
+        box->addWidget(_addButton);
+
+        _removeButton = new QPushButton("Remove");
+        connect(_removeButton, &QPushButton::clicked, this, &Properties::listItemRemove);
+        box->addWidget(_removeButton);
+
+        box->addStretch();
+
+        layout->addLayout(box);
+    }
+    {
+        QFrame* line = new QFrame;
+        line->setFrameShape(QFrame::HLine);
+        line->setFrameShadow(QFrame::Sunken);
+        layout->addWidget(line);
+    }
+    {
+        _commandLabel = new QLabel("Property Set Command");
+        layout->addWidget(_commandLabel);
+
+        _commandCombo = new QComboBox;
+        _commandCombo->addItems({ "SetPropertyValue", "SetPropertyValueSingle" });
+        layout->addWidget(_commandCombo);
+
+        _propertyLabel = new QLabel("Property");
+        layout->addWidget(_propertyLabel);
+        _propertyEdit = new QLineEdit;
+        _propertyEdit->setToolTip("Exact string is required for the property to be set");
+        layout->addWidget(_propertyEdit);
+
+        _valueLabel = new QLabel("Value to Set");
+        layout->addWidget(_valueLabel);
+        _valueEdit = new QLineEdit;
+        layout->addWidget(_valueEdit);
+
+        {
+            QBoxLayout* box = new QHBoxLayout;
+            _saveButton = new QPushButton("Save");
+            connect(_saveButton, &QPushButton::clicked, this, &Properties::listItemSave);
+            box->addWidget(_saveButton);
+
+            _cancelButton = new QPushButton("Cancel");
+            connect(
+                _cancelButton, &QPushButton::clicked,
+                this, &Properties::listItemCancelSave
+            );
+            box->addWidget(_cancelButton);
+
+            box->addStretch();
+
+            layout->addLayout(box);
+        }
+    }
+    {
+        QBoxLayout* footerLayout = new QHBoxLayout;
+
+        _errorMsg = new QLabel;
+        _errorMsg->setObjectName("error-message");
+        _errorMsg->setWordWrap(true);
+        footerLayout->addWidget(_errorMsg);
+
+        _buttonBox = new QDialogButtonBox;
+        _buttonBox->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
+
+        connect(
+            _buttonBox, &QDialogButtonBox::accepted,
+            this, &Properties::parseSelections
+        );
+        QObject::connect(
+            _buttonBox, &QDialogButtonBox::rejected,
+            this, &Properties::reject
+        );
+        footerLayout->addWidget(_buttonBox);
+        layout->addLayout(footerLayout);
     }
 
-    connect(ui->list, SIGNAL(itemSelectionChanged()), this, SLOT(listItemSelected()));
-    connect(ui->button_add, SIGNAL(clicked()), this, SLOT(listItemAdded()));
-    connect(ui->button_save, SIGNAL(clicked()), this, SLOT(listItemSave()));
-    connect(ui->button_cancel, SIGNAL(clicked()), this, SLOT(listItemCancelSave()));
-    connect(ui->button_remove, SIGNAL(clicked()), this, SLOT(listItemRemove()));
-    connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(parseSelections()));
-
-    QStringList commandOptions { "SetPropertyValue", "SetPropertyValueSingle" };
-    ui->combo_command->addItems(commandOptions);
     transitionFromEditMode();
 }
 
-QString properties::createOneLineSummary(openspace::Profile::Property p) {
+QString Properties::createOneLineSummary(openspace::Profile::Property p) {
     QString summary = QString(p.name.c_str());
     summary += " = ";
     summary += QString(p.value.c_str());
@@ -65,72 +157,72 @@ QString properties::createOneLineSummary(openspace::Profile::Property p) {
     return summary;
 }
 
-void properties::listItemSelected(void) {
-    QListWidgetItem *item = ui->list->currentItem();
-    int index = ui->list->row(item);
+void Properties::listItemSelected() {
+    QListWidgetItem* item = _list->currentItem();
+    int index = _list->row(item);
 
     if (_data.size() > 0) {
         openspace::Profile::Property& p = _data[index];
         if (p.setType == openspace::Profile::Property::SetType::SetPropertyValue) {
-            ui->combo_command->setCurrentIndex(0);
+            _commandCombo->setCurrentIndex(0);
         }
         else {
-            ui->combo_command->setCurrentIndex(1);
+            _commandCombo->setCurrentIndex(1);
         }
-        ui->line_property->setText(QString(p.name.c_str()));
-        ui->line_value->setText(QString(p.value.c_str()));
+        _propertyEdit->setText(QString::fromStdString(p.name));
+        _valueEdit->setText(QString::fromStdString(p.value));
     }
     transitionToEditMode();
 }
 
-bool properties::isLineEmpty(int index) {
+bool Properties::isLineEmpty(int index) {
     bool isEmpty = true;
-    if (ui->list->item(index)->text().compare("") != 0) {
+    if (!_list->item(index)->text().isEmpty()) {
         isEmpty = false;
     }
-    if ((_data.size() > 0) && (_data.at(0).name.compare("") != 0)) {
+    if (!_data.empty() && !_data.at(0).name.empty()) {
         isEmpty = false;
     }
     return isEmpty;
 }
 
-void properties::listItemAdded(void) {
-    int currentListSize = ui->list->count();
+void Properties::listItemAdded(void) {
+    int currentListSize = _list->count();
 
      if ((currentListSize == 1) && (isLineEmpty(0))) {
          //Special case where list is "empty" but really has one line that is blank.
          // This is done because QListWidget does not seem to like having its sole
          // remaining item being removed.
          _data.at(0) = kBlank;
-         ui->list->item(0)->setText("  (Enter details below & click 'Save')");
-         ui->list->setCurrentRow(0);
+         _list->item(0)->setText("  (Enter details below & click 'Save')");
+         _list->setCurrentRow(0);
          transitionToEditMode();
      }
      else {
          _data.push_back(kBlank);
-         ui->list->addItem(new QListWidgetItem("  (Enter details below & click 'Save')"));
+         _list->addItem(new QListWidgetItem("  (Enter details below & click 'Save')"));
          //Scroll down to that blank line highlighted
-         ui->list->setCurrentRow(ui->list->count() - 1);
+         _list->setCurrentRow(_list->count() - 1);
      }
 
-    //Blank-out the 2 text fields, set combo box to index 0
-    ui->combo_command->setCurrentIndex(0);
-    ui->line_property->setText(QString(_data.back().name.c_str()));
-    ui->line_value->setText(QString(_data.back().value.c_str()));
-    ui->combo_command->setFocus(Qt::OtherFocusReason);
+    // Blank-out the 2 text fields, set combo box to index 0
+    _commandCombo->setCurrentIndex(0);
+    _propertyEdit->setText(QString(_data.back().name.c_str()));
+    _valueEdit->setText(QString(_data.back().value.c_str()));
+    _commandCombo->setFocus(Qt::OtherFocusReason);
     _editModeNewItem = true;
 }
 
-void properties::listItemSave(void) {
+void Properties::listItemSave(void) {
     if (!areRequiredFormsFilled()) {
         return;
     }
 
-    QListWidgetItem *item = ui->list->currentItem();
-    int index = ui->list->row(item);
+    QListWidgetItem* item = _list->currentItem();
+    int index = _list->row(item);
 
     if ( _data.size() > 0) {
-        if (ui->combo_command->currentIndex() == 0) {
+        if (_commandCombo->currentIndex() == 0) {
             _data[index].setType
                 = openspace::Profile::Property::SetType::SetPropertyValue;
         }
@@ -138,33 +230,33 @@ void properties::listItemSave(void) {
             _data[index].setType
                 = openspace::Profile::Property::SetType::SetPropertyValueSingle;
         }
-        _data[index].name = ui->line_property->text().toUtf8().constData();
-        _data[index].value = ui->line_value->text().toUtf8().constData();
-        ui->list->item(index)->setText(createOneLineSummary(_data[index]));
+        _data[index].name = _propertyEdit->text().toStdString();
+        _data[index].value = _valueEdit->text().toStdString();
+        _list->item(index)->setText(createOneLineSummary(_data[index]));
     }
     transitionFromEditMode();
     _editModeNewItem = false;
 }
 
-bool properties::areRequiredFormsFilled() {
+bool Properties::areRequiredFormsFilled() {
     bool requiredFormsFilled = true;
     QString errors;
-    if (ui->line_property->text().length() == 0) {
+    if (_propertyEdit->text().length() == 0) {
         errors += "Missing property name";
         requiredFormsFilled = false;
     }
-    if (ui->line_value->text().length() == 0) {
+    if (_valueEdit->text().length() == 0) {
         if (errors.length() > 0) {
             errors += ", ";
         }
         errors += "Missing value";
         requiredFormsFilled = false;
     }
-    ui->label_error->setText("<font color='red'>" + errors + "</font>");
+    _errorMsg->setText("<font color='red'>" + errors + "</font>");
     return requiredFormsFilled;
 }
 
-void properties::listItemCancelSave(void) {
+void Properties::listItemCancelSave(void) {
     listItemSelected();
     transitionFromEditMode();
     if (_editModeNewItem) {
@@ -177,19 +269,19 @@ void properties::listItemCancelSave(void) {
     _editModeNewItem = false;
 }
 
-void properties::listItemRemove(void) {
-    if (ui->list->count() > 0) {
-        if (ui->list->currentRow() >= 0 && ui->list->currentRow() < ui->list->count()) {
-            if (ui->list->count() == 1) {
+void Properties::listItemRemove(void) {
+    if (_list->count() > 0) {
+        if (_list->currentRow() >= 0 && _list->currentRow() < _list->count()) {
+            if (_list->count() == 1) {
                 //Special case where last remaining item is being removed (QListWidget
                 // doesn't like the final item being removed so instead clear it)
                 _data.at(0) = kBlank;
-                ui->list->item(0)->setText("");
+                _list->item(0)->setText("");
             }
             else {
-                int index = ui->list->currentRow();
-                if (index >= 0 && index < ui->list->count()) {
-                    delete ui->list->takeItem(index);
+                int index = _list->currentRow();
+                if (index >= 0 && index < _list->count()) {
+                    delete _list->takeItem(index);
                     if (_data.size() > 0) {
                         _data.erase(_data.begin() + index);
                     }
@@ -200,62 +292,57 @@ void properties::listItemRemove(void) {
     transitionFromEditMode();
 }
 
-void properties::transitionToEditMode(void) {
-    ui->list->setDisabled(true);
-    ui->button_add->setDisabled(true);
-    ui->button_remove->setDisabled(true);
-    ui->button_cancel->setDisabled(true);
-    ui->button_save->setDisabled(true);
-    ui->buttonBox->setDisabled(true);
+void Properties::transitionToEditMode(void) {
+    _list->setDisabled(true);
+    _addButton->setDisabled(true);
+    _removeButton->setDisabled(true);
+    _saveButton->setDisabled(true);
+    _cancelButton->setDisabled(true);
+    _buttonBox->setDisabled(true);
 
-    ui->label_command->setText("<font color='black'>Property Set Command</font>");
-    ui->label_property->setText("<font color='black'>Property</font>");
-    ui->label_value->setText("<font color='black'>Value to set</font>");
+    _commandLabel->setText("<font color='black'>Property Set Command</font>");
+    _propertyLabel->setText("<font color='black'>Property</font>");
+    _valueLabel->setText("<font color='black'>Value to set</font>");
     editBoxDisabled(false);
-    ui->label_error->setText("");
+    _errorMsg->setText("");
 }
 
-void properties::transitionFromEditMode(void) {
-    ui->list->setDisabled(false);
-    ui->button_add->setDisabled(false);
-    ui->button_remove->setDisabled(false);
-    ui->button_cancel->setDisabled(false);
-    ui->button_save->setDisabled(false);
-    ui->buttonBox->setDisabled(false);
+void Properties::transitionFromEditMode(void) {
+    _list->setDisabled(false);
+    _addButton->setDisabled(false);
+    _removeButton->setDisabled(false);
+    _saveButton->setDisabled(false);
+    _cancelButton->setDisabled(false);
+    _buttonBox->setDisabled(false);
 
-    ui->label_command->setText("<font color='light gray'>Property Set Command</font>");
-    ui->label_property->setText("<font color='light gray'>Property</font>");
-    ui->label_value->setText("<font color='light gray'>Value to set</font>");
+    _commandLabel->setText("<font color='light gray'>Property Set Command</font>");
+    _propertyLabel->setText("<font color='light gray'>Property</font>");
+    _valueLabel->setText("<font color='light gray'>Value to set</font>");
     editBoxDisabled(true);
-    ui->label_error->setText("");
+    _errorMsg->setText("");
 }
 
-void properties::editBoxDisabled(bool disabled) {
-    ui->label_command->setDisabled(disabled);
-    ui->combo_command->setDisabled(disabled);
-    ui->label_property->setDisabled(disabled);
-    ui->line_property->setDisabled(disabled);
-    ui->label_value->setDisabled(disabled);
-    ui->line_value->setDisabled(disabled);
-    ui->button_cancel->setDisabled(disabled);
-    ui->button_save->setDisabled(disabled);
+void Properties::editBoxDisabled(bool disabled) {
+    _commandLabel->setDisabled(disabled);
+    _commandCombo->setDisabled(disabled);
+    _propertyLabel->setDisabled(disabled);
+    _propertyEdit->setDisabled(disabled);
+    _valueLabel->setDisabled(disabled);
+    _valueEdit->setDisabled(disabled);
+    _saveButton->setDisabled(disabled);
+    _cancelButton->setDisabled(disabled);
 }
 
-void properties::parseSelections() {
-    //Handle case with only one remaining but empty line
+void Properties::parseSelections() {
+    // Handle case with only one remaining but empty line
     if ((_data.size() == 1) && (_data.at(0).name.compare("") == 0)) {
         _data.clear();
     }
-    _imported->setProperties(_data);
+    _profile->setProperties(_data);
     accept();
 }
 
-properties::~properties() {
-    delete ui;
-}
-
-void properties::keyPressEvent(QKeyEvent *evt)
-{
+void Properties::keyPressEvent(QKeyEvent* evt) {
     if(evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return) {
         if (_editModeNewItem) {
             listItemSave();

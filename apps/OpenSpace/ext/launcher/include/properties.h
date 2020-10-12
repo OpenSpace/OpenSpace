@@ -28,18 +28,33 @@
 #include <QDialog>
 
 #include <openspace/scene/profile.h>
-#include <QWidget>
-#include <QListWidgetItem>
 
-QT_BEGIN_NAMESPACE
-namespace Ui {
-class properties;
-}
-QT_END_NAMESPACE
+class QComboBox;
+class QDialogButtonBox;
+class QLabel;
+class QLineEdit;
+class QListWidget;
+class QPushButton;
 
-class properties : public QDialog
-{
-    Q_OBJECT
+class Properties : public QDialog {
+Q_OBJECT
+
+public:
+    /**
+     * Constructor for properties class
+     *
+     * \param imported The #openspace::Profile object containing all data of the
+     *                 new or imported profile.
+     * \param parent Pointer to parent Qt widget (optional)
+     */
+    Properties(openspace::Profile* profile, QWidget* parent);
+
+    /**
+     * Handles keypress while the Qt dialog window is open
+     *
+     * \param evt #QKeyEvent object for the key press event
+     */
+    void keyPressEvent(QKeyEvent *evt);
 
 public slots:
     void listItemSelected();
@@ -50,31 +65,6 @@ public slots:
     void transitionToEditMode();
     void parseSelections();
 
-public:
-    /**
-     * Constructor for properties class
-     *
-     * \param imported The #openspace::Profile object containing all data of the
-     *                 new or imported profile.
-     * \param parent Pointer to parent Qt widget (optional)
-     */
-    explicit properties(openspace::Profile* imported, QWidget *parent = nullptr);
-
-    /**
-     * Destructor for properties class
-     */
-    ~properties();
-
-    /**
-     * Handles keypress while the Qt dialog window is open
-     *
-     * \param evt #QKeyEvent object for the key press event
-     */
-    void keyPressEvent(QKeyEvent *evt);
-
-protected:
-    //void resizeEvent(QResizeEvent* event);
-
 private:
     QString createOneLineSummary(openspace::Profile::Property p);
     void transitionFromEditMode();
@@ -82,13 +72,24 @@ private:
     bool areRequiredFormsFilled();
     bool isLineEmpty(int index);
 
-    Ui::properties *ui;
-    QWidget* _parent;
-    openspace::Profile* _imported;
+    openspace::Profile* _profile;
     std::vector<openspace::Profile::Property> _data;
     bool _editModeNewItem = false;
-    const openspace::Profile::Property kBlank
-        = {openspace::Profile::Property::SetType::SetPropertyValue, "", ""};
+
+    QListWidget* _list = nullptr;
+    QPushButton* _addButton = nullptr;
+    QPushButton* _removeButton = nullptr;
+    QLabel* _commandLabel = nullptr;
+    QComboBox* _commandCombo = nullptr;
+    QLabel* _propertyLabel = nullptr;
+    QLineEdit* _propertyEdit = nullptr;
+    QLabel* _valueLabel = nullptr;
+    QLineEdit* _valueEdit = nullptr;
+    QPushButton* _saveButton = nullptr;
+    QPushButton* _cancelButton = nullptr;
+    QDialogButtonBox* _buttonBox = nullptr;
+
+    QLabel* _errorMsg = nullptr;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___PROPERTIES___H__

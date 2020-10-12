@@ -76,8 +76,7 @@ Camera::Camera(openspace::Profile* profile, QWidget *parent)
     }
 
     {
-        QWidget* footer = new QWidget;
-        QBoxLayout* footerLayout = new QHBoxLayout(footer);
+        QBoxLayout* footerLayout = new QHBoxLayout;
 
         _errorMsg = new QLabel;
         _errorMsg->setObjectName("error-message");
@@ -90,7 +89,7 @@ Camera::Camera(openspace::Profile* profile, QWidget *parent)
         connect(buttons, &QDialogButtonBox::rejected, this, &Camera::reject);
         footerLayout->addWidget(buttons);
 
-        layout->addWidget(footer);
+        layout->addLayout(footerLayout);
     }
 
     if (_profile->camera().has_value()) {

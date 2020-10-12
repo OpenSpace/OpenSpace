@@ -143,7 +143,7 @@ void ProfileEdit::openModules() {
 void ProfileEdit::openProperties() {
     ui->label_error->setText("");
     if (_pData) {
-        _properties = new properties(_pData);
+        _properties = new Properties(_pData, this);
         _properties->exec();
         labelText(_pData, _pData->properties().size(), "Properties",
             ui->label_properties
