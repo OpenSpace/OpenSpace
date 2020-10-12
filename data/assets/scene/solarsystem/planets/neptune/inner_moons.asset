@@ -12,6 +12,12 @@ local parentIdentifier = transforms.NeptuneBarycenter.Identifier
 local parentSpice = "NEPTUNE BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_neptune", "moon_inner" }
 local trailColor = { 0.2, 0.5, 0.75 }
+local trailTags = { 
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_neptune",
+    "moonTrail_minor"
+}
 
 local innerMoons = {
     {
@@ -23,6 +29,7 @@ local innerMoons = {
         Spice = "NAIAD",
         Radii = { 96000, 60000, 52000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
         },
@@ -39,6 +46,7 @@ local innerMoons = {
         Spice = "THALASSA",
         Radii = { 108000, 100000, 52000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
         },
@@ -55,6 +63,7 @@ local innerMoons = {
         Spice = "DESPINA",
         Radii = { 180000, 148000, 128000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
         },
@@ -71,6 +80,7 @@ local innerMoons = {
         Spice = "GALATEA",
         Radii = { 204000, 184000, 144000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
         },
@@ -87,6 +97,7 @@ local innerMoons = {
         Spice = "LARISSA",
         Radii = { 216000, 204000, 168000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
         },
@@ -103,6 +114,7 @@ local innerMoons = {
         Spice = "814",
         Radii = { 16000, 16000, 16000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Name = "S/2004 N 1",
             Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
@@ -120,6 +132,7 @@ local innerMoons = {
         Spice = "PROTEUS",
         Radii = { 436000, 416000, 402000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
         },

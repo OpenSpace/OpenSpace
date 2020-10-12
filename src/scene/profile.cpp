@@ -711,7 +711,7 @@ std::string Profile::convertToScene() const {
         output += fmt::format(
             k.isLocal ?
             "openspace.bindKeyLocal(\"{}\",\"{}\", [[{}]], [[{}]], [[{}]]);\n" :
-            "openspace.bindKey(\"{}\", \"{}\", [[{}]], [[{}]], [[{}]]);\n",
+            "openspace.bindKey(\"{}\", [[{}]], [[{}]], [[{}]], [[{}]]);\n",
             key, k.script, k.documentation, name, k.guiPath
         );
     }

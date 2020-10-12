@@ -1,26 +1,55 @@
-#Version
-1.0
-
-#Module
-Touch	local webGui = asset.require('util/webgui'); webGui.setCefRoute("ontouch")	openspace.printFatal('Could not load scene due to missing module "touch"')
-
-#Asset
-base	
-scene/solarsystem/planets/earth/earth	earthAsset
-util/webgui	
-
-#Property
-setPropertyValueSingle	Scene.Pluto.Renderable.Enabled	false
-setPropertyValueSingle	Scene.Charon.Renderable.Enabled	false
-setPropertyValueSingle	Scene.PlutoBarycenterTrail.Renderable.Enabled	false
-
-#Time
-relative	-1d
-
-#Camera
-setNavigationState	earthAsset.Earth.Identifier			58.5877, 16.1924, 20000000			
-
-#MarkNodes
-Earth
-Mars
-Moon
+{
+  "additional_scripts": [
+    "openspace.setPropertyValueSingle(\"Modules.CefWebGui.GuiUrl\", 'http://127.0.0.1:4680/frontend/#/ontouch');"
+  ],
+  "assets": [
+    "base"
+  ],
+  "camera": {
+    "altitude": 20000000.0,
+    "anchor": "Earth",
+    "latitude": 58.5877,
+    "longitude": 16.1924,
+    "type": "goToGeo"
+  },
+  "meta": {
+    "author": "OpenSpace Team",
+    "description": "Profile set up to load /touch path from the gui, which contains an alternate gui with stories for a touch screen.",
+    "license": "MIT License",
+    "name": "Touch",
+    "url": "https://www.openspaceproject.com",
+    "version": "1.0"
+  },
+  "modules": [
+    {
+      "loadedInstruction": "",
+      "name": "Touch",
+      "notLoadedInstruction": "openspace.printFatal('Could not load scene due to missing module \"touch\"');"
+    }
+  ],
+  "properties": [
+    {
+      "name": "Scene.PlutoBarycenterTrail.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "false"
+    },
+    {
+      "name": "Scene.Pluto.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "false"
+    },
+    {
+      "name": "Scene.Charon.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "false"
+    }
+  ],
+  "time": {
+    "type": "relative",
+    "value": "-1d"
+  },
+  "version": {
+    "major": 1,
+    "minor": 0
+  }
+}

@@ -1,7 +1,7 @@
 asset.require('spice/base')
 
 local createGlobeWithoutName = function(identifier, parent, parentSpiceName, spiceName,
-    radii, tags, guiPath, trailColor, orbitPeriod, kernels)
+    radii, tags, trailTags, guiPath, trailColor, orbitPeriod, kernels)
     return {
         Identifier = identifier,
         Parent = parent,
@@ -36,7 +36,8 @@ local createGlobeWithoutName = function(identifier, parent, parentSpiceName, spi
             },
             Color = trailColor,
             Period = orbitPeriod,
-            Resolution = 1000
+            Resolution = 1000,
+            Tag = trailTags,
         },
         GUI = {
             Path = guiPath
@@ -45,9 +46,9 @@ local createGlobeWithoutName = function(identifier, parent, parentSpiceName, spi
 end
 
 local createGlobeWithName = function(identifier, name, parent, parentSpiceName, spiceName,
-    radii, tags, guiPath, trailColor, orbitPeriod, kernels, layers)
+    radii, tags, trailTags, guiPath, trailColor, orbitPeriod, kernels, layers)
     g, t = createGlobeWithoutName(identifier, parent, parentSpiceName, spiceName, radii,
-        tags, guiPath, trailColor, orbitPeriod, kernels, layers)
+        tags, trailTags, guiPath, trailColor, orbitPeriod, kernels, layers)
     g.GUI.Name = name
     t.GUI.Name = name .. " Trail"
 
@@ -75,6 +76,9 @@ local createGlobes = function(t)
         if not v.Layers then
             v.Layers = {}
         end
+        if not v.TrailTags then
+            v.TrailTags = {}
+        end
         if v.Name then
             globe, trail = createGlobeWithName(
                 v.Identifier,
@@ -84,6 +88,7 @@ local createGlobes = function(t)
                 v.Spice,
                 v.Radii,
                 v.Tags,
+                v.TrailTags,
                 v.GUI.Path,
                 v.TrailColor,
                 v.OrbitPeriod,
@@ -98,6 +103,7 @@ local createGlobes = function(t)
                 v.Spice,
                 v.Radii,
                 v.Tags,
+                v.TrailTags,
                 v.GUI.Path,
                 v.TrailColor,
                 v.OrbitPeriod,
