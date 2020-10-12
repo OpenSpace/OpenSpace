@@ -41,8 +41,6 @@ set(HEADER_FILES
   include/profileedit.h
   include/properties.h
   include/ui_launcherwindow.h
-  include/ui_profileedit.h
-  include/ui_properties.h
 )
 
 set(SOURCE_FILES

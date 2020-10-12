@@ -35,7 +35,6 @@ template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 ProfileEdit::ProfileEdit(openspace::Profile* profile, const std::string reportedAssets,
                          std::vector<std::string>& profilesReadOnly, QWidget *parent)
     : QDialog(parent)
-    , ui(new Ui::ProfileEdit)
     , _reportedAssets(reportedAssets)
     , _pData(profile)
     , _profilesReadOnly(profilesReadOnly)
@@ -47,62 +46,295 @@ ProfileEdit::ProfileEdit(openspace::Profile* profile, const std::string reported
     QString styleSheet = QLatin1String(file.readAll());
     setStyleSheet(styleSheet);
 
+    QBoxLayout* layout = new QVBoxLayout(this);
+    QBoxLayout* topLayout = new QHBoxLayout;
+    QBoxLayout* leftLayout = new QVBoxLayout;
+    {
+        QBoxLayout* container = new QHBoxLayout;
+        QLabel* profileLabel = new QLabel("Profile Name:");
+        container->addWidget(profileLabel);
 
-    ui->setupUi(this);
-    if (_pData != nullptr) {
-        initSummaryTextForEachCategory();
-        connect(ui->duplicate_profile, SIGNAL(clicked()), this, SLOT(duplicateProfile()));
-        connect(ui->edit_meta, SIGNAL(clicked()), this, SLOT(openMeta()));
-        connect(ui->edit_properties, SIGNAL(clicked()), this, SLOT(openProperties()));
-        connect(ui->edit_modules, SIGNAL(clicked()), this, SLOT(openModules()));
-        connect(ui->edit_keybindings, SIGNAL(clicked()), this, SLOT(openKeybindings()));
-        connect(ui->edit_assets, SIGNAL(clicked()), this, SLOT(openAssets()));
-        connect(ui->edit_time, SIGNAL(clicked()), this, SLOT(openTime()));
-        connect(ui->edit_additionalscripts, SIGNAL(clicked()), this,
-            SLOT(openAddedScripts()));
-        connect(ui->edit_deltatimes, SIGNAL(clicked()), this, SLOT(openDeltaTimes()));
-        connect(ui->edit_camera, SIGNAL(clicked()), this, SLOT(openCamera()));
-        connect(ui->edit_marknodes, SIGNAL(clicked()), this, SLOT(openMarkNodes()));
-        connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(approved()));
-        connect(ui->buttonBox, SIGNAL(rejected()), this, SLOT(cancel()));
+        _profileEdit = new QLineEdit;
+        container->addWidget(_profileEdit);
+
+        QPushButton* duplicateButton = new QPushButton("Duplicate Profile");
+        connect(
+            duplicateButton, &QPushButton::clicked,
+            this, &ProfileEdit::duplicateProfile
+        );
+        container->addWidget(duplicateButton);
+
+        leftLayout->addLayout(container);
     }
-}
+    {
+        QFrame* line = new QFrame;
+        line->setFrameShape(QFrame::HLine);
+        line->setFrameShadow(QFrame::Sunken);
+        leftLayout->addWidget(line);
+    }
+    {
+        QGridLayout* container = new QGridLayout;
+        container->setColumnStretch(1, 1);
 
-ProfileEdit::~ProfileEdit() {
-    delete ui;
+        _propertiesLabel = new QLabel("Properties");
+        container->addWidget(_propertiesLabel, 0, 0);
+
+        QPushButton* editProperties = new QPushButton("Edit");
+        connect(
+            editProperties, &QPushButton::clicked,
+            this, &ProfileEdit::openProperties
+        );
+        container->addWidget(editProperties, 0, 2);
+
+        _propertiesEdit = new QTextEdit;
+        _propertiesEdit->setReadOnly(true);
+        container->addWidget(_propertiesEdit, 1, 0, 1, 3);
+
+        leftLayout->addLayout(container);
+    }
+    {
+        QFrame* line = new QFrame;
+        line->setFrameShape(QFrame::HLine);
+        line->setFrameShadow(QFrame::Sunken);
+        leftLayout->addWidget(line);
+    }
+    {
+        QGridLayout* container = new QGridLayout;
+        container->setColumnStretch(1, 1);
+
+        _assetsLabel = new QLabel("Assets");
+        container->addWidget(_assetsLabel, 0, 0);
+
+        QPushButton* assetsProperties = new QPushButton("Edit");
+        connect(assetsProperties, &QPushButton::clicked, this, &ProfileEdit::openAssets);
+        container->addWidget(assetsProperties, 0, 2);
+
+        _assetsEdit = new QTextEdit;
+        _assetsEdit->setReadOnly(true);
+        container->addWidget(_assetsEdit, 1, 0, 1, 3);
+
+        leftLayout->addLayout(container);
+    }
+    {
+        QFrame* line = new QFrame;
+        line->setFrameShape(QFrame::HLine);
+        line->setFrameShadow(QFrame::Sunken);
+        leftLayout->addWidget(line);
+    }
+    {
+        QGridLayout* container = new QGridLayout;
+        container->setColumnStretch(1, 1);
+
+        _keybindingsLabel = new QLabel("Keybindings");
+        container->addWidget(_keybindingsLabel, 0, 0);
+
+        QPushButton* keybindingsProperties = new QPushButton("Edit");
+        connect(
+            keybindingsProperties, &QPushButton::clicked,
+            this, &ProfileEdit::openKeybindings
+        );
+        container->addWidget(keybindingsProperties, 0, 2);
+
+        _keybindingsEdit = new QTextEdit;
+        _keybindingsEdit->setReadOnly(true);
+        container->addWidget(_keybindingsEdit, 1, 0, 1, 3);
+
+        leftLayout->addLayout(container);
+    }
+    topLayout->addLayout(leftLayout);
+
+    {
+        QFrame* line = new QFrame;
+        line->setFrameShape(QFrame::HLine);
+        line->setFrameShadow(QFrame::Sunken);
+        topLayout->addWidget(line);
+    }
+
+    QBoxLayout* rightLayout = new QVBoxLayout;
+    {
+        QBoxLayout* container = new QVBoxLayout;
+        _metaLabel = new QLabel("Meta");
+        container->addWidget(_metaLabel);
+
+        QPushButton* metaEdit = new QPushButton("Edit");
+        connect(metaEdit, &QPushButton::clicked, this, &ProfileEdit::openMeta);
+        metaEdit->setLayoutDirection(Qt::RightToLeft);
+        container->addWidget(metaEdit);
+        rightLayout->addLayout(container);
+    }
+    {
+        QFrame* line = new QFrame;
+        line->setFrameShape(QFrame::HLine);
+        line->setFrameShadow(QFrame::Sunken);
+        rightLayout->addWidget(line);
+    }
+    {
+        QBoxLayout* container = new QVBoxLayout;
+        _interestingNodesLabel = new QLabel("Mark Interesting Nodes");
+        container->addWidget(_interestingNodesLabel);
+
+        QPushButton* interestingNodesEdit = new QPushButton("Edit");
+        connect(
+            interestingNodesEdit, &QPushButton::clicked,
+            this, &ProfileEdit::openMarkNodes
+        );
+        interestingNodesEdit->setLayoutDirection(Qt::RightToLeft);
+        container->addWidget(interestingNodesEdit);
+        rightLayout->addLayout(container);
+    }
+    {
+        QFrame* line = new QFrame;
+        line->setFrameShape(QFrame::HLine);
+        line->setFrameShadow(QFrame::Sunken);
+        rightLayout->addWidget(line);
+    }
+    {
+        QBoxLayout* container = new QVBoxLayout;
+        _deltaTimesLabel = new QLabel("Simulation Time Increments");
+        container->addWidget(_deltaTimesLabel);
+
+        QPushButton* deltaTimesEdit = new QPushButton("Edit");
+        connect(
+            deltaTimesEdit, &QPushButton::clicked,
+            this, &ProfileEdit::openDeltaTimes
+        );
+        deltaTimesEdit->setLayoutDirection(Qt::RightToLeft);
+        container->addWidget(deltaTimesEdit);
+        rightLayout->addLayout(container);
+    }
+    {
+        QFrame* line = new QFrame;
+        line->setFrameShape(QFrame::HLine);
+        line->setFrameShadow(QFrame::Sunken);
+        rightLayout->addWidget(line);
+    }
+    {
+        QBoxLayout* container = new QVBoxLayout;
+        _cameraLabel = new QLabel("Camera");
+        container->addWidget(_cameraLabel);
+
+        QPushButton* cameraEdit = new QPushButton("Edit");
+        connect(cameraEdit, &QPushButton::clicked, this, &ProfileEdit::openCamera);
+        cameraEdit->setLayoutDirection(Qt::RightToLeft);
+        container->addWidget(cameraEdit);
+        rightLayout->addLayout(container);
+    }
+    {
+        QFrame* line = new QFrame;
+        line->setFrameShape(QFrame::HLine);
+        line->setFrameShadow(QFrame::Sunken);
+        rightLayout->addWidget(line);
+    }
+    {
+        QBoxLayout* container = new QVBoxLayout;
+        _timeLabel = new QLabel("Time");
+        container->addWidget(_timeLabel);
+
+        QPushButton* timeEdit = new QPushButton("Edit");
+        connect(timeEdit, &QPushButton::clicked, this, &ProfileEdit::openTime);
+        timeEdit->setLayoutDirection(Qt::RightToLeft);
+        container->addWidget(timeEdit);
+        rightLayout->addLayout(container);
+    }
+    {
+        QFrame* line = new QFrame;
+        line->setFrameShape(QFrame::HLine);
+        line->setFrameShadow(QFrame::Sunken);
+        rightLayout->addWidget(line);
+    }
+    {
+        QBoxLayout* container = new QVBoxLayout;
+        _modulesLabel = new QLabel("Modules");
+        container->addWidget(_modulesLabel);
+
+        QPushButton* modulesEdit = new QPushButton("Edit");
+        connect(modulesEdit, &QPushButton::clicked, this, &ProfileEdit::openModules);
+        modulesEdit->setLayoutDirection(Qt::RightToLeft);
+        container->addWidget(modulesEdit);
+        rightLayout->addLayout(container);
+    }
+    {
+        QFrame* line = new QFrame;
+        line->setFrameShape(QFrame::HLine);
+        line->setFrameShadow(QFrame::Sunken);
+        rightLayout->addWidget(line);
+    }
+    {
+        QBoxLayout* container = new QVBoxLayout;
+        _additionalScriptsLabel = new QLabel("Additional Scripts");
+        container->addWidget(_additionalScriptsLabel);
+
+        QPushButton* additionalScriptsEdit = new QPushButton("Edit");
+        connect(
+            additionalScriptsEdit, &QPushButton::clicked,
+            this, &ProfileEdit::openAddedScripts
+        );
+        additionalScriptsEdit->setLayoutDirection(Qt::RightToLeft);
+        container->addWidget(additionalScriptsEdit);
+        rightLayout->addLayout(container);
+    }
+    topLayout->addLayout(rightLayout);
+    layout->addLayout(topLayout);
+
+    {
+        QFrame* line = new QFrame;
+        line->setFrameShape(QFrame::HLine);
+        line->setFrameShadow(QFrame::Sunken);
+        layout->addWidget(line);
+    }
+
+    {
+        QBoxLayout* footer = new QHBoxLayout;
+        _errorMsg = new QLabel;
+        _errorMsg->setObjectName("error-message");
+        _errorMsg->setWordWrap(true);
+        footer->addWidget(_errorMsg);
+
+        QDialogButtonBox* buttons = new QDialogButtonBox;
+        buttons->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
+        connect(
+            buttons, &QDialogButtonBox::accepted,
+            this, &ProfileEdit::cancel
+        );
+        connect(
+            buttons, &QDialogButtonBox::rejected,
+            this, &DeltaTimes::reject
+        );
+        footer->addWidget(buttons);
+        layout->addLayout(footer);
+    }
+
+    initSummaryTextForEachCategory();
 }
 
 void ProfileEdit::initSummaryTextForEachCategory() {
-    labelText(_pData, _pData->modules().size(), "Modules", ui->label_modules);
+    labelText(_pData, _pData->modules().size(), "Modules", _modulesLabel);
 
-    labelText(_pData, _pData->assets().size(), "Assets", ui->label_assets);
-    ui->text_assets->setText(summarizeText_assets());
-    ui->text_assets->setReadOnly(true);
+    labelText(_pData, _pData->assets().size(), "Assets", _assetsLabel);
+    _assetsEdit->setText(summarizeText_assets());
 
-    labelText(_pData, _pData->properties().size(), "Properties", ui->label_properties);
-    ui->text_properties->setText(summarizeText_properties());
-    ui->text_properties->setReadOnly(true);
+    labelText(_pData, _pData->properties().size(), "Properties", _propertiesLabel);
+    _propertiesEdit->setText(summarizeText_properties());
 
-    labelText(_pData, _pData->keybindings().size(), "Keybindings", ui->label_keybindings);
-    ui->text_keybindings->setText(summarizeText_keybindings());
-    ui->text_keybindings->setReadOnly(true);
+    labelText(_pData, _pData->keybindings().size(), "Keybindings", _keybindingsLabel);
+    _keybindingsEdit->setText(summarizeText_keybindings());
 
     labelText(_pData, _pData->deltaTimes().size(), "Simulation Time Increments",
-        ui->label_deltatimes);
+        _deltaTimesLabel);
     labelText(_pData, _pData->markNodes().size(), "Mark Interesting Nodes",
-        ui->label_marknodes);
-    labelText(_pData, 0, "Camera", ui->label_camera);
-    labelText(_pData, 0, "Time", ui->label_time);
-    labelText(_pData, 0, "Meta", ui->label_meta);
-    labelText(_pData, 0, "Additional Scripts", ui->label_additionalscripts);
+        _interestingNodesLabel);
+    labelText(_pData, 0, "Camera", _cameraLabel);
+    labelText(_pData, 0, "Time", _timeLabel);
+    labelText(_pData, 0, "Meta", _metaLabel);
+    labelText(_pData, 0, "Additional Scripts", _additionalScriptsLabel);
 }
 
 void ProfileEdit::setProfileName(QString profileToSet) {
-    ui->line_profile->setText(profileToSet);
+    _profileEdit->setText(profileToSet);
 }
 
 void ProfileEdit::duplicateProfile() {
-    QString currentProfile = ui->line_profile->text();
+    QString currentProfile = _profileEdit->text();
     if (currentProfile != "") {
         QString duplicatedName = currentProfile + "_1";
         if ((currentProfile.length() > 2)
@@ -116,13 +348,13 @@ void ProfileEdit::duplicateProfile() {
                     + "_" + QString::number(val + 1);
             }
         }
-        ui->line_profile->setText(duplicatedName);
+        _profileEdit->setText(duplicatedName);
     }
-    ui->label_error->setText("");
+    _errorMsg->setText("");
 }
 
 void ProfileEdit::openMeta() {
-    ui->label_error->setText("");
+    _errorMsg->setText("");
     if (_pData) {
        _meta = new Meta(_pData, this);
        _meta->exec();
@@ -131,55 +363,53 @@ void ProfileEdit::openMeta() {
 }
 
 void ProfileEdit::openModules() {
-    ui->label_error->setText("");
+    _errorMsg->setText("");
     if (_pData) {
         _modules = new Modules(_pData, this);
         _modules->exec();
-        labelText(_pData, _pData->modules().size(), "Modules", ui->label_modules);
+        labelText(_pData, _pData->modules().size(), "Modules", _modulesLabel);
         delete _modules;
     }
 }
 
 void ProfileEdit::openProperties() {
-    ui->label_error->setText("");
+    _errorMsg->setText("");
     if (_pData) {
         _properties = new Properties(_pData, this);
         _properties->exec();
-        labelText(_pData, _pData->properties().size(), "Properties",
-            ui->label_properties
-        );
-        ui->text_properties->setText(summarizeText_properties());
+        labelText(_pData, _pData->properties().size(), "Properties", _propertiesLabel);
+        _propertiesEdit->setText(summarizeText_properties());
         delete _properties;
     }
 }
 
 void ProfileEdit::openKeybindings() {
-    ui->label_error->setText("");
+    _errorMsg->setText("");
     if (_pData) {
         _keybindings = new Keybindings(_pData, this);
         _keybindings->exec();
         labelText(_pData, _pData->keybindings().size(), "Keybindings",
-            ui->label_keybindings
+            _keybindingsLabel
         );
-        ui->text_keybindings->setText(summarizeText_keybindings());
+        _keybindingsEdit->setText(summarizeText_keybindings());
         delete _keybindings;
     }
 }
 
 void ProfileEdit::openAssets() {
-    ui->label_error->setText("");
+    _errorMsg->setText("");
     if (_pData) {
         _assets = new Assets(_pData, _reportedAssets, this);
         _assets->exec();
-        labelText(_pData, _pData->assets().size(), "Assets", ui->label_assets);
-        ui->text_assets->setText(_assets->createTextSummary());
-        ui->text_assets->setText(summarizeText_assets());
+        labelText(_pData, _pData->assets().size(), "Assets", _assetsLabel);
+        _assetsEdit->setText(_assets->createTextSummary());
+        _assetsEdit->setText(summarizeText_assets());
         delete _assets;
     }
 }
 
 void ProfileEdit::openTime() {
-    ui->label_error->setText("");
+    _errorMsg->setText("");
     if (_pData) {
         _time = new Time(_pData, this);
         _time->exec();
@@ -188,19 +418,19 @@ void ProfileEdit::openTime() {
 }
 
 void ProfileEdit::openDeltaTimes() {
-    ui->label_error->setText("");
+    _errorMsg->setText("");
     if (_pData) {
         _deltaTimes = new DeltaTimes(_pData, this);
         _deltaTimes->exec();
         labelText(_pData, _pData->deltaTimes().size(), "Simulation Time Increments",
-            ui->label_deltatimes
+            _deltaTimesLabel
         );
         delete _deltaTimes;
     }
 }
 
 void ProfileEdit::openAddedScripts() {
-    ui->label_error->setText("");
+    _errorMsg->setText("");
     if (_pData) {
         _addedScripts = new AdditionalScripts(_pData, this);
         _addedScripts->exec();
@@ -209,7 +439,7 @@ void ProfileEdit::openAddedScripts() {
 }
 
 void ProfileEdit::openCamera() {
-    ui->label_error->setText("");
+    _errorMsg->setText("");
     if (_pData) {
         _camera = new Camera(_pData, this);
         _camera->exec();
@@ -218,12 +448,12 @@ void ProfileEdit::openCamera() {
 }
 
 void ProfileEdit::openMarkNodes() {
-    ui->label_error->setText("");
+    _errorMsg->setText("");
     if (_pData) {
         _markNodes = new MarkNodes(_pData, this);
         _markNodes->exec();
         labelText(_pData, _pData->markNodes().size(), "Mark Interesting Nodes",
-            ui->label_marknodes
+            _interestingNodesLabel
         );
         delete _markNodes;
     }
@@ -411,7 +641,7 @@ bool ProfileEdit::wasSaved() {
 }
 
 std::string ProfileEdit::specifiedFilename() {
-    return ui->line_profile->text().toUtf8().constData();
+    return _profileEdit->text().toUtf8().constData();
 }
 
 void ProfileEdit::cancel() {
@@ -425,10 +655,10 @@ bool ProfileEdit::isReadOnly(std::string profileSave) {
 }
 
 void ProfileEdit::approved() {
-    QString profileName = ui->line_profile->text();
+    QString profileName = _profileEdit->text();
     if ((profileName.length() > 0) && !isReadOnly(profileName.toUtf8().constData())) {
         _saveSelected = true;
-        ui->label_error->setText("");
+        _errorMsg->setText("");
         accept();
     }
     else {
@@ -439,7 +669,7 @@ void ProfileEdit::approved() {
         QString errorLabel = "<font color='red'>";
         errorLabel += "This is a read-only profile. Click 'duplicate' or rename & save.";
         errorLabel += "</font>";
-        ui->label_error->setText(errorLabel);
+        _errorMsg->setText(errorLabel);
     }
 }
 

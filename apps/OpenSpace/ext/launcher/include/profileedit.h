@@ -39,31 +39,8 @@
 #include "marknodes.h"
 #include <openspace/scene/profile.h>
 
-QT_BEGIN_NAMESPACE
-namespace Ui {
-class ProfileEdit;
-}
-QT_END_NAMESPACE
-
-class ProfileEdit : public QDialog
-{
-    Q_OBJECT
-
-public slots:
-    void duplicateProfile();
-    void openMeta();
-    void openProperties();
-    void openModules();
-    void openKeybindings();
-    void openAssets();
-    void openTime();
-    void openAddedScripts();
-    void openDeltaTimes();
-    void openCamera();
-    void openMarkNodes();
-    void cancel();
-    void approved();
-
+class ProfileEdit : public QDialog {
+Q_OBJECT
 public:
     /**
      * Constructor for ProfileEdit class
@@ -77,11 +54,6 @@ public:
      */
     explicit ProfileEdit(openspace::Profile* profile, const std::string reportedAssets,
         std::vector<std::string>& profilesReadOnly, QWidget *parent = nullptr);
-
-    /**
-     * Destructor for ProfileEdit class
-     */
-    ~ProfileEdit();
 
     /**
      * Sets the profile name in top save/edit window. This can be changed by user in
@@ -114,6 +86,21 @@ public:
      */
     void keyPressEvent(QKeyEvent *evt);
 
+public slots:
+    void duplicateProfile();
+    void openMeta();
+    void openProperties();
+    void openModules();
+    void openKeybindings();
+    void openAssets();
+    void openTime();
+    void openAddedScripts();
+    void openDeltaTimes();
+    void openCamera();
+    void openMarkNodes();
+    void cancel();
+    void approved();
+
 private:
     void initSummaryTextForEachCategory();
     QString summarizeText_meta();
@@ -128,7 +115,6 @@ private:
     void labelText(openspace::Profile* pData, int size, QString title, QLabel* pLabel);
     bool isReadOnly(std::string profileToSave);
 
-    Ui::ProfileEdit *ui;
     QWidget* _parent;
     Meta* _meta;
     Properties* _properties;
@@ -144,6 +130,23 @@ private:
     const std::string _reportedAssets;
     bool _saveSelected = false;
     std::vector<std::string> _profilesReadOnly;
+
+    QLineEdit* _profileEdit = nullptr;
+    QLabel* _modulesLabel = nullptr;
+    QLabel* _assetsLabel = nullptr;
+    QTextEdit* _assetsEdit = nullptr;
+    QLabel* _propertiesLabel = nullptr;
+    QTextEdit* _propertiesEdit = nullptr;
+    QLabel* _keybindingsLabel = nullptr;
+    QTextEdit* _keybindingsEdit = nullptr;
+    QLabel* _deltaTimesLabel = nullptr;
+    QLabel* _interestingNodesLabel = nullptr;
+    QLabel* _cameraLabel = nullptr;
+    QLabel* _timeLabel = nullptr;
+    QLabel* _metaLabel = nullptr;
+    QLabel* _additionalScriptsLabel = nullptr;
+
+    QLabel* _errorMsg = nullptr;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___PROFILEEDIT___H__
