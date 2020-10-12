@@ -40,7 +40,7 @@ AdditionalScriptsDialog::AdditionalScriptsDialog(openspace::Profile* profile,
 
     QBoxLayout* layout = new QVBoxLayout(this);
     {
-        QLabel* heading = new QLabel("Addtional Lua Scripts for Configuration");
+        QLabel* heading = new QLabel("Additional Lua Scripts for Configuration");
         heading->setObjectName("heading");
         layout->addWidget(heading);
     }

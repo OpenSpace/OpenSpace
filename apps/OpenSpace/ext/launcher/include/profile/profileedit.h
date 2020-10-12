@@ -103,15 +103,9 @@ public slots:
 
 private:
     void initSummaryTextForEachCategory();
-    QString summarizeText_meta();
-    QString summarizeText_modules();
-    QString summarizeText_assets();
-    QString summarizeText_properties();
-    QString summarizeText_keybindings();
-    QString summarizeText_time();
-    QString summarizeText_camera();
-    QString summarizeText_markNodes();
-    QString summarizeText_addedScripts();
+    std::string summarizeAssets();
+    std::string summarizeProperties();
+    std::string summarizeKeybindings();
     void labelText(openspace::Profile* pData, int size, QString title, QLabel* pLabel);
     bool isReadOnly(std::string profileToSave);
 

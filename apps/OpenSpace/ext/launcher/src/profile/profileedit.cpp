@@ -33,13 +33,12 @@
 #include <QPushButton>
 #include <QTextEdit>
 #include <QDialogButtonBox>
-#include <QCoreApplication>
 
 template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
 template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
 ProfileEdit::ProfileEdit(openspace::Profile* profile, const std::string reportedAssets,
-                         std::vector<std::string>& profilesReadOnly, QWidget *parent)
+                         std::vector<std::string>& profilesReadOnly, QWidget* parent)
     : QDialog(parent)
     , _reportedAssets(reportedAssets)
     , _pData(profile)
@@ -323,13 +322,13 @@ void ProfileEdit::initSummaryTextForEachCategory() {
     labelText(_pData, _pData->modules().size(), "Modules", _modulesLabel);
 
     labelText(_pData, _pData->assets().size(), "Assets", _assetsLabel);
-    _assetsEdit->setText(summarizeText_assets());
+    _assetsEdit->setText(QString::fromStdString(summarizeAssets()));
 
     labelText(_pData, _pData->properties().size(), "Properties", _propertiesLabel);
-    _propertiesEdit->setText(summarizeText_properties());
+    _propertiesEdit->setText(QString::fromStdString(summarizeProperties()));
 
     labelText(_pData, _pData->keybindings().size(), "Keybindings", _keybindingsLabel);
-    _keybindingsEdit->setText(summarizeText_keybindings());
+    _keybindingsEdit->setText(QString::fromStdString(summarizeKeybindings()));
 
     labelText(_pData, _pData->deltaTimes().size(), "Simulation Time Increments",
         _deltaTimesLabel);
@@ -362,130 +361,93 @@ void ProfileEdit::duplicateProfile() {
         }
         _profileEdit->setText(duplicatedName);
     }
-    _errorMsg->setText("");
+    _errorMsg->clear();
 }
 
 void ProfileEdit::openMeta() {
-    _errorMsg->setText("");
+    _errorMsg->clear();
     if (_pData) {
-       _meta = new MetaDialog(_pData, this);
-       _meta->exec();
-       delete _meta;
+        MetaDialog(_pData, this).exec();
     }
 }
 
 void ProfileEdit::openModules() {
-    _errorMsg->setText("");
+    _errorMsg->clear();
     if (_pData) {
-        _modules = new ModulesDialog(_pData, this);
-        _modules->exec();
+        ModulesDialog(_pData, this).exec();
         labelText(_pData, _pData->modules().size(), "Modules", _modulesLabel);
-        delete _modules;
     }
 }
 
 void ProfileEdit::openProperties() {
-    _errorMsg->setText("");
+    _errorMsg->clear();
     if (_pData) {
-        _properties = new PropertiesDialog(_pData, this);
-        _properties->exec();
+        PropertiesDialog(_pData, this).exec();
         labelText(_pData, _pData->properties().size(), "Properties", _propertiesLabel);
-        _propertiesEdit->setText(summarizeText_properties());
-        delete _properties;
+        _propertiesEdit->setText(QString::fromStdString(summarizeProperties()));
     }
 }
 
 void ProfileEdit::openKeybindings() {
-    _errorMsg->setText("");
+    _errorMsg->clear();
     if (_pData) {
-        _keybindings = new KeybindingsDialog(_pData, this);
-        _keybindings->exec();
+        KeybindingsDialog(_pData, this).exec();
         labelText(_pData, _pData->keybindings().size(), "Keybindings",
             _keybindingsLabel
         );
-        _keybindingsEdit->setText(summarizeText_keybindings());
-        delete _keybindings;
+        _keybindingsEdit->setText(QString::fromStdString(summarizeKeybindings()));
     }
 }
 
 void ProfileEdit::openAssets() {
-    _errorMsg->setText("");
+    _errorMsg->clear();
     if (_pData) {
-        _assets = new AssetsDialog(_pData, _reportedAssets, this);
-        _assets->exec();
+        AssetsDialog(_pData, _reportedAssets, this).exec();
         labelText(_pData, _pData->assets().size(), "Assets", _assetsLabel);
         _assetsEdit->setText(_assets->createTextSummary());
-        _assetsEdit->setText(summarizeText_assets());
-        delete _assets;
+        _assetsEdit->setText(QString::fromStdString(summarizeAssets()));
     }
 }
 
 void ProfileEdit::openTime() {
-    _errorMsg->setText("");
+    _errorMsg->clear();
     if (_pData) {
-        _time = new TimeDialog(_pData, this);
-        _time->exec();
-        delete _time;
+        TimeDialog(_pData, this).exec();
     }
 }
 
 void ProfileEdit::openDeltaTimes() {
-    _errorMsg->setText("");
+    _errorMsg->clear();
     if (_pData) {
-        _deltaTimes = new DeltaTimesDialog(_pData, this);
-        _deltaTimes->exec();
+        DeltaTimesDialog(_pData, this).exec();
         labelText(_pData, _pData->deltaTimes().size(), "Simulation Time Increments",
             _deltaTimesLabel
         );
-        delete _deltaTimes;
     }
 }
 
 void ProfileEdit::openAddedScripts() {
-    _errorMsg->setText("");
+    _errorMsg->clear();
     if (_pData) {
-        _addedScripts = new AdditionalScriptsDialog(_pData, this);
-        _addedScripts->exec();
-        delete _addedScripts;
+        AdditionalScriptsDialog(_pData, this).exec();
     }
 }
 
 void ProfileEdit::openCamera() {
-    _errorMsg->setText("");
+    _errorMsg->clear();
     if (_pData) {
-        _camera = new CameraDialog(_pData, this);
-        _camera->exec();
-        delete _camera;
+        CameraDialog(_pData, this).exec();
     }
 }
 
 void ProfileEdit::openMarkNodes() {
-    _errorMsg->setText("");
+    _errorMsg->clear();
     if (_pData) {
-        _markNodes = new MarkNodesDialog(_pData, this);
-        _markNodes->exec();
+        MarkNodesDialog(_pData, this).exec();
         labelText(_pData, _pData->markNodes().size(), "Mark Interesting Nodes",
             _interestingNodesLabel
         );
-        delete _markNodes;
     }
-}
-
-QString ProfileEdit::summarizeText_meta() {
-    if (_pData == nullptr) {
-        return "";
-    }
-    QString s;
-    if (_pData->meta().has_value()) {
-        s += QString(_pData->meta().value().name->c_str());
-        s += ", " + QString(_pData->meta().value().version->c_str());
-        s += ", " + QString(_pData->meta().value().description->c_str());
-        s += ", " + QString(_pData->meta().value().author->c_str());
-        s += ", " + QString(_pData->meta().value().url->c_str());
-        s += ", " + QString(_pData->meta().value().license->c_str());
-    }
-
-    return s;
 }
 
 void ProfileEdit::labelText(openspace::Profile* pData, int size, QString title,
@@ -496,154 +458,47 @@ void ProfileEdit::labelText(openspace::Profile* pData, int size, QString title,
     }
     QString label;
     if (size > 0) {
-        label = "<html><head/><body><p><span style=\" font-weight:600;\">" + title + " ("
-            + QString::number(size) + ")</span></p></body></html>";
+        label = title + " (" + QString::number(size) + ")";
     }
     else {
-        label = "<html><head/><body><p><span style=\" font-weight:600;\">" + title
-            + "</span></p></body></html>";
+        label = title;
     }
     QByteArray qba = label.toLocal8Bit();
-    pLabel->setText(QCoreApplication::translate("ProfileEdit", qba.data(), nullptr));
+    pLabel->setText(label);
 }
 
-QString ProfileEdit::summarizeText_modules() {
+std::string ProfileEdit::summarizeProperties() {
     if (_pData == nullptr) {
         return "";
     }
-    QString results;
-    for (openspace::Profile::Module m : _pData->modules()) {
-        results += QString(m.name.c_str());
-        if (m.loadedInstruction->size() > 0 && m.notLoadedInstruction->size() > 0) {
-            results += "(has commands for both loaded & non-loaded conditions)";
-        }
-        else if (m.loadedInstruction->size() > 0) {
-            results += "(has command for loaded condition)";
-        }
-        else if (m.notLoadedInstruction->size() > 0) {
-            results += "(has command for non-loaded condition)";
-        }
-        results += "\n";
-    }
-    return results;
-}
-
-QString ProfileEdit::summarizeText_properties() {
-    if (_pData == nullptr) {
-        return "";
-    }
-    QString results;
+    std::string results;
     for (openspace::Profile::Property p : _pData->properties()) {
-        results += QString(p.name.c_str()) + " = ";
-        results += QString(p.value.c_str()) + "\n";
+        results += p.name + " = " + p.value + '\n';
     }
     return results;
 }
 
-QString ProfileEdit::summarizeText_keybindings() {
+std::string ProfileEdit::summarizeKeybindings() {
     if (_pData == nullptr) {
         return "";
     }
-    QString results;
+    std::string results;
     for (openspace::Profile::Keybinding k : _pData->keybindings()) {
-        results += QString(k.name.c_str()) + " (";
+        results += k.name + " (";
         int keymod = static_cast<int>(k.key.modifier);
         if (keymod != static_cast<int>(openspace::KeyModifier::NoModifier)) {
-            results += QString(openspace::KeyModifierNames.at(keymod).c_str()) + "+";
+            results += openspace::KeyModifierNames.at(keymod) + "+";
         }
-        results += QString(openspace::KeyNames.at(static_cast<int>(k.key.key)).c_str());
+        results += openspace::KeyNames.at(static_cast<int>(k.key.key));
         results += ")\n";
     }
     return results;
 }
 
-QString ProfileEdit::summarizeText_assets() {
-    QString results;
-    for (std::string a : _pData->assets()) {
-        results += QString(a.c_str()) + "\n"; //"    ";
-    }
-    return results;
-}
-
-QString ProfileEdit::summarizeText_time() {
-    if (_pData == nullptr) {
-        return "";
-    }
-    QString results;
-    if (_pData->time().has_value()) {
-        if (_pData->time().value().type == openspace::Profile::Time::Type::Absolute) {
-            results = "Absolute time: ";
-        }
-        else if (_pData->time().value().type
-                 == openspace::Profile::Time::Type::Relative)
-        {
-            results = "Relative time: ";
-        }
-        results += QString(_pData->time().value().value.c_str());
-    }
-    return results;
-}
-
-QString ProfileEdit::summarizeText_addedScripts() {
-    if (_pData == nullptr) {
-        return "";
-    }
-    QString result;
-    for (auto s : _pData->additionalScripts()) {
-        result += QString(s.c_str());
-    result += "\n";
-    }
-    return result;
-}
-
-QString ProfileEdit::summarizeText_camera() {
-    if (_pData == nullptr) {
-        return "";
-    }
-    QString results;
-    if (_pData->camera().has_value()) {
-        std::visit(overloaded {
-            [&] (const openspace::Profile::CameraNavState& nav) {
-                results = "setNavigationState: ";
-                results += QString(nav.anchor.c_str()) + " ";
-                results += QString(nav.aim->c_str()) + " ";
-                results += QString(nav.referenceFrame.c_str()) + " ";
-                results += "Pos=" + QString::number(nav.position.x) + ",";
-                results += QString::number(nav.position.y) + ",";
-                results += QString::number(nav.position.z) + " ";
-                if (nav.up.has_value()) {
-                    results += "Up=" + QString::number(nav.up.value().x) + ",";
-                    results += QString::number(nav.up.value().y) + ",";
-                    results += QString::number(nav.up.value().z) + " ";
-                }
-                if (nav.yaw.has_value()) {
-                    results += "Yaw=" + QString::number(nav.yaw.value()) + " ";
-                }
-                if (nav.pitch.has_value()) {
-                    results += "Pitch=" + QString::number(nav.pitch.value());
-                }
-            },
-            [&] (const openspace::Profile::CameraGoToGeo& geo) {
-                results = "goToGeo: ";
-                results += QString(geo.anchor.c_str()) + " ";
-                results += "Lat=" + QString::number(geo.latitude) + " ";
-                results += "Lon=" + QString::number(geo.longitude) + " ";
-                if (geo.altitude.has_value()) {
-                    results += "Alt=" + QString::number(geo.altitude.value());
-                }
-            },
-        }, _pData->camera().value());
-    }
-    return results;
-}
-
-QString ProfileEdit::summarizeText_markNodes() {
-    if (_pData == nullptr) {
-        return "";
-    }
-    QString results;
-    for (auto s : _pData->markNodes()) {
-        results += QString(s.c_str()) + "  ";
+std::string ProfileEdit::summarizeAssets() {
+    std::string results;
+    for (const std::string& a : _pData->assets()) {
+        results += a + "\n";
     }
     return results;
 }

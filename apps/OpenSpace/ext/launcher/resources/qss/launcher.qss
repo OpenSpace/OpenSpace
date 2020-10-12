@@ -10,7 +10,7 @@ QLabel#heading {
 }
 
 QLabel#error-message {
-  color: #dd1111;
+  color: rgb(221, 17, 17);
 }
 
 /*
@@ -27,14 +27,24 @@ LauncherWindow  QLabel#clear {
 
 LauncherWindow  QComboBox#config {
   background: rgb(96, 96, 96);
-  border: 1px solid gray;
+  border: 1px solid rgb(128, 128, 128);
   border-radius: 3px;
+  border-color: rgb(225, 225, 225);
   padding: 1px 18px 1px 3px;
   min-width: 6em;
   font-size: 14px;
   font-family: Segoe UI;
   font-weight: bold;
-  color: #ffffff;
+  color: rgb(255, 255, 255);
+}
+
+LauncherWindow  QComboBox#config:hover {
+  background: rgb(120, 120, 120);
+}
+
+LauncherWindow  QPushButton {
+  font-family: Segoe UI;
+  font-weight: bold;
 }
 
 LauncherWindow  QPushButton#large {
@@ -42,11 +52,12 @@ LauncherWindow  QPushButton#large {
   border-radius: 2px;
   border-style: outset;
   border-width: 2px;
-  border-color: #333;
+  border-color: rgb(225, 225, 225);
   font-size: 24px;
-  font-family: Segoe UI;
-  font-weight: bold;
-  color: #efefef;
+  color: rgb(239, 239, 239);
+}
+LauncherWindow  QPushButton#large:hover {
+  background: rgb(150, 150, 150);
 }
 
 LauncherWindow  QPushButton#small {
@@ -54,11 +65,13 @@ LauncherWindow  QPushButton#small {
   border-radius: 2px;
   border-style: outset;
   border-width: 1px;
-  border-color: #111;
+  border-color: rgb(225, 225, 225);
   font-size: 14px;
-  font-family: Segoe UI;
-  font-weight: bold;
-  color: #fff;
+  color: rgb(255, 255, 255);
+}
+
+LauncherWindow  QPushButton#small:hover {
+  background: rgb(120, 120, 120);
 }
 
 /*
