@@ -81,7 +81,7 @@ std::string starColor(float bv, std::ifstream& colormap) {
     return fmt::format("{{ {}, {}, {} }}", r, g, b);
 }
 
-glm::dmat4 computeOrbitPlaneRotationMatrix(float i, float bigom, float om) {
+glm::dmat4 computeOrbitPlaneRotationMatrix(float i, float bigom, float omega) {
     // Exoplanet defined inclination changed to be used as Kepler defined inclination
     const glm::dvec3 ascendingNodeAxisRot = glm::dvec3(0.0, 0.0, 1.0);
     const glm::dvec3 inclinationAxisRot =  glm::dvec3(1.0, 0.0, 0.0);
@@ -89,7 +89,7 @@ glm::dmat4 computeOrbitPlaneRotationMatrix(float i, float bigom, float om) {
 
     const double asc = glm::radians(bigom);
     const double inc = glm::radians(i);
-    const double per = glm::radians(om);
+    const double per = glm::radians(omega);
 
     const glm::dmat4 orbitPlaneRotation =
         glm::rotate(asc, glm::dvec3(ascendingNodeAxisRot)) *
@@ -337,11 +337,11 @@ int addExoplanetSystem(lua_State* L) {
         if (std::isnan(planet.i)) {
             planet.i = 90.f;
         }
-        if (std::isnan(planet.bigOm)) {
-            planet.bigOm = 180.f;
+        if (std::isnan(planet.bigOmega)) {
+            planet.bigOmega = 180.f;
         }
-        if (std::isnan(planet.om)) {
-            planet.om = 90.f;
+        if (std::isnan(planet.omega)) {
+            planet.omega = 90.f;
         }
         Time epoch;
         std::string sEpoch;
@@ -385,8 +385,8 @@ int addExoplanetSystem(lua_State* L) {
             "Eccentricity = " + std::to_string(planet.ecc) + "," //ECC
             "SemiMajorAxis = " + std::to_string(semiMajorAxisInKm) + ","
             "Inclination = " + std::to_string(planet.i) + "," //I
-            "AscendingNode = " + std::to_string(planet.bigOm) + "," //BIGOM
-            "ArgumentOfPeriapsis = " + std::to_string(planet.om) + "," //OM
+            "AscendingNode = " + std::to_string(planet.bigOmega) + "," //BIGOM
+            "ArgumentOfPeriapsis = " + std::to_string(planet.omega) + "," //OM
             "MeanAnomaly = 0.0,"
             "Epoch = '" + sEpoch + "'," //TT. JD to YYYY MM DD hh:mm:ss
             "Period = " + std::to_string(period) + ""
@@ -455,8 +455,8 @@ int addExoplanetSystem(lua_State* L) {
             // Get the orbit plane of the planet trail orbit from the KeplerTranslation
             const glm::dmat4 orbitPlaneRotationMatrix = computeOrbitPlaneRotationMatrix(
                 planet.i,
-                planet.bigOm,
-                planet.om
+                planet.bigOmega,
+                planet.omega
             );
             const glm::dmat3 rotation = orbitPlaneRotationMatrix;
 

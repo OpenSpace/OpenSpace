@@ -22,35 +22,28 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSCSVTOBINTASK___H__
-#define __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSCSVTOBINTASK___H__
+#include <openspace/util/coordinateconversion.h>
 
-#include <openspace/properties/vector/vec3property.h>
-#include <openspace/util/task.h>
-#include <string>
+namespace openspace {
 
-namespace openspace::exoplanets {
+glm::dvec3 icrsToGalacticCartesian(float ra, float dec, double distance) {
+    // Convert to Galactic Coordinates from ICRS right ascension and declination
+    // https://gea.esac.esa.int/archive/documentation/GDR2/Data_processing/
+    // chap_cu3ast/sec_cu3ast_intro/ssec_cu3ast_intro_tansforms.html#SSS1
+    const glm::dmat3 conversionMatrix = glm::dmat3({
+        -0.0548755604162154,  0.4941094278755837, -0.8676661490190047, // col 0
+        -0.8734370902348850, -0.4448296299600112, -0.1980763734312015, // col 1
+        -0.4838350155487132,  0.7469822444972189,  0.4559837761750669  // col 2
+    });
 
-class ExoplanetsCsvToBinTask : public Task {
-public:
-    ExoplanetsCsvToBinTask(const ghoul::Dictionary& dictionary);
-    std::string description() override;
-    void perform(const Task::ProgressCallback& progressCallback) override;
-    static documentation::Documentation documentation();
+    glm::dvec3 rICRS = glm::dvec3(
+        cos(glm::radians(ra)) * cos(glm::radians(dec)),
+        sin(glm::radians(ra)) * cos(glm::radians(dec)),
+        sin(glm::radians(dec))
+    );
+    glm::dvec3 rGalactic = conversionMatrix * rICRS; // on the unit sphere
 
-private:
-    std::string _inputCsvPath;
-    std::string _inputSpeckPath;
-    std::string _outputBinPath;
-    std::string _outputLutPath;
-    std::string _teffToBvFilePath;
+    return distance * rGalactic;
+}
 
-    glm::vec3 starPosition(const std::string& starName);
-
-    // Compute b-v color from teff value using a conversion file
-    float bvFromTeff(float teff);
-};
-
-} // namespace openspace::exoplanets
-
-#endif // __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSCSVTOBINTASK___H__
+} // namespace openspace
