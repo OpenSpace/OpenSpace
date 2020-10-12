@@ -49,7 +49,7 @@ public:
      *                 new or imported profile.
      * \param parent Pointer to parent Qt widget (optional)
      */
-    KeybindingsDialog(openspace::Profile* profile, QWidget* parent);
+    KeybindingsDialog(openspace::Profile& profile, QWidget* parent);
 
     /**
      * Handles keypress while the Qt dialog window is open
@@ -77,7 +77,7 @@ private:
         const std::string& to);
     bool isLineEmpty(int index);
 
-    openspace::Profile* _profile;
+    openspace::Profile& _profile;
     std::vector<openspace::Profile::Keybinding> _data;
     std::vector<int> _mapModKeyComboBoxIndexToKeyValue;
     std::vector<int> _mapKeyComboBoxIndexToKeyValue;

@@ -45,7 +45,7 @@ public:
      *                 new or imported profile.
      * \param parent Pointer to parent Qt widget (optional)
      */
-    DeltaTimesDialog(openspace::Profile* profile, QWidget* parent);
+    DeltaTimesDialog(openspace::Profile& profile, QWidget* parent);
 
     /**
      * Returns a text summary of the delta time list for display purposes
@@ -87,7 +87,7 @@ private:
     QString checkForTimeDescription(int intervalIndex, int value);
     bool isLineEmpty(int index);
 
-    openspace::Profile* _profile;
+    openspace::Profile& _profile;
     std::vector<double> _data;
     bool _editModeNewItem = false;
 

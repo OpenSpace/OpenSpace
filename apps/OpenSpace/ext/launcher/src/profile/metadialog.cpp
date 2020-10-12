@@ -33,7 +33,7 @@
 #include <QVBoxLayout>
 #include <algorithm>
 
-MetaDialog::MetaDialog(openspace::Profile* profile, QWidget *parent)
+MetaDialog::MetaDialog(openspace::Profile& profile, QWidget *parent)
     : QDialog(parent)
     , _profile(profile)
 {
@@ -72,8 +72,8 @@ MetaDialog::MetaDialog(openspace::Profile* profile, QWidget *parent)
     layout->addWidget(buttons);
 
 
-    if (_profile->meta().has_value()) {
-        openspace::Profile::Meta meta = *_profile->meta();
+    if (_profile.meta().has_value()) {
+        openspace::Profile::Meta meta = *_profile.meta();
         if (meta.name.has_value()) {
             _nameEdit->setText(QString::fromStdString(*meta.name));
         }
@@ -121,10 +121,10 @@ void MetaDialog::save() {
         if (!_licenseEdit->text().isEmpty()) {
             m.license = _licenseEdit->text().toStdString();
         }
-        _profile->setMeta(m);
+        _profile.setMeta(m);
     }
     else {
-        _profile->clearMeta();
+        _profile.clearMeta();
     }
     accept();
 }

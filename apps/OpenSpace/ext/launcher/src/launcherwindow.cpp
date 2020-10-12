@@ -46,8 +46,10 @@ namespace {
     constexpr const int SmallItemWidth = 100;
 } // namespace
 
+using namespace openspace;
+
 LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
-                               openspace::configuration::Configuration& globalConfig,
+                               configuration::Configuration& globalConfig,
                                bool sgctConfigEnabled, std::string sgctConfigName,
                                QWidget *parent)
     : QMainWindow(parent)
@@ -56,7 +58,7 @@ LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
     , _filesystemAccess(".asset",
                         {"scene", "global", "customization", "examples", "util"},
                         true, true)
-    , _basePath(QString::fromUtf8(basePath.c_str()))
+    , _basePath(QString::fromStdString(basePath))
     , _profileChangeAllowed(profileEnabled)
     , _sgctConfigChangeAllowed(sgctConfigEnabled)
     , _globalConfig(globalConfig)
@@ -124,8 +126,8 @@ LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
 
 
     _reportAssetsInFilesystem = _filesystemAccess.useQtFileSystemModelToTraverseDir(
-        QString(basePath.c_str()) + "/data/assets");
-    populateProfilesList(QString(globalConfig.profile.c_str()));
+        QString::fromStdString(basePath) + "/data/assets");
+    populateProfilesList(QString::fromStdString(globalConfig.profile));
 
     _profileBox->setDisabled(!_profileChangeAllowed);
 
@@ -141,7 +143,6 @@ LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
         hasSyncFiles = true;
     }
 
-
     QString filename;
     QString bgpath;
     if (hasSyncFiles) {
@@ -150,7 +151,7 @@ LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
         std::uniform_int_distribution<int> uni(0, 4);
         auto random_integer = uni(rng);
         filename = QString::fromStdString("/http/launcher_images/1/profile" + std::to_string(random_integer) + ".png");
-        bgpath = QString(globalConfig.pathTokens["SYNC"].c_str()) + filename;
+        bgpath = QString::fromStdString(globalConfig.pathTokens["SYNC"]) + filename;
     }
     else {
         bgpath = QString::fromStdString(":/images/launcher-background.png");
@@ -164,7 +165,8 @@ void LauncherWindow::populateProfilesList(QString preset) {
         _profileBox->removeItem(i);
     }
     std::string reportProfiles = _fileAccessProfiles.useQtFileSystemModelToTraverseDir(
-        _basePath + "/data/profiles");
+        _basePath + "/data/profiles"
+    );
     std::stringstream instream(reportProfiles);
     std::string iline;
     QStringList profilesListLine;
@@ -183,12 +185,13 @@ void LauncherWindow::populateProfilesList(QString preset) {
 
 void LauncherWindow::populateWindowConfigsList(QString preset) {
     std::string reportConfigs = _fileAccessWinConfigs.useQtFileSystemModelToTraverseDir(
-        _basePath + "/config");
+        _basePath + "/config"
+    );
     std::stringstream instream(reportConfigs);
     std::string iline;
     QStringList windowConfigsListLine;
     while (std::getline(instream, iline)) {
-        windowConfigsListLine << iline.c_str();
+        windowConfigsListLine << QString::fromStdString(iline);
     }
     _windowConfigBox->addItems(windowConfigsListLine);
     if (preset.length() > 0) {
@@ -205,55 +208,52 @@ void LauncherWindow::populateWindowConfigsList(QString preset) {
 
 void LauncherWindow::openWindow_new() {
     QString initialProfileSelection = _profileBox->currentText();
-    openspace::Profile* pData = new openspace::Profile();
-    if (pData != nullptr) {
-        myEditorWindow = new ProfileEdit(pData, _reportAssetsInFilesystem,
-            _globalConfig.profilesReadOnly, this);
-        myEditorWindow->exec();
-        if (myEditorWindow->wasSaved()) {
-            std::string saveProfilePath = _basePath.toUtf8().constData();
-            saveProfilePath += "/data/profiles/";
-            saveProfilePath += myEditorWindow->specifiedFilename() + ".profile";
-            saveProfileToFile(saveProfilePath, pData);
-            populateProfilesList(QString(myEditorWindow->specifiedFilename().c_str()));
-        }
-        else {
-            populateProfilesList(initialProfileSelection);
-        }
-        delete myEditorWindow;
-        delete pData;
+    Profile profile;
+    myEditorWindow = new ProfileEdit(profile, _reportAssetsInFilesystem,
+        _globalConfig.profilesReadOnly, this);
+    myEditorWindow->exec();
+    if (myEditorWindow->wasSaved()) {
+        std::string saveProfilePath = _basePath.toUtf8().constData();
+        saveProfilePath += "/data/profiles/";
+        saveProfilePath += myEditorWindow->specifiedFilename() + ".profile";
+        saveProfileToFile(saveProfilePath, profile);
+        populateProfilesList(QString(myEditorWindow->specifiedFilename().c_str()));
     }
+    else {
+        populateProfilesList(initialProfileSelection);
+    }
+    delete myEditorWindow;
 }
 
 void LauncherWindow::openWindow_edit() {
     QString initialProfileSelection = _profileBox->currentText();
-    std::string profilePath = _basePath.toUtf8().constData();
+    std::string profilePath = _basePath.toStdString();
     profilePath += "/data/profiles/";
     int selectedProfileIdx = _profileBox->currentIndex();
     QString profileToSet = _profileBox->itemText(selectedProfileIdx);
-    std::string editProfilePath = profilePath + profileToSet.toUtf8().constData();
+    std::string editProfilePath = profilePath + profileToSet.toStdString();
     editProfilePath += ".profile";
-    openspace::Profile* pData;
-    bool validFile = loadProfileFromFile(pData, editProfilePath);
-    if (pData != nullptr && validFile) {
-        myEditorWindow = new ProfileEdit(pData, _reportAssetsInFilesystem,
+    Profile* profile;
+    bool validFile = loadProfileFromFile(profile, editProfilePath);
+    if (profile != nullptr && validFile) {
+        myEditorWindow = new ProfileEdit(*profile, _reportAssetsInFilesystem,
             _globalConfig.profilesReadOnly, this);
         myEditorWindow->setProfileName(profileToSet);
         myEditorWindow->exec();
         if (myEditorWindow->wasSaved()) {
             profilePath += myEditorWindow->specifiedFilename() + ".profile";
-            saveProfileToFile(profilePath, pData);
+            saveProfileToFile(profilePath, *profile);
             populateProfilesList(QString(myEditorWindow->specifiedFilename().c_str()));
         }
         else {
             populateProfilesList(initialProfileSelection);
         }
         delete myEditorWindow;
-        delete pData;
+        delete profile;
     }
 }
 
-void LauncherWindow::saveProfileToFile(const std::string& path, openspace::Profile* p) {
+void LauncherWindow::saveProfileToFile(const std::string& path, const Profile& p) {
     std::ofstream outFile;
     try {
         outFile.open(path, std::ofstream::out);
@@ -269,7 +269,7 @@ void LauncherWindow::saveProfileToFile(const std::string& path, openspace::Profi
     }
 
     try {
-        outFile << p->serialize();
+        outFile << p.serialize();
     }
     catch (const std::ofstream::failure& e) {
         QMessageBox::critical(
@@ -284,7 +284,7 @@ void LauncherWindow::saveProfileToFile(const std::string& path, openspace::Profi
     outFile.close();
 }
 
-bool LauncherWindow::loadProfileFromFile(openspace::Profile*& p, std::string filename) {
+bool LauncherWindow::loadProfileFromFile(Profile*& p, std::string filename) {
     bool successfulLoad = true;
     std::string content;
     if (filename.length() > 0) {
@@ -305,9 +305,9 @@ bool LauncherWindow::loadProfileFromFile(openspace::Profile*& p, std::string fil
         }
     }
     try {
-        p = new openspace::Profile(content);
+        p = new Profile(content);
     }
-    catch (const openspace::Profile::ParsingError& e) {
+    catch (const Profile::ParsingError& e) {
         QMessageBox::critical(
             this,
             "Exception",

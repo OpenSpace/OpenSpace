@@ -52,7 +52,7 @@ public:
      *                         not be overwritten
      * \param parent Pointer to parent Qt widget (optional)
      */
-    ProfileEdit(openspace::Profile* profile, const std::string reportedAssets,
+    ProfileEdit(openspace::Profile& profile, const std::string reportedAssets,
         std::vector<std::string>& profilesReadOnly, QWidget* parent);
 
     /**
@@ -106,21 +106,11 @@ private:
     std::string summarizeAssets();
     std::string summarizeProperties();
     std::string summarizeKeybindings();
-    void labelText(openspace::Profile* pData, int size, QString title, QLabel* pLabel);
+    void labelText(const openspace::Profile& pData, int size, QString title,
+        QLabel* pLabel);
     bool isReadOnly(std::string profileToSave);
 
-    QWidget* _parent;
-    MetaDialog* _meta;
-    PropertiesDialog* _properties;
-    ModulesDialog* _modules;
-    KeybindingsDialog* _keybindings;
-    AssetsDialog* _assets;
-    TimeDialog* _time;
-    AdditionalScriptsDialog* _addedScripts;
-    DeltaTimesDialog* _deltaTimes;
-    CameraDialog* _camera;
-    MarkNodesDialog* _markNodes;
-    openspace::Profile* _pData;
+    openspace::Profile& _profile;
     const std::string _reportedAssets;
     bool _saveSelected = false;
     std::vector<std::string> _profilesReadOnly;

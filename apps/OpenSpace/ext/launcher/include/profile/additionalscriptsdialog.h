@@ -41,13 +41,13 @@ public:
      *                new or imported profile.
      * \param parent Pointer to parent Qt widget
      */
-    AdditionalScriptsDialog(openspace::Profile* profile, QWidget* parent);
+    AdditionalScriptsDialog(openspace::Profile& profile, QWidget* parent);
 
 private slots:
     void parseScript();
 
 private:
-    openspace::Profile* _profile = nullptr;
+    openspace::Profile& _profile;
     QTextEdit* _textScripts = nullptr;
 };
 

@@ -43,7 +43,7 @@ public:
      *                new or imported profile.
      * \param parent Pointer to parent Qt widget (optional)
      */
-    CameraDialog(openspace::Profile* profile, QWidget* parent);
+    CameraDialog(openspace::Profile& profile, QWidget* parent);
 
 private slots:
     void approved();
@@ -56,7 +56,7 @@ private:
     void addErrorMsg(QString errorDescription);
     bool areRequiredFormsFilledAndValid();
 
-    openspace::Profile* _profile = nullptr;
+    openspace::Profile& _profile;
     QTabWidget* _tabWidget = nullptr;
     struct {
         QLineEdit* anchor = nullptr;

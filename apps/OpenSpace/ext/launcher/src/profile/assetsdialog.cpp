@@ -115,7 +115,7 @@ namespace {
     }
 } // namespace
 
-AssetsDialog::AssetsDialog(openspace::Profile* profile, const std::string reportAssets,
+AssetsDialog::AssetsDialog(openspace::Profile& profile, const std::string reportAssets,
                            QWidget* parent)
     : QDialog(parent)
     , _profile(profile)
@@ -151,7 +151,7 @@ AssetsDialog::AssetsDialog(openspace::Profile* profile, const std::string report
         connect(_assetTree, &QTreeView::clicked, this, &AssetsDialog::selected);
 
 
-        for (const std::string& a : _profile->assets()) {
+        for (const std::string& a : _profile.assets()) {
             QModelIndex parent = _assetTreeModel.index(-1, 0);
             int nRows = _assetTreeModel.rowCount(parent);
             traverseToFindFilesystemMatch(_assetTreeModel, parent, nRows, a);
@@ -220,13 +220,13 @@ QString AssetsDialog::createTextSummary() {
 }
 
 void AssetsDialog::parseSelections() {
-    _profile->clearAssets();
+    _profile.clearAssets();
     std::vector<std::string> summaryPaths;
     std::vector<AssetTreeItem*> summaryItems;
     _assetTreeModel.getSelectedAssets(summaryPaths, summaryItems);
 
     for (const std::string& sel : summaryPaths) {
-        _profile->addAsset(sel);
+        _profile.addAsset(sel);
     }
     accept();
 }

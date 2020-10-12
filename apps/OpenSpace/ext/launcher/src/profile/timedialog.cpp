@@ -36,7 +36,7 @@
 
 using namespace openspace;
 
-TimeDialog::TimeDialog(openspace::Profile* profile, QWidget* parent)
+TimeDialog::TimeDialog(openspace::Profile& profile, QWidget* parent)
     : QDialog(parent)
     , _profile(profile)
 {
@@ -90,8 +90,8 @@ TimeDialog::TimeDialog(openspace::Profile* profile, QWidget* parent)
 
     QStringList types { "Absolute", "Relative" };
     _typeCombo->addItems(types);
-    if (_profile->time().has_value()) {
-        _data = _profile->time().value();
+    if (_profile.time().has_value()) {
+        _data = *_profile.time();
         if (_data.type == Profile::Time::Type::Relative) {
             if (_data.value == "") {
                 _data.value = "now";
@@ -148,13 +148,13 @@ void TimeDialog::approved() {
     constexpr const int Relative = static_cast<int>(Profile::Time::Type::Relative);
     if (_typeCombo->currentIndex() == Relative) {
         if (_relativeEdit->text().isEmpty()) {
-            _profile->clearTime();
+            _profile.clearTime();
         }
         else {
             Profile::Time t;
             t.type = Profile::Time::Type::Relative;
             t.value = _relativeEdit->text().toUtf8().constData();
-            _profile->setTime(t);
+            _profile.setTime(t);
         }
     }
     else {
@@ -165,7 +165,7 @@ void TimeDialog::approved() {
             _absoluteEdit->date().toString("yyyy-MM-dd").toStdString(),
             _absoluteEdit->time().toString().toStdString()
         );
-        _profile->setTime(t);
+        _profile.setTime(t);
     }
     accept();
 }

@@ -48,7 +48,7 @@ public:
      *                     in class #assetTreeModel)
      * \param parent Pointer to parent Qt widget
      */
-    AssetsDialog(openspace::Profile* profile, const std::string reportAssets,
+    AssetsDialog(openspace::Profile& profile, const std::string reportAssets,
         QWidget* parent);
 
     /**
@@ -63,7 +63,7 @@ private slots:
     void selected(const QModelIndex&);
 
 private:
-    openspace::Profile* _profile = nullptr;
+    openspace::Profile& _profile;
     AssetTreeModel _assetTreeModel;
     QTreeView* _assetTree = nullptr;
     QTextEdit* _summary = nullptr;

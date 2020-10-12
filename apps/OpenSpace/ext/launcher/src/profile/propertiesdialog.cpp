@@ -43,10 +43,10 @@ namespace {
     };
 } // namespace
 
-PropertiesDialog::PropertiesDialog(openspace::Profile* profile, QWidget *parent)
+PropertiesDialog::PropertiesDialog(openspace::Profile& profile, QWidget *parent)
     : QDialog(parent)
     , _profile(profile)
-    , _data(_profile->properties())
+    , _data(_profile.properties())
 {
     setWindowTitle("Set Property Values");
 
@@ -347,7 +347,7 @@ void PropertiesDialog::parseSelections() {
     if ((_data.size() == 1) && (_data.at(0).name.compare("") == 0)) {
         _data.clear();
     }
-    _profile->setProperties(_data);
+    _profile.setProperties(_data);
     accept();
 }
 

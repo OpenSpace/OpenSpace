@@ -93,10 +93,10 @@ namespace {
 
 } // namespace
 
-KeybindingsDialog::KeybindingsDialog(openspace::Profile* profile, QWidget *parent)
+KeybindingsDialog::KeybindingsDialog(openspace::Profile& profile, QWidget *parent)
     : QDialog(parent)
     , _profile(profile)
-    , _data(_profile->keybindings())
+    , _data(_profile.keybindings())
 {
     setWindowTitle("Assign Keybindings");
 
@@ -484,7 +484,7 @@ void KeybindingsDialog::parseSelections() {
     if ((_data.size() == 1) && (_data.at(0).name.empty())) {
         _data.clear();
     }
-    _profile->setKeybindings(_data);
+    _profile.setKeybindings(_data);
     accept();
 }
 

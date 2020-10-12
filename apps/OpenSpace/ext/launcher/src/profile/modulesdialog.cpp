@@ -33,10 +33,10 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
-ModulesDialog::ModulesDialog(openspace::Profile* profile, QWidget *parent)
+ModulesDialog::ModulesDialog(openspace::Profile& profile, QWidget *parent)
     : QDialog(parent)
     , _profile(profile)
-    , _data(_profile->modules())
+    , _data(_profile.modules())
 {
     setWindowTitle("Modules");
 
@@ -343,7 +343,7 @@ void ModulesDialog::parseSelections() {
     if ((_data.size() == 1) && (_data.at(0).name.empty())) {
         _data.clear();
     }
-    _profile->setModules(_data);
+    _profile.setModules(_data);
     accept();
 }
 

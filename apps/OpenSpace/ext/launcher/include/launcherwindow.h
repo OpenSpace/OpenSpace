@@ -98,7 +98,7 @@ private:
     void populateProfilesList(QString preset);
     void populateWindowConfigsList(QString preset);
     bool loadProfileFromFile(openspace::Profile*& p, std::string filename);
-    void saveProfileToFile(const std::string& path, openspace::Profile* p);
+    void saveProfileToFile(const std::string& path, const openspace::Profile& p);
 
     ProfileEdit* myEditorWindow;
     FileSystemAccess _fileAccessProfiles;

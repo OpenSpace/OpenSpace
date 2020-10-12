@@ -43,13 +43,13 @@ public:
     *                 new or imported profile.
     * \param parent Pointer to parent Qt widget
     */
-    MetaDialog(openspace::Profile* profile, QWidget* parent);
+    MetaDialog(openspace::Profile& profile, QWidget* parent);
 
 public slots:
     void save();
 
 private:
-    openspace::Profile* _profile;
+    openspace::Profile& _profile;
 
     QLineEdit* _nameEdit = nullptr;
     QLineEdit* _versionEdit = nullptr;

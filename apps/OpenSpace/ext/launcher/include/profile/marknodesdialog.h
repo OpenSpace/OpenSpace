@@ -44,7 +44,7 @@ public:
      *                 new or imported profile.
      * \param parent Pointer to parent Qt widget
      */
-    MarkNodesDialog(openspace::Profile* profile, QWidget* parent);
+    MarkNodesDialog(openspace::Profile& profile, QWidget* parent);
 
     /**
      * Handles keypress while the Qt dialog window is open
@@ -61,7 +61,7 @@ public slots:
 
 private:
     std::vector<QListWidgetItem*> _markedNodesListItems;
-    openspace::Profile* _profile;
+    openspace::Profile& _profile;
     std::vector<std::string> _data;
 
     QListWidget* _list = nullptr;

@@ -44,7 +44,7 @@ public:
      *                 new or imported profile.
      * \param parent Pointer to parent Qt widget (optional)
      */
-    TimeDialog(openspace::Profile* profile, QWidget* parent);
+    TimeDialog(openspace::Profile& profile, QWidget* parent);
 
 public slots:
     void enableAccordingToType(int);
@@ -52,7 +52,7 @@ public slots:
 
 private:
     void enableFormatForAbsolute(bool enableAbs);
-    openspace::Profile* _profile;
+    openspace::Profile& _profile;
     openspace::Profile::Time _data;
     bool _initializedAsAbsolute = true;
 

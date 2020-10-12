@@ -46,7 +46,7 @@ public:
      *                 new or imported profile.
      * \param parent Pointer to parent Qt widget (optional)
      */
-    PropertiesDialog(openspace::Profile* profile, QWidget* parent);
+    PropertiesDialog(openspace::Profile& profile, QWidget* parent);
 
     /**
      * Handles keypress while the Qt dialog window is open
@@ -71,7 +71,7 @@ private:
     bool areRequiredFormsFilled();
     bool isLineEmpty(int index);
 
-    openspace::Profile* _profile;
+    openspace::Profile& _profile;
     std::vector<openspace::Profile::Property> _data;
     bool _editModeNewItem = false;
 
