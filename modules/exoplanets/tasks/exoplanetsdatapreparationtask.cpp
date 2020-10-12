@@ -113,7 +113,7 @@ void ExoplanetsDataPreparationTask::perform(const Task::ProgressCallback& progre
         if (ec == std::errc()) {
             return result;
         }
-        return NAN;
+        return std::numeric_limits<float>::quiet_NaN();
     #else
         // clang is missing float support for std::from_chars
         return !str.empty() ? std::stof(str.c_str(), nullptr) : NAN;
@@ -127,7 +127,7 @@ void ExoplanetsDataPreparationTask::perform(const Task::ProgressCallback& progre
         if (ec == std::errc()) {
             return result;
         }
-        return NAN;
+        return std::numeric_limits<double>::quiet_NaN();
     #else
         // clang is missing double support for std::from_chars
         return !str.empty() ? std::stod(str.c_str(), nullptr) : NAN;
@@ -159,9 +159,9 @@ void ExoplanetsDataPreparationTask::perform(const Task::ProgressCallback& progre
         std::string component;
         std::string speckStarname;
 
-        float ra = NAN;     // decimal degrees
-        float dec = NAN;    // decimal degrees
-        float distanceInParsec = NAN;
+        float ra = std::numeric_limits<float>::quiet_NaN();     // decimal degrees
+        float dec = std::numeric_limits<float>::quiet_NaN();    // decimal degrees
+        float distanceInParsec = std::numeric_limits<float>::quiet_NaN();
 
         std::istringstream lineStream(planetRow);
         int columnIndex = 0;
@@ -287,9 +287,9 @@ void ExoplanetsDataPreparationTask::perform(const Task::ProgressCallback& progre
 
         // @TODO (emmbr 2020-10-05) Currently, the dataset has no information about the
         // longitude of the ascending node, but maybe it might in the future
-        p.bigOmega = NAN;
-        p.bigOmegaUpper = NAN;
-        p.bigOmegaLower = NAN;
+        p.bigOmega = std::numeric_limits<float>::quiet_NaN();
+        p.bigOmegaUpper = std::numeric_limits<float>::quiet_NaN();
+        p.bigOmegaLower = std::numeric_limits<float>::quiet_NaN();
 
         bool foundPositionFromSpeck = !std::isnan(p.positionX);
         bool hasDistance = !std::isnan(distanceInParsec);
@@ -319,7 +319,7 @@ glm::vec3 ExoplanetsDataPreparationTask::starPosition(const std::string& starNam
         LERROR(fmt::format("Error opening file expl.speck"));
     }
 
-    glm::vec3 position{ NAN };
+    glm::vec3 position{ std::numeric_limits<float>::quiet_NaN() };
     std::string line;
 
     while (getline(exoplanetsFile, line)) {
@@ -357,13 +357,13 @@ glm::vec3 ExoplanetsDataPreparationTask::starPosition(const std::string& starNam
 
 float ExoplanetsDataPreparationTask::bvFromTeff(float teff) {
     if (std::isnan(teff)) {
-        return NAN;
+        return std::numeric_limits<float>::quiet_NaN();
     }
 
     std::ifstream teffToBvFile(_teffToBvFilePath);
     if (!teffToBvFile.good()) {
         LERROR(fmt::format("Failed to open teff_bv.txt file"));
-        return NAN;
+        return std::numeric_limits<float>::quiet_NaN();
     }
 
     float bv = 0.f;

@@ -34,8 +34,8 @@ struct Exoplanet {
     double aUpper;      // Upper uncertainty of orbital semi-major axis
     double aLower;      // Lower uncertainty of orbital semi-major axis
     float bigOmega;     // Longitude of ascending node in degrees
-    float bigOmegaUpper;// Upper uncertainty of longitude of ascending node
-    float bigOmegaLower;// Lower uncertainty of longitude of ascending node
+    float bigOmegaUpper; // Upper uncertainty of longitude of ascending node
+    float bigOmegaLower; // Lower uncertainty of longitude of ascending node
     bool binary;        // Star known to be binary?
     float bmv;          // B − V color
     float ecc;          // Orbital eccentricity

@@ -30,13 +30,13 @@
 namespace openspace {
 
 /**
-* Converts from ICRS coordinates to galactic cartesian coordinates.
-* \param ra Right ascension, given in decimal degrees
-* \param dec Declination, given in decimal degrees
-* \param distance The distance, or radius, to the position given in any unit.
-* \return A position in galactic cartesian coordinates, given in the same unit as the
-* distance parameter.
-*/
+ * Converts from ICRS coordinates to galactic cartesian coordinates.
+ * \param ra Right ascension, given in decimal degrees
+ * \param dec Declination, given in decimal degrees
+ * \param distance The distance, or radius, to the position given in any unit.
+ * \return A position in galactic cartesian coordinates, given in the same unit as the
+ *         distance parameter.
+ */
 glm::dvec3 icrsToGalacticCartesian(float ra, float dec, double distance);
 
 } // namespace openspace
