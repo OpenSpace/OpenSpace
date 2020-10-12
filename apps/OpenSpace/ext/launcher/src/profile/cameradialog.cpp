@@ -303,17 +303,23 @@ bool CameraDialog::areRequiredFormsFilledAndValid() {
             addErrorMsg("Position Z is empty");
         }
         int upVectorCount = 0;
-        if (_navState.upX->text().isEmpty()) {
-            allFormsOk = false;
-            addErrorMsg("Up X is empty");
-        }
-        if (_navState.upY->text().isEmpty()) {
-            allFormsOk = false;
-            addErrorMsg("Up Y is empty");
-        }
-        if (_navState.upZ->text().isEmpty()) {
-            allFormsOk = false;
-            addErrorMsg("Up Z is empty");
+        const bool hasUpX = !_navState.upX->text().isEmpty();
+        const bool hasUpY = !_navState.upY->text().isEmpty();
+        const bool hasUpZ = !_navState.upZ->text().isEmpty();
+
+        if (hasUpX || hasUpY || hasUpZ) {
+            if (!hasUpX) {
+                allFormsOk = false;
+                addErrorMsg("Up X is empty");
+            }
+            if (!hasUpY) {
+                allFormsOk = false;
+                addErrorMsg("Up Y is empty");
+            }
+            if (!hasUpZ) {
+                allFormsOk = false;
+                addErrorMsg("Up Z is empty");
+            }
         }
         if (!_navState.yaw->text().isEmpty()) {
             if (!inNumericalRange(_navState.yaw, -360.0, 360.0)) {
