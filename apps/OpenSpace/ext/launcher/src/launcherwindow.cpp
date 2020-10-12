@@ -82,7 +82,7 @@ LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
     QLabel* logoImage = new QLabel(centralWidget);
     logoImage->setObjectName("clear");
     logoImage->setGeometry(QRect(LeftRuler, TopRuler, ItemWidth, ItemWidth / 4));
-    logoImage->setPixmap(QPixmap(_basePath + "/data/images/openspace-horiz-logo-small.png"));
+    logoImage->setPixmap(QPixmap(":/images/openspace-horiz-logo-small.png"));
 
     QLabel* labelChoose = new QLabel("Choose Profile", centralWidget);
     labelChoose->setObjectName("clear");
@@ -154,8 +154,7 @@ LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
         bgpath = QString(globalConfig.pathTokens["SYNC"].c_str()) + filename;
     }
     else {
-        filename = QString::fromStdString("/data/images/profile0.png");
-        bgpath = QDir::fromNativeSeparators(_basePath) + filename;
+        bgpath = QString::fromStdString(":/images/launcher-background.png");
     }
 
     backgroundImage->setPixmap(QPixmap(bgpath));
