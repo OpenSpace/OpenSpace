@@ -26,25 +26,15 @@
 #define __OPENSPACE_UI_LAUNCHER___LAUNCHERWINDOW___H__
 
 #include <QMainWindow>
+
 #include <QString>
 #include "profileedit.h"
 #include "filesystemaccess.h"
 #include <openspace/scene/profile.h>
 #include <openspace/engine/globals.h>
 
-QT_BEGIN_NAMESPACE
-namespace Ui { class LauncherWindow; }
-QT_END_NAMESPACE
-
-class LauncherWindow : public QMainWindow
-{
-    Q_OBJECT
-
-public slots:
-    void openWindow_edit();
-    void openWindow_new();
-    void startOpenSpace();
-
+class LauncherWindow : public QMainWindow {
+Q_OBJECT
 public:
     /**
      * Constructor for LauncherWindow class
@@ -99,13 +89,17 @@ public:
       */
     std::string selectedWindowConfig();
 
+public slots:
+    void openWindow_edit();
+    void openWindow_new();
+    void startOpenSpace();
+
 private:
     void populateProfilesList(QString preset);
     void populateWindowConfigsList(QString preset);
     bool loadProfileFromFile(openspace::Profile*& p, std::string filename);
     void saveProfileToFile(const std::string& path, openspace::Profile* p);
 
-    Ui::LauncherWindow *ui;
     ProfileEdit* myEditorWindow;
     FileSystemAccess _fileAccessProfiles;
     FileSystemAccess _fileAccessWinConfigs;
@@ -117,5 +111,8 @@ private:
     bool _fullyConfiguredViaCliArgs = false;
     bool _profileChangeAllowed = true;
     bool _sgctConfigChangeAllowed = true;
+
+    QComboBox* _profileBox = nullptr;
+    QComboBox* _windowConfigBox = nullptr;
 };
 #endif // __OPENSPACE_UI_LAUNCHER___LAUNCHERWINDOW___H__

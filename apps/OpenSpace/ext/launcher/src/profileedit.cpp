@@ -24,10 +24,16 @@
 
 #include <openspace/scene/profile.h>
 #include "profileedit.h"
-#include "./ui_profileedit.h"
 #include "filesystemaccess.h"
 #include <QKeyEvent>
 #include <iostream>
+#include <QVBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QTextEdit>
+#include <QDialogButtonBox>
+#include <QCoreApplication>
 
 template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
 template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;

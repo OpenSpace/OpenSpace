@@ -25,7 +25,6 @@
 #include <openspace/scene/profile.h>
 #include "launcherwindow.h"
 #include "profileedit.h"
-#include "./ui_launcherwindow.h"
 #include <QPixmap>
 #include <QKeyEvent>
 #include "filesystemaccess.h"
@@ -34,13 +33,25 @@
 #include <iostream>
 #include <QMessageBox>
 #include <random>
+#include <QLabel>
+#include <QComboBox>
+#include <QPushButton>
+
+namespace {
+    constexpr const int ScreenWidth = 480;
+    constexpr const int ScreenHeight = 640;
+
+    constexpr const int LeftRuler = 40;
+    constexpr const int TopRuler = 80;
+    constexpr const int ItemWidth = 240;
+    constexpr const int SmallItemWidth = 100;
+} // namespace
 
 LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
                                openspace::configuration::Configuration& globalConfig,
                                bool sgctConfigEnabled, std::string sgctConfigName,
                                QWidget *parent)
     : QMainWindow(parent)
-    , ui(new Ui::LauncherWindow)
     , _fileAccessProfiles(".profile", { "./" }, true, false)
     , _fileAccessWinConfigs(".xml", { "./" }, true, false)
     , _filesystemAccess(".asset",
@@ -51,19 +62,66 @@ LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
     , _sgctConfigChangeAllowed(sgctConfigEnabled)
     , _globalConfig(globalConfig)
 {
-    ui->setupUi(this);
-    QString logoPath = _basePath + "/data/images/openspace-horiz-logo-small.png";
-     QPixmap pix(logoPath);
-    ui->logolabel->setPixmap(pix);
-    connect(ui->qBtn_start, SIGNAL(released()), this, SLOT(startOpenSpace()));
-    connect(ui->newButton, SIGNAL(released()), this, SLOT(openWindow_new()));
-    connect(ui->editButton, SIGNAL(released()), this, SLOT(openWindow_edit()));
+    setWindowTitle("OpenSpace Launcher");
+    setFixedSize(ScreenWidth, ScreenHeight);
+    setAutoFillBackground(false);
+
+    QWidget* centralWidget = new QWidget(this);
+
+    QLabel* backgroundImage = new QLabel(centralWidget);
+    backgroundImage->setGeometry(QRect(0, 0, ScreenWidth, ScreenHeight));
+
+    QLabel* logoImage = new QLabel(centralWidget);
+    logoImage->setObjectName("clear");
+    logoImage->setGeometry(QRect(LeftRuler, TopRuler, ItemWidth, ItemWidth / 4));
+    logoImage->setPixmap(QPixmap(_basePath + "/data/images/openspace-horiz-logo-small.png"));
+
+    QLabel* labelChoose = new QLabel("Choose Profile", centralWidget);
+    labelChoose->setObjectName("clear");
+    labelChoose->setGeometry(QRect(LeftRuler, TopRuler + 80, 151, 24));
+
+    _profileBox = new QComboBox(centralWidget);
+    _profileBox->setGeometry(QRect(LeftRuler, TopRuler + 110, ItemWidth, ItemWidth / 4));
+
+    QLabel* optionsLabel = new QLabel("Window Options", centralWidget);
+    optionsLabel->setObjectName("clear");
+    optionsLabel->setGeometry(QRect(LeftRuler, TopRuler + 180, 151, 24));
+
+    _windowConfigBox = new QComboBox(centralWidget);
+    _windowConfigBox->setGeometry(QRect(LeftRuler, TopRuler + 210, ItemWidth, ItemWidth / 4));
+
+    QPushButton* startButton = new QPushButton("START", centralWidget);
+    connect(startButton, &QPushButton::released, this, &LauncherWindow::startOpenSpace);
+    startButton->setObjectName("large");
+    startButton->setGeometry(QRect(LeftRuler, TopRuler + 290, ItemWidth, ItemWidth / 4));
+    startButton->setCursor(Qt::PointingHandCursor);
+    
+    QPushButton* newButton = new QPushButton("New", centralWidget);
+    connect(newButton, &QPushButton::released, this, &LauncherWindow::openWindow_new);
+    newButton->setObjectName("small");
+    newButton->setGeometry(QRect(LeftRuler + 140, TopRuler + 380, SmallItemWidth, SmallItemWidth / 4));
+    newButton->setCursor(Qt::PointingHandCursor);
+
+    QPushButton* editButton = new QPushButton("Edit", centralWidget);
+    connect(editButton, &QPushButton::released, this, &LauncherWindow::openWindow_edit);
+    editButton->setObjectName("small");
+    editButton->setGeometry(QRect(LeftRuler, TopRuler + 380, SmallItemWidth, SmallItemWidth / 4));
+    editButton->setCursor(Qt::PointingHandCursor);
+
+    setCentralWidget(centralWidget);
+
+
+
+
+
     _reportAssetsInFilesystem = _filesystemAccess.useQtFileSystemModelToTraverseDir(
         QString(basePath.c_str()) + "/data/assets");
     populateProfilesList(QString(globalConfig.profile.c_str()));
-    ui->comboBoxProfiles->setDisabled(!_profileChangeAllowed);
+
+    _profileBox->setDisabled(!_profileChangeAllowed);
+
     populateWindowConfigsList(QString(sgctConfigName.c_str()));
-    ui->comboBoxWindowConfigs->setDisabled(!_sgctConfigChangeAllowed);
+    _windowConfigBox->setDisabled(!_sgctConfigChangeAllowed);
     _fullyConfiguredViaCliArgs = (!profileEnabled && !sgctConfigEnabled);
 
     bool hasSyncFiles = false;
@@ -90,14 +148,12 @@ LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
         bgpath = QDir::fromNativeSeparators(_basePath) + filename;
     }
 
-
-    QPixmap bgpix(bgpath);
-    ui->backgroundImage->setPixmap(bgpix);
+    backgroundImage->setPixmap(QPixmap(bgpath));
 }
 
 void LauncherWindow::populateProfilesList(QString preset) {
-    for (int i = 0; i < ui->comboBoxProfiles->count(); ++i) {
-        ui->comboBoxProfiles->removeItem(i);
+    for (int i = 0; i < _profileBox->count(); ++i) {
+        _profileBox->removeItem(i);
     }
     std::string reportProfiles = _fileAccessProfiles.useQtFileSystemModelToTraverseDir(
         _basePath + "/data/profiles");
@@ -105,14 +161,14 @@ void LauncherWindow::populateProfilesList(QString preset) {
     std::string iline;
     QStringList profilesListLine;
     while (std::getline(instream, iline)) {
-        if (ui->comboBoxProfiles->findText(QString(iline.c_str())) == -1) {
-            ui->comboBoxProfiles->addItem(iline.c_str());
+        if (_profileBox->findText(QString(iline.c_str())) == -1) {
+            _profileBox->addItem(iline.c_str());
         }
     }
     if (preset.length() > 0) {
-        int presetMatchIdx = ui->comboBoxProfiles->findText(preset);
+        int presetMatchIdx = _profileBox->findText(preset);
         if (presetMatchIdx != -1) {
-            ui->comboBoxProfiles->setCurrentIndex(presetMatchIdx);
+            _profileBox->setCurrentIndex(presetMatchIdx);
         }
     }
 }
@@ -126,22 +182,21 @@ void LauncherWindow::populateWindowConfigsList(QString preset) {
     while (std::getline(instream, iline)) {
         windowConfigsListLine << iline.c_str();
     }
-    ui->comboBoxWindowConfigs->addItems(windowConfigsListLine);
+    _windowConfigBox->addItems(windowConfigsListLine);
     if (preset.length() > 0) {
-        int presetMatchIdx = ui->comboBoxWindowConfigs->findText(preset);
+        int presetMatchIdx = _windowConfigBox->findText(preset);
         if (presetMatchIdx != -1) {
-            ui->comboBoxWindowConfigs->setCurrentIndex(presetMatchIdx);
+            _windowConfigBox->setCurrentIndex(presetMatchIdx);
         }
         else {
-            ui->comboBoxWindowConfigs->addItem(preset);
-            ui->comboBoxWindowConfigs->setCurrentIndex(
-                ui->comboBoxWindowConfigs->count() - 1);
+            _windowConfigBox->addItem(preset);
+            _windowConfigBox->setCurrentIndex(_windowConfigBox->count() - 1);
         }
     }
 }
 
 void LauncherWindow::openWindow_new() {
-    QString initialProfileSelection = ui->comboBoxProfiles->currentText();
+    QString initialProfileSelection = _profileBox->currentText();
     openspace::Profile* pData = new openspace::Profile();
     if (pData != nullptr) {
         myEditorWindow = new ProfileEdit(pData, _reportAssetsInFilesystem,
@@ -163,11 +218,11 @@ void LauncherWindow::openWindow_new() {
 }
 
 void LauncherWindow::openWindow_edit() {
-    QString initialProfileSelection = ui->comboBoxProfiles->currentText();
+    QString initialProfileSelection = _profileBox->currentText();
     std::string profilePath = _basePath.toUtf8().constData();
     profilePath += "/data/profiles/";
-    int selectedProfileIdx = ui->comboBoxProfiles->currentIndex();
-    QString profileToSet = ui->comboBoxProfiles->itemText(selectedProfileIdx);
+    int selectedProfileIdx = _profileBox->currentIndex();
+    QString profileToSet = _profileBox->itemText(selectedProfileIdx);
     std::string editProfilePath = profilePath + profileToSet.toUtf8().constData();
     editProfilePath += ".profile";
     openspace::Profile* pData;
@@ -270,7 +325,6 @@ bool LauncherWindow::loadProfileFromFile(openspace::Profile*& p, std::string fil
 
 LauncherWindow::~LauncherWindow() {
     delete myEditorWindow;
-    delete ui;
 }
 
 bool LauncherWindow::wasLaunchSelected() {
@@ -282,11 +336,11 @@ bool LauncherWindow::isFullyConfiguredFromCliArgs() {
 }
 
 std::string LauncherWindow::selectedProfile() {
-    return ui->comboBoxProfiles->currentText().toUtf8().constData();
+    return _profileBox->currentText().toUtf8().constData();
 }
 
 std::string LauncherWindow::selectedWindowConfig() {
-    return ui->comboBoxWindowConfigs->currentText().toUtf8().constData();
+    return _windowConfigBox->currentText().toUtf8().constData();
 }
 
 void LauncherWindow::startOpenSpace() {

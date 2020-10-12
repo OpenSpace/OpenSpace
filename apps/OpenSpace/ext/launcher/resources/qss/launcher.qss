@@ -10,6 +10,59 @@ QLabel#error-message {
 }
 
 /*
+ * LauncherWindow
+ */
+
+LauncherWindow  QLabel {
+  font-family: Segoe UI;
+}
+
+LauncherWindow  QLabel#clear {
+  background-color: rgba(0, 0, 0, 0%);
+}
+
+LauncherWindow  QComboBox {
+  background: rgb(96, 96, 96);
+  border: 1px solid gray;
+  border-radius: 3px;
+  padding: 1px 18px 1px 3px;
+  min-width: 6em;
+  font-size: 14px;
+  font-family: Segoe UI;
+  font-weight: bold;
+  color: #fff;
+}
+
+LauncherWindow  QComboBox QListView {
+  background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #666, stop: 1 #888);
+  color: #fff;
+}
+
+LauncherWindow  QPushButton#large {
+  background: rgb(128, 128, 128);
+  border-radius: 2px;
+  border-style: outset;
+  border-width: 2px;
+  border-color: #333;
+  font-size: 24px;
+  font-family: Segoe UI;
+  font-weight: bold;
+  color: #fff;
+}
+
+LauncherWindow  QPushButton#small {
+  background: rgb(96, 96, 96);
+  border-radius: 2px;
+  border-style: outset;
+  border-width: 1px;
+  border-color: #111;
+  font-size: 14px;
+  font-family: Segoe UI;
+  font-weight: bold;
+  color: #fff;
+}
+
+/*
  * Assets
  */
 Assets  QTreeView {

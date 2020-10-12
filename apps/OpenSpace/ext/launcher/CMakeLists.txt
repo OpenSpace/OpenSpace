@@ -40,7 +40,6 @@ set(HEADER_FILES
   include/timedialog.h
   include/profileedit.h
   include/properties.h
-  include/ui_launcherwindow.h
 )
 
 set(SOURCE_FILES
