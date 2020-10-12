@@ -15,8 +15,20 @@ local MercuryBarycenter = {
     GUI = {
         Name = "Mercury Barycenter",
         Path = "/Solar System/Planets/Mercury",
-        Hidden = true
+        Hidden = true,
+        Description = [[ Mercury Barycenter position]],
     }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { MercuryBarycenter })
+
+
+asset.meta = {
+    Name = "Mercury Transforms",
+    Version = "1.0",
+    Description = [[ Mercury Barycenter transform]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = "MercuryBarycenter"
+}

@@ -21,7 +21,9 @@ local Neptune = {
     },
     Tag = { "planet_solarSystem", "planet_giants" },
     GUI = {
-        Path = "/Solar System/Planets/Neptune"
+        Name = "Neptune",
+        Path = "/Solar System/Planets/Neptune",
+        Description = [[Neptune globe]]
     }
 }
 
@@ -42,8 +44,20 @@ local NeptuneLabel = {
     Tag = { "solarsystem_labels" },
     GUI = {
         Name = "Neptune Label",
-        Path = "/Solar System/Planets/Neptune"
+        Path = "/Solar System/Planets/Neptune",
+        Description = [[ Main planet label for Neptune.]],
     }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Neptune, NeptuneLabel })
+
+
+asset.meta = {
+    Name = "Neptune",
+    Version = "1.0",
+    Description = [[ Neptune globe, and main planet label.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = "Neptune"
+}

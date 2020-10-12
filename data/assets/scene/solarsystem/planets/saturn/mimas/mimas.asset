@@ -44,10 +44,21 @@ local Mimas = {
     },
     Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
     GUI = {
-        Path = "/Solar System/Planets/Saturn/Moons"
+        Name = "Mimas",
+        Path = "/Solar System/Planets/Saturn/Moons",
+        Description = [[That's no moon...]]
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Mimas })
+
+
+asset.meta = {
+    Name = "Mimas",
+    Version = "1.0",
+    Description = [[ Mimas globe with labels.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = "Mimas"
+}

@@ -459,6 +459,9 @@ std::string consumeTemporalMetaData(TemporalTileProvider& t, const std::string& 
     }
     else {
         gdalNode = CPLSearchXMLNode(node, "FilePath");
+        if (gdalNode) {
+            return "";
+        }
         std::string gdalDescription = std::string(gdalNode->psChild->pszValue);
         return gdalDescription;
     }

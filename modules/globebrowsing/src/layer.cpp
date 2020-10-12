@@ -94,6 +94,14 @@ namespace {
         "If the 'Type' of this layer is a solid color, this value determines what this "
         "solid color is."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo GuiDescriptionInfo = {
+        "GuiDescription",
+        "Gui Description",
+        "This is the description for the scene graph node to be shown in the gui "
+        "example: Earth is a special place",
+        openspace::properties::Property::Visibility::Hidden
+    };
 } // namespace
 
 documentation::Documentation Layer::Documentation() {
@@ -219,6 +227,8 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
     , _remove(RemoveInfo)
     , _solidColor(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _layerGroupId(id)
+    , _guiDescription(GuiDescriptionInfo)
+
 {
     documentation::testSpecificationAndThrow(Documentation(), layerDict, "Layer");
 
@@ -238,6 +248,11 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
 
     if (layerDict.hasKeyAndValue<bool>(EnabledInfo.identifier)) {
         _enabled = layerDict.value<bool>(EnabledInfo.identifier);
+    }
+
+    if (layerDict.hasKey(KeyDesc)) {
+        _guiDescription = description();
+        addProperty(_guiDescription);
     }
 
     bool padTiles = true;

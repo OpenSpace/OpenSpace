@@ -44,10 +44,21 @@ local Titan = {
     },
     Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
     GUI = {
-        Path = "/Solar System/Planets/Saturn/Moons"
+        Name = "Titan",
+        Path = "/Solar System/Planets/Saturn/Moons",
+        Description = [[Largest moon of Saturn.]]
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Titan })
+
+
+asset.meta = {
+    Name = "Titan",
+    Version = "1.0",
+    Description = [[ Titan globe with labels.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = "Titan"
+}

@@ -47,11 +47,11 @@ local Station2Boulder1Model = {
     },
     Renderable = {
         Type = "RenderableModel",
-        Geometry = {
+        Geometry = {{
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/b1-v2.obj",
             ColorTexture = models .. "/b1-v2_u1_v1.jpeg"
-        },
+        }},
         RotationVector = { 243.243256 ,206.270264, 309.677429 },
         LightSources = LightSources,
         PerformShading = false,
@@ -93,11 +93,11 @@ local Station2Boulder2Model = {
     },
     Renderable = {
         Type = "RenderableModel",
-        Geometry = {
+        Geometry = {{
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/b2model.obj",
             ColorTexture = models .. "/b2model_u1_v1.jpeg"
-        },
+        }},
         RotationVector = { 66.162155, 7.783780, 114.193550 },
         LightSources = LightSources,
         PerformShading = false,
@@ -139,11 +139,11 @@ local Station2Boulder3Model = {
     },
     Renderable = {
         Type = "RenderableModel",
-        Geometry = {
+        Geometry = {{
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/b3model.obj",
             ColorTexture = models .. "/b3model_u1_v1.jpeg"
-        },
+        }},
         RotationVector = { 161.513519 ,243.243256, 65.806450 },
         LightSources = LightSources,
         PerformShading = false,

@@ -31,6 +31,7 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/interaction/keybindingmanager.h>
+#include <openspace/scene/scenelicensewriter.h>
 #include <ghoul/logging/logmanager.h>
 
 
@@ -41,6 +42,8 @@ namespace {
     constexpr const char* TypeLua = "lua";
     constexpr const char* TypeFactories = "factories";
     constexpr const char* TypeKeyboard = "keyboard";
+    constexpr const char* TypeAsset = "asset";
+    constexpr const char* TypeMeta= "meta";
 } // namespace
 
 namespace openspace {
@@ -61,6 +64,14 @@ void DocumentationTopic::handleJson(const nlohmann::json& json) {
     }
     else if (requestedType == TypeKeyboard) {
         response = json::parse(global::keybindingManager.generateJson());
+    }
+    else if (requestedType == TypeAsset) {
+        response = json::parse(global::keybindingManager.generateJson());
+    }
+    else if (requestedType == TypeMeta) {
+        std::string docs = SceneLicenseWriter().generateJson();
+        nlohmann::json parsedDocs = json::parse(docs);
+        response = parsedDocs;
     }
 
     _connection->sendJson(wrappedPayload(response));

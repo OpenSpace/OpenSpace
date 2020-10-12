@@ -55,6 +55,4 @@ local Ceres = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Ceres })

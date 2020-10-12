@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_EXOPLENETS___RENDERABLEORBITDISC___H__
+#ifndef __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__
 #define __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__
 
 #include <openspace/properties/stringproperty.h>
@@ -36,7 +36,6 @@
 namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl {
     class ProgramObject;
-    class Texture;
 } // namespace ghoul::opengl
 
 namespace openspace {
@@ -80,4 +79,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_EXOPLENETS___RENDERABLEORBITDISC___H__
+#endif // __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__

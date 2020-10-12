@@ -14,7 +14,9 @@ local Sun = {
         PerformShading = false
     },
     GUI = {
-        Path = "/Solar System/Sun"
+        Name = "Sun",
+        Path = "/Solar System/Sun",
+        Description = "Globe for the sun in our solar system."
     }
 }
 
@@ -42,8 +44,20 @@ local SunLabel = {
     Tag = { "solarsystem_labels" },
     GUI = {
         Name = "Sun Label",
-        Path = "/Solar System/Sun"
+        Path = "/Solar System/Sun",
+        Description = "Label for the sun in our solar system."
     }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Sun, SunLabel })
+
+
+asset.meta = {
+    Name = "Sun",
+    Version = "1.0",
+    Description = [[ The Sun and label]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = "Sun,SunLabel"
+}

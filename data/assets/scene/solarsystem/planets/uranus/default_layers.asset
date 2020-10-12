@@ -7,3 +7,13 @@ local colorLayer = asset.require(colorLayersPath .. "/uranus_texture")
 asset.onInitialize(function () 
     openspace.setPropertyValueSingle("Scene.Uranus.Renderable.Layers.ColorLayers." .. colorLayer.layer.Identifier .. ".Enabled", true)
 end)
+
+
+asset.meta = {
+    Name = "Default Uranus Layers",
+    Version = "1.0",
+    Description = [[ Default Uranus layers are: Uranus texture]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

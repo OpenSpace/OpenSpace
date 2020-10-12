@@ -157,11 +157,11 @@ local Juno = {
     },
     Renderable = {
         Type = "RenderableModel",
-        Geometry = {
+        Geometry = {{
             Type = "MultiModelGeometry",
             GeometryFile = model .. "/Juno.obj",
             ColorTexture =  textures .. "/gray.png"
-        }, 
+        }},
         ModelTransform = RotationMatrix,
         LightSources = assetHelper.getDefaultLightSources(sunTransforms.SolarSystemBarycenter.Identifier)
     },
@@ -196,7 +196,5 @@ local JunoTrail = {
         Path = "/Solar System/Missions/Juno"
     }
 }
-
-
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Juno, JunoTrail })
