@@ -38,6 +38,8 @@ Modules::Modules(openspace::Profile* profile, QWidget *parent)
     , _profile(profile)
     , _data(_profile->modules())
 {
+    setWindowTitle("Modules");
+
     QBoxLayout* layout = new QVBoxLayout(this);
     
     {

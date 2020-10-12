@@ -41,14 +41,14 @@ namespace {
         "",
         ""
     };
-}
+} // namespace
 
 Properties::Properties(openspace::Profile* profile, QWidget *parent)
     : QDialog(parent)
     , _profile(profile)
     , _data(_profile->properties())
 {
-    setWindowTitle("Profile Editor");
+    setWindowTitle("Set Property Values");
 
     QBoxLayout* layout = new QVBoxLayout(this);
     {

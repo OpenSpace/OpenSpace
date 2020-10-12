@@ -45,12 +45,7 @@ ProfileEdit::ProfileEdit(openspace::Profile* profile, const std::string reported
     , _pData(profile)
     , _profilesReadOnly(profilesReadOnly)
 {
-    Q_INIT_RESOURCE(resources);
-
-    QFile file(":/qss/launcher.qss");
-    file.open(QFile::ReadOnly);
-    QString styleSheet = QLatin1String(file.readAll());
-    setStyleSheet(styleSheet);
+    setWindowTitle("Profile Editor");
 
     QBoxLayout* layout = new QVBoxLayout(this);
     QBoxLayout* topLayout = new QHBoxLayout;
@@ -70,19 +65,20 @@ ProfileEdit::ProfileEdit(openspace::Profile* profile, const std::string reported
         );
         container->addWidget(duplicateButton);
 
-        leftLayout->addLayout(container);
+        layout->addLayout(container);
     }
     {
         QFrame* line = new QFrame;
         line->setFrameShape(QFrame::HLine);
         line->setFrameShadow(QFrame::Sunken);
-        leftLayout->addWidget(line);
+        layout->addWidget(line);
     }
     {
         QGridLayout* container = new QGridLayout;
         container->setColumnStretch(1, 1);
 
         _propertiesLabel = new QLabel("Properties");
+        _propertiesLabel->setWordWrap(true);
         container->addWidget(_propertiesLabel, 0, 0);
 
         QPushButton* editProperties = new QPushButton("Edit");
@@ -109,6 +105,7 @@ ProfileEdit::ProfileEdit(openspace::Profile* profile, const std::string reported
         container->setColumnStretch(1, 1);
 
         _assetsLabel = new QLabel("Assets");
+        _assetsLabel->setWordWrap(true);
         container->addWidget(_assetsLabel, 0, 0);
 
         QPushButton* assetsProperties = new QPushButton("Edit");
@@ -132,6 +129,7 @@ ProfileEdit::ProfileEdit(openspace::Profile* profile, const std::string reported
         container->setColumnStretch(1, 1);
 
         _keybindingsLabel = new QLabel("Keybindings");
+        _keybindingsLabel->setWordWrap(true);
         container->addWidget(_keybindingsLabel, 0, 0);
 
         QPushButton* keybindingsProperties = new QPushButton("Edit");
@@ -147,7 +145,7 @@ ProfileEdit::ProfileEdit(openspace::Profile* profile, const std::string reported
 
         leftLayout->addLayout(container);
     }
-    topLayout->addLayout(leftLayout);
+    topLayout->addLayout(leftLayout, 3);
 
     {
         QFrame* line = new QFrame;
@@ -160,6 +158,7 @@ ProfileEdit::ProfileEdit(openspace::Profile* profile, const std::string reported
     {
         QBoxLayout* container = new QVBoxLayout;
         _metaLabel = new QLabel("Meta");
+        _metaLabel->setWordWrap(true);
         container->addWidget(_metaLabel);
 
         QPushButton* metaEdit = new QPushButton("Edit");
@@ -177,6 +176,7 @@ ProfileEdit::ProfileEdit(openspace::Profile* profile, const std::string reported
     {
         QBoxLayout* container = new QVBoxLayout;
         _interestingNodesLabel = new QLabel("Mark Interesting Nodes");
+        _interestingNodesLabel->setWordWrap(true);
         container->addWidget(_interestingNodesLabel);
 
         QPushButton* interestingNodesEdit = new QPushButton("Edit");
@@ -197,6 +197,7 @@ ProfileEdit::ProfileEdit(openspace::Profile* profile, const std::string reported
     {
         QBoxLayout* container = new QVBoxLayout;
         _deltaTimesLabel = new QLabel("Simulation Time Increments");
+        _deltaTimesLabel->setWordWrap(true);
         container->addWidget(_deltaTimesLabel);
 
         QPushButton* deltaTimesEdit = new QPushButton("Edit");
@@ -217,6 +218,7 @@ ProfileEdit::ProfileEdit(openspace::Profile* profile, const std::string reported
     {
         QBoxLayout* container = new QVBoxLayout;
         _cameraLabel = new QLabel("Camera");
+        _cameraLabel->setWordWrap(true);
         container->addWidget(_cameraLabel);
 
         QPushButton* cameraEdit = new QPushButton("Edit");
@@ -234,6 +236,7 @@ ProfileEdit::ProfileEdit(openspace::Profile* profile, const std::string reported
     {
         QBoxLayout* container = new QVBoxLayout;
         _timeLabel = new QLabel("Time");
+        _timeLabel->setWordWrap(true);
         container->addWidget(_timeLabel);
 
         QPushButton* timeEdit = new QPushButton("Edit");
@@ -251,6 +254,7 @@ ProfileEdit::ProfileEdit(openspace::Profile* profile, const std::string reported
     {
         QBoxLayout* container = new QVBoxLayout;
         _modulesLabel = new QLabel("Modules");
+        _modulesLabel->setWordWrap(true);
         container->addWidget(_modulesLabel);
 
         QPushButton* modulesEdit = new QPushButton("Edit");
@@ -268,6 +272,7 @@ ProfileEdit::ProfileEdit(openspace::Profile* profile, const std::string reported
     {
         QBoxLayout* container = new QVBoxLayout;
         _additionalScriptsLabel = new QLabel("Additional Scripts");
+        _additionalScriptsLabel->setWordWrap(true);
         container->addWidget(_additionalScriptsLabel);
 
         QPushButton* additionalScriptsEdit = new QPushButton("Edit");

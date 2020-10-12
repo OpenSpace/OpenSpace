@@ -52,8 +52,8 @@ public:
      *                         not be overwritten
      * \param parent Pointer to parent Qt widget (optional)
      */
-    explicit ProfileEdit(openspace::Profile* profile, const std::string reportedAssets,
-        std::vector<std::string>& profilesReadOnly, QWidget *parent = nullptr);
+    ProfileEdit(openspace::Profile* profile, const std::string reportedAssets,
+        std::vector<std::string>& profilesReadOnly, QWidget* parent);
 
     /**
      * Sets the profile name in top save/edit window. This can be changed by user in

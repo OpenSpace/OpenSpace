@@ -40,6 +40,8 @@ Time::Time(openspace::Profile* profile, QWidget* parent)
     : QDialog(parent)
     , _profile(profile)
 {
+    setWindowTitle("Time");
+
     QBoxLayout* layout = new QVBoxLayout(this);
 
     {

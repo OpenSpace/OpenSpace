@@ -37,6 +37,8 @@ Meta::Meta(openspace::Profile* profile, QWidget *parent)
     : QDialog(parent)
     , _profile(profile)
 {
+    setWindowTitle("Meta");
+
     QBoxLayout* layout = new QVBoxLayout(this);
     layout->addWidget(new QLabel("Name"));
     _nameEdit = new QLineEdit;

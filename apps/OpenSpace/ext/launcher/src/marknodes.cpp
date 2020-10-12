@@ -39,6 +39,8 @@ MarkNodes::MarkNodes(openspace::Profile* profile, QWidget* parent)
     , _profile(profile)
     , _data(_profile->markNodes())
 {
+    setWindowTitle("Mark Interesting Nodes");
+
     QBoxLayout* layout = new QVBoxLayout(this);
     _list = new QListWidget;
     connect(

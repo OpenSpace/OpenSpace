@@ -62,9 +62,17 @@ LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
     , _sgctConfigChangeAllowed(sgctConfigEnabled)
     , _globalConfig(globalConfig)
 {
+    Q_INIT_RESOURCE(resources);
+
     setWindowTitle("OpenSpace Launcher");
     setFixedSize(ScreenWidth, ScreenHeight);
     setAutoFillBackground(false);
+
+    QFile file(":/qss/launcher.qss");
+    file.open(QFile::ReadOnly);
+    QString styleSheet = QLatin1String(file.readAll());
+    setStyleSheet(styleSheet);
+
 
     QWidget* centralWidget = new QWidget(this);
 
@@ -81,6 +89,7 @@ LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
     labelChoose->setGeometry(QRect(LeftRuler, TopRuler + 80, 151, 24));
 
     _profileBox = new QComboBox(centralWidget);
+    _profileBox->setObjectName("config");
     _profileBox->setGeometry(QRect(LeftRuler, TopRuler + 110, ItemWidth, ItemWidth / 4));
 
     QLabel* optionsLabel = new QLabel("Window Options", centralWidget);
@@ -88,6 +97,7 @@ LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
     optionsLabel->setGeometry(QRect(LeftRuler, TopRuler + 180, 151, 24));
 
     _windowConfigBox = new QComboBox(centralWidget);
+    _windowConfigBox->setObjectName("config");
     _windowConfigBox->setGeometry(QRect(LeftRuler, TopRuler + 210, ItemWidth, ItemWidth / 4));
 
     QPushButton* startButton = new QPushButton("START", centralWidget);
@@ -200,7 +210,7 @@ void LauncherWindow::openWindow_new() {
     openspace::Profile* pData = new openspace::Profile();
     if (pData != nullptr) {
         myEditorWindow = new ProfileEdit(pData, _reportAssetsInFilesystem,
-            _globalConfig.profilesReadOnly);
+            _globalConfig.profilesReadOnly, this);
         myEditorWindow->exec();
         if (myEditorWindow->wasSaved()) {
             std::string saveProfilePath = _basePath.toUtf8().constData();
@@ -229,7 +239,7 @@ void LauncherWindow::openWindow_edit() {
     bool validFile = loadProfileFromFile(pData, editProfilePath);
     if (pData != nullptr && validFile) {
         myEditorWindow = new ProfileEdit(pData, _reportAssetsInFilesystem,
-            _globalConfig.profilesReadOnly);
+            _globalConfig.profilesReadOnly, this);
         myEditorWindow->setProfileName(profileToSet);
         myEditorWindow->exec();
         if (myEditorWindow->wasSaved()) {
