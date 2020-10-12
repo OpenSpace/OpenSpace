@@ -183,42 +183,47 @@ void createExoplanetSystem(std::string_view starName) {
         starToSunVec.z
     );
 
-    // Star renderable globe, if we have a radius
+    // Star renderable globe, if we have a radius and bv color index
     std::string starGlobeRenderableString;
-    const float starRadius = p.rStar;
-    if (!std::isnan(starRadius)) {
-        const std::string color = starColor(p.bmv);
-
-        if (color.empty()) {
-            LERROR("Error computing star color");
-            return;
-        }
-
+    if (!std::isnan(p.rStar)) {
         const float radiusInMeter =
-            starRadius * static_cast<float>(distanceconstants::SolarRadius);
+            p.rStar * static_cast<float>(distanceconstants::SolarRadius);
+
+        std::string layers = "";
+        if (!std::isnan(p.bmv)) {
+            // @TODO (emmbr, 2020-10-12) should also check the bv value for the siblings.
+            // The data on the planets is derived from different sources, so while this
+            // planet has a nan value, another might not
+            const std::string color = starColor(p.bmv);
+
+            if (color.empty()) {
+                LERROR("Error occurred when computing star color");
+                return;
+            }
+
+            layers = "ColorLayers = {"
+                "{"
+                    "Identifier = 'StarColor',"
+                    "Type = 'SolidColor',"
+                    "Color = " + color + ","
+                    "BlendMode = 'Normal',"
+                    "Enabled = true"
+                "},"
+                "{"
+                    "Identifier = 'StarTexture',"
+                    "FilePath = openspace.absPath('" + StarTextureFile + "'),"
+                    "BlendMode = 'Color',"
+                    "Enabled = true"
+                "}"
+            "}";
+        }
 
         starGlobeRenderableString = "Renderable = {"
             "Type = 'RenderableGlobe',"
             "Radii = " + std::to_string(radiusInMeter) + ","
             "SegmentsPerPatch = 64,"
             "PerformShading = false,"
-            "Layers = {"
-                "ColorLayers = {"
-                    "{"
-                        "Identifier = 'StarColor',"
-                        "Type = 'SolidColor',"
-                        "Color = " + color + ","
-                        "BlendMode = 'Normal',"
-                        "Enabled = true"
-                    "},"
-                    "{"
-                        "Identifier = 'StarTexture',"
-                        "FilePath = openspace.absPath('" + StarTextureFile +"'),"
-                        "BlendMode = 'Color',"
-                        "Enabled = true"
-                    "}"
-                "}"
-            "}"
+            "Layers = {" + layers + "}"
         "},";
     }
 
