@@ -32,12 +32,11 @@
 #include "modules.h"
 #include "keybindings.h"
 #include "assets.h"
-#include "ostime.h"
+#include "timedialog.h"
 #include "additionalscripts.h"
 #include "deltatimes.h"
 #include "camera.h"
 #include "marknodes.h"
-#include "ostime.h"
 #include <openspace/scene/profile.h>
 
 QT_BEGIN_NAMESPACE
@@ -136,7 +135,7 @@ private:
     Modules* _modules;
     Keybindings* _keybindings;
     Assets* _assets;
-    ostime* _time;
+    Time* _time;
     AdditionalScripts* _addedScripts;
     DeltaTimes* _deltaTimes;
     Camera* _camera;

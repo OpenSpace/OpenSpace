@@ -181,7 +181,7 @@ void ProfileEdit::openAssets() {
 void ProfileEdit::openTime() {
     ui->label_error->setText("");
     if (_pData) {
-        _time = new ostime(_pData);
+        _time = new Time(_pData, this);
         _time->exec();
         delete _time;
     }

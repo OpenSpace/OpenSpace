@@ -28,26 +28,14 @@
 #include <QDialog>
 
 #include <openspace/scene/profile.h>
-#include <QWidget>
-#include <optional>
 
+class QComboBox;
+class QDateTimeEdit;
+class QLabel;
+class QLineEdit;
 
-
-QT_BEGIN_NAMESPACE
-namespace Ui {
-class time;
-}
-QT_END_NAMESPACE
-
-class ostime : public QDialog
-{
-    Q_OBJECT
-
-public slots:
-    void enableAccordingToType(int);
-    void cancel();
-    void approved();
-
+class Time : public QDialog {
+Q_OBJECT
 public:
     /**
      * Constructor for ostime class
@@ -56,20 +44,23 @@ public:
      *                 new or imported profile.
      * \param parent Pointer to parent Qt widget (optional)
      */
-    explicit ostime(openspace::Profile* imported, QWidget *parent = nullptr);
+    Time(openspace::Profile* profile, QWidget* parent);
 
-    /**
-     * Destructor for ostime class
-     */
-    ~ostime();
+public slots:
+    void enableAccordingToType(int);
+    void approved();
 
 private:
     void enableFormatForAbsolute(bool enableAbs);
-    Ui::time *ui;
-    QWidget* _parent;
-    openspace::Profile* _imported;
+    openspace::Profile* _profile;
     openspace::Profile::Time _data;
     bool _initializedAsAbsolute = true;
+
+    QComboBox* _typeCombo = nullptr;
+    QLabel* _absoluteLabel = nullptr;
+    QDateTimeEdit* _absoluteEdit = nullptr;
+    QLabel* _relativeLabel = nullptr;
+    QLineEdit* _relativeEdit = nullptr;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___OSTIME___H__
