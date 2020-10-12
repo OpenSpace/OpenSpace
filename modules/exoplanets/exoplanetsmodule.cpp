@@ -52,9 +52,9 @@ scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
             "addExoplanetSystem",
             &exoplanets::luascriptfunctions::addExoplanetSystem,
             {},
-            "string",
-            "Add the exoplanet system specified by the input string, including "
-            "information about the host star and planets."
+            "string or list of strings",
+            "Add one or multiple exoplanet systems to the scene, as specified by the "
+            "input. An input string should be the name of the system host star."
         },
         {
             "removeExoplanetSystem",

@@ -62,93 +62,7 @@ constexpr const char* StarTextureFile = "${SYNC}/http/exoplanets_textures/1/sun.
 constexpr const char* DiscTextureFile =
     "${SYNC}/http/exoplanets_textures/1/disc_texture.png";
 
-constexpr const char* BvColormapPath = "${SYNC}/http/stars_colormap/2/colorbv.cmap";
-
-std::string starColor(float bv, std::ifstream& colormap) {
-    const int t = static_cast<int>(round(((bv + 0.4) / (2.0 + 0.4)) * 255));
-    std::string color;
-    for (int i = 0; i < t + 12; i++) {
-        getline(colormap, color);
-    }
-    colormap.close();
-
-    std::istringstream colorStream(color);
-    std::string r, g, b;
-    getline(colorStream, r, ' ');
-    getline(colorStream, g, ' ');
-    getline(colorStream, b, ' ');
-
-    return fmt::format("{{ {}, {}, {} }}", r, g, b);
-}
-
-glm::dmat4 computeOrbitPlaneRotationMatrix(float i, float bigom, float omega) {
-    // Exoplanet defined inclination changed to be used as Kepler defined inclination
-    const glm::dvec3 ascendingNodeAxisRot = glm::dvec3(0.0, 0.0, 1.0);
-    const glm::dvec3 inclinationAxisRot =  glm::dvec3(1.0, 0.0, 0.0);
-    const glm::dvec3 argPeriapsisAxisRot = glm::dvec3(0.0, 0.0, 1.0);
-
-    const double asc = glm::radians(bigom);
-    const double inc = glm::radians(i);
-    const double per = glm::radians(omega);
-
-    const glm::dmat4 orbitPlaneRotation =
-        glm::rotate(asc, glm::dvec3(ascendingNodeAxisRot)) *
-        glm::rotate(inc, glm::dvec3(inclinationAxisRot)) *
-        glm::rotate(per, glm::dvec3(argPeriapsisAxisRot));
-
-    return orbitPlaneRotation;
-}
-
-// Rotate the original coordinate system (where x is pointing to First Point of Aries)
-// so that x is pointing from star to the sun.
-// Modified from "http://www.opengl-tutorial.org/intermediate-tutorials/
-// tutorial-17-quaternions/ #how-do-i-find-the-rotation-between-2-vectors"
-glm::dmat3 exoplanetSystemRotation(glm::dvec3 start, glm::dvec3 end) {
-    glm::quat rotationQuat;
-    glm::dvec3 rotationAxis;
-    const float cosTheta = static_cast<float>(glm::dot(start, end));
-    constexpr float Epsilon = 1E-3f;
-
-    if (cosTheta < -1.f + Epsilon) {
-        // special case when vectors in opposite directions:
-        // there is no "ideal" rotation axis
-        // So guess one; any will do as long as it's perpendicular to start vector
-        rotationAxis = glm::cross(glm::dvec3(0.0, 0.0, 1.0), start);
-        if (length2(rotationAxis) < 0.01f) {
-            // bad luck, they were parallel, try again!
-            rotationAxis = glm::cross(glm::dvec3(1.0, 0.0, 0.0), start);
-        }
-
-        rotationAxis = glm::normalize(rotationAxis);
-        rotationQuat = glm::quat(glm::radians(180.f), rotationAxis);
-        return glm::dmat3(toMat4(rotationQuat));
-    }
-
-    rotationAxis = glm::cross(start, end);
-
-    const float s = sqrt((1.f + cosTheta) * 2.f);
-    const float invs = 1.f / s;
-
-    rotationQuat = glm::quat(
-        s * 0.5f,
-        rotationAxis.x * invs,
-        rotationAxis.y * invs,
-        rotationAxis.z * invs
-    );
-
-    return glm::dmat3(glm::toMat4(rotationQuat));
-}
-
-// Create an identifier without whitespaces
-std::string createIdentifier(std::string name) {
-    std::replace(name.begin(), name.end(), ' ', '_');
-    return name;
-}
-
-int addExoplanetSystem(lua_State* L) {
-    const int StringLocation = -1;
-    const std::string starName = luaL_checkstring(L, StringLocation);
-
+void createExoplanetSystem(std::string_view starName) {
     // If user have given name as in EOD, change it to speck-name
     const std::string starNameSpeck = std::string(speckStarName(starName));
 
@@ -157,21 +71,28 @@ int addExoplanetSystem(lua_State* L) {
 
     SceneGraphNode* existingStarNode = sceneGraphNode(starIdentifier);
     if (existingStarNode) {
-        return ghoul::lua::luaError(
-            L,
-            "Adding of exoplanet system failed. The system has already been added."
-        );
+        LERROR(fmt::format(
+            "Adding of exoplanet system '{}' failed. The system has already been added.",
+            starName
+        ));
+        return;
     }
 
     std::ifstream data(absPath(ExoplanetsDataPath), std::ios::in | std::ios::binary);
 
     if (!data.good()) {
-        return ghoul::lua::luaError(L, "Failed to open exoplanets data file");
+        LERROR(fmt::format(
+            "Failed to open exoplanets data file: '{}'", absPath(ExoplanetsDataPath)
+        ));
+        return;
     }
 
     std::ifstream lut(absPath(LookUpTablePath));
     if (!lut.good()) {
-        return ghoul::lua::luaError(L, "Failed to open exoplanets look-up table file");
+        LERROR(fmt::format(
+            "Failed to open exoplanets look-up table: '{}'", absPath(LookUpTablePath)
+        ));
+        return;
     }
 
     // 1. search lut for the starname and return the corresponding location
@@ -207,19 +128,18 @@ int addExoplanetSystem(lua_State* L) {
     lut.close();
 
     if (!found) {
-        return ghoul::lua::luaError(
-            L,
-            "No star with the provided name was found."
-        );
+        LERROR(fmt::format("No star with the provided name was found: '{}'", starName));
+        return;
     }
 
     bool notEnoughData = std::isnan(p.positionX) || std::isnan(p.a) || std::isnan(p.per);
 
     if (notEnoughData) {
-        return ghoul::lua::luaError(
-            L,
-            "Insufficient data available for representing the exoplanet system."
-        );
+        LERROR(fmt::format(
+            "Insufficient data available for representing the exoplanet system: '{}'",
+            starName
+        ));
+        return;
     }
 
     const glm::dvec3 starPosition = glm::dvec3(
@@ -267,14 +187,15 @@ int addExoplanetSystem(lua_State* L) {
     std::string starGlobeRenderableString;
     const float starRadius = p.rStar;
     if (!std::isnan(starRadius)) {
-        std::ifstream colorMap(absPath(BvColormapPath), std::ios::in);
+        const std::string color = starColor(p.bmv);
 
-        if (!colorMap.good()) {
-            return ghoul::lua::luaError(L, "Failed to open colormap data file");
+        if (color.empty()) {
+            LERROR("Error computing star color");
+            return;
         }
 
-        const std::string color = starColor(p.bmv, colorMap);
-        const float radiusInMeter = starRadius * static_cast<float>(distanceconstants::SolarRadius);
+        const float radiusInMeter =
+            starRadius * static_cast<float>(distanceconstants::SolarRadius);
 
         starGlobeRenderableString = "Renderable = {"
             "Type = 'RenderableGlobe',"
@@ -493,11 +414,45 @@ int addExoplanetSystem(lua_State* L) {
             );
         }
     }
+}
 
+int addExoplanetSystem(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::addExoplanetSystem");
+
+    const int t = lua_type(L, 1);
+    if (t == LUA_TSTRING) {
+        // The user provided a single name
+        const std::string& starName = ghoul::lua::value<std::string>(L, 1);
+        createExoplanetSystem(starName);
+    }
+    else if (t == LUA_TTABLE) {
+        // A list of names was provided
+        ghoul::Dictionary d;
+        ghoul::lua::luaDictionaryFromState(L, d);
+
+        for (size_t i = 1; i <= d.size(); ++i) {
+            if (!d.hasKeyAndValue<std::string>(std::to_string(i))) {
+                return ghoul::lua::luaError(
+                    L, fmt::format("List item {} is of invalid type", i)
+                );
+            }
+            const std::string& starName = d.value<std::string>(std::to_string(i));
+            createExoplanetSystem(starName);
+        }
+        lua_pop(L, 1);
+    }
+    else {
+        return ghoul::lua::luaError(L, "Invalid input");
+    }
+
+    lua_settop(L, 0);
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
 int removeExoplanetSystem(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeExoplanetSystem");
+
     const int StringLocation = -1;
     const std::string starName = luaL_checkstring(L, StringLocation);
     const std::string starNameSpeck = std::string(speckStarName(starName));

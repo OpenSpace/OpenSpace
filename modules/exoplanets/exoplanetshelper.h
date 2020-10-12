@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_MODULE_EXOPLANETS___EXOPLANET_HELPER___H__
 #define __OPENSPACE_MODULE_EXOPLANETS___EXOPLANET_HELPER___H__
 
+#include <ghoul/glm.h>
 #include <string>
 
 namespace openspace::exoplanets {
@@ -70,6 +71,18 @@ std::string_view speckStarName(std::string_view name);
 
 // Convert speck-file specific names to the corresponding name in the csv data file
 std::string_view csvStarName(std::string_view name);
+
+// Compute star color in RGB from b-v color index
+std::string starColor(float bv);
+
+glm::dmat4 computeOrbitPlaneRotationMatrix(float i, float bigom, float omega);
+
+// Rotate the original coordinate system (where x is pointing to First Point of Aries)
+// so that x is pointing from star to the sun.
+glm::dmat3 exoplanetSystemRotation(glm::dvec3 start, glm::dvec3 end);
+
+// Create an identifier without whitespaces
+std::string createIdentifier(std::string name);
 
 } // namespace openspace::exoplanets
 
