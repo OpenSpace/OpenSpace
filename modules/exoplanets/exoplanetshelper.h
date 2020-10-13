@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_MODULE_EXOPLANETS___EXOPLANET_HELPER___H__
 #define __OPENSPACE_MODULE_EXOPLANETS___EXOPLANET_HELPER___H__
 
+#include <ghoul/glm.h>
 #include <string>
 
 namespace openspace::exoplanets {
@@ -33,42 +34,33 @@ struct Exoplanet {
     float a;            // Orbital semi-major axis in AU
     double aUpper;      // Upper uncertainty of orbital semi-major axis
     double aLower;      // Lower uncertainty of orbital semi-major axis
-    double ua;          // Uncertainty of orbital semi-major axis
-    float bigOm;        // Longitude of ascending node in degrees
-    float bigOmUpper;   // Upper uncertainty of longitude of ascending node
-    float bigOmLower;   // Lower uncertainty of longitude of ascending node
-    float uBigOm;       // Uncertainty of longitude of ascending node
+    float bigOmega;     // Longitude of ascending node in degrees
+    float bigOmegaUpper; // Upper uncertainty of longitude of ascending node
+    float bigOmegaLower; // Lower uncertainty of longitude of ascending node
     bool binary;        // Star known to be binary?
     float bmv;          // B − V color
     float ecc;          // Orbital eccentricity
     float eccUpper;     // Upper uncertainty of orbital eccentricity
     float eccLower;     // Lower uncertainty of orbital eccentricity
-    float uEcc;         // Uncertainty of orbital eccentricity
     float i;            // Orbital inclination in degrees (for transiting systems only)
     float iUpper;       // Upper uncertainty of orbital inclination
     float iLower;       // Lower uncertainty of orbital inclination
-    float ui;           // Uncertainty of orbital inclination
     int nComp;          // Number of planetary companions known
-    float om;           // Argument of periastron in degrees
-    float omUpper;      // Upper uncertainty of argument of periastron
-    float omLower;      // Lower uncertainty of argument of periastron
-    float uOm;          // Uncertainty of argument of periastron
+    float omega;        // Argument of periastron in degrees
+    float omegaUpper;   // Upper uncertainty of argument of periastron
+    float omegaLower;   // Lower uncertainty of argument of periastron
     double per;         // Orbital period in days
     float perUpper;     // Upper uncertainty of period
     float perLower;     // Lower uncertainty of period
-    float uPer;         // Uncertainty of period
     double r;           // Radius of the planet in Jupiter radii
     double rUpper;      // Upper uncertainty of radius of the planet
     double rLower;      // Lower uncertainty of radius of the planet
-    double ur;          // Uncertainty of radius of the planet
     float rStar;        // Estimated radius of the star in solar radii
     float rStarUpper;   // Upper uncertainty of estimated star radius
     float rStarLower;   // Lower uncertainty of estimated star radius
-    float urStar;       // Uncertainty of estimated star radius
     double tt;          // Epoch of transit center in HJD-2440000
     float ttUpper;      // Upper uncertainty of epoch of transit center
     float ttLower;      // Lower uncertainty of epoch of transit center
-    float uTt;          // Uncertainty of epoch of transit center
     float positionX;    // Star position's X-coordinate in parsec
     float positionY;    // Star position's Y-coordinate in parsec
     float positionZ;    // Star position's Z-coordinate in parsec
@@ -79,6 +71,18 @@ std::string_view speckStarName(std::string_view name);
 
 // Convert speck-file specific names to the corresponding name in the csv data file
 std::string_view csvStarName(std::string_view name);
+
+// Compute star color in RGB from b-v color index
+std::string starColor(float bv);
+
+glm::dmat4 computeOrbitPlaneRotationMatrix(float i, float bigom, float omega);
+
+// Rotate the original coordinate system (where x is pointing to First Point of Aries)
+// so that x is pointing from star to the sun.
+glm::dmat3 exoplanetSystemRotation(glm::dvec3 start, glm::dvec3 end);
+
+// Create an identifier without whitespaces
+std::string createIdentifier(std::string name);
 
 } // namespace openspace::exoplanets
 

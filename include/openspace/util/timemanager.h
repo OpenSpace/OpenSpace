@@ -25,6 +25,9 @@
 #ifndef __OPENSPACE_CORE___TIMEMANAGER___H__
 #define __OPENSPACE_CORE___TIMEMANAGER___H__
 
+#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/util/keys.h>
 #include <openspace/util/syncdata.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timeline.h>
@@ -32,14 +35,6 @@
 #include <optional>
 #include <utility>
 #include <vector>
-
-#include <deque>
-#include <functional>
-#include <openspace/util/timeline.h>
-#include <openspace/util/time.h>
-#include <openspace/util/syncdata.h>
-#include <openspace/properties/propertyowner.h>
-#include <openspace/properties/scalar/floatproperty.h>
 
 namespace openspace {
 
@@ -130,6 +125,9 @@ private:
     TimeKeyframeData interpolate(const Keyframe<TimeKeyframeData>& past,
         const Keyframe<TimeKeyframeData>& future, double time);
 
+    void addDeltaTimesKeybindings();
+    void clearDeltaTimesKeybindings();
+
     Timeline<TimeKeyframeData> _timeline;
     SyncData<Time> _currentTime;
     SyncData<Time> _integrateFromTime;
@@ -142,8 +140,9 @@ private:
     double _lastDeltaTime = 0.0;
     double _lastTargetDeltaTime = 0.0;
 
-    std::vector<double> _deltaTimeSteps;
     bool _deltaTimeStepsChanged = false;
+    std::vector<double> _deltaTimeSteps;
+    std::vector<KeyWithModifier> _deltaTimeStepKeybindings;
 
     properties::FloatProperty _defaultTimeInterpolationDuration;
     properties::FloatProperty _defaultDeltaTimeInterpolationDuration;

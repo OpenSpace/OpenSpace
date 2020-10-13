@@ -22,66 +22,35 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___KEYBINDINGMANAGER___H__
-#define __OPENSPACE_CORE___KEYBINDINGMANAGER___H__
+#ifndef __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSDATAPREPARATIONTASK___H__
+#define __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSDATAPREPARATIONTASK___H__
 
-#include <openspace/documentation/documentationgenerator.h>
+#include <openspace/properties/vector/vec3property.h>
+#include <openspace/util/task.h>
+#include <string>
 
-#include <openspace/util/keys.h>
-#include <ghoul/misc/boolean.h>
+namespace openspace::exoplanets {
 
-namespace openspace {
-    class Camera;
-    class SceneGraphNode;
-} // namespace openspace
-
-namespace openspace::scripting { struct LuaLibrary; }
-
-namespace openspace::interaction {
-
-class KeybindingManager : public DocumentationGenerator {
+class ExoplanetsDataPreparationTask : public Task {
 public:
-    BooleanType(IsSynchronized);
-
-    struct KeyInformation {
-        std::string command;
-        IsSynchronized synchronization;
-        std::string documentation;
-        std::string name;
-        std::string guiPath;
-    };
-
-    KeybindingManager();
-
-    void resetKeyBindings();
-
-    void bindKeyLocal(Key key, KeyModifier modifier, std::string luaCommand,
-        std::string documentation = "", std::string name = "", std::string guiPath = "");
-
-    void bindKey(Key key, KeyModifier modifier, std::string luaCommand,
-        std::string documentation = "", std::string name = "", std::string guiPath = "");
-
-    void removeKeyBinding(const std::string& key);
-    void removeKeyBinding(const KeyWithModifier& key);
-
-    std::vector<std::pair<KeyWithModifier, KeyInformation>> keyBinding(
-        const std::string& key) const;
-
-    std::vector<std::pair<KeyWithModifier, KeyInformation>> keyBinding(
-        const KeyWithModifier& key) const;
-
-    static scripting::LuaLibrary luaLibrary();
-
-    void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
-
-    std::string generateJson() const override;
-
-    const std::multimap<KeyWithModifier, KeyInformation>& keyBindings() const;
+    ExoplanetsDataPreparationTask(const ghoul::Dictionary& dictionary);
+    std::string description() override;
+    void perform(const Task::ProgressCallback& progressCallback) override;
+    static documentation::Documentation documentation();
 
 private:
-    std::multimap<KeyWithModifier, KeyInformation> _keyLua;
+    std::string _inputDataPath;
+    std::string _inputSpeckPath;
+    std::string _outputBinPath;
+    std::string _outputLutPath;
+    std::string _teffToBvFilePath;
+
+    glm::vec3 starPosition(const std::string& starName);
+
+    // Compute b-v color from teff value using a conversion file
+    float bvFromTeff(float teff);
 };
 
-} // namespace openspace::interaction
+} // namespace openspace::exoplanets
 
-#endif // __OPENSPACE_CORE___KEYBINDINGMANAGER___H__
+#endif // __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSDATAPREPARATIONTASK___H__

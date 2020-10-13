@@ -279,7 +279,6 @@ local initializeAndAddNodes = function()
     }
 }
 
-  table.insert(nodes, issTrail)
   return { iss, parentNode, issTrail }
 end
 
@@ -289,7 +288,15 @@ asset.onInitialize(function ()
     openspace.addSceneGraphNode(node)
   end
   openspace.setPropertyValueSingle("Scene.ISSparentNode.Rotation.yAxis-InvertObject", true)
+
 end)
+
+asset.onDeinitialize(function ()
+  for i=1, #nodes do
+    openspace.removeSceneGraphNode(nodes[#nodes + 1 - i].Identifier)
+  end
+end)
+
 
 
 asset.meta = {
