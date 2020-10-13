@@ -62,8 +62,19 @@ local MercuryLabel = {
     Tag = { "solarsystem_labels" },
     GUI = {
         Name = "Mercury Label",
-        Path = "/Solar System/Planets/Mercury"
+        Path = "/Solar System/Planets/Mercury",
     }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Mercury, MercuryLabel })
+
+
+asset.meta = {
+    Name = "Mercury",
+    Version = "1.0",
+    Description = [[ Mercury globe with labels, and main planet label.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = "Mercury,MercuryLabel"
+}

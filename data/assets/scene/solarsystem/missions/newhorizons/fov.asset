@@ -368,8 +368,6 @@ local Rex = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     Lorri,
     RalphLeisa,

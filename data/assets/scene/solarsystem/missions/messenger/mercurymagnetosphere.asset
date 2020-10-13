@@ -1,6 +1,6 @@
 -- mercurymagnetosphere.asset
-
 local assetHelper = asset.require('util/asset_helper')
+local mercuryTransforms = asset.require('scene/solarsystem/planets/mercury/transforms')
 
 local localFolder = asset.syncedResource({
     Name = "Mercury Magnetosphere",
@@ -15,7 +15,7 @@ local MercuryRadius = 2.4397E6
 local Magnetosphere = {   
     Name = "Mercury Magnetosphere",
     Identifier = "MercuryMagnetosphere",
-    Parent = "MercuryBarycenter",
+    Parent = mercuryTransforms.MercuryBarycenter.Identifier,
     SceneRadius = 0.8E+5,
     Renderable = {
         Type = "RenderableTimeVaryingVolume",

@@ -16,7 +16,7 @@ local Rhea = {
         },
         Rotation = {
             Type = "SpiceRotation",
-            SourceFrame = "IAU_ENCELADUS",
+            SourceFrame = "IAU_RHEA",
             DestinationFrame = "GALACTIC"
         }
     },
@@ -44,10 +44,20 @@ local Rhea = {
     },
     Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
     GUI = {
-        Path = "/Solar System/Planets/Saturn/Moons"
+        Name = "Rhea",
+        Path = "/Solar System/Planets/Saturn/Moons",
+        Description = [[Second largest moon of Saturn.]]
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Rhea })
+
+
+asset.meta = {
+    Name = "Rhea",
+    Version = "1.0",
+    Description = [[ Rhea globe with labels.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

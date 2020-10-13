@@ -40,7 +40,7 @@ int startRecording(lua_State* L) {
         return luaL_error(L, "filepath string is empty");
     }
     global::sessionRecording.setRecordDataFormat(
-        openspace::interaction::SessionRecording::RecordedDataMode::Binary
+        interaction::SessionRecording::DataMode::Binary
     );
     global::sessionRecording.startRecording(recordFilePath);
 
@@ -63,7 +63,7 @@ int startRecordingAscii(lua_State* L) {
         return luaL_error(L, "filepath string is empty");
     }
     global::sessionRecording.setRecordDataFormat(
-        openspace::interaction::SessionRecording::RecordedDataMode::Ascii
+        interaction::SessionRecording::DataMode::Ascii
     );
     global::sessionRecording.startRecording(recordFilePath);
 
@@ -80,7 +80,7 @@ int stopRecording(lua_State* L) {
     return 0;
 }
 
-int startPlayback(lua_State* L, openspace::interaction::KeyframeTimeRef timeMode,
+int startPlayback(lua_State* L, interaction::KeyframeTimeRef timeMode,
                   bool forceSimTimeAtStart)
 {
     using ghoul::lua::luaTypeToString;
@@ -107,30 +107,30 @@ int startPlayback(lua_State* L, openspace::interaction::KeyframeTimeRef timeMode
 
 int startPlaybackDefault(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::startPlaybackDefault");
-    using openspace::interaction::KeyframeNavigator;
+    using interaction::KeyframeNavigator;
     return startPlayback(L,
-        openspace::interaction::KeyframeTimeRef::Relative_recordedStart, true);
+        interaction::KeyframeTimeRef::Relative_recordedStart, true);
 }
 
 int startPlaybackApplicationTime(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::startPlaybackApplicationTime");
 
     return startPlayback(L,
-        openspace::interaction::KeyframeTimeRef::Relative_applicationStart, false);
+        interaction::KeyframeTimeRef::Relative_applicationStart, false);
 }
 
 int startPlaybackRecordedTime(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::startPlaybackRecordedTime");
-    using openspace::interaction::KeyframeNavigator;
+    using interaction::KeyframeNavigator;
     return startPlayback(L,
-        openspace::interaction::KeyframeTimeRef::Relative_recordedStart, false);
+        interaction::KeyframeTimeRef::Relative_recordedStart, false);
 }
 
 int startPlaybackSimulationTime(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::startPlaybackSimulationTime");
-    using openspace::interaction::KeyframeNavigator;
+    using interaction::KeyframeNavigator;
     return startPlayback(L,
-        openspace::interaction::KeyframeTimeRef::Absolute_simTimeJ2000, false);
+        interaction::KeyframeTimeRef::Absolute_simTimeJ2000, false);
 }
 
 int stopPlayback(lua_State* L) {

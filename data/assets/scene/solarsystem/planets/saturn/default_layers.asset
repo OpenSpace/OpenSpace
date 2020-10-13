@@ -7,3 +7,13 @@ local colorLayer = asset.require(colorLayersPath .. "/saturn_texture")
 asset.onInitialize(function () 
     openspace.setPropertyValueSingle("Scene.Saturn.Renderable.Layers.ColorLayers." .. colorLayer.layer.Identifier .. ".Enabled", true)
 end)
+
+
+asset.meta = {
+    Name = "Default Saturn Layers",
+    Version = "1.0",
+    Description = [[ Default Saturn layers are: Saturn texture]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

@@ -44,30 +44,6 @@ asset.require('customization/globebrowsing')
 -- Keybindings that are specific for this scene
 local Keybindings = {
     {
-        Key = "b",
-        Name = "Toggle background",
-        Command = propertyHelper.invert('Scene.MilkyWay.Renderable.Enabled') ..
-                  propertyHelper.invert('Scene.Stars.Renderable.Enabled'),
-        Documentation = "Toggle background (Stars and Milkyway).",
-        GuiPath = "/Rendering",
-        Local = false
-    },
-    {
-        Key = "g",
-        Name = "Toggle background/shading",
-        Command = propertyHelper.invert('Scene.MilkyWay.Renderable.Enabled') ..
-                  propertyHelper.invert('Scene.Stars.Renderable.Enabled') ..
-                  propertyHelper.invert('Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Enabled') ..
-                  propertyHelper.invert('Scene.EarthAtmosphere.Renderable.Enabled') ..
-                  propertyHelper.invert('Scene.MarsAtmosphere.Renderable.Enabled') ..
-                  propertyHelper.invert('Scene.Earth.Renderable.Layers.WaterMasks.MODIS_Water_Mask.Enabled') ..
-                  propertyHelper.invert('Scene.Moon.Renderable.Enabled') ..
-                  propertyHelper.invert('Scene.Sun.Renderable.Enabled'),
-        Documentation = "Toogles background and shading mode on the Earth and Mars alongside visibility of the Moon and the Sun",
-        GuiPath = "/Rendering",
-        Local = false
-    },
-    {
         Key = "h",
         Name="Toggle Trails",
         Command = "local list = openspace.getProperty('{planetTrail_solarSystem}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end\n" ..

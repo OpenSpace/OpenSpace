@@ -38,19 +38,6 @@ m	Draws the instrument field of views in a solid color or as lines.	Toggle instr
 Shift+t	Toggles the visibility of the shadow visualization of Pluto and Charon.	Toggle Shadows	/New Horizons	false	renderableHelper.toggle('Scene.PlutoShadow') .. renderableHelper.toggle('Scene.CharonShadow')
 t	Toggles the trail of New Horizons.	Toggle NH Trail	/New Horizons	false	renderableHelper.toggle('Scene.NewHorizonsTrailPluto')
 h	Disables visibility of the trails	Hide Trails	/Rendering	false	"local list = openspace.getProperty('*Trail.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
-1	Setting the simulation speed to 1 seconds per realtime second	Set sim speed 1	/Simulation Speed	false	"openspace.time.interpolateDeltaTime(1)"
-2	Setting the simulation speed to 5 seconds per realtime second	Set sim speed 5	/Simulation Speed	false	"openspace.time.interpolateDeltaTime(5)"
-3	Setting the simulation speed to 10 seconds per realtime second	Set sim speed 10	/Simulation Speed	false	"openspace.time.interpolateDeltaTime(10)"
-4	Setting the simulation speed to 20 seconds per realtime second	Set sim speed 20	/Simulation Speed	false	"openspace.time.interpolateDeltaTime(20)"
-5	Setting the simulation speed to 40 seconds per realtime second	Set sim speed 40	/Simulation Speed	false	"openspace.time.interpolateDeltaTime(40)"
-6	Setting the simulation speed to 60 seconds per realtime second	Set sim speed 60	/Simulation Speed	false	"openspace.time.interpolateDeltaTime(60)"
-7	Setting the simulation speed to 120 seconds per realtime second	Set sim speed 120	/Simulation Speed	false	"openspace.time.interpolateDeltaTime(120)"
-8	Setting the simulation speed to 360 seconds per realtime second	Set sim speed 360	/Simulation Speed	false	"openspace.time.interpolateDeltaTime(360)"
-9	Setting the simulation speed to 540 seconds per realtime second	Set sim speed 540	/Simulation Speed	false	"openspace.time.interpolateDeltaTime(540)"
-0	Setting the simulation speed to 1080 seconds per realtime second	Set sim speed 1080	/Simulation Speed	false	"openspace.time.interpolateDeltaTime(1080)"
-Shift+1	Setting the simulation speed to 2160 seconds per realtime second	Set sim speed 2160	/Simulation Speed	false	"openspace.time.interpolateDeltaTime(2160)"
-Shift+2	Setting the simulation speed to 4320 seconds per realtime second	Set sim speed 4320	/Simulation Speed	false	"openspace.time.interpolateDeltaTime(4320)"
-Shift+3	Setting the simulation speed to 8640 seconds per realtime second	Set sim speed 8640	/Simulation Speed	false	"openspace.time.interpolateDeltaTime(8640)"
 
 #Time
 absolute	2015-07-14T08:00:00.00
@@ -62,3 +49,17 @@ setNavigationState	"NewHorizons"		"Root"	-6.572656E1, -7.239404E1, -2.111890E1	0
 Pluto
 NewHorizons
 Charon
+
+#DeltaTimes
+1
+5
+10
+20
+40
+120
+360
+540
+1080
+2160
+4320
+8640
