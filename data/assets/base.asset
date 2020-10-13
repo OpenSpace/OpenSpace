@@ -19,10 +19,12 @@ asset.require('scene/solarsystem/missions/voyagerpioneer/voyager1_2__pioneer10_1
 asset.require('scene/milkyway/milkyway/volume')
 asset.require('scene/milkyway/constellations/constellation_art')
 asset.require('scene/milkyway/constellations/constellation_keybinds')
+asset.require('util/launcher_images')
 
 local assetHelper = asset.require('util/asset_helper')
 assetHelper.requireAll(asset, 'scene/milkyway/exoplanets')
 assetHelper.requireAll(asset, 'scene/digitaluniverse')
+
 
 asset.onInitialize(function ()
     openspace.globebrowsing.loadWMSServersFromFile(

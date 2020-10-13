@@ -10,6 +10,18 @@
     "longitude": 16.1924,
     "type": "goToGeo"
   },
+  "delta_times": [
+    1.0,
+    5.0,
+    30.0,
+    60.0,
+    300.0,
+    1800.0,
+    3600.0,
+    43200.0,
+    86400.0,
+    604800.0
+  ],
   "keybindings": [
     {
       "documentation": "Set and goto Insight Landing",

@@ -19,6 +19,9 @@ QLabel#error-message {
 
 LauncherWindow  QLabel {
   font-family: Segoe UI;
+  color: #ddd;
+  font-size:10pt;
+  font-weight:600;
 }
 
 LauncherWindow  QLabel#clear {

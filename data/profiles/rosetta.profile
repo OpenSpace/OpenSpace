@@ -80,7 +80,7 @@
       "is_local": false,
       "key": "I",
       "name": "Toggle image plane",
-      "script": "openspace.setPropertyValueSingle('Scene.ImagePlaneRosetta.Enabled', not openspace.getPropertyValue('Scene.ImagePlaneRosetta.Enabled'));"
+      "script": "openspace.setPropertyValueSingle('Scene.ImagePlaneRosetta.Renderable.Enabled', not openspace.getPropertyValue('Scene.ImagePlaneRosetta.Renderable.Enabled'));"
     },
     {
       "documentation": "Toggles the visibility of Philae's trail.",
@@ -88,7 +88,7 @@
       "is_local": false,
       "key": "O",
       "name": "Toggle Philae trail",
-      "script": "openspace.setPropertyValueSingle(Scene.PhilaeTrail.Enabled', not openspace.getPropertyValue(Scene.PhilaeTrail.Enabled'));"
+      "script": "openspace.setPropertyValueSingle(Scene.PhilaeTrail.Renderable.Enabled', not openspace.getPropertyValue(Scene.PhilaeTrail.Renderable.Enabled'));"
     },
     {
       "documentation": "Enables or disables the image projection on 67P.",
