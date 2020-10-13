@@ -279,14 +279,22 @@ void KeybindingsDialog::listItemSelected(void) {
 
     if (_data.size() > 0) {
         openspace::Profile::Keybinding& k = _data[index];
-        _keyModCombo->setCurrentIndex(
-            indexInKeyMapping(_mapModKeyComboBoxIndexToKeyValue,
-            static_cast<int>(k.key.modifier))
+        const int modifierKey = indexInKeyMapping(
+            _mapModKeyComboBoxIndexToKeyValue,
+            static_cast<int>(k.key.modifier)
         );
-        _keyCombo->setCurrentIndex(
-            indexInKeyMapping(_mapKeyComboBoxIndexToKeyValue,
-            static_cast<int>(k.key.key))
-        );
+        _keyModCombo->setCurrentIndex(modifierKey);
+
+        if (k.key.key == openspace::Key::Unknown) {
+            _keyCombo->setCurrentIndex(0);
+        }
+        else {
+            const int key = indexInKeyMapping(
+                _mapKeyComboBoxIndexToKeyValue,
+                static_cast<int>(k.key.key)
+            );
+            _keyCombo->setCurrentIndex(key);
+        }
 
         // Do key here
         _nameEdit->setText(QString(k.name.c_str()));
@@ -333,29 +341,35 @@ bool KeybindingsDialog::isLineEmpty(int index) {
     return isEmpty;
 }
 
-void KeybindingsDialog::listItemAdded(void) {
+void KeybindingsDialog::listItemAdded() {
     int currentListSize = _list->count();
 
-     if ((currentListSize == 1) && (isLineEmpty(0))) {
-         //Special case where list is "empty" but really has one line that is blank.
-         // This is done because QListWidget does not seem to like having its sole
-         // remaining item being removed.
-         _data.at(0) = kBlank;
-         _list->item(0)->setText("  (Enter details below & click 'Save')");
-         transitionToEditMode();
-     }
-     else {
+     //if ((currentListSize == 1) && (isLineEmpty(0))) {
+    //if (currentListSize == 0) {
+    //     // Special case where list is "empty" but really has one line that is blank.
+    //     // This is done because QListWidget does not seem to like having its sole
+    //     // remaining item being removed.
+    //     _data.at(0) = kBlank;
+    //     _list->item(0)->setText("  (Enter details below & click 'Save')");
+    //     transitionToEditMode();
+    // }
+    // else {
         _data.push_back(kBlank);
         _list->addItem(new QListWidgetItem("  (Enter details below & click 'Save')"));
         //Scroll down to that blank line highlighted
         _list->setCurrentRow(_list->count() - 1);
-     }
+     //}
 
-    //Blank-out the 2 text fields, set combo box to index 0
-     _keyModCombo->setCurrentIndex(static_cast<int>(_data.back().key.modifier));
-     _keyCombo->setCurrentIndex(static_cast<int>(_data.back().key.key));
-     _keyModCombo->setFocus(Qt::OtherFocusReason);
-     _nameEdit->setText(QString::fromStdString(_data.back().name));
+    // Blank-out the 2 text fields, set combo box to index 0
+    _keyModCombo->setCurrentIndex(static_cast<int>(_data.back().key.modifier));
+    if (_data.back().key.key == openspace::Key::Unknown) {
+        _keyCombo->setCurrentIndex(0);
+    }
+    else {
+        _keyCombo->setCurrentIndex(static_cast<int>(_data.back().key.key));
+    }
+    _keyModCombo->setFocus(Qt::OtherFocusReason);
+    _nameEdit->setText(QString::fromStdString(_data.back().name));
     _guiPathEdit->setText("/");
     _documentationEdit->setText(QString::fromStdString(_data.back().documentation));
     _localCheck->setChecked(false);
