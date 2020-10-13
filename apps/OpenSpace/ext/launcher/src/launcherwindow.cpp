@@ -43,7 +43,31 @@ namespace {
     constexpr const int LeftRuler = 40;
     constexpr const int TopRuler = 80;
     constexpr const int ItemWidth = 240;
+    constexpr const int ItemHeight = ItemWidth / 4;
     constexpr const int SmallItemWidth = 100;
+    constexpr const int SmallItemHeight = SmallItemWidth / 4;
+
+    namespace geometry {
+        constexpr const QRect BackgroundImage(0, 0, ScreenWidth, ScreenHeight);
+        constexpr const QRect LogoImage(LeftRuler, TopRuler, ItemWidth, ItemHeight);
+        constexpr const QRect ChooseLabel(LeftRuler, TopRuler + 80, 151, 24);
+        constexpr const QRect ProfileBox(
+            LeftRuler, TopRuler + 110, ItemWidth, ItemHeight
+        );
+        constexpr const QRect OptionsLabel(LeftRuler, TopRuler + 180, 151, 24);
+        constexpr const QRect WindowConfigBox(
+            LeftRuler, TopRuler + 210, ItemWidth, ItemHeight
+        );
+        constexpr const QRect StartButton(
+            LeftRuler, TopRuler + 290, ItemWidth, ItemHeight
+        );
+        constexpr const QRect NewButton(
+            LeftRuler + 140, TopRuler + 380, SmallItemWidth, SmallItemHeight
+        );
+        constexpr const QRect EditButton(
+            LeftRuler, TopRuler + 380, SmallItemWidth, SmallItemHeight
+        );
+    } // geometry
 } // namespace
 
 using namespace openspace;
@@ -78,70 +102,71 @@ LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
     setFixedSize(ScreenWidth, ScreenHeight);
     setAutoFillBackground(false);
 
-    QFile file(":/qss/launcher.qss");
-    file.open(QFile::ReadOnly);
-    QString styleSheet = QLatin1String(file.readAll());
-    setStyleSheet(styleSheet);
+    {
+        QFile file(":/qss/launcher.qss");
+        file.open(QFile::ReadOnly);
+        QString styleSheet = QLatin1String(file.readAll());
+        setStyleSheet(styleSheet);
+    }
 
 
     QWidget* centralWidget = new QWidget(this);
 
     QLabel* backgroundImage = new QLabel(centralWidget);
-    backgroundImage->setGeometry(QRect(0, 0, ScreenWidth, ScreenHeight));
+    backgroundImage->setGeometry(geometry::BackgroundImage);
 
     QLabel* logoImage = new QLabel(centralWidget);
     logoImage->setObjectName("clear");
-    logoImage->setGeometry(QRect(LeftRuler, TopRuler, ItemWidth, ItemWidth / 4));
+    logoImage->setGeometry(geometry::LogoImage);
     logoImage->setPixmap(QPixmap(":/images/openspace-horiz-logo-small.png"));
 
     QLabel* labelChoose = new QLabel("Choose Profile", centralWidget);
     labelChoose->setObjectName("clear");
-    labelChoose->setGeometry(QRect(LeftRuler, TopRuler + 80, 151, 24));
+    labelChoose->setGeometry(geometry::ChooseLabel);
 
     _profileBox = new QComboBox(centralWidget);
     _profileBox->setObjectName("config");
-    _profileBox->setGeometry(QRect(LeftRuler, TopRuler + 110, ItemWidth, ItemWidth / 4));
+    _profileBox->setGeometry(geometry::ProfileBox);
 
     QLabel* optionsLabel = new QLabel("Window Options", centralWidget);
     optionsLabel->setObjectName("clear");
-    optionsLabel->setGeometry(QRect(LeftRuler, TopRuler + 180, 151, 24));
+    optionsLabel->setGeometry(geometry::OptionsLabel);
 
     _windowConfigBox = new QComboBox(centralWidget);
     _windowConfigBox->setObjectName("config");
-    _windowConfigBox->setGeometry(QRect(LeftRuler, TopRuler + 210, ItemWidth, ItemWidth / 4));
+    _windowConfigBox->setGeometry(geometry::WindowConfigBox);
 
     QPushButton* startButton = new QPushButton("START", centralWidget);
     connect(startButton, &QPushButton::released, this, &LauncherWindow::startOpenSpace);
     startButton->setObjectName("large");
-    startButton->setGeometry(QRect(LeftRuler, TopRuler + 290, ItemWidth, ItemWidth / 4));
+    startButton->setGeometry(geometry::StartButton);
     startButton->setCursor(Qt::PointingHandCursor);
     
     QPushButton* newButton = new QPushButton("New", centralWidget);
-    connect(newButton, &QPushButton::released, this, &LauncherWindow::openWindow_new);
+    connect(newButton, &QPushButton::released, this, &LauncherWindow::openWindowNew);
     newButton->setObjectName("small");
-    newButton->setGeometry(QRect(LeftRuler + 140, TopRuler + 380, SmallItemWidth, SmallItemWidth / 4));
+    newButton->setGeometry(geometry::NewButton);
     newButton->setCursor(Qt::PointingHandCursor);
 
     QPushButton* editButton = new QPushButton("Edit", centralWidget);
-    connect(editButton, &QPushButton::released, this, &LauncherWindow::openWindow_edit);
+    connect(editButton, &QPushButton::released, this, &LauncherWindow::openWindowEdit);
     editButton->setObjectName("small");
-    editButton->setGeometry(QRect(LeftRuler, TopRuler + 380, SmallItemWidth, SmallItemWidth / 4));
+    editButton->setGeometry(geometry::EditButton);
     editButton->setCursor(Qt::PointingHandCursor);
 
     setCentralWidget(centralWidget);
 
 
 
-
-
     _reportAssetsInFilesystem = _filesystemAccess.useQtFileSystemModelToTraverseDir(
-        QString::fromStdString(basePath) + "/data/assets");
+        QString::fromStdString(basePath) + "/data/assets"
+    );
     populateProfilesList(globalConfig.profile);
 
-    _profileBox->setDisabled(!_profileChangeAllowed);
+    _profileBox->setEnabled(_profileChangeAllowed);
 
     populateWindowConfigsList(sgctConfigName);
-    _windowConfigBox->setDisabled(!_sgctConfigChangeAllowed);
+    _windowConfigBox->setEnabled(_sgctConfigChangeAllowed);
     _fullyConfiguredViaCliArgs = (!profileEnabled && !sgctConfigEnabled);
 
     bool hasSyncFiles = false;
@@ -160,7 +185,7 @@ LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
         std::random_device rd;
         std::mt19937 rng(rd());
         std::uniform_int_distribution<int> uni(0, 4);
-        auto random_integer = uni(rng);
+        int random_integer = uni(rng);
         filename = QString::fromStdString(
             "/http/launcher_images/1/profile" + std::to_string(random_integer) + ".png"
         );
@@ -174,9 +199,7 @@ LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
 }
 
 void LauncherWindow::populateProfilesList(std::string preset) {
-    for (int i = 0; i < _profileBox->count(); ++i) {
-        _profileBox->removeItem(i);
-    }
+    _profileBox->clear();
     std::string reportProfiles = _fileAccessProfiles.useQtFileSystemModelToTraverseDir(
         _basePath + "/data/profiles"
     );
@@ -219,13 +242,13 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
     }
 }
 
-void LauncherWindow::openWindow_new() {
+void LauncherWindow::openWindowNew() {
     std::string initialProfileSelection = _profileBox->currentText().toStdString();
     Profile profile;
     ProfileEdit editor(
         profile,
         _reportAssetsInFilesystem,
-        _globalConfig.profilesReadOnly,
+        _globalConfig.readOnlyProfiles,
         this
     );
     editor.exec();
@@ -241,7 +264,7 @@ void LauncherWindow::openWindow_new() {
     }
 }
 
-void LauncherWindow::openWindow_edit() {
+void LauncherWindow::openWindowEdit() {
     std::string initialProfileSelection = _profileBox->currentText().toStdString();
     std::string profilePath = _basePath.toStdString() + "/data/profiles/";
     int selectedProfileIdx = _profileBox->currentIndex();
@@ -253,7 +276,7 @@ void LauncherWindow::openWindow_edit() {
         ProfileEdit editor(
             *profile,
             _reportAssetsInFilesystem,
-            _globalConfig.profilesReadOnly,
+            _globalConfig.readOnlyProfiles,
             this
         );
         editor.setProfileName(profileToSet);
@@ -273,18 +296,6 @@ void LauncherWindow::saveProfileToFile(const std::string& path, const Profile& p
     std::ofstream outFile;
     try {
         outFile.open(path, std::ofstream::out);
-    }
-    catch (const std::ofstream::failure& e) {
-        QMessageBox::critical(
-            this,
-            "Exception",
-            QString::fromStdString(fmt::format(
-                "Exception opening profile file {} for write: ({})", path, e.what()
-            ))
-        );
-    }
-
-    try {
         outFile << p.serialize();
     }
     catch (const std::ofstream::failure& e) {
@@ -292,12 +303,10 @@ void LauncherWindow::saveProfileToFile(const std::string& path, const Profile& p
             this,
             "Exception",
             QString::fromStdString(fmt::format(
-                "Data write error to file: {} ({})", path, e.what()
+                "Error writing data to file: {} ({})", path, e.what()
             ))
         );
     }
-
-    outFile.close();
 }
 
 std::optional<Profile> LauncherWindow::loadProfileFromFile(std::string filename) {
@@ -346,19 +355,19 @@ std::optional<Profile> LauncherWindow::loadProfileFromFile(std::string filename)
     }
 }
 
-bool LauncherWindow::wasLaunchSelected() {
+bool LauncherWindow::wasLaunchSelected() const {
     return _launch;
 }
 
-bool LauncherWindow::isFullyConfiguredFromCliArgs() {
+bool LauncherWindow::isFullyConfiguredFromCliArgs() const {
     return _fullyConfiguredViaCliArgs;
 }
 
-std::string LauncherWindow::selectedProfile() {
+std::string LauncherWindow::selectedProfile() const {
     return _profileBox->currentText().toStdString();
 }
 
-std::string LauncherWindow::selectedWindowConfig() {
+std::string LauncherWindow::selectedWindowConfig() const {
     return _windowConfigBox->currentText().toStdString();
 }
 

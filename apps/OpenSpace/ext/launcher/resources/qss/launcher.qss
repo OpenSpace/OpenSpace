@@ -89,9 +89,13 @@ ProfileEdit  QLabel#profile {
   font-weight: bold;
 }
 
-ProfileEdit QLabel#heading {
+ProfileEdit  QLabel#heading {
   font-size: 10pt;
   font-weight: bold;
+}
+
+ProfileEdit  QLabel#error-message {
+  min-width: 10em;
 }
 
 /*

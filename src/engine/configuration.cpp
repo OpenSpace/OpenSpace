@@ -91,7 +91,7 @@ namespace {
     constexpr const char* KeyModuleConfigurations = "ModuleConfigurations";
 
     constexpr const char* KeySgctConfigNameInitialized = "sgctconfiginitializeString";
-    constexpr const char* KeyReadOnlyProfiles = "ProfilesReadOnly";
+    constexpr const char* KeyReadOnlyProfiles = "ReadOnlyProfiles";
     constexpr const char* KeyBypassLauncher = "BypassLauncher";
 
     template <typename T>
@@ -310,7 +310,7 @@ void parseLuaState(Configuration& configuration) {
     getValue(s, KeyHttpProxy, c.httpProxy);
 
     getValue(s, KeySgctConfigNameInitialized, c.sgctConfigNameInitialized);
-    getValue(s, KeyReadOnlyProfiles, c.profilesReadOnly);
+    getValue(s, KeyReadOnlyProfiles, c.readOnlyProfiles);
     getValue(s, KeyBypassLauncher, c.bypassLauncher);
 }
 

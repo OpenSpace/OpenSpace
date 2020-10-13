@@ -46,7 +46,7 @@ struct Configuration {
     std::string sgctConfigNameInitialized;
     std::string asset;
     std::string profile;
-    std::vector<std::string> profilesReadOnly;
+    std::vector<std::string> readOnlyProfiles;
     std::vector<std::string> globalCustomizationScripts;
     std::map<std::string, std::string> pathTokens = {
         { "CACHE" , "CACHE = \"${BASE}/cache\"" }

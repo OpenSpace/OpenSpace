@@ -69,7 +69,7 @@ public:
      *
      * \return true if the file was saved (false if cancel)
      */
-    bool wasSaved();
+    bool wasSaved() const;
 
     /**
      * Gets the profile name from the top save/edit window. This can be changed by user in
@@ -77,14 +77,14 @@ public:
      *
      * \return the profile name
      */
-    std::string specifiedFilename();
+    std::string specifiedFilename() const;
 
     /**
      * Handles keypress while the Qt dialog window is open
      *
      * \param evt #QKeyEvent object for the key press event
      */
-    void keyPressEvent(QKeyEvent *evt);
+    void keyPressEvent(QKeyEvent* evt);
 
 public slots:
     void duplicateProfile();
@@ -106,14 +106,12 @@ private:
     std::string summarizeAssets();
     std::string summarizeProperties();
     std::string summarizeKeybindings();
-    void labelText(const openspace::Profile& pData, int size, QString title,
-        QLabel* pLabel);
     bool isReadOnly(std::string profileToSave);
 
     openspace::Profile& _profile;
     const std::string _reportedAssets;
     bool _saveSelected = false;
-    std::vector<std::string> _profilesReadOnly;
+    std::vector<std::string> _readOnlyProfiles;
 
     QLineEdit* _profileEdit = nullptr;
     QLabel* _modulesLabel = nullptr;

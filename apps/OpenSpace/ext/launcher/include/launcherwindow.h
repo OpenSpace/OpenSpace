@@ -59,7 +59,7 @@ public:
       *
       * \return true if the "start OpenSpace" button was clicked
       */
-    bool wasLaunchSelected();
+    bool wasLaunchSelected() const;
 
     /**
       * Returns true if both the profile and sgct window configuration were specified
@@ -67,7 +67,7 @@ public:
       *
       * \return true if both profile and sgct window config were specified at CLI
       */
-    bool isFullyConfiguredFromCliArgs();
+    bool isFullyConfiguredFromCliArgs() const;
 
     /**
       * Returns the selected profile name when launcher window closed
@@ -75,7 +75,7 @@ public:
       * \return name of selected profile (this is only the name without file extension
       *         and without path)
       */
-    std::string selectedProfile();
+    std::string selectedProfile() const;
 
     /**
       * Returns the selected sgct window configuration when launcher window closed
@@ -83,11 +83,11 @@ public:
       * \return name of selected profile (this is only the name without file extension
       *         and without path)
       */
-    std::string selectedWindowConfig();
+    std::string selectedWindowConfig() const;
 
 public slots:
-    void openWindow_edit();
-    void openWindow_new();
+    void openWindowEdit();
+    void openWindowNew();
     void startOpenSpace();
 
 private:
