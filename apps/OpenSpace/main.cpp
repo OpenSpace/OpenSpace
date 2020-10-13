@@ -1173,7 +1173,7 @@ int main(int argc, char** argv) {
         int qac = 0;
         qaobj.reset(new QApplication(qac, nullptr));
         launchwin.reset(new LauncherWindow(absPath("${BASE}"), !haveCliProfile,
-            global::configuration, !haveCliSGCTConfig, windowCfgPreset));
+            global::configuration, !haveCliSGCTConfig, windowCfgPreset, nullptr));
         launchwin->show();
         qaobj->exec();
 

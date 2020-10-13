@@ -32,7 +32,7 @@ LauncherWindow  QComboBox#config {
   border-color: rgb(225, 225, 225);
   padding: 1px 18px 1px 3px;
   min-width: 6em;
-  font-size: 14px;
+  font-size: 10pt;
   font-family: Segoe UI;
   font-weight: bold;
   color: rgb(255, 255, 255);
@@ -47,18 +47,14 @@ LauncherWindow  QComboBox#config:disabled {
   color: rgb(225, 225, 225);
 }
 
-LauncherWindow  QPushButton {
-  font-family: Segoe UI;
-  font-weight: bold;
-}
-
 LauncherWindow  QPushButton#large {
   background: rgb(128, 128, 128);
   border-radius: 2px;
   border-style: outset;
   border-width: 2px;
   border-color: rgb(225, 225, 225);
-  font-size: 24px;
+  font-size: 16pt;
+  font-weight: bold;
   color: rgb(239, 239, 239);
 }
 LauncherWindow  QPushButton#large:hover {
@@ -71,7 +67,9 @@ LauncherWindow  QPushButton#small {
   border-style: outset;
   border-width: 1px;
   border-color: rgb(225, 225, 225);
-  font-size: 14px;
+  min-height: 1em;
+  font-size: 10pt;
+  font-weight: bold;
   color: rgb(255, 255, 255);
 }
 
@@ -86,11 +84,13 @@ ProfileEdit  QTextEdit {
   min-width: 30em;
 }
 
-ProfileEdit  QLabel {
-  font-size: 14px;
+ProfileEdit  QLabel#profile {
+  font-size: 10pt;
+  font-weight: bold;
 }
 
-ProfileEdit  QLabel#profile {
+ProfileEdit QLabel#heading {
+  font-size: 10pt;
   font-weight: bold;
 }
 

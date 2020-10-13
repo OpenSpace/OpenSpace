@@ -368,9 +368,9 @@ void CameraDialog::approved() {
 
     if (_tabWidget->currentIndex() == CameraTypeNav) {
         openspace::Profile::CameraNavState nav;
-        nav.anchor = _navState.anchor->text().toUtf8().constData();
-        nav.aim = _navState.aim->text().toUtf8().constData();
-        nav.referenceFrame = _navState.refFrame->text().toUtf8().constData();
+        nav.anchor = _navState.anchor->text().toStdString();
+        nav.aim = _navState.aim->text().toStdString();
+        nav.referenceFrame = _navState.refFrame->text().toStdString();
         nav.position.x = _navState.positionX->text().toDouble();
         nav.position.y = _navState.positionY->text().toDouble();
         nav.position.z = _navState.positionZ->text().toDouble();
@@ -404,7 +404,7 @@ void CameraDialog::approved() {
     }
     else if (_tabWidget->currentIndex() == CameraTypeGeo) {
         openspace::Profile::CameraGoToGeo geo;
-        geo.anchor = _geoState.anchor->text().toUtf8().constData();
+        geo.anchor = _geoState.anchor->text().toStdString();
         geo.latitude = _geoState.latitude->text().toDouble();
         geo.longitude = _geoState.longitude->text().toDouble();
         if (!_geoState.altitude->text().isEmpty()) {

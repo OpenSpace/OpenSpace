@@ -149,7 +149,7 @@ ModulesDialog::ModulesDialog(openspace::Profile& profile, QWidget *parent)
 }
 
 QString ModulesDialog::createOneLineSummary(openspace::Profile::Module m) {
-    QString summary = QString(m.name.c_str());
+    QString summary = QString::fromStdString(m.name);
     bool hasCommandForLoaded = (m.loadedInstruction->length() > 0);
     bool hasCommandForNotLoaded = (m.notLoadedInstruction->length() > 0);
 

@@ -69,7 +69,7 @@ namespace {
             bool foundDirMatch = false;
             for (int r = 0; r < nRows; r++) {
                 QModelIndex idx = model.index(r, 0, parent);
-                std::string assetName = model.name(idx).toUtf8().constData();
+                std::string assetName = model.name(idx).toStdString();
                 if (!model.isAsset(idx)) {
                     if (firstDir.compare(assetName) == 0) {
                         int nChildRows = model.childCount(idx);
@@ -86,7 +86,7 @@ namespace {
                 //Insert missing directory here with name and exists=false condition
                 model.assetItem(parent)->insertChildren(nRows, 1, 3);
                 QModelIndex idx = model.index(nRows, 0, parent);
-                model.setName(idx, QString(firstDir.c_str()));
+                model.setName(idx, QString::fromStdString(firstDir));
                 model.setExistenceInFilesystem(idx, false);
                 traverseToFindFilesystemMatch(model, idx, 0, nextPath);
             }
@@ -95,7 +95,7 @@ namespace {
             bool foundFileMatch = false;
             for (int r = 0; r < nRows; r++) {
                 QModelIndex idx = model.index(r, 0, parent);
-                std::string assetName = model.name(idx).toUtf8().constData();
+                std::string assetName = model.name(idx).toStdString();
 
                 if (path.compare(assetName) == 0) {
                     foundFileMatch = true;
@@ -107,7 +107,7 @@ namespace {
                 //Insert missing file here with name and exists=false condition
                 model.assetItem(parent)->insertChildren(nRows, 1, 3);
                 QModelIndex idx = model.index(nRows, 0, parent);
-                model.setName(idx, QString(path.c_str()));
+                model.setName(idx, QString::fromStdString(path));
                 model.setChecked(idx, true);
                 model.setExistenceInFilesystem(idx, false);
             }
@@ -214,7 +214,7 @@ QString AssetsDialog::createTextSummary() {
             (existsInFilesystem ? "black" : "red"),
             summaryPaths.at(i)
         );
-        summary += QString(s.c_str());
+        summary += QString::fromStdString(s);
     }
     return summary;
 }

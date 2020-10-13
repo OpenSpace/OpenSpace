@@ -155,9 +155,9 @@ PropertiesDialog::PropertiesDialog(openspace::Profile& profile, QWidget *parent)
 }
 
 QString PropertiesDialog::createOneLineSummary(openspace::Profile::Property p) {
-    QString summary = QString(p.name.c_str());
+    QString summary = QString::fromStdString(p.name);
     summary += " = ";
-    summary += QString(p.value.c_str());
+    summary += QString::fromStdString(p.value);
     summary += " (SetPropertyValue";
     if (p.setType == openspace::Profile::Property::SetType::SetPropertyValueSingle) {
         summary += "Single";
@@ -216,8 +216,8 @@ void PropertiesDialog::listItemAdded(void) {
 
     // Blank-out the 2 text fields, set combo box to index 0
     _commandCombo->setCurrentIndex(0);
-    _propertyEdit->setText(QString(_data.back().name.c_str()));
-    _valueEdit->setText(QString(_data.back().value.c_str()));
+    _propertyEdit->setText(QString::fromStdString(_data.back().name));
+    _valueEdit->setText(QString::fromStdString(_data.back().value));
     _commandCombo->setFocus(Qt::OtherFocusReason);
     _editModeNewItem = true;
 }

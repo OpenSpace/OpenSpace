@@ -57,7 +57,7 @@ void FileSystemAccess::parseChildDirElements(QFileInfo fileInfo, std::string spa
     QFileInfoList fileList = dir.entryInfoList(_fileFilterOptions);
     for (int i = 0; i < fileList.size(); i++) {
         QFileInfo fileInfo = fileList[i];
-        std::string res = space + fileInfo.fileName().toUtf8().constData();
+        std::string res = space + fileInfo.fileName().toStdString();
 
         if (fileInfo.isDir()) {
             if (level != 0 || (level == 0 && isApprovedPath(res))) {

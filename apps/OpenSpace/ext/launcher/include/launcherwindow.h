@@ -32,6 +32,7 @@
 #include "filesystemaccess.h"
 #include <openspace/scene/profile.h>
 #include <openspace/engine/globals.h>
+#include <optional>
 
 class LauncherWindow : public QMainWindow {
 Q_OBJECT
@@ -46,16 +47,11 @@ public:
      * \param sgctConfigName the name of the sgct configuration function used to
      *                       generate window config (blank if file is used)
      * \param parentItem The parent that contains this (and possibly other) children
-     *                   in the tree structure (optional).
+     *                   in the tree structure.
      */
     LauncherWindow(std::string basePath, bool profileEnabled,
         openspace::configuration::Configuration& globalConfig, bool sgctConfigEnabled,
-        std::string sgctConfigName, QWidget *parent = nullptr);
-
-    /**
-     * Destructor for LauncherWindow class
-     */
-    ~LauncherWindow();
+        std::string sgctConfigName, QWidget* parent);
 
     /**
       * Returns bool for whether "start OpenSpace" was chosen when this window closed.
@@ -95,12 +91,11 @@ public slots:
     void startOpenSpace();
 
 private:
-    void populateProfilesList(QString preset);
-    void populateWindowConfigsList(QString preset);
-    bool loadProfileFromFile(openspace::Profile*& p, std::string filename);
+    void populateProfilesList(std::string preset);
+    void populateWindowConfigsList(std::string preset);
+    std::optional<openspace::Profile> loadProfileFromFile(std::string filename);
     void saveProfileToFile(const std::string& path, const openspace::Profile& p);
 
-    ProfileEdit* myEditorWindow;
     FileSystemAccess _fileAccessProfiles;
     FileSystemAccess _fileAccessWinConfigs;
     FileSystemAccess _filesystemAccess;

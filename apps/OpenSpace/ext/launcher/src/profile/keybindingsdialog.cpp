@@ -170,7 +170,7 @@ KeybindingsDialog::KeybindingsDialog(openspace::Profile& profile, QWidget *paren
         QStringList comboKeysStringList;
         for (int i = 0; i < static_cast<int>(openspace::Key::Last); ++i) {
             if (openspace::KeyNames.find(i) != openspace::KeyNames.end()) {
-                comboKeysStringList += QString(openspace::KeyNames.at(i).c_str());
+                comboKeysStringList += QString::fromStdString(openspace::KeyNames.at(i));
                 // Create map to relate key combo box to integer value defined in Key
                 _mapKeyComboBoxIndexToKeyValue.push_back(i);
             }
@@ -297,11 +297,11 @@ void KeybindingsDialog::listItemSelected(void) {
         }
 
         // Do key here
-        _nameEdit->setText(QString(k.name.c_str()));
-        _guiPathEdit->setText(QString(k.guiPath.c_str()));
-        _documentationEdit->setText(QString(k.documentation.c_str()));
+        _nameEdit->setText(QString::fromStdString(k.name));
+        _guiPathEdit->setText(QString::fromStdString(k.guiPath));
+        _documentationEdit->setText(QString::fromStdString(k.documentation));
         _localCheck->setChecked(k.isLocal);
-        _scriptEdit->setText(QString(k.script.c_str()));
+        _scriptEdit->setText(QString::fromStdString(k.script));
     }
     transitionToEditMode();
 }
@@ -392,10 +392,10 @@ void KeybindingsDialog::listItemSave(void) {
         _data[index].key.modifier = static_cast<openspace::KeyModifier>(keyModIdx);
         int keyIdx = _mapKeyComboBoxIndexToKeyValue.at(_keyCombo->currentIndex());
         _data[index].key.key = static_cast<openspace::Key>(keyIdx);
-        _data[index].name = _nameEdit->text().toUtf8().constData();
-        _data[index].guiPath = _guiPathEdit->text().toUtf8().constData();
-        _data[index].documentation = _documentationEdit->text().toUtf8().constData();
-        _data[index].script = _scriptEdit->toPlainText().toUtf8().constData();
+        _data[index].name = _nameEdit->text().toStdString();
+        _data[index].guiPath = _guiPathEdit->text().toStdString();
+        _data[index].documentation = _documentationEdit->text().toStdString();
+        _data[index].script = _scriptEdit->toPlainText().toStdString();
         _data[index].isLocal = (_localCheck->isChecked());
         std::string summary = createOneLineSummary(_data[index]);
         _list->item(index)->setText(QString::fromStdString(summary));

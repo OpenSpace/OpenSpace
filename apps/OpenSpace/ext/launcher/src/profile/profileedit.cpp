@@ -80,6 +80,7 @@ ProfileEdit::ProfileEdit(Profile& profile, const std::string reportedAssets,
         container->setColumnStretch(1, 1);
 
         _propertiesLabel = new QLabel("Properties");
+        _propertiesLabel->setObjectName("heading");
         _propertiesLabel->setWordWrap(true);
         container->addWidget(_propertiesLabel, 0, 0);
 
@@ -107,6 +108,7 @@ ProfileEdit::ProfileEdit(Profile& profile, const std::string reportedAssets,
         container->setColumnStretch(1, 1);
 
         _assetsLabel = new QLabel("Assets");
+        _assetsLabel->setObjectName("heading");
         _assetsLabel->setWordWrap(true);
         container->addWidget(_assetsLabel, 0, 0);
 
@@ -131,6 +133,7 @@ ProfileEdit::ProfileEdit(Profile& profile, const std::string reportedAssets,
         container->setColumnStretch(1, 1);
 
         _keybindingsLabel = new QLabel("Keybindings");
+        _keybindingsLabel->setObjectName("heading");
         _keybindingsLabel->setWordWrap(true);
         container->addWidget(_keybindingsLabel, 0, 0);
 
@@ -160,6 +163,7 @@ ProfileEdit::ProfileEdit(Profile& profile, const std::string reportedAssets,
     {
         QBoxLayout* container = new QVBoxLayout;
         _metaLabel = new QLabel("Meta");
+        _metaLabel->setObjectName("heading");
         _metaLabel->setWordWrap(true);
         container->addWidget(_metaLabel);
 
@@ -178,6 +182,7 @@ ProfileEdit::ProfileEdit(Profile& profile, const std::string reportedAssets,
     {
         QBoxLayout* container = new QVBoxLayout;
         _interestingNodesLabel = new QLabel("Mark Interesting Nodes");
+        _interestingNodesLabel->setObjectName("heading");
         _interestingNodesLabel->setWordWrap(true);
         container->addWidget(_interestingNodesLabel);
 
@@ -199,6 +204,7 @@ ProfileEdit::ProfileEdit(Profile& profile, const std::string reportedAssets,
     {
         QBoxLayout* container = new QVBoxLayout;
         _deltaTimesLabel = new QLabel("Simulation Time Increments");
+        _deltaTimesLabel->setObjectName("heading");
         _deltaTimesLabel->setWordWrap(true);
         container->addWidget(_deltaTimesLabel);
 
@@ -220,6 +226,7 @@ ProfileEdit::ProfileEdit(Profile& profile, const std::string reportedAssets,
     {
         QBoxLayout* container = new QVBoxLayout;
         _cameraLabel = new QLabel("Camera");
+        _cameraLabel->setObjectName("heading");
         _cameraLabel->setWordWrap(true);
         container->addWidget(_cameraLabel);
 
@@ -238,6 +245,7 @@ ProfileEdit::ProfileEdit(Profile& profile, const std::string reportedAssets,
     {
         QBoxLayout* container = new QVBoxLayout;
         _timeLabel = new QLabel("Time");
+        _timeLabel->setObjectName("heading");
         _timeLabel->setWordWrap(true);
         container->addWidget(_timeLabel);
 
@@ -256,6 +264,7 @@ ProfileEdit::ProfileEdit(Profile& profile, const std::string reportedAssets,
     {
         QBoxLayout* container = new QVBoxLayout;
         _modulesLabel = new QLabel("Modules");
+        _modulesLabel->setObjectName("heading");
         _modulesLabel->setWordWrap(true);
         container->addWidget(_modulesLabel);
 
@@ -274,6 +283,7 @@ ProfileEdit::ProfileEdit(Profile& profile, const std::string reportedAssets,
     {
         QBoxLayout* container = new QVBoxLayout;
         _additionalScriptsLabel = new QLabel("Additional Scripts");
+        _additionalScriptsLabel->setObjectName("heading");
         _additionalScriptsLabel->setWordWrap(true);
         container->addWidget(_additionalScriptsLabel);
 
@@ -485,7 +495,7 @@ bool ProfileEdit::wasSaved() {
 }
 
 std::string ProfileEdit::specifiedFilename() {
-    return _profileEdit->text().toUtf8().constData();
+    return _profileEdit->text().toStdString();
 }
 
 void ProfileEdit::cancel() {
@@ -500,7 +510,7 @@ bool ProfileEdit::isReadOnly(std::string profileSave) {
 
 void ProfileEdit::approved() {
     QString profileName = _profileEdit->text();
-    if ((profileName.length() > 0) && !isReadOnly(profileName.toUtf8().constData())) {
+    if ((profileName.length() > 0) && !isReadOnly(profileName.toStdString())) {
         _saveSelected = true;
         _errorMsg->setText("");
         accept();

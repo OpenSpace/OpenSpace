@@ -80,7 +80,7 @@ AdditionalScriptsDialog::AdditionalScriptsDialog(openspace::Profile& profile,
 
 void AdditionalScriptsDialog::parseScript() {
     std::vector<std::string> tmpMultilineStringToVector;
-    std::istringstream iss(_textScripts->toPlainText().toUtf8().constData());
+    std::istringstream iss(_textScripts->toPlainText().toStdString());
     while (!iss.eof()) {
         std::string s;
         getline(iss, s);

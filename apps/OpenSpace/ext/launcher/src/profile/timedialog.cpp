@@ -153,7 +153,7 @@ void TimeDialog::approved() {
         else {
             Profile::Time t;
             t.type = Profile::Time::Type::Relative;
-            t.value = _relativeEdit->text().toUtf8().constData();
+            t.value = _relativeEdit->text().toStdString();
             _profile.setTime(t);
         }
     }

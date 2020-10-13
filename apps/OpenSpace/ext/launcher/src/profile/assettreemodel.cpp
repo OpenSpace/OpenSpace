@@ -144,7 +144,7 @@ AssetTreeModel::AssetTreeModel(QObject* parent)
 }
 
 void AssetTreeModel::importModelData(const std::string& contents) {
-    std::istringstream iss(contents.c_str());
+    std::istringstream iss(contents);
     ImportElement rootElem = { "", 0, false };
 
     if (importGetNextLine(rootElem, iss)) {
