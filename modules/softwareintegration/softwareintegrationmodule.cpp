@@ -214,13 +214,49 @@ namespace openspace {
             float size = readFloatValue(message);
             std::string guiName = readGUI(message);
 
-            ghoul::Dictionary renderable = {
-                { "Type", "RenderablePointsCloud"s },
-                { "Color", static_cast<glm::dvec3>(color)},
-                { "Data", pointData },
-                { "Opacity", static_cast<double>(opacity) },
-                { "Size", static_cast<double>(size)}
-            };
+            bool hasLuminosityData = !luminosityData.empty();
+            bool hasVelocityData = !velocityData.empty();
+
+            if (hasLuminosityData && hasVelocityData) {
+                ghoul::Dictionary renderable = {
+                    { "Type", "RenderablePointsCloud"s },
+                    { "Color", static_cast<glm::dvec3>(color)},
+                    { "Data", pointData },
+                    { "Luminosity", luminosityData },
+                    { "Opacity", static_cast<double>(opacity) },
+                    { "Size", static_cast<double>(size)},
+                    { "Velocity", velocityData }
+                };
+            }
+            else if (hasLuminosityData && !hasVelocityData) {
+                ghoul::Dictionary renderable = {
+                    { "Type", "RenderablePointsCloud"s },
+                    { "Color", static_cast<glm::dvec3>(color)},
+                    { "Data", pointData },
+                    { "Luminosity", luminosityData },
+                    { "Opacity", static_cast<double>(opacity) },
+                    { "Size", static_cast<double>(size)},
+                };
+            }
+            else if (!hasLuminosityData && hasVelocityData) {
+                ghoul::Dictionary renderable = {
+                    { "Type", "RenderablePointsCloud"s },
+                    { "Color", static_cast<glm::dvec3>(color)},
+                    { "Data", pointData },
+                    { "Opacity", static_cast<double>(opacity) },
+                    { "Size", static_cast<double>(size)},
+                    { "Velocity", velocityData }
+                };
+            }
+            else {
+                ghoul::Dictionary renderable = {
+                    { "Type", "RenderablePointsCloud"s },
+                    { "Color", static_cast<glm::dvec3>(color)},
+                    { "Data", pointData },
+                    { "Opacity", static_cast<double>(opacity) },
+                    { "Size", static_cast<double>(size)},
+                };
+            }
 
             ghoul::Dictionary gui = {
                 { "Name", guiName },
