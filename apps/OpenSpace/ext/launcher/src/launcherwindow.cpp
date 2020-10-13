@@ -310,24 +310,21 @@ void LauncherWindow::saveProfileToFile(const std::string& path, const Profile& p
 }
 
 std::optional<Profile> LauncherWindow::loadProfileFromFile(std::string filename) {
-    bool successfulLoad = true;
+    std::ifstream inFile;
+    try {
+        inFile.open(filename, std::ifstream::in);
+    }
+    catch (const std::ifstream::failure& e) {
+        throw ghoul::RuntimeError(fmt::format(
+            "Exception opening {} profile for read: ({})",
+            filename,
+            e.what()
+        ));
+    }
     std::string content;
-    if (filename.length() > 0) {
-        std::ifstream inFile;
-        try {
-            inFile.open(filename, std::ifstream::in);
-        }
-        catch (const std::ifstream::failure& e) {
-            throw ghoul::RuntimeError(fmt::format(
-                "Exception opening {} profile for read: ({})",
-                filename,
-                e.what()
-            ));
-        }
-        std::string line;
-        while (std::getline(inFile, line)) {
-            content += line;
-        }
+    std::string line;
+    while (std::getline(inFile, line)) {
+        content += line;
     }
     try {
         return Profile(content);
