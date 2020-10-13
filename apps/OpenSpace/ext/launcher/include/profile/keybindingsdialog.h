@@ -66,6 +66,7 @@ public slots:
     void listItemCancelSave();
     void transitionToEditMode();
     void parseSelections();
+    void keySelected(int index);
 
 private:
     void transitionFromEditMode();

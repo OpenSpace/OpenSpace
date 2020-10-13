@@ -176,6 +176,10 @@ KeybindingsDialog::KeybindingsDialog(openspace::Profile& profile, QWidget *paren
             }
         }
         _keyCombo->addItems(comboKeysStringList);
+        connect(
+            _keyCombo, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            this, &KeybindingsDialog::keySelected
+        );
         box->addWidget(_keyCombo, 1, 1);
 
 
@@ -292,6 +296,25 @@ void KeybindingsDialog::listItemSelected(void) {
         _scriptEdit->setText(QString(k.script.c_str()));
     }
     transitionToEditMode();
+}
+
+void KeybindingsDialog::keySelected(int index) {
+    const QString numKeyWarning = "Warning: using a number key may conflict with the "
+        "keybindings for simulation time increments. ";
+    QString errorContents = _errorMsg->text();
+    bool alreadyContainsWarning = (errorContents.length() >= numKeyWarning.length() &&
+        errorContents.left(numKeyWarning.length()) == numKeyWarning);
+    if  (_mapKeyComboBoxIndexToKeyValue[index] >= static_cast<int>(openspace::Key::Num0)
+      && _mapKeyComboBoxIndexToKeyValue[index] <= static_cast<int>(openspace::Key::Num9))
+    {
+        if (!alreadyContainsWarning) {
+            errorContents = numKeyWarning + errorContents;
+            _errorMsg->setText(errorContents);
+        }
+    }
+    else if (alreadyContainsWarning) {
+        _errorMsg->setText(errorContents.mid(numKeyWarning.length()));
+    }
 }
 
 int KeybindingsDialog::indexInKeyMapping(std::vector<int>& mapVector, int keyInt) {
