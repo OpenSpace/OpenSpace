@@ -250,7 +250,7 @@ void createExoplanetSystem(std::string_view starName) {
 
     openspace::global::scriptEngine.queueScript(
         "openspace.addSceneGraphNode(" + starParent + ");",
-        openspace::scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::RemoteScripting::Yes
     );
 
     // Planets
@@ -350,7 +350,7 @@ void createExoplanetSystem(std::string_view starName) {
 
         openspace::global::scriptEngine.queueScript(
             "openspace.addSceneGraphNode(" + planetNode + ");",
-            openspace::scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::RemoteScripting::Yes
         );
 
         const std::string planetTrailNode = "{"
@@ -416,7 +416,7 @@ void createExoplanetSystem(std::string_view starName) {
 
             openspace::global::scriptEngine.queueScript(
                 "openspace.addSceneGraphNode(" + discNode + ");",
-                openspace::scripting::ScriptEngine::RemoteScripting::Yes
+                scripting::ScriptEngine::RemoteScripting::Yes
             );
         }
     }
@@ -472,38 +472,46 @@ int removeExoplanetSystem(lua_State* L) {
     return 0;
 }
 
-int getListOfExoplanets(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::getListOfExoplanets");
-
-    std::ifstream file(absPath(LookUpTablePath));
-
-    if (!file.good()) {
-        return ghoul::lua::luaError(
-            L,
-            fmt::format("Failed to open file '{}'", LookUpTablePath)
-        );
-    }
-
+std::vector<std::string> readHostStarNames(std::ifstream& lookupTableFile) {
     std::vector<std::string> names;
-    // As of 2020 there are about 4000 confirmed exoplanets, so use this number
-    // as a guess for the vector size
-    const int nExoplanetsGuess = 4000;
-    names.reserve(nExoplanetsGuess);
-
     std::string line;
-    while (getline(file, line)) {
+
+    // Read number of lines
+    int nExoplanets = 0;
+    while (getline(lookupTableFile, line)) {
+        ++nExoplanets;
+    }
+    lookupTableFile.clear();
+    lookupTableFile.seekg(0);
+    names.reserve(nExoplanets);
+
+    while (getline(lookupTableFile, line)) {
         std::stringstream ss(line);
         std::string name;
         getline(ss, name, ',');
         // Remove the last two characters, that specify the planet
         name = name.substr(0, name.size() - 2);
-
         names.push_back(name);
     }
 
     // For easier read, sort by names and remove duplicates
     std::sort(names.begin(), names.end());
     names.erase(std::unique(names.begin(), names.end()), names.end());
+
+    return names;
+}
+
+int getListOfExoplanets(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::getListOfExoplanets");
+
+    std::ifstream file(absPath(LookUpTablePath));
+    if (!file.good()) {
+        return ghoul::lua::luaError(
+            L, fmt::format("Failed to open file '{}'", LookUpTablePath
+        ));
+    }
+
+    std::vector<std::string> names = readHostStarNames(file);
 
     lua_newtable(L);
     int number = 1;
@@ -520,34 +528,13 @@ int listAvailableExoplanetSystems(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::listAvailableExoplanetSystems");
 
     std::ifstream file(absPath(LookUpTablePath));
-
     if (!file.good()) {
         return ghoul::lua::luaError(
-            L,
-            fmt::format("Failed to open file '{}'", LookUpTablePath)
-        );
+            L, fmt::format("Failed to open file '{}'", LookUpTablePath
+        ));
     }
 
-    std::vector<std::string> names;
-    // As of 2020 there are about 4000 confirmed exoplanets, so use this number
-    // as a guess for the vector size
-    const int nExoplanetsGuess = 4000;
-    names.reserve(nExoplanetsGuess);
-
-    std::string line;
-    while (getline(file, line)) {
-        std::stringstream ss(line);
-        std::string name;
-        getline(ss, name, ',');
-        // Remove the last two characters, that specify the planet
-        name = name.substr(0, name.size() - 2);
-
-        names.push_back(name);
-    }
-
-    // For easier read, sort by names and remove duplicates
-    std::sort(names.begin(), names.end());
-    names.erase(std::unique(names.begin(), names.end()), names.end());
+    std::vector<std::string> names = readHostStarNames(file);
 
     std::string output;
     for (auto it = names.begin(); it != names.end(); ++it) {
@@ -558,8 +545,7 @@ int listAvailableExoplanetSystems(lua_State* L) {
 
     LINFO(fmt::format(
         "There is data available for the following {} exoplanet systems: {}",
-        names.size(),
-        output
+        names.size(), output
     ));
 
     return 0;
