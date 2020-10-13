@@ -128,7 +128,7 @@ set_folder_location(vrpn "External/SGCT")
 set_folder_location(zlibstatic "External/SGCT")
 
 if (UNIX AND (NOT APPLE))
-  target_link_libraries(OpenSpace Xcursor Xinerama X11)
+  target_link_libraries(OpenSpace PUBLIC Xcursor Xinerama X11)
 endif ()
 
 end_header("Dependency: SGCT")
