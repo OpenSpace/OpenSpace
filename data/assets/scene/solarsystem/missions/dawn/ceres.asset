@@ -28,7 +28,7 @@ local Ceres = {
         Translation = {
             Type = "SpiceTranslation",
             Target = "CERES",
-            Observer = "SSB",
+            Observer = "SUN",
             Kernels = {
                 kernels .. "/dawn_ceres_v01.tpc",
                 kernels .. "/sb_ceres_140724.bsp",
@@ -44,8 +44,9 @@ local Ceres = {
             ColorLayers = {
                 {
                     Name = "Texture",
+                    Identifier = "CeresTexture",
                     FilePath = textures .. "/gray.png",
-                    Enabled = true
+                    Enabled = true,
                 }
             }
         }
@@ -55,4 +56,28 @@ local Ceres = {
     }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Ceres })
+
+local CeresTrail = {
+    Identifier = "CeresTrail",
+    Parent = transforms.SolarSystemBarycenter.Identifier,
+    Renderable = {
+        Type = "RenderableTrailOrbit",
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "CERES",
+            Observer = "SUN"
+        },
+        Color = { 0.7, 0.8, 0.7 },
+        StartTime = "2010 JAN 01 00:00:00.000",
+        EndTime = "2100 JAN 01 00:00:00.000",
+        Period = 1325.0,
+        Resolution = 3600 * 24
+    },
+    GUI = {
+        Name = "Ceres Trail",
+        Path = "/Solar System/Asteroid Belt/Vesta"
+    }
+}
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { Ceres, CeresTrail })

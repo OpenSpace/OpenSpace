@@ -67,6 +67,7 @@ public:
         std::optional<std::string> url;
         std::optional<std::string> license;
     };
+
     struct Property {
         enum class SetType {
             SetPropertyValue,
@@ -114,7 +115,7 @@ public:
         std::optional<double> altitude;
     };
     using CameraType = std::variant<CameraNavState, CameraGoToGeo>;
-  
+
     Profile() = default;
     explicit Profile(const std::string& content);
     std::string serialize() const;
@@ -139,6 +140,37 @@ public:
     /// Removes an asset
     void removeAsset(const std::string& path);
 
+    /// Removes all assets
+    void clearAssets();
+
+    Version version() const;
+    std::vector<Module> modules() const;
+    std::optional<Meta> meta() const;
+    std::vector<std::string> assets() const;
+    std::vector<Property> properties() const;
+    std::vector<Keybinding> keybindings() const;
+    std::optional<Time> time() const;
+    std::vector<double> deltaTimes() const;
+    std::optional<CameraType> camera() const;
+    std::vector<std::string> markNodes() const;
+    std::vector<std::string> additionalScripts() const;
+
+    void clearMeta();
+    void clearTime();
+    void clearCamera();
+
+    void setVersion(Version v);
+    void setModules(std::vector<Module>& m);
+    void setMeta(Meta m);
+    void setProperties(std::vector<Property>& p);
+    void setKeybindings(std::vector<Keybinding>& k);
+    void setTime(Time t);
+    void setDeltaTimes(std::vector<double> dt);
+    void setCamera(CameraType c);
+    void setMarkNodes(std::vector<std::string>& n);
+    void setAdditionalScripts(std::vector<std::string>& s);
+
+
     /**
      * Returns the Lua library that contains all Lua functions available to provide
      * profile functionality.
@@ -149,17 +181,17 @@ public:
 private:
     static constexpr const Version CurrentVersion = Version { 1, 0 };
 
-    Version version = CurrentVersion;
-    std::vector<Module> modules;
-    std::optional<Meta> meta;
-    std::vector<std::string> assets;
-    std::vector<Property> properties;
-    std::vector<Keybinding> keybindings;
-    std::optional<Time> time;
-    std::vector<double> deltaTimes;
-    std::optional<CameraType> camera;
-    std::vector<std::string> markNodes;
-    std::vector<std::string> additionalScripts;
+    Version _version = CurrentVersion;
+    std::vector<Module> _modules;
+    std::optional<Meta> _meta;
+    std::vector<std::string> _assets;
+    std::vector<Property> _properties;
+    std::vector<Keybinding> _keybindings;
+    std::optional<Time> _time;
+    std::vector<double> _deltaTimes;
+    std::optional<CameraType> _camera;
+    std::vector<std::string> _markNodes;
+    std::vector<std::string> _additionalScripts;
 
     bool _ignoreUpdates = false;
 };

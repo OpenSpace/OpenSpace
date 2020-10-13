@@ -9,6 +9,12 @@ local parentIdentifier = transforms.JupiterBarycenter.Identifier
 local parentSpice = "JUPITER BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_carpo" }
 local trailColor = { 0.4, 0.3, 0.01 }
+local trailTags = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor"
+}
 
 local carpoGroup = {
     {
@@ -20,6 +26,7 @@ local carpoGroup = {
         Spice = "CARPO",
         Radii = { 3000, 3000, 3000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Jupiter/Moons/Carpo Group"
         },

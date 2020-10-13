@@ -1,0 +1,134 @@
+/*
+ * General settings
+ */
+* {
+  font-family: Segoe UI;
+}
+
+QLabel#heading {
+    font-size: 12pt;
+}
+
+QLabel#error-message {
+  color: rgb(221, 17, 17);
+}
+
+/*
+ * LauncherWindow
+ */
+
+LauncherWindow  QLabel {
+  font-family: Segoe UI;
+}
+
+LauncherWindow  QLabel#clear {
+  background-color: rgba(0, 0, 0, 0%);
+}
+
+LauncherWindow  QComboBox#config {
+  background: rgb(96, 96, 96);
+  border: 1px solid rgb(128, 128, 128);
+  border-radius: 3px;
+  border-color: rgb(225, 225, 225);
+  padding: 1px 18px 1px 3px;
+  min-width: 6em;
+  font-size: 10pt;
+  font-family: Segoe UI;
+  font-weight: bold;
+  color: rgb(255, 255, 255);
+}
+
+LauncherWindow  QComboBox#config:hover {
+  background: rgb(120, 120, 120);
+}
+
+LauncherWindow  QComboBox#config:disabled {
+  background: rgb(175, 175, 175);
+  color: rgb(225, 225, 225);
+}
+
+LauncherWindow  QPushButton#large {
+  background: rgb(128, 128, 128);
+  border-radius: 2px;
+  border-style: outset;
+  border-width: 2px;
+  border-color: rgb(225, 225, 225);
+  font-size: 16pt;
+  font-weight: bold;
+  color: rgb(239, 239, 239);
+}
+LauncherWindow  QPushButton#large:hover {
+  background: rgb(150, 150, 150);
+}
+
+LauncherWindow  QPushButton#small {
+  background: rgb(96, 96, 96);
+  border-radius: 2px;
+  border-style: outset;
+  border-width: 1px;
+  border-color: rgb(225, 225, 225);
+  min-height: 1em;
+  font-size: 10pt;
+  font-weight: bold;
+  color: rgb(255, 255, 255);
+}
+
+LauncherWindow  QPushButton#small:hover {
+  background: rgb(120, 120, 120);
+}
+
+/*
+ * ProfileEdit
+ */
+ProfileEdit  QTextEdit {
+  min-width: 30em;
+}
+
+ProfileEdit  QLabel#profile {
+  font-size: 10pt;
+  font-weight: bold;
+}
+
+ProfileEdit  QLabel#heading {
+  font-size: 10pt;
+  font-weight: bold;
+}
+
+ProfileEdit  QLabel#error-message {
+  min-width: 10em;
+}
+
+/*
+ * Properties
+ */
+PropertiesDialog  QListWidget {
+  min-width: 40em;
+}
+
+/*
+ * Assets
+ */
+AssetsDialog  QTreeView {
+  min-width: 40em;
+}
+
+/*
+ * Keybindings
+ */
+KeybindingsDialog  QListWidget {
+  min-width: 40em;
+}
+
+/*
+ * DeltaTimes
+ */
+DeltaTimesDialog  QListWidget {
+  min-width: 40em;
+}
+
+/*
+ * Camera
+ */
+ CameraDialog  QLabel#error-message {
+  min-width: 10em;
+}
