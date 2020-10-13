@@ -1,0 +1,89 @@
+local assetHelper = asset.require('util/asset_helper')
+
+local sampleInterval = 24*60*60
+
+local voyager1 = {
+   Identifier = "Voyager1",
+   Parent = "SolarSystemBarycenter",
+   Renderable = {
+       Type = "RenderableTrailTrajectory",
+       Translation = {
+           Type = "HorizonsTranslation",
+           HorizonsTextFile = asset.localResource("voyager_1.txt")
+       },
+       Color = { 0.9, 0.9, 0.0 },
+       StartTime = "1977 SEP 06 00:00:00",
+       EndTime = "2030 DEC 31 00:00:00",
+       SampleInterval = sampleInterval,
+       TimeStampSubsampleFactor = 1
+   },
+   GUI = {
+       Name = "Voyager 1",
+       Path = "/Solar System/Missions"
+   }
+}
+
+local voyager2 = {
+   Identifier = "Voyager2",
+   Parent = "SolarSystemBarycenter",
+   Renderable = {
+       Type = "RenderableTrailTrajectory",
+       Translation = {
+           Type = "HorizonsTranslation",
+           HorizonsTextFile = asset.localResource("voyager_2.txt")
+       },
+       Color = { 0.9, 0.9, 0.0 },
+       StartTime = "1977 AUG 21 00:00:00",
+       EndTime = "2030 DEC 31 00:00:00",
+       SampleInterval = sampleInterval,
+       TimeStampSubsampleFactor = 1
+   },
+   GUI = {
+       Name = "Voyager 2",
+       Path = "/Solar System/Missions"
+   }
+}
+
+local pioneer10 = {
+   Identifier = "Pioneer10",
+   Parent = "SolarSystemBarycenter",
+   Renderable = {
+       Type = "RenderableTrailTrajectory",
+       Translation = {
+           Type = "HorizonsTranslation",
+           HorizonsTextFile = asset.localResource("pioneer_10.txt")
+       },
+       Color = { 0.9, 0.3, 0.0 },
+       StartTime = "1972 MAR 04 00:00:00",
+       EndTime = "2030 DEC 31 00:00:00",
+       SampleInterval = sampleInterval,
+       TimeStampSubsampleFactor = 1
+   },
+   GUI = {
+       Name = "Pioneer 10",
+       Path = "/Solar System/Missions"
+   }
+}
+
+local pioneer11 ={
+   Identifier = "Pioneer11",
+   Parent = "SolarSystemBarycenter",
+   Renderable = {
+       Type = "RenderableTrailTrajectory",
+       Translation = {
+           Type = "HorizonsTranslation",
+           HorizonsTextFile = asset.localResource("pioneer_11.txt")
+       },
+       Color = { 0.9, 0.3, 0.0 },
+       StartTime = "1973 APR 07 00:00:00",
+       EndTime = "2030 DEC 31 00:00:00",
+       SampleInterval = sampleInterval,
+       TimeStampSubsampleFactor = 1
+   },
+   GUI = {
+       Name = "Pioneer 11",
+       Path = "/Solar System/Missions"
+   }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { voyager1, voyager2, pioneer10, pioneer11 })
