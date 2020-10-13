@@ -130,8 +130,12 @@ namespace openspace {
         // And delegate decoding depending on message type
         if (type == "CONN")
             return Message(MessageType::Connection, messageBuffer);
-        if (type == "DATA")
+        else if (type == "DATA")
             return Message(MessageType::ReadPointData, messageBuffer);
+        else if (type == "LUMI")
+            return Message(MessageType::ReadLuminosityData, messageBuffer);
+        else if (type == "VELO")
+            return Message(MessageType::ReadVelocityData, messageBuffer);
         else if( type == "ASGN")
             return Message(MessageType::AddSceneGraphNode, messageBuffer);
         else if (type == "RSGN")

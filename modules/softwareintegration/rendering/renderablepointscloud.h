@@ -61,6 +61,8 @@ protected:
     bool readPointData();
 
     bool _hasPointData = false;
+    bool _hasLuminosityData = false;
+    bool _hasVelocityData = false;
     bool _isDirty = true;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram = nullptr;
@@ -71,6 +73,8 @@ protected:
     properties::Vec3Property _color;
 
     std::vector<std::vector<float>> _pointData;
+    std::vector<float> _luminosityData;
+    std::vector<float> _velocityData;
     std::vector<float> _fullData;
     std::vector<float> _slicedData;
 

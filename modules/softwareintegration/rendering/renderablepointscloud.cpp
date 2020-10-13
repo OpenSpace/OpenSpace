@@ -41,6 +41,8 @@ namespace {
     constexpr const char* ProgramName = "shaderProgram";
     constexpr const char* _loggerCat = "PointsCloud";
     constexpr const char* KeyData = "Data";
+    constexpr const char* KeyLuminosity = "Luminosity";
+    constexpr const char* KeyVelocity = "Velocity";
 
     constexpr int8_t CurrentCacheVersion = 1;
 
@@ -138,6 +140,16 @@ namespace openspace {
         if (dictionary.hasKey(KeyData)) {
             _pointData = dictionary.value<std::vector<std::vector<float>>>(KeyData);
             _hasPointData = true;
+        }
+
+        if (dictionary.hasKey(KeyLuminosity)) {
+            _luminosityData = dictionary.value<std::vector<float>>(KeyLuminosity);
+            _hasLuminosityData = true;
+        }
+
+        if (dictionary.hasKey(KeyVelocity)) {
+            _velocityData = dictionary.value<std::vector<float>>(KeyVelocity);
+            _hasVelocityData = true;
         }
 
         if (dictionary.hasKey(OpacityInfo.identifier)) {

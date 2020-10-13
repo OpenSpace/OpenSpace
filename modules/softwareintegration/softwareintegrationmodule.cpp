@@ -191,6 +191,22 @@ namespace openspace {
             }
             break;
         }
+        case SoftwareConnection::MessageType::ReadLuminosityData: {
+            messageOffset = 0; // Resets message offset 
+
+            luminosityData.clear();
+            luminosityData = readData(message);
+
+            break;
+        }
+        case SoftwareConnection::MessageType::ReadVelocityData: {
+            messageOffset = 0; // Resets message offset 
+
+            velocityData.clear();
+            velocityData = readData(message);
+
+            break;
+        }
         case SoftwareConnection::MessageType::AddSceneGraphNode: {
             std::string identifier = readIdentifier(message);
             glm::vec3 color = readColor(message);
