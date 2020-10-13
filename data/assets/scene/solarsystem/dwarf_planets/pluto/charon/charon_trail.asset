@@ -17,6 +17,11 @@ local CharonTrailBarycentric = {
         Period = 6.38723,
         Resolution = 1000
     },
+    Tag = { 
+        "moonTrail_solarSystem", 
+        "moonTrail_dwarf", 
+        "moonTrail_pluto", 
+        "moonTrail_minor" },
     GUI = {
         Name = "Charon Barycentric Trail",
         Path = "/Solar System/Dwarf Planets/Pluto"
