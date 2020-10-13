@@ -82,9 +82,7 @@ private:
      */
     void transitionEditMode(int index, bool state);
 
-    QString timeDescription(int value);
     void setLabelForKey(int index, bool editMode, std::string color);
-    QString checkForTimeDescription(int intervalIndex, int value);
     bool isLineEmpty(int index);
 
     openspace::Profile& _profile;

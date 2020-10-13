@@ -42,20 +42,40 @@ namespace {
     constexpr const int MaxNumberOfKeys = 30;
 
     struct TimeInterval {
-        int index;
-        double secondsPerInterval;
-        QString intervalName;
+        uint64_t secondsPerInterval;
+        std::string intervalName;
     };
 
-    std::array<TimeInterval, 8> TimeIntervals = {
-        TimeInterval{ 0, 31536000.0, "year" },
-        TimeInterval{ 1, 18144000.0, "month" },
-        TimeInterval{ 2, 604800.0, "week" },
-        TimeInterval{ 3, 86400.0, "day" },
-        TimeInterval{ 4, 3600.0, "hour" },
-        TimeInterval{ 5, 60.0, "minute" },
-        TimeInterval{ 6, 1.0, "second" },
+    std::array<TimeInterval, 7> TimeIntervals = {
+        TimeInterval{ 31536000, "year" },
+        TimeInterval{ 18144000, "month" },
+        TimeInterval{ 604800, "week" },
+        TimeInterval{ 86400, "day" },
+        TimeInterval{ 3600, "hour" },
+        TimeInterval{ 60, "minute" },
+        TimeInterval{ 1, "second" }
     };
+
+    std::string checkForTimeDescription(int intervalIndex, double value) {
+        double amount = value / TimeIntervals[intervalIndex].secondsPerInterval;
+        std::string description = fmt::format("{}", amount);
+        description += " " + TimeIntervals[intervalIndex].intervalName + "/sec";
+        return description;
+    }
+
+    std::string timeDescription(double value) {
+        if (value == 0) {
+            return "";
+        }
+
+        size_t i;
+        for (i = 0; i < (TimeIntervals.size() - 1); ++i) {
+            if (abs(value) >= TimeIntervals[i].secondsPerInterval) {
+                break;
+            }
+        }
+        return checkForTimeDescription(i, value);
+    }
 
 } // namespace
 
@@ -187,7 +207,7 @@ std::string DeltaTimesDialog::createSummaryForDeltaTime(size_t idx, bool forList
     if (forListView) {
         s += "\t" + std::to_string(_data.at(idx));
         s += "\t";
-        s += timeDescription(_data.at(idx)).toStdString();
+        s += timeDescription(_data.at(idx));
     }
     return s;
 }
@@ -227,20 +247,6 @@ void DeltaTimesDialog::setLabelForKey(int index, bool editMode, std::string colo
     ));
 }
 
-QString DeltaTimesDialog::timeDescription(int value) {
-    if (value == 0) {
-        return "";
-    }
-
-    size_t i;
-    for (i = 0; i < (TimeIntervals.size() - 1); ++i) {
-        if (abs(value) >= TimeIntervals[i].secondsPerInterval) {
-            break;
-        }
-    }
-    return checkForTimeDescription(i, value);
-}
-
 void DeltaTimesDialog::valueChanged(const QString& text) {
     if (_seconds->text() == "") {
         _errorMsg->setText("");
@@ -248,18 +254,12 @@ void DeltaTimesDialog::valueChanged(const QString& text) {
     else {
         int value = _seconds->text().toDouble();
         if (value != 0) {
-            _value->setText("<font color='black'>" +
-                timeDescription(_seconds->text().toDouble()) + "</font>");
+            _value->setText(QString::fromStdString(
+                timeDescription(_seconds->text().toDouble()))
+            );
             _errorMsg->setText("");
         }
     }
-}
-
-QString DeltaTimesDialog::checkForTimeDescription(int intervalIndex, int value) {
-    double amount = static_cast<double>(value)
-        / TimeIntervals[intervalIndex].secondsPerInterval;
-    QString description = QString::number(amount, 'g', 2);
-    return description += " " + TimeIntervals[intervalIndex].intervalName + "/sec";
 }
 
 bool DeltaTimesDialog::isLineEmpty(int index) {
