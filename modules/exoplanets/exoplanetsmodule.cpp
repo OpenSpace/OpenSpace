@@ -70,6 +70,13 @@ scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
             "",
             "Prints a list with the names of all exoplanet systems that can be added to "
             "the scene graph to the OpenSpace Log. "
+        },
+        {
+            "getListOfExoplanets",
+            &exoplanets::luascriptfunctions::getListOfExoplanets,
+            {},
+            "",
+            "gets a list with the names of all exoplanet systems that can be used by a gui"
         }
     };
 

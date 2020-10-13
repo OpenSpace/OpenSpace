@@ -241,6 +241,7 @@ void createExoplanetSystem(std::string_view starName) {
                 "Position = " + ghoul::to_string(starPosition) + ""
             "}"
         "},"
+        "Tag = {'exoplanet_system'},"
         "GUI = {"
             "Name = '" + starNameSpeck + " (Star)',"
             "Path = '" + guiPath + "'"
@@ -469,6 +470,50 @@ int removeExoplanetSystem(lua_State* L) {
     );
 
     return 0;
+}
+
+int getListOfExoplanets(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::getListOfExoplanets");
+
+    std::ifstream file(absPath(LookUpTablePath));
+
+    if (!file.good()) {
+        return ghoul::lua::luaError(
+            L,
+            fmt::format("Failed to open file '{}'", LookUpTablePath)
+        );
+    }
+
+    std::vector<std::string> names;
+    // As of 2020 there are about 4000 confirmed exoplanets, so use this number
+    // as a guess for the vector size
+    const int nExoplanetsGuess = 4000;
+    names.reserve(nExoplanetsGuess);
+
+    std::string line;
+    while (getline(file, line)) {
+        std::stringstream ss(line);
+        std::string name;
+        getline(ss, name, ',');
+        // Remove the last two characters, that specify the planet
+        name = name.substr(0, name.size() - 2);
+
+        names.push_back(name);
+    }
+
+    // For easier read, sort by names and remove duplicates
+    std::sort(names.begin(), names.end());
+    names.erase(std::unique(names.begin(), names.end()), names.end());
+
+    lua_newtable(L);
+    int number = 1;
+    for (const std::string& s : names) {
+        lua_pushstring(L, s.c_str());
+        lua_rawseti(L, -2, number);
+        ++number;
+    }
+
+    return 1;
 }
 
 int listAvailableExoplanetSystems(lua_State* L) {
