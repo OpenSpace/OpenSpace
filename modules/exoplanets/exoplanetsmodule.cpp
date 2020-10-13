@@ -76,7 +76,7 @@ scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
             &exoplanets::luascriptfunctions::getListOfExoplanets,
             {},
             "",
-            "gets a list with the names of all exoplanet systems that can be used by a gui"
+            "Gets a list with the names of all exoplanet systems, that can be used by a GUI."
         }
     };
 
