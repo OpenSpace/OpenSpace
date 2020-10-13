@@ -42,6 +42,11 @@ LauncherWindow  QComboBox#config:hover {
   background: rgb(120, 120, 120);
 }
 
+LauncherWindow  QComboBox#config:disabled {
+  background: rgb(175, 175, 175);
+  color: rgb(225, 225, 225);
+}
+
 LauncherWindow  QPushButton {
   font-family: Segoe UI;
   font-weight: bold;
