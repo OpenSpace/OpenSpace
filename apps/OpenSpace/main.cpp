@@ -63,6 +63,7 @@
 #include <Tracy.hpp>
 #include <chrono>
 #include <ctime>
+#include <memory>
 
 #ifdef WIN32
 #include <openspace/openspace.h>
@@ -988,16 +989,14 @@ std::string setWindowConfigPresetForGui(const std::string labelFromCfgFile,
     return preset;
 }
 
-std::string getSelectedSgctProfileFromLauncher(LauncherWindow* lw, bool hasCliSGCTConfig,
+std::string getSelectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTConfig,
                                                std::string windowConfiguration,
                                                const std::string& labelFromCfgFile,
                                                const std::string& xmlExt)
 {
     std::string config = windowConfiguration;
     if (!hasCliSGCTConfig) {
-        if (lw != nullptr) {
-            config = lw->selectedWindowConfig();
-        }
+        config = lw.selectedWindowConfig();
         if (config.find(labelFromCfgFile) != std::string::npos) {
             if (config.find("sgct.config") == std::string::npos) {
                 config = config.substr(0, config.length() - labelFromCfgFile.length());
@@ -1165,16 +1164,16 @@ int main(int argc, char** argv) {
     std::string windowCfgPreset = setWindowConfigPresetForGui(labelFromCfgFile, xmlExt,
         haveCliSGCTConfig, sgctFunctionName);
 
-    QApplication* qaobj = nullptr;
-    LauncherWindow* launchwin = nullptr;
+    std::shared_ptr<QApplication> qaobj;
+    std::shared_ptr<LauncherWindow> launchwin;
     bool skipLauncherSinceProfileAndWindowAreConfiguredInCli =
         (haveCliProfile && haveCliSGCTConfig) || global::configuration.bypassLauncher;
 
     if (!skipLauncherSinceProfileAndWindowAreConfiguredInCli) {
         int qac = 0;
-        qaobj = new QApplication(qac, nullptr);
-        launchwin = new LauncherWindow(absPath("${BASE}"), !haveCliProfile,
-            global::configuration, !haveCliSGCTConfig, windowCfgPreset);
+        qaobj.reset(new QApplication(qac, nullptr));
+        launchwin.reset(new LauncherWindow(absPath("${BASE}"), !haveCliProfile,
+            global::configuration, !haveCliSGCTConfig, windowCfgPreset));
         launchwin->show();
         qaobj->exec();
 
@@ -1184,7 +1183,7 @@ int main(int argc, char** argv) {
 
         global::configuration.profile = launchwin->selectedProfile();
         windowConfiguration = getSelectedSgctProfileFromLauncher(
-            launchwin,
+            *launchwin,
             haveCliSGCTConfig,
             windowConfiguration,
             labelFromCfgFile,
@@ -1306,8 +1305,8 @@ int main(int argc, char** argv) {
     }
 #endif // OPENSPACE_HAS_SPOUT
 
-    delete launchwin;
-    delete qaobj;
+    launchwin->close();
+    qaobj->quit();
 
     ghoul::deinitialize();
     exit(EXIT_SUCCESS);

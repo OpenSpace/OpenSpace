@@ -332,7 +332,9 @@ bool LauncherWindow::loadProfileFromFile(Profile*& p, std::string filename) {
 }
 
 LauncherWindow::~LauncherWindow() {
-    delete myEditorWindow;
+    if (myEditorWindow != nullptr) {
+        delete myEditorWindow;
+    }
 }
 
 bool LauncherWindow::wasLaunchSelected() {
