@@ -175,7 +175,7 @@ namespace openspace {
         return ((_shaderProgram != nullptr) && (!_fullData.empty()));
     }
 
-    void RenderablePointsCloud::initialize() {
+    void RenderablePointsCloud::initialize() { 
         bool isSuccessful = loadData();
         if (!isSuccessful) {
             throw ghoul::RuntimeError("Error loading data");
