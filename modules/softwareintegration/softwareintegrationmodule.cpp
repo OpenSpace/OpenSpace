@@ -27,6 +27,7 @@
 #include <modules/softwareintegration/rendering/renderablepointscloud.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scripting/scriptengine.h>
@@ -285,8 +286,12 @@ namespace openspace {
                 SceneGraphNode* sgn = global::renderEngine.scene()->loadNode(node);
                 if (!sgn) {
                     LERROR("Scene", "Could not load scene graph node");
+                    break;
                 }
                 global::renderEngine.scene()->initializeNode(sgn);
+                global::navigationHandler.orbitalNavigator().setFocusNode(sgn);
+                global::navigationHandler.orbitalNavigator().startRetargetAnchor();
+                global::navigationHandler.orbitalNavigator().startRetargetAim();
             }
             catch (const documentation::SpecificationError& e) {
                 return LERROR(fmt::format("Documentation SpecificationError: Error loading scene graph node {}",
@@ -305,6 +310,8 @@ namespace openspace {
         case SoftwareConnection::MessageType::RemoveSceneGraphNode: {
             std::string identifier(message.begin(), message.end());
 
+            global::navigationHandler.orbitalNavigator().setFocusNode("Earth");
+            
             openspace::global::scriptEngine.queueScript(
                 "openspace.removeSceneGraphNode('" + identifier + "');",
                 scripting::ScriptEngine::RemoteScripting::Yes
