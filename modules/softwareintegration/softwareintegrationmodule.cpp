@@ -289,9 +289,13 @@ namespace openspace {
                     break;
                 }
                 global::renderEngine.scene()->initializeNode(sgn);
-                global::navigationHandler.orbitalNavigator().setFocusNode(sgn);
-                global::navigationHandler.orbitalNavigator().startRetargetAnchor();
-                global::navigationHandler.orbitalNavigator().startRetargetAim();
+
+                openspace::global::scriptEngine.queueScript(
+                    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)"
+                    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', '" + identifier + "')"
+                    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')",
+                    scripting::ScriptEngine::RemoteScripting::Yes
+                );
             }
             catch (const documentation::SpecificationError& e) {
                 return LERROR(fmt::format("Documentation SpecificationError: Error loading scene graph node {}",
@@ -309,10 +313,11 @@ namespace openspace {
         }
         case SoftwareConnection::MessageType::RemoveSceneGraphNode: {
             std::string identifier(message.begin(), message.end());
-
-            global::navigationHandler.orbitalNavigator().setFocusNode("Earth");
             
             openspace::global::scriptEngine.queueScript(
+                "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" 
+                "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth')"
+                "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
                 "openspace.removeSceneGraphNode('" + identifier + "');",
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
