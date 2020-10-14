@@ -123,6 +123,7 @@ LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
     QLabel* labelChoose = new QLabel("Choose Profile", centralWidget);
     labelChoose->setObjectName("clear");
     labelChoose->setGeometry(geometry::ChooseLabel);
+    labelChoose->setObjectName("label_choose");
 
     _profileBox = new QComboBox(centralWidget);
     _profileBox->setObjectName("config");
@@ -131,6 +132,7 @@ LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
     QLabel* optionsLabel = new QLabel("Window Options", centralWidget);
     optionsLabel->setObjectName("clear");
     optionsLabel->setGeometry(geometry::OptionsLabel);
+    optionsLabel->setObjectName("label_options");
 
     _windowConfigBox = new QComboBox(centralWidget);
     _windowConfigBox->setObjectName("config");

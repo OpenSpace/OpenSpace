@@ -16,12 +16,14 @@ QLabel#error-message {
 /*
  * LauncherWindow
  */
-
 LauncherWindow  QLabel {
   font-family: Segoe UI;
+  font-weight:600;
+}
+
+LauncherWindow  QLabel#label_choose, QLabel#label_options {
   color: #ddd;
   font-size:10pt;
-  font-weight:600;
 }
 
 LauncherWindow  QLabel#clear {
