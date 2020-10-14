@@ -50,6 +50,7 @@ MetaDialog::MetaDialog(openspace::Profile& profile, QWidget *parent)
 
     layout->addWidget(new QLabel("Description"));
     _descriptionEdit = new QTextEdit;
+    _descriptionEdit->setAcceptRichText(false);
     _descriptionEdit->setTabChangesFocus(true);
     layout->addWidget(_descriptionEdit);
 

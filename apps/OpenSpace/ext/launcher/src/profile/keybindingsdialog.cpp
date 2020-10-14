@@ -219,6 +219,7 @@ KeybindingsDialog::KeybindingsDialog(openspace::Profile& profile, QWidget *paren
         _scriptLabel = new QLabel("Script");
         box->addWidget(_scriptLabel, 6, 0, 1, 2);
         _scriptEdit = new QTextEdit;
+        _scriptEdit->setAcceptRichText(false);
         _scriptEdit->setToolTip("Command(s) to execute at keypress event");
         _scriptEdit->setTabChangesFocus(true);
         box->addWidget(_scriptEdit, 7, 0, 1, 2);

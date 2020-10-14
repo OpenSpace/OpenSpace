@@ -46,6 +46,7 @@ AdditionalScriptsDialog::AdditionalScriptsDialog(openspace::Profile& profile,
     }
 
     _textScripts = new QTextEdit;
+    _textScripts->setAcceptRichText(false);
     layout->addWidget(_textScripts, 1);
 
     {
