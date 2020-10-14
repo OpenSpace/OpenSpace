@@ -25,6 +25,7 @@ local assetHelper = asset.require('util/asset_helper')
 assetHelper.requireAll(asset, 'scene/milkyway/exoplanets')
 assetHelper.requireAll(asset, 'scene/digitaluniverse')
 
+asset.require('customization/globebrowsing')
 
 asset.onInitialize(function ()
     openspace.globebrowsing.loadWMSServersFromFile(

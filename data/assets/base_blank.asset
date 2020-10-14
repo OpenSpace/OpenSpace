@@ -15,8 +15,6 @@ asset.require('util/default_joystick')
 -- Load web gui
 local webGui = asset.require('util/webgui')
 
-asset.require('customization/globebrowsing')
-
 -- Keybindings that are specific for this scene
 local Keybindings = {
     {
