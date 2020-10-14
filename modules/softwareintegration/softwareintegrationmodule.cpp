@@ -56,6 +56,10 @@ namespace openspace {
         start(4700);
     }
 
+    void SoftwareIntegrationModule::internalDeinitialize() {
+        stop();
+    }
+
     void SoftwareIntegrationModule::internalDeinitializeGL() {
 
     }
@@ -71,6 +75,13 @@ namespace openspace {
     void SoftwareIntegrationModule::stop() {
         _shouldStop = true;
         _socketServer.close();
+
+        if (_serverThread.joinable()) {
+            _serverThread.join();
+        }
+        if (_eventLoopThread.joinable()) {
+            _eventLoopThread.join();
+        }
     }
 
     bool SoftwareIntegrationModule::isConnected(const Peer& peer) const {
@@ -115,8 +126,10 @@ namespace openspace {
 
     void SoftwareIntegrationModule::eventLoop() {
         while (!_shouldStop) {
-            PeerMessage pm = _incomingMessages.pop();
-            handlePeerMessage(std::move(pm));
+            if (!_incomingMessages.empty()) {
+                PeerMessage pm = _incomingMessages.pop();
+                handlePeerMessage(std::move(pm));
+            }
         }
     }
 
@@ -217,7 +230,7 @@ namespace openspace {
             bool hasLuminosityData = !luminosityData.empty();
             bool hasVelocityData = !velocityData.empty();
 
-            if (hasLuminosityData && hasVelocityData) {
+            /*if (hasLuminosityData && hasVelocityData) {
                 ghoul::Dictionary renderable = {
                     { "Type", "RenderablePointsCloud"s },
                     { "Color", static_cast<glm::dvec3>(color)},
@@ -248,7 +261,7 @@ namespace openspace {
                     { "Velocity", velocityData }
                 };
             }
-            else {
+            else {*/
                 ghoul::Dictionary renderable = {
                     { "Type", "RenderablePointsCloud"s },
                     { "Color", static_cast<glm::dvec3>(color)},
@@ -256,8 +269,7 @@ namespace openspace {
                     { "Opacity", static_cast<double>(opacity) },
                     { "Size", static_cast<double>(size)},
                 };
-            }
-
+            
             ghoul::Dictionary gui = {
                 { "Name", guiName },
                 { "Path", "/Examples"s }

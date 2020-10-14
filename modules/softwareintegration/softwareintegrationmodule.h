@@ -64,6 +64,7 @@ private:
     };
 
     void internalInitialize(const ghoul::Dictionary&) override;
+    void internalDeinitialize() override;
     void internalDeinitializeGL() override;
 
     bool isConnected(const Peer& peer) const;
