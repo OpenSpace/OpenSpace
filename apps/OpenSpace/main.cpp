@@ -1305,8 +1305,12 @@ int main(int argc, char** argv) {
     }
 #endif // OPENSPACE_HAS_SPOUT
 
-    launchwin->close();
-    qaobj->quit();
+    if (launchwin != nullptr) {
+        launchwin->close();
+    }
+    if (qaobj != nullptr) {
+        qaobj->quit();
+    }
 
     ghoul::deinitialize();
     exit(EXIT_SUCCESS);
