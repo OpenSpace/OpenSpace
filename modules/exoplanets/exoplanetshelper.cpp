@@ -81,6 +81,17 @@ std::string_view csvStarName(std::string_view name) {
     return name;
 }
 
+bool hasSufficientData(const Exoplanet& p) {
+    bool invalidPos = std::isnan(p.positionX)
+        || std::isnan(p.positionY)
+        || std::isnan(p.positionZ);
+
+    bool hasSemiMajorAxis = !std::isnan(p.a);
+    bool hasOrbitalPeriod = !std::isnan(p.per);
+
+    return !invalidPos && hasSemiMajorAxis && hasOrbitalPeriod;
+}
+
 std::string starColor(float bv) {
     std::ifstream colorMap(absPath(BvColormapPath), std::ios::in);
 

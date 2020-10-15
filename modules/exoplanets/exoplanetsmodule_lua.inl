@@ -121,6 +121,14 @@ void createExoplanetSystem(std::string_view starName) {
             planetNames.push_back(name);
             planetSystem.push_back(p);
             found = true;
+
+            if (!hasSufficientData(p)) {
+                LERROR(fmt::format(
+                    "Insufficient data available for visualizion of exoplanet system: '{}'",
+                    starName
+                ));
+                return;
+            }
         }
     }
 
@@ -129,16 +137,6 @@ void createExoplanetSystem(std::string_view starName) {
 
     if (!found) {
         LERROR(fmt::format("No star with the provided name was found: '{}'", starName));
-        return;
-    }
-
-    bool notEnoughData = std::isnan(p.positionX) || std::isnan(p.a) || std::isnan(p.per);
-
-    if (notEnoughData) {
-        LERROR(fmt::format(
-            "Insufficient data available for representing the exoplanet system: '{}'",
-            starName
-        ));
         return;
     }
 

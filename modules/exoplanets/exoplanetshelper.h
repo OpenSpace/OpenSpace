@@ -72,6 +72,9 @@ std::string_view speckStarName(std::string_view name);
 // Convert speck-file specific names to the corresponding name in the csv data file
 std::string_view csvStarName(std::string_view name);
 
+// Check if the exoplanet p has sufficient data for visualization
+bool hasSufficientData(const Exoplanet& p);
+
 // Compute star color in RGB from b-v color index
 std::string starColor(float bv);
 
