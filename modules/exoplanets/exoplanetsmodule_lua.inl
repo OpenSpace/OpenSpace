@@ -259,15 +259,18 @@ void createExoplanetSystem(std::string_view starName) {
         if (std::isnan(planet.ecc)) {
             planet.ecc = 0.f;
         }
-        if (std::isnan(planet.i)) {
-            planet.i = 90.f;
-        }
-        if (std::isnan(planet.bigOmega)) {
-            planet.bigOmega = 180.f;
-        }
-        if (std::isnan(planet.omega)) {
-            planet.omega = 90.f;
-        }
+
+        // KeplerTranslation requires angles in range [0, 360]
+        auto validAngle = [](float angle, float defaultValue) {
+            if (std::isnan(angle)) { return defaultValue; }
+            if (angle < 0.f) { return angle + 360.f; }
+            if (angle > 360.f) { return angle - 360.f; }
+        };
+
+        planet.i = validAngle(planet.i, 90.f);
+        planet.bigOmega = validAngle(planet.bigOmega, 180.f);
+        planet.omega = validAngle(planet.omega, 90.f);
+
         Time epoch;
         std::string sEpoch;
         if (!std::isnan(planet.tt)) {
