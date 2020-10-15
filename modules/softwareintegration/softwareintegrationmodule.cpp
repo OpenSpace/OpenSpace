@@ -319,11 +319,14 @@ namespace openspace {
             if (global::navigationHandler.orbitalNavigator().anchorNode() == sgn) {
                 openspace::global::scriptEngine.queueScript(
                     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Sun')"
-                    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
-                    "openspace.removeSceneGraphNode('" + identifier + "');",
+                    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')",
                     scripting::ScriptEngine::RemoteScripting::Yes
                 );
             }
+            openspace::global::scriptEngine.queueScript(
+                "openspace.removeSceneGraphNode('" + identifier + "');",
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
             LINFO(fmt::format("Scengraph {} removed.", identifier));
             break;
         }
