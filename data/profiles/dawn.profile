@@ -1,51 +1,63 @@
-#Version
-1.0
-
-#Asset
-base	
-scene/solarsystem/missions/dawn/ceres	
-scene/solarsystem/missions/dawn/dawn	DawnAsset
-scene/solarsystem/missions/dawn/vesta	
-
-#Time
-absolute	2011 AUG 06 00:00:00
-
-#Camera
-setNavigationState	DawnAsset.Dawn.Identifier			526781518487.171326, 257168309890.072144, -1381125204152.817383			
-
-#MarkNodes
-Dawn
-Ceres
-Vesta
-
-#DeltaTimes
-1
-2
-5
-10
-30
-60
-120
-300
-600
-1800
-3600
-7200
-10800
-21600
-43200
-86400
-172800
-345600
-604800
-1209600
-2592000
-5184000
-7776000
-15552000
-31536000
-63072000
-157680000
-315360000
-630720000
-1576800000
+{
+  "assets": [
+    "base",
+    "scene/solarsystem/missions/dawn/ceres",
+    "scene/solarsystem/missions/dawn/dawn",
+    "scene/solarsystem/missions/dawn/vesta"
+  ],
+  "camera": {
+    "aim": "",
+    "anchor": "Dawn",
+    "frame": "",
+    "position": {
+      "x": 526782000000.0,
+      "y": 257168000000.0,
+      "z": -1381130000000.0
+    },
+    "type": "setNavigationState"
+  },
+  "delta_times": [
+    1.0,
+    5.0,
+    30.0,
+    60.0,
+    300.0,
+    1800.0,
+    3600.0,
+    43200.0,
+    86400.0,
+    604800.0,
+    1209600.0,
+    2592000.0,
+    5184000.0,
+    7776000.0,
+    15552000.0,
+    31536000.0,
+    63072000.0,
+    157680000.0,
+    315360000.0,
+    630720000.0
+  ],
+  "mark_nodes": [
+    "Dawn",
+    "Ceres",
+    "Vesta",
+    "Sun"
+  ],
+  "meta": {
+    "author": "OpenSpace Team",
+    "description": "work in progress profile for the dawn mission",
+    "license": "MIT License",
+    "name": "Dawn",
+    "url": "https://www.openspaceproject.com",
+    "version": "1.0"
+  },
+  "time": {
+    "type": "absolute",
+    "value": "2011-08-06T00:00:00"
+  },
+  "version": {
+    "major": 1,
+    "minor": 0
+  }
+}

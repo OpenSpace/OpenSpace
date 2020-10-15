@@ -26,14 +26,14 @@ asset.onInitialize(function ()
         helper.previousFlipbookPage(flipbook);
     end
 
-    openspace.bindKey("RIGHT", "nextFlip()", "Show the next Apollo 11 flipbook image.", "Next A11 flip", "/Missions/Apollo/11")
-    openspace.bindKey("LEFT", "previousFlip()","Show the previous Apollo 11 flipbook image.", "Prev A11 flip", "/Missions/Apollo/11")
+    openspace.bindKey("p", "nextFlip()", "Show the next Apollo 11 flipbook image.", "Next A11 flip", "/Missions/Apollo/11")
+    openspace.bindKey("o", "previousFlip()","Show the previous Apollo 11 flipbook image.", "Prev A11 flip", "/Missions/Apollo/11")
 end)
 
 
 asset.onDeinitialize(function ()
     flipbook = nil;
 
-    openspace.clearKey("RIGHT")
-    openspace.clearKey("LEFT")
+    openspace.clearKey("o")
+    openspace.clearKey("p")
 end)

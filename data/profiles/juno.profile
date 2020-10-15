@@ -1,38 +1,64 @@
-#Version
-1.0
-
-#Asset
-base	
-scene/solarsystem/missions/juno/juno	junoAsset
-
-#Time
-absolute	2016-07-01T10:05:00.00
-
-#Camera
-setNavigationState	junoAsset.Juno.Identifier		"Root"	1.243398E8, 7.176068E7, -1.519733E7	-0.377400E0, 0.764573E0, 0.522492E0		
-
-#MarkNodes
-Jupiter
-Juno
-
-#DeltaTimes
-1
-5
-10
-20
-40
-90
-360
-720
-2880
-14400
-28800
-57600
-115200
-230400
-460800
-921600
-1843200
-3686400
-7372800
-14745600
+{
+  "assets": [
+    "base",
+    "scene/solarsystem/missions/juno/juno"
+  ],
+  "camera": {
+    "aim": "",
+    "anchor": "Juno",
+    "frame": "",
+    "position": {
+      "x": 124339800.0,
+      "y": 71760680.0,
+      "z": -15197330.0
+    },
+    "type": "setNavigationState",
+    "up": {
+      "x": -0.3774,
+      "y": 0.764573,
+      "z": 0.522492
+    }
+  },
+  "delta_times": [
+    1.0,
+    5.0,
+    30.0,
+    60.0,
+    300.0,
+    1800.0,
+    3600.0,
+    43200.0,
+    86400.0,
+    604800.0,
+    1209600.0,
+    2592000.0,
+    5184000.0,
+    7776000.0,
+    15552000.0,
+    31536000.0,
+    63072000.0,
+    157680000.0,
+    315360000.0,
+    630720000.0
+  ],
+  "mark_nodes": [
+    "Jupiter",
+    "Juno"
+  ],
+  "meta": {
+    "author": "OpenSpace Team",
+    "description": "work in progress scene for juno",
+    "license": "MIT License",
+    "name": "Juno",
+    "url": "https://www.openspaceproject.com",
+    "version": "0.1"
+  },
+  "time": {
+    "type": "absolute",
+    "value": "2016-07-01T10:05:00"
+  },
+  "version": {
+    "major": 1,
+    "minor": 0
+  }
+}

@@ -18,10 +18,13 @@ asset.require(colorLayersPath .. "/themis_ir_night_sweden")
 asset.require(colorLayersPath .. "/ctx_mosaic_utah") 
 asset.require(colorLayersPath .. "/ctx_mosaic_sweden") 
 asset.require(colorLayersPath .. "/ctx_blended_01")
+asset.require(colorLayersPath .. "/hirise")
+asset.require(colorLayersPath .. "/hirisels")
 
 -- Height layers
 asset.require(heightLayersPath .. "/mola_europe")
 local heightLayer = asset.require(heightLayersPath .. "/mola_utah")
+asset.require(heightLayersPath .. "/hirisels")
 
 -- Overlays
 asset.require(overlaysPath .. "/indices")
@@ -39,10 +42,10 @@ end)
 
 asset.meta = {
     Name = "Default Mars Layers",
-    Version = "1.0",
+    Version = "1.1",
     Description = [[ Default Mars layers are: MOC WA Color, Viking MDIM, MOLA Pseudo
-        Color, MOLA HRSC, Themis IR Day, Themis IR Night, CTX Mosaic, and CTX Blended
-        beta01]],
+        Color, MOLA HRSC, Themis IR Day, Themis IR Night, CTX Mosaic, CTX Blended
+        beta01, HiRISE, and HiRISE Local Set]],
     Author = "OpenSpace Team",
     URL = "http://openspaceproject.com",
     License = "MIT license"

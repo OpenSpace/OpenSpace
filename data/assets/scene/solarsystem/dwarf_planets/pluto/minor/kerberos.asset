@@ -47,7 +47,7 @@ local KerberosTrail = {
         "moonTrail_pluto", 
         "moonTrail_minor" },
     GUI = {
-        Name = "Hydra Trail",
+        Name = "Kerberos Trail",
         Path = "/Solar System/Dwarf Planets/Pluto"
     }
 }

@@ -11,6 +11,12 @@ local parentIdentifier = transforms.SaturnBarycenter.Identifier
 local parentSpice = "SATURN BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_norse" }
 local trailColor = { 0.5, 0.3, 0.3 }
+local trailTags = { 
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor"
+}
 
 local norseGroup = {
     {
@@ -22,6 +28,7 @@ local norseGroup = {
         Spice = "PHOEBE",
         Radii = { 218800, 217000, 203600 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
         },
@@ -38,6 +45,7 @@ local norseGroup = {
         Spice = "SKATHI",
         Radii = { 8000, 8000, 8000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
         },
@@ -54,6 +62,7 @@ local norseGroup = {
         Spice = "65055",
         Radii = { 6000, 6000, 6000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Name = "S/2007 S 2",
             Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
@@ -71,6 +80,7 @@ local norseGroup = {
         Spice = "SKOLL",
         Radii = { 6000, 6000, 6000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
         },
@@ -87,6 +97,7 @@ local norseGroup = {
         Spice = "65041",
         Radii = { 6000, 6000, 6000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Name = "S/2004 S 13",
             Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
@@ -104,6 +115,7 @@ local norseGroup = {
         Spice = "GREIP",
         Radii = { 6000, 6000, 6000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
         },
@@ -120,6 +132,7 @@ local norseGroup = {
         Spice = "HYRROKKIN",
         Radii = { 8000, 8000, 8000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
         },
@@ -136,6 +149,7 @@ local norseGroup = {
         Spice = "JARNSAXA",
         Radii = { 6000, 6000, 6000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
         },
@@ -152,6 +166,7 @@ local norseGroup = {
         Spice = "MUNDILFARI",
         Radii = { 7000, 7000, 7000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
         },
@@ -168,6 +183,7 @@ local norseGroup = {
         Spice = "65048",
         Radii = { 6000, 6000, 6000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Name = "S/2006 S 1",
             Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
@@ -185,6 +201,7 @@ local norseGroup = {
         Spice = "65045",
         Radii = { 4000, 4000, 4000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Name = "S/2004 S 17",
             Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
@@ -202,6 +219,7 @@ local norseGroup = {
         Spice = "BERGELMIR",
         Radii = { 6000, 6000, 6000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
         },
@@ -218,6 +236,7 @@ local norseGroup = {
         Spice = "NARVI",
         Radii = { 7000, 7000, 7000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
         },
@@ -234,6 +253,7 @@ local norseGroup = {
         Spice = "SUTTUNGR",
         Radii = { 7000, 7000, 7000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
         },
@@ -250,6 +270,7 @@ local norseGroup = {
         Spice = "HATI",
         Radii = { 6000, 6000, 6000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
         },
@@ -266,6 +287,7 @@ local norseGroup = {
         Spice = "65040",
         Radii = { 5000, 5000, 5000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Name = "S/2004 S 12",
             Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
@@ -283,6 +305,7 @@ local norseGroup = {
         Spice = "FARBAUTI",
         Radii = { 5000, 5000, 5000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
         },
@@ -299,6 +322,7 @@ local norseGroup = {
         Spice = "THRYMR",
         Radii = { 7000, 7000, 7000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
         },
@@ -315,6 +339,7 @@ local norseGroup = {
         Spice = "AEGIR",
         Radii = { 6000, 6000, 6000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
         },
@@ -331,6 +356,7 @@ local norseGroup = {
         Spice = "65056",
         Radii = { 5000, 5000, 5000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Name = "S/2007 S 3",
             Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
@@ -348,6 +374,7 @@ local norseGroup = {
         Spice = "BESTLA",
         Radii = { 7000, 7000, 7000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
         },
@@ -364,6 +391,7 @@ local norseGroup = {
         Spice = "65035",
         Radii = { 6000, 6000, 6000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Name = "S/2004 S 7",
             Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
@@ -381,6 +409,7 @@ local norseGroup = {
         Spice = "65050",
         Radii = { 6000, 6000, 6000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Name = "S/2006 S 3",
             Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
@@ -398,6 +427,7 @@ local norseGroup = {
         Spice = "FENRIR",
         Radii = { 4000, 4000, 4000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
         },
@@ -431,6 +461,7 @@ local norseGroup = {
         Spice = "KARI",
         Radii = { 7000, 7000, 7000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
         },
@@ -447,6 +478,7 @@ local norseGroup = {
         Spice = "YMIR",
         Radii = { 18000, 18000, 18000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
         },
@@ -463,6 +495,7 @@ local norseGroup = {
         Spice = "LOGE",
         Radii = { 6000, 6000, 6000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
         },
@@ -479,6 +512,7 @@ local norseGroup = {
         Spice = "FORNJOT",
         Radii = { 6000, 6000, 6000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Norse Group"
         },

@@ -170,6 +170,7 @@ void to_json(nlohmann::json& j, const Profile::Meta& v) {
     }
 }
 
+
 void from_json(const nlohmann::json& j, Profile::Meta& v) {
     checkValue(j, "name", &nlohmann::json::is_string, "meta", true);
     checkValue(j, "version", &nlohmann::json::is_string, "meta", true);
@@ -202,6 +203,7 @@ void from_json(const nlohmann::json& j, Profile::Meta& v) {
         v.license = j["license"].get<std::string>();
     }
 }
+
 
 void to_json(nlohmann::json& j, const Profile::Property::SetType& v) {
     j = [](Profile::Property::SetType t) {
@@ -447,7 +449,7 @@ void Profile::saveCurrentSettingsToProfile(const properties::PropertyOwner& root
                                            std::string currentTime,
                                  interaction::NavigationHandler::NavigationState navState)
 {
-    version = Profile::CurrentVersion;
+    _version = Profile::CurrentVersion;
 
     //
     // Update properties
@@ -459,7 +461,7 @@ void Profile::saveCurrentSettingsToProfile(const properties::PropertyOwner& root
         p.setType = Property::SetType::SetPropertyValueSingle;
         p.name = prop->fullyQualifiedIdentifier();
         p.value = prop->getStringValue();
-        properties.push_back(std::move(p));
+        _properties.push_back(std::move(p));
     }
 
     //
@@ -468,11 +470,11 @@ void Profile::saveCurrentSettingsToProfile(const properties::PropertyOwner& root
     Time t;
     t.value = std::move(currentTime);
     t.type = Time::Type::Absolute;
-    time = t;
+    _time = t;
 
     // Delta times
     std::vector<double> dts = global::timeManager.deltaTimeSteps();
-    deltaTimes = std::move(dts);
+    _deltaTimes = std::move(dts);
 
     // Camera
 
@@ -484,7 +486,7 @@ void Profile::saveCurrentSettingsToProfile(const properties::PropertyOwner& root
     c.up = navState.up;
     c.yaw = navState.yaw;
     c.pitch = navState.pitch;
-    camera = std::move(c);
+    _camera = std::move(c);
 }
 
 void Profile::setIgnoreUpdates(bool ignoreUpdates) {
@@ -498,14 +500,14 @@ void Profile::addAsset(const std::string& path) {
         return;
     }
 
-    const auto it = std::find(assets.cbegin(), assets.cend(), path);
+    const auto it = std::find(_assets.cbegin(), _assets.cend(), path);
 
-    if (it != assets.end()) {
+    if (it != _assets.end()) {
         // Asset already existed, so nothing to do here
         return;
     }
 
-    assets.push_back(path);
+    _assets.push_back(path);
 }
 
 void Profile::removeAsset(const std::string& path) {
@@ -515,15 +517,19 @@ void Profile::removeAsset(const std::string& path) {
         return;
     }
 
-    const auto it = std::find(assets.cbegin(), assets.cend(), path);
+    const auto it = std::find(_assets.cbegin(), _assets.cend(), path);
 
-    if (it == assets.end()) {
+    if (it == _assets.end()) {
         throw ghoul::RuntimeError(fmt::format(
             "Tried to remove non-existing asset '{}'", path
         ));
     }
 
-    assets.erase(it);
+    _assets.erase(it);
+}
+
+void Profile::clearAssets() {
+    _assets.clear();
 }
 
 scripting::LuaLibrary Profile::luaLibrary() {
@@ -551,29 +557,29 @@ scripting::LuaLibrary Profile::luaLibrary() {
 
 std::string Profile::serialize() const {
     nlohmann::json r;
-    r["version"] = version;
-    if (!modules.empty()) {
-        r["modules"] = modules;
+    r["version"] = _version;
+    if (!_modules.empty()) {
+        r["modules"] = _modules;
     }
-    if (meta.has_value()) {
-        r["meta"] = *meta;
+    if (_meta.has_value()) {
+        r["meta"] = *_meta;
     }
-    if (!assets.empty()) {
-        r["assets"] = assets;
+    if (!_assets.empty()) {
+        r["assets"] = _assets;
     }
-    if (!properties.empty()) {
-        r["properties"] = properties;
+    if (!_properties.empty()) {
+        r["properties"] = _properties;
     }
-    if (!keybindings.empty()) {
-        r["keybindings"] = keybindings;
+    if (!_keybindings.empty()) {
+        r["keybindings"] = _keybindings;
     }
-    if (time.has_value()) {
-        r["time"] = *time;
+    if (_time.has_value()) {
+        r["time"] = *_time;
     }
-    if (!deltaTimes.empty()) {
-        r["delta_times"] = deltaTimes;
+    if (!_deltaTimes.empty()) {
+        r["delta_times"] = _deltaTimes;
     }
-    if (camera.has_value()) {
+    if (_camera.has_value()) {
         r["camera"] = std::visit(
             overloaded {
                 [](const CameraNavState& camera) {
@@ -583,14 +589,15 @@ std::string Profile::serialize() const {
                     return nlohmann::json(camera);
                 }
             },
-            *camera
+            *_camera
         );
     }
-    if (!markNodes.empty()) {
-        r["mark_nodes"] = markNodes;
+
+    if (!_markNodes.empty()) {
+        r["mark_nodes"] = _markNodes;
     }
-    if (!additionalScripts.empty()) {
-        r["additional_scripts"] = additionalScripts;
+    if (!_additionalScripts.empty()) {
+        r["additional_scripts"] = _additionalScripts;
     }
 
     return r.dump(2);
@@ -600,35 +607,35 @@ Profile::Profile(const std::string& content) {
     try {
         nlohmann::json profile = nlohmann::json::parse(content);
 
-        profile.at("version").get_to(version);
+        profile.at("version").get_to(_version);
         if (profile.find("modules") != profile.end()) {
-            profile["modules"].get_to(modules);
+            profile["modules"].get_to(_modules);
         }
         if (profile.find("meta") != profile.end()) {
-            meta = profile.at("meta").get<Meta>();
+            _meta = profile.at("meta").get<Meta>();
         }
         if (profile.find("assets") != profile.end()) {
-            profile.at("assets").get_to(assets);
+            profile.at("assets").get_to(_assets);
         }
         if (profile.find("properties") != profile.end()) {
-            profile.at("properties").get_to(properties);
+            profile.at("properties").get_to(_properties);
         }
         if (profile.find("keybindings") != profile.end()) {
-            profile.at("keybindings").get_to(keybindings);
+            profile.at("keybindings").get_to(_keybindings);
         }
         if (profile.find("time") != profile.end()) {
-            time = profile.at("time").get<Time>();
+            _time = profile.at("time").get<Time>();
         }
         if (profile.find("delta_times") != profile.end()) {
-            profile.at("delta_times").get_to(deltaTimes);
+            profile.at("delta_times").get_to(_deltaTimes);
         }
         if (profile.find("camera") != profile.end()) {
             nlohmann::json c = profile.at("camera");
             if (c.at("type") == CameraNavState::Type) {
-                camera = c.get<CameraNavState>();
+                _camera = c.get<CameraNavState>();
             }
             else if (c.at("type") == CameraGoToGeo::Type) {
-                camera = c.get<CameraGoToGeo>();
+                _camera = c.get<CameraGoToGeo>();
             }
             else {
                 throw Profile::ParsingError(
@@ -638,10 +645,10 @@ Profile::Profile(const std::string& content) {
             }
         }
         if (profile.find("mark_nodes") != profile.end()) {
-            profile.at("mark_nodes").get_to(markNodes);
+            profile.at("mark_nodes").get_to(_markNodes);
         }
         if (profile.find("additional_scripts") != profile.end()) {
-            profile.at("additional_scripts").get_to(additionalScripts);
+            profile.at("additional_scripts").get_to(_additionalScripts);
         }
     }
     catch (const nlohmann::json::exception& e) {
@@ -658,32 +665,33 @@ std::string Profile::convertToScene() const {
 
     std::string output;
 
-    if (meta.has_value()) {
+    if (_meta.has_value()) {
         output += "asset.meta = {";
-        if (meta->name.has_value()) {
-            output += fmt::format("  Name = {},", *meta->name);
+
+        if (_meta->name.has_value()) {
+            output += fmt::format("  Name = [[{}]],", *_meta->name);
         }
-        if (meta->version.has_value()) {
-            output += fmt::format("  Version = {},", *meta->version);
+        if (_meta->version.has_value()) {
+            output += fmt::format("  Version = [[{}]],", *_meta->version);
         }
-        if (meta->description.has_value()) {
-            output += fmt::format("  Description = {},", *meta->description);
+        if (_meta->description.has_value()) {
+            output += fmt::format("  Description = [[{}]],", *_meta->description);
         }
-        if (meta->author.has_value()) {
-            output += fmt::format("  Author = {},", *meta->author);
+        if (_meta->author.has_value()) {
+            output += fmt::format("  Author = [[{}]],", *_meta->author);
         }
-        if (meta->url.has_value()) {
-            output += fmt::format("  URL = {},", *meta->url);
+        if (_meta->url.has_value()) {
+            output += fmt::format("  URL = [[{}]],", *_meta->url);
         }
-        if (meta->license.has_value()) {
-            output += fmt::format("  License = {},", *meta->license);
+        if (_meta->license.has_value()) {
+            output += fmt::format("  License = [[{}]],", *_meta->license);
         }
 
         output += "}";
     }
 
     // Modules
-    for (const Module& m : modules) {
+    for (const Module& m : _modules) {
         output += fmt::format(
             "if openspace.modules.isLoaded(\"{}\") then {} else {} end\n",
             m.name, *m.loadedInstruction, *m.notLoadedInstruction
@@ -691,32 +699,32 @@ std::string Profile::convertToScene() const {
     }
 
     // Assets
-    for (const std::string& asset : assets) {
+    for (const std::string& asset : _assets) {
         output += fmt::format("asset.require(\"{}\");\n", asset);
     }
 
     output += "asset.onInitialize(function()\n";
     // Keybindings
-    for (const Keybinding& k : keybindings) {
+    for (const Keybinding& k : _keybindings) {
         const std::string key = ghoul::to_string(k.key);
         const std::string name = k.name.empty() ? key : k.name;
         output += fmt::format(
             k.isLocal ?
-            "openspace.bindKeyLocal(\"{}\", {}, [[{}]], [[{}]], [[{}]]);\n" :
-            "openspace.bindKey(\"{}\", {}, [[{}]], [[{}]], [[{}]]);\n",
+            "openspace.bindKeyLocal(\"{}\",\"{}\", [[{}]], [[{}]], [[{}]]);\n" :
+            "openspace.bindKey(\"{}\", [[{}]], [[{}]], [[{}]], [[{}]]);\n",
             key, k.script, k.documentation, name, k.guiPath
         );
     }
 
     // Time
-    switch (time->type) {
+    switch (_time->type) {
         case Time::Type::Absolute:
-            output += fmt::format("openspace.time.setTime(\"{}\")\n", time->value);
+            output += fmt::format("openspace.time.setTime(\"{}\")\n", _time->value);
             break;
         case Time::Type::Relative:
             output += "local now = openspace.time.currentWallTime();\n";
             output += fmt::format(
-                "local prev = openspace.time.advancedTime(now, \"{}\");\n", time->value
+                "local prev = openspace.time.advancedTime(now, \"{}\");\n", _time->value
             );
             output += "openspace.time.setTime(prev);\n";
             break;
@@ -727,7 +735,7 @@ std::string Profile::convertToScene() const {
     // Delta Times
     {
         std::string times;
-        for (const double d : deltaTimes) {
+        for (const double d : _deltaTimes) {
             times += fmt::format("{} ,", d);
         }
         output += fmt::format("openspace.time.setDeltaTimeSteps({{ {} }});\n", times);
@@ -736,14 +744,14 @@ std::string Profile::convertToScene() const {
     // Mark Nodes
     {
         std::string nodes;
-        for (const std::string& n : markNodes) {
+        for (const std::string& n : _markNodes) {
             nodes += fmt::format("[[{}]],", n);
         }
         output += fmt::format("openspace.markInterestingNodes({{ {} }});\n", nodes);
     }
 
     // Properties
-    for (const Property& p : properties) {
+    for (const Property& p : _properties) {
         switch (p.setType) {
             case Property::SetType::SetPropertyValue:
                 output += fmt::format(
@@ -763,7 +771,7 @@ std::string Profile::convertToScene() const {
     }
 
     // Camera
-    if (camera.has_value()) {
+    if (_camera.has_value()) {
         output += std::visit(
             overloaded {
                 [](const CameraNavState& camera) {
@@ -812,11 +820,11 @@ std::string Profile::convertToScene() const {
                     }
                 }
             },
-            *camera
+            *_camera
         );
     }
 
-    for (const std::string& a : additionalScripts) {
+    for (const std::string& a : _additionalScripts) {
         output += fmt::format("{}\n", a);
     }
 
@@ -824,5 +832,107 @@ std::string Profile::convertToScene() const {
 
     return output;
 }
+
+Profile::Version Profile::version() const {
+    return _version;
+}
+
+std::vector<Profile::Module> Profile::modules() const {
+    return _modules;
+}
+
+std::optional<Profile::Meta> Profile::meta() const {
+    return _meta;
+}
+
+std::vector<std::string> Profile::assets() const {
+    return _assets;
+}
+
+std::vector<Profile::Property> Profile::properties() const {
+    return _properties;
+}
+
+std::vector<Profile::Keybinding> Profile::keybindings() const {
+    return _keybindings;
+}
+
+std::optional<Profile::Time> Profile::time() const {
+    return _time;
+}
+
+std::vector<double> Profile::deltaTimes() const {
+    return _deltaTimes;
+}
+
+std::optional<Profile::CameraType> Profile::camera() const {
+    return _camera;
+}
+
+std::vector<std::string> Profile::markNodes() const {
+    return _markNodes;
+}
+
+std::vector<std::string> Profile::additionalScripts() const {
+    return _additionalScripts;
+}
+
+void Profile::setVersion(Version v) {
+    _version = v;
+}
+
+void Profile::setModules(std::vector<Module>& m) {
+    _modules.clear();
+    copy(m.begin(), m.end(), back_inserter(_modules));
+}
+
+void Profile::setMeta(Meta m) {
+    _meta = m;
+}
+
+void Profile::setProperties(std::vector<Property>& p) {
+    _properties.clear();
+    copy(p.begin(), p.end(), back_inserter(_properties));
+}
+
+void Profile::setKeybindings(std::vector<Keybinding>& k) {
+    _keybindings.clear();
+    copy(k.begin(), k.end(), back_inserter(_keybindings));
+}
+
+void Profile::setTime(Time t) {
+    _time = t;
+}
+
+void Profile::setDeltaTimes(std::vector<double> dt) {
+    _deltaTimes = dt;
+}
+
+void Profile::setCamera(CameraType c) {
+    _camera = c;
+}
+
+void Profile::setMarkNodes(std::vector<std::string>& n) {
+    _markNodes.clear();
+    copy(n.begin(), n.end(), back_inserter(_markNodes));
+}
+
+void Profile::setAdditionalScripts(std::vector<std::string>& s) {
+    _additionalScripts.clear();
+    copy(s.begin(), s.end(), back_inserter(_additionalScripts));
+}
+
+void Profile::clearMeta() {
+    _meta = std::nullopt;
+}
+
+void Profile::clearTime() {
+    _time = std::nullopt;
+}
+
+void Profile::clearCamera() {
+    _camera = std::nullopt;
+}
+
 
 }  // namespace openspace

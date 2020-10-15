@@ -225,16 +225,16 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
                 }
                 catch (std::invalid_argument&) {
                     const char* errMsg = "Unable to convert field {} to double value "\
-                        "(invalid_argument exception) at line {}/{} of {}";
-                    LERROR(fmt::format(
+                        "(invalid_argument exception). Ignoring line {}/{} of {}.";
+                    LINFO(fmt::format(
                         errMsg,
                         fieldCount, csvLine + 1, numberOfLines, filename
                     ));
                 }
                 catch (std::out_of_range&) {
                     const char* errMsg = "Unable to convert field {} to double value "\
-                        "(out_of_range exception) at line {}/{} of {}";
-                    LERROR(fmt::format(
+                        "(out_of_range exception). Ignoring line {}/{} of {}.";
+                    LINFO(fmt::format(
                         errMsg,
                         fieldCount, csvLine + 1, numberOfLines, filename
                     ));

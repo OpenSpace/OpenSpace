@@ -1,43 +1,58 @@
-#Version
-1.0
-
-#Module
-Volume	asset.require('scene/solarsystem/missions/messenger/mercurymagnetosphere')	openspace.printWarning("Volume module is not loaded, skipping asset: mercurymagnetosphere")
-
-#Asset
-base	
-scene/solarsystem/missions/messenger/dashboard	
-scene/solarsystem/missions/messenger/messengerSC	
-
-#Time
-absolute	2011 MAY 13 00:05:18
-
-#Camera
-setNavigationState	"Mercury"		"Root"	2.423690E11, 1.979038E11, -2.241483E10	-0.492046E0, 0.666088E0, 0.560551E0		
-
-#MarkNodes
-Mercury
-Messenger
-Sun
-
-#DeltaTimes
-1
-5
-10
-20
-40
-90
-360
-720
-2880
-14400
-28800
-57600
-115200
-230400
-460800
-921600
-1843200
-3686400
-7372800
-14745600
+{
+  "assets": [
+    "base",
+    "scene/solarsystem/missions/messenger/dashboard",
+    "scene/solarsystem/missions/messenger/mercurymagnetosphere",
+    "scene/solarsystem/missions/messenger/messengerSC"
+  ],
+  "camera": {
+    "altitude": 40000000.0,
+    "anchor": "Mercury",
+    "latitude": 80.0,
+    "longitude": 100.0,
+    "type": "goToGeo"
+  },
+  "delta_times": [
+    1.0,
+    5.0,
+    30.0,
+    60.0,
+    300.0,
+    1800.0,
+    3600.0,
+    43200.0,
+    86400.0,
+    604800.0,
+    1209600.0,
+    2592000.0,
+    5184000.0,
+    7776000.0,
+    15552000.0,
+    31536000.0,
+    63072000.0,
+    157680000.0,
+    315360000.0,
+    630720000.0
+  ],
+  "mark_nodes": [
+    "Mercury",
+    "Messenger",
+    "Sun"
+  ],
+  "meta": {
+    "author": "OpenSpace Team",
+    "description": "This scene contains model and trajectory of the NASA MESSENGER spacecraft with craft pointing data from 2011-03 to 2011-06. In addition, a rendering of Mercury’s magnetosphere based on data recorded by MESSENGER can be enabled and viewed around the planet. Along with the mission data, additional maps were added to Mercury showing mineral abundances on the surface and a multi-color mosaic from the MDIS instrument.",
+    "license": "MIT License",
+    "name": "Messenger",
+    "url": "https://www.openspaceproject.com",
+    "version": "1.0"
+  },
+  "time": {
+    "type": "absolute",
+    "value": "2011-05-13T08:55:00"
+  },
+  "version": {
+    "major": 1,
+    "minor": 0
+  }
+}

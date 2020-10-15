@@ -9,6 +9,12 @@ local parentIdentifier = transforms.SaturnBarycenter.Identifier
 local parentSpice = "SATURN BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_gallic" }
 local trailColor = { 0.5, 0.3, 0.3 }
+local trailTags = { 
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor"
+}
 
 local gallicGroup = {
     {
@@ -20,6 +26,7 @@ local gallicGroup = {
         Spice = "ALBIORIX",
         Radii = { 32000, 32000, 32000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Gallic Group"
         },
@@ -36,6 +43,7 @@ local gallicGroup = {
         Spice = "BEBHIONN",
         Radii = { 6000, 6000, 6000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Gallic Group"
         },
@@ -52,6 +60,7 @@ local gallicGroup = {
         Spice = "ERRIAPUS",
         Radii = { 10000, 10000, 10000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Gallic Group"
         },
@@ -68,6 +77,7 @@ local gallicGroup = {
         Spice = "TARVOS",
         Radii = { 15000, 15000, 15000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Gallic Group"
         },

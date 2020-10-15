@@ -2,13 +2,9 @@
 -- loading this scene directly without any other elements added on top of it will
 -- probably not work
 
-local assetHelper = asset.require('util/asset_helper')
-local sceneHelper = asset.require('util/scene_helper')
-local propertyHelper = asset.require('util/property_helper')
+asset.require('./base_blank')
 
 -- Specifying which other assets should be loaded in this scene
-asset.require('spice/base')
-
 asset.require('scene/solarsystem/sun/sun')
 asset.require('scene/solarsystem/sun/glare')
 asset.require('scene/solarsystem/sun/default_layers')
@@ -19,62 +15,24 @@ asset.require('scene/solarsystem/planets/mars/moons/deimos')
 asset.require('scene/solarsystem/dwarf_planets/pluto/system')
 asset.require('scene/solarsystem/dwarf_planets/pluto/default_layers')
 asset.require('scene/solarsystem/dwarf_planets/pluto/charon/default_layers')
+asset.require('scene/solarsystem/missions/voyagerpioneer/voyager1_2__pioneer10_11')
 asset.require('scene/milkyway/milkyway/volume')
 asset.require('scene/milkyway/constellations/constellation_art')
 asset.require('scene/milkyway/constellations/constellation_keybinds')
+asset.require('util/launcher_images')
 
 --- TESTELITEST ---
 asset.require('examples/pointscloud')
 --- TESTELITEST ---
 
+local assetHelper = asset.require('util/asset_helper')
 assetHelper.requireAll(asset, 'scene/milkyway/exoplanets')
-
 assetHelper.requireAll(asset, 'scene/digitaluniverse')
-
--- Load default key bindings applicable to most scenes
-asset.require('util/default_keybindings')
-asset.require('util/default_dashboard')
-asset.require('util/default_joystick')
-
--- Load web gui
-local webGui = asset.require('util/webgui')
 
 asset.require('customization/globebrowsing')
 
--- Keybindings that are specific for this scene
-local Keybindings = {
-    {
-        Key = "h",
-        Name="Toggle Trails",
-        Command = "local list = openspace.getProperty('{planetTrail_solarSystem}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end\n" ..
-        "local moonlist = openspace.getProperty('{moonTrail_solarSystem}.Renderable.Enabled'); for _,v in pairs(moonlist) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end",
-        Documentation = "Toggles the visibility of planet and moon trails",
-        GuiPath = "/Rendering",
-        Local = false
-    },
-    {
-        Key = "l",
-        Name = "Toggle planet labels",
-        Command = "local list = openspace.getProperty('{solarsystem_labels}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end",
-        Documentation = "Turns on visibility for all solar system labels",
-        GuiPath = "/Rendering",
-        Local = false
-    }
-}
-
 asset.onInitialize(function ()
-    webGui.setCefRoute("onscreen")
-
-    sceneHelper.bindKeys(Keybindings)
-    openspace.setDefaultGuiSorting()
-
-    openspace.setPropertyValueSingle("RenderEngine.VerticalLogOffset", 0.100000)
-
     openspace.globebrowsing.loadWMSServersFromFile(
         openspace.absPath("${DATA}/globebrowsing_servers.lua")
     )
-end)
-
-asset.onDeinitialize(function ()
-    sceneHelper.unbindKeys(Keybindings)
 end)
