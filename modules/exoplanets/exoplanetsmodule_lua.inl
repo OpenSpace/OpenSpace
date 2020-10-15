@@ -24,7 +24,6 @@
 
 #include <modules/exoplanets/exoplanetshelper.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/moduleengine.h>
 #include <openspace/query/query.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
@@ -36,13 +35,7 @@
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
-#include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/quaternion.hpp>
-#include <glm/gtx/transform.hpp>
-#include <cfloat>
-#include <cmath>
 #include <fstream>
-#include <iostream>
 #include <sstream>
 
 namespace {
