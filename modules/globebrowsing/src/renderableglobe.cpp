@@ -1050,6 +1050,10 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
     if (_globalRenderer.updatedSinceLastCall) {
         const std::array<LayerGroup*, LayerManager::NumLayerGroups>& layerGroups =
             _layerManager.layerGroups();
+
+        using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+        _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
+        _globalRenderer.program->setIgnoreAttributeLocationError(IgnoreError::Yes);
         for (size_t i = 0; i < layerGroups.size(); ++i) {
             const std::string& nameBase = layergroupid::LAYER_GROUP_IDENTIFIERS[i];
             _globalRenderer.gpuLayerGroups[i].bind(
@@ -1059,6 +1063,8 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
                 static_cast<int>(i)
             );
         }
+        _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::No);
+        _globalRenderer.program->setIgnoreAttributeLocationError(IgnoreError::No);
 
         const float dsf = static_cast<float>(
             _generalProperties.currentLodScaleFactor * _ellipsoid.minimumRadius()
@@ -1074,6 +1080,8 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
     if (_localRenderer.updatedSinceLastCall) {
         const std::array<LayerGroup*, LayerManager::NumLayerGroups>& layerGroups =
             _layerManager.layerGroups();
+        using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+        _localRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
         for (size_t i = 0; i < layerGroups.size(); ++i) {
             const std::string& nameBase = layergroupid::LAYER_GROUP_IDENTIFIERS[i];
             _localRenderer.gpuLayerGroups[i].bind(
@@ -1083,6 +1091,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
                 static_cast<int>(i)
             );
         }
+        _localRenderer.program->setIgnoreUniformLocationError(IgnoreError::No);
 
         const float dsf = static_cast<float>(
             _generalProperties.currentLodScaleFactor * _ellipsoid.minimumRadius()
