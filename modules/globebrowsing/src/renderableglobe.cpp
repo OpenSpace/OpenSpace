@@ -1053,7 +1053,6 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
 
         using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
         _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
-        _globalRenderer.program->setIgnoreAttributeLocationError(IgnoreError::Yes);
         for (size_t i = 0; i < layerGroups.size(); ++i) {
             const std::string& nameBase = layergroupid::LAYER_GROUP_IDENTIFIERS[i];
             _globalRenderer.gpuLayerGroups[i].bind(
@@ -1064,8 +1063,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
             );
         }
         _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::No);
-        _globalRenderer.program->setIgnoreAttributeLocationError(IgnoreError::No);
-
+        
         const float dsf = static_cast<float>(
             _generalProperties.currentLodScaleFactor * _ellipsoid.minimumRadius()
         );
