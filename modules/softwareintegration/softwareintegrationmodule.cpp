@@ -313,14 +313,17 @@ namespace openspace {
         }
         case SoftwareConnection::MessageType::RemoveSceneGraphNode: {
             std::string identifier(message.begin(), message.end());
+
+            SceneGraphNode* sgn = global::renderEngine.scene()->sceneGraphNode(identifier);
             
-            openspace::global::scriptEngine.queueScript(
-                "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" 
-                "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth')"
-                "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
-                "openspace.removeSceneGraphNode('" + identifier + "');",
-                scripting::ScriptEngine::RemoteScripting::Yes
-            );
+            if (global::navigationHandler.orbitalNavigator().anchorNode() == sgn) {
+                openspace::global::scriptEngine.queueScript(
+                    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Sun')"
+                    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
+                    "openspace.removeSceneGraphNode('" + identifier + "');",
+                    scripting::ScriptEngine::RemoteScripting::Yes
+                );
+            }
             LINFO(fmt::format("Scengraph {} removed.", identifier));
             break;
         }
