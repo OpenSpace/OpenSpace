@@ -29,7 +29,6 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/distanceconstants.h>
-#include <openspace/util/spicemanager.h>
 #include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -146,40 +145,7 @@ void createExoplanetSystem(std::string_view starName) {
         p.positionZ * distanceconstants::Parsec
     );
 
-    const glm::dvec3 sunPosition = glm::dvec3(0.0, 0.0, 0.0);
-    const glm::dvec3 starToSunVec = glm::normalize(sunPosition - starPosition);
-    const glm::dvec3 galacticNorth = glm::dvec3(0.0, 0.0, 1.0);
-
-    const glm::dmat3 galaxticToCelestialMatrix =
-        SpiceManager::ref().positionTransformMatrix("GALACTIC", "J2000", 0.0);
-
-    const glm::dvec3 celestialNorth = glm::normalize(
-        galaxticToCelestialMatrix * galacticNorth
-    );
-
-    // Earth's north vector projected onto the skyplane, the plane perpendicular to the
-    // viewing vector (starToSunVec)
-    const float celestialAngle = static_cast<float>(glm::dot(
-        celestialNorth,
-        starToSunVec
-    ));
-    glm::dvec3 northProjected = glm::normalize(
-        celestialNorth - (celestialAngle / glm::length(starToSunVec)) * starToSunVec
-    );
-
-    const glm::dvec3 beta = glm::normalize(glm::cross(starToSunVec, northProjected));
-
-    const glm::dmat3 exoplanetSystemRotation = glm::dmat3(
-        northProjected.x,
-        northProjected.y,
-        northProjected.z,
-        beta.x,
-        beta.y,
-        beta.z,
-        starToSunVec.x,
-        starToSunVec.y,
-        starToSunVec.z
-    );
+    const glm::dmat3 exoplanetSystemRotation = computeSystemRotation(starPosition);
 
     // Star renderable globe, if we have a radius and bv color index
     std::string starGlobeRenderableString;

@@ -82,7 +82,7 @@ glm::dmat4 computeOrbitPlaneRotationMatrix(float i, float bigom, float omega);
 
 // Rotate the original coordinate system (where x is pointing to First Point of Aries)
 // so that x is pointing from star to the sun.
-glm::dmat3 exoplanetSystemRotation(glm::dvec3 start, glm::dvec3 end);
+glm::dmat3 computeSystemRotation(glm::dvec3 starPosition);
 
 // Create an identifier without whitespaces
 std::string createIdentifier(std::string name);
