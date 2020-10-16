@@ -1208,10 +1208,6 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         TracyGpuZone("Raycaster Tasks")
         GLDebugGroup group("Raycaster Tasks");
         performRaycasterTasks(tasks.raycasterTasks);
-
-        if (HasGLDebugInfo) {
-            glPopDebugGroup();
-        }
     }
 
     if (!tasks.deferredcasterTasks.empty()) {
