@@ -87,6 +87,8 @@ glm::dmat3 computeSystemRotation(glm::dvec3 starPosition);
 // Create an identifier without whitespaces
 std::string createIdentifier(std::string name);
 
+void sanitizeNameString(std::string& s);
+
 } // namespace openspace::exoplanets
 
 #endif // __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSMODULE___H__

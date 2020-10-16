@@ -59,7 +59,11 @@ void createExoplanetSystem(std::string_view starName) {
     const std::string starNameSpeck = std::string(speckStarName(starName));
 
     const std::string starIdentifier = createIdentifier(starNameSpeck);
-    const std::string guiPath = ExoplanetsGuiPath + starNameSpeck;
+
+    std::string sanitizedStarName = starNameSpeck;
+    sanitizeNameString(sanitizedStarName);
+
+    const std::string guiPath = ExoplanetsGuiPath + sanitizedStarName;
 
     SceneGraphNode* existingStarNode = sceneGraphNode(starIdentifier);
     if (existingStarNode) {
@@ -110,6 +114,7 @@ void createExoplanetSystem(std::string_view starName) {
             data.seekg(location);
             data.read(reinterpret_cast<char*>(&p), sizeof(Exoplanet));
 
+            sanitizeNameString(name);
             planetNames.push_back(name);
             planetSystem.push_back(p);
             found = true;
@@ -200,7 +205,7 @@ void createExoplanetSystem(std::string_view starName) {
         "},"
         "Tag = {'exoplanet_system'},"
         "GUI = {"
-            "Name = '" + starNameSpeck + " (Star)',"
+            "Name = '" + sanitizedStarName + " (Star)',"
             "Path = '" + guiPath + "'"
         "}"
     "}";
