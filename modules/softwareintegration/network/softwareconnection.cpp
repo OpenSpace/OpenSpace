@@ -59,7 +59,7 @@ namespace openspace {
             if (!_socket->put<char>(message.data(), message.size())) {
                 return false;
             }
-            LERROR(fmt::format("Message sent: {}", message));
+            LINFO(fmt::format("Message sent: {}", message));
         }
         else
         {

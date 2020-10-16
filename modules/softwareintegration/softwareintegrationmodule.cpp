@@ -332,7 +332,7 @@ namespace openspace {
         }
         case SoftwareConnection::MessageType::Color: {
             std::string msg(message.begin(), message.end());
-            LERROR(fmt::format("Message recieved: {}", msg));
+            LINFO(fmt::format("Message recieved: {}", msg));
             std::string identifier = readIdentifier(message);
             glm::vec3 color = readColor(message);
 
@@ -350,7 +350,7 @@ namespace openspace {
         }
         case SoftwareConnection::MessageType::Opacity: {
             std::string msg(message.begin(), message.end());
-            LERROR(fmt::format("Message recieved: {}", msg));
+            LINFO(fmt::format("Message recieved: {}", msg));
             std::string identifier = readIdentifier(message);
             float opacity = readFloatValue(message);
 
@@ -368,7 +368,7 @@ namespace openspace {
         }
         case SoftwareConnection::MessageType::Size: {
             std::string msg(message.begin(), message.end());
-            LERROR(fmt::format("Message recieved: {}", msg));
+            LINFO(fmt::format("Message recieved: {}", msg));
             std::string identifier = readIdentifier(message);
             float size = readFloatValue(message);
 
@@ -386,7 +386,7 @@ namespace openspace {
         }
         case SoftwareConnection::MessageType::Visibility: {
             std::string msg(message.begin(), message.end());
-            LERROR(fmt::format("Message recieved: {}", msg));
+            LINFO(fmt::format("Message recieved: {}", msg));
             std::string identifier = readIdentifier(message);
             std::string visibility;
             visibility.push_back(message[messageOffset]);
