@@ -56,12 +56,16 @@ Fragment getFragment() {
     // Moving the origin to the center
     vec2 st = (vs_st - vec2(0.5)) * 2.0;
 
+    float offsetLower = textureOffset.x;
+    float offsetUpper = textureOffset.y;
+    float offsetIntervalSize = offsetLower + offsetUpper;
+
     float AUpper = semiMajorAxis;
     float BUpper = semiMinorAxis(AUpper, eccentricity);
     float CUpper = sqrt(AUpper*AUpper - BUpper*BUpper);
     float outerApoapsisDistance = AUpper * (1 + eccentricity);
 
-    float ALower = AUpper - AstronomicalUnit * (textureOffset.x + textureOffset.y);
+    float ALower = AUpper - AstronomicalUnit * offsetIntervalSize;
     float BLower = semiMinorAxis(ALower, eccentricity);
     float CLower = sqrt(ALower*ALower - BLower*BLower);
     float innerApoapsisDistance = ALower * (1 + eccentricity);
@@ -91,18 +95,28 @@ Fragment getFragment() {
 
     // Find outer ellipse: where along the direction does the equation == 1?
     float denominator = pow(BU_n * dir.x, 2.0) + pow(AU_n * dir.y, 2.0);
-    float first = -(pow(BU_n, 2.0) * dir.x * CU_n) / denominator;
-    float second = pow((pow(BU_n, 2.0) * dir.x * CU_n)  /  denominator, 2.0);
+    float first = -(BU_n * BU_n * dir.x * CU_n) / denominator;
+    float second = pow((BU_n * BU_n * dir.x * CU_n)  /  denominator, 2.0);
     float third = (pow(BU_n * CU_n, 2.0) - pow(AU_n * BU_n, 2.0)) / denominator;
 
     float scale = first + sqrt(second - third);
 
-    vec2 max = dir * scale;
-    vec2 min = max * (innerApoapsisDistance / outerApoapsisDistance);
+    vec2 outerPoint = dir * scale;
+    vec2 innerPoint = outerPoint * (innerApoapsisDistance / outerApoapsisDistance);
 
-    float distance1 = distance(max, min);
-    float distance2 = distance(max, st);
-    float textureCoord = distance2 / distance1;
+    float discWidth = distance(outerPoint, innerPoint);
+    float distanceFromOuterEdge = distance(outerPoint, st);
+    float textureCoord = distanceFromOuterEdge / discWidth;
+
+    // Scale texture coordinate to handle asymmetric offset intervals
+    float textureMid = offsetUpper / offsetIntervalSize;
+
+    if(textureCoord > textureMid) {
+        textureCoord = 0.5 + 0.5 * (textureCoord - textureMid) / (1.0 - textureMid);
+    }
+    else {
+        textureCoord = 0.5 * textureCoord / textureMid;
+    }
 
     vec4 diffuse = texture(discTexture, textureCoord);
     diffuse.a *= opacity;
