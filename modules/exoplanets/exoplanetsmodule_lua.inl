@@ -432,9 +432,21 @@ int removeExoplanetSystem(lua_State* L) {
     return 0;
 }
 
-std::vector<std::string> readHostStarNames(std::ifstream& lookupTableFile) {
+std::vector<std::string> hostStarsWithSufficientData() {
     std::vector<std::string> names;
     std::string line;
+
+    std::ifstream lookupTableFile(absPath(LookUpTablePath));
+    if (!lookupTableFile.good()) {
+        LERROR(fmt::format("Failed to open lookup table file '{}'", LookUpTablePath));
+        return {};
+    }
+
+    std::ifstream data(absPath(ExoplanetsDataPath), std::ios::in | std::ios::binary);
+    if (!data.good()) {
+        LERROR(fmt::format("Failed to open data file '{}'", ExoplanetsDataPath));
+        return {};
+    }
 
     // Read number of lines
     int nExoplanets = 0;
@@ -445,13 +457,26 @@ std::vector<std::string> readHostStarNames(std::ifstream& lookupTableFile) {
     lookupTableFile.seekg(0);
     names.reserve(nExoplanets);
 
+    Exoplanet p;
     while (getline(lookupTableFile, line)) {
         std::stringstream ss(line);
         std::string name;
         getline(ss, name, ',');
         // Remove the last two characters, that specify the planet
         name = name.substr(0, name.size() - 2);
-        names.push_back(name);
+
+        // Don't want to list systems where there is not enough data to visualize.
+        // So, test if there is before adding the name to the list.
+        std::string location_s;
+        getline(ss, location_s);
+        long location = std::stol(location_s.c_str());
+
+        data.seekg(location);
+        data.read(reinterpret_cast<char*>(&p), sizeof(Exoplanet));
+
+        if (hasSufficientData(p)) {
+            names.push_back(name);
+        }
     }
 
     // For easier read, sort by names and remove duplicates
@@ -464,14 +489,7 @@ std::vector<std::string> readHostStarNames(std::ifstream& lookupTableFile) {
 int getListOfExoplanets(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::getListOfExoplanets");
 
-    std::ifstream file(absPath(LookUpTablePath));
-    if (!file.good()) {
-        return ghoul::lua::luaError(
-            L, fmt::format("Failed to open file '{}'", LookUpTablePath
-        ));
-    }
-
-    std::vector<std::string> names = readHostStarNames(file);
+    std::vector<std::string> names = hostStarsWithSufficientData();
 
     lua_newtable(L);
     int number = 1;
@@ -487,14 +505,7 @@ int getListOfExoplanets(lua_State* L) {
 int listAvailableExoplanetSystems(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::listAvailableExoplanetSystems");
 
-    std::ifstream file(absPath(LookUpTablePath));
-    if (!file.good()) {
-        return ghoul::lua::luaError(
-            L, fmt::format("Failed to open file '{}'", LookUpTablePath
-        ));
-    }
-
-    std::vector<std::string> names = readHostStarNames(file);
+    std::vector<std::string> names = hostStarsWithSufficientData();
 
     std::string output;
     for (auto it = names.begin(); it != names.end(); ++it) {
