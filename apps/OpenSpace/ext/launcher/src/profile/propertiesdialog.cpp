@@ -35,15 +35,17 @@
 #include <QVBoxLayout>
 #include <iostream>
 
+using namespace openspace;
+
 namespace {
-    const openspace::Profile::Property kBlank {
-        openspace::Profile::Property::SetType::SetPropertyValue,
+    const Profile::Property kBlank {
+        Profile::Property::SetType::SetPropertyValueSingle,
         "",
         ""
     };
 } // namespace
 
-PropertiesDialog::PropertiesDialog(openspace::Profile& profile, QWidget *parent)
+PropertiesDialog::PropertiesDialog(Profile& profile, QWidget *parent)
     : QDialog(parent)
     , _profile(profile)
     , _data(_profile.properties())
@@ -93,7 +95,7 @@ PropertiesDialog::PropertiesDialog(openspace::Profile& profile, QWidget *parent)
         layout->addWidget(_commandLabel);
 
         _commandCombo = new QComboBox;
-        _commandCombo->addItems({ "SetPropertyValue", "SetPropertyValueSingle" });
+        _commandCombo->addItems({ "SetPropertyValueSingle", "SetPropertyValue" });
         layout->addWidget(_commandCombo);
 
         _propertyLabel = new QLabel("Property");
@@ -154,12 +156,12 @@ PropertiesDialog::PropertiesDialog(openspace::Profile& profile, QWidget *parent)
     transitionFromEditMode();
 }
 
-QString PropertiesDialog::createOneLineSummary(openspace::Profile::Property p) {
+QString PropertiesDialog::createOneLineSummary(Profile::Property p) {
     QString summary = QString::fromStdString(p.name);
     summary += " = ";
     summary += QString::fromStdString(p.value);
     summary += " (SetPropertyValue";
-    if (p.setType == openspace::Profile::Property::SetType::SetPropertyValueSingle) {
+    if (p.setType == Profile::Property::SetType::SetPropertyValueSingle) {
         summary += "Single";
     }
     summary += ")";
@@ -171,8 +173,8 @@ void PropertiesDialog::listItemSelected() {
     int index = _list->row(item);
 
     if (_data.size() > 0) {
-        openspace::Profile::Property& p = _data[index];
-        if (p.setType == openspace::Profile::Property::SetType::SetPropertyValue) {
+        Profile::Property& p = _data[index];
+        if (p.setType == Profile::Property::SetType::SetPropertyValueSingle) {
             _commandCombo->setCurrentIndex(0);
         }
         else {
@@ -199,7 +201,7 @@ void PropertiesDialog::listItemAdded(void) {
     int currentListSize = _list->count();
 
      if ((currentListSize == 1) && (isLineEmpty(0))) {
-         //Special case where list is "empty" but really has one line that is blank.
+         // Special case where list is "empty" but really has one line that is blank.
          // This is done because QListWidget does not seem to like having its sole
          // remaining item being removed.
          _data.at(0) = kBlank;
@@ -232,12 +234,10 @@ void PropertiesDialog::listItemSave(void) {
 
     if ( _data.size() > 0) {
         if (_commandCombo->currentIndex() == 0) {
-            _data[index].setType
-                = openspace::Profile::Property::SetType::SetPropertyValue;
+            _data[index].setType = Profile::Property::SetType::SetPropertyValueSingle;
         }
         else {
-            _data[index].setType
-                = openspace::Profile::Property::SetType::SetPropertyValueSingle;
+            _data[index].setType = Profile::Property::SetType::SetPropertyValue;
         }
         _data[index].name = _propertyEdit->text().toStdString();
         _data[index].value = _valueEdit->text().toStdString();
