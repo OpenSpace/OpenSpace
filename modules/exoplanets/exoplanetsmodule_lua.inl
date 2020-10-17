@@ -24,12 +24,10 @@
 
 #include <modules/exoplanets/exoplanetshelper.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/moduleengine.h>
 #include <openspace/query/query.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/distanceconstants.h>
-#include <openspace/util/spicemanager.h>
 #include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -37,13 +35,7 @@
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
-#include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/quaternion.hpp>
-#include <glm/gtx/transform.hpp>
-#include <cfloat>
-#include <cmath>
 #include <fstream>
-#include <iostream>
 #include <sstream>
 
 namespace {
@@ -67,7 +59,11 @@ void createExoplanetSystem(std::string_view starName) {
     const std::string starNameSpeck = std::string(speckStarName(starName));
 
     const std::string starIdentifier = createIdentifier(starNameSpeck);
-    const std::string guiPath = ExoplanetsGuiPath + starNameSpeck;
+
+    std::string sanitizedStarName = starNameSpeck;
+    sanitizeNameString(sanitizedStarName);
+
+    const std::string guiPath = ExoplanetsGuiPath + sanitizedStarName;
 
     SceneGraphNode* existingStarNode = sceneGraphNode(starIdentifier);
     if (existingStarNode) {
@@ -118,9 +114,18 @@ void createExoplanetSystem(std::string_view starName) {
             data.seekg(location);
             data.read(reinterpret_cast<char*>(&p), sizeof(Exoplanet));
 
+            sanitizeNameString(name);
             planetNames.push_back(name);
             planetSystem.push_back(p);
             found = true;
+
+            if (!hasSufficientData(p)) {
+                LERROR(fmt::format(
+                    "Insufficient data available for visualizion of exoplanet system: '{}'",
+                    starName
+                ));
+                return;
+            }
         }
     }
 
@@ -132,56 +137,13 @@ void createExoplanetSystem(std::string_view starName) {
         return;
     }
 
-    bool notEnoughData = std::isnan(p.positionX) || std::isnan(p.a) || std::isnan(p.per);
-
-    if (notEnoughData) {
-        LERROR(fmt::format(
-            "Insufficient data available for representing the exoplanet system: '{}'",
-            starName
-        ));
-        return;
-    }
-
     const glm::dvec3 starPosition = glm::dvec3(
         p.positionX * distanceconstants::Parsec,
         p.positionY * distanceconstants::Parsec,
         p.positionZ * distanceconstants::Parsec
     );
 
-    const glm::dvec3 sunPosition = glm::dvec3(0.0, 0.0, 0.0);
-    const glm::dvec3 starToSunVec = glm::normalize(sunPosition - starPosition);
-    const glm::dvec3 galacticNorth = glm::dvec3(0.0, 0.0, 1.0);
-
-    const glm::dmat3 galaxticToCelestialMatrix =
-        SpiceManager::ref().positionTransformMatrix("GALACTIC", "J2000", 0.0);
-
-    const glm::dvec3 celestialNorth = glm::normalize(
-        galaxticToCelestialMatrix * galacticNorth
-    );
-
-    // Earth's north vector projected onto the skyplane, the plane perpendicular to the
-    // viewing vector (starToSunVec)
-    const float celestialAngle = static_cast<float>(glm::dot(
-        celestialNorth,
-        starToSunVec
-    ));
-    glm::dvec3 northProjected = glm::normalize(
-        celestialNorth - (celestialAngle / glm::length(starToSunVec)) * starToSunVec
-    );
-
-    const glm::dvec3 beta = glm::normalize(glm::cross(starToSunVec, northProjected));
-
-    const glm::dmat3 exoplanetSystemRotation = glm::dmat3(
-        northProjected.x,
-        northProjected.y,
-        northProjected.z,
-        beta.x,
-        beta.y,
-        beta.z,
-        starToSunVec.x,
-        starToSunVec.y,
-        starToSunVec.z
-    );
+    const glm::dmat3 exoplanetSystemRotation = computeSystemRotation(starPosition);
 
     // Star renderable globe, if we have a radius and bv color index
     std::string starGlobeRenderableString;
@@ -243,7 +205,7 @@ void createExoplanetSystem(std::string_view starName) {
         "},"
         "Tag = {'exoplanet_system'},"
         "GUI = {"
-            "Name = '" + starNameSpeck + " (Star)',"
+            "Name = '" + sanitizedStarName + " (Star)',"
             "Path = '" + guiPath + "'"
         "}"
     "}";
@@ -261,15 +223,18 @@ void createExoplanetSystem(std::string_view starName) {
         if (std::isnan(planet.ecc)) {
             planet.ecc = 0.f;
         }
-        if (std::isnan(planet.i)) {
-            planet.i = 90.f;
-        }
-        if (std::isnan(planet.bigOmega)) {
-            planet.bigOmega = 180.f;
-        }
-        if (std::isnan(planet.omega)) {
-            planet.omega = 90.f;
-        }
+
+        // KeplerTranslation requires angles in range [0, 360]
+        auto validAngle = [](float angle, float defaultValue) {
+            if (std::isnan(angle)) { return defaultValue; }
+            if (angle < 0.f) { return angle + 360.f; }
+            if (angle > 360.f) { return angle - 360.f; }
+        };
+
+        planet.i = validAngle(planet.i, 90.f);
+        planet.bigOmega = validAngle(planet.bigOmega, 180.f);
+        planet.omega = validAngle(planet.omega, 90.f);
+
         Time epoch;
         std::string sEpoch;
         if (!std::isnan(planet.tt)) {
@@ -472,9 +437,21 @@ int removeExoplanetSystem(lua_State* L) {
     return 0;
 }
 
-std::vector<std::string> readHostStarNames(std::ifstream& lookupTableFile) {
+std::vector<std::string> hostStarsWithSufficientData() {
     std::vector<std::string> names;
     std::string line;
+
+    std::ifstream lookupTableFile(absPath(LookUpTablePath));
+    if (!lookupTableFile.good()) {
+        LERROR(fmt::format("Failed to open lookup table file '{}'", LookUpTablePath));
+        return {};
+    }
+
+    std::ifstream data(absPath(ExoplanetsDataPath), std::ios::in | std::ios::binary);
+    if (!data.good()) {
+        LERROR(fmt::format("Failed to open data file '{}'", ExoplanetsDataPath));
+        return {};
+    }
 
     // Read number of lines
     int nExoplanets = 0;
@@ -485,13 +462,26 @@ std::vector<std::string> readHostStarNames(std::ifstream& lookupTableFile) {
     lookupTableFile.seekg(0);
     names.reserve(nExoplanets);
 
+    Exoplanet p;
     while (getline(lookupTableFile, line)) {
         std::stringstream ss(line);
         std::string name;
         getline(ss, name, ',');
         // Remove the last two characters, that specify the planet
         name = name.substr(0, name.size() - 2);
-        names.push_back(name);
+
+        // Don't want to list systems where there is not enough data to visualize.
+        // So, test if there is before adding the name to the list.
+        std::string location_s;
+        getline(ss, location_s);
+        long location = std::stol(location_s.c_str());
+
+        data.seekg(location);
+        data.read(reinterpret_cast<char*>(&p), sizeof(Exoplanet));
+
+        if (hasSufficientData(p)) {
+            names.push_back(name);
+        }
     }
 
     // For easier read, sort by names and remove duplicates
@@ -504,14 +494,7 @@ std::vector<std::string> readHostStarNames(std::ifstream& lookupTableFile) {
 int getListOfExoplanets(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::getListOfExoplanets");
 
-    std::ifstream file(absPath(LookUpTablePath));
-    if (!file.good()) {
-        return ghoul::lua::luaError(
-            L, fmt::format("Failed to open file '{}'", LookUpTablePath
-        ));
-    }
-
-    std::vector<std::string> names = readHostStarNames(file);
+    std::vector<std::string> names = hostStarsWithSufficientData();
 
     lua_newtable(L);
     int number = 1;
@@ -527,14 +510,7 @@ int getListOfExoplanets(lua_State* L) {
 int listAvailableExoplanetSystems(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::listAvailableExoplanetSystems");
 
-    std::ifstream file(absPath(LookUpTablePath));
-    if (!file.good()) {
-        return ghoul::lua::luaError(
-            L, fmt::format("Failed to open file '{}'", LookUpTablePath
-        ));
-    }
-
-    std::vector<std::string> names = readHostStarNames(file);
+    std::vector<std::string> names = hostStarsWithSufficientData();
 
     std::string output;
     for (auto it = names.begin(); it != names.end(); ++it) {

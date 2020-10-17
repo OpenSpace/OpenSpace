@@ -531,6 +531,54 @@ int removeSceneGraphNode(lua_State* L) {
 
     std::string name = ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::Yes);
 
+    SceneGraphNode* foundNode = sceneGraphNode(name);
+    if (!foundNode) {
+        LERRORC(
+            "removeSceneGraphNode",
+            fmt::format("Did not find a match for identifier: {} ", name)
+        );
+        return 0;
+    }
+
+    SceneGraphNode* parent = foundNode->parent();
+    if (!parent) {
+        LERRORC(
+            "removeSceneGraphNode",
+            fmt::format("Cannot remove root node")
+        );
+        return 0;
+    }
+
+    // Remove the node and all its children
+    std::function<void(SceneGraphNode*)> removeNode =
+        [&removeNode](SceneGraphNode* localNode) {
+        std::vector<SceneGraphNode*> children = localNode->children();
+
+        ghoul::mm_unique_ptr<SceneGraphNode> n = localNode->parent()->detachChild(
+            *localNode
+        );
+        ghoul_assert(n.get() == localNode, "Wrong node returned from detaching");
+
+        for (SceneGraphNode* c : children) {
+            removeNode(c);
+        }
+
+        localNode->deinitializeGL();
+        localNode->deinitialize();
+        n = nullptr;
+    };
+
+    removeNode(foundNode);
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
+int removeSceneGraphNodesFromRegex(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeSceneGraphNodesFromRegex");
+
+    std::string name = ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::Yes);
+
     const std::vector<SceneGraphNode*>& nodes =
         global::renderEngine.scene()->allSceneGraphNodes();
 
@@ -553,8 +601,8 @@ int removeSceneGraphNode(lua_State* L) {
             SceneGraphNode* parent = node->parent();
             if (!parent) {
                 LERRORC(
-                    "removeSceneGraphNode",
-                    fmt::format("{}: Cannot remove root node")
+                    "removeSceneGraphNodesFromRegex",
+                    fmt::format("Cannot remove root node")
                 );
             }
             else {
@@ -565,8 +613,8 @@ int removeSceneGraphNode(lua_State* L) {
 
     if (!foundMatch) {
         LERRORC(
-            "removeSceneGraphNode",
-            "Did not find a match for identifier: " + name
+            "removeSceneGraphNodesFromRegex",
+            fmt::format("Did not find a match for identifier: {}", name)
         );
         return 0;
     }

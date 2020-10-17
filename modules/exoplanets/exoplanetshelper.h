@@ -72,6 +72,9 @@ std::string_view speckStarName(std::string_view name);
 // Convert speck-file specific names to the corresponding name in the csv data file
 std::string_view csvStarName(std::string_view name);
 
+// Check if the exoplanet p has sufficient data for visualization
+bool hasSufficientData(const Exoplanet& p);
+
 // Compute star color in RGB from b-v color index
 std::string starColor(float bv);
 
@@ -79,10 +82,12 @@ glm::dmat4 computeOrbitPlaneRotationMatrix(float i, float bigom, float omega);
 
 // Rotate the original coordinate system (where x is pointing to First Point of Aries)
 // so that x is pointing from star to the sun.
-glm::dmat3 exoplanetSystemRotation(glm::dvec3 start, glm::dvec3 end);
+glm::dmat3 computeSystemRotation(glm::dvec3 starPosition);
 
 // Create an identifier without whitespaces
 std::string createIdentifier(std::string name);
+
+void sanitizeNameString(std::string& s);
 
 } // namespace openspace::exoplanets
 

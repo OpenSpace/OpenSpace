@@ -24,6 +24,7 @@
 
 #include <modules/exoplanets/exoplanetshelper.h>
 
+#include <openspace/util/spicemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
@@ -81,6 +82,17 @@ std::string_view csvStarName(std::string_view name) {
     return name;
 }
 
+bool hasSufficientData(const Exoplanet& p) {
+    bool invalidPos = std::isnan(p.positionX)
+        || std::isnan(p.positionY)
+        || std::isnan(p.positionZ);
+
+    bool hasSemiMajorAxis = !std::isnan(p.a);
+    bool hasOrbitalPeriod = !std::isnan(p.per);
+
+    return !invalidPos && hasSemiMajorAxis && hasOrbitalPeriod;
+}
+
 std::string starColor(float bv) {
     std::ifstream colorMap(absPath(BvColormapPath), std::ios::in);
 
@@ -126,49 +138,54 @@ glm::dmat4 computeOrbitPlaneRotationMatrix(float i, float bigom, float omega) {
     return orbitPlaneRotation;
 }
 
-// Rotate the original coordinate system (where x is pointing to First Point of Aries)
-// so that x is pointing from star to the sun.
-// Modified from "http://www.opengl-tutorial.org/intermediate-tutorials/
-// tutorial-17-quaternions/ #how-do-i-find-the-rotation-between-2-vectors"
-glm::dmat3 exoplanetSystemRotation(glm::dvec3 start, glm::dvec3 end) {
-    glm::quat rotationQuat;
-    glm::dvec3 rotationAxis;
-    const float cosTheta = static_cast<float>(glm::dot(start, end));
-    constexpr float Epsilon = 1E-3f;
+glm::dmat3 computeSystemRotation(glm::dvec3 starPosition) {
+    const glm::dvec3 sunPosition = glm::dvec3(0.0, 0.0, 0.0);
+    const glm::dvec3 starToSunVec = glm::normalize(sunPosition - starPosition);
+    const glm::dvec3 galacticNorth = glm::dvec3(0.0, 0.0, 1.0);
 
-    if (cosTheta < -1.f + Epsilon) {
-        // special case when vectors in opposite directions:
-        // there is no "ideal" rotation axis
-        // So guess one; any will do as long as it's perpendicular to start vector
-        rotationAxis = glm::cross(glm::dvec3(0.0, 0.0, 1.0), start);
-        if (glm::length2(rotationAxis) < 0.01f) {
-            // bad luck, they were parallel, try again!
-            rotationAxis = glm::cross(glm::dvec3(1.0, 0.0, 0.0), start);
-        }
+    const glm::dmat3 galacticToCelestialMatrix =
+        SpiceManager::ref().positionTransformMatrix("GALACTIC", "J2000", 0.0);
 
-        rotationAxis = glm::normalize(rotationAxis);
-        rotationQuat = glm::quat(glm::radians(180.f), rotationAxis);
-        return glm::dmat3(glm::toMat4(rotationQuat));
-    }
-
-    rotationAxis = glm::cross(start, end);
-
-    const float s = sqrt((1.f + cosTheta) * 2.f);
-    const float invs = 1.f / s;
-
-    rotationQuat = glm::quat(
-        s * 0.5f,
-        static_cast<float>(rotationAxis.x * invs),
-        static_cast<float>(rotationAxis.y * invs),
-        static_cast<float>(rotationAxis.z * invs)
+    const glm::dvec3 celestialNorth = glm::normalize(
+        galacticToCelestialMatrix * galacticNorth
     );
 
-    return glm::dmat3(glm::toMat4(rotationQuat));
+    // Earth's north vector projected onto the skyplane, the plane perpendicular to the
+    // viewing vector (starToSunVec)
+    const float celestialAngle = static_cast<float>(glm::dot(
+        celestialNorth,
+        starToSunVec
+    ));
+    glm::dvec3 northProjected = glm::normalize(
+        celestialNorth - (celestialAngle / glm::length(starToSunVec)) * starToSunVec
+    );
+
+    const glm::dvec3 beta = glm::normalize(glm::cross(starToSunVec, northProjected));
+
+    return glm::dmat3(
+        northProjected.x,
+        northProjected.y,
+        northProjected.z,
+        beta.x,
+        beta.y,
+        beta.z,
+        starToSunVec.x,
+        starToSunVec.y,
+        starToSunVec.z
+    );
 }
 
 std::string createIdentifier(std::string name) {
     std::replace(name.begin(), name.end(), ' ', '_');
+    sanitizeNameString(name);
     return name;
+}
+
+void sanitizeNameString(std::string& s) {
+    // We want to avoid quotes and apostrophes in names, since they cause problems
+    // when a string is translated to a script call
+    s.erase(remove(s.begin(), s.end(), '\"'), s.end());
+    s.erase(remove(s.begin(), s.end(), '\''), s.end());
 }
 
 } // namespace openspace::exoplanets
