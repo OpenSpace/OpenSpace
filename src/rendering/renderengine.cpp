@@ -1409,9 +1409,9 @@ void RenderEngine::renderScreenLog() {
 
     _log->removeExpiredEntries();
 
-    constexpr const int MaxNumberMessages = 10;
-    constexpr const int CategoryLength = 30;
-    constexpr const int MessageLength = 140;
+    constexpr const int MaxNumberMessages = 20;
+    constexpr const int CategoryLength = 60;
+    constexpr const int MessageLength = 280;
     constexpr const std::chrono::seconds FadeTime(5);
 
     const std::vector<ScreenLog::LogEntry>& entries = _log->entries();
