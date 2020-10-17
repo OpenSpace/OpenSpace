@@ -186,6 +186,12 @@ namespace {
         "astronomical objects."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo OptionColorRangeInfo = {
+        "OptionColorRange",
+        "Option Color Range",
+        "This value changes the range of values to be mapped with the current color map."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo SizeOptionInfo = {
         "SizeOption",
         "Size Option Variable",
@@ -435,6 +441,8 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _drawLabels(DrawLabelInfo, false)
     , _pixelSizeControl(PixelSizeControlInfo, false)
     , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _optionColorRangeData(OptionColorRangeInfo, glm::vec2(0.f))
+
     , _datavarSizeOption(
         SizeOptionInfo,
         properties::OptionProperty::DisplayType::Dropdown
@@ -548,6 +556,8 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         }
         _colorOption.onChange([&]() {
             _dataIsDirty = true;
+            const glm::vec2 colorRange = _colorRangeData[_colorOption.value()];
+            _optionColorRangeData = colorRange;
             _colorOptionString = _optionConversionMap[_colorOption.value()];
         });
         addProperty(_colorOption);
@@ -561,7 +571,14 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
                     rangeDataDict.value<glm::vec2>(std::to_string(i + 1))
                 );
             }
+            _optionColorRangeData = _colorRangeData[_colorRangeData.size() - 1];
         }
+        _optionColorRangeData.onChange([&]() {
+            const glm::vec2 colorRange = _optionColorRangeData;
+            _colorRangeData[_colorOption.value()] = colorRange;
+            _dataIsDirty = true;
+        });
+        addProperty(_optionColorRangeData);
 
         if (dictionary.hasKey(ExactColorMapInfo.identifier)) {
             _isColorMapExact = dictionary.value<bool>(ExactColorMapInfo.identifier);

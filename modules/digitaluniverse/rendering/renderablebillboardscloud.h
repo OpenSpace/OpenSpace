@@ -123,6 +123,7 @@ private:
     properties::BoolProperty _drawLabels;
     properties::BoolProperty _pixelSizeControl;
     properties::OptionProperty _colorOption;
+    properties::Vec2Property _optionColorRangeData;
     properties::OptionProperty _datavarSizeOption;
     properties::Vec2Property _fadeInDistance;
     properties::BoolProperty _disableFadeInDistance;
