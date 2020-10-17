@@ -22,19 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/scene/profile.h>
 #include "launcherwindow.h"
-#include <QPixmap>
-#include <QKeyEvent>
-#include "filesystemaccess.h"
+
+#include "profile/profileedit.h"
+
 #include <openspace/engine/configuration.h>
-#include <sstream>
-#include <iostream>
-#include <QMessageBox>
-#include <random>
-#include <QLabel>
 #include <QComboBox>
+#include <QLabel>
+#include <QMessageBox>
 #include <QPushButton>
+#include <filesystem>
+#include <iostream>
+#include <random>
 
 namespace {
     constexpr const int ScreenWidth = 480;
@@ -77,15 +76,10 @@ LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
                                bool sgctConfigEnabled, std::string sgctConfigName,
                                QWidget* parent)
     : QMainWindow(parent)
-    , _fileAccessProfiles(".profile", { "./" }, true, false)
-    , _fileAccessWinConfigs(".xml", { "./" }, true, false)
-    , _filesystemAccess(
-        ".asset", { "scene", "global", "customization", "examples", "util" }, true, true
-    )
-    , _basePath(QString::fromStdString(basePath))
-    , _profileChangeAllowed(profileEnabled)
-    , _sgctConfigChangeAllowed(sgctConfigEnabled)
+    , _basePath(std::move(basePath))
     , _globalConfig(globalConfig)
+    , _fullyConfiguredViaCliArgs(!profileEnabled && !sgctConfigEnabled)
+
 {
     Q_INIT_RESOURCE(resources);
 
@@ -109,11 +103,35 @@ LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
         setStyleSheet(styleSheet);
     }
 
+    setCentralWidget(createCentralWidget());
 
+
+
+
+    populateProfilesList(globalConfig.profile);
+
+    _profileBox->setEnabled(profileEnabled);
+
+    populateWindowConfigsList(sgctConfigName);
+    _windowConfigBox->setEnabled(sgctConfigEnabled);
+
+
+    std::string syncPath = globalConfig.pathTokens["SYNC"] + "/http/launcher_images";
+    if (std::filesystem::exists(syncPath)) {
+        try {
+            setBackgroundImage(syncPath);
+        }
+        catch (const std::exception& e) {
+            std::cerr << "Error occurrred while reading background images: " << e.what();
+        }
+    }
+}
+
+QWidget* LauncherWindow::createCentralWidget() {
     QWidget* centralWidget = new QWidget(this);
 
-    QLabel* backgroundImage = new QLabel(centralWidget);
-    backgroundImage->setGeometry(geometry::BackgroundImage);
+    _backgroundImage = new QLabel(centralWidget);
+    _backgroundImage->setGeometry(geometry::BackgroundImage);
 
     QLabel* logoImage = new QLabel(centralWidget);
     logoImage->setObjectName("clear");
@@ -143,7 +161,7 @@ LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
     startButton->setObjectName("large");
     startButton->setGeometry(geometry::StartButton);
     startButton->setCursor(Qt::PointingHandCursor);
-    
+
     QPushButton* newButton = new QPushButton("New", centralWidget);
     connect(newButton, &QPushButton::released, this, &LauncherWindow::openWindowNew);
     newButton->setObjectName("small");
@@ -156,24 +174,26 @@ LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
     editButton->setGeometry(geometry::EditButton);
     editButton->setCursor(Qt::PointingHandCursor);
 
-    setCentralWidget(centralWidget);
+    return centralWidget;
+}
+
+void LauncherWindow::setBackgroundImage(const std::string& syncPath) {
+    namespace fs = std::filesystem;
+
+    fs::directory_entry latestVersion;
+    for (const fs::directory_entry& p : fs::directory_iterator(syncPath)) {
+        if (!p.is_directory()) {
+            continue;
+        }
+        std::string path = p.path().string();
+        std::
+
+    }
 
 
-
-    _reportAssetsInFilesystem = _filesystemAccess.useQtFileSystemModelToTraverseDir(
-        QString::fromStdString(basePath) + "/data/assets"
-    );
-    populateProfilesList(globalConfig.profile);
-
-    _profileBox->setEnabled(_profileChangeAllowed);
-
-    populateWindowConfigsList(sgctConfigName);
-    _windowConfigBox->setEnabled(_sgctConfigChangeAllowed);
-    _fullyConfiguredViaCliArgs = (!profileEnabled && !sgctConfigEnabled);
-
-    bool hasSyncFiles = false;
+        bool hasSyncFiles = false;
     QString syncFilePath = QString::fromStdString(
-        globalConfig.pathTokens["SYNC"] + "/http/launcher_images/1/profile1.png"
+        syncPath + "/http/launcher_images/1/profile1.png"
     );
     QFileInfo check_file(syncFilePath);
     // check if file exists and if yes: Is it really a file and no directory?
@@ -191,18 +211,20 @@ LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
         filename = QString::fromStdString(
             "/http/launcher_images/1/profile" + std::to_string(random_integer) + ".png"
         );
-        bgpath = QString::fromStdString(globalConfig.pathTokens["SYNC"]) + filename;
+        bgpath = QString::fromStdString(syncPath) + filename;
     }
     else {
         bgpath = QString::fromStdString(":/images/launcher-background.png");
     }
 
-    backgroundImage->setPixmap(QPixmap(bgpath));
+    _backgroundImage->setPixmap(QPixmap(bgpath));
 }
 
 void LauncherWindow::populateProfilesList(std::string preset) {
     _profileBox->clear();
-    std::string reportProfiles = _fileAccessProfiles.useQtFileSystemModelToTraverseDir(
+
+    FileSystemAccess profiles(".profile", { "./" }, true, false);
+    std::string reportProfiles = profiles.useQtFileSystemModelToTraverseDir(
         _basePath + "/data/profiles"
     );
     std::stringstream instream(reportProfiles);
@@ -222,7 +244,8 @@ void LauncherWindow::populateProfilesList(std::string preset) {
 }
 
 void LauncherWindow::populateWindowConfigsList(std::string preset) {
-    std::string reportConfigs = _fileAccessWinConfigs.useQtFileSystemModelToTraverseDir(
+    FileSystemAccess configs(".xml", { "./" }, true, false);
+    std::string reportConfigs = configs.useQtFileSystemModelToTraverseDir(
         _basePath + "/config"
     );
     std::stringstream instream(reportConfigs);
@@ -245,18 +268,24 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
 }
 
 void LauncherWindow::openWindowNew() {
+    FileSystemAccess assets(
+        ".asset", { "scene", "global", "customization", "examples", "util" }, true, true
+    );
+    std::string assetList = assets.useQtFileSystemModelToTraverseDir(
+        _basePath + "/data/assets"
+    );
+
     std::string initialProfileSelection = _profileBox->currentText().toStdString();
     Profile profile;
     ProfileEdit editor(
         profile,
-        _reportAssetsInFilesystem,
+        assetList,
         _globalConfig.readOnlyProfiles,
         this
     );
     editor.exec();
     if (editor.wasSaved()) {
-        std::string saveProfilePath = _basePath.toStdString();
-        saveProfilePath += "/data/profiles/";
+        std::string saveProfilePath = _basePath + "/data/profiles/";
         saveProfilePath += editor.specifiedFilename() + ".profile";
         saveProfileToFile(saveProfilePath, profile);
         populateProfilesList(editor.specifiedFilename());
@@ -267,8 +296,15 @@ void LauncherWindow::openWindowNew() {
 }
 
 void LauncherWindow::openWindowEdit() {
+    FileSystemAccess assets(
+        ".asset", { "scene", "global", "customization", "examples", "util" }, true, true
+    );
+    std::string assetList = assets.useQtFileSystemModelToTraverseDir(
+        _basePath + "/data/assets"
+    );
+
     std::string initialProfileSelection = _profileBox->currentText().toStdString();
-    std::string profilePath = _basePath.toStdString() + "/data/profiles/";
+    std::string profilePath = _basePath + "/data/profiles/";
     int selectedProfileIdx = _profileBox->currentIndex();
     QString profileToSet = _profileBox->itemText(selectedProfileIdx);
     std::string editProfilePath = profilePath + profileToSet.toStdString() + ".profile";
@@ -277,7 +313,7 @@ void LauncherWindow::openWindowEdit() {
     if (profile.has_value()) {
         ProfileEdit editor(
             *profile,
-            _reportAssetsInFilesystem,
+            assetList,
             _globalConfig.readOnlyProfiles,
             this
         );
