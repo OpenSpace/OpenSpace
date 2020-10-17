@@ -378,6 +378,25 @@ int property_setValueSingle(lua_State* L) {
 
 /**
  * \ingroup LuaScripts
+ * hasProperty(string):
+ * Returns whether a property with the given URI exists
+ */
+int property_hasProperty(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::property_hasProperty");
+
+    std::string uri = ghoul::lua::value<std::string>(
+        L,
+        1,
+        ghoul::lua::PopValue::Yes
+    );
+
+    openspace::properties::Property* prop = property(uri);
+    ghoul::lua::push(L, prop != nullptr);
+    return 1;
+}
+
+/**
+ * \ingroup LuaScripts
  * getPropertyValue(string):
  * Returns the value of the property identified by the passed URI as a Lua object that can
  * be passed to the setPropertyValue method.
@@ -389,7 +408,7 @@ int property_getValue(lua_State* L) {
         L,
         1,
         ghoul::lua::PopValue::Yes
-        );
+    );
 
     openspace::properties::Property* prop = property(uri);
     if (!prop) {

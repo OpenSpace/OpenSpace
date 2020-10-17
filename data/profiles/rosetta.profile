@@ -98,7 +98,7 @@
       "is_local": false,
       "key": "O",
       "name": "Toggle Philae trail",
-      "script": "openspace.setPropertyValueSingle(Scene.PhilaeTrail.Renderable.Enabled', not openspace.getPropertyValue(Scene.PhilaeTrail.Renderable.Enabled'));"
+      "script": "openspace.setPropertyValueSingle('Scene.PhilaeTrail.Renderable.Enabled', not openspace.getPropertyValue('Scene.PhilaeTrail.Renderable.Enabled'));"
     },
     {
       "documentation": "Enables or disables the image projection on 67P.",
@@ -106,7 +106,7 @@
       "is_local": false,
       "key": "P",
       "name": "Toggle 67P projection",
-      "script": "openspace.setPropertyValueSingle(Scene.67P.Renderable.ProjectionComponent.PerformProjection', not openspace.getPropertyValue(Scene.67P.Renderable.ProjectionComponent.PerformProjection'));"
+      "script": "openspace.setPropertyValueSingle('Scene.67P.Renderable.ProjectionComponent.PerformProjection', not openspace.getPropertyValue('Scene.67P.Renderable.ProjectionComponent.PerformProjection'));"
     }
   ],
   "mark_nodes": [

@@ -139,10 +139,10 @@ DashboardItemGlobeLocation::DashboardItemGlobeLocation(
     auto updateFormatString = [this]() {
         using namespace fmt::literals;
 
-        _formatString =
-            "Position: {{:03.{0}f}}{{}}, {{:03.{0}f}}{{}}  Altitude: {{}} {{}}"_format(
-                _significantDigits.value()
-            );
+        _formatString = fmt::format(
+            "Position: {{:03.{0}f}}{{}}, {{:03.{0}f}}{{}}  Altitude: {{:03.{0}f}} {{}}",
+            _significantDigits.value()
+        );
     };
     _significantDigits.onChange(updateFormatString);
     addProperty(_significantDigits);
@@ -199,8 +199,6 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
 
     std::pair<double, std::string> dist = simplifyDistance(altitude);
 
-    penPosition.y -= _font->height();
-
     std::fill(_buffer.begin(), _buffer.end(), 0);
     char* end = fmt::format_to(
         _buffer.data(),
@@ -212,7 +210,9 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
     std::string_view text = std::string_view(_buffer.data(), end - _buffer.data());
 
     RenderFont(*_font, penPosition, text);
+    penPosition.y -= _font->height();
 }
+
 glm::vec2 DashboardItemGlobeLocation::size() const {
     ZoneScoped
 

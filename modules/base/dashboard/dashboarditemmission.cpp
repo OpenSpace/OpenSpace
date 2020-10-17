@@ -209,7 +209,6 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
                 1.0 - remaining / phase->timeRange().duration()
             );
             const std::string progress = progressToStr(25, t);
-            penPosition.y -= _font->height();
             RenderFont(
                 *_font,
                 penPosition,
@@ -219,16 +218,17 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
                 ),
                 currentMissionColor
             );
+            penPosition.y -= _font->height();
         }
         else {
             if (!phase->name().empty()) {
-                penPosition.y -= _font->height();
                 RenderFont(
                     *_font,
                     penPosition,
                     phase->name(),
                     nonCurrentMissionColor
                 );
+                penPosition.y -= _font->height();
             }
         }
         penPosition.x -= depth * PixelIndentation;

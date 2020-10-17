@@ -758,7 +758,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
     if (intersects(mousePosition, _cameraButtonLocations.rotation)) {
         constexpr const char* ToggleRotationFrictionScript = R"(
             local f = 'NavigationHandler.OrbitalNavigator.Friction.RotationalFriction';
-            openspace.setPropertyValue(f, not openspace.getPropertyValue(f));)";
+            openspace.setPropertyValueSingle(f, not openspace.getPropertyValue(f));)";
 
         global::scriptEngine.queueScript(
             ToggleRotationFrictionScript,
@@ -770,7 +770,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
     if (intersects(mousePosition, _cameraButtonLocations.zoom)) {
         constexpr const char* ToggleZoomFrictionScript = R"(
             local f = 'NavigationHandler.OrbitalNavigator.Friction.ZoomFriction';
-            openspace.setPropertyValue(f, not openspace.getPropertyValue(f));)";
+            openspace.setPropertyValueSingle(f, not openspace.getPropertyValue(f));)";
 
         global::scriptEngine.queueScript(
             ToggleZoomFrictionScript,
@@ -782,7 +782,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
     if (intersects(mousePosition, _cameraButtonLocations.roll)) {
         constexpr const char* ToggleRollFrictionScript = R"(
             local f = 'NavigationHandler.OrbitalNavigator.Friction.RollFriction';
-            openspace.setPropertyValue(f, not openspace.getPropertyValue(f));)";
+            openspace.setPropertyValueSingle(f, not openspace.getPropertyValue(f));)";
 
         global::scriptEngine.queueScript(
             ToggleRollFrictionScript,

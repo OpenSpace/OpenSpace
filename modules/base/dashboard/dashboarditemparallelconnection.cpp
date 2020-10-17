@@ -161,8 +161,8 @@ void DashboardItemParallelConnection::render(glm::vec2& penPosition) {
     }
 
     if (!connectionInfo.empty()) {
-        penPosition.y -= _font->height();
         RenderFont(*_font, penPosition, connectionInfo);
+        penPosition.y -= _font->height();
     }
 }
 

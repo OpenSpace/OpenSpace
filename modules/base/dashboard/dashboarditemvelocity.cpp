@@ -208,7 +208,6 @@ void DashboardItemVelocity::render(glm::vec2& penPosition) {
         dist = { convertedD, nameForDistanceUnit(unit, convertedD != 1.0) };
     }
 
-    penPosition.y -= _font->height();
     RenderFont(
         *_font,
         penPosition,
@@ -216,6 +215,7 @@ void DashboardItemVelocity::render(glm::vec2& penPosition) {
             "Camera velocity: {} {}/s", dist.first, dist.second
         )
     );
+    penPosition.y -= _font->height();
 
     _prevPosition = currentPos;
 }

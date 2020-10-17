@@ -637,12 +637,18 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "the fourth argument to setPropertyValue."
             },
             {
+                "hasProperty",
+                &luascriptfunctions::property_hasProperty,
+                {},
+                "string",
+                "Returns whether a property with the given URI exists"
+            },
+            {
                 "getPropertyValue",
                 &luascriptfunctions::property_getValue,
                 {},
                 "string",
-                "Returns the value the property, identified by "
-                "the provided URI."
+                "Returns the value the property, identified by the provided URI."
             },
             {
                 "getProperty",

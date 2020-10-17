@@ -496,27 +496,27 @@ bool ProfileEdit::isReadOnly(std::string profileSave) {
 
 void ProfileEdit::approved() {
     QString profileName = _profileEdit->text();
+    if (profileName.isEmpty()) {
+        _errorMsg->setText("Profile name must be specified");
+        return;
+    }
+
     if ((profileName.length() > 0) && !isReadOnly(profileName.toStdString())) {
         _saveSelected = true;
         _errorMsg->setText("");
         accept();
     }
     else {
-        //QString formatText = "<font color='red'>";
-        //formatText += ui->label_profile->text();
-        //formatText += "</font>";
-        //ui->label_profile->setText(formatText);
-        QString errorLabel = "<font color='red'>";
-        errorLabel += "This is a read-only profile. Click 'duplicate' or rename & save.";
-        errorLabel += "</font>";
-        _errorMsg->setText(errorLabel);
+        _errorMsg->setText(
+            "This is a read-only profile. Click 'duplicate' or rename & save"
+        );
     }
 }
 
-void ProfileEdit::keyPressEvent(QKeyEvent *evt)
-{
-    if(evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return)
+void ProfileEdit::keyPressEvent(QKeyEvent* evt) {
+    if (evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return) {
         return;
+    }
     QDialog::keyPressEvent(evt);
 }
 

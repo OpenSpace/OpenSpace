@@ -113,12 +113,12 @@ DashboardItemDate::DashboardItemDate(const ghoul::Dictionary& dictionary)
 void DashboardItemDate::render(glm::vec2& penPosition) {
     ZoneScoped
 
-    penPosition.y -= _font->height();
     RenderFont(
         *_font,
         penPosition,
         fmt::format("Date: {} UTC", global::timeManager.time().UTC())
     );
+    penPosition.y -= _font->height();
 }
 
 glm::vec2 DashboardItemDate::size() const {
