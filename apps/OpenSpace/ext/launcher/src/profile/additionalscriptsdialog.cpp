@@ -71,22 +71,22 @@ AdditionalScriptsDialog::AdditionalScriptsDialog(openspace::Profile& profile,
     }
 
     std::vector<std::string> scripts = _profile.additionalScripts();
-    std::string scpts = std::accumulate(
+    std::string scriptText = std::accumulate(
         scripts.begin(), scripts.end(),
         std::string(), [](std::string lhs, std::string rhs) { return lhs + rhs + '\n'; }
     );
-    _textScripts->setText(QString::fromStdString(std::move(scpts)));
+    _textScripts->setText(QString::fromStdString(std::move(scriptText)));
     _textScripts->moveCursor(QTextCursor::MoveOperation::End);
 }
 
 void AdditionalScriptsDialog::parseScript() {
-    std::vector<std::string> tmpMultilineStringToVector;
+    std::vector<std::string> additionalScripts;
     std::istringstream iss(_textScripts->toPlainText().toStdString());
     while (!iss.eof()) {
         std::string s;
-        getline(iss, s);
-        tmpMultilineStringToVector.push_back(s);
+        std::getline(iss, s);
+        additionalScripts.push_back(std::move(s));
     }
-    _profile.setAdditionalScripts(tmpMultilineStringToVector);
+    _profile.setAdditionalScripts(additionalScripts);
     accept();
 }

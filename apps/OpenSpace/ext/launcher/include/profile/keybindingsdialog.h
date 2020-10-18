@@ -56,7 +56,7 @@ public:
      *
      * \param evt #QKeyEvent object for the key press event
      */
-    void keyPressEvent(QKeyEvent *evt);
+    void keyPressEvent(QKeyEvent* evt);
 
 public slots:
     void listItemSelected();
@@ -73,9 +73,6 @@ private:
     void editBoxDisabled(bool disabled);
     int indexInKeyMapping(std::vector<int>& mapVector, int keyInt);
     bool areRequiredFormsFilled();
-    std::string truncateString(std::string& s);
-    void replaceChars(std::string& src, const std::string& from,
-        const std::string& to);
     bool isLineEmpty(int index);
 
     openspace::Profile& _profile;

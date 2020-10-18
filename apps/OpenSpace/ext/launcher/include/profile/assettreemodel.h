@@ -32,7 +32,7 @@
 #include <memory>
 
 class AssetTreeModel : public QAbstractItemModel {
-    Q_OBJECT
+Q_OBJECT
 
 public:
     AssetTreeModel(QObject* parent = nullptr);

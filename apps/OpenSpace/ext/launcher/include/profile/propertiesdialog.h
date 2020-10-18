@@ -53,9 +53,9 @@ public:
      *
      * \param evt #QKeyEvent object for the key press event
      */
-    void keyPressEvent(QKeyEvent *evt);
+    void keyPressEvent(QKeyEvent* evt);
 
-public slots:
+private slots:
     void listItemSelected();
     void listItemAdded();
     void listItemRemove();

@@ -35,7 +35,6 @@ class QTextEdit;
 class MetaDialog : public QDialog {
 Q_OBJECT
 public:
-
    /**
     * Constructor for meta class
     *
@@ -45,7 +44,7 @@ public:
     */
     MetaDialog(openspace::Profile& profile, QWidget* parent);
 
-public slots:
+private slots:
     void save();
 
 private:

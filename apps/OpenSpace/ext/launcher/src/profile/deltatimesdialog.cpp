@@ -76,7 +76,6 @@ namespace {
         }
         return checkForTimeDescription(i, value);
     }
-
 } // namespace
 
 DeltaTimesDialog::DeltaTimesDialog(openspace::Profile& profile, QWidget *parent)
@@ -105,7 +104,7 @@ DeltaTimesDialog::DeltaTimesDialog(openspace::Profile& profile, QWidget *parent)
         );
         buttonLayout->addWidget(_addButton);
 
-        _removeButton = new QPushButton("Remove LastEntry");
+        _removeButton = new QPushButton("Remove Last Entry");
         connect(
             _removeButton, &QPushButton::clicked,
             this, &DeltaTimesDialog::removeDeltaTimeValue
@@ -205,9 +204,7 @@ std::string DeltaTimesDialog::createSummaryForDeltaTime(size_t idx, bool forList
     }
 
     if (forListView) {
-        s += "\t" + std::to_string(_data.at(idx));
-        s += "\t";
-        s += timeDescription(_data.at(idx));
+        s += '\t' + std::to_string(_data.at(idx)) + '\t' + timeDescription(_data.at(idx));
     }
     return s;
 }
@@ -220,7 +217,7 @@ void DeltaTimesDialog::listItemSelected() {
         _listWidget->setCurrentRow(index);
     }
 
-    if (_data.size() > 0) {
+    if (!_data.empty()) {
         if (_data.at(index) == 0) {
             _seconds->clear();
         }
@@ -238,9 +235,7 @@ void DeltaTimesDialog::setLabelForKey(int index, bool editMode, std::string colo
         index = _data.size() - 1;
     }
     if (editMode) {
-        labelS += " '";
-        labelS += createSummaryForDeltaTime(index, false);
-        labelS += "':";
+        labelS += " '" + createSummaryForDeltaTime(index, false) + "':";
     }
     _adjustLabel->setText(QString::fromStdString(
         "<font color='" + color + "'>" + labelS + "</font>"
@@ -248,7 +243,7 @@ void DeltaTimesDialog::setLabelForKey(int index, bool editMode, std::string colo
 }
 
 void DeltaTimesDialog::valueChanged(const QString& text) {
-    if (_seconds->text() == "") {
+    if (_seconds->text().isEmpty()) {
         _errorMsg->setText("");
     }
     else {
@@ -297,21 +292,20 @@ void DeltaTimesDialog::addDeltaTimeValue() {
 }
 
 void DeltaTimesDialog::saveDeltaTimeValue() {
-    QListWidgetItem *item = _listWidget->currentItem();
+    QListWidgetItem* item = _listWidget->currentItem();
     if (item != nullptr) {
         int index = _listWidget->row(item);
         if (_data.size() > 0) {
             _data.at(index) = _seconds->text().toDouble();
             std::string summary = createSummaryForDeltaTime(index, true);
             _listWidget->item(index)->setText(QString::fromStdString(summary));
-            //setLabelForKey(index, true, "black");
             transitionEditMode(index, false);
             _editModeNewItem = false;
         }
     }
 }
 
-void DeltaTimesDialog::discardDeltaTimeValue(void) {
+void DeltaTimesDialog::discardDeltaTimeValue() {
     listItemSelected();
     transitionEditMode(_listWidget->count() - 1, false);
     if (_editModeNewItem && !_data.empty() && _data.back() == 0) {

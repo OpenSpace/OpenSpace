@@ -35,6 +35,7 @@
 #include <QPushButton>
 #include <filesystem>
 #include <iostream>
+#include <random>
 
 using namespace openspace;
 
@@ -128,7 +129,6 @@ namespace {
             );
         }
     }
-
 } // namespace
 
 using namespace openspace;
@@ -169,7 +169,6 @@ LauncherWindow::LauncherWindow(bool profileEnabled,
 
 
     populateProfilesList(globalConfig.profile);
-
     _profileBox->setEnabled(profileEnabled);
 
     populateWindowConfigsList(sgctConfigName);
@@ -289,7 +288,9 @@ void LauncherWindow::setBackgroundImage(const std::string& syncPath) {
     for (const fs::directory_entry& p : fs::directory_iterator(latest.path)) {
         files.push_back(p.path().string());
     }
-    std::random_shuffle(files.begin(), files.end());
+    std::random_device rd;
+    std::mt19937 g(rd());
+    std::shuffle(files.begin(), files.end(), g);
     // We know there has to be at least one folder, so it's fine to just pick the first
     std::string image = files.front();
     _backgroundImage->setPixmap(QPixmap(QString::fromStdString(image)));
@@ -309,9 +310,9 @@ void LauncherWindow::populateProfilesList(std::string preset) {
     }
 
     // Try to find the requested profile and set it as the current one
-    const int presetMatchIdx = _profileBox->findText(QString::fromStdString(preset));
-    if (presetMatchIdx != -1) {
-        _profileBox->setCurrentIndex(presetMatchIdx);
+    const int idx = _profileBox->findText(QString::fromStdString(std::move(preset)));
+    if (idx != -1) {
+        _profileBox->setCurrentIndex(idx);
 
     }
 }
@@ -331,9 +332,9 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
     // Try to find the requested configuration file and set it as the current one. As we
     // have support for function-generated configuration files that will not be in the
     // list we need to add a preset that doesn't exist a file for
-    const int presetMatchIdx = _windowConfigBox->findText(QString::fromStdString(preset));
-    if (presetMatchIdx != -1) {
-        _windowConfigBox->setCurrentIndex(presetMatchIdx);
+    const int idx = _windowConfigBox->findText(QString::fromStdString(std::move(preset)));
+    if (idx != -1) {
+        _windowConfigBox->setCurrentIndex(idx);
     }
     else {
         // Add the requested preset at the top

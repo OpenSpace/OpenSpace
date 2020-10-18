@@ -140,7 +140,7 @@ void MarkNodesDialog::parseSelections() {
     accept();
 }
 
-void MarkNodesDialog::keyPressEvent(QKeyEvent *evt) {
+void MarkNodesDialog::keyPressEvent(QKeyEvent* evt) {
    if (evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return) {
         if (_newNode->text().length() > 0 && _newNode->hasFocus()) {
             listItemAdded();

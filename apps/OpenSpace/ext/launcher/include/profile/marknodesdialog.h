@@ -53,7 +53,7 @@ public:
      */
     void keyPressEvent(QKeyEvent* evt);
 
-public slots:
+private slots:
     void listItemSelected();
     void listItemAdded();
     void listItemRemove();

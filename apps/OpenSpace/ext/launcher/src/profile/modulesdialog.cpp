@@ -33,7 +33,13 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
-ModulesDialog::ModulesDialog(openspace::Profile& profile, QWidget *parent)
+using namespace openspace;
+
+namespace {
+    const Profile::Module Blank = { "", "", "" };
+} // namespace
+
+ModulesDialog::ModulesDialog(Profile& profile, QWidget *parent)
     : QDialog(parent)
     , _profile(profile)
     , _data(_profile.modules())
@@ -52,8 +58,8 @@ ModulesDialog::ModulesDialog(openspace::Profile& profile, QWidget *parent)
         _list->setMovement(QListView::Free);
         _list->setResizeMode(QListView::Adjust);
 
-        for (size_t i = 0; i < _data.size(); ++i) {
-            _list->addItem(new QListWidgetItem(createOneLineSummary(_data[i])));
+        for (const Profile::Module& m : _data) {
+            _list->addItem(new QListWidgetItem(createOneLineSummary(m)));
         }
         layout->addWidget(_list);
     }
@@ -148,7 +154,7 @@ ModulesDialog::ModulesDialog(openspace::Profile& profile, QWidget *parent)
     transitionFromEditMode();
 }
 
-QString ModulesDialog::createOneLineSummary(openspace::Profile::Module m) {
+QString ModulesDialog::createOneLineSummary(Profile::Module m) {
     QString summary = QString::fromStdString(m.name);
     bool hasCommandForLoaded = (m.loadedInstruction->length() > 0);
     bool hasCommandForNotLoaded = (m.notLoadedInstruction->length() > 0);
@@ -169,11 +175,11 @@ QString ModulesDialog::createOneLineSummary(openspace::Profile::Module m) {
 }
 
 void ModulesDialog::listItemSelected() {
-    QListWidgetItem *item = _list->currentItem();
+    QListWidgetItem* item = _list->currentItem();
     int index = _list->row(item);
 
-    if (_data.size() > 0) {
-        const openspace::Profile::Module& m = _data[index];
+    if (!_data.empty()) {
+        const Profile::Module& m = _data[index];
         _moduleEdit->setText(QString::fromStdString(m.name));
         if (m.loadedInstruction.has_value()) {
             _loadedEdit->setText(QString::fromStdString(*m.loadedInstruction));
@@ -191,7 +197,7 @@ void ModulesDialog::listItemSelected() {
     transitionToEditMode();
 }
 
-bool ModulesDialog::isLineEmpty(int index) {
+bool ModulesDialog::isLineEmpty(int index) const {
     bool isEmpty = true;
     if (!_list->item(index)->text().isEmpty()) {
         isEmpty = false;
@@ -202,20 +208,20 @@ bool ModulesDialog::isLineEmpty(int index) {
     return isEmpty;
 }
 
-void ModulesDialog::listItemAdded(void) {
+void ModulesDialog::listItemAdded() {
     int currentListSize = _list->count();
 
     if ((currentListSize == 1) && (isLineEmpty(0))) {
-        //Special case where list is "empty" but really has one line that is blank.
+        // Special case where list is "empty" but really has one line that is blank.
         // This is done because QListWidget does not seem to like having its sole
         // remaining item being removed.
-        _data.at(0) = kBlank;
+        _data.at(0) = Blank;
         _list->item(0)->setText("  (Enter details below & click 'Save')");
         _list->setCurrentRow(0);
         transitionToEditMode();
     }
     else {
-        _data.push_back(kBlank);
+        _data.push_back(Blank);
         _list->addItem(new QListWidgetItem("  (Enter details below & click 'Save')"));
         //Scroll down to that blank line highlighted
         _list->setCurrentRow(_list->count() - 1);
@@ -242,9 +248,8 @@ void ModulesDialog::listItemAdded(void) {
     _editModeNewItem = true;
 }
 
-void ModulesDialog::listItemSave(void) {
+void ModulesDialog::listItemSave() {
     if (_moduleEdit->text().isEmpty()) {
-        //ui->label_module->setText("<font color='red'>Module</font>");
         _errorMsg->setText("Missing module name");
         return;
     }
@@ -262,32 +267,28 @@ void ModulesDialog::listItemSave(void) {
     _editModeNewItem = false;
 }
 
-void ModulesDialog::listItemCancelSave(void) {
+void ModulesDialog::listItemCancelSave() {
     transitionFromEditMode();
-    if (_editModeNewItem) {
-        if (_data.size() > 0) {
-            if(_data.back().name.length() == 0) {
-                listItemRemove();
-            }
-        }
+    if (_editModeNewItem && !_data.empty() && _data.back().name.empty()) {
+        listItemRemove();
     }
     _editModeNewItem = false;
 }
 
-void ModulesDialog::listItemRemove(void) {
+void ModulesDialog::listItemRemove() {
     if (_list->count() > 0) {
         if (_list->currentRow() >= 0 && _list->currentRow() < _list->count()) {
             if (_list->count() == 1) {
-                //Special case where last remaining item is being removed (QListWidget
+                // Special case where last remaining item is being removed (QListWidget
                 // doesn't like the final item being removed so instead clear it)
-                _data.at(0) = kBlank;
+                _data.at(0) = Blank;
                 _list->item(0)->setText("");
             }
             else {
                 int index = _list->currentRow();
                 if (index >= 0 && index < _list->count()) {
                     delete _list->takeItem(index);
-                    if (_data.size() > 0) {
+                    if (!_data.empty()) {
                         _data.erase(_data.begin() + index);
                     }
                 }
@@ -297,7 +298,7 @@ void ModulesDialog::listItemRemove(void) {
     transitionFromEditMode();
 }
 
-void ModulesDialog::transitionToEditMode(void) {
+void ModulesDialog::transitionToEditMode() {
     _list->setDisabled(true);
     _buttonAdd->setDisabled(true);
     _buttonRemove->setDisabled(true);
@@ -312,7 +313,7 @@ void ModulesDialog::transitionToEditMode(void) {
     _errorMsg->setText("");
 }
 
-void ModulesDialog::transitionFromEditMode(void) {
+void ModulesDialog::transitionFromEditMode() {
     _list->setDisabled(false);
     _buttonAdd->setDisabled(false);
     _buttonRemove->setDisabled(false);

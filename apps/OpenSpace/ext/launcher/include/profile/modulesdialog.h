@@ -52,9 +52,9 @@ public:
      *
      * \param evt #QKeyEvent object for the key press event
      */
-    void keyPressEvent(QKeyEvent *evt);
+    void keyPressEvent(QKeyEvent* evt);
 
-public slots:
+private slots:
     void listItemSelected();
     void listItemAdded();
     void listItemRemove();
@@ -67,12 +67,11 @@ private:
     QString createOneLineSummary(openspace::Profile::Module m);
     void transitionFromEditMode();
     void editBoxDisabled(bool disabled);
-    bool isLineEmpty(int index);
+    bool isLineEmpty(int index) const;
 
     openspace::Profile& _profile;
     std::vector<openspace::Profile::Module> _data;
     bool _editModeNewItem = false;
-    const openspace::Profile::Module kBlank = {"", "", ""};
 
     QListWidget* _list = nullptr;
     QLabel* _moduleLabel = nullptr;

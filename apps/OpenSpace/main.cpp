@@ -927,29 +927,29 @@ void setSgctDelegateFunctions() {
     };
 }
 
-void analyzeCommandLineArgsForSettings(int& argc, char** argv, bool& sgct, bool& profile,
-                                       std::string& sgctFunctionName)
+void checkCommandLineForSettings(int& argc, char** argv, bool& hasSGCT, bool& hasProfile,
+                                 std::string& sgctFunctionName)
 {
-    bool haveCliConfigFlag = false;
     for (int i = 1; i < argc; ++i) {
-        std::string a = argv[i];
-        if (a.compare("-c") == 0 || a.compare("--config") == 0) {
-            haveCliConfigFlag = true;
-        }
-        else if (haveCliConfigFlag) {
-            a.erase(remove_if(a.begin(), a.end(), isspace), a.end());
+        const std::string arg = argv[i];
+        if (arg == "-c" || arg == "--config") {
+            std::string p = ((i + 1) < argc) ? argv[i + 1] : "";
+            p.erase(std::remove_if(p.begin(), p.end(), ::isspace), p.end());
+
             const std::string sgctAssignment = "SGCTConfig=";
-            size_t findSgct = a.find(sgctAssignment);
-            size_t findBracket = a.find("}");
+            const size_t findSgct = p.find(sgctAssignment);
+            const size_t findBracket = p.find("}");
             if (findSgct != std::string::npos) {
                 if (findBracket != std::string::npos) {
-                    sgctFunctionName = a.substr(findSgct + sgctAssignment.length(),
-                        findBracket - findSgct);
+                    sgctFunctionName = arg.substr(
+                        findSgct + sgctAssignment.length(),
+                        findBracket - findSgct
+                    );
                 }
-                sgct = true;
+                hasSGCT = true;
             }
-            if (a.find("Profile=") != std::string::npos) {
-                profile = true;
+            if (p.find("Profile=") != std::string::npos) {
+                hasProfile = true;
             }
         }
     }
@@ -959,40 +959,35 @@ std::string setWindowConfigPresetForGui(const std::string labelFromCfgFile,
                                         const std::string xmlExt, bool haveCliSGCTConfig,
                                         const std::string& sgctFunctionName)
 {
-    const std::string labelFromCli = " (from CLI)";
+    configuration::Configuration& config = global::configuration;
+
     std::string preset;
-    bool sgctConfigFileSpecifiedByLuaFunction
-        = (global::configuration.sgctConfigNameInitialized.length() > 0);
+    bool sgctConfigFileSpecifiedByLuaFunction = !config.sgctConfigNameInitialized.empty();
     if (haveCliSGCTConfig) {
-        preset = (sgctFunctionName.length() > 0) ? sgctFunctionName
-            : global::configuration.windowConfiguration;
-        preset += labelFromCli;
+        preset = sgctFunctionName.empty() ? config.windowConfiguration : sgctFunctionName;
+        preset += " (from CLI)";
     }
     else if (sgctConfigFileSpecifiedByLuaFunction) {
-        preset = global::configuration.sgctConfigNameInitialized;
-        preset += labelFromCfgFile;
+        preset = config.sgctConfigNameInitialized + labelFromCfgFile;
     }
     else {
-        preset = global::configuration.windowConfiguration;
-        if (preset.find("/") != std::string::npos) {
-            preset.erase(0, preset.find_last_of("/") + 1);
+        preset = config.windowConfiguration;
+        if (preset.find('/') != std::string::npos) {
+            preset.erase(0, preset.find_last_of('/') + 1);
         }
         if (preset.length() >= xmlExt.length()) {
-            if (preset.substr(preset.length() - xmlExt.length())
-                .compare(xmlExt) == 0)
-            {
-                preset = preset.substr(0, preset.length()
-                    - xmlExt.length());
+            if (preset.substr(preset.length() - xmlExt.length()) == xmlExt) {
+                preset = preset.substr(0, preset.length() - xmlExt.length());
             }
         }
     }
     return preset;
 }
 
-std::string getSelectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTConfig,
-                                               std::string windowConfiguration,
-                                               const std::string& labelFromCfgFile,
-                                               const std::string& xmlExt)
+std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTConfig,
+                                            std::string windowConfiguration,
+                                            const std::string& labelFromCfgFile,
+                                            const std::string& xmlExt)
 {
     std::string config = windowConfiguration;
     if (!hasCliSGCTConfig) {
@@ -1152,39 +1147,40 @@ int main(int argc, char** argv) {
 
     global::openSpaceEngine.registerPathTokens();
 
-    bool haveCliSGCTConfig = false;
-    bool haveCliProfile = false;
-    std::string sgctFunctionName;
-    analyzeCommandLineArgsForSettings(argc, argv, haveCliSGCTConfig, haveCliProfile,
-        sgctFunctionName);
 
-    //Call profile GUI
+    bool hasSGCTConfig = false;
+    bool hasProfile = false;
+    std::string sgctFunctionName;
+    checkCommandLineForSettings(argc, argv, hasSGCTConfig, hasProfile, sgctFunctionName);
+
+    // Call profile GUI
     const std::string labelFromCfgFile = " (from .cfg)";
     const std::string xmlExt = ".xml";
-    std::string windowCfgPreset = setWindowConfigPresetForGui(labelFromCfgFile, xmlExt,
-        haveCliSGCTConfig, sgctFunctionName);
+    std::string windowCfgPreset = setWindowConfigPresetForGui(
+        labelFromCfgFile,
+        xmlExt,
+        hasSGCTConfig,
+        sgctFunctionName
+    );
 
-    std::shared_ptr<QApplication> qaobj;
-    std::shared_ptr<LauncherWindow> launchwin;
-    bool skipLauncherSinceProfileAndWindowAreConfiguredInCli =
-        (haveCliProfile && haveCliSGCTConfig) || global::configuration.bypassLauncher;
-
-    if (!skipLauncherSinceProfileAndWindowAreConfiguredInCli) {
+    bool skipLauncher =
+        (hasProfile && hasSGCTConfig) || global::configuration.bypassLauncher;
+    if (!skipLauncher) {
         int qac = 0;
-        qaobj.reset(new QApplication(qac, nullptr));
-        launchwin.reset(new LauncherWindow(!haveCliProfile,
-            global::configuration, !haveCliSGCTConfig, windowCfgPreset, nullptr));
-        launchwin->show();
-        qaobj->exec();
+        QApplication app(qac, nullptr);
+        LauncherWindow win(!hasProfile,
+            global::configuration, !hasSGCTConfig, windowCfgPreset, nullptr);
+        win.show();
+        app.exec();
 
-        if (!launchwin->wasLaunchSelected()) {
-            exit(EXIT_FAILURE);
+        if (!win.wasLaunchSelected()) {
+            exit(EXIT_SUCCESS);
         }
 
-        global::configuration.profile = launchwin->selectedProfile();
-        windowConfiguration = getSelectedSgctProfileFromLauncher(
-            *launchwin,
-            haveCliSGCTConfig,
+        global::configuration.profile = win.selectedProfile();
+        windowConfiguration = selectedSgctProfileFromLauncher(
+            win,
+            hasSGCTConfig,
             windowConfiguration,
             labelFromCfgFile,
             xmlExt
@@ -1304,13 +1300,6 @@ int main(int argc, char** argv) {
         }
     }
 #endif // OPENSPACE_HAS_SPOUT
-
-    if (launchwin != nullptr) {
-        launchwin->close();
-    }
-    if (qaobj != nullptr) {
-        qaobj->quit();
-    }
 
     ghoul::deinitialize();
     exit(EXIT_SUCCESS);

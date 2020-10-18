@@ -197,7 +197,7 @@ bool PropertiesDialog::isLineEmpty(int index) {
     return isEmpty;
 }
 
-void PropertiesDialog::listItemAdded(void) {
+void PropertiesDialog::listItemAdded() {
     int currentListSize = _list->count();
 
      if ((currentListSize == 1) && (isLineEmpty(0))) {
@@ -224,7 +224,7 @@ void PropertiesDialog::listItemAdded(void) {
     _editModeNewItem = true;
 }
 
-void PropertiesDialog::listItemSave(void) {
+void PropertiesDialog::listItemSave() {
     if (!areRequiredFormsFilled()) {
         return;
     }
@@ -265,7 +265,7 @@ bool PropertiesDialog::areRequiredFormsFilled() {
     return requiredFormsFilled;
 }
 
-void PropertiesDialog::listItemCancelSave(void) {
+void PropertiesDialog::listItemCancelSave() {
     listItemSelected();
     transitionFromEditMode();
     if (_editModeNewItem) {
@@ -278,7 +278,7 @@ void PropertiesDialog::listItemCancelSave(void) {
     _editModeNewItem = false;
 }
 
-void PropertiesDialog::listItemRemove(void) {
+void PropertiesDialog::listItemRemove() {
     if (_list->count() > 0) {
         if (_list->currentRow() >= 0 && _list->currentRow() < _list->count()) {
             if (_list->count() == 1) {
@@ -301,7 +301,7 @@ void PropertiesDialog::listItemRemove(void) {
     transitionFromEditMode();
 }
 
-void PropertiesDialog::transitionToEditMode(void) {
+void PropertiesDialog::transitionToEditMode() {
     _list->setDisabled(true);
     _addButton->setDisabled(true);
     _removeButton->setDisabled(true);
@@ -316,7 +316,7 @@ void PropertiesDialog::transitionToEditMode(void) {
     _errorMsg->setText("");
 }
 
-void PropertiesDialog::transitionFromEditMode(void) {
+void PropertiesDialog::transitionFromEditMode() {
     _list->setDisabled(false);
     _addButton->setDisabled(false);
     _removeButton->setDisabled(false);

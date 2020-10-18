@@ -46,7 +46,7 @@ public:
      */
     TimeDialog(openspace::Profile& profile, QWidget* parent);
 
-public slots:
+private slots:
     void enableAccordingToType(int);
     void approved();
 

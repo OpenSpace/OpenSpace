@@ -49,6 +49,13 @@
 using namespace openspace;
 
 namespace {
+    QFrame* createLine() {
+        QFrame* line = new QFrame;
+        line->setFrameShape(QFrame::HLine);
+        line->setFrameShadow(QFrame::Sunken);
+        return line;
+    }
+
     QString labelText(int size, QString title) {
         QString label;
         if (size > 0) {
@@ -90,7 +97,6 @@ namespace {
         }
         return results;
     }
-
 } // namespace
 
 ProfileEdit::ProfileEdit(Profile& profile, std::string profileName, 
@@ -126,12 +132,7 @@ ProfileEdit::ProfileEdit(Profile& profile, std::string profileName,
 
         layout->addLayout(container);
     }
-    {
-        QFrame* line = new QFrame;
-        line->setFrameShape(QFrame::HLine);
-        line->setFrameShadow(QFrame::Sunken);
-        layout->addWidget(line);
-    }
+    layout->addWidget(createLine());
     {
         QGridLayout* container = new QGridLayout;
         container->setColumnStretch(1, 1);
@@ -154,12 +155,7 @@ ProfileEdit::ProfileEdit(Profile& profile, std::string profileName,
 
         leftLayout->addLayout(container);
     }
-    {
-        QFrame* line = new QFrame;
-        line->setFrameShape(QFrame::HLine);
-        line->setFrameShadow(QFrame::Sunken);
-        leftLayout->addWidget(line);
-    }
+    leftLayout->addWidget(createLine());
     {
         QGridLayout* container = new QGridLayout;
         container->setColumnStretch(1, 1);
@@ -179,12 +175,7 @@ ProfileEdit::ProfileEdit(Profile& profile, std::string profileName,
 
         leftLayout->addLayout(container);
     }
-    {
-        QFrame* line = new QFrame;
-        line->setFrameShape(QFrame::HLine);
-        line->setFrameShadow(QFrame::Sunken);
-        leftLayout->addWidget(line);
-    }
+    leftLayout->addWidget(createLine());
     {
         QGridLayout* container = new QGridLayout;
         container->setColumnStretch(1, 1);
@@ -209,12 +200,7 @@ ProfileEdit::ProfileEdit(Profile& profile, std::string profileName,
     }
     topLayout->addLayout(leftLayout, 3);
 
-    {
-        QFrame* line = new QFrame;
-        line->setFrameShape(QFrame::HLine);
-        line->setFrameShadow(QFrame::Sunken);
-        topLayout->addWidget(line);
-    }
+    topLayout->addWidget(createLine());
 
     QBoxLayout* rightLayout = new QVBoxLayout;
     {
@@ -230,12 +216,7 @@ ProfileEdit::ProfileEdit(Profile& profile, std::string profileName,
         container->addWidget(metaEdit);
         rightLayout->addLayout(container);
     }
-    {
-        QFrame* line = new QFrame;
-        line->setFrameShape(QFrame::HLine);
-        line->setFrameShadow(QFrame::Sunken);
-        rightLayout->addWidget(line);
-    }
+    rightLayout->addWidget(createLine());
     {
         QBoxLayout* container = new QVBoxLayout;
         _interestingNodesLabel = new QLabel("Mark Interesting Nodes");
@@ -252,12 +233,7 @@ ProfileEdit::ProfileEdit(Profile& profile, std::string profileName,
         container->addWidget(interestingNodesEdit);
         rightLayout->addLayout(container);
     }
-    {
-        QFrame* line = new QFrame;
-        line->setFrameShape(QFrame::HLine);
-        line->setFrameShadow(QFrame::Sunken);
-        rightLayout->addWidget(line);
-    }
+    rightLayout->addWidget(createLine());
     {
         QBoxLayout* container = new QVBoxLayout;
         _deltaTimesLabel = new QLabel("Simulation Time Increments");
@@ -274,12 +250,7 @@ ProfileEdit::ProfileEdit(Profile& profile, std::string profileName,
         container->addWidget(deltaTimesEdit);
         rightLayout->addLayout(container);
     }
-    {
-        QFrame* line = new QFrame;
-        line->setFrameShape(QFrame::HLine);
-        line->setFrameShadow(QFrame::Sunken);
-        rightLayout->addWidget(line);
-    }
+    rightLayout->addWidget(createLine());
     {
         QBoxLayout* container = new QVBoxLayout;
         _cameraLabel = new QLabel("Camera");
@@ -293,12 +264,7 @@ ProfileEdit::ProfileEdit(Profile& profile, std::string profileName,
         container->addWidget(cameraEdit);
         rightLayout->addLayout(container);
     }
-    {
-        QFrame* line = new QFrame;
-        line->setFrameShape(QFrame::HLine);
-        line->setFrameShadow(QFrame::Sunken);
-        rightLayout->addWidget(line);
-    }
+    rightLayout->addWidget(createLine());
     {
         QBoxLayout* container = new QVBoxLayout;
         _timeLabel = new QLabel("Time");
@@ -312,12 +278,7 @@ ProfileEdit::ProfileEdit(Profile& profile, std::string profileName,
         container->addWidget(timeEdit);
         rightLayout->addLayout(container);
     }
-    {
-        QFrame* line = new QFrame;
-        line->setFrameShape(QFrame::HLine);
-        line->setFrameShadow(QFrame::Sunken);
-        rightLayout->addWidget(line);
-    }
+    rightLayout->addWidget(createLine());
     {
         QBoxLayout* container = new QVBoxLayout;
         _modulesLabel = new QLabel("Modules");
@@ -331,12 +292,7 @@ ProfileEdit::ProfileEdit(Profile& profile, std::string profileName,
         container->addWidget(modulesEdit);
         rightLayout->addLayout(container);
     }
-    {
-        QFrame* line = new QFrame;
-        line->setFrameShape(QFrame::HLine);
-        line->setFrameShadow(QFrame::Sunken);
-        rightLayout->addWidget(line);
-    }
+    rightLayout->addWidget(createLine());
     {
         QBoxLayout* container = new QVBoxLayout;
         _additionalScriptsLabel = new QLabel("Additional Scripts");
@@ -356,12 +312,7 @@ ProfileEdit::ProfileEdit(Profile& profile, std::string profileName,
     topLayout->addLayout(rightLayout);
     layout->addLayout(topLayout);
 
-    {
-        QFrame* line = new QFrame;
-        line->setFrameShape(QFrame::HLine);
-        line->setFrameShadow(QFrame::Sunken);
-        layout->addWidget(line);
-    }
+    layout->addWidget(createLine());
 
     {
         QBoxLayout* footer = new QHBoxLayout;
@@ -413,9 +364,8 @@ void ProfileEdit::duplicateProfile() {
     }
 
     constexpr const char Separator = '_';
-    size_t it = profile.rfind(Separator);
     int version = 0;
-    if (it != std::string::npos) {
+    if (size_t it = profile.rfind(Separator); it != std::string::npos) {
         // If the value exists, we have a profile that potentially already has a version
         // number attached to it
         std::string versionStr = profile.substr(it + 1);
@@ -443,7 +393,7 @@ void ProfileEdit::duplicateProfile() {
         std::string candidatePath = _profileBasePath + candidate + ".profile";
 
         if (!std::filesystem::exists(candidatePath)) {
-            _profileEdit->setText(QString::fromStdString(candidate));
+            _profileEdit->setText(QString::fromStdString(std::move(candidate)));
             return;
         }
     }
