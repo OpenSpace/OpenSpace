@@ -27,13 +27,13 @@
 #include "profile/profileedit.h"
 
 #include <openspace/engine/configuration.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <QComboBox>
 #include <QLabel>
 #include <QMessageBox>
 #include <QPushButton>
 #include <filesystem>
 #include <iostream>
-#include <random>
 
 namespace {
     constexpr const int ScreenWidth = 480;
@@ -106,8 +106,6 @@ LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
     setCentralWidget(createCentralWidget());
 
 
-
-
     populateProfilesList(globalConfig.profile);
 
     _profileBox->setEnabled(profileEnabled);
@@ -116,10 +114,10 @@ LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
     _windowConfigBox->setEnabled(sgctConfigEnabled);
 
 
-    std::string syncPath = globalConfig.pathTokens["SYNC"] + "/http/launcher_images";
-    if (std::filesystem::exists(syncPath)) {
+    std::string path = absPath(globalConfig.pathTokens["SYNC"] + "/http/launcher_images");
+    if (std::filesystem::exists(path)) {
         try {
-            setBackgroundImage(syncPath);
+            setBackgroundImage(path);
         }
         catch (const std::exception& e) {
             std::cerr << "Error occurrred while reading background images: " << e.what();
@@ -132,6 +130,7 @@ QWidget* LauncherWindow::createCentralWidget() {
 
     _backgroundImage = new QLabel(centralWidget);
     _backgroundImage->setGeometry(geometry::BackgroundImage);
+    _backgroundImage->setPixmap(QPixmap(":/images/launcher-background.png"));
 
     QLabel* logoImage = new QLabel(centralWidget);
     logoImage->setObjectName("clear");
@@ -180,90 +179,89 @@ QWidget* LauncherWindow::createCentralWidget() {
 void LauncherWindow::setBackgroundImage(const std::string& syncPath) {
     namespace fs = std::filesystem;
 
-    fs::directory_entry latestVersion;
+    // First, we iterate through all folders in the launcher_images sync folder and we get
+    // the folder with the highest number
+    struct {
+        fs::directory_entry path;
+        int version = -1;
+    } latest;
     for (const fs::directory_entry& p : fs::directory_iterator(syncPath)) {
         if (!p.is_directory()) {
             continue;
         }
-        std::string path = p.path().string();
-        std::
+        const std::string versionStr = p.path().stem().string();
+        // All folder names in the sync folder should only be a digit, so we should be
+        // find to just convert it here
+        const int version = std::stoi(versionStr);
 
+        if (version > latest.version) {
+            latest.version = version;
+            latest.path = p;
+        }
     }
 
-
-        bool hasSyncFiles = false;
-    QString syncFilePath = QString::fromStdString(
-        syncPath + "/http/launcher_images/1/profile1.png"
-    );
-    QFileInfo check_file(syncFilePath);
-    // check if file exists and if yes: Is it really a file and no directory?
-    if (check_file.exists() && check_file.isFile()) {
-        hasSyncFiles = true;
+    if (latest.version == -1) {
+        // The sync folder existed, but nothing was in there. Kinda weird, but still
+        return;
     }
 
-    QString filename;
-    QString bgpath;
-    if (hasSyncFiles) {
-        std::random_device rd;
-        std::mt19937 rng(rd());
-        std::uniform_int_distribution<int> uni(0, 4);
-        int random_integer = uni(rng);
-        filename = QString::fromStdString(
-            "/http/launcher_images/1/profile" + std::to_string(random_integer) + ".png"
-        );
-        bgpath = QString::fromStdString(syncPath) + filename;
+    // Now we know which folder to use, we will pick an image at random
+    std::vector<std::string> files;
+    for (const fs::directory_entry& p : fs::directory_iterator(latest.path)) {
+        files.push_back(p.path().string());
     }
-    else {
-        bgpath = QString::fromStdString(":/images/launcher-background.png");
-    }
-
-    _backgroundImage->setPixmap(QPixmap(bgpath));
+    std::random_shuffle(files.begin(), files.end());
+    // We know there has to be at least one folder, so it's fine to just pick the first
+    std::string image = files.front();
+    _backgroundImage->setPixmap(QPixmap(QString::fromStdString(image)));
 }
 
 void LauncherWindow::populateProfilesList(std::string preset) {
+    namespace fs = std::filesystem;
+    
     _profileBox->clear();
 
-    FileSystemAccess profiles(".profile", { "./" }, true, false);
-    std::string reportProfiles = profiles.useQtFileSystemModelToTraverseDir(
-        _basePath + "/data/profiles"
-    );
-    std::stringstream instream(reportProfiles);
-    std::string iline;
-    QStringList profilesListLine;
-    while (std::getline(instream, iline)) {
-        if (_profileBox->findText(QString::fromStdString(iline)) == -1) {
-            _profileBox->addItem(QString::fromStdString(iline));
+    // Add all the files with the .profile extension to the dropdown
+    const std::string profilePath = _basePath + "/data/profiles";
+    for (const fs::directory_entry& p : fs::directory_iterator(profilePath)) {
+        if (p.path().extension() != ".profile") {
+            continue;
         }
+        _profileBox->addItem(QString::fromStdString(p.path().stem().string()));
     }
-    if (preset.length() > 0) {
-        int presetMatchIdx = _profileBox->findText(QString::fromStdString(preset));
-        if (presetMatchIdx != -1) {
-            _profileBox->setCurrentIndex(presetMatchIdx);
-        }
+
+    // Try to find the requested profile and set it as the current one
+    const int presetMatchIdx = _profileBox->findText(QString::fromStdString(preset));
+    if (presetMatchIdx != -1) {
+        _profileBox->setCurrentIndex(presetMatchIdx);
+
     }
 }
 
 void LauncherWindow::populateWindowConfigsList(std::string preset) {
-    FileSystemAccess configs(".xml", { "./" }, true, false);
-    std::string reportConfigs = configs.useQtFileSystemModelToTraverseDir(
-        _basePath + "/config"
-    );
-    std::stringstream instream(reportConfigs);
-    std::string iline;
-    QStringList windowConfigsListLine;
-    while (std::getline(instream, iline)) {
-        windowConfigsListLine << QString::fromStdString(iline);
+    namespace fs = std::filesystem;
+
+    _windowConfigBox->clear();
+    // Add all the files with the .xml extension to the dropdown
+    const std::string configPath = _basePath + "/config";
+    for (const fs::directory_entry& p : fs::directory_iterator(configPath)) {
+        if (p.path().extension() != ".xml") {
+            continue;
+        }
+        _windowConfigBox->addItem(QString::fromStdString(p.path().stem().string()));
     }
-    _windowConfigBox->addItems(windowConfigsListLine);
-    if (preset.length() > 0) {
-        int presetMatchIdx = _windowConfigBox->findText(QString::fromStdString(preset));
-        if (presetMatchIdx != -1) {
-            _windowConfigBox->setCurrentIndex(presetMatchIdx);
-        }
-        else {
-            _windowConfigBox->addItem(QString::fromStdString(preset));
-            _windowConfigBox->setCurrentIndex(_windowConfigBox->count() - 1);
-        }
+
+    // Try to find the requested configuration file and set it as the current one. As we
+    // have support for function-generated configuration files that will not be in the
+    // list we need to add a preset that doesn't exist a file for
+    const int presetMatchIdx = _windowConfigBox->findText(QString::fromStdString(preset));
+    if (presetMatchIdx != -1) {
+        _windowConfigBox->setCurrentIndex(presetMatchIdx);
+    }
+    else {
+        // Add the requested preset at the top
+        _windowConfigBox->insertItem(0, QString::fromStdString(preset));
+        _windowConfigBox->setCurrentIndex(0);
     }
 }
 
