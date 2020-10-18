@@ -29,11 +29,14 @@
 #include <openspace/engine/configuration.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <QComboBox>
+#include <QFile>
 #include <QLabel>
 #include <QMessageBox>
 #include <QPushButton>
 #include <filesystem>
 #include <iostream>
+
+using namespace openspace;
 
 namespace {
     constexpr const int ScreenWidth = 480;
@@ -67,12 +70,71 @@ namespace {
             LeftRuler, TopRuler + 380, SmallItemWidth, SmallItemHeight
         );
     } // geometry
+
+    std::optional<Profile> loadProfileFromFile(QWidget* parent, std::string filename) {
+        std::ifstream inFile;
+        try {
+            inFile.open(filename, std::ifstream::in);
+        }
+        catch (const std::ifstream::failure& e) {
+            throw ghoul::RuntimeError(fmt::format(
+                "Exception opening {} profile for read: ({})", filename, e.what()
+            ));
+        }
+        std::string content;
+        std::string line;
+        while (std::getline(inFile, line)) {
+            content += line;
+        }
+        try {
+            return Profile(content);
+        }
+        catch (const Profile::ParsingError& e) {
+            QMessageBox::critical(
+                parent,
+                "Exception",
+                QString::fromStdString(fmt::format(
+                    "ParsingError exception in {}: {}, {}", filename, e.component, e.message
+                ))
+            );
+            return std::nullopt;
+        }
+        catch (const ghoul::RuntimeError& e) {
+            QMessageBox::critical(
+                parent,
+                "Exception",
+                QString::fromStdString(fmt::format(
+                    "RuntimeError exception in {}, component {}: {}",
+                    filename, e.component, e.message
+                ))
+            );
+            return std::nullopt;
+        }
+    }
+
+    void saveProfile(QWidget* parent, const std::string& path, const Profile& p) {
+        std::ofstream outFile;
+        try {
+            outFile.open(path, std::ofstream::out);
+            outFile << p.serialize();
+        }
+        catch (const std::ofstream::failure& e) {
+            QMessageBox::critical(
+                parent,
+                "Exception",
+                QString::fromStdString(fmt::format(
+                    "Error writing data to file: {} ({})", path, e.what()
+                ))
+            );
+        }
+    }
+
 } // namespace
 
 using namespace openspace;
 
 LauncherWindow::LauncherWindow(bool profileEnabled,
-                               configuration::Configuration& globalConfig,
+                               const configuration::Configuration& globalConfig,
                                bool sgctConfigEnabled, std::string sgctConfigName,
                                QWidget* parent)
     : QMainWindow(parent)
@@ -80,8 +142,6 @@ LauncherWindow::LauncherWindow(bool profileEnabled,
     , _configPath(absPath(globalConfig.pathTokens.at("CONFIG")) + '/')
     , _profilePath(absPath(globalConfig.pathTokens.at("PROFILES")) + '/')
     , _readOnlyProfiles(globalConfig.readOnlyProfiles)
-    , _fullyConfiguredViaCliArgs(!profileEnabled && !sgctConfigEnabled)
-
 {
     Q_INIT_RESOURCE(resources);
 
@@ -116,10 +176,10 @@ LauncherWindow::LauncherWindow(bool profileEnabled,
     _windowConfigBox->setEnabled(sgctConfigEnabled);
 
 
-    std::string path = absPath(globalConfig.pathTokens["SYNC"] + "/http/launcher_images");
-    if (std::filesystem::exists(path)) {
+    std::string p = absPath(globalConfig.pathTokens.at("SYNC") + "/http/launcher_images");
+    if (std::filesystem::exists(p)) {
         try {
-            setBackgroundImage(path);
+            setBackgroundImage(p);
         }
         catch (const std::exception& e) {
             std::cerr << "Error occurrred while reading background images: " << e.what();
@@ -128,7 +188,7 @@ LauncherWindow::LauncherWindow(bool profileEnabled,
 }
 
 QWidget* LauncherWindow::createCentralWidget() {
-    QWidget* centralWidget = new QWidget(this);
+    QWidget* centralWidget = new QWidget;
 
     _backgroundImage = new QLabel(centralWidget);
     _backgroundImage->setGeometry(geometry::BackgroundImage);
@@ -158,19 +218,36 @@ QWidget* LauncherWindow::createCentralWidget() {
     _windowConfigBox->setGeometry(geometry::WindowConfigBox);
 
     QPushButton* startButton = new QPushButton("START", centralWidget);
-    connect(startButton, &QPushButton::released, this, &LauncherWindow::startOpenSpace);
+    connect(
+        startButton, &QPushButton::released,
+        [this]() {
+            _shouldLaunch = true;
+            close();
+        }
+    );
     startButton->setObjectName("large");
     startButton->setGeometry(geometry::StartButton);
     startButton->setCursor(Qt::PointingHandCursor);
 
     QPushButton* newButton = new QPushButton("New", centralWidget);
-    connect(newButton, &QPushButton::released, this, &LauncherWindow::openWindowNew);
+    connect(
+        newButton, &QPushButton::released,
+        [this]() {
+            openProfileEditor("");
+        }
+    );
     newButton->setObjectName("small");
     newButton->setGeometry(geometry::NewButton);
     newButton->setCursor(Qt::PointingHandCursor);
 
     QPushButton* editButton = new QPushButton("Edit", centralWidget);
-    connect(editButton, &QPushButton::released, this, &LauncherWindow::openWindowEdit);
+    connect(
+        editButton, &QPushButton::released,
+        [this]() {
+            const std::string selection = _profileBox->currentText().toStdString();
+            openProfileEditor(selection);
+        }
+    );
     editButton->setObjectName("small");
     editButton->setGeometry(geometry::EditButton);
     editButton->setCursor(Qt::PointingHandCursor);
@@ -265,109 +342,38 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
     }
 }
 
-void LauncherWindow::openWindowNew() {
-    std::string initialProfileSelection = _profileBox->currentText().toStdString();
-    Profile profile;
-    ProfileEdit editor(profile, _assetPath, _readOnlyProfiles, this);
+void LauncherWindow::openProfileEditor(const std::string& profile) {
+    std::optional<Profile> p;
+    if (profile.empty()) {
+        // If the requested profile is the empty string, then we want to create a new one
+
+        p = Profile();
+    }
+    else {
+        // Otherwise, we want to load that profile
+
+        std::string fullProfilePath = _profilePath + profile + ".profile";
+        p = loadProfileFromFile(this, fullProfilePath);
+        if (!p.has_value()) {
+            return;
+        }
+    }
+
+    ProfileEdit editor(*p, profile, _assetPath, _profilePath, _readOnlyProfiles, this);
     editor.exec();
     if (editor.wasSaved()) {
-        std::string savePath = _profilePath + editor.specifiedFilename() + ".profile";
-        saveProfileToFile(savePath, profile);
+        const std::string path = _profilePath + editor.specifiedFilename() + ".profile";
+        saveProfile(this, path, *p);
         populateProfilesList(editor.specifiedFilename());
     }
     else {
-        populateProfilesList(initialProfileSelection);
-    }
-}
-
-void LauncherWindow::openWindowEdit() {
-    std::string initialProfileSelection = _profileBox->currentText().toStdString();
-    int selectedProfileIdx = _profileBox->currentIndex();
-    QString profileToSet = _profileBox->itemText(selectedProfileIdx);
-    std::string editProfilePath = _profilePath + profileToSet.toStdString() + ".profile";
-
-    std::optional<Profile> profile = loadProfileFromFile(editProfilePath);
-    if (profile.has_value()) {
-        ProfileEdit editor(*profile, _assetPath, _readOnlyProfiles, this);
-        editor.setProfileName(profileToSet);
-        editor.exec();
-        if (editor.wasSaved()) {
-            const std::string p = _profilePath + editor.specifiedFilename() + ".profile";
-            saveProfileToFile(p, *profile);
-            populateProfilesList(editor.specifiedFilename());
-        }
-        else {
-            populateProfilesList(initialProfileSelection);
-        }
-    }
-}
-
-void LauncherWindow::saveProfileToFile(const std::string& path, const Profile& p) {
-    std::ofstream outFile;
-    try {
-        outFile.open(path, std::ofstream::out);
-        outFile << p.serialize();
-    }
-    catch (const std::ofstream::failure& e) {
-        QMessageBox::critical(
-            this,
-            "Exception",
-            QString::fromStdString(fmt::format(
-                "Error writing data to file: {} ({})", path, e.what()
-            ))
-        );
-    }
-}
-
-std::optional<Profile> LauncherWindow::loadProfileFromFile(std::string filename) {
-    std::ifstream inFile;
-    try {
-        inFile.open(filename, std::ifstream::in);
-    }
-    catch (const std::ifstream::failure& e) {
-        throw ghoul::RuntimeError(fmt::format(
-            "Exception opening {} profile for read: ({})",
-            filename,
-            e.what()
-        ));
-    }
-    std::string content;
-    std::string line;
-    while (std::getline(inFile, line)) {
-        content += line;
-    }
-    try {
-        return Profile(content);
-    }
-    catch (const Profile::ParsingError& e) {
-        QMessageBox::critical(
-            this,
-            "Exception",
-            QString::fromStdString(fmt::format(
-                "ParsingError exception in {}: {}, {}", filename, e.component, e.message
-            ))
-        );
-        return std::nullopt;
-    }
-    catch (const ghoul::RuntimeError& e) {
-        QMessageBox::critical(
-            this,
-            "Exception",
-            QString::fromStdString(fmt::format(
-                "RuntimeError exception in {}, component {}: {}",
-                filename, e.component, e.message
-            ))
-        );
-        return std::nullopt;
+        const std::string current = _profileBox->currentText().toStdString();
+        populateProfilesList(current);
     }
 }
 
 bool LauncherWindow::wasLaunchSelected() const {
-    return _launch;
-}
-
-bool LauncherWindow::isFullyConfiguredFromCliArgs() const {
-    return _fullyConfiguredViaCliArgs;
+    return _shouldLaunch;
 }
 
 std::string LauncherWindow::selectedProfile() const {
@@ -376,9 +382,4 @@ std::string LauncherWindow::selectedProfile() const {
 
 std::string LauncherWindow::selectedWindowConfig() const {
     return _windowConfigBox->currentText().toStdString();
-}
-
-void LauncherWindow::startOpenSpace() {
-    _launch = true;
-    close();
 }

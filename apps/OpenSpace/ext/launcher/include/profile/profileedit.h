@@ -26,18 +26,15 @@
 #define __OPENSPACE_UI_LAUNCHER___PROFILEEDIT___H__
 
 #include <QDialog>
-#include <QWidget>
-#include "profile/metadialog.h"
-#include "profile/propertiesdialog.h"
-#include "profile/modulesdialog.h"
-#include "profile/keybindingsdialog.h"
-#include "profile/assetsdialog.h"
-#include "profile/timedialog.h"
-#include "profile/additionalscriptsdialog.h"
-#include "profile/deltatimesdialog.h"
-#include "profile/cameradialog.h"
-#include "profile/marknodesdialog.h"
-#include <openspace/scene/profile.h>
+#include <string>
+#include <vector>
+
+namespace openspace { class Profile; }
+
+class QWidget;
+class QLabel;
+class QLineEdit;
+class QTextEdit;
 
 class ProfileEdit : public QDialog {
 Q_OBJECT
@@ -52,17 +49,9 @@ public:
      *                         not be overwritten
      * \param parent Pointer to parent Qt widget (optional)
      */
-    ProfileEdit(openspace::Profile& profile, std::string assetBasePath,
+    ProfileEdit(openspace::Profile& profile, std::string profileName,
+        std::string assetBasePath, std::string profileBasePath,
         const std::vector<std::string>& profilesReadOnly, QWidget* parent);
-
-    /**
-     * Sets the profile name in top save/edit window. This can be changed by user in
-     * order to save to a different file.
-     *
-     * \param profileToSet name of the profile to set to
-     */
-    void setProfileName(QString profileToSet);
-
 
     /**
      * Gets the status of the save when the window is closed; was the file saved?
@@ -86,7 +75,7 @@ public:
      */
     void keyPressEvent(QKeyEvent* evt);
 
-public slots:
+private slots:
     void duplicateProfile();
     void openMeta();
     void openProperties();
@@ -103,13 +92,10 @@ public slots:
 
 private:
     void initSummaryTextForEachCategory();
-    std::string summarizeAssets();
-    std::string summarizeProperties();
-    std::string summarizeKeybindings();
-    bool isReadOnly(std::string profileToSave);
 
     openspace::Profile& _profile;
     const std::string _assetBasePath;
+    const std::string _profileBasePath;
     bool _saveSelected = false;
     const std::vector<std::string>& _readOnlyProfiles;
 

@@ -50,8 +50,8 @@ public:
      *                   in the tree structure.
      */
     LauncherWindow(bool profileEnabled,
-        openspace::configuration::Configuration& globalConfig, bool sgctConfigEnabled, 
-        std::string sgctConfigName, QWidget* parent);
+        const openspace::configuration::Configuration& globalConfig,
+        bool sgctConfigEnabled,  std::string sgctConfigName, QWidget* parent);
 
     /**
       * Returns bool for whether "start OpenSpace" was chosen when this window closed.
@@ -60,14 +60,6 @@ public:
       * \return true if the "start OpenSpace" button was clicked
       */
     bool wasLaunchSelected() const;
-
-    /**
-      * Returns true if both the profile and sgct window configuration were specified
-      * at the command line (and so the launcher will not run).
-      *
-      * \return true if both profile and sgct window config were specified at CLI
-      */
-    bool isFullyConfiguredFromCliArgs() const;
 
     /**
       * Returns the selected profile name when launcher window closed
@@ -85,26 +77,20 @@ public:
       */
     std::string selectedWindowConfig() const;
 
-public slots:
-    void openWindowEdit();
-    void openWindowNew();
-    void startOpenSpace();
-
 private:
     QWidget* createCentralWidget();
     void setBackgroundImage(const std::string& syncPath);
 
+    void openProfileEditor(const std::string& profile);
+
     void populateProfilesList(std::string preset);
     void populateWindowConfigsList(std::string preset);
-    std::optional<openspace::Profile> loadProfileFromFile(std::string filename);
-    void saveProfileToFile(const std::string& path, const openspace::Profile& p);
 
     const std::string _assetPath;
     const std::string _configPath;
     const std::string _profilePath;
     const std::vector<std::string>& _readOnlyProfiles;
-    bool _launch = false;
-    bool _fullyConfiguredViaCliArgs = false;
+    bool _shouldLaunch = false;
 
     QComboBox* _profileBox = nullptr;
     QComboBox* _windowConfigBox = nullptr;

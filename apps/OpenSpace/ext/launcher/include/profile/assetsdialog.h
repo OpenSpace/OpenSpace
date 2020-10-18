@@ -50,6 +50,11 @@ public:
     AssetsDialog(openspace::Profile& profile, const std::string& assetBasePath,
         QWidget* parent);
 
+private slots:
+    void parseSelections();
+    void selected(const QModelIndex&);
+
+private:
     /**
      * Creates a text summary of all assets and their paths
      *
@@ -57,11 +62,6 @@ public:
      */
     QString createTextSummary();
 
-private slots:
-    void parseSelections();
-    void selected(const QModelIndex&);
-
-private:
     openspace::Profile& _profile;
     AssetTreeModel _assetTreeModel;
     QTreeView* _assetTree = nullptr;

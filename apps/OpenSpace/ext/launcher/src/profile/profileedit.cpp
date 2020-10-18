@@ -22,21 +22,33 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/scene/profile.h>
 #include "profile/profileedit.h"
+
+#include "profile/additionalscriptsdialog.h"
+#include "profile/assetsdialog.h"
+#include "profile/cameradialog.h"
+#include "profile/deltatimesdialog.h"
+#include "profile/keybindingsdialog.h"
+#include "profile/marknodesdialog.h"
+#include "profile/metadialog.h"
+#include "profile/modulesdialog.h"
+#include "profile/propertiesdialog.h"
+#include "profile/timedialog.h"
+#include <openspace/scene/profile.h>
+#include <QDialogButtonBox>
 #include <QKeyEvent>
-#include <iostream>
-#include <QVBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QTextEdit>
-#include <QDialogButtonBox>
+#include <QVBoxLayout>
+#include <QWidget>
+#include <filesystem>
+#include <iostream>
+
+using namespace openspace;
 
 namespace {
-    template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
-    template <class... Ts> overloaded(Ts...)->overloaded<Ts...>;
-
     QString labelText(int size, QString title) {
         QString label;
         if (size > 0) {
@@ -47,15 +59,47 @@ namespace {
         }
         return label;
     }
+
+    std::string summarizeAssets(const std::vector<std::string>& assets) {
+        std::string results;
+        for (const std::string& a : assets) {
+            results += a + '\n';
+        }
+        return results;
+    }
+
+    std::string summarizeKeybindings(const std::vector<Profile::Keybinding>& keybindings)
+    {
+        std::string results;
+        for (Profile::Keybinding k : keybindings) {
+            results += k.name + " (";
+            int keymod = static_cast<int>(k.key.modifier);
+            if (keymod != static_cast<int>(openspace::KeyModifier::NoModifier)) {
+                results += openspace::KeyModifierNames.at(keymod) + "+";
+            }
+            results += openspace::KeyNames.at(static_cast<int>(k.key.key));
+            results += ")\n";
+        }
+        return results;
+    }
+
+    std::string summarizeProperties(const std::vector<Profile::Property>& properties) {
+        std::string results;
+        for (openspace::Profile::Property p : properties) {
+            results += p.name + " = " + p.value + '\n';
+        }
+        return results;
+    }
+
 } // namespace
 
-using namespace openspace;
-
-ProfileEdit::ProfileEdit(Profile& profile, std::string assetBasePath,
+ProfileEdit::ProfileEdit(Profile& profile, std::string profileName, 
+                         std::string assetBasePath, std::string profileBasePath,
                          const std::vector<std::string>& readOnlyProfiles,
                          QWidget* parent)
     : QDialog(parent)
     , _assetBasePath(std::move(assetBasePath))
+    , _profileBasePath(std::move(profileBasePath))
     , _profile(profile)
     , _readOnlyProfiles(readOnlyProfiles)
 {
@@ -70,7 +114,7 @@ ProfileEdit::ProfileEdit(Profile& profile, std::string assetBasePath,
         profileLabel->setObjectName("profile");
         container->addWidget(profileLabel);
 
-        _profileEdit = new QLineEdit;
+        _profileEdit = new QLineEdit(QString::fromStdString(profileName));
         container->addWidget(_profileEdit);
 
         QPushButton* duplicateButton = new QPushButton("Duplicate Profile");
@@ -341,13 +385,17 @@ void ProfileEdit::initSummaryTextForEachCategory() {
     _modulesLabel->setText(labelText(_profile.modules().size(), "Modules"));
 
     _assetsLabel->setText(labelText(_profile.assets().size(), "Assets"));
-    _assetsEdit->setText(QString::fromStdString(summarizeAssets()));
+    _assetsEdit->setText(QString::fromStdString(summarizeAssets(_profile.assets())));
 
     _propertiesLabel->setText(labelText(_profile.properties().size(), "Properties"));
-    _propertiesEdit->setText(QString::fromStdString(summarizeProperties()));
+    _propertiesEdit->setText(
+        QString::fromStdString(summarizeProperties(_profile.properties()))
+    );
 
     _keybindingsLabel->setText(labelText(_profile.keybindings().size(), "Keybindings"));
-    _keybindingsEdit->setText(QString::fromStdString(summarizeKeybindings()));
+    _keybindingsEdit->setText(
+        QString::fromStdString(summarizeKeybindings(_profile.keybindings()))
+    );
 
     _deltaTimesLabel->setText(
         labelText(_profile.deltaTimes().size(), "Simulation Time Increments")
@@ -357,28 +405,48 @@ void ProfileEdit::initSummaryTextForEachCategory() {
     );
 }
 
-void ProfileEdit::setProfileName(QString profileToSet) {
-    _profileEdit->setText(profileToSet);
-}
-
 void ProfileEdit::duplicateProfile() {
-    QString currentProfile = _profileEdit->text();
-    if (!currentProfile.isEmpty()) {
-        QString duplicatedName = currentProfile + "_1";
-        if ((currentProfile.length() > 2)
-            && (currentProfile.midRef(currentProfile.length() - 2, 1) == "_"))
-        {
-            QStringRef num = currentProfile.midRef(currentProfile.length() - 1, 1);
-            bool validConversion = false;
-            int val = num.toInt(&validConversion, 10);
-            if (validConversion && val < 9) {
-                duplicatedName = currentProfile.left(currentProfile.length() - 2)
-                    + "_" + QString::number(val + 1);
-            }
-        }
-        _profileEdit->setText(duplicatedName);
-    }
     _errorMsg->clear();
+    std::string profile = _profileEdit->text().toStdString();
+    if (profile.empty()) {
+        return;
+    }
+
+    constexpr const char Separator = '_';
+    size_t it = profile.rfind(Separator);
+    int version = 0;
+    if (it != std::string::npos) {
+        // If the value exists, we have a profile that potentially already has a version
+        // number attached to it
+        std::string versionStr = profile.substr(it + 1);
+        try {
+            version = std::stoi(versionStr);
+
+            // We will re-add the separator with the new version string to the file, so we
+            // will remove the suffix here first
+            profile = profile.substr(0, it);
+        }
+        catch (const std::invalid_argument& e) {
+            // If this exception is thrown, we did find a separator character but the
+            // substring afterwards was not a number, so the user just added a separator
+            // by themselves. In this case we don't do anything
+        }
+    }
+
+    // By this point we have our current profile (without any suffix) in 'profile' and the
+    // currently active version in 'version'. Now we need to put both together again and
+    // also make sure that we don't pick a version number that already exists
+    while (true) {
+        version++;
+
+        std::string candidate = profile + Separator + std::to_string(version);
+        std::string candidatePath = _profileBasePath + candidate + ".profile";
+
+        if (!std::filesystem::exists(candidatePath)) {
+            _profileEdit->setText(QString::fromStdString(candidate));
+            return;
+        }
+    }
 }
 
 void ProfileEdit::openMeta() {
@@ -396,23 +464,25 @@ void ProfileEdit::openProperties() {
     _errorMsg->clear();
     PropertiesDialog(_profile, this).exec();
     _propertiesLabel->setText(labelText(_profile.properties().size(), "Properties"));
-    _propertiesEdit->setText(QString::fromStdString(summarizeProperties()));
+    _propertiesEdit->setText(
+        QString::fromStdString(summarizeProperties(_profile.properties()))
+    );
 }
 
 void ProfileEdit::openKeybindings() {
     _errorMsg->clear();
     KeybindingsDialog(_profile, this).exec();
     _keybindingsLabel->setText(labelText(_profile.keybindings().size(), "Keybindings"));
-    _keybindingsEdit->setText(QString::fromStdString(summarizeKeybindings()));
+    _keybindingsEdit->setText(
+        QString::fromStdString(summarizeKeybindings(_profile.keybindings()))
+    );
 }
 
 void ProfileEdit::openAssets() {
     _errorMsg->clear();
-    AssetsDialog assets(_profile, _assetBasePath, this);
-    assets.exec();
+    AssetsDialog(_profile, _assetBasePath, this).exec();
     _assetsLabel->setText(labelText(_profile.assets().size(), "Assets"));
-    _assetsEdit->setText(assets.createTextSummary());
-    _assetsEdit->setText(QString::fromStdString(summarizeAssets()));
+    _assetsEdit->setText(QString::fromStdString(summarizeAssets(_profile.assets())));
 }
 
 void ProfileEdit::openTime() {
@@ -446,36 +516,6 @@ void ProfileEdit::openMarkNodes() {
     );
 }
 
-std::string ProfileEdit::summarizeProperties() {
-    std::string results;
-    for (openspace::Profile::Property p : _profile.properties()) {
-        results += p.name + " = " + p.value + '\n';
-    }
-    return results;
-}
-
-std::string ProfileEdit::summarizeKeybindings() {
-    std::string results;
-    for (openspace::Profile::Keybinding k : _profile.keybindings()) {
-        results += k.name + " (";
-        int keymod = static_cast<int>(k.key.modifier);
-        if (keymod != static_cast<int>(openspace::KeyModifier::NoModifier)) {
-            results += openspace::KeyModifierNames.at(keymod) + "+";
-        }
-        results += openspace::KeyNames.at(static_cast<int>(k.key.key));
-        results += ")\n";
-    }
-    return results;
-}
-
-std::string ProfileEdit::summarizeAssets() {
-    std::string results;
-    for (const std::string& a : _profile.assets()) {
-        results += a + '\n';
-    }
-    return results;
-}
-
 bool ProfileEdit::wasSaved() const {
     return _saveSelected;
 }
@@ -489,26 +529,22 @@ void ProfileEdit::cancel() {
     reject();
 }
 
-bool ProfileEdit::isReadOnly(std::string profileSave) {
-    auto it = std::find(_readOnlyProfiles.begin(), _readOnlyProfiles.end(), profileSave);
-    return !(it == _readOnlyProfiles.end());
-}
-
 void ProfileEdit::approved() {
-    QString profileName = _profileEdit->text();
-    if (profileName.isEmpty()) {
+    std::string profileName = _profileEdit->text().toStdString();
+    if (profileName.empty()) {
         _errorMsg->setText("Profile name must be specified");
         return;
     }
 
-    if ((profileName.length() > 0) && !isReadOnly(profileName.toStdString())) {
+    auto it = std::find(_readOnlyProfiles.begin(), _readOnlyProfiles.end(), profileName);
+    if (it == _readOnlyProfiles.end()) {
         _saveSelected = true;
         _errorMsg->setText("");
         accept();
     }
     else {
         _errorMsg->setText(
-            "This is a read-only profile. Click 'duplicate' or rename & save"
+            "This is a read-only profile. Click 'Duplicate' or rename & save"
         );
     }
 }
