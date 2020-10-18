@@ -27,7 +27,6 @@
 
 #include <QMainWindow>
 
-#include "filesystemaccess.h"
 #include <openspace/scene/profile.h>
 #include <optional>
 
@@ -42,7 +41,6 @@ public:
     /**
      * Constructor for LauncherWindow class
      *
-     * \param basePath The base OpenSpace installation path
      * \param profileEnabled true if profile selection combo box will be enabled
      * \param globalConfig reference to global configuration for OpenSpace settings
      * \param sgctConfigEnabled true if window selection combo box will be enabled
@@ -51,7 +49,7 @@ public:
      * \param parentItem The parent that contains this (and possibly other) children
      *                   in the tree structure.
      */
-    LauncherWindow(std::string basePath, bool profileEnabled,
+    LauncherWindow(bool profileEnabled,
         openspace::configuration::Configuration& globalConfig, bool sgctConfigEnabled, 
         std::string sgctConfigName, QWidget* parent);
 
@@ -101,8 +99,10 @@ private:
     std::optional<openspace::Profile> loadProfileFromFile(std::string filename);
     void saveProfileToFile(const std::string& path, const openspace::Profile& p);
 
-    openspace::configuration::Configuration& _globalConfig;
-    std::string _basePath;
+    const std::string _assetPath;
+    const std::string _configPath;
+    const std::string _profilePath;
+    const std::vector<std::string>& _readOnlyProfiles;
     bool _launch = false;
     bool _fullyConfiguredViaCliArgs = false;
 

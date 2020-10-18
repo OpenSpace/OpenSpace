@@ -71,13 +71,15 @@ namespace {
 
 using namespace openspace;
 
-LauncherWindow::LauncherWindow(std::string basePath, bool profileEnabled,
+LauncherWindow::LauncherWindow(bool profileEnabled,
                                configuration::Configuration& globalConfig,
                                bool sgctConfigEnabled, std::string sgctConfigName,
                                QWidget* parent)
     : QMainWindow(parent)
-    , _basePath(std::move(basePath))
-    , _globalConfig(globalConfig)
+    , _assetPath(absPath(globalConfig.pathTokens.at("ASSETS")) + '/')
+    , _configPath(absPath(globalConfig.pathTokens.at("CONFIG")) + '/')
+    , _profilePath(absPath(globalConfig.pathTokens.at("PROFILES")) + '/')
+    , _readOnlyProfiles(globalConfig.readOnlyProfiles)
     , _fullyConfiguredViaCliArgs(!profileEnabled && !sgctConfigEnabled)
 
 {
@@ -222,8 +224,7 @@ void LauncherWindow::populateProfilesList(std::string preset) {
     _profileBox->clear();
 
     // Add all the files with the .profile extension to the dropdown
-    const std::string profilePath = _basePath + "/data/profiles";
-    for (const fs::directory_entry& p : fs::directory_iterator(profilePath)) {
+    for (const fs::directory_entry& p : fs::directory_iterator(_profilePath)) {
         if (p.path().extension() != ".profile") {
             continue;
         }
@@ -243,8 +244,7 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
 
     _windowConfigBox->clear();
     // Add all the files with the .xml extension to the dropdown
-    const std::string configPath = _basePath + "/config";
-    for (const fs::directory_entry& p : fs::directory_iterator(configPath)) {
+    for (const fs::directory_entry& p : fs::directory_iterator(_configPath)) {
         if (p.path().extension() != ".xml") {
             continue;
         }
@@ -266,26 +266,13 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
 }
 
 void LauncherWindow::openWindowNew() {
-    FileSystemAccess assets(
-        ".asset", { "scene", "global", "customization", "examples", "util" }, true, true
-    );
-    std::string assetList = assets.useQtFileSystemModelToTraverseDir(
-        _basePath + "/data/assets"
-    );
-
     std::string initialProfileSelection = _profileBox->currentText().toStdString();
     Profile profile;
-    ProfileEdit editor(
-        profile,
-        assetList,
-        _globalConfig.readOnlyProfiles,
-        this
-    );
+    ProfileEdit editor(profile, _assetPath, _readOnlyProfiles, this);
     editor.exec();
     if (editor.wasSaved()) {
-        std::string saveProfilePath = _basePath + "/data/profiles/";
-        saveProfilePath += editor.specifiedFilename() + ".profile";
-        saveProfileToFile(saveProfilePath, profile);
+        std::string savePath = _profilePath + editor.specifiedFilename() + ".profile";
+        saveProfileToFile(savePath, profile);
         populateProfilesList(editor.specifiedFilename());
     }
     else {
@@ -294,32 +281,19 @@ void LauncherWindow::openWindowNew() {
 }
 
 void LauncherWindow::openWindowEdit() {
-    FileSystemAccess assets(
-        ".asset", { "scene", "global", "customization", "examples", "util" }, true, true
-    );
-    std::string assetList = assets.useQtFileSystemModelToTraverseDir(
-        _basePath + "/data/assets"
-    );
-
     std::string initialProfileSelection = _profileBox->currentText().toStdString();
-    std::string profilePath = _basePath + "/data/profiles/";
     int selectedProfileIdx = _profileBox->currentIndex();
     QString profileToSet = _profileBox->itemText(selectedProfileIdx);
-    std::string editProfilePath = profilePath + profileToSet.toStdString() + ".profile";
+    std::string editProfilePath = _profilePath + profileToSet.toStdString() + ".profile";
 
     std::optional<Profile> profile = loadProfileFromFile(editProfilePath);
     if (profile.has_value()) {
-        ProfileEdit editor(
-            *profile,
-            assetList,
-            _globalConfig.readOnlyProfiles,
-            this
-        );
+        ProfileEdit editor(*profile, _assetPath, _readOnlyProfiles, this);
         editor.setProfileName(profileToSet);
         editor.exec();
         if (editor.wasSaved()) {
-            profilePath += editor.specifiedFilename() + ".profile";
-            saveProfileToFile(profilePath, *profile);
+            const std::string p = _profilePath + editor.specifiedFilename() + ".profile";
+            saveProfileToFile(p, *profile);
             populateProfilesList(editor.specifiedFilename());
         }
         else {

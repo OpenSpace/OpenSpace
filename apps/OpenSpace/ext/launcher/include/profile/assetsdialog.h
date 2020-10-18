@@ -28,7 +28,6 @@
 #include <QDialog>
 
 #include "assettreemodel.h"
-#include "filesystemaccess.h"
 
 namespace openspace { class Profile; }
 
@@ -48,7 +47,7 @@ public:
      *                     in class #assetTreeModel)
      * \param parent Pointer to parent Qt widget
      */
-    AssetsDialog(openspace::Profile& profile, const std::string reportAssets,
+    AssetsDialog(openspace::Profile& profile, const std::string& assetBasePath,
         QWidget* parent);
 
     /**

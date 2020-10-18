@@ -115,7 +115,7 @@ namespace {
     }
 } // namespace
 
-AssetsDialog::AssetsDialog(openspace::Profile& profile, const std::string reportAssets,
+AssetsDialog::AssetsDialog(openspace::Profile& profile, const std::string& assetBasePath,
                            QWidget* parent)
     : QDialog(parent)
     , _profile(profile)
@@ -129,7 +129,7 @@ AssetsDialog::AssetsDialog(openspace::Profile& profile, const std::string report
         layout->addWidget(heading);
     }
     {
-        _assetTreeModel.importModelData(reportAssets);
+        _assetTreeModel.importModelData(assetBasePath);
 
         _assetTree = new QTreeView;
         _assetTree->setToolTip(

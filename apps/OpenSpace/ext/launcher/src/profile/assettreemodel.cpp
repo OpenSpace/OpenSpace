@@ -24,6 +24,7 @@
 
 #include "profile/assettreeitem.h"
 #include "profile/assettreemodel.h"
+#include "filesystemaccess.h"
 #include <sstream>
 #include <QColor>
 
@@ -143,8 +144,13 @@ AssetTreeModel::AssetTreeModel(QObject* parent)
     );
 }
 
-void AssetTreeModel::importModelData(const std::string& contents) {
-    std::istringstream iss(contents);
+void AssetTreeModel::importModelData(const std::string& assetBasePath) {
+    FileSystemAccess assets(
+        ".asset", { "scene", "global", "customization", "examples", "util" }, true, true
+    );
+    std::string assetList = assets.useQtFileSystemModelToTraverseDir(assetBasePath);
+
+    std::istringstream iss(assetList);
     ImportElement rootElem = { "", 0, false };
 
     if (importGetNextLine(rootElem, iss)) {

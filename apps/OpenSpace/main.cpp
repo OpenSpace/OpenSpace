@@ -1172,7 +1172,7 @@ int main(int argc, char** argv) {
     if (!skipLauncherSinceProfileAndWindowAreConfiguredInCli) {
         int qac = 0;
         qaobj.reset(new QApplication(qac, nullptr));
-        launchwin.reset(new LauncherWindow(absPath("${BASE}"), !haveCliProfile,
+        launchwin.reset(new LauncherWindow(!haveCliProfile,
             global::configuration, !haveCliSGCTConfig, windowCfgPreset, nullptr));
         launchwin->show();
         qaobj->exec();

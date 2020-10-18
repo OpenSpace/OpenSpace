@@ -24,7 +24,6 @@
 
 #include <openspace/scene/profile.h>
 #include "profile/profileedit.h"
-#include "filesystemaccess.h"
 #include <QKeyEvent>
 #include <iostream>
 #include <QVBoxLayout>
@@ -52,10 +51,11 @@ namespace {
 
 using namespace openspace;
 
-ProfileEdit::ProfileEdit(Profile& profile, const std::string reportedAssets,
-                         std::vector<std::string>& readOnlyProfiles, QWidget* parent)
+ProfileEdit::ProfileEdit(Profile& profile, std::string assetBasePath,
+                         const std::vector<std::string>& readOnlyProfiles,
+                         QWidget* parent)
     : QDialog(parent)
-    , _reportedAssets(reportedAssets)
+    , _assetBasePath(std::move(assetBasePath))
     , _profile(profile)
     , _readOnlyProfiles(readOnlyProfiles)
 {
@@ -408,7 +408,7 @@ void ProfileEdit::openKeybindings() {
 
 void ProfileEdit::openAssets() {
     _errorMsg->clear();
-    AssetsDialog assets(_profile, _reportedAssets, this);
+    AssetsDialog assets(_profile, _assetBasePath, this);
     assets.exec();
     _assetsLabel->setText(labelText(_profile.assets().size(), "Assets"));
     _assetsEdit->setText(assets.createTextSummary());
