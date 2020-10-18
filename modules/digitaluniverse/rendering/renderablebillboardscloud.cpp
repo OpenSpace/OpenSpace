@@ -257,6 +257,19 @@ namespace {
         "Enable pixel size control.",
         "Enable pixel size control for rectangular projections."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo UseLinearFiltering = {
+        "UseLinearFiltering",
+        "Use Linear Filtering",
+        "Determines whether the provided color map should be sampled nearest neighbor "
+        "(=off) or linearly (=on"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo SetRangeFromData = {
+        "SetRangeFromData",
+        "Set Data Range from Data",
+        "Set the data range based on the available data"
+    };
 }  // namespace
 
 namespace openspace {
@@ -422,6 +435,12 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
                 new BoolVerifier,
                 Optional::Yes,
                 PixelSizeControlInfo.description
+            },
+            {
+                UseLinearFiltering.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                UseLinearFiltering.description
             }
         }
     };
@@ -459,6 +478,8 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _correctionSizeEndDistance(CorrectionSizeEndDistanceInfo, 17.f, 12.f, 25.f)
     , _correctionSizeFactor(CorrectionSizeFactorInfo, 8.f, 0.f, 20.f)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _setRangeFromData(SetRangeFromData)
+    , _useLinearFiltering(UseLinearFiltering, false)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -713,6 +734,28 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         _pixelSizeControl = dictionary.value<bool>(PixelSizeControlInfo.identifier);
         addProperty(_pixelSizeControl);
     }
+
+    _setRangeFromData.onChange([this]() {
+        const int colorMapInUse =
+            _hasColorMapFile ? _variableDataPositionMap[_colorOptionString] : 0;
+
+        float minValue = std::numeric_limits<float>::max();
+        float maxValue = std::numeric_limits<float>::min();
+        for (size_t i = 0; i < _fullData.size(); i += _nValuesPerAstronomicalObject) {
+            float colorIdx = _fullData[i + 3 + colorMapInUse];
+            maxValue = colorIdx >= maxValue ? colorIdx : maxValue;
+            minValue = colorIdx < minValue ? colorIdx : minValue;
+        }
+
+        _optionColorRangeData = glm::vec2(minValue, maxValue);
+    });
+    addProperty(_setRangeFromData);
+
+    if (dictionary.hasKey(UseLinearFiltering.identifier)) {
+        _useLinearFiltering = dictionary.value<bool>(UseLinearFiltering.identifier);
+    }
+    _useLinearFiltering.onChange([&]() { _dataIsDirty = true; });
+    addProperty(_useLinearFiltering);
 }
 
 bool RenderableBillboardsCloud::isReady() const {
@@ -1668,11 +1711,9 @@ void RenderableBillboardsCloud::createDataSlice() {
                 _slicedData.push_back(position[j]);
                 biggestCoord = biggestCoord < position[j] ? position[j] : biggestCoord;
             }
-
             // Note: if exact colormap option is not selected, the first color and the
             // last color in the colormap file are the outliers colors.
-            int variableColor = static_cast<int>(_fullData[i + 3 + colorMapInUse]);
-            int colorIndex = 0;
+            float variableColor = _fullData[i + 3 + colorMapInUse];
 
             float cmax, cmin;
             if (_colorRangeData.empty()) {
@@ -1686,19 +1727,51 @@ void RenderableBillboardsCloud::createDataSlice() {
             }
 
             if (_isColorMapExact) {
-                colorIndex = variableColor + cmin;
+                int colorIndex = variableColor + cmin;
+                for (int j = 0; j < 4; ++j) {
+                    _slicedData.push_back(_colorMapData[colorIndex][j]);
+                }
             }
             else {
-                float ncmap = static_cast<float>(_colorMapData.size());
-                float normalization = ((cmax != cmin) && (ncmap > 2)) ?
-                                      (ncmap - 2) / (cmax - cmin) : 0;
-                colorIndex = (variableColor - cmin) * normalization + 1;
-                colorIndex = colorIndex < 0 ? 0 : colorIndex;
-                colorIndex = colorIndex >= ncmap ? ncmap - 1 : colorIndex;
-            }
+                if (_useLinearFiltering) {
+                    const float value = variableColor;
 
-            for (int j = 0; j < 4; ++j) {
-                _slicedData.push_back(_colorMapData[colorIndex][j]);
+                    float valueT = (value - cmin) / (cmax - cmin); // in [0, 1)
+                    valueT = std::clamp(valueT, 0.f, 1.f);
+
+                    const float idx = valueT * (_colorMapData.size() - 1);
+                    const int floorIdx = static_cast<int>(std::floor(idx));
+                    const int ceilIdx = static_cast<int>(std::ceil(idx));
+
+                    const glm::vec4 floorColor = _colorMapData[floorIdx];
+                    const glm::vec4 ceilColor = _colorMapData[ceilIdx];
+
+                    if (floorColor != ceilColor) {
+                        const glm::vec4 c = floorColor + idx * (ceilColor - floorColor);
+                        _slicedData.push_back(c.r);
+                        _slicedData.push_back(c.g);
+                        _slicedData.push_back(c.b);
+                        _slicedData.push_back(c.a);
+                    }
+                    else {
+                        _slicedData.push_back(floorColor.r);
+                        _slicedData.push_back(floorColor.g);
+                        _slicedData.push_back(floorColor.b);
+                        _slicedData.push_back(floorColor.a);
+                    }
+                }
+                else {
+                    float ncmap = static_cast<float>(_colorMapData.size());
+                    float normalization = ((cmax != cmin) && (ncmap > 2)) ?
+                        (ncmap - 2) / (cmax - cmin) : 0;
+                    int colorIndex = (variableColor - cmin) * normalization + 1;
+                    colorIndex = colorIndex < 0 ? 0 : colorIndex;
+                    colorIndex = colorIndex >= ncmap ? ncmap - 1 : colorIndex;
+
+                    for (int j = 0; j < 4; ++j) {
+                        _slicedData.push_back(_colorMapData[colorIndex][j]);
+                    }
+                }
             }
 
             if (_hasDatavarSize) {
