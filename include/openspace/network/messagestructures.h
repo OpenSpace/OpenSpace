@@ -26,6 +26,8 @@
 #define __OPENSPACE_CORE___MESSAGESTRUCTURES___H__
 
 #include <ghoul/glm.h>
+#include <ghoul/logging/logmanager.h>
+#include <fmt/format.h>
 #include <algorithm>
 #include <cstring>
 #include <fstream>
@@ -373,17 +375,31 @@ struct ScriptMessage {
     double _timestamp = 0.0;
 
     void serialize(std::vector<char>& buffer) const {
-        size_t strLen = _script.size();
-        size_t writeSize_bytes = sizeof(size_t);
+        uint32_t strLen = static_cast<uint32_t>(_script.size());
 
-        unsigned char const *p = reinterpret_cast<unsigned char const*>(&strLen);
-        buffer.insert(buffer.end(), p, p + writeSize_bytes);
+        const char* p = reinterpret_cast<const char*>(&strLen);
+        buffer.insert(buffer.end(), p, p + sizeof(uint32_t));
 
         buffer.insert(buffer.end(), _script.begin(), _script.end());
     };
 
     void deserialize(const std::vector<char>& buffer) {
-        _script.assign(buffer.begin(), buffer.end());
+        const char* p = buffer.data();
+        const uint32_t len = *reinterpret_cast<const uint32_t*>(p);
+
+        if (buffer.size() != (sizeof(uint32_t) + len)) {
+            LERRORC(
+                "ParallelPeer",
+                fmt::format(
+                    "Received buffer with wrong size. Expected {} got {}",
+                    len, buffer.size()
+                )
+            );
+            return;
+        }
+
+        // We can skip over the first uint32_t that encoded the length
+        _script.assign(buffer.begin() + sizeof(uint32_t), buffer.end());
     };
 
     void write(std::ostream* out) const {
