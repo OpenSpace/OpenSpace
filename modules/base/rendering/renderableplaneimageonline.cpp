@@ -120,24 +120,30 @@ void RenderablePlaneImageOnline::update(const UpdateData&) {
                 return;
             }
 
-            std::unique_ptr<ghoul::opengl::Texture> texture =
-                ghoul::io::TextureReader::ref().loadTexture(
-                    reinterpret_cast<void*>(imageFile.buffer),
-                    imageFile.size,
-                    imageFile.format
-                );
+            try {
+                std::unique_ptr<ghoul::opengl::Texture> texture =
+                    ghoul::io::TextureReader::ref().loadTexture(
+                        reinterpret_cast<void*>(imageFile.buffer),
+                        imageFile.size,
+                        imageFile.format
+                    );
 
-            if (texture) {
-                // Images don't need to start on 4-byte boundaries, for example if the
-                // image is only RGB
-                glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+                if (texture) {
+                    // Images don't need to start on 4-byte boundaries, for example if the
+                    // image is only RGB
+                    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-                texture->uploadTexture();
-                texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-                texture->purgeFromRAM();
+                    texture->uploadTexture();
+                    texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+                    texture->purgeFromRAM();
 
-                _texture = std::move(texture);
+                    _texture = std::move(texture);
+                    _textureIsDirty = false;
+                }
+            }
+            catch (const ghoul::io::TextureReader::InvalidLoadException& e) {
                 _textureIsDirty = false;
+                LERRORC(e.component, e.message);
             }
         }
     }
