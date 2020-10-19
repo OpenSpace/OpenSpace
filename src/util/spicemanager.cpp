@@ -194,6 +194,9 @@ void throwSpiceError(const std::string& errorMessage) {
         reset_c();
         throw openspace::SpiceManager::SpiceException(errorMessage + ": " + buffer);
     }
+    else {
+        reset_c();
+    }
 }
 
 SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
