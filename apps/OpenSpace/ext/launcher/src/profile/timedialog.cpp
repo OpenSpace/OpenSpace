@@ -24,6 +24,7 @@
 
 #include "profile/timedialog.h"
 
+#include "profile/line.h"
 #include <QComboBox>
 #include <QDateTimeEdit>
 #include <QDialogButtonBox>
@@ -41,9 +42,32 @@ TimeDialog::TimeDialog(openspace::Profile& profile, QWidget* parent)
     , _profile(profile)
 {
     setWindowTitle("Time");
+    createWidgets();
 
+    QStringList types = { "Absolute", "Relative" };
+    _typeCombo->addItems(types);
+    if (_profile.time().has_value()) {
+        _data = *_profile.time();
+        if (_data.type == Profile::Time::Type::Relative) {
+            if (_data.value == "") {
+                _data.value = "now";
+            }
+            _relativeEdit->setSelection(0, _relativeEdit->text().length());
+        }
+        else {
+            _absoluteEdit->setSelectedSection(QDateTimeEdit::YearSection);
+        }
+    }
+    else {
+        _data.type = Profile::Time::Type::Relative;
+        _data.value = "now";
+    }
+    _initializedAsAbsolute = (_data.type == Profile::Time::Type::Absolute);
+    enableAccordingToType(static_cast<int>(_data.type));
+}
+
+void TimeDialog::createWidgets() {
     QBoxLayout* layout = new QVBoxLayout(this);
-
     {
         layout->addWidget(new QLabel("Time Type"));
         _typeCombo = new QComboBox;
@@ -71,12 +95,7 @@ TimeDialog::TimeDialog(openspace::Profile& profile, QWidget* parent)
         );
         layout->addWidget(_relativeEdit);
     }
-    {
-        QFrame* line = new QFrame;
-        line->setFrameShape(QFrame::HLine);
-        line->setFrameShadow(QFrame::Sunken);
-        layout->addWidget(line);
-    }
+    layout->addWidget(new Line);
     {
         QDialogButtonBox* buttons = new QDialogButtonBox;
         buttons->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
@@ -85,29 +104,6 @@ TimeDialog::TimeDialog(openspace::Profile& profile, QWidget* parent)
         QObject::connect(buttons, &QDialogButtonBox::rejected, this, &TimeDialog::reject);
         layout->addWidget(buttons);
     }
-
-
-
-    QStringList types { "Absolute", "Relative" };
-    _typeCombo->addItems(types);
-    if (_profile.time().has_value()) {
-        _data = *_profile.time();
-        if (_data.type == Profile::Time::Type::Relative) {
-            if (_data.value == "") {
-                _data.value = "now";
-            }
-            _relativeEdit->setSelection(0, _relativeEdit->text().length());
-        }
-        else {
-            _absoluteEdit->setSelectedSection(QDateTimeEdit::YearSection);
-        }
-    }
-    else {
-        _data.type = Profile::Time::Type::Relative;
-        _data.value = "now";
-    }
-    _initializedAsAbsolute = (_data.type == Profile::Time::Type::Absolute);
-    enableAccordingToType(static_cast<int>(_data.type));
 }
 
 void TimeDialog::enableAccordingToType(int idx) {

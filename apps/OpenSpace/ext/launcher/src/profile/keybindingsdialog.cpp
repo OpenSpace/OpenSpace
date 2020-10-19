@@ -24,6 +24,7 @@
 
 #include "profile/keybindingsdialog.h"
 
+#include "profile/line.h"
 #include <openspace/scene/profile.h>
 #include <openspace/util/keys.h>
 #include <qevent.h>
@@ -38,9 +39,11 @@
 #include <QTextEdit>
 #include <QDialogButtonBox>
 
+using namespace openspace;
+
 namespace {
-    const openspace::Profile::Keybinding kBlank = {
-        { openspace::Key::Unknown, openspace::KeyModifier::NoModifier },
+    const Profile::Keybinding BlankKey= {
+        { Key::Unknown, KeyModifier::NoModifier },
         "",
         "",
         "",
@@ -52,8 +55,7 @@ namespace {
         std::string newString;
         std::string::size_type found, last = 0;
 
-        while ((found = src.find(from, last)) != std::string::npos)
-        {
+        while ((found = src.find(from, last)) != std::string::npos) {
             newString.append(src, last, (found - last));
             newString += to;
             last = found + from.length();
@@ -72,16 +74,16 @@ namespace {
         return s;
     }
 
-    std::string createOneLineSummary(openspace::Profile::Keybinding k) {
+    std::string createOneLineSummary(Profile::Keybinding k) {
         std::string summary;
 
         int keymod = static_cast<int>(k.key.modifier);
-        if (keymod != static_cast<int>(openspace::KeyModifier::NoModifier)) {
-            summary += openspace::KeyModifierNames.at(keymod) + " ";
+        if (keymod != static_cast<int>(KeyModifier::NoModifier)) {
+            summary += KeyModifierNames.at(keymod) + " ";
         }
         int keyname = static_cast<int>(k.key.key);
 
-        summary += openspace::KeyNames.at(keyname) + "  ";
+        summary += KeyNames.at(keyname) + "  ";
         summary += truncateString(k.name) + " (";
         summary += truncateString(k.documentation) + ") @ ";
         summary += truncateString(k.guiPath) + " ";
@@ -93,13 +95,18 @@ namespace {
 
 } // namespace
 
-KeybindingsDialog::KeybindingsDialog(openspace::Profile& profile, QWidget *parent)
+KeybindingsDialog::KeybindingsDialog(Profile& profile, QWidget *parent)
     : QDialog(parent)
     , _profile(profile)
     , _data(_profile.keybindings())
 {
     setWindowTitle("Assign Keybindings");
+    createWidgets();
 
+    transitionFromEditMode();
+}
+
+void KeybindingsDialog::createWidgets() {
     QBoxLayout* layout = new QVBoxLayout(this);
     {
         _list = new QListWidget;
@@ -136,12 +143,7 @@ KeybindingsDialog::KeybindingsDialog(openspace::Profile& profile, QWidget *paren
         box->addStretch();
         layout->addLayout(box);
     }
-    {
-        QFrame* line = new QFrame;
-        line->setFrameShape(QFrame::HLine);
-        line->setFrameShadow(QFrame::Sunken);
-        layout->addWidget(line);
-    }
+    layout->addWidget(new Line);
     {
         QGridLayout* box = new QGridLayout;
 
@@ -154,7 +156,7 @@ KeybindingsDialog::KeybindingsDialog(openspace::Profile& profile, QWidget *paren
 
         QStringList comboModKeysStringList;
         int modIdx = 0;
-        for (const std::pair<const int, std::string>& m : openspace::KeyModifierNames) {
+        for (const std::pair<const int, std::string>& m : KeyModifierNames) {
             comboModKeysStringList += QString::fromStdString(m.second);
             _mapModKeyComboBoxIndexToKeyValue.push_back(modIdx++);
         }
@@ -168,9 +170,9 @@ KeybindingsDialog::KeybindingsDialog(openspace::Profile& profile, QWidget *paren
         _keyCombo->setToolTip("Key to press for this keybinding");
 
         QStringList comboKeysStringList;
-        for (int i = 0; i < static_cast<int>(openspace::Key::Last); ++i) {
-            if (openspace::KeyNames.find(i) != openspace::KeyNames.end()) {
-                comboKeysStringList += QString::fromStdString(openspace::KeyNames.at(i));
+        for (int i = 0; i < static_cast<int>(Key::Last); ++i) {
+            if (KeyNames.find(i) != KeyNames.end()) {
+                comboKeysStringList += QString::fromStdString(KeyNames.at(i));
                 // Create map to relate key combo box to integer value defined in Key
                 _mapKeyComboBoxIndexToKeyValue.push_back(i);
             }
@@ -243,12 +245,7 @@ KeybindingsDialog::KeybindingsDialog(openspace::Profile& profile, QWidget *paren
         box->addLayout(buttonBox, 8, 1, 1, 2);
         layout->addLayout(box);
     }
-    {
-        QFrame* line = new QFrame;
-        line->setFrameShape(QFrame::HLine);
-        line->setFrameShadow(QFrame::Sunken);
-        layout->addWidget(line);
-    }
+    layout->addWidget(new Line);
     {
         QBoxLayout* footerLayout = new QHBoxLayout;
 
@@ -270,23 +267,21 @@ KeybindingsDialog::KeybindingsDialog(openspace::Profile& profile, QWidget *paren
         footerLayout->addWidget(_buttonBox);
         layout->addLayout(footerLayout);
     }
-
-    transitionFromEditMode();
 }
 
-void KeybindingsDialog::listItemSelected(void) {
+void KeybindingsDialog::listItemSelected() {
     QListWidgetItem *item = _list->currentItem();
     int index = _list->row(item);
 
     if (_data.size() > 0) {
-        openspace::Profile::Keybinding& k = _data[index];
+        Profile::Keybinding& k = _data[index];
         const int modifierKey = indexInKeyMapping(
             _mapModKeyComboBoxIndexToKeyValue,
             static_cast<int>(k.key.modifier)
         );
         _keyModCombo->setCurrentIndex(modifierKey);
 
-        if (k.key.key == openspace::Key::Unknown) {
+        if (k.key.key == Key::Unknown) {
             _keyCombo->setCurrentIndex(0);
         }
         else {
@@ -308,13 +303,13 @@ void KeybindingsDialog::listItemSelected(void) {
 }
 
 void KeybindingsDialog::keySelected(int index) {
-    const QString numKeyWarning = "Warning: using a number key may conflict with the "
-        "keybindings for simulation time increments. ";
+    const QString numKeyWarning = "Warning: Using a number key may conflict with the "
+        "keybindings for simulation time increments.";
     QString errorContents = _errorMsg->text();
     bool alreadyContainsWarning = (errorContents.length() >= numKeyWarning.length() &&
         errorContents.left(numKeyWarning.length()) == numKeyWarning);
-    if  (_mapKeyComboBoxIndexToKeyValue[index] >= static_cast<int>(openspace::Key::Num0)
-      && _mapKeyComboBoxIndexToKeyValue[index] <= static_cast<int>(openspace::Key::Num9))
+    if  (_mapKeyComboBoxIndexToKeyValue[index] >= static_cast<int>(Key::Num0)
+      && _mapKeyComboBoxIndexToKeyValue[index] <= static_cast<int>(Key::Num9))
     {
         if (!alreadyContainsWarning) {
             errorContents = numKeyWarning + errorContents;
@@ -327,8 +322,8 @@ void KeybindingsDialog::keySelected(int index) {
 }
 
 int KeybindingsDialog::indexInKeyMapping(std::vector<int>& mapVector, int keyInt) {
-    auto it = std::find(mapVector.begin(), mapVector.end(), keyInt);
-    return std::distance(mapVector.begin(), it);
+    const auto it = std::find(mapVector.cbegin(), mapVector.cend(), keyInt);
+    return std::distance(mapVector.cbegin(), it);
 }
 
 bool KeybindingsDialog::isLineEmpty(int index) {
@@ -345,25 +340,14 @@ bool KeybindingsDialog::isLineEmpty(int index) {
 void KeybindingsDialog::listItemAdded() {
     int currentListSize = _list->count();
 
-     //if ((currentListSize == 1) && (isLineEmpty(0))) {
-    //if (currentListSize == 0) {
-    //     // Special case where list is "empty" but really has one line that is blank.
-    //     // This is done because QListWidget does not seem to like having its sole
-    //     // remaining item being removed.
-    //     _data.at(0) = kBlank;
-    //     _list->item(0)->setText("  (Enter details below & click 'Save')");
-    //     transitionToEditMode();
-    // }
-    // else {
-        _data.push_back(kBlank);
-        _list->addItem(new QListWidgetItem("  (Enter details below & click 'Save')"));
-        //Scroll down to that blank line highlighted
-        _list->setCurrentRow(_list->count() - 1);
-     //}
+    _data.push_back(BlankKey);
+    _list->addItem(new QListWidgetItem("  (Enter details below & click 'Save')"));
+    // Scroll down to that blank line highlighted
+    _list->setCurrentRow(_list->count() - 1);
 
     // Blank-out the 2 text fields, set combo box to index 0
     _keyModCombo->setCurrentIndex(static_cast<int>(_data.back().key.modifier));
-    if (_data.back().key.key == openspace::Key::Unknown) {
+    if (_data.back().key.key == Key::Unknown) {
         _keyCombo->setCurrentIndex(0);
     }
     else {
@@ -379,7 +363,7 @@ void KeybindingsDialog::listItemAdded() {
     _editModeNewItem = true;
 }
 
-void KeybindingsDialog::listItemSave(void) {
+void KeybindingsDialog::listItemSave() {
     if (!areRequiredFormsFilled()) {
         return;
     }
@@ -390,9 +374,9 @@ void KeybindingsDialog::listItemSave(void) {
     if (!_data.empty()) {
         int keyModIdx = _mapModKeyComboBoxIndexToKeyValue.at(
             _keyModCombo->currentIndex());
-        _data[index].key.modifier = static_cast<openspace::KeyModifier>(keyModIdx);
+        _data[index].key.modifier = static_cast<KeyModifier>(keyModIdx);
         int keyIdx = _mapKeyComboBoxIndexToKeyValue.at(_keyCombo->currentIndex());
-        _data[index].key.key = static_cast<openspace::Key>(keyIdx);
+        _data[index].key.key = static_cast<Key>(keyIdx);
         _data[index].name = _nameEdit->text().toStdString();
         _data[index].guiPath = _guiPathEdit->text().toStdString();
         _data[index].documentation = _documentationEdit->text().toStdString();
@@ -412,14 +396,14 @@ bool KeybindingsDialog::areRequiredFormsFilled() {
         requiredFormsFilled = false;
     }
     if (_nameEdit->text().length() == 0) {
-        if (errors.length() > 0) {
+        if (!errors.empty()) {
             errors += ", ";
         }
         errors += "Missing keybinding name";
         requiredFormsFilled = false;
     }
-    if (_scriptEdit->toPlainText().length() == 0) {
-        if (errors.length() > 0) {
+    if (_scriptEdit->toPlainText().isEmpty()) {
+        if (!errors.empty()) {
             errors += ", ";
         }
         errors += "Missing script";
@@ -429,31 +413,31 @@ bool KeybindingsDialog::areRequiredFormsFilled() {
     return requiredFormsFilled;
 }
 
-void KeybindingsDialog::listItemCancelSave(void) {
+void KeybindingsDialog::listItemCancelSave() {
     listItemSelected();
     transitionFromEditMode();
     if (_editModeNewItem && !_data.empty() &&
         (_data.back().name.length() == 0 || _data.back().script.length() == 0 ||
-        _data.back().key.key == openspace::Key::Unknown))
+        _data.back().key.key == Key::Unknown))
     {
         listItemRemove();
     }
     _editModeNewItem = false;
 }
 
-void KeybindingsDialog::listItemRemove(void) {
+void KeybindingsDialog::listItemRemove() {
     if (_list->count() > 0) {
         if (_list->count() == 1) {
             // Special case where last remaining item is being removed (QListWidget does
             // not like the final item being removed so instead clear it & leave it)
-            _data.at(0) = kBlank;
+            _data.at(0) = BlankKey;
             _list->item(0)->setText("");
         }
         else {
             int index = _list->currentRow();
             if (index >= 0 && index < _list->count()) {
                 _list->takeItem(index);
-                if (_data.size() > 0) {
+                if (!_data.empty()) {
                     _data.erase(_data.begin() + index);
                 }
             }
@@ -481,7 +465,7 @@ void KeybindingsDialog::transitionToEditMode() {
     _errorMsg->setText("");
 }
 
-void KeybindingsDialog::transitionFromEditMode(void) {
+void KeybindingsDialog::transitionFromEditMode() {
     _list->setDisabled(false);
     _addButton->setDisabled(false);
     _removeButton->setDisabled(false);

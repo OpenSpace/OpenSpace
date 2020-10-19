@@ -40,8 +40,8 @@ public:
     /**
      * Constructor for markNodes class
      *
-     * \param imported The #openspace::Profile object containing all data of the
-     *                 new or imported profile.
+     * \param profile The #openspace::Profile object containing all data of the
+     *                new or imported profile.
      * \param parent Pointer to parent Qt widget
      */
     MarkNodesDialog(openspace::Profile& profile, QWidget* parent);
@@ -53,13 +53,15 @@ public:
      */
     void keyPressEvent(QKeyEvent* evt);
 
-public slots:
+private slots:
     void listItemSelected();
     void listItemAdded();
     void listItemRemove();
     void parseSelections();
 
 private:
+    void createWidgets();
+
     std::vector<QListWidgetItem*> _markedNodesListItems;
     openspace::Profile& _profile;
     std::vector<std::string> _data;

@@ -47,6 +47,8 @@ private slots:
     void parseScript();
 
 private:
+    void createWidgets();
+
     openspace::Profile& _profile;
     QTextEdit* _textScripts = nullptr;
 };

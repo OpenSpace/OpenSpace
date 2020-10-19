@@ -30,7 +30,9 @@ AssetTreeItem::AssetTreeItem(const std::vector<QVariant>& data, AssetTreeItem* p
 {}
 
 AssetTreeItem::~AssetTreeItem() {
-    qDeleteAll(_childItems);
+    for (AssetTreeItem* item : _childItems) {
+        delete item;
+    }
 }
 
 AssetTreeItem* AssetTreeItem::child(int row) {
@@ -48,12 +50,12 @@ int AssetTreeItem::childCount() const {
 
 int AssetTreeItem::row() const {
     if (_parentItem) {
-        auto it = std::find(
-            _parentItem->_childItems.begin(),
-            _parentItem->_childItems.end(),
+        const auto it = std::find(
+            _parentItem->_childItems.cbegin(),
+            _parentItem->_childItems.cend(),
             this
         );
-        return std::distance(_parentItem->_childItems.begin(), it);
+        return std::distance(_parentItem->_childItems.cbegin(), it);
     }
     else {
         return 0;

@@ -33,8 +33,8 @@ FileSystemAccess::FileSystemAccess(std::string fileExtension,
     , _useCheckboxes(useCheckboxes)
 {}
 
-std::string FileSystemAccess::useQtFileSystemModelToTraverseDir(QString dir) {
-    _filesystemModel.setRootPath(dir);
+std::string FileSystemAccess::useQtFileSystemModelToTraverseDir(std::string dir) {
+    _filesystemModel.setRootPath(QString::fromStdString(dir));
     QModelIndex index = _filesystemModel.index(_filesystemModel.rootPath());
     QFileInfo fileInfo = _filesystemModel.fileInfo(index);
     std::vector<std::string> dirsNested;

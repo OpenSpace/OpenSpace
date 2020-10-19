@@ -41,20 +41,20 @@ public:
     /**
      * Constructor for osmodules class
      *
-     * \param imported The #openspace::Profile object containing all data of the
-     *                 new or imported profile.
+     * \param profile The #openspace::Profile object containing all data of the
+     *                new or imported profile.
      * \param parent Pointer to parent Qt widget
      */
-    ModulesDialog(openspace::Profile& profiles, QWidget* parent);
+    ModulesDialog(openspace::Profile& profile, QWidget* parent);
 
     /**
      * Handles keypress while the Qt dialog window is open
      *
      * \param evt #QKeyEvent object for the key press event
      */
-    void keyPressEvent(QKeyEvent *evt);
+    void keyPressEvent(QKeyEvent* evt);
 
-public slots:
+private slots:
     void listItemSelected();
     void listItemAdded();
     void listItemRemove();
@@ -64,15 +64,16 @@ public slots:
     void parseSelections();
 
 private:
+    void createWidgets();
+
     QString createOneLineSummary(openspace::Profile::Module m);
     void transitionFromEditMode();
     void editBoxDisabled(bool disabled);
-    bool isLineEmpty(int index);
+    bool isLineEmpty(int index) const;
 
     openspace::Profile& _profile;
     std::vector<openspace::Profile::Module> _data;
     bool _editModeNewItem = false;
-    const openspace::Profile::Module kBlank = {"", "", ""};
 
     QListWidget* _list = nullptr;
     QLabel* _moduleLabel = nullptr;

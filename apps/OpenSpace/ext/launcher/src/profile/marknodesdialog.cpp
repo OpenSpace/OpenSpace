@@ -24,6 +24,7 @@
 
 #include "profile/marknodesdialog.h"
 
+#include "profile/line.h"
 #include <openspace/scene/profile.h>
 #include <QDialogButtonBox>
 #include <QEvent>
@@ -40,7 +41,10 @@ MarkNodesDialog::MarkNodesDialog(openspace::Profile& profile, QWidget* parent)
     , _data(_profile.markNodes())
 {
     setWindowTitle("Mark Interesting Nodes");
+    createWidgets();
+}
 
+void MarkNodesDialog::createWidgets() {
     QBoxLayout* layout = new QVBoxLayout(this);
     _list = new QListWidget;
     connect(
@@ -80,6 +84,7 @@ MarkNodesDialog::MarkNodesDialog(openspace::Profile& profile, QWidget* parent)
         box->addWidget(addButton);
         layout->addLayout(box);
     }
+    layout->addWidget(new Line);
     {
         QDialogButtonBox* buttons = new QDialogButtonBox;
         buttons->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
@@ -95,11 +100,11 @@ MarkNodesDialog::MarkNodesDialog(openspace::Profile& profile, QWidget* parent)
     }
 }
 
-void MarkNodesDialog::listItemSelected(void) {
+void MarkNodesDialog::listItemSelected() {
     _removeButton->setEnabled(true);
 }
 
-void MarkNodesDialog::listItemAdded(void) {
+void MarkNodesDialog::listItemAdded() {
     if (_newNode->text().isEmpty()) {
         return;
     }
@@ -140,7 +145,7 @@ void MarkNodesDialog::parseSelections() {
     accept();
 }
 
-void MarkNodesDialog::keyPressEvent(QKeyEvent *evt) {
+void MarkNodesDialog::keyPressEvent(QKeyEvent* evt) {
    if (evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return) {
         if (_newNode->text().length() > 0 && _newNode->hasFocus()) {
             listItemAdded();
