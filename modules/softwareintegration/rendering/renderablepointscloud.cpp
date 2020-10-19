@@ -138,17 +138,38 @@ namespace openspace {
         addProperty(_color);
 
         if (dictionary.hasKey(KeyData)) {
-            _pointData = dictionary.value<std::vector<std::vector<float>>>(KeyData);
+            ghoul::Dictionary pointDataDict = dictionary.value<ghoul::Dictionary>(
+                    KeyData
+                );
+            for (int i = 0; i < static_cast<int>(pointDataDict.size()); ++i) {
+                _pointData.push_back(
+                    { pointDataDict.value<glm::vec3>(std::to_string(i + 1)) }
+                );
+            }
             _hasPointData = true;
         }
 
         if (dictionary.hasKey(KeyLuminosity)) {
-            _luminosityData = dictionary.value<std::vector<float>>(KeyLuminosity);
+            ghoul::Dictionary luminosityDataDict = dictionary.value<ghoul::Dictionary>(
+                    KeyLuminosity
+                );
+            for (int i = 0; i < static_cast<int>(luminosityDataDict.size()); ++i) {
+                _luminosityData.push_back(
+                    { luminosityDataDict.value<float>(std::to_string(i + 1)) }
+                );
+            }
             _hasLuminosityData = true;
         }
 
         if (dictionary.hasKey(KeyVelocity)) {
-            _velocityData = dictionary.value<std::vector<float>>(KeyVelocity);
+            ghoul::Dictionary velocityDataDict = dictionary.value<ghoul::Dictionary>(
+                    KeyVelocity
+                );
+            for (int i = 0; i < static_cast<int>(velocityDataDict.size()); ++i) {
+                _velocityData.push_back(
+                    { velocityDataDict.value<float>(std::to_string(i + 1)) }
+                );
+            }
             _hasVelocityData = true;
         }
 

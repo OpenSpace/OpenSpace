@@ -8,9 +8,9 @@ local RenderablePointsCloud = {
         Type = "RenderablePointsCloud",
         Color = {0.0, 0.0, 0.0},
         Data = {{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}},
-        Luminosity = {0.0, 0.0, 0.0}
+        Luminosity = {0.0, 0.0, 0.0},
         Opacity = 0.0,
-        Size = 0
+        Size = 0.0,
         Velocity = {0.0, 0.0, 0.0}
     },
     GUI = {

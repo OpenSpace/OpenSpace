@@ -210,7 +210,6 @@ namespace openspace {
 
             luminosityData.clear();
             luminosityData = readData(message);
-
             break;
         }
         case SoftwareConnection::MessageType::ReadVelocityData: {
@@ -218,58 +217,78 @@ namespace openspace {
 
             velocityData.clear();
             velocityData = readData(message);
-
             break;
         }
         case SoftwareConnection::MessageType::AddSceneGraphNode: {
+            // The following order of creating variables is the exact order they're received in the message
+            // If the order is not the same, the global variable 'message offset' will be wrong
             std::string identifier = readIdentifier(message);
             glm::vec3 color = readColor(message);
             float opacity = readFloatValue(message);
             float size = readFloatValue(message);
             std::string guiName = readGUI(message);
-
+            
             bool hasLuminosityData = !luminosityData.empty();
             bool hasVelocityData = !velocityData.empty();
+            ghoul::Dictionary renderable;
+            ghoul::Dictionary pointDataDictonary;
+            ghoul::Dictionary luminosityDataDictonary;
+            ghoul::Dictionary velocityDataDictionary;
+            for (int i = 0; i < pointData.size(); ++i) {
+                pointDataDictonary.setValue<glm::vec3>(std::to_string(i + 1), pointData[i]);
+            }
+            if (hasLuminosityData) {
+                for (int i = 0; i < luminosityData.size(); ++i) {
+                    luminosityDataDictonary.setValue<float>(std::to_string(i + 1), luminosityData[i]);
+                }
+            }
+            if (hasVelocityData) {
+                for (int i = 0; i < velocityData.size(); ++i) {
+                    velocityDataDictionary.setValue<float>(std::to_string(i + 1), velocityData[i]);
+                }
+            }
 
-            /*if (hasLuminosityData && hasVelocityData) {
-                ghoul::Dictionary renderable = {
+            // Create a renderable depending on what data was received
+            if (hasLuminosityData && hasVelocityData) {
+                renderable = {
                     { "Type", "RenderablePointsCloud"s },
                     { "Color", static_cast<glm::dvec3>(color)},
-                    { "Data", pointData },
-                    { "Luminosity", luminosityData },
+                    { "Data", pointDataDictonary },
+                    { "Luminosity", luminosityDataDictonary },
                     { "Opacity", static_cast<double>(opacity) },
                     { "Size", static_cast<double>(size)},
-                    { "Velocity", velocityData }
+                    { "Velocity", velocityDataDictionary }
                 };
             }
             else if (hasLuminosityData && !hasVelocityData) {
-                ghoul::Dictionary renderable = {
+                renderable = {
                     { "Type", "RenderablePointsCloud"s },
                     { "Color", static_cast<glm::dvec3>(color)},
-                    { "Data", pointData },
-                    { "Luminosity", luminosityData },
+                    { "Data", pointDataDictonary },
+                    { "Luminosity", luminosityDataDictonary },
                     { "Opacity", static_cast<double>(opacity) },
                     { "Size", static_cast<double>(size)},
                 };
             }
             else if (!hasLuminosityData && hasVelocityData) {
-                ghoul::Dictionary renderable = {
+                renderable = {
                     { "Type", "RenderablePointsCloud"s },
                     { "Color", static_cast<glm::dvec3>(color)},
-                    { "Data", pointData },
+                    { "Data", pointDataDictonary },
                     { "Opacity", static_cast<double>(opacity) },
                     { "Size", static_cast<double>(size)},
-                    { "Velocity", velocityData }
+                    { "Velocity", velocityDataDictionary }
                 };
             }
-            else {*/
-                ghoul::Dictionary renderable = {
+            else {
+                renderable = {
                     { "Type", "RenderablePointsCloud"s },
                     { "Color", static_cast<glm::dvec3>(color)},
-                    { "Data", pointData },
+                    { "Data", pointDataDictonary },
                     { "Opacity", static_cast<double>(opacity) },
                     { "Size", static_cast<double>(size)},
                 };
+            }
             
             ghoul::Dictionary gui = {
                 { "Name", guiName },
@@ -525,8 +544,8 @@ namespace openspace {
         lengthOfColor.push_back(message[messageOffset]);
         messageOffset++;
 
-        // Color is sent in format (redValue, greenValue, blueValue)
-        // Therefor, we have to iterate through the message and ignore characters
+        // Color is recieved in a string-format of (redValue, greenValue, blueValue)
+        // Therefore, we have to iterate through the message and ignore characters
         // "( , )" and separate the values in the string
         std::string red;
         while (message[messageOffset] != ',')

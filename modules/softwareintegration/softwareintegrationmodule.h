@@ -84,7 +84,7 @@ private:
     std::string readIdentifier(std::vector<char>& message);
     std::string readGUI(std::vector<char>& message);
 
-    std::vector<std::vector<float>> pointData;
+    std::vector<glm::vec3> pointData;
     std::vector<float> luminosityData;
     std::vector<float> velocityData;
     std::unordered_map<size_t, std::shared_ptr<Peer>> _peers;

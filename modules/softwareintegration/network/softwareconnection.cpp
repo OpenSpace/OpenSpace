@@ -130,7 +130,7 @@ namespace openspace {
         // And delegate decoding depending on message type
         if (type == "CONN")
             return Message(MessageType::Connection, messageBuffer);
-        else if (type == "DATA")
+        else if (type == "PDAT")
             return Message(MessageType::ReadPointData, messageBuffer);
         else if (type == "LUMI")
             return Message(MessageType::ReadLuminosityData, messageBuffer);

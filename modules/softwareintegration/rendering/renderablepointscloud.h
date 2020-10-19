@@ -72,7 +72,7 @@ protected:
     properties::FloatProperty _size;
     properties::Vec3Property _color;
 
-    std::vector<std::vector<float>> _pointData;
+    std::vector<glm::vec3> _pointData;
     std::vector<float> _luminosityData;
     std::vector<float> _velocityData;
     std::vector<float> _fullData;
