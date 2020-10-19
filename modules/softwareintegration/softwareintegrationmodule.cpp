@@ -187,8 +187,6 @@ namespace openspace {
             break;
         } 
         case SoftwareConnection::MessageType::ReadPointData: {
-            std::string poinDataMessage(message.begin(), message.end());
-            LINFO(fmt::format("Message recieved.. Point Data: {}", poinDataMessage));
             messageOffset = 0; // Resets message offset 
 
             std::vector<float> xCoordinates = readData(message);
@@ -208,8 +206,6 @@ namespace openspace {
             break;
         }
         case SoftwareConnection::MessageType::ReadLuminosityData: {
-            std::string luminosityDataMessage(message.begin(), message.end());
-            LINFO(fmt::format("Message recieved.. Luminosity Data: {}", luminosityDataMessage));
             messageOffset = 0; // Resets message offset 
 
             luminosityData.clear();
@@ -217,8 +213,6 @@ namespace openspace {
             break;
         }
         case SoftwareConnection::MessageType::ReadVelocityData: {
-            std::string velocityDataMessage(message.begin(), message.end());
-            LINFO(fmt::format("Message recieved.. Velocity Data: {}", velocityDataMessage));
             messageOffset = 0; // Resets message offset 
 
             velocityData.clear();
