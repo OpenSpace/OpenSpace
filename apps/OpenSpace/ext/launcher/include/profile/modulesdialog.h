@@ -41,11 +41,11 @@ public:
     /**
      * Constructor for osmodules class
      *
-     * \param imported The #openspace::Profile object containing all data of the
-     *                 new or imported profile.
+     * \param profile The #openspace::Profile object containing all data of the
+     *                new or imported profile.
      * \param parent Pointer to parent Qt widget
      */
-    ModulesDialog(openspace::Profile& profiles, QWidget* parent);
+    ModulesDialog(openspace::Profile& profile, QWidget* parent);
 
     /**
      * Handles keypress while the Qt dialog window is open
@@ -64,6 +64,8 @@ private slots:
     void parseSelections();
 
 private:
+    void createWidgets();
+
     QString createOneLineSummary(openspace::Profile::Module m);
     void transitionFromEditMode();
     void editBoxDisabled(bool disabled);

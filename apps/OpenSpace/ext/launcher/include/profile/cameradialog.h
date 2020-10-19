@@ -50,6 +50,7 @@ private slots:
     void tabSelect(int);
 
 private:
+    void createWidgets();
     QWidget* createNavStateWidget();
     QWidget* createGeoWidget();
 

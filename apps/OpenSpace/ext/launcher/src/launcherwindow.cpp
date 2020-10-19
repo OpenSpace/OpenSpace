@@ -79,7 +79,7 @@ namespace {
         }
         catch (const std::ifstream::failure& e) {
             throw ghoul::RuntimeError(fmt::format(
-                "Exception opening {} profile for read: ({})", filename, e.what()
+                "Exception opening {} profile for read: {}", filename, e.what()
             ));
         }
         std::string content;
@@ -95,7 +95,8 @@ namespace {
                 parent,
                 "Exception",
                 QString::fromStdString(fmt::format(
-                    "ParsingError exception in {}: {}, {}", filename, e.component, e.message
+                    "ParsingError exception in {}: {}, {}",
+                    filename, e.component, e.message
                 ))
             );
             return std::nullopt;
@@ -146,7 +147,6 @@ LauncherWindow::LauncherWindow(bool profileEnabled,
     Q_INIT_RESOURCE(resources);
 
     qInstallMessageHandler(
-        // Now that the log is enabled and available, we can pipe all Qt messages to that
         [](QtMsgType type, const QMessageLogContext&, const QString& msg) {
             if (type == QtCriticalMsg || type == QtFatalMsg || type == QtSystemMsg) {
                 std::cerr << msg.toStdString() << std::endl;

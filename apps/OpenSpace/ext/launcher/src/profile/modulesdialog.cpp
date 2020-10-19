@@ -24,6 +24,7 @@
 
 #include "profile/modulesdialog.h"
 
+#include "profile/line.h"
 #include <QDialogButtonBox>
 #include <QEvent>
 #include <QKeyEvent>
@@ -45,9 +46,13 @@ ModulesDialog::ModulesDialog(Profile& profile, QWidget *parent)
     , _data(_profile.modules())
 {
     setWindowTitle("Modules");
+    createWidgets();
 
+    transitionFromEditMode();
+}
+
+void ModulesDialog::createWidgets() {
     QBoxLayout* layout = new QVBoxLayout(this);
-    
     {
         _list = new QListWidget;
         connect(
@@ -123,12 +128,7 @@ ModulesDialog::ModulesDialog(Profile& profile, QWidget *parent)
 
         layout->addLayout(box);
     }
-    {
-        QFrame* line = new QFrame;
-        line->setFrameShape(QFrame::HLine);
-        line->setFrameShadow(QFrame::Sunken);
-        layout->addWidget(line);
-    }
+    layout->addWidget(new Line);
     {
         QBoxLayout* footerLayout = new QHBoxLayout;
 
@@ -150,8 +150,6 @@ ModulesDialog::ModulesDialog(Profile& profile, QWidget *parent)
         footerLayout->addWidget(_buttonBox);
         layout->addLayout(footerLayout);
     }
-
-    transitionFromEditMode();
 }
 
 QString ModulesDialog::createOneLineSummary(Profile::Module m) {

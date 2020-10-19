@@ -24,6 +24,7 @@
 
 #include "profile/keybindingsdialog.h"
 
+#include "profile/line.h"
 #include <openspace/scene/profile.h>
 #include <openspace/util/keys.h>
 #include <qevent.h>
@@ -100,7 +101,12 @@ KeybindingsDialog::KeybindingsDialog(Profile& profile, QWidget *parent)
     , _data(_profile.keybindings())
 {
     setWindowTitle("Assign Keybindings");
+    createWidgets();
 
+    transitionFromEditMode();
+}
+
+void KeybindingsDialog::createWidgets() {
     QBoxLayout* layout = new QVBoxLayout(this);
     {
         _list = new QListWidget;
@@ -137,12 +143,7 @@ KeybindingsDialog::KeybindingsDialog(Profile& profile, QWidget *parent)
         box->addStretch();
         layout->addLayout(box);
     }
-    {
-        QFrame* line = new QFrame;
-        line->setFrameShape(QFrame::HLine);
-        line->setFrameShadow(QFrame::Sunken);
-        layout->addWidget(line);
-    }
+    layout->addWidget(new Line);
     {
         QGridLayout* box = new QGridLayout;
 
@@ -244,12 +245,7 @@ KeybindingsDialog::KeybindingsDialog(Profile& profile, QWidget *parent)
         box->addLayout(buttonBox, 8, 1, 1, 2);
         layout->addLayout(box);
     }
-    {
-        QFrame* line = new QFrame;
-        line->setFrameShape(QFrame::HLine);
-        line->setFrameShadow(QFrame::Sunken);
-        layout->addWidget(line);
-    }
+    layout->addWidget(new Line);
     {
         QBoxLayout* footerLayout = new QHBoxLayout;
 
@@ -271,8 +267,6 @@ KeybindingsDialog::KeybindingsDialog(Profile& profile, QWidget *parent)
         footerLayout->addWidget(_buttonBox);
         layout->addLayout(footerLayout);
     }
-
-    transitionFromEditMode();
 }
 
 void KeybindingsDialog::listItemSelected() {

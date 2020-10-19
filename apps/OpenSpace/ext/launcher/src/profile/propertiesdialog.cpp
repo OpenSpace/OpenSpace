@@ -24,6 +24,7 @@
 
 #include "profile/propertiesdialog.h"
 
+#include "profile/line.h"
 #include <QComboBox>
 #include <QDialogButtonBox>
 #include <QEvent>
@@ -38,7 +39,7 @@
 using namespace openspace;
 
 namespace {
-    const Profile::Property kBlank {
+    const Profile::Property Blank {
         Profile::Property::SetType::SetPropertyValueSingle,
         "",
         ""
@@ -51,7 +52,12 @@ PropertiesDialog::PropertiesDialog(Profile& profile, QWidget *parent)
     , _data(_profile.properties())
 {
     setWindowTitle("Set Property Values");
+    createWidgets();
 
+    transitionFromEditMode();
+}
+
+void PropertiesDialog::createWidgets() {
     QBoxLayout* layout = new QVBoxLayout(this);
     {
         _list = new QListWidget;
@@ -84,12 +90,7 @@ PropertiesDialog::PropertiesDialog(Profile& profile, QWidget *parent)
 
         layout->addLayout(box);
     }
-    {
-        QFrame* line = new QFrame;
-        line->setFrameShape(QFrame::HLine);
-        line->setFrameShadow(QFrame::Sunken);
-        layout->addWidget(line);
-    }
+    layout->addWidget(new Line);
     {
         _commandLabel = new QLabel("Property Set Command");
         layout->addWidget(_commandLabel);
@@ -130,6 +131,7 @@ PropertiesDialog::PropertiesDialog(Profile& profile, QWidget *parent)
             layout->addLayout(box);
         }
     }
+    layout->addWidget(new Line);
     {
         QBoxLayout* footerLayout = new QHBoxLayout;
 
@@ -152,8 +154,6 @@ PropertiesDialog::PropertiesDialog(Profile& profile, QWidget *parent)
         footerLayout->addWidget(_buttonBox);
         layout->addLayout(footerLayout);
     }
-
-    transitionFromEditMode();
 }
 
 QString PropertiesDialog::createOneLineSummary(Profile::Property p) {
@@ -204,13 +204,13 @@ void PropertiesDialog::listItemAdded() {
          // Special case where list is "empty" but really has one line that is blank.
          // This is done because QListWidget does not seem to like having its sole
          // remaining item being removed.
-         _data.at(0) = kBlank;
+         _data.at(0) = Blank;
          _list->item(0)->setText("  (Enter details below & click 'Save')");
          _list->setCurrentRow(0);
          transitionToEditMode();
      }
      else {
-         _data.push_back(kBlank);
+         _data.push_back(Blank);
          _list->addItem(new QListWidgetItem("  (Enter details below & click 'Save')"));
          //Scroll down to that blank line highlighted
          _list->setCurrentRow(_list->count() - 1);
@@ -284,7 +284,7 @@ void PropertiesDialog::listItemRemove() {
             if (_list->count() == 1) {
                 //Special case where last remaining item is being removed (QListWidget
                 // doesn't like the final item being removed so instead clear it)
-                _data.at(0) = kBlank;
+                _data.at(0) = Blank;
                 _list->item(0)->setText("");
             }
             else {

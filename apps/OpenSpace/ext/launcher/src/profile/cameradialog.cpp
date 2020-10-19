@@ -24,6 +24,7 @@
 
 #include "profile/cameradialog.h"
 
+#include "profile/line.h"
 #include <openspace/scene/profile.h>
 #include <QDialogButtonBox>
 #include <QDoubleValidator>
@@ -60,37 +61,7 @@ CameraDialog::CameraDialog(openspace::Profile& profile, QWidget *parent)
     , _profile(profile)
 {
     setWindowTitle("Set Camera Position");
-
-    QBoxLayout* layout = new QVBoxLayout(this);
-    _tabWidget = new QTabWidget;
-    connect(_tabWidget, &QTabWidget::tabBarClicked, this, &CameraDialog::tabSelect);
-    _tabWidget->addTab(createNavStateWidget(), "Navigation State");
-    _tabWidget->addTab(createGeoWidget(), "Geo State");
-    layout->addWidget(_tabWidget);
-
-    {
-        QFrame* line = new QFrame;
-        line->setFrameShape(QFrame::HLine);
-        line->setFrameShadow(QFrame::Sunken);
-        layout->addWidget(line);
-    }
-
-    {
-        QBoxLayout* footerLayout = new QHBoxLayout;
-
-        _errorMsg = new QLabel;
-        _errorMsg->setObjectName("error-message");
-        _errorMsg->setWordWrap(true);
-        footerLayout->addWidget(_errorMsg);
-
-        QDialogButtonBox* buttons = new QDialogButtonBox;
-        buttons->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
-        connect(buttons, &QDialogButtonBox::accepted, this, &CameraDialog::approved);
-        connect(buttons, &QDialogButtonBox::rejected, this, &CameraDialog::reject);
-        footerLayout->addWidget(buttons);
-
-        layout->addLayout(footerLayout);
-    }
+    createWidgets();
 
     if (_profile.camera().has_value()) {
         openspace::Profile::CameraType type = *_profile.camera();
@@ -160,6 +131,34 @@ CameraDialog::CameraDialog(openspace::Profile& profile, QWidget *parent)
         _geoState.latitude->clear();
         _geoState.longitude->clear();
         _geoState.altitude->clear();
+    }
+}
+
+void CameraDialog::createWidgets() {
+    QBoxLayout* layout = new QVBoxLayout(this);
+    _tabWidget = new QTabWidget;
+    connect(_tabWidget, &QTabWidget::tabBarClicked, this, &CameraDialog::tabSelect);
+    _tabWidget->addTab(createNavStateWidget(), "Navigation State");
+    _tabWidget->addTab(createGeoWidget(), "Geo State");
+    layout->addWidget(_tabWidget);
+
+    layout->addWidget(new Line);
+
+    {
+        QBoxLayout* footerLayout = new QHBoxLayout;
+
+        _errorMsg = new QLabel;
+        _errorMsg->setObjectName("error-message");
+        _errorMsg->setWordWrap(true);
+        footerLayout->addWidget(_errorMsg);
+
+        QDialogButtonBox* buttons = new QDialogButtonBox;
+        buttons->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
+        connect(buttons, &QDialogButtonBox::accepted, this, &CameraDialog::approved);
+        connect(buttons, &QDialogButtonBox::rejected, this, &CameraDialog::reject);
+        footerLayout->addWidget(buttons);
+
+        layout->addLayout(footerLayout);
     }
 }
 

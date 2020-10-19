@@ -29,6 +29,7 @@
 #include "profile/cameradialog.h"
 #include "profile/deltatimesdialog.h"
 #include "profile/keybindingsdialog.h"
+#include "profile/line.h"
 #include "profile/marknodesdialog.h"
 #include "profile/metadialog.h"
 #include "profile/modulesdialog.h"
@@ -49,13 +50,6 @@
 using namespace openspace;
 
 namespace {
-    QFrame* createLine() {
-        QFrame* line = new QFrame;
-        line->setFrameShape(QFrame::HLine);
-        line->setFrameShadow(QFrame::Sunken);
-        return line;
-    }
-
     QString labelText(int size, QString title) {
         QString label;
         if (size > 0) {
@@ -99,7 +93,7 @@ namespace {
     }
 } // namespace
 
-ProfileEdit::ProfileEdit(Profile& profile, std::string profileName, 
+ProfileEdit::ProfileEdit(Profile& profile, const std::string& profileName, 
                          std::string assetBasePath, std::string profileBasePath,
                          const std::vector<std::string>& readOnlyProfiles,
                          QWidget* parent)
@@ -110,7 +104,12 @@ ProfileEdit::ProfileEdit(Profile& profile, std::string profileName,
     , _readOnlyProfiles(readOnlyProfiles)
 {
     setWindowTitle("Profile Editor");
+    createWidgets(profileName);
 
+    initSummaryTextForEachCategory();
+}
+
+void ProfileEdit::createWidgets(const std::string& profileName) {
     QBoxLayout* layout = new QVBoxLayout(this);
     QBoxLayout* topLayout = new QHBoxLayout;
     QBoxLayout* leftLayout = new QVBoxLayout;
@@ -132,7 +131,7 @@ ProfileEdit::ProfileEdit(Profile& profile, std::string profileName,
 
         layout->addLayout(container);
     }
-    layout->addWidget(createLine());
+    layout->addWidget(new Line);
     {
         QGridLayout* container = new QGridLayout;
         container->setColumnStretch(1, 1);
@@ -155,7 +154,7 @@ ProfileEdit::ProfileEdit(Profile& profile, std::string profileName,
 
         leftLayout->addLayout(container);
     }
-    leftLayout->addWidget(createLine());
+    leftLayout->addWidget(new Line);
     {
         QGridLayout* container = new QGridLayout;
         container->setColumnStretch(1, 1);
@@ -175,7 +174,7 @@ ProfileEdit::ProfileEdit(Profile& profile, std::string profileName,
 
         leftLayout->addLayout(container);
     }
-    leftLayout->addWidget(createLine());
+    leftLayout->addWidget(new Line);
     {
         QGridLayout* container = new QGridLayout;
         container->setColumnStretch(1, 1);
@@ -200,7 +199,7 @@ ProfileEdit::ProfileEdit(Profile& profile, std::string profileName,
     }
     topLayout->addLayout(leftLayout, 3);
 
-    topLayout->addWidget(createLine());
+    topLayout->addWidget(new Line);
 
     QBoxLayout* rightLayout = new QVBoxLayout;
     {
@@ -216,7 +215,7 @@ ProfileEdit::ProfileEdit(Profile& profile, std::string profileName,
         container->addWidget(metaEdit);
         rightLayout->addLayout(container);
     }
-    rightLayout->addWidget(createLine());
+    rightLayout->addWidget(new Line);
     {
         QBoxLayout* container = new QVBoxLayout;
         _interestingNodesLabel = new QLabel("Mark Interesting Nodes");
@@ -233,7 +232,7 @@ ProfileEdit::ProfileEdit(Profile& profile, std::string profileName,
         container->addWidget(interestingNodesEdit);
         rightLayout->addLayout(container);
     }
-    rightLayout->addWidget(createLine());
+    rightLayout->addWidget(new Line);
     {
         QBoxLayout* container = new QVBoxLayout;
         _deltaTimesLabel = new QLabel("Simulation Time Increments");
@@ -250,7 +249,7 @@ ProfileEdit::ProfileEdit(Profile& profile, std::string profileName,
         container->addWidget(deltaTimesEdit);
         rightLayout->addLayout(container);
     }
-    rightLayout->addWidget(createLine());
+    rightLayout->addWidget(new Line);
     {
         QBoxLayout* container = new QVBoxLayout;
         _cameraLabel = new QLabel("Camera");
@@ -264,7 +263,7 @@ ProfileEdit::ProfileEdit(Profile& profile, std::string profileName,
         container->addWidget(cameraEdit);
         rightLayout->addLayout(container);
     }
-    rightLayout->addWidget(createLine());
+    rightLayout->addWidget(new Line);
     {
         QBoxLayout* container = new QVBoxLayout;
         _timeLabel = new QLabel("Time");
@@ -278,7 +277,7 @@ ProfileEdit::ProfileEdit(Profile& profile, std::string profileName,
         container->addWidget(timeEdit);
         rightLayout->addLayout(container);
     }
-    rightLayout->addWidget(createLine());
+    rightLayout->addWidget(new Line);
     {
         QBoxLayout* container = new QVBoxLayout;
         _modulesLabel = new QLabel("Modules");
@@ -292,7 +291,7 @@ ProfileEdit::ProfileEdit(Profile& profile, std::string profileName,
         container->addWidget(modulesEdit);
         rightLayout->addLayout(container);
     }
-    rightLayout->addWidget(createLine());
+    rightLayout->addWidget(new Line);
     {
         QBoxLayout* container = new QVBoxLayout;
         _additionalScriptsLabel = new QLabel("Additional Scripts");
@@ -312,7 +311,7 @@ ProfileEdit::ProfileEdit(Profile& profile, std::string profileName,
     topLayout->addLayout(rightLayout);
     layout->addLayout(topLayout);
 
-    layout->addWidget(createLine());
+    layout->addWidget(new Line);
 
     {
         QBoxLayout* footer = new QHBoxLayout;
@@ -328,8 +327,6 @@ ProfileEdit::ProfileEdit(Profile& profile, std::string profileName,
         footer->addWidget(buttons);
         layout->addLayout(footer);
     }
-
-    initSummaryTextForEachCategory();
 }
 
 void ProfileEdit::initSummaryTextForEachCategory() {

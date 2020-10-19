@@ -24,6 +24,7 @@
 
 #include "profile/assetsdialog.h"
 
+#include "profile/line.h"
 #include <openspace/scene/profile.h>
 #include <QDialogButtonBox>
 #include <QHeaderView>
@@ -121,7 +122,11 @@ AssetsDialog::AssetsDialog(openspace::Profile& profile, const std::string& asset
     , _profile(profile)
 {
     setWindowTitle("Assets");
+    _assetTreeModel.importModelData(assetBasePath);
+    createWidgets();
+}
 
+void AssetsDialog::createWidgets() {
     QBoxLayout* layout = new QVBoxLayout(this);
     {
         QLabel* heading = new QLabel("Select assets from /data/assets");
@@ -129,8 +134,6 @@ AssetsDialog::AssetsDialog(openspace::Profile& profile, const std::string& asset
         layout->addWidget(heading);
     }
     {
-        _assetTreeModel.importModelData(assetBasePath);
-
         _assetTree = new QTreeView;
         _assetTree->setToolTip(
             "Expand arrow entries to browse assets in this OpenSpace installation. "
@@ -177,12 +180,8 @@ AssetsDialog::AssetsDialog(openspace::Profile& profile, const std::string& asset
         _summary->setText(createTextSummary());
         layout->addWidget(_summary);
     }
-    {
-        QFrame* line = new QFrame;
-        line->setFrameShape(QFrame::HLine);
-        line->setFrameShadow(QFrame::Sunken);
-        layout->addWidget(line);
-    }
+
+    layout->addWidget(new Line);
 
     {
         QDialogButtonBox* buttons = new QDialogButtonBox;

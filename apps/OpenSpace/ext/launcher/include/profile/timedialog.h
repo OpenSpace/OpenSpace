@@ -40,9 +40,9 @@ public:
     /**
      * Constructor for ostime class
      *
-     * \param imported The #openspace::Profile object containing all data of the
-     *                 new or imported profile.
-     * \param parent Pointer to parent Qt widget (optional)
+     * \param profile The #openspace::Profile object containing all data of the
+     *                new or imported profile.
+     * \param parent Pointer to parent Qt widget
      */
     TimeDialog(openspace::Profile& profile, QWidget* parent);
 
@@ -51,7 +51,9 @@ private slots:
     void approved();
 
 private:
+    void createWidgets();
     void enableFormatForAbsolute(bool enableAbs);
+
     openspace::Profile& _profile;
     openspace::Profile::Time _data;
     bool _initializedAsAbsolute = true;

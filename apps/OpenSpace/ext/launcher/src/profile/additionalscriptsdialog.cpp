@@ -24,6 +24,7 @@
 
 #include "profile/additionalscriptsdialog.h"
 
+#include "profile/line.h"
 #include <openspace/scene/profile.h>
 #include <QDialogButtonBox>
 #include <QHBoxLayout>
@@ -37,7 +38,18 @@ AdditionalScriptsDialog::AdditionalScriptsDialog(openspace::Profile& profile,
     , _profile(profile)
 {
     setWindowTitle("Additional Scripts");
+    createWidgets();
 
+    std::vector<std::string> scripts = _profile.additionalScripts();
+    std::string scriptText = std::accumulate(
+        scripts.begin(), scripts.end(),
+        std::string(), [](std::string lhs, std::string rhs) { return lhs + rhs + '\n'; }
+    );
+    _textScripts->setText(QString::fromStdString(std::move(scriptText)));
+    _textScripts->moveCursor(QTextCursor::MoveOperation::End);
+}
+
+void AdditionalScriptsDialog::createWidgets() {
     QBoxLayout* layout = new QVBoxLayout(this);
     {
         QLabel* heading = new QLabel("Additional Lua Scripts for Configuration");
@@ -49,12 +61,7 @@ AdditionalScriptsDialog::AdditionalScriptsDialog(openspace::Profile& profile,
     _textScripts->setAcceptRichText(false);
     layout->addWidget(_textScripts, 1);
 
-    {
-        QFrame* line = new QFrame;
-        line->setFrameShape(QFrame::HLine);
-        line->setFrameShadow(QFrame::Sunken);
-        layout->addWidget(line);
-    }
+    layout->addWidget(new Line);
 
     {
         QDialogButtonBox* buttons = new QDialogButtonBox;
@@ -69,14 +76,6 @@ AdditionalScriptsDialog::AdditionalScriptsDialog(openspace::Profile& profile,
         );
         layout->addWidget(buttons);
     }
-
-    std::vector<std::string> scripts = _profile.additionalScripts();
-    std::string scriptText = std::accumulate(
-        scripts.begin(), scripts.end(),
-        std::string(), [](std::string lhs, std::string rhs) { return lhs + rhs + '\n'; }
-    );
-    _textScripts->setText(QString::fromStdString(std::move(scriptText)));
-    _textScripts->moveCursor(QTextCursor::MoveOperation::End);
 }
 
 void AdditionalScriptsDialog::parseScript() {

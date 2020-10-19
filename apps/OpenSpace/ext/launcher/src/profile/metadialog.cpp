@@ -24,6 +24,7 @@
 
 #include "profile/metadialog.h"
 
+#include "profile/line.h"
 #include <openspace/scene/profile.h>
 #include <QDialogButtonBox>
 #include <QKeyEvent>
@@ -38,40 +39,7 @@ MetaDialog::MetaDialog(openspace::Profile& profile, QWidget *parent)
     , _profile(profile)
 {
     setWindowTitle("Meta");
-
-    QBoxLayout* layout = new QVBoxLayout(this);
-    layout->addWidget(new QLabel("Name"));
-    _nameEdit = new QLineEdit;
-    layout->addWidget(_nameEdit);
-
-    layout->addWidget(new QLabel("Version"));
-    _versionEdit = new QLineEdit;
-    layout->addWidget(_versionEdit);
-
-    layout->addWidget(new QLabel("Description"));
-    _descriptionEdit = new QTextEdit;
-    _descriptionEdit->setAcceptRichText(false);
-    _descriptionEdit->setTabChangesFocus(true);
-    layout->addWidget(_descriptionEdit);
-
-    layout->addWidget(new QLabel("Author"));
-    _authorEdit = new QLineEdit;
-    layout->addWidget(_authorEdit);
-    
-    layout->addWidget(new QLabel("URL"));
-    _urlEdit = new QLineEdit;
-    layout->addWidget(_urlEdit);
-
-    layout->addWidget(new QLabel("License"));
-    _licenseEdit = new QLineEdit;
-    layout->addWidget(_licenseEdit);
-
-    QDialogButtonBox* buttons = new QDialogButtonBox;
-    buttons->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
-    QObject::connect(buttons, &QDialogButtonBox::accepted, this, &MetaDialog::save);
-    QObject::connect(buttons, &QDialogButtonBox::rejected, this, &MetaDialog::reject);
-    layout->addWidget(buttons);
-
+    createWidgets();
 
     if (_profile.meta().has_value()) {
         openspace::Profile::Meta meta = *_profile.meta();
@@ -94,6 +62,43 @@ MetaDialog::MetaDialog(openspace::Profile& profile, QWidget *parent)
             _licenseEdit->setText(QString::fromStdString(*meta.license));
         }
     }
+}
+
+void MetaDialog::createWidgets() {
+    QBoxLayout* layout = new QVBoxLayout(this);
+    layout->addWidget(new QLabel("Name"));
+    _nameEdit = new QLineEdit;
+    layout->addWidget(_nameEdit);
+
+    layout->addWidget(new QLabel("Version"));
+    _versionEdit = new QLineEdit;
+    layout->addWidget(_versionEdit);
+
+    layout->addWidget(new QLabel("Description"));
+    _descriptionEdit = new QTextEdit;
+    _descriptionEdit->setAcceptRichText(false);
+    _descriptionEdit->setTabChangesFocus(true);
+    layout->addWidget(_descriptionEdit);
+
+    layout->addWidget(new QLabel("Author"));
+    _authorEdit = new QLineEdit;
+    layout->addWidget(_authorEdit);
+
+    layout->addWidget(new QLabel("URL"));
+    _urlEdit = new QLineEdit;
+    layout->addWidget(_urlEdit);
+
+    layout->addWidget(new QLabel("License"));
+    _licenseEdit = new QLineEdit;
+    layout->addWidget(_licenseEdit);
+
+    layout->addWidget(new Line);
+
+    QDialogButtonBox* buttons = new QDialogButtonBox;
+    buttons->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
+    QObject::connect(buttons, &QDialogButtonBox::accepted, this, &MetaDialog::save);
+    QObject::connect(buttons, &QDialogButtonBox::rejected, this, &MetaDialog::reject);
+    layout->addWidget(buttons);
 }
 
 void MetaDialog::save() {

@@ -42,14 +42,16 @@ public:
     /**
      * Constructor for ProfileEdit class
      *
-     * \param imported The #openspace::Profile object containing all data of the
-     *                 new or imported profile.
-     * \param reportedAssets string list of assets reported by filesystemAccess class
+     * \param profile The #openspace::Profile object containing all data of the
+     *                new or imported profile.
+     * \param profileName The name of the profile to create
+     * \param assetBasePath The path to the folder where the assets live
+     * \param profileName The path to the folder in which all profiles live
      * \param profilesReadOnly vector list of profile names that are read-only and must
      *                         not be overwritten
-     * \param parent Pointer to parent Qt widget (optional)
+     * \param parent Pointer to parent Qt widget
      */
-    ProfileEdit(openspace::Profile& profile, std::string profileName,
+    ProfileEdit(openspace::Profile& profile, const std::string& profileName,
         std::string assetBasePath, std::string profileBasePath,
         const std::vector<std::string>& profilesReadOnly, QWidget* parent);
 
@@ -91,6 +93,7 @@ private slots:
     void approved();
 
 private:
+    void createWidgets(const std::string& profileName);
     void initSummaryTextForEachCategory();
 
     openspace::Profile& _profile;
