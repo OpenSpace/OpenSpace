@@ -27,7 +27,7 @@ local object = {
         File = speck .. "/SDSSgals.speck",
         ColorMap = speck .. "/SDSSgals.cmap",
         ColorOption = { "redshift", "proximity" },
-        ColorRange = { { 0.001, 2.0 }, { 1.0, 50.0 } },
+        ColorRange = { { 0.0, 0.075 }, { 1.0, 50.0 } },
         Texture = textures .. "/point3A.png",
         Unit = "Mpc",
         -- Fade in value in the same unit as "Unit"
