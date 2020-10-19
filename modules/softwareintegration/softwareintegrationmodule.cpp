@@ -177,7 +177,7 @@ namespace openspace {
             return;
         }
         std::shared_ptr<Peer>& peer = it->second;
-        
+
         const SoftwareConnection::MessageType messageType = peerMessage.message.type;
         std::vector<char>& message = peerMessage.message.content;
         switch (messageType) {
@@ -187,6 +187,8 @@ namespace openspace {
             break;
         } 
         case SoftwareConnection::MessageType::ReadPointData: {
+            std::string poinDataMessage(message.begin(), message.end());
+            LINFO(fmt::format("Message recieved.. Point Data: {}", poinDataMessage));
             messageOffset = 0; // Resets message offset 
 
             std::vector<float> xCoordinates = readData(message);
@@ -206,6 +208,8 @@ namespace openspace {
             break;
         }
         case SoftwareConnection::MessageType::ReadLuminosityData: {
+            std::string luminosityDataMessage(message.begin(), message.end());
+            LINFO(fmt::format("Message recieved.. Luminosity Data: {}", luminosityDataMessage));
             messageOffset = 0; // Resets message offset 
 
             luminosityData.clear();
@@ -213,6 +217,8 @@ namespace openspace {
             break;
         }
         case SoftwareConnection::MessageType::ReadVelocityData: {
+            std::string velocityDataMessage(message.begin(), message.end());
+            LINFO(fmt::format("Message recieved.. Velocity Data: {}", velocityDataMessage));
             messageOffset = 0; // Resets message offset 
 
             velocityData.clear();
@@ -220,6 +226,9 @@ namespace openspace {
             break;
         }
         case SoftwareConnection::MessageType::AddSceneGraphNode: {
+            std::string sgnMessage(message.begin(), message.end());
+            LINFO(fmt::format("Message recieved.. Scene Graph Node Data: {}", sgnMessage));
+
             // The following order of creating variables is the exact order they're received in the message
             // If the order is not the same, the global variable 'message offset' will be wrong
             std::string identifier = readIdentifier(message);
@@ -350,8 +359,8 @@ namespace openspace {
             break;
         }
         case SoftwareConnection::MessageType::Color: {
-            std::string msg(message.begin(), message.end());
-            LINFO(fmt::format("Message recieved: {}", msg));
+            std::string colorMessage(message.begin(), message.end());
+            LINFO(fmt::format("Message recieved.. New Color: {}", colorMessage));
             std::string identifier = readIdentifier(message);
             glm::vec3 color = readColor(message);
 
@@ -368,8 +377,8 @@ namespace openspace {
             break;
         }
         case SoftwareConnection::MessageType::Opacity: {
-            std::string msg(message.begin(), message.end());
-            LINFO(fmt::format("Message recieved: {}", msg));
+            std::string opacityMessage(message.begin(), message.end());
+            LINFO(fmt::format("Message recieved.. New Opacity: {}", opacityMessage));
             std::string identifier = readIdentifier(message);
             float opacity = readFloatValue(message);
 
@@ -386,8 +395,8 @@ namespace openspace {
             break;
         }
         case SoftwareConnection::MessageType::Size: {
-            std::string msg(message.begin(), message.end());
-            LINFO(fmt::format("Message recieved: {}", msg));
+            std::string sizeMessage(message.begin(), message.end());
+            LINFO(fmt::format("Message recieved.. New Size: {}", sizeMessage));
             std::string identifier = readIdentifier(message);
             float size = readFloatValue(message);
 
@@ -404,8 +413,8 @@ namespace openspace {
             break;
         }
         case SoftwareConnection::MessageType::Visibility: {
-            std::string msg(message.begin(), message.end());
-            LINFO(fmt::format("Message recieved: {}", msg));
+            std::string visibilityMessage(message.begin(), message.end());
+            LINFO(fmt::format("Message recieved.. New Visibility: {}", visibilityMessage));
             std::string identifier = readIdentifier(message);
             std::string visibility;
             visibility.push_back(message[messageOffset]);
@@ -517,26 +526,6 @@ namespace openspace {
         visibilityProperty->onChange(toggleVisibility);
     }
 
-    // Read size value or opacity value
-    float SoftwareIntegrationModule::readFloatValue(std::vector<char>& message) {
-        std::string length;
-        length.push_back(message[messageOffset]);
-        messageOffset++;
-
-        int lengthOfValue = stoi(length);
-        std::string value;
-        int counter = 0;
-        while (counter != lengthOfValue)
-        {
-            value.push_back(message[messageOffset]);
-            messageOffset++;
-            counter++;
-        }
-        float floatValue = std::stof(value);
-
-        return floatValue;
-    }
-
     glm::vec3 SoftwareIntegrationModule::readColor(std::vector<char>& message) {
         std::string lengthOfColor; // Not used for now, but sent in message
         lengthOfColor.push_back(message[messageOffset]);
@@ -618,24 +607,24 @@ namespace openspace {
         return data;
     }
 
-    std::string SoftwareIntegrationModule::readIdentifier(std::vector<char>& message) {
+    // Read size value or opacity value
+    float SoftwareIntegrationModule::readFloatValue(std::vector<char>& message) {
         std::string length;
-        length.push_back(message[0]);
-        length.push_back(message[1]);
+        length.push_back(message[messageOffset]);
+        messageOffset++;
 
-        int lengthOfIdentifier = stoi(length);
+        int lengthOfValue = stoi(length);
+        std::string value;
         int counter = 0;
-        messageOffset = 2; // Resets messageOffset
-
-        std::string identifier;
-        while (counter != lengthOfIdentifier)
+        while (counter != lengthOfValue)
         {
-            identifier.push_back(message[messageOffset]);
+            value.push_back(message[messageOffset]);
             messageOffset++;
             counter++;
         }
+        float floatValue = std::stof(value);
 
-        return identifier;
+        return floatValue;
     }
 
     std::string SoftwareIntegrationModule::readGUI(std::vector<char>& message) {
@@ -656,6 +645,26 @@ namespace openspace {
         }
 
         return GUI;
+    }
+
+    std::string SoftwareIntegrationModule::readIdentifier(std::vector<char>& message) {
+        std::string length;
+        length.push_back(message[0]);
+        length.push_back(message[1]);
+
+        int lengthOfIdentifier = stoi(length);
+        int counter = 0;
+        messageOffset = 2; // Resets messageOffset
+
+        std::string identifier;
+        while (counter != lengthOfIdentifier)
+        {
+            identifier.push_back(message[messageOffset]);
+            messageOffset++;
+            counter++;
+        }
+
+        return identifier;
     }
 
     size_t SoftwareIntegrationModule::nConnections() const {

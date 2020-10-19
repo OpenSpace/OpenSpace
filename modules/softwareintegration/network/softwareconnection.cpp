@@ -54,7 +54,7 @@ namespace openspace {
 
     bool SoftwareConnection::sendMessage(std::string message) {
 
-        if (_isListening == true)
+        if (_isListening)
         {
             if (!_socket->put<char>(message.data(), message.size())) {
                 return false;
