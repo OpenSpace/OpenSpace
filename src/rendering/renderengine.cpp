@@ -1447,7 +1447,7 @@ void RenderEngine::renderScreenLog() {
 
         const glm::vec4 white(0.9f, 0.9f, 0.9f, alpha);
 
-        std::array<char, 15 + CategoryLength + 3> buf;
+        std::array<char, 15 + 1 + CategoryLength + 3> buf;
         {
             std::fill(buf.begin(), buf.end(), char(0));
             char* end = fmt::format_to(
