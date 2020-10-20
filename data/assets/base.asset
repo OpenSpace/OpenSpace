@@ -3,6 +3,7 @@
 -- probably not work
 
 asset.require('./base_blank')
+asset.require('examples/pointscloud')
 
 -- Specifying which other assets should be loaded in this scene
 asset.require('scene/solarsystem/sun/sun')
@@ -20,10 +21,6 @@ asset.require('scene/milkyway/milkyway/volume')
 asset.require('scene/milkyway/constellations/constellation_art')
 asset.require('scene/milkyway/constellations/constellation_keybinds')
 asset.require('util/launcher_images')
-
---- TESTELITEST ---
-asset.require('examples/pointscloud')
---- TESTELITEST ---
 
 local assetHelper = asset.require('util/asset_helper')
 assetHelper.requireAll(asset, 'scene/milkyway/exoplanets')

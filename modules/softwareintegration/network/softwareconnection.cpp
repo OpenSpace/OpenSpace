@@ -59,7 +59,7 @@ namespace openspace {
             if (!_socket->put<char>(message.data(), message.size())) {
                 return false;
             }
-            LINFO(fmt::format("Message sent: {}", message));
+            LDEBUG(fmt::format("Message sent: {}", message));
         }
         else
         {
@@ -81,12 +81,12 @@ namespace openspace {
     }
 
     SoftwareConnection::Message SoftwareConnection::receiveMessage() {
-        // Header consists of version (1 char), message type (4 char) & message size (9 char)
+        // Header consists of version (1 char), message type (4 char) & subject size (9 char)
         size_t HeaderSize = 14 * sizeof(char);
 
         // Create basic buffer for receiving first part of message
         std::vector<char> headerBuffer(HeaderSize);
-        std::vector<char> messageBuffer;
+        std::vector<char> subjectBuffer;
 
         // Receive the header data
         if (!_socket->get(headerBuffer.data(), HeaderSize)) {
@@ -115,52 +115,52 @@ namespace openspace {
             type.push_back(headerBuffer[i]);
 
         // Read and convert message size: Byte 5-13
-        std::string messageSizeIn;
+        std::string subjectSizeIn;
         for (int i = 5; i <= 13; i++)
-            messageSizeIn.push_back(headerBuffer[i]);
-        const size_t messageSize = stoi(messageSizeIn);
+            subjectSizeIn.push_back(headerBuffer[i]);
+        const size_t subjectSize = stoi(subjectSizeIn);
 
         // Receive the message data
-        messageBuffer.resize(messageSize);
-        if (!_socket->get(messageBuffer.data(), messageSize)) {
+        subjectBuffer.resize(subjectSize);
+        if (!_socket->get(subjectBuffer.data(), subjectSize)) {
             LERROR("Failed to read message from socket. Disconnecting.");
             throw SoftwareConnectionLostError();
         }
 
         // And delegate decoding depending on message type
         if (type == "CONN")
-            return Message(MessageType::Connection, messageBuffer);
+            return Message(MessageType::Connection, subjectBuffer);
         else if (type == "PDAT")
-            return Message(MessageType::ReadPointData, messageBuffer);
+            return Message(MessageType::ReadPointData, subjectBuffer);
         else if (type == "LUMI")
-            return Message(MessageType::ReadLuminosityData, messageBuffer);
+            return Message(MessageType::ReadLuminosityData, subjectBuffer);
         else if (type == "VELO")
-            return Message(MessageType::ReadVelocityData, messageBuffer);
+            return Message(MessageType::ReadVelocityData, subjectBuffer);
         else if( type == "ASGN")
-            return Message(MessageType::AddSceneGraphNode, messageBuffer);
+            return Message(MessageType::AddSceneGraphNode, subjectBuffer);
         else if (type == "RSGN")
-            return Message(MessageType::RemoveSceneGraphNode, messageBuffer);
+            return Message(MessageType::RemoveSceneGraphNode, subjectBuffer);
         else if (type == "UPCO") {
             _isListening = false;
-            return Message(MessageType::Color, messageBuffer);
+            return Message(MessageType::Color, subjectBuffer);
         }
         else if (type == "UPOP") {
             _isListening = false;
-            return Message(MessageType::Opacity, messageBuffer);
+            return Message(MessageType::Opacity, subjectBuffer);
         }
         else if (type == "UPSI") {
             _isListening = false;
-            return Message(MessageType::Size, messageBuffer);
+            return Message(MessageType::Size, subjectBuffer);
         }
         else if (type == "TOVI") {
             _isListening = false;
-            return Message(MessageType::Visibility, messageBuffer);
+            return Message(MessageType::Visibility, subjectBuffer);
         }
         else if (type == "DISC")
-            return Message(MessageType::Disconnection, messageBuffer);
+            return Message(MessageType::Disconnection, subjectBuffer);
         else {
             LERROR(fmt::format("Unsupported message type: {}. Disconnecting...", type));
-            return Message(MessageType::Disconnection, messageBuffer);
+            return Message(MessageType::Disconnection, subjectBuffer);
         }
     }
 

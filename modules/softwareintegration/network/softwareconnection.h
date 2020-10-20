@@ -70,6 +70,7 @@ public:
     bool isConnectedOrConnecting() const;
     bool sendMessage(std::string message);
     void disconnect();
+
     ghoul::io::TcpSocket* socket();
 
     SoftwareConnection::Message receiveMessage();

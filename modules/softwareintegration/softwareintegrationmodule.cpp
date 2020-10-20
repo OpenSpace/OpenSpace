@@ -90,6 +90,15 @@ namespace openspace {
             peer.status != SoftwareConnection::Status::Disconnected;
     }
 
+    std::shared_ptr<SoftwareIntegrationModule::Peer> SoftwareIntegrationModule::peer(size_t id) {
+        std::lock_guard<std::mutex> lock(_peerListMutex);
+        auto it = _peers.find(id);
+        if (it == _peers.end()) {
+            return nullptr;
+        }
+        return it->second;
+    }
+
     void SoftwareIntegrationModule::disconnect(Peer& peer) {
         if (isConnected(peer)) {
             _nConnections = nConnections() - 1;
@@ -98,6 +107,15 @@ namespace openspace {
         peer.connection.disconnect();
         peer.thread.join();
         _peers.erase(peer.id);
+    }
+
+    void SoftwareIntegrationModule::eventLoop() {
+        while (!_shouldStop) {
+            if (!_incomingMessages.empty()) {
+                PeerMessage pm = _incomingMessages.pop();
+                handlePeerMessage(std::move(pm));
+            }
+        }
     }
 
     void SoftwareIntegrationModule::handleNewPeers() {
@@ -114,33 +132,15 @@ namespace openspace {
             std::shared_ptr<Peer> p = std::make_shared<Peer>(Peer{
                 id,
                 "",
+                std::thread(),
                 SoftwareConnection(std::move(socket)),
-                SoftwareConnection::Status::Connecting,
-                std::thread()
+                SoftwareConnection::Status::Connecting
                 });
             auto it = _peers.emplace(p->id, p);
             it.first->second->thread = std::thread([this, id]() {
                 handlePeer(id);
             });
         }
-    }
-
-    void SoftwareIntegrationModule::eventLoop() {
-        while (!_shouldStop) {
-            if (!_incomingMessages.empty()) {
-                PeerMessage pm = _incomingMessages.pop();
-                handlePeerMessage(std::move(pm));
-            }
-        }
-    }
-
-    std::shared_ptr<SoftwareIntegrationModule::Peer> SoftwareIntegrationModule::peer(size_t id) {
-        std::lock_guard<std::mutex> lock(_peerListMutex);
-        auto it = _peers.find(id);
-        if (it == _peers.end()) {
-            return nullptr;
-        }
-        return it->second;
     }
 
     void SoftwareIntegrationModule::handlePeer(size_t id) {
@@ -221,7 +221,7 @@ namespace openspace {
         }
         case SoftwareConnection::MessageType::AddSceneGraphNode: {
             std::string sgnMessage(message.begin(), message.end());
-            LINFO(fmt::format("Message recieved.. Scene Graph Node Data: {}", sgnMessage));
+            LDEBUG(fmt::format("Message recieved.. Scene Graph Node Data: {}", sgnMessage));
 
             // The following order of creating variables is the exact order they're received in the message
             // If the order is not the same, the global variable 'message offset' will be wrong
@@ -233,10 +233,12 @@ namespace openspace {
             
             bool hasLuminosityData = !luminosityData.empty();
             bool hasVelocityData = !velocityData.empty();
+
             ghoul::Dictionary renderable;
             ghoul::Dictionary pointDataDictonary;
             ghoul::Dictionary luminosityDataDictonary;
             ghoul::Dictionary velocityDataDictionary;
+
             for (int i = 0; i < pointData.size(); ++i) {
                 pointDataDictonary.setValue<glm::vec3>(std::to_string(i + 1), pointData[i]);
             }
@@ -330,7 +332,7 @@ namespace openspace {
                 );
             }
 
-            handleProperties(identifier, peer);
+            handlePeerProperties(identifier, peer);
             break;
         }
         case SoftwareConnection::MessageType::RemoveSceneGraphNode: {
@@ -354,7 +356,7 @@ namespace openspace {
         }
         case SoftwareConnection::MessageType::Color: {
             std::string colorMessage(message.begin(), message.end());
-            LINFO(fmt::format("Message recieved.. New Color: {}", colorMessage));
+            LDEBUG(fmt::format("Message recieved.. New Color: {}", colorMessage));
             std::string identifier = readIdentifier(message);
             glm::vec3 color = readColor(message);
 
@@ -372,7 +374,7 @@ namespace openspace {
         }
         case SoftwareConnection::MessageType::Opacity: {
             std::string opacityMessage(message.begin(), message.end());
-            LINFO(fmt::format("Message recieved.. New Opacity: {}", opacityMessage));
+            LDEBUG(fmt::format("Message recieved.. New Opacity: {}", opacityMessage));
             std::string identifier = readIdentifier(message);
             float opacity = readFloatValue(message);
 
@@ -390,7 +392,7 @@ namespace openspace {
         }
         case SoftwareConnection::MessageType::Size: {
             std::string sizeMessage(message.begin(), message.end());
-            LINFO(fmt::format("Message recieved.. New Size: {}", sizeMessage));
+            LDEBUG(fmt::format("Message recieved.. New Size: {}", sizeMessage));
             std::string identifier = readIdentifier(message);
             float size = readFloatValue(message);
 
@@ -408,7 +410,7 @@ namespace openspace {
         }
         case SoftwareConnection::MessageType::Visibility: {
             std::string visibilityMessage(message.begin(), message.end());
-            LINFO(fmt::format("Message recieved.. New Visibility: {}", visibilityMessage));
+            LDEBUG(fmt::format("Message recieved.. New Visibility: {}", visibilityMessage));
             std::string identifier = readIdentifier(message);
             std::string visibility;
             visibility.push_back(message[messageOffset]);
@@ -434,7 +436,7 @@ namespace openspace {
         }
     }
 
-    void SoftwareIntegrationModule::handleProperties(std::string identifier, const std::shared_ptr<Peer>& peer) {
+    void SoftwareIntegrationModule::handlePeerProperties(std::string identifier, const std::shared_ptr<Peer>& peer) {
         const Renderable* myRenderable = renderable(identifier);
         properties::Property* colorProperty = myRenderable->property("Color");
         properties::Property* opacityProperty = myRenderable->property("Opacity");
@@ -520,6 +522,26 @@ namespace openspace {
         visibilityProperty->onChange(toggleVisibility);
     }
 
+    // Read size value or opacity value
+    float SoftwareIntegrationModule::readFloatValue(std::vector<char>& message) {
+        std::string length;
+        length.push_back(message[messageOffset]);
+        messageOffset++;
+
+        int lengthOfValue = stoi(length);
+        std::string value;
+        int counter = 0;
+        while (counter != lengthOfValue)
+        {
+            value.push_back(message[messageOffset]);
+            messageOffset++;
+            counter++;
+        }
+        float floatValue = std::stof(value);
+
+        return floatValue;
+    }
+
     glm::vec3 SoftwareIntegrationModule::readColor(std::vector<char>& message) {
         std::string lengthOfColor; // Not used for now, but sent in message
         lengthOfColor.push_back(message[messageOffset]);
@@ -567,60 +589,6 @@ namespace openspace {
         return color;
     }
 
-    std::vector<float> SoftwareIntegrationModule::readData(std::vector<char>& message) {
-        std::string length;
-        int lengthOffset = messageOffset + 9; // 9 first bytes is the length of the data
-
-        for (int i = messageOffset; i < lengthOffset; i++)
-        {
-            length.push_back(message[i]);
-            messageOffset++;
-        }
-           
-        int lengthOfData = stoi(length);
-        int counter = 0;
-
-        std::vector< float > data;
-        std::string value;
-
-        while (counter != lengthOfData)
-        {
-            while (message[messageOffset] != ',')
-            {
-                value.push_back(message[messageOffset]);
-                messageOffset++;
-                counter++;
-            }
-            float dataValue = stof(value);
-            data.push_back(dataValue);
-            value = "";
-            messageOffset++;
-            counter++;
-        }
-
-        return data;
-    }
-
-    // Read size value or opacity value
-    float SoftwareIntegrationModule::readFloatValue(std::vector<char>& message) {
-        std::string length;
-        length.push_back(message[messageOffset]);
-        messageOffset++;
-
-        int lengthOfValue = stoi(length);
-        std::string value;
-        int counter = 0;
-        while (counter != lengthOfValue)
-        {
-            value.push_back(message[messageOffset]);
-            messageOffset++;
-            counter++;
-        }
-        float floatValue = std::stof(value);
-
-        return floatValue;
-    }
-
     std::string SoftwareIntegrationModule::readGUI(std::vector<char>& message) {
         std::string length;
         length.push_back(message[messageOffset]);
@@ -659,6 +627,40 @@ namespace openspace {
         }
 
         return identifier;
+    }
+
+    std::vector<float> SoftwareIntegrationModule::readData(std::vector<char>& message) {
+        std::string length;
+        int lengthOffset = messageOffset + 9; // 9 first bytes is the length of the data
+
+        for (int i = messageOffset; i < lengthOffset; i++)
+        {
+            length.push_back(message[i]);
+            messageOffset++;
+        }
+
+        int lengthOfData = stoi(length);
+        int counter = 0;
+
+        std::vector< float > data;
+        std::string value;
+
+        while (counter != lengthOfData)
+        {
+            while (message[messageOffset] != ',')
+            {
+                value.push_back(message[messageOffset]);
+                messageOffset++;
+                counter++;
+            }
+            float dataValue = stof(value);
+            data.push_back(dataValue);
+            value = "";
+            messageOffset++;
+            counter++;
+        }
+
+        return data;
     }
 
     size_t SoftwareIntegrationModule::nConnections() const {

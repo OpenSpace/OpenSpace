@@ -30,13 +30,13 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
+namespace openspace::documentation { struct Documentation; }
+
 namespace ghoul::filesystem { class File; }
 
 namespace ghoul::opengl {
     class ProgramObject;
 } // namespace ghoul::opengl
-
-namespace openspace::documentation { struct Documentation; }
 
 namespace openspace {
 
@@ -60,8 +60,8 @@ protected:
     bool loadData();
     bool readPointData();
 
-    bool _hasPointData = false;
     bool _hasLuminosityData = false;
+    bool _hasPointData = false;
     bool _hasVelocityData = false;
     bool _isDirty = true;
 
@@ -73,10 +73,10 @@ protected:
     properties::Vec3Property _color;
 
     std::vector<glm::vec3> _pointData;
-    std::vector<float> _luminosityData;
-    std::vector<float> _velocityData;
     std::vector<float> _fullData;
+    std::vector<float> _luminosityData;
     std::vector<float> _slicedData;
+    std::vector<float> _velocityData;
 
     int _nValuesPerPoints = 0;
 

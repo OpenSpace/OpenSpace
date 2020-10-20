@@ -24,11 +24,11 @@
 
 #include <modules/softwareintegration/rendering/renderablepointscloud.h>
 
+#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/updatestructures.h>
-#include <openspace/documentation/verifier.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -38,11 +38,11 @@
 #include <fstream>
 
 namespace {
-    constexpr const char* ProgramName = "shaderProgram";
-    constexpr const char* _loggerCat = "PointsCloud";
     constexpr const char* KeyData = "Data";
     constexpr const char* KeyLuminosity = "Luminosity";
     constexpr const char* KeyVelocity = "Velocity";
+    constexpr const char* ProgramName = "shaderProgram";
+    constexpr const char* _loggerCat = "PointsCloud";
 
     constexpr int8_t CurrentCacheVersion = 1;
 
@@ -315,6 +315,30 @@ namespace openspace {
         _isDirty = false;
     }
 
+    void RenderablePointsCloud::createDataSlice() {
+        _slicedData.clear();
+        _slicedData.reserve(4 * (_fullData.size() / _nValuesPerPoints));
+
+        auto addPosition = [&](const glm::vec4& pos) {
+            for (int j = 0; j < 4; ++j) {
+                _slicedData.push_back(pos[j]);
+            }
+        };
+
+        for (size_t i = 0; i < _fullData.size(); i += _nValuesPerPoints) {
+            glm::dvec4 transformedPos = _transformationMatrix * glm::dvec4(
+                _fullData[i + 0],
+                _fullData[i + 1],
+                _fullData[i + 2],
+                1.0
+            );
+            // W-normalization
+            transformedPos /= transformedPos.w;
+            transformedPos *= openspace::distanceconstants::Parsec;
+            addPosition(transformedPos);
+        }
+    }
+
     bool RenderablePointsCloud::loadData() {
         bool isSuccessful = true;
         _slicedData.clear();
@@ -353,30 +377,6 @@ namespace openspace {
         _fullData.insert(_fullData.end(), values.begin(), values.end());
 
         return true;
-    }
-
-    void RenderablePointsCloud::createDataSlice() {
-        _slicedData.clear();
-        _slicedData.reserve(4 * (_fullData.size() / _nValuesPerPoints));
-
-        auto addPosition = [&](const glm::vec4& pos) {
-            for (int j = 0; j < 4; ++j) {
-                _slicedData.push_back(pos[j]);
-            }
-        };
-
-        for (size_t i = 0; i < _fullData.size(); i += _nValuesPerPoints) {
-            glm::dvec4 transformedPos = _transformationMatrix * glm::dvec4(
-                _fullData[i + 0],
-                _fullData[i + 1],
-                _fullData[i + 2],
-                1.0
-            );
-            // W-normalization
-            transformedPos /= transformedPos.w;
-            transformedPos *= openspace::distanceconstants::Parsec;
-            addPosition(transformedPos);
-        }
     }
 
 } // namespace openspace

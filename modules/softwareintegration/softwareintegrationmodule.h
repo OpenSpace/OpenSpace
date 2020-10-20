@@ -43,6 +43,7 @@ public:
 
     void start(int port);
     void stop();
+
     size_t nConnections() const;
 
     size_t messageOffset = 0;
@@ -53,13 +54,15 @@ private:
     struct Peer {
         size_t id;
         std::string name;
+        std::thread thread;
+
         SoftwareConnection connection;
         SoftwareConnection::Status status;
-        std::thread thread;
     };
 
     struct PeerMessage {
         size_t peerId;
+
         SoftwareConnection::Message message;
     };
 
@@ -69,34 +72,34 @@ private:
 
     bool isConnected(const Peer& peer) const;
 
-    void disconnect(Peer& peer); 
-
-    void handleNewPeers();
-    void eventLoop();
     std::shared_ptr<Peer> peer(size_t id);
+
+    void disconnect(Peer& peer); 
+    void eventLoop();
+    void handleNewPeers();
     void handlePeer(size_t id);
     void handlePeerMessage(PeerMessage peerMessage);
-    void handleProperties(std::string identifier, const std::shared_ptr<Peer>& peer);
+    void handlePeerProperties(std::string identifier, const std::shared_ptr<Peer>& peer);
     
     float readFloatValue(std::vector<char>& message);
     glm::vec3 readColor(std::vector<char>& message);
-    std::vector<float> readData(std::vector<char>& message);
-    std::string readIdentifier(std::vector<char>& message);
     std::string readGUI(std::vector<char>& message);
+    std::string readIdentifier(std::vector<char>& message);
+    std::vector<float> readData(std::vector<char>& message);
 
     std::vector<glm::vec3> pointData;
     std::vector<float> luminosityData;
     std::vector<float> velocityData;
+
     std::unordered_map<size_t, std::shared_ptr<Peer>> _peers;
     mutable std::mutex _peerListMutex;
 
-    std::thread _serverThread;
-    std::thread _eventLoopThread;
     ghoul::io::TcpSocketServer _socketServer;
     size_t _nextConnectionId = 1;
     std::atomic_bool _shouldStop = false;
-
     std::atomic_size_t _nConnections = 0;
+    std::thread _eventLoopThread;
+    std::thread _serverThread;
 
     ConcurrentQueue<PeerMessage> _incomingMessages;
 };
