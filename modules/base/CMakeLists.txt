@@ -37,8 +37,6 @@ set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemvelocity.h
   ${CMAKE_CURRENT_SOURCE_DIR}/lightsource/cameralightsource.h
   ${CMAKE_CURRENT_SOURCE_DIR}/lightsource/scenegraphlightsource.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/modelgeometry.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/multimodelgeometry.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/grids/renderableboxgrid.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/grids/renderablegrid.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/grids/renderableradialgrid.h
@@ -89,8 +87,6 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemvelocity.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/lightsource/cameralightsource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/lightsource/scenegraphlightsource.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/modelgeometry.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/multimodelgeometry.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/grids/renderableboxgrid.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/grids/renderablegrid.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/grids/renderableradialgrid.cpp

@@ -33,6 +33,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
+#include <ghoul/io/model/modelreader.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <memory>
 
@@ -41,6 +42,8 @@ namespace ghoul::opengl {
     class Texture;
 } // namespace ghoul::opengl
 
+namespace ghoul::modelgeometry { class ModelGeometry; }
+
 namespace openspace {
 
 struct RenderData;
@@ -48,7 +51,6 @@ struct UpdateData;
 class LightSource;
 
 namespace documentation { struct Documentation; }
-namespace modelgeometry { class ModelGeometry; }
 
 class RenderableModel : public Renderable {
 public:
@@ -67,7 +69,8 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    std::vector<ghoul::mm_unique_ptr<modelgeometry::ModelGeometry>> _geometry;
+    std::string _file;
+    std::unique_ptr<ghoul::modelgeometry::ModelGeometry> _geometry;
 
     properties::FloatProperty _ambientIntensity;
 

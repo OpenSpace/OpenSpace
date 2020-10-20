@@ -49,8 +49,6 @@
 #include <modules/base/rendering/renderabletrailtrajectory.h>
 #include <modules/base/rendering/renderableplaneimagelocal.h>
 #include <modules/base/rendering/renderableplaneimageonline.h>
-#include <modules/base/rendering/modelgeometry.h>
-#include <modules/base/rendering/multimodelgeometry.h>
 #include <modules/base/rendering/screenspacedashboard.h>
 #include <modules/base/rendering/screenspaceimagelocal.h>
 #include <modules/base/rendering/screenspaceimageonline.h>
@@ -85,10 +83,6 @@ ghoul::opengl::TextureManager BaseModule::TextureManager;
 BaseModule::BaseModule() : OpenSpaceModule(BaseModule::Name) {}
 
 void BaseModule::internalInitialize(const ghoul::Dictionary&) {
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<modelgeometry::ModelGeometry>>(),
-        "ModelGeometry"
-    );
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<ScreenSpaceRenderable>>(),
         "ScreenSpaceRenderable"
@@ -175,10 +169,6 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
 
     fLightSource->registerClass<CameraLightSource>("CameraLightSource");
     fLightSource->registerClass<SceneGraphLightSource>("SceneGraphLightSource");
-
-    auto fGeometry = FactoryManager::ref().factory<modelgeometry::ModelGeometry>();
-    ghoul_assert(fGeometry, "Model geometry factory was not created");
-    fGeometry->registerClass<modelgeometry::MultiModelGeometry>("MultiModelGeometry");
 }
 
 void BaseModule::internalDeinitializeGL() {
@@ -233,8 +223,6 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
 
         SceneGraphLightSource::Documentation(),
         CameraLightSource::Documentation(),
-
-        modelgeometry::ModelGeometry::Documentation(),
     };
 }
 

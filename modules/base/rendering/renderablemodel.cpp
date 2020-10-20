@@ -25,7 +25,6 @@
 #include <modules/base/rendering/renderablemodel.h>
 
 #include <modules/base/basemodule.h>
-#include <modules/base/rendering/modelgeometry.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
@@ -35,6 +34,7 @@
 #include <openspace/scene/scene.h>
 #include <openspace/scene/lightsource.h>
 
+#include <ghoul/io/model/modelgeometry.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/invariants.h>
@@ -44,7 +44,7 @@
 
 namespace {
     constexpr const char* ProgramName = "ModelProgram";
-    constexpr const char* KeyGeometry = "Geometry";
+    constexpr const char* KeyGeomModelFile = "GeometryFile";
 
     constexpr const std::array<const char*, 12> UniformNames = {
         "opacity", "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
@@ -113,15 +113,12 @@ documentation::Documentation RenderableModel::Documentation() {
         "base_renderable_model",
         {
             {
-                KeyGeometry,
-                new TableVerifier({
-                    {
-                        "*",
-                        new ReferencingVerifier("base_geometry_model"),
-                        Optional::Yes
-                    }
-                }),
+                KeyGeomModelFile,
+                new StringVerifier,
                 Optional::No,
+                "The file that should be loaded in this RenderableModel. The file can "
+                "contain filesystem tokens or can be specified relatively to the "
+                "location of the .mod file. "
                 "This specifies the model that is rendered by the Renderable."
             },
             {
@@ -208,13 +205,11 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     registerUpdateRenderBinFromOpacity();
 
 
-    if (dictionary.hasKey(KeyGeometry)) {
-        ghoul::Dictionary dict = dictionary.value<ghoul::Dictionary>(KeyGeometry);
-        for (int i = 1; i <= dict.size(); ++i) {
-            std::string key = std::to_string(i);
-            ghoul::Dictionary geom = dict.value<ghoul::Dictionary>(key);
-            _geometry.push_back(modelgeometry::ModelGeometry::createFromDictionary(geom));
-        }
+    if (dictionary.hasKey(KeyGeomModelFile)) {
+        _file = absPath(dictionary.value<std::string>(KeyGeomModelFile));
+
+        // Read the file and save the resulting ModelGeometry
+        _geometry = ghoul::io::ModelReader::ref().loadModel(_file);
     }
 
     if (dictionary.hasKey(ModelTransformInfo.identifier)) {
@@ -301,16 +296,14 @@ void RenderableModel::initializeGL() {
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
-    for (const ghoul::mm_unique_ptr<modelgeometry::ModelGeometry>& geom : _geometry) {
-        geom->initialize(this);
-    }
+    float maximumDistanceSquared = 0;
+    _geometry->initialize(maximumDistanceSquared);
+    setBoundingSphere(glm::sqrt(maximumDistanceSquared));
 }
 
 void RenderableModel::deinitializeGL() {
-    for (const ghoul::mm_unique_ptr<modelgeometry::ModelGeometry>& geom : _geometry) {
-        geom->deinitialize();
-    }
-    _geometry.clear();
+    _geometry->deinitialize();
+    _geometry.reset();
 
     BaseModule::ProgramObjectManager.release(
         ProgramName,
@@ -394,11 +387,8 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     ghoul::opengl::TextureUnit unit;
     unit.activate();
     _program->setUniform(_uniformCache.texture, unit);
-    for (const ghoul::mm_unique_ptr<modelgeometry::ModelGeometry>& geom : _geometry) {
-        geom->setUniforms(*_program);
-        geom->bindTexture();
-        geom->render();
-    }
+    _geometry->setUniforms(*_program);
+    _geometry->render(*_program);
     if (_disableFaceCulling) {
         glEnable(GL_CULL_FACE);
     }
