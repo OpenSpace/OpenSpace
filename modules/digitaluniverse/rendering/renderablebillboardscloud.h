@@ -29,6 +29,7 @@
 
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec2property.h>
@@ -123,6 +124,7 @@ private:
     properties::BoolProperty _drawLabels;
     properties::BoolProperty _pixelSizeControl;
     properties::OptionProperty _colorOption;
+    properties::Vec2Property _optionColorRangeData;
     properties::OptionProperty _datavarSizeOption;
     properties::Vec2Property _fadeInDistance;
     properties::BoolProperty _disableFadeInDistance;
@@ -130,6 +132,8 @@ private:
     properties::FloatProperty _billboardMinSize;
     properties::FloatProperty _correctionSizeEndDistance;
     properties::FloatProperty _correctionSizeFactor;
+    properties::BoolProperty _useLinearFiltering;
+    properties::TriggerProperty _setRangeFromData;
 
     // DEBUG:
     properties::OptionProperty _renderOption;

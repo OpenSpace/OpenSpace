@@ -22,65 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___CAMERA___H__
-#define __OPENSPACE_UI_LAUNCHER___CAMERA___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___LINE___H__
+#define __OPENSPACE_UI_LAUNCHER___LINE___H__
 
-#include <QDialog>
+#include <QFrame>
 
-namespace openspace { class Profile; }
-
-class QLabel;
-class QLineEdit;
-class QTabWidget;
-
-class CameraDialog : public QDialog {
-Q_OBJECT
+class Line : public QFrame {
 public:
-    /**
-     * Constructor for camera gui class
-     *
-     * \param profile The #openspace::Profile object containing all data of the
-     *                new or imported profile.
-     * \param parent Pointer to parent Qt widget (optional)
-     */
-    CameraDialog(openspace::Profile& profile, QWidget* parent);
-
-private slots:
-    void approved();
-    void tabSelect(int);
-
-private:
-    void createWidgets();
-    QWidget* createNavStateWidget();
-    QWidget* createGeoWidget();
-
-    void addErrorMsg(QString errorDescription);
-    bool areRequiredFormsFilledAndValid();
-
-    openspace::Profile& _profile;
-    QTabWidget* _tabWidget = nullptr;
-    struct {
-        QLineEdit* anchor = nullptr;
-        QLineEdit* aim = nullptr;
-        QLineEdit* refFrame = nullptr;
-        QLineEdit* positionX = nullptr;
-        QLineEdit* positionY = nullptr;
-        QLineEdit* positionZ = nullptr;
-        QLineEdit* upX = nullptr;
-        QLineEdit* upY = nullptr;
-        QLineEdit* upZ = nullptr;
-        QLineEdit* yaw = nullptr;
-        QLineEdit* pitch = nullptr;
-    } _navState;
-
-    struct {
-        QLineEdit* anchor = nullptr;
-        QLineEdit* latitude = nullptr;
-        QLineEdit* longitude = nullptr;
-        QLineEdit* altitude = nullptr;
-    } _geoState;
-
-    QLabel* _errorMsg = nullptr;
+    Line();
 };
 
-#endif // __OPENSPACE_UI_LAUNCHER___CAMERA___H__
+#endif // __OPENSPACE_UI_LAUNCHER___LINE___H__

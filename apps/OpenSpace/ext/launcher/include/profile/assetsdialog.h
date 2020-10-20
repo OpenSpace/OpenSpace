@@ -28,7 +28,6 @@
 #include <QDialog>
 
 #include "assettreemodel.h"
-#include "filesystemaccess.h"
 
 namespace openspace { class Profile; }
 
@@ -43,14 +42,18 @@ public:
      *
      * \param profile The #openspace::Profile object containing all data of the
      *                new or imported profile.
-     * \param reportAssets A full summary of all assets and their respective paths in
-     *                     a text format unique to this application (more details are
-     *                     in class #assetTreeModel)
+     * \param assetBasePath The path to the folder in which all of the assets are living
      * \param parent Pointer to parent Qt widget
      */
-    AssetsDialog(openspace::Profile& profile, const std::string reportAssets,
+    AssetsDialog(openspace::Profile& profile, const std::string& assetBasePath,
         QWidget* parent);
 
+private slots:
+    void parseSelections();
+    void selected(const QModelIndex&);
+
+private:
+    void createWidgets();
     /**
      * Creates a text summary of all assets and their paths
      *
@@ -58,11 +61,6 @@ public:
      */
     QString createTextSummary();
 
-private slots:
-    void parseSelections();
-    void selected(const QModelIndex&);
-
-private:
     openspace::Profile& _profile;
     AssetTreeModel _assetTreeModel;
     QTreeView* _assetTree = nullptr;

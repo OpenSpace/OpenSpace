@@ -444,7 +444,6 @@ void DashboardItemDistance::render(glm::vec2& penPosition) {
         dist = { convertedD, nameForDistanceUnit(unit, convertedD != 1.0) };
     }
 
-    penPosition.y -= _font->height();
     std::fill(_buffer.begin(), _buffer.end(), 0);
     char* end = fmt::format_to(
         _buffer.data(),
@@ -454,6 +453,7 @@ void DashboardItemDistance::render(glm::vec2& penPosition) {
 
     std::string_view text = std::string_view(_buffer.data(), end - _buffer.data());
     RenderFont(*_font, penPosition, text);
+    penPosition.y -= _font->height();
 }
 
 glm::vec2 DashboardItemDistance::size() const {

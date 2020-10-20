@@ -203,7 +203,6 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
 
     std::string pauseText = global::timeManager.isPaused() ? " (Paused)" : "";
 
-    penPosition.y -= _font->height();
     if (targetDt != currentDt && !global::timeManager.isPaused()) {
         // We are in the middle of a transition
         RenderFont(
@@ -227,6 +226,7 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
             )
         );
     }
+    penPosition.y -= _font->height();
 }
 
 glm::vec2 DashboardItemSimulationIncrement::size() const {

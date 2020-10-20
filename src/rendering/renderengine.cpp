@@ -758,7 +758,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
     if (intersects(mousePosition, _cameraButtonLocations.rotation)) {
         constexpr const char* ToggleRotationFrictionScript = R"(
             local f = 'NavigationHandler.OrbitalNavigator.Friction.RotationalFriction';
-            openspace.setPropertyValue(f, not openspace.getPropertyValue(f));)";
+            openspace.setPropertyValueSingle(f, not openspace.getPropertyValue(f));)";
 
         global::scriptEngine.queueScript(
             ToggleRotationFrictionScript,
@@ -770,7 +770,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
     if (intersects(mousePosition, _cameraButtonLocations.zoom)) {
         constexpr const char* ToggleZoomFrictionScript = R"(
             local f = 'NavigationHandler.OrbitalNavigator.Friction.ZoomFriction';
-            openspace.setPropertyValue(f, not openspace.getPropertyValue(f));)";
+            openspace.setPropertyValueSingle(f, not openspace.getPropertyValue(f));)";
 
         global::scriptEngine.queueScript(
             ToggleZoomFrictionScript,
@@ -782,7 +782,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
     if (intersects(mousePosition, _cameraButtonLocations.roll)) {
         constexpr const char* ToggleRollFrictionScript = R"(
             local f = 'NavigationHandler.OrbitalNavigator.Friction.RollFriction';
-            openspace.setPropertyValue(f, not openspace.getPropertyValue(f));)";
+            openspace.setPropertyValueSingle(f, not openspace.getPropertyValue(f));)";
 
         global::scriptEngine.queueScript(
             ToggleRollFrictionScript,
@@ -1409,9 +1409,9 @@ void RenderEngine::renderScreenLog() {
 
     _log->removeExpiredEntries();
 
-    constexpr const int MaxNumberMessages = 10;
+    constexpr const int MaxNumberMessages = 20;
     constexpr const int CategoryLength = 30;
-    constexpr const int MessageLength = 140;
+    constexpr const int MessageLength = 280;
     constexpr const std::chrono::seconds FadeTime(5);
 
     const std::vector<ScreenLog::LogEntry>& entries = _log->entries();
@@ -1447,7 +1447,7 @@ void RenderEngine::renderScreenLog() {
 
         const glm::vec4 white(0.9f, 0.9f, 0.9f, alpha);
 
-        std::array<char, 15 + CategoryLength + 3> buf;
+        std::array<char, 15 + 1 + CategoryLength + 3> buf;
         {
             std::fill(buf.begin(), buf.end(), char(0));
             char* end = fmt::format_to(
@@ -1493,7 +1493,7 @@ void RenderEngine::renderScreenLog() {
             RenderFont(
                 *_fontLog,
                 glm::vec2(
-                    10 + 30 * _fontLog->pointSize(),
+                    10 + (30 + 3) * _fontLog->pointSize(),
                     _fontLog->pointSize() * nr * 2 + fontRes.y * _verticalLogOffset
                 ),
                 levelText,
@@ -1504,7 +1504,7 @@ void RenderEngine::renderScreenLog() {
         RenderFont(
             *_fontLog,
             glm::vec2(
-                10 + 41 * _fontLog->pointSize(),
+                10 + 44 * _fontLog->pointSize(),
                 _fontLog->pointSize() * nr * 2 + fontRes.y * _verticalLogOffset
             ),
             message,

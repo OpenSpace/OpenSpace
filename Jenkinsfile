@@ -95,7 +95,8 @@ parallel tools: {
         tool: cppCheck()
       ) 
     }  
-  }
+    cleanWs()
+  } // node('tools')
 },
 linux_gcc: {
   node('linux' && 'gcc') {
@@ -119,6 +120,7 @@ linux_gcc: {
     stage('linux-gcc/test') {
       // testHelper.runUnitTests('build/OpenSpaceTest');
     }
+    cleanWs()
   } // node('linux')
 },
 linux_clang: {
@@ -143,6 +145,7 @@ linux_clang: {
     stage('linux-clang/test') {
       // testHelper.runUnitTests('build/OpenSpaceTest');
     }
+    cleanWs()
   } // node('linux')
 },
 windows: {
@@ -164,7 +167,8 @@ windows: {
         // testHelper.runUnitTests('bin\\Debug\\OpenSpaceTest')
       }
     } // node('windows')
-  }
+    cleanWs()
+  } // node('windows')
 },
 macos: {
   node('macos') {
@@ -182,5 +186,6 @@ macos: {
       // Currently, the unit tests are crashing on OS X
       // testHelper.runUnitTests('build/Debug/OpenSpaceTest')
     }
-  } // node('osx')
+    cleanWs()
+  } // node('macos')
 }

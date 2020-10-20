@@ -121,6 +121,8 @@ void DashboardItemParallelConnection::render(glm::vec2& penPosition) {
     const size_t nConnections = global::parallelPeer.nConnections();
     const std::string& hostName = global::parallelPeer.hostName();
 
+    int nLines = 1;
+
     std::string connectionInfo;
     int nClients = static_cast<int>(nConnections);
     if (status == ParallelConnection::Status::Host) {
@@ -158,11 +160,13 @@ void DashboardItemParallelConnection::render(glm::vec2& penPosition) {
         else if (nClients == 1) {
             connectionInfo += "You are the only client";
         }
+
+        nLines = 2;
     }
 
     if (!connectionInfo.empty()) {
-        penPosition.y -= _font->height();
         RenderFont(*_font, penPosition, connectionInfo);
+        penPosition.y -= _font->height() * nLines;
     }
 }
 

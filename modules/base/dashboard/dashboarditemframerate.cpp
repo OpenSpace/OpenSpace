@@ -149,6 +149,21 @@ namespace {
                 throw ghoul::MissingCaseException();
         }
     }
+
+    [[ nodiscard ]] int nLines(
+                           openspace::DashboardItemFramerate::FrametimeType frametimeType)
+    {
+        using FrametimeType = openspace::DashboardItemFramerate::FrametimeType;
+        switch (frametimeType) {
+            case FrametimeType::DtTimeAvg:                return 1;
+            case FrametimeType::DtTimeExtremes:           return 2;
+            case FrametimeType::DtStandardDeviation:      return 1;
+            case FrametimeType::DtCoefficientOfVariation: return 1;
+            case FrametimeType::FPS:                      return 1;
+            case FrametimeType::FPSAvg:                   return 1;
+            default:                                  throw ghoul::MissingCaseException();
+        }
+    }
 } // namespace
 
 namespace openspace {
@@ -309,13 +324,12 @@ void DashboardItemFramerate::render(glm::vec2& penPosition) {
     int nLines = output.empty() ? 0 :
         static_cast<int>((std::count(output.begin(), output.end(), '\n') + 1));
 
-    penPosition.y -= _font->height() * static_cast<float>(nLines);
-
     ghoul::fontrendering::FontRenderer::defaultRenderer().render(
         *_font,
         penPosition,
         output
     );
+    penPosition.y -= _font->height() * static_cast<float>(nLines);
 }
 
 glm::vec2 DashboardItemFramerate::size() const {

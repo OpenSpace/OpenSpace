@@ -28,6 +28,7 @@
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
 #include <ctime>
 #include <filesystem>
 
@@ -65,11 +66,14 @@ int saveSettingsToProfile(lua_State* L) {
             utcTime->tm_min,
             utcTime->tm_sec
         );
-        std::string newFile = fmt::format(
-            "{}_{}.{}",
-            f.fullBaseName(), time, f.fileExtension()
-        );
-        std::filesystem::copy(global::configuration.profile, newFile);
+        std::string newFile = fmt::format("{}_{}", f.fullBaseName(), time);
+        std::string sourcePath =
+            absPath("${PROFILES}") + '/' + global::configuration.profile + ".profile";
+        std::string destPath =
+            absPath("${PROFILES}") + '/' + newFile + ".profile";
+
+        LINFOC("Profile", fmt::format("Saving a copy of the old profile as {}", newFile));
+        std::filesystem::copy(sourcePath, destPath);
         saveFilePath = global::configuration.profile;
     }
     else {
@@ -97,14 +101,14 @@ int saveSettingsToProfile(lua_State* L) {
     }
     const std::string absFilename = absPath("${PROFILES}/" + saveFilePath + ".profile");
 
-    const bool overwrite = (n == 2) ? ghoul::lua::value<bool>(L, 2) : false;
+    const bool overwrite = (n == 2) ? ghoul::lua::value<bool>(L, 2) : true;
 
     if (FileSys.fileExists(absFilename) && !overwrite) {
         return luaL_error(
             L, 
             fmt::format(
-                "Unable to save profile '{}'. File of same name already exists.",
-                absFilename.c_str()
+                "Unable to save profile '{}'. File of same name already exists",
+                absFilename
             ).c_str()
         );
     }
@@ -130,8 +134,7 @@ int saveSettingsToProfile(lua_State* L) {
         return luaL_error(
             L,
             fmt::format(
-                "Data write error to file: {} ({})",
-                absFilename, e.what()
+                "Data write error to file: {} ({})", absFilename, e.what()
             ).c_str()
         );
     }

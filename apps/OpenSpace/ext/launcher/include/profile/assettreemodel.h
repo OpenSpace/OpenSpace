@@ -32,7 +32,7 @@
 #include <memory>
 
 class AssetTreeModel : public QAbstractItemModel {
-    Q_OBJECT
+Q_OBJECT
 
 public:
     AssetTreeModel(QObject* parent = nullptr);
@@ -145,23 +145,11 @@ public:
         std::vector<AssetTreeItem*>& outputItems);
 
     /**
-      * Imports asset tree data for this model. The import text format is unique to
-      * this asset tree structure.
-      * Each line starts with an character (0, 1, or x) to represent its checked status
-      * or if it doesn't exist in the current filesystem.
-      * This is followed by the name of either an asset or directory, with a space for
-      * each level of sub-directory. Example:
-      * 0Base
-      * 0 Directory
-      * 0  Asset1
-      * 1  Asset2
-      * 0 Asset3
-      * 1Asset4
-      * This format is used internally to translate from code that reads the filesystem
-      *
-      * \param contents asset recursive listing of directory in format described above
+      * Imports asset tree data for this model by recursively traversing the folder
+      * structure.
+      * \param assetBasePath The base path where to find all assets
       */
-    void importModelData(const std::string& contents);
+    void importModelData(const std::string& assetBasePath);
 
     /**
       * Returns bool for if item is checked/selected
