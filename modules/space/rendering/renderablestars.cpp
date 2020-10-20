@@ -42,6 +42,7 @@
 #include <ghoul/opengl/textureunit.h>
 #include <array>
 #include <cstdint>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <limits>
@@ -688,7 +689,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 RenderableStars::~RenderableStars() {}
 
 bool RenderableStars::isReady() const {
-    return _program != nullptr;
+    return _program && _pointSpreadFunctionTexture;
 }
 
 void RenderableStars::initializeGL() {
@@ -1214,7 +1215,9 @@ void RenderableStars::update(const UpdateData&) {
     if (_pointSpreadFunctionTextureIsDirty) {
         LDEBUG("Reloading Point Spread Function texture");
         _pointSpreadFunctionTexture = nullptr;
-        if (!_pointSpreadFunctionTexturePath.value().empty()) {
+        if (!_pointSpreadFunctionTexturePath.value().empty() &&
+            std::filesystem::exists(_pointSpreadFunctionTexturePath.value()))
+        {
             _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
                 absPath(_pointSpreadFunctionTexturePath)
             );
