@@ -40,13 +40,13 @@ int add(lua_State* state) {
         ghoul::lua::PopValue::Yes
     );
 
-    if (global::renderEngine.scene()) {
+    if (global::renderEngine->scene()) {
         assetManager->add(assetName);
     }
     else {
         // The scene might not exist yet if OpenSpace was started without specifying an
         // initial asset
-        global::openSpaceEngine.scheduleLoadSingleAsset(assetName);
+        global::openSpaceEngine->scheduleLoadSingleAsset(assetName);
     }
 
 

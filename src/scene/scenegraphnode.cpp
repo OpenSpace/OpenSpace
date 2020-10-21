@@ -154,7 +154,7 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         "SceneGraphNode"
     );
 
-    SceneGraphNode* n = global::memoryManager.PersistentMemory.alloc<SceneGraphNode>();
+    SceneGraphNode* n = global::memoryManager->PersistentMemory.alloc<SceneGraphNode>();
     ghoul::mm_unique_ptr<SceneGraphNode> result = ghoul::mm_unique_ptr<SceneGraphNode>(n);
 
 #ifdef Debugging_Core_SceneGraphNode_Indices
@@ -332,13 +332,13 @@ SceneGraphNode::SceneGraphNode()
     , _guiDescription(GuiDescriptionInfo)
     , _transform {
         ghoul::mm_unique_ptr<Translation>(
-            global::memoryManager.PersistentMemory.alloc<StaticTranslation>()
+            global::memoryManager->PersistentMemory.alloc<StaticTranslation>()
         ),
         ghoul::mm_unique_ptr<Rotation>(
-            global::memoryManager.PersistentMemory.alloc<StaticRotation>()
+            global::memoryManager->PersistentMemory.alloc<StaticRotation>()
         ),
         ghoul::mm_unique_ptr<Scale>(
-            global::memoryManager.PersistentMemory.alloc<StaticScale>()
+            global::memoryManager->PersistentMemory.alloc<StaticScale>()
         )
     }
    , _boundingSphere(properties::FloatProperty(BoundingSphereInfo, 0.f))
@@ -689,7 +689,7 @@ void SceneGraphNode::computeScreenSpaceData(RenderData& newData) {
         return;
     }
 
-    glm::ivec2 res = global::windowDelegate.currentSubwindowSize();
+    glm::ivec2 res = global::windowDelegate->currentSubwindowSize();
 
     // Get the radius of node
     double nodeRadius = static_cast<double>(this->boundingSphere());

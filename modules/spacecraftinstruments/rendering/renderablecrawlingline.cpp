@@ -133,7 +133,7 @@ bool RenderableCrawlingLine::isReady() const {
 }
 
 void RenderableCrawlingLine::initializeGL() {
-    _program = global::renderEngine.buildRenderProgram(
+    _program = global::renderEngine->buildRenderProgram(
         "RenderableCrawlingLine",
         absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/crawlingline_vs.glsl"),
         absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/crawlingline_fs.glsl")
@@ -169,7 +169,7 @@ void RenderableCrawlingLine::deinitializeGL() {
     _vbo = 0;
 
     if (_program) {
-        global::renderEngine.removeRenderProgram(_program.get());
+        global::renderEngine->removeRenderProgram(_program.get());
         _program = nullptr;
     }
 }

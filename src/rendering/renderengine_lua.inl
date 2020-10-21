@@ -44,7 +44,7 @@ int setRenderer(lua_State* L) {
         1,
         ghoul::lua::PopValue::Yes
     );
-    global::renderEngine.setRendererFromString(renderer);
+    global::renderEngine->setRendererFromString(renderer);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -69,7 +69,7 @@ int addScreenSpaceRenderable(lua_State* L) {
     std::unique_ptr<ScreenSpaceRenderable> s =
         ScreenSpaceRenderable::createFromDictionary(d);
 
-    global::renderEngine.addScreenSpaceRenderable(std::move(s));
+    global::renderEngine->addScreenSpaceRenderable(std::move(s));
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -83,7 +83,7 @@ int removeScreenSpaceRenderable(lua_State* L) {
         1,
         ghoul::lua::PopValue::Yes
     );
-    global::renderEngine.removeScreenSpaceRenderable(name);
+    global::renderEngine->removeScreenSpaceRenderable(name);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -92,8 +92,8 @@ int removeScreenSpaceRenderable(lua_State* L) {
 int takeScreenshot(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::takeScreenshot");
 
-    global::renderEngine.takeScreenshot();
-    const unsigned int screenshotNumber = global::renderEngine.latestScreenshotNumber();
+    global::renderEngine->takeScreenshot();
+    const unsigned int screenshotNumber = global::renderEngine->latestScreenshotNumber();
 
     lua_pushinteger(L, screenshotNumber);
     return 1;

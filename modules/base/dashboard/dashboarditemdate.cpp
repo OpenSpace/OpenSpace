@@ -95,7 +95,7 @@ DashboardItemDate::DashboardItemDate(const ghoul::Dictionary& dictionary)
         _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
     }
     _fontName.onChange([this](){
-        _font = global::fontManager.font(_fontName, _fontSize);
+        _font = global::fontManager->font(_fontName, _fontSize);
     });
     addProperty(_fontName);
 
@@ -103,11 +103,11 @@ DashboardItemDate::DashboardItemDate(const ghoul::Dictionary& dictionary)
         _fontSize = static_cast<float>(dictionary.value<double>(FontSizeInfo.identifier));
     }
     _fontSize.onChange([this](){
-        _font = global::fontManager.font(_fontName, _fontSize);
+        _font = global::fontManager->font(_fontName, _fontSize);
     });
     addProperty(_fontSize);
 
-    _font = global::fontManager.font(_fontName, _fontSize);
+    _font = global::fontManager->font(_fontName, _fontSize);
 }
 
 void DashboardItemDate::render(glm::vec2& penPosition) {
@@ -116,7 +116,7 @@ void DashboardItemDate::render(glm::vec2& penPosition) {
     RenderFont(
         *_font,
         penPosition,
-        fmt::format("Date: {} UTC", global::timeManager.time().UTC())
+        fmt::format("Date: {} UTC", global::timeManager->time().UTC())
     );
     penPosition.y -= _font->height();
 }
@@ -125,7 +125,7 @@ glm::vec2 DashboardItemDate::size() const {
     ZoneScoped
 
     return _font->boundingBox(
-        fmt::format("Date: {} UTC", global::timeManager.time().UTC())
+        fmt::format("Date: {} UTC", global::timeManager->time().UTC())
     );
 }
 

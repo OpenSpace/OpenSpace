@@ -428,14 +428,14 @@ void RenderableMultiresVolume::initializeGL() {
     );
     _raycaster->initialize();
 
-    global::raycasterManager.attachRaycaster(*_raycaster);
+    global::raycasterManager->attachRaycaster(*_raycaster);
 
     auto onChange = [&](bool enabled) {
         if (enabled) {
-            global::raycasterManager.attachRaycaster(*_raycaster);
+            global::raycasterManager->attachRaycaster(*_raycaster);
         }
         else {
-            global::raycasterManager.detachRaycaster(*_raycaster);
+            global::raycasterManager->detachRaycaster(*_raycaster);
         }
     };
 

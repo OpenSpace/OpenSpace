@@ -383,8 +383,8 @@ int unzipFile(lua_State* L) {
  * Saves the last entry from the script log to the current profile
  */
 int saveLastChangeToProfile(lua_State* L) {
-    std::string asset = global::configuration.asset;
-    std::string logFilePath = absPath(global::configuration.scriptLog);
+    std::string asset = global::configuration->asset;
+    std::string logFilePath = absPath(global::configuration->scriptLog);
     std::ifstream logfile(logFilePath);
     std::string actualLastLine;
     std::string lastLine;

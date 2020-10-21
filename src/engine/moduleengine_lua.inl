@@ -45,7 +45,7 @@ int isLoaded(lua_State* L) {
         ghoul::lua::PopValue::Yes
     );
 
-    const std::vector<OpenSpaceModule*>& modules = global::moduleEngine.modules();
+    const std::vector<OpenSpaceModule*>& modules = global::moduleEngine->modules();
 
     auto it = std::find_if(
         modules.begin(),

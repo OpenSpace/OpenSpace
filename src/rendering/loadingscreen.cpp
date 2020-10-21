@@ -112,7 +112,7 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
     , _showProgressbar(showProgressbar)
     , _randomEngine(_randomDevice())
 {
-    _loadingFont = global::fontManager.font(
+    _loadingFont = global::fontManager->font(
         "Loading",
         LoadingFontSize,
         ghoul::fontrendering::FontManager::Outline::No,
@@ -120,7 +120,7 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
     );
 
     if (_showMessage) {
-        _messageFont = global::fontManager.font(
+        _messageFont = global::fontManager->font(
             "Loading",
             MessageFontSize,
             ghoul::fontrendering::FontManager::Outline::No,
@@ -129,7 +129,7 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
     }
 
     if (_showNodeNames) {
-        _itemFont = global::fontManager.font(
+        _itemFont = global::fontManager->font(
             "Loading",
             ItemFontSize,
             ghoul::fontrendering::FontManager::Outline::No,
@@ -165,9 +165,9 @@ void LoadingScreen::render() {
     // We have to recalculate the positions here because we will not be informed about a
     // window size change
 
-    const glm::vec2 dpiScaling = global::windowDelegate.dpiScaling();
+    const glm::vec2 dpiScaling = global::windowDelegate->dpiScaling();
     const glm::ivec2 res =
-        glm::vec2(global::windowDelegate.currentSubwindowSize()) * dpiScaling;
+        glm::vec2(global::windowDelegate->currentSubwindowSize()) * dpiScaling;
 
     float screenAspectRatio = static_cast<float>(res.x) / static_cast<float>(res.y);
 
@@ -485,7 +485,7 @@ void LoadingScreen::render() {
     glEnable(GL_DEPTH_TEST);
 
     std::this_thread::sleep_for(RefreshRate);
-    global::windowDelegate.swapBuffer();
+    global::windowDelegate->swapBuffer();
     FrameMarkEnd("Loading")
 }
 

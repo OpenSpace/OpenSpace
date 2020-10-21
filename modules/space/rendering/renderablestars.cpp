@@ -693,7 +693,7 @@ bool RenderableStars::isReady() const {
 }
 
 void RenderableStars::initializeGL() {
-    _program = global::renderEngine.buildRenderProgram(
+    _program = global::renderEngine->buildRenderProgram(
         "Star",
         absPath("${MODULE_SPACE}/shaders/star_vs.glsl"),
         absPath("${MODULE_SPACE}/shaders/star_fs.glsl"),
@@ -803,7 +803,7 @@ void RenderableStars::deinitializeGL() {
     //_shapeTexture = nullptr;
 
     if (_program) {
-        global::renderEngine.removeRenderProgram(_program.get());
+        global::renderEngine->removeRenderProgram(_program.get());
         _program = nullptr;
     }
 }
@@ -916,7 +916,7 @@ void RenderableStars::renderPSFToTexture() {
     //glDeleteFramebuffers(1, &convolveFBO);
 
     // Restores OpenGL blending state
-    global::renderEngine.openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetBlendState();
 }
 
 void RenderableStars::render(const RenderData& data, RendererTasks&) {

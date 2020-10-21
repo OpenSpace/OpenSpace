@@ -53,9 +53,9 @@ int main(int argc, char** argv) {
     );
 
     std::string configFile = configuration::findConfiguration();
-    global::configuration = configuration::loadConfigurationFromFile(configFile);
-    global::openSpaceEngine.registerPathTokens();
-    global::openSpaceEngine.initialize();
+    *global::configuration = configuration::loadConfigurationFromFile(configFile);
+    global::openSpaceEngine->registerPathTokens();
+    global::openSpaceEngine->initialize();
 
     FileSys.registerPathToken("${TESTDIR}", "${BASE}/tests");
 
@@ -66,6 +66,6 @@ int main(int argc, char** argv) {
 
     // And the deinitialization needs the SpiceManager to be initialized
     openspace::SpiceManager::initialize();
-    global::openSpaceEngine.deinitialize();
+    global::openSpaceEngine->deinitialize();
     return result;
 }

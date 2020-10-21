@@ -64,7 +64,7 @@ void GuiMemoryComponent::render() {
     _isCollapsed = ImGui::IsWindowCollapsed();
 
     ImGui::Text("%s", "Persistent Memory Pool");
-    renderMemoryPoolInformation(global::memoryManager.PersistentMemory);
+    renderMemoryPoolInformation(global::memoryManager->PersistentMemory);
 
     //ImGui::Text("%s", "Temporary Memory Pool");
     //renderMemoryPoolInformation(global::memoryManager.TemporaryMemory);

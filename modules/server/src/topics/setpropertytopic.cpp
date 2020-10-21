@@ -110,13 +110,13 @@ void SetPropertyTopic::handleJson(const nlohmann::json& json) {
         if (propertyKey == SpecialKeyTime) {
             Time newTime;
             newTime.setTime(json.at(ValueKey).get<std::string>());
-            global::timeManager.setTimeNextFrame(newTime);
+            global::timeManager->setTimeNextFrame(newTime);
         }
         else {
             nlohmann::json value = json.at(ValueKey);
             std::string literal = luaLiteralFromJson(value);
 
-            global::scriptEngine.queueScript(
+            global::scriptEngine->queueScript(
                 fmt::format(
                     "openspace.setPropertyValueSingle(\"{}\", {})", propertyKey, literal
                 ),

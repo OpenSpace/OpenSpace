@@ -69,81 +69,42 @@ class Profile;
 
 namespace global {
 
-namespace detail {
+inline ghoul::fontrendering::FontManager* fontManager;
+inline Dashboard* dashboard;
+inline DeferredcasterManager* deferredcasterManager;
+inline DownloadManager* downloadManager;
+inline LuaConsole* luaConsole;
+inline MemoryManager* memoryManager;
+inline MissionManager* missionManager;
+inline ModuleEngine* moduleEngine;
+inline OpenSpaceEngine* openSpaceEngine;
+inline ParallelPeer* parallelPeer;
+inline RaycasterManager* raycasterManager;
+inline RenderEngine* renderEngine;
+inline std::vector<std::unique_ptr<ScreenSpaceRenderable>>* screenSpaceRenderables;
+inline SyncEngine* syncEngine;
+inline TimeManager* timeManager;
+inline VersionChecker* versionChecker;
+inline VirtualPropertyManager* virtualPropertyManager;
+inline WindowDelegate* windowDelegate;
+inline configuration::Configuration* configuration;
+inline interaction::InteractionMonitor* interactionMonitor;
+inline interaction::JoystickInputStates* joystickInputStates;
+inline interaction::WebsocketInputStates* websocketInputStates;
+inline interaction::KeybindingManager* keybindingManager;
+inline interaction::NavigationHandler* navigationHandler;
+inline interaction::SessionRecording* sessionRecording;
+inline interaction::ShortcutManager* shortcutManager;
+inline properties::PropertyOwner* rootPropertyOwner;
+inline properties::PropertyOwner* screenSpaceRootPropertyOwner;
+inline scripting::ScriptEngine* scriptEngine;
+inline scripting::ScriptScheduler* scriptScheduler;
+inline Profile* profile;
 
-ghoul::fontrendering::FontManager& gFontManager();
-Dashboard& gDashboard();
-DeferredcasterManager& gDeferredcasterManager();
-DownloadManager& gDownloadManager();
-LuaConsole& gLuaConsole();
-MemoryManager& gMemoryManager();
-MissionManager& gMissionManager();
-ModuleEngine& gModuleEngine();
-OpenSpaceEngine& gOpenSpaceEngine();
-ParallelPeer& gParallelPeer();
-RaycasterManager& gRaycasterManager();
-RenderEngine& gRenderEngine();
-std::vector<std::unique_ptr<ScreenSpaceRenderable>>& gScreenspaceRenderables();
-SyncEngine& gSyncEngine();
-TimeManager& gTimeManager();
-VersionChecker& gVersionChecker();
-VirtualPropertyManager& gVirtualPropertyManager();
-WindowDelegate& gWindowDelegate();
-configuration::Configuration& gConfiguration();
-interaction::InteractionMonitor& gInteractionMonitor();
-interaction::JoystickInputStates& gJoystickInputStates();
-interaction::WebsocketInputStates& gWebsocketInputStates();
-interaction::KeybindingManager& gKeybindingManager();
-interaction::NavigationHandler& gNavigationHandler();
-interaction::SessionRecording& gSessionRecording();
-interaction::ShortcutManager& gShortcutManager();
-properties::PropertyOwner& gRootPropertyOwner();
-properties::PropertyOwner& gScreenSpaceRootPropertyOwner();
-scripting::ScriptEngine& gScriptEngine();
-scripting::ScriptScheduler& gScriptScheduler();
-Profile& gProfile();
-
-} // namespace detail
-
-static ghoul::fontrendering::FontManager& fontManager = detail::gFontManager();
-static Dashboard& dashboard = detail::gDashboard();
-static DeferredcasterManager& deferredcasterManager = detail::gDeferredcasterManager();
-static DownloadManager& downloadManager = detail::gDownloadManager();
-static LuaConsole& luaConsole = detail::gLuaConsole();
-static MemoryManager& memoryManager = detail::gMemoryManager();
-static MissionManager& missionManager = detail::gMissionManager();
-static ModuleEngine& moduleEngine = detail::gModuleEngine();
-static OpenSpaceEngine& openSpaceEngine = detail::gOpenSpaceEngine();
-static ParallelPeer& parallelPeer = detail::gParallelPeer();
-static RaycasterManager& raycasterManager = detail::gRaycasterManager();
-static RenderEngine& renderEngine = detail::gRenderEngine();
-static std::vector<std::unique_ptr<ScreenSpaceRenderable>>& screenSpaceRenderables =
-    detail::gScreenspaceRenderables();
-static SyncEngine& syncEngine = detail::gSyncEngine();
-static TimeManager& timeManager = detail::gTimeManager();
-static VersionChecker& versionChecker = detail::gVersionChecker();
-static VirtualPropertyManager& virtualPropertyManager = detail::gVirtualPropertyManager();
-static WindowDelegate& windowDelegate = detail::gWindowDelegate();
-static configuration::Configuration& configuration = detail::gConfiguration();
-static interaction::InteractionMonitor& interactionMonitor =
-    detail::gInteractionMonitor();
-static interaction::JoystickInputStates& joystickInputStates =
-    detail::gJoystickInputStates();
-static interaction::WebsocketInputStates& websocketInputStates =
-    detail::gWebsocketInputStates();
-static interaction::KeybindingManager& keybindingManager = detail::gKeybindingManager();
-static interaction::NavigationHandler& navigationHandler = detail::gNavigationHandler();
-static interaction::SessionRecording& sessionRecording = detail::gSessionRecording();
-static interaction::ShortcutManager& shortcutManager = detail::gShortcutManager();
-static properties::PropertyOwner& rootPropertyOwner = detail::gRootPropertyOwner();
-static properties::PropertyOwner& screenSpaceRootPropertyOwner =
-    detail::gScreenSpaceRootPropertyOwner();
-static scripting::ScriptEngine& scriptEngine = detail::gScriptEngine();
-static scripting::ScriptScheduler& scriptScheduler = detail::gScriptScheduler();
-static Profile& profile = detail::gProfile();
-
+void create();
 void initialize();
 void initializeGL();
+void destroy();
 void deinitialize();
 void deinitializeGL();
 
