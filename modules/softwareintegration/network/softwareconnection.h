@@ -76,7 +76,7 @@ public:
     SoftwareConnection::Message receiveMessage();
 
     bool _isListening = true;
-    static const unsigned int ProtocolVersion;
+    static const float ProtocolVersion;
 
 private:
     std::unique_ptr<ghoul::io::TcpSocket> _socket;

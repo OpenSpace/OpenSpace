@@ -33,7 +33,7 @@ namespace {
 
 namespace openspace {
 
-    const unsigned int SoftwareConnection::ProtocolVersion = 1;
+    const float SoftwareConnection::ProtocolVersion = 1.0;
 
     SoftwareConnection::Message::Message(MessageType type, std::vector<char> content)
         : type(type)
@@ -81,8 +81,8 @@ namespace openspace {
     }
 
     SoftwareConnection::Message SoftwareConnection::receiveMessage() {
-        // Header consists of version (1 char), message type (4 char) & subject size (9 char)
-        size_t HeaderSize = 14 * sizeof(char);
+        // Header consists of version (3 char), message type (4 char) & subject size (9 char)
+        size_t HeaderSize = 16 * sizeof(char);
 
         // Create basic buffer for receiving first part of message
         std::vector<char> headerBuffer(HeaderSize);
@@ -94,9 +94,10 @@ namespace openspace {
             throw SoftwareConnectionLostError();
         }
 
-        // Read and convert version number: Byte 0
+        // Read and convert version number: Byte 0-2
         std::string version;
-        version.push_back(headerBuffer[0]);
+        for (int i = 0; i < 3; i++)
+            version.push_back(headerBuffer[i]);
         const uint32_t protocolVersionIn = std::stoi(version);
 
         // Make sure that header matches the protocol version
@@ -109,14 +110,14 @@ namespace openspace {
             throw SoftwareConnectionLostError();
         }
 
-        // Read message type: Byte 1-4
+        // Read message type: Byte 3-6
         std::string type;
-        for(int i = 1; i <= 4; i++)
+        for(int i = 3; i < 7; i++)
             type.push_back(headerBuffer[i]);
 
-        // Read and convert message size: Byte 5-13
+        // Read and convert message size: Byte 7-15
         std::string subjectSizeIn;
-        for (int i = 5; i <= 13; i++)
+        for (int i = 7; i < 16; i++)
             subjectSizeIn.push_back(headerBuffer[i]);
         const size_t subjectSize = stoi(subjectSizeIn);
 
