@@ -162,11 +162,11 @@ NavigationHandler::~NavigationHandler() {} // NOLINT
 void NavigationHandler::initialize() {
     ZoneScoped
 
-    global::parallelPeer.connectionEvent().subscribe(
+    global::parallelPeer->connectionEvent().subscribe(
         "NavigationHandler",
         "statusChanged",
         [this]() {
-            _useKeyFrameInteraction = (global::parallelPeer.status() ==
+            _useKeyFrameInteraction = (global::parallelPeer->status() ==
                 ParallelConnection::Status::ClientWithHost);
         }
     );
@@ -175,7 +175,7 @@ void NavigationHandler::initialize() {
 void NavigationHandler::deinitialize() {
     ZoneScoped
 
-    global::parallelPeer.connectionEvent().unsubscribe("NavigationHandler");
+    global::parallelPeer->connectionEvent().unsubscribe("NavigationHandler");
 }
 
 void NavigationHandler::setFocusNode(SceneGraphNode* node) {

@@ -65,7 +65,7 @@ void InteractionMonitor::setIdleTime(float time) {
 }
 
 void InteractionMonitor::updateActivityState() {
-    const double currentApplicationTime = global::windowDelegate.applicationTime();
+    const double currentApplicationTime = global::windowDelegate->applicationTime();
     const double timeDiff = currentApplicationTime - _lastInteractionTime;
 
     if (timeDiff >= _idleTime && _isInActiveState) {
@@ -74,7 +74,7 @@ void InteractionMonitor::updateActivityState() {
 }
 
 void InteractionMonitor::markInteraction() {
-    _lastInteractionTime = global::windowDelegate.applicationTime();
+    _lastInteractionTime = global::windowDelegate->applicationTime();
     _isInActiveState = true;
 }
 

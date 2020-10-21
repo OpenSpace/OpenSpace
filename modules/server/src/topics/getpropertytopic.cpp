@@ -64,7 +64,7 @@ void GetPropertyTopic::handleJson(const nlohmann::json& json) {
     }
     else if (requestedKey == AllScreenSpaceRenderablesValue) {
         response = wrappedPayload({
-            { "value", global::renderEngine.screenSpaceRenderables() }
+            { "value", global::renderEngine->screenSpaceRenderables() }
         });
     }
     else if (requestedKey == RootPropertyOwner) {

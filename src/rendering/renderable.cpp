@@ -112,7 +112,7 @@ ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
     Renderable* result = factory->create(
         renderableType,
         dictionary,
-        &global::memoryManager.PersistentMemory
+        &global::memoryManager->PersistentMemory
     );
     return ghoul::mm_unique_ptr<Renderable>(result);
 }

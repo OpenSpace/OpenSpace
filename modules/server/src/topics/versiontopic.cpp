@@ -56,9 +56,9 @@ void VersionTopic::handleJson(const nlohmann::json&) {
         }
     };
 
-    if (global::versionChecker.hasLatestVersionInfo()) {
+    if (global::versionChecker->hasLatestVersionInfo()) {
         VersionChecker::SemanticVersion latestVersion =
-            global::versionChecker.latestVersion();
+            global::versionChecker->latestVersion();
 
         versionJson["latestOpenSpaceVersion"] = {
             { "major", latestVersion.major },

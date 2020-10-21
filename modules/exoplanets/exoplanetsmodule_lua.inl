@@ -210,7 +210,7 @@ void createExoplanetSystem(std::string_view starName) {
         "}"
     "}";
 
-    openspace::global::scriptEngine.queueScript(
+    openspace::global::scriptEngine->queueScript(
         "openspace.addSceneGraphNode(" + starParent + ");",
         scripting::ScriptEngine::RemoteScripting::Yes
     );
@@ -313,7 +313,7 @@ void createExoplanetSystem(std::string_view starName) {
             trailResolution *= 2;
         }
 
-        openspace::global::scriptEngine.queueScript(
+        openspace::global::scriptEngine->queueScript(
             "openspace.addSceneGraphNode(" + planetNode + ");",
             scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -335,7 +335,7 @@ void createExoplanetSystem(std::string_view starName) {
             "}"
         "}";
 
-        openspace::global::scriptEngine.queueScript(
+        openspace::global::scriptEngine->queueScript(
             "openspace.addSceneGraphNode(" + planetTrailNode + ");",
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -379,7 +379,7 @@ void createExoplanetSystem(std::string_view starName) {
                 "}"
             "}";
 
-            openspace::global::scriptEngine.queueScript(
+            openspace::global::scriptEngine->queueScript(
                 "openspace.addSceneGraphNode(" + discNode + ");",
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
@@ -429,7 +429,7 @@ int removeExoplanetSystem(lua_State* L) {
     const std::string starNameSpeck = std::string(speckStarName(starName));
     const std::string starIdentifier = createIdentifier(starNameSpeck);
 
-    openspace::global::scriptEngine.queueScript(
+    openspace::global::scriptEngine->queueScript(
         "openspace.removeSceneGraphNode('" + starIdentifier + "');",
         scripting::ScriptEngine::RemoteScripting::Yes
     );

@@ -76,7 +76,7 @@ namespace {
         glm::dvec3 anchorNodePos(0.0);
 
         const interaction::OrbitalNavigator& nav =
-            global::navigationHandler.orbitalNavigator();
+            global::navigationHandler->orbitalNavigator();
 
         if (nav.anchorNode()) {
             anchorNodePos = nav.anchorNode()->worldPosition();
@@ -178,7 +178,7 @@ void RenderableNodeLine::initializeGL() {
     _program = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return global::renderEngine.buildRenderProgram(
+            return global::renderEngine->buildRenderProgram(
                 ProgramName,
                 absPath("${MODULE_BASE}/shaders/line_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/line_fs.glsl")
@@ -208,8 +208,8 @@ void RenderableNodeLine::deinitializeGL() {
     BaseModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
-        global::renderEngine.removeRenderProgram(p);
-    }
+            global::renderEngine->removeRenderProgram(p);
+        }
     );
     _program = nullptr;
 }
@@ -235,10 +235,10 @@ void RenderableNodeLine::updateVertexData() {
 
     // Update the positions of the nodes
     _startPos = coordinatePosFromAnchorNode(
-        global::renderEngine.scene()->sceneGraphNode(_start)->worldPosition()
+        global::renderEngine->scene()->sceneGraphNode(_start)->worldPosition()
     );
     _endPos = coordinatePosFromAnchorNode(
-        global::renderEngine.scene()->sceneGraphNode(_end)->worldPosition()
+        global::renderEngine->scene()->sceneGraphNode(_end)->worldPosition()
     );
 
     _vertexArray.push_back(static_cast<float>(_startPos.x));
@@ -272,10 +272,10 @@ void RenderableNodeLine::render(const RenderData& data, RendererTasks&) {
 
     glm::dmat4 anchorTranslation(1.0);
     // Update anchor node information, used to counter precision problems
-    if (global::navigationHandler.orbitalNavigator().anchorNode()) {
+    if (global::navigationHandler->orbitalNavigator().anchorNode()) {
         anchorTranslation = glm::translate(
             glm::dmat4(1.0),
-            global::navigationHandler.orbitalNavigator().anchorNode()->worldPosition()
+            global::navigationHandler->orbitalNavigator().anchorNode()->worldPosition()
         );
     }
 
@@ -304,18 +304,18 @@ void RenderableNodeLine::render(const RenderData& data, RendererTasks&) {
     // Restore GL State
     unbindGL();
     _program->deactivate();
-    global::renderEngine.openglStateCache().resetBlendState();
-    global::renderEngine.openglStateCache().resetLineState();
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetLineState();
 }
 
 void RenderableNodeLine::validateNodes() {
-    if (!global::renderEngine.scene()->sceneGraphNode(_start)) {
+    if (!global::renderEngine->scene()->sceneGraphNode(_start)) {
         LERROR(fmt::format(
             "There is no scenegraph node with id {}, defaults to 'Root'", _start
         ));
         _start = Root;
     }
-    if (!global::renderEngine.scene()->sceneGraphNode(_end)) {
+    if (!global::renderEngine->scene()->sceneGraphNode(_end)) {
         LERROR(fmt::format(
             "There is no scenegraph node with id {}, defaults to 'Root'", _end
         ));

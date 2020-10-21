@@ -52,7 +52,7 @@ namespace openspace::luascriptfunctions {
 
 int clearShortcuts(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::clearShortcuts");
-    global::shortcutManager.resetShortcuts();
+    global::shortcutManager->resetShortcuts();
     return 0;
 }
 
@@ -60,7 +60,7 @@ int bindShortcut(lua_State* L) {
     int n = ghoul::lua::checkArgumentsAndThrow(L, { 2, 4 }, "lua::bindShortcut");
 
     interaction::ShortcutManager::ShortcutInformation info = extractInfo(L, n, true);
-    global::shortcutManager.addShortcut(std::move(info));
+    global::shortcutManager->addShortcut(std::move(info));
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -70,7 +70,7 @@ int bindShortcutLocal(lua_State* L) {
     int n = ghoul::lua::checkArgumentsAndThrow(L, { 2, 4 }, "lua::bindShortcutLocal");
 
     interaction::ShortcutManager::ShortcutInformation info = extractInfo(L, n, false);
-    global::shortcutManager.addShortcut(std::move(info));
+    global::shortcutManager->addShortcut(std::move(info));
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;

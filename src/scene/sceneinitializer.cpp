@@ -52,7 +52,7 @@ MultiThreadedSceneInitializer::MultiThreadedSceneInitializer(unsigned int nThrea
 
 void MultiThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
     auto initFunction = [this, node]() {
-        LoadingScreen* loadingScreen = global::openSpaceEngine.loadingScreen();
+        LoadingScreen* loadingScreen = global::openSpaceEngine->loadingScreen();
 
         LoadingScreen::ProgressInfo progressInfo;
         progressInfo.progress = 1.f;
@@ -83,7 +83,7 @@ void MultiThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
     LoadingScreen::ProgressInfo progressInfo;
     progressInfo.progress = 0.f;
 
-    LoadingScreen* loadingScreen = global::openSpaceEngine.loadingScreen();
+    LoadingScreen* loadingScreen = global::openSpaceEngine->loadingScreen();
     if (loadingScreen) {
         loadingScreen->setItemNumber(loadingScreen->itemNumber() + 1);
         loadingScreen->updateItem(

@@ -39,7 +39,7 @@ void DataPlane::initializeGL() {
     IswaCygnet::initialize();
 
     if (!_shader) {
-        _shader = global::renderEngine.buildRenderProgram(
+        _shader = global::renderEngine->buildRenderProgram(
             "DataPlaneProgram",
             absPath("${MODULE_ISWA}/shaders/dataplane_vs.glsl"),
             absPath("${MODULE_ISWA}/shaders/dataplane_fs.glsl")

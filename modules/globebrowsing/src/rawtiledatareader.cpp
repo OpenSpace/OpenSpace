@@ -444,7 +444,7 @@ void RawTileDataReader::initialize() {
         throw ghoul::RuntimeError("File path must not be empty");
     }
 
-    GlobeBrowsingModule& module = *global::moduleEngine.module<GlobeBrowsingModule>();
+    GlobeBrowsingModule& module = *global::moduleEngine->module<GlobeBrowsingModule>();
 
     std::string content = _datasetFilePath;
     if (module.isWMSCachingEnabled()) {

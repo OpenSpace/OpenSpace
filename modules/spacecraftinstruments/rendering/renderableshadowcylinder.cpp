@@ -269,7 +269,7 @@ void RenderableShadowCylinder::initializeGL() {
     _shader = SpacecraftInstrumentsModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return global::renderEngine.buildRenderProgram(
+            return global::renderEngine->buildRenderProgram(
                 ProgramName,
                 absPath(
                     "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/terminatorshadow_vs.glsl"
@@ -288,7 +288,7 @@ void RenderableShadowCylinder::deinitializeGL() {
     SpacecraftInstrumentsModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
-            global::renderEngine.removeRenderProgram(p);
+            global::renderEngine->removeRenderProgram(p);
         }
     );
     _shader = nullptr;

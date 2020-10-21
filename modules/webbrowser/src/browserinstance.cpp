@@ -75,8 +75,8 @@ BrowserInstance::~BrowserInstance() {
 
 void BrowserInstance::initialize() {
     reshape(static_cast<glm::ivec2>(
-        static_cast<glm::vec2>(global::windowDelegate.currentSubwindowSize()) *
-        global::windowDelegate.dpiScaling()
+        static_cast<glm::vec2>(global::windowDelegate->currentSubwindowSize()) *
+        global::windowDelegate->dpiScaling()
     ));
     _isInitialized = true;
     _shouldReshape = true;
@@ -170,7 +170,7 @@ bool BrowserInstance::sendMouseWheelEvent(const CefMouseEvent& event,
 }
 
 void BrowserInstance::setZoom(float ratio) {
-    const float dpiScaling = global::windowDelegate.dpiScaling().x;
+    const float dpiScaling = global::windowDelegate->dpiScaling().x;
 
     // Zooming in CEF is non-linear according to this:
     // https://www.magpcss.org/ceforum/viewtopic.php?f=6&t=11491

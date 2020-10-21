@@ -125,7 +125,7 @@ DashboardItemPropertyValue::DashboardItemPropertyValue(
         _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
     }
     _fontName.onChange([this](){
-        _font = global::fontManager.font(_fontName, _fontSize);
+        _font = global::fontManager->font(_fontName, _fontSize);
     });
     addProperty(_fontName);
 
@@ -133,7 +133,7 @@ DashboardItemPropertyValue::DashboardItemPropertyValue(
         _fontSize = static_cast<float>(dictionary.value<double>(FontSizeInfo.identifier));
     }
     _fontSize.onChange([this](){
-        _font = global::fontManager.font(_fontName, _fontSize);
+        _font = global::fontManager->font(_fontName, _fontSize);
     });
     addProperty(_fontSize);
 
@@ -148,7 +148,7 @@ DashboardItemPropertyValue::DashboardItemPropertyValue(
     }
     addProperty(_displayString);
 
-    _font = global::fontManager.font(_fontName, _fontSize);
+    _font = global::fontManager->font(_fontName, _fontSize);
 }
 
 void DashboardItemPropertyValue::render(glm::vec2& penPosition) {

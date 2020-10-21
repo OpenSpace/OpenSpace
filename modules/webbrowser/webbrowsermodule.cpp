@@ -138,7 +138,7 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
         _enabled = dictionary.value<bool>("Enabled");
     }
 
-    const bool isMaster = global::windowDelegate.isMaster();
+    const bool isMaster = global::windowDelegate->isMaster();
 
     if (!_enabled || (!isMaster) ) {
         return;

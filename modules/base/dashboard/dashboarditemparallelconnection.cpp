@@ -99,7 +99,7 @@ DashboardItemParallelConnection::DashboardItemParallelConnection(
         _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
     }
     _fontName.onChange([this](){
-        _font = global::fontManager.font(_fontName, _fontSize);
+        _font = global::fontManager->font(_fontName, _fontSize);
     });
     addProperty(_fontName);
 
@@ -107,19 +107,19 @@ DashboardItemParallelConnection::DashboardItemParallelConnection(
         _fontSize = static_cast<float>(dictionary.value<double>(FontSizeInfo.identifier));
     }
     _fontSize.onChange([this](){
-        _font = global::fontManager.font(_fontName, _fontSize);
+        _font = global::fontManager->font(_fontName, _fontSize);
     });
     addProperty(_fontSize);
 
-    _font = global::fontManager.font(_fontName, _fontSize);
+    _font = global::fontManager->font(_fontName, _fontSize);
 }
 
 void DashboardItemParallelConnection::render(glm::vec2& penPosition) {
     ZoneScoped
 
-    const ParallelConnection::Status status = global::parallelPeer.status();
-    const size_t nConnections = global::parallelPeer.nConnections();
-    const std::string& hostName = global::parallelPeer.hostName();
+    const ParallelConnection::Status status = global::parallelPeer->status();
+    const size_t nConnections = global::parallelPeer->nConnections();
+    const std::string& hostName = global::parallelPeer->hostName();
 
     int nLines = 1;
 
@@ -173,9 +173,9 @@ void DashboardItemParallelConnection::render(glm::vec2& penPosition) {
 glm::vec2 DashboardItemParallelConnection::size() const {
     ZoneScoped
 
-    ParallelConnection::Status status = global::parallelPeer.status();
-    size_t nConnections = global::parallelPeer.nConnections();
-    const std::string& hostName = global::parallelPeer.hostName();
+    ParallelConnection::Status status = global::parallelPeer->status();
+    size_t nConnections = global::parallelPeer->nConnections();
+    const std::string& hostName = global::parallelPeer->hostName();
 
     std::string connectionInfo;
     int nClients = static_cast<int>(nConnections);

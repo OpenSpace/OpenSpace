@@ -89,7 +89,7 @@ void TouchMarker::initialize() {
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
 
-    _shader = global::renderEngine.buildRenderProgram(
+    _shader = global::renderEngine->buildRenderProgram(
         "MarkerProgram",
         absPath("${MODULE_TOUCH}/shaders/marker_vs.glsl"),
         absPath("${MODULE_TOUCH}/shaders/marker_fs.glsl")
@@ -106,7 +106,7 @@ void TouchMarker::deinitialize() {
     _vertexPositionBuffer = 0;
 
     if (_shader) {
-        global::renderEngine.removeRenderProgram(_shader.get());
+        global::renderEngine->removeRenderProgram(_shader.get());
         _shader = nullptr;
     }
 }

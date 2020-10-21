@@ -329,7 +329,7 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
     if (dictionary.hasKey(KeyFrameConversions)) {
         ghoul::Dictionary fc = dictionary.value<ghoul::Dictionary>(KeyFrameConversions);
         for (const std::string& key : fc.keys()) {
-            global::moduleEngine.module<SpacecraftInstrumentsModule>()->addFrame(
+            global::moduleEngine->module<SpacecraftInstrumentsModule>()->addFrame(
                 key,
                 fc.value<std::string>(key)
             );
@@ -370,7 +370,7 @@ void RenderableFov::initializeGL() {
         SpacecraftInstrumentsModule::ProgramObjectManager.request(
             ProgramName,
             []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-                return global::renderEngine.buildRenderProgram(
+                return global::renderEngine->buildRenderProgram(
                     ProgramName,
                     absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/fov_vs.glsl"),
                     absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/fov_fs.glsl")
@@ -518,7 +518,7 @@ void RenderableFov::deinitializeGL() {
     SpacecraftInstrumentsModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
-            global::renderEngine.removeRenderProgram(p);
+            global::renderEngine->removeRenderProgram(p);
         }
     );
     _program = nullptr;
@@ -562,10 +562,10 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
     {
         const bool convert = (ref.find("IAU_") == std::string::npos);
         if (convert) {
+            SpacecraftInstrumentsModule* m =
+                global::moduleEngine->module<SpacecraftInstrumentsModule>();
             return {
-                global::moduleEngine.module<SpacecraftInstrumentsModule>()->frameFromBody(
-                    target
-                ),
+                m->frameFromBody(target),
                 true
             };
         }
@@ -960,7 +960,9 @@ std::pair<std::string, bool> RenderableFov::determineTarget(double time) {
         bool inFOV = SpiceManager::ref().isTargetInFieldOfView(
             pt,
             _instrument.spacecraft,
-            global::moduleEngine.module<SpacecraftInstrumentsModule>()->frameFromBody(pt),
+            global::moduleEngine->module<SpacecraftInstrumentsModule>()->frameFromBody(
+                pt
+            ),
             _instrument.name,
             SpiceManager::FieldOfViewMethod::Ellipsoid,
             _instrument.aberrationCorrection,
