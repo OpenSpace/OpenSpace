@@ -229,6 +229,7 @@ void createExoplanetSystem(std::string_view starName) {
             if (std::isnan(angle)) { return defaultValue; }
             if (angle < 0.f) { return angle + 360.f; }
             if (angle > 360.f) { return angle - 360.f; }
+            return angle;
         };
 
         planet.i = validAngle(planet.i, 90.f);
