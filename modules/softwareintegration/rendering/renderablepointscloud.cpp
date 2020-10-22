@@ -251,6 +251,7 @@ namespace openspace {
 
             // Changes GL state:
             glEnablei(GL_BLEND, 0);
+            glDepthMask(false);
             glBlendEquation(GL_FUNC_ADD);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glEnable(GL_PROGRAM_POINT_SIZE); // Enable gl_PointSize in vertex
@@ -264,6 +265,7 @@ namespace openspace {
 
             // Restores GL State
             global::renderEngine.openglStateCache().resetBlendState();
+            global::renderEngine.openglStateCache().resetDepthState();
         }
     }
 

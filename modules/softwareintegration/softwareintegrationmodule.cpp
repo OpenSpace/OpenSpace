@@ -337,6 +337,7 @@ namespace openspace {
         }
         case SoftwareConnection::MessageType::RemoveSceneGraphNode: {
             std::string identifier(message.begin(), message.end());
+            LDEBUG(fmt::format("Message recieved.. Delete SGN: {}", identifier));
 
             SceneGraphNode* sgn = global::renderEngine.scene()->sceneGraphNode(identifier);
             
@@ -351,7 +352,7 @@ namespace openspace {
                 "openspace.removeSceneGraphNode('" + identifier + "');",
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
-            LINFO(fmt::format("Scengraph {} removed.", identifier));
+            LDEBUG(fmt::format("Scengraph {} removed.", identifier));
             break;
         }
         case SoftwareConnection::MessageType::Color: {
