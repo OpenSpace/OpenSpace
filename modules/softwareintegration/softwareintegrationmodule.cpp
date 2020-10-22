@@ -307,14 +307,14 @@ namespace openspace {
             };
 
             try {
-                SceneGraphNode* sgn = global::renderEngine.scene()->loadNode(node);
+                SceneGraphNode* sgn = global::renderEngine->scene()->loadNode(node);
                 if (!sgn) {
                     LERROR("Scene", "Could not load scene graph node");
                     break;
                 }
-                global::renderEngine.scene()->initializeNode(sgn);
+                global::renderEngine->scene()->initializeNode(sgn);
 
-                openspace::global::scriptEngine.queueScript(
+                openspace::global::scriptEngine->queueScript(
                     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)"
                     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', '" + identifier + "')"
                     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')",
@@ -339,16 +339,16 @@ namespace openspace {
             std::string identifier(message.begin(), message.end());
             LDEBUG(fmt::format("Message recieved.. Delete SGN: {}", identifier));
 
-            SceneGraphNode* sgn = global::renderEngine.scene()->sceneGraphNode(identifier);
+            SceneGraphNode* sgn = global::renderEngine->scene()->sceneGraphNode(identifier);
             
-            if (global::navigationHandler.orbitalNavigator().anchorNode() == sgn) {
-                openspace::global::scriptEngine.queueScript(
+            if (global::navigationHandler->orbitalNavigator().anchorNode() == sgn) {
+                openspace::global::scriptEngine->queueScript(
                     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Sun')"
                     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')",
                     scripting::ScriptEngine::RemoteScripting::Yes
                 );
             }
-            openspace::global::scriptEngine.queueScript(
+            openspace::global::scriptEngine->queueScript(
                 "openspace.removeSceneGraphNode('" + identifier + "');",
                 scripting::ScriptEngine::RemoteScripting::Yes
             );

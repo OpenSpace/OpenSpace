@@ -204,7 +204,7 @@ namespace openspace {
     }
 
     void RenderablePointsCloud::initializeGL() {
-        _shaderProgram = global::renderEngine.buildRenderProgram(
+        _shaderProgram = global::renderEngine->buildRenderProgram(
             "PointsCloud",
             absPath("${MODULE_SOFTWAREINTEGRATION}/shaders/point_vs.glsl"),
             absPath("${MODULE_SOFTWAREINTEGRATION}/shaders/point_fs.glsl")
@@ -219,7 +219,7 @@ namespace openspace {
         _vertexBufferObjectID = 0;
 
         if (_shaderProgram) {
-            global::renderEngine.removeRenderProgram(_shaderProgram.get());
+            global::renderEngine->removeRenderProgram(_shaderProgram.get());
             _shaderProgram = nullptr;
         }
     }
@@ -264,8 +264,8 @@ namespace openspace {
             _shaderProgram->deactivate();
 
             // Restores GL State
-            global::renderEngine.openglStateCache().resetBlendState();
-            global::renderEngine.openglStateCache().resetDepthState();
+            global::renderEngine->openglStateCache().resetBlendState();
+            global::renderEngine->openglStateCache().resetDepthState();
         }
     }
 
