@@ -162,7 +162,7 @@ void ScreenSpaceImageOnline::update() {
 std::future<DownloadManager::MemoryFile> ScreenSpaceImageOnline::downloadImageToMemory(
                                                                    const std::string& url)
 {
-    return global::downloadManager.fetchFile(
+    return global::downloadManager->fetchFile(
         url,
         [url](const DownloadManager::MemoryFile&) {
             LDEBUGC(

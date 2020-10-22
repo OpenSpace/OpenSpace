@@ -473,7 +473,7 @@ void Profile::saveCurrentSettingsToProfile(const properties::PropertyOwner& root
     _time = t;
 
     // Delta times
-    std::vector<double> dts = global::timeManager.deltaTimeSteps();
+    std::vector<double> dts = global::timeManager->deltaTimeSteps();
     _deltaTimes = std::move(dts);
 
     // Camera

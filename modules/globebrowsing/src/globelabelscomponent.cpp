@@ -444,7 +444,7 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
 }
 
 void GlobeLabelsComponent::initializeFonts() {
-    _font = openspace::global::fontManager.font(
+    _font = openspace::global::fontManager->font(
         "Mono",
         static_cast<float>(_labelsFontSize),
         ghoul::fontrendering::FontManager::Outline::Yes,
@@ -562,7 +562,7 @@ bool GlobeLabelsComponent::readLabelsFile(const std::string& file) {
             strncpy(lEntry.feature, token.c_str(), 256);
 
             GlobeBrowsingModule* _globeBrowsingModule =
-                global::moduleEngine.module<openspace::GlobeBrowsingModule>();
+                global::moduleEngine->module<openspace::GlobeBrowsingModule>();
             lEntry.geoPosition = _globeBrowsingModule->cartesianCoordinatesFromGeo(
                 *_globe,
                 lEntry.latitude,

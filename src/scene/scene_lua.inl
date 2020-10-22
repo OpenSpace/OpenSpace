@@ -110,12 +110,12 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
                 foundMatching = true;
 
                 if (interpolationDuration == 0.0) {
-                    global::renderEngine.scene()->removePropertyInterpolation(prop);
+                    global::renderEngine->scene()->removePropertyInterpolation(prop);
                     prop->setLuaValue(L);
                 }
                 else {
                     prop->setLuaInterpolationTarget(L);
-                    global::renderEngine.scene()->addPropertyInterpolation(
+                    global::renderEngine->scene()->addPropertyInterpolation(
                         prop,
                         static_cast<float>(interpolationDuration),
                         easingFunction
@@ -188,12 +188,12 @@ int setPropertyCall_single(properties::Property& prop, const std::string& uri,
     }
     else {
         if (duration == 0.0) {
-            global::renderEngine.scene()->removePropertyInterpolation(&prop);
+            global::renderEngine->scene()->removePropertyInterpolation(&prop);
             prop.setLuaValue(L);
         }
         else {
             prop.setLuaInterpolationTarget(L);
-            global::renderEngine.scene()->addPropertyInterpolation(
+            global::renderEngine->scene()->addPropertyInterpolation(
                 &prop,
                 static_cast<float>(duration),
                 easingFunction
@@ -499,7 +499,7 @@ int loadScene(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadScene");
 
     const std::string& sceneFile = ghoul::lua::value<std::string>(L, 1);
-    global::openSpaceEngine.scheduleLoadSingleAsset(sceneFile);
+    global::openSpaceEngine->scheduleLoadSingleAsset(sceneFile);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -518,13 +518,13 @@ int addSceneGraphNode(lua_State* L) {
     }
 
     try {
-        SceneGraphNode* node = global::renderEngine.scene()->loadNode(d);
+        SceneGraphNode* node = global::renderEngine->scene()->loadNode(d);
         if (!node) {
             LERRORC("Scene", "Could not load scene graph node");
             return ghoul::lua::luaError(L, "Error loading scene graph node");
         }
 
-        global::renderEngine.scene()->initializeNode(node);
+        global::renderEngine->scene()->initializeNode(node);
     }
     catch (const documentation::SpecificationError& e) {
         return ghoul::lua::luaError(
@@ -599,7 +599,7 @@ int removeSceneGraphNodesFromRegex(lua_State* L) {
     std::string name = ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::Yes);
 
     const std::vector<SceneGraphNode*>& nodes =
-        global::renderEngine.scene()->allSceneGraphNodes();
+        global::renderEngine->scene()->allSceneGraphNodes();
 
     // Replace all wildcards * with the correct regex (.*)
     size_t startPos = name.find("*");
@@ -697,7 +697,7 @@ int hasSceneGraphNode(lua_State* L) {
         1,
         ghoul::lua::PopValue::Yes
         );
-    SceneGraphNode* node = global::renderEngine.scene()->sceneGraphNode(nodeName);
+    SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(nodeName);
 
     ghoul::lua::push(L, node != nullptr);
 
@@ -712,7 +712,7 @@ int addInterestingTime(lua_State* L) {
     std::string time = ghoul::lua::value<std::string>(L, 2, ghoul::lua::PopValue::No);
     lua_pop(L, 2);
 
-    global::renderEngine.scene()->addInterestingTime(
+    global::renderEngine->scene()->addInterestingTime(
         { std::move(name), std::move(time) }
     );
 

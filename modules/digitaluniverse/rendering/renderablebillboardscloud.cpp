@@ -785,7 +785,7 @@ void RenderableBillboardsCloud::initializeGL() {
     _program = DigitalUniverseModule::ProgramObjectManager.request(
         ProgramObjectName,
         []() {
-            return global::renderEngine.buildRenderProgram(
+            return global::renderEngine->buildRenderProgram(
                 ProgramObjectName,
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_vs.glsl"),
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_fs.glsl"),
@@ -815,7 +815,7 @@ void RenderableBillboardsCloud::initializeGL() {
     if (_hasLabel) {
         if (_font == nullptr) {
             size_t _fontSize = 50;
-            _font = global::fontManager.font(
+            _font = global::fontManager->font(
                 "Mono",
                 static_cast<float>(_fontSize),
                 ghoul::fontrendering::FontManager::Outline::Yes,
@@ -834,7 +834,7 @@ void RenderableBillboardsCloud::deinitializeGL() {
     DigitalUniverseModule::ProgramObjectManager.release(
         ProgramObjectName,
         [](ghoul::opengl::ProgramObject* p) {
-            global::renderEngine.removeRenderProgram(p);
+            global::renderEngine->removeRenderProgram(p);
         }
     );
     _program = nullptr;
@@ -866,7 +866,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
 
     _program->setUniform(
         "screenSize",
-        glm::vec2(global::renderEngine.renderingResolution())
+        glm::vec2(global::renderEngine->renderingResolution())
     );
 
     _program->setUniform(_uniformCache.cameraPos, data.camera.positionVec3());
@@ -925,8 +925,8 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     glBindVertexArray(0);
     _program->deactivate();
 
-    global::renderEngine.openglStateCache().resetBlendState();
-    global::renderEngine.openglStateCache().resetDepthState();
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
 }
 
 void RenderableBillboardsCloud::renderLabels(const RenderData& data,

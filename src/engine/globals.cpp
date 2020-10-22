@@ -58,188 +58,198 @@
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/sharedmemory.h>
 #include <ghoul/opengl/texture.h>
+#include <array>
+
+namespace openspace {
+namespace {
+    constexpr const int TotalSize =
+        sizeof(ghoul::fontrendering::FontManager) +
+        sizeof(Dashboard) +
+        sizeof(DeferredcasterManager) +
+        sizeof(DownloadManager) +
+        sizeof(LuaConsole) +
+        sizeof(MemoryManager) +
+        sizeof(MissionManager) +
+        sizeof(ModuleEngine) +
+        sizeof(OpenSpaceEngine) +
+        sizeof(ParallelPeer) +
+        sizeof(RaycasterManager) +
+        sizeof(RenderEngine) +
+        sizeof(std::vector<std::unique_ptr<ScreenSpaceRenderable>>) +
+        sizeof(SyncEngine) +
+        sizeof(TimeManager) +
+        sizeof(VersionChecker) +
+        sizeof(VirtualPropertyManager) +
+        sizeof(WindowDelegate) +
+        sizeof(configuration::Configuration) +
+        sizeof(interaction::InteractionMonitor) +
+        sizeof(interaction::WebsocketInputStates) +
+        sizeof(interaction::KeybindingManager) +
+        sizeof(interaction::NavigationHandler) +
+        sizeof(interaction::SessionRecording) +
+        sizeof(interaction::ShortcutManager) +
+        sizeof(properties::PropertyOwner) +
+        sizeof(properties::PropertyOwner) +
+        sizeof(scripting::ScriptEngine) +
+        sizeof(scripting::ScriptScheduler) +
+        sizeof(Profile);
+
+    std::array<std::byte, TotalSize> DataStorage;
+} // namespace
+} // namespace openspace
 
 namespace openspace::global {
 
-namespace detail {
+void create() {
+    ZoneScoped
 
-ghoul::fontrendering::FontManager& gFontManager() {
-    static ghoul::fontrendering::FontManager g({ 1536, 1536, 1 });
-    return g;
+    std::byte* currentPos = DataStorage.data();
+
+    fontManager = new (currentPos) ghoul::fontrendering::FontManager({ 1536, 1536, 1 });
+    assert(fontManager);
+    currentPos += sizeof(ghoul::fontrendering::FontManager);
+
+    dashboard = new (currentPos) Dashboard;
+    assert(dashboard);
+    currentPos += sizeof(Dashboard);
+
+    deferredcasterManager = new (currentPos) DeferredcasterManager;
+    assert(deferredcasterManager);
+    currentPos += sizeof(DeferredcasterManager);
+
+    downloadManager = new (currentPos) DownloadManager;
+    assert(downloadManager);
+    currentPos += sizeof(DownloadManager);
+
+    luaConsole = new (currentPos) LuaConsole;
+    assert(luaConsole);
+    currentPos += sizeof(LuaConsole);
+
+    memoryManager = new (currentPos) MemoryManager;
+    assert(memoryManager);
+    currentPos += sizeof(MemoryManager);
+
+    missionManager = new (currentPos) MissionManager;
+    assert(missionManager);
+    currentPos += sizeof(MissionManager);
+
+    moduleEngine = new (currentPos) ModuleEngine;
+    assert(moduleEngine);
+    currentPos += sizeof(ModuleEngine);
+
+    openSpaceEngine = new (currentPos) OpenSpaceEngine;
+    assert(openSpaceEngine);
+    currentPos += sizeof(OpenSpaceEngine);
+
+    parallelPeer = new (currentPos) ParallelPeer;
+    assert(parallelPeer);
+    currentPos += sizeof(ParallelPeer);
+
+    raycasterManager = new (currentPos) RaycasterManager;
+    assert(raycasterManager);
+    currentPos += sizeof(RaycasterManager);
+
+    renderEngine = new (currentPos) RenderEngine;
+    assert(renderEngine);
+    currentPos += sizeof(RenderEngine);
+
+    screenSpaceRenderables = new (currentPos) std::vector<std::unique_ptr<ScreenSpaceRenderable>>;
+    assert(screenSpaceRenderables);
+    currentPos += sizeof(std::vector<std::unique_ptr<ScreenSpaceRenderable>>);
+
+    syncEngine = new (currentPos) SyncEngine(4096);
+    assert(syncEngine);
+    currentPos += sizeof(SyncEngine);
+
+    timeManager = new (currentPos) TimeManager;
+    assert(timeManager);
+    currentPos += sizeof(TimeManager);
+
+    versionChecker = new (currentPos) VersionChecker;
+    assert(versionChecker);
+    currentPos += sizeof(VersionChecker);
+
+    virtualPropertyManager = new (currentPos) VirtualPropertyManager;
+    assert(virtualPropertyManager);
+    currentPos += sizeof(VirtualPropertyManager);
+
+    windowDelegate = new (currentPos) WindowDelegate;
+    assert(windowDelegate);
+    currentPos += sizeof(WindowDelegate);
+
+    configuration = new (currentPos) configuration::Configuration;
+    assert(configuration);
+    currentPos += sizeof(configuration::Configuration);
+
+    interactionMonitor = new (currentPos) interaction::InteractionMonitor;
+    assert(interactionMonitor);
+    currentPos += sizeof(interaction::InteractionMonitor);
+
+    joystickInputStates = new (currentPos) interaction::JoystickInputStates;
+    assert(joystickInputStates);
+    currentPos += sizeof(interaction::JoystickInputStates);
+
+    websocketInputStates = new (currentPos) interaction::WebsocketInputStates;
+    assert(websocketInputStates);
+    currentPos += sizeof(interaction::WebsocketInputStates);
+
+    keybindingManager = new (currentPos) interaction::KeybindingManager;
+    assert(keybindingManager);
+    currentPos += sizeof(interaction::KeybindingManager);
+
+    navigationHandler = new (currentPos) interaction::NavigationHandler;
+    assert(navigationHandler);
+    currentPos += sizeof(interaction::NavigationHandler);
+
+    sessionRecording = new (currentPos) interaction::SessionRecording;
+    assert(sessionRecording);
+    currentPos += sizeof(interaction::SessionRecording);
+
+    shortcutManager = new (currentPos) interaction::ShortcutManager;
+    assert(shortcutManager);
+    currentPos += sizeof(interaction::ShortcutManager);
+
+    rootPropertyOwner = new (currentPos) properties::PropertyOwner({ "" });
+    assert(rootPropertyOwner);
+    currentPos += sizeof(properties::PropertyOwner);
+
+    screenSpaceRootPropertyOwner = new (currentPos) properties::PropertyOwner({ "ScreenSpace" });
+    assert(screenSpaceRootPropertyOwner);
+    currentPos += sizeof(properties::PropertyOwner);
+
+    scriptEngine = new (currentPos) scripting::ScriptEngine;
+    assert(scriptEngine);
+    currentPos += sizeof(scripting::ScriptEngine);
+
+    scriptScheduler = new (currentPos) scripting::ScriptScheduler;
+    assert(scriptScheduler);
+    currentPos += sizeof(scripting::ScriptScheduler);
+
+    profile = new (currentPos) Profile;
+    assert(profile);
+    currentPos += sizeof(Profile);
 }
-
-Dashboard& gDashboard() {
-    static Dashboard g;
-    return g;
-}
-
-DeferredcasterManager& gDeferredcasterManager() {
-    static DeferredcasterManager g;
-    return g;
-}
-
-DownloadManager& gDownloadManager() {
-    static DownloadManager g;
-    return g;
-}
-
-LuaConsole& gLuaConsole() {
-    static LuaConsole g;
-    return g;
-}
-
-MemoryManager& gMemoryManager() {
-    static MemoryManager g;
-    return g;
-}
-
-MissionManager& gMissionManager() {
-    static MissionManager g;
-    return g;
-}
-
-ModuleEngine& gModuleEngine() {
-    static ModuleEngine g;
-    return g;
-}
-
-OpenSpaceEngine& gOpenSpaceEngine() {
-    static OpenSpaceEngine g;
-    return g;
-}
-
-ParallelPeer& gParallelPeer() {
-    static ParallelPeer g;
-    return g;
-}
-
-RaycasterManager& gRaycasterManager() {
-    static RaycasterManager g;
-    return g;
-}
-
-RenderEngine& gRenderEngine() {
-    static RenderEngine g;
-    return g;
-}
-
-std::vector<std::unique_ptr<ScreenSpaceRenderable>>& gScreenspaceRenderables() {
-    static std::vector<std::unique_ptr<ScreenSpaceRenderable>> g;
-    return g;
-}
-
-SyncEngine& gSyncEngine() {
-    static SyncEngine g(4096);
-    return g;
-}
-
-TimeManager& gTimeManager() {
-    static TimeManager g;
-    return g;
-}
-
-VersionChecker& gVersionChecker() {
-    static VersionChecker g;
-    return g;
-}
-
-VirtualPropertyManager& gVirtualPropertyManager() {
-    static VirtualPropertyManager g;
-    return g;
-}
-
-WindowDelegate& gWindowDelegate() {
-    static WindowDelegate g;
-    return g;
-}
-
-configuration::Configuration& gConfiguration() {
-    static configuration::Configuration g;
-    return g;
-}
-
-interaction::InteractionMonitor& gInteractionMonitor() {
-    static interaction::InteractionMonitor g;
-    return g;
-}
-
-interaction::JoystickInputStates& gJoystickInputStates() {
-    static interaction::JoystickInputStates g;
-    return g;
-}
-
-interaction::WebsocketInputStates& gWebsocketInputStates() {
-    static interaction::WebsocketInputStates g;
-    return g;
-}
-
-interaction::KeybindingManager& gKeybindingManager() {
-    static interaction::KeybindingManager g;
-    return g;
-}
-
-interaction::NavigationHandler& gNavigationHandler() {
-    static interaction::NavigationHandler g;
-    return g;
-}
-
-interaction::SessionRecording& gSessionRecording() {
-    static interaction::SessionRecording g;
-    return g;
-}
-
-interaction::ShortcutManager& gShortcutManager() {
-    static interaction::ShortcutManager g;
-    return g;
-}
-
-properties::PropertyOwner& gRootPropertyOwner() {
-    static properties::PropertyOwner g({ "" });
-    return g;
-}
-
-properties::PropertyOwner& gScreenSpaceRootPropertyOwner() {
-    static properties::PropertyOwner g({ "ScreenSpace" });
-    return g;
-}
-
-scripting::ScriptEngine& gScriptEngine() {
-    static scripting::ScriptEngine g;
-    return g;
-}
-
-scripting::ScriptScheduler& gScriptScheduler() {
-    static scripting::ScriptScheduler g;
-    return g;
-}
-
-Profile& gProfile() {
-    static Profile g;
-    return g;
-}
-
-} // namespace detail
 
 void initialize() {
     ZoneScoped
 
-    global::rootPropertyOwner.addPropertySubOwner(global::moduleEngine);
+    rootPropertyOwner->addPropertySubOwner(global::moduleEngine);
 
-    global::navigationHandler.setPropertyOwner(&global::rootPropertyOwner);
+    navigationHandler->setPropertyOwner(global::rootPropertyOwner);
     // New property subowners also have to be added to the ImGuiModule callback!
-    global::rootPropertyOwner.addPropertySubOwner(global::navigationHandler);
-    global::rootPropertyOwner.addPropertySubOwner(global::interactionMonitor);
-    global::rootPropertyOwner.addPropertySubOwner(global::sessionRecording);
-    global::rootPropertyOwner.addPropertySubOwner(global::timeManager);
+    rootPropertyOwner->addPropertySubOwner(global::navigationHandler);
+    rootPropertyOwner->addPropertySubOwner(global::interactionMonitor);
+    rootPropertyOwner->addPropertySubOwner(global::sessionRecording);
+    rootPropertyOwner->addPropertySubOwner(global::timeManager);
 
-    global::rootPropertyOwner.addPropertySubOwner(global::renderEngine);
-    global::rootPropertyOwner.addPropertySubOwner(global::screenSpaceRootPropertyOwner);
+    rootPropertyOwner->addPropertySubOwner(global::renderEngine);
+    rootPropertyOwner->addPropertySubOwner(global::screenSpaceRootPropertyOwner);
 
-    global::rootPropertyOwner.addPropertySubOwner(global::parallelPeer);
-    global::rootPropertyOwner.addPropertySubOwner(global::luaConsole);
-    global::rootPropertyOwner.addPropertySubOwner(global::dashboard);
+    rootPropertyOwner->addPropertySubOwner(global::parallelPeer);
+    rootPropertyOwner->addPropertySubOwner(global::luaConsole);
+    rootPropertyOwner->addPropertySubOwner(global::dashboard);
 
-    global::syncEngine.addSyncable(&global::scriptEngine);
+    syncEngine->addSyncable(global::scriptEngine);
 }
 
 void initializeGL() {
@@ -247,30 +257,127 @@ void initializeGL() {
 
 }
 
+void destroy() {
+    LDEBUGC("Globals", "Destroying 'Profile'");
+    profile->~Profile();
+
+    LDEBUGC("Globals", "Destroying 'ScriptScheduler'");
+    scriptScheduler->~ScriptScheduler();
+
+    LDEBUGC("Globals", "Destroying 'ScriptEngine'");
+    scriptEngine->~ScriptEngine();
+
+    LDEBUGC("Globals", "Destroying 'ScreenSpace Root Owner'");
+    screenSpaceRootPropertyOwner->~PropertyOwner();
+
+    LDEBUGC("Globals", "Destroying 'Root Owner'");
+    rootPropertyOwner->~PropertyOwner();
+
+    LDEBUGC("Globals", "Destroying 'ShortcutManager'");
+    shortcutManager->~ShortcutManager();
+
+    LDEBUGC("Globals", "Destroying 'SessionRecording'");
+    sessionRecording->~SessionRecording();
+
+    LDEBUGC("Globals", "Destroying 'NavigationHandler'");
+    navigationHandler->~NavigationHandler();
+
+    LDEBUGC("Globals", "Destroying 'KeybindingManager'");
+    keybindingManager->~KeybindingManager();
+
+    LDEBUGC("Globals", "Destroying 'WebsocketInputStates'");
+    websocketInputStates->~WebsocketInputStates();
+
+    LDEBUGC("Globals", "Destroying 'JoystickInputStates'");
+    joystickInputStates->~JoystickInputStates();
+
+    LDEBUGC("Globals", "Destroying 'InteractionMonitor'");
+    interactionMonitor->~InteractionMonitor();
+
+    LDEBUGC("Globals", "Destroying 'Configuration'");
+    configuration->~Configuration();
+
+    LDEBUGC("Globals", "Destroying 'WindowDelegate'");
+    windowDelegate->~WindowDelegate();
+
+    LDEBUGC("Globals", "Destroying 'VirtualPropertyManager'");
+    virtualPropertyManager->~VirtualPropertyManager();
+
+    LDEBUGC("Globals", "Destroying 'VersionChecker'");
+    versionChecker->~VersionChecker();
+
+    LDEBUGC("Globals", "Destroying 'TimeManager'");
+    timeManager->~TimeManager();
+
+    LDEBUGC("Globals", "Destroying 'SyncEngine'");
+    syncEngine->~SyncEngine();
+
+    LDEBUGC("Globals", "Destroying 'ScreenSpaceRenderables'");
+    screenSpaceRenderables->~vector<std::unique_ptr<ScreenSpaceRenderable>>();
+
+    LDEBUGC("Globals", "Destroying 'RenderEngine'");
+    renderEngine->~RenderEngine();
+
+    LDEBUGC("Globals", "Destroying 'RaycasterManager'");
+    raycasterManager->~RaycasterManager();
+
+    LDEBUGC("Globals", "Destroying 'ParallelPeer'");
+    parallelPeer->~ParallelPeer();
+
+    LDEBUGC("Globals", "Destroying 'OpenSpaceEngine'");
+    openSpaceEngine->~OpenSpaceEngine();
+
+    LDEBUGC("Globals", "Destroying 'ModuleEngine'");
+    moduleEngine->~ModuleEngine();
+
+    LDEBUGC("Globals", "Destroying 'MissionManager'");
+    missionManager->~MissionManager();
+
+    LDEBUGC("Globals", "Destroying 'MemoryManager'");
+    memoryManager->~MemoryManager();
+
+    LDEBUGC("Globals", "Destroying 'LuaConsole'");
+    luaConsole->~LuaConsole();
+
+    LDEBUGC("Globals", "Destroying 'DownloadManager'");
+    downloadManager->~DownloadManager();
+
+    LDEBUGC("Globals", "Destroying 'DeferredcasterManager'");
+    deferredcasterManager->~DeferredcasterManager();
+
+    LDEBUGC("Globals", "Destroying 'Dashboard'");
+    dashboard->~Dashboard();
+
+    LDEBUGC("Globals", "Destroying 'FontManager'");
+    fontManager->~FontManager();
+
+    std::fill(DataStorage.begin(), DataStorage.end(), std::byte(0));
+}
+
 void deinitialize() {
     ZoneScoped
 
-    for (std::unique_ptr<ScreenSpaceRenderable>& ssr : global::screenSpaceRenderables) {
+    for (std::unique_ptr<ScreenSpaceRenderable>& ssr : *screenSpaceRenderables) {
         ssr->deinitialize();
     }
 
-    global::syncEngine.removeSyncables(global::timeManager.getSyncables());
+    syncEngine->removeSyncables(timeManager->getSyncables());
 
-    global::moduleEngine.deinitialize();
-    global::luaConsole.deinitialize();
-    global::scriptEngine.deinitialize();
-    global::fontManager.deinitialize();
+    moduleEngine->deinitialize();
+    luaConsole->deinitialize();
+    scriptEngine->deinitialize();
+    fontManager->deinitialize();
 }
 
 void deinitializeGL() {
     ZoneScoped
 
-    for (std::unique_ptr<ScreenSpaceRenderable>& ssr : global::screenSpaceRenderables) {
+    for (std::unique_ptr<ScreenSpaceRenderable>& ssr : *screenSpaceRenderables) {
         ssr->deinitializeGL();
     }
 
-    global::renderEngine.deinitializeGL();
-    global::moduleEngine.deinitializeGL();
+    renderEngine->deinitializeGL();
+    moduleEngine->deinitializeGL();
 }
 
 } // namespace openspace::global

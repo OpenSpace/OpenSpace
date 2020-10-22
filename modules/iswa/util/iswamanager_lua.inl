@@ -85,7 +85,7 @@ int iswa_addScreenSpaceCygnet(lua_State* L) {
     int updateInterval = info->updateInterval;
     info->selected = true;
 
-    if (global::renderEngine.screenSpaceRenderable(name)) {
+    if (global::renderEngine->screenSpaceRenderable(name)) {
         LERROR("A cygnet with the name \"" + name +"\" already exist");
         return 0;
     }
@@ -97,7 +97,7 @@ int iswa_addScreenSpaceCygnet(lua_State* L) {
         std::unique_ptr<ScreenSpaceRenderable> s(
             ScreenSpaceRenderable::createFromDictionary(d)
         );
-        global::renderEngine.addScreenSpaceRenderable(std::move(s));
+        global::renderEngine->addScreenSpaceRenderable(std::move(s));
     }
     return 0;
 }
@@ -127,7 +127,7 @@ int iswa_addScreenSpaceCygnet(lua_State* L) {
 
 int iswa_removeCygnet(lua_State* L) {
     std::string name = luaL_checkstring(L, -1);
-    global::scriptEngine.queueScript(
+    global::scriptEngine->queueScript(
         "openspace.removeSceneGraphNode('" + name + "')",
         scripting::ScriptEngine::RemoteScripting::Yes
     );
@@ -153,7 +153,7 @@ int iswa_removeScrenSpaceCygnet(lua_State* L) {
         "openspace.unregisterScreenSpaceRenderable('" +
         cygnetInformation[id]->name + "');";
 
-    global::scriptEngine.queueScript(
+    global::scriptEngine->queueScript(
         script,
         scripting::ScriptEngine::RemoteScripting::Yes
     );

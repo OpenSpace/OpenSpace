@@ -24,6 +24,7 @@
 
 #include "profile/cameradialog.h"
 
+#include "profile/line.h"
 #include <openspace/scene/profile.h>
 #include <QDialogButtonBox>
 #include <QDoubleValidator>
@@ -60,37 +61,7 @@ CameraDialog::CameraDialog(openspace::Profile& profile, QWidget *parent)
     , _profile(profile)
 {
     setWindowTitle("Set Camera Position");
-
-    QBoxLayout* layout = new QVBoxLayout(this);
-    _tabWidget = new QTabWidget;
-    connect(_tabWidget, &QTabWidget::tabBarClicked, this, &CameraDialog::tabSelect);
-    _tabWidget->addTab(createNavStateWidget(), "Navigation State");
-    _tabWidget->addTab(createGeoWidget(), "Geo State");
-    layout->addWidget(_tabWidget);
-
-    {
-        QFrame* line = new QFrame;
-        line->setFrameShape(QFrame::HLine);
-        line->setFrameShadow(QFrame::Sunken);
-        layout->addWidget(line);
-    }
-
-    {
-        QBoxLayout* footerLayout = new QHBoxLayout;
-
-        _errorMsg = new QLabel;
-        _errorMsg->setObjectName("error-message");
-        _errorMsg->setWordWrap(true);
-        footerLayout->addWidget(_errorMsg);
-
-        QDialogButtonBox* buttons = new QDialogButtonBox;
-        buttons->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
-        connect(buttons, &QDialogButtonBox::accepted, this, &CameraDialog::approved);
-        connect(buttons, &QDialogButtonBox::rejected, this, &CameraDialog::reject);
-        footerLayout->addWidget(buttons);
-
-        layout->addLayout(footerLayout);
-    }
+    createWidgets();
 
     if (_profile.camera().has_value()) {
         openspace::Profile::CameraType type = *_profile.camera();
@@ -163,6 +134,34 @@ CameraDialog::CameraDialog(openspace::Profile& profile, QWidget *parent)
     }
 }
 
+void CameraDialog::createWidgets() {
+    QBoxLayout* layout = new QVBoxLayout(this);
+    _tabWidget = new QTabWidget;
+    connect(_tabWidget, &QTabWidget::tabBarClicked, this, &CameraDialog::tabSelect);
+    _tabWidget->addTab(createNavStateWidget(), "Navigation State");
+    _tabWidget->addTab(createGeoWidget(), "Geo State");
+    layout->addWidget(_tabWidget);
+
+    layout->addWidget(new Line);
+
+    {
+        QBoxLayout* footerLayout = new QHBoxLayout;
+
+        _errorMsg = new QLabel;
+        _errorMsg->setObjectName("error-message");
+        _errorMsg->setWordWrap(true);
+        footerLayout->addWidget(_errorMsg);
+
+        QDialogButtonBox* buttons = new QDialogButtonBox;
+        buttons->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
+        connect(buttons, &QDialogButtonBox::accepted, this, &CameraDialog::approved);
+        connect(buttons, &QDialogButtonBox::rejected, this, &CameraDialog::reject);
+        footerLayout->addWidget(buttons);
+
+        layout->addLayout(footerLayout);
+    }
+}
+
 QWidget* CameraDialog::createNavStateWidget() {
     QWidget* box = new QWidget;
     QGridLayout* layout = new QGridLayout(box);
@@ -175,14 +174,16 @@ QWidget* CameraDialog::createNavStateWidget() {
     layout->addWidget(new QLabel("Aim:"), 1, 0);
     _navState.aim = new QLineEdit;
     _navState.aim->setToolTip(
-        "[OPTIONAL] If specified, camera will be aimed at this node while keeping the "
-        "anchor node in the same view location"
+        "If specified, camera will be aimed at this node while keeping the anchor node "
+        "in the same view location"
     );
+    _navState.aim->setPlaceholderText("optional");
     layout->addWidget(_navState.aim, 1, 1);
 
     layout->addWidget(new QLabel("Reference Frame:"), 2, 0);
     _navState.refFrame = new QLineEdit;
-    _navState.refFrame->setToolTip("[OPTIONAL] Camera location in reference to this frame");
+    _navState.refFrame->setToolTip("Camera location in reference to this frame");
+    _navState.refFrame->setPlaceholderText("optional");
     layout->addWidget(_navState.refFrame, 2, 1);
 
     layout->addWidget(new QLabel("Position:"), 3, 0);
@@ -218,19 +219,22 @@ QWidget* CameraDialog::createNavStateWidget() {
         upLayout->addWidget(new QLabel("X"));
         _navState.upX = new QLineEdit;
         _navState.upX->setValidator(new QDoubleValidator);
-        _navState.upX->setToolTip("[OPTIONAL] Camera up vector (x)");
+        _navState.upX->setToolTip("Camera up vector (x)");
+        _navState.upX->setPlaceholderText("semioptional");
         upLayout->addWidget(_navState.upX);
 
         upLayout->addWidget(new QLabel("Y"));
         _navState.upY = new QLineEdit;
         _navState.upY->setValidator(new QDoubleValidator);
-        _navState.upY->setToolTip("[OPTIONAL] Camera up vector (y)");
+        _navState.upY->setToolTip("Camera up vector (y)");
+        _navState.upY->setPlaceholderText("semioptional");
         upLayout->addWidget(_navState.upY);
 
         upLayout->addWidget(new QLabel("Z"));
         _navState.upZ = new QLineEdit;
         _navState.upZ->setValidator(new QDoubleValidator);
-        _navState.upZ->setToolTip("[OPTIONAL] Camera up vector (z)");
+        _navState.upZ->setToolTip("Camera up vector (z)");
+        _navState.upZ->setPlaceholderText("semioptional");
         upLayout->addWidget(_navState.upZ);
         layout->addWidget(upBox, 4, 1);
     }
@@ -238,13 +242,15 @@ QWidget* CameraDialog::createNavStateWidget() {
     layout->addWidget(new QLabel("Yaw angle:"), 5, 0);
     _navState.yaw = new QLineEdit;
     _navState.yaw->setValidator(new QDoubleValidator);
-    _navState.yaw->setToolTip("[OPTIONAL] yaw angle +/- 360 degrees");
+    _navState.yaw->setToolTip("Yaw angle +/- 360 degrees");
+    _navState.yaw->setPlaceholderText("optional");
     layout->addWidget(_navState.yaw, 5, 1);
 
     layout->addWidget(new QLabel("Pitch angle:"), 6, 0);
     _navState.pitch = new QLineEdit;
     _navState.pitch->setValidator(new QDoubleValidator);
-    _navState.pitch->setToolTip("[OPTIONAL] pitch angle +/- 360 degrees");
+    _navState.pitch->setToolTip("Pitch angle +/- 360 degrees");
+    _navState.pitch->setPlaceholderText("optional");
     layout->addWidget(_navState.pitch, 6, 1);
 
     return box;
@@ -274,8 +280,8 @@ QWidget* CameraDialog::createGeoWidget() {
     layout->addWidget(new QLabel("Altitude"), 3, 0);
     _geoState.altitude = new QLineEdit;
     _geoState.altitude->setValidator(new QDoubleValidator);
-    _geoState.altitude->setToolTip("[OPTIONAL] Altitude of camera (meters)");
-    //altitude->setPlaceholderText("optional");
+    _geoState.altitude->setToolTip("Altitude of camera (meters)");
+    _geoState.altitude->setPlaceholderText("optional");
     layout->addWidget(_geoState.altitude, 3, 1);
 
     return box;
@@ -354,7 +360,7 @@ bool CameraDialog::areRequiredFormsFilledAndValid() {
 
 void CameraDialog::addErrorMsg(QString errorDescription) {
     QString contents = _errorMsg->text();
-    if (contents.length() > 0) {
+    if (!contents.isEmpty()) {
         contents += ", ";
     }
     contents += errorDescription;

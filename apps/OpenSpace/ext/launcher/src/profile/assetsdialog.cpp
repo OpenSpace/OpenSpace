@@ -24,6 +24,7 @@
 
 #include "profile/assetsdialog.h"
 
+#include "profile/line.h"
 #include <openspace/scene/profile.h>
 #include <QDialogButtonBox>
 #include <QHeaderView>
@@ -58,8 +59,8 @@ namespace {
     void traverseToFindFilesystemMatch(AssetTreeModel& model, QModelIndex parent,
                                        int nRows, const std::string& path)
     {
-        size_t slash = path.find_first_of('/', 0);
-        bool endOfPath = (slash == std::string::npos);
+        const size_t slash = path.find_first_of('/', 0);
+        const bool endOfPath = (slash == std::string::npos);
         std::string firstDir = endOfPath ? "" : path.substr(0, slash);
 
         if (!endOfPath) {
@@ -71,7 +72,7 @@ namespace {
                 QModelIndex idx = model.index(r, 0, parent);
                 std::string assetName = model.name(idx).toStdString();
                 if (!model.isAsset(idx)) {
-                    if (firstDir.compare(assetName) == 0) {
+                    if (firstDir == assetName) {
                         int nChildRows = model.childCount(idx);
                         foundDirMatch = true;
                         traverseToFindFilesystemMatch(model, idx, nChildRows, nextPath);
@@ -83,7 +84,7 @@ namespace {
                 }
             }
             if (!foundDirMatch) {
-                //Insert missing directory here with name and exists=false condition
+                // Insert missing directory here with name and exists=false condition
                 model.assetItem(parent)->insertChildren(nRows, 1, 3);
                 QModelIndex idx = model.index(nRows, 0, parent);
                 model.setName(idx, QString::fromStdString(firstDir));
@@ -97,14 +98,14 @@ namespace {
                 QModelIndex idx = model.index(r, 0, parent);
                 std::string assetName = model.name(idx).toStdString();
 
-                if (path.compare(assetName) == 0) {
+                if (path == assetName) {
                     foundFileMatch = true;
                     model.setChecked(idx, true);
                     break;
                 }
             }
             if (!foundFileMatch) {
-                //Insert missing file here with name and exists=false condition
+                // Insert missing file here with name and exists=false condition
                 model.assetItem(parent)->insertChildren(nRows, 1, 3);
                 QModelIndex idx = model.index(nRows, 0, parent);
                 model.setName(idx, QString::fromStdString(path));
@@ -115,13 +116,17 @@ namespace {
     }
 } // namespace
 
-AssetsDialog::AssetsDialog(openspace::Profile& profile, const std::string reportAssets,
+AssetsDialog::AssetsDialog(openspace::Profile& profile, const std::string& assetBasePath,
                            QWidget* parent)
     : QDialog(parent)
     , _profile(profile)
 {
     setWindowTitle("Assets");
+    _assetTreeModel.importModelData(assetBasePath);
+    createWidgets();
+}
 
+void AssetsDialog::createWidgets() {
     QBoxLayout* layout = new QVBoxLayout(this);
     {
         QLabel* heading = new QLabel("Select assets from /data/assets");
@@ -129,8 +134,6 @@ AssetsDialog::AssetsDialog(openspace::Profile& profile, const std::string report
         layout->addWidget(heading);
     }
     {
-        _assetTreeModel.importModelData(reportAssets);
-
         _assetTree = new QTreeView;
         _assetTree->setToolTip(
             "Expand arrow entries to browse assets in this OpenSpace installation. "
@@ -177,12 +180,8 @@ AssetsDialog::AssetsDialog(openspace::Profile& profile, const std::string report
         _summary->setText(createTextSummary());
         layout->addWidget(_summary);
     }
-    {
-        QFrame* line = new QFrame;
-        line->setFrameShape(QFrame::HLine);
-        line->setFrameShadow(QFrame::Sunken);
-        layout->addWidget(line);
-    }
+
+    layout->addWidget(new Line);
 
     {
         QDialogButtonBox* buttons = new QDialogButtonBox;
@@ -210,10 +209,13 @@ QString AssetsDialog::createTextSummary() {
     QString summary;
     for (int i = 0; i < summaryItems.size(); ++i) {
         bool existsInFilesystem = summaryItems.at(i)->doesExistInFilesystem();
-        std::string s = fmt::format("<font color='{}'>{}</font><br>",
-            (existsInFilesystem ? "black" : "red"),
-            summaryPaths.at(i)
-        );
+
+        constexpr const char* ExistsFormat = "{}<br>";
+        constexpr const char* NotExistsFormat = "<font color='{}'>{}</font><br>";
+
+        std::string s = existsInFilesystem ?
+            fmt::format("{}<br>", summaryPaths.at(i)) :
+            fmt::format("<font color='red'>{}</font><br>", summaryPaths.at(i));
         summary += QString::fromStdString(s);
     }
     return summary;

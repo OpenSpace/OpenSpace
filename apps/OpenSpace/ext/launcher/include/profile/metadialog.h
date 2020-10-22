@@ -35,20 +35,21 @@ class QTextEdit;
 class MetaDialog : public QDialog {
 Q_OBJECT
 public:
-
    /**
     * Constructor for meta class
     *
-    * \param imported The #openspace::Profile object containing all data of the
-    *                 new or imported profile.
+    * \param profile The #openspace::Profile object containing all data of the
+    *                new or imported profile.
     * \param parent Pointer to parent Qt widget
     */
     MetaDialog(openspace::Profile& profile, QWidget* parent);
 
-public slots:
+private slots:
     void save();
 
 private:
+    void createWidgets();
+
     openspace::Profile& _profile;
 
     QLineEdit* _nameEdit = nullptr;

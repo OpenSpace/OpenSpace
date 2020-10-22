@@ -47,7 +47,7 @@ void DataSphere::initializeGL() {
     IswaCygnet::initializeGL();
 
     if (!_shader) {
-        _shader = global::renderEngine.buildRenderProgram(
+        _shader = global::renderEngine->buildRenderProgram(
             "DataSphereProgram",
             absPath("${MODULE_ISWA}/shaders/datasphere_vs.glsl"),
             absPath("${MODULE_ISWA}/shaders/datasphere_fs.glsl")

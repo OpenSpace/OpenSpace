@@ -348,7 +348,7 @@ void RenderableFieldlinesSequence::initializeGL() {
     setupProperties();
 
     // Setup shader program
-    _shaderProgram = global::renderEngine.buildRenderProgram(
+    _shaderProgram = global::renderEngine->buildRenderProgram(
         "FieldlinesSequence",
         absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_vs.glsl"),
         absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_fs.glsl")
@@ -757,21 +757,21 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
     }
 
     _pFocusOnOriginBtn.onChange([this] {
-        SceneGraphNode* node = global::renderEngine.scene()->sceneGraphNode(_identifier);
+        SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(_identifier);
         if (!node) {
             LWARNING(fmt::format(
                 "Could not find a node in scenegraph called '{}'", _identifier
             ));
             return;
         }
-        global::navigationHandler.orbitalNavigator().setFocusNode(
+        global::navigationHandler->orbitalNavigator().setFocusNode(
             node->parent()->identifier()
         );
-        global::navigationHandler.orbitalNavigator().startRetargetAnchor();
+        global::navigationHandler->orbitalNavigator().startRetargetAnchor();
     });
 
     _pJumpToStartBtn.onChange([this] {
-        global::timeManager.setTimeNextFrame(Time(_startTimes[0]));
+        global::timeManager->setTimeNextFrame(Time(_startTimes[0]));
     });
 }
 
@@ -1027,7 +1027,7 @@ void RenderableFieldlinesSequence::deinitializeGL() {
     _vertexMaskingBuffer = 0;
 
     if (_shaderProgram) {
-        global::renderEngine.removeRenderProgram(_shaderProgram.get());
+        global::renderEngine->removeRenderProgram(_shaderProgram.get());
         _shaderProgram = nullptr;
     }
 
@@ -1092,12 +1092,12 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
         _shaderProgram->setUniform("particleSpeed",   _pFlowSpeed);
         _shaderProgram->setUniform(
             "time",
-            global::windowDelegate.applicationTime() * (_pFlowReversed ? -1 : 1)
+            global::windowDelegate->applicationTime() * (_pFlowReversed ? -1 : 1)
         );
 
         bool additiveBlending = false;
         if (_pColorABlendEnabled) {
-            const auto renderer = global::renderEngine.rendererImplementation();
+            const auto renderer = global::renderEngine->rendererImplementation();
             const bool usingFBufferRenderer = renderer ==
                                         RenderEngine::RendererImplementation::Framebuffer;
 

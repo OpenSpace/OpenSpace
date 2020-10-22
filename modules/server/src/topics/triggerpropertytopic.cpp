@@ -42,7 +42,7 @@ namespace openspace {
 void TriggerPropertyTopic::handleJson(const nlohmann::json& json) {
     try {
         const std::string& propertyKey = json.at(PropertyKey).get<std::string>();
-        global::scriptEngine.queueScript(
+        global::scriptEngine->queueScript(
             fmt::format(
                 "openspace.setPropertyValueSingle(\"{}\", nil)", propertyKey
             ),

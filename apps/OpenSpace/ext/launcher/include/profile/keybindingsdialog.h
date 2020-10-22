@@ -45,7 +45,7 @@ public:
     /**
      * Constructor for keybindings class
      *
-     * \param imported The #openspace::Profile object containing all data of the
+     * \param profile The #openspace::Profile object containing all data of the
      *                 new or imported profile.
      * \param parent Pointer to parent Qt widget (optional)
      */
@@ -56,9 +56,9 @@ public:
      *
      * \param evt #QKeyEvent object for the key press event
      */
-    void keyPressEvent(QKeyEvent *evt);
+    void keyPressEvent(QKeyEvent* evt);
 
-public slots:
+private slots:
     void listItemSelected();
     void listItemAdded();
     void listItemRemove();
@@ -69,13 +69,11 @@ public slots:
     void keySelected(int index);
 
 private:
+    void createWidgets();
     void transitionFromEditMode();
     void editBoxDisabled(bool disabled);
     int indexInKeyMapping(std::vector<int>& mapVector, int keyInt);
     bool areRequiredFormsFilled();
-    std::string truncateString(std::string& s);
-    void replaceChars(std::string& src, const std::string& from,
-        const std::string& to);
     bool isLineEmpty(int index);
 
     openspace::Profile& _profile;

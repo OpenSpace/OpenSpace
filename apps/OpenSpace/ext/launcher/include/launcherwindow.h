@@ -27,12 +27,13 @@
 
 #include <QMainWindow>
 
-#include <QString>
-#include "profile/profileedit.h"
-#include "filesystemaccess.h"
 #include <openspace/scene/profile.h>
-#include <openspace/engine/globals.h>
 #include <optional>
+
+namespace openspace::configuration { struct Configuration; }
+
+class QComboBox;
+class QLabel;
 
 class LauncherWindow : public QMainWindow {
 Q_OBJECT
@@ -40,7 +41,6 @@ public:
     /**
      * Constructor for LauncherWindow class
      *
-     * \param basePath The base OpenSpace installation path
      * \param profileEnabled true if profile selection combo box will be enabled
      * \param globalConfig reference to global configuration for OpenSpace settings
      * \param sgctConfigEnabled true if window selection combo box will be enabled
@@ -49,9 +49,9 @@ public:
      * \param parentItem The parent that contains this (and possibly other) children
      *                   in the tree structure.
      */
-    LauncherWindow(std::string basePath, bool profileEnabled,
-        openspace::configuration::Configuration& globalConfig, bool sgctConfigEnabled,
-        std::string sgctConfigName, QWidget* parent);
+    LauncherWindow(bool profileEnabled,
+        const openspace::configuration::Configuration& globalConfig,
+        bool sgctConfigEnabled,  std::string sgctConfigName, QWidget* parent);
 
     /**
       * Returns bool for whether "start OpenSpace" was chosen when this window closed.
@@ -60,14 +60,6 @@ public:
       * \return true if the "start OpenSpace" button was clicked
       */
     bool wasLaunchSelected() const;
-
-    /**
-      * Returns true if both the profile and sgct window configuration were specified
-      * at the command line (and so the launcher will not run).
-      *
-      * \return true if both profile and sgct window config were specified at CLI
-      */
-    bool isFullyConfiguredFromCliArgs() const;
 
     /**
       * Returns the selected profile name when launcher window closed
@@ -85,29 +77,23 @@ public:
       */
     std::string selectedWindowConfig() const;
 
-public slots:
-    void openWindowEdit();
-    void openWindowNew();
-    void startOpenSpace();
-
 private:
+    QWidget* createCentralWidget();
+    void setBackgroundImage(const std::string& syncPath);
+
+    void openProfileEditor(const std::string& profile);
+
     void populateProfilesList(std::string preset);
     void populateWindowConfigsList(std::string preset);
-    std::optional<openspace::Profile> loadProfileFromFile(std::string filename);
-    void saveProfileToFile(const std::string& path, const openspace::Profile& p);
 
-    FileSystemAccess _fileAccessProfiles;
-    FileSystemAccess _fileAccessWinConfigs;
-    FileSystemAccess _filesystemAccess;
-    std::string _reportAssetsInFilesystem;
-    openspace::configuration::Configuration& _globalConfig;
-    QString _basePath;
-    bool _launch = false;
-    bool _fullyConfiguredViaCliArgs = false;
-    bool _profileChangeAllowed = true;
-    bool _sgctConfigChangeAllowed = true;
+    const std::string _assetPath;
+    const std::string _configPath;
+    const std::string _profilePath;
+    const std::vector<std::string>& _readOnlyProfiles;
+    bool _shouldLaunch = false;
 
     QComboBox* _profileBox = nullptr;
     QComboBox* _windowConfigBox = nullptr;
+    QLabel* _backgroundImage = nullptr;
 };
 #endif // __OPENSPACE_UI_LAUNCHER___LAUNCHERWINDOW___H__

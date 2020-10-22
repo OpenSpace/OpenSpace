@@ -24,6 +24,7 @@
 
 #include "profile/assettreeitem.h"
 #include "profile/assettreemodel.h"
+#include "filesystemaccess.h"
 #include <sstream>
 #include <QColor>
 
@@ -57,7 +58,8 @@ namespace {
     }
 
     bool importGetNextLine(ImportElement& elem, std::istringstream& iss) {
-        bool ok = std::getline(iss, elem.line) ? true : false;
+        std::getline(iss, elem.line);
+        const bool ok = iss.good();
         if (!ok) {
             elem.line = "";
             elem.level = -1;
@@ -143,8 +145,16 @@ AssetTreeModel::AssetTreeModel(QObject* parent)
     );
 }
 
-void AssetTreeModel::importModelData(const std::string& contents) {
-    std::istringstream iss(contents);
+void AssetTreeModel::importModelData(const std::string& assetBasePath) {
+    FileSystemAccess assets(
+        ".asset",
+        { "scene", "global", "customization", "examples", "util" },
+        true,
+        true
+    );
+    std::string assetList = assets.useQtFileSystemModelToTraverseDir(assetBasePath);
+
+    std::istringstream iss(assetList);
     ImportElement rootElem = { "", 0, false };
 
     if (importGetNextLine(rootElem, iss)) {
@@ -164,8 +174,8 @@ AssetTreeItem* AssetTreeModel::getItem(const QModelIndex& index) const {
 
 bool AssetTreeModel::isChecked(QModelIndex& index) const {
     AssetTreeItem* item = getItem(index);
-    int checked = item->data(1).toInt();
-    return checked == Qt::Checked;
+    const int isChecked = item->data(1).toInt();
+    return isChecked == Qt::Checked;
 }
 
 bool AssetTreeModel::isAsset(QModelIndex& index) const {

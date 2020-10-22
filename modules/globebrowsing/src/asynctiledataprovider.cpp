@@ -48,7 +48,7 @@ AsyncTileDataProvider::AsyncTileDataProvider(std::string name,
 {
     ZoneScoped
 
-    _globeBrowsingModule = global::moduleEngine.module<GlobeBrowsingModule>();
+    _globeBrowsingModule = global::moduleEngine->module<GlobeBrowsingModule>();
     performReset(ResetRawTileDataReader::No);
 }
 

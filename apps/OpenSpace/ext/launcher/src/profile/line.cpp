@@ -22,53 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/imgui/include/guimemorycomponent.h>
+#include "profile/line.h"
 
-#include <modules/imgui/include/imgui_include.h>
-#include <openspace/engine/globals.h>
-#include <openspace/util/memorymanager.h>
-
-namespace {
-    const ImVec2 Size = ImVec2(350, 500);
-
-    template <typename MemoryPool>
-    void renderMemoryPoolInformation(const MemoryPool& p) {
-        //ImGui::Text("Bucket Size: %i", p.BucketSize);
-        ImGui::Text("Number of Buckets: %i", p.nBuckets());
-        const std::vector<int>& occupancies = p.occupancies();
-        for (size_t i = 0; i < occupancies.size(); ++i) {
-            ImGui::Text(
-                "  %i: %i/%i (%.2f/%.2f kiB)",
-                i,
-                occupancies[i],
-                p._bucketSize,
-                occupancies[i] / 1024.f,
-                p._bucketSize / 1024.f
-            );
-        }
-    }
-} // namespace
-
-namespace openspace::gui {
-
-GuiMemoryComponent::GuiMemoryComponent()
-    : GuiComponent("memory_information", "Memory Information")
-{}
-
-void GuiMemoryComponent::render() {
-    ImGui::SetNextWindowCollapsed(_isCollapsed);
-
-    bool v = _isEnabled;
-    ImGui::Begin("Memory Information", &v, Size, 0.5f);
-    _isEnabled = v;
-    _isCollapsed = ImGui::IsWindowCollapsed();
-
-    ImGui::Text("%s", "Persistent Memory Pool");
-    renderMemoryPoolInformation(global::memoryManager->PersistentMemory);
-
-    //ImGui::Text("%s", "Temporary Memory Pool");
-    //renderMemoryPoolInformation(global::memoryManager.TemporaryMemory);
-    ImGui::End();
+Line::Line() {
+    setFrameShape(QFrame::HLine);
+    setFrameShadow(QFrame::Sunken);
 }
-
-} // namespace openspace::gui

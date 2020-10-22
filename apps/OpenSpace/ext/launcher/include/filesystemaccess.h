@@ -54,7 +54,7 @@ public:
      *
      * \param dir The directory from which to start the search from
      */
-    std::string useQtFileSystemModelToTraverseDir(QString dir);
+    std::string useQtFileSystemModelToTraverseDir(std::string dir);
 
 private:
     void parseChildDirElements(QFileInfo item, std::string space, int level,

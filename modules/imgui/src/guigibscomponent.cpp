@@ -122,7 +122,7 @@ void GuiGIBSComponent::render() {
             "FilePath = {} }})",
             layer, xmlFunc
         );
-        global::scriptEngine.queueScript(
+        global::scriptEngine->queueScript(
             script,
             scripting::ScriptEngine::RemoteScripting::Yes
         );

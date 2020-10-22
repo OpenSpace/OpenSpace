@@ -51,7 +51,7 @@ std::string SceneLicenseWriter::generateJson() const {
     json << "[";
 
     std::vector<const Asset*> assets =
-        global::openSpaceEngine.assetManager().rootAsset().subTreeAssets();
+        global::openSpaceEngine->assetManager().rootAsset().subTreeAssets();
 
     int metaTotal = 0;
     for (const Asset* asset : assets) {

@@ -265,7 +265,7 @@ void RingsComponent::initializeGL() {
 
     try {
         //global::renderEngine.removeRenderProgram(_geometryOnlyShader.get());
-        _geometryOnlyShader = global::renderEngine.buildRenderProgram(
+        _geometryOnlyShader = global::renderEngine->buildRenderProgram(
             "RingsGeomOnlyProgram",
             absPath("${MODULE_GLOBEBROWSING}/shaders/rings_geom_vs.glsl"),
             absPath("${MODULE_GLOBEBROWSING}/shaders/rings_geom_fs.glsl")
@@ -298,10 +298,10 @@ void RingsComponent::deinitializeGL() {
     _textureFile = nullptr;
     _texture = nullptr;
 
-    global::renderEngine.removeRenderProgram(_shader.get());
+    global::renderEngine->removeRenderProgram(_shader.get());
     _shader = nullptr;
 
-    global::renderEngine.removeRenderProgram(_geometryOnlyShader.get());
+    global::renderEngine->removeRenderProgram(_geometryOnlyShader.get());
     _geometryOnlyShader = nullptr;
 }
 
@@ -410,7 +410,7 @@ void RingsComponent::update(const UpdateData& data) {
     }
 
     _sunPosition = glm::normalize(
-        global::renderEngine.scene()->sceneGraphNode("Sun")->worldPosition() -
+        global::renderEngine->scene()->sceneGraphNode("Sun")->worldPosition() -
         data.modelTransform.translation
     );
 }
@@ -488,8 +488,8 @@ void RingsComponent::compileShadowShader() {
     dict.setValue("nShadowSamples", std::to_string(_nShadowSamples - 1));
 
     try {
-        global::renderEngine.removeRenderProgram(_shader.get());
-        _shader = global::renderEngine.buildRenderProgram(
+        global::renderEngine->removeRenderProgram(_shader.get());
+        _shader = global::renderEngine->buildRenderProgram(
             "RingsProgram",
             absPath("${MODULE_GLOBEBROWSING}/shaders/rings_vs.glsl"),
             absPath("${MODULE_GLOBEBROWSING}/shaders/rings_fs.glsl"),
