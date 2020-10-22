@@ -154,10 +154,10 @@ void JoystickCameraStates::updateStateFromInput(const InputState& inputState,
     for (int i = 0; i < JoystickInputState::MaxButtons; ++i) {
         auto itRange = _buttonMapping.equal_range(i);
         for (auto it = itRange.first; it != itRange.second; ++it) {
-            bool active = global::joystickInputStates.button(i, it->second.action);
+            bool active = global::joystickInputStates->button(i, it->second.action);
 
             if (active) {
-                global::scriptEngine.queueScript(
+                global::scriptEngine->queueScript(
                     it->second.command,
                     scripting::ScriptEngine::RemoteScripting(it->second.synchronization)
                 );

@@ -112,7 +112,7 @@ void KameleonPlane::deinitializeGL() {
 
 void KameleonPlane::initializeGL() {
     if (!_shader) {
-        _shader = global::renderEngine.buildRenderProgram(
+        _shader = global::renderEngine->buildRenderProgram(
             "DataPlaneProgram",
             absPath("${MODULE_ISWA}/shaders/dataplane_vs.glsl"),
             absPath("${MODULE_ISWA}/shaders/dataplane_fs.glsl")
@@ -274,7 +274,7 @@ void KameleonPlane::updateFieldlineSeeds() {
             seedPath.first
         );
         if (it == selectedOptions.end() && std::get<2>(seedPath.second)) {
-            SceneGraphNode* n = global::renderEngine.scene()->sceneGraphNode(
+            SceneGraphNode* n = global::renderEngine->scene()->sceneGraphNode(
                 std::get<0>(seedPath.second)
             );
             if (!n) {
@@ -282,7 +282,7 @@ void KameleonPlane::updateFieldlineSeeds() {
             }
 
             LDEBUG("Removed fieldlines: " + std::get<0>(seedPath.second));
-            global::scriptEngine.queueScript(
+            global::scriptEngine->queueScript(
                 "openspace.removeSceneGraphNode('" + std::get<0>(seedPath.second) + "')",
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
@@ -290,7 +290,7 @@ void KameleonPlane::updateFieldlineSeeds() {
         // if this option was turned on
         }
         else if (it != selectedOptions.end() && !std::get<2>(seedPath.second)) {
-            SceneGraphNode* n = global::renderEngine.scene()->sceneGraphNode(
+            SceneGraphNode* n = global::renderEngine->scene()->sceneGraphNode(
                 std::get<0>(seedPath.second)
             );
             if (n) {

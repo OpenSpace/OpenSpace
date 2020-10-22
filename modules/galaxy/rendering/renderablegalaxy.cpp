@@ -356,10 +356,10 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
 
     auto onChange = [&](bool enabled) {
         if (enabled) {
-            global::raycasterManager.attachRaycaster(*_raycaster);
+            global::raycasterManager->attachRaycaster(*_raycaster);
         }
         else {
-            global::raycasterManager.detachRaycaster(*_raycaster);
+            global::raycasterManager->detachRaycaster(*_raycaster);
         }
     };
 
@@ -464,19 +464,19 @@ void RenderableGalaxy::initializeGL() {
     // We no longer need the data
     _volume = nullptr;
 
-    global::raycasterManager.attachRaycaster(*_raycaster);
+    global::raycasterManager->attachRaycaster(*_raycaster);
 
     // initialize points.
     if (_pointsFilename.empty()) {
         return;
     }
 
-    _pointsProgram = global::renderEngine.buildRenderProgram(
+    _pointsProgram = global::renderEngine->buildRenderProgram(
         "Galaxy points",
         absPath("${MODULE_GALAXY}/shaders/points_vs.glsl"),
         absPath("${MODULE_GALAXY}/shaders/points_fs.glsl")
     );
-    _billboardsProgram = global::renderEngine.buildRenderProgram(
+    _billboardsProgram = global::renderEngine->buildRenderProgram(
         "Galaxy billboard",
         absPath("${MODULE_GALAXY}/shaders/billboard_vs.glsl"),
         absPath("${MODULE_GALAXY}/shaders/billboard_fs.glsl"),
@@ -557,7 +557,7 @@ void RenderableGalaxy::initializeGL() {
 
 void RenderableGalaxy::deinitializeGL() {
     if (_raycaster) {
-        global::raycasterManager.detachRaycaster(*_raycaster);
+        global::raycasterManager->detachRaycaster(*_raycaster);
         _raycaster = nullptr;
     }
 
@@ -716,8 +716,8 @@ void RenderableGalaxy::renderPoints(const RenderData& data) {
     _pointsProgram->deactivate();
 
     // Restores OpenGL Rendering State
-    global::renderEngine.openglStateCache().resetBlendState();
-    global::renderEngine.openglStateCache().resetDepthState();
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
 }
 
 void RenderableGalaxy::renderBillboards(const RenderData& data) {

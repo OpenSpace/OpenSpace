@@ -112,7 +112,7 @@ TimeManager::TimeManager()
 void TimeManager::interpolateTime(double targetTime, double durationSeconds) {
     ghoul_precondition(durationSeconds > 0.f, "durationSeconds must be positive");
 
-    const double now = global::windowDelegate.applicationTime();
+    const double now = global::windowDelegate->applicationTime();
     const bool pause = isPaused();
 
     const TimeKeyframeData current = { time(), deltaTime(), false, false };
@@ -126,10 +126,10 @@ void TimeManager::interpolateTime(double targetTime, double durationSeconds) {
 void TimeManager::interpolateTimeRelative(double delta, double durationSeconds) {
     ghoul_precondition(durationSeconds > 0.f, "durationSeconds must be positive");
 
-    const float duration = global::timeManager.defaultTimeInterpolationDuration();
+    const float duration = global::timeManager->defaultTimeInterpolationDuration();
 
     const TimeKeyframeData predictedTime = interpolate(
-        global::windowDelegate.applicationTime() + duration
+        global::windowDelegate->applicationTime() + duration
     );
     const double targetTime = predictedTime.time.j2000Seconds() + delta;
     interpolateTime(targetTime, durationSeconds);
@@ -262,7 +262,7 @@ void TimeManager::progressTime(double dt) {
         return;
     }
 
-    const double now = global::windowDelegate.applicationTime();
+    const double now = global::windowDelegate->applicationTime();
     const std::deque<Keyframe<TimeKeyframeData>>& keyframes = _timeline.keyframes();
 
     auto firstFutureKeyframe = std::lower_bound(
@@ -455,7 +455,7 @@ void TimeManager::addDeltaTimesKeybindings() {
 
     auto addDeltaTimeKeybind = [this](Key key, KeyModifier mod, double step) {
         const std::string s = fmt::format("{:.0f}", step);
-        global::keybindingManager.bindKeyLocal(
+        global::keybindingManager->bindKeyLocal(
             key,
             mod,
             fmt::format("openspace.time.interpolateDeltaTime({})", s),
@@ -507,7 +507,7 @@ void TimeManager::addDeltaTimesKeybindings() {
 void TimeManager::clearDeltaTimesKeybindings() {
     for (const KeyWithModifier& kb : _deltaTimeStepKeybindings) {
         // Check if there are multiple keys bound to the same key
-        auto bindings = global::keybindingManager.keyBinding(kb);
+        auto bindings = global::keybindingManager->keyBinding(kb);
         if (bindings.size() > 1) {
             std::string names;
             for (auto& b : bindings) {
@@ -519,7 +519,7 @@ void TimeManager::clearDeltaTimesKeybindings() {
                 ghoul::to_string(kb), names
             ));
         }
-        global::keybindingManager.removeKeyBinding(kb);
+        global::keybindingManager->removeKeyBinding(kb);
     }
     _deltaTimeStepKeybindings.clear();
 }
@@ -716,7 +716,7 @@ void TimeManager::interpolateDeltaTime(double newDeltaTime, double interpolation
         return;
     }
 
-    const double now = global::windowDelegate.applicationTime();
+    const double now = global::windowDelegate->applicationTime();
     Time newTime(
         time().j2000Seconds() + (_deltaTime + newDeltaTime) * 0.5 * interpolationDuration
     );
@@ -812,7 +812,7 @@ void TimeManager::interpolatePause(bool pause, double interpolationDuration) {
         return;
     }
 
-    const double now = global::windowDelegate.applicationTime();
+    const double now = global::windowDelegate->applicationTime();
     double targetDelta = pause ? 0.0 : _targetDeltaTime;
     Time newTime(
         time().j2000Seconds() + (_deltaTime + targetDelta) * 0.5 * interpolationDuration

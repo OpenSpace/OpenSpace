@@ -52,13 +52,13 @@ void GuiShortcutsComponent::render() {
     // First the actual shortcuts
     CaptionText("Shortcuts");
     const std::vector<interaction::ShortcutManager::ShortcutInformation>& shortcuts =
-        global::shortcutManager.shortcuts();
+        global::shortcutManager->shortcuts();
 
     for (size_t i = 0; i < shortcuts.size(); ++i) {
         const interaction::ShortcutManager::ShortcutInformation& info = shortcuts[i];
 
         if (ImGui::Button(info.name.c_str())) {
-            global::scriptEngine.queueScript(
+            global::scriptEngine->queueScript(
                 info.script,
                 scripting::ScriptEngine::RemoteScripting(info.synchronization)
             );
@@ -83,11 +83,11 @@ void GuiShortcutsComponent::render() {
     CaptionText("Keybindings");
     using K = KeyWithModifier;
     using V = interaction::KeybindingManager::KeyInformation;
-    const std::multimap<K, V>& binds = global::keybindingManager.keyBindings();
+    const std::multimap<K, V>& binds = global::keybindingManager->keyBindings();
 
     for (const std::pair<const K, V>& p : binds) {
         if (ImGui::Button(ghoul::to_string(p.first).c_str())) {
-            global::scriptEngine.queueScript(
+            global::scriptEngine->queueScript(
                 p.second.command,
                 scripting::ScriptEngine::RemoteScripting(p.second.synchronization)
             );

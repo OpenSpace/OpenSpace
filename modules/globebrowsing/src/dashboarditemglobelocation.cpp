@@ -105,7 +105,7 @@ DashboardItemGlobeLocation::DashboardItemGlobeLocation(
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 10.f, 144.f, 1.f)
     , _significantDigits(SignificantDigitsInfo, 4, 1, 12)
-    , _font(global::fontManager.font(KeyFontMono, 10))
+    , _font(global::fontManager->font(KeyFontMono, 10))
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -127,12 +127,12 @@ DashboardItemGlobeLocation::DashboardItemGlobeLocation(
 
 
     _fontName.onChange([this]() {
-        _font = global::fontManager.font(_fontName, _fontSize);
+        _font = global::fontManager->font(_fontName, _fontSize);
     });
     addProperty(_fontName);
 
     _fontSize.onChange([this]() {
-        _font = global::fontManager.font(_fontName, _fontSize);
+        _font = global::fontManager->font(_fontName, _fontSize);
     });
     addProperty(_fontSize);
 
@@ -148,7 +148,7 @@ DashboardItemGlobeLocation::DashboardItemGlobeLocation(
     addProperty(_significantDigits);
     updateFormatString();
 
-    _font = global::fontManager.font(_fontName, _fontSize);
+    _font = global::fontManager->font(_fontName, _fontSize);
     _buffer.resize(128);
 }
 
@@ -157,7 +157,7 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
 
     using namespace globebrowsing;
 
-    const SceneGraphNode* n = global::navigationHandler.orbitalNavigator().anchorNode();
+    const SceneGraphNode* n = global::navigationHandler->orbitalNavigator().anchorNode();
     if (!n) {
         return;
     }
@@ -166,7 +166,7 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
         return;
     }
 
-    const glm::dvec3 cameraPosition = global::navigationHandler.camera()->positionVec3();
+    const glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
     const glm::dmat4 inverseModelTransform = glm::inverse(n->modelTransform());
     const glm::dvec3 cameraPositionModelSpace =
         glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));

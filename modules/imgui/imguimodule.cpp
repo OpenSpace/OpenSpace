@@ -51,13 +51,13 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         gui._globalProperty.setSource(
             []() {
             std::vector<properties::PropertyOwner*> res = {
-                &global::navigationHandler,
-                &global::sessionRecording,
-                &global::timeManager,
-                &global::renderEngine,
-                &global::parallelPeer,
-                &global::luaConsole,
-                &global::dashboard
+                global::navigationHandler,
+                global::sessionRecording,
+                global::timeManager,
+                global::renderEngine,
+                global::parallelPeer,
+                global::luaConsole,
+                global::dashboard
             };
             return res;
         }
@@ -65,21 +65,21 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
 
         gui._screenSpaceProperty.setSource(
             []() {
-                return global::screenSpaceRootPropertyOwner.propertySubOwners();
+                return global::screenSpaceRootPropertyOwner->propertySubOwners();
             }
         );
 
         gui._moduleProperty.setSource(
             []() {
                 std::vector<properties::PropertyOwner*> v;
-                v.push_back(&(global::moduleEngine));
+                v.push_back(global::moduleEngine);
                 return v;
             }
         );
 
         gui._sceneProperty.setSource(
             []() {
-                const Scene* scene = global::renderEngine.scene();
+                const Scene* scene = global::renderEngine->scene();
                 const std::vector<SceneGraphNode*>& nodes = scene ?
                     scene->allSceneGraphNodes() :
                     std::vector<SceneGraphNode*>();
@@ -94,7 +94,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         gui._virtualProperty.setSource(
             []() {
                 std::vector<properties::PropertyOwner*> res = {
-                    &global::virtualPropertyManager
+                    global::virtualPropertyManager
                 };
 
                 return res;
@@ -104,7 +104,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         gui._featuredProperties.setSource(
             []() {
                 std::vector<SceneGraphNode*> nodes =
-                    global::renderEngine.scene()->allSceneGraphNodes();
+                    global::renderEngine->scene()->allSceneGraphNodes();
 
                 nodes.erase(
                     std::remove_if(
@@ -154,7 +154,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
     global::callback::draw2D.emplace_back([&]() {
         ZoneScopedN("ImGUI")
 
-        WindowDelegate& delegate = global::windowDelegate;
+        WindowDelegate& delegate = *global::windowDelegate;
         const bool showGui = delegate.hasGuiWindow() ? delegate.isGuiWindow() : true;
         if (delegate.isMaster() && showGui) {
             const glm::ivec2 windowSize = delegate.currentSubwindowSize();

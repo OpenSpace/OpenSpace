@@ -39,10 +39,10 @@ int startRecording(lua_State* L) {
     if (recordFilePath.empty()) {
         return luaL_error(L, "filepath string is empty");
     }
-    global::sessionRecording.setRecordDataFormat(
+    global::sessionRecording->setRecordDataFormat(
         interaction::SessionRecording::DataMode::Binary
     );
-    global::sessionRecording.startRecording(recordFilePath);
+    global::sessionRecording->startRecording(recordFilePath);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -62,10 +62,10 @@ int startRecordingAscii(lua_State* L) {
     if (recordFilePath.empty()) {
         return luaL_error(L, "filepath string is empty");
     }
-    global::sessionRecording.setRecordDataFormat(
+    global::sessionRecording->setRecordDataFormat(
         interaction::SessionRecording::DataMode::Ascii
     );
-    global::sessionRecording.startRecording(recordFilePath);
+    global::sessionRecording->startRecording(recordFilePath);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -74,7 +74,7 @@ int startRecordingAscii(lua_State* L) {
 int stopRecording(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::stopRecording");
 
-    global::sessionRecording.stopRecording();
+    global::sessionRecording->stopRecording();
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -95,7 +95,7 @@ int startPlayback(lua_State* L, interaction::KeyframeTimeRef timeMode,
         return luaL_error(L, "filepath string is empty");
     }
 
-    global::sessionRecording.startPlayback(
+    global::sessionRecording->startPlayback(
         playbackFilePath,
         timeMode,
         forceSimTimeAtStart
@@ -136,7 +136,7 @@ int startPlaybackSimulationTime(lua_State* L) {
 int stopPlayback(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::stopPlayback");
 
-    global::sessionRecording.stopPlayback();
+    global::sessionRecording->stopPlayback();
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -151,7 +151,7 @@ int enableTakeScreenShotDuringPlayback(lua_State* L) {
 
     const int fps = nArguments == 0 ? 60 : ghoul::lua::value<int>(L, 1);
 
-    global::sessionRecording.enableTakeScreenShotDuringPlayback(fps);
+    global::sessionRecording->enableTakeScreenShotDuringPlayback(fps);
 
     lua_settop(L, 0);
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
@@ -161,7 +161,7 @@ int enableTakeScreenShotDuringPlayback(lua_State* L) {
 int disableTakeScreenShotDuringPlayback(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::disableTakeScreenShotDuringPlayback");
 
-    global::sessionRecording.disableTakeScreenShotDuringPlayback();
+    global::sessionRecording->disableTakeScreenShotDuringPlayback();
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;

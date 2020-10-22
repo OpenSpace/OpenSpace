@@ -152,7 +152,7 @@ void RenderablePlaneImageOnline::update(const UpdateData&) {
 std::future<DownloadManager::MemoryFile>
 RenderablePlaneImageOnline::downloadImageToMemory(const std::string& url)
 {
-    return global::downloadManager.fetchFile(
+    return global::downloadManager->fetchFile(
         url,
         [url](const DownloadManager::MemoryFile&) {
             LDEBUGC(

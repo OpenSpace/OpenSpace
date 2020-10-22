@@ -49,7 +49,7 @@ int addDashboardItem(lua_State* L) {
         lua_settop(L, 0);
 
         try {
-            global::dashboard.addDashboardItem(DashboardItem::createFromDictionary(d));
+            global::dashboard->addDashboardItem(DashboardItem::createFromDictionary(d));
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC("addDashboardItem", e.what());
@@ -75,7 +75,7 @@ int removeDashboardItem(lua_State* L) {
 
     std::string identifier = luaL_checkstring(L, -1);
 
-    global::dashboard.removeDashboardItem(identifier);
+    global::dashboard->removeDashboardItem(identifier);
 
     lua_settop(L, 0);
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
@@ -90,7 +90,7 @@ int removeDashboardItem(lua_State* L) {
 int clearDashboardItems(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::clearDashboardItems");
 
-    global::dashboard.clearDashboardItems();
+    global::dashboard->clearDashboardItems();
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;

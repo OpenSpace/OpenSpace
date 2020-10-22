@@ -59,9 +59,11 @@ local setCurrentSlide = function (deck, index, interpolationDuration)
         if (index == i) then
             opacity = 1
         end
-        openspace.setPropertyValueSingle(
-            "ScreenSpace." .. identifier .. ".Alpha", opacity,
-            interpolationDuration, "QuadraticEaseOut")
+        if interpolationDuration == 0 then
+            openspace.setPropertyValueSingle("ScreenSpace." .. identifier .. ".Alpha", opacity)
+        else
+            openspace.setPropertyValueSingle("ScreenSpace." .. identifier .. ".Alpha", opacity, interpolationDuration, "QuadraticEaseOut")
+        end
     end
 end
 

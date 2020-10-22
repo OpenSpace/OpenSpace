@@ -1271,7 +1271,12 @@ glm::dvec3 OrbitalNavigator::moveCameraAlongVector(const glm::dvec3& camPos,
         velocity = 1.0 - destination / distFromCameraToFocus;
     }
     else { // When flying away from anchor
-        velocity = distFromCameraToFocus / destination - 1.0;
+        if (destination == 0.0) {
+            velocity = -1.0;
+        }
+        else {
+            velocity = distFromCameraToFocus / destination - 1.0;
+        }
     }
     velocity *= _velocitySensitivity;
 

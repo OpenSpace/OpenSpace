@@ -205,7 +205,7 @@ ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
         _dynamicDepthTextureRes = false;
     }
     else {
-        glm::ivec2 renderingResolution = global::renderEngine.renderingResolution();
+        glm::ivec2 renderingResolution = global::renderEngine->renderingResolution();
         _shadowDepthTextureWidth = renderingResolution.x * 2;
         _shadowDepthTextureHeight = renderingResolution.y * 2;
         _dynamicDepthTextureRes = true;
@@ -413,7 +413,7 @@ void ShadowComponent::end() {
 
     if (_viewDepthMap) {
         if (!_renderDMProgram) {
-            _renderDMProgram = global::renderEngine.buildRenderProgram(
+            _renderDMProgram = global::renderEngine->buildRenderProgram(
                 "ShadowMappingDebuggingProgram",
                 absPath("${MODULE_GLOBEBROWSING}/shaders/smviewer_vs.glsl"),
                 absPath("${MODULE_GLOBEBROWSING}/shaders/smviewer_fs.glsl")
@@ -442,9 +442,9 @@ void ShadowComponent::end() {
 void ShadowComponent::update(const UpdateData&) {
     ZoneScoped
 
-    _sunPosition = global::renderEngine.scene()->sceneGraphNode("Sun")->worldPosition();
+    _sunPosition = global::renderEngine->scene()->sceneGraphNode("Sun")->worldPosition();
 
-    glm::ivec2 renderingResolution = global::renderEngine.renderingResolution();
+    glm::ivec2 renderingResolution = global::renderEngine->renderingResolution();
     if (_dynamicDepthTextureRes && ((_shadowDepthTextureWidth != renderingResolution.x) ||
         (_shadowDepthTextureHeight != renderingResolution.y)))
     {

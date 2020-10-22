@@ -888,7 +888,7 @@ void RenderableGaiaStars::initializeGL() {
             _uniformCache.valuesPerStar = _program->uniformLocation("valuesPerStar");
             _uniformCache.nChunksToRender = _program->uniformLocation("nChunksToRender");
 
-            _programTM = global::renderEngine.buildRenderProgram(
+            _programTM = global::renderEngine->buildRenderProgram(
                 "ToneMapping",
                 absPath("${MODULE_GAIA}/shaders/gaia_tonemapping_vs.glsl"),
                 absPath("${MODULE_GAIA}/shaders/gaia_tonemapping_point_fs.glsl")
@@ -913,7 +913,7 @@ void RenderableGaiaStars::initializeGL() {
                 absPath("${MODULE_GAIA}/shaders/gaia_point_ge.glsl")
             );
 
-            _programTM = global::renderEngine.buildRenderProgram("ToneMapping",
+            _programTM = global::renderEngine->buildRenderProgram("ToneMapping",
                 absPath("${MODULE_GAIA}/shaders/gaia_tonemapping_vs.glsl"),
                 absPath("${MODULE_GAIA}/shaders/gaia_tonemapping_point_fs.glsl")
             );
@@ -950,7 +950,7 @@ void RenderableGaiaStars::initializeGL() {
             _uniformCache.valuesPerStar = _program->uniformLocation("valuesPerStar");
             _uniformCache.nChunksToRender = _program->uniformLocation("nChunksToRender");
 
-            _programTM = global::renderEngine.buildRenderProgram(
+            _programTM = global::renderEngine->buildRenderProgram(
                 "ToneMapping",
                 absPath("${MODULE_GAIA}/shaders/gaia_tonemapping_vs.glsl"),
                 absPath("${MODULE_GAIA}/shaders/gaia_tonemapping_billboard_fs.glsl")
@@ -964,7 +964,7 @@ void RenderableGaiaStars::initializeGL() {
             break;
         }
         case gaia::ShaderOption::Billboard_SSBO_noFBO: {
-            _program = global::renderEngine.buildRenderProgram("GaiaStar",
+            _program = global::renderEngine->buildRenderProgram("GaiaStar",
                 absPath("${MODULE_GAIA}/shaders/gaia_ssbo_vs.glsl"),
                 absPath("${MODULE_GAIA}/shaders/gaia_billboard_nofbo_fs.glsl"),
                 absPath("${MODULE_GAIA}/shaders/gaia_billboard_ge.glsl")
@@ -1006,7 +1006,7 @@ void RenderableGaiaStars::initializeGL() {
             );
             _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
 
-            _programTM = global::renderEngine.buildRenderProgram("ToneMapping",
+            _programTM = global::renderEngine->buildRenderProgram("ToneMapping",
                 absPath("${MODULE_GAIA}/shaders/gaia_tonemapping_vs.glsl"),
                 absPath("${MODULE_GAIA}/shaders/gaia_tonemapping_billboard_fs.glsl")
             );
@@ -1124,11 +1124,11 @@ void RenderableGaiaStars::deinitializeGL() {
     _fboTexture = nullptr;
 
     if (_program) {
-        global::renderEngine.removeRenderProgram(_program.get());
+        global::renderEngine->removeRenderProgram(_program.get());
         _program = nullptr;
     }
     if (_programTM) {
-        global::renderEngine.removeRenderProgram(_programTM.get());
+        global::renderEngine->removeRenderProgram(_programTM.get());
         _programTM = nullptr;
     }
 }
@@ -1149,7 +1149,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     glm::dmat4 projection = data.camera.projectionMatrix();
 
     glm::dmat4 modelViewProjMat = projection * view * model;
-    glm::vec2 screenSize = glm::vec2(global::renderEngine.renderingResolution());
+    glm::vec2 screenSize = glm::vec2(global::renderEngine->renderingResolution());
 
     // Wait until camera has stabilized before we traverse the Octree/stream from files.
     const double rotationDiff = abs(length(_previousCameraRotation) -
@@ -1593,7 +1593,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
                         absPath("${MODULE_GAIA}/shaders/gaia_point_ge.glsl")
                     );
                 if (_program) {
-                    global::renderEngine.removeRenderProgram(_program.get());
+                    global::renderEngine->removeRenderProgram(_program.get());
                 }
                 _program = std::move(program);
 
@@ -1656,7 +1656,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
                         absPath("${MODULE_GAIA}/shaders/gaia_point_ge.glsl")
                     );
                 if (_program) {
-                    global::renderEngine.removeRenderProgram(_program.get());
+                    global::renderEngine->removeRenderProgram(_program.get());
                 }
                 _program = std::move(program);
 
@@ -1699,7 +1699,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
                     );
                 }
                 else {
-                    program = global::renderEngine.buildRenderProgram("GaiaStar",
+                    program = global::renderEngine->buildRenderProgram("GaiaStar",
                         absPath("${MODULE_GAIA}/shaders/gaia_ssbo_vs.glsl"),
                         absPath("${MODULE_GAIA}/shaders/gaia_billboard_nofbo_fs.glsl"),
                         absPath("${MODULE_GAIA}/shaders/gaia_billboard_ge.glsl")
@@ -1707,7 +1707,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 }
 
                 if (_program) {
-                    global::renderEngine.removeRenderProgram(_program.get());
+                    global::renderEngine->removeRenderProgram(_program.get());
                 }
                 _program = std::move(program);
 
@@ -1781,7 +1781,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
                         absPath("${MODULE_GAIA}/shaders/gaia_billboard_ge.glsl")
                     );
                 if (_program) {
-                    global::renderEngine.removeRenderProgram(_program.get());
+                    global::renderEngine->removeRenderProgram(_program.get());
                 }
                 _program = std::move(program);
 
@@ -1851,13 +1851,13 @@ void RenderableGaiaStars::update(const UpdateData&) {
             case gaia::ShaderOption::Point_SSBO:
             case gaia::ShaderOption::Point_VBO: {
                 std::unique_ptr<ghoul::opengl::ProgramObject> programTM =
-                    global::renderEngine.buildRenderProgram(
+                    global::renderEngine->buildRenderProgram(
                         "ToneMapping",
                         absPath("${MODULE_GAIA}/shaders/gaia_tonemapping_vs.glsl"),
                         absPath("${MODULE_GAIA}/shaders/gaia_tonemapping_point_fs.glsl")
                     );
                 if (_programTM) {
-                    global::renderEngine.removeRenderProgram(_programTM.get());
+                    global::renderEngine->removeRenderProgram(_programTM.get());
                 }
                 _programTM = std::move(programTM);
 
@@ -1879,9 +1879,9 @@ void RenderableGaiaStars::update(const UpdateData&) {
                     "${MODULE_GAIA}/shaders/gaia_tonemapping_billboard_fs.glsl"
                 );
                 std::unique_ptr<ghoul::opengl::ProgramObject> programTM =
-                    global::renderEngine.buildRenderProgram("ToneMapping", vs, fs);
+                    global::renderEngine->buildRenderProgram("ToneMapping", vs, fs);
                 if (_programTM) {
-                    global::renderEngine.removeRenderProgram(_programTM.get());
+                    global::renderEngine->removeRenderProgram(_programTM.get());
                 }
                 _programTM = std::move(programTM);
                 break;
@@ -2236,7 +2236,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
         }
         if (!_fboTexture) {
             // Generate a new texture and attach it to our FBO.
-            glm::vec2 screenSize = glm::vec2(global::renderEngine.renderingResolution());
+            glm::vec2 screenSize = glm::vec2(global::renderEngine->renderingResolution());
             _fboTexture = std::make_unique<ghoul::opengl::Texture>(
                 glm::uvec3(screenSize, 1),
                 ghoul::opengl::Texture::Format::RGBA,
@@ -2321,9 +2321,9 @@ void RenderableGaiaStars::update(const UpdateData&) {
         _colorTextureIsDirty = false;
     }
 
-    if (global::windowDelegate.windowHasResized()) {
+    if (global::windowDelegate->windowHasResized()) {
         // Update FBO texture resolution if we haven't already.
-        glm::vec2 screenSize = glm::vec2(global::renderEngine.renderingResolution());
+        glm::vec2 screenSize = glm::vec2(global::renderEngine->renderingResolution());
         const bool hasChanged = glm::any(
             glm::notEqual(_fboTexture->dimensions(), glm::uvec3(screenSize, 1))
         );

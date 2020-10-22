@@ -494,7 +494,7 @@ void RenderablePlanesCloud::initializeGL() {
     _program = DigitalUniverseModule::ProgramObjectManager.request(
         ProgramObjectName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return global::renderEngine.buildRenderProgram(
+            return global::renderEngine->buildRenderProgram(
                 "RenderablePlanesCloud",
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/plane_vs.glsl"),
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/plane_fs.glsl")
@@ -511,7 +511,7 @@ void RenderablePlanesCloud::initializeGL() {
     if (_hasLabel) {
         if (!_font) {
             constexpr const int FontSize = 30;
-            _font = global::fontManager.font(
+            _font = global::fontManager->font(
                 "Mono",
                 static_cast<float>(FontSize),
                 ghoul::fontrendering::FontManager::Outline::Yes,
@@ -537,7 +537,7 @@ void RenderablePlanesCloud::deinitializeGL() {
     DigitalUniverseModule::ProgramObjectManager.release(
         ProgramObjectName,
         [](ghoul::opengl::ProgramObject* p) {
-            global::renderEngine.removeRenderProgram(p);
+            global::renderEngine->removeRenderProgram(p);
         }
     );
 }
@@ -590,8 +590,8 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
     _program->deactivate();
 
     // Restores OpenGL Rendering State
-    global::renderEngine.openglStateCache().resetBlendState();
-    global::renderEngine.openglStateCache().resetDepthState();
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
 }
 
 void RenderablePlanesCloud::renderLabels(const RenderData& data,
