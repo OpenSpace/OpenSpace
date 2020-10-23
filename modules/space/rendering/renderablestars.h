@@ -58,6 +58,7 @@ public:
 
     bool isReady() const override;
 
+    void loadPSFTexture();
     void renderPSFToTexture();
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
