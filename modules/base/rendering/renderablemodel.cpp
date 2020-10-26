@@ -45,6 +45,7 @@
 namespace {
     constexpr const char* ProgramName = "ModelProgram";
     constexpr const char* KeyGeomModelFile = "GeometryFile";
+    constexpr const char* KeyForceRenderInvisible = "ForceRenderInvisible";
 
     constexpr const std::array<const char*, 12> UniformNames = {
         "opacity", "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
@@ -120,6 +121,13 @@ documentation::Documentation RenderableModel::Documentation() {
                 "contain filesystem tokens or can be specified relatively to the "
                 "location of the .mod file. "
                 "This specifies the model that is rendered by the Renderable."
+            },
+            {
+                KeyForceRenderInvisible,
+                new BoolVerifier,
+                Optional::Yes,
+                "Set if invisible parts (parts with no textures or materials) of the model "
+                "should be forced to render or not."
             },
             {
                 AmbientIntensityInfo.identifier,
@@ -204,12 +212,24 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
 
+    if (dictionary.hasKey(KeyForceRenderInvisible)) {
+        _forceRenderInvisible = dictionary.value<bool>(KeyForceRenderInvisible);
+
+        if (!_forceRenderInvisible) {
+            // Asset file have specifically said to not render invisible parts,
+            // do not notify in the log if invisible parts are detected and dropped
+            _notifyInvisibleDropped = false;
+        }
+    }
 
     if (dictionary.hasKey(KeyGeomModelFile)) {
         _file = absPath(dictionary.value<std::string>(KeyGeomModelFile));
 
         // Read the file and save the resulting ModelGeometry
-        _geometry = ghoul::io::ModelReader::ref().loadModel(_file);
+        _geometry = ghoul::io::ModelReader::ref().loadModel(_file,
+            _forceRenderInvisible,
+            _notifyInvisibleDropped
+        );
     }
 
     if (dictionary.hasKey(ModelTransformInfo.identifier)) {

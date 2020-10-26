@@ -71,6 +71,8 @@ public:
 private:
     std::string _file;
     std::unique_ptr<ghoul::modelgeometry::ModelGeometry> _geometry;
+    bool _forceRenderInvisible = false;
+    bool _notifyInvisibleDropped = true;
 
     properties::FloatProperty _ambientIntensity;
 
