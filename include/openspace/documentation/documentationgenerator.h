@@ -102,6 +102,16 @@ private:
  */
 std::string escapedJson(const std::string& text);
 
+
+/**
+ * This function takes a \p list of text and escapes all necessary characters () that JSON
+ * does not want in its strings.
+ * \param text The list text that is to be escaped
+ * \return The same text will all required characteres escaped
+ */
+std::string escapedJson(const std::vector<std::string>& list);
+
+
 } // namespace openspace
 
 #endif // __OPENSPACE_CORE___DOCUMENTATIONGENERATOR___H__

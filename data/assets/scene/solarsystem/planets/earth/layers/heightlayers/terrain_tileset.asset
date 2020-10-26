@@ -31,5 +31,5 @@ asset.meta = {
     Author = "ESRI",
     URL = "https://www.arcgis.com/home/item.html?id=1b48cd3b6276416784fe90a68c580a89",
     License = "Esri Master License Agreement",
-    Identifiers = "Terrain_tileset"
+    Identifiers = {"Terrain_tileset"}
 }

@@ -124,5 +124,5 @@ asset.meta = {
     Author = "Stuart Levy (NCSA/UIUC), Brian Abbott (AMNH)",
     URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
     License = "AMNH Digital Universe",
-    Identifiers = "TullyGalaxies,TullyGalaxiesImages"
+    Identifiers = {"TullyGalaxies" , "TullyGalaxiesImages"}
 }
