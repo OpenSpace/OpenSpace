@@ -152,8 +152,8 @@ documentation::Documentation PathSpecification::Documentation() {
 
 // create correct type of instruction and present and throw error with useful
 // error message if we failed.
-void PathSpecification::tryReadInstruction(int index, std::string type,
-                                           ghoul::Dictionary& dictionary)
+void PathSpecification::tryReadInstruction(int index, const std::string& type,
+                                           const ghoul::Dictionary& dictionary)
 {
     if (type == KeyTypeTargetNode) {
         try {

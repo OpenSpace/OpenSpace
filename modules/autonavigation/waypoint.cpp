@@ -37,7 +37,7 @@ namespace {
 
 namespace openspace::autonavigation {
 
-WaypointNodeDetails::WaypointNodeDetails(const std::string nodeIdentifier) {
+WaypointNodeDetails::WaypointNodeDetails(const std::string& nodeIdentifier) {
     const SceneGraphNode* node = sceneGraphNode(nodeIdentifier);
     if (!node) {
         LERROR(fmt::format("Could not find node '{}'.", nodeIdentifier));
@@ -54,7 +54,6 @@ double WaypointNodeDetails::findValidBoundingSphere(const SceneGraphNode* node) 
         global::moduleEngine->module<AutoNavigationModule>()->minValidBoundingSphere();
 
     if (bs < minValidBoundingSphere) {
-
         // If the bs of the target is too small, try to find a good value in a child node.
         // Only check the closest children, to avoid deep traversal in the scene graph.
         // Also, the possibility to find a bounding sphere represents the visual size of

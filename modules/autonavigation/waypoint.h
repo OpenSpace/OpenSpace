@@ -39,12 +39,12 @@ struct CameraPose {
 // The waypoint node is the anchor or target node.
 struct WaypointNodeDetails {
     WaypointNodeDetails() = default;
-    WaypointNodeDetails(const std::string nodeIdentifier);
+    WaypointNodeDetails(const std::string& nodeIdentifier);
 
     static double findValidBoundingSphere(const SceneGraphNode* node);
 
     std::string identifier;
-    double validBoundingSphere; // to be able to handle nodes with faulty bounding spheres
+    double validBoundingSphere = 0.0; // to be able to handle nodes with faulty bounding spheres
 };
 
 struct Waypoint {

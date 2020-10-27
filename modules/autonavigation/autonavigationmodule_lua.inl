@@ -39,275 +39,276 @@
 
 namespace openspace::autonavigation::luascriptfunctions {
 
-    const double EPSILON = 1e-12;
+const double EPSILON = 1e-12;
 
-    int continuePath(lua_State* L) {
-        ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::continuePath");
+int continuePath(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::continuePath");
 
-        AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-        AutoNavigationHandler& handler = module->AutoNavigationHandler();
-        handler.continuePath();
+    AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
+    AutoNavigationHandler& handler = module->AutoNavigationHandler();
+    handler.continuePath();
 
-        return 0;
+    return 0;
+}
+
+int stopPath(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::stopPath");
+
+    AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
+    AutoNavigationHandler& handler = module->AutoNavigationHandler();
+    handler.abortPath();
+
+    return 0;
+}
+
+int goTo(lua_State* L) {
+    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 1, 2 }, "lua::goTo");
+
+    const std::string& nodeIdentifier = ghoul::lua::value<std::string>(L, 1);
+
+    if (!sceneGraphNode(nodeIdentifier)) {
+        lua_settop(L, 0);
+        return ghoul::lua::luaError(L, "Unknown node name: " + nodeIdentifier);
     }
 
-    int stopPath(lua_State* L) {
-        ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::stopPath");
+    ghoul::Dictionary insDict;
+    insDict.setValue("Target", nodeIdentifier);
 
-        AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-        AutoNavigationHandler& handler = module->AutoNavigationHandler();
-        handler.abortPath();
-
-        return 0;
-    }
-
-    int goTo(lua_State* L) {
-        int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 1, 2 }, "lua::goTo");
-
-        const std::string& nodeIdentifier = ghoul::lua::value<std::string>(L, 1);
-
-        if (!sceneGraphNode(nodeIdentifier)) {
+    if (nArguments > 1) {
+        double duration = ghoul::lua::value<double>(L, 2);
+        if (duration <= EPSILON) {
             lua_settop(L, 0);
-            return ghoul::lua::luaError(L, "Unknown node name: " + nodeIdentifier);
+            return ghoul::lua::luaError(L, "Duration must be larger than zero.");
         }
-
-        ghoul::Dictionary insDict;
-        insDict.setValue("Target", nodeIdentifier);
-
-        if (nArguments > 1) {
-            double duration = ghoul::lua::value<double>(L, 2);
-            if (duration <= EPSILON) {
-                lua_settop(L, 0);
-                return ghoul::lua::luaError(L, "Duration must be larger than zero.");
-            }
-            insDict.setValue("Duration", duration);
-        }
-
-        PathSpecification spec = PathSpecification(TargetNodeInstruction{insDict});
-
-        AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-        AutoNavigationHandler& handler = module->AutoNavigationHandler();
-        handler.createPath(spec);
-
-        lua_settop(L, 0);
-        ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-        return 0;
+        insDict.setValue("Duration", duration);
     }
 
-    int generatePath(lua_State* L) {
-        ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::generatePath");
+    PathSpecification spec = PathSpecification(TargetNodeInstruction{insDict});
 
-        ghoul::Dictionary dictionary;
-        ghoul::lua::luaDictionaryFromState(L, dictionary);
-        PathSpecification spec(dictionary);
+    AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
+    AutoNavigationHandler& handler = module->AutoNavigationHandler();
+    handler.createPath(spec);
 
-        if (spec.instructions()->empty()) {
-            lua_settop(L, 0);
-            return ghoul::lua::luaError(
-                L, fmt::format("No instructions for camera path generation were provided.")
-            );
-        }
+    lua_settop(L, 0);
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
 
-        AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-        AutoNavigationHandler& handler = module->AutoNavigationHandler();
-        handler.createPath(spec);
+int generatePath(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::generatePath");
 
+    ghoul::Dictionary dictionary;
+    ghoul::lua::luaDictionaryFromState(L, dictionary);
+    PathSpecification spec(dictionary);
+
+    if (spec.instructions()->empty()) {
         lua_settop(L, 0);
-        ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-        return 0;
+        return ghoul::lua::luaError(
+            L, fmt::format("No instructions for camera path generation were provided.")
+        );
     }
 
-    int generatePathFromFile(lua_State* L) {
-        ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::generatePathFromFile");
+    AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
+    AutoNavigationHandler& handler = module->AutoNavigationHandler();
+    handler.createPath(spec);
 
-        const std::string& filepath = ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::Yes);
+    lua_settop(L, 0);
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
 
-        if (filepath.empty()) {
-            return ghoul::lua::luaError(L, "filepath string is empty");
-        }
+int generatePathFromFile(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::generatePathFromFile");
 
-        const std::string absolutePath = absPath(filepath);
+    const std::string& filepath = ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::Yes);
 
-        LINFOC("AutoNavigationModule", fmt::format("Reading path instructions from file: {}", absolutePath));
-
-        if (!FileSys.fileExists(absolutePath)) {
-            throw ghoul::FileNotFoundError(absolutePath, "PathSpecification");
-        }
-
-        // Try to read the dictionary
-        ghoul::Dictionary dictionary;
-        try {
-            ghoul::lua::loadDictionaryFromFile(absolutePath, dictionary);
-            openspace::documentation::testSpecificationAndThrow(
-                PathSpecification::Documentation(),
-                dictionary,
-                "PathSpecification"
-            );
-        }
-        catch (ghoul::RuntimeError& e) {
-            return ghoul::lua::luaError(
-                L, fmt::format("Unable to read dictionary from file: {}", e.message)
-            );
-        }
-
-        PathSpecification spec(dictionary);
-
-        if (spec.instructions()->empty()) {
-            return ghoul::lua::luaError(
-                L, fmt::format("No instructions for camera path generation were provided.")
-            );
-        }
-
-        LINFOC("AutoNavigationModule", "Reading succeeded. Creating path");
-
-        AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-        AutoNavigationHandler& handler = module->AutoNavigationHandler();
-        handler.createPath(spec);
-
-        ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-        return 0;
+    if (filepath.empty()) {
+        return ghoul::lua::luaError(L, "filepath string is empty");
     }
 
-    // TODO: remove when not needed
-    // Created for debugging. Access info for rendereable path
-    int getPathPositions(lua_State* L) {
-        ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::getPathPositions");
+    const std::string absolutePath = absPath(filepath);
 
-        const int pointsPerSegment = (int)ghoul::lua::value<lua_Number>(L, 1);
+    LINFOC("AutoNavigationModule", fmt::format(
+        "Reading path instructions from file: {}", absolutePath
+    ));
 
-        // Get sample positions from the current curve
-        AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-        AutoNavigationHandler& handler = module->AutoNavigationHandler();
-        std::vector<glm::dvec3> points = handler.getCurvePositions(pointsPerSegment);
+    if (!FileSys.fileExists(absolutePath)) {
+        throw ghoul::FileNotFoundError(absolutePath, "PathSpecification");
+    }
 
-        // Push the points to the Lua stack:
-        lua_settop(L, 0);
-        const auto pushVector = [](lua_State* L, const glm::dvec3& v) {
-            lua_newtable(L);
-            ghoul::lua::push(L, 1, v.x);
-            lua_rawset(L, -3);
-            ghoul::lua::push(L, 2, v.y);
-            lua_rawset(L, -3);
-            ghoul::lua::push(L, 3, v.z);
-            lua_rawset(L, -3);
-        };
+    // Try to read the dictionary
+    ghoul::Dictionary dictionary;
+    try {
+        ghoul::lua::loadDictionaryFromFile(absolutePath, dictionary);
+        openspace::documentation::testSpecificationAndThrow(
+            PathSpecification::Documentation(),
+            dictionary,
+            "PathSpecification"
+        );
+    }
+    catch (ghoul::RuntimeError& e) {
+        return ghoul::lua::luaError(
+            L, fmt::format("Unable to read dictionary from file: {}", e.message)
+        );
+    }
 
+    PathSpecification spec(dictionary);
+
+    if (spec.instructions()->empty()) {
+        return ghoul::lua::luaError(
+            L, fmt::format("No instructions for camera path generation were provided.")
+        );
+    }
+
+    LINFOC("AutoNavigationModule", "Reading succeeded. Creating path");
+
+    AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
+    AutoNavigationHandler& handler = module->AutoNavigationHandler();
+    handler.createPath(spec);
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
+// TODO: remove when not needed
+// Created for debugging. Access info for rendereable path
+int getPathPositions(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::getPathPositions");
+
+    const int pointsPerSegment = (int)ghoul::lua::value<lua_Number>(L, 1);
+
+    // Get sample positions from the current curve
+    AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
+    AutoNavigationHandler& handler = module->AutoNavigationHandler();
+    std::vector<glm::dvec3> points = handler.getCurvePositions(pointsPerSegment);
+
+    // Push the points to the Lua stack:
+    lua_settop(L, 0);
+    const auto pushVector = [](lua_State* L, const glm::dvec3& v) {
         lua_newtable(L);
-        for (int i = 0; i < points.size(); ++i) {
-            ghoul::lua::push(L, i+1);
-            pushVector(L, points[i]);
-            lua_rawset(L, -3);
-        }
+        ghoul::lua::push(L, 1, v.x);
+        lua_rawset(L, -3);
+        ghoul::lua::push(L, 2, v.y);
+        lua_rawset(L, -3);
+        ghoul::lua::push(L, 3, v.z);
+        lua_rawset(L, -3);
+    };
 
-        ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
-        return 1;
+    lua_newtable(L);
+    for (int i = 0; i < points.size(); ++i) {
+        ghoul::lua::push(L, i+1);
+        pushVector(L, points[i]);
+        lua_rawset(L, -3);
     }
 
-    // TODO: remove when not needed
-    // Created for debugging. Access info for rendereable path
-    int getPathOrientations(lua_State* L) {
-        ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::getPathPositions");
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
+    return 1;
+}
 
-        const int pointsPerSegment = (int)ghoul::lua::value<lua_Number>(L, 1);
+// TODO: remove when not needed
+// Created for debugging. Access info for rendereable path
+int getPathOrientations(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::getPathPositions");
 
-        // Get sample positions from the current curve
-        AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-        AutoNavigationHandler& handler = module->AutoNavigationHandler();
-        std::vector<glm::dquat> orientations = handler.getCurveOrientations(pointsPerSegment);
+    const int pointsPerSegment = (int)ghoul::lua::value<lua_Number>(L, 1);
 
-        // Push the rotation to the Lua stack:
-        lua_settop(L, 0);
-        const auto pushVector = [](lua_State* L, const glm::dquat& v) {
-            lua_newtable(L);
-            ghoul::lua::push(L, 1, v.w);
-            lua_rawset(L, -4);
-            ghoul::lua::push(L, 2, v.x);
-            lua_rawset(L, -4);
-            ghoul::lua::push(L, 3, v.y);
-            lua_rawset(L, -4);
-            ghoul::lua::push(L, 4, v.z);
-            lua_rawset(L, -4);
-        };
+    // Get sample positions from the current curve
+    AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
+    AutoNavigationHandler& handler = module->AutoNavigationHandler();
+    std::vector<glm::dquat> orientations = handler.getCurveOrientations(pointsPerSegment);
 
+    // Push the rotation to the Lua stack:
+    lua_settop(L, 0);
+    const auto pushVector = [](lua_State* L, const glm::dquat& v) {
         lua_newtable(L);
-        for (int i = 0; i < orientations.size(); ++i) {
-            ghoul::lua::push(L, i + 1);
-            pushVector(L, orientations[i]);
-            lua_rawset(L, -4);
-        }
+        ghoul::lua::push(L, 1, v.w);
+        lua_rawset(L, -4);
+        ghoul::lua::push(L, 2, v.x);
+        lua_rawset(L, -4);
+        ghoul::lua::push(L, 3, v.y);
+        lua_rawset(L, -4);
+        ghoul::lua::push(L, 4, v.z);
+        lua_rawset(L, -4);
+    };
 
-        ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
-        return 1;
+    lua_newtable(L);
+    for (int i = 0; i < orientations.size(); ++i) {
+        ghoul::lua::push(L, i + 1);
+        pushVector(L, orientations[i]);
+        lua_rawset(L, -4);
     }
 
-    // TODO: remove when not needed
-   // Created for debugging. Access info for rendereable path
-    int getPathViewDirections(lua_State* L) {
-        ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::getPathViewDirections");
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
+    return 1;
+}
 
-        const int pointsPerSegment = (int)ghoul::lua::value<lua_Number>(L, 1);
+// TODO: remove when not needed
+// Created for debugging. Access info for rendereable path
+int getPathViewDirections(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::getPathViewDirections");
 
-        // Get sample positions from the current curve
-        AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-        AutoNavigationHandler& handler = module->AutoNavigationHandler();
-        std::vector<glm::dvec3> viewDirections = handler.getCurveViewDirections(pointsPerSegment);
+    const int pointsPerSegment = (int)ghoul::lua::value<lua_Number>(L, 1);
 
-        // Push the rotation to the Lua stack:
+    // Get sample positions from the current curve
+    AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
+    AutoNavigationHandler& handler = module->AutoNavigationHandler();
+    std::vector<glm::dvec3> viewDirections = handler.getCurveViewDirections(pointsPerSegment);
 
-        // Push the points to the Lua stack:
-        lua_settop(L, 0);
-        const auto pushVector = [](lua_State* L, const glm::dvec3& v) {
-            lua_newtable(L);
-            ghoul::lua::push(L, 1, v.x);
-            lua_rawset(L, -3);
-            ghoul::lua::push(L, 2, v.y);
-            lua_rawset(L, -3);
-            ghoul::lua::push(L, 3, v.z);
-            lua_rawset(L, -3);
-        };
-
+    // Push the points to the Lua stack:
+    lua_settop(L, 0);
+    const auto pushVector = [](lua_State* L, const glm::dvec3& v) {
         lua_newtable(L);
-        for (int i = 0; i < viewDirections.size(); ++i) {
-            ghoul::lua::push(L, i + 1);
-            pushVector(L, viewDirections[i]);
-            lua_rawset(L, -3);
-        }
+        ghoul::lua::push(L, 1, v.x);
+        lua_rawset(L, -3);
+        ghoul::lua::push(L, 2, v.y);
+        lua_rawset(L, -3);
+        ghoul::lua::push(L, 3, v.z);
+        lua_rawset(L, -3);
+    };
 
-        ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
-        return 1;
+    // Push the rotation to the Lua stack:
+    lua_newtable(L);
+    for (int i = 0; i < viewDirections.size(); ++i) {
+        ghoul::lua::push(L, i + 1);
+        pushVector(L, viewDirections[i]);
+        lua_rawset(L, -3);
     }
 
-    // TODO: remove when not needed
-    // Created for debugging. Access info for rendering of control points
-    int getControlPoints(lua_State* L) {
-        ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::getControlPoints");
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
+    return 1;
+}
 
-        // Get sample positions from the current curve
-        AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-        AutoNavigationHandler& handler = module->AutoNavigationHandler();
-        std::vector<glm::dvec3> points = handler.getControlPoints();
+// TODO: remove when not needed
+// Created for debugging. Access info for rendering of control points
+int getControlPoints(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::getControlPoints");
 
-        // Push the points to the Lua stack:
-        lua_settop(L, 0);
-        const auto pushVector = [](lua_State* L, const glm::dvec3& v) {
-            lua_newtable(L);
-            ghoul::lua::push(L, 1, v.x);
-            lua_rawset(L, -3);
-            ghoul::lua::push(L, 2, v.y);
-            lua_rawset(L, -3);
-            ghoul::lua::push(L, 3, v.z);
-            lua_rawset(L, -3);
-        };
+    // Get sample positions from the current curve
+    AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
+    AutoNavigationHandler& handler = module->AutoNavigationHandler();
+    std::vector<glm::dvec3> points = handler.getControlPoints();
 
+    // Push the points to the Lua stack:
+    lua_settop(L, 0);
+    const auto pushVector = [](lua_State* L, const glm::dvec3& v) {
         lua_newtable(L);
-        for (int i = 0; i < points.size(); ++i) {
-            ghoul::lua::push(L, i+1);
-            pushVector(L, points[i]);
-            lua_rawset(L, -3);
-        }
+        ghoul::lua::push(L, 1, v.x);
+        lua_rawset(L, -3);
+        ghoul::lua::push(L, 2, v.y);
+        lua_rawset(L, -3);
+        ghoul::lua::push(L, 3, v.z);
+        lua_rawset(L, -3);
+    };
 
-        ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
-        return 1;
+    lua_newtable(L);
+    for (int i = 0; i < points.size(); ++i) {
+        ghoul::lua::push(L, i+1);
+        pushVector(L, points[i]);
+        lua_rawset(L, -3);
     }
+
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
+    return 1;
+}
 
 } // namespace openspace::autonavigation::luascriptfunctions

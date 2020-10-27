@@ -45,59 +45,63 @@
 namespace {
     constexpr const char* _loggerCat = "AutoNavigationHandler";
 
-    constexpr const openspace::properties::Property::PropertyInfo DefaultCurveOptionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DefaultCurveOptionInfo = {
         "DefaultCurveOption",
         "Default Curve Option",
         "The defualt curve type chosen when generating a path, if none is specified."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo IncludeRollInfo = {
+    constexpr openspace::properties::Property::PropertyInfo IncludeRollInfo = {
         "IncludeRollInfo",
         "Include Roll",
         "If disabled, roll is removed from the interpolation of camera orientation."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo StopAtTargetsPerDefaultInfo = {
+    constexpr openspace::properties::Property::PropertyInfo StopAtTargetsPerDefaultInfo = {
         "StopAtTargetsPerDefault",
         "Stop At Targets Per Default",
-        "Applied during path creation. If enabled, stops are automatically added between"
-        " the path segments. The user must then choose to continue the path after reaching a target"
+        "Applied during path creation. If enabled, stops are automatically added "
+        "between the path segments. The user must then choose to continue the path "
+        "after reaching a target"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo DefaultStopBehaviorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DefaultStopBehaviorInfo = {
         "DefaultStopBehavior",
         "Default Stop Behavior",
-        "The default camera behavior that is applied when the camera reaches and stops at a target."
+        "The default camera behavior that is applied when the camera reaches and stops "
+        "at a target."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo ApplyStopBehaviorWhenIdleInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ApplyStopBehaviorWhenIdleInfo = {
         "ApplyStopBehaviorWhenIdle",
         "Apply Stop Behavior When Idle",
-        "If enabled, the camera is controlled using the default stop behavior even when no path is playing."
+        "If enabled, the camera is controlled using the default stop behavior even when"
+        "no path is playing."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo RelevantNodeTagsInfo = {
+    constexpr openspace::properties::Property::PropertyInfo RelevantNodeTagsInfo = {
         "RelevantNodeTags",
         "Relevant Node Tags",
-        "List of tags for the nodes that are relevant for path creation, for example when avoiding collisions."
+        "List of tags for the nodes that are relevant for path creation, for example "
+        "when avoiding collisions."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo DefaultPositionOffsetAngleInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DefaultPositionOffsetAngleInfo = {
         "DefaultPositionOffsetAngle",
         "Default Position Offset Angle",
         "Used for creating a default position at a target node. The angle (in degrees) "
-        "specifies the deviation from the line connecting the target node and the sun, in "
-        "the direction of the camera position at the start of the path."
+        "specifies the deviation from the line connecting the target node and the sun, "
+        "in the direction of the camera position at the start of the path."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo NumberSimulationStepsInfo = {
+    constexpr openspace::properties::Property::PropertyInfo NumberSimulationStepsInfo = {
         "NumberSimulationSteps",
         "Number Simulation Steps",
-        "The number of steps used to simulate the camera motion, per frame. A larger number "
-        "increases the precision, at the cost of reduced efficiency."
+        "The number of steps used to simulate the camera motion, per frame. A larger "
+        "number increases the precision, at the cost of reduced efficiency."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo SpeedScaleInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SpeedScaleInfo = {
         "SpeedScale",
         "Speed Scale",
         "Scale factor that affects the default speed for a camera path."
@@ -439,9 +443,12 @@ Waypoint AutoNavigationHandler::lastWayPoint() {
 }
 
 void AutoNavigationHandler::removeRollRotation(CameraPose& pose, double deltaTime) {
-    glm::dvec3 anchorPos = anchor()->worldPosition();
-    const double notTooCloseDistance = deltaTime * glm::distance(anchorPos, pose.position);
-    glm::dvec3 cameraDir = glm::normalize(pose.rotation * Camera::ViewDirectionCameraSpace);
+    const glm::dvec3 anchorPos = anchor()->worldPosition();
+    const glm::dvec3 cameraDir = glm::normalize(
+        pose.rotation * Camera::ViewDirectionCameraSpace
+    );
+    const double anchorToPosDistance = glm::distance(anchorPos, pose.position);
+    const double notTooCloseDistance = deltaTime * anchorToPosDistance;
     glm::dvec3 lookAtPos = pose.position + notTooCloseDistance * cameraDir;
     glm::dquat rollFreeRotation = helpers::getLookAtQuaternion(
         pose.position,
@@ -623,7 +630,8 @@ Waypoint AutoNavigationHandler::computeDefaultWaypoint(const TargetNodeInstructi
         stepDirection = glm::normalize(nodePos - closeNode->worldPosition());
     }
     else {
-        // Go to a point that is being lit up by the sun, slightly offsetted from sun direction
+        // Go to a point that is being lit up by the sun, slightly offsetted from sun
+        // direction
         const glm::dvec3 sunPos = glm::dvec3(0.0, 0.0, 0.0);
         const glm::dvec3 prevPos = lastWayPoint().position();
         const glm::dvec3 targetToPrev = prevPos - nodePos;

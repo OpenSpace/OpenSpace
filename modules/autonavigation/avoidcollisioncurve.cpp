@@ -84,7 +84,6 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
     double cosAngleToTarget = glm::dot(normalize(-startViewDirection), normalize(startToEnd));
     bool targetInOppositeDirection = cosAngleToTarget > 0.7;
 
-    // TODO: reduce magical numbers / create constants
     if (targetInOppositeDirection) {
         glm::dquat midleRotation = glm::slerp(start.rotation(), end.rotation(), 0.5);
         glm::dvec3 middleViewDirection = midleRotation * glm::dvec3(0.0, 0.0, -1.0);

@@ -92,42 +92,47 @@ scripting::LuaLibrary AutoNavigationModule::luaLibrary() const {
             &autonavigation::luascriptfunctions::goTo,
             {},
             "string, [double]",
-            "TODO: Description. Go to the node with the given name with optional duration."
+            "Mov the camera to the node with the specified. The optional parameter "
+            "specifies the duration of the motion."
         },
         {
             "generatePath",
             &autonavigation::luascriptfunctions::generatePath,
             {},
             "table",
-            "Generate the path as described by the lua table input argument. TODO: Describe how a path instruction is defined?. "
+            "Generate the path as described by the lua table input argument. "
         },
         {
             "generatePathFromFile",
             &autonavigation::luascriptfunctions::generatePathFromFile,
             {},
             "string",
-            "Read an input file with lua instructions and use those to generate a camera path. TODO: Describe how a path instruction is defined?. "
+            "Read an input file with lua instructions and use those to generate a camera "
+            "path. "
         },
         {
             "getPathPositions",
             &autonavigation::luascriptfunctions::getPathPositions,
             {},
             "number",
-            "FOR DEBUG. Sample positions along the path. The input argument is the number of samples per path segment. "
+            "FOR DEBUG. Sample positions along the path. The input argument is the "
+            "number of samples per path segment. "
         },
         {
             "getPathOrientations",
             &autonavigation::luascriptfunctions::getPathOrientations,
             {},
             "number",
-            "FOR DEBUG. Sample orientations along the path. The input argument is the number of samples per path segment. "
+            "FOR DEBUG. Sample orientations along the path. The input argument is the "
+            "number of samples per path segment. "
         },
          {
             "getPathViewDirections",
             &autonavigation::luascriptfunctions::getPathViewDirections,
             {},
             "number",
-            "FOR DEBUG. Sample view directions along the path. The input argument is the number of samples per path segment. "
+            "FOR DEBUG. Sample view directions along the path. The input argument is "
+            "the number of samples per path segment. "
         },
         {
             "getControlPoints",

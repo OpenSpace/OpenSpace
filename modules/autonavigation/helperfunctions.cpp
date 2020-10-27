@@ -98,9 +98,10 @@ namespace openspace::autonavigation::helpers {
 
 namespace openspace::autonavigation::interpolation {
 
-    // Based on implementation by Mika Rantanen https://qroph.github.io/2018/07/30/smooth-paths-using-catmull-rom-splines.html
+    // Based on implementation by Mika Rantanen
+    // https://qroph.github.io/2018/07/30/smooth-paths-using-catmull-rom-splines.html
     glm::dvec3 catmullRom(double t, const glm::dvec3& p0, const glm::dvec3& p1,
-        const glm::dvec3& p2, const glm::dvec3& p3, double alpha)
+                          const glm::dvec3& p2, const glm::dvec3& p3, double alpha)
     {
         glm::dvec3 m01, m02, m23, m13;
 
@@ -121,15 +122,14 @@ namespace openspace::autonavigation::interpolation {
         glm::dvec3 c = m1;
         glm::dvec3 d = p1;
 
-        return
-            a * t * t * t +
-            b * t * t +
-            c * t +
-            d;
+        return a * t * t * t
+            + b * t * t
+            + c * t
+            + d;
     }
 
     glm::dvec3 cubicBezier(double t, const glm::dvec3& cp1, const glm::dvec3& cp2,
-        const glm::dvec3& cp3, const glm::dvec3& cp4)
+                           const glm::dvec3& cp3, const glm::dvec3& cp4)
     {
         ghoul_assert(t >= 0 && t <= 1.0, "Interpolation variable out of range [0, 1]");
 
@@ -157,9 +157,9 @@ namespace openspace::autonavigation::interpolation {
         const double t3 = t2 * t;
 
         // calculate basis functions
-        double const a0 = (2.0*t3) - (3.0*t2) + 1.0;
-        double const a1 = (-2.0*t3) + (3.0*t2);
-        double const b0 = t3 - (2.0*t2) + t;
+        double const a0 = (2.0 * t3) - (3.0 * t2) + 1.0;
+        double const a1 = (-2.0 * t3) + (3.0 * t2);
+        double const b0 = t3 - (2.0 * t2) + t;
         double const b1 = t3 - t2;
 
         return (a0 * p1) + (a1 * p2) + (b0 * tangent1) + (b1 * tangent2);
@@ -167,7 +167,7 @@ namespace openspace::autonavigation::interpolation {
 
     // uniform if tKnots are equally spaced, or else non uniform
     glm::dvec3 piecewiseCubicBezier(double t, const std::vector<glm::dvec3>& points,
-                                                  const std::vector<double>& tKnots)
+                                    const std::vector<double>& tKnots)
     {
         ghoul_assert(points.size() > 4, "Minimum of four control points needed for interpolation!");
         ghoul_assert((points.size() - 1) % 3 == 0, "A vector containing 3n + 1 control points must be provided!");
@@ -189,12 +189,17 @@ namespace openspace::autonavigation::interpolation {
         unsigned int idx = segmentIdx * 3;
 
         // Interpolate using De Casteljau's algorithm
-        return interpolation::cubicBezier(tScaled, points[idx], points[idx + 1],
-            points[idx + 2], points[idx + 3]);
+        return interpolation::cubicBezier(
+            tScaled,
+            points[idx],
+            points[idx + 1],
+            points[idx + 2],
+            points[idx + 3]
+        );
     }
 
     glm::dvec3 piecewiseLinear(double t, const std::vector<glm::dvec3>& points,
-                                             const std::vector<double>& tKnots)
+                               const std::vector<double>& tKnots)
     {
         ghoul_assert(points.size() == tKnots.size(), "Must have equal number of points and times!");
         ghoul_assert(points.size() > 2, "Minimum of two control points needed for interpolation!");

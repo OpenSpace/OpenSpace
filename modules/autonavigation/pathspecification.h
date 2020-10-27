@@ -52,13 +52,12 @@ public:
     const bool hasStartState() const;
 
 private:
-    void tryReadInstruction(int index, std::string type, ghoul::Dictionary& dictionary);
+    void tryReadInstruction(int index, const std::string& type,
+        const ghoul::Dictionary& dictionary);
 
     std::vector<std::unique_ptr<Instruction>> _instructions;
     std::optional<bool> _stopAtTargets;
     std::optional<NavigationState> _startState;
-
-    // TODO: maxSpeed or speedFactor or something?
 };
 
 } // namespace openspace::autonavigation
