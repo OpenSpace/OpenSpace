@@ -34,12 +34,11 @@
 #include <openspace/util/updatestructures.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/lightsource.h>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/misc/invariants.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
 
@@ -49,15 +48,13 @@ namespace {
 
     constexpr const int DefaultBlending = 0;
     constexpr const int AdditiveBlending = 1;
-    constexpr const int GLSuggestionBlending = 2;
-    constexpr const int PointsAndLinesBlending = 3;
-    constexpr const int PolygonBlending = 4;
-    constexpr const int ColorAddingBlending = 5;
+    constexpr const int PointsAndLinesBlending = 2;
+    constexpr const int PolygonBlending = 3;
+    constexpr const int ColorAddingBlending = 4;
 
     std::map<std::string, int> BlendingMapping = {
         {"Default", DefaultBlending},
         {"Additive", AdditiveBlending},
-        {"OpenGL Suggestion", GLSuggestionBlending},
         {"Points and Lines", PointsAndLinesBlending},
         {"Polygon", PolygonBlending},
         {"Color Adding", ColorAddingBlending}
@@ -333,7 +330,6 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
     _blendingFuncOption.addOption(DefaultBlending, "Default");
     _blendingFuncOption.addOption(AdditiveBlending, "Additive");
-    _blendingFuncOption.addOption(GLSuggestionBlending, "OpenGL Suggestion");
     _blendingFuncOption.addOption(PointsAndLinesBlending, "Points and Lines");
     _blendingFuncOption.addOption(PolygonBlending, "Polygon");
     _blendingFuncOption.addOption(ColorAddingBlending, "Color Adding");
@@ -479,9 +475,6 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     case AdditiveBlending:
         glBlendFunc(GL_ONE, GL_ONE);
         break;
-    case GLSuggestionBlending:
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        break;
     case PointsAndLinesBlending:
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         break;
@@ -509,7 +502,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         glEnable(GL_CULL_FACE);
     }
 
-    global::renderEngine.openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetBlendState();
 
     if (_disableDepthTest) {
         glEnable(GL_DEPTH_TEST);
