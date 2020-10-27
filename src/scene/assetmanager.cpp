@@ -65,7 +65,7 @@ bool AssetManager::update() {
         const bool add = c.second;
         if (add) {
             _assetLoader.add(path);
-            global::profile.addAsset(path);
+            global::profile->addAsset(path);
         }
     }
     // Remove assets
@@ -75,7 +75,7 @@ bool AssetManager::update() {
         const bool remove = !c.second;
         if (remove && _assetLoader.has(path)) {
             _assetLoader.remove(path);
-            global::profile.removeAsset(path);
+            global::profile->removeAsset(path);
         }
     }
     _pendingStateChangeCommands.clear();

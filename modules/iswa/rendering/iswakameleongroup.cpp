@@ -149,7 +149,7 @@ void IswaKameleonGroup::updateFieldlineSeeds() {
         if (it == options.end() && std::get<2>(seedPath.second)) {
             LDEBUG("Removed fieldlines: " + std::get<0>(seedPath.second));
 
-            global::scriptEngine.queueScript(
+            global::scriptEngine->queueScript(
                 "openspace.removeSceneGraphNode('" + std::get<0>(seedPath.second) + "')",
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
@@ -176,7 +176,7 @@ void IswaKameleonGroup::clearFieldlines() {
         if (std::get<2>(seedPath.second)) {
             LDEBUG("Removed fieldlines: " + std::get<0>(seedPath.second));
 
-            global::scriptEngine.queueScript(
+            global::scriptEngine->queueScript(
                 "openspace.removeSceneGraphNode('" + std::get<0>(seedPath.second) + "')",
                 scripting::ScriptEngine::RemoteScripting::Yes
             );

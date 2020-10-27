@@ -41,8 +41,6 @@ local PlutoKernels = {
     Kernels .. "/NavSE_plu047_od122.bsp"
 }
 
-
-
 asset.export("Kernels", Kernels)
 asset.export("NewHorizonsKernels", NewHorizonsKernels)
 asset.export("PlutoKernels", PlutoKernels)

@@ -48,10 +48,29 @@ local constellations = {
         Unit = "pc"
     },
     GUI = {
-        Path = "/Milky Way/Constellations"
+        Name = "Constellations",
+        Path = "/Milky Way/Constellations",
+        Description = [[Census 88 constellations and labels. DU Version 2.3. <br> These
+            modern constellations are largely based on those of the Babylonians and
+            Greeks; however, most cultures have their own figures and stories of the sky.
+            More than half the official constellations adopted by scientists in 1930 were
+            known to the ancients over 2,000 years ago. Each star falls into one of these
+            88 regions. Of course, today we know the stars in any given constellation do
+            not necessarily have any physical relationship with one another. One star may
+            be nearby, while an adjacent star in the sky may be far away.(Description
+            from URL) <br><br> Data Reference: various]],
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { constellationsExtragalactic, constellations })
+
+
+asset.meta = {
+    Name = "Constellations",
+    Version = "1.0",
+    Description = [[Digital Universe asset for constellation lines]],
+    Author = "Brian Abbott (AMNH)",
+    URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+    License = "AMNH Digital Universe",
+    Identifiers = "Constellations,ConstellationsExtragalactic"
+}

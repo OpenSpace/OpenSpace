@@ -7,8 +7,14 @@ local kernel = asset.require('../kernels').jup341
 
 local parentIdentifier = transforms.JupiterBarycenter.Identifier
 local parentSpice = "JUPITER BARYCENTER"
-local tags = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_ananke" }
+local tags = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_ananke"}
 local trailColor = { 0.4, 0.3, 0.01 }
+local trailTags = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor"
+}
 
 local anankeGroup = {
     {
@@ -20,6 +26,7 @@ local anankeGroup = {
         Spice = "552",
         Radii = { 1000, 1000, 1000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Name = "S/2010 J 2",
             Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
@@ -37,6 +44,7 @@ local anankeGroup = {
         Spice = "THELXINOE",
         Radii = { 2000, 2000, 2000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
         },
@@ -53,6 +61,7 @@ local anankeGroup = {
         Spice = "EUANTHE",
         Radii = { 3000, 3000, 3000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
         },
@@ -69,6 +78,7 @@ local anankeGroup = {
         Spice = "IOCASTE",
         Radii = { 5000, 5000, 5000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
         },
@@ -85,6 +95,7 @@ local anankeGroup = {
         Spice = "55068",
         Radii = { 2000, 2000, 2000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Name = "S/2003 J 16",
             Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
@@ -102,6 +113,7 @@ local anankeGroup = {
         Spice = "PRAXIDIKE",
         Radii = { 7000, 7000, 7000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
         },
@@ -118,6 +130,7 @@ local anankeGroup = {
         Spice = "HARPALYKE",
         Radii = { 4000, 4000, 4000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
         },
@@ -134,6 +147,7 @@ local anankeGroup = {
         Spice = "MNEME",
         Radii = { 2000, 2000, 2000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
         },
@@ -150,6 +164,7 @@ local anankeGroup = {
         Spice = "HERMIPPE",
         Radii = { 4000, 4000, 4000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
         },
@@ -166,6 +181,7 @@ local anankeGroup = {
         Spice = "THYONE",
         Radii = { 4000, 4000, 4000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
         },
@@ -181,6 +197,7 @@ local anankeGroup = {
         },
         Spice = "ANANKE",
         Radii = { 28000, 28000, 28000 },
+        TrailTags = trailTags,
         Tags = tags,
         GUI = {
             Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
@@ -191,9 +208,20 @@ local anankeGroup = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(
     asset,
     proceduralGlobes.createGlobes(anankeGroup)
 )
+
+
+asset.meta = {
+    Name = "Jupiter Ananke Group Moons",
+    Version = "1.0",
+    Description = [[ Procedural Globe asset containing Jupiter's Ananke Group
+        moons: S2010J2, Thelxinoe, Euanthe, Iocaste, S2003J16, Praxidike, Harpalyke,
+        Mneme, Hermippe, Thyone, and Ananke. Blank globes
+        and SPICE trails are generated for each moon.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

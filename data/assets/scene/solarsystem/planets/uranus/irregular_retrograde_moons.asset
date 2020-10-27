@@ -9,6 +9,12 @@ local parentIdentifier = transforms.UranusBarycenter.Identifier
 local parentSpice = "URANUS BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_irregular_retrograde" }
 local trailColor = { 0.60, 0.65, 0.84 }
+local trailTags = { 
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_uranus",
+    "moonTrail_minor"
+}
 
 local irregularMoons = {
     {
@@ -20,6 +26,7 @@ local irregularMoons = {
         Spice = "FRANCISCO",
         Radii = { 22000, 22000, 22000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Uranus/Moons/Irregular Retrograde Moons"
         },
@@ -36,6 +43,7 @@ local irregularMoons = {
         Spice = "CALIBAN",
         Radii = { 72000, 72000, 72000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Uranus/Moons/Irregular Retrograde Moons"
         },
@@ -52,6 +60,7 @@ local irregularMoons = {
         Spice = "STEPHANO",
         Radii = { 32000, 32000, 32000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Uranus/Moons/Irregular Retrograde Moons"
         },
@@ -68,6 +77,7 @@ local irregularMoons = {
         Spice = "TRINCULO",
         Radii = { 18000, 18000, 18000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Uranus/Moons/Irregular Retrograde Moons"
         },
@@ -84,6 +94,7 @@ local irregularMoons = {
         Spice = "SYCORAX",
         Radii = { 165000, 165000, 165000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Uranus/Moons/Irregular Retrograde Moons"
         },
@@ -100,6 +111,7 @@ local irregularMoons = {
         Spice = "PROSPERO",
         Radii = { 50000, 50000, 50000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Uranus/Moons/Irregular Retrograde Moons"
         },
@@ -116,6 +128,7 @@ local irregularMoons = {
         Spice = "SETEBOS",
         Radii = { 48000, 48000, 48000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Uranus/Moons/Irregular Retrograde Moons"
         },
@@ -132,6 +145,7 @@ local irregularMoons = {
         Spice = "FERDINAND",
         Radii = { 20000, 20000, 20000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Uranus/Moons/Irregular Retrograde Moons"
         },
@@ -141,9 +155,19 @@ local irregularMoons = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(
     asset,
     proceduralGlobes.createGlobes(irregularMoons)
 )
+
+
+asset.meta = {
+    Name = "Uranus Irregular Retrograde Moons",
+    Version = "1.0",
+    Description = [[ Procedural Globe asset containing Uranus' irregular retrograde
+        moons: Francisco, Caliban, Stephano, Trinculo, Sycorax, Prospero, Setebos and
+        Ferdinand. Blank globes and SPICE trails are generated for each moon.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

@@ -21,10 +21,21 @@ local MercuryTrail = {
     Tag = { "planetTrail_solarSystem", "planetTrail_terrestrial" },
     GUI = {
         Name = "Mercury Trail",
-        Path = "/Solar System/Planets/Mercury"
+        Path = "/Solar System/Planets/Mercury",
+        Description = [[ Trail of Mercury as observed by the Sun.]],
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { MercuryTrail })
+
+
+asset.meta = {
+    Name = "Mercury Trail",
+    Version = "1.0",
+    Description = [[ Main trail for Mercury. Data from NASA Spice (see
+        base spice asset)]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = "MercuryTrail"
+}

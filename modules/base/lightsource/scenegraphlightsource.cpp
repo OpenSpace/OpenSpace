@@ -110,7 +110,7 @@ SceneGraphLightSource::SceneGraphLightSource(const ghoul::Dictionary& dictionary
 
     _sceneGraphNodeReference.onChange([this]() {
         _sceneGraphNode =
-            global::renderEngine.scene()->sceneGraphNode(_sceneGraphNodeReference);
+            global::renderEngine->scene()->sceneGraphNode(_sceneGraphNodeReference);
     });
 
 }
@@ -119,7 +119,7 @@ bool SceneGraphLightSource::initialize() {
     ZoneScoped
 
     _sceneGraphNode =
-        global::renderEngine.scene()->sceneGraphNode(_sceneGraphNodeReference);
+        global::renderEngine->scene()->sceneGraphNode(_sceneGraphNodeReference);
     return _sceneGraphNode != nullptr;
 }
 

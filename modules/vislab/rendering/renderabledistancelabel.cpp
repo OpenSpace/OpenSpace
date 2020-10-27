@@ -122,7 +122,7 @@ void RenderableDistanceLabel::update(const UpdateData&) {
         return;
     }
 
-    RenderEngine& RE = global::renderEngine;
+    RenderEngine& RE = *global::renderEngine;
 
     SceneGraphNode* nodelineNode = RE.scene()->sceneGraphNode(_nodelineId);
     if (nodelineNode) {

@@ -14,7 +14,6 @@ local GaiaTrail = {
     Parent = earthTransforms.EarthBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailTrajectory",
-        Enabled = false,
         Translation = {
             Type = "HorizonsTranslation",
             HorizonsTextFile = trail .. "/gaia_orbit_horizons.dat"
@@ -26,7 +25,7 @@ local GaiaTrail = {
         PointSize = 5,
         SampleInterval = 12000,
         TimeStampSubsampleFactor = 1,
-        EnableFade = false,
+        EnableFade = true,
         Rendering = "Lines"
     },
     GUI = {
@@ -52,7 +51,7 @@ local GaiaTrailEclip = {
         PointSize = 5,
         SampleInterval = 6000,
         TimeStampSubsampleFactor = 1,
-        EnableFade = false,
+        EnableFade = true,
         Rendering = "Lines"
     },
     GUI = {

@@ -9,6 +9,12 @@ local parentIdentifier = transforms.JupiterBarycenter.Identifier
 local parentSpice = "JUPITER BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_inner" }
 local trailColor = { 0.4, 0.3, 0.01 }
+local trailTags = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor"
+}
 
 local innerMoons = {
     {
@@ -20,6 +26,7 @@ local innerMoons = {
         Spice = "METIS",
         Radii = { 60000, 40000, 34000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Jupiter/Moons/Inner Group"
         },
@@ -36,6 +43,7 @@ local innerMoons = {
         Spice = "ADRASTEA",
         Radii = { 20000, 16000, 14000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Jupiter/Moons/Inner Group"
         },
@@ -52,6 +60,7 @@ local innerMoons = {
         Spice = "AMALTHEA",
         Radii = { 250000, 146000, 128000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Jupiter/Moons/Inner Group"
         },
@@ -68,6 +77,7 @@ local innerMoons = {
         Spice = "THEBE",
         Radii = { 116000, 98000, 84000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Jupiter/Moons/Inner Group"
         },
@@ -77,9 +87,19 @@ local innerMoons = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(
     asset,
     proceduralGlobes.createGlobes(innerMoons)
 )
+
+
+asset.meta = {
+    Name = "Jupiter Inner Group Moons",
+    Version = "1.0",
+    Description = [[ Procedural Globe asset containing Jupiter's Inner Group
+        moons: Metis, Adrastea, Amalthea, and Thebe. Blank globes and SPICE trails
+        are generated for each moon.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

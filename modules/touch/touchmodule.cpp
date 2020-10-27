@@ -67,7 +67,7 @@ bool TouchModule::processNewInput() {
     _touch.touchActive(!_touchPoints.empty());
 
     if (!_touchPoints.empty()) {
-        global::interactionMonitor.markInteraction();
+        global::interactionMonitor->markInteraction();
     }
 
     // Erase old input id's that no longer exists
@@ -197,7 +197,7 @@ void TouchModule::internalInitialize(const ghoul::Dictionary& /*dictionary*/){
 #ifdef WIN32
         // We currently only support one window of touch input internally
         // so here we grab the first window-handle and use it.
-        void* nativeWindowHandle = global::windowDelegate.getNativeWindowHandle(0);
+        void* nativeWindowHandle = global::windowDelegate->getNativeWindowHandle(0);
         if (nativeWindowHandle) {
             _win32TouchHook = std::make_unique<Win32TouchHook>(nativeWindowHandle);
         }
@@ -231,10 +231,10 @@ void TouchModule::internalInitialize(const ghoul::Dictionary& /*dictionary*/){
 
 
     global::callback::preSync.push_back([&]() {
-        _touch.setCamera(global::navigationHandler.camera());
-        _touch.setFocusNode(global::navigationHandler.orbitalNavigator().anchorNode());
+        _touch.setCamera(global::navigationHandler->camera());
+        _touch.setFocusNode(global::navigationHandler->orbitalNavigator().anchorNode());
 
-        if (processNewInput() && global::windowDelegate.isMaster() && _touchActive) {
+        if (processNewInput() && global::windowDelegate->isMaster() && _touchActive) {
             _touch.updateStateFromInput(_touchPoints, _lastTouchInputs);
         }
         else if (_touchPoints.empty()) {
@@ -247,7 +247,7 @@ void TouchModule::internalInitialize(const ghoul::Dictionary& /*dictionary*/){
             _lastTouchInputs.emplace_back(points.latestInput());
         }
         // calculate the new camera state for this frame
-        _touch.step(global::windowDelegate.deltaTime());
+        _touch.step(global::windowDelegate->deltaTime());
         clearInputs();
     });
 

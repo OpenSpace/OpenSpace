@@ -50,8 +50,8 @@ void GuiJoystickComponent::render() {
     _isEnabled = v;
     _isCollapsed = ImGui::IsWindowCollapsed();
 
-    for (size_t i = 0; i < global::joystickInputStates.size(); ++i) {
-        const JoystickInputState& state = global::joystickInputStates[i];
+    for (size_t i = 0; i < global::joystickInputStates->size(); ++i) {
+        const JoystickInputState& state = global::joystickInputStates->at(i);
         if (!state.isConnected) {
             continue;
         }
@@ -85,7 +85,7 @@ void GuiJoystickComponent::render() {
     ImGui::Text("%s", "Summed contributions");
     ImGui::Text("%s", "Axes");
     for (int i = 0; i < JoystickInputState::MaxAxes; ++i) {
-        float f = global::joystickInputStates.axis(i);
+        float f = global::joystickInputStates->axis(i);
         ImGui::SliderFloat(
             std::to_string(i).c_str(),
             &f,
@@ -97,8 +97,8 @@ void GuiJoystickComponent::render() {
     for (int i = 0; i < JoystickInputState::MaxButtons; ++i) {
         ImGui::RadioButton(
             std::to_string(i).c_str(),
-            global::joystickInputStates.button(i, JoystickAction::Press) ||
-                global::joystickInputStates.button(i, JoystickAction::Repeat)
+            global::joystickInputStates->button(i, JoystickAction::Press) ||
+                global::joystickInputStates->button(i, JoystickAction::Repeat)
         );
     }
 

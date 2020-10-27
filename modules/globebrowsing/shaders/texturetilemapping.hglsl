@@ -363,7 +363,7 @@ vec4 calculateNight(vec4 currentColor, vec2 uv, vec3 levelWeights,
         // Filter to night side
         vec4 newColor = vec4(cosineFactor * colorSample.xyz, adjustedAlpha);
 
-        color = blendNightLayers#{i}(currentColor, newColor, adjustedAlpha);
+        color = blendNightLayers#{i}(color, newColor, adjustedAlpha);
     }
     #endfor
 

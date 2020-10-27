@@ -51,14 +51,16 @@
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <numeric>
 #include <queue>
-#ifndef __APPLE__
-#include <memory_resource>
-#else
+#include <vector>
+
+#if defined(__APPLE__) || (defined(__linux__) && defined(__clang__))
 #include <experimental/memory_resource>
 namespace std {
     using namespace experimental;
 } // namespace std
-#endif // __APPLE__
+#else
+#include <memory_resource>
+#endif
 
 namespace {
     // Global flags to modify the RenderableGlobe
@@ -268,22 +270,22 @@ const Chunk& findChunkNode(const Chunk& node, const Geodetic2& location) {
     return *n;
 }
 
-#ifndef __APPLE__
-using ChunkTileVector = std::pmr::vector<std::pair<ChunkTile, const LayerRenderSettings*>>;
-#else // __APPLE__
+#if defined(__APPLE__) || (defined(__linux__) && defined(__clang__))
 using ChunkTileVector = std::vector<std::pair<ChunkTile, const LayerRenderSettings*>>;
-#endif // __APPLE__
+#else
+using ChunkTileVector = std::pmr::vector<std::pair<ChunkTile, const LayerRenderSettings*>>;
+#endif
 
 ChunkTileVector tilesAndSettingsUnsorted(const LayerGroup& layerGroup,
                                          const TileIndex& tileIndex)
 {
     ZoneScoped
 
-#ifndef __APPLE__
-    ChunkTileVector tilesAndSettings(&global::memoryManager.TemporaryMemory);
-#else // __APPLE__
+#if defined(__APPLE__) || (defined(__linux__) && defined(__clang__))
     ChunkTileVector tilesAndSettings;
-#endif // __APPLE__
+#else
+    ChunkTileVector tilesAndSettings(&global::memoryManager->TemporaryMemory);
+#endif
     for (Layer* layer : layerGroup.activeLayers()) {
         if (layer->tileProvider()) {
             tilesAndSettings.emplace_back(
@@ -762,12 +764,12 @@ void RenderableGlobe::deinitialize() {
 
 void RenderableGlobe::deinitializeGL() {
     if (_localRenderer.program) {
-        global::renderEngine.removeRenderProgram(_localRenderer.program.get());
+        global::renderEngine->removeRenderProgram(_localRenderer.program.get());
         _localRenderer.program = nullptr;
     }
 
     if (_globalRenderer.program) {
-        global::renderEngine.removeRenderProgram(_globalRenderer.program.get());
+        global::renderEngine->removeRenderProgram(_globalRenderer.program.get());
         _globalRenderer.program = nullptr;
     }
 
@@ -1048,6 +1050,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
     if (_globalRenderer.updatedSinceLastCall) {
         const std::array<LayerGroup*, LayerManager::NumLayerGroups>& layerGroups =
             _layerManager.layerGroups();
+
         for (size_t i = 0; i < layerGroups.size(); ++i) {
             const std::string& nameBase = layergroupid::LAYER_GROUP_IDENTIFIERS[i];
             _globalRenderer.gpuLayerGroups[i].bind(
@@ -1072,6 +1075,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
     if (_localRenderer.updatedSinceLastCall) {
         const std::array<LayerGroup*, LayerManager::NumLayerGroups>& layerGroups =
             _layerManager.layerGroups();
+
         for (size_t i = 0; i < layerGroups.size(); ++i) {
             const std::string& nameBase = layergroupid::LAYER_GROUP_IDENTIFIERS[i];
             _localRenderer.gpuLayerGroups[i].bind(
@@ -1809,8 +1813,8 @@ void RenderableGlobe::recompileShaders() {
     //
     // Create local shader
     //
-    global::renderEngine.removeRenderProgram(_localRenderer.program.get());
-    _localRenderer.program = global::renderEngine.buildRenderProgram(
+    global::renderEngine->removeRenderProgram(_localRenderer.program.get());
+    _localRenderer.program = global::renderEngine->buildRenderProgram(
         "LocalChunkedLodPatch",
         absPath("${MODULE_GLOBEBROWSING}/shaders/localrenderer_vs.glsl"),
         absPath("${MODULE_GLOBEBROWSING}/shaders/renderer_fs.glsl"),
@@ -1838,8 +1842,8 @@ void RenderableGlobe::recompileShaders() {
     //
     // Create global shader
     //
-    global::renderEngine.removeRenderProgram(_globalRenderer.program.get());
-    _globalRenderer.program = global::renderEngine.buildRenderProgram(
+    global::renderEngine->removeRenderProgram(_globalRenderer.program.get());
+    _globalRenderer.program = global::renderEngine->buildRenderProgram(
         "GlobalChunkedLodPatch",
         absPath("${MODULE_GLOBEBROWSING}/shaders/globalrenderer_vs.glsl"),
         absPath("${MODULE_GLOBEBROWSING}/shaders/renderer_fs.glsl"),
@@ -2124,9 +2128,11 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
         casterPos *= KM_TO_M; // converting to meters
 
         const std::string source = shadowConf.source.first;
-        SceneGraphNode* sourceNode = global::renderEngine.scene()->sceneGraphNode(source);
+        SceneGraphNode* sourceNode =
+            global::renderEngine->scene()->sceneGraphNode(source);
         const std::string caster = shadowConf.caster.first;
-        SceneGraphNode* casterNode = global::renderEngine.scene()->sceneGraphNode(caster);
+        SceneGraphNode* casterNode =
+            global::renderEngine->scene()->sceneGraphNode(caster);
 
         const double sourceRadiusScale = std::max(
             glm::compMax(sourceNode->scale()),

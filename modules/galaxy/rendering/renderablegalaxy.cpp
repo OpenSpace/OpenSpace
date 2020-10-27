@@ -199,13 +199,37 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
 {
     dictionary.getValue("VolumeRenderingEnabled", _volumeRenderingEnabled);
     dictionary.getValue("StarRenderingEnabled", _starRenderingEnabled);
-    dictionary.getValue("StepSize", _stepSize);
-    dictionary.getValue("AbsorptionMultiply", _absorptionMultiply);
-    dictionary.getValue("EmissionMultiply", _emissionMultiply);
+    {
+        double stepSize;
+        dictionary.getValue("StepSize", stepSize);
+        _stepSize = static_cast<float>(stepSize);
+    }
+    {
+        double absorptionMultiply = _absorptionMultiply;
+        dictionary.getValue("AbsorptionMultiply", absorptionMultiply);
+        _absorptionMultiply = static_cast<float>(absorptionMultiply);
+    }
+    {
+        double emissionMultiply = _emissionMultiply;
+        dictionary.getValue("EmissionMultiply", emissionMultiply);
+        _emissionMultiply = static_cast<float>(emissionMultiply);
+    }
     dictionary.getValue("StarRenderingMethod", _starRenderingMethod);
-    dictionary.getValue("EnabledPointsRatio", _enabledPointsRatio);
-    dictionary.getValue("Translation", _translation);
-    dictionary.getValue("Rotation", _rotation);
+    {
+        double enabledPointsRatio = _enabledPointsRatio;
+        dictionary.getValue("EnabledPointsRatio", enabledPointsRatio);
+        _enabledPointsRatio = static_cast<float>(enabledPointsRatio);
+    }
+    {
+        glm::dvec3 translation = glm::vec3(_translation);
+        dictionary.getValue("Translation", translation);
+        _translation = glm::vec3(translation);
+    }
+    {
+        glm::dvec3 rotation = glm::vec3(_rotation);
+        dictionary.getValue("Rotation", rotation);
+        _rotation = glm::vec3(rotation);
+    }
 
     if (dictionary.hasKeyAndValue<bool>(VolumeRenderingEnabledInfo.identifier)) {
         _volumeRenderingEnabled = dictionary.value<bool>(
@@ -332,10 +356,10 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
 
     auto onChange = [&](bool enabled) {
         if (enabled) {
-            global::raycasterManager.attachRaycaster(*_raycaster);
+            global::raycasterManager->attachRaycaster(*_raycaster);
         }
         else {
-            global::raycasterManager.detachRaycaster(*_raycaster);
+            global::raycasterManager->detachRaycaster(*_raycaster);
         }
     };
 
@@ -440,19 +464,19 @@ void RenderableGalaxy::initializeGL() {
     // We no longer need the data
     _volume = nullptr;
 
-    global::raycasterManager.attachRaycaster(*_raycaster);
+    global::raycasterManager->attachRaycaster(*_raycaster);
 
     // initialize points.
     if (_pointsFilename.empty()) {
         return;
     }
 
-    _pointsProgram = global::renderEngine.buildRenderProgram(
+    _pointsProgram = global::renderEngine->buildRenderProgram(
         "Galaxy points",
         absPath("${MODULE_GALAXY}/shaders/points_vs.glsl"),
         absPath("${MODULE_GALAXY}/shaders/points_fs.glsl")
     );
-    _billboardsProgram = global::renderEngine.buildRenderProgram(
+    _billboardsProgram = global::renderEngine->buildRenderProgram(
         "Galaxy billboard",
         absPath("${MODULE_GALAXY}/shaders/billboard_vs.glsl"),
         absPath("${MODULE_GALAXY}/shaders/billboard_fs.glsl"),
@@ -533,7 +557,7 @@ void RenderableGalaxy::initializeGL() {
 
 void RenderableGalaxy::deinitializeGL() {
     if (_raycaster) {
-        global::raycasterManager.detachRaycaster(*_raycaster);
+        global::raycasterManager->detachRaycaster(*_raycaster);
         _raycaster = nullptr;
     }
 
@@ -692,8 +716,8 @@ void RenderableGalaxy::renderPoints(const RenderData& data) {
     _pointsProgram->deactivate();
 
     // Restores OpenGL Rendering State
-    global::renderEngine.openglStateCache().resetBlendState();
-    global::renderEngine.openglStateCache().resetDepthState();
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
 }
 
 void RenderableGalaxy::renderBillboards(const RenderData& data) {

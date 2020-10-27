@@ -221,12 +221,12 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
     }
 
     _fontName.onChange([this]() {
-        _font = global::fontManager.font(_fontName, _fontSize);
+        _font = global::fontManager->font(_fontName, _fontSize);
     });
     addProperty(_fontName);
 
     _fontSize.onChange([this]() {
-        _font = global::fontManager.font(_fontName, _fontSize);
+        _font = global::fontManager->font(_fontName, _fontSize);
     });
     addProperty(_fontSize);
 
@@ -358,7 +358,7 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
     _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
     addProperty(_requestedUnit);
 
-    _font = global::fontManager.font(_fontName, _fontSize);
+    _font = global::fontManager->font(_fontName, _fontSize);
 
     _buffer.resize(256);
 }
@@ -369,7 +369,7 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
 {
     if ((mainComp.type == Type::Node) || (mainComp.type == Type::NodeSurface)) {
         if (!mainComp.node) {
-            mainComp.node = global::renderEngine.scene()->sceneGraphNode(
+            mainComp.node = global::renderEngine->scene()->sceneGraphNode(
                 mainComp.nodeName
             );
 
@@ -406,7 +406,7 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
         }
         case Type::Focus: {
             const SceneGraphNode* anchor =
-                global::navigationHandler.orbitalNavigator().anchorNode();
+                global::navigationHandler->orbitalNavigator().anchorNode();
             if (!anchor) {
                 return { glm::dvec3(0.0), "Unknown" };
             }
@@ -415,7 +415,7 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
             }
         }
         case Type::Camera:
-            return { global::renderEngine.scene()->camera()->positionVec3(), "camera" };
+            return { global::renderEngine->scene()->camera()->positionVec3(), "camera" };
         default:
             return { glm::dvec3(0.0), "Unknown" };
     }
@@ -444,7 +444,6 @@ void DashboardItemDistance::render(glm::vec2& penPosition) {
         dist = { convertedD, nameForDistanceUnit(unit, convertedD != 1.0) };
     }
 
-    penPosition.y -= _font->height();
     std::fill(_buffer.begin(), _buffer.end(), 0);
     char* end = fmt::format_to(
         _buffer.data(),
@@ -454,6 +453,7 @@ void DashboardItemDistance::render(glm::vec2& penPosition) {
 
     std::string_view text = std::string_view(_buffer.data(), end - _buffer.data());
     RenderFont(*_font, penPosition, text);
+    penPosition.y -= _font->height();
 }
 
 glm::vec2 DashboardItemDistance::size() const {

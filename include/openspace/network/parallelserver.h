@@ -50,9 +50,6 @@ public:
 
 private:
     struct Peer {
-        //Peer(size_t id_, std::string name_, ParallelConnection parallelConnection_,
-            //ParallelConnection::Status status_, std::thread )
-
         size_t id;
         std::string name;
         ParallelConnection parallelConnection;
@@ -87,7 +84,6 @@ private:
     void handleData(const Peer& peer, std::vector<char> data);
     void handleHostshipRequest(std::shared_ptr<Peer> peer, std::vector<char> message);
     void handleHostshipResignation(Peer& peer);
-    void handleDisconnection(std::shared_ptr<Peer> peer);
 
     void handleNewPeers();
     void eventLoop();

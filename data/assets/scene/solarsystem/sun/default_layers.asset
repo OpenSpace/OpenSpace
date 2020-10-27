@@ -7,3 +7,13 @@ local colorLayer = asset.require(colorLayersPath .. "/sun_texture")
 asset.onInitialize(function () 
     openspace.setPropertyValueSingle("Scene.Sun.Renderable.Layers.ColorLayers." .. colorLayer.layer.Identifier .. ".Enabled", true)
 end)
+
+
+asset.meta = {
+    Name = "Default Sun layers",
+    Version = "1.0",
+    Description = [[ Default Sun layers renderable globe.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

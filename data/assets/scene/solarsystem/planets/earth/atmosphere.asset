@@ -96,10 +96,20 @@ local Atmosphere = {
     },
     GUI = {
         Name = "Earth Atmosphere",
-        Path = "/Solar System/Planets/Earth"
+        Path = "/Solar System/Planets/Earth",
+        Description = [[ Atmosphere of Earth.]]
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Atmosphere })
+
+
+asset.meta = {
+    Name = "Earth Atmosphere",
+    Version = "1.0",
+    Description = [[ RenderableAtmosphere for Earth.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = "EarthAtmosphere"
+}

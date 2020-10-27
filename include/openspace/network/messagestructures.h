@@ -26,10 +26,15 @@
 #define __OPENSPACE_CORE___MESSAGESTRUCTURES___H__
 
 #include <ghoul/glm.h>
+#include <ghoul/logging/logmanager.h>
+#include <fmt/format.h>
+#include <algorithm>
 #include <cstring>
+#include <fstream>
+#include <iomanip>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <fstream>
 
 namespace openspace::datamessagestructures {
 
@@ -167,6 +172,26 @@ struct CameraKeyframe {
         out.write(reinterpret_cast<const char*>(&_timestamp), sizeof(_timestamp));
     };
 
+    void write(std::stringstream& out) const {
+        // Add camera position
+        out << std::fixed << std::setprecision(7) << _position.x << ' '
+            << std::fixed << std::setprecision(7) << _position.y << ' '
+            << std::fixed << std::setprecision(7) << _position.z << ' ';
+        // Add camera rotation
+        out << std::fixed << std::setprecision(7) << _rotation.x << ' '
+            << std::fixed << std::setprecision(7) << _rotation.y << ' '
+            << std::fixed << std::setprecision(7) << _rotation.z << ' '
+            << std::fixed << std::setprecision(7) << _rotation.w << ' ';
+        out << std::scientific << _scale << ' ';
+        if (_followNodeRotation) {
+            out << "F ";
+        }
+        else {
+            out << "- ";
+        }
+        out << _focusNode;
+    };
+
     void read(std::istream* in) {
         // Read position
         in->read(reinterpret_cast<char*>(&_position), sizeof(_position));
@@ -193,6 +218,22 @@ struct CameraKeyframe {
 
         // Read timestamp
         in->read(reinterpret_cast<char*>(&_timestamp), sizeof(_timestamp));
+    };
+
+    void read(std::istringstream& iss) {
+        std::string rotationFollowing;
+
+        iss >> _position.x
+            >> _position.y
+            >> _position.z
+            >> _rotation.x
+            >> _rotation.y
+            >> _rotation.z
+            >> _rotation.w
+            >> _scale
+            >> rotationFollowing
+            >> _focusNode;
+        _followNodeRotation = (rotationFollowing == "F");
     };
 };
 
@@ -226,8 +267,34 @@ struct TimeKeyframe {
         out->write(reinterpret_cast<const char*>(this), sizeof(TimeKeyframe));
     };
 
+    void write(std::stringstream& out) const {
+        out << ' ' << _dt;
+        if (_paused) {
+            out << " P";
+        }
+        else {
+            out << " R";
+        }
+        if (_requiresTimeJump) {
+            out << " J";
+        }
+        else {
+            out << " -";
+        }
+    };
+
     void read(std::istream* in) {
         in->read(reinterpret_cast<char*>(this), sizeof(TimeKeyframe));
+    };
+
+    void read(std::istringstream& iss) {
+        std::string paused, jump;
+
+        iss >> _dt
+            >> paused
+            >> jump;
+        _paused = (paused == "P");
+        _requiresTimeJump = (jump == "J");
     };
 };
 
@@ -308,16 +375,59 @@ struct ScriptMessage {
     double _timestamp = 0.0;
 
     void serialize(std::vector<char>& buffer) const {
+        uint32_t strLen = static_cast<uint32_t>(_script.size());
+
+        const char* p = reinterpret_cast<const char*>(&strLen);
+        buffer.insert(buffer.end(), p, p + sizeof(uint32_t));
+
         buffer.insert(buffer.end(), _script.begin(), _script.end());
     };
 
     void deserialize(const std::vector<char>& buffer) {
-        _script.assign(buffer.begin(), buffer.end());
+        const char* p = buffer.data();
+        const uint32_t len = *reinterpret_cast<const uint32_t*>(p);
+
+        if (buffer.size() != (sizeof(uint32_t) + len)) {
+            LERRORC(
+                "ParallelPeer",
+                fmt::format(
+                    "Received buffer with wrong size. Expected {} got {}",
+                    len, buffer.size()
+                )
+            );
+            return;
+        }
+
+        // We can skip over the first uint32_t that encoded the length
+        _script.assign(buffer.begin() + sizeof(uint32_t), buffer.end());
     };
 
     void write(std::ostream* out) const {
         out->write(_script.c_str(), _script.size());
     };
+
+    void write(unsigned char* buf, size_t& idx, std::ofstream& file) const {
+        size_t strLen = _script.size();
+        size_t writeSize_bytes = sizeof(size_t);
+
+        unsigned char const *p = reinterpret_cast<unsigned char const*>(&strLen);
+        memcpy((buf + idx), p, writeSize_bytes);
+        idx += static_cast<unsigned int>(writeSize_bytes);
+
+        memcpy((buf + idx), _script.c_str(), _script.size());
+        idx += static_cast<unsigned int>(strLen);
+        file.write(reinterpret_cast<char*>(buf), idx);
+        //Write directly to file because some scripts can be very long
+        file.write(_script.c_str(), _script.size());
+    };
+
+    void write(std::stringstream& ss) const {
+        unsigned int numLinesInScript = static_cast<unsigned int>(
+            std::count(_script.begin(), _script.end(), '\n')
+        );
+        ss << ' ' << (numLinesInScript + 1) << ' ';
+        ss << _script;
+    }
 
     void read(std::istream* in) {
         size_t strLen;
@@ -330,6 +440,25 @@ struct ScriptMessage {
 
         _script.erase();
         _script = temp.data();
+    };
+
+    void read(std::istringstream& iss) {
+        int numScriptLines;
+        iss >> numScriptLines;
+        if (numScriptLines < 0) {
+            numScriptLines = 0;
+        }
+        std::string tmpReadbackScript;
+        _script.erase();
+        for (int i = 0; i < numScriptLines; ++i) {
+            std::getline(iss, tmpReadbackScript);
+            size_t start = tmpReadbackScript.find_first_not_of(" ");
+            tmpReadbackScript = tmpReadbackScript.substr(start);
+            _script.append(tmpReadbackScript);
+            if (i < (numScriptLines - 1)) {
+                _script.append("\n");
+            }
+        }
     };
 };
 

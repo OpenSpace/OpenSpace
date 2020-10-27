@@ -9,6 +9,12 @@ local parentIdentifier = transforms.JupiterBarycenter.Identifier
 local parentSpice = "JUPITER BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_himalia" }
 local trailColor = { 0.4, 0.3, 0.01 }
+local trailTags = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor"
+}
 
 local himaliaGroup = {
     {
@@ -20,6 +26,7 @@ local himaliaGroup = {
         Spice = "LEDA",
         Radii = { 16000, 16000, 16000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group"
         },
@@ -36,6 +43,7 @@ local himaliaGroup = {
         Spice = "HIMALIA",
         Radii = { 170000, 170000, 170000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group"
         },
@@ -52,6 +60,7 @@ local himaliaGroup = {
         Spice = "LYSITHEA",
         Radii = { 36000, 36000, 36000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group"
         },
@@ -68,6 +77,7 @@ local himaliaGroup = {
         Spice = "ELARA",
         Radii = { 86000, 86000, 86000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group"
         },
@@ -85,6 +95,7 @@ local himaliaGroup = {
         Spice = "553",
         Radii = { 4000, 4000, 4000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group"
         },
@@ -94,9 +105,19 @@ local himaliaGroup = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(
     asset,
     proceduralGlobes.createGlobes(himaliaGroup)
 )
+
+
+asset.meta = {
+    Name = "Jupiter Himalia Group Moons",
+    Version = "1.0",
+    Description = [[ Procedural Globe asset containing Jupiter's Himalia Group
+        moons: Leda, Himalia, Lysithea, Elara and Dia. Blank globes and SPICE trails
+        are generated for each moon.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}
