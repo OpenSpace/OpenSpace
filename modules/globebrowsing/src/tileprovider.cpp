@@ -191,7 +191,7 @@ bool initTexturesFromLoadedData(DefaultTileProvider& t) {
 void initialize(TextTileProvider& t) {
     ZoneScoped
 
-    t.font = global::fontManager.font("Mono", static_cast<float>(t.fontSize));
+    t.font = global::fontManager->font("Mono", static_cast<float>(t.fontSize));
     t.fontRenderer = ghoul::fontrendering::FontRenderer::createDefault();
     t.fontRenderer->setFramebufferSize(glm::vec2(t.initData.dimensions));
     glGenFramebuffers(1, &t.fbo);
@@ -235,7 +235,7 @@ Tile tile(TextTileProvider& t, const TileIndex& tileIndex) {
         t.fontRenderer->render(*t.font, t.textPosition, t.text, t.textColor);
 
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-        global::renderEngine.openglStateCache().resetViewportState();
+        global::renderEngine->openglStateCache().resetViewportState();
         //glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 
         tile = Tile{ texture, std::nullopt, Tile::Status::OK };
@@ -459,6 +459,9 @@ std::string consumeTemporalMetaData(TemporalTileProvider& t, const std::string& 
     }
     else {
         gdalNode = CPLSearchXMLNode(node, "FilePath");
+        if (gdalNode) {
+            return "";
+        }
         std::string gdalDescription = std::string(gdalNode->psChild->pszValue);
         return gdalDescription;
     }
@@ -553,7 +556,7 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
 
     type = Type::DefaultTileProvider;
 
-    tileCache = global::moduleEngine.module<GlobeBrowsingModule>()->tileCache();
+    tileCache = global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
     name = "Name unspecified";
     if (dictionary.hasKeyAndValue<std::string>("Name")) {
         name = dictionary.value<std::string>("Name");
@@ -632,7 +635,7 @@ TextTileProvider::TextTileProvider(TileTextureInitData initData, size_t fontSize
 {
     ZoneScoped
 
-    tileCache = global::moduleEngine.module<GlobeBrowsingModule>()->tileCache();
+    tileCache = global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
 }
 
 
@@ -646,7 +649,7 @@ SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& di
 
     type = Type::SizeReferenceTileProvider;
 
-    font = global::fontManager.font("Mono", static_cast<float>(fontSize));
+    font = global::fontManager->font("Mono", static_cast<float>(fontSize));
 
     if (dictionary.hasKeyAndValue<glm::dvec3>(sizereferenceprovider::KeyRadii)) {
         ellipsoid = dictionary.value<glm::dvec3>(sizereferenceprovider::KeyRadii);
@@ -1217,9 +1220,9 @@ int update(TileProvider& tp) {
         case Type::TemporalTileProvider: {
             TemporalTileProvider& t = static_cast<TemporalTileProvider&>(tp);
             if (t.successfulInitialization) {
-                TileProvider* newCurrent = getTileProvider(t, global::timeManager.time());
-                if (newCurrent) {
-                    t.currentTileProvider = newCurrent;
+                TileProvider* newCurr = getTileProvider(t, global::timeManager->time());
+                if (newCurr) {
+                    t.currentTileProvider = newCurr;
                 }
                 if (t.currentTileProvider) {
                     update(*t.currentTileProvider);

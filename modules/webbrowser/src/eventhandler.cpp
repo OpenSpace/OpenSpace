@@ -332,7 +332,7 @@ bool EventHandler::mouseButtonCallback(MouseButton button, MouseAction action,
         return false;
     }
 
-    global::interactionMonitor.markInteraction();
+    global::interactionMonitor->markInteraction();
     MouseButtonState& state = (button == MouseButton::Left) ? _leftButton : _rightButton;
 
     int clickCount = BrowserInstance::SingleClick;
@@ -381,11 +381,11 @@ bool EventHandler::isDoubleClick(const MouseButtonState& button) const {
 }
 
 bool EventHandler::mousePositionCallback(double x, double y) {
-    const glm::vec2 dpiScaling = global::windowDelegate.dpiScaling();
+    const glm::vec2 dpiScaling = global::windowDelegate->dpiScaling();
     _mousePosition.x = floor(static_cast<float>(x) * dpiScaling.x);
     _mousePosition.y = floor(static_cast<float>(y) * dpiScaling.y);
     _browserInstance->sendMouseMoveEvent(mouseEvent());
-    global::interactionMonitor.markInteraction();
+    global::interactionMonitor->markInteraction();
 
     // Let the mouse event trickle on
     return false;
@@ -476,7 +476,7 @@ CefTouchEvent EventHandler::touchEvent(const TouchInput& input,
     event.y = windowPos.y;
     event.type = eventType;
     const std::vector<std::pair<Key, KeyModifier>>& keyModVec =
-        global::navigationHandler.inputState().pressedKeys();
+        global::navigationHandler->inputState().pressedKeys();
     for (const std::pair<Key, KeyModifier>& keyModPair : keyModVec) {
         const KeyModifier mods = keyModPair.second;
         event.modifiers |= static_cast<uint32_t>(mapToCefModifiers(mods));

@@ -650,11 +650,11 @@ local Dawn = {
     Renderable = {
         Type = "RenderableModel",
         Body = "DAWN",
-        Geometry = {
+        Geometry = {{
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/mainbodydawn.obj",
             ColorTexture = textures .. "/gray.png"
-        },
+        }},
         LightSources = LightSources
     },
     GUI = {
@@ -682,11 +682,11 @@ local DawnSolarArray1 = {
     Renderable = {
         Type = "RenderableModel",
         Body = "DAWN",
-        Geometry = {
+        Geometry = {{
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/solarpanelleft.obj",
             ColorTexture = textures .. "/gray.png"
-        },
+        }},
         LightSources = LightSources
     },
     GUI = {
@@ -713,11 +713,11 @@ local DawnSolarArray2 = {
     Renderable = {
         Type = "RenderableModel",
         Body = "DAWN",
-        Geometry = {
+        Geometry = {{
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/solarpanelright.obj",
             ColorTexture = textures .. "/gray.png"
-        },
+        }},
         LightSources = LightSources
     },
     GUI = {
@@ -737,13 +737,13 @@ local DawnTrail = {
             Observer = "SUN"
         },
         Color = { 1.0, 0.8, 0.4 },
-        ShowFullTrail = true,
+        ShowFullTrail = false,
         StartTime = "2007 SEP 26 13:28:00",
         EndTime = "2012 SEP 12 12:00:00",
         PointSize = 5,
         SampleInterval = 3600,
         TimeStampSubsampleFactor = 4,
-        EnableFade = false,
+        EnableFade = true,
         Rendering = "Lines+Points"
     },
     GUI = {

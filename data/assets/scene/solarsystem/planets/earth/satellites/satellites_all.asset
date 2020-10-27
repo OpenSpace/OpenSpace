@@ -6,3 +6,14 @@ asset.require('./satellites_misc')
 asset.require('./satellites_navigation')
 asset.require('./satellites_science')
 asset.require('./satellites_weather')
+
+
+asset.meta = {
+    Name = "Satellites All",
+    Version = "1.0",
+    Description = [[ Meta asset for all satellites of Earth. Containing all other meta
+    assets.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

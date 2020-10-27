@@ -637,12 +637,18 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "the fourth argument to setPropertyValue."
             },
             {
+                "hasProperty",
+                &luascriptfunctions::property_hasProperty,
+                {},
+                "string",
+                "Returns whether a property with the given URI exists"
+            },
+            {
                 "getPropertyValue",
                 &luascriptfunctions::property_getValue,
                 {},
                 "string",
-                "Returns the value the property, identified by "
-                "the provided URI."
+                "Returns the value the property, identified by the provided URI."
             },
             {
                 "getProperty",
@@ -674,6 +680,14 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 {},
                 "string",
                 "Removes the SceneGraphNode identified by name"
+            },
+            {
+                "removeSceneGraphNodesFromRegex",
+                &luascriptfunctions::removeSceneGraphNodesFromRegex,
+                {},
+                "string",
+                "Removes all SceneGraphNodes with identifiers matching the input regular "
+                "expression"
             },
             {
                 "hasSceneGraphNode",

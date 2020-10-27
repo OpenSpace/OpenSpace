@@ -80,11 +80,11 @@ local Voyager1Main = {
     Parent = Voyager1.Identifier,
     Renderable = {
         Type = "RenderableModel",
-        Geometry = {
+        Geometry = {{
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/voyager-main.obj",
             ColorTexture = models .. "/voyager-main.jpg"
-        },
+        }},
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -99,11 +99,11 @@ local Voyager1Antenna = {
     Parent = Voyager1.Identifier,
     Renderable = {
         Type = "RenderableModel",
-        Geometry = {
+        Geometry = {{
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/voyager-antenna.obj",
             ColorTexture = models .. "/voyager-antenna.png"
-        },
+        }},
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -229,8 +229,6 @@ local VoyagerTrailCruiseSaturnInf = {
         Path = "/Solar System/Missions/Voyager 1"
     }
 }
-
-
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     Voyager1,

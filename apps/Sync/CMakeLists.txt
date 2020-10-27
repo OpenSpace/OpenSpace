@@ -37,7 +37,7 @@ create_new_application(Sync MACOSX_BUNDLE
   ${CMAKE_CURRENT_SOURCE_DIR}/openspace.icns
 )
 
-target_link_libraries(Sync openspace-core)
+target_link_libraries(Sync PUBLIC openspace-core)
 
 # Web Browser and Web gui
 # Why not put these in the module's path? Because they do not have access to the

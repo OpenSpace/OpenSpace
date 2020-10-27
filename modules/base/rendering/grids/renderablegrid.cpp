@@ -153,7 +153,7 @@ void RenderableGrid::initializeGL() {
     _gridProgram = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return global::renderEngine.buildRenderProgram(
+            return global::renderEngine->buildRenderProgram(
                 ProgramName,
                 absPath("${MODULE_BASE}/shaders/grid_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/grid_fs.glsl")
@@ -180,7 +180,7 @@ void RenderableGrid::deinitializeGL() {
     BaseModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
-            global::renderEngine.removeRenderProgram(p);
+            global::renderEngine->removeRenderProgram(p);
         }
     );
     _gridProgram = nullptr;
@@ -219,8 +219,8 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&){
     _gridProgram->deactivate();
 
     // Restores GL State
-    global::renderEngine.openglStateCache().resetBlendState();
-    global::renderEngine.openglStateCache().resetLineState();
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetLineState();
 }
 
 void RenderableGrid::update(const UpdateData&) {

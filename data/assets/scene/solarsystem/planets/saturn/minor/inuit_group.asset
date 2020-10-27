@@ -9,6 +9,12 @@ local parentIdentifier = transforms.SaturnBarycenter.Identifier
 local parentSpice = "SATURN BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_inuit" }
 local trailColor = { 0.5, 0.3, 0.3 }
+local trailTags = { 
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor"
+}
 
 local inuitGroup = {
     {
@@ -20,6 +26,7 @@ local inuitGroup = {
         Spice = "KIVIUQ",
         Radii = { 16000, 16000, 16000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Inuit Group"
         },
@@ -36,6 +43,7 @@ local inuitGroup = {
         Spice = "IJIRAQ",
         Radii = { 12000, 12000, 12000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Inuit Group"
         },
@@ -52,6 +60,7 @@ local inuitGroup = {
         Spice = "PAALIAQ",
         Radii = { 22000, 22000, 22000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Inuit Group"
         },
@@ -68,6 +77,7 @@ local inuitGroup = {
         Spice = "SIARNAQ",
         Radii = { 40000, 40000, 40000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Inuit Group"
         },
@@ -84,6 +94,7 @@ local inuitGroup = {
         Spice = "TARQEQ",
         Radii = { 7000, 7000, 7000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Inuit Group"
         },
@@ -93,9 +104,19 @@ local inuitGroup = {
     },
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(
     asset,
     proceduralGlobes.createGlobes(inuitGroup)
 )
+
+
+asset.meta = {
+    Name = "Saturn Inuit Group Moons",
+    Version = "1.0",
+    Description = [[ Procedural Globe asset containing Saturn's Inuit Group
+        moons: Kiviuq, Ijiraq, Paaliaq, Siarnaq and Tarqeq. Blank globes and SPICE trails
+        are generated for each moon.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

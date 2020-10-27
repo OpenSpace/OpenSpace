@@ -52,7 +52,7 @@ namespace {
 
 TEST_CASE("AssetLoader: Assertion", "[assetloader]") {
     openspace::Scene scene(std::make_unique<openspace::SingleThreadedSceneInitializer>());
-    ghoul::lua::LuaState* state = openspace::global::scriptEngine.luaState();
+    ghoul::lua::LuaState* state = openspace::global::scriptEngine->luaState();
     openspace::SynchronizationWatcher syncWatcher;
     openspace::AssetLoader assetLoader(
         state,
@@ -66,7 +66,7 @@ TEST_CASE("AssetLoader: Assertion", "[assetloader]") {
 
 TEST_CASE("AssetLoader: Basic Export Import", "[assetloader]") {
     openspace::Scene scene(std::make_unique<openspace::SingleThreadedSceneInitializer>());
-    ghoul::lua::LuaState* state = openspace::global::scriptEngine.luaState();
+    ghoul::lua::LuaState* state = openspace::global::scriptEngine->luaState();
     openspace::SynchronizationWatcher syncWatcher;
     openspace::AssetLoader assetLoader(
         state,
@@ -79,7 +79,7 @@ TEST_CASE("AssetLoader: Basic Export Import", "[assetloader]") {
 
 TEST_CASE("AssetLoader: Asset Functions", "[assetloader]") {
     openspace::Scene scene(std::make_unique<openspace::SingleThreadedSceneInitializer>());
-    ghoul::lua::LuaState* state = openspace::global::scriptEngine.luaState();
+    ghoul::lua::LuaState* state = openspace::global::scriptEngine->luaState();
     openspace::SynchronizationWatcher syncWatcher;
     openspace::AssetLoader assetLoader(
         state,
@@ -92,7 +92,7 @@ TEST_CASE("AssetLoader: Asset Functions", "[assetloader]") {
 
 TEST_CASE("AssetLoader: Asset Initialization", "[assetloader]") {
     openspace::Scene scene(std::make_unique<openspace::SingleThreadedSceneInitializer>());
-    ghoul::lua::LuaState* state = openspace::global::scriptEngine.luaState();
+    ghoul::lua::LuaState* state = openspace::global::scriptEngine->luaState();
     openspace::SynchronizationWatcher syncWatcher;
     openspace::AssetLoader assetLoader(
         state,

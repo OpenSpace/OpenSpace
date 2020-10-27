@@ -82,4 +82,3 @@ local getBookmarks = function (guiPath, bookmarkfile)
 end
 
 asset.export('getBookmarks', getBookmarks)
-

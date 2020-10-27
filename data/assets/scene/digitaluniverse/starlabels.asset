@@ -26,10 +26,21 @@ local object = {
     },
     GUI = {
         Name = "Stars Labels",
-        Path = "/Milky Way/Stars"
+        Path = "/Milky Way/Stars",
+        Description = [[Labels for stars in the Milky Way. See 'Stars' for more
+            info.]],
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+
+
+asset.meta = {
+    Name = "Star Labels",
+    Version = "2.0",
+    Description = [[Digital Universe asset for labels of the stars.]],
+    Author = "Brian Abbott (AMNH)",
+    URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+    License = "AMNH Digital Universe",
+    Identifiers = "StarsLabels"
+}

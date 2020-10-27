@@ -17,8 +17,19 @@ local UranusBarycenter = {
     GUI = {
         Name = "Uranus Barycenter",
         Path = "/Solar System/Planets/Uranus",
-        Hidden = true
+        Hidden = true,
+        Description = [[ Uranus Barycenter position]],
     }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { UranusBarycenter })
+
+
+asset.meta = {
+    Name = "Uranus Transforms",
+    Version = "1.0",
+    Description = [[ Uranus Barycenter transform]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

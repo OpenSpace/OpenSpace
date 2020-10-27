@@ -219,12 +219,12 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
     }
 
     _fontName.onChange([this]() {
-        _font = global::fontManager.font(_fontName, _fontSize);
+        _font = global::fontManager->font(_fontName, _fontSize);
     });
     addProperty(_fontName);
 
     _fontSize.onChange([this]() {
-        _font = global::fontManager.font(_fontName, _fontSize);
+        _font = global::fontManager->font(_fontName, _fontSize);
     });
     addProperty(_fontSize);
 
@@ -352,7 +352,7 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
     }
     addProperty(_destination.nodeName);
 
-    _font = global::fontManager.font(_fontName, _fontSize);
+    _font = global::fontManager->font(_fontName, _fontSize);
     _buffer.resize(128);
 }
 
@@ -361,7 +361,7 @@ std::pair<glm::dvec3, std::string> DashboardItemAngle::positionAndLabel(
 {
     if (comp.type == Type::Node) {
         if (!comp.node) {
-            comp.node = global::renderEngine.scene()->sceneGraphNode(comp.nodeName);
+            comp.node = global::renderEngine->scene()->sceneGraphNode(comp.nodeName);
 
             if (!comp.node) {
                 LERRORC(
@@ -379,14 +379,14 @@ std::pair<glm::dvec3, std::string> DashboardItemAngle::positionAndLabel(
         case Type::Focus:
         {
             const SceneGraphNode* node =
-                global::navigationHandler.orbitalNavigator().anchorNode();
+                global::navigationHandler->orbitalNavigator().anchorNode();
             return {
                 node->worldPosition(),
                 "focus"
             };
         }
         case Type::Camera:
-            return { global::renderEngine.scene()->camera()->positionVec3(), "camera" };
+            return { global::renderEngine->scene()->camera()->positionVec3(), "camera" };
         default:
             return { glm::dvec3(0.0), "Unknown" };
     }
@@ -404,7 +404,6 @@ void DashboardItemAngle::render(glm::vec2& penPosition) {
 
     std::fill(_buffer.begin(), _buffer.end(), 0);
     if (glm::length(a) == 0.0 || glm::length(b) == 0) {
-        penPosition.y -= _font->height();
         char* end = fmt::format_to(
             _buffer.data(),
             "Could not compute angle at {} between {} and {}",
@@ -412,13 +411,13 @@ void DashboardItemAngle::render(glm::vec2& penPosition) {
         );
         std::string_view text = std::string_view(_buffer.data(), end - _buffer.data());
         RenderFont(*_font, penPosition, text);
+        penPosition.y -= _font->height();
     }
     else {
         const double angle = glm::degrees(
             glm::acos(glm::dot(a, b) / (glm::length(a) * glm::length(b)))
         );
 
-        penPosition.y -= _font->height();
         char* end = fmt::format_to(
             _buffer.data(),
             "Angle at {} between {} and {}: {} degrees",
@@ -426,6 +425,7 @@ void DashboardItemAngle::render(glm::vec2& penPosition) {
         );
         std::string_view text = std::string_view(_buffer.data(), end - _buffer.data());
         RenderFont(*_font, penPosition, text);
+        penPosition.y -= _font->height();
     }
 }
 

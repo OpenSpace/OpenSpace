@@ -71,7 +71,7 @@ local EarthBarycenterTrail = {
         StartTime = "1968 DEC 21",
         EndTime = "1968 DEC 28",
         SampleInterval = 30,
-        Enabled = true,
+        Enabled = false,
     },
     GUI = {
         Name = "Apollo 8 Earth Barycenter Trail",

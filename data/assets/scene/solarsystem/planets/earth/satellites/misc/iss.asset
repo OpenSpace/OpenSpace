@@ -250,7 +250,35 @@ local initializeAndAddNodes = function()
     }
   }
 
-  table.insert(nodes, issTrail)
+  local IssLabel = {
+    Identifier = "IssLabel",
+    Parent = iss.Identifier,
+
+    Renderable = {
+        Enabled = false,
+        Type = "RenderableLabels",
+        LabelText = "ISS",
+        FontSize = 100.0,
+        LabelSize = 3.4,
+        LabelMaxSize = 100.0,
+        LabelMinSize = 1.0,
+        LabelOrientationOption = "Camera View Direction",
+        BlendMode = "Additive",
+        EnableFading = true,
+        FadeStartUnit = "au",
+        FadeStartDistance = 0.15,
+        FadeStartSpeed = 1.0,
+        FadeEndUnit = "au",
+        FadeEndDistance = 15.0,
+        FadeEndSpeed = 25.0
+    },
+    Tag = { "solarsystem_labels" },
+    GUI = {
+        Name = "ISS Label",
+        Path = "/Solar System/Planets/Earth/Satellites"
+    }
+}
+
   return { iss, parentNode, issTrail }
 end
 
@@ -260,4 +288,23 @@ asset.onInitialize(function ()
     openspace.addSceneGraphNode(node)
   end
   openspace.setPropertyValueSingle("Scene.ISSparentNode.Rotation.yAxis-InvertObject", true)
+
 end)
+
+asset.onDeinitialize(function ()
+  for i=1, #nodes do
+    openspace.removeSceneGraphNode(nodes[#nodes + 1 - i].Identifier)
+  end
+end)
+
+
+
+asset.meta = {
+    Name = "ISS",
+    Version = "1.0",
+    Description = [[ Model and Trail for ISS. Model from NASA 3D models, trail from
+    CELESTRAK]],
+    Author = "OpenSpace Team",
+    URL = "https://celestrak.com/",
+    License = "NASA"
+}

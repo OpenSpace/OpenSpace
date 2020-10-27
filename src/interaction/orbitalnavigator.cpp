@@ -244,15 +244,15 @@ OrbitalNavigator::OrbitalNavigator()
     , _aim(AimInfo)
     , _retargetAnchor(RetargetAnchorInfo)
     , _retargetAim(RetargetAimInfo)
-    , _followAnchorNodeRotationDistance(FollowAnchorNodeInfo, 5.0f, 0.0f, 20.f)
+    , _followAnchorNodeRotationDistance(FollowAnchorNodeInfo, 5.f, 0.f, 20.f)
     , _minimumAllowedDistance(MinimumDistanceInfo, 10.0f, 0.0f, 10000.f)
     , _flightDestinationDistance(FlightDestinationDistInfo, 2e8f, 0.0f, 1e10f)
     , _flightDestinationFactor(FlightDestinationFactorInfo, 1E-4, 1E-6, 0.5)
     , _applyLinearFlight(ApplyLinearFlightInfo, false)
     , _velocitySensitivity(VelocityZoomControlInfo, 0.02f, 0.01f, 0.15f)      
-    , _mouseSensitivity(MouseSensitivityInfo, 15.0f, 1.0f, 50.f)
-    , _joystickSensitivity(JoystickSensitivityInfo, 10.0f, 1.0f, 50.f)
-    , _websocketSensitivity(WebsocketSensitivityInfo, 10.0f, 1.0f, 50.f)
+    , _mouseSensitivity(MouseSensitivityInfo, 15.f, 1.f, 50.f)
+    , _joystickSensitivity(JoystickSensitivityInfo, 10.f, 1.0f, 50.f)
+    , _websocketSensitivity(WebsocketSensitivityInfo, 5.f, 1.0f, 50.f)
     , _useAdaptiveStereoscopicDepth(UseAdaptiveStereoscopicDepthInfo, true)
     , _stereoscopicDepthOfFocusSurface(StereoscopicDepthOfFocusSurfaceInfo, 8, 0.25, 100)
     , _staticViewScaleExponent(StaticViewScaleExponentInfo, 0.f, -30, 10)
@@ -1271,7 +1271,12 @@ glm::dvec3 OrbitalNavigator::moveCameraAlongVector(const glm::dvec3& camPos,
         velocity = 1.0 - destination / distFromCameraToFocus;
     }
     else { // When flying away from anchor
-        velocity = distFromCameraToFocus / destination - 1.0;
+        if (destination == 0.0) {
+            velocity = -1.0;
+        }
+        else {
+            velocity = distFromCameraToFocus / destination - 1.0;
+        }
     }
     velocity *= _velocitySensitivity;
 

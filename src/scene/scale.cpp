@@ -69,7 +69,7 @@ ghoul::mm_unique_ptr<Scale> Scale::createFromDictionary(const ghoul::Dictionary&
     Scale* result = factory->create(
         scaleType,
         dictionary,
-        &global::memoryManager.PersistentMemory
+        &global::memoryManager->PersistentMemory
     );
     result->setIdentifier("Scale");
     return ghoul::mm_unique_ptr<Scale>(result);

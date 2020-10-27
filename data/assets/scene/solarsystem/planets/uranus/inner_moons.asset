@@ -8,7 +8,15 @@ local kernel = asset.require('./kernels').ura091
 local parentIdentifier = transforms.UranusBarycenter.Identifier
 local parentSpice = "URANUS BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_inner" }
+
 local trailColor = { 0.60, 0.65, 0.84 }
+local trailTags = { 
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_uranus",
+    "moonTrail_minor"
+}
+
 
 local innerMoons = {
     {
@@ -20,6 +28,7 @@ local innerMoons = {
         Spice = "CORDELIA",
         Radii = { 40000, 40000, 40000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
         },
@@ -36,6 +45,7 @@ local innerMoons = {
         Spice = "OPHELIA",
         Radii = { 43000, 43000, 43000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
         },
@@ -52,6 +62,7 @@ local innerMoons = {
         Spice = "BIANCA",
         Radii = { 51000, 51000, 51000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
         },
@@ -68,6 +79,7 @@ local innerMoons = {
         Spice = "CRESSIDA",
         Radii = { 80000, 80000, 80000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
         },
@@ -84,6 +96,7 @@ local innerMoons = {
         Spice = "DESDEMONA",
         Radii = { 64000, 64000, 64000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
         },
@@ -100,6 +113,7 @@ local innerMoons = {
         Spice = "JULIET",
         Radii = { 94000, 94000, 94000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
         },
@@ -116,6 +130,7 @@ local innerMoons = {
         Spice = "PORTIA",
         Radii = { 135000, 135000, 135000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
         },
@@ -132,6 +147,7 @@ local innerMoons = {
         Spice = "ROSALIND",
         Radii = { 72000, 72000, 72000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
         },
@@ -148,6 +164,7 @@ local innerMoons = {
         Spice = "CUPID",
         Radii = { 18000, 18000, 18000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
         },
@@ -164,6 +181,7 @@ local innerMoons = {
         Spice = "BELINDA",
         Radii = { 90000, 90000, 90000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
         },
@@ -180,6 +198,7 @@ local innerMoons = {
         Spice = "PERDITA",
         Radii = { 30000, 30000, 30000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
         },
@@ -196,6 +215,7 @@ local innerMoons = {
         Spice = "PUCK",
         Radii = { 162000, 162000, 162000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
         },
@@ -212,6 +232,7 @@ local innerMoons = {
         Spice = "MAB",
         Radii = { 25000, 25000, 25000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
         },
@@ -221,9 +242,20 @@ local innerMoons = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(
     asset,
     proceduralGlobes.createGlobes(innerMoons)
 )
+
+
+asset.meta = {
+    Name = "Uranus Irregular Retrograde Moons",
+    Version = "1.0",
+    Description = [[ Procedural Globe asset containing Uranus' irregular retrograde
+        moons: Cordelia, Ophelia, Bianca, Cressida, Desdemona, Juliet, Portia, Rosalind,
+        Cupid, Belinda, Perdita, Puck and Mab. Blank globes and SPICE trails are
+        generated for each moon.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

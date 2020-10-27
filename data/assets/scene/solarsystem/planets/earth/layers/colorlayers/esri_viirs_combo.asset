@@ -36,7 +36,9 @@ local layer = {
         },
     },
     PadTiles = false,
-    Fallback = fallBackLayer
+    Fallback = fallBackLayer,
+    Description = [[Level based layer combining "VIIRS SNPP (Temporal)" and ESRI World
+        Imagery. "VIIRS SNPP (Temporal)" is faded out at tile level 4]]
 }
 
 asset.onInitialize(function () 
@@ -44,3 +46,15 @@ asset.onInitialize(function ()
 end)
 
 asset.export("layer", layer)
+
+
+asset.meta = {
+    Name = "ESRI VIIRS Combo",
+    Version = "1.0",
+    Description = [[Level based layer combining "VIIRS SNPP (Temporal)" and ESRI World
+    Imagery. "VIIRS SNPP (Temporal)" is faded out at tile level 4]],
+    Author = "OpenSpace Tem",
+    URL = "http://www.openspaceproject.com",
+    License = "MIT License",
+    Identifiers = "ESRI_VIIRS_Combo"
+}

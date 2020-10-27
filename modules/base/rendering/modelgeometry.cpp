@@ -96,7 +96,7 @@ ghoul::mm_unique_ptr<ModelGeometry> ModelGeometry::createFromDictionary(
     ModelGeometry* geometry = factory->create(
         geometryType,
         dictionary,
-        &global::memoryManager.PersistentMemory
+        &global::memoryManager->PersistentMemory
     );
     return ghoul::mm_unique_ptr<ModelGeometry>(geometry);
 }
