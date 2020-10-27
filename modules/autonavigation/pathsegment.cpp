@@ -55,7 +55,7 @@ PathSegment::PathSegment(Waypoint start, Waypoint end, CurveType type,
     else {
         _duration = std::log(pathLength());
 
-        auto module = global::moduleEngine.module<AutoNavigationModule>();
+        auto module = global::moduleEngine->module<AutoNavigationModule>();
         _duration /= module->AutoNavigationHandler().speedScale();
     }
 }
@@ -85,7 +85,7 @@ CameraPose PathSegment::traversePath(double dt) {
         return _start.pose;
     }
 
-    AutoNavigationModule* module = global::moduleEngine.module<AutoNavigationModule>();
+    AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
     AutoNavigationHandler& handler = module->AutoNavigationHandler();
     const int nrSteps = handler.nrSimulationStepsPerFrame();
 

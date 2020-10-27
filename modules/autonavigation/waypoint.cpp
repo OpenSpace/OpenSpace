@@ -51,7 +51,7 @@ WaypointNodeDetails::WaypointNodeDetails(const std::string nodeIdentifier) {
 double WaypointNodeDetails::findValidBoundingSphere(const SceneGraphNode* node) {
     double bs = static_cast<double>(node->boundingSphere());
     const double minValidBoundingSphere =
-        global::moduleEngine.module<AutoNavigationModule>()->minValidBoundingSphere();
+        global::moduleEngine->module<AutoNavigationModule>()->minValidBoundingSphere();
 
     if (bs < minValidBoundingSphere) {
 

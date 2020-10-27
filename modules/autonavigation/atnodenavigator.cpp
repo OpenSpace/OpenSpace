@@ -82,11 +82,11 @@ void AtNodeNavigator::updateCamera(double deltaTime) {
 }
 
 Camera* AtNodeNavigator::camera() const {
-    return global::navigationHandler.camera();
+    return global::navigationHandler->camera();
 }
 
 const SceneGraphNode* AtNodeNavigator::anchor() const {
-    return global::navigationHandler.anchorNode();
+    return global::navigationHandler->anchorNode();
 }
 
 // Move along the right vector for the camera, while looking at the center of the node

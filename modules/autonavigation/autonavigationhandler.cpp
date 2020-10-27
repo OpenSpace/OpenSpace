@@ -157,11 +157,11 @@ AutoNavigationHandler::AutoNavigationHandler()
 AutoNavigationHandler::~AutoNavigationHandler() {} // NOLINT
 
 Camera* AutoNavigationHandler::camera() const {
-    return global::navigationHandler.camera();
+    return global::navigationHandler->camera();
 }
 
 const SceneGraphNode* AutoNavigationHandler::anchor() const {
-    return global::navigationHandler.anchorNode();
+    return global::navigationHandler->anchorNode();
 }
 
 bool AutoNavigationHandler::hasFinished() const {
@@ -211,7 +211,7 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
     // navigation when we reach the end.
     std::string currentAnchor = anchor()->identifier();
     if (currentAnchor != newAnchor) {
-        global::navigationHandler.orbitalNavigator().setAnchorNode(newAnchor);
+        global::navigationHandler->orbitalNavigator().setAnchorNode(newAnchor);
     }
 
     if (!_includeRoll) {
@@ -296,10 +296,10 @@ void AutoNavigationHandler::startPath() {
     );
 
     // TODO: remove this line at the end of our project. Used to simplify testing
-    global::timeManager.setPause(true);
+    global::timeManager->setPause(true);
 
     //OBS! Until we can handle simulation time: early out if not paused
-    if (!global::timeManager.isPaused()) {
+    if (!global::timeManager->isPaused()) {
         LERROR("Simulation time must be paused to run a camera path.");
         return;
     }
@@ -430,7 +430,7 @@ std::vector<glm::dvec3> AutoNavigationHandler::getControlPoints() {
 Waypoint AutoNavigationHandler::wayPointFromCamera() {
     const glm::dvec3 pos = camera()->positionVec3();
     const glm::dquat rot = camera()->rotationQuaternion();
-    const std::string node = global::navigationHandler.anchorNode()->identifier();
+    const std::string node = global::navigationHandler->anchorNode()->identifier();
     return Waypoint{ pos, rot, node };
 }
 
@@ -654,7 +654,7 @@ Waypoint AutoNavigationHandler::computeDefaultWaypoint(const TargetNodeInstructi
 
 std::vector<SceneGraphNode*> AutoNavigationHandler::findRelevantNodes() {
     const std::vector<SceneGraphNode*>& allNodes =
-        global::renderEngine.scene()->allSceneGraphNodes();
+        global::renderEngine->scene()->allSceneGraphNodes();
 
     const std::vector<std::string> relevantTags = _relevantNodeTags;
 

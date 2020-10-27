@@ -113,7 +113,7 @@ std::vector<Waypoint> TargetNodeInstruction::getWaypoints() const {
         targetPos = targetNode->worldPosition() +
             targetNode->worldRotationMatrix() * position.value();
 
-        Camera* camera = global::navigationHandler.camera();
+        Camera* camera = global::navigationHandler->camera();
 
         glm::dmat4 lookAtMat = glm::lookAt(
             targetPos,

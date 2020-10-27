@@ -44,7 +44,7 @@ namespace openspace::autonavigation::luascriptfunctions {
     int continuePath(lua_State* L) {
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::continuePath");
 
-        AutoNavigationModule* module = global::moduleEngine.module<AutoNavigationModule>();
+        AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
         AutoNavigationHandler& handler = module->AutoNavigationHandler();
         handler.continuePath();
 
@@ -54,7 +54,7 @@ namespace openspace::autonavigation::luascriptfunctions {
     int stopPath(lua_State* L) {
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::stopPath");
 
-        AutoNavigationModule* module = global::moduleEngine.module<AutoNavigationModule>();
+        AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
         AutoNavigationHandler& handler = module->AutoNavigationHandler();
         handler.abortPath();
 
@@ -85,7 +85,7 @@ namespace openspace::autonavigation::luascriptfunctions {
 
         PathSpecification spec = PathSpecification(TargetNodeInstruction{insDict});
 
-        AutoNavigationModule* module = global::moduleEngine.module<AutoNavigationModule>();
+        AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
         AutoNavigationHandler& handler = module->AutoNavigationHandler();
         handler.createPath(spec);
 
@@ -108,7 +108,7 @@ namespace openspace::autonavigation::luascriptfunctions {
             );
         }
 
-        AutoNavigationModule* module = global::moduleEngine.module<AutoNavigationModule>();
+        AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
         AutoNavigationHandler& handler = module->AutoNavigationHandler();
         handler.createPath(spec);
 
@@ -160,7 +160,7 @@ namespace openspace::autonavigation::luascriptfunctions {
 
         LINFOC("AutoNavigationModule", "Reading succeeded. Creating path");
 
-        AutoNavigationModule* module = global::moduleEngine.module<AutoNavigationModule>();
+        AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
         AutoNavigationHandler& handler = module->AutoNavigationHandler();
         handler.createPath(spec);
 
@@ -176,7 +176,7 @@ namespace openspace::autonavigation::luascriptfunctions {
         const int pointsPerSegment = (int)ghoul::lua::value<lua_Number>(L, 1);
 
         // Get sample positions from the current curve
-        AutoNavigationModule* module = global::moduleEngine.module<AutoNavigationModule>();
+        AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
         AutoNavigationHandler& handler = module->AutoNavigationHandler();
         std::vector<glm::dvec3> points = handler.getCurvePositions(pointsPerSegment);
 
@@ -211,7 +211,7 @@ namespace openspace::autonavigation::luascriptfunctions {
         const int pointsPerSegment = (int)ghoul::lua::value<lua_Number>(L, 1);
 
         // Get sample positions from the current curve
-        AutoNavigationModule* module = global::moduleEngine.module<AutoNavigationModule>();
+        AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
         AutoNavigationHandler& handler = module->AutoNavigationHandler();
         std::vector<glm::dquat> orientations = handler.getCurveOrientations(pointsPerSegment);
 
@@ -248,7 +248,7 @@ namespace openspace::autonavigation::luascriptfunctions {
         const int pointsPerSegment = (int)ghoul::lua::value<lua_Number>(L, 1);
 
         // Get sample positions from the current curve
-        AutoNavigationModule* module = global::moduleEngine.module<AutoNavigationModule>();
+        AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
         AutoNavigationHandler& handler = module->AutoNavigationHandler();
         std::vector<glm::dvec3> viewDirections = handler.getCurveViewDirections(pointsPerSegment);
 
@@ -283,7 +283,7 @@ namespace openspace::autonavigation::luascriptfunctions {
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::getControlPoints");
 
         // Get sample positions from the current curve
-        AutoNavigationModule* module = global::moduleEngine.module<AutoNavigationModule>();
+        AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
         AutoNavigationHandler& handler = module->AutoNavigationHandler();
         std::vector<glm::dvec3> points = handler.getControlPoints();
 
