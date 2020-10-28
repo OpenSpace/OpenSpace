@@ -33,5 +33,5 @@ asset.meta = {
     Author = "OpenSpace Team",
     URL = "http://www.openspaceproject.com",
     License = "NASA/PDS",
-    Identifiers = "MOC_WA_Color_Utah"
+    Identifiers = {"MOC_WA_Color_Utah"}
 }

@@ -30,5 +30,5 @@ asset.meta = {
     Author = "ESRI",
     URL = "https://www.arcgis.com/home/item.html?id=21b4ba14d9e5472d97afcbb819f7368e",
     License = "Esri Master License Agreement",
-    Identifiers = "ESRI_Imagery_World_2D"
+    Identifiers = {"ESRI_Imagery_World_2D"}
 }

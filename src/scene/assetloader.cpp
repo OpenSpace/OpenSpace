@@ -305,7 +305,14 @@ bool AssetLoader::loadAsset(Asset* asset) {
             metaDict.getValue(MetaInformationAuthor, meta.author);
             metaDict.getValue(MetaInformationURL, meta.url);
             metaDict.getValue(MetaInformationLicense, meta.license);
-            metaDict.getValue(MetaInformationIdentifiers, meta.identifiers);
+            if (metaDict.hasKey(MetaInformationIdentifiers)) {
+                ghoul::Dictionary iddict = metaDict.value<ghoul::Dictionary>(MetaInformationIdentifiers);
+                for (int i = 1; i <= iddict.size(); ++i) {
+                    std::string key = std::to_string(i);
+                    std::string identifier = iddict.value<std::string>(key);
+                    meta.identifiers.push_back(identifier);
+                }
+            }
             asset->setMetaInformation(std::move(meta));
         }
     }
