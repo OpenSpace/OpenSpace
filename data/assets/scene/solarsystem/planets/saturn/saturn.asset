@@ -3,12 +3,7 @@ local assetHelper = asset.require('util/asset_helper')
 asset.require("spice/base")
 asset.require('./trail')
 
-local textures = asset.syncedResource({
-    Type = "HttpSynchronization",
-    Name = "Saturn textures",
-    Identifier = "saturn_textures",
-    Version = 3
-})
+local texturesPath = asset.require("./saturn_textures").TexturesPath
 
 local Saturn = {
     Identifier = "Saturn",
@@ -26,7 +21,7 @@ local Saturn = {
         SegmentsPerPatch = 64,
         Layers = {},
         Rings = {
-            Texture = textures .. "/saturn_rings.png",
+            Texture = texturesPath .. "/saturn_rings.png",
             Size = 140445000,
             Offset = { 74500 / 140445.100671159, 1.0 }, -- min / max extend
         },
