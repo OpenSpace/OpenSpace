@@ -51,7 +51,7 @@ target_include_directories(OpenSpaceTest PUBLIC
     "${GHOUL_BASE_DIR}/ext/catch2/single_include"
 )
 target_compile_definitions(OpenSpaceTest PUBLIC "GHL_THROW_ON_ASSERT")
-target_link_libraries(OpenSpaceTest openspace-core)
+target_link_libraries(OpenSpaceTest PUBLIC openspace-core)
 
 if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
   # Add the CEF binary distribution's cmake/ directory to the module path and

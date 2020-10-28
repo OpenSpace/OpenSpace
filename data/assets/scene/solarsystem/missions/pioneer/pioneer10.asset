@@ -1,12 +1,7 @@
 local assetHelper = asset.require('util/asset_helper')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local model = asset.require("scene/solarsystem/missions/pioneer/pioneermodel")
 
-local modelFolder = asset.syncedResource({
-    Name = "Pioneer 10/11 Models",
-    Type = "HttpSynchronization",
-    Identifier = "pioneer_10_11_model",
-    Version = 2
-})
 
 local kernelsFolder = asset.syncedResource({
     Name = "Pioneer Kernels",
@@ -30,15 +25,7 @@ local Pioneer10 = {
             Kernels = kernelsList
         },
     },
-    Renderable = {
-        Type = "RenderableModel",
-        Geometry = {
-            Type = "MultiModelGeometry",
-            GeometryFile = modelFolder .. "/Pioneer.obj",
-            ColorTexture = modelFolder .. "/gray.png"
-        },
-        LightSources = assetHelper.getDefaultLightSources(sunTransforms.SolarSystemBarycenter.Identifier)
-    },
+    Renderable = model.PioneerModel,
     GUI = {
         Name = "Pioneer 10",
         Path = "/Solar System/Missions/Pioneer/10"

@@ -35,9 +35,18 @@ documentation::Documentation Configuration::Documentation = {
         {
             KeySGCTConfig,
             new StringAnnotationVerifier("A valid SGCT configuration file"),
-            Optional::No,
+            Optional::Yes,
             "The SGCT configuration file that determines the window and view frustum "
             "settings that are being used when OpenSpace is started."
+        },
+        {
+            KeySgctConfigNameInitialized,
+            new StringAnnotationVerifier("The type of SGCT auto-gen function (if called)"),
+            Optional::Yes,
+            "The SGCT configuration can be defined from an .xml file, or auto-generated "
+            "by an sgct.config.* lua function. If a lua function is used to generate the "
+            "SGCT configuration, then this key contains the name of the function, "
+            "otherwise is blank."
         },
         {
             KeyAsset,
@@ -428,6 +437,12 @@ documentation::Documentation Configuration::Documentation = {
             new TableVerifier,
             Optional::Yes,
             "Configurations for each module"
+        },
+        {
+            KeyReadOnlyProfiles,
+            new StringListVerifier,
+            Optional::Yes,
+            "List of profiles that cannot be overwritten by user"
         }
     }
 };

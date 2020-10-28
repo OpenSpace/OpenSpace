@@ -37,10 +37,28 @@ local object = {
     },
     GUI = {
         Name = "2MASS Galaxies",
-        Path = "/Universe/Galaxies"
+        Path = "/Universe/Galaxies",
+        Description = [[ The Two Micron All-Sky Survey (2MASS) is an infrared survey
+            of the sky published in 2003. Because it is looking in the infrared, and
+            this is a composite of the 2MASS point-source catalog, most of the light
+            from this survey is starlight. In visible light, clouds of gas and dust
+            obscure our view. However, in infrared, the longer wavelengths of light can
+            penetrate these clouds without being scattered, thereby revealing stars
+            that would normally be hidden to our eye. (Description from URL)]],
     }
 }
 
 
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+
+
+asset.meta = {
+    Name = "2MASS Galaxies",
+    Version = "1.0",
+    Description = [[ Digital Universe asset for the Two Micron All-Sky Survey (2MASS) 
+        survey]],
+    Author = "Brian Abbott (AMNH)",
+    URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+    License = "AMNH Digital Universe",
+    Identifiers = {"2MASS"}
+}

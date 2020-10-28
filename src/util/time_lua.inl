@@ -55,7 +55,7 @@ int time_setDeltaTime(lua_State* L) {
             return luaL_error(L, "bad argument #%d (%s)", 2, msg);
         }
         const double newDeltaTime = lua_tonumber(L, 1);
-        global::timeManager.setDeltaTime(newDeltaTime);
+        global::timeManager->setDeltaTime(newDeltaTime);
     }
     else {
         lua_settop(L, 0);
@@ -98,7 +98,7 @@ int time_setDeltaTimeSteps(lua_State* L) {
     }
     lua_pop(L, 1);
 
-    global::timeManager.setDeltaTimeSteps(inputDeltaTimes);
+    global::timeManager->setDeltaTimeSteps(inputDeltaTimes);
 
     lua_settop(L, 0);
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
@@ -114,7 +114,7 @@ int time_setDeltaTimeSteps(lua_State* L) {
 int time_setNextDeltaTimeStep(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::time_setNextDeltaTimeStep");
 
-    global::timeManager.setNextDeltaTimeStep();
+    global::timeManager->setNextDeltaTimeStep();
 
     lua_settop(L, 0);
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
@@ -130,7 +130,7 @@ int time_setNextDeltaTimeStep(lua_State* L) {
 int time_setPreviousDeltaTimeStep(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::time_setPreviousDeltaTimeStep");
 
-    global::timeManager.setPreviousDeltaTimeStep();
+    global::timeManager->setPreviousDeltaTimeStep();
 
     lua_settop(L, 0);
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
@@ -153,7 +153,7 @@ int time_interpolateNextDeltaTimeStep(lua_State* L) {
     );
 
     double interpolationDuration = 
-        global::timeManager.defaultDeltaTimeInterpolationDuration();
+        global::timeManager->defaultDeltaTimeInterpolationDuration();
 
     const int nArguments = lua_gettop(L);
     if (nArguments == 1) {
@@ -171,7 +171,7 @@ int time_interpolateNextDeltaTimeStep(lua_State* L) {
         interpolationDuration = lua_tonumber(L, 1);
     }
 
-    global::timeManager.interpolateNextDeltaTimeStep(interpolationDuration);
+    global::timeManager->interpolateNextDeltaTimeStep(interpolationDuration);
 
     lua_settop(L, 0);
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
@@ -194,7 +194,7 @@ int time_interpolatePreviousDeltaTimeStep(lua_State* L) {
     );
 
     double interpolationDuration = 
-        global::timeManager.defaultDeltaTimeInterpolationDuration();
+        global::timeManager->defaultDeltaTimeInterpolationDuration();
 
     const int nArguments = lua_gettop(L);
     if (nArguments == 1) {
@@ -212,7 +212,7 @@ int time_interpolatePreviousDeltaTimeStep(lua_State* L) {
         interpolationDuration = lua_tonumber(L, 1);
     }
 
-    global::timeManager.interpolatePreviousDeltaTimeStep(interpolationDuration);
+    global::timeManager->interpolatePreviousDeltaTimeStep(interpolationDuration);
 
     lua_settop(L, 0);
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
@@ -256,7 +256,7 @@ int time_interpolateDeltaTime(lua_State* L) {
 
         const double interpolationDuration = lua_tonumber(L, 2);
         const double newDeltaTime = lua_tonumber(L, 1);
-        global::timeManager.interpolateDeltaTime(newDeltaTime, interpolationDuration);
+        global::timeManager->interpolateDeltaTime(newDeltaTime, interpolationDuration);
     }
     else if (nArguments == 1) {
         const bool isNumber = (lua_isnumber(L, 1) != 0);
@@ -271,9 +271,9 @@ int time_interpolateDeltaTime(lua_State* L) {
             return luaL_error(L, "bad argument #%d (%s)", 2, msg);
         }
         const double newDeltaTime = lua_tonumber(L, 1);
-        global::timeManager.interpolateDeltaTime(
+        global::timeManager->interpolateDeltaTime(
             newDeltaTime,
-            global::timeManager.defaultDeltaTimeInterpolationDuration()
+            global::timeManager->defaultDeltaTimeInterpolationDuration()
         );
     }
     else {
@@ -295,7 +295,7 @@ int time_interpolateDeltaTime(lua_State* L) {
  * Returns the delta time by calling the Time::deltaTime method
  */
 int time_deltaTime(lua_State* L) {
-    lua_pushnumber(L, global::timeManager.deltaTime());
+    lua_pushnumber(L, global::timeManager->deltaTime());
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
@@ -309,7 +309,7 @@ int time_togglePause(lua_State* L) {
     const int nArguments = lua_gettop(L);
 
     if (nArguments == 0) {
-        global::timeManager.setPause(!global::timeManager.isPaused());
+        global::timeManager->setPause(!global::timeManager->isPaused());
     }
     else {
         lua_settop(L, 0);
@@ -350,17 +350,17 @@ int time_interpolateTogglePause(lua_State* L) {
 
         const double interpolationDuration = lua_tonumber(L, 1);
 
-        global::timeManager.interpolatePause(
-            !global::timeManager.isPaused(),
+        global::timeManager->interpolatePause(
+            !global::timeManager->isPaused(),
             interpolationDuration
         );
     }
     else if (nArguments == 0) {
-        const bool pause = !global::timeManager.isPaused();
-        global::timeManager.interpolatePause(pause,
+        const bool pause = !global::timeManager->isPaused();
+        global::timeManager->interpolatePause(pause,
             pause ?
-            global::timeManager.defaultPauseInterpolationDuration() :
-            global::timeManager.defaultUnpauseInterpolationDuration()
+            global::timeManager->defaultPauseInterpolationDuration() :
+            global::timeManager->defaultUnpauseInterpolationDuration()
         );
     }
     else {
@@ -388,7 +388,7 @@ int time_setPause(lua_State* L) {
 
     if (nArguments == 1) {
         const bool pause = lua_toboolean(L, 1) == 1;
-        global::timeManager.setPause(pause);
+        global::timeManager->setPause(pause);
     }
     else {
         lua_settop(L, 0);
@@ -429,14 +429,14 @@ int time_interpolatePause(lua_State* L) {
         }
         const double interpolationDuration = lua_tonumber(L, 2);
         const bool pause = lua_toboolean(L, 1) == 1;
-        global::timeManager.interpolatePause(pause, interpolationDuration);
+        global::timeManager->interpolatePause(pause, interpolationDuration);
     }
     else if (nArguments == 1) {
         const bool pause = lua_toboolean(L, 1) == 1;
-        global::timeManager.interpolatePause(pause,
+        global::timeManager->interpolatePause(pause,
             pause ?
-            global::timeManager.defaultPauseInterpolationDuration() :
-            global::timeManager.defaultUnpauseInterpolationDuration()
+            global::timeManager->defaultPauseInterpolationDuration() :
+            global::timeManager->defaultUnpauseInterpolationDuration()
         );
     }
     else {
@@ -488,12 +488,12 @@ int time_setTime(lua_State* L) {
     if (nArguments == 1) {
         if (isNumber) {
             double value = lua_tonumber(L, 1);
-            global::timeManager.setTimeNextFrame(Time(value));
+            global::timeManager->setTimeNextFrame(Time(value));
             return 0;
         }
         if (isString) {
             const char* time = lua_tostring(L, 1);
-            global::timeManager.setTimeNextFrame(Time(Time::convertTime(time)));
+            global::timeManager->setTimeNextFrame(Time(Time::convertTime(time)));
             return 0;
         }
         ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
@@ -541,17 +541,17 @@ int time_interpolateTime(lua_State* L) {
     if (lua_gettop(L) == 1) {
         if (isNumber) {
             double value = lua_tonumber(L, 1);
-            global::timeManager.interpolateTime(
+            global::timeManager->interpolateTime(
                 value,
-                global::timeManager.defaultTimeInterpolationDuration()
+                global::timeManager->defaultTimeInterpolationDuration()
             );
             return 0;
         }
         if (isString) {
             const char* time = lua_tostring(L, 1);
-            global::timeManager.interpolateTime(
+            global::timeManager->interpolateTime(
                 Time::convertTime(time),
-                global::timeManager.defaultTimeInterpolationDuration()
+                global::timeManager->defaultTimeInterpolationDuration()
             );
             return 0;
         }
@@ -577,10 +577,10 @@ int time_interpolateTime(lua_State* L) {
 
         const double duration = lua_tonumber(L, 2);
         if (duration > 0) {
-            global::timeManager.interpolateTime(targetTime, duration);
+            global::timeManager->interpolateTime(targetTime, duration);
         }
         else {
-            global::timeManager.setTimeNextFrame(Time(targetTime));
+            global::timeManager->setTimeNextFrame(Time(targetTime));
         }
     }
     return 0;
@@ -615,9 +615,9 @@ int time_interpolateTimeRelative(lua_State* L) {
 
     if (lua_gettop(L) == 1 && isNumber) {
         double delta = lua_tonumber(L, 1);
-        global::timeManager.interpolateTimeRelative(
+        global::timeManager->interpolateTimeRelative(
             delta,
-            global::timeManager.defaultTimeInterpolationDuration()
+            global::timeManager->defaultTimeInterpolationDuration()
         );
         ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
 
@@ -638,11 +638,11 @@ int time_interpolateTimeRelative(lua_State* L) {
 
         const double duration = lua_tonumber(L, 2);
         if (duration > 0) {
-            global::timeManager.interpolateTimeRelative(delta, duration);
+            global::timeManager->interpolateTimeRelative(delta, duration);
         }
         else {
-            global::timeManager.setTimeNextFrame(
-                Time(global::timeManager.time().j2000Seconds() + delta)
+            global::timeManager->setTimeNextFrame(
+                Time(global::timeManager->time().j2000Seconds() + delta)
             );
         }
     }
@@ -656,7 +656,7 @@ int time_interpolateTimeRelative(lua_State* L) {
  * It is returned by calling the Time::currentTime method.
  */
 int time_currentTime(lua_State* L) {
-    ghoul::lua::push(L, global::timeManager.time().j2000Seconds());
+    ghoul::lua::push(L, global::timeManager->time().j2000Seconds());
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
@@ -668,7 +668,7 @@ int time_currentTime(lua_State* L) {
  * timezone by calling the Time::UTC method
  */
 int time_currentTimeUTC(lua_State* L) {
-    ghoul::lua::push(L, global::timeManager.time().UTC());
+    ghoul::lua::push(L, global::timeManager->time().UTC());
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }

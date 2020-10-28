@@ -35,6 +35,4 @@ local object = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })

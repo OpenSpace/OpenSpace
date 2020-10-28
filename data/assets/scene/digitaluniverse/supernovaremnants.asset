@@ -40,10 +40,24 @@ local object = {
     },
     GUI = {
         Name = "Supernova Remnants",
-        Path = "/Milky Way"
+        Path = "/Milky Way",
+        Description = [[Census: 112 supernova remnants.<br> DU Version 3.7. A supernova
+            remnant is the ejected gas that results from a supernova. It glows for a
+            cosmically short period of time before mixing with the interstellar medium.
+            (Description from URL) <br><br> Data Reference: The First Fermi LAT SNR
+            Catalog (Acero+, 2016)]],
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+
+
+asset.meta = {
+    Name = "Supernova Remnants",
+    Version = "2.0",
+    Description = [[Digital Universe asset for Supernova Remnants.]],
+    Author = "Brian Abbott (AMNH)",
+    URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+    License = "AMNH Digital Universe",
+    Identifiers = {"SupernovaRemnants"}
+}

@@ -16,7 +16,7 @@ local Iapetus = {
         },
         Rotation = {
             Type = "SpiceRotation",
-            SourceFrame = "IAU_ENCELADUS",
+            SourceFrame = "IAU_IAPETUS",
             DestinationFrame = "GALACTIC"
         }
     },
@@ -44,10 +44,21 @@ local Iapetus = {
     },
     Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
     GUI = {
-        Path = "/Solar System/Planets/Saturn/Moons"
+        Name = "Iapetus",
+        Path = "/Solar System/Planets/Saturn/Moons",
+        Description = [[Third largest moon of Saturn. ]]
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Iapetus })
+
+
+asset.meta = {
+    Name = "Iapetus",
+    Version = "1.0",
+    Description = [[ Iapetus globe with labels.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = {"Iapetus"}
+}

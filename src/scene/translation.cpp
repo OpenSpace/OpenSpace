@@ -70,7 +70,7 @@ ghoul::mm_unique_ptr<Translation> Translation::createFromDictionary(
     Translation* result = factory->create(
         translationType,
         dictionary,
-        &global::memoryManager.PersistentMemory
+        &global::memoryManager->PersistentMemory
     );
     result->setIdentifier("Translation");
     return ghoul::mm_unique_ptr<Translation>(result);

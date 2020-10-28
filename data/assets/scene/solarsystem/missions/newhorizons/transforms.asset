@@ -46,8 +46,6 @@ local NewHorizonsPosition = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     PlutoBarycenterAccurate,
     NewHorizonsPosition 

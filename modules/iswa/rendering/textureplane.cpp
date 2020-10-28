@@ -39,7 +39,7 @@ TexturePlane::TexturePlane(const ghoul::Dictionary& dictionary)
 
 void TexturePlane::initializeGL() {
     if (!_shader) {
-        _shader = global::renderEngine.buildRenderProgram(
+        _shader = global::renderEngine->buildRenderProgram(
             "PlaneProgram",
             absPath("${MODULE_ISWA}/shaders/textureplane_vs.glsl"),
             absPath("${MODULE_ISWA}/shaders/textureplane_fs.glsl")

@@ -205,7 +205,7 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
         return _position;
     }
 
-    GlobeBrowsingModule& mod = *(global::moduleEngine.module<GlobeBrowsingModule>());
+    GlobeBrowsingModule& mod = *(global::moduleEngine->module<GlobeBrowsingModule>());
 
     if (_useHeightmap) {
         glm::vec3 groundPos = mod.cartesianCoordinatesFromGeo(

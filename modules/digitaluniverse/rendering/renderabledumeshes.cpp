@@ -249,7 +249,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
 
     _renderOption.addOption(RenderOptionViewDirection, "Camera View Direction");
     _renderOption.addOption(RenderOptionPositionNormal, "Camera Position Normal");
-    if (global::windowDelegate.isFisheyeRendering()) {
+    if (global::windowDelegate->isFisheyeRendering()) {
         _renderOption = RenderOptionPositionNormal;
     }
     else {
@@ -352,7 +352,7 @@ void RenderableDUMeshes::initializeGL() {
     _program = DigitalUniverseModule::ProgramObjectManager.request(
         ProgramObjectName,
         []() {
-            return global::renderEngine.buildRenderProgram(
+            return global::renderEngine->buildRenderProgram(
                 "RenderableDUMeshes",
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/dumesh_vs.glsl"),
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/dumesh_fs.glsl")
@@ -372,7 +372,7 @@ void RenderableDUMeshes::initializeGL() {
     if (_hasLabel) {
         if (!_font) {
             constexpr const int FontSize = 50;
-            _font = global::fontManager.font(
+            _font = global::fontManager->font(
                 "Mono",
                 static_cast<float>(FontSize),
                 ghoul::fontrendering::FontManager::Outline::Yes,
@@ -393,7 +393,7 @@ void RenderableDUMeshes::deinitializeGL() {
     DigitalUniverseModule::ProgramObjectManager.release(
         ProgramObjectName,
         [](ghoul::opengl::ProgramObject* p) {
-            global::renderEngine.removeRenderProgram(p);
+            global::renderEngine->removeRenderProgram(p);
         }
     );
 }
@@ -424,7 +424,7 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
                 case Wire:
                     glLineWidth(_lineWidth);
                     glDrawArrays(GL_LINE_STRIP, 0, pair.second.numV);
-                    global::renderEngine.openglStateCache().resetLineState();
+                    global::renderEngine->openglStateCache().resetLineState();
                     break;
                 case Point:
                     glDrawArrays(GL_POINTS, 0, pair.second.numV);
@@ -439,8 +439,8 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
     _program->deactivate();
 
     // Restores GL State
-    global::renderEngine.openglStateCache().resetDepthState();
-    global::renderEngine.openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
+    global::renderEngine->openglStateCache().resetBlendState();
 }
 
 void RenderableDUMeshes::renderLabels(const RenderData& data,

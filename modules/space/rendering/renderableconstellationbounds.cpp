@@ -205,7 +205,7 @@ RenderableConstellationBounds::RenderableConstellationBounds(
 }
 
 void RenderableConstellationBounds::initializeGL() {
-    _program = global::renderEngine.buildRenderProgram(
+    _program = global::renderEngine->buildRenderProgram(
         "ConstellationBounds",
         absPath("${MODULE_SPACE}/shaders/constellationbounds_vs.glsl"),
         absPath("${MODULE_SPACE}/shaders/constellationbounds_fs.glsl")
@@ -237,7 +237,7 @@ void RenderableConstellationBounds::deinitializeGL() {
     _vao = 0;
 
     if (_program) {
-        global::renderEngine.removeRenderProgram(_program.get());
+        global::renderEngine->removeRenderProgram(_program.get());
         _program = nullptr;
     }
 }

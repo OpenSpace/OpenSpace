@@ -1,7 +1,7 @@
-local Hydra = asset.require('scene/solarsystem/dwarf_planets/pluto/hydra')
-local Kerberos = asset.require('scene/solarsystem/dwarf_planets/pluto/kerberos')
-local Nix = asset.require('scene/solarsystem/dwarf_planets/pluto/nix')
-local Styx = asset.require('scene/solarsystem/dwarf_planets/pluto/styx')
+local Hydra = asset.require('scene/solarsystem/dwarf_planets/pluto/minor/hydra')
+local Kerberos = asset.require('scene/solarsystem/dwarf_planets/pluto/minor/kerberos')
+local Nix = asset.require('scene/solarsystem/dwarf_planets/pluto/minor/nix')
+local Styx = asset.require('scene/solarsystem/dwarf_planets/pluto/minor/styx')
 local assetHelper = asset.require('util/asset_helper')
 
 local hydraTextures = asset.syncedResource({

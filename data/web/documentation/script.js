@@ -133,6 +133,10 @@ window.onload = function () {
           /\\n/g, ""
         );
         documentation[i].data[j].description = escaped;
+        var escapedLicense = documentation[i].data[j].license.replace(
+          /\\n/g, ""
+        );
+        documentation[i].data[j].license = escapedLicense;
       }
     }
 

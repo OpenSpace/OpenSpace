@@ -8,7 +8,12 @@ local layer = {
     Name = "Terrain tileset",
     FilePath = mapServiceConfigsPath .. "/ESRI/Terrain.wms",
     TilePixelSize = 64,
-    Fallback = fallBackLayer
+    Fallback = fallBackLayer,
+    Description = [[This globe layer presents elevation data at approximately 90m or 1km
+        per pixel resolution for the world. The elevation data includes 90m Shuttle Radar
+        Topography Mission (SRTM) elevation data from NASA and National
+        Geospatial-Intelligence Agency (NGA) where it is available and 1km GTOPO30
+        data from the USGS elsewhere. Vertical units are measured in meters.]],
 }
 
 asset.onInitialize(function () 
@@ -16,3 +21,15 @@ asset.onInitialize(function ()
 end)
 
 asset.export("layer", layer)
+
+
+asset.meta = {
+    Name = "World Elevation (3D)",
+    Version = "1.0",
+    Description = [[Main web loaded height layer for Earth. This layer is hosted by
+        ESRI.]],
+    Author = "ESRI",
+    URL = "https://www.arcgis.com/home/item.html?id=1b48cd3b6276416784fe90a68c580a89",
+    License = "Esri Master License Agreement",
+    Identifiers = {"Terrain_tileset"}
+}

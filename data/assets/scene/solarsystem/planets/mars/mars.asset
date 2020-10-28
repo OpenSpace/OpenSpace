@@ -41,7 +41,9 @@ local Mars = {
     },
     Tag = { "planet_solarSystem", "planet_terrestrial" },
     GUI = {
-        Path = "/Solar System/Planets/Mars"
+        Name = "Mars",
+        Path = "/Solar System/Planets/Mars",
+        Description = [[ Main globe for Mars with labels and map layers.]]
     }
 }
 
@@ -68,8 +70,20 @@ local MarsLabel = {
     Tag = { "solarsystem_labels" },
     GUI = {
         Name = "Mars Label",
-        Path = "/Solar System/Planets/Mars"
+        Path = "/Solar System/Planets/Mars",
+        Description = [[ Main label for Mars]]
     }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Mars, MarsLabel })
+
+
+asset.meta = {
+    Name = "Mars",
+    Version = "1.0",
+    Description = [[ Mars globe, and main globe label.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = {"Mars", "MarsLabel"}
+}

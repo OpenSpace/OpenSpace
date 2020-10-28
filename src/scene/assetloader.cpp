@@ -43,7 +43,6 @@ namespace {
     constexpr const char* AssetGlobalVariableName = "asset";
 
     constexpr const char* RequireFunctionName = "require";
-    constexpr const char* RequestFunctionName = "request";
     constexpr const char* ExistsFunctionName = "exists";
     constexpr const char* ExportFunctionName = "export";
 
@@ -63,6 +62,7 @@ namespace {
     constexpr const char* MetaInformationAuthor = "Author";
     constexpr const char* MetaInformationURL = "URL";
     constexpr const char* MetaInformationLicense = "License";
+    constexpr const char* MetaInformationIdentifiers = "Identifiers";
 
     constexpr const char* ExportsTableName = "_exports";
     constexpr const char* AssetTableName = "_asset";
@@ -305,6 +305,14 @@ bool AssetLoader::loadAsset(Asset* asset) {
             metaDict.getValue(MetaInformationAuthor, meta.author);
             metaDict.getValue(MetaInformationURL, meta.url);
             metaDict.getValue(MetaInformationLicense, meta.license);
+            if (metaDict.hasKey(MetaInformationIdentifiers)) {
+                ghoul::Dictionary iddict = metaDict.value<ghoul::Dictionary>(MetaInformationIdentifiers);
+                for (int i = 1; i <= iddict.size(); ++i) {
+                    std::string key = std::to_string(i);
+                    std::string identifier = iddict.value<std::string>(key);
+                    meta.identifiers.push_back(identifier);
+                }
+            }
             asset->setMetaInformation(std::move(meta));
         }
     }

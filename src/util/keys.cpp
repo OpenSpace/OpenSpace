@@ -59,7 +59,6 @@ bool hasKeyModifier(KeyModifier lhs, KeyModifier rhs) {
            static_cast<std::underlying_type_t<KeyModifier>>(rhs);
 }
 
-
 KeyModifier operator|(KeyModifier lhs, KeyModifier rhs) {
     return static_cast<KeyModifier>(
         static_cast<std::underlying_type_t<KeyModifier>>(lhs) |
@@ -90,7 +89,6 @@ KeyWithModifier stringToKey(std::string str) {
         );
     }
     Key k = itKey->second;
-
 
     KeyModifier m = KeyModifier::NoModifier;
     std::for_each(

@@ -87,7 +87,7 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary &dictionary)
         _url = dictionary.value<std::string>(UrlInfo.identifier);
     }
 
-    glm::vec2 windowDimensions = global::windowDelegate.currentSubwindowSize();
+    glm::vec2 windowDimensions = global::windowDelegate->currentSubwindowSize();
     _dimensions = windowDimensions;
 
     _renderHandler = new ScreenSpaceRenderHandler();
@@ -105,7 +105,7 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary &dictionary)
     addProperty(_dimensions);
     addProperty(_reload);
 
-    WebBrowserModule* webBrowser = global::moduleEngine.module<WebBrowserModule>();
+    WebBrowserModule* webBrowser = global::moduleEngine->module<WebBrowserModule>();
     if (webBrowser) {
         webBrowser->addBrowser(_browserInstance.get());
     }
@@ -135,7 +135,7 @@ bool ScreenSpaceBrowser::deinitializeGL() {
 
     _browserInstance->close(true);
 
-    WebBrowserModule* webBrowser = global::moduleEngine.module<WebBrowserModule>();
+    WebBrowserModule* webBrowser = global::moduleEngine->module<WebBrowserModule>();
     if (webBrowser) {
         webBrowser->removeBrowser(_browserInstance.get());
         _browserInstance.reset();

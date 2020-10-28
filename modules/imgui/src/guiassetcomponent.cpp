@@ -74,7 +74,7 @@ void GuiAssetComponent::render() {
     ImGui::Begin("Assets", &e);
     _isEnabled = e;
 
-    AssetManager& assetManager = global::openSpaceEngine.assetManager();
+    AssetManager& assetManager = global::openSpaceEngine->assetManager();
 
     std::string rootPath;
 

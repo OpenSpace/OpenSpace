@@ -44,7 +44,7 @@ public:
     virtual bool isDone() const = 0;
 
 protected:
-    size_t _topicId;
+    size_t _topicId = 0;
     Connection* _connection;
 };
 

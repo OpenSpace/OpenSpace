@@ -25,7 +25,7 @@
 #include <modules/exoplanets/exoplanetsmodule.h>
 
 #include <modules/exoplanets/rendering/renderableorbitdisc.h>
-#include <modules/exoplanets/tasks/exoplanetscsvtobintask.h>
+#include <modules/exoplanets/tasks/exoplanetsdatapreparationtask.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/interaction/navigationhandler.h>
@@ -52,9 +52,9 @@ scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
             "addExoplanetSystem",
             &exoplanets::luascriptfunctions::addExoplanetSystem,
             {},
-            "string",
-            "Add the exoplanet system specified by the input string, including "
-            "information about the host star and planets."
+            "string or list of strings",
+            "Add one or multiple exoplanet systems to the scene, as specified by the "
+            "input. An input string should be the name of the system host star."
         },
         {
             "removeExoplanetSystem",
@@ -70,6 +70,13 @@ scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
             "",
             "Prints a list with the names of all exoplanet systems that can be added to "
             "the scene graph to the OpenSpace Log. "
+        },
+        {
+            "getListOfExoplanets",
+            &exoplanets::luascriptfunctions::getListOfExoplanets,
+            {},
+            "",
+            "Gets a list with the names of all exoplanet systems, that can be used by a GUI."
         }
     };
 
@@ -80,13 +87,13 @@ void ExoplanetsModule::internalInitialize(const ghoul::Dictionary&) {
     auto fTask = FactoryManager::ref().factory<Task>();
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fTask, "No task factory existed");
-    fTask->registerClass<ExoplanetsCsvToBinTask>("ExoplanetsCsvToBinTask");
+    fTask->registerClass<ExoplanetsDataPreparationTask>("ExoplanetsDataPreparationTask");
     fRenderable->registerClass<RenderableOrbitDisc>("RenderableOrbitDisc");
 }
 
 std::vector<documentation::Documentation> ExoplanetsModule::documentations() const {
     return {
-        ExoplanetsCsvToBinTask::documentation()
+        ExoplanetsDataPreparationTask::documentation()
     };
 }
 

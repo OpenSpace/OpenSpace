@@ -24,11 +24,11 @@ end
 
 local previousFlipbookPage = function (flipbook)
 
+    local localIndex = flipbook.CurrentFlipIndex;
+
     if (localIndex == -1) then
         return
     end
-
-    local localIndex = flipbook.CurrentFlipIndex;
 
     local assetSring = flipbook.AssetPrefix .. localIndex; 
     openspace.setPropertyValueSingle("Scene." .. flipbook.AssetGlobe .. ".Renderable.Layers.ColorLayers.".. assetSring .. ".Enabled", false)

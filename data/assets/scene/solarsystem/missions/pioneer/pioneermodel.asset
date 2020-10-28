@@ -1,0 +1,23 @@
+local assetHelper = asset.require('util/asset_helper')
+
+
+local modelFolder = asset.syncedResource({
+    Name = "Pioneer 10/11 Models",
+    Type = "HttpSynchronization",
+    Identifier = "pioneer_10_11_model",
+    Version = 2
+})
+
+local ModelRenderable = {
+    Type = "RenderableModel",
+    Geometry = {{
+        Type = "MultiModelGeometry",
+        GeometryFile = modelFolder .. "/Pioneer.obj",
+        ColorTexture = modelFolder .. "/gray.png"
+    }},
+    LightSources = assetHelper.getDefaultLightSources(
+        sunTransforms.SolarSystemBarycenter.Identifier
+    )
+}
+
+asset.export("PioneerModel", ModelRenderable)

@@ -157,7 +157,7 @@ bool RenderableOrbitDisc::isReady() const {
 }
 
 void RenderableOrbitDisc::initializeGL() {
-    _shader = global::renderEngine.buildRenderProgram(
+    _shader = global::renderEngine->buildRenderProgram(
         "OrbitdiscProgram",
         absPath("${BASE}/modules/exoplanets/shaders/orbitdisc_vs.glsl"),
         absPath("${BASE}/modules/exoplanets/shaders/orbitdisc_fs.glsl")
@@ -189,7 +189,7 @@ void RenderableOrbitDisc::deinitializeGL() {
     _textureFile = nullptr;
     _texture = nullptr;
 
-    global::renderEngine.removeRenderProgram(_shader.get());
+    global::renderEngine->removeRenderProgram(_shader.get());
     _shader = nullptr;
 }
 
@@ -228,9 +228,9 @@ void RenderableOrbitDisc::render(const RenderData& data, RendererTasks&) {
     _shader->deactivate();
 
     // Restores GL State
-    global::renderEngine.openglStateCache().resetBlendState();
-    global::renderEngine.openglStateCache().resetDepthState();
-    global::renderEngine.openglStateCache().resetPolygonAndClippingState();
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
+    global::renderEngine->openglStateCache().resetPolygonAndClippingState();
 }
 
 void RenderableOrbitDisc::update(const UpdateData& data) {

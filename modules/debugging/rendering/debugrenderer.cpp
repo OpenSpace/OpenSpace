@@ -42,7 +42,7 @@ namespace openspace {
 DebugRenderer* DebugRenderer::_reference = nullptr;
 
 DebugRenderer::DebugRenderer()  {
-    _programObject = global::renderEngine.buildRenderProgram(
+    _programObject = global::renderEngine->buildRenderProgram(
         "BasicDebugShader",
         absPath("${MODULE_DEBUGGING}/rendering/debugshader_vs.glsl"),
         absPath("${MODULE_DEBUGGING}/rendering/debugshader_fs.glsl")

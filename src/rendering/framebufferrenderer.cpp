@@ -171,111 +171,35 @@ void FramebufferRenderer::initialize() {
 
     // GBuffers
     glGenTextures(1, &_gBuffers.colorTexture);
-    if (HasGLDebugInfo) {
-        glObjectLabel(GL_TEXTURE, _gBuffers.colorTexture, -1, "G-Buffer Color");
-    }
     glGenTextures(1, &_gBuffers.depthTexture);
-    if (HasGLDebugInfo) {
-        glObjectLabel(GL_TEXTURE, _gBuffers.depthTexture, -1, "G-Buffer Depth");
-    }
     glGenTextures(1, &_gBuffers.positionTexture);
-    if (HasGLDebugInfo) {
-        glObjectLabel(GL_TEXTURE, _gBuffers.positionTexture, -1, "G-Buffer Position");
-    }
     glGenTextures(1, &_gBuffers.normalTexture);
-    if (HasGLDebugInfo) {
-        glObjectLabel(GL_TEXTURE, _gBuffers.normalTexture, -1, "G-Buffer Normal");
-    }
     glGenFramebuffers(1, &_gBuffers.framebuffer);
-    if (HasGLDebugInfo) {
-        glObjectLabel(GL_FRAMEBUFFER, _gBuffers.framebuffer, -1, "G-Buffer Main");
-    }
+   
 
     // PingPong Buffers
     // The first pingpong buffer shares the color texture with the renderbuffer:
     _pingPongBuffers.colorTexture[0] = _gBuffers.colorTexture;
     glGenTextures(1, &_pingPongBuffers.colorTexture[1]);
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(
-            GL_TEXTURE,
-            _pingPongBuffers.colorTexture[1],
-            -1,
-            "G-Buffer Color Ping-Pong"
-        );
-    }
     glGenFramebuffers(1, &_pingPongBuffers.framebuffer);
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(
-            GL_FRAMEBUFFER,
-            _pingPongBuffers.framebuffer,
-            -1,
-            "G-Buffer Ping-Pong"
-        );
-    }
-
+    
     // Exit framebuffer
     glGenTextures(1, &_exitColorTexture);
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_TEXTURE, _exitColorTexture, -1, "Exit color");
-    }
-    glGenTextures(1, &_exitDepthTexture);
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_TEXTURE, _exitColorTexture, -1, "Exit depth");
-    }
+    glGenTextures(1, &_exitDepthTexture);    
     glGenFramebuffers(1, &_exitFramebuffer);
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_FRAMEBUFFER, _exitFramebuffer, -1, "Exit");
-    }
 
     // HDR / Filtering Buffers
     glGenFramebuffers(1, &_hdrBuffers.hdrFilteringFramebuffer);
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_FRAMEBUFFER, _exitFramebuffer, -1, "HDR filtering");
-    }
     glGenTextures(1, &_hdrBuffers.hdrFilteringTexture);
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_TEXTURE, _hdrBuffers.hdrFilteringTexture, -1, "HDR filtering");
-    }
-
-
+    
     // FXAA Buffers
     glGenFramebuffers(1, &_fxaaBuffers.fxaaFramebuffer);
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_FRAMEBUFFER, _fxaaBuffers.fxaaFramebuffer, -1, "FXAA");
-    }
     glGenTextures(1, &_fxaaBuffers.fxaaTexture);
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_TEXTURE, _fxaaBuffers.fxaaTexture, -1, "FXAA");
-    }
-
+    
     // DownscaleVolumeRendering
     glGenFramebuffers(1, &_downscaleVolumeRendering.framebuffer);
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(
-            GL_FRAMEBUFFER,
-            _downscaleVolumeRendering.framebuffer,
-            -1,
-            "Downscaled Volume"
-        );
-    }
     glGenTextures(1, &_downscaleVolumeRendering.colorTexture);
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(
-            GL_TEXTURE,
-            _downscaleVolumeRendering.colorTexture,
-            -1,
-            "Downscaled Volume Color"
-        );
-    }
     glGenTextures(1, &_downscaleVolumeRendering.depthbuffer);
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(
-            GL_TEXTURE,
-            _downscaleVolumeRendering.depthbuffer,
-            -1,
-            "Downscaled Volume Depth"
-        );
-    }
 
     // Allocate Textures/Buffers Memory
     updateResolution();
@@ -311,6 +235,9 @@ void FramebufferRenderer::initialize() {
         _gBuffers.depthTexture,
         0
     );
+    if (HasGLDebugInfo) {
+        glObjectLabel(GL_FRAMEBUFFER, _gBuffers.framebuffer, -1, "G-Buffer Main");
+    }
 
     GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
@@ -339,6 +266,14 @@ void FramebufferRenderer::initialize() {
         _gBuffers.depthTexture,
         0
     );
+    if (glbinding::Binding::ObjectLabel.isResolved()) {
+        glObjectLabel(
+            GL_FRAMEBUFFER,
+            _pingPongBuffers.framebuffer,
+            -1,
+            "G-Buffer Ping-Pong"
+        );
+    }
 
     status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
@@ -362,6 +297,9 @@ void FramebufferRenderer::initialize() {
         _exitDepthTexture,
         0
     );
+    if (glbinding::Binding::ObjectLabel.isResolved()) {
+        glObjectLabel(GL_FRAMEBUFFER, _exitFramebuffer, -1, "Exit");
+    }
 
     status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
@@ -378,6 +316,9 @@ void FramebufferRenderer::initialize() {
         _hdrBuffers.hdrFilteringTexture,
         0
     );
+    if (glbinding::Binding::ObjectLabel.isResolved()) {
+        glObjectLabel(GL_FRAMEBUFFER, _hdrBuffers.hdrFilteringFramebuffer, -1, "HDR filtering");
+    }
 
     status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
@@ -394,6 +335,9 @@ void FramebufferRenderer::initialize() {
         _fxaaBuffers.fxaaTexture,
         0
     );
+    if (glbinding::Binding::ObjectLabel.isResolved()) {
+        glObjectLabel(GL_FRAMEBUFFER, _fxaaBuffers.fxaaFramebuffer, -1, "FXAA");
+    }
 
     status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
@@ -416,6 +360,14 @@ void FramebufferRenderer::initialize() {
         _downscaleVolumeRendering.depthbuffer,
         0
     );
+    if (glbinding::Binding::ObjectLabel.isResolved()) {
+        glObjectLabel(
+            GL_FRAMEBUFFER,
+            _downscaleVolumeRendering.framebuffer,
+            -1,
+            "Downscaled Volume"
+        );
+    }
 
     status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
@@ -449,8 +401,8 @@ void FramebufferRenderer::initialize() {
         DownscaledVolumeUniformNames
     );
 
-    global::raycasterManager.addListener(*this);
-    global::deferredcasterManager.addListener(*this);
+    global::raycasterManager->addListener(*this);
+    global::deferredcasterManager->addListener(*this);
 
     // Set Default Rendering OpenGL State
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
@@ -466,7 +418,7 @@ void FramebufferRenderer::initialize() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // Save State in Cache
-    global::renderEngine.openglStateCache().loadCurrentGLState();
+    global::renderEngine->openglStateCache().loadCurrentGLState();
 }
 
 void FramebufferRenderer::deinitialize() {
@@ -500,8 +452,8 @@ void FramebufferRenderer::deinitialize() {
     glDeleteBuffers(1, &_vertexPositionBuffer);
     glDeleteVertexArrays(1, &_screenQuad);
 
-    global::raycasterManager.removeListener(*this);
-    global::deferredcasterManager.removeListener(*this);
+    global::raycasterManager->removeListener(*this);
+    global::deferredcasterManager->removeListener(*this);
 }
 
 void FramebufferRenderer::raycastersChanged(VolumeRaycaster&,
@@ -797,6 +749,10 @@ void FramebufferRenderer::updateResolution() {
     ZoneScoped
     TracyGpuZone("Renderer updateResolution")
 
+    HasGLDebugInfo = glbinding::Binding::ObjectLabel.isResolved() &&
+                     glbinding::Binding::PushDebugGroup.isResolved() &&
+                     glbinding::Binding::PopDebugGroup.isResolved();
+
     glBindTexture(GL_TEXTURE_2D, _gBuffers.colorTexture);
     glTexImage2D(
         GL_TEXTURE_2D,
@@ -811,6 +767,9 @@ void FramebufferRenderer::updateResolution() {
     );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    if (HasGLDebugInfo) {
+        glObjectLabel(GL_TEXTURE, _gBuffers.colorTexture, -1, "G-Buffer Color");
+    }
 
     glBindTexture(GL_TEXTURE_2D, _gBuffers.positionTexture);
     glTexImage2D(
@@ -826,6 +785,9 @@ void FramebufferRenderer::updateResolution() {
     );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    if (HasGLDebugInfo) {
+        glObjectLabel(GL_TEXTURE, _gBuffers.positionTexture, -1, "G-Buffer Position");
+    }
 
     glBindTexture(GL_TEXTURE_2D, _gBuffers.normalTexture);
     glTexImage2D(
@@ -841,6 +803,9 @@ void FramebufferRenderer::updateResolution() {
     );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    if (HasGLDebugInfo) {
+        glObjectLabel(GL_TEXTURE, _gBuffers.normalTexture, -1, "G-Buffer Normal");
+    }
 
     glBindTexture(GL_TEXTURE_2D, _gBuffers.depthTexture);
     glTexImage2D(
@@ -856,6 +821,9 @@ void FramebufferRenderer::updateResolution() {
     );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    if (HasGLDebugInfo) {
+        glObjectLabel(GL_TEXTURE, _gBuffers.depthTexture, -1, "G-Buffer Depth");
+    }
 
     glBindTexture(GL_TEXTURE_2D, _pingPongBuffers.colorTexture[1]);
     glTexImage2D(
@@ -871,6 +839,14 @@ void FramebufferRenderer::updateResolution() {
     );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    if (glbinding::Binding::ObjectLabel.isResolved()) {
+        glObjectLabel(
+            GL_TEXTURE,
+            _pingPongBuffers.colorTexture[1],
+            -1,
+            "G-Buffer Color Ping-Pong"
+        );
+    }
 
     // HDR / Filtering
     glBindTexture(GL_TEXTURE_2D, _hdrBuffers.hdrFilteringTexture);
@@ -887,6 +863,9 @@ void FramebufferRenderer::updateResolution() {
     );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    if (glbinding::Binding::ObjectLabel.isResolved()) {
+        glObjectLabel(GL_TEXTURE, _hdrBuffers.hdrFilteringTexture, -1, "HDR filtering");
+    }
 
     // FXAA
     glBindTexture(GL_TEXTURE_2D, _fxaaBuffers.fxaaTexture);
@@ -903,6 +882,9 @@ void FramebufferRenderer::updateResolution() {
     );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    if (glbinding::Binding::ObjectLabel.isResolved()) {
+        glObjectLabel(GL_TEXTURE, _fxaaBuffers.fxaaTexture, -1, "FXAA");
+    }
 
     // Downscale Volume Rendering
     glBindTexture(GL_TEXTURE_2D, _downscaleVolumeRendering.colorTexture);
@@ -925,6 +907,14 @@ void FramebufferRenderer::updateResolution() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     float volumeBorderColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
     glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, volumeBorderColor);
+    if (glbinding::Binding::ObjectLabel.isResolved()) {
+        glObjectLabel(
+            GL_TEXTURE,
+            _downscaleVolumeRendering.colorTexture,
+            -1,
+            "Downscaled Volume Color"
+        );
+    }
 
     glBindTexture(GL_TEXTURE_2D, _downscaleVolumeRendering.depthbuffer);
     glTexImage2D(
@@ -944,6 +934,14 @@ void FramebufferRenderer::updateResolution() {
     );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    if (glbinding::Binding::ObjectLabel.isResolved()) {
+        glObjectLabel(
+            GL_TEXTURE,
+            _downscaleVolumeRendering.depthbuffer,
+            -1,
+            "Downscaled Volume Depth"
+        );
+    }
 
     // Volume Rendering Textures
     glBindTexture(GL_TEXTURE_2D, _exitColorTexture);
@@ -958,12 +956,13 @@ void FramebufferRenderer::updateResolution() {
         GL_UNSIGNED_SHORT,
         nullptr
     );
-
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    if (glbinding::Binding::ObjectLabel.isResolved()) {
+        glObjectLabel(GL_TEXTURE, _exitColorTexture, -1, "Exit color");
+    }
 
     glBindTexture(GL_TEXTURE_2D, _exitDepthTexture);
-
     glTexImage2D(
         GL_TEXTURE_2D,
         0,
@@ -975,9 +974,11 @@ void FramebufferRenderer::updateResolution() {
         GL_FLOAT,
         nullptr
     );
-
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    if (glbinding::Binding::ObjectLabel.isResolved()) {
+        glObjectLabel(GL_TEXTURE, _exitColorTexture, -1, "Exit depth");
+    }
 
     _dirtyResolution = false;
 }
@@ -991,7 +992,7 @@ void FramebufferRenderer::updateRaycastData() {
     _insideRaycastPrograms.clear();
 
     const std::vector<VolumeRaycaster*>& raycasters =
-        global::raycasterManager.raycasters();
+        global::raycasterManager->raycasters();
 
     int nextId = 0;
     for (VolumeRaycaster* raycaster : raycasters) {
@@ -1063,7 +1064,7 @@ void FramebufferRenderer::updateDeferredcastData() {
     _deferredcastPrograms.clear();
 
     const std::vector<Deferredcaster*>& deferredcasters =
-        global::deferredcasterManager.deferredcasters();
+        global::deferredcasterManager->deferredcasters();
     int nextId = 0;
     for (Deferredcaster* caster : deferredcasters) {
         DeferredcastData data = { nextId++, "HELPER" };
@@ -1147,10 +1148,10 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
 
     GLint viewport[4] = { 0 };
-    global::renderEngine.openglStateCache().viewport(viewport);
+    global::renderEngine->openglStateCache().viewport(viewport);
 
     // Reset Render Pipeline State
-    global::renderEngine.openglStateCache().resetCachedStates();
+    global::renderEngine->openglStateCache().resetCachedStates();
 
     _pingPongIndex = 0;
 
@@ -1164,13 +1165,13 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         TracyGpuZone("Deferred G-Buffer")
 
         GLint vp[4] = {viewport[0], viewport[1], _resolution.x, _resolution.y};
-        global::renderEngine.openglStateCache().setViewportState(vp);
+        global::renderEngine->openglStateCache().setViewportState(vp);
 
         glBindFramebuffer(GL_FRAMEBUFFER, _gBuffers.framebuffer);
         glDrawBuffers(3, ColorAttachmentArray);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
-    Time time = global::timeManager.time();
+    Time time = global::timeManager->time();
 
     RenderData data = {
         *camera,
@@ -1208,10 +1209,6 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         TracyGpuZone("Raycaster Tasks")
         GLDebugGroup group("Raycaster Tasks");
         performRaycasterTasks(tasks.raycasterTasks);
-
-        if (HasGLDebugInfo) {
-            glPopDebugGroup();
-        }
     }
 
     if (!tasks.deferredcasterTasks.empty()) {
@@ -1290,7 +1287,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
         glBindFramebuffer(GL_FRAMEBUFFER, _exitFramebuffer);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         GLint viewport[4] = { 0 };
-        global::renderEngine.openglStateCache().viewport(viewport);
+        global::renderEngine->openglStateCache().viewport(viewport);
 
         ghoul::opengl::ProgramObject* exitProgram = _exitPrograms[raycaster].get();
         if (exitProgram) {
@@ -1308,7 +1305,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
                 static_cast<GLsizei>(viewport[2] * s),
                 static_cast<GLsizei>(viewport[3] * s)
             };
-            global::renderEngine.openglStateCache().setViewportState(newVP);
+            global::renderEngine->openglStateCache().setViewportState(newVP);
 
             if (_downscaleVolumeRendering.currentDownscaleFactor != s) {
                 _downscaleVolumeRendering.currentDownscaleFactor = s;
@@ -1405,7 +1402,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
         }
 
         if (raycaster->downscaleRender() < 1.f) {
-            global::renderEngine.openglStateCache().setViewportState(viewport);
+            global::renderEngine->openglStateCache().setViewportState(viewport);
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _gBuffers.framebuffer);
             writeDownscaledVolume();
         }
@@ -1543,7 +1540,7 @@ void FramebufferRenderer::updateRendererData() {
     dict.setValue("hdrExposure", std::to_string(_hdrExposure));
     dict.setValue("disableHDR", std::to_string(_disableHDR));
     _rendererData = dict;
-    global::renderEngine.setRendererData(dict);
+    global::renderEngine->setRendererData(dict);
 }
 
 } // namespace openspace

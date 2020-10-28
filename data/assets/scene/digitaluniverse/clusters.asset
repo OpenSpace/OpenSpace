@@ -31,10 +31,24 @@ local object = {
     },
     GUI = {
         Name = "Galaxy Cluster Labels",
-        Path = "/Universe/Galaxies"
+        Path = "/Universe/Galaxies",
+        Description = [[Census 15 galaxy cluster labels. DU Version 1.2. <br>The Galaxy
+            clusters dataset is a series of labels that mark where the large clusters of
+            galaxies are in the nearby universe. These labels must be used in conjunction
+            with the Tully galaxy group.(Description from URL) <br><br> Data Reference:
+            Brian Abbott (AMNH)]],
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })
+
+
+asset.meta = {
+    Name = "Galaxy Clusters Labels",
+    Version = "1.0",
+    Description = [[Digital Universe asset for Galaxy Clusters]],
+    Author = "Brian Abbott (AMNH)",
+    URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+    License = "AMNH Digital Universe",
+    Identifiers = {"GalaxyClusterLabels"}
+}

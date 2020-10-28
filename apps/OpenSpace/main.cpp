@@ -63,6 +63,7 @@
 #include <Tracy.hpp>
 #include <chrono>
 #include <ctime>
+#include <memory>
 
 #ifdef WIN32
 #include <openspace/openspace.h>
@@ -85,6 +86,9 @@
 #ifdef OPENSPACE_HAS_NVTOOLS
 #include "nvToolsExt.h"
 #endif // OPENSPACE_HAS_NVTOOLS
+
+#include <launcherwindow.h>
+#include <QApplication>
 
 using namespace openspace;
 using namespace sgct;
@@ -217,7 +221,7 @@ void mainInitFunc(GLFWwindow*) {
     LTRACE("main::mainInitFunc(begin)");
 
     LDEBUG("Initializing OpenSpace Engine started");
-    global::openSpaceEngine.initialize();
+    global::openSpaceEngine->initialize();
     LDEBUG("Initializing OpenSpace Engine finished");
 
     {
@@ -243,7 +247,7 @@ void mainInitFunc(GLFWwindow*) {
     currentViewport = currentWindow->viewports().front().get();
 
     LDEBUG("Initializing OpenGL in OpenSpace Engine started");
-    global::openSpaceEngine.initializeGL();
+    global::openSpaceEngine->initializeGL();
     LDEBUG("Initializing OpenGL in OpenSpace Engine finished");
 
 
@@ -321,7 +325,7 @@ void mainInitFunc(GLFWwindow*) {
     //  Screenshots
     //
     std::string screenshotPath = "${SCREENSHOTS}";
-    if (global::configuration.shouldUseScreenshotDate) {
+    if (global::configuration->shouldUseScreenshotDate) {
         std::time_t now = std::time(nullptr);
         std::tm* nowTime = std::localtime(&now);
         char mbstr[128];
@@ -347,7 +351,7 @@ void mainPreSyncFunc() {
     LTRACE("main::mainPreSyncFunc(begin)");
 
     try {
-        global::openSpaceEngine.preSynchronization();
+        global::openSpaceEngine->preSynchronization();
     }
     catch (const ghoul::RuntimeError& e) {
         LFATALC(e.component, e.message);
@@ -360,7 +364,7 @@ void mainPreSyncFunc() {
     for (int i = GLFW_JOYSTICK_1; i <= GLFW_JOYSTICK_LAST; ++i) {
         ZoneScopedN("Joystick state");
 
-        JoystickInputState& state = global::joystickInputStates[i];
+        JoystickInputState& state = global::joystickInputStates->at(i);
 
         int present = glfwJoystickPresent(i);
         if (present == GLFW_FALSE) {
@@ -442,7 +446,7 @@ void mainPostSyncPreDrawFunc() {
 #endif // OPENSPACE_HAS_NVTOOLS
     LTRACE("main::postSynchronizationPreDraw(begin)");
 
-    global::openSpaceEngine.postSynchronizationPreDraw();
+    global::openSpaceEngine->postSynchronizationPreDraw();
 
 #ifdef OPENVR_SUPPORT
     if (FirstOpenVRWindow) {
@@ -511,7 +515,7 @@ void mainRenderFunc(const sgct::RenderData& data) {
         );
         currentModelMatrix = modelMatrix;
         currentModelViewProjectionMatrix = modelMatrix * viewMatrix * projectionMatrix;
-        global::openSpaceEngine.render(modelMatrix, viewMatrix, projectionMatrix);
+        global::openSpaceEngine->render(modelMatrix, viewMatrix, projectionMatrix);
     }
     catch (const ghoul::RuntimeError& e) {
         LERRORC(e.component, e.message);
@@ -534,7 +538,7 @@ void mainDraw2DFunc(const sgct::RenderData& data) {
     currentFrustumMode = data.frustumMode;
 
     try {
-        global::openSpaceEngine.drawOverlays();
+        global::openSpaceEngine->drawOverlays();
     }
     catch (const ghoul::RuntimeError& e) {
         LERRORC(e.component, e.message);
@@ -561,7 +565,7 @@ void mainPostDrawFunc() {
     }
 #endif // OPENVR_SUPPORT
 
-    global::openSpaceEngine.postDraw();
+    global::openSpaceEngine->postDraw();
 
 #ifdef OPENSPACE_HAS_SPOUT
     for (const SpoutWindow& w : SpoutWindows) {
@@ -605,7 +609,7 @@ void mainKeyboardCallback(sgct::Key key, sgct::Modifier modifiers, sgct::Action 
     const openspace::Key k = openspace::Key(key);
     const KeyModifier m = KeyModifier(modifiers);
     const KeyAction a = KeyAction(action);
-    global::openSpaceEngine.keyboardCallback(k, m, a);
+    global::openSpaceEngine->keyboardCallback(k, m, a);
 
     LTRACE("main::mainKeyboardCallback(begin)");
 }
@@ -621,7 +625,7 @@ void mainMouseButtonCallback(sgct::MouseButton key, sgct::Modifier modifiers,
     const openspace::MouseButton k = openspace::MouseButton(key);
     const openspace::MouseAction a = openspace::MouseAction(action);
     const openspace::KeyModifier m = openspace::KeyModifier(modifiers);
-    global::openSpaceEngine.mouseButtonCallback(k, a, m);
+    global::openSpaceEngine->mouseButtonCallback(k, a, m);
 
     LTRACE("main::mainMouseButtonCallback(end)");
 }
@@ -630,7 +634,7 @@ void mainMouseButtonCallback(sgct::MouseButton key, sgct::Modifier modifiers,
 
 void mainMousePosCallback(double x, double y) {
     ZoneScoped
-    global::openSpaceEngine.mousePositionCallback(x, y);
+    global::openSpaceEngine->mousePositionCallback(x, y);
 }
 
 
@@ -639,7 +643,7 @@ void mainMouseScrollCallback(double posX, double posY) {
     ZoneScoped
     LTRACE("main::mainMouseScrollCallback(begin");
 
-    global::openSpaceEngine.mouseScrollWheelCallback(posX, posY);
+    global::openSpaceEngine->mouseScrollWheelCallback(posX, posY);
 
     LTRACE("main::mainMouseScrollCallback(end)");
 }
@@ -650,7 +654,7 @@ void mainCharCallback(unsigned int codepoint, int modifiers) {
     ZoneScoped
 
     const KeyModifier m = KeyModifier(modifiers);
-    global::openSpaceEngine.charCallback(codepoint, m);
+    global::openSpaceEngine->charCallback(codepoint, m);
 }
 
 
@@ -659,7 +663,7 @@ std::vector<std::byte> mainEncodeFun() {
     ZoneScoped
     LTRACE("main::mainEncodeFun(begin)");
 
-    std::vector<std::byte> data = global::openSpaceEngine.encode();
+    std::vector<std::byte> data = global::openSpaceEngine->encode();
 
     LTRACE("main::mainEncodeFun(end)");
     return data;
@@ -671,7 +675,7 @@ void mainDecodeFun(const std::vector<std::byte>& data, unsigned int) {
     ZoneScoped
     LTRACE("main::mainDecodeFun(begin)");
 
-    global::openSpaceEngine.decode(data);
+    global::openSpaceEngine->decode(data);
 
     LTRACE("main::mainDecodeFun(end)");
 }
@@ -700,7 +704,7 @@ void mainLogCallback(Log::Level level, std::string_view message) {
 
 
 void setSgctDelegateFunctions() {
-    WindowDelegate& sgctDelegate = global::windowDelegate;
+    WindowDelegate& sgctDelegate = *global::windowDelegate;
     sgctDelegate.terminate = []() { Engine::instance().terminate(); };
     sgctDelegate.setBarrier = [](bool enabled) {
         ZoneScoped
@@ -923,7 +927,90 @@ void setSgctDelegateFunctions() {
     };
 }
 
+void checkCommandLineForSettings(int& argc, char** argv, bool& hasSGCT, bool& hasProfile,
+                                 std::string& sgctFunctionName)
+{
+    for (int i = 1; i < argc; ++i) {
+        const std::string arg = argv[i];
+        if (arg == "-c" || arg == "--config") {
+            std::string p = ((i + 1) < argc) ? argv[i + 1] : "";
+            p.erase(std::remove_if(p.begin(), p.end(), ::isspace), p.end());
+
+            const std::string sgctAssignment = "SGCTConfig=";
+            const size_t findSgct = p.find(sgctAssignment);
+            const size_t findBracket = p.find("}");
+            if (findSgct != std::string::npos) {
+                if (findBracket != std::string::npos) {
+                    sgctFunctionName = arg.substr(
+                        findSgct + sgctAssignment.length(),
+                        findBracket - findSgct
+                    );
+                }
+                hasSGCT = true;
+            }
+            if (p.find("Profile=") != std::string::npos) {
+                hasProfile = true;
+            }
+        }
+    }
+}
+
+std::string setWindowConfigPresetForGui(const std::string labelFromCfgFile,
+                                        const std::string xmlExt, bool haveCliSGCTConfig,
+                                        const std::string& sgctFunctionName)
+{
+    configuration::Configuration& config = *global::configuration;
+
+    std::string preset;
+    bool sgctConfigFileSpecifiedByLuaFunction = !config.sgctConfigNameInitialized.empty();
+    if (haveCliSGCTConfig) {
+        preset = sgctFunctionName.empty() ? config.windowConfiguration : sgctFunctionName;
+        preset += " (from CLI)";
+    }
+    else if (sgctConfigFileSpecifiedByLuaFunction) {
+        preset = config.sgctConfigNameInitialized + labelFromCfgFile;
+    }
+    else {
+        preset = config.windowConfiguration;
+        if (preset.find('/') != std::string::npos) {
+            preset.erase(0, preset.find_last_of('/') + 1);
+        }
+        if (preset.length() >= xmlExt.length()) {
+            if (preset.substr(preset.length() - xmlExt.length()) == xmlExt) {
+                preset = preset.substr(0, preset.length() - xmlExt.length());
+            }
+        }
+    }
+    return preset;
+}
+
+std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTConfig,
+                                            std::string windowConfiguration,
+                                            const std::string& labelFromCfgFile,
+                                            const std::string& xmlExt)
+{
+    std::string config = windowConfiguration;
+    if (!hasCliSGCTConfig) {
+        config = lw.selectedWindowConfig();
+        if (config.find(labelFromCfgFile) != std::string::npos) {
+            if (config.find("sgct.config") == std::string::npos) {
+                config = config.substr(0, config.length() - labelFromCfgFile.length());
+            }
+            else {
+                config = windowConfiguration;
+            }
+        }
+        else {
+            config = "${CONFIG}/" + config + xmlExt;
+        }
+        global::configuration->windowConfiguration = config;
+    }
+    return config;
+}
+
 int main(int argc, char** argv) {
+    glfwInit();
+
 #ifdef WIN32
     SetUnhandledExceptionFilter(generateMiniDump);
 #endif // WIN32
@@ -946,6 +1033,7 @@ int main(int argc, char** argv) {
     }
 
     ghoul::initialize();
+    global::create();
 
     // Register the path of the executable,
     // to make it possible to find other files in the same directory.
@@ -1019,26 +1107,25 @@ int main(int argc, char** argv) {
 
         // Loading configuration from disk
         LDEBUG("Loading configuration from disk");
-        global::configuration = configuration::loadConfigurationFromFile(
+        *global::configuration = configuration::loadConfigurationFromFile(
             configurationFilePath
         );
-
         // If the user requested a commandline-based configuration script that should
         // overwrite some of the values, this is the time to do it
         if (!commandlineArguments.configurationOverride.empty()) {
             LDEBUG("Executing Lua script passed through the commandline:");
             LDEBUG(commandlineArguments.configurationOverride);
             ghoul::lua::runScript(
-                global::configuration.state,
+                global::configuration->state,
                 commandlineArguments.configurationOverride
             );
-            parseLuaState(global::configuration);
+            parseLuaState(*global::configuration);
         }
 
         // Determining SGCT configuration file
-        LDEBUG("SGCT Configuration file: " + global::configuration.windowConfiguration);
+        LDEBUG("SGCT Configuration file: " + global::configuration->windowConfiguration);
 
-        windowConfiguration = global::configuration.windowConfiguration;
+        windowConfiguration = global::configuration->windowConfiguration;
     }
     catch (const documentation::SpecificationError& e) {
         LFATALC("main", "Loading of configuration file failed");
@@ -1061,7 +1148,47 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
-    global::openSpaceEngine.registerPathTokens();
+    global::openSpaceEngine->registerPathTokens();
+
+
+    bool hasSGCTConfig = false;
+    bool hasProfile = false;
+    std::string sgctFunctionName;
+    checkCommandLineForSettings(argc, argv, hasSGCTConfig, hasProfile, sgctFunctionName);
+
+    // Call profile GUI
+    const std::string labelFromCfgFile = " (from .cfg)";
+    const std::string xmlExt = ".xml";
+    std::string windowCfgPreset = setWindowConfigPresetForGui(
+        labelFromCfgFile,
+        xmlExt,
+        hasSGCTConfig,
+        sgctFunctionName
+    );
+
+    bool skipLauncher =
+        (hasProfile && hasSGCTConfig) || global::configuration->bypassLauncher;
+    if (!skipLauncher) {
+        int qac = 0;
+        QApplication app(qac, nullptr);
+        LauncherWindow win(!hasProfile,
+            *global::configuration, !hasSGCTConfig, windowCfgPreset, nullptr);
+        win.show();
+        app.exec();
+
+        if (!win.wasLaunchSelected()) {
+            exit(EXIT_SUCCESS);
+        }
+
+        global::configuration->profile = win.selectedProfile();
+        windowConfiguration = selectedSgctProfileFromLauncher(
+            win,
+            hasSGCTConfig,
+            windowConfiguration,
+            labelFromCfgFile,
+            xmlExt
+        );
+    }
 
     // Prepend the outgoing sgctArguments with the program name
     // as well as the configuration file that sgct is supposed to use
@@ -1107,11 +1234,12 @@ int main(int argc, char** argv) {
     catch (const std::runtime_error& e) {
         LFATALC("main", e.what());
         Engine::destroy();
-        global::openSpaceEngine.deinitialize();
+        global::openSpaceEngine->deinitialize();
         ghoul::deinitialize();
+        throw;
     }
     catch (...) {
-        global::openSpaceEngine.deinitialize();
+        global::openSpaceEngine->deinitialize();
         ghoul::deinitialize();
         Engine::destroy();
         throw;
@@ -1150,8 +1278,9 @@ int main(int argc, char** argv) {
     Engine::instance().render();
     LINFO("Ending rendering loop");
 
-    global::openSpaceEngine.deinitializeGL();
-    global::openSpaceEngine.deinitialize();
+    global::openSpaceEngine->deinitializeGL();
+    global::openSpaceEngine->deinitialize();
+    global::destroy();
 
     // Clear function bindings to avoid crash after destroying the OpenSpace Engine
     Log::instance().setLogCallback(nullptr);

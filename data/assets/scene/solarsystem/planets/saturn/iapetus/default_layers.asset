@@ -5,5 +5,16 @@ local colorLayer = asset.require(colorLayersPath .. "/iapetus_texture")
 -- Set enabled layers (temporary solution)
 -- @TODO: do this using a boolean that's passed to the 'asset.require' instead 
 asset.onInitialize(function () 
-    openspace.setPropertyValueSingle("Scene.Iapetus.Renderable.Layers.ColorLayers." .. colorLayer.layer.Identifier .. ".Enabled", true)
+    openspace.setPropertyValueSingle("Scene.Iapetus.Renderable.Layers.ColorLayers." ..
+        colorLayer.layer.Identifier .. ".Enabled", true)
 end)
+
+
+asset.meta = {
+    Name = "Default Iapetus Layers",
+    Version = "1.0",
+    Description = [[ Default Iapetus layers are: Iapetus Texture]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

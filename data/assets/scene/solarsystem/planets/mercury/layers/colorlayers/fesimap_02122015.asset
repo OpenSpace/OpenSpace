@@ -2,6 +2,7 @@ local texturesPath = asset.require("./../../mercury_textures").TexturesPath
 local globeIdentifier = asset.require("./../../mercury").Mercury.Identifier
 
 local layer = {
+    Name = "Iron Abundance",
     Identifier = "fesimap_02122015",
     FilePath = texturesPath .. "/fesimap_02122015.png",
     BlendMode = "Multiply",

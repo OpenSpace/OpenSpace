@@ -316,7 +316,8 @@ std::unique_ptr<ScreenSpaceRenderable> ScreenSpaceRenderable::createFromDictiona
 }
 
 std::string ScreenSpaceRenderable::makeUniqueIdentifier(std::string name) {
-    std::vector<ScreenSpaceRenderable*> r = global::renderEngine.screenSpaceRenderables();
+    std::vector<ScreenSpaceRenderable*> r =
+        global::renderEngine->screenSpaceRenderables();
 
     auto nameTaken = [&r](const std::string& name) {
         bool nameTaken = std::any_of(
@@ -459,7 +460,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     _delete.onChange([this](){
         std::string script =
             "openspace.removeScreenSpaceRenderable('" + identifier() + "');";
-        global::scriptEngine.queueScript(
+        global::scriptEngine->queueScript(
             script,
             scripting::ScriptEngine::RemoteScripting::No
         );
@@ -484,7 +485,7 @@ bool ScreenSpaceRenderable::deinitialize() {
 
 bool ScreenSpaceRenderable::deinitializeGL() {
     if (_shader) {
-        global::renderEngine.removeRenderProgram(_shader.get());
+        global::renderEngine->removeRenderProgram(_shader.get());
         _shader = nullptr;
     }
 
@@ -521,13 +522,13 @@ float ScreenSpaceRenderable::depth() {
 void ScreenSpaceRenderable::createShaders() {
     ghoul::Dictionary dict = ghoul::Dictionary();
 
-    auto res = global::windowDelegate.currentDrawBufferResolution();
+    auto res = global::windowDelegate->currentDrawBufferResolution();
     ghoul::Dictionary rendererData = {
         { "fragmentRendererPath", "${SHADERS}/framebuffer/renderframebuffer.frag" },
         { "windowWidth" , res.x },
         { "windowHeight" , res.y },
-        { "hdrExposure", global::renderEngine.hdrExposure() },
-        { "disableHDR", global::renderEngine.isHdrDisabled() }
+        { "hdrExposure", global::renderEngine->hdrExposure() },
+        { "disableHDR", global::renderEngine->isHdrDisabled() }
     };
 
     dict.setValue("rendererData", rendererData);
@@ -543,7 +544,7 @@ void ScreenSpaceRenderable::createShaders() {
 }
 
 glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
-    glm::vec2 resolution = global::windowDelegate.currentDrawBufferResolution();
+    glm::vec2 resolution = global::windowDelegate->currentDrawBufferResolution();
 
     //to scale the plane
     float textureRatio =
@@ -571,12 +572,12 @@ glm::mat4 ScreenSpaceRenderable::globalRotationMatrix() {
     // 2) sgct's scene matrix (also called model matrix by sgct)
 
     glm::mat4 inverseRotation = glm::inverse(
-        global::renderEngine.globalRotation() *
-        global::windowDelegate.modelMatrix()
+        global::renderEngine->globalRotation() *
+        global::windowDelegate->modelMatrix()
     );
 
     // The rotation of all screen space renderables is adjustable in the render engine:
-    return global::renderEngine.screenSpaceRotation() * inverseRotation;
+    return global::renderEngine->screenSpaceRotation() * inverseRotation;
 }
 
 glm::mat4 ScreenSpaceRenderable::localRotationMatrix() {
@@ -617,7 +618,7 @@ void ScreenSpaceRenderable::draw(glm::mat4 modelTransform) {
 
     _shader->setUniform(
         _uniformCache.viewProj,
-        global::renderEngine.scene()->camera()->viewProjectionMatrix()
+        global::renderEngine->scene()->camera()->viewProjectionMatrix()
     );
 
     ghoul::opengl::TextureUnit unit;

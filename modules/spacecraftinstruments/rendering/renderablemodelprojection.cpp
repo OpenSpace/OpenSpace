@@ -157,7 +157,7 @@ bool RenderableModelProjection::isReady() const {
 }
 
 void RenderableModelProjection::initializeGL() {
-    _programObject = global::renderEngine.buildRenderProgram(
+    _programObject = global::renderEngine->buildRenderProgram(
         "ModelShader",
         absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModel_vs.glsl"),
         absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModel_fs.glsl")
@@ -213,7 +213,7 @@ void RenderableModelProjection::deinitializeGL() {
 
     _projectionComponent.deinitialize();
 
-    global::renderEngine.removeRenderProgram(_programObject.get());
+    global::renderEngine->removeRenderProgram(_programObject.get());
     _programObject = nullptr;
 }
 
@@ -347,9 +347,8 @@ void RenderableModelProjection::update(const UpdateData& data) {
         }
     }
 
-    // @TODO:  Change this to remove PSC
     glm::dvec3 p =
-        global::renderEngine.scene()->sceneGraphNode("Sun")->worldPosition() -
+        global::renderEngine->scene()->sceneGraphNode("Sun")->worldPosition() -
         data.modelTransform.translation;
 
     _sunPosition = static_cast<glm::vec3>(p);

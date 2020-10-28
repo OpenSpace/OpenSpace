@@ -29,6 +29,7 @@
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/util/keys.h>
+#include <ghoul/misc/exception.h>
 #include <optional>
 #include <string>
 #include <variant>
@@ -40,6 +41,14 @@ namespace scripting { struct LuaLibrary; }
 
 class Profile {
 public:
+    struct ParsingError : public ghoul::RuntimeError {
+        enum class Severity { Info, Warning, Error };
+
+        explicit ParsingError(Severity severity, std::string msg);
+
+        Severity severity;
+    };
+
     // Version
     struct Version {
         int major = 0;
@@ -47,21 +56,18 @@ public:
     };
     struct Module {
         std::string name;
-        std::string loadedInstruction;
-        std::string notLoadedInstruction;
+        std::optional<std::string> loadedInstruction;
+        std::optional<std::string> notLoadedInstruction;
     };
     struct Meta {
-        std::string name;
-        std::string version;
-        std::string description;
-        std::string author;
-        std::string url;
-        std::string license;
+        std::optional<std::string> name;
+        std::optional<std::string> version;
+        std::optional<std::string> description;
+        std::optional<std::string> author;
+        std::optional<std::string> url;
+        std::optional<std::string> license;
     };
-    struct Asset {
-        std::string path;
-        std::string name;
-    };
+
     struct Property {
         enum class SetType {
             SetPropertyValue,
@@ -87,13 +93,13 @@ public:
         };
 
         Type type;
-        std::string time;
+        std::string value;
     };
     struct CameraNavState {
         static constexpr const char* Type = "setNavigationState";
 
         std::string anchor;
-        std::string aim;
+        std::optional<std::string> aim;
         std::string referenceFrame;
         glm::dvec3 position;
         std::optional<glm::dvec3> up;
@@ -111,7 +117,7 @@ public:
     using CameraType = std::variant<CameraNavState, CameraGoToGeo>;
 
     Profile() = default;
-    Profile(const std::vector<std::string>& content);
+    explicit Profile(const std::string& content);
     std::string serialize() const;
 
     std::string convertToScene() const;
@@ -134,6 +140,37 @@ public:
     /// Removes an asset
     void removeAsset(const std::string& path);
 
+    /// Removes all assets
+    void clearAssets();
+
+    Version version() const;
+    std::vector<Module> modules() const;
+    std::optional<Meta> meta() const;
+    std::vector<std::string> assets() const;
+    std::vector<Property> properties() const;
+    std::vector<Keybinding> keybindings() const;
+    std::optional<Time> time() const;
+    std::vector<double> deltaTimes() const;
+    std::optional<CameraType> camera() const;
+    std::vector<std::string> markNodes() const;
+    std::vector<std::string> additionalScripts() const;
+
+    void clearMeta();
+    void clearTime();
+    void clearCamera();
+
+    void setVersion(Version v);
+    void setModules(std::vector<Module>& m);
+    void setMeta(Meta m);
+    void setProperties(std::vector<Property>& p);
+    void setKeybindings(std::vector<Keybinding>& k);
+    void setTime(Time t);
+    void setDeltaTimes(std::vector<double> dt);
+    void setCamera(CameraType c);
+    void setMarkNodes(std::vector<std::string>& n);
+    void setAdditionalScripts(std::vector<std::string>& s);
+
+
     /**
      * Returns the Lua library that contains all Lua functions available to provide
      * profile functionality.
@@ -144,17 +181,17 @@ public:
 private:
     static constexpr const Version CurrentVersion = Version { 1, 0 };
 
-    Version version = CurrentVersion;
-    std::vector<Module> modules;
-    std::optional<Meta> meta;
-    std::vector<Asset> assets;
-    std::vector<Property> properties;
-    std::vector<Keybinding> keybindings;
-    std::optional<Time> time;
-    std::vector<double> deltaTimes;
-    std::optional<CameraType> camera;
-    std::vector<std::string> markNodes;
-    std::vector<std::string> additionalScripts;
+    Version _version = CurrentVersion;
+    std::vector<Module> _modules;
+    std::optional<Meta> _meta;
+    std::vector<std::string> _assets;
+    std::vector<Property> _properties;
+    std::vector<Keybinding> _keybindings;
+    std::optional<Time> _time;
+    std::vector<double> _deltaTimes;
+    std::optional<CameraType> _camera;
+    std::vector<std::string> _markNodes;
+    std::vector<std::string> _additionalScripts;
 
     bool _ignoreUpdates = false;
 };

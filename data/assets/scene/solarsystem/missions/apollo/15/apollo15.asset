@@ -63,12 +63,12 @@ local Apollo15 = {
 --     Parent = Apollo15.Identifier,
 --     Renderable = {
 --         Type = "RenderableModel",
---         Geometry = {
+--         Geometry = {{
 --             Type = "MultiModelGeometry",
 -- --            GeometryFile = models .. "/Apollo_Spacecraft.obj"
 --             GeometryFile = models .. "/Apollo_CSM_shrunk_rotated_xy_doubble_size.obj",
     --         ColorTexture = models .. "/gray.png"
---         },
+--         }},
 --         LightSources = LightSources,
 --         DisableFaceCulling = true 
 --     },
@@ -110,6 +110,4 @@ for k,v in pairs(model_part) do
     table.insert(list, v)
 end
 
-
 assetHelper.registerSceneGraphNodesAndExport(asset, list)
-

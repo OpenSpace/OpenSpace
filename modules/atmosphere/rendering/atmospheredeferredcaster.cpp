@@ -335,10 +335,10 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
 
                     const std::string source = shadowConf.source.first;
                     SceneGraphNode* sourceNode =
-                        global::renderEngine.scene()->sceneGraphNode(source);
+                        global::renderEngine->scene()->sceneGraphNode(source);
                     const std::string caster = shadowConf.caster.first;
                     SceneGraphNode* casterNode =
-                        global::renderEngine.scene()->sceneGraphNode(caster);
+                        global::renderEngine->scene()->sceneGraphNode(caster);
 
                     const double sourceRadiusScale = std::max(
                         glm::compMax(sourceNode->scale()),
@@ -1198,7 +1198,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
     }
 
     // Restores OpenGL blending state
-    global::renderEngine.openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetBlendState();
 }
 
 void AtmosphereDeferredcaster::preCalculateAtmosphereParam() {
@@ -1217,7 +1217,7 @@ void AtmosphereDeferredcaster::preCalculateAtmosphereParam() {
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
 
     GLint m_viewport[4];
-    global::renderEngine.openglStateCache().viewport(m_viewport);
+    global::renderEngine->openglStateCache().viewport(m_viewport);
 
     // Creates the FBO for the calculations
     GLuint calcFBO;
@@ -1243,7 +1243,7 @@ void AtmosphereDeferredcaster::preCalculateAtmosphereParam() {
 
     // Restores system state
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-    global::renderEngine.openglStateCache().setViewportState(m_viewport);
+    global::renderEngine->openglStateCache().setViewportState(m_viewport);
     glDeleteBuffers(1, &quadCalcVBO);
     glDeleteVertexArrays(1, &quadCalcVAO);
     glDeleteFramebuffers(1, &calcFBO);

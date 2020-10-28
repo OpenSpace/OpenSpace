@@ -231,7 +231,7 @@ void WebGuiModule::startProcess() {
 
     _endpoints.clear();
 
-    ServerModule* serverModule = global::moduleEngine.module<ServerModule>();
+    ServerModule* serverModule = global::moduleEngine->module<ServerModule>();
     const ServerInterface* serverInterface =
         serverModule->serverInterfaceByIdentifier(_webSocketInterface);
     if (!serverInterface) {

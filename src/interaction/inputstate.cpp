@@ -108,31 +108,31 @@ bool InputState::isMouseButtonPressed(MouseButton mouseButton) const {
 }
 
 float InputState::joystickAxis(int i) const {
-    return global::joystickInputStates.axis(i);
+    return global::joystickInputStates->axis(i);
 }
 
 bool InputState::joystickButton(int i) const {
-    return global::joystickInputStates.button(i, JoystickAction::Press);
+    return global::joystickInputStates->button(i, JoystickAction::Press);
 }
 
 float InputState::websocketAxis(int i) const {
-    return global::websocketInputStates.axis(i);
+    return global::websocketInputStates->axis(i);
 }
 
 bool InputState::websocketButton(int i) const {
-    return global::websocketInputStates.button(i, WebsocketAction::Press);
+    return global::websocketInputStates->button(i, WebsocketAction::Press);
 }
 
 void InputState::resetWebsockets() {
     using K = size_t;
     using V = WebsocketInputState*;
-    for (const std::pair<const K, V>& p : global::websocketInputStates) {
+    for (const std::pair<const K, V>& p : *global::websocketInputStates) {
         p.second->isConnected = false;
     }
 }
 
 bool InputState::hasWebsocketStates() const {
-    return !global::websocketInputStates.empty();
+    return !global::websocketInputStates->empty();
 }
 
 } // namespace openspace::interaction
