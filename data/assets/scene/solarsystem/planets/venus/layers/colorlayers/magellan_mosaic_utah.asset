@@ -43,5 +43,5 @@ asset.meta = {
     URL = "https://astrogeology.usgs.gov/search/map/Venus/Magellan/" ..
         "Venus_Magellan_LeftLook_mosaic_global_75m",
     License = "NASA/PDS",
-    Identifiers = "Magellan_Mosaic_Utah"
+    Identifiers = {"Magellan_Mosaic_Utah"}
 }

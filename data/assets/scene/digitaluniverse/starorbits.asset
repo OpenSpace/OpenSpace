@@ -187,6 +187,6 @@ asset.meta = {
     Author = "Brian Abbott (AMNH)",
     URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
     License = "AMNH Digital Universe",
-    Identifiers = "SunOrbit,BarnardsOrbit,KapteynsOrbit,pM_J13420Orbit,LSR1826Orbit," ..
-        "LSRJ0822Orbit,lacaille9352Orbit"
+    Identifiers = {"SunOrbit", "BarnardsOrbit", "KapteynsOrbit", "pM_J13420Orbit", 
+        "LSR1826Orbit", "LSRJ0822Orbit", "lacaille9352Orbit"}
 }

@@ -548,8 +548,8 @@ asset.meta = {
     Author = "Brian Abbott (AMNH)",
     URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
     License = "AMNH Digital Universe",
-    Identifiers = "RadioSphere,OortSphere,EclipticSphere,EclipticSphereLabels,Equatorial,"
-        .. "EquatorialSphereLabels,GalacticSphere,GalacticSphereLabels,1ldGrid,1lmGrid,"
-        .. "1lyGrid,10lyGrid,100lyGrid,1klyGrid,10klyGrid,100klyGrid,1MlyGrid,10MlyGrid,"
-        .. "100MlyGrid,20GlyGrid"
+    Identifiers = {"RadioSphere", "OortSphere", "EclipticSphere", "EclipticSphereLabels",
+        "Equatorial", "EquatorialSphereLabels", "GalacticSphere", "GalacticSphereLabels",
+        "1ldGrid", "1lmGrid", "1lyGrid", "10lyGrid", "100lyGrid", "1klyGrid" "10klyGrid",
+        "100klyGrid", "1MlyGrid", "10MlyGrid", "100MlyGrid", "20GlyGrid"}
 }

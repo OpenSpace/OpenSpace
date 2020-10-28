@@ -47,5 +47,5 @@ asset.meta = {
     Author = "OpenSpace Team",
     URL = "https://worldview.earthdata.nasa.gov/?l=VIIRS_SNPP_DayNightBand_ENCC",
     License = "NASA",
-    Identifiers = "Earth_at_Night_Temporal"
+    Identifiers = {"Earth_at_Night_Temporal"}
 }

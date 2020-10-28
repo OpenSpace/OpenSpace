@@ -62,5 +62,5 @@ asset.meta = {
     Author = "OpenSpace Team",
     URL = "http://openspaceproject.com",
     License = "MIT License",
-    Identifiers = "MilkyWayVolume"
+    Identifiers = {"MilkyWayVolume"}
 }
