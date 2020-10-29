@@ -53,16 +53,11 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
     _relevantNodes = module->AutoNavigationHandler().relevantNodes();
 
-    glm::dvec3 startNodeCenter = start.node()->worldPosition();
-    glm::dvec3 endNodeCenter = end.node()->worldPosition();
-    double startNodeRadius = start.nodeDetails.validBoundingSphere;
-    double endNodeRadius = end.nodeDetails.validBoundingSphere;
-    glm::dvec3 startViewDirection = glm::normalize(
-        start.rotation() * glm::dvec3(0.0, 0.0, -1.0)
-    );
-    glm::dvec3 endViewDirection = glm::normalize(
-        end.rotation() * glm::dvec3(0.0, 0.0, -1.0)
-    );
+    const glm::dvec3 startNodeCenter = start.node()->worldPosition();
+    const glm::dvec3 endNodeCenter = end.node()->worldPosition();
+    const double startNodeRadius = start.nodeDetails.validBoundingSphere;
+    const double endNodeRadius = end.nodeDetails.validBoundingSphere;
+    const glm::dvec3 startViewDir = start.rotation() * glm::dvec3(0.0, 0.0, -1.0);
 
     // Add control points for a catmull-rom spline, first and last will not be intersected
     _points.push_back(start.position());
@@ -79,25 +74,24 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
     }
 
     // Add point for moving out if the end state is in opposite direction
-    //TODO: determine if its best to compare to end orientation or position
     glm::dvec3 startToEnd = end.position() - start.position();
-    double cosAngleToTarget = glm::dot(normalize(-startViewDirection), normalize(startToEnd));
+    double cosAngleToTarget = glm::dot(normalize(-startViewDir), normalize(startToEnd));
     bool targetInOppositeDirection = cosAngleToTarget > 0.7;
 
     if (targetInOppositeDirection) {
-        glm::dquat midleRotation = glm::slerp(start.rotation(), end.rotation(), 0.5);
-        glm::dvec3 middleViewDirection = midleRotation * glm::dvec3(0.0, 0.0, -1.0);
-        double stepOutdistance = 0.4 * glm::length(startToEnd);
+        const glm::dquat midleRot = glm::slerp(start.rotation(), end.rotation(), 0.5);
+        const glm::dvec3 middleViewDir = midleRot * glm::dvec3(0.0, 0.0, -1.0);
+        const double stepOutDistance = 0.4 * glm::length(startToEnd);
 
-        glm::dvec3 newPosition = start.position() + 0.2 * startToEnd -
-                                 stepOutdistance * glm::normalize(middleViewDirection);
+        glm::dvec3 newPos = start.position() + 0.2 * startToEnd -
+            stepOutDistance * glm::normalize(middleViewDir);
 
-        _points.push_back(newPosition);
+        _points.push_back(newPos);
     }
 
     // Add an extra point to approach target
-    glm::dvec3 nodeToEnd = end.position() - endNodeCenter;
-    double distanceToEndNode = glm::length(nodeToEnd);
+    const glm::dvec3 nodeToEnd = end.position() - endNodeCenter;
+    const double distanceToEndNode = glm::length(nodeToEnd);
 
     if (distanceToEndNode < CloseToNodeThresholdFactor * endNodeRadius) {
         double distance = endNodeRadius;
@@ -118,10 +112,12 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
 
 // Interpolate a list of control points and knot times
 glm::dvec3 AvoidCollisionCurve::interpolate(double u) {
-    if (u < Epsilon)
+    if (u < Epsilon) {
         return _points[1];
-    if (u > (1.0 - Epsilon))
+    }
+    if (u > (1.0 - Epsilon)) {
         return *(_points.end() - 2);
+    }
 
     std::vector<double>::iterator segmentEndIt =
         std::lower_bound(_parameterIntervals.begin(), _parameterIntervals.end(), u);
@@ -145,27 +141,27 @@ glm::dvec3 AvoidCollisionCurve::interpolate(double u) {
 // If a collision happens, create a new point for the path to go through, in an attempt to
 // avoid that collision
 void AvoidCollisionCurve::removeCollisions(int step) {
-    int nrSegments = _points.size() - 3;
+    if (step > MaxAvoidCollisionSteps) {
+        return;
+    }
 
-    if (step > MaxAvoidCollisionSteps)
-        return; // TODO: handle better / present warning if early out
-
-    for (int i = 0; i < nrSegments; ++i) {
+    const int nSegments = _points.size() - 3;
+    for (int i = 0; i < nSegments; ++i) {
         const glm::dvec3 lineStart = _points[i + 1];
         const glm::dvec3 lineEnd = _points[i + 2];
 
         for (SceneGraphNode* node : _relevantNodes) {
-            // do collision check in relative coordinates, to avoid huge numbers
+            // Do collision check in relative coordinates, to avoid huge numbers
             const glm::dmat4 modelTransform = node->modelTransform();
             glm::dvec3 p1 = glm::inverse(modelTransform) * glm::dvec4(lineStart, 1.0);
             glm::dvec3 p2 = glm::inverse(modelTransform) * glm::dvec4(lineEnd, 1.0);
 
-            // sphere to check for collision
+            // Sphere to check for collision
             double radius = node->boundingSphere();
             glm::dvec3 center = glm::dvec3(0.0, 0.0, 0.0);
 
-            // add a buffer, so we don't pass too close to the node
-            // dont't add it if any point is inside the buffer
+            // Add a buffer to avoid passing too close to the node.
+            // Dont't add it if any point is inside the buffer
             double buffer = CollisionBufferSizeFactor * node->boundingSphere();
             bool p1IsInside = helpers::isPointInsideSphere(p1, center, radius + buffer);
             bool p2IsInside = helpers::isPointInsideSphere(p2, center, radius + buffer);
@@ -183,7 +179,6 @@ void AvoidCollisionCurve::removeCollisions(int step) {
             );
 
             if (collision) {
-                //LINFO(fmt::format("Collision with node: {}!", node->identifier()));
                 glm::dvec3 collisionPoint = modelTransform *
                     glm::dvec4(intersectionPointModelCoords, 1.0);
 
@@ -199,17 +194,20 @@ void AvoidCollisionCurve::removeCollisions(int step) {
                     break;
                 }
 
-                // to avoid collision, take a step in an orhtogonal direction of the
+                // To avoid collision, take a step in an orhtogonal direction of the
                 // collision point and add a new point
-                glm::dvec3 lineDirection = glm::normalize(lineEnd - lineStart);
-                glm::dvec3 nodeCenter = node->worldPosition();
-                glm::dvec3 collisionPointToCenter = nodeCenter - collisionPoint;
-                glm::dvec3 parallell = glm::proj(collisionPointToCenter, lineDirection);
-                glm::dvec3 orthogonal = collisionPointToCenter - parallell;
+                const glm::dvec3 lineDirection = glm::normalize(lineEnd - lineStart);
+                const glm::dvec3 nodeCenter = node->worldPosition();
+                const glm::dvec3 collisionPointToCenter = nodeCenter - collisionPoint;
 
-                double avoidCollisionDistance = AvoidCollisionDistanceFactor * radius;
+                const glm::dvec3 parallell = glm::proj(collisionPointToCenter, lineDirection);
+                const glm::dvec3 orthogonal = collisionPointToCenter - parallell;
+
+                const double avoidCollisionDistance = AvoidCollisionDistanceFactor * radius;
+
                 glm::dvec3 extraKnot = collisionPoint -
                     avoidCollisionDistance * glm::normalize(orthogonal);
+
                 _points.insert(_points.begin() + i + 2, extraKnot);
 
                 removeCollisions(++step);

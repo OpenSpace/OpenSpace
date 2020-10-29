@@ -57,7 +57,7 @@ public:
     bool hasReachedEnd() const;
 
     double speedAtTime(double time) const;
-    CameraPose interpolatedPose(double u) const;
+    CameraPose interpolatedPose(double distance) const;
 
 private:
     void initCurve();

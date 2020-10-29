@@ -100,9 +100,7 @@ CameraPose PathSegment::traversePath(double dt) {
     _progressedTime += dt;
     _traveledDistance += displacement;
 
-    const double relativeDisplacement = _traveledDistance / pathLength();
-
-    return interpolatedPose(relativeDisplacement);
+    return interpolatedPose(_traveledDistance);
 }
 
 std::string PathSegment::getCurrentAnchor() const {
@@ -118,7 +116,8 @@ double PathSegment::speedAtTime(double time) const {
     return _speedFunction->scaledValue(time, _duration, pathLength());
 }
 
-CameraPose PathSegment::interpolatedPose(double u) const {
+CameraPose PathSegment::interpolatedPose(double distance) const {
+    double u = distance / pathLength();
     CameraPose cs;
     cs.position = _curve->positionAt(u);
     cs.rotation = _rotationInterpolator->interpolate(u);
@@ -135,7 +134,7 @@ void PathSegment::initCurve() {
         _rotationInterpolator = std::make_unique<EasedSlerpInterpolator>(
             _start.rotation(),
             _end.rotation()
-            );
+        );
         _speedFunction = std::make_unique<QuinticDampenedSpeed>();
         break;
 
@@ -156,7 +155,7 @@ void PathSegment::initCurve() {
             _start.node()->worldPosition(),
             _end.node()->worldPosition(),
             _curve.get()
-            );
+        );
         _speedFunction = std::make_unique<QuinticDampenedSpeed>();
         break;
 

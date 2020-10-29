@@ -150,7 +150,7 @@ documentation::Documentation PathSpecification::Documentation() {
     };
 }
 
-// create correct type of instruction and present and throw error with useful
+// Create correct type of instruction and present and throw error with useful
 // error message if we failed.
 void PathSpecification::tryReadInstruction(int index, const std::string& type,
                                            const ghoul::Dictionary& dictionary)
