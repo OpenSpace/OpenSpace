@@ -46,16 +46,16 @@ namespace openspace::autonavigation::helpers {
     }
 
     /*
-       Calculate the intersection of a line and a sphere
-       The line segment is defined from p1 to p2
-       The sphere is of radius r and centered at sc
-       There are potentially two points of intersection given by
-       p = p1 + mu1 (p2 - p1)
-       p = p1 + mu2 (p2 - p1)
-       Source: http://paulbourke.net/geometry/circlesphere/raysphere.c
-    */
-    bool lineSphereIntersection(glm::dvec3 p1, glm::dvec3 p2, glm::dvec3 sc, double r,
-                                                         glm::dvec3& intersectionPoint)
+     * Calculate the intersection of a line and a sphere
+     * The line segment is defined from p1 to p2
+     * The sphere is of radius r and centered at sc
+     * There are potentially two points of intersection given by
+     * p = p1 + mu1 (p2 - p1)
+     * p = p1 + mu2 (p2 - p1)
+     * Source: http://paulbourke.net/geometry/circlesphere/raysphere.c
+     */
+    bool lineSphereIntersection(glm::dvec3 p1, glm::dvec3 p2, glm::dvec3 sc,
+                                double r, glm::dvec3& intersectionPoint)
     {
         long double a, b, c;
         glm::dvec3 dp = p2 - p1;
@@ -113,6 +113,37 @@ namespace openspace::autonavigation::helpers {
         }
 
         return (h / 3) * (endpoints + 4 * times4 + 2 * times2);
+    }
+
+    /*
+     * Approximate area under a function using 5-point Gaussian quadrature
+     * https://en.wikipedia.org/wiki/Gaussian_quadrature
+     */
+    double fivePointGaussianQuadrature(double t0, double t1,
+                                       std::function<double(double)> f)
+    {
+        struct GaussLengendreCoefficient {
+            double abscissa; // xi
+            double weight;   // wi
+        };
+
+        static constexpr GaussLengendreCoefficient coefficients[] = {
+            { 0.0, 0.5688889 },
+            { -0.5384693, 0.47862867 },
+            { 0.5384693, 0.47862867 },
+            { -0.90617985, 0.23692688 },
+            { 0.90617985, 0.23692688 }
+        };
+
+        const double a = t0;
+        const double b = t1;
+        double length = 0.0;
+        for (auto coefficient : coefficients) {
+            // change of interval to [a, b] from [-1, 1] (also 0.5 * (b - a) below)
+            double const t = 0.5 * ((b - a) * coefficient.abscissa + (b + a));
+            length += f(t) * coefficient.weight;
+        }
+        return 0.5 * (b - a) * length;
     }
 
 } // helpers

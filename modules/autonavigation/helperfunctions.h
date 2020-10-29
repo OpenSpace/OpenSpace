@@ -47,6 +47,8 @@ namespace openspace::autonavigation::helpers {
 
     double simpsonsRule(double t0, double t1, int n, std::function<double(double)> f);
 
+    double fivePointGaussianQuadrature(double t0, double t1,
+        std::function<double(double)> f);
 } // namespace
 
 namespace openspace::autonavigation::interpolation {

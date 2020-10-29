@@ -73,13 +73,13 @@ double PathCurve::curveParameter(double s) {
     const double uMax = _parameterIntervals[segmentIndex];
     double u = uMin + (uMax - uMin) * (segmentS / segmentLength);
 
-    const int nrIterations = 40;
+    const int nIterations = 40;
 
     // initialize root bounding limits for bisection
     double lower = uMin;
     double upper = uMax;
 
-    for (int i = 0; i < nrIterations; ++i) {
+    for (int i = 0; i < nIterations; ++i) {
         double F = arcLength(uMin, u) - segmentS;
 
         const double tolerance = 0.1; // meters. Note that distances are very large
@@ -137,7 +137,7 @@ void PathCurve::initParameterIntervals() {
     for (unsigned int i = 1; i <= _nrSegments; i++) {
         double u = _parameterIntervals[i];
         double uPrev = _parameterIntervals[i - 1];
-        _lengths.push_back(arcLength(uPrev, u)); // OBS! Is this length computed well enough?
+        _lengths.push_back(arcLength(uPrev, u));
         _lengthSums.push_back(_lengthSums[i - 1] + _lengths[i]);
     }
     _totalLength = _lengthSums.back();
@@ -162,32 +162,12 @@ double PathCurve::arcLength(double limit) {
     return arcLength(0.0, limit);
 }
 
-// Approximate the arc length using 5-point Gaussian quadrature
-// https://en.wikipedia.org/wiki/Gaussian_quadrature
 double PathCurve::arcLength(double lowerLimit, double upperLimit) {
-    double a = lowerLimit;
-    double b = upperLimit;
-
-    struct GaussLengendreCoefficient {
-        double abscissa; // xi
-        double weight;   // wi
-    };
-
-    static constexpr GaussLengendreCoefficient coefficients[] =
-    {
-        { 0.0, 0.5688889 },
-        { -0.5384693, 0.47862867 },
-        { 0.5384693, 0.47862867 },
-        { -0.90617985, 0.23692688 },
-        { 0.90617985, 0.23692688 }
-    };
-
-    double length = 0.0;
-    for (auto coefficient : coefficients) {
-        double const t = 0.5 * ((b - a)*coefficient.abscissa + (b + a)); // change of interval to [a, b] from [-1, 1] (also 0.5 * (b - a) below)
-        length += approximatedDerivative(t) * coefficient.weight;
-    }
-    return 0.5 * (b - a) * length;
+    return helpers::fivePointGaussianQuadrature(
+        lowerLimit,
+        upperLimit,
+        [this](double u) { return approximatedDerivative(u); }
+    );
 }
 
 Bezier3Curve::Bezier3Curve(const Waypoint& start, const Waypoint& end) {
