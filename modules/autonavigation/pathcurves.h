@@ -31,10 +31,8 @@
 
 namespace openspace::autonavigation {
 
-// TODO: move to pathsegment.h instead
 enum CurveType {
     AvoidCollision,
-    Bezier3,
     Linear,
     ZoomOutOverview
 };
@@ -54,7 +52,6 @@ public:
     std::vector<glm::dvec3> getPoints(); // for debugging
 
 protected:
-    // TODO: give a better name after experimental curve types have been added
     void initParameterIntervals();
 
     double approximatedDerivative(double u, double h = 1E-7);
@@ -62,20 +59,12 @@ protected:
     double arcLength(double lowerLimit, double upperLimit);
 
     std::vector<glm::dvec3> _points;
-    unsigned int _nrSegments;
+    unsigned int _nSegments;
 
     std::vector<double> _parameterIntervals;
     std::vector<double> _lengths;
     std::vector<double> _lengthSums;
     double _totalLength;
-};
-
-// TODO: Put path curve classes in separate files
-
-class Bezier3Curve : public PathCurve {
-public:
-    Bezier3Curve(const Waypoint& start, const Waypoint& end);
-    glm::dvec3 interpolate(double u);
 };
 
 class LinearCurve : public PathCurve {

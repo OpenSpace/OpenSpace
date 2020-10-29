@@ -86,7 +86,7 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
     _points.push_back(end.position() + endTangentLength * endTangentDirection);
     _points.push_back(end.position());
 
-    _nrSegments = (unsigned int)std::floor((_points.size() - 1) / 3.0);
+    _nSegments = (unsigned int)std::floor((_points.size() - 1) / 3.0);
 
     initParameterIntervals();
 }

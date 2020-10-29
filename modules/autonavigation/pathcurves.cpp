@@ -60,7 +60,7 @@ double PathCurve::curveParameter(double s) {
     if (s >= _totalLength) return 1.0;
 
     unsigned int segmentIndex;
-    for (segmentIndex = 1; segmentIndex < _nrSegments; ++segmentIndex) {
+    for (segmentIndex = 1; segmentIndex < _nSegments; ++segmentIndex) {
         if (s <= _lengthSums[segmentIndex])
             break;
     }
@@ -114,27 +114,27 @@ std::vector<glm::dvec3> PathCurve::getPoints() {
 }
 
 void PathCurve::initParameterIntervals() {
-    ghoul_assert(_nrSegments > 0, "Cannot have a curve with zero segments!");
+    ghoul_assert(_nSegments > 0, "Cannot have a curve with zero segments!");
     _parameterIntervals.clear();
-    _parameterIntervals.reserve(_nrSegments + 1);
+    _parameterIntervals.reserve(_nSegments + 1);
 
     // compute initial values, to be able to compute lengths
-    double dt = 1.0 / _nrSegments;
+    double dt = 1.0 / _nSegments;
     _parameterIntervals.push_back(0.0);
-    for (unsigned int i = 1; i < _nrSegments; i++) {
+    for (unsigned int i = 1; i < _nSegments; i++) {
         _parameterIntervals.push_back(dt * i);
     }
     _parameterIntervals.push_back(1.0);
 
     // lengths
     _lengths.clear();
-    _lengths.reserve(_nrSegments + 1);
+    _lengths.reserve(_nSegments + 1);
     _lengthSums.clear();
-    _lengthSums.reserve(_nrSegments + 1);
+    _lengthSums.reserve(_nSegments + 1);
 
     _lengths.push_back(0.0);
     _lengthSums.push_back(0.0);
-    for (unsigned int i = 1; i <= _nrSegments; i++) {
+    for (unsigned int i = 1; i <= _nSegments; i++) {
         double u = _parameterIntervals[i];
         double uPrev = _parameterIntervals[i - 1];
         _lengths.push_back(arcLength(uPrev, u));
@@ -143,7 +143,7 @@ void PathCurve::initParameterIntervals() {
     _totalLength = _lengthSums.back();
 
     // scale parameterIntervals to better match arc lengths
-    for (unsigned int i = 1; i <= _nrSegments; i++) {
+    for (unsigned int i = 1; i <= _nSegments; i++) {
         _parameterIntervals[i] = _lengthSums[i] / _totalLength;
     }
 }
@@ -170,97 +170,10 @@ double PathCurve::arcLength(double lowerLimit, double upperLimit) {
     );
 }
 
-Bezier3Curve::Bezier3Curve(const Waypoint& start, const Waypoint& end) {
-    glm::dvec3 startNodePos = start.node()->worldPosition();
-    glm::dvec3 endNodePos = end.node()->worldPosition();
-
-    double startNodeRadius = start.nodeDetails.validBoundingSphere;
-    double endNodeRadius = end.nodeDetails.validBoundingSphere;
-
-    glm::dvec3 startNodeToStartPos = start.position() - startNodePos;
-    glm::dvec3 endNodeToEndPos = end.position() - endNodePos;
-
-    double startTangentLength = 2.0 * startNodeRadius;
-    double endTangentLength = 2.0 * endNodeRadius;
-    glm::dvec3 startTangentDirection = normalize(startNodeToStartPos);
-    glm::dvec3 endTangentDirection = normalize(endNodeToEndPos);
-
-    // Start by going outwards
-    _points.push_back(start.position());
-    _points.push_back(start.position() + startTangentLength * startTangentDirection);
-
-    const std::string& startNode = start.nodeDetails.identifier;
-    const std::string& endNode = end.nodeDetails.identifier;
-
-    if (startNode != endNode) {
-
-        glm::dvec3 startNodeToEndNode = endNodePos - startNodePos;
-        glm::dvec3 startToEndDirection = normalize(end.position() - start.position());
-
-        // Assuming we move straigh out to point to a distance proportional to radius, angle is enough to check collision risk
-        double cosStartAngle = glm::dot(startTangentDirection, startToEndDirection);
-        double cosEndAngle = glm::dot(endTangentDirection, startToEndDirection);
-
-        //TODO: investigate suitable values, could be risky close to surface..
-        bool TARGET_BEHIND_STARTNODE = cosStartAngle < -0.8;
-        bool TARGET_BEHIND_ENDNODE = cosEndAngle > 0.8;
-        bool TARGET_IN_OPPOSITE_DIRECTION = cosStartAngle > 0.7;
-
-        // Avoid collision with startnode by adding control points on the side of it
-        if (TARGET_BEHIND_STARTNODE) {
-            glm::dvec3 parallell = glm::proj(startNodeToStartPos, startNodeToEndNode);
-            glm::dvec3 orthogonal = normalize(startNodeToStartPos - parallell);
-            double dist = 5.0 * startNodeRadius;
-            glm::dvec3 extraKnot = startNodePos + dist * orthogonal;
-
-            _points.push_back(extraKnot + parallell);
-            _points.push_back(extraKnot);
-            _points.push_back(extraKnot - parallell);
-        }
-
-        // Zoom out, to get a better understanding in a 180 degree turn situation
-        if (TARGET_IN_OPPOSITE_DIRECTION) {
-            glm::dvec3 parallell = glm::proj(startNodeToStartPos, startNodeToEndNode);
-            glm::dvec3 orthogonal = normalize(startNodeToStartPos - parallell);
-            double dist = 0.5 * glm::length(startNodeToEndNode);
-            // Distant middle point
-            glm::dvec3 extraKnot = startNodePos + dist * normalize(parallell) + 3.0 * dist * orthogonal;
-
-            _points.push_back(extraKnot - 0.3 * dist *  normalize(parallell));
-            _points.push_back(extraKnot);
-            _points.push_back(extraKnot + 0.3 * dist *  normalize(parallell));
-        }
-
-        // Avoid collision with endnode by adding control points on the side of it
-        if (TARGET_BEHIND_ENDNODE) {
-            glm::dvec3 parallell = glm::proj(endNodeToEndPos, startNodeToEndNode);
-            glm::dvec3 orthogonal = normalize(endNodeToEndPos - parallell);
-            double dist = 5.0 * endNodeRadius;
-            glm::dvec3 extraKnot = endNodePos + dist * orthogonal;
-
-            _points.push_back(extraKnot - parallell);
-            _points.push_back(extraKnot);
-            _points.push_back(extraKnot + parallell);
-        }
-    }
-
-    _points.push_back(end.position() + endTangentLength * endTangentDirection);
-    _points.push_back(end.position());
-
-    _nrSegments = (unsigned int)std::floor((_points.size() - 1) / 3.0);
-
-   initParameterIntervals();
-}
-
-// Interpolate a list of control points and knot times
-glm::dvec3 Bezier3Curve::interpolate(double u) {
-    return interpolation::piecewiseCubicBezier(u, _points, _parameterIntervals);
-}
-
 LinearCurve::LinearCurve(const Waypoint& start, const Waypoint& end) {
     _points.push_back(start.position());
     _points.push_back(end.position());
-    _nrSegments = 1;
+    _nSegments = 1;
     initParameterIntervals();
 }
 

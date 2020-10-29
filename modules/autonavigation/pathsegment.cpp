@@ -139,18 +139,6 @@ void PathSegment::initCurve() {
         _speedFunction = std::make_unique<QuinticDampenedSpeed>();
         break;
 
-    case CurveType::Bezier3:
-        _curve = std::make_unique<Bezier3Curve>(_start, _end);
-        _rotationInterpolator = std::make_unique<LookAtInterpolator>(
-            _start.rotation(),
-            _end.rotation(),
-            _start.node()->worldPosition(),
-            _end.node()->worldPosition(),
-            _curve.get()
-        );
-        _speedFunction = std::make_unique<QuinticDampenedSpeed>();
-        break;
-
     case CurveType::Linear:
         _curve = std::make_unique<LinearCurve>(_start, _end);
         _rotationInterpolator = std::make_unique<EasedSlerpInterpolator>(
