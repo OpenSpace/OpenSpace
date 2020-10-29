@@ -137,13 +137,13 @@ namespace openspace::autonavigation::helpers {
 
         const double a = t0;
         const double b = t1;
-        double length = 0.0;
+        double sum = 0.0;
         for (auto coefficient : coefficients) {
             // change of interval to [a, b] from [-1, 1] (also 0.5 * (b - a) below)
             double const t = 0.5 * ((b - a) * coefficient.abscissa + (b + a));
-            length += f(t) * coefficient.weight;
+            sum += f(t) * coefficient.weight;
         }
-        return 0.5 * (b - a) * length;
+        return 0.5 * (b - a) * sum;
     }
 
 } // helpers
