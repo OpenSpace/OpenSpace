@@ -26,11 +26,12 @@
 #define __OPENSPACE_MODULE___EASINGFUNCTIONS___H__
 
 #include <ghoul/glm.h>
-#include <ghoul/misc/assert.h>
 #include <ghoul/logging/logmanager.h>
-#include <vector>
-#include <cmath>
+#include <ghoul/misc/assert.h>
 #include <algorithm>
+#include <cmath>
+#include <functional>
+#include <vector>
 
 namespace openspace::autonavigation::helpers {
 
@@ -43,6 +44,8 @@ namespace openspace::autonavigation::helpers {
         glm::dvec3 sphereCenter, double spehereRadius, glm::dvec3& intersectionPoint);
 
     bool isPointInsideSphere(const glm::dvec3& p, const glm::dvec3& c, double r);
+
+    double simpsonsRule(double t0, double t1, int n, std::function<double(double)> f);
 
 } // namespace
 

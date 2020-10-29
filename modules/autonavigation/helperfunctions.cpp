@@ -94,6 +94,27 @@ namespace openspace::autonavigation::helpers {
         return false;
     }
 
+    double simpsonsRule(double t0, double t1, int n, std::function<double(double)> f) {
+        double h = (t1 - t0) / n;
+        double times4 = 0.0;
+        double times2 = 0.0;
+        double endpoints = f(t0) + f(t1);
+
+        // weight 4
+        for (int i = 1; i < n; i += 2) {
+            double t = t0 + i * h;
+            times4 += f(t);
+        }
+
+        // weight 2
+        for (int i = 2; i < n; i += 2) {
+            double t = t0 + i * h;
+            times2 += f(t);
+        }
+
+        return (h / 3) * (endpoints + 4 * times4 + 2 * times2);
+    }
+
 } // helpers
 
 namespace openspace::autonavigation::interpolation {

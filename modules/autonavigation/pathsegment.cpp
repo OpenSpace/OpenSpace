@@ -26,6 +26,7 @@
 
 #include <modules/autonavigation/autonavigationmodule.h>
 #include <modules/autonavigation/avoidcollisioncurve.h>
+#include <modules/autonavigation/helperfunctions.h>
 #include <modules/autonavigation/pathcurves.h>
 #include <modules/autonavigation/rotationinterpolator.h>
 #include <modules/autonavigation/speedfunction.h>
@@ -87,21 +88,19 @@ CameraPose PathSegment::traversePath(double dt) {
 
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
     AutoNavigationHandler& handler = module->AutoNavigationHandler();
-    const int nrSteps = handler.nrSimulationStepsPerFrame();
+    const int nSteps = handler.integrationResolutionPerFrame();
 
-    // compute displacement along the path during this frame
-    double displacement = 0.0;
-    double h = dt / nrSteps;
-    for (int i = 0; i < nrSteps; ++i) {
-        double t = _progressedTime + i * h;
-        double speed = 0.5 * (speedAtTime(t - 0.01*h) + speedAtTime(t + 0.01*h)); // average
-        displacement += h * speed;
-    }
-
-    _traveledDistance += displacement;
-    double relativeDisplacement = _traveledDistance / pathLength();
+    double displacement = helpers::simpsonsRule(
+        _progressedTime,
+        _progressedTime + dt,
+        nSteps,
+        [this](double t) { return speedAtTime(t); }
+    );
 
     _progressedTime += dt;
+    _traveledDistance += displacement;
+
+    const double relativeDisplacement = _traveledDistance / pathLength();
 
     return interpolatedPose(relativeDisplacement);
 }

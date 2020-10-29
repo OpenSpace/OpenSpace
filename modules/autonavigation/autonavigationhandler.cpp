@@ -94,11 +94,11 @@ namespace {
         "in the direction of the camera position at the start of the path."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo NumberSimulationStepsInfo = {
-        "NumberSimulationSteps",
-        "Number Simulation Steps",
-        "The number of steps used to simulate the camera motion, per frame. A larger "
-        "number increases the precision, at the cost of reduced efficiency."
+    constexpr openspace::properties::Property::PropertyInfo IntegrationResolutionInfo = {
+        "IntegrationResolution",
+        "Path Integration Resolution",
+        "The number of steps used to integrate along the spline curve every frame. A "
+        "larger number increases the precision, at the cost of reduced efficiency."
     };
 
     constexpr openspace::properties::Property::PropertyInfo SpeedScaleInfo = {
@@ -120,7 +120,7 @@ AutoNavigationHandler::AutoNavigationHandler()
     , _applyStopBehaviorWhenIdle(ApplyStopBehaviorWhenIdleInfo, false)
     , _relevantNodeTags(RelevantNodeTagsInfo)
     , _defaultPositionOffsetAngle(DefaultPositionOffsetAngleInfo, 30.f, -90.f, 90.f)
-    , _nrSimulationSteps(NumberSimulationStepsInfo, 5, 2 , 10)
+    , _integrationResolutionPerFrame(IntegrationResolutionInfo, 100, 10, 500)
     , _speedScale(SpeedScaleInfo, 1.f, 0.01f, 2.f)
 {
     addPropertySubOwner(_atNodeNavigator);
@@ -154,7 +154,7 @@ AutoNavigationHandler::AutoNavigationHandler()
     addProperty(_relevantNodeTags);
 
     addProperty(_defaultPositionOffsetAngle);
-    addProperty(_nrSimulationSteps);
+    addProperty(_integrationResolutionPerFrame);
     addProperty(_speedScale);
 }
 
@@ -177,8 +177,8 @@ const std::vector<SceneGraphNode*>& AutoNavigationHandler::relevantNodes() const
     return _relevantNodes;
 }
 
-int AutoNavigationHandler::nrSimulationStepsPerFrame() const {
-    return _nrSimulationSteps;
+int AutoNavigationHandler::integrationResolutionPerFrame() const {
+    return _integrationResolutionPerFrame;
 }
 
 double AutoNavigationHandler::speedScale() const {
@@ -255,15 +255,15 @@ void AutoNavigationHandler::createPath(PathSpecification& spec) {
         LINFO("Property for stop at targets per default was overridden by path specification.");
     }
 
-    const int nrInstructions = (int)spec.instructions()->size();
+    const int nInstructions = static_cast<int>(spec.instructions()->size());
 
-    for (int i = 0; i < nrInstructions; i++) {
+    for (int i = 0; i < nInstructions; i++) {
         const Instruction* instruction = spec.instruction(i);
         if (instruction) {
             addSegment(instruction, i);
 
             // Add info about stops between segments
-            if (i < nrInstructions - 1) {
+            if (i < nInstructions - 1) {
                 addStopDetails(instruction);
             }
         }

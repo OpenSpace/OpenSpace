@@ -53,7 +53,7 @@ public:
     const SceneGraphNode* anchor() const;
     bool hasFinished() const;
     const std::vector<SceneGraphNode*>& relevantNodes() const;
-    int nrSimulationStepsPerFrame() const;
+    int integrationResolutionPerFrame() const;
     double speedScale() const;
 
     void updateCamera(double deltaTime);
@@ -117,7 +117,7 @@ private:
     properties::StringListProperty _relevantNodeTags;
 
     properties::FloatProperty _defaultPositionOffsetAngle;
-    properties::IntProperty _nrSimulationSteps;
+    properties::IntProperty _integrationResolutionPerFrame;
 
     properties::FloatProperty _speedScale;
 };
