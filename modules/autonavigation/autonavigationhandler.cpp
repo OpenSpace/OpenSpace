@@ -331,7 +331,12 @@ void AutoNavigationHandler::continuePath() {
 }
 
 void AutoNavigationHandler::abortPath() {
+    if (!_isPlaying) {
+        LWARNING("No camera path is playing.");
+        return;
+    }
     _isPlaying = false;
+    LINFO("Aborted camera path.");
 }
 
 // TODO: remove when not needed
