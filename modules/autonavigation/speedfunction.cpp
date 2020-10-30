@@ -24,6 +24,7 @@
 
 #include <modules/autonavigation/speedfunction.h>
 
+#include <modules/autonavigation/helperfunctions.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/easing.h>
 #include <algorithm>
@@ -49,15 +50,13 @@ double SpeedFunction::scaledValue(double time, double duration, double pathLengt
 }
 
 void SpeedFunction::initIntegratedSum() {
-    // apply duration constraint (eq. 14 in Eberly)
-    double speedSum = 0.0;
-    int steps = 100;
-    double h = 1.0 / steps;
-    for (double t = 0.0; t <= 1.0; t += h) {
-        double midpointSpeed = 0.5 * (value(t + 0.5*h) + value(t - 0.5*h));
-        speedSum += h * midpointSpeed;
-    }
-    _integratedSum = speedSum;
+    const int steps = 100;
+    _integratedSum = helpers::simpsonsRule(
+        0.0,
+        1.0,
+        steps,
+        [this](double t) { return value(t); }
+    );
 }
 
 SexticDampenedSpeed::SexticDampenedSpeed() {
