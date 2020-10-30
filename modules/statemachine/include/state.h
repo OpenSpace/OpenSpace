@@ -22,29 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifndef __OPENSPACE_MODULE_STATEMACHINE___STATE___H__
+#define __OPENSPACE_MODULE_STATEMACHINE___STATE___H__
+
 #include "modules/statemachine/include/statemachine.h"
 
-#include "modules/statemachine/include/defaultstate.h"
-
+#include <string>
 namespace openspace {
 
-StateMachine::StateMachine() {
-    _currentState = &DefaultState::getInstance();
-    _currentState->enter(this);
-}
+class StateMachine;
 
-StateMachine::~StateMachine() {
+class State {
+public:
+    State();
+    virtual ~State();
 
-}
-
-State* StateMachine::currentState() const {
-    return _currentState;
-}
-
-void StateMachine::setState(State& newState) {
-    _currentState->exit(this);
-    _currentState = &newState;
-    _currentState->enter(this);
-}
+    // What should be done entering the state, while in the state and exiting the state
+    virtual void enter(openspace::StateMachine* statemachine) = 0;
+    virtual void activate(openspace::StateMachine* statemachine) = 0;
+    virtual void idle(openspace::StateMachine* statemachine) = 0;
+    virtual void exit(openspace::StateMachine* statemachine) = 0;
+    virtual bool isIdle() = 0;
+    virtual std::string name() = 0;
+};
 
 } // namespace openspace
+
+#endif __OPENSPACE_MODULE_STATEMACHINE___STATE___H__

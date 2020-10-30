@@ -22,29 +22,53 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "modules/statemachine/include/statemachine.h"
+#include "modules/statemachine/include/earthstate.h"
 
-#include "modules/statemachine/include/defaultstate.h"
+#include <iostream>
 
 namespace openspace {
 
-StateMachine::StateMachine() {
-    _currentState = &DefaultState::getInstance();
-    _currentState->enter(this);
+EarthState::EarthState() {
+    _name = "EarthState";
 }
 
-StateMachine::~StateMachine() {
+EarthState::~EarthState() {
 
 }
 
-State* StateMachine::currentState() const {
-    return _currentState;
+State& EarthState::getInstance() {
+    static EarthState singleton;
+    return singleton;
 }
 
-void StateMachine::setState(State& newState) {
-    _currentState->exit(this);
-    _currentState = &newState;
-    _currentState->enter(this);
+void EarthState::enter(openspace::StateMachine* statemachine) {
+    std::cout << "Entering Earth state!" << std::endl;
+    _isIdle = false;
+    activate(statemachine);
+}
+
+void EarthState::activate(openspace::StateMachine* statemachine) {
+    std::cout << "Executing Earth state!" << std::endl;
+    _isIdle = false;
+    idle(statemachine);
+}
+
+void EarthState::idle(openspace::StateMachine* statemachine) {
+    std::cout << "Earth state idle!" << std::endl;
+    _isIdle = true;
+}
+
+void EarthState::exit(openspace::StateMachine* statemachine) {
+    std::cout << "Leaving Earth sate!" << std::endl;
+    _isIdle = false;
+}
+
+bool EarthState::isIdle() {
+    return _isIdle;
+}
+
+std::string EarthState::name() {
+    return _name;
 }
 
 } // namespace openspace

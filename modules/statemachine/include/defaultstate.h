@@ -22,29 +22,40 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "modules/statemachine/include/statemachine.h"
+#ifndef __OPENSPACE_MODULE_STATEMACHINE___DEFAULTSTATE___H__
+#define __OPENSPACE_MODULE_STATEMACHINE___DEFAULTSTATE___H__
 
-#include "modules/statemachine/include/defaultstate.h"
+#include "modules/statemachine/include/state.h"
 
 namespace openspace {
 
-StateMachine::StateMachine() {
-    _currentState = &DefaultState::getInstance();
-    _currentState->enter(this);
-}
+class State;
+class StateMachine;
 
-StateMachine::~StateMachine() {
+// All concrete States should be singletons
+class DefaultState : public State {
+public:
+    static State& getInstance();
+    ~DefaultState();
+    DefaultState(const DefaultState&) = delete;
+    DefaultState(const DefaultState&&) = delete;
+    DefaultState& operator= (const DefaultState& other) = delete;
+    DefaultState& operator= (const DefaultState&& other) = delete;
 
-}
+    // What should be done entering the state, while in the state and exiting the state
+    void enter(openspace::StateMachine* statemachine) override;
+    void activate(openspace::StateMachine* statemachine) override;
+    void idle(openspace::StateMachine* statemachine) override;
+    void exit(openspace::StateMachine* statemachine) override;
+    bool isIdle() override;
+    std::string name() override;
 
-State* StateMachine::currentState() const {
-    return _currentState;
-}
-
-void StateMachine::setState(State& newState) {
-    _currentState->exit(this);
-    _currentState = &newState;
-    _currentState->enter(this);
-}
+private:
+    DefaultState();
+    bool _isIdle;
+    std::string _name;
+};
 
 } // namespace openspace
+
+#endif __OPENSPACE_MODULE_STATEMACHINE___DEFAULTSTATE___H__

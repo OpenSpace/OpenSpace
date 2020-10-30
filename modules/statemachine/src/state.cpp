@@ -22,29 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "modules/statemachine/include/statemachine.h"
-
-#include "modules/statemachine/include/defaultstate.h"
+#include "modules/statemachine/include/state.h"
 
 namespace openspace {
 
-StateMachine::StateMachine() {
-    _currentState = &DefaultState::getInstance();
-    _currentState->enter(this);
-}
+    State::State() {
 
-StateMachine::~StateMachine() {
+    }
 
-}
+    State::~State() {
 
-State* StateMachine::currentState() const {
-    return _currentState;
-}
-
-void StateMachine::setState(State& newState) {
-    _currentState->exit(this);
-    _currentState = &newState;
-    _currentState->enter(this);
-}
+    }
 
 } // namespace openspace

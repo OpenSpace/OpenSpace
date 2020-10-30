@@ -22,29 +22,53 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "modules/statemachine/include/statemachine.h"
-
 #include "modules/statemachine/include/defaultstate.h"
+
+#include <iostream>
 
 namespace openspace {
 
-StateMachine::StateMachine() {
-    _currentState = &DefaultState::getInstance();
-    _currentState->enter(this);
+DefaultState::DefaultState() {
+    _name = "DefaultState";
 }
 
-StateMachine::~StateMachine() {
+DefaultState::~DefaultState() {
 
 }
 
-State* StateMachine::currentState() const {
-    return _currentState;
+State& DefaultState::getInstance() {
+    static DefaultState singleton;
+    return singleton;
 }
 
-void StateMachine::setState(State& newState) {
-    _currentState->exit(this);
-    _currentState = &newState;
-    _currentState->enter(this);
+void DefaultState::enter(openspace::StateMachine* statemachine) {
+    std::cout << "Entering Default state!" << std::endl;
+    _isIdle = false;
+    activate(statemachine);
+}
+
+void DefaultState::activate(openspace::StateMachine* statemachine) {
+    std::cout << "Executing Default state!" << std::endl;
+    _isIdle = false;
+    idle(statemachine);
+}
+
+void DefaultState::idle(openspace::StateMachine* statemachine) {
+    std::cout << "Default state idle!" << std::endl;
+    _isIdle = true;
+}
+
+void DefaultState::exit(openspace::StateMachine* statemachine) {
+    std::cout << "Leaving Default sate!" << std::endl;
+    _isIdle = false;
+}
+
+bool DefaultState::isIdle() {
+    return _isIdle;
+}
+
+std::string DefaultState::name() {
+    return _name;
 }
 
 } // namespace openspace

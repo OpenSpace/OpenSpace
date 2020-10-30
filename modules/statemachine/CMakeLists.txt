@@ -26,11 +26,17 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/include/statemachine.h
+	${CMAKE_CURRENT_SOURCE_DIR}/include/state.h
+	${CMAKE_CURRENT_SOURCE_DIR}/include/defaultstate.h
+	${CMAKE_CURRENT_SOURCE_DIR}/include/earthstate.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/src/statemachine.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/state.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/defaultstate.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/earthstate.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

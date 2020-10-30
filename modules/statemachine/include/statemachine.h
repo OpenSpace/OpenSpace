@@ -25,15 +25,22 @@
 #ifndef __OPENSPACE_MODULE_STATEMACHINE___STATEMACHINE___H__
 #define __OPENSPACE_MODULE_STATEMACHINE___STATEMACHINE___H__
 
+#include "modules/statemachine/include/state.h"
+
 namespace openspace {
+
+class State;
 
 class StateMachine{
 public:
     StateMachine();
     ~StateMachine();
 
-private:
+    State* currentState() const;
+    void setState(State& newState);
 
+private:
+    State* _currentState;
 };
 
 } // namespace openspace
