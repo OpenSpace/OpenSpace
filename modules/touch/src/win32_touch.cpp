@@ -35,6 +35,7 @@
 #include <thread>
 #include <tchar.h>
 #include <tpcshrd.h>
+#include <debugapi.h>
 
 // #define ENABLE_TUIOMESSAGES
 #define ENABLE_DIRECTMSG
@@ -230,25 +231,31 @@ Win32TouchHook::Win32TouchHook(void* nativeWindow) {
             GetCurrentThreadId()
         );
 
-        // In theory, if our UI is pumped from a different thread, we can
-        // handle Low-level mouse events in that thread as well.
-        // this might help reduce mouse lag while running OpenSpace?
-        // gMouseHookThread = new std::thread([](){
-        //     gMouseHook = SetWindowsHookExW(
-        //         WH_MOUSE_LL,
-        //         LowLevelMouseProc,
-        //         GetModuleHandleW(NULL),
-        //         0 //<- Global thread id (low-level mouse is global only)
-        //     );
-        //     if (!gMouseHook) {
-        //         LINFO("Could not setup mousehook!");
-        //     }
+        // Attach a lowlevel mouse hook.
+        // This mouse hook prevents injected mouse events (touch-to-mouse),
+        // since we cannot catch it in our messageloop.
+        // Since this is attached to windows global thread, this will block lowlevel mouse
+        // access to all running applications if we stall in this thread. 
+        // Debug breakpoints typically freeze our application, in which case we simply don't
+        // create this if a debugger is attached. 
+        if (!IsDebuggerPresent()) {
+            gMouseHookThread = new std::thread([](){
+                gMouseHook = SetWindowsHookExW(
+                    WH_MOUSE_LL,
+                    LowLevelMouseProc,
+                    GetModuleHandleW(NULL),
+                    0 //<- Global thread id (low-level mouse is global only)
+                );
+                if (!gMouseHook) {  
+                    LINFO("Could not setup mousehook!");
+                }
 
-        //     MSG msg;
-        //     while (GetMessage(&msg, NULL, 0, 0)) {
-        //         DispatchMessage(&msg);
-        //     }
-        // });
+                MSG msg;
+                while (GetMessage(&msg, NULL, 0, 0)) {
+                    DispatchMessage(&msg);
+                }
+            });
+        }
 
         if (!gTouchHook) {
             LINFO(fmt::format("Failed to setup WindowsHook for touch input redirection"));
@@ -272,13 +279,13 @@ Win32TouchHook::~Win32TouchHook() {
 }
 
 // Low-level mouse hook is "needed" if we want to stop mousecursor from moving
-// when we get a touch-input on our window A negative effect is that this
-// function is for global threads, meaning our application will cause Windows to
-// stall the mouse cursor when this function can't be scheduled. This is not yet
-// fail-proof...might be a race-condition on message pumping?
+// when we get a touch-input on our window. 
+// A negative effect is that this function is for global threads, meaning our 
+// application will cause Windows to stall the mouse cursor when this 
+// function can't be scheduled (i.e. when debugger hits a breakpoint). 
+// This is not yet fail-proof...might be a race-condition on message pumping?
 // - Seems to move the cursor when we get two fingers as input..
-// - If we ourselves would pump windows for events, we can handle this in the
-// pump-loop
+// - If we ourselves would pump windows for events, we can handle this.
 LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
     constexpr const LONG_PTR SIGNATURE_MASK = 0xFFFFFF00;
     constexpr const LONG_PTR MOUSEEVENTF_FROMTOUCH = 0xFF515700;
