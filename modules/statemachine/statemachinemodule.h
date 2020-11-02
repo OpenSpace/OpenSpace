@@ -31,8 +31,12 @@ namespace openspace {
 
 class StateMachineModule : public OpenSpaceModule {
 public:
+    constexpr static const char* Name = "StateMachine";
+
     StateMachineModule();
     ~StateMachineModule();
+
+    scripting::LuaLibrary luaLibrary() const override;
 
 protected:
     void internalInitialize(const ghoul::Dictionary& dictionary) override;

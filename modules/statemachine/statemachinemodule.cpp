@@ -24,6 +24,10 @@
 
 #include "modules/statemachine/statemachinemodule.h"
 
+#include <openspace/scripting/lualibrary.h>
+
+#include "statemachinemodule_lua.inl"
+
 namespace openspace {
 
 StateMachineModule::StateMachineModule()
@@ -42,6 +46,21 @@ void StateMachineModule::internalInitialize(const ghoul::Dictionary& dictionary)
 
 void StateMachineModule::internalDeinitialize() {
 
+}
+
+scripting::LuaLibrary StateMachineModule::luaLibrary() const {
+    scripting::LuaLibrary res;
+    res.name = "statemachine";
+    res.functions = {
+         {
+            "createStateMachine",
+            &luascriptfunctions::createStateMachine,
+            {},
+            "list of tables",
+            "List of tables describing the states for the state machine."
+        },
+    };
+    return res;
 }
 
 } // namespace openspace
