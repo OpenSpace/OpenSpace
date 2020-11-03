@@ -24,6 +24,9 @@
 
 #include <modules/statemachine/include/state.h>
 
+#include <openspace/engine/globals.h>
+#include <openspace/scripting/scriptengine.h>
+
 namespace {
     constexpr const char* StateNameKey = "Identifier";
     constexpr const char* EnterFunctionKey = "Enter";
@@ -38,11 +41,11 @@ State::State(const ghoul::Dictionary& dictionary) {
     }
 
     if (dictionary.hasValue<std::string>(EnterFunctionKey)) {
-        std::string enter = dictionary.value<std::string>(EnterFunctionKey);
+        _enter = dictionary.value<std::string>(EnterFunctionKey);
     }
 
     if (dictionary.hasValue<std::string>(ExitFunctionKey)) {
-        std::string exit = dictionary.value<std::string>(ExitFunctionKey);
+        _exit = dictionary.value<std::string>(ExitFunctionKey);
     }
 
     _isIdle = true;
@@ -54,6 +57,12 @@ State::~State() {
 
 void State::enter(openspace::StateMachine* statemachine) {
     _isIdle = false;
+    global::scriptEngine->queueScript(_enter,
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
+
+    // When script is done running, perform idle behaviour
+    idle(statemachine);
 }
 
 void State::idle(openspace::StateMachine* statemachine) {
@@ -62,6 +71,10 @@ void State::idle(openspace::StateMachine* statemachine) {
 
 void State::exit(openspace::StateMachine* statemachine) {
     _isIdle = false;
+    global::scriptEngine->queueScript(_exit,
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
+    _isIdle = true;
 }
 
 bool State::isIdle() {

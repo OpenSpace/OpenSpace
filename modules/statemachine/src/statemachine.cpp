@@ -45,8 +45,36 @@ State* StateMachine::currentState() const {
     return _currentState;
 }
 
+void StateMachine::transitionTo(std::string newState) {
+    // Find newState in already defined states
+    bool wasFound = false;
+    for (unsigned int i = 0; i < _states.size(); ++i) {
+        if (_states[i].name() == newState) {
+            setState(_states[i]);
+            wasFound = true;
+            break;
+        }
+    }
+
+    if (!wasFound) {
+        // TODO: Warn
+    }
+}
+
 void StateMachine::setState(State& newState) {
+    // If first state to be set
+    if (!_currentState) {
+        // Enter new state
+        _currentState = &newState;
+        _currentState->enter(this);
+    }
+
+    // Exit current state
     _currentState->exit(this);
+
+    // Transition to newState
+
+    // Enter new state
     _currentState = &newState;
     _currentState->enter(this);
 }

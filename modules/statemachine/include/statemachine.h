@@ -39,10 +39,11 @@ public:
     ~StateMachine();
 
     State* currentState() const;
+    void transitionTo(std::string newState);
     void setState(State& newState);
 
 private:
-    State* _currentState;
+    State* _currentState = nullptr;
     std::vector<State> _states;
 };
 

@@ -44,6 +44,15 @@ void StateMachineModule::initializeStateMachine(const ghoul::Dictionary& diction
     _machine = std::make_unique<StateMachine>(StateMachine(dictionary));
 }
 
+void StateMachineModule::transitionTo(std::string newState) {
+    if (!_machine) {
+        // TODO: Warn
+        return;
+    }
+
+     _machine->transitionTo(newState);
+}
+
 void StateMachineModule::internalInitialize(const ghoul::Dictionary& dictionary) {
 
 }

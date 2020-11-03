@@ -42,6 +42,9 @@ public:
 
     void initializeStateMachine(const ghoul::Dictionary& dictionary);
 
+    // initializeStateMachine must have been called before
+    void transitionTo(std::string newState);
+
 protected:
     void internalInitialize(const ghoul::Dictionary& dictionary) override;
     void internalDeinitialize() override;
