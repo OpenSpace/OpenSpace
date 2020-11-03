@@ -26,7 +26,7 @@
 
 #include <modules/autonavigation/autonavigationmodule.h>
 #include <modules/autonavigation/helperfunctions.h>
-#include <modules/autonavigation/pathcurves.h>
+#include <modules/autonavigation/pathcurve.h>
 #include <modules/autonavigation/rotationinterpolator.h>
 #include <modules/autonavigation/speedfunction.h>
 #include <modules/autonavigation/curves/avoidcollisioncurve.h>
@@ -76,8 +76,8 @@ const double PathSegment::duration() const { return _duration; }
 const double PathSegment::pathLength() const { return _curve->length(); }
 
 // TODO: remove function for debugging
-const std::vector<glm::dvec3> PathSegment::getControlPoints() const {
-    return _curve->getPoints();
+const std::vector<glm::dvec3> PathSegment::controlPoints() const {
+    return _curve->points();
 }
 
 CameraPose PathSegment::traversePath(double dt) {
@@ -103,7 +103,7 @@ CameraPose PathSegment::traversePath(double dt) {
     return interpolatedPose(_traveledDistance);
 }
 
-std::string PathSegment::getCurrentAnchor() const {
+std::string PathSegment::currentAnchor() const {
     bool pastHalfway = (_traveledDistance / pathLength()) > 0.5;
     return (pastHalfway) ? _end.nodeDetails.identifier : _start.nodeDetails.identifier;
 }

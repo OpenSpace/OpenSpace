@@ -49,7 +49,7 @@ public:
 
     virtual glm::dvec3 interpolate(double u) = 0;
 
-    std::vector<glm::dvec3> getPoints(); // for debugging
+    std::vector<glm::dvec3> points(); // for debugging
 
 protected:
     void initParameterIntervals();

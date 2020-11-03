@@ -104,7 +104,7 @@ void AtNodeNavigator::orbitNode(double deltaTime) {
     double orbitSpeed = distanceToSurface * speedFactor;
 
     // compute a new position along the orbit
-    const glm::dquat lookAtNodeRotation = helpers::getLookAtQuaternion(
+    const glm::dquat lookAtNodeRotation = helpers::lookAtQuaternion(
         prevPosition,
         nodeCenter,
         up
@@ -123,7 +123,7 @@ void AtNodeNavigator::orbitNode(double deltaTime) {
     // rotate with the orbit, but keep the relative orientation with regards to the anchor
     const glm::dquat localRotation = glm::inverse(lookAtNodeRotation) * prevRotation;
     const glm::dquat newLookAtRotation =
-        helpers::getLookAtQuaternion(newPosition, nodeCenter, up);
+        helpers::lookAtQuaternion(newPosition, nodeCenter, up);
 
     const glm::dquat newRotation = newLookAtRotation * localRotation;
 

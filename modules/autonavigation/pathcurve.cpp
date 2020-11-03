@@ -22,7 +22,7 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/autonavigation/pathcurves.h>
+#include <modules/autonavigation/pathcurve.h>
 
 #include <modules/autonavigation/helperfunctions.h>
 #include <openspace/query/query.h>
@@ -109,7 +109,7 @@ double PathCurve::curveParameter(double s) {
 
 // TODO: remove when not needed
 // Created for debugging
-std::vector<glm::dvec3> PathCurve::getPoints() {
+std::vector<glm::dvec3> PathCurve::points() {
     return _points;
 }
 

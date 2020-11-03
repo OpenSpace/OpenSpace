@@ -99,7 +99,7 @@ TargetNodeInstruction::TargetNodeInstruction(const ghoul::Dictionary& dictionary
     }
 }
 
-std::vector<Waypoint> TargetNodeInstruction::getWaypoints() const {
+std::vector<Waypoint> TargetNodeInstruction::waypoints() const {
     const SceneGraphNode* targetNode = sceneGraphNode(nodeIdentifier);
     if (!targetNode) {
         LERROR(fmt::format("Could not find target node '{}'", nodeIdentifier));
@@ -146,7 +146,7 @@ NavigationStateInstruction::NavigationStateInstruction(
     }
 }
 
-std::vector<Waypoint> NavigationStateInstruction::getWaypoints() const {
+std::vector<Waypoint> NavigationStateInstruction::waypoints() const {
     Waypoint wp{ navigationState };
     return std::vector<Waypoint>({ wp });
 }

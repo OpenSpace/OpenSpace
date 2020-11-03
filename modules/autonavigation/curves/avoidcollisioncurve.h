@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_AUTONAVIGATION___AVOIDCOLLISIONCURVE___H__
 #define __OPENSPACE_MODULE_AUTONAVIGATION___AVOIDCOLLISIONCURVE___H__
 
-#include <modules/autonavigation/pathcurves.h>
+#include <modules/autonavigation/pathcurve.h>
 
 namespace openspace::autonavigation {
 

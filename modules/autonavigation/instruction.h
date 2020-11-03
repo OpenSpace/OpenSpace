@@ -36,7 +36,7 @@ struct Instruction {
     Instruction(const ghoul::Dictionary& dictionary);
     virtual ~Instruction();
 
-    virtual std::vector<Waypoint> getWaypoints() const = 0;
+    virtual std::vector<Waypoint> waypoints() const = 0;
 
     // TODO
     //static documentation::Documentation Documentation();
@@ -53,7 +53,7 @@ struct Instruction {
 struct TargetNodeInstruction : public Instruction {
     TargetNodeInstruction(const ghoul::Dictionary& dictionary);
 
-    std::vector<Waypoint> getWaypoints() const override;
+    std::vector<Waypoint> waypoints() const override;
 
     // TODO
     //static documentation::Documentation Documentation();
@@ -68,7 +68,7 @@ struct NavigationStateInstruction : public Instruction {
 
     NavigationStateInstruction(const ghoul::Dictionary& dictionary);
 
-    std::vector<Waypoint> getWaypoints() const override;
+    std::vector<Waypoint> waypoints() const override;
 
     // TODO
     //static documentation::Documentation Documentation();

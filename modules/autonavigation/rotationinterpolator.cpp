@@ -25,7 +25,7 @@
 #include <modules/autonavigation/rotationinterpolator.h>
 
 #include <modules/autonavigation/helperfunctions.h>
-#include <modules/autonavigation/pathcurves.h>
+#include <modules/autonavigation/pathcurve.h>
 #include <modules/autonavigation/waypoint.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/interpolator.h>
@@ -69,7 +69,7 @@ glm::dquat LookAtRotator::interpolate(double u) {
     glm::dvec3 lookAtPos = interpolation::linear(uNew, _startLookAtPos, _endLookAtPos);
     glm::dvec3 startUpVec = _start * glm::dvec3(0.0, 1.0, 0.0);
 
-    return helpers::getLookAtQuaternion(_path->positionAt(u), lookAtPos, startUpVec);
+    return helpers::lookAtQuaternion(_path->positionAt(u), lookAtPos, startUpVec);
 }
 
 LookAtInterpolator::LookAtInterpolator(glm::dquat start, glm::dquat end,
@@ -122,7 +122,7 @@ glm::dquat LookAtInterpolator::interpolate(double u) {
     double uUp = ghoul::cubicEaseInOut(u);
     glm::dvec3 up = ghoul::interpolateLinear(uUp, startUp, endUp);
 
-    return helpers::getLookAtQuaternion(_path->positionAt(u), lookAtPos, up);
+    return helpers::lookAtQuaternion(_path->positionAt(u), lookAtPos, up);
 }
 
 } // namespace openspace::autonavigation

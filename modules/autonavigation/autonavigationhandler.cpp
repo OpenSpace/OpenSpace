@@ -208,7 +208,7 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
     std::unique_ptr<PathSegment> &currentSegment = _pathSegments[_currentSegmentIndex];
 
     CameraPose newPose = currentSegment->traversePath(deltaTime);
-    const std::string newAnchor = currentSegment->getCurrentAnchor();
+    const std::string newAnchor = currentSegment->currentAnchor();
 
     // Set anchor node in orbitalNavigator, to render visible nodes and add activate
     // navigation when we reach the end.
@@ -341,7 +341,7 @@ void AutoNavigationHandler::abortPath() {
 
 // TODO: remove when not needed
 // Created for debugging
-std::vector<glm::dvec3> AutoNavigationHandler::getCurvePositions(int nPerSegment) {
+std::vector<glm::dvec3> AutoNavigationHandler::curvePositions(int nPerSegment) {
     std::vector<glm::dvec3> positions;
 
     if (_pathSegments.empty()) {
@@ -364,7 +364,7 @@ std::vector<glm::dvec3> AutoNavigationHandler::getCurvePositions(int nPerSegment
 
 // TODO: remove when not needed
 // Created for debugging
-std::vector<glm::dquat> AutoNavigationHandler::getCurveOrientations(int nPerSegment) {
+std::vector<glm::dquat> AutoNavigationHandler::curveOrientations(int nPerSegment) {
     std::vector<glm::dquat> orientations;
 
     if (_pathSegments.empty()) {
@@ -388,7 +388,7 @@ std::vector<glm::dquat> AutoNavigationHandler::getCurveOrientations(int nPerSegm
 
 // TODO: remove when not needed or combined into pose version
 // Created for debugging
-std::vector<glm::dvec3> AutoNavigationHandler::getCurveViewDirections(int nPerSegment) {
+std::vector<glm::dvec3> AutoNavigationHandler::curveViewDirections(int nPerSegment) {
     std::vector<glm::dvec3> viewDirections;
 
     if (_pathSegments.empty()) {
@@ -419,7 +419,7 @@ std::vector<glm::dvec3> AutoNavigationHandler::getCurveViewDirections(int nPerSe
 
 // TODO: remove when not needed
 // Created for debugging
-std::vector<glm::dvec3> AutoNavigationHandler::getControlPoints() {
+std::vector<glm::dvec3> AutoNavigationHandler::controlPoints() {
     std::vector<glm::dvec3> points;
 
     if (_pathSegments.empty()) {
@@ -428,7 +428,7 @@ std::vector<glm::dvec3> AutoNavigationHandler::getControlPoints() {
     }
 
     for (std::unique_ptr<PathSegment> &p : _pathSegments) {
-        const std::vector<glm::dvec3> curvePoints = p->getControlPoints();
+        const std::vector<glm::dvec3> curvePoints = p->controlPoints();
         points.insert(points.end(), curvePoints.begin(), curvePoints.end());
     }
 
@@ -454,7 +454,7 @@ void AutoNavigationHandler::removeRollRotation(CameraPose& pose, double deltaTim
     const double anchorToPosDistance = glm::distance(anchorPos, pose.position);
     const double notTooCloseDistance = deltaTime * anchorToPosDistance;
     glm::dvec3 lookAtPos = pose.position + notTooCloseDistance * cameraDir;
-    glm::dquat rollFreeRotation = helpers::getLookAtQuaternion(
+    glm::dquat rollFreeRotation = helpers::lookAtQuaternion(
         pose.position,
         lookAtPos,
         camera()->lookUpVectorWorldSpace()
@@ -508,7 +508,7 @@ void AutoNavigationHandler::addSegment(const Instruction* ins, int index) {
     // TODO: Improve how curve types are handled
     const int curveType = _defaultCurveOption;
 
-    std::vector<Waypoint> waypoints = ins->getWaypoints();
+    std::vector<Waypoint> waypoints = ins->waypoints();
     Waypoint waypointToAdd;
 
     if (waypoints.size() == 0) {
@@ -655,7 +655,7 @@ Waypoint AutoNavigationHandler::computeDefaultWaypoint(const TargetNodeInstructi
 
     const glm::dvec3 targetPos = nodePos + stepDirection * (radius + height);
 
-    const glm::dquat targetRot = helpers::getLookAtQuaternion(
+    const glm::dquat targetRot = helpers::lookAtQuaternion(
         targetPos,
         targetNode->worldPosition(),
         camera()->lookUpVectorWorldSpace()

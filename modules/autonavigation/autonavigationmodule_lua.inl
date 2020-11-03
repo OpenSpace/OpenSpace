@@ -180,7 +180,7 @@ int getPathPositions(lua_State* L) {
     // Get sample positions from the current curve
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
     AutoNavigationHandler& handler = module->AutoNavigationHandler();
-    std::vector<glm::dvec3> points = handler.getCurvePositions(pointsPerSegment);
+    std::vector<glm::dvec3> points = handler.curvePositions(pointsPerSegment);
 
     // Push the points to the Lua stack:
     lua_settop(L, 0);
@@ -215,7 +215,7 @@ int getPathOrientations(lua_State* L) {
     // Get sample positions from the current curve
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
     AutoNavigationHandler& handler = module->AutoNavigationHandler();
-    std::vector<glm::dquat> orientations = handler.getCurveOrientations(pointsPerSegment);
+    std::vector<glm::dquat> orientations = handler.curveOrientations(pointsPerSegment);
 
     // Push the rotation to the Lua stack:
     lua_settop(L, 0);
@@ -252,7 +252,7 @@ int getPathViewDirections(lua_State* L) {
     // Get sample positions from the current curve
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
     AutoNavigationHandler& handler = module->AutoNavigationHandler();
-    std::vector<glm::dvec3> viewDirections = handler.getCurveViewDirections(pointsPerSegment);
+    std::vector<glm::dvec3> viewDirections = handler.curveViewDirections(pointsPerSegment);
 
     // Push the points to the Lua stack:
     lua_settop(L, 0);
@@ -286,7 +286,7 @@ int getControlPoints(lua_State* L) {
     // Get sample positions from the current curve
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
     AutoNavigationHandler& handler = module->AutoNavigationHandler();
-    std::vector<glm::dvec3> points = handler.getControlPoints();
+    std::vector<glm::dvec3> points = handler.controlPoints();
 
     // Push the points to the Lua stack:
     lua_settop(L, 0);

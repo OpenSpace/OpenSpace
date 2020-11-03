@@ -38,7 +38,7 @@ namespace openspace::autonavigation::helpers {
     // Make interpolator parameter t [0,1] progress only inside a subinterval
     double shiftAndScale(double t, double newStart, double newEnd);
 
-    glm::dquat getLookAtQuaternion(glm::dvec3 eye, glm::dvec3 center, glm::dvec3 up);
+    glm::dquat lookAtQuaternion(glm::dvec3 eye, glm::dvec3 center, glm::dvec3 up);
 
     bool lineSphereIntersection(glm::dvec3 linePoint1, glm::dvec3 linePoint2,
         glm::dvec3 sphereCenter, double spehereRadius, glm::dvec3& intersectionPoint);

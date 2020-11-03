@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE___PATHSEGMENT___H__
 #define __OPENSPACE_MODULE___PATHSEGMENT___H__
 
-#include <modules/autonavigation/pathcurves.h>
+#include <modules/autonavigation/pathcurve.h>
 #include <modules/autonavigation/rotationinterpolator.h>
 #include <modules/autonavigation/speedfunction.h>
 #include <modules/autonavigation/waypoint.h>
@@ -50,10 +50,10 @@ public:
     const double duration() const;
     const double pathLength() const;
 
-    const std::vector<glm::dvec3> getControlPoints() const; // debugging
+    const std::vector<glm::dvec3> controlPoints() const; // debugging
 
     CameraPose traversePath(double dt);
-    std::string getCurrentAnchor() const;
+    std::string currentAnchor() const;
     bool hasReachedEnd() const;
 
     double speedAtTime(double time) const;

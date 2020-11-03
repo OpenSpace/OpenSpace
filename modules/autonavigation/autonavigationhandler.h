@@ -64,10 +64,10 @@ public:
     void abortPath();
 
     // TODO: remove functions for debugging
-    std::vector<glm::dvec3> getCurvePositions(int nPerSegment); //debug
-    std::vector<glm::dquat> getCurveOrientations(int nPerSegment); //debug
-    std::vector<glm::dvec3> getCurveViewDirections(int nPerSegment); //debug
-    std::vector<glm::dvec3> getControlPoints(); //debug
+    std::vector<glm::dvec3> curvePositions(int nPerSegment);
+    std::vector<glm::dquat> curveOrientations(int nPerSegment);
+    std::vector<glm::dvec3> curveViewDirections(int nPerSegment);
+    std::vector<glm::dvec3> controlPoints();
 
 private:
     Waypoint wayPointFromCamera();
