@@ -22,7 +22,7 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/autonavigation/zoomoutoverviewcurve.h>
+#include <modules/autonavigation/curves/zoomoutoverviewcurve.h>
 
 #include <modules/autonavigation/autonavigationmodule.h>
 #include <modules/autonavigation/helperfunctions.h>

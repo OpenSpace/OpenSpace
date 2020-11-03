@@ -25,12 +25,12 @@
 #include <modules/autonavigation/pathsegment.h>
 
 #include <modules/autonavigation/autonavigationmodule.h>
-#include <modules/autonavigation/avoidcollisioncurve.h>
 #include <modules/autonavigation/helperfunctions.h>
 #include <modules/autonavigation/pathcurves.h>
 #include <modules/autonavigation/rotationinterpolator.h>
 #include <modules/autonavigation/speedfunction.h>
-#include <modules/autonavigation/zoomoutoverviewcurve.h>
+#include <modules/autonavigation/curves/avoidcollisioncurve.h>
+#include <modules/autonavigation/curves/zoomoutoverviewcurve.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/scene/scenegraphnode.h>
