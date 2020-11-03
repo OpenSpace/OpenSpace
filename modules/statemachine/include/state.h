@@ -25,8 +25,8 @@
 #ifndef __OPENSPACE_MODULE_STATEMACHINE___STATE___H__
 #define __OPENSPACE_MODULE_STATEMACHINE___STATE___H__
 
-#include "modules/statemachine/include/statemachine.h"
-
+#include <modules/statemachine/include/statemachine.h>
+#include <ghoul/misc/dictionary.h>
 #include <string>
 namespace openspace {
 
@@ -34,16 +34,21 @@ class StateMachine;
 
 class State {
 public:
-    State();
+    State(const ghoul::Dictionary& dictionary);
     virtual ~State();
 
     // What should be done entering the state, while in the state and exiting the state
-    virtual void enter(openspace::StateMachine* statemachine) = 0;
-    virtual void activate(openspace::StateMachine* statemachine) = 0;
-    virtual void idle(openspace::StateMachine* statemachine) = 0;
-    virtual void exit(openspace::StateMachine* statemachine) = 0;
-    virtual bool isIdle() = 0;
-    virtual std::string name() = 0;
+    void enter(openspace::StateMachine* statemachine);
+    void idle(openspace::StateMachine* statemachine);
+    void exit(openspace::StateMachine* statemachine);
+    bool isIdle();
+    std::string name();
+
+private:
+    bool _isIdle;
+    std::string _name;
+    std::string _enter;
+    std::string _exit;
 };
 
 } // namespace openspace

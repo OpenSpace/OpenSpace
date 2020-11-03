@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "modules/statemachine/statemachinemodule.h"
+#include <modules/statemachine/statemachinemodule.h>
 
 #include <openspace/scripting/lualibrary.h>
 
@@ -38,6 +38,10 @@ StateMachineModule::StateMachineModule()
 
 StateMachineModule::~StateMachineModule() {
 
+}
+
+void StateMachineModule::initializeStateMachine(const ghoul::Dictionary& dictionary) {
+    _machine = std::make_unique<StateMachine>(StateMachine(dictionary));
 }
 
 void StateMachineModule::internalInitialize(const ghoul::Dictionary& dictionary) {

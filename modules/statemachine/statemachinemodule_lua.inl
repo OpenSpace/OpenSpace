@@ -40,8 +40,7 @@ int createStateMachine(lua_State* L) {
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
 
     // @TODO: create StateMachine from the input dictionary. but for now, just display a message
-    // soemthing like: module->initStateMachine(dictionary)?
-
+    module->initializeStateMachine(dictionary);
     LINFOC("StateMachine", "State machine was created.");
 
     lua_settop(L, 0);

@@ -25,7 +25,9 @@
 #ifndef __OPENSPACE_MODULE_STATEMACHINE___STATEMACHINEMODULE___H__
 #define __OPENSPACE_MODULE_STATEMACHINE___STATEMACHINEMODULE___H__
 
-#include "openspace/util/openspacemodule.h"
+#include <openspace/util/openspacemodule.h>
+
+#include <modules/statemachine/include/statemachine.h>
 
 namespace openspace {
 
@@ -38,12 +40,14 @@ public:
 
     scripting::LuaLibrary luaLibrary() const override;
 
+    void initializeStateMachine(const ghoul::Dictionary& dictionary);
+
 protected:
     void internalInitialize(const ghoul::Dictionary& dictionary) override;
     void internalDeinitialize() override;
 
 private:
-
+    std::unique_ptr<StateMachine> _machine = nullptr;
 };
 
 } // namespace openspace

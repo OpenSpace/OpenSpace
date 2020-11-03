@@ -25,7 +25,9 @@
 #ifndef __OPENSPACE_MODULE_STATEMACHINE___STATEMACHINE___H__
 #define __OPENSPACE_MODULE_STATEMACHINE___STATEMACHINE___H__
 
-#include "modules/statemachine/include/state.h"
+#include <modules/statemachine/include/state.h>
+#include <ghoul/misc/dictionary.h>
+#include <vector>
 
 namespace openspace {
 
@@ -33,7 +35,7 @@ class State;
 
 class StateMachine{
 public:
-    StateMachine();
+    StateMachine(const ghoul::Dictionary& dictionary);
     ~StateMachine();
 
     State* currentState() const;
@@ -41,6 +43,7 @@ public:
 
 private:
     State* _currentState;
+    std::vector<State> _states;
 };
 
 } // namespace openspace

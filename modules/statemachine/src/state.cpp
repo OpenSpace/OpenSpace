@@ -22,16 +22,54 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "modules/statemachine/include/state.h"
+#include <modules/statemachine/include/state.h>
+
+namespace {
+    constexpr const char* StateNameKey = "Identifier";
+    constexpr const char* EnterFunctionKey = "Enter";
+    constexpr const char* ExitFunctionKey = "Exit";
+} // namespace
 
 namespace openspace {
 
-    State::State() {
-
+State::State(const ghoul::Dictionary& dictionary) {
+    if (dictionary.hasValue<std::string>(StateNameKey)) {
+        _name = dictionary.value<std::string>(StateNameKey);
     }
 
-    State::~State() {
-
+    if (dictionary.hasValue<std::string>(EnterFunctionKey)) {
+        std::string enter = dictionary.value<std::string>(EnterFunctionKey);
     }
+
+    if (dictionary.hasValue<std::string>(ExitFunctionKey)) {
+        std::string exit = dictionary.value<std::string>(ExitFunctionKey);
+    }
+
+    _isIdle = true;
+}
+
+State::~State() {
+
+}
+
+void State::enter(openspace::StateMachine* statemachine) {
+    _isIdle = false;
+}
+
+void State::idle(openspace::StateMachine* statemachine) {
+    _isIdle = true;
+}
+
+void State::exit(openspace::StateMachine* statemachine) {
+    _isIdle = false;
+}
+
+bool State::isIdle() {
+    return _isIdle;
+}
+
+std::string State::name() {
+    return _name;
+}
 
 } // namespace openspace

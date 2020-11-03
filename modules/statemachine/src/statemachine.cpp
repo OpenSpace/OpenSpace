@@ -24,13 +24,17 @@
 
 #include "modules/statemachine/include/statemachine.h"
 
-#include "modules/statemachine/include/defaultstate.h"
-
 namespace openspace {
 
-StateMachine::StateMachine() {
-    _currentState = &DefaultState::getInstance();
-    _currentState->enter(this);
+StateMachine::StateMachine(const ghoul::Dictionary& dictionary) {
+    // Go through all states in the dictionary
+    for (size_t i = 1; i <= dictionary.size(); ++i) {
+        if (dictionary.hasKey(std::to_string(i))) {
+            // One state
+            ghoul::Dictionary stateDictionary = dictionary.value<ghoul::Dictionary>(std::to_string(i));
+            _states.push_back(State(stateDictionary));
+        }
+    }
 }
 
 StateMachine::~StateMachine() {
