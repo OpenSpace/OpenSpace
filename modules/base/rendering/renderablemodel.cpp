@@ -53,11 +53,11 @@ namespace {
     constexpr const int ColorAddingBlending = 4;
 
     std::map<std::string, int> BlendingMapping = {
-        {"Default", DefaultBlending},
-        {"Additive", AdditiveBlending},
-        {"Points and Lines", PointsAndLinesBlending},
-        {"Polygon", PolygonBlending},
-        {"Color Adding", ColorAddingBlending}
+        { "Default", DefaultBlending },
+        { "Additive", AdditiveBlending },
+        { "Points and Lines", PointsAndLinesBlending },
+        { "Polygon", PolygonBlending },
+        { "Color Adding", ColorAddingBlending }
     };
 
     constexpr const std::array<const char*, 13> UniformNames = {
@@ -248,7 +248,10 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _rotationVec(RotationVecInfo, glm::dvec3(0.0), glm::dvec3(0.0), glm::dvec3(360.0))
     , _enableOpacityBlending(EnableOpacityBlendingInfo, false)
     , _disableDepthTest(DisableDepthTestInfo, false)
-    , _blendingFuncOption(BlendingOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _blendingFuncOption(
+        BlendingOptionInfo,
+        properties::OptionProperty::DisplayType::Dropdown
+    )
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
 {
     documentation::testSpecificationAndThrow(
@@ -337,12 +340,16 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     addProperty(_blendingFuncOption);
 
     if (dictionary.hasKey(BlendingOptionInfo.identifier)) {
-        const std::string blendingOpt(dictionary.value<std::string>(BlendingOptionInfo.identifier));
+        const std::string blendingOpt = dictionary.value<std::string>(
+            BlendingOptionInfo.identifier
+        );
         _blendingFuncOption.set(BlendingMapping[blendingOpt]);
     }
 
     if (dictionary.hasKey(DisableDepthTestInfo.identifier)) {
-        _enableOpacityBlending = dictionary.value<bool>(EnableOpacityBlendingInfo.identifier);
+        _enableOpacityBlending = dictionary.value<bool>(
+            EnableOpacityBlendingInfo.identifier
+        );
     }
 
     addProperty(_enableOpacityBlending);
@@ -469,21 +476,21 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 
     glEnablei(GL_BLEND, 0);
     switch (_blendingFuncOption) {
-    case DefaultBlending:
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        break;
-    case AdditiveBlending:
-        glBlendFunc(GL_ONE, GL_ONE);
-        break;
-    case PointsAndLinesBlending:
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        break;
-    case PolygonBlending:
-        glBlendFunc(GL_SRC_ALPHA_SATURATE, GL_ONE);
-        break;
-    case ColorAddingBlending:
-        glBlendFunc(GL_SRC_COLOR, GL_DST_COLOR);
-        break;
+        case DefaultBlending:
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            break;
+        case AdditiveBlending:
+            glBlendFunc(GL_ONE, GL_ONE);
+            break;
+        case PointsAndLinesBlending:
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            break;
+        case PolygonBlending:
+            glBlendFunc(GL_SRC_ALPHA_SATURATE, GL_ONE);
+            break;
+        case ColorAddingBlending:
+            glBlendFunc(GL_SRC_COLOR, GL_DST_COLOR);
+            break;
     };
 
     if (_disableDepthTest) {

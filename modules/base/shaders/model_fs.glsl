@@ -47,8 +47,9 @@ uniform float opacity = 1.0;
 const vec3 SpecularAlbedo = vec3(1.0);
 
 Fragment getFragment() {
-    if (opacity == 0.0)
+    if (opacity == 0.0) {
         discard;
+    }
 
     vec3 diffuseAlbedo = texture(texture1, vs_st).rgb;
 
@@ -89,20 +90,21 @@ Fragment getFragment() {
     }
 
     if (opacityBlending) {
-        //frag.color.a = opacity * (frag.color.r + frag.color.g + frag.color.b)/3.0;
-        frag.color.a = opacity * ( max(max(frag.color.r, frag.color.g), frag.color.b) );
-    } else {
+        // frag.color.a = opacity * (frag.color.r + frag.color.g + frag.color.b)/3.0;
+        frag.color.a = opacity * max(max(frag.color.r, frag.color.g), frag.color.b);
+    }
+    else {
         frag.color.a = opacity;
     }
 
-    if (frag.color.a < 0.1)
+    if (frag.color.a < 0.1) {
         discard;
+    }
 
     frag.depth          = vs_screenSpaceDepth;
     frag.gPosition      = vs_positionCameraSpace;
     frag.gNormal        = vec4(vs_normalViewSpace, 0.0);
     frag.disableLDR2HDR = true;
-
 
     return frag;
 }
