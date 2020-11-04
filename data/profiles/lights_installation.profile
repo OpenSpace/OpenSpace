@@ -86,6 +86,11 @@
       "name": "{earth_satellites}.Renderable.Enabled",
       "type": "setPropertyValue",
       "value": "false"
+    },
+    {
+      "name": "NavigationHandler.OrbitalNavigator.VelocityZoomControl",
+      "type": "setPropertyValueSingle",
+      "value": "0.01"
     }
   ],
   "time": {
