@@ -51,10 +51,6 @@ State::State(const ghoul::Dictionary& dictionary) {
     _isIdle = true;
 }
 
-State::~State() {
-
-}
-
 void State::enter(openspace::StateMachine* statemachine) {
     _isIdle = false;
     global::scriptEngine->queueScript(_enter,
@@ -77,11 +73,11 @@ void State::exit(openspace::StateMachine* statemachine) {
     _isIdle = true;
 }
 
-bool State::isIdle() {
+bool State::isIdle() const{
     return _isIdle;
 }
 
-std::string State::name() {
+std::string State::name() const{
     return _name;
 }
 

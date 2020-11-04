@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_STATEMACHINE___STATE___H__
-#define __OPENSPACE_MODULE_STATEMACHINE___STATE___H__
+#ifndef __OPENSPACE_MODULE_STATEMACHINE___TRANSITION___H__
+#define __OPENSPACE_MODULE_STATEMACHINE___TRANSITION___H__
 
 #include <modules/statemachine/include/statemachine.h>
 #include <ghoul/misc/dictionary.h>
@@ -33,25 +33,21 @@ namespace openspace {
 
 class StateMachine;
 
-class State {
+class Transition {
 public:
-    State(const ghoul::Dictionary& dictionary);
-    ~State() = default;
+    Transition(const ghoul::Dictionary& dictionary);
+    ~Transition() = default;
 
-    // What should be done entering the state, while in the state and exiting the state
-    void enter(openspace::StateMachine* statemachine);
-    void idle(openspace::StateMachine* statemachine);
-    void exit(openspace::StateMachine* statemachine);
-    bool isIdle() const;
-    std::string name() const;
+    std::string from() const;
+    std::string to() const; 
+    void performAction() const;
 
 private:
-    bool _isIdle;
-    std::string _name;
-    std::string _enter;
-    std::string _exit;
+    std::string _from;
+    std::string _to;
+    std::string _action;
 };
 
 } // namespace openspace
 
-#endif __OPENSPACE_MODULE_STATEMACHINE___STATE___H__
+#endif __OPENSPACE_MODULE_STATEMACHINE___TRANSITION___H__

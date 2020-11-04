@@ -26,14 +26,16 @@
 #define __OPENSPACE_MODULE_STATEMACHINE___STATEMACHINE___H__
 
 #include <modules/statemachine/include/state.h>
+#include <modules/statemachine/include/transition.h>
 #include <ghoul/misc/dictionary.h>
 #include <vector>
 
 namespace openspace {
 
 class State;
+class Transition;
 
-class StateMachine{
+class StateMachine {
 public:
     StateMachine(const ghoul::Dictionary& dictionary);
     ~StateMachine();
@@ -45,6 +47,7 @@ public:
 private:
     State* _currentState = nullptr;
     std::vector<State> _states;
+    std::vector<Transition> _transitions;
 };
 
 } // namespace openspace

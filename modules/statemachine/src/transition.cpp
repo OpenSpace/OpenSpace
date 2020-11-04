@@ -22,36 +22,45 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_STATEMACHINE___STATE___H__
-#define __OPENSPACE_MODULE_STATEMACHINE___STATE___H__
+#include <modules/statemachine/include/transition.h>
 
-#include <modules/statemachine/include/statemachine.h>
-#include <ghoul/misc/dictionary.h>
-#include <string>
+#include <openspace/engine/globals.h>
+#include <openspace/scripting/scriptengine.h>
+
+namespace {
+    constexpr const char* FromStateKey = "From";
+    constexpr const char* ToStateKey = "To";
+    constexpr const char* ActionFunctionKey = "Action";
+} // namespace
 
 namespace openspace {
 
-class StateMachine;
+Transition::Transition(const ghoul::Dictionary& dictionary) {
+    if (dictionary.hasValue<std::string>(FromStateKey)) {
+        _from = dictionary.value<std::string>(FromStateKey);
+    }
 
-class State {
-public:
-    State(const ghoul::Dictionary& dictionary);
-    ~State() = default;
+    if (dictionary.hasValue<std::string>(ToStateKey)) {
+        _to = dictionary.value<std::string>(ToStateKey);
+    }
 
-    // What should be done entering the state, while in the state and exiting the state
-    void enter(openspace::StateMachine* statemachine);
-    void idle(openspace::StateMachine* statemachine);
-    void exit(openspace::StateMachine* statemachine);
-    bool isIdle() const;
-    std::string name() const;
+    if (dictionary.hasValue<std::string>(ActionFunctionKey)) {
+        _action = dictionary.value<std::string>(ActionFunctionKey);
+    }
+}
 
-private:
-    bool _isIdle;
-    std::string _name;
-    std::string _enter;
-    std::string _exit;
-};
+std::string Transition::from() const {
+    return _from;
+}
+
+std::string Transition::to() const {
+    return _to;
+}
+
+void Transition::performAction() const {
+    global::scriptEngine->queueScript(_action,
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
+}
 
 } // namespace openspace
-
-#endif __OPENSPACE_MODULE_STATEMACHINE___STATE___H__

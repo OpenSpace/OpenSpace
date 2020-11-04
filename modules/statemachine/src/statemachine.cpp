@@ -24,15 +24,44 @@
 
 #include "modules/statemachine/include/statemachine.h"
 
+namespace {
+    constexpr const char* StatesKey = "States";
+    constexpr const char* TransitionsKey = "Transitions";
+} // namespace
+
 namespace openspace {
 
 StateMachine::StateMachine(const ghoul::Dictionary& dictionary) {
-    // Go through all states in the dictionary
-    for (size_t i = 1; i <= dictionary.size(); ++i) {
-        if (dictionary.hasKey(std::to_string(i))) {
-            // One state
-            ghoul::Dictionary stateDictionary = dictionary.value<ghoul::Dictionary>(std::to_string(i));
-            _states.push_back(State(stateDictionary));
+
+    // States
+    if (dictionary.hasKey(StatesKey)) {
+        ghoul::Dictionary statesDictionary =
+            dictionary.value<ghoul::Dictionary>(StatesKey);
+
+        // Go through all states in the dictionary
+        for (size_t i = 1; i <= statesDictionary.size(); ++i) {
+            if (statesDictionary.hasKey(std::to_string(i))) {
+                // One state
+                ghoul::Dictionary state =
+                    statesDictionary.value<ghoul::Dictionary>(std::to_string(i));
+                _states.push_back(State(state));
+            }
+        }
+    }
+
+    // Transitions
+    if (dictionary.hasKey(TransitionsKey)) {
+        ghoul::Dictionary transitionsDictionary =
+            dictionary.value<ghoul::Dictionary>(TransitionsKey);
+
+        // Go through all states in the dictionary
+        for (size_t i = 1; i <= transitionsDictionary.size(); ++i) {
+            if (transitionsDictionary.hasKey(std::to_string(i))) {
+                // One state
+                ghoul::Dictionary transition =
+                    transitionsDictionary.value<ghoul::Dictionary>(std::to_string(i));
+                _transitions.push_back(Transition(transition));
+            }
         }
     }
 }
@@ -62,17 +91,34 @@ void StateMachine::transitionTo(std::string newState) {
 }
 
 void StateMachine::setState(State& newState) {
-    // If first state to be set
+    // If initial state to be set
     if (!_currentState) {
-        // Enter new state
+        // Enter initial state without transition
         _currentState = &newState;
         _currentState->enter(this);
+    }
+
+    // Check if transition has been defined
+    int transitionIndex = -1;
+    for (unsigned int i = 0; i < _transitions.size(); ++i) {
+        if ( _transitions[i].from() == _currentState->name() &&
+             _transitions[i].to() == newState.name() )
+        {
+            transitionIndex = i;
+            break;
+        }
+    }
+
+    if (transitionIndex == -1) {
+        // TODO: Warn
+        return;
     }
 
     // Exit current state
     _currentState->exit(this);
 
     // Transition to newState
+    _transitions[transitionIndex].performAction();
 
     // Enter new state
     _currentState = &newState;
