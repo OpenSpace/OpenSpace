@@ -169,7 +169,8 @@ void HorizonsTranslation::readHorizonsTextFile() {
 
     if (!fileStream.good()) {
         LERROR(fmt::format(
-            "Failed to open Horizons text file '{}'", _horizonsTextFile));
+            "Failed to open Horizons text file '{}'", _horizonsTextFile
+        ));
         return;
     }
 
@@ -227,7 +228,7 @@ bool HorizonsTranslation::loadCachedFile(const std::string& file) {
         return false;
     }
 
-    // Read how many values to read
+    // Read how many keyframes to read
     int32_t nKeyframes = 0;
 
     fileStream.read(reinterpret_cast<char*>(&nKeyframes), sizeof(int32_t));
@@ -265,7 +266,7 @@ void HorizonsTranslation::saveCachedFile(const std::string& file) const {
         return;
     }
 
-    // Write how many values are to be written
+    // Write how many keyframes are to be written
     int32_t nKeyframes = static_cast<int32_t>(_timeline.nKeyframes());
     if (nKeyframes == 0) {
         throw ghoul::RuntimeError("Error writing cache: No values were loaded");
@@ -276,18 +277,22 @@ void HorizonsTranslation::saveCachedFile(const std::string& file) const {
     std::deque<Keyframe<glm::dvec3>> keyframes = _timeline.keyframes();
     for (int i = 0; i < nKeyframes; i++) {
         // First write timestamp
-        fileStream.write(reinterpret_cast<const char*>(&keyframes[i].timestamp),
+        fileStream.write(reinterpret_cast<const char*>(
+            &keyframes[i].timestamp),
             sizeof(double)
         );
 
         // and then the components of the position vector one by one
-        fileStream.write(reinterpret_cast<const char*>(&keyframes[i].data.x),
+        fileStream.write(reinterpret_cast<const char*>(
+            &keyframes[i].data.x),
             sizeof(double)
         );
-        fileStream.write(reinterpret_cast<const char*>(&keyframes[i].data.y),
+        fileStream.write(reinterpret_cast<const char*>(
+            &keyframes[i].data.y),
             sizeof(double)
         );
-        fileStream.write(reinterpret_cast<const char*>(&keyframes[i].data.z),
+        fileStream.write(reinterpret_cast<const char*>(
+            &keyframes[i].data.z),
             sizeof(double)
         );
     }
