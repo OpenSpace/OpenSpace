@@ -31,5 +31,5 @@ asset.meta = {
     URL = "https://astrogeology.usgs.gov/search/map/Titan/Cassini/Global-Mosaic/" ..
         "Titan_ISS_P19658_Mosaic_Global_4km",
     License = "NASA/PDS",
-    Identifiers = "Cassini_ISS_Global_Mosaic_4km_LiU"
+    Identifiers = {"Cassini_ISS_Global_Mosaic_4km_LiU"}
 }
