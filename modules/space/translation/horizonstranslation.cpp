@@ -129,36 +129,34 @@ glm::dvec3 HorizonsTranslation::position(const UpdateData& data) const {
 }
 
 void HorizonsTranslation::loadData() {
-    std::string _file = _horizonsTextFile;
-    if (!FileSys.fileExists(absPath(_file))) {
+    std::string file = _horizonsTextFile;
+    if (!FileSys.fileExists(absPath(file))) {
         return;
     }
 
     std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-        _file,
+        file,
         ghoul::filesystem::CacheManager::Persistent::Yes
     );
 
     bool hasCachedFile = FileSys.fileExists(cachedFile);
     if (hasCachedFile) {
-        LINFO(fmt::format("Cached file '{}' used for Horizon file '{}'",
-            cachedFile, _file
-        ));
+        LINFO(fmt::format("Cached file '{}' used for Horizon file '{}'", cachedFile, file));
 
         bool success = loadCachedFile(cachedFile);
         if (success) {
             return;
         }
         else {
-            FileSys.cacheManager()->removeCacheFile(_file);
+            FileSys.cacheManager()->removeCacheFile(file);
             // Intentional fall-through to the 'else' computation to generate the cache
             // file for the next run
         }
     }
     else {
-        LINFO(fmt::format("Cache for Horizon file '{}' not found", _file));
+        LINFO(fmt::format("Cache for Horizon file '{}' not found", file));
     }
-    LINFO(fmt::format("Loading Horizon file '{}'", _file));
+    LINFO(fmt::format("Loading Horizon file '{}'", file));
 
     readHorizonsTextFile();
 
@@ -171,8 +169,7 @@ void HorizonsTranslation::readHorizonsTextFile() {
 
     if (!fileStream.good()) {
         LERROR(fmt::format(
-            "Failed to open Horizons text file '{}'", _horizonsTextFile
-        ));
+            "Failed to open Horizons text file '{}'", _horizonsTextFile));
         return;
     }
 
@@ -224,41 +221,41 @@ void HorizonsTranslation::readHorizonsTextFile() {
 
 bool HorizonsTranslation::loadCachedFile(const std::string& file) {
     std::ifstream fileStream(file, std::ifstream::binary);
-    if (fileStream.good()) {
 
-        // Read how many values to read
-        int32_t nKeyframes = 0;
-        fileStream.read(reinterpret_cast<char*>(&nKeyframes), sizeof(int32_t));
-        if (nKeyframes == 0) {
-            throw ghoul::RuntimeError("Error reading cache: No values were loaded");
-        }
-
-        // Read the values in same order as they were written
-        double timestamp, x, y, z;
-        glm::dvec3 gPos;
-        for (int i = 0; i < nKeyframes; ++i) {
-            // Timestamp
-            fileStream.read(reinterpret_cast<char*>(&timestamp), sizeof(double));
-
-            // Position vector components
-            fileStream.read(reinterpret_cast<char*>(&x), sizeof(glm::f64));
-            fileStream.read(reinterpret_cast<char*>(&y), sizeof(glm::f64));
-            fileStream.read(reinterpret_cast<char*>(&z), sizeof(glm::f64));
-
-            // Recreate the position vector
-            gPos = glm::dvec3(x, y, z);
-
-            // Add keyframe in timeline
-            _timeline.addKeyframe(timestamp, std::move(gPos));
-        }
-
-        bool success = fileStream.good();
-        return success;
-    }
-    else {
+    if (!fileStream.good()) {
         LERROR(fmt::format("Error opening file '{}' for loading cache file", file));
         return false;
     }
+
+    // Read how many values to read
+    int32_t nKeyframes = 0;
+
+    fileStream.read(reinterpret_cast<char*>(&nKeyframes), sizeof(int32_t));
+    if (nKeyframes == 0) {
+        throw ghoul::RuntimeError("Error reading cache: No values were loaded");
+    }
+
+    // Read the values in same order as they were written
+    for (int i = 0; i < nKeyframes; ++i) {
+        double timestamp, x, y, z;
+        glm::dvec3 gPos;
+
+        // Timestamp
+        fileStream.read(reinterpret_cast<char*>(&timestamp), sizeof(double));
+
+        // Position vector components
+        fileStream.read(reinterpret_cast<char*>(&x), sizeof(double));
+        fileStream.read(reinterpret_cast<char*>(&y), sizeof(double));
+        fileStream.read(reinterpret_cast<char*>(&z), sizeof(double));
+
+        // Recreate the position vector
+        gPos = glm::dvec3(x, y, z);
+
+        // Add keyframe in timeline
+        _timeline.addKeyframe(timestamp, std::move(gPos));
+    }
+
+    return fileStream.good();
 }
 
 void HorizonsTranslation::saveCachedFile(const std::string& file) const {
@@ -285,13 +282,13 @@ void HorizonsTranslation::saveCachedFile(const std::string& file) const {
 
         // and then the components of the position vector one by one
         fileStream.write(reinterpret_cast<const char*>(&keyframes[i].data.x),
-            sizeof(glm::f64)
+            sizeof(double)
         );
         fileStream.write(reinterpret_cast<const char*>(&keyframes[i].data.y),
-            sizeof(glm::f64)
+            sizeof(double)
         );
         fileStream.write(reinterpret_cast<const char*>(&keyframes[i].data.z),
-            sizeof(glm::f64)
+            sizeof(double)
         );
     }
 }
