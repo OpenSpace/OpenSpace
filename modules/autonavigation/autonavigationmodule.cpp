@@ -92,8 +92,17 @@ scripting::LuaLibrary AutoNavigationModule::luaLibrary() const {
             &autonavigation::luascriptfunctions::goTo,
             {},
             "string, [double]",
-            "Mov the camera to the node with the specified. The optional parameter "
+            "Move the camera to the node with the specified name. The optional parameter "
             "specifies the duration of the motion."
+        },
+        {
+            "goToHeight",
+            &autonavigation::luascriptfunctions::goToHeight,
+            {},
+            "string, double, [double]",
+            "Move the camera to the node with the specified name. The second input "
+            "parameter is the desired target height and the the optional third "
+            "parameter specifies the duration of the motion."
         },
         {
             "generatePath",

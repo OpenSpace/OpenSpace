@@ -45,8 +45,7 @@ int continuePath(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::continuePath");
 
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-    AutoNavigationHandler& handler = module->AutoNavigationHandler();
-    handler.continuePath();
+    module->AutoNavigationHandler().continuePath();
 
     return 0;
 }
@@ -55,8 +54,7 @@ int stopPath(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::stopPath");
 
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-    AutoNavigationHandler& handler = module->AutoNavigationHandler();
-    handler.abortPath();
+    module->AutoNavigationHandler().abortPath();
 
     return 0;
 }
@@ -86,8 +84,42 @@ int goTo(lua_State* L) {
     PathSpecification spec = PathSpecification(TargetNodeInstruction{insDict});
 
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-    AutoNavigationHandler& handler = module->AutoNavigationHandler();
-    handler.createPath(spec);
+    module->AutoNavigationHandler().createPath(spec);
+
+    lua_settop(L, 0);
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
+int goToHeight(lua_State* L) {
+    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 2, 3 }, "lua::goToHeight");
+
+    const std::string& nodeIdentifier = ghoul::lua::value<std::string>(L, 1);
+
+    if (!sceneGraphNode(nodeIdentifier)) {
+        lua_settop(L, 0);
+        return ghoul::lua::luaError(L, "Unknown node name: " + nodeIdentifier);
+    }
+
+    double height = ghoul::lua::value<double>(L, 2);
+
+    ghoul::Dictionary insDict;
+    insDict.setValue("Target", nodeIdentifier);
+    insDict.setValue("Height", height);
+
+    if (nArguments > 2) {
+        double duration = ghoul::lua::value<double>(L, 3);
+        if (duration <= EPSILON) {
+            lua_settop(L, 0);
+            return ghoul::lua::luaError(L, "Duration must be larger than zero.");
+        }
+        insDict.setValue("Duration", duration);
+    }
+
+    PathSpecification spec = PathSpecification(TargetNodeInstruction{ insDict });
+
+    AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
+    module->AutoNavigationHandler().createPath(spec);
 
     lua_settop(L, 0);
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
@@ -109,8 +141,7 @@ int generatePath(lua_State* L) {
     }
 
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-    AutoNavigationHandler& handler = module->AutoNavigationHandler();
-    handler.createPath(spec);
+    module->AutoNavigationHandler().createPath(spec);
 
     lua_settop(L, 0);
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
@@ -163,8 +194,7 @@ int generatePathFromFile(lua_State* L) {
     LINFOC("AutoNavigationModule", "Reading succeeded. Creating path");
 
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-    AutoNavigationHandler& handler = module->AutoNavigationHandler();
-    handler.createPath(spec);
+    module->AutoNavigationHandler().createPath(spec);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
