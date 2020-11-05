@@ -46,24 +46,21 @@ namespace openspace::autonavigation {
 
 // Go far out to get a view of both tagets, aimed to match lookAt orientation
 ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint& end) {
-    glm::dvec3 startNodePos = start.node()->worldPosition();
-    glm::dvec3 endNodePos = end.node()->worldPosition();
+    const double startNodeRadius = start.nodeDetails.validBoundingSphere;
+    const double endNodeRadius = end.nodeDetails.validBoundingSphere;
 
-    double startNodeRadius = start.nodeDetails.validBoundingSphere;
-    double endNodeRadius = end.nodeDetails.validBoundingSphere;
+    const double endsTangetLengthFactor = 2.0;
+    const double startTangentLength = endsTangetLengthFactor * startNodeRadius;
+    const double endTangentLength = endsTangetLengthFactor * endNodeRadius;
 
-    glm::dvec3 startNodeToStartPos = start.position() - startNodePos;
-    glm::dvec3 endNodeToEndPos = end.position() - endNodePos;
-    glm::dvec3 startNodeToEndNode = endNodePos - startNodePos;
-
-    double startTangentLength = 2.0 * startNodeRadius;
-    double endTangentLength = 2.0 * endNodeRadius;
-    glm::dvec3 startTangentDirection = normalize(startNodeToStartPos);
-    glm::dvec3 endTangentDirection = normalize(endNodeToEndPos);
+    const glm::dvec3 startNodePos = start.node()->worldPosition();
+    const glm::dvec3 endNodePos = end.node()->worldPosition();
+    const glm::dvec3 startNodeToStartPos = start.position() - startNodePos;
+    const glm::dvec3 startTangentDir = normalize(startNodeToStartPos);
 
     // Start by going outwards
     _points.push_back(start.position());
-    _points.push_back(start.position() + startTangentLength * startTangentDirection);
+    _points.push_back(start.position() + startTangentLength * startTangentDir);
 
     const std::string& startNode = start.nodeDetails.identifier;
     const std::string& endNode = end.nodeDetails.identifier;
@@ -71,19 +68,24 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
     // Zoom out
     if (startNode != endNode) {
         // TODO: set a smarter orthogonal direction
+        glm::dvec3 startNodeToEndNode = endNodePos - startNodePos;
         glm::dvec3 parallell = glm::proj(startNodeToStartPos, startNodeToEndNode);
-        glm::dvec3 orthogonalDirction = normalize(startNodeToStartPos - parallell);
+        glm::dvec3 orthogonal = normalize(startNodeToStartPos - parallell);
 
         glm::dvec3 extraKnot = startNodePos + 0.5 * startNodeToEndNode
-            + 1.5 * glm::length(startNodeToEndNode) * orthogonalDirction;
+            + 1.5 * glm::length(startNodeToEndNode) * orthogonal;
 
-        _points.push_back(extraKnot - 0.2 * startNodeToEndNode);
+        const double midTangentLengthFactor = 0.3;
+        _points.push_back(extraKnot - midTangentLengthFactor * startNodeToEndNode);
         _points.push_back(extraKnot);
-        _points.push_back(extraKnot + 0.2 * startNodeToEndNode);
+        _points.push_back(extraKnot + midTangentLengthFactor * startNodeToEndNode);
     }
 
-    // closing in on end node
-    _points.push_back(end.position() + endTangentLength * endTangentDirection);
+    // Closing in on end node
+    const glm::dvec3 endNodeToEndPos = end.position() - endNodePos;
+    const glm::dvec3 endTangentDir = normalize(endNodeToEndPos);
+
+    _points.push_back(end.position() + endTangentLength * endTangentDir);
     _points.push_back(end.position());
 
     _nSegments = (unsigned int)std::floor((_points.size() - 1) / 3.0);
