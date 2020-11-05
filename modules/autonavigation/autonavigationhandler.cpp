@@ -94,6 +94,13 @@ namespace {
         "in the direction of the camera position at the start of the path."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo PickClosestTargetPosInfo = {
+        "PickClosestTargetPosition",
+        "Pick Closest Target Position",
+        "If this flag is set to two the target position for a node based motion is "
+        "computed along the line from the previous camera position."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo IntegrationResolutionInfo = {
         "IntegrationResolution",
         "Path Integration Resolution",
@@ -120,6 +127,7 @@ AutoNavigationHandler::AutoNavigationHandler()
     , _applyStopBehaviorWhenIdle(ApplyStopBehaviorWhenIdleInfo, false)
     , _relevantNodeTags(RelevantNodeTagsInfo)
     , _defaultPositionOffsetAngle(DefaultPositionOffsetAngleInfo, 30.f, -90.f, 90.f)
+    , _pickClosestTargetPosition(PickClosestTargetPosInfo, false)
     , _integrationResolutionPerFrame(IntegrationResolutionInfo, 100, 10, 500)
     , _speedScale(SpeedScaleInfo, 1.f, 0.01f, 2.f)
 {
@@ -153,6 +161,7 @@ AutoNavigationHandler::AutoNavigationHandler()
     addProperty(_relevantNodeTags);
 
     addProperty(_defaultPositionOffsetAngle);
+    addProperty(_pickClosestTargetPosition);
     addProperty(_integrationResolutionPerFrame);
     addProperty(_speedScale);
 }
@@ -627,6 +636,7 @@ Waypoint AutoNavigationHandler::computeDefaultWaypoint(const TargetNodeInstructi
     const glm::dvec3 nodePos = targetNode->worldPosition();
     const glm::dvec3 sunPos = glm::dvec3(0.0, 0.0, 0.0);
     const SceneGraphNode* closeNode = findNodeNearTarget(targetNode);
+    const glm::dvec3 prevPos = lastWayPoint().position();
 
     glm::dvec3 stepDirection;
     if (closeNode) {
@@ -635,13 +645,16 @@ Waypoint AutoNavigationHandler::computeDefaultWaypoint(const TargetNodeInstructi
         stepDirection = glm::normalize(nodePos - closeNode->worldPosition());
     }
     else if (glm::length(sunPos - nodePos) < epsilon) {
-        // Special case for when the target is the Sun
+        // Special case for when the target is the Sun. Assumption: want an overview of
+        // the solar system, and not stay in the orbital plane
         stepDirection = glm::dvec3(0.0, 0.0, 1.0);
+    }
+    else if (_pickClosestTargetPosition) {
+        stepDirection = glm::normalize(prevPos - nodePos);
     }
     else {
         // Go to a point that is being lit up by the sun, slightly offsetted from sun
         // direction
-        const glm::dvec3 prevPos = lastWayPoint().position();
         const glm::dvec3 targetToPrev = prevPos - nodePos;
         const glm::dvec3 targetToSun = sunPos - nodePos;
 

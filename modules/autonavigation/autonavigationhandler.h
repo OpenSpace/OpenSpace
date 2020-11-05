@@ -115,10 +115,9 @@ private:
     properties::BoolProperty _applyStopBehaviorWhenIdle;
 
     properties::StringListProperty _relevantNodeTags;
-
     properties::FloatProperty _defaultPositionOffsetAngle;
+    properties::BoolProperty _pickClosestTargetPosition;
     properties::IntProperty _integrationResolutionPerFrame;
-
     properties::FloatProperty _speedScale;
 };
 
