@@ -115,9 +115,9 @@ documentation::Documentation RenderableModel::Documentation() {
         {
             {
                 KeyGeomModelFile,
-                new StringVerifier,
+                new OrVerifier({ new StringVerifier, new StringListVerifier }),
                 Optional::No,
-                "The file that should be loaded in this RenderableModel. The file can "
+                "The file or files that should be loaded in this RenderableModel. The file can "
                 "contain filesystem tokens or can be specified relatively to the "
                 "location of the .mod file. "
                 "This specifies the model that is rendered by the Renderable."
@@ -223,13 +223,52 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     }
 
     if (dictionary.hasKey(KeyGeomModelFile)) {
-        _file = absPath(dictionary.value<std::string>(KeyGeomModelFile));
+        std::string file;
 
-        // Read the file and save the resulting ModelGeometry
-        _geometry = ghoul::io::ModelReader::ref().loadModel(_file,
-            _forceRenderInvisible,
-            _notifyInvisibleDropped
-        );
+        if (dictionary.hasKeyAndValue<std::string>(KeyGeomModelFile)) {
+            // Handle single file
+            file = absPath(dictionary.value<std::string>(KeyGeomModelFile));
+            _geometry = ghoul::io::ModelReader::ref().loadModel(
+                file,
+                _forceRenderInvisible,
+                _notifyInvisibleDropped
+            );
+        }
+        else if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyGeomModelFile)) {
+            ghoul::Dictionary fileDictionary = dictionary.value<ghoul::Dictionary>(
+                KeyGeomModelFile
+            );
+            std::vector<std::unique_ptr<ghoul::modelgeometry::ModelGeometry>> geometries;
+
+            for (std::string k : fileDictionary.keys()) {
+                // Handle each file
+                file = absPath(fileDictionary.value<std::string>(k));
+                geometries.push_back(ghoul::io::ModelReader::ref().loadModel(
+                    file,
+                    _forceRenderInvisible,
+                    _notifyInvisibleDropped
+                ));
+            }
+
+            if (geometries.size() > 0) {
+                ghoul::modelgeometry::ModelGeometry combinedGeometry =
+                std::move(*geometries[0].release());
+
+                 // Combine all models into one ModelGeometry
+                 for (unsigned int i = 1; i < geometries.size(); ++i) {
+                    for (unsigned int m = 0; m < geometries[i]->meshes().size(); ++m) {
+                        combinedGeometry.meshes().push_back(
+                            std::move(geometries[i]->meshes()[m])
+                        );
+
+                    }
+                }
+                _geometry = std::make_unique<ghoul::modelgeometry::ModelGeometry>(
+                    std::move(combinedGeometry)
+                );
+                _geometry->calculateBoundingRadius();
+            }
+        }
     }
 
     if (dictionary.hasKey(ModelTransformInfo.identifier)) {
