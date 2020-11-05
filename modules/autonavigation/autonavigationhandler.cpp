@@ -214,6 +214,12 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
         return;
     }
 
+    // If for some reason the time is no longer paused, pause it again
+    if (!global::timeManager->isPaused()) {
+        global::timeManager->setPause(true);
+        LINFO("Cannot start simulation time during camera motion");
+    }
+
     std::unique_ptr<PathSegment> &currentSegment = _pathSegments[_currentSegmentIndex];
 
     CameraPose newPose = currentSegment->traversePath(deltaTime);
@@ -306,9 +312,6 @@ void AutoNavigationHandler::startPath() {
         _stops.size() == (_pathSegments.size() - 1),
         "Must have exactly one stop entry between every segment."
     );
-
-    // TODO: remove this line at the end of our project. Used to simplify testing
-    global::timeManager->setPause(true);
 
     //OBS! Until we can handle simulation time: early out if not paused
     if (!global::timeManager->isPaused()) {
