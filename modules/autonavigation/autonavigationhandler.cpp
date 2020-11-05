@@ -623,25 +623,30 @@ Waypoint AutoNavigationHandler::computeDefaultWaypoint(const TargetNodeInstructi
         return Waypoint();
     }
 
+    const float epsilon = 1e-5f;
     const glm::dvec3 nodePos = targetNode->worldPosition();
-
-    glm::dvec3 stepDirection;
+    const glm::dvec3 sunPos = glm::dvec3(0.0, 0.0, 0.0);
     const SceneGraphNode* closeNode = findNodeNearTarget(targetNode);
 
+    glm::dvec3 stepDirection;
     if (closeNode) {
         // If the node is close to another node in the scene, make sure that the
         // position is set to minimize risk of collision
         stepDirection = glm::normalize(nodePos - closeNode->worldPosition());
     }
+    else if (glm::length(sunPos - nodePos) < epsilon) {
+        // Special case for when the target is the Sun
+        stepDirection = glm::dvec3(0.0, 0.0, 1.0);
+    }
     else {
         // Go to a point that is being lit up by the sun, slightly offsetted from sun
         // direction
-        const glm::dvec3 sunPos = glm::dvec3(0.0, 0.0, 0.0);
         const glm::dvec3 prevPos = lastWayPoint().position();
         const glm::dvec3 targetToPrev = prevPos - nodePos;
         const glm::dvec3 targetToSun = sunPos - nodePos;
+
         const glm::dvec3 axis = glm::normalize(glm::cross(targetToPrev, targetToSun));
-        const float angle = glm::radians(-1.f *_defaultPositionOffsetAngle);
+        const float angle = glm::radians(-1.f * _defaultPositionOffsetAngle);
         const glm::dquat offsetRotation = angleAxis(static_cast<double>(angle), axis);
 
         stepDirection = glm::normalize(offsetRotation * targetToSun);
