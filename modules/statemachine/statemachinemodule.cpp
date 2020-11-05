@@ -72,6 +72,13 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
             "list of tables",
             "List of tables describing the states for the state machine."
         },
+        {
+            "goTo",
+            &luascriptfunctions::goTo,
+            {},
+            "String",
+            "String name of State to go to."
+        },
     };
     return res;
 }

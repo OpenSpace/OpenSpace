@@ -48,4 +48,25 @@ int createStateMachine(lua_State* L) {
     return 0;
 }
 
+int goTo(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::goTo");
+    const bool isString = (lua_isstring(L, 1) != 0);
+
+    if (!isString) {
+        lua_settop(L, 0);
+        const char* msg = lua_pushfstring(
+            L,
+            "%s expected, got %s",
+            lua_typename(L, LUA_TSTRING),
+            luaL_typename(L, -1)
+        );
+        return luaL_error(L, "bad argument #%d (%s)", 2, msg);
+    }
+
+    const std::string newState = lua_tostring(L, 1);
+    StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
+    module->transitionTo(newState);
+    LINFOC("StateMachine", "Transitioning to " + newState);
+}
+
 } //namespace openspace::luascriptfunctions
