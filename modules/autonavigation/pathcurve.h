@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,31 +22,57 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef __OPENSPACE_MODULE_AUTONAVIGATION___PATHCURVE___H__
+#define __OPENSPACE_MODULE_AUTONAVIGATION___PATHCURVE___H__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include <modules/autonavigation/waypoint.h>
+#include <ghoul/glm.h>
+#include <vector>
 
-layout(location = 0) in vec4 in_position;
-layout(location = 1) in vec2 in_st;
-layout(location = 2) in vec3 in_normal;
+namespace openspace::autonavigation {
 
-out vec2 vs_st;
-out vec3 vs_normalViewSpace;
-out float vs_screenSpaceDepth;
-out vec4 vs_positionCameraSpace;
+enum CurveType {
+    AvoidCollision,
+    Linear,
+    ZoomOutOverview
+};
 
-uniform mat4 modelViewTransform;
-uniform mat4 projectionTransform;
-uniform mat4 normalTransform;
+class PathCurve {
+public:
+    virtual ~PathCurve() = 0;
 
-void main() {
-    vs_positionCameraSpace = modelViewTransform * in_position;
-    vec4 positionClipSpace = projectionTransform * vs_positionCameraSpace;
-    vec4 positionScreenSpace = z_normalization(positionClipSpace);
+    const double length() const;
+    glm::dvec3 positionAt(double relativeLength);
 
-    gl_Position = positionScreenSpace;
-    vs_st = in_st;
-    vs_screenSpaceDepth = positionScreenSpace.w;
-    
-    vs_normalViewSpace = normalize(mat3(normalTransform) * in_normal);
-}
+    // compute curve parameter that matches the input arc length s
+    double curveParameter(double s);
+
+    virtual glm::dvec3 interpolate(double u) = 0;
+
+    std::vector<glm::dvec3> points(); // for debugging
+
+protected:
+    void initParameterIntervals();
+
+    double approximatedDerivative(double u, double h = 1E-7);
+    double arcLength(double limit = 1.0);
+    double arcLength(double lowerLimit, double upperLimit);
+
+    std::vector<glm::dvec3> _points;
+    unsigned int _nSegments;
+
+    std::vector<double> _parameterIntervals;
+    std::vector<double> _lengths;
+    std::vector<double> _lengthSums;
+    double _totalLength;
+};
+
+class LinearCurve : public PathCurve {
+public:
+    LinearCurve(const Waypoint& start, const Waypoint& end);
+    glm::dvec3 interpolate(double u);
+};
+
+} // namespace openspace::autonavigation
+
+#endif // __OPENSPACE_MODULE_AUTONAVIGATION___PATHCURVE___H__

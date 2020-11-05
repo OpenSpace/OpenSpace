@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,31 +22,61 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef __OPENSPACE_MODULE_AUTONAVIGATION___ROTATIONINTERPOLATOR___H__
+#define __OPENSPACE_MODULE_AUTONAVIGATION___ROTATIONINTERPOLATOR___H__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include <ghoul/glm.h>
 
-layout(location = 0) in vec4 in_position;
-layout(location = 1) in vec2 in_st;
-layout(location = 2) in vec3 in_normal;
+namespace openspace::autonavigation {
 
-out vec2 vs_st;
-out vec3 vs_normalViewSpace;
-out float vs_screenSpaceDepth;
-out vec4 vs_positionCameraSpace;
+class PathCurve;
 
-uniform mat4 modelViewTransform;
-uniform mat4 projectionTransform;
-uniform mat4 normalTransform;
+class RotationInterpolator {
+public:
+    RotationInterpolator() = default;
+    RotationInterpolator(glm::dquat start, glm::dquat end);
 
-void main() {
-    vs_positionCameraSpace = modelViewTransform * in_position;
-    vec4 positionClipSpace = projectionTransform * vs_positionCameraSpace;
-    vec4 positionScreenSpace = z_normalization(positionClipSpace);
+    virtual glm::dquat interpolate(double u) = 0;
 
-    gl_Position = positionScreenSpace;
-    vs_st = in_st;
-    vs_screenSpaceDepth = positionScreenSpace.w;
-    
-    vs_normalViewSpace = normalize(mat3(normalTransform) * in_normal);
-}
+protected:
+    glm::dquat _start;
+    glm::dquat _end;
+};
+
+class EasedSlerpInterpolator : public RotationInterpolator {
+public:
+    EasedSlerpInterpolator(glm::dquat start, glm::dquat end);
+    glm::dquat interpolate(double u);
+};
+
+// Look at start node until tStart, then turn to look at end node from tEnd.
+// OBS! Does not care about actual end and start value!! I.e. Not an interpolation!
+class LookAtRotator : public RotationInterpolator {
+public:
+    LookAtRotator(glm::dquat start, glm::dquat end, glm::dvec3 startLookAtPos,
+        glm::dvec3 endLookAtPos, PathCurve* path);
+    glm::dquat interpolate(double u);
+
+private:
+    glm::dvec3 _startLookAtPos;
+    glm::dvec3 _endLookAtPos;
+    PathCurve* _path = nullptr;
+};
+
+// Interpolates a look at position for the camera, and takes the start and end rotation
+// into account
+class LookAtInterpolator : public RotationInterpolator {
+public:
+    LookAtInterpolator(glm::dquat start, glm::dquat end, glm::dvec3 startLookAtPos,
+        glm::dvec3 endLookAtPos, PathCurve* path);
+    glm::dquat interpolate(double u);
+
+private:
+    glm::dvec3 _startLookAtPos;
+    glm::dvec3 _endLookAtPos;
+    PathCurve* _path = nullptr;
+};
+
+} // namespace openspace::autonavigation
+
+#endif // __OPENSPACE_MODULE_AUTONAVIGATION___ROTATIONINTERPOLATOR___H__

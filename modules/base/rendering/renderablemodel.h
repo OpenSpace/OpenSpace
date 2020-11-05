@@ -26,7 +26,8 @@
 #define __OPENSPACE_MODULE_BASE___RENDERABLEMODEL___H__
 
 #include <openspace/rendering/renderable.h>
-
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/matrix/dmat4property.h>
 #include <openspace/properties/matrix/mat3property.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -79,11 +80,15 @@ private:
     properties::DMat4Property _modelTransform;
     properties::Vec3Property _rotationVec;
 
+    properties::BoolProperty _disableDepthTest;
+    properties::BoolProperty _enableOpacityBlending;
+    properties::OptionProperty _blendingFuncOption;
+
     ghoul::opengl::ProgramObject* _program = nullptr;
     UniformCache(opacity, nLightSources, lightDirectionsViewSpace, lightIntensities,
-        modelViewTransform, crippedModelViewTransform, projectionTransform, 
+        modelViewTransform, normalTransform, projectionTransform, 
         performShading, texture, ambientIntensity, diffuseIntensity, 
-        specularIntensity) _uniformCache;
+        specularIntensity, opacityBlending) _uniformCache;
 
     std::vector<std::unique_ptr<LightSource>> _lightSources;
 

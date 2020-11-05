@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,31 +22,42 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef __OPENSPACE_MODULE_AUTONAVIGATION___SPEEDFUNCTION___H__
+#define __OPENSPACE_MODULE_AUTONAVIGATION___SPEEDFUNCTION___H__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+namespace openspace::autonavigation {
 
-layout(location = 0) in vec4 in_position;
-layout(location = 1) in vec2 in_st;
-layout(location = 2) in vec3 in_normal;
+// The speed function describing the shape of the speed curve. Values in [0,1].
+class SpeedFunction {
+public:
+    SpeedFunction() = default;
+    virtual ~SpeedFunction();
 
-out vec2 vs_st;
-out vec3 vs_normalViewSpace;
-out float vs_screenSpaceDepth;
-out vec4 vs_positionCameraSpace;
+    double scaledValue(double time, double duration, double pathLength) const;
 
-uniform mat4 modelViewTransform;
-uniform mat4 projectionTransform;
-uniform mat4 normalTransform;
+    virtual double value(double t) const = 0;
 
-void main() {
-    vs_positionCameraSpace = modelViewTransform * in_position;
-    vec4 positionClipSpace = projectionTransform * vs_positionCameraSpace;
-    vec4 positionScreenSpace = z_normalization(positionClipSpace);
+protected:
+    // must be called by each subclass after initialization
+    void initIntegratedSum();
 
-    gl_Position = positionScreenSpace;
-    vs_st = in_st;
-    vs_screenSpaceDepth = positionScreenSpace.w;
-    
-    vs_normalViewSpace = normalize(mat3(normalTransform) * in_normal);
-}
+    // store the sum of the function over the duration of the segment,
+    // so we don't need to recompue it every time we access the speed
+    double _integratedSum = 0.0;
+};
+
+class SexticDampenedSpeed : public SpeedFunction {
+public:
+    SexticDampenedSpeed();
+    double value(double t) const override;
+};
+
+class QuinticDampenedSpeed : public SpeedFunction {
+public:
+    QuinticDampenedSpeed();
+    double value(double t) const override;
+};
+
+} // namespace openspace::autonavigation
+
+#endif // __OPENSPACE_MODULE_AUTONAVIGATION___SPEEDFUNCTION___H__

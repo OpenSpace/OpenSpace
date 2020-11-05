@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,31 +22,60 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef __OPENSPACE_MODULE___PATHSEGMENT___H__
+#define __OPENSPACE_MODULE___PATHSEGMENT___H__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include <modules/autonavigation/pathcurve.h>
+#include <modules/autonavigation/rotationinterpolator.h>
+#include <modules/autonavigation/speedfunction.h>
+#include <modules/autonavigation/waypoint.h>
+#include <ghoul/glm.h>
+#include <vector>
 
-layout(location = 0) in vec4 in_position;
-layout(location = 1) in vec2 in_st;
-layout(location = 2) in vec3 in_normal;
+namespace openspace::autonavigation {
 
-out vec2 vs_st;
-out vec3 vs_normalViewSpace;
-out float vs_screenSpaceDepth;
-out vec4 vs_positionCameraSpace;
+class PathSegment {
+public:
+    PathSegment(Waypoint start, Waypoint end, CurveType type,
+        std::optional<double> duration = std::nullopt);
 
-uniform mat4 modelViewTransform;
-uniform mat4 projectionTransform;
-uniform mat4 normalTransform;
+    ~PathSegment() = default;
 
-void main() {
-    vs_positionCameraSpace = modelViewTransform * in_position;
-    vec4 positionClipSpace = projectionTransform * vs_positionCameraSpace;
-    vec4 positionScreenSpace = z_normalization(positionClipSpace);
+    // Mutators
+    void setStart(Waypoint wp);
 
-    gl_Position = positionScreenSpace;
-    vs_st = in_st;
-    vs_screenSpaceDepth = positionScreenSpace.w;
-    
-    vs_normalViewSpace = normalize(mat3(normalTransform) * in_normal);
-}
+    // Accessors
+    const Waypoint start() const;
+    const Waypoint end() const;
+    const double duration() const;
+    const double pathLength() const;
+
+    const std::vector<glm::dvec3> controlPoints() const; // debugging
+
+    CameraPose traversePath(double dt);
+    std::string currentAnchor() const;
+    bool hasReachedEnd() const;
+
+    double speedAtTime(double time) const;
+    CameraPose interpolatedPose(double distance) const;
+
+private:
+    void initCurve();
+
+    Waypoint _start;
+    Waypoint _end;
+    double _duration;
+    CurveType _curveType;
+
+    std::unique_ptr<SpeedFunction> _speedFunction;
+    std::unique_ptr<RotationInterpolator> _rotationInterpolator;
+    std::unique_ptr<PathCurve> _curve;
+
+    // Playback variables
+    double _traveledDistance = 0.0;
+    double _progressedTime = 0.0; // Time since playback started
+};
+
+} // namespace openspace::autonavigation
+
+#endif // __OPENSPACE_MODULE___PATHSEGMENT___H__

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,31 +22,37 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef __OPENSPACE_MODULE_AUTONAVIGATION___AUTONAVIGATION_MODULE___H__
+#define __OPENSPACE_MODULE_AUTONAVIGATION___AUTONAVIGATION_MODULE___H__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include <openspace/util/openspacemodule.h>
 
-layout(location = 0) in vec4 in_position;
-layout(location = 1) in vec2 in_st;
-layout(location = 2) in vec3 in_normal;
+#include <openspace/documentation/documentation.h>
+#include <modules/autonavigation/autonavigationhandler.h>
 
-out vec2 vs_st;
-out vec3 vs_normalViewSpace;
-out float vs_screenSpaceDepth;
-out vec4 vs_positionCameraSpace;
+namespace openspace {
 
-uniform mat4 modelViewTransform;
-uniform mat4 projectionTransform;
-uniform mat4 normalTransform;
+class AutoNavigationModule : public OpenSpaceModule {
+public:
+    constexpr static const char* Name = "AutoNavigation";
 
-void main() {
-    vs_positionCameraSpace = modelViewTransform * in_position;
-    vec4 positionClipSpace = projectionTransform * vs_positionCameraSpace;
-    vec4 positionScreenSpace = z_normalization(positionClipSpace);
+    AutoNavigationModule();
+    virtual ~AutoNavigationModule() = default;
 
-    gl_Position = positionScreenSpace;
-    vs_st = in_st;
-    vs_screenSpaceDepth = positionScreenSpace.w;
-    
-    vs_normalViewSpace = normalize(mat3(normalTransform) * in_normal);
-}
+    autonavigation::AutoNavigationHandler& AutoNavigationHandler();
+    double minValidBoundingSphere() const;
+
+    std::vector<documentation::Documentation> documentations() const override;
+    scripting::LuaLibrary luaLibrary() const override;
+
+private:
+    void internalInitialize(const ghoul::Dictionary&) override;
+
+    autonavigation::AutoNavigationHandler _autoNavigationHandler;
+
+    properties::DoubleProperty _minValidBoundingSphere;
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_AUTONAVIGATION___AUTONAVIGATION_MODULE___H__

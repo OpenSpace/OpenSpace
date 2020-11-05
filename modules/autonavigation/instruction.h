@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,31 +22,61 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef __OPENSPACE_MODULE___PATHINSTRUCTION___H__
+#define __OPENSPACE_MODULE___PATHINSTRUCTION___H__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include <modules/autonavigation/waypoint.h>
+#include <openspace/interaction/navigationhandler.h>
+#include <optional>
 
-layout(location = 0) in vec4 in_position;
-layout(location = 1) in vec2 in_st;
-layout(location = 2) in vec3 in_normal;
+namespace openspace::autonavigation {
 
-out vec2 vs_st;
-out vec3 vs_normalViewSpace;
-out float vs_screenSpaceDepth;
-out vec4 vs_positionCameraSpace;
+struct Instruction {
+    Instruction() = default;
+    Instruction(const ghoul::Dictionary& dictionary);
+    virtual ~Instruction();
 
-uniform mat4 modelViewTransform;
-uniform mat4 projectionTransform;
-uniform mat4 normalTransform;
+    virtual std::vector<Waypoint> waypoints() const = 0;
 
-void main() {
-    vs_positionCameraSpace = modelViewTransform * in_position;
-    vec4 positionClipSpace = projectionTransform * vs_positionCameraSpace;
-    vec4 positionScreenSpace = z_normalization(positionClipSpace);
+    // TODO
+    //static documentation::Documentation Documentation();
 
-    gl_Position = positionScreenSpace;
-    vs_st = in_st;
-    vs_screenSpaceDepth = positionScreenSpace.w;
-    
-    vs_normalViewSpace = normalize(mat3(normalTransform) * in_normal);
-}
+    std::optional<double> duration;
+
+    std::optional<bool> stopAtTarget;
+
+    // only relevant is stopAtTarget true
+    std::optional<double> stopDuration;
+    std::optional<std::string> stopBehavior;
+};
+
+struct TargetNodeInstruction : public Instruction {
+    TargetNodeInstruction(const ghoul::Dictionary& dictionary);
+
+    std::vector<Waypoint> waypoints() const override;
+
+    // TODO
+    //static documentation::Documentation Documentation();
+
+    std::string nodeIdentifier;
+    std::optional<glm::dvec3> position; // relative to target node (model space)
+    std::optional<double> height;
+};
+
+struct NavigationStateInstruction : public Instruction {
+    using NavigationState = interaction::NavigationHandler::NavigationState;
+
+    NavigationStateInstruction(const ghoul::Dictionary& dictionary);
+
+    std::vector<Waypoint> waypoints() const override;
+
+    // TODO
+    //static documentation::Documentation Documentation();
+
+    NavigationState navigationState;
+};
+
+
+} // namespace openspace::autonavigation
+
+#endif // __OPENSPACE_MODULE___PATHINSTRUCTION___H__

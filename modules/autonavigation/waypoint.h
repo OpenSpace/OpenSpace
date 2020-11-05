@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,31 +22,48 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef __OPENSPACE_MODULE___WAYPOINT___H__
+#define __OPENSPACE_MODULE___WAYPOINT___H__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include <openspace/interaction/navigationhandler.h>
+#include <ghoul/glm.h>
+#include <vector>
 
-layout(location = 0) in vec4 in_position;
-layout(location = 1) in vec2 in_st;
-layout(location = 2) in vec3 in_normal;
+namespace openspace::autonavigation {
 
-out vec2 vs_st;
-out vec3 vs_normalViewSpace;
-out float vs_screenSpaceDepth;
-out vec4 vs_positionCameraSpace;
+struct CameraPose {
+    glm::dvec3 position;
+    glm::dquat rotation;
+};
 
-uniform mat4 modelViewTransform;
-uniform mat4 projectionTransform;
-uniform mat4 normalTransform;
+// The waypoint node is the anchor or target node.
+struct WaypointNodeDetails {
+    WaypointNodeDetails() = default;
+    WaypointNodeDetails(const std::string& nodeIdentifier);
 
-void main() {
-    vs_positionCameraSpace = modelViewTransform * in_position;
-    vec4 positionClipSpace = projectionTransform * vs_positionCameraSpace;
-    vec4 positionScreenSpace = z_normalization(positionClipSpace);
+    static double findValidBoundingSphere(const SceneGraphNode* node);
 
-    gl_Position = positionScreenSpace;
-    vs_st = in_st;
-    vs_screenSpaceDepth = positionScreenSpace.w;
-    
-    vs_normalViewSpace = normalize(mat3(normalTransform) * in_normal);
-}
+    std::string identifier;
+    double validBoundingSphere = 0.0; // to be able to handle nodes with faulty bounding spheres
+};
+
+struct Waypoint {
+    using NavigationState = interaction::NavigationHandler::NavigationState;
+
+    // TODO: create waypoints from a dictionary
+
+    Waypoint() = default;
+    Waypoint(const glm::dvec3& pos, const glm::dquat& rot, const std::string& ref);
+    Waypoint(const NavigationState& ns);
+
+    glm::dvec3 position() const;
+    glm::dquat rotation() const;
+    SceneGraphNode* node() const;
+
+    CameraPose pose;
+    WaypointNodeDetails nodeDetails;
+};
+
+} // namespace openspace::autonavigation
+
+#endif // __OPENSPACE_MODULE___WAYPOINT___H__

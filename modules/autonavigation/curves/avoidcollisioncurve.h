@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,31 +22,26 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef __OPENSPACE_MODULE_AUTONAVIGATION___AVOIDCOLLISIONCURVE___H__
+#define __OPENSPACE_MODULE_AUTONAVIGATION___AVOIDCOLLISIONCURVE___H__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include <modules/autonavigation/pathcurve.h>
 
-layout(location = 0) in vec4 in_position;
-layout(location = 1) in vec2 in_st;
-layout(location = 2) in vec3 in_normal;
+namespace openspace::autonavigation {
 
-out vec2 vs_st;
-out vec3 vs_normalViewSpace;
-out float vs_screenSpaceDepth;
-out vec4 vs_positionCameraSpace;
+struct WayPoint;
 
-uniform mat4 modelViewTransform;
-uniform mat4 projectionTransform;
-uniform mat4 normalTransform;
+class AvoidCollisionCurve : public PathCurve {
+public:
+    AvoidCollisionCurve(const Waypoint& start, const Waypoint& end);
+    glm::dvec3 interpolate(double u);
 
-void main() {
-    vs_positionCameraSpace = modelViewTransform * in_position;
-    vec4 positionClipSpace = projectionTransform * vs_positionCameraSpace;
-    vec4 positionScreenSpace = z_normalization(positionClipSpace);
+private:
+    void removeCollisions(int step = 0);
 
-    gl_Position = positionScreenSpace;
-    vs_st = in_st;
-    vs_screenSpaceDepth = positionScreenSpace.w;
-    
-    vs_normalViewSpace = normalize(mat3(normalTransform) * in_normal);
-}
+    std::vector<SceneGraphNode*> _relevantNodes;
+};
+
+} // namespace openspace::autonavigation
+
+#endif // __OPENSPACE_MODULE_AUTONAVIGATION___AVOIDCOLLISIONCURVE___H__
