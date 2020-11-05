@@ -38,7 +38,6 @@
 
 namespace {
     constexpr const char* _loggerCat = "AvoidCollisionCurve";
-    const double Epsilon = 1E-7;
 
     const double CloseToNodeThresholdFactor = 5.0;
     const double AvoidCollisionDistanceFactor = 3.0;
@@ -112,10 +111,10 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
 
 // Interpolate a list of control points and knot times
 glm::dvec3 AvoidCollisionCurve::interpolate(double u) {
-    if (u < Epsilon) {
+    if (u <= 0.0) {
         return _points[1];
     }
-    if (u > (1.0 - Epsilon)) {
+    if (u > 1.0) {
         return *(_points.end() - 2);
     }
 

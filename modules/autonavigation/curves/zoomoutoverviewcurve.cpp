@@ -38,7 +38,6 @@
 
 namespace {
     constexpr const char* _loggerCat = "ZoomOutOverviewCurve";
-    const double Epsilon = 1E-12;
 
 } // namespace
 
@@ -94,9 +93,9 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
 }
 
 glm::dvec3 ZoomOutOverviewCurve::interpolate(double u) {
-    if (u < Epsilon)
+    if (u <= 0.0)
         return _points[0];
-    if (u > (1.0 - Epsilon))
+    if (u > 1.0)
         return _points.back();
 
     return interpolation::piecewiseCubicBezier(u, _points, _parameterIntervals);
