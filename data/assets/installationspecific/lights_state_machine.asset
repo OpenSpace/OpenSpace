@@ -1,0 +1,234 @@
+---------------------------------------------------------------- 
+-- GENERAL USEFUL THINGS
+----------------------------------------------------------------
+local orbitOnArrival = function()
+    return [[
+        openspace.setPropertyValueSingle(
+            "Modules.AutoNavigation.AutoNavigationHandler.DefaultStopBehavior", 
+            1 -- Orbit
+        )
+        openspace.setPropertyValueSingle(
+            "Modules.AutoNavigation.AutoNavigationHandler.ApplyStopBehaviorWhenIdle", 
+            true
+        )
+    ]]
+end
+
+local stopOrbiting = function()
+    return [[
+        openspace.setPropertyValueSingle(
+            "Modules.AutoNavigation.AutoNavigationHandler.ApplyStopBehaviorWhenIdle", 
+            false
+        )
+    ]]
+end
+
+local setOrbitSpeedFactor = function(value)
+    return [[
+        openspace.setPropertyValueSingle(
+            "Modules.AutoNavigation.AutoNavigationHandler.AtNodeNavigator.OrbitSpeedFactor",
+            ]] .. tostring(value) .. [[
+        )    
+    ]]
+end
+
+local changeAnchor = function(name, interpolationTime) 
+    return [[
+        openspace.setPropertyValueSingle(
+            "NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime", 
+            ]] .. tostring(interpolationTime) .. [[
+        ) 
+        openspace.setPropertyValueSingle(
+            "NavigationHandler.OrbitalNavigator.RetargetAnchor", 
+            nil
+        )
+        openspace.setPropertyValueSingle(
+            "NavigationHandler.OrbitalNavigator.Anchor", 
+            "]] .. name .. [["
+        )
+        openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Aim", '')
+    ]]
+end
+
+local applyLinearFlight = function(height, zoomSpeedFactor) 
+    return [[
+        openspace.setPropertyValueSingle(
+            'NavigationHandler.OrbitalNavigator.FlightDestinationDistance', 
+            ]] .. tostring(height) .. [[
+        )
+        openspace.setPropertyValueSingle(
+            'NavigationHandler.OrbitalNavigator.FlightDestinationFactor', 
+            ]] .. tostring(zoomSpeedFactor) .. [[
+        )
+        openspace.setPropertyValueSingle(
+            'NavigationHandler.OrbitalNavigator.ApplyLinearFlight', 
+            true
+        )
+    ]]
+end
+
+-- Sets the camera path curve type to the one that has a look at rotation 
+-- and zooming out motion to show both targets, if close enough.
+local setCurveTypeToZoomOverview = function ()
+    -- CurveOption 2 = ZoomOutOverview
+    return [[
+        openspace.setPropertyValueSingle(
+            "Modules.AutoNavigation.AutoNavigationHandler.DefaultCurveOption", 
+            2 
+        )
+    ]]
+end 
+
+---------------------------------------------------------------- 
+-- ASTEROIDS STATE
+----------------------------------------------------------------
+local interestingAsteroids = [[{
+    'sssb_sssb_data_apollo_asteroid', 
+    'sssb_sssb_data_aten_asteroid',
+    'sssb_sssb_data_atira_asteroid', 
+    'sssb_sssb_data_inner_main_belt_asteroid'
+}]]
+
+-- Set a specific property for the asteroid renderable
+local setAsteroidsProperty = function(property, value, duration) 
+    local interpolationDurationString = "";
+    if(duration) then 
+        interpolationDurationString = "," .. tostring(duration) .. ""
+    end
+
+    return [[
+        local asteroids =]] .. interestingAsteroids .. [[
+        for _, a in ipairs(asteroids) do
+            openspace.setPropertyValueSingle(
+                'Scene.' .. a .. '.Renderable.]] .. property .. [[', 
+                ]] ..  tostring(value) .. [[
+                ]] .. interpolationDurationString .. [[
+            )
+        end
+    ]]
+end
+
+local asteroidsTargetDistance = 1e12
+local fadeInDuration = 10
+local fadeOutDuration = 10
+
+asteroidsState = {
+    Identifier = "Asteroids", 
+    Enter = [[
+        openspace.printInfo('Entering Asteroids State')
+        ]] .. setAsteroidsProperty('Opacity', 0) .. [[
+        ]] .. setAsteroidsProperty('Enabled', true) .. [[
+        ]] .. setAsteroidsProperty('Opacity', 1, fadeInDuration) .. [[ 
+    ]],
+    Exit = [[
+        openspace.printInfo('Exiting Asteroids State')
+        ]] .. setAsteroidsProperty('Opacity', 0, fadeOutDuration) .. [[
+        ]] .. setAsteroidsProperty('Enabled', false) .. [[ 
+    ]]
+    -- OBS! Ideally we want to disable the asteroids after they are 
+    -- completely faded out 
+}
+
+---------------------------------------------------------------- 
+-- GALAXY STATE
+----------------------------------------------------------------
+local fourGigaParsecsInMeter = 1.2342712E26
+local galaxiesTargetDistance = fourGigaParsecsInMeter
+
+galaxiesState = {
+    Identifier = "Galaxies", 
+    Enter = [[
+        openspace.printInfo('Entering Galaxies State')
+        ]] .. setOrbitSpeedFactor(0.05) .. [[
+        ]] .. orbitOnArrival() .. [[
+
+    ]],
+    Exit = [[
+        openspace.printInfo('Exiting Galaxies State')
+        ]] .. stopOrbiting() .. [[
+    ]]
+}
+
+---------------------------------------------------------------- 
+-- EARTH STATE
+----------------------------------------------------------------
+local earthTargetDistance = 26000000
+
+earthState = {
+    Identifier = "Earth", 
+    Enter = [[
+        openspace.printInfo('Entering Earth State')
+        ]] .. setOrbitSpeedFactor(0.1) .. [[
+        ]] .. orbitOnArrival() .. [[
+    ]],
+    Exit = [[
+        openspace.printInfo('Exiting Earth State')
+        ]] .. stopOrbiting() .. [[
+    ]]
+}
+
+---------------------------------------------------------------- 
+-- COMBINE STATES AND TRANSITIONS
+----------------------------------------------------------------
+states = { earthState, galaxiesState, asteroidsState }
+
+transitions = {
+    {
+        From = "Asteroids", 
+        To = "Earth", 
+        Action = [[
+            ]] .. setCurveTypeToZoomOverview() .. [[
+            openspace.time.setPause(true)
+
+            openspace.autonavigation.goTo('Earth')
+        ]]
+    },
+    {
+        From = "Earth", 
+        To = "Asteroids", 
+        Action = [[
+            ]] .. setCurveTypeToZoomOverview() .. [[
+            openspace.time.setPause(true)
+
+            local targetDistance = ]] .. tostring(asteroidsTargetDistance) .. [[
+            openspace.autonavigation.goToHeight('Sun', targetDistance)
+        ]]
+    },
+    {
+        From = "Asteroids", 
+        To = "Galaxies", 
+        Action =  [[
+            ]] .. applyLinearFlight(galaxiesTargetDistance, 0.01) .. [[ -- TODO: better zoom speed
+        ]]
+    },
+    {
+        From = "Earth", 
+        To = "Galaxies", 
+        Action =  [[
+            ]] .. applyLinearFlight(galaxiesTargetDistance, 0.01) .. [[ -- TODO: better zoom speed
+        ]]
+    },
+    {
+        From = "Galaxies", 
+        To = "Earth", 
+        Action = [[
+            ]] .. changeAnchor('Earth', 1) .. [[
+            ]] .. applyLinearFlight(earthTargetDistance, 0.01) .. [[
+        ]]
+    },
+    {
+        From = "Galaxies", 
+        To = "Asteroids", 
+        Action = [[
+            ]] .. changeAnchor('Sun', 1) .. [[
+            ]] .. applyLinearFlight(asteroidsTargetDistance, 0.01) .. [[
+        ]]
+    },
+}
+
+asset.onInitialize(function()
+    openspace.statemachine.createStateMachine({
+        States = states, 
+        Transitions = transitions
+    })
+end)

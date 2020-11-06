@@ -8,7 +8,8 @@
     "scene/solarsystem/sssb/atira_asteroid",
     "scene/solarsystem/sssb/centaur_asteroid",
     "scene/solarsystem/sssb/inner_main_belt_asteroid",
-    "scene/solarsystem/sssb/pha"
+    "scene/solarsystem/sssb/pha", 
+    "installationspecific/lights_state_machine"
   ],
   "camera": {
     "altitude": 17000000.0,
