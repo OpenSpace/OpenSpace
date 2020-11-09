@@ -38,8 +38,9 @@ class Transition;
 class StateMachine {
 public:
     StateMachine(const ghoul::Dictionary& dictionary);
-    ~StateMachine();
+    ~StateMachine() = default;
 
+    void setInitialState(std::string initialState);
     State* currentState() const;
     void transitionTo(std::string newState);
     void setState(State& newState);

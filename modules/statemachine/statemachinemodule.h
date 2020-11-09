@@ -41,6 +41,8 @@ public:
     scripting::LuaLibrary luaLibrary() const override;
 
     void initializeStateMachine(const ghoul::Dictionary& dictionary);
+    void setInitialState(std::string initialState);
+    std::string currentState() const;
 
     // initializeStateMachine must have been called before
     void transitionTo(std::string newState);

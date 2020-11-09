@@ -32,14 +32,12 @@ namespace openspace::luascriptfunctions {
 
 int createStateMachine(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::createStateMachine");
-    // @TODO: later, include list of transitions in input
 
     ghoul::Dictionary dictionary;
     ghoul::lua::luaDictionaryFromState(L, dictionary);
 
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
 
-    // @TODO: create StateMachine from the input dictionary. but for now, just display a message
     module->initializeStateMachine(dictionary);
     LINFOC("StateMachine", "State machine was created.");
 
@@ -67,6 +65,48 @@ int goTo(lua_State* L) {
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
     module->transitionTo(newState);
     LINFOC("StateMachine", "Transitioning to " + newState);
+
+    lua_settop(L, 0);
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
+int setInitialState(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::setStartState");
+    const bool isString = (lua_isstring(L, 1) != 0);
+
+    if (!isString) {
+        lua_settop(L, 0);
+        const char* msg = lua_pushfstring(
+            L,
+            "%s expected, got %s",
+            lua_typename(L, LUA_TSTRING),
+            luaL_typename(L, -1)
+        );
+        return luaL_error(L, "bad argument #%d (%s)", 2, msg);
+    }
+
+    const std::string startState = lua_tostring(L, 1);
+    StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
+    module->setInitialState(startState);
+    LINFOC("StateMachine", "Initial state set to: " + startState);
+
+    lua_settop(L, 0);
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
+int getCurrentState(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::property_getValue");
+
+    StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
+    std::string currentState = module->currentState();
+
+    // TODO: Push currentState name on the lua stack in order to return the value
+    lua_newtable(L);
+    lua_pushstring(L, currentState.c_str());
+
+    return 1;
 }
 
 } //namespace openspace::luascriptfunctions
