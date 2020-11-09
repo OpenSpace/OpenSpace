@@ -97,7 +97,7 @@ int setInitialState(lua_State* L) {
 }
 
 int getCurrentState(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::property_getValue");
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::getCurrentState");
 
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
     std::string currentState = module->currentState();
