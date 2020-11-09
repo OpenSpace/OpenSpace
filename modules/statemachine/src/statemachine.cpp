@@ -24,6 +24,8 @@
 
 #include "modules/statemachine/include/statemachine.h"
 
+#include <ghoul/logging/logmanager.h>
+
 namespace {
     constexpr const char* StatesKey = "States";
     constexpr const char* TransitionsKey = "Transitions";
@@ -32,16 +34,13 @@ namespace {
 namespace openspace {
 
 StateMachine::StateMachine(const ghoul::Dictionary& dictionary) {
-
     // States
     if (dictionary.hasKey(StatesKey)) {
         ghoul::Dictionary statesDictionary =
             dictionary.value<ghoul::Dictionary>(StatesKey);
 
-        // Go through all states in the dictionary
-        for (size_t i = 1; i <= statesDictionary.size(); ++i) {
+        for (unsigned int i = 1; i <= statesDictionary.size(); ++i) {
             if (statesDictionary.hasKey(std::to_string(i))) {
-                // One state
                 ghoul::Dictionary state =
                     statesDictionary.value<ghoul::Dictionary>(std::to_string(i));
                 _states.push_back(State(state));
@@ -54,10 +53,8 @@ StateMachine::StateMachine(const ghoul::Dictionary& dictionary) {
         ghoul::Dictionary transitionsDictionary =
             dictionary.value<ghoul::Dictionary>(TransitionsKey);
 
-        // Go through all states in the dictionary
-        for (size_t i = 1; i <= transitionsDictionary.size(); ++i) {
+        for (unsigned int i = 1; i <= transitionsDictionary.size(); ++i) {
             if (transitionsDictionary.hasKey(std::to_string(i))) {
-                // One state
                 ghoul::Dictionary transition =
                     transitionsDictionary.value<ghoul::Dictionary>(std::to_string(i));
                 _transitions.push_back(Transition(transition));
@@ -66,20 +63,22 @@ StateMachine::StateMachine(const ghoul::Dictionary& dictionary) {
     }
 }
 
-void StateMachine::setInitialState(std::string initialState) {
-    // Find initialState in already defined states
+void StateMachine::setInitialState(const std::string initialState) {
     bool wasFound = false;
     for (unsigned int i = 0; i < _states.size(); ++i) {
         if (_states[i].name() == initialState) {
-            _currentState = &_states[i];
-            _currentState->enter(this);
             wasFound = true;
+            _currentState = &_states[i];
+            _currentState->enter();
             break;
         }
     }
 
     if (!wasFound) {
-        // TODO: Warn
+        LWARNINGC("StateMachine", fmt::format(
+            "Attempting to initialize with undefined state '{}'",
+            initialState)
+        );
     }
 }
 
@@ -87,29 +86,30 @@ State* StateMachine::currentState() const {
     return _currentState;
 }
 
-void StateMachine::transitionTo(std::string newState) {
-    // Find newState in already defined states
+void StateMachine::transitionTo(const std::string newState) {
     bool wasFound = false;
     for (unsigned int i = 0; i < _states.size(); ++i) {
         if (_states[i].name() == newState) {
-            setState(_states[i]);
             wasFound = true;
+            setState(_states[i]);
             break;
         }
     }
 
     if (!wasFound) {
-        // TODO: Warn
+        LWARNINGC("StateMachine", fmt::format(
+            "Attempting to transition to undefined state '{}'",
+            newState)
+        );
     }
 }
 
 void StateMachine::setState(State& newState) {
-    // If initial state to be set
     if (!_currentState) {
         setInitialState(newState.name());
     }
 
-    // Check if transition has been defined
+    // Check if the transition from _currentState to newState exists
     int transitionIndex = -1;
     for (unsigned int i = 0; i < _transitions.size(); ++i) {
         if ( _transitions[i].from() == _currentState->name() &&
@@ -121,19 +121,18 @@ void StateMachine::setState(State& newState) {
     }
 
     if (transitionIndex == -1) {
-        // TODO: Warn
+        LWARNINGC("StateMachine", fmt::format(
+            "Transition from '{}' to '{}' is undefined",
+            _currentState->name(),
+            newState.name())
+        );
         return;
     }
 
-    // Exit current state
-    _currentState->exit(this);
-
-    // Transition to newState
+    _currentState->exit();
     _transitions[transitionIndex].performAction();
-
-    // Enter new state
     _currentState = &newState;
-    _currentState->enter(this);
+    _currentState->enter();
 }
 
 } // namespace openspace

@@ -102,7 +102,6 @@ int getCurrentState(lua_State* L) {
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
     std::string currentState = module->currentState();
 
-    // TODO: Push currentState name on the lua stack in order to return the value
     lua_newtable(L);
     lua_pushstring(L, currentState.c_str());
 

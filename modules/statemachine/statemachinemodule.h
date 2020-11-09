@@ -36,16 +36,16 @@ public:
     constexpr static const char* Name = "StateMachine";
 
     StateMachineModule();
-    ~StateMachineModule();
-
-    scripting::LuaLibrary luaLibrary() const override;
+    ~StateMachineModule() = default;
 
     void initializeStateMachine(const ghoul::Dictionary& dictionary);
-    void setInitialState(std::string initialState);
-    std::string currentState() const;
 
     // initializeStateMachine must have been called before
-    void transitionTo(std::string newState);
+    void setInitialState(const std::string initialState);
+    std::string currentState() const;
+    void transitionTo(const std::string newState);
+
+    scripting::LuaLibrary luaLibrary() const override;
 
 protected:
     void internalInitialize(const ghoul::Dictionary& dictionary) override;

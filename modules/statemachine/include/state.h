@@ -25,13 +25,10 @@
 #ifndef __OPENSPACE_MODULE_STATEMACHINE___STATE___H__
 #define __OPENSPACE_MODULE_STATEMACHINE___STATE___H__
 
-#include <modules/statemachine/include/statemachine.h>
 #include <ghoul/misc/dictionary.h>
 #include <string>
 
 namespace openspace {
-
-class StateMachine;
 
 class State {
 public:
@@ -39,9 +36,9 @@ public:
     ~State() = default;
 
     // What should be done entering the state, while in the state and exiting the state
-    void enter(openspace::StateMachine* statemachine);
-    void idle(openspace::StateMachine* statemachine);
-    void exit(openspace::StateMachine* statemachine);
+    void enter();
+    void idle();
+    void exit();
     bool isIdle() const;
     std::string name() const;
 

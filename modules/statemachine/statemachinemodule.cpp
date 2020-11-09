@@ -24,29 +24,23 @@
 
 #include <modules/statemachine/statemachinemodule.h>
 
-#include <openspace/scripting/lualibrary.h>
+#include <ghoul/logging/logmanager.h>
 #include <modules/statemachine/statemachinemodule_lua.inl>
-#include <string>
+#include <openspace/scripting/lualibrary.h>
 
 namespace openspace {
 
 StateMachineModule::StateMachineModule()
-    : OpenSpaceModule("StateMachine")
-{
-
-}
-
-StateMachineModule::~StateMachineModule() {
-
-}
+    : OpenSpaceModule(Name)
+{ }
 
 void StateMachineModule::initializeStateMachine(const ghoul::Dictionary& dictionary) {
     _machine = std::make_unique<StateMachine>(StateMachine(dictionary));
 }
 
-void StateMachineModule::setInitialState(std::string initialState) {
+void StateMachineModule::setInitialState(const std::string initialState) {
     if (!_machine) {
-        // TODO: Warn
+        LWARNINGC("StateMachineModule", "Attempting to use uninitialized stateMachine");
         return;
     }
 
@@ -55,16 +49,16 @@ void StateMachineModule::setInitialState(std::string initialState) {
 
 std::string StateMachineModule::currentState() const {
     if (!_machine) {
-        // TODO: Warn
+        LWARNINGC("StateMachineModule", "Attempting to use uninitialized stateMachine");
         return "";
     }
 
     return _machine->currentState()->name();
 }
 
-void StateMachineModule::transitionTo(std::string newState) {
+void StateMachineModule::transitionTo(const std::string newState) {
     if (!_machine) {
-        // TODO: Warn
+        LWARNINGC("StateMachineModule", "Attempting to use uninitialized stateMachine");
         return;
     }
 

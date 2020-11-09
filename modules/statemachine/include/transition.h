@@ -25,13 +25,10 @@
 #ifndef __OPENSPACE_MODULE_STATEMACHINE___TRANSITION___H__
 #define __OPENSPACE_MODULE_STATEMACHINE___TRANSITION___H__
 
-#include <modules/statemachine/include/statemachine.h>
 #include <ghoul/misc/dictionary.h>
 #include <string>
 
 namespace openspace {
-
-class StateMachine;
 
 class Transition {
 public:
