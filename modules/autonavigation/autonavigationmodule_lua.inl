@@ -24,6 +24,8 @@
 
 #include <modules/autonavigation/pathspecification.h>
 #include <modules/autonavigation/instruction.h>
+#include <modules/globebrowsing/globebrowsingmodule.h>
+#include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/interaction/navigationhandler.h>
@@ -109,6 +111,61 @@ int goToHeight(lua_State* L) {
 
     if (nArguments > 2) {
         double duration = ghoul::lua::value<double>(L, 3);
+        if (duration <= EPSILON) {
+            lua_settop(L, 0);
+            return ghoul::lua::luaError(L, "Duration must be larger than zero.");
+        }
+        insDict.setValue("Duration", duration);
+    }
+
+    PathSpecification spec = PathSpecification(TargetNodeInstruction{ insDict });
+
+    AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
+    module->AutoNavigationHandler().createPath(spec);
+
+    lua_settop(L, 0);
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
+// @TODO (emmbr 2020-11-06) Ideally, this module shouldn't depend on things from 
+// Globebrowsing, but we want it for an istallation. Later on, move this functionality 
+// somewhere else. Maybe combine with the existing "goToGeo" in globebrowsing?
+int goToGeo(lua_State* L) {
+    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 4, 5 }, "lua::goToGeo");
+
+    const std::string& nodeIdentifier = ghoul::lua::value<std::string>(L, 1);
+    const SceneGraphNode* n = sceneGraphNode(nodeIdentifier);
+    if (!n) {
+        lua_settop(L, 0);
+        return ghoul::lua::luaError(L, "Unknown globe name: " + nodeIdentifier);
+    }
+
+    const double latitude = ghoul::lua::value<double>(L, 2);
+    const double longitude = ghoul::lua::value<double>(L, 3);
+    const double altitude = ghoul::lua::value<double>(L, 4);
+
+    using RenderableGlobe = openspace::globebrowsing::RenderableGlobe;
+    const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
+    if (!globe) {
+        return ghoul::lua::luaError(L, "Identifier must be a RenderableGlobe");
+    }
+
+    // Compute the relative position based on the input values
+    glm::vec3 positionModelCoords = global::moduleEngine->module<GlobeBrowsingModule>()
+        ->cartesianCoordinatesFromGeo(
+        *globe, 
+        latitude, 
+        longitude, 
+        altitude
+    );
+
+    ghoul::Dictionary insDict;
+    insDict.setValue("Target", nodeIdentifier);
+    insDict.setValue("Position", positionModelCoords);
+
+    if (nArguments > 4) {
+        double duration = ghoul::lua::value<double>(L, 5);
         if (duration <= EPSILON) {
             lua_settop(L, 0);
             return ghoul::lua::luaError(L, "Duration must be larger than zero.");

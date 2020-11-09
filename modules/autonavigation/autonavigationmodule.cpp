@@ -105,6 +105,15 @@ scripting::LuaLibrary AutoNavigationModule::luaLibrary() const {
             "parameter specifies the duration of the motion."
         },
         {
+            "goToGeo",
+            &autonavigation::luascriptfunctions::goToGeo,
+            {},
+            "string, double, double, double, [double]",
+            "Move the camera to the globe with the name given by the input string. "
+            "The next three input parameters are latitude, longitude and altitude. "
+            "The final argument is an optional duration for the motion."
+        },
+        {
             "generatePath",
             &autonavigation::luascriptfunctions::generatePath,
             {},
