@@ -66,8 +66,21 @@ StateMachine::StateMachine(const ghoul::Dictionary& dictionary) {
     }
 }
 
-StateMachine::~StateMachine() {
+void StateMachine::setInitialState(std::string initialState) {
+    // Find initialState in already defined states
+    bool wasFound = false;
+    for (unsigned int i = 0; i < _states.size(); ++i) {
+        if (_states[i].name() == initialState) {
+            _currentState = &_states[i];
+            _currentState->enter(this);
+            wasFound = true;
+            break;
+        }
+    }
 
+    if (!wasFound) {
+        // TODO: Warn
+    }
 }
 
 State* StateMachine::currentState() const {
@@ -93,9 +106,7 @@ void StateMachine::transitionTo(std::string newState) {
 void StateMachine::setState(State& newState) {
     // If initial state to be set
     if (!_currentState) {
-        // Enter initial state without transition
-        _currentState = &newState;
-        _currentState->enter(this);
+        setInitialState(newState.name());
     }
 
     // Check if transition has been defined

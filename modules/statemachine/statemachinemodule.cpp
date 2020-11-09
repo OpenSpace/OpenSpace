@@ -25,8 +25,8 @@
 #include <modules/statemachine/statemachinemodule.h>
 
 #include <openspace/scripting/lualibrary.h>
-
-#include "statemachinemodule_lua.inl"
+#include <modules/statemachine/statemachinemodule_lua.inl>
+#include <string>
 
 namespace openspace {
 
@@ -42,6 +42,24 @@ StateMachineModule::~StateMachineModule() {
 
 void StateMachineModule::initializeStateMachine(const ghoul::Dictionary& dictionary) {
     _machine = std::make_unique<StateMachine>(StateMachine(dictionary));
+}
+
+void StateMachineModule::setInitialState(std::string initialState) {
+    if (!_machine) {
+        // TODO: Warn
+        return;
+    }
+
+    _machine->setInitialState(initialState);
+}
+
+std::string StateMachineModule::currentState() const {
+    if (!_machine) {
+        // TODO: Warn
+        return "";
+    }
+
+    return _machine->currentState()->name();
 }
 
 void StateMachineModule::transitionTo(std::string newState) {
@@ -70,7 +88,7 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
             &luascriptfunctions::createStateMachine,
             {},
             "list of tables",
-            "List of tables describing the states for the state machine."
+            "List of tables describing the states and transitions for the state machine."
         },
         {
             "goTo",
@@ -78,6 +96,20 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
             {},
             "String",
             "String name of State to go to."
+        },
+        {
+            "setInitialState",
+            &luascriptfunctions::setInitialState,
+            {},
+            "String",
+            "String name of the first state to set and enter into."
+        },
+        {
+            "getCurrentState",
+            &luascriptfunctions::getCurrentState,
+            {},
+            "",
+            "Returns the string name of the current state that the statemachine is in."
         },
     };
     return res;
