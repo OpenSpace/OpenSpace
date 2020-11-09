@@ -36,15 +36,15 @@ namespace {
 namespace openspace {
 
 Transition::Transition(const ghoul::Dictionary& dictionary) {
-    if (dictionary.hasValue<std::string>(FromStateKey)) {
+    if (dictionary.hasKey(FromStateKey)) {
         _from = dictionary.value<std::string>(FromStateKey);
     }
 
-    if (dictionary.hasValue<std::string>(ToStateKey)) {
+    if (dictionary.hasKey(ToStateKey)) {
         _to = dictionary.value<std::string>(ToStateKey);
     }
 
-    if (dictionary.hasValue<std::string>(ActionFunctionKey)) {
+    if (dictionary.hasKey(ActionFunctionKey)) {
         _action = dictionary.value<std::string>(ActionFunctionKey);
     }
 }
@@ -58,7 +58,8 @@ std::string Transition::to() const {
 }
 
 void Transition::performAction() const {
-    global::scriptEngine->queueScript(_action,
+    global::scriptEngine->queueScript(
+        _action,
         scripting::ScriptEngine::RemoteScripting::Yes
     );
 }

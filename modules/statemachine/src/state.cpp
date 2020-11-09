@@ -36,40 +36,44 @@ namespace {
 namespace openspace {
 
 State::State(const ghoul::Dictionary& dictionary) {
-    if (dictionary.hasValue<std::string>(StateNameKey)) {
+    if (dictionary.hasKey(StateNameKey)) {
         _name = dictionary.value<std::string>(StateNameKey);
     }
 
-    if (dictionary.hasValue<std::string>(EnterFunctionKey)) {
+    if (dictionary.hasKey(EnterFunctionKey)) {
         _enter = dictionary.value<std::string>(EnterFunctionKey);
     }
 
-    if (dictionary.hasValue<std::string>(ExitFunctionKey)) {
+    if (dictionary.hasKey(ExitFunctionKey)) {
         _exit = dictionary.value<std::string>(ExitFunctionKey);
     }
 
     _isIdle = true;
 }
 
-void State::enter(openspace::StateMachine* statemachine) {
+void State::enter() {
     _isIdle = false;
-    global::scriptEngine->queueScript(_enter,
+    global::scriptEngine->queueScript(
+        _enter,
         scripting::ScriptEngine::RemoteScripting::Yes
     );
 
-    // When script is done running, perform idle behaviour
-    idle(statemachine);
+    // TODO: Wait for script to finish, then perform idle behaviour
+    idle();
 }
 
-void State::idle(openspace::StateMachine* statemachine) {
+void State::idle() {
     _isIdle = true;
 }
 
-void State::exit(openspace::StateMachine* statemachine) {
+void State::exit() {
     _isIdle = false;
-    global::scriptEngine->queueScript(_exit,
+    global::scriptEngine->queueScript(
+        _exit,
         scripting::ScriptEngine::RemoteScripting::Yes
     );
+
+    // TODO: Wait for script to finish, then set state as idle
     _isIdle = true;
 }
 
