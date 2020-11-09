@@ -27,22 +27,18 @@
 
 #include <modules/statemachine/include/state.h>
 #include <modules/statemachine/include/transition.h>
-#include <ghoul/misc/dictionary.h>
 #include <vector>
 
 namespace openspace {
-
-class State;
-class Transition;
 
 class StateMachine {
 public:
     StateMachine(const ghoul::Dictionary& dictionary);
     ~StateMachine() = default;
 
-    void setInitialState(std::string initialState);
+    void setInitialState(const std::string initialState);
     State* currentState() const;
-    void transitionTo(std::string newState);
+    void transitionTo(const std::string newState);
     void setState(State& newState);
 
 private:

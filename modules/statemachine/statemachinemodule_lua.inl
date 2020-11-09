@@ -97,12 +97,11 @@ int setInitialState(lua_State* L) {
 }
 
 int getCurrentState(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::property_getValue");
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::getCurrentState");
 
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
     std::string currentState = module->currentState();
 
-    // TODO: Push currentState name on the lua stack in order to return the value
     lua_newtable(L);
     lua_pushstring(L, currentState.c_str());
 
