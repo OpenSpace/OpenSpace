@@ -231,4 +231,5 @@ asset.onInitialize(function()
         States = states, 
         Transitions = transitions
     })
+	openspace.statemachine.setInitialState("Earth");
 end)
