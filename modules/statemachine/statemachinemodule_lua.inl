@@ -108,4 +108,14 @@ int getCurrentState(lua_State* L) {
     return 1;
 }
 
+int getIsIdle(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::getIsIdle");
+
+    StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
+    std::string isIdle  = module->isIdle() ? "True" : "False";
+
+    lua_newtable(L);
+    lua_pushstring(L, isIdle.c_str());
+}
+
 } //namespace openspace::luascriptfunctions

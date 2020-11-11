@@ -56,6 +56,10 @@ std::string StateMachineModule::currentState() const {
     return _machine->currentState()->name();
 }
 
+bool StateMachineModule::isIdle() const {
+    return _machine->isIdle();
+}
+
 void StateMachineModule::transitionTo(const std::string newState) {
     if (!_machine) {
         LWARNINGC("StateMachineModule", "Attempting to use uninitialized stateMachine");
@@ -104,6 +108,13 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
             {},
             "",
             "Returns the string name of the current state that the statemachine is in."
+        },
+        {
+            "getIsIdle",
+            &luascriptfunctions::getIsIdle,
+            {},
+            "",
+            "Returns true if state machine is idle and false otherwise."
         },
     };
     return res;

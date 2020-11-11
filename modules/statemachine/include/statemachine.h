@@ -38,6 +38,7 @@ public:
 
     void setInitialState(const std::string initialState);
     State* currentState() const;
+    bool isIdle() const;
     void transitionTo(const std::string newState);
     void setState(State& newState);
 

@@ -43,6 +43,7 @@ public:
     // initializeStateMachine must have been called before
     void setInitialState(const std::string initialState);
     std::string currentState() const;
+    bool isIdle() const;
     void transitionTo(const std::string newState);
 
     scripting::LuaLibrary luaLibrary() const override;
