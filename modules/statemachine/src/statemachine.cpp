@@ -86,6 +86,17 @@ State* StateMachine::currentState() const {
     return _currentState;
 }
 
+bool StateMachine::isIdle() const {
+    bool isIdle = true;
+    for (unsigned int i = 0; i < _states.size(); ++i) {
+        if (!_states[i].isIdle()) {
+            isIdle = false;
+            break;
+        }
+    }
+    return isIdle;
+}
+
 void StateMachine::transitionTo(const std::string newState) {
     bool wasFound = false;
     for (unsigned int i = 0; i < _states.size(); ++i) {
