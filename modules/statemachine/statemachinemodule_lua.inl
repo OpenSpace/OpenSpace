@@ -116,6 +116,8 @@ int getIsIdle(lua_State* L) {
 
     lua_newtable(L);
     lua_pushstring(L, isIdle.c_str());
+
+    return 1;
 }
 
 } //namespace openspace::luascriptfunctions
