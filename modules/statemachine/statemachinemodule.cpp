@@ -28,6 +28,10 @@
 #include <modules/statemachine/statemachinemodule_lua.inl>
 #include <openspace/scripting/lualibrary.h>
 
+namespace {
+    constexpr const char* _loggerCat = "StateMachine";
+}
+
 namespace openspace {
 
 StateMachineModule::StateMachineModule()
@@ -40,7 +44,7 @@ void StateMachineModule::initializeStateMachine(const ghoul::Dictionary& diction
 
 void StateMachineModule::setInitialState(const std::string initialState) {
     if (!_machine) {
-        LWARNINGC("StateMachineModule", "Attempting to use uninitialized stateMachine");
+        LWARNING("Attempting to use uninitialized state machine");
         return;
     }
 
@@ -49,7 +53,7 @@ void StateMachineModule::setInitialState(const std::string initialState) {
 
 std::string StateMachineModule::currentState() const {
     if (!_machine) {
-        LWARNINGC("StateMachineModule", "Attempting to use uninitialized stateMachine");
+        LWARNING("Attempting to use uninitialized state machine");
         return "";
     }
 
@@ -57,16 +61,21 @@ std::string StateMachineModule::currentState() const {
 }
 
 bool StateMachineModule::isIdle() const {
+    if (!_machine) {
+        LWARNING("Attempting to use uninitialized state machine");
+        return false;
+    }
+
     return _machine->isIdle();
 }
 
 void StateMachineModule::transitionTo(const std::string newState) {
     if (!_machine) {
-        LWARNINGC("StateMachineModule", "Attempting to use uninitialized stateMachine");
+        LWARNING("Attempting to use uninitialized state machine");
         return;
     }
 
-     _machine->transitionTo(newState);
+    _machine->transitionTo(newState);
 }
 
 void StateMachineModule::internalInitialize(const ghoul::Dictionary& dictionary) {
@@ -103,15 +112,15 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
             "String name of the first state to set and enter into."
         },
         {
-            "getCurrentState",
-            &luascriptfunctions::getCurrentState,
+            "currentState",
+            &luascriptfunctions::currentState,
             {},
             "",
             "Returns the string name of the current state that the statemachine is in."
         },
         {
-            "getIsIdle",
-            &luascriptfunctions::getIsIdle,
+            "isIdle",
+            &luascriptfunctions::isIdle,
             {},
             "",
             "Returns true if state machine is idle and false otherwise."

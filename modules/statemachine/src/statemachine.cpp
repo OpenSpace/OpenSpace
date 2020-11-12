@@ -27,6 +27,8 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
+    constexpr const char* _loggerCat = "StateMachine";
+
     constexpr const char* StatesKey = "States";
     constexpr const char* TransitionsKey = "Transitions";
 } // namespace
@@ -75,10 +77,9 @@ void StateMachine::setInitialState(const std::string initialState) {
     }
 
     if (!wasFound) {
-        LWARNINGC("StateMachine", fmt::format(
-            "Attempting to initialize with undefined state '{}'",
-            initialState)
-        );
+        LWARNING(fmt::format(
+            "Attempting to initialize with undefined state '{}'", initialState
+        ));
     }
 }
 
@@ -108,10 +109,9 @@ void StateMachine::transitionTo(const std::string newState) {
     }
 
     if (!wasFound) {
-        LWARNINGC("StateMachine", fmt::format(
-            "Attempting to transition to undefined state '{}'",
-            newState)
-        );
+        LWARNING(fmt::format(
+            "Attempting to transition to undefined state '{}'", newState
+        ));
     }
 }
 
@@ -132,11 +132,10 @@ void StateMachine::setState(State& newState) {
     }
 
     if (transitionIndex == -1) {
-        LWARNINGC("StateMachine", fmt::format(
+        LWARNING(fmt::format(
             "Transition from '{}' to '{}' is undefined",
-            _currentState->name(),
-            newState.name())
-        );
+            _currentState->name(), newState.name()
+        ));
         return;
     }
 

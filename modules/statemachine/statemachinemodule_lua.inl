@@ -96,8 +96,8 @@ int setInitialState(lua_State* L) {
     return 0;
 }
 
-int getCurrentState(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::getCurrentState");
+int currentState(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::currentState");
 
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
     std::string currentState = module->currentState();
@@ -105,17 +105,21 @@ int getCurrentState(lua_State* L) {
     lua_newtable(L);
     lua_pushstring(L, currentState.c_str());
 
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
 
-int getIsIdle(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::getIsIdle");
+int isIdle(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::isIdle");
 
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
     std::string isIdle  = module->isIdle() ? "True" : "False";
 
     lua_newtable(L);
     lua_pushstring(L, isIdle.c_str());
+
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
+    return 1;
 }
 
 } //namespace openspace::luascriptfunctions
