@@ -40,7 +40,7 @@ void StateMachineModule::initializeStateMachine(const ghoul::Dictionary& diction
 
 void StateMachineModule::setInitialState(const std::string initialState) {
     if (!_machine) {
-        LWARNINGC("StateMachineModule", "Attempting to use uninitialized stateMachine");
+        LWARNINGC("StateMachineModule", "Attempting to use uninitialized state machine");
         return;
     }
 
@@ -49,7 +49,7 @@ void StateMachineModule::setInitialState(const std::string initialState) {
 
 std::string StateMachineModule::currentState() const {
     if (!_machine) {
-        LWARNINGC("StateMachineModule", "Attempting to use uninitialized stateMachine");
+        LWARNINGC("StateMachineModule", "Attempting to use uninitialized state machine");
         return "";
     }
 
@@ -62,7 +62,7 @@ bool StateMachineModule::isIdle() const {
 
 void StateMachineModule::transitionTo(const std::string newState) {
     if (!_machine) {
-        LWARNINGC("StateMachineModule", "Attempting to use uninitialized stateMachine");
+        LWARNINGC("StateMachineModule", "Attempting to use uninitialized state machine");
         return;
     }
 
@@ -103,15 +103,15 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
             "String name of the first state to set and enter into."
         },
         {
-            "getCurrentState",
-            &luascriptfunctions::getCurrentState,
+            "currentState",
+            &luascriptfunctions::currentState,
             {},
             "",
             "Returns the string name of the current state that the statemachine is in."
         },
         {
-            "getIsIdle",
-            &luascriptfunctions::getIsIdle,
+            "isIdle",
+            &luascriptfunctions::isIdle,
             {},
             "",
             "Returns true if state machine is idle and false otherwise."
