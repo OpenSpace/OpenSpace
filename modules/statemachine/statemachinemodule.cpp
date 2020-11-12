@@ -28,6 +28,10 @@
 #include <modules/statemachine/statemachinemodule_lua.inl>
 #include <openspace/scripting/lualibrary.h>
 
+namespace {
+    constexpr const char* _loggerCat = "StateMachine";
+}
+
 namespace openspace {
 
 StateMachineModule::StateMachineModule()
@@ -40,7 +44,7 @@ void StateMachineModule::initializeStateMachine(const ghoul::Dictionary& diction
 
 void StateMachineModule::setInitialState(const std::string initialState) {
     if (!_machine) {
-        LWARNINGC("StateMachineModule", "Attempting to use uninitialized state machine");
+        LWARNING("Attempting to use uninitialized state machine");
         return;
     }
 
@@ -49,7 +53,7 @@ void StateMachineModule::setInitialState(const std::string initialState) {
 
 std::string StateMachineModule::currentState() const {
     if (!_machine) {
-        LWARNINGC("StateMachineModule", "Attempting to use uninitialized state machine");
+        LWARNING("Attempting to use uninitialized state machine");
         return "";
     }
 
@@ -62,11 +66,11 @@ bool StateMachineModule::isIdle() const {
 
 void StateMachineModule::transitionTo(const std::string newState) {
     if (!_machine) {
-        LWARNINGC("StateMachineModule", "Attempting to use uninitialized state machine");
+        LWARNING("Attempting to use uninitialized state machine");
         return;
     }
 
-     _machine->transitionTo(newState);
+    _machine->transitionTo(newState);
 }
 
 void StateMachineModule::internalInitialize(const ghoul::Dictionary& dictionary) {
