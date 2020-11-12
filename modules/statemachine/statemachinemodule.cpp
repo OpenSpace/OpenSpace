@@ -62,7 +62,7 @@ std::string StateMachineModule::currentState() const {
 
 bool StateMachineModule::isIdle() const {
     if (!_machine) {
-        LWARNINGC("StateMachineModule", "Attempting to use uninitialized stateMachine");
+        LWARNING("Attempting to use uninitialized stateMachine");
         return false;
     }
 
