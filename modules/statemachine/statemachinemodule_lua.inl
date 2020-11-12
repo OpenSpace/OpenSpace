@@ -102,9 +102,7 @@ int currentState(lua_State* L) {
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
     std::string currentState = module->currentState();
 
-    lua_newtable(L);
     lua_pushstring(L, currentState.c_str());
-
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
@@ -115,9 +113,7 @@ int isIdle(lua_State* L) {
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
     std::string isIdle  = module->isIdle() ? "True" : "False";
 
-    lua_newtable(L);
     lua_pushstring(L, isIdle.c_str());
-
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
