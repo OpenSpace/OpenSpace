@@ -370,6 +370,7 @@ struct ScriptMessage {
     ScriptMessage(const std::vector<char>& buffer) {
         deserialize(buffer);
     }
+    virtual ~ScriptMessage() {};
 
     std::string _script;
     double _timestamp = 0.0;
@@ -429,8 +430,8 @@ struct ScriptMessage {
         ss << _script;
     }
 
-    void read(std::istream* in) {
-        size_t strLen;
+    virtual void read(std::istream* in) {
+        uint32_t strLen;
         //Read string length from file
         in->read(reinterpret_cast<char*>(&strLen), sizeof(strLen));
         //Read back full string
