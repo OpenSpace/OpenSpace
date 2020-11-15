@@ -342,6 +342,21 @@ bool SpiceManager::hasSpkCoverage(const std::string& target, double et) const {
     return false;
 }
 
+std::vector< std::pair<double, double>> SpiceManager::getSpkCoverage(const std::string& target) const {
+    ghoul_assert(!target.empty(), "Empty target");
+
+    const int id = naifId(target);
+    const auto it = _spkIntervals.find(id);
+    if (it != _spkIntervals.end()) {
+        return it->second;
+    }
+    else {
+        std::vector< std::pair<double, double>> emptyList;
+        return  emptyList;
+    }
+}
+
+
 bool SpiceManager::hasCkCoverage(const std::string& frame, double et) const {
     ghoul_assert(!frame.empty(), "Empty target");
 
@@ -356,6 +371,64 @@ bool SpiceManager::hasCkCoverage(const std::string& frame, double et) const {
         }
     }
     return false;
+}
+
+std::vector< std::pair<double, double>> SpiceManager::getCkCoverage(const std::string& target) const {
+    ghoul_assert(!target.empty(), "Empty target");
+
+    int id = naifId(target);
+    const auto it = _ckIntervals.find(id);
+    if (it != _ckIntervals.end()) {
+        return it->second;
+    }
+    else {
+        id *= 1000;
+        const auto it = _ckIntervals.find(id);
+        if (it != _ckIntervals.end()) {
+            return it->second;
+        }
+        else {
+            std::vector< std::pair<double, double>> emptyList;
+            return  emptyList;
+        }
+    }
+}
+
+std::vector< std::pair<int, std::string>> SpiceManager::getSpiceBodies(bool builtInFrames) const {
+    std::vector< std::pair<int, std::string>> bodies;
+
+#define FRNMLN          33
+#define LNSIZE          81
+    SPICEINT_CELL(idset, 8192);
+
+    SpiceChar               frname[FRNMLN];
+    SpiceChar               outlin[LNSIZE];
+
+    SpiceInt                i;
+    SpiceInt                j;
+
+    for (i = 1; i <= 6; i++) {
+        if (i < 6) {
+            if (builtInFrames) {
+                bltfrm_c(i, &idset);
+            } else {
+                kplfrm_c(i, &idset);
+            }
+        } else {
+            if (builtInFrames) {
+                bltfrm_c(SPICE_FRMTYP_ALL, &idset);
+            }
+            else {
+                kplfrm_c(SPICE_FRMTYP_ALL, &idset);
+            }
+        }
+
+        for (j = 0; j < card_c(&idset); j++) {
+            frmnam_c(((SpiceInt*)idset.data)[j], FRNMLN, frname);
+            bodies.push_back(std::make_pair(((long)((SpiceInt*)idset.data)[j]),frname));
+        }
+    }
+    return bodies;
 }
 
 bool SpiceManager::hasValue(int naifId, const std::string& item) const {
@@ -1250,7 +1323,30 @@ scripting::LuaLibrary SpiceManager::luaLibrary() {
                 "{string, number}",
                 "Unloads the provided SPICE kernel. The name can contain path tokens, "
                 "which are automatically resolved"
+            },
+            {
+                "getSpkCoverage",
+                &luascriptfunctions::getSpkCoverage,
+                {},
+                "{string [, printValues]}",
+                "Returns a list of SPK coverage intervals for the target."
+            },
+            {
+                "getCkCoverage",
+                & luascriptfunctions::getCkCoverage,
+                {},
+                "{string [, printValues]}",
+                "Returns a list of CK coverage intervals for the target."
+            },
+            {
+                "getSpiceBodies",
+                &luascriptfunctions::getSpiceBodies,
+                {},
+                "{builtInFrames [, printValues]}",
+                "Returns a list of Spice Bodies loaded into the system. Returns SPICE built in frames if builtInFrames"
+                "Returns User loaded frames if !builtInFrames"
             }
+
         }
     };
 }

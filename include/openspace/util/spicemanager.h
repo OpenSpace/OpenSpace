@@ -227,6 +227,18 @@ public:
     bool hasSpkCoverage(const std::string& target, double et) const;
 
     /**
+     * Returns a list of loaded SPK coverage intervals for \p target
+     *
+     * \param target The body to be examined. The target has to name a valid SPICE object
+     *        with respect to the kernels that have been loaded
+     * \return \c list of SPK kernels for \p target , \c empty list if none loaded.
+     *
+     * \throw SpiceException If \p target does not name a valid SPICE object
+     * \pre \p target must not be empty.
+     */
+    std::vector< std::pair<double, double>> getSpkCoverage(const std::string& target) const;
+
+    /**
      * Returns whether a given \p frame has a CK kernel covering it at the designated
      * \p et ephemeris time.
      *
@@ -241,6 +253,27 @@ public:
      * \pre \p target must not be empty.
      */
     bool hasCkCoverage(const std::string& frame, double et) const;
+
+    /**
+    * Returns a list of loaded CK coverage intervals for \p target
+    *
+    * \param target The body to be examined. The target has to name a valid SPICE object
+    *        with respect to the kernels that have been loaded
+    * \return \c list of CK kernels for \p target , \c empty list if none loaded.
+    *
+    * \throw SpiceException If \p target does not name a valid SPICE object
+    * \pre \p target must not be empty.
+    */
+    std::vector< std::pair<double, double>> getCkCoverage(const std::string& target) const;
+
+    /**
+   * Returns a list of loaded spice frames,
+   *
+   * \param builtInFrames Boolean representing if builtIn or LoadedFrames should be used
+   * \return \c list of Spice frames with ID(int) and Name(string).
+   *
+   */
+    std::vector< std::pair<int, std::string>> getSpiceBodies(bool builtInFrames) const;
 
     /**
      * Determines whether values exist for some \p item for any body, identified by its
