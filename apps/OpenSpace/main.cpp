@@ -1189,6 +1189,11 @@ int main(int argc, char** argv) {
             xmlExt
         );
     }
+    if (global::configuration->profile.empty()) {
+        LFATAL("Cannot launch with an empty profile");
+        exit(EXIT_FAILURE);
+    }
+
 
     // Prepend the outgoing sgctArguments with the program name
     // as well as the configuration file that sgct is supposed to use
