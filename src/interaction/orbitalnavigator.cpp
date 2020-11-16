@@ -103,6 +103,13 @@ namespace {
         "the sensitivity is the less impact a mouse motion will have."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo JoystickEnabledInfo = {
+        "JoystickEnabled",
+        "Joystick Control Enabled",
+        "If this is selected, a connected joystick will be used as an optional input "
+        "device. If this is deselected, any joystick input will be ignored"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo JoystickSensitivityInfo = {
         "JoystickSensitivity",
         "Joystick Sensitivity",
