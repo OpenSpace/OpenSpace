@@ -70,7 +70,7 @@ public:
     };
 
     static const size_t FileHeaderVersionLength = 5;
-    static constexpr char FileHeaderVersion[] = "00.85";
+    char FileHeaderVersion[FileHeaderVersionLength+1] = "01.00";
     static const char DataFormatAsciiTag = 'A';
     static const char DataFormatBinaryTag = 'B';
     static const size_t keyframeHeaderSize_bytes = 33;
@@ -455,10 +455,21 @@ public:
      * (will determine the file format conversion to convert from based on the file's
      * header version number).
      *
+     * \param filename name of the file to convert
+     * \param root (optional) the 5-character version string that represents the version
+     *             of the original file to convert (before recursion started)
      */
-    static bool convertFile(std::string filename);
+    bool convertFile(std::string filename, std::string root = "root");
 
-private:
+    /**
+     * Returns pointer to SessionRecording object that is the previous legacy version
+     * of the current version.
+     *
+     * \return Pointer to the previous version of the SessionRecording
+     */
+    SessionRecording* getLegacy();
+
+protected:
     properties::BoolProperty _renderPlaybackInformation;
 
     enum class RecordedType {
@@ -532,15 +543,18 @@ private:
     double getNextTimestamp();
     double getPrevTimestamp();
     void cleanUpPlayback();
-    static bool convertEntries(std::string& inFilename, std::ifstream& inFile,
+    bool convertEntries(std::string& inFilename, std::ifstream& inFile,
         DataMode mode, int lineNum, std::ofstream& outFile);
-    static bool convertCamera(std::ifstream& inFile, DataMode mode, int lineNum,
+    virtual bool convertCamera(std::ifstream& inFile, DataMode mode, int lineNum,
         std::string& inputLine, std::ofstream& outFile, unsigned char* buff);
-    static bool convertTimeChange(std::ifstream& inFile, DataMode mode, int lineNum,
+    virtual bool convertTimeChange(std::ifstream& inFile, DataMode mode, int lineNum,
         std::string& inputLine, std::ofstream& outFile, unsigned char* buff);
-    static bool convertScript(std::ifstream& inFile, DataMode mode, int lineNum,
+    virtual bool convertScript(std::ifstream& inFile, DataMode mode, int lineNum,
         std::string& inputLine, std::ofstream& outFile, unsigned char* buff);
-    static std::string determineConversionOutFilename(const std::string filename);
+    std::string determineConversionOutFilename(const std::string filename);
+    void readPlaybackFileHeader(const std::string filename,
+        std::string& conversionInFilename, std::ifstream& conversionInFile,
+        std::string& version, DataMode& mode);
 
     static void writeToFileBuffer(unsigned char* buf, size_t& idx, double src);
     static void writeToFileBuffer(unsigned char* buf, size_t& idx, std::vector<char>& cv);
@@ -592,8 +606,10 @@ private:
     int _conversionLineNum = 1;
 };
 
-class SessionRecording_legacy_0085 : SessionRecording {
-    struct ScriptMessage_legacy_0085 : datamessagestructures::ScriptMessage {
+class SessionRecording_legacy_0085 : public SessionRecording {
+    char FileHeaderVersion[FileHeaderVersionLength+1] = "00.85";
+
+    struct ScriptMessage_legacy_0085 : public datamessagestructures::ScriptMessage {
         void read(std::istream* in) {
             size_t strLen;
             //Read string length from file
@@ -608,9 +624,8 @@ class SessionRecording_legacy_0085 : SessionRecording {
         };
     };
 
-    void convertUp(std::string header, std::string fileToConvert);
-
-    static constexpr char FileHeaderVersion[] = "01.00";
+    bool convertScript(std::ifstream& inFile, DataMode mode, int lineNum,
+        std::string& inputLine, std::ofstream& outFile, unsigned char* buffer);
 };
 
 } // namespace openspace

@@ -67,6 +67,10 @@ namespace {
 
 namespace openspace::interaction {
 
+ConversionError::ConversionError(std::string msg)
+    : ghoul::RuntimeError(std::move(msg), "conversionError")
+{}
+
 SessionRecording::SessionRecording()
     : properties::PropertyOwner({ "SessionRecording", "Session Recording" })
     , _renderPlaybackInformation(RenderPlaybackInfo, false)
@@ -74,10 +78,15 @@ SessionRecording::SessionRecording()
     auto fTask = FactoryManager::ref().factory<Task>();
     ghoul_assert(fTask, "No task factory existed");
     fTask->registerClass<ConvertRecFormatTask>("ConvertRecFormatTask");
+    fTask->registerClass<ConvertRecFormatTask>("ConvertRecFileVersionTask");
     addProperty(_renderPlaybackInformation);
 }
 
-SessionRecording::~SessionRecording() {} // NOLINT
+SessionRecording::~SessionRecording() { // NOLINT
+    if (legacyVersion != nullptr) {
+        delete legacyVersion;
+    }
+}
 
 void SessionRecording::deinitialize() {
     stopRecording();
@@ -1619,7 +1628,7 @@ void SessionRecording::saveKeyframeToFileBinary(unsigned char* buffer,
                                                 size_t size,
                                                 std::ofstream& file)
 {
-    file.write(reinterpret_cast<unsigned char*>(buffer), size);
+    file.write(reinterpret_cast<const char*>(buffer), size);
 }
 
 void SessionRecording::saveKeyframeToFile(std::string entry, std::ofstream& file) {
@@ -1664,140 +1673,82 @@ std::vector<std::string> SessionRecording::playbackList() const {
     return fileList;
 }
 
-scripting::LuaLibrary SessionRecording::luaLibrary() {
-    return {
-        "sessionRecording",
-        {
-            {
-                "startRecording",
-                &luascriptfunctions::startRecording,
-                {},
-                "string",
-                "Starts a recording session. The string argument is the filename used "
-                "for the file where the recorded keyframes are saved. "
-                "The file data format is binary."
-            },
-            {
-                "startRecordingAscii",
-                &luascriptfunctions::startRecordingAscii,
-                {},
-                "string",
-                "Starts a recording session. The string argument is the filename used "
-                "for the file where the recorded keyframes are saved. "
-                "The file data format is ASCII."
-            },
-            {
-                "stopRecording",
-                &luascriptfunctions::stopRecording,
-                {},
-                "void",
-                "Stops a recording session"
-            },
-            {
-                "startPlayback",
-                &luascriptfunctions::startPlaybackDefault,
-                {},
-                "string",
-                "Starts a playback session with keyframe times that are relative to "
-                "the time since the recording was started (the same relative time "
-                "applies to the playback). When playback starts, the simulation time "
-                "is automatically set to what it was at recording time. The string "
-                "argument is the filename to pull playback keyframes from."
-            },
-            {
-                "startPlaybackApplicationTime",
-                &luascriptfunctions::startPlaybackApplicationTime,
-                {},
-                "string",
-                "Starts a playback session with keyframe times that are relative to "
-                "application time (seconds since OpenSpace application started). "
-                "The string argument is the filename to pull playback keyframes from."
-            },
-            {
-                "startPlaybackRecordedTime",
-                &luascriptfunctions::startPlaybackRecordedTime,
-                {},
-                "string",
-                "Starts a playback session with keyframe times that are relative to "
-                "the time since the recording was started (the same relative time "
-                "applies to the playback). The string argument is the filename to pull "
-                "playback keyframes from."
-            },
-            {
-                "startPlaybackSimulationTime",
-                &luascriptfunctions::startPlaybackSimulationTime,
-                {},
-                "string",
-                "Starts a playback session with keyframe times that are relative to "
-                "the simulated date & time. The string argument is the filename to pull "
-                "playback keyframes from."
-            },
-            {
-                "stopPlayback",
-                &luascriptfunctions::stopPlayback,
-                {},
-                "void",
-                "Stops a playback session before playback of all keyframes is complete"
-            },
-            {
-                "enableTakeScreenShotDuringPlayback",
-                &luascriptfunctions::enableTakeScreenShotDuringPlayback,
-                {},
-                "[int]",
-                "Enables that rendered frames should be saved during playback. The "
-                "parameter determines the number of frames that are exported per second "
-                "if this value is not provided, 60 frames per second will be exported."
-            },
-            {
-                "disableTakeScreenShotDuringPlayback",
-                &luascriptfunctions::disableTakeScreenShotDuringPlayback,
-                {},
-                "void",
-                "Used to disable that renderings are saved during playback"
-            }
-        }
-    };
+void SessionRecording::readPlaybackFileHeader(const std::string filename,
+                                              std::string& conversionInFilename,
+                                              std::ifstream& conversionInFile,
+                                              std::string& version,
+                                              DataMode& mode)
+{
+    if (filename.find("/") != std::string::npos) {
+        throw ConversionError("Playback filename musn't contain path (/) elements");
+    }
+    conversionInFilename = absPath("${RECORDINGS}/" + filename);
+    if (!FileSys.fileExists(conversionInFilename)) {
+        throw ConversionError("Cannot find the specified playback file to convert.");
+    }
+
+
+    // Open in ASCII first
+    conversionInFile.open(conversionInFilename, std::ifstream::in);
+    // Read header
+    std::string readBackHeaderString = readHeaderElement(
+            conversionInFile,
+        FileHeaderTitle.length()
+    );
+
+    if (readBackHeaderString != FileHeaderTitle) {
+        throw ConversionError("File to convert does not contain expected header.");
+    }
+    version = readHeaderElement(conversionInFile, FileHeaderVersionLength);
+    std::string readDataMode = readHeaderElement(conversionInFile, 1);
+    if (readDataMode[0] == DataFormatAsciiTag) {
+        mode = DataMode::Ascii;
+    }
+    else if (readDataMode[0] == DataFormatBinaryTag) {
+        mode = DataMode::Binary;
+    }
+    else {
+        throw ConversionError("Unknown data type in header (needs Ascii or Binary)");
+    }
 }
 
-bool SessionRecording::convertFile(std::string filename) {
+bool SessionRecording::convertFile(std::string filename, std::string version) {
     bool success = true;
+    std::string conversionInFilename;
+    std::ifstream conversionInFile;
+    DataMode mode;
+    bool preRecursion = (version == "root") ? true : false;
+    std::string throwOut;
 
     try {
-        if (filename.find("/") != std::string::npos) {
-            throw ConversionError("Playback filename musn't contain path (/) elements");
-        }
-        std::string conversionInFilename = absPath("${RECORDINGS}/" + filename);
-        if (!FileSys.fileExists(conversionInFilename)) {
-            throw ConversionError("Cannot find the specified playback file to convert.");
-        }
-
-        int conversionLineNum = 1;
-        // Open in ASCII first
-        std::ifstream conversionInFile;
-        conversionInFile.open(conversionInFilename, std::ifstream::in);
-        // Read header
-        std::string readBackHeaderString = readHeaderElement(
-                conversionInFile,
-            FileHeaderTitle.length()
+        readPlaybackFileHeader(
+            filename,
+            conversionInFilename,
+            conversionInFile,
+            preRecursion ? version : throwOut,
+            mode
         );
+        int conversionLineNum = 1;
+        LINFO(fmt::format(
+            "Starting conversion on rec file {}, version {} in {} mode.",
+            filename, version, (mode == DataMode::Ascii) ? "ascii" : "binary"
+        ));
 
-        if (readBackHeaderString != FileHeaderTitle) {
-            throw ConversionError("File to convert does not contain expected header.");
-        }
-        if (readBackHeaderString != FileHeaderTitle) {
-            throw ConversionError("File to convert does not contain expected header.");
-        }
-        readHeaderElement(conversionInFile, FileHeaderVersionLength);
-        std::string readDataMode = readHeaderElement(conversionInFile, 1);
-        DataMode mode;
-        if (readDataMode[0] == DataFormatAsciiTag) {
-            mode = DataMode::Ascii;
-        }
-        else if (readDataMode[0] == DataFormatBinaryTag) {
-            mode = DataMode::Binary;
-        }
-        else {
-            throw ConversionError("Unknown data type in header (needs Ascii or Binary)");
+        //If this instance of the SessionRecording class isn't the instance with the
+        // correct version of the file to be converted, then call getLegacy() to recurse
+        // to the next level down in the legacy subclasses until we get the right
+        // version, then proceed with conversion from there.
+        if (version.compare(FileHeaderVersion) != 0) {
+            conversionInFile.close();
+            SessionRecording* old = getLegacy();
+            old->convertFile(filename, version);
+            readPlaybackFileHeader(
+                filename,
+                conversionInFilename,
+                conversionInFile,
+                version,
+                mode
+            );
         }
 
         if (!conversionInFile.is_open() || !conversionInFile.good()) {
@@ -1829,6 +1780,8 @@ bool SessionRecording::convertFile(std::string filename) {
             conversionLineNum,
             conversionOutFile
         );
+        conversionInFile.close();
+        conversionOutFile.close();
     }
     catch (ConversionError& c) {
         LERROR(c.message);
@@ -1843,7 +1796,8 @@ bool SessionRecording::convertEntries(std::string& inFilename, std::ifstream& in
 {
     bool conversionStatusOk = true;
     std::string lineParsing;
-    std::shared_ptr<char[]> buffer(new char[_saveBufferMaxSize_bytes]);
+    //std::shared_ptr<unsigned char[]> buffer(new unsigned char[_saveBufferMaxSize_bytes]);
+    unsigned char* buffer = new unsigned char[_saveBufferMaxSize_bytes];
 
     if (mode == DataMode::Binary) {
         unsigned char frameType;
@@ -1867,7 +1821,7 @@ bool SessionRecording::convertEntries(std::string& inFilename, std::ifstream& in
                     lineNum,
                     lineParsing,
                     outFile,
-                    buffer
+                    reinterpret_cast<unsigned char*>(buffer)
                 );
             }
             else if (frameType == HeaderTimeBinary) {
@@ -1962,7 +1916,14 @@ bool SessionRecording::convertEntries(std::string& inFilename, std::ifstream& in
             lineNum, inFilename
         ));
     }
+    if (buffer != nullptr) {
+        delete buffer;
+    }
     return conversionStatusOk;
+}
+
+SessionRecording* SessionRecording::getLegacy() {
+    legacyVersion = new SessionRecording_legacy_0085();
 }
 
 std::string SessionRecording::determineConversionOutFilename(const std::string filename) {
@@ -1981,14 +1942,135 @@ std::string SessionRecording::determineConversionOutFilename(const std::string f
     return absPath("${RECORDINGS}/convert/" + conversionOutFilename);
 }
 
-void SessionRecording_legacy_0085::convertUp(std::string header, std::string fileToConvert)
+bool SessionRecording_legacy_0085::convertScript(std::ifstream& inFile, DataMode mode,
+                                                 int lineNum, std::string& inputLine,
+                                                 std::ofstream& outFile,
+                                                 unsigned char* buffer)
 {
-    if (strcmp(legacyVersion->FileHeaderVersion, FileHeaderVersion) == 0) {
-        convertFile(fileToConvert);
+    Timestamps times;
+    ScriptMessage_legacy_0085 kf;
+
+    bool success = readSingleKeyframeScript(
+        kf,
+        times,
+        mode,
+        inFile,
+        inputLine,
+        lineNum
+    );
+    if (success) {
+        saveSingleKeyframeScript(
+            kf,
+            times,
+            mode,
+            outFile,
+            buffer
+        );
     }
-    else {
-        //Oldest known version
-    }
+    return success;
+}
+
+scripting::LuaLibrary SessionRecording::luaLibrary() {
+    return {
+        "sessionRecording",
+        {
+            {
+                "startRecording",
+                &luascriptfunctions::startRecording,
+                {},
+                "string",
+                "Starts a recording session. The string argument is the filename used "
+                "for the file where the recorded keyframes are saved. "
+                "The file data format is binary."
+            },
+            {
+                "startRecordingAscii",
+                &luascriptfunctions::startRecordingAscii,
+                {},
+                "string",
+                "Starts a recording session. The string argument is the filename used "
+                "for the file where the recorded keyframes are saved. "
+                "The file data format is ASCII."
+            },
+            {
+                "stopRecording",
+                &luascriptfunctions::stopRecording,
+                {},
+                "void",
+                "Stops a recording session"
+            },
+            {
+                "startPlayback",
+                &luascriptfunctions::startPlaybackDefault,
+                {},
+                "string",
+                "Starts a playback session with keyframe times that are relative to "
+                "the time since the recording was started (the same relative time "
+                "applies to the playback). When playback starts, the simulation time "
+                "is automatically set to what it was at recording time. The string "
+                "argument is the filename to pull playback keyframes from."
+            },
+            {
+                "startPlaybackApplicationTime",
+                &luascriptfunctions::startPlaybackApplicationTime,
+                {},
+                "string",
+                "Starts a playback session with keyframe times that are relative to "
+                "application time (seconds since OpenSpace application started). "
+                "The string argument is the filename to pull playback keyframes from."
+            },
+            {
+                "startPlaybackRecordedTime",
+                &luascriptfunctions::startPlaybackRecordedTime,
+                {},
+                "string",
+                "Starts a playback session with keyframe times that are relative to "
+                "the time since the recording was started (the same relative time "
+                "applies to the playback). The string argument is the filename to pull "
+                "playback keyframes from."
+            },
+            {
+                "startPlaybackSimulationTime",
+                &luascriptfunctions::startPlaybackSimulationTime,
+                {},
+                "string",
+                "Starts a playback session with keyframe times that are relative to "
+                "the simulated date & time. The string argument is the filename to pull "
+                "playback keyframes from."
+            },
+            {
+                "stopPlayback",
+                &luascriptfunctions::stopPlayback,
+                {},
+                "void",
+                "Stops a playback session before playback of all keyframes is complete"
+            },
+            {
+                "enableTakeScreenShotDuringPlayback",
+                &luascriptfunctions::enableTakeScreenShotDuringPlayback,
+                {},
+                "[int]",
+                "Enables that rendered frames should be saved during playback. The "
+                "parameter determines the number of frames that are exported per second "
+                "if this value is not provided, 60 frames per second will be exported."
+            },
+            {
+                "disableTakeScreenShotDuringPlayback",
+                &luascriptfunctions::disableTakeScreenShotDuringPlayback,
+                {},
+                "void",
+                "Used to disable that renderings are saved during playback"
+            },
+            {
+                "fileFormatConversion",
+                &luascriptfunctions::fileFormatConversion,
+                {},
+                "string",
+                "Performs a conversion of the specified file to the most most recent "
+                "file format, creating a copy of the recording file."
+            },
+        }
+    };
 }
 
 } // namespace openspace::interaction

@@ -128,10 +128,7 @@ void ConvertRecFormatTask::convert() {
         SessionRecording::FileHeaderTitle.c_str(),
         SessionRecording::FileHeaderTitle.length()
     );
-    _oFile.write(
-        SessionRecording::FileHeaderVersion,
-        SessionRecording::FileHeaderVersionLength
-    );
+    _oFile.write(_version.c_str(), SessionRecording::FileHeaderVersionLength);
     _oFile.close();
 
     if (_fileFormatType == SessionRecording::DataMode::Ascii) {
@@ -161,7 +158,7 @@ void ConvertRecFormatTask::determineFormatType() {
     }
     else {
         //Read version string and throw it away (and also line feed character at end)
-        SessionRecording::readHeaderElement(_iFile,
+        _version = SessionRecording::readHeaderElement(_iFile,
             SessionRecording::FileHeaderVersionLength);
         line = SessionRecording::readHeaderElement(_iFile, 1);
         SessionRecording::readHeaderElement(_iFile, 1);
