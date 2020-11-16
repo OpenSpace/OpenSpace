@@ -925,6 +925,9 @@ void setSgctDelegateFunctions() {
 
         return currentWindow->swapGroupFrameNumber();
     };
+    sgctDelegate.setScreenshotFolder = [](std::string path) {
+        Settings::instance().setCapturePath(std::move(path));
+    };
 }
 
 void checkCommandLineForSettings(int& argc, char** argv, bool& hasSGCT, bool& hasProfile,
