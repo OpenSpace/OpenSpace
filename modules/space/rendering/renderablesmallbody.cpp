@@ -399,6 +399,10 @@ void RenderableSmallBody::readOrbitalParamsFromThisLine(bool firstDataLine,
 }
 
 static double importAngleValue(const std::string& angle) {
+    if (angle.empty()) {
+        return 0.0;
+    }
+
     double output = std::stod(angle);
     output = std::fmod(output, 360.0);
     if (output < 0.0) {
