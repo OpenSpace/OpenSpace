@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/autonavigation/pathspecification.h>
 #include <modules/autonavigation/instruction.h>
+#include <modules/autonavigation/pathspecification.h>
 #include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/engine/globals.h>
@@ -41,7 +41,7 @@
 
 namespace openspace::autonavigation::luascriptfunctions {
 
-const double EPSILON = 1e-12;
+const double Epsilon = 1e-12;
 
 int continuePath(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::continuePath");
@@ -61,8 +61,54 @@ int stopPath(lua_State* L) {
     return 0;
 }
 
+// All the goTo function has the same two optional input parameters at the end. The 
+// purpose of this function is to handle these input parameters and add the result
+// to the dictionary specifying the instruction for a camera path.
+int handleOptionalGoToParameters(lua_State* L, const int startLocation, 
+                                 const int nArguments, 
+                                 ghoul::Dictionary& resultInstruction)
+{
+    const bool firstIsNumber = (lua_isnumber(L, startLocation) != 0);
+    const bool firstIsBool = (lua_isboolean(L, startLocation) != 0);
+
+    if (!(firstIsNumber || firstIsBool)) {
+        const char* msg = lua_pushfstring(
+            L,
+            "%s or %s expected, got %s",
+            lua_typename(L, LUA_TNUMBER),
+            lua_typename(L, LUA_TBOOLEAN),
+            luaL_typename(L, -1)
+        );
+        return ghoul::lua::luaError(
+            L, fmt::format("bad argument #{} ({})", startLocation, msg)
+        );
+    }
+
+    int location = startLocation;
+
+    if (firstIsBool) {
+        const bool useUpFromTarget = (lua_toboolean(L, location) == 1);
+        resultInstruction.setValue("UseTargetUpDirection", useUpFromTarget);
+
+        if (nArguments > startLocation) {
+            location++;
+        }
+    }
+
+    if (firstIsNumber || nArguments > startLocation) {
+        double duration = ghoul::lua::value<double>(L, location);
+        if (duration <= Epsilon) {
+            lua_settop(L, 0);
+            return ghoul::lua::luaError(L, "Duration must be larger than zero.");
+        }
+        resultInstruction.setValue("Duration", duration);
+    }
+
+    return 0;
+}
+
 int goTo(lua_State* L) {
-    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 1, 2 }, "lua::goTo");
+    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 1, 3 }, "lua::goTo");
 
     const std::string& nodeIdentifier = ghoul::lua::value<std::string>(L, 1);
 
@@ -75,12 +121,10 @@ int goTo(lua_State* L) {
     insDict.setValue("Target", nodeIdentifier);
 
     if (nArguments > 1) {
-        double duration = ghoul::lua::value<double>(L, 2);
-        if (duration <= EPSILON) {
-            lua_settop(L, 0);
-            return ghoul::lua::luaError(L, "Duration must be larger than zero.");
+        int result = handleOptionalGoToParameters(L, 2, nArguments, insDict);
+        if (result != 0) {
+            return result; // An error occurred
         }
-        insDict.setValue("Duration", duration);
     }
 
     PathSpecification spec = PathSpecification(TargetNodeInstruction{insDict});
@@ -94,7 +138,7 @@ int goTo(lua_State* L) {
 }
 
 int goToHeight(lua_State* L) {
-    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 2, 3 }, "lua::goToHeight");
+    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 2, 4 }, "lua::goToHeight");
 
     const std::string& nodeIdentifier = ghoul::lua::value<std::string>(L, 1);
 
@@ -110,12 +154,10 @@ int goToHeight(lua_State* L) {
     insDict.setValue("Height", height);
 
     if (nArguments > 2) {
-        double duration = ghoul::lua::value<double>(L, 3);
-        if (duration <= EPSILON) {
-            lua_settop(L, 0);
-            return ghoul::lua::luaError(L, "Duration must be larger than zero.");
+        int result = handleOptionalGoToParameters(L, 3, nArguments, insDict);
+        if (result != 0) {
+            return result; // An error occurred
         }
-        insDict.setValue("Duration", duration);
     }
 
     PathSpecification spec = PathSpecification(TargetNodeInstruction{ insDict });
@@ -132,7 +174,7 @@ int goToHeight(lua_State* L) {
 // Globebrowsing, but we want it for an istallation. Later on, move this functionality 
 // somewhere else. Maybe combine with the existing "goToGeo" in globebrowsing?
 int goToGeo(lua_State* L) {
-    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 4, 5 }, "lua::goToGeo");
+    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 4, 6 }, "lua::goToGeo");
 
     const std::string& nodeIdentifier = ghoul::lua::value<std::string>(L, 1);
     const SceneGraphNode* n = sceneGraphNode(nodeIdentifier);
@@ -165,12 +207,10 @@ int goToGeo(lua_State* L) {
     insDict.setValue("Position", positionModelCoords);
 
     if (nArguments > 4) {
-        double duration = ghoul::lua::value<double>(L, 5);
-        if (duration <= EPSILON) {
-            lua_settop(L, 0);
-            return ghoul::lua::luaError(L, "Duration must be larger than zero.");
+        int result = handleOptionalGoToParameters(L, 5, nArguments, insDict);
+        if (result != 0) {
+            return result; // An error occurred
         }
-        insDict.setValue("Duration", duration);
     }
 
     PathSpecification spec = PathSpecification(TargetNodeInstruction{ insDict });

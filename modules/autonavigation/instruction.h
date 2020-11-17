@@ -54,6 +54,7 @@ struct TargetNodeInstruction : public Instruction {
     TargetNodeInstruction(const ghoul::Dictionary& dictionary);
 
     std::vector<Waypoint> waypoints() const override;
+    bool setUpDirectionFromTarget() const;
 
     // TODO
     //static documentation::Documentation Documentation();
@@ -61,6 +62,7 @@ struct TargetNodeInstruction : public Instruction {
     std::string nodeIdentifier;
     std::optional<glm::dvec3> position; // relative to target node (model space)
     std::optional<double> height;
+    std::optional<bool> useTargetUpDirection;
 };
 
 struct NavigationStateInstruction : public Instruction {
