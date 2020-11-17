@@ -177,17 +177,15 @@ transitions = {
         From = "Asteroids", 
         To = "Earth", 
         Action = [[
-            ]] .. setCurveTypeToZoomOverview() .. [[
             openspace.time.setPause(true)
 
-            openspace.autonavigation.goTo('Earth')
+            openspace.autonavigation.goTo('Earth', true)
         ]]
     },
     {
         From = "Earth", 
         To = "Asteroids", 
         Action = [[
-            ]] .. setCurveTypeToZoomOverview() .. [[
             openspace.time.setPause(true)
 
             local targetDistance = ]] .. tostring(asteroidsTargetDistance) .. [[
