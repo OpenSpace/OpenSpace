@@ -52,7 +52,7 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo IncludeRollInfo = {
-        "IncludeRollInfo",
+        "IncludeRoll",
         "Include Roll",
         "If disabled, roll is removed from the interpolation of camera orientation."
     };
