@@ -119,11 +119,14 @@ asteroidsState = {
         ]] .. setAsteroidsProperty('Opacity', 0) .. [[
         ]] .. setAsteroidsProperty('Enabled', true) .. [[
         ]] .. setAsteroidsProperty('Opacity', 1, fadeInDuration) .. [[ 
+        ]] .. setOrbitSpeedFactor(0.15) .. [[
+        ]] .. orbitOnArrival() .. [[
     ]],
     Exit = [[
         openspace.printInfo('Exiting Asteroids State')
         ]] .. setAsteroidsProperty('Opacity', 0, fadeOutDuration) .. [[
         ]] .. setAsteroidsProperty('Enabled', false) .. [[ 
+        ]] .. stopOrbiting() .. [[
     ]]
     -- OBS! Ideally we want to disable the asteroids after they are 
     -- completely faded out 
@@ -158,7 +161,7 @@ earthState = {
     Identifier = "Earth", 
     Enter = [[
         openspace.printInfo('Entering Earth State')
-        ]] .. setOrbitSpeedFactor(0.1) .. [[
+        ]] .. setOrbitSpeedFactor(0.2) .. [[
         ]] .. orbitOnArrival() .. [[
     ]],
     Exit = [[
@@ -178,7 +181,6 @@ transitions = {
         To = "Earth", 
         Action = [[
             openspace.time.setPause(true)
-
             openspace.autonavigation.goTo('Earth', true)
         ]]
     },
@@ -187,24 +189,19 @@ transitions = {
         To = "Asteroids", 
         Action = [[
             openspace.time.setPause(true)
-
             local targetDistance = ]] .. tostring(asteroidsTargetDistance) .. [[
-            openspace.autonavigation.goToHeight('Sun', targetDistance)
+            openspace.autonavigation.goToHeight('Sun', targetDistance, true)
         ]]
     },
     {
         From = "Asteroids", 
         To = "Galaxies", 
-        Action =  [[
-            ]] .. applyLinearFlight(galaxiesTargetDistance, 2) .. [[
-        ]]
+        Action = applyLinearFlight(galaxiesTargetDistance, 2)
     },
     {
         From = "Earth", 
         To = "Galaxies", 
-        Action =  [[
-            ]] .. applyLinearFlight(galaxiesTargetDistance, 1.5) .. [[
-        ]]
+        Action = applyLinearFlight(galaxiesTargetDistance, 1.5)
     },
     {
         From = "Galaxies", 
