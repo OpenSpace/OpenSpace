@@ -680,11 +680,10 @@ Waypoint AutoNavigationHandler::computeDefaultWaypoint(const TargetNodeInstructi
     // Up direction
     glm::dvec3 up = camera()->lookUpVectorWorldSpace();
     if (ins->setUpDirectionFromTarget()) {
-        // @TODO (emmbr 2020-11-17) For now, compute up using the model rotation. 
-        // But this does not correlate to what we humans consider the natural up
-        // direction for most objects. A better solution would be to make each sgn 
-        // aware of its own 'up' and query it for it
-        up = targetNode->rotationMatrix() * glm::dvec3(0.0, 1.0, 0.0);
+        // @TODO (emmbr 2020-11-17) For now, this is hardcoded to look good for Earth, 
+        // which is where it matters the most. A better solution would be to make each 
+        // sgn aware of its own 'up' and query 
+        up = targetNode->worldRotationMatrix() * glm::dvec3(0.0, 0.0, 1.0);
     }
 
     // Rotation

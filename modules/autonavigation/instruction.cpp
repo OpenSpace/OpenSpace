@@ -123,7 +123,10 @@ std::vector<Waypoint> TargetNodeInstruction::waypoints() const {
 
         glm::dvec3 up = camera->lookUpVectorWorldSpace();
         if (setUpDirectionFromTarget()) {
-            up = targetNode->rotationMatrix() * glm::dvec3(0.0, 1.0, 0.0);
+            // @TODO (emmbr 2020-11-17) For now, this is hardcoded to look good for Earth, 
+            // which is where it matters the most. A better solution would be to make each 
+            // sgn aware of its own 'up' and query 
+            up = targetNode->worldRotationMatrix() * glm::dvec3(0.0, 0.0, 1.0);
         }
 
         const glm::dvec3 lookAtPos = targetNode->worldPosition();
