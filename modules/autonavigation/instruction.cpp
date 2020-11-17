@@ -24,6 +24,7 @@
 
 #include <modules/autonavigation/instruction.h>
 
+#include <modules/autonavigation/helperfunctions.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/navigationhandler.h>
@@ -43,6 +44,7 @@ namespace {
     constexpr const char* KeyTarget = "Target";
     constexpr const char* KeyPosition = "Position";
     constexpr const char* KeyHeight = "Height";
+    constexpr const char* KeyUseTargetUpDirection = "UseTargetUpDirection";
 
     constexpr const char* KeyNavigationState = "NavigationState";
 } // namespace
@@ -97,6 +99,10 @@ TargetNodeInstruction::TargetNodeInstruction(const ghoul::Dictionary& dictionary
     if (dictionary.hasValue<double>(KeyHeight)) {
         height = dictionary.value<double>(KeyHeight);
     }
+
+    if (dictionary.hasValue<bool>(KeyUseTargetUpDirection)) {
+        useTargetUpDirection = dictionary.value<bool>(KeyUseTargetUpDirection);
+    }
 }
 
 std::vector<Waypoint> TargetNodeInstruction::waypoints() const {
@@ -108,26 +114,36 @@ std::vector<Waypoint> TargetNodeInstruction::waypoints() const {
 
     glm::dvec3 targetPos;
     if (position.has_value()) {
-        // note that the anchor and reference frame is our targetnode.
+        // Note that the anchor and reference frame is our targetnode.
         // The position in instruction is given is relative coordinates.
         targetPos = targetNode->worldPosition() +
             targetNode->worldRotationMatrix() * position.value();
 
         Camera* camera = global::navigationHandler->camera();
 
-        glm::dmat4 lookAtMat = glm::lookAt(
-            targetPos,
-            targetNode->worldPosition(),
-            camera->lookUpVectorWorldSpace()
-        );
+        glm::dvec3 up = camera->lookUpVectorWorldSpace();
+        if (setUpDirectionFromTarget()) {
+            // @TODO (emmbr 2020-11-17) For now, this is hardcoded to look good for Earth, 
+            // which is where it matters the most. A better solution would be to make each 
+            // sgn aware of its own 'up' and query 
+            up = targetNode->worldRotationMatrix() * glm::dvec3(0.0, 0.0, 1.0);
+        }
 
-        glm::dquat targetRot = glm::normalize(glm::inverse(glm::quat_cast(lookAtMat)));
+        const glm::dvec3 lookAtPos = targetNode->worldPosition();
+        const glm::dquat targetRot = helpers::lookAtQuaternion(targetPos, lookAtPos, up);
 
         Waypoint wp{ targetPos, targetRot, nodeIdentifier };
         return std::vector<Waypoint>({ wp });
     }
 
     return std::vector<Waypoint>();
+}
+
+bool TargetNodeInstruction::setUpDirectionFromTarget() const {
+    if (!useTargetUpDirection.has_value()) {
+        return false;
+    }
+    return useTargetUpDirection.value();
 }
 
 NavigationStateInstruction::NavigationStateInstruction(

@@ -1523,6 +1523,13 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
                 "Remove all registered virtual properties"
             },
             {
+                "setScreenshotFolder",
+                &luascriptfunctions::setScreenshotFolder,
+                {},
+                "string",
+                "Sets the folder used for storing screenshots or session recording frames"
+            },
+            {
                 "addTag",
                 &luascriptfunctions::addTag,
                 {},

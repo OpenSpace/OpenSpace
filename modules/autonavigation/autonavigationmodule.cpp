@@ -91,27 +91,33 @@ scripting::LuaLibrary AutoNavigationModule::luaLibrary() const {
             "goTo",
             &autonavigation::luascriptfunctions::goTo,
             {},
-            "string, [double]",
-            "Move the camera to the node with the specified name. The optional parameter "
-            "specifies the duration of the motion."
+            "string [, bool, double]",
+            "Move the camera to the node with the specified name. The optional double "
+            "specifies the duration of the motion. If the optional bool is set to true "
+            "the target up vector for camera is set based on the target node. Either of "
+            "the optional parameters can be left out."
         },
         {
             "goToHeight",
             &autonavigation::luascriptfunctions::goToHeight,
             {},
-            "string, double, [double]",
+            "string, double [, bool, double]",
             "Move the camera to the node with the specified name. The second input "
-            "parameter is the desired target height and the the optional third "
-            "parameter specifies the duration of the motion."
+            "parameter is the desired target height. The optional double "
+            "specifies the duration of the motion. If the optional bool is set to true "
+            "the target up vector for camera is set based on the target node. Either of "
+            "the optional parameters can be left out."
         },
         {
             "goToGeo",
             &autonavigation::luascriptfunctions::goToGeo,
             {},
-            "string, double, double, double, [double]",
+            "string, double, double, double [, bool, double]",
             "Move the camera to the globe with the name given by the input string. "
             "The next three input parameters are latitude, longitude and altitude. "
-            "The final argument is an optional duration for the motion."
+            "The optional double specifies the duration of the motion. If the optional "
+            "bool is set to true the target up vector for camera is set based on the "
+            "target node. Either of the optional parameters can be left out."
         },
         {
             "generatePath",

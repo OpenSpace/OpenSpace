@@ -33,6 +33,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/triggerproperty.h>
+#include <chrono>
 
 namespace ghoul {
     namespace fontrendering { class Font; }
@@ -229,6 +230,8 @@ private:
     properties::FloatProperty _saturation;
     properties::FloatProperty _value;
 
+    properties::IntProperty _framerateLimit;
+    std::chrono::high_resolution_clock::time_point _lastFrameTime;
     properties::FloatProperty _horizFieldOfView;
 
     properties::Vec3Property _globalRotation;

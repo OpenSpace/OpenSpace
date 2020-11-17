@@ -103,6 +103,13 @@ namespace {
         "the sensitivity is the less impact a mouse motion will have."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo JoystickEnabledInfo = {
+        "JoystickEnabled",
+        "Joystick Control Enabled",
+        "If this is selected, a connected joystick will be used as an optional input "
+        "device. If this is deselected, any joystick input will be ignored"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo JoystickSensitivityInfo = {
         "JoystickSensitivity",
         "Joystick Sensitivity",
@@ -249,7 +256,7 @@ OrbitalNavigator::OrbitalNavigator()
     , _flightDestinationDistance(FlightDestinationDistInfo, 2e8f, 0.0f, 1e10f)
     , _flightDestinationFactor(FlightDestinationFactorInfo, 1E-4, 1E-6, 0.5)
     , _applyLinearFlight(ApplyLinearFlightInfo, false)
-    , _velocitySensitivity(VelocityZoomControlInfo, 0.02f, 0.01f, 0.15f)      
+    , _velocitySensitivity(VelocityZoomControlInfo, 3.5f, 0.001f, 20.f)      
     , _mouseSensitivity(MouseSensitivityInfo, 15.f, 1.f, 50.f)
     , _joystickSensitivity(JoystickSensitivityInfo, 10.f, 1.0f, 50.f)
     , _websocketSensitivity(WebsocketSensitivityInfo, 5.f, 1.0f, 50.f)
@@ -474,7 +481,8 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
                 pose.position,
                 distFromCameraToFocus,
                 camPosToAnchorPosDiff,
-                _flightDestinationDistance
+                _flightDestinationDistance,
+                deltaTime
             );
         }
         else {
@@ -1261,7 +1269,8 @@ glm::dvec3 OrbitalNavigator::translateHorizontally(double deltaTime,
 glm::dvec3 OrbitalNavigator::moveCameraAlongVector(const glm::dvec3& camPos,
                                                   double distFromCameraToFocus,
                                                   const glm::dvec3& camPosToAnchorPosDiff,
-                                                  double destination) const
+                                                  double destination,
+                                                  double deltaTime) const
 {
     // This factor adapts the velocity so it slows down when getting closer
     // to our final destination
@@ -1278,7 +1287,7 @@ glm::dvec3 OrbitalNavigator::moveCameraAlongVector(const glm::dvec3& camPos,
             velocity = distFromCameraToFocus / destination - 1.0;
         }
     }
-    velocity *= _velocitySensitivity;
+    velocity *= _velocitySensitivity * deltaTime;
 
     // Return the updated camera position
     return camPos - velocity * camPosToAnchorPosDiff;

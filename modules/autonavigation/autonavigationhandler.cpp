@@ -641,6 +641,7 @@ Waypoint AutoNavigationHandler::computeDefaultWaypoint(const TargetNodeInstructi
     const SceneGraphNode* closeNode = findNodeNearTarget(targetNode);
     const glm::dvec3 prevPos = lastWayPoint().position();
 
+    // Position
     glm::dvec3 stepDirection;
     if (closeNode) {
         // If the node is close to another node in the scene, make sure that the
@@ -671,16 +672,23 @@ Waypoint AutoNavigationHandler::computeDefaultWaypoint(const TargetNodeInstructi
     const double radius = WaypointNodeDetails::findValidBoundingSphere(targetNode);
     const double defaultHeight = 2.0 * radius;
 
-    bool hasHeight = ins->height.has_value();
+    const bool hasHeight = ins->height.has_value();
     const double height = hasHeight ? ins->height.value() : defaultHeight;
 
     const glm::dvec3 targetPos = nodePos + stepDirection * (radius + height);
 
-    const glm::dquat targetRot = helpers::lookAtQuaternion(
-        targetPos,
-        targetNode->worldPosition(),
-        camera()->lookUpVectorWorldSpace()
-    );
+    // Up direction
+    glm::dvec3 up = camera()->lookUpVectorWorldSpace();
+    if (ins->setUpDirectionFromTarget()) {
+        // @TODO (emmbr 2020-11-17) For now, this is hardcoded to look good for Earth, 
+        // which is where it matters the most. A better solution would be to make each 
+        // sgn aware of its own 'up' and query 
+        up = targetNode->worldRotationMatrix() * glm::dvec3(0.0, 0.0, 1.0);
+    }
+
+    // Rotation
+    const glm::dvec3 lookAtPos = targetNode->worldPosition();
+    const glm::dquat targetRot = helpers::lookAtQuaternion(targetPos, lookAtPos, up);
 
     return Waypoint{ targetPos, targetRot, ins->nodeIdentifier };
 }

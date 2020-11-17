@@ -46,7 +46,7 @@ EasedSlerpInterpolator::EasedSlerpInterpolator(glm::dquat start, glm::dquat end)
 
 glm::dquat EasedSlerpInterpolator::interpolate(double u) {
     double uScaled = helpers::shiftAndScale(u, 0.1, 0.9);
-    uScaled = ghoul::cubicEaseInOut(uScaled);
+    uScaled = ghoul::sineEaseInOut(uScaled);
     return glm::slerp(_start, _end, uScaled);
 }
 
@@ -115,11 +115,12 @@ glm::dquat LookAtInterpolator::interpolate(double u) {
         lookAtPos = ghoul::interpolateLinear(uNew, _endLookAtPos, endViewPos);
     }
 
-    // handle up vector
+    // Handle up vector
     glm::dvec3 startUp = _start * glm::dvec3(0.0, 1.0, 0.0);
     glm::dvec3 endUp = _end * glm::dvec3(0.0, 1.0, 0.0);
 
-    double uUp = ghoul::cubicEaseInOut(u);
+    double uInInterval = helpers::shiftAndScale(u, u1, u2);
+    double uUp = ghoul::sineEaseInOut(uInInterval);
     glm::dvec3 up = ghoul::interpolateLinear(uUp, startUp, endUp);
 
     return helpers::lookAtQuaternion(_path->positionAt(u), lookAtPos, up);
