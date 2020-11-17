@@ -8,7 +8,7 @@
     "scene/solarsystem/sssb/atira_asteroid",
     "scene/solarsystem/sssb/centaur_asteroid",
     "scene/solarsystem/sssb/inner_main_belt_asteroid",
-    "scene/solarsystem/sssb/pha", 
+    "scene/solarsystem/sssb/pha",
     "installationspecific/lights_state_machine"
   ],
   "camera": {
@@ -89,9 +89,9 @@
       "value": "false"
     },
     {
-      "name": "NavigationHandler.OrbitalNavigator.VelocityZoomControl",
+      "name": "Modules.AutoNavigation.AutoNavigationHandler.IncludeRoll",
       "type": "setPropertyValueSingle",
-      "value": "0.01"
+      "value": "true"
     }
   ],
   "time": {
