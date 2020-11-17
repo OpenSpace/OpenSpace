@@ -57,7 +57,7 @@ local applyLinearFlight = function(height, zoomSpeedFactor)
             ]] .. tostring(height) .. [[
         )
         openspace.setPropertyValueSingle(
-            'NavigationHandler.OrbitalNavigator.FlightDestinationFactor', 
+            'NavigationHandler.OrbitalNavigator.VelocityZoomControl', 
             ]] .. tostring(zoomSpeedFactor) .. [[
         )
         openspace.setPropertyValueSingle(
@@ -198,14 +198,14 @@ transitions = {
         From = "Asteroids", 
         To = "Galaxies", 
         Action =  [[
-            ]] .. applyLinearFlight(galaxiesTargetDistance, 0.01) .. [[ -- TODO: better zoom speed
+            ]] .. applyLinearFlight(galaxiesTargetDistance, 2) .. [[
         ]]
     },
     {
         From = "Earth", 
         To = "Galaxies", 
         Action =  [[
-            ]] .. applyLinearFlight(galaxiesTargetDistance, 0.01) .. [[ -- TODO: better zoom speed
+            ]] .. applyLinearFlight(galaxiesTargetDistance, 1.5) .. [[
         ]]
     },
     {
@@ -213,7 +213,7 @@ transitions = {
         To = "Earth", 
         Action = [[
             ]] .. changeAnchor('Earth', 1) .. [[
-            ]] .. applyLinearFlight(earthTargetDistance, 0.01) .. [[
+            ]] .. applyLinearFlight(earthTargetDistance, 1) .. [[
         ]]
     },
     {
@@ -221,7 +221,7 @@ transitions = {
         To = "Asteroids", 
         Action = [[
             ]] .. changeAnchor('Sun', 1) .. [[
-            ]] .. applyLinearFlight(asteroidsTargetDistance, 0.01) .. [[
+            ]] .. applyLinearFlight(asteroidsTargetDistance, 1.5) .. [[
         ]]
     },
 }
