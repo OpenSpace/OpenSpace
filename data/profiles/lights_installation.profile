@@ -92,6 +92,16 @@
       "name": "Modules.AutoNavigation.AutoNavigationHandler.IncludeRoll",
       "type": "setPropertyValueSingle",
       "value": "true"
+    },
+    {
+      "name": "Scene.Constellations.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "true"
+    },
+    {
+      "name": "Scene.Constellations.Renderable.Opacity",
+      "type": "setPropertyValueSingle",
+      "value": "0.0"
     }
   ],
   "time": {

@@ -124,7 +124,19 @@ marsState = {
 -- 5. CONSTELLATIONS
 ----------------------------------------------------------------
 local constellationsLinesMaxOpacity = 0.3
+local constellationsFadeInOutDuration = 4
+
 local constellationsTargetDistance = 2E9
+
+local fadeLinesToOpacity = function(targetValue) 
+    return [[
+        openspace.setPropertyValueSingle(
+            "Scene.Constellations.Renderable.Opacity", 
+            ]] .. tostring(targetValue) .. [[,
+            ]] .. tostring(constellationsFadeInOutDuration) .. [[
+        )
+    ]]
+end
 
 constellationsState = {
     Identifier = "Constellations", 
@@ -132,11 +144,13 @@ constellationsState = {
         openspace.printInfo('Entering Constellations State')
         ]] .. util.setOrbitSpeedFactor(0.2) .. [[
         ]] .. util.orbitOnArrival() .. [[
+        ]] .. fadeLinesToOpacity(constellationsLinesMaxOpacity) .. [[
     ]],
     -- TODO: fade in constellation images when we have them laoded in the profile
     Exit = [[
         openspace.printInfo('Exiting Constellations State')
         ]] .. util.stopOrbiting() .. [[
+        ]] .. fadeLinesToOpacity(0.0) .. [[
     ]]
 }
 
@@ -221,7 +235,7 @@ transitions = {
         To = "Constellations", 
         Action = [[
             ]] .. util.changeAnchor('Earth', 2) .. [[
-            ]] .. util.applyLinearFlight(constellationsTargetDistance, 1.5) .. [[
+            ]] .. util.applyLinearFlight(constellationsTargetDistance, 1) .. [[
         ]]
     }
 }
