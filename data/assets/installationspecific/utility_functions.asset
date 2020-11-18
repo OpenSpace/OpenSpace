@@ -67,6 +67,15 @@ local applyLinearFlight = function(height, zoomSpeedFactor)
     ]]
 end
 
+local disableLinearFlight = function() 
+    return [[
+        openspace.setPropertyValueSingle(
+            'NavigationHandler.OrbitalNavigator.ApplyLinearFlight', 
+            false
+        )
+    ]]
+end
+
 -- Sets the camera path curve type to the one that has a look at rotation 
 -- and zooming out motion to show both targets, if close enough.
 local setCurveTypeToZoomOverview = function ()
@@ -84,4 +93,5 @@ asset.export("stopOrbiting", stopOrbiting)
 asset.export("setOrbitSpeedFactor", setOrbitSpeedFactor)
 asset.export("changeAnchor", changeAnchor)
 asset.export("applyLinearFlight", applyLinearFlight)
+asset.export("disableLinearFlight", disableLinearFlight)
 asset.export("setCurveTypeToZoomOverview", setCurveTypeToZoomOverview)
