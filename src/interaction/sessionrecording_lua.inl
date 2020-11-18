@@ -180,7 +180,7 @@ int fileFormatConversion(lua_State* L) {
         return luaL_error(L, "filepath string is empty");
     }
 
-    global::sessionRecording.convertFile(convertFilePath);
+    global::sessionRecording.convertFile(convertFilePath, 0);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;

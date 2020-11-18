@@ -184,7 +184,7 @@ interaction::NavigationHandler& gNavigationHandler() {
 }
 
 interaction::SessionRecording& gSessionRecording() {
-    static interaction::SessionRecording g;
+    static interaction::SessionRecording g(true);
     return g;
 }
 

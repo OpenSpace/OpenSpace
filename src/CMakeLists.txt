@@ -63,6 +63,7 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/interaction/shortcutmanager_lua.inl
   ${OPENSPACE_BASE_DIR}/src/interaction/websocketinputstate.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/websocketcamerastates.cpp
+  ${OPENSPACE_BASE_DIR}/src/interaction/tasks/convertrecfileversiontask.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/tasks/convertrecformattask.cpp
   ${OPENSPACE_BASE_DIR}/src/mission/mission.cpp
   ${OPENSPACE_BASE_DIR}/src/mission/missionmanager.cpp
@@ -246,6 +247,7 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/shortcutmanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/websocketinputstate.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/websocketcamerastates.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/tasks/convertrecfileversiontask.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/tasks/convertrecformattask.h
   ${OPENSPACE_BASE_DIR}/include/openspace/mission/mission.h
   ${OPENSPACE_BASE_DIR}/include/openspace/mission/missionmanager.h
