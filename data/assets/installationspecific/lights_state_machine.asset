@@ -3,7 +3,7 @@ local util = asset.require('./utility_functions')
 ---------------------------------------------------------------- 
 -- DEFAULT STATE - to reduce number of transitions
 ----------------------------------------------------------------
-local defaultTargetDistance = 3E12
+local defaultTargetDistance = 3.0E12
 
 defaultState = {
     Identifier = "Default", 
@@ -105,15 +105,52 @@ asteroidsState = {
 ---------------------------------------------------------------- 
 -- 4. MARS
 ----------------------------------------------------------------
+local marsTargetDistance = 26000000
+
+marsState = {
+    Identifier = "Mars", 
+    Enter = [[
+        openspace.printInfo('Entering Mars State')
+        ]] .. util.setOrbitSpeedFactor(0.2) .. [[
+        ]] .. util.orbitOnArrival() .. [[
+    ]],
+    Exit = [[
+        openspace.printInfo('Exiting Mars State')
+        ]] .. util.stopOrbiting() .. [[
+    ]]
+}
 
 ---------------------------------------------------------------- 
 -- 5. CONSTELLATIONS
 ----------------------------------------------------------------
+local constellationsLinesMaxOpacity = 0.3
+local constellationsTargetDistance = 2E9
+
+constellationsState = {
+    Identifier = "Constellations", 
+    Enter = [[
+        openspace.printInfo('Entering Constellations State')
+        ]] .. util.setOrbitSpeedFactor(0.2) .. [[
+        ]] .. util.orbitOnArrival() .. [[
+    ]],
+    -- TODO: fade in constellation images when we have them laoded in the profile
+    Exit = [[
+        openspace.printInfo('Exiting Constellations State')
+        ]] .. util.stopOrbiting() .. [[
+    ]]
+}
 
 ---------------------------------------------------------------- 
 -- COMBINE STATES AND TRANSITIONS
 ----------------------------------------------------------------
-states = { defaultState, earthState, galaxiesState, asteroidsState }
+states = { 
+    defaultState, 
+    earthState, 
+    galaxiesState, 
+    asteroidsState, 
+    marsState, 
+    constellationsState
+}
 
 transitions = {
     -- 1. Earth
@@ -160,31 +197,33 @@ transitions = {
         ]]
     },
     -- 4. Mars
-    -- {
-    --     From = "Mars", 
-    --     To = "Default", 
-    --     Action = [[
-    --     ]]
-    -- },
-    -- {
-    --     From = "Default", 
-    --     To = "Mars", 
-    --     Action = [[
-    --     ]]
-    -- },
+    {
+        From = "Mars", 
+        To = "Default", 
+        Action = util.applyLinearFlight(defaultTargetDistance, 1.5)
+    },
+    {
+        From = "Default", 
+        To = "Mars", 
+        Action = [[
+            openspace.time.setPause(true)
+            openspace.autonavigation.goTo('Mars', true)
+        ]]
+    },
     -- 5. Constellations
-    -- {
-    --     From = "Constellations", 
-    --     To = "Default", 
-    --     Action = [[
-    --     ]]
-    -- },
-    -- {
-    --     From = "Default", 
-    --     To = "Constellations", 
-    --     Action = [[
-    --     ]]
-    -- }
+    {
+        From = "Constellations", 
+        To = "Default", 
+        Action = util.applyLinearFlight(defaultTargetDistance, 1.5)
+    },
+    {
+        From = "Default", 
+        To = "Constellations", 
+        Action = [[
+            ]] .. util.changeAnchor('Earth', 2) .. [[
+            ]] .. util.applyLinearFlight(constellationsTargetDistance, 1.5) .. [[
+        ]]
+    }
 }
 
 asset.onInitialize(function()
