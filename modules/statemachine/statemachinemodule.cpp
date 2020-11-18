@@ -78,6 +78,15 @@ void StateMachineModule::transitionTo(const std::string newState) {
     _machine->transitionTo(newState);
 }
 
+bool StateMachineModule::canGoTo(const std::string state) const {
+    if (!_machine) {
+        LWARNING("Attempting to use uninitialized state machine");
+        return false;
+    }
+
+    return _machine->canGoTo(state);
+}
+
 void StateMachineModule::internalInitialize(const ghoul::Dictionary& dictionary) {
 
 }
@@ -124,6 +133,14 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
             {},
             "",
             "Returns true if state machine is idle and false otherwise."
+        },
+        {
+            "canGoTo",
+            &luascriptfunctions::canGoTo,
+            {},
+            "String",
+            "Returns true if there is a defined transition between the current state and "
+            "the given string name of a state, otherwise false"
         },
     };
     return res;

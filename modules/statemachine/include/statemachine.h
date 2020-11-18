@@ -40,12 +40,16 @@ public:
     State* currentState() const;
     bool isIdle() const;
     void transitionTo(const std::string newState);
+    bool canGoTo(const std::string state) const;
     void setState(State& newState);
 
 private:
     State* _currentState = nullptr;
     std::vector<State> _states;
     std::vector<Transition> _transitions;
+
+    int findTransitionTo(const std::string state) const;
+    int findState(const std::string state) const;
 };
 
 } // namespace openspace

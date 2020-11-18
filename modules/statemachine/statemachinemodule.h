@@ -45,6 +45,7 @@ public:
     std::string currentState() const;
     bool isIdle() const;
     void transitionTo(const std::string newState);
+    bool canGoTo(const std::string state) const;
 
     scripting::LuaLibrary luaLibrary() const override;
 
