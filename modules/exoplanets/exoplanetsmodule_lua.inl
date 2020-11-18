@@ -275,11 +275,11 @@ void createExoplanetSystem(std::string_view starName) {
 
         const std::string planetKeplerTranslation = "{"
             "Type = 'KeplerTranslation',"
-            "Eccentricity = " + std::to_string(planet.ecc) + "," //ECC
+            "Eccentricity = " + std::to_string(planet.ecc) + "," 
             "SemiMajorAxis = " + std::to_string(semiMajorAxisInKm) + ","
-            "Inclination = " + std::to_string(planet.i) + "," //I
-            "AscendingNode = " + std::to_string(planet.bigOmega) + "," //BIGOM
-            "ArgumentOfPeriapsis = " + std::to_string(planet.omega) + "," //OM
+            "Inclination = " + std::to_string(planet.i) + ","
+            "AscendingNode = " + std::to_string(planet.bigOmega) + ","
+            "ArgumentOfPeriapsis = " + std::to_string(planet.omega) + ","
             "MeanAnomaly = 0.0,"
             "Epoch = '" + sEpoch + "'," //TT. JD to YYYY MM DD hh:mm:ss
             "Period = " + std::to_string(period) + ""
@@ -292,7 +292,7 @@ void createExoplanetSystem(std::string_view starName) {
             "Renderable = {"
                 "Type = 'RenderableGlobe',"
                 "Enabled = " + enabled + ","
-                "Radii = " + std::to_string(planetRadius) + "," //R. in meters.
+                "Radii = " + std::to_string(planetRadius) + "," //R. in meters
                 "SegmentsPerPatch = 64,"
                 "PerformShading = false,"
                 "Layers = {}"
@@ -308,7 +308,7 @@ void createExoplanetSystem(std::string_view starName) {
 
         int trailResolution = 1000;
 
-        // increase the resolution for highly eccentric orbits
+        // Increase the resolution for highly eccentric orbits
         const float eccentricityThreshold = 0.85f;
         if (planet.ecc > eccentricityThreshold) {
             trailResolution *= 2;
