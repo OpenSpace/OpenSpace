@@ -22,8 +22,9 @@ asset.require('scene/milkyway/objects/orionnebula/orionnebula')
 asset.require('util/launcher_images')
 
 local assetHelper = asset.require('util/asset_helper')
-assetHelper.requireAll(asset, 'scene/milkyway/exoplanets')
-assetHelper.requireAll(asset, 'scene/digitaluniverse')
+asset.require('scene/milkyway/exoplanets/exoplanets_data')
+asset.require('scene/milkyway/exoplanets/exoplanets_textures')
+asset.require('scene/digitaluniverse/digitaluniverse')
 
 asset.require('customization/globebrowsing')
 
