@@ -81,9 +81,10 @@ public:
 
     using CallbackHandle = int;
     using StateChangeCallback = std::function<void()>;
-    SessionRecording* legacyVersion;
+    SessionRecording* _legacyVersion;
 
     SessionRecording();
+    SessionRecording(bool isGlobal);
 
     ~SessionRecording();
 
@@ -456,18 +457,33 @@ public:
      * header version number).
      *
      * \param filename name of the file to convert
+     * \param depth iteration number to prevent runaway recursion (call with zero)
      * \param root (optional) the 5-character version string that represents the version
      *             of the original file to convert (before recursion started)
      */
-    bool convertFile(std::string filename, std::string root = "root");
+    bool convertFile(std::string filename, int depth, std::string root = "root");
 
     /**
-     * Returns pointer to SessionRecording object that is the previous legacy version
-     * of the current version.
-     *
-     * \return Pointer to the previous version of the SessionRecording
+     * Sets the object's legacy pointer to the SessionRecording object from the previous
+     * legacy version
      */
-    SessionRecording* getLegacy();
+    void getLegacy();
+
+    /*
+     * \return string of the file format version this class supports
+     *
+     */
+    virtual std::string fileFormatVersion();
+
+    /*
+     * Determines a filename for the conversion result based on the original filename
+     * and the file format version number.
+     *
+     * \param filename source filename to be converted
+     *
+     * \return pathname of the converted version of the file
+     */
+    std::string determineConversionOutFilename(const std::string filename);
 
 protected:
     properties::BoolProperty _renderPlaybackInformation;
@@ -551,7 +567,6 @@ protected:
         std::string& inputLine, std::ofstream& outFile, unsigned char* buff);
     virtual bool convertScript(std::ifstream& inFile, DataMode mode, int lineNum,
         std::string& inputLine, std::ofstream& outFile, unsigned char* buff);
-    std::string determineConversionOutFilename(const std::string filename);
     void readPlaybackFileHeader(const std::string filename,
         std::string& conversionInFilename, std::ifstream& conversionInFile,
         std::string& version, DataMode& mode);
@@ -604,10 +619,17 @@ protected:
 
     DataMode _conversionDataMode = DataMode::Binary;
     int _conversionLineNum = 1;
+    const int _maximumRecursionDepth = 100;
 };
 
 class SessionRecording_legacy_0085 : public SessionRecording {
+public:
+    SessionRecording_legacy_0085() : SessionRecording() {}
+    ~SessionRecording_legacy_0085() {}
     char FileHeaderVersion[FileHeaderVersionLength+1] = "00.85";
+    std::string fileFormatVersion() {
+        return std::string(FileHeaderVersion);
+    }
 
     struct ScriptMessage_legacy_0085 : public datamessagestructures::ScriptMessage {
         void read(std::istream* in) {
@@ -624,6 +646,7 @@ class SessionRecording_legacy_0085 : public SessionRecording {
         };
     };
 
+protected:
     bool convertScript(std::ifstream& inFile, DataMode mode, int lineNum,
         std::string& inputLine, std::ofstream& outFile, unsigned char* buffer);
 };
