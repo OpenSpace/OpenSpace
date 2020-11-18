@@ -1722,11 +1722,8 @@ void SessionRecording::readPlaybackFileHeader(const std::string filename,
 
 bool SessionRecording::convertFile(std::string filename, int depth, std::string version) {
     bool success = true;
-    std::string conversionInFilename;
-    std::ifstream conversionInFile;
     DataMode mode;
-    bool preRecursion = (version == "root") ? true : false;
-    std::string throwOut;
+    bool rootLevel = (version == "root");
 
     if (depth == _maximumRecursionDepth) {
         LERROR("Runaway recursion in session recording conversion of file version.");
@@ -1734,11 +1731,14 @@ bool SessionRecording::convertFile(std::string filename, int depth, std::string 
     }
 
     try {
+        std::string conversionInFilename;
+        std::ifstream conversionInFile;
+        std::string throwOut;
         readPlaybackFileHeader(
             filename,
             conversionInFilename,
             conversionInFile,
-            preRecursion ? version : throwOut,
+            rootLevel ? version : throwOut,
             mode
         );
         int conversionLineNum = 1;
@@ -1760,7 +1760,7 @@ bool SessionRecording::convertFile(std::string filename, int depth, std::string 
             );
         }
 
-        if (version != "root") {
+        if (!rootLevel) {
             if (!conversionInFile.is_open() || !conversionInFile.good()) {
                 throw ConversionError(fmt::format(
                     "Unable to open file {} for conversion", conversionInFilename.c_str()
@@ -1787,6 +1787,15 @@ bool SessionRecording::convertFile(std::string filename, int depth, std::string 
                 ));
                 return false;
             }
+            conversionOutFile << FileHeaderTitle;
+            conversionOutFile.write(FileHeaderVersion, FileHeaderVersionLength);
+            if (mode == DataMode::Binary) {
+                conversionOutFile << DataFormatBinaryTag;
+            }
+            else {
+                conversionOutFile << DataFormatAsciiTag;
+            }
+            conversionOutFile << '\n';
             success = convertEntries(
                 conversionInFilename,
                 conversionInFile,
@@ -1794,9 +1803,9 @@ bool SessionRecording::convertFile(std::string filename, int depth, std::string 
                 conversionLineNum,
                 conversionOutFile
             );
-            conversionInFile.close();
             conversionOutFile.close();
         }
+        conversionInFile.close();
     }
     catch (ConversionError& c) {
         LERROR(c.message);
@@ -1849,14 +1858,20 @@ bool SessionRecording::convertEntries(std::string& inFilename, std::ifstream& in
                 );
             }
             else if (frameType == HeaderScriptBinary) {
-                conversionStatusOk = convertScript(
-                    inFile,
-                    mode,
-                    lineNum,
-                    lineParsing,
-                    outFile,
-                    buffer
-                );
+                try {
+                    conversionStatusOk = convertScript(
+                        inFile,
+                        mode,
+                        lineNum,
+                        lineParsing,
+                        outFile,
+                        buffer
+                    );
+                }
+                catch (ConversionError& c) {
+                    LERROR(c.message);
+                    conversionStatusOk = false;
+                }
             }
             else {
                 LERROR(fmt::format(
@@ -1864,7 +1879,6 @@ bool SessionRecording::convertEntries(std::string& inFilename, std::ifstream& in
                     frameType, lineNum - 1, inFilename
                 ));
                 conversionStatusOk = false;
-                break;
             }
             lineNum++;
         }
@@ -1904,14 +1918,20 @@ bool SessionRecording::convertEntries(std::string& inFilename, std::ifstream& in
                 );
             }
             else if (entryType == HeaderScriptAscii) {
-                conversionStatusOk = convertScript(
-                    inFile,
-                    mode,
-                    lineNum,
-                    lineParsing,
-                    outFile,
-                    buffer
-                );
+                try {
+                    conversionStatusOk = convertScript(
+                        inFile,
+                        mode,
+                        lineNum,
+                        lineParsing,
+                        outFile,
+                        buffer
+                    );
+                }
+                catch (ConversionError& c) {
+                    LERROR(c.message);
+                    conversionStatusOk = false;
+                }
             }
             else if (entryType.substr(0, 1) == HeaderCommentAscii) {
                 continue;
@@ -1922,7 +1942,6 @@ bool SessionRecording::convertEntries(std::string& inFilename, std::ifstream& in
                     entryType, lineNum, inFilename
                 ));
                 conversionStatusOk = false;
-                break;
             }
         }
         LINFO(fmt::format(
@@ -1965,7 +1984,7 @@ std::string SessionRecording::determineConversionOutFilename(const std::string f
     //    );
     //}
     //return absPath(legacyRecordingSaveDirectory + "/" + conversionOutFilename);
-    return absPath(conversionOutFilename);
+    return absPath("${RECORDINGS}/" + conversionOutFilename);
 }
 
 bool SessionRecording_legacy_0085::convertScript(std::ifstream& inFile, DataMode mode,
