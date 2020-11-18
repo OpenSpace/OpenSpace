@@ -74,6 +74,13 @@ scripting::LuaLibrary AutoNavigationModule::luaLibrary() const {
     };
     res.functions = {
         {
+            "isFlying",
+            &autonavigation::luascriptfunctions::isFlying,
+            {},
+            "",
+            "Returns true if a camera path is currently running, and false otherwise."
+        },
+        {
             "continuePath",
             &autonavigation::luascriptfunctions::continuePath,
             {},

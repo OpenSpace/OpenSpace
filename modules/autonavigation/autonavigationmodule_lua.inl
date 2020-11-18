@@ -43,6 +43,17 @@ namespace openspace::autonavigation::luascriptfunctions {
 
 const double Epsilon = 1e-12;
 
+int isFlying(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::isFlying");
+
+    AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
+    bool hasFinished = module->AutoNavigationHandler().hasFinished();
+
+    ghoul::lua::push(L, !hasFinished);
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
+    return 0;
+}
+
 int continuePath(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::continuePath");
 
