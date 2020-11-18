@@ -1,6 +1,17 @@
 local util = asset.require('./utility_functions')
 
 ---------------------------------------------------------------- 
+-- DEFAULT STATE - to reduce number of transitions
+----------------------------------------------------------------
+local defaultTargetDistance = 3E12
+
+defaultState = {
+    Identifier = "Default", 
+    Enter = [[]],
+    Exit = [[]]
+}
+
+---------------------------------------------------------------- 
 -- 1. EARTH STATE
 ----------------------------------------------------------------
 local earthTargetDistance = 26000000
@@ -102,52 +113,78 @@ asteroidsState = {
 ---------------------------------------------------------------- 
 -- COMBINE STATES AND TRANSITIONS
 ----------------------------------------------------------------
-states = { earthState, galaxiesState, asteroidsState }
+states = { defaultState, earthState, galaxiesState, asteroidsState }
 
 transitions = {
+    -- 1. Earth
     {
-        From = "Asteroids", 
+        From = "Earth", 
+        To = "Default", 
+        Action = util.applyLinearFlight(defaultTargetDistance, 1.5)
+    },
+    {
+        From = "Default", 
         To = "Earth", 
         Action = [[
             openspace.time.setPause(true)
             openspace.autonavigation.goTo('Earth', true)
         ]]
     },
+    -- 2. Galaxies
     {
-        From = "Earth", 
+        From = "Galaxies", 
+        To = "Default", 
+        Action = util.applyLinearFlight(defaultTargetDistance, 1.5)
+    },
+    {
+        From = "Default", 
+        To = "Galaxies", 
+        Action = util.applyLinearFlight(galaxiesTargetDistance, 1.5)
+    },
+    -- 3. Asteroids
+    {
+        From = "Asteroids", 
+        To = "Default", 
+        Action = [[
+            ]] .. util.changeAnchor('Sun', 1) .. [[
+            ]] .. util.applyLinearFlight(defaultTargetDistance, 1.5) .. [[
+        ]]
+    },
+    {
+        From = "Default", 
         To = "Asteroids", 
         Action = [[
             openspace.time.setPause(true)
             local targetDistance = ]] .. tostring(asteroidsTargetDistance) .. [[
-            openspace.autonavigation.goToHeight('Sun', targetDistance, true)
+            openspace.autonavigation.goToHeight('Sun', targetDistance, true, 10)
         ]]
     },
-    {
-        From = "Asteroids", 
-        To = "Galaxies", 
-        Action = util.applyLinearFlight(galaxiesTargetDistance, 2)
-    },
-    {
-        From = "Earth", 
-        To = "Galaxies", 
-        Action = util.applyLinearFlight(galaxiesTargetDistance, 1.5)
-    },
-    {
-        From = "Galaxies", 
-        To = "Earth", 
-        Action = [[
-            ]] .. util.changeAnchor('Earth', 1) .. [[
-            ]] .. util.applyLinearFlight(earthTargetDistance, 1) .. [[
-        ]]
-    },
-    {
-        From = "Galaxies", 
-        To = "Asteroids", 
-        Action = [[
-            ]] .. util.changeAnchor('Sun', 1) .. [[
-            ]] .. util.applyLinearFlight(asteroidsTargetDistance, 1.5) .. [[
-        ]]
-    }
+    -- 4. Mars
+    -- {
+    --     From = "Mars", 
+    --     To = "Default", 
+    --     Action = [[
+    --     ]]
+    -- },
+    -- {
+    --     From = "Default", 
+    --     To = "Mars", 
+    --     Action = [[
+    --     ]]
+    -- },
+    -- 5. Constellations
+    -- {
+    --     From = "Constellations", 
+    --     To = "Default", 
+    --     Action = [[
+    --     ]]
+    -- },
+    -- {
+    --     From = "Default", 
+    --     To = "Constellations", 
+    --     Action = [[
+    --     ]]
+    -- }
 }
 
 asset.onInitialize(function()
