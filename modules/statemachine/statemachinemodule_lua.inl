@@ -111,9 +111,31 @@ int isIdle(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::isIdle");
 
     StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
-    std::string isIdle  = module->isIdle() ? "True" : "False";
+    ghoul::lua::push(L, module->isIdle());
 
-    lua_pushstring(L, isIdle.c_str());
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
+    return 1;
+}
+
+int canGoTo(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::canGoTo");
+    const bool isString = (lua_isstring(L, 1) != 0);
+
+    if (!isString) {
+        lua_settop(L, 0);
+        const char* msg = lua_pushfstring(
+            L,
+            "%s expected, got %s",
+            lua_typename(L, LUA_TSTRING),
+            luaL_typename(L, -1)
+        );
+        return luaL_error(L, "bad argument #%d (%s)", 2, msg);
+    }
+
+    const std::string state = lua_tostring(L, 1);
+    StateMachineModule* module = global::moduleEngine->module<StateMachineModule>();
+    ghoul::lua::push(L, module->canGoTo(state));
+
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
