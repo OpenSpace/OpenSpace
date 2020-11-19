@@ -71,6 +71,7 @@ public:
 
     static const size_t FileHeaderVersionLength = 5;
     char FileHeaderVersion[FileHeaderVersionLength+1] = "01.00";
+    char TargetConvertVersion[FileHeaderVersionLength+1] = "01.00";
     static const char DataFormatAsciiTag = 'A';
     static const char DataFormatBinaryTag = 'B';
     static const size_t keyframeHeaderSize_bytes = 33;
@@ -81,7 +82,6 @@ public:
 
     using CallbackHandle = int;
     using StateChangeCallback = std::function<void()>;
-    SessionRecording* _legacyVersion;
 
     SessionRecording();
     SessionRecording(bool isGlobal);
@@ -162,7 +162,7 @@ public:
      *
      * \return \c true if recording to file starts without errors
      */
-    bool startPlayback(const std::string& filename, KeyframeTimeRef timeMode,
+    bool startPlayback(std::string& filename, KeyframeTimeRef timeMode,
         bool forceSimTimeAtStart);
 
     /**
@@ -457,23 +457,41 @@ public:
      * header version number).
      *
      * \param filename name of the file to convert
-     * \param depth iteration number to prevent runaway recursion (call with zero)
-     * \param root (optional) the 5-character version string that represents the version
-     *             of the original file to convert (before recursion started)
+     * \param depth iteration number to prevent runaway recursion (init call with zero)
+     *
+     * \return string containing the filename of the previous conversion step. This is
+     *         used if there are multiple conversion steps where each step has to use
+     *         the output of the previous.
      */
-    bool convertFile(std::string filename, int depth, std::string root = "root");
+    std::string convertFile(std::string filename, int depth = 0);
 
     /**
-     * Sets the object's legacy pointer to the SessionRecording object from the previous
-     * legacy version
+     * Goes to legacy session recording inherited class, and calls its convertFile()
+     * method, and then returns the resulting conversion filename.
+     *
+     * \param filename name of the file to convert
+     * \param depth iteration number to prevent runaway recursion (init call with zero)
+     *
+     * \return string containing the filename of the conversion
      */
-    void getLegacy();
+    virtual std::string getLegacyConversionResult(std::string filename, int depth);
 
     /*
-     * \return string of the file format version this class supports
+     * Version string for file format version currently supported by this class
      *
+     * \return string of the file format version this class supports
      */
     virtual std::string fileFormatVersion();
+
+    /*
+     * Version string for file format version that a conversion operation will convert
+     * to (e.g. upgrades to this version). This is only relevant for inherited classes
+     * that support conversion from legacy versions (if called in the base class, it
+     * will return its own current version).
+     *
+     * \return string of the file format version this class supports
+     */
+    virtual std::string targetFileFormatVersion();
 
     /*
      * Determines a filename for the conversion result based on the original filename
@@ -484,6 +502,23 @@ public:
      * \return pathname of the converted version of the file
      */
     std::string determineConversionOutFilename(const std::string filename);
+
+    /*
+     * Sets the filename of the final conversion result. Intended to be used only in
+     * the base class when all conversion recursions are complete.
+     *
+     * \param filename the name of the final conversion result
+     *
+     */
+    virtual void setFinalConversionFilename(std::string filename) final;
+
+    /*
+     * Retrieves filename of the final conversion result. Intended to be used only in
+     * the base class when all conversion recursions are complete.
+     *
+     * \return filename of the converted version of the file
+     */
+    virtual std::string finalConversionFilename() final;
 
 protected:
     properties::BoolProperty _renderPlaybackInformation;
@@ -568,7 +603,7 @@ protected:
     virtual bool convertScript(std::ifstream& inFile, DataMode mode, int lineNum,
         std::string& inputLine, std::ofstream& outFile, unsigned char* buff);
     void readPlaybackFileHeader(const std::string filename,
-        std::string& conversionInFilename, std::ifstream& conversionInFile,
+        std::ifstream& conversionInFile,
         std::string& version, DataMode& mode);
 
     static void writeToFileBuffer(unsigned char* buf, size_t& idx, double src);
@@ -617,6 +652,7 @@ protected:
 
     int _nextCallbackHandle = 0;
 
+    std::string _finalConversionFile;
     DataMode _conversionDataMode = DataMode::Binary;
     int _conversionLineNum = 1;
     const int _maximumRecursionDepth = 100;
@@ -627,9 +663,14 @@ public:
     SessionRecording_legacy_0085() : SessionRecording() {}
     ~SessionRecording_legacy_0085() {}
     char FileHeaderVersion[FileHeaderVersionLength+1] = "00.85";
+    char TargetConvertVersion[FileHeaderVersionLength+1] = "01.00";
     std::string fileFormatVersion() {
         return std::string(FileHeaderVersion);
     }
+    std::string targetFileFormatVersion() {
+        return std::string(TargetConvertVersion);
+    }
+    std::string getLegacyConversionResult(std::string filename, int depth);
 
     struct ScriptMessage_legacy_0085 : public datamessagestructures::ScriptMessage {
         void read(std::istream* in) {

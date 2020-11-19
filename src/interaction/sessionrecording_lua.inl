@@ -96,7 +96,7 @@ int startPlayback(lua_State* L, interaction::KeyframeTimeRef timeMode,
     }
 
     global::sessionRecording.startPlayback(
-        playbackFilePath,
+        const_cast<std::string&>(playbackFilePath),
         timeMode,
         forceSimTimeAtStart
     );
@@ -179,8 +179,7 @@ int fileFormatConversion(lua_State* L) {
     if (convertFilePath.empty()) {
         return luaL_error(L, "filepath string is empty");
     }
-
-    global::sessionRecording.convertFile(convertFilePath, 0);
+    global::sessionRecording.convertFile(convertFilePath);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;

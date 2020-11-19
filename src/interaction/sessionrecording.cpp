@@ -90,9 +90,6 @@ SessionRecording::SessionRecording(bool isGlobal)
 }
 
 SessionRecording::~SessionRecording() { // NOLINT
-    if (_legacyVersion != nullptr) {
-        delete _legacyVersion;
-    }
 }
 
 void SessionRecording::deinitialize() {
@@ -219,7 +216,7 @@ void SessionRecording::stopRecording() {
     _recordFile.close();
 }
 
-bool SessionRecording::startPlayback(const std::string& filename,
+bool SessionRecording::startPlayback(std::string& filename,
                                      KeyframeTimeRef timeMode,
                                      bool forceSimTimeAtStart)
 {
@@ -227,7 +224,16 @@ bool SessionRecording::startPlayback(const std::string& filename,
         LERROR("Playback filename must not contain path (/) elements");
         return false;
     }
-    const std::string absFilename = absPath("${RECORDINGS}/" + filename);
+    std::string absFilename;
+    //Run through conversion in case file is older. Does nothing if the file format
+    // is up-to-date
+    filename = convertFile(filename);
+    if (FileSys.fileExists(filename)) {
+        absFilename = filename;
+    }
+    else {
+        absFilename = absPath("${RECORDINGS}/" + filename);
+    }
 
     if (_state == SessionState::Recording) {
         LERROR("Unable to start playback while in session recording mode");
@@ -1681,7 +1687,6 @@ std::vector<std::string> SessionRecording::playbackList() const {
 }
 
 void SessionRecording::readPlaybackFileHeader(const std::string filename,
-                                              std::string& conversionInFilename,
                                               std::ifstream& conversionInFile,
                                               std::string& version,
                                               DataMode& mode)
@@ -1689,7 +1694,7 @@ void SessionRecording::readPlaybackFileHeader(const std::string filename,
     if (filename.find("/") != std::string::npos) {
         throw ConversionError("Playback filename musn't contain path (/) elements");
     }
-    conversionInFilename = absPath("${RECORDINGS}/" + filename);
+    std::string conversionInFilename = absPath("${RECORDINGS}/" + filename);
     if (!FileSys.fileExists(conversionInFilename)) {
         throw ConversionError("Cannot find the specified playback file to convert.");
     }
@@ -1720,57 +1725,52 @@ void SessionRecording::readPlaybackFileHeader(const std::string filename,
     readHeaderElement(conversionInFile, 1);
 }
 
-bool SessionRecording::convertFile(std::string filename, int depth, std::string version) {
-    bool success = true;
-    DataMode mode;
-    bool rootLevel = (version == "root");
-
-    if (depth == _maximumRecursionDepth) {
+std::string SessionRecording::convertFile(std::string filename, int depth)
+{
+    std::string conversionOutFilename = filename;
+    if (depth >= _maximumRecursionDepth) {
         LERROR("Runaway recursion in session recording conversion of file version.");
         exit(EXIT_FAILURE);
     }
 
+    std::string newFilename = filename;
     try {
-        std::string conversionInFilename;
         std::ifstream conversionInFile;
-        std::string throwOut;
-        readPlaybackFileHeader(
-            filename,
-            conversionInFilename,
-            conversionInFile,
-            rootLevel ? version : throwOut,
-            mode
-        );
+        DataMode mode;
+        std::string fileVersion;
+        readPlaybackFileHeader(filename, conversionInFile, fileVersion, mode);
         int conversionLineNum = 1;
 
         //If this instance of the SessionRecording class isn't the instance with the
         // correct version of the file to be converted, then call getLegacy() to recurse
         // to the next level down in the legacy subclasses until we get the right
         // version, then proceed with conversion from there.
-        if (version.compare(fileFormatVersion()) != 0) {
+        if (fileVersion.compare(fileFormatVersion()) != 0) {
             conversionInFile.close();
-            getLegacy();
-            _legacyVersion->convertFile(filename, depth + 1, version);
-            readPlaybackFileHeader(
-                filename,
-                conversionInFilename,
-                conversionInFile,
-                version,
-                mode
-            );
-        }
+            newFilename = getLegacyConversionResult(filename, depth + 1);
 
-        if (!rootLevel) {
+            while (newFilename.substr(newFilename.length() - 1, 1) == "/") {
+                newFilename.pop_back();
+            }
+            if (newFilename.find("/") != std::string::npos) {
+                newFilename = newFilename.substr(newFilename.find_last_of("/") + 1);
+            }
+            if (filename == newFilename) {
+                return filename;
+            }
+            readPlaybackFileHeader(newFilename, conversionInFile, fileVersion, mode);
+        }
+        if (depth != 0) {
             if (!conversionInFile.is_open() || !conversionInFile.good()) {
                 throw ConversionError(fmt::format(
-                    "Unable to open file {} for conversion", conversionInFilename.c_str()
+                    "Unable to open file {} for conversion", newFilename.c_str()
                 ));
             }
-            std::string conversionOutFilename = determineConversionOutFilename(filename);
+            conversionOutFilename = determineConversionOutFilename(filename);
             LINFO(fmt::format(
                 "Starting conversion on rec file {}, version {} in {} mode. "
                 "Writing result to {}.",
-                filename, version, (mode == DataMode::Ascii) ? "ascii" : "binary",
+                newFilename, fileVersion, (mode == DataMode::Ascii) ? "ascii" : "binary",
                 conversionOutFilename
             ));
             std::ofstream conversionOutFile;
@@ -1785,10 +1785,13 @@ bool SessionRecording::convertFile(std::string filename, int depth, std::string 
                     "Unable to open file {} for conversion result",
                     conversionOutFilename.c_str()
                 ));
-                return false;
+                return "";
             }
             conversionOutFile << FileHeaderTitle;
-            conversionOutFile.write(FileHeaderVersion, FileHeaderVersionLength);
+            conversionOutFile.write(
+                targetFileFormatVersion().c_str(),
+                FileHeaderVersionLength
+            );
             if (mode == DataMode::Binary) {
                 conversionOutFile << DataFormatBinaryTag;
             }
@@ -1796,8 +1799,8 @@ bool SessionRecording::convertFile(std::string filename, int depth, std::string 
                 conversionOutFile << DataFormatAsciiTag;
             }
             conversionOutFile << '\n';
-            success = convertEntries(
-                conversionInFilename,
+            convertEntries(
+                newFilename,
                 conversionInFile,
                 mode,
                 conversionLineNum,
@@ -1809,9 +1812,14 @@ bool SessionRecording::convertFile(std::string filename, int depth, std::string 
     }
     catch (ConversionError& c) {
         LERROR(c.message);
-        success = false;
     }
-    return success;
+
+    if (depth == 0) {
+        return newFilename;
+    }
+    else {
+        return conversionOutFilename;
+    }
 }
 
 bool SessionRecording::convertEntries(std::string& inFilename, std::ifstream& inFile,
@@ -1955,24 +1963,50 @@ bool SessionRecording::convertEntries(std::string& inFilename, std::ifstream& in
     return conversionStatusOk;
 }
 
-void SessionRecording::getLegacy() {
-    _legacyVersion = new SessionRecording_legacy_0085();
+std::string SessionRecording::getLegacyConversionResult(std::string filename, int depth) {
+    SessionRecording_legacy_0085 legacy;
+    return legacy.convertFile(filename, depth + 1);
+}
+
+std::string SessionRecording_legacy_0085::getLegacyConversionResult(std::string filename,
+                                                                    int depth)
+{
+    //This method is overriden in each legacy subclass, but does nothing in this instance
+    // as the oldest supported legacy version.
+    LERROR(fmt::format(
+        "Version 00.85 is the oldest supported legacy file format; no conversion "
+        "can be made. It is possible that file {} has a corrupted header or an invalid "
+        "file format version number.",
+        filename
+    ));
+    return filename;
 }
 
 std::string SessionRecording::fileFormatVersion() {
     return std::string(FileHeaderVersion);
 }
 
+std::string SessionRecording::targetFileFormatVersion() {
+    return std::string(FileHeaderVersion);
+}
+
+std::string SessionRecording::finalConversionFilename() {
+    return _finalConversionFile;
+}
+
+void SessionRecording::setFinalConversionFilename(std::string filename) {
+    _finalConversionFile = filename;
+}
+
 std::string SessionRecording::determineConversionOutFilename(const std::string filename) {
     const std::string legacyRecordingSaveDirectory = "${RECORDINGS}/convert";
-    std::string conversionOutFilename;
+    std::string conversionOutFilename = filename.substr(0, filename.find_last_of("."))
+        + "_" + fileFormatVersion() + "-" + targetFileFormatVersion();
     if (filename.substr(filename.find_last_of(".")) == FileExtensionBinary) {
-        conversionOutFilename = filename.substr(0, filename.find_last_of("."))
-            + "_" + fileFormatVersion() + FileExtensionBinary;
+        conversionOutFilename += FileExtensionBinary;
     }
     else if (filename.substr(filename.find_last_of(".")) == FileExtensionAscii) {
-        conversionOutFilename = filename.substr(0, filename.find_last_of("."))
-            + "_" + fileFormatVersion() + FileExtensionAscii;
+        conversionOutFilename += FileExtensionAscii;
     }
     else {
         conversionOutFilename = filename + "_";

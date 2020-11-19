@@ -98,7 +98,7 @@ void ConvertRecFileVersionTask::convert() {
         ));
         return;
     }
-    sessRec->convertFile(_inFilename, 0);
+    sessRec->convertFile(_inFilename);
 }
 
 documentation::Documentation ConvertRecFileVersionTask::documentation() {
