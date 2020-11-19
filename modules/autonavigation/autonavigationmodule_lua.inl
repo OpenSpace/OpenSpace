@@ -51,7 +51,7 @@ int isFlying(lua_State* L) {
 
     ghoul::lua::push(L, !hasFinished);
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
-    return 0;
+    return 1;
 }
 
 int continuePath(lua_State* L) {
@@ -60,6 +60,7 @@ int continuePath(lua_State* L) {
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
     module->AutoNavigationHandler().continuePath();
 
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -69,14 +70,15 @@ int stopPath(lua_State* L) {
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
     module->AutoNavigationHandler().abortPath();
 
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
-// All the goTo function has the same two optional input parameters at the end. The 
+// All the goTo function has the same two optional input parameters at the end. The
 // purpose of this function is to handle these input parameters and add the result
 // to the dictionary specifying the instruction for a camera path.
-int handleOptionalGoToParameters(lua_State* L, const int startLocation, 
-                                 const int nArguments, 
+int handleOptionalGoToParameters(lua_State* L, const int startLocation,
+                                 const int nArguments,
                                  ghoul::Dictionary& resultInstruction)
 {
     const bool firstIsNumber = (lua_isnumber(L, startLocation) != 0);
@@ -181,8 +183,8 @@ int goToHeight(lua_State* L) {
     return 0;
 }
 
-// @TODO (emmbr 2020-11-06) Ideally, this module shouldn't depend on things from 
-// Globebrowsing, but we want it for an istallation. Later on, move this functionality 
+// @TODO (emmbr 2020-11-06) Ideally, this module shouldn't depend on things from
+// Globebrowsing, but we want it for an istallation. Later on, move this functionality
 // somewhere else. Maybe combine with the existing "goToGeo" in globebrowsing?
 int goToGeo(lua_State* L) {
     int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 4, 6 }, "lua::goToGeo");
@@ -207,9 +209,9 @@ int goToGeo(lua_State* L) {
     // Compute the relative position based on the input values
     glm::vec3 positionModelCoords = global::moduleEngine->module<GlobeBrowsingModule>()
         ->cartesianCoordinatesFromGeo(
-        *globe, 
-        latitude, 
-        longitude, 
+        *globe,
+        latitude,
+        longitude,
         altitude
     );
 
