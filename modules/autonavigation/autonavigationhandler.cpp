@@ -177,6 +177,10 @@ const SceneGraphNode* AutoNavigationHandler::anchor() const {
 }
 
 bool AutoNavigationHandler::hasFinished() const {
+    if (_pathSegments.empty()) {
+        return true;
+    }
+
     unsigned int lastIndex = (unsigned int)_pathSegments.size() - 1;
     return _currentSegmentIndex > lastIndex;
 }
