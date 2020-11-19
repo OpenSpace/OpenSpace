@@ -39,7 +39,7 @@ galaxiesState = {
     Identifier = "Galaxies", 
     Enter = [[
         openspace.printInfo('Entering Galaxies State')
-        ]] .. util.setOrbitSpeedFactor(0.05) .. [[
+        ]] .. util.setOrbitSpeedFactor(0.1) .. [[
         ]] .. util.orbitOnArrival() .. [[
 
     ]],
@@ -183,6 +183,27 @@ transitions = {
             openspace.autonavigation.goTo('Earth', true)
         ]]
     },
+    -- Mars - Earth
+    {
+        From = "Earth", 
+        To = "Mars", 
+        Action = [[
+            ]] .. util.disableLinearFlight() .. [[
+            ]] .. util.setCurveTypeToZoomOverview() .. [[
+            openspace.time.setPause(true)
+            openspace.autonavigation.goTo('Mars')
+        ]]
+    },
+    {
+        From = "Mars", 
+        To = "Earth", 
+        Action = [[
+            ]] .. util.disableLinearFlight() .. [[
+            ]] .. util.setCurveTypeToZoomOverview() .. [[
+            openspace.time.setPause(true)
+            openspace.autonavigation.goTo('Earth', true)
+        ]]
+    },
     -- 2. Galaxies
     {
         From = "Galaxies", 
@@ -194,12 +215,65 @@ transitions = {
         To = "Galaxies", 
         Action = util.applyLinearFlight(galaxiesTargetDistance, 1.5)
     },
+    -- to Galaxies
+    {
+        From = "Earth",
+        To = "Galaxies", 
+        Action = util.applyLinearFlight(galaxiesTargetDistance, 1.5)
+    },
+    {
+        From = "Mars",
+        To = "Galaxies", 
+        Action = util.applyLinearFlight(galaxiesTargetDistance, 1.5)
+    },
+    {
+        From = "Asteroids",
+        To = "Galaxies", 
+        Action = util.applyLinearFlight(galaxiesTargetDistance, 1.5)
+    },
+    {
+        From = "Constellations",
+        To = "Galaxies", 
+        Action = util.applyLinearFlight(galaxiesTargetDistance, 1.5)
+    },
+    -- from Galaxies
+    {
+        From = "Galaxies", 
+        To = "Earth", 
+        Action = [[
+            ]] .. util.changeAnchor('Earth', 1) .. [[
+            ]] .. util.applyLinearFlight(earthTargetDistance, 1.5) .. [[
+        ]]
+    },
+    {
+        From = "Galaxies", 
+        To = "Asteroids", 
+        Action = [[
+            ]] .. util.changeAnchor('Sun', 1) .. [[
+            ]] .. util.applyLinearFlight(asteroidsTargetDistance, 1.5) .. [[
+        ]]
+    },
+    {
+        From = "Galaxies", 
+        To = "Mars", 
+        Action = [[
+            ]] .. util.changeAnchor('Mars', 1) .. [[
+            ]] .. util.applyLinearFlight(marsTargetDistance, 1.5) .. [[
+        ]]
+    },
+    {
+        From = "Galaxies", 
+        To = "Constellations", 
+        Action = [[
+            ]] .. util.changeAnchor('Earth', 1) .. [[
+            ]] .. util.applyLinearFlight(constellationsTargetDistance, 1.5) .. [[
+        ]]
+    },
     -- 3. Asteroids
     {
         From = "Asteroids", 
         To = "Default", 
         Action = [[
-            ]] .. util.changeAnchor('Sun', 1) .. [[
             ]] .. util.applyLinearFlight(defaultTargetDistance, 1.5) .. [[
         ]]
     },
@@ -209,6 +283,7 @@ transitions = {
         Action = [[
             ]] .. util.disableLinearFlight() .. [[
             ]] .. util.setCurveTypeToZoomOverview() .. [[
+            ]] .. util.changeAnchor('Sun', 1) .. [[
             openspace.time.setPause(true)
             local targetDistance = ]] .. tostring(asteroidsTargetDistance) .. [[
             openspace.autonavigation.goToHeight('Sun', targetDistance, true, 10)
