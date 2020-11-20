@@ -1990,14 +1990,6 @@ std::string SessionRecording::targetFileFormatVersion() {
     return std::string(FileHeaderVersion);
 }
 
-std::string SessionRecording::finalConversionFilename() {
-    return _finalConversionFile;
-}
-
-void SessionRecording::setFinalConversionFilename(std::string filename) {
-    _finalConversionFile = filename;
-}
-
 std::string SessionRecording::determineConversionOutFilename(const std::string filename) {
     const std::string legacyRecordingSaveDirectory = "${RECORDINGS}/convert";
     std::string conversionOutFilename = filename.substr(0, filename.find_last_of("."))

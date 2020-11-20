@@ -503,23 +503,6 @@ public:
      */
     std::string determineConversionOutFilename(const std::string filename);
 
-    /*
-     * Sets the filename of the final conversion result. Intended to be used only in
-     * the base class when all conversion recursions are complete.
-     *
-     * \param filename the name of the final conversion result
-     *
-     */
-    virtual void setFinalConversionFilename(std::string filename) final;
-
-    /*
-     * Retrieves filename of the final conversion result. Intended to be used only in
-     * the base class when all conversion recursions are complete.
-     *
-     * \return filename of the converted version of the file
-     */
-    virtual std::string finalConversionFilename() final;
-
 protected:
     properties::BoolProperty _renderPlaybackInformation;
 
@@ -652,7 +635,6 @@ protected:
 
     int _nextCallbackHandle = 0;
 
-    std::string _finalConversionFile;
     DataMode _conversionDataMode = DataMode::Binary;
     int _conversionLineNum = 1;
     const int _maximumRecursionDepth = 100;
