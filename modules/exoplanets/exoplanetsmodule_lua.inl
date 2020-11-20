@@ -51,6 +51,7 @@ constexpr const char* ExoplanetsDataPath =
     "${SYNC}/http/exoplanets_data/1/exoplanets_data.bin";
 
 constexpr const char* StarTextureFile = "${SYNC}/http/exoplanets_textures/1/sun.jpg";
+constexpr const char* NoDataTextureFile = "${SYNC}/http/exoplanets_textures/1/grid-32.png";
 constexpr const char* DiscTextureFile =
     "${SYNC}/http/exoplanets_textures/1/disc_texture.png";
 
@@ -145,49 +146,58 @@ void createExoplanetSystem(std::string_view starName) {
 
     const glm::dmat3 exoplanetSystemRotation = computeSystemRotation(starPosition);
 
-    // Star renderable globe, if we have a radius and bv color index
-    std::string starGlobeRenderableString;
+    // Star
+    float radiusInMeter = static_cast<float>(distanceconstants::SolarRadius);
     if (!std::isnan(p.rStar)) {
-        const float radiusInMeter =
-            p.rStar * static_cast<float>(distanceconstants::SolarRadius);
+        radiusInMeter *= p.rStar;
+    }
 
-        std::string layers = "";
-        if (!std::isnan(p.bmv)) {
-            // @TODO (emmbr, 2020-10-12) should also check the bv value for the siblings.
-            // The data on the planets is derived from different sources, so while this
-            // planet has a nan value, another might not
-            const std::string color = starColor(p.bmv);
+    std::string colorLayers;
+    if (!std::isnan(p.bmv)) {
+        // @TODO (emmbr, 2020-10-12) should also check the bv value for the siblings.
+        // The data on the planets is derived from different sources, so while this
+        // planet has a nan value, another might not
+        const std::string color = starColor(p.bmv);
 
-            if (color.empty()) {
-                LERROR("Error occurred when computing star color");
-                return;
-            }
-
-            layers = "ColorLayers = {"
-                "{"
-                    "Identifier = 'StarColor',"
-                    "Type = 'SolidColor',"
-                    "Color = " + color + ","
-                    "BlendMode = 'Normal',"
-                    "Enabled = true"
-                "},"
-                "{"
-                    "Identifier = 'StarTexture',"
-                    "FilePath = openspace.absPath('" + StarTextureFile + "'),"
-                    "BlendMode = 'Color',"
-                    "Enabled = true"
-                "}"
-            "}";
+        if (color.empty()) {
+            LERROR("Error occurred when computing star color");
+            return;
         }
 
-        starGlobeRenderableString = "Renderable = {"
-            "Type = 'RenderableGlobe',"
-            "Radii = " + std::to_string(radiusInMeter) + ","
-            "SegmentsPerPatch = 64,"
-            "PerformShading = false,"
-            "Layers = {" + layers + "}"
-        "},";
+        colorLayers =
+            "{"
+                "Identifier = 'StarColor',"
+                "Type = 'SolidColor',"
+                "Color = " + color + ","
+                "BlendMode = 'Normal',"
+                "Enabled = true"
+            "},"
+            "{"
+                "Identifier = 'StarTexture',"
+                "FilePath = " + fmt::format("openspace.absPath('{}')", StarTextureFile) + ","
+                "BlendMode = 'Color',"
+                "Enabled = true"
+            "}";
     }
+    else {
+        colorLayers = 
+            "{"
+                "Identifier = 'NoDataStarTexture',"
+                "FilePath = " + fmt::format("openspace.absPath('{}')", NoDataTextureFile) + ","
+                "BlendMode = 'Color',"
+                "Enabled = true"
+            "}";
+    }
+
+    const std::string starGlobeRenderableString = "Renderable = {"
+        "Type = 'RenderableGlobe',"
+        "Radii = " + std::to_string(radiusInMeter) + ","
+        "SegmentsPerPatch = 64,"
+        "PerformShading = false,"
+        "Layers = {" 
+            "ColorLayers = { " + colorLayers + "}"
+        "}"
+    "},";
 
     const std::string starParent = "{"
         "Identifier = '" + starIdentifier + "',"
