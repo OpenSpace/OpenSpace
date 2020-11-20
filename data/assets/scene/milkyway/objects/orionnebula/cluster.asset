@@ -16,7 +16,7 @@ local OrionClusterStars = {
         Type = "RenderableStars",
         File = sync .. "/oricluster.speck",
         Texture = sync .. "/halo.png",
-        Texture = sync .. "/colorbv.cmap",
+        ColorMap = sync .. "/colorbv.cmap",
         MagnitudeExponent = 5.02,
         SizeComposition = "Distance Modulus",
         RenderMethod = "Texture Based"
@@ -49,5 +49,5 @@ cluster distribution. ]],
     Author = "AMNH Digital Universe",
     URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
     License = "AMNH Digital Universe",
-    Identifiers = "OrionClusterStars"
+    Identifiers = {"OrionClusterStars"}
 }

@@ -1,10 +1,13 @@
--- Add require statements for assets exporting the neccessary globes
--- here we add Mars, Moon and Mercury:
-asset.require('../scene/solarsystem/planets/mars/mars')
-asset.require('../scene/solarsystem/planets/earth/moon/moon')
-asset.require('../scene/solarsystem/planets/mercury/mercury')
-
+----------------------------------------
+-- Configuration options for this asset
 local CreateFocusNodes = false
+local AddMarsLayers = true
+local AddMoonLayers = true
+local AddMercuryLayers = true
+----------------------------------------
+
+-- If you add layers for different planets than listed here, be sure to add an
+-- asset.require(...) statement in here similar to the ones that are used below
 
 -- Add folders to this list that contain .info files describing patches
 -- OBS: Even on Windows, you have to use forward slashes (/) or double backslashes (\\)
@@ -22,11 +25,11 @@ local vrt_folders = {
         -- example:   'C:/OpenSpace/GlobeBrowsingData/Mars/CTX'
 
         -- We recommend using this folder for CTX
-        openspace.absPath('${BASE}/../OpenSpaceData/Mars/CTX'),
+        openspace.absPath('G:/OpenSpaceData/Mars/CTX'),
         -- if not and you have a custom path for CTX layers, enter it below
         '',
         -- We recommend using this folder for HiRISE
-        openspace.absPath('${BASE}/../OpenSpaceData/Mars/HiRISE'),
+        openspace.absPath('G:/OpenSpaceData/Mars/HiRISE'),
         -- if not and you have a custom path for HiRISE layers, enter it below
         ''
     },
@@ -36,8 +39,8 @@ local vrt_folders = {
         -- if areas overlap, images from the lower results will overwrite the images from former
         -- results
         -- example:  'C:/OpenSpace/GlobeBrowsingData/Moon'
-        openspace.absPath('${BASE}/../OpenSpaceData/Moon'),
-        openspace.absPath('${BASE}/../OpenSpaceData/Apollo'),
+        openspace.absPath('G:/OpenSpaceData/Moon'),
+        openspace.absPath('G:/OpenSpaceData/Apollo'),
         ''
     },
     Mercury = {
@@ -46,10 +49,28 @@ local vrt_folders = {
         -- if areas overlap, images from the lower results will overwrite the images from former
         -- results
         -- example:  'C:/OpenSpace/GlobeBrowsingData/Mercury'
-        openspace.absPath('${BASE}/../OpenSpaceData/Mercury'),
+        openspace.absPath('G:/OpenSpaceData/Mercury'),
         ''
     }
 }
+
+-- Add require statements for assets exporting the neccessary globes
+-- here we add Mars, Moon and Mercury:
+if AddMarsLayers then
+    asset.require('../scene/solarsystem/planets/mars/mars')
+else
+    vrt_folders['Mars'] = nil
+end
+if AddMoonLayers then
+    asset.require('../scene/solarsystem/planets/earth/moon/moon')
+else
+    vrt_folders['Moon'] = nil
+end
+if AddMercuryLayers then
+    asset.require('../scene/solarsystem/planets/mercury/mercury')
+else
+    vrt_folders['Mercury'] = nil
+end
 
 asset.onInitialize(function ()
     -- Add local patches described at the top of this file

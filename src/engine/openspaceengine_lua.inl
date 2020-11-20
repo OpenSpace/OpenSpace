@@ -27,6 +27,7 @@
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <filesystem>
 
 namespace openspace::luascriptfunctions {
 
@@ -39,7 +40,7 @@ namespace openspace::luascriptfunctions {
 int toggleShutdown(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::toggleShutdown");
 
-    global::openSpaceEngine.toggleShutdownMode();
+    global::openSpaceEngine->toggleShutdownMode();
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -53,8 +54,8 @@ int toggleShutdown(lua_State* L) {
 int writeDocumentation(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::writeDocumentation");
 
-    global::openSpaceEngine.writeStaticDocumentation();
-    global::openSpaceEngine.writeSceneDocumentation();
+    global::openSpaceEngine->writeStaticDocumentation();
+    global::openSpaceEngine->writeSceneDocumentation();
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -132,7 +133,7 @@ int addVirtualProperty(lua_State* L) {
     }
 
     lua_settop(L, 0);
-    global::virtualPropertyManager.addProperty(std::move(prop));
+    global::virtualPropertyManager->addProperty(std::move(prop));
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -147,9 +148,9 @@ int removeVirtualProperty(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeVirtualProperty");
 
     const std::string& name = ghoul::lua::value<std::string>(L, 1);
-    properties::Property* p = global::virtualPropertyManager.property(name);
+    properties::Property* p = global::virtualPropertyManager->property(name);
     if (p) {
-        global::virtualPropertyManager.removeProperty(p);
+        global::virtualPropertyManager->removeProperty(p);
     }
     else {
         LWARNINGC(
@@ -172,13 +173,34 @@ int removeAllVirtualProperties(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::removeAllVirtualProperties");
 
     const std::vector<properties::Property*>& ps =
-        global::virtualPropertyManager.properties();
+        global::virtualPropertyManager->properties();
     for (properties::Property* p : ps) {
-        global::virtualPropertyManager.removeProperty(p);
+        global::virtualPropertyManager->removeProperty(p);
         delete p;
     }
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
+int setScreenshotFolder(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::setScreenshotFolder");
+
+    std::string arg = ghoul::lua::value<std::string>(L);
+    lua_pop(L, 0);
+
+    std::string folder = FileSys.absolutePath(arg);
+    if (!std::filesystem::exists(folder)) {
+        std::filesystem::create_directory(folder);
+    }
+
+    FileSys.registerPathToken(
+        "${SCREENSHOTS}",
+        folder,
+        ghoul::filesystem::FileSystem::Override::Yes
+    );
+
+    global::windowDelegate->setScreenshotFolder(folder);
     return 0;
 }
 
@@ -194,7 +216,7 @@ int addTag(lua_State* L) {
     std::string tag = ghoul::lua::value<std::string>(L, 2);
     lua_settop(L, 0);
 
-    SceneGraphNode* node = global::renderEngine.scene()->sceneGraphNode(uri);
+    SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(uri);
     if (!node) {
         return ghoul::lua::luaError(
             L,
@@ -220,7 +242,7 @@ int removeTag(lua_State* L) {
     const std::string& tag = ghoul::lua::value<std::string>(L, 2);
     lua_settop(L, 0);
 
-    SceneGraphNode* node = global::renderEngine.scene()->sceneGraphNode(uri);
+    SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(uri);
     if (!node) {
         return ghoul::lua::luaError(
             L,
@@ -248,7 +270,7 @@ int downloadFile(lua_State* L) {
 
     LINFOC("OpenSpaceEngine", fmt::format("Downloading file from {}", uri));
     std::shared_ptr<DownloadManager::FileFuture> future =
-        global::downloadManager.downloadFile(
+        global::downloadManager->downloadFile(
             uri,
             savePath,
             DownloadManager::OverrideFile::Yes,
@@ -268,7 +290,7 @@ int downloadFile(lua_State* L) {
 
 int isMaster(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::isMaster");
-    ghoul::lua::push(L, global::windowDelegate.isMaster());
+    ghoul::lua::push(L, global::windowDelegate->isMaster());
     return 1;
 }
 

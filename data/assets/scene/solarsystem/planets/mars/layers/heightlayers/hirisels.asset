@@ -33,7 +33,7 @@ asset.meta = {
     Author = "USGS",
     URL = "https://www.uahirise.org",
     License = "Esri Master License Agreement",
-    Identifiers = "HiRISE-LS-DEM"
+    Identifiers = {"HiRISE-LS-DEM"}
 }
 
 

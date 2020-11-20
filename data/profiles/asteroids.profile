@@ -1,6 +1,8 @@
 {
   "assets": [
     "base",
+    "scene/solarsystem/interstellar/c-2019_q4_borisov",
+    "scene/solarsystem/interstellar/oumuamua",
     "scene/solarsystem/sssb/amor_asteroid",
     "scene/solarsystem/sssb/apollo_asteroid",
     "scene/solarsystem/sssb/aten_asteroid",

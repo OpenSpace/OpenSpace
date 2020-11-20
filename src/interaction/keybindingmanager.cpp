@@ -53,7 +53,7 @@ void KeybindingManager::keyboardCallback(Key key, KeyModifier modifier, KeyActio
         for (auto it = ret.first; it != ret.second; ++it) {
             using RS = scripting::ScriptEngine::RemoteScripting;
 
-            global::scriptEngine.queueScript(
+            global::scriptEngine->queueScript(
                 it->second.command,
                 it->second.synchronization ? RS::Yes : RS::No
             );

@@ -73,6 +73,7 @@ namespace {
         }
     };
 
+    constexpr const glm::vec4 PosBufferClearVal = { 1e32, 1e32, 1e32, 1.f };
 
     constexpr const std::array<const char*, 7> HDRUniformNames = {
         "hdrFeedingTexture", "blackoutFactor", "hdrExposure", "gamma",
@@ -401,8 +402,8 @@ void FramebufferRenderer::initialize() {
         DownscaledVolumeUniformNames
     );
 
-    global::raycasterManager.addListener(*this);
-    global::deferredcasterManager.addListener(*this);
+    global::raycasterManager->addListener(*this);
+    global::deferredcasterManager->addListener(*this);
 
     // Set Default Rendering OpenGL State
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
@@ -418,7 +419,7 @@ void FramebufferRenderer::initialize() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // Save State in Cache
-    global::renderEngine.openglStateCache().loadCurrentGLState();
+    global::renderEngine->openglStateCache().loadCurrentGLState();
 }
 
 void FramebufferRenderer::deinitialize() {
@@ -452,8 +453,8 @@ void FramebufferRenderer::deinitialize() {
     glDeleteBuffers(1, &_vertexPositionBuffer);
     glDeleteVertexArrays(1, &_screenQuad);
 
-    global::raycasterManager.removeListener(*this);
-    global::deferredcasterManager.removeListener(*this);
+    global::raycasterManager->removeListener(*this);
+    global::deferredcasterManager->removeListener(*this);
 }
 
 void FramebufferRenderer::raycastersChanged(VolumeRaycaster&,
@@ -992,7 +993,7 @@ void FramebufferRenderer::updateRaycastData() {
     _insideRaycastPrograms.clear();
 
     const std::vector<VolumeRaycaster*>& raycasters =
-        global::raycasterManager.raycasters();
+        global::raycasterManager->raycasters();
 
     int nextId = 0;
     for (VolumeRaycaster* raycaster : raycasters) {
@@ -1064,7 +1065,7 @@ void FramebufferRenderer::updateDeferredcastData() {
     _deferredcastPrograms.clear();
 
     const std::vector<Deferredcaster*>& deferredcasters =
-        global::deferredcasterManager.deferredcasters();
+        global::deferredcasterManager->deferredcasters();
     int nextId = 0;
     for (Deferredcaster* caster : deferredcasters) {
         DeferredcastData data = { nextId++, "HELPER" };
@@ -1148,10 +1149,10 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
 
     GLint viewport[4] = { 0 };
-    global::renderEngine.openglStateCache().viewport(viewport);
+    global::renderEngine->openglStateCache().viewport(viewport);
 
     // Reset Render Pipeline State
-    global::renderEngine.openglStateCache().resetCachedStates();
+    global::renderEngine->openglStateCache().resetCachedStates();
 
     _pingPongIndex = 0;
 
@@ -1165,13 +1166,14 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         TracyGpuZone("Deferred G-Buffer")
 
         GLint vp[4] = {viewport[0], viewport[1], _resolution.x, _resolution.y};
-        global::renderEngine.openglStateCache().setViewportState(vp);
+        global::renderEngine->openglStateCache().setViewportState(vp);
 
         glBindFramebuffer(GL_FRAMEBUFFER, _gBuffers.framebuffer);
         glDrawBuffers(3, ColorAttachmentArray);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClearBufferfv(GL_COLOR, 1, glm::value_ptr(PosBufferClearVal));
     }
-    Time time = global::timeManager.time();
+    Time time = global::timeManager->time();
 
     RenderData data = {
         *camera,
@@ -1287,7 +1289,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
         glBindFramebuffer(GL_FRAMEBUFFER, _exitFramebuffer);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         GLint viewport[4] = { 0 };
-        global::renderEngine.openglStateCache().viewport(viewport);
+        global::renderEngine->openglStateCache().viewport(viewport);
 
         ghoul::opengl::ProgramObject* exitProgram = _exitPrograms[raycaster].get();
         if (exitProgram) {
@@ -1305,7 +1307,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
                 static_cast<GLsizei>(viewport[2] * s),
                 static_cast<GLsizei>(viewport[3] * s)
             };
-            global::renderEngine.openglStateCache().setViewportState(newVP);
+            global::renderEngine->openglStateCache().setViewportState(newVP);
 
             if (_downscaleVolumeRendering.currentDownscaleFactor != s) {
                 _downscaleVolumeRendering.currentDownscaleFactor = s;
@@ -1402,7 +1404,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
         }
 
         if (raycaster->downscaleRender() < 1.f) {
-            global::renderEngine.openglStateCache().setViewportState(viewport);
+            global::renderEngine->openglStateCache().setViewportState(viewport);
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _gBuffers.framebuffer);
             writeDownscaledVolume();
         }
@@ -1540,7 +1542,7 @@ void FramebufferRenderer::updateRendererData() {
     dict.setValue("hdrExposure", std::to_string(_hdrExposure));
     dict.setValue("disableHDR", std::to_string(_disableHDR));
     _rendererData = dict;
-    global::renderEngine.setRendererData(dict);
+    global::renderEngine->setRendererData(dict);
 }
 
 } // namespace openspace

@@ -191,22 +191,22 @@ QWidget* CameraDialog::createNavStateWidget() {
         QWidget* posBox = new QWidget;
         QBoxLayout* posLayout = new QHBoxLayout(posBox);
         posLayout->setContentsMargins(0, 0, 0, 0);
-        posLayout->addWidget(new QLabel("X"));
+        posLayout->addWidget(new QLabel("X [m]"));
         _navState.positionX = new QLineEdit;
         _navState.positionX->setValidator(new QDoubleValidator);
-        _navState.positionX->setToolTip("Camera position vector (x)");
+        _navState.positionX->setToolTip("Camera position vector (x) [m]");
         posLayout->addWidget(_navState.positionX);
 
-        posLayout->addWidget(new QLabel("Y"));
+        posLayout->addWidget(new QLabel("Y [m]"));
         _navState.positionY = new QLineEdit;
         _navState.positionY->setValidator(new QDoubleValidator);
-        _navState.positionY->setToolTip("Camera position vector (y)");
+        _navState.positionY->setToolTip("Camera position vector (y) [m]");
         posLayout->addWidget(_navState.positionY);
 
-        posLayout->addWidget(new QLabel("Z"));
+        posLayout->addWidget(new QLabel("Z [m]"));
         _navState.positionZ = new QLineEdit;
         _navState.positionZ->setValidator(new QDoubleValidator);
-        _navState.positionZ->setToolTip("Camera position vector (z)");
+        _navState.positionZ->setToolTip("Camera position vector (z) [m]");
         posLayout->addWidget(_navState.positionZ);
         layout->addWidget(posBox, 3, 1);
     }
@@ -277,7 +277,7 @@ QWidget* CameraDialog::createGeoWidget() {
     _geoState.longitude->setToolTip("Longitude of camera focus point (+/- 180 degrees)");
     layout->addWidget(_geoState.longitude, 2, 1);
 
-    layout->addWidget(new QLabel("Altitude"), 3, 0);
+    layout->addWidget(new QLabel("Altitude [m]"), 3, 0);
     _geoState.altitude = new QLineEdit;
     _geoState.altitude->setValidator(new QDoubleValidator);
     _geoState.altitude->setToolTip("Altitude of camera (meters)");

@@ -230,6 +230,13 @@ namespace {
         "Value"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo FramerateLimitInfo = {
+        "FramerateLimit",
+        "Framerate Limit",
+        "If set to a value bigger than 0, the framerate will be limited to that many "
+        "frames per second without using V-Sync"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo HorizFieldOfViewInfo = {
         "HorizFieldOfView",
         "Horizontal Field of View",
@@ -276,6 +283,7 @@ RenderEngine::RenderEngine()
     , _hue(HueInfo, 0.f, 0.f, 360.f)
     , _saturation(SaturationInfo, 1.f, 0.0f, 2.f)
     , _value(ValueInfo, 1.f, 0.f, 2.f)
+    , _framerateLimit(FramerateLimitInfo, 0.f, 0.f, 500.f)
     , _horizFieldOfView(HorizFieldOfViewInfo, 80.f, 1.f, 179.f)
     , _globalRotation(
         GlobalRotationInfo,
@@ -365,8 +373,8 @@ RenderEngine::RenderEngine()
     addProperty(_applyWarping);
 
     _horizFieldOfView.onChange([this]() {
-        if (global::windowDelegate.isMaster()) {
-            global::windowDelegate.setHorizFieldOfView(_horizFieldOfView);
+        if (global::windowDelegate->isMaster()) {
+            global::windowDelegate->setHorizFieldOfView(_horizFieldOfView);
         }
     });
     addProperty(_horizFieldOfView);
@@ -381,6 +389,7 @@ RenderEngine::RenderEngine()
     addProperty(_saveFrameInformation);
 #endif // OPENSPACE_WITH_INSTRUMENTATION
 
+    addProperty(_framerateLimit);
     addProperty(_globalRotation);
     addProperty(_screenSpaceRotation);
     addProperty(_masterRotation);
@@ -417,11 +426,11 @@ void RenderEngine::initialize() {
 
     // We have to perform these initializations here as the OsEng has not been initialized
     // in our constructor
-    _globalRotation = static_cast<glm::vec3>(global::configuration.globalRotation);
+    _globalRotation = static_cast<glm::vec3>(global::configuration->globalRotation);
     _screenSpaceRotation =
-        static_cast<glm::vec3>(global::configuration.screenSpaceRotation);
-    _masterRotation = static_cast<glm::vec3>(global::configuration.masterRotation);
-    _disableMasterRendering = global::configuration.isRenderingOnMasterDisabled;
+        static_cast<glm::vec3>(global::configuration->screenSpaceRotation);
+    _masterRotation = static_cast<glm::vec3>(global::configuration->masterRotation);
+    _disableMasterRendering = global::configuration->isRenderingOnMasterDisabled;
 
 #ifdef GHOUL_USE_DEVIL
     ghoul::io::TextureReader::ref().addReader(
@@ -452,8 +461,8 @@ void RenderEngine::initialize() {
     );
 
     _versionString = OPENSPACE_VERSION_STRING_FULL;
-    if (global::versionChecker.hasLatestVersionInfo()) {
-        VersionChecker::SemanticVersion latest = global::versionChecker.latestVersion();
+    if (global::versionChecker->hasLatestVersionInfo()) {
+        VersionChecker::SemanticVersion latest = global::versionChecker->latestVersion();
 
         VersionChecker::SemanticVersion current{
             OPENSPACE_VERSION_MAJOR,
@@ -473,7 +482,7 @@ void RenderEngine::initializeGL() {
 
     LTRACE("RenderEngine::initializeGL(begin)");
 
-    std::string renderingMethod = global::configuration.renderingMethod;
+    std::string renderingMethod = global::configuration->renderingMethod;
     if (renderingMethod == "ABuffer") {
         using Version = ghoul::systemcapabilities::Version;
 
@@ -491,35 +500,35 @@ void RenderEngine::initializeGL() {
 
     // set the close clip plane and the far clip plane to extreme values while in
     // development
-    global::windowDelegate.setNearFarClippingPlane(0.001f, 1000.f);
+    global::windowDelegate->setNearFarClippingPlane(0.001f, 1000.f);
 
     // Set horizontal FOV value with whatever the field of view (in degrees) is of the
     // initialized window
-    _horizFieldOfView = static_cast<float>(global::windowDelegate.getHorizFieldOfView());
+    _horizFieldOfView = static_cast<float>(global::windowDelegate->getHorizFieldOfView());
 
     {
         ZoneScopedN("Font: Mono")
         TracyGpuZone("Font: Mono")
         constexpr const float FontSizeFrameinfo = 32.f;
-        _fontFrameInfo = global::fontManager.font(KeyFontMono, FontSizeFrameinfo);
+        _fontFrameInfo = global::fontManager->font(KeyFontMono, FontSizeFrameinfo);
     }
     {
         ZoneScopedN("Font: Date")
         TracyGpuZone("Font: Date")
         constexpr const float FontSizeTime = 15.f;
-        _fontDate = global::fontManager.font(KeyFontMono, FontSizeTime);
+        _fontDate = global::fontManager->font(KeyFontMono, FontSizeTime);
     }
     {
         ZoneScopedN("Font: Info")
         TracyGpuZone("Font: Info")
         constexpr const float FontSizeMono = 10.f;
-        _fontInfo = global::fontManager.font(KeyFontMono, FontSizeMono);
+        _fontInfo = global::fontManager->font(KeyFontMono, FontSizeMono);
     }
     {
         ZoneScopedN("Font: Log")
         TracyGpuZone("Font: Log")
         constexpr const float FontSizeLight = 8.f;
-        _fontLog = global::fontManager.font(KeyFontLight, FontSizeLight);
+        _fontLog = global::fontManager->font(KeyFontLight, FontSizeLight);
     }
 
     {
@@ -549,8 +558,8 @@ void RenderEngine::updateScene() {
 
     _scene->updateInterpolations();
 
-    const Time& currentTime = global::timeManager.time();
-    const Time& integrateFromTime = global::timeManager.integrateFromTime();
+    const Time& currentTime = global::timeManager->time();
+    const Time& integrateFromTime = global::timeManager->integrateFromTime();
 
     _scene->update({
         TransformData{ glm::dvec3(0.0), glm::dmat3(1.0), glm::dvec3(1.0) },
@@ -579,7 +588,7 @@ void RenderEngine::updateShaderPrograms() {
 void RenderEngine::updateRenderer() {
     ZoneScoped
 
-    const bool windowResized = global::windowDelegate.windowHasResized();
+    const bool windowResized = global::windowDelegate->windowHasResized();
 
     if (windowResized) {
         _renderer->setResolution(renderingResolution());
@@ -589,7 +598,7 @@ void RenderEngine::updateRenderer() {
         FR::defaultProjectionRenderer().setFramebufferSize(renderingResolution());
         //Override the aspect ratio property value to match that of resized window
         _horizFieldOfView =
-            static_cast<float>(global::windowDelegate.getHorizFieldOfView());
+            static_cast<float>(global::windowDelegate->getHorizFieldOfView());
     }
 
     _renderer->update();
@@ -598,22 +607,22 @@ void RenderEngine::updateRenderer() {
 void RenderEngine::updateScreenSpaceRenderables() {
     ZoneScoped
 
-    for (std::unique_ptr<ScreenSpaceRenderable>& ssr : global::screenSpaceRenderables) {
+    for (std::unique_ptr<ScreenSpaceRenderable>& ssr : *global::screenSpaceRenderables) {
         ssr->update();
     }
 }
 
 glm::ivec2 RenderEngine::renderingResolution() const {
-    return global::windowDelegate.currentDrawBufferResolution();
+    return global::windowDelegate->currentDrawBufferResolution();
 }
 
 glm::ivec2 RenderEngine::fontResolution() const {
-    const std::string& value = global::configuration.onScreenTextScaling;
+    const std::string& value = global::configuration->onScreenTextScaling;
     if (value == "framebuffer") {
-        return global::windowDelegate.currentViewportSize();
+        return global::windowDelegate->currentViewportSize();
     }
     else {
-        return global::windowDelegate.currentSubwindowSize();
+        return global::windowDelegate->currentSubwindowSize();
     }
 }
 
@@ -638,7 +647,7 @@ glm::mat4 RenderEngine::screenSpaceRotation() const {
 }
 
 glm::mat4 RenderEngine::nodeRotation() const {
-    if (!global::windowDelegate.isMaster()) {
+    if (!global::windowDelegate->isMaster()) {
         return glm::mat4(1.f);
     }
     glm::vec3 rot = _masterRotation;
@@ -661,7 +670,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
 
     LTRACE("RenderEngine::render(begin)");
 
-    const WindowDelegate& delegate = global::windowDelegate;
+    const WindowDelegate& delegate = *global::windowDelegate;
 
     const glm::mat4 globalRot = globalRotation();
     const glm::mat4 nodeRot = nodeRotation();
@@ -674,6 +683,16 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         _camera->sgctInternal.setSceneMatrix(combinedGlobalRot * sceneMatrix);
         _camera->sgctInternal.setProjectionMatrix(projectionMatrix);
         _camera->invalidateCache();
+    }
+
+    const int fpsLimit = _framerateLimit;
+    if (fpsLimit > 0) {
+        // Using a sleep here is not optimal, but we are not looking for FPS-perfect
+        // limiting
+        std::this_thread::sleep_until(_lastFrameTime);
+        const double delta = (1.0 / fpsLimit) * 1000.0 * 1000.0;
+        auto now = std::chrono::high_resolution_clock::now();
+        _lastFrameTime = now + std::chrono::microseconds(static_cast<int>(delta));
     }
 
     const bool masterEnabled = delegate.isMaster() ? !_disableMasterRendering : true;
@@ -694,7 +713,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         );
 
         std::string fn = std::to_string(_frameNumber);
-        WindowDelegate::Frustum frustum = global::windowDelegate.frustumMode();
+        WindowDelegate::Frustum frustum = global::windowDelegate->frustumMode();
         std::string fr = [](WindowDelegate::Frustum frustum) -> std::string {
             switch (frustum) {
                 case WindowDelegate::Frustum::Mono: return "";
@@ -704,9 +723,9 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
             }
         }(frustum);
 
-        std::string sgFn = std::to_string(global::windowDelegate.swapGroupFrameNumber());
-        std::string dt = std::to_string(global::windowDelegate.deltaTime());
-        std::string avgDt = std::to_string(global::windowDelegate.averageDeltaTime());
+        std::string sgFn = std::to_string(global::windowDelegate->swapGroupFrameNumber());
+        std::string dt = std::to_string(global::windowDelegate->deltaTime());
+        std::string avgDt = std::to_string(global::windowDelegate->averageDeltaTime());
 
         std::string res = "Frame: " + fn + ' ' + fr + '\n' +
                           "Swap group frame: " + sgFn + '\n' +
@@ -718,9 +737,9 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         ZoneScopedN("Render Screenspace Renderable")
 
         std::vector<ScreenSpaceRenderable*> ssrs;
-        ssrs.reserve(global::screenSpaceRenderables.size());
+        ssrs.reserve(global::screenSpaceRenderables->size());
         for (const std::unique_ptr<ScreenSpaceRenderable>& ssr :
-            global::screenSpaceRenderables)
+            *global::screenSpaceRenderables)
         {
             if (ssr->isEnabled() && ssr->isReady()) {
                 ssrs.push_back(ssr.get());
@@ -760,7 +779,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
             local f = 'NavigationHandler.OrbitalNavigator.Friction.RotationalFriction';
             openspace.setPropertyValueSingle(f, not openspace.getPropertyValue(f));)";
 
-        global::scriptEngine.queueScript(
+        global::scriptEngine->queueScript(
             ToggleRotationFrictionScript,
             scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -772,7 +791,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
             local f = 'NavigationHandler.OrbitalNavigator.Friction.ZoomFriction';
             openspace.setPropertyValueSingle(f, not openspace.getPropertyValue(f));)";
 
-        global::scriptEngine.queueScript(
+        global::scriptEngine->queueScript(
             ToggleZoomFrictionScript,
             scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -784,7 +803,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
             local f = 'NavigationHandler.OrbitalNavigator.Friction.RollFriction';
             openspace.setPropertyValueSingle(f, not openspace.getPropertyValue(f));)";
 
-        global::scriptEngine.queueScript(
+        global::scriptEngine->queueScript(
             ToggleRollFrictionScript,
             scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -797,7 +816,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
 void RenderEngine::renderOverlays(const ShutdownInformation& shutdownInfo) {
     ZoneScoped
 
-    const bool isMaster = global::windowDelegate.isMaster();
+    const bool isMaster = global::windowDelegate->isMaster();
     if (isMaster || _showOverlayOnSlaves) {
         renderScreenLog();
         renderVersionInformation();
@@ -824,9 +843,9 @@ void RenderEngine::renderEndscreen() {
         glm::vec4(0.f, 0.f, 0.f, 0.5f)
     );
 
-    const glm::vec2 dpiScaling = global::windowDelegate.dpiScaling();
+    const glm::vec2 dpiScaling = global::windowDelegate->dpiScaling();
     const glm::ivec2 res =
-        glm::vec2(global::windowDelegate.currentSubwindowSize()) / dpiScaling;
+        glm::vec2(global::windowDelegate->currentSubwindowSize()) / dpiScaling;
     glViewport(0, 0, res.x, res.y);
 
     using FR = ghoul::fontrendering::FontRenderer;
@@ -872,13 +891,13 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
 void RenderEngine::renderDashboard() {
     ZoneScoped
 
-    glm::vec2 dashboardStart = global::dashboard.getStartPositionOffset();
+    glm::vec2 dashboardStart = global::dashboard->getStartPositionOffset();
     glm::vec2 penPosition = glm::vec2(
         dashboardStart.x,
-        dashboardStart.y + fontResolution().y - global::luaConsole.currentHeight()
+        dashboardStart.y + fontResolution().y - global::luaConsole->currentHeight()
     );
 
-    global::dashboard.render(penPosition);
+    global::dashboard->render(penPosition);
 
 #ifdef REALTIME_CAMERA_POS_DISPLAY
     penPosition += glm::vec2(0.f, -50.f);
@@ -1098,7 +1117,7 @@ void RenderEngine::takeScreenshot() {
         );
     }
 
-    _latestScreenshotNumber = global::windowDelegate.takeScreenshot(_applyWarping);
+    _latestScreenshotNumber = global::windowDelegate->takeScreenshot(_applyWarping);
 }
 
 /**
@@ -1183,11 +1202,11 @@ void RenderEngine::addScreenSpaceRenderable(std::unique_ptr<ScreenSpaceRenderabl
     const std::string identifier = s->identifier();
 
     if (std::find_if(
-        global::screenSpaceRenderables.begin(),
-        global::screenSpaceRenderables.end(),
+        global::screenSpaceRenderables->begin(),
+        global::screenSpaceRenderables->end(),
         [&identifier](const std::unique_ptr<ScreenSpaceRenderable>& ssr) {
             return ssr->identifier() == identifier;
-        }) != global::screenSpaceRenderables.end()
+        }) != global::screenSpaceRenderables->end()
     ) {
         LERROR(fmt::format(
             "Cannot add scene space renderable. "
@@ -1200,22 +1219,22 @@ void RenderEngine::addScreenSpaceRenderable(std::unique_ptr<ScreenSpaceRenderabl
     s->initialize();
     s->initializeGL();
 
-    global::screenSpaceRootPropertyOwner.addPropertySubOwner(s.get());
-    global::screenSpaceRenderables.push_back(std::move(s));
+    global::screenSpaceRootPropertyOwner->addPropertySubOwner(s.get());
+    global::screenSpaceRenderables->push_back(std::move(s));
 }
 
 void RenderEngine::removeScreenSpaceRenderable(ScreenSpaceRenderable* s) {
     const auto it = std::find_if(
-        global::screenSpaceRenderables.begin(),
-        global::screenSpaceRenderables.end(),
+        global::screenSpaceRenderables->begin(),
+        global::screenSpaceRenderables->end(),
         [s](const std::unique_ptr<ScreenSpaceRenderable>& r) { return r.get() == s; }
     );
 
-    if (it != global::screenSpaceRenderables.end()) {
+    if (it != global::screenSpaceRenderables->end()) {
         s->deinitialize();
-        global::screenSpaceRootPropertyOwner.removePropertySubOwner(s);
+        global::screenSpaceRootPropertyOwner->removePropertySubOwner(s);
 
-        global::screenSpaceRenderables.erase(it);
+        global::screenSpaceRenderables->erase(it);
     }
 }
 
@@ -1230,14 +1249,14 @@ ScreenSpaceRenderable* RenderEngine::screenSpaceRenderable(
                                                             const std::string& identifier)
 {
     const auto it = std::find_if(
-        global::screenSpaceRenderables.begin(),
-        global::screenSpaceRenderables.end(),
+        global::screenSpaceRenderables->begin(),
+        global::screenSpaceRenderables->end(),
         [&identifier](const std::unique_ptr<ScreenSpaceRenderable>& s) {
             return s->identifier() == identifier;
         }
     );
 
-    if (it != global::screenSpaceRenderables.end()) {
+    if (it != global::screenSpaceRenderables->end()) {
         return it->get();
     }
     else {
@@ -1246,10 +1265,10 @@ ScreenSpaceRenderable* RenderEngine::screenSpaceRenderable(
 }
 
 std::vector<ScreenSpaceRenderable*> RenderEngine::screenSpaceRenderables() const {
-    std::vector<ScreenSpaceRenderable*> res(global::screenSpaceRenderables.size());
+    std::vector<ScreenSpaceRenderable*> res(global::screenSpaceRenderables->size());
     std::transform(
-        global::screenSpaceRenderables.begin(),
-        global::screenSpaceRenderables.end(),
+        global::screenSpaceRenderables->begin(),
+        global::screenSpaceRenderables->end(),
         res.begin(),
         [](const std::unique_ptr<ScreenSpaceRenderable>& p) { return p.get(); }
     );
@@ -1292,7 +1311,7 @@ void RenderEngine::renderCameraInformation() {
     constexpr const float XSeparation = 5.f;
 
     const interaction::OrbitalNavigator& nav =
-        global::navigationHandler.orbitalNavigator();
+        global::navigationHandler->orbitalNavigator();
 
     using FR = ghoul::fontrendering::FontRenderer;
     

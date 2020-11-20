@@ -82,7 +82,7 @@ namespace {
             );
         }
 
-        openspace::global::scriptEngine.queueScript(
+        openspace::global::scriptEngine->queueScript(
             script,
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -113,7 +113,7 @@ namespace {
             );
         }
 
-        openspace::global::scriptEngine.queueScript(
+        openspace::global::scriptEngine->queueScript(
             script,
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -222,7 +222,7 @@ void GUI::initializeGL() {
     strcpy(iniFileBuffer, cachedFile.c_str());
 #endif
 
-    int nWindows = global::windowDelegate.nWindows();
+    int nWindows = global::windowDelegate->nWindows();
     _contexts.resize(nWindows);
 
     for (int i = 0; i < nWindows; ++i) {
@@ -420,7 +420,7 @@ void GUI::startFrame(float deltaTime, const glm::vec2& windowSize,
                      const glm::vec2& dpiScaling, const glm::vec2& mousePos,
                      uint32_t mouseButtonsPressed)
 {
-    const int iWindow = global::windowDelegate.currentWindowId();
+    const int iWindow = global::windowDelegate->currentWindowId();
     ImGui::SetCurrentContext(_contexts[iWindow]);
 
     ImGuiIO& io = ImGui::GetIO();
@@ -752,7 +752,7 @@ void GUI::render() {
 
     bool addDashboard = ImGui::Button("Add New Dashboard");
     if (addDashboard) {
-        global::scriptEngine.queueScript(
+        global::scriptEngine->queueScript(
             "openspace.addScreenSpaceRenderable({ Type = 'ScreenSpaceDashboard' });",
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -760,7 +760,7 @@ void GUI::render() {
 
     bool addDashboardCopy = ImGui::Button("Add Copy of Main Dashboard");
     if (addDashboardCopy) {
-        global::scriptEngine.queueScript(
+        global::scriptEngine->queueScript(
             "openspace.addScreenSpaceRenderable({ "
                 "Type = 'ScreenSpaceDashboard', UseMainDashboard = true "
             "});",

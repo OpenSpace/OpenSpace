@@ -50,5 +50,5 @@ asset.meta = {
     Description = [[Digital Universe asset for Galaxy Groups]],
     URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
     License = "AMNH Digital Universe",
-    Identifiers = "NearbyGalaxyGroups"
+    Identifiers = {"NearbyGalaxyGroups"}
 }

@@ -205,10 +205,21 @@ openspace.globebrowsing.parseInfoFile = function (file)
     HeightFile = nil
 
     local dir = openspace.directoryForPath(file)
-    dofile(file)
+    file_func, error = loadfile(file)
+    if file_func then
+        file_func()
+    else
+        openspace.printError('Error loading file "' .. file .. '": '.. error)
+        return nil, nil, nil, nil
+    end
 
     local name = Name or Identifier
     local identifier = Identifier or Name
+
+    if name == nil and identifier == nil then
+        openspace.printError('Error loading file "' .. file .. '": No "Name" or "Identifier" found')
+        return nil, nil, nil, nil
+    end
 
     local color = nil
     if ColorFile then

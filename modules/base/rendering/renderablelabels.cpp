@@ -399,7 +399,7 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
         _fontSize = dictionary.value<float>(FontSizeInfo.identifier);
     }
     _fontSize.onChange([&]() {
-        _font = global::fontManager.font(
+        _font = global::fontManager->font(
             "Mono",
             _fontSize,
             ghoul::fontrendering::FontManager::Outline::Yes,
@@ -612,7 +612,7 @@ void RenderableLabels::initialize() {
 void RenderableLabels::initializeGL() {
     if (_font == nullptr) {
         //size_t _fontSize = 50;
-        _font = global::fontManager.font(
+        _font = global::fontManager->font(
             "Mono",
             _fontSize,
             ghoul::fontrendering::FontManager::Outline::Yes,

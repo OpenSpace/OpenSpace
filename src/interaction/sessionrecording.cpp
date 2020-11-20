@@ -193,10 +193,10 @@ bool SessionRecording::startRecording(const std::string& filename) {
         }
         _recordFile << '\n';
 
-        _timestampRecordStarted = global::windowDelegate.applicationTime();
+        _timestampRecordStarted = global::windowDelegate->applicationTime();
 
         //Record the current delta time so this is preserved in recording
-        double currentDeltaTime = global::timeManager.deltaTime();
+        double currentDeltaTime = global::timeManager->deltaTime();
         std::string scriptCommandForInitializingDeltaTime =
             "openspace.time.setDeltaTime(" + std::to_string(currentDeltaTime) + ")";
         saveScriptKeyframe(scriptCommandForInitializingDeltaTime);
@@ -300,9 +300,9 @@ bool SessionRecording::startPlayback(std::string& filename,
         return false;
     }
     //Set time reference mode
-    double now = global::windowDelegate.applicationTime();
+    double now = global::windowDelegate->applicationTime();
     _timestampPlaybackStarted_application = now;
-    _timestampPlaybackStarted_simulation = global::timeManager.time().j2000Seconds();
+    _timestampPlaybackStarted_simulation = global::timeManager->time().j2000Seconds();
     _timestampApplicationStarted_simulation = _timestampPlaybackStarted_simulation - now;
     _playbackTimeReferenceMode = timeMode;
 
@@ -313,8 +313,8 @@ bool SessionRecording::startPlayback(std::string& filename,
         _playbackActive_time = true;
     }
 
-    global::navigationHandler.keyframeNavigator().setTimeReferenceMode(timeMode, now);
-    global::scriptScheduler.setTimeReferenceMode(timeMode);
+    global::navigationHandler->keyframeNavigator().setTimeReferenceMode(timeMode, now);
+    global::scriptScheduler->setTimeReferenceMode(timeMode);
 
     _setSimulationTimeWithNextCameraKeyframe = forceSimTimeAtStart;
     if (!playbackAddEntriesToTimeline()) {
@@ -332,9 +332,9 @@ bool SessionRecording::startPlayback(std::string& filename,
         _keyframesTime.size(), _keyframesScript.size(), (forceSimTimeAtStart ? 1 : 0)
     ));
 
-    global::navigationHandler.triggerPlaybackStart();
-    global::scriptScheduler.triggerPlaybackStart();
-    global::timeManager.triggerPlaybackStart();
+    global::navigationHandler->triggerPlaybackStart();
+    global::scriptScheduler->triggerPlaybackStart();
+    global::timeManager->triggerPlaybackStart();
     _state = SessionState::Playback;
 
     return true;
@@ -398,20 +398,20 @@ void SessionRecording::stopPlayback() {
 }
 
 void SessionRecording::cleanUpPlayback() {
-    global::navigationHandler.stopPlayback();
-    global::timeManager.stopPlayback();
+    global::navigationHandler->stopPlayback();
+    global::timeManager->stopPlayback();
 
-    Camera* camera = global::navigationHandler.camera();
+    Camera* camera = global::navigationHandler->camera();
     ghoul_assert(camera != nullptr, "Camera must not be nullptr");
     Scene* scene = camera->parent()->scene();
     if (!_timeline.empty()) {
         unsigned int p = _timeline[_idxTimeline_cameraPtrPrev].idxIntoKeyframeTypeArray;
-        const SceneGraphNode* node = scene->sceneGraphNode(_keyframesCamera[p].focusNode);
-        if (node) {
-            global::navigationHandler.orbitalNavigator().setFocusNode(node->identifier());
+        const SceneGraphNode* n = scene->sceneGraphNode(_keyframesCamera[p].focusNode);
+        if (n) {
+            global::navigationHandler->orbitalNavigator().setFocusNode(n->identifier());
         }
     }
-    global::scriptScheduler.stopPlayback();
+    global::scriptScheduler->stopPlayback();
 
     _playbackFile.close();
 
@@ -509,7 +509,7 @@ void SessionRecording::saveCameraKeyframe() {
         return;
     }
 
-    const SceneGraphNode* an = global::navigationHandler.orbitalNavigator().anchorNode();
+    const SceneGraphNode* an = global::navigationHandler->orbitalNavigator().anchorNode();
     if (!an) {
         return;
     }
@@ -521,7 +521,7 @@ void SessionRecording::saveCameraKeyframe() {
     Timestamps times = {
         kf._timestamp,
         kf._timestamp - _timestampRecordStarted,
-        global::timeManager.time().j2000Seconds()
+        global::timeManager->time().j2000Seconds()
     };
     saveSingleKeyframeCamera(kf, times, _recordingDataMode, _recordFile, _keyframeBuffer);
 }
@@ -583,7 +583,7 @@ void SessionRecording::saveTimeKeyframe() {
     Timestamps times = {
         kf._timestamp,
         kf._timestamp - _timestampRecordStarted,
-        global::timeManager.time().j2000Seconds()
+        global::timeManager->time().j2000Seconds()
     };
     saveSingleKeyframeTime(kf, times, _recordingDataMode, _recordFile, _keyframeBuffer);
 }
@@ -623,7 +623,7 @@ void SessionRecording::saveScriptKeyframe(std::string scriptToSave)
     Timestamps times = {
         sm._timestamp,
         sm._timestamp - _timestampRecordStarted,
-        global::timeManager.time().j2000Seconds()
+        global::timeManager->time().j2000Seconds()
     };
 
     saveSingleKeyframeScript(
@@ -698,9 +698,9 @@ void SessionRecording::render() {
     constexpr const char* FontName = "Mono";
     constexpr const float FontSizeFrameinfo = 32.f;
     std::shared_ptr<ghoul::fontrendering::Font> font =
-        global::fontManager.font(FontName, FontSizeFrameinfo);
+        global::fontManager->font(FontName, FontSizeFrameinfo);
 
-    glm::vec2 res = global::renderEngine.fontResolution();
+    glm::vec2 res = global::renderEngine->fontResolution();
     glm::vec2 penPosition = glm::vec2(
         res.x / 2 - 150.f,
         res.y / 4
@@ -858,14 +858,14 @@ double SessionRecording::currentTime() const {
         return _saveRenderingCurrentRecordedTime;
     }
     else if (_playbackTimeReferenceMode == KeyframeTimeRef::Relative_recordedStart) {
-        return (global::windowDelegate.applicationTime() -
+        return (global::windowDelegate->applicationTime() -
                 _timestampPlaybackStarted_application);
     }
     else if (_playbackTimeReferenceMode == KeyframeTimeRef::Absolute_simTimeJ2000) {
-        return global::timeManager.time().j2000Seconds();
+        return global::timeManager->time().j2000Seconds();
     }
     else {
-        return global::windowDelegate.applicationTime();
+        return global::windowDelegate->applicationTime();
     }
 }
 
@@ -873,7 +873,7 @@ double SessionRecording::fixedDeltaTimeDuringFrameOutput() const {
     // Check if renderable in focus is still resolving tile loading
     // do not adjust time while we are doing this
     const SceneGraphNode* focusNode =
-        global::navigationHandler.orbitalNavigator().anchorNode();
+        global::navigationHandler->orbitalNavigator().anchorNode();
     const Renderable* focusRenderable = focusNode->renderable();
     if (!focusRenderable || focusRenderable->renderedWithDesiredData()) {
         return _saveRenderingDeltaTime;
@@ -897,7 +897,7 @@ bool SessionRecording::playbackCamera() {
     );
 
     if (_setSimulationTimeWithNextCameraKeyframe) {
-        global::timeManager.setTimeNextFrame(Time(times.timeSim));
+        global::timeManager->setTimeNextFrame(Time(times.timeSim));
         _setSimulationTimeWithNextCameraKeyframe = false;
         _saveRenderingCurrentRecordedTime = times.timeRec;
     }
@@ -1362,11 +1362,11 @@ void SessionRecording::moveAheadInTime() {
         // Check if renderable in focus is still resolving tile loading
         // do not adjust time while we are doing this, or take screenshot
         const SceneGraphNode* focusNode =
-            global::navigationHandler.orbitalNavigator().anchorNode();
+            global::navigationHandler->orbitalNavigator().anchorNode();
         const Renderable* focusRenderable = focusNode->renderable();
         if (!focusRenderable || focusRenderable->renderedWithDesiredData()) {
             _saveRenderingCurrentRecordedTime += _saveRenderingDeltaTime;
-            global::renderEngine.takeScreenshot();
+            global::renderEngine->takeScreenshot();
         }
     }
 }
@@ -1541,17 +1541,17 @@ bool SessionRecording::processCameraKeyframe(double now) {
 
     // Need to activly update the focusNode position of the camera in relation to
     // the rendered objects will be unstable and actually incorrect
-    Camera* camera = global::navigationHandler.camera();
+    Camera* camera = global::navigationHandler->camera();
     Scene* scene = camera->parent()->scene();
 
     const SceneGraphNode* n = scene->sceneGraphNode(_keyframesCamera[prevIdx].focusNode);
 
     if (n) {
-        global::navigationHandler.orbitalNavigator().setFocusNode(n->identifier());
+        global::navigationHandler->orbitalNavigator().setFocusNode(n->identifier());
     }
 
     return interaction::KeyframeNavigator::updateCamera(
-        global::navigationHandler.camera(),
+        global::navigationHandler->camera(),
         prevPose,
         nextPose,
         t,
@@ -1572,7 +1572,7 @@ bool SessionRecording::processScriptKeyframe() {
             _keyframesScript,
             ([this]() { signalPlaybackFinishedForComponent(RecordedType::Script); })
         );
-        global::scriptEngine.queueScript(
+        global::scriptEngine->queueScript(
             nextScript,
             scripting::ScriptEngine::RemoteScripting::Yes
         );

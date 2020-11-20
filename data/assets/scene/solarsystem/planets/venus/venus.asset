@@ -82,5 +82,5 @@ asset.meta = {
     Author = "OpenSpace Team",
     URL = "http://openspaceproject.com",
     License = "MIT license",
-    Identifiers = "Venus,VenusLabel"
+    Identifiers = {"Venus", "VenusLabel"}
 }

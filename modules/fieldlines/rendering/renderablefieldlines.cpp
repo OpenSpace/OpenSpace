@@ -200,7 +200,7 @@ void RenderableFieldlines::initializeGL() {
         throw ghoul::RuntimeError("Error initializing");
     }
 
-    _program = global::renderEngine.buildRenderProgram(
+    _program = global::renderEngine->buildRenderProgram(
         "Fieldline",
         absPath("${MODULE_FIELDLINES}/shaders/fieldline_vs.glsl"),
         absPath("${MODULE_FIELDLINES}/shaders/fieldline_fs.glsl"),
@@ -215,7 +215,7 @@ void RenderableFieldlines::deinitializeGL() {
     _vertexPositionBuffer = 0;
 
     if (_program) {
-        global::renderEngine.removeRenderProgram(_program.get());
+        global::renderEngine->removeRenderProgram(_program.get());
         _program = nullptr;
     }
 }

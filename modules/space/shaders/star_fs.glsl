@@ -101,7 +101,7 @@ Fragment getFragment() {
     vec4 fullColor = vec4(color.rgb, textureColor.a);
     fullColor.a *= alphaValue;
     
-    if (fullColor.a == 0) {
+    if (fullColor.a < 0.001) {
         discard;
     }
 

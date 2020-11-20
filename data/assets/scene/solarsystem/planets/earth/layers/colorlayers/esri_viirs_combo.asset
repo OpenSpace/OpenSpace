@@ -56,5 +56,5 @@ asset.meta = {
     Author = "OpenSpace Tem",
     URL = "http://www.openspaceproject.com",
     License = "MIT License",
-    Identifiers = "ESRI_VIIRS_Combo"
+    Identifiers = {"ESRI_VIIRS_Combo"}
 }
