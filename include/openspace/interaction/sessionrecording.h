@@ -527,6 +527,9 @@ protected:
     double equivalentSimulationTime(double timeOs, double timeRec, double timeSim);
     double equivalentApplicationTime(double timeOs, double timeRec, double timeSim);
     bool handleRecordingFile(std::string filenameIn);
+    bool isPath(std::string& filename);
+    void removeTrailingPathSlashes(std::string& filename);
+    void extractFilenameFromPath(std::string& filename);
     bool playbackCamera();
     bool playbackTimeChange();
     bool playbackScript();
@@ -637,7 +640,7 @@ protected:
 
     DataMode _conversionDataMode = DataMode::Binary;
     int _conversionLineNum = 1;
-    const int _maximumRecursionDepth = 100;
+    const int _maximumRecursionDepth = 50;
 };
 
 class SessionRecording_legacy_0085 : public SessionRecording {

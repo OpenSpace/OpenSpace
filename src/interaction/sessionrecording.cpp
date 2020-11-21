@@ -110,8 +110,32 @@ bool SessionRecording::hasFileExtension(std::string filename, std::string extens
     }
 }
 
+bool SessionRecording::isPath(std::string& filename) {
+    size_t unixDelimiter = filename.find("/");
+    size_t windowsDelimiter = filename.find("\\");
+    return (unixDelimiter != std::string::npos || windowsDelimiter != std::string::npos);
+}
+
+void SessionRecording::removeTrailingPathSlashes(std::string& filename) {
+    while (filename.substr(filename.length() - 1, 1) == "/") {
+        filename.pop_back();
+    }
+    while (filename.substr(filename.length() - 1, 1) == "\\") {
+        filename.pop_back();
+    }
+}
+
+void SessionRecording::extractFilenameFromPath(std::string& filename) {
+    size_t unixDelimiter = filename.find_last_of("/");
+    if (unixDelimiter != std::string::npos)
+        filename = filename.substr(unixDelimiter + 1);
+    size_t windowsDelimiter = filename.find_last_of("\\");
+    if (windowsDelimiter != std::string::npos)
+        filename = filename.substr(windowsDelimiter + 1);
+}
+
 bool SessionRecording::handleRecordingFile(std::string filenameIn) {
-    if (filenameIn.find("/") != std::string::npos) {
+    if (isPath(filenameIn)) {
         LERROR("Recording filename must not contain path (/) elements");
         return false;
     }
@@ -220,7 +244,7 @@ bool SessionRecording::startPlayback(std::string& filename,
                                      KeyframeTimeRef timeMode,
                                      bool forceSimTimeAtStart)
 {
-    if (filename.find("/") != std::string::npos) {
+    if (isPath(filename)) {
         LERROR("Playback filename must not contain path (/) elements");
         return false;
     }
@@ -284,11 +308,11 @@ bool SessionRecording::startPlayback(std::string& filename,
         // past the header, version, and data type
         _playbackFile.close();
         _playbackFile.open(_playbackFilename, std::ifstream::in | std::ios::binary);
-        size_t headerSize = FileHeaderTitle.length() +
-            FileHeaderVersionLength +
-            sizeof(DataFormatBinaryTag) + sizeof('\n');
-        char hBuffer[headerSize];
-        _playbackFile.read(reinterpret_cast<char*>(hBuffer), headerSize);
+        size_t headerSize = FileHeaderTitle.length() + FileHeaderVersionLength
+            + sizeof(DataFormatBinaryTag) + sizeof('\n');
+        std::vector<char> hBuffer;
+        hBuffer.resize(headerSize);
+        _playbackFile.read(hBuffer.data(), headerSize);
     }
 
     if (!_playbackFile.is_open() || !_playbackFile.good()) {
@@ -1691,12 +1715,15 @@ void SessionRecording::readPlaybackFileHeader(const std::string filename,
                                               std::string& version,
                                               DataMode& mode)
 {
-    if (filename.find("/") != std::string::npos) {
-        throw ConversionError("Playback filename musn't contain path (/) elements");
+    if (isPath(const_cast<std::string&>(filename))) {
+        throw ConversionError("Playback filename must not contain path (/) elements");
     }
     std::string conversionInFilename = absPath("${RECORDINGS}/" + filename);
     if (!FileSys.fileExists(conversionInFilename)) {
-        throw ConversionError("Cannot find the specified playback file to convert.");
+        throw ConversionError(fmt::format(
+            "Cannot find the specified playback file '{}' to convert.",
+            conversionInFilename
+        ));
     }
 
     // Open in ASCII first
@@ -1748,12 +1775,9 @@ std::string SessionRecording::convertFile(std::string filename, int depth)
         if (fileVersion.compare(fileFormatVersion()) != 0) {
             conversionInFile.close();
             newFilename = getLegacyConversionResult(filename, depth + 1);
-
-            while (newFilename.substr(newFilename.length() - 1, 1) == "/") {
-                newFilename.pop_back();
-            }
-            if (newFilename.find("/") != std::string::npos) {
-                newFilename = newFilename.substr(newFilename.find_last_of("/") + 1);
+            removeTrailingPathSlashes(newFilename);
+            if (isPath(newFilename)) {
+                extractFilenameFromPath(newFilename);
             }
             if (filename == newFilename) {
                 return filename;
@@ -1965,7 +1989,7 @@ bool SessionRecording::convertEntries(std::string& inFilename, std::ifstream& in
 
 std::string SessionRecording::getLegacyConversionResult(std::string filename, int depth) {
     SessionRecording_legacy_0085 legacy;
-    return legacy.convertFile(filename, depth + 1);
+    return legacy.convertFile(filename, depth);
 }
 
 std::string SessionRecording_legacy_0085::getLegacyConversionResult(std::string filename,
