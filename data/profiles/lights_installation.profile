@@ -102,6 +102,11 @@
       "name": "Scene.Constellations.Renderable.Opacity",
       "type": "setPropertyValueSingle",
       "value": "0.0"
+    },
+    {
+      "name": "Scene.Mars.Renderable.Layers.ColorLayers.Themis_IR_Day_Sweden.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "true"
     }
   ],
   "time": {

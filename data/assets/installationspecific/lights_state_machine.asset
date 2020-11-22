@@ -107,12 +107,18 @@ asteroidsState = {
 ----------------------------------------------------------------
 local marsTargetDistance = 26000000
 
+local marsDetailedLayer = "Scene.Mars.Renderable.Layers.ColorLayers.Themis_IR_Day_Sweden"
+
 marsState = {
-    Identifier = "Mars", 
+    Identifier = "Mars",
     Enter = [[
         openspace.printInfo('Entering Mars State')
         ]] .. util.setOrbitSpeedFactor(0.2) .. [[
         ]] .. util.orbitOnArrival() .. [[
+        -- Make sure that the high-detailed layer is not visible when we arrive
+        openspace.setPropertyValueSingle(
+            "]] .. marsDetailedLayer .. [[.Settings.Opacity", 0
+        )
     ]],
     Exit = [[
         openspace.printInfo('Exiting Mars State')
