@@ -1012,7 +1012,6 @@ std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTC
 }
 
 int main(int argc, char** argv) {
-    glfwInit();
 
 #ifdef WIN32
     SetUnhandledExceptionFilter(generateMiniDump);
@@ -1182,6 +1181,7 @@ int main(int argc, char** argv) {
         if (!win.wasLaunchSelected()) {
             exit(EXIT_SUCCESS);
         }
+        glfwInit();
 
         global::configuration->profile = win.selectedProfile();
         windowConfiguration = selectedSgctProfileFromLauncher(
@@ -1191,6 +1191,8 @@ int main(int argc, char** argv) {
             labelFromCfgFile,
             xmlExt
         );
+    } else {
+        glfwInit();
     }
     if (global::configuration->profile.empty()) {
         LFATAL("Cannot launch with an empty profile");
