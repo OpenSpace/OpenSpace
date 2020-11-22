@@ -123,6 +123,8 @@ marsState = {
     Exit = [[
         openspace.printInfo('Exiting Mars State')
         ]] .. util.stopOrbiting() .. [[
+        -- Make sure that we look at mars when we leave it
+        ]] .. util.changeAnchor('Mars', 3) .. [[
     ]]
 }
 
@@ -299,7 +301,7 @@ transitions = {
     {
         From = "Mars", 
         To = "Default", 
-        Action = util.applyLinearFlight(defaultTargetDistance, 1.5)
+        Action = util.applyLinearFlight(defaultTargetDistance, 1.0)
     },
     {
         From = "Default", 
