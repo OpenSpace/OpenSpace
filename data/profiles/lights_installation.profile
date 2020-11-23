@@ -107,6 +107,16 @@
       "value": "0.0"
     },
     {
+      "name": "Scene.ConstellationArt*.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "true"
+    },
+    {
+      "name": "Scene.ConstellationArt*.Renderable.Opacity",
+      "type": "setPropertyValue",
+      "value": "0.0"
+    },
+    {
       "name": "Scene.Mars.Renderable.Layers.ColorLayers.Themis_IR_Day_Sweden.Enabled",
       "type": "setPropertyValueSingle",
       "value": "true"

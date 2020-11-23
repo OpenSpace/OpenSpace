@@ -136,29 +136,47 @@ local constellationsFadeInOutDuration = 4
 
 local constellationsTargetDistance = 2E9
 
-local fadeLinesToOpacity = function(targetValue) 
+local fadeConstellationsToOpacity = function(targetValue) 
     return [[
         openspace.setPropertyValueSingle(
             "Scene.Constellations.Renderable.Opacity", 
             ]] .. tostring(targetValue) .. [[,
             ]] .. tostring(constellationsFadeInOutDuration) .. [[
         )
+        openspace.setPropertyValue(
+            "Scene.ConstellationArt*.Renderable.Opacity",
+            ]] .. tostring(targetValue / 3.0) .. [[,
+            ]] .. tostring(constellationsFadeInOutDuration) .. [[
+        )
+    ]]
+end
+
+local fadePlanetTrailsToOpacity = function(value)
+    return [[
+        openspace.setPropertyValue(
+            "{planetTrail_solarSystem}.Renderable.Opacity",
+            ]] .. tostring(value) .. [[,
+            ]] .. tostring(constellationsFadeInOutDuration) .. [[
+        );
     ]]
 end
 
 constellationsState = {
-    Identifier = "Constellations", 
+    Identifier = "Constellations",
     Enter = [[
         openspace.printInfo('Entering Constellations State')
         ]] .. util.setOrbitSpeedFactor(0.2) .. [[
         ]] .. util.orbitOnArrival() .. [[
-        ]] .. fadeLinesToOpacity(constellationsLinesMaxOpacity) .. [[
+        ]] .. fadeConstellationsToOpacity(constellationsLinesMaxOpacity) .. [[
+        ]] .. fadePlanetTrailsToOpacity(0.0) .. [[
     ]],
-    -- TODO: fade in constellation images when we have them laoded in the profile
     Exit = [[
         openspace.printInfo('Exiting Constellations State')
         ]] .. util.stopOrbiting() .. [[
-        ]] .. fadeLinesToOpacity(0.0) .. [[
+        ]] .. fadeConstellationsToOpacity(0.0) .. [[
+        ]] .. fadePlanetTrailsToOpacity(1.0) .. [[
+        -- Make sure we are looking at earth when leaving
+        ]] .. util.changeAnchor('Earth', 4) .. [[
     ]]
 }
 
@@ -166,24 +184,24 @@ constellationsState = {
 -- COMBINE STATES AND TRANSITIONS
 ----------------------------------------------------------------
 states = { 
-    defaultState, 
-    earthState, 
-    galaxiesState, 
-    asteroidsState, 
-    marsState, 
+    defaultState,
+    earthState,
+    galaxiesState,
+    asteroidsState,
+    marsState,
     constellationsState
 }
 
 transitions = {
     -- 1. Earth
     {
-        From = "Earth", 
-        To = "Default", 
+        From = "Earth",
+        To = "Default",
         Action = util.applyLinearFlight(defaultTargetDistance, 1.5)
     },
     {
-        From = "Default", 
-        To = "Earth", 
+        From = "Default",
+        To = "Earth",
         Action = [[
             ]] .. util.disableLinearFlight() .. [[
             ]] .. util.setCurveTypeToZoomOverview() .. [[
@@ -193,8 +211,8 @@ transitions = {
     },
     -- Mars - Earth
     {
-        From = "Earth", 
-        To = "Mars", 
+        From = "Earth",
+        To = "Mars",
         Action = [[
             ]] .. util.disableLinearFlight() .. [[
             ]] .. util.setCurveTypeToZoomOverview() .. [[
@@ -203,8 +221,8 @@ transitions = {
         ]]
     },
     {
-        From = "Mars", 
-        To = "Earth", 
+        From = "Mars",
+        To = "Earth",
         Action = [[
             ]] .. util.disableLinearFlight() .. [[
             ]] .. util.setCurveTypeToZoomOverview() .. [[
@@ -214,64 +232,64 @@ transitions = {
     },
     -- 2. Galaxies
     {
-        From = "Galaxies", 
-        To = "Default", 
+        From = "Galaxies",
+        To = "Default",
         Action = util.applyLinearFlight(defaultTargetDistance, 1.5)
     },
     {
-        From = "Default", 
-        To = "Galaxies", 
+        From = "Default",
+        To = "Galaxies",
         Action = util.applyLinearFlight(galaxiesTargetDistance, 1.5)
     },
     -- to Galaxies
     {
         From = "Earth",
-        To = "Galaxies", 
+        To = "Galaxies",
         Action = util.applyLinearFlight(galaxiesTargetDistance, 1.5)
     },
     {
         From = "Mars",
-        To = "Galaxies", 
+        To = "Galaxies",
         Action = util.applyLinearFlight(galaxiesTargetDistance, 1.5)
     },
     {
         From = "Asteroids",
-        To = "Galaxies", 
+        To = "Galaxies",
         Action = util.applyLinearFlight(galaxiesTargetDistance, 1.5)
     },
     {
         From = "Constellations",
-        To = "Galaxies", 
+        To = "Galaxies",
         Action = util.applyLinearFlight(galaxiesTargetDistance, 1.5)
     },
     -- from Galaxies
     {
-        From = "Galaxies", 
-        To = "Earth", 
+        From = "Galaxies",
+        To = "Earth",
         Action = [[
             ]] .. util.changeAnchor('Earth', 1) .. [[
             ]] .. util.applyLinearFlight(earthTargetDistance, 1.5) .. [[
         ]]
     },
     {
-        From = "Galaxies", 
-        To = "Asteroids", 
+        From = "Galaxies",
+        To = "Asteroids",
         Action = [[
             ]] .. util.changeAnchor('Sun', 1) .. [[
             ]] .. util.applyLinearFlight(asteroidsTargetDistance, 1.5) .. [[
         ]]
     },
     {
-        From = "Galaxies", 
-        To = "Mars", 
+        From = "Galaxies",
+        To = "Mars",
         Action = [[
             ]] .. util.changeAnchor('Mars', 1) .. [[
             ]] .. util.applyLinearFlight(marsTargetDistance, 1.5) .. [[
         ]]
     },
     {
-        From = "Galaxies", 
-        To = "Constellations", 
+        From = "Galaxies",
+        To = "Constellations",
         Action = [[
             ]] .. util.changeAnchor('Earth', 1) .. [[
             ]] .. util.applyLinearFlight(constellationsTargetDistance, 1.5) .. [[
@@ -279,15 +297,15 @@ transitions = {
     },
     -- 3. Asteroids
     {
-        From = "Asteroids", 
-        To = "Default", 
+        From = "Asteroids",
+        To = "Default",
         Action = [[
             ]] .. util.applyLinearFlight(defaultTargetDistance, 1.5) .. [[
         ]]
     },
     {
-        From = "Default", 
-        To = "Asteroids", 
+        From = "Default",
+        To = "Asteroids",
         Action = [[
             ]] .. util.disableLinearFlight() .. [[
             ]] .. util.setCurveTypeToZoomOverview() .. [[
@@ -299,13 +317,13 @@ transitions = {
     },
     -- 4. Mars
     {
-        From = "Mars", 
-        To = "Default", 
+        From = "Mars",
+        To = "Default",
         Action = util.applyLinearFlight(defaultTargetDistance, 1.0)
     },
     {
-        From = "Default", 
-        To = "Mars", 
+        From = "Default",
+        To = "Mars",
         Action = [[
             ]] .. util.disableLinearFlight() .. [[
             ]] .. util.setCurveTypeToZoomOverview() .. [[
@@ -315,13 +333,13 @@ transitions = {
     },
     -- 5. Constellations
     {
-        From = "Constellations", 
-        To = "Default", 
+        From = "Constellations",
+        To = "Default",
         Action = util.applyLinearFlight(defaultTargetDistance, 1.5)
     },
     {
-        From = "Default", 
-        To = "Constellations", 
+        From = "Default",
+        To = "Constellations",
         Action = [[
             ]] .. util.changeAnchor('Earth', 2) .. [[
             ]] .. util.applyLinearFlight(constellationsTargetDistance, 1) .. [[
@@ -331,8 +349,8 @@ transitions = {
 
 asset.onInitialize(function()
     openspace.statemachine.createStateMachine({
-        States = states, 
+        States = states,
         Transitions = transitions
     })
-	openspace.statemachine.setInitialState("Earth");
+    openspace.statemachine.setInitialState("Earth");
 end)
