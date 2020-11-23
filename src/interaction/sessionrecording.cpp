@@ -252,6 +252,10 @@ bool SessionRecording::startPlayback(std::string& filename,
     //Run through conversion in case file is older. Does nothing if the file format
     // is up-to-date
     filename = convertFile(filename);
+    if (filename.compare("Legacy currently unsupported") == 0) {
+        LERROR("Playback of legacy format versions is currently not supported.");
+        return false;
+    }
     if (FileSys.fileExists(filename)) {
         absFilename = filename;
     }
@@ -993,6 +997,7 @@ bool SessionRecording::readCameraKeyframeBinary(Timestamps& times,
     times.timeOs = readFromPlayback<double>(file);
     times.timeRec = readFromPlayback<double>(file);
     times.timeSim = readFromPlayback<double>(file);
+
     try {
         kf.read(&file);
     }
@@ -1665,7 +1670,7 @@ void SessionRecording::saveKeyframeToFileBinary(unsigned char* buffer,
                                                 size_t size,
                                                 std::ofstream& file)
 {
-    file.write(reinterpret_cast<const char*>(buffer), size);
+    file.write(reinterpret_cast<char*>(buffer), size);
 }
 
 void SessionRecording::saveKeyframeToFile(std::string entry, std::ofstream& file) {
@@ -1773,6 +1778,8 @@ std::string SessionRecording::convertFile(std::string filename, int depth)
         // to the next level down in the legacy subclasses until we get the right
         // version, then proceed with conversion from there.
         if (fileVersion.compare(fileFormatVersion()) != 0) {
+            //Temporary placeholder for rejecting legacy versions:
+            return "Legacy currently unsupported";
             conversionInFile.close();
             newFilename = getLegacyConversionResult(filename, depth + 1);
             removeTrailingPathSlashes(newFilename);
@@ -1851,8 +1858,6 @@ bool SessionRecording::convertEntries(std::string& inFilename, std::ifstream& in
 {
     bool conversionStatusOk = true;
     std::string lineParsing;
-    //std::shared_ptr<unsigned char[]> buffer(new unsigned char[_saveBufferMaxSize_bytes]);
-    unsigned char* buffer = new unsigned char[_saveBufferMaxSize_bytes];
 
     if (mode == DataMode::Binary) {
         unsigned char frameType;
@@ -1876,7 +1881,7 @@ bool SessionRecording::convertEntries(std::string& inFilename, std::ifstream& in
                     lineNum,
                     lineParsing,
                     outFile,
-                    reinterpret_cast<unsigned char*>(buffer)
+                    _keyframeBuffer
                 );
             }
             else if (frameType == HeaderTimeBinary) {
@@ -1886,7 +1891,7 @@ bool SessionRecording::convertEntries(std::string& inFilename, std::ifstream& in
                     lineNum,
                     lineParsing,
                     outFile,
-                    buffer
+                    _keyframeBuffer
                 );
             }
             else if (frameType == HeaderScriptBinary) {
@@ -1897,7 +1902,7 @@ bool SessionRecording::convertEntries(std::string& inFilename, std::ifstream& in
                         lineNum,
                         lineParsing,
                         outFile,
-                        buffer
+                        _keyframeBuffer
                     );
                 }
                 catch (ConversionError& c) {
@@ -1936,7 +1941,7 @@ bool SessionRecording::convertEntries(std::string& inFilename, std::ifstream& in
                     lineNum,
                     lineParsing,
                     outFile,
-                    buffer
+                    _keyframeBuffer
                 );
             }
             else if (entryType == HeaderTimeAscii) {
@@ -1946,7 +1951,7 @@ bool SessionRecording::convertEntries(std::string& inFilename, std::ifstream& in
                     lineNum,
                     lineParsing,
                     outFile,
-                    buffer
+                    _keyframeBuffer
                 );
             }
             else if (entryType == HeaderScriptAscii) {
@@ -1957,7 +1962,7 @@ bool SessionRecording::convertEntries(std::string& inFilename, std::ifstream& in
                         lineNum,
                         lineParsing,
                         outFile,
-                        buffer
+                        _keyframeBuffer
                     );
                 }
                 catch (ConversionError& c) {
@@ -1980,9 +1985,6 @@ bool SessionRecording::convertEntries(std::string& inFilename, std::ifstream& in
             "Finished parsing {} entries from conversion file {}",
             lineNum, inFilename
         ));
-    }
-    if (buffer != nullptr) {
-        delete buffer;
     }
     return conversionStatusOk;
 }

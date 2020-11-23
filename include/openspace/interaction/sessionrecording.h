@@ -76,7 +76,7 @@ public:
     static const char DataFormatBinaryTag = 'B';
     static const size_t keyframeHeaderSize_bytes = 33;
     static const size_t saveBufferCameraSize_min = 82;
-    static const size_t saveBufferStringSize_max = 1000;
+    static const size_t saveBufferStringSize_max = 2000;
     static const size_t _saveBufferMaxSize_bytes = keyframeHeaderSize_bytes +
         + saveBufferCameraSize_min + saveBufferStringSize_max;
 
