@@ -3,7 +3,7 @@ local util = asset.require('./utility_functions')
 ---------------------------------------------------------------- 
 -- DEFAULT STATE - to reduce number of transitions
 ----------------------------------------------------------------
-local defaultTargetDistance = 3.0E12
+local defaultTargetDistance = 2.5E11
 
 defaultState = {
     Identifier = "Default", 
@@ -32,8 +32,7 @@ earthState = {
 ---------------------------------------------------------------- 
 -- 2. GALAXY STATE
 ----------------------------------------------------------------
-local fourGigaParsecsInMeter = 1.2342712E26
-local galaxiesTargetDistance = fourGigaParsecsInMeter
+local galaxiesTargetDistance =  2.2E25; -- 0.7 Giga parsecs in meter
 
 galaxiesState = {
     Identifier = "Galaxies", 
