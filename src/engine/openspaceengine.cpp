@@ -370,7 +370,7 @@ void OpenSpaceEngine::initialize() {
 
     global::renderEngine->initialize();
 
-    for (const std::function<void()>& func : global::callback::initialize) {
+    for (const std::function<void()>& func : *global::callback::initialize) {
         ZoneScopedN("[Module] initialize")
 
         func();
@@ -663,7 +663,7 @@ void OpenSpaceEngine::initializeGL() {
     global::moduleEngine->initializeGL();
 
 
-    for (const std::function<void()>& func : global::callback::initializeGL) {
+    for (const std::function<void()>& func : *global::callback::initializeGL) {
         ZoneScopedN("[Module] initializeGL")
         func();
     }
@@ -865,7 +865,7 @@ void OpenSpaceEngine::deinitialize() {
 
     LTRACE("OpenSpaceEngine::deinitialize(begin)");
 
-    for (const std::function<void()>& func : global::callback::deinitialize) {
+    for (const std::function<void()>& func : *global::callback::deinitialize) {
         func();
     }
 
@@ -914,7 +914,7 @@ void OpenSpaceEngine::deinitializeGL() {
     global::openSpaceEngine->_scene = nullptr;
     global::renderEngine->setScene(nullptr);
 
-    for (const std::function<void()>& func : global::callback::deinitializeGL) {
+    for (const std::function<void()>& func : *global::callback::deinitializeGL) {
         func();
     }
 
@@ -1125,7 +1125,7 @@ void OpenSpaceEngine::preSynchronization() {
         global::interactionMonitor->updateActivityState();
     }
 
-    for (const std::function<void()>& func : global::callback::preSync) {
+    for (const std::function<void()>& func : *global::callback::preSync) {
         ZoneScopedN("[Module] preSync")
 
         func();
@@ -1180,7 +1180,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
         _scene->camera()->invalidateCache();
     }
 
-    for (const std::function<void()>& func : global::callback::postSyncPreDraw) {
+    for (const std::function<void()>& func : *global::callback::postSyncPreDraw) {
         ZoneScopedN("[Module] postSyncPreDraw")
 
         func();
@@ -1226,7 +1226,7 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& view
 
     global::renderEngine->render(sceneMatrix, viewMatrix, projectionMatrix);
 
-    for (const std::function<void()>& func : global::callback::render) {
+    for (const std::function<void()>& func : *global::callback::render) {
         ZoneScopedN("[Module] render")
 
         func();
@@ -1251,7 +1251,7 @@ void OpenSpaceEngine::drawOverlays() {
         global::sessionRecording->render();
     }
 
-    for (const std::function<void()>& func : global::callback::draw2D) {
+    for (const std::function<void()>& func : *global::callback::draw2D) {
         ZoneScopedN("[Module] draw2D")
 
         func();
@@ -1267,7 +1267,7 @@ void OpenSpaceEngine::postDraw() {
 
     global::renderEngine->postDraw();
 
-    for (const std::function<void()>& func : global::callback::postDraw) {
+    for (const std::function<void()>& func : *global::callback::postDraw) {
         ZoneScopedN("[Module] postDraw")
 
         func();
@@ -1317,7 +1317,7 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
     }
 
     using F = std::function<bool (Key, KeyModifier, KeyAction)>;
-    for (const F& func : global::callback::keyboard) {
+    for (const F& func : *global::callback::keyboard) {
         const bool isConsumed = func(key, mod, action);
         if (isConsumed) {
             return;
@@ -1340,7 +1340,7 @@ void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier)
     ZoneScoped
 
     using F = std::function<bool (unsigned int, KeyModifier)>;
-    for (const F& func : global::callback::character) {
+    for (const F& func : *global::callback::character) {
         bool isConsumed = func(codepoint, modifier);
         if (isConsumed) {
             return;
@@ -1358,7 +1358,7 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button,
     ZoneScoped
 
     using F = std::function<bool (MouseButton, MouseAction, KeyModifier)>;
-    for (const F& func : global::callback::mouseButton) {
+    for (const F& func : *global::callback::mouseButton) {
         bool isConsumed = func(button, action, mods);
         if (isConsumed) {
             // If the mouse was released, we still want to forward it to the navigation
@@ -1390,7 +1390,7 @@ void OpenSpaceEngine::mousePositionCallback(double x, double y) {
     ZoneScoped
 
     using F = std::function<void (double, double)>;
-    for (const F& func : global::callback::mousePosition) {
+    for (const F& func : *global::callback::mousePosition) {
         func(x, y);
     }
 
@@ -1404,7 +1404,7 @@ void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY) {
     ZoneScoped
 
     using F = std::function<bool (double, double)>;
-    for (const F& func : global::callback::mouseScrollWheel) {
+    for (const F& func : *global::callback::mouseScrollWheel) {
         bool isConsumed = func(posX, posY);
         if (isConsumed) {
             return;
@@ -1419,7 +1419,7 @@ void OpenSpaceEngine::touchDetectionCallback(TouchInput input) {
     ZoneScoped
 
     using F = std::function<bool (TouchInput)>;
-    for (const F& func : global::callback::touchDetected) {
+    for (const F& func : *global::callback::touchDetected) {
         bool isConsumed = func(input);
         if (isConsumed) {
             return;
@@ -1431,7 +1431,7 @@ void OpenSpaceEngine::touchUpdateCallback(TouchInput input) {
     ZoneScoped
 
     using F = std::function<bool(TouchInput)>;
-    for (const F& func : global::callback::touchUpdated) {
+    for (const F& func : *global::callback::touchUpdated) {
         bool isConsumed = func(input);
         if (isConsumed) {
             return;
@@ -1443,7 +1443,7 @@ void OpenSpaceEngine::touchExitCallback(TouchInput input) {
     ZoneScoped
 
     using F = std::function<void(TouchInput)>;
-    for (const F& func : global::callback::touchExit) {
+    for (const F& func : *global::callback::touchExit) {
         func(input);
     }
 }

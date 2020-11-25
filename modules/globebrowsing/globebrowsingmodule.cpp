@@ -216,7 +216,7 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
 
 
     // Initialize
-    global::callback::initializeGL.emplace_back([&]() {
+    global::callback::initializeGL->emplace_back([&]() {
         ZoneScopedN("GlobeBrowsingModule")
 
         _tileCache = std::make_unique<cache::MemoryAwareTileCache>(_tileCacheSizeMB);
@@ -232,7 +232,7 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
         addPropertySubOwner(GdalWrapper::ref());
     });
 
-    global::callback::deinitializeGL.emplace_back([]() {
+    global::callback::deinitializeGL->emplace_back([]() {
         ZoneScopedN("GlobeBrowsingModule")
 
         tileprovider::deinitializeDefaultTile();
@@ -240,14 +240,14 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
 
 
     // Render
-    global::callback::render.emplace_back([&]() {
+    global::callback::render->emplace_back([&]() {
         ZoneScopedN("GlobeBrowsingModule")
 
         _tileCache->update();
     });
 
     // Deinitialize
-    global::callback::deinitialize.emplace_back([&]() {
+    global::callback::deinitialize->emplace_back([&]() {
         ZoneScopedN("GlobeBrowsingModule")
 
         GdalWrapper::destroy();

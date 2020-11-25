@@ -24,96 +24,48 @@
 
 #include <openspace/engine/globalscallbacks.h>
 
-namespace openspace::global::detail {
-
-std::vector<std::function<void()>>& gInitialize() {
-    static std::vector<std::function<void()>> g;
-    return g;
-}
-
-std::vector<std::function<void()>>& gDeinitialize() {
-    static std::vector<std::function<void()>> g;
-    return g;
-}
-
-std::vector<std::function<void()>>& gInitializeGL() {
-    static std::vector<std::function<void()>> g;
-    return g;
-}
-
-std::vector<std::function<void()>>& gDeinitializeGL() {
-    static std::vector<std::function<void()>> g;
-    return g;
-}
-
-std::vector<std::function<void()>>& gPreSync() {
-    static std::vector<std::function<void()>> g;
-    return g;
-}
-
-std::vector<std::function<void()>>& gPostSyncPreDraw() {
-    static std::vector<std::function<void()>> g;
-    return g;
-}
-
-std::vector<std::function<void()>>& gRender() {
-    static std::vector<std::function<void()>> g;
-    return g;
-}
-
-std::vector<std::function<void()>>& gDraw2D() {
-    static std::vector<std::function<void()>> g;
-    return g;
-}
-
-std::vector<std::function<void()>>& gPostDraw() {
-    static std::vector<std::function<void()>> g;
-    return g;
-}
-
-std::vector<std::function<bool(Key, KeyModifier, KeyAction)>>& gKeyboard() {
-    static std::vector<std::function<bool(Key, KeyModifier, KeyAction)>> g;
-    return g;
-}
-
-std::vector<std::function<bool(unsigned int, KeyModifier)>>& gCharacter() {
-    static std::vector<std::function<bool(unsigned int, KeyModifier)>> g;
-    return g;
-}
-
-std::vector<std::function<bool(MouseButton, MouseAction, KeyModifier)>>& gMouseButton() {
-    static std::vector<std::function<bool(MouseButton, MouseAction, KeyModifier)>> g;
-    return g;
-}
-
-std::vector<std::function<void(double, double)>>& gMousePosition() {
-    static std::vector<std::function<void(double, double)>> g;
-    return g;
-}
-
-std::vector<std::function<bool(double, double)>>& gMouseScrollWheel() {
-    static std::vector<std::function<bool(double, double)>> g;
-    return g;
-}
-
-std::vector<std::function<bool(TouchInput)>>& gTouchDetected() {
-    static std::vector<std::function<bool(TouchInput)>> g;
-    return g;
-}
-
-std::vector<std::function<bool(TouchInput)>>& gTouchUpdated() {
-    static std::vector<std::function<bool(TouchInput)>> g;
-    return g;
-}
-
-std::vector<std::function<void(TouchInput)>>& gTouchExit() {
-    static std::vector<std::function<void(TouchInput)>> g;
-    return g;
-}
-
-} // namespace openspace::global::detail
-
 namespace openspace::global::callback {
+
+void create() {
+    initialize = new std::vector<std::function<void()>>;
+    deinitialize = new std::vector<std::function<void()>>;
+    initializeGL = new std::vector<std::function<void()>>;
+    deinitializeGL = new std::vector<std::function<void()>>;
+    preSync = new std::vector<std::function<void()>> ;
+    postSyncPreDraw = new std::vector<std::function<void()>> ;
+    render = new std::vector<std::function<void()>>;
+    draw2D = new std::vector<std::function<void()>>;
+    postDraw = new std::vector<std::function<void()>>; 
+    keyboard = new std::vector<std::function<bool(Key, KeyModifier, KeyAction)>>;
+    character = new std::vector<std::function<bool(unsigned int, KeyModifier)>>;
+    mouseButton =
+        new std::vector<std::function<bool(MouseButton, MouseAction, KeyModifier)>>;
+    mousePosition = new std::vector<std::function<void(double, double)>>;
+    mouseScrollWheel = new std::vector<std::function<bool(double, double)>>;
+    touchDetected = new std::vector<std::function<bool(TouchInput)>>;
+    touchUpdated = new std::vector<std::function<bool(TouchInput)>>;
+    touchExit = new std::vector<std::function<void(TouchInput)>>;
+}
+
+void destroy() {
+    delete touchExit;
+    delete touchUpdated;
+    delete touchDetected;
+    delete mouseScrollWheel;
+    delete mousePosition;
+    delete mouseButton;
+    delete character;
+    delete keyboard;
+    delete postDraw;
+    delete draw2D;
+    delete render;
+    delete postSyncPreDraw;
+    delete preSync;
+    delete deinitializeGL;
+    delete initializeGL;
+    delete deinitialize;
+    delete initialize;
+}
 
 void(*webBrowserPerformanceHotfix)() = nullptr;
 

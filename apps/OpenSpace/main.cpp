@@ -224,6 +224,8 @@ void mainInitFunc(GLFWwindow*) {
     global::openSpaceEngine->initialize();
     LDEBUG("Initializing OpenSpace Engine finished");
 
+#ifndef __APPLE__
+    // Apparently: "Cocoa: Regular windows do not have icons on macOS"
     {
         std::string path = absPath("${DATA}/openspace-icon.png");
         int x;
@@ -242,6 +244,7 @@ void mainInitFunc(GLFWwindow*) {
 
         stbi_image_free(icons[0].pixels);
     }
+#endif // __APPLE__
 
     currentWindow = Engine::instance().windows().front().get();
     currentViewport = currentWindow->viewports().front().get();

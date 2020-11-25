@@ -77,7 +77,8 @@ function(run_cef_macosx_config CEF_ROOT module_path)
 
     add_dependencies(${CEF_TARGET} libcef_dll_wrapper "${CEF_HELPER_TARGET}")
 
-    target_link_libraries(${CEF_TARGET} PUBLIC libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
+    # target_link_libraries(${CEF_TARGET} PUBLIC libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
+    target_link_libraries(${CEF_TARGET} PUBLIC libcef_dll_wrapper ${CEF_STANDARD_LIBS})
     set_target_properties(${CEF_TARGET} PROPERTIES
         RESOURCE "${WEBBROWSER_RESOURCES_SRCS}"
         MACOSX_BUNDLE_INFO_PLIST ${module_path}/mac/Info.plist

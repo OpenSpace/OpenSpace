@@ -26,6 +26,7 @@
 
 #include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/configuration.h>
+#include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/syncengine.h>
@@ -103,6 +104,8 @@ namespace openspace::global {
 
 void create() {
     ZoneScoped
+
+    callback::create();
 
     std::byte* currentPos = DataStorage.data();
 
@@ -355,6 +358,8 @@ void destroy() {
     fontManager->~FontManager();
 
     std::fill(DataStorage.begin(), DataStorage.end(), std::byte(0));
+
+    callback::destroy();
 }
 
 void deinitialize() {

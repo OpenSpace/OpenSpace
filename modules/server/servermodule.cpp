@@ -73,7 +73,7 @@ ServerInterface* ServerModule::serverInterfaceByIdentifier(const std::string& id
 }
 
 void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
-    global::callback::preSync.emplace_back([this]() {
+    global::callback::preSync->emplace_back([this]() {
         ZoneScopedN("ServerModule")
 
         preSync();
