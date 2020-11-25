@@ -3,7 +3,7 @@ local util = asset.require('./utility_functions')
 ---------------------------------------------------------------- 
 -- DEFAULT STATE - to reduce number of transitions
 ----------------------------------------------------------------
-local defaultTargetDistance = 2.5E11
+local defaultTargetDistance = 3E11
 
 defaultState = {
     Identifier = "Default", 
@@ -14,7 +14,7 @@ defaultState = {
 ---------------------------------------------------------------- 
 -- 1. EARTH STATE
 ----------------------------------------------------------------
-local earthTargetDistance = 26000000
+local earthTargetDistance = 1.5E7
 
 earthState = {
     Identifier = "Earth", 
@@ -104,7 +104,7 @@ asteroidsState = {
 ---------------------------------------------------------------- 
 -- 4. MARS
 ----------------------------------------------------------------
-local marsTargetDistance = 26000000
+local marsTargetDistance = 7E6
 
 local marsDetailedLayer = "Scene.Mars.Renderable.Layers.ColorLayers.Themis_IR_Day_Sweden"
 
