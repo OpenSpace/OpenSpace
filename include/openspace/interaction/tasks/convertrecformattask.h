@@ -62,6 +62,7 @@ private:
     std::string _version;
 
     std::string _valueFunctionLua;
+    SessionRecording* sessRec;
 };
 
 } // namespace openspace::interaction

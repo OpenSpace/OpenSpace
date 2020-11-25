@@ -252,10 +252,6 @@ bool SessionRecording::startPlayback(std::string& filename,
     //Run through conversion in case file is older. Does nothing if the file format
     // is up-to-date
     filename = convertFile(filename);
-    if (filename.compare("Legacy currently unsupported") == 0) {
-        LERROR("Playback of legacy format versions is currently not supported.");
-        return false;
-    }
     if (FileSys.fileExists(filename)) {
         absFilename = filename;
     }
@@ -938,9 +934,9 @@ bool SessionRecording::playbackCamera() {
     return success;
 }
 
-bool SessionRecording::convertCamera(std::ifstream& inFile, DataMode mode, int lineNum,
-                                     std::string& inputLine, std::ofstream& outFile,
-                                     unsigned char* buffer)
+bool SessionRecording::convertCamera(std::stringstream& inStream, DataMode mode,
+                                     int lineNum, std::string& inputLine,
+                                     std::ofstream& outFile, unsigned char* buffer)
 {
     Timestamps times;
     datamessagestructures::CameraKeyframe kf;
@@ -949,7 +945,7 @@ bool SessionRecording::convertCamera(std::ifstream& inFile, DataMode mode, int l
         kf,
         times,
         mode,
-        inFile,
+        reinterpret_cast<std::ifstream&>(inStream),
         inputLine,
         lineNum
     );
@@ -1072,7 +1068,7 @@ bool SessionRecording::playbackTimeChange() {
     return success;
 }
 
-bool SessionRecording::convertTimeChange(std::ifstream& inFile, DataMode mode, int lineNum,
+bool SessionRecording::convertTimeChange(std::stringstream& inStream, DataMode mode, int lineNum,
                                          std::string& inputLine, std::ofstream& outFile,
                                          unsigned char* buffer)
 {
@@ -1083,7 +1079,7 @@ bool SessionRecording::convertTimeChange(std::ifstream& inFile, DataMode mode, i
         kf,
         times,
         mode,
-        inFile,
+        reinterpret_cast<std::ifstream&>(inStream),
         inputLine,
         lineNum
     );
@@ -1186,6 +1182,14 @@ std::string SessionRecording::readHeaderElement(std::ifstream& stream,
     return std::string(readTemp.begin(), readTemp.end());
 }
 
+std::string SessionRecording::readHeaderElement(std::stringstream& stream,
+                                                size_t readLen_chars)
+{
+    std::vector<char> readTemp(readLen_chars);
+    stream.read(&readTemp[0], readLen_chars);
+    return std::string(readTemp.begin(), readTemp.end());
+}
+
 bool SessionRecording::playbackScript() {
     Timestamps times;
     datamessagestructures::ScriptMessage kf;
@@ -1206,7 +1210,7 @@ bool SessionRecording::playbackScript() {
     return success;
 }
 
-bool SessionRecording::convertScript(std::ifstream& inFile, DataMode mode, int lineNum,
+bool SessionRecording::convertScript(std::stringstream& inStream, DataMode mode, int lineNum,
                                      std::string& inputLine, std::ofstream& outFile,
                                      unsigned char* buffer)
 {
@@ -1217,7 +1221,7 @@ bool SessionRecording::convertScript(std::ifstream& inFile, DataMode mode, int l
         kf,
         times,
         mode,
-        inFile,
+        reinterpret_cast<std::ifstream&>(inStream),
         inputLine,
         lineNum
     );
@@ -1715,35 +1719,21 @@ std::vector<std::string> SessionRecording::playbackList() const {
     return fileList;
 }
 
-void SessionRecording::readPlaybackFileHeader(const std::string filename,
-                                              std::ifstream& conversionInFile,
+void SessionRecording::readPlaybackFileHeader(std::stringstream& conversionInStream,
                                               std::string& version,
                                               DataMode& mode)
 {
-    if (isPath(const_cast<std::string&>(filename))) {
-        throw ConversionError("Playback filename must not contain path (/) elements");
-    }
-    std::string conversionInFilename = absPath("${RECORDINGS}/" + filename);
-    if (!FileSys.fileExists(conversionInFilename)) {
-        throw ConversionError(fmt::format(
-            "Cannot find the specified playback file '{}' to convert.",
-            conversionInFilename
-        ));
-    }
-
-    // Open in ASCII first
-    conversionInFile.open(conversionInFilename, std::ifstream::in);
     // Read header
     std::string readBackHeaderString = readHeaderElement(
-            conversionInFile,
+        conversionInStream,
         FileHeaderTitle.length()
     );
 
     if (readBackHeaderString != FileHeaderTitle) {
         throw ConversionError("File to convert does not contain expected header.");
     }
-    version = readHeaderElement(conversionInFile, FileHeaderVersionLength);
-    std::string readDataMode = readHeaderElement(conversionInFile, 1);
+    version = readHeaderElement(conversionInStream, FileHeaderVersionLength);
+    std::string readDataMode = readHeaderElement(conversionInStream, 1);
     if (readDataMode[0] == DataFormatAsciiTag) {
         mode = DataMode::Ascii;
     }
@@ -1754,23 +1744,54 @@ void SessionRecording::readPlaybackFileHeader(const std::string filename,
         throw ConversionError("Unknown data type in header (needs Ascii or Binary)");
     }
     //Read to throw out newline at end of header
-    readHeaderElement(conversionInFile, 1);
+    readHeaderElement(conversionInStream, 1);
+}
+
+void SessionRecording::readFileIntoStringStream(std::string filename,
+                                                std::ifstream& inputFstream,
+                                                std::stringstream& stream)
+{
+    if (isPath(filename)) {
+        throw ConversionError("Playback filename must not contain path (/) elements");
+    }
+    std::string conversionInFilename = absPath("${RECORDINGS}/" + filename);
+    if (!FileSys.fileExists(conversionInFilename)) {
+        throw ConversionError(fmt::format(
+            "Cannot find the specified playback file '{}' to convert.",
+            conversionInFilename
+        ));
+    }
+    stream.str("");
+    stream.clear();
+    inputFstream.open(conversionInFilename, std::ifstream::in | std::ios::binary);
+    stream << inputFstream.rdbuf();
+    if (!inputFstream.is_open() || !inputFstream.good()) {
+        throw ConversionError(fmt::format(
+            "Unable to open file {} for conversion", filename.c_str()
+        ));
+    }
+    inputFstream.close();
 }
 
 std::string SessionRecording::convertFile(std::string filename, int depth)
 {
     std::string conversionOutFilename = filename;
+    std::ifstream conversionInFile;
+    std::stringstream conversionInStream;
     if (depth >= _maximumRecursionDepth) {
         LERROR("Runaway recursion in session recording conversion of file version.");
         exit(EXIT_FAILURE);
     }
-
     std::string newFilename = filename;
     try {
-        std::ifstream conversionInFile;
+        readFileIntoStringStream(filename, conversionInFile, conversionInStream);
         DataMode mode;
         std::string fileVersion;
-        readPlaybackFileHeader(filename, conversionInFile, fileVersion, mode);
+        readPlaybackFileHeader(
+            conversionInStream,
+            fileVersion,
+            mode
+        );
         int conversionLineNum = 1;
 
         //If this instance of the SessionRecording class isn't the instance with the
@@ -1778,9 +1799,7 @@ std::string SessionRecording::convertFile(std::string filename, int depth)
         // to the next level down in the legacy subclasses until we get the right
         // version, then proceed with conversion from there.
         if (fileVersion.compare(fileFormatVersion()) != 0) {
-            //Temporary placeholder for rejecting legacy versions:
-            return "Legacy currently unsupported";
-            conversionInFile.close();
+            //conversionInStream.seekg(conversionInStream.beg);
             newFilename = getLegacyConversionResult(filename, depth + 1);
             removeTrailingPathSlashes(newFilename);
             if (isPath(newFilename)) {
@@ -1789,14 +1808,14 @@ std::string SessionRecording::convertFile(std::string filename, int depth)
             if (filename == newFilename) {
                 return filename;
             }
-            readPlaybackFileHeader(newFilename, conversionInFile, fileVersion, mode);
+            readFileIntoStringStream(newFilename, conversionInFile, conversionInStream);
+            readPlaybackFileHeader(
+                conversionInStream,
+                fileVersion,
+                mode
+            );
         }
         if (depth != 0) {
-            if (!conversionInFile.is_open() || !conversionInFile.good()) {
-                throw ConversionError(fmt::format(
-                    "Unable to open file {} for conversion", newFilename.c_str()
-                ));
-            }
             conversionOutFilename = determineConversionOutFilename(filename);
             LINFO(fmt::format(
                 "Starting conversion on rec file {}, version {} in {} mode. "
@@ -1832,7 +1851,7 @@ std::string SessionRecording::convertFile(std::string filename, int depth)
             conversionOutFile << '\n';
             convertEntries(
                 newFilename,
-                conversionInFile,
+                conversionInStream,
                 mode,
                 conversionLineNum,
                 conversionOutFile
@@ -1853,8 +1872,9 @@ std::string SessionRecording::convertFile(std::string filename, int depth)
     }
 }
 
-bool SessionRecording::convertEntries(std::string& inFilename, std::ifstream& inFile,
-                                      DataMode mode, int lineNum, std::ofstream& outFile)
+bool SessionRecording::convertEntries(std::string& inFilename,
+                                      std::stringstream& inStream, DataMode mode,
+                                      int lineNum, std::ofstream& outFile)
 {
     bool conversionStatusOk = true;
     std::string lineParsing;
@@ -1864,9 +1884,9 @@ bool SessionRecording::convertEntries(std::string& inFilename, std::ifstream& in
         bool fileReadOk = true;
 
         while (conversionStatusOk && fileReadOk) {
-            frameType = readFromPlayback<unsigned char>(inFile);
+            frameType = readFromPlayback<unsigned char>(inStream);
             // Check if have reached EOF
-            if (!inFile) {
+            if (!inStream) {
                 LINFO(fmt::format(
                     "Finished converting {} entries from playback file {}",
                     lineNum - 1, inFilename
@@ -1876,7 +1896,7 @@ bool SessionRecording::convertEntries(std::string& inFilename, std::ifstream& in
             }
             if (frameType == HeaderCameraBinary) {
                 conversionStatusOk = convertCamera(
-                    inFile,
+                    inStream,
                     mode,
                     lineNum,
                     lineParsing,
@@ -1886,7 +1906,7 @@ bool SessionRecording::convertEntries(std::string& inFilename, std::ifstream& in
             }
             else if (frameType == HeaderTimeBinary) {
                 conversionStatusOk = convertTimeChange(
-                    inFile,
+                    inStream,
                     mode,
                     lineNum,
                     lineParsing,
@@ -1897,7 +1917,7 @@ bool SessionRecording::convertEntries(std::string& inFilename, std::ifstream& in
             else if (frameType == HeaderScriptBinary) {
                 try {
                     conversionStatusOk = convertScript(
-                        inFile,
+                        inStream,
                         mode,
                         lineNum,
                         lineParsing,
@@ -1921,7 +1941,7 @@ bool SessionRecording::convertEntries(std::string& inFilename, std::ifstream& in
         }
     }
     else {
-        while (conversionStatusOk && std::getline(inFile, lineParsing)) {
+        while (conversionStatusOk && std::getline(inStream, lineParsing)) {
             lineNum++;
 
             std::istringstream iss(lineParsing);
@@ -1936,7 +1956,7 @@ bool SessionRecording::convertEntries(std::string& inFilename, std::ifstream& in
 
             if (entryType == HeaderCameraAscii) {
                 conversionStatusOk = convertCamera(
-                    inFile,
+                    inStream,
                     mode,
                     lineNum,
                     lineParsing,
@@ -1946,7 +1966,7 @@ bool SessionRecording::convertEntries(std::string& inFilename, std::ifstream& in
             }
             else if (entryType == HeaderTimeAscii) {
                 conversionStatusOk = convertTimeChange(
-                    inFile,
+                    inStream,
                     mode,
                     lineNum,
                     lineParsing,
@@ -1957,7 +1977,7 @@ bool SessionRecording::convertEntries(std::string& inFilename, std::ifstream& in
             else if (entryType == HeaderScriptAscii) {
                 try {
                     conversionStatusOk = convertScript(
-                        inFile,
+                        inStream,
                         mode,
                         lineNum,
                         lineParsing,
@@ -2039,8 +2059,9 @@ std::string SessionRecording::determineConversionOutFilename(const std::string f
     return absPath("${RECORDINGS}/" + conversionOutFilename);
 }
 
-bool SessionRecording_legacy_0085::convertScript(std::ifstream& inFile, DataMode mode,
-                                                 int lineNum, std::string& inputLine,
+bool SessionRecording_legacy_0085::convertScript(std::stringstream& inStream,
+                                                 DataMode mode, int lineNum,
+                                                 std::string& inputLine,
                                                  std::ofstream& outFile,
                                                  unsigned char* buffer)
 {
@@ -2051,7 +2072,7 @@ bool SessionRecording_legacy_0085::convertScript(std::ifstream& inFile, DataMode
         kf,
         times,
         mode,
-        inFile,
+        reinterpret_cast<std::ifstream&>(inStream),
         inputLine,
         lineNum
     );

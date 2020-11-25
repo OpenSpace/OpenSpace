@@ -261,7 +261,7 @@ public:
      *
      * \return true if data read has no errors
      */
-    static bool readCameraKeyframeBinary(Timestamps& times,
+    bool readCameraKeyframeBinary(Timestamps& times,
         datamessagestructures::CameraKeyframe& kf, std::ifstream& file, int lineN);
 
     /**
@@ -275,7 +275,7 @@ public:
      *
      * \return true if data read has no errors
      */
-    static bool readCameraKeyframeAscii(Timestamps& times,
+    bool readCameraKeyframeAscii(Timestamps& times,
         datamessagestructures::CameraKeyframe& kf, std::string currentParsingLine,
         int lineN);
 
@@ -290,7 +290,7 @@ public:
      *
      * \return true if data read has no errors
      */
-    static bool readTimeKeyframeBinary(Timestamps& times,
+    bool readTimeKeyframeBinary(Timestamps& times,
         datamessagestructures::TimeKeyframe& kf, std::ifstream& file, int lineN);
 
     /**
@@ -304,7 +304,7 @@ public:
      *
      * \return true if data read has no errors
      */
-    static bool readTimeKeyframeAscii(Timestamps& times,
+    bool readTimeKeyframeAscii(Timestamps& times,
         datamessagestructures::TimeKeyframe& kf, std::string currentParsingLine,
         int lineN);
 
@@ -320,7 +320,7 @@ public:
      *
      * \return true if data read has no errors
      */
-    static bool readScriptKeyframeBinary(Timestamps& times,
+    bool readScriptKeyframeBinary(Timestamps& times,
         datamessagestructures::ScriptMessage& kf, std::ifstream& file, int lineN);
 
     /**
@@ -335,7 +335,7 @@ public:
      *
      * \return true if data read has no errors
      */
-    static bool readScriptKeyframeAscii(Timestamps& times,
+    bool readScriptKeyframeAscii(Timestamps& times,
         datamessagestructures::ScriptMessage& kf, std::string currentParsingLine,
         int lineN);
 
@@ -347,7 +347,7 @@ public:
      * \param kfBuffer a buffer temporarily used for preparing data to be written
      * \param file an ofstream reference to the recording file being written-to
      */
-    static void saveCameraKeyframeBinary(Timestamps& times,
+    void saveCameraKeyframeBinary(Timestamps& times,
         datamessagestructures::CameraKeyframe& kf, unsigned char* kfBuffer,
         std::ofstream& file);
 
@@ -358,7 +358,7 @@ public:
      * \param kf reference to a camera keyframe which contains the camera details
      * \param file an ofstream reference to the recording file being written-to
      */
-    static void saveCameraKeyframeAscii(Timestamps& times,
+    void saveCameraKeyframeAscii(Timestamps& times,
         datamessagestructures::CameraKeyframe& kf, std::ofstream& file);
 
     /**
@@ -369,7 +369,7 @@ public:
      * \param kfBuffer a buffer temporarily used for preparing data to be written
      * \param file an ofstream reference to the recording file being written-to
      */
-    static void saveTimeKeyframeBinary(Timestamps& times,
+    void saveTimeKeyframeBinary(Timestamps& times,
         datamessagestructures::TimeKeyframe& kf, unsigned char* kfBuffer,
         std::ofstream& file);
 
@@ -380,7 +380,7 @@ public:
      * \param kf reference to a time keyframe which contains the time details
      * \param file an ofstream reference to the recording file being written-to
      */
-    static void saveTimeKeyframeAscii(Timestamps& times,
+    void saveTimeKeyframeAscii(Timestamps& times,
         datamessagestructures::TimeKeyframe& kf, std::ofstream& file);
 
     /**
@@ -391,7 +391,7 @@ public:
      * \param smBuffer a buffer temporarily used for preparing data to be written
      * \param file an ofstream reference to the recording file being written-to
      */
-    static void saveScriptKeyframeBinary(Timestamps& times,
+    void saveScriptKeyframeBinary(Timestamps& times,
         datamessagestructures::ScriptMessage& sm, unsigned char* smBuffer,
         std::ofstream& file);
 
@@ -402,7 +402,7 @@ public:
      * \param sm reference to a ScriptMessage which contains the script details
      * \param file an ofstream reference to the recording file being written-to
      */
-    static void saveScriptKeyframeAscii(Timestamps& times,
+    void saveScriptKeyframeAscii(Timestamps& times,
         datamessagestructures::ScriptMessage& sm, std::ofstream& file);
 
     /**
@@ -413,6 +413,15 @@ public:
      *        length of the header line, or an arbitrary number of characters within it
      */
     static std::string readHeaderElement(std::ifstream& stream, size_t readLen_chars);
+
+    /**
+ * Reads header information from a session recording file
+ *
+ * \param stringstream reference to ifstream that contains the session recording file data
+ * \param readLen_chars number of characters to be read, which may be the expected
+ *        length of the header line, or an arbitrary number of characters within it
+ */
+    static std::string readHeaderElement(std::stringstream& stream, size_t readLen_chars);
 
     /**
      * Writes a header to a binary recording file buffer
@@ -527,7 +536,7 @@ protected:
     double equivalentSimulationTime(double timeOs, double timeRec, double timeSim);
     double equivalentApplicationTime(double timeOs, double timeRec, double timeSim);
     bool handleRecordingFile(std::string filenameIn);
-    bool isPath(std::string& filename);
+    static bool isPath(std::string& filename);
     void removeTrailingPathSlashes(std::string& filename);
     void extractFilenameFromPath(std::string& filename);
     bool playbackCamera();
@@ -556,20 +565,20 @@ protected:
     bool findNextFutureCameraIndex(double currTime);
     bool processCameraKeyframe(double now);
     bool processScriptKeyframe();
-    static bool readSingleKeyframeCamera(datamessagestructures::CameraKeyframe& kf,
-        Timestamps& times, DataMode mode, std::ifstream& file, std::string& inLine,
-        const int lineNum);
-    static void saveSingleKeyframeCamera(datamessagestructures::CameraKeyframe& kf,
+    bool readSingleKeyframeCamera(datamessagestructures::CameraKeyframe& kf,
+        Timestamps& times, DataMode mode, std::ifstream& file,
+        std::string& inLine, const int lineNum);
+    void saveSingleKeyframeCamera(datamessagestructures::CameraKeyframe& kf,
         Timestamps& times, DataMode mode, std::ofstream& file, unsigned char* buffer);
-    static bool readSingleKeyframeTime(datamessagestructures::TimeKeyframe& kf,
+    bool readSingleKeyframeTime(datamessagestructures::TimeKeyframe& kf,
         Timestamps& times, DataMode mode, std::ifstream& file, std::string& inLine,
         const int lineNum);
-    static void saveSingleKeyframeTime(datamessagestructures::TimeKeyframe& kf,
+    void saveSingleKeyframeTime(datamessagestructures::TimeKeyframe& kf,
         Timestamps& times, DataMode mode, std::ofstream& file, unsigned char* buffer);
-    static bool readSingleKeyframeScript(datamessagestructures::ScriptMessage& kf,
+    bool readSingleKeyframeScript(datamessagestructures::ScriptMessage& kf,
         Timestamps& times, DataMode mode, std::ifstream& file, std::string& inLine,
         const int lineNum);
-    static void saveSingleKeyframeScript(datamessagestructures::ScriptMessage& kf,
+    void saveSingleKeyframeScript(datamessagestructures::ScriptMessage& kf,
         Timestamps& times, DataMode mode, std::ofstream& file, unsigned char* buffer);
     unsigned int findIndexOfLastCameraKeyframeInTimeline();
     bool doesTimelineEntryContainCamera(unsigned int index) const;
@@ -580,22 +589,23 @@ protected:
     double getNextTimestamp();
     double getPrevTimestamp();
     void cleanUpPlayback();
-    bool convertEntries(std::string& inFilename, std::ifstream& inFile,
+    bool convertEntries(std::string& inFilename, std::stringstream& inStream,
         DataMode mode, int lineNum, std::ofstream& outFile);
-    virtual bool convertCamera(std::ifstream& inFile, DataMode mode, int lineNum,
+    virtual bool convertCamera(std::stringstream& inStream, DataMode mode, int lineNum,
         std::string& inputLine, std::ofstream& outFile, unsigned char* buff);
-    virtual bool convertTimeChange(std::ifstream& inFile, DataMode mode, int lineNum,
+    virtual bool convertTimeChange(std::stringstream& inStream, DataMode mode, int lineNum,
         std::string& inputLine, std::ofstream& outFile, unsigned char* buff);
-    virtual bool convertScript(std::ifstream& inFile, DataMode mode, int lineNum,
+    virtual bool convertScript(std::stringstream& inStream, DataMode mode, int lineNum,
         std::string& inputLine, std::ofstream& outFile, unsigned char* buff);
-    void readPlaybackFileHeader(const std::string filename,
-        std::ifstream& conversionInFile,
+    void readPlaybackFileHeader(std::stringstream& conversionInStream,
         std::string& version, DataMode& mode);
 
     static void writeToFileBuffer(unsigned char* buf, size_t& idx, double src);
     static void writeToFileBuffer(unsigned char* buf, size_t& idx, std::vector<char>& cv);
     static void writeToFileBuffer(unsigned char* buf, size_t& idx, unsigned char c);
     static void writeToFileBuffer(unsigned char* buf, size_t& idx, bool b);
+    static void readFileIntoStringStream(std::string filename,
+        std::ifstream& inputFstream, std::stringstream& stream);
 
     DataMode _recordingDataMode = DataMode::Binary;
     SessionState _state = SessionState::Idle;
@@ -676,7 +686,7 @@ public:
     };
 
 protected:
-    bool convertScript(std::ifstream& inFile, DataMode mode, int lineNum,
+    bool convertScript(std::stringstream& inStream, DataMode mode, int lineNum,
         std::string& inputLine, std::ofstream& outFile, unsigned char* buffer);
 };
 
