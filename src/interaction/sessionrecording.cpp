@@ -1719,9 +1719,8 @@ std::vector<std::string> SessionRecording::playbackList() const {
     return fileList;
 }
 
-void SessionRecording::readPlaybackFileHeader(std::stringstream& conversionInStream,
-                                              std::string& version,
-                                              DataMode& mode)
+void SessionRecording::readPlaybackHeader_stream(std::stringstream& conversionInStream,
+                                                 std::string& version, DataMode& mode)
 {
     // Read header
     std::string readBackHeaderString = readHeaderElement(
@@ -1747,6 +1746,34 @@ void SessionRecording::readPlaybackFileHeader(std::stringstream& conversionInStr
     readHeaderElement(conversionInStream, 1);
 }
 
+SessionRecording::DataMode SessionRecording::readModeFromHeader(std::string filename) {
+    DataMode mode;
+    std::ifstream inputFile;
+    // Open in ASCII first
+    inputFile.open(filename, std::ifstream::in);
+    // Read header
+    std::string readBackHeaderString = readHeaderElement(
+        inputFile,
+        FileHeaderTitle.length()
+    );
+    if (readBackHeaderString != FileHeaderTitle) {
+        LERROR("Specified playback file does not contain expected header.");
+    }
+    readHeaderElement(inputFile, FileHeaderVersionLength);
+    std::string readDataMode = readHeaderElement(inputFile, 1);
+    if (readDataMode[0] == DataFormatAsciiTag) {
+        mode = DataMode::Ascii;
+    }
+    else if (readDataMode[0] == DataFormatBinaryTag) {
+        mode = DataMode::Binary;
+    }
+    else {
+        LERROR("Unknown data type in header (should be Ascii or Binary)");
+    }
+    inputFile.close();
+    return mode;
+}
+
 void SessionRecording::readFileIntoStringStream(std::string filename,
                                                 std::ifstream& inputFstream,
                                                 std::stringstream& stream)
@@ -1761,9 +1788,18 @@ void SessionRecording::readFileIntoStringStream(std::string filename,
             conversionInFilename
         ));
     }
+
+    DataMode mode = readModeFromHeader(conversionInFilename);
+
     stream.str("");
     stream.clear();
-    inputFstream.open(conversionInFilename, std::ifstream::in | std::ios::binary);
+    inputFstream.close();
+    if (mode == DataMode::Binary) {
+        inputFstream.open(conversionInFilename, std::ifstream::in | std::ios::binary);
+    }
+    else {
+        inputFstream.open(conversionInFilename, std::ifstream::in);
+    }
     stream << inputFstream.rdbuf();
     if (!inputFstream.is_open() || !inputFstream.good()) {
         throw ConversionError(fmt::format(
@@ -1787,7 +1823,7 @@ std::string SessionRecording::convertFile(std::string filename, int depth)
         readFileIntoStringStream(filename, conversionInFile, conversionInStream);
         DataMode mode;
         std::string fileVersion;
-        readPlaybackFileHeader(
+        readPlaybackHeader_stream(
             conversionInStream,
             fileVersion,
             mode
@@ -1809,14 +1845,14 @@ std::string SessionRecording::convertFile(std::string filename, int depth)
                 return filename;
             }
             readFileIntoStringStream(newFilename, conversionInFile, conversionInStream);
-            readPlaybackFileHeader(
+            readPlaybackHeader_stream(
                 conversionInStream,
                 fileVersion,
                 mode
             );
         }
         if (depth != 0) {
-            conversionOutFilename = determineConversionOutFilename(filename);
+            conversionOutFilename = determineConversionOutFilename(filename, mode);
             LINFO(fmt::format(
                 "Starting conversion on rec file {}, version {} in {} mode. "
                 "Writing result to {}.",
@@ -2036,27 +2072,18 @@ std::string SessionRecording::targetFileFormatVersion() {
     return std::string(FileHeaderVersion);
 }
 
-std::string SessionRecording::determineConversionOutFilename(const std::string filename) {
-    const std::string legacyRecordingSaveDirectory = "${RECORDINGS}/convert";
-    std::string conversionOutFilename = filename.substr(0, filename.find_last_of("."))
-        + "_" + fileFormatVersion() + "-" + targetFileFormatVersion();
-    if (filename.substr(filename.find_last_of(".")) == FileExtensionBinary) {
-        conversionOutFilename += FileExtensionBinary;
+std::string SessionRecording::determineConversionOutFilename(const std::string filename,
+                                                             DataMode mode)
+{
+    std::string filenameSansExtension = filename;
+    std::string fileExtension = (mode == DataMode::Binary) ?
+        FileExtensionBinary : FileExtensionAscii;
+
+    if (filename.find_last_of(".") != std::string::npos) {
+        filenameSansExtension = filename.substr(0, filename.find_last_of("."));
     }
-    else if (filename.substr(filename.find_last_of(".")) == FileExtensionAscii) {
-        conversionOutFilename += FileExtensionAscii;
-    }
-    else {
-        conversionOutFilename = filename + "_";
-    }
-    //if (!FileSys.directoryExists(absPath(legacyRecordingSaveDirectory))) {
-    //    FileSys.createDirectory(
-    //        absPath(legacyRecordingSaveDirectory),
-    //        ghoul::filesystem::FileSystem::Recursive::Yes
-    //    );
-    //}
-    //return absPath(legacyRecordingSaveDirectory + "/" + conversionOutFilename);
-    return absPath("${RECORDINGS}/" + conversionOutFilename);
+    filenameSansExtension += "_" + fileFormatVersion() + "-" + targetFileFormatVersion();
+    return absPath("${RECORDINGS}/" + filenameSansExtension + fileExtension);
 }
 
 bool SessionRecording_legacy_0085::convertScript(std::stringstream& inStream,

@@ -510,7 +510,7 @@ public:
      *
      * \return pathname of the converted version of the file
      */
-    std::string determineConversionOutFilename(const std::string filename);
+    std::string determineConversionOutFilename(const std::string filename, DataMode mode);
 
 protected:
     properties::BoolProperty _renderPlaybackInformation;
@@ -597,14 +597,15 @@ protected:
         std::string& inputLine, std::ofstream& outFile, unsigned char* buff);
     virtual bool convertScript(std::stringstream& inStream, DataMode mode, int lineNum,
         std::string& inputLine, std::ofstream& outFile, unsigned char* buff);
-    void readPlaybackFileHeader(std::stringstream& conversionInStream,
+    DataMode readModeFromHeader(std::string filename);
+    void readPlaybackHeader_stream(std::stringstream& conversionInStream,
         std::string& version, DataMode& mode);
 
     static void writeToFileBuffer(unsigned char* buf, size_t& idx, double src);
     static void writeToFileBuffer(unsigned char* buf, size_t& idx, std::vector<char>& cv);
     static void writeToFileBuffer(unsigned char* buf, size_t& idx, unsigned char c);
     static void writeToFileBuffer(unsigned char* buf, size_t& idx, bool b);
-    static void readFileIntoStringStream(std::string filename,
+    void readFileIntoStringStream(std::string filename,
         std::ifstream& inputFstream, std::stringstream& stream);
 
     DataMode _recordingDataMode = DataMode::Binary;
