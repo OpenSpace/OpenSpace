@@ -97,6 +97,11 @@
       "value": "true"
     },
     {
+      "name": "NavigationHandler.OrbitalNavigator.FlightDestinationFactor",
+      "type": "setPropertyValueSingle",
+      "value": "0.05"
+    },
+    {
       "name": "Scene.Constellations.Renderable.Enabled",
       "type": "setPropertyValueSingle",
       "value": "true"
