@@ -53,25 +53,24 @@ galaxiesState = {
 ---------------------------------------------------------------- 
 -- 3. ASTEROIDS STATE
 ----------------------------------------------------------------
-local interestingAsteroids = [[{
-    'sssb_sssb_data_apollo_asteroid', 
+local defaultShownAsteroids = [[{
+    'sssb_sssb_data_apollo_asteroid',
     'sssb_sssb_data_aten_asteroid',
-    'sssb_sssb_data_atira_asteroid', 
-    'sssb_sssb_data_inner_main_belt_asteroid'
+    'sssb_sssb_data_atira_asteroid'
 }]]
 
 -- Set a specific property for the asteroid renderable
 local setAsteroidsProperty = function(property, value, duration) 
-    local interpolationDurationString = "";
+    local interpolationDurationString = ""
     if(duration) then 
-        interpolationDurationString = "," .. tostring(duration) .. ""
+        interpolationDurationString = "," .. tostring(duration)
     end
 
     return [[
-        local asteroids =]] .. interestingAsteroids .. [[
+        local asteroids =]] .. defaultShownAsteroids .. [[
         for _, a in ipairs(asteroids) do
             openspace.setPropertyValueSingle(
-                'Scene.' .. a .. '.Renderable.]] .. property .. [[', 
+                'Scene.' .. a .. '.Renderable.]] .. property .. [[',
                 ]] ..  tostring(value) .. [[
                 ]] .. interpolationDurationString .. [[
             )
@@ -87,7 +86,7 @@ asteroidsState = {
     Identifier = "Asteroids", 
     Enter = [[
         openspace.printInfo('Entering Asteroids State')
-        ]] .. setAsteroidsProperty('Opacity', 0) .. [[
+        ]] .. setAsteroidsProperty('Opacity', 0.05) .. [[
         ]] .. setAsteroidsProperty('Enabled', true) .. [[
         ]] .. setAsteroidsProperty('Opacity', 1, fadeInDuration) .. [[ 
         ]] .. util.setOrbitSpeedFactor(0.15) .. [[
@@ -95,13 +94,12 @@ asteroidsState = {
     ]],
     Exit = [[
         openspace.printInfo('Exiting Asteroids State')
-        ]] .. setAsteroidsProperty('Opacity', 0, fadeOutDuration) .. [[
-        ]] .. setAsteroidsProperty('Enabled', false) .. [[ 
         ]] .. util.stopOrbiting() .. [[
         openspace.time.setTime(]] .. tostring(defaultTime) .. [[)
     ]]
-    -- OBS! Ideally we want to disable the asteroids after they are 
-    -- completely faded out 
+    -- Note: the asteroids are disabled on the server, since we cannot
+    -- currently wait until they have faded out using Lua
+
 }
 
 ---------------------------------------------------------------- 
