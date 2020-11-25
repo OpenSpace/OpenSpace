@@ -107,6 +107,7 @@ int main(int argc, char** argv) {
     using namespace openspace;
 
     ghoul::initialize();
+    global::create();
 
     // Register the path of the executable,
     // to make it possible to find other files in the same directory.
@@ -117,9 +118,9 @@ int main(int argc, char** argv) {
     );
 
     std::string configFile = configuration::findConfiguration();
-    global::configuration = configuration::loadConfigurationFromFile(configFile);
-    openspace::global::openSpaceEngine.registerPathTokens();
-    global::openSpaceEngine.initialize();
+    *global::configuration = configuration::loadConfigurationFromFile(configFile);
+    openspace::global::openSpaceEngine->registerPathTokens();
+    global::openSpaceEngine->initialize();
 
     ghoul::cmdparser::CommandlineParser commandlineParser(
         "OpenSpace TaskRunner",
@@ -157,5 +158,7 @@ int main(int argc, char** argv) {
         std::cout << "TASK > ";
     }
 
+    global::destroy();
+    ghoul::deinitialize();
     return 0;
 };
