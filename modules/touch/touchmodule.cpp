@@ -191,7 +191,7 @@ TouchModule::~TouchModule() {
 void TouchModule::internalInitialize(const ghoul::Dictionary& /*dictionary*/){
     _ear.reset(new TuioEar());
 
-    global::callback::initializeGL.push_back([&]() {
+    global::callback::initializeGL->push_back([&]() {
         LDEBUGC("TouchModule", "Initializing TouchMarker OpenGL");
         _markers.initialize();
 #ifdef WIN32
@@ -204,33 +204,33 @@ void TouchModule::internalInitialize(const ghoul::Dictionary& /*dictionary*/){
 #endif
     });
 
-    global::callback::deinitializeGL.push_back([&]() {
+    global::callback::deinitializeGL->push_back([&]() {
         LDEBUGC("TouchMarker", "Deinitialize TouchMarker OpenGL");
         _markers.deinitialize();
     });
 
     // These are handled in UI thread, which (as of 20th dec 2019) is in main/rendering
     // thread so we don't need a mutex here
-    global::callback::touchDetected.push_back(
+    global::callback::touchDetected->push_back(
         [this](TouchInput i) {
             addTouchInput(i);
             return true;
         }
     );
 
-    global::callback::touchUpdated.push_back(
+    global::callback::touchUpdated->push_back(
         [this](TouchInput i) {
             updateOrAddTouchInput(i);
             return true;
         }
     );
 
-    global::callback::touchExit.push_back(
+    global::callback::touchExit->push_back(
         std::bind(&TouchModule::removeTouchInput, this, std::placeholders::_1)
     );
 
 
-    global::callback::preSync.push_back([&]() {
+    global::callback::preSync->push_back([&]() {
         _touch.setCamera(global::navigationHandler->camera());
         _touch.setFocusNode(global::navigationHandler->orbitalNavigator().anchorNode());
 
@@ -251,7 +251,7 @@ void TouchModule::internalInitialize(const ghoul::Dictionary& /*dictionary*/){
         clearInputs();
     });
 
-    global::callback::render.push_back([&]() {
+    global::callback::render->push_back([&]() {
         _markers.render(_touchPoints);
     });
 }
