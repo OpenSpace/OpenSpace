@@ -1,7 +1,4 @@
 {
-  "additional_scripts": [
-    "openspace.time.setPause(true)"
-  ],
   "assets": [
     "base",
     "scene/solarsystem/planets/earth/earth",

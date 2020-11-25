@@ -355,4 +355,6 @@ asset.onInitialize(function()
         Transitions = transitions
     })
     openspace.statemachine.setInitialState("Earth")
+
+    openspace.time.setPause(true)
 end)
