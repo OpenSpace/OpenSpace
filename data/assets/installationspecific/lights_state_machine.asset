@@ -1,5 +1,7 @@
 local util = asset.require('./utility_functions')
 
+local defaultTime = 654728475 -- 2020 Sep 9, 9:00
+
 ---------------------------------------------------------------- 
 -- DEFAULT STATE - to reduce number of transitions
 ----------------------------------------------------------------
@@ -96,6 +98,7 @@ asteroidsState = {
         ]] .. setAsteroidsProperty('Opacity', 0, fadeOutDuration) .. [[
         ]] .. setAsteroidsProperty('Enabled', false) .. [[ 
         ]] .. util.stopOrbiting() .. [[
+        openspace.time.setTime(]] .. tostring(defaultTime) .. [[)
     ]]
     -- OBS! Ideally we want to disable the asteroids after they are 
     -- completely faded out 
@@ -351,5 +354,5 @@ asset.onInitialize(function()
         States = states,
         Transitions = transitions
     })
-    openspace.statemachine.setInitialState("Earth");
+    openspace.statemachine.setInitialState("Earth")
 end)

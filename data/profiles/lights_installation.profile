@@ -1,4 +1,7 @@
 {
+  "additional_scripts": [
+    "openspace.time.setPause(true)"
+  ],
   "assets": [
     "base",
     "scene/solarsystem/planets/earth/earth",
@@ -128,8 +131,8 @@
     }
   ],
   "time": {
-    "type": "relative",
-    "value": "-1d"
+    "type": "absolute",
+    "value": "2020-09-30T09:00:00"
   },
   "version": {
     "major": 1,
