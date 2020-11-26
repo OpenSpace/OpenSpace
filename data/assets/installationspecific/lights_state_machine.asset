@@ -18,6 +18,8 @@ defaultState = {
 ----------------------------------------------------------------
 local earthTargetDistance = 1.5E7
 
+local noWeatherLayer = "Scene.Earth.Renderable.Layers.ColorLayers.ESRI_World_Imagery"
+
 earthState = {
     Identifier = "Earth", 
     Enter = [[
@@ -28,6 +30,7 @@ earthState = {
     Exit = [[
         openspace.printInfo('Exiting Earth State')
         ]] .. util.stopOrbiting() .. [[
+        openspace.setPropertyValueSingle(']] .. noWeatherLayer .. [[.Enabled', false);
     ]]
 }
 
