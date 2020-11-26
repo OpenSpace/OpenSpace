@@ -95,11 +95,12 @@ asteroidsState = {
     Exit = [[
         openspace.printInfo('Exiting Asteroids State')
         ]] .. util.stopOrbiting() .. [[
+        openspace.time.setPause(true)
+        openspace.time.setDeltaTime(1)
         openspace.time.setTime(]] .. tostring(defaultTime) .. [[)
     ]]
     -- Note: the asteroids are disabled on the server, since we cannot
     -- currently wait until they have faded out using Lua
-
 }
 
 ---------------------------------------------------------------- 
