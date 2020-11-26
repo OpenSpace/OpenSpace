@@ -140,6 +140,40 @@
       "name": "{solarsystem_labels}.Renderable.Opacity",
       "type": "setPropertyValue",
       "value": "0.0"
+    },
+      "name": "Scene.sssb_sssb_data_apollo_asteroid.Renderable.Appearance.Color",
+      "type": "setPropertyValueSingle",
+      "value": "{0.0, 0.25, 1.0}"
+    },
+    {
+      "name": "Scene.sssb_sssb_data_aten_asteroid.Renderable.Appearance.Color",
+      "type": "setPropertyValueSingle",
+      "value": "{0.0, 0.25, 1.0}"
+    },
+    {
+      "name": "Scene.sssb_sssb_data_atira_asteroid.Renderable.Appearance.Color",
+      "type": "setPropertyValueSingle",
+      "value": "{0.0, 0.25, 1.0}"
+    },
+    {
+      "name": "Scene.sssb_sssb_data_inner_main_belt_asteroid.Renderable.Appearance.Color",
+      "type": "setPropertyValueSingle",
+      "value": "{1.0, 1.0, 0.0}"
+    },
+    {
+      "name": "Scene.sssb_sssb_data_main_belt_asteroid.Renderable.Appearance.Color",
+      "type": "setPropertyValueSingle",
+      "value": "{0.0, 1.0, 0.25}"
+    },
+    {
+      "name": "Scene.sssb_sssb_data_outer_main_belt_asteroid.Renderable.Appearance.Color",
+      "type": "setPropertyValueSingle",
+      "value": "{0.0, 1.0, 1.0}"
+    },
+    {
+      "name": "Scene.sssb_sssb_data_pha.Renderable.Appearance.Color",
+      "type": "setPropertyValueSingle",
+      "value": "{1.0, 0.0, 0.0}"
     }
   ],
   "time": {
