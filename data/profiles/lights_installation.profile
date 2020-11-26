@@ -141,6 +141,7 @@
       "type": "setPropertyValue",
       "value": "0.0"
     },
+    {
       "name": "Scene.sssb_sssb_data_apollo_asteroid.Renderable.Appearance.Color",
       "type": "setPropertyValueSingle",
       "value": "{0.0, 0.25, 1.0}"
