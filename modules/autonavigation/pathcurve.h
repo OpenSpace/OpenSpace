@@ -34,7 +34,8 @@ namespace openspace::autonavigation {
 enum CurveType {
     AvoidCollision,
     Linear,
-    ZoomOutOverview
+    ZoomOutOverview,
+    AvoidCollisionLookAt
 };
 
 class PathCurve {

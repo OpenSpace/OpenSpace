@@ -129,6 +129,19 @@ void PathSegment::initCurve() {
 
     switch (_curveType)
     {
+    case CurveType::AvoidCollisionLookAt:
+        _curve = std::make_unique<AvoidCollisionCurve>(_start, _end);
+        _rotationInterpolator = std::make_unique<LookAtInterpolator>(
+            _start.rotation(),
+            _end.rotation(),
+            _start.node()->worldPosition(),
+            _end.node()->worldPosition(),
+            _curve.get()
+        );
+
+        _speedFunction = std::make_unique<QuinticDampenedSpeed>();
+        break;
+
     case CurveType::AvoidCollision:
         _curve = std::make_unique<AvoidCollisionCurve>(_start, _end);
         _rotationInterpolator = std::make_unique<EasedSlerpInterpolator>(

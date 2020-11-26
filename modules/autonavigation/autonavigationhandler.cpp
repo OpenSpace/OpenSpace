@@ -136,7 +136,8 @@ AutoNavigationHandler::AutoNavigationHandler()
     _defaultCurveOption.addOptions({
         { CurveType::AvoidCollision, "AvoidCollision" },
         { CurveType::Linear, "Linear" },
-        { CurveType::ZoomOutOverview, "ZoomOutOverview"}
+        { CurveType::ZoomOutOverview, "ZoomOutOverview"},
+        { CurveType::AvoidCollisionLookAt, "AvoidCollisionLookAt" }
     });
     addProperty(_defaultCurveOption);
 
@@ -684,9 +685,9 @@ Waypoint AutoNavigationHandler::computeDefaultWaypoint(const TargetNodeInstructi
     // Up direction
     glm::dvec3 up = camera()->lookUpVectorWorldSpace();
     if (ins->setUpDirectionFromTarget()) {
-        // @TODO (emmbr 2020-11-17) For now, this is hardcoded to look good for Earth, 
-        // which is where it matters the most. A better solution would be to make each 
-        // sgn aware of its own 'up' and query 
+        // @TODO (emmbr 2020-11-17) For now, this is hardcoded to look good for Earth,
+        // which is where it matters the most. A better solution would be to make each
+        // sgn aware of its own 'up' and query
         up = targetNode->worldRotationMatrix() * glm::dvec3(0.0, 0.0, 1.0);
     }
 
