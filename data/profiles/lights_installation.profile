@@ -125,6 +125,21 @@
       "name": "Scene.Mars.Renderable.Layers.ColorLayers.Themis_IR_Day_Sweden.Enabled",
       "type": "setPropertyValueSingle",
       "value": "true"
+    },
+    {
+      "name": "{solarsystem_labels}.Renderable.FontSize",
+      "type": "setPropertyValue",
+      "value": "70"
+    },
+    {
+      "name": "{solarsystem_labels}.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "true"
+    },
+    {
+      "name": "{solarsystem_labels}.Renderable.Opacity",
+      "type": "setPropertyValue",
+      "value": "0.0"
     }
   ],
   "time": {

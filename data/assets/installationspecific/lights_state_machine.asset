@@ -62,6 +62,23 @@ local defaultShownAsteroids = [[{
     'sssb_sssb_data_atira_asteroid'
 }]]
 
+local asteroidsTargetDistance = 1e12
+local fadeInDuration = 10
+local fadeOutDuration = 10
+local labelFadeDuration = 4
+
+local setPlanetLabelsOpacity = function(value) 
+    return [[
+        local list = openspace.getProperty('{solarsystem_labels}.Renderable.Opacity');
+        for _,v in pairs(list) do 
+            openspace.setPropertyValueSingle(v,
+                ]] .. tostring(value) .. [[, 
+                ]] .. tostring(labelFadeDuration) .. [[
+            )
+        end
+    ]]
+end
+
 -- Set a specific property for the asteroid renderable
 local setAsteroidsProperty = function(property, value, duration) 
     local interpolationDurationString = ""
@@ -81,12 +98,8 @@ local setAsteroidsProperty = function(property, value, duration)
     ]]
 end
 
-local asteroidsTargetDistance = 1e12
-local fadeInDuration = 10
-local fadeOutDuration = 10
-
 asteroidsState = {
-    Identifier = "Asteroids", 
+    Identifier = "Asteroids",
     Enter = [[
         openspace.printInfo('Entering Asteroids State')
         ]] .. setAsteroidsProperty('Opacity', 0.05) .. [[
@@ -94,6 +107,7 @@ asteroidsState = {
         ]] .. setAsteroidsProperty('Opacity', 1, fadeInDuration) .. [[ 
         ]] .. util.setOrbitSpeedFactor(0.15) .. [[
         ]] .. util.orbitOnArrival() .. [[
+        ]] .. setPlanetLabelsOpacity(1.0) .. [[
     ]],
     Exit = [[
         openspace.printInfo('Exiting Asteroids State')
@@ -101,6 +115,7 @@ asteroidsState = {
         openspace.time.setPause(true)
         openspace.time.setDeltaTime(1)
         openspace.time.setTime(]] .. tostring(defaultTime) .. [[)
+        ]] .. setPlanetLabelsOpacity(0.0) .. [[
     ]]
     -- Note: the asteroids are disabled on the server, since we cannot
     -- currently wait until they have faded out using Lua
