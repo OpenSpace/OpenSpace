@@ -1314,7 +1314,7 @@ void RenderEngine::renderCameraInformation() {
         global::navigationHandler->orbitalNavigator();
 
     using FR = ghoul::fontrendering::FontRenderer;
-    
+
     _cameraButtonLocations.rotation = {
         fontResolution().x - rotationBox.x - XSeparation,
         fontResolution().y - penPosY,

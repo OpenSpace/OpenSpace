@@ -160,7 +160,8 @@ private:
 
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _timeChangeCallbacks;
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _deltaTimeChangeCallbacks;
-    std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _deltaTimeStepsChangeCallbacks;
+    std::vector<std::pair<CallbackHandle, TimeChangeCallback>>
+        _deltaTimeStepsChangeCallbacks;
 
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _timeJumpCallbacks;
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _timelineChangeCallbacks;

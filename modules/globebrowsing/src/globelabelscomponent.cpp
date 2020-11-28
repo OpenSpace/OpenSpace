@@ -692,7 +692,7 @@ void GlobeLabelsComponent::renderLabels(const RenderData& data,
                                         float fadeInVariable
 ) {
     glm::vec4 textColor = glm::vec4(
-        glm::vec3(_labelsColor), 
+        glm::vec3(_labelsColor),
         _labelsOpacity * fadeInVariable
     );
 

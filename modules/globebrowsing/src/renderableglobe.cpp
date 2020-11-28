@@ -273,7 +273,8 @@ const Chunk& findChunkNode(const Chunk& node, const Geodetic2& location) {
 #if defined(__APPLE__) || (defined(__linux__) && defined(__clang__))
 using ChunkTileVector = std::vector<std::pair<ChunkTile, const LayerRenderSettings*>>;
 #else
-using ChunkTileVector = std::pmr::vector<std::pair<ChunkTile, const LayerRenderSettings*>>;
+using ChunkTileVector =
+    std::pmr::vector<std::pair<ChunkTile, const LayerRenderSettings*>>;
 #endif
 
 ChunkTileVector tilesAndSettingsUnsorted(const LayerGroup& layerGroup,

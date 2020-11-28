@@ -1017,7 +1017,7 @@ void OpenSpaceEngine::writeSceneDocumentation() {
             &properties::PropertyOwner::generateJson,
             global::rootPropertyOwner
         );
-        
+
         std::future<std::string> scene = std::async(
             &properties::PropertyOwner::generateJson,
             _scene.get()

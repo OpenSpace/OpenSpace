@@ -54,4 +54,4 @@ private:
 
 } // namespace openspace::interaction
 
-#endif //__OPENSPACE_CORE___CONVERTRECFILEVERSIONTASK___H__
+#endif // __OPENSPACE_CORE___CONVERTRECFILEVERSIONTASK___H__

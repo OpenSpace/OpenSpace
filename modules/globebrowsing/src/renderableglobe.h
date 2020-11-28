@@ -222,7 +222,8 @@ private:
     void debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp,
         bool renderBounds, bool renderAABB) const;
 
-    bool isCullableByFrustum(const Chunk& chunk, const RenderData& renderData, const glm::dmat4& mvp) const;
+    bool isCullableByFrustum(const Chunk& chunk, const RenderData& renderData,
+        const glm::dmat4& mvp) const;
     bool isCullableByHorizon(const Chunk& chunk, const RenderData& renderData,
         const BoundingHeights& heights) const;
 

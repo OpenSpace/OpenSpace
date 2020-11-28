@@ -306,7 +306,8 @@ bool AssetLoader::loadAsset(Asset* asset) {
             metaDict.getValue(MetaInformationURL, meta.url);
             metaDict.getValue(MetaInformationLicense, meta.license);
             if (metaDict.hasKey(MetaInformationIdentifiers)) {
-                ghoul::Dictionary iddict = metaDict.value<ghoul::Dictionary>(MetaInformationIdentifiers);
+                ghoul::Dictionary iddict =
+                    metaDict.value<ghoul::Dictionary>(MetaInformationIdentifiers);
                 for (int i = 1; i <= iddict.size(); ++i) {
                     std::string key = std::to_string(i);
                     std::string identifier = iddict.value<std::string>(key);

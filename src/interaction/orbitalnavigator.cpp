@@ -256,7 +256,7 @@ OrbitalNavigator::OrbitalNavigator()
     , _flightDestinationDistance(FlightDestinationDistInfo, 2e8f, 0.0f, 1e10f)
     , _flightDestinationFactor(FlightDestinationFactorInfo, 1E-4, 1E-6, 0.5)
     , _applyLinearFlight(ApplyLinearFlightInfo, false)
-    , _velocitySensitivity(VelocityZoomControlInfo, 3.5f, 0.001f, 20.f)      
+    , _velocitySensitivity(VelocityZoomControlInfo, 3.5f, 0.001f, 20.f)
     , _mouseSensitivity(MouseSensitivityInfo, 15.f, 1.f, 50.f)
     , _joystickSensitivity(JoystickSensitivityInfo, 10.f, 1.0f, 50.f)
     , _websocketSensitivity(WebsocketSensitivityInfo, 5.f, 1.0f, 50.f)
@@ -476,7 +476,9 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
 
         // Fly towards the flight destination distance. When getting closer than
         // arrivalThreshold terminate the flight
-        if (std::fabs(distFromCameraToFocus - _flightDestinationDistance) > arrivalThreshold) {
+        if (std::fabs(distFromCameraToFocus - _flightDestinationDistance) >
+            arrivalThreshold)
+        {
             pose.position = moveCameraAlongVector(
                 pose.position,
                 distFromCameraToFocus,

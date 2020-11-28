@@ -105,7 +105,7 @@ int saveSettingsToProfile(lua_State* L) {
 
     if (FileSys.fileExists(absFilename) && !overwrite) {
         return luaL_error(
-            L, 
+            L,
             fmt::format(
                 "Unable to save profile '{}'. File of same name already exists",
                 absFilename

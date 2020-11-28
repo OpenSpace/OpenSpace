@@ -582,10 +582,10 @@ void mainPostDrawFunc() {
         }
 
         if (w.right.initialized) {
-            const GLuint texId = window.frameBufferTexture(Window::TextureIndex::RightEye);
-            glBindTexture(GL_TEXTURE_2D, texId);
+            const GLuint tId = window.frameBufferTexture(Window::TextureIndex::RightEye);
+            glBindTexture(GL_TEXTURE_2D, tId);
             w.right.handle->SendTexture(
-                texId,
+                tId,
                 GL_TEXTURE_2D,
                 window.framebufferResolution().x,
                 window.framebufferResolution().y
@@ -1205,7 +1205,7 @@ int main(int argc, char** argv) {
     arguments.insert(arguments.begin() + 2, absPath(windowConfiguration));
 
     // Need to set this before the creation of the sgct::Engine
-    
+
     Log::instance().setLogToConsole(false);
     Log::instance().setShowTime(false);
     Log::instance().setShowLogLevel(false);

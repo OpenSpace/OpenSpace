@@ -141,7 +141,9 @@ void HorizonsTranslation::loadData() {
 
     bool hasCachedFile = FileSys.fileExists(cachedFile);
     if (hasCachedFile) {
-        LINFO(fmt::format("Cached file '{}' used for Horizon file '{}'", cachedFile, file));
+        LINFO(fmt::format(
+            "Cached file '{}' used for Horizon file '{}'", cachedFile, file
+        ));
 
         bool success = loadCachedFile(cachedFile);
         if (success) {

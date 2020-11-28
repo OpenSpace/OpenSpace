@@ -176,27 +176,27 @@ void FramebufferRenderer::initialize() {
     glGenTextures(1, &_gBuffers.positionTexture);
     glGenTextures(1, &_gBuffers.normalTexture);
     glGenFramebuffers(1, &_gBuffers.framebuffer);
-   
+
 
     // PingPong Buffers
     // The first pingpong buffer shares the color texture with the renderbuffer:
     _pingPongBuffers.colorTexture[0] = _gBuffers.colorTexture;
     glGenTextures(1, &_pingPongBuffers.colorTexture[1]);
     glGenFramebuffers(1, &_pingPongBuffers.framebuffer);
-    
+
     // Exit framebuffer
     glGenTextures(1, &_exitColorTexture);
-    glGenTextures(1, &_exitDepthTexture);    
+    glGenTextures(1, &_exitDepthTexture);
     glGenFramebuffers(1, &_exitFramebuffer);
 
     // HDR / Filtering Buffers
     glGenFramebuffers(1, &_hdrBuffers.hdrFilteringFramebuffer);
     glGenTextures(1, &_hdrBuffers.hdrFilteringTexture);
-    
+
     // FXAA Buffers
     glGenFramebuffers(1, &_fxaaBuffers.fxaaFramebuffer);
     glGenTextures(1, &_fxaaBuffers.fxaaTexture);
-    
+
     // DownscaleVolumeRendering
     glGenFramebuffers(1, &_downscaleVolumeRendering.framebuffer);
     glGenTextures(1, &_downscaleVolumeRendering.colorTexture);
@@ -318,7 +318,12 @@ void FramebufferRenderer::initialize() {
         0
     );
     if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_FRAMEBUFFER, _hdrBuffers.hdrFilteringFramebuffer, -1, "HDR filtering");
+        glObjectLabel(
+            GL_FRAMEBUFFER,
+            _hdrBuffers.hdrFilteringFramebuffer,
+            -1,
+            "HDR filtering"
+        );
     }
 
     status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -1134,8 +1139,8 @@ void FramebufferRenderer::updateFXAA() {
 
 void FramebufferRenderer::updateDownscaledVolume() {
     ZoneScoped
-        
-        _downscaledVolumeProgram = ghoul::opengl::ProgramObject::Build(
+
+    _downscaledVolumeProgram = ghoul::opengl::ProgramObject::Build(
         "Write Downscaled Volume Program",
         absPath("${SHADERS}/framebuffer/mergeDownscaledVolume.vert"),
         absPath("${SHADERS}/framebuffer/mergeDownscaledVolume.frag")
@@ -1225,7 +1230,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
         performDeferredTasks(tasks.deferredcasterTasks);
     }
-    
+
     glDrawBuffers(1, &ColorAttachmentArray[_pingPongIndex]);
     glEnablei(GL_BLEND, 0);
 
@@ -1283,7 +1288,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
 
     for (const RaycasterTask& raycasterTask : tasks) {
         TracyGpuZone("Raycaster")
-        
+
         VolumeRaycaster* raycaster = raycasterTask.raycaster;
 
         glBindFramebuffer(GL_FRAMEBUFFER, _exitFramebuffer);
@@ -1418,7 +1423,7 @@ void FramebufferRenderer::performDeferredTasks(
 
     for (const DeferredcasterTask& deferredcasterTask : tasks) {
         TracyGpuZone("Deferredcaster")
-            
+
         Deferredcaster* deferredcaster = deferredcasterTask.deferredcaster;
 
         ghoul::opengl::ProgramObject* deferredcastProgram = nullptr;

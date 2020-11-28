@@ -628,7 +628,7 @@ void RenderablePlanesCloud::renderLabels(const RenderData& data,
     }
 
     glm::vec4 textColor = glm::vec4(
-        glm::vec3(_textColor), 
+        glm::vec3(_textColor),
         _textOpacity * fadeInVariable
     );
 

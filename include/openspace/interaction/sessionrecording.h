@@ -593,8 +593,8 @@ protected:
         DataMode mode, int lineNum, std::ofstream& outFile);
     virtual bool convertCamera(std::stringstream& inStream, DataMode mode, int lineNum,
         std::string& inputLine, std::ofstream& outFile, unsigned char* buff);
-    virtual bool convertTimeChange(std::stringstream& inStream, DataMode mode, int lineNum,
-        std::string& inputLine, std::ofstream& outFile, unsigned char* buff);
+    virtual bool convertTimeChange(std::stringstream& inStream, DataMode mode,
+        int lineNum, std::string& inputLine, std::ofstream& outFile, unsigned char* buff);
     virtual bool convertScript(std::stringstream& inStream, DataMode mode, int lineNum,
         std::string& inputLine, std::ofstream& outFile, unsigned char* buff);
     DataMode readModeFromHeader(std::string filename);

@@ -235,9 +235,9 @@ Win32TouchHook::Win32TouchHook(void* nativeWindow) {
         // This mouse hook prevents injected mouse events (touch-to-mouse),
         // since we cannot catch it in our messageloop.
         // Since this is attached to windows global thread, this will block lowlevel mouse
-        // access to all running applications if we stall in this thread. 
-        // Debug breakpoints typically freeze our application, in which case we simply don't
-        // create this if a debugger is attached. 
+        // access to all running applications if we stall in this thread.
+        // Debug breakpoints typically freeze our application, in which case we simply
+        // don't create this if a debugger is attached.
         if (!IsDebuggerPresent()) {
             gMouseHookThread = new std::thread([](){
                 gMouseHook = SetWindowsHookExW(
@@ -246,7 +246,7 @@ Win32TouchHook::Win32TouchHook(void* nativeWindow) {
                     GetModuleHandleW(NULL),
                     0 //<- Global thread id (low-level mouse is global only)
                 );
-                if (!gMouseHook) {  
+                if (!gMouseHook) {
                     LINFO("Could not setup mousehook!");
                 }
 
@@ -278,12 +278,12 @@ Win32TouchHook::~Win32TouchHook() {
     }
 }
 
-// Low-level mouse hook is "needed" if we want to stop mousecursor from moving
-// when we get a touch-input on our window. 
-// A negative effect is that this function is for global threads, meaning our 
-// application will cause Windows to stall the mouse cursor when this 
-// function can't be scheduled (i.e. when debugger hits a breakpoint). 
-// This is not yet fail-proof...might be a race-condition on message pumping?
+// Low-level mouse hook is "needed" if we want to stop mousecursor from moving when we get
+// a touch-input on our window.
+// A negative effect is that this function is for global threads, meaning our application
+// will cause Windows to stall the mouse cursor when this  function can't be scheduled
+// (i.e. when debugger hits a breakpoint). This is not yet fail-proof...might be a
+// race-condition on message pumping?
 // - Seems to move the cursor when we get two fingers as input..
 // - If we ourselves would pump windows for events, we can handle this.
 LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {

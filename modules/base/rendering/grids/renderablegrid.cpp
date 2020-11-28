@@ -81,7 +81,8 @@ documentation::Documentation RenderableGrid::Documentation() {
             },
             {
                 SegmentsInfo.identifier,
-                new DoubleVector2Verifier, // @TODO (emmbr 2020-07-07): should be Int, but specification test fails...
+                // @TODO (emmbr 2020-07-07): should be Int, but specification test fails..
+                new DoubleVector2Verifier,
                 Optional::Yes,
                 SegmentsInfo.description
             },
@@ -230,13 +231,13 @@ void RenderableGrid::update(const UpdateData&) {
 
     const glm::vec2 halfSize = _size.value() / 2.f;
     const glm::uvec2 nSegments = _segments.value();
-    const glm::vec2 step = _size.value() / static_cast<glm::vec2>(nSegments); 
+    const glm::vec2 step = _size.value() / static_cast<glm::vec2>(nSegments);
 
     const int nLines = (2 * nSegments.x * nSegments.y) + nSegments.x + nSegments.y;
     const int nVertices = 2 * nLines;
     _varray.resize(nVertices);
     // OBS! Could be optimized further by removing duplicate vertices
-       
+
     int nr = 0;
     for (unsigned int i = 0; i < nSegments.x; ++i) {
         for (unsigned int j = 0; j < nSegments.y; ++j) {

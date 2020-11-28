@@ -39,8 +39,8 @@
 
 namespace {
     constexpr const std::array<const char*, 6> UniformNames = {
-        "modelViewProjectionTransform", "textureOffset", "colorFilterValue", "_nightFactor",
-        "sunPosition", "texture1"
+        "modelViewProjectionTransform", "textureOffset", "colorFilterValue",
+        "_nightFactor", "sunPosition", "texture1"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {

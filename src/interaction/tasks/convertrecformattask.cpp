@@ -117,7 +117,8 @@ void ConvertRecFormatTask::convert() {
         );
         return;
     }
-    else if (!SessionRecording::hasFileExtension(_outFilePath, expectedFileExtension_out)) {
+    else if (!SessionRecording::hasFileExtension(_outFilePath, expectedFileExtension_out))
+    {
         _outFilePath += expectedFileExtension_out;
     }
 

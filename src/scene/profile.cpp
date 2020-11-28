@@ -792,7 +792,7 @@ std::string Profile::convertToScene() const {
                     );
                     if (camera.up.has_value()) {
                         result += fmt::format(
-                            "Up = {{ {}, {}, {} }}, ", 
+                            "Up = {{ {}, {}, {} }}, ",
                             camera.up->x, camera.up->y, camera.up->z
                         );
                     }
@@ -809,7 +809,8 @@ std::string Profile::convertToScene() const {
                     if (camera.altitude.has_value()) {
                         return fmt::format(
                             "openspace.globebrowsing.goToGeo([[{}]], {}, {}, {});\n",
-                            camera.anchor, camera.latitude, camera.longitude, *camera.altitude
+                            camera.anchor,
+                            camera.latitude, camera.longitude, *camera.altitude
                         );
                     }
                     else {

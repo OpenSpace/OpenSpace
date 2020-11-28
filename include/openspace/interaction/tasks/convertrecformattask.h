@@ -32,8 +32,6 @@
 
 #include <string>
 
-
-
 namespace openspace::interaction {
 
 class ConvertRecFormatTask : public Task {
@@ -67,4 +65,4 @@ private:
 
 } // namespace openspace::interaction
 
-#endif //__OPENSPACE_CORE___CONVERTRECFORMATTASK___H__
+#endif // __OPENSPACE_CORE___CONVERTRECFORMATTASK___H__

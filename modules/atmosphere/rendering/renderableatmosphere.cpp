@@ -384,13 +384,14 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
                 "Atmosphere Effects. Disabling atmosphere effects for this planet."
             );
         }
-        
+
         if (atmosphereDictionary.hasKey(SunIntensityInfo.identifier)) {
             _sunRadianceIntensity =
                 atmosphereDictionary.value<float>(SunIntensityInfo.identifier);
         }
-        
-        if (atmosphereDictionary.hasKey(MieScatteringExtinctionPropCoeffInfo.identifier)) {
+
+        if (atmosphereDictionary.hasKey(MieScatteringExtinctionPropCoeffInfo.identifier))
+        {
             _mieScattExtPropCoefProp = atmosphereDictionary.value<float>(
                 MieScatteringExtinctionPropCoeffInfo.identifier
             );
@@ -621,7 +622,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             _mieScatteringCoeffZP.onChange(updateAtmosphere);
             addProperty(_mieScatteringCoeffZP);
 
-            _mieScatteringExtinctionPropCoefficientP = 
+            _mieScatteringExtinctionPropCoefficientP =
                 _mieScattExtPropCoefProp != 1.f ? _mieScattExtPropCoefProp :
                 _mieScatteringCoeff.x / _mieExtinctionCoeff.x;
 

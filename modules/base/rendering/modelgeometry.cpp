@@ -82,7 +82,6 @@ documentation:: Documentation ModelGeometry::Documentation() {
     };
 }
 
-// Create with ghoul::mm_unique_ptr 
 ghoul::mm_unique_ptr<ModelGeometry> ModelGeometry::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {

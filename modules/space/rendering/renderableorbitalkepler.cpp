@@ -51,11 +51,17 @@ namespace {
     constexpr const char* KeyLineNum = "LineNumber";
 
     // Fragile! Keep in sync with documentation
-    const std::map<std::string, openspace::Renderable::RenderBin> RenderBinModeConversion = {
+    const std::map<std::string, openspace::Renderable::RenderBin> RenderBinConversion = {
         { "Background", openspace::Renderable::RenderBin::Background },
         { "Opaque", openspace::Renderable::RenderBin::Opaque },
-        { "PreDeferredTransparent", openspace::Renderable::RenderBin::PreDeferredTransparent},
-        { "PostDeferredTransparent", openspace::Renderable::RenderBin::PostDeferredTransparent}
+        {
+            "PreDeferredTransparent",
+            openspace::Renderable::RenderBin::PreDeferredTransparent
+        },
+        {
+            "PostDeferredTransparent",
+            openspace::Renderable::RenderBin::PostDeferredTransparent
+        }
     };
 
     constexpr const std::array<int, 36> LeapYears = {
@@ -416,7 +422,7 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     _sizeRenderCallbackHandle = _sizeRender.onChange(_updateRenderSizeSelect);
 
     if (dict.hasKeyAndValue<std::string>(RenderBinModeInfo.identifier)) {
-        openspace::Renderable::RenderBin cfgRenderBin = RenderBinModeConversion.at(
+        openspace::Renderable::RenderBin cfgRenderBin = RenderBinConversion.at(
             dict.value<std::string>(RenderBinModeInfo.identifier)
         );
         setRenderBin(cfgRenderBin);

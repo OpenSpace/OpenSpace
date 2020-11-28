@@ -62,8 +62,8 @@ namespace {
 
     constexpr const std::array<const char*, 13> UniformNames = {
         "opacity", "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
-        "modelViewTransform", "normalTransform", "projectionTransform", 
-        "performShading", "texture1", "ambientIntensity", "diffuseIntensity", 
+        "modelViewTransform", "normalTransform", "projectionTransform",
+        "performShading", "texture1", "ambientIntensity", "diffuseIntensity",
         "specularIntensity", "opacityBlending"
     };
 

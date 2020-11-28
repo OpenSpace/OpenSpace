@@ -48,7 +48,9 @@ namespace {
 
 namespace openspace::exoplanets {
 
-ExoplanetsDataPreparationTask::ExoplanetsDataPreparationTask(const ghoul::Dictionary& dictionary) {
+ExoplanetsDataPreparationTask::ExoplanetsDataPreparationTask(
+                                                      const ghoul::Dictionary& dictionary)
+{
     openspace::documentation::testSpecificationAndThrow(
         documentation(),
         dictionary,
@@ -71,7 +73,9 @@ std::string ExoplanetsDataPreparationTask::description() {
     );
 }
 
-void ExoplanetsDataPreparationTask::perform(const Task::ProgressCallback& progressCallback) {
+void ExoplanetsDataPreparationTask::perform(
+                                           const Task::ProgressCallback& progressCallback)
+{
     std::ifstream inputDataFile(_inputDataPath);
     if (!inputDataFile.good()) {
         LERROR(fmt::format("Failed to open input file '{}'", _inputDataPath));

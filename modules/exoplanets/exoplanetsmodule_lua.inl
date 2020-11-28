@@ -1,26 +1,26 @@
 /*****************************************************************************************
-*                                                                                       *
-* OpenSpace                                                                             *
-*                                                                                       *
-* Copyright (c) 2014-2020                                                               *
-*                                                                                       *
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
-* software and associated documentation files (the "Software"), to deal in the Software *
-* without restriction, including without limitation the rights to use, copy, modify,    *
-* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
-* permit persons to whom the Software is furnished to do so, subject to the following   *
-* conditions:                                                                           *
-*                                                                                       *
-* The above copyright notice and this permission notice shall be included in all copies *
-* or substantial portions of the Software.                                              *
-*                                                                                       *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
-* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
-* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
-* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
-* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
-****************************************************************************************/
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2020                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
 #include <modules/exoplanets/exoplanetshelper.h>
 #include <openspace/engine/globals.h>
@@ -51,7 +51,8 @@ constexpr const char* ExoplanetsDataPath =
     "${SYNC}/http/exoplanets_data/1/exoplanets_data.bin";
 
 constexpr const char* StarTextureFile = "${SYNC}/http/exoplanets_textures/1/sun.jpg";
-constexpr const char* NoDataTextureFile = "${SYNC}/http/exoplanets_textures/1/grid-32.png";
+constexpr const char* NoDataTextureFile =
+    "${SYNC}/http/exoplanets_textures/1/grid-32.png";
 constexpr const char* DiscTextureFile =
     "${SYNC}/http/exoplanets_textures/1/disc_texture.png";
 
@@ -122,7 +123,7 @@ void createExoplanetSystem(std::string_view starName) {
 
             if (!hasSufficientData(p)) {
                 LERROR(fmt::format(
-                    "Insufficient data available for visualizion of exoplanet system: '{}'",
+                    "Insufficient data available for exoplanet system: '{}'",
                     starName
                 ));
                 return;
@@ -174,16 +175,18 @@ void createExoplanetSystem(std::string_view starName) {
             "},"
             "{"
                 "Identifier = 'StarTexture',"
-                "FilePath = " + fmt::format("openspace.absPath('{}')", StarTextureFile) + ","
+                "FilePath = " +
+                    fmt::format("openspace.absPath('{}')", StarTextureFile) + ","
                 "BlendMode = 'Color',"
                 "Enabled = true"
             "}";
     }
     else {
-        colorLayers = 
+        colorLayers =
             "{"
                 "Identifier = 'NoDataStarTexture',"
-                "FilePath = " + fmt::format("openspace.absPath('{}')", NoDataTextureFile) + ","
+                "FilePath = " +
+                    fmt::format("openspace.absPath('{}')", NoDataTextureFile) + ","
                 "BlendMode = 'Color',"
                 "Enabled = true"
             "}";
@@ -194,7 +197,7 @@ void createExoplanetSystem(std::string_view starName) {
         "Radii = " + std::to_string(radiusInMeter) + ","
         "SegmentsPerPatch = 64,"
         "PerformShading = false,"
-        "Layers = {" 
+        "Layers = {"
             "ColorLayers = { " + colorLayers + "}"
         "}"
     "},";
@@ -259,7 +262,8 @@ void createExoplanetSystem(std::string_view starName) {
         float planetRadius;
         std::string enabled;
 
-        const float astronomicalUnit = static_cast<float>(distanceconstants::AstronomicalUnit);
+        const float astronomicalUnit =
+            static_cast<float>(distanceconstants::AstronomicalUnit);
         const float solarRadius = static_cast<float>(distanceconstants::SolarRadius);
         const float jupiterRadius = static_cast<float>(distanceconstants::JupiterRadius);
 
@@ -285,7 +289,7 @@ void createExoplanetSystem(std::string_view starName) {
 
         const std::string planetKeplerTranslation = "{"
             "Type = 'KeplerTranslation',"
-            "Eccentricity = " + std::to_string(planet.ecc) + "," 
+            "Eccentricity = " + std::to_string(planet.ecc) + ","
             "SemiMajorAxis = " + std::to_string(semiMajorAxisInKm) + ","
             "Inclination = " + std::to_string(planet.i) + ","
             "AscendingNode = " + std::to_string(planet.bigOmega) + ","

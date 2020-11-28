@@ -108,7 +108,7 @@ int time_setDeltaTimeSteps(lua_State* L) {
 /**
  * \ingroup LuaScripts
 * setNextDeltaTimeStep():
-* Immediately set the simulation speed to the first delta time step in the list that is 
+* Immediately set the simulation speed to the first delta time step in the list that is
 * larger than the current choice of simulation speed, if any.
  */
 int time_setNextDeltaTimeStep(lua_State* L) {
@@ -147,12 +147,12 @@ int time_setPreviousDeltaTimeStep(lua_State* L) {
  */
 int time_interpolateNextDeltaTimeStep(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(
-        L, 
-        { 0, 1 }, 
+        L,
+        { 0, 1 },
         "lua::time_interpolateNextDeltaTimeStep"
     );
 
-    double interpolationDuration = 
+    double interpolationDuration =
         global::timeManager->defaultDeltaTimeInterpolationDuration();
 
     const int nArguments = lua_gettop(L);
@@ -181,19 +181,19 @@ int time_interpolateNextDeltaTimeStep(lua_State* L) {
 /**
  * \ingroup LuaScripts
 * interpolatePreviousDeltaTimeStep([interpolationDuration]):
-* Interpolate the simulation speed to the previous delta time step in the list. If an 
+* Interpolate the simulation speed to the previous delta time step in the list. If an
 * input value is given, the interpolation is done over the specified number of seconds.
 * If interpolationDuration is not provided, the interpolation time will be based on the
 * `defaultDeltaTimeInterpolationDuration` property of the TimeManager.
  */
 int time_interpolatePreviousDeltaTimeStep(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(
-        L, 
-        { 0, 1 }, 
+        L,
+        { 0, 1 },
         "lua::time_interpolatePreviousDeltaTimeStep"
     );
 
-    double interpolationDuration = 
+    double interpolationDuration =
         global::timeManager->defaultDeltaTimeInterpolationDuration();
 
     const int nArguments = lua_gettop(L);

@@ -976,7 +976,8 @@ bool SessionRecording::readSingleKeyframeCamera(datamessagestructures::CameraKey
 
 void SessionRecording::saveSingleKeyframeCamera(datamessagestructures::CameraKeyframe& kf,
                                                 Timestamps& times, DataMode mode,
-                                                std::ofstream& file, unsigned char* buffer)
+                                                std::ofstream& file,
+                                                unsigned char* buffer)
 {
     if (mode == DataMode::Binary) {
         saveCameraKeyframeBinary(times, kf, buffer, file);
@@ -1068,9 +1069,9 @@ bool SessionRecording::playbackTimeChange() {
     return success;
 }
 
-bool SessionRecording::convertTimeChange(std::stringstream& inStream, DataMode mode, int lineNum,
-                                         std::string& inputLine, std::ofstream& outFile,
-                                         unsigned char* buffer)
+bool SessionRecording::convertTimeChange(std::stringstream& inStream, DataMode mode,
+                                         int lineNum, std::string& inputLine,
+                                         std::ofstream& outFile, unsigned char* buffer)
 {
     Timestamps times;
     datamessagestructures::TimeKeyframe kf;
@@ -1210,9 +1211,9 @@ bool SessionRecording::playbackScript() {
     return success;
 }
 
-bool SessionRecording::convertScript(std::stringstream& inStream, DataMode mode, int lineNum,
-                                     std::string& inputLine, std::ofstream& outFile,
-                                     unsigned char* buffer)
+bool SessionRecording::convertScript(std::stringstream& inStream, DataMode mode,
+                                     int lineNum, std::string& inputLine,
+                                     std::ofstream& outFile, unsigned char* buffer)
 {
     Timestamps times;
     datamessagestructures::ScriptMessage kf;
@@ -1252,7 +1253,8 @@ bool SessionRecording::readSingleKeyframeScript(datamessagestructures::ScriptMes
 
 void SessionRecording::saveSingleKeyframeScript(datamessagestructures::ScriptMessage& kf,
                                                 Timestamps& times, DataMode mode,
-                                                std::ofstream& file, unsigned char* buffer)
+                                                std::ofstream& file,
+                                                unsigned char* buffer)
 {
     if (mode == DataMode::Binary) {
         saveScriptKeyframeBinary(times, kf, buffer, file);
@@ -1300,8 +1302,7 @@ bool SessionRecording::readScriptKeyframeBinary(Timestamps& times,
 
 bool SessionRecording::readScriptKeyframeAscii(Timestamps& times,
                                                datamessagestructures::ScriptMessage& kf,
-                                               std::string currentParsingLine,
-                                               int lineN)
+                                               std::string currentParsingLine, int lineN)
 {
     std::string entryType;
     std::istringstream iss(currentParsingLine);
@@ -1366,8 +1367,7 @@ bool SessionRecording::addKeyframe(double timestamp,
 
 bool SessionRecording::addKeyframeToTimeline(RecordedType type,
                                              size_t indexIntoTypeKeyframes,
-                                             double timestamp,
-                                             int lineNum)
+                                             double timestamp, int lineNum)
 {
     try {
         _timeline.push_back({
