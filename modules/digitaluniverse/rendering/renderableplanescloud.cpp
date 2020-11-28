@@ -562,6 +562,8 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
     _program->setUniform(_uniformCache.alphaValue, _opacity);
     _program->setUniform(_uniformCache.fadeInValue, fadeInVariable);
 
+    glDisable(GL_CULL_FACE);
+
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
 
@@ -592,6 +594,7 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
     // Restores OpenGL Rendering State
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetDepthState();
+    global::renderEngine->openglStateCache().resetPolygonAndClippingState();
 }
 
 void RenderablePlanesCloud::renderLabels(const RenderData& data,
