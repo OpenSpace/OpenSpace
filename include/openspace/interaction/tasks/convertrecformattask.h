@@ -59,8 +59,10 @@ private:
     std::ifstream _iFile;
     std::ofstream _oFile;
     SessionRecording::DataMode _fileFormatType;
+    std::string _version;
 
     std::string _valueFunctionLua;
+    SessionRecording* sessRec;
 };
 
 } // namespace openspace::interaction

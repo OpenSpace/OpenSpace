@@ -22,51 +22,36 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifndef __OPENSPACE_CORE___CONVERTRECFILEVERSIONTASK___H__
+#define __OPENSPACE_CORE___CONVERTRECFILEVERSIONTASK___H__
+
+#include <openspace/util/task.h>
+#include <openspace/interaction/sessionrecording.h>
+
+#include <ghoul/glm.h>
+
+#include <string>
+
+
+
 namespace openspace::interaction {
 
-template <class T>
-T nextKeyframeObj(unsigned int index, const std::vector<T>& keyframeContainer,
-                  std::function<void()> finishedCallback)
-{
-    if (index >= (keyframeContainer.size() - 1)) {
-        if (index == (keyframeContainer.size() - 1)) {
-            finishedCallback();
-        }
-        return keyframeContainer.back();
-    }
-    else if (index < keyframeContainer.size()) {
-        return keyframeContainer[index];
-    }
-    else {
-        return keyframeContainer.back();
-    }
-}
+class ConvertRecFileVersionTask : public Task {
+public:
+    ConvertRecFileVersionTask(const ghoul::Dictionary& dictionary);
+    ~ConvertRecFileVersionTask();
+    std::string description() override;
+    void perform(const Task::ProgressCallback& progressCallback) override;
+    static documentation::Documentation documentation();
+    void convert();
+    SessionRecording* sessRec;
 
-template <class T>
-T prevKeyframeObj(unsigned int index, const std::vector<T>& keyframeContainer) {
-    if (index >= keyframeContainer.size()) {
-        return keyframeContainer.back();
-    }
-    else if (index > 0) {
-        return keyframeContainer[index - 1];
-    }
-    else {
-        return keyframeContainer.front();
-    }
-}
-
-template <typename T>
-T readFromPlayback(std::ifstream& stream) {
-    T res;
-    stream.read(reinterpret_cast<char*>(&res), sizeof(T));
-    return res;
-}
-
-template <typename T>
-T readFromPlayback(std::stringstream& stream) {
-    T res;
-    stream.read(reinterpret_cast<char*>(&res), sizeof(T));
-    return res;
-}
+private:
+    std::string _inFilename;
+    std::string _inFilePath;
+    std::string _valueFunctionLua;
+};
 
 } // namespace openspace::interaction
+
+#endif //__OPENSPACE_CORE___CONVERTRECFILEVERSIONTASK___H__

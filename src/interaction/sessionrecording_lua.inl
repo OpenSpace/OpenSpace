@@ -96,7 +96,7 @@ int startPlayback(lua_State* L, interaction::KeyframeTimeRef timeMode,
     }
 
     global::sessionRecording->startPlayback(
-        playbackFilePath,
+        const_cast<std::string&>(playbackFilePath),
         timeMode,
         forceSimTimeAtStart
     );
@@ -162,6 +162,24 @@ int disableTakeScreenShotDuringPlayback(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::disableTakeScreenShotDuringPlayback");
 
     global::sessionRecording->disableTakeScreenShotDuringPlayback();
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
+int fileFormatConversion(lua_State* L) {
+    using ghoul::lua::luaTypeToString;
+
+    const std::string convertFilePath = ghoul::lua::value<std::string>(
+        L,
+        1,
+        ghoul::lua::PopValue::Yes
+    );
+
+    if (convertFilePath.empty()) {
+        return luaL_error(L, "filepath string is empty");
+    }
+    global::sessionRecording->convertFile(convertFilePath);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;

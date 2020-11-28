@@ -201,7 +201,7 @@ void create() {
     assert(navigationHandler);
     currentPos += sizeof(interaction::NavigationHandler);
 
-    sessionRecording = new (currentPos) interaction::SessionRecording;
+    sessionRecording = new (currentPos) interaction::SessionRecording(true);
     assert(sessionRecording);
     currentPos += sizeof(interaction::SessionRecording);
 
