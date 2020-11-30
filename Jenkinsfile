@@ -99,8 +99,8 @@ parallel tools: {
   } // node('tools')
 },
 linux_gcc: {
-  node('linux' && 'gcc') {
-    if (${env.USE_BUILD_OS_LINUX}) {
+  if (${env.USE_BUILD_OS_LINUX}) {
+    node('linux' && 'gcc') {
       stage('linux-gcc/scm') {
         deleteDir();
         gitHelper.checkoutGit(url, branch);
@@ -122,12 +122,12 @@ linux_gcc: {
         // testHelper.runUnitTests('build/OpenSpaceTest');
       }
       cleanWs()
-    }
-  } // node('linux')
+    } // node('linux')
+  }
 },
 linux_clang: {
-  node('linux' && 'clang') {
-    if (${env.USE_BUILD_OS_LINUX}) {
+  if (${env.USE_BUILD_OS_LINUX}) {
+    node('linux' && 'clang') {
       stage('linux-clang/scm') {
         deleteDir()
         gitHelper.checkoutGit(url, branch);
@@ -149,12 +149,12 @@ linux_clang: {
         // testHelper.runUnitTests('build/OpenSpaceTest');
       }
       cleanWs()
-    }
-  } // node('linux')
+    } // node('linux')
+  }
 },
 windows: {
-  node('windows') {
-    if (${env.USE_BUILD_OS_WINDOWS}) {
+  if (${env.USE_BUILD_OS_WINDOWS}) {
+    node('windows') {
       ws("${env.JENKINS_BASE}/O/${env.BRANCH_NAME}/${env.BUILD_ID}") {
         stage('windows/scm') {
           deleteDir();
@@ -173,12 +173,12 @@ windows: {
         }
       } // node('windows')
       cleanWs()
-    }
-  } // node('windows')
+    } // node('windows')
+  }
 },
 macos: {
-  node('macos') {
-    if (${env.USE_BUILD_OS_MACOS}) {
+  if (${env.USE_BUILD_OS_MACOS}) {
+    node('macos') {
       stage('macos/scm') {
         deleteDir();
         gitHelper.checkoutGit(url, branch);
@@ -194,6 +194,6 @@ macos: {
         // testHelper.runUnitTests('build/Debug/OpenSpaceTest')
       }
       cleanWs()
-    }
-  } // node('macos')
+    } // node('macos')
+  }
 }
