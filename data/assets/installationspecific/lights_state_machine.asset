@@ -199,6 +199,26 @@ constellationsState = {
     ]]
 }
 
+----------------------------------------------------------------
+-- 6. Saturn
+----------------------------------------------------------------
+local saturnTargetDistance = 36E7
+
+saturnState = {
+    Identifier = "Saturn",
+    Enter = [[
+        openspace.printInfo('Entering Saturn State')
+        ]] .. util.setOrbitSpeedFactor(0.2) .. [[
+        ]] .. util.orbitOnArrival() .. [[
+    ]],
+    Exit = [[
+        openspace.printInfo('Exiting Saturn State')
+        ]] .. util.stopOrbiting() .. [[
+        -- Make sure that we look at saturn when we leave it
+        ]] .. util.changeAnchor('Saturn', 3) .. [[
+    ]]
+}
+
 ---------------------------------------------------------------- 
 -- COMBINE STATES AND TRANSITIONS
 ----------------------------------------------------------------
@@ -208,7 +228,8 @@ states = {
     galaxiesState,
     asteroidsState,
     marsState,
-    constellationsState
+    constellationsState,
+    saturnState
 }
 
 transitions = {
@@ -281,6 +302,11 @@ transitions = {
         To = "Galaxies",
         Action = util.applyLinearFlight(galaxiesTargetDistance, 1.5)
     },
+    {
+        From = "Saturn",
+        To = "Galaxies",
+        Action = util.applyLinearFlight(galaxiesTargetDistance, 1.5)
+    },
     -- from Galaxies
     {
         From = "Galaxies",
@@ -312,6 +338,14 @@ transitions = {
         Action = [[
             ]] .. util.changeAnchor('Earth', 1) .. [[
             ]] .. util.applyLinearFlight(constellationsTargetDistance, 1.5) .. [[
+        ]]
+    },
+    {
+        From = "Galaxies",
+        To = "Saturn",
+        Action = [[
+            ]] .. util.changeAnchor('Saturn', 1) .. [[
+            ]] .. util.applyLinearFlight(saturnTargetDistance, 1.5) .. [[
         ]]
     },
     -- 3. Asteroids
@@ -363,7 +397,27 @@ transitions = {
             ]] .. util.changeAnchor('Earth', 2) .. [[
             ]] .. util.applyLinearFlight(constellationsTargetDistance, 1) .. [[
         ]]
-    }
+    },
+    -- 6. Saturn
+    {
+        From = "Saturn",
+        To = "Default",
+        Action = util.applyLinearFlight(defaultTargetDistance, 1.0)
+    },
+    {
+        From = "Default",
+        To = "Saturn",
+        Action = [[
+            ]] .. util.disableLinearFlight() .. [[
+            ]] .. util.setCurveTypeToZoomOverview() .. [[
+            openspace.time.setPause(true)
+            openspace.autonavigation.goToHeight(
+                'Saturn',
+                ]] .. tostring(saturnTargetDistance) .. [[,
+                true
+            )
+        ]]
+    },
 }
 
 asset.onInitialize(function()
