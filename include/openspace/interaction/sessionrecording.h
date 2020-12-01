@@ -654,6 +654,28 @@ protected:
     const int _maximumRecursionDepth = 50;
 };
 
+// Instructions for bumping the file format version with new changes:
+//
+// 1. Create a new subclass with the current version # in its name, such as:
+//    SessionRecording_legacy_####, which inherits from SessionRecording
+// 2. Override any method that changes in the new version. This includes both
+//    methods in SessionRecording class and structs in
+//    openspace::datamessagestructure that do data read/writes. Make the modified
+//    method/struct virtual, and override it in the new legacy subclass. This
+//    override will contain the code as it is before the new changes. This will
+//    need to be done in every legacy subclass/struct that exists, but only if that
+//    subclass does NOT already contain an override of that method/struct.
+// 3. Override FileHeaderVersion with the version # of the new subclass (which is
+//    the version being replaced by the new changes).
+// 4. Override TargetConvertVersion with the version # with the new changes. This
+//    is now the version that this legacy subclass converts up to.
+// 5. Override getLegacyConversionResult method so that it creates an instance of
+//    the new version subclass. This is how the current version looks back to the
+//    legacy version that preceded it.
+// 6. The convert method for frame types that changed will need to be changed
+//    (for example SessionRecording_legacy_0085::convertScript uses its own
+//    override of script keyframe for the conversion functionality).
+
 class SessionRecording_legacy_0085 : public SessionRecording {
 public:
     SessionRecording_legacy_0085() : SessionRecording() {}
