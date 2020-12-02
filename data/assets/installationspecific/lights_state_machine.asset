@@ -24,7 +24,7 @@ earthState = {
     Identifier = "Earth", 
     Enter = [[
         openspace.printInfo('Entering Earth State')
-        ]] .. util.setOrbitSpeedFactor(0.2) .. [[
+        ]] .. util.setOrbitSpeedFactor(0.4) .. [[
         ]] .. util.orbitOnArrival() .. [[
         openspace.setPropertyValueSingle(
             'ScreenSpace.text-earth.TexturePath',
@@ -47,7 +47,7 @@ galaxiesState = {
     Identifier = "Galaxies", 
     Enter = [[
         openspace.printInfo('Entering Galaxies State')
-        ]] .. util.setOrbitSpeedFactor(0.1) .. [[
+        ]] .. util.setOrbitSpeedFactor(0.2) .. [[
         ]] .. util.orbitOnArrival() .. [[
         openspace.setPropertyValueSingle(
             'ScreenSpace.text-galaxies.TexturePath',
@@ -112,7 +112,7 @@ asteroidsState = {
         ]] .. setAsteroidsProperty('Opacity', 0.05) .. [[
         ]] .. setAsteroidsProperty('Enabled', true) .. [[
         ]] .. setAsteroidsProperty('Opacity', 1, fadeInDuration) .. [[ 
-        ]] .. util.setOrbitSpeedFactor(0.15) .. [[
+        ]] .. util.setOrbitSpeedFactor(0.2) .. [[
         ]] .. util.orbitOnArrival() .. [[
         ]] .. setPlanetLabelsOpacity(1.0) .. [[
     ]],
@@ -139,7 +139,7 @@ marsState = {
     Identifier = "Mars",
     Enter = [[
         openspace.printInfo('Entering Mars State')
-        ]] .. util.setOrbitSpeedFactor(0.2) .. [[
+        ]] .. util.setOrbitSpeedFactor(0.4) .. [[
         ]] .. util.orbitOnArrival() .. [[
         -- Make sure that the high-detailed layer is not visible when we arrive
         openspace.setPropertyValueSingle(
@@ -195,7 +195,7 @@ constellationsState = {
     Identifier = "Constellations",
     Enter = [[
         openspace.printInfo('Entering Constellations State')
-        ]] .. util.setOrbitSpeedFactor(0.2) .. [[
+        ]] .. util.setOrbitSpeedFactor(0.35) .. [[
         ]] .. util.orbitOnArrival() .. [[
         ]] .. fadeConstellationsToOpacity(constellationsLinesMaxOpacity) .. [[
         ]] .. fadePlanetTrailsToOpacity(0.0) .. [[
@@ -219,7 +219,7 @@ saturnState = {
     Identifier = "Saturn",
     Enter = [[
         openspace.printInfo('Entering Saturn State')
-        ]] .. util.setOrbitSpeedFactor(0.2) .. [[
+        ]] .. util.setOrbitSpeedFactor(0.4) .. [[
         ]] .. util.orbitOnArrival() .. [[
     ]],
     Exit = [[
