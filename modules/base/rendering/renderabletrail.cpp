@@ -351,6 +351,7 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
             case RenderInformation::VertexSorting::NewestFirst: return 0;
             case RenderInformation::VertexSorting::OldestFirst: return 1;
             case RenderInformation::VertexSorting::NoSorting: return 2;
+            default:                                  throw ghoul::MissingCaseException();
         }
     }(info.sorting);
 

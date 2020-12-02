@@ -452,7 +452,13 @@ std::vector<documentation::Documentation> GlobeBrowsingModule::documentations() 
 void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
                                     int x, int y, int level)
 {
-    goToChunk(globe, globebrowsing::TileIndex(x, y, level), glm::vec2(0.5f, 0.5f), true);
+    ghoul_assert(level < std::numeric_limits<uint8_t>::max(), "Level way too big");
+    goToChunk(
+        globe,
+        globebrowsing::TileIndex(x, y, static_cast<uint8_t>(level)),
+        glm::vec2(0.5f, 0.5f),
+        true
+    );
 }
 
 void GlobeBrowsingModule::goToGeo(const globebrowsing::RenderableGlobe& globe,

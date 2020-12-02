@@ -1962,7 +1962,8 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
     const int x = static_cast<int>(floor(xIndexSpace));
     const int y = static_cast<int>(floor(yIndexSpace));
 
-    const TileIndex tileIndex(x, y, chunkLevel);
+    ghoul_assert(chunkLevel < std::numeric_limits<uint8_t>::max(), "Too high level");
+    const TileIndex tileIndex(x, y, static_cast<uint8_t>(chunkLevel));
     const GeodeticPatch patch = GeodeticPatch(tileIndex);
 
     const Geodetic2 northEast = patch.corner(Quad::NORTH_EAST);
@@ -2397,7 +2398,7 @@ int RenderableGlobe::desiredLevelByAvailableTileData(const Chunk& chunk) const {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 bool RenderableGlobe::isCullableByFrustum(const Chunk& chunk,
-                                          const RenderData& renderData,
+                                          const RenderData&,
                                           const glm::dmat4& mvp) const
 {
     ZoneScoped

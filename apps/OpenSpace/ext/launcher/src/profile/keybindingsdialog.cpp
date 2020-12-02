@@ -338,8 +338,6 @@ bool KeybindingsDialog::isLineEmpty(int index) {
 }
 
 void KeybindingsDialog::listItemAdded() {
-    int currentListSize = _list->count();
-
     _data.push_back(BlankKey);
     _list->addItem(new QListWidgetItem("  (Enter details below & click 'Save')"));
     // Scroll down to that blank line highlighted

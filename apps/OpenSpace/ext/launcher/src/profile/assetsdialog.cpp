@@ -210,9 +210,6 @@ QString AssetsDialog::createTextSummary() {
     for (int i = 0; i < summaryItems.size(); ++i) {
         bool existsInFilesystem = summaryItems.at(i)->doesExistInFilesystem();
 
-        constexpr const char* ExistsFormat = "{}<br>";
-        constexpr const char* NotExistsFormat = "<font color='{}'>{}</font><br>";
-
         std::string s = existsInFilesystem ?
             fmt::format("{}<br>", summaryPaths.at(i)) :
             fmt::format("<font color='red'>{}</font><br>", summaryPaths.at(i));
@@ -233,6 +230,6 @@ void AssetsDialog::parseSelections() {
     accept();
 }
 
-void AssetsDialog::selected(const QModelIndex& sel) {
+void AssetsDialog::selected(const QModelIndex&) {
     _summary->setText(createTextSummary());
 }

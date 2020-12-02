@@ -50,7 +50,7 @@
 using namespace openspace;
 
 namespace {
-    QString labelText(int size, QString title) {
+    QString labelText(size_t size, QString title) {
         QString label;
         if (size > 0) {
             label = title + " (" + QString::number(size) + ")";
@@ -373,7 +373,7 @@ void ProfileEdit::duplicateProfile() {
             // will remove the suffix here first
             profile = profile.substr(0, it);
         }
-        catch (const std::invalid_argument& e) {
+        catch (const std::invalid_argument&) {
             // If this exception is thrown, we did find a separator character but the
             // substring afterwards was not a number, so the user just added a separator
             // by themselves. In this case we don't do anything

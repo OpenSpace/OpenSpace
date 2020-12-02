@@ -715,9 +715,11 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
         constexpr const char* KeyY = "Y";
 
         int level = static_cast<int>(tileIndexDict.value<double>(KeyLevel));
+        ghoul_assert(level < std::numeric_limits<uint8_t>::max(), "Level too large");
         int x = static_cast<int>(tileIndexDict.value<double>(KeyX));
         int y = static_cast<int>(tileIndexDict.value<double>(KeyY));
-        const TileIndex tileIndex(x, y, level);
+
+        const TileIndex tileIndex(x, y, static_cast<uint8_t>(level));
 
         layergroupid::TypeID providerTypeID = layergroupid::TypeID::DefaultTileLayer;
         if (defaultProviderDict.hasKeyAndValue<std::string>("Type")) {
@@ -845,14 +847,14 @@ bool initialize(TileProvider& tp) {
 
     ghoul_assert(!tp.isInitialized, "TileProvider can only be initialized once.");
 
-    if (TileProvider::NumTileProviders > std::numeric_limits<uint16_t>::max()) {
+    if (TileProvider::NumTileProviders > std::numeric_limits<uint16_t>::max() - 1) {
         LERRORC(
             "TileProvider",
             "Number of tile providers exceeds 65535. Something will break soon"
         );
         TileProvider::NumTileProviders = 0;
     }
-    tp.uniqueIdentifier = TileProvider::NumTileProviders++;
+    tp.uniqueIdentifier = static_cast<uint16_t>(TileProvider::NumTileProviders++);
     if (TileProvider::NumTileProviders == std::numeric_limits<unsigned int>::max()) {
         --TileProvider::NumTileProviders;
         return false;

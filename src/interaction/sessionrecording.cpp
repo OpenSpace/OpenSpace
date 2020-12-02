@@ -1768,9 +1768,8 @@ SessionRecording::DataMode SessionRecording::readModeFromHeader(std::string file
         mode = DataMode::Binary;
     }
     else {
-        LERROR("Unknown data type in header (should be Ascii or Binary)");
+        throw ConversionError("Unknown data type in header (should be Ascii or Binary)");
     }
-    inputFile.close();
     return mode;
 }
 
@@ -2051,7 +2050,7 @@ std::string SessionRecording::getLegacyConversionResult(std::string filename, in
 }
 
 std::string SessionRecording_legacy_0085::getLegacyConversionResult(std::string filename,
-                                                                    int depth)
+                                                                    int)
 {
     //This method is overriden in each legacy subclass, but does nothing in this instance
     // as the oldest supported legacy version.

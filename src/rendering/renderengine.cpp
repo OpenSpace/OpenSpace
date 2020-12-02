@@ -283,7 +283,7 @@ RenderEngine::RenderEngine()
     , _hue(HueInfo, 0.f, 0.f, 360.f)
     , _saturation(SaturationInfo, 1.f, 0.0f, 2.f)
     , _value(ValueInfo, 1.f, 0.f, 2.f)
-    , _framerateLimit(FramerateLimitInfo, 0.f, 0.f, 500.f)
+    , _framerateLimit(FramerateLimitInfo, 0, 0, 500)
     , _horizFieldOfView(HorizFieldOfViewInfo, 80.f, 1.f, 179.f)
     , _globalRotation(
         GlobalRotationInfo,

@@ -63,7 +63,7 @@ int AssetTreeItem::row() const {
 }
 
 int AssetTreeItem::columnCount() const {
-    return _itemData.size();
+    return static_cast<int>(_itemData.size());
 }
 
 QVariant AssetTreeItem::data(int column) const {

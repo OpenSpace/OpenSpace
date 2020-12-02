@@ -77,7 +77,7 @@ std::string ConvertRecFileVersionTask::description() {
     return description;
 }
 
-void ConvertRecFileVersionTask::perform(const Task::ProgressCallback& progressCallback) {
+void ConvertRecFileVersionTask::perform(const Task::ProgressCallback&) {
     convert();
 }
 
