@@ -7,8 +7,8 @@ local qrSpec = {
     Name = "Random State QR Code",
     TexturePath = qrImagePath,
     FaceCamera = false,
-    Scale = 0.08,
-    CartesianPosition = {-0.70, -0.35, -1}
+    Scale = 0.12,
+    CartesianPosition = {-0.68, -0.27, -1}
 }
 
 local labelScale = 0.2
