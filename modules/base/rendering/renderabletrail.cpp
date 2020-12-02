@@ -426,7 +426,7 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
         }
     }
 }
-#pragma optimize("", off)
+
 void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     ZoneScoped
 

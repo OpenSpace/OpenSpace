@@ -79,7 +79,7 @@ function(DownloadNodeJs version download_dir)
       # Linux uses tar.xz
       message(STATUS "Extracting NodeJs: ${NODEJS_DOWNLOAD_PATH} in ${NODEJS_DOWNLOAD_DIR}")
       execute_process(
-        COMMAND tar xvf ${NODEJS_DOWNLOAD_PATH}
+        COMMAND tar xf ${NODEJS_DOWNLOAD_PATH}
         WORKING_DIRECTORY ${NODEJS_DOWNLOAD_DIR}
       )
     endif()
