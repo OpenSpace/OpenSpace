@@ -3,6 +3,7 @@
     "base",
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/satellites/satellites",
+    "scene/solarsystem/planets/saturn/minor_moons",
     "scene/solarsystem/sssb/amor_asteroid",
     "scene/solarsystem/sssb/apollo_asteroid",
     "scene/solarsystem/sssb/aten_asteroid",
@@ -186,6 +187,36 @@
       "name": "ScreenSpace.text-earth.Alpha",
       "type": "setPropertyValueSingle",
       "value": "1.0"
+    },
+    {
+      "name": "{moonTrail_minor}.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "false"
+    },
+    {
+      "name": "{moonTrail_minor}.Renderable.Appearance.Color",
+      "type": "setPropertyValue",
+      "value": "{0.3, 0.5, 0.5}"
+    },
+    {
+      "name": "{moon_gallic}.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "false"
+    },
+    {
+      "name": "{moon_inuit}.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "false"
+    },
+    {
+      "name": "{moon_norse}.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "false"
+    },
+    {
+      "name": "{moon_other}.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "false"
     }
   ],
   "time": {
