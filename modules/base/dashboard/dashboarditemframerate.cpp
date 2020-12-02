@@ -149,21 +149,6 @@ namespace {
                 throw ghoul::MissingCaseException();
         }
     }
-
-    [[ nodiscard ]] int nLines(
-                           openspace::DashboardItemFramerate::FrametimeType frametimeType)
-    {
-        using FrametimeType = openspace::DashboardItemFramerate::FrametimeType;
-        switch (frametimeType) {
-            case FrametimeType::DtTimeAvg:                return 1;
-            case FrametimeType::DtTimeExtremes:           return 2;
-            case FrametimeType::DtStandardDeviation:      return 1;
-            case FrametimeType::DtCoefficientOfVariation: return 1;
-            case FrametimeType::FPS:                      return 1;
-            case FrametimeType::FPSAvg:                   return 1;
-            default:                                  throw ghoul::MissingCaseException();
-        }
-    }
 } // namespace
 
 namespace openspace {
