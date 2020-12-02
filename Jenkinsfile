@@ -201,26 +201,26 @@ windows_msvc: {
     } // node('windows')
   }
 },
-windows_ninja: {
-  if (env.USE_BUILD_OS_WINDOWS == 'true') {
-    node('windows') {
-      ws("${env.JENKINS_BASE}/O/${env.BRANCH_NAME}/${env.BUILD_ID}") {
-        stage('windows-ninja/scm') {
-          deleteDir();
-          gitHelper.checkoutGit(url, branch);
-        }
-        stage('windows-ninja/build') {
-          compileHelper.build(compileHelper.Ninja(), compileHelper.VisualStudio(), moduleCMakeFlags(), '', 'build-ninja');
-        }
-        stage('windows-ninja/test') {
-          // Currently, the unit tests are failing on Windows
-          // testHelper.runUnitTests('bin\\Debug\\OpenSpaceTest')
-        }
-      } // node('windows')
-      cleanWs()
-    } // node('windows')
-  }
-},
+// windows_ninja: {
+//   if (env.USE_BUILD_OS_WINDOWS == 'true') {
+//     node('windows') {
+//       ws("${env.JENKINS_BASE}/O/${env.BRANCH_NAME}/${env.BUILD_ID}") {
+//         stage('windows-ninja/scm') {
+//           deleteDir();
+//           gitHelper.checkoutGit(url, branch);
+//         }
+//         stage('windows-ninja/build') {
+//           compileHelper.build(compileHelper.Ninja(), compileHelper.VisualStudio(), moduleCMakeFlags(), '', 'build-ninja');
+//         }
+//         stage('windows-ninja/test') {
+//           // Currently, the unit tests are failing on Windows
+//           // testHelper.runUnitTests('bin\\Debug\\OpenSpaceTest')
+//         }
+//       } // node('windows')
+//       cleanWs()
+//     } // node('windows')
+//   }
+// },
 macos_make: {
   if (env.USE_BUILD_OS_MACOS == 'true') {
     node('macos') {
