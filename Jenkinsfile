@@ -92,100 +92,108 @@ parallel tools: {
       )
       recordIssues(
         id: 'tools-cppcheck',
-        tool: cppCheck()
+        tool: cppCheck(pattern: 'build/cppcheck.xml')
       ) 
     }  
     cleanWs()
   } // node('tools')
 },
 linux_gcc: {
-  node('linux' && 'gcc') {
-    stage('linux-gcc/scm') {
-      deleteDir();
-      gitHelper.checkoutGit(url, branch);
-    }
-    stage('linux-gcc/build(make)') {
-        def cmakeCompileOptions = moduleCMakeFlags();
-        cmakeCompileOptions += ' -DMAKE_BUILD_TYPE=Release';
-        // Not sure why the linking of OpenSpaceTest takes so long
-        compileHelper.build(compileHelper.Make(), compileHelper.Gcc(), cmakeCompileOptions, 'OpenSpace', 'build-make');
-        compileHelper.recordCompileIssues(compileHelper.Gcc());
-    }
-    stage('linux-gcc/build(ninja)') {
-        def cmakeCompileOptions = moduleCMakeFlags();
-        cmakeCompileOptions += '-DMAKE_BUILD_TYPE=Release';
-        // Not sure why the linking of OpenSpaceTest takes so long
-        compileHelper.build(compileHelper.Ninja(), compileHelper.Gcc(), cmakeCompileOptions, 'OpenSpace', 'build-ninja');
-    }
-    stage('linux-gcc/test') {
-      // testHelper.runUnitTests('build/OpenSpaceTest');
-    }
-    cleanWs()
-  } // node('linux')
-},
-linux_clang: {
-  node('linux' && 'clang') {
-    stage('linux-clang/scm') {
-      deleteDir()
-      gitHelper.checkoutGit(url, branch);
-    }
-    stage('linux-clang/build(make)') {
-        def cmakeCompileOptions = moduleCMakeFlags()
-        cmakeCompileOptions += ' -DMAKE_BUILD_TYPE=Release'
-        // Not sure why the linking of OpenSpaceTest takes so long
-        compileHelper.build(compileHelper.Make(), compileHelper.Clang(), cmakeCompileOptions, 'OpenSpace', 'build-make');
-        compileHelper.recordCompileIssues(compileHelper.Clang());
-    }
-    stage('linux-clang/build(ninja)') {
-        def cmakeCompileOptions = moduleCMakeFlags()
-        cmakeCompileOptions += '-DMAKE_BUILD_TYPE=Release'
-        // Not sure why the linking of OpenSpaceTest takes so long
-        compileHelper.build(compileHelper.Ninja(), compileHelper.Clang(), cmakeCompileOptions, 'OpenSpace', 'build-ninja');
-    }
-    stage('linux-clang/test') {
-      // testHelper.runUnitTests('build/OpenSpaceTest');
-    }
-    cleanWs()
-  } // node('linux')
-},
-windows: {
-  node('windows') {
-    ws("${env.JENKINS_BASE}/O/${env.BRANCH_NAME}/${env.BUILD_ID}") {
-      stage('windows/scm') {
+  if (env.USE_BUILD_OS_LINUX == 'true') {
+    node('linux' && 'gcc') {
+      stage('linux-gcc/scm') {
         deleteDir();
         gitHelper.checkoutGit(url, branch);
       }
-      stage('windows/build(msvc)') {
-        compileHelper.build(compileHelper.VisualStudio(), compileHelper.VisualStudio(), moduleCMakeFlags(), '', 'build-msvc');
-        compileHelper.recordCompileIssues(compileHelper.VisualStudio());
+      stage('linux-gcc/build(make)') {
+          def cmakeCompileOptions = moduleCMakeFlags();
+          cmakeCompileOptions += ' -DMAKE_BUILD_TYPE=Release';
+          // Not sure why the linking of OpenSpaceTest takes so long
+          compileHelper.build(compileHelper.Make(), compileHelper.Gcc(), cmakeCompileOptions, 'OpenSpace', 'build-make');
+          compileHelper.recordCompileIssues(compileHelper.Gcc());
       }
-      stage('windows/build(ninja)') {
-        compileHelper.build(compileHelper.Ninja(), compileHelper.VisualStudio(), moduleCMakeFlags(), '', 'build-ninja');
+      stage('linux-gcc/build(ninja)') {
+          def cmakeCompileOptions = moduleCMakeFlags();
+          cmakeCompileOptions += '-DMAKE_BUILD_TYPE=Release';
+          // Not sure why the linking of OpenSpaceTest takes so long
+          compileHelper.build(compileHelper.Ninja(), compileHelper.Gcc(), cmakeCompileOptions, 'OpenSpace', 'build-ninja');
       }
-      stage('windows/test') {
-        // Currently, the unit tests are failing on Windows
-        // testHelper.runUnitTests('bin\\Debug\\OpenSpaceTest')
+      stage('linux-gcc/test') {
+        // testHelper.runUnitTests('build/OpenSpaceTest');
       }
+      cleanWs()
+    } // node('linux')
+  }
+},
+linux_clang: {
+  if (env.USE_BUILD_OS_LINUX == 'true') {
+    node('linux' && 'clang') {
+      stage('linux-clang/scm') {
+        deleteDir()
+        gitHelper.checkoutGit(url, branch);
+      }
+      stage('linux-clang/build(make)') {
+          def cmakeCompileOptions = moduleCMakeFlags()
+          cmakeCompileOptions += ' -DMAKE_BUILD_TYPE=Release'
+          // Not sure why the linking of OpenSpaceTest takes so long
+          compileHelper.build(compileHelper.Make(), compileHelper.Clang(), cmakeCompileOptions, 'OpenSpace', 'build-make');
+          compileHelper.recordCompileIssues(compileHelper.Clang());
+      }
+      stage('linux-clang/build(ninja)') {
+          def cmakeCompileOptions = moduleCMakeFlags()
+          cmakeCompileOptions += '-DMAKE_BUILD_TYPE=Release'
+          // Not sure why the linking of OpenSpaceTest takes so long
+          compileHelper.build(compileHelper.Ninja(), compileHelper.Clang(), cmakeCompileOptions, 'OpenSpace', 'build-ninja');
+      }
+      stage('linux-clang/test') {
+        // testHelper.runUnitTests('build/OpenSpaceTest');
+      }
+      cleanWs()
+    } // node('linux')
+  }
+},
+windows: {
+  if (env.USE_BUILD_OS_WINDOWS == 'true') {
+    node('windows') {
+      ws("${env.JENKINS_BASE}/O/${env.BRANCH_NAME}/${env.BUILD_ID}") {
+        stage('windows/scm') {
+          deleteDir();
+          gitHelper.checkoutGit(url, branch);
+        }
+        stage('windows/build(msvc)') {
+          compileHelper.build(compileHelper.VisualStudio(), compileHelper.VisualStudio(), moduleCMakeFlags(), '', 'build-msvc');
+          compileHelper.recordCompileIssues(compileHelper.VisualStudio());
+        }
+        stage('windows/build(ninja)') {
+          compileHelper.build(compileHelper.Ninja(), compileHelper.VisualStudio(), moduleCMakeFlags(), '', 'build-ninja');
+        }
+        stage('windows/test') {
+          // Currently, the unit tests are failing on Windows
+          // testHelper.runUnitTests('bin\\Debug\\OpenSpaceTest')
+        }
+      } // node('windows')
+      cleanWs()
     } // node('windows')
-    cleanWs()
-  } // node('windows')
+  }
 },
 macos: {
-  node('macos') {
-    stage('macos/scm') {
-      deleteDir();
-      gitHelper.checkoutGit(url, branch);
-    }
-    stage('macos/build(make)') {
-        compileHelper.build(compileHelper.Make(), compileHelper.Clang(), moduleCMakeFlags(), '', 'build-make');
-    }
-    stage('macos/build(xcode)') {
-        compileHelper.build(compileHelper.Xcode(), compileHelper.Xcode(), moduleCMakeFlags(), '', 'build-xcode');
-    }
-    stage('macos/test') {
-      // Currently, the unit tests are crashing on OS X
-      // testHelper.runUnitTests('build/Debug/OpenSpaceTest')
-    }
-    cleanWs()
-  } // node('macos')
+  if (env.USE_BUILD_OS_MACOS == 'true') {
+    node('macos') {
+      stage('macos/scm') {
+        deleteDir();
+        gitHelper.checkoutGit(url, branch);
+      }
+      stage('macos/build(make)') {
+          compileHelper.build(compileHelper.Make(), compileHelper.Clang(), moduleCMakeFlags(), '', 'build-make');
+      }
+      stage('macos/build(xcode)') {
+          compileHelper.build(compileHelper.Xcode(), compileHelper.Xcode(), moduleCMakeFlags(), '', 'build-xcode');
+      }
+      stage('macos/test') {
+        // Currently, the unit tests are crashing on OS X
+        // testHelper.runUnitTests('build/Debug/OpenSpaceTest')
+      }
+      cleanWs()
+    } // node('macos')
+  }
 }
