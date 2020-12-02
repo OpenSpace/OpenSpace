@@ -96,7 +96,7 @@ namespace {
         sizeof(scripting::ScriptScheduler) +
         sizeof(Profile);
 
-    std::array<std::byte, TotalSize> DataStorage;
+    std::vector<std::byte> DataStorage;
 } // namespace
 } // namespace openspace
 
@@ -106,6 +106,7 @@ void create() {
     ZoneScoped
 
     callback::create();
+    DataStorage.resize(TotalSize);
 
     std::byte* currentPos = DataStorage.data();
 
@@ -357,7 +358,7 @@ void destroy() {
     LDEBUGC("Globals", "Destroying 'FontManager'");
     fontManager->~FontManager();
 
-    std::fill(DataStorage.begin(), DataStorage.end(), std::byte(0));
+    DataStorage.clear();
 
     callback::destroy();
 }
