@@ -1,0 +1,98 @@
+local assetHelper = asset.require('util/asset_helper')
+local qrImagePath = asset.localResource("./images/random-state-qr-scanme.png")
+
+local qrSpec = {
+    Type = "ScreenSpaceImageLocal",
+    Identifier = "random-state-qr",
+    Name = "Random State QR Code",
+    TexturePath = qrImagePath,
+    FaceCamera = false,
+    Scale = 0.08,
+    CartesianPosition = {-0.70, -0.35, -1}
+}
+
+local labelScale = 0.25
+local labelPosition = {0.0, -0.4, -1}
+
+local labels = {
+    {
+        Type = "ScreenSpaceImageLocal",
+        Identifier = "text-earth",
+        Name = "Earth State Label",
+        TexturePath = asset.localResource("./images/text-earth.png"),
+        FaceCamera = false,
+        Scale = labelScale,
+        CartesianPosition = labelPosition,
+        Enabled = false,
+        Alpha = 0.0
+    },
+    {
+        Type = "ScreenSpaceImageLocal",
+        Identifier = "text-galaxies",
+        Name = "Galaxies State Label",
+        TexturePath = asset.localResource("./images/text-galaxies.png"),
+        FaceCamera = false,
+        Scale = labelScale,
+        CartesianPosition = labelPosition,
+        Enabled = false,
+        Alpha = 0.0
+    },
+    {
+        Type = "ScreenSpaceImageLocal",
+        Identifier = "text-galaxies",
+        Name = "Galaxies State Label",
+        TexturePath = asset.localResource("./images/text-galaxies.png"),
+        FaceCamera = false,
+        Scale = labelScale,
+        CartesianPosition = labelPosition,
+        Enabled = false,
+        Alpha = 0.0
+    },
+    {
+        Type = "ScreenSpaceImageLocal",
+        Identifier = "text-asteroids",
+        Name = "Asteroids State Label",
+        TexturePath = asset.localResource("./images/text-asteroids.png"),
+        FaceCamera = false,
+        Scale = labelScale,
+        CartesianPosition = labelPosition,
+        Enabled = false,
+        Alpha = 0.0
+    },
+    {
+        Type = "ScreenSpaceImageLocal",
+        Identifier = "text-mars",
+        Name = "Mars State Label",
+        TexturePath = asset.localResource("./images/text-mars.png"),
+        FaceCamera = false,
+        Scale = labelScale,
+        CartesianPosition = labelPosition,
+        Enabled = false,
+        Alpha = 0.0
+    },
+    {
+        Type = "ScreenSpaceImageLocal",
+        Identifier = "text-constellations",
+        Name = "Constellations State Label",
+        TexturePath = asset.localResource("./images/text-constellations.png"),
+        FaceCamera = false,
+        Scale = labelScale,
+        CartesianPosition = labelPosition,
+        Enabled = false,
+        Alpha = 0.0
+    },
+    {
+        Type = "ScreenSpaceImageLocal",
+        Identifier = "text-saturn",
+        Name = "Saturn State Label",
+        TexturePath = asset.localResource("./images/text-saturn.png"),
+        FaceCamera = false,
+        Scale = labelScale,
+        CartesianPosition = labelPosition,
+        Enabled = false,
+        Alpha = 0.0
+    }
+}
+
+openspace.addScreenSpaceRenderable(qrSpec)
+assetHelper.registerScreenSpaceRenderables(asset, labels)

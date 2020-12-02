@@ -12,7 +12,8 @@
     "scene/solarsystem/sssb/main_belt_asteroid",
     "scene/solarsystem/sssb/outer_main_belt_asteroid",
     "scene/solarsystem/sssb/pha",
-    "installationspecific/lights_state_machine"
+    "installationspecific/lights_state_machine",
+    "installationspecific/screenspacerenderables.asset"
   ],
   "camera": {
     "altitude": 17000000.0,
@@ -175,6 +176,16 @@
       "name": "Scene.sssb_sssb_data_pha.Renderable.Appearance.Color",
       "type": "setPropertyValueSingle",
       "value": "{1.0, 0.0, 0.0}"
+    },
+    {
+      "name": "ScreenSpace.text-earth.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "true"
+    },
+    {
+      "name": "ScreenSpace.text-earth.Alpha",
+      "type": "setPropertyValueSingle",
+      "value": "1.0"
     }
   ],
   "time": {

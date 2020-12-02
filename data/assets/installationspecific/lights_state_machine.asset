@@ -26,6 +26,10 @@ earthState = {
         openspace.printInfo('Entering Earth State')
         ]] .. util.setOrbitSpeedFactor(0.2) .. [[
         ]] .. util.orbitOnArrival() .. [[
+        openspace.setPropertyValueSingle(
+            'ScreenSpace.text-earth.TexturePath',
+            '${ASSETS}/installationspecific/images/text-earth.png'
+        )
     ]],
     Exit = [[
         openspace.printInfo('Exiting Earth State')
@@ -425,7 +429,8 @@ asset.onInitialize(function()
         States = states,
         Transitions = transitions
     })
-    openspace.statemachine.setInitialState("Earth")
 
-    openspace.time.setPause(true)
+    -- OBS: the following lines should be set in the profile
+    openspace.statemachine.setInitialState("Earth")
+    openspace.time.setPause(true) -- However, this does no work
 end)
