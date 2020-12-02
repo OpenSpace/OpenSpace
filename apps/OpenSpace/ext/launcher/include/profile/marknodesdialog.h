@@ -51,7 +51,7 @@ public:
      *
      * \param evt #QKeyEvent object for the key press event
      */
-    void keyPressEvent(QKeyEvent* evt);
+    void keyPressEvent(QKeyEvent* evt) override;
 
 private slots:
     void listItemSelected();

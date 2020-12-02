@@ -48,11 +48,8 @@ void RawVolume<VoxelType>::setDimensions(const glm::uvec3& dimensions) {
 template<typename VoxelType>
 size_t RawVolume<VoxelType>::nCells() const
 {
-    return static_cast<size_t>(
-        static_cast<size_t>(_dimensions.x) *
-        static_cast<size_t>(_dimensions.y) *
-        static_cast<size_t>(_dimensions.z)
-    );
+    return static_cast<size_t>(_dimensions.x) * static_cast<size_t>(_dimensions.y) *
+        static_cast<size_t>(_dimensions.z);
 }
 
 template <typename VoxelType>

@@ -225,9 +225,9 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
     , _enabled(EnabledInfo, false)
     , _reset(ResetInfo)
     , _remove(RemoveInfo)
+    , _guiDescription(GuiDescriptionInfo)
     , _solidColor(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _layerGroupId(id)
-    , _guiDescription(GuiDescriptionInfo)
 
 {
     documentation::testSpecificationAndThrow(Documentation(), layerDict, "Layer");
@@ -517,9 +517,7 @@ void Layer::initializeBasedOnType(layergroupid::TypeID id, ghoul::Dictionary ini
                 std::string name = initDict.value<std::string>(KeyName);
                 LDEBUG("Initializing tile provider for layer: '" + name + "'");
             }
-            _tileProvider = std::unique_ptr<tileprovider::TileProvider>(
-                tileprovider::createFromDictionary(id, std::move(initDict))
-            );
+            _tileProvider = tileprovider::createFromDictionary(id, std::move(initDict));
             break;
         }
         case layergroupid::TypeID::SolidColor: {

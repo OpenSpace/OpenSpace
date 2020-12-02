@@ -142,7 +142,7 @@ namespace {
         buf.push_back('}');
 
         //return json.str();
-    };
+    }
 } // namespace
 
 namespace openspace::properties {

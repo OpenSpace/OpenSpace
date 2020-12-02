@@ -148,7 +148,7 @@ std::string_view RangedTime::end() const {
 
 DateTime::DateTime(std::string_view initDateTime) {
     setTime(initDateTime);
-};
+}
 
 void DateTime::setTime(std::string_view input) {
     // Indices into an ISO8601 YYYY-MM-ddTHH:mm:ss string
@@ -172,7 +172,7 @@ std::string DateTime::ISO8601() const {
         "{:0>4}-{:0>2}-{:0>2}T{:0>2}:{:0>2}:{:0>2}",
         _year, _month, _day, _hour, _minute, _second
     );
-};
+}
 
 double DateTime::J2000() const {
     char Buffer[20];
@@ -259,30 +259,26 @@ void DateTime::decrementOnce(int value, char unit) {
             if (singleDecrement(_minute, value, 0, 59)) {
                 break;
             }
-            // else fall-through if underflow...
-
+            [[ fallthrough ]];
         case 'h':
             if (singleDecrement(_hour, value, 0, 23)) {
                 break;
             }
-            // else fall-through if underflow...
-
+            [[ fallthrough ]];
         case 'd':
             if (singleDecrement(_day, value, 1,
                 monthSize(_month == 1 ? 12 : _month - 1, _year)))
             {
                 break;
             }
-            // else fall-through if underflow...
-
+            [[ fallthrough ]];
         case 'M':
             inBounds = singleDecrement(_month, value, 1, 12);
             _day = std::clamp(_day, 1, monthSize(_month, _year));
             if (inBounds) {
                 break;
             }
-            // else fall-through if underflow...
-
+            [[ fallthrough ]];
         case 'y':
             _year -= value;
             break;
@@ -417,7 +413,7 @@ void TimeQuantizer::verifyResolutionRestrictions(const int value, const char uni
             }
             break;
         case 'h':
-            if (!(value >= 1 && value <= 4 || value == 6 || value == 12)) {
+            if (!((value >= 1 && value <= 4) || value == 6 || value == 12)) {
                 throw ghoul::RuntimeError(fmt::format(
                     "Invalid resolution count of {} for (h)our option. Valid counts are "
                     "1, 2, 3, 4, 6, or 12", value

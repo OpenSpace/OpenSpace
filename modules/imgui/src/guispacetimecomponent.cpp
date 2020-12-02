@@ -393,7 +393,7 @@ void GuiSpaceTimeComponent::render() {
             // value to the new unit
 
             _deltaTime = static_cast<float>(
-                convertTime(dt, TimeUnit::Second, static_cast<TimeUnit>(_deltaTimeUnit))
+                convertTime(dt, TimeUnit::Second, _deltaTimeUnit)
             );
         }
     }
@@ -461,7 +461,7 @@ void GuiSpaceTimeComponent::render() {
             const double newDeltaTime = convertTime(
                 _deltaTime +
                     _accelerationDelta * global::windowDelegate->deltaTime() * 10,
-                static_cast<TimeUnit>(_deltaTimeUnit),
+                _deltaTimeUnit,
                 TimeUnit::Second
             );
 

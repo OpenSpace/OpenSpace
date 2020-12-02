@@ -79,6 +79,20 @@ void SyncBuffer::decode(std::string& s) {
     s = decode();
 }
 
+void SyncBuffer::decode(glm::quat& value) {
+    const size_t size = sizeof(glm::quat);
+    ghoul_assert(_decodeOffset + size < _n, "");
+    std::memcpy(glm::value_ptr(value), _dataStream.data() + _decodeOffset, size);
+    _decodeOffset += size;
+}
+
+void SyncBuffer::decode(glm::vec3& value) {
+    const size_t size = sizeof(glm::vec3);
+    ghoul_assert(_decodeOffset + size < _n, "");
+    std::memcpy(glm::value_ptr(value), _dataStream.data() + _decodeOffset, size);
+    _decodeOffset += size;
+}
+
 void SyncBuffer::setData(std::vector<std::byte> data) {
     _dataStream = std::move(data);
 }

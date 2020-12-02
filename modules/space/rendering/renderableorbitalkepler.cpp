@@ -366,11 +366,11 @@ double RenderableOrbitalKepler::epochFromYMDdSubstring(const std::string& epochS
 
 RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     : Renderable(dict)
-    , _segmentQuality(SegmentQualityInfo, 2, 1, 10)
-    , _path(PathInfo)
     , _upperLimit(UpperLimitInfo, 1000, 1, 1000000)
+    , _segmentQuality(SegmentQualityInfo, 2, 1, 10)
     , _startRenderIdx(StartRenderIdxInfo, 0, 0, 1)
     , _sizeRender(RenderSizeInfo, 1, 1, 2)
+    , _path(PathInfo)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),

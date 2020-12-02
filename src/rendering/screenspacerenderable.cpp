@@ -316,16 +316,16 @@ std::unique_ptr<ScreenSpaceRenderable> ScreenSpaceRenderable::createFromDictiona
 }
 
 std::string ScreenSpaceRenderable::makeUniqueIdentifier(std::string name) {
-    std::vector<ScreenSpaceRenderable*> r =
+    std::vector<ScreenSpaceRenderable*> rs =
         global::renderEngine->screenSpaceRenderables();
 
-    auto nameTaken = [&r](const std::string& name) {
-        bool nameTaken = std::any_of(
-            r.begin(),
-            r.end(),
-            [&name](ScreenSpaceRenderable* r) { return r->identifier() == name; }
+    auto nameTaken = [&rs](const std::string& n) {
+        const bool taken = std::any_of(
+            rs.cbegin(),
+            rs.cend(),
+            [&n](ScreenSpaceRenderable* r) { return r->identifier() == n; }
         );
-        return nameTaken;
+        return taken;
     };
 
     std::string baseName = name;
@@ -429,15 +429,12 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     }
 
     if (dictionary.hasKey(UsePerspectiveProjectionInfo.identifier)) {
-        _usePerspectiveProjection = static_cast<bool>(
-            dictionary.value<bool>(UsePerspectiveProjectionInfo.identifier)
-        );
+        _usePerspectiveProjection = 
+            dictionary.value<bool>(UsePerspectiveProjectionInfo.identifier);
     }
 
     if (dictionary.hasKey(FaceCameraInfo.identifier)) {
-        _faceCamera = static_cast<bool>(
-            dictionary.value<bool>(FaceCameraInfo.identifier)
-        );
+        _faceCamera = dictionary.value<bool>(FaceCameraInfo.identifier);
     }
 
     if (dictionary.hasKeyAndValue<std::string>(KeyTag)) {
@@ -544,9 +541,7 @@ void ScreenSpaceRenderable::createShaders() {
 }
 
 glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
-    glm::vec2 resolution = global::windowDelegate->currentDrawBufferResolution();
-
-    //to scale the plane
+    // to scale the plane
     float textureRatio =
         static_cast<float>(_objectSize.y) / static_cast<float>(_objectSize.x);
 

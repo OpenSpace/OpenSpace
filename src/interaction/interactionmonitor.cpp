@@ -29,8 +29,6 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "InteractionMonitor";
-
     constexpr openspace::properties::Property::PropertyInfo IdleTimeInfo = {
         "IdleTime",
         "Idle Time",

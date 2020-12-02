@@ -590,7 +590,7 @@ void LuaConsole::charCallback(unsigned int codepoint,
         return;
     }
 
-    addToCommand(std::string(1, static_cast<const char>(codepoint)));
+    addToCommand(std::string(1, static_cast<char>(codepoint)));
 }
 
 void LuaConsole::update() {

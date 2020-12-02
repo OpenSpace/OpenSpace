@@ -534,10 +534,6 @@ void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
         cameraPositionModelSpace
     );
 
-    const Geodetic2 geo2 = globe.ellipsoid().cartesianToGeodetic2(
-        posHandle.centerToReferenceSurface
-    );
-
     const double altitude = glm::length(
         cameraPositionModelSpace - posHandle.centerToReferenceSurface
     );
@@ -600,9 +596,6 @@ glm::dquat GlobeBrowsingModule::lookDownCameraRotation(
                                                             globebrowsing::Geodetic2 geo2)
 {
     using namespace globebrowsing;
-
-    // Camera is described in world space
-    const glm::dmat4 modelTransform = globe.modelTransform();
 
     // Lookup vector
     const glm::dvec3 positionModelSpace = globe.ellipsoid().cartesianSurfacePosition(

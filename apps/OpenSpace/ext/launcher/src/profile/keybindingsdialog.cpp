@@ -323,7 +323,7 @@ void KeybindingsDialog::keySelected(int index) {
 
 int KeybindingsDialog::indexInKeyMapping(std::vector<int>& mapVector, int keyInt) {
     const auto it = std::find(mapVector.cbegin(), mapVector.cend(), keyInt);
-    return std::distance(mapVector.cbegin(), it);
+    return static_cast<int>(std::distance(mapVector.cbegin(), it));
 }
 
 bool KeybindingsDialog::isLineEmpty(int index) {

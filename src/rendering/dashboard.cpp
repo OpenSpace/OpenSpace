@@ -143,7 +143,7 @@ void Dashboard::render(glm::vec2& penPosition) {
 
 glm::vec2 Dashboard::getStartPositionOffset() {
     return _startPositionOffset.value();
-};
+}
 
 scripting::LuaLibrary Dashboard::luaLibrary() {
     return {

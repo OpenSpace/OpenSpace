@@ -232,8 +232,8 @@ PixelRegion globalCut(PixelRegion& pr, Side side, int p) {
         return PixelRegion();
     }
 
-    auto setSide = [](PixelRegion& pr, Side side, int pos) {
-        switch (side) {
+    auto setSide = [](PixelRegion& pr, Side s, int pos) {
+        switch (s) {
             case Side::Left:
                 pr.numPixels.x += (pr.start.x - pos);
                 pr.start.x = pos;
@@ -650,7 +650,7 @@ RawTile RawTileDataReader::readTileData(TileIndex tileIndex) const {
 
     for (const MemoryLocation& ml : NoDataAvailableData) {
         std::byte* ptr = rawTile.imageData.get();
-        if (ml.offset >= numBytes || ptr[ml.offset] != ml.value) {
+        if (ml.offset >= static_cast<int>(numBytes) || ptr[ml.offset] != ml.value) {
             // Bail out as early as possible
             break;
         }
