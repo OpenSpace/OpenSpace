@@ -11,8 +11,8 @@ local qrSpec = {
     CartesianPosition = {-0.70, -0.35, -1}
 }
 
-local labelScale = 0.25
-local labelPosition = {0.0, -0.4, -1}
+local labelScale = 0.2
+local labelPosition = {0.0, -0.41, -1}
 
 local labels = {
     {
