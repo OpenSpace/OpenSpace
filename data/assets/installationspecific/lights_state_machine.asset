@@ -142,6 +142,10 @@ marsState = {
         openspace.setPropertyValueSingle(
             "]] .. marsDetailedLayer .. [[.Settings.Opacity", 0
         )
+        openspace.setPropertyValueSingle(
+            'ScreenSpace.text-mars.TexturePath',
+            '${ASSETS}/installationspecific/images/text-mars.png'
+        )
     ]],
     Exit = [[
         openspace.printInfo('Exiting Mars State')
