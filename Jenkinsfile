@@ -92,14 +92,14 @@ parallel tools: {
       )
       recordIssues(
         id: 'tools-cppcheck',
-        tool: cppCheck()
+        tool: cppCheck(pattern: 'build/cppcheck.xml')
       ) 
     }  
     cleanWs()
   } // node('tools')
 },
 linux_gcc: {
-  if (env.USE_BUILD_OS_LINUX) {
+  if (env.USE_BUILD_OS_LINUX == 'true') {
     node('linux' && 'gcc') {
       stage('linux-gcc/scm') {
         deleteDir();
@@ -126,7 +126,7 @@ linux_gcc: {
   }
 },
 linux_clang: {
-  if (env.USE_BUILD_OS_LINUX) {
+  if (env.USE_BUILD_OS_LINUX == 'true') {
     node('linux' && 'clang') {
       stage('linux-clang/scm') {
         deleteDir()
@@ -153,7 +153,7 @@ linux_clang: {
   }
 },
 windows: {
-  if (env.USE_BUILD_OS_WINDOWS) {
+  if (env.USE_BUILD_OS_WINDOWS == 'true') {
     node('windows') {
       ws("${env.JENKINS_BASE}/O/${env.BRANCH_NAME}/${env.BUILD_ID}") {
         stage('windows/scm') {
@@ -177,7 +177,7 @@ windows: {
   }
 },
 macos: {
-  if (env.USE_BUILD_OS_MACOS) {
+  if (env.USE_BUILD_OS_MACOS == 'true') {
     node('macos') {
       stage('macos/scm') {
         deleteDir();
