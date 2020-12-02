@@ -49,7 +49,10 @@ galaxiesState = {
         openspace.printInfo('Entering Galaxies State')
         ]] .. util.setOrbitSpeedFactor(0.1) .. [[
         ]] .. util.orbitOnArrival() .. [[
-
+        openspace.setPropertyValueSingle(
+            'ScreenSpace.text-galaxies.TexturePath',
+            '${ASSETS}/installationspecific/images/text-galaxies.png'
+        )
     ]],
     Exit = [[
         openspace.printInfo('Exiting Galaxies State')

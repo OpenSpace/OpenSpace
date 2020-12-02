@@ -14,7 +14,7 @@ local qrSpec = {
 -- The scale of a screenspace renderable depends on the ratio between its x and y,
 -- so we need different scales for texts of different dimensions to get same height
 local shortLabelScale = 0.2
-local longLabelScale = 0.35
+local longLabelScale = 0.34
 local labelPosition = {0.0, -0.41, -1}
 
 local labels = {
@@ -35,18 +35,7 @@ local labels = {
         Name = "Galaxies State Label",
         TexturePath = asset.localResource("./images/text-galaxies.png"),
         FaceCamera = false,
-        Scale = shortLabelScale,
-        CartesianPosition = labelPosition,
-        Enabled = false,
-        Alpha = 0.0
-    },
-    {
-        Type = "ScreenSpaceImageLocal",
-        Identifier = "text-galaxies",
-        Name = "Galaxies State Label",
-        TexturePath = asset.localResource("./images/text-galaxies.png"),
-        FaceCamera = false,
-        Scale = shortLabelScale,
+        Scale = longLabelScale,
         CartesianPosition = labelPosition,
         Enabled = false,
         Alpha = 0.0
