@@ -1140,14 +1140,6 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         modelViewProjectionTransform
     );
 
-    const bool hasNightLayers = !_layerManager.layerGroup(
-        layergroupid::GroupID::NightLayers
-    ).activeLayers().empty();
-
-    const bool hasWaterLayer = !_layerManager.layerGroup(
-        layergroupid::GroupID::WaterMasks
-    ).activeLayers().empty();
-
     _globalRenderer.program->setUniform("modelViewTransform", modelViewTransform);
 
     const bool hasHeightLayer = !_layerManager.layerGroup(
@@ -1224,7 +1216,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
     int localCount = 0;
 
     auto traversal = [](const Chunk& node, std::vector<const Chunk*>& global,
-        int& globalCount, std::vector<const Chunk*>& local, int& localCount, int cutoff,
+        int& iGlobal, std::vector<const Chunk*>& local, int& iLocal, int cutoff,
         std::vector<const Chunk*>& traversalMemory)
     {
         ZoneScopedN("traversal")
@@ -1239,12 +1231,12 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
 
             if (isLeaf(*n) && n->isVisible) {
                 if (n->tileIndex.level < cutoff) {
-                    global[globalCount] = n;
-                    ++globalCount;
+                    global[iGlobal] = n;
+                    ++iGlobal;
                 }
                 else {
-                    local[localCount] = n;
-                    ++localCount;
+                    local[iLocal] = n;
+                    ++iLocal;
                 }
             }
 
@@ -1316,7 +1308,8 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
     // After certain number of iterations(_debugProperties.dynamicLodIterationCount) of
     // unavailable/available data in a row, we assume that a change could be made.
     const int iterCount = _debugProperties.dynamicLodIterationCount;
-    const bool exceededIterations = _iterationsOfUnavailableData > iterCount;
+    const bool exceededIterations =
+        static_cast<int>(_iterationsOfUnavailableData) > iterCount;
     const float clf = _generalProperties.currentLodScaleFactor;
     const float clfMin = _generalProperties.currentLodScaleFactor.minValue();
     const float targetLod = _generalProperties.targetLodScaleFactor;
@@ -1327,7 +1320,9 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         _iterationsOfUnavailableData = 0;
         _lodScaleFactorDirty = true;
     } // Make 2 times the iterations with available data to move it up again
-    else if (_iterationsOfAvailableData > (iterCount * 2) && clf < targetLod) {
+    else if (static_cast<int>(_iterationsOfAvailableData) >
+             (iterCount * 2) && clf < targetLod)
+    {
         _generalProperties.currentLodScaleFactor =
             _generalProperties.currentLodScaleFactor + 0.1f;
         _iterationsOfAvailableData = 0;

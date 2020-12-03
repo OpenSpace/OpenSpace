@@ -186,18 +186,18 @@ TileTextureInitData::TileTextureInitData(size_t width, size_t height, GLenum typ
 
 TileTextureInitData TileTextureInitData::operator=(const TileTextureInitData& rhs) {
     if (this == &rhs) {
-        return TileTextureInitData(*this);
+        return *this;
     }
 
-    return TileTextureInitData(rhs);
+    return rhs;
 }
 
 TileTextureInitData TileTextureInitData::operator=(TileTextureInitData&& rhs) {
     if (this == &rhs) {
-        return TileTextureInitData(*this);
+        return *this;
     }
 
-    return TileTextureInitData(rhs);
+    return rhs;
 }
 
 } // namespace openspace::globebrowsing

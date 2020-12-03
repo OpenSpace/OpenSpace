@@ -640,16 +640,16 @@ int removeSceneGraphNodesFromRegex(lua_State* L) {
 
     // Add all the children
     std::function<void(SceneGraphNode*, std::vector<SceneGraphNode*>&)> markNode =
-        [&markNode](SceneGraphNode* node, std::vector<SceneGraphNode*>& markedList)
+        [&markNode](SceneGraphNode* node, std::vector<SceneGraphNode*>& marked)
     {
         std::vector<SceneGraphNode*> children = node->children();
         for (SceneGraphNode* child : children) {
-            markNode(child, markedList);
+            markNode(child, marked);
         }
 
-        auto it = std::find(markedList.begin(), markedList.end(), node);
-        if (it == markedList.end()) {
-            markedList.push_back(node);
+        const auto it = std::find(marked.cbegin(), marked.cend(), node);
+        if (it == marked.end()) {
+            marked.push_back(node);
         }
     };
     for (SceneGraphNode* node : markedList) {

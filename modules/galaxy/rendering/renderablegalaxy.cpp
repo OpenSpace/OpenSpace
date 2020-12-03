@@ -52,12 +52,6 @@
 namespace {
     constexpr int8_t CurrentCacheVersion = 1;
 
-    constexpr const char* GlslRaycastPath =
-        "${MODULE_GALAXY}/shaders/galaxyraycast.glsl";
-    constexpr const char* GlslBoundsVsPath =
-        "${MODULE_GALAXY}/shaders/raycasterbounds_vs.glsl";
-    constexpr const char* GlslBoundsFsPath =
-        "${MODULE_GALAXY}/shaders/raycasterbounds_fs.glsl";
     constexpr const char* _loggerCat = "Renderable Galaxy";
 
     constexpr const std::array<const char*, 4> UniformNamesPoints = {

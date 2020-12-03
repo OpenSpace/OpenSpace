@@ -412,9 +412,9 @@ ChunkTilePile Layer::chunkTilePile(const TileIndex& tileIndex, int pileSize) con
         ChunkTilePile chunkTilePile;
         std::fill(chunkTilePile.begin(), chunkTilePile.end(), std::nullopt);
         for (int i = 0; i < pileSize; ++i) {
-            chunkTilePile[i] = ChunkTile {
-                Tile(), TileUvTransform { { 0, 0 }, { 1, 1 } }
-            };
+            ChunkTile tile;
+            tile.uvTransform = TileUvTransform{ { 0, 0 }, { 1, 1 } };
+            chunkTilePile[i] = tile;
         }
         return chunkTilePile;
     }

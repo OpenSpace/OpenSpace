@@ -112,7 +112,7 @@ bool AssetTreeItem::doesExistInFilesystem() const {
 }
 
 QString AssetTreeItem::name() const {
-    return QString(data(0).toString());
+    return data(0).toString();
 }
 
 bool AssetTreeItem::insertChildren(int position, int count, int columns) {

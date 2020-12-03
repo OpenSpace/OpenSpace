@@ -185,15 +185,6 @@ double DateTime::J2000() const {
     return Time::convertTime(Buffer);
 }
 
-void DateTime::operator=(DateTime& src) {
-    _year = src.year();
-    _month = src.month();
-    _day = src.day();
-    _hour = src.hour();
-    _minute = src.minute();
-    _second = src.second();
-}
-
 int DateTime::increment(int value, char unit, double error, double resolution) {
     unsigned int nIncrements = std::abs(static_cast<int>(error / resolution));
     if (nIncrements == 0) {

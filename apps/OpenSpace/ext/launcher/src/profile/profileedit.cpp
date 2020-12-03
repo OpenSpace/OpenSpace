@@ -98,9 +98,9 @@ ProfileEdit::ProfileEdit(Profile& profile, const std::string& profileName,
                          const std::vector<std::string>& readOnlyProfiles,
                          QWidget* parent)
     : QDialog(parent)
+    , _profile(profile)
     , _assetBasePath(std::move(assetBasePath))
     , _profileBasePath(std::move(profileBasePath))
-    , _profile(profile)
     , _readOnlyProfiles(readOnlyProfiles)
 {
     setWindowTitle("Profile Editor");

@@ -45,7 +45,6 @@
 
 namespace {
     constexpr const char* KeyAsset = "Asset";
-    constexpr const char* _loggerCat = "SyncAssetTask";
     constexpr std::chrono::milliseconds ProgressPollInterval(200);
 } // namespace
 

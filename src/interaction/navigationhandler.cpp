@@ -295,7 +295,7 @@ void NavigationHandler::applyNavigationState(const NavigationHandler::Navigation
     }
 
     const glm::dvec3 cameraPositionWorld = anchorWorldPosition +
-        glm::dvec3(referenceFrameTransform * glm::dvec4(ns.position, 1.0));
+        referenceFrameTransform * glm::dvec4(ns.position, 1.0);
 
     glm::dvec3 up = ns.up.has_value() ?
         glm::normalize(referenceFrameTransform * *ns.up) :

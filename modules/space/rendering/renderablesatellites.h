@@ -41,7 +41,7 @@ namespace openspace {
 class RenderableSatellites : public RenderableOrbitalKepler {
 public:
     RenderableSatellites(const ghoul::Dictionary& dictionary);
-    void readDataFile(const std::string& filename);
+    virtual void readDataFile(const std::string& filename) override;
     static documentation::Documentation Documentation();
     void initializeFileReading();
 

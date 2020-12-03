@@ -249,8 +249,6 @@ void RenderableNodeLine::updateVertexData() {
     _vertexArray.push_back(static_cast<float>(_endPos.y));
     _vertexArray.push_back(static_cast<float>(_endPos.z));
 
-    _vertexArray;
-
     bindGL();
     glBufferData(
         GL_ARRAY_BUFFER,

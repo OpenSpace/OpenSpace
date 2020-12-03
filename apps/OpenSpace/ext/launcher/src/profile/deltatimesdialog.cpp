@@ -230,7 +230,7 @@ void DeltaTimesDialog::listItemSelected() {
 
 void DeltaTimesDialog::setLabelForKey(int index, bool editMode, std::string color) {
     std::string labelS = "Set Simulation Time Increment for key";
-    if (index >= _data.size()) {
+    if (index >= static_cast<int>(_data.size())) {
         index = static_cast<int>(_data.size()) - 1;
     }
     if (editMode) {
@@ -365,7 +365,7 @@ void DeltaTimesDialog::parseSelections() {
         }
     }
     std::vector<double> tempDt;
-    for (size_t i = 0; i < (finalNonzeroIndex + 1); ++i) {
+    for (int i = 0; i < (finalNonzeroIndex + 1); ++i) {
         tempDt.push_back(_data[i]);
     }
     _profile.setDeltaTimes(tempDt);

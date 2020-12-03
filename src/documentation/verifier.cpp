@@ -292,9 +292,9 @@ std::string ReferencingVerifier::documentation() const {
     return "Referencing Documentation: '" + identifier + "'";
 }
 
-AndVerifier::AndVerifier(const std::vector<Verifier*> values) {
-    ghoul_assert(!values.empty(), "values must not be empty");
-    for (Verifier* v : values) {
+AndVerifier::AndVerifier(const std::vector<Verifier*> values_) {
+    ghoul_assert(!values_.empty(), "values must not be empty");
+    for (Verifier* v : values_) {
         this->values.push_back(std::shared_ptr<Verifier>(v));
     }
 }
@@ -304,8 +304,8 @@ TestResult AndVerifier::operator()(const ghoul::Dictionary& dictionary,
 {
     std::vector<TestResult> res(values.size());
     std::transform(
-        values.begin(),
-        values.end(),
+        values.cbegin(),
+        values.cend(),
         res.begin(),
         [dictionary, key](const std::shared_ptr<Verifier>& v) {
             return v->operator()(dictionary, key);
@@ -313,9 +313,9 @@ TestResult AndVerifier::operator()(const ghoul::Dictionary& dictionary,
     );
 
     const bool success = std::all_of(
-        res.begin(),
-        res.end(),
-        [](const TestResult& res) { return res.success; }
+        res.cbegin(),
+        res.cend(),
+        std::mem_fn(&TestResult::success)
     );
 
     if (success) {
@@ -330,10 +330,10 @@ std::string AndVerifier::type() const {
     // Dirty hack to get an "and " inserted before the last element
     std::vector<std::string> types(values.size() - 1);
     std::transform(
-        values.begin(),
-        values.end() - 1,
+        values.cbegin(),
+        values.cend() - 1,
         types.begin(),
-        [](const std::shared_ptr<Verifier>& v) { return v->type(); }
+        std::mem_fn(&Verifier::type)
     );
     types.push_back(std::string("and ") + values.back()->type());
 
@@ -344,19 +344,19 @@ std::string AndVerifier::documentation() const {
     // Dirty hack to get an "and " inserted before the last element
     std::vector<std::string> documentations(values.size() - 1);
     std::transform(
-        values.begin(),
-        values.end() - 1,
+        values.cbegin(),
+        values.cend() - 1,
         documentations.begin(),
-        [](const std::shared_ptr<Verifier>& v) { return v->documentation(); }
+        std::mem_fn(&Verifier::documentation)
     );
     documentations.push_back(std::string("and ") + values.back()->documentation());
 
     return ghoul::join(documentations, ", ");
 }
 
-OrVerifier::OrVerifier(const std::vector<Verifier*> values) {
-    ghoul_assert(!values.empty(), "values must not be empty");
-    for (Verifier* v : values) {
+OrVerifier::OrVerifier(const std::vector<Verifier*> values_) {
+    ghoul_assert(!values_.empty(), "values must not be empty");
+    for (Verifier* v : values_) {
         this->values.push_back(std::shared_ptr<Verifier>(v));
     }
 }
@@ -366,8 +366,8 @@ TestResult OrVerifier::operator()(const ghoul::Dictionary& dictionary,
 {
     std::vector<TestResult> res(values.size());
     std::transform(
-        values.begin(),
-        values.end(),
+        values.cbegin(),
+        values.cend(),
         res.begin(),
         [dictionary, key](const std::shared_ptr<Verifier>& v) {
             return v->operator()(dictionary, key);
@@ -375,8 +375,8 @@ TestResult OrVerifier::operator()(const ghoul::Dictionary& dictionary,
     );
 
     const bool success = std::any_of(
-        res.begin(),
-        res.end(),
+        res.cbegin(),
+        res.cend(),
         [](const TestResult& res) { return res.success; }
     );
 
@@ -392,10 +392,10 @@ std::string OrVerifier::type() const {
     // Dirty hack to get an "or " inserted before the last element
     std::vector<std::string> types(values.size() - 1);
     std::transform(
-        values.begin(),
-        values.end() - 1,
+        values.cbegin(),
+        values.cend() - 1,
         types.begin(),
-        [](const std::shared_ptr<Verifier>& v) { return v->type(); }
+        std::mem_fn(&Verifier::type)
     );
     types.push_back(std::string("or ") + values.back()->type());
 
@@ -406,10 +406,10 @@ std::string OrVerifier::documentation() const {
     // Dirty hack to get an "or " inserted before the last element
     std::vector<std::string> documentations(values.size() - 1);
     std::transform(
-        values.begin(),
-        values.end() - 1,
+        values.cbegin(),
+        values.cend() - 1,
         documentations.begin(),
-        [](const std::shared_ptr<Verifier>& v) { return v->documentation(); }
+        std::mem_fn(&Verifier::documentation)
     );
     documentations.push_back(std::string("or ") + values.back()->documentation());
 

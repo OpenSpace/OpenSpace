@@ -120,7 +120,6 @@ private:
 
     GLuint _vertexArray;
     GLuint _vertexBuffer;
-    GLuint _indexBuffer;
 
     void updateBuffers();
 

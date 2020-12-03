@@ -525,13 +525,13 @@ void RenderableOrbitalKepler::updateBuffers() {
     size_t nVerticesTotal = 0;
 
     int numOrbits = static_cast<int>(_data.size());
-    for (size_t i = 0; i < numOrbits; ++i) {
+    for (int i = 0; i < numOrbits; ++i) {
         nVerticesTotal += _segmentSize[i] + 1;
     }
     _vertexBufferData.resize(nVerticesTotal);
 
     size_t vertexBufIdx = 0;
-    for (size_t orbitIdx = 0; orbitIdx < numOrbits; ++orbitIdx) {
+    for (int orbitIdx = 0; orbitIdx < numOrbits; ++orbitIdx) {
         const KeplerParameters& orbit = _data[orbitIdx];
 
         _keplerTranslator.setKeplerElements(

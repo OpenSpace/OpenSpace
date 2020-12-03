@@ -333,7 +333,7 @@ void AssetLoader::unloadAsset(Asset* asset) {
     }
     _onDeinitializationFunctionRefs[asset].clear();
 
-    for (const std::pair<const Asset*, std::vector<int>>& it :
+    for (std::pair<Asset*, std::vector<int>> it :
          _onDependencyInitializationFunctionRefs[asset])
     {
         for (int ref : it.second) {
@@ -342,7 +342,7 @@ void AssetLoader::unloadAsset(Asset* asset) {
     }
     _onDependencyInitializationFunctionRefs.erase(asset);
 
-    for (const std::pair<Asset*, std::vector<int>>& it :
+    for (std::pair<Asset*, std::vector<int>> it :
          _onDependencyDeinitializationFunctionRefs[asset])
     {
         for (int ref : it.second) {

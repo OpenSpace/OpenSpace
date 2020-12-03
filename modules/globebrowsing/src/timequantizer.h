@@ -132,13 +132,6 @@ public:
     void setTime(std::string_view input);
 
     /*
-     * Used to deep-copy from another DateTime instance
-     *
-     * \params src the DateTime object to copy from
-     */
-    void operator=(DateTime& src);
-
-    /*
      * Get the date/time value in ISO8601 format
      *
      * \returns the date/time value string
