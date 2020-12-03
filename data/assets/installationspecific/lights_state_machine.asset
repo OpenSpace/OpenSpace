@@ -161,7 +161,6 @@ marsState = {
 ---------------------------------------------------------------- 
 -- 5. CONSTELLATIONS
 ----------------------------------------------------------------
-local constellationsLinesMaxOpacity = 0.3
 local constellationsFadeInOutDuration = 4
 
 local constellationsTargetDistance = 2E9
@@ -197,7 +196,6 @@ constellationsState = {
         openspace.printInfo('Entering Constellations State')
         ]] .. util.setOrbitSpeedFactor(0.35) .. [[
         ]] .. util.orbitOnArrival() .. [[
-        ]] .. fadeConstellationsToOpacity(constellationsLinesMaxOpacity) .. [[
         ]] .. fadePlanetTrailsToOpacity(0.0) .. [[
     ]],
     Exit = [[
