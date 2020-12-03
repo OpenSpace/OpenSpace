@@ -219,6 +219,10 @@ saturnState = {
         openspace.printInfo('Entering Saturn State')
         ]] .. util.setOrbitSpeedFactor(0.4) .. [[
         ]] .. util.orbitOnArrival() .. [[
+        openspace.setPropertyValueSingle(
+            'ScreenSpace.text-saturn.TexturePath',
+            '${ASSETS}/installationspecific/images/text-saturn.png'
+        )
     ]],
     Exit = [[
         openspace.printInfo('Exiting Saturn State')
