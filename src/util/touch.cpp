@@ -30,13 +30,13 @@
 
 namespace openspace {
 
-TouchInput::TouchInput(size_t touchDeviceId, size_t fingerId, float x, float y,
-                       double timestamp)
-    : touchDeviceId(touchDeviceId)
-    , fingerId(fingerId)
-    , x(x)
-    , y(y)
-    , timestamp(timestamp)
+TouchInput::TouchInput(size_t touchDeviceId_, size_t fingerId_, float x_, float y_,
+                       double timestamp_)
+    : touchDeviceId(touchDeviceId_)
+    , fingerId(fingerId_)
+    , x(x_)
+    , y(y_)
+    , timestamp(timestamp_)
 {}
 
 glm::vec2 TouchInput::screenCoordinates(glm::vec2 resolution) const {
