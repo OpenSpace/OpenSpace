@@ -1415,7 +1415,7 @@ ChunkTile chunkTile(TileProvider& tp, TileIndex tileIndex, int parents, int maxP
         uv.uvOffset *= 0.5;
         uv.uvScale *= 0.5;
 
-        uv.uvOffset += tileIndex.positionRelativeParent();
+        uv.uvOffset += ti.positionRelativeParent();
 
         ti.x /= 2;
         ti.y /= 2;
