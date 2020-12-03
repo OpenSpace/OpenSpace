@@ -409,6 +409,28 @@ transitions = {
             ]] .. util.applyLinearFlight(constellationsTargetDistance, 1) .. [[
         ]]
     },
+    {
+        From = "Earth",
+        To = "Constellations",
+        Action = [[
+            ]] .. util.disableLinearFlight() .. [[
+            ]] .. util.setCurveTypeToZoomOverview() .. [[
+            openspace.time.setPause(true)
+            openspace.autonavigation.goToHeight(
+                'Earth',
+                ]] .. tostring(constellationsTargetDistance) .. [[,
+                true
+            )
+        ]]
+    },
+    {
+        From = "Constellations",
+        To = "Earth",
+        Action = [[
+            ]] .. util.changeAnchor('Earth', 3) .. [[
+            ]] .. util.applyLinearFlight(earthTargetDistance, 2) .. [[
+        ]]
+    },
     -- 6. Saturn
     {
         From = "Saturn",
