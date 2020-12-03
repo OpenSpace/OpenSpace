@@ -225,10 +225,10 @@ void initialize() {
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexXYUVRGBA), nullptr);
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VertexXYUVRGBA),
-        reinterpret_cast<GLvoid*>(offsetof(Vertex, uv)));
+        reinterpret_cast<GLvoid*>(offsetof(VertexXYUVRGBA, uv)));
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(VertexXYUVRGBA),
-        reinterpret_cast<GLvoid*>(offsetof(Vertex, rgba)));
+        reinterpret_cast<GLvoid*>(offsetof(VertexXYUVRGBA, rgba)));
     glBindVertexArray(0);
 
     //

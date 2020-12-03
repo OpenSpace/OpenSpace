@@ -635,8 +635,8 @@ void RenderablePlanesCloud::renderLabels(const RenderData& data,
     ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
     labelInfo.orthoRight = orthoRight;
     labelInfo.orthoUp = orthoUp;
-    labelInfo.minSize = static_cast<int>(_textMinSize);
-    labelInfo.maxSize = static_cast<int>(_textMaxSize);
+    labelInfo.minSize = _textMinSize;
+    labelInfo.maxSize = _textMaxSize;
     labelInfo.cameraPos = data.camera.positionVec3();
     labelInfo.cameraLookUp = data.camera.lookUpVectorWorldSpace();
     labelInfo.renderType = _renderOption;
@@ -992,7 +992,6 @@ bool RenderablePlanesCloud::readSpeckFile() {
 
         glm::vec3 u(0.f);
         glm::vec3 v(0.f);
-        int textureIndex = 0;
 
         std::vector<float> values(_nValuesPerAstronomicalObject);
 
@@ -1021,11 +1020,6 @@ bool RenderablePlanesCloud::readSpeckFile() {
                         v.z = values[i];
                         break;
                 }
-            }
-
-            // JCC: This should be moved to the RenderablePlanesCloud:
-            if (i == _textureVariableIndex) {
-                textureIndex = static_cast<int>(values[i]);
             }
         }
         _fullData.insert(_fullData.end(), values.begin(), values.end());

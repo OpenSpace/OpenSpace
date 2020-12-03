@@ -50,7 +50,9 @@ public:
 
     void decode(std::string& s);
     void decode(glm::quat& value);
+    void decode(glm::dquat& value);
     void decode(glm::vec3& value);
+    void decode(glm::dvec3& value);
 
     template <typename T>
     void decode(T& value);

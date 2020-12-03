@@ -629,9 +629,9 @@ SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary)
 
 
 
-TextTileProvider::TextTileProvider(TileTextureInitData initData, size_t fontSize)
-    : initData(std::move(initData))
-    , fontSize(fontSize)
+TextTileProvider::TextTileProvider(TileTextureInitData initData_, size_t fontSize_)
+    : initData(std::move(initData_))
+    , fontSize(fontSize_)
 {
     ZoneScoped
 
@@ -785,9 +785,7 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
                 typeID = layergroupid::TypeID::DefaultTileLayer;
             }
 
-            std::unique_ptr<TileProvider> tp = std::unique_ptr<TileProvider>(
-                createFromDictionary(typeID, providerDict)
-            );
+            std::unique_ptr<TileProvider> tp = createFromDictionary(typeID, providerDict);
 
             std::string provId = providerDict.value<std::string>("Identifier");
             tp->setIdentifier(provId);
@@ -1413,15 +1411,15 @@ ChunkTile chunkTile(TileProvider& tp, TileIndex tileIndex, int parents, int maxP
 
     ghoul_assert(tp.isInitialized, "TileProvider was not initialized.");
 
-    auto ascendToParent = [](TileIndex& tileIndex, TileUvTransform& uv) {
+    auto ascendToParent = [](TileIndex& ti, TileUvTransform& uv) {
         uv.uvOffset *= 0.5;
         uv.uvScale *= 0.5;
 
         uv.uvOffset += tileIndex.positionRelativeParent();
 
-        tileIndex.x /= 2;
-        tileIndex.y /= 2;
-        tileIndex.level--;
+        ti.x /= 2;
+        ti.y /= 2;
+        ti.level--;
     };
 
     TileUvTransform uvTransform = { glm::vec2(0.f, 0.f), glm::vec2(1.f, 1.f) };

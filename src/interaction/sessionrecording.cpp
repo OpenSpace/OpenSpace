@@ -705,7 +705,7 @@ void SessionRecording::preSynchronization() {
     if (_state != _lastState) {
         using K = const CallbackHandle;
         using V = StateChangeCallback;
-        for (const std::pair<K, V>& it : _stateChangeCallbacks) {
+        for (const std::pair<const K, V>& it : _stateChangeCallbacks) {
             it.second();
         }
     }

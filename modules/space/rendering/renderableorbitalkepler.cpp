@@ -46,9 +46,6 @@
 
 namespace {
     constexpr const char* ProgramName = "OrbitalKepler";
-    constexpr const char* _loggerCat = "OrbitalKepler";
-    constexpr const char* KeyFile = "Path";
-    constexpr const char* KeyLineNum = "LineNumber";
 
     // Fragile! Keep in sync with documentation
     const std::map<std::string, openspace::Renderable::RenderBin> RenderBinConversion = {
