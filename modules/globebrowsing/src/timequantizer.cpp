@@ -627,7 +627,6 @@ std::vector<std::string> TimeQuantizer::quantized(Time& start, Time& end) {
         static_cast<int>(delta) % static_cast<int>(_resolution) == 0,
         "Quantization error"
     );
-    const int nSteps = static_cast<int>(delta / _resolution);
 
     std::vector<std::string> result;
     DateTime itr = s;

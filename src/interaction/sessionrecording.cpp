@@ -301,7 +301,8 @@ bool SessionRecording::startPlayback(std::string& filename,
         LERROR("Unknown data type in header (should be Ascii or Binary)");
         cleanUpPlayback();
     }
-    std::string throwawayNewlineChar = readHeaderElement(_playbackFile, 1);
+    // throwaway newline character
+    readHeaderElement(_playbackFile, 1);
 
     if (_recordingDataMode == DataMode::Binary) {
         //Close & re-open the file, starting from the beginning, and do dummy read
@@ -754,9 +755,8 @@ bool SessionRecording::playbackAddEntriesToTimeline() {
 
     if (_recordingDataMode == DataMode::Binary) {
         unsigned char frameType;
-        bool fileReadOk = true;
 
-        while (parsingStatusOk && fileReadOk) {
+        while (parsingStatusOk) {
             frameType = readFromPlayback<unsigned char>(_playbackFile);
             // Check if have reached EOF
             if (!_playbackFile) {
@@ -764,7 +764,6 @@ bool SessionRecording::playbackAddEntriesToTimeline() {
                     "Finished parsing {} entries from playback file {}",
                     _playbackLineNum - 1, _playbackFilename
                 ));
-                fileReadOk = false;
                 break;
             }
             if (frameType == HeaderCameraBinary) {
@@ -1916,9 +1915,8 @@ bool SessionRecording::convertEntries(std::string& inFilename,
 
     if (mode == DataMode::Binary) {
         unsigned char frameType;
-        bool fileReadOk = true;
 
-        while (conversionStatusOk && fileReadOk) {
+        while (conversionStatusOk) {
             frameType = readFromPlayback<unsigned char>(inStream);
             // Check if have reached EOF
             if (!inStream) {
@@ -1926,7 +1924,6 @@ bool SessionRecording::convertEntries(std::string& inFilename,
                     "Finished converting {} entries from playback file {}",
                     lineNum - 1, inFilename
                 ));
-                fileReadOk = false;
                 break;
             }
             if (frameType == HeaderCameraBinary) {
