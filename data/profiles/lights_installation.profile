@@ -139,6 +139,11 @@
       "value": "true"
     },
     {
+      "name": "Scene.SunLabel.Renderable.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
       "name": "{solarsystem_labels}.Renderable.Opacity",
       "type": "setPropertyValue",
       "value": "0.0"
