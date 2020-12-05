@@ -96,7 +96,15 @@ namespace {
         sizeof(scripting::ScriptScheduler) +
         sizeof(Profile);
 
+    // This is kind of weird.  Optimally, we would want to use the std::array also on
+    // non-windows platforms but that causes some issues with nullptrs being thrown
+    // around.  Switching this to a std::vector with dynamic memory allocation works on
+    // Linux, but it fails on Windows in some SGCT function
+#ifdef WIN32
+    std::array<std::byte, TotalSize> DataStorage;
+#else // WIN32
     std::vector<std::byte> DataStorage;
+#endif // WIN32
 } // namespace
 } // namespace openspace
 
@@ -106,7 +114,10 @@ void create() {
     ZoneScoped
 
     callback::create();
+#ifndef WIN32
     DataStorage.resize(TotalSize);
+#endif // WIN32
+    std::fill(DataStorage.begin(), DataStorage.end(), std::byte(0));
 
     std::byte* currentPos = DataStorage.data();
 
@@ -358,7 +369,9 @@ void destroy() {
     LDEBUGC("Globals", "Destroying 'FontManager'");
     fontManager->~FontManager();
 
+#ifndef WIN32
     DataStorage.clear();
+#endif // WIN32
 
     callback::destroy();
 }
