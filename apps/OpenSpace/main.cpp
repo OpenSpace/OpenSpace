@@ -1171,6 +1171,11 @@ int main(int argc, char** argv) {
         sgctFunctionName
     );
 
+    // (abock, 2020-12-07)  For some reason on Apple the keyboard handler in CEF will call
+    // the Qt one even if the QApplication was destroyed, leading to invalid memory
+    // access.  The only way we could fix this for the release was to keep the
+    // QApplication object around until the end of the program.  Even though the Qt
+    // keyboard handler gets called, it doesn't do anything so everything still works.
 #ifdef __APPLE__
     int qac = 0;
     QApplication app(qac, nullptr);
@@ -1184,8 +1189,13 @@ int main(int argc, char** argv) {
         QApplication app(qac, nullptr);
 #endif // __APPLE__
         
-        LauncherWindow win(!hasProfile,
-            *global::configuration, !hasSGCTConfig, windowCfgPreset, nullptr);
+        LauncherWindow win(
+            !hasProfile,
+            *global::configuration,
+            !hasSGCTConfig,
+            windowCfgPreset,
+            nullptr
+        );
         win.show();
         app.exec();
 
