@@ -338,12 +338,9 @@ void Scene::render(const RenderData& data, RendererTasks& tasks) {
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.what());
         }
-        // I heard you like hotfixes, so I put a hotfix in your hotfix, dawg
-//#ifdef WIN32
         if (global::callback::webBrowserPerformanceHotfix) {
             (*global::callback::webBrowserPerformanceHotfix)();
         }
-//#endif // WIN32
     }
 
     {
