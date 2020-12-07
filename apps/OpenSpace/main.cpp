@@ -1171,11 +1171,19 @@ int main(int argc, char** argv) {
         sgctFunctionName
     );
 
+#ifdef __APPLE__
+    int qac = 0;
+    QApplication app(qac, nullptr);
+#endif // __APPLE__
+
     bool skipLauncher =
         (hasProfile && hasSGCTConfig) || global::configuration->bypassLauncher;
     if (!skipLauncher) {
+#ifndef __APPLE__
         int qac = 0;
         QApplication app(qac, nullptr);
+#endif // __APPLE__
+        
         LauncherWindow win(!hasProfile,
             *global::configuration, !hasSGCTConfig, windowCfgPreset, nullptr);
         win.show();
