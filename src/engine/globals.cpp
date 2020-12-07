@@ -64,6 +64,12 @@
 
 namespace openspace {
 namespace {
+    // This is kind of weird.  Optimally, we would want to use the std::array also on
+    // non-Windows platforms but that causes some issues with nullptrs being thrown
+    // around and invalid accesses.  Switching this to a std::vector with dynamic memory
+    // allocation works on Linux, but it fails on Windows in some SGCT function and on Mac
+    // in some random global randoms
+#ifdef WIN32
     constexpr const int TotalSize =
         sizeof(ghoul::fontrendering::FontManager) +
         sizeof(Dashboard) +
@@ -96,12 +102,6 @@ namespace {
         sizeof(scripting::ScriptScheduler) +
         sizeof(Profile);
 
-    // This is kind of weird.  Optimally, we would want to use the std::array also on
-    // non-Windows platforms but that causes some issues with nullptrs being thrown
-    // around and invalid accesses.  Switching this to a std::vector with dynamic memory
-    // allocation works on Linux, but it fails on Windows in some SGCT function and on Mac
-    // in some random global randoms
-#ifdef WIN32
     std::array<std::byte, TotalSize> DataStorage;
 #endif // WIN32
 } // namespace
@@ -526,7 +526,7 @@ void destroy() {
 
     LDEBUGC("Globals", "Destroying 'ScreenSpaceRenderables'");
 #ifdef WIN32
-    screenSpaceRenderables->~vector<std::unique_ptr<ScreenSpaceRenderable>>();
+    screenSpaceRenderables->~vector();
 #else // ^^^ WIN32 / !WIN32 vvv
     delete screenSpaceRenderables;
 #endif // WIN32
