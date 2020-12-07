@@ -453,6 +453,56 @@ transitions = {
             )
         ]]
     },
+    -- Saturn - Earth
+    {
+        From = "Earth",
+        To = "Saturn",
+        Action = [[
+            ]] .. util.disableLinearFlight() .. [[
+            ]] .. util.setCurveTypeToZoomOverview() .. [[
+            openspace.time.setPause(true)
+            openspace.autonavigation.goToHeight(
+                'Saturn',
+                ]] .. tostring(saturnTargetDistance) .. [[,
+                true
+            )
+        ]]
+    },
+    {
+        From = "Saturn",
+        To = "Earth",
+        Action = [[
+            ]] .. util.disableLinearFlight() .. [[
+            ]] .. util.setCurveTypeToZoomOverview() .. [[
+            openspace.time.setPause(true)
+            openspace.autonavigation.goTo('Earth', true)
+        ]]
+    },
+    -- Saturn - Mars
+    {
+        From = "Mars",
+        To = "Saturn",
+        Action = [[
+            ]] .. util.disableLinearFlight() .. [[
+            ]] .. util.setCurveTypeToZoomOverview() .. [[
+            openspace.time.setPause(true)
+            openspace.autonavigation.goToHeight(
+                'Saturn',
+                ]] .. tostring(saturnTargetDistance) .. [[,
+                true
+            )
+        ]]
+    },
+    {
+        From = "Saturn",
+        To = "Mars",
+        Action = [[
+            ]] .. util.disableLinearFlight() .. [[
+            ]] .. util.setCurveTypeToZoomOverview() .. [[
+            openspace.time.setPause(true)
+            openspace.autonavigation.goTo('Mars', true)
+        ]]
+    }
 }
 
 asset.onInitialize(function()
