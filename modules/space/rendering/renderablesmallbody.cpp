@@ -46,7 +46,6 @@
 #include <vector>
 
 namespace {
-    constexpr const char* ProgramName = "RenderableSmallBody";
     constexpr const char* _loggerCat = "SmallSolarSystemBody";
 
     static const openspace::properties::Property::PropertyInfo PathInfo = {
@@ -85,6 +84,26 @@ namespace {
         "Upper limit on the number of objects for this renderable, regardless of "
         "how many objects are contained in the data file"
     };
+
+    double importAngleValue(const std::string& angle) {
+        if (angle.empty()) {
+            return 0.0;
+        }
+
+        double output = std::stod(angle);
+        output = std::fmod(output, 360.0);
+        if (output < 0.0) {
+            output += 360.0;
+        }
+        return output;
+    }
+
+    std::string& formatObjectName(std::string& name) {
+        const std::string trimChars = "\t\n\v\f\r\" ";
+        name.erase(0, name.find_first_not_of(trimChars));
+        name.erase(name.find_last_not_of(trimChars) + 1);
+        return name;
+    }
 } // namespace
 
 namespace openspace {
@@ -396,26 +415,6 @@ void RenderableSmallBody::readOrbitalParamsFromThisLine(bool firstDataLine,
     _segmentSize.push_back(
         static_cast<size_t>(scale + (scale / pow(1 - keplerElements.eccentricity, 1.2)))
     );
-}
-
-static double importAngleValue(const std::string& angle) {
-    if (angle.empty()) {
-        return 0.0;
-    }
-
-    double output = std::stod(angle);
-    output = std::fmod(output, 360.0);
-    if (output < 0.0) {
-        output += 360.0;
-    }
-    return output;
-}
-
-static std::string& formatObjectName(std::string& name) {
-    const std::string trimChars = "\t\n\v\f\r\" ";
-    name.erase(0, name.find_first_not_of(trimChars));
-    name.erase(name.find_last_not_of(trimChars) + 1);
-    return name;
 }
 
 } // namespace openspace

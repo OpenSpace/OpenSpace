@@ -75,7 +75,7 @@ namespace {
                 break;
             }
         }
-        return checkForTimeDescription(i, value);
+        return checkForTimeDescription(static_cast<int>(i), value);
     }
 } // namespace
 
@@ -230,8 +230,8 @@ void DeltaTimesDialog::listItemSelected() {
 
 void DeltaTimesDialog::setLabelForKey(int index, bool editMode, std::string color) {
     std::string labelS = "Set Simulation Time Increment for key";
-    if (index >= _data.size()) {
-        index = _data.size() - 1;
+    if (index >= static_cast<int>(_data.size())) {
+        index = static_cast<int>(_data.size()) - 1;
     }
     if (editMode) {
         labelS += " '" + createSummaryForDeltaTime(index, false) + "':";
@@ -242,14 +242,14 @@ void DeltaTimesDialog::setLabelForKey(int index, bool editMode, std::string colo
 }
 
 void DeltaTimesDialog::valueChanged(const QString& text) {
-    if (_seconds->text().isEmpty()) {
+    if (text.isEmpty()) {
         _errorMsg->setText("");
     }
     else {
-        int value = _seconds->text().toDouble();
+        int value = text.toDouble();
         if (value != 0) {
             _value->setText(QString::fromStdString(
-                timeDescription(_seconds->text().toDouble()))
+                timeDescription(text.toDouble()))
             );
             _errorMsg->setText("");
         }
@@ -358,14 +358,14 @@ void DeltaTimesDialog::parseSelections() {
     if ((_data.size() == 1) && (_data.at(0) == 0)) {
         _data.clear();
     }
-    int finalNonzeroIndex = _data.size() - 1;
+    int finalNonzeroIndex = static_cast<int>(_data.size()) - 1;
     for (; finalNonzeroIndex >= 0; --finalNonzeroIndex) {
         if (_data.at(finalNonzeroIndex) != 0) {
             break;
         }
     }
     std::vector<double> tempDt;
-    for (size_t i = 0; i < (finalNonzeroIndex + 1); ++i) {
+    for (int i = 0; i < (finalNonzeroIndex + 1); ++i) {
         tempDt.push_back(_data[i]);
     }
     _profile.setDeltaTimes(tempDt);

@@ -696,8 +696,6 @@ void GlobeLabelsComponent::renderLabels(const RenderData& data,
         _labelsOpacity * fadeInVariable
     );
 
-    glm::dvec4 cameraUpVecWorld = glm::dvec4(data.camera.lookUpVectorWorldSpace(), 0.0);
-
     glm::dmat4 VP = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
                     data.camera.combinedViewMatrix();
 

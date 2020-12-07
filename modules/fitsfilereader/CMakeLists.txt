@@ -59,10 +59,8 @@ add_subdirectory(${CCFITS_ROOT_DIR})
 set_folder_location(CCfits "External")
 set(CCfits_BUILD_SHARED_LIBS OFF)
 
-if (GHOUL_DISABLE_EXTERNAL_WARNINGS)
-    disable_external_warnings(cfitsio)
-    disable_external_warnings(CCfits)
-endif ()
+disable_external_warnings(cfitsio)
+disable_external_warnings(CCfits)
 
 target_include_directories(${MODULE_NAME} SYSTEM PUBLIC ${INCLUDES_FOR_TARGET})
 target_link_libraries(${MODULE_NAME} PRIVATE CCfits)

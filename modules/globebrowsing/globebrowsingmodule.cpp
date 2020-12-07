@@ -452,7 +452,13 @@ std::vector<documentation::Documentation> GlobeBrowsingModule::documentations() 
 void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
                                     int x, int y, int level)
 {
-    goToChunk(globe, globebrowsing::TileIndex(x, y, level), glm::vec2(0.5f, 0.5f), true);
+    ghoul_assert(level < std::numeric_limits<uint8_t>::max(), "Level way too big");
+    goToChunk(
+        globe,
+        globebrowsing::TileIndex(x, y, static_cast<uint8_t>(level)),
+        glm::vec2(0.5f, 0.5f),
+        true
+    );
 }
 
 void GlobeBrowsingModule::goToGeo(const globebrowsing::RenderableGlobe& globe,
@@ -528,10 +534,6 @@ void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
         cameraPositionModelSpace
     );
 
-    const Geodetic2 geo2 = globe.ellipsoid().cartesianToGeodetic2(
-        posHandle.centerToReferenceSurface
-    );
-
     const double altitude = glm::length(
         cameraPositionModelSpace - posHandle.centerToReferenceSurface
     );
@@ -594,9 +596,6 @@ glm::dquat GlobeBrowsingModule::lookDownCameraRotation(
                                                             globebrowsing::Geodetic2 geo2)
 {
     using namespace globebrowsing;
-
-    // Camera is described in world space
-    const glm::dmat4 modelTransform = globe.modelTransform();
 
     // Lookup vector
     const glm::dvec3 positionModelSpace = globe.ellipsoid().cartesianSurfacePosition(

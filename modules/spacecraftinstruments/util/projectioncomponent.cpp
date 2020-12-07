@@ -1021,7 +1021,7 @@ std::shared_ptr<ghoul::opengl::Texture> ProjectionComponent::loadProjectionTextu
         );
         texture->setFilter(Texture::FilterMode::LinearMipMap);
     }
-    return std::move(texture);
+    return texture;
 }
 
 bool ProjectionComponent::generateProjectionLayerTexture(const glm::ivec2& size) {

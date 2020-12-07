@@ -85,7 +85,7 @@ std::string ConvertRecFormatTask::description() {
     return description;
 }
 
-void ConvertRecFormatTask::perform(const Task::ProgressCallback& progressCallback) {
+void ConvertRecFormatTask::perform(const Task::ProgressCallback&) {
     convert();
 }
 
@@ -248,7 +248,6 @@ void ConvertRecFormatTask::convertToBinary() {
     char tmpType = SessionRecording::DataFormatBinaryTag;
     _oFile.write(&tmpType, 1);
     _oFile.write("\n", 1);
-    size_t idx = 0;
 
     while (std::getline(_iFile, lineContents)) {
         lineNum++;

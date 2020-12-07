@@ -197,25 +197,25 @@ int calculateTileLevelDifference(GDALDataset* dataset, int minimumPixelSize) {
  * Example: Side = left and pos = 16:
  *                 start.x = 16 and keep the size the same
  */
-void alignPixelRegion(PixelRegion& pr, Side side, int pos) {
+void alignPixelRegion(PixelRegion& pixelRegion, Side side, int pos) {
     switch (side) {
         case Side::Left:
-            pr.start.x = pos;
+            pixelRegion.start.x = pos;
             break;
         case Side::Top:
-            pr.start.y = pos;
+            pixelRegion.start.y = pos;
             break;
         case Side::Right:
-            pr.start.x = pos - pr.numPixels.x;
+            pixelRegion.start.x = pos - pixelRegion.numPixels.x;
             break;
         case Side::Bottom:
-            pr.start.y = pos - pr.numPixels.y;
+            pixelRegion.start.y = pos - pixelRegion.numPixels.y;
             break;
     }
 }
 
-PixelRegion globalCut(PixelRegion& pr, Side side, int p) {
-    const bool lineIntersect = [pr, side, p]() {
+PixelRegion globalCut(PixelRegion& pixelRegion, Side side, int p) {
+    const bool lineIntersect = [pr = pixelRegion, side, p]() {
         switch (side) {
             case Side::Left:
             case Side::Right:
@@ -232,8 +232,8 @@ PixelRegion globalCut(PixelRegion& pr, Side side, int p) {
         return PixelRegion();
     }
 
-    auto setSide = [](PixelRegion& pr, Side side, int pos) {
-        switch (side) {
+    auto setSide = [](PixelRegion& pr, Side s, int pos) {
+        switch (s) {
             case Side::Left:
                 pr.numPixels.x += (pr.start.x - pos);
                 pr.start.x = pos;
@@ -251,35 +251,35 @@ PixelRegion globalCut(PixelRegion& pr, Side side, int p) {
         }
     };
 
-    PixelRegion cutOff(pr);
+    PixelRegion cutOff(pixelRegion);
     int cutSize = 0;
     switch (side) {
         case Side::Left:
-            setSide(pr, Side::Left, p);
+            setSide(pixelRegion, Side::Left, p);
             setSide(cutOff, Side::Right, p - cutSize);
             break;
         case Side::Top:
-            setSide(pr, Side::Top, p);
+            setSide(pixelRegion, Side::Top, p);
             setSide(cutOff, Side::Bottom, p - cutSize);
             break;
         case Side::Right:
-            setSide(pr, Side::Right, p);
+            setSide(pixelRegion, Side::Right, p);
             setSide(cutOff, Side::Left, p + cutSize);
             break;
         case Side::Bottom:
-            setSide(pr, Side::Bottom, p);
+            setSide(pixelRegion, Side::Bottom, p);
             setSide(cutOff, Side::Top, p + cutSize);
             break;
     }
     return cutOff;
 }
 
-int edge(const PixelRegion& pr, Side side) {
+int edge(const PixelRegion& pixelRegion, Side side) {
     switch (side) {
-        case Side::Left:   return pr.start.x;
-        case Side::Top:    return pr.start.y;
-        case Side::Right:  return pr.start.x + pr.numPixels.x;
-        case Side::Bottom: return pr.start.y + pr.numPixels.y;
+        case Side::Left:   return pixelRegion.start.x;
+        case Side::Top:    return pixelRegion.start.y;
+        case Side::Right:  return pixelRegion.start.x + pixelRegion.numPixels.x;
+        case Side::Bottom: return pixelRegion.start.y + pixelRegion.numPixels.y;
         default:           throw ghoul::MissingCaseException();
     }
 }
@@ -650,7 +650,7 @@ RawTile RawTileDataReader::readTileData(TileIndex tileIndex) const {
 
     for (const MemoryLocation& ml : NoDataAvailableData) {
         std::byte* ptr = rawTile.imageData.get();
-        if (ml.offset >= numBytes || ptr[ml.offset] != ml.value) {
+        if (ml.offset >= static_cast<int>(numBytes) || ptr[ml.offset] != ml.value) {
             // Bail out as early as possible
             break;
         }

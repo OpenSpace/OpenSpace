@@ -1377,7 +1377,7 @@ void AtmosphereDeferredcaster::step3DTexture(
         shaderProg->setUniform("dhdH", dminT, dH, dminG, dh);
     }
 
-    shaderProg->setUniform("layer", static_cast<int>(layer));
+    shaderProg->setUniform("layer", layer);
 }
 
 void AtmosphereDeferredcaster::saveTextureToPPMFile(GLenum color_buffer_attachment,

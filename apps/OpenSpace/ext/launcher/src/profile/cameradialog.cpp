@@ -308,7 +308,7 @@ bool CameraDialog::areRequiredFormsFilledAndValid() {
             allFormsOk = false;
             addErrorMsg("Position Z is empty");
         }
-        int upVectorCount = 0;
+
         const bool hasUpX = !_navState.upX->text().isEmpty();
         const bool hasUpY = !_navState.upY->text().isEmpty();
         const bool hasUpZ = !_navState.upZ->text().isEmpty();

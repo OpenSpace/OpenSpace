@@ -38,8 +38,6 @@
 
 namespace openspace {
 
-static double importAngleValue(const std::string& angle);
-
 class RenderableSmallBody : public RenderableOrbitalKepler {
 public:
     RenderableSmallBody(const ghoul::Dictionary& dictionary);
@@ -58,9 +56,6 @@ private:
     /// element draw call is used.
     std::vector<unsigned int> _indexBufferData;
 };
-
-static double importAngleValue(const std::string& angle);
-static std::string& formatObjectName(std::string& name);
 
 } // namespace openspace
 

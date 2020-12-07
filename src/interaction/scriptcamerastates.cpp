@@ -26,11 +26,6 @@
 
 #include <openspace/interaction/inputstate.h>
 
-namespace {
-    const double SENSITIVITY_ADJUSTMENT_INCREASE = 8.0;
-    const double SENSITIVITY_ADJUSTMENT_DECREASE = 0.5;
-}
-
 namespace openspace::interaction {
 
 ScriptCameraStates::ScriptCameraStates() : CameraInteractionStates(1.0, 1.0) {}

@@ -259,12 +259,6 @@ void ParallelServer::handleHostshipRequest(std::shared_ptr<Peer> peer,
 void ParallelServer::handleHostshipResignation(Peer& peer) {
     LINFO(fmt::format("Connection {} wants to resign its hostship", peer.id));
 
-    size_t oldHostPeerId = 0;
-    {
-        std::lock_guard lock(_hostInfoMutex);
-        oldHostPeerId = _hostPeerId;
-    }
-
     setToClient(peer);
 
     LINFO(fmt::format("Connection {} resigned as host", peer.id));

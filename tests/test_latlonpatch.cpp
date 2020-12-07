@@ -71,72 +71,72 @@ TEST_CASE("LatLonPatch: Find Closest Corner 2", "[latlonpatch]") {
 }
 
 TEST_CASE("LatLonPatch: Spherical Clamp 1", "[latlonpatch]") {
-    using namespace openspace::globebrowsing;
+    //using namespace openspace::globebrowsing;
 
-    GeodeticPatch patch(0, 0, glm::pi<float>() / 4.f, glm::pi<float>() / 4.f);
+    //GeodeticPatch patch(0, 0, glm::pi<float>() / 4.f, glm::pi<float>() / 4.f);
 
-    // inside patch latitude-wise, east of patch longitude-wise
-    Geodetic2 point { glm::pi<double>() / 6.0, glm::pi<double>() / 4.0 - 0.01 };
+    //// inside patch latitude-wise, east of patch longitude-wise
+    //Geodetic2 point { glm::pi<double>() / 6.0, glm::pi<double>() / 4.0 - 0.01 };
 
 
-    Geodetic2 clampedPoint = patch.closestPoint(point);
-    Geodetic2 neCorner = patch.corner(NORTH_EAST);
+    //Geodetic2 clampedPoint = patch.closestPoint(point);
+    //Geodetic2 neCorner = patch.corner(NORTH_EAST);
     //REQUIRE(clampedPoint.lat == neCorner.lat);
     //REQUIRE(clampedPoint.lon == neCorner.lon);
 }
 
 TEST_CASE("LatLonPatch: Spherical Clamp 2", "[latlonpatch]") {
-    using namespace openspace::globebrowsing;
+    //using namespace openspace::globebrowsing;
 
-    GeodeticPatch patch(0, 0, glm::pi<float>() / 4.f, glm::pi<float>() / 4.f);
+    //GeodeticPatch patch(0, 0, glm::pi<float>() / 4.f, glm::pi<float>() / 4.f);
 
-    // inside patch latitude-wise, west of patch longitude-wise
-    Geodetic2 point { glm::pi<double>() / 6.0, glm::pi<double>() / 4.0 + 0.01 };
+    //// inside patch latitude-wise, west of patch longitude-wise
+    //Geodetic2 point { glm::pi<double>() / 6.0, glm::pi<double>() / 4.0 + 0.01 };
 
-    Geodetic2 clampedPoint = patch.closestPoint(point);
-    Geodetic2 nwCorner = patch.corner(NORTH_WEST);
+    //Geodetic2 clampedPoint = patch.closestPoint(point);
+    //Geodetic2 nwCorner = patch.corner(NORTH_WEST);
     //REQUIRE(clampedPoint.lat == nwCorner.lat);
     //REQUIRE(clampedPoint.lon == nwCorner.lon);
 }
 
 TEST_CASE("LatLonPatch: Spherical Clamp 3", "[latlonpatch]") {
-    using namespace openspace::globebrowsing;
+    //using namespace openspace::globebrowsing;
 
-    GeodeticPatch patch(0, 0, glm::pi<float>() / 4.f, glm::pi<float>() / 4.f);
+    //GeodeticPatch patch(0, 0, glm::pi<float>() / 4.f, glm::pi<float>() / 4.f);
 
-    // North east of patch
-    Geodetic2 point { glm::pi<double>() / 3.0, glm::pi<double>() / 4.0 - 0.01 };
+    //// North east of patch
+    //Geodetic2 point { glm::pi<double>() / 3.0, glm::pi<double>() / 4.0 - 0.01 };
 
-    Geodetic2 clampedPoint = patch.closestPoint(point);
-    Geodetic2 neCorner = patch.corner(NORTH_EAST);
+    //Geodetic2 clampedPoint = patch.closestPoint(point);
+    //Geodetic2 neCorner = patch.corner(NORTH_EAST);
     //REQUIRE(clampedPoint.lat == neCorner.lat);
     //REQUIRE(clampedPoint.lon == neCorner.lon);
 }
 
 TEST_CASE("LatLonPatch: Spherical Clamp 4", "[latlonpatch]") {
-    using namespace openspace::globebrowsing;
+    //using namespace openspace::globebrowsing;
 
-    GeodeticPatch patch(0, 0, glm::pi<float>() / 4.f, glm::pi<float>() / 4.f);
+    //GeodeticPatch patch(0, 0, glm::pi<float>() / 4.f, glm::pi<float>() / 4.f);
 
-    // South east of patch
-    Geodetic2 point { -glm::pi<double>() / 3.0, glm::pi<double>() / 4.0 - 0.01 };
+    //// South east of patch
+    //Geodetic2 point { -glm::pi<double>() / 3.0, glm::pi<double>() / 4.0 - 0.01 };
 
-    Geodetic2 clampedPoint = patch.closestPoint(point);
-    Geodetic2 seCorner = patch.corner(SOUTH_EAST);
+    //Geodetic2 clampedPoint = patch.closestPoint(point);
+    //Geodetic2 seCorner = patch.corner(SOUTH_EAST);
     //REQUIRE(clampedPoint.lat == seCorner.lat);
     //REQUIRE(clampedPoint.lon == seCorner.lon);
 }
 
 TEST_CASE("LatLonPatch: Spherical Clamp 5", "[latlonpatch]") {
-    using namespace openspace::globebrowsing;
+    //using namespace openspace::globebrowsing;
 
-    GeodeticPatch patch(0, 0, glm::pi<float>() / 4.f, glm::pi<float>() / 4.f);
+    //GeodeticPatch patch(0, 0, glm::pi<float>() / 4.f, glm::pi<float>() / 4.f);
 
-    // South west of patch
-    Geodetic2 point { -glm::pi<double>() / 3.0, 3 * glm::pi<double>() / 4.0 + 0.01 };
+    //// South west of patch
+    //Geodetic2 point { -glm::pi<double>() / 3.0, 3 * glm::pi<double>() / 4.0 + 0.01 };
 
-    Geodetic2 clampedPoint = patch.closestPoint(point);
-    Geodetic2 swCorner = patch.corner(SOUTH_WEST);
+    //Geodetic2 clampedPoint = patch.closestPoint(point);
+    //Geodetic2 swCorner = patch.corner(SOUTH_WEST);
     //REQUIRE(clampedPoint.lat == swCorner.lat);
     //REQUIRE(clampedPoint.lon == swCorner.lon);
 }

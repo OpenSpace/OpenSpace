@@ -324,7 +324,6 @@ void RenderableRadialGrid::update(const UpdateData&) {
     // Lines
     const int nLines = _gridSegments.value()[1];
     const int nVertices = 2 * nLines;
-    const float fsegments = static_cast<float>(nLines);
 
     _lines.varray.clear();
     _lines.varray.reserve(nVertices);

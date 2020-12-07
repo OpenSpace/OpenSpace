@@ -204,11 +204,9 @@ glm::vec2 DashboardItemParallelConnection::size() const {
 
         connectionInfo += "\n";
         if (nClients > 2) {
-            std::string c = std::to_string(nClients - 1);
             connectionInfo += fmt::format(Plural, nClients);
         }
         else if (nClients == 2) {
-            std::string c = std::to_string(nClients - 1);
             connectionInfo += fmt::format(Singular, nClients - 1);
         }
         else if (nClients == 1) {

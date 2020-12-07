@@ -28,7 +28,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
 #include <array>
-#pragma optimize ("", off)
+
 namespace {
     const ImVec2 WindowSize = ImVec2(350, 500);
 } // namespace

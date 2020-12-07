@@ -39,7 +39,7 @@ namespace {
         for (size_t i = 0; i < occupancies.size(); ++i) {
             ImGui::Text(
                 "  %i: %i/%i (%.2f/%.2f kiB)",
-                i,
+                static_cast<int>(i),
                 occupancies[i],
                 p._bucketSize,
                 occupancies[i] / 1024.f,

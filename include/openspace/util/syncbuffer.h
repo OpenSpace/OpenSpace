@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_CORE___SYNCBUFFER___H__
 #define __OPENSPACE_CORE___SYNCBUFFER___H__
 
+#include <ghoul/glm.h>
 #include <memory>
 #include <string>
 #include <vector>
@@ -48,6 +49,10 @@ public:
     T decode();
 
     void decode(std::string& s);
+    void decode(glm::quat& value);
+    void decode(glm::dquat& value);
+    void decode(glm::vec3& value);
+    void decode(glm::dvec3& value);
 
     template <typename T>
     void decode(T& value);

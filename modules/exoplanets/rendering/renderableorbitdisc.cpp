@@ -130,7 +130,9 @@ RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)
     addProperty(_offset);
 
     _size = static_cast<float>(dictionary.value<double>(SizeInfo.identifier));
-    _size = _size + (_offset.value().y * distanceconstants::AstronomicalUnit);
+    _size = static_cast<float>(
+        _size + (_offset.value().y * distanceconstants::AstronomicalUnit)
+    );
     setBoundingSphere(_size);
     _size.onChange([&]() { _planeIsDirty = true; });
     addProperty(_size);
@@ -233,7 +235,7 @@ void RenderableOrbitDisc::render(const RenderData& data, RendererTasks&) {
     global::renderEngine->openglStateCache().resetPolygonAndClippingState();
 }
 
-void RenderableOrbitDisc::update(const UpdateData& data) {
+void RenderableOrbitDisc::update(const UpdateData&) {
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
         _uniformCache.modelViewProjection = _shader->uniformLocation(

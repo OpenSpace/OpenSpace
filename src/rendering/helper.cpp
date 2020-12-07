@@ -204,12 +204,12 @@ void initialize() {
     glBindVertexArray(vertexObjects.square.vao);
     glBindBuffer(GL_ARRAY_BUFFER, vertexObjects.square.vbo);
 
-    struct Vertex {
+    struct VertexXYUVRGBA {
         GLfloat xy[2];
         GLfloat uv[2];
         GLfloat rgba[4];
     };
-    Vertex data[] = {
+    VertexXYUVRGBA data[] = {
         // X     Y    U    V    R    G    B    A
         -1.f, -1.f, 0.f, 0.f, 1.f, 1.f, 1.f, 1.f,
         -1.f,  1.f, 0.f, 1.f, 1.f, 1.f, 1.f, 1.f,
@@ -219,16 +219,16 @@ void initialize() {
          1.f,  1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f,
          1.f, -1.f, 1.f, 0.f, 1.f, 1.f, 1.f, 1.f
     };
-    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(Vertex), data, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(VertexXYUVRGBA), data, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexXYUVRGBA), nullptr);
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-        reinterpret_cast<GLvoid*>(offsetof(Vertex, uv)));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VertexXYUVRGBA),
+        reinterpret_cast<GLvoid*>(offsetof(VertexXYUVRGBA, uv)));
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-        reinterpret_cast<GLvoid*>(offsetof(Vertex, rgba)));
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(VertexXYUVRGBA),
+        reinterpret_cast<GLvoid*>(offsetof(VertexXYUVRGBA, rgba)));
     glBindVertexArray(0);
 
     //
