@@ -185,7 +185,7 @@ void GuiIswaComponent::render() {
         const std::map<int, std::shared_ptr<CygnetInfo>>& map =
             IswaManager::ref().cygnetInformation();
 
-        for (const std::pair<int, std::shared_ptr<CygnetInfo>>& cygnetInfo : map) {
+        for (const std::pair<const int, std::shared_ptr<CygnetInfo>>& cygnetInfo : map) {
             int id = cygnetInfo.first;
             CygnetInfo& info = *cygnetInfo.second;
 

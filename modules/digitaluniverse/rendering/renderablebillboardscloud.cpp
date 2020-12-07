@@ -477,9 +477,9 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _billboardMinSize(BillboardMinSizeInfo, 0.f, 0.f, 100.f)
     , _correctionSizeEndDistance(CorrectionSizeEndDistanceInfo, 17.f, 12.f, 25.f)
     , _correctionSizeFactor(CorrectionSizeFactorInfo, 8.f, 0.f, 20.f)
-    , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _setRangeFromData(SetRangeFromData)
     , _useLinearFiltering(UseLinearFiltering, false)
+    , _setRangeFromData(SetRangeFromData)
+    , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),

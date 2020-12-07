@@ -268,10 +268,8 @@ std::string IswaManager::iswaUrl(int id, double timestamp, const std::string& ty
               "window=-1&cygnetId="+ std::to_string(id) +"&timestamp=";
     }
 
-    //std::string t = Time::ref().currentTimeUTC();
-    std::string_view t = SpiceManager::ref().dateFromEphemerisTime(timestamp);
     std::stringstream ss;
-    ss << t;
+    ss << SpiceManager::ref().dateFromEphemerisTime(timestamp);;
     std::string token;
 
     std::getline(ss, token, ' ');
@@ -482,8 +480,6 @@ std::string IswaManager::jsonSphereToLuaTable(MetadataFuture& data) {
     std::string coordinateType = j["grid_1_type"];
     float updateTime = j["output_time_interval"];
     float radius = j["radius"];
-
-    glm::vec4 spatialScale(6.371f, 6.371f, 6.371f, 6);
 
     glm::vec3 max(
         j["x"]["actual_max"],

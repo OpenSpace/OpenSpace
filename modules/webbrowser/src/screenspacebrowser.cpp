@@ -34,7 +34,6 @@
 #include <ghoul/opengl/texture.h>
 
 namespace {
-    constexpr const char* KeyIdentifier = "Indentifier";
     constexpr const char* _loggerCat = "ScreenSpaceBrowser";
 
     const openspace::properties::Property::PropertyInfo DimensionsInfo = {

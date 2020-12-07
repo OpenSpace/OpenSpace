@@ -61,19 +61,11 @@ namespace {
     constexpr const char* _loggerCat = "RenderableMultiresVolume";
     constexpr const char* KeyDataSource = "Source";
     constexpr const char* KeyErrorHistogramsSource = "ErrorHistogramsSource";
-    constexpr const char* KeyHints = "Hints";
     constexpr const char* KeyTransferFunction = "TransferFunction";
 
-    constexpr const char* KeyVolumeName = "VolumeName";
     constexpr const char* KeyBrickSelector = "BrickSelector";
     constexpr const char* KeyStartTime = "StartTime";
     constexpr const char* KeyEndTime = "EndTime";
-    constexpr const char* GlslHelpersPath =
-        "${MODULES}/multiresvolume/shaders/helpers_fs.glsl";
-    constexpr const char* GlslHelperPath =
-        "${MODULES}/multiresvolume/shaders/helper.glsl";
-    constexpr const char* GlslHeaderPath =
-        "${MODULES}/multiresvolume/shaders/header.glsl";
 
     constexpr openspace::properties::Property::PropertyInfo StepSizeCoefficientInfo = {
         "StepSizeCoefficient",

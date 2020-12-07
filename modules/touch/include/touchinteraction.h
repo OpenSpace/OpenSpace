@@ -47,7 +47,7 @@ namespace openspace {
 class Camera;
 class SceneGraphNode;
 
-//Class used for keeping track of the recent average frame time
+// Class used for keeping track of the recent average frame time
 class FrameTimeAverage {
 public:
     //Update the circular buffer with the most recent frame time
@@ -59,7 +59,6 @@ private:
     static const int TotalSamples = 10;
     int _nSamples = 0;
     double _samples[TotalSamples];
-    double _runningTotal = 0.0;
     int _index = 0;
 };
 
@@ -205,7 +204,6 @@ private:
     double _currentRadius = 1.0;
     double _slerpdT = 10001.0;
     double _timeSlack = 0.0;
-    int _numOfTests = 0;
     std::chrono::milliseconds _time;
     bool _directTouchMode = false;
     bool _wasPrevModeDirectTouch = false;

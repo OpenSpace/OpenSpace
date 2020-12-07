@@ -126,12 +126,8 @@ private:
 
     std::shared_ptr<TransferFunction> _transferFunction;
 
-    float _spatialTolerance;
-    float _temporalTolerance;
-
     std::shared_ptr<TSP> _tsp;
     std::vector<int> _brickIndices;
-    int _atlasMapSize = 0;
 
     std::shared_ptr<AtlasManager> _atlasManager;
 

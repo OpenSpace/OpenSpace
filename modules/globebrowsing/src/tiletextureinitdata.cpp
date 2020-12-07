@@ -197,7 +197,7 @@ TileTextureInitData TileTextureInitData::operator=(TileTextureInitData&& rhs) {
         return *this;
     }
 
-    return rhs;
+    return std::move(rhs);
 }
 
 } // namespace openspace::globebrowsing
