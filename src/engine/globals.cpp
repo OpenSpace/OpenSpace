@@ -97,13 +97,12 @@ namespace {
         sizeof(Profile);
 
     // This is kind of weird.  Optimally, we would want to use the std::array also on
-    // non-windows platforms but that causes some issues with nullptrs being thrown
-    // around.  Switching this to a std::vector with dynamic memory allocation works on
-    // Linux, but it fails on Windows in some SGCT function
+    // non-Windows platforms but that causes some issues with nullptrs being thrown
+    // around and invalid accesses.  Switching this to a std::vector with dynamic memory
+    // allocation works on Linux, but it fails on Windows in some SGCT function and on Mac
+    // in some random global randoms
 #ifdef WIN32
     std::array<std::byte, TotalSize> DataStorage;
-#else // WIN32
-    std::vector<std::byte> DataStorage;
 #endif // WIN32
 } // namespace
 } // namespace openspace
@@ -114,171 +113,261 @@ void create() {
     ZoneScoped
 
     callback::create();
-#ifndef WIN32
-    DataStorage.resize(TotalSize);
-#endif // WIN32
+
+#ifdef WIN32
     std::fill(DataStorage.begin(), DataStorage.end(), std::byte(0));
-
     std::byte* currentPos = DataStorage.data();
+#endif // WIN32
 
-//    fontManager = new (currentPos) ghoul::fontrendering::FontManager({ 1536, 1536, 1 });
-    fontManager = new ghoul::fontrendering::FontManager({ 1536, 1536, 1 });
+#ifdef WIN32
+    fontManager = new (currentPos) ghoul::fontrendering::FontManager({ 1536, 1536, 1 });
     ghoul_assert(fontManager, "No fontManager");
     currentPos += sizeof(ghoul::fontrendering::FontManager);
+#else // ^^^ WIN32 / !WIN32 vvv
+    fontManager = new ghoul::fontrendering::FontManager({ 1536, 1536, 1 });
+#endif // WIN32
 
-//    dashboard = new (currentPos) Dashboard;
-    dashboard = new Dashboard;
+#ifdef WIN32
+    dashboard = new (currentPos) Dashboard;
     ghoul_assert(dashboard, "No dashboard");
     currentPos += sizeof(Dashboard);
+#else // ^^^ WIN32 / !WIN32 vvv
+    dashboard = new Dashboard;
+#endif // WIN32
 
-//    deferredcasterManager = new (currentPos) DeferredcasterManager;
-    deferredcasterManager = new DeferredcasterManager;
+#ifdef WIN32
+    deferredcasterManager = new (currentPos) DeferredcasterManager;
     ghoul_assert(deferredcasterManager, "No deferredcasterManager");
     currentPos += sizeof(DeferredcasterManager);
+#else // ^^^ WIN32 / !WIN32 vvv
+    deferredcasterManager = new DeferredcasterManager;
+#endif // WIN32
 
-//    downloadManager = new (currentPos) DownloadManager;
-    downloadManager = new DownloadManager;
+#ifdef WIN32
+    downloadManager = new (currentPos) DownloadManager;
     ghoul_assert(downloadManager, "No downloadManager");
     currentPos += sizeof(DownloadManager);
+#else // ^^^ WIN32 / !WIN32 vvv
+    downloadManager = new DownloadManager;
+#endif // WIN32
 
-//    luaConsole = new (currentPos) LuaConsole;
-    luaConsole = new LuaConsole;
+#ifdef WIN32
+    luaConsole = new (currentPos) LuaConsole;
     ghoul_assert(luaConsole, "No luaConsole");
     currentPos += sizeof(LuaConsole);
+#else // ^^^ WIN32 / !WIN32 vvv
+    luaConsole = new LuaConsole;
+#endif // WIN32
 
-//    memoryManager = new (currentPos) MemoryManager;
-    memoryManager = new MemoryManager;
+#ifdef WIN32
+    memoryManager = new (currentPos) MemoryManager;
     ghoul_assert(memoryManager, "No memoryManager");
     currentPos += sizeof(MemoryManager);
+#else // ^^^ WIN32 / !WIN32 vvv
+    memoryManager = new MemoryManager;
+#endif // WIN32
 
-//    missionManager = new (currentPos) MissionManager;
-    missionManager = new MissionManager;
+#ifdef WIN32
+    missionManager = new (currentPos) MissionManager;
     ghoul_assert(missionManager, "No missionManager");
     currentPos += sizeof(MissionManager);
+#else // ^^^ WIN32 / !WIN32 vvv
+    missionManager = new MissionManager;
+#endif // WIN32
 
-//    moduleEngine = new (currentPos) ModuleEngine;
-    moduleEngine = new ModuleEngine;
+#ifdef WIN32
+    moduleEngine = new (currentPos) ModuleEngine;
     ghoul_assert(moduleEngine, "No moduleEngine");
     currentPos += sizeof(ModuleEngine);
+#else // ^^^ WIN32 / !WIN32 vvv
+    moduleEngine = new ModuleEngine;
+#endif // WIN32
 
-    //    openSpaceEngine = new (currentPos) OpenSpaceEngine;
-    openSpaceEngine = new OpenSpaceEngine;
+#ifdef WIN32
+    openSpaceEngine = new (currentPos) OpenSpaceEngine;
     ghoul_assert(openSpaceEngine, "No openSpaceEngine");
     currentPos += sizeof(OpenSpaceEngine);
+#else // ^^^ WIN32 / !WIN32 vvv
+    openSpaceEngine = new OpenSpaceEngine;
+#endif // WIN32
 
-//    parallelPeer = new (currentPos) ParallelPeer;
-    parallelPeer = new ParallelPeer;
+#ifdef WIN32
+    parallelPeer = new (currentPos) ParallelPeer;
     ghoul_assert(parallelPeer, "No parallelPeer");
     currentPos += sizeof(ParallelPeer);
+#else // ^^^ WIN32 / !WIN32 vvv
+    parallelPeer = new ParallelPeer;
+#endif // WIN32
 
-//    raycasterManager = new (currentPos) RaycasterManager;
-    raycasterManager = new RaycasterManager;
+#ifdef WIN32
+    raycasterManager = new (currentPos) RaycasterManager;
     ghoul_assert(raycasterManager, "No raycasterManager");
     currentPos += sizeof(RaycasterManager);
+#else // ^^^ WIN32 / !WIN32 vvv
+    raycasterManager = new RaycasterManager;
+#endif // WIN32
 
-//    renderEngine = new (currentPos) RenderEngine;
-    renderEngine = new RenderEngine;
+#ifdef WIN32
+    renderEngine = new (currentPos) RenderEngine;
     ghoul_assert(renderEngine, "No renderEngine");
     currentPos += sizeof(RenderEngine);
+#else // ^^^ WIN32 / !WIN32 vvv
+    renderEngine = new RenderEngine;
+#endif // WIN32
 
-//    screenSpaceRenderables =
-//        new (currentPos) std::vector<std::unique_ptr<ScreenSpaceRenderable>>;
+#ifdef WIN32
     screenSpaceRenderables =
-        new std::vector<std::unique_ptr<ScreenSpaceRenderable>>;
+        new (currentPos) std::vector<std::unique_ptr<ScreenSpaceRenderable>>;
     ghoul_assert(screenSpaceRenderables, "No screenSpaceRenderables");
     currentPos += sizeof(std::vector<std::unique_ptr<ScreenSpaceRenderable>>);
+#else // ^^^ WIN32 / !WIN32 vvv
+    screenSpaceRenderables = new std::vector<std::unique_ptr<ScreenSpaceRenderable>>;
+#endif // WIN32
 
-//    syncEngine = new (currentPos) SyncEngine(4096);
-    syncEngine = new SyncEngine(4096);
+#ifdef WIN32
+    syncEngine = new (currentPos) SyncEngine(4096);
     ghoul_assert(syncEngine, "No syncEngine");
     currentPos += sizeof(SyncEngine);
+#else // ^^^ WIN32 / !WIN32 vvv
+    syncEngine = new SyncEngine(4096);
+#endif // WIN32
 
-//    timeManager = new (currentPos) TimeManager;
-    timeManager = new TimeManager;
+#ifdef WIN32
+    timeManager = new (currentPos) TimeManager;
     ghoul_assert(timeManager, "No timeManager");
     currentPos += sizeof(TimeManager);
+#else // ^^^ WIN32 / !WIN32 vvv
+    timeManager = new TimeManager;
+#endif // WIN32
 
-//    versionChecker = new (currentPos) VersionChecker;
-    versionChecker = new VersionChecker;
+#ifdef WIN32
+    versionChecker = new (currentPos) VersionChecker;
     ghoul_assert(versionChecker, "No versionChecker");
     currentPos += sizeof(VersionChecker);
+#else
+    versionChecker = new VersionChecker;
+#endif // WIN32
 
-//    virtualPropertyManager = new (currentPos) VirtualPropertyManager;
-    virtualPropertyManager = new VirtualPropertyManager;
+#ifdef WIN32
+    virtualPropertyManager = new (currentPos) VirtualPropertyManager;
     ghoul_assert(virtualPropertyManager, "No virtualPropertyManager");
     currentPos += sizeof(VirtualPropertyManager);
+#else // ^^^ WIN32 / !WIN32 vvv
+    virtualPropertyManager = new VirtualPropertyManager;
+#endif // WIN32
 
-//    windowDelegate = new (currentPos) WindowDelegate;
-    windowDelegate = new WindowDelegate;
+#ifdef WIN32
+    windowDelegate = new (currentPos) WindowDelegate;
     ghoul_assert(windowDelegate, "No windowDelegate");
     currentPos += sizeof(WindowDelegate);
+#else // ^^^ WIN32 / !WIN32 vvv
+    windowDelegate = new WindowDelegate;
+#endif // WIN32
 
-//    configuration = new (currentPos) configuration::Configuration;
-    configuration = new configuration::Configuration;
+#ifdef WIN32
+    configuration = new (currentPos) configuration::Configuration;
     ghoul_assert(configuration, "No configuration");
     currentPos += sizeof(configuration::Configuration);
+#else // ^^^ WIN32 / !WIN32 vvv
+    configuration = new configuration::Configuration;
+#endif // WIN32
 
-//    interactionMonitor = new (currentPos) interaction::InteractionMonitor;
-    interactionMonitor = new interaction::InteractionMonitor;
+#ifdef WIN32
+    interactionMonitor = new (currentPos) interaction::InteractionMonitor;
     ghoul_assert(interactionMonitor, "No interactionMonitor");
     currentPos += sizeof(interaction::InteractionMonitor);
+#else // ^^^ WIN32 / !WIN32 vvv
+    interactionMonitor = new interaction::InteractionMonitor;
+#endif // WIN32
 
-//    joystickInputStates = new (currentPos) interaction::JoystickInputStates;
-    joystickInputStates = new interaction::JoystickInputStates;
+#ifdef WIN32
+    joystickInputStates = new (currentPos) interaction::JoystickInputStates;
     ghoul_assert(joystickInputStates, "No joystickInputStates");
     currentPos += sizeof(interaction::JoystickInputStates);
+#else // ^^^ WIN32 / !WIN32 vvv
+    joystickInputStates = new interaction::JoystickInputStates;
+#endif // WIN32
 
-//    websocketInputStates = new (currentPos) interaction::WebsocketInputStates;
-    websocketInputStates = new interaction::WebsocketInputStates;
+#ifdef WIN32
+    websocketInputStates = new (currentPos) interaction::WebsocketInputStates;
     ghoul_assert(websocketInputStates, "No websocketInputStates");
     currentPos += sizeof(interaction::WebsocketInputStates);
+#else // ^^^ WIN32 / !WIN32 vvv
+    websocketInputStates = new interaction::WebsocketInputStates;
+#endif // WIN32
 
-//    keybindingManager = new (currentPos) interaction::KeybindingManager;
-    keybindingManager = new interaction::KeybindingManager;
+#ifdef WIN32
+    keybindingManager = new (currentPos) interaction::KeybindingManager;
     ghoul_assert(keybindingManager, "No keybindingManager");
     currentPos += sizeof(interaction::KeybindingManager);
+#else // ^^^ WIN32 / !WIN32 vvv
+    keybindingManager = new interaction::KeybindingManager;
+#endif // WIN32
 
-//    navigationHandler = new (currentPos) interaction::NavigationHandler;
-    navigationHandler = new interaction::NavigationHandler;
+#ifdef WIN32
+    navigationHandler = new (currentPos) interaction::NavigationHandler;
     ghoul_assert(navigationHandler, "No navigationHandler");
     currentPos += sizeof(interaction::NavigationHandler);
+#else // ^^^ WIN32 / !WIN32 vvv
+    navigationHandler = new interaction::NavigationHandler;
+#endif // WIN32
 
-//    sessionRecording = new (currentPos) interaction::SessionRecording(true);
-    sessionRecording = new interaction::SessionRecording(true);
+#ifdef WIN32
+    sessionRecording = new (currentPos) interaction::SessionRecording(true);
     ghoul_assert(sessionRecording, "No sessionRecording");
     currentPos += sizeof(interaction::SessionRecording);
+#else // ^^^ WIN32 / !WIN32 vvv
+    sessionRecording = new interaction::SessionRecording(true);
+#endif // WIN32
 
-//    shortcutManager = new (currentPos) interaction::ShortcutManager;
-    shortcutManager = new interaction::ShortcutManager;
+#ifdef WIN32
+    shortcutManager = new (currentPos) interaction::ShortcutManager;
     ghoul_assert(shortcutManager, "No shortcutManager");
     currentPos += sizeof(interaction::ShortcutManager);
+#else // ^^^ WIN32 / !WIN32 vvv
+    shortcutManager = new interaction::ShortcutManager;
+#endif // WIN32
 
-//    rootPropertyOwner = new (currentPos) properties::PropertyOwner({ "" });
-    rootPropertyOwner = new properties::PropertyOwner({ "" });
+#ifdef WIN32
+    rootPropertyOwner = new (currentPos) properties::PropertyOwner({ "" });
     ghoul_assert(rootPropertyOwner, "No rootPropertyOwner");
     currentPos += sizeof(properties::PropertyOwner);
+#else // ^^^ WIN32 / !WIN32 vvv
+    rootPropertyOwner = new properties::PropertyOwner({ "" });
+#endif // WIN32
 
-//    screenSpaceRootPropertyOwner =
-//        new (currentPos) properties::PropertyOwner({ "ScreenSpace" });
+#ifdef WIN32
     screenSpaceRootPropertyOwner =
-        new properties::PropertyOwner({ "ScreenSpace" });
+        new (currentPos) properties::PropertyOwner({ "ScreenSpace" });
     ghoul_assert(screenSpaceRootPropertyOwner, "No screenSpaceRootPropertyOwner");
     currentPos += sizeof(properties::PropertyOwner);
+#else // ^^^ WIN32 / !WIN32 vvv
+    screenSpaceRootPropertyOwner = new properties::PropertyOwner({ "ScreenSpace" });
+#endif // WIN32
 
-//    scriptEngine = new (currentPos) scripting::ScriptEngine;
-    scriptEngine = new scripting::ScriptEngine;
+#ifdef WIN32
+    scriptEngine = new (currentPos) scripting::ScriptEngine;
     ghoul_assert(scriptEngine, "No scriptEngine");
     currentPos += sizeof(scripting::ScriptEngine);
+#else // ^^^ WIN32 / !WIN32 vvv
+    scriptEngine = new scripting::ScriptEngine;
+#endif // WIN32
 
-//    scriptScheduler = new (currentPos) scripting::ScriptScheduler;
-    scriptScheduler = new scripting::ScriptScheduler;
+#ifdef WIN32
+    scriptScheduler = new (currentPos) scripting::ScriptScheduler;
     ghoul_assert(scriptScheduler, "No scriptScheduler");
     currentPos += sizeof(scripting::ScriptScheduler);
+#else // ^^^ WIN32 / !WIN32 vvv
+    scriptScheduler = new scripting::ScriptScheduler;
+#endif // WIN32
 
-//    profile = new (currentPos) Profile;
-    profile = new Profile;
+#ifdef WIN32
+    profile = new (currentPos) Profile;
     ghoul_assert(profile, "No profile");
     currentPos += sizeof(Profile);
+#else // ^^^ WIN32 / !WIN32 vvv
+    profile = new Profile;
+#endif // WIN32
 }
 
 void initialize() {
@@ -310,100 +399,220 @@ void initializeGL() {
 
 void destroy() {
     LDEBUGC("Globals", "Destroying 'Profile'");
+#ifdef WIN32
     profile->~Profile();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete profile;
+#endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'ScriptScheduler'");
+#ifdef WIN32
     scriptScheduler->~ScriptScheduler();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete scriptScheduler;
+#endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'ScriptEngine'");
+#ifdef WIN32
     scriptEngine->~ScriptEngine();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete scriptEngine;
+#endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'ScreenSpace Root Owner'");
+#ifdef WIN32
     screenSpaceRootPropertyOwner->~PropertyOwner();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete screenSpaceRootPropertyOwner;
+#endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'Root Owner'");
+#ifdef WIN32
     rootPropertyOwner->~PropertyOwner();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete rootPropertyOwner;
+#endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'ShortcutManager'");
+#ifdef WIN32
     shortcutManager->~ShortcutManager();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete shortcutManager;
+#endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'SessionRecording'");
+#ifdef WIN32
     sessionRecording->~SessionRecording();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete sessionRecording;
+#endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'NavigationHandler'");
+#ifdef WIN32
     navigationHandler->~NavigationHandler();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete navigationHandler;
+#endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'KeybindingManager'");
+#ifdef WIN32
     keybindingManager->~KeybindingManager();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete keybindingManager;
+#endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'WebsocketInputStates'");
+#ifdef WIN32
     websocketInputStates->~WebsocketInputStates();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete websocketInputStates;
+#endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'JoystickInputStates'");
+#ifdef WIN32
     joystickInputStates->~JoystickInputStates();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete joystickInputStates;
+#endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'InteractionMonitor'");
+#ifdef WIN32
     interactionMonitor->~InteractionMonitor();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete interactionMonitor;
+#endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'Configuration'");
+#ifdef WIN32
     configuration->~Configuration();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete configuration;
+#endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'WindowDelegate'");
+#ifdef WIN32
     windowDelegate->~WindowDelegate();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete windowDelegate;
+#endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'VirtualPropertyManager'");
+#ifdef WIN32
     virtualPropertyManager->~VirtualPropertyManager();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete virtualPropertyManager;
+#endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'VersionChecker'");
+#ifdef WIN32
     versionChecker->~VersionChecker();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete versionChecker;
+#endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'TimeManager'");
+#ifdef WIN32
     timeManager->~TimeManager();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete timeManager;
+#endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'SyncEngine'");
+#ifdef WIN32
     syncEngine->~SyncEngine();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete syncEngine;
+#endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'ScreenSpaceRenderables'");
+#ifdef WIN32
     screenSpaceRenderables->~vector<std::unique_ptr<ScreenSpaceRenderable>>();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete screenSpaceRenderables;
+#endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'RenderEngine'");
+#ifdef WIN32
     renderEngine->~RenderEngine();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete renderEngine;
+#endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'RaycasterManager'");
+#ifdef WIN32
     raycasterManager->~RaycasterManager();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete raycasterManager;
+#endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'ParallelPeer'");
+#ifdef WIN32
     parallelPeer->~ParallelPeer();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete parallelPeer;
+#endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'OpenSpaceEngine'");
+#ifdef WIN32
     openSpaceEngine->~OpenSpaceEngine();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete openSpaceEngine;
+#endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'ModuleEngine'");
+#ifdef WIN32
     moduleEngine->~ModuleEngine();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete moduleEngine;
+#endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'MissionManager'");
+#ifdef WIN32
     missionManager->~MissionManager();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete missionManager;
+#endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'MemoryManager'");
+#ifdef WIN32
     memoryManager->~MemoryManager();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete memoryManager;
+#endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'LuaConsole'");
+#ifdef WIN32
     luaConsole->~LuaConsole();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete luaConsole;
+#endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'DownloadManager'");
+#ifdef WIN32
     downloadManager->~DownloadManager();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete downloadManager;
+#endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'DeferredcasterManager'");
+#ifdef WIN32
     deferredcasterManager->~DeferredcasterManager();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete deferredcasterManager;
+#endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'Dashboard'");
+#ifdef WIN32
     dashboard->~Dashboard();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete dashboard;
+#endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'FontManager'");
+#ifdef WIN32
     fontManager->~FontManager();
-
-#ifndef WIN32
-    DataStorage.clear();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete fontManager;
 #endif // WIN32
 
     callback::destroy();
