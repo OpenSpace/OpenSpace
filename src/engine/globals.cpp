@@ -121,129 +121,162 @@ void create() {
 
     std::byte* currentPos = DataStorage.data();
 
-    fontManager = new (currentPos) ghoul::fontrendering::FontManager({ 1536, 1536, 1 });
+//    fontManager = new (currentPos) ghoul::fontrendering::FontManager({ 1536, 1536, 1 });
+    fontManager = new ghoul::fontrendering::FontManager({ 1536, 1536, 1 });
     ghoul_assert(fontManager, "No fontManager");
     currentPos += sizeof(ghoul::fontrendering::FontManager);
 
-    dashboard = new (currentPos) Dashboard;
+//    dashboard = new (currentPos) Dashboard;
+    dashboard = new Dashboard;
     ghoul_assert(dashboard, "No dashboard");
     currentPos += sizeof(Dashboard);
 
-    deferredcasterManager = new (currentPos) DeferredcasterManager;
+//    deferredcasterManager = new (currentPos) DeferredcasterManager;
+    deferredcasterManager = new DeferredcasterManager;
     ghoul_assert(deferredcasterManager, "No deferredcasterManager");
     currentPos += sizeof(DeferredcasterManager);
 
-    downloadManager = new (currentPos) DownloadManager;
+//    downloadManager = new (currentPos) DownloadManager;
+    downloadManager = new DownloadManager;
     ghoul_assert(downloadManager, "No downloadManager");
     currentPos += sizeof(DownloadManager);
 
-    luaConsole = new (currentPos) LuaConsole;
+//    luaConsole = new (currentPos) LuaConsole;
+    luaConsole = new LuaConsole;
     ghoul_assert(luaConsole, "No luaConsole");
     currentPos += sizeof(LuaConsole);
 
-    memoryManager = new (currentPos) MemoryManager;
+//    memoryManager = new (currentPos) MemoryManager;
+    memoryManager = new MemoryManager;
     ghoul_assert(memoryManager, "No memoryManager");
     currentPos += sizeof(MemoryManager);
 
-    missionManager = new (currentPos) MissionManager;
+//    missionManager = new (currentPos) MissionManager;
+    missionManager = new MissionManager;
     ghoul_assert(missionManager, "No missionManager");
     currentPos += sizeof(MissionManager);
 
-    moduleEngine = new (currentPos) ModuleEngine;
+//    moduleEngine = new (currentPos) ModuleEngine;
+    moduleEngine = new ModuleEngine;
     ghoul_assert(moduleEngine, "No moduleEngine");
     currentPos += sizeof(ModuleEngine);
 
-    openSpaceEngine = new (currentPos) OpenSpaceEngine;
+    //    openSpaceEngine = new (currentPos) OpenSpaceEngine;
+    openSpaceEngine = new OpenSpaceEngine;
     ghoul_assert(openSpaceEngine, "No openSpaceEngine");
     currentPos += sizeof(OpenSpaceEngine);
 
-    parallelPeer = new (currentPos) ParallelPeer;
+//    parallelPeer = new (currentPos) ParallelPeer;
+    parallelPeer = new ParallelPeer;
     ghoul_assert(parallelPeer, "No parallelPeer");
     currentPos += sizeof(ParallelPeer);
 
-    raycasterManager = new (currentPos) RaycasterManager;
+//    raycasterManager = new (currentPos) RaycasterManager;
+    raycasterManager = new RaycasterManager;
     ghoul_assert(raycasterManager, "No raycasterManager");
     currentPos += sizeof(RaycasterManager);
 
-    renderEngine = new (currentPos) RenderEngine;
+//    renderEngine = new (currentPos) RenderEngine;
+    renderEngine = new RenderEngine;
     ghoul_assert(renderEngine, "No renderEngine");
     currentPos += sizeof(RenderEngine);
 
+//    screenSpaceRenderables =
+//        new (currentPos) std::vector<std::unique_ptr<ScreenSpaceRenderable>>;
     screenSpaceRenderables =
-        new (currentPos) std::vector<std::unique_ptr<ScreenSpaceRenderable>>;
+        new std::vector<std::unique_ptr<ScreenSpaceRenderable>>;
     ghoul_assert(screenSpaceRenderables, "No screenSpaceRenderables");
     currentPos += sizeof(std::vector<std::unique_ptr<ScreenSpaceRenderable>>);
 
-    syncEngine = new (currentPos) SyncEngine(4096);
+//    syncEngine = new (currentPos) SyncEngine(4096);
+    syncEngine = new SyncEngine(4096);
     ghoul_assert(syncEngine, "No syncEngine");
     currentPos += sizeof(SyncEngine);
 
-    timeManager = new (currentPos) TimeManager;
+//    timeManager = new (currentPos) TimeManager;
+    timeManager = new TimeManager;
     ghoul_assert(timeManager, "No timeManager");
     currentPos += sizeof(TimeManager);
 
-    versionChecker = new (currentPos) VersionChecker;
+//    versionChecker = new (currentPos) VersionChecker;
+    versionChecker = new VersionChecker;
     ghoul_assert(versionChecker, "No versionChecker");
     currentPos += sizeof(VersionChecker);
 
-    virtualPropertyManager = new (currentPos) VirtualPropertyManager;
+//    virtualPropertyManager = new (currentPos) VirtualPropertyManager;
+    virtualPropertyManager = new VirtualPropertyManager;
     ghoul_assert(virtualPropertyManager, "No virtualPropertyManager");
     currentPos += sizeof(VirtualPropertyManager);
 
-    windowDelegate = new (currentPos) WindowDelegate;
+//    windowDelegate = new (currentPos) WindowDelegate;
+    windowDelegate = new WindowDelegate;
     ghoul_assert(windowDelegate, "No windowDelegate");
     currentPos += sizeof(WindowDelegate);
 
-    configuration = new (currentPos) configuration::Configuration;
+//    configuration = new (currentPos) configuration::Configuration;
+    configuration = new configuration::Configuration;
     ghoul_assert(configuration, "No configuration");
     currentPos += sizeof(configuration::Configuration);
 
-    interactionMonitor = new (currentPos) interaction::InteractionMonitor;
+//    interactionMonitor = new (currentPos) interaction::InteractionMonitor;
+    interactionMonitor = new interaction::InteractionMonitor;
     ghoul_assert(interactionMonitor, "No interactionMonitor");
     currentPos += sizeof(interaction::InteractionMonitor);
 
-    joystickInputStates = new (currentPos) interaction::JoystickInputStates;
+//    joystickInputStates = new (currentPos) interaction::JoystickInputStates;
+    joystickInputStates = new interaction::JoystickInputStates;
     ghoul_assert(joystickInputStates, "No joystickInputStates");
     currentPos += sizeof(interaction::JoystickInputStates);
 
-    websocketInputStates = new (currentPos) interaction::WebsocketInputStates;
+//    websocketInputStates = new (currentPos) interaction::WebsocketInputStates;
+    websocketInputStates = new interaction::WebsocketInputStates;
     ghoul_assert(websocketInputStates, "No websocketInputStates");
     currentPos += sizeof(interaction::WebsocketInputStates);
 
-    keybindingManager = new (currentPos) interaction::KeybindingManager;
+//    keybindingManager = new (currentPos) interaction::KeybindingManager;
+    keybindingManager = new interaction::KeybindingManager;
     ghoul_assert(keybindingManager, "No keybindingManager");
     currentPos += sizeof(interaction::KeybindingManager);
 
-    navigationHandler = new (currentPos) interaction::NavigationHandler;
+//    navigationHandler = new (currentPos) interaction::NavigationHandler;
+    navigationHandler = new interaction::NavigationHandler;
     ghoul_assert(navigationHandler, "No navigationHandler");
     currentPos += sizeof(interaction::NavigationHandler);
 
-    sessionRecording = new (currentPos) interaction::SessionRecording(true);
+//    sessionRecording = new (currentPos) interaction::SessionRecording(true);
+    sessionRecording = new interaction::SessionRecording(true);
     ghoul_assert(sessionRecording, "No sessionRecording");
     currentPos += sizeof(interaction::SessionRecording);
 
-    shortcutManager = new (currentPos) interaction::ShortcutManager;
+//    shortcutManager = new (currentPos) interaction::ShortcutManager;
+    shortcutManager = new interaction::ShortcutManager;
     ghoul_assert(shortcutManager, "No shortcutManager");
     currentPos += sizeof(interaction::ShortcutManager);
 
-    rootPropertyOwner = new (currentPos) properties::PropertyOwner({ "" });
+//    rootPropertyOwner = new (currentPos) properties::PropertyOwner({ "" });
+    rootPropertyOwner = new properties::PropertyOwner({ "" });
     ghoul_assert(rootPropertyOwner, "No rootPropertyOwner");
     currentPos += sizeof(properties::PropertyOwner);
 
+//    screenSpaceRootPropertyOwner =
+//        new (currentPos) properties::PropertyOwner({ "ScreenSpace" });
     screenSpaceRootPropertyOwner =
-        new (currentPos) properties::PropertyOwner({ "ScreenSpace" });
+        new properties::PropertyOwner({ "ScreenSpace" });
     ghoul_assert(screenSpaceRootPropertyOwner, "No screenSpaceRootPropertyOwner");
     currentPos += sizeof(properties::PropertyOwner);
 
-    scriptEngine = new (currentPos) scripting::ScriptEngine;
+//    scriptEngine = new (currentPos) scripting::ScriptEngine;
+    scriptEngine = new scripting::ScriptEngine;
     ghoul_assert(scriptEngine, "No scriptEngine");
     currentPos += sizeof(scripting::ScriptEngine);
 
-    scriptScheduler = new (currentPos) scripting::ScriptScheduler;
+//    scriptScheduler = new (currentPos) scripting::ScriptScheduler;
+    scriptScheduler = new scripting::ScriptScheduler;
     ghoul_assert(scriptScheduler, "No scriptScheduler");
     currentPos += sizeof(scripting::ScriptScheduler);
 
-    profile = new (currentPos) Profile;
+//    profile = new (currentPos) Profile;
+    profile = new Profile;
     ghoul_assert(profile, "No profile");
     currentPos += sizeof(Profile);
 }
