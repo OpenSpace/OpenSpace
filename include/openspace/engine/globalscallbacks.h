@@ -31,62 +31,26 @@
 #include <functional>
 #include <vector>
 
-namespace openspace::global {
+namespace openspace::global::callback {
 
-namespace detail {
-
-std::vector<std::function<void()>>& gInitialize();
-std::vector<std::function<void()>>& gDeinitialize();
-
-std::vector<std::function<void()>>& gInitializeGL();
-std::vector<std::function<void()>>& gDeinitializeGL();
-
-std::vector<std::function<void()>>& gPreSync();
-std::vector<std::function<void()>>& gPostSyncPreDraw();
-std::vector<std::function<void()>>& gRender();
-std::vector<std::function<void()>>& gDraw2D();
-std::vector<std::function<void()>>& gPostDraw();
-
-std::vector<std::function<bool(Key, KeyModifier, KeyAction)>>& gKeyboard();
-std::vector<std::function<bool(unsigned int, KeyModifier)>>& gCharacter();
-
-std::vector<std::function<bool(MouseButton, MouseAction, KeyModifier)>>& gMouseButton();
-std::vector<std::function<void(double, double)>>& gMousePosition();
-std::vector<std::function<bool(double, double)>>& gMouseScrollWheel();
-
-std::vector<std::function<bool(TouchInput)>>& gTouchDetected();
-std::vector<std::function<bool(TouchInput)>>& gTouchUpdated();
-std::vector<std::function<void(TouchInput)>>& gTouchExit();
-
-} // namespace detail
-
-namespace callback {
-
-static std::vector<std::function<void()>>& initialize = detail::gInitialize();
-static std::vector<std::function<void()>>& deinitialize = detail::gDeinitialize();
-static std::vector<std::function<void()>>& initializeGL = detail::gInitializeGL();
-static std::vector<std::function<void()>>& deinitializeGL = detail::gDeinitializeGL();
-static std::vector<std::function<void()>>& preSync = detail::gPreSync();
-static std::vector<std::function<void()>>& postSyncPreDraw = detail::gPostSyncPreDraw();
-static std::vector<std::function<void()>>& render = detail::gRender();
-static std::vector<std::function<void()>>& draw2D = detail::gDraw2D();
-static std::vector<std::function<void()>>& postDraw = detail::gPostDraw();
-static std::vector<std::function<bool(Key, KeyModifier, KeyAction)>>& keyboard =
-    detail::gKeyboard();
-static std::vector<std::function<bool(unsigned int, KeyModifier)>>& character =
-    detail::gCharacter();
-static std::vector<std::function<bool(MouseButton, MouseAction, KeyModifier)>>&
-    mouseButton = detail::gMouseButton();
-static std::vector<std::function<void(double, double)>>& mousePosition =
-    detail::gMousePosition();
-static std::vector<std::function<bool(double, double)>>& mouseScrollWheel =
-    detail::gMouseScrollWheel();
-static std::vector<std::function<bool(TouchInput)>>& touchDetected =
-    detail::gTouchDetected();
-static std::vector<std::function<bool(TouchInput)>>& touchUpdated =
-    detail::gTouchUpdated();
-static std::vector<std::function<void(TouchInput)>>& touchExit =
-    detail::gTouchExit();
+inline std::vector<std::function<void()>>* initialize;
+inline std::vector<std::function<void()>>* deinitialize;
+inline std::vector<std::function<void()>>* initializeGL;
+inline std::vector<std::function<void()>>* deinitializeGL;
+inline std::vector<std::function<void()>>* preSync;
+inline std::vector<std::function<void()>>* postSyncPreDraw;
+inline std::vector<std::function<void()>>* render;
+inline std::vector<std::function<void()>>* draw2D;
+inline std::vector<std::function<void()>>* postDraw;
+inline std::vector<std::function<bool(Key, KeyModifier, KeyAction)>>* keyboard;
+inline std::vector<std::function<bool(unsigned int, KeyModifier)>>* character;
+inline std::vector<std::function<bool(MouseButton, MouseAction, KeyModifier)>>*
+    mouseButton;
+inline std::vector<std::function<void(double, double)>>* mousePosition;
+inline std::vector<std::function<bool(double, double)>>* mouseScrollWheel;
+inline std::vector<std::function<bool(TouchInput)>>* touchDetected;
+inline std::vector<std::function<bool(TouchInput)>>* touchUpdated;
+inline std::vector<std::function<void(TouchInput)>>* touchExit;
 
 /**
  * If the framerate becomes slow, Chromium Embedded Framework (used in Web Browser Module)
@@ -99,7 +63,8 @@ static std::vector<std::function<void(TouchInput)>>& touchExit =
  */
 extern void (*webBrowserPerformanceHotfix)();
 
-} // namespace callback
+void create();
+void destroy();
 
 } // namespace openspace::global
 

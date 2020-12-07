@@ -206,11 +206,11 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
     _visible = configuration.hasValue<bool>(VisibleInfo.identifier) &&
                configuration.value<bool>(VisibleInfo.identifier);
 
-    global::callback::initializeGL.emplace_back([this]() {
+    global::callback::initializeGL->emplace_back([this]() {
         startOrStopGui();
     });
 
-    global::callback::draw2D.emplace_back([this](){
+    global::callback::draw2D->emplace_back([this](){
         ZoneScopedN("CefWebGuiModule")
 
         const bool isGuiWindow =
@@ -233,7 +233,7 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
         }
     });
 
-    global::callback::deinitializeGL.emplace_back([this]() {
+    global::callback::deinitializeGL->emplace_back([this]() {
         ZoneScopedN("CefWebGuiModule")
 
         if (_endpointCallback != -1) {

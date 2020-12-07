@@ -3,7 +3,7 @@ local satelliteHelper = asset.require('util/tle_helper')
 local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 
-local url = "https://celestrak.com/satcat/tle.php?CATNR=25994"
+local url = "http://celestrak.com/satcat/tle.php?CATNR=25994"
 local identifier = "Terra"
 local filename = "Terra.txt"
 local nodes = {}
