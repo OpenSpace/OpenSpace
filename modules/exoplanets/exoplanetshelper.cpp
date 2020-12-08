@@ -42,7 +42,7 @@ namespace {
 
 namespace openspace::exoplanets {
 
-bool hasSufficientData(const Exoplanet& p) {
+bool hasSufficientData(const ExoplanetDataEntry& p) {
     bool invalidPos = std::isnan(p.positionX)
         || std::isnan(p.positionY)
         || std::isnan(p.positionZ);

@@ -153,7 +153,7 @@ void ExoplanetsDataPreparationTask::perform(
         return result;
     };
 
-    Exoplanet p;
+    ExoplanetDataEntry p;
     std::string data;
     int exoplanetCount = 0;
     while (getline(inputDataFile, planetRow)) {
@@ -310,7 +310,7 @@ void ExoplanetsDataPreparationTask::perform(
         std::string planetName = starName + " " + component;
         lutFile << planetName << "," << pos << std::endl;
 
-        binFile.write(reinterpret_cast<char*>(&p), sizeof(Exoplanet));
+        binFile.write(reinterpret_cast<char*>(&p), sizeof(ExoplanetDataEntry));
     }
 
     progressCallback(1.f);

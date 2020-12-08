@@ -56,6 +56,72 @@ constexpr const char* NoDataTextureFile =
 constexpr const char* DiscTextureFile =
     "${SYNC}/http/exoplanets_textures/1/disc_texture.png";
 
+ExoplanetSystem findExoplanetSystemInData(std::string_view starName) {
+    ExoplanetSystem system;
+
+    std::ifstream data(absPath(ExoplanetsDataPath), std::ios::in | std::ios::binary);
+    if (!data.good()) {
+        LERROR(fmt::format(
+            "Failed to open exoplanets data file: '{}'", absPath(ExoplanetsDataPath)
+        ));
+        return ExoplanetSystem();
+    }
+
+    std::ifstream lut(absPath(LookUpTablePath));
+    if (!lut.good()) {
+        LERROR(fmt::format(
+            "Failed to open exoplanets look-up table: '{}'", absPath(LookUpTablePath)
+        ));
+        return ExoplanetSystem();
+    }
+
+    // 1. search lut for the starname and return the corresponding location
+    // 2. go to that location in the data file
+    // 3. read sizeof(exoplanet) bytes into an exoplanet object.
+    ExoplanetDataEntry p;
+    std::string line;
+    while (getline(lut, line)) {
+        std::istringstream ss(line);
+        std::string name;
+        getline(ss, name, ',');
+
+        if (name.compare(0, name.length() - 2, starName) == 0) {
+            std::string location_s;
+            getline(ss, location_s);
+            long location = std::stol(location_s.c_str());
+
+            data.seekg(location);
+            data.read(reinterpret_cast<char*>(&p), sizeof(ExoplanetDataEntry));
+
+            sanitizeNameString(name);
+
+            if (!hasSufficientData(p)) {
+                LWARNING(fmt::format("Insufficient data for exoplanet: '{}'", name));
+                continue;
+            }
+
+            system.planetNames.push_back(name);
+            system.planetsData.push_back(p);
+
+            // Star data - Should not vary between planets, but one data entry might
+            // lack data for the host star while another does not. So for every planet,
+            // update star data if needed
+            if (p.positionX != system.starData.position.x) {
+                system.starData.position = { p.positionX, p.positionY, p.positionZ };
+            }
+            if (system.starData.bvColorIndex != p.bmv) {
+                system.starData.bvColorIndex = p.bmv;
+            }
+            if (system.starData.radius != p.rStar) {
+                system.starData.radius = p.rStar;
+            }
+        }
+    }
+
+    system.starName = starName;
+    return std::move(system);
+}
+
 void createExoplanetSystem(const std::string& starName) {
     const std::string starIdentifier = createIdentifier(starName);
 
@@ -73,97 +139,43 @@ void createExoplanetSystem(const std::string& starName) {
         return;
     }
 
-    std::ifstream data(absPath(ExoplanetsDataPath), std::ios::in | std::ios::binary);
+    ExoplanetSystem system = findExoplanetSystemInData(starName);
+    if (system.planetNames.empty()) {
+        LERROR(fmt::format("Exoplanet system '{}' could not be found", starName));
+        return;
+    }
 
-    if (!data.good()) {
+    const glm::dvec3 starPosInParsec = static_cast<glm::dvec3>(system.starData.position);
+
+    bool positionIsInvalid = glm::any(glm::isnan(starPosInParsec));
+    if (positionIsInvalid) {
         LERROR(fmt::format(
-            "Failed to open exoplanets data file: '{}'", absPath(ExoplanetsDataPath)
+            "Insufficient data available for exoplanet system: '{}' -"
+            "Could not determine star position", starName
         ));
         return;
     }
 
-    std::ifstream lut(absPath(LookUpTablePath));
-    if (!lut.good()) {
-        LERROR(fmt::format(
-            "Failed to open exoplanets look-up table: '{}'", absPath(LookUpTablePath)
-        ));
-        return;
-    }
-
-    // 1. search lut for the starname and return the corresponding location
-    // 2. go to that location in the data file
-    // 3. read sizeof(exoplanet) bytes into an exoplanet object.
-    Exoplanet p;
-    std::string line;
-    bool found = false;
-
-    std::vector<Exoplanet> planetSystem;
-    std::vector<std::string> planetNames;
-
-    while (getline(lut, line)) {
-        std::istringstream ss(line);
-        std::string name;
-        getline(ss, name, ',');
-
-        if (name.compare(0, name.length() - 2, starName) == 0) {
-            std::string location_s;
-            getline(ss, location_s);
-            long location = std::stol(location_s.c_str());
-
-            data.seekg(location);
-            data.read(reinterpret_cast<char*>(&p), sizeof(Exoplanet));
-
-            sanitizeNameString(name);
-            planetNames.push_back(name);
-            planetSystem.push_back(p);
-            found = true;
-
-            if (!hasSufficientData(p)) {
-                LERROR(fmt::format(
-                    "Insufficient data available for exoplanet system: '{}'",
-                    starName
-                ));
-                return;
-            }
-        }
-    }
-
-    data.close();
-    lut.close();
-
-    if (!found) {
-        LERROR(fmt::format("No star with the provided name was found: '{}'", starName));
-        return;
-    }
-
-    const glm::dvec3 starPosition = glm::dvec3(
-        p.positionX * distanceconstants::Parsec,
-        p.positionY * distanceconstants::Parsec,
-        p.positionZ * distanceconstants::Parsec
-    );
-
-    const glm::dmat3 exoplanetSystemRotation = computeSystemRotation(starPosition);
-
+    const glm::dvec3 starPos = starPosInParsec * distanceconstants::Parsec;
+    const glm::dmat3 exoplanetSystemRotation = computeSystemRotation(starPos);
     const float solarRadius = static_cast<float>(distanceconstants::SolarRadius);
 
     // Star
     float radiusInMeter = solarRadius;
-    if (!std::isnan(p.rStar)) {
-        radiusInMeter *= p.rStar;
+    if (!std::isnan(system.starData.radius)) {
+        radiusInMeter *= system.starData.radius;
     }
 
     std::string colorLayers;
-    if (!std::isnan(p.bmv)) {
-        // @TODO (emmbr, 2020-10-12) should also check the bv value for the siblings.
-        // The data on the planets is derived from different sources, so while this
-        // planet has a nan value, another might not
-        const glm::vec3 color = starColor(p.bmv);
+    const float bv = system.starData.bvColorIndex;
 
+    if (!std::isnan(bv)) {
+        const glm::vec3 color = starColor(bv);
         colorLayers =
             "{"
                 "Identifier = 'StarColor',"
                 "Type = 'SolidColor',"
-                "Color = " + fmt::format("{}", color) + ","
+                "Color = " + ghoul::to_string(color) + ","
                 "BlendMode = 'Normal',"
                 "Enabled = true"
             "},"
@@ -207,7 +219,7 @@ void createExoplanetSystem(const std::string& starName) {
             "},"
             "Translation = {"
                 "Type = 'StaticTranslation',"
-                "Position = " + ghoul::to_string(starPosition) + ""
+                "Position = " + ghoul::to_string(starPos) + ""
             "}"
         "},"
         "Tag = {'exoplanet_system'},"
@@ -223,9 +235,9 @@ void createExoplanetSystem(const std::string& starName) {
     );
 
     // Planets
-    for (size_t i = 0; i < planetSystem.size(); i++) {
-        Exoplanet planet = planetSystem[i];
-        const std::string planetName = planetNames[i];
+    for (size_t i = 0; i < system.planetNames.size(); i++) {
+        ExoplanetDataEntry planet = system.planetsData[i];
+        const std::string planetName = system.planetNames[i];
 
         if (std::isnan(planet.ecc)) {
             planet.ecc = 0.f;
@@ -253,13 +265,12 @@ void createExoplanetSystem(const std::string& starName) {
             sEpoch = "2009-05-19T07:11:34.080";
         }
 
-        float planetRadius;
-        std::string enabled;
-
         const float astronomicalUnit =
             static_cast<float>(distanceconstants::AstronomicalUnit);
         const float jupiterRadius = static_cast<float>(distanceconstants::JupiterRadius);
 
+        float planetRadius;
+        std::string enabled;
         if (std::isnan(planet.r)) {
             if (std::isnan(planet.rStar)) {
                 planetRadius = planet.a * 0.001f * astronomicalUnit;
@@ -461,7 +472,7 @@ std::vector<std::string> hostStarsWithSufficientData() {
     lookupTableFile.seekg(0);
     names.reserve(nExoplanets);
 
-    Exoplanet p;
+    ExoplanetDataEntry p;
     while (getline(lookupTableFile, line)) {
         std::stringstream ss(line);
         std::string name;
@@ -476,7 +487,7 @@ std::vector<std::string> hostStarsWithSufficientData() {
         long location = std::stol(location_s.c_str());
 
         data.seekg(location);
-        data.read(reinterpret_cast<char*>(&p), sizeof(Exoplanet));
+        data.read(reinterpret_cast<char*>(&p), sizeof(ExoplanetDataEntry));
 
         if (hasSufficientData(p)) {
             names.push_back(name);
