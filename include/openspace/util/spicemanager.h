@@ -236,7 +236,7 @@ public:
      * \throw SpiceException If \p target does not name a valid SPICE object
      * \pre \p target must not be empty.
      */
-    std::vector< std::pair<double, double>> getSpkCoverage(const std::string& target) const;
+    std::vector<std::pair<double, double>> spkCoverage(const std::string& target) const;
 
     /**
      * Returns whether a given \p frame has a CK kernel covering it at the designated
@@ -264,7 +264,7 @@ public:
     * \throw SpiceException If \p target does not name a valid SPICE object
     * \pre \p target must not be empty.
     */
-    std::vector< std::pair<double, double>> getCkCoverage(const std::string& target) const;
+    std::vector<std::pair<double, double>> ckCoverage(const std::string& target) const;
 
     /**
    * Returns a list of loaded spice frames,
@@ -273,7 +273,7 @@ public:
    * \return \c list of Spice frames with ID(int) and Name(string).
    *
    */
-    std::vector< std::pair<int, std::string>> getSpiceBodies(bool builtInFrames) const;
+    std::vector<std::pair<int, std::string>> spiceBodies(bool builtInFrames) const;
 
     /**
      * Determines whether values exist for some \p item for any body, identified by its

@@ -342,7 +342,9 @@ bool SpiceManager::hasSpkCoverage(const std::string& target, double et) const {
     return false;
 }
 
-std::vector< std::pair<double, double>> SpiceManager::getSpkCoverage(const std::string& target) const {
+std::vector<std::pair<double, double>> SpiceManager::spkCoverage(
+                                                          const std::string& target) const
+{
     ghoul_assert(!target.empty(), "Empty target");
 
     const int id = naifId(target);
@@ -351,8 +353,8 @@ std::vector< std::pair<double, double>> SpiceManager::getSpkCoverage(const std::
         return it->second;
     }
     else {
-        std::vector< std::pair<double, double>> emptyList;
-        return  emptyList;
+        std::vector<std::pair<double, double>> emptyList;
+        return emptyList;
     }
 }
 
@@ -373,7 +375,9 @@ bool SpiceManager::hasCkCoverage(const std::string& frame, double et) const {
     return false;
 }
 
-std::vector< std::pair<double, double>> SpiceManager::getCkCoverage(const std::string& target) const {
+std::vector<std::pair<double, double>> SpiceManager::ckCoverage(
+                                                          const std::string& target) const
+{
     ghoul_assert(!target.empty(), "Empty target");
 
     int id = naifId(target);
@@ -388,33 +392,34 @@ std::vector< std::pair<double, double>> SpiceManager::getCkCoverage(const std::s
             return it->second;
         }
         else {
-            std::vector< std::pair<double, double>> emptyList;
-            return  emptyList;
+            std::vector<std::pair<double, double>> emptyList;
+            return emptyList;
         }
     }
 }
 
-std::vector< std::pair<int, std::string>> SpiceManager::getSpiceBodies(bool builtInFrames) const {
-    std::vector< std::pair<int, std::string>> bodies;
+std::vector<std::pair<int, std::string>> SpiceManager::spiceBodies(
+                                                                 bool builtInFrames) const
+{
+    std::vector<std::pair<int, std::string>> bodies;
 
-#define FRNMLN          33
-#define LNSIZE          81
+    constexpr const int Frnmln = 33;
+    constexpr const int Lnsize = 81;
     SPICEINT_CELL(idset, 8192);
 
-    SpiceChar               frname[FRNMLN];
-    SpiceChar               outlin[LNSIZE];
+    SpiceChar frname[Frnmln];
+    SpiceChar outlin[Lnsize];
 
-    SpiceInt                i;
-    SpiceInt                j;
-
-    for (i = 1; i <= 6; i++) {
+    for (SpiceInt i = 1; i <= 6; i++) {
         if (i < 6) {
             if (builtInFrames) {
                 bltfrm_c(i, &idset);
-            } else {
+            }
+            else {
                 kplfrm_c(i, &idset);
             }
-        } else {
+        }
+        else {
             if (builtInFrames) {
                 bltfrm_c(SPICE_FRMTYP_ALL, &idset);
             }
@@ -423,9 +428,13 @@ std::vector< std::pair<int, std::string>> SpiceManager::getSpiceBodies(bool buil
             }
         }
 
-        for (j = 0; j < card_c(&idset); j++) {
-            frmnam_c(((SpiceInt*)idset.data)[j], FRNMLN, frname);
-            bodies.push_back(std::make_pair(((long)((SpiceInt*)idset.data)[j]),frname));
+        for (SpiceInt j = 0; j < card_c(&idset); j++) {
+            frmnam_c(
+                (reinterpret_cast<SpiceInt*>(idset.data))[j],
+                Frnmln,
+                frname
+            );
+            bodies.push_back(std::make_pair(((long)((SpiceInt*)idset.data)[j]), frname));
         }
     }
     return bodies;
@@ -1326,21 +1335,21 @@ scripting::LuaLibrary SpiceManager::luaLibrary() {
             },
             {
                 "getSpkCoverage",
-                &luascriptfunctions::getSpkCoverage,
+                &luascriptfunctions::spkCoverage,
                 {},
                 "{string [, printValues]}",
                 "Returns a list of SPK coverage intervals for the target."
             },
             {
                 "getCkCoverage",
-                & luascriptfunctions::getCkCoverage,
+                & luascriptfunctions::ckCoverage,
                 {},
                 "{string [, printValues]}",
                 "Returns a list of CK coverage intervals for the target."
             },
             {
                 "getSpiceBodies",
-                &luascriptfunctions::getSpiceBodies,
+                &luascriptfunctions::spiceBodies,
                 {},
                 "{builtInFrames [, printValues]}",
                 "Returns a list of Spice Bodies loaded into the system. Returns SPICE built in frames if builtInFrames"

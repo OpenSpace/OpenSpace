@@ -106,25 +106,20 @@ int unloadKernel(lua_State* L) {
 }
 
 /**
- * getSpiceBodies():
+ * spiceBodies():
  * Returns the list of bodies loaded into the spicemanager
  */
-int getSpiceBodies(lua_State* L) {
-
-
-    ghoul::lua::checkArgumentsAndThrow(L, {1,2}, "lua::getSpiceBodies");
+int spiceBodies(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, { 1,2 }, "lua::getSpiceBodies");
     bool isBool = (lua_isboolean(L, 1) == 1);
-    bool buildInBodies = false;
-    if (isBool) {
-        buildInBodies = ghoul::lua::value<bool>(L, 1);
-    }
+    const bool buildInBodies = isBool ? ghoul::lua::value<bool>(L, 1) : false;
+
     isBool = (lua_isboolean(L, 2) == 1);
-    bool printValues = false;
-    if (isBool) {
-        printValues = ghoul::lua::value<bool>(L, 2);
-    }
+    bool printValues = isBool ? ghoul::lua::value<bool>(L, 2) : false;
     lua_settop(L, 0);
-    std::vector< std::pair<int, std::string>> bodies = SpiceManager::ref().getSpiceBodies(buildInBodies);
+    std::vector<std::pair<int, std::string>> bodies = SpiceManager::ref().spiceBodies(
+        buildInBodies
+    );
 
     lua_newtable(L);
     int number = 1;
@@ -138,10 +133,7 @@ int getSpiceBodies(lua_State* L) {
         ++number;
 
         if (printValues) {
-            LINFO(fmt::format(
-                "Body id{} and name: {}",
-                body.first, body.second
-            ));
+            LINFO(fmt::format("Body id '{}' and name: {}", body.first, body.second));
         }
     }
 
@@ -149,7 +141,10 @@ int getSpiceBodies(lua_State* L) {
 }
 
 //internal function for getSpk and getCk coverages
-void buildLuaCoverageStack(lua_State* L, std::vector< std::pair<double, double>> coverage, bool printValues) {
+void buildLuaCoverageStack(lua_State* L,
+                           const std::vector<std::pair<double, double>>& coverage,
+                           bool printValues)
+{
     lua_settop(L, 0);
     lua_newtable(L);
     int number = 1;
@@ -160,7 +155,8 @@ void buildLuaCoverageStack(lua_State* L, std::vector< std::pair<double, double>>
         if (printValues) {
             LINFO(fmt::format(
                 "Coverage start {} and end: {}",
-                SpiceManager::ref().dateFromEphemerisTime(window.first), SpiceManager::ref().dateFromEphemerisTime(window.second)
+                SpiceManager::ref().dateFromEphemerisTime(window.first),
+                SpiceManager::ref().dateFromEphemerisTime(window.second)
             ));
         }
 
@@ -178,11 +174,10 @@ void buildLuaCoverageStack(lua_State* L, std::vector< std::pair<double, double>>
  * getSpkCoverage({string, bool(optional)}):
  * Returns the spk coverage for given body
  */
-int getSpkCoverage(lua_State* L) {
-
+int spkCoverage(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, { 1, 2 }, "lua::getSpkCoverage");
-    bool isString = (lua_isstring(L, 1) == 1);
-    bool isBool = (lua_isboolean(L, 2) == 1);
+    const bool isString = (lua_isstring(L, 1) == 1);
+    const bool isBool = (lua_isboolean(L, 2) == 1);
 
     if (!isString) {
         LERRORC(
@@ -199,12 +194,8 @@ int getSpkCoverage(lua_State* L) {
 
     std::string argument = ghoul::lua::value<std::string>(L, 1);
 
-    bool printValues = false;
-    if (isBool) {
-        printValues = ghoul::lua::value<bool>(L, 2);
-    }
-
-    buildLuaCoverageStack(L, SpiceManager::ref().getSpkCoverage(argument), printValues);
+    bool printValues = isBool ? ghoul::lua::value<bool>(L, 2) : false;
+    buildLuaCoverageStack(L, SpiceManager::ref().spkCoverage(argument), printValues);
 
     return 1;
 }
@@ -213,12 +204,11 @@ int getSpkCoverage(lua_State* L) {
  * getCkCoverage({string, bool(optional)}):
  * Returns the spk coverage for given body
  */
-int getCkCoverage(lua_State* L) {
-
+int ckCoverage(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, { 1, 2 }, "lua::getCkCoverage");
 
-    bool isString = (lua_isstring(L, 1) == 1);
-    bool isBool = (lua_isboolean(L, 2) == 1);
+    const bool isString = (lua_isstring(L, 1) == 1);
+    const bool isBool = (lua_isboolean(L, 2) == 1);
 
     if (!isString) {
         LERRORC(
@@ -234,12 +224,8 @@ int getCkCoverage(lua_State* L) {
     }
 
     std::string argument = ghoul::lua::value<std::string>(L, 1);
-    bool printValues = false;
-    if (isBool) {
-        printValues = ghoul::lua::value<bool>(L, 2);
-    }
-
-    buildLuaCoverageStack(L, SpiceManager::ref().getCkCoverage(argument), printValues);
+    bool printValues = isBool ? ghoul::lua::value<bool>(L, 2) : false;
+    buildLuaCoverageStack(L, SpiceManager::ref().ckCoverage(argument), printValues);
 
     return 1;
 }
