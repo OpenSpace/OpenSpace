@@ -34,22 +34,6 @@
 #include <ghoul/misc/profiling.h>
 
 namespace {
-    constexpr const char* KeyFontMono = "Mono";
-    constexpr const float DefaultFontSize = 10.f;
-
-    constexpr openspace::properties::Property::PropertyInfo FontNameInfo = {
-        "FontName",
-        "Font Name",
-        "This value is the name of the font that is used. It can either refer to an "
-        "internal name registered previously, or it can refer to a path that is used."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
-        "FontSize",
-        "Font Size",
-        "This value determines the size of the font that is used to render the date."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo FrametimeInfo = {
         "FrametimeType",
         "Type of the frame time display",
@@ -166,18 +150,6 @@ documentation::Documentation DashboardItemFramerate::Documentation() {
                 Optional::No
             },
             {
-                FontNameInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                FontNameInfo.description
-            },
-            {
-                FontSizeInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                FontSizeInfo.description
-            },
-            {
                 FrametimeInfo.identifier,
                 new StringInListVerifier({ ValueDtAvg, ValueDtExtremes,
                     ValueDtStandardDeviation, ValueDtCov, ValueFps, ValueFpsAvg, ValueNone
@@ -190,9 +162,7 @@ documentation::Documentation DashboardItemFramerate::Documentation() {
 }
 
 DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictionary)
-    : DashboardItem(dictionary)
-    , _fontName(FontNameInfo, KeyFontMono)
-    , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
+    : DashboardTextItem(dictionary)
     , _frametimeType(FrametimeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _clearCache(ClearCacheInfo)
 {
@@ -201,24 +171,6 @@ DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictiona
         dictionary,
         "DashboardItemFramerate"
     );
-
-    if (dictionary.hasKey(FontNameInfo.identifier)) {
-        _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
-    }
-    _fontName.onChange([this]() {
-        _font = global::fontManager->font(_fontName, _fontSize);
-    });
-    addProperty(_fontName);
-
-    if (dictionary.hasKey(FontSizeInfo.identifier)) {
-        _fontSize = static_cast<float>(
-            dictionary.value<double>(FontSizeInfo.identifier)
-        );
-    }
-    _fontSize.onChange([this](){
-        _font = global::fontManager->font(_fontName, _fontSize);
-    });
-    addProperty(_fontSize);
 
     _frametimeType.addOptions({
         { static_cast<int>(FrametimeType::DtTimeAvg), ValueDtAvg },
@@ -271,8 +223,6 @@ DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictiona
         _shouldClearCache = true;
     });
     addProperty(_clearCache);
-
-    _font = global::fontManager->font(_fontName, _fontSize);
 
     _buffer.resize(128);
 }

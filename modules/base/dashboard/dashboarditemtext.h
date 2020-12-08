@@ -28,15 +28,12 @@
 #include <openspace/rendering/dashboarditem.h>
 
 #include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-
-namespace ghoul::fontrendering { class Font; }
 
 namespace openspace {
 
 namespace documentation { struct Documentation; }
 
-class DashboardItemText : public DashboardItem {
+class DashboardItemText : public DashboardTextItem {
 public:
     DashboardItemText(const ghoul::Dictionary& dictionary);
     virtual ~DashboardItemText() = default;
@@ -48,11 +45,7 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    properties::StringProperty _fontName;
-    properties::FloatProperty _fontSize;
     properties::StringProperty _text;
-    
-    std::shared_ptr<ghoul::fontrendering::Font> _font;
 };
 
 } // namespace openspace

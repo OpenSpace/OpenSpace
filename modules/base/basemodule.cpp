@@ -195,7 +195,6 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         DashboardItemDistance::Documentation(),
         DashboardItemFramerate::Documentation(),
         DashboardItemMission::Documentation(),
-        DashboardItemParallelConnection::Documentation(),
         DashboardItemSimulationIncrement::Documentation(),
         DashboardItemSpacing::Documentation(),
         DashboardItemVelocity::Documentation(),

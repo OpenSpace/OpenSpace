@@ -28,12 +28,8 @@
 #include <openspace/rendering/dashboarditem.h>
 
 #include <openspace/properties/optionproperty.h>
-#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
 #include <utility>
-
-namespace ghoul::fontrendering { class Font; }
 
 namespace openspace {
 
@@ -41,7 +37,7 @@ class SceneGraphNode;
 
 namespace documentation { struct Documentation; }
 
-class DashboardItemVelocity : public DashboardItem {
+class DashboardItemVelocity : public DashboardTextItem {
 public:
     DashboardItemVelocity(const ghoul::Dictionary& dictionary);
     virtual ~DashboardItemVelocity() = default;
@@ -53,14 +49,10 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    properties::StringProperty _fontName;
-    properties::FloatProperty _fontSize;
     properties::BoolProperty _doSimplification;
     properties::OptionProperty _requestedUnit;
 
     glm::dvec3 _prevPosition = glm::dvec3(0.0);
-
-    std::shared_ptr<ghoul::fontrendering::Font> _font;
 };
 
 } // namespace openspace

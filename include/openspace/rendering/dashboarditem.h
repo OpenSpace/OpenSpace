@@ -28,9 +28,12 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/stringproperty.h>
 #include <ghoul/glm.h>
 
 namespace ghoul { class Dictionary; }
+namespace ghoul::fontrendering { class Font; }
 
 namespace openspace {
 
@@ -53,6 +56,22 @@ public:
 
 protected:
     properties::BoolProperty _isEnabled;
+};
+
+
+
+class DashboardTextItem : public DashboardItem {
+public:
+    static documentation::Documentation Documentation();
+
+    DashboardTextItem(const ghoul::Dictionary& dictionary, float fontSize = 10.f,
+        const std::string& fontName = "Mono");
+
+protected:
+    properties::StringProperty _fontName;
+    properties::FloatProperty _fontSize;
+
+    std::shared_ptr<ghoul::fontrendering::Font> _font;
 };
 
 } // openspace

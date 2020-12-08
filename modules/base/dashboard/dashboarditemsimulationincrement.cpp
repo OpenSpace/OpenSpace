@@ -36,22 +36,6 @@
 #include <ghoul/misc/profiling.h>
 
 namespace {
-    constexpr const char* KeyFontMono = "Mono";
-    constexpr const float DefaultFontSize = 10.f;
-
-    constexpr openspace::properties::Property::PropertyInfo FontNameInfo = {
-        "FontName",
-        "Font Name",
-        "This value is the name of the font that is used. It can either refer to an "
-        "internal name registered previously, or it can refer to a path that is used."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
-        "FontSize",
-        "Font Size",
-        "This value determines the size of the font that is used to render the date."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo SimplificationInfo = {
         "Simplification",
         "Time Simplification",
@@ -113,18 +97,6 @@ documentation::Documentation DashboardItemSimulationIncrement::Documentation() {
                 Optional::No
             },
             {
-                FontNameInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                FontNameInfo.description
-            },
-            {
-                FontSizeInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                FontSizeInfo.description
-            },
-            {
                 SimplificationInfo.identifier,
                 new BoolVerifier,
                 Optional::Yes,
@@ -154,9 +126,7 @@ documentation::Documentation DashboardItemSimulationIncrement::Documentation() {
 
 DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
                                                       const ghoul::Dictionary& dictionary)
-    : DashboardItem(dictionary)
-    , _fontName(FontNameInfo, KeyFontMono)
-    , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
+    : DashboardTextItem(dictionary)
     , _doSimplification(SimplificationInfo, true)
     , _requestedUnit(RequestedUnitInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _transitionFormat(
@@ -170,22 +140,6 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
         dictionary,
         "DashboardItemSimulationIncrement"
     );
-
-    if (dictionary.hasKey(FontNameInfo.identifier)) {
-        _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
-    }
-    _fontName.onChange([this](){
-        _font = global::fontManager->font(_fontName, _fontSize);
-    });
-    addProperty(_fontName);
-
-    if (dictionary.hasKey(FontSizeInfo.identifier)) {
-        _fontSize = static_cast<float>(dictionary.value<double>(FontSizeInfo.identifier));
-    }
-    _fontSize.onChange([this](){
-        _font = global::fontManager->font(_fontName, _fontSize);
-    });
-    addProperty(_fontSize);
 
     if (dictionary.hasKey(SimplificationInfo.identifier)) {
         _doSimplification = dictionary.value<bool>(SimplificationInfo.identifier);
@@ -222,9 +176,6 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
         _regularFormat = dictionary.value<std::string>(RegularFormatInfo.identifier);
     }
     addProperty(_regularFormat);
-
-
-    _font = global::fontManager->font(_fontName, _fontSize);
 }
 
 void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {

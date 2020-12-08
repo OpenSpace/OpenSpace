@@ -30,15 +30,12 @@
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-
-namespace ghoul::fontrendering { class Font; }
 
 namespace openspace {
 
 namespace documentation { struct Documentation; }
 
-class DashboardItemSimulationIncrement : public DashboardItem {
+class DashboardItemSimulationIncrement : public DashboardTextItem {
 public:
     DashboardItemSimulationIncrement(const ghoul::Dictionary& dictionary);
     virtual ~DashboardItemSimulationIncrement() = default;
@@ -49,15 +46,11 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    properties::StringProperty _fontName;
-    properties::FloatProperty _fontSize;
     properties::BoolProperty _doSimplification;
     properties::OptionProperty _requestedUnit;
 
     properties::StringProperty _transitionFormat;
     properties::StringProperty _regularFormat;
-
-    std::shared_ptr<ghoul::fontrendering::Font> _font;
 };
 
 } // namespace openspace

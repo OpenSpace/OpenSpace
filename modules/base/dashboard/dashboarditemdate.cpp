@@ -36,22 +36,6 @@
 #include <ghoul/misc/profiling.h>
 
 namespace {
-    constexpr const char* KeyFontMono = "Mono";
-    constexpr const float DefaultFontSize = 15.f;
-
-    constexpr openspace::properties::Property::PropertyInfo FontNameInfo = {
-        "FontName",
-        "Font Name",
-        "This value is the name of the font that is used. It can either refer to an "
-        "internal name registered previously, or it can refer to a path that is used."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
-        "FontSize",
-        "Font Size",
-        "This value determines the size of the font that is used to render the date."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo FormatStringInfo = {
         "FormatString",
         "Format String",
@@ -83,18 +67,6 @@ documentation::Documentation DashboardItemDate::Documentation() {
                 Optional::No
             },
             {
-                FontNameInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                FontNameInfo.description
-            },
-            {
-                FontSizeInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                FontSizeInfo.description
-            },
-            {
                 FormatStringInfo.identifier,
                 new StringVerifier,
                 Optional::Yes,
@@ -111,9 +83,7 @@ documentation::Documentation DashboardItemDate::Documentation() {
 }
 
 DashboardItemDate::DashboardItemDate(const ghoul::Dictionary& dictionary)
-    : DashboardItem(dictionary)
-    , _fontName(FontNameInfo, KeyFontMono)
-    , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
+    : DashboardTextItem(dictionary, 15.f)
     , _formatString(FormatStringInfo, "Date: {} UTC")
     , _timeFormat(TimeFormatInfo, "YYYY MON DDTHR:MN:SC.### ::RND")
 {
@@ -123,22 +93,6 @@ DashboardItemDate::DashboardItemDate(const ghoul::Dictionary& dictionary)
         "DashboardItemDate"
     );
 
-    if (dictionary.hasKey(FontNameInfo.identifier)) {
-        _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
-    }
-    _fontName.onChange([this](){
-        _font = global::fontManager->font(_fontName, _fontSize);
-    });
-    addProperty(_fontName);
-
-    if (dictionary.hasKey(FontSizeInfo.identifier)) {
-        _fontSize = static_cast<float>(dictionary.value<double>(FontSizeInfo.identifier));
-    }
-    _fontSize.onChange([this](){
-        _font = global::fontManager->font(_fontName, _fontSize);
-    });
-    addProperty(_fontSize);
-    
     if (dictionary.hasKey(FormatStringInfo.identifier)) {
         _formatString = dictionary.value<std::string>(FormatStringInfo.identifier);
     }
@@ -148,8 +102,6 @@ DashboardItemDate::DashboardItemDate(const ghoul::Dictionary& dictionary)
         _timeFormat = dictionary.value<std::string>(TimeFormatInfo.identifier);
     }
     addProperty(_timeFormat);
-
-    _font = global::fontManager->font(_fontName, _fontSize);
 }
 
 void DashboardItemDate::render(glm::vec2& penPosition) {

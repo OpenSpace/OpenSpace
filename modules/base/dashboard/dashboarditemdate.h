@@ -28,15 +28,12 @@
 #include <openspace/rendering/dashboarditem.h>
 
 #include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-
-namespace ghoul::fontrendering { class Font; }
 
 namespace openspace {
 
 namespace documentation { struct Documentation; }
 
-class DashboardItemDate : public DashboardItem {
+class DashboardItemDate : public DashboardTextItem {
 public:
     DashboardItemDate(const ghoul::Dictionary& dictionary);
     ~DashboardItemDate() = default;
@@ -48,12 +45,8 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    properties::StringProperty _fontName;
-    properties::FloatProperty _fontSize;
     properties::StringProperty _formatString;
     properties::StringProperty _timeFormat;
-
-    std::shared_ptr<ghoul::fontrendering::Font> _font;
 };
 
 } // namespace openspace
