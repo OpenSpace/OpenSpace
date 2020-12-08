@@ -65,7 +65,7 @@ std::string SceneLicenseWriter::generateJson() const {
     int metaCount = 0;
     for (const Asset* asset : assets) {
         std::optional<Asset::MetaInformation> meta = asset->metaInformation();
-        
+
         if (!meta.has_value()) {
             continue;
         }

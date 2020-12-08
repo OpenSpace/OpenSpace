@@ -789,7 +789,7 @@ void RenderableStars::initializeGL() {
     );
 
     //loadShapeTexture();
-
+    loadPSFTexture();
     renderPSFToTexture();
 }
 
@@ -806,6 +806,39 @@ void RenderableStars::deinitializeGL() {
         global::renderEngine->removeRenderProgram(_program.get());
         _program = nullptr;
     }
+}
+
+void RenderableStars::loadPSFTexture() {
+    _pointSpreadFunctionTexture = nullptr;
+    if (!_pointSpreadFunctionTexturePath.value().empty() &&
+        std::filesystem::exists(_pointSpreadFunctionTexturePath.value()))
+    {
+        _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
+            absPath(_pointSpreadFunctionTexturePath)
+        );
+
+        if (_pointSpreadFunctionTexture) {
+            LDEBUG(fmt::format(
+                "Loaded texture from '{}'",
+                absPath(_pointSpreadFunctionTexturePath)
+            ));
+            _pointSpreadFunctionTexture->uploadTexture();
+        }
+        _pointSpreadFunctionTexture->setFilter(
+            ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
+        );
+
+        _pointSpreadFunctionFile = std::make_unique<ghoul::filesystem::File>(
+            _pointSpreadFunctionTexturePath
+            );
+        _pointSpreadFunctionFile->setCallback(
+            [&](const ghoul::filesystem::File&) {
+            _pointSpreadFunctionTextureIsDirty = true;
+        }
+        );
+    }
+    _pointSpreadFunctionTextureIsDirty = false;
+
 }
 
 void RenderableStars::renderPSFToTexture() {
@@ -958,7 +991,7 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     glm::dmat4 modelMatrix =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         glm::dmat4(data.modelTransform.rotation) *
-        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
+        glm::scale(glm::dmat4(1.0), data.modelTransform.scale);
 
     glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
 
@@ -1214,35 +1247,7 @@ void RenderableStars::update(const UpdateData&) {
 
     if (_pointSpreadFunctionTextureIsDirty) {
         LDEBUG("Reloading Point Spread Function texture");
-        _pointSpreadFunctionTexture = nullptr;
-        if (!_pointSpreadFunctionTexturePath.value().empty() &&
-            std::filesystem::exists(_pointSpreadFunctionTexturePath.value()))
-        {
-            _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_pointSpreadFunctionTexturePath)
-            );
-
-            if (_pointSpreadFunctionTexture) {
-                LDEBUG(fmt::format(
-                    "Loaded texture from '{}'",
-                    absPath(_pointSpreadFunctionTexturePath)
-                ));
-                _pointSpreadFunctionTexture->uploadTexture();
-            }
-            _pointSpreadFunctionTexture->setFilter(
-                ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
-            );
-
-            _pointSpreadFunctionFile = std::make_unique<ghoul::filesystem::File>(
-                _pointSpreadFunctionTexturePath
-            );
-            _pointSpreadFunctionFile->setCallback(
-                [&](const ghoul::filesystem::File&) {
-                    _pointSpreadFunctionTextureIsDirty = true;
-                }
-            );
-        }
-        _pointSpreadFunctionTextureIsDirty = false;
+        loadPSFTexture();
     }
 
     if (_colorTextureIsDirty) {

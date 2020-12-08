@@ -273,7 +273,8 @@ const Chunk& findChunkNode(const Chunk& node, const Geodetic2& location) {
 #if defined(__APPLE__) || (defined(__linux__) && defined(__clang__))
 using ChunkTileVector = std::vector<std::pair<ChunkTile, const LayerRenderSettings*>>;
 #else
-using ChunkTileVector = std::pmr::vector<std::pair<ChunkTile, const LayerRenderSettings*>>;
+using ChunkTileVector =
+    std::pmr::vector<std::pair<ChunkTile, const LayerRenderSettings*>>;
 #endif
 
 ChunkTileVector tilesAndSettingsUnsorted(const LayerGroup& layerGroup,
@@ -1139,14 +1140,6 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         modelViewProjectionTransform
     );
 
-    const bool hasNightLayers = !_layerManager.layerGroup(
-        layergroupid::GroupID::NightLayers
-    ).activeLayers().empty();
-
-    const bool hasWaterLayer = !_layerManager.layerGroup(
-        layergroupid::GroupID::WaterMasks
-    ).activeLayers().empty();
-
     _globalRenderer.program->setUniform("modelViewTransform", modelViewTransform);
 
     const bool hasHeightLayer = !_layerManager.layerGroup(
@@ -1223,7 +1216,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
     int localCount = 0;
 
     auto traversal = [](const Chunk& node, std::vector<const Chunk*>& global,
-        int& globalCount, std::vector<const Chunk*>& local, int& localCount, int cutoff,
+        int& iGlobal, std::vector<const Chunk*>& local, int& iLocal, int cutoff,
         std::vector<const Chunk*>& traversalMemory)
     {
         ZoneScopedN("traversal")
@@ -1238,12 +1231,12 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
 
             if (isLeaf(*n) && n->isVisible) {
                 if (n->tileIndex.level < cutoff) {
-                    global[globalCount] = n;
-                    ++globalCount;
+                    global[iGlobal] = n;
+                    ++iGlobal;
                 }
                 else {
-                    local[localCount] = n;
-                    ++localCount;
+                    local[iLocal] = n;
+                    ++iLocal;
                 }
             }
 
@@ -1315,7 +1308,8 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
     // After certain number of iterations(_debugProperties.dynamicLodIterationCount) of
     // unavailable/available data in a row, we assume that a change could be made.
     const int iterCount = _debugProperties.dynamicLodIterationCount;
-    const bool exceededIterations = _iterationsOfUnavailableData > iterCount;
+    const bool exceededIterations =
+        static_cast<int>(_iterationsOfUnavailableData) > iterCount;
     const float clf = _generalProperties.currentLodScaleFactor;
     const float clfMin = _generalProperties.currentLodScaleFactor.minValue();
     const float targetLod = _generalProperties.targetLodScaleFactor;
@@ -1326,7 +1320,9 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         _iterationsOfUnavailableData = 0;
         _lodScaleFactorDirty = true;
     } // Make 2 times the iterations with available data to move it up again
-    else if (_iterationsOfAvailableData > (iterCount * 2) && clf < targetLod) {
+    else if (static_cast<int>(_iterationsOfAvailableData) >
+             (iterCount * 2) && clf < targetLod)
+    {
         _generalProperties.currentLodScaleFactor =
             _generalProperties.currentLodScaleFactor + 0.1f;
         _iterationsOfAvailableData = 0;
@@ -1694,9 +1690,13 @@ void RenderableGlobe::recompileShaders() {
 
     std::vector<std::pair<std::string, std::string>>& pairs =
         preprocessingData.keyValuePairs;
-
+    
+    const bool hasHeightLayer = !_layerManager.layerGroup(
+        layergroupid::HeightLayers
+    ).activeLayers().empty();
+    
     pairs.emplace_back("useAccurateNormals",
-        std::to_string(_generalProperties.useAccurateNormals)
+        std::to_string(_generalProperties.useAccurateNormals && hasHeightLayer)
     );
     pairs.emplace_back(
         "performShading",
@@ -1961,7 +1961,8 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
     const int x = static_cast<int>(floor(xIndexSpace));
     const int y = static_cast<int>(floor(yIndexSpace));
 
-    const TileIndex tileIndex(x, y, chunkLevel);
+    ghoul_assert(chunkLevel < std::numeric_limits<uint8_t>::max(), "Too high level");
+    const TileIndex tileIndex(x, y, static_cast<uint8_t>(chunkLevel));
     const GeodeticPatch patch = GeodeticPatch(tileIndex);
 
     const Geodetic2 northEast = patch.corner(Quad::NORTH_EAST);
@@ -2396,7 +2397,7 @@ int RenderableGlobe::desiredLevelByAvailableTileData(const Chunk& chunk) const {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 bool RenderableGlobe::isCullableByFrustum(const Chunk& chunk,
-                                          const RenderData& renderData,
+                                          const RenderData&,
                                           const glm::dmat4& mvp) const
 {
     ZoneScoped

@@ -272,14 +272,7 @@ void RenderableBoxGrid::update(const UpdateData&) {
             GL_STATIC_DRAW
         );
 
-        glVertexAttribPointer(
-            0,
-            3,
-            GL_FLOAT,
-            GL_FALSE,
-            sizeof(Vertex),
-            nullptr 
-        );
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
 
         glBindVertexArray(0);
 

@@ -629,9 +629,9 @@ SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary)
 
 
 
-TextTileProvider::TextTileProvider(TileTextureInitData initData, size_t fontSize)
-    : initData(std::move(initData))
-    , fontSize(fontSize)
+TextTileProvider::TextTileProvider(TileTextureInitData initData_, size_t fontSize_)
+    : initData(std::move(initData_))
+    , fontSize(fontSize_)
 {
     ZoneScoped
 
@@ -715,9 +715,11 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
         constexpr const char* KeyY = "Y";
 
         int level = static_cast<int>(tileIndexDict.value<double>(KeyLevel));
+        ghoul_assert(level < std::numeric_limits<uint8_t>::max(), "Level too large");
         int x = static_cast<int>(tileIndexDict.value<double>(KeyX));
         int y = static_cast<int>(tileIndexDict.value<double>(KeyY));
-        const TileIndex tileIndex(x, y, level);
+
+        const TileIndex tileIndex(x, y, static_cast<uint8_t>(level));
 
         layergroupid::TypeID providerTypeID = layergroupid::TypeID::DefaultTileLayer;
         if (defaultProviderDict.hasKeyAndValue<std::string>("Type")) {
@@ -783,9 +785,7 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
                 typeID = layergroupid::TypeID::DefaultTileLayer;
             }
 
-            std::unique_ptr<TileProvider> tp = std::unique_ptr<TileProvider>(
-                createFromDictionary(typeID, providerDict)
-            );
+            std::unique_ptr<TileProvider> tp = createFromDictionary(typeID, providerDict);
 
             std::string provId = providerDict.value<std::string>("Identifier");
             tp->setIdentifier(provId);
@@ -845,14 +845,14 @@ bool initialize(TileProvider& tp) {
 
     ghoul_assert(!tp.isInitialized, "TileProvider can only be initialized once.");
 
-    if (TileProvider::NumTileProviders > std::numeric_limits<uint16_t>::max()) {
+    if (TileProvider::NumTileProviders > std::numeric_limits<uint16_t>::max() - 1) {
         LERRORC(
             "TileProvider",
             "Number of tile providers exceeds 65535. Something will break soon"
         );
         TileProvider::NumTileProviders = 0;
     }
-    tp.uniqueIdentifier = TileProvider::NumTileProviders++;
+    tp.uniqueIdentifier = static_cast<uint16_t>(TileProvider::NumTileProviders++);
     if (TileProvider::NumTileProviders == std::numeric_limits<unsigned int>::max()) {
         --TileProvider::NumTileProviders;
         return false;
@@ -1411,15 +1411,15 @@ ChunkTile chunkTile(TileProvider& tp, TileIndex tileIndex, int parents, int maxP
 
     ghoul_assert(tp.isInitialized, "TileProvider was not initialized.");
 
-    auto ascendToParent = [](TileIndex& tileIndex, TileUvTransform& uv) {
+    auto ascendToParent = [](TileIndex& ti, TileUvTransform& uv) {
         uv.uvOffset *= 0.5;
         uv.uvScale *= 0.5;
 
-        uv.uvOffset += tileIndex.positionRelativeParent();
+        uv.uvOffset += ti.positionRelativeParent();
 
-        tileIndex.x /= 2;
-        tileIndex.y /= 2;
-        tileIndex.level--;
+        ti.x /= 2;
+        ti.y /= 2;
+        ti.level--;
     };
 
     TileUvTransform uvTransform = { glm::vec2(0.f, 0.f), glm::vec2(1.f, 1.f) };

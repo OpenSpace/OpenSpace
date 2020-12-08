@@ -60,7 +60,9 @@ documentation::Documentation Scale::Documentation() {
     };
 }
 
-ghoul::mm_unique_ptr<Scale> Scale::createFromDictionary(const ghoul::Dictionary& dictionary) {
+ghoul::mm_unique_ptr<Scale> Scale::createFromDictionary(
+                                                      const ghoul::Dictionary& dictionary)
+{
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "Scale");
 
     std::string scaleType = dictionary.value<std::string>(KeyType);

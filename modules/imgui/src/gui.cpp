@@ -512,7 +512,7 @@ void GUI::endFrame() {
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(
             GL_ARRAY_BUFFER,
-            static_cast<GLsizeiptr>(cmdList->VtxBuffer.size() * sizeof(ImDrawVert)),
+            cmdList->VtxBuffer.size() * sizeof(ImDrawVert),
             reinterpret_cast<const GLvoid*>(&cmdList->VtxBuffer.front()),
             GL_STREAM_DRAW
         );
@@ -520,7 +520,7 @@ void GUI::endFrame() {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboElements);
         glBufferData(
             GL_ELEMENT_ARRAY_BUFFER,
-            static_cast<GLsizeiptr>(cmdList->IdxBuffer.size() * sizeof(ImDrawIdx)),
+            cmdList->IdxBuffer.size() * sizeof(ImDrawIdx),
             reinterpret_cast<const GLvoid*>(&cmdList->IdxBuffer.front()),
             GL_STREAM_DRAW
         );

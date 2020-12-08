@@ -71,11 +71,17 @@ namespace {
     };
 
     // Fragile! Keep in sync with documentation
-    const std::map<std::string, openspace::Renderable::RenderBin> RenderBinModeConversion = {
+    const std::map<std::string, openspace::Renderable::RenderBin> RenderBinConversion = {
         { "Background", openspace::Renderable::RenderBin::Background },
         { "Opaque", openspace::Renderable::RenderBin::Opaque },
-        { "PreDeferredTransparent", openspace::Renderable::RenderBin::PreDeferredTransparent},
-        { "PostDeferredTransparent", openspace::Renderable::RenderBin::PostDeferredTransparent}
+        {
+            "PreDeferredTransparent",
+            openspace::Renderable::RenderBin::PreDeferredTransparent
+        },
+        {
+            "PostDeferredTransparent",
+            openspace::Renderable::RenderBin::PostDeferredTransparent
+        }
     };
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
@@ -274,7 +280,7 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     addPropertySubOwner(_appearance);
 
     if (dictionary.hasKeyAndValue<std::string>(RenderBinModeInfo.identifier)) {
-        openspace::Renderable::RenderBin cfgRenderBin = RenderBinModeConversion.at(
+        openspace::Renderable::RenderBin cfgRenderBin = RenderBinConversion.at(
             dictionary.value<std::string>(RenderBinModeInfo.identifier)
         );
         setRenderBin(cfgRenderBin);
@@ -327,7 +333,7 @@ bool RenderableTrail::isReady() const {
 
 void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
                                      const RenderData& data,
-                                     const glm::dmat4& modelTransform, 
+                                     const glm::dmat4& modelTransform,
                                      RenderInformation& info, int nVertices, int offset)
 {
     ZoneScoped
@@ -340,11 +346,12 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
         data.camera.combinedViewMatrix() * modelTransform * info._localTransform
     );
 
-    const int sorting = [](RenderInformation::VertexSorting sorting) {
-        switch (sorting) {
+    const int sorting = [](RenderInformation::VertexSorting s) {
+        switch (s) {
             case RenderInformation::VertexSorting::NewestFirst: return 0;
             case RenderInformation::VertexSorting::OldestFirst: return 1;
-            case RenderInformation::VertexSorting::NoSorting: return 2;
+            case RenderInformation::VertexSorting::NoSorting:   return 2;
+            default:                                  throw ghoul::MissingCaseException();
         }
     }(info.sorting);
 
@@ -420,7 +427,7 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
         }
     }
 }
-#pragma optimize("", off)
+
 void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     ZoneScoped
 

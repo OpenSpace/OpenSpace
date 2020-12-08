@@ -62,4 +62,11 @@ T readFromPlayback(std::ifstream& stream) {
     return res;
 }
 
+template <typename T>
+T readFromPlayback(std::stringstream& stream) {
+    T res;
+    stream.read(reinterpret_cast<char*>(&res), sizeof(T));
+    return res;
+}
+
 } // namespace openspace::interaction

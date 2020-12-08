@@ -161,9 +161,6 @@ bool HongKangParser::create() {
     std::string previousCamera;
 
     double captureStart = -1.0;
-    double captureStop = -1.0;
-    double scanStart = -1.0;
-    double scanStop = -1.0;
 
     std::string cameraTarget  = "VOID";
     std::string scannerTarget = "VOID";
@@ -220,7 +217,7 @@ bool HongKangParser::create() {
                 _subsetMap[image.target]._range.include(time);
             }
             if (it->second->decoderType() == "SCANNER") { // SCANNER START
-                scanStart = time;
+                double scanStart = time;
 
                 InstrumentDecoder* scanner = static_cast<InstrumentDecoder*>(
                     it->second.get()
@@ -235,7 +232,10 @@ bool HongKangParser::create() {
                     getline(file, linePeek);
                     if (linePeek.find(endNominal) != std::string::npos) {
                         met = linePeek.substr(25, 9);
-                        scanStop = ephemerisTimeFromMissionElapsedTime(met, _metRef);
+                        double scanStop = ephemerisTimeFromMissionElapsedTime(
+                            met,
+                            _metRef
+                        );
                         scannerTarget = findPlaybookSpecifiedTarget(line);
 
                         TimeRange scanRange = { scanStart, scanStop };
@@ -264,10 +264,8 @@ bool HongKangParser::create() {
             // we have reached the end of a scan or consecutive capture
             // sequence!
             if (captureStart != -1) {
-                // end of capture sequence for camera, store end time of this
-                // sequence
-                captureStop = time;
-                TimeRange cameraRange = { captureStart, captureStop };
+                // end of capture sequence for camera, store end time of this sequence
+                TimeRange cameraRange = { captureStart, time };
                 ghoul_assert(cameraRange.isDefined(), "Invalid time range!");
                 _instrumentTimes.emplace_back(previousCamera, cameraRange);
                 captureStart = -1;

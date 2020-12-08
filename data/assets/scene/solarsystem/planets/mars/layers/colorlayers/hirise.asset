@@ -38,5 +38,5 @@ asset.meta = {
     Author = "esri_astro",
     URL = "https://www.arcgis.com/home/item.html?id=c1c4c750a2154842ae523c984cc14fa5",
     License = "Esri Master License Agreement",
-    Identifiers = "HiRISE-PSP"
+    Identifiers = {"HiRISE-PSP"}
 }

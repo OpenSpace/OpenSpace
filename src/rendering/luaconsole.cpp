@@ -590,7 +590,7 @@ void LuaConsole::charCallback(unsigned int codepoint,
         return;
     }
 
-    addToCommand(std::string(1, static_cast<const char>(codepoint)));
+    addToCommand(std::string(1, static_cast<char>(codepoint)));
 }
 
 void LuaConsole::update() {
@@ -600,7 +600,9 @@ void LuaConsole::update() {
     // what the bounding box for that text would be.
     using namespace ghoul::fontrendering;
 
-    const float height = _historyFont->height() * (_commandsHistory.size() + 1);
+    const float height =
+        _historyFont->height() *
+        (std::min(static_cast<int>(_commandsHistory.size()), _historyLength.value()) + 1);
 
     // Update the full height and the target height.
     // Add the height of the entry line and space for a separator.

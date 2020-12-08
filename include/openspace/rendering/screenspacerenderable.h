@@ -104,7 +104,7 @@ protected:
     properties::Vec3Property _localRotation;
 
     properties::FloatProperty _scale;
-    properties::FloatProperty _alpha;
+    properties::FloatProperty _opacity;
     properties::TriggerProperty _delete;
 
     glm::ivec2 _objectSize = glm::ivec2(0);

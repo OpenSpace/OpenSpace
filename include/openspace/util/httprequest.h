@@ -184,7 +184,6 @@ class AsyncHttpDownload : public virtual HttpDownload {
 public:
     AsyncHttpDownload(std::string url);
     AsyncHttpDownload(AsyncHttpDownload&& d);
-    AsyncHttpDownload& operator=(AsyncHttpDownload&&) = default;
     virtual ~AsyncHttpDownload() = default;
     void start(HttpRequest::RequestOptions opt);
     void cancel();
@@ -210,8 +209,6 @@ public:
 
     HttpFileDownload() = default;
     HttpFileDownload(std::string destination, Overwrite = Overwrite::No);
-    HttpFileDownload(HttpFileDownload&& d) = default;
-    HttpFileDownload& operator=(HttpFileDownload&&) = default;
     virtual ~HttpFileDownload() = default;
 
     const std::string& destination() const;

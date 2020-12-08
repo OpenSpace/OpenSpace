@@ -32,8 +32,6 @@
 
 #include <string>
 
-
-
 namespace openspace::interaction {
 
 class ConvertRecFormatTask : public Task {
@@ -59,10 +57,12 @@ private:
     std::ifstream _iFile;
     std::ofstream _oFile;
     SessionRecording::DataMode _fileFormatType;
+    std::string _version;
 
     std::string _valueFunctionLua;
+    SessionRecording* sessRec;
 };
 
 } // namespace openspace::interaction
 
-#endif //__OPENSPACE_CORE___CONVERTRECFORMATTASK___H__
+#endif // __OPENSPACE_CORE___CONVERTRECFORMATTASK___H__

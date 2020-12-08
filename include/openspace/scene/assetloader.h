@@ -215,7 +215,7 @@ private:
         _onDependencyInitializationFunctionRefs;
     std::unordered_map<Asset*, std::map<Asset*, std::vector<int>>>
         _onDependencyDeinitializationFunctionRefs;
-    
+
     int _assetsTableRef = 0;
 };
 

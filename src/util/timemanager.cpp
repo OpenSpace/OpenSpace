@@ -148,7 +148,7 @@ void TimeManager::preSynchronization(double dt) {
         ZoneScopedN("newTime != _lastTime")
         using K = const CallbackHandle;
         using V = TimeChangeCallback;
-        for (const std::pair<K, V>& it : _timeChangeCallbacks) {
+        for (const std::pair<const K, V>& it : _timeChangeCallbacks) {
             ZoneScopedN("tcc")
             it.second();
         }
@@ -160,7 +160,7 @@ void TimeManager::preSynchronization(double dt) {
         ZoneScopedN("delta time changed")
         using K = const CallbackHandle;
         using V = TimeChangeCallback;
-        for (const std::pair<K, V>& it : _deltaTimeChangeCallbacks) {
+        for (const std::pair<const K, V>& it : _deltaTimeChangeCallbacks) {
             ZoneScopedN("dtcc")
             it.second();
         }
@@ -168,7 +168,7 @@ void TimeManager::preSynchronization(double dt) {
     if (_deltaTimeStepsChanged) {
         using K = const CallbackHandle;
         using V = TimeChangeCallback;
-        for (const std::pair<K, V>& it : _deltaTimeStepsChangeCallbacks) {
+        for (const std::pair<const K, V>& it : _deltaTimeStepsChangeCallbacks) {
             it.second();
         }
     }
@@ -176,7 +176,7 @@ void TimeManager::preSynchronization(double dt) {
         ZoneScopedN("timeline changed")
         using K = const CallbackHandle;
         using V = TimeChangeCallback;
-        for (const std::pair<K, V>& it : _timelineChangeCallbacks) {
+        for (const std::pair<const K, V>& it : _timelineChangeCallbacks) {
             ZoneScopedN("tlcc")
             it.second();
         }
@@ -256,7 +256,7 @@ void TimeManager::progressTime(double dt) {
 
         using K = const CallbackHandle;
         using V = TimeChangeCallback;
-        for (const std::pair<K, V>& it : _timeJumpCallbacks) {
+        for (const std::pair<const K, V>& it : _timeJumpCallbacks) {
             it.second();
         }
         return;

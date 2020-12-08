@@ -170,7 +170,7 @@ void TimeTopic::sendDeltaTimeSteps() {
     const std::vector<double>& steps = global::timeManager->deltaTimeSteps();
 
     json deltaTimeStepsJson = {
-        { "deltaTimeSteps", steps } 
+        { "deltaTimeSteps", steps }
     };
 
     const json nextPrevJson = getNextPrevDeltaTimeStepJson();

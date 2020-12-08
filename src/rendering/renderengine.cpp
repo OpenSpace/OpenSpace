@@ -87,15 +87,6 @@ namespace {
     constexpr const char* KeyFontMono = "Mono";
     constexpr const char* KeyFontLight = "Light";
 
-    constexpr openspace::properties::Property::PropertyInfo PerformanceInfo = {
-        "PerformanceMeasurements",
-        "Performance Measurements",
-        "If this value is enabled, detailed performance measurements about the updates "
-        "and rendering of the scene graph nodes are collected each frame. These values "
-        "provide some information about the impact of individual nodes on the overall "
-        "performance."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo ShowOverlaySlavesInfo = {
         "ShowOverlayOnSlaves",
         "Show Overlay Information on Slaves",
@@ -230,6 +221,13 @@ namespace {
         "Value"
     };
 
+    constexpr openspace::properties::Property::PropertyInfo FramerateLimitInfo = {
+        "FramerateLimit",
+        "Framerate Limit",
+        "If set to a value bigger than 0, the framerate will be limited to that many "
+        "frames per second without using V-Sync"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo HorizFieldOfViewInfo = {
         "HorizFieldOfView",
         "Horizontal Field of View",
@@ -276,6 +274,7 @@ RenderEngine::RenderEngine()
     , _hue(HueInfo, 0.f, 0.f, 360.f)
     , _saturation(SaturationInfo, 1.f, 0.0f, 2.f)
     , _value(ValueInfo, 1.f, 0.f, 2.f)
+    , _framerateLimit(FramerateLimitInfo, 0, 0, 500)
     , _horizFieldOfView(HorizFieldOfViewInfo, 80.f, 1.f, 179.f)
     , _globalRotation(
         GlobalRotationInfo,
@@ -381,6 +380,7 @@ RenderEngine::RenderEngine()
     addProperty(_saveFrameInformation);
 #endif // OPENSPACE_WITH_INSTRUMENTATION
 
+    addProperty(_framerateLimit);
     addProperty(_globalRotation);
     addProperty(_screenSpaceRotation);
     addProperty(_masterRotation);
@@ -676,6 +676,16 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         _camera->invalidateCache();
     }
 
+    const int fpsLimit = _framerateLimit;
+    if (fpsLimit > 0) {
+        // Using a sleep here is not optimal, but we are not looking for FPS-perfect
+        // limiting
+        std::this_thread::sleep_until(_lastFrameTime);
+        const double delta = (1.0 / fpsLimit) * 1000.0 * 1000.0;
+        auto now = std::chrono::high_resolution_clock::now();
+        _lastFrameTime = now + std::chrono::microseconds(static_cast<int>(delta));
+    }
+
     const bool masterEnabled = delegate.isMaster() ? !_disableMasterRendering : true;
     if (masterEnabled && !delegate.isGuiWindow() && _globalBlackOutFactor > 0.f) {
         _renderer->render(
@@ -695,12 +705,12 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
 
         std::string fn = std::to_string(_frameNumber);
         WindowDelegate::Frustum frustum = global::windowDelegate->frustumMode();
-        std::string fr = [](WindowDelegate::Frustum frustum) -> std::string {
-            switch (frustum) {
-                case WindowDelegate::Frustum::Mono: return "";
-                case WindowDelegate::Frustum::LeftEye: return "(left)";
+        std::string fr = [](WindowDelegate::Frustum f) -> std::string {
+            switch (f) {
+                case WindowDelegate::Frustum::Mono:     return "";
+                case WindowDelegate::Frustum::LeftEye:  return "(left)";
                 case WindowDelegate::Frustum::RightEye: return "(right)";
-                default: throw std::logic_error("Unhandled case label");
+                default:                              throw ghoul::MissingCaseException();
             }
         }(frustum);
 
@@ -708,9 +718,10 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         std::string dt = std::to_string(global::windowDelegate->deltaTime());
         std::string avgDt = std::to_string(global::windowDelegate->averageDeltaTime());
 
-        std::string res = "Frame: " + fn + ' ' + fr + '\n' +
-                          "Swap group frame: " + sgFn + '\n' +
-                          "Dt: " + dt + '\n' + "Avg Dt: " + avgDt;
+        std::string res = fmt::format(
+            "Frame: {} {}\nSwap group frame: {}\nDt: {}\nAvg Dt: {}",
+            fn, fr, sgFn, dt, avgDt
+        );
         RenderFont(*_fontFrameInfo, penPosition, res);
     }
 
@@ -829,7 +840,6 @@ void RenderEngine::renderEndscreen() {
         glm::vec2(global::windowDelegate->currentSubwindowSize()) / dpiScaling;
     glViewport(0, 0, res.x, res.y);
 
-    using FR = ghoul::fontrendering::FontRenderer;
     const glm::vec2 size = _fontDate->boundingBox("Shutting down");
     glm::vec2 penPosition = glm::vec2(
         fontResolution().x / 2 - size.x / 2,
@@ -1295,7 +1305,7 @@ void RenderEngine::renderCameraInformation() {
         global::navigationHandler->orbitalNavigator();
 
     using FR = ghoul::fontrendering::FontRenderer;
-    
+
     _cameraButtonLocations.rotation = {
         fontResolution().x - rotationBox.x - XSeparation,
         fontResolution().y - penPosY,

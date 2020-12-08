@@ -100,6 +100,8 @@ struct WindowDelegate {
     Frustum (*frustumMode)() = []() { return Frustum::Mono; };
 
     uint64_t (*swapGroupFrameNumber)() = []() { return uint64_t(0); };
+
+    void (*setScreenshotFolder)(std::string) = [](std::string) {};
 };
 
 } // namespace openspace

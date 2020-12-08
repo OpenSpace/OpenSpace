@@ -38,5 +38,5 @@ asset.meta = {
     URL = "https://astrogeology.usgs.gov/search/map/Venus/Magellan/RadarProperties" ..
         "/Venus_Magellan_Topography_Global_4641m_v02",
     License = "NASA/PDS",
-    Identifiers = "Magellan"
+    Identifiers = {"Magellan"}
 }

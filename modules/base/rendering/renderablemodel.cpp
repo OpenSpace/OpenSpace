@@ -34,11 +34,11 @@
 #include <openspace/util/updatestructures.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/lightsource.h>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/invariants.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
 
@@ -46,11 +46,25 @@ namespace {
     constexpr const char* ProgramName = "ModelProgram";
     constexpr const char* KeyGeometry = "Geometry";
 
-    constexpr const std::array<const char*, 12> UniformNames = {
+    constexpr const int DefaultBlending = 0;
+    constexpr const int AdditiveBlending = 1;
+    constexpr const int PointsAndLinesBlending = 2;
+    constexpr const int PolygonBlending = 3;
+    constexpr const int ColorAddingBlending = 4;
+
+    std::map<std::string, int> BlendingMapping = {
+        { "Default", DefaultBlending },
+        { "Additive", AdditiveBlending },
+        { "Points and Lines", PointsAndLinesBlending },
+        { "Polygon", PolygonBlending },
+        { "Color Adding", ColorAddingBlending }
+    };
+
+    constexpr const std::array<const char*, 13> UniformNames = {
         "opacity", "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
-        "modelViewTransform", "crippedModelViewTransform", "projectionTransform", 
-        "performShading", "texture1", "ambientIntensity", "diffuseIntensity", 
-        "specularIntensity"
+        "modelViewTransform", "normalTransform", "projectionTransform",
+        "performShading", "texture1", "ambientIntensity", "diffuseIntensity",
+        "specularIntensity", "opacityBlending"
     };
 
     constexpr openspace::properties::Property::PropertyInfo AmbientIntensityInfo = {
@@ -101,6 +115,24 @@ namespace {
         "LightSources",
         "Light Sources",
         "A list of light sources that this model should accept light from."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo DisableDepthTestInfo = {
+        "DisableDepthTest",
+        "Disable Depth Test",
+        "Disable Depth Testing for the Model."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo BlendingOptionInfo = {
+        "BledingOption",
+        "Blending Options",
+        "Debug option for blending colors."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo EnableOpacityBlendingInfo = {
+        "EnableOpacityBlending",
+        "Enable Opacity Blending",
+        "Enable Opacity Blending."
     };
 } // namespace
 
@@ -177,7 +209,25 @@ documentation::Documentation RenderableModel::Documentation() {
                 }),
                 Optional::Yes,
                 LightSourcesInfo.description
-            }
+            },
+            {
+                DisableDepthTestInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                DisableDepthTestInfo.description
+            },
+            {
+                BlendingOptionInfo.identifier,
+                new StringVerifier,
+                Optional::Yes,
+                BlendingOptionInfo.description
+            },
+            {
+                EnableOpacityBlendingInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                EnableOpacityBlendingInfo.description
+            },
         }
     };
 }
@@ -196,6 +246,12 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         glm::dmat3(1.0)
     )
     , _rotationVec(RotationVecInfo, glm::dvec3(0.0), glm::dvec3(0.0), glm::dvec3(360.0))
+    , _enableOpacityBlending(EnableOpacityBlendingInfo, false)
+    , _disableDepthTest(DisableDepthTestInfo, false)
+    , _blendingFuncOption(
+        BlendingOptionInfo,
+        properties::OptionProperty::DisplayType::Dropdown
+    )
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
 {
     documentation::testSpecificationAndThrow(
@@ -235,6 +291,10 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         _performShading = dictionary.value<bool>(ShadingInfo.identifier);
     }
 
+    if (dictionary.hasKey(DisableDepthTestInfo.identifier)) {
+        _disableDepthTest = dictionary.value<bool>(DisableDepthTestInfo.identifier);
+    }
+
     if (dictionary.hasKey(DisableFaceCullingInfo.identifier)) {
         _disableFaceCulling = dictionary.value<bool>(DisableFaceCullingInfo.identifier);
     }
@@ -252,14 +312,13 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         }
     }
 
-
     addPropertySubOwner(_lightSourcePropertyOwner);
-
     addProperty(_ambientIntensity);
     addProperty(_diffuseIntensity);
     addProperty(_specularIntensity);
     addProperty(_performShading);
     addProperty(_disableFaceCulling);
+    addProperty(_disableDepthTest);
     addProperty(_modelTransform);
     addProperty(_rotationVec);
 
@@ -271,6 +330,29 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     if (dictionary.hasKey(RotationVecInfo.identifier)) {
         _rotationVec = dictionary.value<glm::vec3>(RotationVecInfo.identifier);
     }
+
+    _blendingFuncOption.addOption(DefaultBlending, "Default");
+    _blendingFuncOption.addOption(AdditiveBlending, "Additive");
+    _blendingFuncOption.addOption(PointsAndLinesBlending, "Points and Lines");
+    _blendingFuncOption.addOption(PolygonBlending, "Polygon");
+    _blendingFuncOption.addOption(ColorAddingBlending, "Color Adding");
+
+    addProperty(_blendingFuncOption);
+
+    if (dictionary.hasKey(BlendingOptionInfo.identifier)) {
+        const std::string blendingOpt = dictionary.value<std::string>(
+            BlendingOptionInfo.identifier
+        );
+        _blendingFuncOption.set(BlendingMapping[blendingOpt]);
+    }
+
+    if (dictionary.hasKey(DisableDepthTestInfo.identifier)) {
+        _enableOpacityBlending = dictionary.value<bool>(
+            EnableOpacityBlendingInfo.identifier
+        );
+    }
+
+    addProperty(_enableOpacityBlending);
 }
 
 bool RenderableModel::isReady() const {
@@ -369,13 +451,11 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         glm::mat4(modelViewTransform)
     );
 
-    glm::dmat4 crippedModelViewTransform = glm::transpose(glm::inverse(
-        glm::dmat4(glm::inverse(data.camera.sgctInternal.viewMatrix())) * modelViewTransform
-    ));
+    glm::dmat4 normalTransform = glm::transpose(glm::inverse(modelViewTransform));
 
     _program->setUniform(
-        _uniformCache.crippedModelViewTransform,
-        glm::mat4(crippedModelViewTransform)
+        _uniformCache.normalTransform,
+        glm::mat4(normalTransform)
     );
 
     _program->setUniform(
@@ -386,9 +466,33 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     _program->setUniform(_uniformCache.diffuseIntensity, _diffuseIntensity);
     _program->setUniform(_uniformCache.specularIntensity, _specularIntensity);
     _program->setUniform(_uniformCache.performShading, _performShading);
+    _program->setUniform(_uniformCache.opacityBlending, _enableOpacityBlending);
 
     if (_disableFaceCulling) {
         glDisable(GL_CULL_FACE);
+    }
+
+    glEnablei(GL_BLEND, 0);
+    switch (_blendingFuncOption) {
+        case DefaultBlending:
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            break;
+        case AdditiveBlending:
+            glBlendFunc(GL_ONE, GL_ONE);
+            break;
+        case PointsAndLinesBlending:
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            break;
+        case PolygonBlending:
+            glBlendFunc(GL_SRC_ALPHA_SATURATE, GL_ONE);
+            break;
+        case ColorAddingBlending:
+            glBlendFunc(GL_SRC_COLOR, GL_DST_COLOR);
+            break;
+    };
+
+    if (_disableDepthTest) {
+        glDisable(GL_DEPTH_TEST);
     }
 
     ghoul::opengl::TextureUnit unit;
@@ -401,6 +505,12 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     }
     if (_disableFaceCulling) {
         glEnable(GL_CULL_FACE);
+    }
+
+    global::renderEngine->openglStateCache().resetBlendState();
+
+    if (_disableDepthTest) {
+        glEnable(GL_DEPTH_TEST);
     }
 
     _program->deactivate();

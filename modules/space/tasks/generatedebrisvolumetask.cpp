@@ -483,7 +483,9 @@ float getMaxApogee(std::vector<KeplerParameters> inData){
     return static_cast<float>(maxApogee*1000);  // * 1000 for meters
 }
 
-int getIndexFromPosition(glm::dvec3 position, glm::uvec3 dim, float maxApogee, std::string gridType){
+int getIndexFromPosition(glm::dvec3 position, glm::uvec3 dim, float maxApogee,
+                         std::string gridType)
+{
     // epsilon is to make sure that for example if newPosition.x/maxApogee = 1,
     // then the index for that dimension will not exceed the range of the grid.
     float epsilon = static_cast<float>(0.000000001);
@@ -492,12 +494,15 @@ int getIndexFromPosition(glm::dvec3 position, glm::uvec3 dim, float maxApogee, s
                                         ,position.y + maxApogee
                                         ,position.z + maxApogee);
 
-        glm::uvec3 coordinateIndex = glm::uvec3(static_cast<int>(newPosition.x * dim.x / (2 * (maxApogee + epsilon)))
-                                                ,static_cast<int>(newPosition.y * dim.y / (2 * (maxApogee + epsilon)))
-                                                ,static_cast<int>(newPosition.z * dim.z / (2 * (maxApogee + epsilon))));
+        glm::uvec3 coordinateIndex = glm::uvec3(
+            static_cast<int>(newPosition.x * dim.x / (2 * (maxApogee + epsilon))),
+            static_cast<int>(newPosition.y * dim.y / (2 * (maxApogee + epsilon))),
+            static_cast<int>(newPosition.z * dim.z / (2 * (maxApogee + epsilon)))
+        );
 
 
-        return coordinateIndex.z * (dim.x * dim.y) + coordinateIndex.y * dim.x + coordinateIndex.x;
+        return coordinateIndex.z * (dim.x * dim.y) +
+            coordinateIndex.y * dim.x + coordinateIndex.x;
     }
     else if(gridType == "Spherical"){
 
@@ -508,16 +513,13 @@ int getIndexFromPosition(glm::dvec3 position, glm::uvec3 dim, float maxApogee, s
             position.z = 0;
         }
 
-        glm::uvec3 coordinateIndex = glm::uvec3(static_cast<int>(position.x * dim.x / (maxApogee))
-                                                ,static_cast<int>(position.y * dim.y / (3.14159265358979323846264338327950288))
-                                                ,static_cast<int>(position.z * dim.z / (2*3.14159265358979323846264338327950288)));
+        glm::uvec3 coordinateIndex = glm::uvec3(
+            static_cast<int>(position.x * dim.x / (maxApogee)),
+            static_cast<int>(position.y * dim.y / glm::pi<double>()),
+            static_cast<int>(position.z * dim.z / glm::two_pi<double>()));
 
-
-        // LINFO(fmt::format("index coords: {} ", coordinateIndex));
-        // LINFO(fmt::format("index dim: {} ", dim));
-        // LINFO(fmt::format("index va: {} ", coordinateIndex.y * (dim.x * dim.y) + coordinateIndex.z * dim.x + coordinateIndex.x));
-
-        return coordinateIndex.z * (dim.x * dim.y) + coordinateIndex.y * dim.x + coordinateIndex.x;
+        return coordinateIndex.z * (dim.x * dim.y) +
+            coordinateIndex.y * dim.x + coordinateIndex.x;
     }
 
     return -1;
@@ -541,9 +543,12 @@ double getVoxelVolume(int index, RawVolume<float>& raw, glm::uvec3 dim, float ma
 
 }
 
-double* mapDensityToVoxels(double* densityArray, std::vector<glm::dvec3> positions, glm::uvec3 dim, float maxApogee, std::string gridType, RawVolume<float>& raw) {
+double* mapDensityToVoxels(double* densityArray, std::vector<glm::dvec3> positions,
+                           glm::uvec3 dim, float maxApogee, std::string gridType,
+                           RawVolume<float>& raw)
+{
 
-    for(const glm::dvec3& position : positions) {
+    for (const glm::dvec3& position : positions) {
         //LINFO(fmt::format("pos: {} ", position));
         int index = getIndexFromPosition(position, dim, maxApogee, gridType);
         //LINFO(fmt::format("index: {} ", index));
@@ -551,7 +556,8 @@ double* mapDensityToVoxels(double* densityArray, std::vector<glm::dvec3> positio
             ++densityArray[index];
         }
         else if(gridType == "Spherical"){
-            double voxelVolume = getVoxelVolume(index, raw, dim, maxApogee); //something like this
+            // something like this
+            double voxelVolume = getVoxelVolume(index, raw, dim, maxApogee);
             densityArray[index] += 1/voxelVolume;
         }
     }
@@ -569,9 +575,11 @@ GenerateDebrisVolumeTask::GenerateDebrisVolumeTask(const ghoul::Dictionary& dict
 
     _rawVolumeOutputPath = absPath(dictionary.value<std::string>(KeyRawVolumeOutput));
     _dictionaryOutputPath = absPath(dictionary.value<std::string>(KeyDictionaryOutput));
-    _dimensions = dictionary.value<glm::vec3>(KeyDimensions); // must not be <glm::uvec3> for some reason.
+    // must not be <glm::uvec3> for some reason.
+    _dimensions = dictionary.value<glm::vec3>(KeyDimensions);
     _startTime = dictionary.value<std::string>(KeyStartTime);
-    _timeStep = dictionary.value<std::string>(KeyTimeStep); // Todo: send KeyTimeStep in as a int or float correctly.
+    // Todo: send KeyTimeStep in as a int or float correctly.
+    _timeStep = dictionary.value<std::string>(KeyTimeStep);
     _endTime = dictionary.value<std::string>(KeyEndTime);
     // since _inputPath is past from task,
     // there will have to be either one task per dataset,
@@ -605,12 +613,35 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
     // std::vector<KeplerParameters>TLEDataVector3 = readTLEFile(_inputPath3);
     // std::vector<KeplerParameters>TLEDataVector4 = readTLEFile(_inputPath4);
 
-    // _TLEDataVector.reserve( TLEDataVector.size() + TLEDataVector1.size() + TLEDataVector2.size() + TLEDataVector3.size() + TLEDataVector4.size());
-    // _TLEDataVector.insert(_TLEDataVector.end(), TLEDataVector.begin(), TLEDataVector.end());
-    // _TLEDataVector.insert(_TLEDataVector.end(), TLEDataVector1.begin(), TLEDataVector1.end());
-    // _TLEDataVector.insert(_TLEDataVector.end(), TLEDataVector2.begin(), TLEDataVector2.end());
-    // _TLEDataVector.insert(_TLEDataVector.end(), TLEDataVector3.begin(), TLEDataVector3.end());
-    // _TLEDataVector.insert(_TLEDataVector.end(), TLEDataVector4.begin(), TLEDataVector4.end());
+    // _TLEDataVector.reserve(
+    //     TLEDataVector.size() + TLEDataVector1.size() + TLEDataVector2.size() +
+    //     TLEDataVector3.size() + TLEDataVector4.size()
+    // );
+    // _TLEDataVector.insert(
+    //     _TLEDataVector.end(),
+    //     TLEDataVector.begin(),
+    //     TLEDataVector.end()
+    // );
+    //_TLEDataVector.insert(
+    //    _TLEDataVector.end(),
+    //    TLEDataVector1.begin(),
+    //    TLEDataVector1.end()
+    //);
+    //_TLEDataVector.insert(
+    //    _TLEDataVector.end(),
+    //    TLEDataVector2.begin(),
+    //    TLEDataVector2.end()
+    //);
+    //_TLEDataVector.insert(
+    //    _TLEDataVector.end(),
+    //    TLEDataVector3.begin(),
+    //    TLEDataVector3.end()
+    //);
+    //_TLEDataVector.insert(
+    //    _TLEDataVector.end(),
+    //    TLEDataVector4.begin(),
+    //    TLEDataVector4.end()
+    //);
     // ----- or ----- if only one
 
         // _TLEDataVector = readTLEFile(_inputPath);
@@ -651,16 +682,31 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
     float minVal = std::numeric_limits<float>::max();
     float maxVal = std::numeric_limits<float>::min();
     // 2.
-    for(int i=0 ; i<=numberOfIterations ; ++i) {
-
-        std::vector<glm::dvec3> startPositionBuffer = getPositionBuffer(_TLEDataVector, startTimeInSeconds+(i*timeStep), _gridType);   //+(i*timeStep)
+    for (int i=0 ; i<=numberOfIterations ; ++i) {
+        std::vector<glm::dvec3> startPositionBuffer = getPositionBuffer(
+            _TLEDataVector,
+            startTimeInSeconds + (i * timeStep),
+            _gridType
+        );   //+(i*timeStep)
         //LINFO(fmt::format("pos: {} ", startPositionBuffer[4]));
 
         double *densityArrayp = new double[size]();
-        //densityArrayp = mapDensityToVoxels(densityArrayp, generatedPositions, _dimensions, maxApogee);
+        //densityArrayp = mapDensityToVoxels(
+        //    densityArrayp,
+        //    generatedPositions,
+        //    _dimensions,
+        //    maxApogee
+        //);
         volume::RawVolume<float> rawVolume(_dimensions);
 
-        densityArrayp = mapDensityToVoxels(densityArrayp, startPositionBuffer, _dimensions, _maxApogee, _gridType, rawVolume);
+        densityArrayp = mapDensityToVoxels(
+            densityArrayp,
+            startPositionBuffer,
+            _dimensions,
+            _maxApogee,
+            _gridType,
+            rawVolume
+        );
         /*std::vector<glm::dvec3> testBuffer;
         testBuffer.push_back(glm::dvec3(0,0,0));
         testBuffer.push_back(glm::dvec3(1,1.5,1.5));
@@ -669,14 +715,20 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
         //testBuffer.push_back(glm::dvec3(10000,1000000000,1000000000));
 
 
-        densityArrayp = mapDensityToVoxels(densityArrayp, testBuffer, _dimensions, _maxApogee, _gridType);
+        densityArrayp = mapDensityToVoxels(
+            densityArrayp,
+            testBuffer,
+            _dimensions,
+            _maxApogee,
+            _gridType
+        );
         */
         // create object rawVolume
 
         //glm::vec3 domainSize = _upperDomainBound - _lowerDomainBound;
 
-        // TODO: Create a forEachSatallite and set(cell, value) to combine mapDensityToVoxel
-        //      and forEachVoxel for less time complexity.
+        // TODO: Create a forEachSatallite and set(cell, value) to combine
+        //       mapDensityToVoxel and forEachVoxel for less time complexity.
         rawVolume.forEachVoxel([&](glm::uvec3 cell, float) {
         //     glm::vec3 coord = _lowerDomainBound +
         //        glm::vec3(cell) / glm::vec3(_dimensions) * domainSize;
@@ -708,7 +760,10 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
         ghoul::filesystem::File file(rawOutputName);
         const std::string directory = file.directoryName();
         if (!FileSys.directoryExists(directory)) {
-            FileSys.createDirectory(directory, ghoul::filesystem::FileSystem::Recursive::Yes);
+            FileSys.createDirectory(
+                directory,
+                ghoul::filesystem::FileSystem::Recursive::Yes
+            );
         }
 
         volume::RawVolumeWriter<float> writer(rawOutputName);

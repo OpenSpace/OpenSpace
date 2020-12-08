@@ -32,5 +32,5 @@ asset.meta = {
     URL = "https://earthdata.nasa.gov/eosdis/science-system-description/" ..
         "eosdis-components/gibs",
     License = "NASA",
-    Identifiers = "MODIS_Terra_Chlorophyll_A_Temporal"
+    Identifiers = {"MODIS_Terra_Chlorophyll_A_Temporal"}
 }

@@ -92,7 +92,7 @@ NSArray* focusIdentifiers;
         if ([identifier isEqualToString:pauseResultId]) {
             NSButton* button = [NSButton 
                 buttonWithTitle:NSLocalizedString(
-                    (global::timeManager.isPaused() ? @"Resume" : @"Pause"),
+                    (global::timeManager->isPaused() ? @"Resume" : @"Pause"),
                     @""
                 )
                 target:self action:@selector(pauseResumeButtonAction:)
@@ -172,14 +172,14 @@ NSArray* focusIdentifiers;
     }
 
     - (void)pauseResumeButtonAction:(id)sender {
-        global::scriptEngine.queueScript(
+        global::scriptEngine->queueScript(
             "openspace.time.togglePause();",
             scripting::ScriptEngine::RemoteScripting::Yes
         );
 
         NSButton* button = static_cast<NSButton*>(sender);
         // This check is inverted since the togglePause script has not run yet
-        [button setTitle: global::timeManager.isPaused() ? @"Pause" : @"Resume"];
+        [button setTitle: global::timeManager->isPaused() ? @"Pause" : @"Resume"];
     }
 
     - (void)focusObjectAction:(id)sender {
@@ -195,7 +195,7 @@ NSArray* focusIdentifiers;
              "NavigationHandler.OrbitalNavigator.Aim",
              "NavigationHandler.OrbitalNavigator.RetargetAnchor"
         );
-        global::scriptEngine.queueScript(
+        global::scriptEngine->queueScript(
             str,
             scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -205,7 +205,7 @@ NSArray* focusIdentifiers;
         // Remove unused variable warning
         (void)sender;
 
-        global::scriptEngine.queueScript(
+        global::scriptEngine->queueScript(
             "local isEnabled = openspace.getPropertyValue('Dashboard.IsEnabled');\
              openspace.setPropertyValueSingle('Dashboard.IsEnabled', not isEnabled);\
              openspace.setPropertyValueSingle('RenderEngine.ShowLog', not isEnabled);\
@@ -218,7 +218,7 @@ NSArray* focusIdentifiers;
     - (void)hideGuiAction:(id)sender {
         // Remove unused variable warning
         (void)sender;
-        global::scriptEngine.queueScript(
+        global::scriptEngine->queueScript(
             "local isEnabled = openspace.getPropertyValue('Modules.CefWebGui.Visible');\
             openspace.setPropertyValueSingle('Modules.CefWebGui.Visible', not isEnabled);",
             scripting::ScriptEngine::RemoteScripting::No
@@ -242,7 +242,7 @@ void showTouchbar() {
         [NSApplication sharedApplication].automaticCustomizeTouchBarMenuItemEnabled = YES;
     }
     
-    std::vector<SceneGraphNode*> ns = global::renderEngine.scene()->allSceneGraphNodes();
+    std::vector<SceneGraphNode*> ns = global::renderEngine->scene()->allSceneGraphNodes();
 
     std::sort(
         ns.begin(),

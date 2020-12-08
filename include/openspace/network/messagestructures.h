@@ -114,12 +114,12 @@ struct CameraKeyframe {
 
         // Position
         size = sizeof(_position);
-        std::memcpy(&_position, buffer.data() + offset, size);
+        std::memcpy(glm::value_ptr(_position), buffer.data() + offset, size);
         offset += size;
 
         // Orientation
         size = sizeof(_rotation);
-        std::memcpy(&_rotation, buffer.data() + offset, size);
+        std::memcpy(glm::value_ptr(_rotation), buffer.data() + offset, size);
         offset += size;
 
         // Follow focus node rotation?
@@ -150,8 +150,14 @@ struct CameraKeyframe {
     };
 
     void write(std::ostream& out) const {
-        out.write(reinterpret_cast<const char*>(&_position), sizeof(_position));
-        out.write(reinterpret_cast<const char*>(&_rotation), sizeof(_rotation));
+        out.write(
+            reinterpret_cast<const char*>(glm::value_ptr(_position)),
+            sizeof(_position)
+        );
+        out.write(
+            reinterpret_cast<const char*>(glm::value_ptr(_rotation)),
+            sizeof(_rotation)
+        );
 
         // Write follow focus node rotation?
         out.write(
@@ -370,6 +376,7 @@ struct ScriptMessage {
     ScriptMessage(const std::vector<char>& buffer) {
         deserialize(buffer);
     }
+    virtual ~ScriptMessage() {};
 
     std::string _script;
     double _timestamp = 0.0;
@@ -429,8 +436,8 @@ struct ScriptMessage {
         ss << _script;
     }
 
-    void read(std::istream* in) {
-        size_t strLen;
+    virtual void read(std::istream* in) {
+        uint32_t strLen;
         //Read string length from file
         in->read(reinterpret_cast<char*>(&strLen), sizeof(strLen));
         //Read back full string

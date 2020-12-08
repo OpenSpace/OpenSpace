@@ -53,13 +53,20 @@ namespace {
     constexpr const char* KeyReferenceFrame = "ReferenceFrame";
     const double Epsilon = 1E-7;
 
-    constexpr const openspace::properties::Property::PropertyInfo KeyDisableInputInfo = {
-        "DisableInputs",
+    using namespace openspace;
+    constexpr const properties::Property::PropertyInfo KeyDisableMouseInputInfo = {
+        "DisableMouseInputs",
         "Disable all mouse inputs",
         "Disables all mouse inputs and prevents them from affecting the camera"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo KeyFrameInfo = {
+    constexpr const properties::Property::PropertyInfo KeyDisableJoystickInputInfo = {
+        "DisableJoystickInputs",
+        "Disable all joystick inputs",
+        "Disables all joystick inputs and prevents them from affecting the camera"
+    };
+
+    constexpr const properties::Property::PropertyInfo KeyFrameInfo = {
         "UseKeyFrameInteraction",
         "Use keyframe interaction",
         "If this is set to 'true' the entire interaction is based off key frames rather "
@@ -131,29 +138,31 @@ NavigationHandler::NavigationState::NavigationState(const ghoul::Dictionary& dic
     }
 }
 
-NavigationHandler::NavigationState::NavigationState(std::string anchor, std::string aim,
-                                                    std::string referenceFrame,
-                                                    glm::dvec3 position,
-                                                    std::optional<glm::dvec3> up,
-                                                    double yaw,
-                                                    double pitch)
-    : anchor(std::move(anchor))
-    , aim(std::move(aim))
-    , referenceFrame(std::move(referenceFrame))
-    , position(std::move(position))
-    , up(std::move(up))
-    , yaw(yaw)
-    , pitch(pitch)
+NavigationHandler::NavigationState::NavigationState(std::string anchor_, std::string aim_,
+                                                    std::string referenceFrame_,
+                                                    glm::dvec3 position_,
+                                                    std::optional<glm::dvec3> up_,
+                                                    double yaw_,
+                                                    double pitch_)
+    : anchor(std::move(anchor_))
+    , aim(std::move(aim_))
+    , referenceFrame(std::move(referenceFrame_))
+    , position(std::move(position_))
+    , up(std::move(up_))
+    , yaw(yaw_)
+    , pitch(pitch_)
 {}
 
 NavigationHandler::NavigationHandler()
     : properties::PropertyOwner({ "NavigationHandler" })
-    , _disableInputs(KeyDisableInputInfo, false)
+    , _disableMouseInputs(KeyDisableMouseInputInfo, false)
+    , _disableJoystickInputs(KeyDisableJoystickInputInfo, true)
     , _useKeyFrameInteraction(KeyFrameInfo, false)
 {
     addPropertySubOwner(_orbitalNavigator);
 
-    addProperty(_disableInputs);
+    addProperty(_disableMouseInputs);
+    addProperty(_disableJoystickInputs);
     addProperty(_useKeyFrameInteraction);
 }
 
@@ -235,6 +244,13 @@ void NavigationHandler::updateCamera(double deltaTime) {
             _keyframeNavigator.updateCamera(*_camera, _playbackModeEnabled);
         }
         else {
+            if (_disableJoystickInputs) {
+                std::fill(
+                    global::joystickInputStates->begin(),
+                    global::joystickInputStates->end(),
+                    JoystickInputState()
+                );
+            }
             _orbitalNavigator.updateStatesFromInput(_inputState, deltaTime);
             _orbitalNavigator.updateCameraStateFromStates(deltaTime);
         }
@@ -279,7 +295,7 @@ void NavigationHandler::applyNavigationState(const NavigationHandler::Navigation
     }
 
     const glm::dvec3 cameraPositionWorld = anchorWorldPosition +
-        glm::dvec3(referenceFrameTransform * glm::dvec4(ns.position, 1.0));
+        referenceFrameTransform * glm::dvec4(ns.position, 1.0);
 
     glm::dvec3 up = ns.up.has_value() ?
         glm::normalize(referenceFrameTransform * *ns.up) :
@@ -334,28 +350,28 @@ const InputState& NavigationHandler::inputState() const {
 }
 
 void NavigationHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
-    if (!_disableInputs) {
+    if (!_disableMouseInputs) {
         _inputState.mouseButtonCallback(button, action);
     }
 }
 
 void NavigationHandler::mousePositionCallback(double x, double y) {
-    if (!_disableInputs) {
+    if (!_disableMouseInputs) {
         _inputState.mousePositionCallback(x, y);
     }
 }
 
 void NavigationHandler::mouseScrollWheelCallback(double pos) {
-    if (!_disableInputs) {
+    if (!_disableMouseInputs) {
         _inputState.mouseScrollWheelCallback(pos);
     }
 }
 
 void NavigationHandler::keyboardCallback(Key key, KeyModifier modifier, KeyAction action)
 {
-    if (!_disableInputs) {
-        _inputState.keyboardCallback(key, modifier, action);
-    }
+    // There is no need to disable the keyboard callback based on a property as the vast
+    // majority of input is coming through Lua scripts anyway which are not blocked here
+    _inputState.keyboardCallback(key, modifier, action);
 }
 
 NavigationHandler::NavigationState NavigationHandler::navigationState() const {

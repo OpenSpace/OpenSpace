@@ -384,13 +384,14 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
                 "Atmosphere Effects. Disabling atmosphere effects for this planet."
             );
         }
-        
+
         if (atmosphereDictionary.hasKey(SunIntensityInfo.identifier)) {
             _sunRadianceIntensity =
                 atmosphereDictionary.value<float>(SunIntensityInfo.identifier);
         }
-        
-        if (atmosphereDictionary.hasKey(MieScatteringExtinctionPropCoeffInfo.identifier)) {
+
+        if (atmosphereDictionary.hasKey(MieScatteringExtinctionPropCoeffInfo.identifier))
+        {
             _mieScattExtPropCoefProp = atmosphereDictionary.value<float>(
                 MieScatteringExtinctionPropCoeffInfo.identifier
             );
@@ -621,7 +622,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             _mieScatteringCoeffZP.onChange(updateAtmosphere);
             addProperty(_mieScatteringCoeffZP);
 
-            _mieScatteringExtinctionPropCoefficientP = 
+            _mieScatteringExtinctionPropCoefficientP =
                 _mieScattExtPropCoefProp != 1.f ? _mieScattExtPropCoefProp :
                 _mieScatteringCoeff.x / _mieExtinctionCoeff.x;
 
@@ -712,7 +713,7 @@ glm::dmat4 RenderableAtmosphere::computeModelTransformMatrix(
     // scale the planet to appropriate size since the planet is a unit sphere
     return glm::translate(glm::dmat4(1.0), transformData.translation) * // Translation
         glm::dmat4(transformData.rotation) *  // Spice rotation
-        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(transformData.scale)));
+        glm::scale(glm::dmat4(1.0), glm::dvec3(transformData.scale));
 }
 
 void RenderableAtmosphere::render(const RenderData& data, RendererTasks& renderTask) {

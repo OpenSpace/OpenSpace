@@ -89,8 +89,8 @@ enum Quad {
 
 
 struct TileDepthTransform {
-    float scale;
-    float offset;
+    float scale = 1.f;
+    float offset = 0.f;
 };
 
 
@@ -104,7 +104,7 @@ struct TileMetaData {
     std::array<float, 4> maxValues;
     std::array<float, 4> minValues;
     std::array<bool, 4> hasMissingData;
-    uint8_t nValues;
+    uint8_t nValues = 0;
 };
 
 

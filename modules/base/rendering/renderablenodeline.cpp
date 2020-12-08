@@ -124,10 +124,10 @@ documentation::Documentation RenderableNodeLine::Documentation() {
 
 RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
     , _start(StartNodeInfo, Root)
     , _end(EndNodeInfo, Root)
+    , _lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -248,8 +248,6 @@ void RenderableNodeLine::updateVertexData() {
     _vertexArray.push_back(static_cast<float>(_endPos.x));
     _vertexArray.push_back(static_cast<float>(_endPos.y));
     _vertexArray.push_back(static_cast<float>(_endPos.z));
-
-    _vertexArray;
 
     bindGL();
     glBufferData(

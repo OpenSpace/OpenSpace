@@ -44,7 +44,7 @@ namespace openspace {
 ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
     addPropertySubOwner(gui);
 
-    global::callback::initialize.emplace_back([&]() {
+    global::callback::initialize->emplace_back([&]() {
         LDEBUGC("ImGUIModule", "Initializing GUI");
         gui.initialize();
 
@@ -130,28 +130,28 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         );
     });
 
-    global::callback::deinitialize.emplace_back([&]() {
+    global::callback::deinitialize->emplace_back([&]() {
         ZoneScopedN("ImGUI")
 
         LDEBUGC("ImGui", "Deinitialize GUI");
         gui.deinitialize();
     });
 
-    global::callback::initializeGL.emplace_back([&]() {
+    global::callback::initializeGL->emplace_back([&]() {
         ZoneScopedN("ImGUI")
 
         LDEBUGC("ImGui", "Initializing GUI OpenGL");
         gui.initializeGL();
     });
 
-    global::callback::deinitializeGL.emplace_back([&]() {
+    global::callback::deinitializeGL->emplace_back([&]() {
         ZoneScopedN("ImGUI")
 
         LDEBUGC("ImGui", "Deinitialize GUI OpenGL");
         gui.deinitializeGL();
     });
 
-    global::callback::draw2D.emplace_back([&]() {
+    global::callback::draw2D->emplace_back([&]() {
         ZoneScopedN("ImGUI")
 
         WindowDelegate& delegate = *global::windowDelegate;
@@ -179,7 +179,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         }
     });
 
-    global::callback::keyboard.emplace_back(
+    global::callback::keyboard->emplace_back(
         [&](Key key, KeyModifier mod, KeyAction action) -> bool {
             ZoneScopedN("ImGUI")
 
@@ -193,7 +193,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         }
     );
 
-    global::callback::character.emplace_back(
+    global::callback::character->emplace_back(
         [&](unsigned int codepoint, KeyModifier modifier) -> bool {
             ZoneScopedN("ImGUI")
 
@@ -207,13 +207,13 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         }
     );
 
-    global::callback::mousePosition.emplace_back(
+    global::callback::mousePosition->emplace_back(
         [&](double x, double y) {
             _mousePosition = glm::vec2(static_cast<float>(x), static_cast<float>(y));
         }
     );
 
-    global::callback::mouseButton.emplace_back(
+    global::callback::mouseButton->emplace_back(
         [&](MouseButton button, MouseAction action, KeyModifier) -> bool {
             ZoneScopedN("ImGUI")
 
@@ -234,7 +234,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         }
     );
 
-    global::callback::mouseScrollWheel.emplace_back(
+    global::callback::mouseScrollWheel->emplace_back(
         [&](double, double posY) -> bool {
             ZoneScopedN("ImGUI")
 
@@ -248,19 +248,19 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         }
     );
 
-    global::callback::touchDetected.emplace_back(
+    global::callback::touchDetected->emplace_back(
         [&](TouchInput input) -> bool {
             return gui.touchDetectedCallback(input);
         }
     );
 
-    global::callback::touchUpdated.emplace_back(
+    global::callback::touchUpdated->emplace_back(
         [&](TouchInput input) -> bool {
             return gui.touchUpdatedCallback(input);
         }
     );
 
-    global::callback::touchExit.emplace_back(
+    global::callback::touchExit->emplace_back(
         [&](TouchInput input) {
             gui.touchExitCallback(input);
         }

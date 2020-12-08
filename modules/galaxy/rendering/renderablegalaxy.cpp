@@ -52,12 +52,6 @@
 namespace {
     constexpr int8_t CurrentCacheVersion = 1;
 
-    constexpr const char* GlslRaycastPath =
-        "${MODULE_GALAXY}/shaders/galaxyraycast.glsl";
-    constexpr const char* GlslBoundsVsPath =
-        "${MODULE_GALAXY}/shaders/raycasterbounds_vs.glsl";
-    constexpr const char* GlslBoundsFsPath =
-        "${MODULE_GALAXY}/shaders/raycasterbounds_fs.glsl";
     constexpr const char* _loggerCat = "Renderable Galaxy";
 
     constexpr const std::array<const char*, 4> UniformNamesPoints = {
@@ -157,13 +151,13 @@ namespace {
         );
         fileStream.write(reinterpret_cast<const char*>(&nPoints), sizeof(int64_t));
         fileStream.write(reinterpret_cast<const char*>(&pointsRatio), sizeof(float));
-        uint64_t nPositions = static_cast<uint64_t>(positions.size());
+        uint64_t nPositions = positions.size();
         fileStream.write(reinterpret_cast<const char*>(&nPositions), sizeof(uint64_t));
         fileStream.write(
             reinterpret_cast<const char*>(positions.data()),
             positions.size() * sizeof(glm::vec3)
         );
-        uint64_t nColors = static_cast<uint64_t>(colors.size());
+        uint64_t nColors = colors.size();
         fileStream.write(reinterpret_cast<const char*>(&nColors), sizeof(uint64_t));
         fileStream.write(
             reinterpret_cast<const char*>(colors.data()),
@@ -685,7 +679,7 @@ void RenderableGalaxy::renderPoints(const RenderData& data) {
     glm::dmat4 modelMatrix =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         glm::dmat4(data.modelTransform.rotation) * rotMatrix *
-        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
     glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
 
@@ -760,7 +754,7 @@ void RenderableGalaxy::renderBillboards(const RenderData& data) {
     glm::dmat4 modelMatrix =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         glm::dmat4(data.modelTransform.rotation) * rotMatrix *
-        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
+        glm::scale(glm::dmat4(1.0), data.modelTransform.scale);
 
     glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
 

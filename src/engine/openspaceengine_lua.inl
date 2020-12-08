@@ -27,6 +27,7 @@
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <filesystem>
 
 namespace openspace::luascriptfunctions {
 
@@ -179,6 +180,27 @@ int removeAllVirtualProperties(lua_State* L) {
     }
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
+int setScreenshotFolder(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::setScreenshotFolder");
+
+    std::string arg = ghoul::lua::value<std::string>(L);
+    lua_pop(L, 0);
+
+    std::string folder = FileSys.absolutePath(arg);
+    if (!std::filesystem::exists(folder)) {
+        std::filesystem::create_directory(folder);
+    }
+
+    FileSys.registerPathToken(
+        "${SCREENSHOTS}",
+        folder,
+        ghoul::filesystem::FileSystem::Override::Yes
+    );
+
+    global::windowDelegate->setScreenshotFolder(folder);
     return 0;
 }
 

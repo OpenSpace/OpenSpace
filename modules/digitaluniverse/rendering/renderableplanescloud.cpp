@@ -562,6 +562,8 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
     _program->setUniform(_uniformCache.alphaValue, _opacity);
     _program->setUniform(_uniformCache.fadeInValue, fadeInVariable);
 
+    glDisable(GL_CULL_FACE);
+
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
 
@@ -592,6 +594,7 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
     // Restores OpenGL Rendering State
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetDepthState();
+    global::renderEngine->openglStateCache().resetPolygonAndClippingState();
 }
 
 void RenderablePlanesCloud::renderLabels(const RenderData& data,
@@ -625,15 +628,15 @@ void RenderablePlanesCloud::renderLabels(const RenderData& data,
     }
 
     glm::vec4 textColor = glm::vec4(
-        glm::vec3(_textColor), 
+        glm::vec3(_textColor),
         _textOpacity * fadeInVariable
     );
 
     ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
     labelInfo.orthoRight = orthoRight;
     labelInfo.orthoUp = orthoUp;
-    labelInfo.minSize = static_cast<int>(_textMinSize);
-    labelInfo.maxSize = static_cast<int>(_textMaxSize);
+    labelInfo.minSize = _textMinSize;
+    labelInfo.maxSize = _textMaxSize;
     labelInfo.cameraPos = data.camera.positionVec3();
     labelInfo.cameraLookUp = data.camera.lookUpVectorWorldSpace();
     labelInfo.renderType = _renderOption;
@@ -989,7 +992,6 @@ bool RenderablePlanesCloud::readSpeckFile() {
 
         glm::vec3 u(0.f);
         glm::vec3 v(0.f);
-        int textureIndex = 0;
 
         std::vector<float> values(_nValuesPerAstronomicalObject);
 
@@ -1018,11 +1020,6 @@ bool RenderablePlanesCloud::readSpeckFile() {
                         v.z = values[i];
                         break;
                 }
-            }
-
-            // JCC: This should be moved to the RenderablePlanesCloud:
-            if (i == _textureVariableIndex) {
-                textureIndex = static_cast<int>(values[i]);
             }
         }
         _fullData.insert(_fullData.end(), values.begin(), values.end());

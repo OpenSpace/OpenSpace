@@ -33,9 +33,13 @@
 
 namespace openspace::interaction {
 
+struct ConversionError : public ghoul::RuntimeError {
+    explicit ConversionError(std::string msg);
+};
 
 class SessionRecording : public properties::PropertyOwner {
 public:
+
     inline static const std::string FileHeaderTitle = "OpenSpace_record/playback";
     inline static const std::string HeaderCameraAscii = "camera";
     inline static const std::string HeaderTimeAscii = "time";
@@ -66,14 +70,13 @@ public:
     };
 
     static const size_t FileHeaderVersionLength = 5;
-    static constexpr char FileHeaderVersion[FileHeaderVersionLength] = {
-        '0', '0', '.', '8', '5'
-    };
+    char FileHeaderVersion[FileHeaderVersionLength+1] = "01.00";
+    char TargetConvertVersion[FileHeaderVersionLength+1] = "01.00";
     static const char DataFormatAsciiTag = 'A';
     static const char DataFormatBinaryTag = 'B';
     static const size_t keyframeHeaderSize_bytes = 33;
     static const size_t saveBufferCameraSize_min = 82;
-    static const size_t saveBufferStringSize_max = 500;
+    static const size_t saveBufferStringSize_max = 2000;
     static const size_t _saveBufferMaxSize_bytes = keyframeHeaderSize_bytes +
         + saveBufferCameraSize_min + saveBufferStringSize_max;
 
@@ -81,6 +84,7 @@ public:
     using StateChangeCallback = std::function<void()>;
 
     SessionRecording();
+    SessionRecording(bool isGlobal);
 
     ~SessionRecording();
 
@@ -158,7 +162,7 @@ public:
      *
      * \return \c true if recording to file starts without errors
      */
-    bool startPlayback(const std::string& filename, KeyframeTimeRef timeMode,
+    bool startPlayback(std::string& filename, KeyframeTimeRef timeMode,
         bool forceSimTimeAtStart);
 
     /**
@@ -254,8 +258,10 @@ public:
      * \param kf reference to a camera keyframe which contains camera details
      * \param file an ifstream reference to the playback file being read
      * \param lineN keyframe number in playback file where this keyframe resides
+     *
+     * \return true if data read has no errors
      */
-    static void readCameraKeyframeBinary(Timestamps& times,
+    bool readCameraKeyframeBinary(Timestamps& times,
         datamessagestructures::CameraKeyframe& kf, std::ifstream& file, int lineN);
 
     /**
@@ -266,8 +272,10 @@ public:
      * \param kf reference to a camera keyframe which contains camera details
      * \param currentParsingLine string containing the most current line that was read
      * \param lineN line number in playback file where this keyframe resides
+     *
+     * \return true if data read has no errors
      */
-    static void readCameraKeyframeAscii(Timestamps& times,
+    bool readCameraKeyframeAscii(Timestamps& times,
         datamessagestructures::CameraKeyframe& kf, std::string currentParsingLine,
         int lineN);
 
@@ -279,8 +287,10 @@ public:
      * \param kf reference to a time keyframe which contains time details
      * \param file an ifstream reference to the playback file being read
      * \param lineN keyframe number in playback file where this keyframe resides
+     *
+     * \return true if data read has no errors
      */
-    static void readTimeKeyframeBinary(Timestamps& times,
+    bool readTimeKeyframeBinary(Timestamps& times,
         datamessagestructures::TimeKeyframe& kf, std::ifstream& file, int lineN);
 
     /**
@@ -291,8 +301,10 @@ public:
      * \param kf reference to a time keyframe which contains time details
      * \param currentParsingLine string containing the most current line that was read
      * \param lineN line number in playback file where this keyframe resides
+     *
+     * \return true if data read has no errors
      */
-    static void readTimeKeyframeAscii(Timestamps& times,
+    bool readTimeKeyframeAscii(Timestamps& times,
         datamessagestructures::TimeKeyframe& kf, std::string currentParsingLine,
         int lineN);
 
@@ -305,8 +317,10 @@ public:
      *        (in chars) and the text itself
      * \param file an ifstream reference to the playback file being read
      * \param lineN keyframe number in playback file where this keyframe resides
+     *
+     * \return true if data read has no errors
      */
-    static void readScriptKeyframeBinary(Timestamps& times,
+    bool readScriptKeyframeBinary(Timestamps& times,
         datamessagestructures::ScriptMessage& kf, std::ifstream& file, int lineN);
 
     /**
@@ -318,8 +332,10 @@ public:
      *        (in chars) and the text itself
      * \param currentParsingLine string containing the most current line that was read
      * \param lineN line number in playback file where this keyframe resides
+     *
+     * \return true if data read has no errors
      */
-    static void readScriptKeyframeAscii(Timestamps& times,
+    bool readScriptKeyframeAscii(Timestamps& times,
         datamessagestructures::ScriptMessage& kf, std::string currentParsingLine,
         int lineN);
 
@@ -331,7 +347,7 @@ public:
      * \param kfBuffer a buffer temporarily used for preparing data to be written
      * \param file an ofstream reference to the recording file being written-to
      */
-    static void saveCameraKeyframeBinary(Timestamps times,
+    void saveCameraKeyframeBinary(Timestamps& times,
         datamessagestructures::CameraKeyframe& kf, unsigned char* kfBuffer,
         std::ofstream& file);
 
@@ -342,7 +358,7 @@ public:
      * \param kf reference to a camera keyframe which contains the camera details
      * \param file an ofstream reference to the recording file being written-to
      */
-    static void saveCameraKeyframeAscii(Timestamps times,
+    void saveCameraKeyframeAscii(Timestamps& times,
         datamessagestructures::CameraKeyframe& kf, std::ofstream& file);
 
     /**
@@ -353,7 +369,7 @@ public:
      * \param kfBuffer a buffer temporarily used for preparing data to be written
      * \param file an ofstream reference to the recording file being written-to
      */
-    static void saveTimeKeyframeBinary(Timestamps times,
+    void saveTimeKeyframeBinary(Timestamps& times,
         datamessagestructures::TimeKeyframe& kf, unsigned char* kfBuffer,
         std::ofstream& file);
 
@@ -364,7 +380,7 @@ public:
      * \param kf reference to a time keyframe which contains the time details
      * \param file an ofstream reference to the recording file being written-to
      */
-    static void saveTimeKeyframeAscii(Timestamps times,
+    void saveTimeKeyframeAscii(Timestamps& times,
         datamessagestructures::TimeKeyframe& kf, std::ofstream& file);
 
     /**
@@ -375,7 +391,7 @@ public:
      * \param smBuffer a buffer temporarily used for preparing data to be written
      * \param file an ofstream reference to the recording file being written-to
      */
-    static void saveScriptKeyframeBinary(Timestamps times,
+    void saveScriptKeyframeBinary(Timestamps& times,
         datamessagestructures::ScriptMessage& sm, unsigned char* smBuffer,
         std::ofstream& file);
 
@@ -386,7 +402,7 @@ public:
      * \param sm reference to a ScriptMessage which contains the script details
      * \param file an ofstream reference to the recording file being written-to
      */
-    static void saveScriptKeyframeAscii(Timestamps times,
+    void saveScriptKeyframeAscii(Timestamps& times,
         datamessagestructures::ScriptMessage& sm, std::ofstream& file);
 
     /**
@@ -399,6 +415,15 @@ public:
     static std::string readHeaderElement(std::ifstream& stream, size_t readLen_chars);
 
     /**
+ * Reads header information from a session recording file
+ *
+ * \param stringstream reference to ifstream that contains the session recording file data
+ * \param readLen_chars number of characters to be read, which may be the expected
+ *        length of the header line, or an arbitrary number of characters within it
+ */
+    static std::string readHeaderElement(std::stringstream& stream, size_t readLen_chars);
+
+    /**
      * Writes a header to a binary recording file buffer
      *
      * \param times reference to a timestamps structure which contains recorded times
@@ -406,7 +431,7 @@ public:
      * \param kfBuffer the char buffer holding the recording info to be written
      * \param idx index into write buffer (this is updated with the num of chars written)
      */
-    static void saveHeaderBinary(Timestamps times, char type, unsigned char* kfBuffer,
+    static void saveHeaderBinary(Timestamps& times, char type, unsigned char* kfBuffer,
         size_t& idx);
 
     /**
@@ -416,7 +441,7 @@ public:
      * \param type string signifying the keyframe type
      * \param line the stringstream buffer being written to
      */
-    static void saveHeaderAscii(Timestamps times, const std::string& type,
+    static void saveHeaderAscii(Timestamps& times, const std::string& type,
         std::stringstream& line);
 
     /**
@@ -435,7 +460,59 @@ public:
      */
     static bool hasFileExtension(std::string filename, std::string extension);
 
-private:
+    /**
+     * Converts file format of a session recording file to the current format version
+     * (will determine the file format conversion to convert from based on the file's
+     * header version number).
+     *
+     * \param filename name of the file to convert
+     * \param depth iteration number to prevent runaway recursion (init call with zero)
+     *
+     * \return string containing the filename of the previous conversion step. This is
+     *         used if there are multiple conversion steps where each step has to use
+     *         the output of the previous.
+     */
+    std::string convertFile(std::string filename, int depth = 0);
+
+    /**
+     * Goes to legacy session recording inherited class, and calls its convertFile()
+     * method, and then returns the resulting conversion filename.
+     *
+     * \param filename name of the file to convert
+     * \param depth iteration number to prevent runaway recursion (init call with zero)
+     *
+     * \return string containing the filename of the conversion
+     */
+    virtual std::string getLegacyConversionResult(std::string filename, int depth);
+
+    /*
+     * Version string for file format version currently supported by this class
+     *
+     * \return string of the file format version this class supports
+     */
+    virtual std::string fileFormatVersion();
+
+    /*
+     * Version string for file format version that a conversion operation will convert
+     * to (e.g. upgrades to this version). This is only relevant for inherited classes
+     * that support conversion from legacy versions (if called in the base class, it
+     * will return its own current version).
+     *
+     * \return string of the file format version this class supports
+     */
+    virtual std::string targetFileFormatVersion();
+
+    /*
+     * Determines a filename for the conversion result based on the original filename
+     * and the file format version number.
+     *
+     * \param filename source filename to be converted
+     *
+     * \return pathname of the converted version of the file
+     */
+    std::string determineConversionOutFilename(const std::string filename, DataMode mode);
+
+protected:
     properties::BoolProperty _renderPlaybackInformation;
 
     enum class RecordedType {
@@ -459,6 +536,9 @@ private:
     double equivalentSimulationTime(double timeOs, double timeRec, double timeSim);
     double equivalentApplicationTime(double timeOs, double timeRec, double timeSim);
     bool handleRecordingFile(std::string filenameIn);
+    static bool isPath(std::string& filename);
+    void removeTrailingPathSlashes(std::string& filename);
+    void extractFilenameFromPath(std::string& filename);
     bool playbackCamera();
     bool playbackTimeChange();
     bool playbackScript();
@@ -485,7 +565,21 @@ private:
     bool findNextFutureCameraIndex(double currTime);
     bool processCameraKeyframe(double now);
     bool processScriptKeyframe();
-    //bool isDataModeBinary();
+    bool readSingleKeyframeCamera(datamessagestructures::CameraKeyframe& kf,
+        Timestamps& times, DataMode mode, std::ifstream& file,
+        std::string& inLine, const int lineNum);
+    void saveSingleKeyframeCamera(datamessagestructures::CameraKeyframe& kf,
+        Timestamps& times, DataMode mode, std::ofstream& file, unsigned char* buffer);
+    bool readSingleKeyframeTime(datamessagestructures::TimeKeyframe& kf,
+        Timestamps& times, DataMode mode, std::ifstream& file, std::string& inLine,
+        const int lineNum);
+    void saveSingleKeyframeTime(datamessagestructures::TimeKeyframe& kf,
+        Timestamps& times, DataMode mode, std::ofstream& file, unsigned char* buffer);
+    bool readSingleKeyframeScript(datamessagestructures::ScriptMessage& kf,
+        Timestamps& times, DataMode mode, std::ifstream& file, std::string& inLine,
+        const int lineNum);
+    void saveSingleKeyframeScript(datamessagestructures::ScriptMessage& kf,
+        Timestamps& times, DataMode mode, std::ofstream& file, unsigned char* buffer);
     unsigned int findIndexOfLastCameraKeyframeInTimeline();
     bool doesTimelineEntryContainCamera(unsigned int index) const;
     std::vector<std::pair<CallbackHandle, StateChangeCallback>> _stateChangeCallbacks;
@@ -495,11 +589,24 @@ private:
     double getNextTimestamp();
     double getPrevTimestamp();
     void cleanUpPlayback();
+    bool convertEntries(std::string& inFilename, std::stringstream& inStream,
+        DataMode mode, int lineNum, std::ofstream& outFile);
+    virtual bool convertCamera(std::stringstream& inStream, DataMode mode, int lineNum,
+        std::string& inputLine, std::ofstream& outFile, unsigned char* buff);
+    virtual bool convertTimeChange(std::stringstream& inStream, DataMode mode,
+        int lineNum, std::string& inputLine, std::ofstream& outFile, unsigned char* buff);
+    virtual bool convertScript(std::stringstream& inStream, DataMode mode, int lineNum,
+        std::string& inputLine, std::ofstream& outFile, unsigned char* buff);
+    DataMode readModeFromHeader(std::string filename);
+    void readPlaybackHeader_stream(std::stringstream& conversionInStream,
+        std::string& version, DataMode& mode);
 
     static void writeToFileBuffer(unsigned char* buf, size_t& idx, double src);
     static void writeToFileBuffer(unsigned char* buf, size_t& idx, std::vector<char>& cv);
     static void writeToFileBuffer(unsigned char* buf, size_t& idx, unsigned char c);
     static void writeToFileBuffer(unsigned char* buf, size_t& idx, bool b);
+    void readFileIntoStringStream(std::string filename,
+        std::ifstream& inputFstream, std::stringstream& stream);
 
     DataMode _recordingDataMode = DataMode::Binary;
     SessionState _state = SessionState::Idle;
@@ -541,6 +648,69 @@ private:
     double _cameraFirstInTimeline_timestamp = 0;
 
     int _nextCallbackHandle = 0;
+
+    DataMode _conversionDataMode = DataMode::Binary;
+    int _conversionLineNum = 1;
+    const int _maximumRecursionDepth = 50;
+};
+
+// Instructions for bumping the file format version with new changes:
+//
+// 1. Create a new subclass with the current version # in its name, such as:
+//    SessionRecording_legacy_####, which inherits from SessionRecording
+// 2. Override any method that changes in the new version. This includes both
+//    methods in SessionRecording class and structs in
+//    openspace::datamessagestructure that do data read/writes. Make the modified
+//    method/struct virtual, and override it in the new legacy subclass. This
+//    override will contain the code as it is before the new changes. This will
+//    need to be done in every legacy subclass/struct that exists, but only if that
+//    subclass does NOT already contain an override of that method/struct.
+// 3. Override FileHeaderVersion with the version # of the new subclass (which is
+//    the version being replaced by the new changes).
+// 4. Override TargetConvertVersion with the version # with the new changes. This
+//    is now the version that this legacy subclass converts up to.
+// 5. Override getLegacyConversionResult method so that it creates an instance of
+//    the new version subclass. This is how the current version looks back to the
+//    legacy version that preceded it.
+// 6. The convert method for frame types that changed will need to be changed
+//    (for example SessionRecording_legacy_0085::convertScript uses its own
+//    override of script keyframe for the conversion functionality).
+
+class SessionRecording_legacy_0085 : public SessionRecording {
+public:
+    SessionRecording_legacy_0085() : SessionRecording() {}
+    ~SessionRecording_legacy_0085() {}
+    char FileHeaderVersion[FileHeaderVersionLength+1] = "00.85";
+    char TargetConvertVersion[FileHeaderVersionLength+1] = "01.00";
+    std::string fileFormatVersion() {
+        return std::string(FileHeaderVersion);
+    }
+    std::string targetFileFormatVersion() {
+        return std::string(TargetConvertVersion);
+    }
+    std::string getLegacyConversionResult(std::string filename, int depth);
+
+    struct ScriptMessage_legacy_0085 : public datamessagestructures::ScriptMessage {
+        void read(std::istream* in) {
+            size_t strLen;
+            //Read string length from file
+            in->read(reinterpret_cast<char*>(&strLen), sizeof(strLen));
+            if (strLen > saveBufferStringSize_max) {
+                throw ConversionError("Invalid script size for conversion read.");
+            }
+            //Read back full string
+            std::vector<char> temp(strLen + 1);
+            in->read(temp.data(), strLen);
+            temp[strLen] = '\0';
+
+            _script.erase();
+            _script = temp.data();
+        };
+    };
+
+protected:
+    bool convertScript(std::stringstream& inStream, DataMode mode, int lineNum,
+        std::string& inputLine, std::ofstream& outFile, unsigned char* buffer);
 };
 
 } // namespace openspace

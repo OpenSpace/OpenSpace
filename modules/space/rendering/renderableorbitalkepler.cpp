@@ -46,16 +46,19 @@
 
 namespace {
     constexpr const char* ProgramName = "OrbitalKepler";
-    constexpr const char* _loggerCat = "OrbitalKepler";
-    constexpr const char* KeyFile = "Path";
-    constexpr const char* KeyLineNum = "LineNumber";
 
     // Fragile! Keep in sync with documentation
-    const std::map<std::string, openspace::Renderable::RenderBin> RenderBinModeConversion = {
+    const std::map<std::string, openspace::Renderable::RenderBin> RenderBinConversion = {
         { "Background", openspace::Renderable::RenderBin::Background },
         { "Opaque", openspace::Renderable::RenderBin::Opaque },
-        { "PreDeferredTransparent", openspace::Renderable::RenderBin::PreDeferredTransparent},
-        { "PostDeferredTransparent", openspace::Renderable::RenderBin::PostDeferredTransparent}
+        {
+            "PreDeferredTransparent",
+            openspace::Renderable::RenderBin::PreDeferredTransparent
+        },
+        {
+            "PostDeferredTransparent",
+            openspace::Renderable::RenderBin::PostDeferredTransparent
+        }
     };
 
     constexpr const std::array<int, 36> LeapYears = {
@@ -360,11 +363,11 @@ double RenderableOrbitalKepler::epochFromYMDdSubstring(const std::string& epochS
 
 RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     : Renderable(dict)
-    , _segmentQuality(SegmentQualityInfo, 2, 1, 10)
-    , _path(PathInfo)
     , _upperLimit(UpperLimitInfo, 1000, 1, 1000000)
+    , _segmentQuality(SegmentQualityInfo, 2, 1, 10)
     , _startRenderIdx(StartRenderIdxInfo, 0, 0, 1)
     , _sizeRender(RenderSizeInfo, 1, 1, 2)
+    , _path(PathInfo)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -416,7 +419,7 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     _sizeRenderCallbackHandle = _sizeRender.onChange(_updateRenderSizeSelect);
 
     if (dict.hasKeyAndValue<std::string>(RenderBinModeInfo.identifier)) {
-        openspace::Renderable::RenderBin cfgRenderBin = RenderBinModeConversion.at(
+        openspace::Renderable::RenderBin cfgRenderBin = RenderBinConversion.at(
             dict.value<std::string>(RenderBinModeInfo.identifier)
         );
         setRenderBin(cfgRenderBin);
@@ -519,13 +522,13 @@ void RenderableOrbitalKepler::updateBuffers() {
     size_t nVerticesTotal = 0;
 
     int numOrbits = static_cast<int>(_data.size());
-    for (size_t i = 0; i < numOrbits; ++i) {
+    for (int i = 0; i < numOrbits; ++i) {
         nVerticesTotal += _segmentSize[i] + 1;
     }
     _vertexBufferData.resize(nVerticesTotal);
 
     size_t vertexBufIdx = 0;
-    for (size_t orbitIdx = 0; orbitIdx < numOrbits; ++orbitIdx) {
+    for (int orbitIdx = 0; orbitIdx < numOrbits; ++orbitIdx) {
         const KeplerParameters& orbit = _data[orbitIdx];
 
         _keplerTranslator.setKeplerElements(

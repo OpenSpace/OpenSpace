@@ -35,5 +35,5 @@ asset.meta = {
     URL = "https://astrogeology.usgs.gov/search/map/Mars/Odyssey/THEMIS-IR-Mosaic-ASU/" ..
         "Mars_MO_THEMIS-IR-Night_mosaic_60N60S_100m_v14",
     License = "NASA/PDS",
-    Identifiers = "Themis_IR_Night_Utah"
+    Identifiers = {"Themis_IR_Night_Utah"}
 }

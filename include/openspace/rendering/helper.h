@@ -105,7 +105,8 @@ VertexXYZ convertToXYZ(const Vertex& v);
 
 std::vector<VertexXYZ> convert(std::vector<Vertex> v);
 
-std::vector<Vertex> createRing(int nSegments, float radius, glm::vec4 colors = glm::vec4(1.f));
+std::vector<Vertex> createRing(int nSegments, float radius,
+    glm::vec4 colors = glm::vec4(1.f));
 
 } // namespace openspace::rendering::helper
 

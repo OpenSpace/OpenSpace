@@ -275,7 +275,6 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
         sequencer.activeInstruments(currentTime);
 
     glm::vec4 firing(0.58f - t, 1.f - t, 1.f - t, 1.f);
-    glm::vec4 notFiring(0.5f, 0.5f, 0.5f, 1.f);
 
     RenderFont(
         *_font,
@@ -334,7 +333,6 @@ glm::vec2 DashboardItemInstruments::size() const {
 
 
     if (remaining > 0) {
-        using FR = ghoul::fontrendering::FontRenderer;
         std::string progress = progressToStr(25, t);
 
         size = addToBoundingbox(

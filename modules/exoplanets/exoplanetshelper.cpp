@@ -177,6 +177,7 @@ glm::dmat3 computeSystemRotation(glm::dvec3 starPosition) {
 
 std::string createIdentifier(std::string name) {
     std::replace(name.begin(), name.end(), ' ', '_');
+    std::replace(name.begin(), name.end(), '.', '-');
     sanitizeNameString(name);
     return name;
 }

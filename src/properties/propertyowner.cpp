@@ -121,9 +121,12 @@ namespace {
         buf.push_back(',');
 
         constexpr const char propertyOwnersText[] = "\"propertyOwners\": [";
-        //constexpr const std::array<char, 20> propertyOwnersText = { "\"propertyOwners\": [" };
         //json << "\"propertyOwners\": [";
-        buf.insert(buf.end(), std::begin(propertyOwnersText), std::end(propertyOwnersText) - 1);
+        buf.insert(
+            buf.end(),
+            std::begin(propertyOwnersText),
+            std::end(propertyOwnersText) - 1
+        );
         auto propertyOwners = owner->propertySubOwners();
         for (properties::PropertyOwner* o : propertyOwners) {
             createJson(o, buf);
@@ -139,7 +142,7 @@ namespace {
         buf.push_back('}');
 
         //return json.str();
-    };
+    }
 } // namespace
 
 namespace openspace::properties {

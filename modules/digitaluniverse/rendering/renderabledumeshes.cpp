@@ -485,7 +485,7 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
     labelInfo.scale = pow(10.f, _textSize);
     labelInfo.enableDepth = true;
     labelInfo.enableFalseDepth = false;
-   
+
     glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), _textOpacity);
 
     for (const std::pair<glm::vec3, std::string>& pair : _labelData) {

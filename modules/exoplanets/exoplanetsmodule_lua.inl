@@ -1,26 +1,26 @@
 /*****************************************************************************************
-*                                                                                       *
-* OpenSpace                                                                             *
-*                                                                                       *
-* Copyright (c) 2014-2020                                                               *
-*                                                                                       *
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
-* software and associated documentation files (the "Software"), to deal in the Software *
-* without restriction, including without limitation the rights to use, copy, modify,    *
-* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
-* permit persons to whom the Software is furnished to do so, subject to the following   *
-* conditions:                                                                           *
-*                                                                                       *
-* The above copyright notice and this permission notice shall be included in all copies *
-* or substantial portions of the Software.                                              *
-*                                                                                       *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
-* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
-* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
-* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
-* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
-****************************************************************************************/
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2020                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
 #include <modules/exoplanets/exoplanetshelper.h>
 #include <openspace/engine/globals.h>
@@ -51,6 +51,8 @@ constexpr const char* ExoplanetsDataPath =
     "${SYNC}/http/exoplanets_data/1/exoplanets_data.bin";
 
 constexpr const char* StarTextureFile = "${SYNC}/http/exoplanets_textures/1/sun.jpg";
+constexpr const char* NoDataTextureFile =
+    "${SYNC}/http/exoplanets_textures/1/grid-32.png";
 constexpr const char* DiscTextureFile =
     "${SYNC}/http/exoplanets_textures/1/disc_texture.png";
 
@@ -121,7 +123,7 @@ void createExoplanetSystem(std::string_view starName) {
 
             if (!hasSufficientData(p)) {
                 LERROR(fmt::format(
-                    "Insufficient data available for visualizion of exoplanet system: '{}'",
+                    "Insufficient data available for exoplanet system: '{}'",
                     starName
                 ));
                 return;
@@ -145,49 +147,60 @@ void createExoplanetSystem(std::string_view starName) {
 
     const glm::dmat3 exoplanetSystemRotation = computeSystemRotation(starPosition);
 
-    // Star renderable globe, if we have a radius and bv color index
-    std::string starGlobeRenderableString;
+    // Star
+    float radiusInMeter = static_cast<float>(distanceconstants::SolarRadius);
     if (!std::isnan(p.rStar)) {
-        const float radiusInMeter =
-            p.rStar * static_cast<float>(distanceconstants::SolarRadius);
+        radiusInMeter *= p.rStar;
+    }
 
-        std::string layers = "";
-        if (!std::isnan(p.bmv)) {
-            // @TODO (emmbr, 2020-10-12) should also check the bv value for the siblings.
-            // The data on the planets is derived from different sources, so while this
-            // planet has a nan value, another might not
-            const std::string color = starColor(p.bmv);
+    std::string colorLayers;
+    if (!std::isnan(p.bmv)) {
+        // @TODO (emmbr, 2020-10-12) should also check the bv value for the siblings.
+        // The data on the planets is derived from different sources, so while this
+        // planet has a nan value, another might not
+        const std::string color = starColor(p.bmv);
 
-            if (color.empty()) {
-                LERROR("Error occurred when computing star color");
-                return;
-            }
-
-            layers = "ColorLayers = {"
-                "{"
-                    "Identifier = 'StarColor',"
-                    "Type = 'SolidColor',"
-                    "Color = " + color + ","
-                    "BlendMode = 'Normal',"
-                    "Enabled = true"
-                "},"
-                "{"
-                    "Identifier = 'StarTexture',"
-                    "FilePath = openspace.absPath('" + StarTextureFile + "'),"
-                    "BlendMode = 'Color',"
-                    "Enabled = true"
-                "}"
-            "}";
+        if (color.empty()) {
+            LERROR("Error occurred when computing star color");
+            return;
         }
 
-        starGlobeRenderableString = "Renderable = {"
-            "Type = 'RenderableGlobe',"
-            "Radii = " + std::to_string(radiusInMeter) + ","
-            "SegmentsPerPatch = 64,"
-            "PerformShading = false,"
-            "Layers = {" + layers + "}"
-        "},";
+        colorLayers =
+            "{"
+                "Identifier = 'StarColor',"
+                "Type = 'SolidColor',"
+                "Color = " + color + ","
+                "BlendMode = 'Normal',"
+                "Enabled = true"
+            "},"
+            "{"
+                "Identifier = 'StarTexture',"
+                "FilePath = " +
+                    fmt::format("openspace.absPath('{}')", StarTextureFile) + ","
+                "BlendMode = 'Color',"
+                "Enabled = true"
+            "}";
     }
+    else {
+        colorLayers =
+            "{"
+                "Identifier = 'NoDataStarTexture',"
+                "FilePath = " +
+                    fmt::format("openspace.absPath('{}')", NoDataTextureFile) + ","
+                "BlendMode = 'Color',"
+                "Enabled = true"
+            "}";
+    }
+
+    const std::string starGlobeRenderableString = "Renderable = {"
+        "Type = 'RenderableGlobe',"
+        "Radii = " + std::to_string(radiusInMeter) + ","
+        "SegmentsPerPatch = 64,"
+        "PerformShading = false,"
+        "Layers = {"
+            "ColorLayers = { " + colorLayers + "}"
+        "}"
+    "},";
 
     const std::string starParent = "{"
         "Identifier = '" + starIdentifier + "',"
@@ -249,7 +262,8 @@ void createExoplanetSystem(std::string_view starName) {
         float planetRadius;
         std::string enabled;
 
-        const float astronomicalUnit = static_cast<float>(distanceconstants::AstronomicalUnit);
+        const float astronomicalUnit =
+            static_cast<float>(distanceconstants::AstronomicalUnit);
         const float solarRadius = static_cast<float>(distanceconstants::SolarRadius);
         const float jupiterRadius = static_cast<float>(distanceconstants::JupiterRadius);
 
@@ -275,11 +289,11 @@ void createExoplanetSystem(std::string_view starName) {
 
         const std::string planetKeplerTranslation = "{"
             "Type = 'KeplerTranslation',"
-            "Eccentricity = " + std::to_string(planet.ecc) + "," //ECC
+            "Eccentricity = " + std::to_string(planet.ecc) + ","
             "SemiMajorAxis = " + std::to_string(semiMajorAxisInKm) + ","
-            "Inclination = " + std::to_string(planet.i) + "," //I
-            "AscendingNode = " + std::to_string(planet.bigOmega) + "," //BIGOM
-            "ArgumentOfPeriapsis = " + std::to_string(planet.omega) + "," //OM
+            "Inclination = " + std::to_string(planet.i) + ","
+            "AscendingNode = " + std::to_string(planet.bigOmega) + ","
+            "ArgumentOfPeriapsis = " + std::to_string(planet.omega) + ","
             "MeanAnomaly = 0.0,"
             "Epoch = '" + sEpoch + "'," //TT. JD to YYYY MM DD hh:mm:ss
             "Period = " + std::to_string(period) + ""
@@ -292,7 +306,7 @@ void createExoplanetSystem(std::string_view starName) {
             "Renderable = {"
                 "Type = 'RenderableGlobe',"
                 "Enabled = " + enabled + ","
-                "Radii = " + std::to_string(planetRadius) + "," //R. in meters.
+                "Radii = " + std::to_string(planetRadius) + "," //R. in meters
                 "SegmentsPerPatch = 64,"
                 "PerformShading = false,"
                 "Layers = {}"
@@ -308,7 +322,7 @@ void createExoplanetSystem(std::string_view starName) {
 
         int trailResolution = 1000;
 
-        // increase the resolution for highly eccentric orbits
+        // Increase the resolution for highly eccentric orbits
         const float eccentricityThreshold = 0.85f;
         if (planet.ecc > eccentricityThreshold) {
             trailResolution *= 2;

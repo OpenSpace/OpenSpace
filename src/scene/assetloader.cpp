@@ -305,7 +305,15 @@ bool AssetLoader::loadAsset(Asset* asset) {
             metaDict.getValue(MetaInformationAuthor, meta.author);
             metaDict.getValue(MetaInformationURL, meta.url);
             metaDict.getValue(MetaInformationLicense, meta.license);
-            metaDict.getValue(MetaInformationIdentifiers, meta.identifiers);
+            if (metaDict.hasKey(MetaInformationIdentifiers)) {
+                ghoul::Dictionary iddict =
+                    metaDict.value<ghoul::Dictionary>(MetaInformationIdentifiers);
+                for (size_t i = 1; i <= iddict.size(); ++i) {
+                    std::string key = std::to_string(i);
+                    std::string identifier = iddict.value<std::string>(key);
+                    meta.identifiers.push_back(identifier);
+                }
+            }
             asset->setMetaInformation(std::move(meta));
         }
     }
@@ -325,7 +333,7 @@ void AssetLoader::unloadAsset(Asset* asset) {
     }
     _onDeinitializationFunctionRefs[asset].clear();
 
-    for (const std::pair<const Asset*, std::vector<int>>& it :
+    for (std::pair<Asset*, std::vector<int>> it :
          _onDependencyInitializationFunctionRefs[asset])
     {
         for (int ref : it.second) {
@@ -334,7 +342,7 @@ void AssetLoader::unloadAsset(Asset* asset) {
     }
     _onDependencyInitializationFunctionRefs.erase(asset);
 
-    for (const std::pair<Asset*, std::vector<int>>& it :
+    for (std::pair<Asset*, std::vector<int>> it :
          _onDependencyDeinitializationFunctionRefs[asset])
     {
         for (int ref : it.second) {

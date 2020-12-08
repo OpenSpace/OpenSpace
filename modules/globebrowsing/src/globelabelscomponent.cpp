@@ -692,11 +692,9 @@ void GlobeLabelsComponent::renderLabels(const RenderData& data,
                                         float fadeInVariable
 ) {
     glm::vec4 textColor = glm::vec4(
-        glm::vec3(_labelsColor), 
+        glm::vec3(_labelsColor),
         _labelsOpacity * fadeInVariable
     );
-
-    glm::dvec4 cameraUpVecWorld = glm::dvec4(data.camera.lookUpVectorWorldSpace(), 0.0);
 
     glm::dmat4 VP = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
                     data.camera.combinedViewMatrix();

@@ -201,7 +201,7 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
         "MVPTransform",
         glm::dmat4(data.camera.projectionMatrix()) * modelViewTransform
     );
-    
+
     _gridProgram->setUniform("gridColor", _gridColor);
 
     float adjustedLineWidth = 1.f;
@@ -215,7 +215,7 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_LINE_SMOOTH);
-    
+
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
     glDrawElements(_mode, _isize, GL_UNSIGNED_INT, nullptr);

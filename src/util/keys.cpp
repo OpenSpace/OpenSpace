@@ -32,10 +32,6 @@
 #include <algorithm>
 #include <vector>
 
-namespace {
-    constexpr const char* _loggerCat = "Keys";
-} // namespace
-
 namespace openspace {
 
 bool hasKeyModifier(KeyAction lhs, KeyAction rhs) {

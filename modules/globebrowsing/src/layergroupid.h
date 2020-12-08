@@ -140,7 +140,8 @@ constexpr openspace::globebrowsing::layergroupid::GroupID from_string(
                                                                   std::string_view string)
 {
     for (int i = 0; i < openspace::globebrowsing::layergroupid::NUM_LAYER_GROUPS; ++i) {
-        if (string == openspace::globebrowsing::layergroupid::LAYER_GROUP_IDENTIFIERS[i]) {
+        if (string == openspace::globebrowsing::layergroupid::LAYER_GROUP_IDENTIFIERS[i])
+        {
             return static_cast<openspace::globebrowsing::layergroupid::GroupID>(i);
         }
     }
@@ -151,9 +152,11 @@ template <>
 constexpr openspace::globebrowsing::layergroupid::AdjustmentTypeID from_string(
                                                                   std::string_view string)
 {
-    for (int i = 0; i < openspace::globebrowsing::layergroupid::NUM_ADJUSTMENT_TYPES; ++i) {
+    for (int i = 0; i < openspace::globebrowsing::layergroupid::NUM_ADJUSTMENT_TYPES; ++i)
+    {
         if (string == openspace::globebrowsing::layergroupid::ADJUSTMENT_TYPE_NAMES[i]) {
-            return static_cast<openspace::globebrowsing::layergroupid::AdjustmentTypeID>(i);
+            return
+                static_cast<openspace::globebrowsing::layergroupid::AdjustmentTypeID>(i);
         }
     }
     return openspace::globebrowsing::layergroupid::AdjustmentTypeID::None;

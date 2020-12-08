@@ -56,7 +56,7 @@ public:
         std::string author;
         std::string url;
         std::string license;
-        std::string identifiers;
+        std::vector<std::string> identifiers;
     };
 
     /**

@@ -123,7 +123,8 @@ glm::vec4 Envelope::valueAtPosition(float pos) const {
                 beforeIter->color * (std::fabs(pos - afterIter->position.first) / dist) +
                 afterIter->color * (std::fabs(pos - beforeIter->position.first) / dist)
             ),
-            beforeIter->position.second * (std::fabs(pos - afterIter->position.first) / dist) +
+            beforeIter->position.second *
+                (std::fabs(pos - afterIter->position.first) / dist) +
                 afterIter->position.second *
                 (std::fabs(pos - beforeIter->position.first) / dist)
         };

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_EXOPLANETS___EXOPLANET_HELPER___H__
-#define __OPENSPACE_MODULE_EXOPLANETS___EXOPLANET_HELPER___H__
+#ifndef __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSHELPER___H__
+#define __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSHELPER___H__
 
 #include <ghoul/glm.h>
 #include <string>
@@ -61,9 +61,12 @@ struct Exoplanet {
     double tt;          // Epoch of transit center in HJD-2440000
     float ttUpper;      // Upper uncertainty of epoch of transit center
     float ttLower;      // Lower uncertainty of epoch of transit center
-    float positionX;    // Star position's X-coordinate in parsec
-    float positionY;    // Star position's Y-coordinate in parsec
-    float positionZ;    // Star position's Z-coordinate in parsec
+    // Star position's X-coordinate in parsec
+    float positionX = std::numeric_limits<float>::quiet_NaN();
+    // Star position's Y-coordinate in parsec
+    float positionY = std::numeric_limits<float>::quiet_NaN();
+    // Star position's Z-coordinate in parsec
+    float positionZ = std::numeric_limits<float>::quiet_NaN();
 };
 
 // Convert csv-file specific names to the corresponding name in the speck data file
@@ -91,4 +94,4 @@ void sanitizeNameString(std::string& s);
 
 } // namespace openspace::exoplanets
 
-#endif // __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSMODULE___H__
+#endif // __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSHELPER___H__

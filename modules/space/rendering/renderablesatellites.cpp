@@ -45,7 +45,6 @@
 #include <vector>
 
 namespace {
-    constexpr const char* ProgramName = "RenderableSatellites";
     constexpr const char* _loggerCat = "Satellites";
 
     static const openspace::properties::Property::PropertyInfo PathInfo = {

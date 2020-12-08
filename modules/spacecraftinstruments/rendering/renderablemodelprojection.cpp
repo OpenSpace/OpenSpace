@@ -43,8 +43,6 @@
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableModelProjection";
-
     constexpr const char* keyGeometry = "Geometry";
     constexpr const char* keyProjection = "Projection";
     constexpr const char* keyBoundingSphereRadius = "BoundingSphereRadius";

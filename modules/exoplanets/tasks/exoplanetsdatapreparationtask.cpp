@@ -48,7 +48,9 @@ namespace {
 
 namespace openspace::exoplanets {
 
-ExoplanetsDataPreparationTask::ExoplanetsDataPreparationTask(const ghoul::Dictionary& dictionary) {
+ExoplanetsDataPreparationTask::ExoplanetsDataPreparationTask(
+                                                      const ghoul::Dictionary& dictionary)
+{
     openspace::documentation::testSpecificationAndThrow(
         documentation(),
         dictionary,
@@ -71,7 +73,9 @@ std::string ExoplanetsDataPreparationTask::description() {
     );
 }
 
-void ExoplanetsDataPreparationTask::perform(const Task::ProgressCallback& progressCallback) {
+void ExoplanetsDataPreparationTask::perform(
+                                           const Task::ProgressCallback& progressCallback)
+{
     std::ifstream inputDataFile(_inputDataPath);
     if (!inputDataFile.good()) {
         LERROR(fmt::format("Failed to open input file '{}'", _inputDataPath));
@@ -369,11 +373,14 @@ float ExoplanetsDataPreparationTask::bvFromTeff(float teff) {
     float bv = 0.f;
     float bvUpper = 0.f;
     float bvLower = 0.f;
-    float teffLower, teffUpper;
-    std::string row, teffString, bvString;
+    float teffLower;
+    float teffUpper;
+    std::string row;
     while (getline(teffToBvFile, row)) {
         std::istringstream lineStream(row);
+        std::string teffString;
         getline(lineStream, teffString, ',');
+        std::string bvString;
         getline(lineStream, bvString);
 
         float teffCurrent = std::stof(teffString.c_str(), nullptr);

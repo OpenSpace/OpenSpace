@@ -73,7 +73,7 @@ WebBrowserModule::WebBrowserModule()
     , _updateBrowserBetweenRenderables(UpdateBrowserBetweenRenderablesInfo, true)
     , _browserUpdateInterval(BrowserUpdateIntervalInfo, 1.f, 1.0f, 1000.f)
 {
-    global::callback::deinitialize.emplace_back([this]() {
+    global::callback::deinitialize->emplace_back([this]() {
         ZoneScopedN("WebBrowserModule")
 
         deinitialize();

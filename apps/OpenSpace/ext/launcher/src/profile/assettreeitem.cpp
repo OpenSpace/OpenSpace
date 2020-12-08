@@ -55,7 +55,7 @@ int AssetTreeItem::row() const {
             _parentItem->_childItems.cend(),
             this
         );
-        return std::distance(_parentItem->_childItems.cbegin(), it);
+        return static_cast<int>(std::distance(_parentItem->_childItems.cbegin(), it));
     }
     else {
         return 0;
@@ -63,11 +63,11 @@ int AssetTreeItem::row() const {
 }
 
 int AssetTreeItem::columnCount() const {
-    return _itemData.size();
+    return static_cast<int>(_itemData.size());
 }
 
 QVariant AssetTreeItem::data(int column) const {
-    if (column < 0 || column >= _itemData.size()) {
+    if (column < 0 || column >= static_cast<int>(_itemData.size())) {
         return QVariant();
     }
     else {
@@ -76,7 +76,7 @@ QVariant AssetTreeItem::data(int column) const {
 }
 
 bool AssetTreeItem::setData(int column, const QVariant& value) {
-    if (column < 0 || column >= _itemData.size()) {
+    if (column < 0 || column >= static_cast<int>(_itemData.size())) {
         return false;
     }
 
@@ -112,11 +112,11 @@ bool AssetTreeItem::doesExistInFilesystem() const {
 }
 
 QString AssetTreeItem::name() const {
-    return QString(data(0).toString());
+    return data(0).toString();
 }
 
 bool AssetTreeItem::insertChildren(int position, int count, int columns) {
-    if (position < 0 || position > _childItems.size()) {
+    if (position < 0 || position > static_cast<int>(_childItems.size())) {
         return false;
     }
 
@@ -130,7 +130,7 @@ bool AssetTreeItem::insertChildren(int position, int count, int columns) {
 }
 
 bool AssetTreeItem::removeChildren(int position, int count) {
-    if (position < 0 || position + count > _childItems.size()) {
+    if (position < 0 || position + count > static_cast<int>(_childItems.size())) {
         return false;
     }
 
@@ -143,7 +143,7 @@ bool AssetTreeItem::removeChildren(int position, int count) {
 }
 
 bool AssetTreeItem::insertColumns(int position, int columns) {
-    if (position < 0 || position > _itemData.size()) {
+    if (position < 0 || position > static_cast<int>(_itemData.size())) {
         return false;
     }
 

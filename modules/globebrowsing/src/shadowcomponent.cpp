@@ -298,7 +298,7 @@ RenderData ShadowComponent::begin(const RenderData& data) {
     //matrix[14] = -glm::dot(cameraZ, lightPosition);
 
 
-    _lightCamera = std::move(std::unique_ptr<Camera>(new Camera(data.camera)));
+    _lightCamera = std::make_unique<Camera>(data.camera);
     _lightCamera->setPositionVec3(lightPosition);
     _lightCamera->setRotation(glm::dquat(glm::inverse(cameraRotationMatrix)));
     //=======================================================================
@@ -512,7 +512,7 @@ void ShadowComponent::updateDepthTexture() {
         0,
         GL_DEPTH_COMPONENT,
         GL_FLOAT,
-        0
+        nullptr
     );
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
