@@ -85,7 +85,7 @@ ExoplanetSystem findExoplanetSystemInData(std::string_view starName) {
         std::string name;
         getline(ss, name, ',');
 
-        if (name.compare(0, name.length() - 2, starName) == 0) {
+        if (name.substr(0, name.length() - 2) == starName) {
             std::string location_s;
             getline(ss, location_s);
             long location = std::stol(location_s.c_str());
@@ -134,7 +134,7 @@ void createExoplanetSystem(const std::string& starName) {
     SceneGraphNode* existingStarNode = sceneGraphNode(starIdentifier);
     if (existingStarNode) {
         LERROR(fmt::format(
-            "Adding of exoplanet system '{}' failed. The system has already been added.",
+            "Adding of exoplanet system '{}' failed. The system has already been added",
             starName
         ));
         return;
@@ -146,16 +146,17 @@ void createExoplanetSystem(const std::string& starName) {
         return;
     }
 
-    const glm::dvec3 starPosInParsec = static_cast<glm::dvec3>(system.starData.position);
+    const glm::vec3 starPosInParsec = system.starData.position;
     if (!isValidPosition(starPosInParsec)) {
         LERROR(fmt::format(
-            "Insufficient data available for exoplanet system: '{}' -"
+            "Insufficient data available for exoplanet system: '{}'. "
             "Could not determine star position", starName
         ));
         return;
     }
 
-    const glm::dvec3 starPos = starPosInParsec * distanceconstants::Parsec;
+    const glm::dvec3 starPos =
+        static_cast<glm::dvec3>(starPosInParsec) * distanceconstants::Parsec;
     const glm::dmat3 exoplanetSystemRotation = computeSystemRotation(starPos);
     const float solarRadius = static_cast<float>(distanceconstants::SolarRadius);
 

@@ -42,7 +42,7 @@ namespace {
 
 namespace openspace::exoplanets {
 
-bool isValidPosition(const glm::vec3 pos) {
+bool isValidPosition(const glm::vec3& pos) {
     return !glm::any(glm::isnan(pos));
 }
 
