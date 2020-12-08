@@ -23,7 +23,7 @@ local OrionClusterStars = {
     },
     GUI = {
         Name = "Orion Nebula Star Cluster",
-        Path = "/Milky Way/Stars",
+        Path = "/Milky Way/Orion",
         Description = [[ In order to have an accurate depiction of the Orion nebula, we
 need to include the star cluster that was birthed from it. We turned to a study of the
 cluster's stellar population by Lynne Hillenbrand, who was working at the University of 

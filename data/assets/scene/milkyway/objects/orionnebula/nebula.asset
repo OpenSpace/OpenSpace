@@ -31,7 +31,7 @@ local NebulaHolder = {
     },
     GUI = {
         Name = "Orion Nebula",
-        Path = "/Milky Way/Objects",
+        Path = "/Milky Way/Orion",
         Description = [[ In the Digital Universe model of the Orion Nebula, we depict the 
 ionization front effectively as a terrain, with a flat Hubble image of the nebula mapped 
 on the undulating surface. In reality, the ionization front has a slight thickness to
@@ -75,7 +75,7 @@ local OrionNebulaModel = {
     },
     GUI = {
         Name = "Orion Nebula Model",
-        Path = "/Milky Way/Objects",
+        Path = "/Milky Way/Orion",
         Hidden = true,
         Description = "Orion Nebula 3D model. See Orion Nebula for description."
     }
@@ -108,7 +108,7 @@ local OrionNebulaShocksModel = {
     },
     GUI = {
         Name = "Orion Nebula Shocks",
-        Path = "/Milky Way/Objects",
+        Path = "/Milky Way/Orion",
         Hidden = false,
         Description = "Orion Nebula Shocks 3D model. See Orion Nebula for description."
     }
@@ -141,7 +141,7 @@ local OrionNebulaProplydsModel = {
     },
     GUI = {
         Name = "Orion Nebula Proplyds",
-        Path = "/Milky Way/Objects",
+        Path = "/Milky Way/Orion",
         Hidden = false,
         Description = "Orion Nebula Proplyds 3D model. See Orion Nebula for description."
     }
@@ -164,6 +164,6 @@ asset.meta = {
     Author = "AMNH Digital Universe",
     URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
     License = "AMNH Digital Universe",
-    Identifiers = {"OrionNebulaHolder", "OrionNebulaModel", "OrionNebulaModel", "OrionNebulaProplydsModel",
+    Identifiers = {"OrionNebulaHolder", "OrionNebulaModel", "OrionNebulaProplydsModel",
         "OrionNebulaShocksModel"}
 }
