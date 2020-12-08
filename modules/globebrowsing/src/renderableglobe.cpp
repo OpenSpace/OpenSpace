@@ -1690,11 +1690,11 @@ void RenderableGlobe::recompileShaders() {
 
     std::vector<std::pair<std::string, std::string>>& pairs =
         preprocessingData.keyValuePairs;
-    
+
     const bool hasHeightLayer = !_layerManager.layerGroup(
         layergroupid::HeightLayers
     ).activeLayers().empty();
-    
+
     pairs.emplace_back("useAccurateNormals",
         std::to_string(_generalProperties.useAccurateNormals && hasHeightLayer)
     );

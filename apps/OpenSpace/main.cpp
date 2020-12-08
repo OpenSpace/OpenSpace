@@ -1188,7 +1188,7 @@ int main(int argc, char** argv) {
         int qac = 0;
         QApplication app(qac, nullptr);
 #endif // __APPLE__
-        
+
         LauncherWindow win(
             !hasProfile,
             *global::configuration,

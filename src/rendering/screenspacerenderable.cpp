@@ -428,7 +428,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     }
 
     if (dictionary.hasKey(UsePerspectiveProjectionInfo.identifier)) {
-        _usePerspectiveProjection = 
+        _usePerspectiveProjection =
             dictionary.value<bool>(UsePerspectiveProjectionInfo.identifier);
     }
 

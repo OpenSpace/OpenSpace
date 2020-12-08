@@ -1351,9 +1351,10 @@ scripting::LuaLibrary SpiceManager::luaLibrary() {
                 "getSpiceBodies",
                 &luascriptfunctions::spiceBodies,
                 {},
-                "{builtInFrames [, printValues]}",
-                "Returns a list of Spice Bodies loaded into the system. Returns SPICE built in frames if builtInFrames"
-                "Returns User loaded frames if !builtInFrames"
+                "{ builtInFrames [, printValues] }",
+                "Returns a list of Spice Bodies loaded into the system. Returns SPICE "
+                "built in frames if builtInFrames. Returns User loaded frames if "
+                "!builtInFrames"
             }
 
         }
