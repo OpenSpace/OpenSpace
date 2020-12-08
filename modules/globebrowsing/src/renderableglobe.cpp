@@ -1811,6 +1811,9 @@ void RenderableGlobe::recompileShaders() {
     // Shadow Mapping Samples
     shaderDictionary.setValue("nShadowSamples", _generalProperties.nShadowSamples - 1);
 
+    // Exclise Shadow Samples
+    int nEclipseShadows = _ellipsoid.shadowConfigurationArray().size();
+    shaderDictionary.setValue("nEclipseShadows", nEclipseShadows - 1);
     //
     // Create local shader
     //

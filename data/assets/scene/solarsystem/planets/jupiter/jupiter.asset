@@ -17,7 +17,34 @@ local Jupiter = {
         Type = "RenderableGlobe",
         Radii = { 71492000.0, 71492000.0, 66854000.0 },
         SegmentsPerPatch = 64,
-        Layers = {}
+        Layers = {},
+        ShadowGroup = {
+            Source1 = {
+                Name = "Sun",
+                -- All radius in meters
+                Radius = 696.3E6
+            },
+            Caster1 = {
+                Name = "Ganymede",
+                -- All radius in meters
+                Radius = 2631000
+            },
+            Caster2 = {
+                Name = "Io",
+                -- All radius in meters
+                Radius = 1821600
+            },
+            Caster3 = {
+                Name = "Europa",
+                -- All radius in meters
+                Radius = 1560800
+            },
+            Caster4 = {
+                Name = "Callisto",
+                -- All radius in meters
+                Radius = 2410000
+            },
+        }
     },
     Tag = { "planet_solarSystem", "planet_giants" },
     GUI = {
