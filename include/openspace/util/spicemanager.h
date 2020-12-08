@@ -544,6 +544,8 @@ public:
         }
     }
 
+    std::string dateFromEphemerisTime(double ephemerisTime, const char* format);
+
     /**
      * Returns the \p position of a \p target body relative to an \p observer in a
      * specific \p referenceFrame, optionally corrected for \p lightTime (planetary

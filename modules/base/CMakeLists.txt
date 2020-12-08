@@ -34,6 +34,7 @@ set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditempropertyvalue.h
   ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemsimulationincrement.h
   ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemspacing.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemtext.h
   ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemvelocity.h
   ${CMAKE_CURRENT_SOURCE_DIR}/lightsource/cameralightsource.h
   ${CMAKE_CURRENT_SOURCE_DIR}/lightsource/scenegraphlightsource.h
@@ -86,6 +87,7 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditempropertyvalue.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemsimulationincrement.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemspacing.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemtext.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemvelocity.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/lightsource/cameralightsource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/lightsource/scenegraphlightsource.cpp

@@ -50,6 +50,8 @@ public:
 private:
     properties::StringProperty _fontName;
     properties::FloatProperty _fontSize;
+    properties::StringProperty _formatString;
+    properties::StringProperty _timeFormat;
 
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 };

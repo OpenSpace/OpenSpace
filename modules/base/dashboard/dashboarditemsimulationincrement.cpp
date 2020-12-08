@@ -32,6 +32,7 @@
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 
 namespace {
@@ -64,6 +65,26 @@ namespace {
         "Requested Unit",
         "If the simplification is disabled, this time unit is used as a destination to "
         "convert the seconds into."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo TransitionFormatInfo = {
+        "TransitionFormat",
+        "Transition Format",
+        "Format string used to format the text used while in a delta time transition, "
+        "that is if the current delta time is being interpolated to reach a target "
+        "delta time. This format gets five parameters in this order:  The target delta "
+        "time value, the target delta time unit, the string 'Paused' if the delta time "
+        "is paused or the empty string otherwise, the current delta time value, and the "
+        "current delta time unit"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo RegularFormatInfo = {
+        "RegularFormat",
+        "Regular Format",
+        "The format string used to format the text if the target delta time is the same "
+        "as the current delta time. This format gets three parameters in this order:  "
+        "The target delta value, the target delta unit, and the string 'Paused' if the "
+        "delta time is paused or the empty string otherwise"
     };
 
     std::vector<std::string> unitList() {
@@ -114,6 +135,18 @@ documentation::Documentation DashboardItemSimulationIncrement::Documentation() {
                 new StringInListVerifier(unitList()),
                 Optional::Yes,
                 RequestedUnitInfo.description
+            },
+            {
+                TransitionFormatInfo.identifier,
+                new StringVerifier,
+                Optional::Yes,
+                TransitionFormatInfo.description
+            },
+            {
+                RegularFormatInfo.identifier,
+                new StringVerifier,
+                Optional::Yes,
+                RegularFormatInfo.description
             }
         }
     };
@@ -126,6 +159,11 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
     , _doSimplification(SimplificationInfo, true)
     , _requestedUnit(RequestedUnitInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _transitionFormat(
+        TransitionFormatInfo,
+        "Simulation increment: {:.1f} {:s} / second{:s} (current: {:.1f} {:s})"
+    )
+    , _regularFormat(RegularFormatInfo, "Simulation increment: {:.1f} {:s} / second{:s}")
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -173,6 +211,19 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
     _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
     addProperty(_requestedUnit);
 
+    if (dictionary.hasKey(TransitionFormatInfo.identifier)) {
+        _transitionFormat = dictionary.value<std::string>(
+            TransitionFormatInfo.identifier
+        );
+    }
+    addProperty(_transitionFormat);
+
+    if (dictionary.hasKey(RegularFormatInfo.identifier)) {
+        _regularFormat = dictionary.value<std::string>(RegularFormatInfo.identifier);
+    }
+    addProperty(_regularFormat);
+
+
     _font = global::fontManager->font(_fontName, _fontSize);
 }
 
@@ -203,28 +254,33 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
 
     std::string pauseText = global::timeManager->isPaused() ? " (Paused)" : "";
 
-    if (targetDt != currentDt && !global::timeManager->isPaused()) {
-        // We are in the middle of a transition
-        RenderFont(
-            *_font,
-            penPosition,
-            fmt::format(
-                "Simulation increment: {:.1f} {:s} / second{:s} (current: {:.1f} {:s})",
-                targetDeltaTime.first, targetDeltaTime.second,
-                pauseText,
-                currentDeltaTime.first, currentDeltaTime.second
-            )
-        );
+    try {
+        if (targetDt != currentDt && !global::timeManager->isPaused()) {
+            // We are in the middle of a transition
+            RenderFont(
+                *_font,
+                penPosition,
+                fmt::format(
+                    _transitionFormat.value().c_str(),
+                    targetDeltaTime.first, targetDeltaTime.second,
+                    pauseText,
+                    currentDeltaTime.first, currentDeltaTime.second
+                )
+            );
+        }
+        else {
+            RenderFont(
+                *_font,
+                penPosition,
+                fmt::format(
+                    _regularFormat.value().c_str(),
+                    targetDeltaTime.first, targetDeltaTime.second, pauseText
+                )
+            );
+        }
     }
-    else {
-        RenderFont(
-            *_font,
-            penPosition,
-            fmt::format(
-                "Simulation increment: {:.1f} {:s} / second{:s}",
-                targetDeltaTime.first, targetDeltaTime.second, pauseText
-            )
-        );
+    catch (const fmt::format_error&) {
+        LERRORC("DashboardItemDate", "Illegal format string");
     }
     penPosition.y -= _font->height();
 }

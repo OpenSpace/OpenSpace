@@ -75,6 +75,7 @@ private:
     properties::FloatProperty _fontSize;
     properties::BoolProperty _doSimplification;
     properties::OptionProperty _requestedUnit;
+    properties::StringProperty _formatString;
 
     Component _source;
     Component _destination;

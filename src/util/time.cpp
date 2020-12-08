@@ -97,8 +97,7 @@ std::string_view Time::UTC() const {
     std::memset(b, 0, 32);
 
     SpiceManager::ref().dateFromEphemerisTime(_time, b, 32, Format);
-
-    return std::string_view(b, 32);
+    return std::string_view(b);
 }
 
 std::string_view Time::ISO8601() const {

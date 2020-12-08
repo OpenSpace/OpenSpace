@@ -101,6 +101,14 @@ namespace {
         "to convert the meters into."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo FormatStringInfo = {
+        "FormatString",
+        "Format String",
+        "The format string that is used for formatting the distance string.  This format "
+        "receives four parameters:  The name of the source, the name of the destination "
+        "the value of the distance and the unit of the distance"
+    };
+
     std::vector<std::string> unitList() {
         std::vector<std::string> res(openspace::DistanceUnits.size());
         std::transform(
@@ -179,6 +187,12 @@ documentation::Documentation DashboardItemDistance::Documentation() {
                 new StringInListVerifier(unitList()),
                 Optional::Yes,
                 RequestedUnitInfo.description
+            },
+            {
+                FormatStringInfo.identifier,
+                new StringVerifier,
+                Optional::Yes,
+                FormatStringInfo.description
             }
         }
     };
@@ -206,6 +220,7 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
         properties::StringProperty(DestinationNodeNameInfo),
         nullptr
     }
+    , _formatString(FormatStringInfo, "Distance from {} to {}: {:f} {}")
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -358,6 +373,11 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
     _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
     addProperty(_requestedUnit);
 
+    if (dictionary.hasKey(FormatStringInfo.identifier)) {
+        _formatString = dictionary.value<std::string>(FormatStringInfo.identifier);
+    }
+    addProperty(_formatString);
+
     _font = global::fontManager->font(_fontName, _fontSize);
 
     _buffer.resize(256);
@@ -445,14 +465,19 @@ void DashboardItemDistance::render(glm::vec2& penPosition) {
     }
 
     std::fill(_buffer.begin(), _buffer.end(), 0);
-    char* end = fmt::format_to(
-        _buffer.data(),
-        "Distance from {} to {}: {:f} {}\0",
-        sourceInfo.second, destinationInfo.second, dist.first, dist.second
-    );
+    try {
+        char* end = fmt::format_to(
+            _buffer.data(),
+            _formatString.value().c_str(),
+            sourceInfo.second, destinationInfo.second, dist.first, dist.second
+        );
 
-    std::string_view text = std::string_view(_buffer.data(), end - _buffer.data());
-    RenderFont(*_font, penPosition, text);
+        std::string_view text = std::string_view(_buffer.data(), end - _buffer.data());
+        RenderFont(*_font, penPosition, text);
+    }
+    catch (const fmt::format_error&) {
+        LERRORC("DashboardItemDate", "Illegal format string");
+    }
     penPosition.y -= _font->height();
 }
 

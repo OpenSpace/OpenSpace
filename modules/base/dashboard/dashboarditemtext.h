@@ -22,14 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___DASHBOARDITEMSIMULATIONINCREMENT___H__
-#define __OPENSPACE_MODULE_BASE___DASHBOARDITEMSIMULATIONINCREMENT___H__
+#ifndef __OPENSPACE_MODULE_BASE___DASHBOARDITEMTEXT___H__
+#define __OPENSPACE_MODULE_BASE___DASHBOARDITEMTEXT___H__
 
 #include <openspace/rendering/dashboarditem.h>
 
-#include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 
 namespace ghoul::fontrendering { class Font; }
@@ -38,12 +36,13 @@ namespace openspace {
 
 namespace documentation { struct Documentation; }
 
-class DashboardItemSimulationIncrement : public DashboardItem {
+class DashboardItemText : public DashboardItem {
 public:
-    DashboardItemSimulationIncrement(const ghoul::Dictionary& dictionary);
-    virtual ~DashboardItemSimulationIncrement() = default;
+    DashboardItemText(const ghoul::Dictionary& dictionary);
+    virtual ~DashboardItemText() = default;
 
     void render(glm::vec2& penPosition) override;
+
     glm::vec2 size() const override;
 
     static documentation::Documentation Documentation();
@@ -51,15 +50,11 @@ public:
 private:
     properties::StringProperty _fontName;
     properties::FloatProperty _fontSize;
-    properties::BoolProperty _doSimplification;
-    properties::OptionProperty _requestedUnit;
-
-    properties::StringProperty _transitionFormat;
-    properties::StringProperty _regularFormat;
-
+    properties::StringProperty _text;
+    
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___DASHBOARDITEMSIMULATIONINCREMENT___H__
+#endif // __OPENSPACE_MODULE_BASE___DASHBOARDITEMTEXT___H__

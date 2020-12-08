@@ -571,6 +571,22 @@ double SpiceManager::ephemerisTimeFromDate(const char* timeString) const {
     return et;
 }
 
+std::string SpiceManager::dateFromEphemerisTime(double ephemerisTime, const char* format)
+{
+    char Buffer[128];
+    std::memset(Buffer, char(0), 128);
+
+    timout_c(ephemerisTime, format, 128, Buffer);
+    if (failed_c()) {
+        throwSpiceError(fmt::format(
+            "Error converting ephemeris time '{}' to date with format '{}'",
+            ephemerisTime, format
+        ));
+    }
+    
+    return std::string(Buffer);
+}
+
 glm::dvec3 SpiceManager::targetPosition(const std::string& target,
                                         const std::string& observer,
                                         const std::string& referenceFrame,
