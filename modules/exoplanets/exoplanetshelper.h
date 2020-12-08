@@ -80,6 +80,8 @@ struct ExoplanetSystem {
     std::vector<ExoplanetDataEntry> planetsData;
 };
 
+bool isValidPosition(const glm::vec3 pos);
+
 // Check if the exoplanet p has sufficient data for visualization
 bool hasSufficientData(const ExoplanetDataEntry& p);
 

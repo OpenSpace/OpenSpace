@@ -106,13 +106,14 @@ ExoplanetSystem findExoplanetSystemInData(std::string_view starName) {
             // Star data - Should not vary between planets, but one data entry might
             // lack data for the host star while another does not. So for every planet,
             // update star data if needed
-            if (p.positionX != system.starData.position.x) {
-                system.starData.position = { p.positionX, p.positionY, p.positionZ };
+            const glm::vec3 pos{ p.positionX, p.positionY, p.positionZ };
+            if (system.starData.position != pos && isValidPosition(pos)) {
+                system.starData.position = pos;
             }
-            if (system.starData.bvColorIndex != p.bmv) {
+            if (system.starData.bvColorIndex != p.bmv && !std::isnan(p.bmv)) {
                 system.starData.bvColorIndex = p.bmv;
             }
-            if (system.starData.radius != p.rStar) {
+            if (system.starData.radius != p.rStar && !std::isnan(p.rStar)) {
                 system.starData.radius = p.rStar;
             }
         }
@@ -146,9 +147,7 @@ void createExoplanetSystem(const std::string& starName) {
     }
 
     const glm::dvec3 starPosInParsec = static_cast<glm::dvec3>(system.starData.position);
-
-    bool positionIsInvalid = glm::any(glm::isnan(starPosInParsec));
-    if (positionIsInvalid) {
+    if (!isValidPosition(starPosInParsec)) {
         LERROR(fmt::format(
             "Insufficient data available for exoplanet system: '{}' -"
             "Could not determine star position", starName

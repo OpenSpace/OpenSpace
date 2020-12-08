@@ -42,15 +42,18 @@ namespace {
 
 namespace openspace::exoplanets {
 
-bool hasSufficientData(const ExoplanetDataEntry& p) {
-    bool invalidPos = std::isnan(p.positionX)
-        || std::isnan(p.positionY)
-        || std::isnan(p.positionZ);
+bool isValidPosition(const glm::vec3 pos) {
+    return !glm::any(glm::isnan(pos));
+}
 
+bool hasSufficientData(const ExoplanetDataEntry& p) {
+    const glm::vec3 starPosition{ p.positionX , p.positionY, p.positionZ };
+
+    bool validStarPosition = isValidPosition(starPosition);
     bool hasSemiMajorAxis = !std::isnan(p.a);
     bool hasOrbitalPeriod = !std::isnan(p.per);
 
-    return !invalidPos && hasSemiMajorAxis && hasOrbitalPeriod;
+    return validStarPosition && hasSemiMajorAxis && hasOrbitalPeriod;
 }
 
 glm::vec3 starColor(float bv) {
