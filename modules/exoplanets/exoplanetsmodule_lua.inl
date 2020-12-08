@@ -348,6 +348,12 @@ void createExoplanetSystem(const std::string& starName) {
             "}"
         "}";
 
+        openspace::global::scriptEngine->queueScript(
+            "openspace.addSceneGraphNode(" + planetTrailNode + ");"
+            "openspace.addSceneGraphNode(" + planetNode + ");",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+
         bool hasUpperAUncertainty = !std::isnan(planet.aUpper);
         bool hasLowerAUncertainty = !std::isnan(planet.aLower);
 
@@ -388,9 +394,7 @@ void createExoplanetSystem(const std::string& starName) {
             "}";
 
             openspace::global::scriptEngine->queueScript(
-                "openspace.addSceneGraphNode(" + discNode + ");"
-                "openspace.addSceneGraphNode(" + planetTrailNode + ");"
-                "openspace.addSceneGraphNode(" + planetNode + ");",
+                "openspace.addSceneGraphNode(" + discNode + ");",
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
         }
