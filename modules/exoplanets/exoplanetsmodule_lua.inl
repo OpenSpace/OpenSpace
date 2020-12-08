@@ -56,33 +56,15 @@ constexpr const char* NoDataTextureFile =
 constexpr const char* DiscTextureFile =
     "${SYNC}/http/exoplanets_textures/1/disc_texture.png";
 
-void createExoplanetSystem(std::string_view starName) {
-    // If user have given name as in EOD, change it to speck-name
-    const std::string starNameSpeck = std::string(speckStarName(starName));
-
-    const std::string starIdentifier = createIdentifier(starNameSpeck);
-
-    std::string sanitizedStarName = starNameSpeck;
-    sanitizeNameString(sanitizedStarName);
-
-    const std::string guiPath = ExoplanetsGuiPath + sanitizedStarName;
-
-    SceneGraphNode* existingStarNode = sceneGraphNode(starIdentifier);
-    if (existingStarNode) {
-        LERROR(fmt::format(
-            "Adding of exoplanet system '{}' failed. The system has already been added.",
-            starName
-        ));
-        return;
-    }
+ExoplanetSystem findExoplanetSystemInData(std::string_view starName) {
+    ExoplanetSystem system;
 
     std::ifstream data(absPath(ExoplanetsDataPath), std::ios::in | std::ios::binary);
-
     if (!data.good()) {
         LERROR(fmt::format(
             "Failed to open exoplanets data file: '{}'", absPath(ExoplanetsDataPath)
         ));
-        return;
+        return ExoplanetSystem();
     }
 
     std::ifstream lut(absPath(LookUpTablePath));
@@ -90,86 +72,110 @@ void createExoplanetSystem(std::string_view starName) {
         LERROR(fmt::format(
             "Failed to open exoplanets look-up table: '{}'", absPath(LookUpTablePath)
         ));
-        return;
+        return ExoplanetSystem();
     }
 
     // 1. search lut for the starname and return the corresponding location
     // 2. go to that location in the data file
     // 3. read sizeof(exoplanet) bytes into an exoplanet object.
-    Exoplanet p;
+    ExoplanetDataEntry p;
     std::string line;
-    bool found = false;
-
-    std::vector<Exoplanet> planetSystem;
-    std::vector<std::string> planetNames;
-
     while (getline(lut, line)) {
         std::istringstream ss(line);
         std::string name;
         getline(ss, name, ',');
 
-        if (name.compare(0, name.length() - 2, starNameSpeck) == 0) {
+        if (name.substr(0, name.length() - 2) == starName) {
             std::string location_s;
             getline(ss, location_s);
             long location = std::stol(location_s.c_str());
 
             data.seekg(location);
-            data.read(reinterpret_cast<char*>(&p), sizeof(Exoplanet));
+            data.read(reinterpret_cast<char*>(&p), sizeof(ExoplanetDataEntry));
 
             sanitizeNameString(name);
-            planetNames.push_back(name);
-            planetSystem.push_back(p);
-            found = true;
 
             if (!hasSufficientData(p)) {
-                LERROR(fmt::format(
-                    "Insufficient data available for exoplanet system: '{}'",
-                    starName
-                ));
-                return;
+                LWARNING(fmt::format("Insufficient data for exoplanet: '{}'", name));
+                continue;
+            }
+
+            system.planetNames.push_back(name);
+            system.planetsData.push_back(p);
+
+            // Star data - Should not vary between planets, but one data entry might
+            // lack data for the host star while another does not. So for every planet,
+            // update star data if needed
+            const glm::vec3 pos{ p.positionX, p.positionY, p.positionZ };
+            if (system.starData.position != pos && isValidPosition(pos)) {
+                system.starData.position = pos;
+            }
+            if (system.starData.bvColorIndex != p.bmv && !std::isnan(p.bmv)) {
+                system.starData.bvColorIndex = p.bmv;
+            }
+            if (system.starData.radius != p.rStar && !std::isnan(p.rStar)) {
+                system.starData.radius = p.rStar;
             }
         }
     }
 
-    data.close();
-    lut.close();
+    system.starName = starName;
+    return std::move(system);
+}
 
-    if (!found) {
-        LERROR(fmt::format("No star with the provided name was found: '{}'", starName));
+void createExoplanetSystem(const std::string& starName) {
+    const std::string starIdentifier = createIdentifier(starName);
+
+    std::string sanitizedStarName = starName;
+    sanitizeNameString(sanitizedStarName);
+
+    const std::string guiPath = ExoplanetsGuiPath + sanitizedStarName;
+
+    SceneGraphNode* existingStarNode = sceneGraphNode(starIdentifier);
+    if (existingStarNode) {
+        LERROR(fmt::format(
+            "Adding of exoplanet system '{}' failed. The system has already been added",
+            starName
+        ));
         return;
     }
 
-    const glm::dvec3 starPosition = glm::dvec3(
-        p.positionX * distanceconstants::Parsec,
-        p.positionY * distanceconstants::Parsec,
-        p.positionZ * distanceconstants::Parsec
-    );
+    ExoplanetSystem system = findExoplanetSystemInData(starName);
+    if (system.planetNames.empty()) {
+        LERROR(fmt::format("Exoplanet system '{}' could not be found", starName));
+        return;
+    }
 
-    const glm::dmat3 exoplanetSystemRotation = computeSystemRotation(starPosition);
+    const glm::vec3 starPosInParsec = system.starData.position;
+    if (!isValidPosition(starPosInParsec)) {
+        LERROR(fmt::format(
+            "Insufficient data available for exoplanet system: '{}'. "
+            "Could not determine star position", starName
+        ));
+        return;
+    }
+
+    const glm::dvec3 starPos =
+        static_cast<glm::dvec3>(starPosInParsec) * distanceconstants::Parsec;
+    const glm::dmat3 exoplanetSystemRotation = computeSystemRotation(starPos);
+    const float solarRadius = static_cast<float>(distanceconstants::SolarRadius);
 
     // Star
-    float radiusInMeter = static_cast<float>(distanceconstants::SolarRadius);
-    if (!std::isnan(p.rStar)) {
-        radiusInMeter *= p.rStar;
+    float radiusInMeter = solarRadius;
+    if (!std::isnan(system.starData.radius)) {
+        radiusInMeter *= system.starData.radius;
     }
 
     std::string colorLayers;
-    if (!std::isnan(p.bmv)) {
-        // @TODO (emmbr, 2020-10-12) should also check the bv value for the siblings.
-        // The data on the planets is derived from different sources, so while this
-        // planet has a nan value, another might not
-        const std::string color = starColor(p.bmv);
+    const float bv = system.starData.bvColorIndex;
 
-        if (color.empty()) {
-            LERROR("Error occurred when computing star color");
-            return;
-        }
-
+    if (!std::isnan(bv)) {
+        const glm::vec3 color = starColor(bv);
         colorLayers =
             "{"
                 "Identifier = 'StarColor',"
                 "Type = 'SolidColor',"
-                "Color = " + color + ","
+                "Color = " + ghoul::to_string(color) + ","
                 "BlendMode = 'Normal',"
                 "Enabled = true"
             "},"
@@ -213,7 +219,7 @@ void createExoplanetSystem(std::string_view starName) {
             "},"
             "Translation = {"
                 "Type = 'StaticTranslation',"
-                "Position = " + ghoul::to_string(starPosition) + ""
+                "Position = " + ghoul::to_string(starPos) + ""
             "}"
         "},"
         "Tag = {'exoplanet_system'},"
@@ -229,9 +235,9 @@ void createExoplanetSystem(std::string_view starName) {
     );
 
     // Planets
-    for (size_t i = 0; i < planetSystem.size(); i++) {
-        Exoplanet planet = planetSystem[i];
-        const std::string planetName = planetNames[i];
+    for (size_t i = 0; i < system.planetNames.size(); i++) {
+        ExoplanetDataEntry planet = system.planetsData[i];
+        const std::string planetName = system.planetNames[i];
 
         if (std::isnan(planet.ecc)) {
             planet.ecc = 0.f;
@@ -259,14 +265,12 @@ void createExoplanetSystem(std::string_view starName) {
             sEpoch = "2009-05-19T07:11:34.080";
         }
 
-        float planetRadius;
-        std::string enabled;
-
         const float astronomicalUnit =
             static_cast<float>(distanceconstants::AstronomicalUnit);
-        const float solarRadius = static_cast<float>(distanceconstants::SolarRadius);
         const float jupiterRadius = static_cast<float>(distanceconstants::JupiterRadius);
 
+        float planetRadius;
+        std::string enabled;
         if (std::isnan(planet.r)) {
             if (std::isnan(planet.rStar)) {
                 planetRadius = planet.a * 0.001f * astronomicalUnit;
@@ -281,7 +285,7 @@ void createExoplanetSystem(std::string_view starName) {
             enabled = "true";
         }
 
-        const float period = static_cast<float>(planet.per * SecondsPerDay);
+        const float periodInSeconds = static_cast<float>(planet.per * SecondsPerDay);
         const float semiMajorAxisInMeter = planet.a * astronomicalUnit;
         const float semiMajorAxisInKm = semiMajorAxisInMeter * 0.001f;
 
@@ -296,7 +300,7 @@ void createExoplanetSystem(std::string_view starName) {
             "ArgumentOfPeriapsis = " + std::to_string(planet.omega) + ","
             "MeanAnomaly = 0.0,"
             "Epoch = '" + sEpoch + "'," //TT. JD to YYYY MM DD hh:mm:ss
-            "Period = " + std::to_string(period) + ""
+            "Period = " + std::to_string(periodInSeconds) + ""
         "}";
 
         const std::string planetNode = "{"
@@ -306,7 +310,7 @@ void createExoplanetSystem(std::string_view starName) {
             "Renderable = {"
                 "Type = 'RenderableGlobe',"
                 "Enabled = " + enabled + ","
-                "Radii = " + std::to_string(planetRadius) + "," //R. in meters
+                "Radii = " + std::to_string(planetRadius) + "," // in meters
                 "SegmentsPerPatch = 64,"
                 "PerformShading = false,"
                 "Layers = {}"
@@ -328,11 +332,6 @@ void createExoplanetSystem(std::string_view starName) {
             trailResolution *= 2;
         }
 
-        openspace::global::scriptEngine->queueScript(
-            "openspace.addSceneGraphNode(" + planetNode + ");",
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
-
         const std::string planetTrailNode = "{"
             "Identifier = '" + planetIdentifier + "_Trail',"
             "Parent = '" + starIdentifier + "',"
@@ -351,8 +350,9 @@ void createExoplanetSystem(std::string_view starName) {
         "}";
 
         openspace::global::scriptEngine->queueScript(
-            "openspace.addSceneGraphNode(" + planetTrailNode + ");",
-            openspace::scripting::ScriptEngine::RemoteScripting::Yes
+            "openspace.addSceneGraphNode(" + planetTrailNode + ");"
+            "openspace.addSceneGraphNode(" + planetNode + ");",
+            scripting::ScriptEngine::RemoteScripting::Yes
         );
 
         bool hasUpperAUncertainty = !std::isnan(planet.aUpper);
@@ -441,8 +441,7 @@ int removeExoplanetSystem(lua_State* L) {
 
     const int StringLocation = -1;
     const std::string starName = luaL_checkstring(L, StringLocation);
-    const std::string starNameSpeck = std::string(speckStarName(starName));
-    const std::string starIdentifier = createIdentifier(starNameSpeck);
+    const std::string starIdentifier = createIdentifier(starName);
 
     openspace::global::scriptEngine->queueScript(
         "openspace.removeSceneGraphNode('" + starIdentifier + "');",
@@ -477,7 +476,7 @@ std::vector<std::string> hostStarsWithSufficientData() {
     lookupTableFile.seekg(0);
     names.reserve(nExoplanets);
 
-    Exoplanet p;
+    ExoplanetDataEntry p;
     while (getline(lookupTableFile, line)) {
         std::stringstream ss(line);
         std::string name;
@@ -492,7 +491,7 @@ std::vector<std::string> hostStarsWithSufficientData() {
         long location = std::stol(location_s.c_str());
 
         data.seekg(location);
-        data.read(reinterpret_cast<char*>(&p), sizeof(Exoplanet));
+        data.read(reinterpret_cast<char*>(&p), sizeof(ExoplanetDataEntry));
 
         if (hasSufficientData(p)) {
             names.push_back(name);
@@ -541,4 +540,5 @@ int listAvailableExoplanetSystems(lua_State* L) {
 
     return 0;
 }
+
 } //namespace openspace::exoplanets::luascriptfunctions

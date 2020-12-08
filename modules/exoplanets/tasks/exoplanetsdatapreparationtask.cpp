@@ -153,7 +153,7 @@ void ExoplanetsDataPreparationTask::perform(
         return result;
     };
 
-    Exoplanet p;
+    ExoplanetDataEntry p;
     std::string data;
     int exoplanetCount = 0;
     while (getline(inputDataFile, planetRow)) {
@@ -161,7 +161,7 @@ void ExoplanetsDataPreparationTask::perform(
         progressCallback(static_cast<float>(exoplanetCount) / static_cast<float>(total));
 
         std::string component;
-        std::string speckStarname;
+        std::string starName;
 
         float ra = std::numeric_limits<float>::quiet_NaN();     // decimal degrees
         float dec = std::numeric_limits<float>::quiet_NaN();    // decimal degrees
@@ -248,9 +248,8 @@ void ExoplanetsDataPreparationTask::perform(
             }
             // Star - name and position
             else if (column == "hostname") {
-                std::string name = readStringData(data);
-                speckStarname = std::string(speckStarName(name));
-                glm::vec3 position = starPosition(speckStarname);
+                starName = readStringData(data);
+                glm::vec3 position = starPosition(starName);
                 p.positionX = position[0];
                 p.positionY = position[1];
                 p.positionZ = position[2];
@@ -308,10 +307,10 @@ void ExoplanetsDataPreparationTask::perform(
 
         // Create look-up table
         long pos = static_cast<long>(binFile.tellp());
-        std::string planetName = speckStarname + " " + component;
+        std::string planetName = starName + " " + component;
         lutFile << planetName << "," << pos << std::endl;
 
-        binFile.write(reinterpret_cast<char*>(&p), sizeof(Exoplanet));
+        binFile.write(reinterpret_cast<char*>(&p), sizeof(ExoplanetDataEntry));
     }
 
     progressCallback(1.f);

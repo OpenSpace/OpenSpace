@@ -27,10 +27,11 @@
 
 #include <ghoul/glm.h>
 #include <string>
+#include <vector>
 
 namespace openspace::exoplanets {
 
-struct Exoplanet {
+struct ExoplanetDataEntry {
     float a;            // Orbital semi-major axis in AU
     double aUpper;      // Upper uncertainty of orbital semi-major axis
     double aLower;      // Lower uncertainty of orbital semi-major axis
@@ -69,17 +70,26 @@ struct Exoplanet {
     float positionZ = std::numeric_limits<float>::quiet_NaN();
 };
 
-// Convert csv-file specific names to the corresponding name in the speck data file
-std::string_view speckStarName(std::string_view name);
+struct StarData {
+    glm::vec3 position; // In parsec
+    float radius;       // In solar radii
+    float bvColorIndex;
+};
 
-// Convert speck-file specific names to the corresponding name in the csv data file
-std::string_view csvStarName(std::string_view name);
+struct ExoplanetSystem {
+    std::string starName;
+    StarData starData;
+    std::vector<std::string> planetNames;
+    std::vector<ExoplanetDataEntry> planetsData;
+};
+
+bool isValidPosition(const glm::vec3& pos);
 
 // Check if the exoplanet p has sufficient data for visualization
-bool hasSufficientData(const Exoplanet& p);
+bool hasSufficientData(const ExoplanetDataEntry& p);
 
 // Compute star color in RGB from b-v color index
-std::string starColor(float bv);
+glm::vec3 starColor(float bv);
 
 glm::dmat4 computeOrbitPlaneRotationMatrix(float i, float bigom, float omega);
 
