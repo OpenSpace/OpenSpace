@@ -56,13 +56,10 @@ constexpr const char* NoDataTextureFile =
 constexpr const char* DiscTextureFile =
     "${SYNC}/http/exoplanets_textures/1/disc_texture.png";
 
-void createExoplanetSystem(std::string_view starName) {
-    // If user have given name as in EOD, change it to speck-name
-    const std::string starNameSpeck = std::string(speckStarName(starName));
+void createExoplanetSystem(const std::string& starName) {
+    const std::string starIdentifier = createIdentifier(starName);
 
-    const std::string starIdentifier = createIdentifier(starNameSpeck);
-
-    std::string sanitizedStarName = starNameSpeck;
+    std::string sanitizedStarName = starName;
     sanitizeNameString(sanitizedStarName);
 
     const std::string guiPath = ExoplanetsGuiPath + sanitizedStarName;
@@ -108,7 +105,7 @@ void createExoplanetSystem(std::string_view starName) {
         std::string name;
         getline(ss, name, ',');
 
-        if (name.compare(0, name.length() - 2, starNameSpeck) == 0) {
+        if (name.compare(0, name.length() - 2, starName) == 0) {
             std::string location_s;
             getline(ss, location_s);
             long location = std::stol(location_s.c_str());
@@ -441,8 +438,7 @@ int removeExoplanetSystem(lua_State* L) {
 
     const int StringLocation = -1;
     const std::string starName = luaL_checkstring(L, StringLocation);
-    const std::string starNameSpeck = std::string(speckStarName(starName));
-    const std::string starIdentifier = createIdentifier(starNameSpeck);
+    const std::string starIdentifier = createIdentifier(starName);
 
     openspace::global::scriptEngine->queueScript(
         "openspace.removeSceneGraphNode('" + starIdentifier + "');",

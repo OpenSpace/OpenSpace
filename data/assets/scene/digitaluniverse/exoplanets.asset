@@ -13,7 +13,7 @@ local speck = asset.syncedResource({
     Name = "Exoplanets Speck Files",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_exoplanets_speck",
-    Version = 1
+    Version = 2
 })
 
 local object = {
