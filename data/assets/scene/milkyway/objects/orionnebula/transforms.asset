@@ -19,7 +19,8 @@ local NebulaPosition = {
     GUI = {
         Name = "Orion Nebula Position",
         Path = "/Milky Way/Objects",
-        Hidden = true
+        Hidden = true,
+        Description = "Static position for Orion Nebula"
     }
 }
 
