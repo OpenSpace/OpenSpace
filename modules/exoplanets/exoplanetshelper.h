@@ -70,7 +70,7 @@ struct Exoplanet {
 bool hasSufficientData(const Exoplanet& p);
 
 // Compute star color in RGB from b-v color index
-std::string starColor(float bv);
+glm::vec3 starColor(float bv);
 
 glm::dmat4 computeOrbitPlaneRotationMatrix(float i, float bigom, float omega);
 

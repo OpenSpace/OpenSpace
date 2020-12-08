@@ -53,7 +53,7 @@ bool hasSufficientData(const Exoplanet& p) {
     return !invalidPos && hasSemiMajorAxis && hasOrbitalPeriod;
 }
 
-std::string starColor(float bv) {
+glm::vec3 starColor(float bv) {
     std::ifstream colorMap(absPath(BvColormapPath), std::ios::in);
 
     if (!colorMap.good()) {
@@ -61,7 +61,7 @@ std::string starColor(float bv) {
             "Failed to open colormap data file: '{}'",
             absPath(BvColormapPath)
         ));
-        return "";
+        return glm::vec3(0.f, 0.f, 0.f);
     }
 
     const int t = static_cast<int>(round(((bv + 0.4) / (2.0 + 0.4)) * 255));
@@ -72,12 +72,10 @@ std::string starColor(float bv) {
     colorMap.close();
 
     std::istringstream colorStream(color);
-    std::string r, g, b;
-    getline(colorStream, r, ' ');
-    getline(colorStream, g, ' ');
-    getline(colorStream, b, ' ');
+    float r, g, b;
+    colorStream >> r >> g >> b;
 
-    return fmt::format("{{ {}, {}, {} }}", r, g, b);
+    return glm::vec3(r, g, b);
 }
 
 glm::dmat4 computeOrbitPlaneRotationMatrix(float i, float bigom, float omega) {
