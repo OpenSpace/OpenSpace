@@ -27,6 +27,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/sessionrecording.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -494,9 +495,14 @@ void Scene::addPropertyInterpolation(properties::Property* prop, float durationS
         ghoul::easingFunction<float>(easingFunction);
 
     // First check if the current property already has an interpolation information
+    std::chrono::steady_clock::time_point now = (
+        global::sessionRecording->isSavingFramesDuringPlayback()     ?
+        global::sessionRecording->currentPlaybackInterpolationTime() :
+        std::chrono::steady_clock::now()
+    );
     for (PropertyInterpolationInfo& info : _propertyInterpolationInfos) {
         if (info.prop == prop) {
-            info.beginTime = std::chrono::steady_clock::now();
+            info.beginTime = now;
             info.durationSeconds = durationSeconds;
             info.easingFunction = func;
             // If we found it, we can break since we make sure that each property is only
@@ -543,8 +549,13 @@ void Scene::updateInterpolations() {
 
     using namespace std::chrono;
 
-    auto now = steady_clock::now();
-
+    steady_clock::time_point now;
+    if (global::sessionRecording->isSavingFramesDuringPlayback()) {
+        now = global::sessionRecording->currentPlaybackInterpolationTime();
+    }
+    else {
+        now = steady_clock::now();
+    }
     // First, let's update the properties
     for (PropertyInterpolationInfo& i : _propertyInterpolationInfos) {
         long long usPassed = duration_cast<std::chrono::microseconds>(

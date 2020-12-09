@@ -30,6 +30,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/scripting/lualibrary.h>
 #include <vector>
+#include <chrono>
 
 namespace openspace::interaction {
 
@@ -116,6 +117,20 @@ public:
      * Fixed delta time set by user for use during saving of frame during playback mode
      */
     double fixedDeltaTimeDuringFrameOutput() const;
+
+    /**
+     * Returns the number of microseconds that have elapsed since playback started, if
+     * playback is set to be in the mode where a screenshot is captured with every
+     * rendered frame (enableTakeScreenShotDuringPlayback() is used to enable this mode).
+     * At the start of playback, this timer is set to the current steady_clock value.
+     * However, during playback it is incremented by the fixed framerate of the playback
+     * rather than the actual clock value (as in normal operation).
+     *
+     * \returns number of microseconds elapsed since playback started in terms of the
+     *          number of rendered frames multiplied by the fixed time increment per
+     *          frame
+     */
+    std::chrono::steady_clock::time_point currentPlaybackInterpolationTime() const;
 
     /**
      * Starts a recording session, which will save data to the provided filename
@@ -627,6 +642,9 @@ protected:
     bool _saveRenderingDuringPlayback = false;
     double _saveRenderingDeltaTime = 1.0 / 30.0;
     double _saveRenderingCurrentRecordedTime;
+    std::chrono::steady_clock::duration _saveRenderingDeltaTime_interpolation_usec;
+    std::chrono::steady_clock::time_point _saveRenderingCurrentRecordedTime_interpolation;
+    long long _saveRenderingClockInterpolation_countsPerSec;
 
     unsigned char _keyframeBuffer[_saveBufferMaxSize_bytes];
 

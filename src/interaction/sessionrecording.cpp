@@ -324,11 +324,15 @@ bool SessionRecording::startPlayback(std::string& filename,
         return false;
     }
     //Set time reference mode
+    using namespace std::chrono;
     double now = global::windowDelegate->applicationTime();
     _timestampPlaybackStarted_application = now;
     _timestampPlaybackStarted_simulation = global::timeManager->time().j2000Seconds();
     _timestampApplicationStarted_simulation = _timestampPlaybackStarted_simulation - now;
     _playbackTimeReferenceMode = timeMode;
+    _saveRenderingCurrentRecordedTime_interpolation = steady_clock::now();
+    _saveRenderingClockInterpolation_countsPerSec =
+        system_clock::duration::period::den / system_clock::duration::period::num;
 
     //Set playback flags to true for all modes
     _playbackActive_camera = true;
@@ -407,6 +411,8 @@ void SessionRecording::signalPlaybackFinishedForComponent(RecordedType type) {
 void SessionRecording::enableTakeScreenShotDuringPlayback(int fps) {
     _saveRenderingDuringPlayback = true;
     _saveRenderingDeltaTime = 1.0 / fps;
+    _saveRenderingDeltaTime_interpolation_usec =
+        std::chrono::microseconds(static_cast<long>(_saveRenderingDeltaTime * 1000000));
 }
 
 void SessionRecording::disableTakeScreenShotDuringPlayback() {
@@ -907,6 +913,10 @@ double SessionRecording::fixedDeltaTimeDuringFrameOutput() const {
     }
 }
 
+std::chrono::steady_clock::time_point SessionRecording::currentPlaybackInterpolationTime() const {
+    return _saveRenderingCurrentRecordedTime_interpolation;
+}
+
 bool SessionRecording::playbackCamera() {
     Timestamps times;
     datamessagestructures::CameraKeyframe kf;
@@ -1388,6 +1398,8 @@ bool SessionRecording::addKeyframeToTimeline(RecordedType type,
 }
 
 void SessionRecording::moveAheadInTime() {
+    using namespace std::chrono;
+
     double currTime = currentTime();
     lookForNonCameraKeyframesThatHaveComeDue(currTime);
     updateCameraWithOrWithoutNewKeyframes(currTime);
@@ -1398,6 +1410,8 @@ void SessionRecording::moveAheadInTime() {
             global::navigationHandler->orbitalNavigator().anchorNode();
         const Renderable* focusRenderable = focusNode->renderable();
         if (!focusRenderable || focusRenderable->renderedWithDesiredData()) {
+            _saveRenderingCurrentRecordedTime_interpolation +=
+                _saveRenderingDeltaTime_interpolation_usec;
             _saveRenderingCurrentRecordedTime += _saveRenderingDeltaTime;
             global::renderEngine->takeScreenshot();
         }
