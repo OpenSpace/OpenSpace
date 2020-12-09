@@ -146,17 +146,10 @@ function (handle_modules internal_module_path external_modules_paths all_enabled
         end_header("End: Module ${name}")
         message(STATUS "")
 
-        # Only link openspace-core against the library if it has been set STATIC
-        # get_target_property(library_type ${library_name} TYPE)
-        # if (NOT ${library_type} STREQUAL "SHARED_LIBRARY")
-            # target_link_libraries(openspace-core PRIVATE ${library_name})
-        # endif()
-
+        # This is just a hack as a dependency from kameleon->core has been introduced that
+        # should be removed
         if (${library_name} STREQUAL "openspace-module-kameleon")
             target_link_libraries(openspace-core PRIVATE openspace-module-kameleon)
-        endif ()
-        if (${library_name} STREQUAL "openspace-module-webbrowser")
-            target_link_libraries(openspace-core PRIVATE openspace-module-webbrowser)
         endif ()
 
         create_define_name(${name} define_name)

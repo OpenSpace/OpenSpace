@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_MODULE_WEBBROWSER___WEBBROWSERMODULE___H__
 #define __OPENSPACE_MODULE_WEBBROWSER___WEBBROWSERMODULE___H__
 
-#include <modules/webbrowser/include/eventhandler.h>
 #include <openspace/util/openspacemodule.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -33,7 +32,9 @@
 
 namespace openspace {
 
+class BrowserInstance;
 class CefHost;
+class EventHandler;
 
 namespace webbrowser {
     extern std::chrono::microseconds interval;
@@ -51,7 +52,6 @@ public:
     void addBrowser(BrowserInstance*);
     void removeBrowser(BrowserInstance*);
 
-    EventHandler eventHandler();
     void attachEventHandler(BrowserInstance* browserInstance);
     void detachEventHandler();
     bool isEnabled() const;
@@ -73,7 +73,7 @@ private:
     properties::FloatProperty _browserUpdateInterval;
 
     std::vector<BrowserInstance*> _browsers;
-    EventHandler _eventHandler;
+    std::unique_ptr<EventHandler> _eventHandler;
     std::unique_ptr<CefHost> _cefHost;
     std::string _webHelperLocation;
     bool _enabled = true;
