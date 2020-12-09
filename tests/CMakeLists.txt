@@ -53,6 +53,13 @@ target_include_directories(OpenSpaceTest PUBLIC
 target_compile_definitions(OpenSpaceTest PUBLIC "GHL_THROW_ON_ASSERT")
 target_link_libraries(OpenSpaceTest PUBLIC openspace-core)
 
+foreach (library_name ${all_enabled_modules})
+    get_target_property(library_type ${library_name} TYPE)
+    if (NOT ${library_type} STREQUAL "SHARED_LIBRARY")
+        target_link_libraries(OpenSpaceTest PRIVATE ${library_name})
+    endif()
+endforeach ()
+
 if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
   # Add the CEF binary distribution's cmake/ directory to the module path and
   # find CEF to initialize it properly.

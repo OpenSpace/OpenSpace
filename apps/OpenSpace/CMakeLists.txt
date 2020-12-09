@@ -27,6 +27,9 @@ include(${GHOUL_BASE_DIR}/support/cmake/message_macros.cmake)
 include(${OPENSPACE_CMAKE_EXT_DIR}/application_definition.cmake)
 include(${OPENSPACE_CMAKE_EXT_DIR}/global_variables.cmake)
 
+# We are getting all_enabled_modules from the handle_applications.cmake file which gets
+# it from the main CMakeLists file
+
 #####
 # OpenVR
 #####
@@ -102,6 +105,13 @@ target_include_directories(
 )
 
 target_link_libraries(OpenSpace PUBLIC openspace-core ${OPENVR_LIBRARY} ${SPOUT_LIBRARY})
+
+foreach (library_name ${all_enabled_modules})
+    get_target_property(library_type ${library_name} TYPE)
+    if (NOT ${library_type} STREQUAL "SHARED_LIBRARY")
+        target_link_libraries(OpenSpace PRIVATE ${library_name})
+    endif()
+endforeach ()
 
 target_compile_definitions(OpenSpace PRIVATE
   ${SGCT_OPENVR_DEFINITIONS}

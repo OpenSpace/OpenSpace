@@ -218,12 +218,13 @@ endif ()
 
 begin_header("Configuring Modules")
 set(OPENSPACE_EXTERNAL_MODULES_PATHS "" CACHE STRING "List of external modules")
-handle_modules("${OPENSPACE_BASE_DIR}/modules" "${OPENSPACE_EXTERNAL_MODULES_PATHS}")
+set(all_enabled_modules "")
+handle_modules("${OPENSPACE_BASE_DIR}/modules" "${OPENSPACE_EXTERNAL_MODULES_PATHS}" all_enabled_modules)
 end_header("End: Configuring Modules")
 message(STATUS "")
 
 begin_header("Configuring Applications")
-handle_applications()
+handle_applications("${all_enabled_modules}")
 end_header("End: Configuring Applications")
 message(STATUS "")
 

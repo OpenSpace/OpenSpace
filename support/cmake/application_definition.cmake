@@ -39,4 +39,6 @@ function (create_new_application application_name)
         )
         ghl_copy_shared_libraries(${application_name} ${OPENSPACE_EXT_DIR}/ghoul)
     endif ()
+
+    target_link_libraries(${application_name} PUBLIC openspace-module-base)
 endfunction ()

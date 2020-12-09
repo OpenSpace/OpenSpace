@@ -23,7 +23,7 @@
 ##########################################################################################
 
 
-function (handle_applications)
+function (handle_applications all_enabled_modules)
     # Get a list of all of the application directories
     file(GLOB appDirs RELATIVE ${OPENSPACE_APPS_DIR} ${OPENSPACE_APPS_DIR}/*)
     # Remove the .DS_Store present on Mac

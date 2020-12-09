@@ -25,7 +25,8 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/global_variables.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/message_macros.cmake)
 
-function (handle_modules internal_module_path external_modules_paths)
+function (handle_modules internal_module_path external_modules_paths all_enabled_modules_out)
+    set(all_enabled_modules "")
     #
     # Step 1:  Get a list of all modules
     #
@@ -139,16 +140,24 @@ function (handle_modules internal_module_path external_modules_paths)
         list(GET enabled_module_paths ${val} path)
 
         create_library_name(${name} library_name)
+        list(APPEND all_enabled_modules "${library_name}")
         begin_header("Module ${name} (${library_name})")
         add_subdirectory(${path})
         end_header("End: Module ${name}")
         message(STATUS "")
 
         # Only link openspace-core against the library if it has been set STATIC
-        get_target_property(library_type ${library_name} TYPE)
-        if (NOT ${library_type} STREQUAL "SHARED_LIBRARY")
-            target_link_libraries(openspace-core PUBLIC ${library_name})
-        endif()
+        # get_target_property(library_type ${library_name} TYPE)
+        # if (NOT ${library_type} STREQUAL "SHARED_LIBRARY")
+            # target_link_libraries(openspace-core PRIVATE ${library_name})
+        # endif()
+
+        if (${library_name} STREQUAL "openspace-module-kameleon")
+            target_link_libraries(openspace-core PRIVATE openspace-module-kameleon)
+        endif ()
+        if (${library_name} STREQUAL "openspace-module-webbrowser")
+            target_link_libraries(openspace-core PRIVATE openspace-module-webbrowser)
+        endif ()
 
         create_define_name(${name} define_name)
         target_compile_definitions(openspace-core PUBLIC "${define_name}")
@@ -233,6 +242,9 @@ function (handle_modules internal_module_path external_modules_paths)
         ${OPENSPACE_CMAKE_EXT_DIR}/module_path.template
         ${CMAKE_BINARY_DIR}/_generated/include/openspace/modulepath.h
     )
+
+    # Return the list of enabled modules to the caller
+    set(${all_enabled_modules_out} ${all_enabled_modules} PARENT_SCOPE)
 endfunction()
 
 
