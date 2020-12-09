@@ -220,7 +220,9 @@ ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
     addProperty(_distanceFraction);
 }
 
-void ShadowComponent::initialize() {}
+void ShadowComponent::initialize() {
+    buildDDepthTexture();
+}
 
 bool ShadowComponent::isReady() const {
     return true;
@@ -236,6 +238,7 @@ void ShadowComponent::initializeGL() {
 void ShadowComponent::deinitializeGL() {
     glDeleteTextures(1, &_shadowDepthTexture);
     glDeleteTextures(1, &_positionInLightSpaceTexture);
+    glDeleteTextures(1, &_dDepthTexture);
     glDeleteFramebuffers(1, &_shadowFBO);
 }
 
@@ -544,6 +547,31 @@ void ShadowComponent::updateDepthTexture() {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+void ShadowComponent::buildDDepthTexture() {
+    glGenTextures(1, &_dDepthTexture);
+    glBindTexture(GL_TEXTURE_2D, _dDepthTexture);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_DEPTH_COMPONENT32F,
+        1,
+        1,
+        0,
+        GL_DEPTH_COMPONENT,
+        GL_FLOAT,
+        nullptr
+    );
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
+
 void ShadowComponent::saveDepthBuffer() {
     int size = _shadowDepthTextureWidth * _shadowDepthTextureHeight;
     std::vector<GLubyte> buffer(size);
@@ -650,6 +678,10 @@ ShadowComponent::ShadowMapData ShadowComponent::shadowMapData() const {
 
 void ShadowComponent::setViewDepthMap(bool enable) {
     _viewDepthMap = enable;
+}
+
+GLuint ShadowComponent::dDepthTexture() const {
+    return _dDepthTexture;
 }
 
 } // namespace openspace
