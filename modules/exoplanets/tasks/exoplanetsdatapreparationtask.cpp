@@ -88,12 +88,20 @@ void ExoplanetsDataPreparationTask::perform(
     int version = 1;
     binFile.write(reinterpret_cast<char*>(&version), sizeof(int));
 
-    std::string planetRow;
-    getline(inputDataFile, planetRow); // The first line, containing the data names
+    auto readFirstDataRow = [](std::ifstream& file, std::string& line) -> void {
+        while (getline(file, line)) {
+            bool shouldSkip = line[0] == '#' || line.empty();
+            if (!shouldSkip) break;
+        }
+    };
+
+    // Find the line containing the data names
+    std::string columnNamesRow;
+    readFirstDataRow(inputDataFile, columnNamesRow);
 
     // Read column names into a vector, for later access
     std::vector<std::string> columnNames;
-    std::stringstream sStream(planetRow);
+    std::stringstream sStream(columnNamesRow);
     std::string colName;
     while (getline(sStream, colName, ',')) {
         columnNames.push_back(colName);
@@ -101,12 +109,15 @@ void ExoplanetsDataPreparationTask::perform(
 
     // Read total number of items
     int total = 0;
-    while (getline(inputDataFile, planetRow)) {
+    std::string row;
+    while (getline(inputDataFile, row)) {
         ++total;
     }
     inputDataFile.clear();
     inputDataFile.seekg(0);
-    getline(inputDataFile, planetRow); // The first line, containing the data names
+
+    // Read past the first line, containing the data names
+    readFirstDataRow(inputDataFile, row);
 
     LINFO(fmt::format("Loading {} exoplanets", total));
 
@@ -156,7 +167,7 @@ void ExoplanetsDataPreparationTask::perform(
     ExoplanetDataEntry p;
     std::string data;
     int exoplanetCount = 0;
-    while (getline(inputDataFile, planetRow)) {
+    while (getline(inputDataFile, row)) {
         ++exoplanetCount;
         progressCallback(static_cast<float>(exoplanetCount) / static_cast<float>(total));
 
@@ -167,7 +178,7 @@ void ExoplanetsDataPreparationTask::perform(
         float dec = std::numeric_limits<float>::quiet_NaN();    // decimal degrees
         float distanceInParsec = std::numeric_limits<float>::quiet_NaN();
 
-        std::istringstream lineStream(planetRow);
+        std::istringstream lineStream(row);
         int columnIndex = 0;
         while (getline(lineStream, data, ',')) {
             const std::string& column = columnNames[columnIndex];
@@ -273,18 +284,39 @@ void ExoplanetsDataPreparationTask::perform(
             else if (column == "st_raderr2") {
                 p.rStarLower = -readFloatData(data);
             }
-            // Color of star (B-V color index computed from star's effective temperature)
+            // Effective temperature and color of star
+            // (B-V color index computed from star's effective temperature)
             else if (column == "st_teff") {
-                float teff = readFloatData(data);
-                p.bmv = bvFromTeff(teff);
+                p.teff = readFloatData(data);
+                p.bmv = bvFromTeff(p.teff);
+            }
+            else if (column == "st_tefferr1") {
+                p.teffUpper = readFloatData(data);
+            }
+            else if (column == "st_tefferr2") {
+                p.teffLower = -readFloatData(data);
+            }
+            // Star luminosity
+            else if (column == "st_lum") {
+                p.luminosity = readFloatData(data);
+            }
+            else if (column == "st_lumerr1") {
+                p.luminosityUpper = readFloatData(data);
+            }
+            else if (column == "st_lumerr2") {
+                p.luminosityLower = -readFloatData(data);
             }
             // Is the planet orbiting a binary system?
             else if (column == "cb_flag") {
                 p.binary = static_cast<bool>(readIntegerData(data));
             }
+            // Number of stars in the system
+            else if (column == "sy_snum") {
+                p.nStars = readIntegerData(data);
+            }
             // Number of planets in the system
             else if (column == "sy_pnum") {
-                p.nComp = readIntegerData(data);
+                p.nPlanets = readIntegerData(data);
             }
         }
 

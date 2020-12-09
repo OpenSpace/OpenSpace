@@ -110,11 +110,17 @@ ExoplanetSystem findExoplanetSystemInData(std::string_view starName) {
             if (system.starData.position != pos && isValidPosition(pos)) {
                 system.starData.position = pos;
             }
-            if (system.starData.bvColorIndex != p.bmv && !std::isnan(p.bmv)) {
-                system.starData.bvColorIndex = p.bmv;
-            }
             if (system.starData.radius != p.rStar && !std::isnan(p.rStar)) {
                 system.starData.radius = p.rStar;
+            }
+            if (system.starData.bv != p.bmv && !std::isnan(p.bmv)) {
+                system.starData.bv = p.bmv;
+            }
+            if (system.starData.teff != p.teff && !std::isnan(p.teff)) {
+                system.starData.teff = p.teff;
+            }
+            if (system.starData.luminosity != p.luminosity && !std::isnan(p.luminosity)) {
+                system.starData.luminosity = p.luminosity;
             }
         }
     }
@@ -167,7 +173,7 @@ void createExoplanetSystem(const std::string& starName) {
     }
 
     std::string colorLayers;
-    const float bv = system.starData.bvColorIndex;
+    const float bv = system.starData.bv;
 
     if (!std::isnan(bv)) {
         const glm::vec3 color = starColor(bv);
