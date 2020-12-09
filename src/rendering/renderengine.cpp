@@ -301,12 +301,6 @@ RenderEngine::RenderEngine()
     addProperty(_showVersionInfo);
     addProperty(_showCameraInfo);
 
-    // @TODO (maci 2019-08-23) disabling FXAA on
-    // MacOS for now until we have fix or MSAA option.
-#ifdef __APPLE__
-    _enableFXAA = false;
-#endif
-
     _enableFXAA.onChange([this]() {
         if (_renderer) {
             _renderer->enableFXAA(_enableFXAA);
