@@ -79,10 +79,13 @@ public:
 
     void setViewDepthMap(bool enable);
 
+    GLuint dDepthTexture() const;
+
 private:
     void createDepthTexture();
     void createShadowFBO();
     void updateDepthTexture();
+    void buildDDepthTexture();
 
     // Debug
     void saveDepthBuffer();
@@ -109,6 +112,9 @@ private:
     bool _dynamicDepthTextureRes = true;
 
     GLuint _shadowDepthTexture = 0;
+    // JCC: Used to avoid recompilation of Globebrowsing's shaders
+    // and incorrect binding of texture type
+    GLuint _dDepthTexture = 0;
     GLuint _positionInLightSpaceTexture = 0;
     GLuint _shadowFBO = 0;
     GLint _defaultFBO = 0;

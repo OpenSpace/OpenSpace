@@ -364,7 +364,7 @@ void RingsComponent::draw(const RenderData& data,
 
         ringTextureUnit.activate();
         _texture->bind();
-        _shader->setUniform(_geomUniformCache.ringTexture, ringTextureUnit);
+        _geometryOnlyShader->setUniform(_geomUniformCache.ringTexture, ringTextureUnit);
     }
 
     glEnable(GL_DEPTH_TEST);

@@ -1399,6 +1399,13 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
         program.setUniform("shadowMapTexture", shadowMapUnit);
         program.setUniform("zFightingPercentage", _generalProperties.zFightingPercentage);
     }
+    else if (_generalProperties.shadowMapping) {
+        shadowMapUnit.activate();
+        // JCC: Avoiding a to recompiling the shaders or having more than one
+        // set of shaders for this step.
+        glBindTexture(GL_TEXTURE_2D, _shadowComponent.dDepthTexture());
+        program.setUniform("shadowMapTexture", shadowMapUnit);
+    }
 
     glEnable(GL_DEPTH_TEST);
 
@@ -1530,6 +1537,13 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
 
         program.setUniform("shadowMapTexture", shadowMapUnit);
         program.setUniform("zFightingPercentage", _generalProperties.zFightingPercentage);
+    } 
+    else if (_generalProperties.shadowMapping) {
+        shadowMapUnit.activate();
+        // JCC: Avoiding a to recompiling the shaders or having more than one
+        // set of shaders for this step.
+        glBindTexture(GL_TEXTURE_2D, _shadowComponent.dDepthTexture());
+        program.setUniform("shadowMapTexture", shadowMapUnit);
     }
 
     glEnable(GL_DEPTH_TEST);
