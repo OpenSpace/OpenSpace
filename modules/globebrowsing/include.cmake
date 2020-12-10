@@ -1,1 +1,5 @@
+set (OPENSPACE_DEPENDENCIES
+  debugging
+)
+
 set (DEFAULT_MODULE ON)
