@@ -26,10 +26,6 @@
 #define __OPENSPACE_MODULE_KAMELEONVOLUME___RENDERABLEKAMELEONVOLUME___H__
 
 #include <openspace/rendering/renderable.h>
-#include <openspace/rendering/transferfunction.h>
-#include <modules/kameleon/include/kameleonwrapper.h>
-#include <modules/volume/rawvolume.h>
-#include <modules/volume/rendering/basicvolumeraycaster.h>
 
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
@@ -37,7 +33,10 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
-namespace openspace { struct RenderData; }
+namespace openspace {
+    struct RenderData;
+    class TransferFunction;
+} // namespace openspace
 
 namespace openspace::volume {
     class BasicVolumeRaycaster;

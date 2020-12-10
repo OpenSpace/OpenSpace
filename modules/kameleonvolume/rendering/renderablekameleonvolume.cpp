@@ -24,6 +24,10 @@
 
 #include <modules/kameleonvolume/rendering/renderablekameleonvolume.h>
 
+#include <modules/volume/rendering/basicvolumeraycaster.h>
+#include <modules/volume/rawvolume.h>
+#include <modules/kameleon/include/kameleonwrapper.h>
+#include <openspace/rendering/transferfunction.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <modules/kameleonvolume/kameleonvolumereader.h>
 #include <modules/volume/rawvolumereader.h>

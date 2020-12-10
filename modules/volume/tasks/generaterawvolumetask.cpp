@@ -27,11 +27,9 @@
 #include <modules/volume/rawvolume.h>
 #include <modules/volume/rawvolumemetadata.h>
 #include <modules/volume/rawvolumewriter.h>
-
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/logging/logmanager.h>
@@ -39,7 +37,6 @@
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
 #include <ghoul/misc/defer.h>
-
 
 #include <fstream>
 
@@ -53,11 +50,9 @@ namespace {
     constexpr const char* KeyUpperDomainBound = "UpperDomainBound";
 } // namespace
 
-namespace openspace {
-namespace volume {
+namespace openspace::volume {
 
-GenerateRawVolumeTask::GenerateRawVolumeTask(const ghoul::Dictionary& dictionary)
-{
+GenerateRawVolumeTask::GenerateRawVolumeTask(const ghoul::Dictionary& dictionary) {
     openspace::documentation::testSpecificationAndThrow(
         documentation(),
         dictionary,
@@ -234,5 +229,4 @@ documentation::Documentation GenerateRawVolumeTask::documentation() {
     };
 }
 
-} // namespace volume
-} // namespace openspace
+} // namespace openspace::volume

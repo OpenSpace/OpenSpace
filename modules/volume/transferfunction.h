@@ -25,8 +25,8 @@
 #ifndef __OPENSPACE_MODULE_VOLUME___TRANSFERFUNCTION___H__
 #define __OPENSPACE_MODULE_VOLUME___TRANSFERFUNCTION___H__
 
-#include <ghoul/glm.h>
 #include <modules/volume/envelope.h>
+#include <ghoul/glm.h>
 
 namespace ghoul { class Dictionary; }
 namespace ghoul::opengl { class Texture; }

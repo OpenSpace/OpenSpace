@@ -27,7 +27,6 @@
 #include <modules/kameleonvolume/kameleonvolumereader.h>
 #include <openspace/openspace.h>
 #include <openspace/documentation/verifier.h>
-#include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/dictionaryjsonformatter.h>
 #include <fstream>
