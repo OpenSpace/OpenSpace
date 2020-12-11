@@ -34,28 +34,16 @@ Interpolator<T>::Interpolator()
 template <typename T>
 void Interpolator<T>::start() {
     _t = 0.f;
-    _isInterpolating = true;
 }
 
 template <typename T>
 void Interpolator<T>::end() {
     _t = 1.f;
-    _isInterpolating = false;
 }
 
 template <typename T>
 void Interpolator<T>::setDeltaTime(float deltaTime) {
-    if (_interpolationTime > 0.f) {
-        _scaledDeltaTime = deltaTime / _interpolationTime;
-    }
-    else {
-        if (deltaTime > 0.f) {
-            _scaledDeltaTime = 1.f;
-        }
-        else {
-            _scaledDeltaTime = -1.f;
-        }
-    }
+    _scaledDeltaTime = deltaTime / _interpolationTime;
 }
 
 template <typename T>
@@ -71,7 +59,7 @@ void Interpolator<T>::setInterpolationTime(float interpolationTime) {
 template <typename T>
 void Interpolator<T>::step() {
     _t += _scaledDeltaTime;
-    _t = glm::clamp(_t, 0.f, 1.f);
+    _t = glm::clamp(_t, 0.0f, 1.0f);
 }
 
 template <typename T>
@@ -86,7 +74,7 @@ T Interpolator<T>::value() const {
 
 template <typename T>
 bool Interpolator<T>::isInterpolating() const {
-    return _isInterpolating;
+    return (_t < 1.f) && (_t >= 0.f);
 }
 
 } // namespace openspace::interaction

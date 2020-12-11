@@ -51,7 +51,6 @@ public:
 
 private:
     std::function<T(float)> _transferFunction;
-    bool _isInterpolating = false;
     float _t = 1.f;
     float _interpolationTime = 1.f;
     float _scaledDeltaTime = 0.f;
