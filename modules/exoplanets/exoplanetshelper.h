@@ -71,9 +71,9 @@ struct ExoplanetDataEntry {
 };
 
 struct StarData {
-    glm::vec3 position; // In parsec
-    float radius;       // In solar radii
-    float bvColorIndex;
+    glm::vec3 position  = glm::vec3(std::numeric_limits<float>::quiet_NaN()); // In parsec
+    float radius        = std::numeric_limits<float>::quiet_NaN(); // In solar radii
+    float bvColorIndex  = std::numeric_limits<float>::quiet_NaN();
 };
 
 struct ExoplanetSystem {
