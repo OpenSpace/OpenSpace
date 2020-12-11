@@ -333,6 +333,7 @@ bool SessionRecording::startPlayback(std::string& filename,
     _saveRenderingCurrentRecordedTime_interpolation = steady_clock::now();
     _saveRenderingClockInterpolation_countsPerSec =
         system_clock::duration::period::den / system_clock::duration::period::num;
+    _saveRendering_isFirstFrame = true;
 
     //Set playback flags to true for all modes
     _playbackActive_camera = true;
@@ -457,6 +458,7 @@ void SessionRecording::cleanUpPlayback() {
     _idxTimeline_cameraPtrPrev = 0;
     _hasHitEndOfCameraKeyframes = false;
     _saveRenderingDuringPlayback = false;
+    _saveRendering_isFirstFrame = true;
 
     _cleanupNeeded = false;
 }
@@ -1403,6 +1405,12 @@ void SessionRecording::moveAheadInTime() {
     double currTime = currentTime();
     lookForNonCameraKeyframesThatHaveComeDue(currTime);
     updateCameraWithOrWithoutNewKeyframes(currTime);
+    //Unfortunately the first frame is sometimes rendered because globebrowsing reports
+    // that all chunks are rendered when they apparently are not.
+    if (_saveRendering_isFirstFrame) {
+        _saveRendering_isFirstFrame = false;
+        return;
+    }
     if (isSavingFramesDuringPlayback()) {
         // Check if renderable in focus is still resolving tile loading
         // do not adjust time while we are doing this, or take screenshot

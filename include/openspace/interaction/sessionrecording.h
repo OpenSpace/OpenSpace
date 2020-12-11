@@ -645,6 +645,7 @@ protected:
     std::chrono::steady_clock::duration _saveRenderingDeltaTime_interpolation_usec;
     std::chrono::steady_clock::time_point _saveRenderingCurrentRecordedTime_interpolation;
     long long _saveRenderingClockInterpolation_countsPerSec;
+    bool _saveRendering_isFirstFrame = true;
 
     unsigned char _keyframeBuffer[_saveBufferMaxSize_bytes];
 

@@ -513,7 +513,7 @@ void Scene::addPropertyInterpolation(properties::Property* prop, float durationS
 
     PropertyInterpolationInfo i = {
         prop,
-        std::chrono::steady_clock::now(),
+        now,
         durationSeconds,
         func
     };
