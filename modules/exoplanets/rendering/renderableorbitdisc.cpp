@@ -50,7 +50,7 @@ namespace {
     static const openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
-        "This value specifies the semi-major axis of the orbit in meter."
+        "This value specifies the semi-major axis of the orbit, in meter."
     };
 
     static const openspace::properties::Property::PropertyInfo EccentricityInfo = {
@@ -63,8 +63,10 @@ namespace {
     static const openspace::properties::Property::PropertyInfo OffsetInfo = {
         "Offset",
         "Offset",
-        "This value is used to limit the width of the rings. Each of the two values is "
-        "the lower and the upper uncertainties of the semi-major axis. "
+        "This property determines the width of the disc. The values specify the lower "
+        "and upper deviation from the semi major axis, respectively. The values are "
+        "relative to the size of the semi-major axis. That is, 0 means no deviation "
+        "from the semi-major axis and 1 is a whole semi-major axis's worth of deviation."
     };
 } // namespace
 
@@ -114,7 +116,7 @@ RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)
     , _texturePath(TextureInfo)
     , _size(SizeInfo, 1.f, 0.f, 3.0e12f)
     , _eccentricity(EccentricityInfo, 0.f, 0.f, 1.f)
-    , _offset(OffsetInfo, glm::vec2(0.f, 1.f), glm::vec2(0.f), glm::vec2(1.f))
+    , _offset(OffsetInfo, glm::vec2(0.f), glm::vec2(0.f), glm::vec2(1.f))
 {
     using ghoul::filesystem::File;
 
@@ -127,15 +129,14 @@ RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)
     if (dictionary.hasKey(OffsetInfo.identifier)) {
         _offset = dictionary.value<glm::vec2>(OffsetInfo.identifier);
     }
+    _offset.onChange([&]() { _planeIsDirty = true; });
     addProperty(_offset);
 
     _size = static_cast<float>(dictionary.value<double>(SizeInfo.identifier));
-    _size = static_cast<float>(
-        _size + (_offset.value().y * distanceconstants::AstronomicalUnit)
-    );
-    setBoundingSphere(_size);
     _size.onChange([&]() { _planeIsDirty = true; });
     addProperty(_size);
+
+    setBoundingSphere(_size + _offset.value().y * _size);
 
     _texturePath = absPath(dictionary.value<std::string>(TextureInfo.identifier));
     _textureFile = std::make_unique<File>(_texturePath);
@@ -168,7 +169,7 @@ void RenderableOrbitDisc::initializeGL() {
     _uniformCache.modelViewProjection = _shader->uniformLocation(
         "modelViewProjectionTransform"
     );
-    _uniformCache.textureOffset = _shader->uniformLocation("textureOffset");
+    _uniformCache.offset = _shader->uniformLocation("offset");
     _uniformCache.opacity = _shader->uniformLocation("opacity");
     _uniformCache.texture = _shader->uniformLocation("discTexture");
     _uniformCache.eccentricity = _shader->uniformLocation("eccentricity");
@@ -209,7 +210,7 @@ void RenderableOrbitDisc::render(const RenderData& data, RendererTasks&) {
         _uniformCache.modelViewProjection,
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
     );
-    _shader->setUniform(_uniformCache.textureOffset, _offset);
+    _shader->setUniform(_uniformCache.offset, _offset);
     _shader->setUniform(_uniformCache.opacity, _opacity);
     _shader->setUniform(_uniformCache.eccentricity, _eccentricity);
     _shader->setUniform(_uniformCache.semiMajorAxis, _size);
@@ -241,7 +242,7 @@ void RenderableOrbitDisc::update(const UpdateData&) {
         _uniformCache.modelViewProjection = _shader->uniformLocation(
             "modelViewProjectionTransform"
         );
-        _uniformCache.textureOffset = _shader->uniformLocation("textureOffset");
+        _uniformCache.offset = _shader->uniformLocation("offset");
         _uniformCache.opacity = _shader->uniformLocation("opacity");
         _uniformCache.texture = _shader->uniformLocation("discTexture");
         _uniformCache.eccentricity = _shader->uniformLocation("eccentricity");
@@ -283,7 +284,8 @@ void RenderableOrbitDisc::loadTexture() {
 }
 
 void RenderableOrbitDisc::createPlane() {
-    const GLfloat size = _size * (1.f + _eccentricity);
+    const GLfloat outerDistance = (_size + _offset.value().y * _size);
+    const GLfloat size = outerDistance * (1.f + _eccentricity);
 
     struct VertexData {
         GLfloat x;

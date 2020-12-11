@@ -66,8 +66,8 @@ private:
     properties::Vec2Property _offset;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
-    UniformCache(modelViewProjection, textureOffset, opacity,
-         texture, eccentricity, semiMajorAxis) _uniformCache;
+    UniformCache(modelViewProjection, offset, opacity, texture,
+        eccentricity, semiMajorAxis) _uniformCache;
     std::unique_ptr<ghoul::opengl::Texture> _texture = nullptr;
     std::unique_ptr<ghoul::filesystem::File> _textureFile;
 

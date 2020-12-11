@@ -58,7 +58,7 @@ constexpr const char* DiscTextureFile =
 constexpr const char* HabitableZoneTextureFile =
     "${SYNC}/http/exoplanets_textures/1/hz_disc_texture.png";
 
-const float AstronomicalUnit = static_cast<float>(distanceconstants::AstronomicalUnit);
+const float AU = static_cast<float>(distanceconstants::AstronomicalUnit);
 const float SolarRadius = static_cast<float>(distanceconstants::SolarRadius);
 const float JupiterRadius = static_cast<float>(distanceconstants::JupiterRadius);
 
@@ -280,7 +280,7 @@ void createExoplanetSystem(const std::string& starName) {
         std::string enabled;
         if (std::isnan(planet.r)) {
             if (std::isnan(planet.rStar)) {
-                planetRadius = planet.a * 0.001f * AstronomicalUnit;
+                planetRadius = planet.a * 0.001f * AU;
             }
             else {
                 planetRadius = planet.rStar * 0.1f * SolarRadius;
@@ -293,7 +293,7 @@ void createExoplanetSystem(const std::string& starName) {
         }
 
         const float periodInSeconds = static_cast<float>(planet.per * SecondsPerDay);
-        const float semiMajorAxisInMeter = planet.a * AstronomicalUnit;
+        const float semiMajorAxisInMeter = planet.a * AU;
         const float semiMajorAxisInKm = semiMajorAxisInMeter * 0.001f;
 
         const std::string planetIdentifier = createIdentifier(planetName);
@@ -373,6 +373,9 @@ void createExoplanetSystem(const std::string& starName) {
             );
             const glm::dmat3 rotationMat3 = static_cast<glm::dmat3>(rotation);
 
+            const float lowerOffset = planet.aLower / planet.a;
+            const float upperOffset = planet.aUpper / planet.a;
+
             const std::string discNode = "{"
                 "Identifier = '" + planetIdentifier + "_Disc',"
                 "Parent = '" + starIdentifier + "',"
@@ -383,8 +386,8 @@ void createExoplanetSystem(const std::string& starName) {
                     "Size = " + std::to_string(semiMajorAxisInMeter) + ","
                     "Eccentricity = " + std::to_string(planet.ecc) + ","
                     "Offset = { " +
-                        std::to_string(planet.aLower) + ", " +
-                        std::to_string(planet.aUpper) +
+                        std::to_string(lowerOffset) + ", " +
+                        std::to_string(upperOffset) +
                     "}," //min / max extend
                     "Opacity = 0.3"
                 "},"
@@ -425,9 +428,11 @@ void createExoplanetSystem(const std::string& starName) {
         const glm::dmat4 rotation = computeOrbitPlaneRotationMatrix(meanInclination);
         const glm::dmat3 rotationMat3 = static_cast<glm::dmat3>(rotation);
 
-        glm::vec2 limits = zone.value();
-        float half = 0.5f * (limits[1] - limits[0]);
-        float center = limits[0] + half;
+        glm::vec2 limitsInMeter = zone.value() * AU;
+        float half = 0.5f * (limitsInMeter[1] - limitsInMeter[0]);
+        float center = limitsInMeter[0] + half;
+        float relativeOffset = half / center;
+
         const std::string zoneDiscNode = "{"
             "Identifier = '" + starIdentifier + "_HZ_Disc',"
             "Parent = '" + starIdentifier + "',"
@@ -439,11 +444,11 @@ void createExoplanetSystem(const std::string& starName) {
                     "Rotation = " + ghoul::to_string(rotationMat3) + ""
                 "},"
                 "Texture = openspace.absPath('" + HabitableZoneTextureFile + "'),"
-                "Size = " + std::to_string(center * AstronomicalUnit) + ","
+                "Size = " + std::to_string(center) + ","
                 "Eccentricity = 0,"
                 "Offset = { " +
-                    std::to_string(half) + ", " +
-                    std::to_string(half) +
+                    std::to_string(relativeOffset) + ", " +
+                    std::to_string(relativeOffset) +
                 "}," //min / max extend
                 "Opacity = 0.05"
             "},"
