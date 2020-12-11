@@ -298,13 +298,16 @@ void ExoplanetsDataPreparationTask::perform(
             }
             // Star luminosity
             else if (column == "st_lum") {
-                p.luminosity = readFloatData(data);
+                float dataInLogSolar = readFloatData(data);
+                p.luminosity = std::pow(10, dataInLogSolar);
             }
             else if (column == "st_lumerr1") {
-                p.luminosityUpper = readFloatData(data);
+                float dataInLogSolar = readFloatData(data);
+                p.luminosityUpper = std::pow(10, dataInLogSolar);
             }
             else if (column == "st_lumerr2") {
-                p.luminosityLower = -readFloatData(data);
+                float dataInLogSolar = readFloatData(data);
+                p.luminosityLower = -std::pow(10, dataInLogSolar);
             }
             // Is the planet orbiting a binary system?
             else if (column == "cb_flag") {

@@ -55,6 +55,12 @@ constexpr const char* NoDataTextureFile =
     "${SYNC}/http/exoplanets_textures/1/grid-32.png";
 constexpr const char* DiscTextureFile =
     "${SYNC}/http/exoplanets_textures/1/disc_texture.png";
+constexpr const char* HabitableZoneTextureFile =
+    "${SYNC}/http/exoplanets_textures/1/hz_disc_texture.png";
+
+const float AstronomicalUnit = static_cast<float>(distanceconstants::AstronomicalUnit);
+const float SolarRadius = static_cast<float>(distanceconstants::SolarRadius);
+const float JupiterRadius = static_cast<float>(distanceconstants::JupiterRadius);
 
 ExoplanetSystem findExoplanetSystemInData(std::string_view starName) {
     ExoplanetSystem system;
@@ -164,10 +170,9 @@ void createExoplanetSystem(const std::string& starName) {
     const glm::dvec3 starPos =
         static_cast<glm::dvec3>(starPosInParsec) * distanceconstants::Parsec;
     const glm::dmat3 exoplanetSystemRotation = computeSystemRotation(starPos);
-    const float solarRadius = static_cast<float>(distanceconstants::SolarRadius);
 
     // Star
-    float radiusInMeter = solarRadius;
+    float radiusInMeter = SolarRadius;
     if (!std::isnan(system.starData.radius)) {
         radiusInMeter *= system.starData.radius;
     }
@@ -242,7 +247,7 @@ void createExoplanetSystem(const std::string& starName) {
 
     // Planets
     for (size_t i = 0; i < system.planetNames.size(); i++) {
-        ExoplanetDataEntry planet = system.planetsData[i];
+        ExoplanetDataEntry& planet = system.planetsData[i];
         const std::string planetName = system.planetNames[i];
 
         if (std::isnan(planet.ecc)) {
@@ -271,28 +276,24 @@ void createExoplanetSystem(const std::string& starName) {
             sEpoch = "2009-05-19T07:11:34.080";
         }
 
-        const float astronomicalUnit =
-            static_cast<float>(distanceconstants::AstronomicalUnit);
-        const float jupiterRadius = static_cast<float>(distanceconstants::JupiterRadius);
-
         float planetRadius;
         std::string enabled;
         if (std::isnan(planet.r)) {
             if (std::isnan(planet.rStar)) {
-                planetRadius = planet.a * 0.001f * astronomicalUnit;
+                planetRadius = planet.a * 0.001f * AstronomicalUnit;
             }
             else {
-                planetRadius = planet.rStar * 0.1f * solarRadius;
+                planetRadius = planet.rStar * 0.1f * SolarRadius;
             }
             enabled = "false";
         }
         else {
-            planetRadius = static_cast<float>(planet.r) * jupiterRadius;
+            planetRadius = static_cast<float>(planet.r) * JupiterRadius;
             enabled = "true";
         }
 
         const float periodInSeconds = static_cast<float>(planet.per * SecondsPerDay);
-        const float semiMajorAxisInMeter = planet.a * astronomicalUnit;
+        const float semiMajorAxisInMeter = planet.a * AstronomicalUnit;
         const float semiMajorAxisInKm = semiMajorAxisInMeter * 0.001f;
 
         const std::string planetIdentifier = createIdentifier(planetName);
@@ -365,13 +366,12 @@ void createExoplanetSystem(const std::string& starName) {
         bool hasLowerAUncertainty = !std::isnan(planet.aLower);
 
         if (hasUpperAUncertainty && hasLowerAUncertainty) {
-            // Get the orbit plane of the planet trail orbit from the KeplerTranslation
-            const glm::dmat4 orbitPlaneRotationMatrix = computeOrbitPlaneRotationMatrix(
+            const glm::dmat4 rotation = computeOrbitPlaneRotationMatrix(
                 planet.i,
                 planet.bigOmega,
                 planet.omega
             );
-            const glm::dmat3 rotation = orbitPlaneRotationMatrix;
+            const glm::dmat3 rotationMat3 = static_cast<glm::dmat3>(rotation);
 
             const std::string discNode = "{"
                 "Identifier = '" + planetIdentifier + "_Disc',"
@@ -391,7 +391,7 @@ void createExoplanetSystem(const std::string& starName) {
                 "Transform = {"
                     "Rotation = {"
                         "Type = 'StaticRotation',"
-                        "Rotation = " + ghoul::to_string(rotation) + ""
+                        "Rotation = " + ghoul::to_string(rotationMat3) + ""
                     "}"
                 "},"
                 "GUI = {"
@@ -405,6 +405,64 @@ void createExoplanetSystem(const std::string& starName) {
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
         }
+    }
+
+    // Habitable Zone
+    bool hasTeff = !std::isnan(system.starData.teff);
+    bool hasLuminosity = !std::isnan(system.starData.luminosity);
+    std::optional<glm::vec2> zone = std::nullopt;
+
+    if (hasTeff && hasLuminosity) {
+        zone = computeHabitableZone(system.starData.teff, system.starData.luminosity);
+    }
+
+    if (zone.has_value()) {
+        float meanInclination = 0.f;
+        for (const ExoplanetDataEntry& p : system.planetsData) {
+            meanInclination += p.i;
+        }
+        meanInclination /= static_cast<float>(system.planetsData.size());
+        const glm::dmat4 rotation = computeOrbitPlaneRotationMatrix(meanInclination);
+        const glm::dmat3 rotationMat3 = static_cast<glm::dmat3>(rotation);
+
+        glm::vec2 limits = zone.value();
+        float half = 0.5f * (limits[1] - limits[0]);
+        float center = limits[0] + half;
+        const std::string zoneDiscNode = "{"
+            "Identifier = '" + starIdentifier + "_HZ_Disc',"
+            "Parent = '" + starIdentifier + "',"
+            "Enabled = true,"
+            "Renderable = {"
+                "Type = 'RenderableOrbitDisc',"
+                "Rotation = {"
+                    "Type = 'StaticRotation',"
+                    "Rotation = " + ghoul::to_string(rotationMat3) + ""
+                "},"
+                "Texture = openspace.absPath('" + HabitableZoneTextureFile + "'),"
+                "Size = " + std::to_string(center * AstronomicalUnit) + ","
+                "Eccentricity = 0,"
+                "Offset = { " +
+                    std::to_string(half) + ", " +
+                    std::to_string(half) +
+                "}," //min / max extend
+                "Opacity = 0.05"
+            "},"
+            "Transform = {"
+                "Rotation = {"
+                    "Type = 'StaticRotation',"
+                    "Rotation = " + ghoul::to_string(rotationMat3) + ""
+                "}"
+            "},"
+            "GUI = {"
+                "Name = '" + starName + " Habitable Zone',"
+                "Path = '" + guiPath + "'"
+            "}"
+        "}";
+
+        openspace::global::scriptEngine->queueScript(
+            "openspace.addSceneGraphNode(" + zoneDiscNode + ");",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
     }
 }
 

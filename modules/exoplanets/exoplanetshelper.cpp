@@ -136,6 +136,41 @@ glm::dmat3 computeSystemRotation(glm::dvec3 starPosition) {
     );
 }
 
+std::optional<glm::vec2> computeHabitableZone(float teff, float luminosity) {
+    // The formula only consider stars with teff in range [2600, 7200] K
+    if (teff > 7200.f || teff < 2600.f) {
+        return std::nullopt;
+    }
+
+    struct Coefficients {
+        float seffSun;
+        float a, b, c, d;
+    };
+
+    // Coefficients for planets of 1 Earth mass. Received from:
+    // https://depts.washington.edu/naivpl/sites/default/files/HZ_coefficients.dat
+    constexpr Coefficients coefficients[] = {
+        // Inner boundary - Runaway greenhouse
+        {1.10700E+00, 1.33200E-04, 1.58000E-08, -8.30800E-12, -1.93100E-15},
+        // Outer boundary - Maximum greenhouse
+        {3.56000E-01, 6.17100E-05, 1.69800E-09, -3.19800E-12, -5.57500E-16}
+    };
+
+    const float tstar = teff - 5780.f;
+    const float tstar2 = tstar * tstar;
+
+    glm::vec2 distances;
+    for (int i = 0; i < 2; ++i) {
+        const Coefficients& coeffs = coefficients[i];
+        float seff = coeffs.seffSun + (coeffs.a * tstar) + (coeffs.b * tstar2) +
+                     (coeffs.c * tstar * tstar2) + (coeffs.d * tstar2 * tstar2);
+
+        distances[i] = std::pow(luminosity / seff, 0.5f);
+    }
+
+    return std::optional<glm::vec2>(std::move(distances));
+}
+
 std::string createIdentifier(std::string name) {
     std::replace(name.begin(), name.end(), ' ', '_');
     std::replace(name.begin(), name.end(), '.', '-');
