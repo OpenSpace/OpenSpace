@@ -134,9 +134,6 @@ function(run_cef_windows_config CEF_TARGET CEF_ROOT MODULE_PATH)
     set_openspace_cef_target_out_dir()
     add_windows_cef_manifest("${CEF_TARGET_OUT_DIR}" "${MODULE_PATH}" "${CEF_TARGET}" "exe")
 
-    # Copy binary and resource files to the target output directory.
-    copy_files("${CEF_TARGET}" "${CEF_BINARY_FILES}" "${CEF_BINARY_DIR}" "$<TARGET_FILE_DIR:${CEF_TARGET}>")
-    copy_files("${CEF_TARGET}" "${CEF_RESOURCE_FILES}" "${CEF_RESOURCE_DIR}" "$<TARGET_FILE_DIR:${CEF_TARGET}>")
 endfunction()
 
 function(run_cef_linux_config CEF_ROOT)

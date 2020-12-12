@@ -168,6 +168,12 @@ if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
 
   set_cef_targets("${CEF_ROOT}" OpenSpace)
   run_cef_platform_config("${CEF_ROOT}" "${CEF_TARGET}" "${WEBBROWSER_MODULE_PATH}")
+
+  # @TODO (abock, 2020-12-12) This should be handled more gracefully.  Right now we *have*
+  # to build OpenSpace or otherwise the necessary files will not be copied over
+  # Copy binary and resource files to the target output directory.
+  copy_files("${CEF_TARGET}" "${CEF_BINARY_FILES}" "${CEF_BINARY_DIR}" "$<TARGET_FILE_DIR:${CEF_TARGET}>")
+  copy_files("${CEF_TARGET}" "${CEF_RESOURCE_FILES}" "${CEF_RESOURCE_DIR}" "$<TARGET_FILE_DIR:${CEF_TARGET}>")
 elseif (OPENSPACE_MODULE_WEBBROWSER)
   message(WARNING "Web configured to be included, but no CEF_ROOT was found, please try configuring CMake again.")
 endif ()
