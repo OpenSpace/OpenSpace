@@ -334,6 +334,8 @@ bool SessionRecording::startPlayback(std::string& filename,
     _saveRenderingClockInterpolation_countsPerSec =
         system_clock::duration::period::den / system_clock::duration::period::num;
     _saveRendering_isFirstFrame = true;
+    _playbackPauseOffset = 0.0;
+    _playbackStartedPaused = global::timeManager->isPaused();
 
     //Set playback flags to true for all modes
     _playbackActive_camera = true;
@@ -459,6 +461,8 @@ void SessionRecording::cleanUpPlayback() {
     _hasHitEndOfCameraKeyframes = false;
     _saveRenderingDuringPlayback = false;
     _saveRendering_isFirstFrame = true;
+    _playbackPauseOffset = 0.0;
+    _playbackStartedPaused = false;
 
     _cleanupNeeded = false;
 }
@@ -891,13 +895,13 @@ double SessionRecording::currentTime() const {
     }
     else if (_playbackTimeReferenceMode == KeyframeTimeRef::Relative_recordedStart) {
         return (global::windowDelegate->applicationTime() -
-                _timestampPlaybackStarted_application);
+                _timestampPlaybackStarted_application) - _playbackPauseOffset;
     }
     else if (_playbackTimeReferenceMode == KeyframeTimeRef::Absolute_simTimeJ2000) {
         return global::timeManager->time().j2000Seconds();
     }
     else {
-        return global::windowDelegate->applicationTime();
+        return global::windowDelegate->applicationTime() - _playbackPauseOffset;
     }
 }
 
@@ -1402,6 +1406,20 @@ bool SessionRecording::addKeyframeToTimeline(RecordedType type,
 void SessionRecording::moveAheadInTime() {
     using namespace std::chrono;
 
+    bool paused = global::timeManager->isPaused();
+    if (paused) {
+        if (_playbackStartedPaused) {
+            return;
+        }
+        else {
+            _playbackPauseOffset += global::windowDelegate->applicationTime() - _previousTime;
+        }
+    }
+    else {
+        _playbackStartedPaused = false;
+    }
+    _previousTime = global::windowDelegate->applicationTime();
+
     double currTime = currentTime();
     lookForNonCameraKeyframesThatHaveComeDue(currTime);
     updateCameraWithOrWithoutNewKeyframes(currTime);
@@ -1418,10 +1436,12 @@ void SessionRecording::moveAheadInTime() {
             global::navigationHandler->orbitalNavigator().anchorNode();
         const Renderable* focusRenderable = focusNode->renderable();
         if (!focusRenderable || focusRenderable->renderedWithDesiredData()) {
-            _saveRenderingCurrentRecordedTime_interpolation +=
-                _saveRenderingDeltaTime_interpolation_usec;
-            _saveRenderingCurrentRecordedTime += _saveRenderingDeltaTime;
-            global::renderEngine->takeScreenshot();
+            if (!paused) {
+                _saveRenderingCurrentRecordedTime_interpolation +=
+                    _saveRenderingDeltaTime_interpolation_usec;
+               _saveRenderingCurrentRecordedTime += _saveRenderingDeltaTime;
+                global::renderEngine->takeScreenshot();
+            }
         }
     }
 }

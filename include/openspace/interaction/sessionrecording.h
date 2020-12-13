@@ -638,6 +638,9 @@ protected:
     bool _playbackActive_script = false;
     bool _hasHitEndOfCameraKeyframes = false;
     bool _setSimulationTimeWithNextCameraKeyframe = false;
+    bool _playbackStartedPaused = false;
+    double _playbackPauseOffset = 0.0;
+    double _previousTime = 0.0;
 
     bool _saveRenderingDuringPlayback = false;
     double _saveRenderingDeltaTime = 1.0 / 30.0;
