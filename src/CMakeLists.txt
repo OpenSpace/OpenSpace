@@ -460,8 +460,7 @@ configure_file(
 )
 
 if (APPLE)
-  find_library(APPKIT_LIBRARY AppKit REQUIRED)
-  target_link_libraries(openspace-core PUBLIC ${APPKIT_LIBRARY})
+  target_link_libraries(openspace-core INTERFACE external-system-apple)
 endif ()
 
 set_openspace_compile_settings(openspace-core)

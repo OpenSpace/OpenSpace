@@ -37,8 +37,6 @@ option(OPENSPACE_OPENVR_SUPPORT "Build OpenSpace application with OpenVR support
 
 if (OPENSPACE_OPENVR_SUPPORT)
   begin_header("Dependency: OpenVR")
-  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${OPENSPACE_EXT_DIR}/sgct/cmake/modules/")
-
   find_package(OpenVR REQUIRED)
 
   set(SGCT_OPENVR_DEFINITIONS OPENVR_SUPPORT)

@@ -58,9 +58,8 @@ set(OPENSPACE_APPS_DIR "${OPENSPACE_BASE_DIR}/apps")
 set(OPENSPACE_EXT_DIR "${OPENSPACE_BASE_DIR}/ext")
 
 if (NOT EXISTS ${OPENSPACE_EXT_DIR}/ghoul/CMakeLists.txt)
-  message(FATAL_ERROR "Git submodules are missing. Please run \n"
-    "git submodule update --init --recursive \n"
-    "to download the missing dependencies."
+  message(FATAL_ERROR "Git submodules are missing. Please run "
+    "git submodule update --init --recursive to download the missing dependencies."
   )
 endif ()
 
@@ -140,55 +139,9 @@ endif ()
 
 include(src/CMakeLists.txt)
 
-##########################################################################################
-# Add external dependencies                                                              #
-##########################################################################################
-# System libraries
-if (APPLE)
-  begin_dependency("Core Libraries")
-  target_include_directories(openspace-core PUBLIC "/Developer/Headers/FlatCarbon")
-  find_library(COREFOUNDATION_LIBRARY CoreFoundation)
-  find_library(CARBON_LIBRARY Carbon)
-  find_library(COCOA_LIBRARY Carbon)
-  find_library(APP_SERVICES_LIBRARY ApplicationServices)
-  mark_as_advanced(CARBON_LIBRARY COCOA_LIBRARY APP_SERVICES_LIBRARY)
-  target_link_libraries(openspace-core PUBLIC ${CARBON_LIBRARY} ${COREFOUNDATION_LIBRARY}
-    ${COCOA_LIBRARY} ${APP_SERVICES_LIBRARY})
-  end_dependency()
-endif ()
-
-# Ghoul
-add_subdirectory(${OPENSPACE_EXT_DIR}/ghoul)
-target_link_libraries(openspace-core PUBLIC Ghoul)
-set_openspace_compile_settings(Ghoul)
-set_folder_location(Lua "External")
-set_folder_location(lz4 "External")
-set_folder_location(GhoulTest "Unit Tests")
-link_directories("${GHOUL_LIBRARY_DIRS}")
-
-# Spice
-begin_dependency("Spice")
-add_subdirectory(${OPENSPACE_EXT_DIR}/spice)
-target_link_libraries(openspace-core PUBLIC Spice)
-set_folder_location(Spice "External")
-end_dependency()
-
-# Curl
-begin_dependency("CURL")
-if (WIN32)
-  set(CURL_ROOT_DIR "${OPENSPACE_EXT_DIR}/curl")
-  target_include_directories(openspace-core SYSTEM PUBLIC ${CURL_ROOT_DIR}/include)
-  target_link_libraries(openspace-core PUBLIC ${CURL_ROOT_DIR}/lib/libcurl.lib)
-  target_compile_definitions(openspace-core PUBLIC "OPENSPACE_CURL_ENABLED" "CURL_STATICLIB")
-else ()
-  find_package(CURL)
-  if (CURL_FOUND)
-    target_include_directories(openspace-core SYSTEM PUBLIC ${CURL_INCLUDE_DIRS})
-    target_link_libraries(openspace-core PUBLIC ${CURL_LIBRARIES})
-    target_compile_definitions(openspace-core PUBLIC "OPENSPACE_CURL_ENABLED")
-  endif ()
-endif ()
-end_dependency()
+# Add external dependencies
+add_subdirectory(${OPENSPACE_EXT_DIR})
+target_link_libraries(openspace-core PUBLIC Ghoul Spice external-curl)
 
 # Qt
 # Unfortunately, we have to set this value manually; sigh

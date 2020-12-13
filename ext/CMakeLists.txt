@@ -22,23 +22,56 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/global_variables.cmake)
+# System libraries
+if (APPLE)
+  begin_dependency("Core Libraries")
+  add_library(external-system-apple INTERFACE)
+  set_folder_location(external-system-apple "External")
 
-function (create_new_application application_name)
-    add_executable(${application_name} MACOSX_BUNDLE ${ARGN})
-    set_openspace_compile_settings(${application_name})
+  target_include_directories(external-system-apple INTERFACE "/Developer/Headers/FlatCarbon")
+  find_library(COREFOUNDATION_LIBRARY CoreFoundation REQUIRED)
+  find_library(CARBON_LIBRARY Carbon REQUIRED)
+  find_library(COCOA_LIBRARY Cocoa REQUIRED) # This was Carbon before
+  find_library(APP_SERVICES_LIBRARY ApplicationServices REQUIRED)
+  find_library(APPKIT_LIBRARY AppKit REQUIRED)
+  mark_as_advanced(COREFOUNDATION_LIBRARY CARBON_LIBRARY COCOA_LIBRARY
+    APP_SERVICES_LIBRARY APPKIT_LIBRARY
+  )
+  target_link_libraries(external-system-apple INTERFACE # This was PUBLIC before
+    ${CARBON_LIBRARY} ${COREFOUNDATION_LIBRARY}
+    ${COCOA_LIBRARY} ${APP_SERVICES_LIBRARY}
+    ${APPKIT_LIBRARY}
+  )
+  end_dependency()
+endif ()
 
-    if (WIN32)
-        get_external_library_dependencies(ext_lib)
-        ghl_copy_files(
-            ${application_name}
-            "${OPENSPACE_EXT_DIR}/curl/lib/libcurl.dll"
-            "${OPENSPACE_EXT_DIR}/curl/lib/libeay32.dll"
-            "${OPENSPACE_EXT_DIR}/curl/lib/ssleay32.dll"
-            ${ext_lib}
-        )
-        ghl_copy_shared_libraries(${application_name} ${OPENSPACE_EXT_DIR}/ghoul)
-    endif ()
+# Ghoul
+add_subdirectory(ghoul)
+set_openspace_compile_settings(Ghoul)
+set_folder_location(Lua "External")
+set_folder_location(lz4 "External")
+set_folder_location(GhoulTest "Unit Tests")
+# link_directories("${GHOUL_LIBRARY_DIRS}")
 
-    target_link_libraries(${application_name} PUBLIC openspace-module-base)
-endfunction ()
+# Spice
+begin_dependency("Spice")
+add_subdirectory(spice)
+set_folder_location(Spice "External")
+end_dependency()
+
+# Curl
+begin_dependency("CURL")
+add_library(external-curl INTERFACE)
+if (WIN32)
+  target_include_directories(external-curl SYSTEM INTERFACE "curl/include")
+  target_link_libraries(external-curl INTERFACE "curl/lib/libcurl.lib")
+  target_compile_definitions(external-curl INTERFACE "OPENSPACE_CURL_ENABLED" "CURL_STATICLIB")
+else ()
+  find_package(CURL)
+  if (CURL_FOUND)
+    target_include_directories(external-curl SYSTEM INTERFACE ${CURL_INCLUDE_DIRS})
+    target_link_libraries(external-curl INTERFACE ${CURL_LIBRARIES})
+    target_compile_definitions(external-curl INTERFACE "OPENSPACE_CURL_ENABLED")
+  endif ()
+endif ()
+end_dependency()
