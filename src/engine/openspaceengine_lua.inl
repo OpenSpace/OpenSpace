@@ -22,11 +22,15 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
 #include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/globals.h>
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <ghoul/filesystem/cachemanager.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <filesystem>
 
 namespace openspace::luascriptfunctions {
@@ -286,6 +290,71 @@ int downloadFile(lua_State* L) {
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
+}
+
+/**
+* \ingroup LuaScripts
+* createPixelImage():
+* Creates a one pixel image with a given color and returns the p
+*/
+int createPixelImage(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::createPixelImage");
+
+    const std::string& name = ghoul::lua::value<std::string>(L, 1);
+    const ghoul::Dictionary& d = ghoul::lua::value<ghoul::Dictionary>(L, 2);
+
+    using namespace openspace::documentation;
+    const std::string& key = "color";
+    ghoul::Dictionary colorDict = {{ key, d }};
+    TestResult res = DoubleVector3Verifier()(colorDict, key);
+
+    if (!res.success) {
+        return ghoul::lua::luaError(L,
+            "Invalid color. Expected three double values {r, g, b} in range 0 to 1"
+        );
+    }
+
+    const glm::vec3 color = colorDict.value<glm::vec3>(key);
+
+    const std::string& fileName = FileSys.cacheManager()->cachedFilename(
+        fmt::format("{}.ppm", name),
+        "",
+        ghoul::filesystem::CacheManager::Persistent::Yes
+    );
+
+    const bool hasCachedFile = FileSys.fileExists(fileName);
+    if (hasCachedFile) {
+        LDEBUGC("OpenSpaceEngine", fmt::format("Cached file '{}' used", fileName));
+        ghoul::lua::push(L, fileName);
+        return 1;
+    }
+    else {
+        // Write the color to a ppm file
+        static std::mutex fileMutex;
+        std::lock_guard guard(fileMutex);
+        std::ofstream ppmFile(fileName, std::ofstream::binary | std::ofstream::trunc);
+
+        unsigned int width = 1;
+        unsigned int height = 1;
+        unsigned int size = width * height;
+        std::vector<unsigned char> img(size * 3);
+        img[0] = static_cast<unsigned char>(255 * color.r);
+        img[1] = static_cast<unsigned char>(255 * color.g);
+        img[2] = static_cast<unsigned char>(255 * color.b);
+
+        if (ppmFile.is_open()) {
+            ppmFile << "P6" << std::endl;
+            ppmFile << width << " " << height << std::endl;
+            ppmFile << 255 << std::endl;
+            ppmFile.write(reinterpret_cast<char*>(&img[0]), size * 3);
+            ppmFile.close();
+            ghoul::lua::push(L, fileName);
+            return 1;
+        }
+        else {
+            return ghoul::lua::luaError(L, "Could not open ppm file for writing.");
+        }
+    }
 }
 
 int isMaster(lua_State* L) {

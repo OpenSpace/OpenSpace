@@ -2,6 +2,6 @@ local DataPath = asset.syncedResource({
     Name = "Exoplanet Data Files",
     Type = "HttpSynchronization",
     Identifier = "exoplanets_data",
-    Version = 1
+    Version = 2
 })
 asset.export("DataPath", DataPath)

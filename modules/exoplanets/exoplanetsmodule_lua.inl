@@ -46,17 +46,15 @@ namespace openspace::exoplanets::luascriptfunctions {
 
 constexpr const char* ExoplanetsGuiPath = "/Milky Way/Exoplanets/Exoplanet Systems/";
 
-constexpr const char* LookUpTablePath = "${SYNC}/http/exoplanets_data/1/lookup.txt";
+constexpr const char* LookUpTablePath = "${SYNC}/http/exoplanets_data/2/lookup.txt";
 constexpr const char* ExoplanetsDataPath =
-    "${SYNC}/http/exoplanets_data/1/exoplanets_data.bin";
+    "${SYNC}/http/exoplanets_data/2/exoplanets_data.bin";
 
 constexpr const char* StarTextureFile = "${SYNC}/http/exoplanets_textures/1/sun.jpg";
 constexpr const char* NoDataTextureFile =
     "${SYNC}/http/exoplanets_textures/1/grid-32.png";
 constexpr const char* DiscTextureFile =
     "${SYNC}/http/exoplanets_textures/1/disc_texture.png";
-constexpr const char* HabitableZoneTextureFile =
-    "${SYNC}/http/exoplanets_textures/1/hz_disc_texture.png";
 
 const float AU = static_cast<float>(distanceconstants::AstronomicalUnit);
 const float SolarRadius = static_cast<float>(distanceconstants::SolarRadius);
@@ -443,7 +441,9 @@ void createExoplanetSystem(const std::string& starName) {
                     "Type = 'StaticRotation',"
                     "Rotation = " + ghoul::to_string(rotationMat3) + ""
                 "},"
-                "Texture = openspace.absPath('" + HabitableZoneTextureFile + "'),"
+                "Texture = openspace.absPath("
+                    "openspace.createPixelImage('exo_habitable_zone', {0, 0.92, 0.81})"
+                "),"
                 "Size = " + std::to_string(center) + ","
                 "Eccentricity = 0,"
                 "Offset = { " +
