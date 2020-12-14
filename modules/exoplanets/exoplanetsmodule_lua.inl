@@ -413,13 +413,13 @@ void createExoplanetSystem(const std::string& starName) {
     // Habitable Zone
     bool hasTeff = !std::isnan(system.starData.teff);
     bool hasLuminosity = !std::isnan(system.starData.luminosity);
-    std::optional<glm::vec2> zone = std::nullopt;
 
     if (hasTeff && hasLuminosity) {
-        zone = computeHabitableZone(system.starData.teff, system.starData.luminosity);
-    }
+        const glm::vec2 zone = computeHabitableZone(
+            system.starData.teff,
+            system.starData.luminosity
+        );
 
-    if (zone.has_value()) {
         float meanInclination = 0.f;
         for (const ExoplanetDataEntry& p : system.planetsData) {
             meanInclination += p.i;
@@ -428,7 +428,7 @@ void createExoplanetSystem(const std::string& starName) {
         const glm::dmat4 rotation = computeOrbitPlaneRotationMatrix(meanInclination);
         const glm::dmat3 rotationMat3 = static_cast<glm::dmat3>(rotation);
 
-        glm::vec2 limitsInMeter = zone.value() * AU;
+        glm::vec2 limitsInMeter = zone * AU;
         float half = 0.5f * (limitsInMeter[1] - limitsInMeter[0]);
         float center = limitsInMeter[0] + half;
         float relativeOffset = half / center;

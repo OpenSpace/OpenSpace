@@ -136,10 +136,16 @@ glm::dmat3 computeSystemRotation(glm::dvec3 starPosition) {
     );
 }
 
-std::optional<glm::vec2> computeHabitableZone(float teff, float luminosity) {
-    // The formula only consider stars with teff in range [2600, 7200] K
-    if (teff > 7200.f || teff < 2600.f) {
-        return std::nullopt;
+glm::vec2 computeHabitableZone(float teff, float luminosity) {
+    // Kopparapu's formula only considers stars with teff in range [2600, 7200] K.
+    // However, we want to use the formula for more stars, so add some flexibility to
+    // the teff boundaries
+    if (teff > 8000.f || teff < 2000.f) {
+        // For the other stars, use a method by Tom E. Morris:
+        // https://www.planetarybiology.com/calculating_habitable_zone.html
+        float inner = sqrtf(luminosity / 1.1f);
+        float outer = sqrtf(luminosity / 0.53f);
+        return glm::vec2(inner, outer);
     }
 
     struct Coefficients {
@@ -151,9 +157,9 @@ std::optional<glm::vec2> computeHabitableZone(float teff, float luminosity) {
     // https://depts.washington.edu/naivpl/sites/default/files/HZ_coefficients.dat
     constexpr Coefficients coefficients[] = {
         // Inner boundary - Runaway greenhouse
-        {1.10700E+00, 1.33200E-04, 1.58000E-08, -8.30800E-12, -1.93100E-15},
+        {1.10700E+00f, 1.33200E-04f, 1.58000E-08f, -8.30800E-12f, -1.93100E-15f},
         // Outer boundary - Maximum greenhouse
-        {3.56000E-01, 6.17100E-05, 1.69800E-09, -3.19800E-12, -5.57500E-16}
+        {3.56000E-01f, 6.17100E-05f, 1.69800E-09f, -3.19800E-12f, -5.57500E-16f}
     };
 
     const float tstar = teff - 5780.f;
@@ -168,7 +174,7 @@ std::optional<glm::vec2> computeHabitableZone(float teff, float luminosity) {
         distances[i] = std::pow(luminosity / seff, 0.5f);
     }
 
-    return std::optional<glm::vec2>(std::move(distances));
+    return distances;
 }
 
 std::string createIdentifier(std::string name) {

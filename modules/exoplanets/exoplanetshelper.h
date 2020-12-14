@@ -117,7 +117,7 @@ glm::dmat3 computeSystemRotation(glm::dvec3 starPosition);
  * \return A vec2 with the lower and upper boundary in atronomical units, if a habitable
            zone could be computed. Otherwise an std::nullopt
  */
-std::optional<glm::vec2> computeHabitableZone(float teff, float luminosity);
+glm::vec2 computeHabitableZone(float teff, float luminosity);
 
 // Create an identifier without whitespaces
 std::string createIdentifier(std::string name);
