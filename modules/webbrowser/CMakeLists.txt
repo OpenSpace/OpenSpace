@@ -45,6 +45,10 @@ cmake_minimum_required(VERSION 2.8.12.1)
 # Use folders in the resulting project files.
 set_property(GLOBAL PROPERTY OS_FOLDERS ON)
 
+# "OpenSpace Helper" is not a valid CMake target name under OLD
+# https://cmake.org/cmake/help/git-stage/policy/CMP0037.html
+cmake_policy(SET CMP0037 OLD)
+
 # Use <PackageName>_ROOT variables
 # https://cmake.org/cmake/help/git-stage/policy/CMP0074.html
 cmake_policy(SET CMP0074 NEW)

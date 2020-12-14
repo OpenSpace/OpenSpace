@@ -25,6 +25,10 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
 
+# Use <PackageName>_ROOT variables
+# https://cmake.org/cmake/help/git-stage/policy/CMP0074.html
+cmake_policy(SET CMP0074 NEW)
+
 set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/kameleonwrapper.h
   ${CMAKE_CURRENT_SOURCE_DIR}/include/kameleonhelper.h

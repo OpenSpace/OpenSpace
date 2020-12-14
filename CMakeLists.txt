@@ -74,6 +74,9 @@ mark_as_advanced(CMAKE_BACKWARDS_COMPATIBILITY CMAKE_BUILD_TYPE CMAKE_DEBUG_POST
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${OPENSPACE_CMAKE_EXT_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OPENSPACE_BASE_DIR}/bin)
 
+# "OpenSpace Helper" is not a valid CMake target name under OLD
+cmake_policy(SET CMP0037 NEW)
+
 ##########################################################################################
 # Main                                                                                   #
 ##########################################################################################

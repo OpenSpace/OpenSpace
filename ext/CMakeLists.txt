@@ -26,7 +26,6 @@
 if (APPLE)
   begin_dependency("Core Libraries")
   add_library(external-system-apple INTERFACE)
-  set_folder_location(external-system-apple "External")
 
   target_include_directories(external-system-apple INTERFACE "/Developer/Headers/FlatCarbon")
   find_library(COREFOUNDATION_LIBRARY CoreFoundation REQUIRED)
@@ -51,7 +50,6 @@ set_openspace_compile_settings(Ghoul)
 set_folder_location(Lua "External")
 set_folder_location(lz4 "External")
 set_folder_location(GhoulTest "Unit Tests")
-# link_directories("${GHOUL_LIBRARY_DIRS}")
 
 # Spice
 begin_dependency("Spice")
