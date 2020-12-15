@@ -24,6 +24,7 @@
 
 #include <openspace/engine/globalscallbacks.h>
 
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
 #include <array>
 
