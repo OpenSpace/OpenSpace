@@ -68,7 +68,8 @@ set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER CMake)
 
 mark_as_advanced(CMAKE_BACKWARDS_COMPATIBILITY CMAKE_BUILD_TYPE CMAKE_DEBUG_POSTFIX
   CMAKE_INSTALL_PREFIX CMAKE_OSX_ARCHITECTURES CMAKE_OSX_DEPLOYMENT_TARGET
-  CMAKE_OSX_SYSROOT CMAKE_RELEASE_POSTFIX)
+  CMAKE_OSX_SYSROOT CMAKE_RELEASE_POSTFIX
+)
 
 # Set build output directories
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${OPENSPACE_CMAKE_EXT_DIR})
@@ -105,7 +106,7 @@ execute_process(
 )
 if (NOT OPENSPACE_GIT_STATUS_RETURN EQUAL 0)
   set(OPENSPACE_GIT_STATUS "uncommitted changes")
-else()
+else ()
   set(OPENSPACE_GIT_STATUS "")
 endif ()
 
@@ -210,7 +211,7 @@ if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
   set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${WEBBROWSER_MODULE_PATH}/cmake")
   include(webbrowser_helpers)
 elseif (OPENSPACE_MODULE_WEBBROWSER)
-  message(WARNING "Web configured to be included, but no CEF_ROOT was found, please try configuring CMake again.")
+  message(WARNING "Web configured to be included, but no CEF_ROOT was found, please try configuring CMake again")
 endif ()
 
 ##########################################################################################
@@ -219,11 +220,6 @@ endif ()
 option(OPENSPACE_WITH_ABUFFER_RENDERER "Compile ABuffer Renderer" OFF)
 if (OPENSPACE_WITH_ABUFFER_RENDERER)
   target_compile_definitions(openspace-core PUBLIC "OPENSPACE_WITH_ABUFFER_RENDERER")
-endif ()
-
-option(OPENSPACE_WITH_INSTRUMENTATION "Add instrumentation options" OFF)
-if (OPENSPACE_WITH_INSTRUMENTATION)
-  target_compile_definitions(openspace-core PUBLIC "OPENSPACE_WITH_INSTRUMENTATION")
 endif ()
 
 
