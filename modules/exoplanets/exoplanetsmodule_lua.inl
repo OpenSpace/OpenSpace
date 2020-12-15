@@ -371,8 +371,8 @@ void createExoplanetSystem(const std::string& starName) {
             );
             const glm::dmat3 rotationMat3 = static_cast<glm::dmat3>(rotation);
 
-            const float lowerOffset = planet.aLower / planet.a;
-            const float upperOffset = planet.aUpper / planet.a;
+            const float lowerOffset = static_cast<float>(planet.aLower / planet.a);
+            const float upperOffset = static_cast<float>(planet.aUpper / planet.a);
 
             const std::string discNode = "{"
                 "Identifier = '" + planetIdentifier + "_Disc',"
@@ -431,6 +431,16 @@ void createExoplanetSystem(const std::string& starName) {
         float center = limitsInMeter[0] + half;
         float relativeOffset = half / center;
 
+        constexpr const char* description =
+            "The habitable zone is the region around a star in which an Earth-like "
+            "planet can potentially have liquid water on its surface."
+            "<br><br>"
+            "The inner boundary is where the greenhouse gases in the atmosphere "
+            "would trap any incoming infrared radiation, leading to the planet "
+            "surface becoming so hot that water boils away. The outer boundary is where "
+            "the greenhouse effect would not be able to maintain surface temperature "
+            "above freezing anywhere on the planet.";
+
         const std::string zoneDiscNode = "{"
             "Identifier = '" + starIdentifier + "_HZ_Disc',"
             "Parent = '" + starIdentifier + "',"
@@ -460,7 +470,8 @@ void createExoplanetSystem(const std::string& starName) {
             "},"
             "GUI = {"
                 "Name = '" + starName + " Habitable Zone',"
-                "Path = '" + guiPath + "'"
+                "Path = '" + guiPath + "',"
+                "Description = '" + description + "'"
             "}"
         "}";
 
