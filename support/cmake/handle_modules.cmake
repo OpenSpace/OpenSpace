@@ -149,6 +149,7 @@ function (handle_modules internal_module_path external_modules_paths all_enabled
         # This is just a hack as a dependency from kameleon->core has been introduced that
         # should be removed
         if (${library_name} STREQUAL "openspace-module-kameleon")
+            cmake_policy(SET CMP0079 NEW)
             target_link_libraries(openspace-core PRIVATE openspace-module-kameleon)
         endif ()
 
