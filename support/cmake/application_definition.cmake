@@ -25,20 +25,20 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/global_variables.cmake)
 
 function (create_new_application application_name)
-    add_executable(${application_name} MACOSX_BUNDLE ${ARGN})
-    set_openspace_compile_settings(${application_name})
+  add_executable(${application_name} MACOSX_BUNDLE ${ARGN})
+  set_openspace_compile_settings(${application_name})
 
-    if (WIN32)
-        get_external_library_dependencies(ext_lib)
-        ghl_copy_files(
-            ${application_name}
-            "${OPENSPACE_EXT_DIR}/curl/lib/libcurl.dll"
-            "${OPENSPACE_EXT_DIR}/curl/lib/libeay32.dll"
-            "${OPENSPACE_EXT_DIR}/curl/lib/ssleay32.dll"
-            ${ext_lib}
-        )
-        ghl_copy_shared_libraries(${application_name} ${OPENSPACE_EXT_DIR}/ghoul)
-    endif ()
+  if (WIN32)
+    get_external_library_dependencies(ext_lib)
+    ghl_copy_files(
+      ${application_name}
+      "${OPENSPACE_EXT_DIR}/curl/lib/libcurl.dll"
+      "${OPENSPACE_EXT_DIR}/curl/lib/libeay32.dll"
+      "${OPENSPACE_EXT_DIR}/curl/lib/ssleay32.dll"
+      ${ext_lib}
+    )
+    ghl_copy_shared_libraries(${application_name} ${OPENSPACE_EXT_DIR}/ghoul)
+  endif ()
 
-    target_link_libraries(${application_name} PUBLIC openspace-module-base)
+  target_link_libraries(${application_name} PUBLIC openspace-module-base)
 endfunction ()

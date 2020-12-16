@@ -35,34 +35,34 @@ function (get_application_attribute_default path result)
 endfunction()
 
 # Get a list of all of the application directories
-file(GLOB appDirs RELATIVE ${OPENSPACE_APPS_DIR} ${OPENSPACE_APPS_DIR}/*)
+file(GLOB app_dirs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/*)
 # Remove the .DS_Store present on Mac
-list(REMOVE_ITEM appDirs ".DS_Store")
-list(REMOVE_ITEM appDirs "CMakeLists.txt")
+list(REMOVE_ITEM app_dirs ".DS_Store")
+list(REMOVE_ITEM app_dirs "CMakeLists.txt")
 
 
 
 
 message(STATUS "Enabled applications:")
-foreach (app ${appDirs})
+foreach (app ${app_dirs})
   string(TOUPPER ${app} upper_app)
   if (OPENSPACE_APPLICATION_${upper_app})
-    message(STATUS "\t${app}  (${OPENSPACE_APPS_DIR}/${app})")
+    message(STATUS "\t${app}  (${CMAKE_CURRENT_SOURCE_DIR}/${app})")
   endif ()
 endforeach ()
 
 # First create all of the options for the applications. In case that one of the
 # applications fail to include later, we still want all of them listed
-foreach (app ${appDirs})
-  set(app_dir "${OPENSPACE_APPS_DIR}/${app}")
+foreach (app ${app_dirs})
+  set(app_dir "${CMAKE_CURRENT_SOURCE_DIR}/${app}")
   string(TOUPPER ${app} upper_app)
 
   get_application_attribute_default(${app_dir} is_default_application)
   option(OPENSPACE_APPLICATION_${upper_app} "Build ${app} application" ${is_default_application})
 endforeach ()
 
-foreach (app ${appDirs})
-  set(app_dir "${OPENSPACE_APPS_DIR}/${app}")
+foreach (app ${app_dirs})
+  set(app_dir "${CMAKE_CURRENT_SOURCE_DIR}/${app}")
   string(TOUPPER ${app} upper_app)
   if (OPENSPACE_APPLICATION_${upper_app})
     begin_header("Application: ${app}")

@@ -172,11 +172,11 @@ if (MSVC)
 endif ()
 
 begin_header("Configuring Modules")
-add_subdirectory(modules)
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/modules")
 end_header("End: Configuring Modules")
 
 begin_header("Configuring Applications")
-add_subdirectory(apps)
+add_subdirectory("${OPENSPACE_APPS_DIR}")
 end_header("End: Configuring Applications")
 
 option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
