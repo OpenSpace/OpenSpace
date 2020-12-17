@@ -61,7 +61,7 @@ if (NOT EXISTS ${OPENSPACE_EXT_DIR}/ghoul/CMakeLists.txt)
   )
 endif ()
 
-set_property(GLOBAL PROPERTY USE_FOLDERS On)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER CMake)
 
 mark_as_advanced(CMAKE_BACKWARDS_COMPATIBILITY CMAKE_BUILD_TYPE CMAKE_DEBUG_POSTFIX
@@ -182,7 +182,7 @@ end_header("End: Configuring Applications")
 option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
 if (OPENSPACE_HAVE_TESTS)
   begin_header("Generating OpenSpace unit test")
-  add_subdirectory("${OPENSPACE_BASE_DIR}/tests")
+  add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/tests")
   end_header()
 endif (OPENSPACE_HAVE_TESTS)
 

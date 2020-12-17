@@ -22,7 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/rendering/screenspacedashboard.h>
 #include <openspace/engine/globals.h>
 #include <ghoul/logging/logmanager.h>
 

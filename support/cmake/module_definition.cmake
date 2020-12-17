@@ -47,6 +47,8 @@ function (create_new_module module_name output_library_name library_mode)
   # Set compile settings that are common to all modules
   set_openspace_compile_settings(${library_name})
 
+  target_include_directories(${library_name} PRIVATE ${OPENSPACE_BASE_DIR})
+
   handle_module_dependencies(${library_name} ${module_name})
 
   if ("${library_mode}" STREQUAL "SHARED")

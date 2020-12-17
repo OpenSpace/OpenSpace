@@ -119,28 +119,13 @@ create_new_module(
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/gdal_data DESTINATION modules/globebrowsing)
 
 if (WIN32)
-  target_include_directories(
-    openspace-module-globebrowsing
-    SYSTEM PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/include
-  )
-
-  target_link_libraries(
-    openspace-module-globebrowsing
-    PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal_i.lib
-  )
+  target_include_directories(openspace-module-globebrowsing SYSTEM PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/include)
+  target_link_libraries(openspace-module-globebrowsing PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal_i.lib)
   register_external_libraries("${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal241.dll")
 else (WIN32)
   find_package(GDAL REQUIRED)
 
-  target_include_directories(
-    openspace-module-globebrowsing
-    SYSTEM PUBLIC
-    ${GDAL_INCLUDE_DIR}
-  )
-
+  target_include_directories(openspace-module-globebrowsing SYSTEM PRIVATE ${GDAL_INCLUDE_DIR})
   target_link_libraries(openspace-module-globebrowsing PRIVATE ${GDAL_LIBRARY})
-
   mark_as_advanced(GDAL_CONFIG GDAL_INCLUDE_DIR GDAL_LIBRARY)
 endif () # WIN32

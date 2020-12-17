@@ -434,17 +434,25 @@ endforeach ()
 # Create OpenSpace target
 ##########################################################################################
 add_library(openspace-core STATIC ${OPENSPACE_HEADER} ${OPENSPACE_SOURCE})
-target_include_directories(openspace-core PUBLIC
-  # In order to be able to include openspace-core files
-  ${OPENSPACE_BASE_DIR}/include
-  # In order to be able to include module files
-  ${OPENSPACE_BASE_DIR}
-  # In order to use the date library
-  SYSTEM ${OPENSPACE_BASE_DIR}/ext/date/include
-  # In order to use the nlohmann JSON library
-  SYSTEM ${OPENSPACE_BASE_DIR}/ext
-  # In order to be able to include the module_registration file
-  ${CMAKE_BINARY_DIR}/_generated/include
+target_include_directories(openspace-core SYSTEM
+  PUBLIC
+    # In order to use the date library
+    ${OPENSPACE_BASE_DIR}/ext/date/include
+    # In order to use the nlohmann JSON library
+    ${OPENSPACE_BASE_DIR}/ext
+)
+
+target_include_directories(openspace-core
+  PUBLIC
+    # In order to be able to include openspace-core files
+    ${OPENSPACE_BASE_DIR}/include
+    # In order to be able to include the module_registration file
+    ${CMAKE_BINARY_DIR}/_generated/include
+
+  PRIVATE
+    # In order to be able to include module files.  This is a temporary fix as this
+    # introduces a dependency from the opnspace-core onto the modules
+    ${OPENSPACE_BASE_DIR}
 )
 
 configure_file(

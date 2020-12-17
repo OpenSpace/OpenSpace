@@ -41,8 +41,6 @@ set(OPENSPACE_SOURCE_FILES
 )
 source_group("Source Files" FILES ${OPENSPACE_SOURCE_FILES})
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-
 create_new_module(
   CefWebGui
   cefwebgui_module

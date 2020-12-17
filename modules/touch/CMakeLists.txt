@@ -58,5 +58,4 @@ create_new_module(
 )
 
 include_external_library(${touch_module} PUBLIC libTUIO11 ${CMAKE_CURRENT_SOURCE_DIR}/ext)
-
 disable_external_warnings_for_file(${CMAKE_CURRENT_SOURCE_DIR}/ext/levmarq.cpp)

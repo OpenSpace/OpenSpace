@@ -24,8 +24,6 @@
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
-# include(GenerateExportHeader)
-
 set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/gui.h
   ${CMAKE_CURRENT_SOURCE_DIR}/include/guiassetcomponent.h
@@ -74,8 +72,6 @@ set(SHADER_FILES
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 
-# set(openspace-module-imgui_LIBRARY_MODE SHARED)
-
 create_new_module(
   "ImGUI"
   imgui_module
@@ -84,5 +80,3 @@ create_new_module(
 )
 
 include_external_library(${imgui_module} PRIVATE Imgui ${CMAKE_CURRENT_SOURCE_DIR}/ext/imgui)
-
-# generate_export_header(${imgui_module} EXPORT_FILE_NAME ${CMAKE_BINARY_DIR}/_generated/include/imgui_export.h)

@@ -22,14 +22,11 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-function (set_openspace_compile_settings project)
-  set_property(TARGET ${project} PROPERTY CXX_STANDARD 17)
-  set_property(TARGET ${project} PROPERTY CXX_STANDARD_REQUIRED ON)
+function (set_openspace_compile_settings target)
+  target_compile_features(${target} PRIVATE cxx_std_17)
 
   if (MSVC)
-    target_compile_options(
-      ${project}
-      PRIVATE
+    target_compile_options(${target} PRIVATE
       "/MP"       # Multi-threading support
       "/W4"       # Highest warning level
       "/w44062"   # enumerator 'identifier' in a switch of enum 'enumeration' is not handled
@@ -75,41 +72,39 @@ function (set_openspace_compile_settings project)
       "/Zc:__cplusplus" # Correctly set the __cplusplus macro
     )
     if (OPENSPACE_WARNINGS_AS_ERRORS)
-      target_compile_options(${project} PRIVATE "/WX")
+      target_compile_options(${target} PRIVATE "/WX")
     endif ()
 
     # Boost as of 1.64 still uses unary_function unless we define this
-    target_compile_definitions(${project} PRIVATE "_HAS_AUTO_PTR_ETC")
-    target_compile_definitions(${project} PRIVATE "NOMINMAX")
+    target_compile_definitions(${target} PRIVATE "_HAS_AUTO_PTR_ETC")
+    target_compile_definitions(${target} PRIVATE "NOMINMAX")
 
     if (OPENSPACE_OPTIMIZATION_ENABLE_AVX)
-      target_compile_options(${project} PRIVATE "/arch:AVX")
+      target_compile_options(${target} PRIVATE "/arch:AVX")
     endif ()
     if (OPENSPACE_OPTIMIZATION_ENABLE_AVX2)
-      target_compile_options(${project} PRIVATE "/arch:AVX2")
+      target_compile_options(${target} PRIVATE "/arch:AVX2")
     endif ()
     if (OPENSPACE_OPTIMIZATION_ENABLE_AVX512)
-      target_compile_options(${project} PRIVATE "/arch:AVX512")
+      target_compile_options(${target} PRIVATE "/arch:AVX512")
     endif ()
 
     if (OPENSPACE_OPTIMIZATION_ENABLE_OTHER_OPTIMIZATIONS)
-      target_compile_options(${project} PRIVATE
+      target_compile_options(${target} PRIVATE
         "/Oi" # usage of intrinsic functions
         "/GL" # Whole program optimization
       )
     else ()
-      target_compile_options(${project} PRIVATE
+      target_compile_options(${target} PRIVATE
         "/ZI"       # Edit and continue support
       )
     endif ()
   elseif (NOT LINUX AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     if (OPENSPACE_WARNINGS_AS_ERRORS)
-      target_compile_options(${project} PRIVATE "-Werror")
+      target_compile_options(${target} PRIVATE "-Werror")
     endif ()
 
-    target_compile_options(
-      ${project}
-      PRIVATE
+    target_compile_options(${target} PRIVATE
       "-stdlib=libc++"
       "-Wall"
       "-Wextra"
@@ -193,12 +188,10 @@ function (set_openspace_compile_settings project)
     )
   elseif (UNIX AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     if (OPENSPACE_WARNINGS_AS_ERRORS)
-      target_compile_options(${project} PRIVATE "-Werror")
+      target_compile_options(${target} PRIVATE "-Werror")
     endif ()
 
-    target_compile_options(
-      ${project}
-      PRIVATE
+    target_compile_options(${target} PRIVATE
       "-stdlib=libc++"
       "-std=c++17"
       "-Wall"
@@ -282,11 +275,9 @@ function (set_openspace_compile_settings project)
       "-Wno-missing-braces"
     )
 
-    target_link_libraries(${project} PRIVATE "c++" "c++abi")
+    target_link_libraries(${target} PRIVATE "c++" "c++abi")
   elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    target_compile_options(
-      ${project}
-      PRIVATE
+    target_compile_options(${target} PRIVATE
       "-ggdb"
       "-Wall"
       "-Wextra"
@@ -315,7 +306,7 @@ function (set_openspace_compile_settings project)
     )
 
     if (OPENSPACE_WARNINGS_AS_ERRORS)
-      target_compile_options(${project} PRIVATE "-Werror")
+      target_compile_options(${target} PRIVATE "-Werror")
     endif ()
   else ()
     message("Compiler not handled in set_openspace_compile_settings.cmake")
