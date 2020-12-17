@@ -168,9 +168,6 @@ protected:
      * Returns a const pointer to the module engine
      */
     const ModuleEngine* moduleEngine() const;
-
-private:
-    const ModuleEngine* _moduleEngine = nullptr;
 };
 
 } // namespace openspace

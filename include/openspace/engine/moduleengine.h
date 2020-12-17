@@ -88,8 +88,7 @@ public:
      *        previously
      * \pre \p module must not be nullptr
      */
-    void registerModule(std::unique_ptr<OpenSpaceModule> module,
-        const ghoul::Dictionary& configuration);
+    void registerModule(std::unique_ptr<OpenSpaceModule> module);
 
     /**
      * Returns a list of all registered OpenSpaceModule%s that have been registered with

@@ -45,14 +45,22 @@ void ModuleEngine::initialize(
 {
     ZoneScoped
 
-    for (OpenSpaceModule* m : AllModules()) {
+    std::vector<OpenSpaceModule*> modules = AllModules();
+
+    for (OpenSpaceModule* m : modules) {
+        registerModule(std::unique_ptr<OpenSpaceModule>(m));
+    }
+
+    for (OpenSpaceModule* m : modules) {
         const std::string& identifier = m->identifier();
         auto it = moduleConfigurations.find(identifier);
         ghoul::Dictionary configuration;
         if (it != moduleConfigurations.end()) {
             configuration = it->second;
         }
-        registerModule(std::unique_ptr<OpenSpaceModule>(m), configuration);
+        m->initialize(this, configuration);
+        addPropertySubOwner(m);
+
     }
 }
 
@@ -99,9 +107,7 @@ void ModuleEngine::deinitializeGL() {
     LDEBUG("Finished deinitializing OpenGL of modules");
 }
 
-void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> mod,
-                                  const ghoul::Dictionary& configuration)
-{
+void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> mod) {
     ZoneScoped
 
     ghoul_assert(mod, "Module must not be nullptr");
@@ -121,8 +127,6 @@ void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> mod,
     }
 
     LDEBUG(fmt::format("Registering module '{}'", mod->identifier()));
-    mod->initialize(this, configuration);
-    addPropertySubOwner(mod.get());
     LDEBUG(fmt::format("Registered module '{}'", mod->identifier()));
     _modules.push_back(std::move(mod));
 }
