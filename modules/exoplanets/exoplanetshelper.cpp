@@ -143,19 +143,22 @@ glm::vec2 computeHabitableZone(float teff, float luminosity) {
     if (teff > 8000.f || teff < 2000.f) {
         // For the other stars, use a method by Tom E. Morris:
         // https://www.planetarybiology.com/calculating_habitable_zone.html
-        float inner = sqrtf(luminosity / 1.1f);
-        float outer = sqrtf(luminosity / 0.53f);
+        float inner = std::sqrt(luminosity / 1.1f);
+        float outer = std::sqrt(luminosity / 0.53f);
         return glm::vec2(inner, outer);
     }
 
     struct Coefficients {
         float seffSun;
-        float a, b, c, d;
+        float a;
+        float b;
+        float c;
+        float d;
     };
 
     // Coefficients for planets of 1 Earth mass. Received from:
     // https://depts.washington.edu/naivpl/sites/default/files/HZ_coefficients.dat
-    constexpr Coefficients coefficients[] = {
+    constexpr const Coefficients coefficients[] = {
         // Inner boundary - Runaway greenhouse
         {1.10700E+00f, 1.33200E-04f, 1.58000E-08f, -8.30800E-12f, -1.93100E-15f},
         // Outer boundary - Maximum greenhouse

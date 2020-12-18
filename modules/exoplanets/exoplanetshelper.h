@@ -80,10 +80,10 @@ struct ExoplanetDataEntry {
 
 struct StarData {
     glm::vec3 position = glm::vec3(std::numeric_limits<float>::quiet_NaN()); // In parsec
-    float radius       = std::numeric_limits<float>::quiet_NaN(); // In solar radii
-    float bv           = std::numeric_limits<float>::quiet_NaN();
-    float teff         = std::numeric_limits<float>::quiet_NaN(); // In Kelvin
-    float luminosity   = std::numeric_limits<float>::quiet_NaN(); // In solar luminosities
+    float radius = std::numeric_limits<float>::quiet_NaN(); // In solar radii
+    float bv = std::numeric_limits<float>::quiet_NaN();
+    float teff = std::numeric_limits<float>::quiet_NaN(); // In Kelvin
+    float luminosity = std::numeric_limits<float>::quiet_NaN(); // In solar luminosities
 };
 
 struct ExoplanetSystem {
@@ -102,7 +102,7 @@ bool hasSufficientData(const ExoplanetDataEntry& p);
 glm::vec3 starColor(float bv);
 
 glm::dmat4 computeOrbitPlaneRotationMatrix(float i, float bigom = 180.f,
-                                           float omega = 90.f);
+    float omega = 90.f);
 
 // Rotate the original coordinate system (where x is pointing to First Point of Aries)
 // so that x is pointing from star to the sun.

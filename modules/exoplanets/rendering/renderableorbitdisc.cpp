@@ -40,6 +40,11 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
+    constexpr const std::array<const char*, 6> UniformNames = {
+        "modelViewProjectionTransform", "offset", "opacity",
+        "discTexture", "eccentricity", "semiMajorAxis"
+    };
+
     static const openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
@@ -166,14 +171,7 @@ void RenderableOrbitDisc::initializeGL() {
         absPath("${BASE}/modules/exoplanets/shaders/orbitdisc_fs.glsl")
     );
 
-    _uniformCache.modelViewProjection = _shader->uniformLocation(
-        "modelViewProjectionTransform"
-    );
-    _uniformCache.offset = _shader->uniformLocation("offset");
-    _uniformCache.opacity = _shader->uniformLocation("opacity");
-    _uniformCache.texture = _shader->uniformLocation("discTexture");
-    _uniformCache.eccentricity = _shader->uniformLocation("eccentricity");
-    _uniformCache.semiMajorAxis = _shader->uniformLocation("semiMajorAxis");
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
 
     glGenVertexArrays(1, &_quad);
     glGenBuffers(1, &_vertexPositionBuffer);
@@ -239,14 +237,7 @@ void RenderableOrbitDisc::render(const RenderData& data, RendererTasks&) {
 void RenderableOrbitDisc::update(const UpdateData&) {
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
-        _uniformCache.modelViewProjection = _shader->uniformLocation(
-            "modelViewProjectionTransform"
-        );
-        _uniformCache.offset = _shader->uniformLocation("offset");
-        _uniformCache.opacity = _shader->uniformLocation("opacity");
-        _uniformCache.texture = _shader->uniformLocation("discTexture");
-        _uniformCache.eccentricity = _shader->uniformLocation("eccentricity");
-        _uniformCache.semiMajorAxis = _shader->uniformLocation("semiMajorAxis");
+        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
     }
 
     if (_planeIsDirty) {

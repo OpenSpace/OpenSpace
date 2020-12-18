@@ -303,13 +303,16 @@ int createPixelImage(lua_State* L) {
     const std::string& name = ghoul::lua::value<std::string>(L, 1);
     const ghoul::Dictionary& d = ghoul::lua::value<ghoul::Dictionary>(L, 2);
 
+    // @TODO (emmbr 2020-12-18) Verify that the input dictionary is a vec3
+    // Would like to clean this up with a more direct use of the Verifier in the future
     using namespace openspace::documentation;
     const std::string& key = "color";
     ghoul::Dictionary colorDict = {{ key, d }};
     TestResult res = DoubleVector3Verifier()(colorDict, key);
 
     if (!res.success) {
-        return ghoul::lua::luaError(L,
+        return ghoul::lua::luaError(
+            L,
             "Invalid color. Expected three double values {r, g, b} in range 0 to 1"
         );
     }

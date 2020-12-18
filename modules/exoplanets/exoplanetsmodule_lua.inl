@@ -56,9 +56,9 @@ constexpr const char* NoDataTextureFile =
 constexpr const char* DiscTextureFile =
     "${SYNC}/http/exoplanets_textures/1/disc_texture.png";
 
-const float AU = static_cast<float>(distanceconstants::AstronomicalUnit);
-const float SolarRadius = static_cast<float>(distanceconstants::SolarRadius);
-const float JupiterRadius = static_cast<float>(distanceconstants::JupiterRadius);
+constexpr const float AU = static_cast<float>(distanceconstants::AstronomicalUnit);
+constexpr const float SolarRadius = static_cast<float>(distanceconstants::SolarRadius);
+constexpr const float JupiterRadius = static_cast<float>(distanceconstants::JupiterRadius);
 
 ExoplanetSystem findExoplanetSystemInData(std::string_view starName) {
     ExoplanetSystem system;
@@ -84,14 +84,14 @@ ExoplanetSystem findExoplanetSystemInData(std::string_view starName) {
     // 3. read sizeof(exoplanet) bytes into an exoplanet object.
     ExoplanetDataEntry p;
     std::string line;
-    while (getline(lut, line)) {
+    while (std::getline(lut, line)) {
         std::istringstream ss(line);
         std::string name;
-        getline(ss, name, ',');
+        std::getline(ss, name, ',');
 
         if (name.substr(0, name.length() - 2) == starName) {
             std::string location_s;
-            getline(ss, location_s);
+            std::getline(ss, location_s);
             long location = std::stol(location_s.c_str());
 
             data.seekg(location);
@@ -151,7 +151,7 @@ void createExoplanetSystem(const std::string& starName) {
     }
 
     ExoplanetSystem system = findExoplanetSystemInData(starName);
-    if (system.planetNames.empty()) {
+    if (system.planetsData.empty()) {
         LERROR(fmt::format("Exoplanet system '{}' could not be found", starName));
         return;
     }
@@ -447,10 +447,6 @@ void createExoplanetSystem(const std::string& starName) {
             "Enabled = true,"
             "Renderable = {"
                 "Type = 'RenderableOrbitDisc',"
-                "Rotation = {"
-                    "Type = 'StaticRotation',"
-                    "Rotation = " + ghoul::to_string(rotationMat3) + ""
-                "},"
                 "Texture = openspace.absPath("
                     "openspace.createPixelImage('exo_habitable_zone', {0, 0.92, 0.81})"
                 "),"
@@ -549,7 +545,7 @@ std::vector<std::string> hostStarsWithSufficientData() {
 
     // Read number of lines
     int nExoplanets = 0;
-    while (getline(lookupTableFile, line)) {
+    while (std::getline(lookupTableFile, line)) {
         ++nExoplanets;
     }
     lookupTableFile.clear();
@@ -557,17 +553,17 @@ std::vector<std::string> hostStarsWithSufficientData() {
     names.reserve(nExoplanets);
 
     ExoplanetDataEntry p;
-    while (getline(lookupTableFile, line)) {
+    while (std::getline(lookupTableFile, line)) {
         std::stringstream ss(line);
         std::string name;
-        getline(ss, name, ',');
+        std::getline(ss, name, ',');
         // Remove the last two characters, that specify the planet
         name = name.substr(0, name.size() - 2);
 
         // Don't want to list systems where there is not enough data to visualize.
         // So, test if there is before adding the name to the list.
         std::string location_s;
-        getline(ss, location_s);
+        std::getline(ss, location_s);
         long location = std::stol(location_s.c_str());
 
         data.seekg(location);
