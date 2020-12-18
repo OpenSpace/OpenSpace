@@ -414,7 +414,7 @@ void DashboardItemDistance::render(glm::vec2& penPosition) {
         dist = { convertedD, nameForDistanceUnit(unit, convertedD != 1.0) };
     }
 
-    std::fill(_buffer.begin(), _buffer.end(), 0);
+    std::fill(_buffer.begin(), _buffer.end(), char(0));
     try {
         char* end = fmt::format_to(
             _buffer.data(),

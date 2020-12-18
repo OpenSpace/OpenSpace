@@ -182,7 +182,9 @@ void DataProcessor::add(const std::vector<std::vector<float>>& optionValues,
             values.begin(),
             values.end(),
             0.f,
-            [mean](float l, float r) { return l + pow(r - mean, 2); }
+            [mean](float l, float r) {
+                return l + static_cast<float>(std::pow(r - mean, 2));
+            }
         );
         const float standardDeviation = sqrt(variance / numValues);
 
@@ -190,8 +192,9 @@ void DataProcessor::add(const std::vector<std::vector<float>>& optionValues,
         const float oldMean = (1.f / _numValues[i]) * _sum[i];
 
         _sum[i] += sum[i];
-        _standardDeviation[i] = sqrt(pow(standardDeviation, 2) +
-                                pow(_standardDeviation[i], 2));
+        _standardDeviation[i] = static_cast<float>(
+            std::sqrt(std::pow(standardDeviation, 2) + std::pow(_standardDeviation[i], 2))
+        );
         _numValues[i] += numValues;
 
         const float min = normalizeWithStandardScore(

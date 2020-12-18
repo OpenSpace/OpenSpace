@@ -247,7 +247,7 @@ void DashboardItemFramerate::render(glm::vec2& penPosition) {
 
     FrametimeType frametimeType = FrametimeType(_frametimeType.value());
 
-    std::fill(_buffer.begin(), _buffer.end(), 0);
+    std::fill(_buffer.begin(), _buffer.end(), char(0));
     char* end = format(
         _buffer,
         frametimeType,
