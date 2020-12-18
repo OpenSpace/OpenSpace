@@ -58,7 +58,7 @@ void ModuleEngine::initialize(
         if (it != moduleConfigurations.end()) {
             configuration = it->second;
         }
-        m->initialize(this, configuration);
+        m->initialize(configuration);
         addPropertySubOwner(m);
 
     }

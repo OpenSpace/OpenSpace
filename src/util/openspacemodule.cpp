@@ -47,9 +47,7 @@ OpenSpaceModule::OpenSpaceModule(std::string name)
     : properties::PropertyOwner({ std::move(name) })
 {}
 
-void OpenSpaceModule::initialize(const ModuleEngine* moduleEngine,
-                                 const ghoul::Dictionary& configuration)
-{
+void OpenSpaceModule::initialize(const ghoul::Dictionary& configuration) {
     ZoneScoped
     ZoneName(identifier().c_str(), identifier().size())
 

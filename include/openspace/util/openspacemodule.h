@@ -66,8 +66,7 @@ public:
      * is set in the OpenSpaceModule constructor. This method will call the
      * internalInitialize method for further customization for each subclass.
      */
-    void initialize(const ModuleEngine* moduleEngine,
-        const ghoul::Dictionary& configuration);
+    void initialize(const ghoul::Dictionary& configuration);
 
     /**
      * This method calls the internalInitializeGL method for further customization for
