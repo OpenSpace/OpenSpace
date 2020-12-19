@@ -124,7 +124,6 @@ private:
     struct {
         properties::BoolProperty showChunkEdges;
         properties::BoolProperty showChunkBounds;
-        properties::BoolProperty showChunkAABB;
         properties::BoolProperty showHeightResolution;
         properties::BoolProperty showHeightIntensities;
         properties::BoolProperty levelByProjectedAreaElseDistance;
@@ -220,7 +219,7 @@ private:
     );
 
     void debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp,
-        bool renderBounds, bool renderAABB) const;
+        bool renderBounds) const;
 
     bool isCullableByFrustum(const Chunk& chunk, const RenderData& renderData,
         const glm::dmat4& mvp) const;
