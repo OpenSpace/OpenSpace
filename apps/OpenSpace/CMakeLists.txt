@@ -102,14 +102,7 @@ target_include_directories(
   ${SPOUT_INCLUDE_DIRS}
 )
 
-target_link_libraries(OpenSpace PUBLIC openspace-core ${OPENVR_LIBRARY} ${SPOUT_LIBRARY})
-
-foreach (library_name ${all_enabled_modules})
-    get_target_property(library_type ${library_name} TYPE)
-    if (NOT ${library_type} STREQUAL "SHARED_LIBRARY")
-        target_link_libraries(OpenSpace PRIVATE ${library_name})
-    endif()
-endforeach ()
+target_link_libraries(OpenSpace PUBLIC openspace-core ${OPENVR_LIBRARY} ${SPOUT_LIBRARY} openspace-module-collection)
 
 target_compile_definitions(OpenSpace PRIVATE
   ${SGCT_OPENVR_DEFINITIONS}
