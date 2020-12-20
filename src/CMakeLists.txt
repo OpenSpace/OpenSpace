@@ -472,3 +472,14 @@ if (APPLE)
 endif ()
 
 set_openspace_compile_settings(openspace-core)
+target_link_libraries(openspace-core PUBLIC Ghoul Spice external-curl)
+
+if (OPENSPACE_WITH_ABUFFER_RENDERER)
+  target_compile_definitions(openspace-core PUBLIC "OPENSPACE_WITH_ABUFFER_RENDERER")
+endif ()
+
+# Just in case, create the bin directory
+add_custom_command(
+  TARGET openspace-core
+  PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+)

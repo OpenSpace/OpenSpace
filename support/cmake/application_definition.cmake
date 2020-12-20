@@ -32,12 +32,12 @@ function (create_new_application application_name)
     get_external_library_dependencies(ext_lib)
     ghl_copy_files(
       ${application_name}
-      "${OPENSPACE_EXT_DIR}/curl/lib/libcurl.dll"
-      "${OPENSPACE_EXT_DIR}/curl/lib/libeay32.dll"
-      "${OPENSPACE_EXT_DIR}/curl/lib/ssleay32.dll"
+      "${OPENSPACE_BASE_DIR}/ext/curl/lib/libcurl.dll"
+      "${OPENSPACE_BASE_DIR}/ext/curl/lib/libeay32.dll"
+      "${OPENSPACE_BASE_DIR}/ext/curl/lib/ssleay32.dll"
       ${ext_lib}
     )
-    ghl_copy_shared_libraries(${application_name} ${OPENSPACE_EXT_DIR}/ghoul)
+    ghl_copy_shared_libraries(${application_name} ${OPENSPACE_BASE_DIR}/ext/ghoul)
   endif ()
 
   target_link_libraries(${application_name} PUBLIC openspace-module-base)

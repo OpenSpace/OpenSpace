@@ -44,14 +44,14 @@ if (OPENSPACE_OPENVR_SUPPORT)
     if (WIN32)
       find_path(SGCT_OPENVR_INCLUDE_DIRECTORY
         NAMES SGCTOpenVR.h
-        PATHS ${OPENSPACE_EXT_DIR}/sgct/additional_includes/openvr NO_DEFAULT_PATH
+        PATHS ${OPENSPACE_BASE_DIR}/ext/sgct/additional_includes/openvr NO_DEFAULT_PATH
         REQUIRED
       )
     else ()
       find_path(SGCT_OPENVR_INCLUDE_DIRECTORY
         NAMES SGCTOpenVR.h
         PATH_SUFFIXES SGCTOpenVR
-        PATHS ${OPENSPACE_EXT_DIR}/sgct/additional_includes/openvr
+        PATHS ${OPENSPACE_BASE_DIR}/ext/sgct/additional_includes/openvr
         REQUIRED
       )
     endif ()
@@ -90,10 +90,7 @@ create_new_application(OpenSpace
   ${CMAKE_CURRENT_SOURCE_DIR}/openspace.icns
 )
 
-set_source_files_properties(
-  ${CMAKE_CURRENT_SOURCE_DIR}/openspace.icns
-  PROPERTIES MACOSX_PACKAGE_LOCATION "Resources"
-)
+set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/openspace.icns PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 
 target_include_directories(
   OpenSpace PRIVATE
@@ -102,7 +99,7 @@ target_include_directories(
   ${SPOUT_INCLUDE_DIRS}
 )
 
-target_link_libraries(OpenSpace PUBLIC openspace-core ${OPENVR_LIBRARY} ${SPOUT_LIBRARY} openspace-module-collection)
+target_link_libraries(OpenSpace PRIVATE openspace-core ${OPENVR_LIBRARY} ${SPOUT_LIBRARY} openspace-module-collection)
 
 target_compile_definitions(OpenSpace PRIVATE
   ${SGCT_OPENVR_DEFINITIONS}
@@ -116,8 +113,7 @@ set(SGCT_DEP_INCLUDE_FREETYPE OFF CACHE BOOL "" FORCE)
 set(SGCT_DEP_INCLUDE_FMT OFF CACHE BOOL "" FORCE)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct)
-target_include_directories(OpenSpace SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct/include)
-target_link_libraries(OpenSpace PUBLIC sgct)
+target_link_libraries(OpenSpace PRIVATE sgct)
 
 set_folder_location(sgct "External")
 set_folder_location(glfw "External/SGCT")
@@ -129,15 +125,14 @@ set_folder_location(vrpn "External/SGCT")
 set_folder_location(zlibstatic "External/SGCT")
 
 if (UNIX AND (NOT APPLE))
-  target_link_libraries(OpenSpace PUBLIC Xcursor Xinerama X11)
+  target_link_libraries(OpenSpace PRIVATE Xcursor Xinerama X11)
 endif ()
 
 end_header("Dependency: SGCT")
 
 begin_header("Dependency: Profile Editor")
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/launcher)
-# target_include_directories(OpenSpace SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ext/launcher/include)
-target_link_libraries(OpenSpace PUBLIC openspace-ui-launcher)
+target_link_libraries(OpenSpace PRIVATE openspace-ui-launcher)
 end_header("Dependency: Profile Editor")
 
 
@@ -165,17 +160,17 @@ if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
   # Copy binary and resource files to the target output directory.
   copy_files("${CEF_TARGET}" "${CEF_BINARY_FILES}" "${CEF_BINARY_DIR}" "$<TARGET_FILE_DIR:${CEF_TARGET}>")
   copy_files("${CEF_TARGET}" "${CEF_RESOURCE_FILES}" "${CEF_RESOURCE_DIR}" "$<TARGET_FILE_DIR:${CEF_TARGET}>")
-elseif (OPENSPACE_MODULE_WEBBROWSER)
+elseif ()
   message(WARNING "Web configured to be included, but no CEF_ROOT was found, please try configuring CMake again.")
 endif ()
 
 if (MSVC)
   begin_header("Dependency: Dbghelp")
   # This library is used for being able to output the callstack if an exception escapes
-  target_link_libraries(OpenSpace PUBLIC Dbghelp.lib)
+  target_link_libraries(OpenSpace PRIVATE Dbghelp.lib)
   end_header()
 endif ()
 
 if (OPENSPACE_NVTOOLS_ENABLED)
-  target_link_libraries(OpenSpace "${OPENSPACE_NVTOOLS_PATH}/lib/x64/nvToolsExt64_1.lib")
+  target_link_libraries(OpenSpace PRIVATE "${OPENSPACE_NVTOOLS_PATH}/lib/x64/nvToolsExt64_1.lib")
 endif ()

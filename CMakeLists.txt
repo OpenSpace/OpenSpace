@@ -42,7 +42,6 @@ include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/message_macros.cmake)
 
 begin_header("Configuring OpenSpace project")
-message(STATUS "CMake version: ${CMAKE_VERSION}")
 
 # Bail out if the user tries to generate a 32 bit project.
 if (NOT ${CMAKE_SIZEOF_VOID_P} EQUAL 8)
@@ -53,9 +52,8 @@ endif ()
 # Cleanup project                                                                        #
 ##########################################################################################
 set(OPENSPACE_APPS_DIR "${OPENSPACE_BASE_DIR}/apps")
-set(OPENSPACE_EXT_DIR "${OPENSPACE_BASE_DIR}/ext")
 
-if (NOT EXISTS ${OPENSPACE_EXT_DIR}/ghoul/CMakeLists.txt)
+if (NOT EXISTS "${OPENSPACE_BASE_DIR}/ext/ghoul/CMakeLists.txt")
   message(FATAL_ERROR "Git submodules are missing. Please run "
     "git submodule update --init --recursive to download the missing dependencies."
   )
@@ -134,16 +132,13 @@ if (MSVC)
   set(GHOUL_OPTIMIZATION_ENABLE_OTHER_OPTIMIZATIONS ${OPENSPACE_OPTIMIZATION_ENABLE_OTHER_OPTIMIZATIONS} CACHE BOOL "" FORCE)
 endif ()
 
-if (UNIX AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -stdlib=libc++")
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++ -lc++abi")
-endif ()
-
-include(src/CMakeLists.txt)
+option(OPENSPACE_WITH_ABUFFER_RENDERER "Compile ABuffer Renderer" OFF)
 
 # Add external dependencies
-add_subdirectory(${OPENSPACE_EXT_DIR})
-target_link_libraries(openspace-core PUBLIC Ghoul Spice external-curl)
+add_subdirectory(${OPENSPACE_BASE_DIR}/ext)
+
+# include(src/CMakeLists.txt)
+add_subdirectory(src)
 
 # Qt
 # Unfortunately, we have to set this value manually; sigh
@@ -204,24 +199,13 @@ if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
   # find CEF to initialize it properly.
   set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${WEBBROWSER_MODULE_PATH}/cmake")
   include(webbrowser_helpers)
-elseif (OPENSPACE_MODULE_WEBBROWSER)
+elseif ()
   message(WARNING "Web configured to be included, but no CEF_ROOT was found, please try configuring CMake again")
 endif ()
 
 ##########################################################################################
 # Misc settings                                                                          #
 ##########################################################################################
-option(OPENSPACE_WITH_ABUFFER_RENDERER "Compile ABuffer Renderer" OFF)
-if (OPENSPACE_WITH_ABUFFER_RENDERER)
-  target_compile_definitions(openspace-core PUBLIC "OPENSPACE_WITH_ABUFFER_RENDERER")
-endif ()
-
-
-# Just in case, create the bin directory
-add_custom_command(
-  TARGET openspace-core
-  PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-)
 
 # Manage the CPack packaging
 include(${OPENSPACE_CMAKE_EXT_DIR}/packaging.cmake)
