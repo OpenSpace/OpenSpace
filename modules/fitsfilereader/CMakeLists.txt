@@ -63,4 +63,4 @@ disable_external_warnings(cfitsio)
 disable_external_warnings(CCfits)
 
 target_include_directories(openspace-module-fitsfilereader SYSTEM PRIVATE ${INCLUDES_FOR_TARGET})
-target_link_libraries(openspace-module-fitsfilereader PRIVATE CCfits)
+target_link_libraries(openspace-module-fitsfilereader PRIVATE cfitsio CCfits)

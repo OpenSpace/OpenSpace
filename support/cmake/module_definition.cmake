@@ -47,9 +47,9 @@ function (create_new_module module_name output_library_name library_mode)
   # Set compile settings that are common to all modules
   set_openspace_compile_settings(${library_name})
 
-  target_include_directories(${library_name} PRIVATE ${OPENSPACE_BASE_DIR})
+  target_include_directories(${library_name} PUBLIC ${OPENSPACE_BASE_DIR})
   create_define_name(${module_name} define_name)
-  target_compile_definitions(${library_name} PRIVATE "${define_name}")
+  target_compile_definitions(${library_name} PUBLIC "${define_name}")
 
   handle_module_dependencies(${library_name} ${module_name})
 
@@ -117,8 +117,6 @@ function (handle_module_dependencies target_name module_name)
       create_library_name(${dep} dep_library)
       message(STATUS "Link: ${target_name} <- ${dep_library}")
       target_link_libraries(${target_name} PRIVATE ${dep_library})
-      create_define_name(${dep} define_name)
-      target_compile_definitions(${target_name} PRIVATE "${define_name}")
     endforeach ()
 
     # Handle external dependencies
