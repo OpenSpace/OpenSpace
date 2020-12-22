@@ -259,7 +259,7 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
                     ));
                 }
                 catch (std::ios_base::failure& f) {
-                    throw f;
+                    throw;
                 }
 
                 if (sequentialLineErrors == 4) {

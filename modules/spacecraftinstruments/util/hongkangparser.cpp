@@ -163,7 +163,6 @@ bool HongKangParser::create() {
     double captureStart = -1.0;
 
     std::string cameraTarget  = "VOID";
-    std::string scannerTarget = "VOID";
 
     std::string line;
     while (!file.eof()) {
@@ -236,7 +235,7 @@ bool HongKangParser::create() {
                             met,
                             _metRef
                         );
-                        scannerTarget = findPlaybookSpecifiedTarget(line);
+                        std::string scannerTarget = findPlaybookSpecifiedTarget(line);
 
                         TimeRange scanRange = { scanStart, scanStop };
                         ghoul_assert(scanRange.isDefined(), "Invalid time range!");

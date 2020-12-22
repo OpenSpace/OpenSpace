@@ -393,7 +393,7 @@ void RenderableKameleonVolume::loadCdf(const std::string& path) {
     }
 
     if (_autoGridType) {
-        if (variables[0] == "r" && variables[0] == "theta" && variables[0] == "phi") {
+        if (variables[0] == "r" && variables[1] == "theta" && variables[2] == "phi") {
             _gridType.setValue(static_cast<int>(volume::VolumeGridType::Spherical));
         }
         else {

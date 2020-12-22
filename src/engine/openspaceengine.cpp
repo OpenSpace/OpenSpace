@@ -633,7 +633,7 @@ void OpenSpaceEngine::initializeGL() {
                     call.parameters.begin(),
                     call.parameters.end(),
                     std::string("("),
-                    [](std::string a, const std::unique_ptr<AbstractValue>& v) {
+                    [](const std::string& a, const std::unique_ptr<AbstractValue>& v) {
                         std::stringstream s;
                         s << v.get();
                         return a + s.str() + ", ";

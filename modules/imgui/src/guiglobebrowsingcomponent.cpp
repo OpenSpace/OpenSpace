@@ -188,7 +188,7 @@ void GuiGlobeBrowsingComponent::render() {
         urlInfo.cbegin(),
         urlInfo.cend(),
         std::string(),
-        [](std::string lhs, const UrlInfo& i) {
+        [](const std::string& lhs, const UrlInfo& i) {
             return lhs + i.name + ": (" + i.url + ")" + '\0';
         }
     );
@@ -257,17 +257,11 @@ void GuiGlobeBrowsingComponent::render() {
 
     }
 
-    if (iServer < 0) {
-        return;
-    }
-    _currentServer = urlInfo[iServer].name;
-
-
-    // Can't use urlIt here since it might have been invalidated before
-    if (urlInfo.empty()) {
+    if (iServer < 0 || urlInfo.empty()) {
         // There are no server so we have to bail
         return;
     }
+    _currentServer = urlInfo[iServer].name;
 
     ImGui::Separator();
 

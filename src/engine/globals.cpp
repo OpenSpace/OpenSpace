@@ -364,7 +364,7 @@ void create() {
 #ifdef WIN32
     profile = new (currentPos) Profile;
     ghoul_assert(profile, "No profile");
-    currentPos += sizeof(Profile);
+    //currentPos += sizeof(Profile);
 #else // ^^^ WIN32 / !WIN32 vvv
     profile = new Profile;
 #endif // WIN32

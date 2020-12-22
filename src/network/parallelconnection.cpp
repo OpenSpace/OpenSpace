@@ -149,7 +149,7 @@ ParallelConnection::Message ParallelConnection::receiveMessage() {
     }
 
     // Make sure that header matches this version of OpenSpace
-    if (!(headerBuffer[0] == 'O' && headerBuffer[1] && 'S')) {
+    if (!(headerBuffer[0] == 'O' && headerBuffer[1] == 'S')) {
         LERROR("Expected to read message header 'OS' from socket.");
         throw ConnectionLostError();
     }

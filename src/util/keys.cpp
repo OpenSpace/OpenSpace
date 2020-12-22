@@ -46,7 +46,7 @@ KeyAction operator|(KeyAction lhs, KeyAction rhs) {
     );
 }
 
-KeyAction operator|=(KeyAction& lhs, KeyAction rhs) {
+KeyAction operator|=(KeyAction lhs, KeyAction rhs) {
     return (lhs | rhs);
 }
 
@@ -62,7 +62,7 @@ KeyModifier operator|(KeyModifier lhs, KeyModifier rhs) {
     );
 }
 
-KeyModifier operator|=(KeyModifier& lhs, KeyModifier rhs) {
+KeyModifier operator|=(KeyModifier lhs, KeyModifier rhs) {
     return (lhs | rhs);
 }
 

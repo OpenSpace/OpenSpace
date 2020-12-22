@@ -52,12 +52,9 @@ public:
     glm::vec4 sample(size_t offset);
     size_t width();
     void setCallback(TfChangedCallback callback);
-    void setTextureFromTxt(std::shared_ptr<ghoul::opengl::Texture> ptr);
+    void setTextureFromTxt();
 
 private:
-    void setTextureFromTxt() {
-        setTextureFromTxt(_texture);
-    }
     void setTextureFromImage();
     void uploadTexture();
 

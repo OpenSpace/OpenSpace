@@ -1,5 +1,9 @@
-// This is not a memleak because the placement new operator does not
-// actually create any memory that could leak
-missingInclude
-noExplicitConstructor
 useStlAlgorithm
+
+unreadVariable:modules/globebrowsing/src/memoryawaretilecache.cpp:232
+unreadVariable:modules/globebrowsing/src/memoryawaretilecache.cpp:373
+unreadVariable:modules/globebrowsing/src/shadowcomponent.cpp:445
+unreadVariable:modules/globebrowsing/src/tileprovider.cpp:620
+unreadVariable:modules/globebrowsing/src/tileprovider.cpp:638
+unreadVariable:tests/test_concurrentjobmanager.cpp:127
+unreadVariable:src/engine/globalscallbacks.cpp:73

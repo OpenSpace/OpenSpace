@@ -97,13 +97,7 @@ bool KeyframeNavigator::updateCamera(Camera& camera, bool ignoreFutureKeyframes)
         return false;
     }
 
-    return updateCamera(
-        &camera,
-        prevKeyframe->data,
-        nextKeyframe->data,
-        t,
-        ignoreFutureKeyframes
-    );
+    return updateCamera(&camera, prevPose, nextPose, t, ignoreFutureKeyframes);
 }
 
 bool KeyframeNavigator::updateCamera(Camera* camera, const CameraPose prevPose,

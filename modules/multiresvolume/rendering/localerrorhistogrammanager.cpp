@@ -82,8 +82,6 @@ bool LocalErrorHistogramManager::buildHistograms(int numBins) {
             success &= buildFromOctreeChild(bst, ot);
             if (!success) {
                 LERROR("Failed in buildFromOctreeChild");
-            }
-            if (!success) {
                 return false;
             }
             pb1.print(processedLeaves++);
@@ -99,8 +97,6 @@ bool LocalErrorHistogramManager::buildHistograms(int numBins) {
             success &= buildFromBstChild(bst, ot);
             if (!success) {
                 LERROR("Failed in buildFromBstChild");
-            }
-            if (!success) {
                 return false;
             }
             pb2.print(processedLeaves++);

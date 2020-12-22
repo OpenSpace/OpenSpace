@@ -77,7 +77,6 @@ double getTime(ccmc::Kameleon* kameleon) {
     // redundant!
 
         std::string seqStartStr;
-        double seqStartDbl;
         if (kameleon->doesAttributeExist("start_time")){
             seqStartStr =
                     kameleon->getGlobalAttribute("start_time").getAttributeString();
@@ -126,13 +125,13 @@ double getTime(ccmc::Kameleon* kameleon) {
                 "No starting time attribute could be found in the .cdf file. Starting "
                 "time is set to 01.JAN.2000 12:00."
             );
-            seqStartDbl = 0.0;
         }
 
         if (seqStartStr.length() == 19) {
             seqStartStr += ".000Z";
         }
 
+        double seqStartDbl;
         if (seqStartStr.length() == 24) {
             seqStartDbl = Time::convertTime(
                 seqStartStr.substr(0, seqStartStr.length() - 2)

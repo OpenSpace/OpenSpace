@@ -173,6 +173,7 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
     : DashboardTextItem(dictionary)
     , _doSimplification(SimplificationInfo, true)
     , _requestedUnit(RequestedUnitInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _formatString(FormatStringInfo, "Distance from {} to {}: {:f} {}")
     , _source{
         properties::OptionProperty(
             SourceTypeInfo,
@@ -189,7 +190,6 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
         properties::StringProperty(DestinationNodeNameInfo),
         nullptr
     }
-    , _formatString(FormatStringInfo, "Distance from {} to {}: {:f} {}")
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
