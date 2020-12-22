@@ -260,7 +260,12 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
                         combinedGeometry.meshes().push_back(
                             std::move(geometries[i]->meshes()[m])
                         );
+                    }
 
+                    for (unsigned int t = 0; t < geometries[i]->textureStorage().size(); ++t) {
+                        combinedGeometry.textureStorage().push_back(
+                            std::move(geometries[i]->textureStorage()[t])
+                        );
                     }
                 }
                 _geometry = std::make_unique<ghoul::modelgeometry::ModelGeometry>(
