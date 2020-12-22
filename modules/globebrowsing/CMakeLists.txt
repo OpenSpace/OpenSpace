@@ -78,7 +78,6 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/layermanager.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/layerrendersettings.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/memoryawaretilecache.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/rawtile.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/rawtiledatareader.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/renderableglobe.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/ringscomponent.cpp

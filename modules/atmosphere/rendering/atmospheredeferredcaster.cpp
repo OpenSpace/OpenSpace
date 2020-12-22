@@ -284,7 +284,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                 _time,
                 lt
             );
-            glm::dvec4 sunPosObj = glm::dvec4(0.0);
+            glm::dvec4 sunPosObj;
 
             // Sun following camera position
             if (_sunFollowingCameraEnabled) {

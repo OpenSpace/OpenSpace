@@ -275,8 +275,8 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     //================================================================
     ghoul::Dictionary shadowDictionary;
     bool success = dictionary.getValue(KeyShadowGroup, shadowDictionary);
-    bool disableShadows = false;
     if (success) {
+        bool disableShadows = false;
         std::vector<std::pair<std::string, double>> sourceArray;
         unsigned int sourceCounter = 1;
         while (success) {
@@ -351,10 +351,10 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     //================================================================
     //========== Reads Atmosphere Entries from mod file ==============
     //================================================================
-    bool errorReadingAtmosphereData = false;
     ghoul::Dictionary atmosphereDictionary;
     success = dictionary.getValue(keyAtmosphere, atmosphereDictionary);
     if (success) {
+        bool errorReadingAtmosphereData = false;
         if (!atmosphereDictionary.getValue(keyAtmosphereRadius, _atmosphereRadius)) {
             errorReadingAtmosphereData = true;
             LWARNINGC(

@@ -1,11 +1,6 @@
 useStlAlgorithm
+unreadVariable
+unusedFunction
 
-unreadVariable:modules/globebrowsing/src/memoryawaretilecache.cpp:232
-unreadVariable:modules/globebrowsing/src/memoryawaretilecache.cpp:373
-unreadVariable:modules/globebrowsing/src/shadowcomponent.cpp:445
-unreadVariable:modules/globebrowsing/src/tileprovider.cpp:622
-unreadVariable:modules/globebrowsing/src/tileprovider.cpp:640
-unreadVariable:tests/test_concurrentjobmanager.cpp:127
-unreadVariable:src/engine/globalscallbacks.cpp:73
 shadowFunction:modules/globebrowsing/src/tileprovider.cpp
 syntaxError:src/scene/profile.cpp:44

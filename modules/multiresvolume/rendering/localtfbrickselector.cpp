@@ -345,9 +345,6 @@ bool LocalTfBrickSelector::calculateBrickErrors() {
     }
 
     size_t tfWidth = tf->width();
-    if (tfWidth <= 0) {
-        return false;
-    }
 
     std::vector<float> gradients(tfWidth - 1);
     for (size_t offset = 0; offset < tfWidth - 1; offset++) {

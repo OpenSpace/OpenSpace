@@ -58,11 +58,9 @@ std::string fromStringConversion(std::string val, bool& success) {
 }
 
 bool toStringConversion(std::string& outValue, std::string inValue) {
-    std::string str;
     nlohmann::json json;
     nlohmann::to_json(json, inValue);
     outValue = json.dump();
-
     return true;
 }
 

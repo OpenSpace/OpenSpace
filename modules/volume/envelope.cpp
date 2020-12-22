@@ -156,11 +156,9 @@ std::string EnvelopePoint::decimalToHexadecimal(int dec) const {
         return "00";
     }
 
-    int hex = dec;
     std::string hexStr;
-
     while (dec > 0) {
-        hex = dec % 16;
+        int hex = dec % 16;
 
         if (hex < 10) {
             hexStr = hexStr.insert(0, std::string(1, static_cast<char>(hex + 48)));

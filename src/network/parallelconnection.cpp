@@ -174,7 +174,7 @@ ParallelConnection::Message ParallelConnection::receiveMessage() {
 
     const uint32_t messageSizeIn =
         *reinterpret_cast<uint32_t*>(headerBuffer.data() + offset);
-    offset += sizeof(uint32_t);
+    //offset += sizeof(uint32_t);
 
     const size_t messageSize = messageSizeIn;
 
