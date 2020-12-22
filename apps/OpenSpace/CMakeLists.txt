@@ -99,7 +99,7 @@ target_include_directories(
   ${SPOUT_INCLUDE_DIRS}
 )
 
-target_link_libraries(OpenSpace PRIVATE openspace-core ${OPENVR_LIBRARY} ${SPOUT_LIBRARY} openspace-module-collection)
+target_link_libraries(OpenSpace PRIVATE openspace-core openspace-module-collection ${OPENVR_LIBRARY} ${SPOUT_LIBRARY})
 
 target_compile_definitions(OpenSpace PRIVATE
   ${SGCT_OPENVR_DEFINITIONS}

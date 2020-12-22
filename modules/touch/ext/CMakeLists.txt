@@ -70,7 +70,7 @@ if (UNIX)
 endif ()
 
 add_library(libTUIO11 ${TUIO_SOURCE})
-target_include_directories(libTUIO11
+target_include_directories(libTUIO11 SYSTEM
   PUBLIC
     "${PROJECT_SOURCE_DIR}/libTUIO11/TUIO"
     "${PROJECT_SOURCE_DIR}/libTUIO11/"
