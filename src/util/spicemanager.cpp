@@ -387,9 +387,9 @@ std::vector<std::pair<double, double>> SpiceManager::ckCoverage(
     }
     else {
         id *= 1000;
-        const auto it = _ckIntervals.find(id);
-        if (it != _ckIntervals.end()) {
-            return it->second;
+        const auto it2 = _ckIntervals.find(id);
+        if (it2 != _ckIntervals.end()) {
+            return it2->second;
         }
         else {
             std::vector<std::pair<double, double>> emptyList;

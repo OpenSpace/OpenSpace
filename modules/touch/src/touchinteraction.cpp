@@ -1086,9 +1086,9 @@ void TouchInteraction::step(double dt, bool directTouch) {
             }
             else if (currentPosViolatingZoomOutLimit) {
 #ifdef TOUCH_DEBUG_PROPERTIES
-                LINFO(fmt::format(
+                LINFOC("", fmt::format(
                     "{}: You are outside zoom out {} limit, only zoom in allowed",
-                    _loggerCat, _zoomOutLimit.value());
+                    _loggerCat, _zoomOutLimit.value()));
 #endif
                 // Only allow zooming in if you are outside the zoom out limit
                 if (newPosDistance < currentPosDistance) {

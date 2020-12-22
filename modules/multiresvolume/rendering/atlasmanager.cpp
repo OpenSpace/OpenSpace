@@ -182,7 +182,7 @@ void AtlasManager::addToAtlas(int firstBrickIndex, int lastBrickIndex,
             unsigned int atlasCoords = _freeAtlasCoords.back();
             _freeAtlasCoords.pop_back();
             int level = _nOtLevels - static_cast<int>(
-                floor(log((7.0 * (float(brickIndex % _nOtNodes)) + 1.0))/log(8)) - 1
+                floor(log1p((7.0 * (float(brickIndex % _nOtNodes))))/log(8)) - 1
             );
             ghoul_assert(atlasCoords <= 0x0FFFFFFF, "@MISSING");
             unsigned int atlasData = (level << 28) + atlasCoords;

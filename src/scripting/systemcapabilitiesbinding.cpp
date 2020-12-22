@@ -175,7 +175,7 @@ int extensions(lua_State* L) {
 
     lua_newtable(L);
 
-    for (size_t i = 1; i <= extensions.size(); ++i) {
+    for (size_t i = 1; i < extensions.size(); ++i) {
         ghoul::lua::push(L, extensions[i]);
         lua_rawseti(L, -2, i);
     }
