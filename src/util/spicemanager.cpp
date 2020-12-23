@@ -408,7 +408,6 @@ std::vector<std::pair<int, std::string>> SpiceManager::spiceBodies(
     SPICEINT_CELL(idset, 8192);
 
     SpiceChar frname[Frnmln];
-    SpiceChar outlin[Lnsize];
 
     for (SpiceInt i = 1; i <= 6; i++) {
         if (i < 6) {

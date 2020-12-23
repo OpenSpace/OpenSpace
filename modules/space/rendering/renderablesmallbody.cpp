@@ -185,8 +185,6 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
     std::string line;
     unsigned int csvLine = 0;
     int fieldCount = 0;
-    float lineSkipFraction = 1.0;
-    int lastLineCount = -1;
     const std::string expectedHeaderLine = "full_name,epoch_cal,e,a,i,om,w,ma,per";
 
     try {
@@ -197,6 +195,7 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
         }
         _numObjects = numberOfLines;
 
+        float lineSkipFraction = 1.0;
         if (!_isFileReadinitialized) {
             _isFileReadinitialized = true;
             initializeFileReading();
@@ -230,6 +229,7 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
             skipSingleLineInFile(file);
         }
         bool firstDataLine = true;
+        int lastLineCount = -1;
         for (csvLine = _startRenderIdx + 1;
              csvLine <= endElement + 1;
              csvLine++, sequentialLineErrors++)
@@ -258,7 +258,7 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
                         fieldCount, csvLine + 1, numberOfLines, filename
                     ));
                 }
-                catch (std::ios_base::failure& f) {
+                catch (std::ios_base::failure&) {
                     throw;
                 }
 

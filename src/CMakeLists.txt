@@ -472,7 +472,7 @@ if (APPLE)
 endif ()
 
 set_openspace_compile_settings(openspace-core)
-target_link_libraries(openspace-core PUBLIC Ghoul Spice external-curl)
+target_link_libraries(openspace-core PUBLIC Ghoul spice external-curl)
 
 if (OPENSPACE_WITH_ABUFFER_RENDERER)
   target_compile_definitions(openspace-core PUBLIC "OPENSPACE_WITH_ABUFFER_RENDERER")

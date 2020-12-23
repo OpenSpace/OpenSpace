@@ -793,12 +793,8 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
                 progressInfo.progress = (*it)->progress();
 
                 if ((*it)->nTotalBytesIsKnown()) {
-                    progressInfo.currentSize = static_cast<uint64_t>(
-                        (*it)->nSynchronizedBytes()
-                    );
-                    progressInfo.totalSize = static_cast<uint64_t>(
-                        (*it)->nTotalBytes()
-                    );
+                    progressInfo.currentSize = (*it)->nSynchronizedBytes();
+                    progressInfo.totalSize = (*it)->nTotalBytes();
                 }
 
                 loading = true;

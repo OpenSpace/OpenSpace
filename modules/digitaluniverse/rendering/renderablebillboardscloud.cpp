@@ -1208,7 +1208,7 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
         ZoneScopedN("Sprite texture")
         TracyGpuZone("Sprite texture")
 
-        ghoul::opengl::Texture* t = _spriteTexture;
+        ghoul::opengl::Texture* texture = _spriteTexture;
 
         unsigned int hash = ghoul::hashCRC32File(_spriteTexturePath);
 
@@ -1225,7 +1225,7 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
             }
         );
 
-        DigitalUniverseModule::TextureManager.release(t);
+        DigitalUniverseModule::TextureManager.release(texture);
         _spriteTextureIsDirty = false;
     }
 }
