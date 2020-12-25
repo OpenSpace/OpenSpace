@@ -298,6 +298,7 @@ function (set_openspace_compile_settings target)
       "-Wuseless-cast"
       "-Wlogical-op"
       "-Wint-in-bool-context"
+      "-Wno-deprecated-copy"
       "-Wno-write-strings"
       "-Wnon-virtual-dtor"
       "-Wold-style-cast"
