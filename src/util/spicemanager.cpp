@@ -404,7 +404,6 @@ std::vector<std::pair<int, std::string>> SpiceManager::spiceBodies(
     std::vector<std::pair<int, std::string>> bodies;
 
     constexpr const int Frnmln = 33;
-    constexpr const int Lnsize = 81;
     SPICEINT_CELL(idset, 8192);
 
     SpiceChar frname[Frnmln];
@@ -433,7 +432,12 @@ std::vector<std::pair<int, std::string>> SpiceManager::spiceBodies(
                 Frnmln,
                 frname
             );
-            bodies.push_back(std::make_pair(((long)((SpiceInt*)idset.data)[j]), frname));
+            bodies.push_back(
+                std::make_pair(
+                    static_cast<long>(reinterpret_cast<SpiceInt*>(idset.data)[j]),
+                    frname
+                )
+            );
         }
     }
     return bodies;
