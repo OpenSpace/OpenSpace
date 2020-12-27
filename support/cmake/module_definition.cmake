@@ -108,6 +108,26 @@ endfunction ()
 function (handle_module_dependencies target_name module_name)
   # We always want to link against Ghoul and the core library
   target_link_libraries(${library_name} PRIVATE Ghoul openspace-core)
+  # We currently can't reuse the precompiled header because that one has the Kameleon
+  # definition stuck into it
+  #target_precompile_headers(${library_name} REUSE_FROM openspace-core)
+  target_precompile_headers(${library_name} PRIVATE
+    [["ghoul/fmt.h"]]
+    [["ghoul/glm.h"]]
+    [["ghoul/misc/assert.h"]]
+    [["ghoul/misc/boolean.h"]]
+    [["ghoul/misc/exception.h"]]
+    [["ghoul/misc/invariants.h"]]
+    [["ghoul/misc/profiling.h"]]
+    <algorithm>
+    <array>
+    <map>
+    <memory>
+    <string>
+    <utility>
+    <vector>
+  )
+
 
   if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/include.cmake")
     include(${CMAKE_CURRENT_SOURCE_DIR}/include.cmake)

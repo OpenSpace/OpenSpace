@@ -28,6 +28,26 @@ function (create_new_application application_name)
   add_executable(${application_name} MACOSX_BUNDLE ${ARGN})
   set_openspace_compile_settings(${application_name})
 
+  # We currently can't reuse the precompiled header because that one has the Kameleon
+  # definition stuck into it
+  #target_precompile_headers(${library_name} REUSE_FROM openspace-core)
+  target_precompile_headers(${application_name} PRIVATE
+    [["ghoul/fmt.h"]]
+    [["ghoul/glm.h"]]
+    [["ghoul/misc/assert.h"]]
+    [["ghoul/misc/boolean.h"]]
+    [["ghoul/misc/exception.h"]]
+    [["ghoul/misc/invariants.h"]]
+    [["ghoul/misc/profiling.h"]]
+    <algorithm>
+    <array>
+    <map>
+    <memory>
+    <string>
+    <utility>
+    <vector>
+  )
+
   if (WIN32)
     get_external_library_dependencies(ext_lib)
     ghl_copy_files(

@@ -455,6 +455,23 @@ target_include_directories(openspace-core
     ${OPENSPACE_BASE_DIR}
 )
 
+target_precompile_headers(openspace-core PRIVATE
+  [["ghoul/fmt.h"]]
+  [["ghoul/glm.h"]]
+  [["ghoul/misc/assert.h"]]
+  [["ghoul/misc/boolean.h"]]
+  [["ghoul/misc/exception.h"]]
+  [["ghoul/misc/invariants.h"]]
+  [["ghoul/misc/profiling.h"]]
+  <algorithm>
+  <array>
+  <map>
+  <memory>
+  <string>
+  <utility>
+  <vector>
+)
+
 configure_file(
   ${OPENSPACE_CMAKE_EXT_DIR}/openspace_header.template
   ${CMAKE_BINARY_DIR}/_generated/include/openspace/openspace.h
