@@ -601,11 +601,6 @@ bool RenderableLabels::isReady() const {
 void RenderableLabels::initialize() {
     ZoneScoped
 
-    bool success = true;// loadData();
-    if (!success) {
-        throw ghoul::RuntimeError("Error loading objects labels data.");
-    }
-
     setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
 }
 

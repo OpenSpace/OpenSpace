@@ -1395,13 +1395,8 @@ void FramebufferRenderer::performDeferredTasks(
 
         Deferredcaster* deferredcaster = deferredcasterTask.deferredcaster;
 
-        ghoul::opengl::ProgramObject* deferredcastProgram = nullptr;
-
-        if (deferredcastProgram != _deferredcastPrograms[deferredcaster].get()
-            || deferredcastProgram == nullptr)
-        {
-            deferredcastProgram = _deferredcastPrograms[deferredcaster].get();
-        }
+        ghoul::opengl::ProgramObject* deferredcastProgram =
+            _deferredcastPrograms[deferredcaster].get();
 
         if (deferredcastProgram) {
             _pingPongIndex = _pingPongIndex == 0 ? 1 : 0;
