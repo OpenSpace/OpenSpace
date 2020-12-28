@@ -30,6 +30,7 @@
 #include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
+#include <array>
 
 namespace {
     constexpr const char* KeyInput = "Input";

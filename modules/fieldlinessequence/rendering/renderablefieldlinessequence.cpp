@@ -221,7 +221,7 @@ namespace {
         Invalid
     };
 
-    float stringToFloat(const std::string input, const float backupValue = 0.f) {
+    float stringToFloat(const std::string& input, float backupValue = 0.f) {
         float tmp;
         try {
             tmp = std::stof(input);

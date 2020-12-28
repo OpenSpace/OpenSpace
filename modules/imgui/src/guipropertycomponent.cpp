@@ -83,7 +83,7 @@ namespace {
     }
 
     struct TreeNode {
-        TreeNode(std::string p)
+        explicit TreeNode(std::string p)
             : path(std::move(p))
 #ifdef Debugging_ImGui_TreeNode_Indices
             , index(nextIndex++)

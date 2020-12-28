@@ -27,20 +27,12 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <modules/volume/rawvolumemetadata.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/triggerproperty.h>
-// #include <modules/volume/rawvolume.h>
- #include <modules/volume/rawvolumemetadata.h>
-// #include <modules/volume/rendering/basicvolumeraycaster.h>
-// #include <modules/volume/rendering/volumeclipplanes.h>
-
-// #include <openspace/properties/vectorproperty.h>
-// #include <openspace/properties/optionproperty.h>
-// #include <openspace/properties/stringproperty.h>
-// #include <openspace/util/boxgeometry.h>
-// #include <openspace/util/histogram.h>
-// #include <openspace/rendering/transferfunction.h>
 
 namespace openspace {
     class Histogram;

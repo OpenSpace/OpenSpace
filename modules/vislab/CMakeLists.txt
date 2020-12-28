@@ -25,17 +25,13 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabledistancelabel.h
+  rendering/renderabledistancelabel.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabledistancelabel.cpp
+  rendering/renderabledistancelabel.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
-create_new_module(
-    "VisLab"
-    vislab_module
-    ${HEADER_FILES} ${SOURCE_FILES}
-)
+create_new_module("VisLab" vislab_module ${HEADER_FILES} ${SOURCE_FILES})

@@ -22,23 +22,55 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+include(${OPENSPACE_CMAKE_EXT_DIR}/set_openspace_compile_settings.cmake)
 
-set(HEADER_FILES
-  rendering/renderabletoyvolume.h
-  rendering/toyvolumeraycaster.h
-)
-source_group("Header Files" FILES ${HEADER_FILES})
+# System libraries
+if (APPLE)
+  begin_dependency("Core Libraries")
+  add_library(external-system-apple INTERFACE)
 
-set(SOURCE_FILES
-  rendering/renderabletoyvolume.cpp
-  rendering/toyvolumeraycaster.cpp
-)
-source_group("Source Files" FILES ${SOURCE_FILES})
+  target_include_directories(external-system-apple INTERFACE "/Developer/Headers/FlatCarbon")
+  find_library(COREFOUNDATION_LIBRARY CoreFoundation REQUIRED)
+  find_library(CARBON_LIBRARY Carbon REQUIRED)
+  find_library(COCOA_LIBRARY Cocoa REQUIRED) # This was Carbon before
+  find_library(APP_SERVICES_LIBRARY ApplicationServices REQUIRED)
+  find_library(APPKIT_LIBRARY AppKit REQUIRED)
+  mark_as_advanced(COREFOUNDATION_LIBRARY CARBON_LIBRARY COCOA_LIBRARY
+    APP_SERVICES_LIBRARY APPKIT_LIBRARY
+  )
+  target_link_libraries(external-system-apple INTERFACE # This was PUBLIC before
+    ${CARBON_LIBRARY} ${COREFOUNDATION_LIBRARY}
+    ${COCOA_LIBRARY} ${APP_SERVICES_LIBRARY}
+    ${APPKIT_LIBRARY}
+  )
+  end_dependency()
+endif ()
 
-create_new_module(
-  "ToyVolume"
-  toyvolume_module
-  STATIC
-  ${HEADER_FILES} ${SOURCE_FILES}
-)
+# Ghoul
+add_subdirectory(ghoul)
+set_folder_location(Lua "External")
+set_folder_location(lz4 "External")
+set_folder_location(GhoulTest "Unit Tests")
+
+# Spice
+begin_dependency("Spice")
+add_subdirectory(spice)
+set_folder_location(spice "External")
+end_dependency()
+
+# Curl
+begin_dependency("CURL")
+add_library(external-curl INTERFACE)
+if (WIN32)
+  target_include_directories(external-curl INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/curl/include")
+  target_link_libraries(external-curl INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/curl/lib/libcurl.lib")
+  target_compile_definitions(external-curl INTERFACE "OPENSPACE_CURL_ENABLED" "CURL_STATICLIB")
+else ()
+  find_package(CURL)
+  if (CURL_FOUND)
+    target_include_directories(external-curl INTERFACE ${CURL_INCLUDE_DIRS})
+    target_link_libraries(external-curl INTERFACE ${CURL_LIBRARIES})
+    target_compile_definitions(external-curl INTERFACE "OPENSPACE_CURL_ENABLED")
+  endif ()
+endif ()
+end_dependency()

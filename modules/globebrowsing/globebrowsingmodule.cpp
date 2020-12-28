@@ -121,12 +121,13 @@ namespace {
         Layer currentLayer;
         for (int i = 0; i < nSubdatasets; ++i) {
             int iDataset = -1;
-            static char IdentifierBuffer[64];
+            std::array<char, 256> IdentifierBuffer;
+            std::fill(IdentifierBuffer.begin(), IdentifierBuffer.end(), '\0');
             sscanf(
                 subDatasets[i],
-                "SUBDATASET_%i_%[^=]",
+                "SUBDATASET_%i_%256[^=]",
                 &iDataset,
-                IdentifierBuffer
+                IdentifierBuffer.data()
             );
 
 
@@ -137,7 +138,7 @@ namespace {
                 currentLayerNumber = iDataset;
             }
 
-            const std::string identifier = std::string(IdentifierBuffer);
+            const std::string identifier = std::string(IdentifierBuffer.data());
             const std::string ds(subDatasets[i]);
             const std::string value = ds.substr(ds.find_first_of('=') + 1);
 

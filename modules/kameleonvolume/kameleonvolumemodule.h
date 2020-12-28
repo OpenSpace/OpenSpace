@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMEMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
+
 #include <vector>
 
 namespace openspace {

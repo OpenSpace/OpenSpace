@@ -613,7 +613,7 @@ int time_interpolateTimeRelative(lua_State* L) {
         return ghoul::lua::luaError(L, fmt::format("bad argument #1 ({})", msg));
     }
 
-    if (lua_gettop(L) == 1 && isNumber) {
+    if (lua_gettop(L) == 1) {
         double delta = lua_tonumber(L, 1);
         global::timeManager->interpolateTimeRelative(
             delta,

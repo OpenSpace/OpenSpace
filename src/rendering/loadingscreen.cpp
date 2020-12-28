@@ -322,15 +322,10 @@ void LoadingScreen::render() {
                     (item.name + " 100%\n99999999/99999999")
                 );
 
-                // The maximum count is in here since we can't control the amount of
-                // screen estate and the number of nodes.  Rather than looping forever
-                // we make use with an overlap in the worst case
-                bool foundSpace = false;
-
                 glm::vec2 ll = glm::vec2(0.f);
                 glm::vec2 ur = glm::vec2(0.f);
                 int i = 0;
-                for (; i < MaxNumberLocationSamples && !foundSpace; ++i) {
+                for (; i < MaxNumberLocationSamples; ++i) {
                     std::uniform_int_distribution<int> distX(
                         15,
                         static_cast<int>(res.x - b.x - 15)

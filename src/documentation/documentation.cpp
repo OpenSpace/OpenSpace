@@ -179,7 +179,8 @@ TestResult testSpecification(const Documentation& documentation,
     TestResult result;
     result.success = true;
 
-    auto applyVerifier = [dictionary, &result](Verifier& verifier, const std::string& key)
+    auto applyVerifier = [dictionary, &result](const Verifier& verifier,
+                                               const std::string& key)
     {
         TestResult res = verifier(dictionary, key);
         if (!res.success) {

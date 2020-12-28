@@ -51,18 +51,6 @@ public:
 
     static GdalWrapper& ref();
 
-    /**
-     * Get the current size of the GDAL in memory cache.
-     * \returns the number of bytes currently in the GDAL memory cache.
-     */
-    static int64_t GDALCacheUsed();
-
-    /**
-     * Get the maximum GDAL in memory cache size.
-     * \returns the maximum number of bytes allowed for the GDAL cache.
-     */
-    static int64_t GDALMaximumCacheSize();
-
     bool logGdalErrors() const;
 
 private:

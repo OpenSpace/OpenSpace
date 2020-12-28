@@ -47,9 +47,7 @@ OpenSpaceModule::OpenSpaceModule(std::string name)
     : properties::PropertyOwner({ std::move(name) })
 {}
 
-void OpenSpaceModule::initialize(const ModuleEngine* moduleEngine,
-                                 const ghoul::Dictionary& configuration)
-{
+void OpenSpaceModule::initialize(const ghoul::Dictionary& configuration) {
     ZoneScoped
     ZoneName(identifier().c_str(), identifier().size())
 
@@ -71,7 +69,6 @@ void OpenSpaceModule::initialize(const ModuleEngine* moduleEngine,
     LDEBUG(fmt::format("Registering module path {}: {}", moduleToken, path));
     FileSys.registerPathToken(moduleToken, std::move(path));
 
-    _moduleEngine = moduleEngine;
     internalInitialize(configuration);
 }
 
@@ -143,10 +140,6 @@ std::string OpenSpaceModule::modulePath() const {
         "Could not resolve path for module '" + identifier() + "'",
         "OpenSpaceModule"
     );
-}
-
-const ModuleEngine* OpenSpaceModule::moduleEngine() const {
-    return _moduleEngine;
 }
 
 void OpenSpaceModule::internalInitialize(const ghoul::Dictionary&) {}

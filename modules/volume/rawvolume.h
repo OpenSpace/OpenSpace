@@ -33,9 +33,9 @@ namespace openspace::volume {
 
 template <typename Type>
 class RawVolume {
+public:
     using VoxelType = Type;
 
-public:
     RawVolume(const glm::uvec3& dimensions);
 
     glm::uvec3 dimensions() const;

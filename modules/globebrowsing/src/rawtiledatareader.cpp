@@ -946,7 +946,6 @@ TileMetaData RawTileDataReader::tileMetaData(RawTile& rawTile,
     std::fill(ppData.maxValues.begin(), ppData.maxValues.end(), -FLT_MAX);
     std::fill(ppData.minValues.begin(), ppData.minValues.end(), FLT_MAX);
     std::fill(ppData.hasMissingData.begin(), ppData.hasMissingData.end(), false);
-    std::vector<float> noDataValues(_initData.nRasters, noDataValueAsFloat());
 
     bool allIsMissing = true;
     for (int y = 0; y < region.numPixels.y; ++y) {

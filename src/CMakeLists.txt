@@ -434,17 +434,42 @@ endforeach ()
 # Create OpenSpace target
 ##########################################################################################
 add_library(openspace-core STATIC ${OPENSPACE_HEADER} ${OPENSPACE_SOURCE})
-target_include_directories(openspace-core PUBLIC
-  # In order to be able to include openspace-core files
-  ${OPENSPACE_BASE_DIR}/include
-  # In order to be able to include module files
-  ${OPENSPACE_BASE_DIR}
-  # In order to use the date library
-  SYSTEM ${OPENSPACE_BASE_DIR}/ext/date/include
-  # In order to use the nlohmann JSON library
-  SYSTEM ${OPENSPACE_BASE_DIR}/ext
-  # In order to be able to include the module_registration file
-  ${CMAKE_BINARY_DIR}/_generated/include
+target_include_directories(openspace-core SYSTEM
+  PUBLIC
+    # In order to use the date library
+    ${OPENSPACE_BASE_DIR}/ext/date/include
+    # In order to use the nlohmann JSON library
+    ${OPENSPACE_BASE_DIR}/ext
+)
+
+target_include_directories(openspace-core
+  PUBLIC
+    # In order to be able to include openspace-core files
+    ${OPENSPACE_BASE_DIR}/include
+    # In order to be able to include the module_registration file
+    ${CMAKE_BINARY_DIR}/_generated/include
+
+  PRIVATE
+    # In order to be able to include module files.  This is a temporary fix as this
+    # introduces a dependency from the opnspace-core onto the modules
+    ${OPENSPACE_BASE_DIR}
+)
+
+target_precompile_headers(openspace-core PRIVATE
+  [["ghoul/fmt.h"]]
+  [["ghoul/glm.h"]]
+  [["ghoul/misc/assert.h"]]
+  [["ghoul/misc/boolean.h"]]
+  [["ghoul/misc/exception.h"]]
+  [["ghoul/misc/invariants.h"]]
+  [["ghoul/misc/profiling.h"]]
+  <algorithm>
+  <array>
+  <map>
+  <memory>
+  <string>
+  <utility>
+  <vector>
 )
 
 configure_file(
@@ -460,8 +485,18 @@ configure_file(
 )
 
 if (APPLE)
-  find_library(APPKIT_LIBRARY AppKit REQUIRED)
-  target_link_libraries(openspace-core PUBLIC ${APPKIT_LIBRARY})
+  target_link_libraries(openspace-core INTERFACE external-system-apple)
 endif ()
 
 set_openspace_compile_settings(openspace-core)
+target_link_libraries(openspace-core PUBLIC Ghoul spice external-curl)
+
+if (OPENSPACE_WITH_ABUFFER_RENDERER)
+  target_compile_definitions(openspace-core PUBLIC "OPENSPACE_WITH_ABUFFER_RENDERER")
+endif ()
+
+# Just in case, create the bin directory
+add_custom_command(
+  TARGET openspace-core
+  PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+)

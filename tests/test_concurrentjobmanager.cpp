@@ -30,7 +30,7 @@
 
 namespace {
     struct TestJob : public openspace::Job<int> {
-        TestJob(int jobExecutingTime)
+        explicit TestJob(int jobExecutingTime)
             : _jobExecutingTime(jobExecutingTime)
         {}
 
@@ -45,12 +45,12 @@ namespace {
 
     private:
         int _jobExecutingTime;
-        int prod;
+        int prod = 0;
     };
 
 
     struct VerboseProduct {
-        VerboseProduct(int v) : val(v) {}
+        explicit VerboseProduct(int v) : val(v) {}
 
         ~VerboseProduct() {}
 
@@ -59,7 +59,7 @@ namespace {
 
 
     struct VerboseJob : public openspace::Job<VerboseProduct> {
-        VerboseJob(int jobExecutingTime)
+        explicit VerboseJob(int jobExecutingTime)
             : _jobExecutingTime(jobExecutingTime)
             , _product(-1)
         {}

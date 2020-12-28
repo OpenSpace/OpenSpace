@@ -277,10 +277,10 @@ int downloadFile(lua_State* L) {
             DownloadManager::FailOnError::Yes,
             5
         );
-    if (!future || (future && !future->isFinished)) {
+    if (!future || !future->isFinished) {
         return ghoul::lua::luaError(
             L,
-            future ? "Download failed" : "Download failed: " + future->errorMessage
+            future ? "Download failed: " + future->errorMessage : "Download failed"
         );
     }
 

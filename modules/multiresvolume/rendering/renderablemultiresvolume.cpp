@@ -464,7 +464,6 @@ bool RenderableMultiresVolume::initializeSelector() {
                     ghoul::filesystem::CacheManager::Persistent::Yes
                 );
                 std::ifstream cacheFile(cacheFilename, std::ios::in | std::ios::binary);
-                std::string errorHistogramsPath = _errorHistogramsPath;
                 if (cacheFile.is_open()) {
                     // Read histograms from cache.
                     cacheFile.close();

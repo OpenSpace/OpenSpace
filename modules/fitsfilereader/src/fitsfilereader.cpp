@@ -28,8 +28,21 @@
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
-#include <CCfits>
 #include <fstream>
+
+#ifdef WIN32
+#pragma warning (push)
+#pragma warning (disable : 4100) // unreferenced formal parameter
+#pragma warning (disable : 4267) // conversion from 'size_t' to 'int'
+#pragma warning (disable : 4456) // declaration of 'col' hides previous local declaration
+#endif // WIN32
+
+#include <CCfits>
+
+#ifdef WIN32
+#pragma warning (pop)
+#endif // WIN32
+
 
 using namespace CCfits;
 
@@ -616,9 +629,9 @@ std::vector<float> FitsFileReader::readSpeckFile(const std::string& filePath,
             // RenderableGaiaStars expects kiloParsec (because fits file from Vienna had
             // in kPc).
             // Thus we need to convert positions twice atm.
-            renderValues[0] = readValues[0] / 1000.0; // PosX
-            renderValues[1] = readValues[1] / 1000.0; // PosY
-            renderValues[2] = readValues[2] / 1000.0; // PosZ
+            renderValues[0] = readValues[0] / 1000.f; // PosX
+            renderValues[1] = readValues[1] / 1000.f; // PosY
+            renderValues[2] = readValues[2] / 1000.f; // PosZ
             renderValues[3] = readValues[6]; // AbsMag
             renderValues[4] = readValues[3]; // color
             renderValues[5] = readValues[13] * readValues[16]; // Vel X

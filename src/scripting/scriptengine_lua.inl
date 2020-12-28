@@ -25,7 +25,7 @@
 #include <ghoul/filesystem/directory.h>
 #include <ghoul/filesystem/file.h>
 
-#include <ext/ghoul/ext/assimp/contrib/zip/src/zip.h>
+#include <ghoul/ext/assimp/contrib/zip/src/zip.h>
 
 namespace openspace::luascriptfunctions {
 

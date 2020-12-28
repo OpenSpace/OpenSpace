@@ -84,14 +84,6 @@ GdalWrapper& GdalWrapper::ref() {
     return *_singleton;
 }
 
-int64_t GDALCacheUsed() {
-    return GDALGetCacheUsed64();
-}
-
-int64_t GDALMaximumCacheSize() {
-    return GDALGetCacheMax64();
-}
-
 bool GdalWrapper::logGdalErrors() const {
     return _logGdalErrors;
 }

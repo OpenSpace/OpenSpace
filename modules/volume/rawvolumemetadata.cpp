@@ -25,8 +25,9 @@
 #include <modules/volume/rawvolumemetadata.h>
 
 #include <openspace/documentation/verifier.h>
-
+#include <openspace/documentation/documentation.h>
 #include <openspace/util/time.h>
+#include <ghoul/misc/dictionary.h>
 
 namespace {
     constexpr const char* KeyDimensions = "Dimensions";

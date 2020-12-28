@@ -24,7 +24,6 @@
 
 #include <modules/globebrowsing/src/asynctiledataprovider.h>
 
-#include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/src/memoryawaretilecache.h>
 #include <modules/globebrowsing/src/rawtiledatareader.h>
 #include <modules/globebrowsing/src/tileloadjob.h>
@@ -48,7 +47,6 @@ AsyncTileDataProvider::AsyncTileDataProvider(std::string name,
 {
     ZoneScoped
 
-    _globeBrowsingModule = global::moduleEngine->module<GlobeBrowsingModule>();
     performReset(ResetRawTileDataReader::No);
 }
 

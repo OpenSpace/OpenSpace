@@ -129,10 +129,6 @@ ParallelPeer::~ParallelPeer() {
     if (_timeJumpCallback != -1) {
         global::timeManager->removeTimeJumpCallback(_timeJumpCallback);
     }
-    if (_timeJumpCallback != -1) {
-        global::timeManager->removeTimeJumpCallback(_timeJumpCallback);
-    }
-
 }
 
 void ParallelPeer::connect() {

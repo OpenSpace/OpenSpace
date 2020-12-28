@@ -151,7 +151,9 @@ bool MultiresVolumeRaycaster::isCameraInside(const RenderData& data,
 
     float divisor = 1.0;
     for (int i = 0; i < 4; i++) for (int j = 0; j < 4; j++) {
-        if (abs(modelTransform[i][j] > divisor)) divisor = modelTransform[i][j];
+        if (abs(modelTransform[i][j]) > divisor) {
+            divisor = modelTransform[i][j];
+        }
     }
 
     glm::mat4 scaledModelTransform = modelTransform / divisor;

@@ -24,6 +24,10 @@
 
 #include <modules/kameleonvolume/rendering/renderablekameleonvolume.h>
 
+#include <modules/volume/rendering/basicvolumeraycaster.h>
+#include <modules/volume/rawvolume.h>
+#include <modules/kameleon/include/kameleonwrapper.h>
+#include <openspace/rendering/transferfunction.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <modules/kameleonvolume/kameleonvolumereader.h>
 #include <modules/volume/rawvolumereader.h>
@@ -389,7 +393,7 @@ void RenderableKameleonVolume::loadCdf(const std::string& path) {
     }
 
     if (_autoGridType) {
-        if (variables[0] == "r" && variables[0] == "theta" && variables[0] == "phi") {
+        if (variables[0] == "r" && variables[1] == "theta" && variables[2] == "phi") {
             _gridType.setValue(static_cast<int>(volume::VolumeGridType::Spherical));
         }
         else {

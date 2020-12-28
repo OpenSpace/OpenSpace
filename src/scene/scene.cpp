@@ -48,6 +48,7 @@ namespace {
     constexpr const char* KeyIdentifier = "Identifier";
     constexpr const char* KeyParent = "Parent";
 
+#ifdef TRACY_ENABLE
     constexpr const char* renderBinToString(int renderBin) {
         // Synced with Renderable::RenderBin
         if (renderBin == 1) {
@@ -69,6 +70,7 @@ namespace {
             throw ghoul::MissingCaseException();
         }
     }
+#endif // TRACY_ENABLE
 } // namespace
 
 namespace openspace {

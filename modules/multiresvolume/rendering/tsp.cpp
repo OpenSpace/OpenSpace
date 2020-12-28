@@ -139,7 +139,7 @@ bool TSP::construct() {
         unsigned int OTNode = OT * _numOTNodes;
 
         // Calculate BST level (first level is level 0)
-        unsigned int BSTLevel = static_cast<unsigned int>(log(OT + 1) / log(2));
+        unsigned int BSTLevel = static_cast<unsigned int>(log1p(OT) / log(2));
 
         // Traverse OT
         unsigned int OTChild = 1;
@@ -574,18 +574,18 @@ bool TSP::writeCache() {
 }
 
 float TSP::spatialError(unsigned int brickIndex) const {
-    return reinterpret_cast<const float&>(_data[brickIndex*NUM_DATA + SPATIAL_ERR]);
+    return *reinterpret_cast<const float*>(_data[brickIndex*NUM_DATA + SPATIAL_ERR]);
 }
 
 float TSP::temporalError(unsigned int brickIndex) const {
-    return reinterpret_cast<const float&>(_data[brickIndex*NUM_DATA + TEMPORAL_ERR]);
+    return *reinterpret_cast<const float*>(_data[brickIndex*NUM_DATA + TEMPORAL_ERR]);
 }
 
 unsigned int TSP::firstOctreeChild(unsigned int brickIndex) const {
     const unsigned int otNode = brickIndex % _numOTNodes;
     const unsigned int bstOffset = brickIndex - otNode;
 
-    const unsigned int depth = static_cast<unsigned int>(log(7 * otNode + 1) / log(8));
+    const unsigned int depth = static_cast<unsigned int>(log1p(7 * otNode) / log(8));
     const unsigned int firstInLevel = static_cast<unsigned int>((pow(8, depth) - 1) / 7);
     const unsigned int levelOffset = otNode - firstInLevel;
     const unsigned int firstInChildLevel = static_cast<unsigned int>(
@@ -599,7 +599,7 @@ unsigned int TSP::firstOctreeChild(unsigned int brickIndex) const {
 unsigned int TSP::bstLeft(unsigned int brickIndex) const {
     const unsigned int bstNode = brickIndex / _numOTNodes;
     const unsigned int otOffset = brickIndex % _numOTNodes;
-    const unsigned int depth = static_cast<unsigned int>(log(bstNode + 1) / log(2));
+    const unsigned int depth = static_cast<unsigned int>(log1p(bstNode) / log(2));
     const unsigned int firstInLevel = static_cast<unsigned int>(pow(2, depth) - 1);
     const unsigned int levelOffset = bstNode - firstInLevel;
     const unsigned int firstInChildLevel = static_cast<unsigned int>(
@@ -620,7 +620,7 @@ bool TSP::isBstLeaf(unsigned int brickIndex) const {
 
 bool TSP::isOctreeLeaf(unsigned int brickIndex) const {
     const unsigned int otNode = brickIndex % _numOTNodes;
-    const unsigned int depth = static_cast<unsigned int>(log(7 * otNode + 1) / log(8));
+    const unsigned int depth = static_cast<unsigned int>(log1p(7 * otNode) / log(8));
     return depth == _numOTLevels - 1;
 }
 

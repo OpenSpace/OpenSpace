@@ -139,14 +139,6 @@ namespace {
         "into the window."
     };
 
-#ifdef OPENSPACE_WITH_INSTRUMENTATION
-    constexpr openspace::properties::Property::PropertyInfo SaveFrameInfo = {
-        "SaveFrameInformation",
-        "Save Frame Information",
-        "Saves the frame information to disk"
-    };
-#endif // OPENSPACE_WITH_INSTRUMENTATION
-
     constexpr openspace::properties::Property::PropertyInfo DisableMasterInfo = {
         "DisableMasterRendering",
         "Disable Master Rendering",
@@ -262,9 +254,6 @@ RenderEngine::RenderEngine()
     , _showCameraInfo(ShowCameraInfo, true)
     , _applyWarping(ApplyWarpingInfo, false)
     , _showFrameInformation(ShowFrameNumberInfo, false)
-#ifdef OPENSPACE_WITH_INSTRUMENTATION
-    , _saveFrameInformation(SaveFrameInfo, false)
-#endif // OPENSPACE_WITH_INSTRUMENTATION
     , _disableMasterRendering(DisableMasterInfo, false)
     , _globalBlackOutFactor(GlobalBlackoutFactorInfo, 1.f, 0.f, 1.f)
     , _enableFXAA(FXAAInfo, true)
@@ -365,14 +354,6 @@ RenderEngine::RenderEngine()
     addProperty(_horizFieldOfView);
 
     addProperty(_showFrameInformation);
-#ifdef OPENSPACE_WITH_INSTRUMENTATION
-    _saveFrameInformation.onChange([&]() {
-        if (_saveFrameInformation) {
-            _frameInfo.lastSavedFrame = frameNumber();
-        }
-    });
-    addProperty(_saveFrameInformation);
-#endif // OPENSPACE_WITH_INSTRUMENTATION
 
     addProperty(_framerateLimit);
     addProperty(_globalRotation);
@@ -904,35 +885,6 @@ void RenderEngine::postDraw() {
     ZoneScoped
 
     ++_frameNumber;
-
-#ifdef OPENSPACE_WITH_INSTRUMENTATION
-    if (_saveFrameInformation) {
-        _frameInfo.frames.push_back({
-            frameNumber(),
-            global::windowDelegate.deltaTime(),
-            global::windowDelegate.averageDeltaTime()
-        });
-    }
-
-    const uint16_t next = _frameInfo.lastSavedFrame + _frameInfo.saveEveryNthFrame;
-    const bool shouldSave = _saveFrameInformation && frameNumber() >= next;
-    if (shouldSave) {
-        std::string filename = fmt::format(
-            "_inst_renderengine_{}_{}.txt",
-            _frameInfo.lastSavedFrame, _frameInfo.saveEveryNthFrame
-        );
-        std::ofstream file(absPath("${BIN}/" + filename));
-        for (const FrameInfo& i : _frameInfo.frames) {
-            std::string line = fmt::format(
-                "{}\t{}\t{}", i.iFrame, i.deltaTime, i.avgDeltaTime
-            );
-            file << line << '\n';
-        }
-
-        _frameInfo.frames.clear();
-        _frameInfo.lastSavedFrame = frameNumber();
-    }
-#endif // OPENSPACE_WITH_INSTRUMENTATION
 }
 
 Scene* RenderEngine::scene() {

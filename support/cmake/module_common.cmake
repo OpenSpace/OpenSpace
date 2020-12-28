@@ -23,29 +23,29 @@
 ##########################################################################################
 
 function (create_library_name module_name library_name)
-    string(TOLOWER ${module_name} module_name)
-    set(${library_name} "openspace-module-${module_name}" PARENT_SCOPE)
+  string(TOLOWER ${module_name} module_name)
+  set(${library_name} "openspace-module-${module_name}" PARENT_SCOPE)
 endfunction ()
 
 function (create_option_name module_name option_name)
-    string(TOUPPER ${module_name} module_name)
-    set(${option_name} "OPENSPACE_MODULE_${module_name}" PARENT_SCOPE)
+  string(TOUPPER ${module_name} module_name)
+  set(${option_name} "OPENSPACE_MODULE_${module_name}" PARENT_SCOPE)
 endfunction ()
 
 function (create_define_name module_name define_name)
-    string(TOUPPER ${module_name} module_name)
-    set(${define_name} "OPENSPACE_MODULE_${module_name}_ENABLED" PARENT_SCOPE)
+  string(TOUPPER ${module_name} module_name)
+  set(${define_name} "OPENSPACE_MODULE_${module_name}_ENABLED" PARENT_SCOPE)
 endfunction ()
 
 function (create_module_header_filepath module_name module_path header_filepath)
-    string(TOLOWER ${module_name} module_name)
-    string(REPLACE "${OPENSPACE_BASE_DIR}/" "" module_path ${module_path})
-    set(header_filepath "${module_path}/${module_name}module.h" PARENT_SCOPE)
+  string(TOLOWER ${module_name} module_name)
+  string(REPLACE "${OPENSPACE_BASE_DIR}/" "" module_path ${module_path})
+  set(header_filepath "${module_path}/${module_name}module.h" PARENT_SCOPE)
 endfunction ()
 
 function (create_module_class_name module_name module_class_name)
-    # Capitalize the first character
-    string(SUBSTRING ${module_name} 0 1 FIRST_LETTER)
-    string(TOUPPER ${FIRST_LETTER} FIRST_LETTER)
-    string(REGEX REPLACE "^.(.*)" "${FIRST_LETTER}\\1" module_name "${module_name}")
+  # Capitalize the first character
+  string(SUBSTRING ${module_name} 0 1 FIRST_LETTER)
+  string(TOUPPER ${FIRST_LETTER} FIRST_LETTER)
+  string(REGEX REPLACE "^.(.*)" "${FIRST_LETTER}\\1" module_name "${module_name}")
 endfunction ()

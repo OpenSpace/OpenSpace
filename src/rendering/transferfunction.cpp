@@ -112,7 +112,7 @@ void TransferFunction::setCallback(TfChangedCallback callback) {
     _tfChangedCallback = std::move(callback);
 }
 
-void TransferFunction::setTextureFromTxt(std::shared_ptr<ghoul::opengl::Texture> ptr) {
+void TransferFunction::setTextureFromTxt() {
     std::ifstream in;
     in.open(_filepath.c_str());
 

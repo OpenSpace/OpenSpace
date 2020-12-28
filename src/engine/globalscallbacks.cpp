@@ -24,6 +24,7 @@
 
 #include <openspace/engine/globalscallbacks.h>
 
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
 #include <array>
 
@@ -203,7 +204,7 @@ void create() {
 #ifdef WIN32
     touchExit = new (currentPos) std::vector<std::function<void(TouchInput)>>;
     ghoul_assert(touchExit, "No touchExit");
-    currentPos += sizeof(std::vector<std::function<void(TouchInput)>>);
+    //currentPos += sizeof(std::vector<std::function<void(TouchInput)>>);
 #else // ^^^ WIN32 / !WIN32 vvv
     touchExit = new std::vector<std::function<void(TouchInput)>>;
 #endif // WIN32

@@ -36,7 +36,7 @@
 #pragma GCC diagnostic ignored "-Wuseless-cast"
 #endif // __GNUC__
 
-#include <ext/json/json.hpp>
+#include <json/json.hpp>
 
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic pop

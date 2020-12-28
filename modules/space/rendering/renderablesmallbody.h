@@ -46,7 +46,7 @@ public:
 private:
     void readOrbitalParamsFromThisLine(bool firstDataLine, int& fieldCount,
         unsigned int& csvLine, std::ifstream& file);
-    void readDataFile(const std::string& filename);
+    virtual void readDataFile(const std::string& filename) override;
     void initializeFileReading();
     void skipSingleLineInFile(std::ifstream& file);
 

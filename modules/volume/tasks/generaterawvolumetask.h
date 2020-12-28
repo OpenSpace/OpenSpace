@@ -28,11 +28,9 @@
 #include <openspace/util/task.h>
 
 #include <ghoul/glm.h>
-
 #include <string>
 
-namespace openspace {
-namespace volume {
+namespace openspace::volume {
 
 class GenerateRawVolumeTask : public Task {
 public:
@@ -53,7 +51,6 @@ private:
     std::string _valueFunctionLua;
 };
 
-} // namespace volume
-} // namespace openspace
+} // namespace openspace::volume
 
 #endif // __OPENSPACE_MODULE_VOLUME___GENERATERAWVOLUMETASK___H__

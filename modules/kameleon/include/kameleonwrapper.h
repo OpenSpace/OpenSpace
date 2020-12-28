@@ -88,7 +88,7 @@ public:
         const glm::size3_t& outDimensions) const;
 
     float* uniformSliceValues(const std::string& var, const glm::size3_t& outDimensions,
-        const float& zSlice) const;
+        float zSlice) const;
 
     float* uniformSampledVectorValues(const std::string& xVar, const std::string& yVar,
         const std::string& zVar, const glm::size3_t& outDimensions) const;
@@ -115,7 +115,6 @@ public:
     std::array<std::string, 3> gridUnits() const;
 
     std::array<std::string, 3> gridVariables() const;
-
 
     Model model() const;
     GridType gridType() const;

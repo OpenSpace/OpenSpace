@@ -477,11 +477,11 @@ bool TimeQuantizer::quantize(Time& t, bool clamp) {
     // resolutionFraction helps to improve iteration performance
     constexpr const double ResolutionFraction = 0.7;
     constexpr const int IterationLimit = 50;
-    int iterations = 0;
-    int lastIncr = 0;
-    int lastDecr = 0;
 
     if (_timerange.includes(t)) {
+        int iterations = 0;
+        int lastIncr = 0;
+        int lastDecr = 0;
         DateTime quantized = DateTime(_timerange.start());
         doFirstApproximation(quantized, unquantized, _resolutionValue, _resolutionUnit);
         double error = unquantized.J2000() - quantized.J2000();

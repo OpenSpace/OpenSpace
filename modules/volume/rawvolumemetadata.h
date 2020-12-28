@@ -25,10 +25,11 @@
 #ifndef __OPENSPACE_MODULE_VOLUME___RAWVOLUMEMETADATA___H__
 #define __OPENSPACE_MODULE_VOLUME___RAWVOLUMEMETADATA___H__
 
-#include <openspace/documentation/documentation.h>
 #include <modules/volume/volumegridtype.h>
+#include <ghoul/glm.h>
 
-#include <ghoul/misc/dictionary.h>
+namespace openspace::documentation { struct Documentation; }
+namespace ghoul { class Dictionary; }
 
 namespace openspace::volume {
 

@@ -55,8 +55,6 @@ struct RawTile {
     GLuint pbo = 0;
 };
 
-RawTile createDefaultTile(TileTextureInitData initData);
-
 } // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___RAWTILE___H__

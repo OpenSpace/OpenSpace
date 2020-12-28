@@ -123,12 +123,6 @@ namespace {
         "" // @TODO Missing documentation
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShowChunkAABBInfo = {
-        "ShowChunkAABB",
-        "Show chunk AABB",
-        "" // @TODO Missing documentation
-    };
-
     constexpr openspace::properties::Property::PropertyInfo HeightResolutionInfo = {
         "ShowHeightResolution",
         "Show height resolution",
@@ -524,7 +518,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     , _debugProperties({
         BoolProperty(ShowChunkEdgeInfo, false),
         BoolProperty(ShowChunkBoundsInfo, false),
-        BoolProperty(ShowChunkAABBInfo, false),
         BoolProperty(HeightResolutionInfo, false),
         BoolProperty(HeightIntensityInfo, false),
         BoolProperty(LevelProjectedAreaInfo, true),
@@ -1283,13 +1276,12 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
     }
     _localRenderer.program->deactivate();
 
-    if (_debugProperties.showChunkBounds || _debugProperties.showChunkAABB) {
+    if (_debugProperties.showChunkBounds) {
         for (int i = 0; i < globalCount; ++i) {
             debugRenderChunk(
                 *_globalChunkBuffer[i],
                 mvp,
-                _debugProperties.showChunkBounds,
-                _debugProperties.showChunkAABB
+                _debugProperties.showChunkBounds
             );
         }
 
@@ -1297,8 +1289,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
             debugRenderChunk(
                 *_localChunkBuffer[i],
                 mvp,
-                _debugProperties.showChunkBounds,
-                _debugProperties.showChunkAABB
+                _debugProperties.showChunkBounds
             );
         }
     }
@@ -1560,7 +1551,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
 }
 
 void RenderableGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp,
-                                       bool renderBounds, bool renderAABB) const
+                                       bool renderBounds) const
 {
     ZoneScoped
 
@@ -1588,12 +1579,6 @@ void RenderableGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp
 
     if (renderBounds) {
         DebugRenderer::ref().renderNiceBox(clippingSpaceCorners, color);
-    }
-
-    if (renderAABB) {
-        const std::vector<glm::vec4>& screenSpacePoints =
-            DebugRenderer::ref().verticesFor(screenSpaceBounds);
-        DebugRenderer::ref().renderNiceBox(screenSpacePoints, color);
     }
 }
 
@@ -1825,7 +1810,7 @@ void RenderableGlobe::recompileShaders() {
     shaderDictionary.setValue("nShadowSamples", _generalProperties.nShadowSamples - 1);
 
     // Exclise Shadow Samples
-    int nEclipseShadows = _ellipsoid.shadowConfigurationArray().size();
+    int nEclipseShadows = static_cast<int>(_ellipsoid.shadowConfigurationArray().size());
     shaderDictionary.setValue("nEclipseShadows", nEclipseShadows - 1);
     //
     // Create local shader

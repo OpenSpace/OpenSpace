@@ -75,15 +75,14 @@ void DashboardItemParallelConnection::render(glm::vec2& penPosition) {
     if (status == ParallelConnection::Status::ClientWithHost ||
         status == ParallelConnection::Status::ClientWithoutHost)
     {
-        constexpr const char* Singular = "You and {} more client are tuned in";
-        constexpr const char* Plural = "You and {} more clients are tuned in";
-
         connectionInfo += "\n";
 
         if (nClients > 2) {
+            constexpr const char* Plural = "You and {} more clients are tuned in";
             connectionInfo += fmt::format(Plural, nClients - 1);
         }
         else if (nClients == 2) {
+            constexpr const char* Singular = "You and {} more client are tuned in";
             connectionInfo += fmt::format(Singular, nClients - 1);
         }
         else if (nClients == 1) {
@@ -128,14 +127,13 @@ glm::vec2 DashboardItemParallelConnection::size() const {
     if (status == ParallelConnection::Status::ClientWithHost ||
         status == ParallelConnection::Status::ClientWithoutHost)
     {
-        constexpr const char* Singular = "You and {} more client are tuned in";
-        constexpr const char* Plural = "You and {} more clients are tuned in";
-
         connectionInfo += "\n";
         if (nClients > 2) {
+            constexpr const char* Plural = "You and {} more clients are tuned in";
             connectionInfo += fmt::format(Plural, nClients);
         }
         else if (nClients == 2) {
+            constexpr const char* Singular = "You and {} more client are tuned in";
             connectionInfo += fmt::format(Singular, nClients - 1);
         }
         else if (nClients == 1) {

@@ -150,12 +150,13 @@ bool doesUriContainGroupTag(const std::string& command, std::string& groupName) 
     }
 }
 
-std::string replaceUriWithGroupName(std::string uri, std::string ownerName) {
+std::string replaceUriWithGroupName(const std::string& uri, const std::string& ownerName)
+{
     size_t pos = uri.find_first_of(".");
     return ownerName + "." + uri.substr(pos);
 }
 
-std::string extractUriWithoutGroupName(std::string uri) {
+std::string extractUriWithoutGroupName(const std::string& uri) {
     size_t pos = uri.find_first_of(".");
     return uri.substr(pos);
 }

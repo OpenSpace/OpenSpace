@@ -103,37 +103,6 @@ namespace {
        GL_COLOR_ATTACHMENT2,
        GL_COLOR_ATTACHMENT3
     };
-
-    void saveTextureToMemory(GLenum attachment, int width, int height,
-                             std::vector<double>& memory)
-    {
-        memory.clear();
-        memory.resize(width * height * 3);
-
-        std::vector<float> tempMemory(width * height * 3);
-
-        if (attachment != GL_DEPTH_ATTACHMENT) {
-            glReadBuffer(attachment);
-            glReadPixels(0, 0, width, height, GL_RGB, GL_FLOAT, tempMemory.data());
-
-        }
-        else {
-            glReadPixels(
-                0,
-                0,
-                width,
-                height,
-                GL_DEPTH_COMPONENT,
-                GL_FLOAT,
-                tempMemory.data()
-            );
-        }
-
-        for (int i = 0; i < width * height * 3; ++i) {
-            memory[i] = static_cast<double>(tempMemory[i]);
-        }
-    }
-
 } // namespace
 
 namespace openspace {
@@ -1426,13 +1395,8 @@ void FramebufferRenderer::performDeferredTasks(
 
         Deferredcaster* deferredcaster = deferredcasterTask.deferredcaster;
 
-        ghoul::opengl::ProgramObject* deferredcastProgram = nullptr;
-
-        if (deferredcastProgram != _deferredcastPrograms[deferredcaster].get()
-            || deferredcastProgram == nullptr)
-        {
-            deferredcastProgram = _deferredcastPrograms[deferredcaster].get();
-        }
+        ghoul::opengl::ProgramObject* deferredcastProgram =
+            _deferredcastPrograms[deferredcaster].get();
 
         if (deferredcastProgram) {
             _pingPongIndex = _pingPongIndex == 0 ? 1 : 0;

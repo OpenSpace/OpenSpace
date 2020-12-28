@@ -199,7 +199,7 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
 
     std::pair<double, std::string> dist = simplifyDistance(altitude);
 
-    std::fill(_buffer.begin(), _buffer.end(), 0);
+    std::fill(_buffer.begin(), _buffer.end(), char(0));
     char* end = fmt::format_to(
         _buffer.data(),
         _formatString.c_str(),

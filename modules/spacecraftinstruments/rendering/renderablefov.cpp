@@ -767,97 +767,96 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
     }
 
 
-#ifdef DEBUG_THIS
-        // At least one point will intersect
-        for (size_t i = 0; i < _instrument.bounds.size(); ++i) {
-            // Wrap around the array index to 0
-            const size_t j = (i == _instrument.bounds.size() - 1) ? 0 : i + 1;
+#if 0 // DEBUG_THIS
+    // At least one point will intersect
+    for (size_t i = 0; i < _instrument.bounds.size(); ++i) {
+        // Wrap around the array index to 0
+        const size_t j = (i == _instrument.bounds.size() - 1) ? 0 : i + 1;
 
-            const glm::dvec3& iBound = _instrument.bounds[i];
-            const glm::dvec3& jBound = _instrument.bounds[j];
+        const glm::dvec3& iBound = _instrument.bounds[i];
+        const glm::dvec3& jBound = _instrument.bounds[j];
 
-            auto intercepts = [&](const glm::dvec3& probe) -> bool {
-                return SpiceManager::ref().surfaceIntercept(
-                    target,
-                    _instrument.spacecraft,
-                    _instrument.name,
-                    makeBodyFixedReferenceFrame(_instrument.referenceFrame).first,
-                    _instrument.aberrationCorrection,
-                    data.time,
-                    probe
-                ).interceptFound;
-            };
+        auto intercepts = [&](const glm::dvec3& probe) -> bool {
+            return SpiceManager::ref().surfaceIntercept(
+                target,
+                _instrument.spacecraft,
+                _instrument.name,
+                makeBodyFixedReferenceFrame(_instrument.referenceFrame).first,
+                _instrument.aberrationCorrection,
+                data.time,
+                probe
+            ).interceptFound;
+        };
 
-            static const uint8_t NoIntersect   = 0b00;
-            static const uint8_t ThisIntersect = 0b01;
-            static const uint8_t NextIntersect = 0b10;
-            static const uint8_t BothIntersect = 0b11;
+        static const uint8_t NoIntersect   = 0b00;
+        static const uint8_t ThisIntersect = 0b01;
+        static const uint8_t NextIntersect = 0b10;
+        static const uint8_t BothIntersect = 0b11;
 
-            const uint8_t type = (intersects[i] ? 1 : 0) + (intersects[j] ? 2 : 0);
-            switch (type) {
-                case NoIntersect:
-                {
-                    // If both points don't intercept, the target might still pass between
-                    // them, so we need to check the intermediate point
+        const uint8_t type = (intersects[i] ? 1 : 0) + (intersects[j] ? 2 : 0);
+        switch (type) {
+            case NoIntersect:
+            {
+                // If both points don't intercept, the target might still pass between
+                // them, so we need to check the intermediate point
 
-                    const glm::dvec3 half = glm::mix(iBound, jBound, 0.5);
-                    if (intercepts(half)) {
-                        // The two outer points do not intersect, but the middle point
-                        // does; so we need to find the intersection points
-                        const double t1 = bisect(half, iBound, intercepts);
-                        const double t2 = 0.5 + bisect(half, jBound, intercepts);
+                const glm::dvec3 half = glm::mix(iBound, jBound, 0.5);
+                if (intercepts(half)) {
+                    // The two outer points do not intersect, but the middle point
+                    // does; so we need to find the intersection points
+                    const double t1 = bisect(half, iBound, intercepts);
+                    const double t2 = 0.5 + bisect(half, jBound, intercepts);
 
-                        //
-                        // The target is sticking out somewhere between i and j, so we
-                        // have three regions here:
-                        // The first (0,t1) and second (t2,1) are not intersecting
-                        // The third between (t1,t2) is intersecting
-                        //
-                        //   i       p1    p2       j
-                        //            *****
-                        //   x-------*     *-------x
-                        //   0       t1    t2      1
+                    //
+                    // The target is sticking out somewhere between i and j, so we
+                    // have three regions here:
+                    // The first (0,t1) and second (t2,1) are not intersecting
+                    // The third between (t1,t2) is intersecting
+                    //
+                    //   i       p1    p2       j
+                    //            *****
+                    //   x-------*     *-------x
+                    //   0       t1    t2      1
 
-                        // OBS: i and j are in bounds-space,  p1, p2 are in
-                        // _orthogonalPlane-space
-                        const size_t p1 = static_cast<size_t>(
-                            indexForBounds(i) + t1 * InterpolationSteps
-                        );
-                        const size_t p2 = static_cast<size_t>(
-                            indexForBounds(i) + t2 * InterpolationSteps
-                        );
+                    // OBS: i and j are in bounds-space,  p1, p2 are in
+                    // _orthogonalPlane-space
+                    const size_t p1 = static_cast<size_t>(
+                        indexForBounds(i) + t1 * InterpolationSteps
+                    );
+                    const size_t p2 = static_cast<size_t>(
+                        indexForBounds(i) + t2 * InterpolationSteps
+                    );
 
-                        // We can copy the non-intersecting parts
-                        copyFieldOfViewValues(i, indexForBounds(i), p1);
-                        copyFieldOfViewValues(i, p2, indexForBounds(j));
+                    // We can copy the non-intersecting parts
+                    copyFieldOfViewValues(i, indexForBounds(i), p1);
+                    copyFieldOfViewValues(i, p2, indexForBounds(j));
 
-                        // Are recompute the intersecting ones
-                        for (size_t k = 0; k <= (p2 - p1); ++k) {
-                            const double t = t1 + k * (t2 - t1);
-                            const glm::dvec3 interpolated = glm::mix(iBound, jBound, t);
-                            const glm::vec3 icpt = interceptVector(interpolated);
-                            _orthogonalPlane.data[p1 + k] = {
-                                icpt.x, icpt.y, icpt.z,
-                                RenderInformation::VertexColorTypeSquare
-                            };
-                        }
+                    // Are recompute the intersecting ones
+                    for (size_t k = 0; k <= (p2 - p1); ++k) {
+                        const double t = t1 + k * (t2 - t1);
+                        const glm::dvec3 interpolated = glm::mix(iBound, jBound, t);
+                        const glm::vec3 icpt = interceptVector(interpolated);
+                        _orthogonalPlane.data[p1 + k] = {
+                            icpt.x, icpt.y, icpt.z,
+                            RenderInformation::VertexColorTypeSquare
+                        };
                     }
-                    else {
-                        copyFieldOfViewValues(
-                            i,
-                            indexForBounds(i),
-                            indexForBounds(i + 1)
-                        );
-                    }
-                    break;
                 }
-                case ThisIntersect:
-                case NextIntersect:
-                case BothIntersect:
-                    break;
-                default:
-                    throw ghoul::MissingCaseException();
+                else {
+                    copyFieldOfViewValues(
+                        i,
+                        indexForBounds(i),
+                        indexForBounds(i + 1)
+                    );
+                }
+                break;
             }
+            case ThisIntersect:
+            case NextIntersect:
+            case BothIntersect:
+                break;
+            default:
+                throw ghoul::MissingCaseException();
         }
     }
 #endif

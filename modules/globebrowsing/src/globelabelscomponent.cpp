@@ -524,9 +524,7 @@ bool GlobeLabelsComponent::readLabelsFile(const std::string& file) {
             strncpy(lEntry.feature, token.c_str(), 256);
             int tokenChar = 0;
             while (tokenChar < 256) {
-                if ((lEntry.feature[tokenChar] < 0 || lEntry.feature[tokenChar] > 127) &&
-                    lEntry.feature[tokenChar] != '\0')
-                {
+                if (lEntry.feature[tokenChar] < 0 && lEntry.feature[tokenChar] != '\0') {
                     lEntry.feature[tokenChar] = '*';
                 }
                 else if (lEntry.feature[tokenChar] == '\"') {

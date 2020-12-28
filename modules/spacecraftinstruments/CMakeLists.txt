@@ -25,63 +25,63 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES    
-  ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditeminstruments.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablecrawlingline.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablefov.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplaneprojection.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplanetprojection.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableshadowcylinder.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemodelprojection.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/util/decoder.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/util/hongkangparser.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/util/instrumenttimesparser.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/util/image.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/util/imagesequencer.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/util/instrumentdecoder.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/util/labelparser.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/util/projectioncomponent.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/util/scannerdecoder.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/util/sequenceparser.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/util/targetdecoder.h
+  dashboard/dashboarditeminstruments.h
+  rendering/renderablecrawlingline.h
+  rendering/renderablefov.h
+  rendering/renderableplaneprojection.h
+  rendering/renderableplanetprojection.h
+  rendering/renderableshadowcylinder.h
+  rendering/renderablemodelprojection.h
+  util/decoder.h
+  util/hongkangparser.h
+  util/instrumenttimesparser.h
+  util/image.h
+  util/imagesequencer.h
+  util/instrumentdecoder.h
+  util/labelparser.h
+  util/projectioncomponent.h
+  util/scannerdecoder.h
+  util/sequenceparser.h
+  util/targetdecoder.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditeminstruments.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablecrawlingline.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablefov.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplaneprojection.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplanetprojection.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableshadowcylinder.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemodelprojection.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/util/decoder.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/util/hongkangparser.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/util/instrumenttimesparser.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/util/imagesequencer.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/util/instrumentdecoder.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/util/labelparser.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/util/projectioncomponent.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/util/scannerdecoder.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/util/sequenceparser.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/util/targetdecoder.cpp
+  dashboard/dashboarditeminstruments.cpp
+  rendering/renderablecrawlingline.cpp
+  rendering/renderablefov.cpp
+  rendering/renderableplaneprojection.cpp
+  rendering/renderableplanetprojection.cpp
+  rendering/renderableshadowcylinder.cpp
+  rendering/renderablemodelprojection.cpp
+  util/decoder.cpp
+  util/hongkangparser.cpp
+  util/instrumenttimesparser.cpp
+  util/imagesequencer.cpp
+  util/instrumentdecoder.cpp
+  util/labelparser.cpp
+  util/projectioncomponent.cpp
+  util/scannerdecoder.cpp
+  util/sequenceparser.cpp
+  util/targetdecoder.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/crawlingline_fs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/crawlingline_vs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fov_fs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fov_vs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderableModel_fs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderableModel_vs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderableModelProjection_fs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderableModelProjection_vs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderablePlanet_fs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderablePlanet_vs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderablePlanetProjection_fs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderablePlanetProjection_vs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/terminatorshadow_fs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/terminatorshadow_vs.glsl
+  shaders/crawlingline_fs.glsl
+  shaders/crawlingline_vs.glsl
+  shaders/fov_fs.glsl
+  shaders/fov_vs.glsl
+  shaders/renderableModel_fs.glsl
+  shaders/renderableModel_vs.glsl
+  shaders/renderableModelProjection_fs.glsl
+  shaders/renderableModelProjection_vs.glsl
+  shaders/renderablePlanet_fs.glsl
+  shaders/renderablePlanet_vs.glsl
+  shaders/renderablePlanetProjection_fs.glsl
+  shaders/renderablePlanetProjection_vs.glsl
+  shaders/terminatorshadow_fs.glsl
+  shaders/terminatorshadow_vs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 

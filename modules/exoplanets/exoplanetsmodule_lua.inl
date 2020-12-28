@@ -120,7 +120,7 @@ ExoplanetSystem findExoplanetSystemInData(std::string_view starName) {
     }
 
     system.starName = starName;
-    return std::move(system);
+    return system;
 }
 
 void createExoplanetSystem(const std::string& starName) {

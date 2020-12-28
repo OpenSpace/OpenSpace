@@ -81,20 +81,20 @@ std::array<std::string, 3> gridVariables(ccmc::Model* model) {
     std::string z = std::move(tokens.at(2));
 
     std::transform(
-        x.begin(),
-        x.end(),
+        x.cbegin(),
+        x.cend(),
         x.begin(),
         [](char c) { return static_cast<char>(tolower(c)); }
     );
     std::transform(
-        y.begin(),
-        y.end(),
+        y.cbegin(),
+        y.cend(),
         y.begin(),
         [](char c) { return static_cast<char>(tolower(c)); }
     );
     std::transform(
-        z.begin(),
-        z.end(),
+        z.cbegin(),
+        z.cend(),
         z.begin(),
         [](char c) { return static_cast<char>(tolower(c)); }
     );
@@ -331,7 +331,7 @@ float* KameleonWrapper::uniformSampledValues(const std::string& var,
 // This method returns new'd memory,  turn into std::vector<float> instead?
 float* KameleonWrapper::uniformSliceValues(const std::string& var,
                                            const glm::size3_t& outDimensions,
-                                           const float& slice) const
+                                           float slice) const
 {
     ghoul_assert(_model && _interpolator, "Model and interpolator must exist");
     LINFO(fmt::format(

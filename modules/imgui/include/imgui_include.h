@@ -30,8 +30,9 @@
 #pragma clang diagnostic ignored "-Wold-style-cast"
 #elif (defined __GNUC__)
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
 #pragma GCC diagnostic ignored "-Wold-style-cast"
+#pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
 #endif // __clang__
 
 #include <imgui.h>

@@ -33,8 +33,6 @@
 #include <optional>
 #include <set>
 
-namespace openspace { class GlobeBrowsingModule; }
-
 namespace openspace::globebrowsing {
 
 struct RawTile;
@@ -103,7 +101,6 @@ protected:
 
 private:
     const std::string _name;
-    GlobeBrowsingModule* _globeBrowsingModule;
     /// The reader used for asynchronous reading
     std::unique_ptr<RawTileDataReader> _rawTileDataReader;
 

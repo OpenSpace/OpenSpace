@@ -26,7 +26,6 @@
 #define __OPENSPACE_MODULE_VOLUME___RAWVOLUMEREADER___H__
 
 #include <ghoul/glm.h>
-#include <memory>
 #include <string>
 
 namespace openspace::volume {

@@ -377,7 +377,7 @@ TestResult OrVerifier::operator()(const ghoul::Dictionary& dictionary,
     const bool success = std::any_of(
         res.cbegin(),
         res.cend(),
-        [](const TestResult& res) { return res.success; }
+        std::mem_fn(&TestResult::success)
     );
 
     if (success) {

@@ -309,7 +309,7 @@ int joystickButton(lua_State* L) {
         cmds.begin(),
         cmds.end(),
         std::string(),
-        [](std::string lhs, std::string rhs) {
+        [](const std::string& lhs, const std::string& rhs) {
             return lhs + ";" + rhs;
         }
     );
