@@ -385,7 +385,11 @@ void FramebufferRenderer::initialize() {
     glDisablei(GL_BLEND, 1);
     glDisablei(GL_BLEND, 2);
 
-    glClampColor(GL_CLAMP_READ_COLOR, GL_FALSE);
+    // glClampColor is weird as it requires a GLenum in the function definition, but
+    // the OpenGL standard says that it only accepts GL_FALSE and GL_TRUE, which are
+    // of type GLboolean *eye rolling*
+    // GLenum(0) == GLboolen(0) == GL_FALSE
+    glClampColor(GL_CLAMP_READ_COLOR, GLenum(0));
 
     glEnable(GL_DEPTH_TEST);
 
