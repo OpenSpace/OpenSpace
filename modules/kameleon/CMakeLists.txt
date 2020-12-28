@@ -30,14 +30,14 @@ include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
 cmake_policy(SET CMP0074 NEW)
 
 set(HEADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/kameleonwrapper.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/kameleonhelper.h
+  include/kameleonwrapper.h
+  include/kameleonhelper.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/kameleonwrapper.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/kameleonhelper.cpp
+  src/kameleonwrapper.cpp
+  src/kameleonhelper.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

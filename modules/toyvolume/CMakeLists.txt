@@ -25,14 +25,14 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletoyvolume.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/toyvolumeraycaster.h
+  rendering/renderabletoyvolume.h
+  rendering/toyvolumeraycaster.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletoyvolume.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/toyvolumeraycaster.cpp
+  rendering/renderabletoyvolume.cpp
+  rendering/toyvolumeraycaster.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

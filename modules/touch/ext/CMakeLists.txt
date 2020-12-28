@@ -26,46 +26,46 @@ project(libTUIO11)
 message(STATUS "Generating libTUIO11 project")
 
 set(TUIO_SOURCE 
-  ${PROJECT_SOURCE_DIR}/libTUIO11/TUIO/WebSockSender.cpp
-  ${PROJECT_SOURCE_DIR}/libTUIO11/TUIO/UdpSender.cpp
-  ${PROJECT_SOURCE_DIR}/libTUIO11/TUIO/UdpReceiver.cpp
-  ${PROJECT_SOURCE_DIR}/libTUIO11/TUIO/TuioTime.cpp
-  ${PROJECT_SOURCE_DIR}/libTUIO11/TUIO/TuioServer.cpp
-  ${PROJECT_SOURCE_DIR}/libTUIO11/TUIO/TuioPoint.cpp
-  ${PROJECT_SOURCE_DIR}/libTUIO11/TUIO/TuioObject.cpp
-  ${PROJECT_SOURCE_DIR}/libTUIO11/TUIO/TuioManager.cpp
-  ${PROJECT_SOURCE_DIR}/libTUIO11/TUIO/TuioDispatcher.cpp
-  ${PROJECT_SOURCE_DIR}/libTUIO11/TUIO/TuioCursor.cpp
-  ${PROJECT_SOURCE_DIR}/libTUIO11/TUIO/TuioContainer.cpp
-  ${PROJECT_SOURCE_DIR}/libTUIO11/TUIO/TuioClient.cpp
-  ${PROJECT_SOURCE_DIR}/libTUIO11/TUIO/TuioBlob.cpp
-  ${PROJECT_SOURCE_DIR}/libTUIO11/TUIO/TcpSender.cpp
-  ${PROJECT_SOURCE_DIR}/libTUIO11/TUIO/TcpReceiver.cpp
-  ${PROJECT_SOURCE_DIR}/libTUIO11/TUIO/OscReceiver.cpp 
-  ${PROJECT_SOURCE_DIR}/libTUIO11/TUIO/OneEuroFilter.cpp
-  ${PROJECT_SOURCE_DIR}/libTUIO11/TUIO/FlashSender.cpp
+  libTUIO11/TUIO/WebSockSender.cpp
+  libTUIO11/TUIO/UdpSender.cpp
+  libTUIO11/TUIO/UdpReceiver.cpp
+  libTUIO11/TUIO/TuioTime.cpp
+  libTUIO11/TUIO/TuioServer.cpp
+  libTUIO11/TUIO/TuioPoint.cpp
+  libTUIO11/TUIO/TuioObject.cpp
+  libTUIO11/TUIO/TuioManager.cpp
+  libTUIO11/TUIO/TuioDispatcher.cpp
+  libTUIO11/TUIO/TuioCursor.cpp
+  libTUIO11/TUIO/TuioContainer.cpp
+  libTUIO11/TUIO/TuioClient.cpp
+  libTUIO11/TUIO/TuioBlob.cpp
+  libTUIO11/TUIO/TcpSender.cpp
+  libTUIO11/TUIO/TcpReceiver.cpp
+  libTUIO11/TUIO/OscReceiver.cpp 
+  libTUIO11/TUIO/OneEuroFilter.cpp
+  libTUIO11/TUIO/FlashSender.cpp
   
-  ${PROJECT_SOURCE_DIR}/libTUIO11/oscpack/ip/IpEndpointName.cpp
+  libTUIO11/oscpack/ip/IpEndpointName.cpp
   
-  ${PROJECT_SOURCE_DIR}/libTUIO11/oscpack/osc/OscTypes.cpp
-  ${PROJECT_SOURCE_DIR}/libTUIO11/oscpack/osc/OscReceivedElements.cpp
-  ${PROJECT_SOURCE_DIR}/libTUIO11/oscpack/osc/OscPrintReceivedElements.cpp
-  ${PROJECT_SOURCE_DIR}/libTUIO11/oscpack/osc/OscOutboundPacketStream.cpp
+  libTUIO11/oscpack/osc/OscTypes.cpp
+  libTUIO11/oscpack/osc/OscReceivedElements.cpp
+  libTUIO11/oscpack/osc/OscPrintReceivedElements.cpp
+  libTUIO11/oscpack/osc/OscOutboundPacketStream.cpp
 )
 
 if (WIN32)
   set(TUIO_SOURCE 
     ${TUIO_SOURCE}
-    ${PROJECT_SOURCE_DIR}/libTUIO11/oscpack/ip/win32/NetworkingUtils.cpp
-    ${PROJECT_SOURCE_DIR}/libTUIO11/oscpack/ip/win32/UdpSocket.cpp
+    libTUIO11/oscpack/ip/win32/NetworkingUtils.cpp
+    libTUIO11/oscpack/ip/win32/UdpSocket.cpp
   )
 endif ()
 
 if (UNIX)
   set(TUIO_SOURCE 
     ${TUIO_SOURCE}
-    ${PROJECT_SOURCE_DIR}/libTUIO11/oscpack/ip/posix/NetworkingUtils.cpp
-    ${PROJECT_SOURCE_DIR}/libTUIO11/oscpack/ip/posix/UdpSocket.cpp
+    libTUIO11/oscpack/ip/posix/NetworkingUtils.cpp
+    libTUIO11/oscpack/ip/posix/UdpSocket.cpp
   )
 endif ()
 

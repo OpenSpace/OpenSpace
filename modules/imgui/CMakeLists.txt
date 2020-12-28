@@ -25,44 +25,43 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/gui.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/guiassetcomponent.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/guicomponent.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/guifilepathcomponent.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/guigibscomponent.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/guiglobebrowsingcomponent.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/guihelpcomponent.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/guijoystickcomponent.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/guimemorycomponent.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/guimissioncomponent.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/guiparallelcomponent.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/guipropertycomponent.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/guishortcutscomponent.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/guispacetimecomponent.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/guiiswacomponent.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/imgui_include.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/renderproperties.h
+  include/gui.h
+  include/guiassetcomponent.h
+  include/guicomponent.h
+  include/guifilepathcomponent.h
+  include/guigibscomponent.h
+  include/guiglobebrowsingcomponent.h
+  include/guihelpcomponent.h
+  include/guijoystickcomponent.h
+  include/guimemorycomponent.h
+  include/guimissioncomponent.h
+  include/guiparallelcomponent.h
+  include/guipropertycomponent.h
+  include/guishortcutscomponent.h
+  include/guispacetimecomponent.h
+  include/guiiswacomponent.h
+  include/imgui_include.h
+  include/renderproperties.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/gui.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/guiassetcomponent.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/guicomponent.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/guifilepathcomponent.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/guigibscomponent.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/guiglobebrowsingcomponent.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/guihelpcomponent.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/guijoystickcomponent.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/guimemorycomponent.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/guimissioncomponent.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/guiparallelcomponent.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/guipropertycomponent.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/guishortcutscomponent.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/guispacetimecomponent.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/guiiswacomponent.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/renderproperties.cpp
-
+  src/gui.cpp
+  src/guiassetcomponent.cpp
+  src/guicomponent.cpp
+  src/guifilepathcomponent.cpp
+  src/guigibscomponent.cpp
+  src/guiglobebrowsingcomponent.cpp
+  src/guihelpcomponent.cpp
+  src/guijoystickcomponent.cpp
+  src/guimemorycomponent.cpp
+  src/guimissioncomponent.cpp
+  src/guiparallelcomponent.cpp
+  src/guipropertycomponent.cpp
+  src/guishortcutscomponent.cpp
+  src/guispacetimecomponent.cpp
+  src/guiiswacomponent.cpp
+  src/renderproperties.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

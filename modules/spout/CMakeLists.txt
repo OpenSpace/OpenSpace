@@ -25,15 +25,15 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/renderableplanespout.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/screenspacespout.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/spoutlibrary.h
+  renderableplanespout.h
+  screenspacespout.h
+  spoutlibrary.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/renderableplanespout.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/screenspacespout.cpp
+  renderableplanespout.cpp
+  screenspacespout.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

@@ -25,51 +25,51 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/envelope.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rawvolume.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumemetadata.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumereader.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumewriter.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/textureslicevolumereader.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/textureslicevolumereader.inl
-  ${CMAKE_CURRENT_SOURCE_DIR}/transferfunction.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/transferfunctionhandler.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/transferfunctionproperty.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumemetadata.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/lrucache.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/lrucache.inl
-  ${CMAKE_CURRENT_SOURCE_DIR}/linearlrucache.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/linearlrucache.inl
-  ${CMAKE_CURRENT_SOURCE_DIR}/volumegridtype.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/volumesampler.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/volumesampler.inl
-  ${CMAKE_CURRENT_SOURCE_DIR}/volumeutils.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletimevaryingvolume.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/basicvolumeraycaster.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/volumeclipplane.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/volumeclipplanes.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/tasks/generaterawvolumetask.h
+  envelope.h
+  rawvolume.h
+  rawvolumemetadata.h
+  rawvolumereader.h
+  rawvolumewriter.h
+  textureslicevolumereader.h
+  textureslicevolumereader.inl
+  transferfunction.h
+  transferfunctionhandler.h
+  transferfunctionproperty.h
+  rawvolumemetadata.h
+  lrucache.h
+  lrucache.inl
+  linearlrucache.h
+  linearlrucache.inl
+  volumegridtype.h
+  volumesampler.h
+  volumesampler.inl
+  volumeutils.h
+  rendering/renderabletimevaryingvolume.h
+  rendering/basicvolumeraycaster.h
+  rendering/volumeclipplane.h
+  rendering/volumeclipplanes.h
+  tasks/generaterawvolumetask.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/envelope.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rawvolume.inl
-  ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumemetadata.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumereader.inl
-  ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumewriter.inl
-  ${CMAKE_CURRENT_SOURCE_DIR}/textureslicevolumereader.inl
-  ${CMAKE_CURRENT_SOURCE_DIR}/transferfunction.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/transferfunctionhandler.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/transferfunctionproperty.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/volumesampler.inl
-  ${CMAKE_CURRENT_SOURCE_DIR}/volumegridtype.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/volumeutils.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletimevaryingvolume.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/basicvolumeraycaster.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/volumeclipplane.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/volumeclipplanes.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tasks/generaterawvolumetask.cpp
+  envelope.cpp
+  rawvolume.inl
+  rawvolumemetadata.cpp
+  rawvolumereader.inl
+  rawvolumewriter.inl
+  textureslicevolumereader.inl
+  transferfunction.cpp
+  transferfunctionhandler.cpp
+  transferfunctionproperty.cpp
+  volumesampler.inl
+  volumegridtype.cpp
+  volumeutils.cpp
+  rendering/renderabletimevaryingvolume.cpp
+  rendering/basicvolumeraycaster.cpp
+  rendering/volumeclipplane.cpp
+  rendering/volumeclipplanes.cpp
+  tasks/generaterawvolumetask.cpp
 )
 
 source_group("Source Files" FILES ${SOURCE_FILES})
