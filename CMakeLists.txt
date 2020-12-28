@@ -157,6 +157,7 @@ if (APPLE)
     "~/Qt/5.10/clang_64/lib/cmake"
     "~/Qt/5.11/clang_64/lib/cmake"
     "~/Qt/5.12/clang_64/lib/cmake"
+    "~/Qt/5.15.1/clang_64/lib/cmake"
   )
 endif ()
 

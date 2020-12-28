@@ -238,4 +238,4 @@ set_folder_location(openspace_web_helper "Helper")
 # Display CEF configuration settings.
 PRINT_CEF_CONFIG()
 
-target_include_directories(${webbrowser_module} PUBLIC ${CEF_ROOT})
+target_include_directories(${webbrowser_module} SYSTEM PUBLIC ${CEF_ROOT})

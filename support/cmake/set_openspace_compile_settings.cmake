@@ -222,6 +222,8 @@ function (set_openspace_compile_settings target)
     if (OPENSPACE_WARNINGS_AS_ERRORS)
       target_compile_options(${target} PRIVATE "-Werror")
     endif ()
+    # Apple has "deprecated" OpenGL and offers nothing by warnings instead
+    target_compile_definitions(${target} PRIVATE "GL_SILENCE_DEPRECATION")
 
     target_compile_options(${target} PRIVATE ${CLANG_WARNINGS})
   elseif (UNIX AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")

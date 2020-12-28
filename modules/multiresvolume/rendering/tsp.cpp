@@ -574,11 +574,11 @@ bool TSP::writeCache() {
 }
 
 float TSP::spatialError(unsigned int brickIndex) const {
-    return reinterpret_cast<const float&>(_data[brickIndex*NUM_DATA + SPATIAL_ERR]);
+    return *reinterpret_cast<const float*>(_data[brickIndex*NUM_DATA + SPATIAL_ERR]);
 }
 
 float TSP::temporalError(unsigned int brickIndex) const {
-    return reinterpret_cast<const float&>(_data[brickIndex*NUM_DATA + TEMPORAL_ERR]);
+    return *reinterpret_cast<const float*>(_data[brickIndex*NUM_DATA + TEMPORAL_ERR]);
 }
 
 unsigned int TSP::firstOctreeChild(unsigned int brickIndex) const {

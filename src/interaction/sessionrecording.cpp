@@ -703,9 +703,9 @@ void SessionRecording::preSynchronization() {
 
     //Handle callback(s) for change in idle/record/playback state
     if (_state != _lastState) {
-        using K = const CallbackHandle;
+        using K = CallbackHandle;
         using V = StateChangeCallback;
-        for (const std::pair<const K, V>& it : _stateChangeCallbacks) {
+        for (const std::pair<K, V>& it : _stateChangeCallbacks) {
             it.second();
         }
     }
