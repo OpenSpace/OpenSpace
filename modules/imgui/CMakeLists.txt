@@ -78,4 +78,4 @@ create_new_module(
   ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
 
-include_external_library(${imgui_module} PRIVATE Imgui ${CMAKE_CURRENT_SOURCE_DIR}/ext/imgui ${CMAKE_CURRENT_SOURCE_DIR}/ext/imgui)
+include_external_library(${imgui_module} PRIVATE Imgui ${CMAKE_CURRENT_SOURCE_DIR}/ext/imgui)
