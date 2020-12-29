@@ -134,7 +134,6 @@ function (set_openspace_compile_settings target)
     "-Wmismatched-tags"
     "-Wmissing-field-initializers"
     "-Wmissing-noreturn"
-    "-Wnewline-eof"
     "-Wnon-virtual-dtor"
     "-Wold-style-cast"
     "-Woverloaded-virtual"
