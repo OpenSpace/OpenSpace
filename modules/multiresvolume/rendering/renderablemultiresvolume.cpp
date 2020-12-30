@@ -193,16 +193,16 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
         );
     }
 
-    if (dictionary.hasKeyAndValue<glm::vec3>("Scaling")) {
-        _scaling = dictionary.value<glm::vec3>("Scaling");
+    if (dictionary.hasKeyAndValue<glm::dvec3>("Scaling")) {
+        _scaling = dictionary.value<glm::dvec3>("Scaling");
     }
 
-    if (dictionary.hasKeyAndValue<glm::vec3>("Translation")) {
-        _translation = dictionary.value<glm::vec3>("Translation");
+    if (dictionary.hasKeyAndValue<glm::dvec3>("Translation")) {
+        _translation = dictionary.value<glm::dvec3>("Translation");
     }
 
-    if (dictionary.hasKeyAndValue<glm::vec3>("Rotation")) {
-        _rotation = dictionary.value<glm::vec3>("Rotation");
+    if (dictionary.hasKeyAndValue<glm::dvec3>("Rotation")) {
+        _rotation = dictionary.value<glm::dvec3>("Rotation");
     }
 
     std::string startTimeString, endTimeString;

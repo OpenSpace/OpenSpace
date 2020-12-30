@@ -110,21 +110,19 @@ IswaDataGroup::~IswaDataGroup() {}
 void IswaDataGroup::registerProperties() {
     _useLog.onChange([this]() {
         LDEBUG("Group " + identifier() + " published useLogChanged");
-        _groupEvent.publish(
-            "useLogChanged",
-            ghoul::Dictionary({ { "useLog", _useLog.value() } })
-        );
+        ghoul::Dictionary d;
+        d.setValue("useLog", _useLog.value());
+        _groupEvent.publish("useLogChanged", d);
     });
 
     _useHistogram.onChange([this]() {
         LDEBUG("Group " + identifier() + " published useHistogramChanged");
-        _groupEvent.publish(
-            "useHistogramChanged",
-            ghoul::Dictionary({ { "useHistogram", _useHistogram.value() } })
-        );
+        ghoul::Dictionary d;
+        d.setValue("useHistogram", _useHistogram.value());
+        _groupEvent.publish("useHistogramChanged", d);
     });
 
-    //If autofiler is on, background values property should be hidden
+    // If autofiler is on, background values property should be hidden
     _autoFilter.onChange([this]() {
         LDEBUG("Group " + identifier() + " published autoFilterChanged");
         // If autofiler is selected, use _dataProcessor to set backgroundValues
@@ -139,34 +137,30 @@ void IswaDataGroup::registerProperties() {
             _backgroundValues.setVisibility(properties::Property::Visibility::All);
             //_backgroundValues.setVisible(true);
         }
-        _groupEvent.publish(
-            "autoFilterChanged",
-            ghoul::Dictionary({ { "autoFilter", _autoFilter.value() } })
-        );
+        ghoul::Dictionary d;
+        d.setValue("autoFilter", _autoFilter.value());
+        _groupEvent.publish("autoFilterChanged", d);
     });
 
     _normValues.onChange([this]() {
         LDEBUG("Group " + identifier() + " published normValuesChanged");
-        _groupEvent.publish(
-            "normValuesChanged",
-            ghoul::Dictionary({ { "normValues", _normValues.value() } })
-        );
+        ghoul::Dictionary d;
+        d.setValue("normValues", glm::dvec2(_normValues.value()));
+        _groupEvent.publish("normValuesChanged", d);
     });
 
     _backgroundValues.onChange([this]() {
         LDEBUG("Group " + identifier() + " published backgroundValuesChanged");
-        _groupEvent.publish(
-            "backgroundValuesChanged",
-            ghoul::Dictionary({ { "backgroundValues", _backgroundValues.value() } })
-        );
+        ghoul::Dictionary d;
+        d.setValue("backgroundValues", glm::dvec2(_backgroundValues.value()));
+        _groupEvent.publish("backgroundValuesChanged", d);
     });
 
     _transferFunctionsFile.onChange([this]() {
         LDEBUG("Group " + identifier() + " published transferFunctionsChanged");
-        _groupEvent.publish(
-            "transferFunctionsChanged",
-            ghoul::Dictionary({ { "transferFunctions", _transferFunctionsFile.value() } })
-        );
+        ghoul::Dictionary d;
+        d.setValue("transferFunctionsChanged", _transferFunctionsFile.value());
+        _groupEvent.publish("transferFunctionsChanged", d);
     });
 
     _dataOptions.onChange([this]() {

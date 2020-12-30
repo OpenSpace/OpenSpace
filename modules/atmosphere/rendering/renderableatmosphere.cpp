@@ -355,7 +355,12 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     success = dictionary.getValue(keyAtmosphere, atmosphereDictionary);
     if (success) {
         bool errorReadingAtmosphereData = false;
-        if (!atmosphereDictionary.getValue(keyAtmosphereRadius, _atmosphereRadius)) {
+        if (atmosphereDictionary.hasKey(keyAtmosphereRadius)) {
+            _atmosphereRadius = static_cast<float>(
+                atmosphereDictionary.value<double>(keyAtmosphereRadius)
+            );
+        }
+        else {
             errorReadingAtmosphereData = true;
             LWARNINGC(
                 identifier,
@@ -364,7 +369,12 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             );
         }
 
-        if (!atmosphereDictionary.getValue(keyPlanetRadius, _atmospherePlanetRadius)) {
+        if (atmosphereDictionary.hasKey(keyPlanetRadius)) {
+            _atmospherePlanetRadius = static_cast<float>(
+                atmosphereDictionary.value<double>(keyPlanetRadius)
+            );
+        }
+        else {
             errorReadingAtmosphereData = true;
             LWARNINGC(
                 identifier,
@@ -373,10 +383,12 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             );
         }
 
-        if (!atmosphereDictionary.getValue(
-                keyAverageGroundReflectance,
-                _planetAverageGroundReflectance))
-        {
+        if (atmosphereDictionary.hasKey(keyAverageGroundReflectance)) {
+            _planetAverageGroundReflectance = static_cast<float>(
+                atmosphereDictionary.value<double>(keyAverageGroundReflectance)
+            );
+        }
+        else {
             errorReadingAtmosphereData = true;
             LWARNINGC(
                 identifier,
@@ -386,21 +398,26 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         }
 
         if (atmosphereDictionary.hasKey(SunIntensityInfo.identifier)) {
-            _sunRadianceIntensity =
-                atmosphereDictionary.value<float>(SunIntensityInfo.identifier);
+            _sunRadianceIntensity = static_cast<float>(
+                atmosphereDictionary.value<double>(SunIntensityInfo.identifier)
+            );
         }
 
         if (atmosphereDictionary.hasKey(MieScatteringExtinctionPropCoeffInfo.identifier))
         {
-            _mieScattExtPropCoefProp = atmosphereDictionary.value<float>(
-                MieScatteringExtinctionPropCoeffInfo.identifier
+            _mieScattExtPropCoefProp = static_cast<float>(
+                atmosphereDictionary.value<double>(
+                    MieScatteringExtinctionPropCoeffInfo.identifier
+                )
             );
         }
 
-        if (!atmosphereDictionary.getValue(
-                GroundRadianceEmittioninfo.identifier,
-                _planetGroundRadianceEmittion))
-        {
+        if (atmosphereDictionary.hasKey(GroundRadianceEmittioninfo.identifier)) {
+            _planetGroundRadianceEmittion = static_cast<float>(
+                atmosphereDictionary.value<double>(GroundRadianceEmittioninfo.identifier)
+            );
+        }
+        else {
             errorReadingAtmosphereData = true;
             LWARNINGC(
                 identifier,
@@ -414,16 +431,30 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
 
         if (success) {
             // Not using right now.
-            glm::vec3 rayleighWavelengths = glm::vec3(0.f);
-            rayleighDictionary.getValue(
-                "Coefficients.Wavelengths",
-                rayleighWavelengths
-            );
+            glm::dvec3 rayleighWavelengths = glm::dvec3(0.f);
+            if (rayleighDictionary.hasKeyAndValue<ghoul::Dictionary>("Coefficients")) {
+                ghoul::Dictionary coefficientsDictionary =
+                    rayleighDictionary.value<ghoul::Dictionary>("Coefficients");
+                if (coefficientsDictionary.hasKey("Wavelengths")) {
+                    rayleighWavelengths =
+                        coefficientsDictionary.value<glm::dvec3>("Wavelengths");
+                }
 
-            if (!rayleighDictionary.getValue(
-                "Coefficients.Scattering",
-                _rayleighScatteringCoeff))
-            {
+                if (coefficientsDictionary.hasKey("Scattering")) {
+                    _rayleighScatteringCoeff = coefficientsDictionary.value<glm::dvec3>(
+                        "Scattering"
+                    );
+                }
+                else {
+                    errorReadingAtmosphereData = true;
+                    LWARNINGC(
+                        identifier,
+                        "No Rayleigh Scattering parameters specified for Atmosphere Effects. "
+                        "Disabling atmosphere effects for this planet."
+                    );
+                }
+            }
+            else {
                 errorReadingAtmosphereData = true;
                 LWARNINGC(
                     identifier,
@@ -432,11 +463,12 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
                 );
             }
 
-            if (!rayleighDictionary.getValue(
-                keyRayleighHeightScale,
-                _rayleighHeightScale)
-            )
-            {
+            if (rayleighDictionary.hasKey(keyRayleighHeightScale)) {
+                _rayleighHeightScale = static_cast<float>(
+                    rayleighDictionary.value<double>(keyRayleighHeightScale)
+                );
+            }
+            else {
                 errorReadingAtmosphereData = true;
                 LWARNINGC(
                     identifier,
@@ -457,15 +489,25 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         ghoul::Dictionary ozoneDictionary;
         success = atmosphereDictionary.getValue(keyOzone, ozoneDictionary);
         if (success) {
-            _ozoneLayerEnabled = true;
-            if (!ozoneDictionary.getValue(keyOzoneHeightScale, _ozoneHeightScale)) {
-                _ozoneLayerEnabled = false;
+            _ozoneLayerEnabled =
+                ozoneDictionary.hasKeyAndValue<double>(keyOzoneHeightScale);
+            if (_ozoneLayerEnabled) {
+                _ozoneHeightScale = static_cast<float>(
+                    ozoneDictionary.value<double>(keyOzoneHeightScale)
+                );
             }
 
-            if (!ozoneDictionary.getValue(
-                "Coefficients.Extinction",
-                _ozoneExtinctionCoeff))
-            {
+            if (ozoneDictionary.hasKeyAndValue<ghoul::Dictionary>("Coefficients")) {
+                ghoul::Dictionary coeff =
+                    ozoneDictionary.value<ghoul::Dictionary>("Coefficients");
+                if (coeff.hasKeyAndValue<glm::dvec3>("Extinction")) {
+                    _ozoneExtinctionCoeff = coeff.value<glm::dvec3>("Extinction");
+                }
+                else {
+                    _ozoneLayerEnabled = false;
+                }
+            }
+            else {
                 _ozoneLayerEnabled = false;
             }
         }
@@ -476,7 +518,12 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         ghoul::Dictionary mieDictionary;
         success = atmosphereDictionary.getValue(keyMie, mieDictionary);
         if (success) {
-            if (!mieDictionary.getValue(keyMieHeightScale, _mieHeightScale)) {
+            if (mieDictionary.hasKey(keyMieHeightScale)) {
+                _mieHeightScale = static_cast<float>(
+                    mieDictionary.value<double>(keyMieHeightScale)
+                );
+            }
+            else {
                 errorReadingAtmosphereData = true;
                 LWARNINGC(
                     identifier,
@@ -485,7 +532,36 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
                 );
             }
 
-            if (!mieDictionary.getValue("Coefficients.Scattering", _mieScatteringCoeff)) {
+            if (mieDictionary.hasKeyAndValue<ghoul::Dictionary>("Coefficients")) {
+                ghoul::Dictionary coeffs =
+                    mieDictionary.value<ghoul::Dictionary>("Coefficients");
+
+                if (coeffs.hasKey("Scattering")) {
+                    _mieScatteringCoeff = coeffs.value<glm::dvec3>("Scattering");
+                }
+                else {
+                    errorReadingAtmosphereData = true;
+                    LWARNINGC(
+                        identifier,
+                        "No Mie Scattering parameters specified for Atmosphere Effects. "
+                        "Disabling atmosphere effects for this planet."
+                    );
+                }
+
+                if (coeffs.hasKey("Extinction")) {
+                    _mieExtinctionCoeff = coeffs.value<glm::dvec3>("Extinction");
+                }
+                else {
+                    errorReadingAtmosphereData = true;
+                    LWARNINGC(
+                        identifier,
+                        "No Mie Scattering parameters specified for Atmosphere Effects. "
+                        "Disabling atmosphere effects for this planet."
+                    );
+                }
+
+            }
+            else {
                 errorReadingAtmosphereData = true;
                 LWARNINGC(
                     identifier,
@@ -494,16 +570,12 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
                 );
             }
 
-            if (!mieDictionary.getValue("Coefficients.Extinction", _mieExtinctionCoeff)) {
-                errorReadingAtmosphereData = true;
-                LWARNINGC(
-                    identifier,
-                    "No Mie Extinction parameters specified for Atmosphere Effects. "
-                    "Disabling atmosphere effects for this planet."
+            if (mieDictionary.hasKey(keyMiePhaseConstant)) {
+                _miePhaseConstant = static_cast<float>(
+                    mieDictionary.value<double>(keyMiePhaseConstant)
                 );
             }
-
-            if (!mieDictionary.getValue(keyMiePhaseConstant, _miePhaseConstant)) {
+            else {
                 errorReadingAtmosphereData = true;
                 LWARNINGC(
                     identifier,
@@ -524,7 +596,10 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         ghoul::Dictionary ImageDictionary;
         success = atmosphereDictionary.getValue(keyImage, ImageDictionary);
         if (success) {
-            if (ImageDictionary.getValue(keyToneMappingOp, _preCalculatedTexturesScale)) {
+            if (ImageDictionary.hasKey(keyToneMappingOp)) {
+                _preCalculatedTexturesScale = static_cast<float>(
+                    ImageDictionary.value<double>(keyToneMappingOp)
+                );
                 LDEBUG(fmt::format(
                     "Atmosphere Texture Scaled to {}",
                     _preCalculatedTexturesScale
@@ -535,15 +610,19 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         ghoul::Dictionary debugDictionary;
         success = atmosphereDictionary.getValue(keyATMDebug, debugDictionary);
         if (success) {
-            if (debugDictionary.getValue(keyTextureScale, _preCalculatedTexturesScale)) {
+            if (debugDictionary.hasKey(keyTextureScale)) {
+                _preCalculatedTexturesScale = static_cast<float>(
+                    debugDictionary.value<double>(keyTextureScale)
+                );
                 LDEBUG(fmt::format(
                     "Atmosphere Texture Scaled to {}",
                     _preCalculatedTexturesScale
                 ));
             }
 
-            if (debugDictionary.getValue(keySaveTextures, _saveCalculationsToTexture)) {
-                LDEBUG("Saving Precalculated Atmosphere Textures.");
+            if (debugDictionary.hasKey(keySaveTextures)) {
+                _saveCalculationsToTexture = debugDictionary.value<bool>(keySaveTextures);
+                LDEBUG("Saving Precalculated Atmosphere Textures");
             }
 
         }

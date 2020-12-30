@@ -551,7 +551,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
 
     // Read the radii in to its own dictionary
     if (dictionary.hasKeyAndValue<glm::dvec3>(KeyRadii)) {
-        _ellipsoid = Ellipsoid(dictionary.value<glm::vec3>(KeyRadii));
+        _ellipsoid = Ellipsoid(dictionary.value<glm::dvec3>(KeyRadii));
         setBoundingSphere(static_cast<float>(_ellipsoid.maximumRadius()));
     }
     else if (dictionary.hasKeyAndValue<double>(KeyRadii)) {
@@ -1796,7 +1796,7 @@ void RenderableGlobe::recompileShaders() {
     for (int i = 0; i < layergroupid::NUM_LAYER_GROUPS; ++i) {
         layerGroupNames.setValue(
             std::to_string(i),
-            layergroupid::LAYER_GROUP_IDENTIFIERS[i]
+            std::string(layergroupid::LAYER_GROUP_IDENTIFIERS[i])
         );
     }
     shaderDictionary.setValue("layerGroups", layerGroupNames);

@@ -567,7 +567,8 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
 
     // 1. Get required Keys
     filePath = dictionary.value<std::string>(KeyFilePath);
-    layerGroupID = dictionary.value<layergroupid::GroupID>("LayerGroupID");
+    layerGroupID =
+        static_cast<layergroupid::GroupID>(dictionary.value<int>("LayerGroupID"));
 
     // 2. Initialize default values for any optional Keys
     // getValue does not work for integers
@@ -751,8 +752,8 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
 
     type = Type::ByLevelTileProvider;
 
-    layergroupid::GroupID layerGroupID = dictionary.value<layergroupid::GroupID>(
-        bylevelprovider::KeyLayerGroupID
+    layergroupid::GroupID layerGroupID = static_cast<layergroupid::GroupID>(
+        dictionary.value<int>(bylevelprovider::KeyLayerGroupID)
     );
 
     if (dictionary.hasKeyAndValue<ghoul::Dictionary>(bylevelprovider::KeyProviders)) {
@@ -772,7 +773,10 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
             ghoul::Dictionary providerDict = levelProviderDict.value<ghoul::Dictionary>(
                 bylevelprovider::KeyTileProvider
             );
-            providerDict.setValue(bylevelprovider::KeyLayerGroupID, layerGroupID);
+            providerDict.setValue(
+                bylevelprovider::KeyLayerGroupID,
+                static_cast<int>(layerGroupID)
+            );
 
             layergroupid::TypeID typeID;
             if (providerDict.hasKeyAndValue<std::string>("Type")) {

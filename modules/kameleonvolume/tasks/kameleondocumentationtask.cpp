@@ -67,15 +67,10 @@ void KameleonDocumentationTask::perform(const Task::ProgressCallback & progressC
     ghoul::Dictionary kameleonDictionary = reader.readMetaData();
     progressCallback(0.33f);
 
-    ghoul::Dictionary dictionary = {
-        { "kameleon", std::move(kameleonDictionary) },
-        { "version",
-            std::to_string(OPENSPACE_VERSION_MAJOR) + "." +
-            std::to_string(OPENSPACE_VERSION_MINOR) + "." +
-            std::to_string(OPENSPACE_VERSION_PATCH)
-        },
-        { "input", _inputPath }
-    };
+    ghoul::Dictionary dictionary;
+    dictionary.setValue("kameleon", std::move(kameleonDictionary));
+    dictionary.setValue("version", std::string(OPENSPACE_VERSION_NUMBER));
+    dictionary.setValue("input", _inputPath);
 
     std::string json = ghoul::formatJson(dictionary);
     progressCallback(0.66f);

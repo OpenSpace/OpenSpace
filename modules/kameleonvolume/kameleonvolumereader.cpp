@@ -179,7 +179,7 @@ void KameleonVolumeReader::addAttributeToDictionary(ghoul::Dictionary& dictionar
     ccmc::Attribute::AttributeType type = attr.getAttributeType();
     switch (type) {
         case ccmc::Attribute::AttributeType::FLOAT:
-            dictionary.setValue<float>(key, attr.getAttributeFloat());
+            dictionary.setValue<double>(key, attr.getAttributeFloat());
             return;
         case ccmc::Attribute::AttributeType::INT:
             dictionary.setValue<int>(key, attr.getAttributeInt());
@@ -215,10 +215,10 @@ ghoul::Dictionary KameleonVolumeReader::readMetaData() const {
         variableDictionary.setValue(variableName, variableAttributesDictionary);
     }
 
-    return {
-        { "globalAttributes", std::move(globalAttributesDictionary) },
-        { "variableAttributes", std::move(variableDictionary) }
-    };
+    ghoul::Dictionary res;
+    res.setValue("globalAttributes", std::move(globalAttributesDictionary));
+    res.setValue("variableAttributes", std::move(variableDictionary));
+    return res;
 }
 
 std::string KameleonVolumeReader::simulationStart() const {

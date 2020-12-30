@@ -726,7 +726,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
 
     if (dictionary.hasKey(AdditionalNodesInfo.identifier)) {
         _additionalNodes = static_cast<glm::ivec2>(
-            dictionary.value<glm::vec2>(AdditionalNodesInfo.identifier)
+            dictionary.value<glm::dvec2>(AdditionalNodesInfo.identifier)
         );
     }
 
@@ -773,32 +773,32 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     }
 
     if (dictionary.hasKey(FilterPosXInfo.identifier)) {
-        _posXThreshold = dictionary.value<glm::vec2>(FilterPosXInfo.identifier);
+        _posXThreshold = dictionary.value<glm::dvec2>(FilterPosXInfo.identifier);
     }
     addProperty(_posXThreshold);
 
     if (dictionary.hasKey(FilterPosYInfo.identifier)) {
-        _posXThreshold = dictionary.value<glm::vec2>(FilterPosYInfo.identifier);
+        _posXThreshold = dictionary.value<glm::dvec2>(FilterPosYInfo.identifier);
     }
     addProperty(_posYThreshold);
 
     if (dictionary.hasKey(FilterPosZInfo.identifier)) {
-        _posZThreshold = dictionary.value<glm::vec2>(FilterPosZInfo.identifier);
+        _posZThreshold = dictionary.value<glm::dvec2>(FilterPosZInfo.identifier);
     }
     addProperty(_posZThreshold);
 
     if (dictionary.hasKey(FilterGMagInfo.identifier)) {
-        _gMagThreshold = dictionary.value<glm::vec2>(FilterGMagInfo.identifier);
+        _gMagThreshold = dictionary.value<glm::dvec2>(FilterGMagInfo.identifier);
     }
     addProperty(_gMagThreshold);
 
     if (dictionary.hasKey(FilterBpRpInfo.identifier)) {
-        _bpRpThreshold = dictionary.value<glm::vec2>(FilterBpRpInfo.identifier);
+        _bpRpThreshold = dictionary.value<glm::dvec2>(FilterBpRpInfo.identifier);
     }
     addProperty(_bpRpThreshold);
 
     if (dictionary.hasKey(FilterDistInfo.identifier)) {
-        _distThreshold = dictionary.value<glm::vec2>(FilterDistInfo.identifier);
+        _distThreshold = dictionary.value<glm::dvec2>(FilterDistInfo.identifier);
     }
     addProperty(_distThreshold);
 

@@ -342,8 +342,8 @@ void DataCygnet::subscribeToGroup() {
         "normValuesChanged",
         [&](const ghoul::Dictionary& dict) {
             LDEBUG(identifier() + " Event normValuesChanged");
-            if (dict.hasKeyAndValue<glm::vec2>("normValues")) {
-                _normValues = dict.value<glm::vec2>("normValues");
+            if (dict.hasKeyAndValue<glm::dvec2>("normValues")) {
+                _normValues = dict.value<glm::dvec2>("normValues");
             }
         }
     );
@@ -353,8 +353,8 @@ void DataCygnet::subscribeToGroup() {
         "backgroundValuesChanged",
         [&](const ghoul::Dictionary& dict) {
             LDEBUG(identifier() + " Event backgroundValuesChanged");
-            if (dict.hasKeyAndValue<glm::vec2>("backgroundValues")) {
-                _backgroundValues = dict.value<glm::vec2>("backgroundValues");
+            if (dict.hasKeyAndValue<glm::dvec2>("backgroundValues")) {
+                _backgroundValues = dict.value<glm::dvec2>("backgroundValues");
             }
         }
     );

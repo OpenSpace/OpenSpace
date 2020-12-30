@@ -126,7 +126,7 @@ public:
     SceneGraphNode* parent() const;
     std::vector<SceneGraphNode*> children() const;
 
-    float boundingSphere() const;
+    double boundingSphere() const;
 
     SceneGraphNode* childNode(const std::string& identifier);
 
@@ -177,7 +177,7 @@ private:
 
     glm::dmat4 _modelTransformCached = glm::dmat4(1.0);
 
-    properties::FloatProperty _boundingSphere;
+    properties::DoubleProperty _boundingSphere;
     properties::BoolProperty _computeScreenSpaceValues;
     properties::IVec2Property _screenSpacePosition;
     properties::BoolProperty _screenVisibility;

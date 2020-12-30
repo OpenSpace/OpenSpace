@@ -119,11 +119,11 @@ RenderableCrawlingLine::RenderableCrawlingLine(const ghoul::Dictionary& dictiona
     _target = dictionary.value<std::string>(KeyTarget);
     _instrumentName = dictionary.value<std::string>(KeyInstrument);
 
-    _lineColorBegin = dictionary.value<glm::vec4>(
+    _lineColorBegin = dictionary.value<glm::dvec4>(
         std::string(KeyColor) + "." + KeyColorStart
     );
 
-    _lineColorEnd = dictionary.value<glm::vec4>(
+    _lineColorEnd = dictionary.value<glm::dvec4>(
         std::string(KeyColor) + "." + KeyColorEnd
     );
 }

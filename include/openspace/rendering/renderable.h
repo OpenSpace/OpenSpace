@@ -28,6 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
@@ -74,8 +75,8 @@ public:
     bool isEnabled() const;
     bool shouldUpdateIfDisabled() const;
 
-    void setBoundingSphere(float boundingSphere);
-    float boundingSphere() const;
+    void setBoundingSphere(double boundingSphere);
+    double boundingSphere() const;
 
     virtual void render(const RenderData& data, RendererTasks& rendererTask);
     virtual void update(const UpdateData& data);
@@ -97,7 +98,7 @@ public:
 protected:
     properties::BoolProperty _enabled;
     properties::FloatProperty _opacity;
-    properties::FloatProperty _boundingSphere;
+    properties::DoubleProperty _boundingSphere;
     properties::StringProperty _renderableType;
 
     bool _shouldUpdateIfDisabled = false;

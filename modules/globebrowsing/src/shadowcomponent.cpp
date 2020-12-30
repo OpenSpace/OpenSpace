@@ -158,7 +158,7 @@ documentation::Documentation ShadowComponent::Documentation() {
             },
             {
                 DepthMapSizeInfo.identifier,
-                new Vector2ListVerifier<float>,
+                new Vector2ListVerifier<double>,
                 Optional::Yes,
                 DepthMapSizeInfo.description
             }
@@ -191,15 +191,15 @@ ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
 
     if (_shadowMapDictionary.hasKey(DistanceFractionInfo.identifier)) {
         _distanceFraction = static_cast<int>(
-            _shadowMapDictionary.value<float>(DistanceFractionInfo.identifier)
+            _shadowMapDictionary.value<double>(DistanceFractionInfo.identifier)
         );
     }
     _saveDepthTexture.onChange([&]() { _executeDepthTextureSave = true; });
 
 
     if (_shadowMapDictionary.hasKey(DepthMapSizeInfo.identifier)) {
-        glm::vec2 depthMapSize =
-            _shadowMapDictionary.value<glm::vec2>(DepthMapSizeInfo.identifier);
+        glm::dvec2 depthMapSize =
+            _shadowMapDictionary.value<glm::dvec2>(DepthMapSizeInfo.identifier);
         _shadowDepthTextureWidth = static_cast<int>(depthMapSize.x);
         _shadowDepthTextureHeight = static_cast<int>(depthMapSize.y);
         _dynamicDepthTextureRes = false;

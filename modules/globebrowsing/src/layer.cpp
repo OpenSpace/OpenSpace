@@ -266,20 +266,22 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
 
     if (layerDict.hasKeyAndValue<ghoul::Dictionary>(KeySettings)) {
         ghoul::Dictionary dict = layerDict.value<ghoul::Dictionary>(KeySettings);
-        if (dict.hasKeyAndValue<float>(KeyOpacity)) {
-            _renderSettings.opacity = dict.value<float>(KeyOpacity);
+        if (dict.hasKeyAndValue<double>(KeyOpacity)) {
+            _renderSettings.opacity = static_cast<float>(dict.value<double>(KeyOpacity));
         }
 
-        if (dict.hasKeyAndValue<float>(KeyGamma)) {
-            _renderSettings.gamma = dict.value<float>(KeyGamma);
+        if (dict.hasKeyAndValue<double>(KeyGamma)) {
+            _renderSettings.gamma = static_cast<float>(dict.value<double>(KeyGamma));
         }
 
-        if (dict.hasKeyAndValue<float>(KeyMultiplier)) {
-            _renderSettings.multiplier = dict.value<float>(KeyMultiplier);
+        if (dict.hasKeyAndValue<double>(KeyMultiplier)) {
+            _renderSettings.multiplier = static_cast<float>(
+                dict.value<double>(KeyMultiplier)
+            );
         }
 
-        if (dict.hasKeyAndValue<float>(KeyOffset)) {
-            _renderSettings.offset = dict.value<float>(KeyOffset);
+        if (dict.hasKeyAndValue<double>(KeyOffset)) {
+            _renderSettings.offset = static_cast<float>(dict.value<double>(KeyOffset));
         }
     }
     if (layerDict.hasKeyAndValue<ghoul::Dictionary>(KeyAdjustment)) {
@@ -512,7 +514,7 @@ void Layer::initializeBasedOnType(layergroupid::TypeID id, ghoul::Dictionary ini
         case layergroupid::TypeID::ByLevelTileLayer: {
             // We add the id to the dictionary since it needs to be known by
             // the tile provider
-            initDict.setValue(KeyLayerGroupID, _layerGroupId);
+            initDict.setValue(KeyLayerGroupID, static_cast<int>(_layerGroupId));
             if (initDict.hasKeyAndValue<std::string>(KeyName)) {
                 std::string name = initDict.value<std::string>(KeyName);
                 LDEBUG("Initializing tile provider for layer: '" + name + "'");
@@ -521,8 +523,8 @@ void Layer::initializeBasedOnType(layergroupid::TypeID id, ghoul::Dictionary ini
             break;
         }
         case layergroupid::TypeID::SolidColor: {
-            if (initDict.hasKeyAndValue<glm::vec3>(ColorInfo.identifier)) {
-                _solidColor = initDict.value<glm::vec3>(ColorInfo.identifier);
+            if (initDict.hasKeyAndValue<glm::dvec3>(ColorInfo.identifier)) {
+                _solidColor = initDict.value<glm::dvec3>(ColorInfo.identifier);
             }
             break;
         }

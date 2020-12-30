@@ -66,19 +66,19 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     dictionary.getValue("Name", name);
     setGuiName(name);
 
-    float renderableId;
+    double renderableId;
     dictionary.getValue("Id", renderableId);
-    float updateTime;
+    double updateTime;
     dictionary.getValue("UpdateTime", updateTime);
-    glm::vec4 spatialScale = glm::vec4(0.f);
+    glm::dvec4 spatialScale = glm::dvec4(0.f);
     dictionary.getValue("SpatialScale", spatialScale);
-    glm::vec3 min = glm::vec3(0.f);
+    glm::dvec3 min = glm::dvec3(0.f);
     dictionary.getValue("GridMin", min);
-    glm::vec3 max = glm::vec3(0.f);
+    glm::dvec3 max = glm::dvec3(0.f);
     dictionary.getValue("GridMax", max);
     dictionary.getValue("Frame",_data.frame);
     dictionary.getValue("CoordinateType", _data.coordinateType);
-    float xOffset = 0.f;
+    double xOffset = 0.f;
     dictionary.getValue("XOffset", xOffset);
 
     dictionary.getValue("Group", _data.groupName);
@@ -271,7 +271,7 @@ void IswaCygnet::initializeGroup() {
         "alphaChanged",
         [&](const ghoul::Dictionary& dict) {
             LDEBUG(identifier() + " Event alphaChanged");
-            _alpha = dict.value<float>("alpha");
+            _alpha = static_cast<float>(dict.value<double>("alpha"));
         }
     );
 

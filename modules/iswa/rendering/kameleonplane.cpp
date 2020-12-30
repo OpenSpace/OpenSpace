@@ -356,8 +356,8 @@ void KameleonPlane::subscribeToGroup() {
     ghoul::Event<ghoul::Dictionary>& groupEvent = _group->groupEvent();
     groupEvent.subscribe(identifier(), "resolutionChanged", [&](ghoul::Dictionary dict) {
         LDEBUG(identifier() + " Event resolutionChanged");
-        if (dict.hasKeyAndValue<float>("resolution")) {
-            _resolution = dict.value<float>("resolution");
+        if (dict.hasKeyAndValue<double>("resolution")) {
+            _resolution = static_cast<float>(dict.value<double>("resolution"));
         }
     });
 

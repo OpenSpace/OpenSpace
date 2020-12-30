@@ -188,11 +188,11 @@ void Renderable::update(const UpdateData&) {}
 
 void Renderable::render(const RenderData&, RendererTasks&) {}
 
-void Renderable::setBoundingSphere(float boundingSphere) {
+void Renderable::setBoundingSphere(double boundingSphere) {
     _boundingSphere = boundingSphere;
 }
 
-float Renderable::boundingSphere() const {
+double Renderable::boundingSphere() const {
     return _boundingSphere;
 }
 

@@ -95,12 +95,16 @@ ghoul::Event<ghoul::Dictionary>& IswaBaseGroup::groupEvent() {
 void IswaBaseGroup::registerProperties() {
     _enabled.onChange([this]() {
         LDEBUG("Group " + identifier() + " published enabledChanged");
-        _groupEvent.publish("enabledChanged", ghoul::Dictionary({{"enabled", _enabled}}));
+        ghoul::Dictionary d;
+        d.setValue("enabled", _enabled.value());
+        _groupEvent.publish("enabledChanged", d);
     });
 
     _alpha.onChange([this]() {
         LDEBUG("Group " + identifier() + " published alphaChanged");
-        _groupEvent.publish("alphaChanged", ghoul::Dictionary({ { "alpha", _alpha } }));
+        ghoul::Dictionary d;
+        d.setValue<double>("alpha", _alpha.value());
+        _groupEvent.publish("alphaChanged", d);
     });
 
 

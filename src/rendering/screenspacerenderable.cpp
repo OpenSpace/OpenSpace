@@ -406,14 +406,14 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
 
     if (_useRadiusAzimuthElevation) {
         if (dictionary.hasKey(RadiusAzimuthElevationInfo.identifier)) {
-            _raePosition = dictionary.value<glm::vec3>(
+            _raePosition = dictionary.value<glm::dvec3>(
                 RadiusAzimuthElevationInfo.identifier
             );
         }
     }
     else {
         if (dictionary.hasKey(CartesianPositionInfo.identifier)) {
-            _cartesianPosition = dictionary.value<glm::vec3>(
+            _cartesianPosition = dictionary.value<glm::dvec3>(
                 CartesianPositionInfo.identifier
             );
         }
@@ -519,16 +519,21 @@ void ScreenSpaceRenderable::createShaders() {
     ghoul::Dictionary dict = ghoul::Dictionary();
 
     auto res = global::windowDelegate->currentDrawBufferResolution();
-    ghoul::Dictionary rendererData = {
-        { "fragmentRendererPath", "${SHADERS}/framebuffer/renderframebuffer.frag" },
-        { "windowWidth" , res.x },
-        { "windowHeight" , res.y },
-        { "hdrExposure", global::renderEngine->hdrExposure() },
-        { "disableHDR", global::renderEngine->isHdrDisabled() }
-    };
+    ghoul::Dictionary rendererData;
+    rendererData.setValue(
+        "fragmentRendererPath",
+        std::string("${SHADERS}/framebuffer/renderframebuffer.frag")
+    );
+    rendererData.setValue("windowWidth", res.x);
+    rendererData.setValue("windowHeight", res.y);
+    rendererData.setValue<double>("hdrExposure", global::renderEngine->hdrExposure());
+    rendererData.setValue("disableHDR", global::renderEngine->isHdrDisabled());
 
     dict.setValue("rendererData", rendererData);
-    dict.setValue("fragmentPath", "${MODULE_BASE}/shaders/screenspace_fs.glsl");
+    dict.setValue(
+        "fragmentPath",
+        std::string("${MODULE_BASE}/shaders/screenspace_fs.glsl")
+    );
     _shader = ghoul::opengl::ProgramObject::Build(
         "ScreenSpaceProgram",
         absPath("${MODULE_BASE}/shaders/screenspace_vs.glsl"),

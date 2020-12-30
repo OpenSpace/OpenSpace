@@ -152,8 +152,8 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
     _texturePath = absPath(dictionary.value<std::string>(TextureInfo.identifier));
     _textureFile = std::make_unique<File>(_texturePath);
 
-    if (dictionary.hasKeyAndValue<glm::vec2>(OffsetInfo.identifier)) {
-        _offset = dictionary.value<glm::vec2>(OffsetInfo.identifier);
+    if (dictionary.hasKeyAndValue<glm::dvec2>(OffsetInfo.identifier)) {
+        _offset = dictionary.value<glm::dvec2>(OffsetInfo.identifier);
     }
     addProperty(_offset);
 

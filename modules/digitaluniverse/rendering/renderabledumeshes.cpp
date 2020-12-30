@@ -211,7 +211,7 @@ documentation::Documentation RenderableDUMeshes::Documentation() {
             },
             {
                 MeshColorInfo.identifier,
-                new Vector3ListVerifier<float>,
+                new Vector3ListVerifier<double>,
                 Optional::No,
                 MeshColorInfo.description
             },
@@ -303,7 +303,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         _hasLabel = true;
 
         if (dictionary.hasKey(TextColorInfo.identifier)) {
-            _textColor = dictionary.value<glm::vec3>(TextColorInfo.identifier);
+            _textColor = dictionary.value<glm::dvec3>(TextColorInfo.identifier);
             _hasLabel = true;
         }
         _textColor.setViewOption(properties::Property::ViewOptions::Color);
@@ -311,22 +311,30 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         _textColor.onChange([&]() { _textColorIsDirty = true; });
 
         if (dictionary.hasKey(TextOpacityInfo.identifier)) {
-            _textOpacity = dictionary.value<float>(TextOpacityInfo.identifier);
+            _textOpacity = static_cast<float>(
+                dictionary.value<double>(TextOpacityInfo.identifier)
+            );
         }
         addProperty(_textOpacity);
 
         if (dictionary.hasKey(TextSizeInfo.identifier)) {
-            _textSize = dictionary.value<float>(TextSizeInfo.identifier);
+            _textSize = static_cast<float>(
+                dictionary.value<double>(TextSizeInfo.identifier)
+            );
         }
         addProperty(_textSize);
 
         if (dictionary.hasKey(LabelMinSizeInfo.identifier)) {
-            _textMinSize = floor(dictionary.value<float>(LabelMinSizeInfo.identifier));
+            _textMinSize = static_cast<float>(
+                floor(dictionary.value<double>(LabelMinSizeInfo.identifier))
+            );
         }
         addProperty(_textMinSize);
 
         if (dictionary.hasKey(LabelMaxSizeInfo.identifier)) {
-            _textMaxSize = floor(dictionary.value<float>(LabelMaxSizeInfo.identifier));
+            _textMaxSize = static_cast<float>(
+                floor(dictionary.value<double>(LabelMaxSizeInfo.identifier))
+            );
         }
         addProperty(_textMaxSize);
     }
@@ -337,7 +345,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         );
         for (int i = 0; i < static_cast<int>(colorDict.size()); ++i) {
             _meshColorMap.insert(
-                { i + 1, colorDict.value<glm::vec3>(std::to_string(i + 1)) }
+                { i + 1, colorDict.value<glm::dvec3>(std::to_string(i + 1)) }
             );
         }
     }

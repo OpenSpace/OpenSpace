@@ -38,7 +38,7 @@ namespace openspace {
 DataSphere::DataSphere(const ghoul::Dictionary& dictionary)
     : DataCygnet(dictionary)
 {
-    _radius = dictionary.value<float>("Radius");
+    _radius = static_cast<float>(dictionary.value<double>("Radius"));
 }
 
 DataSphere::~DataSphere() {}

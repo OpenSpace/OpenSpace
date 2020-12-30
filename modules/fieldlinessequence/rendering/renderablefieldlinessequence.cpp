@@ -499,7 +499,7 @@ void RenderableFieldlinesSequence::extractOptionalInfoFromDictionary(
         const size_t nProvidedRanges = colorTablesRangesDictionary.size();
         for (size_t i = 1; i <= nProvidedRanges; ++i) {
             _colorTableRanges.push_back(
-                colorTablesRangesDictionary.value<glm::vec2>(std::to_string(i)));
+                colorTablesRangesDictionary.value<glm::dvec2>(std::to_string(i)));
         }
     }
     else {
@@ -511,11 +511,11 @@ void RenderableFieldlinesSequence::extractOptionalInfoFromDictionary(
         const size_t nProvidedRanges = maskingRangesDictionary.size();
         for (size_t i = 1; i <= nProvidedRanges; ++i) {
             _maskingRanges.push_back(
-                maskingRangesDictionary.value<glm::vec2>(std::to_string(i)));
+                maskingRangesDictionary.value<glm::dvec2>(std::to_string(i)));
         }
     }
     else {
-        _maskingRanges.push_back(glm::vec2(-100000, 100000)); // Just some default values!
+        _maskingRanges.push_back(glm::dvec2(-100000, 100000)); // Just some default values
     }
 }
 
@@ -540,9 +540,9 @@ bool RenderableFieldlinesSequence::extractJsonInfoFromDictionary(fls::Model& mod
         return false;
     }
 
-    float scaleFactor;
+    double scaleFactor;
     if (_dictionary->getValue(KeyJsonScalingFactor, scaleFactor)) {
-        _scalingFactor = scaleFactor;
+        _scalingFactor = static_cast<float>(scaleFactor);
     }
     else {
         LWARNING(fmt::format(

@@ -214,8 +214,8 @@ void RingsComponent::initialize() {
     );
     _textureFile = std::make_unique<File>(_texturePath);
 
-    if (_ringsDictionary.hasKeyAndValue<glm::vec2>(OffsetInfo.identifier)) {
-        _offset = _ringsDictionary.value<glm::vec2>(OffsetInfo.identifier);
+    if (_ringsDictionary.hasKeyAndValue<glm::dvec2>(OffsetInfo.identifier)) {
+        _offset = _ringsDictionary.value<glm::dvec2>(OffsetInfo.identifier);
     }
     addProperty(_offset);
 
@@ -239,8 +239,8 @@ void RingsComponent::initialize() {
 
     // Shadow Mapping Quality Controls
     if (_ringsDictionary.hasKey(ZFightingPercentageInfo.identifier)) {
-        _zFightingPercentage = _ringsDictionary.value<float>(
-            ZFightingPercentageInfo.identifier
+        _zFightingPercentage = static_cast<float>(
+            _ringsDictionary.value<double>(ZFightingPercentageInfo.identifier)
         );
     }
     addProperty(_zFightingPercentage);

@@ -203,14 +203,14 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     });
     _gridType = static_cast<int>(volume::VolumeGridType::Cartesian);
 
-    if (dictionary.hasKeyAndValue<float>(KeyStepSize)) {
-        _stepSize = dictionary.value<float>(KeyStepSize);
+    if (dictionary.hasKeyAndValue<double>(KeyStepSize)) {
+        _stepSize = static_cast<float>(dictionary.value<double>(KeyStepSize));
     }
 
-    if (dictionary.hasKeyAndValue<float>(KeySecondsBefore)) {
-        _secondsBefore = dictionary.value<float>(KeySecondsBefore);
+    if (dictionary.hasKeyAndValue<double>(KeySecondsBefore)) {
+        _secondsBefore = static_cast<float>(dictionary.value<double>(KeySecondsBefore));
     }
-    _secondsAfter = dictionary.value<float>(KeySecondsAfter);
+    _secondsAfter = static_cast<float>(dictionary.value<double>(KeySecondsAfter));
 
     ghoul::Dictionary clipPlanesDictionary;
     dictionary.getValue(KeyClipPlanes, clipPlanesDictionary);

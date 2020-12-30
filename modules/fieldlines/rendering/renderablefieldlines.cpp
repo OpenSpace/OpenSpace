@@ -164,9 +164,17 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
 }
 
 void RenderableFieldlines::initializeDefaultPropertyValues() {
-    _fieldlineInfo.getValue(KeyFieldlinesStepSize, _stepSize);
-    _fieldlineInfo.getValue(KeyFieldlinesClassification, _classification);
-    _fieldlineInfo.getValue(KeyFieldlinesColor, _fieldlineColor);
+    if (_fieldlineInfo.hasKey(KeyFieldlinesStepSize)) {
+        _stepSize = static_cast<float>(
+            _fieldlineInfo.value<double>(KeyFieldlinesStepSize)
+        );
+    }
+    if (_fieldlineInfo.hasKey(KeyFieldlinesClassification)) {
+        _classification = _fieldlineInfo.value<bool>(KeyFieldlinesClassification);
+    }
+    if (_fieldlineInfo.hasKey(KeyFieldlinesColor)) {
+        _fieldlineColor = _fieldlineInfo.value<glm::dvec4>(KeyFieldlinesColor);
+    }
 
     if (_seedPointsInfo.hasKeyAndValue<std::string>(KeySeedPointsType)) {
         std::string sourceType = _seedPointsInfo.value<std::string>(KeySeedPointsType);
@@ -372,7 +380,7 @@ void RenderableFieldlines::loadSeedPointsFromTable() {
     ghoul::Dictionary seedpointsDictionary;
     _seedPointsInfo.getValue(KeySeedPointsTable, seedpointsDictionary);
     for (const std::string& index : seedpointsDictionary.keys()) {
-        glm::vec3 seedPos = glm::vec3(0.f);
+        glm::dvec3 seedPos = glm::dvec3(0.f);
         _fieldlineInfo.getValue(std::string(KeySeedPointsTable) + "." + index, seedPos);
         _seedPoints.push_back(seedPos);
     }

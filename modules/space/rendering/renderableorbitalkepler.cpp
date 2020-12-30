@@ -378,8 +378,8 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     _path = dict.value<std::string>(PathInfo.identifier);
     _segmentQuality = static_cast<int>(dict.value<double>(SegmentQualityInfo.identifier));
 
-    if (dict.hasKeyAndValue<glm::vec3>(LineColorInfo.identifier)) {
-        _appearance.lineColor = dict.value<glm::vec3>(LineColorInfo.identifier);
+    if (dict.hasKeyAndValue<glm::dvec3>(LineColorInfo.identifier)) {
+        _appearance.lineColor = dict.value<glm::dvec3>(LineColorInfo.identifier);
     }
 
     _appearance.lineFade = dict.hasKeyAndValue<double>(TrailFadeInfo.identifier) ?

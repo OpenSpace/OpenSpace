@@ -242,7 +242,7 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     );
     addPropertySubOwner(_translation.get());
 
-    _appearance.lineColor = dictionary.value<glm::vec3>(LineColorInfo.identifier);
+    _appearance.lineColor = dictionary.value<glm::dvec3>(LineColorInfo.identifier);
 
     if (dictionary.hasKeyAndValue<bool>(EnableFadeInfo.identifier)) {
         _appearance.useLineFade = dictionary.value<bool>(EnableFadeInfo.identifier);

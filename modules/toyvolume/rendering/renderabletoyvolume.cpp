@@ -101,20 +101,20 @@ RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
         );
     }
 
-    if (dictionary.hasKeyAndValue<glm::vec3>(SizeInfo.identifier)) {
-        _size = dictionary.value<glm::vec3>(SizeInfo.identifier);
+    if (dictionary.hasKeyAndValue<glm::dvec3>(SizeInfo.identifier)) {
+        _size = dictionary.value<glm::dvec3>(SizeInfo.identifier);
     }
 
-    if (dictionary.hasKeyAndValue<glm::vec3>(TranslationInfo.identifier)) {
-        _translation = dictionary.value<glm::vec3>(TranslationInfo.identifier);
+    if (dictionary.hasKeyAndValue<glm::dvec3>(TranslationInfo.identifier)) {
+        _translation = dictionary.value<glm::dvec3>(TranslationInfo.identifier);
     }
 
-    if (dictionary.hasKeyAndValue<glm::vec3>(RotationInfo.identifier)) {
-        _rotation = dictionary.value<glm::vec3>(RotationInfo.identifier);
+    if (dictionary.hasKeyAndValue<glm::dvec3>(RotationInfo.identifier)) {
+        _rotation = dictionary.value<glm::dvec3>(RotationInfo.identifier);
     }
 
-    if (dictionary.hasKeyAndValue<glm::vec3>(ColorInfo.identifier)) {
-        _color = dictionary.value<glm::vec3>(ColorInfo.identifier);
+    if (dictionary.hasKeyAndValue<glm::dvec3>(ColorInfo.identifier)) {
+        _color = dictionary.value<glm::dvec3>(ColorInfo.identifier);
     }
 
     if (dictionary.hasKeyAndValue<double>(StepSizeInfo.identifier)) {
@@ -125,17 +125,18 @@ RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
         openspace::properties::Property::Visibility::Developer
     );
     if (dictionary.hasKey("Downscale")) {
-        _downScaleVolumeRendering = dictionary.value<float>("Downscale");
+        _downScaleVolumeRendering = static_cast<float>(
+            dictionary.value<double>("Downscale")
+        );
     }
 
     if (dictionary.hasKey("Steps")) {
-        _rayCastSteps = static_cast<int>(dictionary.value<float>("Steps"));
+        _rayCastSteps = static_cast<int>(dictionary.value<double>("Steps"));
     }
     else {
         LINFO("Number of raycasting steps not specified for ToyVolume."
             " Using default value.");
     }
-
 }
 
 RenderableToyVolume::~RenderableToyVolume() {}

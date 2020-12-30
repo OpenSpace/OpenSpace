@@ -319,7 +319,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
         _meridianShift = dict.value<bool>(MeridianShiftInfo.identifier);
     }
 
-    float radius = std::pow(10.f, 9.f);
+    double radius = std::pow(10.0, 9.0);
     dict.getValue(KeyRadius, radius);
     setBoundingSphere(radius);
 

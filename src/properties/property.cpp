@@ -37,7 +37,7 @@ namespace {
     constexpr const char* MetaDataKeyVisibility = "Visibility";
     constexpr const char* MetaDataKeyReadOnly = "isReadOnly";
 
-    constexpr const char* _metaDataKeyViewPrefix = "view.";
+    constexpr const char* _metaDataKeyViewPrefix = "view";
 
 } // namespace
 
@@ -208,17 +208,19 @@ void Property::setReadOnly(bool state) {
 }
 
 void Property::setViewOption(std::string option, bool value) {
-    _metaData.setValue(
-        _metaDataKeyViewPrefix + std::move(option),
-        value,
-        ghoul::Dictionary::CreateIntermediate::Yes
-    );
+    ghoul::Dictionary d;
+    d.setValue(option, value);
+    _metaData.setValue(_metaDataKeyViewPrefix, d);
 }
 
 bool Property::viewOption(const std::string& option, bool defaultValue) const {
-    bool v = defaultValue;
-    _metaData.getValue(_metaDataKeyViewPrefix + option, v);
-    return v;
+    ghoul::Dictionary d = _metaData.value<ghoul::Dictionary>(_metaDataKeyViewPrefix);
+    if (d.hasKey(option)) {
+        return d.value<bool>(option);
+    }
+    else {
+        return defaultValue;
+    }
 }
 
 const ghoul::Dictionary& Property::metaData() const {

@@ -182,7 +182,7 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     }
 
     if (dictionary.hasKey(BoundingSphereInfo.identifier)) {
-        result->_boundingSphere = dictionary.value<float>(BoundingSphereInfo.identifier);
+        result->_boundingSphere = dictionary.value<double>(BoundingSphereInfo.identifier);
         result->_boundingSphere.setVisibility(properties::Property::Visibility::All);
     }
 
@@ -341,15 +341,13 @@ SceneGraphNode::SceneGraphNode()
             global::memoryManager->PersistentMemory.alloc<StaticScale>()
         )
     }
-   , _boundingSphere(properties::FloatProperty(BoundingSphereInfo, 0.f))
+    , _boundingSphere(BoundingSphereInfo, 0.0)
     , _computeScreenSpaceValues(ComputeScreenSpaceInfo, false)
-    , _screenSpacePosition(
-        properties::IVec2Property(ScreenSpacePositionInfo, glm::ivec2(-1, -1))
-    )
-    , _screenVisibility(properties::BoolProperty(ScreenVisibilityInfo, false))
-    , _distFromCamToNode(properties::DoubleProperty(DistanceFromCamToNodeInfo, -1.0))
-    , _screenSizeRadius(properties::DoubleProperty(ScreenSizeRadiusInfo, 0))
-    , _visibilityDistance(properties::FloatProperty(VisibilityDistanceInfo, 6e10f))
+    , _screenSpacePosition(ScreenSpacePositionInfo, glm::ivec2(-1, -1))
+    , _screenVisibility(ScreenVisibilityInfo, false)
+    , _distFromCamToNode(DistanceFromCamToNodeInfo, -1.0)
+    , _screenSizeRadius(ScreenSizeRadiusInfo, 0)
+    , _visibilityDistance(VisibilityDistanceInfo, 6e10f)
 {
     addProperty(_computeScreenSpaceValues);
     addProperty(_screenSpacePosition);
@@ -888,7 +886,7 @@ std::vector<SceneGraphNode*> SceneGraphNode::children() const {
     return nodes;
 }
 
-float SceneGraphNode::boundingSphere() const {
+double SceneGraphNode::boundingSphere() const {
     return _boundingSphere;
 }
 

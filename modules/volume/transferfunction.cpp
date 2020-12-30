@@ -128,9 +128,13 @@ void TransferFunction::loadEnvelopesFromFile(const std::string& path) {
                     pointDictionary.value<ghoul::Dictionary>("position");
 
                 std::string color = pointDictionary.value<std::string>("color");
-                float posX = positionDictionary.value<float>("x");
-                float posY = positionDictionary.value<float>("y");
-                tmpVec.emplace_back(color, posX, posY);
+                double posX = positionDictionary.value<double>("x");
+                double posY = positionDictionary.value<double>("y");
+                tmpVec.emplace_back(
+                    color,
+                    static_cast<float>(posX),
+                    static_cast<float>(posY)
+                );
             }
             env.setPoints(tmpVec);
             _envelopes.emplace_back(env);
