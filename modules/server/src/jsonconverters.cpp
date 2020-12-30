@@ -91,9 +91,6 @@ void to_json(json& j, const Dictionary& dictionary) {
         else if (dictionary.hasValue<int>(key)) {
             object[key] = dictionary.value<int>(key);
         }
-        else if (dictionary.hasValue<unsigned int>(key)) {
-            object[key] = dictionary.value<unsigned int>(key);
-        }
         else if (dictionary.hasValue<std::string>(key)) {
             object[key] = dictionary.value<std::string>(key);
         }
