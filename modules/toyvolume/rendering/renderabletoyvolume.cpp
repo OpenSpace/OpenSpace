@@ -95,35 +95,45 @@ RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
     , _color(ColorInfo, glm::vec3(1.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
     , _downScaleVolumeRendering(DownscaleVolumeRenderingInfo, 1.f, 0.1f, 1.f)
 {
-    if (dictionary.hasKeyAndValue<double>(ScalingExponentInfo.identifier)) {
+    if (dictionary.hasKey(ScalingExponentInfo.identifier) &&
+        dictionary.hasValue<double>(ScalingExponentInfo.identifier))
+    {
         _scalingExponent = static_cast<int>(
             dictionary.value<double>(ScalingExponentInfo.identifier)
         );
     }
 
-    if (dictionary.hasKeyAndValue<glm::dvec3>(SizeInfo.identifier)) {
+    if (dictionary.hasKey(SizeInfo.identifier) &&
+        dictionary.hasValue<glm::dvec3>(SizeInfo.identifier))
+    {
         _size = dictionary.value<glm::dvec3>(SizeInfo.identifier);
     }
 
-    if (dictionary.hasKeyAndValue<glm::dvec3>(TranslationInfo.identifier)) {
+    if (dictionary.hasKey(TranslationInfo.identifier) &&
+        dictionary.hasValue<glm::dvec3>(TranslationInfo.identifier))
+    {
         _translation = dictionary.value<glm::dvec3>(TranslationInfo.identifier);
     }
 
-    if (dictionary.hasKeyAndValue<glm::dvec3>(RotationInfo.identifier)) {
+    if (dictionary.hasKey(RotationInfo.identifier) &&
+        dictionary.hasValue<glm::dvec3>(RotationInfo.identifier))
+    {
         _rotation = dictionary.value<glm::dvec3>(RotationInfo.identifier);
     }
 
-    if (dictionary.hasKeyAndValue<glm::dvec3>(ColorInfo.identifier)) {
+    if (dictionary.hasKey(ColorInfo.identifier) &&
+        dictionary.hasValue<glm::dvec3>(ColorInfo.identifier))
+    {
         _color = dictionary.value<glm::dvec3>(ColorInfo.identifier);
     }
 
-    if (dictionary.hasKeyAndValue<double>(StepSizeInfo.identifier)) {
+    if (dictionary.hasKey(StepSizeInfo.identifier) &&
+        dictionary.hasValue<double>(StepSizeInfo.identifier))
+    {
         _stepSize = static_cast<float>(dictionary.value<double>(StepSizeInfo.identifier));
     }
 
-    _downScaleVolumeRendering.setVisibility(
-        openspace::properties::Property::Visibility::Developer
-    );
+    _downScaleVolumeRendering.setVisibility(properties::Property::Visibility::Developer);
     if (dictionary.hasKey("Downscale")) {
         _downScaleVolumeRendering = static_cast<float>(
             dictionary.value<double>("Downscale")

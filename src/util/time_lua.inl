@@ -86,7 +86,7 @@ int time_setDeltaTimeSteps(lua_State* L) {
 
     for (size_t i = 1; i <= nItems; ++i) {
         std::string key = std::to_string(i);
-        if (dict.hasKeyAndValue<double>(key)) {
+        if (dict.hasKey(key) && dict.hasValue<double>(key)) {
             const double time = dict.value<double>(key);
             inputDeltaTimes.push_back(time);
         }

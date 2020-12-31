@@ -107,7 +107,9 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     ghoul_assert(fGeometry, "Planet geometry factory was not created");
     fGeometry->registerClass<planetgeometry::SimpleSphereGeometry>("SimpleSphere");
 
-    if (dictionary.hasKeyAndValue<bool>(SpiceExceptionInfo.identifier)) {
+    if (dictionary.hasKey(SpiceExceptionInfo.identifier) &&
+        dictionary.hasValue<bool>(SpiceExceptionInfo.identifier))
+    {
         _showSpiceExceptions = dictionary.value<bool>(SpiceExceptionInfo.identifier);
     }
 }

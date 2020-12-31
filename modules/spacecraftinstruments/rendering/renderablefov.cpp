@@ -314,7 +314,7 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
     );
 
     std::string ia = std::string(KeyInstrument) + "." + KeyInstrumentAberration;
-    if (dictionary.hasKeyAndValue<std::string>(ia)) {
+    if (dictionary.hasKey(ia) && dictionary.hasValue<std::string>(ia)) {
         const std::string& ac = dictionary.value<std::string>(ia);
         _instrument.aberrationCorrection = SpiceManager::AberrationCorrection(ac);
     }

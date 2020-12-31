@@ -259,7 +259,9 @@ void ProjectionComponent::initialize(const std::string& identifier,
         dictionary.value<std::string>(keyProjAberration)
     );
 
-    if (dictionary.hasKeyAndValue<ghoul::Dictionary>(keyPotentialTargets)) {
+    if (dictionary.hasKey(keyPotentialTargets) &&
+        dictionary.hasValue<ghoul::Dictionary>(keyPotentialTargets))
+    {
         const ghoul::Dictionary& potentialTargets = dictionary.value<ghoul::Dictionary>(
             keyPotentialTargets
         );
@@ -272,15 +274,21 @@ void ProjectionComponent::initialize(const std::string& identifier,
         }
     }
 
-    if (dictionary.hasKeyAndValue<bool>(keyNeedsTextureMapDilation)) {
+    if (dictionary.hasKey(keyNeedsTextureMapDilation) &&
+        dictionary.hasValue<bool>(keyNeedsTextureMapDilation))
+    {
         _dilation.isEnabled = dictionary.value<bool>(keyNeedsTextureMapDilation);
     }
 
-    if (dictionary.hasKeyAndValue<bool>(keyNeedsShadowing)) {
+    if (dictionary.hasKey(keyNeedsShadowing) &&
+        dictionary.hasValue<bool>(keyNeedsShadowing))
+    {
         _shadowing.isEnabled = dictionary.value<bool>(keyNeedsShadowing);
     }
 
-    if (dictionary.hasKeyAndValue<double>(keyTextureMapAspectRatio)) {
+    if (dictionary.hasKey(keyTextureMapAspectRatio) &&
+        dictionary.hasValue<double>(keyTextureMapAspectRatio))
+    {
         _projectionTextureAspectRatio =
             static_cast<float>(dictionary.value<double>(keyTextureMapAspectRatio));
     }

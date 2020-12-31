@@ -286,7 +286,9 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         }
     }
 
-    if (dictionary.hasKeyAndValue<double>(LineWidthInfo.identifier)) {
+    if (dictionary.hasKey(LineWidthInfo.identifier) &&
+        dictionary.hasValue<double>(LineWidthInfo.identifier))
+    {
         _lineWidth = static_cast<float>(
             dictionary.value<double>(LineWidthInfo.identifier)
         );

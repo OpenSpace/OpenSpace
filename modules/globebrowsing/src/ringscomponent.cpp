@@ -214,7 +214,9 @@ void RingsComponent::initialize() {
     );
     _textureFile = std::make_unique<File>(_texturePath);
 
-    if (_ringsDictionary.hasKeyAndValue<glm::dvec2>(OffsetInfo.identifier)) {
+    if (_ringsDictionary.hasKey(OffsetInfo.identifier) &&
+        _ringsDictionary.hasValue<glm::dvec2>(OffsetInfo.identifier)) 
+   {
         _offset = _ringsDictionary.value<glm::dvec2>(OffsetInfo.identifier);
     }
     addProperty(_offset);
@@ -224,14 +226,18 @@ void RingsComponent::initialize() {
 
     _textureFile->setCallback([&](const File&) { _textureIsDirty = true; });
 
-    if (_ringsDictionary.hasKeyAndValue<double>(NightFactorInfo.identifier)) {
+    if (_ringsDictionary.hasKey(NightFactorInfo.identifier) &&
+        _ringsDictionary.hasValue<double>(NightFactorInfo.identifier))
+    {
         _nightFactor = static_cast<float>(
             _ringsDictionary.value<double>(NightFactorInfo.identifier)
         );
     }
     addProperty(_nightFactor);
 
-    if (_ringsDictionary.hasKeyAndValue<double>(ColorFilterInfo.identifier)) {
+    if (_ringsDictionary.hasKey(ColorFilterInfo.identifier) &&
+        _ringsDictionary.hasValue<double>(ColorFilterInfo.identifier)) 
+   {
         _colorFilter = static_cast<float>(
             _ringsDictionary.value<double>(ColorFilterInfo.identifier)
         );

@@ -560,7 +560,7 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
 
     tileCache = global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
     name = "Name unspecified";
-    if (dictionary.hasKeyAndValue<std::string>("Name")) {
+    if (dictionary.hasKey("Name") && dictionary.hasValue<std::string>("Name")) {
         name = dictionary.value<std::string>("Name");
     }
     std::string _loggerCat = "DefaultTileProvider (" + name + ")";
@@ -573,14 +573,18 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     // 2. Initialize default values for any optional Keys
     // getValue does not work for integers
     int pixelSize = 0;
-    if (dictionary.hasKeyAndValue<double>(defaultprovider::KeyTilePixelSize)) {
+    if (dictionary.hasKey(defaultprovider::KeyTilePixelSize) &&
+        dictionary.hasValue<double>(defaultprovider::KeyTilePixelSize))
+    {
         pixelSize = static_cast<int>(
             dictionary.value<double>(defaultprovider::KeyTilePixelSize)
         );
         LDEBUG(fmt::format("Default pixel size overridden: {}", pixelSize));
     }
 
-    if (dictionary.hasKeyAndValue<bool>(defaultprovider::KeyPadTiles)) {
+    if (dictionary.hasKey(defaultprovider::KeyPadTiles) &&
+        dictionary.hasValue<bool>(defaultprovider::KeyPadTiles))
+    {
         padTiles = dictionary.value<bool>(defaultprovider::KeyPadTiles);
     }
 
@@ -596,7 +600,9 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
         default:                                  performPreProcessing = false; break;
     }
 
-    if (dictionary.hasKeyAndValue<bool>(defaultprovider::KeyPerformPreProcessing)) {
+    if (dictionary.hasKey(defaultprovider::KeyPerformPreProcessing) &&
+        dictionary.hasValue<bool>(defaultprovider::KeyPerformPreProcessing))
+    {
         performPreProcessing = dictionary.value<bool>(
             defaultprovider::KeyPerformPreProcessing
         );
@@ -654,7 +660,9 @@ SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& di
 
     font = global::fontManager->font("Mono", static_cast<float>(fontSize));
 
-    if (dictionary.hasKeyAndValue<glm::dvec3>(sizereferenceprovider::KeyRadii)) {
+    if (dictionary.hasKey(sizereferenceprovider::KeyRadii) &&
+        dictionary.hasValue<glm::dvec3>(sizereferenceprovider::KeyRadii))
+    {
         ellipsoid = dictionary.value<glm::dvec3>(sizereferenceprovider::KeyRadii);
     }
 }
@@ -685,7 +693,9 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
     );
 
     layergroupid::TypeID typeID;
-    if (defaultProviderDict.hasKeyAndValue<std::string>("Type")) {
+    if (defaultProviderDict.hasKey("Type") &&
+        defaultProviderDict.hasValue<std::string>("Type"))
+    {
         const std::string& t = defaultProviderDict.value<std::string>("Type");
         typeID = ghoul::from_string<layergroupid::TypeID>(t);
 
@@ -725,7 +735,9 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
         const TileIndex tileIndex(x, y, static_cast<uint8_t>(level));
 
         layergroupid::TypeID providerTypeID = layergroupid::TypeID::DefaultTileLayer;
-        if (defaultProviderDict.hasKeyAndValue<std::string>("Type")) {
+        if (defaultProviderDict.hasKey("Type") &&
+            defaultProviderDict.hasValue<std::string>("Type"))
+        {
             const std::string& t = defaultProviderDict.value<std::string>("Type");
             providerTypeID = ghoul::from_string<layergroupid::TypeID>(t);
 
@@ -756,7 +768,9 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
         dictionary.value<int>(bylevelprovider::KeyLayerGroupID)
     );
 
-    if (dictionary.hasKeyAndValue<ghoul::Dictionary>(bylevelprovider::KeyProviders)) {
+    if (dictionary.hasKey(bylevelprovider::KeyProviders) &&
+        dictionary.hasValue<ghoul::Dictionary>(bylevelprovider::KeyProviders))
+    {
         ghoul::Dictionary providers = dictionary.value<ghoul::Dictionary>(
             bylevelprovider::KeyProviders
         );
@@ -779,7 +793,8 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
             );
 
             layergroupid::TypeID typeID;
-            if (providerDict.hasKeyAndValue<std::string>("Type")) {
+            if (providerDict.hasKey("Type") && providerDict.hasValue<std::string>("Type"))
+            {
                 const std::string& typeString = providerDict.value<std::string>("Type");
                 typeID = ghoul::from_string<layergroupid::TypeID>(typeString);
 

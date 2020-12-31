@@ -180,28 +180,38 @@ GlobeBrowsingModule::GlobeBrowsingModule()
 void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     using namespace globebrowsing;
 
-    if (dict.hasKeyAndValue<bool>(WMSCacheEnabledInfo.identifier)) {
+    if (dict.hasKey(WMSCacheEnabledInfo.identifier) &&
+        dict.hasValue<bool>(WMSCacheEnabledInfo.identifier))
+    {
         _wmsCacheEnabled = dict.value<bool>(WMSCacheEnabledInfo.identifier);
     }
-    if (dict.hasKeyAndValue<bool>(OfflineModeInfo.identifier)) {
+    if (dict.hasKey(OfflineModeInfo.identifier) &&
+        dict.hasValue<bool>(OfflineModeInfo.identifier))
+    {
         _offlineMode = dict.value<bool>(OfflineModeInfo.identifier);
     }
-    if (dict.hasKeyAndValue<std::string>(WMSCacheLocationInfo.identifier)) {
+    if (dict.hasKey(WMSCacheLocationInfo.identifier) &&
+        dict.hasValue<std::string>(WMSCacheLocationInfo.identifier))
+    {
         _wmsCacheLocation = dict.value<std::string>(WMSCacheLocationInfo.identifier);
     }
-    if (dict.hasKeyAndValue<double>(WMSCacheSizeInfo.identifier)) {
+    if (dict.hasKey(WMSCacheSizeInfo.identifier) &&
+        dict.hasValue<double>(WMSCacheSizeInfo.identifier))
+    {
         _wmsCacheSizeMB = static_cast<int>(
             dict.value<double>(WMSCacheSizeInfo.identifier)
         );
     }
-    if (dict.hasKeyAndValue<double>(TileCacheSizeInfo.identifier)) {
+    if (dict.hasKey(TileCacheSizeInfo.identifier) &&
+        dict.hasValue<double>(TileCacheSizeInfo.identifier))
+    {
         _tileCacheSizeMB = static_cast<int>(
             dict.value<double>(TileCacheSizeInfo.identifier)
         );
     }
 
     // Sanity check
-    const bool noWarning = dict.hasKeyAndValue<bool>("NoWarning") ?
+    const bool noWarning = dict.hasKey("NoWarning") && dict.hasValue<bool>("NoWarning") ?
         dict.value<bool>("NoWarning") :
         false;
 

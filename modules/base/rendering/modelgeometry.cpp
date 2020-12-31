@@ -85,7 +85,7 @@ documentation:: Documentation ModelGeometry::Documentation() {
 ghoul::mm_unique_ptr<ModelGeometry> ModelGeometry::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
-    if (!dictionary.hasKeyAndValue<std::string>(KeyType)) {
+    if (!dictionary.hasKey(KeyType) || !dictionary.hasValue<std::string>(KeyType)) {
         throw ghoul::RuntimeError("Dictionary did not contain a key 'Type'");
     }
 

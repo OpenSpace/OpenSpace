@@ -356,14 +356,14 @@ void KameleonPlane::subscribeToGroup() {
     ghoul::Event<ghoul::Dictionary>& groupEvent = _group->groupEvent();
     groupEvent.subscribe(identifier(), "resolutionChanged", [&](ghoul::Dictionary dict) {
         LDEBUG(identifier() + " Event resolutionChanged");
-        if (dict.hasKeyAndValue<double>("resolution")) {
+        if (dict.hasKey("resolution") && dict.hasValue<double>("resolution")) {
             _resolution = static_cast<float>(dict.value<double>("resolution"));
         }
     });
 
     groupEvent.subscribe(identifier(), "cdfChanged", [&](ghoul::Dictionary dict) {
         LDEBUG(identifier() + " Event cdfChanged");
-        if (dict.hasKeyAndValue<std::string>("path")) {
+        if (dict.hasKey("path") && dict.hasValue<std::string>("path")) {
             const std::string& path = dict.value<std::string>("path");
             changeKwPath(path);
         }

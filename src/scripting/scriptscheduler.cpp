@@ -100,12 +100,16 @@ ScriptScheduler::ScheduledScript::ScheduledScript(const ghoul::Dictionary& dicti
         universal += ";";
     }
 
-    if (dictionary.hasKeyAndValue<std::string>(KeyForwardScript)) {
+    if (dictionary.hasKey(KeyForwardScript) &&
+        dictionary.hasValue<std::string>(KeyForwardScript))
+    {
         forwardScript =
             universal + dictionary.value<std::string>(KeyForwardScript);
     }
 
-    if (dictionary.hasKeyAndValue<std::string>(KeyBackwardScript)) {
+    if (dictionary.hasKey(KeyBackwardScript) &&
+        dictionary.hasValue<std::string>(KeyBackwardScript))
+    {
         backwardScript =
             universal + dictionary.value<std::string>(KeyBackwardScript);
     }

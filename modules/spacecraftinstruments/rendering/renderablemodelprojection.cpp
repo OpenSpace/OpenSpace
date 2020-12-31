@@ -141,7 +141,9 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     dictionary.getValue(keyBoundingSphereRadius, boundingSphereRadius);
     setBoundingSphere(boundingSphereRadius);
 
-    if (dictionary.hasKeyAndValue<bool>(PerformShadingInfo.identifier)) {
+    if (dictionary.hasKey(PerformShadingInfo.identifier) &&
+        dictionary.hasValue<bool>(PerformShadingInfo.identifier))
+    {
         _performShading = dictionary.value<bool>(PerformShadingInfo.identifier);
     }
 

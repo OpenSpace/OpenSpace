@@ -84,11 +84,11 @@ ConstantRotation::ConstantRotation(const ghoul::Dictionary& dictionary)
     addProperty(_rotationAxis);
     addProperty(_rotationRate);
 
-    if (dictionary.hasKeyAndValue<glm::dvec3>(RotationInfo.identifier)) {
+    if (dictionary.hasKey(RotationInfo.identifier)) {
         _rotationAxis = dictionary.value<glm::dvec3>(RotationInfo.identifier);
     }
 
-    if (dictionary.hasKeyAndValue<double>(RotationRateInfo.identifier)) {
+    if (dictionary.hasKey(RotationRateInfo.identifier)) {
         _rotationRate = static_cast<float>(
             dictionary.value<double>(RotationRateInfo.identifier)
         );

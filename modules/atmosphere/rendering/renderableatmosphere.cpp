@@ -257,7 +257,8 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     , _hardShadowsEnabledP(EclipseHardShadowsInfo, false)
  {
     ghoul_precondition(
-        dictionary.hasKeyAndValue<std::string>(SceneGraphNode::KeyIdentifier),
+        dictionary.hasKey(SceneGraphNode::KeyIdentifier) &&
+        dictionary.hasValue<std::string>(SceneGraphNode::KeyIdentifier),
         "RenderableAtmosphere needs the identifier to be specified"
     );
 
@@ -432,7 +433,9 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         if (success) {
             // Not using right now.
             glm::dvec3 rayleighWavelengths = glm::dvec3(0.f);
-            if (rayleighDictionary.hasKeyAndValue<ghoul::Dictionary>("Coefficients")) {
+            if (rayleighDictionary.hasKey("Coefficients") &&
+                rayleighDictionary.hasValue<ghoul::Dictionary>("Coefficients"))
+            {
                 ghoul::Dictionary coefficientsDictionary =
                     rayleighDictionary.value<ghoul::Dictionary>("Coefficients");
                 if (coefficientsDictionary.hasKey("Wavelengths")) {
@@ -490,17 +493,22 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         success = atmosphereDictionary.getValue(keyOzone, ozoneDictionary);
         if (success) {
             _ozoneLayerEnabled =
-                ozoneDictionary.hasKeyAndValue<double>(keyOzoneHeightScale);
+                ozoneDictionary.hasKey(keyOzoneHeightScale) &&
+                ozoneDictionary.hasValue<double>(keyOzoneHeightScale);
             if (_ozoneLayerEnabled) {
                 _ozoneHeightScale = static_cast<float>(
                     ozoneDictionary.value<double>(keyOzoneHeightScale)
                 );
             }
 
-            if (ozoneDictionary.hasKeyAndValue<ghoul::Dictionary>("Coefficients")) {
+            if (ozoneDictionary.hasKey("Coefficients") &&
+                ozoneDictionary.hasValue<ghoul::Dictionary>("Coefficients"))
+            {
                 ghoul::Dictionary coeff =
                     ozoneDictionary.value<ghoul::Dictionary>("Coefficients");
-                if (coeff.hasKeyAndValue<glm::dvec3>("Extinction")) {
+                if (coeff.hasKey("Extinction") &&
+                    coeff.hasValue<glm::dvec3>("Extinction"))
+                {
                     _ozoneExtinctionCoeff = coeff.value<glm::dvec3>("Extinction");
                 }
                 else {
@@ -532,7 +540,9 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
                 );
             }
 
-            if (mieDictionary.hasKeyAndValue<ghoul::Dictionary>("Coefficients")) {
+            if (mieDictionary.hasKey("Coefficients") &&
+                mieDictionary.hasValue<ghoul::Dictionary>("Coefficients"))
+            {
                 ghoul::Dictionary coeffs =
                     mieDictionary.value<ghoul::Dictionary>("Coefficients");
 

@@ -162,7 +162,7 @@ UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dict,
         }
     }
 
-    if (dict.hasKeyAndValue<bool>(KeyOverride)) {
+    if (dict.hasKey(KeyOverride) && dict.hasValue<bool>(KeyOverride)) {
         _forceOverride = dict.value<bool>(KeyOverride);
     }
 }

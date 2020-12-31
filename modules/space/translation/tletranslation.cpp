@@ -253,7 +253,7 @@ TLETranslation::TLETranslation(const ghoul::Dictionary& dictionary) {
 
     const std::string& file = dictionary.value<std::string>(KeyFile);
     int lineNum = 1;
-    if (dictionary.hasKeyAndValue<double>(KeyLineNumber)) {
+    if (dictionary.hasKey(KeyLineNumber) && dictionary.hasValue<double>(KeyLineNumber)) {
         lineNum = static_cast<int>(dictionary.value<double>(KeyLineNumber));
     }
     readTLEFile(file, lineNum);

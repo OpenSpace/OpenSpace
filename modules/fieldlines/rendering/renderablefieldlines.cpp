@@ -176,13 +176,17 @@ void RenderableFieldlines::initializeDefaultPropertyValues() {
         _fieldlineColor = _fieldlineInfo.value<glm::dvec4>(KeyFieldlinesColor);
     }
 
-    if (_seedPointsInfo.hasKeyAndValue<std::string>(KeySeedPointsType)) {
+    if (_seedPointsInfo.hasKey(KeySeedPointsType) &&
+        _seedPointsInfo.hasValue<std::string>(KeySeedPointsType))
+    {
         std::string sourceType = _seedPointsInfo.value<std::string>(KeySeedPointsType);
 
         if (sourceType == SeedPointsSourceFile) {
             _seedPointSource = SeedPointSourceFile;
 
-            if (_seedPointsInfo.hasKeyAndValue<std::string>(KeySeedPointsFile)) {
+            if (_seedPointsInfo.hasKey(KeySeedPointsFile) &&
+                _seedPointsInfo.hasValue<std::string>(KeySeedPointsFile))
+            {
                 std::string seedPointSourceFile = _seedPointsInfo.value<std::string>(
                     KeySeedPointsFile
                 );
@@ -440,12 +444,14 @@ RenderableFieldlines::generateFieldlinesVolumeKameleon()
     const std::string v2 = std::string(KeyVectorFieldVolumeVariable) + ".2";
     const std::string v3 = std::string(KeyVectorFieldVolumeVariable) + ".3";
 
-    const bool threeVariables = _vectorFieldInfo.hasKeyAndValue<std::string>(v1) &&
-                          _vectorFieldInfo.hasKeyAndValue<std::string>(v2) &&
-                          _vectorFieldInfo.hasKeyAndValue<std::string>(v3);
+    const bool threeVariables =
+        _vectorFieldInfo.hasKey(v1) && _vectorFieldInfo.hasValue<std::string>(v1) &&
+        _vectorFieldInfo.hasKey(v2) && _vectorFieldInfo.hasValue<std::string>(v2) &&
+        _vectorFieldInfo.hasKey(v3) && _vectorFieldInfo.hasValue<std::string>(v3);
 
-    const bool lorentzForce = _vectorFieldInfo.hasKeyAndValue<std::string>(v1) &&
-          (_vectorFieldInfo.value<std::string>(v1) == VectorFieldKameleonVariableLorentz);
+    const bool lorentzForce = _vectorFieldInfo.hasKey(v1) &&
+        _vectorFieldInfo.hasValue<std::string>(v1) &&
+        (_vectorFieldInfo.value<std::string>(v1) == VectorFieldKameleonVariableLorentz);
 
     if (!threeVariables && !lorentzForce) {
         LERROR(fmt::format("'{}' does not name variables", KeyVectorField));

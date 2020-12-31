@@ -169,7 +169,9 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
     )
     , _scaling(ScalingInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(10.f))
 {
-    if (dictionary.hasKeyAndValue<std::string>(KeyDataSource)) {
+    if (dictionary.hasKey(KeyDataSource) &&
+        dictionary.hasValue<std::string>(KeyDataSource))
+    {
         _filename = absPath(dictionary.value<std::string>(KeyDataSource));
     }
     else {
@@ -177,31 +179,39 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
         return;
     }
 
-    if (dictionary.hasKeyAndValue<std::string>(KeyErrorHistogramsSource)) {
+    if (dictionary.hasKey(KeyErrorHistogramsSource) &&
+        dictionary.hasValue<std::string>(KeyErrorHistogramsSource))
+    {
         _errorHistogramsPath = absPath(
             dictionary.value<std::string>(KeyErrorHistogramsSource)
         );
     }
 
-    if (dictionary.hasKeyAndValue<double>("ScalingExponent")) {
+    if (dictionary.hasKey("ScalingExponent") &&
+        dictionary.hasValue<double>("ScalingExponent"))
+    {
         _scalingExponent = static_cast<int>(dictionary.value<double>("ScalingExponent"));
     }
 
-    if (dictionary.hasKeyAndValue<double>("StepSizeCoefficient")) {
+    if (dictionary.hasKey("StepSizeCoefficient") &&
+        dictionary.hasValue<double>("StepSizeCoefficient"))
+    {
         _stepSizeCoefficient = static_cast<float>(
             dictionary.value<double>("StepSizeCoefficient")
         );
     }
 
-    if (dictionary.hasKeyAndValue<glm::dvec3>("Scaling")) {
+    if (dictionary.hasKey("Scaling") && dictionary.hasValue<glm::dvec3>("Scaling")) {
         _scaling = dictionary.value<glm::dvec3>("Scaling");
     }
 
-    if (dictionary.hasKeyAndValue<glm::dvec3>("Translation")) {
+    if (dictionary.hasKey("Translation") &&
+        dictionary.hasValue<glm::dvec3>("Translation"))
+    {
         _translation = dictionary.value<glm::dvec3>("Translation");
     }
 
-    if (dictionary.hasKeyAndValue<glm::dvec3>("Rotation")) {
+    if (dictionary.hasKey("Rotation") && dictionary.hasValue<glm::dvec3>("Rotation")) {
         _rotation = dictionary.value<glm::dvec3>("Rotation");
     }
 
@@ -219,7 +229,9 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
         LWARNING("Node does not provide time information. Viewing one image / frame");
     }
 
-    if (dictionary.hasKeyAndValue<std::string>(KeyTransferFunction)) {
+    if (dictionary.hasKey(KeyTransferFunction) &&
+        dictionary.hasValue<std::string>(KeyTransferFunction))
+    {
         _transferFunctionPath = absPath(
             dictionary.value<std::string>(KeyTransferFunction)
         );
@@ -254,7 +266,9 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
     _tsp = std::make_shared<TSP>(_filename);
     _atlasManager = std::make_shared<AtlasManager>(_tsp.get());
 
-    if (dictionary.hasKeyAndValue<std::string>(KeyBrickSelector)) {
+    if (dictionary.hasKey(KeyBrickSelector) &&
+        dictionary.hasValue<std::string>(KeyBrickSelector))
+    {
         _selectorName = dictionary.value<std::string>(KeyBrickSelector);
     }
 

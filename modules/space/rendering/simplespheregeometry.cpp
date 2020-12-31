@@ -78,7 +78,9 @@ SimpleSphereGeometry::SimpleSphereGeometry(const ghoul::Dictionary& dictionary)
         "SimpleSphereGeometry"
     );
 
-    if (dictionary.hasKeyAndValue<double>(RadiusInfo.identifier)) {
+    if (dictionary.hasKey(RadiusInfo.identifier) &&
+        dictionary.hasValue<double>(RadiusInfo.identifier))
+    {
         const float r = static_cast<float>(
             dictionary.value<double>(RadiusInfo.identifier)
         );

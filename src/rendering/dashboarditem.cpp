@@ -114,7 +114,9 @@ DashboardItem::DashboardItem(const ghoul::Dictionary& dictionary)
     std::string identifier = dictionary.value<std::string>(IdentifierInfo.identifier);
     setIdentifier(std::move(identifier));
 
-    if (dictionary.hasKeyAndValue<std::string>(GuiNameInfo.identifier)) {
+    if (dictionary.hasKey(GuiNameInfo.identifier) &&
+        dictionary.hasValue<std::string>(GuiNameInfo.identifier))
+    {
         std::string guiName = dictionary.value<std::string>(GuiNameInfo.identifier);
         setGuiName(std::move(guiName));
     }

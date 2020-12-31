@@ -63,7 +63,7 @@ RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& di
     dictionary.getValue(KeyName, _name);
     dictionary.getValue(KeyTarget, _defaultTarget);
 
-    if (dictionary.hasKeyAndValue<std::string>(KeyTexture)) {
+    if (dictionary.hasKey(KeyTexture) && dictionary.hasValue<std::string>(KeyTexture)) {
         _texturePath = dictionary.value<std::string>(KeyTexture);
         _texturePath = absPath(_texturePath);
         _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);

@@ -182,7 +182,7 @@ namespace {
             d.getValue(KeyImmediateFlush, v.forceImmediateFlush);
             d.getValue(KeyCapabilitiesVerbosity, v.capabilitiesVerbosity);
 
-            if (d.hasKeyAndValue<ghoul::Dictionary>(KeyLogs)) {
+            if (d.hasKey(KeyLogs) && d.hasValue<ghoul::Dictionary>(KeyLogs)) {
                 ghoul::Dictionary l = d.value<ghoul::Dictionary>(KeyLogs);
                 std::vector<ghoul::Dictionary> res;
                 for (size_t i = 1; i <= l.size(); ++i) {
@@ -218,7 +218,9 @@ namespace {
             d.getValue(KeyActivate, v.isActive);
             d.getValue(KeySynchronous, v.isSynchronous);
 
-            if (d.hasKeyAndValue<ghoul::Dictionary>(KeyFilterIdentifier)) {
+            if (d.hasKey(KeyFilterIdentifier) &&
+                d.hasValue<ghoul::Dictionary>(KeyFilterIdentifier))
+            {
                 ghoul::Dictionary f = d.value<ghoul::Dictionary>(KeyFilterIdentifier);
 
                 std::vector<Configuration::OpenGLDebugContext::IdentifierFilter> res;
@@ -238,7 +240,9 @@ namespace {
                 v.identifierFilters = res;
             }
 
-            if (d.hasKeyAndValue<ghoul::Dictionary>(KeyFilterSeverity)) {
+            if (d.hasKey(KeyFilterSeverity) &&
+                d.hasValue<ghoul::Dictionary>(KeyFilterSeverity))
+            {
                 ghoul::Dictionary f = d.value<ghoul::Dictionary>(KeyFilterSeverity);
 
                 std::vector<std::string> res;

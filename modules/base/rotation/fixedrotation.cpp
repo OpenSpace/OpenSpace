@@ -461,7 +461,9 @@ bool FixedRotation::initialize() {
 
     const bool hasXAxis = _constructorDictionary.hasKey(KeyXAxis);
     if (hasXAxis) {
-        if (_constructorDictionary.hasKeyAndValue<std::string>(KeyXAxis)) {
+        if (_constructorDictionary.hasKey(KeyXAxis) &&
+            _constructorDictionary.hasValue<std::string>(KeyXAxis))
+        {
             _xAxis.type = Axis::Type::Object;
             _xAxis.object = _constructorDictionary.value<std::string>(KeyXAxis);
         }
@@ -486,7 +488,9 @@ bool FixedRotation::initialize() {
 
     const bool hasYAxis = _constructorDictionary.hasKey(KeyYAxis);
     if (hasYAxis) {
-        if (_constructorDictionary.hasKeyAndValue<std::string>(KeyYAxis)) {
+        if (_constructorDictionary.hasKey(KeyYAxis) &&
+            _constructorDictionary.hasValue<std::string>(KeyYAxis))
+        {
             _yAxis.type = Axis::Type::Object;
             _yAxis.object = _constructorDictionary.value<std::string>(KeyYAxis);
         }
@@ -511,7 +515,9 @@ bool FixedRotation::initialize() {
 
     const bool hasZAxis = _constructorDictionary.hasKey(KeyZAxis);
     if (hasZAxis) {
-        if (_constructorDictionary.hasKeyAndValue<std::string>(KeyZAxis)) {
+        if (_constructorDictionary.hasKey(KeyZAxis) &&
+            _constructorDictionary.hasValue<std::string>(KeyZAxis))
+        {
             _zAxis.type = Axis::Type::Object;
             _zAxis.object = _constructorDictionary.value<std::string>(KeyZAxis);
         }

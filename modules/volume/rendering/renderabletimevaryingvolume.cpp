@@ -203,11 +203,13 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     });
     _gridType = static_cast<int>(volume::VolumeGridType::Cartesian);
 
-    if (dictionary.hasKeyAndValue<double>(KeyStepSize)) {
+    if (dictionary.hasKey(KeyStepSize) && dictionary.hasValue<double>(KeyStepSize)) {
         _stepSize = static_cast<float>(dictionary.value<double>(KeyStepSize));
     }
 
-    if (dictionary.hasKeyAndValue<double>(KeySecondsBefore)) {
+    if (dictionary.hasKey(KeySecondsBefore) &&
+        dictionary.hasValue<double>(KeySecondsBefore))
+    {
         _secondsBefore = static_cast<float>(dictionary.value<double>(KeySecondsBefore));
     }
     _secondsAfter = static_cast<float>(dictionary.value<double>(KeySecondsAfter));
@@ -218,7 +220,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     _clipPlanes->setIdentifier("clipPlanes");
     _clipPlanes->setGuiName("Clip Planes");
 
-    if (dictionary.hasKeyAndValue<std::string>(KeyGridType)) {
+    if (dictionary.hasKey(KeyGridType) && dictionary.hasValue<std::string>(KeyGridType)) {
         VolumeGridType gridType = volume::parseGridType(
            dictionary.value<std::string>(KeyGridType)
         );

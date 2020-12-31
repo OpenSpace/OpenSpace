@@ -231,27 +231,37 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
         _rotation = glm::vec3(rotation);
     }
 
-    if (dictionary.hasKeyAndValue<bool>(VolumeRenderingEnabledInfo.identifier)) {
+    if (dictionary.hasKey(VolumeRenderingEnabledInfo.identifier) &&
+        dictionary.hasValue<bool>(VolumeRenderingEnabledInfo.identifier))
+    {
         _volumeRenderingEnabled = dictionary.value<bool>(
             VolumeRenderingEnabledInfo.identifier
         );
     }
 
-    if (dictionary.hasKeyAndValue<bool>(StarRenderingEnabledInfo.identifier)) {
+    if (dictionary.hasKey(StarRenderingEnabledInfo.identifier) &&
+        dictionary.hasValue<bool>(StarRenderingEnabledInfo.identifier))
+    {
         _starRenderingEnabled = static_cast<bool>(StarRenderingEnabledInfo.identifier);
     }
 
-    if (dictionary.hasKeyAndValue<double>(StepSizeInfo.identifier)) {
+    if (dictionary.hasKey(StepSizeInfo.identifier) &&
+        dictionary.hasValue<double>(StepSizeInfo.identifier))
+    {
         _stepSize = static_cast<float>(dictionary.value<double>(StepSizeInfo.identifier));
     }
 
-    if (dictionary.hasKeyAndValue<double>(AbsorptionMultiplyInfo.identifier)) {
+    if (dictionary.hasKey(AbsorptionMultiplyInfo.identifier) &&
+        dictionary.hasValue<double>(AbsorptionMultiplyInfo.identifier))
+    {
         _absorptionMultiply = static_cast<float>(
             dictionary.value<double>(AbsorptionMultiplyInfo.identifier)
         );
     }
 
-    if (dictionary.hasKeyAndValue<double>(EmissionMultiplyInfo.identifier)) {
+    if (dictionary.hasKey(EmissionMultiplyInfo.identifier) &&
+        dictionary.hasValue<double>(EmissionMultiplyInfo.identifier))
+    {
         _emissionMultiply = static_cast<float>(
             dictionary.value<double>(EmissionMultiplyInfo.identifier)
         );
@@ -273,15 +283,20 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
         }
     }
 
-    if (dictionary.hasKeyAndValue<glm::dvec3>(TranslationInfo.identifier)) {
+    if (dictionary.hasKey(TranslationInfo.identifier) &&
+        dictionary.hasValue<glm::dvec3>(TranslationInfo.identifier))
+    {
         _translation = dictionary.value<glm::dvec3>(TranslationInfo.identifier);
     }
 
-    if (dictionary.hasKeyAndValue<glm::dvec3>(RotationInfo.identifier)) {
+    if (dictionary.hasKey(RotationInfo.identifier) &&
+        dictionary.hasValue<glm::dvec3>(RotationInfo.identifier))
+    {
         _rotation = dictionary.value<glm::dvec3>(RotationInfo.identifier);
     }
 
-    if (!dictionary.hasKeyAndValue<ghoul::Dictionary>("Volume")) {
+    if (!dictionary.hasKey("Volume") || !dictionary.hasValue<ghoul::Dictionary>("Volume"))
+    {
         LERROR("No volume dictionary specified.");
     }
 
@@ -325,7 +340,8 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
         );
     }
 
-    if (!dictionary.hasKeyAndValue<ghoul::Dictionary>("Points")) {
+    if (!dictionary.hasKey("Points") || !dictionary.hasValue<ghoul::Dictionary>("Points"))
+    {
         LERROR("No points dictionary specified.");
     }
 
@@ -338,7 +354,9 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
         LERROR("No points filename specified.");
     }
 
-    if (pointsDictionary.hasKeyAndValue<double>(EnabledPointsRatioInfo.identifier)) {
+    if (pointsDictionary.hasKey(EnabledPointsRatioInfo.identifier) &&
+        pointsDictionary.hasValue<double>(EnabledPointsRatioInfo.identifier))
+    {
         _enabledPointsRatio = static_cast<float>(
             pointsDictionary.value<double>(EnabledPointsRatioInfo.identifier)
         );

@@ -234,7 +234,9 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     _colorTexturePaths.onChange([this](){ _colorTextureDirty = true; });
     addProperty(_colorTexturePaths);
 
-    if (dict.hasKeyAndValue<ghoul::Dictionary>(ColorTexturePathsInfo.identifier)) {
+    if (dict.hasKey(ColorTexturePathsInfo.identifier) &&
+        dict.hasValue<ghoul::Dictionary>(ColorTexturePathsInfo.identifier))
+    {
         const ghoul::Dictionary& value = dict.value<ghoul::Dictionary>(
             ColorTexturePathsInfo.identifier
         );
@@ -278,7 +280,9 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     addProperty(_heightMapTexturePaths);
 
 
-    if (dict.hasKeyAndValue<ghoul::Dictionary>(HeightTexturePathsInfo.identifier)) {
+    if (dict.hasKey(HeightTexturePathsInfo.identifier) &&
+        dict.hasValue<ghoul::Dictionary>(HeightTexturePathsInfo.identifier)) 
+   {
         const ghoul::Dictionary& value = dict.value<ghoul::Dictionary>(
             HeightTexturePathsInfo.identifier
         );
@@ -315,7 +319,9 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     addProperty(_addHeightMapTexturePath);
 
 
-    if (dict.hasKeyAndValue<bool>(MeridianShiftInfo.identifier)) {
+    if (dict.hasKey(MeridianShiftInfo.identifier) &&
+        dict.hasValue<bool>(MeridianShiftInfo.identifier))
+    {
         _meridianShift = dict.value<bool>(MeridianShiftInfo.identifier);
     }
 

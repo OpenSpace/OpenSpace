@@ -293,13 +293,13 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     }
 
     if (dictionary.hasKey(KeyTag)) {
-        if (dictionary.hasKeyAndValue<std::string>(KeyTag)) {
+        if (dictionary.hasValue<std::string>(KeyTag)) {
             std::string tagName = dictionary.value<std::string>(KeyTag);
             if (!tagName.empty()) {
                 result->addTag(std::move(tagName));
             }
         }
-        else if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyTag)) {
+        else if (dictionary.hasValue<ghoul::Dictionary>(KeyTag)) {
             ghoul::Dictionary tagNames = dictionary.value<ghoul::Dictionary>(KeyTag);
             std::vector<std::string> keys = tagNames.keys();
             std::string tagName;

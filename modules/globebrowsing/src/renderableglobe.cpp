@@ -550,17 +550,17 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _generalProperties.currentLodScaleFactor.setReadOnly(true);
 
     // Read the radii in to its own dictionary
-    if (dictionary.hasKeyAndValue<glm::dvec3>(KeyRadii)) {
+    if (dictionary.hasKey(KeyRadii) && dictionary.hasValue<glm::dvec3>(KeyRadii)) {
         _ellipsoid = Ellipsoid(dictionary.value<glm::dvec3>(KeyRadii));
         setBoundingSphere(static_cast<float>(_ellipsoid.maximumRadius()));
     }
-    else if (dictionary.hasKeyAndValue<double>(KeyRadii)) {
+    else if (dictionary.hasKey(KeyRadii) && dictionary.hasValue<double>(KeyRadii)) {
         const double radius = dictionary.value<double>(KeyRadii);
         _ellipsoid = Ellipsoid({ radius, radius, radius });
         setBoundingSphere(static_cast<float>(_ellipsoid.maximumRadius()));
     }
 
-    if (dictionary.hasValue<bool>("PerformShading")) {
+    if (dictionary.hasKey("PerformShading")) {
         _generalProperties.performShading = dictionary.value<bool>("PerformShading");
     }
 
@@ -706,7 +706,8 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     }
 
     // Labels Dictionary
-    if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyLabels)) {
+    if (dictionary.hasKey(KeyLabels) && dictionary.hasValue<ghoul::Dictionary>(KeyLabels))
+    {
         _labelsDictionary = dictionary.value<ghoul::Dictionary>(KeyLabels);
     }
 
