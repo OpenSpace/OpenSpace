@@ -202,7 +202,7 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
 
     outputMetadata.setValue(KeyMinValue, reader.minValue(_variable));
     outputMetadata.setValue(KeyMaxValue, reader.maxValue(_variable));
-    outputMetadata.setValue<std::string>(KeyVisUnit, reader.getVisUnit(_variable));
+    outputMetadata.setValue(KeyVisUnit, reader.getVisUnit(_variable));
 
     std::string metadataString = ghoul::formatLua(outputMetadata);
 

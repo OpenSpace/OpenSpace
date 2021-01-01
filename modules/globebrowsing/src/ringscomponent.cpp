@@ -182,12 +182,12 @@ RingsComponent::RingsComponent(const ghoul::Dictionary& dictionary)
 {
     using ghoul::filesystem::File;
 
-    if (dictionary.hasKey("Rings")) {
+    if (dictionary.hasKey("Rings") && dictionary.hasValue<ghoul::Dictionary>("Rings")) {
         // @TODO (abock, 2019-12-16) It would be better to not store the dictionary long
         // term and rather extract the values directly here.  This would require a bit of
         // a rewrite in the RenderableGlobe class to not create the RingsComponent in the
         // class-initializer list though
-        dictionary.getValue("Rings", _ringsDictionary);
+        _ringsDictionary = dictionary.value<ghoul::Dictionary>("Rings");
     }
 
     documentation::testSpecificationAndThrow(

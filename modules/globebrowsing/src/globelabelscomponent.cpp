@@ -337,11 +337,13 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
     if (dictionary.empty()) {
         return;
     }
-    std::string labelsFile;
-    bool successLabels = dictionary.getValue(KeyLabelsFileName, labelsFile);
-    if (!successLabels) {
+    if (!dictionary.hasKey(KeyLabelsFileName) ||
+        !dictionary.hasValue<std::string>(KeyLabelsFileName))
+    {
         return;
     }
+
+    std::string labelsFile = dictionary.value<std::string>(KeyLabelsFileName);
     bool loadSuccess = loadLabelsData(absPath(labelsFile));
     if (!loadSuccess) {
         return;

@@ -566,9 +566,12 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
 
     // Init layer manager
     ghoul::Dictionary layersDictionary;
-    if (!dictionary.getValue(KeyLayers, layersDictionary)) {
+    if (!dictionary.hasKey(KeyLayers) ||
+        !dictionary.hasValue<ghoul::Dictionary>(KeyLayers))
+    {
         throw ghoul::RuntimeError(std::string(KeyLayers) + " must be specified");
     }
+    layersDictionary = dictionary.value<ghoul::Dictionary>(KeyLayers);
 
     _layerManager.initialize(layersDictionary);
 
@@ -635,21 +638,28 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     //================================================================
     //======== Reads Shadow (Eclipses) Entries in mod file ===========
     //================================================================
-    ghoul::Dictionary shadowDictionary;
-    bool success = dictionary.getValue(KeyShadowGroup, shadowDictionary);
+    bool success = dictionary.hasKey(KeyShadowGroup) &&
+        dictionary.hasValue<ghoul::Dictionary>(KeyShadowGroup);
     bool disableShadows = false;
     if (success) {
+        ghoul::Dictionary shadowDictionary =
+            dictionary.value<ghoul::Dictionary>(KeyShadowGroup);
         std::vector<std::pair<std::string, double>> sourceArray;
         unsigned int sourceCounter = 1;
         while (success) {
-            std::string sourceName;
-            success = shadowDictionary.getValue(KeyShadowSource +
-                std::to_string(sourceCounter) + ".Name", sourceName);
+            std::string keyName = 
+                KeyShadowSource + std::to_string(sourceCounter) + ".Name";
+            std::string keyRadius =
+                KeyShadowSource + std::to_string(sourceCounter) + ".Radius";
+
+            success = shadowDictionary.hasKey(keyName) &&
+                shadowDictionary.hasValue<std::string>(keyName);
             if (success) {
-                double sourceRadius;
-                success = shadowDictionary.getValue(KeyShadowSource +
-                    std::to_string(sourceCounter) + ".Radius", sourceRadius);
+                std::string sourceName = shadowDictionary.value<std::string>(keyName);
+                success = shadowDictionary.hasKey(keyRadius) &&
+                    shadowDictionary.hasValue<double>(keyRadius);
                 if (success) {
+                    double sourceRadius = shadowDictionary.value<double>(keyRadius);
                     sourceArray.emplace_back(sourceName, sourceRadius);
                 }
                 else {
@@ -668,14 +678,19 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
             std::vector<std::pair<std::string, double>> casterArray;
             unsigned int casterCounter = 1;
             while (success) {
-                std::string casterName;
-                success = shadowDictionary.getValue(KeyShadowCaster +
-                    std::to_string(casterCounter) + ".Name", casterName);
+                std::string keyName =
+                    KeyShadowCaster + std::to_string(casterCounter) + ".Name";
+                std::string keyRadius =
+                    KeyShadowCaster + std::to_string(casterCounter) + ".Radius";
+                success = shadowDictionary.hasKey(keyName) &&
+                    shadowDictionary.hasValue<std::string>(keyName);
+
                 if (success) {
-                    double casterRadius;
-                    success = shadowDictionary.getValue(KeyShadowCaster +
-                        std::to_string(casterCounter) + ".Radius", casterRadius);
+                    std::string casterName = shadowDictionary.value<std::string>(keyName);
+                    success = shadowDictionary.hasKey(keyRadius) &&
+                        shadowDictionary.hasValue<double>(keyRadius);
                     if (success) {
+                        double casterRadius = shadowDictionary.value<double>(keyRadius);
                         casterArray.emplace_back(casterName, casterRadius);
                     }
                     else {
@@ -712,13 +727,10 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     }
 
     // Components
-    if (dictionary.hasKey("Rings")) {
+    if (dictionary.hasKey("Rings") && dictionary.hasValue<ghoul::Dictionary>("Rings")) {
         _ringsComponent.initialize();
         addPropertySubOwner(_ringsComponent);
         _hasRings = true;
-
-        ghoul::Dictionary ringsDic;
-        dictionary.getValue("Rings", ringsDic);
     }
 
     if (dictionary.hasKey("Shadows")) {

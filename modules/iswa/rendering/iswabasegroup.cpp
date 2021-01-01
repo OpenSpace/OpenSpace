@@ -103,7 +103,7 @@ void IswaBaseGroup::registerProperties() {
     _alpha.onChange([this]() {
         LDEBUG("Group " + identifier() + " published alphaChanged");
         ghoul::Dictionary d;
-        d.setValue<double>("alpha", _alpha.value());
+        d.setValue("alpha", static_cast<double>(_alpha));
         _groupEvent.publish("alphaChanged", d);
     });
 

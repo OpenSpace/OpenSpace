@@ -74,13 +74,20 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
     addProperty(_slice);
     addProperty(_fieldlines);
 
-    dictionary.getValue("kwPath", _kwPath);
+    if (dictionary.hasKey("kwPath") && dictionary.hasValue<std::string>("kwPath")) {
+        _kwPath = dictionary.value<std::string>("kwPath");
+    }
 
-    std::string fieldlineIndexFile;
-    dictionary.getValue("fieldlineSeedsIndexFile", _fieldlineIndexFile);
+    if (dictionary.hasKey("fieldlineSeedsIndexFile") &&
+        dictionary.hasValue<std::string>("fieldlineSeedsIndexFile"))
+    {
+        _fieldlineIndexFile = dictionary.value<std::string>("fieldlineSeedsIndexFile");
+    }
 
     std::string axis;
-    dictionary.getValue("axisCut", axis);
+    if (dictionary.hasKey("axisCut") && dictionary.hasValue<std::string>("axisCut")) {
+        axis = dictionary.value<std::string>("axisCut");
+    }
 
     if (axis == "x") {
         _cut = Cut::X;

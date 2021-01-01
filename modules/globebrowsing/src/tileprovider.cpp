@@ -349,7 +349,7 @@ std::unique_ptr<TileProvider> initTileProvider(TemporalTileProvider& t,
 
     FileSys.expandPathTokens(gdalDatasetXml, IgnoredTokens);
 
-    t.initDict.setValue<std::string>(KeyFilePath, gdalDatasetXml);
+    t.initDict.setValue(KeyFilePath, gdalDatasetXml);
     return std::make_unique<DefaultTileProvider>(t.initDict);
 }
 
@@ -489,7 +489,7 @@ bool readFilePath(TemporalTileProvider& t) {
     // File path was not a path to a file but a GDAL config or empty
     ghoul::filesystem::File f(t.filePath);
     if (FileSys.fileExists(f)) {
-        t.initDict.setValue<std::string>(temporal::KeyBasePath, f.directoryName());
+        t.initDict.setValue(temporal::KeyBasePath, f.directoryName());
     }
 
     t.gdalXmlTemplate = consumeTemporalMetaData(t, xml);

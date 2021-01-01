@@ -197,38 +197,9 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     if (dictionary.hasKey("StarRenderingEnabled")) {
         _starRenderingEnabled = dictionary.value<bool>("StarRenderingEnabled");
     }
-    {
-        double stepSize;
-        dictionary.getValue("StepSize", stepSize);
-        _stepSize = static_cast<float>(stepSize);
-    }
-    {
-        double absorptionMultiply = _absorptionMultiply;
-        dictionary.getValue("AbsorptionMultiply", absorptionMultiply);
-        _absorptionMultiply = static_cast<float>(absorptionMultiply);
-    }
-    {
-        double emissionMultiply = _emissionMultiply;
-        dictionary.getValue("EmissionMultiply", emissionMultiply);
-        _emissionMultiply = static_cast<float>(emissionMultiply);
-    }
+
     if (dictionary.hasKey("StarRenderingMethod")) {
         _starRenderingMethod = dictionary.value<int>("StarRenderingMethod");
-    }
-    {
-        double enabledPointsRatio = _enabledPointsRatio;
-        dictionary.getValue("EnabledPointsRatio", enabledPointsRatio);
-        _enabledPointsRatio = static_cast<float>(enabledPointsRatio);
-    }
-    {
-        glm::dvec3 translation = glm::vec3(_translation);
-        dictionary.getValue("Translation", translation);
-        _translation = glm::vec3(translation);
-    }
-    {
-        glm::dvec3 rotation = glm::vec3(_rotation);
-        dictionary.getValue("Rotation", rotation);
-        _rotation = glm::vec3(rotation);
     }
 
     if (dictionary.hasKey(VolumeRenderingEnabledInfo.identifier) &&
@@ -302,23 +273,27 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
 
     ghoul::Dictionary volumeDictionary = dictionary.value<ghoul::Dictionary>("Volume");
 
-    std::string volumeFilename;
-    if (volumeDictionary.getValue("Filename", volumeFilename)) {
-        _volumeFilename = absPath(volumeFilename);
+    if (volumeDictionary.hasKey("Filename") &&
+        volumeDictionary.hasValue<std::string>("Filename"))
+    {
+        _volumeFilename = absPath(volumeDictionary.value<std::string>("Filename"));
     }
     else {
-        LERROR("No volume filename specified.");
+        LERROR("No volume filename specified");
     }
-    glm::dvec3 volumeDimensions = glm::dvec3(0.f);
-    if (volumeDictionary.getValue("Dimensions", volumeDimensions)) {
-        _volumeDimensions = static_cast<glm::ivec3>(volumeDimensions);
+
+    if (volumeDictionary.hasKey("Dimensions") &&
+        volumeDictionary.hasValue<glm::dvec3>("Dimensions"))
+    {
+        _volumeDimensions = volumeDictionary.value<glm::dvec3>("Dimensions");
     }
     else {
-        LERROR("No volume dimensions specified.");
+        LERROR("No volume dimensions specifieds");
     }
-    glm::dvec3 volumeSize = glm::dvec3(0.f);
-    if (volumeDictionary.getValue("Size", volumeSize)) {
-        _volumeSize = volumeSize;
+
+    if (volumeDictionary.hasKey("Size") && volumeDictionary.hasValue<glm::dvec3>("Size"))
+    {
+        _volumeSize = volumeDictionary.value<glm::dvec3>("Size");
     }
     else {
         LERROR("No volume dimensions specified.");
@@ -346,9 +321,10 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     }
 
     ghoul::Dictionary pointsDictionary = dictionary.value<ghoul::Dictionary>("Points");
-    std::string pointsFilename;
-    if (pointsDictionary.getValue("Filename", pointsFilename)) {
-        _pointsFilename = absPath(pointsFilename);
+    if (pointsDictionary.hasKey("Filename") &&
+        pointsDictionary.hasValue<std::string>("Filename"))
+    {
+        _pointsFilename = absPath(pointsDictionary.value<std::string>("Filename"));
     }
     else {
         LERROR("No points filename specified.");
@@ -362,9 +338,11 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
         );
     }
 
-    std::string pointSpreadFunctionTexturePath;
-    if (pointsDictionary.getValue("Texture", pointSpreadFunctionTexturePath)) {
-        _pointSpreadFunctionTexturePath = absPath(pointSpreadFunctionTexturePath);
+    if (pointsDictionary.hasKey("Texture") &&
+        pointsDictionary.hasValue<std::string>("Texture"))
+    {
+        _pointSpreadFunctionTexturePath =
+            absPath(pointsDictionary.value<std::string>("Texture"));
         _pointSpreadFunctionFile = std::make_unique<ghoul::filesystem::File>(
             _pointSpreadFunctionTexturePath
         );

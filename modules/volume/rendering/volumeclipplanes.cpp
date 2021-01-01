@@ -34,14 +34,13 @@ VolumeClipPlanes::VolumeClipPlanes(const ghoul::Dictionary& dictionary)
     // @TODO Missing documentation
     , _nClipPlanes({ "nClipPlanes", "Number of clip planes", "" }, 0, 0, 10)
 {
-    const std::vector<std::string>& keys = dictionary.keys();
-    for (const std::string& key : keys) {
+    for (std::string_view key : dictionary.keys()) {
         ghoul::Dictionary cutPlaneDictionary = dictionary.value<ghoul::Dictionary>(key);
         VolumeClipPlane clipPlane = VolumeClipPlane(cutPlaneDictionary);
-        clipPlane.setIdentifier(key);
+        clipPlane.setIdentifier(std::string(key));
         _clipPlanes.push_back(std::move(clipPlane));
     }
-    _nClipPlanes = static_cast<int>(keys.size());
+    _nClipPlanes = static_cast<int>(dictionary.keys().size());
 }
 
 void VolumeClipPlanes::initialize() {

@@ -303,7 +303,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         const ghoul::Dictionary& lsDictionary =
             dictionary.value<ghoul::Dictionary>(LightSourcesInfo.identifier);
 
-        for (const std::string& k : lsDictionary.keys()) {
+        for (std::string_view k : lsDictionary.keys()) {
             std::unique_ptr<LightSource> lightSource = LightSource::createFromDictionary(
                 lsDictionary.value<ghoul::Dictionary>(k)
             );

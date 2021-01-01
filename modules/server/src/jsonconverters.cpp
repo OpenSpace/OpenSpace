@@ -72,7 +72,8 @@ namespace ghoul {
 
 void to_json(json& j, const Dictionary& dictionary) {
     json object;
-    for (const std::string& key : dictionary.keys()) {
+    for (std::string_view k : dictionary.keys()) {
+        std::string key = std::string(k);
         if (dictionary.hasValue<glm::dvec4>(key)) {
             const glm::dvec4 v = dictionary.value<glm::dvec4>(key);
             object[key] = json::array({ v[0], v[1], v[2], v[3] });

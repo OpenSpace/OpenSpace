@@ -200,8 +200,8 @@ TestResult testSpecification(const Documentation& documentation,
 
     for (const auto& p : documentation.entries) {
         if (p.key == DocumentationEntry::Wildcard) {
-            for (const std::string& key : dictionary.keys()) {
-                applyVerifier(*(p.verifier), key);
+            for (std::string_view key : dictionary.keys()) {
+                applyVerifier(*(p.verifier), std::string(key));
             }
         }
         else {

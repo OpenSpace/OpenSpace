@@ -31,9 +31,11 @@ namespace openspace {
 TargetDecoder::TargetDecoder(const ghoul::Dictionary& dictionary) : _type("TARGET") {
     _names.resize(dictionary.size());
     for (size_t i = 0; i < _names.size(); ++i) {
-        std::string readMe;
-        dictionary.getValue(std::to_string(i + 1), readMe);
-        _names[i] = readMe;
+        std::string key = std::to_string(i + 1);
+        if (dictionary.hasKey(key) && dictionary.hasValue<std::string>(key)) {
+            std::string readMe = dictionary.value<std::string>(key);
+            _names[i] = readMe;
+        }
     }
 }
 

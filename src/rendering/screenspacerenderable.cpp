@@ -445,8 +445,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     else if (dictionary.hasKey(KeyTag) && dictionary.hasValue<ghoul::Dictionary>(KeyTag))
     {
         const ghoul::Dictionary& tagNames = dictionary.value<ghoul::Dictionary>(KeyTag);
-        const std::vector<std::string>& keys = tagNames.keys();
-        for (const std::string& key : keys) {
+        for (std::string_view key : tagNames.keys()) {
             std::string tagName = tagNames.value<std::string>(key);
             if (!tagName.empty()) {
                 addTag(std::move(tagName));
@@ -527,7 +526,10 @@ void ScreenSpaceRenderable::createShaders() {
     );
     rendererData.setValue("windowWidth", res.x);
     rendererData.setValue("windowHeight", res.y);
-    rendererData.setValue<double>("hdrExposure", global::renderEngine->hdrExposure());
+    rendererData.setValue(
+        "hdrExposure",
+        static_cast<double>(global::renderEngine->hdrExposure())
+    );
     rendererData.setValue("disableHDR", global::renderEngine->isHdrDisabled());
 
     dict.setValue("rendererData", rendererData);

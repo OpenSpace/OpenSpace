@@ -825,8 +825,8 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
 
             // Ugly fix for ASCII sorting when there are more columns read than 10.
             std::set<int> intKeys;
-            for (const std::string& key : tmpDict.keys()) {
-                intKeys.insert(std::stoi(key));
+            for (std::string_view key : tmpDict.keys()) {
+                intKeys.insert(std::stoi(std::string(key)));
             }
 
             for (int key : intKeys) {

@@ -63,39 +63,68 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
 {
     // This changed from setIdentifier to setGuiName, 2018-03-14 ---abock
     std::string name;
-    dictionary.getValue("Name", name);
+    if (dictionary.hasKey("Name") && dictionary.hasValue<std::string>("Name")) {
+        name = dictionary.value<std::string>("Name");
+    }
     setGuiName(name);
 
-    double renderableId;
-    dictionary.getValue("Id", renderableId);
-    double updateTime;
-    dictionary.getValue("UpdateTime", updateTime);
-    glm::dvec4 spatialScale = glm::dvec4(0.f);
-    dictionary.getValue("SpatialScale", spatialScale);
-    glm::dvec3 min = glm::dvec3(0.f);
-    dictionary.getValue("GridMin", min);
-    glm::dvec3 max = glm::dvec3(0.f);
-    dictionary.getValue("GridMax", max);
-    dictionary.getValue("Frame",_data.frame);
-    dictionary.getValue("CoordinateType", _data.coordinateType);
+    _data.id = static_cast<int>(dictionary.value<double>("Id"));
+    _data.updateTime = static_cast<int>(dictionary.value<double>("UpdateTime"));
+
+    _data.spatialScale = glm::dvec4(0.f);
+    if (dictionary.hasKey("SpatialScale") &&
+        dictionary.hasValue<glm::dvec4>("SpatialScale"))
+    {
+        _data.spatialScale = dictionary.value<glm::dvec4>("SpatialScale");
+    }
+
+    _data.gridMin = glm::dvec3(0.f);
+    if (dictionary.hasKey("GridMin") &&
+        dictionary.hasValue<glm::dvec3>("GridMin"))
+    {
+        _data.gridMin = dictionary.value<glm::dvec3>("GridMin");
+    }
+
+    _data.gridMax = glm::dvec3(0.f);
+    if (dictionary.hasKey("GridMax") &&
+        dictionary.hasValue<glm::dvec3>("GridMax"))
+    {
+        _data.gridMax = dictionary.value<glm::dvec3>("GridMax");
+    }
+
+    if (dictionary.hasKey("Frame") && dictionary.hasValue<std::string>("Frame")) {
+        _data.frame = dictionary.value<std::string>("Frame");
+    }
+    if (dictionary.hasKey("CoordinateType") &&
+        dictionary.hasValue<std::string>("CoordinateType"))
+    {
+        _data.coordinateType = dictionary.value<std::string>("CoordinateType");
+    }
+
+
     double xOffset = 0.f;
-    dictionary.getValue("XOffset", xOffset);
+    if (dictionary.hasKey("XOffset") && dictionary.hasValue<double>("XOffset")) {
+        xOffset = dictionary.value<double>("XOffset");
+    }
+    if (dictionary.hasKey("Group") && dictionary.hasValue<std::string>("Group")) {
+        _data.groupName = dictionary.value<std::string>("Group");
+    }
 
-    dictionary.getValue("Group", _data.groupName);
 
-    _data.id = static_cast<int>(renderableId);
-    _data.updateTime = static_cast<int>(updateTime);
-    _data.spatialScale = spatialScale;
-    _data.gridMin = min;
-    _data.gridMax = max;
-
-    glm::vec3 scale = glm::vec3((max.x - min.x), (max.y - min.y), (max.z - min.z));
+    glm::vec3 scale = glm::vec3(
+        _data.gridMax.x - _data.gridMin.x,
+        _data.gridMax.y - _data.gridMin.y,
+        _data.gridMax.z - _data.gridMin.z
+    );
     _data.scale = scale;
 
     glm::vec3 offset = glm::vec3(
-        (min.x + (std::abs(min.x) + std::abs(max.x)) / 2.f) + xOffset,
-        (min.y + (std::abs(min.y) + std::abs(max.y)) / 2.f),
-        (min.z + (std::abs(min.z) + std::abs(max.z)) / 2.f)
+        (_data.gridMin.x +
+            (std::abs(_data.gridMin.x) + std::abs(_data.gridMax.x)) / 2.f) + xOffset,
+        (_data.gridMin.y +
+            (std::abs(_data.gridMin.y) + std::abs(_data.gridMax.y)) / 2.f),
+        (_data.gridMin.z +
+            (std::abs(_data.gridMin.z) + std::abs(_data.gridMax.z)) / 2.f)
     );
     _data.offset = offset;
 

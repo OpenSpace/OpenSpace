@@ -185,9 +185,14 @@ void Property::setGroupIdentifier(std::string groupId) {
 }
 
 std::string Property::groupIdentifier() const {
-    std::string result;
-    _metaData.getValue(MetaDataKeyGroup, result);
-    return result;
+    if (_metaData.hasKey(MetaDataKeyGroup) &&
+        _metaData.hasValue<std::string>(MetaDataKeyGroup))
+    {
+        return _metaData.value<std::string>(MetaDataKeyGroup);
+    }
+    else {
+        return "";
+    }
 }
 
 void Property::setVisibility(Visibility visibility) {

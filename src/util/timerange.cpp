@@ -73,13 +73,11 @@ TimeRange::TimeRange(const ghoul::Dictionary& dict) {
 bool TimeRange::initializeFromDictionary(const ghoul::Dictionary& dict,
                                          TimeRange& timeRange)
 {
-    std::string startTimeStr;
-    std::string endTimeStr;
-
-    bool success = true;
-    success &= dict.getValue(KeyStart, startTimeStr);
-    success &= dict.getValue(KeyEnd, endTimeStr);
-    if (success) {
+    if (dict.hasKey(KeyStart) && dict.hasValue<std::string>(KeyStart) &&
+        dict.hasKey(KeyEnd) && dict.hasValue<std::string>(KeyEnd))
+    {
+        std::string startTimeStr = dict.value<std::string>(KeyStart);
+        std::string endTimeStr = dict.value<std::string>(KeyEnd);
         // Parse to date.
         // @TODO converting string to time stamp should not rely on Spice
         timeRange.start = SpiceManager::ref().ephemerisTimeFromDate(startTimeStr);

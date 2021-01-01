@@ -139,8 +139,7 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     else if (dictionary.hasKey(KeyTag) && dictionary.hasValue<ghoul::Dictionary>(KeyTag))
     {
         const ghoul::Dictionary& tagNames = dictionary.value<ghoul::Dictionary>(KeyTag);
-        const std::vector<std::string>& keys = tagNames.keys();
-        for (const std::string& key : keys) {
+        for (std::string_view key : tagNames.keys()) {
             std::string tagName = tagNames.value<std::string>(key);
             if (!tagName.empty()) {
                 addTag(std::move(tagName));

@@ -326,7 +326,9 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     }
 
     double radius = std::pow(10.0, 9.0);
-    dict.getValue(KeyRadius, radius);
+    if (dict.hasKey(KeyRadius) && dict.hasValue<double>(KeyRadius)) {
+        radius = dict.value<double>(KeyRadius);
+    }
     setBoundingSphere(radius);
 
     addPropertySubOwner(_geometry.get());

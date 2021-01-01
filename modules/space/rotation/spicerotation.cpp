@@ -130,8 +130,8 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
     }
 
     if (dictionary.hasKey(TimeFrameInfo.identifier)) {
-        ghoul::Dictionary timeFrameDictionary;
-        dictionary.getValue(TimeFrameInfo.identifier, timeFrameDictionary);
+        ghoul::Dictionary timeFrameDictionary =
+            dictionary.value<ghoul::Dictionary>(TimeFrameInfo.identifier);
         _timeFrame = TimeFrame::createFromDictionary(timeFrameDictionary);
         if (_timeFrame == nullptr) {
             throw ghoul::RuntimeError("Invalid dictionary for TimeFrame.");

@@ -2154,41 +2154,6 @@ TEST_CASE("Documentation: OrOperator", "[documentation]") {
     REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::Verification);
 }
 
-TEST_CASE("Documentation: BoolVector2Verifier", "[documentation]") {
-    using namespace openspace::documentation;
-
-    Documentation doc {
-        {{ "a", new BoolVector2Verifier, Optional::No }}
-    };
-
-    ghoul::Dictionary positive;
-    positive.setValue("a", glm::bvec2(true));
-    TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
-
-    ghoul::Dictionary negative;
-    {
-        ghoul::Dictionary inner;
-        inner.setValue("1", true);
-        inner.setValue("2", 1.0);
-        negative.setValue("a", inner);
-    };
-    TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
-    REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
-
-    ghoul::Dictionary negative2;
-    negative2.setValue("a", true);
-    negativeRes = testSpecification(doc, negative2);
-    REQUIRE_FALSE(negativeRes.success);
-    REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
-}
-
 TEST_CASE("Documentation: IntVector2Verifier", "[documentation]") {
     using namespace openspace::documentation;
 
@@ -2242,43 +2207,6 @@ TEST_CASE("Documentation: DoubleVector2Verifier", "[documentation]") {
         ghoul::Dictionary inner;
         inner.setValue("1", true);
         inner.setValue("2", 1.0);
-        negative.setValue("a", inner);
-    };
-    TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
-    REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
-
-    ghoul::Dictionary negative2;
-    negative2.setValue("a", true);
-    negativeRes = testSpecification(doc, negative2);
-    REQUIRE_FALSE(negativeRes.success);
-    REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
-}
-
-TEST_CASE("Documentation: BoolVector3Verifier", "[documentation]") {
-    using namespace openspace::documentation;
-    using namespace std::string_literals;
-
-    Documentation doc {
-        { { "a", new BoolVector3Verifier, Optional::No } }
-    };
-
-    ghoul::Dictionary positive;
-    positive.setValue("a", glm::bvec3(true));
-    TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
-
-    ghoul::Dictionary negative;
-    {
-        ghoul::Dictionary inner;
-        inner.setValue("1", true);
-        inner.setValue("2", 1.0);
-        inner.setValue("3", "s"s);
         negative.setValue("a", inner);
     };
     TestResult negativeRes = testSpecification(doc, negative);
@@ -2353,44 +2281,6 @@ TEST_CASE("Documentation: DoubleVector3Verifier", "[documentation]") {
         inner.setValue("1", true);
         inner.setValue("2", 1.0);
         inner.setValue("3", "s"s);
-        negative.setValue("a", inner);
-    };
-    TestResult negativeRes = testSpecification(doc, negative);
-    REQUIRE_FALSE(negativeRes.success);
-    REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
-
-    ghoul::Dictionary negative2;
-    negative2.setValue("a", true);
-    negativeRes = testSpecification(doc, negative2);
-    REQUIRE_FALSE(negativeRes.success);
-    REQUIRE(negativeRes.offenses.size() == 1);
-    REQUIRE(negativeRes.offenses[0].offender == "a");
-    REQUIRE(negativeRes.offenses[0].reason == TestResult::Offense::Reason::WrongType);
-}
-
-TEST_CASE("Documentation: BoolVector4Verifier", "[documentation]") {
-    using namespace openspace::documentation;
-    using namespace std::string_literals;
-
-    Documentation doc {
-        { { "a", new BoolVector4Verifier, Optional::No } }
-    };
-
-    ghoul::Dictionary positive;
-    positive.setValue("a", glm::bvec4(true));
-    TestResult positiveRes = testSpecification(doc, positive);
-    REQUIRE(positiveRes.success);
-    REQUIRE(positiveRes.offenses.empty());
-
-    ghoul::Dictionary negative;
-    {
-        ghoul::Dictionary inner;
-        inner.setValue("1", true);
-        inner.setValue("2", 1.0);
-        inner.setValue("3", "s"s);
-        inner.setValue("4", 1);
         negative.setValue("a", inner);
     };
     TestResult negativeRes = testSpecification(doc, negative);
@@ -2826,13 +2716,10 @@ TEST_CASE("Documentation: DeprecatedVerifier", "[documentation]") {
         { "int" , new IntDeprecatedVerifier, Optional::No },
         { "double", new DoubleDeprecatedVerifier, Optional::No },
         { "string" , new StringDeprecatedVerifier, Optional::No },
-        { "boolvec2", new DeprecatedVerifier<BoolVector2Verifier>, Optional::No },
         { "intvec2", new DeprecatedVerifier<IntVector2Verifier>, Optional::No },
         { "doublevec2", new DeprecatedVerifier<DoubleVector2Verifier>, Optional::No },
-        { "boolvec3", new DeprecatedVerifier<BoolVector3Verifier>, Optional::No },
         { "intvec3", new DeprecatedVerifier<IntVector3Verifier>, Optional::No },
         { "doublevec3", new DeprecatedVerifier<DoubleVector3Verifier>, Optional::No },
-        { "boolvec4", new DeprecatedVerifier<BoolVector4Verifier>, Optional::No },
         { "intvec4", new DeprecatedVerifier<IntVector4Verifier>, Optional::No },
         { "doublevec4", new DeprecatedVerifier<DoubleVector4Verifier>, Optional::No }
     }};
@@ -2842,13 +2729,10 @@ TEST_CASE("Documentation: DeprecatedVerifier", "[documentation]") {
     positive.setValue("int", 1);
     positive.setValue("double", 2.0);
     positive.setValue("string", ""s);
-    positive.setValue("boolvec2", glm::bvec2(false));
     positive.setValue("intvec2", glm::ivec2(0));
     positive.setValue("doublevec2", glm::dvec2(0.0));
-    positive.setValue("boolvec3", glm::bvec3(false));
     positive.setValue("intvec3", glm::ivec3(0));
     positive.setValue("doublevec3", glm::dvec3(0.0));
-    positive.setValue("boolvec4", glm::bvec4(false));
     positive.setValue("intvec4", glm::ivec4(0));
     positive.setValue("doublevec4", glm::dvec4(0.0));
     TestResult positiveRes = testSpecification(doc, positive);
@@ -2857,30 +2741,24 @@ TEST_CASE("Documentation: DeprecatedVerifier", "[documentation]") {
     REQUIRE(positiveRes.warnings.size() == 13);
     REQUIRE(positiveRes.warnings[0].offender == "bool");
     REQUIRE(positiveRes.warnings[0].reason == TestResult::Warning::Reason::Deprecated);
-    REQUIRE(positiveRes.warnings[1].offender == "boolvec2");
+    REQUIRE(positiveRes.warnings[1].offender == "double");
     REQUIRE(positiveRes.warnings[1].reason == TestResult::Warning::Reason::Deprecated);
-    REQUIRE(positiveRes.warnings[2].offender == "boolvec3");
+    REQUIRE(positiveRes.warnings[2].offender == "doublevec2");
     REQUIRE(positiveRes.warnings[2].reason == TestResult::Warning::Reason::Deprecated);
-    REQUIRE(positiveRes.warnings[3].offender == "boolvec4");
+    REQUIRE(positiveRes.warnings[3].offender == "doublevec3");
     REQUIRE(positiveRes.warnings[3].reason == TestResult::Warning::Reason::Deprecated);
-    REQUIRE(positiveRes.warnings[4].offender == "double");
+    REQUIRE(positiveRes.warnings[4].offender == "doublevec4");
     REQUIRE(positiveRes.warnings[4].reason == TestResult::Warning::Reason::Deprecated);
-    REQUIRE(positiveRes.warnings[5].offender == "doublevec2");
+    REQUIRE(positiveRes.warnings[5].offender == "int");
     REQUIRE(positiveRes.warnings[5].reason == TestResult::Warning::Reason::Deprecated);
-    REQUIRE(positiveRes.warnings[6].offender == "doublevec3");
+    REQUIRE(positiveRes.warnings[6].offender == "intvec2");
     REQUIRE(positiveRes.warnings[6].reason == TestResult::Warning::Reason::Deprecated);
-    REQUIRE(positiveRes.warnings[7].offender == "doublevec4");
+    REQUIRE(positiveRes.warnings[7].offender == "intvec3");
     REQUIRE(positiveRes.warnings[7].reason == TestResult::Warning::Reason::Deprecated);
-    REQUIRE(positiveRes.warnings[8].offender == "int");
+    REQUIRE(positiveRes.warnings[8].offender == "intvec4");
     REQUIRE(positiveRes.warnings[8].reason == TestResult::Warning::Reason::Deprecated);
-    REQUIRE(positiveRes.warnings[9].offender == "intvec2");
+    REQUIRE(positiveRes.warnings[9].offender == "string");
     REQUIRE(positiveRes.warnings[9].reason == TestResult::Warning::Reason::Deprecated);
-    REQUIRE(positiveRes.warnings[10].offender == "intvec3");
-    REQUIRE(positiveRes.warnings[10].reason == TestResult::Warning::Reason::Deprecated);
-    REQUIRE(positiveRes.warnings[11].offender == "intvec4");
-    REQUIRE(positiveRes.warnings[11].reason == TestResult::Warning::Reason::Deprecated);
-    REQUIRE(positiveRes.warnings[12].offender == "string");
-    REQUIRE(positiveRes.warnings[12].reason == TestResult::Warning::Reason::Deprecated);
 }
 
 TEST_CASE("Documentation: Verifier Type Post Conditions", "[documentation]") {
@@ -2893,13 +2771,10 @@ TEST_CASE("Documentation: Verifier Type Post Conditions", "[documentation]") {
     REQUIRE(StringVerifier().type() != "");
     REQUIRE(TableVerifier().type() != "");
 
-    REQUIRE(BoolVector2Verifier().type() != "");
     REQUIRE(IntVector2Verifier().type() != "");
     REQUIRE(DoubleVector2Verifier().type() != "");
-    REQUIRE(BoolVector3Verifier().type() != "");
     REQUIRE(IntVector3Verifier().type() != "");
     REQUIRE(DoubleVector3Verifier().type() != "");
-    REQUIRE(BoolVector4Verifier().type() != "");
     REQUIRE(IntVector4Verifier().type() != "");
     REQUIRE(DoubleVector4Verifier().type() != "");
 
@@ -2940,13 +2815,10 @@ TEST_CASE("Documentation: Verifier Type Post Conditions", "[documentation]") {
     REQUIRE(DoubleAnnotationVerifier("A"s).type() != "");
     REQUIRE(StringAnnotationVerifier("A"s).type() != "");
     REQUIRE(TableAnnotationVerifier("A"s).type() != "");
-    REQUIRE(AnnotationVerifier<BoolVector2Verifier>("A"s).type() != "");
     REQUIRE(AnnotationVerifier<IntVector2Verifier>("A"s).type() != "");
     REQUIRE(AnnotationVerifier<DoubleVector2Verifier>("A"s).type() != "");
-    REQUIRE(AnnotationVerifier<BoolVector3Verifier>("A"s).type() != "");
     REQUIRE(AnnotationVerifier<IntVector3Verifier>("A"s).type() != "");
     REQUIRE(AnnotationVerifier<DoubleVector3Verifier>("A"s).type() != "");
-    REQUIRE(AnnotationVerifier<BoolVector4Verifier>("A"s).type() != "");
     REQUIRE(AnnotationVerifier<IntVector4Verifier>("A"s).type() != "");
     REQUIRE(AnnotationVerifier<DoubleVector4Verifier>("A"s).type() != "");
 
@@ -2955,13 +2827,10 @@ TEST_CASE("Documentation: Verifier Type Post Conditions", "[documentation]") {
     REQUIRE(DoubleDeprecatedVerifier().type() != "");
     REQUIRE(StringDeprecatedVerifier().type() != "");
     REQUIRE(TableDeprecatedVerifier().type() != "");
-    REQUIRE(DeprecatedVerifier<BoolVector2Verifier>().type() != "");
     REQUIRE(DeprecatedVerifier<IntVector2Verifier>().type() != "");
     REQUIRE(DeprecatedVerifier<DoubleVector2Verifier>().type() != "");
-    REQUIRE(DeprecatedVerifier<BoolVector3Verifier>().type() != "");
     REQUIRE(DeprecatedVerifier<IntVector3Verifier>().type() != "");
     REQUIRE(DeprecatedVerifier<DoubleVector3Verifier>().type() != "");
-    REQUIRE(DeprecatedVerifier<BoolVector4Verifier>().type() != "");
     REQUIRE(DeprecatedVerifier<IntVector4Verifier>().type() != "");
     REQUIRE(DeprecatedVerifier<DoubleVector4Verifier>().type() != "");
 
@@ -2978,13 +2847,10 @@ TEST_CASE("Documentation: Verifier Documentation Post Conditions", "[documentati
     REQUIRE(StringVerifier().documentation() != "");
     REQUIRE(TableVerifier().documentation() != "");
 
-    REQUIRE(BoolVector2Verifier().documentation() != "");
     REQUIRE(IntVector2Verifier().documentation() != "");
     REQUIRE(DoubleVector2Verifier().documentation() != "");
-    REQUIRE(BoolVector3Verifier().documentation() != "");
     REQUIRE(IntVector3Verifier().documentation() != "");
     REQUIRE(DoubleVector3Verifier().documentation() != "");
-    REQUIRE(BoolVector4Verifier().documentation() != "");
     REQUIRE(IntVector4Verifier().documentation() != "");
     REQUIRE(DoubleVector4Verifier().documentation() != "");
 
@@ -3025,13 +2891,10 @@ TEST_CASE("Documentation: Verifier Documentation Post Conditions", "[documentati
     REQUIRE(DoubleAnnotationVerifier("A"s).documentation() != "");
     REQUIRE(StringAnnotationVerifier("A"s).documentation() != "");
     REQUIRE(TableAnnotationVerifier("A"s).documentation() != "");
-    REQUIRE(AnnotationVerifier<BoolVector2Verifier>("A"s).documentation() != "");
     REQUIRE(AnnotationVerifier<IntVector2Verifier>("A"s).documentation() != "");
     REQUIRE(AnnotationVerifier<DoubleVector2Verifier>("A"s).documentation() != "");
-    REQUIRE(AnnotationVerifier<BoolVector3Verifier>("A"s).documentation() != "");
     REQUIRE(AnnotationVerifier<IntVector3Verifier>("A"s).documentation() != "");
     REQUIRE(AnnotationVerifier<DoubleVector3Verifier>("A"s).documentation() != "");
-    REQUIRE(AnnotationVerifier<BoolVector4Verifier>("A"s).documentation() != "");
     REQUIRE(AnnotationVerifier<IntVector4Verifier>("A"s).documentation() != "");
     REQUIRE(AnnotationVerifier<DoubleVector4Verifier>("A"s).documentation() != "");
 
@@ -3040,13 +2903,10 @@ TEST_CASE("Documentation: Verifier Documentation Post Conditions", "[documentati
     REQUIRE(DoubleDeprecatedVerifier().documentation() != "");
     REQUIRE(StringDeprecatedVerifier().documentation() != "");
     REQUIRE(TableDeprecatedVerifier().documentation() != "");
-    REQUIRE(DeprecatedVerifier<BoolVector2Verifier>().documentation() != "");
     REQUIRE(DeprecatedVerifier<IntVector2Verifier>().documentation() != "");
     REQUIRE(DeprecatedVerifier<DoubleVector2Verifier>().documentation() != "");
-    REQUIRE(DeprecatedVerifier<BoolVector3Verifier>().documentation() != "");
     REQUIRE(DeprecatedVerifier<IntVector3Verifier>().documentation() != "");
     REQUIRE(DeprecatedVerifier<DoubleVector3Verifier>().documentation() != "");
-    REQUIRE(DeprecatedVerifier<BoolVector4Verifier>().documentation() != "");
     REQUIRE(DeprecatedVerifier<IntVector4Verifier>().documentation() != "");
     REQUIRE(DeprecatedVerifier<DoubleVector4Verifier>().documentation() != "");
 

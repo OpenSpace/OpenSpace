@@ -95,23 +95,23 @@ RawVolumeMetadata RawVolumeMetadata::createFromDictionary(
 
 ghoul::Dictionary RawVolumeMetadata::dictionary() {
     ghoul::Dictionary dict;
-    dict.setValue<glm::dvec3>(KeyDimensions, dimensions);
-    dict.setValue<std::string>(KeyGridType, gridTypeToString(gridType));
+    dict.setValue(KeyDimensions, glm::dvec3(dimensions));
+    dict.setValue(KeyGridType, gridTypeToString(gridType));
 
     if (hasDomainUnit) {
-        dict.setValue<std::string>(KeyDomainUnit, domainUnit);
+        dict.setValue(KeyDomainUnit, domainUnit);
     }
     if (hasDomainBounds) {
-        dict.setValue<glm::dvec3>(KeyLowerDomainBound, lowerDomainBound);
-        dict.setValue<glm::dvec3>(KeyUpperDomainBound, upperDomainBound);
+        dict.setValue(KeyLowerDomainBound, glm::dvec3(lowerDomainBound));
+        dict.setValue(KeyUpperDomainBound, glm::dvec3(upperDomainBound));
     }
 
     if (hasValueRange) {
-        dict.setValue<double>(KeyMinValue, minValue);
-        dict.setValue<double>(KeyMaxValue, maxValue);
+        dict.setValue(KeyMinValue, minValue);
+        dict.setValue(KeyMaxValue, maxValue);
     }
     if (hasDomainUnit) {
-        dict.setValue<std::string>(KeyValueUnit, valueUnit);
+        dict.setValue(KeyValueUnit, valueUnit);
     }
 
     if (hasTime) {
@@ -120,7 +120,7 @@ ghoul::Dictionary RawVolumeMetadata::dictionary() {
         if (timeString.back() == 'Z') {
             timeString = timeString.substr(0, timeString.size() - 1);
         }
-        dict.setValue<std::string>(KeyTime, std::string(timeString));
+        dict.setValue(KeyTime, std::string(timeString));
     }
     return dict;
 }

@@ -215,11 +215,13 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
         _rotation = dictionary.value<glm::dvec3>("Rotation");
     }
 
-    std::string startTimeString, endTimeString;
-
-    bool hasTimeData = dictionary.getValue(KeyStartTime, startTimeString) &&
-                       dictionary.getValue(KeyEndTime, endTimeString);
-    if (hasTimeData) {
+    if (dictionary.hasKey(KeyStartTime) &&
+        dictionary.hasValue<std::string>(KeyStartTime) &&
+        dictionary.hasKey(KeyEndTime) &&
+        dictionary.hasValue<std::string>(KeyEndTime))
+    {
+        std::string startTimeString = dictionary.value<std::string>(KeyStartTime);
+        std::string endTimeString = dictionary.value<std::string>(KeyEndTime);
         _startTime = SpiceManager::ref().ephemerisTimeFromDate(startTimeString);
         _endTime = SpiceManager::ref().ephemerisTimeFromDate(endTimeString);
         _loop = false;

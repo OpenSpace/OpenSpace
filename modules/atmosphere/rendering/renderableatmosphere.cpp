@@ -274,21 +274,30 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     //================================================================
     //======== Reads Shadow (Eclipses) Entries in mod file ===========
     //================================================================
-    ghoul::Dictionary shadowDictionary;
-    bool success = dictionary.getValue(KeyShadowGroup, shadowDictionary);
-    if (success) {
+    if (dictionary.hasKey(KeyShadowGroup) &&
+        dictionary.hasValue<ghoul::Dictionary>(KeyShadowGroup))
+    {
+        ghoul::Dictionary shadowDictionary =
+            dictionary.value<ghoul::Dictionary>(KeyShadowGroup);
         bool disableShadows = false;
+        bool success = true;
         std::vector<std::pair<std::string, double>> sourceArray;
         unsigned int sourceCounter = 1;
         while (success) {
-            std::string sourceName;
-            success = shadowDictionary.getValue(KeyShadowSource +
-                std::to_string(sourceCounter) + ".Name", sourceName);
+            std::string keyName =
+                KeyShadowSource + std::to_string(sourceCounter) + ".Name";
+            std::string keyRadius =
+                KeyShadowSource + std::to_string(sourceCounter) + ".Radius";
+
+            success =
+                shadowDictionary.hasKey(keyName) &&
+                shadowDictionary.hasValue<std::string>(keyName);
             if (success) {
-                double sourceRadius;
-                success = shadowDictionary.getValue(KeyShadowSource +
-                    std::to_string(sourceCounter) + ".Radius", sourceRadius);
+                std::string sourceName = shadowDictionary.value<std::string>(keyName);
+                success = shadowDictionary.hasKey(keyRadius) &&
+                    shadowDictionary.hasValue<double>(keyRadius);
                 if (success) {
+                    double sourceRadius = shadowDictionary.value<double>(keyRadius);
                     sourceArray.emplace_back(sourceName, sourceRadius);
                 }
                 else {
@@ -302,6 +311,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
                     break;
                 }
             }
+
             sourceCounter++;
         }
 
@@ -310,14 +320,21 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             std::vector<std::pair<std::string, double>> casterArray;
             unsigned int casterCounter = 1;
             while (success) {
-                std::string casterName;
-                success = shadowDictionary.getValue(KeyShadowCaster +
-                    std::to_string(casterCounter) + ".Name", casterName);
+                std::string keyName =
+                    KeyShadowCaster + std::to_string(casterCounter) + ".Name";
+                std::string keyRadius =
+                    KeyShadowCaster + std::to_string(casterCounter) + ".Radius";
+
+                success = shadowDictionary.hasKey(keyName) &&
+                    shadowDictionary.hasValue<std::string>(keyName);
                 if (success) {
-                    double casterRadius;
-                    success = shadowDictionary.getValue(KeyShadowCaster +
-                        std::to_string(casterCounter) + ".Radius", casterRadius);
+                    std::string casterName = shadowDictionary.value<std::string>(keyName);
+
+                    success = shadowDictionary.hasKey(keyRadius) &&
+                        shadowDictionary.hasValue<double>(keyRadius);
                     if (success) {
+                        double casterRadius =
+                            shadowDictionary.value<double>(keyRadius);
                         casterArray.emplace_back(casterName, casterRadius);
                     }
                     else {
@@ -352,9 +369,11 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     //================================================================
     //========== Reads Atmosphere Entries from mod file ==============
     //================================================================
-    ghoul::Dictionary atmosphereDictionary;
-    success = dictionary.getValue(keyAtmosphere, atmosphereDictionary);
+    bool success = dictionary.hasKey(keyAtmosphere) &&
+        dictionary.hasValue<ghoul::Dictionary>(keyAtmosphere);
     if (success) {
+        ghoul::Dictionary atmosphereDictionary =
+            dictionary.value<ghoul::Dictionary>(keyAtmosphere);
         bool errorReadingAtmosphereData = false;
         if (atmosphereDictionary.hasKey(keyAtmosphereRadius)) {
             _atmosphereRadius = static_cast<float>(
@@ -427,10 +446,11 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             );
         }
 
-        ghoul::Dictionary rayleighDictionary;
-        success = atmosphereDictionary.getValue(keyRayleigh, rayleighDictionary);
-
+        success = atmosphereDictionary.hasKey(keyRayleigh) &&
+            atmosphereDictionary.hasValue<ghoul::Dictionary>(keyRayleigh);
         if (success) {
+            ghoul::Dictionary rayleighDictionary =
+                atmosphereDictionary.value<ghoul::Dictionary>(keyRayleigh);
             // Not using right now.
             glm::dvec3 rayleighWavelengths = glm::dvec3(0.f);
             if (rayleighDictionary.hasKey("Coefficients") &&
@@ -489,9 +509,11 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             );
         }
 
-        ghoul::Dictionary ozoneDictionary;
-        success = atmosphereDictionary.getValue(keyOzone, ozoneDictionary);
+        success = atmosphereDictionary.hasKey(keyOzone) &&
+            atmosphereDictionary.hasValue<ghoul::Dictionary>(keyOzone);
         if (success) {
+            ghoul::Dictionary ozoneDictionary =
+                atmosphereDictionary.value<ghoul::Dictionary>(keyOzone);
             _ozoneLayerEnabled =
                 ozoneDictionary.hasKey(keyOzoneHeightScale) &&
                 ozoneDictionary.hasValue<double>(keyOzoneHeightScale);
@@ -523,9 +545,11 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             _ozoneLayerEnabled = false;
         }
 
-        ghoul::Dictionary mieDictionary;
-        success = atmosphereDictionary.getValue(keyMie, mieDictionary);
+        success = atmosphereDictionary.hasKey(keyMie) &&
+            atmosphereDictionary.hasValue<ghoul::Dictionary>(keyMie);
         if (success) {
+            ghoul::Dictionary mieDictionary =
+                atmosphereDictionary.value<ghoul::Dictionary>(keyMie);
             if (mieDictionary.hasKey(keyMieHeightScale)) {
                 _mieHeightScale = static_cast<float>(
                     mieDictionary.value<double>(keyMieHeightScale)
@@ -603,9 +627,11 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             );
         }
 
-        ghoul::Dictionary ImageDictionary;
-        success = atmosphereDictionary.getValue(keyImage, ImageDictionary);
+        success = atmosphereDictionary.hasKey(keyImage) &&
+            atmosphereDictionary.hasValue<ghoul::Dictionary>(keyImage);
         if (success) {
+            ghoul::Dictionary ImageDictionary =
+                atmosphereDictionary.value<ghoul::Dictionary>(keyImage);
             if (ImageDictionary.hasKey(keyToneMappingOp)) {
                 _preCalculatedTexturesScale = static_cast<float>(
                     ImageDictionary.value<double>(keyToneMappingOp)
@@ -617,9 +643,11 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             }
         }
 
-        ghoul::Dictionary debugDictionary;
-        success = atmosphereDictionary.getValue(keyATMDebug, debugDictionary);
+        success = atmosphereDictionary.hasKey(keyATMDebug) &&
+            atmosphereDictionary.hasValue<ghoul::Dictionary>(keyATMDebug);
         if (success) {
+            ghoul::Dictionary debugDictionary =
+                atmosphereDictionary.value<ghoul::Dictionary>(keyATMDebug);
             if (debugDictionary.hasKey(keyTextureScale)) {
                 _preCalculatedTexturesScale = static_cast<float>(
                     debugDictionary.value<double>(keyTextureScale)

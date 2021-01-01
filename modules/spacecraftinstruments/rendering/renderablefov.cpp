@@ -328,9 +328,9 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
 
     if (dictionary.hasKey(KeyFrameConversions)) {
         ghoul::Dictionary fc = dictionary.value<ghoul::Dictionary>(KeyFrameConversions);
-        for (const std::string& key : fc.keys()) {
+        for (std::string_view key : fc.keys()) {
             global::moduleEngine->module<SpacecraftInstrumentsModule>()->addFrame(
-                key,
+                std::string(key),
                 fc.value<std::string>(key)
             );
         }

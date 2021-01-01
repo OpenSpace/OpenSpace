@@ -44,16 +44,15 @@ std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromDictionary(
 {
     std::vector<std::unique_ptr<Task>> tasks;
 
-    const std::vector<std::string>& keys = tasksDictionary.keys();
-    for (const std::string& key : keys) {
-        std::string taskName;
-        ghoul::Dictionary subTask;
-        if (tasksDictionary.getValue(key, taskName)) {
+    for (std::string_view key : tasksDictionary.keys()) {
+        if (tasksDictionary.hasValue<std::string>(key)) {
+            std::string taskName = tasksDictionary.value<std::string>(key);
             const std::string path = taskName + ".task";
             std::vector<std::unique_ptr<Task>> subTasks = tasksFromFile(path);
             std::move(subTasks.begin(), subTasks.end(), std::back_inserter(tasks));
         }
-        else if (tasksDictionary.getValue(key, subTask)) {
+        else if (tasksDictionary.hasValue<ghoul::Dictionary>(key)) {
+            ghoul::Dictionary subTask = tasksDictionary.value<ghoul::Dictionary>(key);
             const std::string& taskType = subTask.value<std::string>("Type");
             std::unique_ptr<Task> task = Task::createFromDictionary(subTask);
             if (!task) {

@@ -315,14 +315,18 @@ void ProjectionComponent::initialize(const std::string& identifier,
     }
 
     const std::string& sequenceType = dictionary.value<std::string>(keySequenceType);
-    //Important: client must define translation-list in mod file IFF playbook
+    // Important: client must define translation-list in mod file IFF playbook
     if (!dictionary.hasKey(keyTranslation)) {
         LWARNING("No playbook translation provided, spice calls must match playbook!");
         return;
     }
 
     ghoul::Dictionary translationDictionary;
-    dictionary.getValue(keyTranslation, translationDictionary);
+    if (dictionary.hasKey(keyTranslation) &&
+        dictionary.hasValue<ghoul::Dictionary>(keyTranslation))
+    {
+        translationDictionary = dictionary.value<ghoul::Dictionary>(keyTranslation);
+    }
 
     std::vector<std::unique_ptr<SequenceParser>> parsers;
     for (std::string& sequenceSource : sequenceSources) {
@@ -394,14 +398,19 @@ void ProjectionComponent::initialize(const std::string& identifier,
                 dictionary.value<std::string>(keyTimesSequenceDir)
             );
             ghoul::Dictionary timesTranslationDictionary;
-            dictionary.getValue(keyTimesTranslation, timesTranslationDictionary);
+            if (dictionary.hasKey(keyTimesTranslation) &&
+                dictionary.hasValue<ghoul::Dictionary>(keyTimesTranslation))
+            {
+                timesTranslationDictionary =
+                    dictionary.value<ghoul::Dictionary>(keyTimesTranslation);
+            }
 
             parsers.push_back(
                 std::make_unique<InstrumentTimesParser>(
                     identifier,
                     std::move(timesSequenceSource),
                     timesTranslationDictionary
-                    )
+                )
             );
         }
     }

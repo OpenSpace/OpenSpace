@@ -154,10 +154,11 @@ namespace {
             ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
 
             std::map<std::string, std::string> res;
+            std::vector<std::string_view> keys = d.keys();
             for (size_t i = 0; i < d.size(); ++i) {
-                std::string key = d.keys()[i];
+                std::string_view key = keys[i];
                 std::string v = d.value<std::string>(key);
-                res[std::move(key)] = std::move(v);
+                res[std::string(key)] = std::move(v);
             }
             value = res;
         }
@@ -166,10 +167,11 @@ namespace {
             ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
 
             std::map<std::string, ghoul::Dictionary> res;
+            std::vector<std::string_view> keys = d.keys();
             for (size_t i = 0; i < d.size(); ++i) {
-                std::string key = d.keys()[i];
+                std::string_view key = keys[i];
                 ghoul::Dictionary v = d.value<ghoul::Dictionary>(key);
-                res[std::move(key)] = std::move(v);
+                res[std::string(key)] = std::move(v);
             }
             value = res;
         }
@@ -178,9 +180,15 @@ namespace {
             Configuration::Logging& v = static_cast<Configuration::Logging&>(value);
             ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
 
-            d.getValue(KeyLogLevel, v.level);
-            d.getValue(KeyImmediateFlush, v.forceImmediateFlush);
-            d.getValue(KeyCapabilitiesVerbosity, v.capabilitiesVerbosity);
+            if (d.hasKey(KeyLogLevel)) {
+                v.level = d.value<std::string>(KeyLogLevel);
+            }
+            if (d.hasKey(KeyImmediateFlush)) {
+                v.forceImmediateFlush = d.value<bool>(KeyImmediateFlush);
+            }
+            if (d.hasKey(KeyCapabilitiesVerbosity)) {
+                v.capabilitiesVerbosity = d.value<std::string>(KeyCapabilitiesVerbosity);
+            }
 
             if (d.hasKey(KeyLogs) && d.hasValue<ghoul::Dictionary>(KeyLogs)) {
                 ghoul::Dictionary l = d.value<ghoul::Dictionary>(KeyLogs);
@@ -196,18 +204,26 @@ namespace {
             Configuration::DocumentationInfo& v =
                 static_cast<Configuration::DocumentationInfo&>(value);
             ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
-
-            d.getValue(KeyDocumentationPath, v.path);
+            if (d.hasKey(KeyDocumentationPath) &&
+                d.hasValue<std::string>(KeyDocumentationPath))
+            {
+                v.path = d.value<std::string>(KeyDocumentationPath);
+            }
         }
         // NOLINTNEXTLINE
         else if constexpr (std::is_same_v<T, Configuration::LoadingScreen>) {
             Configuration::LoadingScreen& v =
                 static_cast<Configuration::LoadingScreen&>(value);
             ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
-
-            d.getValue(KeyShowMessage, v.isShowingMessages);
-            d.getValue(KeyShowNodeNames, v.isShowingNodeNames);
-            d.getValue(KeyShowProgressbar, v.isShowingProgressbar);
+            if (d.hasKey(KeyShowMessage) && d.hasValue<bool>(KeyShowMessage)) {
+                v.isShowingMessages = d.value<bool>(KeyShowMessage);
+            }
+            if (d.hasKey(KeyShowNodeNames) && d.hasValue<bool>(KeyShowNodeNames)) {
+                v.isShowingNodeNames = d.value<bool>(KeyShowNodeNames);
+            }
+            if (d.hasKey(KeyShowProgressbar) && d.hasValue<bool>(KeyShowProgressbar)) {
+                v.isShowingProgressbar = d.value<bool>(KeyShowProgressbar);
+            }
         }
         // NOLINTNEXTLINE
         else if constexpr (std::is_same_v<T, Configuration::OpenGLDebugContext>) {
@@ -215,8 +231,12 @@ namespace {
                 static_cast<Configuration::OpenGLDebugContext&>(value);
             ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
 
-            d.getValue(KeyActivate, v.isActive);
-            d.getValue(KeySynchronous, v.isSynchronous);
+            if (d.hasKey(KeyActivate) && d.hasValue<bool>(KeyActivate)) {
+                v.isActive = d.value<bool>(KeyActivate);
+            }
+            if (d.hasKey(KeySynchronous) && d.hasValue<bool>(KeySynchronous)) {
+                v.isSynchronous = d.value<bool>(KeySynchronous);
+            }
 
             if (d.hasKey(KeyFilterIdentifier) &&
                 d.hasValue<ghoul::Dictionary>(KeyFilterIdentifier))
@@ -228,11 +248,17 @@ namespace {
                     Configuration::OpenGLDebugContext::IdentifierFilter filter;
                     ghoul::Dictionary fi = f.value<ghoul::Dictionary>(std::to_string(i));
 
-                    double id = static_cast<double>(filter.identifier);
-                    fi.getValue(KeyIdentifier, id);
-                    filter.identifier = static_cast<unsigned int>(id);
-                    fi.getValue(KeySource, filter.source);
-                    fi.getValue(KeyType, filter.type);
+                    if (fi.hasKey(KeyIdentifier) && fi.hasValue<double>(KeyIdentifier)) {
+                        filter.identifier = static_cast<unsigned int>(
+                            fi.value<double>(KeyIdentifier)
+                        );
+                    }
+                    if (fi.hasKey(KeySource) && fi.hasValue<std::string>(KeySource)) {
+                        filter.source = fi.value<std::string>(KeySource);
+                    }
+                    if (fi.hasKey(KeyType) && fi.hasValue<std::string>(KeyType)) {
+                        filter.type = fi.value<std::string>(KeyType);
+                    }
 
                     res.push_back(filter);
                 }
@@ -257,14 +283,25 @@ namespace {
             Configuration::HTTPProxy& v = static_cast<Configuration::HTTPProxy&>(value);
             ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
 
-            d.getValue(KeyActivate, v.usingHttpProxy);
-            d.getValue(KeyAddress, v.address);
-            double p = static_cast<double>(v.port);
-            d.getValue(KeyPort, p);
-            v.port = static_cast<unsigned int>(p);
-            d.getValue(KeyAuthentication, v.authentication);
-            d.getValue(KeyUser, v.user);
-            d.getValue(KeyPassword, v.password);
+            if (d.hasKey(KeyActivate) && d.hasValue<bool>(KeyActivate)) {
+                v.usingHttpProxy = d.value<bool>(KeyActivate);
+            }
+            if (d.hasKey(KeyAddress) && d.hasValue<std::string>(KeyAddress)) {
+                v.address = d.value<std::string>(KeyAddress);
+            }
+            if (d.hasKey(KeyPort) && d.hasValue<double>(KeyPort)) {
+                v.port = static_cast<unsigned int>(d.value<double>(KeyPort));
+            }
+            if (d.hasKey(KeyAuthentication) && d.hasValue<std::string>(KeyAuthentication))
+            {
+                v.authentication = d.value<std::string>(KeyAuthentication);
+            }
+            if (d.hasKey(KeyUser) && d.hasValue<std::string>(KeyUser)) {
+                v.user = d.value<std::string>(KeyUser);
+            }
+            if (d.hasKey(KeyPassword) && d.hasValue<std::string>(KeyPassword)) {
+                v.password = d.value<std::string>(KeyPassword);
+            }
         }
         else {
             value = ghoul::lua::value<T>(L);

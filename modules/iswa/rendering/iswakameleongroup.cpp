@@ -90,7 +90,7 @@ void IswaKameleonGroup::registerProperties() {
     _resolution.onChange([this]() {
         LDEBUG("Group " + identifier() + " published resolutionChanged");
         ghoul::Dictionary d;
-        d.setValue<double>("resolution", _resolution.value());
+        d.setValue("resolution", static_cast<double>(_resolution));
         _groupEvent.publish("resolutionChanged", d);
     });
 

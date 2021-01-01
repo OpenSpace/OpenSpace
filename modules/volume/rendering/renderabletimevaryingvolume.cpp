@@ -215,7 +215,11 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     _secondsAfter = static_cast<float>(dictionary.value<double>(KeySecondsAfter));
 
     ghoul::Dictionary clipPlanesDictionary;
-    dictionary.getValue(KeyClipPlanes, clipPlanesDictionary);
+    if (dictionary.hasKey(KeyClipPlanes) &&
+        dictionary.hasValue<ghoul::Dictionary>(KeyClipPlanes))
+    {
+        clipPlanesDictionary.value<ghoul::Dictionary>(KeyClipPlanes);
+    }
     _clipPlanes = std::make_shared<volume::VolumeClipPlanes>(clipPlanesDictionary);
     _clipPlanes->setIdentifier("clipPlanes");
     _clipPlanes->setGuiName("Clip Planes");

@@ -166,7 +166,7 @@ void IswaDataGroup::registerProperties() {
     _dataOptions.onChange([this]() {
         LDEBUG("Group " + identifier() + " published dataOptionsChanged");
         ghoul::Dictionary dict;
-        dict.setValue<std::vector<int>>("dataOptions", _dataOptions.value());
+        dict.setValue("dataOptions", _dataOptions.value());
         _groupEvent.publish("dataOptionsChanged", dict);
     });
 }

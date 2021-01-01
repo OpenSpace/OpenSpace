@@ -187,8 +187,8 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     }
 
     if (dictionary.hasKey(KeyTransformTranslation)) {
-        ghoul::Dictionary translationDictionary;
-        dictionary.getValue(KeyTransformTranslation, translationDictionary);
+        ghoul::Dictionary translationDictionary =
+            dictionary.value<ghoul::Dictionary>(KeyTransformTranslation);
         result->_transform.translation = Translation::createFromDictionary(
             translationDictionary
         );
@@ -207,8 +207,8 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     }
 
     if (dictionary.hasKey(KeyTransformRotation)) {
-        ghoul::Dictionary rotationDictionary;
-        dictionary.getValue(KeyTransformRotation, rotationDictionary);
+        ghoul::Dictionary rotationDictionary =
+            dictionary.value<ghoul::Dictionary>(KeyTransformRotation);
         result->_transform.rotation = Rotation::createFromDictionary(rotationDictionary);
         if (result->_transform.rotation == nullptr) {
             LERROR(fmt::format(
@@ -225,8 +225,8 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     }
 
     if (dictionary.hasKey(KeyTransformScale)) {
-        ghoul::Dictionary scaleDictionary;
-        dictionary.getValue(KeyTransformScale, scaleDictionary);
+        ghoul::Dictionary scaleDictionary =
+            dictionary.value<ghoul::Dictionary>(KeyTransformScale);
         result->_transform.scale = Scale::createFromDictionary(scaleDictionary);
         if (result->_transform.scale == nullptr) {
             LERROR(fmt::format(
@@ -241,8 +241,8 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     }
 
     if (dictionary.hasKey(KeyTimeFrame)) {
-        ghoul::Dictionary timeFrameDictionary;
-        dictionary.getValue(KeyTimeFrame, timeFrameDictionary);
+        ghoul::Dictionary timeFrameDictionary =
+            dictionary.value<ghoul::Dictionary>(KeyTimeFrame);
         result->_timeFrame = TimeFrame::createFromDictionary(timeFrameDictionary);
         if (result->_timeFrame == nullptr) {
             LERROR(fmt::format(
@@ -260,8 +260,8 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
 
     // We initialize the renderable last as it probably has the most dependencies
     if (dictionary.hasValue<ghoul::Dictionary>(KeyRenderable)) {
-        ghoul::Dictionary renderableDictionary;
-        dictionary.getValue(KeyRenderable, renderableDictionary);
+        ghoul::Dictionary renderableDictionary =
+            dictionary.value<ghoul::Dictionary>(KeyRenderable);
 
         renderableDictionary.setValue(KeyIdentifier, result->_identifier);
 
@@ -301,9 +301,8 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         }
         else if (dictionary.hasValue<ghoul::Dictionary>(KeyTag)) {
             ghoul::Dictionary tagNames = dictionary.value<ghoul::Dictionary>(KeyTag);
-            std::vector<std::string> keys = tagNames.keys();
             std::string tagName;
-            for (const std::string& key : keys) {
+            for (std::string_view key : tagNames.keys()) {
                 tagName = tagNames.value<std::string>(key);
                 if (!tagName.empty()) {
                     result->addTag(std::move(tagName));

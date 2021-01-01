@@ -230,7 +230,11 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     }
 
     ghoul::Dictionary clipPlanesDictionary;
-    dictionary.getValue(KeyClipPlanes, clipPlanesDictionary);
+    if (dictionary.hasKey(KeyClipPlanes) &&
+        dictionary.hasValue<ghoul::Dictionary>(KeyClipPlanes))
+    {
+        clipPlanesDictionary = dictionary.value<ghoul::Dictionary>(KeyClipPlanes);
+    }
     _clipPlanes = std::make_shared<volume::VolumeClipPlanes>(clipPlanesDictionary);
     _clipPlanes->setIdentifier("clipPlanes");
     _clipPlanes->setGuiName("Clip Planes");
