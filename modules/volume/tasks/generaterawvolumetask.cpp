@@ -61,11 +61,11 @@ GenerateRawVolumeTask::GenerateRawVolumeTask(const ghoul::Dictionary& dictionary
 
     _rawVolumeOutputPath = absPath(dictionary.value<std::string>(KeyRawVolumeOutput));
     _dictionaryOutputPath = absPath(dictionary.value<std::string>(KeyDictionaryOutput));
-    _dimensions = glm::uvec3(dictionary.value<glm::vec3>(KeyDimensions));
+    _dimensions = glm::uvec3(dictionary.value<glm::dvec3>(KeyDimensions));
     _time = dictionary.value<std::string>(KeyTime);
     _valueFunctionLua = dictionary.value<std::string>(KeyValueFunction);
-    _lowerDomainBound = dictionary.value<glm::vec3>(KeyLowerDomainBound);
-    _upperDomainBound = dictionary.value<glm::vec3>(KeyUpperDomainBound);
+    _lowerDomainBound = dictionary.value<glm::dvec3>(KeyLowerDomainBound);
+    _upperDomainBound = dictionary.value<glm::dvec3>(KeyUpperDomainBound);
 }
 
 std::string GenerateRawVolumeTask::description() {

@@ -83,13 +83,13 @@ TimeFrameUnion::TimeFrameUnion(const ghoul::Dictionary& dictionary)
     ghoul::Dictionary frames =
         dictionary.value<ghoul::Dictionary>(TimeFramesInfo.identifier);
 
-    for (const std::string& k : frames.keys()) {
+    for (std::string_view k : frames.keys()) {
         const ghoul::Dictionary& subDictionary = frames.value<ghoul::Dictionary>(k);
         _timeFrames.push_back(TimeFrame::createFromDictionary(subDictionary));
         TimeFrame& subFrame = *_timeFrames.back();
-        subFrame.setIdentifier(k);
-        subFrame.setGuiName(k);
-        subFrame.setDescription(k);
+        subFrame.setIdentifier(std::string(k));
+        subFrame.setGuiName(std::string(k));
+        subFrame.setDescription(std::string(k));
         addPropertySubOwner(*_timeFrames.back());
     }
 }

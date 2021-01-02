@@ -144,7 +144,7 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
     }
 
     if (dictionary.hasKey(LineColorInfo.identifier)) {
-        _lineColor = dictionary.value<glm::vec3>(LineColorInfo.identifier);
+        _lineColor = dictionary.value<glm::dvec3>(LineColorInfo.identifier);
     }
     if (dictionary.hasKey(LineWidthInfo.identifier)) {
         _lineWidth = static_cast<float>(

@@ -694,7 +694,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     addPropertySubOwner(_moffatMethodOwner);
 
     if (dictionary.hasKey(FadeInDistancesInfo.identifier)) {
-        glm::vec2 v = dictionary.value<glm::vec2>(FadeInDistancesInfo.identifier);
+        glm::vec2 v = dictionary.value<glm::dvec2>(FadeInDistancesInfo.identifier);
         _fadeInDistance = v;
         _disableFadeInDistance = false;
         addProperty(_fadeInDistance);

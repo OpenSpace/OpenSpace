@@ -299,13 +299,30 @@ bool AssetLoader::loadAsset(Asset* asset) {
             ghoul::lua::luaDictionaryFromState(*_luaState, metaDict);
 
             Asset::MetaInformation meta;
-            metaDict.getValue(MetaInformationName, meta.name);
-            metaDict.getValue(MetaInformationVersion, meta.version);
-            metaDict.getValue(MetaInformationDescription, meta.description);
-            metaDict.getValue(MetaInformationAuthor, meta.author);
-            metaDict.getValue(MetaInformationURL, meta.url);
-            metaDict.getValue(MetaInformationLicense, meta.license);
-            if (metaDict.hasKey(MetaInformationIdentifiers)) {
+            if (metaDict.hasValue<std::string>(MetaInformationName)) {
+                meta.name = metaDict.value<std::string>(MetaInformationName);
+
+            }
+            if (metaDict.hasValue<std::string>(MetaInformationVersion)) {
+                meta.version = metaDict.value<std::string>(MetaInformationVersion);
+
+            }
+            if (metaDict.hasValue<std::string>(MetaInformationDescription)) {
+                meta.description =
+                    metaDict.value<std::string>(MetaInformationDescription);
+
+            }
+            if (metaDict.hasValue<std::string>(MetaInformationAuthor)) {
+                meta.author = metaDict.value<std::string>(MetaInformationAuthor);
+
+            }
+            if (metaDict.hasValue<std::string>(MetaInformationURL)) {
+                meta.url = metaDict.value<std::string>(MetaInformationURL);
+            }
+            if (metaDict.hasValue<std::string>(MetaInformationLicense)) {
+                meta.license = metaDict.value<std::string>(MetaInformationLicense);
+            }
+            if (metaDict.hasValue<ghoul::Dictionary>(MetaInformationIdentifiers)) {
                 ghoul::Dictionary iddict =
                     metaDict.value<ghoul::Dictionary>(MetaInformationIdentifiers);
                 for (size_t i = 1; i <= iddict.size(); ++i) {

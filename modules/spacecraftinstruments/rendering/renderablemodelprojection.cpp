@@ -137,11 +137,13 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
         dictionary.value<ghoul::Dictionary>(keyProjection)
     );
 
-    float boundingSphereRadius = 1.0e9;
-    dictionary.getValue(keyBoundingSphereRadius, boundingSphereRadius);
+    double boundingSphereRadius = 1.0e9;
+    if (dictionary.hasValue<double>(keyBoundingSphereRadius)) {
+        boundingSphereRadius = dictionary.value<double>(keyBoundingSphereRadius);
+    }
     setBoundingSphere(boundingSphereRadius);
 
-    if (dictionary.hasKeyAndValue<bool>(PerformShadingInfo.identifier)) {
+    if (dictionary.hasValue<bool>(PerformShadingInfo.identifier)) {
         _performShading = dictionary.value<bool>(PerformShadingInfo.identifier);
     }
 
@@ -197,7 +199,7 @@ void RenderableModelProjection::initializeGL() {
 
     _projectionComponent.initializeGL();
 
-    float bs = boundingSphere();
+    double bs = boundingSphere();
     _geometry->initialize(this);
     setBoundingSphere(bs); // ignore bounding sphere set by geometry.
 }
@@ -436,7 +438,7 @@ void RenderableModelProjection::attitudeParameters(double time) {
     const glm::vec3 cpos = p * 10000.0;
 
     const float distance = glm::length(cpos);
-    const float radius = boundingSphere();
+    const double radius = boundingSphere();
 
     _projectorMatrix = _projectionComponent.computeProjectorMatrix(
         cpos,
@@ -445,8 +447,8 @@ void RenderableModelProjection::attitudeParameters(double time) {
         _instrumentMatrix,
         _projectionComponent.fieldOfViewY(),
         _projectionComponent.aspectRatio(),
-        distance - radius,
-        distance + radius,
+        static_cast<float>(distance - radius),
+        static_cast<float>(distance + radius),
         _boresight
     );
 }

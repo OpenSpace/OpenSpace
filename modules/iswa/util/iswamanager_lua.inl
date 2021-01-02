@@ -91,8 +91,8 @@ int iswa_addScreenSpaceCygnet(lua_State* L) {
     }
     else {
         d.setValue("Name", name);
-        d.setValue("Type", "ScreenSpaceCygnet");
-        d.setValue("UpdateInterval", static_cast<float>(updateInterval));
+        d.setValue("Type", std::string("ScreenSpaceCygnet"));
+        d.setValue("UpdateInterval", static_cast<double>(updateInterval));
 
         std::unique_ptr<ScreenSpaceRenderable> s(
             ScreenSpaceRenderable::createFromDictionary(d)

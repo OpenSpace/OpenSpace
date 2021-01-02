@@ -56,46 +56,23 @@ int loadScheduledScript(lua_State* L) {
     std::string time = ghoul::lua::value<std::string>(L, 1);
     std::string forwardScript = ghoul::lua::value<std::string>(L, 2);
 
-    if (nArguments == 2) {
-        global::scriptScheduler->loadScripts({
-            {
-                "1",
-                ghoul::Dictionary {
-                    { KeyTime, std::move(time) },
-                    { KeyForwardScript, std::move(forwardScript) }
-                }
-            }
-        });
-    }
-    else if (nArguments == 3) {
+    ghoul::Dictionary script;
+    script.setValue(KeyTime, std::move(time));
+    script.setValue(KeyForwardScript, std::move(forwardScript));
+
+    if (nArguments == 3) {
         std::string backwardScript = ghoul::lua::value<std::string>(L, 3);
-        global::scriptScheduler->loadScripts({
-            {
-                "1",
-                ghoul::Dictionary {
-                    { KeyTime, std::move(time) },
-                    { KeyForwardScript, std::move(forwardScript) },
-                    { KeyBackwardScript, std::move(backwardScript) }
-                }
-            }
-        });
+        script.setValue(KeyBackwardScript, std::move(backwardScript));
     }
     else if (nArguments == 4) {
         std::string backwardScript = ghoul::lua::value<std::string>(L, 3);
+        script.setValue(KeyBackwardScript, std::move(backwardScript));
         std::string universalScript = ghoul::lua::value<std::string>(L, 4);
-
-        global::scriptScheduler->loadScripts({
-            {
-                "1",
-                ghoul::Dictionary {
-                    { KeyTime, std::move(time) },
-                    { KeyForwardScript, std::move(forwardScript) },
-                    { KeyBackwardScript, std::move(backwardScript) },
-                    { KeyUniversalScript, std::move(universalScript) }
-                }
-            }
-        });
+        script.setValue(KeyUniversalScript, std::move(universalScript));
     }
+    ghoul::Dictionary list;
+    list.setValue("1", std::move(script));
+    global::scriptScheduler->loadScripts(list);
 
     lua_settop(L, 0);
 

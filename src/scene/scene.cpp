@@ -430,11 +430,10 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
             // TODO: Throw exception
             LERROR("Dependencies did not have the corrent type");
         }
-        ghoul::Dictionary nodeDependencies;
-        nodeDictionary.getValue(SceneGraphNode::KeyDependencies, nodeDependencies);
+        ghoul::Dictionary nodeDependencies =
+            nodeDictionary.value<ghoul::Dictionary>(SceneGraphNode::KeyDependencies);
 
-        const std::vector<std::string>& keys = nodeDependencies.keys();
-        for (const std::string& key : keys) {
+        for (std::string_view key : nodeDependencies.keys()) {
             std::string value = nodeDependencies.value<std::string>(key);
             dependencyNames.push_back(value);
         }

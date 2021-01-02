@@ -137,7 +137,7 @@ ServerInterface::ServerInterface(const ghoul::Dictionary& config)
             if (config.hasValue<ghoul::Dictionary>(key)) {
                 const ghoul::Dictionary& dict = config.value<ghoul::Dictionary>(key);
                 std::vector<std::string> v;
-                for (const std::string& k : dict.keys()) {
+                for (std::string_view k : dict.keys()) {
                     v.push_back(dict.value<std::string>(k));
                 }
                 list.set(v);

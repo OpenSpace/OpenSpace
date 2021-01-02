@@ -125,7 +125,7 @@ RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)
     );
 
     if (dictionary.hasKey(OffsetInfo.identifier)) {
-        _offset = dictionary.value<glm::vec2>(OffsetInfo.identifier);
+        _offset = dictionary.value<glm::dvec2>(OffsetInfo.identifier);
     }
     addProperty(_offset);
 

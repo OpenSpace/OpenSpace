@@ -95,19 +95,19 @@ ScriptScheduler::ScheduledScript::ScheduledScript(const ghoul::Dictionary& dicti
     // If a universal script is specified, retrieve it and add a ; as a separator so that
     // it can be added to the other scripts
     std::string universal;
-    dictionary.getValue(KeyUniversalScript, universal);
-    if (!universal.empty()) {
-        universal += ";";
+    if (dictionary.hasValue<std::string>(KeyUniversalScript)) {
+        universal = dictionary.value<std::string>(KeyUniversalScript);
+        if (!universal.empty()) {
+            universal += ";";
+        }
     }
 
-    if (dictionary.hasKeyAndValue<std::string>(KeyForwardScript)) {
-        forwardScript =
-            universal + dictionary.value<std::string>(KeyForwardScript);
+    if (dictionary.hasValue<std::string>(KeyForwardScript)) {
+        forwardScript = universal + dictionary.value<std::string>(KeyForwardScript);
     }
 
-    if (dictionary.hasKeyAndValue<std::string>(KeyBackwardScript)) {
-        backwardScript =
-            universal + dictionary.value<std::string>(KeyBackwardScript);
+    if (dictionary.hasValue<std::string>(KeyBackwardScript)) {
+        backwardScript = universal + dictionary.value<std::string>(KeyBackwardScript);
     }
 }
 

@@ -417,7 +417,7 @@ int addExoplanetSystem(lua_State* L) {
         ghoul::lua::luaDictionaryFromState(L, d);
 
         for (size_t i = 1; i <= d.size(); ++i) {
-            if (!d.hasKeyAndValue<std::string>(std::to_string(i))) {
+            if (!d.hasValue<std::string>(std::to_string(i))) {
                 return ghoul::lua::luaError(
                     L, fmt::format("List item {} is of invalid type", i)
                 );

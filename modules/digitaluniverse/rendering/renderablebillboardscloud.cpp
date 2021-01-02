@@ -294,7 +294,7 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
             },
             {
                 keyColor,
-                new Vector3Verifier<float>,
+                new DoubleVector3Verifier,
                 Optional::No,
                 "Astronomical Object Color (r,g,b)."
             },
@@ -384,7 +384,7 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
             },
             {
                 ColorRangeInfo.identifier,
-                new Vector2ListVerifier<float>,
+                new Vector2ListVerifier<double>,
                 Optional::Yes,
                 ColorRangeInfo.description
             },
@@ -503,7 +503,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     _renderOption.addOption(RenderOptionPositionNormal, "Camera Position Normal");
 
     _renderOption = RenderOptionViewDirection;
-    if (dictionary.hasKeyAndValue<std::string>(RenderOptionInfo.identifier)) {
+    if (dictionary.hasValue<std::string>(RenderOptionInfo.identifier)) {
         const std::string o = dictionary.value<std::string>(RenderOptionInfo.identifier);
 
         if (o == "Camera View Direction") {
@@ -589,7 +589,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
             );
             for (size_t i = 0; i < rangeDataDict.size(); ++i) {
                 _colorRangeData.push_back(
-                    rangeDataDict.value<glm::vec2>(std::to_string(i + 1))
+                    rangeDataDict.value<glm::dvec2>(std::to_string(i + 1))
                 );
             }
             _optionColorRangeData = _colorRangeData[_colorRangeData.size() - 1];
@@ -606,7 +606,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         }
     }
     else if (dictionary.hasKey(keyColor)) {
-        _pointColor = dictionary.value<glm::vec3>(keyColor);
+        _pointColor = dictionary.value<glm::dvec3>(keyColor);
         _pointColor.setViewOption(properties::Property::ViewOptions::Color);
         addProperty(_pointColor);
     }
@@ -659,7 +659,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         _hasLabel = true;
 
         if (dictionary.hasKey(TextColorInfo.identifier)) {
-            _textColor = dictionary.value<glm::vec3>(TextColorInfo.identifier);
+            _textColor = dictionary.value<glm::dvec3>(TextColorInfo.identifier);
             _hasLabel = true;
         }
         _textColor.setViewOption(properties::Property::ViewOptions::Color);
@@ -667,22 +667,30 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         _textColor.onChange([&]() { _textColorIsDirty = true; });
 
         if (dictionary.hasKey(TextOpacityInfo.identifier)) {
-            _textOpacity = dictionary.value<float>(TextOpacityInfo.identifier);
+            _textOpacity = static_cast<float>(
+                dictionary.value<double>(TextOpacityInfo.identifier)
+            );
         }
         addProperty(_textOpacity);
 
         if (dictionary.hasKey(TextSizeInfo.identifier)) {
-            _textSize = dictionary.value<float>(TextSizeInfo.identifier);
+            _textSize = static_cast<float>(
+                dictionary.value<double>(TextSizeInfo.identifier)
+            );
         }
         addProperty(_textSize);
 
         if (dictionary.hasKey(LabelMinSizeInfo.identifier)) {
-            _textMinSize = dictionary.value<float>(LabelMinSizeInfo.identifier);
+            _textMinSize = static_cast<float>(
+                dictionary.value<double>(LabelMinSizeInfo.identifier)
+            );
         }
         addProperty(_textMinSize);
 
         if (dictionary.hasKey(LabelMaxSizeInfo.identifier)) {
-            _textMaxSize = dictionary.value<float>(LabelMaxSizeInfo.identifier);
+            _textMaxSize = static_cast<float>(
+                dictionary.value<double>(LabelMaxSizeInfo.identifier)
+            );
         }
         addProperty(_textMaxSize);
     }
@@ -694,7 +702,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     }
 
     if (dictionary.hasKey(FadeInDistancesInfo.identifier)) {
-        glm::vec2 v = dictionary.value<glm::vec2>(FadeInDistancesInfo.identifier);
+        glm::dvec2 v = dictionary.value<glm::dvec2>(FadeInDistancesInfo.identifier);
         _fadeInDistance = v;
         _disableFadeInDistance = false;
         addProperty(_fadeInDistance);

@@ -276,7 +276,7 @@ documentation::Documentation RenderablePlanesCloud::Documentation() {
             },
             {
                 FadeInDistancesInfo.identifier,
-                new Vector2Verifier<float>,
+                new DoubleVector2Verifier,
                 Optional::Yes,
                 FadeInDistancesInfo.description
             },
@@ -385,7 +385,7 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
         _hasLabel = true;
 
         if (dictionary.hasKey(TextColorInfo.identifier)) {
-            _textColor = dictionary.value<glm::vec3>(TextColorInfo.identifier);
+            _textColor = dictionary.value<glm::dvec3>(TextColorInfo.identifier);
             _hasLabel = true;
         }
         _textColor.setViewOption(properties::Property::ViewOptions::Color);
@@ -393,24 +393,28 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
         _textColor.onChange([&]() { _textColorIsDirty = true; });
 
         if (dictionary.hasKey(TextOpacityInfo.identifier)) {
-            _textOpacity = dictionary.value<float>(TextOpacityInfo.identifier);
+            _textOpacity = static_cast<float>(
+                dictionary.value<double>(TextOpacityInfo.identifier)
+            );
         }
         addProperty(_textOpacity);
 
         if (dictionary.hasKey(TextSizeInfo.identifier)) {
-            _textSize = dictionary.value<float>(TextSizeInfo.identifier);
+            _textSize = static_cast<float>(
+                dictionary.value<double>(TextSizeInfo.identifier)
+            );
         }
         addProperty(_textSize);
 
         if (dictionary.hasKey(LabelMinSizeInfo.identifier)) {
             _textMinSize = static_cast<int>(
-                dictionary.value<float>(LabelMinSizeInfo.identifier)
+                dictionary.value<double>(LabelMinSizeInfo.identifier)
             );
         }
 
         if (dictionary.hasKey(LabelMaxSizeInfo.identifier)) {
             _textMaxSize = static_cast<int>(
-                dictionary.value<float>(LabelMaxSizeInfo.identifier)
+                dictionary.value<double>(LabelMaxSizeInfo.identifier)
             );
         }
     }
@@ -461,7 +465,7 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     }
 
     if (dictionary.hasKey(FadeInDistancesInfo.identifier)) {
-        _fadeInDistance = dictionary.value<glm::vec2>(FadeInDistancesInfo.identifier);
+        _fadeInDistance = dictionary.value<glm::dvec2>(FadeInDistancesInfo.identifier);
         _disableFadeInDistance = false;
         addProperty(_fadeInDistance);
         addProperty(_disableFadeInDistance);

@@ -128,12 +128,18 @@ KameleonVolumeToRawTask::KameleonVolumeToRawTask(const ghoul::Dictionary& dictio
     _rawVolumeOutputPath = absPath(dictionary.value<std::string>(KeyRawVolumeOutput));
     _dictionaryOutputPath = absPath(dictionary.value<std::string>(KeyDictionaryOutput));
     _variable = dictionary.value<std::string>(KeyVariable);
-    _dimensions = glm::uvec3(dictionary.value<glm::vec3>(KeyDimensions));
+    _dimensions = glm::uvec3(dictionary.value<glm::dvec3>(KeyDimensions));
 
-    if (!dictionary.getValue<glm::vec3>(KeyLowerDomainBound, _lowerDomainBound)) {
+    if (dictionary.hasKey(KeyLowerDomainBound)) {
+        _lowerDomainBound = dictionary.value<glm::dvec3>(KeyLowerDomainBound);
+    }
+    else {
         _autoDomainBounds = true;
     }
-    if (!dictionary.getValue<glm::vec3>(KeyUpperDomainBound, _upperDomainBound)) {
+    if (dictionary.hasKey(KeyUpperDomainBound)) {
+        _upperDomainBound = dictionary.value<glm::dvec3>(KeyUpperDomainBound);
+    }
+    else {
         _autoDomainBounds = true;
     }
 }
@@ -190,13 +196,13 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
     }
 
     outputMetadata.setValue(KeyTime, time);
-    outputMetadata.setValue(KeyDimensions, glm::vec3(_dimensions));
-    outputMetadata.setValue(KeyLowerDomainBound, _lowerDomainBound);
-    outputMetadata.setValue(KeyUpperDomainBound, _upperDomainBound);
+    outputMetadata.setValue(KeyDimensions, glm::dvec3(_dimensions));
+    outputMetadata.setValue(KeyLowerDomainBound, glm::dvec3(_lowerDomainBound));
+    outputMetadata.setValue(KeyUpperDomainBound, glm::dvec3(_upperDomainBound));
 
-    outputMetadata.setValue(KeyMinValue, static_cast<float>(reader.minValue(_variable)));
-    outputMetadata.setValue(KeyMaxValue, static_cast<float>(reader.maxValue(_variable)));
-    outputMetadata.setValue<std::string>(KeyVisUnit, reader.getVisUnit(_variable));
+    outputMetadata.setValue(KeyMinValue, reader.minValue(_variable));
+    outputMetadata.setValue(KeyMaxValue, reader.maxValue(_variable));
+    outputMetadata.setValue(KeyVisUnit, reader.getVisUnit(_variable));
 
     std::string metadataString = ghoul::formatLua(outputMetadata);
 

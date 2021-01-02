@@ -73,7 +73,7 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary &dictionary)
 {
 
     std::string identifier;
-    if (dictionary.hasKeyAndValue<std::string>(KeyIdentifier)) {
+    if (dictionary.hasValue<std::string>(KeyIdentifier)) {
         identifier = dictionary.value<std::string>(KeyIdentifier);
     }
     else {
@@ -82,7 +82,7 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary &dictionary)
     identifier = makeUniqueIdentifier(identifier);
     setIdentifier(identifier);
 
-    if (dictionary.hasKeyAndValue<std::string>(UrlInfo.identifier)) {
+    if (dictionary.hasValue<std::string>(UrlInfo.identifier)) {
         _url = dictionary.value<std::string>(UrlInfo.identifier);
     }
 

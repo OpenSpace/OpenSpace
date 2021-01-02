@@ -226,7 +226,7 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
 
 
     if (dictionary.hasKey(ShadowColorInfo.identifier)) {
-        _shadowColor = dictionary.value<glm::vec3>(ShadowLengthInfo.identifier);
+        _shadowColor = dictionary.value<glm::dvec3>(ShadowLengthInfo.identifier);
     }
     _shadowColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_shadowColor);

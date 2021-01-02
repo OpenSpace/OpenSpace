@@ -278,13 +278,13 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     }
 
     if (dictionary.hasKey(AmbientIntensityInfo.identifier)) {
-        _ambientIntensity = dictionary.value<float>(AmbientIntensityInfo.identifier);
+        _ambientIntensity = dictionary.value<double>(AmbientIntensityInfo.identifier);
     }
     if (dictionary.hasKey(DiffuseIntensityInfo.identifier)) {
-        _diffuseIntensity = dictionary.value<float>(DiffuseIntensityInfo.identifier);
+        _diffuseIntensity = dictionary.value<double>(DiffuseIntensityInfo.identifier);
     }
     if (dictionary.hasKey(SpecularIntensityInfo.identifier)) {
-        _specularIntensity = dictionary.value<float>(SpecularIntensityInfo.identifier);
+        _specularIntensity = dictionary.value<double>(SpecularIntensityInfo.identifier);
     }
 
     if (dictionary.hasKey(ShadingInfo.identifier)) {
@@ -303,7 +303,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         const ghoul::Dictionary& lsDictionary =
             dictionary.value<ghoul::Dictionary>(LightSourcesInfo.identifier);
 
-        for (const std::string& k : lsDictionary.keys()) {
+        for (std::string_view k : lsDictionary.keys()) {
             std::unique_ptr<LightSource> lightSource = LightSource::createFromDictionary(
                 lsDictionary.value<ghoul::Dictionary>(k)
             );
@@ -328,7 +328,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
 
     if (dictionary.hasKey(RotationVecInfo.identifier)) {
-        _rotationVec = dictionary.value<glm::vec3>(RotationVecInfo.identifier);
+        _rotationVec = dictionary.value<glm::dvec3>(RotationVecInfo.identifier);
     }
 
     _blendingFuncOption.addOption(DefaultBlending, "Default");

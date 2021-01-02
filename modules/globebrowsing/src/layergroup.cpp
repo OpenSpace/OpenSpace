@@ -66,7 +66,7 @@ void LayerGroup::setLayersFromDict(const ghoul::Dictionary& dict) {
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.message);
 
-            if (layerDict.hasKeyAndValue<ghoul::Dictionary>(KeyFallback)) {
+            if (layerDict.hasValue<ghoul::Dictionary>(KeyFallback))  {
                 LWARNING("Unable to create layer. Initializing fallback layer.");
                 ghoul::Dictionary fallbackLayerDict =
                     layerDict.value<ghoul::Dictionary>(KeyFallback);
@@ -124,7 +124,7 @@ Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
         LERROR("Error adding layer. " + ghoul::to_string(res));
     }
 
-    if (!layerDict.hasKeyAndValue<std::string>("Identifier")) {
+    if (!layerDict.hasValue<std::string>("Identifier")) {
         LERROR("'Identifier' must be specified for layer.");
         return nullptr;
     }

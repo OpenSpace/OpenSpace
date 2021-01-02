@@ -118,19 +118,19 @@ RenderableCartesianAxes::RenderableCartesianAxes(const ghoul::Dictionary& dictio
     );
 
     if (dictionary.hasKey(XColorInfo.identifier)) {
-        _xColor = dictionary.value<glm::vec3>(XColorInfo.identifier);
+        _xColor = dictionary.value<glm::dvec3>(XColorInfo.identifier);
     }
     _xColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_xColor);
 
     if (dictionary.hasKey(XColorInfo.identifier)) {
-        _yColor = dictionary.value<glm::vec3>(YColorInfo.identifier);
+        _yColor = dictionary.value<glm::dvec3>(YColorInfo.identifier);
     }
     _yColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_yColor);
 
     if (dictionary.hasKey(ZColorInfo.identifier)) {
-        _zColor = dictionary.value<glm::vec3>(ZColorInfo.identifier);
+        _zColor = dictionary.value<glm::dvec3>(ZColorInfo.identifier);
     }
     _zColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_zColor);

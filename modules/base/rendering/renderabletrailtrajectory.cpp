@@ -166,7 +166,7 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
     _sampleInterval.onChange([this] { _needsFullSweep = true; });
     addProperty(_sampleInterval);
 
-    if (dictionary.hasKeyAndValue<double>(TimeSubSampleInfo.identifier)) {
+    if (dictionary.hasValue<double>(TimeSubSampleInfo.identifier)) {
         _timeStampSubsamplingFactor = static_cast<int>(
             dictionary.value<double>(TimeSubSampleInfo.identifier)
         );
@@ -174,7 +174,7 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
     _timeStampSubsamplingFactor.onChange([this] { _subsamplingIsDirty = true; });
     addProperty(_timeStampSubsamplingFactor);
 
-    if (dictionary.hasKeyAndValue<bool>(RenderFullPathInfo.identifier)) {
+    if (dictionary.hasValue<bool>(RenderFullPathInfo.identifier)) {
         _renderFullTrail = dictionary.value<bool>(RenderFullPathInfo.identifier);
     }
     addProperty(_renderFullTrail);

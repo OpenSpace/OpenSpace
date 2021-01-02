@@ -127,20 +127,23 @@ void LayerAdjustment::setValuesFromDictionary(const ghoul::Dictionary& adjustmen
         "LayerAdjustment"
     );
 
-    if (adjustmentDict.hasKeyAndValue<std::string>(KeyType)) {
+    if (adjustmentDict.hasValue<std::string>(KeyType)) {
         std::string dictType = adjustmentDict.value<std::string>(KeyType);
         _typeOption = static_cast<int>(
             ghoul::from_string<layergroupid::AdjustmentTypeID>(dictType)
         );
     }
 
-    if (adjustmentDict.hasKeyAndValue<glm::vec3>(KeyChromaKeyColor)) {
-        glm::vec3 dictChromaKeyColor = adjustmentDict.value<glm::vec3>(KeyChromaKeyColor);
+    if (adjustmentDict.hasValue<glm::dvec3>(KeyChromaKeyColor)) {
+        glm::vec3 dictChromaKeyColor =
+            adjustmentDict.value<glm::dvec3>(KeyChromaKeyColor);
         _chromaKeyColor = std::move(dictChromaKeyColor);
     }
 
-    if (adjustmentDict.hasKeyAndValue<float>(KeyChromaKeyTolerance)) {
-        float dictChromaKeyTolerance = adjustmentDict.value<float>(KeyChromaKeyTolerance);
+    if (adjustmentDict.hasValue<double>(KeyChromaKeyTolerance)) {
+        float dictChromaKeyTolerance = static_cast<float>(
+            adjustmentDict.value<double>(KeyChromaKeyTolerance)
+        );
         _chromaKeyTolerance = dictChromaKeyTolerance;
     }
 }

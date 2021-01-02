@@ -33,7 +33,7 @@ template <typename T>
 TestResult TemplateVerifier<T>::operator()(const ghoul::Dictionary& dict,
                                            const std::string& key) const
 {
-    if (dict.hasKeyAndValue<Type>(key)) {
+    if (dict.hasValue<Type>(key)) {
         return { true, {}, {} };
     }
     else {

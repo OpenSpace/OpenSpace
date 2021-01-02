@@ -152,8 +152,8 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
     _texturePath = absPath(dictionary.value<std::string>(TextureInfo.identifier));
     _textureFile = std::make_unique<File>(_texturePath);
 
-    if (dictionary.hasKeyAndValue<glm::vec2>(OffsetInfo.identifier)) {
-        _offset = dictionary.value<glm::vec2>(OffsetInfo.identifier);
+    if (dictionary.hasValue<glm::dvec2>(OffsetInfo.identifier)) {
+        _offset = dictionary.value<glm::dvec2>(OffsetInfo.identifier);
     }
     addProperty(_offset);
 
@@ -162,14 +162,14 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
 
     _textureFile->setCallback([&](const File&) { _textureIsDirty = true; });
 
-    if (dictionary.hasKeyAndValue<double>(NightFactorInfo.identifier)) {
+    if (dictionary.hasValue<double>(NightFactorInfo.identifier)) {
         _nightFactor = static_cast<float>(
             dictionary.value<double>(NightFactorInfo.identifier)
         );
     }
     addProperty(_nightFactor);
 
-    if (dictionary.hasKeyAndValue<double>(ColorFilterInfo.identifier)) {
+    if (dictionary.hasValue<double>(ColorFilterInfo.identifier)) {
         _colorFilter = static_cast<float>(
             dictionary.value<double>(ColorFilterInfo.identifier)
         );

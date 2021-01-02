@@ -110,7 +110,7 @@ RenderableBoxGrid::RenderableBoxGrid(const ghoul::Dictionary& dictionary)
     registerUpdateRenderBinFromOpacity();
 
     if (dictionary.hasKey(GridColorInfo.identifier)) {
-        _gridColor = dictionary.value<glm::vec3>(GridColorInfo.identifier);
+        _gridColor = dictionary.value<glm::dvec3>(GridColorInfo.identifier);
     }
     _gridColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_gridColor);
@@ -123,7 +123,7 @@ RenderableBoxGrid::RenderableBoxGrid(const ghoul::Dictionary& dictionary)
     addProperty(_lineWidth);
 
     if (dictionary.hasKey(SizeInfo.identifier)) {
-        _size = dictionary.value<glm::vec3>(SizeInfo.identifier);
+        _size = dictionary.value<glm::dvec3>(SizeInfo.identifier);
     }
     _size.onChange([&]() { _gridIsDirty = true; });
     addProperty(_size);

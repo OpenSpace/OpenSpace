@@ -109,18 +109,15 @@ void TransferFunction::loadEnvelopesFromFile(const std::string& path) {
     ghoul::Dictionary dictionary;
     ghoul::lua::loadDictionaryFromFile(path, dictionary, L);
 
-    const std::vector<std::string>& tfKeys = dictionary.keys();
-    for (const std::string& key : tfKeys) {
+    for (std::string_view key : dictionary.keys()) {
         ghoul::Dictionary tfDictionary = dictionary.value<ghoul::Dictionary>(key);
 
-        const std::vector<std::string>& envelopeKeys = tfDictionary.keys();
-        for (const std::string& envelopeKey : envelopeKeys) {
+        for (std::string_view envelopeKey : tfDictionary.keys()) {
             ghoul::Dictionary envelopeDictionary =
                 tfDictionary.value<ghoul::Dictionary>(envelopeKey);
-            const std::vector<std::string>& pointKeys = envelopeDictionary.keys();
             Envelope env;
             std::vector<EnvelopePoint> tmpVec;
-            for (const std::string& pointKey : pointKeys) {
+            for (std::string_view pointKey : envelopeDictionary.keys()) {
                 ghoul::Dictionary pointDictionary =
                     envelopeDictionary.value<ghoul::Dictionary>(pointKey);
 
@@ -128,9 +125,13 @@ void TransferFunction::loadEnvelopesFromFile(const std::string& path) {
                     pointDictionary.value<ghoul::Dictionary>("position");
 
                 std::string color = pointDictionary.value<std::string>("color");
-                float posX = positionDictionary.value<float>("x");
-                float posY = positionDictionary.value<float>("y");
-                tmpVec.emplace_back(color, posX, posY);
+                double posX = positionDictionary.value<double>("x");
+                double posY = positionDictionary.value<double>("y");
+                tmpVec.emplace_back(
+                    color,
+                    static_cast<float>(posX),
+                    static_cast<float>(posY)
+                );
             }
             env.setPoints(tmpVec);
             _envelopes.emplace_back(env);

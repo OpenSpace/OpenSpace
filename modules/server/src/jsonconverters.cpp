@@ -72,20 +72,9 @@ namespace ghoul {
 
 void to_json(json& j, const Dictionary& dictionary) {
     json object;
-    for (const std::string& key : dictionary.keys()) {
-        if (dictionary.hasValue<glm::vec4>(key)) {
-            const glm::vec4 v = dictionary.value<glm::vec4>(key);
-            object[key] = json::array({ v[0], v[1], v[2], v[3] });
-        }
-        else if (dictionary.hasValue<glm::vec3>(key)) {
-            const glm::vec3 v = dictionary.value<glm::vec3>(key);
-            object[key] = json::array({ v[0], v[1], v[2] });
-        }
-        else if (dictionary.hasValue<glm::vec2>(key)) {
-            const glm::vec2 v = dictionary.value<glm::vec2>(key);
-            object[key] = json::array({ v[0], v[1] });
-        }
-        else if (dictionary.hasValue<glm::dvec4>(key)) {
+    for (std::string_view k : dictionary.keys()) {
+        std::string key = std::string(k);
+        if (dictionary.hasValue<glm::dvec4>(key)) {
             const glm::dvec4 v = dictionary.value<glm::dvec4>(key);
             object[key] = json::array({ v[0], v[1], v[2], v[3] });
         }
@@ -97,17 +86,11 @@ void to_json(json& j, const Dictionary& dictionary) {
             const glm::dvec2 v = dictionary.value<glm::dvec2>(key);
             object[key] = json::array({ v[0], v[1] });
         }
-        else if (dictionary.hasValue<float>(key)) {
-            object[key] = dictionary.value<float>(key);
-        }
         else if (dictionary.hasValue<double>(key)) {
             object[key] = dictionary.value<double>(key);
         }
         else if (dictionary.hasValue<int>(key)) {
             object[key] = dictionary.value<int>(key);
-        }
-        else if (dictionary.hasValue<unsigned int>(key)) {
-            object[key] = dictionary.value<unsigned int>(key);
         }
         else if (dictionary.hasValue<std::string>(key)) {
             object[key] = dictionary.value<std::string>(key);

@@ -56,7 +56,7 @@ void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
             KeyHttpSynchronizationRepositories
         );
 
-        for (const std::string& key : dictionary.keys()) {
+        for (std::string_view key : dictionary.keys()) {
             _synchronizationRepositories.push_back(dictionary.value<std::string>(key));
         }
     }

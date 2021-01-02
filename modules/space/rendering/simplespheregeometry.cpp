@@ -78,14 +78,14 @@ SimpleSphereGeometry::SimpleSphereGeometry(const ghoul::Dictionary& dictionary)
         "SimpleSphereGeometry"
     );
 
-    if (dictionary.hasKeyAndValue<double>(RadiusInfo.identifier)) {
+    if (dictionary.hasValue<double>(RadiusInfo.identifier)) {
         const float r = static_cast<float>(
             dictionary.value<double>(RadiusInfo.identifier)
         );
         _radius = { r, r, r };
     }
     else {
-        _radius = dictionary.value<glm::vec3>(RadiusInfo.identifier);
+        _radius = dictionary.value<glm::dvec3>(RadiusInfo.identifier);
     }
 
     _segments = static_cast<int>(dictionary.value<double>(SegmentsInfo.identifier));

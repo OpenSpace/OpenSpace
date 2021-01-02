@@ -242,25 +242,25 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     );
     addPropertySubOwner(_translation.get());
 
-    _appearance.lineColor = dictionary.value<glm::vec3>(LineColorInfo.identifier);
+    _appearance.lineColor = dictionary.value<glm::dvec3>(LineColorInfo.identifier);
 
-    if (dictionary.hasKeyAndValue<bool>(EnableFadeInfo.identifier)) {
+    if (dictionary.hasValue<bool>(EnableFadeInfo.identifier)) {
         _appearance.useLineFade = dictionary.value<bool>(EnableFadeInfo.identifier);
     }
 
-    if (dictionary.hasKeyAndValue<double>(FadeInfo.identifier)) {
+    if (dictionary.hasValue<double>(FadeInfo.identifier)) {
         _appearance.lineFade = static_cast<float>(
             dictionary.value<double>(FadeInfo.identifier)
         );
     }
 
-    if (dictionary.hasKeyAndValue<double>(LineWidthInfo.identifier)) {
+    if (dictionary.hasValue<double>(LineWidthInfo.identifier)) {
         _appearance.lineWidth = static_cast<float>(dictionary.value<double>(
             LineWidthInfo.identifier
         ));
     }
 
-    if (dictionary.hasKeyAndValue<double>(PointSizeInfo.identifier)) {
+    if (dictionary.hasValue<double>(PointSizeInfo.identifier)) {
         _appearance.pointSize = static_cast<int>(
             dictionary.value<double>(PointSizeInfo.identifier)
         );
@@ -268,7 +268,7 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
 
     // This map is not accessed out of order as long as the Documentation is adapted
     // whenever the map changes. The documentation will check for valid values
-    if (dictionary.hasKeyAndValue<std::string>(RenderingModeInfo.identifier)) {
+    if (dictionary.hasValue<std::string>(RenderingModeInfo.identifier)) {
         _appearance.renderingModes = RenderingModeConversion.at(
             dictionary.value<std::string>(RenderingModeInfo.identifier)
         );
@@ -279,7 +279,7 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
 
     addPropertySubOwner(_appearance);
 
-    if (dictionary.hasKeyAndValue<std::string>(RenderBinModeInfo.identifier)) {
+    if (dictionary.hasValue<std::string>(RenderBinModeInfo.identifier)) {
         openspace::Renderable::RenderBin cfgRenderBin = RenderBinConversion.at(
             dictionary.value<std::string>(RenderBinModeInfo.identifier)
         );

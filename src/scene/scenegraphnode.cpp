@@ -182,13 +182,13 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     }
 
     if (dictionary.hasKey(BoundingSphereInfo.identifier)) {
-        result->_boundingSphere = dictionary.value<float>(BoundingSphereInfo.identifier);
+        result->_boundingSphere = dictionary.value<double>(BoundingSphereInfo.identifier);
         result->_boundingSphere.setVisibility(properties::Property::Visibility::All);
     }
 
     if (dictionary.hasKey(KeyTransformTranslation)) {
-        ghoul::Dictionary translationDictionary;
-        dictionary.getValue(KeyTransformTranslation, translationDictionary);
+        ghoul::Dictionary translationDictionary =
+            dictionary.value<ghoul::Dictionary>(KeyTransformTranslation);
         result->_transform.translation = Translation::createFromDictionary(
             translationDictionary
         );
@@ -207,8 +207,8 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     }
 
     if (dictionary.hasKey(KeyTransformRotation)) {
-        ghoul::Dictionary rotationDictionary;
-        dictionary.getValue(KeyTransformRotation, rotationDictionary);
+        ghoul::Dictionary rotationDictionary =
+            dictionary.value<ghoul::Dictionary>(KeyTransformRotation);
         result->_transform.rotation = Rotation::createFromDictionary(rotationDictionary);
         if (result->_transform.rotation == nullptr) {
             LERROR(fmt::format(
@@ -225,8 +225,8 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     }
 
     if (dictionary.hasKey(KeyTransformScale)) {
-        ghoul::Dictionary scaleDictionary;
-        dictionary.getValue(KeyTransformScale, scaleDictionary);
+        ghoul::Dictionary scaleDictionary =
+            dictionary.value<ghoul::Dictionary>(KeyTransformScale);
         result->_transform.scale = Scale::createFromDictionary(scaleDictionary);
         if (result->_transform.scale == nullptr) {
             LERROR(fmt::format(
@@ -241,8 +241,8 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     }
 
     if (dictionary.hasKey(KeyTimeFrame)) {
-        ghoul::Dictionary timeFrameDictionary;
-        dictionary.getValue(KeyTimeFrame, timeFrameDictionary);
+        ghoul::Dictionary timeFrameDictionary =
+            dictionary.value<ghoul::Dictionary>(KeyTimeFrame);
         result->_timeFrame = TimeFrame::createFromDictionary(timeFrameDictionary);
         if (result->_timeFrame == nullptr) {
             LERROR(fmt::format(
@@ -260,8 +260,8 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
 
     // We initialize the renderable last as it probably has the most dependencies
     if (dictionary.hasValue<ghoul::Dictionary>(KeyRenderable)) {
-        ghoul::Dictionary renderableDictionary;
-        dictionary.getValue(KeyRenderable, renderableDictionary);
+        ghoul::Dictionary renderableDictionary =
+            dictionary.value<ghoul::Dictionary>(KeyRenderable);
 
         renderableDictionary.setValue(KeyIdentifier, result->_identifier);
 
@@ -293,17 +293,16 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     }
 
     if (dictionary.hasKey(KeyTag)) {
-        if (dictionary.hasKeyAndValue<std::string>(KeyTag)) {
+        if (dictionary.hasValue<std::string>(KeyTag)) {
             std::string tagName = dictionary.value<std::string>(KeyTag);
             if (!tagName.empty()) {
                 result->addTag(std::move(tagName));
             }
         }
-        else if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyTag)) {
+        else if (dictionary.hasValue<ghoul::Dictionary>(KeyTag)) {
             ghoul::Dictionary tagNames = dictionary.value<ghoul::Dictionary>(KeyTag);
-            std::vector<std::string> keys = tagNames.keys();
             std::string tagName;
-            for (const std::string& key : keys) {
+            for (std::string_view key : tagNames.keys()) {
                 tagName = tagNames.value<std::string>(key);
                 if (!tagName.empty()) {
                     result->addTag(std::move(tagName));
@@ -341,15 +340,13 @@ SceneGraphNode::SceneGraphNode()
             global::memoryManager->PersistentMemory.alloc<StaticScale>()
         )
     }
-   , _boundingSphere(properties::FloatProperty(BoundingSphereInfo, 0.f))
+    , _boundingSphere(BoundingSphereInfo, 0.0)
     , _computeScreenSpaceValues(ComputeScreenSpaceInfo, false)
-    , _screenSpacePosition(
-        properties::IVec2Property(ScreenSpacePositionInfo, glm::ivec2(-1, -1))
-    )
-    , _screenVisibility(properties::BoolProperty(ScreenVisibilityInfo, false))
-    , _distFromCamToNode(properties::DoubleProperty(DistanceFromCamToNodeInfo, -1.0))
-    , _screenSizeRadius(properties::DoubleProperty(ScreenSizeRadiusInfo, 0))
-    , _visibilityDistance(properties::FloatProperty(VisibilityDistanceInfo, 6e10f))
+    , _screenSpacePosition(ScreenSpacePositionInfo, glm::ivec2(-1, -1))
+    , _screenVisibility(ScreenVisibilityInfo, false)
+    , _distFromCamToNode(DistanceFromCamToNodeInfo, -1.0)
+    , _screenSizeRadius(ScreenSizeRadiusInfo, 0)
+    , _visibilityDistance(VisibilityDistanceInfo, 6e10f)
 {
     addProperty(_computeScreenSpaceValues);
     addProperty(_screenSpacePosition);
@@ -888,7 +885,7 @@ std::vector<SceneGraphNode*> SceneGraphNode::children() const {
     return nodes;
 }
 
-float SceneGraphNode::boundingSphere() const {
+double SceneGraphNode::boundingSphere() const {
     return _boundingSphere;
 }
 

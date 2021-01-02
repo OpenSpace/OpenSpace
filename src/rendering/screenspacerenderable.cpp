@@ -406,14 +406,14 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
 
     if (_useRadiusAzimuthElevation) {
         if (dictionary.hasKey(RadiusAzimuthElevationInfo.identifier)) {
-            _raePosition = dictionary.value<glm::vec3>(
+            _raePosition = dictionary.value<glm::dvec3>(
                 RadiusAzimuthElevationInfo.identifier
             );
         }
     }
     else {
         if (dictionary.hasKey(CartesianPositionInfo.identifier)) {
-            _cartesianPosition = dictionary.value<glm::vec3>(
+            _cartesianPosition = dictionary.value<glm::dvec3>(
                 CartesianPositionInfo.identifier
             );
         }
@@ -436,16 +436,15 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         _faceCamera = dictionary.value<bool>(FaceCameraInfo.identifier);
     }
 
-    if (dictionary.hasKeyAndValue<std::string>(KeyTag)) {
+    if (dictionary.hasValue<std::string>(KeyTag)) {
         std::string tagName = dictionary.value<std::string>(KeyTag);
         if (!tagName.empty()) {
             addTag(std::move(tagName));
         }
     }
-    else if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyTag)) {
+    else if (dictionary.hasValue<ghoul::Dictionary>(KeyTag)) {
         const ghoul::Dictionary& tagNames = dictionary.value<ghoul::Dictionary>(KeyTag);
-        const std::vector<std::string>& keys = tagNames.keys();
-        for (const std::string& key : keys) {
+        for (std::string_view key : tagNames.keys()) {
             std::string tagName = tagNames.value<std::string>(key);
             if (!tagName.empty()) {
                 addTag(std::move(tagName));
@@ -519,16 +518,24 @@ void ScreenSpaceRenderable::createShaders() {
     ghoul::Dictionary dict = ghoul::Dictionary();
 
     auto res = global::windowDelegate->currentDrawBufferResolution();
-    ghoul::Dictionary rendererData = {
-        { "fragmentRendererPath", "${SHADERS}/framebuffer/renderframebuffer.frag" },
-        { "windowWidth" , res.x },
-        { "windowHeight" , res.y },
-        { "hdrExposure", global::renderEngine->hdrExposure() },
-        { "disableHDR", global::renderEngine->isHdrDisabled() }
-    };
+    ghoul::Dictionary rendererData;
+    rendererData.setValue(
+        "fragmentRendererPath",
+        std::string("${SHADERS}/framebuffer/renderframebuffer.frag")
+    );
+    rendererData.setValue("windowWidth", res.x);
+    rendererData.setValue("windowHeight", res.y);
+    rendererData.setValue(
+        "hdrExposure",
+        static_cast<double>(global::renderEngine->hdrExposure())
+    );
+    rendererData.setValue("disableHDR", global::renderEngine->isHdrDisabled());
 
     dict.setValue("rendererData", rendererData);
-    dict.setValue("fragmentPath", "${MODULE_BASE}/shaders/screenspace_fs.glsl");
+    dict.setValue(
+        "fragmentPath",
+        std::string("${MODULE_BASE}/shaders/screenspace_fs.glsl")
+    );
     _shader = ghoul::opengl::ProgramObject::Build(
         "ScreenSpaceProgram",
         absPath("${MODULE_BASE}/shaders/screenspace_vs.glsl"),
