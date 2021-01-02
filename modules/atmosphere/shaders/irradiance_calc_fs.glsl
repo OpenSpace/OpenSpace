@@ -29,7 +29,7 @@ out vec4 renderTableColor;
 
 //uniform sampler2D transmittanceTexture;
 
-void main(void) {
+void main() {
   float muSun, r;
   unmappingRAndMuSun(r, muSun);
   // We are calculating the Irradiance for L0, i.e.,

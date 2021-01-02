@@ -67,8 +67,7 @@ uniform vec2 distThreshold;
 
 // Use binary search to find the chunk containing our star ID.
 int findChunkId(int left, int right, int id) {
-    
-    while ( left <= right ) {
+    while (left <= right) {
         int middle = (left + right) / 2;
         int firstStarInChunk = starsPerChunk[middle];
         if (left == right || (firstStarInChunk <= id && id < starsPerChunk[middle+1])) {
@@ -111,14 +110,15 @@ void main() {
     vec3 in_velocity = vec3(0.0);
 
     // Check if we should filter this star by position.
-    if ( (abs(posXThreshold.x) > EPS && in_position.x < posXThreshold.x) || 
+    if ((abs(posXThreshold.x) > EPS && in_position.x < posXThreshold.x) || 
         (abs(posXThreshold.y) > EPS && in_position.x > posXThreshold.y) || 
         (abs(posYThreshold.x) > EPS && in_position.y < posYThreshold.x) || 
         (abs(posYThreshold.y) > EPS && in_position.y > posYThreshold.y) || 
         (abs(posZThreshold.x) > EPS && in_position.z < posZThreshold.x) || 
         (abs(posZThreshold.y) > EPS && in_position.z > posZThreshold.y) || 
         (abs(distThreshold.x - distThreshold.y) < EPS 
-        && abs(length(in_position) - distThreshold.y) < EPS) ) {
+        && abs(length(in_position) - distThreshold.y) < EPS))
+    {
         // Discard star in geometry shader.
         vs_gPosition = vec4(0.0);    
         gl_Position = vec4(0.0);
@@ -126,24 +126,25 @@ void main() {
     }
 
 
-    if ( renderOption != RENDEROPTION_STATIC ) {
+    if (renderOption != RENDEROPTION_STATIC) {
         int startOfCol = firstStarInChunk + nStarsInChunk * 3 + placeInChunk * 2;
         in_brightness = vec2(allData[startOfCol], allData[startOfCol + 1]);
 
         // Check if we should filter this star by magnitude or color.
-        if ( (abs(gMagThreshold.x - gMagThreshold.y) < EPS && abs(gMagThreshold.x - in_brightness.x) < EPS) ||
+        if ((abs(gMagThreshold.x - gMagThreshold.y) < EPS && abs(gMagThreshold.x - in_brightness.x) < EPS) ||
             (abs(gMagThreshold.x - 20.0f) > EPS && in_brightness.x < gMagThreshold.x) || 
             (abs(gMagThreshold.y - 20.0f) > EPS && in_brightness.x > gMagThreshold.y) ||
             (abs(bpRpThreshold.x - bpRpThreshold.y) < EPS && abs(bpRpThreshold.x - in_brightness.y) < EPS) ||
             (abs(bpRpThreshold.x) > EPS && in_brightness.y < bpRpThreshold.x) || 
-            (abs(bpRpThreshold.y) > EPS && in_brightness.y > bpRpThreshold.y) ) {
+            (abs(bpRpThreshold.y) > EPS && in_brightness.y > bpRpThreshold.y))
+        {
             // Discard star in geometry shader.
             vs_gPosition = vec4(0.0);    
             gl_Position = vec4(0.0);
             return;
         }
 
-        if ( renderOption == RENDEROPTION_MOTION ) {
+        if (renderOption == RENDEROPTION_MOTION) {
             int startOfVel = firstStarInChunk + nStarsInChunk * 5 + placeInChunk * 3;
             in_velocity = vec3(allData[startOfVel], allData[startOfVel + 1], allData[startOfVel + 2]);
         } 
@@ -157,10 +158,11 @@ void main() {
     objectPosition.xyz += time * in_velocity;
 
     // Thres moving stars by their new position.
-    float distPosition = length(objectPosition.xyz / (1000.0 * Parsec) );
-    if ( (abs(distThreshold.x - distThreshold.y) > EPS && 
+    float distPosition = length(objectPosition.xyz / (1000.0 * Parsec));
+    if ((abs(distThreshold.x - distThreshold.y) > EPS && 
         ((abs(distThreshold.x) > EPS && distPosition < distThreshold.x) || 
-        (abs(distThreshold.y) > EPS && distPosition > distThreshold.y))) ) {
+        (abs(distThreshold.y) > EPS && distPosition > distThreshold.y))))
+    {
         // Discard star in geometry shader.
         vs_gPosition = vec4(0.0);    
         gl_Position = vec4(0.0);
@@ -176,7 +178,7 @@ void main() {
 
     // Remove stars without position, happens when VBO chunk is stuffed with zeros.
     // Has to be done in Geometry shader because Vertices cannot be discarded here.
-    if ( length(in_position) > EPS ){
+    if (length(in_position) > EPS){
         vs_gPosition = vec4(model * objectPosition);    
         gl_Position = vec4(projection * viewPosition);
     }

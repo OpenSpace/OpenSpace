@@ -28,6 +28,7 @@
 in vec4 positionLocalSpace;
 in vec4 positionCameraSpace;
 
+
 Fragment getFragment() {
     vec4 position = positionCameraSpace;
 

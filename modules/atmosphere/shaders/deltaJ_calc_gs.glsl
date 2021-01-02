@@ -29,10 +29,8 @@ uniform int layer;
 layout (triangles) in;
 layout (triangle_strip, max_vertices = 3) out;
 
-void main()
-{
-    int n;
-    for (n = 0; n < gl_in.length(); ++n) {
+void main() {
+    for (int n = 0; n < gl_in.length(); ++n) {
         gl_Position = gl_in[n].gl_Position;
         gl_Layer    = layer;
         EmitVertex();

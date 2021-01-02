@@ -97,7 +97,7 @@ void inscatter(float r, float mu, float muSun, float nu, inout vec3 radianceJ) {
   
   // In order to integrate over 4PI, we scan the sphere using the spherical coordinates
   // previously defined
-  for ( int theta_i = 0; theta_i < INSCATTER_SPHERICAL_INTEGRAL_SAMPLES; ++theta_i ) {
+  for (int theta_i = 0; theta_i < INSCATTER_SPHERICAL_INTEGRAL_SAMPLES; ++theta_i) {
     float theta               = (float(theta_i) + 0.5f) * stepTheta;
     float cosineTheta         = cos(theta);
     float cosineTheta2        = cosineTheta * cosineTheta;
@@ -133,7 +133,7 @@ void inscatter(float r, float mu, float muSun, float nu, inout vec3 radianceJ) {
       groundTransmittance = transmittance(Rg, muGround, distanceToGround);
     }
     //for ( int phi_i = 0; phi_i < 2*INSCATTER_SPHERICAL_INTEGRAL_SAMPLES; ++phi_i ) {
-    for ( int phi_i = 0; phi_i < INSCATTER_SPHERICAL_INTEGRAL_SAMPLES; ++phi_i ) {
+    for (int phi_i = 0; phi_i < INSCATTER_SPHERICAL_INTEGRAL_SAMPLES; ++phi_i) {
       float phi   = (float(phi_i) + 0.5) * stepPhi;
       // spherical coordinates: dw = dtheta*dphi*sin(theta)*rho^2
       // rho = 1, we are integrating over a unit sphere
@@ -190,7 +190,7 @@ void inscatter(float r, float mu, float muSun, float nu, inout vec3 radianceJ) {
   }
 }
 
-void main(void) {
+void main() {
   // cosine variables to access deltaS textures
   float mu, muSun, nu;
   // InScattering Radiance to be calculated at

@@ -32,7 +32,6 @@ const float DEFAULT_DEPTH = 3.08567758e19; // 1000 Pc
 
 
 Fragment getFragment() {
-
     vec4 color = vec4(0.0);
     
     // BILLBOARDS

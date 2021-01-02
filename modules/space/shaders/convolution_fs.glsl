@@ -34,7 +34,7 @@ uniform int convolvedfTextureSize;
 uniform sampler2D psfTexture;
 uniform sampler2D shapeTexture;
 
-void main(void) {
+void main() {
     float fullColor = 0.0;
     
     // Kernel Center

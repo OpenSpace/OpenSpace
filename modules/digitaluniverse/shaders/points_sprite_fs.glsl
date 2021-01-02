@@ -30,7 +30,6 @@ in float vs_screenSpaceDepth;
 uniform vec3 color;
 uniform float alphaValue;
 
-// Sprite
 uniform sampler2D spriteTexture;
 
 Fragment getFragment() {

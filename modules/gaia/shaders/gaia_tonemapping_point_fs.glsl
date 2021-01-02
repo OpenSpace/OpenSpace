@@ -37,7 +37,6 @@ const float M_PI = 3.141592653589793238462;
 const float DEFAULT_DEPTH = 3.08567758e19; // 1000 Pc
 
 Fragment getFragment() {
-
     vec4 color = vec4(0.0);
     
     // GL_POINTS

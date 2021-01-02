@@ -33,7 +33,7 @@ uniform int layer;
 uniform sampler3D deltaSRTexture;
 uniform sampler3D deltaSMTexture;
 
-void main(void) {
+void main() {
   // First we convert the window's fragment coordinate to
   // texel coordinates
   vec3 rst = vec3(gl_FragCoord.xy, float(layer) + 0.5f) /

@@ -44,7 +44,7 @@ uniform vec3 boresight;
 
 #define M_PI 3.14159265358979323846
 
-vec4 uvToModel(vec2 uv, vec3 radius, float segments){
+vec4 uvToModel(vec2 uv, vec3 radius, float segments) {
     float fj = uv.x * segments;
     float fi = (1.0 - uv.y) * segments;
 

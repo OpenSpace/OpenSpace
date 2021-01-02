@@ -32,7 +32,7 @@ uniform int layer;
 
 uniform sampler3D deltaSTexture;
 
-void main(void) {
+void main() {
     float x = gl_FragCoord.x - 0.5f;
     float y = gl_FragCoord.y - 0.5f;
 

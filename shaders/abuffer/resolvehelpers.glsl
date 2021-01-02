@@ -53,7 +53,15 @@ uniform vec3 cameraPosInRaycaster#{index}
 #endif
 
 
-
+/**
+ * Normalize a vector
+ * Supporting huge vectors, where the square of any of the components is too large to be
+ * represent as a float. 
+ */
+vec3 safeNormalize(vec3 v) {
+    float m = max(max(abs(v.x), abs(v.y)), abs(v.z));
+    return normalize(v / m);
+}
 
 uniform int nAaSamples;
 

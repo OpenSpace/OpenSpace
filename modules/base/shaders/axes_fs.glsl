@@ -23,7 +23,6 @@
  ****************************************************************************************/
 
 #include "fragment.glsl"
-#include "PowerScaling/powerScaling_fs.hglsl"
 
 in float vs_screenSpaceDepth;
 in vec4 vs_positionViewSpace;

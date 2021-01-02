@@ -29,6 +29,7 @@ in float vs_depth;
 
 uniform bool usingAdditiveBlending;
 
+
 Fragment getFragment() {
     if (vs_color.a == 0) {
         discard;
@@ -45,8 +46,6 @@ Fragment getFragment() {
     // There is no normal here
     // TODO: Add the correct normal if necessary (JCC)
     frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
-
-
 
     if (usingAdditiveBlending) {
         frag.blend = BLEND_MODE_ADDITIVE;

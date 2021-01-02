@@ -106,12 +106,13 @@ uniform ShadowRenderingStruct shadowDataArray[numberOfShadows];
 uniform int shadows;
 uniform bool hardShadows;
 
-vec4 butterworthFunc(const float d, const float r, const float n) {
+vec4 butterworthFunc(float d, float r, float n) {
     return vec4(vec3(sqrt(r/(r + pow(d, 2*n)))), 1.0);    
 }
 
-vec4 calcShadow(const ShadowRenderingStruct shadowInfoArray[numberOfShadows], const dvec3 position,
-                const bool ground) {
+vec4 calcShadow(ShadowRenderingStruct shadowInfoArray[numberOfShadows], dvec3 position,
+                bool ground)
+{
     if (shadowInfoArray[0].isShadowing) {
         dvec3 pc = shadowInfoArray[0].casterPositionVec - position;
         dvec3 sc_norm = shadowInfoArray[0].sourceCasterVec;
@@ -181,7 +182,7 @@ struct dRay {
  *               intersection of the ray with atmosphere when the eye position
  *               is inside atmosphere.
  */
-bool dAtmosphereIntersection(const dvec3 planetPosition, const dRay ray, const double atmRadius,
+bool dAtmosphereIntersection(dvec3 planetPosition, dRay ray, double atmRadius,
                              out bool inside, out double offset, out double maxLength ) {
     dvec3  l  = planetPosition - ray.origin.xyz;
     double s  = dot(l, ray.direction.xyz);
@@ -281,10 +282,10 @@ void dCalculateRayRenderableGlobe(out dRay ray,
  * calculating the reflectance R[L].
  */
 vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor,
-                       const vec3 v, const vec3 s, out float r, out float mu,
-                       out vec3 attenuation, const vec3 fragPosObj, out bool groundHit,
-                       const double maxLength, const double pixelDepth,
-                       const vec4 spaceColor, const float sunIntensity) {
+                       vec3 v, vec3 s, out float r, out float mu,
+                       out vec3 attenuation, vec3 fragPosObj, out bool groundHit,
+                       double maxLength, double pixelDepth,
+                       vec4 spaceColor, float sunIntensity) {
 
     const float INTERPOLATION_EPS = 0.004f; // precision const from Brunetton
 
@@ -446,10 +447,10 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
  * mu := cosine of the zenith view angle
  * attenuationXtoX0 := transmittance T(x,x0)
  */
-vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const float r,
-                 const float mu, const vec3 attenuationXtoX0, const vec4 groundColor, 
-                 const vec3 normal, const float irradianceFactor,
-                 const float waterReflectance, const float sunIntensity)
+vec3 groundColor(vec3 x, float t, vec3 v, vec3 s, float r,
+                 float mu, vec3 attenuationXtoX0, vec4 groundColor, 
+                 vec3 normal, float irradianceFactor,
+                 float waterReflectance, float sunIntensity)
 {
     vec3 reflectedRadiance = vec3(0.0f);
 
@@ -524,8 +525,8 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
  * mu := cosine of the zenith view angle
  * attenuation := transmittance T(x,x0)
  */
-vec3 sunColor(const vec3 x, const float t, const vec3 v, const vec3 s, const float r,
-              const float mu, const float irradianceFactor) {
+vec3 sunColor(vec3 x, float t, vec3 v, vec3 s, float r, float mu, float irradianceFactor)
+{
     vec3 transmittance  = (r <= Rt) ? ( mu < -sqrt(1.0f - Rg2/(r*r)) ? 
                           vec3(0.0f) : transmittanceLUT(r, mu)) : vec3(1.0f);  
     // JCC: Change this function to a impostor texture with gaussian decay color weighted
@@ -694,4 +695,3 @@ void main() {
         renderTarget = bColor;
     }
 }
-

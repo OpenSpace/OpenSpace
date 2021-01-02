@@ -57,14 +57,13 @@ vec3 color2rgb(float color) {
 }
 
 void main() {
-
     // Assume all stars has equal luminosity as the Sun when no magnitude is loaded.
     float luminosity = 0.05;
     vec3 color = vec3(luminosity);
     float ratioMultiplier = 1.0;
 
     // Calculate the color and luminosity if we have the magnitude and B-V color.
-    if ( renderOption != RENDEROPTION_STATIC ) {
+    if (renderOption != RENDEROPTION_STATIC) {
         color = color2rgb(ge_brightness.y);
         ratioMultiplier = 0.01;
 
@@ -89,7 +88,7 @@ void main() {
     color *= luminosity * pow(luminosityMultiplier, 3.0);
 
     // Decrease contributing brightness for stars in central cluster.
-    if ( ge_cameraDistFromSun > ge_starDistFromSun ) {
+    if (ge_cameraDistFromSun > ge_starDistFromSun) {
         float ratio = ge_starDistFromSun / ge_cameraDistFromSun;
         //color *= ratio * ratioMultiplier;
     }

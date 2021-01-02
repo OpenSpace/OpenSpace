@@ -39,8 +39,7 @@ const float stepTheta = M_PI / (2.0f * float(IRRADIANCE_INTEGRAL_SAMPLES));
 uniform sampler3D deltaSRTexture;
 uniform sampler3D deltaSMTexture;
 
-void main(void) {
-  
+void main() {
   float r     = 0.0f;
   float muSun = 0.0f;
   // Unmapping the variables from texture texels coordinates

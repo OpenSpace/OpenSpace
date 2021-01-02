@@ -46,7 +46,6 @@ uniform float viewScaling;
 uniform float cutOffThreshold;
 
 void main() {
-
     ge_brightness = vs_brightness[0];
     ge_starDistFromSun = vs_starDistFromSun[0];
     ge_cameraDistFromSun = vs_cameraDistFromSun[0];

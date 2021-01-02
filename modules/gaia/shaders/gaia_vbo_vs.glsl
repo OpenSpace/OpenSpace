@@ -59,7 +59,7 @@ void main() {
     vs_brightness = in_brightness;
 
     // Check if we should filter this star by position. Thres depending on original values.
-    if ( (abs(posXThreshold.x) > EPS && in_position.x < posXThreshold.x) || 
+    if ((abs(posXThreshold.x) > EPS && in_position.x < posXThreshold.x) || 
         (abs(posXThreshold.y) > EPS && in_position.x > posXThreshold.y) || 
         (abs(posYThreshold.x) > EPS && in_position.y < posYThreshold.x) || 
         (abs(posYThreshold.y) > EPS && in_position.y > posYThreshold.y) || 
@@ -73,7 +73,8 @@ void main() {
         (abs(gMagThreshold.y - 20.0f) > EPS && in_brightness.x > gMagThreshold.y) ||
         (abs(bpRpThreshold.x - bpRpThreshold.y) < EPS && abs(bpRpThreshold.x - in_brightness.y) < EPS) ||
         (abs(bpRpThreshold.x) > EPS && in_brightness.y < bpRpThreshold.x) || 
-        (abs(bpRpThreshold.y) > EPS && in_brightness.y > bpRpThreshold.y))) ) {
+        (abs(bpRpThreshold.y) > EPS && in_brightness.y > bpRpThreshold.y))))
+    {
         // Discard star in geometry shader.
         vs_gPosition = vec4(0.0);    
         gl_Position = vec4(0.0);
@@ -84,16 +85,17 @@ void main() {
     vec4 objectPosition = vec4(in_position * 1000 * Parsec, 1.0);
 
     // Add velocity if we've read any.
-    if ( renderOption == RENDEROPTION_MOTION ) {
+    if (renderOption == RENDEROPTION_MOTION) {
         // Velocity is already in [m/s].
         objectPosition.xyz += time * in_velocity;
     }
 
     // Thres moving stars by their new position.
     float distPosition = length(objectPosition.xyz / (1000.0 * Parsec) );
-    if ( (abs(distThreshold.x - distThreshold.y) > EPS && 
+    if ((abs(distThreshold.x - distThreshold.y) > EPS && 
         ((abs(distThreshold.x) > EPS && distPosition< distThreshold.x) || 
-        (abs(distThreshold.y) > EPS && distPosition > distThreshold.y))) ) {
+        (abs(distThreshold.y) > EPS && distPosition > distThreshold.y))))
+    {
         // Discard star in geometry shader.
         vs_gPosition = vec4(0.0);    
         gl_Position = vec4(0.0);
@@ -109,7 +111,7 @@ void main() {
 
     // Remove stars without position, happens when VBO chunk is stuffed with zeros.
     // Has to be done in Geometry shader because Vertices cannot be discarded here.
-    if ( length(in_position) > EPS ){
+    if (length(in_position) > EPS) {
         vs_gPosition = vec4(model * objectPosition);    
         gl_Position = vec4(projection * viewPosition);
     }

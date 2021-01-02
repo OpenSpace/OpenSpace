@@ -78,7 +78,7 @@ Fragment getFragment() {
 
     // shadow == 1.0 means it is not in shadow
     float shadow = 1.0;
-    if ( shadowCoords.z >= 0 ) {
+    if (shadowCoords.z >= 0) {
         vec4 normalizedShadowCoords = shadowCoords;
         normalizedShadowCoords.z    = normalizeFloat(zFightingPercentage * normalizedShadowCoords.w);
         normalizedShadowCoords.xy   = normalizedShadowCoords.xy / normalizedShadowCoords.w;

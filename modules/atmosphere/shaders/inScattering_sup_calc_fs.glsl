@@ -35,7 +35,7 @@ uniform vec4 dhdH;
 uniform sampler3D deltaJTexture;
 
 // The integrand here is the f(y) of the trapezoidal rule:
-vec3 integrand(const float r, const float mu, const float muSun, const float nu, const float dist) {
+vec3 integrand(float r, float mu, float muSun, float nu, float dist) {
   // We can calculate r_i by the cosine law: r_i^2=dist^2 + r^2 - 2*r*dist*cos(PI-theta)
   float r_i     = sqrt(r * r + dist * dist + 2.0f * r * dist * mu);
   // r_i can be found using the dot product:
@@ -68,7 +68,7 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
   return inScatteringRadiance;
 }
 
-void main(void) {
+void main() {
   float mu = 0.0f, muSunun = 0.0f, nu = 0.0f;
   // Unmapping the variables from texture texels coordinates
   // to mapped coordinates

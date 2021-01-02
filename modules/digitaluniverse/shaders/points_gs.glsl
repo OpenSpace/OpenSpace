@@ -38,8 +38,7 @@ out float gs_screenSpaceDepth;
 
 const float PI = 3.1415926;
 
-void main()
-{
+void main() {
     gs_screenSpaceDepth = vs_screenSpaceDepth[0];
     
     for (int i = 0; i <= sides; i++) {

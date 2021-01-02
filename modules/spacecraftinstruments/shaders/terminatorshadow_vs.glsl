@@ -36,7 +36,7 @@ uniform mat4 modelViewProjectionTransform;
 uniform vec3 shadowColor;
 
 void main() {
-    if (mod(gl_VertexID,2) == 0.0) {
+    if (mod(gl_VertexID, 2) == 0.0) {
         vs_color = shadowColor;
     }
     else {

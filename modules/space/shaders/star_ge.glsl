@@ -186,5 +186,4 @@ void main() {
     EmitVertex();
     
     EndPrimitive();
-
 }

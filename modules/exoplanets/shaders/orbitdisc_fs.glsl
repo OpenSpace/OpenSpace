@@ -111,7 +111,7 @@ Fragment getFragment() {
     // Scale texture coordinate to handle asymmetric offset intervals
     float textureMid = offsetUpper / offsetIntervalSize;
 
-    if(textureCoord > textureMid) {
+    if (textureCoord > textureMid) {
         textureCoord = 0.5 + 0.5 * (textureCoord - textureMid) / (1.0 - textureMid);
     }
     else {

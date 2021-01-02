@@ -62,32 +62,7 @@ float safeLength(vec4 v) {
     }
 }
 
-float safeLength(vec3 v) {
-    float m = max(max(abs(v.x), abs(v.y)), abs(v.z));
-    if (m > 0.f) {
-        return length(v / m) * m;
-    } else {
-        return 0.f;
-    }
-}
-
-float safeLength(vec2 v) {
-    float m = max(abs(v.x), abs(v.y));
-    if (m > 0.f) {
-        return length(v / m) * m;
-    } else {
-        return 0.f;
-    }
-}
-
-/**
- * Normalize a vector
- * Supporting huge vectors, where the square of any of the components is too large to be
- * represent as a float. 
- */
-vec3 safeNormalize(vec3 v) {
-    float m = max(max(abs(v.x), abs(v.y)), abs(v.z));
-    return normalize(v / m);
-}
+float safeLength(vec3 v) { return safeLength(vec4(v, 0.0)); }
+float safeLength(vec2 v) { return safeLength(vec4(v, 0.0, 0.0)); }
 
 #endif // _FLOATOPERATIONS_GLSL_

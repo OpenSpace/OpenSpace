@@ -60,7 +60,6 @@ vec3 color2rgb(float color) {
 }
 
 void main() {
-
     // Assume all stars has equal luminosity as the Sun when no magnitude is loaded.
     float luminosity = 0.05;
     vec3 color = vec3(luminosity);
