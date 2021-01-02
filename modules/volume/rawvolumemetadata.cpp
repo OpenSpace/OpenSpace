@@ -107,8 +107,8 @@ ghoul::Dictionary RawVolumeMetadata::dictionary() {
     }
 
     if (hasValueRange) {
-        dict.setValue(KeyMinValue, minValue);
-        dict.setValue(KeyMaxValue, maxValue);
+        dict.setValue(KeyMinValue, static_cast<double>(minValue));
+        dict.setValue(KeyMaxValue, static_cast<double>(maxValue));
     }
     if (hasDomainUnit) {
         dict.setValue(KeyValueUnit, valueUnit);

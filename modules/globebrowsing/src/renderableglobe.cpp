@@ -743,7 +743,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
 }
 
 void RenderableGlobe::initializeGL() {
-    if (!_labelsDictionary.empty()) {
+    if (!_labelsDictionary.isEmpty()) {
         _globeLabelsComponent.initialize(_labelsDictionary, this);
         addPropertySubOwner(_globeLabelsComponent);
     }

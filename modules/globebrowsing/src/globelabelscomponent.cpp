@@ -334,7 +334,7 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
     _globe = globe;
 
     // Reads labels' file and build cache file if necessary
-    if (dictionary.empty()) {
+    if (dictionary.isEmpty()) {
         return;
     }
     if (!dictionary.hasKey(KeyLabelsFileName) ||

@@ -213,14 +213,16 @@ void RenderableFieldlines::initializeDefaultPropertyValues() {
 
 bool RenderableFieldlines::isReady() const {
     const bool programReady = _program != nullptr;
-    const bool vectorFieldReady = !_vectorFieldInfo.empty();
-    const bool fieldlineReady = !_fieldlineInfo.empty();
-    const bool seedPointsReady = !_seedPointsInfo.empty();
+    const bool vectorFieldReady = !_vectorFieldInfo.isEmpty();
+    const bool fieldlineReady = !_fieldlineInfo.isEmpty();
+    const bool seedPointsReady = !_seedPointsInfo.isEmpty();
     return programReady && vectorFieldReady && fieldlineReady && seedPointsReady;
 }
 
 void RenderableFieldlines::initializeGL() {
-    if (_vectorFieldInfo.empty() || _fieldlineInfo.empty() || _seedPointsInfo.empty()) {
+    if (_vectorFieldInfo.isEmpty() || _fieldlineInfo.isEmpty() ||
+        _seedPointsInfo.isEmpty())
+    {
         throw ghoul::RuntimeError("Error initializing");
     }
 
