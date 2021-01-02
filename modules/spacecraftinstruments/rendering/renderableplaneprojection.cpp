@@ -57,22 +57,22 @@ namespace openspace {
 RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& dict)
     : Renderable(dict)
 {
-    if (dict.hasKey(KeySpacecraft) && dict.hasValue<std::string>(KeySpacecraft)) {
+    if (dict.hasValue<std::string>(KeySpacecraft)) {
         _spacecraft = dict.value<std::string>(KeySpacecraft);
     }
-    if (dict.hasKey(KeyInstrument) && dict.hasValue<std::string>(KeyInstrument)) {
+    if (dict.hasValue<std::string>(KeyInstrument)) {
         _instrument = dict.value<std::string>(KeyInstrument);
     }
-    if (dict.hasKey(KeyMoving) && dict.hasValue<bool>(KeyMoving)) {
+    if (dict.hasValue<bool>(KeyMoving)) {
         _moving = dict.value<bool>(KeyMoving);
     }
-    if (dict.hasKey(KeyName) && dict.hasValue<std::string>(KeyName)) {
+    if (dict.hasValue<std::string>(KeyName)) {
         _name = dict.value<std::string>(KeyName);
     }
-    if (dict.hasKey(KeyTarget) && dict.hasValue<std::string>(KeyTarget)) {
+    if (dict.hasValue<std::string>(KeyTarget)) {
         _defaultTarget = dict.value<std::string>(KeyTarget);
     }
-    if (dict.hasKey(KeyTexture) && dict.hasValue<std::string>(KeyTexture)) {
+    if (dict.hasValue<std::string>(KeyTexture)) {
         _texturePath = dict.value<std::string>(KeyTexture);
         _texturePath = absPath(_texturePath);
         _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);

@@ -180,17 +180,17 @@ namespace {
             Configuration::Logging& v = static_cast<Configuration::Logging&>(value);
             ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
 
-            if (d.hasKey(KeyLogLevel)) {
+            if (d.hasValue<std::string>(KeyLogLevel)) {
                 v.level = d.value<std::string>(KeyLogLevel);
             }
-            if (d.hasKey(KeyImmediateFlush)) {
+            if (d.hasValue<bool>(KeyImmediateFlush)) {
                 v.forceImmediateFlush = d.value<bool>(KeyImmediateFlush);
             }
-            if (d.hasKey(KeyCapabilitiesVerbosity)) {
+            if (d.hasValue<std::string>(KeyCapabilitiesVerbosity)) {
                 v.capabilitiesVerbosity = d.value<std::string>(KeyCapabilitiesVerbosity);
             }
 
-            if (d.hasKey(KeyLogs) && d.hasValue<ghoul::Dictionary>(KeyLogs)) {
+            if (d.hasValue<ghoul::Dictionary>(KeyLogs)) {
                 ghoul::Dictionary l = d.value<ghoul::Dictionary>(KeyLogs);
                 std::vector<ghoul::Dictionary> res;
                 for (size_t i = 1; i <= l.size(); ++i) {
@@ -204,9 +204,7 @@ namespace {
             Configuration::DocumentationInfo& v =
                 static_cast<Configuration::DocumentationInfo&>(value);
             ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
-            if (d.hasKey(KeyDocumentationPath) &&
-                d.hasValue<std::string>(KeyDocumentationPath))
-            {
+            if (d.hasValue<std::string>(KeyDocumentationPath)) {
                 v.path = d.value<std::string>(KeyDocumentationPath);
             }
         }
@@ -215,13 +213,13 @@ namespace {
             Configuration::LoadingScreen& v =
                 static_cast<Configuration::LoadingScreen&>(value);
             ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
-            if (d.hasKey(KeyShowMessage) && d.hasValue<bool>(KeyShowMessage)) {
+            if (d.hasValue<bool>(KeyShowMessage)) {
                 v.isShowingMessages = d.value<bool>(KeyShowMessage);
             }
-            if (d.hasKey(KeyShowNodeNames) && d.hasValue<bool>(KeyShowNodeNames)) {
+            if (d.hasValue<bool>(KeyShowNodeNames)) {
                 v.isShowingNodeNames = d.value<bool>(KeyShowNodeNames);
             }
-            if (d.hasKey(KeyShowProgressbar) && d.hasValue<bool>(KeyShowProgressbar)) {
+            if (d.hasValue<bool>(KeyShowProgressbar)) {
                 v.isShowingProgressbar = d.value<bool>(KeyShowProgressbar);
             }
         }
@@ -231,16 +229,14 @@ namespace {
                 static_cast<Configuration::OpenGLDebugContext&>(value);
             ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
 
-            if (d.hasKey(KeyActivate) && d.hasValue<bool>(KeyActivate)) {
+            if (d.hasValue<bool>(KeyActivate)) {
                 v.isActive = d.value<bool>(KeyActivate);
             }
-            if (d.hasKey(KeySynchronous) && d.hasValue<bool>(KeySynchronous)) {
+            if (d.hasValue<bool>(KeySynchronous)) {
                 v.isSynchronous = d.value<bool>(KeySynchronous);
             }
 
-            if (d.hasKey(KeyFilterIdentifier) &&
-                d.hasValue<ghoul::Dictionary>(KeyFilterIdentifier))
-            {
+            if (d.hasValue<ghoul::Dictionary>(KeyFilterIdentifier)) {
                 ghoul::Dictionary f = d.value<ghoul::Dictionary>(KeyFilterIdentifier);
 
                 std::vector<Configuration::OpenGLDebugContext::IdentifierFilter> res;
@@ -248,15 +244,15 @@ namespace {
                     Configuration::OpenGLDebugContext::IdentifierFilter filter;
                     ghoul::Dictionary fi = f.value<ghoul::Dictionary>(std::to_string(i));
 
-                    if (fi.hasKey(KeyIdentifier) && fi.hasValue<double>(KeyIdentifier)) {
+                    if (fi.hasValue<double>(KeyIdentifier)) {
                         filter.identifier = static_cast<unsigned int>(
                             fi.value<double>(KeyIdentifier)
                         );
                     }
-                    if (fi.hasKey(KeySource) && fi.hasValue<std::string>(KeySource)) {
+                    if (fi.hasValue<std::string>(KeySource)) {
                         filter.source = fi.value<std::string>(KeySource);
                     }
-                    if (fi.hasKey(KeyType) && fi.hasValue<std::string>(KeyType)) {
+                    if (fi.hasValue<std::string>(KeyType)) {
                         filter.type = fi.value<std::string>(KeyType);
                     }
 
@@ -266,9 +262,7 @@ namespace {
                 v.identifierFilters = res;
             }
 
-            if (d.hasKey(KeyFilterSeverity) &&
-                d.hasValue<ghoul::Dictionary>(KeyFilterSeverity))
-            {
+            if (d.hasValue<ghoul::Dictionary>(KeyFilterSeverity)) {
                 ghoul::Dictionary f = d.value<ghoul::Dictionary>(KeyFilterSeverity);
 
                 std::vector<std::string> res;
@@ -283,23 +277,22 @@ namespace {
             Configuration::HTTPProxy& v = static_cast<Configuration::HTTPProxy&>(value);
             ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
 
-            if (d.hasKey(KeyActivate) && d.hasValue<bool>(KeyActivate)) {
+            if (d.hasValue<bool>(KeyActivate)) {
                 v.usingHttpProxy = d.value<bool>(KeyActivate);
             }
-            if (d.hasKey(KeyAddress) && d.hasValue<std::string>(KeyAddress)) {
+            if (d.hasValue<std::string>(KeyAddress)) {
                 v.address = d.value<std::string>(KeyAddress);
             }
-            if (d.hasKey(KeyPort) && d.hasValue<double>(KeyPort)) {
+            if (d.hasValue<double>(KeyPort)) {
                 v.port = static_cast<unsigned int>(d.value<double>(KeyPort));
             }
-            if (d.hasKey(KeyAuthentication) && d.hasValue<std::string>(KeyAuthentication))
-            {
+            if (d.hasValue<std::string>(KeyAuthentication)) {
                 v.authentication = d.value<std::string>(KeyAuthentication);
             }
-            if (d.hasKey(KeyUser) && d.hasValue<std::string>(KeyUser)) {
+            if (d.hasValue<std::string>(KeyUser)) {
                 v.user = d.value<std::string>(KeyUser);
             }
-            if (d.hasKey(KeyPassword) && d.hasValue<std::string>(KeyPassword)) {
+            if (d.hasValue<std::string>(KeyPassword)) {
                 v.password = d.value<std::string>(KeyPassword);
             }
         }

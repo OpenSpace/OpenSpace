@@ -90,9 +90,7 @@ HongKangParser::HongKangParser(std::string name, std::string fileName,
                 const std::string& currentKey = fmt::format("{}.{}", decoderType, key);
 
                 ghoul::Dictionary decoderDictionary;
-                if (translationDictionary.hasKey(currentKey) &&
-                    translationDictionary.hasValue<ghoul::Dictionary>(currentKey))
-                {
+                if (translationDictionary.hasValue<ghoul::Dictionary>(currentKey)) {
                     decoderDictionary = translationDictionary.value<ghoul::Dictionary>(
                         currentKey
                     );

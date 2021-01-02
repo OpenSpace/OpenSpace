@@ -337,9 +337,7 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
     if (dictionary.isEmpty()) {
         return;
     }
-    if (!dictionary.hasKey(KeyLabelsFileName) ||
-        !dictionary.hasValue<std::string>(KeyLabelsFileName))
-    {
+    if (!dictionary.hasValue<std::string>(KeyLabelsFileName)) {
         return;
     }
 

@@ -436,14 +436,13 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         _faceCamera = dictionary.value<bool>(FaceCameraInfo.identifier);
     }
 
-    if (dictionary.hasKey(KeyTag) && dictionary.hasValue<std::string>(KeyTag)) {
+    if (dictionary.hasValue<std::string>(KeyTag)) {
         std::string tagName = dictionary.value<std::string>(KeyTag);
         if (!tagName.empty()) {
             addTag(std::move(tagName));
         }
     }
-    else if (dictionary.hasKey(KeyTag) && dictionary.hasValue<ghoul::Dictionary>(KeyTag))
-    {
+    else if (dictionary.hasValue<ghoul::Dictionary>(KeyTag)) {
         const ghoul::Dictionary& tagNames = dictionary.value<ghoul::Dictionary>(KeyTag);
         for (std::string_view key : tagNames.keys()) {
             std::string tagName = tagNames.value<std::string>(key);

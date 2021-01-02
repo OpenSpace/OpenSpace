@@ -203,28 +203,24 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     });
     _gridType = static_cast<int>(volume::VolumeGridType::Cartesian);
 
-    if (dictionary.hasKey(KeyStepSize) && dictionary.hasValue<double>(KeyStepSize)) {
+    if (dictionary.hasValue<double>(KeyStepSize)) {
         _stepSize = static_cast<float>(dictionary.value<double>(KeyStepSize));
     }
 
-    if (dictionary.hasKey(KeySecondsBefore) &&
-        dictionary.hasValue<double>(KeySecondsBefore))
-    {
+    if (dictionary.hasValue<double>(KeySecondsBefore)) {
         _secondsBefore = static_cast<float>(dictionary.value<double>(KeySecondsBefore));
     }
     _secondsAfter = static_cast<float>(dictionary.value<double>(KeySecondsAfter));
 
     ghoul::Dictionary clipPlanesDictionary;
-    if (dictionary.hasKey(KeyClipPlanes) &&
-        dictionary.hasValue<ghoul::Dictionary>(KeyClipPlanes))
-    {
+    if (dictionary.hasValue<ghoul::Dictionary>(KeyClipPlanes)) {
         clipPlanesDictionary.value<ghoul::Dictionary>(KeyClipPlanes);
     }
     _clipPlanes = std::make_shared<volume::VolumeClipPlanes>(clipPlanesDictionary);
     _clipPlanes->setIdentifier("clipPlanes");
     _clipPlanes->setGuiName("Clip Planes");
 
-    if (dictionary.hasKey(KeyGridType) && dictionary.hasValue<std::string>(KeyGridType)) {
+    if (dictionary.hasValue<std::string>(KeyGridType)) {
         VolumeGridType gridType = volume::parseGridType(
            dictionary.value<std::string>(KeyGridType)
         );

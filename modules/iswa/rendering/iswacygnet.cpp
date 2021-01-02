@@ -63,7 +63,7 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
 {
     // This changed from setIdentifier to setGuiName, 2018-03-14 ---abock
     std::string name;
-    if (dictionary.hasKey("Name") && dictionary.hasValue<std::string>("Name")) {
+    if (dictionary.hasValue<std::string>("Name")) {
         name = dictionary.value<std::string>("Name");
     }
     setGuiName(name);
@@ -72,41 +72,33 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     _data.updateTime = static_cast<int>(dictionary.value<double>("UpdateTime"));
 
     _data.spatialScale = glm::dvec4(0.f);
-    if (dictionary.hasKey("SpatialScale") &&
-        dictionary.hasValue<glm::dvec4>("SpatialScale"))
-    {
+    if (dictionary.hasValue<glm::dvec4>("SpatialScale")) {
         _data.spatialScale = dictionary.value<glm::dvec4>("SpatialScale");
     }
 
     _data.gridMin = glm::dvec3(0.f);
-    if (dictionary.hasKey("GridMin") &&
-        dictionary.hasValue<glm::dvec3>("GridMin"))
-    {
+    if (dictionary.hasValue<glm::dvec3>("GridMin")) {
         _data.gridMin = dictionary.value<glm::dvec3>("GridMin");
     }
 
     _data.gridMax = glm::dvec3(0.f);
-    if (dictionary.hasKey("GridMax") &&
-        dictionary.hasValue<glm::dvec3>("GridMax"))
-    {
+    if (dictionary.hasValue<glm::dvec3>("GridMax")) {
         _data.gridMax = dictionary.value<glm::dvec3>("GridMax");
     }
 
     if (dictionary.hasKey("Frame") && dictionary.hasValue<std::string>("Frame")) {
         _data.frame = dictionary.value<std::string>("Frame");
     }
-    if (dictionary.hasKey("CoordinateType") &&
-        dictionary.hasValue<std::string>("CoordinateType"))
-    {
+    if (dictionary.hasValue<std::string>("CoordinateType")) {
         _data.coordinateType = dictionary.value<std::string>("CoordinateType");
     }
 
 
     double xOffset = 0.f;
-    if (dictionary.hasKey("XOffset") && dictionary.hasValue<double>("XOffset")) {
+    if (dictionary.hasValue<double>("XOffset")) {
         xOffset = dictionary.value<double>("XOffset");
     }
-    if (dictionary.hasKey("Group") && dictionary.hasValue<std::string>("Group")) {
+    if (dictionary.hasValue<std::string>("Group")) {
         _data.groupName = dictionary.value<std::string>("Group");
     }
 

@@ -85,14 +85,11 @@ documentation::Documentation MissionPhase::Documentation() {
 
 MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
     _name = dictionary.value<std::string>(KeyName);
-    if (dictionary.hasKey(KeyDescription) &&
-        dictionary.hasValue<std::string>(KeyDescription))
-    {
+    if (dictionary.hasValue<std::string>(KeyDescription)) {
         _description = dictionary.value<std::string>(KeyDescription);
     }
 
-    if (dictionary.hasKey(KeyPhases) && dictionary.hasValue<ghoul::Dictionary>(KeyPhases))
-    {
+    if (dictionary.hasValue<ghoul::Dictionary>(KeyPhases)) {
         ghoul::Dictionary childDicts = dictionary.value<ghoul::Dictionary>(KeyPhases);
         // This is a nested mission phase
         _subphases.reserve(childDicts.size());
@@ -116,9 +113,7 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
         timeRangeSubPhases.end = _subphases.back().timeRange().end;
 
         // user may specify an overall time range. In that case expand this timerange.
-        if (dictionary.hasKey(KeyTimeRange) &&
-            dictionary.hasValue<ghoul::Dictionary>(KeyTimeRange))
-        {
+        if (dictionary.hasValue<ghoul::Dictionary>(KeyTimeRange)) {
             ghoul::Dictionary range = dictionary.value<ghoul::Dictionary>(KeyTimeRange);
             TimeRange overallTimeRange(range);
             if (!overallTimeRange.includes(timeRangeSubPhases)) {
@@ -137,9 +132,7 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
         }
     }
     else {
-        if (dictionary.hasKey(KeyTimeRange) &&
-            dictionary.hasValue<ghoul::Dictionary>(KeyTimeRange))
-        {
+        if (dictionary.hasValue<ghoul::Dictionary>(KeyTimeRange)) {
             ghoul::Dictionary timeRangeDict =
                 dictionary.value<ghoul::Dictionary>(KeyTimeRange);
             _timeRange = TimeRange(timeRangeDict); // throws exception if unable to parse

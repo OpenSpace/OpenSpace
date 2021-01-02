@@ -50,9 +50,7 @@ LabelParser::LabelParser(std::string name, std::string fileName,
     // get the different instrument types
     // for each decoder (assuming might have more if hong makes changes)
     for (std::string_view decoderStr : dictionary.keys()) {
-        if (!dictionary.hasKey(decoderStr) ||
-            !dictionary.hasValue<ghoul::Dictionary>(decoderStr))
-        {
+        if (!dictionary.hasValue<ghoul::Dictionary>(decoderStr)) {
             continue;
         }
 
@@ -64,9 +62,7 @@ LabelParser::LabelParser(std::string name, std::string fileName,
             for (std::string_view key : typeDict.keys()) {
                 std::string currentKey = fmt::format("{}.{}", decoderStr, key);
 
-                if (!dictionary.hasKey(currentKey) ||
-                    !dictionary.hasValue<ghoul::Dictionary>(currentKey))
-                {
+                if (!dictionary.hasValue<ghoul::Dictionary>(currentKey)) {
                     continue;
                 }
                 ghoul::Dictionary decoderDict =
@@ -82,9 +78,7 @@ LabelParser::LabelParser(std::string name, std::string fileName,
             }
         }
         if (decoderStr == "Target") {
-            if (!typeDict.hasKey(keySpecs) ||
-                !typeDict.hasValue<ghoul::Dictionary>(keySpecs) ||
-                !typeDict.hasKey(keyConvert) ||
+            if (!typeDict.hasValue<ghoul::Dictionary>(keySpecs) ||
                 !typeDict.hasValue<ghoul::Dictionary>(keySpecs))
             {
                 continue;
@@ -96,9 +90,7 @@ LabelParser::LabelParser(std::string name, std::string fileName,
             _specsOfInterest.resize(specsOfInterestDict.size());
             for (size_t n = 0; n < _specsOfInterest.size(); ++n) {
                 std::string key = std::to_string(n + 1);
-                if (specsOfInterestDict.hasKey(key) &&
-                    specsOfInterestDict.hasValue<std::string>(key))
-                {
+                if (specsOfInterestDict.hasValue<std::string>(key)) {
                     std::string readMe = specsOfInterestDict.value<std::string>(key);
                     _specsOfInterest[n] = readMe;
                 }

@@ -73,9 +73,7 @@ TimeRange::TimeRange(const ghoul::Dictionary& dict) {
 bool TimeRange::initializeFromDictionary(const ghoul::Dictionary& dict,
                                          TimeRange& timeRange)
 {
-    if (dict.hasKey(KeyStart) && dict.hasValue<std::string>(KeyStart) &&
-        dict.hasKey(KeyEnd) && dict.hasValue<std::string>(KeyEnd))
-    {
+    if (dict.hasValue<std::string>(KeyStart) && dict.hasValue<std::string>(KeyEnd)) {
         std::string startTimeStr = dict.value<std::string>(KeyStart);
         std::string endTimeStr = dict.value<std::string>(KeyEnd);
         // Parse to date.

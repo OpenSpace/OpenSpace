@@ -120,27 +120,21 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
     std::string identifier = dictionary.value<std::string>(SceneGraphNode::KeyIdentifier);
     setIdentifier(identifier);
 
-    if (!dictionary.hasKey(KeyVectorField) ||
-        !dictionary.hasValue<ghoul::Dictionary>(KeyVectorField))
-    {
+    if (!dictionary.hasValue<ghoul::Dictionary>(KeyVectorField)) {
         LERROR(fmt::format("Renderable does not contain a key for '{}'", KeyVectorField));
     }
     else {
         _vectorFieldInfo = dictionary.value<ghoul::Dictionary>(KeyVectorField);
     }
     
-    if (!dictionary.hasKey(KeyFieldlines) ||
-        !dictionary.hasValue<ghoul::Dictionary>(KeyFieldlines))
-    {
+    if (!dictionary.hasValue<ghoul::Dictionary>(KeyFieldlines)) {
         LERROR(fmt::format("Renderable does not contain a key for '{}'", KeyFieldlines));
     }
     else {
         _fieldlineInfo = dictionary.value<ghoul::Dictionary>(KeyFieldlines);
     }
 
-    if (!dictionary.hasKey(KeySeedPoints) ||
-        !dictionary.hasValue<ghoul::Dictionary>(KeySeedPoints))
-    {
+    if (!dictionary.hasValue<ghoul::Dictionary>(KeySeedPoints)) {
         LERROR(fmt::format("Renderable does not contain a key for '{}'", KeySeedPoints));
     }
     else {
@@ -157,8 +151,8 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
 
     // @TODO hook up visibility changes ---abock
 
-    auto dirtyFieldlines = [this]() { this->_fieldLinesAreDirty = true; };
-    auto dirtySeedpoints = [this]() { this->_seedPointsAreDirty = true; };
+    auto dirtyFieldlines = [this]() { _fieldLinesAreDirty = true; };
+    auto dirtySeedpoints = [this]() { _seedPointsAreDirty = true; };
 
     _stepSize.onChange(dirtyFieldlines);
     addProperty(_stepSize);
@@ -188,17 +182,13 @@ void RenderableFieldlines::initializeDefaultPropertyValues() {
         _fieldlineColor = _fieldlineInfo.value<glm::dvec4>(KeyFieldlinesColor);
     }
 
-    if (_seedPointsInfo.hasKey(KeySeedPointsType) &&
-        _seedPointsInfo.hasValue<std::string>(KeySeedPointsType))
-    {
+    if (_seedPointsInfo.hasValue<std::string>(KeySeedPointsType)) {
         std::string sourceType = _seedPointsInfo.value<std::string>(KeySeedPointsType);
 
         if (sourceType == SeedPointsSourceFile) {
             _seedPointSource = SeedPointSourceFile;
 
-            if (_seedPointsInfo.hasKey(KeySeedPointsFile) &&
-                _seedPointsInfo.hasValue<std::string>(KeySeedPointsFile))
-            {
+            if (_seedPointsInfo.hasValue<std::string>(KeySeedPointsFile)) {
                 std::string seedPointSourceFile = _seedPointsInfo.value<std::string>(
                     KeySeedPointsFile
                 );
@@ -394,9 +384,7 @@ void RenderableFieldlines::loadSeedPointsFromFile() {
 
 void RenderableFieldlines::loadSeedPointsFromTable() {
     // @TODO needs testing ---abock
-    if (!_seedPointsInfo.hasKey(KeySeedPointsTable) ||
-        !_seedPointsInfo.hasValue<ghoul::Dictionary>(KeySeedPointsTable))
-    {
+    if (!_seedPointsInfo.hasValue<ghoul::Dictionary>(KeySeedPointsTable)) {
         return;
     }
     LINFO("Loading provided list of seed points");
@@ -405,7 +393,7 @@ void RenderableFieldlines::loadSeedPointsFromTable() {
     for (std::string_view index : seedpointsDictionary.keys()) {
         std::string key = fmt::format("{}.{}", KeySeedPointsTable, index);
         // (2020-12-31, abock)  Looks to me as if this should be seedpointsDictionary
-        if (_fieldlineInfo.hasKey(key) && _fieldlineInfo.hasValue<glm::dvec3>(key)) {
+        if (_fieldlineInfo.hasValue<glm::dvec3>(key)) {
             glm::dvec3 seedPos = _fieldlineInfo.value<glm::dvec3>(key);
             _seedPoints.push_back(seedPos);
         }
@@ -413,9 +401,7 @@ void RenderableFieldlines::loadSeedPointsFromTable() {
 }
 
 std::vector<RenderableFieldlines::Line> RenderableFieldlines::generateFieldlines() {
-    if (!_vectorFieldInfo.hasKey(KeyVectorFieldType) ||
-        !_vectorFieldInfo.hasValue<std::string>(KeyVectorFieldType))
-    {
+    if (!_vectorFieldInfo.hasValue<std::string>(KeyVectorFieldType)) {
         LERROR(fmt::format(
             "{} does not contain a '{}' key", KeyVectorField, KeyVectorFieldType
         ));
@@ -437,18 +423,14 @@ std::vector<RenderableFieldlines::Line> RenderableFieldlines::generateFieldlines
 std::vector<RenderableFieldlines::Line>
 RenderableFieldlines::generateFieldlinesVolumeKameleon()
 {
-    if (!_vectorFieldInfo.hasKey(KeyVectorFieldVolumeModel) ||
-        !_vectorFieldInfo.hasValue<std::string>(KeyVectorFieldVolumeModel))
-    {
+    if (!_vectorFieldInfo.hasValue<std::string>(KeyVectorFieldVolumeModel)) {
         LERROR(fmt::format("{} does not name a model", KeyVectorField));
         return {};
     }
 
     std::string model = _vectorFieldInfo.value<std::string>(KeyVectorFieldVolumeModel);
 
-    if (!_vectorFieldInfo.hasKey(KeyVectorFieldFile) ||
-        !_vectorFieldInfo.hasValue<std::string>(KeyVectorFieldFile))
-    {
+    if (!_vectorFieldInfo.hasValue<std::string>(KeyVectorFieldFile)) {
         LERROR(fmt::format("{} does not name a file", KeyVectorField));
         return {};
     }
@@ -471,12 +453,11 @@ RenderableFieldlines::generateFieldlinesVolumeKameleon()
     const std::string v3 = std::string(KeyVectorFieldVolumeVariable) + ".3";
 
     const bool threeVariables =
-        _vectorFieldInfo.hasKey(v1) && _vectorFieldInfo.hasValue<std::string>(v1) &&
-        _vectorFieldInfo.hasKey(v2) && _vectorFieldInfo.hasValue<std::string>(v2) &&
-        _vectorFieldInfo.hasKey(v3) && _vectorFieldInfo.hasValue<std::string>(v3);
-
-    const bool lorentzForce = _vectorFieldInfo.hasKey(v1) &&
         _vectorFieldInfo.hasValue<std::string>(v1) &&
+        _vectorFieldInfo.hasValue<std::string>(v2) &&
+        _vectorFieldInfo.hasValue<std::string>(v3);
+
+    const bool lorentzForce = _vectorFieldInfo.hasValue<std::string>(v1) &&
         (_vectorFieldInfo.value<std::string>(v1) == VectorFieldKameleonVariableLorentz);
 
     if (!threeVariables && !lorentzForce) {

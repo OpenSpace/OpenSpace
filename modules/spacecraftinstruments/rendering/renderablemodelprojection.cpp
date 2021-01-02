@@ -138,16 +138,12 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     );
 
     double boundingSphereRadius = 1.0e9;
-    if (dictionary.hasKey(keyBoundingSphereRadius) &&
-        dictionary.hasValue<double>(keyBoundingSphereRadius))
-    {
+    if (dictionary.hasValue<double>(keyBoundingSphereRadius)) {
         boundingSphereRadius = dictionary.value<double>(keyBoundingSphereRadius);
     }
     setBoundingSphere(boundingSphereRadius);
 
-    if (dictionary.hasKey(PerformShadingInfo.identifier) &&
-        dictionary.hasValue<bool>(PerformShadingInfo.identifier))
-    {
+    if (dictionary.hasValue<bool>(PerformShadingInfo.identifier)) {
         _performShading = dictionary.value<bool>(PerformShadingInfo.identifier);
     }
 

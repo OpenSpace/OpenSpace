@@ -185,9 +185,7 @@ void Property::setGroupIdentifier(std::string groupId) {
 }
 
 std::string Property::groupIdentifier() const {
-    if (_metaData.hasKey(MetaDataKeyGroup) &&
-        _metaData.hasValue<std::string>(MetaDataKeyGroup))
-    {
+    if (_metaData.hasValue<std::string>(MetaDataKeyGroup)) {
         return _metaData.value<std::string>(MetaDataKeyGroup);
     }
     else {
@@ -357,7 +355,7 @@ std::string Property::generateMetaDataJsonDescription() const {
     const std::string& vis = VisibilityConverter.at(visibility);
 
     bool isReadOnly = false;
-    if (_metaData.hasKey(MetaDataKeyReadOnly)) {
+    if (_metaData.hasValue<bool>(MetaDataKeyReadOnly)) {
         isReadOnly = _metaData.value<bool>(MetaDataKeyReadOnly);
     }
 

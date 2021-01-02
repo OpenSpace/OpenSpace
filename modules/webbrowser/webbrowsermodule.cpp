@@ -129,16 +129,14 @@ std::string WebBrowserModule::findHelperExecutable() {
 void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     ZoneScoped
 
-    if (dictionary.hasKey("WebHelperLocation") &&
-        dictionary.hasValue<bool>("WebHelperLocation"))
-    {
+    if (dictionary.hasValue<bool>("WebHelperLocation")) {
         _webHelperLocation = absPath(dictionary.value<std::string>("WebHelperLocation"));
     }
     else {
         _webHelperLocation = findHelperExecutable();
     }
 
-    if (dictionary.hasKey("Enabled") && dictionary.hasValue<bool>("Enabled")) {
+    if (dictionary.hasValue<bool>("Enabled")) {
         _enabled = dictionary.value<bool>("Enabled");
     }
 

@@ -503,9 +503,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     _renderOption.addOption(RenderOptionPositionNormal, "Camera Position Normal");
 
     _renderOption = RenderOptionViewDirection;
-    if (dictionary.hasKey(RenderOptionInfo.identifier) &&
-        dictionary.hasValue<std::string>(RenderOptionInfo.identifier))
-    {
+    if (dictionary.hasValue<std::string>(RenderOptionInfo.identifier)) {
         const std::string o = dictionary.value<std::string>(RenderOptionInfo.identifier);
 
         if (o == "Camera View Direction") {

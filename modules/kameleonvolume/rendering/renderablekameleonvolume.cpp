@@ -154,9 +154,7 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     , _transferFunctionPath(TransferFunctionInfo)
     , _cache(CacheInfo)
 {
-    if (dictionary.hasKey(KeyDimensions) &&
-        dictionary.hasValue<glm::dvec3>(KeyDimensions))
-    {
+    if (dictionary.hasValue<glm::dvec3>(KeyDimensions)) {
         _dimensions = dictionary.value<glm::dvec3>(KeyDimensions);
     }
     else {
@@ -166,50 +164,40 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
 
     _stepSize = static_cast<float>(dictionary.value<double>(KeyStepSize));
 
-    if (dictionary.hasKey(KeyTransferFunction) &&
-        dictionary.hasValue<std::string>(KeyTransferFunction))
-    {
+    if (dictionary.hasValue<std::string>(KeyTransferFunction)) {
         _transferFunctionPath = dictionary.value<std::string>(KeyTransferFunction);
         _transferFunction = std::make_shared<openspace::TransferFunction>(
             _transferFunctionPath, [](const openspace::TransferFunction&) {}
         );
     }
 
-    if (dictionary.hasKey(KeySource) && dictionary.hasValue<std::string>(KeySource)) {
+    if (dictionary.hasValue<std::string>(KeySource)) {
         _sourcePath = absPath(dictionary.value<std::string>(KeySource));
     }
 
-    if (dictionary.hasKey(KeyVariable) && dictionary.hasValue<std::string>(KeyVariable)) {
+    if (dictionary.hasValue<std::string>(KeyVariable)) {
         _variable = dictionary.value<std::string>(KeyVariable);
     }
 
-    if (dictionary.hasKey(KeyLowerDomainBound) &&
-        dictionary.hasValue<glm::dvec3>(KeyLowerDomainBound))
-    {
+    if (dictionary.hasValue<glm::dvec3>(KeyLowerDomainBound)) {
         _lowerDomainBound = dictionary.value<glm::dvec3>(KeyLowerDomainBound);
     }
     else {
         _autoDomainBounds = true;
     }
 
-    if (dictionary.hasKey(KeyUpperDomainBound) &&
-        dictionary.hasValue<glm::dvec3>(KeyUpperDomainBound))
-    {
+    if (dictionary.hasValue<glm::dvec3>(KeyUpperDomainBound)) {
         _upperDomainBound = dictionary.value<glm::dvec3>(KeyUpperDomainBound);
     }
     else {
         _autoDomainBounds = true;
     }
 
-    if (dictionary.hasKey(KeyDomainScale) &&
-        dictionary.hasValue<glm::dvec3>(KeyDomainScale))
-    {
+    if (dictionary.hasValue<glm::dvec3>(KeyDomainScale)) {
         _domainScale = dictionary.value<glm::dvec3>(KeyDomainScale);
     }
 
-    if (dictionary.hasKey(KeyLowerValueBound) &&
-        dictionary.hasValue<double>(KeyLowerValueBound))
-    {
+    if (dictionary.hasValue<double>(KeyLowerValueBound)) {
         _lowerValueBound = static_cast<float>(
             dictionary.value<double>(KeyLowerValueBound)
         );
@@ -218,9 +206,7 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
         _autoValueBounds = true;
     }
 
-    if (dictionary.hasKey(KeyUpperValueBound) &&
-        dictionary.hasValue<double>(KeyUpperValueBound)) 
-   {
+    if (dictionary.hasValue<double>(KeyUpperValueBound)) {
         _upperValueBound = static_cast<float>(
             dictionary.value<double>(KeyUpperValueBound)
         );
@@ -230,16 +216,14 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     }
 
     ghoul::Dictionary clipPlanesDictionary;
-    if (dictionary.hasKey(KeyClipPlanes) &&
-        dictionary.hasValue<ghoul::Dictionary>(KeyClipPlanes))
-    {
+    if (dictionary.hasValue<ghoul::Dictionary>(KeyClipPlanes)) {
         clipPlanesDictionary = dictionary.value<ghoul::Dictionary>(KeyClipPlanes);
     }
     _clipPlanes = std::make_shared<volume::VolumeClipPlanes>(clipPlanesDictionary);
     _clipPlanes->setIdentifier("clipPlanes");
     _clipPlanes->setGuiName("Clip Planes");
 
-    if (dictionary.hasKey(KeyCache) && dictionary.hasValue<bool>(KeyCache)) {
+    if (dictionary.hasValue<bool>(KeyCache)) {
         _cache = dictionary.value<bool>(KeyCache);
     }
 
@@ -253,7 +237,7 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     );
     _gridType.setValue(static_cast<int>(volume::VolumeGridType::Cartesian));
 
-    if (dictionary.hasKey(KeyGridType) && dictionary.hasValue<std::string>(KeyGridType)) {
+    if (dictionary.hasValue<std::string>(KeyGridType)) {
         const std::string& gridType = dictionary.value<std::string>(KeyGridType);
         if (gridType == ValueSphericalGridType) {
             _gridType.setValue(static_cast<int>(volume::VolumeGridType::Spherical));

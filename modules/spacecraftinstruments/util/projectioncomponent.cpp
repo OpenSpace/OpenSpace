@@ -259,9 +259,7 @@ void ProjectionComponent::initialize(const std::string& identifier,
         dictionary.value<std::string>(keyProjAberration)
     );
 
-    if (dictionary.hasKey(keyPotentialTargets) &&
-        dictionary.hasValue<ghoul::Dictionary>(keyPotentialTargets))
-    {
+    if (dictionary.hasValue<ghoul::Dictionary>(keyPotentialTargets)) {
         const ghoul::Dictionary& potentialTargets = dictionary.value<ghoul::Dictionary>(
             keyPotentialTargets
         );
@@ -274,21 +272,15 @@ void ProjectionComponent::initialize(const std::string& identifier,
         }
     }
 
-    if (dictionary.hasKey(keyNeedsTextureMapDilation) &&
-        dictionary.hasValue<bool>(keyNeedsTextureMapDilation))
-    {
+    if (dictionary.hasValue<bool>(keyNeedsTextureMapDilation)) {
         _dilation.isEnabled = dictionary.value<bool>(keyNeedsTextureMapDilation);
     }
 
-    if (dictionary.hasKey(keyNeedsShadowing) &&
-        dictionary.hasValue<bool>(keyNeedsShadowing))
-    {
+    if (dictionary.hasValue<bool>(keyNeedsShadowing)) {
         _shadowing.isEnabled = dictionary.value<bool>(keyNeedsShadowing);
     }
 
-    if (dictionary.hasKey(keyTextureMapAspectRatio) &&
-        dictionary.hasValue<double>(keyTextureMapAspectRatio))
-    {
+    if (dictionary.hasValue<double>(keyTextureMapAspectRatio)) {
         _projectionTextureAspectRatio =
             static_cast<float>(dictionary.value<double>(keyTextureMapAspectRatio));
     }
@@ -322,9 +314,7 @@ void ProjectionComponent::initialize(const std::string& identifier,
     }
 
     ghoul::Dictionary translationDictionary;
-    if (dictionary.hasKey(keyTranslation) &&
-        dictionary.hasValue<ghoul::Dictionary>(keyTranslation))
-    {
+    if (dictionary.hasValue<ghoul::Dictionary>(keyTranslation)) {
         translationDictionary = dictionary.value<ghoul::Dictionary>(keyTranslation);
     }
 
@@ -398,9 +388,7 @@ void ProjectionComponent::initialize(const std::string& identifier,
                 dictionary.value<std::string>(keyTimesSequenceDir)
             );
             ghoul::Dictionary timesTranslationDictionary;
-            if (dictionary.hasKey(keyTimesTranslation) &&
-                dictionary.hasValue<ghoul::Dictionary>(keyTimesTranslation))
-            {
+            if (dictionary.hasValue<ghoul::Dictionary>(keyTimesTranslation)) {
                 timesTranslationDictionary =
                     dictionary.value<ghoul::Dictionary>(keyTimesTranslation);
             }

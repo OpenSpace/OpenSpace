@@ -175,8 +175,7 @@ ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
 {
     using ghoul::filesystem::File;
 
-    if (dictionary.hasKey("Shadows") && dictionary.hasValue<ghoul::Dictionary>("Shadows"))
-    {
+    if (dictionary.hasValue<ghoul::Dictionary>("Shadows")) {
         // @TODO (abock, 2019-12-16) It would be better to not store the dictionary long
         // term and rather extract the values directly here.  This would require a bit of
         // a rewrite in the RenderableGlobe class to not create the ShadowComponent in the

@@ -372,17 +372,13 @@ void RenderableFieldlinesSequence::initializeGL() {
 bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
                                                            SourceFileType& sourceFileType)
 {
-    if (_dictionary->hasKey(SceneGraphNode::KeyIdentifier) &&
-        _dictionary->hasValue<std::string>(SceneGraphNode::KeyIdentifier))
-    {
+    if (_dictionary->hasValue<std::string>(SceneGraphNode::KeyIdentifier)) {
         _identifier = _dictionary->value<std::string>(SceneGraphNode::KeyIdentifier);
     }
 
     // ------------------- EXTRACT MANDATORY VALUES FROM DICTIONARY ------------------- //
     std::string inputFileTypeString;
-    if (!_dictionary->hasKey(KeyInputFileType) ||
-        !_dictionary->hasValue<std::string>(KeyInputFileType))
-    {
+    if (!_dictionary->hasValue<std::string>(KeyInputFileType)) {
         LERROR(fmt::format("{}: The field {} is missing", _identifier, KeyInputFileType));
     }
     else {
@@ -413,9 +409,7 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
         }
     }
 
-    if (!_dictionary->hasKey(KeySourceFolder) ||
-        !_dictionary->hasValue<std::string>(KeySourceFolder))
-    {
+    if (!_dictionary->hasValue<std::string>(KeySourceFolder)) {
         LERROR(fmt::format("{}: The field {} is missing", _identifier, KeySourceFolder));
         return false;
     }
@@ -475,9 +469,7 @@ void RenderableFieldlinesSequence::extractOptionalInfoFromDictionary(
 {
 
     // ------------------- EXTRACT OPTIONAL VALUES FROM DICTIONARY ------------------- //
-    if (_dictionary->hasKey(KeyOutputFolder) &&
-        _dictionary->hasValue<std::string>(KeyOutputFolder))
-    {
+    if (_dictionary->hasValue<std::string>(KeyOutputFolder)) {
         outputFolderPath = _dictionary->value<std::string>(KeyOutputFolder);
         ghoul::filesystem::Directory outputFolder(outputFolderPath);
         if (FileSys.directoryExists(outputFolder)) {
@@ -492,9 +484,7 @@ void RenderableFieldlinesSequence::extractOptionalInfoFromDictionary(
         }
     }
 
-    if (_dictionary->hasKey(KeyColorTablePaths) &&
-        _dictionary->hasValue<ghoul::Dictionary>(KeyColorTablePaths))
-    {
+    if (_dictionary->hasValue<ghoul::Dictionary>(KeyColorTablePaths)) {
         ghoul::Dictionary colorTablesPathsDictionary =
             _dictionary->value<ghoul::Dictionary>(KeyColorTablePaths);
         const size_t nProvidedPaths = colorTablesPathsDictionary.size();
@@ -508,9 +498,7 @@ void RenderableFieldlinesSequence::extractOptionalInfoFromDictionary(
         }
     }
 
-    if (_dictionary->hasKey(KeyColorTableRanges) &&
-        _dictionary->hasValue<ghoul::Dictionary>(KeyColorTableRanges))
-    {
+    if (_dictionary->hasValue<ghoul::Dictionary>(KeyColorTableRanges)) {
         ghoul::Dictionary colorTablesRangesDictionary =
             _dictionary->value<ghoul::Dictionary>(KeyColorTableRanges);
         const size_t nProvidedRanges = colorTablesRangesDictionary.size();
@@ -523,9 +511,7 @@ void RenderableFieldlinesSequence::extractOptionalInfoFromDictionary(
         _colorTableRanges.push_back(glm::vec2(0.f, 1.f));
     }
 
-    if (_dictionary->hasKey(KeyMaskingRanges) &&
-        _dictionary->hasValue<ghoul::Dictionary>(KeyMaskingRanges))
-    {
+    if (_dictionary->hasValue<ghoul::Dictionary>(KeyMaskingRanges)) {
         ghoul::Dictionary maskingRangesDictionary =
             _dictionary->value<ghoul::Dictionary>(KeyMaskingRanges);
         const size_t nProvidedRanges = maskingRangesDictionary.size();
@@ -543,8 +529,7 @@ void RenderableFieldlinesSequence::extractOptionalInfoFromDictionary(
  * Returns false if it fails to extract mandatory information!
  */
 bool RenderableFieldlinesSequence::extractJsonInfoFromDictionary(fls::Model& model) {
-    if (_dictionary->hasKey(KeyJsonSimulationModel) &&
-        _dictionary->hasValue<std::string>(KeyJsonSimulationModel)) {
+    if (_dictionary->hasValue<std::string>(KeyJsonSimulationModel)) {
         std::string modelStr = _dictionary->value<std::string>(KeyJsonSimulationModel);
         std::transform(
             modelStr.begin(),
@@ -561,9 +546,7 @@ bool RenderableFieldlinesSequence::extractJsonInfoFromDictionary(fls::Model& mod
         return false;
     }
 
-    if (_dictionary->hasKey(KeyJsonScalingFactor) &&
-        _dictionary->hasValue<double>(KeyJsonScalingFactor))
-    {
+    if (_dictionary->hasValue<double>(KeyJsonScalingFactor)) {
         _scalingFactor = static_cast<float>(
             _dictionary->value<double>(KeyJsonScalingFactor)
         );
@@ -633,9 +616,7 @@ void RenderableFieldlinesSequence::loadOsflsStatesIntoRAM(const std::string& out
 }
 
 void RenderableFieldlinesSequence::extractOsflsInfoFromDictionary() {
-    if (_dictionary->hasKey(KeyOslfsLoadAtRuntime) &&
-        _dictionary->hasValue<bool>(KeyOslfsLoadAtRuntime))
-    {
+    if (_dictionary->hasValue<bool>(KeyOslfsLoadAtRuntime)) {
         _loadingStatesDynamically = _dictionary->value<bool>(KeyOslfsLoadAtRuntime);
     }
     else {
@@ -933,9 +914,7 @@ bool RenderableFieldlinesSequence::extractCdfInfoFromDictionary(std::string& see
                                                                 std::string& tracingVar,
                                                       std::vector<std::string>& extraVars)
 {
-    if (_dictionary->hasKey(KeyCdfSeedPointFile) &&
-        _dictionary->hasValue<std::string>(KeyCdfSeedPointFile))
-    {
+    if (_dictionary->hasValue<std::string>(KeyCdfSeedPointFile)) {
         seedFilePath = _dictionary->value<std::string>(KeyCdfSeedPointFile);
         ghoul::filesystem::File seedPointFile(seedFilePath);
         if (FileSys.fileExists(seedPointFile)) {
@@ -954,9 +933,7 @@ bool RenderableFieldlinesSequence::extractCdfInfoFromDictionary(std::string& see
         return false;
     }
 
-    if (_dictionary->hasKey(KeyCdfTracingVariable) &&
-        _dictionary->hasValue<std::string>(KeyCdfTracingVariable))
-    {
+    if (_dictionary->hasValue<std::string>(KeyCdfTracingVariable)) {
         tracingVar = _dictionary->value<std::string>(KeyCdfTracingVariable);
     }
     else {
@@ -967,9 +944,7 @@ bool RenderableFieldlinesSequence::extractCdfInfoFromDictionary(std::string& see
         ));
     }
 
-    if (_dictionary->hasKey(KeyCdfExtraVariables) &&
-        _dictionary->hasValue<ghoul::Dictionary>(KeyCdfExtraVariables))
-    {
+    if (_dictionary->hasValue<ghoul::Dictionary>(KeyCdfExtraVariables)) {
         ghoul::Dictionary extraQuantityNamesDictionary =
             _dictionary->value<ghoul::Dictionary>(KeyCdfExtraVariables);
         const size_t nProvidedExtras = extraQuantityNamesDictionary.size();

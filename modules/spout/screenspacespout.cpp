@@ -94,9 +94,7 @@ ScreenSpaceSpout::ScreenSpaceSpout(const ghoul::Dictionary& dictionary)
     );
 
     std::string identifier;
-    if (dictionary.hasKey(KeyIdentifier) &&
-        dictionary.hasValue<std::string>(KeyIdentifier))
-    {
+    if (dictionary.hasValue<std::string>(KeyIdentifier)) {
         identifier = dictionary.value<std::string>(KeyIdentifier);
     }
     else {

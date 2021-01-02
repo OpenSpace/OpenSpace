@@ -202,37 +202,27 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
         _starRenderingMethod = dictionary.value<int>("StarRenderingMethod");
     }
 
-    if (dictionary.hasKey(VolumeRenderingEnabledInfo.identifier) &&
-        dictionary.hasValue<bool>(VolumeRenderingEnabledInfo.identifier))
-    {
+    if (dictionary.hasValue<bool>(VolumeRenderingEnabledInfo.identifier)) {
         _volumeRenderingEnabled = dictionary.value<bool>(
             VolumeRenderingEnabledInfo.identifier
         );
     }
 
-    if (dictionary.hasKey(StarRenderingEnabledInfo.identifier) &&
-        dictionary.hasValue<bool>(StarRenderingEnabledInfo.identifier))
-    {
+    if (dictionary.hasValue<bool>(StarRenderingEnabledInfo.identifier)) {
         _starRenderingEnabled = static_cast<bool>(StarRenderingEnabledInfo.identifier);
     }
 
-    if (dictionary.hasKey(StepSizeInfo.identifier) &&
-        dictionary.hasValue<double>(StepSizeInfo.identifier))
-    {
+    if (dictionary.hasValue<double>(StepSizeInfo.identifier)) {
         _stepSize = static_cast<float>(dictionary.value<double>(StepSizeInfo.identifier));
     }
 
-    if (dictionary.hasKey(AbsorptionMultiplyInfo.identifier) &&
-        dictionary.hasValue<double>(AbsorptionMultiplyInfo.identifier))
-    {
+    if (dictionary.hasValue<double>(AbsorptionMultiplyInfo.identifier)) {
         _absorptionMultiply = static_cast<float>(
             dictionary.value<double>(AbsorptionMultiplyInfo.identifier)
         );
     }
 
-    if (dictionary.hasKey(EmissionMultiplyInfo.identifier) &&
-        dictionary.hasValue<double>(EmissionMultiplyInfo.identifier))
-    {
+    if (dictionary.hasValue<double>(EmissionMultiplyInfo.identifier)) {
         _emissionMultiply = static_cast<float>(
             dictionary.value<double>(EmissionMultiplyInfo.identifier)
         );
@@ -254,45 +244,35 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
         }
     }
 
-    if (dictionary.hasKey(TranslationInfo.identifier) &&
-        dictionary.hasValue<glm::dvec3>(TranslationInfo.identifier))
-    {
+    if (dictionary.hasValue<glm::dvec3>(TranslationInfo.identifier)) {
         _translation = dictionary.value<glm::dvec3>(TranslationInfo.identifier);
     }
 
-    if (dictionary.hasKey(RotationInfo.identifier) &&
-        dictionary.hasValue<glm::dvec3>(RotationInfo.identifier))
-    {
+    if (dictionary.hasValue<glm::dvec3>(RotationInfo.identifier)) {
         _rotation = dictionary.value<glm::dvec3>(RotationInfo.identifier);
     }
 
-    if (!dictionary.hasKey("Volume") || !dictionary.hasValue<ghoul::Dictionary>("Volume"))
-    {
+    if (!dictionary.hasValue<ghoul::Dictionary>("Volume")) {
         LERROR("No volume dictionary specified.");
     }
 
     ghoul::Dictionary volumeDictionary = dictionary.value<ghoul::Dictionary>("Volume");
 
-    if (volumeDictionary.hasKey("Filename") &&
-        volumeDictionary.hasValue<std::string>("Filename"))
-    {
+    if (volumeDictionary.hasValue<std::string>("Filename")) {
         _volumeFilename = absPath(volumeDictionary.value<std::string>("Filename"));
     }
     else {
         LERROR("No volume filename specified");
     }
 
-    if (volumeDictionary.hasKey("Dimensions") &&
-        volumeDictionary.hasValue<glm::dvec3>("Dimensions"))
-    {
+    if (volumeDictionary.hasValue<glm::dvec3>("Dimensions")) {
         _volumeDimensions = volumeDictionary.value<glm::dvec3>("Dimensions");
     }
     else {
         LERROR("No volume dimensions specifieds");
     }
 
-    if (volumeDictionary.hasKey("Size") && volumeDictionary.hasValue<glm::dvec3>("Size"))
-    {
+    if (volumeDictionary.hasValue<glm::dvec3>("Size")) {
         _volumeSize = volumeDictionary.value<glm::dvec3>("Size");
     }
     else {
@@ -315,32 +295,25 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
         );
     }
 
-    if (!dictionary.hasKey("Points") || !dictionary.hasValue<ghoul::Dictionary>("Points"))
-    {
+    if (!dictionary.hasValue<ghoul::Dictionary>("Points")) {
         LERROR("No points dictionary specified.");
     }
 
     ghoul::Dictionary pointsDictionary = dictionary.value<ghoul::Dictionary>("Points");
-    if (pointsDictionary.hasKey("Filename") &&
-        pointsDictionary.hasValue<std::string>("Filename"))
-    {
+    if (pointsDictionary.hasValue<std::string>("Filename")) {
         _pointsFilename = absPath(pointsDictionary.value<std::string>("Filename"));
     }
     else {
         LERROR("No points filename specified.");
     }
 
-    if (pointsDictionary.hasKey(EnabledPointsRatioInfo.identifier) &&
-        pointsDictionary.hasValue<double>(EnabledPointsRatioInfo.identifier))
-    {
+    if (pointsDictionary.hasValue<double>(EnabledPointsRatioInfo.identifier)) {
         _enabledPointsRatio = static_cast<float>(
             pointsDictionary.value<double>(EnabledPointsRatioInfo.identifier)
         );
     }
 
-    if (pointsDictionary.hasKey("Texture") &&
-        pointsDictionary.hasValue<std::string>("Texture"))
-    {
+    if (pointsDictionary.hasValue<std::string>("Texture")) {
         _pointSpreadFunctionTexturePath =
             absPath(pointsDictionary.value<std::string>("Texture"));
         _pointSpreadFunctionFile = std::make_unique<ghoul::filesystem::File>(

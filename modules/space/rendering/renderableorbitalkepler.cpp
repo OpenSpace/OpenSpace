@@ -378,38 +378,31 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     _path = dict.value<std::string>(PathInfo.identifier);
     _segmentQuality = static_cast<int>(dict.value<double>(SegmentQualityInfo.identifier));
 
-    if (dict.hasKey(LineColorInfo.identifier) &&
-        dict.hasValue<glm::dvec3>(LineColorInfo.identifier))
-    {
+    if (dict.hasValue<glm::dvec3>(LineColorInfo.identifier)) {
         _appearance.lineColor = dict.value<glm::dvec3>(LineColorInfo.identifier);
     }
 
     _appearance.lineFade =
-        dict.hasKey(TrailFadeInfo.identifier) &&
         dict.hasValue<double>(TrailFadeInfo.identifier) ?
         static_cast<float>(dict.value<double>(TrailFadeInfo.identifier)) :
         20.f;
 
     _upperLimit =
-        dict.hasKey(UpperLimitInfo.identifier) &&
         dict.hasValue<double>(UpperLimitInfo.identifier) ?
         static_cast<unsigned int>(dict.value<double>(UpperLimitInfo.identifier)) :
         0u;
 
     _startRenderIdx =
-        dict.hasKey(StartRenderIdxInfo.identifier) &&
         dict.hasValue<double>(StartRenderIdxInfo.identifier) ?
         static_cast<unsigned int>(dict.value<double>(StartRenderIdxInfo.identifier)) :
         0u;
 
     _sizeRender =
-        dict.hasKey(RenderSizeInfo.identifier) &&
         dict.hasValue<double>(RenderSizeInfo.identifier) ?
         static_cast<unsigned int>(dict.value<double>(RenderSizeInfo.identifier)) :
         0u;
 
     _appearance.lineWidth =
-        dict.hasKey(LineWidthInfo.identifier) &&
         dict.hasValue<double>(LineWidthInfo.identifier) ?
         static_cast<float>(dict.value<double>(LineWidthInfo.identifier)) :
         2.f;
@@ -430,9 +423,7 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     _startRenderIdxCallbackHandle = _startRenderIdx.onChange(_updateStartRenderIdxSelect);
     _sizeRenderCallbackHandle = _sizeRender.onChange(_updateRenderSizeSelect);
 
-    if (dict.hasKey(RenderBinModeInfo.identifier) &&
-        dict.hasValue<std::string>(RenderBinModeInfo.identifier))
-    {
+    if (dict.hasValue<std::string>(RenderBinModeInfo.identifier)) {
         Renderable::RenderBin cfgRenderBin = RenderBinConversion.at(
             dict.value<std::string>(RenderBinModeInfo.identifier)
         );

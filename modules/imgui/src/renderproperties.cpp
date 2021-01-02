@@ -125,8 +125,7 @@ void renderOptionProperty(Property* prop, const std::string& ownerName,
     const std::string& name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
     bool isReadOnly = false;
-    if (p->metaData().hasKey("isReadOnly") && p->metaData().hasValue<bool>("isReadOnly"))
-    {
+    if (p->metaData().hasValue<bool>("isReadOnly")) {
         isReadOnly = p->metaData().value<bool>("isReadOnly");
     }
 

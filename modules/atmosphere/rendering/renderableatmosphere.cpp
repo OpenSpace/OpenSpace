@@ -257,7 +257,6 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     , _hardShadowsEnabledP(EclipseHardShadowsInfo, false)
  {
     ghoul_precondition(
-        dictionary.hasKey(SceneGraphNode::KeyIdentifier) &&
         dictionary.hasValue<std::string>(SceneGraphNode::KeyIdentifier),
         "RenderableAtmosphere needs the identifier to be specified"
     );
@@ -274,9 +273,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     //================================================================
     //======== Reads Shadow (Eclipses) Entries in mod file ===========
     //================================================================
-    if (dictionary.hasKey(KeyShadowGroup) &&
-        dictionary.hasValue<ghoul::Dictionary>(KeyShadowGroup))
-    {
+    if (dictionary.hasValue<ghoul::Dictionary>(KeyShadowGroup)) {
         ghoul::Dictionary shadowDictionary =
             dictionary.value<ghoul::Dictionary>(KeyShadowGroup);
         bool disableShadows = false;
@@ -289,13 +286,10 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             std::string keyRadius =
                 KeyShadowSource + std::to_string(sourceCounter) + ".Radius";
 
-            success =
-                shadowDictionary.hasKey(keyName) &&
-                shadowDictionary.hasValue<std::string>(keyName);
+            success = shadowDictionary.hasValue<std::string>(keyName);
             if (success) {
                 std::string sourceName = shadowDictionary.value<std::string>(keyName);
-                success = shadowDictionary.hasKey(keyRadius) &&
-                    shadowDictionary.hasValue<double>(keyRadius);
+                success = shadowDictionary.hasValue<double>(keyRadius);
                 if (success) {
                     double sourceRadius = shadowDictionary.value<double>(keyRadius);
                     sourceArray.emplace_back(sourceName, sourceRadius);
@@ -325,13 +319,11 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
                 std::string keyRadius =
                     KeyShadowCaster + std::to_string(casterCounter) + ".Radius";
 
-                success = shadowDictionary.hasKey(keyName) &&
-                    shadowDictionary.hasValue<std::string>(keyName);
+                success = shadowDictionary.hasValue<std::string>(keyName);
                 if (success) {
                     std::string casterName = shadowDictionary.value<std::string>(keyName);
 
-                    success = shadowDictionary.hasKey(keyRadius) &&
-                        shadowDictionary.hasValue<double>(keyRadius);
+                    success = shadowDictionary.hasValue<double>(keyRadius);
                     if (success) {
                         double casterRadius =
                             shadowDictionary.value<double>(keyRadius);
@@ -369,8 +361,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     //================================================================
     //========== Reads Atmosphere Entries from mod file ==============
     //================================================================
-    bool success = dictionary.hasKey(keyAtmosphere) &&
-        dictionary.hasValue<ghoul::Dictionary>(keyAtmosphere);
+    bool success = dictionary.hasValue<ghoul::Dictionary>(keyAtmosphere);
     if (success) {
         ghoul::Dictionary atmosphereDictionary =
             dictionary.value<ghoul::Dictionary>(keyAtmosphere);
@@ -446,16 +437,13 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             );
         }
 
-        success = atmosphereDictionary.hasKey(keyRayleigh) &&
-            atmosphereDictionary.hasValue<ghoul::Dictionary>(keyRayleigh);
+        success = atmosphereDictionary.hasValue<ghoul::Dictionary>(keyRayleigh);
         if (success) {
             ghoul::Dictionary rayleighDictionary =
                 atmosphereDictionary.value<ghoul::Dictionary>(keyRayleigh);
             // Not using right now.
             glm::dvec3 rayleighWavelengths = glm::dvec3(0.f);
-            if (rayleighDictionary.hasKey("Coefficients") &&
-                rayleighDictionary.hasValue<ghoul::Dictionary>("Coefficients"))
-            {
+            if (rayleighDictionary.hasValue<ghoul::Dictionary>("Coefficients")) {
                 ghoul::Dictionary coefficientsDictionary =
                     rayleighDictionary.value<ghoul::Dictionary>("Coefficients");
                 if (coefficientsDictionary.hasKey("Wavelengths")) {
@@ -509,28 +497,21 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             );
         }
 
-        success = atmosphereDictionary.hasKey(keyOzone) &&
-            atmosphereDictionary.hasValue<ghoul::Dictionary>(keyOzone);
+        success = atmosphereDictionary.hasValue<ghoul::Dictionary>(keyOzone);
         if (success) {
             ghoul::Dictionary ozoneDictionary =
                 atmosphereDictionary.value<ghoul::Dictionary>(keyOzone);
-            _ozoneLayerEnabled =
-                ozoneDictionary.hasKey(keyOzoneHeightScale) &&
-                ozoneDictionary.hasValue<double>(keyOzoneHeightScale);
+            _ozoneLayerEnabled = ozoneDictionary.hasValue<double>(keyOzoneHeightScale);
             if (_ozoneLayerEnabled) {
                 _ozoneHeightScale = static_cast<float>(
                     ozoneDictionary.value<double>(keyOzoneHeightScale)
                 );
             }
 
-            if (ozoneDictionary.hasKey("Coefficients") &&
-                ozoneDictionary.hasValue<ghoul::Dictionary>("Coefficients"))
-            {
+            if (ozoneDictionary.hasValue<ghoul::Dictionary>("Coefficients")) {
                 ghoul::Dictionary coeff =
                     ozoneDictionary.value<ghoul::Dictionary>("Coefficients");
-                if (coeff.hasKey("Extinction") &&
-                    coeff.hasValue<glm::dvec3>("Extinction"))
-                {
+                if (coeff.hasValue<glm::dvec3>("Extinction")) {
                     _ozoneExtinctionCoeff = coeff.value<glm::dvec3>("Extinction");
                 }
                 else {
@@ -545,8 +526,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             _ozoneLayerEnabled = false;
         }
 
-        success = atmosphereDictionary.hasKey(keyMie) &&
-            atmosphereDictionary.hasValue<ghoul::Dictionary>(keyMie);
+        success = atmosphereDictionary.hasValue<ghoul::Dictionary>(keyMie);
         if (success) {
             ghoul::Dictionary mieDictionary =
                 atmosphereDictionary.value<ghoul::Dictionary>(keyMie);
@@ -564,13 +544,11 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
                 );
             }
 
-            if (mieDictionary.hasKey("Coefficients") &&
-                mieDictionary.hasValue<ghoul::Dictionary>("Coefficients"))
-            {
+            if (mieDictionary.hasValue<ghoul::Dictionary>("Coefficients")) {
                 ghoul::Dictionary coeffs =
                     mieDictionary.value<ghoul::Dictionary>("Coefficients");
 
-                if (coeffs.hasKey("Scattering")) {
+                if (coeffs.hasValue<glm::dvec3>("Scattering")) {
                     _mieScatteringCoeff = coeffs.value<glm::dvec3>("Scattering");
                 }
                 else {
@@ -582,7 +560,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
                     );
                 }
 
-                if (coeffs.hasKey("Extinction")) {
+                if (coeffs.hasValue<glm::dvec3>("Extinction")) {
                     _mieExtinctionCoeff = coeffs.value<glm::dvec3>("Extinction");
                 }
                 else {
@@ -604,7 +582,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
                 );
             }
 
-            if (mieDictionary.hasKey(keyMiePhaseConstant)) {
+            if (mieDictionary.hasValue<double>(keyMiePhaseConstant)) {
                 _miePhaseConstant = static_cast<float>(
                     mieDictionary.value<double>(keyMiePhaseConstant)
                 );
@@ -627,8 +605,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             );
         }
 
-        success = atmosphereDictionary.hasKey(keyImage) &&
-            atmosphereDictionary.hasValue<ghoul::Dictionary>(keyImage);
+        success = atmosphereDictionary.hasValue<ghoul::Dictionary>(keyImage);
         if (success) {
             ghoul::Dictionary ImageDictionary =
                 atmosphereDictionary.value<ghoul::Dictionary>(keyImage);
@@ -643,8 +620,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             }
         }
 
-        success = atmosphereDictionary.hasKey(keyATMDebug) &&
-            atmosphereDictionary.hasValue<ghoul::Dictionary>(keyATMDebug);
+        success = atmosphereDictionary.hasValue<ghoul::Dictionary>(keyATMDebug);
         if (success) {
             ghoul::Dictionary debugDictionary =
                 atmosphereDictionary.value<ghoul::Dictionary>(keyATMDebug);

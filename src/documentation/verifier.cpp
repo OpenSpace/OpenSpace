@@ -136,7 +136,7 @@ std::string DoubleVerifier::type() const {
 TestResult IntVerifier::operator()(const ghoul::Dictionary & dict,
                                    const std::string & key) const
 {
-    if (dict.hasKey(key) && dict.hasValue<int>(key)) {
+    if (dict.hasValue<int>(key)) {
         // We we have a key and the value is int, we are done
         return { true, {}, {} };
     }
@@ -184,7 +184,7 @@ TableVerifier::TableVerifier(std::vector<DocumentationEntry> documentationEntrie
 TestResult TableVerifier::operator()(const ghoul::Dictionary& dictionary,
                                      const std::string& key) const
 {
-    if (dictionary.hasKey(key) && dictionary.hasValue<Type>(key)) {
+    if (dictionary.hasValue<Type>(key)) {
         ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>(key);
         TestResult res = testSpecification({documentations}, d);
 

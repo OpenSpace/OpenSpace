@@ -110,17 +110,13 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
     _sourceFrame = dictionary.value<std::string>(SourceInfo.identifier);
     _destinationFrame = dictionary.value<std::string>(DestinationInfo.identifier);
 
-    if (dictionary.hasKey(KeyKernels) && dictionary.hasValue<std::string>(KeyKernels)) {
+    if (dictionary.hasValue<std::string>(KeyKernels)) {
         SpiceManager::ref().loadKernel(dictionary.value<std::string>(KeyKernels));
     }
-    else if (dictionary.hasKey(KeyKernels) &&
-        dictionary.hasValue<ghoul::Dictionary>(KeyKernels))
-    {
+    else if (dictionary.hasValue<ghoul::Dictionary>(KeyKernels)) {
         ghoul::Dictionary kernels = dictionary.value<ghoul::Dictionary>(KeyKernels);
         for (size_t i = 1; i <= kernels.size(); ++i) {
-            if (!kernels.hasKey(std::to_string(i)) ||
-                !kernels.hasValue<std::string>(std::to_string(i)))
-            {
+            if (!kernels.hasValue<std::string>(std::to_string(i))) {
                 throw ghoul::RuntimeError("Kernels has to be an array-style table");
             }
 

@@ -369,9 +369,7 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
     _labelOrientationOption.addOption(NormalDirection, "Camera Position Normal");
 
     _labelOrientationOption = NormalDirection;
-    if (dictionary.hasKey(LabelOrientationOptionInfo.identifier) &&
-        dictionary.hasValue<std::string>(LabelOrientationOptionInfo.identifier))
-    {
+    if (dictionary.hasValue<std::string>(LabelOrientationOptionInfo.identifier)) {
         const std::string o = dictionary.value<std::string>(
             LabelOrientationOptionInfo.identifier
         );

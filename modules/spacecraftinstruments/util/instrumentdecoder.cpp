@@ -38,7 +38,7 @@ namespace {
 namespace openspace {
 
 InstrumentDecoder::InstrumentDecoder(const ghoul::Dictionary& dictionary) {
-    if (dictionary.hasKey(KeyDetector) && dictionary.hasValue<std::string>(KeyDetector)) {
+    if (dictionary.hasValue<std::string>(KeyDetector)) {
         _type = dictionary.value<std::string>(KeyDetector);
         std::for_each(
             _type.begin(),
@@ -51,16 +51,14 @@ InstrumentDecoder::InstrumentDecoder(const ghoul::Dictionary& dictionary) {
         throw ghoul::RuntimeError("Instrument has not provided detector type");
     }
 
-    if (dictionary.hasKey(KeyStopCommand) &&
-        dictionary.hasValue<std::string>(KeyStopCommand) && _type == "SCANNER")
-    {
+    if (dictionary.hasValue<std::string>(KeyStopCommand) && _type == "SCANNER") {
         _stopCommand = dictionary.value<std::string>(KeyStopCommand);
     }
     else {
         LWARNING("Scanner must provide stop command, please check mod file.");
     }
 
-    if (dictionary.hasKey(KeySpice) && dictionary.hasValue<ghoul::Dictionary>(KeySpice)) {
+    if (dictionary.hasValue<ghoul::Dictionary>(KeySpice)) {
         ghoul::Dictionary spiceDictionary = dictionary.value<ghoul::Dictionary>(KeySpice);
 
         _spiceIDs.resize(spiceDictionary.size());

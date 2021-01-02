@@ -130,14 +130,13 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     // I can't come up with a good reason not to do this for all renderables
     registerUpdateRenderBinFromOpacity();
 
-    if (dictionary.hasKey(KeyTag) && dictionary.hasValue<std::string>(KeyTag)) {
+    if (dictionary.hasValue<std::string>(KeyTag)) {
         std::string tagName = dictionary.value<std::string>(KeyTag);
         if (!tagName.empty()) {
             addTag(std::move(tagName));
         }
     }
-    else if (dictionary.hasKey(KeyTag) && dictionary.hasValue<ghoul::Dictionary>(KeyTag))
-    {
+    else if (dictionary.hasValue<ghoul::Dictionary>(KeyTag)) {
         const ghoul::Dictionary& tagNames = dictionary.value<ghoul::Dictionary>(KeyTag);
         for (std::string_view key : tagNames.keys()) {
             std::string tagName = tagNames.value<std::string>(key);
@@ -152,9 +151,7 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     }
 
     if (dictionary.hasKey(OpacityInfo.identifier)) {
-        _opacity = static_cast<float>(dictionary.value<double>(
-            OpacityInfo.identifier)
-       );
+        _opacity = static_cast<float>(dictionary.value<double>(OpacityInfo.identifier));
     }
 
     addProperty(_enabled);
