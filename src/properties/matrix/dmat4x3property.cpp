@@ -36,8 +36,8 @@ glm::dmat4x3 fromLuaConversion(lua_State* state, bool& success) {
     glm::dmat4x3 result;
     lua_pushnil(state);
     int number = 1;
-    for (glm::length_t i = 0; i < ghoul::glm_cols<glm::dmat4x3>::value; ++i) {
-        for (glm::length_t j = 0; j < ghoul::glm_rows<glm::dmat4x3>::value; ++j) {
+    for (glm::length_t i = 0; i < glm::dmat4x3::row_type::length(); ++i) {
+        for (glm::length_t j = 0; j < glm::dmat4x3::col_type::length(); ++j) {
             int hasNext = lua_next(state, -2);
             if (hasNext != 1) {
                 success = false;
@@ -63,8 +63,8 @@ glm::dmat4x3 fromLuaConversion(lua_State* state, bool& success) {
 bool toLuaConversion(lua_State* state, glm::dmat4x3 value) {
     lua_newtable(state);
     int number = 1;
-    for (glm::length_t i = 0; i < ghoul::glm_cols<glm::dmat4x3>::value; ++i) {
-        for (glm::length_t j = 0; j < ghoul::glm_rows<glm::dmat4x3>::value; ++j) {
+    for (glm::length_t i = 0; i < glm::dmat4x3::row_type::length(); ++i) {
+        for (glm::length_t j = 0; j < glm::dmat4x3::col_type::length(); ++j) {
             lua_pushnumber(state, value[i][j]);
             lua_rawseti(state, -2, number);
             ++number;
@@ -76,15 +76,13 @@ bool toLuaConversion(lua_State* state, glm::dmat4x3 value) {
 glm::dmat4x3 fromStringConversion(const std::string& val, bool& success) {
     glm::dmat4x3 result = glm::dmat4x3(1.0);
     std::vector<std::string> tokens = ghoul::tokenizeString(val, ',');
-    if (tokens.size() !=
-        (ghoul::glm_rows<glm::dmat4x3>::value * ghoul::glm_cols<glm::dmat4x3>::value))
-    {
+    if (tokens.size() != ghoul::glm_components<glm::dmat4x3>::value) {
         success = false;
         return result;
     }
     int number = 0;
-    for (glm::length_t i = 0; i < ghoul::glm_cols<glm::dmat4x3>::value; ++i) {
-        for (glm::length_t j = 0; j < ghoul::glm_rows<glm::dmat4x3>::value; ++j) {
+    for (glm::length_t i = 0; i < glm::dmat4x3::row_type::length(); ++i) {
+        for (glm::length_t j = 0; j < glm::dmat4x3::col_type::length(); ++j) {
             std::stringstream s(tokens[number]);
             glm::dmat4x3::value_type v;
             s >> v;
@@ -104,8 +102,8 @@ glm::dmat4x3 fromStringConversion(const std::string& val, bool& success) {
 
 bool toStringConversion(std::string& outValue, glm::dmat4x3 inValue) {
     outValue = "[";
-    for (glm::length_t i = 0; i < ghoul::glm_cols<glm::dmat4x3>::value; ++i) {
-        for (glm::length_t j = 0; j < ghoul::glm_rows<glm::dmat4x3>::value; ++j) {
+    for (glm::length_t i = 0; i < glm::dmat4x3::row_type::length(); ++i) {
+        for (glm::length_t j = 0; j < glm::dmat4x3::col_type::length(); ++j) {
             outValue += std::to_string(inValue[i][j]) + ",";
         }
     }
