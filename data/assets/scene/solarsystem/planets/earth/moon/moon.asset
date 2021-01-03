@@ -26,15 +26,13 @@ local Moon = {
         SegmentsPerPatch = 64,
         Layers = {},
         ShadowGroup = {
-            Source1 = {
-                Name = sunAsset.Sun.Name,
-                Radius = 696.3E6
+            Sources = {
+                { Name = sunAsset.Sun.Identifier, Radius = 696.3E6 },
             },
-            Caster1 = { 
-                Name = earthAsset.Earth.Name,
-                Radius = 6.371E6
+            Casters = {
+                { Name = earthAsset.Earth.Identifier, Radius = 6.371E6 },
             }
-        },
+        },        
         Labels = {
             Enable = false,
             FileName = labelsPath .. "/moon.labels",

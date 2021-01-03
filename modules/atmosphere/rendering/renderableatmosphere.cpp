@@ -60,20 +60,20 @@ namespace {
     constexpr const char* KeyShadowSource = "Source";
     constexpr const char* KeyShadowCaster = "Caster";
 
-    constexpr const char* keyPlanetRadius = "PlanetRadius";
-    constexpr const char* keyAverageGroundReflectance = "PlanetAverageGroundReflectance";
-    constexpr const char* keyRayleigh = "Rayleigh";
-    constexpr const char* keyRayleighHeightScale = "H_R";
-    constexpr const char* keyOzone = "Ozone";
-    constexpr const char* keyOzoneHeightScale = "H_O";
-    constexpr const char* keyMie = "Mie";
-    constexpr const char* keyMieHeightScale = "H_M";
-    constexpr const char* keyMiePhaseConstant = "G";
-    constexpr const char* keyImage = "Image";
-    constexpr const char* keyToneMappingOp = "ToneMapping";
-    constexpr const char* keyATMDebug = "Debug";
-    constexpr const char* keyTextureScale = "PreCalculatedTextureScale";
-    constexpr const char* keySaveTextures = "SaveCalculatedTextures";
+    constexpr const char* KeyPlanetRadius = "PlanetRadius";
+    constexpr const char* KeyAverageGroundReflectance = "PlanetAverageGroundReflectance";
+    constexpr const char* KeyRayleigh = "Rayleigh";
+    constexpr const char* KeyRayleighHeightScale = "H_R";
+    constexpr const char* KeyOzone = "Ozone";
+    constexpr const char* KeyOzoneHeightScale = "H_O";
+    constexpr const char* KeyMie = "Mie";
+    constexpr const char* KeyMieHeightScale = "H_M";
+    constexpr const char* KeyMiePhaseConstant = "G";
+    constexpr const char* KeyImage = "Image";
+    constexpr const char* KeyToneMappingOp = "ToneMapping";
+    constexpr const char* KeyATMDebug = "Debug";
+    constexpr const char* KeyTextureScale = "PreCalculatedTextureScale";
+    constexpr const char* KeySaveTextures = "SaveCalculatedTextures";
 
     constexpr openspace::properties::Property::PropertyInfo AtmosphereHeightInfo = {
         "AtmosphereHeight",
@@ -137,7 +137,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo MieScatteringCoeffInfo = {
         "MieScatteringCoeff",
-        "Mie Scattering Coeff (x10e-3)",
+        "Mie Scattering Coeff",
         "Mie sea-level scattering coefficients in meters"
     };
 
@@ -214,18 +214,18 @@ documentation::Documentation RenderableAtmosphere::Documentation() {
                 {
                     "*",
                     new TableVerifier({
-                                        {
-                        "Name",
-                        new StringVerifier,
-                        Optional::No,
-                        "The scene graph node name of the caster"
-                    },
-                    {
-                        "Radius",
-                        new DoubleVerifier,
-                        Optional::No,
-                        "The radius of the object in meters"
-                    }
+                        {
+                            "Name",
+                            new StringVerifier,
+                            Optional::No,
+                            "The scene graph node name of the caster"
+                        },
+                        {
+                            "Radius",
+                            new DoubleVerifier,
+                            Optional::No,
+                            "The radius of the object in meters"
+                        }
                     }),
                     Optional::Yes,
                     "Individual shadow casters"
@@ -257,7 +257,7 @@ documentation::Documentation RenderableAtmosphere::Documentation() {
             ""
         },
         {
-            keyRayleighHeightScale,
+            KeyRayleighHeightScale,
             new DoubleVerifier,
             Optional::No,
             ""
@@ -266,7 +266,7 @@ documentation::Documentation RenderableAtmosphere::Documentation() {
 
     TableVerifier* ozoneTable = new TableVerifier({
         {
-            keyOzoneHeightScale,
+            KeyOzoneHeightScale,
             new DoubleVerifier,
             Optional::Yes,
             ""
@@ -288,7 +288,7 @@ documentation::Documentation RenderableAtmosphere::Documentation() {
 
     TableVerifier* mieTable = new TableVerifier({
         {
-            keyMieHeightScale,
+            KeyMieHeightScale,
             new DoubleVerifier,
             Optional::No,
             ""
@@ -313,7 +313,7 @@ documentation::Documentation RenderableAtmosphere::Documentation() {
             ""
         },
         {
-            keyMiePhaseConstant,
+            KeyMiePhaseConstant,
             new DoubleInRangeVerifier(-1.0, 1.0),
             Optional::No,
             ""
@@ -338,13 +338,13 @@ documentation::Documentation RenderableAtmosphere::Documentation() {
                 AtmosphereHeightInfo.description
             },
             {
-                keyPlanetRadius,
+                KeyPlanetRadius,
                 new DoubleVerifier,
                 Optional::No,
                 "The radius of the planet in meters"
             },
             {
-                keyAverageGroundReflectance,
+                KeyAverageGroundReflectance,
                 new DoubleVerifier,
                 Optional::No,
                 ""
@@ -368,34 +368,34 @@ documentation::Documentation RenderableAtmosphere::Documentation() {
                 GroundRadianceEmittioninfo.description
             },
             {
-                keyRayleigh,
+                KeyRayleigh,
                 rayleighTable,
                 Optional::No,
                 ""
             },
             {
-                keyOzone,
+                KeyOzone,
                 ozoneTable,
                 Optional::Yes,
                 ""
             },
             {
-                keyMie,
+                KeyMie,
                 mieTable,
                 Optional::No,
                 ""
             },
             {
-                keyATMDebug,
+                KeyATMDebug,
                 new TableVerifier({
                     {
-                        keyTextureScale,
+                        KeyTextureScale,
                         new DoubleInRangeVerifier(0.0, 1.0),
                         Optional::Yes,
                         ""
                     },
                     {
-                        keySaveTextures,
+                        KeySaveTextures,
                         new BoolVerifier,
                         Optional::Yes,
                         ""
@@ -451,7 +451,6 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         ghoul::Dictionary shadowDictionary =
             dictionary.value<ghoul::Dictionary>(KeyShadowGroup);
 
-
         std::vector<std::pair<std::string, double>> sourceArray;
         ghoul::Dictionary sources = shadowDictionary.value<ghoul::Dictionary>("Sources");
         for (std::string_view k : sources.keys()) {
@@ -489,9 +488,9 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     _atmosphereHeight = static_cast<float>(
         dictionary.value<double>(AtmosphereHeightInfo.identifier)
     );
-    _planetRadius = static_cast<float>(dictionary.value<double>(keyPlanetRadius));
+    _planetRadius = static_cast<float>(dictionary.value<double>(KeyPlanetRadius));
     _groundAverageReflectance = static_cast<float>(
-        dictionary.value<double>(keyAverageGroundReflectance)
+        dictionary.value<double>(KeyAverageGroundReflectance)
     );
     _groundRadianceEmission = static_cast<float>(
         dictionary.value<double>(GroundRadianceEmittioninfo.identifier)
@@ -510,22 +509,22 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     }
 
     {
-        ghoul::Dictionary rayleighDict = dictionary.value<ghoul::Dictionary>(keyRayleigh);
+        ghoul::Dictionary rayleighDict = dictionary.value<ghoul::Dictionary>(KeyRayleigh);
 
         ghoul::Dictionary coeffs = rayleighDict.value<ghoul::Dictionary>("Coefficients");
         _rayleighScatteringCoeff = coeffs.value<glm::dvec3>("Scattering");
 
         _rayleighHeightScale = static_cast<float>(
-            rayleighDict.value<double>(keyRayleighHeightScale)
+            rayleighDict.value<double>(KeyRayleighHeightScale)
         );
     }
 
-    if (dictionary.hasValue<ghoul::Dictionary>(keyOzone)) {
-        ghoul::Dictionary ozoneDict = dictionary.value<ghoul::Dictionary>(keyOzone);
+    if (dictionary.hasValue<ghoul::Dictionary>(KeyOzone)) {
+        ghoul::Dictionary ozoneDict = dictionary.value<ghoul::Dictionary>(KeyOzone);
 
-        if (ozoneDict.hasValue<double>(keyOzoneHeightScale)) {
+        if (ozoneDict.hasValue<double>(KeyOzoneHeightScale)) {
             _ozoneHeightScale = static_cast<float>(
-                ozoneDict.value<double>(keyOzoneHeightScale)
+                ozoneDict.value<double>(KeyOzoneHeightScale)
             );
             _ozoneEnabled = true;
         }
@@ -539,8 +538,8 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     }
 
     {
-        ghoul::Dictionary mieDict = dictionary.value<ghoul::Dictionary>(keyMie);
-        _mieHeightScale = static_cast<float>(mieDict.value<double>(keyMieHeightScale));
+        ghoul::Dictionary mieDict = dictionary.value<ghoul::Dictionary>(KeyMie);
+        _mieHeightScale = static_cast<float>(mieDict.value<double>(KeyMieHeightScale));
 
         ghoul::Dictionary coeffs = mieDict.value<ghoul::Dictionary>("Coefficients");
 
@@ -548,23 +547,23 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         _mieExtinctionCoeff = coeffs.value<glm::dvec3>("Extinction");
 
         _miePhaseConstant = static_cast<float>(
-            mieDict.value<double>(keyMiePhaseConstant)
+            mieDict.value<double>(KeyMiePhaseConstant)
         );
     }
 
-    if (dictionary.hasValue<ghoul::Dictionary>(keyATMDebug)) {
-        ghoul::Dictionary debugDict = dictionary.value<ghoul::Dictionary>(keyATMDebug);
-        if (debugDict.hasKey(keyTextureScale)) {
+    if (dictionary.hasValue<ghoul::Dictionary>(KeyATMDebug)) {
+        ghoul::Dictionary debugDict = dictionary.value<ghoul::Dictionary>(KeyATMDebug);
+        if (debugDict.hasKey(KeyTextureScale)) {
             _preCalculatedTexturesScale = static_cast<float>(
-                debugDict.value<double>(keyTextureScale)
+                debugDict.value<double>(KeyTextureScale)
             );
             LDEBUG(fmt::format(
                 "Atmosphere Texture Scaled to {}", _preCalculatedTexturesScale
             ));
         }
 
-        if (debugDict.hasKey(keySaveTextures)) {
-            _saveCalculationsToTexture = debugDict.value<bool>(keySaveTextures);
+        if (debugDict.hasKey(KeySaveTextures)) {
+            _saveCalculationsToTexture = debugDict.value<bool>(KeySaveTextures);
             LDEBUG("Saving Precalculated Atmosphere Textures");
         }
     }

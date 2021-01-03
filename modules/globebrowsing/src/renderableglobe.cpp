@@ -633,84 +633,43 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _localChunkBuffer.resize(2048);
     _traversalMemory.resize(512);
 
-    //================================================================
-    //======== Reads Shadow (Eclipses) Entries in mod file ===========
-    //================================================================
-    bool success = dictionary.hasValue<ghoul::Dictionary>(KeyShadowGroup);
-    bool disableShadows = false;
-    if (success) {
+    // ================================================================
+    // ======== Reads Shadow (Eclipses) Entries in asset file =========
+    // ================================================================
+    if (dictionary.hasValue<ghoul::Dictionary>(KeyShadowGroup)) {
         ghoul::Dictionary shadowDictionary =
             dictionary.value<ghoul::Dictionary>(KeyShadowGroup);
+
         std::vector<std::pair<std::string, double>> sourceArray;
-        unsigned int sourceCounter = 1;
-        while (success) {
-            std::string keyName = 
-                KeyShadowSource + std::to_string(sourceCounter) + ".Name";
-            std::string keyRadius =
-                KeyShadowSource + std::to_string(sourceCounter) + ".Radius";
+        ghoul::Dictionary sources = shadowDictionary.value<ghoul::Dictionary>("Sources");
+        for (std::string_view k : sources.keys()) {
+            ghoul::Dictionary source = sources.value<ghoul::Dictionary>(k);
 
-            success = shadowDictionary.hasValue<std::string>(keyName);
-            if (success) {
-                std::string sourceName = shadowDictionary.value<std::string>(keyName);
-                success = shadowDictionary.hasValue<double>(keyRadius);
-                if (success) {
-                    double sourceRadius = shadowDictionary.value<double>(keyRadius);
-                    sourceArray.emplace_back(sourceName, sourceRadius);
-                }
-                else {
-                    //LWARNING("No Radius value expecified for Shadow Source Name "
-                    //    << sourceName << " from " << name
-                    //    << " planet.\nDisabling shadows for this planet.");
-                    disableShadows = true;
-                    break;
-                }
-            }
-            sourceCounter++;
+            std::string name = source.value<std::string>("Name");
+            double radius = source.value<double>("Radius");
+            sourceArray.emplace_back(name, radius);
         }
 
-        if (!disableShadows && !sourceArray.empty()) {
-            success = true;
-            std::vector<std::pair<std::string, double>> casterArray;
-            unsigned int casterCounter = 1;
-            while (success) {
-                std::string keyName =
-                    KeyShadowCaster + std::to_string(casterCounter) + ".Name";
-                std::string keyRadius =
-                    KeyShadowCaster + std::to_string(casterCounter) + ".Radius";
-                success = shadowDictionary.hasValue<std::string>(keyName);
+        std::vector<std::pair<std::string, double>> casterArray;
+        ghoul::Dictionary casters = shadowDictionary.value<ghoul::Dictionary>("Casters");
+        for (std::string_view k : casters.keys()) {
+            ghoul::Dictionary caster = casters.value<ghoul::Dictionary>(k);
 
-                if (success) {
-                    std::string casterName = shadowDictionary.value<std::string>(keyName);
-                    success = shadowDictionary.hasValue<double>(keyRadius);
-                    if (success) {
-                        double casterRadius = shadowDictionary.value<double>(keyRadius);
-                        casterArray.emplace_back(casterName, casterRadius);
-                    }
-                    else {
-                        //LWARNING("No Radius value expecified for Shadow Caster Name "
-                        //    << casterName << " from " << name
-                        //    << " planet.\nDisabling shadows for this planet.");
-                        disableShadows = true;
-                        break;
-                    }
-                }
+            std::string name = caster.value<std::string>("Name");
+            double radius = caster.value<double>("Radius");
+            casterArray.emplace_back(name, radius);
+        }
 
-                casterCounter++;
-            }
-
-            std::vector<Ellipsoid::ShadowConfiguration> shadowConfArray;
-            if (!disableShadows && (!sourceArray.empty() && !casterArray.empty())) {
-                for (const std::pair<std::string, double>& source : sourceArray) {
-                    for (const std::pair<std::string, double>& caster : casterArray) {
-                        Ellipsoid::ShadowConfiguration sc;
-                        sc.source = source;
-                        sc.caster = caster;
-                        shadowConfArray.push_back(sc);
-                    }
-                }
-                _ellipsoid.setShadowConfigurationArray(shadowConfArray);
+        std::vector<Ellipsoid::ShadowConfiguration> shadowConfArray;
+        for (const std::pair<std::string, double>& source : sourceArray) {
+            for (const std::pair<std::string, double>& caster : casterArray) {
+                Ellipsoid::ShadowConfiguration sc;
+                sc.source = source;
+                sc.caster = caster;
+                shadowConfArray.push_back(sc);
             }
         }
+        _ellipsoid.setShadowConfigurationArray(shadowConfArray);
     }
 
     // Labels Dictionary
