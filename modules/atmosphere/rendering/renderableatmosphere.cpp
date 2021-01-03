@@ -183,24 +183,56 @@ documentation::Documentation RenderableAtmosphere::Documentation() {
 
     TableVerifier* shadowGroupTable = new TableVerifier({
         {
-            "*",
+            "Sources",
             new TableVerifier({
                 {
-                    "Name",
-                    new StringVerifier,
-                    Optional::No,
-                    "The scene graph node name of the caster/source"
-                },
-                {
-                    "Radius",
-                    new DoubleVerifier,
-                    Optional::No,
-                    "The radius of the object in meters"
+                    "*",
+                    new TableVerifier({
+                        {
+                            "Name",
+                            new StringVerifier,
+                            Optional::No,
+                            "The scene graph node name of the source"
+                        },
+                        {
+                            "Radius",
+                            new DoubleVerifier,
+                            Optional::No,
+                            "The radius of the object in meters"
+                        }
+                    }),
+                    Optional::Yes,
+                    "Individual light sources"
                 }
             }),
             Optional::No,
-            "A list of casters and sources. The sources must be named SourceX and the "
-            "casters be named CasterX where X is a whole number starting at 1"
+            "A list of light sources"
+        },
+        {
+            "Casters",
+            new TableVerifier({
+                {
+                    "*",
+                    new TableVerifier({
+                                        {
+                        "Name",
+                        new StringVerifier,
+                        Optional::No,
+                        "The scene graph node name of the caster"
+                    },
+                    {
+                        "Radius",
+                        new DoubleVerifier,
+                        Optional::No,
+                        "The radius of the object in meters"
+                    }
+                    }),
+                    Optional::Yes,
+                    "Individual shadow casters"
+                }
+            }),
+            Optional::No,
+            "A list of objects that cast light on this atmosphere"
         }
     });
 
@@ -282,7 +314,7 @@ documentation::Documentation RenderableAtmosphere::Documentation() {
         },
         {
             keyMiePhaseConstant,
-            new DoubleVerifier,
+            new DoubleInRangeVerifier(-1.0, 1.0),
             Optional::No,
             ""
         }
@@ -418,51 +450,36 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     if (dictionary.hasKey(KeyShadowGroup)) {
         ghoul::Dictionary shadowDictionary =
             dictionary.value<ghoul::Dictionary>(KeyShadowGroup);
-        bool success = true;
+
+
         std::vector<std::pair<std::string, double>> sourceArray;
-        unsigned int sourceCounter = 1;
-        while (success) {
-            std::string baseKey = KeyShadowSource + std::to_string(sourceCounter);
-            success = shadowDictionary.hasKey(baseKey);
+        ghoul::Dictionary sources = shadowDictionary.value<ghoul::Dictionary>("Sources");
+        for (std::string_view k : sources.keys()) {
+            ghoul::Dictionary source = sources.value<ghoul::Dictionary>(k);
 
-            if (success) {
-                ghoul::Dictionary s = shadowDictionary.value<ghoul::Dictionary>(baseKey);
-
-                std::string sourceName = s.value<std::string>("Name");
-                double sourceRadius = s.value<double>("Radius");
-                sourceArray.emplace_back(sourceName, sourceRadius);
-            }
-
-            sourceCounter++;
+            std::string name = source.value<std::string>("Name");
+            double radius = source.value<double>("Radius");
+            sourceArray.emplace_back(name, radius);
         }
 
-        success = true;
         std::vector<std::pair<std::string, double>> casterArray;
-        unsigned int casterCounter = 1;
-        while (success) {
-            std::string baseKey = KeyShadowCaster + std::to_string(casterCounter);
-            success = shadowDictionary.hasKey(baseKey);
+        ghoul::Dictionary casters = shadowDictionary.value<ghoul::Dictionary>("Casters");
+        for (std::string_view k : casters.keys()) {
+            ghoul::Dictionary caster = casters.value<ghoul::Dictionary>(k);
 
-            if (success) {
-                ghoul::Dictionary s = shadowDictionary.value<ghoul::Dictionary>(baseKey);
-                std::string casterName = s.value<std::string>("Name");
-                double casterRadius = s.value<double>("Radius");
-                casterArray.emplace_back(casterName, casterRadius);
-            }
-
-            casterCounter++;
+            std::string name = caster.value<std::string>("Name");
+            double radius = caster.value<double>("Radius");
+            casterArray.emplace_back(name, radius);
         }
 
-        if (!sourceArray.empty() && !casterArray.empty()) {
-            for (const std::pair<std::string, double>& source : sourceArray) {
-                for (const std::pair<std::string, double>& caster : casterArray) {
-                    ShadowConfiguration sc;
-                    sc.source = source;
-                    sc.caster = caster;
-                    _shadowConfArray.push_back(sc);
-                }
+        _shadowEnabled = !sourceArray.empty() && !casterArray.empty();
+        for (const std::pair<std::string, double>& source : sourceArray) {
+            for (const std::pair<std::string, double>& caster : casterArray) {
+                ShadowConfiguration sc;
+                sc.source = source;
+                sc.caster = caster;
+                _shadowConfArray.push_back(sc);
             }
-            _shadowEnabled = true;
         }
     }
 
