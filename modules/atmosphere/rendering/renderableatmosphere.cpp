@@ -60,7 +60,6 @@ namespace {
     constexpr const char* KeyShadowSource = "Source";
     constexpr const char* KeyShadowCaster = "Caster";
 
-    constexpr const char* keyAtmosphereRadius = "AtmosphereRadius";
     constexpr const char* keyPlanetRadius = "PlanetRadius";
     constexpr const char* keyAverageGroundReflectance = "PlanetAverageGroundReflectance";
     constexpr const char* keyRayleigh = "Rayleigh";
@@ -77,9 +76,9 @@ namespace {
     constexpr const char* keySaveTextures = "SaveCalculatedTextures";
 
     constexpr openspace::properties::Property::PropertyInfo AtmosphereHeightInfo = {
-        "atmosphereHeight",
+        "AtmosphereHeight",
         "Atmosphere Height (KM)",
-        "The thickness of the atmosphere in Km"
+        "The thickness of the atmosphere in km"
     };
 
     constexpr openspace::properties::Property::PropertyInfo AverageGroundReflectanceInfo =
@@ -91,7 +90,7 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo GroundRadianceEmittioninfo = {
-        "GroundRadianceEmittion",
+        "GroundRadianceEmission",
         "Percentage of initial radiance emitted from ground",
         "Multiplier of the ground radiance color during the rendering phase"
     };
@@ -103,24 +102,10 @@ namespace {
         "constant factor"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RayleighScatteringCoeffXInfo =
+    constexpr openspace::properties::Property::PropertyInfo RayleighScatteringCoeffInfo =
     {
-        "RayleighScatteringCoeffX",
-        "Rayleigh Scattering Coeff X (x10e-3)",
-        "Rayleigh sea-level scattering coefficients in meters"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo RayleighScatteringCoeffYInfo =
-    {
-        "RayleighScatteringCoeffY",
-        "Rayleigh Scattering Coeff Y (x10e-3)",
-        "Rayleigh sea-level scattering coefficients in meters"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo RayleighScatteringCoeffZInfo =
-    {
-        "RayleighScatteringCoeffZ",
-        "Rayleigh Scattering Coeff Z (x10e-3)",
+        "RayleighScatteringCoeff",
+        "Rayleigh Scattering Coeff",
         "Rayleigh sea-level scattering coefficients in meters"
     };
 
@@ -137,21 +122,9 @@ namespace {
         "constant factor"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OzoneLayerCoeffXInfo = {
-        "OzoneLayerCoeffX",
-        "Ozone Layer Extinction Coeff X (x10e-5)",
-        "Ozone scattering coefficients in meters"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo OzoneLayerCoeffYInfo = {
-        "OzoneLayerCoeffY",
-        "Ozone Layer Extinction Coeff Y (x10e-5)",
-        "Ozone scattering coefficients in meters"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo OzoneLayerCoeffZInfo = {
-        "OzoneLayerCoeffZ",
-        "Ozone Layer Extinction Coeff Z (x10e-5)",
+    constexpr openspace::properties::Property::PropertyInfo OzoneLayerCoeffInfo = {
+        "OzoneLayerCoeff",
+        "Ozone Layer Extinction Coeff",
         "Ozone scattering coefficients in meters"
     };
 
@@ -162,21 +135,9 @@ namespace {
         "constant factor"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MieScatteringCoeffXInfo = {
-        "MieScatteringCoeffX",
-        "Mie Scattering Coeff X (x10e-3)",
-        "Mie sea-level scattering coefficients in meters"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo MieScatteringCoeffYInfo = {
-        "MieScatteringCoeffY",
-        "Mie Scattering Coeff Y (x10e-3)",
-        "Mie sea-level scattering coefficients in meters"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo MieScatteringCoeffZInfo = {
-        "MieScatteringCoeffZ",
-        "Mie Scattering Coeff Z (x10e-3)",
+    constexpr openspace::properties::Property::PropertyInfo MieScatteringCoeffInfo = {
+        "MieScatteringCoeff",
+        "Mie Scattering Coeff (x10e-3)",
         "Mie sea-level scattering coefficients in meters"
     };
 
@@ -238,9 +199,8 @@ documentation::Documentation RenderableAtmosphere::Documentation() {
                 }
             }),
             Optional::No,
-            "A list of casters and sources. The sources must be named "
-            "SourceX and the casters be named CasterX where X is a whole "
-            "number starting at 1"
+            "A list of casters and sources. The sources must be named SourceX and the "
+            "casters be named CasterX where X is a whole number starting at 1"
         }
     });
 
@@ -340,10 +300,10 @@ documentation::Documentation RenderableAtmosphere::Documentation() {
                 "calculations"
             },
             {
-                keyAtmosphereRadius,
+                AtmosphereHeightInfo.identifier,
                 new DoubleVerifier,
                 Optional::No,
-                "The radius of the atmosphere in meters"
+                AtmosphereHeightInfo.description
             },
             {
                 keyPlanetRadius,
@@ -418,32 +378,33 @@ documentation::Documentation RenderableAtmosphere::Documentation() {
 
 RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _atmosphereHeightP(AtmosphereHeightInfo, 60.0f, 0.1f, 99.0f)
-    , _groundAverageReflectanceP(AverageGroundReflectanceInfo, 0.1f, 0.0f, 1.0f)
-    , _groundRadianceEmittionP(GroundRadianceEmittioninfo, 0.3f, 0.0f, 1.0f)
-    , _rayleighHeightScaleP(RayleighHeightScaleInfo, 8.0f, 0.1f, 20.0f)
-    , _rayleighScatteringCoeffXP(RayleighScatteringCoeffXInfo, 1.0f, 0.01f, 100.0f)
-    , _rayleighScatteringCoeffYP(RayleighScatteringCoeffYInfo, 1.0f, 0.01f, 100.0f)
-    , _rayleighScatteringCoeffZP(RayleighScatteringCoeffZInfo, 1.0f, 0.01f, 100.0f)
-    , _ozoneEnabledP(OzoneLayerInfo, true)
-    , _ozoneHeightScaleP(OzoneHeightScaleInfo, 8.0f, 0.1f, 20.0f)
-    , _ozoneCoeffXP(OzoneLayerCoeffXInfo, 3.426f, 0.01f, 100.0f)
-    , _ozoneCoeffYP(OzoneLayerCoeffYInfo, 8.298f, 0.01f, 100.0f)
-    , _ozoneCoeffZP(OzoneLayerCoeffZInfo, 0.356f, 0.01f, 100.0f)
-    , _mieHeightScaleP(MieHeightScaleInfo, 1.2f, 0.1f, 20.0f)
-    , _mieScatteringCoeffXP(MieScatteringCoeffXInfo, 4.0f, 0.01f, 1000.0f)
-    , _mieScatteringCoeffYP(MieScatteringCoeffYInfo, 4.0f, 0.01f, 1000.0f)
-    , _mieScatteringCoeffZP(MieScatteringCoeffZInfo, 4.0f, 0.01f, 1000.0f)
-    , _mieScatteringExtinctionPropCoefficientP(
-        MieScatteringExtinctionPropCoeffInfo,
-        0.9f,
-        0.01f,
-        1.0f
+    , _atmosphereHeight(AtmosphereHeightInfo, 60.f, 0.1f, 99.0f)
+    , _groundAverageReflectance(AverageGroundReflectanceInfo, 0.f, 0.f, 1.f)
+    , _groundRadianceEmission(GroundRadianceEmittioninfo, 0.f, 0.f, 1.f)
+    , _rayleighHeightScale(RayleighHeightScaleInfo, 0.f, 0.1f, 20.f)
+    , _rayleighScatteringCoeff(
+        RayleighScatteringCoeffInfo,
+        glm::vec3(0.f), glm::vec3(0.00001f), glm::vec3(0.1f)
     )
-    , _mieAsymmetricFactorGP(MieAsymmetricFactorGInfo, 0.85f, -1.0f, 1.0f)
-    , _sunIntensityP(SunIntensityInfo, 50.0f, 0.1f, 1000.0f)
-    , _sunFollowingCameraEnabledP(EnableSunOnCameraPositionInfo, false)
-    , _hardShadowsEnabledP(EclipseHardShadowsInfo, false)
+    , _ozoneEnabled(OzoneLayerInfo, false)
+    , _ozoneHeightScale(OzoneHeightScaleInfo, 0.f, 0.1f, 20.f)
+    , _ozoneCoeff(
+        OzoneLayerCoeffInfo,
+        glm::vec3(0.f), glm::vec3(0.00001f), glm::vec3(0.001f)
+    )
+    , _mieHeightScale(MieHeightScaleInfo, 0.f, 0.1f, 20.f)
+    , _mieScatteringCoeff(
+        MieScatteringCoeffInfo,
+        glm::vec3(0.004f), glm::vec3(0.00001f), glm::vec3(1.f)
+    )
+    , _mieScatteringExtinctionPropCoefficient(
+        MieScatteringExtinctionPropCoeffInfo,
+        0.9f, 0.01f, 1.f
+    )
+    , _miePhaseConstant(MieAsymmetricFactorGInfo, 0.f, -1.f, 1.f)
+    , _sunIntensity(SunIntensityInfo, 5.f, 0.1f, 1000.f)
+    , _sunFollowingCameraEnabled(EnableSunOnCameraPositionInfo, false)
+    , _hardShadowsEnabled(EclipseHardShadowsInfo, false)
  {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -506,21 +467,21 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     }
 
     //================================================================
-    //========== Reads Atmosphere Entries from mod file ==============
+    //========== Reads Atmosphere Entries from asset file ============
     //================================================================
-    _atmosphereRadius = static_cast<float>(dictionary.value<double>(keyAtmosphereRadius));
-    _atmospherePlanetRadius = static_cast<float>(
-        dictionary.value<double>(keyPlanetRadius)
+    _atmosphereHeight = static_cast<float>(
+        dictionary.value<double>(AtmosphereHeightInfo.identifier)
     );
-    _planetAverageGroundReflectance = static_cast<float>(
+    _planetRadius = static_cast<float>(dictionary.value<double>(keyPlanetRadius));
+    _groundAverageReflectance = static_cast<float>(
         dictionary.value<double>(keyAverageGroundReflectance)
     );
-    _planetGroundRadianceEmittion = static_cast<float>(
+    _groundRadianceEmission = static_cast<float>(
         dictionary.value<double>(GroundRadianceEmittioninfo.identifier)
     );
 
     if (dictionary.hasKey(SunIntensityInfo.identifier)) {
-        _sunRadianceIntensity = static_cast<float>(
+        _sunIntensity = static_cast<float>(
             dictionary.value<double>(SunIntensityInfo.identifier)
         );
     }
@@ -542,8 +503,6 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         );
     }
 
-
-    _ozoneLayerEnabled = false;
     if (dictionary.hasValue<ghoul::Dictionary>(keyOzone)) {
         ghoul::Dictionary ozoneDict = dictionary.value<ghoul::Dictionary>(keyOzone);
 
@@ -551,13 +510,13 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             _ozoneHeightScale = static_cast<float>(
                 ozoneDict.value<double>(keyOzoneHeightScale)
             );
-            _ozoneLayerEnabled = true;
+            _ozoneEnabled = true;
         }
 
         if (ozoneDict.hasValue<ghoul::Dictionary>("Coefficients")) {
             ghoul::Dictionary coeff = ozoneDict.value<ghoul::Dictionary>("Coefficients");
             if (coeff.hasValue<glm::dvec3>("Extinction")) {
-                _ozoneExtinctionCoeff = coeff.value<glm::dvec3>("Extinction");
+                _ozoneCoeff = coeff.value<glm::dvec3>("Extinction");
             }
         }
     }
@@ -596,156 +555,113 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     //========================================================
     //============== Atmosphere Properties ===================
     //========================================================
-    auto updateAtmosphere = [this]() { updateAtmosphereParameters(); };
+    auto updateWithCalculation = [this]() {
+        _deferredCasterNeedsUpdate = true;
+        _deferredCasterNeedsCalculation = true;
+    };
+    auto updateWithoutCalculation = [this]() {
+        _deferredCasterNeedsUpdate = true;
+    };
 
-    _atmosphereHeightP =_atmosphereRadius - _atmospherePlanetRadius;
-    _atmosphereHeightP.onChange(updateAtmosphere);
-    addProperty(_atmosphereHeightP);
+    _atmosphereHeight.onChange(updateWithCalculation);
+    addProperty(_atmosphereHeight);
 
-    _groundAverageReflectanceP = _planetAverageGroundReflectance;
-    _groundAverageReflectanceP.onChange(updateAtmosphere);
-    addProperty(_groundAverageReflectanceP);
+    _groundAverageReflectance.onChange(updateWithCalculation);
+    addProperty(_groundAverageReflectance);
 
-    _groundRadianceEmittionP = _planetGroundRadianceEmittion;
-    _groundRadianceEmittionP.onChange(updateAtmosphere);
-    addProperty(_groundRadianceEmittionP);
+    _groundRadianceEmission.onChange(updateWithoutCalculation);
+    addProperty(_groundRadianceEmission);
 
-    _rayleighHeightScaleP = _rayleighHeightScale;
-    _rayleighHeightScaleP.onChange(updateAtmosphere);
-    addProperty(_rayleighHeightScaleP);
+    _rayleighHeightScale.onChange(updateWithCalculation);
+    addProperty(_rayleighHeightScale);
 
-    _rayleighScatteringCoeffXP = _rayleighScatteringCoeff.x * 1000.0f;
-    _rayleighScatteringCoeffXP.onChange(updateAtmosphere);
-    addProperty(_rayleighScatteringCoeffXP);
+    _rayleighScatteringCoeff.onChange(updateWithCalculation);
+    addProperty(_rayleighScatteringCoeff);
 
-    _rayleighScatteringCoeffYP = _rayleighScatteringCoeff.y * 1000.0f;
-    _rayleighScatteringCoeffYP.onChange(updateAtmosphere);
-    addProperty(_rayleighScatteringCoeffYP);
+    _ozoneEnabled.onChange(updateWithCalculation);
+    addProperty(_ozoneEnabled);
 
-    _rayleighScatteringCoeffZP = _rayleighScatteringCoeff.z * 1000.0f;
-    _rayleighScatteringCoeffZP.onChange(updateAtmosphere);
-    addProperty(_rayleighScatteringCoeffZP);
+    _ozoneHeightScale.onChange(updateWithCalculation);
+    addProperty(_ozoneHeightScale);
 
-    _ozoneEnabledP = _ozoneLayerEnabled;
-    _ozoneEnabledP.onChange(updateAtmosphere);
-    addProperty(_ozoneEnabledP);
+    _ozoneCoeff.onChange(updateWithCalculation);
+    addProperty(_ozoneCoeff);
 
-    _ozoneHeightScaleP = _ozoneHeightScale;
-    _ozoneHeightScaleP.onChange(updateAtmosphere);
-    addProperty(_ozoneHeightScaleP);
+    _mieHeightScale.onChange(updateWithCalculation);
+    addProperty(_mieHeightScale);
 
-    _ozoneCoeffXP = _ozoneExtinctionCoeff.x * 100000.0f;
-    _ozoneCoeffXP.onChange(updateAtmosphere);
-    addProperty(_ozoneCoeffXP);
+    _mieScatteringCoeff.onChange(updateWithCalculation);
+    addProperty(_mieScatteringCoeff);
 
-    _ozoneCoeffYP = _ozoneExtinctionCoeff.y * 100000.0f;
-    _ozoneCoeffYP.onChange(updateAtmosphere);
-    addProperty(_ozoneCoeffYP);
-
-
-    _ozoneCoeffZP = _ozoneExtinctionCoeff.z * 100000.0f;
-    _ozoneCoeffZP.onChange(updateAtmosphere);
-    addProperty(_ozoneCoeffZP);
-
-    _mieHeightScaleP = _mieHeightScale;
-    _mieHeightScaleP.onChange(updateAtmosphere);
-    addProperty(_mieHeightScaleP);
-
-    _mieScatteringCoeffXP = _mieScatteringCoeff.x * 1000.0f;
-    _mieScatteringCoeffXP.onChange(updateAtmosphere);
-    addProperty(_mieScatteringCoeffXP);
-
-    _mieScatteringCoeffYP = _mieScatteringCoeff.y * 1000.0f;
-    _mieScatteringCoeffYP.onChange(updateAtmosphere);
-    addProperty(_mieScatteringCoeffYP);
-
-    _mieScatteringCoeffZP = _mieScatteringCoeff.z * 1000.0f;
-    _mieScatteringCoeffZP.onChange(updateAtmosphere);
-    addProperty(_mieScatteringCoeffZP);
-
-    _mieScatteringExtinctionPropCoefficientP =
+    _mieScatteringExtinctionPropCoefficient =
         _mieScattExtPropCoefProp != 1.f ? _mieScattExtPropCoefProp :
-        _mieScatteringCoeff.x / _mieExtinctionCoeff.x;
+        _mieScatteringCoeff.value().x / _mieExtinctionCoeff.x;
 
-    _mieScatteringExtinctionPropCoefficientP.onChange(updateAtmosphere);
-    addProperty(_mieScatteringExtinctionPropCoefficientP);
+    _mieScatteringExtinctionPropCoefficient.onChange(updateWithCalculation);
+    addProperty(_mieScatteringExtinctionPropCoefficient);
 
-    _mieAsymmetricFactorGP = _miePhaseConstant;
-    _mieAsymmetricFactorGP.onChange(updateAtmosphere);
-    addProperty(_mieAsymmetricFactorGP);
+    _miePhaseConstant.onChange(updateWithCalculation);
+    addProperty(_miePhaseConstant);
 
-    _sunIntensityP = _sunRadianceIntensity;
-    _sunIntensityP.onChange(updateAtmosphere);
-    addProperty(_sunIntensityP);
+    _sunIntensity.onChange(updateWithoutCalculation);
+    addProperty(_sunIntensity);
 
-    _sunFollowingCameraEnabledP = _sunFollowingCameraEnabled;
-    _sunFollowingCameraEnabledP.onChange(updateAtmosphere);
-    addProperty(_sunFollowingCameraEnabledP);
+    _sunFollowingCameraEnabled.onChange(updateWithoutCalculation);
+    addProperty(_sunFollowingCameraEnabled);
 
-    _hardShadowsEnabledP = _hardShadows;
-    _hardShadowsEnabledP.onChange(updateAtmosphere);
     if (_shadowEnabled) {
-        addProperty(_hardShadowsEnabledP);
+        _hardShadowsEnabled.onChange(updateWithoutCalculation);
+        addProperty(_hardShadowsEnabled);
     }
 }
 
 void RenderableAtmosphere::deinitializeGL() {
-    if (_deferredcaster) {
-        global::deferredcasterManager->detachDeferredcaster(*_deferredcaster);
-        _deferredcaster = nullptr;
-    }
+    global::deferredcasterManager->detachDeferredcaster(*_deferredcaster);
+    _deferredcaster = nullptr;
 }
 
 void RenderableAtmosphere::initializeGL() {
     _deferredcaster = std::make_unique<AtmosphereDeferredcaster>();
-    if (_deferredcaster) {
-        _deferredcaster->setAtmosphereRadius(_atmosphereRadius);
-        _deferredcaster->setPlanetRadius(_atmospherePlanetRadius);
-        _deferredcaster->setPlanetAverageGroundReflectance(
-            _planetAverageGroundReflectance
-        );
-        _deferredcaster->setPlanetGroundRadianceEmittion(
-            _planetGroundRadianceEmittion
-        );
-        _deferredcaster->setRayleighHeightScale(_rayleighHeightScale);
-        _deferredcaster->enableOzone(_ozoneLayerEnabled);
-        _deferredcaster->setOzoneHeightScale(_ozoneHeightScale);
-        _deferredcaster->setMieHeightScale(_mieHeightScale);
-        _deferredcaster->setMiePhaseConstant(_miePhaseConstant);
-        _deferredcaster->setSunRadianceIntensity(_sunRadianceIntensity);
-        _deferredcaster->setRayleighScatteringCoefficients(_rayleighScatteringCoeff);
-        _deferredcaster->setOzoneExtinctionCoefficients(_ozoneExtinctionCoeff);
-        _deferredcaster->setMieScatteringCoefficients(_mieScatteringCoeff);
-        _deferredcaster->setMieExtinctionCoefficients(_mieExtinctionCoeff);
-        // TODO: Fix the ellipsoid nature of the renderable globe (JCC)
-        //_deferredcaster->setEllipsoidRadii(_ellipsoid.radii());
-        _deferredcaster->enableSunFollowing(_sunFollowingCameraEnabled);
+    _deferredcaster->setAtmosphereRadius(_planetRadius + _atmosphereHeight);
+    _deferredcaster->setPlanetRadius(_planetRadius);
+    _deferredcaster->setPlanetAverageGroundReflectance(_groundAverageReflectance);
+    _deferredcaster->setPlanetGroundRadianceEmittion(_groundRadianceEmission);
+    _deferredcaster->setRayleighHeightScale(_rayleighHeightScale);
+    _deferredcaster->enableOzone(_ozoneEnabled);
+    _deferredcaster->setOzoneHeightScale(_ozoneHeightScale);
+    _deferredcaster->setMieHeightScale(_mieHeightScale);
+    _deferredcaster->setMiePhaseConstant(_miePhaseConstant);
+    _deferredcaster->setSunRadianceIntensity(_sunIntensity);
+    _deferredcaster->setRayleighScatteringCoefficients(_rayleighScatteringCoeff);
+    _deferredcaster->setOzoneExtinctionCoefficients(_ozoneCoeff);
+    _deferredcaster->setMieScatteringCoefficients(_mieScatteringCoeff);
+    _deferredcaster->setMieExtinctionCoefficients(_mieExtinctionCoeff);
+    // TODO: Fix the ellipsoid nature of the renderable globe (JCC)
+    //_deferredcaster->setEllipsoidRadii(_ellipsoid.radii());
+    _deferredcaster->enableSunFollowing(_sunFollowingCameraEnabled);
 
-        _deferredcaster->setPrecalculationTextureScale(_preCalculatedTexturesScale);
-        if (_saveCalculationsToTexture)
-            _deferredcaster->enablePrecalculationTexturesSaving();
+    _deferredcaster->setPrecalculationTextureScale(_preCalculatedTexturesScale);
+    if (_saveCalculationsToTexture)
+        _deferredcaster->enablePrecalculationTexturesSaving();
 
-        if (_shadowEnabled) {
-            _deferredcaster->setShadowConfigArray(_shadowConfArray);
-            _deferredcaster->setHardShadows(_hardShadows);
-        }
-
-        _deferredcaster->initialize();
+    if (_shadowEnabled) {
+        _deferredcaster->setShadowConfigArray(_shadowConfArray);
+        // We no longer need it
+        _shadowConfArray.clear();
+        _deferredcaster->setHardShadows(_hardShadowsEnabled);
     }
 
-    global::deferredcasterManager->attachDeferredcaster(*_deferredcaster);
+    _deferredcaster->initialize();
 
-    return;
+    global::deferredcasterManager->attachDeferredcaster(*_deferredcaster);
 }
 
 bool RenderableAtmosphere::isReady() const {
-    bool ready = true;
-    ready &= (_deferredcaster != nullptr);
-    return ready;
+    return true;
 }
 
 glm::dmat4 RenderableAtmosphere::computeModelTransformMatrix(
-                                            const openspace::TransformData& transformData)
+                                                       const TransformData& transformData)
 {
     // scale the planet to appropriate size since the planet is a unit sphere
     return glm::translate(glm::dmat4(1.0), transformData.translation) * // Translation
@@ -761,7 +677,14 @@ void RenderableAtmosphere::render(const RenderData& data, RendererTasks& renderT
 }
 
 void RenderableAtmosphere::update(const UpdateData& data) {
-    _stateMatrix = data.modelTransform.rotation;
+    if (_deferredCasterNeedsUpdate) {
+        updateAtmosphereParameters();
+        _deferredCasterNeedsUpdate = false;
+    }
+    if (_deferredCasterNeedsCalculation) {
+        _deferredcaster->preCalculateAtmosphereParam();
+        _deferredCasterNeedsCalculation = false;
+    }
 
     _deferredcaster->setTime(data.time.j2000Seconds());
     glm::dmat4 modelTransform = computeModelTransformMatrix(data.modelTransform);
@@ -770,69 +693,28 @@ void RenderableAtmosphere::update(const UpdateData& data) {
 }
 
 void RenderableAtmosphere::updateAtmosphereParameters() {
-    bool executeComputation = true;
-
-    if (_sunRadianceIntensity != _sunIntensityP ||
-        _planetGroundRadianceEmittion != _groundRadianceEmittionP ||
-        _sunFollowingCameraEnabled != _sunFollowingCameraEnabledP ||
-        _hardShadows != _hardShadowsEnabledP)
-    {
-        executeComputation = false;
-    }
-
-    _atmosphereRadius               = _atmospherePlanetRadius + _atmosphereHeightP;
-    _planetAverageGroundReflectance = _groundAverageReflectanceP;
-    _planetGroundRadianceEmittion   = _groundRadianceEmittionP;
-    _rayleighHeightScale            = _rayleighHeightScaleP;
-    _rayleighScatteringCoeff = glm::vec3(
-        _rayleighScatteringCoeffXP * 0.001f,
-        _rayleighScatteringCoeffYP * 0.001f,
-        _rayleighScatteringCoeffZP * 0.001f
-    );
-    _ozoneLayerEnabled    = _ozoneEnabledP;
-    _ozoneHeightScale     = _ozoneHeightScaleP;
-    _ozoneExtinctionCoeff = glm::vec3(_ozoneCoeffXP.value() * 0.00001f,
-        _ozoneCoeffYP.value() * 0.00001f,
-        _ozoneCoeffZP.value() * 0.00001f);
-    _mieHeightScale     = _mieHeightScaleP;
-    _mieScatteringCoeff = glm::vec3(
-        _mieScatteringCoeffXP * 0.001f,
-        _mieScatteringCoeffYP * 0.001f,
-        _mieScatteringCoeffZP * 0.001f
-    );
     _mieExtinctionCoeff =
-        _mieScatteringCoeff * (1.f / _mieScatteringExtinctionPropCoefficientP);
-    _miePhaseConstant = _mieAsymmetricFactorGP;
-    _sunRadianceIntensity = _sunIntensityP;
-    _sunFollowingCameraEnabled = _sunFollowingCameraEnabledP;
-    _hardShadows = _hardShadowsEnabledP;
+        _mieScatteringCoeff.value() / _mieScatteringExtinctionPropCoefficient.value();
 
-
-    _deferredcaster->setAtmosphereRadius(_atmosphereRadius);
-    _deferredcaster->setPlanetRadius(_atmospherePlanetRadius);
-    _deferredcaster->setPlanetAverageGroundReflectance(
-        _planetAverageGroundReflectance
-    );
-    _deferredcaster->setPlanetGroundRadianceEmittion(_planetGroundRadianceEmittion);
+    _deferredcaster->setAtmosphereRadius(_planetRadius + _atmosphereHeight);
+    _deferredcaster->setPlanetRadius(_planetRadius);
+    _deferredcaster->setPlanetAverageGroundReflectance(_groundAverageReflectance);
+    _deferredcaster->setPlanetGroundRadianceEmittion(_groundRadianceEmission);
     _deferredcaster->setRayleighHeightScale(_rayleighHeightScale);
-    _deferredcaster->enableOzone(_ozoneLayerEnabled);
+    _deferredcaster->enableOzone(_ozoneEnabled);
     _deferredcaster->setOzoneHeightScale(_ozoneHeightScale);
     _deferredcaster->setMieHeightScale(_mieHeightScale);
     _deferredcaster->setMiePhaseConstant(_miePhaseConstant);
-    _deferredcaster->setSunRadianceIntensity(_sunRadianceIntensity);
+    _deferredcaster->setSunRadianceIntensity(_sunIntensity);
     _deferredcaster->setRayleighScatteringCoefficients(_rayleighScatteringCoeff);
-    _deferredcaster->setOzoneExtinctionCoefficients(_ozoneExtinctionCoeff);
+    _deferredcaster->setOzoneExtinctionCoefficients(_ozoneCoeff);
     _deferredcaster->setMieScatteringCoefficients(_mieScatteringCoeff);
     _deferredcaster->setMieExtinctionCoefficients(_mieExtinctionCoeff);
     _deferredcaster->enableSunFollowing(_sunFollowingCameraEnabled);
     //_deferredcaster->setEllipsoidRadii(_ellipsoid.radii());
 
     if (_shadowEnabled) {
-        _deferredcaster->setHardShadows(_hardShadows);
-    }
-
-    if (executeComputation) {
-        _deferredcaster->preCalculateAtmosphereParam();
+        _deferredcaster->setHardShadows(_hardShadowsEnabled);
     }
 }
 

@@ -9,12 +9,11 @@ local Atmosphere = {
     Renderable = {
         Type = "RenderableAtmosphere",
         -- Atmosphere radius in Km
-        AtmosphereRadius = 6121.9,
+        AtmosphereHeight = 6121.9 - 6051.9,
         PlanetRadius = 6051.9,
         PlanetAverageGroundReflectance = 0.018,
-        GroundRadianceEmittion = 0.8,
+        GroundRadianceEmission = 0.8,
         SunIntensity = 11.47,
-        --MieScatteringExtinctionPropCoefficient = 0.23862,
         Rayleigh = {
             Coefficients = {
                 -- Wavelengths are given in 10^-9m
@@ -40,12 +39,6 @@ local Atmosphere = {
             -- Mie Phase Function Value (G e [-1.0, 1.0]. 
             -- If G = 1.0, Mie phase function = Rayleigh Phase Function)
             G = 0.85
-        },
-        Image = {
-            ToneMapping = jToneMapping,
-            Exposure = 0.4,
-            Background = 1.8,
-            Gamma = 1.85
         },
         Debug = {
             -- PreCalculatedTextureScale is a float from 1.0 to N, with N > 0.0 and N in Naturals (i.e., 1, 2, 3, 4, 5....)

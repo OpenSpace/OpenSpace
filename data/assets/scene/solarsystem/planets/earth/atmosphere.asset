@@ -11,10 +11,10 @@ local Atmosphere = {
     Renderable = {
         Type = "RenderableAtmosphere",
           -- Atmosphere radius in Km
-          AtmosphereRadius = 6447.0,
+          AtmosphereHeight = 6447.0 - 6377.0,
           PlanetRadius    = 6377.0,
           PlanetAverageGroundReflectance = 0.1,
-          GroundRadianceEmittion = 0.6,
+          GroundRadianceEmission = 0.6,
           SunIntensity = 6.9,
           Rayleigh = {
             Coefficients = {
