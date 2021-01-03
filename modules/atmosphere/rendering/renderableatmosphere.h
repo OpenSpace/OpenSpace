@@ -42,7 +42,7 @@
 namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
-}
+} // namespace ghoul::opengl
 
 namespace openspace {
 
@@ -108,7 +108,6 @@ private:
     properties::BoolProperty  _sunFollowingCameraEnabledP;
     properties::BoolProperty  _hardShadowsEnabledP;
 
-    bool _atmosphereEnabled = false;
     bool _ozoneLayerEnabled = false;
     bool _sunFollowingCameraEnabled = false;
     float _atmosphereRadius = 0.f;
