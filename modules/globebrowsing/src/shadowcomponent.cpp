@@ -321,7 +321,7 @@ RenderData ShadowComponent::begin(const RenderData& data) {
 
 
     // Saves current state
-    _defaultFBO = global::renderEngine->openglStateCache().defaultFramebuffer();
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_currentFBO);
     global::renderEngine->openglStateCache().viewport(_mViewport);
     
     glBindFramebuffer(GL_FRAMEBUFFER, _shadowFBO);
@@ -360,7 +360,7 @@ void ShadowComponent::end() {
     }
 
     // Restores system state
-    glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, _currentFBO);
     GLenum drawBuffers[] = {
         GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2
     };
@@ -430,7 +430,7 @@ void ShadowComponent::createDepthTexture() {
 
 void ShadowComponent::createShadowFBO() {
     // Saves current FBO first
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_currentFBO);
 
     glGenFramebuffers(1, &_shadowFBO);
     glBindFramebuffer(GL_FRAMEBUFFER, _shadowFBO);
@@ -455,7 +455,7 @@ void ShadowComponent::createShadowFBO() {
     checkFrameBufferState("createShadowFBO()");
 
     // Restores system state
-    glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, _currentFBO);
 }
 
 void ShadowComponent::updateDepthTexture() {

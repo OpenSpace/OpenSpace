@@ -117,7 +117,7 @@ private:
     GLuint _dDepthTexture = 0;
     GLuint _positionInLightSpaceTexture = 0;
     GLuint _shadowFBO = 0;
-    GLint _defaultFBO = 0;
+    GLint _currentFBO = 0;
     GLint _mViewport[4];
 
     GLboolean _faceCulling;
