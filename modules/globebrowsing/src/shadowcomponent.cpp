@@ -44,6 +44,7 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
@@ -320,20 +321,9 @@ RenderData ShadowComponent::begin(const RenderData& data) {
 
 
     // Saves current state
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
-    glGetIntegerv(GL_VIEWPORT, _mViewport);
-    _faceCulling = glIsEnabled(GL_CULL_FACE);
-    glGetIntegerv(GL_CULL_FACE_MODE, &_faceToCull);
-    _polygonOffSet = glIsEnabled(GL_POLYGON_OFFSET_FILL);
-    glGetFloatv(GL_POLYGON_OFFSET_FACTOR, &_polygonOffSetFactor);
-    glGetFloatv(GL_POLYGON_OFFSET_UNITS, &_polygonOffSetUnits);
-    glGetFloatv(GL_COLOR_CLEAR_VALUE, _colorClearValue);
-    glGetFloatv(GL_DEPTH_CLEAR_VALUE, &_depthClearValue);
-    _depthIsEnabled = glIsEnabled(GL_DEPTH_TEST);
-    glGetIntegerv(GL_DEPTH_FUNC, &_depthFunction);
-    _blendIsEnabled = glIsEnabled(GL_BLEND);
-
-
+    _defaultFBO = global::renderEngine->openglStateCache().defaultFramebuffer();
+    global::renderEngine->openglStateCache().viewport(_mViewport);
+    
     glBindFramebuffer(GL_FRAMEBUFFER, _shadowFBO);
     GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_NONE, GL_NONE };
     glDrawBuffers(3, drawBuffers);
@@ -377,38 +367,11 @@ void ShadowComponent::end() {
     glDrawBuffers(3, drawBuffers);
     glViewport(_mViewport[0], _mViewport[1], _mViewport[2], _mViewport[3]);
 
-    if (_faceCulling) {
-        glEnable(GL_CULL_FACE);
-        glCullFace(_faceToCull);
-    }
-    else {
-        glDisable(GL_CULL_FACE);
-    }
-
-    if (_depthIsEnabled) {
-        glEnable(GL_DEPTH_TEST);
-    }
-    else {
-        glDisable(GL_DEPTH_TEST);
-    }
-
-    glDepthFunc(_depthFunction);
-
-    if (_polygonOffSet) {
-        glEnable(GL_POLYGON_OFFSET_FILL);
-        glPolygonOffset(_polygonOffSetFactor, _polygonOffSetUnits);
-    }
-    else {
-        glDisable(GL_POLYGON_OFFSET_FILL);
-    }
-
-    glClearColor(
-        _colorClearValue[0],
-        _colorClearValue[1],
-        _colorClearValue[2],
-        _colorClearValue[3]
-    );
-    glClearDepth(_depthClearValue);
+    // Restores OpenGL Rendering State
+    global::renderEngine->openglStateCache().resetColorState();
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
+    global::renderEngine->openglStateCache().resetPolygonAndClippingState();
 
     if (_blendIsEnabled) {
         glEnable(GL_BLEND);
