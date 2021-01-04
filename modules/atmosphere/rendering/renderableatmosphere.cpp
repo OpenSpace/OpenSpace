@@ -47,6 +47,7 @@
 #include <glm/gtx/string_cast.hpp>
 #include <fstream>
 #include <memory>
+#include <optional>
 
 #ifdef WIN32
 #define _USE_MATH_DEFINES
@@ -75,14 +76,13 @@ namespace {
     constexpr const char* KeyTextureScale = "PreCalculatedTextureScale";
     constexpr const char* KeySaveTextures = "SaveCalculatedTextures";
 
-    constexpr openspace::properties::Property::PropertyInfo AtmosphereHeightInfo = {
+    constexpr openspace::properties::Property::PropertyInfo AtmosphereHeightInfo {
         "AtmosphereHeight",
         "Atmosphere Height (KM)",
         "The thickness of the atmosphere in km"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AverageGroundReflectanceInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo AverageGroundReflectanceInfo {
         "AverageGroundReflectance",
         "Average Ground Reflectance (%)",
         "Average percentage of light reflected by the ground during the pre-calculation "
@@ -95,7 +95,7 @@ namespace {
         "Multiplier of the ground radiance color during the rendering phase"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RayleighHeightScaleInfo = {
+    constexpr openspace::properties::Property::PropertyInfo RayleighHeightScaleInfo= {
         "RayleighHeightScale",
         "Rayleigh Scale Height (KM)",
         "It is the vertical distance over which the density and pressure fall by a "
@@ -177,6 +177,88 @@ namespace {
 } // namespace
 
 namespace openspace {
+
+struct [[codegen::Dictionary]] Parameters {
+    struct ShadowGroup {
+        // Individual light sources
+        struct SourceElement {
+            // The scene graph node name of the source
+            std::string name;
+            // The radius of the object in meters
+            std::string radius;
+        };
+        // A list of light sources
+        std::vector<SourceElement> sources;
+
+        // Individual shadow casters
+        struct CasterElement {
+            // The scene graph node name of the source
+            std::string name;
+            // The radius of the object in meters
+            std::string radius;
+        };
+
+        // A list of objects that cast light on this atmosphere
+        std::vector<CasterElement> casters;
+    };
+    // Declares shadow groups, meaning which nodes are considered in shadow calculations
+    std::optional<ShadowGroup> shadowGroup;
+
+    // [[codegen::description(AtmosphereHeightInfo)]]
+    double atmosphereHeight;
+
+    // The radius of the planet in meters
+    double planetRadius;
+
+    double planetAverageGroundReflectance;
+
+    // [[codegen::description(SunIntensityInfo)]]
+    std::optional<double> sunIntensity;
+
+    // [[codegen::description(MieScatteringExtinctionPropCoeffInfo)]]
+    std::optional<double> mieScatteringExtinctionPropCoefficient;
+
+    // [[codegen::description(GroundRadianceEmittioninfo)]]
+    double groundRadianceEmission;
+
+    struct Rayleigh {
+        struct Coefficients {
+            glm::dvec3 wavelenghts;
+            glm::dvec3 scattering;
+        };
+        Coefficients coefficients;
+        double heightScale [[codegen::key(H_R)]];
+    };
+    Rayleigh rayleigh;
+
+    struct Ozone {
+        struct Coefficients {
+            glm::dvec4 extinction;
+        };
+        Coefficients coefficients;
+        double heightScale [[codegen::key(H_O)]];
+    };
+    std::optional<Ozone> ozone;
+
+    struct Mie {
+        struct Coefficients {
+            glm::dvec3 scattering;
+            glm::dvec3 extinction;
+        };
+        Coefficients coefficients;
+        double heightScale [[codegen::key(H_M)]];
+        double phaseConstant [[codegen::key(G), codegen::inrange(-1.0, 1.0)]];
+    };
+    Mie mie;
+
+    struct ATMDebug {
+        std::optional<double> preCalculatedTextureScale [[codegen::inrange(0.0, 1.0)]];
+        std::optional<bool> saveCalculatedTextures;
+    };
+    std::optional<ATMDebug> debug;
+};
+//#include "renderableatmosphere_codegen.inc"
+
 
 documentation::Documentation RenderableAtmosphere::Documentation() {
     using namespace documentation;
