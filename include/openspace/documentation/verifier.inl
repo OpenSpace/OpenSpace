@@ -328,7 +328,7 @@ template <typename T>
 AnnotationVerifier<T>::AnnotationVerifier(std::string a)
     : annotation(std::move(a))
 {
-    ghoul_assert(!annotation.empty(), "Annotation must not be empty");
+
 }
 
 template <typename T>
