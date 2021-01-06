@@ -174,91 +174,92 @@ namespace {
         "Enable Hard Shadows for Eclipses",
         "Enable/Disables hard shadows through the atmosphere"
     };
+
+
+    struct [[codegen::Dictionary(RenderableAtmosphere)]] Parameters {
+        struct ShadowGroup {
+            // Individual light sources
+            struct SourceElement {
+                // The scene graph node name of the source
+                std::string name;
+                // The radius of the object in meters
+                double radius;
+            };
+            // A list of light sources
+            std::vector<SourceElement> sources;
+
+            // Individual shadow casters
+            struct CasterElement {
+                // The scene graph node name of the source
+                std::string name;
+                // The radius of the object in meters
+                double radius;
+            };
+
+            // A list of objects that cast light on this atmosphere
+            std::vector<CasterElement> casters;
+        };
+        // Declares shadow groups, meaning which nodes are considered in shadow calculations
+        std::optional<ShadowGroup> shadowGroup;
+
+        // [[codegen::description(AtmosphereHeightInfo)]]
+        float atmosphereHeight;
+
+        // The radius of the planet in meters
+        float planetRadius;
+
+        float planetAverageGroundReflectance;
+
+        // [[codegen::description(SunIntensityInfo)]]
+        std::optional<float> sunIntensity;
+
+        // [[codegen::description(MieScatteringExtinctionPropCoeffInfo)]]
+        std::optional<float> mieScatteringExtinctionPropCoefficient;
+
+        // [[codegen::description(GroundRadianceEmittioninfo)]]
+        float groundRadianceEmission;
+
+        struct Rayleigh {
+            struct Coefficients {
+                glm::dvec3 wavelengths;
+                glm::dvec3 scattering;
+            };
+            Coefficients coefficients;
+            float heightScale [[codegen::key(H_R)]];
+        };
+        Rayleigh rayleigh;
+
+        struct Ozone {
+            struct Coefficients {
+                std::optional<glm::vec3> extinction;
+            };
+            std::optional<Coefficients> coefficients;
+            std::optional<float> heightScale [[codegen::key(H_O)]];
+        };
+        std::optional<Ozone> ozone;
+
+        struct Mie {
+            struct Coefficients {
+                glm::dvec3 scattering;
+                glm::dvec3 extinction;
+            };
+            Coefficients coefficients;
+            float heightScale [[codegen::key(H_M)]];
+            float phaseConstant [[codegen::key(G), codegen::inrange(-1.0, 1.0)]];
+        };
+        Mie mie;
+
+        struct ATMDebug {
+            std::optional<float> preCalculatedTextureScale [[codegen::inrange(0.0, 1.0)]];
+            std::optional<bool> saveCalculatedTextures;
+        };
+        std::optional<ATMDebug> debug;
+    };
+#include "renderableatmosphere_codegen.cpp"
+
 } // namespace
 
 namespace openspace {
-
-struct [[codegen::Dictionary(RenderableAtmosphere)]] Parameters {
-    struct ShadowGroup {
-        // Individual light sources
-        struct SourceElement {
-            // The scene graph node name of the source
-            std::string name;
-            // The radius of the object in meters
-            double radius;
-        };
-        // A list of light sources
-        std::vector<SourceElement> sources;
-
-        // Individual shadow casters
-        struct CasterElement {
-            // The scene graph node name of the source
-            std::string name;
-            // The radius of the object in meters
-            double radius;
-        };
-
-        // A list of objects that cast light on this atmosphere
-        std::vector<CasterElement> casters;
-    };
-    // Declares shadow groups, meaning which nodes are considered in shadow calculations
-    std::optional<ShadowGroup> shadowGroup;
-
-    // [[codegen::description(AtmosphereHeightInfo)]]
-    float atmosphereHeight;
-
-    // The radius of the planet in meters
-    float planetRadius;
-
-    float planetAverageGroundReflectance;
-
-    // [[codegen::description(SunIntensityInfo)]]
-    std::optional<float> sunIntensity;
-
-    // [[codegen::description(MieScatteringExtinctionPropCoeffInfo)]]
-    std::optional<float> mieScatteringExtinctionPropCoefficient;
-
-    // [[codegen::description(GroundRadianceEmittioninfo)]]
-    float groundRadianceEmission;
-
-    struct Rayleigh {
-        struct Coefficients {
-            glm::dvec3 wavelengths;
-            glm::dvec3 scattering;
-        };
-        Coefficients coefficients;
-        float heightScale [[codegen::key(H_R)]];
-    };
-    Rayleigh rayleigh;
-
-    struct Ozone {
-        struct Coefficients {
-            std::optional<glm::dvec4> extinction;
-        };
-        std::optional<Coefficients> coefficients;
-        std::optional<float> heightScale [[codegen::key(H_O)]];
-    };
-    std::optional<Ozone> ozone;
-
-    struct Mie {
-        struct Coefficients {
-            glm::dvec3 scattering;
-            glm::dvec3 extinction;
-        };
-        Coefficients coefficients;
-        float heightScale [[codegen::key(H_M)]];
-        float phaseConstant [[codegen::key(G), codegen::inrange(-1.0, 1.0)]];
-    };
-    Mie mie;
-
-    struct ATMDebug {
-        std::optional<float> preCalculatedTextureScale [[codegen::inrange(0.0, 1.0)]];
-        std::optional<bool> saveCalculatedTextures;
-    };
-    std::optional<ATMDebug> debug;
-};
-#include "renderableatmosphere_codegen.cpp"
-
 
 documentation::Documentation RenderableAtmosphere::Documentation() {
     return codegen::doc<RenderableAtmosphere>();
@@ -302,7 +303,6 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         _deferredCasterNeedsUpdate = true;
     };
 
-
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _shadowEnabled = p.shadowGroup.has_value();
@@ -329,15 +329,12 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     _groundAverageReflectance.onChange(updateWithCalculation);
     addProperty(_groundAverageReflectance);
 
-    if (p.sunIntensity.has_value()) {
-        _sunIntensity = *p.sunIntensity;
-    }
+    _sunIntensity = p.sunIntensity.value_or(_sunIntensity);
     _sunIntensity.onChange(updateWithoutCalculation);
     addProperty(_sunIntensity);
 
-    if (p.mieScatteringExtinctionPropCoefficient.has_value()) {
-        _mieScattExtPropCoefProp = *p.mieScatteringExtinctionPropCoefficient;
-    }
+    _mieScattExtPropCoefProp =
+        p.mieScatteringExtinctionPropCoefficient.value_or(_mieScattExtPropCoefProp);
 
     _rayleighScatteringCoeff = p.rayleigh.coefficients.scattering;
     _rayleighScatteringCoeff.onChange(updateWithCalculation);
@@ -348,15 +345,11 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     addProperty(_rayleighHeightScale);
 
     if (p.ozone.has_value()) {
-        if (p.ozone->heightScale.has_value()) {
-            _ozoneHeightScale = *p.ozone->heightScale;
-            _ozoneEnabled = true;
-        }
+        _ozoneHeightScale = p.ozone->heightScale.value_or(_ozoneHeightScale);
+        _ozoneEnabled = p.ozone->heightScale.has_value();
 
-        if (p.ozone->coefficients.has_value() &&
-            p.ozone->coefficients->extinction.has_value())
-        {
-            _ozoneCoeff = *p.ozone->coefficients->extinction;
+        if (p.ozone->coefficients.has_value()) {
+            _ozoneCoeff = p.ozone->coefficients->extinction.value_or(_ozoneCoeff);
         }
     }
     _ozoneEnabled.onChange(updateWithCalculation);
@@ -388,12 +381,11 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     addProperty(_mieScatteringExtinctionPropCoefficient);
     
     if (p.debug.has_value()) {
-        if (p.debug->preCalculatedTextureScale.has_value()) {
-            _preCalculatedTexturesScale = *p.debug->preCalculatedTextureScale;
-        }
-        if (p.debug->saveCalculatedTextures.has_value()) {
-            _saveCalculationsToTexture = *p.debug->saveCalculatedTextures;
-        }
+        _preCalculatedTexturesScale =
+            p.debug->preCalculatedTextureScale.value_or(_preCalculatedTexturesScale);
+
+        _saveCalculationsToTexture =
+            p.debug->saveCalculatedTextures.value_or(_saveCalculationsToTexture);
     }
 
     _groundRadianceEmission = p.groundRadianceEmission;

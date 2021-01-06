@@ -34,30 +34,18 @@ namespace {
         "Intensity",
         "The intensity of this light source"
     };
+
+    struct [[codegen::Dictionary(CameraLightSource)]] Parameters {
+        // [[codegen::description(IntensityInfo)]]
+        float intensity;
+    };
+#include "cameralightsource_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation CameraLightSource::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "Camera Light Source",
-        "base_camera_light_source",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("CameraLightSource"),
-                Optional::No,
-                "The type of this light source"
-            },
-            {
-                IntensityInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                IntensityInfo.description
-            }
-        }
-    };
+    return codegen::doc<CameraLightSource>();
 }
 
 CameraLightSource::CameraLightSource()
@@ -70,18 +58,9 @@ CameraLightSource::CameraLightSource(const ghoul::Dictionary& dictionary)
     : LightSource(dictionary)
     , _intensity(IntensityInfo, 1.f, 0.f, 1.f)
 {
+    Parameters p = codegen::bake<Parameters>(dictionary);
+    _intensity = p.intensity;
     addProperty(_intensity);
-
-    documentation::testSpecificationAndThrow(Documentation(),
-                                             dictionary,
-                                             "CameraLightSource");
-
-
-    if (dictionary.hasValue<double>(IntensityInfo.identifier)) {
-        _intensity = static_cast<float>(
-            dictionary.value<double>(IntensityInfo.identifier)
-        );
-    }
 }
 
 float CameraLightSource::intensity() const {

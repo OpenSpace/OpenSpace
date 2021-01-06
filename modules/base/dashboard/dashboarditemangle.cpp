@@ -85,66 +85,29 @@ namespace {
         "If a scene graph node is selected as type, this value specifies the name of the "
         "node that is to be used as the destination for computing the angle."
     };
+
+    struct [[codegen::Dictionary(DashboardItemAngle)]] Parameters {
+        // [[codegen::description(SourceTypeInfo)]]
+        std::optional<std::string> sourceType [[codegen::inlist("Node", "Focus", "Camera")]];
+        // [[codegen::description(SourceNodeNameInfo)]]
+        std::optional<std::string> sourceNodeName;
+        // [[codegen::description(ReferenceTypeInfo)]]
+        std::string referenceType [[codegen::inlist("Node", "Focus", "Camera")]];
+        // [[codegen::description(ReferenceNodeNameInfo)]]
+        std::optional<std::string> referenceNodeName;
+        // [[codegen::description(DestinationTypeInfo)]]
+        std::optional<std::string>
+            destinationType [[codegen::inlist("Node", "Focus", "Camera")]];
+        // [[codegen::description(DestinationNodeNameInfo)]]
+        std::optional<std::string> destinationNodeName;
+    };
+#include "dashboarditemangle_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation DashboardItemAngle::Documentation() {
-    using namespace documentation;
-
-    return {
-        "DashboardItem Angle",
-        "base_dashboarditem_angle",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("DashboardItemAngle"),
-                Optional::No
-            },
-            {
-                SourceTypeInfo.identifier,
-                new StringInListVerifier({
-                    "Node", "Focus", "Camera"
-                }),
-                Optional::Yes,
-                SourceTypeInfo.description
-            },
-            {
-                SourceNodeNameInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                SourceNodeNameInfo.description
-            },
-            {
-                ReferenceTypeInfo.identifier,
-                new StringInListVerifier({
-                    "Node", "Focus", "Camera"
-                }),
-                Optional::No,
-                ReferenceTypeInfo.description
-            },
-            {
-                ReferenceNodeNameInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                ReferenceNodeNameInfo.description
-            },
-            {
-                DestinationTypeInfo.identifier,
-                new StringInListVerifier({
-                    "Node", "Focus", "Camera"
-                }),
-                Optional::Yes,
-                DestinationTypeInfo.description
-            },
-            {
-                DestinationNodeNameInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                DestinationNodeNameInfo.description
-            }
-        }
-    };
+    return codegen::doc<DashboardItemAngle>();
 }
 
 DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
@@ -174,11 +137,8 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
         nullptr
     }
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "DashboardItemAngle"
-    );
+    Parameters p = codegen::bake<Parameters>(dictionary);
+
 
     _source.type.addOptions({
         { Type::Node, "Node" },
@@ -190,12 +150,11 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
             properties::Property::Visibility(_source.type == Type::Node)
         );
     });
-    if (dictionary.hasKey(SourceTypeInfo.identifier)) {
-        std::string value = dictionary.value<std::string>(SourceTypeInfo.identifier);
-        if (value == "Node") {
+    if (p.sourceType.has_value()) {
+        if (*p.sourceType == "Node") {
             _source.type = Type::Node;
         }
-        else if (value == "Focus") {
+        else if (*p.sourceType == "Focus") {
             _source.type = Type::Focus;
         }
         else {
@@ -209,10 +168,8 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
 
     _source.nodeName.onChange([this]() { _source.node = nullptr; });
     if (_source.type == Type::Node) {
-        if (dictionary.hasKey(SourceNodeNameInfo.identifier)) {
-            _source.nodeName = dictionary.value<std::string>(
-                SourceNodeNameInfo.identifier
-            );
+        if (p.sourceNodeName.has_value()) {
+            _source.nodeName = *p.sourceNodeName;
         }
         else {
             LERRORC(
@@ -234,11 +191,10 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
             properties::Property::Visibility(_reference.type == Type::Node)
         );
     });
-    std::string value = dictionary.value<std::string>(ReferenceTypeInfo.identifier);
-    if (value == "Node") {
+    if (p.referenceType == "Node") {
         _reference.type = Type::Node;
     }
-    else if (value == "Focus") {
+    else if (p.referenceType == "Focus") {
         _reference.type = Type::Focus;
     }
     else {
@@ -248,10 +204,8 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
 
     _reference.nodeName.onChange([this]() { _reference.node = nullptr; });
     if (_reference.type == Type::Node) {
-        if (dictionary.hasKey(ReferenceNodeNameInfo.identifier)) {
-            _reference.nodeName = dictionary.value<std::string>(
-                ReferenceNodeNameInfo.identifier
-            );
+        if (p.referenceNodeName.has_value()) {
+            _reference.nodeName = *p.referenceNodeName;
         }
         else {
             LERRORC(
@@ -272,12 +226,11 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
             properties::Property::Visibility(_source.type == Type::Node)
         );
     });
-    if (dictionary.hasKey(DestinationTypeInfo.identifier)) {
-        std::string type = dictionary.value<std::string>(DestinationTypeInfo.identifier);
-        if (type == "Node") {
+    if (p.destinationType.has_value()) {
+        if (*p.destinationType == "Node") {
             _destination.type = Type::Node;
         }
-        else if (type == "Focus") {
+        else if (*p.destinationType == "Focus") {
             _destination.type = Type::Focus;
         }
         else {
@@ -290,10 +243,8 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
     addProperty(_destination.type);
     _destination.nodeName.onChange([this]() { _destination.node = nullptr; });
     if (_destination.type == Type::Node) {
-        if (dictionary.hasKey(DestinationNodeNameInfo.identifier)) {
-            _destination.nodeName = dictionary.value<std::string>(
-                DestinationNodeNameInfo.identifier
-            );
+        if (p.destinationNodeName.has_value()) {
+            _destination.nodeName = *p.destinationNodeName;
         }
         else {
             LERRORC(
