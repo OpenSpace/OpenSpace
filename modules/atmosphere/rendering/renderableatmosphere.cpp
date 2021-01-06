@@ -205,21 +205,21 @@ struct [[codegen::Dictionary(RenderableAtmosphere)]] Parameters {
     std::optional<ShadowGroup> shadowGroup;
 
     // [[codegen::description(AtmosphereHeightInfo)]]
-    double atmosphereHeight;
+    float atmosphereHeight;
 
     // The radius of the planet in meters
-    double planetRadius;
+    float planetRadius;
 
-    double planetAverageGroundReflectance;
+    float planetAverageGroundReflectance;
 
     // [[codegen::description(SunIntensityInfo)]]
-    std::optional<double> sunIntensity;
+    std::optional<float> sunIntensity;
 
     // [[codegen::description(MieScatteringExtinctionPropCoeffInfo)]]
-    std::optional<double> mieScatteringExtinctionPropCoefficient;
+    std::optional<float> mieScatteringExtinctionPropCoefficient;
 
     // [[codegen::description(GroundRadianceEmittioninfo)]]
-    double groundRadianceEmission;
+    float groundRadianceEmission;
 
     struct Rayleigh {
         struct Coefficients {
@@ -227,7 +227,7 @@ struct [[codegen::Dictionary(RenderableAtmosphere)]] Parameters {
             glm::dvec3 scattering;
         };
         Coefficients coefficients;
-        double heightScale [[codegen::key(H_R)]];
+        float heightScale [[codegen::key(H_R)]];
     };
     Rayleigh rayleigh;
 
@@ -236,7 +236,7 @@ struct [[codegen::Dictionary(RenderableAtmosphere)]] Parameters {
             std::optional<glm::dvec4> extinction;
         };
         std::optional<Coefficients> coefficients;
-        std::optional<double> heightScale [[codegen::key(H_O)]];
+        std::optional<float> heightScale [[codegen::key(H_O)]];
     };
     std::optional<Ozone> ozone;
 
@@ -246,13 +246,13 @@ struct [[codegen::Dictionary(RenderableAtmosphere)]] Parameters {
             glm::dvec3 extinction;
         };
         Coefficients coefficients;
-        double heightScale [[codegen::key(H_M)]];
-        double phaseConstant [[codegen::key(G), codegen::inrange(-1.0, 1.0)]];
+        float heightScale [[codegen::key(H_M)]];
+        float phaseConstant [[codegen::key(G), codegen::inrange(-1.0, 1.0)]];
     };
     Mie mie;
 
     struct ATMDebug {
-        std::optional<double> preCalculatedTextureScale [[codegen::inrange(0.0, 1.0)]];
+        std::optional<float> preCalculatedTextureScale [[codegen::inrange(0.0, 1.0)]];
         std::optional<bool> saveCalculatedTextures;
     };
     std::optional<ATMDebug> debug;
@@ -319,33 +319,31 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         }
     }
 
-    _atmosphereHeight = static_cast<float>(p.atmosphereHeight);
+    _atmosphereHeight = p.atmosphereHeight;
     _atmosphereHeight.onChange(updateWithCalculation);
     addProperty(_atmosphereHeight);
 
-    _planetRadius = static_cast<float>(p.planetRadius);
+    _planetRadius = p.planetRadius;
 
-    _groundAverageReflectance = static_cast<float>(p.planetAverageGroundReflectance);
+    _groundAverageReflectance = p.planetAverageGroundReflectance;
     _groundAverageReflectance.onChange(updateWithCalculation);
     addProperty(_groundAverageReflectance);
 
     if (p.sunIntensity.has_value()) {
-        _sunIntensity = static_cast<float>(*p.sunIntensity);
+        _sunIntensity = *p.sunIntensity;
     }
     _sunIntensity.onChange(updateWithoutCalculation);
     addProperty(_sunIntensity);
 
     if (p.mieScatteringExtinctionPropCoefficient.has_value()) {
-        _mieScattExtPropCoefProp = static_cast<float>(
-            *p.mieScatteringExtinctionPropCoefficient
-        );
+        _mieScattExtPropCoefProp = *p.mieScatteringExtinctionPropCoefficient;
     }
 
     _rayleighScatteringCoeff = p.rayleigh.coefficients.scattering;
     _rayleighScatteringCoeff.onChange(updateWithCalculation);
     addProperty(_rayleighScatteringCoeff);
 
-    _rayleighHeightScale = static_cast<float>(p.rayleigh.heightScale);
+    _rayleighHeightScale = p.rayleigh.heightScale;
     _rayleighHeightScale.onChange(updateWithCalculation);
     addProperty(_rayleighHeightScale);
 
@@ -369,7 +367,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     addProperty(_ozoneCoeff);
 
 
-    _mieHeightScale = static_cast<float>(p.mie.heightScale);
+    _mieHeightScale = p.mie.heightScale;
     _mieHeightScale.onChange(updateWithCalculation);
     addProperty(_mieHeightScale);
 
@@ -378,7 +376,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     addProperty(_mieScatteringCoeff);
 
     _mieExtinctionCoeff = p.mie.coefficients.extinction;
-    _miePhaseConstant = static_cast<float>(p.mie.phaseConstant);
+    _miePhaseConstant = p.mie.phaseConstant;
     _miePhaseConstant.onChange(updateWithCalculation);
     addProperty(_miePhaseConstant);
 
@@ -391,9 +389,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     
     if (p.debug.has_value()) {
         if (p.debug->preCalculatedTextureScale.has_value()) {
-            _preCalculatedTexturesScale = static_cast<float>(
-                *p.debug->preCalculatedTextureScale
-            );
+            _preCalculatedTexturesScale = *p.debug->preCalculatedTextureScale;
         }
         if (p.debug->saveCalculatedTextures.has_value()) {
             _saveCalculationsToTexture = *p.debug->saveCalculatedTextures;
