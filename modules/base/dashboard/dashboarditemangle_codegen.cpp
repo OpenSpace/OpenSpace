@@ -16,11 +16,12 @@ template <typename T> openspace::documentation::Documentation doc() {
 template <> openspace::documentation::Documentation doc<openspace::DashboardItemAngle>() {
     using namespace openspace::documentation;
     TableVerifier* codegen_Parameters = new TableVerifier;
-    codegen_Parameters->documentations.push_back({"SourceType",new StringInListVerifier({"Node", "Focus", "Camera"}),Optional::Yes,SourceTypeInfo.description});
+    StringInListVerifier* codegen_Parameters_Type = new StringInListVerifier({"Node","Focus","Camera"});
+    codegen_Parameters->documentations.push_back({"SourceType",codegen_Parameters_Type,Optional::Yes,SourceTypeInfo.description});
     codegen_Parameters->documentations.push_back({"SourceNodeName",new StringVerifier,Optional::Yes,SourceNodeNameInfo.description});
-    codegen_Parameters->documentations.push_back({"ReferenceType",new StringInListVerifier({"Node", "Focus", "Camera"}),Optional::No,ReferenceTypeInfo.description});
+    codegen_Parameters->documentations.push_back({"ReferenceType",codegen_Parameters_Type,Optional::No,ReferenceTypeInfo.description});
     codegen_Parameters->documentations.push_back({"ReferenceNodeName",new StringVerifier,Optional::Yes,ReferenceNodeNameInfo.description});
-    codegen_Parameters->documentations.push_back({"DestinationType",new StringInListVerifier({"Node", "Focus", "Camera"}),Optional::Yes,DestinationTypeInfo.description});
+    codegen_Parameters->documentations.push_back({"DestinationType",codegen_Parameters_Type,Optional::Yes,DestinationTypeInfo.description});
     codegen_Parameters->documentations.push_back({"DestinationNodeName",new StringVerifier,Optional::Yes,DestinationNodeNameInfo.description});
 
     openspace::documentation::Documentation d = {
@@ -47,6 +48,12 @@ template<typename T> void bakeTo(const ghoul::Dictionary& d, std::string_view ke
     else *val = std::nullopt;
 }
 void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::string* val) { *val = d.value<std::string>(key); }
+void bakeTo(const ghoul::Dictionary& d, std::string_view key, Parameters::Type* val) {
+    std::string v = d.value<std::string>(key);
+    if (v == "Node") { *val = Parameters::Type::Node; }
+    if (v == "Focus") { *val = Parameters::Type::Focus; }
+    if (v == "Camera") { *val = Parameters::Type::Camera; }
+}
 
 } // namespace internal
 

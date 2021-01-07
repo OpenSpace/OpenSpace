@@ -87,17 +87,22 @@ namespace {
     };
 
     struct [[codegen::Dictionary(DashboardItemAngle)]] Parameters {
+        enum class Type {
+            Node,
+            Focus,
+            Camera
+        };
+
         // [[codegen::description(SourceTypeInfo)]]
-        std::optional<std::string> sourceType [[codegen::inlist("Node", "Focus", "Camera")]];
+        std::optional<Type> sourceType;
         // [[codegen::description(SourceNodeNameInfo)]]
         std::optional<std::string> sourceNodeName;
         // [[codegen::description(ReferenceTypeInfo)]]
-        std::string referenceType [[codegen::inlist("Node", "Focus", "Camera")]];
+        Type referenceType;
         // [[codegen::description(ReferenceNodeNameInfo)]]
         std::optional<std::string> referenceNodeName;
         // [[codegen::description(DestinationTypeInfo)]]
-        std::optional<std::string>
-            destinationType [[codegen::inlist("Node", "Focus", "Camera")]];
+        std::optional<Type> destinationType;
         // [[codegen::description(DestinationNodeNameInfo)]]
         std::optional<std::string> destinationNodeName;
     };
@@ -151,14 +156,16 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
         );
     });
     if (p.sourceType.has_value()) {
-        if (*p.sourceType == "Node") {
-            _source.type = Type::Node;
-        }
-        else if (*p.sourceType == "Focus") {
-            _source.type = Type::Focus;
-        }
-        else {
-            _source.type = Type::Camera;
+        switch (*p.sourceType) {
+            case Parameters::Type::Node:
+                _source.type = Type::Node;
+                break;
+            case Parameters::Type::Focus:
+                _source.type = Type::Focus;
+                break;
+            default:
+                _source.type = Type::Camera;
+                break;
         }
     }
     else {
@@ -191,14 +198,16 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
             properties::Property::Visibility(_reference.type == Type::Node)
         );
     });
-    if (p.referenceType == "Node") {
-        _reference.type = Type::Node;
-    }
-    else if (p.referenceType == "Focus") {
-        _reference.type = Type::Focus;
-    }
-    else {
-        _reference.type = Type::Camera;
+    switch (p.referenceType) {
+        case Parameters::Type::Node:
+            _reference.type = Type::Node;
+            break;
+        case Parameters::Type::Focus:
+            _reference.type = Type::Focus;
+            break;
+        default:
+            _reference.type = Type::Camera;
+            break;
     }
     addProperty(_reference.type);
 
@@ -227,14 +236,16 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
         );
     });
     if (p.destinationType.has_value()) {
-        if (*p.destinationType == "Node") {
-            _destination.type = Type::Node;
-        }
-        else if (*p.destinationType == "Focus") {
-            _destination.type = Type::Focus;
-        }
-        else {
-            _destination.type = Type::Camera;
+        switch (*p.destinationType) {
+            case Parameters::Type::Node:
+                _destination.type = Type::Node;
+                break;
+            case Parameters::Type::Focus:
+                _destination.type = Type::Focus;
+                break;
+            default:
+                _destination.type = Type::Camera;
+                break;
         }
     }
     else {
