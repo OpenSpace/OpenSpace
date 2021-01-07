@@ -1,0 +1,22 @@
+local assetHelper = asset.require('util/asset_helper')
+
+local singeColorTexturePath = openspace.createPixelImage("example_ring_color", {0.0, 1.0, 1.0})
+
+local BasicDisc = {
+    Identifier = "BasicDisc",
+    Parent = "Root",
+    Renderable = {
+        Type = "RenderableDisc",
+        Texture = singeColorTexturePath,
+        Size = 1e10,
+        Width = 0.5
+    },
+    GUI = {
+        Name = "Basic Disc",
+        Path = "/Examples/Discs"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { 
+    BasicDisc
+})
