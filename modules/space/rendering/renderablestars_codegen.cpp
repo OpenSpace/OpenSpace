@@ -18,7 +18,7 @@ template <> openspace::documentation::Documentation doc<openspace::RenderableSta
     TableVerifier* codegen_Parameters = new TableVerifier;
     codegen_Parameters->documentations.push_back({"File",new StringVerifier,Optional::No,"The path to the SPECK file containing information about the stars being rendered"});
     codegen_Parameters->documentations.push_back({"ColorMap",new StringVerifier,Optional::No,ColorTextureInfo.description});
-    codegen_Parameters->documentations.push_back({"ColorOption",new StringInListVerifier({"Color", "Velocity", "Speed", "Other Data", "Fixed Color"}),Optional::Yes,ColorOptionInfo.description});
+    codegen_Parameters->documentations.push_back({"ColorOption",new InListVerifier<StringVerifier>({"Color", "Velocity", "Speed", "Other Data", "Fixed Color"}),Optional::Yes,ColorOptionInfo.description});
     codegen_Parameters->documentations.push_back({"OtherData",new StringVerifier,Optional::Yes,OtherDataOptionInfo.description});
     codegen_Parameters->documentations.push_back({"OtherDataColorMap",new StringVerifier,Optional::Yes,OtherDataColorMapInfo.description});
     codegen_Parameters->documentations.push_back({"FilterOutOfRange",new BoolVerifier,Optional::Yes,FilterOutOfRangeInfo.description});
