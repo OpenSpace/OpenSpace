@@ -35,9 +35,10 @@
 #include <modules/globebrowsing/src/layermanager.h>
 #include <modules/globebrowsing/src/memoryawaretilecache.h>
 #include <modules/globebrowsing/src/tileprovider.h>
+#include <openspace/documentation/verifier.h>
+#include <openspace/engine/globalscallbacks.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/orbitalnavigator.h>
-#include <openspace/engine/globalscallbacks.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -158,6 +159,16 @@ namespace {
 
         return result;
     }
+
+    struct [[codegen::Dictionary(GlobeBrowsingModule)]] Parameters {
+        std::optional<bool> cacheEnabled [[codegen::key(WMSCacheEnabled)]];
+        std::optional<bool> offlineMode;
+        std::optional<std::string> cacheLocation [[codegen::key(WMSCacheLocation)]];
+        std::optional<int> wmsCacheSize [[codegen::key(WMSCacheSize)]];
+        std::optional<int> tileCacheSize;
+        std::optional<bool> noWarning;
+    };
+#include "globebrowsingmodule_codegen.cpp"
 } // namespace
 
 namespace openspace {
@@ -180,30 +191,13 @@ GlobeBrowsingModule::GlobeBrowsingModule()
 void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     using namespace globebrowsing;
 
-    if (dict.hasValue<bool>(WMSCacheEnabledInfo.identifier)) {
-        _wmsCacheEnabled = dict.value<bool>(WMSCacheEnabledInfo.identifier);
-    }
-    if (dict.hasValue<bool>(OfflineModeInfo.identifier)) {
-        _offlineMode = dict.value<bool>(OfflineModeInfo.identifier);
-    }
-    if (dict.hasValue<std::string>(WMSCacheLocationInfo.identifier)) {
-        _wmsCacheLocation = dict.value<std::string>(WMSCacheLocationInfo.identifier);
-    }
-    if (dict.hasValue<double>(WMSCacheSizeInfo.identifier)) {
-        _wmsCacheSizeMB = static_cast<int>(
-            dict.value<double>(WMSCacheSizeInfo.identifier)
-        );
-    }
-    if (dict.hasValue<double>(TileCacheSizeInfo.identifier)) {
-        _tileCacheSizeMB = static_cast<int>(
-            dict.value<double>(TileCacheSizeInfo.identifier)
-        );
-    }
-
-    // Sanity check
-    const bool noWarning = dict.hasValue<bool>("NoWarning") ?
-        dict.value<bool>("NoWarning") :
-        false;
+    Parameters p = codegen::bake<Parameters>(dict);
+    _wmsCacheEnabled = p.cacheEnabled.value_or(_wmsCacheEnabled);
+    _offlineMode = p.offlineMode.value_or(_offlineMode);
+    _wmsCacheLocation = p.cacheLocation.value_or(_wmsCacheLocation);
+    _wmsCacheSizeMB = p.wmsCacheSize.value_or(_wmsCacheSizeMB);
+    _tileCacheSizeMB = p.tileCacheSize.value_or(_tileCacheSizeMB);
+    const bool noWarning = p.noWarning.value_or(false);
 
     if (!_wmsCacheEnabled && _offlineMode && !noWarning) {
         LWARNINGC(
