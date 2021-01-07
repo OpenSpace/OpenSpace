@@ -307,7 +307,8 @@ int createPixelImage(lua_State* L) {
     // Would like to clean this up with a more direct use of the Verifier in the future
     using namespace openspace::documentation;
     const std::string& key = "color";
-    ghoul::Dictionary colorDict = {{ key, d }};
+    ghoul::Dictionary colorDict;
+    colorDict.setValue(key, d);
     TestResult res = DoubleVector3Verifier()(colorDict, key);
 
     if (!res.success) {
@@ -317,7 +318,7 @@ int createPixelImage(lua_State* L) {
         );
     }
 
-    const glm::vec3 color = colorDict.value<glm::vec3>(key);
+    const glm::dvec3 color = colorDict.value<glm::dvec3>(key);
 
     const std::string& fileName = FileSys.cacheManager()->cachedFilename(
         fmt::format("{}.ppm", name),
