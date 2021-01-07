@@ -68,35 +68,22 @@ namespace {
         );
         return res;
     }
+
+    struct [[codegen::Dictionary(DashboardItemVelocity)]] Parameters {
+        // [[codegen::description(SimplificationInfo)]]
+        std::optional<bool> simplification;
+
+        // [[codegen::description(RequestedUnitInfo)]]
+        std::optional<std::string> requestedUnit [[codegen::inlist(unitList())]];
+    };
+#include "dashboarditemvelocity_codegen.cpp"
+
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation DashboardItemVelocity::Documentation() {
-    using namespace documentation;
-    return {
-        "DashboardItem Velocity",
-        "base_dashboarditem_velocity",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("DashboardItemVelocity"),
-                Optional::No
-            },
-            {
-                SimplificationInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                SimplificationInfo.description
-            },
-            {
-                RequestedUnitInfo.identifier,
-                new StringInListVerifier(unitList()),
-                Optional::Yes,
-                RequestedUnitInfo.description
-            }
-        }
-    };
+    return codegen::doc<DashboardItemVelocity>();
 }
 
 DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary)
@@ -104,6 +91,8 @@ DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary
     , _doSimplification(SimplificationInfo, true)
     , _requestedUnit(RequestedUnitInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
+    Parameters p = codegen::bake<Parameters>(dictionary);
+
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
