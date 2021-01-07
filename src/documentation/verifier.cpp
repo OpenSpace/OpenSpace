@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,23 +32,23 @@ namespace openspace::documentation {
 
 // The explicit template instantiations for many of the commonly used template values
 // This cuts down on the compilation time by only compiling these once
-template struct Vector2Verifier<bool>;
+//template struct Vector2Verifier<bool>;
 template struct Vector2Verifier<int>;
 template struct Vector2Verifier<double>;
-template struct Vector3Verifier<bool>;
+//template struct Vector3Verifier<bool>;
 template struct Vector3Verifier<int>;
 template struct Vector3Verifier<double>;
-template struct Vector4Verifier<bool>;
+//template struct Vector4Verifier<bool>;
 template struct Vector4Verifier<int>;
 template struct Vector4Verifier<double>;
 
-template struct Vector2ListVerifier<bool>;
+//template struct Vector2ListVerifier<bool>;
 template struct Vector2ListVerifier<int>;
 template struct Vector2ListVerifier<double>;
-template struct Vector3ListVerifier<bool>;
+//template struct Vector3ListVerifier<bool>;
 template struct Vector3ListVerifier<int>;
 template struct Vector3ListVerifier<double>;
-template struct Vector4ListVerifier<bool>;
+//template struct Vector4ListVerifier<bool>;
 template struct Vector4ListVerifier<int>;
 template struct Vector4ListVerifier<double>;
 
@@ -100,13 +100,13 @@ template struct AnnotationVerifier<IntVerifier>;
 template struct AnnotationVerifier<DoubleVerifier>;
 template struct AnnotationVerifier<StringVerifier>;
 template struct AnnotationVerifier<TableVerifier>;
-template struct AnnotationVerifier<BoolVector2Verifier>;
+//template struct AnnotationVerifier<BoolVector2Verifier>;
 template struct AnnotationVerifier<IntVector2Verifier>;
 template struct AnnotationVerifier<DoubleVector2Verifier>;
-template struct AnnotationVerifier<BoolVector3Verifier>;
+//template struct AnnotationVerifier<BoolVector3Verifier>;
 template struct AnnotationVerifier<IntVector3Verifier>;
 template struct AnnotationVerifier<DoubleVector3Verifier>;
-template struct AnnotationVerifier<BoolVector4Verifier>;
+//template struct AnnotationVerifier<BoolVector4Verifier>;
 template struct AnnotationVerifier<IntVector4Verifier>;
 template struct AnnotationVerifier<DoubleVector4Verifier>;
 
@@ -115,13 +115,13 @@ template struct DeprecatedVerifier<IntVerifier>;
 template struct DeprecatedVerifier<DoubleVerifier>;
 template struct DeprecatedVerifier<StringVerifier>;
 template struct DeprecatedVerifier<TableVerifier>;
-template struct DeprecatedVerifier<BoolVector2Verifier>;
+//template struct DeprecatedVerifier<BoolVector2Verifier>;
 template struct DeprecatedVerifier<IntVector2Verifier>;
 template struct DeprecatedVerifier<DoubleVector2Verifier>;
-template struct DeprecatedVerifier<BoolVector3Verifier>;
+//template struct DeprecatedVerifier<BoolVector3Verifier>;
 template struct DeprecatedVerifier<IntVector3Verifier>;
 template struct DeprecatedVerifier<DoubleVector3Verifier>;
-template struct DeprecatedVerifier<BoolVector4Verifier>;
+//template struct DeprecatedVerifier<BoolVector4Verifier>;
 template struct DeprecatedVerifier<IntVector4Verifier>;
 template struct DeprecatedVerifier<DoubleVector4Verifier>;
 
@@ -136,7 +136,7 @@ std::string DoubleVerifier::type() const {
 TestResult IntVerifier::operator()(const ghoul::Dictionary & dict,
                                    const std::string & key) const
 {
-    if (dict.hasKeyAndValue<int>(key)) {
+    if (dict.hasValue<int>(key)) {
         // We we have a key and the value is int, we are done
         return { true, {}, {} };
     }
@@ -184,7 +184,7 @@ TableVerifier::TableVerifier(std::vector<DocumentationEntry> documentationEntrie
 TestResult TableVerifier::operator()(const ghoul::Dictionary& dictionary,
                                      const std::string& key) const
 {
-    if (dictionary.hasKeyAndValue<Type>(key)) {
+    if (dictionary.hasValue<Type>(key)) {
         ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>(key);
         TestResult res = testSpecification({documentations}, d);
 
@@ -377,7 +377,7 @@ TestResult OrVerifier::operator()(const ghoul::Dictionary& dictionary,
     const bool success = std::any_of(
         res.cbegin(),
         res.cend(),
-        [](const TestResult& res) { return res.success; }
+        std::mem_fn(&TestResult::success)
     );
 
     if (success) {

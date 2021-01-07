@@ -60,9 +60,9 @@ local setCurrentSlide = function (deck, index, interpolationDuration)
             opacity = 1
         end
         if interpolationDuration == 0 then
-            openspace.setPropertyValueSingle("ScreenSpace." .. identifier .. ".Alpha", opacity)
+            openspace.setPropertyValueSingle("ScreenSpace." .. identifier .. ".Opacity", opacity)
         else
-            openspace.setPropertyValueSingle("ScreenSpace." .. identifier .. ".Alpha", opacity, interpolationDuration, "QuadraticEaseOut")
+            openspace.setPropertyValueSingle("ScreenSpace." .. identifier .. ".Opacity", opacity, interpolationDuration, "QuadraticEaseOut")
         end
     end
 end
@@ -84,13 +84,13 @@ local toggleSlides = function (deck, interpolationDuration)
                 opacity = 1
             end
             openspace.setPropertyValueSingle(
-                "ScreenSpace." .. identifier .. ".Alpha", opacity,
+                "ScreenSpace." .. identifier .. ".Opacity", opacity,
                 interpolationDuration, "QuadraticEaseOut")
         end
     else 
         for i, identifier in pairs(deck.SlideIdentifiers) do
             openspace.setPropertyValueSingle(
-                "ScreenSpace." .. identifier .. ".Alpha", 0,
+                "ScreenSpace." .. identifier .. ".Opacity", 0,
                 interpolationDuration, "QuadraticEaseOut")
         end
     end

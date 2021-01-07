@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,8 +25,9 @@
 #include <modules/volume/rawvolumemetadata.h>
 
 #include <openspace/documentation/verifier.h>
-
+#include <openspace/documentation/documentation.h>
 #include <openspace/util/time.h>
+#include <ghoul/misc/dictionary.h>
 
 namespace {
     constexpr const char* KeyDimensions = "Dimensions";
@@ -55,28 +56,30 @@ RawVolumeMetadata RawVolumeMetadata::createFromDictionary(
     );
 
     RawVolumeMetadata metadata;
-    metadata.dimensions = dictionary.value<glm::vec3>(KeyDimensions);
+    metadata.dimensions = dictionary.value<glm::dvec3>(KeyDimensions);
 
-    metadata.hasDomainBounds = dictionary.hasValue<glm::vec3>(KeyLowerDomainBound) &&
-            dictionary.hasValue<glm::vec3>(KeyUpperDomainBound);
+    metadata.hasDomainBounds = dictionary.hasValue<glm::dvec3>(KeyLowerDomainBound) &&
+            dictionary.hasValue<glm::dvec3>(KeyUpperDomainBound);
 
     if (metadata.hasDomainBounds) {
-        metadata.lowerDomainBound = dictionary.value<glm::vec3>(KeyLowerDomainBound);
-        metadata.upperDomainBound = dictionary.value<glm::vec3>(KeyUpperDomainBound);
+        metadata.lowerDomainBound = dictionary.value<glm::dvec3>(KeyLowerDomainBound);
+        metadata.upperDomainBound = dictionary.value<glm::dvec3>(KeyUpperDomainBound);
     }
-    metadata.hasDomainUnit = dictionary.hasValue<float>(KeyDomainUnit);
+    metadata.hasDomainUnit = static_cast<float>(
+        dictionary.hasValue<double>(KeyDomainUnit)
+    );
     if (metadata.hasDomainUnit) {
         metadata.domainUnit = dictionary.value<std::string>(KeyDomainUnit);
     }
 
-    metadata.hasValueRange = dictionary.hasValue<float>(KeyMinValue) &&
-        dictionary.hasValue<float>(KeyMaxValue);
+    metadata.hasValueRange = dictionary.hasValue<double>(KeyMinValue) &&
+        dictionary.hasValue<double>(KeyMaxValue);
 
     if (metadata.hasValueRange) {
-        metadata.minValue = dictionary.value<float>(KeyMinValue);
-        metadata.maxValue = dictionary.value<float>(KeyMaxValue);
+        metadata.minValue = static_cast<float>(dictionary.value<double>(KeyMinValue));
+        metadata.maxValue = static_cast<float>(dictionary.value<double>(KeyMaxValue));
     }
-    metadata.hasValueUnit = dictionary.hasValue<float>(KeyValueUnit);
+    metadata.hasValueUnit = static_cast<float>(dictionary.hasValue<double>(KeyValueUnit));
     if (metadata.hasValueUnit) {
         metadata.valueUnit = dictionary.value<std::string>(KeyValueUnit);
     }
@@ -92,23 +95,23 @@ RawVolumeMetadata RawVolumeMetadata::createFromDictionary(
 
 ghoul::Dictionary RawVolumeMetadata::dictionary() {
     ghoul::Dictionary dict;
-    dict.setValue<glm::vec3>(KeyDimensions, dimensions);
-    dict.setValue<std::string>(KeyGridType, gridTypeToString(gridType));
+    dict.setValue(KeyDimensions, glm::dvec3(dimensions));
+    dict.setValue(KeyGridType, gridTypeToString(gridType));
 
     if (hasDomainUnit) {
-        dict.setValue<std::string>(KeyDomainUnit, domainUnit);
+        dict.setValue(KeyDomainUnit, domainUnit);
     }
     if (hasDomainBounds) {
-        dict.setValue<glm::vec3>(KeyLowerDomainBound, lowerDomainBound);
-        dict.setValue<glm::vec3>(KeyUpperDomainBound, upperDomainBound);
+        dict.setValue(KeyLowerDomainBound, glm::dvec3(lowerDomainBound));
+        dict.setValue(KeyUpperDomainBound, glm::dvec3(upperDomainBound));
     }
 
     if (hasValueRange) {
-        dict.setValue<double>(KeyMinValue, minValue);
-        dict.setValue<double>(KeyMaxValue, maxValue);
+        dict.setValue(KeyMinValue, static_cast<double>(minValue));
+        dict.setValue(KeyMaxValue, static_cast<double>(maxValue));
     }
     if (hasDomainUnit) {
-        dict.setValue<std::string>(KeyValueUnit, valueUnit);
+        dict.setValue(KeyValueUnit, valueUnit);
     }
 
     if (hasTime) {
@@ -117,7 +120,7 @@ ghoul::Dictionary RawVolumeMetadata::dictionary() {
         if (timeString.back() == 'Z') {
             timeString = timeString.substr(0, timeString.size() - 1);
         }
-        dict.setValue<std::string>(KeyTime, std::string(timeString));
+        dict.setValue(KeyTime, std::string(timeString));
     }
     return dict;
 }
@@ -130,7 +133,7 @@ documentation::Documentation RawVolumeMetadata::Documentation() {
         {
             {
                 KeyDimensions,
-                new Vector3Verifier<float>,
+                new DoubleVector3Verifier,
                 Optional::No,
                 "Specifies the number of grid cells in each dimension",
             },
@@ -142,13 +145,13 @@ documentation::Documentation RawVolumeMetadata::Documentation() {
             },
             {
                 KeyLowerDomainBound,
-                new Vector3Verifier<float>,
+                new DoubleVector3Verifier,
                 Optional::Yes,
                 "Specifies the lower domain bounds in the model coordinate system",
             },
             {
                 KeyUpperDomainBound,
-                new Vector3Verifier<float>,
+                new DoubleVector3Verifier,
                 Optional::Yes,
                 "Specifies the upper domain bounds in the model coordinate system",
             },

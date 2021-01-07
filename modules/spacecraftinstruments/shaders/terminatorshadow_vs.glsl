@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,7 +36,7 @@ uniform mat4 modelViewProjectionTransform;
 uniform vec3 shadowColor;
 
 void main() {
-    if (mod(gl_VertexID,2) == 0.0) {
+    if (mod(gl_VertexID, 2) == 0.0) {
         vs_color = shadowColor;
     }
     else {

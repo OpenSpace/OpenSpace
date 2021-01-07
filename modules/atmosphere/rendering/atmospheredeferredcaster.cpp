@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -284,7 +284,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                 _time,
                 lt
             );
-            glm::dvec4 sunPosObj = glm::dvec4(0.0);
+            glm::dvec4 sunPosObj;
 
             // Sun following camera position
             if (_sunFollowingCameraEnabled) {
@@ -340,6 +340,15 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                     SceneGraphNode* casterNode =
                         global::renderEngine->scene()->sceneGraphNode(caster);
 
+                    if ((sourceNode == nullptr) || (casterNode == nullptr)) {
+                        LERRORC(
+                            "AtmosphereDeferredcaster",
+                            "Invalid scenegraph node for the shadow's caster or shadow's "
+                            "receiver."
+                        );
+                        return;
+                    }
+
                     const double sourceRadiusScale = std::max(
                         glm::compMax(sourceNode->scale()),
                         1.0
@@ -349,15 +358,6 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                         glm::compMax(casterNode->scale()),
                         1.0
                     );
-
-                    if ((sourceNode == nullptr) || (casterNode == nullptr)) {
-                        LERRORC(
-                            "AtmosphereDeferredcaster",
-                            "Invalid scenegraph node for the shadow's caster or shadow's "
-                            "receiver."
-                        );
-                        return;
-                    }
 
                     // First we determine if the caster is shadowing the current planet
                     // (all calculations in World Coordinates):

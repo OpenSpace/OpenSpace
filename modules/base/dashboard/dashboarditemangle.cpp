@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -353,7 +353,7 @@ void DashboardItemAngle::render(glm::vec2& penPosition) {
     const glm::dvec3 a = referenceInfo.first - sourceInfo.first;
     const glm::dvec3 b = destinationInfo.first - sourceInfo.first;
 
-    std::fill(_buffer.begin(), _buffer.end(), 0);
+    std::fill(_buffer.begin(), _buffer.end(), char(0));
     if (glm::length(a) == 0.0 || glm::length(b) == 0) {
         char* end = fmt::format_to(
             _buffer.data(),

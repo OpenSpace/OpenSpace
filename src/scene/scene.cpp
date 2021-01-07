@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,6 +48,7 @@ namespace {
     constexpr const char* KeyIdentifier = "Identifier";
     constexpr const char* KeyParent = "Parent";
 
+#ifdef TRACY_ENABLE
     constexpr const char* renderBinToString(int renderBin) {
         // Synced with Renderable::RenderBin
         if (renderBin == 1) {
@@ -69,6 +70,7 @@ namespace {
             throw ghoul::MissingCaseException();
         }
     }
+#endif // TRACY_ENABLE
 } // namespace
 
 namespace openspace {
@@ -428,11 +430,10 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
             // TODO: Throw exception
             LERROR("Dependencies did not have the corrent type");
         }
-        ghoul::Dictionary nodeDependencies;
-        nodeDictionary.getValue(SceneGraphNode::KeyDependencies, nodeDependencies);
+        ghoul::Dictionary nodeDependencies =
+            nodeDictionary.value<ghoul::Dictionary>(SceneGraphNode::KeyDependencies);
 
-        const std::vector<std::string>& keys = nodeDependencies.keys();
-        for (const std::string& key : keys) {
+        for (std::string_view key : nodeDependencies.keys()) {
             std::string value = nodeDependencies.value<std::string>(key);
             dependencyNames.push_back(value);
         }

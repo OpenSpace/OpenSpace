@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -119,14 +119,14 @@ RenderableGrid::RenderableGrid(const ghoul::Dictionary& dictionary)
     registerUpdateRenderBinFromOpacity();
 
     if (dictionary.hasKey(GridColorInfo.identifier)) {
-        _gridColor = dictionary.value<glm::vec3>(GridColorInfo.identifier);
+        _gridColor = dictionary.value<glm::dvec3>(GridColorInfo.identifier);
     }
     _gridColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_gridColor);
 
     if (dictionary.hasKey(SegmentsInfo.identifier)) {
         _segments = static_cast<glm::uvec2>(
-            dictionary.value<glm::vec2>(SegmentsInfo.identifier)
+            dictionary.value<glm::dvec2>(SegmentsInfo.identifier)
         );
     }
     _segments.onChange([&]() { _gridIsDirty = true; });
@@ -140,7 +140,7 @@ RenderableGrid::RenderableGrid(const ghoul::Dictionary& dictionary)
     addProperty(_lineWidth);
 
     if (dictionary.hasKey(SizeInfo.identifier)) {
-        _size = dictionary.value<glm::vec2>(SizeInfo.identifier);
+        _size = dictionary.value<glm::dvec2>(SizeInfo.identifier);
     }
     _size.onChange([&]() { _gridIsDirty = true; });
     addProperty(_size);

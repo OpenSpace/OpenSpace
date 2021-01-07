@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -378,27 +378,32 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     _path = dict.value<std::string>(PathInfo.identifier);
     _segmentQuality = static_cast<int>(dict.value<double>(SegmentQualityInfo.identifier));
 
-    if (dict.hasKeyAndValue<glm::vec3>(LineColorInfo.identifier)) {
-        _appearance.lineColor = dict.value<glm::vec3>(LineColorInfo.identifier);
+    if (dict.hasValue<glm::dvec3>(LineColorInfo.identifier)) {
+        _appearance.lineColor = dict.value<glm::dvec3>(LineColorInfo.identifier);
     }
 
-    _appearance.lineFade = dict.hasKeyAndValue<double>(TrailFadeInfo.identifier) ?
+    _appearance.lineFade =
+        dict.hasValue<double>(TrailFadeInfo.identifier) ?
         static_cast<float>(dict.value<double>(TrailFadeInfo.identifier)) :
         20.f;
 
-    _upperLimit = dict.hasKeyAndValue<double>(UpperLimitInfo.identifier) ?
+    _upperLimit =
+        dict.hasValue<double>(UpperLimitInfo.identifier) ?
         static_cast<unsigned int>(dict.value<double>(UpperLimitInfo.identifier)) :
         0u;
 
-    _startRenderIdx = dict.hasKeyAndValue<double>(StartRenderIdxInfo.identifier) ?
+    _startRenderIdx =
+        dict.hasValue<double>(StartRenderIdxInfo.identifier) ?
         static_cast<unsigned int>(dict.value<double>(StartRenderIdxInfo.identifier)) :
         0u;
 
-    _sizeRender = dict.hasKeyAndValue<double>(RenderSizeInfo.identifier) ?
+    _sizeRender =
+        dict.hasValue<double>(RenderSizeInfo.identifier) ?
         static_cast<unsigned int>(dict.value<double>(RenderSizeInfo.identifier)) :
         0u;
 
-    _appearance.lineWidth = dict.hasKeyAndValue<double>(LineWidthInfo.identifier) ?
+    _appearance.lineWidth =
+        dict.hasValue<double>(LineWidthInfo.identifier) ?
         static_cast<float>(dict.value<double>(LineWidthInfo.identifier)) :
         2.f;
 
@@ -418,12 +423,13 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     _startRenderIdxCallbackHandle = _startRenderIdx.onChange(_updateStartRenderIdxSelect);
     _sizeRenderCallbackHandle = _sizeRender.onChange(_updateRenderSizeSelect);
 
-    if (dict.hasKeyAndValue<std::string>(RenderBinModeInfo.identifier)) {
-        openspace::Renderable::RenderBin cfgRenderBin = RenderBinConversion.at(
+    if (dict.hasValue<std::string>(RenderBinModeInfo.identifier)) {
+        Renderable::RenderBin cfgRenderBin = RenderBinConversion.at(
             dict.value<std::string>(RenderBinModeInfo.identifier)
         );
         setRenderBin(cfgRenderBin);
-    } else {
+    }
+    else {
         setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
     }
 }

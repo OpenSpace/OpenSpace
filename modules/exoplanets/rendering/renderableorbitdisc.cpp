@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -132,7 +132,7 @@ RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)
     );
 
     if (dictionary.hasKey(OffsetInfo.identifier)) {
-        _offset = dictionary.value<glm::vec2>(OffsetInfo.identifier);
+        _offset = dictionary.value<glm::dvec2>(OffsetInfo.identifier);
     }
     _offset.onChange([&]() { _planeIsDirty = true; });
     addProperty(_offset);

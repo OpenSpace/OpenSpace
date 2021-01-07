@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -121,12 +121,13 @@ namespace {
         Layer currentLayer;
         for (int i = 0; i < nSubdatasets; ++i) {
             int iDataset = -1;
-            static char IdentifierBuffer[64];
+            std::array<char, 256> IdentifierBuffer;
+            std::fill(IdentifierBuffer.begin(), IdentifierBuffer.end(), '\0');
             sscanf(
                 subDatasets[i],
-                "SUBDATASET_%i_%[^=]",
+                "SUBDATASET_%i_%256[^=]",
                 &iDataset,
-                IdentifierBuffer
+                IdentifierBuffer.data()
             );
 
 
@@ -137,7 +138,7 @@ namespace {
                 currentLayerNumber = iDataset;
             }
 
-            const std::string identifier = std::string(IdentifierBuffer);
+            const std::string identifier = std::string(IdentifierBuffer.data());
             const std::string ds(subDatasets[i]);
             const std::string value = ds.substr(ds.find_first_of('=') + 1);
 
@@ -179,28 +180,28 @@ GlobeBrowsingModule::GlobeBrowsingModule()
 void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     using namespace globebrowsing;
 
-    if (dict.hasKeyAndValue<bool>(WMSCacheEnabledInfo.identifier)) {
+    if (dict.hasValue<bool>(WMSCacheEnabledInfo.identifier)) {
         _wmsCacheEnabled = dict.value<bool>(WMSCacheEnabledInfo.identifier);
     }
-    if (dict.hasKeyAndValue<bool>(OfflineModeInfo.identifier)) {
+    if (dict.hasValue<bool>(OfflineModeInfo.identifier)) {
         _offlineMode = dict.value<bool>(OfflineModeInfo.identifier);
     }
-    if (dict.hasKeyAndValue<std::string>(WMSCacheLocationInfo.identifier)) {
+    if (dict.hasValue<std::string>(WMSCacheLocationInfo.identifier)) {
         _wmsCacheLocation = dict.value<std::string>(WMSCacheLocationInfo.identifier);
     }
-    if (dict.hasKeyAndValue<double>(WMSCacheSizeInfo.identifier)) {
+    if (dict.hasValue<double>(WMSCacheSizeInfo.identifier)) {
         _wmsCacheSizeMB = static_cast<int>(
             dict.value<double>(WMSCacheSizeInfo.identifier)
         );
     }
-    if (dict.hasKeyAndValue<double>(TileCacheSizeInfo.identifier)) {
+    if (dict.hasValue<double>(TileCacheSizeInfo.identifier)) {
         _tileCacheSizeMB = static_cast<int>(
             dict.value<double>(TileCacheSizeInfo.identifier)
         );
     }
 
     // Sanity check
-    const bool noWarning = dict.hasKeyAndValue<bool>("NoWarning") ?
+    const bool noWarning = dict.hasValue<bool>("NoWarning") ?
         dict.value<bool>("NoWarning") :
         false;
 

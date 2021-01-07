@@ -15,15 +15,11 @@ local Earth = {
         PerformShading = false,
         Layers = {},
         ShadowGroup = {
-            Source1 = {
-                Name = "Sun",
-                -- All radius in meters
-                Radius = 696.3E6
+            Sources = {
+                { Name = "Sun", Radius = 696.3E6 },
             },
-            Caster1 = { 
-                Name = "Moon",
-                -- All radius in meters
-                Radius = 1.737E6
+            Casters = {
+                { Name = "Moon", Radius = 1.737E6 },
             }
         },
         Labels = {

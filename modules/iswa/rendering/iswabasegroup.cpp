@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -95,12 +95,16 @@ ghoul::Event<ghoul::Dictionary>& IswaBaseGroup::groupEvent() {
 void IswaBaseGroup::registerProperties() {
     _enabled.onChange([this]() {
         LDEBUG("Group " + identifier() + " published enabledChanged");
-        _groupEvent.publish("enabledChanged", ghoul::Dictionary({{"enabled", _enabled}}));
+        ghoul::Dictionary d;
+        d.setValue("enabled", _enabled.value());
+        _groupEvent.publish("enabledChanged", d);
     });
 
     _alpha.onChange([this]() {
         LDEBUG("Group " + identifier() + " published alphaChanged");
-        _groupEvent.publish("alphaChanged", ghoul::Dictionary({ { "alpha", _alpha } }));
+        ghoul::Dictionary d;
+        d.setValue("alpha", static_cast<double>(_alpha));
+        _groupEvent.publish("alphaChanged", d);
     });
 
 

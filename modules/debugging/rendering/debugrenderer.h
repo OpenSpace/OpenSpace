@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,10 +26,6 @@
 #define __OPENSPACE_MODULE_DEBUGGING___DEBUGRENDERER___H__
 
 #include <openspace/util/updatestructures.h>
-
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-#include <modules/globebrowsing/src/basictypes.h>
-#endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
@@ -131,15 +127,6 @@ public:
      */
     void renderCameraFrustum(const RenderData& data, const Camera& otherCamera,
         const glm::vec4& rgba = { 1.f, 1.f, 1.f, 0.3f }) const;
-
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-    /**
-      * Takes a AABB3 in screen space and returns vertices representing the corner points
-      * of the AABB. The ordering of the corner points is compatible with the box
-      * rendering methods in this class.
-      */
-    const Vertices verticesFor(const globebrowsing::AABB3& screenSpaceAABB) const;
-#endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 
 protected:
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;

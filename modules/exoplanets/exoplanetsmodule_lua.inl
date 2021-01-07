@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -130,7 +130,7 @@ ExoplanetSystem findExoplanetSystemInData(std::string_view starName) {
     }
 
     system.starName = starName;
-    return std::move(system);
+    return system;
 }
 
 void createExoplanetSystem(const std::string& starName) {
@@ -493,7 +493,7 @@ int addExoplanetSystem(lua_State* L) {
         ghoul::lua::luaDictionaryFromState(L, d);
 
         for (size_t i = 1; i <= d.size(); ++i) {
-            if (!d.hasKeyAndValue<std::string>(std::to_string(i))) {
+            if (!d.hasValue<std::string>(std::to_string(i))) {
                 return ghoul::lua::luaError(
                     L, fmt::format("List item {} is of invalid type", i)
                 );

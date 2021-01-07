@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -224,25 +224,5 @@ void DebugRenderer::renderCameraFrustum(const RenderData& data, const Camera& ot
     renderNiceBox(clippingSpaceFrustumCorners, rgba);
     glEnable(GL_CULL_FACE);
 }
-
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-const DebugRenderer::Vertices DebugRenderer::verticesFor(
-                                        const globebrowsing::AABB3& screenSpaceAABB) const
-{
-    Vertices vertices(8);
-    for (size_t i = 0; i < 8; i++) {
-        const bool cornerIsRight = i % 2 == 0;
-        const bool cornerIsUp = i > 3;
-        const bool cornerIsFar = (i / 2) % 2 == 1;
-
-        const double x = cornerIsRight ? screenSpaceAABB.max.x : screenSpaceAABB.min.x;
-        const double y = cornerIsUp ? screenSpaceAABB.max.y : screenSpaceAABB.min.y;
-        const double z = cornerIsFar ? screenSpaceAABB.max.z : screenSpaceAABB.min.z;
-
-        vertices[i] = glm::vec4(x, y, z, 1);
-    }
-    return vertices;
-}
-#endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 
 } // namespace openspace

@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2020                                                                #
+# Copyright (c) 2014-2021                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -37,14 +37,11 @@ set(GHOUL_BASE_DIR "${OPENSPACE_BASE_DIR}/ext/ghoul")
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_common.cmake)
 include(${OPENSPACE_CMAKE_EXT_DIR}/global_variables.cmake)
-include(${OPENSPACE_CMAKE_EXT_DIR}/handle_applications.cmake)
-include(${OPENSPACE_CMAKE_EXT_DIR}/handle_modules.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/copy_shared_libraries.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/message_macros.cmake)
 
 begin_header("Configuring OpenSpace project")
-message(STATUS "CMake version: ${CMAKE_VERSION}")
 
 # Bail out if the user tries to generate a 32 bit project.
 if (NOT ${CMAKE_SIZEOF_VOID_P} EQUAL 8)
@@ -55,25 +52,27 @@ endif ()
 # Cleanup project                                                                        #
 ##########################################################################################
 set(OPENSPACE_APPS_DIR "${OPENSPACE_BASE_DIR}/apps")
-set(OPENSPACE_EXT_DIR "${OPENSPACE_BASE_DIR}/ext")
 
-if (NOT EXISTS ${OPENSPACE_EXT_DIR}/ghoul/CMakeLists.txt)
-  message(FATAL_ERROR "Git submodules are missing. Please run \n"
-    "git submodule update --init --recursive \n"
-    "to download the missing dependencies."
+if (NOT EXISTS "${OPENSPACE_BASE_DIR}/ext/ghoul/CMakeLists.txt")
+  message(FATAL_ERROR "Git submodules are missing. Please run "
+    "git submodule update --init --recursive to download the missing dependencies."
   )
 endif ()
 
-set_property(GLOBAL PROPERTY USE_FOLDERS On)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER CMake)
 
 mark_as_advanced(CMAKE_BACKWARDS_COMPATIBILITY CMAKE_BUILD_TYPE CMAKE_DEBUG_POSTFIX
   CMAKE_INSTALL_PREFIX CMAKE_OSX_ARCHITECTURES CMAKE_OSX_DEPLOYMENT_TARGET
-  CMAKE_OSX_SYSROOT CMAKE_RELEASE_POSTFIX)
+  CMAKE_OSX_SYSROOT CMAKE_RELEASE_POSTFIX
+)
 
 # Set build output directories
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${OPENSPACE_CMAKE_EXT_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OPENSPACE_BASE_DIR}/bin)
+
+# "OpenSpace Helper" is not a valid CMake target name under OLD
+cmake_policy(SET CMP0037 NEW)
 
 ##########################################################################################
 # Main                                                                                   #
@@ -103,7 +102,7 @@ execute_process(
 )
 if (NOT OPENSPACE_GIT_STATUS_RETURN EQUAL 0)
   set(OPENSPACE_GIT_STATUS "uncommitted changes")
-else()
+else ()
   set(OPENSPACE_GIT_STATUS "")
 endif ()
 
@@ -133,62 +132,18 @@ if (MSVC)
   set(GHOUL_OPTIMIZATION_ENABLE_OTHER_OPTIMIZATIONS ${OPENSPACE_OPTIMIZATION_ENABLE_OTHER_OPTIMIZATIONS} CACHE BOOL "" FORCE)
 endif ()
 
+option(OPENSPACE_WITH_ABUFFER_RENDERER "Compile ABuffer Renderer" OFF)
+
 if (UNIX AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -stdlib=libc++")
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++ -lc++abi")
 endif ()
 
-include(src/CMakeLists.txt)
+# Add external dependencies
+add_subdirectory(${OPENSPACE_BASE_DIR}/ext)
 
-##########################################################################################
-# Add external dependencies                                                              #
-##########################################################################################
-# System libraries
-if (APPLE)
-  begin_dependency("Core Libraries")
-  target_include_directories(openspace-core PUBLIC "/Developer/Headers/FlatCarbon")
-  find_library(COREFOUNDATION_LIBRARY CoreFoundation)
-  find_library(CARBON_LIBRARY Carbon)
-  find_library(COCOA_LIBRARY Carbon)
-  find_library(APP_SERVICES_LIBRARY ApplicationServices)
-  mark_as_advanced(CARBON_LIBRARY COCOA_LIBRARY APP_SERVICES_LIBRARY)
-  target_link_libraries(openspace-core PUBLIC ${CARBON_LIBRARY} ${COREFOUNDATION_LIBRARY}
-    ${COCOA_LIBRARY} ${APP_SERVICES_LIBRARY})
-  end_dependency()
-endif ()
-
-# Ghoul
-add_subdirectory(${OPENSPACE_EXT_DIR}/ghoul)
-target_link_libraries(openspace-core PUBLIC Ghoul)
-set_openspace_compile_settings(Ghoul)
-set_folder_location(Lua "External")
-set_folder_location(lz4 "External")
-set_folder_location(GhoulTest "Unit Tests")
-link_directories("${GHOUL_LIBRARY_DIRS}")
-
-# Spice
-begin_dependency("Spice")
-add_subdirectory(${OPENSPACE_EXT_DIR}/spice)
-target_link_libraries(openspace-core PUBLIC Spice)
-set_folder_location(Spice "External")
-end_dependency()
-
-# Curl
-begin_dependency("CURL")
-if (WIN32)
-  set(CURL_ROOT_DIR "${OPENSPACE_EXT_DIR}/curl")
-  target_include_directories(openspace-core SYSTEM PUBLIC ${CURL_ROOT_DIR}/include)
-  target_link_libraries(openspace-core PUBLIC ${CURL_ROOT_DIR}/lib/libcurl.lib)
-  target_compile_definitions(openspace-core PUBLIC "OPENSPACE_CURL_ENABLED" "CURL_STATICLIB")
-else ()
-  find_package(CURL)
-  if (CURL_FOUND)
-    target_include_directories(openspace-core SYSTEM PUBLIC ${CURL_INCLUDE_DIRS})
-    target_link_libraries(openspace-core PUBLIC ${CURL_LIBRARIES})
-    target_compile_definitions(openspace-core PUBLIC "OPENSPACE_CURL_ENABLED")
-  endif ()
-endif ()
-end_dependency()
+# include(src/CMakeLists.txt)
+add_subdirectory(src)
 
 # Qt
 # Unfortunately, we have to set this value manually; sigh
@@ -202,6 +157,7 @@ if (APPLE)
     "~/Qt/5.10/clang_64/lib/cmake"
     "~/Qt/5.11/clang_64/lib/cmake"
     "~/Qt/5.12/clang_64/lib/cmake"
+    "~/Qt/5.15.1/clang_64/lib/cmake"
   )
 endif ()
 
@@ -217,20 +173,17 @@ if (MSVC)
 endif ()
 
 begin_header("Configuring Modules")
-set(OPENSPACE_EXTERNAL_MODULES_PATHS "" CACHE STRING "List of external modules")
-handle_modules("${OPENSPACE_BASE_DIR}/modules" "${OPENSPACE_EXTERNAL_MODULES_PATHS}")
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/modules")
 end_header("End: Configuring Modules")
-message(STATUS "")
 
 begin_header("Configuring Applications")
-handle_applications()
+add_subdirectory("${OPENSPACE_APPS_DIR}")
 end_header("End: Configuring Applications")
-message(STATUS "")
 
 option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
 if (OPENSPACE_HAVE_TESTS)
   begin_header("Generating OpenSpace unit test")
-  add_subdirectory("${OPENSPACE_BASE_DIR}/tests")
+  add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/tests")
   end_header()
 endif (OPENSPACE_HAVE_TESTS)
 
@@ -252,29 +205,13 @@ if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
   # find CEF to initialize it properly.
   set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${WEBBROWSER_MODULE_PATH}/cmake")
   include(webbrowser_helpers)
-elseif (OPENSPACE_MODULE_WEBBROWSER)
-  message(WARNING "Web configured to be included, but no CEF_ROOT was found, please try configuring CMake again.")
+elseif ()
+  message(WARNING "Web configured to be included, but no CEF_ROOT was found, please try configuring CMake again")
 endif ()
 
 ##########################################################################################
 # Misc settings                                                                          #
 ##########################################################################################
-option(OPENSPACE_WITH_ABUFFER_RENDERER "Compile ABuffer Renderer" OFF)
-if (OPENSPACE_WITH_ABUFFER_RENDERER)
-  target_compile_definitions(openspace-core PUBLIC "OPENSPACE_WITH_ABUFFER_RENDERER")
-endif ()
-
-option(OPENSPACE_WITH_INSTRUMENTATION "Add instrumentation options" OFF)
-if (OPENSPACE_WITH_INSTRUMENTATION)
-  target_compile_definitions(openspace-core PUBLIC "OPENSPACE_WITH_INSTRUMENTATION")
-endif ()
-
-
-# Just in case, create the bin directory
-add_custom_command(
-  TARGET openspace-core
-  PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-)
 
 # Manage the CPack packaging
 include(${OPENSPACE_CMAKE_EXT_DIR}/packaging.cmake)

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -114,7 +114,7 @@ DashboardItem::DashboardItem(const ghoul::Dictionary& dictionary)
     std::string identifier = dictionary.value<std::string>(IdentifierInfo.identifier);
     setIdentifier(std::move(identifier));
 
-    if (dictionary.hasKeyAndValue<std::string>(GuiNameInfo.identifier)) {
+    if (dictionary.hasValue<std::string>(GuiNameInfo.identifier)) {
         std::string guiName = dictionary.value<std::string>(GuiNameInfo.identifier);
         setGuiName(std::move(guiName));
     }
@@ -170,6 +170,12 @@ DashboardTextItem::DashboardTextItem(const ghoul::Dictionary& dictionary, float 
     , _fontName(FontNameInfo, fontName)
     , _fontSize(FontSizeInfo, fontSize, 6.f, 144.f, 1.f)
 {
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "DashboardTextItem"
+    );
+
     if (dictionary.hasKey(FontNameInfo.identifier)) {
         _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
     }

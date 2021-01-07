@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,7 +44,7 @@ uniform vec3 boresight;
 
 #define M_PI 3.14159265358979323846
 
-vec4 uvToModel(vec2 uv, vec3 radius, float segments){
+vec4 uvToModel(vec2 uv, vec3 radius, float segments) {
     float fj = uv.x * segments;
     float fi = (1.0 - uv.y) * segments;
 

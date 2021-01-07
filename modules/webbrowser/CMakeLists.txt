@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2020                                                                #
+# Copyright (c) 2014-2021                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -44,6 +44,10 @@ cmake_minimum_required(VERSION 2.8.12.1)
 
 # Use folders in the resulting project files.
 set_property(GLOBAL PROPERTY OS_FOLDERS ON)
+
+# "OpenSpace Helper" is not a valid CMake target name under OLD
+# https://cmake.org/cmake/help/git-stage/policy/CMP0037.html
+cmake_policy(SET CMP0037 OLD)
 
 # Use <PackageName>_ROOT variables
 # https://cmake.org/cmake/help/git-stage/policy/CMP0074.html
@@ -234,4 +238,4 @@ set_folder_location(openspace_web_helper "Helper")
 # Display CEF configuration settings.
 PRINT_CEF_CONFIG()
 
-target_include_directories(${webbrowser_module} PUBLIC ${CEF_ROOT})
+target_include_directories(${webbrowser_module} SYSTEM PUBLIC ${CEF_ROOT})

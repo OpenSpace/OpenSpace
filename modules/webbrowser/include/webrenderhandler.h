@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,12 +31,17 @@
 #ifdef _MSC_VER
 #pragma warning (push)
 #pragma warning (disable : 4100)
+#elif __clang__
+//#pragma clang diagnostic push
+//#pragma clang diagnostic ignored "-Wunused-variable"
 #endif // _MSC_VER
 
 #include <include/cef_render_handler.h>
 
 #ifdef _MSC_VER
 #pragma warning (pop)
+#elif __clang__
+//#pragma clang diagnostic pop
 #endif // _MSC_VER
 
 #include <ghoul/opengl/ghoul_gl.h>

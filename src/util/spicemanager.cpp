@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -387,9 +387,9 @@ std::vector<std::pair<double, double>> SpiceManager::ckCoverage(
     }
     else {
         id *= 1000;
-        const auto it = _ckIntervals.find(id);
-        if (it != _ckIntervals.end()) {
-            return it->second;
+        const auto it2 = _ckIntervals.find(id);
+        if (it2 != _ckIntervals.end()) {
+            return it2->second;
         }
         else {
             std::vector<std::pair<double, double>> emptyList;
@@ -404,11 +404,9 @@ std::vector<std::pair<int, std::string>> SpiceManager::spiceBodies(
     std::vector<std::pair<int, std::string>> bodies;
 
     constexpr const int Frnmln = 33;
-    constexpr const int Lnsize = 81;
     SPICEINT_CELL(idset, 8192);
 
     SpiceChar frname[Frnmln];
-    SpiceChar outlin[Lnsize];
 
     for (SpiceInt i = 1; i <= 6; i++) {
         if (i < 6) {
@@ -434,7 +432,12 @@ std::vector<std::pair<int, std::string>> SpiceManager::spiceBodies(
                 Frnmln,
                 frname
             );
-            bodies.push_back(std::make_pair(((long)((SpiceInt*)idset.data)[j]), frname));
+            bodies.push_back(
+                std::make_pair(
+                    static_cast<long>(reinterpret_cast<SpiceInt*>(idset.data)[j]),
+                    frname
+                )
+            );
         }
     }
     return bodies;

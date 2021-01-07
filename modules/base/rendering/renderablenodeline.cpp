@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -144,7 +144,7 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
     }
 
     if (dictionary.hasKey(LineColorInfo.identifier)) {
-        _lineColor = dictionary.value<glm::vec3>(LineColorInfo.identifier);
+        _lineColor = dictionary.value<glm::dvec3>(LineColorInfo.identifier);
     }
     if (dictionary.hasKey(LineWidthInfo.identifier)) {
         _lineWidth = static_cast<float>(

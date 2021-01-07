@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -49,7 +49,6 @@ out float vertexID_f;
 // out double tajm;
 
 void main() {
-
     // tajm = inGameTime;
     /** The way the position and line fade is calculated is:
     *   By using inGameTime, epoch and period of this orbit, 
@@ -91,10 +90,4 @@ void main() {
     vec4 vs_position = z_normalization( projectionTransform * viewSpacePosition);
     gl_Position = vs_position;
     vs_position_w = vs_position.w;
-
 }
-
-
-
-
-

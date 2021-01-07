@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -1140,13 +1140,10 @@ using TableDeprecatedVerifier = DeprecatedVerifier<TableVerifier>;
 // Definitions of external templates that are instantiated in the cpp file
 // This cuts down the compilation times as almost all of the possible template types do
 // not need to be instantiated multiple times
-extern template struct Vector2Verifier<bool>;
 extern template struct Vector2Verifier<int>;
 extern template struct Vector2Verifier<double>;
-extern template struct Vector3Verifier<bool>;
 extern template struct Vector3Verifier<int>;
 extern template struct Vector3Verifier<double>;
-extern template struct Vector4Verifier<bool>;
 extern template struct Vector4Verifier<int>;
 extern template struct Vector4Verifier<double>;
 
@@ -1196,13 +1193,10 @@ extern template struct AnnotationVerifier<IntVerifier>;
 extern template struct AnnotationVerifier<DoubleVerifier>;
 extern template struct AnnotationVerifier<StringVerifier>;
 extern template struct AnnotationVerifier<TableVerifier>;
-extern template struct AnnotationVerifier<BoolVector2Verifier>;
 extern template struct AnnotationVerifier<IntVector2Verifier>;
 extern template struct AnnotationVerifier<DoubleVector2Verifier>;
-extern template struct AnnotationVerifier<BoolVector3Verifier>;
 extern template struct AnnotationVerifier<IntVector3Verifier>;
 extern template struct AnnotationVerifier<DoubleVector3Verifier>;
-extern template struct AnnotationVerifier<BoolVector4Verifier>;
 extern template struct AnnotationVerifier<IntVector4Verifier>;
 extern template struct AnnotationVerifier<DoubleVector4Verifier>;
 
@@ -1211,13 +1205,10 @@ extern template struct DeprecatedVerifier<IntVerifier>;
 extern template struct DeprecatedVerifier<DoubleVerifier>;
 extern template struct DeprecatedVerifier<StringVerifier>;
 extern template struct DeprecatedVerifier<TableVerifier>;
-extern template struct DeprecatedVerifier<BoolVector2Verifier>;
 extern template struct DeprecatedVerifier<IntVector2Verifier>;
 extern template struct DeprecatedVerifier<DoubleVector2Verifier>;
-extern template struct DeprecatedVerifier<BoolVector3Verifier>;
 extern template struct DeprecatedVerifier<IntVector3Verifier>;
 extern template struct DeprecatedVerifier<DoubleVector3Verifier>;
-extern template struct DeprecatedVerifier<BoolVector4Verifier>;
 extern template struct DeprecatedVerifier<IntVector4Verifier>;
 extern template struct DeprecatedVerifier<DoubleVector4Verifier>;
 

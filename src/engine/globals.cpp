@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -364,7 +364,7 @@ void create() {
 #ifdef WIN32
     profile = new (currentPos) Profile;
     ghoul_assert(profile, "No profile");
-    currentPos += sizeof(Profile);
+    //currentPos += sizeof(Profile);
 #else // ^^^ WIN32 / !WIN32 vvv
     profile = new Profile;
 #endif // WIN32

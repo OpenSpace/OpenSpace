@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -182,12 +182,12 @@ RingsComponent::RingsComponent(const ghoul::Dictionary& dictionary)
 {
     using ghoul::filesystem::File;
 
-    if (dictionary.hasKey("Rings")) {
+    if (dictionary.hasValue<ghoul::Dictionary>("Rings")) {
         // @TODO (abock, 2019-12-16) It would be better to not store the dictionary long
         // term and rather extract the values directly here.  This would require a bit of
         // a rewrite in the RenderableGlobe class to not create the RingsComponent in the
         // class-initializer list though
-        dictionary.getValue("Rings", _ringsDictionary);
+        _ringsDictionary = dictionary.value<ghoul::Dictionary>("Rings");
     }
 
     documentation::testSpecificationAndThrow(
@@ -214,8 +214,8 @@ void RingsComponent::initialize() {
     );
     _textureFile = std::make_unique<File>(_texturePath);
 
-    if (_ringsDictionary.hasKeyAndValue<glm::vec2>(OffsetInfo.identifier)) {
-        _offset = _ringsDictionary.value<glm::vec2>(OffsetInfo.identifier);
+    if (_ringsDictionary.hasValue<glm::dvec2>(OffsetInfo.identifier)) {
+        _offset = _ringsDictionary.value<glm::dvec2>(OffsetInfo.identifier);
     }
     addProperty(_offset);
 
@@ -224,14 +224,14 @@ void RingsComponent::initialize() {
 
     _textureFile->setCallback([&](const File&) { _textureIsDirty = true; });
 
-    if (_ringsDictionary.hasKeyAndValue<double>(NightFactorInfo.identifier)) {
+    if (_ringsDictionary.hasValue<double>(NightFactorInfo.identifier)) {
         _nightFactor = static_cast<float>(
             _ringsDictionary.value<double>(NightFactorInfo.identifier)
         );
     }
     addProperty(_nightFactor);
 
-    if (_ringsDictionary.hasKeyAndValue<double>(ColorFilterInfo.identifier)) {
+    if (_ringsDictionary.hasValue<double>(ColorFilterInfo.identifier)) {
         _colorFilter = static_cast<float>(
             _ringsDictionary.value<double>(ColorFilterInfo.identifier)
         );
@@ -239,8 +239,8 @@ void RingsComponent::initialize() {
 
     // Shadow Mapping Quality Controls
     if (_ringsDictionary.hasKey(ZFightingPercentageInfo.identifier)) {
-        _zFightingPercentage = _ringsDictionary.value<float>(
-            ZFightingPercentageInfo.identifier
+        _zFightingPercentage = static_cast<float>(
+            _ringsDictionary.value<double>(ZFightingPercentageInfo.identifier)
         );
     }
     addProperty(_zFightingPercentage);
