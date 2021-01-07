@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,13 +33,6 @@
 #include <string>
 #include <vector>
 
-namespace {
-    constexpr const char* KeyTime = "Time";
-    constexpr const char* KeyForwardScript = "ForwardScript";
-    constexpr const char* KeyBackwardScript = "BackwardScript";
-    constexpr const char* KeyUniversalScript = "Script";
-} // namespace
-
 namespace ghoul { class Dictionary; }
 namespace openspace::documentation { struct Documentation; }
 
@@ -54,12 +47,11 @@ struct LuaLibrary;
 class ScriptScheduler {
 public:
     struct ScheduledScript {
-        ScheduledScript() = default;
-        ScheduledScript(const ghoul::Dictionary& dictionary);
 
         double time = -std::numeric_limits<double>::max();
         std::string forwardScript;
         std::string backwardScript;
+        std::string universalScript;
     };
 
     /**
@@ -69,7 +61,7 @@ public:
      * \throw SpecificationError If the dictionary does not adhere to the Documentation as
      * specified in the openspace::Documentation function
      */
-    void loadScripts(const ghoul::Dictionary& dictionary);
+    void loadScripts(std::vector<ScheduledScript> scheduledScripts);
 
 
     /**

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -158,7 +158,7 @@ documentation::Documentation ShadowComponent::Documentation() {
             },
             {
                 DepthMapSizeInfo.identifier,
-                new Vector2ListVerifier<float>,
+                new Vector2ListVerifier<double>,
                 Optional::Yes,
                 DepthMapSizeInfo.description
             }
@@ -175,12 +175,12 @@ ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
 {
     using ghoul::filesystem::File;
 
-    if (dictionary.hasKey("Shadows")) {
+    if (dictionary.hasValue<ghoul::Dictionary>("Shadows")) {
         // @TODO (abock, 2019-12-16) It would be better to not store the dictionary long
         // term and rather extract the values directly here.  This would require a bit of
         // a rewrite in the RenderableGlobe class to not create the ShadowComponent in the
         // class-initializer list though
-        dictionary.getValue("Shadows", _shadowMapDictionary);
+        _shadowMapDictionary = dictionary.value<ghoul::Dictionary>("Shadows");
     }
 
     documentation::testSpecificationAndThrow(
@@ -191,15 +191,15 @@ ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
 
     if (_shadowMapDictionary.hasKey(DistanceFractionInfo.identifier)) {
         _distanceFraction = static_cast<int>(
-            _shadowMapDictionary.value<float>(DistanceFractionInfo.identifier)
+            _shadowMapDictionary.value<double>(DistanceFractionInfo.identifier)
         );
     }
     _saveDepthTexture.onChange([&]() { _executeDepthTextureSave = true; });
 
 
     if (_shadowMapDictionary.hasKey(DepthMapSizeInfo.identifier)) {
-        glm::vec2 depthMapSize =
-            _shadowMapDictionary.value<glm::vec2>(DepthMapSizeInfo.identifier);
+        glm::dvec2 depthMapSize =
+            _shadowMapDictionary.value<glm::dvec2>(DepthMapSizeInfo.identifier);
         _shadowDepthTextureWidth = static_cast<int>(depthMapSize.x);
         _shadowDepthTextureHeight = static_cast<int>(depthMapSize.y);
         _dynamicDepthTextureRes = false;
@@ -220,7 +220,9 @@ ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
     addProperty(_distanceFraction);
 }
 
-void ShadowComponent::initialize() {}
+void ShadowComponent::initialize() {
+    buildDDepthTexture();
+}
 
 bool ShadowComponent::isReady() const {
     return true;
@@ -236,6 +238,7 @@ void ShadowComponent::initializeGL() {
 void ShadowComponent::deinitializeGL() {
     glDeleteTextures(1, &_shadowDepthTexture);
     glDeleteTextures(1, &_positionInLightSpaceTexture);
+    glDeleteTextures(1, &_dDepthTexture);
     glDeleteFramebuffers(1, &_shadowFBO);
 }
 
@@ -298,7 +301,7 @@ RenderData ShadowComponent::begin(const RenderData& data) {
     //matrix[14] = -glm::dot(cameraZ, lightPosition);
 
 
-    _lightCamera = std::move(std::unique_ptr<Camera>(new Camera(data.camera)));
+    _lightCamera = std::make_unique<Camera>(data.camera);
     _lightCamera->setPositionVec3(lightPosition);
     _lightCamera->setRotation(glm::dquat(glm::inverse(cameraRotationMatrix)));
     //=======================================================================
@@ -512,7 +515,7 @@ void ShadowComponent::updateDepthTexture() {
         0,
         GL_DEPTH_COMPONENT,
         GL_FLOAT,
-        0
+        nullptr
     );
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -540,6 +543,31 @@ void ShadowComponent::updateDepthTexture() {
     //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void ShadowComponent::buildDDepthTexture() {
+    glGenTextures(1, &_dDepthTexture);
+    glBindTexture(GL_TEXTURE_2D, _dDepthTexture);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_DEPTH_COMPONENT32F,
+        1,
+        1,
+        0,
+        GL_DEPTH_COMPONENT,
+        GL_FLOAT,
+        nullptr
+    );
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 
     glBindTexture(GL_TEXTURE_2D, 0);
 }
@@ -650,6 +678,10 @@ ShadowComponent::ShadowMapData ShadowComponent::shadowMapData() const {
 
 void ShadowComponent::setViewDepthMap(bool enable) {
     _viewDepthMap = enable;
+}
+
+GLuint ShadowComponent::dDepthTexture() const {
+    return _dDepthTexture;
 }
 
 } // namespace openspace

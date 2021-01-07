@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -85,7 +85,7 @@ documentation:: Documentation ModelGeometry::Documentation() {
 ghoul::mm_unique_ptr<ModelGeometry> ModelGeometry::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
-    if (!dictionary.hasKeyAndValue<std::string>(KeyType)) {
+    if (!dictionary.hasValue<std::string>(KeyType)) {
         throw ghoul::RuntimeError("Dictionary did not contain a key 'Type'");
     }
 

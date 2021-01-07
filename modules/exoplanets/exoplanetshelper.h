@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,10 +27,11 @@
 
 #include <ghoul/glm.h>
 #include <string>
+#include <vector>
 
 namespace openspace::exoplanets {
 
-struct Exoplanet {
+struct ExoplanetDataEntry {
     float a;            // Orbital semi-major axis in AU
     double aUpper;      // Upper uncertainty of orbital semi-major axis
     double aLower;      // Lower uncertainty of orbital semi-major axis
@@ -61,22 +62,34 @@ struct Exoplanet {
     double tt;          // Epoch of transit center in HJD-2440000
     float ttUpper;      // Upper uncertainty of epoch of transit center
     float ttLower;      // Lower uncertainty of epoch of transit center
-    float positionX;    // Star position's X-coordinate in parsec
-    float positionY;    // Star position's Y-coordinate in parsec
-    float positionZ;    // Star position's Z-coordinate in parsec
+    // Star position's X-coordinate in parsec
+    float positionX = std::numeric_limits<float>::quiet_NaN();
+    // Star position's Y-coordinate in parsec
+    float positionY = std::numeric_limits<float>::quiet_NaN();
+    // Star position's Z-coordinate in parsec
+    float positionZ = std::numeric_limits<float>::quiet_NaN();
 };
 
-// Convert csv-file specific names to the corresponding name in the speck data file
-std::string_view speckStarName(std::string_view name);
+struct StarData {
+    glm::vec3 position  = glm::vec3(std::numeric_limits<float>::quiet_NaN()); // In parsec
+    float radius        = std::numeric_limits<float>::quiet_NaN(); // In solar radii
+    float bvColorIndex  = std::numeric_limits<float>::quiet_NaN();
+};
 
-// Convert speck-file specific names to the corresponding name in the csv data file
-std::string_view csvStarName(std::string_view name);
+struct ExoplanetSystem {
+    std::string starName;
+    StarData starData;
+    std::vector<std::string> planetNames;
+    std::vector<ExoplanetDataEntry> planetsData;
+};
+
+bool isValidPosition(const glm::vec3& pos);
 
 // Check if the exoplanet p has sufficient data for visualization
-bool hasSufficientData(const Exoplanet& p);
+bool hasSufficientData(const ExoplanetDataEntry& p);
 
 // Compute star color in RGB from b-v color index
-std::string starColor(float bv);
+glm::vec3 starColor(float bv);
 
 glm::dmat4 computeOrbitPlaneRotationMatrix(float i, float bigom, float omega);
 

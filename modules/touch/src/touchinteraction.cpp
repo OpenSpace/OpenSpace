@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -217,12 +217,6 @@ namespace {
         "" // @TODO Missing documentation
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PickingRadiusInfo = {
-        "PickingRadiusMinimum",
-        "Minimum radius for picking in NDC coordinates",
-        "" // @TODO Missing documentation
-    };
-
     constexpr openspace::properties::Property::PropertyInfo ZoomOutLimitInfo = {
         "ZoomOutLimit",
         "Zoom Out Limit",
@@ -278,13 +272,13 @@ TouchInteraction::TouchInteraction()
         0.25f
     )
     , _zoomBoundarySphereMultiplier(ZoomBoundarySphereMultiplierInfo, 1.001f, 1.f, 1.01f)
+    , _zoomInLimit(ZoomInLimitInfo, -1.0, 0.0, std::numeric_limits<double>::max())
     , _zoomOutLimit(
         ZoomOutLimitInfo,
         std::numeric_limits<double>::max(),
         1000.0,
         std::numeric_limits<double>::max()
     )
-    , _zoomInLimit(ZoomInLimitInfo, -1.0, 0.0, std::numeric_limits<double>::max())
     , _inputStillThreshold(InputSensitivityInfo, 0.0005f, 0.f, 0.001f)
     // used to void wrongly interpreted roll interactions
     , _centroidStillThreshold(StationaryCentroidInfo, 0.0018f, 0.f, 0.01f)
@@ -303,10 +297,10 @@ TouchInteraction::TouchInteraction()
         0.f,
         1.f
     )
+    , _constTimeDecay_secs(ConstantTimeDecaySecsInfo, 1.75f, 0.1f, 4.0f)
     , _pinchInputs({ TouchInput(0, 0, 0.0, 0.0, 0.0), TouchInput(0, 0, 0.0, 0.0, 0.0) })
     , _vel{ glm::dvec2(0.0), 0.0, 0.0, glm::dvec2(0.0) }
     , _sensitivity{ glm::dvec2(0.08, 0.045), 12.0, 2.75, glm::dvec2(0.08, 0.045) }
-    , _constTimeDecay_secs(ConstantTimeDecaySecsInfo, 1.75f, 0.1f, 4.0f)
     // calculated with two vectors with known diff in length, then
     // projDiffLength/diffLength.
 {
@@ -1092,9 +1086,9 @@ void TouchInteraction::step(double dt, bool directTouch) {
             }
             else if (currentPosViolatingZoomOutLimit) {
 #ifdef TOUCH_DEBUG_PROPERTIES
-                LINFO(fmt::format(
+                LINFOC("", fmt::format(
                     "{}: You are outside zoom out {} limit, only zoom in allowed",
-                    _loggerCat, _zoomOutLimit.value());
+                    _loggerCat, _zoomOutLimit.value()));
 #endif
                 // Only allow zooming in if you are outside the zoom out limit
                 if (newPosDistance < currentPosDistance) {

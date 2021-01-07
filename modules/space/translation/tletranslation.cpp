@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -253,7 +253,7 @@ TLETranslation::TLETranslation(const ghoul::Dictionary& dictionary) {
 
     const std::string& file = dictionary.value<std::string>(KeyFile);
     int lineNum = 1;
-    if (dictionary.hasKeyAndValue<double>(KeyLineNumber)) {
+    if (dictionary.hasValue<double>(KeyLineNumber)) {
         lineNum = static_cast<int>(dictionary.value<double>(KeyLineNumber));
     }
     readTLEFile(file, lineNum);

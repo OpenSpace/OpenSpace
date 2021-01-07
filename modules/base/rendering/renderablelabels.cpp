@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -369,10 +369,10 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
     _labelOrientationOption.addOption(NormalDirection, "Camera Position Normal");
 
     _labelOrientationOption = NormalDirection;
-    if (dictionary.hasKeyAndValue<std::string>(LabelOrientationOptionInfo.identifier)) {
+    if (dictionary.hasValue<std::string>(LabelOrientationOptionInfo.identifier)) {
         const std::string o = dictionary.value<std::string>(
             LabelOrientationOptionInfo.identifier
-            );
+        );
 
         if (o == "Camera View Direction") {
             _labelOrientationOption = ViewDirection;
@@ -391,12 +391,12 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
 
     _labelColor.setViewOption(properties::Property::ViewOptions::Color);
     if (dictionary.hasKey(LabelColorInfo.identifier)) {
-        _labelColor = dictionary.value<glm::vec3>(LabelColorInfo.identifier);
+        _labelColor = dictionary.value<glm::dvec3>(LabelColorInfo.identifier);
     }
     addProperty(_labelColor);
 
     if (dictionary.hasKey(FontSizeInfo.identifier)) {
-        _fontSize = dictionary.value<float>(FontSizeInfo.identifier);
+        _fontSize = static_cast<float>(dictionary.value<double>(FontSizeInfo.identifier));
     }
     _fontSize.onChange([&]() {
         _font = global::fontManager->font(
@@ -409,24 +409,30 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
     addProperty(_fontSize);
 
     if (dictionary.hasKey(LabelSizeInfo.identifier)) {
-        _labelSize = dictionary.value<float>(LabelSizeInfo.identifier);
+        _labelSize = static_cast<float>(
+            dictionary.value<double>(LabelSizeInfo.identifier)
+        );
     }
     addProperty(_labelSize);
 
     if (dictionary.hasKey(LabelMinSizeInfo.identifier)) {
-        _labelMinSize = dictionary.value<float>(LabelMinSizeInfo.identifier);
+        _labelMinSize = static_cast<float>(
+            dictionary.value<double>(LabelMinSizeInfo.identifier)
+        );
     }
     addProperty(_labelMinSize);
 
     if (dictionary.hasKey(LabelMaxSizeInfo.identifier)) {
-        _labelMaxSize = dictionary.value<float>(LabelMaxSizeInfo.identifier);
+        _labelMaxSize = static_cast<float>(
+            dictionary.value<double>(LabelMaxSizeInfo.identifier)
+        );
     }
     addProperty(_labelMaxSize);
 
     if (dictionary.hasKey(TransformationMatrixInfo.identifier)) {
         _transformationMatrix = dictionary.value<glm::dmat4>(
             TransformationMatrixInfo.identifier
-            );
+        );
     }
 
     if (dictionary.hasKey(PixelSizeControlInfo.identifier)) {
@@ -440,7 +446,9 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
     addProperty(_enableFadingEffect);
 
     if (dictionary.hasKey(FadeStartDistInfo.identifier)) {
-        _fadeStartDistance = dictionary.value<float>(FadeStartDistInfo.identifier);
+        _fadeStartDistance = static_cast<float>(
+            dictionary.value<double>(FadeStartDistInfo.identifier)
+        );
     }
 
     addProperty(_fadeStartDistance);
@@ -511,13 +519,17 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
     addProperty(_fadeStartUnitOption);
 
     if (dictionary.hasKey(FadeStartSpeedInfo.identifier)) {
-        _fadeStartSpeed = dictionary.value<float>(FadeStartSpeedInfo.identifier);
+        _fadeStartSpeed = static_cast<float>(
+            dictionary.value<double>(FadeStartSpeedInfo.identifier)
+        );
     }
 
     addProperty(_fadeStartSpeed);
 
     if (dictionary.hasKey(FadeEndDistInfo.identifier)) {
-        _fadeEndDistance = dictionary.value<float>(FadeEndDistInfo.identifier);
+        _fadeEndDistance = static_cast<float>(
+            dictionary.value<double>(FadeEndDistInfo.identifier)
+        );
     }
 
     addProperty(_fadeEndDistance);
@@ -588,7 +600,9 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
     addProperty(_fadeEndUnitOption);
 
     if (dictionary.hasKey(FadeEndSpeedInfo.identifier)) {
-        _fadeEndSpeed = dictionary.value<float>(FadeEndSpeedInfo.identifier);
+        _fadeEndSpeed = static_cast<float>(
+            dictionary.value<double>(FadeEndSpeedInfo.identifier)
+        );
     }
 
     addProperty(_fadeEndSpeed);
@@ -600,11 +614,6 @@ bool RenderableLabels::isReady() const {
 
 void RenderableLabels::initialize() {
     ZoneScoped
-
-    bool success = true;// loadData();
-    if (!success) {
-        throw ghoul::RuntimeError("Error loading objects labels data.");
-    }
 
     setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
 }

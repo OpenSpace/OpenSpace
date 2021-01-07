@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,10 +43,8 @@
 #include <ghoul/misc/boolean.h>
 //#include <ghoul/opengl/ghoul_gl.h>
 #include <GLFW/glfw3.h>
-#ifdef _WIN32
+#ifdef WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32
-#else
-#define GLFW_INCLUDE_NONE
 #endif
 #include <GLFW/glfw3native.h>
 #include <sgct/clustermanager.h>
@@ -1014,7 +1012,7 @@ std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTC
     return config;
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char* argv[]) {
 
 #ifdef WIN32
     SetUnhandledExceptionFilter(generateMiniDump);
@@ -1171,13 +1169,31 @@ int main(int argc, char** argv) {
         sgctFunctionName
     );
 
+    // (abock, 2020-12-07)  For some reason on Apple the keyboard handler in CEF will call
+    // the Qt one even if the QApplication was destroyed, leading to invalid memory
+    // access.  The only way we could fix this for the release was to keep the
+    // QApplication object around until the end of the program.  Even though the Qt
+    // keyboard handler gets called, it doesn't do anything so everything still works.
+#ifdef __APPLE__
+    int qac = 0;
+    QApplication app(qac, nullptr);
+#endif // __APPLE__
+
     bool skipLauncher =
         (hasProfile && hasSGCTConfig) || global::configuration->bypassLauncher;
     if (!skipLauncher) {
+#ifndef __APPLE__
         int qac = 0;
         QApplication app(qac, nullptr);
-        LauncherWindow win(!hasProfile,
-            *global::configuration, !hasSGCTConfig, windowCfgPreset, nullptr);
+#endif // __APPLE__
+
+        LauncherWindow win(
+            !hasProfile,
+            *global::configuration,
+            !hasSGCTConfig,
+            windowCfgPreset,
+            nullptr
+        );
         win.show();
         app.exec();
 

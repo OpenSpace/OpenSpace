@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -85,10 +85,12 @@ documentation::Documentation MissionPhase::Documentation() {
 
 MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
     _name = dictionary.value<std::string>(KeyName);
-    dictionary.getValue(KeyDescription, _description);
+    if (dictionary.hasValue<std::string>(KeyDescription)) {
+        _description = dictionary.value<std::string>(KeyDescription);
+    }
 
-    ghoul::Dictionary childDicts;
-    if (dictionary.getValue(KeyPhases, childDicts)) {
+    if (dictionary.hasValue<ghoul::Dictionary>(KeyPhases)) {
+        ghoul::Dictionary childDicts = dictionary.value<ghoul::Dictionary>(KeyPhases);
         // This is a nested mission phase
         _subphases.reserve(childDicts.size());
         for (size_t i = 0; i < childDicts.size(); ++i) {
@@ -111,9 +113,9 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
         timeRangeSubPhases.end = _subphases.back().timeRange().end;
 
         // user may specify an overall time range. In that case expand this timerange.
-        ghoul::Dictionary timeRangeDict;
-        if (dictionary.getValue(KeyTimeRange, timeRangeDict)) {
-            TimeRange overallTimeRange(timeRangeDict);
+        if (dictionary.hasValue<ghoul::Dictionary>(KeyTimeRange)) {
+            ghoul::Dictionary range = dictionary.value<ghoul::Dictionary>(KeyTimeRange);
+            TimeRange overallTimeRange(range);
             if (!overallTimeRange.includes(timeRangeSubPhases)) {
                 throw ghoul::RuntimeError(
                     "User specified time range must at least include its subphases'",
@@ -130,8 +132,9 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
         }
     }
     else {
-        ghoul::Dictionary timeRangeDict;
-        if (dictionary.getValue(KeyTimeRange, timeRangeDict)) {
+        if (dictionary.hasValue<ghoul::Dictionary>(KeyTimeRange)) {
+            ghoul::Dictionary timeRangeDict =
+                dictionary.value<ghoul::Dictionary>(KeyTimeRange);
             _timeRange = TimeRange(timeRangeDict); // throws exception if unable to parse
         }
         else {

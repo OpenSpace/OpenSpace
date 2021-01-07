@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -503,12 +503,6 @@ documentation::Documentation RenderableGaiaStars::Documentation() {
 RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _filePath(FilePathInfo)
-    , _fileReaderOption(
-        FileReaderOptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
-    , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _shaderOption(ShaderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _pointSpreadFunctionTexturePath(PsfTextureInfo)
     , _colorTexturePath(ColorTextureInfo)
     , _luminosityMultiplier(LuminosityMultiplierInfo, 35.f, 1.f, 1000.f)
@@ -522,8 +516,6 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _additionalNodes(AdditionalNodesInfo, glm::ivec2(1), glm::ivec2(0), glm::ivec2(4))
     , _tmPointPixelWeightThreshold(TmPointPxThresholdInfo, 0.001f, 0.000001f, 0.01f)
     , _lodPixelThreshold(LodPixelThresholdInfo, 250.f, 0.f, 5000.f)
-    , _maxGpuMemoryPercent(MaxGpuMemoryPercentInfo, 0.45f, 0.f, 1.f)
-    , _maxCpuMemoryPercent(MaxCpuMemoryPercentInfo, 0.5f, 0.f, 1.f)
     , _posXThreshold(FilterPosXInfo, glm::vec2(0.f), glm::vec2(-10.f), glm::vec2(10.f))
     , _posYThreshold(FilterPosYInfo, glm::vec2(0.f), glm::vec2(-10.f), glm::vec2(10.f))
     , _posZThreshold(FilterPosZInfo, glm::vec2(0.f), glm::vec2(-10.f), glm::vec2(10.f))
@@ -533,9 +525,17 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _firstRow(FirstRowInfo, 0, 0, 2539913) // DR1-max: 2539913
     , _lastRow(LastRowInfo, 0, 0, 2539913)
     , _columnNamesList(ColumnNamesInfo)
+    , _fileReaderOption(
+        FileReaderOptionInfo,
+        properties::OptionProperty::DisplayType::Dropdown
+    )
+    , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _shaderOption(ShaderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _nRenderedStars(NumRenderedStarsInfo, 0, 0, 2000000000) // 2 Billion stars
     , _cpuRamBudgetProperty(CpuRamBudgetInfo, 0.f, 0.f, 1.f)
     , _gpuStreamBudgetProperty(GpuStreamBudgetInfo, 0.f, 0.f, 1.f)
+    , _maxGpuMemoryPercent(MaxGpuMemoryPercentInfo, 0.45f, 0.f, 1.f)
+    , _maxCpuMemoryPercent(MaxCpuMemoryPercentInfo, 0.5f, 0.f, 1.f)
     , _reportGlErrors(ReportGlErrorsInfo, false)
     , _accumulatedIndices(1, 0)
 {
@@ -726,7 +726,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
 
     if (dictionary.hasKey(AdditionalNodesInfo.identifier)) {
         _additionalNodes = static_cast<glm::ivec2>(
-            dictionary.value<glm::vec2>(AdditionalNodesInfo.identifier)
+            dictionary.value<glm::dvec2>(AdditionalNodesInfo.identifier)
         );
     }
 
@@ -773,32 +773,32 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     }
 
     if (dictionary.hasKey(FilterPosXInfo.identifier)) {
-        _posXThreshold = dictionary.value<glm::vec2>(FilterPosXInfo.identifier);
+        _posXThreshold = dictionary.value<glm::dvec2>(FilterPosXInfo.identifier);
     }
     addProperty(_posXThreshold);
 
     if (dictionary.hasKey(FilterPosYInfo.identifier)) {
-        _posXThreshold = dictionary.value<glm::vec2>(FilterPosYInfo.identifier);
+        _posXThreshold = dictionary.value<glm::dvec2>(FilterPosYInfo.identifier);
     }
     addProperty(_posYThreshold);
 
     if (dictionary.hasKey(FilterPosZInfo.identifier)) {
-        _posZThreshold = dictionary.value<glm::vec2>(FilterPosZInfo.identifier);
+        _posZThreshold = dictionary.value<glm::dvec2>(FilterPosZInfo.identifier);
     }
     addProperty(_posZThreshold);
 
     if (dictionary.hasKey(FilterGMagInfo.identifier)) {
-        _gMagThreshold = dictionary.value<glm::vec2>(FilterGMagInfo.identifier);
+        _gMagThreshold = dictionary.value<glm::dvec2>(FilterGMagInfo.identifier);
     }
     addProperty(_gMagThreshold);
 
     if (dictionary.hasKey(FilterBpRpInfo.identifier)) {
-        _bpRpThreshold = dictionary.value<glm::vec2>(FilterBpRpInfo.identifier);
+        _bpRpThreshold = dictionary.value<glm::dvec2>(FilterBpRpInfo.identifier);
     }
     addProperty(_bpRpThreshold);
 
     if (dictionary.hasKey(FilterDistInfo.identifier)) {
-        _distThreshold = dictionary.value<glm::vec2>(FilterDistInfo.identifier);
+        _distThreshold = dictionary.value<glm::dvec2>(FilterDistInfo.identifier);
     }
     addProperty(_distThreshold);
 
@@ -825,8 +825,8 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
 
             // Ugly fix for ASCII sorting when there are more columns read than 10.
             std::set<int> intKeys;
-            for (const std::string& key : tmpDict.keys()) {
-                intKeys.insert(std::stoi(key));
+            for (std::string_view key : tmpDict.keys()) {
+                intKeys.insert(std::stoi(std::string(key)));
             }
 
             for (int key : intKeys) {
@@ -1142,7 +1142,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 
     glm::dmat4 model = glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         glm::dmat4(data.modelTransform.rotation) *
-        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
     float viewScaling = data.camera.scaling();
     glm::dmat4 view = data.camera.combinedViewMatrix();

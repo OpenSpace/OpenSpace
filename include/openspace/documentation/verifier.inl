@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,7 +33,7 @@ template <typename T>
 TestResult TemplateVerifier<T>::operator()(const ghoul::Dictionary& dict,
                                            const std::string& key) const
 {
-    if (dict.hasKeyAndValue<Type>(key)) {
+    if (dict.hasValue<Type>(key)) {
         return { true, {}, {} };
     }
     else {
@@ -328,7 +328,7 @@ template <typename T>
 AnnotationVerifier<T>::AnnotationVerifier(std::string a)
     : annotation(std::move(a))
 {
-    ghoul_assert(!annotation.empty(), "Annotation must not be empty");
+
 }
 
 template <typename T>

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,8 +32,6 @@
 #include <map>
 #include <optional>
 #include <set>
-
-namespace openspace { class GlobeBrowsingModule; }
 
 namespace openspace::globebrowsing {
 
@@ -103,7 +101,6 @@ protected:
 
 private:
     const std::string _name;
-    GlobeBrowsingModule* _globeBrowsingModule;
     /// The reader used for asynchronous reading
     std::unique_ptr<RawTileDataReader> _rawTileDataReader;
 

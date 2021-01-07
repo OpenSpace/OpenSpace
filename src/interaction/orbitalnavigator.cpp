@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -101,13 +101,6 @@ namespace {
         "Mouse Sensitivity",
         "Determines the sensitivity of the camera motion thorugh the mouse. The lower "
         "the sensitivity is the less impact a mouse motion will have."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo JoystickEnabledInfo = {
-        "JoystickEnabled",
-        "Joystick Control Enabled",
-        "If this is selected, a connected joystick will be used as an optional input "
-        "device. If this is deselected, any joystick input will be ignored"
     };
 
     constexpr openspace::properties::Property::PropertyInfo JoystickSensitivityInfo = {
@@ -1282,12 +1275,7 @@ glm::dvec3 OrbitalNavigator::moveCameraAlongVector(const glm::dvec3& camPos,
         velocity = 1.0 - destination / distFromCameraToFocus;
     }
     else { // When flying away from anchor
-        if (destination == 0.0) {
-            velocity = -1.0;
-        }
-        else {
-            velocity = distFromCameraToFocus / destination - 1.0;
-        }
+        velocity = distFromCameraToFocus / destination - 1.0;
     }
     velocity *= _velocitySensitivity * deltaTime;
 

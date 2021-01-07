@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -107,20 +107,20 @@ StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary) : StaticRota
         "StaticRotation"
     );
 
-    if (dictionary.hasKeyAndValue<glm::dvec3>(RotationInfo.identifier)) {
+    if (dictionary.hasValue<glm::dvec3>(RotationInfo.identifier)) {
         _eulerRotation = static_cast<glm::vec3>(
             dictionary.value<glm::dvec3>(RotationInfo.identifier)
         );
         _matrixIsDirty = true;
     }
-    else if (dictionary.hasKeyAndValue<glm::dvec4>(RotationInfo.identifier)) {
+    else if (dictionary.hasValue<glm::dvec4>(RotationInfo.identifier)) {
         glm::dvec4 data = dictionary.value<glm::dvec4>(RotationInfo.identifier);
         _eulerRotation = rotationMatrixToEulerAngles(
             glm::mat3_cast(glm::dquat(data.w, data.x, data.y, data.z))
         );
         _matrixIsDirty = true;
     }
-    else if (dictionary.hasKeyAndValue<glm::dmat3>(RotationInfo.identifier)) {
+    else if (dictionary.hasValue<glm::dmat3>(RotationInfo.identifier)) {
         _eulerRotation = rotationMatrixToEulerAngles(
             dictionary.value<glm::dmat3>(RotationInfo.identifier)
         );

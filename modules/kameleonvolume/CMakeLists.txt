@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2020                                                                #
+# Copyright (c) 2014-2021                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -25,20 +25,20 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/kameleonvolumereader.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablekameleonvolume.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/tasks/kameleondocumentationtask.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/tasks/kameleonmetadatatojsontask.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/tasks/kameleonvolumetorawtask.h
+  kameleonvolumereader.h
+  rendering/renderablekameleonvolume.h
+  tasks/kameleondocumentationtask.h
+  tasks/kameleonmetadatatojsontask.h
+  tasks/kameleonvolumetorawtask.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/kameleonvolumereader.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablekameleonvolume.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tasks/kameleondocumentationtask.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tasks/kameleonmetadatatojsontask.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tasks/kameleonvolumetorawtask.cpp
+  kameleonvolumereader.cpp
+  rendering/renderablekameleonvolume.cpp
+  tasks/kameleondocumentationtask.cpp
+  tasks/kameleonmetadatatojsontask.cpp
+  tasks/kameleonvolumetorawtask.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

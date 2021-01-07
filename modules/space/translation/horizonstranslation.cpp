@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -176,16 +176,9 @@ void HorizonsTranslation::readHorizonsTextFile() {
         return;
     }
 
-    // The beginning of a Horizons file has a header with a lot of information about the
-    // query that we do not care about. Ignore everything until data starts, including
-    // the row marked by $$SOE (i.e. Start Of Ephemerides).
-    std::string line;
-    while (line[0] != '$') {
-        std::getline(fileStream, line);
-    }
-
     // Read data line by line until $$EOE (i.e. End Of Ephemerides).
     // Skip the rest of the file.
+    std::string line;
     std::getline(fileStream, line);
     while (line[0] != '$') {
         std::stringstream str(line);

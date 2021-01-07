@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -138,19 +138,19 @@ NavigationHandler::NavigationState::NavigationState(const ghoul::Dictionary& dic
     }
 }
 
-NavigationHandler::NavigationState::NavigationState(std::string anchor, std::string aim,
-                                                    std::string referenceFrame,
-                                                    glm::dvec3 position,
-                                                    std::optional<glm::dvec3> up,
-                                                    double yaw,
-                                                    double pitch)
-    : anchor(std::move(anchor))
-    , aim(std::move(aim))
-    , referenceFrame(std::move(referenceFrame))
-    , position(std::move(position))
-    , up(std::move(up))
-    , yaw(yaw)
-    , pitch(pitch)
+NavigationHandler::NavigationState::NavigationState(std::string anchor_, std::string aim_,
+                                                    std::string referenceFrame_,
+                                                    glm::dvec3 position_,
+                                                    std::optional<glm::dvec3> up_,
+                                                    double yaw_,
+                                                    double pitch_)
+    : anchor(std::move(anchor_))
+    , aim(std::move(aim_))
+    , referenceFrame(std::move(referenceFrame_))
+    , position(std::move(position_))
+    , up(std::move(up_))
+    , yaw(yaw_)
+    , pitch(pitch_)
 {}
 
 NavigationHandler::NavigationHandler()
@@ -295,7 +295,7 @@ void NavigationHandler::applyNavigationState(const NavigationHandler::Navigation
     }
 
     const glm::dvec3 cameraPositionWorld = anchorWorldPosition +
-        glm::dvec3(referenceFrameTransform * glm::dvec4(ns.position, 1.0));
+        referenceFrameTransform * glm::dvec4(ns.position, 1.0);
 
     glm::dvec3 up = ns.up.has_value() ?
         glm::normalize(referenceFrameTransform * *ns.up) :

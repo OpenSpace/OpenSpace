@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -146,7 +146,7 @@ void TimeManager::preSynchronization(double dt) {
 
     if (newTime != _lastTime) {
         ZoneScopedN("newTime != _lastTime")
-        using K = const CallbackHandle;
+        using K = CallbackHandle;
         using V = TimeChangeCallback;
         for (const std::pair<K, V>& it : _timeChangeCallbacks) {
             ZoneScopedN("tcc")
@@ -158,7 +158,7 @@ void TimeManager::preSynchronization(double dt) {
         _targetDeltaTime != _lastTargetDeltaTime)
     {
         ZoneScopedN("delta time changed")
-        using K = const CallbackHandle;
+        using K = CallbackHandle;
         using V = TimeChangeCallback;
         for (const std::pair<K, V>& it : _deltaTimeChangeCallbacks) {
             ZoneScopedN("dtcc")
@@ -166,7 +166,7 @@ void TimeManager::preSynchronization(double dt) {
         }
     }
     if (_deltaTimeStepsChanged) {
-        using K = const CallbackHandle;
+        using K = CallbackHandle;
         using V = TimeChangeCallback;
         for (const std::pair<K, V>& it : _deltaTimeStepsChangeCallbacks) {
             it.second();
@@ -174,7 +174,7 @@ void TimeManager::preSynchronization(double dt) {
     }
     if (_timelineChanged) {
         ZoneScopedN("timeline changed")
-        using K = const CallbackHandle;
+        using K = CallbackHandle;
         using V = TimeChangeCallback;
         for (const std::pair<K, V>& it : _timelineChangeCallbacks) {
             ZoneScopedN("tlcc")
@@ -254,7 +254,7 @@ void TimeManager::progressTime(double dt) {
         _integrateFromTime.data().setTime(_timeNextFrame.j2000Seconds());
         _shouldSetTime = false;
 
-        using K = const CallbackHandle;
+        using K = CallbackHandle;
         using V = TimeChangeCallback;
         for (const std::pair<K, V>& it : _timeJumpCallbacks) {
             it.second();

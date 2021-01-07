@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -461,7 +461,7 @@ bool FixedRotation::initialize() {
 
     const bool hasXAxis = _constructorDictionary.hasKey(KeyXAxis);
     if (hasXAxis) {
-        if (_constructorDictionary.hasKeyAndValue<std::string>(KeyXAxis)) {
+        if (_constructorDictionary.hasValue<std::string>(KeyXAxis)) {
             _xAxis.type = Axis::Type::Object;
             _xAxis.object = _constructorDictionary.value<std::string>(KeyXAxis);
         }
@@ -486,7 +486,7 @@ bool FixedRotation::initialize() {
 
     const bool hasYAxis = _constructorDictionary.hasKey(KeyYAxis);
     if (hasYAxis) {
-        if (_constructorDictionary.hasKeyAndValue<std::string>(KeyYAxis)) {
+        if (_constructorDictionary.hasValue<std::string>(KeyYAxis)) {
             _yAxis.type = Axis::Type::Object;
             _yAxis.object = _constructorDictionary.value<std::string>(KeyYAxis);
         }
@@ -511,7 +511,7 @@ bool FixedRotation::initialize() {
 
     const bool hasZAxis = _constructorDictionary.hasKey(KeyZAxis);
     if (hasZAxis) {
-        if (_constructorDictionary.hasKeyAndValue<std::string>(KeyZAxis)) {
+        if (_constructorDictionary.hasValue<std::string>(KeyZAxis)) {
             _zAxis.type = Axis::Type::Object;
             _zAxis.object = _constructorDictionary.value<std::string>(KeyZAxis);
         }
@@ -569,7 +569,11 @@ glm::dmat3 FixedRotation::matrix(const UpdateData&) const {
     {
         LWARNINGC(
             "FixedRotation",
-            fmt::format("Near-collinear vectors detected: x ({}) y ({}) z ({})", x, y, z)
+            fmt::format(
+                "Near-collinear vectors detected: "
+                "x ({}, {}, {}) y ({}, {}, {}) z ({}, {}, {})",
+                x.x, x.y, x.z, y.x, y.y, y.z, z.x, z.y, z.z
+            )
         );
         return glm::dmat3();
     }

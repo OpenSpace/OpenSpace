@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -153,7 +153,7 @@ void ExoplanetsDataPreparationTask::perform(
         return result;
     };
 
-    Exoplanet p;
+    ExoplanetDataEntry p;
     std::string data;
     int exoplanetCount = 0;
     while (getline(inputDataFile, planetRow)) {
@@ -161,7 +161,7 @@ void ExoplanetsDataPreparationTask::perform(
         progressCallback(static_cast<float>(exoplanetCount) / static_cast<float>(total));
 
         std::string component;
-        std::string speckStarname;
+        std::string starName;
 
         float ra = std::numeric_limits<float>::quiet_NaN();     // decimal degrees
         float dec = std::numeric_limits<float>::quiet_NaN();    // decimal degrees
@@ -248,9 +248,8 @@ void ExoplanetsDataPreparationTask::perform(
             }
             // Star - name and position
             else if (column == "hostname") {
-                std::string name = readStringData(data);
-                speckStarname = std::string(speckStarName(name));
-                glm::vec3 position = starPosition(speckStarname);
+                starName = readStringData(data);
+                glm::vec3 position = starPosition(starName);
                 p.positionX = position[0];
                 p.positionY = position[1];
                 p.positionZ = position[2];
@@ -308,10 +307,10 @@ void ExoplanetsDataPreparationTask::perform(
 
         // Create look-up table
         long pos = static_cast<long>(binFile.tellp());
-        std::string planetName = speckStarname + " " + component;
+        std::string planetName = starName + " " + component;
         lutFile << planetName << "," << pos << std::endl;
 
-        binFile.write(reinterpret_cast<char*>(&p), sizeof(Exoplanet));
+        binFile.write(reinterpret_cast<char*>(&p), sizeof(ExoplanetDataEntry));
     }
 
     progressCallback(1.f);
@@ -373,11 +372,14 @@ float ExoplanetsDataPreparationTask::bvFromTeff(float teff) {
     float bv = 0.f;
     float bvUpper = 0.f;
     float bvLower = 0.f;
-    float teffLower, teffUpper;
-    std::string row, teffString, bvString;
+    float teffLower;
+    float teffUpper;
+    std::string row;
     while (getline(teffToBvFile, row)) {
         std::istringstream lineStream(row);
+        std::string teffString;
         getline(lineStream, teffString, ',');
+        std::string bvString;
         getline(lineStream, bvString);
 
         float teffCurrent = std::stof(teffString.c_str(), nullptr);

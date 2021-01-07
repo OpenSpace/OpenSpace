@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -110,13 +110,13 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
     _sourceFrame = dictionary.value<std::string>(SourceInfo.identifier);
     _destinationFrame = dictionary.value<std::string>(DestinationInfo.identifier);
 
-    if (dictionary.hasKeyAndValue<std::string>(KeyKernels)) {
+    if (dictionary.hasValue<std::string>(KeyKernels)) {
         SpiceManager::ref().loadKernel(dictionary.value<std::string>(KeyKernels));
     }
-    else if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyKernels)) {
+    else if (dictionary.hasValue<ghoul::Dictionary>(KeyKernels)) {
         ghoul::Dictionary kernels = dictionary.value<ghoul::Dictionary>(KeyKernels);
         for (size_t i = 1; i <= kernels.size(); ++i) {
-            if (!kernels.hasKeyAndValue<std::string>(std::to_string(i))) {
+            if (!kernels.hasValue<std::string>(std::to_string(i))) {
                 throw ghoul::RuntimeError("Kernels has to be an array-style table");
             }
 
@@ -126,8 +126,8 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
     }
 
     if (dictionary.hasKey(TimeFrameInfo.identifier)) {
-        ghoul::Dictionary timeFrameDictionary;
-        dictionary.getValue(TimeFrameInfo.identifier, timeFrameDictionary);
+        ghoul::Dictionary timeFrameDictionary =
+            dictionary.value<ghoul::Dictionary>(TimeFrameInfo.identifier);
         _timeFrame = TimeFrame::createFromDictionary(timeFrameDictionary);
         if (_timeFrame == nullptr) {
             throw ghoul::RuntimeError("Invalid dictionary for TimeFrame.");

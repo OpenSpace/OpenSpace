@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2020                                                                #
+# Copyright (c) 2014-2021                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -25,39 +25,39 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/atlasmanager.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/brickmanager.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/brickselector.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/brickcover.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/brickselection.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/multiresvolumeraycaster.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/shenbrickselector.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/tfbrickselector.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/localtfbrickselector.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simpletfbrickselector.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemultiresvolume.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/tsp.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/histogrammanager.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/errorhistogrammanager.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/localerrorhistogrammanager.h
+  rendering/atlasmanager.h
+  rendering/brickmanager.h
+  rendering/brickselector.h
+  rendering/brickcover.h
+  rendering/brickselection.h
+  rendering/multiresvolumeraycaster.h
+  rendering/shenbrickselector.h
+  rendering/tfbrickselector.h
+  rendering/localtfbrickselector.h
+  rendering/simpletfbrickselector.h
+  rendering/renderablemultiresvolume.h
+  rendering/tsp.h
+  rendering/histogrammanager.h
+  rendering/errorhistogrammanager.h
+  rendering/localerrorhistogrammanager.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/atlasmanager.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/brickcover.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/brickmanager.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/brickselection.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/multiresvolumeraycaster.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/shenbrickselector.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/tfbrickselector.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/localtfbrickselector.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simpletfbrickselector.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemultiresvolume.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/tsp.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/histogrammanager.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/errorhistogrammanager.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/localerrorhistogrammanager.cpp
+  rendering/atlasmanager.cpp
+  rendering/brickcover.cpp
+  rendering/brickmanager.cpp
+  rendering/brickselection.cpp
+  rendering/multiresvolumeraycaster.cpp
+  rendering/shenbrickselector.cpp
+  rendering/tfbrickselector.cpp
+  rendering/localtfbrickselector.cpp
+  rendering/simpletfbrickselector.cpp
+  rendering/renderablemultiresvolume.cpp
+  rendering/tsp.cpp
+  rendering/histogrammanager.cpp
+  rendering/errorhistogrammanager.cpp
+  rendering/localerrorhistogrammanager.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -125,12 +125,14 @@ RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)
     );
 
     if (dictionary.hasKey(OffsetInfo.identifier)) {
-        _offset = dictionary.value<glm::vec2>(OffsetInfo.identifier);
+        _offset = dictionary.value<glm::dvec2>(OffsetInfo.identifier);
     }
     addProperty(_offset);
 
     _size = static_cast<float>(dictionary.value<double>(SizeInfo.identifier));
-    _size = _size + (_offset.value().y * distanceconstants::AstronomicalUnit);
+    _size = static_cast<float>(
+        _size + (_offset.value().y * distanceconstants::AstronomicalUnit)
+    );
     setBoundingSphere(_size);
     _size.onChange([&]() { _planeIsDirty = true; });
     addProperty(_size);
@@ -233,7 +235,7 @@ void RenderableOrbitDisc::render(const RenderData& data, RendererTasks&) {
     global::renderEngine->openglStateCache().resetPolygonAndClippingState();
 }
 
-void RenderableOrbitDisc::update(const UpdateData& data) {
+void RenderableOrbitDisc::update(const UpdateData&) {
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
         _uniformCache.modelViewProjection = _shader->uniformLocation(

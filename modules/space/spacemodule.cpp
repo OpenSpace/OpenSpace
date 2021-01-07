@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -107,7 +107,7 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     ghoul_assert(fGeometry, "Planet geometry factory was not created");
     fGeometry->registerClass<planetgeometry::SimpleSphereGeometry>("SimpleSphere");
 
-    if (dictionary.hasKeyAndValue<bool>(SpiceExceptionInfo.identifier)) {
+    if (dictionary.hasValue<bool>(SpiceExceptionInfo.identifier)) {
         _showSpiceExceptions = dictionary.value<bool>(SpiceExceptionInfo.identifier);
     }
 }

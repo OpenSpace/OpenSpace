@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,11 +25,6 @@
 #include <openspace/interaction/scriptcamerastates.h>
 
 #include <openspace/interaction/inputstate.h>
-
-namespace {
-    const double SENSITIVITY_ADJUSTMENT_INCREASE = 8.0;
-    const double SENSITIVITY_ADJUSTMENT_DECREASE = 0.5;
-}
 
 namespace openspace::interaction {
 

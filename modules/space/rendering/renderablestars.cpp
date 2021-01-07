@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -73,7 +73,7 @@ namespace {
 
     constexpr double PARSEC = 0.308567756E17;
 
-    struct CommonDataLayout {
+    struct ColorVBOLayout {
         std::array<float, 3> position;
         float value;
         float luminance;
@@ -81,19 +81,35 @@ namespace {
         float apparentMagnitude;
     };
 
-    struct ColorVBOLayout : public CommonDataLayout {};
+    struct VelocityVBOLayout {
+        std::array<float, 3> position;
+        float value;
+        float luminance;
+        float absoluteMagnitude;
+        float apparentMagnitude;
 
-    struct VelocityVBOLayout : public CommonDataLayout {
         float vx; // v_x
         float vy; // v_y
         float vz; // v_z
     };
 
-    struct SpeedVBOLayout : public CommonDataLayout {
+    struct SpeedVBOLayout {
+        std::array<float, 3> position;
+        float value;
+        float luminance;
+        float absoluteMagnitude;
+        float apparentMagnitude;
+
         float speed;
     };
 
-    struct OtherDataLayout : public CommonDataLayout {};
+    struct OtherDataLayout {
+        std::array<float, 3> position;
+        float value;
+        float luminance;
+        float absoluteMagnitude;
+        float apparentMagnitude;
+    };
 
     constexpr openspace::properties::Property::PropertyInfo SpeckFileInfo = {
         "SpeckFile",
@@ -678,7 +694,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     addPropertySubOwner(_moffatMethodOwner);
 
     if (dictionary.hasKey(FadeInDistancesInfo.identifier)) {
-        glm::vec2 v = dictionary.value<glm::vec2>(FadeInDistancesInfo.identifier);
+        glm::vec2 v = dictionary.value<glm::dvec2>(FadeInDistancesInfo.identifier);
         _fadeInDistance = v;
         _disableFadeInDistance = false;
         addProperty(_fadeInDistance);
@@ -991,7 +1007,7 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     glm::dmat4 modelMatrix =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         glm::dmat4(data.modelTransform.rotation) *
-        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
+        glm::scale(glm::dmat4(1.0), data.modelTransform.scale);
 
     glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
 

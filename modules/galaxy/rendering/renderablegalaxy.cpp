@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -52,12 +52,6 @@
 namespace {
     constexpr int8_t CurrentCacheVersion = 1;
 
-    constexpr const char* GlslRaycastPath =
-        "${MODULE_GALAXY}/shaders/galaxyraycast.glsl";
-    constexpr const char* GlslBoundsVsPath =
-        "${MODULE_GALAXY}/shaders/raycasterbounds_vs.glsl";
-    constexpr const char* GlslBoundsFsPath =
-        "${MODULE_GALAXY}/shaders/raycasterbounds_fs.glsl";
     constexpr const char* _loggerCat = "Renderable Galaxy";
 
     constexpr const std::array<const char*, 4> UniformNamesPoints = {
@@ -157,13 +151,13 @@ namespace {
         );
         fileStream.write(reinterpret_cast<const char*>(&nPoints), sizeof(int64_t));
         fileStream.write(reinterpret_cast<const char*>(&pointsRatio), sizeof(float));
-        uint64_t nPositions = static_cast<uint64_t>(positions.size());
+        uint64_t nPositions = positions.size();
         fileStream.write(reinterpret_cast<const char*>(&nPositions), sizeof(uint64_t));
         fileStream.write(
             reinterpret_cast<const char*>(positions.data()),
             positions.size() * sizeof(glm::vec3)
         );
-        uint64_t nColors = static_cast<uint64_t>(colors.size());
+        uint64_t nColors = colors.size();
         fileStream.write(reinterpret_cast<const char*>(&nColors), sizeof(uint64_t));
         fileStream.write(
             reinterpret_cast<const char*>(colors.data()),
@@ -197,61 +191,38 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     , _downScaleVolumeRendering(DownscaleVolumeRenderingInfo, 1.f, 0.1f, 1.f)
     , _numberOfRayCastingSteps(NumberOfRayCastingStepsInfo, 1000.f, 1.f, 1000.f)
 {
-    dictionary.getValue("VolumeRenderingEnabled", _volumeRenderingEnabled);
-    dictionary.getValue("StarRenderingEnabled", _starRenderingEnabled);
-    {
-        double stepSize;
-        dictionary.getValue("StepSize", stepSize);
-        _stepSize = static_cast<float>(stepSize);
+    if (dictionary.hasKey("VolumeRenderingEnabled")) {
+        _volumeRenderingEnabled = dictionary.value<bool>("VolumeRenderingEnabled");
     }
-    {
-        double absorptionMultiply = _absorptionMultiply;
-        dictionary.getValue("AbsorptionMultiply", absorptionMultiply);
-        _absorptionMultiply = static_cast<float>(absorptionMultiply);
-    }
-    {
-        double emissionMultiply = _emissionMultiply;
-        dictionary.getValue("EmissionMultiply", emissionMultiply);
-        _emissionMultiply = static_cast<float>(emissionMultiply);
-    }
-    dictionary.getValue("StarRenderingMethod", _starRenderingMethod);
-    {
-        double enabledPointsRatio = _enabledPointsRatio;
-        dictionary.getValue("EnabledPointsRatio", enabledPointsRatio);
-        _enabledPointsRatio = static_cast<float>(enabledPointsRatio);
-    }
-    {
-        glm::dvec3 translation = glm::vec3(_translation);
-        dictionary.getValue("Translation", translation);
-        _translation = glm::vec3(translation);
-    }
-    {
-        glm::dvec3 rotation = glm::vec3(_rotation);
-        dictionary.getValue("Rotation", rotation);
-        _rotation = glm::vec3(rotation);
+    if (dictionary.hasKey("StarRenderingEnabled")) {
+        _starRenderingEnabled = dictionary.value<bool>("StarRenderingEnabled");
     }
 
-    if (dictionary.hasKeyAndValue<bool>(VolumeRenderingEnabledInfo.identifier)) {
+    if (dictionary.hasKey("StarRenderingMethod")) {
+        _starRenderingMethod = dictionary.value<int>("StarRenderingMethod");
+    }
+
+    if (dictionary.hasValue<bool>(VolumeRenderingEnabledInfo.identifier)) {
         _volumeRenderingEnabled = dictionary.value<bool>(
             VolumeRenderingEnabledInfo.identifier
         );
     }
 
-    if (dictionary.hasKeyAndValue<bool>(StarRenderingEnabledInfo.identifier)) {
+    if (dictionary.hasValue<bool>(StarRenderingEnabledInfo.identifier)) {
         _starRenderingEnabled = static_cast<bool>(StarRenderingEnabledInfo.identifier);
     }
 
-    if (dictionary.hasKeyAndValue<double>(StepSizeInfo.identifier)) {
+    if (dictionary.hasValue<double>(StepSizeInfo.identifier)) {
         _stepSize = static_cast<float>(dictionary.value<double>(StepSizeInfo.identifier));
     }
 
-    if (dictionary.hasKeyAndValue<double>(AbsorptionMultiplyInfo.identifier)) {
+    if (dictionary.hasValue<double>(AbsorptionMultiplyInfo.identifier)) {
         _absorptionMultiply = static_cast<float>(
             dictionary.value<double>(AbsorptionMultiplyInfo.identifier)
         );
     }
 
-    if (dictionary.hasKeyAndValue<double>(EmissionMultiplyInfo.identifier)) {
+    if (dictionary.hasValue<double>(EmissionMultiplyInfo.identifier)) {
         _emissionMultiply = static_cast<float>(
             dictionary.value<double>(EmissionMultiplyInfo.identifier)
         );
@@ -273,37 +244,36 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
         }
     }
 
-    if (dictionary.hasKeyAndValue<glm::vec3>(TranslationInfo.identifier)) {
-        _translation = dictionary.value<glm::vec3>(TranslationInfo.identifier);
+    if (dictionary.hasValue<glm::dvec3>(TranslationInfo.identifier)) {
+        _translation = dictionary.value<glm::dvec3>(TranslationInfo.identifier);
     }
 
-    if (dictionary.hasKeyAndValue<glm::vec3>(RotationInfo.identifier)) {
-        _rotation = dictionary.value<glm::vec3>(RotationInfo.identifier);
+    if (dictionary.hasValue<glm::dvec3>(RotationInfo.identifier)) {
+        _rotation = dictionary.value<glm::dvec3>(RotationInfo.identifier);
     }
 
-    if (!dictionary.hasKeyAndValue<ghoul::Dictionary>("Volume")) {
+    if (!dictionary.hasValue<ghoul::Dictionary>("Volume")) {
         LERROR("No volume dictionary specified.");
     }
 
     ghoul::Dictionary volumeDictionary = dictionary.value<ghoul::Dictionary>("Volume");
 
-    std::string volumeFilename;
-    if (volumeDictionary.getValue("Filename", volumeFilename)) {
-        _volumeFilename = absPath(volumeFilename);
+    if (volumeDictionary.hasValue<std::string>("Filename")) {
+        _volumeFilename = absPath(volumeDictionary.value<std::string>("Filename"));
     }
     else {
-        LERROR("No volume filename specified.");
+        LERROR("No volume filename specified");
     }
-    glm::vec3 volumeDimensions = glm::vec3(0.f);
-    if (volumeDictionary.getValue("Dimensions", volumeDimensions)) {
-        _volumeDimensions = static_cast<glm::ivec3>(volumeDimensions);
+
+    if (volumeDictionary.hasValue<glm::dvec3>("Dimensions")) {
+        _volumeDimensions = volumeDictionary.value<glm::dvec3>("Dimensions");
     }
     else {
-        LERROR("No volume dimensions specified.");
+        LERROR("No volume dimensions specifieds");
     }
-    glm::vec3 volumeSize = glm::vec3(0.f);
-    if (volumeDictionary.getValue("Size", volumeSize)) {
-        _volumeSize = volumeSize;
+
+    if (volumeDictionary.hasValue<glm::dvec3>("Size")) {
+        _volumeSize = volumeDictionary.value<glm::dvec3>("Size");
     }
     else {
         LERROR("No volume dimensions specified.");
@@ -320,32 +290,32 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
 
     _downScaleVolumeRendering.setVisibility(properties::Property::Visibility::Developer);
     if (volumeDictionary.hasKey(DownscaleVolumeRenderingInfo.identifier)) {
-        _downScaleVolumeRendering =
-            volumeDictionary.value<float>(DownscaleVolumeRenderingInfo.identifier);
+        _downScaleVolumeRendering = static_cast<float>(
+            volumeDictionary.value<double>(DownscaleVolumeRenderingInfo.identifier)
+        );
     }
 
-    if (!dictionary.hasKeyAndValue<ghoul::Dictionary>("Points")) {
+    if (!dictionary.hasValue<ghoul::Dictionary>("Points")) {
         LERROR("No points dictionary specified.");
     }
 
     ghoul::Dictionary pointsDictionary = dictionary.value<ghoul::Dictionary>("Points");
-    std::string pointsFilename;
-    if (pointsDictionary.getValue("Filename", pointsFilename)) {
-        _pointsFilename = absPath(pointsFilename);
+    if (pointsDictionary.hasValue<std::string>("Filename")) {
+        _pointsFilename = absPath(pointsDictionary.value<std::string>("Filename"));
     }
     else {
         LERROR("No points filename specified.");
     }
 
-    if (pointsDictionary.hasKeyAndValue<double>(EnabledPointsRatioInfo.identifier)) {
+    if (pointsDictionary.hasValue<double>(EnabledPointsRatioInfo.identifier)) {
         _enabledPointsRatio = static_cast<float>(
             pointsDictionary.value<double>(EnabledPointsRatioInfo.identifier)
         );
     }
 
-    std::string pointSpreadFunctionTexturePath;
-    if (pointsDictionary.getValue("Texture", pointSpreadFunctionTexturePath)) {
-        _pointSpreadFunctionTexturePath = absPath(pointSpreadFunctionTexturePath);
+    if (pointsDictionary.hasValue<std::string>("Texture")) {
+        _pointSpreadFunctionTexturePath =
+            absPath(pointsDictionary.value<std::string>("Texture"));
         _pointSpreadFunctionFile = std::make_unique<ghoul::filesystem::File>(
             _pointSpreadFunctionTexturePath
         );
@@ -685,7 +655,7 @@ void RenderableGalaxy::renderPoints(const RenderData& data) {
     glm::dmat4 modelMatrix =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         glm::dmat4(data.modelTransform.rotation) * rotMatrix *
-        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
     glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
 
@@ -760,7 +730,7 @@ void RenderableGalaxy::renderBillboards(const RenderData& data) {
     glm::dmat4 modelMatrix =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         glm::dmat4(data.modelTransform.rotation) * rotMatrix *
-        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
+        glm::scale(glm::dmat4(1.0), data.modelTransform.scale);
 
     glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
 

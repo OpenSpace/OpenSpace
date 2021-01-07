@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -98,99 +98,99 @@ ConstructOctreeTask::ConstructOctreeTask(const ghoul::Dictionary& dictionary) {
 
     // Check for filter params.
     if (dictionary.hasKey(KeyFilterPosX)) {
-        _posX = dictionary.value<glm::vec2>(KeyFilterPosX);
+        _posX = dictionary.value<glm::dvec2>(KeyFilterPosX);
         _filterPosX = true;
     }
     if (dictionary.hasKey(KeyFilterPosY)) {
-        _posY = dictionary.value<glm::vec2>(KeyFilterPosY);
+        _posY = dictionary.value<glm::dvec2>(KeyFilterPosY);
         _filterPosY = true;
     }
     if (dictionary.hasKey(KeyFilterPosZ)) {
-        _posZ = dictionary.value<glm::vec2>(KeyFilterPosZ);
+        _posZ = dictionary.value<glm::dvec2>(KeyFilterPosZ);
         _filterPosZ = true;
     }
     if (dictionary.hasKey(KeyFilterGMag)) {
-        _gMag = dictionary.value<glm::vec2>(KeyFilterGMag);
+        _gMag = dictionary.value<glm::dvec2>(KeyFilterGMag);
         _filterGMag = true;
     }
     if (dictionary.hasKey(KeyFilterBpRp)) {
-        _bpRp = dictionary.value<glm::vec2>(KeyFilterBpRp);
+        _bpRp = dictionary.value<glm::dvec2>(KeyFilterBpRp);
         _filterBpRp = true;
     }
     if (dictionary.hasKey(KeyFilterVelX)) {
-        _velX = dictionary.value<glm::vec2>(KeyFilterVelX);
+        _velX = dictionary.value<glm::dvec2>(KeyFilterVelX);
         _filterVelX = true;
     }
     if (dictionary.hasKey(KeyFilterVelY)) {
-        _velY = dictionary.value<glm::vec2>(KeyFilterVelY);
+        _velY = dictionary.value<glm::dvec2>(KeyFilterVelY);
         _filterVelY = true;
     }
     if (dictionary.hasKey(KeyFilterVelZ)) {
-        _velZ = dictionary.value<glm::vec2>(KeyFilterVelZ);
+        _velZ = dictionary.value<glm::dvec2>(KeyFilterVelZ);
         _filterVelZ = true;
     }
     if (dictionary.hasKey(KeyFilterBpMag)) {
-        _bpMag = dictionary.value<glm::vec2>(KeyFilterBpMag);
+        _bpMag = dictionary.value<glm::dvec2>(KeyFilterBpMag);
         _filterBpMag = true;
     }
     if (dictionary.hasKey(KeyFilterRpMag)) {
-        _rpMag = dictionary.value<glm::vec2>(KeyFilterRpMag);
+        _rpMag = dictionary.value<glm::dvec2>(KeyFilterRpMag);
         _filterRpMag = true;
     }
     if (dictionary.hasKey(KeyFilterBpG)) {
-        _bpG = dictionary.value<glm::vec2>(KeyFilterBpG);
+        _bpG = dictionary.value<glm::dvec2>(KeyFilterBpG);
         _filterBpG = true;
     }
     if (dictionary.hasKey(KeyFilterGRp)) {
-        _gRp = dictionary.value<glm::vec2>(KeyFilterGRp);
+        _gRp = dictionary.value<glm::dvec2>(KeyFilterGRp);
         _filterGRp = true;
     }
     if (dictionary.hasKey(KeyFilterRa)) {
-        _ra = dictionary.value<glm::vec2>(KeyFilterRa);
+        _ra = dictionary.value<glm::dvec2>(KeyFilterRa);
         _filterRa = true;
     }
     if (dictionary.hasKey(KeyFilterRaError)) {
-        _raError = dictionary.value<glm::vec2>(KeyFilterRaError);
+        _raError = dictionary.value<glm::dvec2>(KeyFilterRaError);
         _filterRaError = true;
     }
     if (dictionary.hasKey(KeyFilterDec)) {
-        _dec = dictionary.value<glm::vec2>(KeyFilterDec);
+        _dec = dictionary.value<glm::dvec2>(KeyFilterDec);
         _filterDec = true;
     }
     if (dictionary.hasKey(KeyFilterDecError)) {
-        _decError = dictionary.value<glm::vec2>(KeyFilterDecError);
+        _decError = dictionary.value<glm::dvec2>(KeyFilterDecError);
         _filterDecError = true;
     }
     if (dictionary.hasKey(KeyFilterParallax)) {
-        _parallax = dictionary.value<glm::vec2>(KeyFilterParallax);
+        _parallax = dictionary.value<glm::dvec2>(KeyFilterParallax);
         _filterParallax = true;
     }
     if (dictionary.hasKey(KeyFilterParallaxError)) {
-        _parallaxError = dictionary.value<glm::vec2>(KeyFilterParallaxError);
+        _parallaxError = dictionary.value<glm::dvec2>(KeyFilterParallaxError);
         _filterParallaxError = true;
     }
     if (dictionary.hasKey(KeyFilterPmra)) {
-        _pmra = dictionary.value<glm::vec2>(KeyFilterPmra);
+        _pmra = dictionary.value<glm::dvec2>(KeyFilterPmra);
         _filterPmra = true;
     }
     if (dictionary.hasKey(KeyFilterPmraError)) {
-        _pmraError = dictionary.value<glm::vec2>(KeyFilterPmraError);
+        _pmraError = dictionary.value<glm::dvec2>(KeyFilterPmraError);
         _filterPmraError = true;
     }
     if (dictionary.hasKey(KeyFilterPmdec)) {
-        _pmdec = dictionary.value<glm::vec2>(KeyFilterPmdec);
+        _pmdec = dictionary.value<glm::dvec2>(KeyFilterPmdec);
         _filterPmdec = true;
     }
     if (dictionary.hasKey(KeyFilterPmdecError)) {
-        _pmdecError = dictionary.value<glm::vec2>(KeyFilterPmdecError);
+        _pmdecError = dictionary.value<glm::dvec2>(KeyFilterPmdecError);
         _filterPmdecError = true;
     }
     if (dictionary.hasKey(KeyFilterRv)) {
-        _rv = dictionary.value<glm::vec2>(KeyFilterRv);
+        _rv = dictionary.value<glm::dvec2>(KeyFilterRv);
         _filterRv = true;
     }
     if (dictionary.hasKey(KeyFilterRvError)) {
-        _rvError = dictionary.value<glm::vec2>(KeyFilterRvError);
+        _rvError = dictionary.value<glm::dvec2>(KeyFilterRvError);
         _filterRvError = true;
     }
 }

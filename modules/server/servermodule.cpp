@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -84,7 +84,7 @@ void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
     }
     ghoul::Dictionary interfaces = configuration.value<ghoul::Dictionary>(KeyInterfaces);
 
-    for (const std::string& key : interfaces.keys()) {
+    for (std::string_view key : interfaces.keys()) {
         ghoul::Dictionary interfaceDictionary = interfaces.value<ghoul::Dictionary>(key);
 
         // @TODO (abock, 2019-09-17);  This is a hack to make the parsing of the
