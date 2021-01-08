@@ -223,8 +223,8 @@ documentation::Documentation TLETranslation::Documentation() {
         "space_transform_tle",
         {
             {
-                "Type",
-                new StringEqualVerifier("TLETranslation"),
+               "Type",
+               new StringEqualVerifier("TLETranslation"),
                Optional::No
             },
             {
