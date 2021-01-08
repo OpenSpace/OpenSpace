@@ -29,7 +29,7 @@
 
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-
+#include <openspace/util/planegeometry.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
@@ -59,7 +59,6 @@ public:
 
 private:
     void loadTexture();
-    void createPlane();
 
     properties::StringProperty _texturePath;
     properties::FloatProperty _size;
@@ -70,9 +69,9 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     std::unique_ptr<ghoul::filesystem::File> _textureFile;
 
+    std::unique_ptr<PlaneGeometry> _plane;
+
     bool _textureIsDirty = false;
-    GLuint _quad = 0;
-    GLuint _vertexPositionBuffer = 0;
     bool _planeIsDirty = false;
 };
 

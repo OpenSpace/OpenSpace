@@ -178,6 +178,7 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/util/httprequest.cpp
   ${OPENSPACE_BASE_DIR}/src/util/keys.cpp
   ${OPENSPACE_BASE_DIR}/src/util/openspacemodule.cpp
+  ${OPENSPACE_BASE_DIR}/src/util/planegeometry.cpp
   ${OPENSPACE_BASE_DIR}/src/util/progressbar.cpp
   ${OPENSPACE_BASE_DIR}/src/util/resourcesynchronization.cpp
   ${OPENSPACE_BASE_DIR}/src/util/screenlog.cpp
@@ -373,6 +374,7 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/util/memorymanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/mouse.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/openspacemodule.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/util/planegeometry.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/progressbar.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/resourcesynchronization.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/screenlog.h

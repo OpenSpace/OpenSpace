@@ -133,6 +133,8 @@ RenderableDisc::RenderableDisc(const ghoul::Dictionary& dictionary)
     _textureFile->setCallback([&](const File&) { _textureIsDirty = true; });
 
     addProperty(_opacity);
+
+    _plane = std::make_unique<PlaneGeometry>(2*_size);
 }
 
 bool RenderableDisc::isReady() const {
@@ -148,19 +150,13 @@ void RenderableDisc::initializeGL() {
 
     ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
 
-    glGenVertexArrays(1, &_quad);
-    glGenBuffers(1, &_vertexPositionBuffer);
-
-    createPlane();
+    _plane->initialize();
     loadTexture();
 }
 
 void RenderableDisc::deinitializeGL() {
-    glDeleteVertexArrays(1, &_quad);
-    _quad = 0;
-
-    glDeleteBuffers(1, &_vertexPositionBuffer);
-    _vertexPositionBuffer = 0;
+    _plane->deinitialize();
+    _plane = nullptr;
 
     _textureFile = nullptr;
     _texture = nullptr;
@@ -197,8 +193,7 @@ void RenderableDisc::render(const RenderData& data, RendererTasks&) {
     glDepthMask(false);
     glDisable(GL_CULL_FACE);
 
-    glBindVertexArray(_quad);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    _plane->render();
 
     _shader->deactivate();
 
@@ -215,7 +210,7 @@ void RenderableDisc::update(const UpdateData&) {
     }
 
     if (_planeIsDirty) {
-        createPlane();
+        _plane->updateSize(2*_size);
         _planeIsDirty = false;
     }
 
@@ -249,48 +244,6 @@ void RenderableDisc::loadTexture() {
             );
         }
     }
-}
-
-void RenderableDisc::createPlane() {
-    const GLfloat size = _size;
-
-    struct VertexData {
-        GLfloat x;
-        GLfloat y;
-        GLfloat s;
-        GLfloat t;
-    };
-
-    VertexData data[] = {
-        { -size, -size, 0.f, 0.f },
-        {  size,  size, 1.f, 1.f },
-        { -size,  size, 0.f, 1.f },
-        { -size, -size, 0.f, 0.f },
-        {  size, -size, 1.f, 0.f },
-        {  size,  size, 1.f, 1.f },
-    };
-
-    glBindVertexArray(_quad);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(
-        0,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(VertexData),
-        nullptr
-    );
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(
-        1,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(VertexData),
-        reinterpret_cast<void*>(offsetof(VertexData, s)) // NOLINT
-    );
 }
 
 } // namespace openspace
