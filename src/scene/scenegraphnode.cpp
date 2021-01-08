@@ -263,7 +263,7 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         ghoul::Dictionary renderableDictionary =
             dictionary.value<ghoul::Dictionary>(KeyRenderable);
 
-        renderableDictionary.setValue(KeyIdentifier, result->_identifier);
+        //renderableDictionary.setValue(KeyIdentifier, result->_identifier);
 
         result->_renderable = Renderable::createFromDictionary(renderableDictionary);
         if (result->_renderable == nullptr) {

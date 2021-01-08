@@ -239,7 +239,7 @@ void testSpecificationAndThrow(const Documentation& documentation,
     // Perform testing against the documentation/specification
     TestResult testResult = testSpecification(documentation, dictionary);
     if (!testResult.success) {
-        throw SpecificationError(std::move(testResult), std::move(component));
+        throw SpecificationError(testResult, component);
     }
 }
 

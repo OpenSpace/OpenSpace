@@ -35,7 +35,7 @@ template<typename T> void bakeTo(const ghoul::Dictionary&, std::string_view, T*)
 void bakeTo(const ghoul::Dictionary& d, std::string_view key, glm::dmat3x3* val) { *val = d.value<glm::dmat3x3>(key); }
 void bakeTo(const ghoul::Dictionary& d, std::string_view key, glm::dvec3* val) { *val = d.value<glm::dvec3>(key); }
 void bakeTo(const ghoul::Dictionary& d, std::string_view key, glm::dvec4* val) { *val = d.value<glm::dvec4>(key); }
-void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::variant<glm::dvec3,glm::dvec4,glm::dmat3x3>* val) {
+void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::variant<glm::dvec3, glm::dvec4, glm::dmat3x3>* val) {
    if (d.hasValue<glm::dvec3>(key)) { *val = d.value<glm::dvec3>(key); return; }
    if (d.hasValue<glm::dvec4>(key)) { *val = d.value<glm::dvec4>(key); return; }
    if (d.hasValue<glm::dmat3x3>(key)) { *val = d.value<glm::dmat3x3>(key); return; }
