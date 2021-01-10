@@ -37,6 +37,7 @@ template <> openspace::documentation::Documentation doc<openspace::GlobeBrowsing
 namespace codegen {
 namespace internal {
 template<typename T> void bakeTo(const ghoul::Dictionary&, std::string_view, T*) { static_assert(sizeof(T) == 0); } // This should never be called
+template<typename T> void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::optional<T>* val);
 void bakeTo(const ghoul::Dictionary& d, std::string_view key, bool* val) { *val = d.value<bool>(key); }
 void bakeTo(const ghoul::Dictionary& d, std::string_view key, int* val) { *val = static_cast<int>(d.value<double>(key)); }
 
@@ -52,7 +53,7 @@ void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::string* val) 
 
 } // namespace internal
 
-template <typename T> T bake(const ghoul::Dictionary& dict) { static_assert(sizeof(T) == 0); };
+template <typename T> T bake(const ghoul::Dictionary&) { static_assert(sizeof(T) == 0); };
 template <> Parameters bake<Parameters>(const ghoul::Dictionary& dict) {
     openspace::documentation::testSpecificationAndThrow(codegen::doc<openspace::GlobeBrowsingModule>(), dict, "GlobeBrowsingModule");
     Parameters res;

@@ -38,6 +38,7 @@ template <> openspace::documentation::Documentation doc<openspace::DashboardItem
 namespace codegen {
 namespace internal {
 template<typename T> void bakeTo(const ghoul::Dictionary&, std::string_view, T*) { static_assert(sizeof(T) == 0); } // This should never be called
+template<typename T> void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::optional<T>* val);
 
 template<typename T> void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::optional<T>* val) {
     if (d.hasKey(key)) {
@@ -57,7 +58,7 @@ void bakeTo(const ghoul::Dictionary& d, std::string_view key, Parameters::Type* 
 
 } // namespace internal
 
-template <typename T> T bake(const ghoul::Dictionary& dict) { static_assert(sizeof(T) == 0); };
+template <typename T> T bake(const ghoul::Dictionary&) { static_assert(sizeof(T) == 0); };
 template <> Parameters bake<Parameters>(const ghoul::Dictionary& dict) {
     openspace::documentation::testSpecificationAndThrow(codegen::doc<openspace::DashboardItemAngle>(), dict, "DashboardItemAngle");
     Parameters res;
