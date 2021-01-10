@@ -12,7 +12,7 @@
 namespace codegen {
 template <typename T> openspace::documentation::Documentation doc() {
     static_assert(sizeof(T) == 0); // This should never be called
-    return openspace::documentation::Documentation(); // just to make GCC/Clang happy
+    return openspace::documentation::Documentation();
 }
 template <> openspace::documentation::Documentation doc<openspace::globebrowsing::Layer>() {
     using namespace openspace::documentation;
@@ -87,7 +87,7 @@ template<typename T> void bakeTo(const ghoul::Dictionary& d, std::string_view ke
 
 } // namespace internal
 
-template <typename T> T bake(const ghoul::Dictionary&) { static_assert(sizeof(T) == 0); };
+template <typename T> T bake(const ghoul::Dictionary&) { static_assert(sizeof(T) == 0); }
 template <> Parameters bake<Parameters>(const ghoul::Dictionary& dict) {
     openspace::documentation::testSpecificationAndThrow(codegen::doc<openspace::globebrowsing::Layer>(), dict, "Layer");
     Parameters res;
