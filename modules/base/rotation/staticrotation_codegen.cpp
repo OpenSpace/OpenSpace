@@ -12,6 +12,7 @@
 namespace codegen {
 template <typename T> openspace::documentation::Documentation doc() {
     static_assert(sizeof(T) == 0); // This should never be called
+    return openspace::documentation::Documentation(); // just to make GCC/Clang happy
 }
 template <> openspace::documentation::Documentation doc<openspace::StaticRotation>() {
     using namespace openspace::documentation;
@@ -36,9 +37,9 @@ void bakeTo(const ghoul::Dictionary& d, std::string_view key, glm::dmat3x3* val)
 void bakeTo(const ghoul::Dictionary& d, std::string_view key, glm::dvec3* val) { *val = d.value<glm::dvec3>(key); }
 void bakeTo(const ghoul::Dictionary& d, std::string_view key, glm::dvec4* val) { *val = d.value<glm::dvec4>(key); }
 void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::variant<glm::dvec3, glm::dvec4, glm::dmat3x3>* val) {
-   if (d.hasValue<glm::dvec3>(key)) { *val = d.value<glm::dvec3>(key); return; }
-   if (d.hasValue<glm::dvec4>(key)) { *val = d.value<glm::dvec4>(key); return; }
-   if (d.hasValue<glm::dmat3x3>(key)) { *val = d.value<glm::dmat3x3>(key); return; }
+   if (d.hasValue<glm::dvec3>(key)) { glm::dvec3 v; bakeTo(d, key, &v); *val = std::move(v); }
+   if (d.hasValue<glm::dvec4>(key)) { glm::dvec4 v; bakeTo(d, key, &v); *val = std::move(v); }
+   if (d.hasValue<glm::dmat3x3>(key)) { glm::dmat3x3 v; bakeTo(d, key, &v); *val = std::move(v); }
 }
 } // namespace internal
 

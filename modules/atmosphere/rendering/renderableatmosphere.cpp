@@ -55,27 +55,6 @@
 #include <math.h>
 
 namespace {
-    static const char* _loggerCat = "RenderableAtmosphere";
-
-    constexpr const char* KeyShadowGroup  = "ShadowGroup";
-    constexpr const char* KeyShadowSource = "Source";
-    constexpr const char* KeyShadowCaster = "Caster";
-
-    constexpr const char* KeyPlanetRadius = "PlanetRadius";
-    constexpr const char* KeyAverageGroundReflectance = "PlanetAverageGroundReflectance";
-    constexpr const char* KeyRayleigh = "Rayleigh";
-    constexpr const char* KeyRayleighHeightScale = "H_R";
-    constexpr const char* KeyOzone = "Ozone";
-    constexpr const char* KeyOzoneHeightScale = "H_O";
-    constexpr const char* KeyMie = "Mie";
-    constexpr const char* KeyMieHeightScale = "H_M";
-    constexpr const char* KeyMiePhaseConstant = "G";
-    constexpr const char* KeyImage = "Image";
-    constexpr const char* KeyToneMappingOp = "ToneMapping";
-    constexpr const char* KeyATMDebug = "Debug";
-    constexpr const char* KeyTextureScale = "PreCalculatedTextureScale";
-    constexpr const char* KeySaveTextures = "SaveCalculatedTextures";
-
     constexpr openspace::properties::Property::PropertyInfo AtmosphereHeightInfo {
         "AtmosphereHeight",
         "Atmosphere Height (KM)",

@@ -51,10 +51,6 @@
 namespace {
     constexpr const char* _loggerCat = "RenderableStars";
 
-    constexpr const char* KeyFile = "File";
-    constexpr const char* KeyStaticFilterValue = "StaticFilter";
-    constexpr const char* KeyStaticFilterReplacement = "StaticFilterReplacement";
-
     constexpr const std::array<const char*, 17> UniformNames = {
         "modelMatrix", "cameraUp", "cameraViewProjectionMatrix",
         "colorOption", "magnitudeExponent", "eyePosition", "psfParamConf",

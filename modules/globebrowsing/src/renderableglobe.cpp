@@ -82,8 +82,6 @@ namespace {
     constexpr const char* KeyRadii = "Radii";
     constexpr const char* KeyLayers = "Layers";
     constexpr const char* KeyShadowGroup = "ShadowGroup";
-    constexpr const char* KeyShadowSource = "Source";
-    constexpr const char* KeyShadowCaster = "Caster";
     constexpr const char* KeyLabels = "Labels";
 
     const openspace::globebrowsing::AABB3 CullingFrustum{

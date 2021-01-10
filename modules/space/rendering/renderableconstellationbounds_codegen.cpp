@@ -12,6 +12,7 @@
 namespace codegen {
 template <typename T> openspace::documentation::Documentation doc() {
     static_assert(sizeof(T) == 0); // This should never be called
+    return openspace::documentation::Documentation(); // just to make GCC/Clang happy
 }
 template <> openspace::documentation::Documentation doc<openspace::RenderableConstellationBounds>() {
     using namespace openspace::documentation;

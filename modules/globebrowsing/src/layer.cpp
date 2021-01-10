@@ -42,15 +42,7 @@ namespace {
     constexpr const char* KeyName = "Name";
     constexpr const char* KeyDesc = "Description";
     constexpr const char* KeyLayerGroupID = "LayerGroupID";
-    constexpr const char* KeySettings = "Settings";
     constexpr const char* KeyAdjustment = "Adjustment";
-    constexpr const char* KeyPadTiles = "PadTiles";
-
-    constexpr const char* KeyOpacity = "Opacity";
-    constexpr const char* KeyGamma = "Gamma";
-    constexpr const char* KeyMultiplier = "Multiplier";
-    constexpr const char* KeyOffset = "Offset";
-
 
     constexpr openspace::properties::Property::PropertyInfo TypeInfo = {
         "Type",
