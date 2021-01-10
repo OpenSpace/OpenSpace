@@ -39,6 +39,13 @@ namespace codegen {
 namespace internal {
 template<typename T> void bakeTo(const ghoul::Dictionary&, std::string_view, T*) { static_assert(sizeof(T) == 0); } // This should never be called
 template<typename T> void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::optional<T>* val);
+void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::string* val) { *val = d.value<std::string>(key); }
+void bakeTo(const ghoul::Dictionary& d, std::string_view key, Parameters::Type* val) {
+    std::string v = d.value<std::string>(key);
+    if (v == "Node") { *val = Parameters::Type::Node; }
+    if (v == "Focus") { *val = Parameters::Type::Focus; }
+    if (v == "Camera") { *val = Parameters::Type::Camera; }
+}
 
 template<typename T> void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::optional<T>* val) {
     if (d.hasKey(key)) {
@@ -47,13 +54,6 @@ template<typename T> void bakeTo(const ghoul::Dictionary& d, std::string_view ke
         *val = v;
     }
     else *val = std::nullopt;
-}
-void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::string* val) { *val = d.value<std::string>(key); }
-void bakeTo(const ghoul::Dictionary& d, std::string_view key, Parameters::Type* val) {
-    std::string v = d.value<std::string>(key);
-    if (v == "Node") { *val = Parameters::Type::Node; }
-    if (v == "Focus") { *val = Parameters::Type::Focus; }
-    if (v == "Camera") { *val = Parameters::Type::Camera; }
 }
 
 } // namespace internal

@@ -35,6 +35,7 @@ namespace internal {
 template<typename T> void bakeTo(const ghoul::Dictionary&, std::string_view, T*) { static_assert(sizeof(T) == 0); } // This should never be called
 template<typename T> void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::optional<T>* val);
 void bakeTo(const ghoul::Dictionary& d, std::string_view key, bool* val) { *val = d.value<bool>(key); }
+void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::string* val) { *val = d.value<std::string>(key); }
 
 template<typename T> void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::optional<T>* val) {
     if (d.hasKey(key)) {
@@ -44,7 +45,6 @@ template<typename T> void bakeTo(const ghoul::Dictionary& d, std::string_view ke
     }
     else *val = std::nullopt;
 }
-void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::string* val) { *val = d.value<std::string>(key); }
 
 } // namespace internal
 

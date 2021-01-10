@@ -58,15 +58,6 @@ void bakeTo(const ghoul::Dictionary& d, std::string_view key, float* val) { *val
 void bakeTo(const ghoul::Dictionary& d, std::string_view key, glm::dvec3* val) { *val = d.value<glm::dvec3>(key); }
 void bakeTo(const ghoul::Dictionary& d, std::string_view key, glm::vec3* val) { *val = d.value<glm::dvec3>(key); }
 void bakeTo(const ghoul::Dictionary&, std::string_view, std::monostate* val) { *val = std::monostate(); }
-
-template<typename T> void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::optional<T>* val) {
-    if (d.hasKey(key)) {
-        T v;
-        bakeTo(d, key, &v);
-        *val = v;
-    }
-    else *val = std::nullopt;
-}
 void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::string* val) { *val = d.value<std::string>(key); }
 template <> void bakeTo<Parameters::Settings>(const ghoul::Dictionary& d, std::string_view key, Parameters::Settings* val) {
     Parameters::Settings& res = *val;
@@ -82,6 +73,15 @@ template <> void bakeTo<Parameters::LayerAdjustment>(const ghoul::Dictionary& d,
     internal::bakeTo(dict, "Type", &res.type);
     internal::bakeTo(dict, "ChromaKeyColor", &res.chromaKeyColor);
     internal::bakeTo(dict, "ChromaKeyTolerance", &res.chromaKeyTolerance);
+}
+
+template<typename T> void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::optional<T>* val) {
+    if (d.hasKey(key)) {
+        T v;
+        bakeTo(d, key, &v);
+        *val = v;
+    }
+    else *val = std::nullopt;
 }
 
 } // namespace internal

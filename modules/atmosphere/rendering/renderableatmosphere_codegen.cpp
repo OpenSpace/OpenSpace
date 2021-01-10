@@ -81,27 +81,7 @@ void bakeTo(const ghoul::Dictionary& d, std::string_view key, double* val) { *va
 void bakeTo(const ghoul::Dictionary& d, std::string_view key, float* val) { *val = static_cast<float>(d.value<double>(key)); }
 void bakeTo(const ghoul::Dictionary& d, std::string_view key, glm::dvec3* val) { *val = d.value<glm::dvec3>(key); }
 void bakeTo(const ghoul::Dictionary& d, std::string_view key, glm::vec3* val) { *val = d.value<glm::dvec3>(key); }
-
-template<typename T> void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::optional<T>* val) {
-    if (d.hasKey(key)) {
-        T v;
-        bakeTo(d, key, &v);
-        *val = v;
-    }
-    else *val = std::nullopt;
-}
 void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::string* val) { *val = d.value<std::string>(key); }
-
-template<typename T> void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::vector<T>* val) {
-    ghoul::Dictionary dict = d.value<ghoul::Dictionary>(key);
-    std::vector<std::string_view> keys = dict.keys();
-    val->reserve(keys.size());
-    for (size_t i = 0; i < dict.size(); ++i) {
-        T v;
-        bakeTo(dict, keys[i], &v);
-        val->push_back(std::move(v));
-    }
-}
 template <> void bakeTo<Parameters::ShadowGroup::SourceElement>(const ghoul::Dictionary& d, std::string_view key, Parameters::ShadowGroup::SourceElement* val) {
     Parameters::ShadowGroup::SourceElement& res = *val;
     ghoul::Dictionary dict = d.value<ghoul::Dictionary>(key);
@@ -161,6 +141,26 @@ template <> void bakeTo<Parameters::ATMDebug>(const ghoul::Dictionary& d, std::s
     ghoul::Dictionary dict = d.value<ghoul::Dictionary>(key);
     internal::bakeTo(dict, "PreCalculatedTextureScale", &res.preCalculatedTextureScale);
     internal::bakeTo(dict, "SaveCalculatedTextures", &res.saveCalculatedTextures);
+}
+
+template<typename T> void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::optional<T>* val) {
+    if (d.hasKey(key)) {
+        T v;
+        bakeTo(d, key, &v);
+        *val = v;
+    }
+    else *val = std::nullopt;
+}
+
+template<typename T> void bakeTo(const ghoul::Dictionary& d, std::string_view key, std::vector<T>* val) {
+    ghoul::Dictionary dict = d.value<ghoul::Dictionary>(key);
+    std::vector<std::string_view> keys = dict.keys();
+    val->reserve(keys.size());
+    for (size_t i = 0; i < dict.size(); ++i) {
+        T v;
+        bakeTo(dict, keys[i], &v);
+        val->push_back(std::move(v));
+    }
 }
 
 } // namespace internal
