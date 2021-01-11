@@ -40,6 +40,7 @@
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/glm.h>
 #include <glm/gtx/string_cast.hpp>
+#include <optional>
 
 namespace {
     constexpr const char* ProgramName = "Plane";
@@ -68,36 +69,24 @@ namespace {
         "Blending Mode",
         "This determines the blending mode that is applied to this plane."
     };
+
+    struct [[codegen::Dictionary(RenderablePlane)]] Parameters {
+        // [[codegen::description(BillboardInfo)]]
+        std::optional<bool> billboard;
+
+        // [[codegen::description(SizeInfo)]]
+        double size;
+
+        // [[codegen::description(BlendModeInfo)]]
+        std::optional<std::string> blendMode [[codegen::inlist("Normal", "Additive")]];
+    };
+#include "renderableplane_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderablePlane::Documentation() {
-    using namespace documentation;
-    return {
-        "Renderable Plane",
-        "base_renderable_plane",
-        {
-            {
-                SizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::No,
-                SizeInfo.description
-            },
-            {
-                BillboardInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                BillboardInfo.description
-            },
-            {
-                BlendModeInfo.identifier,
-                new StringInListVerifier({ "Normal", "Additive" }),
-                Optional::Yes,
-                BlendModeInfo.description, // + " The default value is 'Normal'.",
-            }
-        }
-    };
+    return codegen::doc<RenderablePlane>();
 }
 
 RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
@@ -106,20 +95,13 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     , _billboard(BillboardInfo, false)
     , _size(SizeInfo, 10.f, 0.f, 1e25f)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderablePlane"
-    );
+    Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
 
-    _size = static_cast<float>(dictionary.value<double>(SizeInfo.identifier));
-
-    if (dictionary.hasKey(BillboardInfo.identifier)) {
-        _billboard = dictionary.value<bool>(BillboardInfo.identifier);
-    }
+    _size = p.size;
+    _billboard = p.billboard.value_or<bool>(_billboard);
 
     _blendMode.addOptions({
         { BlendModeNormal, "Normal" },
@@ -144,12 +126,11 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
         }
     });
 
-    if (dictionary.hasKey(BlendModeInfo.identifier)) {
-        const std::string v = dictionary.value<std::string>(BlendModeInfo.identifier);
-        if (v == "Normal") {
+    if (p.blendMode.has_value()) {
+        if (*p.blendMode == "Normal") {
             _blendMode = BlendModeNormal;
         }
-        else if (v == "Additive") {
+        else if (*p.blendMode == "Additive") {
             _blendMode = BlendModeAdditive;
         }
     }
