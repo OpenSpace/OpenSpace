@@ -282,7 +282,8 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
         addProperty(_fadeInThreshold);
     }
 
-    if (dictionary.hasKey(FadeInThresholdInfo.identifier)) {
+    if (dictionary.hasKey(FadeInThresholdInfo.identifier) ||
+        dictionary.hasKey(FadeOutThresholdInfo.identifier)) {
         _disableFadeInDistance.set(false);
         addProperty(_disableFadeInDistance);
     }
