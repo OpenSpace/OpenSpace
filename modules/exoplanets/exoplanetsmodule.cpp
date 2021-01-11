@@ -93,7 +93,8 @@ void ExoplanetsModule::internalInitialize(const ghoul::Dictionary&) {
 
 std::vector<documentation::Documentation> ExoplanetsModule::documentations() const {
     return {
-        ExoplanetsDataPreparationTask::documentation()
+        ExoplanetsDataPreparationTask::documentation(),
+        RenderableOrbitDisc::Documentation()
     };
 }
 
