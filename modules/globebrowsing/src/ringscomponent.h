@@ -78,6 +78,8 @@ private:
     void compileShadowShader();
 
     properties::StringProperty _texturePath;
+    properties::StringProperty _textureFwrdPath;
+    properties::StringProperty _textureBckwrdPath;
     properties::FloatProperty _size;
     properties::Vec2Property _offset;
     properties::FloatProperty _nightFactor;
@@ -89,12 +91,17 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     std::unique_ptr<ghoul::opengl::ProgramObject> _geometryOnlyShader;
     UniformCache(modelViewProjectionMatrix, textureOffset, colorFilterValue, nightFactor,
-        sunPosition, ringTexture, shadowMatrix, shadowMapTexture, zFightingPercentage
+        sunPosition, ringTexture, ringTextureFwrd, ringTextureBckwrd, shadowMatrix, 
+        shadowMapTexture, zFightingPercentage
     ) _uniformCache;
     UniformCache(modelViewProjectionMatrix, textureOffset, ringTexture
     ) _geomUniformCache;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
+    std::unique_ptr<ghoul::opengl::Texture> _textureForwards;
+    std::unique_ptr<ghoul::opengl::Texture> _textureBackwards;
     std::unique_ptr<ghoul::filesystem::File> _textureFile;
+    std::unique_ptr<ghoul::filesystem::File> _textureFileForwards;
+    std::unique_ptr<ghoul::filesystem::File> _textureFileBackwards;
 
     ghoul::Dictionary _ringsDictionary;
     bool _textureIsDirty = false;

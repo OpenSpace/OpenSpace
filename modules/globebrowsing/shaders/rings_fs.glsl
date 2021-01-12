@@ -34,6 +34,8 @@ in vec4 shadowCoords;
 
 uniform sampler2DShadow shadowMapTexture;
 uniform sampler1D ringTexture;
+uniform sampler1D ringTextureFwrd;
+uniform sampler1D ringTextureBckwrd;
 uniform vec2 textureOffset;
 uniform float colorFilterValue;
 
@@ -66,7 +68,8 @@ Fragment getFragment() {
         discard;
     }
 
-    vec4 diffuse = texture(ringTexture, texCoord);
+    //vec4 diffuse = texture(ringTexture, texCoord);
+    vec4 diffuse = texture(ringTextureBckwrd, texCoord);
     // divided by 3 as length of vec3(1.0, 1.0, 1.0) will return 3 and we want
     // to normalize the alpha value to [0,1]
     float colorValue = length(diffuse.rgb) / 3.0;

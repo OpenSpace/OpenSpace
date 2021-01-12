@@ -22,6 +22,8 @@ local Saturn = {
         Layers = {},
         Rings = {
             Texture = texturesPath .. "/saturn_rings.png",
+            TextureFwrd = texturesPath .. "/final_color_forward_os.png",
+            TextureBckwrd = texturesPath .. "/final_color_backwards_os.png",
             Size = 140445000,
             Offset = { 74500 / 140445.100671159, 1.0 }, -- min / max extend
         },
