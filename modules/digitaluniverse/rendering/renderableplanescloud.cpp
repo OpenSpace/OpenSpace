@@ -299,7 +299,7 @@ documentation::Documentation RenderablePlanesCloud::Documentation() {
 
 RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 1E5)
+    , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 300000.f)
     , _textColor(TextColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _textOpacity(TextOpacityInfo, 1.f, 0.f, 1.f)
     , _textSize(TextSizeInfo, 8.0, 0.5, 24.0)
