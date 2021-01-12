@@ -1,5 +1,4 @@
 assert(type(asset.require) == "function", "require should be function")
-assert(type(asset.request) == "function", "request should be function")
 assert(type(asset.localResource) == "function", "localResource should be function")
 assert(type(asset.syncedResource) == "function", "syncedResource should be function")
 assert(type(asset.export) == "function", "export should be function")

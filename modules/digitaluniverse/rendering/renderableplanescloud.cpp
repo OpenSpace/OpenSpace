@@ -299,7 +299,7 @@ documentation::Documentation RenderablePlanesCloud::Documentation() {
 
 RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 100.f)
+    , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 300000.f)
     , _textColor(TextColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _textOpacity(TextOpacityInfo, 1.f, 0.f, 1.f)
     , _textSize(TextSizeInfo, 8.0, 0.5, 24.0)
@@ -569,7 +569,7 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
     glDisable(GL_CULL_FACE);
 
     GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
+    global::renderEngine->openglStateCache().viewport(viewport);
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();
