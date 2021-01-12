@@ -41,9 +41,9 @@ uniform bool has_texture_normal;
 uniform bool has_texture_specular;
 uniform bool has_color_specular;
 
-uniform sampler2D texture_diffuse1;
-uniform sampler2D texture_normal1;
-uniform sampler2D texture_specular1;
+uniform sampler2D texture_diffuse;
+uniform sampler2D texture_normal;
+uniform sampler2D texture_specular;
 
 uniform vec3 color_diffuse;
 uniform vec3 color_specular;
@@ -78,7 +78,7 @@ Fragment getFragment() {
 
 	vec3 diffuseAlbedo;
 	if (has_texture_diffuse) {
-		diffuseAlbedo = texture(texture_diffuse1, vs_st).rgb;
+		diffuseAlbedo = texture(texture_diffuse, vs_st).rgb;
 	}
 	else {
 		diffuseAlbedo = color_diffuse;
@@ -90,7 +90,7 @@ Fragment getFragment() {
 
 		vec3 specularAlbedo;
 		if (has_texture_specular) {
-			specularAlbedo = texture(texture_specular1, vs_st).rgb;
+			specularAlbedo = texture(texture_specular, vs_st).rgb;
 		}
 		else {
 			if(has_color_specular) {
@@ -107,7 +107,7 @@ Fragment getFragment() {
         
         vec3 n;
 		if(has_texture_normal) {
-			vec3 normalAlbedo = texture(texture_normal1, vs_st).rgb;
+			vec3 normalAlbedo = texture(texture_normal, vs_st).rgb;
 			normalAlbedo = normalize(normalAlbedo * 2.0 - 1.0);
 			n = normalize(TBN * normalAlbedo);
 		}
