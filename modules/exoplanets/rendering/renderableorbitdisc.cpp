@@ -33,10 +33,8 @@
 #include <openspace/util/distanceconstants.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
@@ -144,12 +142,8 @@ RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)
     setBoundingSphere(_size + _offset.value().y * _size);
 
     _texturePath = absPath(dictionary.value<std::string>(TextureInfo.identifier));
-    _textureFile = std::make_unique<File>(_texturePath);
-
-    _texturePath.onChange([&]() { _textureIsDirty = true; });
+    _texturePath.onChange([&]() { _texture->loadFromFile(_texturePath); });
     addProperty(_texturePath);
-
-    _textureFile->setCallback([&](const File&) { _textureIsDirty = true; });
 
     _eccentricity = static_cast<float>(
         dictionary.value<double>(EccentricityInfo.identifier)
@@ -158,12 +152,17 @@ RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)
     addProperty(_eccentricity);
 
     addProperty(_opacity);
-
-    _plane = std::make_unique<PlaneGeometry>(planeSize());
 }
 
 bool RenderableOrbitDisc::isReady() const {
-    return _shader && _texture;
+    return _shader && _texture && _plane;
+}
+
+void RenderableOrbitDisc::initialize() {
+    _texture = std::make_unique<TextureComponent>(
+        ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
+    );
+    _plane = std::make_unique<PlaneGeometry>(planeSize());
 }
 
 void RenderableOrbitDisc::initializeGL() {
@@ -175,15 +174,15 @@ void RenderableOrbitDisc::initializeGL() {
 
     ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
 
+    _texture->loadFromFile(_texturePath);
+    _texture->uploadToGpu();
+
     _plane->initialize();
-    loadTexture();
 }
 
 void RenderableOrbitDisc::deinitializeGL() {
     _plane->deinitialize();
     _plane = nullptr;
-
-    _textureFile = nullptr;
     _texture = nullptr;
 
     global::renderEngine->removeRenderProgram(_shader.get());
@@ -240,33 +239,7 @@ void RenderableOrbitDisc::update(const UpdateData&) {
         _planeIsDirty = false;
     }
 
-    if (_textureIsDirty) {
-        loadTexture();
-        _textureIsDirty = false;
-    }
-}
-
-void RenderableOrbitDisc::loadTexture() {
-    if (!_texturePath.value().empty()) {
-        std::unique_ptr<ghoul::opengl::Texture> texture =
-            ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
-
-        if (texture) {
-            LDEBUGC(
-                "RenderableOrbitDisc",
-                fmt::format("Loaded texture from '{}'", absPath(_texturePath))
-            );
-            _texture = std::move(texture);
-
-            _texture->uploadTexture();
-            _texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-
-            _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
-            _textureFile->setCallback(
-                [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
-            );
-        }
-    }
+    _texture->update();
 }
 
 float RenderableOrbitDisc::planeSize() const {

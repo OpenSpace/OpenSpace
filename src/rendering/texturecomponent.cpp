@@ -22,53 +22,75 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEDISC___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLEDISC___H__
-
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/rendering/renderable.h>
 #include <openspace/rendering/texturecomponent.h>
-#include <openspace/util/planegeometry.h>
-#include <ghoul/opengl/uniformcache.h>
-#include <ghoul/opengl/ghoul_gl.h>
 
-namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl { class ProgramObject; }
+#include <ghoul/filesystem/file.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/io/texture/texturereader.h>
+#include <ghoul/logging/logmanager.h>
+
+namespace {
+    constexpr const char* _loggerCat = "TextureComponent";
+} // namespace
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+TextureComponent::TextureComponent(const Texture::FilterMode filterMode, bool watchFile)
+    : _filterMode(filterMode), _shouldWatchFile(watchFile)
+{}
 
-class RenderableDisc : public Renderable {
-public:
-    RenderableDisc(const ghoul::Dictionary& dictionary);
+ghoul::opengl::Texture* TextureComponent::texture() const {
+    return _texture.get();
+}
 
-    void initialize() override;
-    void initializeGL() override;
-    void deinitializeGL() override;
+void TextureComponent::bind() {
+    ghoul_assert(_texture, "Texture must be loaded before binding");
+    _texture->bind();
+}
 
-    bool isReady() const override;
+void TextureComponent::uploadToGpu() {
+    if (!_texture) {
+        LERROR("Could not upload texture to GPU. Texture not loaded");
+        return;
+    }
+    _texture->uploadTexture();
+    _texture->setFilter(_filterMode);
+}
 
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void update(const UpdateData& data) override;
+void TextureComponent::loadFromFile(const std::string& path) {
+    if (!path.empty()) {
+        using namespace ghoul::io;
+        using namespace ghoul::opengl;
+        std::unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
+            absPath(path)
+        );
 
-    static documentation::Documentation Documentation();
+        if (texture) {
+            LDEBUG(fmt::format("Loaded texture from '{}'", absPath(path)));
+            _texture = nullptr;
+            _texture = std::move(texture);
 
-private:
-    properties::StringProperty _texturePath;
-    properties::FloatProperty _size;
-    properties::FloatProperty _width;
+            _textureFile = std::make_unique<ghoul::filesystem::File>(path);
+            if (_shouldWatchFile) {
+                _textureFile->setCallback(
+                    [&](const ghoul::filesystem::File&) { _fileIsDirty = true; }
+                );
+            }
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-    UniformCache(modelViewProjection, opacity, width, texture) _uniformCache;
+            _fileIsDirty = false;
+            _textureIsDirty = true;
+        }
+    }
+}
 
-    std::unique_ptr<PlaneGeometry> _plane;
-    std::unique_ptr<TextureComponent> _texture;
+void TextureComponent::update() {
+    if (_fileIsDirty) {
+        loadFromFile(_textureFile->path());
+    }
 
-    bool _planeIsDirty = false;
-};
-
+    if (_textureIsDirty) {
+        uploadToGpu();
+        _textureIsDirty = false;
+    }
+}
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLEDISC___H__

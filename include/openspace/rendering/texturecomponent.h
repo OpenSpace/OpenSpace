@@ -22,53 +22,49 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEDISC___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLEDISC___H__
+#ifndef __OPENSPACE_CORE___TEXTURECOMPONENT___H__
+#define __OPENSPACE_CORE___TEXTURECOMPONENT___H__
 
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/texturecomponent.h>
-#include <openspace/util/planegeometry.h>
-#include <ghoul/opengl/uniformcache.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/texture.h>
+#include <optional>
 
 namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl { class ProgramObject; }
+namespace ghoul::opengl {class Texture; }
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+class TextureComponent {
+    using Texture = ghoul::opengl::Texture;
 
-class RenderableDisc : public Renderable {
 public:
-    RenderableDisc(const ghoul::Dictionary& dictionary);
+    TextureComponent() = default;
+    TextureComponent(const Texture::FilterMode filterMode, bool watchFile = true);
+    ~TextureComponent() = default;
 
-    void initialize() override;
-    void initializeGL() override;
-    void deinitializeGL() override;
+    Texture* texture() const;
 
-    bool isReady() const override;
+    void bind();
+    void uploadToGpu();
 
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void update(const UpdateData& data) override;
+    // Loads a texture from a file on disk
+    void loadFromFile(const std::string& path);
 
-    static documentation::Documentation Documentation();
+    // Function to call in a renderable's update function to make sure
+    // the texture is kept up to date
+    void update();
 
 private:
-    properties::StringProperty _texturePath;
-    properties::FloatProperty _size;
-    properties::FloatProperty _width;
+    std::unique_ptr<ghoul::filesystem::File> _textureFile = nullptr;
+    std::unique_ptr<Texture> _texture = nullptr;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-    UniformCache(modelViewProjection, opacity, width, texture) _uniformCache;
+    Texture::FilterMode _filterMode = Texture::FilterMode::LinearMipMap;
+    bool _shouldWatchFile = true;
 
-    std::unique_ptr<PlaneGeometry> _plane;
-    std::unique_ptr<TextureComponent> _texture;
-
-    bool _planeIsDirty = false;
+    bool _fileIsDirty = false;
+    bool _textureIsDirty = false;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLEDISC___H__
+#endif // __OPENSPACE_CORE___TEXTURECOMPONENT___H__

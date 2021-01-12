@@ -31,14 +31,14 @@
 #include <openspace/scene/scene.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
+    constexpr const char* _loggerCat = "RenderableDisc";
+
     constexpr const std::array<const char*, 4> UniformNames = {
         "modelViewProjectionTransform", "opacity", "width", "colorTexture"
     };
@@ -106,8 +106,6 @@ RenderableDisc::RenderableDisc(const ghoul::Dictionary& dictionary)
     , _size(SizeInfo, 1.f, 0.f, 1e13f)
     , _width(WidthInfo, 0.5f, 0.f, 1.f)
 {
-    using ghoul::filesystem::File;
-
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
@@ -120,25 +118,26 @@ RenderableDisc::RenderableDisc(const ghoul::Dictionary& dictionary)
     addProperty(_size);
 
     _texturePath = absPath(dictionary.value<std::string>(TextureInfo.identifier));
-    _textureFile = std::make_unique<File>(_texturePath);
+    _texturePath.onChange([&]() { _texture->loadFromFile(_texturePath); });
+    addProperty(_texturePath);
 
     if (dictionary.hasKey(WidthInfo.identifier)) {
         _width = dictionary.value<double>(WidthInfo.identifier);
     }
     addProperty(_width);
 
-    _texturePath.onChange([&]() { loadTexture(); });
-    addProperty(_texturePath);
-
-    _textureFile->setCallback([&](const File&) { _textureIsDirty = true; });
-
     addProperty(_opacity);
-
-    _plane = std::make_unique<PlaneGeometry>(2*_size);
 }
 
 bool RenderableDisc::isReady() const {
-    return _shader && _texture;
+    return _shader && _texture && _plane;
+}
+
+void RenderableDisc::initialize() {
+    _texture = std::make_unique<TextureComponent>(
+        ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
+    );
+    _plane = std::make_unique<PlaneGeometry>(2 * _size);
 }
 
 void RenderableDisc::initializeGL() {
@@ -150,15 +149,15 @@ void RenderableDisc::initializeGL() {
 
     ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
 
+    _texture->loadFromFile(_texturePath);
+    _texture->uploadToGpu();
+
     _plane->initialize();
-    loadTexture();
 }
 
 void RenderableDisc::deinitializeGL() {
     _plane->deinitialize();
     _plane = nullptr;
-
-    _textureFile = nullptr;
     _texture = nullptr;
 
     global::renderEngine->removeRenderProgram(_shader.get());
@@ -210,40 +209,11 @@ void RenderableDisc::update(const UpdateData&) {
     }
 
     if (_planeIsDirty) {
-        _plane->updateSize(2*_size);
+        _plane->updateSize(2 * _size);
         _planeIsDirty = false;
     }
 
-    if (_textureIsDirty) {
-        loadTexture();
-        _textureIsDirty = false;
-    }
-}
-
-void RenderableDisc::loadTexture() {
-    if (!_texturePath.value().empty()) {
-        using namespace ghoul::io;
-        using namespace ghoul::opengl;
-        std::unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
-            absPath(_texturePath)
-        );
-
-        if (texture) {
-            LDEBUGC(
-                "RenderableDisc",
-                fmt::format("Loaded texture from '{}'", absPath(_texturePath))
-            );
-            _texture = std::move(texture);
-
-            _texture->uploadTexture();
-            _texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-
-            _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
-            _textureFile->setCallback(
-                [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
-            );
-        }
-    }
+    _texture->update();
 }
 
 } // namespace openspace

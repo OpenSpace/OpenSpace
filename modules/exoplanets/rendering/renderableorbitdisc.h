@@ -29,9 +29,9 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/texturecomponent.h>
 #include <openspace/util/planegeometry.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/uniformcache.h>
 
 namespace ghoul::filesystem { class File; }
@@ -47,6 +47,7 @@ class RenderableOrbitDisc : public Renderable {
 public:
     RenderableOrbitDisc(const ghoul::Dictionary& dictionary);
 
+    void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
 
@@ -58,8 +59,6 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    void loadTexture();
-
     // Computes the size of the plane quad using the relevant properties
     float planeSize() const;
 
@@ -71,12 +70,10 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
     UniformCache(modelViewProjection, offset, opacity, texture,
         eccentricity, semiMajorAxis) _uniformCache;
-    std::unique_ptr<ghoul::opengl::Texture> _texture = nullptr;
-    std::unique_ptr<ghoul::filesystem::File> _textureFile;
 
     std::unique_ptr<PlaneGeometry> _plane;
+    std::unique_ptr<TextureComponent> _texture;
 
-    bool _textureIsDirty = false;
     bool _planeIsDirty = false;
 };
 
