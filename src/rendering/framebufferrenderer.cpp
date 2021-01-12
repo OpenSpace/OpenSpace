@@ -556,27 +556,6 @@ void FramebufferRenderer::updateDownscaleTextures() {
 }
 
 void FramebufferRenderer::writeDownscaledVolume() {
-    // Saving current OpenGL state
-    GLboolean blendEnabled = glIsEnabledi(GL_BLEND, 0);
-
-    GLenum blendEquationRGB;
-    glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
-
-    GLenum blendEquationAlpha;
-    glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
-
-    GLenum blendDestAlpha;
-    glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
-
-    GLenum blendDestRGB;
-    glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
-
-    GLenum blendSrcAlpha;
-    glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
-
-    GLenum blendSrcRGB;
-    glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
-
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
@@ -620,14 +599,9 @@ void FramebufferRenderer::writeDownscaledVolume() {
 
     _downscaledVolumeProgram->deactivate();
 
-    // Restores blending state
-    glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
-    glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
-
-    if (!blendEnabled) {
-        glDisablei(GL_BLEND, 0);
-    }
-
+    // Restores OpenGL Rendering State
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
 }
 
 void FramebufferRenderer::update() {
@@ -1125,6 +1099,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     TracyGpuZone("FramebufferRenderer")
 
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
+    global::renderEngine->openglStateCache().setDefaultFramebuffer(_defaultFBO);
 
     GLint viewport[4] = { 0 };
     global::renderEngine->openglStateCache().viewport(viewport);

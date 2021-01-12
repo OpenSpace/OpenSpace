@@ -569,7 +569,7 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
     glDisable(GL_CULL_FACE);
 
     GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
+    global::renderEngine->openglStateCache().viewport(viewport);
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();
