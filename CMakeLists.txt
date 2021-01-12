@@ -140,9 +140,22 @@ if (UNIX AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif ()
 
 # Add external dependencies
-add_subdirectory(${OPENSPACE_BASE_DIR}/ext)
+add_subdirectory(ext)
 
-# include(src/CMakeLists.txt)
+add_subdirectory(support/coding/codegen)
+
+# It is important that the __codegen.h does not actually exist so that this target
+# is never considered as finished
+add_custom_target(run_codegen ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/__codegen.h")
+add_dependencies(run_codegen codegen)
+add_custom_command(
+  OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/__codegen.h"
+  COMMAND codegen ARGS "--folder" "${OPENSPACE_BASE_DIR}/modules"
+  VERBATIM
+)
+set_folder_location(codegen "support")
+set_folder_location(run_codegen "support")
+
 add_subdirectory(src)
 
 # Qt

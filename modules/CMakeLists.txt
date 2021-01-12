@@ -288,6 +288,8 @@ foreach (val RANGE ${enabled_module_count})
   list(APPEND all_enabled_modules "${library_name}")
   begin_header("Module ${name} (${library_name})")
   add_subdirectory(${path})
+  # Make sure that the code generator always runs before a module
+  add_dependencies(${library_name} run_codegen)
   end_header("End: Module ${name}")
   message(STATUS "")
 
