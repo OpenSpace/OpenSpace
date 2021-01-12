@@ -2738,7 +2738,8 @@ TEST_CASE("Documentation: DeprecatedVerifier", "[documentation]") {
     TestResult positiveRes = testSpecification(doc, positive);
     REQUIRE(positiveRes.success);
     REQUIRE(positiveRes.offenses.empty());
-    REQUIRE(positiveRes.warnings.size() == 13);
+    REQUIRE(positiveRes.warnings.size() == doc.entries.size());
+
     REQUIRE(positiveRes.warnings[0].offender == "bool");
     REQUIRE(positiveRes.warnings[0].reason == TestResult::Warning::Reason::Deprecated);
     REQUIRE(positiveRes.warnings[1].offender == "double");

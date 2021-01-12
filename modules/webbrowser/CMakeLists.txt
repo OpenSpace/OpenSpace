@@ -236,6 +236,15 @@ set_folder_location(openspace_web_helper "Helper")
 
 
 # Display CEF configuration settings.
-PRINT_CEF_CONFIG()
+# PRINT_CEF_CONFIG()
 
 target_include_directories(${webbrowser_module} SYSTEM PUBLIC ${CEF_ROOT})
+
+set(deps "")
+foreach (i ${CEF_BINARY_FILES})
+  list(APPEND deps "${CEF_BINARY_DIR}/${i}")
+endforeach()
+foreach (j ${CEF_RESOURCE_FILES})
+list(APPEND deps "${CEF_RESOURCE_DIR}/${j}")
+endforeach()
+add_external_library_dependencies("${deps}")

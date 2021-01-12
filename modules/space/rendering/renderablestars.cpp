@@ -762,7 +762,7 @@ void RenderableStars::loadPSFTexture() {
 void RenderableStars::renderPSFToTexture() {
     // Saves current FBO first
     GLint defaultFBO;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
+    defaultFBO = global::renderEngine->openglStateCache().defaultFramebuffer();
 
 //    GLint m_viewport[4];
 //    global::renderEngine.openglStateCache().viewPort(m_viewport);
@@ -875,24 +875,6 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
         return;
     }
 
-    // Saving current OpenGL state
-    GLenum blendEquationRGB;
-    GLenum blendEquationAlpha;
-    GLenum blendDestAlpha;
-    GLenum blendDestRGB;
-    GLenum blendSrcAlpha;
-    GLenum blendSrcRGB;
-    GLboolean depthMask;
-
-    glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
-    glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
-    glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
-    glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
-    glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
-    glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
-
-    glGetBooleanv(GL_DEPTH_WRITEMASK, &depthMask);
-
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glDepthMask(false);
 
@@ -995,13 +977,9 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     glBindVertexArray(0);
     _program->deactivate();
 
-    glDepthMask(true);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
     // Restores OpenGL blending state
-    glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
-    glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
-    glDepthMask(depthMask);
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
 }
 
 void RenderableStars::update(const UpdateData&) {
