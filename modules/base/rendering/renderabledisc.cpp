@@ -142,7 +142,7 @@ void RenderableDisc::initialize() {
 
 void RenderableDisc::initializeGL() {
     _shader = global::renderEngine->buildRenderProgram(
-        "RingProgram",
+        "DiscProgram",
         absPath("${MODULE_BASE}/shaders/disc_vs.glsl"),
         absPath("${MODULE_BASE}/shaders/disc_fs.glsl")
     );

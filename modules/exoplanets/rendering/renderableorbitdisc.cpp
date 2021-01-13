@@ -47,7 +47,7 @@ namespace {
         "Texture",
         "Texture",
         "This value is the path to a texture on disk that contains a one-dimensional "
-        "texture which is used for these rings."
+        "texture which is used for the color."
     };
 
     static const openspace::properties::Property::PropertyInfo SizeInfo = {
@@ -121,8 +121,6 @@ RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)
     , _eccentricity(EccentricityInfo, 0.f, 0.f, 1.f)
     , _offset(OffsetInfo, glm::vec2(0.f), glm::vec2(0.f), glm::vec2(1.f))
 {
-    using ghoul::filesystem::File;
-
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
@@ -167,7 +165,7 @@ void RenderableOrbitDisc::initialize() {
 
 void RenderableOrbitDisc::initializeGL() {
     _shader = global::renderEngine->buildRenderProgram(
-        "OrbitdiscProgram",
+        "OrbitDiscProgram",
         absPath("${BASE}/modules/exoplanets/shaders/orbitdisc_vs.glsl"),
         absPath("${BASE}/modules/exoplanets/shaders/orbitdisc_fs.glsl")
     );

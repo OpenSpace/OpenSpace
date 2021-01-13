@@ -35,9 +35,7 @@
 #include <ghoul/opengl/uniformcache.h>
 
 namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl {
-    class ProgramObject;
-} // namespace ghoul::opengl
+namespace ghoul::opengl { class ProgramObject; } // namespace ghoul::opengl
 
 namespace openspace {
 
