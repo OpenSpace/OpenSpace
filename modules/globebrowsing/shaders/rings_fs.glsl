@@ -36,10 +36,13 @@ uniform sampler2DShadow shadowMapTexture;
 uniform sampler1D ringTexture;
 uniform sampler1D ringTextureFwrd;
 uniform sampler1D ringTextureBckwrd;
+uniform sampler1D ringTextureUnlit;
+
 uniform vec2 textureOffset;
 uniform float colorFilterValue;
 
 uniform vec3 sunPosition;
+uniform vec3 camPositionObj;
 uniform float _nightFactor;
 uniform float zFightingPercentage;
 
@@ -69,15 +72,24 @@ Fragment getFragment() {
     }
 
     //vec4 diffuse = texture(ringTexture, texCoord);
-    vec4 diffuse = texture(ringTextureBckwrd, texCoord);
+    vec4 colorBckwrd = vec4(0.95) * texture(ringTextureBckwrd, texCoord);
+    vec4 colorFwrd   = vec4(0.5) * texture(ringTextureFwrd, texCoord);
+    float lerpFactor = (1.f + dot(camPositionObj.xyz, sunPosition.xyz)) * 0.5f;
+
+    vec4 diffuse = mix(colorFwrd, colorBckwrd, lerpFactor);
+    diffuse.a = 1.f;
+    
     // divided by 3 as length of vec3(1.0, 1.0, 1.0) will return 3 and we want
     // to normalize the alpha value to [0,1]
-    float colorValue = length(diffuse.rgb) / 3.0;
-    if (colorValue < colorFilterValue) {
-        diffuse.a = colorValue * colorFilterValue;
-        if (diffuse.a < 0.65)
-            discard;
-    }
+    float colorValue = length(diffuse.rgb) / 0.57735026919;
+    diffuse.a = colorValue;
+    if (diffuse.a + 1 < 1.2)
+        discard;
+    // if (colorValue < colorFilterValue) {
+    //     diffuse.a = colorValue * colorFilterValue;
+    //     if (diffuse.a < 0.99)
+    //         discard;
+    // }
 
     // shadow == 1.0 means it is not in shadow
     float shadow = 1.0;
@@ -117,7 +129,7 @@ Fragment getFragment() {
     // Reduce the color of the fragment by the user factor
     // if we are facing away from the Sun
     if (dot(sunPosition, normal) < 0) {
-        diffuse.xyz *= _nightFactor;
+        diffuse.xyz = vec3(0.9) * texture(ringTextureUnlit, texCoord).xyz * _nightFactor;
     }
 
     Fragment frag;
