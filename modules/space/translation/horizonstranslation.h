@@ -27,7 +27,7 @@
 
 #include <openspace/scene/translation.h>
 
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/stringlistproperty.h>
 #include <openspace/util/timeline.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/lua/luastate.h>
@@ -60,12 +60,11 @@ public:
 
 private:
     void loadData();
-    void readHorizonsTextFile();
+    void readHorizonsTextFile(const std::string& file);
     bool loadCachedFile(const std::string& file);
     void saveCachedFile(const std::string& file) const;
 
-    properties::StringProperty _horizonsTextFile;
-    std::unique_ptr<ghoul::filesystem::File> _fileHandle;
+    properties::StringListProperty _horizonsTextFiles;
     ghoul::lua::LuaState _state;
     Timeline<glm::dvec3> _timeline;
 };
