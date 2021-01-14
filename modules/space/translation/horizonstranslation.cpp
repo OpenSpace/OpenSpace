@@ -37,6 +37,7 @@
 
 namespace {
     constexpr const char* _loggerCat = "HorizonsTranslation";
+    constexpr int8_t CurrentCacheVersion = 1;
 } // namespace
 
 namespace {
@@ -230,6 +231,16 @@ bool HorizonsTranslation::loadCachedFile(const std::string& file) {
         return false;
     }
 
+    // Check the caching version
+    int8_t version = 0;
+    fileStream.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
+    if (version != CurrentCacheVersion) {
+        LINFO("The format of the cached file has changed: deleting old cache");
+        fileStream.close();
+        FileSys.deleteFile(file);
+        return false;
+    }
+
     // Read how many keyframes to read
     int32_t nKeyframes = 0;
 
@@ -267,6 +278,12 @@ void HorizonsTranslation::saveCachedFile(const std::string& file) const {
         LERROR(fmt::format("Error opening file '{}' for save cache file", file));
         return;
     }
+
+    // Write which version of caching that is used
+    fileStream.write(
+        reinterpret_cast<const char*>(&CurrentCacheVersion),
+        sizeof(int8_t)
+    );
 
     // Write how many keyframes are to be written
     int32_t nKeyframes = static_cast<int32_t>(_timeline.nKeyframes());
