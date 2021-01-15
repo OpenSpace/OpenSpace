@@ -27,6 +27,7 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 set(HEADER_FILES
     exoplanetshelper.h
     exoplanetsmodule.h
+    rendering/renderablehabitablezone.h
     rendering/renderableorbitdisc.h
     tasks/exoplanetsdatapreparationtask.h
 )
@@ -36,6 +37,7 @@ set(SOURCE_FILES
     exoplanetshelper.cpp
     exoplanetsmodule.cpp
     exoplanetsmodule_lua.inl
+    rendering/renderablehabitablezone.cpp
     rendering/renderableorbitdisc.cpp
     tasks/exoplanetsdatapreparationtask.cpp
 )

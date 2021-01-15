@@ -22,55 +22,39 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEDISC___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLEDISC___H__
+#ifndef __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEHABITABLEZONE___H__
+#define __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEHABITABLEZONE___H__
 
-#include <openspace/properties/stringproperty.h>
+#include <modules/base/rendering/renderabledisc.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/texturecomponent.h>
-#include <openspace/util/planegeometry.h>
-#include <ghoul/opengl/uniformcache.h>
-#include <ghoul/opengl/ghoul_gl.h>
-
-namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
 namespace documentation { struct Documentation; }
 
-class RenderableDisc : public Renderable {
+class RenderableHabitableZone : public RenderableDisc {
 public:
-    RenderableDisc(const ghoul::Dictionary& dictionary);
-
-    void initialize() override;
-    void initializeGL() override;
-    void deinitializeGL() override;
-
-    bool isReady() const override;
-
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void update(const UpdateData& data) override;
+    RenderableHabitableZone(const ghoul::Dictionary& dictionary);
 
     static documentation::Documentation Documentation();
 
-protected:
-    virtual float planeSize();
+private:
+    void computeZone();
 
-    properties::StringProperty _texturePath;
-    properties::FloatProperty _size;
-    properties::FloatProperty _width;
+    /**
+     * Compute the inner and outer boundary of the habitable zone of a star, accordring to
+     * formula and coefficients by Kopparapu et al. (2015) https://arxiv.org/abs/1404.5292
+     *
+     * \param teff The effective temperature of the star, in Kelvin
+     * \param luminosity The luminosity of the star, in solar luminosities
+     * \return A vec2 with the lower and upper boundary in atronomical units
+     */
+    glm::vec2 computeKopparapuZoneBoundaries(float teff, float luminosity);
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-    UniformCache(modelViewProjection, opacity, width, texture) _uniformCache;
-
-    std::unique_ptr<PlaneGeometry> _plane;
-    std::unique_ptr<TextureComponent> _texture;
-
-    bool _planeIsDirty = false;
+    properties::FloatProperty _teff;
+    properties::FloatProperty _luminosity;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLEDISC___H__
+#endif // __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEHABITABLEZONE___H__

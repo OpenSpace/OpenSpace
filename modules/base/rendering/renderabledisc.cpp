@@ -74,11 +74,6 @@ documentation::Documentation RenderableDisc::Documentation() {
         "renderable_disc",
         {
             {
-                "Type",
-                new StringEqualVerifier("RenderableDisc"),
-                Optional::No
-            },
-            {
                 TextureInfo.identifier,
                 new StringVerifier,
                 Optional::No,
@@ -87,7 +82,7 @@ documentation::Documentation RenderableDisc::Documentation() {
             {
                 SizeInfo.identifier,
                 new DoubleVerifier,
-                Optional::No,
+                Optional::Yes,
                 SizeInfo.description
             },
             {
@@ -112,17 +107,19 @@ RenderableDisc::RenderableDisc(const ghoul::Dictionary& dictionary)
         "RenderableDisc"
     );
 
-    _size = static_cast<float>(dictionary.value<double>(SizeInfo.identifier));
-    setBoundingSphere(_size);
-    _size.onChange([&]() { _planeIsDirty = true; });
-    addProperty(_size);
-
     _texturePath = absPath(dictionary.value<std::string>(TextureInfo.identifier));
     _texturePath.onChange([&]() { _texture->loadFromFile(_texturePath); });
     addProperty(_texturePath);
 
+    if (dictionary.hasKey(SizeInfo.identifier)) {
+        _size = static_cast<float>(dictionary.value<double>(SizeInfo.identifier));
+    }
+    setBoundingSphere(_size);
+    _size.onChange([&]() { _planeIsDirty = true; });
+    addProperty(_size);
+
     if (dictionary.hasKey(WidthInfo.identifier)) {
-        _width = dictionary.value<double>(WidthInfo.identifier);
+        _width = static_cast<float>(dictionary.value<double>(WidthInfo.identifier));
     }
     addProperty(_width);
 
@@ -137,7 +134,7 @@ void RenderableDisc::initialize() {
     _texture = std::make_unique<TextureComponent>(
         ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
     );
-    _plane = std::make_unique<PlaneGeometry>(2 * _size);
+    _plane = std::make_unique<PlaneGeometry>(planeSize());
 }
 
 void RenderableDisc::initializeGL() {
@@ -209,11 +206,15 @@ void RenderableDisc::update(const UpdateData&) {
     }
 
     if (_planeIsDirty) {
-        _plane->updateSize(2 * _size);
+        _plane->updateSize(planeSize());
         _planeIsDirty = false;
     }
 
     _texture->update();
+}
+
+float RenderableDisc::planeSize() {
+    return 2 * _size;
 }
 
 } // namespace openspace

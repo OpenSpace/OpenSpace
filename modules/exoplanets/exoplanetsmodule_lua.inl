@@ -413,11 +413,6 @@ void createExoplanetSystem(const std::string& starName) {
     bool hasLuminosity = !std::isnan(system.starData.luminosity);
 
     if (hasTeff && hasLuminosity) {
-        const glm::vec2 zone = computeHabitableZone(
-            system.starData.teff,
-            system.starData.luminosity
-        );
-
         float meanInclination = 0.f;
         for (const ExoplanetDataEntry& p : system.planetsData) {
             meanInclination += p.i;
@@ -425,11 +420,6 @@ void createExoplanetSystem(const std::string& starName) {
         meanInclination /= static_cast<float>(system.planetsData.size());
         const glm::dmat4 rotation = computeOrbitPlaneRotationMatrix(meanInclination);
         const glm::dmat3 rotationMat3 = static_cast<glm::dmat3>(rotation);
-
-        glm::vec2 limitsInMeter = zone * AU;
-        float half = 0.5f * (limitsInMeter[1] - limitsInMeter[0]);
-        float center = limitsInMeter[0] + half;
-        float relativeOffset = half / center;
 
         constexpr const char* description =
             "The habitable zone is the region around a star in which an Earth-like "
@@ -446,16 +436,12 @@ void createExoplanetSystem(const std::string& starName) {
             "Parent = '" + starIdentifier + "',"
             "Enabled = true,"
             "Renderable = {"
-                "Type = 'RenderableOrbitDisc',"
+                "Type = 'RenderableHabitableZone',"
                 "Texture = openspace.absPath("
                     "openspace.createPixelImage('exo_habitable_zone', {0, 0.92, 0.81})"
                 "),"
-                "Size = " + std::to_string(center) + ","
-                "Eccentricity = 0,"
-                "Offset = { " +
-                    std::to_string(relativeOffset) + ", " +
-                    std::to_string(relativeOffset) +
-                "}," //min / max extend
+                "Luminosity = " + std::to_string(system.starData.luminosity) + ","
+                "EffectiveTemperature = " + std::to_string(system.starData.teff) + ","
                 "Opacity = 0.05"
             "},"
             "Transform = {"

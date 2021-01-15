@@ -24,6 +24,7 @@
 
 #include <modules/exoplanets/exoplanetsmodule.h>
 
+#include <modules/exoplanets/rendering/renderablehabitablezone.h>
 #include <modules/exoplanets/rendering/renderableorbitdisc.h>
 #include <modules/exoplanets/tasks/exoplanetsdatapreparationtask.h>
 #include <openspace/engine/globals.h>
@@ -89,12 +90,14 @@ void ExoplanetsModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul_assert(fTask, "No task factory existed");
     fTask->registerClass<ExoplanetsDataPreparationTask>("ExoplanetsDataPreparationTask");
     fRenderable->registerClass<RenderableOrbitDisc>("RenderableOrbitDisc");
+    fRenderable->registerClass<RenderableHabitableZone>("RenderableHabitableZone");
 }
 
 std::vector<documentation::Documentation> ExoplanetsModule::documentations() const {
     return {
         ExoplanetsDataPreparationTask::documentation(),
-        RenderableOrbitDisc::Documentation()
+        RenderableOrbitDisc::Documentation(),
+        RenderableHabitableZone::Documentation()
     };
 }
 
