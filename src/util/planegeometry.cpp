@@ -44,7 +44,7 @@ PlaneGeometry::~PlaneGeometry() {
 
 bool PlaneGeometry::initialize() {
     // Initialize and upload to GPU
-    const glm::vec2 size = _size * 0.5f;
+    const glm::vec2 size = _size;
 
     struct VertexData {
         GLfloat x;

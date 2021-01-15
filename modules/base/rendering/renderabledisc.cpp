@@ -214,7 +214,7 @@ void RenderableDisc::update(const UpdateData&) {
 }
 
 float RenderableDisc::planeSize() {
-    return 2 * _size;
+    return _size;
 }
 
 } // namespace openspace

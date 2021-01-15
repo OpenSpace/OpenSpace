@@ -243,7 +243,7 @@ void RenderableOrbitDisc::update(const UpdateData&) {
 float RenderableOrbitDisc::planeSize() const {
     float maxRadius = _size + _offset.value().y * _size;
     maxRadius *= (1.f + _eccentricity);
-    return 2.f * maxRadius;
+    return maxRadius;
 }
 
 } // namespace openspace
