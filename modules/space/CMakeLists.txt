@@ -27,6 +27,7 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 set(HEADER_FILES
   rendering/planetgeometry.h
   rendering/renderableconstellationbounds.h
+  rendering/renderablehabitablezone.h
   rendering/renderablerings.h
   rendering/renderableorbitalkepler.h
   rendering/renderablesatellites.h
@@ -44,6 +45,7 @@ source_group("Header Files" FILES ${HEADER_FILES})
 set(SOURCE_FILES
   rendering/planetgeometry.cpp
   rendering/renderableconstellationbounds.cpp
+  rendering/renderablehabitablezone.cpp
   rendering/renderablerings.cpp
   rendering/renderableorbitalkepler.cpp
   rendering/renderablesatellites.cpp

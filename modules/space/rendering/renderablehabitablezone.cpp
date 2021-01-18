@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/exoplanets/rendering/renderablehabitablezone.h>
+#include <modules/space/rendering/renderablehabitablezone.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
@@ -63,11 +63,6 @@ documentation::Documentation RenderableHabitableZone::Documentation() {
         "Renderable Habitable Zone",
         "exoplanets_renderable_habitable_zone",
         {
-            {
-                "Type",
-                new StringEqualVerifier("RenderableHabitableZone"),
-                Optional::No
-            },
             {
                 EffectiveTemperatureInfo.identifier,
                 new DoubleVerifier,
