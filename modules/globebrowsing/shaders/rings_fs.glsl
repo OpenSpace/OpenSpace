@@ -76,6 +76,8 @@ Fragment getFragment() {
     vec4 colorFwrd   = vec4(0.5) * texture(ringTextureFwrd, texCoord);
     float lerpFactor = (1.f + dot(camPositionObj.xyz, sunPosition.xyz)) * 0.5f;
 
+    // Jon Colors:
+    //vec4 diffuse = mix(colorFwrd * vec4(1, 0.88, 0.82, 1.0), colorBckwrd * vec4(1, 0.88, 0.82, 1.0), lerpFactor);
     vec4 diffuse = mix(colorFwrd, colorBckwrd, lerpFactor);
     diffuse.a = 1.f;
     
