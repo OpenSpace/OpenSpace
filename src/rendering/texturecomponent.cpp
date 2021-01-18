@@ -35,12 +35,23 @@ namespace {
 
 namespace openspace {
 
-TextureComponent::TextureComponent(const Texture::FilterMode filterMode, bool watchFile)
-    : _filterMode(filterMode), _shouldWatchFile(watchFile)
+TextureComponent::TextureComponent(const Texture::FilterMode filterMode,
+                                   bool watchFile, bool shouldPurge)
+    : _filterMode(filterMode)
+    , _shouldWatchFile(watchFile)
+    , _shouldPurgeFromRAM(shouldPurge)
 {}
 
 ghoul::opengl::Texture* TextureComponent::texture() const {
     return _texture.get();
+}
+
+void TextureComponent::setShouldWatchFileForChanges(bool value) {
+    _shouldWatchFile = value;
+}
+
+void TextureComponent::setShouldPurgeFromRAM(bool value) {
+    _shouldPurgeFromRAM = value;
 }
 
 void TextureComponent::bind() {
@@ -55,6 +66,9 @@ void TextureComponent::uploadToGpu() {
     }
     _texture->uploadTexture();
     _texture->setFilter(_filterMode);
+    if (_shouldPurgeFromRAM) {
+        _texture->purgeFromRAM();
+    }
 }
 
 void TextureComponent::loadFromFile(const std::string& path) {
@@ -67,7 +81,6 @@ void TextureComponent::loadFromFile(const std::string& path) {
 
         if (texture) {
             LDEBUG(fmt::format("Loaded texture from '{}'", absPath(path)));
-            _texture = nullptr;
             _texture = std::move(texture);
 
             _textureFile = std::make_unique<ghoul::filesystem::File>(path);

@@ -39,10 +39,14 @@ class TextureComponent {
 
 public:
     TextureComponent() = default;
-    TextureComponent(const Texture::FilterMode filterMode, bool watchFile = true);
+    TextureComponent(const Texture::FilterMode filterMode, bool watchFile = true,
+        bool shouldPurge = true);
     ~TextureComponent() = default;
 
     Texture* texture() const;
+
+    void setShouldWatchFileForChanges(bool value);
+    void setShouldPurgeFromRAM(bool value);
 
     void bind();
     void uploadToGpu();
@@ -60,9 +64,10 @@ private:
 
     Texture::FilterMode _filterMode = Texture::FilterMode::LinearMipMap;
     bool _shouldWatchFile = true;
+    bool _shouldPurgeFromRAM = true;
 
-    bool _fileIsDirty = false;
-    bool _textureIsDirty = false;
+    bool _fileIsDirty;
+    bool _textureIsDirty;
 };
 
 } // namespace openspace
