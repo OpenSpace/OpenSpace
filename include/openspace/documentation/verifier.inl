@@ -29,6 +29,18 @@
 
 namespace openspace::documentation {
 
+template <>
+TestResult TemplateVerifier<glm::ivec2>::operator()(const ghoul::Dictionary& dict,
+    const std::string& key) const;
+
+template <>
+TestResult TemplateVerifier<glm::ivec3>::operator()(const ghoul::Dictionary& dict,
+    const std::string& key) const;
+
+template <>
+TestResult TemplateVerifier<glm::ivec4>::operator()(const ghoul::Dictionary& dict,
+    const std::string& key) const;
+
 template <typename T>
 TestResult TemplateVerifier<T>::operator()(const ghoul::Dictionary& dict,
                                            const std::string& key) const

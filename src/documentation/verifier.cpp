@@ -133,7 +133,7 @@ std::string DoubleVerifier::type() const {
     return "Double";
 }
 
-TestResult IntVerifier::operator()(const ghoul::Dictionary & dict,
+TestResult IntVerifier::operator()(const ghoul::Dictionary& dict,
                                    const std::string & key) const
 {
     if (dict.hasValue<int>(key)) {
@@ -175,6 +175,120 @@ std::string IntVerifier::type() const {
 
 std::string StringVerifier::type() const {
     return "String";
+}
+
+template <>
+TestResult TemplateVerifier<glm::ivec2>::operator()(const ghoul::Dictionary& dict,
+                                                    const std::string& key) const
+{
+    if (dict.hasValue<glm::ivec2>(key)) {
+        return { true, {}, {} };
+    }
+    else {
+        if (dict.hasKey(key)) {
+            if (dict.hasValue<glm::dvec2>(key)) {
+                glm::dvec2 value = dict.value<glm::dvec2>(key);
+                glm::dvec2 intPart;
+                glm::bvec2 isInt = {
+                    modf(value.x, &intPart.x) == 0.0,
+                    modf(value.y, &intPart.y) == 0.0
+                };
+                if (isInt.x && isInt.y) {
+                    return { true, {}, {} };
+                }
+                else {
+                    return {
+                        false,
+                        {{ key, TestResult::Offense::Reason::WrongType }},
+                        {}
+                    };
+                }
+            }
+            else {
+                return { false, {{ key, TestResult::Offense::Reason::WrongType }}, {} };
+            }
+        }
+        else {
+            return { false, {{ key, TestResult::Offense::Reason::MissingKey }}, {} };
+        }
+    }
+}
+
+template <>
+TestResult TemplateVerifier<glm::ivec3>::operator()(const ghoul::Dictionary& dict,
+                                                    const std::string& key) const
+{
+    if (dict.hasValue<glm::ivec3>(key)) {
+        return { true, {}, {} };
+    }
+    else {
+        if (dict.hasKey(key)) {
+            if (dict.hasValue<glm::dvec3>(key)) {
+                glm::dvec3 value = dict.value<glm::dvec3>(key);
+                glm::dvec3 intPart;
+                glm::bvec3 isInt = {
+                    modf(value.x, &intPart.x) == 0.0,
+                    modf(value.y, &intPart.y) == 0.0,
+                    modf(value.z, &intPart.z) == 0.0
+                };
+                if (isInt.x && isInt.y && isInt.z) {
+                    return { true, {}, {} };
+                }
+                else {
+                    return {
+                        false,
+                        {{ key, TestResult::Offense::Reason::WrongType }},
+                        {}
+                    };
+                }
+            }
+            else {
+                return { false, {{ key, TestResult::Offense::Reason::WrongType }}, {} };
+            }
+        }
+        else {
+            return { false, {{ key, TestResult::Offense::Reason::MissingKey }}, {} };
+        }
+    }
+}
+
+template <>
+TestResult TemplateVerifier<glm::ivec4>::operator()(const ghoul::Dictionary& dict,
+                                                    const std::string& key) const
+{
+    if (dict.hasValue<glm::ivec4>(key)) {
+        return { true, {}, {} };
+    }
+    else {
+        if (dict.hasKey(key)) {
+            if (dict.hasValue<glm::dvec4>(key)) {
+                glm::dvec4 value = dict.value<glm::dvec4>(key);
+                glm::dvec4 intPart;
+                glm::bvec4 isInt = {
+                    modf(value.x, &intPart.x) == 0.0,
+                    modf(value.y, &intPart.y) == 0.0,
+                    modf(value.z, &intPart.z) == 0.0,
+                    modf(value.w, &intPart.w) == 0.0
+                };
+                if (isInt.x && isInt.y && isInt.z && isInt.w) {
+                    return { true, {}, {} };
+                }
+                else {
+                    return {
+                        false,
+                        {{ key, TestResult::Offense::Reason::WrongType }},
+                        {}
+                    };
+                }
+            }
+            else {
+                return { false, {{ key, TestResult::Offense::Reason::WrongType }}, {} };
+            }
+        }
+        else {
+            return { false, {{ key, TestResult::Offense::Reason::MissingKey }}, {} };
+        }
+    }
 }
 
 TableVerifier::TableVerifier(std::vector<DocumentationEntry> documentationEntries)
