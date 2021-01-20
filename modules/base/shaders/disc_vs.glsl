@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,15 +30,16 @@ layout(location = 0) in vec2 in_position;
 layout(location = 1) in vec2 in_st;
 
 out vec2 vs_st;
-out vec4 vs_position;
+out float vs_screenSpaceDepth;
 
 uniform mat4 modelViewProjectionTransform;
 
 void main() {
-    vs_st = in_st;
+    vec4 position = vec4(in_position.xy, 0.0, 1.0);
+    vec4 positionScreenSpace = z_normalization(modelViewProjectionTransform * position);
 
-    vs_position = z_normalization(
-        modelViewProjectionTransform * vec4(in_position.xy, 0.0, 1.0)
-    );
-    gl_Position = vs_position;
+    vs_st = in_st;
+    vs_screenSpaceDepth = positionScreenSpace.w;
+
+    gl_Position = positionScreenSpace;
 }

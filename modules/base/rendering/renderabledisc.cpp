@@ -124,6 +124,8 @@ RenderableDisc::RenderableDisc(const ghoul::Dictionary& dictionary)
     addProperty(_width);
 
     addProperty(_opacity);
+
+    setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
 }
 
 bool RenderableDisc::isReady() const {
@@ -185,7 +187,7 @@ void RenderableDisc::render(const RenderData& data, RendererTasks&) {
     _shader->setUniform(_uniformCache.texture, unit);
 
     glEnablei(GL_BLEND, 0);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDepthMask(false);
     glDisable(GL_CULL_FACE);
 

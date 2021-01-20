@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,7 @@
 #include "fragment.glsl"
 
 in vec2 vs_st;
-in vec4 vs_position;
+in float vs_screenSpaceDepth;
 
 uniform sampler1D colorTexture;
 uniform float width;
@@ -55,6 +55,6 @@ Fragment getFragment() {
 
     Fragment frag;
     frag.color = diffuse;
-    frag.depth = vs_position.w;
+    frag.depth = vs_screenSpaceDepth;
     return frag;
 }
