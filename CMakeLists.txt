@@ -139,11 +139,11 @@ if (UNIX AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++ -lc++abi")
 endif ()
 
-# Add external dependencies
 add_subdirectory(ext)
 
-add_subdirectory(support/coding/codegen)
+add_subdirectory(src)
 
+add_subdirectory(support/coding/codegen)
 # It is important that the __codegen.h does not actually exist so that this target
 # is never considered as finished
 add_custom_target(run_codegen ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/__codegen.h")
@@ -153,10 +153,10 @@ add_custom_command(
   COMMAND codegen ARGS "--folder" "${OPENSPACE_BASE_DIR}/modules"
   VERBATIM
 )
+set_folder_location(codegen-lib "support")
 set_folder_location(codegen "support")
 set_folder_location(run_codegen "support")
 
-add_subdirectory(src)
 
 # Qt
 # Unfortunately, we have to set this value manually; sigh
@@ -188,6 +188,12 @@ endif ()
 begin_header("Configuring Modules")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/modules")
 end_header("End: Configuring Modules")
+
+
+add_subdirectory(support/coding/codegen/tests)
+set_folder_location(run_test_codegen "Unit Tests/support")
+set_folder_location(codegentest "Unit Tests")
+
 
 begin_header("Configuring Applications")
 add_subdirectory("${OPENSPACE_APPS_DIR}")
