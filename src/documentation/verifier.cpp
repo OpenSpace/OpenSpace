@@ -137,7 +137,7 @@ TestResult IntVerifier::operator()(const ghoul::Dictionary& dict,
                                    const std::string & key) const
 {
     if (dict.hasValue<int>(key)) {
-        // We we have a key and the value is int, we are done
+        // We have a key and the value is int, we are done
         return { true, {}, {} };
     }
     else {
