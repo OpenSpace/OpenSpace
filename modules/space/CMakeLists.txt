@@ -65,6 +65,8 @@ set(SHADER_FILES
   shaders/constellationbounds_vs.glsl
   shaders/debrisViz_fs.glsl
   shaders/debrisViz_vs.glsl
+  shaders/habitablezone_vs.glsl
+  shaders/habitablezone_fs.glsl
   shaders/rings_vs.glsl
   shaders/rings_fs.glsl
   shaders/star_fs.glsl

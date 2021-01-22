@@ -122,7 +122,6 @@ RenderableDisc::RenderableDisc(const ghoul::Dictionary& dictionary)
         _width = static_cast<float>(dictionary.value<double>(WidthInfo.identifier));
     }
     addProperty(_width);
-
     addProperty(_opacity);
 
     setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
@@ -140,13 +139,7 @@ void RenderableDisc::initialize() {
 }
 
 void RenderableDisc::initializeGL() {
-    _shader = global::renderEngine->buildRenderProgram(
-        "DiscProgram",
-        absPath("${MODULE_BASE}/shaders/disc_vs.glsl"),
-        absPath("${MODULE_BASE}/shaders/disc_fs.glsl")
-    );
-
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+    initializeShader();
 
     _texture->loadFromFile(_texturePath);
     _texture->uploadToGpu();
@@ -204,7 +197,7 @@ void RenderableDisc::render(const RenderData& data, RendererTasks&) {
 void RenderableDisc::update(const UpdateData&) {
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+        updateUniformLocations();
     }
 
     if (_planeIsDirty) {
@@ -213,6 +206,19 @@ void RenderableDisc::update(const UpdateData&) {
     }
 
     _texture->update();
+}
+
+void RenderableDisc::initializeShader() {
+    _shader = global::renderEngine->buildRenderProgram(
+        "DiscProgram",
+        absPath("${MODULE_BASE}/shaders/disc_vs.glsl"),
+        absPath("${MODULE_BASE}/shaders/disc_fs.glsl")
+    );
+    updateUniformLocations();
+}
+
+void RenderableDisc::updateUniformLocations() {
+   ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
 }
 
 float RenderableDisc::planeSize() {

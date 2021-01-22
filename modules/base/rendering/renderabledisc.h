@@ -56,6 +56,9 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
+    virtual void initializeShader();
+    virtual void updateUniformLocations();
+
     virtual float planeSize();
 
     properties::StringProperty _texturePath;
@@ -63,10 +66,12 @@ protected:
     properties::FloatProperty _width;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-    UniformCache(modelViewProjection, opacity, width, texture) _uniformCache;
 
     std::unique_ptr<PlaneGeometry> _plane;
     std::unique_ptr<TextureComponent> _texture;
+
+private:
+    UniformCache(modelViewProjection, opacity, width, texture) _uniformCache;
 
     bool _planeIsDirty = false;
 };

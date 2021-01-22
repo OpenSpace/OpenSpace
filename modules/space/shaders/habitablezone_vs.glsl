@@ -22,50 +22,24 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEHABITABLEZONE___H__
-#define __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEHABITABLEZONE___H__
+#version __CONTEXT__
 
-#include <modules/base/rendering/renderabledisc.h>
-#include <openspace/properties/scalar/floatproperty.h>
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-namespace openspace {
+layout(location = 0) in vec2 in_position;
+layout(location = 1) in vec2 in_st;
 
-namespace documentation { struct Documentation; }
+out vec2 vs_st;
+out float vs_screenSpaceDepth;
 
-class RenderableHabitableZone : public RenderableDisc {
-public:
-    RenderableHabitableZone(const ghoul::Dictionary& dictionary);
+uniform mat4 modelViewProjectionTransform;
 
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
+void main() {
+    vec4 position = vec4(in_position.xy, 0.0, 1.0);
+    vec4 positionScreenSpace = z_normalization(modelViewProjectionTransform * position);
 
-    static documentation::Documentation Documentation();
+    vs_st = in_st;
+    vs_screenSpaceDepth = positionScreenSpace.w;
 
-private:
-    void initializeShader() override;
-    void updateUniformLocations() override;
-    void computeZone();
-
-    /**
-     * Compute the inner and outer boundary of the habitable zone of a star, accordring to
-     * formula and coefficients by Kopparapu et al. (2015) https://arxiv.org/abs/1404.5292
-     *
-     * \param teff The effective temperature of the star, in Kelvin
-     * \param luminosity The luminosity of the star, in solar luminosities
-     * \return A vec4 with the boundaries in atronomical units, in the order:
-               optimistic inner, conservative inner, conservative outer, optimistic outer
-     */
-    glm::vec4 computeKopparapuZoneBoundaries(float teff, float luminosity);
-
-    properties::FloatProperty _teff;
-    properties::FloatProperty _luminosity;
-    properties::BoolProperty _showOptimistic;
-
-    glm::vec2 _conservativeBounds;
-
-    UniformCache(modelViewProjection, opacity, width, texture,
-        conservativeBounds, showOptimistic) _uniformCache;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEHABITABLEZONE___H__
+    gl_Position = positionScreenSpace;
+}

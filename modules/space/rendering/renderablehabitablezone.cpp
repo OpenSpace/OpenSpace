@@ -31,6 +31,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/distanceconstants.h>
+#include <openspace/util/updatestructures.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/openglstatecache.h>
@@ -40,18 +41,30 @@
 namespace {
     constexpr const char* _loggerCat = "RenderableHabitableZone";
 
+    constexpr const std::array<const char*, 6> UniformNames = {
+        "modelViewProjectionTransform", "opacity", "width", "transferFunctionTexture",
+        "conservativeBounds", "showOptimistic"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo EffectiveTemperatureInfo = {
         "EffectiveTemperature",
         "Effective Temperature",
-        "The effective temperature of the corresponding star, in Kelvin."
+        "The effective temperature of the corresponding star, in Kelvin. "
         "Used to compute the width and size of the disc."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LuminosityInfo = {
         "Luminosity",
         "Luminosity",
-        "The luminosity of the corresponding star, in units of solar luminosities."
+        "The luminosity of the corresponding star, in units of solar luminosities. "
         "Used to compute the width and size of the disc."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo OptimisticInfo = {
+        "Optimistic",
+        "Optimistic" ,
+        "If true, the habitable zone disc is rendered with the optimistic boundaries "
+        "rather than the conservative ones."
     };
 } // namespace
 
@@ -74,6 +87,12 @@ documentation::Documentation RenderableHabitableZone::Documentation() {
                 new DoubleVerifier,
                 Optional::No,
                 LuminosityInfo.description
+            },
+            {
+                OptimisticInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                OptimisticInfo.description
             }
         }
     };
@@ -95,6 +114,7 @@ RenderableHabitableZone::RenderableHabitableZone(const ghoul::Dictionary& dictio
     : RenderableDisc(dictionary)
     , _teff(EffectiveTemperatureInfo, 5780.f, 0.f, 7.5e4f)
     , _luminosity(LuminosityInfo, 1.f, 0.f, 1e8f)
+    , _showOptimistic(OptimisticInfo, false)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -118,6 +138,11 @@ RenderableHabitableZone::RenderableHabitableZone(const ghoul::Dictionary& dictio
     _luminosity.onChange([this]() { computeZone(); });
     addProperty(_luminosity);
 
+    if (dictionary.hasKey(OptimisticInfo.identifier)) {
+        _showOptimistic = dictionary.value<bool>(OptimisticInfo.identifier);
+    }
+    addProperty(_showOptimistic);
+
     // Make parent's size related properties read only. We want to set them based on the
     // given temperature and luminosity
     _size.setReadOnly(true);
@@ -126,11 +151,65 @@ RenderableHabitableZone::RenderableHabitableZone(const ghoul::Dictionary& dictio
     computeZone();
 }
 
+void RenderableHabitableZone::render(const RenderData& data, RendererTasks&) {
+    _shader->activate();
+
+    glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+        glm::dmat4(data.modelTransform.rotation) *
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+
+    glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+
+    _shader->setUniform(
+        _uniformCache.modelViewProjection,
+        data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
+    );
+    _shader->setUniform(_uniformCache.width, _width);
+    _shader->setUniform(_uniformCache.opacity, _opacity);
+    _shader->setUniform(_uniformCache.conservativeBounds, _conservativeBounds);
+    _shader->setUniform(_uniformCache.showOptimistic, _showOptimistic);
+
+    ghoul::opengl::TextureUnit unit;
+    unit.activate();
+    _texture->bind();
+    _shader->setUniform(_uniformCache.texture, unit);
+
+    glEnablei(GL_BLEND, 0);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthMask(false);
+    glDisable(GL_CULL_FACE);
+
+    _plane->render();
+
+    _shader->deactivate();
+
+    // Restores GL State
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
+    global::renderEngine->openglStateCache().resetPolygonAndClippingState();
+}
+
+void RenderableHabitableZone::initializeShader() {
+    _shader = global::renderEngine->buildRenderProgram(
+        "HabitableZoneProgram",
+        absPath("${MODULE_SPACE}/shaders/habitablezone_vs.glsl"),
+        absPath("${MODULE_SPACE}/shaders/habitablezone_fs.glsl")
+    );
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+}
+
+void RenderableHabitableZone::updateUniformLocations() {
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+}
+
 void RenderableHabitableZone::computeZone() {
-    glm::vec2 distancesInAu = computeKopparapuZoneBoundaries(_teff, _luminosity);
+    glm::vec4 distancesInAu = computeKopparapuZoneBoundaries(_teff, _luminosity);
     constexpr float AU = static_cast<float>(distanceconstants::AstronomicalUnit);
     const float inner = distancesInAu[0] * AU;
-    const float outer = distancesInAu[1] * AU;
+    const float innerConservative = distancesInAu[1] * AU;
+    const float outerConservative = distancesInAu[2] * AU;
+    const float outer = distancesInAu[3] * AU;
 
     float discWidth = 0.f;
     if (outer > 0.f) {
@@ -139,20 +218,25 @@ void RenderableHabitableZone::computeZone() {
 
     _size.set(outer);
     _width.set(discWidth);
+
+    // Compute the coservative bounds normalized by the size of the disc, i.e. in [0, 1]
+    _conservativeBounds = glm::vec2(innerConservative, outerConservative);
+    _conservativeBounds /= _size;
 }
 
-glm::vec2 RenderableHabitableZone::computeKopparapuZoneBoundaries(float teff,
+glm::vec4 RenderableHabitableZone::computeKopparapuZoneBoundaries(float teff,
                                                                   float luminosity)
 {
     // Kopparapu's formula only considers stars with teff in range [2600, 7200] K.
     // However, we want to use the formula for more stars, so add some flexibility to
-    // the teff boundaries
+    // the teff boundaries.
+    // OBS! This also prevents problems with too large values in the distance computation
     if (teff > 8000.f || teff < 2000.f) {
         // For the other stars, use a method by Tom E. Morris:
         // https://www.planetarybiology.com/calculating_habitable_zone.html
         float inner = std::sqrt(luminosity / 1.1f);
         float outer = std::sqrt(luminosity / 0.53f);
-        return glm::vec2(inner, outer);
+        return glm::vec4(inner, inner, outer, outer);
     }
 
     struct Coefficients {
@@ -166,17 +250,21 @@ glm::vec2 RenderableHabitableZone::computeKopparapuZoneBoundaries(float teff,
     // Coefficients for planets of 1 Earth mass. Received from:
     // https://depts.washington.edu/naivpl/sites/default/files/HZ_coefficients.dat
     constexpr const Coefficients coefficients[] = {
-        // Inner boundary - Runaway greenhouse
+        // Optimistic Inner boundary - Recent Venus
+        {1.77600E+00f, 2.13600E-04f, 2.53300E-08f, -1.33200E-11f, -3.09700E-15f},
+        // Conservative Inner boundary - Runaway greenhouse
         {1.10700E+00f, 1.33200E-04f, 1.58000E-08f, -8.30800E-12f, -1.93100E-15f},
-        // Outer boundary - Maximum greenhouse
-        {3.56000E-01f, 6.17100E-05f, 1.69800E-09f, -3.19800E-12f, -5.57500E-16f}
+        // Conservative Outer boundary - Maximum greenhouse
+        {3.56000E-01f, 6.17100E-05f, 1.69800E-09f, -3.19800E-12f, -5.57500E-16f},
+        // Optimistic Outer boundary - Early Mars
+        {3.20000E-01f, 5.54700E-05f, 1.52600E-09f, -2.87400E-12f, -5.01100E-16f}
     };
 
     const float tstar = teff - 5780.f;
     const float tstar2 = tstar * tstar;
 
-    glm::vec2 distances;
-    for (int i = 0; i < 2; ++i) {
+    glm::vec4 distances;
+    for (int i = 0; i < 4; ++i) {
         const Coefficients& coeffs = coefficients[i];
         float seff = coeffs.seffSun + (coeffs.a * tstar) + (coeffs.b * tstar2) +
             (coeffs.c * tstar * tstar2) + (coeffs.d * tstar2 * tstar2);
