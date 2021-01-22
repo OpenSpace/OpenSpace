@@ -22,50 +22,37 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___ASSETS___H__
-#define __OPENSPACE_UI_LAUNCHER___ASSETS___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___ASSETEDIT___H__
+#define __OPENSPACE_UI_LAUNCHER___ASSETEDIT___H__
 
 #include <QDialog>
+#include <string>
 
-#include "assettreemodel.h"
+namespace openspace { class Asset; }
 
-namespace openspace { class Profile; }
+class QWidget;
+class QLabel;
+class QLineEdit;
 
-class QTextEdit;
-class QTreeView;
-
-class AssetsDialog : public QDialog {
+class AssetEdit : public QDialog {
 Q_OBJECT
 public:
     /**
-     * Constructor for assets class
-     *
-     * \param profile The #openspace::Profile object containing all data of the
-     *                new or imported profile.
-     * \param assetBasePath The path to the folder in which all of the assets are living
-     * \param parent Pointer to parent Qt widget
+     * Constructor for AssetEdit class
      */
-    AssetsDialog(openspace::Profile& profile, const std::string& assetBasePath,
-        QWidget* parent);
+    AssetEdit(const std::string& assetName, QWidget* parent);
 
 private slots:
-    void parseSelections();
-    void selected(const QModelIndex&);
+    void openHorizons();
+    void approved();
 
 private:
-    void createWidgets();
-    /**
-     * Creates a text summary of all assets and their paths
-     *
-     * \return the #std::string summary
-     */
-    QString createTextSummary();
-    void openAssetEditor(const std::string& asset);
+    void createWidgets(const std::string& assetName);
 
-    openspace::Profile& _profile;
-    AssetTreeModel _assetTreeModel;
-    QTreeView* _assetTree = nullptr;
-    QTextEdit* _summary = nullptr;
+    QLabel* _horizonsLabel = nullptr;
+    QLineEdit* _assetEdit = nullptr;
+
+    QLabel* _errorMsg = nullptr;
 };
 
-#endif // __OPENSPACE_UI_LAUNCHER___ASSETS___H__
+#endif // __OPENSPACE_UI_LAUNCHER___ASSETEDIT___H__

@@ -22,50 +22,71 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_UI_LAUNCHER___ASSETS___H__
-#define __OPENSPACE_UI_LAUNCHER___ASSETS___H__
+#include "profile/horizonsdialog.h"
 
-#include <QDialog>
+#include "profile/line.h"
+#include <QDialogButtonBox>
+#include <QFileDialog>
+#include <QHeaderView>
+#include <QLabel>
+#include <QPushButton>
+#include <QVBoxLayout>
 
-#include "assettreemodel.h"
+HorizonsDialog::HorizonsDialog(QWidget* parent)
+    : QDialog(parent)
+{
+    setWindowTitle("Horizons");
+    createWidgets();
+}
 
-namespace openspace { class Profile; }
+void HorizonsDialog::createWidgets() {
+    QBoxLayout* layout = new QVBoxLayout(this);
+    {
+        QGridLayout* container = new QGridLayout;
+        container->setColumnStretch(1, 1);
 
-class QTextEdit;
-class QTreeView;
+        QLabel* localLabel = new QLabel("Select a local Horizons file");
+        localLabel->setObjectName("heading");
+        container->addWidget(localLabel, 0, 0);
 
-class AssetsDialog : public QDialog {
-Q_OBJECT
-public:
-    /**
-     * Constructor for assets class
-     *
-     * \param profile The #openspace::Profile object containing all data of the
-     *                new or imported profile.
-     * \param assetBasePath The path to the folder in which all of the assets are living
-     * \param parent Pointer to parent Qt widget
-     */
-    AssetsDialog(openspace::Profile& profile, const std::string& assetBasePath,
-        QWidget* parent);
+        QPushButton* horizonsFileButton = new QPushButton("Browse", this);
+        connect(
+            horizonsFileButton, &QPushButton::released,
+            [this]() {
+                openHorizonsFile();
+            }
+        );
+        horizonsFileButton->setCursor(Qt::PointingHandCursor);
+        container->addWidget(horizonsFileButton, 0, 2);
 
-private slots:
-    void parseSelections();
-    void selected(const QModelIndex&);
+        layout->addLayout(container);
+    }
+    layout->addWidget(new Line);
+    {
+        QBoxLayout* footer = new QHBoxLayout;
+        _errorMsg = new QLabel;
+        _errorMsg->setObjectName("error-message");
+        _errorMsg->setWordWrap(true);
+        footer->addWidget(_errorMsg);
 
-private:
-    void createWidgets();
-    /**
-     * Creates a text summary of all assets and their paths
-     *
-     * \return the #std::string summary
-     */
-    QString createTextSummary();
-    void openAssetEditor(const std::string& asset);
+        QDialogButtonBox* buttons = new QDialogButtonBox;
+        buttons->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
+        connect(buttons, &QDialogButtonBox::accepted, this, &HorizonsDialog::approved);
+        connect(buttons, &QDialogButtonBox::rejected, this, &HorizonsDialog::reject);
+        footer->addWidget(buttons);
+        layout->addLayout(footer);
+    }
+}
 
-    openspace::Profile& _profile;
-    AssetTreeModel _assetTreeModel;
-    QTreeView* _assetTree = nullptr;
-    QTextEdit* _summary = nullptr;
-};
+void HorizonsDialog::openHorizonsFile() {
+    _horizonsFile = QFileDialog::getOpenFileName(
+        this,
+        tr("Open Horizons file"),
+        "",
+        tr("Horiozons file (*.dat)")
+    ).toStdString();
+}
 
-#endif // __OPENSPACE_UI_LAUNCHER___ASSETS___H__
+void HorizonsDialog::approved() {
+    accept();
+}

@@ -29,10 +29,12 @@ set(HEADER_FILES
   include/launcherwindow.h
   include/profile/additionalscriptsdialog.h
   include/profile/assetsdialog.h
+  include/profile/assetedit.h
   include/profile/assettreeitem.h
   include/profile/assettreemodel.h
   include/profile/cameradialog.h
   include/profile/deltatimesdialog.h
+  include/profile/horizonsdialog.h
   include/profile/keybindingsdialog.h
   include/profile/line.h
   include/profile/marknodesdialog.h
@@ -48,10 +50,12 @@ set(SOURCE_FILES
   src/filesystemaccess.cpp
   src/profile/additionalscriptsdialog.cpp
   src/profile/assetsdialog.cpp
+  src/profile/assetedit.cpp
   src/profile/assettreeitem.cpp
   src/profile/assettreemodel.cpp
   src/profile/cameradialog.cpp
   src/profile/deltatimesdialog.cpp
+  src/profile/horizonsdialog.cpp
   src/profile/keybindingsdialog.cpp
   src/profile/line.cpp
   src/profile/marknodesdialog.cpp
@@ -70,9 +74,11 @@ qt5_wrap_cpp(
   include/launcherwindow.h
   include/profile/additionalscriptsdialog.h
   include/profile/assetsdialog.h
+  include/profile/assetedit.h
   include/profile/assettreemodel.h
   include/profile/cameradialog.h
   include/profile/deltatimesdialog.h
+  include/profile/horizonsdialog.h
   include/profile/keybindingsdialog.h
   include/profile/marknodesdialog.h
   include/profile/metadialog.h

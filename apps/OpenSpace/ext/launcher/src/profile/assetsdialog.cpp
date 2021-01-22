@@ -24,11 +24,14 @@
 
 #include "profile/assetsdialog.h"
 
+#include "profile/assetedit.h"
+
 #include "profile/line.h"
 #include <openspace/scene/profile.h>
 #include <QDialogButtonBox>
 #include <QHeaderView>
 #include <QLabel>
+#include <QPushButton>
 #include <QVBoxLayout>
 #include <QTextEdit>
 #include <QTreeView>
@@ -129,9 +132,23 @@ AssetsDialog::AssetsDialog(openspace::Profile& profile, const std::string& asset
 void AssetsDialog::createWidgets() {
     QBoxLayout* layout = new QVBoxLayout(this);
     {
+        QGridLayout* container = new QGridLayout;
+        container->setColumnStretch(1, 1);
+
         QLabel* heading = new QLabel("Select assets from /data/assets");
         heading->setObjectName("heading");
-        layout->addWidget(heading);
+        container->addWidget(heading, 0, 0);
+
+        QPushButton* newAssetButton = new QPushButton("New Asset", this);
+        connect(
+            newAssetButton, &QPushButton::released,
+            [this]() {
+                openAssetEditor("");
+            }
+        );
+        newAssetButton->setCursor(Qt::PointingHandCursor);
+        container->addWidget(newAssetButton, 0, 2);
+        layout->addLayout(container);
     }
     {
         _assetTree = new QTreeView;
@@ -216,6 +233,11 @@ QString AssetsDialog::createTextSummary() {
         summary += QString::fromStdString(s);
     }
     return summary;
+}
+
+void AssetsDialog::openAssetEditor(const std::string& asset) {
+    AssetEdit editor(asset, this);
+    editor.exec();
 }
 
 void AssetsDialog::parseSelections() {
