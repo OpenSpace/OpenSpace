@@ -35,15 +35,16 @@ namespace {
 
 namespace openspace {
 
-TextureComponent::TextureComponent(const Texture::FilterMode filterMode,
-                                   bool watchFile, bool shouldPurge)
-    : _filterMode(filterMode)
-    , _shouldWatchFile(watchFile)
-    , _shouldPurgeFromRAM(shouldPurge)
-{}
-
 ghoul::opengl::Texture* TextureComponent::texture() const {
     return _texture.get();
+}
+
+void TextureComponent::setFilterMode(Texture::FilterMode filterMode) {
+    _filterMode = filterMode;
+}
+
+void TextureComponent::setWrapping(Texture::WrappingMode wrapping) {
+    _wrappingMode = wrapping;
 }
 
 void TextureComponent::setShouldWatchFileForChanges(bool value) {
@@ -66,6 +67,7 @@ void TextureComponent::uploadToGpu() {
     }
     _texture->uploadTexture();
     _texture->setFilter(_filterMode);
+    _texture->setWrapping(_wrappingMode);
     if (_shouldPurgeFromRAM) {
         _texture->purgeFromRAM();
     }

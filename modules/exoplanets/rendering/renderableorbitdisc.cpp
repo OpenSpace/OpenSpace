@@ -157,9 +157,8 @@ bool RenderableOrbitDisc::isReady() const {
 }
 
 void RenderableOrbitDisc::initialize() {
-    _texture = std::make_unique<TextureComponent>(
-        ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
-    );
+    _texture = std::make_unique<TextureComponent>();
+    _texture->setFilterMode(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
     _plane = std::make_unique<PlaneGeometry>(planeSize());
 }
 

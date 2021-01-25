@@ -39,12 +39,12 @@ class TextureComponent {
 
 public:
     TextureComponent() = default;
-    TextureComponent(const Texture::FilterMode filterMode, bool watchFile = true,
-        bool shouldPurge = true);
     ~TextureComponent() = default;
 
     Texture* texture() const;
 
+    void setFilterMode(Texture::FilterMode filterMode);
+    void setWrapping(Texture::WrappingMode wrapping);
     void setShouldWatchFileForChanges(bool value);
     void setShouldPurgeFromRAM(bool value);
 
@@ -63,11 +63,12 @@ private:
     std::unique_ptr<Texture> _texture = nullptr;
 
     Texture::FilterMode _filterMode = Texture::FilterMode::LinearMipMap;
+    Texture::WrappingMode _wrappingMode = Texture::WrappingMode::Repeat;
     bool _shouldWatchFile = true;
     bool _shouldPurgeFromRAM = true;
 
-    bool _fileIsDirty;
-    bool _textureIsDirty;
+    bool _fileIsDirty = false;
+    bool _textureIsDirty = false;
 };
 
 } // namespace openspace
