@@ -67,6 +67,7 @@ set(SOURCE_FILES
 )
 
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
+find_package(Qt5 COMPONENTS Network REQUIRED)
 
 set(MOC_FILES "")
 qt5_wrap_cpp(
@@ -94,5 +95,5 @@ qt5_add_resources(RESOURCE_FILES resources/resources.qrc)
 add_library(openspace-ui-launcher STATIC ${HEADER_FILES} ${SOURCE_FILES} ${MOC_FILES} ${RESOURCE_FILES})
 set_openspace_compile_settings(openspace-ui-launcher)
 target_include_directories(openspace-ui-launcher PUBLIC include)
-target_link_libraries(openspace-ui-launcher PUBLIC Qt5::Core Qt5::Gui Qt5::Widgets openspace-core)
+target_link_libraries(openspace-ui-launcher PUBLIC Qt5::Core Qt5::Gui Qt5::Network Qt5::Widgets openspace-core)
 

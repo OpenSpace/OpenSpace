@@ -22,19 +22,38 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+ // Things needed to construct the url for the http request to JPL Horizons interface
+#define HORIZONS_REQUEST_URL "https://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=1&MAKE_EPHEM='YES'&TABLE_TYPE='OBSERVER'&QUANTITIES='20,33'&RANGE_UNITS='KM'&SUPPRESS_RANGE_RATE='YES'&CSV_FORMAT='NO'"
+#define COMMAND "&COMMAND="
+#define CENTER "&CENTER="
+#define START_TIME "&START_TIME="
+#define STOP_TIME "&STOP_TIME="
+#define STEP_SIZE "&STEP_SIZE="
+#define SPACE "%20"
+
 #include "profile/horizonsdialog.h"
 
 #include "profile/line.h"
+#include <QDateTimeEdit>
 #include <QDialogButtonBox>
+#include <QEventLoop>
 #include <QFileDialog>
 #include <QHeaderView>
 #include <QLabel>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
 #include <QPushButton>
+#include <QSslConfiguration>
 #include <QVBoxLayout>
+#include <iostream>
 
 HorizonsDialog::HorizonsDialog(QWidget* parent)
-    : QDialog(parent)
+    : QDialog(parent), _config(QSslConfiguration::defaultConfiguration())
 {
+    _manager = new QNetworkAccessManager();
+    _config.setProtocol(QSsl::TlsV1_2);
+
     setWindowTitle("Horizons");
     createWidgets();
 }
@@ -63,6 +82,30 @@ void HorizonsDialog::createWidgets() {
     }
     layout->addWidget(new Line);
     {
+        QBoxLayout* container = new QHBoxLayout;
+        QLabel* generateLabel = new QLabel("Or generate a new Horizons file");
+        generateLabel->setObjectName("heading");
+        container->addWidget(generateLabel);
+
+        layout->addLayout(container);
+    }
+    {
+        _startLabel = new QLabel("Start Time:");
+        layout->addWidget(_startLabel);
+        _startEdit = new QDateTimeEdit;
+        _startEdit->setDisplayFormat("yyyy-MM-dd  T  hh:mm");
+        _startEdit->setDate(QDate::currentDate().addDays(-1));
+        layout->addWidget(_startEdit);
+    }
+    {
+        _endLabel = new QLabel("End Time:");
+        layout->addWidget(_endLabel);
+        _endEdit = new QDateTimeEdit;
+        _endEdit->setDisplayFormat("yyyy-MM-dd  T  hh:mm");
+        _endEdit->setDate(QDate::currentDate());
+        layout->addWidget(_endEdit);
+    }
+    {
         QBoxLayout* footer = new QHBoxLayout;
         _errorMsg = new QLabel;
         _errorMsg->setObjectName("error-message");
@@ -78,6 +121,26 @@ void HorizonsDialog::createWidgets() {
     }
 }
 
+// Send HTTPS request synchronously, EventLoop waits until request has finished
+void HorizonsDialog::sendRequest(const std::string url) {
+    QNetworkRequest request;
+    request.setSslConfiguration(_config);
+    request.setHeader(QNetworkRequest::UserAgentHeader, "OpenSpace");
+    request.setUrl(QUrl(url.c_str()));
+
+    QNetworkReply *reply = _manager->get(request);
+    QEventLoop loop;
+    auto status = QObject::connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    if (!status) {
+        std::cout << "Connection failed" << std::endl;
+        return;
+    }
+
+    loop.exec(QEventLoop::ExcludeUserInputEvents);
+
+    handleReply(reply);
+}
+
 void HorizonsDialog::openHorizonsFile() {
     _horizonsFile = QFileDialog::getOpenFileName(
         this,
@@ -87,6 +150,61 @@ void HorizonsDialog::openHorizonsFile() {
     ).toStdString();
 }
 
+void HorizonsDialog::sendHorizonsRequest() {
+    // Construct url for https request
+    std::string url = "";
+    url.append(HORIZONS_REQUEST_URL);
+    url.append(COMMAND); url.append("'-74'");
+    url.append(CENTER); url.append("'500@4'");
+
+    url.append(START_TIME); url.append("'");
+    url.append(_startEdit->date().toString("yyyy-MM-dd").toStdString());
+    url.append(SPACE);
+    url.append(_startEdit->time().toString("hh:mm").toStdString());
+    url.append("'");
+
+    url.append(STOP_TIME); url.append("'");
+    url.append(_endEdit->date().toString("yyyy-MM-dd").toStdString());
+    url.append(SPACE);
+    url.append(_endEdit->time().toString("hh:mm").toStdString());
+    url.append("'");
+
+    url.append(STEP_SIZE); url.append("'10"); url.append(SPACE); url.append("m'");
+
+    std::cout << "URL: " << url << std::endl;
+
+    sendRequest(url);
+}
+
+void HorizonsDialog::handleReply(QNetworkReply *reply) {
+    if (reply->error()) {
+        std::cout << reply->errorString().toStdString();
+        return;
+    }
+
+    QUrl redirect = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
+    if (redirect.isValid() && reply->url() != redirect) {
+        std::cout << "Redirect has been requested" << std::endl;
+    }
+
+    QString answer = reply->readAll();
+
+    std::cout << "Reply: '";
+    std::cout << answer.toStdString();
+    std::cout << "'" << std::endl;
+
+    reply->deleteLater();
+}
+
 void HorizonsDialog::approved() {
+    if (_horizonsFile.empty()) {
+        // Send request of Horizon file if no local file has been specified
+        sendHorizonsRequest();
+    }
+
     accept();
+}
+
+HorizonsDialog::~HorizonsDialog() {
+    _manager->deleteLater();
 }

@@ -26,10 +26,14 @@
 #define __OPENSPACE_UI_LAUNCHER___HORIZONS___H__
 
 #include <QDialog>
+#include <QNetworkReply>
+#include <QSslConfiguration>
 #include <string>
 
 class QLabel;
 class QDateTimeEdit;
+class QNetworkReply;
+class QSslConfiguration;
 
 class HorizonsDialog : public QDialog {
 Q_OBJECT
@@ -38,15 +42,26 @@ public:
      * Constructor for HorizonsDialog class
      */
     HorizonsDialog(QWidget* parent);
+    ~HorizonsDialog();
 
 private slots:
     void openHorizonsFile();
+    void sendHorizonsRequest();
+    void handleReply(QNetworkReply *reply);
     void approved();
 
 private:
     void createWidgets();
+    void sendRequest(const std::string url);
 
     std::string _horizonsFile;
+    QNetworkAccessManager* _manager;
+    QSslConfiguration _config;
+
+    QLabel* _startLabel;
+    QDateTimeEdit* _startEdit;
+    QLabel* _endLabel;
+    QDateTimeEdit* _endEdit;
 
     QLabel* _errorMsg = nullptr;
 };
