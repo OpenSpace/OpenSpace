@@ -30,41 +30,60 @@
 #define STOP_TIME "&STOP_TIME="
 #define STEP_SIZE "&STEP_SIZE="
 #define SPACE "%20"
+#define TIMEVARYING "arcseconds (time-varying)"
+#define MINUTES "minutes"
+#define HOURS "hours"
+#define DAYS "days"
+#define MONTHS "calendar months"
+#define YEARS "calendar years"
+#define UNITLESS "equal intervals (unitless)"
 
 #include "profile/horizonsdialog.h"
 
 #include "profile/line.h"
+#include <QComboBox>
 #include <QDateTimeEdit>
 #include <QDialogButtonBox>
 #include <QEventLoop>
 #include <QFileDialog>
-#include <QHeaderView>
 #include <QLabel>
+#include <QLineEdit>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QPushButton>
-#include <QSslConfiguration>
 #include <QVBoxLayout>
+#include <algorithm>
 #include <iostream>
 
 HorizonsDialog::HorizonsDialog(QWidget* parent)
-    : QDialog(parent), _config(QSslConfiguration::defaultConfiguration())
+    : QDialog(parent)
 {
-    _manager = new QNetworkAccessManager();
-    _config.setProtocol(QSsl::TlsV1_2);
+    _manager = new QNetworkAccessManager(this);
 
     setWindowTitle("Horizons");
     createWidgets();
+
+    QStringList timeTypes = {
+        TIMEVARYING,
+        MINUTES,
+        HOURS,
+        DAYS,
+        MONTHS,
+        YEARS,
+        UNITLESS
+    };
+    _timeTypeCombo->addItems(timeTypes);
+    _timeTypeCombo->setCurrentIndex(1);
 }
 
 void HorizonsDialog::createWidgets() {
     QBoxLayout* layout = new QVBoxLayout(this);
     {
-        QGridLayout* container = new QGridLayout;
+        QGridLayout* container = new QGridLayout(this);
         container->setColumnStretch(1, 1);
 
-        QLabel* localLabel = new QLabel("Select a local Horizons file");
+        QLabel* localLabel = new QLabel("Select a local Horizons file", this);
         localLabel->setObjectName("heading");
         container->addWidget(localLabel, 0, 0);
 
@@ -82,37 +101,74 @@ void HorizonsDialog::createWidgets() {
     }
     layout->addWidget(new Line);
     {
-        QBoxLayout* container = new QHBoxLayout;
-        QLabel* generateLabel = new QLabel("Or generate a new Horizons file");
+        QLabel* generateLabel = new QLabel("Or generate a new Horizons file", this);
         generateLabel->setObjectName("heading");
-        container->addWidget(generateLabel);
+        layout->addWidget(generateLabel);
+    }
+    {
+        QBoxLayout* container = new QHBoxLayout(this);
+        QLabel* targetLabel = new QLabel("Target Body:", this);
+        container->addWidget(targetLabel);
+
+        _targetEdit = new QLineEdit(QString::fromStdString("Mars Reconnaissance Orbiter"), this);
+        container->addWidget(_targetEdit);
 
         layout->addLayout(container);
     }
     {
-        _startLabel = new QLabel("Start Time:");
-        layout->addWidget(_startLabel);
-        _startEdit = new QDateTimeEdit;
+        QBoxLayout* container = new QHBoxLayout(this);
+        QLabel* centerLabel = new QLabel("Observer Location:", this);
+        container->addWidget(centerLabel);
+
+        _centerEdit = new QLineEdit(QString::fromStdString("500@4"), this);
+        container->addWidget(_centerEdit);
+
+        layout->addLayout(container);
+    }
+    {
+        QBoxLayout* container = new QHBoxLayout(this);
+        QLabel* startLabel = new QLabel("Start Time:", this);
+        container->addWidget(startLabel);
+        _startEdit = new QDateTimeEdit(this);
         _startEdit->setDisplayFormat("yyyy-MM-dd  T  hh:mm");
         _startEdit->setDate(QDate::currentDate().addDays(-1));
-        layout->addWidget(_startEdit);
+        container->addWidget(_startEdit);
+        layout->addLayout(container);
     }
     {
-        _endLabel = new QLabel("End Time:");
-        layout->addWidget(_endLabel);
-        _endEdit = new QDateTimeEdit;
+        QBoxLayout* container = new QHBoxLayout(this);
+        QLabel* endLabel = new QLabel("End Time:", this);
+        container->addWidget(endLabel);
+        _endEdit = new QDateTimeEdit(this);
         _endEdit->setDisplayFormat("yyyy-MM-dd  T  hh:mm");
         _endEdit->setDate(QDate::currentDate());
-        layout->addWidget(_endEdit);
+        container->addWidget(_endEdit);
+        layout->addLayout(container);
     }
     {
-        QBoxLayout* footer = new QHBoxLayout;
-        _errorMsg = new QLabel;
+        QBoxLayout* container = new QHBoxLayout(this);
+        QLabel* stepLabel = new QLabel("Step Size:", this);
+        container->addWidget(stepLabel);
+
+        _stepEdit = new QLineEdit(this);
+        _stepEdit->setValidator(new QIntValidator(this));
+        _stepEdit->setText(QString::number(10));
+        container->addWidget(_stepEdit);
+
+        _timeTypeCombo = new QComboBox(this);
+        container->addWidget(_timeTypeCombo);
+
+        layout->addLayout(container);
+    }
+    layout->addWidget(new Line);
+    {
+        QBoxLayout* footer = new QHBoxLayout(this);
+        _errorMsg = new QLabel(this);
         _errorMsg->setObjectName("error-message");
         _errorMsg->setWordWrap(true);
         footer->addWidget(_errorMsg);
 
-        QDialogButtonBox* buttons = new QDialogButtonBox;
+        QDialogButtonBox* buttons = new QDialogButtonBox(this);
         buttons->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
         connect(buttons, &QDialogButtonBox::accepted, this, &HorizonsDialog::approved);
         connect(buttons, &QDialogButtonBox::rejected, this, &HorizonsDialog::reject);
@@ -121,10 +177,9 @@ void HorizonsDialog::createWidgets() {
     }
 }
 
-// Send HTTPS request synchronously, EventLoop waits until request has finished
+// Send request synchronously, EventLoop waits until request has finished
 void HorizonsDialog::sendRequest(const std::string url) {
     QNetworkRequest request;
-    request.setSslConfiguration(_config);
     request.setHeader(QNetworkRequest::UserAgentHeader, "OpenSpace");
     request.setUrl(QUrl(url.c_str()));
 
@@ -150,12 +205,34 @@ void HorizonsDialog::openHorizonsFile() {
     ).toStdString();
 }
 
+void replaceAll(std::string& string, const std::string& from, const std::string& to) {
+    if (from.empty())
+        return;
+    size_t startPos = 0;
+    while ((startPos = string.find(from, startPos)) != std::string::npos) {
+        string.replace(startPos, from.length(), to);
+        startPos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
+    }
+}
+
 void HorizonsDialog::sendHorizonsRequest() {
-    // Construct url for https request
+    // Construct url for request
     std::string url = "";
     url.append(HORIZONS_REQUEST_URL);
-    url.append(COMMAND); url.append("'-74'");
-    url.append(CENTER); url.append("'500@4'");
+
+    std::string command = _targetEdit->text().toStdString();
+    replaceAll(command, " ", SPACE);
+    url.append(COMMAND);
+    url.append("'");
+    url.append(command);
+    url.append("'");;
+
+    std::string center = _centerEdit->text().toStdString();
+    replaceAll(center, " ", SPACE);
+    url.append(CENTER);
+    url.append("'");
+    url.append(center);
+    url.append("'");;
 
     url.append(START_TIME); url.append("'");
     url.append(_startEdit->date().toString("yyyy-MM-dd").toStdString());
@@ -163,13 +240,35 @@ void HorizonsDialog::sendHorizonsRequest() {
     url.append(_startEdit->time().toString("hh:mm").toStdString());
     url.append("'");
 
-    url.append(STOP_TIME); url.append("'");
+    url.append(STOP_TIME);
+    url.append("'");
     url.append(_endEdit->date().toString("yyyy-MM-dd").toStdString());
     url.append(SPACE);
     url.append(_endEdit->time().toString("hh:mm").toStdString());
     url.append("'");
 
-    url.append(STEP_SIZE); url.append("'10"); url.append(SPACE); url.append("m'");
+    url.append(STEP_SIZE);
+    url.append("'");
+    url.append(_stepEdit->text().toStdString());
+    url.append(SPACE);
+    if (_timeTypeCombo->currentText().toStdString() == TIMEVARYING) {
+        url.append("VAR'");
+    }
+    else if (_timeTypeCombo->currentText().toStdString() == MINUTES) {
+        url.append("m'");
+    }
+    else if (_timeTypeCombo->currentText().toStdString() == HOURS) {
+        url.append("h'");
+    }
+    else if (_timeTypeCombo->currentText().toStdString() == DAYS) {
+        url.append("d'");
+    }
+    else if (_timeTypeCombo->currentText().toStdString() == MONTHS) {
+        url.append("MO'");
+    }
+    else if (_timeTypeCombo->currentText().toStdString() == YEARS) {
+        url.append("Y'");
+    }
 
     std::cout << "URL: " << url << std::endl;
 
@@ -203,8 +302,4 @@ void HorizonsDialog::approved() {
     }
 
     accept();
-}
-
-HorizonsDialog::~HorizonsDialog() {
-    _manager->deleteLater();
 }
