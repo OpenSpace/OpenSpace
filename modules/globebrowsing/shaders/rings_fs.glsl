@@ -84,14 +84,15 @@ Fragment getFragment() {
     // divided by 3 as length of vec3(1.0, 1.0, 1.0) will return 3 and we want
     // to normalize the alpha value to [0,1]
     float colorValue = length(diffuse.rgb) / 0.57735026919;
-    diffuse.a = colorValue;
-    if (diffuse.a + 1 < 1.2)
-        discard;
-    // if (colorValue < colorFilterValue) {
-    //     diffuse.a = colorValue * colorFilterValue;
-    //     if (diffuse.a < 0.99)
-    //         discard;
-    // }
+    if (colorValue < colorFilterValue) {
+        diffuse.a = colorValue * colorFilterValue;
+        if (diffuse.a < 0.99)
+            discard;
+    } else {
+        diffuse.a = colorValue;
+        if (diffuse.a + 1 < 1.2)
+            discard;
+    }
 
     // shadow == 1.0 means it is not in shadow
     float shadow = 1.0;
