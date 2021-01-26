@@ -55,6 +55,8 @@ constexpr const char* NoDataTextureFile =
     "${SYNC}/http/exoplanets_textures/1/grid-32.png";
 constexpr const char* DiscTextureFile =
     "${SYNC}/http/exoplanets_textures/1/disc_texture.png";
+constexpr const char* HabitableZoneTextureFile =
+    "${SYNC}/http/habitable_zone_textures/1/green_faded.png";
 
 constexpr const float AU = static_cast<float>(distanceconstants::AstronomicalUnit);
 constexpr const float SolarRadius = static_cast<float>(distanceconstants::SolarRadius);
@@ -437,12 +439,10 @@ void createExoplanetSystem(const std::string& starName) {
             "Enabled = true,"
             "Renderable = {"
                 "Type = 'RenderableHabitableZone',"
-                "Texture = openspace.absPath("
-                    "openspace.createPixelImage('exo_habitable_zone', {0, 0.92, 0.81})"
-                "),"
+                "Texture = openspace.absPath('" + HabitableZoneTextureFile + "'),"
                 "Luminosity = " + std::to_string(system.starData.luminosity) + ","
                 "EffectiveTemperature = " + std::to_string(system.starData.teff) + ","
-                "Opacity = 0.05"
+                "Opacity = 0.07"
             "},"
             "Transform = {"
                 "Rotation = {"

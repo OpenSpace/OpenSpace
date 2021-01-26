@@ -1,8 +1,12 @@
 local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("./transforms")
 
-local color = {0, 1, 0.81};
-local texture = openspace.absPath(openspace.createPixelImage('sun_habitable_zone', color));
+local TexturesPath = asset.syncedResource({
+    Type = "HttpSynchronization",
+    Name = "Habitable Zone Textures",
+    Identifier = "habitable_zone_textures",
+    Version = 1
+})
 
 local HabitableZone = {
     Identifier = "SunHabitableZone",
@@ -10,10 +14,10 @@ local HabitableZone = {
     Renderable = {
         Type = "RenderableHabitableZone",
         Enabled = false,
-        Texture = texture,
+        Texture = TexturesPath .. "/hot_to_cold_faded.png",
         EffectiveTemperature = 5780, -- Kelvin
         Luminosity = 1, -- solar
-        Opacity = 0.06
+        Opacity = 0.1
     },
     GUI = {
         Name = "Sun Habitable Zone",
