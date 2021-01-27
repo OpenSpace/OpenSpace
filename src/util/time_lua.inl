@@ -91,8 +91,10 @@ int time_setDeltaTimeSteps(lua_State* L) {
             inputDeltaTimes.push_back(time);
         }
         else {
-            const char* msg = lua_pushfstring(L,
-                "Error setting delta times. Expected list of numbers.");
+            const char* msg = lua_pushfstring(
+                L,
+                "Error setting delta times. Expected list of numbers"
+            );
             return ghoul::lua::luaError(L, fmt::format("bad argument ({})", msg));
         }
     }
