@@ -160,7 +160,7 @@ namespace {
         return result;
     }
 
-    struct [[codegen::Dictionary(GlobeBrowsingModule), codegen::notypecheck]] Parameters {
+    struct [[codegen::Dictionary(GlobeBrowsingModule)]] Parameters {
         std::optional<bool> cacheEnabled [[codegen::key(WMSCacheEnabled)]];
         std::optional<bool> offlineMode;
         std::optional<std::string> cacheLocation [[codegen::key(WMSCacheLocation)]];
