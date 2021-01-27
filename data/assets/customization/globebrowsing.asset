@@ -25,11 +25,11 @@ local vrt_folders = {
         -- example:   'C:/OpenSpace/GlobeBrowsingData/Mars/CTX'
 
         -- We recommend using this folder for CTX
-        openspace.absPath('G:/OpenSpaceData/Mars/CTX'),
+        openspace.absPath('${BASE}/../OpenSpaceData/Mars/CTX'),
         -- if not and you have a custom path for CTX layers, enter it below
         '',
         -- We recommend using this folder for HiRISE
-        openspace.absPath('G:/OpenSpaceData/Mars/HiRISE'),
+        openspace.absPath('${BASE}/../OpenSpaceData/Mars/HiRISE'),
         -- if not and you have a custom path for HiRISE layers, enter it below
         ''
     },
@@ -39,8 +39,8 @@ local vrt_folders = {
         -- if areas overlap, images from the lower results will overwrite the images from former
         -- results
         -- example:  'C:/OpenSpace/GlobeBrowsingData/Moon'
-        openspace.absPath('G:/OpenSpaceData/Moon'),
-        openspace.absPath('G:/OpenSpaceData/Apollo'),
+        openspace.absPath('${BASE}/../OpenSpaceData/Moon'),
+        openspace.absPath('${BASE}/../OpenSpaceData/Apollo'),
         ''
     },
     Mercury = {
@@ -49,7 +49,7 @@ local vrt_folders = {
         -- if areas overlap, images from the lower results will overwrite the images from former
         -- results
         -- example:  'C:/OpenSpace/GlobeBrowsingData/Mercury'
-        openspace.absPath('G:/OpenSpaceData/Mercury'),
+        openspace.absPath('${BASE}/../OpenSpaceData/Mercury'),
         ''
     }
 }
