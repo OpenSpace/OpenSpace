@@ -28,7 +28,6 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
-//#include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/documentation/verifier.h>
 #include <ghoul/glm.h>

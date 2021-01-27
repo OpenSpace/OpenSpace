@@ -27,7 +27,6 @@
 #include <modules/base/basemodule.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/documentation/verifier.h>
 #include <ghoul/glm.h>
@@ -91,12 +90,7 @@ documentation::Documentation RenderableSphericalGrid::Documentation() {
 RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _gridProgram(nullptr)
-    , _color(
-        ColorInfo,
-        glm::vec3(0.5f, 0.5, 0.5f),
-        glm::vec3(0.f),
-        glm::vec3(1.f)
-    )
+    , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
     , _segments(SegmentsInfo, 36, 4, 200)
     , _lineWidth(LineWidthInfo, 0.5f, 0.f, 20.f)
 {

@@ -1,6 +1,6 @@
 local assetHelper = asset.require('util/asset_helper')
 
-local scale = 3E11  
+local scale = 149597870700 -- 1 AU
 
 local radialGrid = {
     Identifier = "ExampleRadialGrid",
@@ -17,6 +17,7 @@ local radialGrid = {
         Color = { 0.6, 1.0, 0.7 },
         LineWidth = 3.0,
         GridSegments = { 3, 4 },
+        OuterSize = 1.0,
         InnerRadius = 0.2,
         Enabled = false
     },
@@ -39,7 +40,7 @@ local planarGrid = {
         Color = { 0.0, 1.0, 0.8 },
         LineWidth = 2.0,
         Segments = { 5, 10 },
-        Size = { 1, 2} ,
+        Size = { 1, 2 },
         Enabled = false
     },
     GUI = {
