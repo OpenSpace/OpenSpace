@@ -24,7 +24,6 @@
 
 #include <modules/spacecraftinstruments/rendering/renderablemodelprojection.h>
 
-#include <modules/base/rendering/modelgeometry.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
@@ -35,6 +34,8 @@
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/io/model/modelgeometry.h>
+#include <ghoul/io/model/modelreader.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/programobject.h>
@@ -45,7 +46,7 @@
 namespace {
     constexpr const char* _loggerCat = "RenderableModelProjection";
 
-    constexpr const char* keyGeometry = "Geometry";
+    constexpr const char* KeyGeomModelFile = "GeometryFile";
     constexpr const char* keyProjection = "Projection";
     constexpr const char* keyBoundingSphereRadius = "BoundingSphereRadius";
 
@@ -89,10 +90,10 @@ documentation::Documentation RenderableModelProjection::Documentation() {
                 Optional::No
             },
             {
-                keyGeometry,
-                new ReferencingVerifier("base_geometry_model"),
+                KeyGeomModelFile,
+                new OrVerifier({ new StringVerifier, new StringListVerifier }),
                 Optional::No,
-                "The geometry that is used for rendering this model."
+                "The file or files that that is used for rendering this model"
             },
             {
                 keyProjection,
@@ -128,9 +129,56 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
         dictionary,
         "RenderableModelProjection"
     );
-    using ghoul::Dictionary;
-    Dictionary geometryDictionary = dictionary.value<Dictionary>(keyGeometry);
-    _geometry = modelgeometry::ModelGeometry::createFromDictionary(geometryDictionary);
+
+    if (dictionary.hasKey(KeyGeomModelFile)) {
+        std::string file;
+
+        if (dictionary.hasKeyAndValue<std::string>(KeyGeomModelFile)) {
+            // Handle single file
+            file = absPath(dictionary.value<std::string>(KeyGeomModelFile));
+            _geometry = ghoul::io::ModelReader::ref().loadModel(file, false, true);
+        }
+        else if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyGeomModelFile)) {
+            ghoul::Dictionary fileDictionary = dictionary.value<ghoul::Dictionary>(
+                KeyGeomModelFile
+            );
+            std::vector<std::unique_ptr<ghoul::modelgeometry::ModelGeometry>> geometries;
+
+            for (std::string k : fileDictionary.keys()) {
+                // Handle each file
+                file = absPath(fileDictionary.value<std::string>(k));
+                geometries.push_back(ghoul::io::ModelReader::ref().loadModel(
+                    file,
+                    false,
+                    true
+                ));
+            }
+
+            if (geometries.size() > 0) {
+                ghoul::modelgeometry::ModelGeometry combinedGeometry =
+                    std::move(*geometries[0].release());
+
+                // Combine all models into one ModelGeometry
+                for (unsigned int i = 1; i < geometries.size(); ++i) {
+                    for (unsigned int m = 0; m < geometries[i]->meshes().size(); ++m) {
+                        combinedGeometry.meshes().push_back(
+                            std::move(geometries[i]->meshes()[m])
+                        );
+                    }
+
+                    for (unsigned int t = 0; t < geometries[i]->textureStorage().size(); ++t) {
+                        combinedGeometry.textureStorage().push_back(
+                            std::move(geometries[i]->textureStorage()[t])
+                        );
+                    }
+                }
+                _geometry = std::make_unique<ghoul::modelgeometry::ModelGeometry>(
+                    std::move(combinedGeometry)
+                );
+                _geometry->calculateBoundingRadius();
+            }
+        }
+    }
 
     addPropertySubOwner(_projectionComponent);
 
@@ -200,7 +248,8 @@ void RenderableModelProjection::initializeGL() {
     _projectionComponent.initializeGL();
 
     float bs = boundingSphere();
-    _geometry->initialize(this);
+    float temp = 0.f;
+    _geometry->initialize(temp);
     setBoundingSphere(bs); // ignore bounding sphere set by geometry.
 }
 
@@ -272,11 +321,8 @@ void RenderableModelProjection::render(const RenderData& data, RendererTasks&) {
         _projectionComponent.projectionFading()
     );
 
-    _geometry->setUniforms(*_programObject);
-
     ghoul::opengl::TextureUnit baseUnit;
     baseUnit.activate();
-    _geometry->bindTexture();
     _programObject->setUniform(_mainUniformCache.baseTexture, baseUnit);
 
     ghoul::opengl::TextureUnit projectionUnit;
@@ -284,7 +330,7 @@ void RenderableModelProjection::render(const RenderData& data, RendererTasks&) {
     _projectionComponent.projectionTexture().bind();
     _programObject->setUniform(_mainUniformCache.projectionTexture, projectionUnit);
 
-    _geometry->render();
+    _geometry->render(*_programObject, false);
 
     _programObject->deactivate();
 }
@@ -369,9 +415,8 @@ void RenderableModelProjection::imageProjectGPU(
             _depthFboUniformCache.ModelTransform,
             _transform
         );
-        _geometry->setUniforms(*_fboProgramObject);
 
-        _geometry->render();
+        _geometry->render(*_fboProgramObject, false);
 
         _depthFboProgramObject->deactivate();
         _projectionComponent.depthMapRenderEnd();
@@ -401,8 +446,7 @@ void RenderableModelProjection::imageProjectGPU(
     _fboProgramObject->setUniform(_fboUniformCache.ModelTransform, _transform);
     _fboProgramObject->setUniform(_fboUniformCache.boresight, _boresight);
 
-    _geometry->setUniforms(*_fboProgramObject);
-    _geometry->render();
+    _geometry->render(*_fboProgramObject, false);
 
     _fboProgramObject->deactivate();
 

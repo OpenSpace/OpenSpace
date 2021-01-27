@@ -39,14 +39,14 @@ namespace ghoul::opengl {
     class Texture;
 } // namespace ghoul::opengl
 
+namespace ghoul::modelgeometry { class ModelGeometry; }
+
 namespace openspace {
 
 namespace documentation { struct Documentation; }
 
 struct RenderData;
 struct UpdateData;
-
-namespace modelgeometry { class ModelGeometry; }
 
 class RenderableModelProjection : public Renderable {
 public:
@@ -84,7 +84,7 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _depthFboProgramObject;
     UniformCache(ProjectorMatrix, ModelTransform) _depthFboUniformCache;
 
-    ghoul::mm_unique_ptr<modelgeometry::ModelGeometry> _geometry;
+    std::unique_ptr<ghoul::modelgeometry::ModelGeometry> _geometry;
 
     glm::dmat3 _instrumentMatrix = glm::dmat3(1.0);
 
