@@ -91,7 +91,7 @@ RenderableBoxGrid::RenderableBoxGrid(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
     , _lineWidth(LineWidthInfo, 0.5f, 0.f, 20.f)
-    , _size(SizeInfo, glm::vec3(1e20f), glm::vec3(1.f), glm::vec3(1e35f))
+    , _size(SizeInfo, glm::vec3(1.f), glm::vec3(1.f), glm::vec3(100.f))
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -204,9 +204,6 @@ void RenderableBoxGrid::render(const RenderData& data, RendererTasks&){
 
 void RenderableBoxGrid::update(const UpdateData&) {
     if (_gridIsDirty) {
-        //_vsize = (_segments + 1) * (_segments + 1);
-        //_varray.resize(_vsize);
-
         const glm::vec3 llf = -_size.value() / 2.f;
         const glm::vec3 urb =  _size.value() / 2.f;
 
@@ -239,6 +236,9 @@ void RenderableBoxGrid::update(const UpdateData&) {
         const glm::vec3 v6 = glm::vec3(urb.x, urb.y, urb.z);
         const glm::vec3 v7 = glm::vec3(llf.x, urb.y, urb.z);
 
+        _varray.clear();
+        _varray.reserve(16);
+
         // First add the bounds
         _varray.push_back({ v0.x, v0.y, v0.z });
         _varray.push_back({ v1.x, v1.y, v1.z });
@@ -257,7 +257,6 @@ void RenderableBoxGrid::update(const UpdateData&) {
         _varray.push_back({ v7.x, v7.y, v7.z });
         _varray.push_back({ v3.x, v3.y, v3.z });
 
-
         glBindVertexArray(_vaoID);
         glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
         glBufferData(
@@ -268,7 +267,6 @@ void RenderableBoxGrid::update(const UpdateData&) {
         );
 
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
-
         glBindVertexArray(0);
 
         _gridIsDirty = false;
