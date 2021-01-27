@@ -45,6 +45,7 @@ public:
 
 private slots:
     void openHorizonsFile();
+    void openSaveDirectory();
     void sendHorizonsRequest();
     void handleReply(QNetworkReply *reply);
     void approved();
@@ -56,6 +57,8 @@ private:
     std::string _horizonsFile;
     QNetworkAccessManager* _manager;
 
+    QLineEdit* _directoryEdit = nullptr;
+    QLineEdit* _nameEdit = nullptr;
     QLineEdit* _targetEdit = nullptr;
     QLineEdit* _centerEdit = nullptr;
     QDateTimeEdit* _startEdit;

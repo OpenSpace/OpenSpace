@@ -44,6 +44,7 @@
 #include <QComboBox>
 #include <QDateTimeEdit>
 #include <QDialogButtonBox>
+#include <QDir>
 #include <QEventLoop>
 #include <QFileDialog>
 #include <QLabel>
@@ -54,6 +55,8 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <algorithm>
+#include <filesystem>
+#include <fstream>
 #include <iostream>
 
 HorizonsDialog::HorizonsDialog(QWidget* parent)
@@ -83,7 +86,7 @@ void HorizonsDialog::createWidgets() {
         QGridLayout* container = new QGridLayout(this);
         container->setColumnStretch(1, 1);
 
-        QLabel* localLabel = new QLabel("Select a local Horizons file", this);
+        QLabel* localLabel = new QLabel("Select a local Horizons file:", this);
         localLabel->setObjectName("heading");
         container->addWidget(localLabel, 0, 0);
 
@@ -101,9 +104,41 @@ void HorizonsDialog::createWidgets() {
     }
     layout->addWidget(new Line);
     {
-        QLabel* generateLabel = new QLabel("Or generate a new Horizons file", this);
+        QLabel* generateLabel = new QLabel("Or generate a new Horizons file:", this);
         generateLabel->setObjectName("heading");
         layout->addWidget(generateLabel);
+    }
+    {
+        QBoxLayout* container = new QHBoxLayout(this);
+        QLabel* nameLabel = new QLabel("Filename:", this);
+        container->addWidget(nameLabel);
+
+        _nameEdit = new QLineEdit(QString::fromStdString("Horizons.dat"), this);
+        _nameEdit->setToolTip("Name of the generated Horizons file. Must end with '.dat'");
+        container->addWidget(_nameEdit);
+
+        layout->addLayout(container);
+    }
+    {
+        QBoxLayout* container = new QHBoxLayout(this);
+        QLabel* nameLabel = new QLabel("Save directory:", this);
+        container->addWidget(nameLabel);
+
+        _directoryEdit = new QLineEdit(this);
+        _directoryEdit->setToolTip("Directory where the generated Horizons file is saved");
+        container->addWidget(_directoryEdit);
+
+        QPushButton* directoryButton = new QPushButton("Browse", this);
+        connect(
+            directoryButton, &QPushButton::released,
+            [this]() {
+                openSaveDirectory();
+            }
+        );
+        directoryButton->setCursor(Qt::PointingHandCursor);
+        container->addWidget(directoryButton);
+
+        layout->addLayout(container);
     }
     {
         QBoxLayout* container = new QHBoxLayout(this);
@@ -205,6 +240,12 @@ void HorizonsDialog::openHorizonsFile() {
     ).toStdString();
 }
 
+void HorizonsDialog::openSaveDirectory() {
+    std::string directory = QFileDialog::getExistingDirectory(this).toStdString();
+    std::cout << "Directory: " << directory << std::endl;
+    _directoryEdit->setText(directory.c_str());
+}
+
 void replaceAll(std::string& string, const std::string& from, const std::string& to) {
     if (from.empty())
         return;
@@ -232,9 +273,10 @@ void HorizonsDialog::sendHorizonsRequest() {
     url.append(CENTER);
     url.append("'");
     url.append(center);
-    url.append("'");;
+    url.append("'");
 
-    url.append(START_TIME); url.append("'");
+    url.append(START_TIME);
+    url.append("'");
     url.append(_startEdit->date().toString("yyyy-MM-dd").toStdString());
     url.append(SPACE);
     url.append(_startEdit->time().toString("hh:mm").toStdString());
@@ -292,6 +334,17 @@ void HorizonsDialog::handleReply(QNetworkReply *reply) {
     std::cout << answer.toStdString();
     std::cout << "'" << std::endl;
 
+    // Create a text file and write reply to it
+    QString filePath = _directoryEdit->text();
+    filePath.append(QDir::separator());
+    filePath.append(_nameEdit->text());
+
+    std::ofstream file(filePath.toStdString());
+    file << answer.toStdString() << std::endl;
+
+    file.close();
+    _horizonsFile = std::filesystem::absolute(filePath.toStdString()).string();
+
     reply->deleteLater();
 }
 
@@ -299,7 +352,15 @@ void HorizonsDialog::approved() {
     if (_horizonsFile.empty()) {
         // Send request of Horizon file if no local file has been specified
         sendHorizonsRequest();
+
+        if (_horizonsFile.empty()) {
+            _errorMsg->setText(
+                "At least one Horizons file must be specified or generated"
+            );
+            return;
+        }
     }
 
+    std::cout << "File: " << _horizonsFile << std::endl;
     accept();
 }
