@@ -88,7 +88,6 @@ documentation::Documentation RenderableSphericalGrid::Documentation() {
     };
 }
 
-
 RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _gridProgram(nullptr)
@@ -215,6 +214,7 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_LINE_SMOOTH);
+    glDepthMask(false);
 
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
@@ -226,6 +226,7 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
     // Restores GL State
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetLineState();
+    global::renderEngine->openglStateCache().resetDepthState();
 }
 
 void RenderableSphericalGrid::update(const UpdateData&) {

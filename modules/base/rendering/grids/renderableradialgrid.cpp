@@ -49,7 +49,7 @@ namespace {
         "GridSegments",
         "Number of Grid Segments",
         "Specifies the number of segments for the grid, in the radial and angular "
-        " direction respectively"
+        "direction respectively"
     };
 
     constexpr openspace::properties::Property::PropertyInfo CircleSegmentsInfo = {
@@ -272,6 +272,7 @@ void RenderableRadialGrid::render(const RenderData& data, RendererTasks&) {
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_LINE_SMOOTH);
+    glDepthMask(false);
 
     for (GeometryData& c : _circles) {
         c.render();
@@ -284,6 +285,7 @@ void RenderableRadialGrid::render(const RenderData& data, RendererTasks&) {
     // Restores GL State
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetLineState();
+    global::renderEngine->openglStateCache().resetDepthState();
 }
 
 void RenderableRadialGrid::update(const UpdateData&) {

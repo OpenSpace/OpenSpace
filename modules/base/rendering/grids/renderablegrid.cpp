@@ -212,6 +212,7 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&){
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_LINE_SMOOTH);
+    glDepthMask(false);
 
     glBindVertexArray(_vaoID);
     glDrawArrays(_mode, 0, static_cast<GLsizei>(_varray.size()));
@@ -222,6 +223,7 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&){
     // Restores GL State
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetLineState();
+    global::renderEngine->openglStateCache().resetDepthState();
 }
 
 void RenderableGrid::update(const UpdateData&) {

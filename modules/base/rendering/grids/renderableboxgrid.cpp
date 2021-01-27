@@ -88,7 +88,6 @@ documentation::Documentation RenderableBoxGrid::Documentation() {
     };
 }
 
-
 RenderableBoxGrid::RenderableBoxGrid(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _gridColor(
@@ -195,6 +194,7 @@ void RenderableBoxGrid::render(const RenderData& data, RendererTasks&){
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnablei(GL_BLEND, 0);
     glEnable(GL_LINE_SMOOTH);
+    glDepthMask(false);
 
     glBindVertexArray(_vaoID);
     glDrawArrays(_mode, 0, static_cast<GLsizei>(_varray.size()));
@@ -205,6 +205,7 @@ void RenderableBoxGrid::render(const RenderData& data, RendererTasks&){
     // Restores GL State
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetLineState();
+    global::renderEngine->openglStateCache().resetDepthState();
 }
 
 void RenderableBoxGrid::update(const UpdateData&) {
