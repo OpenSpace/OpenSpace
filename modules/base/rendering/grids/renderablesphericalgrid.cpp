@@ -38,9 +38,9 @@
 namespace {
     constexpr const char* ProgramName = "GridProgram";
 
-    constexpr openspace::properties::Property::PropertyInfo GridColorInfo = {
-        "GridColor",
-        "Grid Color",
+    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+        "Color",
+        "Color",
         "This value determines the color of the grid lines that are rendered."
     };
 
@@ -67,10 +67,10 @@ documentation::Documentation RenderableSphericalGrid::Documentation() {
         "base_renderable_sphericalgrid",
         {
             {
-                GridColorInfo.identifier,
+                ColorInfo.identifier,
                 new DoubleVector3Verifier,
                 Optional::Yes,
-                GridColorInfo.description
+                ColorInfo.description
             },
             {
                 SegmentsInfo.identifier,
@@ -91,8 +91,8 @@ documentation::Documentation RenderableSphericalGrid::Documentation() {
 RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _gridProgram(nullptr)
-    , _gridColor(
-        GridColorInfo,
+    , _color(
+        ColorInfo,
         glm::vec3(0.5f, 0.5, 0.5f),
         glm::vec3(0.f),
         glm::vec3(1.f)
@@ -109,11 +109,11 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
 
-    if (dictionary.hasKey(GridColorInfo.identifier)) {
-        _gridColor = dictionary.value<glm::dvec3>(GridColorInfo.identifier);
+    if (dictionary.hasKey(ColorInfo.identifier)) {
+        _color = dictionary.value<glm::dvec3>(ColorInfo.identifier);
     }
-    _gridColor.setViewOption(properties::Property::ViewOptions::Color);
-    addProperty(_gridColor);
+    _color.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_color);
 
     if (dictionary.hasKey(SegmentsInfo.identifier)) {
         _segments = static_cast<int>(dictionary.value<double>(SegmentsInfo.identifier));
@@ -201,7 +201,7 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
         glm::dmat4(data.camera.projectionMatrix()) * modelViewTransform
     );
 
-    _gridProgram->setUniform("gridColor", _gridColor);
+    _gridProgram->setUniform("gridColor", _color);
 
     float adjustedLineWidth = 1.f;
 

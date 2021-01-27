@@ -61,7 +61,7 @@ protected:
 
     ghoul::opengl::ProgramObject* _gridProgram;
 
-    properties::Vec3Property _gridColor;
+    properties::Vec3Property _color;
     properties::IntProperty _segments;
     properties::FloatProperty _lineWidth;
 

@@ -61,7 +61,7 @@ protected:
 
     ghoul::opengl::ProgramObject* _gridProgram = nullptr;
 
-    properties::Vec3Property _gridColor;
+    properties::Vec3Property _color;
     properties::UVec2Property _segments;
     properties::FloatProperty _lineWidth;
     properties::Vec2Property _size;

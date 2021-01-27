@@ -39,9 +39,9 @@
 namespace {
     constexpr const char* ProgramName = "GridProgram";
 
-    constexpr openspace::properties::Property::PropertyInfo GridColorInfo = {
-        "GridColor",
-        "Grid Color",
+    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+        "Color",
+        "Color",
         "This value determines the color of the grid lines that are rendered."
     };
 
@@ -88,10 +88,10 @@ documentation::Documentation RenderableRadialGrid::Documentation() {
         "base_renderable_radialgrid",
         {
             {
-                GridColorInfo.identifier,
+                ColorInfo.identifier,
                 new DoubleVector3Verifier,
                 Optional::Yes,
-                GridColorInfo.description
+                ColorInfo.description
             },
             {
                 GridSegmentsInfo.identifier,
@@ -129,13 +129,8 @@ documentation::Documentation RenderableRadialGrid::Documentation() {
 
 RenderableRadialGrid::RenderableRadialGrid(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _gridColor(GridColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
-    , _gridSegments(
-        GridSegmentsInfo,
-        glm::ivec2(1, 1),
-        glm::ivec2(1),
-        glm::ivec2(200)
-    )
+    , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
+    , _gridSegments(GridSegmentsInfo, glm::ivec2(1), glm::ivec2(1), glm::ivec2(200))
     , _circleSegments(CircleSegmentsInfo, 36, 4, 200)
     , _lineWidth(LineWidthInfo, 0.5f, 0.f, 20.f)
     , _maxRadius(OuterRadiusInfo, 1.f, 0.f, 20.f)
@@ -150,11 +145,11 @@ RenderableRadialGrid::RenderableRadialGrid(const ghoul::Dictionary& dictionary)
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
 
-    if (dictionary.hasKey(GridColorInfo.identifier)) {
-        _gridColor = dictionary.value<glm::dvec3>(GridColorInfo.identifier);
+    if (dictionary.hasKey(ColorInfo.identifier)) {
+        _color = dictionary.value<glm::dvec3>(ColorInfo.identifier);
     }
-    _gridColor.setViewOption(properties::Property::ViewOptions::Color);
-    addProperty(_gridColor);
+    _color.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_color);
 
     if (dictionary.hasKey(GridSegmentsInfo.identifier)) {
         _gridSegments = static_cast<glm::ivec2>(
@@ -259,7 +254,7 @@ void RenderableRadialGrid::render(const RenderData& data, RendererTasks&) {
         glm::dmat4(data.camera.projectionMatrix()) * modelViewTransform
     );
 
-    _gridProgram->setUniform("gridColor", _gridColor);
+    _gridProgram->setUniform("gridColor", _color);
 
     float adjustedLineWidth = 1.f;
 
