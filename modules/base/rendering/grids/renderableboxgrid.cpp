@@ -166,8 +166,6 @@ void RenderableBoxGrid::deinitializeGL() {
 void RenderableBoxGrid::render(const RenderData& data, RendererTasks&){
     _gridProgram->activate();
 
-    _gridProgram->setUniform("opacity", _opacity);
-
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
@@ -180,11 +178,15 @@ void RenderableBoxGrid::render(const RenderData& data, RendererTasks&){
         "MVPTransform",
         glm::dmat4(data.camera.projectionMatrix()) * modelViewTransform
     );
-
+    _gridProgram->setUniform("opacity", _opacity);
     _gridProgram->setUniform("gridColor", _color);
 
-    // Changes GL state:
+    // Change GL state:
+#ifndef __APPLE__
     glLineWidth(_lineWidth);
+#else
+    glLineWidth(1.f);
+#endif
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnablei(GL_BLEND, 0);
     glEnable(GL_LINE_SMOOTH);
@@ -196,7 +198,7 @@ void RenderableBoxGrid::render(const RenderData& data, RendererTasks&){
 
     _gridProgram->deactivate();
 
-    // Restores GL State
+    // Restore GL State
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetLineState();
     global::renderEngine->openglStateCache().resetDepthState();
