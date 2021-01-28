@@ -310,20 +310,20 @@ namespace {
         // The path to the SPECK file containing information about the stars being rendered
         std::string file;
 
-        // [[codegen::description(ColorTextureInfo)]]
+        // [[codegen::verbatim(ColorTextureInfo.description)]]
         std::string colorMap;
 
-        // [[codegen::description(ColorOptionInfo)]]
+        // [[codegen::verbatim(ColorOptionInfo.description)]]
         std::optional<std::string> colorOption
             [[codegen::inlist("Color", "Velocity", "Speed", "Other Data", "Fixed Color")]];
 
-        // [[codegen::description(OtherDataOptionInfo)]]
+        // [[codegen::verbatim(OtherDataOptionInfo.description)]]
         std::optional<std::string> otherData;
 
-        // [[codegen::description(OtherDataColorMapInfo)]]
+        // [[codegen::verbatim(OtherDataColorMapInfo.description)]]
         std::optional<std::string> otherDataColorMap;
 
-        // [[codegen::description(FilterOutOfRangeInfo)]]
+        // [[codegen::verbatim(FilterOutOfRangeInfo.description)]]
         std::optional<bool> filterOutOfRange;
 
         // This value specifies a value that is always filtered out of the value ranges on
@@ -334,25 +334,25 @@ namespace {
         // value only makes sense if 'StaticFilter' is 'true', as well
         std::optional<float> staticFilterReplacement;
 
-        // [[codegen::description(MagnitudeExponentInfo)]]
+        // [[codegen::verbatim(MagnitudeExponentInfo.description)]]
         std::optional<float> magnitudeExponent;
 
-        // [[codegen::description(EnableTestGridInfo)]]
+        // [[codegen::verbatim(EnableTestGridInfo.description)]]
         std::optional<bool> enableTestGrid;
 
-        // [[codegen::description(RenderMethodOptionInfo)]]
+        // [[codegen::verbatim(RenderMethodOptionInfo.description)]]
         std::string renderMethod;
 
-        // [[codegen::description(PsfTextureInfo)]]
+        // [[codegen::verbatim(PsfTextureInfo.description)]]
         std::string texture;
 
-        // [[codegen::description(SizeCompositionOptionInfo)]]
+        // [[codegen::verbatim(SizeCompositionOptionInfo.description)]]
         std::optional<std::string> sizeComposition;
 
-        // [[codegen::description(FadeInDistancesInfo)]]
+        // [[codegen::verbatim(FadeInDistancesInfo.description)]]
         std::optional<glm::dvec2> fadeInDistances;
 
-        // [[codegen::description(DisableFadeInInfo)]]
+        // [[codegen::verbatim(DisableFadeInInfo.description)]]
         std::optional<bool> distableFadeIn;
     };
 #include "renderablestars_codegen.cpp"

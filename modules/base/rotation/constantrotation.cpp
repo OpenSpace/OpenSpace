@@ -44,9 +44,9 @@ namespace {
     };
 
     struct [[codegen::Dictionary(ConstantRotation)]] Parameters {
-        // [[codegen::description(RotationInfo)]]
+        // [[codegen::verbatim(RotationInfo.description)]]
         std::optional<glm::dvec3> rotationAxis;
-        // [[codegen::description(RotationRateInfo)]]
+        // [[codegen::verbatim(RotationRateInfo.description)]]
         std::optional<float> rotationRate;
     };
 #include "constantrotation_codegen.cpp"

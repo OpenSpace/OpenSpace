@@ -181,7 +181,7 @@ namespace {
         // Declares shadow groups, meaning which nodes are considered in shadow calculations
         std::optional<ShadowGroup> shadowGroup;
 
-        // [[codegen::description(AtmosphereHeightInfo)]]
+        // [[codegen::verbatim(AtmosphereHeightInfo.description)]]
         float atmosphereHeight;
 
         // The radius of the planet in meters
@@ -189,13 +189,13 @@ namespace {
 
         float planetAverageGroundReflectance;
 
-        // [[codegen::description(SunIntensityInfo)]]
+        // [[codegen::verbatim(SunIntensityInfo.description)]]
         std::optional<float> sunIntensity;
 
-        // [[codegen::description(MieScatteringExtinctionPropCoeffInfo)]]
+        // [[codegen::verbatim(MieScatteringExtinctionPropCoeffInfo.description)]]
         std::optional<float> mieScatteringExtinctionPropCoefficient;
 
-        // [[codegen::description(GroundRadianceEmittioninfo)]]
+        // [[codegen::verbatim(GroundRadianceEmittioninfo.description)]]
         float groundRadianceEmission;
 
         struct Rayleigh {

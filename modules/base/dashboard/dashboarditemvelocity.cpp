@@ -70,10 +70,10 @@ namespace {
     }
 
     struct [[codegen::Dictionary(DashboardItemVelocity)]] Parameters {
-        // [[codegen::description(SimplificationInfo)]]
+        // [[codegen::verbatim(SimplificationInfo.description)]]
         std::optional<bool> simplification;
 
-        // [[codegen::description(RequestedUnitInfo)]]
+        // [[codegen::verbatim(RequestedUnitInfo.description)]]
         std::optional<std::string> requestedUnit [[codegen::inlist(unitList())]];
     };
 #include "dashboarditemvelocity_codegen.cpp"

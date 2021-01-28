@@ -71,13 +71,13 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderablePlane)]] Parameters {
-        // [[codegen::description(BillboardInfo)]]
+        // [[codegen::verbatim(BillboardInfo.description)]]
         std::optional<bool> billboard;
 
-        // [[codegen::description(SizeInfo)]]
+        // [[codegen::verbatim(SizeInfo.description)]]
         double size;
 
-        // [[codegen::description(BlendModeInfo)]]
+        // [[codegen::verbatim(BlendModeInfo.description)]]
         std::optional<std::string> blendMode [[codegen::inlist("Normal", "Additive")]];
     };
 #include "renderableplane_codegen.cpp"

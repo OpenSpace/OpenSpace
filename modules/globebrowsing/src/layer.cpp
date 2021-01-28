@@ -108,7 +108,7 @@ namespace {
         // presented to the user
         std::optional<std::string> description;
 
-        // [[codegen::description(ColorInfo)]]
+        // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec3> color;
 
         // Specifies the type of layer that is to be added. If this value is not

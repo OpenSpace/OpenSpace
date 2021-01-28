@@ -32,6 +32,7 @@
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/misc/profiling.h>
+#include <optional>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo FrametimeInfo = {
@@ -133,32 +134,21 @@ namespace {
                 throw ghoul::MissingCaseException();
         }
     }
+
+    struct [[codegen::Dictionary(DashboardItemFramerate)]] Parameters {
+        // [[codegen::verbatim(FrametimeInfo.description)]]
+        std::optional<std::string> frametimeType [[codegen::inlist(ValueDtAvg,
+            ValueDtExtremes, ValueDtStandardDeviation, ValueDtCov, ValueFps, ValueFpsAvg,
+            ValueNone)]];
+    };
+#include "dashboarditemframerate_codegen.cpp"
+
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation DashboardItemFramerate::Documentation() {
-    using namespace documentation;
-
-    return {
-        "DashboardItem Framerate",
-        "base_dashboarditem_framerate",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("DashboardItemFramerate"),
-                Optional::No
-            },
-            {
-                FrametimeInfo.identifier,
-                new StringInListVerifier({ ValueDtAvg, ValueDtExtremes,
-                    ValueDtStandardDeviation, ValueDtCov, ValueFps, ValueFpsAvg, ValueNone
-                }),
-                Optional::Yes,
-                FrametimeInfo.description
-            }
-        }
-    };
+    return codegen::doc<DashboardItemFramerate>();
 }
 
 DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictionary)
@@ -166,11 +156,7 @@ DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictiona
     , _frametimeType(FrametimeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _clearCache(ClearCacheInfo)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "DashboardItemFramerate"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _frametimeType.addOptions({
         { static_cast<int>(FrametimeType::DtTimeAvg), ValueDtAvg },
@@ -188,26 +174,25 @@ DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictiona
         { static_cast<int>(FrametimeType::None), ValueNone }
     });
 
-    if (dictionary.hasKey(FrametimeInfo.identifier)) {
-        const std::string& v = dictionary.value<std::string>(FrametimeInfo.identifier);
-        if (v == ValueDtAvg) {
+    if (p.frametimeType.has_value()) {
+        if (*p.frametimeType == ValueDtAvg) {
             _frametimeType = static_cast<int>(FrametimeType::DtTimeAvg);
         }
-        else if (v == ValueDtExtremes) {
+        else if (*p.frametimeType == ValueDtExtremes) {
             _frametimeType = static_cast<int>(FrametimeType::DtTimeExtremes);
         }
-        else if (v == ValueDtStandardDeviation) {
+        else if (*p.frametimeType == ValueDtStandardDeviation) {
             _frametimeType =
                 static_cast<int>(FrametimeType::DtStandardDeviation);
         }
-        else if (v == ValueDtCov) {
+        else if (*p.frametimeType == ValueDtCov) {
             _frametimeType =
                 static_cast<int>(FrametimeType::DtCoefficientOfVariation);
         }
-        else if (v == ValueFps) {
+        else if (*p.frametimeType == ValueFps) {
             _frametimeType = static_cast<int>(FrametimeType::FPS);
         }
-        else if (v == ValueFpsAvg) {
+        else if (*p.frametimeType == ValueFpsAvg) {
             _frametimeType = static_cast<int>(FrametimeType::FPSAvg);
         }
         else {

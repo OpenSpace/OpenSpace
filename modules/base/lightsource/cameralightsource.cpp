@@ -36,7 +36,7 @@ namespace {
     };
 
     struct [[codegen::Dictionary(CameraLightSource)]] Parameters {
-        // [[codegen::description(IntensityInfo)]]
+        // [[codegen::verbatim(IntensityInfo.description)]]
         float intensity;
     };
 #include "cameralightsource_codegen.cpp"

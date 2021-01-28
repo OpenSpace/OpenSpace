@@ -93,17 +93,17 @@ namespace {
             Camera
         };
 
-        // [[codegen::description(SourceTypeInfo)]]
+        // [[codegen::verbatim(SourceTypeInfo.description)]]
         std::optional<Type> sourceType;
-        // [[codegen::description(SourceNodeNameInfo)]]
+        // [[codegen::verbatim(SourceNodeNameInfo.description)]]
         std::optional<std::string> sourceNodeName;
-        // [[codegen::description(ReferenceTypeInfo)]]
+        // [[codegen::verbatim(ReferenceTypeInfo.description)]]
         Type referenceType;
-        // [[codegen::description(ReferenceNodeNameInfo)]]
+        // [[codegen::verbatim(ReferenceNodeNameInfo.description)]]
         std::optional<std::string> referenceNodeName;
-        // [[codegen::description(DestinationTypeInfo)]]
+        // [[codegen::verbatim(DestinationTypeInfo.description)]]
         std::optional<Type> destinationType;
-        // [[codegen::description(DestinationNodeNameInfo)]]
+        // [[codegen::verbatim(DestinationNodeNameInfo.description)]]
         std::optional<std::string> destinationNodeName;
     };
 #include "dashboarditemangle_codegen.cpp"

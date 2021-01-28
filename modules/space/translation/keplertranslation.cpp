@@ -107,28 +107,28 @@ namespace {
     };
 
     struct [[codegen::Dictionary(KeplerTranslation)]] Parameters {
-        // [[codegen::description(EccentricityInfo)]]
+        // [[codegen::verbatim(EccentricityInfo.description)]]
         double eccentricity [[codegen::inrange(0.0, 1.0)]];
 
-        // [[codegen::description(SemiMajorAxisInfo)]]
+        // [[codegen::verbatim(SemiMajorAxisInfo.description)]]
         double semiMajorAxis;
 
-        // [[codegen::description(InclinationInfo)]]
+        // [[codegen::verbatim(InclinationInfo.description)]]
         double inclination [[codegen::inrange(0.0, 360.0)]];
 
-        // [[codegen::description(AscendingNodeInfo)]]
+        // [[codegen::verbatim(AscendingNodeInfo.description)]]
         double ascendingNode [[codegen::inrange(0.0, 360.0)]];
 
-        // [[codegen::description(ArgumentOfPeriapsisInfo)]]
+        // [[codegen::verbatim(ArgumentOfPeriapsisInfo.description)]]
         double argumentOfPeriapsis [[codegen::inrange(0.0, 360.0)]];
 
-        // [[codegen::description(MeanAnomalyAtEpochInfo)]]
+        // [[codegen::verbatim(MeanAnomalyAtEpochInfo.description)]]
         double meanAnomaly [[codegen::inrange(0.0, 360.0)]];
 
-        // [[codegen::description(EpochInfo)]]
+        // [[codegen::verbatim(EpochInfo.description)]]
         std::string epoch;
 
-        // [[codegen::description(PeriodInfo)]]
+        // [[codegen::verbatim(PeriodInfo.description)]]
         double period [[codegen::greater(0.0)]];
     };
 #include "keplertranslation_codegen.cpp"

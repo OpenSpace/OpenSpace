@@ -120,13 +120,13 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableSphere)]] Parameters {
-        // [[codegen::description(SizeInfo)]]
+        // [[codegen::verbatim(SizeInfo.description)]]
         double size;
 
-        // [[codegen::description(SegmentsInfo)]]
+        // [[codegen::verbatim(SegmentsInfo.description)]]
         int segments;
 
-        // [[codegen::description(TextureInfo)]]
+        // [[codegen::verbatim(TextureInfo.description)]]
         std::string texture;
 
         enum class Orientation {
@@ -135,25 +135,25 @@ namespace {
             Both
         };
 
-        // [[codegen::description(OrientationInfo)]]
+        // [[codegen::verbatim(OrientationInfo.description)]]
         std::optional<Orientation> orientation;
 
-        // [[codegen::description(UseAdditiveBlendingInfo)]]
+        // [[codegen::verbatim(UseAdditiveBlendingInfo.description)]]
         std::optional<bool> useAdditiveBlending;
 
-        // [[codegen::description(MirrorTextureInfo)]]
+        // [[codegen::verbatim(MirrorTextureInfo.description)]]
         std::optional<bool> mirrorTexture;
 
-        // [[codegen::description(FadeOutThresholdInfo)]]
+        // [[codegen::verbatim(FadeOutThresholdInfo.description)]]
         std::optional<double> fadeOutThreshold [[codegen::inrange(0.0, 1.0)]];
 
-        // [[codegen::description(FadeInThresholdInfo)]]
+        // [[codegen::verbatim(FadeInThresholdInfo.description)]]
         std::optional<double> fadeInThreshold;
 
-        // [[codegen::description(DisableFadeInOutInfo)]]
+        // [[codegen::verbatim(DisableFadeInOutInfo.description)]]
         std::optional<bool> disableFadeInOut;
 
-        // [[codegen::description(BackgroundInfo)]]
+        // [[codegen::verbatim(BackgroundInfo.description)]]
         std::optional<bool> background;
     };
 #include "renderablesphere_codegen.cpp"

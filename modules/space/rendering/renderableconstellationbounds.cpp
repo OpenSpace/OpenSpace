@@ -77,7 +77,7 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableConstellationBounds)]] Parameters {
-        // [[codegen::description(VertexInfo)]]
+        // [[codegen::verbatim(VertexInfo.description)]]
         std::string file;
 
         // Specifies the file that contains the mapping between constellation 
@@ -85,13 +85,13 @@ namespace {
         // abbreviations are used as the full names
         std::optional<std::string> constellationFile;
 
-        // [[codegen::description(ColorInfo)]]
+        // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec3> color;
 
-        // [[codegen::description(LineWidthInfo)]]
+        // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
 
-        // [[codegen::description(SelectionInfo)]]
+        // [[codegen::verbatim(SelectionInfo.description)]]
         std::optional<std::vector<std::string>> constellationSelection;
     };
 #include "renderableconstellationbounds_codegen.cpp"
