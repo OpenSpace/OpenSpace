@@ -65,7 +65,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DashboardItemDate::Documentation() {
-    return codegen::doc<DashboardItemDate>();
+    return codegen::doc<Parameters>();
 }
 
 DashboardItemDate::DashboardItemDate(const ghoul::Dictionary& dictionary)

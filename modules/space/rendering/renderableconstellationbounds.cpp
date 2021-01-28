@@ -100,7 +100,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableConstellationBounds::Documentation() {
-    return codegen::doc<RenderableConstellationBounds>();
+    return codegen::doc<Parameters>();
 } // namespace
 
 

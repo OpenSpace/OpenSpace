@@ -121,7 +121,7 @@ namespace {
 
     struct [[codegen::Dictionary(RenderableSphere)]] Parameters {
         // [[codegen::verbatim(SizeInfo.description)]]
-        double size;
+        float size;
 
         // [[codegen::verbatim(SegmentsInfo.description)]]
         int segments;
@@ -145,10 +145,10 @@ namespace {
         std::optional<bool> mirrorTexture;
 
         // [[codegen::verbatim(FadeOutThresholdInfo.description)]]
-        std::optional<double> fadeOutThreshold [[codegen::inrange(0.0, 1.0)]];
+        std::optional<float> fadeOutThreshold [[codegen::inrange(0.0, 1.0)]];
 
         // [[codegen::verbatim(FadeInThresholdInfo.description)]]
-        std::optional<double> fadeInThreshold;
+        std::optional<float> fadeInThreshold;
 
         // [[codegen::verbatim(DisableFadeInOutInfo.description)]]
         std::optional<bool> disableFadeInOut;
@@ -162,7 +162,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableSphere::Documentation() {
-    return codegen::doc<RenderableSphere>();
+    return codegen::doc<Parameters>();
 }
 
 RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)

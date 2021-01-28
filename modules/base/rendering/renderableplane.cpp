@@ -75,7 +75,7 @@ namespace {
         std::optional<bool> billboard;
 
         // [[codegen::verbatim(SizeInfo.description)]]
-        double size;
+        float size;
 
         // [[codegen::verbatim(BlendModeInfo.description)]]
         std::optional<std::string> blendMode [[codegen::inlist("Normal", "Additive")]];
@@ -86,7 +86,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderablePlane::Documentation() {
-    return codegen::doc<RenderablePlane>();
+    return codegen::doc<Parameters>();
 }
 
 RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)

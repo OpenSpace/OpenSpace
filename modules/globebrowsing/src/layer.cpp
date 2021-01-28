@@ -169,7 +169,7 @@ namespace {
 } // namespace
 
 documentation::Documentation Layer::Documentation() {
-    documentation::Documentation doc = codegen::doc<Layer>();
+    documentation::Documentation doc = codegen::doc<Parameters>();
     doc.id = "globebrowsing_layer";
     return doc;
 }

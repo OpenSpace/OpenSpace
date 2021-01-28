@@ -142,7 +142,7 @@ KeplerTranslation::RangeError::RangeError(std::string off)
 {}
 
 documentation::Documentation KeplerTranslation::Documentation() {
-    return codegen::doc<KeplerTranslation>();
+    return codegen::doc<Parameters>();
 }
 
 KeplerTranslation::KeplerTranslation()

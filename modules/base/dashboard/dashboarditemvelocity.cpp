@@ -83,7 +83,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DashboardItemVelocity::Documentation() {
-    return codegen::doc<DashboardItemVelocity>();
+    return codegen::doc<Parameters>();
 }
 
 DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary)

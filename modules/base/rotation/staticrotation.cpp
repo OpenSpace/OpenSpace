@@ -67,7 +67,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation StaticRotation::Documentation() {
-    documentation::Documentation doc = codegen::doc<StaticRotation>();
+    documentation::Documentation doc = codegen::doc<Parameters>();
     doc.id = "base_transform_rotation_static";
     return doc;
 }
