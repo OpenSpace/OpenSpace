@@ -45,24 +45,18 @@ namespace {
         "as the first argument, the current wall time as milliseconds past the J2000 "
         "epoch the second argument and computes the three scaling factors."
     };
+
+    struct [[codegen::Dictionary(LuaScale)]] Parameters {
+        // [[codegen::verbatim(ScriptInfo.description)]]
+        std::string script;
+    };
+#include "luascale_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation LuaScale::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "Lua Scaling",
-        "base_scale_lua",
-        {
-            {
-                ScriptInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                ScriptInfo.description
-            }
-        }
-    };
+    return codegen::doc<Parameters>();
 }
 
 LuaScale::LuaScale()
@@ -81,9 +75,8 @@ LuaScale::LuaScale()
 }
 
 LuaScale::LuaScale(const ghoul::Dictionary& dictionary) : LuaScale() {
-    documentation::testSpecificationAndThrow(Documentation(), dictionary, "LuaScale");
-
-    _luaScriptFile = absPath(dictionary.value<std::string>(ScriptInfo.identifier));
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    _luaScriptFile = absPath(p.script);
 }
 
 glm::dvec3 LuaScale::scaleValue(const UpdateData& data) const {

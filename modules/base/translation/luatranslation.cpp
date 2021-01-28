@@ -46,31 +46,19 @@ namespace {
         "epoch as the first argument, the current wall time as milliseconds past the "
         "J2000 epoch as the second argument and computes the translation."
     };
+
+    struct [[codegen::Dictionary(LuaTranslation)]] Parameters {
+        // [[codegen::verbatim(ScriptInfo.description)]]
+        std::string script;
+    };
+#include "luatranslation_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation LuaTranslation::Documentation() {
-    using namespace documentation;
-    return {
-        "Lua Translation",
-        "base_transform_translation_lua",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("LuaTranslation"),
-                Optional::No
-            },
-            {
-                ScriptInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                ScriptInfo.description
-            }
-        }
-    };
+    return codegen::doc<Parameters>();
 }
-
 
 LuaTranslation::LuaTranslation()
     : _luaScriptFile(ScriptInfo)
@@ -89,13 +77,8 @@ LuaTranslation::LuaTranslation()
 }
 
 LuaTranslation::LuaTranslation(const ghoul::Dictionary& dictionary) : LuaTranslation() {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "StaticTranslation"
-    );
-
-    _luaScriptFile = absPath(dictionary.value<std::string>(ScriptInfo.identifier));
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    _luaScriptFile = absPath(p.script);
 }
 
 glm::dvec3 LuaTranslation::position(const UpdateData& data) const {

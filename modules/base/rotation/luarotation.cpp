@@ -45,29 +45,18 @@ namespace {
         "J2000 epoch as the second argument and computes the rotation returned as 9 "
         "values."
     };
+
+    struct [[codegen::Dictionary(LuaRotation)]] Parameters {
+        // [[codegen::verbatim(ScriptInfo.description)]]
+        std::string script;
+    };
+#include "luarotation_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation LuaRotation::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "Lua Rotation",
-        "base_transform_rotation_lua",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("LuaRotation"),
-                Optional::No
-            },
-            {
-                ScriptInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                ScriptInfo.description
-            }
-        }
-    };
+    return codegen::doc<Parameters>();
 }
 
 LuaRotation::LuaRotation()
@@ -86,13 +75,9 @@ LuaRotation::LuaRotation()
 }
 
 LuaRotation::LuaRotation(const ghoul::Dictionary& dictionary) : LuaRotation() {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "LuaRotation"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _luaScriptFile = absPath(dictionary.value<std::string>(ScriptInfo.identifier));
+    _luaScriptFile = absPath(p.script);
 }
 
 glm::dmat3 LuaRotation::matrix(const UpdateData& data) const {

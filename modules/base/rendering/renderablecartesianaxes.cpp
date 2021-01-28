@@ -34,6 +34,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
+#include <optional>
 
 namespace {
     constexpr const char* ProgramName = "CartesianAxesProgram";
@@ -56,38 +57,26 @@ namespace {
         "Z Color",
         "This value determines the color of the z axis."
     };
+
+    struct [[codegen::Dictionary(RenderableCartesianAxes)]] Parameters {
+        // [[codegen::verbatim(XColorInfo.description)]]
+        std::optional<glm::vec3> xColor;
+
+        // [[codegen::verbatim(YColorInfo.description)]]
+        std::optional<glm::vec3> yColor;
+
+        // [[codegen::verbatim(ZColorInfo.description)]]
+        std::optional<glm::vec3> zColor;
+
+    };
+#include "renderablecartesianaxes_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableCartesianAxes::Documentation() {
-    using namespace documentation;
-    return {
-        "CartesianAxesProgram",
-        "base_renderable_cartesianaxes",
-        {
-            {
-                XColorInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                XColorInfo.description
-            },
-            {
-                YColorInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                YColorInfo.description
-            },
-            {
-                ZColorInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                ZColorInfo.description
-            }
-        }
-    };
+    return codegen::doc<Parameters>();
 }
-
 
 RenderableCartesianAxes::RenderableCartesianAxes(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
@@ -111,27 +100,16 @@ RenderableCartesianAxes::RenderableCartesianAxes(const ghoul::Dictionary& dictio
         glm::vec3(1.f)
     )
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableCartesianAxes"
-    );
-
-    if (dictionary.hasKey(XColorInfo.identifier)) {
-        _xColor = dictionary.value<glm::dvec3>(XColorInfo.identifier);
-    }
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    _xColor = p.xColor.value_or(_xColor);
     _xColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_xColor);
 
-    if (dictionary.hasKey(XColorInfo.identifier)) {
-        _yColor = dictionary.value<glm::dvec3>(YColorInfo.identifier);
-    }
+    _yColor = p.yColor.value_or(_yColor);
     _yColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_yColor);
 
-    if (dictionary.hasKey(ZColorInfo.identifier)) {
-        _zColor = dictionary.value<glm::dvec3>(ZColorInfo.identifier);
-    }
+    _zColor = p.zColor.value_or(_zColor);
     _zColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_zColor);
 }

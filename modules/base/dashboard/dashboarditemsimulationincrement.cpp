@@ -81,47 +81,27 @@ namespace {
         );
         return res;
     }
+
+    struct [[codegen::Dictionary(DashboardItemSimulationIncrement)]] Parameters {
+        // [[codegen::verbatim(SimplificationInfo.description)]]
+        std::optional<bool> simplification;
+
+        // [[codegen::verbatim(RequestedUnitInfo.description)]]
+        std::optional<std::string> requestedUnit [[codegen::inlist(unitList())]];
+
+        // [[codegen::verbatim(TransitionFormatInfo.description)]]
+        std::optional<std::string> transitionFormat;
+
+        // [[codegen::verbatim(RegularFormatInfo.description)]]
+        std::optional<std::string> regularFormat;
+    };
+#include "dashboarditemsimulationincrement_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation DashboardItemSimulationIncrement::Documentation() {
-    using namespace documentation;
-    return {
-        "DashboardItem Simulation Increment",
-        "base_dashboarditem_simulationincrement",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("DashboardItemSimulationIncrement"),
-                Optional::No
-            },
-            {
-                SimplificationInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                SimplificationInfo.description
-            },
-            {
-                RequestedUnitInfo.identifier,
-                new StringInListVerifier(unitList()),
-                Optional::Yes,
-                RequestedUnitInfo.description
-            },
-            {
-                TransitionFormatInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                TransitionFormatInfo.description
-            },
-            {
-                RegularFormatInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                RegularFormatInfo.description
-            }
-        }
-    };
+    return codegen::doc<Parameters>();
 }
 
 DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
@@ -135,15 +115,9 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
     )
     , _regularFormat(RegularFormatInfo, "Simulation increment: {:.1f} {:s} / second{:s}")
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "DashboardItemSimulationIncrement"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    if (dictionary.hasKey(SimplificationInfo.identifier)) {
-        _doSimplification = dictionary.value<bool>(SimplificationInfo.identifier);
-    }
+    _doSimplification = p.simplification.value_or(_doSimplification);
     _doSimplification.onChange([this]() {
         _requestedUnit.setVisibility(
             _doSimplification ?
@@ -157,24 +131,17 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
         _requestedUnit.addOption(static_cast<int>(u), nameForTimeUnit(u));
     }
     _requestedUnit = static_cast<int>(TimeUnit::Second);
-    if (dictionary.hasKey(RequestedUnitInfo.identifier)) {
-        std::string value = dictionary.value<std::string>(RequestedUnitInfo.identifier);
-        TimeUnit unit = timeUnitFromString(value.c_str());
+    if (p.requestedUnit.has_value()) {
+        TimeUnit unit = timeUnitFromString(p.requestedUnit->c_str());
         _requestedUnit = static_cast<int>(unit);
     }
     _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
     addProperty(_requestedUnit);
 
-    if (dictionary.hasKey(TransitionFormatInfo.identifier)) {
-        _transitionFormat = dictionary.value<std::string>(
-            TransitionFormatInfo.identifier
-        );
-    }
+    _transitionFormat = p.transitionFormat.value_or(_transitionFormat);
     addProperty(_transitionFormat);
 
-    if (dictionary.hasKey(RegularFormatInfo.identifier)) {
-        _regularFormat = dictionary.value<std::string>(RegularFormatInfo.identifier);
-    }
+    _regularFormat = p.regularFormat.value_or(_regularFormat);
     addProperty(_regularFormat);
 }
 

@@ -34,6 +34,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
+#include <optional>
 
 namespace {
     constexpr const char* ProgramName = "GridProgram";
@@ -56,38 +57,26 @@ namespace {
         "Line Width",
         "This value specifies the line width of the spherical grid."
     };
+
+    struct [[codegen::Dictionary(RenderableSphericalGrid)]] Parameters {
+        // [[codegen::verbatim(GridColorInfo.description)]]
+        std::optional<glm::vec3> gridColor;
+
+        // [[codegen::verbatim(SegmentsInfo.description)]]
+        std::optional<int> segments;
+
+        // [[codegen::verbatim(LineWidthInfo.description)]]
+        std::optional<float> lineWidth;
+
+    };
+#include "renderablesphericalgrid_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableSphericalGrid::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderableSphericalGrid",
-        "base_renderable_sphericalgrid",
-        {
-            {
-                GridColorInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                GridColorInfo.description
-            },
-            {
-                SegmentsInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                SegmentsInfo.description
-            },
-            {
-                LineWidthInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                LineWidthInfo.description
-            }
-        }
-    };
+    return codegen::doc<Parameters>();
 }
-
 
 RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
@@ -101,24 +90,16 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
     , _segments(SegmentsInfo, 36, 4, 200)
     , _lineWidth(LineWidthInfo, 0.5f, 0.f, 20.f)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableSphericalGrid"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
 
-    if (dictionary.hasKey(GridColorInfo.identifier)) {
-        _gridColor = dictionary.value<glm::dvec3>(GridColorInfo.identifier);
-    }
+    _gridColor = p.gridColor.value_or(_gridColor);
     _gridColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_gridColor);
 
-    if (dictionary.hasKey(SegmentsInfo.identifier)) {
-        _segments = static_cast<int>(dictionary.value<double>(SegmentsInfo.identifier));
-    }
+    _segments = p.segments.value_or(_segments);
     _segments.onChange([&]() {
         if (_segments.value() % 2 == 1) {
             _segments = _segments - 1;
@@ -127,11 +108,7 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
     });
     addProperty(_segments);
 
-    if (dictionary.hasKey(LineWidthInfo.identifier)) {
-        _lineWidth = static_cast<float>(
-            dictionary.value<double>(LineWidthInfo.identifier)
-        );
-    }
+    _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
 }
 

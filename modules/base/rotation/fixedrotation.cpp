@@ -32,7 +32,9 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
+#include <optional>
 #include <string>
+#include <variant>
 
 namespace {
     constexpr const char* KeyXAxis = "XAxis";
@@ -186,98 +188,57 @@ namespace {
         "only needed if any of the three axis uses the Object type. In this case, the "
         "location of the attached node is required to compute the relative direction."
     };
+
+    struct [[codegen::Dictionary(FixedRotation)]] Parameters {
+        // This value specifies the direction of the new X axis. If this value is not
+        // specified, it will be computed by completing a right handed coordinate system
+        // from the Y and Z axis, which must be specified instead. If this value is a 
+        // string, it is interpreted as the identifier of another scenegraph node. If this
+        // value is a 3-vector, it is interpreted as a direction vector
+        std::optional<std::variant<std::string, glm::dvec3>> xAxis;
+
+        // [[codegen::verbatim(XAxisOrthogonalVectorInfo.description)]]
+        std::optional<bool> xAxisOrthogonal;
+
+        // [[codegen::verbatim(XAxisInvertObjectInfo.description)]]
+        std::optional<bool> xAxisInvert [[codegen::key(xAxis - InvertObject)]];
+
+        // This value specifies the direction of the new Y axis. If this value is not
+        // specified, it will be computed by completing a right handed coordinate system
+        // from the X and Z axis, which must be specified instead. If this value is a
+        // string, it is interpreted as the identifier of another scenegraph node. If this
+        // value is a 3-vector, it is interpreted as a direction vector
+        std::optional<std::variant<std::string, glm::dvec3>> yAxis;
+
+        // [[codegen::verbatim(YAxisOrthogonalVectorInfo.description)]]
+        std::optional<bool> yAxisOrthogonal;
+
+        // [[codegen::verbatim(YAxisInvertObjectInfo.description)]]
+        std::optional<bool> yAxisInvert [[codegen::key(yAxis - InvertObject)]];
+
+        // This value specifies the direction of the new Z axis. If this value is not
+        // specified, it will be computed by completing a right handed coordinate system
+        // from the X and Y axis, which must be specified instead. If this value is a
+        // string, it is interpreted as the identifier of another scenegraph node. If this
+        // value is a 3-vector, it is interpreted as a direction vector
+        std::optional<std::variant<std::string, glm::dvec3>> zAxis;
+
+        // [[codegen::verbatim(ZAxisOrthogonalVectorInfo.description)]]
+        std::optional<bool> zAxisOrthogonal;
+
+        // [[codegen::verbatim(ZAxisInvertObjectInfo.description)]]
+        std::optional<bool> zAxisInvert [[codegen::key(zAxis - InvertObject)]];
+
+        // [[codegen::verbatim(AttachedInfo.description)]]
+        std::optional<std::string> attached;
+    };
+#include "fixedrotation_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation FixedRotation::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "Fixed Rotation",
-        "base_transform_rotation_fixed",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("FixedRotation"),
-                Optional::No
-            },
-            {
-                KeyXAxis,
-                new OrVerifier({ new StringVerifier, new DoubleVector3Verifier, }),
-                Optional::Yes,
-                "This value specifies the direction of the new X axis. If this value is "
-                "not specified, it will be computed by completing a right handed "
-                "coordinate system from the Y and Z axis, which must be specified "
-                "instead. If this value is a string, it is interpreted as the identifier "
-                "of another scenegraph node. If this value is a 3-vector, it is "
-                "interpreted as a direction vector."
-            },
-            {
-                KeyXAxisOrthogonal,
-                new BoolVerifier,
-                Optional::Yes,
-                XAxisOrthogonalVectorInfo.description
-            },
-            {
-                XAxisInvertObjectInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                XAxisInvertObjectInfo.description
-            },
-            {
-                KeyYAxis,
-                new OrVerifier({ new StringVerifier, new DoubleVector3Verifier, }),
-                Optional::Yes,
-                "This value specifies the direction of the new Y axis. If this value is "
-                "not specified, it will be computed by completing a right handed "
-                "coordinate system from the X and Z axis, which must be specified "
-                "instead. If this value is a string, it is interpreted as the identifier "
-                "of another scenegraph node. If this value is a 3-vector, it is "
-                "interpreted as a direction vector."
-            },
-            {
-                KeyYAxisOrthogonal,
-                new BoolVerifier,
-                Optional::Yes,
-                YAxisOrthogonalVectorInfo.description
-            },
-            {
-                YAxisInvertObjectInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                YAxisInvertObjectInfo.description
-            },
-            {
-                KeyZAxis,
-                new OrVerifier({ new StringVerifier, new DoubleVector3Verifier, }),
-                Optional::Yes,
-                "This value specifies the direction of the new Z axis. If this value is "
-                "not specified, it will be computed by completing a right handed "
-                "coordinate system from the X and Y axis, which must be specified "
-                "instead. If this value is a string, it is interpreted as the identifier "
-                "of another scenegraph node. If this value is a 3-vector, it is "
-                "interpreted as a direction vector."
-            },
-            {
-                KeyZAxisOrthogonal,
-                new BoolVerifier,
-                Optional::Yes,
-                ZAxisOrthogonalVectorInfo.description
-            },
-            {
-                ZAxisInvertObjectInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                ZAxisInvertObjectInfo.description
-            },
-            {
-                AttachedInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                AttachedInfo.description
-            }
-        }
-    };
+    return codegen::doc<Parameters>();
 }
 
 FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)

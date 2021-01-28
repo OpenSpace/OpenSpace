@@ -46,6 +46,7 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <glm/gtx/string_cast.hpp>
+#include <optional>
 
 namespace {
     constexpr const char* _loggerCat = "base::RenderableLabels";
@@ -176,122 +177,91 @@ namespace {
         "Fade-In/-Out ending speed.",
         "Fade-In/-Out ending speed."
     };
+
+    struct [[codegen::Dictionary(RenderableLabels)]] Parameters {
+        enum class BlendMode {
+            Normal,
+            Additive
+        };
+
+        // [[codegen::verbatim(BlendModeInfo.description)]]
+        std::optional<BlendMode> blendMode;
+
+        enum class Orientation {
+            ViewDirection [[codegen::key(Camera View Direction)]],
+            PositionNormal [[codegen::key(Camera Position Normal)]]
+        };
+
+        // [[codegen::verbatim(LabelOrientationOptionInfo.description)]]
+        std::optional<Orientation> labelOrientationOption;
+
+        // [[codegen::verbatim(LabelColorInfo.description)]]
+        std::optional<glm::vec3> labelColor;
+
+        // [[codegen::verbatim(LabelTextInfo.description)]]
+        std::optional<std::string> labelText;
+
+        // [[codegen::verbatim(FontSizeInfo.description)]]
+        std::optional<float> fontSize;
+
+        // [[codegen::verbatim(LabelSizeInfo.description)]]
+        std::optional<float> labelSize;
+
+        // [[codegen::verbatim(LabelMinSizeInfo.description)]]
+        std::optional<float> labelMinSize;
+
+        // [[codegen::verbatim(LabelMaxSizeInfo.description)]]
+        std::optional<float> labelMaxSize;
+
+        // [[codegen::verbatim(EnableFadingEffectInfo.description)]]
+        std::optional<bool> enableFading;
+
+        // [[codegen::verbatim(PixelSizeControlInfo.description)]]
+        std::optional<bool> enablePixelControl;
+
+        // [[codegen::verbatim(TransformationMatrixInfo.description)]]
+        std::optional<glm::dmat4x4> transformationMatrix;
+
+        enum class Unit {
+            Meter [[codegen::key(m)]],
+            Kilometer [[codegen::key(Km)]],
+            Megameter [[codegen::key(Mm)]],
+            Gigameter [[codegen::key(Gm)]],
+            Terameter [[codegen::key(Tm)]],
+            Petameter [[codegen::key(Pm)]],
+            AstronomicalUnit [[codegen::key(au)]],
+            Parsec [[codegen::key(pc)]],
+            KiloParsec [[codegen::key(Kpc)]],
+            MegaParsec [[codgen::key(Mpc)]],
+            GigaParsec [[codegen::key(Gpc)]],
+            GigaLightyear [[codegen::key(Gly)]]
+        };
+
+        // [[codegen::verbatim(FadeStartUnitOptionInfo.description)]]
+        std::optional<Unit> fadeStartUnit;
+
+        // [[codegen::verbatim(FadeEndUnitOptionInfo.description)]]
+        std::optional<Unit> fadeEndUnit;
+
+        // [[codegen::verbatim(FadeStartDistInfo.description)]]
+        std::optional<float> fadeStartDistance;
+
+        // [[codegen::verbatim(FadeEndDistInfo.description)]]
+        std::optional<float> fadeEndDistance;
+
+        // [[codegen::verbatim(FadeStartSpeedInfo.description)]]
+        std::optional<float> fadeStartSpeed;
+
+        // [[codegen::verbatim(FadeEndSpeedInfo.description)]]
+        std::optional<float> fadeEndSpeed;
+    };
+#include "renderablelabels_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableLabels::Documentation() {
-    using namespace documentation;
-    return {
-        "Renderable Labels",
-        "base_renderable_labels",
-        {
-            {
-                BlendModeInfo.identifier,
-                new StringInListVerifier({ "Normal", "Additive" }),
-                Optional::Yes,
-                BlendModeInfo.description, // + " The default value is 'Normal'.",
-            },
-            {
-                LabelOrientationOptionInfo.identifier,
-                new StringInListVerifier(
-                    { "Camera View Direction", "Camera Position Normal" }
-                ),
-                Optional::Yes,
-                LabelOrientationOptionInfo.description,
-            },
-            {
-                LabelColorInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                LabelColorInfo.description,
-            },
-            {
-                LabelTextInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                LabelTextInfo.description
-            },
-            {
-                FontSizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                FontSizeInfo.description
-            },
-            {
-                LabelSizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                LabelSizeInfo.description
-            },
-            {
-                LabelMinSizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                LabelMinSizeInfo.description
-            },
-            {
-                LabelMaxSizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                LabelMaxSizeInfo.description
-            },
-            {
-                EnableFadingEffectInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                EnableFadingEffectInfo.description
-            },
-            {
-                PixelSizeControlInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                PixelSizeControlInfo.description
-            },
-            {
-                FadeStartUnitOptionInfo.identifier,
-                new StringInListVerifier(
-                    { "m", "Km", "Mm", "Gm", "au", "Tm", "Pm", "pc", "Kpc", "Mpc",
-                      "Gpc", "Gly"}
-                ),
-                Optional::Yes,
-                FadeStartUnitOptionInfo.description,
-            },
-            {
-                FadeEndUnitOptionInfo.identifier,
-                new StringInListVerifier(
-                    {"m", "Km", "Mm", "Gm", "au", "Tm", "Pm", "pc", "Kpc", "Mpc",
-                     "Gpc", "Gly"}
-                ),
-                Optional::Yes,
-                FadeEndUnitOptionInfo.description,
-            },
-            {
-                FadeStartDistInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                FadeStartDistInfo.description
-            },
-            {
-                FadeEndDistInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                FadeEndDistInfo.description
-            },
-            {
-                FadeStartSpeedInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                FadeStartSpeedInfo.description
-            },
-            {
-                FadeEndSpeedInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                FadeEndSpeedInfo.description
-            },
-        }
-    };
+    return codegen::doc<Parameters>();
 }
 
 RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
@@ -327,11 +297,7 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
         properties::OptionProperty::DisplayType::Dropdown
     )
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableLabels"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
@@ -353,13 +319,14 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
         }
     });
 
-    if (dictionary.hasKey(BlendModeInfo.identifier)) {
-        const std::string v = dictionary.value<std::string>(BlendModeInfo.identifier);
-        if (v == "Normal") {
-            _blendMode = BlendModeNormal;
-        }
-        else if (v == "Additive") {
-            _blendMode = BlendModeAdditive;
+    if (p.blendMode.has_value()) {
+        switch (*p.blendMode) {
+            case Parameters::BlendMode::Normal:
+                _blendMode = BlendModeNormal;
+                break;
+            case Parameters::BlendMode::Additive:
+                _blendMode = BlendModeAdditive;
+                break;
         }
     }
 
@@ -369,35 +336,26 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
     _labelOrientationOption.addOption(NormalDirection, "Camera Position Normal");
 
     _labelOrientationOption = NormalDirection;
-    if (dictionary.hasValue<std::string>(LabelOrientationOptionInfo.identifier)) {
-        const std::string o = dictionary.value<std::string>(
-            LabelOrientationOptionInfo.identifier
-        );
-
-        if (o == "Camera View Direction") {
-            _labelOrientationOption = ViewDirection;
-        }
-        else if (o == "Camera Position Normal") {
-            _labelOrientationOption = NormalDirection;
+    if (p.labelOrientationOption.has_value()) {
+        switch (*p.labelOrientationOption) {
+            case Parameters::Orientation::ViewDirection:
+                _labelOrientationOption = ViewDirection;
+                break;
+            case Parameters::Orientation::PositionNormal:
+                _labelOrientationOption = NormalDirection;
+                break;
         }
     }
-
-    if (dictionary.hasKey(LabelTextInfo.identifier)) {
-        _labelText = dictionary.value<std::string>(LabelTextInfo.identifier);
-    }
-    addProperty(_labelText);
-
     addProperty(_labelOrientationOption);
 
+    _labelText = p.labelText.value_or(_labelText);
+    addProperty(_labelText);
+
+    _labelColor = p.labelColor.value_or(_labelColor);
     _labelColor.setViewOption(properties::Property::ViewOptions::Color);
-    if (dictionary.hasKey(LabelColorInfo.identifier)) {
-        _labelColor = dictionary.value<glm::dvec3>(LabelColorInfo.identifier);
-    }
     addProperty(_labelColor);
 
-    if (dictionary.hasKey(FontSizeInfo.identifier)) {
-        _fontSize = static_cast<float>(dictionary.value<double>(FontSizeInfo.identifier));
-    }
+    _fontSize = p.fontSize.value_or(_fontSize);
     _fontSize.onChange([&]() {
         _font = global::fontManager->font(
             "Mono",
@@ -408,49 +366,28 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
     });
     addProperty(_fontSize);
 
-    if (dictionary.hasKey(LabelSizeInfo.identifier)) {
-        _labelSize = static_cast<float>(
-            dictionary.value<double>(LabelSizeInfo.identifier)
-        );
-    }
+    _labelSize = p.labelSize.value_or(_labelSize);
     addProperty(_labelSize);
 
-    if (dictionary.hasKey(LabelMinSizeInfo.identifier)) {
-        _labelMinSize = static_cast<float>(
-            dictionary.value<double>(LabelMinSizeInfo.identifier)
-        );
-    }
+    _labelMinSize = p.labelMinSize.value_or(_labelMinSize);
     addProperty(_labelMinSize);
 
-    if (dictionary.hasKey(LabelMaxSizeInfo.identifier)) {
-        _labelMaxSize = static_cast<float>(
-            dictionary.value<double>(LabelMaxSizeInfo.identifier)
-        );
-    }
+    _labelMaxSize = p.labelMaxSize.value_or(_labelMaxSize);
     addProperty(_labelMaxSize);
 
-    if (dictionary.hasKey(TransformationMatrixInfo.identifier)) {
-        _transformationMatrix = dictionary.value<glm::dmat4>(
-            TransformationMatrixInfo.identifier
-        );
-    }
+    _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);
 
-    if (dictionary.hasKey(PixelSizeControlInfo.identifier)) {
-        _pixelSizeControl = dictionary.value<bool>(PixelSizeControlInfo.identifier);
+    _pixelSizeControl = p.enablePixelControl.value_or(_pixelSizeControl);
+    if (_pixelSizeControl) {
+        // @TODO (abock, 2021-01-28) I don't know why we only add the property if the
+        // pixel control is enabled, but I think this is an error
         addProperty(_pixelSizeControl);
     }
 
-    if (dictionary.hasKey(EnableFadingEffectInfo.identifier)) {
-        _enableFadingEffect = dictionary.value<bool>(EnableFadingEffectInfo.identifier);
-    }
+    _enableFadingEffect = p.enableFading.value_or(_enableFadingEffect);
     addProperty(_enableFadingEffect);
 
-    if (dictionary.hasKey(FadeStartDistInfo.identifier)) {
-        _fadeStartDistance = static_cast<float>(
-            dictionary.value<double>(FadeStartDistInfo.identifier)
-        );
-    }
-
+    _fadeStartDistance = p.fadeStartDistance.value_or(_fadeStartDistance);
     addProperty(_fadeStartDistance);
 
     _fadeStartUnitOption.addOption(Meter, MeterUnit);
@@ -466,72 +403,56 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
     _fadeStartUnitOption.addOption(Gigaparsec, GigaparsecUnit);
     _fadeStartUnitOption.addOption(GigalightYears, GigalightyearUnit);
 
-    _fadeStartUnitOption = AU;
 
-    if (dictionary.hasKey(FadeStartUnitOptionInfo.identifier)) {
-        std::string unit = dictionary.value<std::string>(
-            FadeStartUnitOptionInfo.identifier
-        );
-        if (unit == MeterUnit) {
-            _fadeStartUnitOption = Meter;
-        }
-        else if (unit == KilometerUnit) {
-            _fadeStartUnitOption = Kilometer;
-        }
-        else if (unit == MegameterUnit) {
-            _fadeStartUnitOption = Megameter;
-        }
-        else if (unit == GigameterUnit) {
-            _fadeStartUnitOption = Gigameter;
-        }
-        else if (unit == AstronomicalUnit) {
-            _fadeStartUnitOption = AU;
-        }
-        else if (unit == TerameterUnit) {
-            _fadeStartUnitOption = Terameter;
-        }
-        else if (unit == PetameterUnit) {
-            _fadeStartUnitOption = Petameter;
-        }
-        else if (unit == ParsecUnit) {
-            _fadeStartUnitOption = Parsec;
-        }
-        else if (unit == KiloparsecUnit) {
-            _fadeStartUnitOption = Kiloparsec;
-        }
-        else if (unit == MegaparsecUnit) {
-            _fadeStartUnitOption = Megaparsec;
-        }
-        else if (unit == GigaparsecUnit) {
-            _fadeStartUnitOption = Gigaparsec;
-        }
-        else if (unit == GigalightyearUnit) {
-            _fadeStartUnitOption = GigalightYears;
-        }
-        else {
-            LWARNING(
-                "No unit given for RenderableLabels. Using kilometer as units."
-            );
-            _fadeStartUnitOption = Kilometer;
+    if (p.fadeStartUnit.has_value()) {
+        switch (*p.fadeStartUnit) {
+            case Parameters::Unit::Meter:
+                _fadeStartUnitOption = Meter;
+                break;
+            case Parameters::Unit::Kilometer:
+                _fadeStartUnitOption = Kilometer;
+                break;
+            case Parameters::Unit::Megameter:
+                _fadeStartUnitOption = Megameter;
+                break;
+            case Parameters::Unit::Gigameter:
+                _fadeStartUnitOption = Gigameter;
+                break;
+            case Parameters::Unit::Terameter:
+                _fadeStartUnitOption = Terameter;
+                break;
+            case Parameters::Unit::Petameter:
+                _fadeStartUnitOption = Petameter;
+                break;
+            case Parameters::Unit::AstronomicalUnit:
+                _fadeStartUnitOption = AU;
+                break;
+            case Parameters::Unit::Parsec:
+                _fadeStartUnitOption = Parsec;
+                break;
+            case Parameters::Unit::KiloParsec:
+                _fadeStartUnitOption = Kiloparsec;
+                break;
+            case Parameters::Unit::MegaParsec:
+                _fadeStartUnitOption = Megaparsec;
+                break;
+            case Parameters::Unit::GigaParsec:
+                _fadeStartUnitOption = Gigaparsec;
+                break;
+            case Parameters::Unit::GigaLightyear:
+                _fadeStartUnitOption = GigalightYears;
+                break;
         }
     }
-
+    else {
+        _fadeStartUnitOption = AU;
+    }
     addProperty(_fadeStartUnitOption);
 
-    if (dictionary.hasKey(FadeStartSpeedInfo.identifier)) {
-        _fadeStartSpeed = static_cast<float>(
-            dictionary.value<double>(FadeStartSpeedInfo.identifier)
-        );
-    }
-
+    _fadeStartSpeed = p.fadeStartSpeed.value_or(_fadeStartSpeed);
     addProperty(_fadeStartSpeed);
 
-    if (dictionary.hasKey(FadeEndDistInfo.identifier)) {
-        _fadeEndDistance = static_cast<float>(
-            dictionary.value<double>(FadeEndDistInfo.identifier)
-        );
-    }
-
+    _fadeEndDistance = p.fadeEndDistance.value_or(_fadeEndDistance);
     addProperty(_fadeEndDistance);
 
     _fadeEndUnitOption.addOption(Meter, MeterUnit);
@@ -547,64 +468,53 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
     _fadeEndUnitOption.addOption(Gigaparsec, GigaparsecUnit);
     _fadeEndUnitOption.addOption(GigalightYears, GigalightyearUnit);
 
-    _fadeEndUnitOption = AU;
 
-    if (dictionary.hasKey(FadeEndUnitOptionInfo.identifier)) {
-        std::string unit = dictionary.value<std::string>(
-            FadeEndUnitOptionInfo.identifier
-        );
-        if (unit == MeterUnit) {
-            _fadeEndUnitOption = Meter;
-        }
-        else if (unit == KilometerUnit) {
-            _fadeEndUnitOption = Kilometer;
-        }
-        else if (unit == MegameterUnit) {
-            _fadeEndUnitOption = Megameter;
-        }
-        else if (unit == GigameterUnit) {
-            _fadeEndUnitOption = Gigameter;
-        }
-        else if (unit == AstronomicalUnit) {
-            _fadeEndUnitOption = AU;
-        }
-        else if (unit == TerameterUnit) {
-            _fadeEndUnitOption = Terameter;
-        }
-        else if (unit == PetameterUnit) {
-            _fadeEndUnitOption = Petameter;
-        }
-        else if (unit == ParsecUnit) {
-            _fadeEndUnitOption = Parsec;
-        }
-        else if (unit == KiloparsecUnit) {
-            _fadeEndUnitOption = Kiloparsec;
-        }
-        else if (unit == MegaparsecUnit) {
-            _fadeEndUnitOption = Megaparsec;
-        }
-        else if (unit == GigaparsecUnit) {
-            _fadeEndUnitOption = Gigaparsec;
-        }
-        else if (unit == GigalightyearUnit) {
-            _fadeEndUnitOption = GigalightYears;
-        }
-        else {
-            LWARNING(
-                "No unit given for RenderableLabels. Using kilometer as units."
-            );
-            _fadeEndUnitOption = Kilometer;
+    if (p.fadeEndUnit.has_value()) {
+        switch (*p.fadeEndUnit) {
+            case Parameters::Unit::Meter:
+                _fadeStartUnitOption = Meter;
+                break;
+            case Parameters::Unit::Kilometer:
+                _fadeStartUnitOption = Kilometer;
+                break;
+            case Parameters::Unit::Megameter:
+                _fadeStartUnitOption = Megameter;
+                break;
+            case Parameters::Unit::Gigameter:
+                _fadeStartUnitOption = Gigameter;
+                break;
+            case Parameters::Unit::Terameter:
+                _fadeStartUnitOption = Terameter;
+                break;
+            case Parameters::Unit::Petameter:
+                _fadeStartUnitOption = Petameter;
+                break;
+            case Parameters::Unit::AstronomicalUnit:
+                _fadeStartUnitOption = AU;
+                break;
+            case Parameters::Unit::Parsec:
+                _fadeStartUnitOption = Parsec;
+                break;
+            case Parameters::Unit::KiloParsec:
+                _fadeEndUnitOption = Kiloparsec;
+                break;
+            case Parameters::Unit::MegaParsec:
+                _fadeEndUnitOption = Megaparsec;
+                break;
+            case Parameters::Unit::GigaParsec:
+                _fadeEndUnitOption = Gigaparsec;
+                break;
+            case Parameters::Unit::GigaLightyear:
+                _fadeEndUnitOption = GigalightYears;
+                break;
         }
     }
-
+    else {
+        _fadeEndUnitOption = AU;
+    }
     addProperty(_fadeEndUnitOption);
-
-    if (dictionary.hasKey(FadeEndSpeedInfo.identifier)) {
-        _fadeEndSpeed = static_cast<float>(
-            dictionary.value<double>(FadeEndSpeedInfo.identifier)
-        );
-    }
-
+    
+    _fadeEndSpeed = p.fadeEndSpeed.value_or(_fadeEndSpeed);
     addProperty(_fadeEndSpeed);
 }
 
