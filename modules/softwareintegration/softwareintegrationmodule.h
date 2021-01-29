@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -68,19 +68,18 @@ private:
 
     void internalInitialize(const ghoul::Dictionary&) override;
     void internalDeinitialize() override;
-    void internalDeinitializeGL() override;
 
     bool isConnected(const Peer& peer) const;
 
     std::shared_ptr<Peer> peer(size_t id);
 
-    void disconnect(Peer& peer); 
+    void disconnect(Peer& peer);
     void eventLoop();
     void handleNewPeers();
     void handlePeer(size_t id);
     void handlePeerMessage(PeerMessage peerMessage);
     void handlePeerProperties(std::string identifier, const std::shared_ptr<Peer>& peer);
-    
+
     float readFloatValue(std::vector<char>& message);
     glm::vec3 readColor(std::vector<char>& message);
     std::string readGUI(std::vector<char>& message);
