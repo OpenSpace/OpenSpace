@@ -29,6 +29,7 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
+#include <optional>
 
 namespace {
     constexpr const char* KeyKernels = "Kernels";
@@ -52,76 +53,47 @@ namespace {
         "Time Frame",
         "The time frame in which the spice kernels are valid."
     };
+
+    struct [[codegen::Dictionary(SpiceRotation)]] Parameters {
+        // [[codegen::verbatim(SourceInfo.description)]]
+        std::string sourceFrame
+            [[codegen::annotation("A valid SPICE NAIF name or integer")]];
+
+        // [[codegen::verbatim(DestinationInfo.description)]]
+        std::string destinationFrame;
+
+        // [[codegen::verbatim(DestinationInfo.description)]]
+        std::optional<std::variant<std::vector<std::string>, std::string>> kernels;
+
+        // [[codegen::verbatim(TimeFrameInfo.description)]]
+        std::optional<std::monostate> timeFrame [[codegen::reference("core_time_frame")]];
+    };
+#include "spicerotation_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation SpiceRotation::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "Spice Rotation",
-        "space_transform_rotation_spice",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("SpiceRotation"),
-                Optional::No
-            },
-            {
-                SourceInfo.identifier,
-                new StringAnnotationVerifier("A valid SPICE NAIF name or integer"),
-                Optional::No,
-                SourceInfo.description
-            },
-            {
-                DestinationInfo.identifier,
-                new StringAnnotationVerifier("A valid SPICE NAIF name or integer"),
-                Optional::No,
-                DestinationInfo.description
-            },
-            {
-                KeyKernels,
-                new OrVerifier({ new StringListVerifier, new StringVerifier }),
-                Optional::Yes,
-                "A single kernel or list of kernels that this SpiceTranslation depends "
-                "on. All provided kernels will be loaded before any other operation is "
-                "performed."
-            },
-            {
-                TimeFrameInfo.identifier,
-                new ReferencingVerifier("core_time_frame"),
-                Optional::Yes,
-                TimeFrameInfo.description
-            },
-        }
-    };
+    return codegen::doc<Parameters>();
 }
 
 SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
     : _sourceFrame(SourceInfo)
     , _destinationFrame(DestinationInfo)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "SpiceRotation"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _sourceFrame = dictionary.value<std::string>(SourceInfo.identifier);
-    _destinationFrame = dictionary.value<std::string>(DestinationInfo.identifier);
+    _sourceFrame = p.sourceFrame;
+    _destinationFrame = p.destinationFrame;
 
-    if (dictionary.hasValue<std::string>(KeyKernels)) {
-        SpiceManager::ref().loadKernel(dictionary.value<std::string>(KeyKernels));
-    }
-    else if (dictionary.hasValue<ghoul::Dictionary>(KeyKernels)) {
-        ghoul::Dictionary kernels = dictionary.value<ghoul::Dictionary>(KeyKernels);
-        for (size_t i = 1; i <= kernels.size(); ++i) {
-            if (!kernels.hasValue<std::string>(std::to_string(i))) {
-                throw ghoul::RuntimeError("Kernels has to be an array-style table");
+    if (p.kernels.has_value()) {
+        if (std::holds_alternative<std::vector<std::string>>(*p.kernels)) {
+            SpiceManager::ref().loadKernel(std::get<std::string>(*p.kernels));
+        }
+        else {
+            for (const std::string& s : std::get<std::vector<std::string>>(*p.kernels)) {
+                SpiceManager::ref().loadKernel(s);
             }
-
-            std::string kernel = kernels.value<std::string>(std::to_string(i));
-            SpiceManager::ref().loadKernel(kernel);
         }
     }
 
@@ -130,7 +102,7 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
             dictionary.value<ghoul::Dictionary>(TimeFrameInfo.identifier);
         _timeFrame = TimeFrame::createFromDictionary(timeFrameDictionary);
         if (_timeFrame == nullptr) {
-            throw ghoul::RuntimeError("Invalid dictionary for TimeFrame.");
+            throw ghoul::RuntimeError("Invalid dictionary for TimeFrame");
         }
         addPropertySubOwner(_timeFrame.get());
     }
