@@ -50,7 +50,7 @@ namespace {
 
     constexpr const char* KeyLabelsFileName = "FileName";
 
-    constexpr const double LabelFadeOutLimitAltitude_meters = 25000.0;
+    constexpr const double LabelFadeOutLimitAltitudeMeters = 25000.0;
     constexpr const double RangeAngularCoefConst = 0.8;
     constexpr const float MinOpacityValueConst = 0.009f;
 
