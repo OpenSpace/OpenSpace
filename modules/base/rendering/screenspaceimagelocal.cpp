@@ -32,6 +32,7 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureconversion.h>
+#include <optional>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo TexturePathInfo = {
@@ -42,41 +43,28 @@ namespace {
         "and displayed. The size of the image will also automatically set the default "
         "size of this plane."
     };
+
+    struct [[codegen::Dictionary(ScreenSpaceImageLocal)]] Parameters {
+        // Specifies the GUI name of the ScreenspaceImage
+        std::optional<std::string> name;
+
+        // [[codegen::verbatim(TexturePathInfo.description)]]
+        std::optional<std::string> texturePath;
+    };
+#include "screenspaceimagelocal_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation ScreenSpaceImageLocal::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "ScreenSpace Local Image",
-        "base_screenspace_image_local",
-        {
-            {
-                KeyName,
-                new StringVerifier,
-                Optional::Yes,
-                "Specifies the GUI name of the ScreenspaceImage"
-            },
-            {
-                TexturePathInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                TexturePathInfo.description
-            }
-        }
-    };
+    return codegen::doc<Parameters>();
 }
 
 ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _texturePath(TexturePathInfo)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "ScreenSpaceImageLocal"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     std::string identifier;
     if (dictionary.hasValue<std::string>(KeyIdentifier)) {
@@ -101,16 +89,16 @@ ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary
     });
     addProperty(_texturePath);
 
-    if (dictionary.hasKey(TexturePathInfo.identifier)) {
-        std::string path = dictionary.value<std::string>(TexturePathInfo.identifier);
-        if (!FileSys.fileExists(FileSys.absolutePath(path))) {
-            LWARNINGC(
-                "ScreenSpaceImageLocal",
-                fmt::format("Image {} did not exist for {}", path, _identifier)
-            );
+    if (p.texturePath.has_value()) {
+        if (FileSys.fileExists(FileSys.absolutePath(*p.texturePath))) {
+            _texturePath = FileSys.absolutePath(*p.texturePath);
         }
         else {
-            _texturePath = path;
+            LWARNINGC(
+                "ScreenSpaceImageLocal",
+                fmt::format("Image {} did not exist for {}", *p.texturePath, _identifier)
+            );
+
         }
     }
 }

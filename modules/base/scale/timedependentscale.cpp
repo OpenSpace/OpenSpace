@@ -28,6 +28,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
+#include <optional>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo ReferenceDateInfo = {
@@ -53,36 +54,24 @@ namespace {
         "negative values. This is useful for instantaneous events that only propagate "
         "forwards. The default value is 'true'."
     };
+
+    struct [[codegen::Dictionary(TimeDependentScale)]] Parameters {
+        // [[codegen::verbatim(ReferenceDateInfo.description)]]
+        std::string referenceDate;
+
+        // [[codegen::verbatim(SpeedInfo.description)]]
+        std::optional<double> speed;
+
+        // [[codegen::verbatim(ClampToPositiveInfo.description)]]
+        std::optional<bool> clampToPositive;
+    };
+#include "timedependentscale_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation TimeDependentScale::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "Timedependent Scaling",
-        "base_scale_timedependent",
-        {
-            {
-                ReferenceDateInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                ReferenceDateInfo.description
-            },
-            {
-                SpeedInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                SpeedInfo.description
-            },
-            {
-                ClampToPositiveInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                ClampToPositiveInfo.description
-            }
-        }
-    };
+    return codegen::doc<Parameters>();
 }
 
 TimeDependentScale::TimeDependentScale(const ghoul::Dictionary& dictionary)
@@ -90,21 +79,17 @@ TimeDependentScale::TimeDependentScale(const ghoul::Dictionary& dictionary)
     , _speed(SpeedInfo, 1.0, 0.0, 1e12)
     , _clampToPositive(ClampToPositiveInfo, true)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "TimeDependentScale"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _referenceDate = dictionary.value<std::string>(ReferenceDateInfo.identifier);
+    _referenceDate = p.referenceDate;
     _referenceDate.onChange([this]() { _cachedReferenceDirty = true; });
     addProperty(_referenceDate);
 
-    if (dictionary.value<double>(SpeedInfo.identifier)) {
-        _speed = dictionary.value<double>(SpeedInfo.identifier);
-    }
+    _speed = p.speed.value_or(_speed);
     addProperty(_speed);
 
+    // @TODO (abock, 2021-01-09) The clamp to positive value from the dictionary was never
+    // actually read. I think this should probably be done here?
     addProperty(_clampToPositive);
 }
 

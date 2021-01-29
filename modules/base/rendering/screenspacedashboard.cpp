@@ -34,6 +34,7 @@
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/logging/logmanager.h>
+#include <optional>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo UseMainInfo = {
@@ -42,6 +43,15 @@ namespace {
         "If this value is set to 'true', this ScreenSpaceDashboard will use the "
         "main dashboard instead of creating an independent one."
     };
+
+    struct [[codegen::Dictionary(ScreenSpaceDashboard)]] Parameters {
+        // Specifies the GUI name of the ScreenSpaceDashboard
+        std::optional<std::string> name;
+
+        // [[codegen::verbatim(UseMainInfo.description)]]
+        std::optional<bool> useMainDashboard;
+    };
+#include "screenspacedashboard_codegen.cpp"
 } // namespace
 
 namespace openspace {
@@ -115,42 +125,20 @@ int removeDashboardItemsFromScreenSpace(lua_State* L) {
     dash->dashboard().clearDashboardItems();
     return 0;
 }
-
 } // namespace luascriptfunctions
 
-
 documentation::Documentation ScreenSpaceDashboard::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "ScreenSpace Dashboard",
-        "base_screenspace_dashboard",
-        {
-            {
-                KeyName,
-                new StringVerifier,
-                Optional::Yes,
-                "Specifies the GUI name of the ScreenSpaceDashboard"
-            },
-            {
-                UseMainInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                UseMainInfo.description
-            }
-        }
-    };
+    return codegen::doc<Parameters>();
 }
 
 ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
     : ScreenSpaceFramebuffer(dictionary)
     , _useMainDashboard(UseMainInfo, false)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "ScreenSpaceDashboard"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
+    // @TODO (abock, 2021-01-29) Should this be the name variable? The identifier wasn't
+    // declared in the documentation
     std::string identifier;
     if (dictionary.hasValue<std::string>(KeyIdentifier)) {
         identifier = dictionary.value<std::string>(KeyIdentifier);
@@ -161,9 +149,7 @@ ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
     identifier = makeUniqueIdentifier(identifier);
     setIdentifier(std::move(identifier));
 
-    if (dictionary.hasKey(UseMainInfo.identifier)) {
-        _useMainDashboard = dictionary.value<bool>(UseMainInfo.identifier);
-    }
+    _useMainDashboard = p.useMainDashboard.value_or(_useMainDashboard);
     addProperty(_useMainDashboard);
 
     _scale = 1.f;
