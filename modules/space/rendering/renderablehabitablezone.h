@@ -54,7 +54,7 @@ private:
      * \return A vec4 with the boundaries in atronomical units, in the order:
                optimistic inner, conservative inner, conservative outer, optimistic outer
      */
-    glm::vec4 computeKopparapuZoneBoundaries(float teff, float luminosity);
+    glm::dvec4 computeKopparapuZoneBoundaries(float teff, float luminosity);
 
     properties::FloatProperty _teff;
     properties::FloatProperty _luminosity;

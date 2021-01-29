@@ -30,12 +30,16 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "TextureComponent";
+    constexpr const char _loggerCat[] = "TextureComponent";
 } // namespace
 
 namespace openspace {
 
-ghoul::opengl::Texture* TextureComponent::texture() const {
+const ghoul::opengl::Texture* TextureComponent::texture() const {
+    return _texture.get();
+}
+
+ghoul::opengl::Texture* TextureComponent::texture() {
     return _texture.get();
 }
 

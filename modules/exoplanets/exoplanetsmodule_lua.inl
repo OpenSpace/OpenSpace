@@ -39,23 +39,23 @@
 #include <sstream>
 
 namespace {
-    constexpr const char* _loggerCat = "ExoplanetsModule";
+    constexpr const char _loggerCat[] = "ExoplanetsModule";
 } // namespace
 
 namespace openspace::exoplanets::luascriptfunctions {
 
-constexpr const char* ExoplanetsGuiPath = "/Milky Way/Exoplanets/Exoplanet Systems/";
+constexpr const char ExoplanetsGuiPath[] = "/Milky Way/Exoplanets/Exoplanet Systems/";
 
-constexpr const char* LookUpTablePath = "${SYNC}/http/exoplanets_data/2/lookup.txt";
-constexpr const char* ExoplanetsDataPath =
+constexpr const char LookUpTablePath[] = "${SYNC}/http/exoplanets_data/2/lookup.txt";
+constexpr const char ExoplanetsDataPath[] =
     "${SYNC}/http/exoplanets_data/2/exoplanets_data.bin";
 
-constexpr const char* StarTextureFile = "${SYNC}/http/exoplanets_textures/2/sun.jpg";
-constexpr const char* NoDataTextureFile =
+constexpr const char StarTextureFile[] = "${SYNC}/http/exoplanets_textures/2/sun.jpg";
+constexpr const char NoDataTextureFile[] =
     "${SYNC}/http/exoplanets_textures/2/grid-32.png";
-constexpr const char* DiscTextureFile =
+constexpr const char DiscTextureFile[] =
     "${SYNC}/http/exoplanets_textures/2/disc_bw_texture.png";
-constexpr const char* HabitableZoneTextureFile =
+constexpr const char HabitableZoneTextureFile[] =
     "${SYNC}/http/habitable_zone_textures/1/hot_to_cold_faded.png";
 
 constexpr const float AU = static_cast<float>(distanceconstants::AstronomicalUnit);

@@ -35,17 +35,44 @@ namespace openspace {
 
 PlaneGeometry::PlaneGeometry(glm::vec2 size) : _size(std::move(size)) {}
 
-PlaneGeometry::PlaneGeometry(float size) : _size(size, size) {}
+PlaneGeometry::PlaneGeometry(float size) : PlaneGeometry(glm::vec2(size, size)) {}
 
 PlaneGeometry::~PlaneGeometry() {
     glDeleteBuffers(1, &_vBufferId);
     glDeleteVertexArrays(1, &_vaoId);
 }
 
-bool PlaneGeometry::initialize() {
-    // Initialize and upload to GPU
-    const glm::vec2 size = _size;
+void PlaneGeometry::initialize() {
+    glGenVertexArrays(1, &_vaoId);
+    glGenBuffers(1, &_vBufferId);
+    updateGeometry();
+}
 
+void PlaneGeometry::deinitialize() {
+    glDeleteVertexArrays(1, &_vaoId);
+    _vaoId = 0;
+
+    glDeleteBuffers(1, &_vBufferId);
+    _vBufferId = 0;
+}
+
+void PlaneGeometry::render() {
+    glBindVertexArray(_vaoId);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+}
+
+void PlaneGeometry::updateSize(const glm::vec2& size) {
+    _size = size;
+    updateGeometry();
+}
+
+void PlaneGeometry::updateSize(const float size) {
+    updateSize(glm::vec2(size));
+}
+
+void PlaneGeometry::updateGeometry() {
+    const glm::vec2 size = _size;
     struct VertexData {
         GLfloat x;
         GLfloat y;
@@ -59,25 +86,10 @@ bool PlaneGeometry::initialize() {
         { -size.x,  size.y, 0.f, 1.f },
         { -size.x, -size.y, 0.f, 0.f },
         {  size.x, -size.y, 1.f, 0.f },
-        {  size.x,  size.y, 1.f, 1.f },
+        {  size.x,  size.y, 1.f, 1.f }
     };
 
-    if (_vaoId == 0) {
-        glGenVertexArrays(1, &_vaoId);
-    }
-
-    if (_vBufferId == 0) {
-        glGenBuffers(1, &_vBufferId);
-
-        if (_vBufferId == 0) {
-            LERROR("Could not create vertex buffer");
-            return false;
-        }
-    }
-
-    // First VAO setup
     glBindVertexArray(_vaoId);
-
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
@@ -91,33 +103,6 @@ bool PlaneGeometry::initialize() {
         sizeof(VertexData),
         reinterpret_cast<void*>(offsetof(VertexData, s)) // NOLINT
     );
-
-    glBindVertexArray(0);
-    return true;
-}
-
-void PlaneGeometry::deinitialize() {
-    glDeleteVertexArrays(1, &_vaoId);
-    _vaoId = 0;
-
-    glDeleteBuffers(1, &_vBufferId);
-    _vBufferId = 0;
-}
-
-void PlaneGeometry::render() {
-    glBindVertexArray(_vaoId);  // select first VAO
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    glBindVertexArray(0);
-}
-
-void PlaneGeometry::updateSize(const glm::vec2 size) {
-    _size = size;
-    initialize();
-}
-
-void PlaneGeometry::updateSize(const float size) {
-    _size = glm::vec2(size, size);
-    initialize();
 }
 
 } // namespace openspace

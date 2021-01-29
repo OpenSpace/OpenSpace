@@ -32,15 +32,13 @@ uniform float width;
 uniform float opacity;
 
 Fragment getFragment() {
-    // Moving the origin to the center
-    vec2 st = (vs_st - vec2(0.5)) * 2.0;
-
     // The length of the texture coordinates vector is our distance from the center
-    float radius = length(st);
+    float radius = length(vs_st);
 
     // We only want to consider ring-like objects so we need to discard everything else
-    if (radius > 1.0)
+    if (radius > 1.0) {
         discard;
+    }
 
     // Remapping the texture coordinates
     // Radius \in [0,1],

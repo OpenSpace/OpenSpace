@@ -5,3 +5,12 @@ local DataPath = asset.syncedResource({
     Version = 2
 })
 asset.export("DataPath", DataPath)
+
+asset.meta = {
+    Name = "Exoplanet Data",
+    Version = "2.0",
+    Description = [[ The data that is used for the exoplanet systems.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+}

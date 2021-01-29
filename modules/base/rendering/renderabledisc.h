@@ -59,7 +59,7 @@ protected:
     virtual void initializeShader();
     virtual void updateUniformLocations();
 
-    virtual float planeSize();
+    virtual float planeSize() const;
 
     properties::StringProperty _texturePath;
     properties::FloatProperty _size;

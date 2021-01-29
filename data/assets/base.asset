@@ -22,9 +22,11 @@ asset.require('scene/milkyway/constellations/constellation_keybinds')
 asset.require('scene/milkyway/objects/orionnebula/orionnebula')
 asset.require('util/launcher_images')
 
-local assetHelper = asset.require('util/asset_helper')
+-- For exoplanet system visualizations
 asset.require('scene/milkyway/exoplanets/exoplanets_data')
 asset.require('scene/milkyway/exoplanets/exoplanets_textures')
+
+local assetHelper = asset.require('util/asset_helper')
 asset.require('scene/digitaluniverse/2dF')
 asset.require('scene/digitaluniverse/2mass')
 asset.require('scene/digitaluniverse/6dF')

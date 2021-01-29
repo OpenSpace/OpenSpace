@@ -25,9 +25,7 @@
 #ifndef __OPENSPACE_CORE___TEXTURECOMPONENT___H__
 #define __OPENSPACE_CORE___TEXTURECOMPONENT___H__
 
-#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/texture.h>
-#include <optional>
 
 namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl {class Texture; }
@@ -35,13 +33,11 @@ namespace ghoul::opengl {class Texture; }
 namespace openspace {
 
 class TextureComponent {
+public:
     using Texture = ghoul::opengl::Texture;
 
-public:
-    TextureComponent() = default;
-    ~TextureComponent() = default;
-
-    Texture* texture() const;
+    const Texture* texture() const;
+    Texture* texture();
 
     void setFilterMode(Texture::FilterMode filterMode);
     void setWrapping(Texture::WrappingMode wrapping);
@@ -59,8 +55,8 @@ public:
     void update();
 
 private:
-    std::unique_ptr<ghoul::filesystem::File> _textureFile = nullptr;
-    std::unique_ptr<Texture> _texture = nullptr;
+    std::unique_ptr<ghoul::filesystem::File> _textureFile;
+    std::unique_ptr<Texture> _texture;
 
     Texture::FilterMode _filterMode = Texture::FilterMode::LinearMipMap;
     Texture::WrappingMode _wrappingMode = Texture::WrappingMode::Repeat;

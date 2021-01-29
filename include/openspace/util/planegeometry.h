@@ -37,14 +37,16 @@ public:
 
     ~PlaneGeometry();
 
-    bool initialize();
+    void initialize();
     void deinitialize();
     void render();
 
-    void updateSize(const glm::vec2 size);
+    void updateSize(const glm::vec2& size);
     void updateSize(const float size);
 
 private:
+    void updateGeometry();
+
     GLuint _vaoId = 0;
     GLuint _vBufferId = 0;
     glm::vec2 _size = glm::vec2(0.f);

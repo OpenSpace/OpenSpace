@@ -38,7 +38,9 @@ void main() {
     vec4 position = vec4(in_position.xy, 0.0, 1.0);
     vec4 positionScreenSpace = z_normalization(modelViewProjectionTransform * position);
 
-    vs_st = in_st;
+    // Moving the origin to the center
+    vs_st = (in_st - vec2(0.5)) * 2.0;
+
     vs_screenSpaceDepth = positionScreenSpace.w;
 
     gl_Position = positionScreenSpace;

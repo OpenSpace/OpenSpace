@@ -1,12 +1,6 @@
 local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("./transforms")
-
-local TexturesPath = asset.syncedResource({
-    Type = "HttpSynchronization",
-    Name = "Habitable Zone Textures",
-    Identifier = "habitable_zone_textures",
-    Version = 1
-})
+local textures = asset.require('scene/milkyway/habitable_zones/habitable_zone_textures').TexturesPath
 
 local HabitableZone = {
     Identifier = "SunHabitableZone",
@@ -14,7 +8,7 @@ local HabitableZone = {
     Renderable = {
         Type = "RenderableHabitableZone",
         Enabled = false,
-        Texture = TexturesPath .. "/hot_to_cold_faded.png",
+        Texture = textures .. "/hot_to_cold_faded.png",
         EffectiveTemperature = 5780, -- Kelvin
         Luminosity = 1, -- solar
         Opacity = 0.1

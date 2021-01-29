@@ -43,7 +43,7 @@ float computeTextureCoord(float radius, float innerRadius,
     const float t1 = 1.0 / 3.0;
     const float t2 = 2.0 / 3.0;
 
-    if(radius < conservativeInner) {
+    if (radius < conservativeInner) {
         float t = (radius - innerRadius) / (conservativeInner - innerRadius);
         return mix(0.0, t1, t);
     }
@@ -58,11 +58,8 @@ float computeTextureCoord(float radius, float innerRadius,
 }
 
 Fragment getFragment() {
-    // Moving the origin to the center
-    vec2 st = (vs_st - vec2(0.5)) * 2.0;
-
     // The length of the texture coordinates vector is our distance from the center
-    float radius = length(st);
+    float radius = length(vs_st);
     float innerRadius = 1.0 - width;
 
     // We only want to consider ring-like objects so we need to discard everything else
