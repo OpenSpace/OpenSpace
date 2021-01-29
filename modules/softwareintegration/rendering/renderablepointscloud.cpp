@@ -132,7 +132,7 @@ namespace openspace {
         );
 
         if (dictionary.hasKey(ColorInfo.identifier)) {
-            _color = dictionary.value<glm::vec3>(ColorInfo.identifier);
+            _color = dictionary.value<glm::dvec3>(ColorInfo.identifier);
         }
         _color.setViewOption(properties::Property::ViewOptions::Color);
         addProperty(_color);
@@ -143,32 +143,30 @@ namespace openspace {
                 );
             for (int i = 0; i < static_cast<int>(pointDataDict.size()); ++i) {
                 _pointData.push_back(
-                    { pointDataDict.value<glm::vec3>(std::to_string(i + 1)) }
+                    { pointDataDict.value<glm::dvec3>(std::to_string(i + 1)) }
                 );
             }
             _hasPointData = true;
         }
 
         if (dictionary.hasKey(KeyLuminosity)) {
-            ghoul::Dictionary luminosityDataDict = dictionary.value<ghoul::Dictionary>(
-                    KeyLuminosity
+            ghoul::Dictionary lumDict = dictionary.value<ghoul::Dictionary>(KeyLuminosity);
+            for (int i = 0; i < static_cast<int>(lumDict.size()); ++i) {
+                float luminosity = static_cast<float>(
+                    lumDict.value<double>(std::to_string(i + 1))
                 );
-            for (int i = 0; i < static_cast<int>(luminosityDataDict.size()); ++i) {
-                _luminosityData.push_back(
-                    { luminosityDataDict.value<float>(std::to_string(i + 1)) }
-                );
+                _luminosityData.push_back(luminosity);
             }
             _hasLuminosityData = true;
         }
 
         if (dictionary.hasKey(KeyVelocity)) {
-            ghoul::Dictionary velocityDataDict = dictionary.value<ghoul::Dictionary>(
-                    KeyVelocity
+            ghoul::Dictionary velDict = dictionary.value<ghoul::Dictionary>(KeyVelocity);
+            for (int i = 0; i < static_cast<int>(velDict.size()); ++i) {
+                float velocity = static_cast<float>(
+                    velDict.value<double>(std::to_string(i + 1))
                 );
-            for (int i = 0; i < static_cast<int>(velocityDataDict.size()); ++i) {
-                _velocityData.push_back(
-                    { velocityDataDict.value<float>(std::to_string(i + 1)) }
-                );
+                _velocityData.push_back(velocity);
             }
             _hasVelocityData = true;
         }
@@ -196,7 +194,7 @@ namespace openspace {
         return ((_shaderProgram != nullptr) && (!_fullData.empty()));
     }
 
-    void RenderablePointsCloud::initialize() { 
+    void RenderablePointsCloud::initialize() {
         bool isSuccessful = loadData();
         if (!isSuccessful) {
             throw ghoul::RuntimeError("Error loading data");
@@ -269,7 +267,7 @@ namespace openspace {
         }
     }
 
-    void RenderablePointsCloud::update(const UpdateData&) {        
+    void RenderablePointsCloud::update(const UpdateData&) {
         if (!_isDirty) {
             return;
         }
@@ -311,7 +309,7 @@ namespace openspace {
                 nullptr
             );
         }
-        
+
         glBindVertexArray(0);
 
         _isDirty = false;

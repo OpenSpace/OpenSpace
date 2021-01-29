@@ -185,9 +185,9 @@ namespace openspace {
             std::string software(message.begin(), message.end());
             LINFO(fmt::format("OpenSpace has connected with {} through socket.", software));
             break;
-        } 
+        }
         case SoftwareConnection::MessageType::ReadPointData: {
-            messageOffset = 0; // Resets message offset 
+            messageOffset = 0; // Resets message offset
 
             std::vector<float> xCoordinates = readData(message);
             std::vector<float> yCoordinates = readData(message);
@@ -206,14 +206,14 @@ namespace openspace {
             break;
         }
         case SoftwareConnection::MessageType::ReadLuminosityData: {
-            messageOffset = 0; // Resets message offset 
+            messageOffset = 0; // Resets message offset
 
             luminosityData.clear();
             luminosityData = readData(message);
             break;
         }
         case SoftwareConnection::MessageType::ReadVelocityData: {
-            messageOffset = 0; // Resets message offset 
+            messageOffset = 0; // Resets message offset
 
             velocityData.clear();
             velocityData = readData(message);
@@ -230,81 +230,52 @@ namespace openspace {
             float opacity = readFloatValue(message);
             float size = readFloatValue(message);
             std::string guiName = readGUI(message);
-            
+
             bool hasLuminosityData = !luminosityData.empty();
             bool hasVelocityData = !velocityData.empty();
 
-            ghoul::Dictionary renderable;
             ghoul::Dictionary pointDataDictonary;
             ghoul::Dictionary luminosityDataDictonary;
             ghoul::Dictionary velocityDataDictionary;
 
             for (int i = 0; i < pointData.size(); ++i) {
-                pointDataDictonary.setValue<glm::vec3>(std::to_string(i + 1), pointData[i]);
+                pointDataDictonary.setValue<glm::dvec3>(std::to_string(i + 1), pointData[i]);
             }
             if (hasLuminosityData) {
                 for (int i = 0; i < luminosityData.size(); ++i) {
-                    luminosityDataDictonary.setValue<float>(std::to_string(i + 1), luminosityData[i]);
+                    luminosityDataDictonary.setValue<double>(std::to_string(i + 1), luminosityData[i]);
                 }
             }
             if (hasVelocityData) {
                 for (int i = 0; i < velocityData.size(); ++i) {
-                    velocityDataDictionary.setValue<float>(std::to_string(i + 1), velocityData[i]);
+                    velocityDataDictionary.setValue<double>(std::to_string(i + 1), velocityData[i]);
                 }
             }
 
             // Create a renderable depending on what data was received
-            if (hasLuminosityData && hasVelocityData) {
-                renderable = {
-                    { "Type", "RenderablePointsCloud"s },
-                    { "Color", static_cast<glm::dvec3>(color)},
-                    { "Data", pointDataDictonary },
-                    { "Luminosity", luminosityDataDictonary },
-                    { "Opacity", static_cast<double>(opacity) },
-                    { "Size", static_cast<double>(size)},
-                    { "Velocity", velocityDataDictionary }
-                };
-            }
-            else if (hasLuminosityData && !hasVelocityData) {
-                renderable = {
-                    { "Type", "RenderablePointsCloud"s },
-                    { "Color", static_cast<glm::dvec3>(color)},
-                    { "Data", pointDataDictonary },
-                    { "Luminosity", luminosityDataDictonary },
-                    { "Opacity", static_cast<double>(opacity) },
-                    { "Size", static_cast<double>(size)},
-                };
-            }
-            else if (!hasLuminosityData && hasVelocityData) {
-                renderable = {
-                    { "Type", "RenderablePointsCloud"s },
-                    { "Color", static_cast<glm::dvec3>(color)},
-                    { "Data", pointDataDictonary },
-                    { "Opacity", static_cast<double>(opacity) },
-                    { "Size", static_cast<double>(size)},
-                    { "Velocity", velocityDataDictionary }
-                };
-            }
-            else {
-                renderable = {
-                    { "Type", "RenderablePointsCloud"s },
-                    { "Color", static_cast<glm::dvec3>(color)},
-                    { "Data", pointDataDictonary },
-                    { "Opacity", static_cast<double>(opacity) },
-                    { "Size", static_cast<double>(size)},
-                };
-            }
-            
-            ghoul::Dictionary gui = {
-                { "Name", guiName },
-                { "Path", "/Examples"s }
-            };
+            ghoul::Dictionary renderable;
+            renderable.setValue("Type", "RenderablePointsCloud"s);
+            renderable.setValue("Color", static_cast<glm::dvec3>(color));
+            renderable.setValue("Data", pointDataDictonary);
+            renderable.setValue("Opacity", static_cast<double>(opacity));
+            renderable.setValue("Size", static_cast<double>(size));
 
-            ghoul::Dictionary node = {
-                { "Identifier", identifier },
-                { "Renderable", renderable },
-                { "GUI", gui }
-            };
+            if (hasLuminosityData) {
+                renderable.setValue("Luminosity", luminosityDataDictonary);
+            }
+
+            if (hasVelocityData) {
+                renderable.setValue("Velocity", velocityDataDictionary);
+            }
+
+            ghoul::Dictionary gui;
+            gui.setValue("Name", guiName);
+            gui.setValue("Path", "/Examples"s);
+
+            ghoul::Dictionary node;
+            node.setValue("Identifier", identifier);
+            node.setValue("Renderable", renderable);
+            node.setValue("GUI", gui);
 
             try {
                 SceneGraphNode* sgn = global::renderEngine->scene()->loadNode(node);
@@ -340,7 +311,7 @@ namespace openspace {
             LDEBUG(fmt::format("Message recieved.. Delete SGN: {}", identifier));
 
             SceneGraphNode* sgn = global::renderEngine->scene()->sceneGraphNode(identifier);
-            
+
             if (global::navigationHandler->orbitalNavigator().anchorNode() == sgn) {
                 openspace::global::scriptEngine->queueScript(
                     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Sun')"
@@ -510,7 +481,7 @@ namespace openspace {
                 propertyValue = "T";
 
             std::string subject = lengthOfIdentifier + identifier + propertyValue;
-            // We don't need a lengthOfValue here because it will always be 1 character 
+            // We don't need a lengthOfValue here because it will always be 1 character
 
             // Format length of subject to always be 4 digits
             std::ostringstream os;
