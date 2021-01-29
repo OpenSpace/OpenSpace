@@ -50,7 +50,7 @@ namespace {
 
     constexpr const char* KeyLabelsFileName = "FileName";
 
-    constexpr const double LabelFadeRangeConst = 1500.0;
+    constexpr const double LabelFadeOutLimitAltitudeMeters = 25000.0;
     constexpr const double RangeAngularCoefConst = 0.8;
     constexpr const float MinOpacityValueConst = 0.009f;
 
@@ -674,10 +674,10 @@ void GlobeLabelsComponent::draw(const RenderData& data) {
 
     if (_labelsFadeOutEnabled) {
         glm::dvec2 fadeRange = glm::dvec2(
-            averageRadius + _labelsMinHeight + LabelFadeRangeConst
+            averageRadius + _labelsMinHeight + LabelFadeOutLimitAltitude_meters
         );
         fadeRange.x += _labelsFadeOutDist;
-        double a = RangeAngularCoefConst / (fadeRange.x - fadeRange.y);
+        double a = 1.0 / (fadeRange.x - fadeRange.y);
         double b = -(fadeRange.y / (fadeRange.x - fadeRange.y));
         double funcValue = a * distanceCameraGlobeWorld + b;
         varyingOpacity *= static_cast<float>(std::min(funcValue, 1.0));
