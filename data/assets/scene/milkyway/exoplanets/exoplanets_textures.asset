@@ -2,7 +2,7 @@ local ExoplanetsTexturesPath = asset.syncedResource({
     Name = "Exoplanet Textures",
     Type = "HttpSynchronization",
     Identifier = "exoplanets_textures",
-    Version = 1
+    Version = 2
 })
 
 local HabitableZoneTexturesPath = asset.syncedResource({

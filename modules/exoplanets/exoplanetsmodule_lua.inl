@@ -50,13 +50,13 @@ constexpr const char* LookUpTablePath = "${SYNC}/http/exoplanets_data/2/lookup.t
 constexpr const char* ExoplanetsDataPath =
     "${SYNC}/http/exoplanets_data/2/exoplanets_data.bin";
 
-constexpr const char* StarTextureFile = "${SYNC}/http/exoplanets_textures/1/sun.jpg";
+constexpr const char* StarTextureFile = "${SYNC}/http/exoplanets_textures/2/sun.jpg";
 constexpr const char* NoDataTextureFile =
-    "${SYNC}/http/exoplanets_textures/1/grid-32.png";
+    "${SYNC}/http/exoplanets_textures/2/grid-32.png";
 constexpr const char* DiscTextureFile =
-    "${SYNC}/http/exoplanets_textures/1/disc_texture.png";
+    "${SYNC}/http/exoplanets_textures/2/disc_bw_texture.png";
 constexpr const char* HabitableZoneTextureFile =
-    "${SYNC}/http/habitable_zone_textures/1/green_faded.png";
+    "${SYNC}/http/habitable_zone_textures/1/hot_to_cold_faded.png";
 
 constexpr const float AU = static_cast<float>(distanceconstants::AstronomicalUnit);
 constexpr const float SolarRadius = static_cast<float>(distanceconstants::SolarRadius);
@@ -389,7 +389,7 @@ void createExoplanetSystem(const std::string& starName) {
                         std::to_string(lowerOffset) + ", " +
                         std::to_string(upperOffset) +
                     "}," //min / max extend
-                    "Opacity = 0.3"
+                    "Opacity = 0.25"
                 "},"
                 "Transform = {"
                     "Rotation = {"
@@ -442,6 +442,7 @@ void createExoplanetSystem(const std::string& starName) {
                 "Texture = openspace.absPath('" + HabitableZoneTextureFile + "'),"
                 "Luminosity = " + std::to_string(system.starData.luminosity) + ","
                 "EffectiveTemperature = " + std::to_string(system.starData.teff) + ","
+                "Optimistic = true,"
                 "Opacity = 0.07"
             "},"
             "Transform = {"
