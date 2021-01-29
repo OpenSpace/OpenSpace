@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,7 +41,7 @@ documentation::Documentation Configuration::Documentation = {
         },
         {
             KeySgctConfigNameInitialized,
-            new StringAnnotationVerifier("The type of SGCT auto-gen function (if called)"),
+            new StringAnnotationVerifier("The type of SGCT autogen function (if called)"),
             Optional::Yes,
             "The SGCT configuration can be defined from an .xml file, or auto-generated "
             "by an sgct.config.* lua function. If a lua function is used to generate the "

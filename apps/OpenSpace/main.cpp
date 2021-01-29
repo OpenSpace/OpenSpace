@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,10 +43,8 @@
 #include <ghoul/misc/boolean.h>
 //#include <ghoul/opengl/ghoul_gl.h>
 #include <GLFW/glfw3.h>
-#ifdef _WIN32
+#ifdef WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32
-#else
-#define GLFW_INCLUDE_NONE
 #endif
 #include <GLFW/glfw3native.h>
 #include <sgct/clustermanager.h>
@@ -224,6 +222,8 @@ void mainInitFunc(GLFWwindow*) {
     global::openSpaceEngine->initialize();
     LDEBUG("Initializing OpenSpace Engine finished");
 
+#ifndef __APPLE__
+    // Apparently: "Cocoa: Regular windows do not have icons on macOS"
     {
         std::string path = absPath("${DATA}/openspace-icon.png");
         int x;
@@ -242,6 +242,7 @@ void mainInitFunc(GLFWwindow*) {
 
         stbi_image_free(icons[0].pixels);
     }
+#endif // __APPLE__
 
     currentWindow = Engine::instance().windows().front().get();
     currentViewport = currentWindow->viewports().front().get();
@@ -582,10 +583,10 @@ void mainPostDrawFunc() {
         }
 
         if (w.right.initialized) {
-            const GLuint texId = window.frameBufferTexture(Window::TextureIndex::RightEye);
-            glBindTexture(GL_TEXTURE_2D, texId);
+            const GLuint tId = window.frameBufferTexture(Window::TextureIndex::RightEye);
+            glBindTexture(GL_TEXTURE_2D, tId);
             w.right.handle->SendTexture(
-                texId,
+                tId,
                 GL_TEXTURE_2D,
                 window.framebufferResolution().x,
                 window.framebufferResolution().y
@@ -925,6 +926,9 @@ void setSgctDelegateFunctions() {
 
         return currentWindow->swapGroupFrameNumber();
     };
+    sgctDelegate.setScreenshotFolder = [](std::string path) {
+        Settings::instance().setCapturePath(std::move(path));
+    };
 }
 
 void checkCommandLineForSettings(int& argc, char** argv, bool& hasSGCT, bool& hasProfile,
@@ -1008,8 +1012,7 @@ std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTC
     return config;
 }
 
-int main(int argc, char** argv) {
-    glfwInit();
+int main(int argc, char* argv[]) {
 
 #ifdef WIN32
     SetUnhandledExceptionFilter(generateMiniDump);
@@ -1166,19 +1169,38 @@ int main(int argc, char** argv) {
         sgctFunctionName
     );
 
+    // (abock, 2020-12-07)  For some reason on Apple the keyboard handler in CEF will call
+    // the Qt one even if the QApplication was destroyed, leading to invalid memory
+    // access.  The only way we could fix this for the release was to keep the
+    // QApplication object around until the end of the program.  Even though the Qt
+    // keyboard handler gets called, it doesn't do anything so everything still works.
+#ifdef __APPLE__
+    int qac = 0;
+    QApplication app(qac, nullptr);
+#endif // __APPLE__
+
     bool skipLauncher =
         (hasProfile && hasSGCTConfig) || global::configuration->bypassLauncher;
     if (!skipLauncher) {
+#ifndef __APPLE__
         int qac = 0;
         QApplication app(qac, nullptr);
-        LauncherWindow win(!hasProfile,
-            *global::configuration, !hasSGCTConfig, windowCfgPreset, nullptr);
+#endif // __APPLE__
+
+        LauncherWindow win(
+            !hasProfile,
+            *global::configuration,
+            !hasSGCTConfig,
+            windowCfgPreset,
+            nullptr
+        );
         win.show();
         app.exec();
 
         if (!win.wasLaunchSelected()) {
             exit(EXIT_SUCCESS);
         }
+        glfwInit();
 
         global::configuration->profile = win.selectedProfile();
         windowConfiguration = selectedSgctProfileFromLauncher(
@@ -1188,7 +1210,14 @@ int main(int argc, char** argv) {
             labelFromCfgFile,
             xmlExt
         );
+    } else {
+        glfwInit();
     }
+    if (global::configuration->profile.empty()) {
+        LFATAL("Cannot launch with an empty profile");
+        exit(EXIT_FAILURE);
+    }
+
 
     // Prepend the outgoing sgctArguments with the program name
     // as well as the configuration file that sgct is supposed to use
@@ -1197,7 +1226,7 @@ int main(int argc, char** argv) {
     arguments.insert(arguments.begin() + 2, absPath(windowConfiguration));
 
     // Need to set this before the creation of the sgct::Engine
-    
+
     Log::instance().setLogToConsole(false);
     Log::instance().setShowTime(false);
     Log::instance().setShowLogLevel(false);

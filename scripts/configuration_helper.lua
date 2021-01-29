@@ -345,7 +345,6 @@ function generateCluster(arg)
 <?xml version="1.0" ?>
 <Cluster
     masterAddress="localhost"
-    externalControlPort="20500"
     debug="]] .. tostring(arg["sgctDebug"]) .. [["
 >
 ]] .. (arg["settings"] or "") .. [[

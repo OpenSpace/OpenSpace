@@ -69,5 +69,6 @@ asset.meta = {
     Description = [[ Saturn globe, and main planet label.]],
     Author = "OpenSpace Team",
     URL = "http://openspaceproject.com",
-    License = "MIT license"
+    License = "MIT license",
+    Identifiers = {"Saturn", "SaturnLabel"}
 }

@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2020                                                                #
+# Copyright (c) 2014-2021                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -40,8 +40,6 @@ set(OPENSPACE_SOURCE_FILES
   src/guikeyboardhandler.cpp
 )
 source_group("Source Files" FILES ${OPENSPACE_SOURCE_FILES})
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 create_new_module(
   CefWebGui

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -73,14 +73,14 @@ int getNavigationState(lua_State* L) {
 
     lua_settop(L, 0);
 
-    const auto pushVector = [](lua_State* L, const glm::dvec3& v) {
-        lua_newtable(L);
-        ghoul::lua::push(L, 1, v.x);
-        lua_rawset(L, -3);
-        ghoul::lua::push(L, 2, v.y);
-        lua_rawset(L, -3);
-        ghoul::lua::push(L, 3, v.z);
-        lua_rawset(L, -3);
+    const auto pushVector = [](lua_State* s, const glm::dvec3& v) {
+        lua_newtable(s);
+        ghoul::lua::push(s, 1, v.x);
+        lua_rawset(s, -3);
+        ghoul::lua::push(s, 2, v.y);
+        lua_rawset(s, -3);
+        ghoul::lua::push(s, 3, v.z);
+        lua_rawset(s, -3);
     };
 
     lua_newtable(L);
@@ -309,7 +309,7 @@ int joystickButton(lua_State* L) {
         cmds.begin(),
         cmds.end(),
         std::string(),
-        [](std::string lhs, std::string rhs) {
+        [](const std::string& lhs, const std::string& rhs) {
             return lhs + ";" + rhs;
         }
     );

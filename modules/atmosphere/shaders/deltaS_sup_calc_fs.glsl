@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,7 +32,7 @@ uniform int layer;
 
 uniform sampler3D deltaSTexture;
 
-void main(void) {
+void main() {
     float x = gl_FragCoord.x - 0.5f;
     float y = gl_FragCoord.y - 0.5f;
 

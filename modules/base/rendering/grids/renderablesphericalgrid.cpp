@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,6 @@
 #include <modules/base/basemodule.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/documentation/verifier.h>
 #include <ghoul/glm.h>
@@ -38,9 +37,9 @@
 namespace {
     constexpr const char* ProgramName = "GridProgram";
 
-    constexpr openspace::properties::Property::PropertyInfo GridColorInfo = {
-        "GridColor",
-        "Grid Color",
+    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+        "Color",
+        "Color",
         "This value determines the color of the grid lines that are rendered."
     };
 
@@ -67,10 +66,10 @@ documentation::Documentation RenderableSphericalGrid::Documentation() {
         "base_renderable_sphericalgrid",
         {
             {
-                GridColorInfo.identifier,
+                ColorInfo.identifier,
                 new DoubleVector3Verifier,
                 Optional::Yes,
-                GridColorInfo.description
+                ColorInfo.description
             },
             {
                 SegmentsInfo.identifier,
@@ -88,16 +87,10 @@ documentation::Documentation RenderableSphericalGrid::Documentation() {
     };
 }
 
-
 RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _gridProgram(nullptr)
-    , _gridColor(
-        GridColorInfo,
-        glm::vec3(0.5f, 0.5, 0.5f),
-        glm::vec3(0.f),
-        glm::vec3(1.f)
-    )
+    , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
     , _segments(SegmentsInfo, 36, 4, 200)
     , _lineWidth(LineWidthInfo, 0.5f, 0.f, 20.f)
 {
@@ -110,11 +103,11 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
 
-    if (dictionary.hasKey(GridColorInfo.identifier)) {
-        _gridColor = dictionary.value<glm::vec3>(GridColorInfo.identifier);
+    if (dictionary.hasKey(ColorInfo.identifier)) {
+        _color = dictionary.value<glm::dvec3>(ColorInfo.identifier);
     }
-    _gridColor.setViewOption(properties::Property::ViewOptions::Color);
-    addProperty(_gridColor);
+    _color.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_color);
 
     if (dictionary.hasKey(SegmentsInfo.identifier)) {
         _segments = static_cast<int>(dictionary.value<double>(SegmentsInfo.identifier));
@@ -186,8 +179,6 @@ void RenderableSphericalGrid::deinitializeGL() {
 void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
     _gridProgram->activate();
 
-    _gridProgram->setUniform("opacity", _opacity);
-
     const glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
@@ -201,21 +192,20 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
         "MVPTransform",
         glm::dmat4(data.camera.projectionMatrix()) * modelViewTransform
     );
-    
-    _gridProgram->setUniform("gridColor", _gridColor);
+    _gridProgram->setUniform("opacity", _opacity);
+    _gridProgram->setUniform("gridColor", _color);
 
-    float adjustedLineWidth = 1.f;
-
+    // Change GL state:
 #ifndef __APPLE__
-    adjustedLineWidth = _lineWidth;
+    glLineWidth(_lineWidth);
+#else
+    glLineWidth(1.f);
 #endif
-
-    // Changes GL state:
-    glLineWidth(adjustedLineWidth);
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_LINE_SMOOTH);
-    
+    glDepthMask(false);
+
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
     glDrawElements(_mode, _isize, GL_UNSIGNED_INT, nullptr);
@@ -223,9 +213,10 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
 
     _gridProgram->deactivate();
 
-    // Restores GL State
+    // Restore GL State
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetLineState();
+    global::renderEngine->openglStateCache().resetDepthState();
 }
 
 void RenderableSphericalGrid::update(const UpdateData&) {

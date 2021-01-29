@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -256,46 +256,46 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
     , _drawSolid(DrawSolidInfo, false)
     , _standOffDistance(StandoffDistanceInfo, 0.9999, 0.99, 1.0, 0.000001)
     , _colors({
-        { 
-            DefaultStartColorInfo, 
-            glm::vec3(0.4f), 
-            glm::vec3(0.f), 
-            glm::vec3(1.f)
-        },
-        { 
-            DefaultEndColorInfo, 
-            glm::vec3(0.85f), 
-            glm::vec3(0.f), 
-            glm::vec3(1.f)
-        },
-        { 
-            ActiveColorInfo, 
-            glm::vec3(0.f, 1.f, 0.f), 
-            glm::vec3(0.f), 
-            glm::vec3(1.f) 
-        },
-        { 
-            TargetInFovInfo, 
-            glm::vec3(0.f, 0.5f, 0.7f), 
-            glm::vec3(0.f), 
-            glm::vec3(1.f) 
-        },
-        { 
-            IntersectionStartInfo, 
-            glm::vec3(1.f, 0.89f, 0.f), 
+        {
+            DefaultStartColorInfo,
+            glm::vec3(0.4f),
             glm::vec3(0.f),
-            glm::vec3(1.f) 
-        },
-        { 
-            IntersectionEndInfo, 
-            glm::vec3(1.f, 0.29f, 0.f), 
-            glm::vec3(0.f), 
             glm::vec3(1.f)
         },
-        { 
-            SquareColorInfo, 
-            glm::vec3(0.85f), 
-            glm::vec3(0.f), 
+        {
+            DefaultEndColorInfo,
+            glm::vec3(0.85f),
+            glm::vec3(0.f),
+            glm::vec3(1.f)
+        },
+        {
+            ActiveColorInfo,
+            glm::vec3(0.f, 1.f, 0.f),
+            glm::vec3(0.f),
+            glm::vec3(1.f)
+        },
+        {
+            TargetInFovInfo,
+            glm::vec3(0.f, 0.5f, 0.7f),
+            glm::vec3(0.f),
+            glm::vec3(1.f)
+        },
+        {
+            IntersectionStartInfo,
+            glm::vec3(1.f, 0.89f, 0.f),
+            glm::vec3(0.f),
+            glm::vec3(1.f)
+        },
+        {
+            IntersectionEndInfo,
+            glm::vec3(1.f, 0.29f, 0.f),
+            glm::vec3(0.f),
+            glm::vec3(1.f)
+        },
+        {
+            SquareColorInfo,
+            glm::vec3(0.85f),
+            glm::vec3(0.f),
             glm::vec3(1.f)
         }
     })
@@ -314,7 +314,7 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
     );
 
     std::string ia = std::string(KeyInstrument) + "." + KeyInstrumentAberration;
-    if (dictionary.hasKeyAndValue<std::string>(ia)) {
+    if (dictionary.hasValue<std::string>(ia)) {
         const std::string& ac = dictionary.value<std::string>(ia);
         _instrument.aberrationCorrection = SpiceManager::AberrationCorrection(ac);
     }
@@ -328,9 +328,9 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
 
     if (dictionary.hasKey(KeyFrameConversions)) {
         ghoul::Dictionary fc = dictionary.value<ghoul::Dictionary>(KeyFrameConversions);
-        for (const std::string& key : fc.keys()) {
+        for (std::string_view key : fc.keys()) {
             global::moduleEngine->module<SpacecraftInstrumentsModule>()->addFrame(
-                key,
+                std::string(key),
                 fc.value<std::string>(key)
             );
         }
@@ -767,97 +767,96 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
     }
 
 
-#ifdef DEBUG_THIS
-        // At least one point will intersect
-        for (size_t i = 0; i < _instrument.bounds.size(); ++i) {
-            // Wrap around the array index to 0
-            const size_t j = (i == _instrument.bounds.size() - 1) ? 0 : i + 1;
+#if 0 // DEBUG_THIS
+    // At least one point will intersect
+    for (size_t i = 0; i < _instrument.bounds.size(); ++i) {
+        // Wrap around the array index to 0
+        const size_t j = (i == _instrument.bounds.size() - 1) ? 0 : i + 1;
 
-            const glm::dvec3& iBound = _instrument.bounds[i];
-            const glm::dvec3& jBound = _instrument.bounds[j];
+        const glm::dvec3& iBound = _instrument.bounds[i];
+        const glm::dvec3& jBound = _instrument.bounds[j];
 
-            auto intercepts = [&](const glm::dvec3& probe) -> bool {
-                return SpiceManager::ref().surfaceIntercept(
-                    target,
-                    _instrument.spacecraft,
-                    _instrument.name,
-                    makeBodyFixedReferenceFrame(_instrument.referenceFrame).first,
-                    _instrument.aberrationCorrection,
-                    data.time,
-                    probe
-                ).interceptFound;
-            };
+        auto intercepts = [&](const glm::dvec3& probe) -> bool {
+            return SpiceManager::ref().surfaceIntercept(
+                target,
+                _instrument.spacecraft,
+                _instrument.name,
+                makeBodyFixedReferenceFrame(_instrument.referenceFrame).first,
+                _instrument.aberrationCorrection,
+                data.time,
+                probe
+            ).interceptFound;
+        };
 
-            static const uint8_t NoIntersect   = 0b00;
-            static const uint8_t ThisIntersect = 0b01;
-            static const uint8_t NextIntersect = 0b10;
-            static const uint8_t BothIntersect = 0b11;
+        static const uint8_t NoIntersect   = 0b00;
+        static const uint8_t ThisIntersect = 0b01;
+        static const uint8_t NextIntersect = 0b10;
+        static const uint8_t BothIntersect = 0b11;
 
-            const uint8_t type = (intersects[i] ? 1 : 0) + (intersects[j] ? 2 : 0);
-            switch (type) {
-                case NoIntersect:
-                {
-                    // If both points don't intercept, the target might still pass between
-                    // them, so we need to check the intermediate point
+        const uint8_t type = (intersects[i] ? 1 : 0) + (intersects[j] ? 2 : 0);
+        switch (type) {
+            case NoIntersect:
+            {
+                // If both points don't intercept, the target might still pass between
+                // them, so we need to check the intermediate point
 
-                    const glm::dvec3 half = glm::mix(iBound, jBound, 0.5);
-                    if (intercepts(half)) {
-                        // The two outer points do not intersect, but the middle point
-                        // does; so we need to find the intersection points
-                        const double t1 = bisect(half, iBound, intercepts);
-                        const double t2 = 0.5 + bisect(half, jBound, intercepts);
+                const glm::dvec3 half = glm::mix(iBound, jBound, 0.5);
+                if (intercepts(half)) {
+                    // The two outer points do not intersect, but the middle point
+                    // does; so we need to find the intersection points
+                    const double t1 = bisect(half, iBound, intercepts);
+                    const double t2 = 0.5 + bisect(half, jBound, intercepts);
 
-                        //
-                        // The target is sticking out somewhere between i and j, so we
-                        // have three regions here:
-                        // The first (0,t1) and second (t2,1) are not intersecting
-                        // The third between (t1,t2) is intersecting
-                        //
-                        //   i       p1    p2       j
-                        //            *****
-                        //   x-------*     *-------x
-                        //   0       t1    t2      1
+                    //
+                    // The target is sticking out somewhere between i and j, so we
+                    // have three regions here:
+                    // The first (0,t1) and second (t2,1) are not intersecting
+                    // The third between (t1,t2) is intersecting
+                    //
+                    //   i       p1    p2       j
+                    //            *****
+                    //   x-------*     *-------x
+                    //   0       t1    t2      1
 
-                        // OBS: i and j are in bounds-space,  p1, p2 are in
-                        // _orthogonalPlane-space
-                        const size_t p1 = static_cast<size_t>(
-                            indexForBounds(i) + t1 * InterpolationSteps
-                        );
-                        const size_t p2 = static_cast<size_t>(
-                            indexForBounds(i) + t2 * InterpolationSteps
-                        );
+                    // OBS: i and j are in bounds-space,  p1, p2 are in
+                    // _orthogonalPlane-space
+                    const size_t p1 = static_cast<size_t>(
+                        indexForBounds(i) + t1 * InterpolationSteps
+                    );
+                    const size_t p2 = static_cast<size_t>(
+                        indexForBounds(i) + t2 * InterpolationSteps
+                    );
 
-                        // We can copy the non-intersecting parts
-                        copyFieldOfViewValues(i, indexForBounds(i), p1);
-                        copyFieldOfViewValues(i, p2, indexForBounds(j));
+                    // We can copy the non-intersecting parts
+                    copyFieldOfViewValues(i, indexForBounds(i), p1);
+                    copyFieldOfViewValues(i, p2, indexForBounds(j));
 
-                        // Are recompute the intersecting ones
-                        for (size_t k = 0; k <= (p2 - p1); ++k) {
-                            const double t = t1 + k * (t2 - t1);
-                            const glm::dvec3 interpolated = glm::mix(iBound, jBound, t);
-                            const glm::vec3 icpt = interceptVector(interpolated);
-                            _orthogonalPlane.data[p1 + k] = {
-                                icpt.x, icpt.y, icpt.z,
-                                RenderInformation::VertexColorTypeSquare
-                            };
-                        }
+                    // Are recompute the intersecting ones
+                    for (size_t k = 0; k <= (p2 - p1); ++k) {
+                        const double t = t1 + k * (t2 - t1);
+                        const glm::dvec3 interpolated = glm::mix(iBound, jBound, t);
+                        const glm::vec3 icpt = interceptVector(interpolated);
+                        _orthogonalPlane.data[p1 + k] = {
+                            icpt.x, icpt.y, icpt.z,
+                            RenderInformation::VertexColorTypeSquare
+                        };
                     }
-                    else {
-                        copyFieldOfViewValues(
-                            i,
-                            indexForBounds(i),
-                            indexForBounds(i + 1)
-                        );
-                    }
-                    break;
                 }
-                case ThisIntersect:
-                case NextIntersect:
-                case BothIntersect:
-                    break;
-                default:
-                    throw ghoul::MissingCaseException();
+                else {
+                    copyFieldOfViewValues(
+                        i,
+                        indexForBounds(i),
+                        indexForBounds(i + 1)
+                    );
+                }
+                break;
             }
+            case ThisIntersect:
+            case NextIntersect:
+            case BothIntersect:
+                break;
+            default:
+                throw ghoul::MissingCaseException();
         }
     }
 #endif

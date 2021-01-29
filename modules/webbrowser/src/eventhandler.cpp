@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -152,7 +152,7 @@ namespace {
 namespace openspace {
 
 void EventHandler::initialize() {
-    global::callback::character.emplace_back(
+    global::callback::character->emplace_back(
         [this](unsigned int charCode, KeyModifier mod) -> bool {
             if (_browserInstance) {
                 return charCallback(charCode, mod);
@@ -160,7 +160,7 @@ void EventHandler::initialize() {
             return false;
         }
     );
-    global::callback::keyboard.emplace_back(
+    global::callback::keyboard->emplace_back(
         [this](Key key, KeyModifier mod, KeyAction action) -> bool {
             if (_browserInstance) {
                 return keyboardCallback(key, mod, action);
@@ -168,7 +168,7 @@ void EventHandler::initialize() {
             return false;
         }
     );
-    global::callback::mousePosition.emplace_back(
+    global::callback::mousePosition->emplace_back(
         [this](double x, double y) -> bool {
             if (_browserInstance) {
                 return mousePositionCallback(x, y);
@@ -176,7 +176,7 @@ void EventHandler::initialize() {
             return false;
         }
     );
-    global::callback::mouseButton.emplace_back(
+    global::callback::mouseButton->emplace_back(
         [this](MouseButton button, MouseAction action, KeyModifier mods) -> bool {
             if (_browserInstance) {
                 return mouseButtonCallback(button, action, mods);
@@ -184,7 +184,7 @@ void EventHandler::initialize() {
             return false;
         }
     );
-    global::callback::mouseScrollWheel.emplace_back(
+    global::callback::mouseScrollWheel->emplace_back(
         [this](double x, double y) -> bool {
             if (_browserInstance) {
                 const glm::ivec2 delta(x, y);
@@ -194,7 +194,7 @@ void EventHandler::initialize() {
         }
     );
 
-    global::callback::touchDetected.emplace_back(
+    global::callback::touchDetected->emplace_back(
         [&](TouchInput input) -> bool {
             if (!_browserInstance) {
                 return false;
@@ -236,7 +236,7 @@ void EventHandler::initialize() {
         }
     );
 
-    global::callback::touchUpdated.emplace_back(
+    global::callback::touchUpdated->emplace_back(
         [&](TouchInput input) -> bool {
             if (!_browserInstance) {
                 return false;
@@ -278,7 +278,7 @@ void EventHandler::initialize() {
         }
     );
 
-    global::callback::touchExit.emplace_back(
+    global::callback::touchExit->emplace_back(
         [&](TouchInput input) {
             if (!_browserInstance) {
                 return;

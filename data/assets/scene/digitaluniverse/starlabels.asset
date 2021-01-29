@@ -42,5 +42,5 @@ asset.meta = {
     Author = "Brian Abbott (AMNH)",
     URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
     License = "AMNH Digital Universe",
-    Identifiers = "StarsLabels"
+    Identifiers = {"StarsLabels"}
 }

@@ -18,5 +18,5 @@ asset.meta = {
     Author = "NASA",
     URL = "https://visibleearth.nasa.gov/collection/1484/blue-marble",
     License = "NASA",
-    Identifiers = "Earth_Bluemarble_Height"
+    Identifiers = {"Earth_Bluemarble_Height"}
 }

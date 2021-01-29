@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,7 +46,6 @@
 #include <vector>
 
 namespace {
-    constexpr const char* ProgramName = "RenderableSmallBody";
     constexpr const char* _loggerCat = "SmallSolarSystemBody";
 
     static const openspace::properties::Property::PropertyInfo PathInfo = {
@@ -85,6 +84,26 @@ namespace {
         "Upper limit on the number of objects for this renderable, regardless of "
         "how many objects are contained in the data file"
     };
+
+    double importAngleValue(const std::string& angle) {
+        if (angle.empty()) {
+            return 0.0;
+        }
+
+        double output = std::stod(angle);
+        output = std::fmod(output, 360.0);
+        if (output < 0.0) {
+            output += 360.0;
+        }
+        return output;
+    }
+
+    std::string& formatObjectName(std::string& name) {
+        const std::string trimChars = "\t\n\v\f\r\" ";
+        name.erase(0, name.find_first_not_of(trimChars));
+        name.erase(name.find_last_not_of(trimChars) + 1);
+        return name;
+    }
 } // namespace
 
 namespace openspace {
@@ -166,8 +185,6 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
     std::string line;
     unsigned int csvLine = 0;
     int fieldCount = 0;
-    float lineSkipFraction = 1.0;
-    int lastLineCount = -1;
     const std::string expectedHeaderLine = "full_name,epoch_cal,e,a,i,om,w,ma,per";
 
     try {
@@ -178,6 +195,7 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
         }
         _numObjects = numberOfLines;
 
+        float lineSkipFraction = 1.0;
         if (!_isFileReadinitialized) {
             _isFileReadinitialized = true;
             initializeFileReading();
@@ -211,6 +229,7 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
             skipSingleLineInFile(file);
         }
         bool firstDataLine = true;
+        int lastLineCount = -1;
         for (csvLine = _startRenderIdx + 1;
              csvLine <= endElement + 1;
              csvLine++, sequentialLineErrors++)
@@ -239,8 +258,8 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
                         fieldCount, csvLine + 1, numberOfLines, filename
                     ));
                 }
-                catch (std::ios_base::failure& f) {
-                    throw f;
+                catch (std::ios_base::failure&) {
+                    throw;
                 }
 
                 if (sequentialLineErrors == 4) {
@@ -396,22 +415,6 @@ void RenderableSmallBody::readOrbitalParamsFromThisLine(bool firstDataLine,
     _segmentSize.push_back(
         static_cast<size_t>(scale + (scale / pow(1 - keplerElements.eccentricity, 1.2)))
     );
-}
-
-static double importAngleValue(const std::string& angle) {
-    double output = std::stod(angle);
-    output = std::fmod(output, 360.0);
-    if (output < 0.0) {
-        output += 360.0;
-    }
-    return output;
-}
-
-static std::string& formatObjectName(std::string& name) {
-    const std::string trimChars = "\t\n\v\f\r\" ";
-    name.erase(0, name.find_first_not_of(trimChars));
-    name.erase(name.find_last_not_of(trimChars) + 1);
-    return name;
 }
 
 } // namespace openspace

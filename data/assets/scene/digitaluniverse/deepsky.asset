@@ -33,7 +33,7 @@ local deepSkyPoints = {
         TextColor = { 0.1, 0.4, 0.6 },
         TextSize = 20.50,
         TextMinSize = 16.0,
-        Unit = "Mpc",
+        Unit = "pc",
         -- Fade in value in the same unit as "Unit"
         --FadeInDistances = { 0.05, 1.0 },
         -- Max size in pixels
@@ -68,7 +68,7 @@ local deepSkyImages = {
         TexturePath = textures,
         Luminosity = "radius",
         ScaleLuminosity = 0.001,
-        Unit = "Mpc",
+        Unit = "pc",
         -- Fade in value in the same unit as "Unit"
         --FadeInDistances = {0.001, 0.05010},
         PlaneMinSize = 5.0
@@ -105,6 +105,6 @@ asset.meta = {
     Author = "Nate Greenstein, Matt Everhart, Brian Abbott (AMNH)",
     URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
     License = "AMNH Digital Universe",
-    Identifiers = "DeepSkyObjects,DeepSkyObjectsImages"
+    Identifiers = {"DeepSkyObjects", "DeepSkyObjectsImages"}
 }
 

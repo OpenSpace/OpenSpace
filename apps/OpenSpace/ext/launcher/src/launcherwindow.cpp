@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,7 @@
 
 #include <openspace/engine/configuration.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
 #include <QComboBox>
 #include <QFile>
 #include <QLabel>
@@ -220,8 +221,17 @@ QWidget* LauncherWindow::createCentralWidget() {
     connect(
         startButton, &QPushButton::released,
         [this]() {
-            _shouldLaunch = true;
-            close();
+            if (_profileBox->currentText().isEmpty()) {
+                QMessageBox::critical(
+                    this,
+                    "Empty Profile",
+                    "Cannot launch with an empty profile"
+                );
+            }
+            else {
+                _shouldLaunch = true;
+                close();
+            }
         }
     );
     startButton->setObjectName("large");
@@ -301,6 +311,13 @@ void LauncherWindow::populateProfilesList(std::string preset) {
     
     _profileBox->clear();
 
+    if (!std::filesystem::exists(_profilePath)) {
+        LINFOC(
+            "LauncherWindow",
+            fmt::format("Could not find profile folder '{}'", _profilePath)
+        );
+        return;
+    }
     // Add all the files with the .profile extension to the dropdown
     for (const fs::directory_entry& p : fs::directory_iterator(_profilePath)) {
         if (p.path().extension() != ".profile") {
@@ -321,12 +338,20 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
     namespace fs = std::filesystem;
 
     _windowConfigBox->clear();
-    // Add all the files with the .xml extension to the dropdown
-    for (const fs::directory_entry& p : fs::directory_iterator(_configPath)) {
-        if (p.path().extension() != ".xml") {
-            continue;
+    if (std::filesystem::exists(_configPath)) {
+        // Add all the files with the .xml extension to the dropdown
+        for (const fs::directory_entry& p : fs::directory_iterator(_configPath)) {
+            if (p.path().extension() != ".xml") {
+                continue;
+            }
+            _windowConfigBox->addItem(QString::fromStdString(p.path().stem().string()));
         }
-        _windowConfigBox->addItem(QString::fromStdString(p.path().stem().string()));
+    }
+    else {
+        LINFOC(
+            "LauncherWindow",
+            fmt::format("Could not find config folder '{}'", _configPath)
+        );
     }
 
     // Try to find the requested configuration file and set it as the current one. As we

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -137,11 +137,10 @@ glm::vec3 SceneGraphLightSource::directionViewSpace(const RenderData& renderData
 
     const glm::dvec3 renderNodePosition = renderData.modelTransform.translation;
 
-    const glm::dvec3 lightDirectionViewSpace = renderData.camera.viewRotationMatrix() *
-        glm::dvec4((lightPosition - renderNodePosition), 1.0);
+    const glm::dvec3 viewSpace = glm::dvec3(renderData.camera.combinedViewMatrix() *
+        glm::dvec4((lightPosition - renderNodePosition), 1.0));
 
-    return glm::normalize(lightDirectionViewSpace);
+    return glm::normalize(viewSpace);
 }
-
 
 } // namespace openspace

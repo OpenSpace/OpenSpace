@@ -29,7 +29,7 @@ local object = {
         CorrectionSizeEndDistance = 15.86,
         CorrectionSizeFactor = 8.59,
         Unit = "pc",
-        BillboardMaxSize = 23.0,
+        BillboardMaxSize = 30.0,
         EnablePixelSizeControl = true
     },
     GUI = {
@@ -58,5 +58,5 @@ asset.meta = {
     Author = "Brian Abbott, Emily Rice, and Jason No (AMNH)",
     URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
     License = "AMNH Digital Universe",
-    Identifiers = "KeplerPlanetaryCandidates"
+    Identifiers = {"KeplerPlanetaryCandidates"}
 }

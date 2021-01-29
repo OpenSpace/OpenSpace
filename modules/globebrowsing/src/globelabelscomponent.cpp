@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -334,14 +334,14 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
     _globe = globe;
 
     // Reads labels' file and build cache file if necessary
-    if (dictionary.empty()) {
+    if (dictionary.isEmpty()) {
         return;
     }
-    std::string labelsFile;
-    bool successLabels = dictionary.getValue(KeyLabelsFileName, labelsFile);
-    if (!successLabels) {
+    if (!dictionary.hasValue<std::string>(KeyLabelsFileName)) {
         return;
     }
+
+    std::string labelsFile = dictionary.value<std::string>(KeyLabelsFileName);
     bool loadSuccess = loadLabelsData(absPath(labelsFile));
     if (!loadSuccess) {
         return;
@@ -357,7 +357,9 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
     }
 
     if (dictionary.hasKey(LabelsFontSizeInfo.identifier)) {
-        _labelsFontSize = dictionary.value<float>(LabelsFontSizeInfo.identifier);
+        _labelsFontSize = static_cast<float>(
+            dictionary.value<double>(LabelsFontSizeInfo.identifier)
+        );
         _labelsFontSize.onChange([this]() { initializeFonts(); });
     }
 
@@ -368,15 +370,19 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
     }
 
     if (dictionary.hasKey(LabelsMinHeightInfo.identifier)) {
-        _labelsMinHeight = dictionary.value<float>(LabelsMinHeightInfo.identifier);
+        _labelsMinHeight = static_cast<float>(
+            dictionary.value<double>(LabelsMinHeightInfo.identifier)
+        );
     }
 
     if (dictionary.hasKey(LabelsColorInfo.identifier)) {
-        _labelsColor = dictionary.value<glm::vec3>(LabelsColorInfo.identifier);
+        _labelsColor = dictionary.value<glm::dvec3>(LabelsColorInfo.identifier);
     }
 
     if (dictionary.hasKey(LabelsOpacityInfo.identifier)) {
-        _labelsOpacity = dictionary.value<float>(LabelsOpacityInfo.identifier);
+        _labelsOpacity = static_cast<float>(
+            dictionary.value<double>(LabelsOpacityInfo.identifier)
+        );
     }
 
     if (dictionary.hasKey(LabelsFadeInEnabledInfo.identifier)) {
@@ -384,8 +390,8 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
     }
 
     if (dictionary.hasKey(LabelsFadeInStartingDistanceInfo.identifier)) {
-        _labelsFadeInDist = dictionary.value<float>(
-            LabelsFadeInStartingDistanceInfo.identifier
+        _labelsFadeInDist = static_cast<float>(
+            dictionary.value<double>(LabelsFadeInStartingDistanceInfo.identifier)
         );
     }
 
@@ -396,20 +402,20 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
     }
 
     if (dictionary.hasKey(LabelsFadeOutStartingDistanceInfo.identifier)) {
-        _labelsFadeOutDist = dictionary.value<float>(
-            LabelsFadeOutStartingDistanceInfo.identifier
+        _labelsFadeOutDist = static_cast<float>(
+            dictionary.value<double>(LabelsFadeOutStartingDistanceInfo.identifier)
         );
     }
 
     if (dictionary.hasKey(LabelsMinSizeInfo.identifier)) {
         _labelsMinSize = static_cast<int>(
-            dictionary.value<float>(LabelsMinSizeInfo.identifier)
+            dictionary.value<double>(LabelsMinSizeInfo.identifier)
         );
     }
 
     if (dictionary.hasKey(LabelsMaxSizeInfo.identifier)) {
         _labelsMaxSize = static_cast<int>(
-            dictionary.value<float>(LabelsMaxSizeInfo.identifier)
+            dictionary.value<double>(LabelsMaxSizeInfo.identifier)
         );
     }
 
@@ -524,9 +530,7 @@ bool GlobeLabelsComponent::readLabelsFile(const std::string& file) {
             strncpy(lEntry.feature, token.c_str(), 256);
             int tokenChar = 0;
             while (tokenChar < 256) {
-                if ((lEntry.feature[tokenChar] < 0 || lEntry.feature[tokenChar] > 127) &&
-                    lEntry.feature[tokenChar] != '\0')
-                {
+                if (lEntry.feature[tokenChar] < 0 && lEntry.feature[tokenChar] != '\0') {
                     lEntry.feature[tokenChar] = '*';
                 }
                 else if (lEntry.feature[tokenChar] == '\"') {
@@ -692,11 +696,9 @@ void GlobeLabelsComponent::renderLabels(const RenderData& data,
                                         float fadeInVariable
 ) {
     glm::vec4 textColor = glm::vec4(
-        glm::vec3(_labelsColor), 
+        glm::vec3(_labelsColor),
         _labelsOpacity * fadeInVariable
     );
-
-    glm::dvec4 cameraUpVecWorld = glm::dvec4(data.camera.lookUpVectorWorldSpace(), 0.0);
 
     glm::dmat4 VP = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
                     data.camera.combinedViewMatrix();

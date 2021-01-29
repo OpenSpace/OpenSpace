@@ -26,5 +26,5 @@ asset.meta = {
     Author = "OpenSpace Team",
     URL = "https://visibleearth.nasa.gov/images/79765/night-lights-2012-map",
     License = "NASA",
-    Identifiers = "Earth_at_Night_2012"
+    Identifiers = {"Earth_at_Night_2012"}
 }

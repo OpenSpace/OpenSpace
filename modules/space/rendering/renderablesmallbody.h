@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,8 +38,6 @@
 
 namespace openspace {
 
-static double importAngleValue(const std::string& angle);
-
 class RenderableSmallBody : public RenderableOrbitalKepler {
 public:
     RenderableSmallBody(const ghoul::Dictionary& dictionary);
@@ -48,7 +46,7 @@ public:
 private:
     void readOrbitalParamsFromThisLine(bool firstDataLine, int& fieldCount,
         unsigned int& csvLine, std::ifstream& file);
-    void readDataFile(const std::string& filename);
+    virtual void readDataFile(const std::string& filename) override;
     void initializeFileReading();
     void skipSingleLineInFile(std::ifstream& file);
 
@@ -58,9 +56,6 @@ private:
     /// element draw call is used.
     std::vector<unsigned int> _indexBufferData;
 };
-
-static double importAngleValue(const std::string& angle);
-static std::string& formatObjectName(std::string& name);
 
 } // namespace openspace
 

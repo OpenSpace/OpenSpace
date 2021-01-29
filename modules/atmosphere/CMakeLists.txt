@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2020                                                                #
+# Copyright (c) 2014-2021                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -25,46 +25,46 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/atmospheredeferredcaster.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableatmosphere.h
+  rendering/atmospheredeferredcaster.h
+  rendering/renderableatmosphere.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/atmospheredeferredcaster.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableatmosphere.cpp
+  rendering/atmospheredeferredcaster.cpp
+  rendering/renderableatmosphere.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/atmosphere_common.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/atmosphere_deferred_vs.glsl 
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/atmosphere_deferred_fs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaE_calc_vs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaE_calc_fs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaJ_calc_vs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaJ_calc_fs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaJ_calc_gs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaS_calc_vs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaS_calc_gs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaS_calc_fs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaS_sup_calc_vs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaS_sup_calc_gs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaS_sup_calc_fs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/inScattering_calc_vs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/inScattering_calc_gs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/inScattering_calc_fs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/inScattering_sup_calc_vs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/inScattering_sup_calc_gs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/inScattering_sup_calc_fs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/irradiance_calc_vs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/irradiance_calc_fs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/irradiance_final_vs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/irradiance_final_fs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/irradiance_sup_calc_vs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/irradiance_sup_calc_fs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/transmittance_calc_vs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/transmittance_calc_fs.glsl
+  shaders/atmosphere_common.glsl
+  shaders/atmosphere_deferred_vs.glsl 
+  shaders/atmosphere_deferred_fs.glsl
+  shaders/deltaE_calc_vs.glsl
+  shaders/deltaE_calc_fs.glsl
+  shaders/deltaJ_calc_vs.glsl
+  shaders/deltaJ_calc_fs.glsl
+  shaders/deltaJ_calc_gs.glsl
+  shaders/deltaS_calc_vs.glsl
+  shaders/deltaS_calc_gs.glsl
+  shaders/deltaS_calc_fs.glsl
+  shaders/deltaS_sup_calc_vs.glsl
+  shaders/deltaS_sup_calc_gs.glsl
+  shaders/deltaS_sup_calc_fs.glsl
+  shaders/inScattering_calc_vs.glsl
+  shaders/inScattering_calc_gs.glsl
+  shaders/inScattering_calc_fs.glsl
+  shaders/inScattering_sup_calc_vs.glsl
+  shaders/inScattering_sup_calc_gs.glsl
+  shaders/inScattering_sup_calc_fs.glsl
+  shaders/irradiance_calc_vs.glsl
+  shaders/irradiance_calc_fs.glsl
+  shaders/irradiance_final_vs.glsl
+  shaders/irradiance_final_fs.glsl
+  shaders/irradiance_sup_calc_vs.glsl
+  shaders/irradiance_sup_calc_fs.glsl
+  shaders/transmittance_calc_vs.glsl
+  shaders/transmittance_calc_fs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,6 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/glm.h>
@@ -39,9 +38,9 @@
 namespace {
     constexpr const char* ProgramName = "GridProgram";
 
-    constexpr openspace::properties::Property::PropertyInfo GridColorInfo = {
-        "GridColor",
-        "Grid Color",
+    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+        "Color",
+        "Color",
         "This value determines the color of the grid lines that are rendered."
     };
 
@@ -74,14 +73,15 @@ documentation::Documentation RenderableGrid::Documentation() {
         "base_renderable_grid",
         {
             {
-                GridColorInfo.identifier,
+                ColorInfo.identifier,
                 new DoubleVector3Verifier,
                 Optional::Yes,
-                GridColorInfo.description
+                ColorInfo.description
             },
             {
                 SegmentsInfo.identifier,
-                new DoubleVector2Verifier, // @TODO (emmbr 2020-07-07): should be Int, but specification test fails...
+                // @TODO (emmbr 2020-07-07): should be Int, but specification test fails..
+                new DoubleVector2Verifier,
                 Optional::Yes,
                 SegmentsInfo.description
             },
@@ -103,7 +103,7 @@ documentation::Documentation RenderableGrid::Documentation() {
 
 RenderableGrid::RenderableGrid(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _gridColor(GridColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
+    , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
     , _segments(SegmentsInfo, glm::uvec2(10), glm::uvec2(1), glm::uvec2(200))
     , _lineWidth(LineWidthInfo, 0.5f, 0.f, 20.f)
     , _size(SizeInfo, glm::vec2(1e20f), glm::vec2(1.f), glm::vec2(1e35f))
@@ -117,15 +117,15 @@ RenderableGrid::RenderableGrid(const ghoul::Dictionary& dictionary)
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
 
-    if (dictionary.hasKey(GridColorInfo.identifier)) {
-        _gridColor = dictionary.value<glm::vec3>(GridColorInfo.identifier);
+    if (dictionary.hasKey(ColorInfo.identifier)) {
+        _color = dictionary.value<glm::dvec3>(ColorInfo.identifier);
     }
-    _gridColor.setViewOption(properties::Property::ViewOptions::Color);
-    addProperty(_gridColor);
+    _color.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_color);
 
     if (dictionary.hasKey(SegmentsInfo.identifier)) {
         _segments = static_cast<glm::uvec2>(
-            dictionary.value<glm::vec2>(SegmentsInfo.identifier)
+            dictionary.value<glm::dvec2>(SegmentsInfo.identifier)
         );
     }
     _segments.onChange([&]() { _gridIsDirty = true; });
@@ -139,7 +139,7 @@ RenderableGrid::RenderableGrid(const ghoul::Dictionary& dictionary)
     addProperty(_lineWidth);
 
     if (dictionary.hasKey(SizeInfo.identifier)) {
-        _size = dictionary.value<glm::vec2>(SizeInfo.identifier);
+        _size = dictionary.value<glm::dvec2>(SizeInfo.identifier);
     }
     _size.onChange([&]() { _gridIsDirty = true; });
     addProperty(_size);
@@ -189,8 +189,6 @@ void RenderableGrid::deinitializeGL() {
 void RenderableGrid::render(const RenderData& data, RendererTasks&){
     _gridProgram->activate();
 
-    _gridProgram->setUniform("opacity", _opacity);
-
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
@@ -203,14 +201,19 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&){
         "MVPTransform",
         glm::dmat4(data.camera.projectionMatrix()) * modelViewTransform
     );
+    _gridProgram->setUniform("opacity", _opacity);
+    _gridProgram->setUniform("gridColor", _color);
 
-    _gridProgram->setUniform("gridColor", _gridColor);
-
-    // Changes GL state:
+    // Change GL state:
+#ifndef __APPLE__
     glLineWidth(_lineWidth);
+#else
+    glLineWidth(1.f);
+#endif
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_LINE_SMOOTH);
+    glDepthMask(false);
 
     glBindVertexArray(_vaoID);
     glDrawArrays(_mode, 0, static_cast<GLsizei>(_varray.size()));
@@ -218,9 +221,10 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&){
 
     _gridProgram->deactivate();
 
-    // Restores GL State
+    // Restore GL State
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetLineState();
+    global::renderEngine->openglStateCache().resetDepthState();
 }
 
 void RenderableGrid::update(const UpdateData&) {
@@ -230,13 +234,13 @@ void RenderableGrid::update(const UpdateData&) {
 
     const glm::vec2 halfSize = _size.value() / 2.f;
     const glm::uvec2 nSegments = _segments.value();
-    const glm::vec2 step = _size.value() / static_cast<glm::vec2>(nSegments); 
+    const glm::vec2 step = _size.value() / static_cast<glm::vec2>(nSegments);
 
     const int nLines = (2 * nSegments.x * nSegments.y) + nSegments.x + nSegments.y;
     const int nVertices = 2 * nLines;
     _varray.resize(nVertices);
     // OBS! Could be optimized further by removing duplicate vertices
-       
+
     int nr = 0;
     for (unsigned int i = 0; i < nSegments.x; ++i) {
         for (unsigned int j = 0; j < nSegments.y; ++j) {

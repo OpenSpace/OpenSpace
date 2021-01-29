@@ -33,5 +33,5 @@ asset.meta = {
     Author = "OpenSpace Team",
     URL = "http://www.openspaceproject.com",
     License = "NASA/PDS",
-    Identifiers = "MOLA_HRSC_Sweden"
+    Identifiers = {"MOLA_HRSC_Sweden"}
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -185,7 +185,7 @@ void GuiIswaComponent::render() {
         const std::map<int, std::shared_ptr<CygnetInfo>>& map =
             IswaManager::ref().cygnetInformation();
 
-        for (const std::pair<int, std::shared_ptr<CygnetInfo>>& cygnetInfo : map) {
+        for (const std::pair<const int, std::shared_ptr<CygnetInfo>>& cygnetInfo : map) {
             int id = cygnetInfo.first;
             CygnetInfo& info = *cygnetInfo.second;
 

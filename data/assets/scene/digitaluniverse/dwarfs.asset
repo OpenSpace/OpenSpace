@@ -32,10 +32,10 @@ local object = {
         TextColor = { 0.5, 0.1, 0.2 },
         TextSize = 14.6,
         TextMinSize = 10.0,
-        ScaleFactor = 370,
+        ScaleFactor = 372.1,
         --CorrectionSizeEndDistance = 16.1,
         --CorrectionSizeFactor = 7.75,
-        BillboardMaxSize = 18.0,
+        BillboardMaxSize = 20.0,
         EnablePixelSizeControl = true,
         Unit = "pc"
     },
@@ -72,5 +72,5 @@ asset.meta = {
     Author = "Brian Abbott (AMNH)",
     URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
     License = "AMNH Digital Universe",
-    Identifiers = "Dwarfs"
+    Identifiers = {"Dwarfs"}
 }

@@ -40,7 +40,7 @@ local radio = {
         Type = "RenderableSphericalGrid",
         Enabled = false,
         Opacity = 1.0,
-        GridColor = { 0.3, 0.84, 1.0 },
+        Color = { 0.3, 0.84, 1.0 },
         LineWidth = 2.0
     },
     GUI = {
@@ -66,7 +66,7 @@ local oort = {
         Type = "RenderableSphericalGrid",
         Enabled = false,
         Opacity = 0.8,
-        GridColor = { 0.8, 0.4, 0.4 },
+        Color = { 0.8, 0.4, 0.4 },
         LineWidth = 2.0
     },
     GUI = {
@@ -92,7 +92,7 @@ local ecliptic = {
         Type = "RenderableSphericalGrid",
         Enabled = false,
         Opacity = 1.0,
-        GridColor = { 0.74, 0.26, 0.26 },
+        Color = { 0.74, 0.26, 0.26 },
         LineWidth = 2.0
     },
     GUI = {
@@ -146,7 +146,7 @@ local equatorial = {
         Type = "RenderableSphericalGrid",
         Enabled = false,
         Opacity = 0.8,
-        GridColor = { 0.69, 0.68, 0.29 },
+        Color = { 0.69, 0.68, 0.29 },
         LineWidth = 2.0
     },
     GUI = {
@@ -197,7 +197,7 @@ local galactic = {
         Enabled = false,
         LineWidth = 2.0,
         Opacity = 1.0,
-        GridColor = { 0.0, 0.6, 0.6 }
+        Color = { 0.0, 0.6, 0.6 }
     },
     GUI = {
         Name = "Galactic Sphere",
@@ -548,8 +548,8 @@ asset.meta = {
     Author = "Brian Abbott (AMNH)",
     URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
     License = "AMNH Digital Universe",
-    Identifiers = "RadioSphere,OortSphere,EclipticSphere,EclipticSphereLabels,Equatorial,"
-        .. "EquatorialSphereLabels,GalacticSphere,GalacticSphereLabels,1ldGrid,1lmGrid,"
-        .. "1lyGrid,10lyGrid,100lyGrid,1klyGrid,10klyGrid,100klyGrid,1MlyGrid,10MlyGrid,"
-        .. "100MlyGrid,20GlyGrid"
+    Identifiers = {"RadioSphere", "OortSphere", "EclipticSphere", "EclipticSphereLabels",
+        "Equatorial", "EquatorialSphereLabels", "GalacticSphere", "GalacticSphereLabels",
+        "1ldGrid", "1lmGrid", "1lyGrid", "10lyGrid", "100lyGrid", "1klyGrid", "10klyGrid",
+        "100klyGrid", "1MlyGrid", "10MlyGrid", "100MlyGrid", "20GlyGrid"}
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,11 +34,10 @@ namespace {
 
     template <typename T, typename Func>
     T solveIteration(const Func& function, T x0, const T& err = 0.0, int maxIter = 100) {
-        T x = 0;
         T x2 = x0;
 
         for (int i = 0; i < maxIter; ++i) {
-            x = x2;
+            T x = x2;
             x2 = function(x);
             if (std::abs(x2 - x) < err) {
                 return x2;

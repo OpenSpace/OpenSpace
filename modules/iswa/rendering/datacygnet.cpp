@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -331,7 +331,7 @@ void DataCygnet::subscribeToGroup() {
         "dataOptionsChanged",
         [&](const ghoul::Dictionary& dict) {
             LDEBUG(identifier() + " Event dataOptionsChanged");
-            if (dict.hasKeyAndValue<std::vector<int>>("dataOptions")) {
+            if (dict.hasValue<std::vector<int>>("dataOptions")) {
                 _dataOptions = dict.value<std::vector<int>>("dataOptions");
             }
         }
@@ -342,8 +342,8 @@ void DataCygnet::subscribeToGroup() {
         "normValuesChanged",
         [&](const ghoul::Dictionary& dict) {
             LDEBUG(identifier() + " Event normValuesChanged");
-            if (dict.hasKeyAndValue<glm::vec2>("normValues")) {
-                _normValues = dict.value<glm::vec2>("normValues");
+            if (dict.hasValue<glm::dvec2>("normValues")) {
+                _normValues = dict.value<glm::dvec2>("normValues");
             }
         }
     );
@@ -353,8 +353,8 @@ void DataCygnet::subscribeToGroup() {
         "backgroundValuesChanged",
         [&](const ghoul::Dictionary& dict) {
             LDEBUG(identifier() + " Event backgroundValuesChanged");
-            if (dict.hasKeyAndValue<glm::vec2>("backgroundValues")) {
-                _backgroundValues = dict.value<glm::vec2>("backgroundValues");
+            if (dict.hasValue<glm::dvec2>("backgroundValues")) {
+                _backgroundValues = dict.value<glm::dvec2>("backgroundValues");
             }
         }
     );

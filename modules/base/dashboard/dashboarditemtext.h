@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,17 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/src/rawtile.h>
+#ifndef __OPENSPACE_MODULE_BASE___DASHBOARDITEMTEXT___H__
+#define __OPENSPACE_MODULE_BASE___DASHBOARDITEMTEXT___H__
 
-namespace openspace::globebrowsing {
+#include <openspace/rendering/dashboarditem.h>
 
-RawTile createDefaultTile(TileTextureInitData initData) {
-    RawTile defaultRes;
-    std::byte* data = new std::byte[initData.totalNumBytes];
-    defaultRes.imageData = std::unique_ptr<std::byte[]>(data);
-    std::fill_n(defaultRes.imageData.get(), initData.totalNumBytes, std::byte(0));
-    defaultRes.textureInitData = std::move(initData);
-    return defaultRes;
-}
+#include <openspace/properties/stringproperty.h>
 
-} // namespace openspace::globebrowsing
+namespace openspace {
+
+namespace documentation { struct Documentation; }
+
+class DashboardItemText : public DashboardTextItem {
+public:
+    DashboardItemText(const ghoul::Dictionary& dictionary);
+    virtual ~DashboardItemText() = default;
+
+    void render(glm::vec2& penPosition) override;
+
+    glm::vec2 size() const override;
+
+    static documentation::Documentation Documentation();
+
+private:
+    properties::StringProperty _text;
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_BASE___DASHBOARDITEMTEXT___H__

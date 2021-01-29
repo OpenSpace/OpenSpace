@@ -32,5 +32,5 @@ asset.meta = {
     Author = "OpenSpace Team",
     URL = "http://openspaceproject.com",
     License = "MIT license",
-    Identifiers = "EarthMarker"
+    Identifiers = {"EarthMarker"}
 }

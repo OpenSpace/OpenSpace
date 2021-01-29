@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -130,16 +130,15 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     // I can't come up with a good reason not to do this for all renderables
     registerUpdateRenderBinFromOpacity();
 
-    if (dictionary.hasKeyAndValue<std::string>(KeyTag)) {
+    if (dictionary.hasValue<std::string>(KeyTag)) {
         std::string tagName = dictionary.value<std::string>(KeyTag);
         if (!tagName.empty()) {
             addTag(std::move(tagName));
         }
     }
-    else if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyTag)) {
+    else if (dictionary.hasValue<ghoul::Dictionary>(KeyTag)) {
         const ghoul::Dictionary& tagNames = dictionary.value<ghoul::Dictionary>(KeyTag);
-        const std::vector<std::string>& keys = tagNames.keys();
-        for (const std::string& key : keys) {
+        for (std::string_view key : tagNames.keys()) {
             std::string tagName = tagNames.value<std::string>(key);
             if (!tagName.empty()) {
                 addTag(std::move(tagName));
@@ -152,9 +151,7 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     }
 
     if (dictionary.hasKey(OpacityInfo.identifier)) {
-        _opacity = static_cast<float>(dictionary.value<double>(
-            OpacityInfo.identifier)
-       );
+        _opacity = static_cast<float>(dictionary.value<double>(OpacityInfo.identifier));
     }
 
     addProperty(_enabled);
@@ -188,11 +185,11 @@ void Renderable::update(const UpdateData&) {}
 
 void Renderable::render(const RenderData&, RendererTasks&) {}
 
-void Renderable::setBoundingSphere(float boundingSphere) {
+void Renderable::setBoundingSphere(double boundingSphere) {
     _boundingSphere = boundingSphere;
 }
 
-float Renderable::boundingSphere() const {
+double Renderable::boundingSphere() const {
     return _boundingSphere;
 }
 

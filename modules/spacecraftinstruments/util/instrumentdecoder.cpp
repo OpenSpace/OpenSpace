@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,7 +38,7 @@ namespace {
 namespace openspace {
 
 InstrumentDecoder::InstrumentDecoder(const ghoul::Dictionary& dictionary) {
-    if (dictionary.hasKeyAndValue<std::string>(KeyDetector)) {
+    if (dictionary.hasValue<std::string>(KeyDetector)) {
         _type = dictionary.value<std::string>(KeyDetector);
         std::for_each(
             _type.begin(),
@@ -51,14 +51,14 @@ InstrumentDecoder::InstrumentDecoder(const ghoul::Dictionary& dictionary) {
         throw ghoul::RuntimeError("Instrument has not provided detector type");
     }
 
-    if (dictionary.hasKeyAndValue<std::string>(KeyStopCommand) && _type == "SCANNER"){
-        dictionary.getValue(KeyStopCommand, _stopCommand);
+    if (dictionary.hasValue<std::string>(KeyStopCommand) && _type == "SCANNER") {
+        _stopCommand = dictionary.value<std::string>(KeyStopCommand);
     }
     else {
         LWARNING("Scanner must provide stop command, please check mod file.");
     }
 
-    if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeySpice)) {
+    if (dictionary.hasValue<ghoul::Dictionary>(KeySpice)) {
         ghoul::Dictionary spiceDictionary = dictionary.value<ghoul::Dictionary>(KeySpice);
 
         _spiceIDs.resize(spiceDictionary.size());

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,8 +32,7 @@ uniform int sides;
 
 const float PI = 3.1415926;
 
-void main()
-{
+void main() {
     // for (int i = 0; i <= sides; i++) {
     //     // Angle between each side in radians
     //     float ang = PI * 2.0 / float(sides) * i;

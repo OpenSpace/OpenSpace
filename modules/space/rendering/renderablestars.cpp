@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -73,7 +73,7 @@ namespace {
 
     constexpr double PARSEC = 0.308567756E17;
 
-    struct CommonDataLayout {
+    struct ColorVBOLayout {
         std::array<float, 3> position;
         float value;
         float luminance;
@@ -81,19 +81,35 @@ namespace {
         float apparentMagnitude;
     };
 
-    struct ColorVBOLayout : public CommonDataLayout {};
+    struct VelocityVBOLayout {
+        std::array<float, 3> position;
+        float value;
+        float luminance;
+        float absoluteMagnitude;
+        float apparentMagnitude;
 
-    struct VelocityVBOLayout : public CommonDataLayout {
         float vx; // v_x
         float vy; // v_y
         float vz; // v_z
     };
 
-    struct SpeedVBOLayout : public CommonDataLayout {
+    struct SpeedVBOLayout {
+        std::array<float, 3> position;
+        float value;
+        float luminance;
+        float absoluteMagnitude;
+        float apparentMagnitude;
+
         float speed;
     };
 
-    struct OtherDataLayout : public CommonDataLayout {};
+    struct OtherDataLayout {
+        std::array<float, 3> position;
+        float value;
+        float luminance;
+        float absoluteMagnitude;
+        float apparentMagnitude;
+    };
 
     constexpr openspace::properties::Property::PropertyInfo SpeckFileInfo = {
         "SpeckFile",
@@ -678,7 +694,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     addPropertySubOwner(_moffatMethodOwner);
 
     if (dictionary.hasKey(FadeInDistancesInfo.identifier)) {
-        glm::vec2 v = dictionary.value<glm::vec2>(FadeInDistancesInfo.identifier);
+        glm::vec2 v = dictionary.value<glm::dvec2>(FadeInDistancesInfo.identifier);
         _fadeInDistance = v;
         _disableFadeInDistance = false;
         addProperty(_fadeInDistance);
@@ -789,7 +805,7 @@ void RenderableStars::initializeGL() {
     );
 
     //loadShapeTexture();
-
+    loadPSFTexture();
     renderPSFToTexture();
 }
 
@@ -808,10 +824,43 @@ void RenderableStars::deinitializeGL() {
     }
 }
 
+void RenderableStars::loadPSFTexture() {
+    _pointSpreadFunctionTexture = nullptr;
+    if (!_pointSpreadFunctionTexturePath.value().empty() &&
+        std::filesystem::exists(_pointSpreadFunctionTexturePath.value()))
+    {
+        _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
+            absPath(_pointSpreadFunctionTexturePath)
+        );
+
+        if (_pointSpreadFunctionTexture) {
+            LDEBUG(fmt::format(
+                "Loaded texture from '{}'",
+                absPath(_pointSpreadFunctionTexturePath)
+            ));
+            _pointSpreadFunctionTexture->uploadTexture();
+        }
+        _pointSpreadFunctionTexture->setFilter(
+            ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
+        );
+
+        _pointSpreadFunctionFile = std::make_unique<ghoul::filesystem::File>(
+            _pointSpreadFunctionTexturePath
+            );
+        _pointSpreadFunctionFile->setCallback(
+            [&](const ghoul::filesystem::File&) {
+            _pointSpreadFunctionTextureIsDirty = true;
+        }
+        );
+    }
+    _pointSpreadFunctionTextureIsDirty = false;
+
+}
+
 void RenderableStars::renderPSFToTexture() {
     // Saves current FBO first
     GLint defaultFBO;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
+    defaultFBO = global::renderEngine->openglStateCache().defaultFramebuffer();
 
 //    GLint m_viewport[4];
 //    global::renderEngine.openglStateCache().viewPort(m_viewport);
@@ -924,24 +973,6 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
         return;
     }
 
-    // Saving current OpenGL state
-    GLenum blendEquationRGB;
-    GLenum blendEquationAlpha;
-    GLenum blendDestAlpha;
-    GLenum blendDestRGB;
-    GLenum blendSrcAlpha;
-    GLenum blendSrcRGB;
-    GLboolean depthMask;
-
-    glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
-    glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
-    glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
-    glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
-    glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
-    glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
-
-    glGetBooleanv(GL_DEPTH_WRITEMASK, &depthMask);
-
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glDepthMask(false);
 
@@ -958,7 +989,7 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     glm::dmat4 modelMatrix =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         glm::dmat4(data.modelTransform.rotation) *
-        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
+        glm::scale(glm::dmat4(1.0), data.modelTransform.scale);
 
     glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
 
@@ -1044,13 +1075,9 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     glBindVertexArray(0);
     _program->deactivate();
 
-    glDepthMask(true);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
     // Restores OpenGL blending state
-    glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
-    glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
-    glDepthMask(depthMask);
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
 }
 
 void RenderableStars::update(const UpdateData&) {
@@ -1214,35 +1241,7 @@ void RenderableStars::update(const UpdateData&) {
 
     if (_pointSpreadFunctionTextureIsDirty) {
         LDEBUG("Reloading Point Spread Function texture");
-        _pointSpreadFunctionTexture = nullptr;
-        if (!_pointSpreadFunctionTexturePath.value().empty() &&
-            std::filesystem::exists(_pointSpreadFunctionTexturePath.value()))
-        {
-            _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_pointSpreadFunctionTexturePath)
-            );
-
-            if (_pointSpreadFunctionTexture) {
-                LDEBUG(fmt::format(
-                    "Loaded texture from '{}'",
-                    absPath(_pointSpreadFunctionTexturePath)
-                ));
-                _pointSpreadFunctionTexture->uploadTexture();
-            }
-            _pointSpreadFunctionTexture->setFilter(
-                ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
-            );
-
-            _pointSpreadFunctionFile = std::make_unique<ghoul::filesystem::File>(
-                _pointSpreadFunctionTexturePath
-            );
-            _pointSpreadFunctionFile->setCallback(
-                [&](const ghoul::filesystem::File&) {
-                    _pointSpreadFunctionTextureIsDirty = true;
-                }
-            );
-        }
-        _pointSpreadFunctionTextureIsDirty = false;
+        loadPSFTexture();
     }
 
     if (_colorTextureIsDirty) {
