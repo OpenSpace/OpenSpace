@@ -313,9 +313,15 @@ namespace {
         // [[codegen::verbatim(ColorTextureInfo.description)]]
         std::string colorMap;
 
+        enum class ColorOption {
+            Color,
+            Velocity,
+            Speed,
+            OtherData [[codegen::key("Other Data")]],
+            FixedColor [[codegen::key("Fixed Color")]]
+        };
         // [[codegen::verbatim(ColorOptionInfo.description)]]
-        std::optional<std::string> colorOption
-            [[codegen::inlist("Color", "Velocity", "Speed", "Other Data", "Fixed Color")]];
+        std::optional<ColorOption> colorOption;
 
         // [[codegen::verbatim(OtherDataOptionInfo.description)]]
         std::optional<std::string> otherData;
@@ -456,20 +462,22 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         { ColorOption::FixedColor, "Fixed Color" }
     });
     if (p.colorOption.has_value()) {
-        if (*p.colorOption == "Color") {
-            _colorOption = ColorOption::Color;
-        }
-        else if (*p.colorOption == "Velocity") {
-            _colorOption = ColorOption::Velocity;
-        }
-        else if (*p.colorOption == "Speed") {
-            _colorOption = ColorOption::Speed;
-        }
-        else if (*p.colorOption == "OtherData") {
-            _colorOption = ColorOption::OtherData;
-        }
-        else {
-            _colorOption = ColorOption::FixedColor;
+        switch (*p.colorOption) {
+            case Parameters::ColorOption::Color:
+                _colorOption = ColorOption::Color;
+                break;
+            case Parameters::ColorOption::Velocity:
+                _colorOption = ColorOption::Velocity;
+                break;
+            case Parameters::ColorOption::Speed:
+                _colorOption = ColorOption::Speed;
+                break;
+            case Parameters::ColorOption::OtherData:
+                _colorOption = ColorOption::OtherData;
+                break;
+            case Parameters::ColorOption::FixedColor:
+                _colorOption = ColorOption::FixedColor;
+                break;
         }
     }
     _colorOption.onChange([&] { _dataIsDirty = true; });

@@ -161,10 +161,10 @@ namespace {
     }
 
     struct [[codegen::Dictionary(GlobeBrowsingModule)]] Parameters {
-        std::optional<bool> cacheEnabled [[codegen::key(WMSCacheEnabled)]];
+        std::optional<bool> cacheEnabled [[codegen::key("WMSCacheEnabled")]];
         std::optional<bool> offlineMode;
-        std::optional<std::string> cacheLocation [[codegen::key(WMSCacheLocation)]];
-        std::optional<int> wmsCacheSize [[codegen::key(WMSCacheSize)]];
+        std::optional<std::string> cacheLocation [[codegen::key("WMSCacheLocation")]];
+        std::optional<int> wmsCacheSize [[codegen::key("WMSCacheSize")]];
         std::optional<int> tileCacheSize;
         std::optional<bool> noWarning;
     };

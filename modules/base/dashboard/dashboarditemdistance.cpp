@@ -108,7 +108,7 @@ namespace {
     struct [[codegen::Dictionary(DashboardItemDistance)]] Parameters {
         enum class TypeInfo {
             Node,
-            NodeSurface [[codegen::key(Node Surface)]],
+            NodeSurface [[codegen::key("Node Surface")]],
             Focus,
             Camera
         };

@@ -204,7 +204,7 @@ namespace {
                 glm::dvec3 scattering;
             };
             Coefficients coefficients;
-            float heightScale [[codegen::key(H_R)]];
+            float heightScale [[codegen::key("H_R")]];
         };
         Rayleigh rayleigh;
 
@@ -213,7 +213,7 @@ namespace {
                 std::optional<glm::vec3> extinction;
             };
             std::optional<Coefficients> coefficients;
-            std::optional<float> heightScale [[codegen::key(H_O)]];
+            std::optional<float> heightScale [[codegen::key("H_O")]];
         };
         std::optional<Ozone> ozone;
 
@@ -223,8 +223,8 @@ namespace {
                 glm::dvec3 extinction;
             };
             Coefficients coefficients;
-            float heightScale [[codegen::key(H_M)]];
-            float phaseConstant [[codegen::key(G), codegen::inrange(-1.0, 1.0)]];
+            float heightScale [[codegen::key("H_M")]];
+            float phaseConstant [[codegen::key("G"), codegen::inrange(-1.0, 1.0)]];
         };
         Mie mie;
 

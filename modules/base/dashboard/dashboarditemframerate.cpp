@@ -136,10 +136,17 @@ namespace {
     }
 
     struct [[codegen::Dictionary(DashboardItemFramerate)]] Parameters {
+        enum class Type {
+            DtAvg [[codegen::key("Average Deltatime")]],
+            DtExtremes [[codegen::key("Deltatime extremes")]],
+            DtStandardDeviation [[codegen::key("Deltatime standard deviation")]],
+            DtCoefficientOfVariation [[codegen::key("Deltatime coefficient of variation")]],
+            FPS [[codegen::key("Frames per second")]],
+            FPSAvg [[codegen::key("Average frames per second")]]
+        };
+
         // [[codegen::verbatim(FrametimeInfo.description)]]
-        std::optional<std::string> frametimeType [[codegen::inlist(ValueDtAvg,
-            ValueDtExtremes, ValueDtStandardDeviation, ValueDtCov, ValueFps, ValueFpsAvg,
-            ValueNone)]];
+        std::optional<Type> frametimeType;
     };
 #include "dashboarditemframerate_codegen.cpp"
 
@@ -177,28 +184,25 @@ DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictiona
     });
 
     if (p.frametimeType.has_value()) {
-        if (*p.frametimeType == ValueDtAvg) {
-            _frametimeType = static_cast<int>(FrametimeType::DtTimeAvg);
-        }
-        else if (*p.frametimeType == ValueDtExtremes) {
-            _frametimeType = static_cast<int>(FrametimeType::DtTimeExtremes);
-        }
-        else if (*p.frametimeType == ValueDtStandardDeviation) {
-            _frametimeType =
-                static_cast<int>(FrametimeType::DtStandardDeviation);
-        }
-        else if (*p.frametimeType == ValueDtCov) {
-            _frametimeType =
-                static_cast<int>(FrametimeType::DtCoefficientOfVariation);
-        }
-        else if (*p.frametimeType == ValueFps) {
-            _frametimeType = static_cast<int>(FrametimeType::FPS);
-        }
-        else if (*p.frametimeType == ValueFpsAvg) {
-            _frametimeType = static_cast<int>(FrametimeType::FPSAvg);
-        }
-        else {
-            _frametimeType = static_cast<int>(FrametimeType::None);
+        switch (*p.frametimeType) {
+            case Parameters::Type::DtAvg:
+                _frametimeType = static_cast<int>(FrametimeType::DtTimeAvg);
+                break;
+            case Parameters::Type::DtExtremes:
+                _frametimeType = static_cast<int>(FrametimeType::DtTimeExtremes);
+                break;
+            case Parameters::Type::DtStandardDeviation:
+                _frametimeType = static_cast<int>(FrametimeType::DtStandardDeviation);
+                break;
+            case Parameters::Type::DtCoefficientOfVariation:
+                _frametimeType = static_cast<int>(FrametimeType::DtCoefficientOfVariation);
+                break;
+            case Parameters::Type::FPS:
+                _frametimeType = static_cast<int>(FrametimeType::FPS);
+                break;
+            case Parameters::Type::FPSAvg:
+                _frametimeType = static_cast<int>(FrametimeType::FPSAvg);
+                break;
         }
     }
     else {

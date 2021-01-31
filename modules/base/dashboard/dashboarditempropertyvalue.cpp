@@ -51,7 +51,7 @@ namespace {
 
     struct [[codegen::Dictionary(DashboardItemPropertyValue)]] Parameters {
         // [[codegen::verbatim(PropertyUriInfo.description)]]
-        std::optional<std::string> uri [[codegen::key(URI)]];
+        std::optional<std::string> uri [[codegen::key("URI")]];
 
         // [[codegen::verbatim(DisplayStringInfo.description)]]
         std::optional<std::string> displayString;

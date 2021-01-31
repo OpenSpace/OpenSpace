@@ -44,7 +44,7 @@ namespace {
 
     struct [[codegen::Dictionary(RenderablePlaneImageOnline)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
-        std::string url [[codegen::key(URL)]];
+        std::string url [[codegen::key("URL")]];
     };
 #include "renderableplaneimageonline_codegen.cpp"
 } // namespace

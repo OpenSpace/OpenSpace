@@ -143,8 +143,14 @@ namespace {
 
         // This used to be   new ReferencingVerifier("globebrowsing_layeradjustment")
         struct LayerAdjustment {
+            enum class Type {
+                None,
+                ChromaKey,
+                TransferFunction
+            };
+
             // Specifies the type of the adjustment that is applied
-            std::optional<std::string> type [[codegen::inlist("None", "ChromaKey", "TransferFunction")]];
+            std::optional<Type> type;
 
             // Specifies the chroma key used when selecting 'ChromaKey' for the 'Type'
             std::optional<glm::dvec3> chromaKeyColor;
@@ -155,9 +161,16 @@ namespace {
         };
         std::optional<LayerAdjustment> adjustment;
 
+        enum class BlendMode {
+            Normal,
+            Multiply,
+            Add,
+            Subtract,
+            Color
+        };
         // Sets the blend mode of this layer to determine how it interacts with other
         // layers on top of this
-        std::optional<std::string> blendMode [[codegen::inlist("Normal", "Multiply", "Add", "Subtract", "Color")]];
+        std::optional<BlendMode> blendMode;
 
         // If the primary layer creation fails, this layer is used as a fallback
         std::optional<std::monostate>
@@ -248,8 +261,23 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
 
     // Initialize blend mode
     if (p.blendMode.has_value()) {
-        using namespace layergroupid;
-        _blendModeOption = static_cast<int>(ghoul::from_string<BlendModeID>(*p.blendMode));
+        switch (*p.blendMode) {
+            case Parameters::BlendMode::Normal:
+                _blendModeOption = static_cast<int>(layergroupid::BlendModeID::Normal);
+                break;
+            case Parameters::BlendMode::Multiply:
+                _blendModeOption = static_cast<int>(layergroupid::BlendModeID::Multiply);
+                break;
+            case Parameters::BlendMode::Add:
+                _blendModeOption = static_cast<int>(layergroupid::BlendModeID::Add);
+                break;
+            case Parameters::BlendMode::Subtract:
+                _blendModeOption = static_cast<int>(layergroupid::BlendModeID::Subtract);
+                break;
+            case Parameters::BlendMode::Color:
+                _blendModeOption = static_cast<int>(layergroupid::BlendModeID::Color);
+                break;
+        }
     }
     else {
         _blendModeOption = static_cast<int>(layergroupid::BlendModeID::Normal);

@@ -188,8 +188,8 @@ namespace {
         std::optional<BlendMode> blendMode;
 
         enum class Orientation {
-            ViewDirection [[codegen::key(Camera View Direction)]],
-            PositionNormal [[codegen::key(Camera Position Normal)]]
+            ViewDirection [[codegen::key("Camera View Direction")]],
+            PositionNormal [[codegen::key("Camera Position Normal")]]
         };
 
         // [[codegen::verbatim(LabelOrientationOptionInfo.description)]]
@@ -223,18 +223,18 @@ namespace {
         std::optional<glm::dmat4x4> transformationMatrix;
 
         enum class Unit {
-            Meter [[codegen::key(m)]],
-            Kilometer [[codegen::key(Km)]],
-            Megameter [[codegen::key(Mm)]],
-            Gigameter [[codegen::key(Gm)]],
-            Terameter [[codegen::key(Tm)]],
-            Petameter [[codegen::key(Pm)]],
-            AstronomicalUnit [[codegen::key(au)]],
-            Parsec [[codegen::key(pc)]],
-            KiloParsec [[codegen::key(Kpc)]],
-            MegaParsec [[codgen::key(Mpc)]],
-            GigaParsec [[codegen::key(Gpc)]],
-            GigaLightyear [[codegen::key(Gly)]]
+            Meter [[codegen::key("m")]],
+            Kilometer [[codegen::key("Km")]],
+            Megameter [[codegen::key("Mm")]],
+            Gigameter [[codegen::key("Gm")]],
+            Terameter [[codegen::key("Tm")]],
+            Petameter [[codegen::key("Pm")]],
+            AstronomicalUnit [[codegen::key("au")]],
+            Parsec [[codegen::key("pc")]],
+            KiloParsec [[codegen::key("Kpc")]],
+            MegaParsec [[codgen::key("Mpc")]],
+            GigaParsec [[codegen::key("Gpc")]],
+            GigaLightyear [[codegen::key("Gly")]]
         };
 
         // [[codegen::verbatim(FadeStartUnitOptionInfo.description)]]

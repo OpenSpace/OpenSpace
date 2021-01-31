@@ -102,13 +102,13 @@ namespace {
         glm::dvec3 color;
 
         enum class Unit {
-            Meter [[codegen::key(m)]],
-            Kilometer [[codegen::key(Km)]],
-            Parsec [[codegen::key(pc)]],
-            Kiloparsec [[codegen::key(Kpc)]],
-            Megaparsec [[codegen::key(Mpc)]],
-            Gigaparsec [[codegen::key(Gpc)]],
-            Gigalightyears [[codegen::key(Gly)]]
+            Meter [[codegen::key("m")]],
+            Kilometer [[codegen::key("Km")]],
+            Parsec [[codegen::key("pc")]],
+            Kiloparsec [[codegen::key("Kpc")]],
+            Megaparsec [[codegen::key("Mpc")]],
+            Gigaparsec [[codegen::key("Gpc")]],
+            Gigalightyears [[codegen::key("Gly")]]
         };
         std::optional<Unit> unit;
 

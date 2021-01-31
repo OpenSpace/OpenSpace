@@ -76,9 +76,13 @@ namespace {
 
         // [[codegen::verbatim(SizeInfo.description)]]
         float size;
-
+        
+        enum class BlendMode {
+            Normal,
+            Additive
+        };
         // [[codegen::verbatim(BlendModeInfo.description)]]
-        std::optional<std::string> blendMode [[codegen::inlist("Normal", "Additive")]];
+        std::optional<BlendMode> blendMode;
     };
 #include "renderableplane_codegen.cpp"
 } // namespace
@@ -129,10 +133,10 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     });
 
     if (p.blendMode.has_value()) {
-        if (*p.blendMode == "Normal") {
+        if (*p.blendMode == Parameters::BlendMode::Normal) {
             _blendMode = BlendModeNormal;
         }
-        else if (*p.blendMode == "Additive") {
+        else if (*p.blendMode == Parameters::BlendMode::Additive) {
             _blendMode = BlendModeAdditive;
         }
     }

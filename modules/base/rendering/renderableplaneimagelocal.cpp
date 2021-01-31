@@ -67,7 +67,7 @@ namespace {
         };
 
         // [[codegen::verbatim(RenderableTypeInfo.description)]]
-        std::optional<RenderType> renderType [[codegen::key(RenderableType)]];
+        std::optional<RenderType> renderType [[codegen::key("RenderableType")]];
 
         // If this value is set to 'true', the image for this plane will not be loaded at
         // startup but rather when image is shown for the first time. Additionally, if the

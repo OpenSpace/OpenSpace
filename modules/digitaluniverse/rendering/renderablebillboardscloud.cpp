@@ -287,20 +287,20 @@ namespace {
         std::optional<bool> drawElements;
 
         enum class RenderOption {
-            ViewDirection [[codegen::key(Camera View Direction)]],
-            PositionNormal [[codegen::key(Camera Position Normal)]]
+            ViewDirection [[codegen::key("Camera View Direction")]],
+            PositionNormal [[codegen::key("Camera Position Normal")]]
         };
         // [[codegen::verbatim(RenderOptionInfo.description)]]
         std::optional<RenderOption> renderOption;
 
         enum class Unit {
-            Meter [[codegen::key(m)]],
-            Kilometer [[codegen::key(Km)]],
-            Parsec [[codegen::key(pc)]],
-            Kiloparsec [[codegen::key(Kpc)]],
-            Megaparsec [[codegen::key(Mpc)]],
-            Gigaparsec [[codegen::key(Gpc)]],
-            GigalightYears [[codegen::key(Gly)]]
+            Meter [[codegen::key("m")]],
+            Kilometer [[codegen::key("Km")]],
+            Parsec [[codegen::key("pc")]],
+            Kiloparsec [[codegen::key("Kpc")]],
+            Megaparsec [[codegen::key("Mpc")]],
+            Gigaparsec [[codegen::key("Gpc")]],
+            GigalightYears [[codegen::key("Gly")]]
         };
         std::optional<Unit> unit;
 

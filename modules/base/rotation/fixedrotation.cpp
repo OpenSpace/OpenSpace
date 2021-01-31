@@ -201,7 +201,7 @@ namespace {
         std::optional<bool> xAxisOrthogonal;
 
         // [[codegen::verbatim(XAxisInvertObjectInfo.description)]]
-        std::optional<bool> xAxisInvert [[codegen::key(xAxis - InvertObject)]];
+        std::optional<bool> xAxisInvert [[codegen::key("xAxis - InvertObject")]];
 
         // This value specifies the direction of the new Y axis. If this value is not
         // specified, it will be computed by completing a right handed coordinate system
@@ -214,7 +214,7 @@ namespace {
         std::optional<bool> yAxisOrthogonal;
 
         // [[codegen::verbatim(YAxisInvertObjectInfo.description)]]
-        std::optional<bool> yAxisInvert [[codegen::key(yAxis - InvertObject)]];
+        std::optional<bool> yAxisInvert [[codegen::key("yAxis - InvertObject")]];
 
         // This value specifies the direction of the new Z axis. If this value is not
         // specified, it will be computed by completing a right handed coordinate system
@@ -227,7 +227,7 @@ namespace {
         std::optional<bool> zAxisOrthogonal;
 
         // [[codegen::verbatim(ZAxisInvertObjectInfo.description)]]
-        std::optional<bool> zAxisInvert [[codegen::key(zAxis - InvertObject)]];
+        std::optional<bool> zAxisInvert [[codegen::key("zAxis - InvertObject")]];
 
         // [[codegen::verbatim(AttachedInfo.description)]]
         std::optional<std::string> attached;

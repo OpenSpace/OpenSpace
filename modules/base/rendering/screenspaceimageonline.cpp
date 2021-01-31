@@ -50,7 +50,7 @@ namespace {
         std::optional<std::string> name;
 
         // [[codegen::verbatim(TextureInfo.description)]]
-        std::optional<std::string> url [[codegen::key(URL)]];
+        std::optional<std::string> url [[codegen::key("URL")]];
     };
 #include "screenspaceimageonline_codegen.cpp"
 } // namespace
