@@ -98,11 +98,6 @@ documentation::Documentation DashboardItemInstruments::Documentation() {
         "spacecraftinstruments_dashboarditem_instuments",
         {
             {
-                "Type",
-                new StringEqualVerifier("DashboardItemInstruments"),
-                Optional::No
-            },
-            {
                 FontNameInfo.identifier,
                 new StringVerifier,
                 Optional::Yes,

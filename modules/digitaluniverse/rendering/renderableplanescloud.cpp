@@ -191,11 +191,6 @@ documentation::Documentation RenderablePlanesCloud::Documentation() {
         "digitaluniverse_RenderablePlanesCloud",
         {
             {
-                "Type",
-                new StringEqualVerifier("RenderablePlanesCloud"),
-                Optional::No
-            },
-            {
                 KeyFile,
                 new StringVerifier,
                 Optional::Yes,

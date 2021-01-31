@@ -116,12 +116,6 @@ documentation::Documentation RenderableShadowCylinder::Documentation() {
         "newhorizons_renderable_shadowcylinder",
         {
             {
-                "Type",
-                new StringEqualVerifier("RenderableShadowCylinder"),
-                Optional::No,
-                ""
-            },
-            {
                 NumberPointsInfo.identifier,
                 new IntVerifier,
                 Optional::Yes,

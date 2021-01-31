@@ -150,11 +150,6 @@ documentation::Documentation RenderableDUMeshes::Documentation() {
         "digitaluniverse_renderabledumeshes",
         {
             {
-                "Type",
-                new StringEqualVerifier("RenderableDUMeshes"),
-                Optional::No
-            },
-            {
                 KeyFile,
                 new StringVerifier,
                 Optional::No,

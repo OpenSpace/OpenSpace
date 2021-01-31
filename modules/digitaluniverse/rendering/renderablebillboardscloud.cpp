@@ -281,11 +281,6 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
         "digitaluniverse_RenderableBillboardsCloud",
         {
             {
-                "Type",
-                new StringEqualVerifier("RenderableBillboardsCloud"),
-                Optional::No
-            },
-            {
                 KeyFile,
                 new StringVerifier,
                 Optional::Yes,

@@ -43,11 +43,6 @@ documentation::Documentation TimelineRotation::Documentation() {
         "base_transform_rotation_keyframe",
         {
             {
-                KeyType,
-                new StringEqualVerifier("TimelineRotation"),
-                Optional::No
-            },
-            {
                 KeyKeyframes,
                 new TableVerifier({
                     { "*", new TableVerifier(), Optional::No, "Any translation object" }

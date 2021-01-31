@@ -43,11 +43,6 @@ documentation::Documentation TimelineTranslation::Documentation() {
         "base_transform_translation_keyframe",
         {
             {
-                KeyType,
-                new StringEqualVerifier("TimelineTranslation"),
-                Optional::No
-            },
-            {
                 KeyKeyframes,
                 new TableVerifier({
                     { "*", new TableVerifier(), Optional::No, "Any translation object" }

@@ -467,12 +467,6 @@ documentation::Documentation RenderableGlobe::Documentation() {
         "globebrowsing_renderableglobe",
         {
             {
-                "Type",
-                new StringEqualVerifier("RenderableGlobe"),
-                Optional::No,
-                ""
-            },
-            {
                 KeyRadii,
                 new OrVerifier({ new DoubleVector3Verifier, new DoubleVerifier }),
                 Optional::Yes,

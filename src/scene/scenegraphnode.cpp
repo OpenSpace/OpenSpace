@@ -35,6 +35,7 @@
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include "scenegraphnode_doc.inl"
@@ -266,13 +267,7 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         //renderableDictionary.setValue(KeyIdentifier, result->_identifier);
 
         result->_renderable = Renderable::createFromDictionary(renderableDictionary);
-        if (result->_renderable == nullptr) {
-            LERROR(fmt::format(
-                "Failed to create renderable for SceneGraphNode '{}'",
-                result->identifier()
-            ));
-            return nullptr;
-        }
+        ghoul_assert(result->_renderable, "Failed to create Renderable");
         result->addPropertySubOwner(result->_renderable.get());
         LDEBUG(fmt::format(
             "Successfully created renderable for '{}'", result->identifier()

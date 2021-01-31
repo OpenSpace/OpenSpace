@@ -102,11 +102,6 @@ documentation::Documentation RenderablePoints::Documentation() {
         "digitaluniverse_renderablepoints",
         {
             {
-                "Type",
-                new StringEqualVerifier("RenderablePoints"),
-                Optional::No
-            },
-            {
                 KeyFile,
                 new StringVerifier,
                 Optional::No,

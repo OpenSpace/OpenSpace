@@ -315,12 +315,6 @@ documentation::Documentation ConvertRecFormatTask::documentation() {
         "convert_format_task",
         {
             {
-                "Type",
-                new StringEqualVerifier("ConvertRecFormatTask"),
-                Optional::No,
-                "The type of this task",
-            },
-            {
                 KeyInFilePath,
                 new StringAnnotationVerifier("A valid filename to convert"),
                 Optional::No,

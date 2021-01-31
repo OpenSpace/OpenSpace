@@ -75,15 +75,15 @@ documentation::Documentation Renderable::Documentation() {
         "Renderable",
         "renderable",
         {
-            {
-                KeyType,
-                new StringAnnotationVerifier("A valid Renderable created by a factory"),
-                Optional::No,
-                "This key specifies the type of Renderable that gets created. It has to "
-                "be one of the valid Renderables that are available for creation (see "
-                "the FactoryDocumentation for a list of possible Renderables), which "
-                "depends on the configration of the application"
-            },
+            //{
+            //    KeyType,
+            //    new StringAnnotationVerifier("A valid Renderable created by a factory"),
+            //    Optional::No,
+            //    "This key specifies the type of Renderable that gets created. It has to "
+            //    "be one of the valid Renderables that are available for creation (see "
+            //    "the FactoryDocumentation for a list of possible Renderables), which "
+            //    "depends on the configration of the application"
+            //},
             {
                 EnabledInfo.identifier,
                 new BoolVerifier,
@@ -101,11 +101,18 @@ documentation::Documentation Renderable::Documentation() {
 }
 
 ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
-                                                      const ghoul::Dictionary& dictionary)
+                                                             ghoul::Dictionary dictionary)
 {
+    if (!dictionary.hasKey(KeyType)) {
+        throw ghoul::RuntimeError("Tried to create Renderable but no 'Type' was found");
+    }
+
+    // This should be done in the constructor instead with noexhaustive
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "Renderable");
 
     std::string renderableType = dictionary.value<std::string>(KeyType);
+    // Now we no longer need the type variable
+    dictionary.removeValue(KeyType);
 
     auto factory = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(factory, "Renderable factory did not exist");
