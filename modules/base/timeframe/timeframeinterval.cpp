@@ -120,10 +120,10 @@ TimeFrameInterval::TimeFrameInterval(const ghoul::Dictionary& dictionary)
 
     if (p.end.has_value()) {
         if (std::holds_alternative<double>(*p.end)) {
-            _start = std::get<double>(*p.end);
+            _end = std::get<double>(*p.end);
         }
         else {
-            _start = SpiceManager::ref().ephemerisTimeFromDate(
+            _end = SpiceManager::ref().ephemerisTimeFromDate(
                 std::get<std::string>(*p.end)
             );
         }

@@ -89,7 +89,7 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
     _destinationFrame = p.destinationFrame;
 
     if (p.kernels.has_value()) {
-        if (std::holds_alternative<std::vector<std::string>>(*p.kernels)) {
+        if (std::holds_alternative<std::string>(*p.kernels)) {
             SpiceManager::ref().loadKernel(std::get<std::string>(*p.kernels));
         }
         else {

@@ -61,8 +61,8 @@ namespace {
         enum class RenderType {
             Background,
             Opaque,
-            PreDeferredTransparent,
-            PostDeferredTransparent,
+            PreDeferredTransparency,
+            PostDeferredTransparency,
             Overlay
         };
 
@@ -110,10 +110,10 @@ RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& di
             case Parameters::RenderType::Opaque:
                 setRenderBin(Renderable::RenderBin::Opaque);
                 break;
-            case Parameters::RenderType::PreDeferredTransparent:
+            case Parameters::RenderType::PreDeferredTransparency:
                 setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
                 break;
-            case Parameters::RenderType::PostDeferredTransparent:
+            case Parameters::RenderType::PostDeferredTransparency:
                 setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
                 break;
             case Parameters::RenderType::Overlay:
