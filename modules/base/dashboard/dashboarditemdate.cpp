@@ -77,14 +77,10 @@ DashboardItemDate::DashboardItemDate(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    if (p.formatString.has_value()) {
-        _formatString = *p.formatString;
-    }
+    _formatString = p.formatString.value_or(_formatString);
     addProperty(_formatString);
 
-    if (p.timeFormat.has_value()) {
-        _timeFormat = *p.timeFormat;
-    }
+    _timeFormat = p.timeFormat.value_or(_timeFormat);
     addProperty(_timeFormat);
 }
 

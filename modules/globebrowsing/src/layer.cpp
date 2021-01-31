@@ -95,8 +95,7 @@ namespace {
         openspace::properties::Property::Visibility::Hidden
     };
 
-    struct [[codegen::Dictionary(Layer), codegen::namespace(globebrowsing),
-        codegen::noexhaustive()]] Parameters {
+    struct [[codegen::Dictionary(Layer), codegen::noexhaustive()]] Parameters {
         // The unique identifier for this layer. May not contain '.' or spaces
         std::string identifier;
 

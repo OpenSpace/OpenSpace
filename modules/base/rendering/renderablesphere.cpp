@@ -237,18 +237,18 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
 
     bool hasGivenFadeOut = p.fadeOutThreshold.has_value();
     if (hasGivenFadeOut) {
-        _fadeOutThreshold = p.fadeOutThreshold.value();
+        _fadeOutThreshold = *p.fadeOutThreshold;
         addProperty(_fadeOutThreshold);
     }
 
     bool hasGivenFadeIn = p.fadeInThreshold.has_value();
     if (hasGivenFadeIn) {
-        _fadeInThreshold = p.fadeInThreshold.value_or(_fadeInThreshold);
+        _fadeInThreshold = *p.fadeInThreshold;
         addProperty(_fadeInThreshold);
     }
 
     if (hasGivenFadeIn || hasGivenFadeOut) {
-        _disableFadeInDistance.set(false);
+        _disableFadeInDistance = false;
         addProperty(_disableFadeInDistance);
     }
 
