@@ -1540,6 +1540,17 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
                 "Removes a tag (second argument) from a scene graph node (first argument)"
             },
             {
+                "createPixelImage",
+                &luascriptfunctions::createPixelImage,
+                {},
+                "string, vec3",
+                "Creates a 1 pixel image with a certain color in the cache folder and "
+                "returns the path to the file. If a cached file with the given name "
+                "already exists, the path to that file is returned. The first argument "
+                "is the name of the file, without extension. The second is the RGB "
+                "color, given as {r, g, b} with values between 0 and 1."
+            },
+            {
                 "isMaster",
                 &luascriptfunctions::isMaster,
                 {},

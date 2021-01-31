@@ -46,15 +46,19 @@ namespace openspace::exoplanets::luascriptfunctions {
 
 constexpr const char* ExoplanetsGuiPath = "/Milky Way/Exoplanets/Exoplanet Systems/";
 
-constexpr const char* LookUpTablePath = "${SYNC}/http/exoplanets_data/1/lookup.txt";
+constexpr const char* LookUpTablePath = "${SYNC}/http/exoplanets_data/2/lookup.txt";
 constexpr const char* ExoplanetsDataPath =
-    "${SYNC}/http/exoplanets_data/1/exoplanets_data.bin";
+    "${SYNC}/http/exoplanets_data/2/exoplanets_data.bin";
 
 constexpr const char* StarTextureFile = "${SYNC}/http/exoplanets_textures/1/sun.jpg";
 constexpr const char* NoDataTextureFile =
     "${SYNC}/http/exoplanets_textures/1/grid-32.png";
 constexpr const char* DiscTextureFile =
     "${SYNC}/http/exoplanets_textures/1/disc_texture.png";
+
+constexpr const float AU = static_cast<float>(distanceconstants::AstronomicalUnit);
+constexpr const float SolarRadius = static_cast<float>(distanceconstants::SolarRadius);
+constexpr const float JupiterRadius = static_cast<float>(distanceconstants::JupiterRadius);
 
 ExoplanetSystem findExoplanetSystemInData(std::string_view starName) {
     ExoplanetSystem system;
@@ -80,14 +84,14 @@ ExoplanetSystem findExoplanetSystemInData(std::string_view starName) {
     // 3. read sizeof(exoplanet) bytes into an exoplanet object.
     ExoplanetDataEntry p;
     std::string line;
-    while (getline(lut, line)) {
+    while (std::getline(lut, line)) {
         std::istringstream ss(line);
         std::string name;
-        getline(ss, name, ',');
+        std::getline(ss, name, ',');
 
         if (name.substr(0, name.length() - 2) == starName) {
             std::string location_s;
-            getline(ss, location_s);
+            std::getline(ss, location_s);
             long location = std::stol(location_s.c_str());
 
             data.seekg(location);
@@ -110,11 +114,17 @@ ExoplanetSystem findExoplanetSystemInData(std::string_view starName) {
             if (system.starData.position != pos && isValidPosition(pos)) {
                 system.starData.position = pos;
             }
-            if (system.starData.bvColorIndex != p.bmv && !std::isnan(p.bmv)) {
-                system.starData.bvColorIndex = p.bmv;
-            }
             if (system.starData.radius != p.rStar && !std::isnan(p.rStar)) {
                 system.starData.radius = p.rStar;
+            }
+            if (system.starData.bv != p.bmv && !std::isnan(p.bmv)) {
+                system.starData.bv = p.bmv;
+            }
+            if (system.starData.teff != p.teff && !std::isnan(p.teff)) {
+                system.starData.teff = p.teff;
+            }
+            if (system.starData.luminosity != p.luminosity && !std::isnan(p.luminosity)) {
+                system.starData.luminosity = p.luminosity;
             }
         }
     }
@@ -141,7 +151,7 @@ void createExoplanetSystem(const std::string& starName) {
     }
 
     ExoplanetSystem system = findExoplanetSystemInData(starName);
-    if (system.planetNames.empty()) {
+    if (system.planetsData.empty()) {
         LERROR(fmt::format("Exoplanet system '{}' could not be found", starName));
         return;
     }
@@ -158,16 +168,15 @@ void createExoplanetSystem(const std::string& starName) {
     const glm::dvec3 starPos =
         static_cast<glm::dvec3>(starPosInParsec) * distanceconstants::Parsec;
     const glm::dmat3 exoplanetSystemRotation = computeSystemRotation(starPos);
-    const float solarRadius = static_cast<float>(distanceconstants::SolarRadius);
 
     // Star
-    float radiusInMeter = solarRadius;
+    float radiusInMeter = SolarRadius;
     if (!std::isnan(system.starData.radius)) {
         radiusInMeter *= system.starData.radius;
     }
 
     std::string colorLayers;
-    const float bv = system.starData.bvColorIndex;
+    const float bv = system.starData.bv;
 
     if (!std::isnan(bv)) {
         const glm::vec3 color = starColor(bv);
@@ -236,7 +245,7 @@ void createExoplanetSystem(const std::string& starName) {
 
     // Planets
     for (size_t i = 0; i < system.planetNames.size(); i++) {
-        ExoplanetDataEntry planet = system.planetsData[i];
+        ExoplanetDataEntry& planet = system.planetsData[i];
         const std::string planetName = system.planetNames[i];
 
         if (std::isnan(planet.ecc)) {
@@ -265,28 +274,24 @@ void createExoplanetSystem(const std::string& starName) {
             sEpoch = "2009-05-19T07:11:34.080";
         }
 
-        const float astronomicalUnit =
-            static_cast<float>(distanceconstants::AstronomicalUnit);
-        const float jupiterRadius = static_cast<float>(distanceconstants::JupiterRadius);
-
         float planetRadius;
         std::string enabled;
         if (std::isnan(planet.r)) {
             if (std::isnan(planet.rStar)) {
-                planetRadius = planet.a * 0.001f * astronomicalUnit;
+                planetRadius = planet.a * 0.001f * AU;
             }
             else {
-                planetRadius = planet.rStar * 0.1f * solarRadius;
+                planetRadius = planet.rStar * 0.1f * SolarRadius;
             }
             enabled = "false";
         }
         else {
-            planetRadius = static_cast<float>(planet.r) * jupiterRadius;
+            planetRadius = static_cast<float>(planet.r) * JupiterRadius;
             enabled = "true";
         }
 
         const float periodInSeconds = static_cast<float>(planet.per * SecondsPerDay);
-        const float semiMajorAxisInMeter = planet.a * astronomicalUnit;
+        const float semiMajorAxisInMeter = planet.a * AU;
         const float semiMajorAxisInKm = semiMajorAxisInMeter * 0.001f;
 
         const std::string planetIdentifier = createIdentifier(planetName);
@@ -359,13 +364,15 @@ void createExoplanetSystem(const std::string& starName) {
         bool hasLowerAUncertainty = !std::isnan(planet.aLower);
 
         if (hasUpperAUncertainty && hasLowerAUncertainty) {
-            // Get the orbit plane of the planet trail orbit from the KeplerTranslation
-            const glm::dmat4 orbitPlaneRotationMatrix = computeOrbitPlaneRotationMatrix(
+            const glm::dmat4 rotation = computeOrbitPlaneRotationMatrix(
                 planet.i,
                 planet.bigOmega,
                 planet.omega
             );
-            const glm::dmat3 rotation = orbitPlaneRotationMatrix;
+            const glm::dmat3 rotationMat3 = static_cast<glm::dmat3>(rotation);
+
+            const float lowerOffset = static_cast<float>(planet.aLower / planet.a);
+            const float upperOffset = static_cast<float>(planet.aUpper / planet.a);
 
             const std::string discNode = "{"
                 "Identifier = '" + planetIdentifier + "_Disc',"
@@ -377,15 +384,15 @@ void createExoplanetSystem(const std::string& starName) {
                     "Size = " + std::to_string(semiMajorAxisInMeter) + ","
                     "Eccentricity = " + std::to_string(planet.ecc) + ","
                     "Offset = { " +
-                        std::to_string(planet.aLower) + ", " +
-                        std::to_string(planet.aUpper) +
+                        std::to_string(lowerOffset) + ", " +
+                        std::to_string(upperOffset) +
                     "}," //min / max extend
                     "Opacity = 0.3"
                 "},"
                 "Transform = {"
                     "Rotation = {"
                         "Type = 'StaticRotation',"
-                        "Rotation = " + ghoul::to_string(rotation) + ""
+                        "Rotation = " + ghoul::to_string(rotationMat3) + ""
                     "}"
                 "},"
                 "GUI = {"
@@ -399,6 +406,105 @@ void createExoplanetSystem(const std::string& starName) {
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
         }
+    }
+
+
+    float meanInclination = 0.f;
+    for (const ExoplanetDataEntry& p : system.planetsData) {
+        meanInclination += p.i;
+    }
+    meanInclination /= static_cast<float>(system.planetsData.size());
+    const glm::dmat4 rotation = computeOrbitPlaneRotationMatrix(meanInclination);
+    const glm::dmat3 meanOrbitPlaneRotationMatrix = static_cast<glm::dmat3>(rotation);
+
+    // 1 AU Size Comparison Ring
+    const std::string ringIdentifier = starIdentifier + "_1AU_Ring";
+    const std::string ring = "{"
+        "Identifier = '" + starIdentifier + "_1AU_Ring',"
+        "Parent = '" + starIdentifier + "',"
+        "Enabled = false,"
+        "Renderable = {"
+            "Type = 'RenderableRadialGrid',"
+            "OuterRadius = " + std::to_string(AU) + ","
+            "CircleSegments = 64,"
+            "LineWidth = 2.0,"
+        "},"
+        "Transform = {"
+            "Rotation = {"
+                "Type = 'StaticRotation',"
+                "Rotation = " + ghoul::to_string(meanOrbitPlaneRotationMatrix) + ""
+            "}"
+        "},"
+        "GUI = {"
+            "Name = '1 AU Size Comparison Ring',"
+            "Path = '" + guiPath + "'"
+        "}"
+    "}";
+
+    openspace::global::scriptEngine->queueScript(
+        "openspace.addSceneGraphNode(" + ring + ");",
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
+
+    // Habitable Zone
+    bool hasTeff = !std::isnan(system.starData.teff);
+    bool hasLuminosity = !std::isnan(system.starData.luminosity);
+
+    if (hasTeff && hasLuminosity) {
+        const glm::vec2 zone = computeHabitableZone(
+            system.starData.teff,
+            system.starData.luminosity
+        );
+
+        glm::vec2 limitsInMeter = zone * AU;
+        float half = 0.5f * (limitsInMeter[1] - limitsInMeter[0]);
+        float center = limitsInMeter[0] + half;
+        float relativeOffset = half / center;
+
+        constexpr const char* description =
+            "The habitable zone is the region around a star in which an Earth-like "
+            "planet can potentially have liquid water on its surface."
+            "<br><br>"
+            "The inner boundary is where the greenhouse gases in the atmosphere "
+            "would trap any incoming infrared radiation, leading to the planet "
+            "surface becoming so hot that water boils away. The outer boundary is where "
+            "the greenhouse effect would not be able to maintain surface temperature "
+            "above freezing anywhere on the planet.";
+
+        const std::string zoneDiscNode = "{"
+            "Identifier = '" + starIdentifier + "_HZ_Disc',"
+            "Parent = '" + starIdentifier + "',"
+            "Enabled = true,"
+            "Renderable = {"
+                "Type = 'RenderableOrbitDisc',"
+                "Texture = openspace.absPath("
+                    "openspace.createPixelImage('exo_habitable_zone', {0, 0.92, 0.81})"
+                "),"
+                "Size = " + std::to_string(center) + ","
+                "Eccentricity = 0,"
+                "Offset = { " +
+                    std::to_string(relativeOffset) + ", " +
+                    std::to_string(relativeOffset) +
+                "}," //min / max extend
+                "Opacity = 0.05"
+            "},"
+            "Transform = {"
+                "Rotation = {"
+                    "Type = 'StaticRotation',"
+                    "Rotation = " + ghoul::to_string(meanOrbitPlaneRotationMatrix) + ""
+                "}"
+            "},"
+            "GUI = {"
+                "Name = '" + starName + " Habitable Zone',"
+                "Path = '" + guiPath + "',"
+                "Description = '" + description + "'"
+            "}"
+        "}";
+
+        openspace::global::scriptEngine->queueScript(
+            "openspace.addSceneGraphNode(" + zoneDiscNode + ");",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
     }
 }
 
@@ -469,7 +575,7 @@ std::vector<std::string> hostStarsWithSufficientData() {
 
     // Read number of lines
     int nExoplanets = 0;
-    while (getline(lookupTableFile, line)) {
+    while (std::getline(lookupTableFile, line)) {
         ++nExoplanets;
     }
     lookupTableFile.clear();
@@ -477,17 +583,17 @@ std::vector<std::string> hostStarsWithSufficientData() {
     names.reserve(nExoplanets);
 
     ExoplanetDataEntry p;
-    while (getline(lookupTableFile, line)) {
+    while (std::getline(lookupTableFile, line)) {
         std::stringstream ss(line);
         std::string name;
-        getline(ss, name, ',');
+        std::getline(ss, name, ',');
         // Remove the last two characters, that specify the planet
         name = name.substr(0, name.size() - 2);
 
         // Don't want to list systems where there is not enough data to visualize.
         // So, test if there is before adding the name to the list.
         std::string location_s;
-        getline(ss, location_s);
+        std::getline(ss, location_s);
         long location = std::stol(location_s.c_str());
 
         data.seekg(location);

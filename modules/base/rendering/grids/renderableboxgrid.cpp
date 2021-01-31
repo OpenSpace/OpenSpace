@@ -28,7 +28,6 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/documentation/verifier.h>
 #include <ghoul/glm.h>
@@ -39,9 +38,9 @@
 namespace {
     constexpr const char* ProgramName = "GridProgram";
 
-    constexpr openspace::properties::Property::PropertyInfo GridColorInfo = {
-        "GridColor",
-        "Grid Color",
+    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+        "Color",
+        "Color",
         "This value determines the color of the grid lines that are rendered."
     };
 
@@ -58,8 +57,8 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableBoxGrid)]] Parameters {
-        // [[codegen::verbatim(GridColorInfo.description)]]
-        std::optional<glm::vec3> gridColor;
+        // [[codegen::verbatim(ColorInfo.description)]]
+        std::optional<glm::vec3> color;
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
@@ -80,23 +79,18 @@ documentation::Documentation RenderableBoxGrid::Documentation() {
 
 RenderableBoxGrid::RenderableBoxGrid(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _gridColor(
-        GridColorInfo,
-        glm::vec3(0.5f, 0.5, 0.5f),
-        glm::vec3(0.f),
-        glm::vec3(1.f)
-    )
+    , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
     , _lineWidth(LineWidthInfo, 0.5f, 0.f, 20.f)
-    , _size(SizeInfo, glm::vec3(1e20f), glm::vec3(1.f), glm::vec3(1e35f))
+    , _size(SizeInfo, glm::vec3(1.f), glm::vec3(1.f), glm::vec3(100.f))
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
 
-    _gridColor = p.gridColor.value_or(_gridColor);
-    _gridColor.setViewOption(properties::Property::ViewOptions::Color);
-    addProperty(_gridColor);
+    _color = p.color.value_or(_color);
+    _color.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_color);
 
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
@@ -150,8 +144,6 @@ void RenderableBoxGrid::deinitializeGL() {
 void RenderableBoxGrid::render(const RenderData& data, RendererTasks&){
     _gridProgram->activate();
 
-    _gridProgram->setUniform("opacity", _opacity);
-
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
@@ -164,14 +156,19 @@ void RenderableBoxGrid::render(const RenderData& data, RendererTasks&){
         "MVPTransform",
         glm::dmat4(data.camera.projectionMatrix()) * modelViewTransform
     );
+    _gridProgram->setUniform("opacity", _opacity);
+    _gridProgram->setUniform("gridColor", _color);
 
-    _gridProgram->setUniform("gridColor", _gridColor);
-
-    // Changes GL state:
+    // Change GL state:
+#ifndef __APPLE__
     glLineWidth(_lineWidth);
+#else
+    glLineWidth(1.f);
+#endif
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnablei(GL_BLEND, 0);
     glEnable(GL_LINE_SMOOTH);
+    glDepthMask(false);
 
     glBindVertexArray(_vaoID);
     glDrawArrays(_mode, 0, static_cast<GLsizei>(_varray.size()));
@@ -179,16 +176,14 @@ void RenderableBoxGrid::render(const RenderData& data, RendererTasks&){
 
     _gridProgram->deactivate();
 
-    // Restores GL State
+    // Restore GL State
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetLineState();
+    global::renderEngine->openglStateCache().resetDepthState();
 }
 
 void RenderableBoxGrid::update(const UpdateData&) {
     if (_gridIsDirty) {
-        //_vsize = (_segments + 1) * (_segments + 1);
-        //_varray.resize(_vsize);
-
         const glm::vec3 llf = -_size.value() / 2.f;
         const glm::vec3 urb =  _size.value() / 2.f;
 
@@ -221,6 +216,9 @@ void RenderableBoxGrid::update(const UpdateData&) {
         const glm::vec3 v6 = glm::vec3(urb.x, urb.y, urb.z);
         const glm::vec3 v7 = glm::vec3(llf.x, urb.y, urb.z);
 
+        _varray.clear();
+        _varray.reserve(16);
+
         // First add the bounds
         _varray.push_back({ v0.x, v0.y, v0.z });
         _varray.push_back({ v1.x, v1.y, v1.z });
@@ -239,7 +237,6 @@ void RenderableBoxGrid::update(const UpdateData&) {
         _varray.push_back({ v7.x, v7.y, v7.z });
         _varray.push_back({ v3.x, v3.y, v3.z });
 
-
         glBindVertexArray(_vaoID);
         glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
         glBufferData(
@@ -250,7 +247,6 @@ void RenderableBoxGrid::update(const UpdateData&) {
         );
 
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
-
         glBindVertexArray(0);
 
         _gridIsDirty = false;

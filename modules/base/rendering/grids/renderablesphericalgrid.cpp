@@ -27,7 +27,6 @@
 #include <modules/base/basemodule.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/documentation/verifier.h>
 #include <ghoul/glm.h>
@@ -39,9 +38,9 @@
 namespace {
     constexpr const char* ProgramName = "GridProgram";
 
-    constexpr openspace::properties::Property::PropertyInfo GridColorInfo = {
-        "GridColor",
-        "Grid Color",
+    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+        "Color",
+        "Color",
         "This value determines the color of the grid lines that are rendered."
     };
 
@@ -59,8 +58,8 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableSphericalGrid)]] Parameters {
-        // [[codegen::verbatim(GridColorInfo.description)]]
-        std::optional<glm::vec3> gridColor;
+        // [[codegen::verbatim(ColorInfo.description)]]
+        std::optional<glm::vec3> color;
 
         // [[codegen::verbatim(SegmentsInfo.description)]]
         std::optional<int> segments;
@@ -83,12 +82,7 @@ documentation::Documentation RenderableSphericalGrid::Documentation() {
 RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _gridProgram(nullptr)
-    , _gridColor(
-        GridColorInfo,
-        glm::vec3(0.5f, 0.5, 0.5f),
-        glm::vec3(0.f),
-        glm::vec3(1.f)
-    )
+    , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
     , _segments(SegmentsInfo, 36, 4, 200)
     , _lineWidth(LineWidthInfo, 0.5f, 0.f, 20.f)
 {
@@ -97,9 +91,9 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
 
-    _gridColor = p.gridColor.value_or(_gridColor);
-    _gridColor.setViewOption(properties::Property::ViewOptions::Color);
-    addProperty(_gridColor);
+    _color = p.color.value_or(_color);
+    _color.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_color);
 
     _segments = p.segments.value_or(_segments);
     _segments.onChange([&]() {
@@ -165,8 +159,6 @@ void RenderableSphericalGrid::deinitializeGL() {
 void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
     _gridProgram->activate();
 
-    _gridProgram->setUniform("opacity", _opacity);
-
     const glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
@@ -180,20 +172,19 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
         "MVPTransform",
         glm::dmat4(data.camera.projectionMatrix()) * modelViewTransform
     );
+    _gridProgram->setUniform("opacity", _opacity);
+    _gridProgram->setUniform("gridColor", _color);
 
-    _gridProgram->setUniform("gridColor", _gridColor);
-
-    float adjustedLineWidth = 1.f;
-
+    // Change GL state:
 #ifndef __APPLE__
-    adjustedLineWidth = _lineWidth;
+    glLineWidth(_lineWidth);
+#else
+    glLineWidth(1.f);
 #endif
-
-    // Changes GL state:
-    glLineWidth(adjustedLineWidth);
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_LINE_SMOOTH);
+    glDepthMask(false);
 
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
@@ -202,9 +193,10 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
 
     _gridProgram->deactivate();
 
-    // Restores GL State
+    // Restore GL State
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetLineState();
+    global::renderEngine->openglStateCache().resetDepthState();
 }
 
 void RenderableSphericalGrid::update(const UpdateData&) {

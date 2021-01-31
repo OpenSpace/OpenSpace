@@ -150,13 +150,13 @@ namespace {
         std::optional<bool> drawLabels;
 
         enum class Unit {
-            Meter [[codegey::key(m)]],
-            Kilometer [[codegey::key(Km)]],
-            Parsec [[codegey::key(pc)]],
-            Kiloparsec [[codegey::key(Kpc)]],
-            MegaParsec [[codegey::key(Mpc)]],
-            Gigaparsec [[codegey::key(Gpc)]],
-            Gigalightyears [[codegey::key(Gly)]]
+            Meter [[codegen::key(m)]],
+            Kilometer [[codegen::key(Km)]],
+            Parsec [[codegen::key(pc)]],
+            Kiloparsec [[codegen::key(Kpc)]],
+            MegaParsec [[codegen::key(Mpc)]],
+            Gigaparsec [[codegen::key(Gpc)]],
+            Gigalightyears [[codegen::key(Gly)]]
         };
         std::optional<Unit> unit;
 
