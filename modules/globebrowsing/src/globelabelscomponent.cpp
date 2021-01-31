@@ -674,7 +674,7 @@ void GlobeLabelsComponent::draw(const RenderData& data) {
 
     if (_labelsFadeOutEnabled) {
         glm::dvec2 fadeRange = glm::dvec2(
-            averageRadius + _labelsMinHeight + LabelFadeOutLimitAltitude_meters
+            averageRadius + _labelsMinHeight + LabelFadeOutLimitAltitudeMeters
         );
         fadeRange.x += _labelsFadeOutDist;
         double a = 1.0 / (fadeRange.x - fadeRange.y);
