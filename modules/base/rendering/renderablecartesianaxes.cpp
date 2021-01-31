@@ -75,7 +75,9 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableCartesianAxes::Documentation() {
-    return codegen::doc<Parameters>();
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_renderable_cartesianaxes";
+    return doc;
 }
 
 RenderableCartesianAxes::RenderableCartesianAxes(const ghoul::Dictionary& dictionary)

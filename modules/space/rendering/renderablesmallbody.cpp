@@ -130,7 +130,9 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableSmallBody::Documentation() {
-    return codegen::doc<Parameters>();
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "space_renderable_small_body";
+    return doc;
 }
 
 RenderableSmallBody::RenderableSmallBody(const ghoul::Dictionary& dictionary)

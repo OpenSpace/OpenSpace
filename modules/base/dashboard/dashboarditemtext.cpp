@@ -50,7 +50,9 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DashboardItemText::Documentation() {
-    return codegen::doc<Parameters>();
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_dashboarditem_text";
+    return doc;
 }
 
 DashboardItemText::DashboardItemText(const ghoul::Dictionary& dictionary)

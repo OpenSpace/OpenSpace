@@ -56,7 +56,9 @@ namespace {
 namespace openspace {
 
 documentation::Documentation LuaRotation::Documentation() {
-    return codegen::doc<Parameters>();
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_transform_rotation_lua";
+    return doc;
 }
 
 LuaRotation::LuaRotation()

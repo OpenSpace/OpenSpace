@@ -59,7 +59,9 @@ namespace {
 namespace openspace {
 
 documentation::Documentation SceneGraphLightSource::Documentation() {
-    return codegen::doc<Parameters>();
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_scene_graph_light_source";
+    return doc;
 }
 
 SceneGraphLightSource::SceneGraphLightSource()

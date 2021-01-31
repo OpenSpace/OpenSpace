@@ -104,7 +104,9 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableRadialGrid::Documentation() {
-    return codegen::doc<Parameters>();
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_renderable_radialgrid";
+    return doc;
 }
 
 RenderableRadialGrid::RenderableRadialGrid(const ghoul::Dictionary& dictionary)

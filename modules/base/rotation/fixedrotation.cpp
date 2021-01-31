@@ -238,7 +238,9 @@ namespace {
 namespace openspace {
 
 documentation::Documentation FixedRotation::Documentation() {
-    return codegen::doc<Parameters>();
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_transform_rotation_fixed";
+    return doc;
 }
 
 FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)

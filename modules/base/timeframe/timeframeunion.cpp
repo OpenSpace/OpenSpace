@@ -49,7 +49,9 @@ namespace {
 namespace openspace {
 
 documentation::Documentation TimeFrameUnion::Documentation() {
-    return codegen::doc<Parameters>();
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_time_frame_union";
+    return doc;
 }
 
 bool TimeFrameUnion::isActive(const Time& time) const {

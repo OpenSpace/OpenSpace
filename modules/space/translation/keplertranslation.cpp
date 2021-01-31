@@ -142,7 +142,9 @@ KeplerTranslation::RangeError::RangeError(std::string off)
 {}
 
 documentation::Documentation KeplerTranslation::Documentation() {
-    return codegen::doc<Parameters>();
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "space_transform_kepler";
+    return doc;
 }
 
 KeplerTranslation::KeplerTranslation()

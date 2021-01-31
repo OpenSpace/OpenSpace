@@ -56,7 +56,9 @@ namespace {
 namespace openspace {
 
 documentation::Documentation LuaScale::Documentation() {
-    return codegen::doc<Parameters>();
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_scale_lua";
+    return doc;
 }
 
 LuaScale::LuaScale()

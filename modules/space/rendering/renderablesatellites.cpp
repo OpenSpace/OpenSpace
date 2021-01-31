@@ -97,13 +97,15 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableSatellites::Documentation() {
-    return codegen::doc<Parameters>();
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "space_renderable_satellites";
+    return doc;
 }
 
 RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
     : RenderableOrbitalKepler(dictionary)
 {
-    codegen::bake<Parameters>(dictionary);
+    //codegen::bake<Parameters>(dictionary);
 }
 
 void RenderableSatellites::readDataFile(const std::string& filename) {

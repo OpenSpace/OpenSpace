@@ -75,7 +75,9 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableSphericalGrid::Documentation() {
-    return codegen::doc<Parameters>();
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_renderable_sphericalgrid";
+    return doc;
 }
 
 RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictionary)

@@ -52,7 +52,9 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderablePlaneImageOnline::Documentation() {
-    return codegen::doc<Parameters>();
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_renderable_plane_image_online";
+    return doc;
 }
 
 RenderablePlaneImageOnline::RenderablePlaneImageOnline(

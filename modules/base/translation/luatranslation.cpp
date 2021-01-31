@@ -57,7 +57,9 @@ namespace {
 namespace openspace {
 
 documentation::Documentation LuaTranslation::Documentation() {
-    return codegen::doc<Parameters>();
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_transform_translation_lua";
+    return doc;
 }
 
 LuaTranslation::LuaTranslation()

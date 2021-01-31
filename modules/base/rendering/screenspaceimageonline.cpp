@@ -58,7 +58,9 @@ namespace {
 namespace openspace {
 
 documentation::Documentation ScreenSpaceImageOnline::Documentation() {
-    return codegen::doc<Parameters>();
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_screenspace_image_online";
+    return doc;
 }
 
 ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictionary)
