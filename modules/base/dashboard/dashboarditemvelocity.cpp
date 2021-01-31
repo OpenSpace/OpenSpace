@@ -162,7 +162,7 @@ void DashboardItemVelocity::render(glm::vec2& penPosition) {
         *_font,
         penPosition,
         fmt::format(
-            "Camera velocity: {} {}/s", dist.first, dist.second
+            "Camera velocity: {:.4f} {}/s", dist.first, dist.second
         )
     );
     penPosition.y -= _font->height();
