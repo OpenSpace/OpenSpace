@@ -88,7 +88,7 @@ StaticRotation::StaticRotation()
 }
 
 StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary) : StaticRotation() {
-    Parameters p = codegen::bake<Parameters>(dictionary);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     if (std::holds_alternative<glm::dvec3>(p.rotation)) {
         _eulerRotation = std::get<glm::dvec3>(p.rotation);

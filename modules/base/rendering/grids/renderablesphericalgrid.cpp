@@ -66,7 +66,6 @@ namespace {
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
-
     };
 #include "renderablesphericalgrid_codegen.cpp"
 } // namespace

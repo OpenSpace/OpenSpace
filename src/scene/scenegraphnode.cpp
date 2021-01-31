@@ -264,8 +264,6 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         ghoul::Dictionary renderableDictionary =
             dictionary.value<ghoul::Dictionary>(KeyRenderable);
 
-        //renderableDictionary.setValue(KeyIdentifier, result->_identifier);
-
         result->_renderable = Renderable::createFromDictionary(renderableDictionary);
         ghoul_assert(result->_renderable, "Failed to create Renderable");
         result->addPropertySubOwner(result->_renderable.get());

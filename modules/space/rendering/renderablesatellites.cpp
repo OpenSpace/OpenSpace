@@ -105,7 +105,10 @@ documentation::Documentation RenderableSatellites::Documentation() {
 RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
     : RenderableOrbitalKepler(dictionary)
 {
-    //codegen::bake<Parameters>(dictionary);
+    // Commented out right now as its not super clear how it works with inheritance. We'd
+    // probably want a codegen::check function that only does the checking without
+    // actually creating a Parameter objects
+    // codegen::bake<Parameters>(dictionary);
 }
 
 void RenderableSatellites::readDataFile(const std::string& filename) {

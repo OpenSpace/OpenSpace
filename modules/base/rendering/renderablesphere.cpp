@@ -180,7 +180,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     , _fadeInThreshold(FadeInThresholdInfo, -1.f, 0.f, 1.f)
     , _fadeOutThreshold(FadeOutThresholdInfo, -1.f, 0.f, 1.f)
 {
-    Parameters p = codegen::bake<Parameters>(dictionary);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();

@@ -191,7 +191,7 @@ GlobeBrowsingModule::GlobeBrowsingModule()
 void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     using namespace globebrowsing;
 
-    Parameters p = codegen::bake<Parameters>(dict);
+    const Parameters p = codegen::bake<Parameters>(dict);
     _wmsCacheEnabled = p.cacheEnabled.value_or(_wmsCacheEnabled);
     _offlineMode = p.offlineMode.value_or(_offlineMode);
     _wmsCacheLocation = p.cacheLocation.value_or(_wmsCacheLocation);

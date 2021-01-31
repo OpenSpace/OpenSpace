@@ -118,7 +118,7 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
 {
     using ghoul::filesystem::File;
 
-    Parameters p = codegen::bake<Parameters>(dictionary);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _size = p.size;
     setBoundingSphere(_size);

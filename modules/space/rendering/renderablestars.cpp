@@ -429,8 +429,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 {
     using File = ghoul::filesystem::File;
 
-    Parameters p = codegen::bake<Parameters>(dictionary);
-
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();

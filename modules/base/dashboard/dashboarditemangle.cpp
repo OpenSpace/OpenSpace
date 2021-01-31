@@ -144,8 +144,7 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
         nullptr
     }
 {
-    Parameters p = codegen::bake<Parameters>(dictionary);
-
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _source.type.addOptions({
         { Type::Node, "Node" },

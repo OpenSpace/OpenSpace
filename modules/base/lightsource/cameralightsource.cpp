@@ -60,7 +60,7 @@ CameraLightSource::CameraLightSource(const ghoul::Dictionary& dictionary)
     : LightSource(dictionary)
     , _intensity(IntensityInfo, 1.f, 0.f, 1.f)
 {
-    Parameters p = codegen::bake<Parameters>(dictionary);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
     _intensity = p.intensity;
     addProperty(_intensity);
 }

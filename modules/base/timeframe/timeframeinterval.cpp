@@ -61,7 +61,6 @@ namespace {
 
         // [[codegen::verbatim(EndInfo.description)]]
         std::optional<std::variant<double, std::string>> end;
-
     };
 #include "timeframeinterval_codegen.cpp"
 } // namespace

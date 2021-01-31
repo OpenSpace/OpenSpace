@@ -115,7 +115,7 @@ RenderableConstellationBounds::RenderableConstellationBounds(
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 32.f)
     , _constellationSelection(SelectionInfo)
 {
-    Parameters p = codegen::bake<Parameters>(dictionary);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _vertexFilename.onChange([&](){ loadVertexFile(); });
     addProperty(_vertexFilename);

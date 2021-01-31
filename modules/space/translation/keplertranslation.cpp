@@ -188,7 +188,7 @@ KeplerTranslation::KeplerTranslation()
 KeplerTranslation::KeplerTranslation(const ghoul::Dictionary& dictionary)
     : KeplerTranslation()
 {
-    Parameters p = codegen::bake<Parameters>(dictionary);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     setKeplerElements(
         p.eccentricity,

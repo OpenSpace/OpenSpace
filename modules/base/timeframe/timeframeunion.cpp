@@ -66,6 +66,9 @@ bool TimeFrameUnion::isActive(const Time& time) const {
 TimeFrameUnion::TimeFrameUnion(const ghoul::Dictionary& dictionary)
     : TimeFrame()
 {
+    // I don't know how we can actually help the reference attribute properly. Since the
+    // Parameter list only contains the monostate, there is no need to actually create
+    // the object here
     codegen::bake<Parameters>(dictionary);
 
     ghoul::Dictionary frames =

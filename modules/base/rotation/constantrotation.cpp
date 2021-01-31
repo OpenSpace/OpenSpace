@@ -69,7 +69,7 @@ ConstantRotation::ConstantRotation(const ghoul::Dictionary& dictionary)
     )
     , _rotationRate(RotationRateInfo, 1.f, -1000.f, 1000.f)
 {
-    Parameters p = codegen::bake<Parameters>(dictionary);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _rotationAxis = p.rotationAxis.value_or(_rotationAxis);
     addProperty(_rotationAxis);

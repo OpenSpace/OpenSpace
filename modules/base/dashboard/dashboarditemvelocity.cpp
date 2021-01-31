@@ -93,7 +93,7 @@ DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary
     , _doSimplification(SimplificationInfo, true)
     , _requestedUnit(RequestedUnitInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
-    Parameters p = codegen::bake<Parameters>(dictionary);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
     _doSimplification = p.simplification.value_or(_doSimplification);
     _doSimplification.onChange([this]() {
         _requestedUnit.setVisibility(

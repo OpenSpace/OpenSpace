@@ -175,9 +175,7 @@ namespace {
         std::optional<std::monostate>
             fallback [[codegen::reference("globebrowsing_layer")]];
     };
-
 #include "layer_codegen.cpp"
-
 } // namespace
 
 documentation::Documentation Layer::Documentation() {
@@ -204,9 +202,7 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
     , _layerGroupId(id)
 
 {
-    Parameters p = codegen::bake<Parameters>(layerDict);
-
-    documentation::testSpecificationAndThrow(Documentation(), layerDict, "Layer");
+    const Parameters p = codegen::bake<Parameters>(layerDict);
 
     layergroupid::TypeID typeID;
     if (p.type.has_value()) {

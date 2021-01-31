@@ -107,7 +107,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     registerUpdateRenderBinFromOpacity();
 
     _size = p.size;
-    _billboard = p.billboard.value_or<bool>(_billboard);
+    _billboard = p.billboard.value_or(_billboard);
 
     _blendMode.addOptions({
         { BlendModeNormal, "Normal" },
