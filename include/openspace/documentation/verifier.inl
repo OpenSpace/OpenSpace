@@ -143,7 +143,7 @@ TestResult OperatorVerifier<T, Operator>::operator()(const ghoul::Dictionary& di
                 val = static_cast<int>(d);
             }
             else {
-                return { false, { { key, TestResult::Offense::Reason::WrongType } } };
+                return { false, { { key, TestResult::Offense::Reason::WrongType } }, {} };
             }
         }
         else {
@@ -306,7 +306,7 @@ TestResult InRangeVerifier<T>::operator()(const ghoul::Dictionary& dict,
                 val = static_cast<int>(d);
             }
             else {
-                return { false, { { key, TestResult::Offense::Reason::WrongType } } };
+                return { false, { { key, TestResult::Offense::Reason::WrongType } }, {} };
             }
         }
         else {
@@ -353,7 +353,7 @@ TestResult NotInRangeVerifier<T>::operator()(const ghoul::Dictionary& dict,
                 val = static_cast<int>(d);
             }
             else {
-                return { false, { { key, TestResult::Offense::Reason::WrongType } } };
+                return { false, { { key, TestResult::Offense::Reason::WrongType } }, {} };
             }
         }
         else {
