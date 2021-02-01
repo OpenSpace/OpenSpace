@@ -345,7 +345,7 @@ TestResult NotInRangeVerifier<T>::operator()(const ghoul::Dictionary& dict,
     TestResult res = T::operator()(dict, key);
     if (res.success) {
         typename T::Type val;
-        if constexpr (std::is_same_v<T::Type, int>) {
+        if constexpr (std::is_same_v<typename T::Type, int>) {
             const double d = dict.value<double>(key);
             double intPart;
             bool isInt = modf(d, &intPart) == 0.0;
