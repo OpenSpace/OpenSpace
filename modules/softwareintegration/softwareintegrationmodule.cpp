@@ -211,36 +211,36 @@ void SoftwareIntegrationModule::handlePeerMessage(PeerMessage peerMessage) {
         break;
     }
     case SoftwareConnection::MessageType::ReadPointData: {
-        messageOffset = 0; // Resets message offset
+        _messageOffset = 0; // Resets message offset
 
         std::vector<float> xCoordinates = readData(message);
         std::vector<float> yCoordinates = readData(message);
         std::vector<float> zCoordinates = readData(message);
 
         int size = xCoordinates.size();
-        pointData.clear();
+        _pointData.clear();
 
         for (int i = 0; i < size; i++) {
             float x = xCoordinates[i];
             float y = yCoordinates[i];
             float z = zCoordinates[i];
 
-            pointData.push_back({ x, y, z });
+            _pointData.push_back({ x, y, z });
         }
         break;
     }
     case SoftwareConnection::MessageType::ReadLuminosityData: {
-        messageOffset = 0; // Resets message offset
+        _messageOffset = 0; // Resets message offset
 
-        luminosityData.clear();
-        luminosityData = readData(message);
+        _luminosityData.clear();
+        _luminosityData = readData(message);
         break;
     }
     case SoftwareConnection::MessageType::ReadVelocityData: {
-        messageOffset = 0; // Resets message offset
+        _messageOffset = 0; // Resets message offset
 
-        velocityData.clear();
-        velocityData = readData(message);
+        _velocityData.clear();
+        _velocityData = readData(message);
         break;
     }
     case SoftwareConnection::MessageType::AddSceneGraphNode: {
@@ -256,8 +256,8 @@ void SoftwareIntegrationModule::handlePeerMessage(PeerMessage peerMessage) {
         std::string guiName = readGUI(message);
 
         ghoul::Dictionary pointDataDictonary;
-        for (int i = 0; i < pointData.size(); ++i) {
-            pointDataDictonary.setValue<glm::dvec3>(fmt::format("[{}]", i + 1), pointData[i]);
+        for (int i = 0; i < _pointData.size(); ++i) {
+            pointDataDictonary.setValue<glm::dvec3>(fmt::format("[{}]", i + 1), _pointData[i]);
         }
 
         // Create a renderable depending on what data was received
@@ -268,21 +268,21 @@ void SoftwareIntegrationModule::handlePeerMessage(PeerMessage peerMessage) {
         renderable.setValue("Size", static_cast<double>(size));
         renderable.setValue("Data", pointDataDictonary);
 
-        bool hasLuminosityData = !luminosityData.empty();
-        bool hasVelocityData = !velocityData.empty();
+        bool hasLuminosityData = !_luminosityData.empty();
+        bool hasVelocityData = !_velocityData.empty();
 
         if (hasLuminosityData) {
             ghoul::Dictionary luminosityDataDictonary;
-            for (int i = 0; i < luminosityData.size(); ++i) {
-                luminosityDataDictonary.setValue<double>(fmt::format("[{}]", i + 1), luminosityData[i]);
+            for (int i = 0; i < _luminosityData.size(); ++i) {
+                luminosityDataDictonary.setValue<double>(fmt::format("[{}]", i + 1), _luminosityData[i]);
             }
             renderable.setValue("Luminosity", luminosityDataDictonary);
         }
 
         if (hasVelocityData) {
             ghoul::Dictionary velocityDataDictionary;
-            for (int i = 0; i < velocityData.size(); ++i) {
-                velocityDataDictionary.setValue<double>(fmt::format("[{}]", i + 1), velocityData[i]);
+            for (int i = 0; i < _velocityData.size(); ++i) {
+                velocityDataDictionary.setValue<double>(fmt::format("[{}]", i + 1), _velocityData[i]);
             }
             renderable.setValue("Velocity", velocityDataDictionary);
         }
@@ -398,7 +398,7 @@ void SoftwareIntegrationModule::handlePeerMessage(PeerMessage peerMessage) {
         LDEBUG(fmt::format("Message recieved.. New Visibility: {}", visibilityMessage));
         std::string identifier = readIdentifier(message);
         std::string visibility;
-        visibility.push_back(message[messageOffset]);
+        visibility.push_back(message[_messageOffset]);
         bool boolValue = (visibility == "F") ? false : true;
 
         // Toggle visibility of renderable
@@ -526,15 +526,15 @@ void SoftwareIntegrationModule::subscribeToRenderableUpdates(std::string identif
 // Read size value or opacity value
 float SoftwareIntegrationModule::readFloatValue(std::vector<char>& message) {
     std::string length;
-    length.push_back(message[messageOffset]);
-    messageOffset++;
+    length.push_back(message[_messageOffset]);
+    _messageOffset++;
 
     int lengthOfValue = stoi(length);
     std::string value;
     int counter = 0;
     while (counter != lengthOfValue) {
-        value.push_back(message[messageOffset]);
-        messageOffset++;
+        value.push_back(message[_messageOffset]);
+        _messageOffset++;
         counter++;
     }
     return std::stof(value);
@@ -542,39 +542,39 @@ float SoftwareIntegrationModule::readFloatValue(std::vector<char>& message) {
 
 glm::vec3 SoftwareIntegrationModule::readColor(std::vector<char>& message) {
     std::string lengthOfColor; // Not used for now, but sent in message
-    lengthOfColor.push_back(message[messageOffset]);
-    messageOffset++;
-    lengthOfColor.push_back(message[messageOffset]);
-    messageOffset++;
+    lengthOfColor.push_back(message[_messageOffset]);
+    _messageOffset++;
+    lengthOfColor.push_back(message[_messageOffset]);
+    _messageOffset++;
 
     // Color is recieved in a string-format of (redValue, greenValue, blueValue)
     // Therefore, we have to iterate through the message and ignore characters
     // "( , )" and separate the values in the string
     std::string red;
-    while (message[messageOffset] != ',') {
-        if (message[messageOffset] == '(') {
-            messageOffset++;
+    while (message[_messageOffset] != ',') {
+        if (message[_messageOffset] == '(') {
+            _messageOffset++;
         }
         else {
-            red.push_back(message[messageOffset]);
-            messageOffset++;
+            red.push_back(message[_messageOffset]);
+            _messageOffset++;
         }
     }
-    messageOffset++;
+    _messageOffset++;
 
     std::string green;
-    while (message[messageOffset] != ',') {
-        green.push_back(message[messageOffset]);
-        messageOffset++;
+    while (message[_messageOffset] != ',') {
+        green.push_back(message[_messageOffset]);
+        _messageOffset++;
     }
-    messageOffset++;
+    _messageOffset++;
 
     std::string blue;
-    while (message[messageOffset] != ')') {
-        blue.push_back(message[messageOffset]);
-        messageOffset++;
+    while (message[_messageOffset] != ')') {
+        blue.push_back(message[_messageOffset]);
+        _messageOffset++;
     }
-    messageOffset++;
+    _messageOffset++;
 
     // Convert red, green, blue strings to floats
     float r = std::stof(red);
@@ -586,17 +586,17 @@ glm::vec3 SoftwareIntegrationModule::readColor(std::vector<char>& message) {
 
 std::string SoftwareIntegrationModule::readGUI(std::vector<char>& message) {
     std::string length;
-    length.push_back(message[messageOffset]);
-    messageOffset++;
-    length.push_back(message[messageOffset]);
-    messageOffset++;
+    length.push_back(message[_messageOffset]);
+    _messageOffset++;
+    length.push_back(message[_messageOffset]);
+    _messageOffset++;
 
     int lengthOfGuiName = stoi(length);
     std::string guiName;
     int counter = 0;
     while (counter != lengthOfGuiName) {
-        guiName.push_back(message[messageOffset]);
-        messageOffset++;
+        guiName.push_back(message[_messageOffset]);
+        _messageOffset++;
         counter++;
     }
 
@@ -610,12 +610,12 @@ std::string SoftwareIntegrationModule::readIdentifier(std::vector<char>& message
 
     int lengthOfIdentifier = stoi(length);
     int counter = 0;
-    messageOffset = 2; // Resets messageOffset
+    _messageOffset = 2; // Resets messageOffset
 
     std::string identifier;
     while (counter != lengthOfIdentifier) {
-        identifier.push_back(message[messageOffset]);
-        messageOffset++;
+        identifier.push_back(message[_messageOffset]);
+        _messageOffset++;
         counter++;
     }
 
@@ -624,11 +624,11 @@ std::string SoftwareIntegrationModule::readIdentifier(std::vector<char>& message
 
 std::vector<float> SoftwareIntegrationModule::readData(std::vector<char>& message) {
     std::string length;
-    int lengthOffset = messageOffset + 9; // 9 first bytes is the length of the data
+    int lengthOffset = _messageOffset + 9; // 9 first bytes is the length of the data
 
-    for (int i = messageOffset; i < lengthOffset; i++) {
+    for (int i = _messageOffset; i < lengthOffset; i++) {
         length.push_back(message[i]);
-        messageOffset++;
+        _messageOffset++;
     }
 
     int lengthOfData = stoi(length);
@@ -638,15 +638,15 @@ std::vector<float> SoftwareIntegrationModule::readData(std::vector<char>& messag
     std::string value;
 
     while (counter != lengthOfData) {
-        while (message[messageOffset] != ',') {
-            value.push_back(message[messageOffset]);
-            messageOffset++;
+        while (message[_messageOffset] != ',') {
+            value.push_back(message[_messageOffset]);
+            _messageOffset++;
             counter++;
         }
         float dataValue = stof(value);
         data.push_back(dataValue);
         value = "";
-        messageOffset++;
+        _messageOffset++;
         counter++;
     }
 

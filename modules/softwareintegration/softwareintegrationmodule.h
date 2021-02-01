@@ -46,8 +46,6 @@ public:
 
     size_t nConnections() const;
 
-    size_t messageOffset = 0;
-
     std::vector<documentation::Documentation> documentations() const override;
 
 private:
@@ -86,9 +84,11 @@ private:
     std::string readIdentifier(std::vector<char>& message);
     std::vector<float> readData(std::vector<char>& message);
 
-    std::vector<glm::vec3> pointData;
-    std::vector<float> luminosityData;
-    std::vector<float> velocityData;
+    size_t _messageOffset = 0;
+
+    std::vector<glm::vec3> _pointData;
+    std::vector<float> _luminosityData;
+    std::vector<float> _velocityData;
 
     std::unordered_map<size_t, std::shared_ptr<Peer>> _peers;
     mutable std::mutex _peerListMutex;
