@@ -15,8 +15,20 @@ local NeptuneBarycenter = {
     GUI = {
         Name = "Neptune Barycenter",
         Path = "/Solar System/Planets/Neptune",
-        Hidden = true
+        Hidden = true,
+        Description = [[ Neptune Barycenter position]],
     }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { NeptuneBarycenter })
+
+
+asset.meta = {
+    Name = "Neptune Transforms",
+    Version = "1.0",
+    Description = [[ Neptune Barycenter transform]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = {"NeptuneBarycenter"}
+}

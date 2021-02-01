@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -89,8 +89,8 @@ ReadFitsTask::ReadFitsTask(const ghoul::Dictionary& dictionary) {
 
         // Ugly fix for ASCII sorting when there are more columns read than 10.
         std::set<int> intKeys;
-        for (const std::string& key : d.keys()) {
-            intKeys.insert(std::stoi(key));
+        for (std::string_view key : d.keys()) {
+            intKeys.insert(std::stoi(std::string(key)));
         }
 
         for (int key : intKeys) {

@@ -22,6 +22,8 @@ asset.require(heightLayersPath .. "/loladem_sweden")
 -- Set enabled layers (temporary solution)
 -- @TODO: do this using a boolean that's passed to the 'asset.require' instead 
 asset.onInitialize(function () 
-    openspace.setPropertyValueSingle("Scene.Moon.Renderable.Layers.ColorLayers." .. colorLayer.layer.Identifier .. ".Enabled", true)
-    openspace.setPropertyValueSingle("Scene.Moon.Renderable.Layers.HeightLayers." .. heightLayer.layer.Identifier .. ".Enabled", true)
+    openspace.setPropertyValueSingle("Scene.Moon.Renderable.Layers.ColorLayers." ..
+        colorLayer.layer.Identifier .. ".Enabled", true)
+    openspace.setPropertyValueSingle("Scene.Moon.Renderable.Layers.HeightLayers." ..
+        heightLayer.layer.Identifier .. ".Enabled", true)
 end)

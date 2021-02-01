@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,9 @@
 #ifndef __OPENSPACE_CORE___TIMEMANAGER___H__
 #define __OPENSPACE_CORE___TIMEMANAGER___H__
 
+#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/util/keys.h>
 #include <openspace/util/syncdata.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timeline.h>
@@ -32,14 +35,6 @@
 #include <optional>
 #include <utility>
 #include <vector>
-
-#include <deque>
-#include <functional>
-#include <openspace/util/timeline.h>
-#include <openspace/util/time.h>
-#include <openspace/util/syncdata.h>
-#include <openspace/properties/propertyowner.h>
-#include <openspace/properties/scalar/floatproperty.h>
 
 namespace openspace {
 
@@ -120,6 +115,7 @@ public:
     void removeDeltaTimeChangeCallback(CallbackHandle handle);
     void removeDeltaTimeStepsChangeCallback(CallbackHandle handle);
     void triggerPlaybackStart();
+    void stopPlayback();
     void removeTimeJumpCallback(CallbackHandle handle);
     void removeTimelineChangeCallback(CallbackHandle handle);
 
@@ -128,6 +124,9 @@ private:
     void applyKeyframeData(const TimeKeyframeData& keyframe);
     TimeKeyframeData interpolate(const Keyframe<TimeKeyframeData>& past,
         const Keyframe<TimeKeyframeData>& future, double time);
+
+    void addDeltaTimesKeybindings();
+    void clearDeltaTimesKeybindings();
 
     Timeline<TimeKeyframeData> _timeline;
     SyncData<Time> _currentTime;
@@ -141,8 +140,9 @@ private:
     double _lastDeltaTime = 0.0;
     double _lastTargetDeltaTime = 0.0;
 
-    std::vector<double> _deltaTimeSteps;
     bool _deltaTimeStepsChanged = false;
+    std::vector<double> _deltaTimeSteps;
+    std::vector<KeyWithModifier> _deltaTimeStepKeybindings;
 
     properties::FloatProperty _defaultTimeInterpolationDuration;
     properties::FloatProperty _defaultDeltaTimeInterpolationDuration;
@@ -160,7 +160,8 @@ private:
 
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _timeChangeCallbacks;
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _deltaTimeChangeCallbacks;
-    std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _deltaTimeStepsChangeCallbacks;
+    std::vector<std::pair<CallbackHandle, TimeChangeCallback>>
+        _deltaTimeStepsChangeCallbacks;
 
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _timeJumpCallbacks;
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _timelineChangeCallbacks;

@@ -5,11 +5,11 @@ local images = asset.syncedResource({
     Name = "Constellation Images",
     Type = "HttpSynchronization",
     Identifier = "constellation_images",
-    Version = 1
+    Version = 2
 })
 
 --function that reads the file
-local createConstellations = function (guiPath, constellationfile)
+local createConstellations = function (baseIdentifier, guiPath, constellationfile)
   local genConstellations = {};
   --skip the first line
   local notFirstLine = false;
@@ -33,7 +33,8 @@ local createConstellations = function (guiPath, constellationfile)
         group = (group == '' and globe or group)
 
         local aconstellation = {
-          Identifier = guiPath .. '-' .. name,
+          -- Identifier = guiPath .. '-' .. name,
+          Identifier = baseIdentifier .. '-' .. abbreviation,
           Parent = transforms.SolarSystemBarycenter.Identifier,
           Transform = {
               Translation = {
@@ -83,7 +84,7 @@ local nodes = {}
 asset.onInitialize(function ()
   local constellationsCSV = images .. "/constellation_data.csv"
 
-  nodes = createConstellations('Constellation Art', constellationsCSV)
+  nodes = createConstellations('ConstellationArt', 'Constellation Art', constellationsCSV)
   for _, n in ipairs(nodes) do
     openspace.addSceneGraphNode(n);
   end
@@ -101,6 +102,6 @@ asset.meta = {
     Version = "1.0",
     Description = "Artistic images depicting the constellations",
     Author = "James Hedberg",
-    URL = "jameshedberg.com",
+    URL = "http://jameshedberg.com",
     License = "CC-BY"
 }

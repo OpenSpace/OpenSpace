@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -50,7 +50,7 @@ GuiGlobeBrowsingComponent::GuiGlobeBrowsingComponent()
 {}
 
 void GuiGlobeBrowsingComponent::render() {
-    GlobeBrowsingModule* module = global::moduleEngine.module<GlobeBrowsingModule>();
+    GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
     using UrlInfo = GlobeBrowsingModule::UrlInfo;
     using Capabilities = GlobeBrowsingModule::Capabilities;
     using Layer = GlobeBrowsingModule::Layer;
@@ -66,7 +66,7 @@ void GuiGlobeBrowsingComponent::render() {
 
     // Render the list of planets
     std::vector<SceneGraphNode*> nodes =
-        global::renderEngine.scene()->allSceneGraphNodes();
+        global::renderEngine->scene()->allSceneGraphNodes();
 
     nodes.erase(
         std::remove_if(
@@ -127,7 +127,7 @@ void GuiGlobeBrowsingComponent::render() {
 
         // Check if the focus node is a RenderableGlobe
         const SceneGraphNode* const focus =
-            global::navigationHandler.orbitalNavigator().anchorNode();
+            global::navigationHandler->orbitalNavigator().anchorNode();
 
         const auto it = std::find(nodes.cbegin(), nodes.cend(), focus);
         if (it != nodes.end()) {
@@ -152,7 +152,7 @@ void GuiGlobeBrowsingComponent::render() {
     bool selectFocusNode = ImGui::Button("From Focus");
     if (selectFocusNode) {
         const SceneGraphNode* const focus =
-            global::navigationHandler.orbitalNavigator().anchorNode();
+            global::navigationHandler->orbitalNavigator().anchorNode();
 
         const auto it = std::find(nodes.cbegin(), nodes.cend(), focus);
         if (it != nodes.end()) {
@@ -188,7 +188,7 @@ void GuiGlobeBrowsingComponent::render() {
         urlInfo.cbegin(),
         urlInfo.cend(),
         std::string(),
-        [](std::string lhs, const UrlInfo& i) {
+        [](const std::string& lhs, const UrlInfo& i) {
             return lhs + i.name + ": (" + i.url + ")" + '\0';
         }
     );
@@ -257,17 +257,11 @@ void GuiGlobeBrowsingComponent::render() {
 
     }
 
-    if (iServer < 0) {
-        return;
-    }
-    _currentServer = urlInfo[iServer].name;
-
-
-    // Can't use urlIt here since it might have been invalidated before
-    if (urlInfo.empty()) {
+    if (iServer < 0 || urlInfo.empty()) {
         // There are no server so we have to bail
         return;
     }
+    _currentServer = urlInfo[iServer].name;
 
     ImGui::Separator();
 
@@ -330,7 +324,7 @@ void GuiGlobeBrowsingComponent::render() {
                 std::remove(layerName.begin(), layerName.end(), ' '),
                 layerName.end()
             );
-            global::scriptEngine.queueScript(
+            global::scriptEngine->queueScript(
                 fmt::format(
                     "openspace.globebrowsing.addLayer(\
                         '{}', \

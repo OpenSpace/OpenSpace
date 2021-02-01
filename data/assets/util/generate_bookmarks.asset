@@ -36,7 +36,7 @@ local getBookmarks = function (guiPath, bookmarkfile)
               Type = 'RenderableSphericalGrid',
               Enabled = false,
               Opacity = 0.3,
-              GridColor = { 0.3, 0.84, 1.0},
+              Color = { 0.3, 0.84, 1.0},
               LineWidth = linewidth
           },
           GUI = {
@@ -82,4 +82,3 @@ local getBookmarks = function (guiPath, bookmarkfile)
 end
 
 asset.export('getBookmarks', getBookmarks)
-

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -88,7 +88,7 @@ public:
         const glm::size3_t& outDimensions) const;
 
     float* uniformSliceValues(const std::string& var, const glm::size3_t& outDimensions,
-        const float& zSlice) const;
+        float zSlice) const;
 
     float* uniformSampledVectorValues(const std::string& xVar, const std::string& yVar,
         const std::string& zVar, const glm::size3_t& outDimensions) const;
@@ -115,7 +115,6 @@ public:
     std::array<std::string, 3> gridUnits() const;
 
     std::array<std::string, 3> gridVariables() const;
-
 
     Model model() const;
     GridType gridType() const;

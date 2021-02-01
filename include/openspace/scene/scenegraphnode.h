@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -126,7 +126,7 @@ public:
     SceneGraphNode* parent() const;
     std::vector<SceneGraphNode*> children() const;
 
-    float boundingSphere() const;
+    double boundingSphere() const;
 
     SceneGraphNode* childNode(const std::string& identifier);
 
@@ -159,6 +159,7 @@ private:
 
     properties::StringProperty _guiPath;
     properties::StringProperty _guiDisplayName;
+    properties::StringProperty _guiDescription;
 
     // Transformation defined by ephemeris, rotation and scale
     struct {
@@ -176,7 +177,7 @@ private:
 
     glm::dmat4 _modelTransformCached = glm::dmat4(1.0);
 
-    properties::FloatProperty _boundingSphere;
+    properties::DoubleProperty _boundingSphere;
     properties::BoolProperty _computeScreenSpaceValues;
     properties::IVec2Property _screenSpacePosition;
     properties::BoolProperty _screenVisibility;

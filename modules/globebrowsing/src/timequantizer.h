@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -130,13 +130,6 @@ public:
      * \params input the ISO8601 date/time string (YYYY-MM-DDTHH:mm:ss) to set
      */
     void setTime(std::string_view input);
-
-    /*
-     * Used to deep-copy from another DateTime instance
-     *
-     * \params src the DateTime object to copy from
-     */
-    void operator=(DateTime& src);
 
     /*
      * Get the date/time value in ISO8601 format

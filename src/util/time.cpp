@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -91,12 +91,13 @@ void Time::setTime(const char* time) {
 
 std::string_view Time::UTC() const {
     constexpr const char Format[] = "YYYY MON DDTHR:MN:SC.### ::RND";
-    char* b = reinterpret_cast<char*>(global::memoryManager.TemporaryMemory.allocate(32));
+    char* b = reinterpret_cast<char*>(
+        global::memoryManager->TemporaryMemory.allocate(32)
+    );
     std::memset(b, 0, 32);
 
     SpiceManager::ref().dateFromEphemerisTime(_time, b, 32, Format);
-
-    return std::string_view(b, 32);
+    return std::string_view(b);
 }
 
 std::string_view Time::ISO8601() const {
@@ -104,12 +105,13 @@ std::string_view Time::ISO8601() const {
 
     constexpr const char Format[] = "YYYY-MM-DDTHR:MN:SC.###";
     constexpr const int S = sizeof(Format);
-    char* b = reinterpret_cast<char*>(global::memoryManager.TemporaryMemory.allocate(S));
+    char* b = reinterpret_cast<char*>(
+        global::memoryManager->TemporaryMemory.allocate(S)
+    );
     std::memset(b, 0, S);
 
     SpiceManager::ref().dateFromEphemerisTime(_time, b, S, Format);
-
-    return std::string_view(b, S-1);
+    return std::string_view(b, S - 1);
 }
 
 void Time::ISO8601(char* buffer) const {

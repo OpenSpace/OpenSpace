@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,7 +39,7 @@ TexturePlane::TexturePlane(const ghoul::Dictionary& dictionary)
 
 void TexturePlane::initializeGL() {
     if (!_shader) {
-        _shader = global::renderEngine.buildRenderProgram(
+        _shader = global::renderEngine->buildRenderProgram(
             "PlaneProgram",
             absPath("${MODULE_ISWA}/shaders/textureplane_vs.glsl"),
             absPath("${MODULE_ISWA}/shaders/textureplane_fs.glsl")

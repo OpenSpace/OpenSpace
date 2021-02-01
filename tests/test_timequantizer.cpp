@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -186,7 +186,7 @@ TEST_CASE("TimeQuantizer: Test days resolution", "[timequantizer]") {
     singleTimeTest(testT, t1, false, "2021-11-07T00:00:00", "2021-11-07T00:00:00.000");
 
     t1.setStartEndRange("2019-02-21T00:00:00", "2021-09-01T00:00:00");
-    t1.setResolution("11d");
+    t1.setResolution("1d");
 
     singleTimeTest(testT, t1, true, "2020-03-01T00:30:00", "2020-03-01T00:00:00.000");
     singleTimeTest(testT, t1, true, "2019-03-04T00:00:02", "2019-03-04T00:00:00.000");

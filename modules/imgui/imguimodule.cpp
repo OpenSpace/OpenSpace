@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,20 +44,20 @@ namespace openspace {
 ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
     addPropertySubOwner(gui);
 
-    global::callback::initialize.emplace_back([&]() {
+    global::callback::initialize->emplace_back([&]() {
         LDEBUGC("ImGUIModule", "Initializing GUI");
         gui.initialize();
 
         gui._globalProperty.setSource(
             []() {
             std::vector<properties::PropertyOwner*> res = {
-                &global::navigationHandler,
-                &global::sessionRecording,
-                &global::timeManager,
-                &global::renderEngine,
-                &global::parallelPeer,
-                &global::luaConsole,
-                &global::dashboard
+                global::navigationHandler,
+                global::sessionRecording,
+                global::timeManager,
+                global::renderEngine,
+                global::parallelPeer,
+                global::luaConsole,
+                global::dashboard
             };
             return res;
         }
@@ -65,21 +65,21 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
 
         gui._screenSpaceProperty.setSource(
             []() {
-                return global::screenSpaceRootPropertyOwner.propertySubOwners();
+                return global::screenSpaceRootPropertyOwner->propertySubOwners();
             }
         );
 
         gui._moduleProperty.setSource(
             []() {
                 std::vector<properties::PropertyOwner*> v;
-                v.push_back(&(global::moduleEngine));
+                v.push_back(global::moduleEngine);
                 return v;
             }
         );
 
         gui._sceneProperty.setSource(
             []() {
-                const Scene* scene = global::renderEngine.scene();
+                const Scene* scene = global::renderEngine->scene();
                 const std::vector<SceneGraphNode*>& nodes = scene ?
                     scene->allSceneGraphNodes() :
                     std::vector<SceneGraphNode*>();
@@ -94,7 +94,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         gui._virtualProperty.setSource(
             []() {
                 std::vector<properties::PropertyOwner*> res = {
-                    &global::virtualPropertyManager
+                    global::virtualPropertyManager
                 };
 
                 return res;
@@ -104,7 +104,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         gui._featuredProperties.setSource(
             []() {
                 std::vector<SceneGraphNode*> nodes =
-                    global::renderEngine.scene()->allSceneGraphNodes();
+                    global::renderEngine->scene()->allSceneGraphNodes();
 
                 nodes.erase(
                     std::remove_if(
@@ -130,31 +130,31 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         );
     });
 
-    global::callback::deinitialize.emplace_back([&]() {
+    global::callback::deinitialize->emplace_back([&]() {
         ZoneScopedN("ImGUI")
 
         LDEBUGC("ImGui", "Deinitialize GUI");
         gui.deinitialize();
     });
 
-    global::callback::initializeGL.emplace_back([&]() {
+    global::callback::initializeGL->emplace_back([&]() {
         ZoneScopedN("ImGUI")
 
         LDEBUGC("ImGui", "Initializing GUI OpenGL");
         gui.initializeGL();
     });
 
-    global::callback::deinitializeGL.emplace_back([&]() {
+    global::callback::deinitializeGL->emplace_back([&]() {
         ZoneScopedN("ImGUI")
 
         LDEBUGC("ImGui", "Deinitialize GUI OpenGL");
         gui.deinitializeGL();
     });
 
-    global::callback::draw2D.emplace_back([&]() {
+    global::callback::draw2D->emplace_back([&]() {
         ZoneScopedN("ImGUI")
 
-        WindowDelegate& delegate = global::windowDelegate;
+        WindowDelegate& delegate = *global::windowDelegate;
         const bool showGui = delegate.hasGuiWindow() ? delegate.isGuiWindow() : true;
         if (delegate.isMaster() && showGui) {
             const glm::ivec2 windowSize = delegate.currentSubwindowSize();
@@ -179,7 +179,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         }
     });
 
-    global::callback::keyboard.emplace_back(
+    global::callback::keyboard->emplace_back(
         [&](Key key, KeyModifier mod, KeyAction action) -> bool {
             ZoneScopedN("ImGUI")
 
@@ -193,7 +193,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         }
     );
 
-    global::callback::character.emplace_back(
+    global::callback::character->emplace_back(
         [&](unsigned int codepoint, KeyModifier modifier) -> bool {
             ZoneScopedN("ImGUI")
 
@@ -207,13 +207,13 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         }
     );
 
-    global::callback::mousePosition.emplace_back(
+    global::callback::mousePosition->emplace_back(
         [&](double x, double y) {
             _mousePosition = glm::vec2(static_cast<float>(x), static_cast<float>(y));
         }
     );
 
-    global::callback::mouseButton.emplace_back(
+    global::callback::mouseButton->emplace_back(
         [&](MouseButton button, MouseAction action, KeyModifier) -> bool {
             ZoneScopedN("ImGUI")
 
@@ -234,7 +234,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         }
     );
 
-    global::callback::mouseScrollWheel.emplace_back(
+    global::callback::mouseScrollWheel->emplace_back(
         [&](double, double posY) -> bool {
             ZoneScopedN("ImGUI")
 
@@ -248,19 +248,19 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         }
     );
 
-    global::callback::touchDetected.emplace_back(
+    global::callback::touchDetected->emplace_back(
         [&](TouchInput input) -> bool {
             return gui.touchDetectedCallback(input);
         }
     );
 
-    global::callback::touchUpdated.emplace_back(
+    global::callback::touchUpdated->emplace_back(
         [&](TouchInput input) -> bool {
             return gui.touchUpdatedCallback(input);
         }
     );
 
-    global::callback::touchExit.emplace_back(
+    global::callback::touchExit->emplace_back(
         [&](TouchInput input) {
             gui.touchExitCallback(input);
         }

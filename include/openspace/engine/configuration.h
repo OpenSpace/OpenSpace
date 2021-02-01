@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,8 +43,10 @@ struct Configuration {
     Configuration& operator=(Configuration&&) = default;
 
     std::string windowConfiguration = "${CONFIG}/single.xml";
+    std::string sgctConfigNameInitialized;
     std::string asset;
     std::string profile;
+    std::vector<std::string> readOnlyProfiles;
     std::vector<std::string> globalCustomizationScripts;
     std::map<std::string, std::string> pathTokens = {
         { "CACHE" , "CACHE = \"${BASE}/cache\"" }
@@ -92,6 +94,7 @@ struct Configuration {
     glm::dvec3 masterRotation = glm::dvec3(0.0);
     bool isConsoleDisabled = false;
     bool usingProfile = false;
+    bool bypassLauncher = false;
 
     std::map<std::string, ghoul::Dictionary> moduleConfigurations;
 

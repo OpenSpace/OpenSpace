@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -282,8 +282,8 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
         addProperty(_fadeInThreshold);
     }
 
-    if (dictionary.hasKey(FadeOutThresholdInfo.identifier) ||
-        dictionary.hasKey(FadeInThresholdInfo.identifier)) {
+    if (dictionary.hasKey(FadeInThresholdInfo.identifier) ||
+        dictionary.hasKey(FadeOutThresholdInfo.identifier)) {
         _disableFadeInDistance.set(false);
         addProperty(_disableFadeInDistance);
     }
@@ -310,7 +310,7 @@ void RenderableSphere::initializeGL() {
     _shader = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return global::renderEngine.buildRenderProgram(
+            return global::renderEngine->buildRenderProgram(
                 ProgramName,
                 absPath("${MODULE_BASE}/shaders/sphere_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/sphere_fs.glsl")
@@ -329,7 +329,7 @@ void RenderableSphere::deinitializeGL() {
     BaseModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
-            global::renderEngine.removeRenderProgram(p);
+            global::renderEngine->removeRenderProgram(p);
         }
     );
     _shader = nullptr;
@@ -370,7 +370,9 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
             const float startLogFadeDistance = glm::log(_size * _fadeInThreshold);
             const float stopLogFadeDistance = startLogFadeDistance + 1.f;
 
-            if (logDistCamera > startLogFadeDistance && logDistCamera < stopLogFadeDistance) {
+            if (logDistCamera > startLogFadeDistance && logDistCamera <
+                stopLogFadeDistance)
+            {
                 const float fadeFactor = glm::clamp(
                     (logDistCamera - startLogFadeDistance) /
                     (stopLogFadeDistance - startLogFadeDistance),
@@ -391,7 +393,9 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
             const float startLogFadeDistance = glm::log(_size * _fadeOutThreshold);
             const float stopLogFadeDistance = startLogFadeDistance + 1.f;
 
-            if (logDistCamera > startLogFadeDistance && logDistCamera < stopLogFadeDistance) {
+            if (logDistCamera > startLogFadeDistance && logDistCamera <
+                stopLogFadeDistance)
+            {
                 const float fadeFactor = glm::clamp(
                     (logDistCamera - startLogFadeDistance) /
                     (stopLogFadeDistance - startLogFadeDistance),
@@ -430,10 +434,10 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
         glDisable(GL_CULL_FACE);
     }
 
-    bool usingFramebufferRenderer = global::renderEngine.rendererImplementation() ==
+    bool usingFramebufferRenderer = global::renderEngine->rendererImplementation() ==
                                     RenderEngine::RendererImplementation::Framebuffer;
 
-    bool usingABufferRenderer = global::renderEngine.rendererImplementation() ==
+    bool usingABufferRenderer = global::renderEngine->rendererImplementation() ==
                                 RenderEngine::RendererImplementation::ABuffer;
 
     if (usingABufferRenderer && _useAdditiveBlending) {

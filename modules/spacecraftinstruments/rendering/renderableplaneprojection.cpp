@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -54,17 +54,26 @@ namespace {
 
 namespace openspace {
 
-RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& dictionary)
-    : Renderable(dictionary)
+RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& dict)
+    : Renderable(dict)
 {
-    dictionary.getValue(KeySpacecraft, _spacecraft);
-    dictionary.getValue(KeyInstrument, _instrument);
-    dictionary.getValue(KeyMoving, _moving);
-    dictionary.getValue(KeyName, _name);
-    dictionary.getValue(KeyTarget, _defaultTarget);
-
-    if (dictionary.hasKeyAndValue<std::string>(KeyTexture)) {
-        _texturePath = dictionary.value<std::string>(KeyTexture);
+    if (dict.hasValue<std::string>(KeySpacecraft)) {
+        _spacecraft = dict.value<std::string>(KeySpacecraft);
+    }
+    if (dict.hasValue<std::string>(KeyInstrument)) {
+        _instrument = dict.value<std::string>(KeyInstrument);
+    }
+    if (dict.hasValue<bool>(KeyMoving)) {
+        _moving = dict.value<bool>(KeyMoving);
+    }
+    if (dict.hasValue<std::string>(KeyName)) {
+        _name = dict.value<std::string>(KeyName);
+    }
+    if (dict.hasValue<std::string>(KeyTarget)) {
+        _defaultTarget = dict.value<std::string>(KeyTarget);
+    }
+    if (dict.hasValue<std::string>(KeyTexture)) {
+        _texturePath = dict.value<std::string>(KeyTexture);
         _texturePath = absPath(_texturePath);
         _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
     }
@@ -80,7 +89,7 @@ void RenderablePlaneProjection::initializeGL() {
     glGenVertexArrays(1, &_quad);
     glGenBuffers(1, &_vertexPositionBuffer);
 
-    _shader = global::renderEngine.buildRenderProgram(
+    _shader = global::renderEngine->buildRenderProgram(
         "Image Plane",
         absPath("${MODULE_BASE}/shaders/imageplane_vs.glsl"),
         absPath("${MODULE_BASE}/shaders/imageplane_fs.glsl")
@@ -92,7 +101,7 @@ void RenderablePlaneProjection::initializeGL() {
 
 void RenderablePlaneProjection::deinitializeGL() {
     if (_shader) {
-        global::renderEngine.removeRenderProgram(_shader.get());
+        global::renderEngine->removeRenderProgram(_shader.get());
         _shader = nullptr;
     }
 
@@ -253,8 +262,8 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
     }
 
     if (!_moving) {
-        SceneGraphNode* thisNode = global::renderEngine.scene()->sceneGraphNode(_name);
-        SceneGraphNode* newParent = global::renderEngine.scene()->sceneGraphNode(
+        SceneGraphNode* thisNode = global::renderEngine->scene()->sceneGraphNode(_name);
+        SceneGraphNode* newParent = global::renderEngine->scene()->sceneGraphNode(
             _target.node
         );
         if (thisNode && newParent) {
@@ -313,7 +322,7 @@ void RenderablePlaneProjection::setTarget(std::string body) {
     }
 
     _target.frame =
-        global::moduleEngine.module<SpacecraftInstrumentsModule>()->frameFromBody(body);
+        global::moduleEngine->module<SpacecraftInstrumentsModule>()->frameFromBody(body);
     _target.body = std::move(body);
 }
 

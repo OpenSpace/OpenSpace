@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,13 +28,14 @@
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
 #include <ctime>
 #include <filesystem>
 
 namespace openspace::luascriptfunctions {
 
 int saveSettingsToProfile(lua_State* L) {
-    if (!global::configuration.usingProfile) {
+    if (!global::configuration->usingProfile) {
         return luaL_error(
             L,
             "Program was not started with a profile, so cannot use this "
@@ -50,7 +51,7 @@ int saveSettingsToProfile(lua_State* L) {
 
     std::string saveFilePath;
     if (n == 0) {
-        const ghoul::filesystem::File f = global::configuration.profile;
+        const ghoul::filesystem::File f = global::configuration->profile;
 
         std::time_t t = std::time(nullptr);
         std::tm* utcTime = std::gmtime(&t);
@@ -65,12 +66,15 @@ int saveSettingsToProfile(lua_State* L) {
             utcTime->tm_min,
             utcTime->tm_sec
         );
-        std::string newFile = fmt::format(
-            "{}_{}.{}",
-            f.fullBaseName(), time, f.fileExtension()
-        );
-        std::filesystem::copy(global::configuration.profile, newFile);
-        saveFilePath = global::configuration.profile;
+        std::string newFile = fmt::format("{}_{}", f.fullBaseName(), time);
+        std::string sourcePath =
+            absPath("${PROFILES}") + '/' + global::configuration->profile + ".profile";
+        std::string destPath =
+            absPath("${PROFILES}") + '/' + newFile + ".profile";
+
+        LINFOC("Profile", fmt::format("Saving a copy of the old profile as {}", newFile));
+        std::filesystem::copy(sourcePath, destPath);
+        saveFilePath = global::configuration->profile;
     }
     else {
         saveFilePath = ghoul::lua::value<std::string>(L, 1);
@@ -79,12 +83,12 @@ int saveSettingsToProfile(lua_State* L) {
         }
     }
 
-    const properties::PropertyOwner& root = global::rootPropertyOwner;
-    std::string currentTime = std::string(global::timeManager.time().ISO8601());
+    const properties::PropertyOwner& root = *global::rootPropertyOwner;
+    std::string currentTime = std::string(global::timeManager->time().ISO8601());
     interaction::NavigationHandler::NavigationState navState =
-        global::navigationHandler.navigationState();
-    global::profile.saveCurrentSettingsToProfile(root, currentTime, navState);
-    global::configuration.profile = saveFilePath;
+        global::navigationHandler->navigationState();
+    global::profile->saveCurrentSettingsToProfile(root, currentTime, navState);
+    global::configuration->profile = saveFilePath;
 
     if (saveFilePath.find('/') != std::string::npos) {
         return luaL_error(L, "Profile filename must not contain path (/) elements");
@@ -97,14 +101,14 @@ int saveSettingsToProfile(lua_State* L) {
     }
     const std::string absFilename = absPath("${PROFILES}/" + saveFilePath + ".profile");
 
-    const bool overwrite = (n == 2) ? ghoul::lua::value<bool>(L, 2) : false;
+    const bool overwrite = (n == 2) ? ghoul::lua::value<bool>(L, 2) : true;
 
     if (FileSys.fileExists(absFilename) && !overwrite) {
         return luaL_error(
-            L, 
+            L,
             fmt::format(
-                "Unable to save profile '{}'. File of same name already exists.",
-                absFilename.c_str()
+                "Unable to save profile '{}'. File of same name already exists",
+                absFilename
             ).c_str()
         );
     }
@@ -124,14 +128,13 @@ int saveSettingsToProfile(lua_State* L) {
     }
 
     try {
-        outFile << global::profile.serialize();
+        outFile << global::profile->serialize();
     }
     catch (const std::ofstream::failure& e) {
         return luaL_error(
             L,
             fmt::format(
-                "Data write error to file: {} ({})",
-                absFilename, e.what()
+                "Data write error to file: {} ({})", absFilename, e.what()
             ).c_str()
         );
     }

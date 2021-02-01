@@ -61,11 +61,11 @@ local Body = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_BODY_new_1.obj",
           ColorTexture = textures .. "/tex_01.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false,
     },
@@ -83,11 +83,11 @@ local Body_detail = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_BODY_new_1_new_detail.obj",
           ColorTexture = textures .. "/tex_01.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false,
     },
@@ -104,11 +104,11 @@ local Body_staticParts_1 = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_BODY_new_2.obj",
           ColorTexture = textures .. "/tex_02.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -124,11 +124,11 @@ local Body_staticParts_2 = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_BODY_new_3.obj",
           ColorTexture = textures .. "/tex_03.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -144,11 +144,11 @@ local Body_staticParts_3 = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_BODY_new_4.obj",
           ColorTexture = textures .. "/tex_04.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -164,11 +164,11 @@ local Body_staticParts_4 = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_BODY_new_5.obj",
           ColorTexture = textures .. "/tex_05.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -184,11 +184,11 @@ local Body_staticParts_5 = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_BODY_new_A0.obj",
           ColorTexture = textures .. "/parts_AO.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -205,11 +205,11 @@ local RA_Shoulder_AZ = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_RA_SHOULDER_AZ_new.obj",
           ColorTexture = textures .. "/tex_03.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -225,11 +225,11 @@ local RA_Shoulder_AZ_detail_1 = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_RA_SHOULDER_AZ_detail_1.obj",
           ColorTexture = textures .. "/tex_05.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -245,11 +245,11 @@ local RA_Shoulder_AZ_detail_2 = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_RA_SHOULDER_AZ_detail_2.obj",
           ColorTexture = textures .. "/tex_01.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -266,11 +266,11 @@ local RA_Shoulder_EL_1 = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_RA_SHOULDER_EL_1.obj",
           ColorTexture = textures .. "/tex_01.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -287,11 +287,11 @@ local RA_Shoulder_EL_detail_1 = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_RA_SHOULDER_EL_detail_1.obj",
           ColorTexture = textures .. "/tex_04.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -307,11 +307,11 @@ local RA_Shoulder_EL_detail_2 = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_RA_SHOULDER_EL_detail_2.obj",
           ColorTexture = textures .. "/tex_05.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -329,11 +329,11 @@ local RA_Shoulder_EL_2 = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_RA_SHOULDER_EL_2.obj",
           ColorTexture = textures .. "/tex_03.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -350,11 +350,11 @@ local RA_Elbow_1 = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/MSL_RA_ELBOW_1.obj",
             ColorTexture = textures .. "/tex_01.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -370,11 +370,11 @@ local RA_Elbow_detail_1 = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/MSL_RA_ELBOW_detail_1.obj",
             ColorTexture = textures .. "/tex_04.png",
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -390,11 +390,11 @@ local RA_Elbow_detail_2 = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/MSL_RA_ELBOW_detail_2.obj",
             ColorTexture = textures .. "/tex_05.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -411,11 +411,11 @@ local RA_Elbow_2 = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/MSL_RA_ELBOW_2.obj",
             ColorTexture = textures .. "/tex_03.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -433,11 +433,11 @@ local RA_Wrist = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_RA_TURRET_new_1.obj",
           ColorTexture = textures .. "/tex_03.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -453,11 +453,11 @@ local RA_Wrist_details = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_RA_TURRET_new_1_details.obj",
           ColorTexture = textures .. "/tex_01.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -474,11 +474,11 @@ local RA_Turret = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_RA_TURRET_new_2.obj",
           ColorTexture = textures .. "/tex_04.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -495,11 +495,11 @@ local RA_Turret_details_1 = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_RA_TURRET_new_2_detail_1.obj",
           ColorTexture = textures .. "/tex_05.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -515,11 +515,11 @@ local RA_Turret_details_2 = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_RA_TURRET_new_2_detail_2.obj",
           ColorTexture = textures .. "/tex_03.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -536,11 +536,11 @@ local RSM_root = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_RSM_ROOT.obj",
           ColorTexture = textures .. "/tex_04.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -556,11 +556,11 @@ local RSM_AZ = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_RSM_AZ.obj",
           ColorTexture = textures .. "/tex_04.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -576,11 +576,11 @@ local RSM_EL = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_RSM_EL.obj",
           ColorTexture = textures .. "/tex_04.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -597,11 +597,11 @@ local HGA_AZ = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_HGA_AZ_0ANGLE.obj",
           ColorTexture = textures .. "/tex_02.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -617,11 +617,11 @@ local HGA_EL = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_HGA_EL.obj",
           ColorTexture = textures .. "/tex_02.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -638,11 +638,11 @@ local SAM_Cover_1 = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_SAM_FIXED_COVER_1.obj",
           ColorTexture = textures .. "/MSLTextureTest.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -658,11 +658,11 @@ local SAM_Cover_2 = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_SAM_FIXED_COVER_2.obj",
           ColorTexture = textures .. "/MSLTextureTest.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -678,11 +678,11 @@ local CHEMIN_Bottom = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_CHEMIN.obj",
           ColorTexture = textures .. "/MSLTextureTest.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -699,11 +699,11 @@ local Wheel_Base = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_WHEEL_BASE.obj",
           ColorTexture = textures .. "/tex_02.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -718,11 +718,11 @@ local Wheel_Base_2 = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_WHEEL_BASE_2.obj",
           ColorTexture = textures .. "/tex_03.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -739,11 +739,11 @@ local Wheel_Leg_1_L = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_WHEEL_LEG_1_L.obj",
           ColorTexture = textures .. "/tex_03.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -759,11 +759,11 @@ local Wheel_Leg_1A_L_detail = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_WHEEL_LEG_1A_L_detail.obj",
           ColorTexture = textures .. "/tex_05.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -779,11 +779,11 @@ local Wheel_Leg_1B_L_detail = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_WHEEL_LEG_1B_L_detail.obj",
           ColorTexture = textures .. "/tex_05.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -799,11 +799,11 @@ local Wheel_Leg_2_L = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_WHEEL_LEG_2_L_new.obj",
           ColorTexture = textures .. "/tex_03.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -819,11 +819,11 @@ local Wheel_Wrist_F_L = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_WHEEL_WRIST_F_L.obj",
           ColorTexture = textures .. "/tex_02.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -839,11 +839,11 @@ local Wheel_Wrist_hub_F_L = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_WHEEL_WRIST_1B_F_L.obj",
           ColorTexture = textures .. "/tex_02.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -859,11 +859,11 @@ local Wheel_F_L = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_WHEEL_L.obj",
           ColorTexture = textures .. "/tex_03.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -879,11 +879,11 @@ local Wheel_C_L = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_WHEEL_L.obj",
           ColorTexture = textures .. "/tex_03.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -899,11 +899,11 @@ local Wheel_Wrist_B_L = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_WHEEL_WRIST_B_L.obj",
           ColorTexture = textures .. "/tex_02.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -919,11 +919,11 @@ local Wheel_Wrist_hub_B_L = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_WHEEL_WRIST_1B_B_L.obj",
           ColorTexture = textures .. "/tex_02.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false,
     },
@@ -940,11 +940,11 @@ local Wheel_B_L = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_WHEEL_L.obj",
           ColorTexture = textures .. "/tex_03.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -961,11 +961,11 @@ local Wheel_Leg_1_R = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_WHEEL_LEG_1_R.obj",
           ColorTexture = textures .. "/tex_03.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -981,11 +981,11 @@ local Wheel_Leg_1A_R_detail = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_WHEEL_LEG_1A_R_detail.obj",
           ColorTexture = textures .. "/tex_05.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -1001,11 +1001,11 @@ local Wheel_Leg_1B_R_detail = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_WHEEL_LEG_1B_R_detail.obj",
           ColorTexture = textures .. "/tex_05.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -1021,11 +1021,11 @@ local Wheel_Leg_2_R = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_WHEEL_LEG_2_R_new.obj",
           ColorTexture = textures .. "/tex_03.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -1041,12 +1041,12 @@ local Wheel_Wrist_F_R = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_WHEEL_WRIST_F_R.obj",
           --GeometryFile = models .. "/MSL_WHEEL_WRIST_F_L.obj",
           ColorTexture = textures .. "/tex_02.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -1062,11 +1062,11 @@ local Wheel_Wrist_hub_F_R = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_WHEEL_WRIST_1B_F_R.obj",
           ColorTexture = textures .. "/tex_02.png",
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -1082,11 +1082,11 @@ local Wheel_F_R = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_WHEEL_R.obj",
           ColorTexture = textures .. "/tex_03.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -1102,11 +1102,11 @@ local Wheel_C_R = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_WHEEL_R.obj",
           ColorTexture = textures .. "/tex_03.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -1122,11 +1122,11 @@ local Wheel_Wrist_B_R = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_WHEEL_WRIST_1A_B_R.obj",
           ColorTexture = textures .. "/tex_02.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -1142,11 +1142,11 @@ local Wheel_Wrist_hub_B_R = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_WHEEL_WRIST_1B_B_R.obj",
           ColorTexture = textures .. "/tex_02.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },
@@ -1162,11 +1162,11 @@ local Wheel_B_R = {
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
+        Geometry = {{
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_WHEEL_R.obj",
           ColorTexture = textures .. "/tex_03.png"
-        },
+        }},
         LightSources = LightSources,
         PerformShading = false
     },

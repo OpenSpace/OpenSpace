@@ -16,7 +16,7 @@ local Iapetus = {
         },
         Rotation = {
             Type = "SpiceRotation",
-            SourceFrame = "IAU_ENCELADUS",
+            SourceFrame = "IAU_IAPETUS",
             DestinationFrame = "GALACTIC"
         }
     },
@@ -29,25 +29,37 @@ local Iapetus = {
             Enable = false,
             FileName = labelsPath .. "/iapetus.labels",
             LabelAlignmentOption = "Horizontally", -- or Circularly
-            LabelsFontSize = 14.0,
+            LabelsFontSize = 30.0,
             LabelsSize = 8.0,
             LabelsMinSize = 1.0,
             LabelsMaxSize = 1500.0,
             ProximityEnabled = false,
             LabelsFadeInEnabled = true,
-            FadeInStartingDistance = 500000.0,
-            FadeOutStartingDistance = 1000000.0,
+            LabelsFadeOutEnabled = true,
+            FadeInStartingDistance = 3500000.0,
+            FadeOutStartingDistance = 600000.0,
             LabelsForceDomeRendering = true,
-            LabelsDistanceEPS = 1350000.0,
+            LabelsDistanceEPS = 250000.0,
             LabelsColor = { 1.0, 1.0, 0.0 }
         }
     },
     Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
     GUI = {
-        Path = "/Solar System/Planets/Saturn/Moons"
+        Name = "Iapetus",
+        Path = "/Solar System/Planets/Saturn/Moons",
+        Description = [[Third largest moon of Saturn. ]]
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Iapetus })
+
+
+asset.meta = {
+    Name = "Iapetus",
+    Version = "1.0",
+    Description = [[ Iapetus globe with labels.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = {"Iapetus"}
+}

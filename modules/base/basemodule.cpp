@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,6 +33,7 @@
 #include <modules/base/dashboard/dashboarditempropertyvalue.h>
 #include <modules/base/dashboard/dashboarditemsimulationincrement.h>
 #include <modules/base/dashboard/dashboarditemspacing.h>
+#include <modules/base/dashboard/dashboarditemtext.h>
 #include <modules/base/dashboard/dashboarditemvelocity.h>
 #include <modules/base/lightsource/cameralightsource.h>
 #include <modules/base/lightsource/scenegraphlightsource.h>
@@ -114,6 +115,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
         "DashboardItemSimulationIncrement"
     );
     fDashboard->registerClass<DashboardItemSpacing>("DashboardItemSpacing");
+    fDashboard->registerClass<DashboardItemText>("DashboardItemText");
     fDashboard->registerClass<DashboardItemVelocity>("DashboardItemVelocity");
 
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
@@ -183,7 +185,6 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         DashboardItemDistance::Documentation(),
         DashboardItemFramerate::Documentation(),
         DashboardItemMission::Documentation(),
-        DashboardItemParallelConnection::Documentation(),
         DashboardItemSimulationIncrement::Documentation(),
         DashboardItemSpacing::Documentation(),
         DashboardItemVelocity::Documentation(),

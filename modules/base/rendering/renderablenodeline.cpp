@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -76,7 +76,7 @@ namespace {
         glm::dvec3 anchorNodePos(0.0);
 
         const interaction::OrbitalNavigator& nav =
-            global::navigationHandler.orbitalNavigator();
+            global::navigationHandler->orbitalNavigator();
 
         if (nav.anchorNode()) {
             anchorNodePos = nav.anchorNode()->worldPosition();
@@ -124,10 +124,10 @@ documentation::Documentation RenderableNodeLine::Documentation() {
 
 RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
     , _start(StartNodeInfo, Root)
     , _end(EndNodeInfo, Root)
+    , _lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -144,7 +144,7 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
     }
 
     if (dictionary.hasKey(LineColorInfo.identifier)) {
-        _lineColor = dictionary.value<glm::vec3>(LineColorInfo.identifier);
+        _lineColor = dictionary.value<glm::dvec3>(LineColorInfo.identifier);
     }
     if (dictionary.hasKey(LineWidthInfo.identifier)) {
         _lineWidth = static_cast<float>(
@@ -178,7 +178,7 @@ void RenderableNodeLine::initializeGL() {
     _program = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return global::renderEngine.buildRenderProgram(
+            return global::renderEngine->buildRenderProgram(
                 ProgramName,
                 absPath("${MODULE_BASE}/shaders/line_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/line_fs.glsl")
@@ -208,8 +208,8 @@ void RenderableNodeLine::deinitializeGL() {
     BaseModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
-        global::renderEngine.removeRenderProgram(p);
-    }
+            global::renderEngine->removeRenderProgram(p);
+        }
     );
     _program = nullptr;
 }
@@ -235,10 +235,10 @@ void RenderableNodeLine::updateVertexData() {
 
     // Update the positions of the nodes
     _startPos = coordinatePosFromAnchorNode(
-        global::renderEngine.scene()->sceneGraphNode(_start)->worldPosition()
+        global::renderEngine->scene()->sceneGraphNode(_start)->worldPosition()
     );
     _endPos = coordinatePosFromAnchorNode(
-        global::renderEngine.scene()->sceneGraphNode(_end)->worldPosition()
+        global::renderEngine->scene()->sceneGraphNode(_end)->worldPosition()
     );
 
     _vertexArray.push_back(static_cast<float>(_startPos.x));
@@ -248,8 +248,6 @@ void RenderableNodeLine::updateVertexData() {
     _vertexArray.push_back(static_cast<float>(_endPos.x));
     _vertexArray.push_back(static_cast<float>(_endPos.y));
     _vertexArray.push_back(static_cast<float>(_endPos.z));
-
-    _vertexArray;
 
     bindGL();
     glBufferData(
@@ -272,10 +270,10 @@ void RenderableNodeLine::render(const RenderData& data, RendererTasks&) {
 
     glm::dmat4 anchorTranslation(1.0);
     // Update anchor node information, used to counter precision problems
-    if (global::navigationHandler.orbitalNavigator().anchorNode()) {
+    if (global::navigationHandler->orbitalNavigator().anchorNode()) {
         anchorTranslation = glm::translate(
             glm::dmat4(1.0),
-            global::navigationHandler.orbitalNavigator().anchorNode()->worldPosition()
+            global::navigationHandler->orbitalNavigator().anchorNode()->worldPosition()
         );
     }
 
@@ -304,18 +302,18 @@ void RenderableNodeLine::render(const RenderData& data, RendererTasks&) {
     // Restore GL State
     unbindGL();
     _program->deactivate();
-    global::renderEngine.openglStateCache().resetBlendState();
-    global::renderEngine.openglStateCache().resetLineState();
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetLineState();
 }
 
 void RenderableNodeLine::validateNodes() {
-    if (!global::renderEngine.scene()->sceneGraphNode(_start)) {
+    if (!global::renderEngine->scene()->sceneGraphNode(_start)) {
         LERROR(fmt::format(
             "There is no scenegraph node with id {}, defaults to 'Root'", _start
         ));
         _start = Root;
     }
-    if (!global::renderEngine.scene()->sceneGraphNode(_end)) {
+    if (!global::renderEngine->scene()->sceneGraphNode(_end)) {
         LERROR(fmt::format(
             "There is no scenegraph node with id {}, defaults to 'Root'", _end
         ));

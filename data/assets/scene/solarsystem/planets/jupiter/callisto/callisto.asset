@@ -37,8 +37,9 @@ local Callisto = {
             LabelsMaxSize = 1500.0,
             ProximityEnabled = false,
             LabelsFadeInEnabled = true,
+            LabelsFadeOutEnabled = true,
             FadeInStartingDistance = 15000000.0,
-            FadeOutStartingDistance = 1000000.0,
+            FadeOutStartingDistance = 5000000.0,
             LabelsForceDomeRendering = true,
             LabelsDistanceEPS = 1350000.0,
             LabelsColor = { 1.0, 1.0, 0.0 }
@@ -50,6 +51,15 @@ local Callisto = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Callisto })
+
+
+asset.meta = {
+    Name = "Callisto",
+    Version = "1.0",
+    Description = [[ Callisto globe with labels.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = {"Callisto"}
+}

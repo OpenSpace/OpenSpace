@@ -22,6 +22,14 @@ local PlutoBarycenter = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { PlutoBarycenter })
+
+
+asset.meta = {
+    Name = "Pluto Transforms",
+    Version = "1.0",
+    Description = [[ Pluto Barycenter transform]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

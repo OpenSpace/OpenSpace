@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -70,7 +70,7 @@ int addDashboardItemToScreenSpace(lua_State* L) {
         return 0;
     }
 
-    ScreenSpaceRenderable* ssr = global::renderEngine.screenSpaceRenderable(name);
+    ScreenSpaceRenderable* ssr = global::renderEngine->screenSpaceRenderable(name);
 
     if (!ssr) {
         return ghoul::lua::luaError(L, "Provided name is not a ScreenSpace item");
@@ -98,7 +98,7 @@ int removeDashboardItemsFromScreenSpace(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeDashboardItemsFromScreenSpace");
 
     const std::string& name = ghoul::lua::value<std::string>(L, 1);
-    ScreenSpaceRenderable* ssr = global::renderEngine.screenSpaceRenderable(name);
+    ScreenSpaceRenderable* ssr = global::renderEngine->screenSpaceRenderable(name);
 
     if (!ssr) {
         return ghoul::lua::luaError(L, "Provided name is not a ScreenSpace item");
@@ -152,7 +152,7 @@ ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
     );
 
     std::string identifier;
-    if (dictionary.hasKeyAndValue<std::string>(KeyIdentifier)) {
+    if (dictionary.hasValue<std::string>(KeyIdentifier)) {
         identifier = dictionary.value<std::string>(KeyIdentifier);
     }
     else {
@@ -177,7 +177,7 @@ bool ScreenSpaceDashboard::initializeGL() {
         glm::vec2 penPosition = glm::vec2(10.f, _size.value().w );
 
         if (_useMainDashboard) {
-            global::dashboard.render(penPosition);
+            global::dashboard->render(penPosition);
         }
         else {
             _dashboard.render(penPosition);
@@ -200,8 +200,8 @@ bool ScreenSpaceDashboard::isReady() const {
 }
 
 void ScreenSpaceDashboard::update() {
-    if (global::windowDelegate.windowHasResized()) {
-        const glm::ivec2 size = global::windowDelegate.currentDrawBufferResolution();
+    if (global::windowDelegate->windowHasResized()) {
+        const glm::ivec2 size = global::windowDelegate->currentDrawBufferResolution();
         _size = { 0.f, 0.f, size.x, size.y };
         createFramebuffer();
     }

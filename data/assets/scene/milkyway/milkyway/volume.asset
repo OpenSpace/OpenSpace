@@ -52,3 +52,15 @@ local MilkyWayVolumeGalaxy = {
 
 local objects = { MilkyWayVolumeGalaxy }
 assetHelper.registerSceneGraphNodesAndExport(asset, objects)
+
+
+asset.meta = {
+    Name = "Milky Way Volume",
+    Version = "1.0",
+    Description = [[Volumetric rendering of Milky Way galaxy based on simulation from
+        NAOJ.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT License",
+    Identifiers = {"MilkyWayVolume"}
+}

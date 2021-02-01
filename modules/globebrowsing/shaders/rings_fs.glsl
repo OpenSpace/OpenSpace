@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -78,7 +78,7 @@ Fragment getFragment() {
 
     // shadow == 1.0 means it is not in shadow
     float shadow = 1.0;
-    if ( shadowCoords.z >= 0 ) {
+    if (shadowCoords.z >= 0) {
         vec4 normalizedShadowCoords = shadowCoords;
         normalizedShadowCoords.z    = normalizeFloat(zFightingPercentage * normalizedShadowCoords.w);
         normalizedShadowCoords.xy   = normalizedShadowCoords.xy / normalizedShadowCoords.w;

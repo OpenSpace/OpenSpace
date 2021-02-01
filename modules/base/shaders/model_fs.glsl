@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,6 +40,8 @@ uniform bool has_texture_diffuse;
 uniform bool has_texture_normal;
 uniform bool has_texture_specular;
 uniform bool has_color_specular;
+
+uniform bool opacityBlending = false;
 
 uniform sampler2D texture_diffuse;
 uniform sampler2D texture_normal;
@@ -83,6 +85,10 @@ Fragment getFragment() {
 	else {
 		diffuseAlbedo = color_diffuse;
 	}
+
+    if (opacity == 0.0) {
+        discard;
+    }
 
     Fragment frag;
 
@@ -143,12 +149,22 @@ Fragment getFragment() {
         frag.color.rgb = diffuseAlbedo;
     }
 
-    frag.color.a        = opacity;
+    if (opacityBlending) {
+        // frag.color.a = opacity * (frag.color.r + frag.color.g + frag.color.b)/3.0;
+        frag.color.a = opacity * max(max(frag.color.r, frag.color.g), frag.color.b);
+    }
+    else {
+        frag.color.a = opacity;
+    }
+
+    if (frag.color.a < 0.1) {
+        discard;
+    }
+
     frag.depth          = vs_screenSpaceDepth;
     frag.gPosition      = vs_positionCameraSpace;
     frag.gNormal        = vec4(vs_normalViewSpace, 0.0);
     frag.disableLDR2HDR = true;
-
 
     return frag;
 }

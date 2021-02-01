@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -179,7 +179,8 @@ TestResult testSpecification(const Documentation& documentation,
     TestResult result;
     result.success = true;
 
-    auto applyVerifier = [dictionary, &result](Verifier& verifier, const std::string& key)
+    auto applyVerifier = [dictionary, &result](const Verifier& verifier,
+                                               const std::string& key)
     {
         TestResult res = verifier(dictionary, key);
         if (!res.success) {
@@ -199,8 +200,8 @@ TestResult testSpecification(const Documentation& documentation,
 
     for (const auto& p : documentation.entries) {
         if (p.key == DocumentationEntry::Wildcard) {
-            for (const std::string& key : dictionary.keys()) {
-                applyVerifier(*(p.verifier), key);
+            for (std::string_view key : dictionary.keys()) {
+                applyVerifier(*(p.verifier), std::string(key));
             }
         }
         else {

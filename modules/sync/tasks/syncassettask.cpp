@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,7 +45,6 @@
 
 namespace {
     constexpr const char* KeyAsset = "Asset";
-    constexpr const char* _loggerCat = "SyncAssetTask";
     constexpr std::chrono::milliseconds ProgressPollInterval(200);
 } // namespace
 
@@ -94,7 +93,7 @@ void SyncAssetTask::perform(const Task::ProgressCallback& progressCallback) {
 
     registerCoreClasses(scriptEngine);
 
-    for (OpenSpaceModule* m : global::moduleEngine.modules()) {
+    for (OpenSpaceModule* m : global::moduleEngine->modules()) {
         scriptEngine.addLibrary(m->luaLibrary());
 
         for (scripting::LuaLibrary& l : m->luaLibraries()) {

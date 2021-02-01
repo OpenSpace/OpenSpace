@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -65,7 +65,7 @@ bool AssetManager::update() {
         const bool add = c.second;
         if (add) {
             _assetLoader.add(path);
-            global::profile.addAsset(path);
+            global::profile->addAsset(path);
         }
     }
     // Remove assets
@@ -75,7 +75,7 @@ bool AssetManager::update() {
         const bool remove = !c.second;
         if (remove && _assetLoader.has(path)) {
             _assetLoader.remove(path);
-            global::profile.removeAsset(path);
+            global::profile->removeAsset(path);
         }
     }
     _pendingStateChangeCommands.clear();

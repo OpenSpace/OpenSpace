@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -119,11 +119,11 @@ RenderableCrawlingLine::RenderableCrawlingLine(const ghoul::Dictionary& dictiona
     _target = dictionary.value<std::string>(KeyTarget);
     _instrumentName = dictionary.value<std::string>(KeyInstrument);
 
-    _lineColorBegin = dictionary.value<glm::vec4>(
+    _lineColorBegin = dictionary.value<glm::dvec4>(
         std::string(KeyColor) + "." + KeyColorStart
     );
 
-    _lineColorEnd = dictionary.value<glm::vec4>(
+    _lineColorEnd = dictionary.value<glm::dvec4>(
         std::string(KeyColor) + "." + KeyColorEnd
     );
 }
@@ -133,7 +133,7 @@ bool RenderableCrawlingLine::isReady() const {
 }
 
 void RenderableCrawlingLine::initializeGL() {
-    _program = global::renderEngine.buildRenderProgram(
+    _program = global::renderEngine->buildRenderProgram(
         "RenderableCrawlingLine",
         absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/crawlingline_vs.glsl"),
         absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/crawlingline_fs.glsl")
@@ -169,7 +169,7 @@ void RenderableCrawlingLine::deinitializeGL() {
     _vbo = 0;
 
     if (_program) {
-        global::renderEngine.removeRenderProgram(_program.get());
+        global::renderEngine->removeRenderProgram(_program.get());
         _program = nullptr;
     }
 }

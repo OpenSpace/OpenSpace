@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -211,7 +211,7 @@ documentation::Documentation RenderableDUMeshes::Documentation() {
             },
             {
                 MeshColorInfo.identifier,
-                new Vector3ListVerifier<float>,
+                new Vector3ListVerifier<double>,
                 Optional::No,
                 MeshColorInfo.description
             },
@@ -249,7 +249,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
 
     _renderOption.addOption(RenderOptionViewDirection, "Camera View Direction");
     _renderOption.addOption(RenderOptionPositionNormal, "Camera Position Normal");
-    if (global::windowDelegate.isFisheyeRendering()) {
+    if (global::windowDelegate->isFisheyeRendering()) {
         _renderOption = RenderOptionPositionNormal;
     }
     else {
@@ -286,7 +286,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         }
     }
 
-    if (dictionary.hasKeyAndValue<double>(LineWidthInfo.identifier)) {
+    if (dictionary.hasValue<double>(LineWidthInfo.identifier)) {
         _lineWidth = static_cast<float>(
             dictionary.value<double>(LineWidthInfo.identifier)
         );
@@ -303,7 +303,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         _hasLabel = true;
 
         if (dictionary.hasKey(TextColorInfo.identifier)) {
-            _textColor = dictionary.value<glm::vec3>(TextColorInfo.identifier);
+            _textColor = dictionary.value<glm::dvec3>(TextColorInfo.identifier);
             _hasLabel = true;
         }
         _textColor.setViewOption(properties::Property::ViewOptions::Color);
@@ -311,22 +311,30 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         _textColor.onChange([&]() { _textColorIsDirty = true; });
 
         if (dictionary.hasKey(TextOpacityInfo.identifier)) {
-            _textOpacity = dictionary.value<float>(TextOpacityInfo.identifier);
+            _textOpacity = static_cast<float>(
+                dictionary.value<double>(TextOpacityInfo.identifier)
+            );
         }
         addProperty(_textOpacity);
 
         if (dictionary.hasKey(TextSizeInfo.identifier)) {
-            _textSize = dictionary.value<float>(TextSizeInfo.identifier);
+            _textSize = static_cast<float>(
+                dictionary.value<double>(TextSizeInfo.identifier)
+            );
         }
         addProperty(_textSize);
 
         if (dictionary.hasKey(LabelMinSizeInfo.identifier)) {
-            _textMinSize = floor(dictionary.value<float>(LabelMinSizeInfo.identifier));
+            _textMinSize = static_cast<float>(
+                floor(dictionary.value<double>(LabelMinSizeInfo.identifier))
+            );
         }
         addProperty(_textMinSize);
 
         if (dictionary.hasKey(LabelMaxSizeInfo.identifier)) {
-            _textMaxSize = floor(dictionary.value<float>(LabelMaxSizeInfo.identifier));
+            _textMaxSize = static_cast<float>(
+                floor(dictionary.value<double>(LabelMaxSizeInfo.identifier))
+            );
         }
         addProperty(_textMaxSize);
     }
@@ -337,7 +345,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         );
         for (int i = 0; i < static_cast<int>(colorDict.size()); ++i) {
             _meshColorMap.insert(
-                { i + 1, colorDict.value<glm::vec3>(std::to_string(i + 1)) }
+                { i + 1, colorDict.value<glm::dvec3>(std::to_string(i + 1)) }
             );
         }
     }
@@ -352,7 +360,7 @@ void RenderableDUMeshes::initializeGL() {
     _program = DigitalUniverseModule::ProgramObjectManager.request(
         ProgramObjectName,
         []() {
-            return global::renderEngine.buildRenderProgram(
+            return global::renderEngine->buildRenderProgram(
                 "RenderableDUMeshes",
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/dumesh_vs.glsl"),
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/dumesh_fs.glsl")
@@ -372,7 +380,7 @@ void RenderableDUMeshes::initializeGL() {
     if (_hasLabel) {
         if (!_font) {
             constexpr const int FontSize = 50;
-            _font = global::fontManager.font(
+            _font = global::fontManager->font(
                 "Mono",
                 static_cast<float>(FontSize),
                 ghoul::fontrendering::FontManager::Outline::Yes,
@@ -393,7 +401,7 @@ void RenderableDUMeshes::deinitializeGL() {
     DigitalUniverseModule::ProgramObjectManager.release(
         ProgramObjectName,
         [](ghoul::opengl::ProgramObject* p) {
-            global::renderEngine.removeRenderProgram(p);
+            global::renderEngine->removeRenderProgram(p);
         }
     );
 }
@@ -424,7 +432,7 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
                 case Wire:
                     glLineWidth(_lineWidth);
                     glDrawArrays(GL_LINE_STRIP, 0, pair.second.numV);
-                    global::renderEngine.openglStateCache().resetLineState();
+                    global::renderEngine->openglStateCache().resetLineState();
                     break;
                 case Point:
                     glDrawArrays(GL_POINTS, 0, pair.second.numV);
@@ -439,8 +447,8 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
     _program->deactivate();
 
     // Restores GL State
-    global::renderEngine.openglStateCache().resetDepthState();
-    global::renderEngine.openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
+    global::renderEngine->openglStateCache().resetBlendState();
 }
 
 void RenderableDUMeshes::renderLabels(const RenderData& data,
@@ -485,7 +493,7 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
     labelInfo.scale = pow(10.f, _textSize);
     labelInfo.enableDepth = true;
     labelInfo.enableFalseDepth = false;
-   
+
     glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), _textOpacity);
 
     for (const std::pair<glm::vec3, std::string>& pair : _labelData) {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -194,8 +194,10 @@ void WebGuiModule::internalInitialize(const ghoul::Dictionary& configuration) {
     _servedDirectories.onChange([this]() {
         std::unordered_map<std::string, std::string> newEndpoints;
         std::vector<std::string> list = _servedDirectories.value();
-        for (int i = 0; i < list.size() - 1; i += 2) {
-            newEndpoints[list[i]] = newEndpoints[list[i + 1]];
+        if (!list.empty()) {
+            for (size_t i = 0; i < list.size() - 1; i += 2) {
+                newEndpoints[list[i]] = newEndpoints[list[i + 1]];
+            }
         }
         for (const std::pair<const std::string, std::string>& e : _endpoints) {
             if (newEndpoints.find(e.first) == newEndpoints.end()) {
@@ -221,7 +223,7 @@ void WebGuiModule::internalInitialize(const ghoul::Dictionary& configuration) {
 void WebGuiModule::notifyEndpointListeners(const std::string& endpoint, bool exists) {
     using K = CallbackHandle;
     using V = EndpointCallback;
-    for (const std::pair<const K, V>& it : _endpointChangeCallbacks) {
+    for (const std::pair<K, V>& it : _endpointChangeCallbacks) {
         it.second(endpoint, exists);
     }
 }
@@ -231,7 +233,7 @@ void WebGuiModule::startProcess() {
 
     _endpoints.clear();
 
-    ServerModule* serverModule = global::moduleEngine.module<ServerModule>();
+    ServerModule* serverModule = global::moduleEngine->module<ServerModule>();
     const ServerInterface* serverInterface =
         serverModule->serverInterfaceByIdentifier(_webSocketInterface);
     if (!serverInterface) {

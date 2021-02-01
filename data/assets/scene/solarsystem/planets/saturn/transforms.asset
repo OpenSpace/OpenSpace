@@ -15,8 +15,20 @@ local SaturnBarycenter = {
     GUI = {
         Name = "Saturn Barycenter",
         Path = "/Solar System/Planets/Saturn",
-        Hidden = true
+        Hidden = true,
+        Description = [[ Saturn Barycenter position]]
     }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { SaturnBarycenter })
+
+
+asset.meta = {
+    Name = "Saturn Transforms",
+    Version = "1.0",
+    Description = [[ Saturn Barycenter transform]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = {"SaturnBarycenter"}
+}

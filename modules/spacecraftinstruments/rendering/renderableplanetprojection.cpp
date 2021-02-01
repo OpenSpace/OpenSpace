@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -234,7 +234,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     _colorTexturePaths.onChange([this](){ _colorTextureDirty = true; });
     addProperty(_colorTexturePaths);
 
-    if (dict.hasKeyAndValue<ghoul::Dictionary>(ColorTexturePathsInfo.identifier)) {
+    if (dict.hasValue<ghoul::Dictionary>(ColorTexturePathsInfo.identifier)) {
         const ghoul::Dictionary& value = dict.value<ghoul::Dictionary>(
             ColorTexturePathsInfo.identifier
         );
@@ -278,7 +278,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     addProperty(_heightMapTexturePaths);
 
 
-    if (dict.hasKeyAndValue<ghoul::Dictionary>(HeightTexturePathsInfo.identifier)) {
+    if (dict.hasValue<ghoul::Dictionary>(HeightTexturePathsInfo.identifier)) {
         const ghoul::Dictionary& value = dict.value<ghoul::Dictionary>(
             HeightTexturePathsInfo.identifier
         );
@@ -315,12 +315,14 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     addProperty(_addHeightMapTexturePath);
 
 
-    if (dict.hasKeyAndValue<bool>(MeridianShiftInfo.identifier)) {
+    if (dict.hasValue<bool>(MeridianShiftInfo.identifier)) {
         _meridianShift = dict.value<bool>(MeridianShiftInfo.identifier);
     }
 
-    float radius = std::pow(10.f, 9.f);
-    dict.getValue(KeyRadius, radius);
+    double radius = std::pow(10.0, 9.0);
+    if (dict.hasValue<double>(KeyRadius)) {
+        radius = dict.value<double>(KeyRadius);
+    }
     setBoundingSphere(radius);
 
     addPropertySubOwner(_geometry.get());
@@ -360,7 +362,7 @@ void RenderablePlanetProjection::initializeGL() {
         SpacecraftInstrumentsModule::ProgramObjectManager.request(
             ProjectiveProgramName,
             []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-                return global::renderEngine.buildRenderProgram(
+                return global::renderEngine->buildRenderProgram(
                     ProjectiveProgramName,
                     absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/"
                             "renderablePlanet_vs.glsl"
@@ -450,7 +452,7 @@ void RenderablePlanetProjection::deinitializeGL() {
     SpacecraftInstrumentsModule::ProgramObjectManager.release(
         ProjectiveProgramName,
         [](ghoul::opengl::ProgramObject* p) {
-            global::renderEngine.removeRenderProgram(p);
+            global::renderEngine->removeRenderProgram(p);
         }
     );
     _programObject = nullptr;

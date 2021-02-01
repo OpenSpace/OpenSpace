@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -121,12 +121,13 @@ namespace {
         Layer currentLayer;
         for (int i = 0; i < nSubdatasets; ++i) {
             int iDataset = -1;
-            static char IdentifierBuffer[64];
+            std::array<char, 256> IdentifierBuffer;
+            std::fill(IdentifierBuffer.begin(), IdentifierBuffer.end(), '\0');
             sscanf(
                 subDatasets[i],
-                "SUBDATASET_%i_%[^=]",
+                "SUBDATASET_%i_%256[^=]",
                 &iDataset,
-                IdentifierBuffer
+                IdentifierBuffer.data()
             );
 
 
@@ -137,7 +138,7 @@ namespace {
                 currentLayerNumber = iDataset;
             }
 
-            const std::string identifier = std::string(IdentifierBuffer);
+            const std::string identifier = std::string(IdentifierBuffer.data());
             const std::string ds(subDatasets[i]);
             const std::string value = ds.substr(ds.find_first_of('=') + 1);
 
@@ -179,28 +180,28 @@ GlobeBrowsingModule::GlobeBrowsingModule()
 void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     using namespace globebrowsing;
 
-    if (dict.hasKeyAndValue<bool>(WMSCacheEnabledInfo.identifier)) {
+    if (dict.hasValue<bool>(WMSCacheEnabledInfo.identifier)) {
         _wmsCacheEnabled = dict.value<bool>(WMSCacheEnabledInfo.identifier);
     }
-    if (dict.hasKeyAndValue<bool>(OfflineModeInfo.identifier)) {
+    if (dict.hasValue<bool>(OfflineModeInfo.identifier)) {
         _offlineMode = dict.value<bool>(OfflineModeInfo.identifier);
     }
-    if (dict.hasKeyAndValue<std::string>(WMSCacheLocationInfo.identifier)) {
+    if (dict.hasValue<std::string>(WMSCacheLocationInfo.identifier)) {
         _wmsCacheLocation = dict.value<std::string>(WMSCacheLocationInfo.identifier);
     }
-    if (dict.hasKeyAndValue<double>(WMSCacheSizeInfo.identifier)) {
+    if (dict.hasValue<double>(WMSCacheSizeInfo.identifier)) {
         _wmsCacheSizeMB = static_cast<int>(
             dict.value<double>(WMSCacheSizeInfo.identifier)
         );
     }
-    if (dict.hasKeyAndValue<double>(TileCacheSizeInfo.identifier)) {
+    if (dict.hasValue<double>(TileCacheSizeInfo.identifier)) {
         _tileCacheSizeMB = static_cast<int>(
             dict.value<double>(TileCacheSizeInfo.identifier)
         );
     }
 
     // Sanity check
-    const bool noWarning = dict.hasKeyAndValue<bool>("NoWarning") ?
+    const bool noWarning = dict.hasValue<bool>("NoWarning") ?
         dict.value<bool>("NoWarning") :
         false;
 
@@ -216,7 +217,7 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
 
 
     // Initialize
-    global::callback::initializeGL.emplace_back([&]() {
+    global::callback::initializeGL->emplace_back([&]() {
         ZoneScopedN("GlobeBrowsingModule")
 
         _tileCache = std::make_unique<cache::MemoryAwareTileCache>(_tileCacheSizeMB);
@@ -232,7 +233,7 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
         addPropertySubOwner(GdalWrapper::ref());
     });
 
-    global::callback::deinitializeGL.emplace_back([]() {
+    global::callback::deinitializeGL->emplace_back([]() {
         ZoneScopedN("GlobeBrowsingModule")
 
         tileprovider::deinitializeDefaultTile();
@@ -240,14 +241,14 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
 
 
     // Render
-    global::callback::render.emplace_back([&]() {
+    global::callback::render->emplace_back([&]() {
         ZoneScopedN("GlobeBrowsingModule")
 
         _tileCache->update();
     });
 
     // Deinitialize
-    global::callback::deinitialize.emplace_back([&]() {
+    global::callback::deinitialize->emplace_back([&]() {
         ZoneScopedN("GlobeBrowsingModule")
 
         GdalWrapper::destroy();
@@ -452,7 +453,13 @@ std::vector<documentation::Documentation> GlobeBrowsingModule::documentations() 
 void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
                                     int x, int y, int level)
 {
-    goToChunk(globe, globebrowsing::TileIndex(x, y, level), glm::vec2(0.5f, 0.5f), true);
+    ghoul_assert(level < std::numeric_limits<uint8_t>::max(), "Level way too big");
+    goToChunk(
+        globe,
+        globebrowsing::TileIndex(x, y, static_cast<uint8_t>(level)),
+        glm::vec2(0.5f, 0.5f),
+        true
+    );
 }
 
 void GlobeBrowsingModule::goToGeo(const globebrowsing::RenderableGlobe& globe,
@@ -511,7 +518,7 @@ void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
     };
 
     // Compute altitude
-    const glm::dvec3 cameraPosition = global::navigationHandler.camera()->positionVec3();
+    const glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
     SceneGraphNode* globeSceneGraphNode = dynamic_cast<SceneGraphNode*>(globe.owner());
     if (!globeSceneGraphNode) {
         LERROR(
@@ -528,10 +535,6 @@ void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
         cameraPositionModelSpace
     );
 
-    const Geodetic2 geo2 = globe.ellipsoid().cartesianToGeodetic2(
-        posHandle.centerToReferenceSurface
-    );
-
     const double altitude = glm::length(
         cameraPositionModelSpace - posHandle.centerToReferenceSurface
     );
@@ -545,7 +548,7 @@ void GlobeBrowsingModule::goToGeodetic2(const globebrowsing::RenderableGlobe& gl
 {
     using namespace globebrowsing;
 
-    const glm::dvec3 cameraPosition = global::navigationHandler.camera()->positionVec3();
+    const glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
     SceneGraphNode* globeSceneGraphNode = dynamic_cast<SceneGraphNode*>(globe.owner());
     if (!globeSceneGraphNode) {
         LERROR("Error when going to Geodetic2");
@@ -585,7 +588,7 @@ void GlobeBrowsingModule::goToGeodetic3(const globebrowsing::RenderableGlobe& gl
     state.position = positionModelSpace;
     state.up = slightlyNorth;
 
-    global::navigationHandler.setNavigationStateNextFrame(state);
+    global::navigationHandler->setNavigationStateNextFrame(state);
 }
 
 glm::dquat GlobeBrowsingModule::lookDownCameraRotation(
@@ -594,9 +597,6 @@ glm::dquat GlobeBrowsingModule::lookDownCameraRotation(
                                                             globebrowsing::Geodetic2 geo2)
 {
     using namespace globebrowsing;
-
-    // Camera is described in world space
-    const glm::dmat4 modelTransform = globe.modelTransform();
 
     // Lookup vector
     const glm::dvec3 positionModelSpace = globe.ellipsoid().cartesianSurfacePosition(
@@ -624,7 +624,7 @@ GlobeBrowsingModule::castFocusNodeRenderableToGlobe()
     using namespace globebrowsing;
 
     const Renderable* renderable =
-        global::navigationHandler.orbitalNavigator().anchorNode()->renderable();
+        global::navigationHandler->orbitalNavigator().anchorNode()->renderable();
 
     if (!renderable) {
         return nullptr;

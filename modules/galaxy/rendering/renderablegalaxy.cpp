@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -52,12 +52,6 @@
 namespace {
     constexpr int8_t CurrentCacheVersion = 1;
 
-    constexpr const char* GlslRaycastPath =
-        "${MODULE_GALAXY}/shaders/galaxyraycast.glsl";
-    constexpr const char* GlslBoundsVsPath =
-        "${MODULE_GALAXY}/shaders/raycasterbounds_vs.glsl";
-    constexpr const char* GlslBoundsFsPath =
-        "${MODULE_GALAXY}/shaders/raycasterbounds_fs.glsl";
     constexpr const char* _loggerCat = "Renderable Galaxy";
 
     constexpr const std::array<const char*, 4> UniformNamesPoints = {
@@ -157,13 +151,13 @@ namespace {
         );
         fileStream.write(reinterpret_cast<const char*>(&nPoints), sizeof(int64_t));
         fileStream.write(reinterpret_cast<const char*>(&pointsRatio), sizeof(float));
-        uint64_t nPositions = static_cast<uint64_t>(positions.size());
+        uint64_t nPositions = positions.size();
         fileStream.write(reinterpret_cast<const char*>(&nPositions), sizeof(uint64_t));
         fileStream.write(
             reinterpret_cast<const char*>(positions.data()),
             positions.size() * sizeof(glm::vec3)
         );
-        uint64_t nColors = static_cast<uint64_t>(colors.size());
+        uint64_t nColors = colors.size();
         fileStream.write(reinterpret_cast<const char*>(&nColors), sizeof(uint64_t));
         fileStream.write(
             reinterpret_cast<const char*>(colors.data()),
@@ -197,37 +191,38 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     , _downScaleVolumeRendering(DownscaleVolumeRenderingInfo, 1.f, 0.1f, 1.f)
     , _numberOfRayCastingSteps(NumberOfRayCastingStepsInfo, 1000.f, 1.f, 1000.f)
 {
-    dictionary.getValue("VolumeRenderingEnabled", _volumeRenderingEnabled);
-    dictionary.getValue("StarRenderingEnabled", _starRenderingEnabled);
-    dictionary.getValue("StepSize", _stepSize);
-    dictionary.getValue("AbsorptionMultiply", _absorptionMultiply);
-    dictionary.getValue("EmissionMultiply", _emissionMultiply);
-    dictionary.getValue("StarRenderingMethod", _starRenderingMethod);
-    dictionary.getValue("EnabledPointsRatio", _enabledPointsRatio);
-    dictionary.getValue("Translation", _translation);
-    dictionary.getValue("Rotation", _rotation);
+    if (dictionary.hasKey("VolumeRenderingEnabled")) {
+        _volumeRenderingEnabled = dictionary.value<bool>("VolumeRenderingEnabled");
+    }
+    if (dictionary.hasKey("StarRenderingEnabled")) {
+        _starRenderingEnabled = dictionary.value<bool>("StarRenderingEnabled");
+    }
 
-    if (dictionary.hasKeyAndValue<bool>(VolumeRenderingEnabledInfo.identifier)) {
+    if (dictionary.hasKey("StarRenderingMethod")) {
+        _starRenderingMethod = dictionary.value<int>("StarRenderingMethod");
+    }
+
+    if (dictionary.hasValue<bool>(VolumeRenderingEnabledInfo.identifier)) {
         _volumeRenderingEnabled = dictionary.value<bool>(
             VolumeRenderingEnabledInfo.identifier
         );
     }
 
-    if (dictionary.hasKeyAndValue<bool>(StarRenderingEnabledInfo.identifier)) {
+    if (dictionary.hasValue<bool>(StarRenderingEnabledInfo.identifier)) {
         _starRenderingEnabled = static_cast<bool>(StarRenderingEnabledInfo.identifier);
     }
 
-    if (dictionary.hasKeyAndValue<double>(StepSizeInfo.identifier)) {
+    if (dictionary.hasValue<double>(StepSizeInfo.identifier)) {
         _stepSize = static_cast<float>(dictionary.value<double>(StepSizeInfo.identifier));
     }
 
-    if (dictionary.hasKeyAndValue<double>(AbsorptionMultiplyInfo.identifier)) {
+    if (dictionary.hasValue<double>(AbsorptionMultiplyInfo.identifier)) {
         _absorptionMultiply = static_cast<float>(
             dictionary.value<double>(AbsorptionMultiplyInfo.identifier)
         );
     }
 
-    if (dictionary.hasKeyAndValue<double>(EmissionMultiplyInfo.identifier)) {
+    if (dictionary.hasValue<double>(EmissionMultiplyInfo.identifier)) {
         _emissionMultiply = static_cast<float>(
             dictionary.value<double>(EmissionMultiplyInfo.identifier)
         );
@@ -249,37 +244,36 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
         }
     }
 
-    if (dictionary.hasKeyAndValue<glm::vec3>(TranslationInfo.identifier)) {
-        _translation = dictionary.value<glm::vec3>(TranslationInfo.identifier);
+    if (dictionary.hasValue<glm::dvec3>(TranslationInfo.identifier)) {
+        _translation = dictionary.value<glm::dvec3>(TranslationInfo.identifier);
     }
 
-    if (dictionary.hasKeyAndValue<glm::vec3>(RotationInfo.identifier)) {
-        _rotation = dictionary.value<glm::vec3>(RotationInfo.identifier);
+    if (dictionary.hasValue<glm::dvec3>(RotationInfo.identifier)) {
+        _rotation = dictionary.value<glm::dvec3>(RotationInfo.identifier);
     }
 
-    if (!dictionary.hasKeyAndValue<ghoul::Dictionary>("Volume")) {
+    if (!dictionary.hasValue<ghoul::Dictionary>("Volume")) {
         LERROR("No volume dictionary specified.");
     }
 
     ghoul::Dictionary volumeDictionary = dictionary.value<ghoul::Dictionary>("Volume");
 
-    std::string volumeFilename;
-    if (volumeDictionary.getValue("Filename", volumeFilename)) {
-        _volumeFilename = absPath(volumeFilename);
+    if (volumeDictionary.hasValue<std::string>("Filename")) {
+        _volumeFilename = absPath(volumeDictionary.value<std::string>("Filename"));
     }
     else {
-        LERROR("No volume filename specified.");
+        LERROR("No volume filename specified");
     }
-    glm::vec3 volumeDimensions = glm::vec3(0.f);
-    if (volumeDictionary.getValue("Dimensions", volumeDimensions)) {
-        _volumeDimensions = static_cast<glm::ivec3>(volumeDimensions);
+
+    if (volumeDictionary.hasValue<glm::dvec3>("Dimensions")) {
+        _volumeDimensions = volumeDictionary.value<glm::dvec3>("Dimensions");
     }
     else {
-        LERROR("No volume dimensions specified.");
+        LERROR("No volume dimensions specifieds");
     }
-    glm::vec3 volumeSize = glm::vec3(0.f);
-    if (volumeDictionary.getValue("Size", volumeSize)) {
-        _volumeSize = volumeSize;
+
+    if (volumeDictionary.hasValue<glm::dvec3>("Size")) {
+        _volumeSize = volumeDictionary.value<glm::dvec3>("Size");
     }
     else {
         LERROR("No volume dimensions specified.");
@@ -296,32 +290,32 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
 
     _downScaleVolumeRendering.setVisibility(properties::Property::Visibility::Developer);
     if (volumeDictionary.hasKey(DownscaleVolumeRenderingInfo.identifier)) {
-        _downScaleVolumeRendering =
-            volumeDictionary.value<float>(DownscaleVolumeRenderingInfo.identifier);
+        _downScaleVolumeRendering = static_cast<float>(
+            volumeDictionary.value<double>(DownscaleVolumeRenderingInfo.identifier)
+        );
     }
 
-    if (!dictionary.hasKeyAndValue<ghoul::Dictionary>("Points")) {
+    if (!dictionary.hasValue<ghoul::Dictionary>("Points")) {
         LERROR("No points dictionary specified.");
     }
 
     ghoul::Dictionary pointsDictionary = dictionary.value<ghoul::Dictionary>("Points");
-    std::string pointsFilename;
-    if (pointsDictionary.getValue("Filename", pointsFilename)) {
-        _pointsFilename = absPath(pointsFilename);
+    if (pointsDictionary.hasValue<std::string>("Filename")) {
+        _pointsFilename = absPath(pointsDictionary.value<std::string>("Filename"));
     }
     else {
         LERROR("No points filename specified.");
     }
 
-    if (pointsDictionary.hasKeyAndValue<double>(EnabledPointsRatioInfo.identifier)) {
+    if (pointsDictionary.hasValue<double>(EnabledPointsRatioInfo.identifier)) {
         _enabledPointsRatio = static_cast<float>(
             pointsDictionary.value<double>(EnabledPointsRatioInfo.identifier)
         );
     }
 
-    std::string pointSpreadFunctionTexturePath;
-    if (pointsDictionary.getValue("Texture", pointSpreadFunctionTexturePath)) {
-        _pointSpreadFunctionTexturePath = absPath(pointSpreadFunctionTexturePath);
+    if (pointsDictionary.hasValue<std::string>("Texture")) {
+        _pointSpreadFunctionTexturePath =
+            absPath(pointsDictionary.value<std::string>("Texture"));
         _pointSpreadFunctionFile = std::make_unique<ghoul::filesystem::File>(
             _pointSpreadFunctionTexturePath
         );
@@ -332,10 +326,10 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
 
     auto onChange = [&](bool enabled) {
         if (enabled) {
-            global::raycasterManager.attachRaycaster(*_raycaster);
+            global::raycasterManager->attachRaycaster(*_raycaster);
         }
         else {
-            global::raycasterManager.detachRaycaster(*_raycaster);
+            global::raycasterManager->detachRaycaster(*_raycaster);
         }
     };
 
@@ -440,19 +434,19 @@ void RenderableGalaxy::initializeGL() {
     // We no longer need the data
     _volume = nullptr;
 
-    global::raycasterManager.attachRaycaster(*_raycaster);
+    global::raycasterManager->attachRaycaster(*_raycaster);
 
     // initialize points.
     if (_pointsFilename.empty()) {
         return;
     }
 
-    _pointsProgram = global::renderEngine.buildRenderProgram(
+    _pointsProgram = global::renderEngine->buildRenderProgram(
         "Galaxy points",
         absPath("${MODULE_GALAXY}/shaders/points_vs.glsl"),
         absPath("${MODULE_GALAXY}/shaders/points_fs.glsl")
     );
-    _billboardsProgram = global::renderEngine.buildRenderProgram(
+    _billboardsProgram = global::renderEngine->buildRenderProgram(
         "Galaxy billboard",
         absPath("${MODULE_GALAXY}/shaders/billboard_vs.glsl"),
         absPath("${MODULE_GALAXY}/shaders/billboard_fs.glsl"),
@@ -533,7 +527,7 @@ void RenderableGalaxy::initializeGL() {
 
 void RenderableGalaxy::deinitializeGL() {
     if (_raycaster) {
-        global::raycasterManager.detachRaycaster(*_raycaster);
+        global::raycasterManager->detachRaycaster(*_raycaster);
         _raycaster = nullptr;
     }
 
@@ -661,7 +655,7 @@ void RenderableGalaxy::renderPoints(const RenderData& data) {
     glm::dmat4 modelMatrix =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         glm::dmat4(data.modelTransform.rotation) * rotMatrix *
-        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
     glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
 
@@ -692,8 +686,8 @@ void RenderableGalaxy::renderPoints(const RenderData& data) {
     _pointsProgram->deactivate();
 
     // Restores OpenGL Rendering State
-    global::renderEngine.openglStateCache().resetBlendState();
-    global::renderEngine.openglStateCache().resetDepthState();
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
 }
 
 void RenderableGalaxy::renderBillboards(const RenderData& data) {
@@ -701,24 +695,7 @@ void RenderableGalaxy::renderBillboards(const RenderData& data) {
         return;
     }
 
-    // Saving current OpenGL state
-    GLenum blendEquationRGB;
-    GLenum blendEquationAlpha;
-    GLenum blendDestAlpha;
-    GLenum blendDestRGB;
-    GLenum blendSrcAlpha;
-    GLenum blendSrcRGB;
-    GLboolean depthMask;
-
-    glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
-    glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
-    glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
-    glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
-    glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
-    glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
-
-    glGetBooleanv(GL_DEPTH_WRITEMASK, &depthMask);
-
+    // Change OpenGL Blending and Depth states
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glDepthMask(false);
     glDisable(GL_DEPTH_TEST);
@@ -736,7 +713,7 @@ void RenderableGalaxy::renderBillboards(const RenderData& data) {
     glm::dmat4 modelMatrix =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         glm::dmat4(data.modelTransform.rotation) * rotMatrix *
-        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
+        glm::scale(glm::dmat4(1.0), data.modelTransform.scale);
 
     glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
 
@@ -770,14 +747,9 @@ void RenderableGalaxy::renderBillboards(const RenderData& data) {
 
     _billboardsProgram->deactivate();
 
-    glEnable(GL_DEPTH_TEST);
-    glDepthMask(true);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    // Restores OpenGL blending state
-    glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
-    glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
-    glDepthMask(depthMask);
+    // Restores OpenGL Rendering State
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
 }
 
 float RenderableGalaxy::safeLength(const glm::vec3& vector) const {

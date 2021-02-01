@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,7 +45,7 @@ int isLoaded(lua_State* L) {
         ghoul::lua::PopValue::Yes
     );
 
-    const std::vector<OpenSpaceModule*>& modules = global::moduleEngine.modules();
+    const std::vector<OpenSpaceModule*>& modules = global::moduleEngine->modules();
 
     auto it = std::find_if(
         modules.begin(),

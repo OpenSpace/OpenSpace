@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,35 +39,6 @@
 
 #include <ghoul/logging/logmanager.h>
 
-namespace {
-    constexpr const uint32_t ProtocolVersion = 3;
-    constexpr const size_t MaxLatencyDiffs = 64;
-
-    constexpr openspace::properties::Property::PropertyInfo BufferTimeInfo = {
-        "BufferTime",
-        "Buffer Time",
-        "" // @TODO Missing documentation
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo TimeKeyFrameInfo = {
-        "TimeKeyframeInterval",
-        "Time keyframe interval",
-        "" // @TODO Missing documentation
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo CameraKeyFrameInfo = {
-        "CameraKeyframeInterval",
-        "Camera Keyframe interval",
-        "" // @TODO Missing documentation
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo TimeToleranceInfo = {
-        "TimeTolerance",
-        "Time tolerance",
-        "" // @TODO Missing documentation
-    };
-} // namespace
-
 namespace openspace {
 
 ExternInteraction::ExternInteraction()
@@ -82,7 +53,7 @@ void ExternInteraction::cameraInteraction(datamessagestructures::CameraKeyframe 
     pose.scale = std::move(kf._scale);
     pose.followFocusNodeRotation = std::move(kf._followNodeRotation);
 
-    global::navigationHandler.keyframeNavigator().addKeyframe(kf._timestamp, pose);
+    global::navigationHandler->keyframeNavigator().addKeyframe(kf._timestamp, pose);
 }
 
 void ExternInteraction::timeInteraction(datamessagestructures::TimeKeyframe kf) {
@@ -91,18 +62,18 @@ void ExternInteraction::timeInteraction(datamessagestructures::TimeKeyframe kf) 
     timeKfData.pause = std::move(kf._paused);
     timeKfData.jump = std::move(kf._requiresTimeJump);
 
-    global::timeManager.addKeyframe(kf._timestamp, timeKfData);
+    global::timeManager->addKeyframe(kf._timestamp, timeKfData);
 }
 
 void ExternInteraction::scriptInteraction(datamessagestructures::ScriptMessage sm) {
-    global::scriptEngine.queueScript(
+    global::scriptEngine->queueScript(
         std::move(sm._script),
         scripting::ScriptEngine::RemoteScripting::No
     );
 }
 
 datamessagestructures::CameraKeyframe ExternInteraction::generateCameraKeyframe() {
-    interaction::NavigationHandler& navHandler = global::navigationHandler;
+    interaction::NavigationHandler& navHandler = *global::navigationHandler;
     datamessagestructures::CameraKeyframe kf;
     const SceneGraphNode* focusNode = navHandler.orbitalNavigator().anchorNode();
 
@@ -126,21 +97,21 @@ datamessagestructures::CameraKeyframe ExternInteraction::generateCameraKeyframe(
     kf._scale = navHandler.camera()->scaling();
 
     // Timestamp as current runtime of OpenSpace instance
-    kf._timestamp = global::windowDelegate.applicationTime();
+    kf._timestamp = global::windowDelegate->applicationTime();
 
     return kf;
 }
 
 datamessagestructures::TimeKeyframe ExternInteraction::generateTimeKeyframe() {
     datamessagestructures::TimeKeyframe kf;
-    const Time& time = global::timeManager.time();
+    const Time& time = global::timeManager->time();
 
-    kf._dt = global::timeManager.deltaTime();
-    kf._paused = global::timeManager.isPaused();
+    kf._dt = global::timeManager->deltaTime();
+    kf._paused = global::timeManager->isPaused();
     kf._time = time.j2000Seconds();
 
     // Timestamp as current runtime of OpenSpace instance
-    kf._timestamp = global::windowDelegate.applicationTime();
+    kf._timestamp = global::windowDelegate->applicationTime();
     return kf;
 }
 
@@ -150,7 +121,7 @@ datamessagestructures::ScriptMessage ExternInteraction::generateScriptMessage(
     datamessagestructures::ScriptMessage sm;
     sm._script = std::move(script);
     // Timestamp as current runtime of OpenSpace instance
-    sm._timestamp = global::windowDelegate.applicationTime();
+    sm._timestamp = global::windowDelegate->applicationTime();
     return sm;
 }
 

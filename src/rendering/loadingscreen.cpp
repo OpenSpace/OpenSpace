@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -112,7 +112,7 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
     , _showProgressbar(showProgressbar)
     , _randomEngine(_randomDevice())
 {
-    _loadingFont = global::fontManager.font(
+    _loadingFont = global::fontManager->font(
         "Loading",
         LoadingFontSize,
         ghoul::fontrendering::FontManager::Outline::No,
@@ -120,7 +120,7 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
     );
 
     if (_showMessage) {
-        _messageFont = global::fontManager.font(
+        _messageFont = global::fontManager->font(
             "Loading",
             MessageFontSize,
             ghoul::fontrendering::FontManager::Outline::No,
@@ -129,7 +129,7 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
     }
 
     if (_showNodeNames) {
-        _itemFont = global::fontManager.font(
+        _itemFont = global::fontManager->font(
             "Loading",
             ItemFontSize,
             ghoul::fontrendering::FontManager::Outline::No,
@@ -165,9 +165,9 @@ void LoadingScreen::render() {
     // We have to recalculate the positions here because we will not be informed about a
     // window size change
 
-    const glm::vec2 dpiScaling = global::windowDelegate.dpiScaling();
+    const glm::vec2 dpiScaling = global::windowDelegate->dpiScaling();
     const glm::ivec2 res =
-        glm::vec2(global::windowDelegate.currentSubwindowSize()) * dpiScaling;
+        glm::vec2(global::windowDelegate->currentSubwindowSize()) * dpiScaling;
 
     float screenAspectRatio = static_cast<float>(res.x) / static_cast<float>(res.y);
 
@@ -322,15 +322,10 @@ void LoadingScreen::render() {
                     (item.name + " 100%\n99999999/99999999")
                 );
 
-                // The maximum count is in here since we can't control the amount of
-                // screen estate and the number of nodes.  Rather than looping forever
-                // we make use with an overlap in the worst case
-                bool foundSpace = false;
-
                 glm::vec2 ll = glm::vec2(0.f);
                 glm::vec2 ur = glm::vec2(0.f);
                 int i = 0;
-                for (; i < MaxNumberLocationSamples && !foundSpace; ++i) {
+                for (; i < MaxNumberLocationSamples; ++i) {
                     std::uniform_int_distribution<int> distX(
                         15,
                         static_cast<int>(res.x - b.x - 15)
@@ -485,7 +480,7 @@ void LoadingScreen::render() {
     glEnable(GL_DEPTH_TEST);
 
     std::this_thread::sleep_for(RefreshRate);
-    global::windowDelegate.swapBuffer();
+    global::windowDelegate->swapBuffer();
     FrameMarkEnd("Loading")
 }
 

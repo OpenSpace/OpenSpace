@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,104 +24,174 @@
 
 #include <modules/exoplanets/exoplanetshelper.h>
 
+#include <openspace/util/spicemanager.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/fmt.h>
+#include <ghoul/logging/logmanager.h>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/transform.hpp>
 #include <string_view>
+#include <fstream>
+#include <sstream>
+
+namespace {
+    constexpr const char* _loggerCat = "ExoplanetsModule";
+
+    constexpr const char* BvColormapPath = "${SYNC}/http/stars_colormap/2/colorbv.cmap";
+}
 
 namespace openspace::exoplanets {
 
-std::string_view speckStarName(std::string_view csvName) {
-    if (csvName == "HD 1237") { return "GJ 3021"; }
-    if (csvName == "MOA-2009-BLG-387L") { return "MOA 2009-BLG-387L"; }
-    if (csvName == "HD 126614 A") { return "HD 126614"; }
-    if (csvName == "epsilon Ret") { return "HD 27442"; }
-    if (csvName == "PH-1") { return "PH1"; }
-    if (csvName == "gamma Leo A") { return "gam 1 Leo"; }
-    if (csvName == "OGLE-2007-BLG-368L") { return "OGLE 2007-BLG-368L"; }
-    if (csvName == "alpha Ari") { return "alf Ari"; }
-    if (csvName == "mu Ara") { return "HD 160691"; }
-    if (csvName == "OGLE-05-169L") { return "OGLE 2005-BLG-169L"; }
-    if (csvName == "tau Gru") { return "HD 216435"; }
-    if (csvName == "iota Hor") { return "HR 810"; }
-    if (csvName == "OGLE-05-071L") { return "OGLE 2005-BLG-71L"; }
-    if (csvName == "OGLE235-MOA53") { return "OGLE 2003-BLG-235L"; }
-    if (csvName == "MOA-2008-BLG-310L") { return "MOA 2008-BLG-310L"; }
-    if (csvName == "KIC 11442793") { return "KOI-351"; }
-    if (csvName == "OGLE-2006-BLG-109L") { return "OGLE 2006-BLG-109L"; }
-    if (csvName == "HD 137388") { return "HD 137388 A"; }
-    if (csvName == "kappa CrB") { return "kap CrB"; }
-    if (csvName == "XO-2") { return "XO-2 N"; }
-    if (csvName == "epsilon Tau") { return  "eps Tau"; }
-    if (csvName == "epsilon Eri") { return "eps Eri"; }
-    if (csvName == "Kepler-448") { return "KOI-12"; }
-    if (csvName == "omega Ser") { return "ome Ser"; }
-    if (csvName == "MOA-2010-BLG-477L") { return "MOA 2010-BLG-477L"; }
-    if (csvName == "GJ 176") { return "HD 285968"; }
-    if (csvName == "HIP 2247") { return "BD-17 63"; }
-    if (csvName == "MOA-2009-BLG-266L") { return "MOA 2009-BLG-266L"; }
-    if (csvName == "Kepler-89") { return "KOI-94"; }
-    if (csvName == "iota Dra") { return "HIP 75458"; }
-    if (csvName == "MOA-2007-BLG-400L") { return "MOA 2007-BLG-400L"; }
-    if (csvName == "upsilon And") { return "ups And"; }
-    if (csvName == "OGLE-2011-BLG-0251") { return "OGLE 2011-BLG-251L"; }
-    if (csvName == "OGLE-05-390L") { return "OGLE 2005-BLG-390L"; }
-    if (csvName == "Kepler-420") { return "KOI-1257"; }
-    if (csvName == "beta Pic") { return "bet Pic"; }
-    if (csvName == "gamma Cep") { return "gam Cep"; }
-    if (csvName == "MOA-2007-BLG-192L") { return "MOA 2007-BLG-192L"; }
-    if (csvName == "MOA-2009-BLG-319L") { return "MOA 2009-BLG-319L"; }
-    if (csvName == "omicron CrB") { return "omi CrB"; }
-    if (csvName == "beta Gem") { return "HD 62509"; }
-    if (csvName == "epsilon CrB") { return "eps CrB"; }
-    if (csvName == "omicron UMa") { return "omi UMa"; }
-    if (csvName == "HD 142022") { return "HD 142022 A"; }
-    return csvName;
+bool isValidPosition(const glm::vec3& pos) {
+    return !glm::any(glm::isnan(pos));
 }
 
-std::string_view csvStarName(std::string_view name) {
-    if (name == "GJ 3021") { return "HD 1237"; }
-    if (name == "MOA 2009-BLG-387L") { return "MOA-2009-BLG-387L"; }
-    if (name == "HD 126614") { return "HD 126614 A"; }
-    if (name == "HD 27442") { return "epsilon Ret"; }
-    if (name == "PH1") { return "PH-1"; }
-    if (name == "gam 1 Leo") { return "gamma Leo A"; }
-    if (name == "OGLE 2007-BLG-368L") { return "OGLE-2007-BLG-368L"; }
-    if (name == "alf Ari") { return "alpha Ari"; }
-    if (name == "HD 160691") { return "mu Ara"; }
-    if (name == "OGLE 2005-BLG-169L") { return "OGLE-05-169L"; }
-    if (name == "HD 216435") { return "tau Gru"; }
-    if (name == "HR 810") { return "iota Hor"; }
-    if (name == "OGLE 2005-BLG-71L") { return "OGLE-05-071L"; }
-    if (name == "OGLE 2003-BLG-235L") { return "OGLE235-MOA53"; }
-    if (name == "MOA 2008-BLG-310L") { return "MOA-2008-BLG-310L"; }
-    if (name == "KOI-351") { return "KIC 11442793"; }
-    if (name == "OGLE 2006-BLG-109L") { return "OGLE-2006-BLG-109L"; }
-    if (name == "HD 137388 A") { return "HD 137388"; }
-    if (name == "kap CrB") { return "kappa CrB"; }
-    if (name == "XO-2 N") { return "XO-2"; }
-    if (name == "eps Tau") { return "epsilon Tau"; }
-    if (name == "eps Eri") { return "epsilon Eri"; }
-    if (name == "KOI-12") { return "Kepler-448"; }
-    if (name == "ome Ser") { return "omega Ser"; }
-    if (name == "MOA 2010-BLG-477L") { return "MOA-2010-BLG-477L"; }
-    if (name == "HD 285968") { return "GJ 176"; }
-    if (name == "BD-17 63") { return "HIP 2247"; }
-    if (name == "MOA 2009-BLG-266L") { return "MOA-2009-BLG-266L"; }
-    if (name == "KOI-94") { return "Kepler-89"; }
-    if (name == "HIP 75458") { return "iota Dra"; }
-    if (name == "MOA 2007-BLG-400L") { return "MOA-2007-BLG-400L"; }
-    if (name == "ups And") { return "upsilon And"; }
-    if (name == "OGLE 2011-BLG-251L") { return "OGLE-2011-BLG-0251"; }
-    if (name == "OGLE 2005-BLG-390L") { return "OGLE-05-390L"; }
-    if (name == "KOI-1257") { return "Kepler-420"; }
-    if (name == "bet Pic") { return "beta Pic"; }
-    if (name == "gam Cep") { return "gamma Cep"; }
-    if (name == "MOA 2007-BLG-192L") { return "MOA-2007-BLG-192L"; }
-    if (name == "MOA 2009-BLG-319L") { return "MOA-2009-BLG-319L"; }
-    if (name == "omi CrB") { return "omicron CrB"; }
-    if (name == "HD 62509") { return "beta Gem"; }
-    if (name == "eps CrB") { return "epsilon CrB"; }
-    if (name == "omi UMa") { return "omicron UMa"; }
-    if (name == "HD 142022 A") { return "HD 142022"; }
+bool hasSufficientData(const ExoplanetDataEntry& p) {
+    const glm::vec3 starPosition{ p.positionX , p.positionY, p.positionZ };
+
+    bool validStarPosition = isValidPosition(starPosition);
+    bool hasSemiMajorAxis = !std::isnan(p.a);
+    bool hasOrbitalPeriod = !std::isnan(p.per);
+
+    return validStarPosition && hasSemiMajorAxis && hasOrbitalPeriod;
+}
+
+glm::vec3 starColor(float bv) {
+    std::ifstream colorMap(absPath(BvColormapPath), std::ios::in);
+
+    if (!colorMap.good()) {
+        LERROR(fmt::format(
+            "Failed to open colormap data file: '{}'",
+            absPath(BvColormapPath)
+        ));
+        return glm::vec3(0.f, 0.f, 0.f);
+    }
+
+    const int t = static_cast<int>(round(((bv + 0.4) / (2.0 + 0.4)) * 255));
+    std::string color;
+    for (int i = 0; i < t + 12; i++) {
+        getline(colorMap, color);
+    }
+    colorMap.close();
+
+    std::istringstream colorStream(color);
+    float r, g, b;
+    colorStream >> r >> g >> b;
+
+    return glm::vec3(r, g, b);
+}
+
+glm::dmat4 computeOrbitPlaneRotationMatrix(float i, float bigom, float omega) {
+    // Exoplanet defined inclination changed to be used as Kepler defined inclination
+    const glm::dvec3 ascendingNodeAxisRot = glm::dvec3(0.0, 0.0, 1.0);
+    const glm::dvec3 inclinationAxisRot = glm::dvec3(1.0, 0.0, 0.0);
+    const glm::dvec3 argPeriapsisAxisRot = glm::dvec3(0.0, 0.0, 1.0);
+
+    const double asc = glm::radians(bigom);
+    const double inc = glm::radians(i);
+    const double per = glm::radians(omega);
+
+    const glm::dmat4 orbitPlaneRotation =
+        glm::rotate(asc, glm::dvec3(ascendingNodeAxisRot)) *
+        glm::rotate(inc, glm::dvec3(inclinationAxisRot)) *
+        glm::rotate(per, glm::dvec3(argPeriapsisAxisRot));
+
+    return orbitPlaneRotation;
+}
+
+glm::dmat3 computeSystemRotation(glm::dvec3 starPosition) {
+    const glm::dvec3 sunPosition = glm::dvec3(0.0, 0.0, 0.0);
+    const glm::dvec3 starToSunVec = glm::normalize(sunPosition - starPosition);
+    const glm::dvec3 galacticNorth = glm::dvec3(0.0, 0.0, 1.0);
+
+    const glm::dmat3 galacticToCelestialMatrix =
+        SpiceManager::ref().positionTransformMatrix("GALACTIC", "J2000", 0.0);
+
+    const glm::dvec3 celestialNorth = glm::normalize(
+        galacticToCelestialMatrix * galacticNorth
+    );
+
+    // Earth's north vector projected onto the skyplane, the plane perpendicular to the
+    // viewing vector (starToSunVec)
+    const float celestialAngle = static_cast<float>(glm::dot(
+        celestialNorth,
+        starToSunVec
+    ));
+    glm::dvec3 northProjected = glm::normalize(
+        celestialNorth - (celestialAngle / glm::length(starToSunVec)) * starToSunVec
+    );
+
+    const glm::dvec3 beta = glm::normalize(glm::cross(starToSunVec, northProjected));
+
+    return glm::dmat3(
+        northProjected.x,
+        northProjected.y,
+        northProjected.z,
+        beta.x,
+        beta.y,
+        beta.z,
+        starToSunVec.x,
+        starToSunVec.y,
+        starToSunVec.z
+    );
+}
+
+glm::vec2 computeHabitableZone(float teff, float luminosity) {
+    // Kopparapu's formula only considers stars with teff in range [2600, 7200] K.
+    // However, we want to use the formula for more stars, so add some flexibility to
+    // the teff boundaries
+    if (teff > 8000.f || teff < 2000.f) {
+        // For the other stars, use a method by Tom E. Morris:
+        // https://www.planetarybiology.com/calculating_habitable_zone.html
+        float inner = std::sqrt(luminosity / 1.1f);
+        float outer = std::sqrt(luminosity / 0.53f);
+        return glm::vec2(inner, outer);
+    }
+
+    struct Coefficients {
+        float seffSun;
+        float a;
+        float b;
+        float c;
+        float d;
+    };
+
+    // Coefficients for planets of 1 Earth mass. Received from:
+    // https://depts.washington.edu/naivpl/sites/default/files/HZ_coefficients.dat
+    constexpr const Coefficients coefficients[] = {
+        // Inner boundary - Runaway greenhouse
+        {1.10700E+00f, 1.33200E-04f, 1.58000E-08f, -8.30800E-12f, -1.93100E-15f},
+        // Outer boundary - Maximum greenhouse
+        {3.56000E-01f, 6.17100E-05f, 1.69800E-09f, -3.19800E-12f, -5.57500E-16f}
+    };
+
+    const float tstar = teff - 5780.f;
+    const float tstar2 = tstar * tstar;
+
+    glm::vec2 distances;
+    for (int i = 0; i < 2; ++i) {
+        const Coefficients& coeffs = coefficients[i];
+        float seff = coeffs.seffSun + (coeffs.a * tstar) + (coeffs.b * tstar2) +
+                     (coeffs.c * tstar * tstar2) + (coeffs.d * tstar2 * tstar2);
+
+        distances[i] = std::pow(luminosity / seff, 0.5f);
+    }
+
+    return distances;
+}
+
+std::string createIdentifier(std::string name) {
+    std::replace(name.begin(), name.end(), ' ', '_');
+    std::replace(name.begin(), name.end(), '.', '-');
+    sanitizeNameString(name);
     return name;
+}
+
+void sanitizeNameString(std::string& s) {
+    // We want to avoid quotes and apostrophes in names, since they cause problems
+    // when a string is translated to a script call
+    s.erase(remove(s.begin(), s.end(), '\"'), s.end());
+    s.erase(remove(s.begin(), s.end(), '\''), s.end());
 }
 
 } // namespace openspace::exoplanets

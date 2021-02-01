@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -301,7 +301,7 @@ int ErrorHistogramManager::parentOffset(int offset, int base) const {
         return -1;
     }
     const int depth = static_cast<int>(
-        floor(log(((base - 1) * offset + 1.0)) / log(base))
+        floor(log1p(((base - 1) * offset)) / log(base))
     );
     const int firstInLevel = static_cast<int>((pow(base, depth) - 1) / (base - 1));
     const int inLevelOffset = offset - firstInLevel;

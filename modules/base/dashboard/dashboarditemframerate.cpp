@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,22 +34,6 @@
 #include <ghoul/misc/profiling.h>
 
 namespace {
-    constexpr const char* KeyFontMono = "Mono";
-    constexpr const float DefaultFontSize = 10.f;
-
-    constexpr openspace::properties::Property::PropertyInfo FontNameInfo = {
-        "FontName",
-        "Font Name",
-        "This value is the name of the font that is used. It can either refer to an "
-        "internal name registered previously, or it can refer to a path that is used."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
-        "FontSize",
-        "Font Size",
-        "This value determines the size of the font that is used to render the date."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo FrametimeInfo = {
         "FrametimeType",
         "Type of the frame time display",
@@ -75,7 +59,7 @@ namespace {
         return fmt::format_to(
             buffer.data(),
             "Avg. Frametime: {:.2f} ms\0",
-            openspace::global::windowDelegate.averageDeltaTime() * 1000.0
+            openspace::global::windowDelegate->averageDeltaTime() * 1000.0
         );
     }
 
@@ -87,8 +71,8 @@ namespace {
             buffer.data(),
             "Last frametimes between: {:.2f} and {:.2f} ms\n"
             "Overall between: {:.2f} and {:.2f} ms\0",
-            openspace::global::windowDelegate.minDeltaTime() * 1000.0,
-            openspace::global::windowDelegate.maxDeltaTime() * 1000.0,
+            openspace::global::windowDelegate->minDeltaTime() * 1000.0,
+            openspace::global::windowDelegate->maxDeltaTime() * 1000.0,
             minFrametimeCache,
             maxFrametimeCache
         );
@@ -98,7 +82,7 @@ namespace {
         return fmt::format_to(
             buffer.data(),
             "Frametime standard deviation : {:.2f} ms\0",
-            openspace::global::windowDelegate.deltaTimeStandardDeviation() * 1000.0
+            openspace::global::windowDelegate->deltaTimeStandardDeviation() * 1000.0
         );
     }
 
@@ -106,8 +90,8 @@ namespace {
         return fmt::format_to(
             buffer.data(),
             "Frametime coefficient of variation : {:.2f} %\0",
-            openspace::global::windowDelegate.deltaTimeStandardDeviation() /
-            openspace::global::windowDelegate.averageDeltaTime() * 100.0
+            openspace::global::windowDelegate->deltaTimeStandardDeviation() /
+            openspace::global::windowDelegate->averageDeltaTime() * 100.0
         );
     }
 
@@ -115,7 +99,7 @@ namespace {
         return fmt::format_to(
             buffer.data(),
             "FPS: {:3.2f}\0",
-            1.0 / openspace::global::windowDelegate.deltaTime()
+            1.0 / openspace::global::windowDelegate->deltaTime()
         );
     }
 
@@ -123,7 +107,7 @@ namespace {
         return fmt::format_to(
             buffer.data(),
             "Avg. FPS: {:3.2f}\0",
-            1.0 / openspace::global::windowDelegate.averageDeltaTime()
+            1.0 / openspace::global::windowDelegate->averageDeltaTime()
         );
     }
 
@@ -166,18 +150,6 @@ documentation::Documentation DashboardItemFramerate::Documentation() {
                 Optional::No
             },
             {
-                FontNameInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                FontNameInfo.description
-            },
-            {
-                FontSizeInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                FontSizeInfo.description
-            },
-            {
                 FrametimeInfo.identifier,
                 new StringInListVerifier({ ValueDtAvg, ValueDtExtremes,
                     ValueDtStandardDeviation, ValueDtCov, ValueFps, ValueFpsAvg, ValueNone
@@ -190,9 +162,7 @@ documentation::Documentation DashboardItemFramerate::Documentation() {
 }
 
 DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictionary)
-    : DashboardItem(dictionary)
-    , _fontName(FontNameInfo, KeyFontMono)
-    , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
+    : DashboardTextItem(dictionary)
     , _frametimeType(FrametimeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _clearCache(ClearCacheInfo)
 {
@@ -201,24 +171,6 @@ DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictiona
         dictionary,
         "DashboardItemFramerate"
     );
-
-    if (dictionary.hasKey(FontNameInfo.identifier)) {
-        _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
-    }
-    _fontName.onChange([this]() {
-        _font = global::fontManager.font(_fontName, _fontSize);
-    });
-    addProperty(_fontName);
-
-    if (dictionary.hasKey(FontSizeInfo.identifier)) {
-        _fontSize = static_cast<float>(
-            dictionary.value<double>(FontSizeInfo.identifier)
-        );
-    }
-    _fontSize.onChange([this](){
-        _font = global::fontManager.font(_fontName, _fontSize);
-    });
-    addProperty(_fontSize);
 
     _frametimeType.addOptions({
         { static_cast<int>(FrametimeType::DtTimeAvg), ValueDtAvg },
@@ -272,8 +224,6 @@ DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictiona
     });
     addProperty(_clearCache);
 
-    _font = global::fontManager.font(_fontName, _fontSize);
-
     _buffer.resize(128);
 }
 
@@ -288,16 +238,16 @@ void DashboardItemFramerate::render(glm::vec2& penPosition) {
 
     _minDeltaTimeCache = std::min(
         _minDeltaTimeCache,
-        global::windowDelegate.minDeltaTime() * 1000.0
+        global::windowDelegate->minDeltaTime() * 1000.0
     );
     _maxDeltaTimeCache = std::max(
         _maxDeltaTimeCache,
-        global::windowDelegate.maxDeltaTime() * 1000.0
+        global::windowDelegate->maxDeltaTime() * 1000.0
     );
 
     FrametimeType frametimeType = FrametimeType(_frametimeType.value());
 
-    std::fill(_buffer.begin(), _buffer.end(), 0);
+    std::fill(_buffer.begin(), _buffer.end(), char(0));
     char* end = format(
         _buffer,
         frametimeType,
@@ -309,21 +259,20 @@ void DashboardItemFramerate::render(glm::vec2& penPosition) {
     int nLines = output.empty() ? 0 :
         static_cast<int>((std::count(output.begin(), output.end(), '\n') + 1));
 
-    penPosition.y -= _font->height() * static_cast<float>(nLines);
-
     ghoul::fontrendering::FontRenderer::defaultRenderer().render(
         *_font,
         penPosition,
         output
     );
+    penPosition.y -= _font->height() * static_cast<float>(nLines);
 }
 
 glm::vec2 DashboardItemFramerate::size() const {
     ZoneScoped
 
     const FrametimeType t = FrametimeType(_frametimeType.value());
-    format(_buffer, t, _minDeltaTimeCache, _maxDeltaTimeCache);
-    std::string_view output = _buffer.data();
+    char* end = format(_buffer, t, _minDeltaTimeCache, _maxDeltaTimeCache);
+    std::string_view output = std::string_view(_buffer.data(), end - _buffer.data());
 
     if (output.empty()) {
         return { 0.f, 0.f };

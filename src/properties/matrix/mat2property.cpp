@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,8 +36,8 @@ glm::mat2x2 fromLuaConversion(lua_State* state, bool& success) {
     glm::mat2x2 result = glm::mat2x2(1.f);
     lua_pushnil(state);
     int number = 1;
-    for (glm::length_t i = 0; i < ghoul::glm_cols<glm::mat2x2>::value; ++i) {
-        for (glm::length_t j = 0; j < ghoul::glm_rows<glm::mat2x2>::value; ++j) {
+    for (glm::length_t i = 0; i < glm::mat2x2::row_type::length(); ++i) {
+        for (glm::length_t j = 0; j < glm::mat2x2::col_type::length(); ++j) {
             int hasNext = lua_next(state, -2);
             if (hasNext != 1) {
                 success = false;
@@ -65,8 +65,8 @@ glm::mat2x2 fromLuaConversion(lua_State* state, bool& success) {
 bool toLuaConversion(lua_State* state, glm::mat2x2 value) {
     lua_newtable(state);
     int number = 1;
-    for (glm::length_t i = 0; i < ghoul::glm_cols<glm::mat2x2>::value; ++i) {
-        for (glm::length_t j = 0; j < ghoul::glm_rows<glm::mat2x2>::value; ++j) {
+    for (glm::length_t i = 0; i < glm::mat2x2::row_type::length(); ++i) {
+        for (glm::length_t j = 0; j < glm::mat2x2::col_type::length(); ++j) {
             lua_pushnumber(state, static_cast<lua_Number>(value[i][j]));
             lua_rawseti(state, -2, number);
             ++number;
@@ -78,15 +78,13 @@ bool toLuaConversion(lua_State* state, glm::mat2x2 value) {
 glm::mat2x2 fromStringConversion(const std::string& val, bool& success) {
     glm::mat2x2 result = glm::mat2x2(1.f);
     std::vector<std::string> tokens = ghoul::tokenizeString(val, ',');
-    if (tokens.size() !=
-        (ghoul::glm_rows<glm::mat2x2>::value * ghoul::glm_cols<glm::mat2x2>::value))
-    {
+    if (tokens.size() != ghoul::glm_components<glm::mat2x2>::value) {
         success = false;
         return result;
     }
     int number = 0;
-    for (glm::length_t i = 0; i < ghoul::glm_cols<glm::mat2x2>::value; ++i) {
-        for (glm::length_t j = 0; j < ghoul::glm_rows<glm::mat2x2>::value; ++j) {
+    for (glm::length_t i = 0; i < glm::mat2x2::row_type::length(); ++i) {
+        for (glm::length_t j = 0; j < glm::mat2x2::col_type::length(); ++j) {
             std::stringstream s(tokens[number]);
             glm::mat2x2::value_type v;
             s >> v;
@@ -106,8 +104,8 @@ glm::mat2x2 fromStringConversion(const std::string& val, bool& success) {
 
 bool toStringConversion(std::string& outValue, glm::mat2x2 inValue) {
     outValue = "[";
-    for (glm::length_t i = 0; i < ghoul::glm_cols<glm::mat2x2>::value; ++i) {
-        for (glm::length_t j = 0; j < ghoul::glm_rows<glm::mat2x2>::value; ++j) {
+    for (glm::length_t i = 0; i < glm::mat2x2::row_type::length(); ++i) {
+        for (glm::length_t j = 0; j < glm::mat2x2::col_type::length(); ++j) {
             outValue += std::to_string(inValue[i][j]) + ",";
         }
     }

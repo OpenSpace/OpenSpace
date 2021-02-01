@@ -32,15 +32,16 @@ local Europa = {
             FileName = labelsPath .. "/europa.labels",
             LabelAlignmentOption = "Horizontally", -- or Circularly
             LabelsFontSize = 40.0,
-            LabelsSize = 10.5,
+            LabelsSize = 10.0,
             LabelsMinSize = 1.0,
             LabelsMaxSize = 1500.0,
             ProximityEnabled = false,
             LabelsFadeInEnabled = true,
-            FadeInStartingDistance = 15000000.0,
-            FadeOutStartingDistance = 1000000.0,
+            LabelsFadeOutEnabled = true,
+            FadeInStartingDistance = 8000000.0,
+            FadeOutStartingDistance = 5000000.0,
             LabelsForceDomeRendering = true,
-            LabelsDistanceEPS = 1350000.0,
+            LabelsDistanceEPS = 700000.0,
             LabelsColor = { 1.0, 1.0, 0.0 }
         }
     },
@@ -50,6 +51,15 @@ local Europa = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Europa })
+
+
+asset.meta = {
+    Name = "Mimas",
+    Version = "1.0",
+    Description = [[ Europa globe with labels.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = {"Europa"}
+}

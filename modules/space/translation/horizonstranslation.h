@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -59,7 +59,10 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    void readHorizonsTextFile(const std::string& _horizonsTextFilePath);
+    void loadData();
+    void readHorizonsTextFile();
+    bool loadCachedFile(const std::string& file);
+    void saveCachedFile(const std::string& file) const;
 
     properties::StringProperty _horizonsTextFile;
     std::unique_ptr<ghoul::filesystem::File> _fileHandle;

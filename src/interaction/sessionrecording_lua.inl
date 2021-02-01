@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,10 +39,10 @@ int startRecording(lua_State* L) {
     if (recordFilePath.empty()) {
         return luaL_error(L, "filepath string is empty");
     }
-    global::sessionRecording.setRecordDataFormat(
-        openspace::interaction::SessionRecording::RecordedDataMode::Binary
+    global::sessionRecording->setRecordDataFormat(
+        interaction::SessionRecording::DataMode::Binary
     );
-    global::sessionRecording.startRecording(recordFilePath);
+    global::sessionRecording->startRecording(recordFilePath);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -62,10 +62,10 @@ int startRecordingAscii(lua_State* L) {
     if (recordFilePath.empty()) {
         return luaL_error(L, "filepath string is empty");
     }
-    global::sessionRecording.setRecordDataFormat(
-        openspace::interaction::SessionRecording::RecordedDataMode::Ascii
+    global::sessionRecording->setRecordDataFormat(
+        interaction::SessionRecording::DataMode::Ascii
     );
-    global::sessionRecording.startRecording(recordFilePath);
+    global::sessionRecording->startRecording(recordFilePath);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -74,13 +74,13 @@ int startRecordingAscii(lua_State* L) {
 int stopRecording(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::stopRecording");
 
-    global::sessionRecording.stopRecording();
+    global::sessionRecording->stopRecording();
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
-int startPlayback(lua_State* L, openspace::interaction::KeyframeTimeRef timeMode,
+int startPlayback(lua_State* L, interaction::KeyframeTimeRef timeMode,
                   bool forceSimTimeAtStart)
 {
     using ghoul::lua::luaTypeToString;
@@ -95,8 +95,8 @@ int startPlayback(lua_State* L, openspace::interaction::KeyframeTimeRef timeMode
         return luaL_error(L, "filepath string is empty");
     }
 
-    global::sessionRecording.startPlayback(
-        playbackFilePath,
+    global::sessionRecording->startPlayback(
+        const_cast<std::string&>(playbackFilePath),
         timeMode,
         forceSimTimeAtStart
     );
@@ -107,36 +107,36 @@ int startPlayback(lua_State* L, openspace::interaction::KeyframeTimeRef timeMode
 
 int startPlaybackDefault(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::startPlaybackDefault");
-    using openspace::interaction::KeyframeNavigator;
+    using interaction::KeyframeNavigator;
     return startPlayback(L,
-        openspace::interaction::KeyframeTimeRef::Relative_recordedStart, true);
+        interaction::KeyframeTimeRef::Relative_recordedStart, true);
 }
 
 int startPlaybackApplicationTime(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::startPlaybackApplicationTime");
 
     return startPlayback(L,
-        openspace::interaction::KeyframeTimeRef::Relative_applicationStart, false);
+        interaction::KeyframeTimeRef::Relative_applicationStart, false);
 }
 
 int startPlaybackRecordedTime(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::startPlaybackRecordedTime");
-    using openspace::interaction::KeyframeNavigator;
+    using interaction::KeyframeNavigator;
     return startPlayback(L,
-        openspace::interaction::KeyframeTimeRef::Relative_recordedStart, false);
+        interaction::KeyframeTimeRef::Relative_recordedStart, false);
 }
 
 int startPlaybackSimulationTime(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::startPlaybackSimulationTime");
-    using openspace::interaction::KeyframeNavigator;
+    using interaction::KeyframeNavigator;
     return startPlayback(L,
-        openspace::interaction::KeyframeTimeRef::Absolute_simTimeJ2000, false);
+        interaction::KeyframeTimeRef::Absolute_simTimeJ2000, false);
 }
 
 int stopPlayback(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::stopPlayback");
 
-    global::sessionRecording.stopPlayback();
+    global::sessionRecording->stopPlayback();
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -151,7 +151,7 @@ int enableTakeScreenShotDuringPlayback(lua_State* L) {
 
     const int fps = nArguments == 0 ? 60 : ghoul::lua::value<int>(L, 1);
 
-    global::sessionRecording.enableTakeScreenShotDuringPlayback(fps);
+    global::sessionRecording->enableTakeScreenShotDuringPlayback(fps);
 
     lua_settop(L, 0);
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
@@ -161,7 +161,25 @@ int enableTakeScreenShotDuringPlayback(lua_State* L) {
 int disableTakeScreenShotDuringPlayback(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::disableTakeScreenShotDuringPlayback");
 
-    global::sessionRecording.disableTakeScreenShotDuringPlayback();
+    global::sessionRecording->disableTakeScreenShotDuringPlayback();
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
+int fileFormatConversion(lua_State* L) {
+    using ghoul::lua::luaTypeToString;
+
+    const std::string convertFilePath = ghoul::lua::value<std::string>(
+        L,
+        1,
+        ghoul::lua::PopValue::Yes
+    );
+
+    if (convertFilePath.empty()) {
+        return luaL_error(L, "filepath string is empty");
+    }
+    global::sessionRecording->convertFile(convertFilePath);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;

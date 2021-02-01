@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,7 +39,7 @@ uniform float betaConstant;
 
 in vec2 psfCoords;
 
-void main(void) {
+void main() {
     vec4 fullColor = vec4(0.0, 0.0, 0.0, 1.0);
     if (psfMethod == 0) { 
         // PSF Functions from paper: Physically-Based Galre Effects for Digital
@@ -50,7 +50,8 @@ void main(void) {
         float f2  = 72.37/pow(theta + alphaConst, 2.0);
         float psf_p = p0Param * f0 + p1Param * f1 + p2Param * f2;
         fullColor = vec4(psf_p);
-    } else if (psfMethod == 1) {
+    }
+    else if (psfMethod == 1) {
         // Moffat
         float r = sqrt((psfCoords.y*psfCoords.y + psfCoords.x*psfCoords.x)) * 90.0;
         float alpha = FWHM / (2.f * sqrt(pow(2.f, 1.f/betaConstant) - 1));

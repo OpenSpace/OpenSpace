@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -74,13 +74,18 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
     addProperty(_slice);
     addProperty(_fieldlines);
 
-    dictionary.getValue("kwPath", _kwPath);
+    if (dictionary.hasValue<std::string>("kwPath")) {
+        _kwPath = dictionary.value<std::string>("kwPath");
+    }
 
-    std::string fieldlineIndexFile;
-    dictionary.getValue("fieldlineSeedsIndexFile", _fieldlineIndexFile);
+    if (dictionary.hasValue<std::string>("fieldlineSeedsIndexFile")) {
+        _fieldlineIndexFile = dictionary.value<std::string>("fieldlineSeedsIndexFile");
+    }
 
     std::string axis;
-    dictionary.getValue("axisCut", axis);
+    if (dictionary.hasValue<std::string>("axisCut")) {
+        axis = dictionary.value<std::string>("axisCut");
+    }
 
     if (axis == "x") {
         _cut = Cut::X;
@@ -112,7 +117,7 @@ void KameleonPlane::deinitializeGL() {
 
 void KameleonPlane::initializeGL() {
     if (!_shader) {
-        _shader = global::renderEngine.buildRenderProgram(
+        _shader = global::renderEngine->buildRenderProgram(
             "DataPlaneProgram",
             absPath("${MODULE_ISWA}/shaders/dataplane_vs.glsl"),
             absPath("${MODULE_ISWA}/shaders/dataplane_fs.glsl")
@@ -274,7 +279,7 @@ void KameleonPlane::updateFieldlineSeeds() {
             seedPath.first
         );
         if (it == selectedOptions.end() && std::get<2>(seedPath.second)) {
-            SceneGraphNode* n = global::renderEngine.scene()->sceneGraphNode(
+            SceneGraphNode* n = global::renderEngine->scene()->sceneGraphNode(
                 std::get<0>(seedPath.second)
             );
             if (!n) {
@@ -282,7 +287,7 @@ void KameleonPlane::updateFieldlineSeeds() {
             }
 
             LDEBUG("Removed fieldlines: " + std::get<0>(seedPath.second));
-            global::scriptEngine.queueScript(
+            global::scriptEngine->queueScript(
                 "openspace.removeSceneGraphNode('" + std::get<0>(seedPath.second) + "')",
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
@@ -290,7 +295,7 @@ void KameleonPlane::updateFieldlineSeeds() {
         // if this option was turned on
         }
         else if (it != selectedOptions.end() && !std::get<2>(seedPath.second)) {
-            SceneGraphNode* n = global::renderEngine.scene()->sceneGraphNode(
+            SceneGraphNode* n = global::renderEngine->scene()->sceneGraphNode(
                 std::get<0>(seedPath.second)
             );
             if (n) {
@@ -356,14 +361,14 @@ void KameleonPlane::subscribeToGroup() {
     ghoul::Event<ghoul::Dictionary>& groupEvent = _group->groupEvent();
     groupEvent.subscribe(identifier(), "resolutionChanged", [&](ghoul::Dictionary dict) {
         LDEBUG(identifier() + " Event resolutionChanged");
-        if (dict.hasKeyAndValue<float>("resolution")) {
-            _resolution = dict.value<float>("resolution");
+        if (dict.hasKey("resolution") && dict.hasValue<double>("resolution")) {
+            _resolution = static_cast<float>(dict.value<double>("resolution"));
         }
     });
 
     groupEvent.subscribe(identifier(), "cdfChanged", [&](ghoul::Dictionary dict) {
         LDEBUG(identifier() + " Event cdfChanged");
-        if (dict.hasKeyAndValue<std::string>("path")) {
+        if (dict.hasKey("path") && dict.hasValue<std::string>("path")) {
             const std::string& path = dict.value<std::string>("path");
             changeKwPath(path);
         }

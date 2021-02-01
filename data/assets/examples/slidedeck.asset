@@ -28,15 +28,16 @@ asset.onInitialize(function ()
     end
 
     helper.setCurrentSlide(deck, 1)
-    openspace.bindKey("RIGHT", "nextSlide()", "Next slide", "Next slide", "/Slides")
-    openspace.bindKey("LEFT", "previousSlide()", "Previous slide", "Previous slide", "/Slides")
-    openspace.bindKey("UP", "toggleSlides()", "Toggle slides", "Toggle slides", "/Slides")
+    openspace.bindKey("KP_6", "nextSlide()", "Next slide", "Next slide", "/Slides")
+    openspace.bindKey("KP_4", "previousSlide()", "Previous slide", "Previous slide", "/Slides")
+    openspace.bindKey("KP_0", "toggleSlides()", "Toggle slides", "Toggle slides", "/Slides")
 
 end)
 
 
 asset.onDeinitialize(function()
-    openspace.clearKey("RIGHT")
-    openspace.clearKey("LEFT")
+    openspace.clearKey("KP_6")
+    openspace.clearKey("KP_4")
+    openspace.clearKey("KP_0")
     helper.removeDeck(deck)
 end)

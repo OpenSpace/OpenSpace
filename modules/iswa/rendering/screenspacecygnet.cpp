@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,10 +40,10 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
     _downloadImage = true;
     _texturePath = IswaManager::ref().iswaUrl(
         _cygnetId,
-        global::timeManager.time().j2000Seconds()
+        global::timeManager->time().j2000Seconds()
     );
 
-    _openSpaceTime = global::timeManager.time().j2000Seconds();
+    _openSpaceTime = global::timeManager->time().j2000Seconds();
     _lastUpdateOpenSpaceTime = _openSpaceTime;
 
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -53,7 +53,7 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
     _minRealTimeUpdateInterval = 100;
 
     _delete.onChange([this]() {
-        global::scriptEngine.queueScript(
+        global::scriptEngine->queueScript(
             "openspace.iswa.removeScreenSpaceCygnet("+std::to_string(_cygnetId)+");",
             scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -61,7 +61,7 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
 }
 
 void ScreenSpaceCygnet::update() {
-    _openSpaceTime = global::timeManager.time().j2000Seconds();
+    _openSpaceTime = global::timeManager->time().j2000Seconds();
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()
     );
@@ -72,7 +72,7 @@ void ScreenSpaceCygnet::update() {
     if (timeToUpdate) {
         _texturePath = IswaManager::ref().iswaUrl(
             _cygnetId,
-            global::timeManager.time().j2000Seconds()
+            global::timeManager->time().j2000Seconds()
         );
         _lastUpdateRealTime = _realTime;
         _lastUpdateOpenSpaceTime = _openSpaceTime;

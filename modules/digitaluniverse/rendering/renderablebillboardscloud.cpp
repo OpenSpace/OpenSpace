@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -186,6 +186,12 @@ namespace {
         "astronomical objects."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo OptionColorRangeInfo = {
+        "OptionColorRange",
+        "Option Color Range",
+        "This value changes the range of values to be mapped with the current color map."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo SizeOptionInfo = {
         "SizeOption",
         "Size Option Variable",
@@ -251,6 +257,19 @@ namespace {
         "Enable pixel size control.",
         "Enable pixel size control for rectangular projections."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo UseLinearFiltering = {
+        "UseLinearFiltering",
+        "Use Linear Filtering",
+        "Determines whether the provided color map should be sampled nearest neighbor "
+        "(=off) or linearly (=on"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo SetRangeFromData = {
+        "SetRangeFromData",
+        "Set Data Range from Data",
+        "Set the data range based on the available data"
+    };
 }  // namespace
 
 namespace openspace {
@@ -275,7 +294,7 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
             },
             {
                 keyColor,
-                new Vector3Verifier<float>,
+                new DoubleVector3Verifier,
                 Optional::No,
                 "Astronomical Object Color (r,g,b)."
             },
@@ -365,7 +384,7 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
             },
             {
                 ColorRangeInfo.identifier,
-                new Vector2ListVerifier<float>,
+                new Vector2ListVerifier<double>,
                 Optional::Yes,
                 ColorRangeInfo.description
             },
@@ -416,6 +435,12 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
                 new BoolVerifier,
                 Optional::Yes,
                 PixelSizeControlInfo.description
+            },
+            {
+                UseLinearFiltering.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                UseLinearFiltering.description
             }
         }
     };
@@ -435,6 +460,8 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _drawLabels(DrawLabelInfo, false)
     , _pixelSizeControl(PixelSizeControlInfo, false)
     , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _optionColorRangeData(OptionColorRangeInfo, glm::vec2(0.f))
+
     , _datavarSizeOption(
         SizeOptionInfo,
         properties::OptionProperty::DisplayType::Dropdown
@@ -450,6 +477,8 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _billboardMinSize(BillboardMinSizeInfo, 0.f, 0.f, 100.f)
     , _correctionSizeEndDistance(CorrectionSizeEndDistanceInfo, 17.f, 12.f, 25.f)
     , _correctionSizeFactor(CorrectionSizeFactorInfo, 8.f, 0.f, 20.f)
+    , _useLinearFiltering(UseLinearFiltering, false)
+    , _setRangeFromData(SetRangeFromData)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
     documentation::testSpecificationAndThrow(
@@ -473,8 +502,8 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     _renderOption.addOption(RenderOptionViewDirection, "Camera View Direction");
     _renderOption.addOption(RenderOptionPositionNormal, "Camera Position Normal");
 
-    _renderOption = RenderOptionPositionNormal;
-    if (dictionary.hasKeyAndValue<std::string>(RenderOptionInfo.identifier)) {
+    _renderOption = RenderOptionViewDirection;
+    if (dictionary.hasValue<std::string>(RenderOptionInfo.identifier)) {
         const std::string o = dictionary.value<std::string>(RenderOptionInfo.identifier);
 
         if (o == "Camera View Direction") {
@@ -548,6 +577,8 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         }
         _colorOption.onChange([&]() {
             _dataIsDirty = true;
+            const glm::vec2 colorRange = _colorRangeData[_colorOption.value()];
+            _optionColorRangeData = colorRange;
             _colorOptionString = _optionConversionMap[_colorOption.value()];
         });
         addProperty(_colorOption);
@@ -558,17 +589,24 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
             );
             for (size_t i = 0; i < rangeDataDict.size(); ++i) {
                 _colorRangeData.push_back(
-                    rangeDataDict.value<glm::vec2>(std::to_string(i + 1))
+                    rangeDataDict.value<glm::dvec2>(std::to_string(i + 1))
                 );
             }
+            _optionColorRangeData = _colorRangeData[_colorRangeData.size() - 1];
         }
+        _optionColorRangeData.onChange([&]() {
+            const glm::vec2 colorRange = _optionColorRangeData;
+            _colorRangeData[_colorOption.value()] = colorRange;
+            _dataIsDirty = true;
+        });
+        addProperty(_optionColorRangeData);
 
         if (dictionary.hasKey(ExactColorMapInfo.identifier)) {
             _isColorMapExact = dictionary.value<bool>(ExactColorMapInfo.identifier);
         }
     }
     else if (dictionary.hasKey(keyColor)) {
-        _pointColor = dictionary.value<glm::vec3>(keyColor);
+        _pointColor = dictionary.value<glm::dvec3>(keyColor);
         _pointColor.setViewOption(properties::Property::ViewOptions::Color);
         addProperty(_pointColor);
     }
@@ -621,7 +659,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         _hasLabel = true;
 
         if (dictionary.hasKey(TextColorInfo.identifier)) {
-            _textColor = dictionary.value<glm::vec3>(TextColorInfo.identifier);
+            _textColor = dictionary.value<glm::dvec3>(TextColorInfo.identifier);
             _hasLabel = true;
         }
         _textColor.setViewOption(properties::Property::ViewOptions::Color);
@@ -629,22 +667,30 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         _textColor.onChange([&]() { _textColorIsDirty = true; });
 
         if (dictionary.hasKey(TextOpacityInfo.identifier)) {
-            _textOpacity = dictionary.value<float>(TextOpacityInfo.identifier);
+            _textOpacity = static_cast<float>(
+                dictionary.value<double>(TextOpacityInfo.identifier)
+            );
         }
         addProperty(_textOpacity);
 
         if (dictionary.hasKey(TextSizeInfo.identifier)) {
-            _textSize = dictionary.value<float>(TextSizeInfo.identifier);
+            _textSize = static_cast<float>(
+                dictionary.value<double>(TextSizeInfo.identifier)
+            );
         }
         addProperty(_textSize);
 
         if (dictionary.hasKey(LabelMinSizeInfo.identifier)) {
-            _textMinSize = dictionary.value<float>(LabelMinSizeInfo.identifier);
+            _textMinSize = static_cast<float>(
+                dictionary.value<double>(LabelMinSizeInfo.identifier)
+            );
         }
         addProperty(_textMinSize);
 
         if (dictionary.hasKey(LabelMaxSizeInfo.identifier)) {
-            _textMaxSize = dictionary.value<float>(LabelMaxSizeInfo.identifier);
+            _textMaxSize = static_cast<float>(
+                dictionary.value<double>(LabelMaxSizeInfo.identifier)
+            );
         }
         addProperty(_textMaxSize);
     }
@@ -656,7 +702,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     }
 
     if (dictionary.hasKey(FadeInDistancesInfo.identifier)) {
-        glm::vec2 v = dictionary.value<glm::vec2>(FadeInDistancesInfo.identifier);
+        glm::dvec2 v = dictionary.value<glm::dvec2>(FadeInDistancesInfo.identifier);
         _fadeInDistance = v;
         _disableFadeInDistance = false;
         addProperty(_fadeInDistance);
@@ -696,6 +742,28 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         _pixelSizeControl = dictionary.value<bool>(PixelSizeControlInfo.identifier);
         addProperty(_pixelSizeControl);
     }
+
+    _setRangeFromData.onChange([this]() {
+        const int colorMapInUse =
+            _hasColorMapFile ? _variableDataPositionMap[_colorOptionString] : 0;
+
+        float minValue = std::numeric_limits<float>::max();
+        float maxValue = std::numeric_limits<float>::min();
+        for (size_t i = 0; i < _fullData.size(); i += _nValuesPerAstronomicalObject) {
+            float colorIdx = _fullData[i + 3 + colorMapInUse];
+            maxValue = colorIdx >= maxValue ? colorIdx : maxValue;
+            minValue = colorIdx < minValue ? colorIdx : minValue;
+        }
+
+        _optionColorRangeData = glm::vec2(minValue, maxValue);
+    });
+    addProperty(_setRangeFromData);
+
+    if (dictionary.hasKey(UseLinearFiltering.identifier)) {
+        _useLinearFiltering = dictionary.value<bool>(UseLinearFiltering.identifier);
+    }
+    _useLinearFiltering.onChange([&]() { _dataIsDirty = true; });
+    addProperty(_useLinearFiltering);
 }
 
 bool RenderableBillboardsCloud::isReady() const {
@@ -725,7 +793,7 @@ void RenderableBillboardsCloud::initializeGL() {
     _program = DigitalUniverseModule::ProgramObjectManager.request(
         ProgramObjectName,
         []() {
-            return global::renderEngine.buildRenderProgram(
+            return global::renderEngine->buildRenderProgram(
                 ProgramObjectName,
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_vs.glsl"),
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_fs.glsl"),
@@ -755,7 +823,7 @@ void RenderableBillboardsCloud::initializeGL() {
     if (_hasLabel) {
         if (_font == nullptr) {
             size_t _fontSize = 50;
-            _font = global::fontManager.font(
+            _font = global::fontManager->font(
                 "Mono",
                 static_cast<float>(_fontSize),
                 ghoul::fontrendering::FontManager::Outline::Yes,
@@ -774,7 +842,7 @@ void RenderableBillboardsCloud::deinitializeGL() {
     DigitalUniverseModule::ProgramObjectManager.release(
         ProgramObjectName,
         [](ghoul::opengl::ProgramObject* p) {
-            global::renderEngine.removeRenderProgram(p);
+            global::renderEngine->removeRenderProgram(p);
         }
     );
     _program = nullptr;
@@ -806,7 +874,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
 
     _program->setUniform(
         "screenSize",
-        glm::vec2(global::renderEngine.renderingResolution())
+        glm::vec2(global::renderEngine->renderingResolution())
     );
 
     _program->setUniform(_uniformCache.cameraPos, data.camera.positionVec3());
@@ -865,8 +933,8 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     glBindVertexArray(0);
     _program->deactivate();
 
-    global::renderEngine.openglStateCache().resetBlendState();
-    global::renderEngine.openglStateCache().resetDepthState();
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
 }
 
 void RenderableBillboardsCloud::renderLabels(const RenderData& data,
@@ -1148,7 +1216,7 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
         ZoneScopedN("Sprite texture")
         TracyGpuZone("Sprite texture")
 
-        ghoul::opengl::Texture* t = _spriteTexture;
+        ghoul::opengl::Texture* texture = _spriteTexture;
 
         unsigned int hash = ghoul::hashCRC32File(_spriteTexturePath);
 
@@ -1165,7 +1233,7 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
             }
         );
 
-        DigitalUniverseModule::TextureManager.release(t);
+        DigitalUniverseModule::TextureManager.release(texture);
         _spriteTextureIsDirty = false;
     }
 }
@@ -1651,11 +1719,9 @@ void RenderableBillboardsCloud::createDataSlice() {
                 _slicedData.push_back(position[j]);
                 biggestCoord = biggestCoord < position[j] ? position[j] : biggestCoord;
             }
-
             // Note: if exact colormap option is not selected, the first color and the
             // last color in the colormap file are the outliers colors.
-            int variableColor = static_cast<int>(_fullData[i + 3 + colorMapInUse]);
-            int colorIndex = 0;
+            float variableColor = _fullData[i + 3 + colorMapInUse];
 
             float cmax, cmin;
             if (_colorRangeData.empty()) {
@@ -1669,19 +1735,51 @@ void RenderableBillboardsCloud::createDataSlice() {
             }
 
             if (_isColorMapExact) {
-                colorIndex = variableColor + cmin;
+                int colorIndex = variableColor + cmin;
+                for (int j = 0; j < 4; ++j) {
+                    _slicedData.push_back(_colorMapData[colorIndex][j]);
+                }
             }
             else {
-                float ncmap = static_cast<float>(_colorMapData.size());
-                float normalization = ((cmax != cmin) && (ncmap > 2)) ?
-                                      (ncmap - 2) / (cmax - cmin) : 0;
-                colorIndex = (variableColor - cmin) * normalization + 1;
-                colorIndex = colorIndex < 0 ? 0 : colorIndex;
-                colorIndex = colorIndex >= ncmap ? ncmap - 1 : colorIndex;
-            }
+                if (_useLinearFiltering) {
+                    const float value = variableColor;
 
-            for (int j = 0; j < 4; ++j) {
-                _slicedData.push_back(_colorMapData[colorIndex][j]);
+                    float valueT = (value - cmin) / (cmax - cmin); // in [0, 1)
+                    valueT = std::clamp(valueT, 0.f, 1.f);
+
+                    const float idx = valueT * (_colorMapData.size() - 1);
+                    const int floorIdx = static_cast<int>(std::floor(idx));
+                    const int ceilIdx = static_cast<int>(std::ceil(idx));
+
+                    const glm::vec4 floorColor = _colorMapData[floorIdx];
+                    const glm::vec4 ceilColor = _colorMapData[ceilIdx];
+
+                    if (floorColor != ceilColor) {
+                        const glm::vec4 c = floorColor + idx * (ceilColor - floorColor);
+                        _slicedData.push_back(c.r);
+                        _slicedData.push_back(c.g);
+                        _slicedData.push_back(c.b);
+                        _slicedData.push_back(c.a);
+                    }
+                    else {
+                        _slicedData.push_back(floorColor.r);
+                        _slicedData.push_back(floorColor.g);
+                        _slicedData.push_back(floorColor.b);
+                        _slicedData.push_back(floorColor.a);
+                    }
+                }
+                else {
+                    float ncmap = static_cast<float>(_colorMapData.size());
+                    float normalization = ((cmax != cmin) && (ncmap > 2)) ?
+                        (ncmap - 2) / (cmax - cmin) : 0;
+                    int colorIndex = (variableColor - cmin) * normalization + 1;
+                    colorIndex = colorIndex < 0 ? 0 : colorIndex;
+                    colorIndex = colorIndex >= ncmap ? ncmap - 1 : colorIndex;
+
+                    for (int j = 0; j < 4; ++j) {
+                        _slicedData.push_back(_colorMapData[colorIndex][j]);
+                    }
+                }
             }
 
             if (_hasDatavarSize) {

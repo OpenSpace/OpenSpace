@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,7 +28,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
 #include <array>
-#pragma optimize ("", off)
+
 namespace {
     const ImVec2 WindowSize = ImVec2(350, 500);
 } // namespace
@@ -122,7 +122,7 @@ void GuiGIBSComponent::render() {
             "FilePath = {} }})",
             layer, xmlFunc
         );
-        global::scriptEngine.queueScript(
+        global::scriptEngine->queueScript(
             script,
             scripting::ScriptEngine::RemoteScripting::Yes
         );

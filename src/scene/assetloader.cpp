@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,7 +43,6 @@ namespace {
     constexpr const char* AssetGlobalVariableName = "asset";
 
     constexpr const char* RequireFunctionName = "require";
-    constexpr const char* RequestFunctionName = "request";
     constexpr const char* ExistsFunctionName = "exists";
     constexpr const char* ExportFunctionName = "export";
 
@@ -63,6 +62,7 @@ namespace {
     constexpr const char* MetaInformationAuthor = "Author";
     constexpr const char* MetaInformationURL = "URL";
     constexpr const char* MetaInformationLicense = "License";
+    constexpr const char* MetaInformationIdentifiers = "Identifiers";
 
     constexpr const char* ExportsTableName = "_exports";
     constexpr const char* AssetTableName = "_asset";
@@ -299,12 +299,38 @@ bool AssetLoader::loadAsset(Asset* asset) {
             ghoul::lua::luaDictionaryFromState(*_luaState, metaDict);
 
             Asset::MetaInformation meta;
-            metaDict.getValue(MetaInformationName, meta.name);
-            metaDict.getValue(MetaInformationVersion, meta.version);
-            metaDict.getValue(MetaInformationDescription, meta.description);
-            metaDict.getValue(MetaInformationAuthor, meta.author);
-            metaDict.getValue(MetaInformationURL, meta.url);
-            metaDict.getValue(MetaInformationLicense, meta.license);
+            if (metaDict.hasValue<std::string>(MetaInformationName)) {
+                meta.name = metaDict.value<std::string>(MetaInformationName);
+
+            }
+            if (metaDict.hasValue<std::string>(MetaInformationVersion)) {
+                meta.version = metaDict.value<std::string>(MetaInformationVersion);
+
+            }
+            if (metaDict.hasValue<std::string>(MetaInformationDescription)) {
+                meta.description =
+                    metaDict.value<std::string>(MetaInformationDescription);
+
+            }
+            if (metaDict.hasValue<std::string>(MetaInformationAuthor)) {
+                meta.author = metaDict.value<std::string>(MetaInformationAuthor);
+
+            }
+            if (metaDict.hasValue<std::string>(MetaInformationURL)) {
+                meta.url = metaDict.value<std::string>(MetaInformationURL);
+            }
+            if (metaDict.hasValue<std::string>(MetaInformationLicense)) {
+                meta.license = metaDict.value<std::string>(MetaInformationLicense);
+            }
+            if (metaDict.hasValue<ghoul::Dictionary>(MetaInformationIdentifiers)) {
+                ghoul::Dictionary iddict =
+                    metaDict.value<ghoul::Dictionary>(MetaInformationIdentifiers);
+                for (size_t i = 1; i <= iddict.size(); ++i) {
+                    std::string key = std::to_string(i);
+                    std::string identifier = iddict.value<std::string>(key);
+                    meta.identifiers.push_back(identifier);
+                }
+            }
             asset->setMetaInformation(std::move(meta));
         }
     }
@@ -324,7 +350,7 @@ void AssetLoader::unloadAsset(Asset* asset) {
     }
     _onDeinitializationFunctionRefs[asset].clear();
 
-    for (const std::pair<const Asset*, std::vector<int>>& it :
+    for (std::pair<Asset*, std::vector<int>> it :
          _onDependencyInitializationFunctionRefs[asset])
     {
         for (int ref : it.second) {
@@ -333,7 +359,7 @@ void AssetLoader::unloadAsset(Asset* asset) {
     }
     _onDependencyInitializationFunctionRefs.erase(asset);
 
-    for (const std::pair<Asset*, std::vector<int>>& it :
+    for (std::pair<Asset*, std::vector<int>> it :
          _onDependencyDeinitializationFunctionRefs[asset])
     {
         for (int ref : it.second) {

@@ -30,13 +30,14 @@ local Titan = {
             FileName = labelsPath .. "/titan.labels",
             LabelAlignmentOption = "Horizontally", -- or Circularly
             LabelsFontSize = 14.0,
-            LabelsSize = 8.0,
+            LabelsSize = 10.0,
             LabelsMinSize = 1.0,
             LabelsMaxSize = 1500.0,
             ProximityEnabled = false,
             LabelsFadeInEnabled = true,
-            FadeInStartingDistance = 500000.0,
-            FadeOutStartingDistance = 1000000.0,
+            LabelsFadeOutEnabled = true,
+            FadeInStartingDistance = 7500000.0,
+            FadeOutStartingDistance = 6000000.0,
             LabelsForceDomeRendering = true,
             LabelsDistanceEPS = 1350000.0,
             LabelsColor = { 1.0, 1.0, 0.0 }
@@ -44,10 +45,21 @@ local Titan = {
     },
     Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
     GUI = {
-        Path = "/Solar System/Planets/Saturn/Moons"
+        Name = "Titan",
+        Path = "/Solar System/Planets/Saturn/Moons",
+        Description = [[Largest moon of Saturn.]]
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Titan })
+
+
+asset.meta = {
+    Name = "Titan",
+    Version = "1.0",
+    Description = [[ Titan globe with labels.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = {"Titan"}
+}

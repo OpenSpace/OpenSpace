@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -56,6 +56,42 @@ DocumentationGenerator::templatesToRegister()
 
 std::string DocumentationGenerator::jsonName() {
     return _jsonName;
+}
+
+std::string escapedJson(const std::vector<std::string>& list) {
+    std::string jsonString;
+    jsonString += "[";
+    for (const std::string& text : list) {
+        jsonString += "\\\"";
+        for (const char& c : text) {
+            switch (c) {
+            case '\t':
+                jsonString += "\\t"; // Replace tab with \t.
+                break;
+            case '"':
+                jsonString += "\\\""; // Replace " with \".
+                break;
+            case '\\':
+                jsonString += "\\\\"; // Replace \ with \\.
+                break;
+            case '\n':
+                jsonString += "\\\\n"; // Replace newline with \n.
+                break;
+            case '\r':
+                jsonString += "\\r"; // Replace carriage return with \r.
+                break;
+            default:
+                jsonString += c;
+            }
+        }
+        jsonString += "\\\",";
+    }
+    if (jsonString.length() > 1) {
+        jsonString.pop_back();
+    }
+    jsonString += "]";
+
+    return jsonString;
 }
 
 std::string escapedJson(const std::string& text) {

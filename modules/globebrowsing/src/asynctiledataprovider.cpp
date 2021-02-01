@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,7 +24,6 @@
 
 #include <modules/globebrowsing/src/asynctiledataprovider.h>
 
-#include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/src/memoryawaretilecache.h>
 #include <modules/globebrowsing/src/rawtiledatareader.h>
 #include <modules/globebrowsing/src/tileloadjob.h>
@@ -48,7 +47,6 @@ AsyncTileDataProvider::AsyncTileDataProvider(std::string name,
 {
     ZoneScoped
 
-    _globeBrowsingModule = global::moduleEngine.module<GlobeBrowsingModule>();
     performReset(ResetRawTileDataReader::No);
 }
 

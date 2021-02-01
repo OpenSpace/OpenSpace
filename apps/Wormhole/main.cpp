@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,42 +44,33 @@ int main(int argc, char** argv) {
         CommandlineParser::AllowUnknownCommands::Yes
     );
 
-    std::stringstream defaultPassword;
-    defaultPassword << std::hex << std::setfill('0') << std::setw(6) <<
-        (std::hash<size_t>{}(
-            std::chrono::system_clock::now().time_since_epoch().count()
-        ) % 0xffffff);
+    struct {
+        std::string port;
+        std::string password;
+        std::string changeHostPassword;
+    } settings;
 
-    std::stringstream defaultChangeHostPassword;
-    defaultChangeHostPassword << std::hex << std::setfill('0') << std::setw(6) <<
-        (std::hash<size_t>{}(
-            std::chrono::system_clock::now().time_since_epoch().count() + 1
-        ) % 0xffffff);
-
-    std::string portString;
     commandlineParser.addCommand(
         std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
-            portString,
+            settings.port,
             "--port",
             "-p",
             "Sets the port to listen on"
         )
     );
 
-    std::string password;
     commandlineParser.addCommand(
         std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
-            password,
+            settings.password,
             "--password",
             "-l",
             "Sets the password to use"
         )
     );
 
-    std::string changeHostPassword;
     commandlineParser.addCommand(
         std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
-            changeHostPassword,
+            settings.changeHostPassword,
             "--hostpassword",
             "-h",
             "Sets the host password to use"
@@ -89,29 +80,41 @@ int main(int argc, char** argv) {
     commandlineParser.setCommandLine(arguments);
     commandlineParser.execute();
 
-    if (password.empty()) {
-        password = defaultPassword.str();
+    if (settings.password.empty()) {
+        std::stringstream defaultPassword;
+        defaultPassword << std::hex << std::setfill('0') << std::setw(6) <<
+            (std::hash<size_t>{}(
+                std::chrono::system_clock::now().time_since_epoch().count()
+                ) % 0xffffff);
+
+        settings.password = defaultPassword.str();
     }
-    if (changeHostPassword.empty()) {
-        changeHostPassword = defaultChangeHostPassword.str();
+    if (settings.changeHostPassword.empty()) {
+        std::stringstream defaultChangeHostPassword;
+        defaultChangeHostPassword << std::hex << std::setfill('0') << std::setw(6) <<
+            (std::hash<size_t>{}(
+                std::chrono::system_clock::now().time_since_epoch().count() + 1
+                ) % 0xffffff);
+
+        settings.changeHostPassword = defaultChangeHostPassword.str();
     }
 
-    LINFO(fmt::format("Connection password: {}", password));
-    LINFO(fmt::format("Host password: {}", changeHostPassword));
+    LINFO(fmt::format("Connection password: {}", settings.password));
+    LINFO(fmt::format("Host password: {}", settings.changeHostPassword));
 
     int port = 25001;
 
-    if (!portString.empty()) {
+    if (!settings.port.empty()) {
         try {
-            port = std::stoi(portString);
+            port = std::stoi(settings.port);
         }
         catch (const std::invalid_argument&) {
-            LERROR(fmt::format("Invalid port: {}", portString));
+            LERROR(fmt::format("Invalid port: {}", settings.port));
         }
     }
 
     ParallelServer server;
-    server.start(port, password, changeHostPassword);
+    server.start(port, settings.password, settings.changeHostPassword);
     server.setDefaultHostAddress("127.0.0.1");
     LINFO(fmt::format("Server listening to port {}", port));
 

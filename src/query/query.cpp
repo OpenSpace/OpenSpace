@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,7 +32,7 @@
 namespace openspace {
 
 Scene* sceneGraph() {
-    return global::renderEngine.scene();
+    return global::renderEngine->scene();
 }
 
 SceneGraphNode* sceneGraphNode(const std::string& name) {
@@ -49,7 +49,7 @@ const Renderable* renderable(const std::string& name) {
 }
 
 properties::Property* property(const std::string& uri) {
-    properties::Property* property = global::rootPropertyOwner.property(uri);
+    properties::Property* property = global::rootPropertyOwner->property(uri);
     return property;
 }
 
@@ -57,14 +57,14 @@ std::vector<properties::Property*> allProperties() {
     std::vector<properties::Property*> properties;
 
     std::vector<properties::Property*> p =
-        global::rootPropertyOwner.propertiesRecursive();
+        global::rootPropertyOwner->propertiesRecursive();
 
     properties.insert(properties.end(), p.begin(), p.end());
 
     // The virtual property manager is not part of the rootProperty owner since it cannot
     // have an identifier or the "regex as identifier" trick would not work
     std::vector<properties::Property*> p2 =
-        global::virtualPropertyManager.propertiesRecursive();
+        global::virtualPropertyManager->propertiesRecursive();
 
     properties.insert(properties.end(), p2.begin(), p2.end());
 

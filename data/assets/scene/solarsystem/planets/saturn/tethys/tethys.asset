@@ -16,7 +16,7 @@ local Tethys = {
         },
         Rotation = {
             Type = "SpiceRotation",
-            SourceFrame = "IAU_ENCELADUS",
+            SourceFrame = "IAU_TETHYS",
             DestinationFrame = "GALACTIC"
         }
     },
@@ -29,16 +29,17 @@ local Tethys = {
             Enable = false,
             FileName = labelsPath .. "/tethys.labels",
             LabelAlignmentOption = "Horizontally", -- or Circularly
-            LabelsFontSize = 14.0,
+            LabelsFontSize = 24.0,
             LabelsSize = 8.0,
             LabelsMinSize = 1.0,
             LabelsMaxSize = 1500.0,
             ProximityEnabled = false,
             LabelsFadeInEnabled = true,
-            FadeInStartingDistance = 500000.0,
-            FadeOutStartingDistance = 1000000.0,
+            LabelsFadeOutEnabled = true,
+            FadeInStartingDistance = 1500000.0,
+            FadeOutStartingDistance = 500000.0,
             LabelsForceDomeRendering = true,
-            LabelsDistanceEPS = 1350000.0,
+            LabelsDistanceEPS = 200000.0,
             LabelsColor = { 1.0, 1.0, 0.0 }
         }
     },
@@ -48,6 +49,14 @@ local Tethys = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Tethys })
+
+
+asset.meta = {
+    Name = "Tethys",
+    Version = "1.0",
+    Description = [[ Tethys globe with labels.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

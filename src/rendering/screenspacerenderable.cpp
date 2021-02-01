@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -102,10 +102,10 @@ namespace {
     };
 
 
-    constexpr openspace::properties::Property::PropertyInfo AlphaInfo = {
-        "Alpha",
-        "Transparency",
-        "This value determines the transparency of the screen space plane. If this value "
+    constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
+        "Opacity",
+        "Opacity",
+        "This value determines the opacity of the screen space plane. If this value "
         "is 1, the plane is completely opaque, if this value is 0, the plane is "
         "completely transparent."
     };
@@ -280,10 +280,10 @@ documentation::Documentation ScreenSpaceRenderable::Documentation() {
                 ScaleInfo.description
             },
             {
-                AlphaInfo.identifier,
+                OpacityInfo.identifier,
                 new DoubleVerifier,
                 Optional::Yes,
-                AlphaInfo.description
+                OpacityInfo.description
             },
             {
                 KeyTag,
@@ -316,15 +316,16 @@ std::unique_ptr<ScreenSpaceRenderable> ScreenSpaceRenderable::createFromDictiona
 }
 
 std::string ScreenSpaceRenderable::makeUniqueIdentifier(std::string name) {
-    std::vector<ScreenSpaceRenderable*> r = global::renderEngine.screenSpaceRenderables();
+    std::vector<ScreenSpaceRenderable*> rs =
+        global::renderEngine->screenSpaceRenderables();
 
-    auto nameTaken = [&r](const std::string& name) {
-        bool nameTaken = std::any_of(
-            r.begin(),
-            r.end(),
-            [&name](ScreenSpaceRenderable* r) { return r->identifier() == name; }
+    auto nameTaken = [&rs](const std::string& n) {
+        const bool taken = std::any_of(
+            rs.cbegin(),
+            rs.cend(),
+            [&n](ScreenSpaceRenderable* r) { return r->identifier() == n; }
         );
-        return nameTaken;
+        return taken;
     };
 
     std::string baseName = name;
@@ -361,7 +362,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         glm::vec3(glm::pi<float>())
     )
     , _scale(ScaleInfo, 0.25f, 0.f, 2.f)
-    , _alpha(AlphaInfo, 1.f, 0.f, 1.f)
+    , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
     , _delete(DeleteInfo)
 {
     if (dictionary.hasKey(KeyIdentifier)) {
@@ -371,7 +372,6 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     if (dictionary.hasKey(KeyName)) {
         setGuiName(dictionary.value<std::string>(KeyName));
     }
-
 
     addProperty(_enabled);
     addProperty(_useRadiusAzimuthElevation);
@@ -391,7 +391,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     });
 
     addProperty(_scale);
-    addProperty(_alpha);
+    addProperty(_opacity);
     addProperty(_localRotation);
 
     if (dictionary.hasKey(EnabledInfo.identifier)) {
@@ -406,14 +406,14 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
 
     if (_useRadiusAzimuthElevation) {
         if (dictionary.hasKey(RadiusAzimuthElevationInfo.identifier)) {
-            _raePosition = dictionary.value<glm::vec3>(
+            _raePosition = dictionary.value<glm::dvec3>(
                 RadiusAzimuthElevationInfo.identifier
             );
         }
     }
     else {
         if (dictionary.hasKey(CartesianPositionInfo.identifier)) {
-            _cartesianPosition = dictionary.value<glm::vec3>(
+            _cartesianPosition = dictionary.value<glm::dvec3>(
                 CartesianPositionInfo.identifier
             );
         }
@@ -423,32 +423,28 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         _scale = static_cast<float>(dictionary.value<double>(ScaleInfo.identifier));
     }
 
-    if (dictionary.hasKey(AlphaInfo.identifier)) {
-        _alpha = static_cast<float>(dictionary.value<double>(AlphaInfo.identifier));
+    if (dictionary.hasKey(OpacityInfo.identifier)) {
+        _opacity = static_cast<float>(dictionary.value<double>(OpacityInfo.identifier));
     }
 
     if (dictionary.hasKey(UsePerspectiveProjectionInfo.identifier)) {
-        _usePerspectiveProjection = static_cast<bool>(
-            dictionary.value<bool>(UsePerspectiveProjectionInfo.identifier)
-        );
+        _usePerspectiveProjection =
+            dictionary.value<bool>(UsePerspectiveProjectionInfo.identifier);
     }
 
     if (dictionary.hasKey(FaceCameraInfo.identifier)) {
-        _faceCamera = static_cast<bool>(
-            dictionary.value<bool>(FaceCameraInfo.identifier)
-        );
+        _faceCamera = dictionary.value<bool>(FaceCameraInfo.identifier);
     }
 
-    if (dictionary.hasKeyAndValue<std::string>(KeyTag)) {
+    if (dictionary.hasValue<std::string>(KeyTag)) {
         std::string tagName = dictionary.value<std::string>(KeyTag);
         if (!tagName.empty()) {
             addTag(std::move(tagName));
         }
     }
-    else if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyTag)) {
+    else if (dictionary.hasValue<ghoul::Dictionary>(KeyTag)) {
         const ghoul::Dictionary& tagNames = dictionary.value<ghoul::Dictionary>(KeyTag);
-        const std::vector<std::string>& keys = tagNames.keys();
-        for (const std::string& key : keys) {
+        for (std::string_view key : tagNames.keys()) {
             std::string tagName = tagNames.value<std::string>(key);
             if (!tagName.empty()) {
                 addTag(std::move(tagName));
@@ -459,7 +455,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     _delete.onChange([this](){
         std::string script =
             "openspace.removeScreenSpaceRenderable('" + identifier() + "');";
-        global::scriptEngine.queueScript(
+        global::scriptEngine->queueScript(
             script,
             scripting::ScriptEngine::RemoteScripting::No
         );
@@ -484,7 +480,7 @@ bool ScreenSpaceRenderable::deinitialize() {
 
 bool ScreenSpaceRenderable::deinitializeGL() {
     if (_shader) {
-        global::renderEngine.removeRenderProgram(_shader.get());
+        global::renderEngine->removeRenderProgram(_shader.get());
         _shader = nullptr;
     }
 
@@ -521,17 +517,25 @@ float ScreenSpaceRenderable::depth() {
 void ScreenSpaceRenderable::createShaders() {
     ghoul::Dictionary dict = ghoul::Dictionary();
 
-    auto res = global::windowDelegate.currentDrawBufferResolution();
-    ghoul::Dictionary rendererData = {
-        { "fragmentRendererPath", "${SHADERS}/framebuffer/renderframebuffer.frag" },
-        { "windowWidth" , res.x },
-        { "windowHeight" , res.y },
-        { "hdrExposure", global::renderEngine.hdrExposure() },
-        { "disableHDR", global::renderEngine.isHdrDisabled() }
-    };
+    auto res = global::windowDelegate->currentDrawBufferResolution();
+    ghoul::Dictionary rendererData;
+    rendererData.setValue(
+        "fragmentRendererPath",
+        std::string("${SHADERS}/framebuffer/renderframebuffer.frag")
+    );
+    rendererData.setValue("windowWidth", res.x);
+    rendererData.setValue("windowHeight", res.y);
+    rendererData.setValue(
+        "hdrExposure",
+        static_cast<double>(global::renderEngine->hdrExposure())
+    );
+    rendererData.setValue("disableHDR", global::renderEngine->isHdrDisabled());
 
     dict.setValue("rendererData", rendererData);
-    dict.setValue("fragmentPath", "${MODULE_BASE}/shaders/screenspace_fs.glsl");
+    dict.setValue(
+        "fragmentPath",
+        std::string("${MODULE_BASE}/shaders/screenspace_fs.glsl")
+    );
     _shader = ghoul::opengl::ProgramObject::Build(
         "ScreenSpaceProgram",
         absPath("${MODULE_BASE}/shaders/screenspace_vs.glsl"),
@@ -543,9 +547,7 @@ void ScreenSpaceRenderable::createShaders() {
 }
 
 glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
-    glm::vec2 resolution = global::windowDelegate.currentDrawBufferResolution();
-
-    //to scale the plane
+    // to scale the plane
     float textureRatio =
         static_cast<float>(_objectSize.y) / static_cast<float>(_objectSize.x);
 
@@ -571,12 +573,12 @@ glm::mat4 ScreenSpaceRenderable::globalRotationMatrix() {
     // 2) sgct's scene matrix (also called model matrix by sgct)
 
     glm::mat4 inverseRotation = glm::inverse(
-        global::renderEngine.globalRotation() *
-        global::windowDelegate.modelMatrix()
+        global::renderEngine->globalRotation() *
+        global::windowDelegate->modelMatrix()
     );
 
     // The rotation of all screen space renderables is adjustable in the render engine:
-    return global::renderEngine.screenSpaceRotation() * inverseRotation;
+    return global::renderEngine->screenSpaceRotation() * inverseRotation;
 }
 
 glm::mat4 ScreenSpaceRenderable::localRotationMatrix() {
@@ -612,12 +614,12 @@ void ScreenSpaceRenderable::draw(glm::mat4 modelTransform) {
 
     _shader->activate();
 
-    _shader->setUniform(_uniformCache.alpha, _alpha);
+    _shader->setUniform(_uniformCache.alpha, _opacity);
     _shader->setUniform(_uniformCache.modelTransform, modelTransform);
 
     _shader->setUniform(
         _uniformCache.viewProj,
-        global::renderEngine.scene()->camera()->viewProjectionMatrix()
+        global::renderEngine->scene()->camera()->viewProjectionMatrix()
     );
 
     ghoul::opengl::TextureUnit unit;

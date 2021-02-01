@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -115,7 +115,7 @@ documentation::Documentation RenderablePoints::Documentation() {
             },
             {
                 keyColor,
-                new Vector3Verifier<float>,
+                new Vector3Verifier<double>,
                 Optional::No,
                 "Astronomical Object Color (r,g,b)."
             },
@@ -195,7 +195,7 @@ RenderablePoints::RenderablePoints(const ghoul::Dictionary& dictionary)
     }
 
     if (dictionary.hasKey(keyColor)) {
-        _pointColor = dictionary.value<glm::vec3>(keyColor);
+        _pointColor = dictionary.value<glm::dvec3>(keyColor);
     }
     addProperty(_pointColor);
 
@@ -256,7 +256,7 @@ void RenderablePoints::initializeGL() {
         _program = DigitalUniverseModule::ProgramObjectManager.request(
             "RenderablePoints Sprite",
             []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-                return global::renderEngine.buildRenderProgram(
+                return global::renderEngine->buildRenderProgram(
                     "RenderablePoints Sprite",
                     absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_vs.glsl"),
                     absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_sprite_fs.glsl")
@@ -268,7 +268,7 @@ void RenderablePoints::initializeGL() {
         _program = DigitalUniverseModule::ProgramObjectManager.request(
             "RenderablePoints",
             []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-                return global::renderEngine.buildRenderProgram(
+                return global::renderEngine->buildRenderProgram(
                     "RenderablePoints",
                     absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_vs.glsl"),
                     absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_sprite_fs.glsl")
@@ -288,7 +288,7 @@ void RenderablePoints::deinitializeGL() {
     DigitalUniverseModule::ProgramObjectManager.release(
         _program->name(),
         [](ghoul::opengl::ProgramObject* p) {
-            global::renderEngine.removeRenderProgram(p);
+            global::renderEngine->removeRenderProgram(p);
         }
     );
 

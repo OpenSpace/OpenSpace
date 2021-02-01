@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -133,18 +133,18 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     if (dictionary.hasKey(KeyGeomModelFile)) {
         std::string file;
 
-        if (dictionary.hasKeyAndValue<std::string>(KeyGeomModelFile)) {
+        if (dictionary.hasValue<std::string>(KeyGeomModelFile)) {
             // Handle single file
             file = absPath(dictionary.value<std::string>(KeyGeomModelFile));
             _geometry = ghoul::io::ModelReader::ref().loadModel(file, false, true);
         }
-        else if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyGeomModelFile)) {
+        else if (dictionary.hasValue<ghoul::Dictionary>(KeyGeomModelFile)) {
             ghoul::Dictionary fileDictionary = dictionary.value<ghoul::Dictionary>(
                 KeyGeomModelFile
             );
             std::vector<std::unique_ptr<ghoul::modelgeometry::ModelGeometry>> geometries;
 
-            for (std::string k : fileDictionary.keys()) {
+            for (std::string_view k : fileDictionary.keys()) {
                 // Handle each file
                 file = absPath(fileDictionary.value<std::string>(k));
                 geometries.push_back(ghoul::io::ModelReader::ref().loadModel(
@@ -187,11 +187,13 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
         dictionary.value<ghoul::Dictionary>(keyProjection)
     );
 
-    float boundingSphereRadius = 1.0e9;
-    dictionary.getValue(keyBoundingSphereRadius, boundingSphereRadius);
+    double boundingSphereRadius = 1.0e9;
+    if (dictionary.hasValue<double>(keyBoundingSphereRadius)) {
+        boundingSphereRadius = dictionary.value<double>(keyBoundingSphereRadius);
+    }
     setBoundingSphere(boundingSphereRadius);
 
-    if (dictionary.hasKeyAndValue<bool>(PerformShadingInfo.identifier)) {
+    if (dictionary.hasValue<bool>(PerformShadingInfo.identifier)) {
         _performShading = dictionary.value<bool>(PerformShadingInfo.identifier);
     }
 
@@ -205,7 +207,7 @@ bool RenderableModelProjection::isReady() const {
 }
 
 void RenderableModelProjection::initializeGL() {
-    _programObject = global::renderEngine.buildRenderProgram(
+    _programObject = global::renderEngine->buildRenderProgram(
         "ModelShader",
         absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModel_vs.glsl"),
         absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModel_fs.glsl")
@@ -262,7 +264,7 @@ void RenderableModelProjection::deinitializeGL() {
 
     _projectionComponent.deinitialize();
 
-    global::renderEngine.removeRenderProgram(_programObject.get());
+    global::renderEngine->removeRenderProgram(_programObject.get());
     _programObject = nullptr;
 }
 
@@ -393,9 +395,8 @@ void RenderableModelProjection::update(const UpdateData& data) {
         }
     }
 
-    // @TODO:  Change this to remove PSC
     glm::dvec3 p =
-        global::renderEngine.scene()->sceneGraphNode("Sun")->worldPosition() -
+        global::renderEngine->scene()->sceneGraphNode("Sun")->worldPosition() -
         data.modelTransform.translation;
 
     _sunPosition = static_cast<glm::vec3>(p);
@@ -483,7 +484,7 @@ void RenderableModelProjection::attitudeParameters(double time) {
     const glm::vec3 cpos = p * 10000.0;
 
     const float distance = glm::length(cpos);
-    const float radius = boundingSphere();
+    const double radius = boundingSphere();
 
     _projectorMatrix = _projectionComponent.computeProjectorMatrix(
         cpos,
@@ -492,8 +493,8 @@ void RenderableModelProjection::attitudeParameters(double time) {
         _instrumentMatrix,
         _projectionComponent.fieldOfViewY(),
         _projectionComponent.aspectRatio(),
-        distance - radius,
-        distance + radius,
+        static_cast<float>(distance - radius),
+        static_cast<float>(distance + radius),
         _boresight
     );
 }

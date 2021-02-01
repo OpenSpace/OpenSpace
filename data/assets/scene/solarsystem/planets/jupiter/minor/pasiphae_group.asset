@@ -9,7 +9,12 @@ local parentIdentifier = transforms.JupiterBarycenter.Identifier
 local parentSpice = "JUPITER BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_pasiphae" }
 local trailColor = { 0.4, 0.3, 0.01 }
-
+local trailTags = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_minor"
+}
 local pasiphaeGroup = {
     {
         Identifier = "Euporie",
@@ -20,6 +25,7 @@ local pasiphaeGroup = {
         Spice = "EUPORIE",
         Radii = { 2000, 2000, 2000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
         },
@@ -36,6 +42,7 @@ local pasiphaeGroup = {
         Spice = "555",
         Radii = { 2000, 2000, 2000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Name = "S/2003 J 18",
             Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
@@ -53,6 +60,7 @@ local pasiphaeGroup = {
         Spice = "HELIKE",
         Radii = { 4000, 4000, 4000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
         },
@@ -69,6 +77,7 @@ local pasiphaeGroup = {
         Spice = "ORTHOSIE",
         Radii = { 2000, 2000, 2000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
         },
@@ -85,6 +94,7 @@ local pasiphaeGroup = {
         Spice = "554",
         Radii = { 3000, 3000, 3000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Name = "S/2016 J 1",
             Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
@@ -102,6 +112,7 @@ local pasiphaeGroup = {
         Spice = "558",
         Radii = { 2000, 2000, 2000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Name = "S/2003 J 15",
             Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
@@ -119,6 +130,7 @@ local pasiphaeGroup = {
         Spice = "AOEDE",
         Radii = { 4000, 4000, 4000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
         },
@@ -135,6 +147,7 @@ local pasiphaeGroup = {
         Spice = "CALLIRRHOE",
         Radii = { 9000, 9000, 9000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
         },
@@ -151,6 +164,7 @@ local pasiphaeGroup = {
         Spice = "EURYDOME",
         Radii = { 3000, 3000, 3000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
         },
@@ -167,6 +181,7 @@ local pasiphaeGroup = {
         Spice = "KORE",
         Radii = { 2000, 2000, 2000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
         },
@@ -183,6 +198,7 @@ local pasiphaeGroup = {
         Spice = "CYLLENE",
         Radii = { 2000, 2000, 2000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
         },
@@ -199,6 +215,7 @@ local pasiphaeGroup = {
         Spice = "556",
         Radii = { 1000, 1000, 1000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Name = "S/2011 J 2",
             Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
@@ -216,6 +233,7 @@ local pasiphaeGroup = {
         Spice = "559",
         Radii = { 2000, 2000, 2000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Name = "S/2017 J 1",
             Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
@@ -233,6 +251,7 @@ local pasiphaeGroup = {
         Spice = "55062",
         Radii = { 2000, 2000, 2000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Name = "S/2003 J 4",
             Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
@@ -250,6 +269,7 @@ local pasiphaeGroup = {
         Spice = "PASIPHAE",
         Radii = { 60000, 60000, 60000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
         },
@@ -266,6 +286,7 @@ local pasiphaeGroup = {
         Spice = "HEGEMONE",
         Radii = { 3000, 3000, 3000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
         },
@@ -282,6 +303,7 @@ local pasiphaeGroup = {
         Spice = "SINOPE",
         Radii = { 38000, 38000, 38000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
         },
@@ -298,6 +320,7 @@ local pasiphaeGroup = {
         Spice = "SPONDE",
         Radii = { 2000, 2000, 2000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
         },
@@ -314,6 +337,7 @@ local pasiphaeGroup = {
         Spice = "AUTONOE",
         Radii = { 4000, 4000, 4000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
         },
@@ -331,6 +355,7 @@ local pasiphaeGroup = {
         Spice = "MAGACLITE",
         Radii = { 5000, 5000, 5000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
         },
@@ -340,9 +365,21 @@ local pasiphaeGroup = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(
     asset,
     proceduralGlobes.createGlobes(pasiphaeGroup)
 )
+
+
+asset.meta = {
+    Name = "Jupiter Pasiphae Group Moons",
+    Version = "1.0",
+    Description = [[ Procedural Globe asset containing Jupiter's Pasiphae Group
+        moons: Euporie, S2003J18, Helike, Orthosie, S2016J1, S2003J15, Aoede, Callirrhoe,
+        Eurydome, Kore, Cyllene, S2011J2, S2017J1, S2003J4, Pasiphae, Hegemone, Sinope,
+        Sponde, Autonoe and Megaclite. Blank globes and SPICE trails are generated for
+        each moon.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

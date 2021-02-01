@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -58,11 +58,9 @@ std::string fromStringConversion(std::string val, bool& success) {
 }
 
 bool toStringConversion(std::string& outValue, std::string inValue) {
-    std::string str;
     nlohmann::json json;
     nlohmann::to_json(json, inValue);
     outValue = json.dump();
-
     return true;
 }
 

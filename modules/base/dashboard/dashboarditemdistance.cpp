@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,23 +41,6 @@
 #include <ghoul/misc/profiling.h>
 
 namespace {
-    constexpr const char* KeyFontMono = "Mono";
-
-    constexpr const float DefaultFontSize = 10.f;
-
-    constexpr openspace::properties::Property::PropertyInfo FontNameInfo = {
-        "FontName",
-        "Font Name",
-        "This value is the name of the font that is used. It can either refer to an "
-        "internal name registered previously, or it can refer to a path that is used."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
-        "FontSize",
-        "Font Size",
-        "This value determines the size of the font that is used to render the distance."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo SourceTypeInfo = {
         "SourceType",
         "Source Type",
@@ -101,6 +84,14 @@ namespace {
         "to convert the meters into."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo FormatStringInfo = {
+        "FormatString",
+        "Format String",
+        "The format string that is used for formatting the distance string.  This format "
+        "receives four parameters:  The name of the source, the name of the destination "
+        "the value of the distance and the unit of the distance"
+    };
+
     std::vector<std::string> unitList() {
         std::vector<std::string> res(openspace::DistanceUnits.size());
         std::transform(
@@ -127,18 +118,6 @@ documentation::Documentation DashboardItemDistance::Documentation() {
                 "Type",
                 new StringEqualVerifier("DashboardItemDistance"),
                 Optional::No
-            },
-            {
-                FontNameInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                FontNameInfo.description
-            },
-            {
-                FontSizeInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                FontSizeInfo.description
             },
             {
                 SourceTypeInfo.identifier,
@@ -179,17 +158,22 @@ documentation::Documentation DashboardItemDistance::Documentation() {
                 new StringInListVerifier(unitList()),
                 Optional::Yes,
                 RequestedUnitInfo.description
+            },
+            {
+                FormatStringInfo.identifier,
+                new StringVerifier,
+                Optional::Yes,
+                FormatStringInfo.description
             }
         }
     };
 }
 
 DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary)
-    : DashboardItem(dictionary)
-    , _fontName(FontNameInfo, KeyFontMono)
-    , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
+    : DashboardTextItem(dictionary)
     , _doSimplification(SimplificationInfo, true)
     , _requestedUnit(RequestedUnitInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _formatString(FormatStringInfo, "Distance from {} to {}: {:f} {}")
     , _source{
         properties::OptionProperty(
             SourceTypeInfo,
@@ -212,23 +196,6 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
         dictionary,
         "DashboardItemDistance"
     );
-
-    if (dictionary.hasKey(FontNameInfo.identifier)) {
-        _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
-    }
-    if (dictionary.hasKey(FontSizeInfo.identifier)) {
-        _fontSize = static_cast<float>(dictionary.value<double>(FontSizeInfo.identifier));
-    }
-
-    _fontName.onChange([this]() {
-        _font = global::fontManager.font(_fontName, _fontSize);
-    });
-    addProperty(_fontName);
-
-    _fontSize.onChange([this]() {
-        _font = global::fontManager.font(_fontName, _fontSize);
-    });
-    addProperty(_fontSize);
 
     _source.type.addOptions({
         { Type::Node, "Node" },
@@ -358,7 +325,10 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
     _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
     addProperty(_requestedUnit);
 
-    _font = global::fontManager.font(_fontName, _fontSize);
+    if (dictionary.hasKey(FormatStringInfo.identifier)) {
+        _formatString = dictionary.value<std::string>(FormatStringInfo.identifier);
+    }
+    addProperty(_formatString);
 
     _buffer.resize(256);
 }
@@ -369,7 +339,7 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
 {
     if ((mainComp.type == Type::Node) || (mainComp.type == Type::NodeSurface)) {
         if (!mainComp.node) {
-            mainComp.node = global::renderEngine.scene()->sceneGraphNode(
+            mainComp.node = global::renderEngine->scene()->sceneGraphNode(
                 mainComp.nodeName
             );
 
@@ -388,7 +358,7 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
             return { mainComp.node->worldPosition(), mainComp.node->guiName() };
         case Type::NodeSurface:
         {
-            glm::dvec3 otherPos = glm::dvec3(0.0);
+            glm::dvec3 otherPos;
             if (otherComp.type == Type::NodeSurface) {
                 // We are only interested in the direction, and we want to prevent
                 // infinite recursion
@@ -406,7 +376,7 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
         }
         case Type::Focus: {
             const SceneGraphNode* anchor =
-                global::navigationHandler.orbitalNavigator().anchorNode();
+                global::navigationHandler->orbitalNavigator().anchorNode();
             if (!anchor) {
                 return { glm::dvec3(0.0), "Unknown" };
             }
@@ -415,7 +385,7 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
             }
         }
         case Type::Camera:
-            return { global::renderEngine.scene()->camera()->positionVec3(), "camera" };
+            return { global::renderEngine->scene()->camera()->positionVec3(), "camera" };
         default:
             return { glm::dvec3(0.0), "Unknown" };
     }
@@ -444,16 +414,21 @@ void DashboardItemDistance::render(glm::vec2& penPosition) {
         dist = { convertedD, nameForDistanceUnit(unit, convertedD != 1.0) };
     }
 
-    penPosition.y -= _font->height();
-    std::fill(_buffer.begin(), _buffer.end(), 0);
-    char* end = fmt::format_to(
-        _buffer.data(),
-        "Distance from {} to {}: {:f} {}\0",
-        sourceInfo.second, destinationInfo.second, dist.first, dist.second
-    );
+    std::fill(_buffer.begin(), _buffer.end(), char(0));
+    try {
+        char* end = fmt::format_to(
+            _buffer.data(),
+            _formatString.value().c_str(),
+            sourceInfo.second, destinationInfo.second, dist.first, dist.second
+        );
 
-    std::string_view text = std::string_view(_buffer.data(), end - _buffer.data());
-    RenderFont(*_font, penPosition, text);
+        std::string_view text = std::string_view(_buffer.data(), end - _buffer.data());
+        RenderFont(*_font, penPosition, text);
+    }
+    catch (const fmt::format_error&) {
+        LERRORC("DashboardItemDate", "Illegal format string");
+    }
+    penPosition.y -= _font->height();
 }
 
 glm::vec2 DashboardItemDistance::size() const {

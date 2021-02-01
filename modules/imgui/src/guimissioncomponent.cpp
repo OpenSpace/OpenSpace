@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,7 +42,7 @@ namespace {
         std::string missionHashname = "##" + mission.name();
 
 
-        const double currentTime = openspace::global::timeManager.time().j2000Seconds();
+        const double currentTime = openspace::global::timeManager->time().j2000Seconds();
         openspace::MissionPhase::Trace t = mission.phaseTrace(currentTime, 0);
 
         int treeOption = t.empty() ? 0 : ImGuiTreeNodeFlags_DefaultOpen;
@@ -74,7 +74,7 @@ namespace {
                 &v,
                 s,
                 e,
-                std::string(openspace::global::timeManager.time().UTC()).c_str()
+                std::string(openspace::global::timeManager->time().UTC()).c_str()
             );
             ImGui::SameLine();
             ImGui::Text("%s", std::string(endTime.UTC()).c_str());
@@ -98,7 +98,7 @@ GuiMissionComponent::GuiMissionComponent()
 {}
 
 void GuiMissionComponent::render() {
-    if (!global::missionManager.hasCurrentMission()) {
+    if (!global::missionManager->hasCurrentMission()) {
         return;
     }
 
@@ -109,7 +109,7 @@ void GuiMissionComponent::render() {
 
     _isCollapsed = ImGui::IsWindowCollapsed();
 
-    const Mission& currentMission = global::missionManager.currentMission();
+    const Mission& currentMission = global::missionManager->currentMission();
     renderMission(currentMission);
 
     ImGui::End();

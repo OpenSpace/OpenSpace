@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -145,7 +145,7 @@ DashboardItemInstruments::DashboardItemInstruments(const ghoul::Dictionary& dict
         glm::vec3(0.f),
         glm::vec3(1.f)
     )
-    , _font(global::fontManager.font(KeyFontMono, 10))
+    , _font(global::fontManager->font(KeyFontMono, 10))
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -161,12 +161,12 @@ DashboardItemInstruments::DashboardItemInstruments(const ghoul::Dictionary& dict
     }
 
     _fontName.onChange([this]() {
-        _font = global::fontManager.font(_fontName, _fontSize);
+        _font = global::fontManager->font(_fontName, _fontSize);
     });
     addProperty(_fontName);
 
     _fontSize.onChange([this]() {
-        _font = global::fontManager.font(_fontName, _fontSize);
+        _font = global::fontManager->font(_fontName, _fontSize);
     });
     addProperty(_fontSize);
 
@@ -175,13 +175,13 @@ DashboardItemInstruments::DashboardItemInstruments(const ghoul::Dictionary& dict
     _activeFlash.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_activeFlash);
 
-    _font = global::fontManager.font(_fontName, _fontSize);
+    _font = global::fontManager->font(_fontName, _fontSize);
 }
 
 void DashboardItemInstruments::render(glm::vec2& penPosition) {
     ZoneScoped
 
-    double currentTime = global::timeManager.time().j2000Seconds();
+    double currentTime = global::timeManager->time().j2000Seconds();
 
     if (!ImageSequencer::ref().isReady()) {
         return;
@@ -230,8 +230,8 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
             ghoul::fontrendering::CrDirection::Down
         );
 
-        std::string_view str = SpiceManager::ref().dateFromEphemerisTime(
-            sequencer.nextCaptureTime(global::timeManager.time().j2000Seconds()),
+        std::string str = SpiceManager::ref().dateFromEphemerisTime(
+            sequencer.nextCaptureTime(global::timeManager->time().j2000Seconds()),
             "YYYY MON DD HR:MN:SC"
         );
 
@@ -275,7 +275,6 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
         sequencer.activeInstruments(currentTime);
 
     glm::vec4 firing(0.58f - t, 1.f - t, 1.f - t, 1.f);
-    glm::vec4 notFiring(0.5f, 0.5f, 0.5f, 1.f);
 
     RenderFont(
         *_font,
@@ -315,7 +314,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
 glm::vec2 DashboardItemInstruments::size() const {
     glm::vec2 size = glm::vec2(0.f);
     //return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-    double currentTime = global::timeManager.time().j2000Seconds();
+    double currentTime = global::timeManager->time().j2000Seconds();
 
     if (!ImageSequencer::ref().isReady()) {
         return glm::vec2(0.f);
@@ -334,7 +333,6 @@ glm::vec2 DashboardItemInstruments::size() const {
 
 
     if (remaining > 0) {
-        using FR = ghoul::fontrendering::FontRenderer;
         std::string progress = progressToStr(25, t);
 
         size = addToBoundingbox(

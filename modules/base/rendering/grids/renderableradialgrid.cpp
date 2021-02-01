@@ -3,7 +3,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,7 +28,6 @@
 #include <modules/base/basemodule.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/documentation/verifier.h>
 #include <ghoul/glm.h>
@@ -39,9 +38,9 @@
 namespace {
     constexpr const char* ProgramName = "GridProgram";
 
-    constexpr openspace::properties::Property::PropertyInfo GridColorInfo = {
-        "GridColor",
-        "Grid Color",
+    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+        "Color",
+        "Color",
         "This value determines the color of the grid lines that are rendered."
     };
 
@@ -49,7 +48,7 @@ namespace {
         "GridSegments",
         "Number of Grid Segments",
         "Specifies the number of segments for the grid, in the radial and angular "
-        " direction respectively"
+        "direction respectively"
     };
 
     constexpr openspace::properties::Property::PropertyInfo CircleSegmentsInfo = {
@@ -88,10 +87,10 @@ documentation::Documentation RenderableRadialGrid::Documentation() {
         "base_renderable_radialgrid",
         {
             {
-                GridColorInfo.identifier,
+                ColorInfo.identifier,
                 new DoubleVector3Verifier,
                 Optional::Yes,
-                GridColorInfo.description
+                ColorInfo.description
             },
             {
                 GridSegmentsInfo.identifier,
@@ -129,13 +128,8 @@ documentation::Documentation RenderableRadialGrid::Documentation() {
 
 RenderableRadialGrid::RenderableRadialGrid(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _gridColor(GridColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
-    , _gridSegments(
-        GridSegmentsInfo, 
-        glm::ivec2(1, 1),  
-        glm::ivec2(1),
-        glm::ivec2(200)
-    )
+    , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
+    , _gridSegments(GridSegmentsInfo, glm::ivec2(1), glm::ivec2(1), glm::ivec2(200))
     , _circleSegments(CircleSegmentsInfo, 36, 4, 200)
     , _lineWidth(LineWidthInfo, 0.5f, 0.f, 20.f)
     , _maxRadius(OuterRadiusInfo, 1.f, 0.f, 20.f)
@@ -150,15 +144,15 @@ RenderableRadialGrid::RenderableRadialGrid(const ghoul::Dictionary& dictionary)
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
 
-    if (dictionary.hasKey(GridColorInfo.identifier)) {
-        _gridColor = dictionary.value<glm::vec3>(GridColorInfo.identifier);
+    if (dictionary.hasKey(ColorInfo.identifier)) {
+        _color = dictionary.value<glm::dvec3>(ColorInfo.identifier);
     }
-    _gridColor.setViewOption(properties::Property::ViewOptions::Color);
-    addProperty(_gridColor);
+    _color.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_color);
 
     if (dictionary.hasKey(GridSegmentsInfo.identifier)) {
         _gridSegments = static_cast<glm::ivec2>(
-            dictionary.value<glm::vec2>(GridSegmentsInfo.identifier)
+            dictionary.value<glm::dvec2>(GridSegmentsInfo.identifier)
         );
     }
     _gridSegments.onChange([&]() { _gridIsDirty = true; });
@@ -221,7 +215,7 @@ void RenderableRadialGrid::initializeGL() {
     _gridProgram = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return global::renderEngine.buildRenderProgram(
+            return global::renderEngine->buildRenderProgram(
                 ProgramName,
                 absPath("${MODULE_BASE}/shaders/grid_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/grid_fs.glsl")
@@ -234,7 +228,7 @@ void RenderableRadialGrid::deinitializeGL() {
     BaseModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
-            global::renderEngine.removeRenderProgram(p);
+            global::renderEngine->removeRenderProgram(p);
         }
     );
     _gridProgram = nullptr;
@@ -242,8 +236,6 @@ void RenderableRadialGrid::deinitializeGL() {
 
 void RenderableRadialGrid::render(const RenderData& data, RendererTasks&) {
     _gridProgram->activate();
-
-    _gridProgram->setUniform("opacity", _opacity);
 
     const glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
@@ -258,21 +250,20 @@ void RenderableRadialGrid::render(const RenderData& data, RendererTasks&) {
         "MVPTransform",
         glm::dmat4(data.camera.projectionMatrix()) * modelViewTransform
     );
-    
-    _gridProgram->setUniform("gridColor", _gridColor);
+    _gridProgram->setUniform("opacity", _opacity);
+    _gridProgram->setUniform("gridColor", _color);
 
-    float adjustedLineWidth = 1.f;
-
+    // Change GL state:
 #ifndef __APPLE__
-    adjustedLineWidth = _lineWidth;
+    glLineWidth(_lineWidth);
+#else
+    glLineWidth(1.f);
 #endif
-
-    // Changes GL state:
-    glLineWidth(adjustedLineWidth);
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_LINE_SMOOTH);
-    
+    glDepthMask(false);
+
     for (GeometryData& c : _circles) {
         c.render();
     }
@@ -281,9 +272,10 @@ void RenderableRadialGrid::render(const RenderData& data, RendererTasks&) {
 
     _gridProgram->deactivate();
 
-    // Restores GL State
-    global::renderEngine.openglStateCache().resetBlendState();
-    global::renderEngine.openglStateCache().resetLineState();
+    // Restore GL State
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetLineState();
+    global::renderEngine->openglStateCache().resetDepthState();
 }
 
 void RenderableRadialGrid::update(const UpdateData&) {
@@ -324,7 +316,6 @@ void RenderableRadialGrid::update(const UpdateData&) {
     // Lines
     const int nLines = _gridSegments.value()[1];
     const int nVertices = 2 * nLines;
-    const float fsegments = static_cast<float>(nLines);
 
     _lines.varray.clear();
     _lines.varray.reserve(nVertices);
@@ -337,9 +328,9 @@ void RenderableRadialGrid::update(const UpdateData&) {
             rendering::helper::createRing(nLines, _minRadius);
 
         for (int i = 0; i < nLines; ++i) {
-            const rendering::helper::VertexXYZ vOut = 
+            const rendering::helper::VertexXYZ vOut =
                 rendering::helper::convertToXYZ(outerVertices[i]);
-            
+
             const rendering::helper::VertexXYZ vIn =
                 rendering::helper::convertToXYZ(innerVertices[i]);
 
@@ -352,7 +343,7 @@ void RenderableRadialGrid::update(const UpdateData&) {
     _gridIsDirty = false;
 }
 
-RenderableRadialGrid::GeometryData::GeometryData(GLenum renderMode) 
+RenderableRadialGrid::GeometryData::GeometryData(GLenum renderMode)
     : mode(renderMode)
 {
     glGenVertexArrays(1, &vao);
@@ -375,8 +366,8 @@ RenderableRadialGrid::GeometryData::GeometryData(GeometryData&& other) noexcept 
     other.vbo = 0;
 }
 
-RenderableRadialGrid::GeometryData& 
-RenderableRadialGrid::GeometryData::operator=(GeometryData&& other) noexcept 
+RenderableRadialGrid::GeometryData&
+RenderableRadialGrid::GeometryData::operator=(GeometryData&& other) noexcept
 {
     if (this != &other) {
         vao = other.vao;
@@ -409,11 +400,11 @@ void RenderableRadialGrid::GeometryData::update() {
     );
 
     glVertexAttribPointer(
-        0, 
-        3, 
-        GL_FLOAT, 
-        GL_FALSE, 
-        sizeof(rendering::helper::VertexXYZ), 
+        0,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(rendering::helper::VertexXYZ),
         nullptr
     );
 }

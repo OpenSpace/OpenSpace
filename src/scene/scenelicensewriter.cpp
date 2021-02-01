@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -51,7 +51,7 @@ std::string SceneLicenseWriter::generateJson() const {
     json << "[";
 
     std::vector<const Asset*> assets =
-        global::openSpaceEngine.assetManager().rootAsset().subTreeAssets();
+        global::openSpaceEngine->assetManager().rootAsset().subTreeAssets();
 
     int metaTotal = 0;
     for (const Asset* asset : assets) {
@@ -65,7 +65,7 @@ std::string SceneLicenseWriter::generateJson() const {
     int metaCount = 0;
     for (const Asset* asset : assets) {
         std::optional<Asset::MetaInformation> meta = asset->metaInformation();
-        
+
         if (!meta.has_value()) {
             continue;
         }
@@ -82,6 +82,7 @@ std::string SceneLicenseWriter::generateJson() const {
         json << fmt::format(replStr, "url", escapedJson(meta->url));
         //json << fmt::format(replStr2, "licenseText", escapedJson(license.licenseText));
         json << fmt::format(replStr, "license", escapedJson(meta->license));
+        json << fmt::format(replStr, "identifiers", escapedJson(meta->identifiers));
         json << fmt::format(replStr2, "path", escapedJson(asset->assetFilePath()));
         json << "}";
 
@@ -92,18 +93,7 @@ std::string SceneLicenseWriter::generateJson() const {
     }
 
     json << "]";
-
-    std::string jsonString;
-    for (const char& c : json.str()) {
-        if (c == '\'') {
-            jsonString += "\\'";
-        }
-        else {
-            jsonString += c;
-        }
-    }
-
-    return jsonString;
+    return json.str();
 }
 
 } // namespace openspace

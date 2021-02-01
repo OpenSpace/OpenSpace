@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,6 +44,7 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
@@ -158,7 +159,7 @@ documentation::Documentation ShadowComponent::Documentation() {
             },
             {
                 DepthMapSizeInfo.identifier,
-                new Vector2ListVerifier<float>,
+                new Vector2ListVerifier<double>,
                 Optional::Yes,
                 DepthMapSizeInfo.description
             }
@@ -175,12 +176,12 @@ ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
 {
     using ghoul::filesystem::File;
 
-    if (dictionary.hasKey("Shadows")) {
+    if (dictionary.hasValue<ghoul::Dictionary>("Shadows")) {
         // @TODO (abock, 2019-12-16) It would be better to not store the dictionary long
         // term and rather extract the values directly here.  This would require a bit of
         // a rewrite in the RenderableGlobe class to not create the ShadowComponent in the
         // class-initializer list though
-        dictionary.getValue("Shadows", _shadowMapDictionary);
+        _shadowMapDictionary = dictionary.value<ghoul::Dictionary>("Shadows");
     }
 
     documentation::testSpecificationAndThrow(
@@ -191,21 +192,21 @@ ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
 
     if (_shadowMapDictionary.hasKey(DistanceFractionInfo.identifier)) {
         _distanceFraction = static_cast<int>(
-            _shadowMapDictionary.value<float>(DistanceFractionInfo.identifier)
+            _shadowMapDictionary.value<double>(DistanceFractionInfo.identifier)
         );
     }
     _saveDepthTexture.onChange([&]() { _executeDepthTextureSave = true; });
 
 
     if (_shadowMapDictionary.hasKey(DepthMapSizeInfo.identifier)) {
-        glm::vec2 depthMapSize =
-            _shadowMapDictionary.value<glm::vec2>(DepthMapSizeInfo.identifier);
+        glm::dvec2 depthMapSize =
+            _shadowMapDictionary.value<glm::dvec2>(DepthMapSizeInfo.identifier);
         _shadowDepthTextureWidth = static_cast<int>(depthMapSize.x);
         _shadowDepthTextureHeight = static_cast<int>(depthMapSize.y);
         _dynamicDepthTextureRes = false;
     }
     else {
-        glm::ivec2 renderingResolution = global::renderEngine.renderingResolution();
+        glm::ivec2 renderingResolution = global::renderEngine->renderingResolution();
         _shadowDepthTextureWidth = renderingResolution.x * 2;
         _shadowDepthTextureHeight = renderingResolution.y * 2;
         _dynamicDepthTextureRes = true;
@@ -220,7 +221,9 @@ ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
     addProperty(_distanceFraction);
 }
 
-void ShadowComponent::initialize() {}
+void ShadowComponent::initialize() {
+    buildDDepthTexture();
+}
 
 bool ShadowComponent::isReady() const {
     return true;
@@ -236,6 +239,7 @@ void ShadowComponent::initializeGL() {
 void ShadowComponent::deinitializeGL() {
     glDeleteTextures(1, &_shadowDepthTexture);
     glDeleteTextures(1, &_positionInLightSpaceTexture);
+    glDeleteTextures(1, &_dDepthTexture);
     glDeleteFramebuffers(1, &_shadowFBO);
 }
 
@@ -298,7 +302,7 @@ RenderData ShadowComponent::begin(const RenderData& data) {
     //matrix[14] = -glm::dot(cameraZ, lightPosition);
 
 
-    _lightCamera = std::move(std::unique_ptr<Camera>(new Camera(data.camera)));
+    _lightCamera = std::make_unique<Camera>(data.camera);
     _lightCamera->setPositionVec3(lightPosition);
     _lightCamera->setRotation(glm::dquat(glm::inverse(cameraRotationMatrix)));
     //=======================================================================
@@ -317,20 +321,9 @@ RenderData ShadowComponent::begin(const RenderData& data) {
 
 
     // Saves current state
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
-    glGetIntegerv(GL_VIEWPORT, _mViewport);
-    _faceCulling = glIsEnabled(GL_CULL_FACE);
-    glGetIntegerv(GL_CULL_FACE_MODE, &_faceToCull);
-    _polygonOffSet = glIsEnabled(GL_POLYGON_OFFSET_FILL);
-    glGetFloatv(GL_POLYGON_OFFSET_FACTOR, &_polygonOffSetFactor);
-    glGetFloatv(GL_POLYGON_OFFSET_UNITS, &_polygonOffSetUnits);
-    glGetFloatv(GL_COLOR_CLEAR_VALUE, _colorClearValue);
-    glGetFloatv(GL_DEPTH_CLEAR_VALUE, &_depthClearValue);
-    _depthIsEnabled = glIsEnabled(GL_DEPTH_TEST);
-    glGetIntegerv(GL_DEPTH_FUNC, &_depthFunction);
-    _blendIsEnabled = glIsEnabled(GL_BLEND);
-
-
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_currentFBO);
+    global::renderEngine->openglStateCache().viewport(_mViewport);
+    
     glBindFramebuffer(GL_FRAMEBUFFER, _shadowFBO);
     GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_NONE, GL_NONE };
     glDrawBuffers(3, drawBuffers);
@@ -367,45 +360,18 @@ void ShadowComponent::end() {
     }
 
     // Restores system state
-    glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, _currentFBO);
     GLenum drawBuffers[] = {
         GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2
     };
     glDrawBuffers(3, drawBuffers);
     glViewport(_mViewport[0], _mViewport[1], _mViewport[2], _mViewport[3]);
 
-    if (_faceCulling) {
-        glEnable(GL_CULL_FACE);
-        glCullFace(_faceToCull);
-    }
-    else {
-        glDisable(GL_CULL_FACE);
-    }
-
-    if (_depthIsEnabled) {
-        glEnable(GL_DEPTH_TEST);
-    }
-    else {
-        glDisable(GL_DEPTH_TEST);
-    }
-
-    glDepthFunc(_depthFunction);
-
-    if (_polygonOffSet) {
-        glEnable(GL_POLYGON_OFFSET_FILL);
-        glPolygonOffset(_polygonOffSetFactor, _polygonOffSetUnits);
-    }
-    else {
-        glDisable(GL_POLYGON_OFFSET_FILL);
-    }
-
-    glClearColor(
-        _colorClearValue[0],
-        _colorClearValue[1],
-        _colorClearValue[2],
-        _colorClearValue[3]
-    );
-    glClearDepth(_depthClearValue);
+    // Restores OpenGL Rendering State
+    global::renderEngine->openglStateCache().resetColorState();
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
+    global::renderEngine->openglStateCache().resetPolygonAndClippingState();
 
     if (_blendIsEnabled) {
         glEnable(GL_BLEND);
@@ -413,7 +379,7 @@ void ShadowComponent::end() {
 
     if (_viewDepthMap) {
         if (!_renderDMProgram) {
-            _renderDMProgram = global::renderEngine.buildRenderProgram(
+            _renderDMProgram = global::renderEngine->buildRenderProgram(
                 "ShadowMappingDebuggingProgram",
                 absPath("${MODULE_GLOBEBROWSING}/shaders/smviewer_vs.glsl"),
                 absPath("${MODULE_GLOBEBROWSING}/shaders/smviewer_fs.glsl")
@@ -442,9 +408,9 @@ void ShadowComponent::end() {
 void ShadowComponent::update(const UpdateData&) {
     ZoneScoped
 
-    _sunPosition = global::renderEngine.scene()->sceneGraphNode("Sun")->worldPosition();
+    _sunPosition = global::renderEngine->scene()->sceneGraphNode("Sun")->worldPosition();
 
-    glm::ivec2 renderingResolution = global::renderEngine.renderingResolution();
+    glm::ivec2 renderingResolution = global::renderEngine->renderingResolution();
     if (_dynamicDepthTextureRes && ((_shadowDepthTextureWidth != renderingResolution.x) ||
         (_shadowDepthTextureHeight != renderingResolution.y)))
     {
@@ -464,7 +430,7 @@ void ShadowComponent::createDepthTexture() {
 
 void ShadowComponent::createShadowFBO() {
     // Saves current FBO first
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_currentFBO);
 
     glGenFramebuffers(1, &_shadowFBO);
     glBindFramebuffer(GL_FRAMEBUFFER, _shadowFBO);
@@ -489,7 +455,7 @@ void ShadowComponent::createShadowFBO() {
     checkFrameBufferState("createShadowFBO()");
 
     // Restores system state
-    glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, _currentFBO);
 }
 
 void ShadowComponent::updateDepthTexture() {
@@ -512,7 +478,7 @@ void ShadowComponent::updateDepthTexture() {
         0,
         GL_DEPTH_COMPONENT,
         GL_FLOAT,
-        0
+        nullptr
     );
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -540,6 +506,31 @@ void ShadowComponent::updateDepthTexture() {
     //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void ShadowComponent::buildDDepthTexture() {
+    glGenTextures(1, &_dDepthTexture);
+    glBindTexture(GL_TEXTURE_2D, _dDepthTexture);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_DEPTH_COMPONENT32F,
+        1,
+        1,
+        0,
+        GL_DEPTH_COMPONENT,
+        GL_FLOAT,
+        nullptr
+    );
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 
     glBindTexture(GL_TEXTURE_2D, 0);
 }
@@ -650,6 +641,10 @@ ShadowComponent::ShadowMapData ShadowComponent::shadowMapData() const {
 
 void ShadowComponent::setViewDepthMap(bool enable) {
     _viewDepthMap = enable;
+}
+
+GLuint ShadowComponent::dDepthTexture() const {
+    return _dDepthTexture;
 }
 
 } // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,7 +43,8 @@
 int main(int argc, char** argv) {
     using namespace openspace;
     ghoul::initialize();
-
+    global::create();
+    
     // Register the path of the executable,
     // to make it possible to find other files in the same directory.
     FileSys.registerPathToken(
@@ -53,9 +54,9 @@ int main(int argc, char** argv) {
     );
 
     std::string configFile = configuration::findConfiguration();
-    global::configuration = configuration::loadConfigurationFromFile(configFile);
-    global::openSpaceEngine.registerPathTokens();
-    global::openSpaceEngine.initialize();
+    *global::configuration = configuration::loadConfigurationFromFile(configFile);
+    global::openSpaceEngine->registerPathTokens();
+    global::openSpaceEngine->initialize();
 
     FileSys.registerPathToken("${TESTDIR}", "${BASE}/tests");
 
@@ -66,6 +67,6 @@ int main(int argc, char** argv) {
 
     // And the deinitialization needs the SpiceManager to be initialized
     openspace::SpiceManager::initialize();
-    global::openSpaceEngine.deinitialize();
+    global::openSpaceEngine->deinitialize();
     return result;
 }

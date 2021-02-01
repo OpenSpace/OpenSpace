@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,8 +25,9 @@
 #include <modules/webbrowser/webbrowsermodule.h>
 
 #include <modules/webbrowser/include/browserinstance.h>
-#include <modules/webbrowser/include/screenspacebrowser.h>
 #include <modules/webbrowser/include/cefhost.h>
+#include <modules/webbrowser/include/eventhandler.h>
+#include <modules/webbrowser/include/screenspacebrowser.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
@@ -72,8 +73,9 @@ WebBrowserModule::WebBrowserModule()
     : OpenSpaceModule(WebBrowserModule::Name)
     , _updateBrowserBetweenRenderables(UpdateBrowserBetweenRenderablesInfo, true)
     , _browserUpdateInterval(BrowserUpdateIntervalInfo, 1.f, 1.0f, 1000.f)
+    , _eventHandler(new EventHandler)
 {
-    global::callback::deinitialize.emplace_back([this]() {
+    global::callback::deinitialize->emplace_back([this]() {
         ZoneScopedN("WebBrowserModule")
 
         deinitialize();
@@ -105,7 +107,7 @@ void WebBrowserModule::internalDeinitialize() {
         return;
     }
 
-    _eventHandler.resetBrowserInstance();
+    _eventHandler->resetBrowserInstance();
 
     bool forceBrowserShutdown = true;
     for (BrowserInstance* browser : _browsers) {
@@ -127,18 +129,18 @@ std::string WebBrowserModule::findHelperExecutable() {
 void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     ZoneScoped
 
-    if (dictionary.hasKeyAndValue<bool>("WebHelperLocation")) {
+    if (dictionary.hasValue<bool>("WebHelperLocation")) {
         _webHelperLocation = absPath(dictionary.value<std::string>("WebHelperLocation"));
     }
     else {
         _webHelperLocation = findHelperExecutable();
     }
 
-    if (dictionary.hasKeyAndValue<bool>("Enabled")) {
+    if (dictionary.hasValue<bool>("Enabled")) {
         _enabled = dictionary.value<bool>("Enabled");
     }
 
-    const bool isMaster = global::windowDelegate.isMaster();
+    const bool isMaster = global::windowDelegate->isMaster();
 
     if (!_enabled || (!isMaster) ) {
         return;
@@ -159,7 +161,7 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
         );
     }
 
-    _eventHandler.initialize();
+    _eventHandler->initialize();
 
     // register ScreenSpaceBrowser
     auto fScreenSpaceRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
@@ -199,17 +201,13 @@ void WebBrowserModule::removeBrowser(BrowserInstance* browser) {
 
 void WebBrowserModule::attachEventHandler(BrowserInstance* browserInstance) {
     if (_enabled) {
-        _eventHandler.setBrowserInstance(browserInstance);
+        _eventHandler->setBrowserInstance(browserInstance);
     }
-}
-
-EventHandler WebBrowserModule::eventHandler() {
-    return _eventHandler;
 }
 
 void WebBrowserModule::detachEventHandler() {
     if (_enabled) {
-        _eventHandler.setBrowserInstance(nullptr);
+        _eventHandler->setBrowserInstance(nullptr);
     }
 }
 

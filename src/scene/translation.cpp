@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -70,7 +70,7 @@ ghoul::mm_unique_ptr<Translation> Translation::createFromDictionary(
     Translation* result = factory->create(
         translationType,
         dictionary,
-        &global::memoryManager.PersistentMemory
+        &global::memoryManager->PersistentMemory
     );
     result->setIdentifier("Translation");
     return ghoul::mm_unique_ptr<Translation>(result);

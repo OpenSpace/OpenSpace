@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -54,7 +54,7 @@ ScriptEngine::ScriptEngine()
         }
     )
 {
-    tracy::LuaRegister(_state);
+    //tracy::LuaRegister(_state);
 }
 
 void ScriptEngine::initialize() {
@@ -634,8 +634,8 @@ bool ScriptEngine::writeLog(const std::string& script) {
     // Check that logging is enabled and initialize if necessary
     if (!_logFileExists) {
         // If a ScriptLogFile was specified, generate it now
-        if (!global::configuration.scriptLog.empty()) {
-            _logFilename = absPath(global::configuration.scriptLog);
+        if (!global::configuration->scriptLog.empty()) {
+            _logFilename = absPath(global::configuration->scriptLog);
             _logFileExists = true;
 
             LDEBUG(fmt::format(
@@ -690,11 +690,11 @@ void ScriptEngine::preSync(bool isMaster) {
         // Not really a received script but the master also needs to run the script...
         _masterScriptQueue.push(item);
 
-        if (global::parallelPeer.isHost() && remoteScripting) {
-            global::parallelPeer.sendScript(item.script);
+        if (global::parallelPeer->isHost() && remoteScripting) {
+            global::parallelPeer->sendScript(item.script);
         }
-        if (global::sessionRecording.isRecording()) {
-            global::sessionRecording.saveScriptKeyframe(item.script);
+        if (global::sessionRecording->isRecording()) {
+            global::sessionRecording->saveScriptKeyframe(item.script);
         }
     }
 }

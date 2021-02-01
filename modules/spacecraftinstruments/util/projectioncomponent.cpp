@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -259,7 +259,7 @@ void ProjectionComponent::initialize(const std::string& identifier,
         dictionary.value<std::string>(keyProjAberration)
     );
 
-    if (dictionary.hasKeyAndValue<ghoul::Dictionary>(keyPotentialTargets)) {
+    if (dictionary.hasValue<ghoul::Dictionary>(keyPotentialTargets)) {
         const ghoul::Dictionary& potentialTargets = dictionary.value<ghoul::Dictionary>(
             keyPotentialTargets
         );
@@ -272,15 +272,15 @@ void ProjectionComponent::initialize(const std::string& identifier,
         }
     }
 
-    if (dictionary.hasKeyAndValue<bool>(keyNeedsTextureMapDilation)) {
+    if (dictionary.hasValue<bool>(keyNeedsTextureMapDilation)) {
         _dilation.isEnabled = dictionary.value<bool>(keyNeedsTextureMapDilation);
     }
 
-    if (dictionary.hasKeyAndValue<bool>(keyNeedsShadowing)) {
+    if (dictionary.hasValue<bool>(keyNeedsShadowing)) {
         _shadowing.isEnabled = dictionary.value<bool>(keyNeedsShadowing);
     }
 
-    if (dictionary.hasKeyAndValue<double>(keyTextureMapAspectRatio)) {
+    if (dictionary.hasValue<double>(keyTextureMapAspectRatio)) {
         _projectionTextureAspectRatio =
             static_cast<float>(dictionary.value<double>(keyTextureMapAspectRatio));
     }
@@ -307,14 +307,16 @@ void ProjectionComponent::initialize(const std::string& identifier,
     }
 
     const std::string& sequenceType = dictionary.value<std::string>(keySequenceType);
-    //Important: client must define translation-list in mod file IFF playbook
+    // Important: client must define translation-list in mod file IFF playbook
     if (!dictionary.hasKey(keyTranslation)) {
         LWARNING("No playbook translation provided, spice calls must match playbook!");
         return;
     }
 
     ghoul::Dictionary translationDictionary;
-    dictionary.getValue(keyTranslation, translationDictionary);
+    if (dictionary.hasValue<ghoul::Dictionary>(keyTranslation)) {
+        translationDictionary = dictionary.value<ghoul::Dictionary>(keyTranslation);
+    }
 
     std::vector<std::unique_ptr<SequenceParser>> parsers;
     for (std::string& sequenceSource : sequenceSources) {
@@ -386,14 +388,17 @@ void ProjectionComponent::initialize(const std::string& identifier,
                 dictionary.value<std::string>(keyTimesSequenceDir)
             );
             ghoul::Dictionary timesTranslationDictionary;
-            dictionary.getValue(keyTimesTranslation, timesTranslationDictionary);
+            if (dictionary.hasValue<ghoul::Dictionary>(keyTimesTranslation)) {
+                timesTranslationDictionary =
+                    dictionary.value<ghoul::Dictionary>(keyTimesTranslation);
+            }
 
             parsers.push_back(
                 std::make_unique<InstrumentTimesParser>(
                     identifier,
                     std::move(timesSequenceSource),
                     timesTranslationDictionary
-                    )
+                )
             );
         }
     }
@@ -1021,7 +1026,7 @@ std::shared_ptr<ghoul::opengl::Texture> ProjectionComponent::loadProjectionTextu
         );
         texture->setFilter(Texture::FilterMode::LinearMipMap);
     }
-    return std::move(texture);
+    return texture;
 }
 
 bool ProjectionComponent::generateProjectionLayerTexture(const glm::ivec2& size) {

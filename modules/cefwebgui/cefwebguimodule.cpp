@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -89,9 +89,9 @@ CefWebGuiModule::CefWebGuiModule()
 void CefWebGuiModule::startOrStopGui() {
     ZoneScoped
 
-    WebBrowserModule* webBrowserModule = global::moduleEngine.module<WebBrowserModule>();
+    WebBrowserModule* webBrowserModule = global::moduleEngine->module<WebBrowserModule>();
 
-    const bool isMaster = global::windowDelegate.isMaster();
+    const bool isMaster = global::windowDelegate->isMaster();
 
     if (_enabled && isMaster) {
         LDEBUGC("WebBrowser", fmt::format("Loading GUI from {}", _url));
@@ -103,9 +103,9 @@ void CefWebGuiModule::startOrStopGui() {
             );
             _instance->initialize();
             _instance->reshape(static_cast<glm::ivec2>(
-                static_cast<glm::vec2>(global::windowDelegate.currentSubwindowSize()) *
-                global::windowDelegate.dpiScaling()
-                ));
+                static_cast<glm::vec2>(global::windowDelegate->currentSubwindowSize()) *
+                global::windowDelegate->dpiScaling()
+            ));
             if (!_url.value().empty()) {
                 _instance->loadUrl(_url);
             }
@@ -130,7 +130,7 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
     ZoneScoped
 
     WebBrowserModule* webBrowserModule =
-        global::moduleEngine.module<WebBrowserModule>();
+        global::moduleEngine->module<WebBrowserModule>();
 
     bool available = webBrowserModule && webBrowserModule->isEnabled();
 
@@ -185,7 +185,7 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
     // TODO: See if the hardcoded endpoint `frontend` below can be removed.
     // Possible fix: Reload browser if cefwebgui is routed to localhost
     // and the same endpoint that just came online.
-    WebGuiModule* webGuiModule = global::moduleEngine.module<WebGuiModule>();
+    WebGuiModule* webGuiModule = global::moduleEngine->module<WebGuiModule>();
 
     _endpointCallback = webGuiModule->addEndpointChangeCallback(
         [this](const std::string& endpoint, bool exists) {
@@ -196,8 +196,10 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
         }
     );
 
-    if (configuration.hasValue<float>(GuiScaleInfo.identifier)) {
-        _guiScale = configuration.value<float>(GuiScaleInfo.identifier);
+    if (configuration.hasValue<double>(GuiScaleInfo.identifier)) {
+        _guiScale = static_cast<float>(
+            configuration.value<double>(GuiScaleInfo.identifier)
+        );
     }
 
     _enabled = configuration.hasValue<bool>(EnabledInfo.identifier) &&
@@ -206,24 +208,24 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
     _visible = configuration.hasValue<bool>(VisibleInfo.identifier) &&
                configuration.value<bool>(VisibleInfo.identifier);
 
-    global::callback::initializeGL.emplace_back([this]() {
+    global::callback::initializeGL->emplace_back([this]() {
         startOrStopGui();
     });
 
-    global::callback::draw2D.emplace_back([this](){
+    global::callback::draw2D->emplace_back([this](){
         ZoneScopedN("CefWebGuiModule")
 
         const bool isGuiWindow =
-            global::windowDelegate.hasGuiWindow() ?
-            global::windowDelegate.isGuiWindow() :
+            global::windowDelegate->hasGuiWindow() ?
+            global::windowDelegate->isGuiWindow() :
             true;
-        const bool isMaster = global::windowDelegate.isMaster();
+        const bool isMaster = global::windowDelegate->isMaster();
 
         if (isGuiWindow && isMaster && _instance) {
-            if (global::windowDelegate.windowHasResized() || _instance->_shouldReshape) {
-                glm::ivec2 csws = global::windowDelegate.currentSubwindowSize();
+            if (global::windowDelegate->windowHasResized() || _instance->_shouldReshape) {
+                glm::ivec2 csws = global::windowDelegate->currentSubwindowSize();
                 _instance->reshape(static_cast<glm::ivec2>(
-                    static_cast<glm::vec2>(csws) * global::windowDelegate.dpiScaling()
+                    static_cast<glm::vec2>(csws) * global::windowDelegate->dpiScaling()
                 ));
                 _instance->_shouldReshape = false;
             }
@@ -233,11 +235,11 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
         }
     });
 
-    global::callback::deinitializeGL.emplace_back([this]() {
+    global::callback::deinitializeGL->emplace_back([this]() {
         ZoneScopedN("CefWebGuiModule")
 
         if (_endpointCallback != -1) {
-            WebGuiModule* webGuiModule = global::moduleEngine.module<WebGuiModule>();
+            WebGuiModule* webGuiModule = global::moduleEngine->module<WebGuiModule>();
             webGuiModule->removeEndpointChangeCallback(_endpointCallback);
             _endpointCallback = -1;
         }

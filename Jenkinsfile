@@ -67,7 +67,7 @@ def moduleCMakeFlags() {
 
   def flags = '';
   for (module in modules) {
-      flags += "-D OPENSPACE_MODULE_${module.toUpperCase()}=ON "
+      flags += "-DOPENSPACE_MODULE_${module.toUpperCase()}=ON "
   }
   return flags;
 }
@@ -78,89 +78,180 @@ def moduleCMakeFlags() {
 // Pipeline start
 //
 
-parallel master: {
-  node('master') {
-    stage('master/scm') {
+parallel tools: {
+  node('tools') {
+    stage('tools/scm') {
       deleteDir();
-      gitHelper.checkoutGit(url, branch);
+      gitHelper.checkoutGit(url, branch, false);
       helper.createDirectory('build');
     }
-    stage('master/cppcheck/create') {
-      sh 'cppcheck --enable=all --xml --xml-version=2 -i ext --suppressions-list=support/cppcheck/suppressions.txt include modules src tests 2> build/cppcheck.xml';
-    }
-    stage('master/cloc/create') {
-      sh 'cloc --by-file --exclude-dir=build,data,ext --xml --out=build/cloc.xml --force-lang-def=support/cloc/langDef --quiet .';
-    }
-  }
+    stage('tools/cppcheck') {
+      sh(
+        script: 'cppcheck --enable=all --xml --xml-version=2 -i ext --suppressions-list=support/cppcheck/suppressions.txt include modules src tests 2> build/cppcheck.xml',
+        label: 'CPPCheck'
+      )
+      recordIssues(
+        id: 'tools-cppcheck',
+        tool: cppCheck(pattern: 'build/cppcheck.xml')
+      ) 
+    }  
+    cleanWs()
+  } // node('tools')
 },
-linux: {
-  node('linux') {
-    stage('linux/scm') {
-      deleteDir()
-      gitHelper.checkoutGit(url, branch);
-    }
-    stage('linux/build') {
-        // Not sure why the linking of OpenSpaceTest takes so long
-        compileHelper.build(compileHelper.Make(), compileHelper.Gcc(), moduleCMakeFlags(), 'OpenSpace', 'build-all');
-    }
-    stage('linux/warnings') {
-      // compileHelper.recordCompileIssues(compileHelper.Gcc());
-    }
-    stage('linux/test') {
-      // testHelper.runUnitTests('build/OpenSpaceTest');
-    }
-  } // node('linux')
-},
-windows: {
-  node('windows') {
-    ws("${env.JENKINS_BASE}/O/${env.BRANCH_NAME}/${env.BUILD_ID}") {
-      stage('windows/scm') {
+linux_gcc_make: {
+  if (env.USE_BUILD_OS_LINUX == 'true') {
+    node('linux' && 'gcc') {
+      stage('linux-gcc-make/scm') {
         deleteDir();
         gitHelper.checkoutGit(url, branch);
       }
-      stage('windows/build') {
-        compileHelper.build(compileHelper.VisualStudio(), compileHelper.VisualStudio(), moduleCMakeFlags(), '', 'build-all');
+      stage('linux-gcc-make/build') {
+          def cmakeCompileOptions = moduleCMakeFlags();
+          cmakeCompileOptions += ' -DMAKE_BUILD_TYPE=Release';
+          // Not sure why the linking of OpenSpaceTest takes so long
+          compileHelper.build(compileHelper.Make(), compileHelper.Gcc(), cmakeCompileOptions, 'OpenSpace', 'build-make');
+          compileHelper.recordCompileIssues(compileHelper.Gcc());
       }
-      stage('windows/warnings') {
-        // compileHelper.recordCompileIssues(compileHelper.VisualStudio());
+      stage('linux-gcc-make/test') {
+        // testHelper.runUnitTests('build/OpenSpaceTest');
       }
-      stage('windows/test') {
+      cleanWs()
+    } // node('linux')
+  }
+},
+linux_gcc_ninja: {
+  if (env.USE_BUILD_OS_LINUX == 'true') {
+    node('linux' && 'gcc') {
+      stage('linux-gcc-ninja/scm') {
+        deleteDir();
+        gitHelper.checkoutGit(url, branch);
+      }
+      stage('linux-gcc-ninja/build') {
+          def cmakeCompileOptions = moduleCMakeFlags();
+          cmakeCompileOptions += '-DMAKE_BUILD_TYPE=Release';
+          // Not sure why the linking of OpenSpaceTest takes so long
+          compileHelper.build(compileHelper.Ninja(), compileHelper.Gcc(), cmakeCompileOptions, 'OpenSpace', 'build-ninja');
+      }
+      stage('linux-gcc-ninja/test') {
+        // testHelper.runUnitTests('build/OpenSpaceTest');
+      }
+      cleanWs()
+    } // node('linux')
+  }
+},
+linux_clang_make: {
+  if (env.USE_BUILD_OS_LINUX == 'true') {
+    node('linux' && 'clang') {
+      stage('linux-clang-make/scm') {
+        deleteDir()
+        gitHelper.checkoutGit(url, branch);
+      }
+      stage('linux-clang-make/build') {
+          def cmakeCompileOptions = moduleCMakeFlags()
+          cmakeCompileOptions += ' -DMAKE_BUILD_TYPE=Release'
+          // Not sure why the linking of OpenSpaceTest takes so long
+          compileHelper.build(compileHelper.Make(), compileHelper.Clang(), cmakeCompileOptions, 'OpenSpace', 'build-make');
+          compileHelper.recordCompileIssues(compileHelper.Clang());
+      }
+      stage('linux-clang-make/test') {
+        // testHelper.runUnitTests('build/OpenSpaceTest');
+      }
+      cleanWs()
+    } // node('linux')
+  }
+},
+linux_clang_ninja: {
+  if (env.USE_BUILD_OS_LINUX == 'true') {
+    node('linux' && 'clang') {
+      stage('linux-clang-ninja/scm') {
+        deleteDir()
+        gitHelper.checkoutGit(url, branch);
+      }
+      stage('linux-clang-ninja/build') {
+          def cmakeCompileOptions = moduleCMakeFlags()
+          cmakeCompileOptions += '-DMAKE_BUILD_TYPE=Release'
+          // Not sure why the linking of OpenSpaceTest takes so long
+          compileHelper.build(compileHelper.Ninja(), compileHelper.Clang(), cmakeCompileOptions, 'OpenSpace', 'build-ninja');
+      }
+      stage('linux-clang-ninja/test') {
+        // testHelper.runUnitTests('build/OpenSpaceTest');
+      }
+      cleanWs()
+    } // node('linux')
+  }
+},
+windows_msvc: {
+  if (env.USE_BUILD_OS_WINDOWS == 'true') {
+    node('windows') {
+      stage('windows-msvc/scm') {
+        deleteDir();
+        gitHelper.checkoutGit(url, branch);
+      }
+      stage('windows-msvc/build') {
+        compileHelper.build(compileHelper.VisualStudio(), compileHelper.VisualStudio(), moduleCMakeFlags(), '', 'build-msvc');
+        compileHelper.recordCompileIssues(compileHelper.VisualStudio());
+      }
+      stage('windows-msvc/test') {
         // Currently, the unit tests are failing on Windows
         // testHelper.runUnitTests('bin\\Debug\\OpenSpaceTest')
       }
+      cleanWs()
     } // node('windows')
   }
 },
-osx: {
-  node('osx') {
-    stage('osx/scm') {
-      deleteDir();
-      gitHelper.checkoutGit(url, branch);
-    }
-    stage('osx/build') {
-        compileHelper.build(compileHelper.Xcode(), compileHelper.Clang(), moduleCMakeFlags(), '', 'build-all');
-    }
-    stage('osx/warnings') {
-      // compileHelper.recordCompileIssues(compileHelper.Clang());
-    }
-    stage('osx/test') {
-      // Currently, the unit tests are crashing on OS X
-      // testHelper.runUnitTests('build/Debug/OpenSpaceTest')
-    }
-  } // node('osx')
-}
-
-//
-// Post-build actions
-//
-node('master') {
-  stage('master/cppcheck/publish') {
-    // publishCppcheck(pattern: 'build/cppcheck.xml');
+// windows_ninja: {
+//   if (env.USE_BUILD_OS_WINDOWS == 'true') {
+//     node('windows') {
+//       ws("${env.JENKINS_BASE}/O/${env.BRANCH_NAME}/${env.BUILD_ID}") {
+//         stage('windows-ninja/scm') {
+//           deleteDir();
+//           gitHelper.checkoutGit(url, branch);
+//         }
+//         stage('windows-ninja/build') {
+//           compileHelper.build(compileHelper.Ninja(), compileHelper.VisualStudio(), moduleCMakeFlags(), '', 'build-ninja');
+//         }
+//         stage('windows-ninja/test') {
+//           // Currently, the unit tests are failing on Windows
+//           // testHelper.runUnitTests('bin\\Debug\\OpenSpaceTest')
+//         }
+//       } // node('windows')
+//       cleanWs()
+//     } // node('windows')
+//   }
+// },
+macos_make: {
+  if (env.USE_BUILD_OS_MACOS == 'true') {
+    node('macos') {
+      stage('macos-make/scm') {
+        deleteDir();
+        gitHelper.checkoutGit(url, branch);
+      }
+      stage('macos-make/build') {
+          compileHelper.build(compileHelper.Make(), compileHelper.Clang(), moduleCMakeFlags(), '', 'build-make');
+      }
+      stage('macos-make/test') {
+        // Currently, the unit tests are crashing on OS X
+        // testHelper.runUnitTests('build/Debug/OpenSpaceTest')
+      }
+      cleanWs()
+    } // node('macos')
   }
-  stage('master/cloc/publish') {
-    sloccountPublish(encoding: '', pattern: 'build/cloc.xml');
-  }
-  stage('master/notifications') {
-    slackHelper.sendChangeSetSlackMessage(currentBuild);
+},
+macos_xcode: {
+  if (env.USE_BUILD_OS_MACOS == 'true') {
+    node('macos') {
+      stage('macos-xcode/scm') {
+        deleteDir();
+        gitHelper.checkoutGit(url, branch);
+      }
+      stage('macos-xcode/build') {
+          compileHelper.build(compileHelper.Xcode(), compileHelper.Xcode(), moduleCMakeFlags(), '', 'build-xcode');
+      }
+      stage('macos-xcode/test') {
+        // Currently, the unit tests are crashing on OS X
+        // testHelper.runUnitTests('build/Debug/OpenSpaceTest')
+      }
+      cleanWs()
+    } // node('macos')
   }
 }

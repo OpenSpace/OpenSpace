@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,13 +48,15 @@ TimeTopic::TimeTopic()
 
 TimeTopic::~TimeTopic() {
     if (_timeCallbackHandle != UnsetOnChangeHandle) {
-        global::timeManager.removeTimeChangeCallback(_timeCallbackHandle);
+        global::timeManager->removeTimeChangeCallback(_timeCallbackHandle);
     }
     if (_deltaTimeCallbackHandle != UnsetOnChangeHandle) {
-        global::timeManager.removeDeltaTimeChangeCallback(_deltaTimeCallbackHandle);
+        global::timeManager->removeDeltaTimeChangeCallback(_deltaTimeCallbackHandle);
     }
     if (_deltaTimeStepsCallbackHandle != UnsetOnChangeHandle) {
-        global::timeManager.removeDeltaTimeStepsChangeCallback(_deltaTimeStepsCallbackHandle);
+        global::timeManager->removeDeltaTimeStepsChangeCallback(
+            _deltaTimeStepsCallbackHandle
+        );
     }
 }
 
@@ -77,20 +79,20 @@ void TimeTopic::handleJson(const nlohmann::json& json) {
         return;
     }
 
-    _timeCallbackHandle = global::timeManager.addTimeChangeCallback([this]() {
+    _timeCallbackHandle = global::timeManager->addTimeChangeCallback([this]() {
         std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
         if (now - _lastUpdateTime > TimeUpdateInterval) {
             sendCurrentTime();
         }
     });
 
-    _deltaTimeCallbackHandle = global::timeManager.addDeltaTimeChangeCallback([this]() {
+    _deltaTimeCallbackHandle = global::timeManager->addDeltaTimeChangeCallback([this]() {
         // Throttle by last update,
         // but force update if pause state or target delta changes.
 
         std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-        const double targetDeltaTime = global::timeManager.targetDeltaTime();
-        const bool isPaused = global::timeManager.isPaused();
+        const double targetDeltaTime = global::timeManager->targetDeltaTime();
+        const bool isPaused = global::timeManager->isPaused();
         const bool forceUpdate =
             isPaused != _lastPauseState || targetDeltaTime != _lastTargetDeltaTime;
 
@@ -99,9 +101,9 @@ void TimeTopic::handleJson(const nlohmann::json& json) {
         }
     });
 
-    _deltaTimeStepsCallbackHandle = global::timeManager.addDeltaTimeStepsChangeCallback(
+    _deltaTimeStepsCallbackHandle = global::timeManager->addDeltaTimeStepsChangeCallback(
         [this]() {
-            const std::vector<double> steps = global::timeManager.deltaTimeSteps();
+            const std::vector<double> steps = global::timeManager->deltaTimeSteps();
             if (steps != _lastDeltaTimeSteps) {
                 sendDeltaTimeSteps();
             }
@@ -110,8 +112,8 @@ void TimeTopic::handleJson(const nlohmann::json& json) {
 }
 
 const json TimeTopic::getNextPrevDeltaTimeStepJson() {
-    const std::optional<double> nextStep = global::timeManager.nextDeltaTimeStep();
-    const std::optional<double> prevStep = global::timeManager.previousDeltaTimeStep();
+    const std::optional<double> nextStep = global::timeManager->nextDeltaTimeStep();
+    const std::optional<double> prevStep = global::timeManager->previousDeltaTimeStep();
     const bool hasNext = nextStep.has_value();
     const bool hasPrev = prevStep.has_value();
 
@@ -135,7 +137,7 @@ void TimeTopic::sendCurrentTime() {
     ZoneScoped
 
     const json timeJson = {
-        { "time", global::timeManager.time().ISO8601() }
+        { "time", global::timeManager->time().ISO8601() }
     };
     const json payload = wrappedPayload(timeJson);
     _connection->sendJson(payload);
@@ -143,10 +145,10 @@ void TimeTopic::sendCurrentTime() {
 }
 
 void TimeTopic::sendFullTimeData() {
-    std::string_view currentTime = global::timeManager.time().ISO8601();
-    const double deltaTime = global::timeManager.deltaTime();
-    const double targetDeltaTime = global::timeManager.targetDeltaTime();
-    const bool isPaused = global::timeManager.isPaused();
+    std::string_view currentTime = global::timeManager->time().ISO8601();
+    const double deltaTime = global::timeManager->deltaTime();
+    const double targetDeltaTime = global::timeManager->targetDeltaTime();
+    const bool isPaused = global::timeManager->isPaused();
 
     json timeJson = {
         { "time", currentTime },
@@ -165,10 +167,10 @@ void TimeTopic::sendFullTimeData() {
 }
 
 void TimeTopic::sendDeltaTimeSteps() {
-    const std::vector<double>& steps = global::timeManager.deltaTimeSteps();
+    const std::vector<double>& steps = global::timeManager->deltaTimeSteps();
 
     json deltaTimeStepsJson = {
-        { "deltaTimeSteps", steps } 
+        { "deltaTimeSteps", steps }
     };
 
     const json nextPrevJson = getNextPrevDeltaTimeStepJson();

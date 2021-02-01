@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,7 @@
 #include <ghoul/filesystem/directory.h>
 #include <ghoul/filesystem/file.h>
 
-#include <ext/ghoul/ext/assimp/contrib/zip/src/zip.h>
+#include <ghoul/ext/assimp/contrib/zip/src/zip.h>
 
 namespace openspace::luascriptfunctions {
 
@@ -383,8 +383,8 @@ int unzipFile(lua_State* L) {
  * Saves the last entry from the script log to the current profile
  */
 int saveLastChangeToProfile(lua_State* L) {
-    std::string asset = global::configuration.asset;
-    std::string logFilePath = absPath(global::configuration.scriptLog);
+    std::string asset = global::configuration->asset;
+    std::string logFilePath = absPath(global::configuration->scriptLog);
     std::ifstream logfile(logFilePath);
     std::string actualLastLine;
     std::string lastLine;

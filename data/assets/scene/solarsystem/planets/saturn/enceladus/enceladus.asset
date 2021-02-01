@@ -29,25 +29,37 @@ local Enceladus = {
             Enable = false,
             FileName = labelsPath .. "/enceladus.labels",
             LabelAlignmentOption = "Horizontally", -- or Circularly
-            LabelsFontSize = 14.0,
+            LabelsFontSize = 22.0,
             LabelsSize = 8.0,
             LabelsMinSize = 1.0,
             LabelsMaxSize = 1500.0,
             ProximityEnabled = false,
             LabelsFadeInEnabled = true,
-            FadeInStartingDistance = 500000.0,
-            FadeOutStartingDistance = 1000000.0,
+            LabelsFadeOutEnabled = true,
+            FadeInStartingDistance = 1000000.0,
+            FadeOutStartingDistance = 500000.0,
             LabelsForceDomeRendering = true,
-            LabelsDistanceEPS = 1350000.0,
+            LabelsDistanceEPS = 100000.0,
             LabelsColor = { 1.0, 1.0, 0.0 }
         }
     },
     Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
     GUI = {
-        Path = "/Solar System/Planets/Saturn/Moons"
+        Name = "Enceladus",
+        Path = "/Solar System/Planets/Saturn/Moons",
+        Description = [[ Enceladus globe with labels]],
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Enceladus })
+
+
+asset.meta = {
+    Name = "Enceladus",
+    Version = "1.0",
+    Description = [[ Enceladus globe with labels and map layers]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = {"Enceladus"}
+}

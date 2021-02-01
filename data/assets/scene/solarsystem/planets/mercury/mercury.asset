@@ -27,13 +27,15 @@ local Mercury = {
             Enable = false,
             FileName = labelsPath .. "/Mercury.labels",
             LabelAlignmentOption = "Horizontally", -- or Circularly
-            LabelsFontSize = 40.0,
+            LabelsFontSize = 22.0,
             LabelsSize = 10.0,
             LabelsMinSize = 1.0,
             LabelsMaxSize = 1500.0,
             ProximityEnabled = false,
-            FadeInStartingDistance = 40000000.0,
-            FadeOutStartingDistance = 80000.0,
+            LabelsFadeInEnabled = true,
+            LabelsFadeOutEnabled = true,
+            FadeInStartingDistance = 5000000.0,
+            FadeOutStartingDistance = 1800000.0,
             LabelsForceDomeRendering = true,
             LabelsDistanceEPS = 1500000.0,
             LabelsColor = { 1.0, 1.0, 0.0 }
@@ -62,8 +64,19 @@ local MercuryLabel = {
     Tag = { "solarsystem_labels" },
     GUI = {
         Name = "Mercury Label",
-        Path = "/Solar System/Planets/Mercury"
+        Path = "/Solar System/Planets/Mercury",
     }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Mercury, MercuryLabel })
+
+
+asset.meta = {
+    Name = "Mercury",
+    Version = "1.0",
+    Description = [[ Mercury globe with labels, and main planet label.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = {"Mercury" , "MercuryLabel"}
+}

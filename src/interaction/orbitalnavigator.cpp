@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -244,15 +244,15 @@ OrbitalNavigator::OrbitalNavigator()
     , _aim(AimInfo)
     , _retargetAnchor(RetargetAnchorInfo)
     , _retargetAim(RetargetAimInfo)
-    , _followAnchorNodeRotationDistance(FollowAnchorNodeInfo, 5.0f, 0.0f, 20.f)
+    , _followAnchorNodeRotationDistance(FollowAnchorNodeInfo, 5.f, 0.f, 20.f)
     , _minimumAllowedDistance(MinimumDistanceInfo, 10.0f, 0.0f, 10000.f)
     , _flightDestinationDistance(FlightDestinationDistInfo, 2e8f, 0.0f, 1e10f)
     , _flightDestinationFactor(FlightDestinationFactorInfo, 1E-4, 1E-6, 0.5)
     , _applyLinearFlight(ApplyLinearFlightInfo, false)
-    , _velocitySensitivity(VelocityZoomControlInfo, 0.02f, 0.01f, 0.15f)      
-    , _mouseSensitivity(MouseSensitivityInfo, 15.0f, 1.0f, 50.f)
-    , _joystickSensitivity(JoystickSensitivityInfo, 10.0f, 1.0f, 50.f)
-    , _websocketSensitivity(WebsocketSensitivityInfo, 10.0f, 1.0f, 50.f)
+    , _velocitySensitivity(VelocityZoomControlInfo, 3.5f, 0.001f, 20.f)
+    , _mouseSensitivity(MouseSensitivityInfo, 15.f, 1.f, 50.f)
+    , _joystickSensitivity(JoystickSensitivityInfo, 10.f, 1.0f, 50.f)
+    , _websocketSensitivity(WebsocketSensitivityInfo, 5.f, 1.0f, 50.f)
     , _useAdaptiveStereoscopicDepth(UseAdaptiveStereoscopicDepthInfo, true)
     , _stereoscopicDepthOfFocusSurface(StereoscopicDepthOfFocusSurfaceInfo, 8, 0.25, 100)
     , _staticViewScaleExponent(StaticViewScaleExponentInfo, 0.f, -30, 10)
@@ -469,12 +469,15 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
 
         // Fly towards the flight destination distance. When getting closer than
         // arrivalThreshold terminate the flight
-        if (std::fabs(distFromCameraToFocus - _flightDestinationDistance) > arrivalThreshold) {
+        if (std::fabs(distFromCameraToFocus - _flightDestinationDistance) >
+            arrivalThreshold)
+        {
             pose.position = moveCameraAlongVector(
                 pose.position,
                 distFromCameraToFocus,
                 camPosToAnchorPosDiff,
-                _flightDestinationDistance
+                _flightDestinationDistance,
+                deltaTime
             );
         }
         else {
@@ -1261,7 +1264,8 @@ glm::dvec3 OrbitalNavigator::translateHorizontally(double deltaTime,
 glm::dvec3 OrbitalNavigator::moveCameraAlongVector(const glm::dvec3& camPos,
                                                   double distFromCameraToFocus,
                                                   const glm::dvec3& camPosToAnchorPosDiff,
-                                                  double destination) const
+                                                  double destination,
+                                                  double deltaTime) const
 {
     // This factor adapts the velocity so it slows down when getting closer
     // to our final destination
@@ -1273,7 +1277,7 @@ glm::dvec3 OrbitalNavigator::moveCameraAlongVector(const glm::dvec3& camPos,
     else { // When flying away from anchor
         velocity = distFromCameraToFocus / destination - 1.0;
     }
-    velocity *= _velocitySensitivity;
+    velocity *= _velocitySensitivity * deltaTime;
 
     // Return the updated camera position
     return camPos - velocity * camPosToAnchorPosDiff;

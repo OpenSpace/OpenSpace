@@ -11,6 +11,12 @@ local parentIdentifier = transforms.SaturnBarycenter.Identifier
 local parentSpice = "SATURN BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_other" }
 local trailColor = { 0.5, 0.3, 0.3 }
+local trailTags = { 
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_minor"
+}
 
 local otherGroup = {
     {
@@ -22,6 +28,7 @@ local otherGroup = {
         Spice = "ATLAS",
         Radii = { 41000, 35000, 19000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Other Group"
         },
@@ -38,6 +45,7 @@ local otherGroup = {
         Spice = "PROMETHEUS",
         Radii = { 136000, 79000, 59000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Other Group"
         },
@@ -54,6 +62,7 @@ local otherGroup = {
         Spice = "PANDORA",
         Radii = { 104000, 81000, 64000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Other Group"
         },
@@ -70,6 +79,7 @@ local otherGroup = {
         Spice = "EPIMETHEUS",
         Radii = { 130000, 114000, 106000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Other Group"
         },
@@ -86,6 +96,7 @@ local otherGroup = {
         Spice = "JANUS",
         Radii = { 203000, 185000, 153000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Other Group"
         },
@@ -102,6 +113,7 @@ local otherGroup = {
         Spice = "AEGAEON",
         Radii = { 500, 500, 500 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Other Group"
         },
@@ -118,6 +130,7 @@ local otherGroup = {
         Spice = "METHONE",
         Radii = { 3200, 3200, 3200 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Other Group"
         },
@@ -134,6 +147,7 @@ local otherGroup = {
         Spice = "ANTHE",
         Radii = { 1800, 1800, 1800 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Other Group"
         },
@@ -150,6 +164,7 @@ local otherGroup = {
         Spice = "PALLENE",
         Radii = { 6000, 6000, 4000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Other Group"
         },
@@ -166,6 +181,7 @@ local otherGroup = {
         Spice = "TELESTO",
         Radii = { 33000, 24000, 20000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Other Group"
         },
@@ -182,6 +198,7 @@ local otherGroup = {
         Spice = "CALYPSO",
         Radii = { 30000, 23000, 14000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Other Group"
         },
@@ -198,6 +215,7 @@ local otherGroup = {
         Spice = "HELENE",
         Radii = { 43000, 38000, 26000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Other Group"
         },
@@ -214,6 +232,7 @@ local otherGroup = {
         Spice = "POLYDEUCES",
         Radii = { 3000, 2000, 1000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Saturn/Moons/Other Group"
         },
@@ -223,9 +242,21 @@ local otherGroup = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(
     asset,
     proceduralGlobes.createGlobes(otherGroup)
 )
+
+
+asset.meta = {
+    Name = "Saturn Other Group Moons",
+    Version = "1.0",
+    Description = [[ Procedural Globe asset containing Saturn's Other Group
+        moons: Phoebe, Skathi, S2007S2, Skoll, S2004S13, Greip, Hyrrokkin, Jarnsaxa,
+        Mundilfari, S2006S1, S2004S17, Bergelmir, Narvi, Suttungr, Hati, S2004S12,
+        Farbauti, Thrymr, Aegir, S2007S3, Bestla, S2004S7, S2006S3, Fenrir, Kari, Ymir,
+        Loge, Fornjot. Blank globes and SPICE trails are generated for each moon.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

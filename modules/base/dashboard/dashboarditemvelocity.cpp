@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,23 +41,6 @@
 #include <ghoul/misc/profiling.h>
 
 namespace {
-    constexpr const char* KeyFontMono = "Mono";
-
-    constexpr const float DefaultFontSize = 10.f;
-
-    constexpr openspace::properties::Property::PropertyInfo FontNameInfo = {
-        "FontName",
-        "Font Name",
-        "This value is the name of the font that is used. It can either refer to an "
-        "internal name registered previously, or it can refer to a path that is used."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
-        "FontSize",
-        "Font Size",
-        "This value determines the size of the font that is used to render the velocity."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo SimplificationInfo = {
         "Simplification",
         "Simplification",
@@ -101,18 +84,6 @@ documentation::Documentation DashboardItemVelocity::Documentation() {
                 Optional::No
             },
             {
-                FontNameInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                FontNameInfo.description
-            },
-            {
-                FontSizeInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                FontSizeInfo.description
-            },
-            {
                 SimplificationInfo.identifier,
                 new BoolVerifier,
                 Optional::Yes,
@@ -129,9 +100,7 @@ documentation::Documentation DashboardItemVelocity::Documentation() {
 }
 
 DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary)
-    : DashboardItem(dictionary)
-    , _fontName(FontNameInfo, KeyFontMono)
-    , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
+    : DashboardTextItem(dictionary)
     , _doSimplification(SimplificationInfo, true)
     , _requestedUnit(RequestedUnitInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
@@ -140,23 +109,6 @@ DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary
         dictionary,
         "DashboardItemVelocity"
     );
-
-    if (dictionary.hasKey(FontNameInfo.identifier)) {
-        _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
-    }
-    if (dictionary.hasKey(FontSizeInfo.identifier)) {
-        _fontSize = static_cast<float>(dictionary.value<double>(FontSizeInfo.identifier));
-    }
-
-    _fontName.onChange([this]() {
-        _font = global::fontManager.font(_fontName, _fontSize);
-    });
-    addProperty(_fontName);
-
-    _fontSize.onChange([this]() {
-        _font = global::fontManager.font(_fontName, _fontSize);
-    });
-    addProperty(_fontSize);
 
     if (dictionary.hasKey(SimplificationInfo.identifier)) {
         _doSimplification = dictionary.value<bool>(SimplificationInfo.identifier);
@@ -183,18 +135,16 @@ DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary
     }
     _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
     addProperty(_requestedUnit);
-
-    _font = global::fontManager.font(_fontName, _fontSize);
 }
 
 void DashboardItemVelocity::render(glm::vec2& penPosition) {
     ZoneScoped
 
-    const glm::dvec3 currentPos = global::renderEngine.scene()->camera()->positionVec3();
+    const glm::dvec3 currentPos = global::renderEngine->scene()->camera()->positionVec3();
     const glm::dvec3 dt = currentPos - _prevPosition;
     const double speedPerFrame = glm::length(dt);
 
-    const double secondsPerFrame = global::windowDelegate.averageDeltaTime();
+    const double secondsPerFrame = global::windowDelegate->averageDeltaTime();
 
     const double speedPerSecond = speedPerFrame / secondsPerFrame;
 
@@ -208,14 +158,14 @@ void DashboardItemVelocity::render(glm::vec2& penPosition) {
         dist = { convertedD, nameForDistanceUnit(unit, convertedD != 1.0) };
     }
 
-    penPosition.y -= _font->height();
     RenderFont(
         *_font,
         penPosition,
         fmt::format(
-            "Camera velocity: {} {}/s", dist.first, dist.second
+            "Camera velocity: {:.4f} {}/s", dist.first, dist.second
         )
     );
+    penPosition.y -= _font->height();
 
     _prevPosition = currentPos;
 }

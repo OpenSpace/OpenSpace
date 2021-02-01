@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,12 +29,11 @@ in vec2 vs_st;
 in vec4 vs_position;
 
 uniform sampler1D discTexture;
-uniform vec2 textureOffset;
+uniform vec2 offset; // relative to semi major axis
 uniform float opacity;
 uniform float eccentricity;
 uniform float semiMajorAxis;
 
-const float AstronomicalUnit = 149597870700.0; // m
 const float Epsilon = 0.0000001;
 
 // Compute semi minor axis from major axis, a, and eccentricity, e
@@ -56,12 +55,15 @@ Fragment getFragment() {
     // Moving the origin to the center
     vec2 st = (vs_st - vec2(0.5)) * 2.0;
 
-    float AUpper = semiMajorAxis;
+    float offsetLower = offset.x * semiMajorAxis;
+    float offsetUpper = offset.y * semiMajorAxis;
+
+    float AUpper = semiMajorAxis + offsetUpper;
     float BUpper = semiMinorAxis(AUpper, eccentricity);
     float CUpper = sqrt(AUpper*AUpper - BUpper*BUpper);
     float outerApoapsisDistance = AUpper * (1 + eccentricity);
 
-    float ALower = AUpper - AstronomicalUnit * (textureOffset.x + textureOffset.y);
+    float ALower = semiMajorAxis - offsetLower;
     float BLower = semiMinorAxis(ALower, eccentricity);
     float CLower = sqrt(ALower*ALower - BLower*BLower);
     float innerApoapsisDistance = ALower * (1 + eccentricity);
@@ -91,18 +93,31 @@ Fragment getFragment() {
 
     // Find outer ellipse: where along the direction does the equation == 1?
     float denominator = pow(BU_n * dir.x, 2.0) + pow(AU_n * dir.y, 2.0);
-    float first = -(pow(BU_n, 2.0) * dir.x * CU_n) / denominator;
-    float second = pow((pow(BU_n, 2.0) * dir.x * CU_n)  /  denominator, 2.0);
+    float first = -(BU_n * BU_n * dir.x * CU_n) / denominator;
+    float second = pow((BU_n * BU_n * dir.x * CU_n)  /  denominator, 2.0);
     float third = (pow(BU_n * CU_n, 2.0) - pow(AU_n * BU_n, 2.0)) / denominator;
 
     float scale = first + sqrt(second - third);
 
-    vec2 max = dir * scale;
-    vec2 min = max * (innerApoapsisDistance / outerApoapsisDistance);
+    vec2 outerPoint = dir * scale;
+    vec2 innerPoint = outerPoint * (innerApoapsisDistance / outerApoapsisDistance);
 
-    float distance1 = distance(max, min);
-    float distance2 = distance(max, st);
-    float textureCoord = distance2 / distance1;
+    float discWidth = distance(outerPoint, innerPoint);
+    float distanceFromOuterEdge = distance(outerPoint, st);
+    float relativeDistance = distanceFromOuterEdge / discWidth;
+
+    // Compute texture coordinate based on the distance to outer edge
+    float textureCoord = 0.0;
+
+    // The midpoint (textureCoord = 0.5) depends on the ratio between the offsets
+    // (Note that the texture goes from outer to inner edge of disc)
+    float midPoint = offsetUpper / (offsetUpper + offsetLower);
+    if(relativeDistance > midPoint) {
+        textureCoord = 0.5 + 0.5 * (relativeDistance - midPoint) / (1.0 - midPoint);
+    }
+    else {
+        textureCoord = 0.5 * (relativeDistance / midPoint);
+    }
 
     vec4 diffuse = texture(discTexture, textureCoord);
     diffuse.a *= opacity;

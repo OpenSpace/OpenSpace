@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -47,8 +47,6 @@
 #include <unordered_map>
 
 namespace {
-    constexpr const char* BasePathToken = "${BASE}";
-
     enum class Command {
         Connect = 0,
         Disconnect,
@@ -90,12 +88,7 @@ namespace {
     constexpr const char* AutopilotEngagedKey = "engaged";
     constexpr const char* AutopilotInputKey = "autopilotInput";
 
-    constexpr const char* FlightControllerType = "flightcontroller";
-
     // Friction JSON Keys
-    constexpr const char* FrictionEngagedKey = "engaged";
-    constexpr const char* FrictionPropertyUri =
-        "NavigationHandler.OrbitalNavigator.Friction";
     constexpr const char* FrictionRotationKey = "rotation";
     constexpr const char* FrictionZoomKey = "zoom";
     constexpr const char* FrictionRollKey = "roll";
@@ -104,7 +97,6 @@ namespace {
     constexpr const char* RollFriction = "Friction.RollFriction";
 
     // Friction Lua Keys
-    constexpr const char* LuaKey = "lua";
     constexpr const char* LuaScript = "script";
 
     constexpr const char* OrbitX = "orbitX";
@@ -148,9 +140,6 @@ namespace {
         { Friction, Command::Friction },
         { Lua, Command::Lua }
     });
-
-    const int Axes = 10;
-
 } // namespace
 
 using nlohmann::json;
@@ -159,20 +148,20 @@ namespace openspace {
 
 FlightControllerTopic::FlightControllerTopic() {
     for (auto it = AxisIndexMap.begin(); it != AxisIndexMap.end(); ++it) {
-        global::navigationHandler.setWebsocketAxisMapping(
+        global::navigationHandler->setWebsocketAxisMapping(
             int(std::distance(AxisIndexMap.begin(), it)),
             it->second
         );
     }
 
     // Add WebsocketInputState to global states
-    global::websocketInputStates[_topicId] = &_inputState;
+    (*global::websocketInputStates)[_topicId] = &_inputState;
 }
 
 FlightControllerTopic::~FlightControllerTopic() {
     // Reset global websocketInputStates
-    global::websocketInputStates.erase(_topicId);
-    global::websocketInputStates = interaction::WebsocketInputStates();
+    global::websocketInputStates->erase(_topicId);
+    *global::websocketInputStates = interaction::WebsocketInputStates();
 }
 
 bool FlightControllerTopic::isDone() const {
@@ -234,7 +223,7 @@ void FlightControllerTopic::connect() {
 void FlightControllerTopic::setFocusNodes() {
     // Get all scene nodes
     std::vector<SceneGraphNode*> nodes =
-        global::renderEngine.scene()->allSceneGraphNodes();
+        global::renderEngine->scene()->allSceneGraphNodes();
 
     // Remove all nodes with no renderable
     nodes.erase(
@@ -271,7 +260,7 @@ void FlightControllerTopic::setFocusNodes() {
 
 void FlightControllerTopic::setInterestingTimes() {
     std::vector<Scene::InterestingTime> times =
-        global::renderEngine.scene()->interestingTimes();
+        global::renderEngine->scene()->interestingTimes();
 
     std::sort(
         times.begin(),
@@ -323,30 +312,30 @@ void FlightControllerTopic::changeFocus(const nlohmann::json& json) const {
     const bool retargetAnchor = json[RetargetAnchorKey];
     const bool retargetAim = json[RetargetAimKey];
 
-    Scene* scene = global::renderEngine.scene();
+    Scene* scene = global::renderEngine->scene();
     const SceneGraphNode* focusNode = scene->sceneGraphNode(focus);
     const SceneGraphNode* aimNode = scene->sceneGraphNode(aim);
     const SceneGraphNode* anchorNode = scene->sceneGraphNode(anchor);
     if (focusNode) {
-        global::navigationHandler.orbitalNavigator().setFocusNode(
+        global::navigationHandler->orbitalNavigator().setFocusNode(
             focusNode,
             resetVelocities
         );
     }
     else {
         if (aimNode) {
-            global::navigationHandler.orbitalNavigator().setAimNode(aim);
+            global::navigationHandler->orbitalNavigator().setAimNode(aim);
         }
         if (anchorNode) {
-            global::navigationHandler.orbitalNavigator().setAnchorNode(anchor);
+            global::navigationHandler->orbitalNavigator().setAnchorNode(anchor);
         }
     }
 
     if (retargetAnchor) {
-        global::navigationHandler.orbitalNavigator().startRetargetAnchor();
+        global::navigationHandler->orbitalNavigator().startRetargetAnchor();
     }
     if (retargetAim) {
-        global::navigationHandler.orbitalNavigator().startRetargetAim();
+        global::navigationHandler->orbitalNavigator().startRetargetAim();
     }
 }
 
@@ -362,7 +351,7 @@ void FlightControllerTopic::setRenderableEnabled(const nlohmann::json& json) con
     const std::string name = json[RenderableKey][SceneNodeName];
     const bool enabled = json[RenderableKey][SceneNodeEnabled];
 
-    const SceneGraphNode* node = global::renderEngine.scene()->sceneGraphNode(name);
+    const SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(name);
     if (node && node->renderable() != nullptr) {
         node->renderable()->property(RenderableEnabled)->set(enabled);
     }
@@ -370,8 +359,8 @@ void FlightControllerTopic::setRenderableEnabled(const nlohmann::json& json) con
 
 void FlightControllerTopic::disconnect() {
     // Reset global websocketInputStates
-    global::websocketInputStates.erase(_topicId);
-    global::websocketInputStates = interaction::WebsocketInputStates();
+    global::websocketInputStates->erase(_topicId);
+    *global::websocketInputStates = interaction::WebsocketInputStates();
 
     // Update FlightController
     nlohmann::json j;
@@ -388,7 +377,7 @@ void FlightControllerTopic::setFriction(bool all) const {
 
 void FlightControllerTopic::setFriction(bool roll, bool rotation, bool zoom) const {
     const interaction::OrbitalNavigator& navigator =
-        global::navigationHandler.orbitalNavigator();
+        global::navigationHandler->orbitalNavigator();
 
     navigator.property(RollFriction)->set(roll);
     navigator.property(RotationalFriction)->set(rotation);
@@ -476,7 +465,7 @@ void FlightControllerTopic::processInputState(const nlohmann::json& json) {
 
 void FlightControllerTopic::processLua(const nlohmann::json &json) {
     const std::string script = json[LuaScript];
-    global::scriptEngine.queueScript(
+    global::scriptEngine->queueScript(
         script,
         openspace::scripting::ScriptEngine::RemoteScripting::Yes
     );

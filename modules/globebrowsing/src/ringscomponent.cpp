@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -182,12 +182,12 @@ RingsComponent::RingsComponent(const ghoul::Dictionary& dictionary)
 {
     using ghoul::filesystem::File;
 
-    if (dictionary.hasKey("Rings")) {
+    if (dictionary.hasValue<ghoul::Dictionary>("Rings")) {
         // @TODO (abock, 2019-12-16) It would be better to not store the dictionary long
         // term and rather extract the values directly here.  This would require a bit of
         // a rewrite in the RenderableGlobe class to not create the RingsComponent in the
         // class-initializer list though
-        dictionary.getValue("Rings", _ringsDictionary);
+        _ringsDictionary = dictionary.value<ghoul::Dictionary>("Rings");
     }
 
     documentation::testSpecificationAndThrow(
@@ -214,8 +214,8 @@ void RingsComponent::initialize() {
     );
     _textureFile = std::make_unique<File>(_texturePath);
 
-    if (_ringsDictionary.hasKeyAndValue<glm::vec2>(OffsetInfo.identifier)) {
-        _offset = _ringsDictionary.value<glm::vec2>(OffsetInfo.identifier);
+    if (_ringsDictionary.hasValue<glm::dvec2>(OffsetInfo.identifier)) {
+        _offset = _ringsDictionary.value<glm::dvec2>(OffsetInfo.identifier);
     }
     addProperty(_offset);
 
@@ -224,14 +224,14 @@ void RingsComponent::initialize() {
 
     _textureFile->setCallback([&](const File&) { _textureIsDirty = true; });
 
-    if (_ringsDictionary.hasKeyAndValue<double>(NightFactorInfo.identifier)) {
+    if (_ringsDictionary.hasValue<double>(NightFactorInfo.identifier)) {
         _nightFactor = static_cast<float>(
             _ringsDictionary.value<double>(NightFactorInfo.identifier)
         );
     }
     addProperty(_nightFactor);
 
-    if (_ringsDictionary.hasKeyAndValue<double>(ColorFilterInfo.identifier)) {
+    if (_ringsDictionary.hasValue<double>(ColorFilterInfo.identifier)) {
         _colorFilter = static_cast<float>(
             _ringsDictionary.value<double>(ColorFilterInfo.identifier)
         );
@@ -239,8 +239,8 @@ void RingsComponent::initialize() {
 
     // Shadow Mapping Quality Controls
     if (_ringsDictionary.hasKey(ZFightingPercentageInfo.identifier)) {
-        _zFightingPercentage = _ringsDictionary.value<float>(
-            ZFightingPercentageInfo.identifier
+        _zFightingPercentage = static_cast<float>(
+            _ringsDictionary.value<double>(ZFightingPercentageInfo.identifier)
         );
     }
     addProperty(_zFightingPercentage);
@@ -265,7 +265,7 @@ void RingsComponent::initializeGL() {
 
     try {
         //global::renderEngine.removeRenderProgram(_geometryOnlyShader.get());
-        _geometryOnlyShader = global::renderEngine.buildRenderProgram(
+        _geometryOnlyShader = global::renderEngine->buildRenderProgram(
             "RingsGeomOnlyProgram",
             absPath("${MODULE_GLOBEBROWSING}/shaders/rings_geom_vs.glsl"),
             absPath("${MODULE_GLOBEBROWSING}/shaders/rings_geom_fs.glsl")
@@ -298,10 +298,10 @@ void RingsComponent::deinitializeGL() {
     _textureFile = nullptr;
     _texture = nullptr;
 
-    global::renderEngine.removeRenderProgram(_shader.get());
+    global::renderEngine->removeRenderProgram(_shader.get());
     _shader = nullptr;
 
-    global::renderEngine.removeRenderProgram(_geometryOnlyShader.get());
+    global::renderEngine->removeRenderProgram(_geometryOnlyShader.get());
     _geometryOnlyShader = nullptr;
 }
 
@@ -364,7 +364,7 @@ void RingsComponent::draw(const RenderData& data,
 
         ringTextureUnit.activate();
         _texture->bind();
-        _shader->setUniform(_geomUniformCache.ringTexture, ringTextureUnit);
+        _geometryOnlyShader->setUniform(_geomUniformCache.ringTexture, ringTextureUnit);
     }
 
     glEnable(GL_DEPTH_TEST);
@@ -410,7 +410,7 @@ void RingsComponent::update(const UpdateData& data) {
     }
 
     _sunPosition = glm::normalize(
-        global::renderEngine.scene()->sceneGraphNode("Sun")->worldPosition() -
+        global::renderEngine->scene()->sceneGraphNode("Sun")->worldPosition() -
         data.modelTransform.translation
     );
 }
@@ -488,8 +488,8 @@ void RingsComponent::compileShadowShader() {
     dict.setValue("nShadowSamples", std::to_string(_nShadowSamples - 1));
 
     try {
-        global::renderEngine.removeRenderProgram(_shader.get());
-        _shader = global::renderEngine.buildRenderProgram(
+        global::renderEngine->removeRenderProgram(_shader.get());
+        _shader = global::renderEngine->buildRenderProgram(
             "RingsProgram",
             absPath("${MODULE_GLOBEBROWSING}/shaders/rings_vs.glsl"),
             absPath("${MODULE_GLOBEBROWSING}/shaders/rings_fs.glsl"),
