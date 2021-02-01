@@ -27,6 +27,7 @@
 #include <modules/softwareintegration/rendering/renderablepointscloud.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/globalscallbacks.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
@@ -34,6 +35,7 @@
 #include <openspace/util/factorymanager.h>
 #include <openspace/query/query.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionaryluaformatter.h>
 
 #include <iomanip>
 
@@ -55,10 +57,35 @@ void SoftwareIntegrationModule::internalInitialize(const ghoul::Dictionary&) {
 
     // Open port
     start(4700);
+
+    global::callback::preSync->emplace_back([this]() { preSyncUpdate(); });
 }
 
 void SoftwareIntegrationModule::internalDeinitialize() {
     stop();
+}
+
+void SoftwareIntegrationModule::preSyncUpdate() {
+    if (_onceNodeExistsCallbacks.empty()) {
+        return;
+    }
+
+    // Check if the scene graph node has been created. If so, call the corresponding
+    // callback function to set up any subscriptions
+    auto it = _onceNodeExistsCallbacks.begin();
+    while (it != _onceNodeExistsCallbacks.end()) {
+        const std::string& identifier = it->first;
+        const std::function<void()>& callback = it->second;
+        const SceneGraphNode* sgn =
+            global::renderEngine->scene()->sceneGraphNode(identifier);
+
+        if (sgn) {
+            callback();
+            it = _onceNodeExistsCallbacks.erase(it);
+            continue;
+        }
+        it++;
+    }
 }
 
 void SoftwareIntegrationModule::start(int port) {
@@ -230,7 +257,7 @@ void SoftwareIntegrationModule::handlePeerMessage(PeerMessage peerMessage) {
 
         ghoul::Dictionary pointDataDictonary;
         for (int i = 0; i < pointData.size(); ++i) {
-            pointDataDictonary.setValue<glm::dvec3>(std::to_string(i + 1), pointData[i]);
+            pointDataDictonary.setValue<glm::dvec3>(fmt::format("[{}]", i + 1), pointData[i]);
         }
 
         // Create a renderable depending on what data was received
@@ -247,7 +274,7 @@ void SoftwareIntegrationModule::handlePeerMessage(PeerMessage peerMessage) {
         if (hasLuminosityData) {
             ghoul::Dictionary luminosityDataDictonary;
             for (int i = 0; i < luminosityData.size(); ++i) {
-                luminosityDataDictonary.setValue<double>(std::to_string(i + 1), luminosityData[i]);
+                luminosityDataDictonary.setValue<double>(fmt::format("[{}]", i + 1), luminosityData[i]);
             }
             renderable.setValue("Luminosity", luminosityDataDictonary);
         }
@@ -255,49 +282,39 @@ void SoftwareIntegrationModule::handlePeerMessage(PeerMessage peerMessage) {
         if (hasVelocityData) {
             ghoul::Dictionary velocityDataDictionary;
             for (int i = 0; i < velocityData.size(); ++i) {
-                velocityDataDictionary.setValue<double>(std::to_string(i + 1), velocityData[i]);
+                velocityDataDictionary.setValue<double>(fmt::format("[{}]", i + 1), velocityData[i]);
             }
             renderable.setValue("Velocity", velocityDataDictionary);
         }
 
         ghoul::Dictionary gui;
         gui.setValue("Name", guiName);
-        gui.setValue("Path", "/Examples"s);
+        gui.setValue("Path", "/Software Integration"s);
 
         ghoul::Dictionary node;
         node.setValue("Identifier", identifier);
         node.setValue("Renderable", renderable);
         node.setValue("GUI", gui);
 
-        try {
-            SceneGraphNode* sgn = global::renderEngine->scene()->loadNode(node);
-            if (!sgn) {
-                LERROR("Scene", "Could not load scene graph node");
-                break;
-            }
-            global::renderEngine->scene()->initializeNode(sgn);
+        openspace::global::scriptEngine->queueScript(
+            "openspace.addSceneGraphNode(" + ghoul::formatLua(node) + ")",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
 
-            openspace::global::scriptEngine->queueScript(
-                "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)"
-                "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', '" + identifier + "')"
-                "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')",
-                scripting::ScriptEngine::RemoteScripting::Yes
-            );
-        }
-        catch (const documentation::SpecificationError& e) {
-            return LERROR(fmt::format(
-                "Documentation SpecificationError: Error loading scene graph node {}",
-                e.what())
-            );
-        }
-        catch (const ghoul::RuntimeError& e) {
-            return LERROR(fmt::format(
-                "RuntimeError: Error loading scene graph node {}",
-                e.what())
-            );
-        }
+        openspace::global::scriptEngine->queueScript(
+            "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)"
+            "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', '" + identifier + "')"
+            "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
 
-        handlePeerProperties(identifier, peer);
+        // We have to wait until the renderable exists before we can subscribe to
+        // changes in its properties
+        auto callback = [this, identifier, peerId]() {
+            subscribeToRenderableUpdates(identifier, peerId);
+        };
+        _onceNodeExistsCallbacks.emplace(identifier, callback);
+
         break;
     }
     case SoftwareConnection::MessageType::RemoveSceneGraphNode: {
@@ -402,12 +419,25 @@ void SoftwareIntegrationModule::handlePeerMessage(PeerMessage peerMessage) {
     }
 }
 
-void SoftwareIntegrationModule::handlePeerProperties(std::string identifier, const std::shared_ptr<Peer>& peer) {
-    const Renderable* myRenderable = renderable(identifier);
-    properties::Property* colorProperty = myRenderable->property("Color");
-    properties::Property* opacityProperty = myRenderable->property("Opacity");
-    properties::Property* sizeProperty = myRenderable->property("Size");
-    properties::Property* visibilityProperty = myRenderable->property("ToggleVisibility");
+void SoftwareIntegrationModule::subscribeToRenderableUpdates(std::string identifier,
+                                                             size_t peerId)
+{
+    const Renderable* aRenderable = renderable(identifier);
+    if (!aRenderable) {
+        LERROR(fmt::format("Renderable with identifier '{}' doesn't exist", identifier));
+        return;
+    }
+
+    std::shared_ptr<Peer> peer = this->peer(peerId);
+    if (!peer) {
+        LERROR(fmt::format("Peer connection with id '{}' could not be found", peerId));
+        return;
+    }
+
+    properties::Property* colorProperty = aRenderable->property("Color");
+    properties::Property* opacityProperty = aRenderable->property("Opacity");
+    properties::Property* sizeProperty = aRenderable->property("Size");
+    properties::Property* visibilityProperty = aRenderable->property("ToggleVisibility");
 
     // Update color of renderable
     auto updateColor = [colorProperty, identifier, peer]() {
@@ -425,7 +455,9 @@ void SoftwareIntegrationModule::handlePeerProperties(std::string identifier, con
         std::string message = messageType + lengthOfSubject + subject;
         peer->connection.sendMessage(message);
     };
-    colorProperty->onChange(updateColor);
+    if (colorProperty) {
+        colorProperty->onChange(updateColor);
+    }
 
     // Update opacity of renderable
     auto updateOpacity = [opacityProperty, identifier, peer]() {
@@ -443,7 +475,9 @@ void SoftwareIntegrationModule::handlePeerProperties(std::string identifier, con
         std::string message = messageType + lengthOfSubject + subject;
         peer->connection.sendMessage(message);
     };
-    opacityProperty->onChange(updateOpacity);
+    if (opacityProperty) {
+        opacityProperty->onChange(updateOpacity);
+    }
 
     // Update size of renderable
     auto updateSize = [sizeProperty, identifier, peer]() {
@@ -461,7 +495,9 @@ void SoftwareIntegrationModule::handlePeerProperties(std::string identifier, con
         std::string message = messageType + lengthOfSubject + subject;
         peer->connection.sendMessage(message);
     };
-    sizeProperty->onChange(updateSize);
+    if (sizeProperty) {
+        sizeProperty->onChange(updateSize);
+    }
 
     // Toggle visibility of renderable
     auto toggleVisibility = [visibilityProperty, identifier, peer]() {
@@ -482,7 +518,9 @@ void SoftwareIntegrationModule::handlePeerProperties(std::string identifier, con
         std::string message = messageType + lengthOfSubject + subject;
         peer->connection.sendMessage(message);
     };
-    visibilityProperty->onChange(toggleVisibility);
+    if (visibilityProperty) {
+        visibilityProperty->onChange(toggleVisibility);
+    }
 }
 
 // Read size value or opacity value

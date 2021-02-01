@@ -62,12 +62,12 @@ private:
 
     struct PeerMessage {
         size_t peerId;
-
         SoftwareConnection::Message message;
     };
 
     void internalInitialize(const ghoul::Dictionary&) override;
     void internalDeinitialize() override;
+    void preSyncUpdate();
 
     bool isConnected(const Peer& peer) const;
 
@@ -78,7 +78,7 @@ private:
     void handleNewPeers();
     void handlePeer(size_t id);
     void handlePeerMessage(PeerMessage peerMessage);
-    void handlePeerProperties(std::string identifier, const std::shared_ptr<Peer>& peer);
+    void subscribeToRenderableUpdates(std::string identifier, const size_t peerId);
 
     float readFloatValue(std::vector<char>& message);
     glm::vec3 readColor(std::vector<char>& message);
@@ -101,6 +101,8 @@ private:
     std::thread _serverThread;
 
     ConcurrentQueue<PeerMessage> _incomingMessages;
+
+    std::unordered_map<std::string, std::function<void()>> _onceNodeExistsCallbacks;
 };
 
 } // namespace openspace
