@@ -26,7 +26,9 @@
 #define __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEHABITABLEZONE___H__
 
 #include <modules/base/rendering/renderabledisc.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec2property.h>
 
 namespace openspace {
 
@@ -46,7 +48,7 @@ private:
     void computeZone();
 
     /**
-     * Compute the inner and outer boundary of the habitable zone of a star, accordring to
+     * Compute the inner and outer boundary of the habitable zone of a star, according to
      * formula and coefficients by Kopparapu et al. (2015) https://arxiv.org/abs/1404.5292
      *
      * \param teff The effective temperature of the star, in Kelvin
@@ -59,6 +61,8 @@ private:
     properties::FloatProperty _teff;
     properties::FloatProperty _luminosity;
     properties::BoolProperty _showOptimistic;
+
+    properties::Vec2Property _kopparapuTeffInterval;
 
     glm::vec2 _conservativeBounds;
 

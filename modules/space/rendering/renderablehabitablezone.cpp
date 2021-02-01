@@ -66,6 +66,15 @@ namespace {
         "If true, the habitable zone disc is rendered with the optimistic boundaries "
         "rather than the conservative ones."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo KopparapuTeffIntervalInfo = {
+        "KopparapuTeffInterval",
+        "Effective Temperature Interval (Kopparapu's formula)" ,
+        "The range for which Kopparapu's formula is used for the habitable zone "
+        "computation. For stars with effective temperatures outside the range, a "
+        "simpler method by Tom E. Harris is used. This method only uses the star "
+        "luminosity and does not include computation of the optimistic boundaries."
+    };
 } // namespace
 
 namespace openspace {
@@ -93,6 +102,12 @@ documentation::Documentation RenderableHabitableZone::Documentation() {
                 new BoolVerifier,
                 Optional::Yes,
                 OptimisticInfo.description
+            },
+            {
+                KopparapuTeffIntervalInfo.identifier,
+                new DoubleVector2Verifier,
+                Optional::Yes,
+                KopparapuTeffIntervalInfo.description
             }
         }
     };
@@ -115,6 +130,7 @@ RenderableHabitableZone::RenderableHabitableZone(const ghoul::Dictionary& dictio
     , _teff(EffectiveTemperatureInfo, 5780.f, 0.f, 7.5e4f)
     , _luminosity(LuminosityInfo, 1.f, 0.f, 1e8f)
     , _showOptimistic(OptimisticInfo, false)
+    , _kopparapuTeffInterval(KopparapuTeffIntervalInfo, glm::vec2(2000.f, 8000.f))
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -142,6 +158,11 @@ RenderableHabitableZone::RenderableHabitableZone(const ghoul::Dictionary& dictio
         _showOptimistic = dictionary.value<bool>(OptimisticInfo.identifier);
     }
     addProperty(_showOptimistic);
+
+    // The user should not be able to change this property. It's just used to communicate
+    // the different rendering that happens outside of this interval
+    addProperty(_kopparapuTeffInterval);
+    _kopparapuTeffInterval.setReadOnly(true);
 
     // Make parent's size related properties read only. We want to set them based on the
     // given temperature and luminosity
@@ -229,9 +250,10 @@ glm::dvec4 RenderableHabitableZone::computeKopparapuZoneBoundaries(float teff,
 {
     // Kopparapu's formula only considers stars with teff in range [2600, 7200] K.
     // However, we want to use the formula for more stars, so add some flexibility to
-    // the teff boundaries.
-    // OBS! This also prevents problems with too large values in the distance computation
-    if (teff > 8000.f || teff < 2000.f) {
+    // the teff boundaries (see constructor).
+    // OBS! This also prevents problems with too large teff values in the computation
+    const glm::vec2 teffBounds = _kopparapuTeffInterval;
+    if (teff > teffBounds.y || teff < teffBounds.x) {
         // For the other stars, use a method by Tom E. Morris:
         // https://www.planetarybiology.com/calculating_habitable_zone.html
         const double L = static_cast<double>(luminosity);
