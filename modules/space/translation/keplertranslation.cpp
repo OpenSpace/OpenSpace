@@ -31,7 +31,6 @@
 #include <glm/gtx/transform.hpp>
 
 namespace {
-
     template <typename T, typename Func>
     T solveIteration(const Func& function, T x0, const T& err = 0.0, int maxIter = 100) {
         T x2 = x0;

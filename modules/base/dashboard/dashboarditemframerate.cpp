@@ -48,14 +48,6 @@ namespace {
         "does not use any caching, this trigger does not do anything."
     };
 
-    constexpr const char* ValueDtAvg = "Average Deltatime";
-    constexpr const char* ValueDtExtremes = "Deltatime extremes";
-    constexpr const char* ValueDtStandardDeviation = "Deltatime standard deviation";
-    constexpr const char* ValueDtCov = "Deltatime coefficient of variation";
-    constexpr const char* ValueFps = "Frames per second";
-    constexpr const char* ValueFpsAvg = "Average frames per second";
-    constexpr const char* ValueNone = "None";
-
     [[ nodiscard ]] char* formatDt(std::vector<char>& buffer) {
         return fmt::format_to(
             buffer.data(),
@@ -168,19 +160,19 @@ DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictiona
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _frametimeType.addOptions({
-        { static_cast<int>(FrametimeType::DtTimeAvg), ValueDtAvg },
-        { static_cast<int>(FrametimeType::DtTimeExtremes), ValueDtExtremes },
+        { static_cast<int>(FrametimeType::DtTimeAvg), "Average Deltatime" },
+        { static_cast<int>(FrametimeType::DtTimeExtremes), "Deltatime extremes" },
         {
             static_cast<int>(FrametimeType::DtStandardDeviation),
-            ValueDtStandardDeviation
+            "Deltatime standard deviation"
         },
         {
             static_cast<int>(FrametimeType::DtCoefficientOfVariation),
-            ValueDtCov
+            "Deltatime coefficient of variation"
         },
-        { static_cast<int>(FrametimeType::FPS), ValueFps },
-        { static_cast<int>(FrametimeType::FPSAvg), ValueFpsAvg },
-        { static_cast<int>(FrametimeType::None), ValueNone }
+        { static_cast<int>(FrametimeType::FPS), "Frames per second" },
+        { static_cast<int>(FrametimeType::FPSAvg), "Average frames per second" },
+        { static_cast<int>(FrametimeType::None), "None" }
     });
 
     if (p.frametimeType.has_value()) {

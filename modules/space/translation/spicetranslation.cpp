@@ -36,8 +36,6 @@
 #include <optional>
 
 namespace {
-    constexpr const char* KeyKernels = "Kernels";
-
     constexpr const char* DefaultReferenceFrame = "GALACTIC";
 
     constexpr openspace::properties::Property::PropertyInfo TargetInfo = {
@@ -102,7 +100,9 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
 
     auto loadKernel = [](const std::string& kernel) {
         if (!FileSys.fileExists(kernel)) {
-            throw SpiceManager::SpiceException("Kernel '" + kernel + "' does not exist");
+            throw SpiceManager::SpiceException(fmt::format(
+                "Kernel '{}' does not exist", kernel
+            ));
         }
 
         try {

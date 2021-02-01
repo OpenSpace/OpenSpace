@@ -33,9 +33,6 @@
 #include <vector>
 
 namespace {
-    constexpr const char* KeyFile = "File";
-    constexpr const char* KeyLineNumber = "LineNumber";
-
     // The list of leap years only goes until 2056 as we need to touch this file then
     // again anyway ;)
     const std::vector<int> LeapYears = {

@@ -66,17 +66,6 @@ namespace {
         "hasColorMap", "enabledRectSizeControl", "hasDvarScaling"
     };
 
-    constexpr const char* KeyFile = "File";
-    constexpr const char* keyColor = "Color";
-    constexpr const char* keyUnit = "Unit";
-    constexpr const char* MeterUnit = "m";
-    constexpr const char* KilometerUnit = "Km";
-    constexpr const char* ParsecUnit = "pc";
-    constexpr const char* KiloparsecUnit = "Kpc";
-    constexpr const char* MegaparsecUnit = "Mpc";
-    constexpr const char* GigaparsecUnit = "Gpc";
-    constexpr const char* GigalightyearUnit = "Gly";
-
     constexpr int8_t CurrentCacheVersion = 1;
     constexpr double PARSEC = 0.308567756E17;
 

@@ -30,7 +30,6 @@
 #include <openspace/util/time.h>
 
 namespace {
-    constexpr const char* KeyType = "Type";
     constexpr const char* KeyKeyframes = "Keyframes";
 } // namespace
 

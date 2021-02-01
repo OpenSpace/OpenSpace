@@ -55,16 +55,6 @@ namespace {
         "modelViewTransform", "projectionTransform", "alphaValue", "color"
     };
 
-    constexpr const char* KeyFile = "File";
-    constexpr const char* keyUnit = "Unit";
-    constexpr const char* MeterUnit = "m";
-    constexpr const char* KilometerUnit = "Km";
-    constexpr const char* ParsecUnit = "pc";
-    constexpr const char* KiloparsecUnit = "Kpc";
-    constexpr const char* MegaparsecUnit = "Mpc";
-    constexpr const char* GigaparsecUnit = "Gpc";
-    constexpr const char* GigalightyearUnit = "Gly";
-
     constexpr const int RenderOptionViewDirection = 0;
     constexpr const int RenderOptionPositionNormal = 1;
 

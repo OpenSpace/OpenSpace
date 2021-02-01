@@ -30,8 +30,6 @@
 #include <ghoul/misc/templatefactory.h>
 
 namespace {
-    constexpr const char* KeyType = "Type";
-
     struct [[codegen::Dictionary(PlanetGeometry)]] Parameters {
         // The type of the PlanetGeometry that will can be constructed
         std::string type;

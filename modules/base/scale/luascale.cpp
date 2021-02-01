@@ -32,7 +32,6 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
-
 #include <chrono>
 
 namespace {
