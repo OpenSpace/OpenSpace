@@ -34,7 +34,7 @@ class Connection;
 class Topic {
 public:
     Topic() {};
-    virtual ~Topic() = default;
+    virtual ~Topic();
 
     void initialize(Connection* connection, size_t topicId);
     nlohmann::json wrappedPayload(const nlohmann::json& payload) const;
