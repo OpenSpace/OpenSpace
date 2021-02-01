@@ -25,7 +25,8 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { HabitableZone })
 asset.meta = {
     Name = "Sun Habitable Zone",
     Version = "1.0",
-    Description = [[ The habitable zone around our sun]],
+    Description = [[ The habitable zone around our sun, computed using formula and 
+    coefficients by Kopparapu et al. (2015) https://arxiv.org/abs/1404.5292]],
     Author = "OpenSpace Team",
     URL = "http://openspaceproject.com",
     License = "MIT license",
