@@ -400,18 +400,20 @@ void TimeManager::setDeltaTime(double deltaTime) {
 }
 
 void TimeManager::setDeltaTimeSteps(std::vector<double> deltaTimes) {
+    // Add negative versions
     std::vector<double> negatives;
     negatives.reserve(deltaTimes.size());
     std::transform(
         deltaTimes.begin(),
         deltaTimes.end(),
         std::back_inserter(negatives),
-        [](double d) { return -d; }
+        std::negate<double>()
     );
 
     deltaTimes.reserve(2 * deltaTimes.size());
     deltaTimes.insert(deltaTimes.end(), negatives.begin(), negatives.end());
 
+    // Sort and remove duplicates
     std::sort(deltaTimes.begin(), deltaTimes.end());
     deltaTimes.erase(std::unique(deltaTimes.begin(), deltaTimes.end()), deltaTimes.end());
 
@@ -449,10 +451,6 @@ void TimeManager::addDeltaTimesKeybindings() {
         [](double value) { return value >= 0.0; }
     );
 
-    const int nKeys = static_cast<int>(Keys.size());
-    const int nSteps = static_cast<int>(steps.size());
-    const int maxIterations = (nSteps >= nKeys) ? nKeys : nSteps;
-
     auto addDeltaTimeKeybind = [this](Key key, KeyModifier mod, double step) {
         const std::string s = fmt::format("{:.0f}", step);
         global::keybindingManager->bindKeyLocal(
@@ -468,37 +466,36 @@ void TimeManager::addDeltaTimesKeybindings() {
         _deltaTimeStepKeybindings.push_back(KeyWithModifier{ key, mod });
     };
 
+    const int nKeys = static_cast<int>(Keys.size());
+    const int nSteps = static_cast<int>(steps.size());
+
     // For each key, add upp to three keybinds (no modifier, then SHIFT and then CTRL),
     // plus inverted version of each time step one using the ALT modifier
-    for (int i = 0; i < maxIterations; ++i) {
-        const Key key = Keys[i];
-        addDeltaTimeKeybind(key, KeyModifier::NoModifier, steps[i]);
-        addDeltaTimeKeybind(key, KeyModifier::Alt, -steps[i]);
+    for (int i = 0; i < nSteps; ++i) {
+        const Key key = Keys[i % nKeys];
+        const double deltaTimeStep = steps[i];
 
-        if (nSteps > nKeys) {
-            const int index = nKeys + i;
-            addDeltaTimeKeybind(key, KeyModifier::Shift, steps[index]);
-
-            KeyModifier mod = KeyModifier::Shift | KeyModifier::Alt;
-            addDeltaTimeKeybind(key, mod, -steps[index]);
+        KeyModifier modifier = KeyModifier::NoModifier;
+        if (i > nKeys - 1) {
+            modifier = KeyModifier::Shift;
+        }
+        else if (i > 2 * nKeys - 1) {
+            modifier = KeyModifier::Control;
         }
 
-        if (nSteps > 2 * nKeys) {
-            const int index = 2 * nKeys + i;
-            addDeltaTimeKeybind(key, KeyModifier::Control, steps[index]);
+        KeyModifier negativeModifier = modifier | KeyModifier::Alt;
 
-            KeyModifier mod = KeyModifier::Control | KeyModifier::Alt;
-            addDeltaTimeKeybind(key, mod, -steps[index]);
-        }
+        addDeltaTimeKeybind(key, modifier, deltaTimeStep);
+        addDeltaTimeKeybind(key, negativeModifier, -deltaTimeStep);
     }
 
-    LINFO("Added keybindings for specified delta time steps.");
+    LINFO("Added keybindings for specified delta time steps");
     const int maxKeyBinds = 3 * nKeys;
     if (nSteps > maxKeyBinds) {
         LWARNING(fmt::format(
             "Error settings delta time keys: Too many delta times, so not all could be "
             "mapped to a key. Total: {} steps, which is {} more than the number of "
-            "available keybindings.",
+            "available keybindings",
             nSteps, nSteps - maxKeyBinds
         ));
     }

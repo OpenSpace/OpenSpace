@@ -29,7 +29,6 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/glm.h>
@@ -39,9 +38,9 @@
 namespace {
     constexpr const char* ProgramName = "GridProgram";
 
-    constexpr openspace::properties::Property::PropertyInfo GridColorInfo = {
-        "GridColor",
-        "Grid Color",
+    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+        "Color",
+        "Color",
         "This value determines the color of the grid lines that are rendered."
     };
 
@@ -74,10 +73,10 @@ documentation::Documentation RenderableGrid::Documentation() {
         "base_renderable_grid",
         {
             {
-                GridColorInfo.identifier,
+                ColorInfo.identifier,
                 new DoubleVector3Verifier,
                 Optional::Yes,
-                GridColorInfo.description
+                ColorInfo.description
             },
             {
                 SegmentsInfo.identifier,
@@ -104,7 +103,7 @@ documentation::Documentation RenderableGrid::Documentation() {
 
 RenderableGrid::RenderableGrid(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _gridColor(GridColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
+    , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
     , _segments(SegmentsInfo, glm::uvec2(10), glm::uvec2(1), glm::uvec2(200))
     , _lineWidth(LineWidthInfo, 0.5f, 0.f, 20.f)
     , _size(SizeInfo, glm::vec2(1e20f), glm::vec2(1.f), glm::vec2(1e35f))
@@ -118,11 +117,11 @@ RenderableGrid::RenderableGrid(const ghoul::Dictionary& dictionary)
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
 
-    if (dictionary.hasKey(GridColorInfo.identifier)) {
-        _gridColor = dictionary.value<glm::dvec3>(GridColorInfo.identifier);
+    if (dictionary.hasKey(ColorInfo.identifier)) {
+        _color = dictionary.value<glm::dvec3>(ColorInfo.identifier);
     }
-    _gridColor.setViewOption(properties::Property::ViewOptions::Color);
-    addProperty(_gridColor);
+    _color.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_color);
 
     if (dictionary.hasKey(SegmentsInfo.identifier)) {
         _segments = static_cast<glm::uvec2>(
@@ -190,8 +189,6 @@ void RenderableGrid::deinitializeGL() {
 void RenderableGrid::render(const RenderData& data, RendererTasks&){
     _gridProgram->activate();
 
-    _gridProgram->setUniform("opacity", _opacity);
-
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
@@ -204,14 +201,19 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&){
         "MVPTransform",
         glm::dmat4(data.camera.projectionMatrix()) * modelViewTransform
     );
+    _gridProgram->setUniform("opacity", _opacity);
+    _gridProgram->setUniform("gridColor", _color);
 
-    _gridProgram->setUniform("gridColor", _gridColor);
-
-    // Changes GL state:
+    // Change GL state:
+#ifndef __APPLE__
     glLineWidth(_lineWidth);
+#else
+    glLineWidth(1.f);
+#endif
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_LINE_SMOOTH);
+    glDepthMask(false);
 
     glBindVertexArray(_vaoID);
     glDrawArrays(_mode, 0, static_cast<GLsizei>(_varray.size()));
@@ -219,9 +221,10 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&){
 
     _gridProgram->deactivate();
 
-    // Restores GL State
+    // Restore GL State
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetLineState();
+    global::renderEngine->openglStateCache().resetDepthState();
 }
 
 void RenderableGrid::update(const UpdateData&) {

@@ -410,19 +410,49 @@ void createExoplanetSystem(const std::string& starName) {
         }
     }
 
+
+    float meanInclination = 0.f;
+    for (const ExoplanetDataEntry& p : system.planetsData) {
+        meanInclination += p.i;
+    }
+    meanInclination /= static_cast<float>(system.planetsData.size());
+    const glm::dmat4 rotation = computeOrbitPlaneRotationMatrix(meanInclination);
+    const glm::dmat3 meanOrbitPlaneRotationMatrix = static_cast<glm::dmat3>(rotation);
+
+    // 1 AU Size Comparison Ring
+    const std::string ringIdentifier = starIdentifier + "_1AU_Ring";
+    const std::string ring = "{"
+        "Identifier = '" + starIdentifier + "_1AU_Ring',"
+        "Parent = '" + starIdentifier + "',"
+        "Enabled = false,"
+        "Renderable = {"
+            "Type = 'RenderableRadialGrid',"
+            "OuterRadius = " + std::to_string(AU) + ","
+            "CircleSegments = 64,"
+            "LineWidth = 2.0,"
+        "},"
+        "Transform = {"
+            "Rotation = {"
+                "Type = 'StaticRotation',"
+                "Rotation = " + ghoul::to_string(meanOrbitPlaneRotationMatrix) + ""
+            "}"
+        "},"
+        "GUI = {"
+            "Name = '1 AU Size Comparison Ring',"
+            "Path = '" + guiPath + "'"
+        "}"
+    "}";
+
+    openspace::global::scriptEngine->queueScript(
+        "openspace.addSceneGraphNode(" + ring + ");",
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
+
     // Habitable Zone
     bool hasTeff = !std::isnan(system.starData.teff);
     bool hasLuminosity = !std::isnan(system.starData.luminosity);
 
     if (hasTeff && hasLuminosity) {
-        float meanInclination = 0.f;
-        for (const ExoplanetDataEntry& p : system.planetsData) {
-            meanInclination += p.i;
-        }
-        meanInclination /= static_cast<float>(system.planetsData.size());
-        const glm::dmat4 rotation = computeOrbitPlaneRotationMatrix(meanInclination);
-        const glm::dmat3 rotationMat3 = static_cast<glm::dmat3>(rotation);
-
         constexpr const char* description =
             "The habitable zone is the region around a star in which an Earth-like "
             "planet can potentially have liquid water on its surface."
@@ -448,7 +478,7 @@ void createExoplanetSystem(const std::string& starName) {
             "Transform = {"
                 "Rotation = {"
                     "Type = 'StaticRotation',"
-                    "Rotation = " + ghoul::to_string(rotationMat3) + ""
+                    "Rotation = " + ghoul::to_string(meanOrbitPlaneRotationMatrix) + ""
                 "}"
             "},"
             "GUI = {"
