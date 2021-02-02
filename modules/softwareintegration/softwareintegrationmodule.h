@@ -80,8 +80,7 @@ private:
 
     float readFloatValue(std::vector<char>& message);
     glm::vec3 readColor(std::vector<char>& message);
-    std::string readGUI(std::vector<char>& message);
-    std::string readIdentifier(std::vector<char>& message);
+    std::string readString(std::vector<char>& message);
     std::vector<float> readData(std::vector<char>& message);
 
     size_t _messageOffset = 0;
