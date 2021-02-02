@@ -80,9 +80,7 @@ namespace {
         // [[codegen::verbatim(VertexInfo.description)]]
         std::string file;
 
-        // Specifies the file that contains the mapping between constellation 
-        // abbreviations and full name of the constellation. If the file is omitted, the
-        // abbreviations are used as the full names
+        // [[codegen::verbatim(ConstellationInfo.description)]]
         std::optional<std::string> constellationFile;
 
         // [[codegen::verbatim(ColorInfo.description)]]

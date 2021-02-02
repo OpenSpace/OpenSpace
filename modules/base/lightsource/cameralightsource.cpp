@@ -27,6 +27,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
+#include <optional>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo IntensityInfo = {
@@ -37,7 +38,7 @@ namespace {
 
     struct [[codegen::Dictionary(CameraLightSource)]] Parameters {
         // [[codegen::verbatim(IntensityInfo.description)]]
-        float intensity;
+        std::optional<float> intensity;
     };
 #include "cameralightsource_codegen.cpp"
 } // namespace
@@ -61,7 +62,7 @@ CameraLightSource::CameraLightSource(const ghoul::Dictionary& dictionary)
     , _intensity(IntensityInfo, 1.f, 0.f, 1.f)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-    _intensity = p.intensity;
+    _intensity = p.intensity.value_or(_intensity);
     addProperty(_intensity);
 }
 

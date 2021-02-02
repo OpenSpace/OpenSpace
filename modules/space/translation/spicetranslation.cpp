@@ -62,9 +62,7 @@ namespace {
     };
 
     struct [[codegen::Dictionary(SpiceTranslation)]] Parameters {
-        // This is the SPICE NAIF name for the body whose translation is to be computed by
-        // the SpiceTranslation. It can either be a fully qualified name (such as
-        // 'EARTH') or a NAIF integer id code (such as '399')
+        // [[codegen::verbatim(TargetInfo.description)]]
         std::string target
             [[codegen::annotation("A valid SPICE NAIF name or identifier")]];
 

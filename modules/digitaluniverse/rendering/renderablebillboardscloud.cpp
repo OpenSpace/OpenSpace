@@ -266,8 +266,8 @@ namespace {
         // object being rendered
         std::optional<std::string> file;
 
-        // Astronomical Object Color (r,g,b)
-        glm::dvec3 color;
+        // [[codegen::verbatim(ColorInfo.description)]]
+        glm::vec3 color;
 
         // [[codegen::verbatim(SpriteTextureInfo.description)]]
         std::optional<std::string> texture;

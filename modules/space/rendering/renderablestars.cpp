@@ -308,7 +308,7 @@ namespace {
 
     struct [[codegen::Dictionary(RenderableStars)]] Parameters {
         // The path to the SPECK file containing information about the stars being rendered
-        std::string file;
+        std::string speckFile [[codegen::key("File")]];
 
         // [[codegen::verbatim(ColorTextureInfo.description)]]
         std::string colorMap;
@@ -434,7 +434,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
 
-    _speckFile = absPath(p.file);
+    _speckFile = absPath(p.speckFile);
     _speckFile.onChange([&]() { _speckFileIsDirty = true; });
     addProperty(_speckFile);
 

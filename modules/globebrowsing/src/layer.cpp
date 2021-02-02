@@ -140,7 +140,6 @@ namespace {
         // Specifies the render settings that should be applied to this layer
         std::optional<Settings> settings;
 
-        // This used to be   new ReferencingVerifier("globebrowsing_layeradjustment")
         struct LayerAdjustment {
             enum class Type {
                 None,
@@ -158,6 +157,7 @@ namespace {
             // 'ChromaKey' type is selected for the 'Type'
             std::optional<double> chromaKeyTolerance;
         };
+        // Parameters that set individual adjustment parameters for this layer
         std::optional<LayerAdjustment> adjustment;
 
         enum class BlendMode {

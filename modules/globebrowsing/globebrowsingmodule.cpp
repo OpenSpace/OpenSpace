@@ -161,11 +161,24 @@ namespace {
     }
 
     struct [[codegen::Dictionary(GlobeBrowsingModule)]] Parameters {
+        // [[codegen::verbatim(WMSCacheEnabledInfo.description)]]
         std::optional<bool> cacheEnabled [[codegen::key("WMSCacheEnabled")]];
+        
+        // [[codegen::verbatim(OfflineModeInfo.description)]]
         std::optional<bool> offlineMode;
+        
+        // [[codegen::verbatim(WMSCacheLocationInfo.description)]]
         std::optional<std::string> cacheLocation [[codegen::key("WMSCacheLocation")]];
+        
+        // [[codegen::verbatim(WMSCacheSizeInfo.description)]]
         std::optional<int> wmsCacheSize [[codegen::key("WMSCacheSize")]];
+        
+        // [[codegen::verbatim(TileCacheSizeInfo.description)]]
         std::optional<int> tileCacheSize;
+        
+        // If you know what you are doing and you have WMS caching *disabled* but offline
+        // mode *enabled*, you can set this value to 'true' to silence a warning that you
+        // would otherwise get at startup
         std::optional<bool> noWarning;
     };
 #include "globebrowsingmodule_codegen.cpp"

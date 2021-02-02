@@ -55,13 +55,14 @@
 #include <math.h>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo AtmosphereHeightInfo {
+    constexpr openspace::properties::Property::PropertyInfo AtmosphereHeightInfo = {
         "AtmosphereHeight",
         "Atmosphere Height (KM)",
         "The thickness of the atmosphere in km"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AverageGroundReflectanceInfo {
+    constexpr openspace::properties::Property::PropertyInfo AverageGroundReflectanceInfo =
+    {
         "AverageGroundReflectance",
         "Average Ground Reflectance (%)",
         "Average percentage of light reflected by the ground during the pre-calculation "
@@ -74,7 +75,7 @@ namespace {
         "Multiplier of the ground radiance color during the rendering phase"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RayleighHeightScaleInfo= {
+    constexpr openspace::properties::Property::PropertyInfo RayleighHeightScaleInfo = {
         "RayleighHeightScale",
         "Rayleigh Scale Height (KM)",
         "It is the vertical distance over which the density and pressure fall by a "
@@ -339,7 +340,6 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     addProperty(_ozoneHeightScale);
     _ozoneCoeff.onChange(updateWithCalculation);
     addProperty(_ozoneCoeff);
-
 
     _mieHeightScale = p.mie.heightScale;
     _mieHeightScale.onChange(updateWithCalculation);

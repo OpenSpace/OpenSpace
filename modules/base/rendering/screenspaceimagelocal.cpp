@@ -68,6 +68,8 @@ ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
+    // @TODO (abock, 2021-02-02) Should this be the name variable? The identifier wasn't
+    // declared in the documentation
     std::string identifier;
     if (dictionary.hasValue<std::string>(KeyIdentifier)) {
         identifier = dictionary.value<std::string>(KeyIdentifier);
@@ -100,7 +102,6 @@ ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary
                 "ScreenSpaceImageLocal",
                 fmt::format("Image {} did not exist for {}", *p.texturePath, _identifier)
             );
-
         }
     }
 }

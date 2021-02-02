@@ -144,13 +144,23 @@ add_subdirectory(ext)
 add_subdirectory(src)
 
 add_subdirectory(support/coding/codegen)
-# It is important that the __codegen.h does not actually exist so that this target
-# is never considered as finished
-add_custom_target(run_codegen ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/__codegen.h")
+# It is important that the __codegen_module.h and __codegen_src.h do not actually exist so
+# that this target is never considered as finished
+add_custom_target(
+  run_codegen
+  ALL DEPENDS
+    "${CMAKE_CURRENT_BINARY_DIR}/__codegen_module.h"
+    "${CMAKE_CURRENT_BINARY_DIR}/__codegen_src.h"
+)
 add_dependencies(run_codegen codegen)
 add_custom_command(
-  OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/__codegen.h"
+  OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/__codegen_module.h"
   COMMAND codegen ARGS "--folder" "${OPENSPACE_BASE_DIR}/modules"
+  VERBATIM
+)
+add_custom_command(
+  OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/__codegen_src.h"
+  COMMAND codegen ARGS "--folder" "${OPENSPACE_BASE_DIR}/src"
   VERBATIM
 )
 set_folder_location(codegen-lib "support")

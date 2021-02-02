@@ -88,7 +88,7 @@ namespace {
         std::string file;
 
         // Astronomical Object Color (r,g,b)
-        glm::dvec3 color;
+        glm::vec3 color;
 
         enum class Unit {
             Meter [[codegen::key("m")]],
