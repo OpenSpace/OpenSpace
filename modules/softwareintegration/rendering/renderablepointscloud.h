@@ -33,10 +33,7 @@
 namespace openspace::documentation { struct Documentation; }
 
 namespace ghoul::filesystem { class File; }
-
-namespace ghoul::opengl {
-    class ProgramObject;
-} // namespace ghoul::opengl
+namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
@@ -57,29 +54,22 @@ public:
 
 protected:
     void createDataSlice();
-    bool loadData();
-    bool readPointData();
+    void loadData();
 
-    bool _hasLuminosityData = false;
     bool _hasPointData = false;
-    bool _hasVelocityData = false;
     bool _isDirty = true;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram = nullptr;
 
-    properties::BoolProperty _toggleVisibility;
+    properties::BoolProperty _isVisible;
     properties::FloatProperty _size;
     properties::Vec3Property _color;
 
     std::vector<glm::vec3> _pointData;
     std::vector<float> _fullData;
-    std::vector<float> _luminosityData;
     std::vector<float> _slicedData;
-    std::vector<float> _velocityData;
 
-    int _nValuesPerPoints = 0;
-
-    glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
+    int _nValuesPerPoint = 0;
 
     GLuint _vertexArrayObjectID = 0;
     GLuint _vertexBufferObjectID = 0;

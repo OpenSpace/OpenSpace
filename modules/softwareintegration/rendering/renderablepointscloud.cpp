@@ -38,10 +38,6 @@
 #include <fstream>
 
 namespace {
-    constexpr const char* KeyData = "Data";
-    constexpr const char* KeyLuminosity = "Luminosity";
-    constexpr const char* KeyVelocity = "Velocity";
-
     constexpr const char* _loggerCat = "PointsCloud";
 
     constexpr int8_t CurrentCacheVersion = 1;
@@ -62,6 +58,12 @@ namespace {
         "ToggleVisibility",
         "Toggle Visibility",
         "Enables/Disables the drawing of points."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo DataInfo = {
+        "Data",
+        "Data",
+        "Data to use for the positions of the points, given in Parsec."
     };
 } // namespace
 
@@ -90,6 +92,12 @@ documentation::Documentation RenderablePointsCloud::Documentation() {
                 new BoolVerifier,
                 Optional::Yes,
                 ToggleVisibilityInfo.description
+            },
+            {
+                DataInfo.identifier,
+                new Vector3ListVerifier<double>,
+                Optional::No,
+                DataInfo.description
             }
         }
     };
@@ -99,7 +107,7 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     : Renderable(dictionary)
     , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
     , _size(SizeInfo, 1.f, 0.f, 150.f)
-    , _toggleVisibility(ToggleVisibilityInfo, true)
+    , _isVisible(ToggleVisibilityInfo, true)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -113,34 +121,9 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     _color.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_color);
 
-    if (dictionary.hasKey(KeyData)) {
-        ghoul::Dictionary dataDict = dictionary.value<ghoul::Dictionary>(KeyData);
-        for (int i = 0; i < static_cast<int>(dataDict.size()); ++i) {
-            _pointData.push_back(dataDict.value<glm::dvec3>(std::to_string(i + 1)));
-        }
-        _hasPointData = true;
-    }
-
-    if (dictionary.hasKey(KeyLuminosity)) {
-        ghoul::Dictionary lumDict = dictionary.value<ghoul::Dictionary>(KeyLuminosity);
-        for (int i = 0; i < static_cast<int>(lumDict.size()); ++i) {
-            float luminosity = static_cast<float>(
-                lumDict.value<double>(std::to_string(i + 1))
-            );
-            _luminosityData.push_back(luminosity);
-        }
-        _hasLuminosityData = true;
-    }
-
-    if (dictionary.hasKey(KeyVelocity)) {
-        ghoul::Dictionary velDict = dictionary.value<ghoul::Dictionary>(KeyVelocity);
-        for (int i = 0; i < static_cast<int>(velDict.size()); ++i) {
-            float velocity = static_cast<float>(
-                velDict.value<double>(std::to_string(i + 1))
-            );
-            _velocityData.push_back(velocity);
-        }
-        _hasVelocityData = true;
+    ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>(DataInfo.identifier);
+    for (int i = 0; i < static_cast<int>(d.size()); ++i) {
+        _pointData.push_back(d.value<glm::dvec3>(std::to_string(i + 1)));
     }
 
     addProperty(_opacity);
@@ -151,10 +134,9 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     addProperty(_size);
 
     if (dictionary.hasKey(ToggleVisibilityInfo.identifier)) {
-        _toggleVisibility = dictionary.value<bool>(ToggleVisibilityInfo.identifier);
+        _isVisible = dictionary.value<bool>(ToggleVisibilityInfo.identifier);
     }
-    _toggleVisibility.onChange([&]() { _hasPointData = !_hasPointData; });
-    addProperty(_toggleVisibility);
+    addProperty(_isVisible);
 }
 
 bool RenderablePointsCloud::isReady() const {
@@ -162,10 +144,7 @@ bool RenderablePointsCloud::isReady() const {
 }
 
 void RenderablePointsCloud::initialize() {
-    bool isSuccessful = loadData();
-    if (!isSuccessful) {
-        throw ghoul::RuntimeError("Error loading data");
-    }
+    loadData();
 }
 
 void RenderablePointsCloud::initializeGL() {
@@ -194,44 +173,46 @@ void RenderablePointsCloud::render(const RenderData& data, RendererTasks&) {
         return;
     }
 
-    if (_hasPointData && _toggleVisibility) {
-        _shaderProgram->activate();
-
-        glm::dmat4 modelTransform =
-            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
-            glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-            glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-
-        glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
-
-        _shaderProgram->setUniform("modelViewTransform", modelViewTransform);
-        _shaderProgram->setUniform(
-            "MVPTransform",
-            glm::dmat4(data.camera.projectionMatrix()) * modelViewTransform
-        );
-
-        _shaderProgram->setUniform("color", _color);
-        _shaderProgram->setUniform("opacity", _opacity);
-        _shaderProgram->setUniform("size", _size);
-
-        // Changes GL state:
-        glEnablei(GL_BLEND, 0);
-        glDepthMask(false);
-        glBlendEquation(GL_FUNC_ADD);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glEnable(GL_PROGRAM_POINT_SIZE); // Enable gl_PointSize in vertex
-
-        glBindVertexArray(_vertexArrayObjectID);
-        const GLsizei nPoints = static_cast<GLsizei>(_fullData.size() / _nValuesPerPoints);
-        glDrawArrays(GL_POINTS, 0, nPoints);
-
-        glBindVertexArray(0);
-        _shaderProgram->deactivate();
-
-        // Restores GL State
-        global::renderEngine->openglStateCache().resetBlendState();
-        global::renderEngine->openglStateCache().resetDepthState();
+    if (!_isVisible) {
+        return;
     }
+
+    _shaderProgram->activate();
+
+    glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
+        glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+
+    glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+
+    _shaderProgram->setUniform("modelViewTransform", modelViewTransform);
+    _shaderProgram->setUniform(
+        "MVPTransform",
+        glm::dmat4(data.camera.projectionMatrix()) * modelViewTransform
+    );
+
+    _shaderProgram->setUniform("color", _color);
+    _shaderProgram->setUniform("opacity", _opacity);
+    _shaderProgram->setUniform("size", _size);
+
+    // Changes GL state:
+    glEnablei(GL_BLEND, 0);
+    glDepthMask(false);
+    glBlendEquation(GL_FUNC_ADD);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_PROGRAM_POINT_SIZE); // Enable gl_PointSize in vertex
+
+    glBindVertexArray(_vertexArrayObjectID);
+    const GLsizei nPoints = static_cast<GLsizei>(_fullData.size() / _nValuesPerPoint);
+    glDrawArrays(GL_POINTS, 0, nPoints);
+
+    glBindVertexArray(0);
+    _shaderProgram->deactivate();
+
+    // Restores GL State
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
 }
 
 void RenderablePointsCloud::update(const UpdateData&) {
@@ -239,43 +220,41 @@ void RenderablePointsCloud::update(const UpdateData&) {
         return;
     }
 
-    if (_hasPointData) {
-        LDEBUG("Regenerating data");
+    LDEBUG("Regenerating data");
 
-        createDataSlice();
+    createDataSlice();
 
-        int size = static_cast<int>(_slicedData.size());
+    int size = static_cast<int>(_slicedData.size());
 
-        if (_vertexArrayObjectID == 0) {
-            glGenVertexArrays(1, &_vertexArrayObjectID);
-            LDEBUG(fmt::format("Generating Vertex Array id '{}'", _vertexArrayObjectID));
-        }
-        if (_vertexBufferObjectID == 0) {
-            glGenBuffers(1, &_vertexBufferObjectID);
-            LDEBUG(fmt::format("Generating Vertex Buffer Object id '{}'", _vertexBufferObjectID));
-        }
-
-        glBindVertexArray(_vertexArrayObjectID);
-        glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferObjectID);
-        glBufferData(
-            GL_ARRAY_BUFFER,
-            size * sizeof(float),
-            _slicedData.data(),
-            GL_STATIC_DRAW
-        );
-
-        GLint positionAttribute = _shaderProgram->attributeLocation("in_position");
-
-        glEnableVertexAttribArray(positionAttribute);
-        glVertexAttribPointer(
-            positionAttribute,
-            4,
-            GL_FLOAT,
-            GL_FALSE,
-            0,
-            nullptr
-        );
+    if (_vertexArrayObjectID == 0) {
+        glGenVertexArrays(1, &_vertexArrayObjectID);
+        LDEBUG(fmt::format("Generating Vertex Array id '{}'", _vertexArrayObjectID));
     }
+    if (_vertexBufferObjectID == 0) {
+        glGenBuffers(1, &_vertexBufferObjectID);
+        LDEBUG(fmt::format("Generating Vertex Buffer Object id '{}'", _vertexBufferObjectID));
+    }
+
+    glBindVertexArray(_vertexArrayObjectID);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferObjectID);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        size * sizeof(float),
+        _slicedData.data(),
+        GL_STATIC_DRAW
+    );
+
+    GLint positionAttribute = _shaderProgram->attributeLocation("in_position");
+
+    glEnableVertexAttribArray(positionAttribute);
+    glVertexAttribPointer(
+        positionAttribute,
+        4,
+        GL_FLOAT,
+        GL_FALSE,
+        0,
+        nullptr
+    );
 
     glBindVertexArray(0);
 
@@ -284,7 +263,7 @@ void RenderablePointsCloud::update(const UpdateData&) {
 
 void RenderablePointsCloud::createDataSlice() {
     _slicedData.clear();
-    _slicedData.reserve(4 * (_fullData.size() / _nValuesPerPoints));
+    _slicedData.reserve(4 * (_fullData.size() / _nValuesPerPoint));
 
     auto addPosition = [&](const glm::vec4& pos) {
         for (int j = 0; j < 4; ++j) {
@@ -292,8 +271,8 @@ void RenderablePointsCloud::createDataSlice() {
         }
     };
 
-    for (size_t i = 0; i < _fullData.size(); i += _nValuesPerPoints) {
-        glm::dvec4 transformedPos = _transformationMatrix * glm::dvec4(
+    for (size_t i = 0; i < _fullData.size(); i += _nValuesPerPoint) {
+        glm::dvec4 transformedPos = glm::dvec4(
             _fullData[i + 0],
             _fullData[i + 1],
             _fullData[i + 2],
@@ -306,43 +285,28 @@ void RenderablePointsCloud::createDataSlice() {
     }
 }
 
-bool RenderablePointsCloud::loadData() {
-    bool isSuccessful = true;
-    _slicedData.clear();
-    _fullData.clear();
-
-    isSuccessful &= readPointData();
-    if (!isSuccessful) {
-        return false;
-    }
-
-    if (!_hasPointData) {
-        isSuccessful = true;
-    }
-
-    return isSuccessful;
-}
-
-bool RenderablePointsCloud::readPointData() {
-    if (!_hasPointData) {
+void RenderablePointsCloud::loadData() {
+    if (_pointData.empty()) {
         LERROR("No point data found");
-        return false;
+        return;
     }
 
-    _nValuesPerPoints = 3;
+    _nValuesPerPoint = 3;
 
     int dataSize = _pointData.size();
-    std::vector<float> values(_nValuesPerPoints);
+    std::vector<float> values(_nValuesPerPoint);
 
     for (int i = 0; i < dataSize; i++) {
-        for (int j = 0; j < _nValuesPerPoints; j++) {
+        for (int j = 0; j < _nValuesPerPoint; j++) {
             values.push_back(_pointData[i][j]);
         }
     }
 
-    _fullData.insert(_fullData.end(), values.begin(), values.end());
+    // @TODO: potentially combine with additional data about the points, such as
+    // velocity and luminosity
 
-    return true;
+    _fullData.insert(_fullData.end(), values.begin(), values.end());
+    _isDirty = true;
 }
 
 } // namespace openspace
