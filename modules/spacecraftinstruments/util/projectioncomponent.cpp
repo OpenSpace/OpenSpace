@@ -46,34 +46,8 @@
 #include <variant>
 
 namespace {
-    constexpr const char* keyPotentialTargets = "PotentialTargets";
-
-    constexpr const char* keyInstrument = "Instrument.Name";
-    constexpr const char* keyInstrumentFovy = "Instrument.Fovy";
-    constexpr const char* keyInstrumentAspect = "Instrument.Aspect";
-
     constexpr const char* keyTranslation = "DataInputTranslation";
     constexpr const char* keyTimesTranslation = "TimesDataInputTranslation";
-
-    constexpr const char* keyProjObserver = "Observer";
-    constexpr const char* keyProjTarget = "Target";
-    constexpr const char* keyProjAberration = "Aberration";
-
-    constexpr const char* keySequenceDir = "Sequence";
-    constexpr const char* keyTimesSequenceDir = "TimesSequence";
-    constexpr const char* keySequenceType = "SequenceType";
-
-    constexpr const char* keyNeedsTextureMapDilation = "TextureMap";
-    constexpr const char* keyNeedsShadowing = "ShadowMap";
-    constexpr const char* keyTextureMapAspectRatio = "AspectRatio";
-
-    constexpr const char* sequenceTypeImage = "image-sequence";
-    constexpr const char* sequenceTypePlaybook = "playbook";
-    constexpr const char* sequenceTypeHybrid = "hybrid";
-    constexpr const char* sequenceTypeInstrumentTimes = "instrument-times";
-    constexpr const char* sequenceTypeImageAndInstrumentTimes =
-        "image-and-instrument-times";
-
     constexpr const char* placeholderFile = "${DATA}/placeholder.png";
 
     constexpr const char* _loggerCat = "ProjectionComponent";
@@ -135,11 +109,11 @@ namespace {
         Instrument instrument;
 
         enum class Type {
-            ImageSequence [[codegen::key(sequenceTypeImage)]],
-            Playbook [[codegen::key(sequenceTypePlaybook)]],
-            Hybrid [[codegen::key(sequenceTypeHybrid)]],
-            InstrumentTimes [[codegen::key(sequenceTypeInstrumentTimes)]],
-            ImageAndInstrumentTimes [[codegen::key(sequenceTypeImageAndInstrumentTimes)]]
+            ImageSequence [[codegen::key("image-sequence")]],
+            Playbook [[codegen::key("playbook")]],
+            Hybrid [[codegen::key("hybrid")]],
+            InstrumentTimes [[codegen::key("instrument-times")]],
+            ImageAndInstrumentTimes [[codegen::key("image-and-instrument-times")]]
         };
         // This value determines which type of sequencer is used for generating image 
         // schedules. The 'playbook' is using a custom format designed by the New Horizons 
