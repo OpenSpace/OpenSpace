@@ -147,7 +147,7 @@ namespace {
             for (size_t i = 1; i <= d.size(); ++i) {
                 res.push_back(d.value<std::string>(std::to_string(i)));
             }
-            value = res;
+            value = std::move(res);
         }
         // NOLINTNEXTLINE
         else if constexpr (std::is_same_v<T, std::map<std::string, std::string>>) {
@@ -160,7 +160,7 @@ namespace {
                 std::string v = d.value<std::string>(key);
                 res[std::string(key)] = std::move(v);
             }
-            value = res;
+            value = std::move(res);
         }
         // NOLINTNEXTLINE
         else if constexpr (std::is_same_v<T, std::map<std::string, ghoul::Dictionary>>) {
@@ -173,7 +173,7 @@ namespace {
                 ghoul::Dictionary v = d.value<ghoul::Dictionary>(key);
                 res[std::string(key)] = std::move(v);
             }
-            value = res;
+            value = std::move(res);
         }
         // NOLINTNEXTLINE
         else if constexpr (std::is_same_v<T, Configuration::Logging>) {
@@ -256,7 +256,10 @@ namespace {
                         filter.type = fi.value<std::string>(KeyType);
                     }
 
-                    res.push_back(filter);
+                    auto fff = filter;
+                    const auto ffg = filter;
+
+                    res.push_back(std::move(filter));
                 }
 
                 v.identifierFilters = res;

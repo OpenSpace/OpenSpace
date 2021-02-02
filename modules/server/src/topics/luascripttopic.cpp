@@ -180,9 +180,11 @@ void LuaScriptTopic::runScript(const std::string& script, bool shouldReturn) {
     scripting::ScriptEngine::ScriptCallback callback;
     if (shouldReturn) {
         callback = [this](ghoul::Dictionary data) {
-            nlohmann::json j = data;
-            _connection->sendJson(wrappedPayload(j));
-            _waitingForReturnValue = false;
+            if (_connection) {
+                nlohmann::json j = data;
+                _connection->sendJson(wrappedPayload(j));
+                _waitingForReturnValue = false;
+            }
         };
         _waitingForReturnValue = true;
     }
