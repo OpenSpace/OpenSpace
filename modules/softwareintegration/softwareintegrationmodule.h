@@ -86,7 +86,13 @@ private:
 
     size_t _messageOffset = 0;
 
+    // @TODO (emmbr 2021-02-02) We should avoid storing the data like this; it is simply
+    // not feasible when adding additional message types!
+    // Maybe the MessageType::AddSceneGraphNode can be removed, and instead the SGN is
+    // always added when reading a point data set? Then we wouldn't have to store the data
     std::vector<glm::vec3> _pointData;
+    // @TODO (emmbr 2021-02-02) The velocity and luminosity seems to be a WIP and is
+    // actually not used anywhere. Maybe remove everything related to it, for now?
     std::vector<float> _luminosityData;
     std::vector<float> _velocityData;
 
