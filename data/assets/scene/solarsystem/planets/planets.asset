@@ -14,6 +14,8 @@ asset.require('./earth/moon/trail')
 
 asset.require('./mars/mars')
 asset.require('./mars/atmosphere')
+asset.require('./mars/moons/phobos')
+asset.require('./mars/moons/deimos')
 
 asset.require('./jupiter/jupiter')
 asset.require('./jupiter/major_moons')
