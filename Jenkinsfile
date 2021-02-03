@@ -114,6 +114,7 @@ linux_gcc_make: {
       }
       stage('linux-gcc-make/test') {
         // testHelper.runUnitTests('build/OpenSpaceTest');
+        testHelper.runUnitTests('build/codegentest')
       }
       cleanWs()
     } // node('linux')
@@ -134,6 +135,7 @@ linux_gcc_ninja: {
       }
       stage('linux-gcc-ninja/test') {
         // testHelper.runUnitTests('build/OpenSpaceTest');
+        testHelper.runUnitTests('build/codegentest')
       }
       cleanWs()
     } // node('linux')
@@ -155,6 +157,7 @@ linux_clang_make: {
       }
       stage('linux-clang-make/test') {
         // testHelper.runUnitTests('build/OpenSpaceTest');
+        testHelper.runUnitTests('build/codegentest')
       }
       cleanWs()
     } // node('linux')
@@ -175,6 +178,7 @@ linux_clang_ninja: {
       }
       stage('linux-clang-ninja/test') {
         // testHelper.runUnitTests('build/OpenSpaceTest');
+        testHelper.runUnitTests('build/codegentest')
       }
       cleanWs()
     } // node('linux')
@@ -194,6 +198,7 @@ windows_msvc: {
       stage('windows-msvc/test') {
         // Currently, the unit tests are failing on Windows
         // testHelper.runUnitTests('bin\\Debug\\OpenSpaceTest')
+        testHelper.runUnitTests('bin\\Debug\\codegentest')
       }
       cleanWs()
     } // node('windows')
