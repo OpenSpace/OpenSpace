@@ -22,11 +22,7 @@ local NewHorizons = {
     Renderable = {
         Type = "RenderableModel",
         Body = "NEW HORIZONS",
-        Geometry = {{
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/NewHorizonsCleanModel.obj",
-            ColorTexture = textures .. "/NHTexture.jpg"
-        }}, 
+        GeometryFile = models .. "/NewHorizonsCleanModel.obj",
         AmbientIntensity = 0.0,
         DiffuseIntensity = 1.0,
         SpecularIntensity = 1.0,

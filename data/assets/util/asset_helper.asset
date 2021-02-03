@@ -165,11 +165,7 @@ local createModelPart = function (parent, sunLightSourceNode, models, geometry, 
         Parent = parent,
         Renderable = {
             Type = "RenderableModel",
-            Geometry = {{
-                Type = "MultiModelGeometry",
-                GeometryFile =  models .. "/" .. geometry .. ".obj",
-                ColorTexture = models .. "/" .. texture
-            }},
+            GeometryFile =  models .. "/" .. geometry .. ".obj",
             LightSources = lightSources,
             PerformShading = performShading,
             DisableFaceCulling = true 

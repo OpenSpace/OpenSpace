@@ -34,11 +34,7 @@ local Bennu = {
     Renderable = {
         Type = "RenderableModelProjection",
         Body = BENNU_BODY,
-        Geometry = {
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/BennuTextured.obj",
-            ColorTexture = textures .. "/gray.png"
-        },
+        GeometryFile = models .. "/BennuTextured.obj",
         Projection = {
             Sequence   = asset.localResource('InstrumentTimes'),
             SequenceType = "instrument-times",
