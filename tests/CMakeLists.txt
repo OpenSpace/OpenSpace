@@ -33,6 +33,7 @@ add_executable(
   test_latlonpatch.cpp
   test_lrucache.cpp
   test_luaconversions.cpp
+  test_lua_createsinglecolorimage.cpp
   test_optionproperty.cpp
   test_profile.cpp
   test_rawvolumeio.cpp
