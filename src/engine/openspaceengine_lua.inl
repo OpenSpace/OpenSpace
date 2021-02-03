@@ -294,11 +294,11 @@ int downloadFile(lua_State* L) {
 
 /**
 * \ingroup LuaScripts
-* createPixelImage():
-* Creates a one pixel image with a given color and returns the p
+* createSingeColorImage():
+* Creates a one pixel image with a given color and returns the path to the cached file
 */
-int createPixelImage(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::createPixelImage");
+int createSingeColorImage(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::createSingeColorImage");
 
     const std::string& name = ghoul::lua::value<std::string>(L, 1);
     const ghoul::Dictionary& d = ghoul::lua::value<ghoul::Dictionary>(L, 2);

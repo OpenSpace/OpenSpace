@@ -1540,8 +1540,8 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
                 "Removes a tag (second argument) from a scene graph node (first argument)"
             },
             {
-                "createPixelImage",
-                &luascriptfunctions::createPixelImage,
+                "createSingeColorImage",
+                &luascriptfunctions::createSingeColorImage,
                 {},
                 "string, vec3",
                 "Creates a 1 pixel image with a certain color in the cache folder and "
