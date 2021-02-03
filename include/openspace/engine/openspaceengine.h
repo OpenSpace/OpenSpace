@@ -139,4 +139,11 @@ private:
 
 } // namespace openspace
 
+// Lua functions - exposed for testing
+namespace openspace::luascriptfunctions {
+
+int createSingeColorImage(lua_State* L);
+
+}
+
 #endif // __OPENSPACE_CORE___OPENSPACEENGINE___H__
