@@ -1,7 +1,19 @@
+asset.require('./../habitable_zones/habitable_zone_textures')
+
 local TexturesPath = asset.syncedResource({
     Name = "Exoplanet Textures",
     Type = "HttpSynchronization",
     Identifier = "exoplanets_textures",
-    Version = 1
+    Version = 2
 })
 asset.export("TexturesPath", TexturesPath)
+
+asset.meta = {
+    Name = "Exoplanet Textures",
+    Version = "2.0",
+    Description = [[ Adds all textures that are required for the exoplanet system
+     visualizations]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+}

@@ -143,6 +143,7 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/rendering/renderengine.cpp
   ${OPENSPACE_BASE_DIR}/src/rendering/renderengine_lua.inl
   ${OPENSPACE_BASE_DIR}/src/rendering/screenspacerenderable.cpp
+  ${OPENSPACE_BASE_DIR}/src/rendering/texturecomponent.cpp
   ${OPENSPACE_BASE_DIR}/src/rendering/transferfunction.cpp
   ${OPENSPACE_BASE_DIR}/src/rendering/volumeraycaster.cpp
   ${OPENSPACE_BASE_DIR}/src/scene/asset.cpp
@@ -178,6 +179,7 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/util/httprequest.cpp
   ${OPENSPACE_BASE_DIR}/src/util/keys.cpp
   ${OPENSPACE_BASE_DIR}/src/util/openspacemodule.cpp
+  ${OPENSPACE_BASE_DIR}/src/util/planegeometry.cpp
   ${OPENSPACE_BASE_DIR}/src/util/progressbar.cpp
   ${OPENSPACE_BASE_DIR}/src/util/resourcesynchronization.cpp
   ${OPENSPACE_BASE_DIR}/src/util/screenlog.cpp
@@ -322,6 +324,7 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/dashboard.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/dashboarditem.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/framebufferrenderer.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/rendering/deferredcaster.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/deferredcasterlistener.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/deferredcastermanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/loadingscreen.h
@@ -332,11 +335,11 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/renderable.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/renderer.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/renderengine.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/rendering/volume.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/screenspacerenderable.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/rendering/deferredcaster.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/rendering/volumeraycaster.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/rendering/texturecomponent.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/transferfunction.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/rendering/volume.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/rendering/volumeraycaster.h
   ${OPENSPACE_BASE_DIR}/include/openspace/scene/asset.h
   ${OPENSPACE_BASE_DIR}/include/openspace/scene/assetlistener.h
   ${OPENSPACE_BASE_DIR}/include/openspace/scene/assetloader.h
@@ -373,6 +376,7 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/util/memorymanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/mouse.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/openspacemodule.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/util/planegeometry.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/progressbar.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/resourcesynchronization.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/screenlog.h

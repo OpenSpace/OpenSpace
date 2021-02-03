@@ -108,17 +108,6 @@ glm::dmat4 computeOrbitPlaneRotationMatrix(float i, float bigom = 180.f,
 // so that x is pointing from star to the sun.
 glm::dmat3 computeSystemRotation(glm::dvec3 starPosition);
 
-/**
- * Compute the inner and outer boundary of the habitable zone of a star, accordring to
- * formula and coefficients by Kopparapu et al. (2015) https://arxiv.org/abs/1404.5292
- *
- * \param teff The effective temperature of the star, in Kelvin
- * \param luminosity The luminosity of the star, in solar luminosities
- * \return A vec2 with the lower and upper boundary in atronomical units, if a habitable
-           zone could be computed. Otherwise an std::nullopt
- */
-glm::vec2 computeHabitableZone(float teff, float luminosity);
-
 // Create an identifier without whitespaces
 std::string createIdentifier(std::string name);
 

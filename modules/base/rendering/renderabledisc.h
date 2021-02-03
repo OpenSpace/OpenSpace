@@ -22,28 +22,27 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__
-#define __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEDISC___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLEDISC___H__
 
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/vec2property.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/texturecomponent.h>
 #include <openspace/util/planegeometry.h>
-#include <openspace/util/updatestructures.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <ghoul/opengl/ghoul_gl.h>
 
 namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl { class ProgramObject; } // namespace ghoul::opengl
+namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
 namespace documentation { struct Documentation; }
 
-class RenderableOrbitDisc : public Renderable {
+class RenderableDisc : public Renderable {
 public:
-    RenderableOrbitDisc(const ghoul::Dictionary& dictionary);
+    RenderableDisc(const ghoul::Dictionary& dictionary);
 
     void initialize() override;
     void initializeGL() override;
@@ -56,25 +55,27 @@ public:
 
     static documentation::Documentation Documentation();
 
-private:
-    // Computes the size of the plane quad using the relevant properties
-    float planeSize() const;
+protected:
+    virtual void initializeShader();
+    virtual void updateUniformLocations();
+
+    virtual float planeSize() const;
 
     properties::StringProperty _texturePath;
     properties::FloatProperty _size;
-    properties::FloatProperty _eccentricity;
-    properties::Vec2Property _offset;
+    properties::FloatProperty _width;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
-    UniformCache(modelViewProjection, offset, opacity, texture,
-        eccentricity, semiMajorAxis) _uniformCache;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 
     std::unique_ptr<PlaneGeometry> _plane;
     std::unique_ptr<TextureComponent> _texture;
+
+private:
+    UniformCache(modelViewProjection, opacity, width, texture) _uniformCache;
 
     bool _planeIsDirty = false;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLEDISC___H__

@@ -22,59 +22,26 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__
-#define __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__
+#version __CONTEXT__
 
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/vec2property.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/texturecomponent.h>
-#include <openspace/util/planegeometry.h>
-#include <openspace/util/updatestructures.h>
-#include <ghoul/opengl/uniformcache.h>
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl { class ProgramObject; } // namespace ghoul::opengl
+layout(location = 0) in vec2 in_position;
+layout(location = 1) in vec2 in_st;
 
-namespace openspace {
+out vec2 vs_st;
+out float vs_screenSpaceDepth;
 
-namespace documentation { struct Documentation; }
+uniform mat4 modelViewProjectionTransform;
 
-class RenderableOrbitDisc : public Renderable {
-public:
-    RenderableOrbitDisc(const ghoul::Dictionary& dictionary);
+void main() {
+    vec4 position = vec4(in_position.xy, 0.0, 1.0);
+    vec4 positionScreenSpace = z_normalization(modelViewProjectionTransform * position);
 
-    void initialize() override;
-    void initializeGL() override;
-    void deinitializeGL() override;
+    // Moving the origin to the center
+    vs_st = (in_st - vec2(0.5)) * 2.0;
 
-    bool isReady() const override;
+    vs_screenSpaceDepth = positionScreenSpace.w;
 
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void update(const UpdateData& data) override;
-
-    static documentation::Documentation Documentation();
-
-private:
-    // Computes the size of the plane quad using the relevant properties
-    float planeSize() const;
-
-    properties::StringProperty _texturePath;
-    properties::FloatProperty _size;
-    properties::FloatProperty _eccentricity;
-    properties::Vec2Property _offset;
-
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
-    UniformCache(modelViewProjection, offset, opacity, texture,
-        eccentricity, semiMajorAxis) _uniformCache;
-
-    std::unique_ptr<PlaneGeometry> _plane;
-    std::unique_ptr<TextureComponent> _texture;
-
-    bool _planeIsDirty = false;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__
+    gl_Position = positionScreenSpace;
+}

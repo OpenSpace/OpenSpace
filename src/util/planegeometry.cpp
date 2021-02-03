@@ -22,59 +22,87 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__
-#define __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__
-
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/vec2property.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/texturecomponent.h>
 #include <openspace/util/planegeometry.h>
-#include <openspace/util/updatestructures.h>
-#include <ghoul/opengl/uniformcache.h>
 
-namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl { class ProgramObject; } // namespace ghoul::opengl
+#include <ghoul/logging/logmanager.h>
+#include <string>
+
+namespace {
+    constexpr const char* _loggerCat = "PlaneGeometry";
+} // namespace
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+PlaneGeometry::PlaneGeometry(glm::vec2 size) : _size(std::move(size)) {}
 
-class RenderableOrbitDisc : public Renderable {
-public:
-    RenderableOrbitDisc(const ghoul::Dictionary& dictionary);
+PlaneGeometry::PlaneGeometry(float size) : PlaneGeometry(glm::vec2(size, size)) {}
 
-    void initialize() override;
-    void initializeGL() override;
-    void deinitializeGL() override;
+PlaneGeometry::~PlaneGeometry() {
+    glDeleteBuffers(1, &_vBufferId);
+    glDeleteVertexArrays(1, &_vaoId);
+}
 
-    bool isReady() const override;
+void PlaneGeometry::initialize() {
+    glGenVertexArrays(1, &_vaoId);
+    glGenBuffers(1, &_vBufferId);
+    updateGeometry();
+}
 
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void update(const UpdateData& data) override;
+void PlaneGeometry::deinitialize() {
+    glDeleteVertexArrays(1, &_vaoId);
+    _vaoId = 0;
 
-    static documentation::Documentation Documentation();
+    glDeleteBuffers(1, &_vBufferId);
+    _vBufferId = 0;
+}
 
-private:
-    // Computes the size of the plane quad using the relevant properties
-    float planeSize() const;
+void PlaneGeometry::render() {
+    glBindVertexArray(_vaoId);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+}
 
-    properties::StringProperty _texturePath;
-    properties::FloatProperty _size;
-    properties::FloatProperty _eccentricity;
-    properties::Vec2Property _offset;
+void PlaneGeometry::updateSize(const glm::vec2& size) {
+    _size = size;
+    updateGeometry();
+}
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
-    UniformCache(modelViewProjection, offset, opacity, texture,
-        eccentricity, semiMajorAxis) _uniformCache;
+void PlaneGeometry::updateSize(const float size) {
+    updateSize(glm::vec2(size));
+}
 
-    std::unique_ptr<PlaneGeometry> _plane;
-    std::unique_ptr<TextureComponent> _texture;
+void PlaneGeometry::updateGeometry() {
+    const glm::vec2 size = _size;
+    struct VertexData {
+        GLfloat x;
+        GLfloat y;
+        GLfloat s;
+        GLfloat t;
+    };
 
-    bool _planeIsDirty = false;
-};
+    VertexData vertices[] = {
+        { -size.x, -size.y, 0.f, 0.f },
+        {  size.x,  size.y, 1.f, 1.f },
+        { -size.x,  size.y, 0.f, 1.f },
+        { -size.x, -size.y, 0.f, 0.f },
+        {  size.x, -size.y, 1.f, 0.f },
+        {  size.x,  size.y, 1.f, 1.f }
+    };
+
+    glBindVertexArray(_vaoId);
+    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), nullptr);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(VertexData),
+        reinterpret_cast<void*>(offsetof(VertexData, s)) // NOLINT
+    );
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__

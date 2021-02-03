@@ -24,8 +24,8 @@
 
 #include <modules/space/spacemodule.h>
 
-#include <modules/space/rendering/renderablesatellites.h>
 #include <modules/space/rendering/renderableconstellationbounds.h>
+#include <modules/space/rendering/renderablehabitablezone.h>
 #include <modules/space/rendering/renderablerings.h>
 #include <modules/space/rendering/renderablesatellites.h>
 #include <modules/space/rendering/renderablesmallbody.h>
@@ -80,7 +80,7 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     fRenderable->registerClass<RenderableConstellationBounds>(
         "RenderableConstellationBounds"
     );
-
+    fRenderable->registerClass<RenderableHabitableZone>("RenderableHabitableZone");
     fRenderable->registerClass<RenderableRings>("RenderableRings");
     fRenderable->registerClass<RenderableSatellites>("RenderableSatellites");
     fRenderable->registerClass<RenderableSmallBody>("RenderableSmallBody");
@@ -119,6 +119,7 @@ void SpaceModule::internalDeinitializeGL() {
 std::vector<documentation::Documentation> SpaceModule::documentations() const {
     return {
         RenderableConstellationBounds::Documentation(),
+        RenderableHabitableZone::Documentation(),
         RenderableRings::Documentation(),
         RenderableSatellites::Documentation(),
         RenderableSmallBody::Documentation(),

@@ -22,59 +22,66 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__
-#define __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__
+#include "fragment.glsl"
 
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/vec2property.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/texturecomponent.h>
-#include <openspace/util/planegeometry.h>
-#include <openspace/util/updatestructures.h>
-#include <ghoul/opengl/uniformcache.h>
+in vec2 vs_st;
+in float vs_screenSpaceDepth;
 
-namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl { class ProgramObject; } // namespace ghoul::opengl
+uniform sampler1D transferFunctionTexture;
+uniform float width;
+uniform float opacity;
+uniform vec2 conservativeBounds;
+uniform bool showOptimistic;
 
-namespace openspace {
+// Remap the radius to texture coordinates in the trasfer function texture. The texture
+// is treated as a linear scale where the color represent too cold to too hot. Account
+// for the conservative bounds my mapping one third of the texture ouside each boundary.
+// All parameters \in [0,1], where 1.0 corresponds to the max radius.
+float computeTextureCoord(float radius, float innerRadius,
+                          float conservativeInner, float conservativeOuter)
+{
+    const float t1 = 1.0 / 3.0;
+    const float t2 = 2.0 / 3.0;
 
-namespace documentation { struct Documentation; }
+    if (radius < conservativeInner) {
+        float t = (radius - innerRadius) / (conservativeInner - innerRadius);
+        return mix(0.0, t1, t);
+    }
+    else if (radius > conservativeOuter) {
+        float t = (radius - conservativeOuter) / (1.0 - conservativeOuter);
+        return mix(t2, 1.0, t);
+    }
+    else {
+        float t = (radius - conservativeInner) / (conservativeOuter - conservativeInner);
+        return mix(t1, t2, t);
+    }
+}
 
-class RenderableOrbitDisc : public Renderable {
-public:
-    RenderableOrbitDisc(const ghoul::Dictionary& dictionary);
+Fragment getFragment() {
+    // The length of the texture coordinates vector is our distance from the center
+    float radius = length(vs_st);
+    float innerRadius = 1.0 - width;
 
-    void initialize() override;
-    void initializeGL() override;
-    void deinitializeGL() override;
+    // We only want to consider ring-like objects so we need to discard everything else
+    if (radius > 1.0 || radius < innerRadius) {
+        discard;
+    }
 
-    bool isReady() const override;
+    float consInner = conservativeBounds.x;
+    float consOuter = conservativeBounds.y;
+    bool outsideConservative = (radius < consInner) || (radius > consOuter);
 
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void update(const UpdateData& data) override;
+    if (!showOptimistic && outsideConservative) {
+        discard;
+    }
 
-    static documentation::Documentation Documentation();
+    float texCoord = computeTextureCoord(radius, innerRadius, consInner, consOuter);
 
-private:
-    // Computes the size of the plane quad using the relevant properties
-    float planeSize() const;
+    vec4 diffuse = texture(transferFunctionTexture, texCoord);
+    diffuse.a *= opacity;
 
-    properties::StringProperty _texturePath;
-    properties::FloatProperty _size;
-    properties::FloatProperty _eccentricity;
-    properties::Vec2Property _offset;
-
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
-    UniformCache(modelViewProjection, offset, opacity, texture,
-        eccentricity, semiMajorAxis) _uniformCache;
-
-    std::unique_ptr<PlaneGeometry> _plane;
-    std::unique_ptr<TextureComponent> _texture;
-
-    bool _planeIsDirty = false;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__
+    Fragment frag;
+    frag.color = diffuse;
+    frag.depth = vs_screenSpaceDepth;
+    return frag;
+}
