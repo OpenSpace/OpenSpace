@@ -91,7 +91,7 @@ private:
     ghoul::opengl::ProgramObject* _program = nullptr;
     UniformCache(opacity, nLightSources, lightDirectionsViewSpace, lightIntensities,
         modelViewTransform, normalTransform, projectionTransform,
-        performShading, texture, ambientIntensity, diffuseIntensity,
+        performShading, ambientIntensity, diffuseIntensity,
         specularIntensity, opacityBlending) _uniformCache;
 
     std::vector<std::unique_ptr<LightSource>> _lightSources;

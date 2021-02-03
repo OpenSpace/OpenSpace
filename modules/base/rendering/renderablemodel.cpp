@@ -40,7 +40,6 @@
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/textureunit.h>
 
 namespace {
     constexpr const char* ProgramName = "ModelProgram";
@@ -61,10 +60,10 @@ namespace {
         { "Color Adding", ColorAddingBlending }
     };
 
-    constexpr const std::array<const char*, 13> UniformNames = {
+    constexpr const std::array<const char*, 12> UniformNames = {
         "opacity", "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
         "modelViewTransform", "normalTransform", "projectionTransform",
-        "performShading", "texture1", "ambientIntensity", "diffuseIntensity",
+        "performShading", "ambientIntensity", "diffuseIntensity",
         "specularIntensity", "opacityBlending"
     };
 
@@ -552,10 +551,6 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         glDisable(GL_DEPTH_TEST);
     }
 
-    ghoul::opengl::TextureUnit unit;
-    unit.activate();
-    _program->setUniform(_uniformCache.texture, unit);
-    _geometry->setUniforms(*_program);
     _geometry->render(*_program);
     if (_disableFaceCulling) {
         glEnable(GL_CULL_FACE);
