@@ -95,7 +95,7 @@ parallel tools: {
         tool: cppCheck(pattern: 'build/cppcheck.xml')
       ) 
     }  
-    cleanWs()
+    // cleanWs()
   } // node('tools')
 },
 linux_gcc_make: {
@@ -114,9 +114,9 @@ linux_gcc_make: {
       }
       stage('linux-gcc-make/test') {
         // testHelper.runUnitTests('build/OpenSpaceTest');
-        testHelper.runUnitTests('build/codegentest')
+        // testHelper.runUnitTests('bin/codegentest')
       }
-      cleanWs()
+      // cleanWs()
     } // node('linux')
   }
 },
@@ -135,9 +135,9 @@ linux_gcc_ninja: {
       }
       stage('linux-gcc-ninja/test') {
         // testHelper.runUnitTests('build/OpenSpaceTest');
-        testHelper.runUnitTests('build/codegentest')
+        // testHelper.runUnitTests('bin/codegentest')
       }
-      cleanWs()
+      // cleanWs()
     } // node('linux')
   }
 },
@@ -157,9 +157,9 @@ linux_clang_make: {
       }
       stage('linux-clang-make/test') {
         // testHelper.runUnitTests('build/OpenSpaceTest');
-        testHelper.runUnitTests('build/codegentest')
+        // testHelper.runUnitTests('bin/codegentest')
       }
-      cleanWs()
+      // cleanWs()
     } // node('linux')
   }
 },
@@ -178,9 +178,9 @@ linux_clang_ninja: {
       }
       stage('linux-clang-ninja/test') {
         // testHelper.runUnitTests('build/OpenSpaceTest');
-        testHelper.runUnitTests('build/codegentest')
+        // testHelper.runUnitTests('bin/codegentest')
       }
-      cleanWs()
+      // cleanWs()
     } // node('linux')
   }
 },
@@ -200,7 +200,7 @@ windows_msvc: {
         // testHelper.runUnitTests('bin\\Debug\\OpenSpaceTest')
         testHelper.runUnitTests('bin\\Debug\\codegentest')
       }
-      cleanWs()
+      // cleanWs()
     } // node('windows')
   }
 },
@@ -238,7 +238,7 @@ macos_make: {
         // Currently, the unit tests are crashing on OS X
         // testHelper.runUnitTests('build/Debug/OpenSpaceTest')
       }
-      cleanWs()
+      // cleanWs()
     } // node('macos')
   }
 },
@@ -256,7 +256,7 @@ macos_xcode: {
         // Currently, the unit tests are crashing on OS X
         // testHelper.runUnitTests('build/Debug/OpenSpaceTest')
       }
-      cleanWs()
+      // cleanWs()
     } // node('macos')
   }
 }

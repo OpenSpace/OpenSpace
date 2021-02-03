@@ -472,6 +472,8 @@ target_precompile_headers(openspace-core PRIVATE
   <vector>
 )
 
+add_dependencies(openspace-core run_codegen)
+
 configure_file(
   ${OPENSPACE_CMAKE_EXT_DIR}/openspace_header.template
   ${CMAKE_BINARY_DIR}/_generated/include/openspace/openspace.h
