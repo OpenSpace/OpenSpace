@@ -36,19 +36,26 @@ TEST_CASE("CreateSingleColorImage: Create image and check return value",
 {
     ghoul::lua::LuaState L;
     ghoul::lua::push(L, "colorFile");
-    ghoul::lua::push(L, std::vector<double>({ 1.0, 0.0, 0.0 }));
+    ghoul::lua::push(L, std::vector{ 1.0, 0.0, 0.0 });
 
     int res = openspace::luascriptfunctions::createSingeColorImage(L);
 
     // One return value
     CHECK(res == 1);
     CHECK(lua_gettop(L) == 1);
+    CHECK(lua_isstring(L, 1));
+
+    std::string path = ghoul::lua::value<std::string>(L, 1);
+    CHECK_THAT(
+        path,
+        Catch::Matchers::Contains("OpenSpace\\cache\\colorFile.ppm")
+    );
 }
 
 TEST_CASE("CreateSingleColorImage: Faulty 1st input type", "[createsinglecolorimage]") {
     ghoul::lua::LuaState L;
-    ghoul::lua::push(L, std::vector<double>({ 1.0, 0.0, 0.0 }));
-    ghoul::lua::push(L, std::vector<double>({ 1.0, 0.0, 0.0 }));
+    ghoul::lua::push(L, std::vector{ 1.0, 0.0, 0.0 });
+    ghoul::lua::push(L, std::vector{ 1.0, 0.0, 0.0 });
 
     CHECK_THROWS_WITH(
         openspace::luascriptfunctions::createSingeColorImage(L),
@@ -70,7 +77,7 @@ TEST_CASE("CreateSingleColorImage: Faulty 2nd input type", "[createsinglecolorim
 TEST_CASE("CreateSingleColorImage: Invalid number of inputs", "[createsinglecolorimage]")
 {
     ghoul::lua::LuaState L;
-    ghoul::lua::push(L, std::vector<double>({ 1.0, 0.0, 0.0 }));
+    ghoul::lua::push(L, std::vector{ 1.0, 0.0, 0.0 });
 
     CHECK_THROWS_WITH(
         openspace::luascriptfunctions::createSingeColorImage(L),
@@ -83,7 +90,7 @@ TEST_CASE("CreateSingleColorImage: Faulty color value (vec4)",
 {
     ghoul::lua::LuaState L;
     ghoul::lua::push(L, "notCreatedColorFile");
-    ghoul::lua::push(L, std::vector<double>({ 1.0, 0.0, 0.0, 0.0 }));
+    ghoul::lua::push(L, std::vector{ 1.0, 0.0, 0.0, 0.0 });
 
     CHECK_THROWS_WITH(
         openspace::luascriptfunctions::createSingeColorImage(L),
@@ -98,7 +105,7 @@ TEST_CASE("CreateSingleColorImage: Faulty color value (invalid values)",
 {
     ghoul::lua::LuaState L;
     ghoul::lua::push(L, "notCreatedColorFile");
-    ghoul::lua::push(L, std::vector<double>({ 255.0, 0.0, 0.0 }));
+    ghoul::lua::push(L, std::vector{ 255.0, 0.0, 0.0 });
 
     // @TODO (emmbr 2020-02-04) This test case should be here, but as of now this case is
     // not handled. Finish it up when we have a better way of verifying that a dictionary
@@ -117,7 +124,7 @@ TEST_CASE("CreateSingleColorImage: Check if file was created",
 {
     ghoul::lua::LuaState L;
     ghoul::lua::push(L, "colorFile2");
-    ghoul::lua::push(L, std::vector<double>({ 0.0, 1.0, 0.0 }));
+    ghoul::lua::push(L, std::vector{ 0.0, 1.0, 0.0 });
 
     int res = openspace::luascriptfunctions::createSingeColorImage(L);
 
@@ -128,9 +135,8 @@ TEST_CASE("CreateSingleColorImage: Check if file was created",
 
 TEST_CASE("CreateSingleColorImage: Load created image", "[createsinglecolorimage]") {
     ghoul::lua::LuaState L;
-    const glm::dvec3 color = { 1.0, 0.0, 0.0 };
     ghoul::lua::push(L, "colorFile");
-    ghoul::lua::push(L, std::vector<double>({ color.x, color.y, color.z }));
+    ghoul::lua::push(L, std::vector{ 1.0, 0.0, 0.0 });
 
     // Loads the same file that was created in a previous test case
     int res = openspace::luascriptfunctions::createSingeColorImage(L);
