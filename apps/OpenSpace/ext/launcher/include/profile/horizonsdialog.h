@@ -58,6 +58,7 @@ private:
     QNetworkAccessManager* _manager;
 
     QLineEdit* _directoryEdit = nullptr;
+    QLineEdit* _fileEdit = nullptr;
     QLineEdit* _nameEdit = nullptr;
     QLineEdit* _targetEdit = nullptr;
     QLineEdit* _centerEdit = nullptr;

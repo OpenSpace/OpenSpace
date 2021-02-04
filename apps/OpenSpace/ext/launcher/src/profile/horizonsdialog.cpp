@@ -83,22 +83,27 @@ HorizonsDialog::HorizonsDialog(QWidget* parent)
 void HorizonsDialog::createWidgets() {
     QBoxLayout* layout = new QVBoxLayout(this);
     {
-        QGridLayout* container = new QGridLayout(this);
-        container->setColumnStretch(1, 1);
-
         QLabel* localLabel = new QLabel("Select a local Horizons file:", this);
         localLabel->setObjectName("heading");
-        container->addWidget(localLabel, 0, 0);
+        layout->addWidget(localLabel);
+    }
+    {
+        QBoxLayout* container = new QHBoxLayout(this);
+        QLabel* fileLabel = new QLabel("File:", this);
+        container->addWidget(fileLabel);
 
-        QPushButton* horizonsFileButton = new QPushButton("Browse", this);
+        _fileEdit = new QLineEdit(this);
+        container->addWidget(_fileEdit);
+
+        QPushButton* fileButton = new QPushButton("Browse", this);
         connect(
-            horizonsFileButton, &QPushButton::released,
-            [this]() {
-                openHorizonsFile();
-            }
+            fileButton,
+            &QPushButton::released,
+            this,
+            &HorizonsDialog::openHorizonsFile
         );
-        horizonsFileButton->setCursor(Qt::PointingHandCursor);
-        container->addWidget(horizonsFileButton, 0, 2);
+        fileButton->setCursor(Qt::PointingHandCursor);
+        container->addWidget(fileButton);
 
         layout->addLayout(container);
     }
@@ -130,10 +135,10 @@ void HorizonsDialog::createWidgets() {
 
         QPushButton* directoryButton = new QPushButton("Browse", this);
         connect(
-            directoryButton, &QPushButton::released,
-            [this]() {
-                openSaveDirectory();
-            }
+            directoryButton,
+            &QPushButton::released,
+            this,
+            &HorizonsDialog::openSaveDirectory
         );
         directoryButton->setCursor(Qt::PointingHandCursor);
         container->addWidget(directoryButton);
@@ -238,6 +243,7 @@ void HorizonsDialog::openHorizonsFile() {
         "",
         tr("Horiozons file (*.dat)")
     ).toStdString();
+    _fileEdit->setText(_horizonsFile.c_str());
 }
 
 void HorizonsDialog::openSaveDirectory() {
