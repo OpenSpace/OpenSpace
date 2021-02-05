@@ -209,25 +209,8 @@ void SoftwareIntegrationModule::handlePeerMessage(PeerMessage peerMessage) {
         break;
     }
     case SoftwareConnection::MessageType::ReadPointData: {
-        std::vector<float> xCoordinates = readData(message);
-        std::vector<float> yCoordinates = readData(message);
-        std::vector<float> zCoordinates = readData(message);
-
-        int size = xCoordinates.size();
-        _pointData.clear();
-
-        for (int i = 0; i < size; i++) {
-            float x = xCoordinates[i];
-            float y = yCoordinates[i];
-            float z = zCoordinates[i];
-
-            _pointData.push_back({ x, y, z });
-        }
-        break;
-    }
-    case SoftwareConnection::MessageType::AddSceneGraphNode: {
         std::string sgnMessage(message.begin(), message.end());
-        LDEBUG(fmt::format("Message recieved.. Scene Graph Node Data: {}", sgnMessage));
+        LDEBUG(fmt::format("Message recieved.. Point Data: {}", sgnMessage));
 
         // The following order of creating variables is the exact order they're received
         // in the message. If the order is not the same, the global variable
@@ -238,13 +221,43 @@ void SoftwareIntegrationModule::handlePeerMessage(PeerMessage peerMessage) {
         float size = readFloatValue(message);
         std::string guiName = readString(message);
 
-        ghoul::Dictionary pointDataDictonary;
-        for (int i = 0; i < _pointData.size(); ++i) {
-            const std::string key = fmt::format("[{}]", i + 1);
-            pointDataDictonary.setValue<glm::dvec3>(key, _pointData[i]);
+        // 9 first bytes is the length of the data
+        const int lengthOffset = _messageOffset + 9;
+        std::string length;
+        for (int i = _messageOffset; i < lengthOffset; i++) {
+            length.push_back(message[i]);
+            _messageOffset++;
         }
 
-        // Create a renderable depending on what data was received
+        const int nPoints = stoi(length);
+
+        std::vector<float> xCoordinates = readFloatData(message, nPoints);
+        std::vector<float> yCoordinates = readFloatData(message, nPoints);
+        std::vector<float> zCoordinates = readFloatData(message, nPoints);
+
+        // Do some simple checking to make sure the data was loaded correctly
+        // @TODO make this check more clever to avoid trying to read all data
+        // if something goes wrong
+        bool equalSize = (xCoordinates.size() == yCoordinates.size()) &&
+            (xCoordinates.size() == zCoordinates.size());
+
+        if (!equalSize || (nPoints != xCoordinates.size())) {
+            LERROR("Something went wrong when loading the data!");
+            return;
+        }
+
+        // TODO: if huge number of points, save to a file instead
+        ghoul::Dictionary pointDataDictonary;
+        for (int i = 0; i < xCoordinates.size(); i++) {
+            float x = xCoordinates[i];
+            float y = yCoordinates[i];
+            float z = zCoordinates[i];
+
+            const std::string key = fmt::format("[{}]", i + 1);
+            pointDataDictonary.setValue<glm::dvec3>(key, { x, y, z });
+        }
+
+        // Create a renderable
         ghoul::Dictionary renderable;
         renderable.setValue("Type", "RenderablePointsCloud"s);
         renderable.setValue("Color", static_cast<glm::dvec3>(color));
@@ -280,6 +293,7 @@ void SoftwareIntegrationModule::handlePeerMessage(PeerMessage peerMessage) {
         };
         _onceNodeExistsCallbacks.emplace(identifier, callback);
 
+        // Create renderable
         break;
     }
     case SoftwareConnection::MessageType::RemoveSceneGraphNode: {
@@ -551,44 +565,44 @@ std::string SoftwareIntegrationModule::readString(std::vector<char>& message) {
     length.push_back(message[_messageOffset]);
     _messageOffset++;
 
-    int lengthOfGuiName = stoi(length);
-    std::string guiName;
+    int lengthOfValue = stoi(length);
+    std::string value;
     int counter = 0;
-    while (counter != lengthOfGuiName) {
-        guiName.push_back(message[_messageOffset]);
+    while (counter != lengthOfValue) {
+        value.push_back(message[_messageOffset]);
         _messageOffset++;
         counter++;
     }
 
-    return guiName;
+    return value;
 }
 
-std::vector<float> SoftwareIntegrationModule::readData(std::vector<char>& message) {
-    // 9 first bytes is the length of the data
-    const int lengthOffset = _messageOffset + 9;
-
-    std::string length;
-    for (int i = _messageOffset; i < lengthOffset; i++) {
-        length.push_back(message[i]);
-        _messageOffset++;
-    }
-
-    const int lengthOfData = stoi(length);
-    int counter = 0;
-
+std::vector<float> SoftwareIntegrationModule::readFloatData(std::vector<char>& message,
+                                                            int nValues)
+{
     std::vector<float> data;
-    while (counter != lengthOfData) {
+
+    for (int counter = 0; counter < nValues; ++counter) {
         std::string value;
         while (message[_messageOffset] != ',') {
             value.push_back(message[_messageOffset]);
             _messageOffset++;
-            counter++;
         }
-        float dataValue = stof(value);
 
-        data.push_back(dataValue);
+        try {
+            float dataValue = stof(value);
+            data.push_back(dataValue);
+        }
+        catch (const std::invalid_argument& ia) {
+            LERROR(fmt::format(
+                "Error reading value {}. Invalid argument: {} ",
+                counter + 1,
+                ia.what()
+            ));
+            return std::vector<float>();
+        }
+
         _messageOffset++;
-        counter++;
     }
 
     return data;

@@ -81,15 +81,9 @@ private:
     float readFloatValue(std::vector<char>& message);
     glm::vec3 readColor(std::vector<char>& message);
     std::string readString(std::vector<char>& message);
-    std::vector<float> readData(std::vector<char>& message);
+    std::vector<float> readFloatData(std::vector<char>& message, int nValues);
 
     size_t _messageOffset = 0;
-
-    // @TODO (emmbr 2021-02-02) We should avoid storing the data like this; it is simply
-    // not feasible when adding additional message types!
-    // Maybe the MessageType::AddSceneGraphNode can be removed, and instead the SGN is
-    // always added when reading a point data set? Then we wouldn't have to store the data
-    std::vector<glm::vec3> _pointData;
 
     std::unordered_map<size_t, std::shared_ptr<Peer>> _peers;
     mutable std::mutex _peerListMutex;

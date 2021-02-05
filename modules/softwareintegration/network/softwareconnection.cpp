@@ -134,9 +134,6 @@ SoftwareConnection::Message SoftwareConnection::receiveMessage() {
     else if (type == "PDAT") {
         return Message(MessageType::ReadPointData, subjectBuffer);
     }
-    else if (type == "ASGN") {
-        return Message(MessageType::AddSceneGraphNode, subjectBuffer);
-    }
     else if (type == "RSGN") {
         return Message(MessageType::RemoveSceneGraphNode, subjectBuffer);
     }
