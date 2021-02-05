@@ -441,9 +441,9 @@ void RenderableModel::initializeGL() {
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
-    float maximumDistanceSquared = 0;
-    _geometry->initialize(maximumDistanceSquared);
-    setBoundingSphere(glm::sqrt(maximumDistanceSquared));
+    _geometry->initialize();
+    _geometry->calculateBoundingRadius();
+    setBoundingSphere(glm::sqrt(_geometry->boundingRadius()));
 }
 
 void RenderableModel::deinitializeGL() {
