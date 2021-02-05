@@ -38,8 +38,6 @@
 #include <optional>
 
 namespace {
-    constexpr const char* KeyLazyLoading = "LazyLoading";
-
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",

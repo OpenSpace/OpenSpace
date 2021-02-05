@@ -37,7 +37,6 @@
 
 namespace {
     constexpr const char* KeyType = "Type";
-    constexpr const char* KeyTag = "Tag";
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
@@ -185,7 +184,7 @@ SurfacePositionHandle Renderable::calculateSurfacePositionHandle(
 {
     const glm::dvec3 directionFromCenterToTarget = glm::normalize(targetModelSpace);
     return {
-        directionFromCenterToTarget * static_cast<double>(boundingSphere()),
+        directionFromCenterToTarget * boundingSphere(),
         directionFromCenterToTarget,
         0.0
     };

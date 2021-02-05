@@ -49,8 +49,6 @@
 #include <optional>
 
 namespace {
-    constexpr const char* _loggerCat = "base::RenderableLabels";
-
     constexpr const char* MeterUnit = "m";
     constexpr const char* KilometerUnit = "Km";
     constexpr const char* MegameterUnit = "Mm";

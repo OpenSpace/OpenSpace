@@ -208,7 +208,6 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
                 break;
             default:
                 throw ghoul::MissingCaseException();
-                break;
         }
     }
     else {

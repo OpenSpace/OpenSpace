@@ -682,7 +682,7 @@ void SceneGraphNode::computeScreenSpaceData(RenderData& newData) {
     glm::ivec2 res = global::windowDelegate->currentSubwindowSize();
 
     // Get the radius of node
-    double nodeRadius = static_cast<double>(this->boundingSphere());
+    double nodeRadius = boundingSphere();
 
     // Distance from the camera to the node
     double distFromCamToNode = glm::distance(cam.positionVec3(), worldPos) - nodeRadius;

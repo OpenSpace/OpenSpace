@@ -208,7 +208,8 @@ function (set_openspace_compile_settings target)
     "-Wold-style-cast"
     "-Woverloaded-virtual"
     "-Wno-long-long"
-    "-Wno-unknown-attributes"
+    "-Wno-ignored-attributes"
+    "-Wno-attributes"
   )
   if (OPENSPACE_WARNINGS_AS_ERRORS)
     set(GCC_WARNINGS ${CLANG_WARNINGS} "-Werror")

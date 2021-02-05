@@ -97,26 +97,6 @@ namespace {
         "The path to the color map file of the astronomical object."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ExactColorMapInfo = {
-        "ExactColorMap",
-        "Exact Color Map File",
-        "Set a 1 to 1 relationship between the color index variable and the colormap"
-        " entrered value."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo ColorRangeInfo = {
-        "ColorRange",
-        "Color Range",
-        "This value determines the colormap ranges for the color parameters of the "
-        "astronomical objects."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo PolygonSidesInfo = {
-        "PolygonSides",
-        "Polygon Sides",
-        "The number of sides for the polygon used to represent the astronomical object."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo TextColorInfo = {
         "TextColor",
         "Text Color",
@@ -134,13 +114,6 @@ namespace {
         "TextSize",
         "Text Size",
         "The text size for the astronomical object labels."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo LabelFileInfo = {
-        "LabelFile",
-        "Label File",
-        "The path to the label file that contains information about the astronomical "
-        "objects being rendered."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LabelMinSizeInfo = {
@@ -187,12 +160,6 @@ namespace {
         "Size Option Variable",
         "This value determines which paramenter (datavar) is used for scaling "
         "of the astronomical objects."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
-        "TransformationMatrix",
-        "Transformation Matrix",
-        "Transformation matrix to be applied to each astronomical object."
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
@@ -299,10 +266,11 @@ namespace {
         // [[codegen::verbatim(ColorMapInfo.description)]]
         std::optional<std::string> colorMap;
 
-        // [[codgen::verbatim(ExactColorMapInfo.description)]]
+        // Set a 1 to 1 relationship between the color index variable and the colormap
+        // entrered value
         std::optional<bool> exactColorMap;
 
-        // [[codgen::verbatim(PolygonSidesInfo.description)]]
+        // The number of sides for the polygon used to represent the astronomical object
         std::optional<int> polygonSides;
 
         // [[codgen::verbatim(DrawLabelInfo.description)]]
@@ -317,7 +285,8 @@ namespace {
         // [[codgen::verbatim(TextSizeInfo.description)]]
         std::optional<float> textSize;
 
-        // [[codgen::verbatim(LabelFileInfo.description)]]
+        // The path to the label file that contains information about the astronomical
+        // objects being rendered
         std::optional<std::string> labelFile;
 
         // [[codgen::verbatim(LabelMinSizeInfo.description)]]
@@ -332,11 +301,11 @@ namespace {
         // [[codgen::verbatim(SizeOptionInfo.description)]]
         std::optional<std::vector<std::string>> sizeOption;
 
-        // [[codgen::verbatim(ColorRangeInfo.description)]]
+        // This value determines the colormap ranges for the color parameters of the
+        // astronomical objects
         std::optional<std::vector<glm::vec2>> colorRange;
-        // new Vector2ListVerifier<double>
 
-        // [[codgen::verbatim(TransformationMatrixInfo.description)]]
+        // Transformation matrix to be applied to each astronomical object
         std::optional<glm::dmat4x4> transformationMatrix;
 
         // [[codgen::verbatim(FadeInDistancesInfo.description)]]

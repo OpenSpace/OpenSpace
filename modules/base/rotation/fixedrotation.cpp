@@ -37,13 +37,6 @@
 #include <variant>
 
 namespace {
-    constexpr const char* KeyXAxis = "XAxis";
-    constexpr const char* KeyXAxisOrthogonal = "XAxisOrthogonal";
-    constexpr const char* KeyYAxis = "YAxis";
-    constexpr const char* KeyYAxisOrthogonal = "YAxisOrthogonal";
-    constexpr const char* KeyZAxis = "ZAxis";
-    constexpr const char* KeyZAxisOrthogonal = "ZAxisOrthogonal";
-
     constexpr const openspace::properties::Property::PropertyInfo EnableInfo = {
         "Enable",
         "Enabled",

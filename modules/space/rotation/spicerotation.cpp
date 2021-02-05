@@ -32,8 +32,6 @@
 #include <optional>
 
 namespace {
-    constexpr const char* KeyKernels = "Kernels";
-
     constexpr openspace::properties::Property::PropertyInfo SourceInfo = {
         "SourceFrame",
         "Source",
