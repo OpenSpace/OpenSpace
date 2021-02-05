@@ -58,33 +58,33 @@ uniform float opacity = 1.0;
 
 Fragment getFragment() {
 
-	// Render invisible mesh with flashy procedural material
-	if(use_forced_color) {
-		Fragment frag;
+    // Render invisible mesh with flashy procedural material
+    if (use_forced_color) {
+        Fragment frag;
 
-		vec3 adjustedPos = floor(vs_positionCameraSpace.xyz * 3.0);
-		float chessboard  = adjustedPos.x + adjustedPos.y + adjustedPos.z;
-		chessboard = fract(chessboard * 0.5);
-		chessboard *= 2;
-		// Pink and complementary green in a chessboard pattern
-		frag.color.rgb = mix(vec3(1.0, 0.0, 0.8), vec3(0.0, 1.0, 0.2), chessboard);
+        vec3 adjustedPos = floor(vs_positionCameraSpace.xyz * 3.0);
+        float chessboard  = adjustedPos.x + adjustedPos.y + adjustedPos.z;
+        chessboard = fract(chessboard * 0.5);
+        chessboard *= 2;
+        // Pink and complementary green in a chessboard pattern
+        frag.color.rgb = mix(vec3(1.0, 0.0, 0.8), vec3(0.0, 1.0, 0.2), chessboard);
 
-		frag.color.a        = opacity;
-		frag.depth          = vs_screenSpaceDepth;
-		frag.gPosition      = vs_positionCameraSpace;
-		frag.gNormal        = vec4(vs_normalViewSpace, 0.0);
-		frag.disableLDR2HDR = true;
+        frag.color.a        = opacity;
+        frag.depth          = vs_screenSpaceDepth;
+        frag.gPosition      = vs_positionCameraSpace;
+        frag.gNormal        = vec4(vs_normalViewSpace, 0.0);
+        frag.disableLDR2HDR = true;
 
-		return frag;
-	}
+        return frag;
+    }
 
-	vec3 diffuseAlbedo;
-	if (has_texture_diffuse) {
-		diffuseAlbedo = texture(texture_diffuse, vs_st).rgb;
-	}
-	else {
-		diffuseAlbedo = color_diffuse;
-	}
+    vec3 diffuseAlbedo;
+    if (has_texture_diffuse) {
+        diffuseAlbedo = texture(texture_diffuse, vs_st).rgb;
+    }
+    else {
+        diffuseAlbedo = color_diffuse;
+    }
 
     if (opacity == 0.0) {
         discard;
@@ -94,32 +94,32 @@ Fragment getFragment() {
 
     if (performShading) {
 
-		vec3 specularAlbedo;
-		if (has_texture_specular) {
-			specularAlbedo = texture(texture_specular, vs_st).rgb;
-		}
-		else {
-			if(has_color_specular) {
-				specularAlbedo = color_specular;
-			}
-			else {
-				specularAlbedo = vec3(1.0);
-			}
-		}
+        vec3 specularAlbedo;
+        if (has_texture_specular) {
+            specularAlbedo = texture(texture_specular, vs_st).rgb;
+        }
+        else {
+            if (has_color_specular) {
+                specularAlbedo = color_specular;
+            }
+            else {
+                specularAlbedo = vec3(1.0);
+            }
+        }
 
         // Some of these values could be passed in as uniforms
         const vec3 lightColorAmbient = vec3(1.0);
         const vec3 lightColor = vec3(1.0);
         
         vec3 n;
-		if(has_texture_normal) {
-			vec3 normalAlbedo = texture(texture_normal, vs_st).rgb;
-			normalAlbedo = normalize(normalAlbedo * 2.0 - 1.0);
-			n = normalize(TBN * normalAlbedo);
-		}
-		else {
-			n = normalize(vs_normalViewSpace);
-		}
+        if (has_texture_normal) {
+            vec3 normalAlbedo = texture(texture_normal, vs_st).rgb;
+            normalAlbedo = normalize(normalAlbedo * 2.0 - 1.0);
+            n = normalize(TBN * normalAlbedo);
+        }
+        else {
+            n = normalize(vs_normalViewSpace);
+        }
 
         vec3 c = normalize(vs_positionCameraSpace.xyz);
 
@@ -133,9 +133,9 @@ Fragment getFragment() {
             float specularCosineFactor = dot(c,r);
             const float specularPower = 100.0;
 
-			vec3 diffuseColor =
-				diffuseIntensity * lightColor * diffuseAlbedo *
-				max(diffuseCosineFactor, 0);
+        vec3 diffuseColor =
+            diffuseIntensity * lightColor * diffuseAlbedo *
+            max(diffuseCosineFactor, 0);
 
             vec3 specularColor =
                 specularIntensity * lightColor * specularAlbedo *

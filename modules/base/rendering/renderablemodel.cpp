@@ -305,22 +305,22 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
                 ));
             }
 
-            if (geometries.size() > 0) {
+            if (!geometries.empty()) {
                 ghoul::modelgeometry::ModelGeometry combinedGeometry =
                 std::move(*geometries[0].release());
 
                  // Combine all models into one ModelGeometry
                  for (unsigned int i = 1; i < geometries.size(); ++i) {
-                    for (unsigned int m = 0; m < geometries[i]->meshes().size(); ++m) {
+                    for (const ghoul::io::ModelMesh& mesh : geometries[i]->meshes()) {
                         combinedGeometry.meshes().push_back(
-                            std::move(geometries[i]->meshes()[m])
+                            std::move(mesh)
                         );
                     }
 
-                    for (unsigned int t = 0; t < geometries[i]->textureStorage().size(); ++t) {
-                        combinedGeometry.textureStorage().push_back(
-                            std::move(geometries[i]->textureStorage()[t])
-                        );
+                    for (const ghoul::modelgeometry::ModelGeometry::TextureEntry& texture
+                        : geometries[i]->textureStorage())
+                    {
+                        combinedGeometry.textureStorage().push_back(std::move(texture));
                     }
                 }
                 _geometry = std::make_unique<ghoul::modelgeometry::ModelGeometry>(
