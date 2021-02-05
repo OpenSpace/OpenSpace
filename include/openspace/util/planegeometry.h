@@ -22,59 +22,36 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__
-#define __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__
+#ifndef __OPENSPACE_CORE___PLANEGEOMETRY___H__
+#define __OPENSPACE_CORE___PLANEGEOMETRY___H__
 
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/vec2property.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/texturecomponent.h>
-#include <openspace/util/planegeometry.h>
-#include <openspace/util/updatestructures.h>
-#include <ghoul/opengl/uniformcache.h>
-
-namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl { class ProgramObject; } // namespace ghoul::opengl
+#include <ghoul/glm.h>
+#include <ghoul/opengl/ghoul_gl.h>
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
-class RenderableOrbitDisc : public Renderable {
+class PlaneGeometry {
 public:
-    RenderableOrbitDisc(const ghoul::Dictionary& dictionary);
+    PlaneGeometry(glm::vec2 size);
+    PlaneGeometry(float size);
 
-    void initialize() override;
-    void initializeGL() override;
-    void deinitializeGL() override;
+    ~PlaneGeometry();
 
-    bool isReady() const override;
+    void initialize();
+    void deinitialize();
+    void render();
 
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void update(const UpdateData& data) override;
-
-    static documentation::Documentation Documentation();
+    void updateSize(const glm::vec2& size);
+    void updateSize(const float size);
 
 private:
-    // Computes the size of the plane quad using the relevant properties
-    float planeSize() const;
+    void updateGeometry();
 
-    properties::StringProperty _texturePath;
-    properties::FloatProperty _size;
-    properties::FloatProperty _eccentricity;
-    properties::Vec2Property _offset;
-
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
-    UniformCache(modelViewProjection, offset, opacity, texture,
-        eccentricity, semiMajorAxis) _uniformCache;
-
-    std::unique_ptr<PlaneGeometry> _plane;
-    std::unique_ptr<TextureComponent> _texture;
-
-    bool _planeIsDirty = false;
+    GLuint _vaoId = 0;
+    GLuint _vBufferId = 0;
+    glm::vec2 _size = glm::vec2(0.f);
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__
+#endif // __OPENSPACE_CORE___PLANEGEOMETRY___H__

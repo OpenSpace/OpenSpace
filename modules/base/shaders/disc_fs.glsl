@@ -22,59 +22,37 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__
-#define __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__
+#include "fragment.glsl"
 
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/vec2property.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/texturecomponent.h>
-#include <openspace/util/planegeometry.h>
-#include <openspace/util/updatestructures.h>
-#include <ghoul/opengl/uniformcache.h>
+in vec2 vs_st;
+in float vs_screenSpaceDepth;
 
-namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl { class ProgramObject; } // namespace ghoul::opengl
+uniform sampler1D colorTexture;
+uniform float width;
+uniform float opacity;
 
-namespace openspace {
+Fragment getFragment() {
+    // The length of the texture coordinates vector is our distance from the center
+    float radius = length(vs_st);
 
-namespace documentation { struct Documentation; }
+    // We only want to consider ring-like objects so we need to discard everything else
+    if (radius > 1.0) {
+        discard;
+    }
 
-class RenderableOrbitDisc : public Renderable {
-public:
-    RenderableOrbitDisc(const ghoul::Dictionary& dictionary);
+    // Remapping the texture coordinates
+    // Radius \in [0,1],
+    float inner = 1.0 - width;
+    float texCoord = (radius - inner) / (1.0 - inner);
+    if (texCoord < 0.0 || texCoord > 1.0) {
+        discard;
+    }
 
-    void initialize() override;
-    void initializeGL() override;
-    void deinitializeGL() override;
+    vec4 diffuse = texture(colorTexture, texCoord);
+    diffuse.a *= opacity;
 
-    bool isReady() const override;
-
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void update(const UpdateData& data) override;
-
-    static documentation::Documentation Documentation();
-
-private:
-    // Computes the size of the plane quad using the relevant properties
-    float planeSize() const;
-
-    properties::StringProperty _texturePath;
-    properties::FloatProperty _size;
-    properties::FloatProperty _eccentricity;
-    properties::Vec2Property _offset;
-
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
-    UniformCache(modelViewProjection, offset, opacity, texture,
-        eccentricity, semiMajorAxis) _uniformCache;
-
-    std::unique_ptr<PlaneGeometry> _plane;
-    std::unique_ptr<TextureComponent> _texture;
-
-    bool _planeIsDirty = false;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__
+    Fragment frag;
+    frag.color = diffuse;
+    frag.depth = vs_screenSpaceDepth;
+    return frag;
+}

@@ -22,59 +22,51 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__
-#define __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__
+#ifndef __OPENSPACE_CORE___TEXTURECOMPONENT___H__
+#define __OPENSPACE_CORE___TEXTURECOMPONENT___H__
 
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/vec2property.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/texturecomponent.h>
-#include <openspace/util/planegeometry.h>
-#include <openspace/util/updatestructures.h>
-#include <ghoul/opengl/uniformcache.h>
+#include <ghoul/opengl/texture.h>
 
 namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl { class ProgramObject; } // namespace ghoul::opengl
+namespace ghoul::opengl {class Texture; }
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
-class RenderableOrbitDisc : public Renderable {
+class TextureComponent {
 public:
-    RenderableOrbitDisc(const ghoul::Dictionary& dictionary);
+    using Texture = ghoul::opengl::Texture;
 
-    void initialize() override;
-    void initializeGL() override;
-    void deinitializeGL() override;
+    const Texture* texture() const;
+    Texture* texture();
 
-    bool isReady() const override;
+    void setFilterMode(Texture::FilterMode filterMode);
+    void setWrapping(Texture::WrappingMode wrapping);
+    void setShouldWatchFileForChanges(bool value);
+    void setShouldPurgeFromRAM(bool value);
 
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void update(const UpdateData& data) override;
+    void bind();
+    void uploadToGpu();
 
-    static documentation::Documentation Documentation();
+    // Loads a texture from a file on disk
+    void loadFromFile(const std::string& path);
+
+    // Function to call in a renderable's update function to make sure
+    // the texture is kept up to date
+    void update();
 
 private:
-    // Computes the size of the plane quad using the relevant properties
-    float planeSize() const;
+    std::unique_ptr<ghoul::filesystem::File> _textureFile;
+    std::unique_ptr<Texture> _texture;
 
-    properties::StringProperty _texturePath;
-    properties::FloatProperty _size;
-    properties::FloatProperty _eccentricity;
-    properties::Vec2Property _offset;
+    Texture::FilterMode _filterMode = Texture::FilterMode::LinearMipMap;
+    Texture::WrappingMode _wrappingMode = Texture::WrappingMode::Repeat;
+    bool _shouldWatchFile = true;
+    bool _shouldPurgeFromRAM = true;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
-    UniformCache(modelViewProjection, offset, opacity, texture,
-        eccentricity, semiMajorAxis) _uniformCache;
-
-    std::unique_ptr<PlaneGeometry> _plane;
-    std::unique_ptr<TextureComponent> _texture;
-
-    bool _planeIsDirty = false;
+    bool _fileIsDirty = false;
+    bool _textureIsDirty = false;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__
+#endif // __OPENSPACE_CORE___TEXTURECOMPONENT___H__

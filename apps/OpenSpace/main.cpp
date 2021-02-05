@@ -41,11 +41,11 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/boolean.h>
-//#include <ghoul/opengl/ghoul_gl.h>
-#include <GLFW/glfw3.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #ifdef WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32
 #endif
+#include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 #include <sgct/clustermanager.h>
 #include <sgct/commandline.h>
@@ -576,7 +576,7 @@ void mainPostDrawFunc() {
             glBindTexture(GL_TEXTURE_2D, texId);
             w.leftOrMain.handle->SendTexture(
                 texId,
-                GL_TEXTURE_2D,
+                GLuint(GL_TEXTURE_2D),
                 window.framebufferResolution().x,
                 window.framebufferResolution().y
             );
@@ -587,7 +587,7 @@ void mainPostDrawFunc() {
             glBindTexture(GL_TEXTURE_2D, tId);
             w.right.handle->SendTexture(
                 tId,
-                GL_TEXTURE_2D,
+                GLuint(GL_TEXTURE_2D),
                 window.framebufferResolution().x,
                 window.framebufferResolution().y
             );
@@ -1013,7 +1013,6 @@ std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTC
 }
 
 int main(int argc, char* argv[]) {
-
 #ifdef WIN32
     SetUnhandledExceptionFilter(generateMiniDump);
 #endif // WIN32

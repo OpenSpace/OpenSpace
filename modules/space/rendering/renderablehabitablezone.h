@@ -22,59 +22,54 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__
-#define __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__
+#ifndef __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEHABITABLEZONE___H__
+#define __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEHABITABLEZONE___H__
 
-#include <openspace/properties/stringproperty.h>
+#include <modules/base/rendering/renderabledisc.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec2property.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/texturecomponent.h>
-#include <openspace/util/planegeometry.h>
-#include <openspace/util/updatestructures.h>
-#include <ghoul/opengl/uniformcache.h>
-
-namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl { class ProgramObject; } // namespace ghoul::opengl
 
 namespace openspace {
 
 namespace documentation { struct Documentation; }
 
-class RenderableOrbitDisc : public Renderable {
+class RenderableHabitableZone : public RenderableDisc {
 public:
-    RenderableOrbitDisc(const ghoul::Dictionary& dictionary);
-
-    void initialize() override;
-    void initializeGL() override;
-    void deinitializeGL() override;
-
-    bool isReady() const override;
+    RenderableHabitableZone(const ghoul::Dictionary& dictionary);
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void update(const UpdateData& data) override;
 
     static documentation::Documentation Documentation();
 
 private:
-    // Computes the size of the plane quad using the relevant properties
-    float planeSize() const;
+    void initializeShader() override;
+    void updateUniformLocations() override;
+    void computeZone();
 
-    properties::StringProperty _texturePath;
-    properties::FloatProperty _size;
-    properties::FloatProperty _eccentricity;
-    properties::Vec2Property _offset;
+    /**
+     * Compute the inner and outer boundary of the habitable zone of a star, according to
+     * formula and coefficients by Kopparapu et al. (2015) https://arxiv.org/abs/1404.5292
+     *
+     * \param teff The effective temperature of the star, in Kelvin
+     * \param luminosity The luminosity of the star, in solar luminosities
+     * \return A vec4 with the boundaries in atronomical units, in the order:
+               optimistic inner, conservative inner, conservative outer, optimistic outer
+     */
+    glm::dvec4 computeKopparapuZoneBoundaries(float teff, float luminosity);
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
-    UniformCache(modelViewProjection, offset, opacity, texture,
-        eccentricity, semiMajorAxis) _uniformCache;
+    properties::FloatProperty _teff;
+    properties::FloatProperty _luminosity;
+    properties::BoolProperty _showOptimistic;
 
-    std::unique_ptr<PlaneGeometry> _plane;
-    std::unique_ptr<TextureComponent> _texture;
+    properties::Vec2Property _kopparapuTeffInterval;
 
-    bool _planeIsDirty = false;
+    glm::vec2 _conservativeBounds;
+
+    UniformCache(modelViewProjection, opacity, width, texture,
+        conservativeBounds, showOptimistic) _uniformCache;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__
+#endif // __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEHABITABLEZONE___H__
