@@ -225,16 +225,6 @@ void SoftwareIntegrationModule::handlePeerMessage(PeerMessage peerMessage) {
         }
         break;
     }
-    case SoftwareConnection::MessageType::ReadLuminosityData: {
-        _luminosityData.clear();
-        _luminosityData = readData(message);
-        break;
-    }
-    case SoftwareConnection::MessageType::ReadVelocityData: {
-        _velocityData.clear();
-        _velocityData = readData(message);
-        break;
-    }
     case SoftwareConnection::MessageType::AddSceneGraphNode: {
         std::string sgnMessage(message.begin(), message.end());
         LDEBUG(fmt::format("Message recieved.. Scene Graph Node Data: {}", sgnMessage));
@@ -261,27 +251,6 @@ void SoftwareIntegrationModule::handlePeerMessage(PeerMessage peerMessage) {
         renderable.setValue("Opacity", static_cast<double>(opacity));
         renderable.setValue("Size", static_cast<double>(size));
         renderable.setValue("Data", pointDataDictonary);
-
-        bool hasLuminosityData = !_luminosityData.empty();
-        bool hasVelocityData = !_velocityData.empty();
-
-        if (hasLuminosityData) {
-            ghoul::Dictionary luminosityDataDictonary;
-            for (int i = 0; i < _luminosityData.size(); ++i) {
-                const std::string key = fmt::format("[{}]", i + 1);
-                luminosityDataDictonary.setValue<double>(key, _luminosityData[i]);
-            }
-            renderable.setValue("Luminosity", luminosityDataDictonary);
-        }
-
-        if (hasVelocityData) {
-            ghoul::Dictionary velocityDataDictionary;
-            for (int i = 0; i < _velocityData.size(); ++i) {
-                const std::string key = fmt::format("[{}]", i + 1);
-                velocityDataDictionary.setValue<double>(key, _velocityData[i]);
-            }
-            renderable.setValue("Velocity", velocityDataDictionary);
-        }
 
         ghoul::Dictionary gui;
         gui.setValue("Name", guiName);

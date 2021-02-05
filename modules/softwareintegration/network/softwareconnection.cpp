@@ -134,12 +134,6 @@ SoftwareConnection::Message SoftwareConnection::receiveMessage() {
     else if (type == "PDAT") {
         return Message(MessageType::ReadPointData, subjectBuffer);
     }
-    else if (type == "LUMI") {
-        return Message(MessageType::ReadLuminosityData, subjectBuffer);
-    }
-    else if (type == "VELO") {
-        return Message(MessageType::ReadVelocityData, subjectBuffer);
-    }
     else if (type == "ASGN") {
         return Message(MessageType::AddSceneGraphNode, subjectBuffer);
     }
