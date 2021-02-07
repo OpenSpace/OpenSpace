@@ -387,20 +387,32 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
         static_cast<float>(dict.value<double>(TrailFadeInfo.identifier)) :
         20.f;
 
-    _upperLimit =
-        dict.hasValue<double>(UpperLimitInfo.identifier) ?
-        static_cast<unsigned int>(dict.value<double>(UpperLimitInfo.identifier)) :
-        0u;
+    if (dict.hasValue<double>(UpperLimitInfo.identifier)) {
+        _upperLimit = static_cast<unsigned int>(
+            dict.value<double>(UpperLimitInfo.identifier));
+        _propsDefinedInAssetFlag.upperLimit = true;
+    }
+    else {
+        _upperLimit = 0u;
+    }
 
-    _startRenderIdx =
-        dict.hasValue<double>(StartRenderIdxInfo.identifier) ?
-        static_cast<unsigned int>(dict.value<double>(StartRenderIdxInfo.identifier)) :
-        0u;
+    if (dict.hasValue<double>(StartRenderIdxInfo.identifier)) {
+        _startRenderIdx = static_cast<unsigned int>(
+            dict.value<double>(StartRenderIdxInfo.identifier));
+        _propsDefinedInAssetFlag.startRenderIdx = true;
+    }
+    else {
+        _startRenderIdx = 0u;
+    }
 
-    _sizeRender =
-        dict.hasValue<double>(RenderSizeInfo.identifier) ?
-        static_cast<unsigned int>(dict.value<double>(RenderSizeInfo.identifier)) :
-        0u;
+    if (dict.hasValue<double>(RenderSizeInfo.identifier)) {
+        _sizeRender = static_cast<unsigned int>(
+            dict.value<double>(RenderSizeInfo.identifier));
+        _propsDefinedInAssetFlag.sizeRender = true;
+    }
+    else {
+        _sizeRender = 0u;
+    }
 
     _appearance.lineWidth =
         dict.hasValue<double>(LineWidthInfo.identifier) ?

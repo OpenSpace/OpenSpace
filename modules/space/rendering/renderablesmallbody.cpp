@@ -183,14 +183,12 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
             _isFileReadinitialized = true;
             initializeFileReading();
         }
+        if (_sizeRender < _numObjects || _startRenderIdx > 0) {
+            lineSkipFraction = 1.0;
+        }
         else {
-            if (_sizeRender < _numObjects || _startRenderIdx > 0) {
-                lineSkipFraction = 1.0;
-            }
-            else {
-                lineSkipFraction = static_cast<float>(_upperLimit)
-                    / static_cast<float>(_numObjects);
-            }
+            lineSkipFraction = static_cast<float>(_upperLimit)
+                / static_cast<float>(_numObjects);
         }
 
         if (line.compare(expectedHeaderLine) != 0) {
@@ -273,18 +271,34 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
 
 void RenderableSmallBody::initializeFileReading() {
     _startRenderIdx.removeOnChange(_startRenderIdxCallbackHandle);
-    _sizeRender.removeOnChange(_sizeRenderCallbackHandle);
     _startRenderIdx.setMaxValue(static_cast<unsigned int>(_numObjects - 1));
+    if (_propsDefinedInAssetFlag.startRenderIdx) {
+        _propsDefinedInAssetFlag.startRenderIdx = false;
+    }
+    else {
+        _startRenderIdx = static_cast<unsigned int>(0);
+    }
+    _startRenderIdxCallbackHandle
+        = _startRenderIdx.onChange(_updateStartRenderIdxSelect);
+
+    _sizeRender.removeOnChange(_sizeRenderCallbackHandle);
     _sizeRender.setMaxValue(static_cast<unsigned int>(_numObjects));
-    _startRenderIdx = static_cast<unsigned int>(0);
-    _sizeRender = static_cast<unsigned int>(_numObjects);
-    _startRenderIdxCallbackHandle = _startRenderIdx.onChange(_updateStartRenderIdxSelect);
+    if (_propsDefinedInAssetFlag.sizeRender) {
+        _propsDefinedInAssetFlag.sizeRender = false;
+    }
+    else {
+        _sizeRender = static_cast<unsigned int>(_numObjects);
+    }
     _sizeRenderCallbackHandle = _sizeRender.onChange(_updateRenderSizeSelect);
-    // If a limit wasn't specified in dictionary, set it to # lines in file
-    // minus the header line (but temporarily disable callback to avoid 2nd call)
+
     _upperLimit.removeOnChange(_upperLimitCallbackHandle);
     _upperLimit.setMaxValue(static_cast<unsigned int>(_numObjects));
-    _upperLimit = static_cast<unsigned int>(_numObjects);
+    if (_propsDefinedInAssetFlag.upperLimit) {
+        _propsDefinedInAssetFlag.upperLimit = false;
+    }
+    else {
+        _upperLimit = static_cast<unsigned int>(_numObjects);
+    }
     _upperLimitCallbackHandle = _upperLimit.onChange(_reinitializeTrailBuffers);
 }
 
