@@ -81,6 +81,12 @@ protected:
         double epoch = 0.0;
         double period = 0.0;
     };
+    struct PropsDependentOnFileData {
+        bool startRenderIdx = false;
+        bool sizeRender = false;
+        bool upperLimit = false;
+    } _propsDefinedInAssetFlag;
+
     std::streamoff _numObjects;
     bool _isFileReadinitialized = false;
     inline static constexpr double convertAuToKm = 1.496e8;
