@@ -326,7 +326,7 @@ void RenderableSmallBody::readOrbitalParamsFromThisLine(bool firstDataLine,
 
     // Object designator string
     std::getline(file, name, ',');
-    if (_startRenderIdx > 0 && _startRenderIdx == (csvLine - 1)) {
+    if (_startRenderIdx > 0 && _startRenderIdx == (csvLine - 1) && _sizeRender == 1) {
         formatObjectName(name);
         LINFO(fmt::format("Set render block to start at object  {}", name));
     }
