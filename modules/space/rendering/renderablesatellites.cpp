@@ -162,7 +162,7 @@ void RenderableSatellites::readDataFile(const std::string& filename) {
             //     5   12-14   International Designator (Launch number of the year)
             //     6   15-17   International Designator(piece of the launch)    A
             name += " " + line.substr(2, 15);
-            if (_startRenderIdx > 0 && _startRenderIdx == i) {
+            if (_startRenderIdx > 0 && _startRenderIdx == i && _sizeRender == 1) {
                 LINFO(fmt::format(
                     "Set render block to start at object  {}",
                     name
@@ -252,15 +252,25 @@ void RenderableSatellites::readDataFile(const std::string& filename) {
 
 void RenderableSatellites::initializeFileReading() {
     _startRenderIdx.removeOnChange(_startRenderIdxCallbackHandle);
-    _sizeRender.removeOnChange(_sizeRenderCallbackHandle);
     _startRenderIdx.setMaxValue(static_cast<unsigned int>(_numObjects - 1));
-    _sizeRender.setMaxValue(static_cast<unsigned int>(_numObjects));
-    _startRenderIdx = static_cast<unsigned int>(0);
-    _sizeRender = static_cast<unsigned int>(_numObjects);
+    if (_propsDefinedInAssetFlag.startRenderIdx) {
+        _propsDefinedInAssetFlag.startRenderIdx = false;
+    }
+    else {
+        _startRenderIdx = static_cast<unsigned int>(0);
+    }
     _startRenderIdxCallbackHandle = _startRenderIdx.onChange(
         _updateStartRenderIdxSelect);
-    _sizeRenderCallbackHandle = _sizeRender.onChange(
-        _updateRenderSizeSelect);
+
+    _sizeRender.removeOnChange(_sizeRenderCallbackHandle);
+    _sizeRender.setMaxValue(static_cast<unsigned int>(_numObjects));
+    if (_propsDefinedInAssetFlag.sizeRender) {
+        _propsDefinedInAssetFlag.sizeRender = false;
+    }
+    else {
+        _sizeRender = static_cast<unsigned int>(_numObjects);
+    }
+    _sizeRenderCallbackHandle = _sizeRender.onChange(_updateRenderSizeSelect);
 }
 
 void RenderableSatellites::skipSingleEntryInFile(std::ifstream& file) {
