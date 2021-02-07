@@ -104,7 +104,7 @@ int saveSettingsToProfile(lua_State* L) {
     }
     std::string absFilename = absPath("${PROFILES}/" + saveFilePath + ".profile");
     if (!FileSys.fileExists(absFilename)) {
-        absFilename = absPath("$[USER_PROFILES}/" + saveFilePath + ".profile");
+        absFilename = absPath("${USER_PROFILES}/" + saveFilePath + ".profile");
     }
     const bool overwrite = (n == 2) ? ghoul::lua::value<bool>(L, 2) : true;
 

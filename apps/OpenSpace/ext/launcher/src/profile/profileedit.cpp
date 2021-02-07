@@ -94,8 +94,8 @@ namespace {
 } // namespace
 
 ProfileEdit::ProfileEdit(Profile& profile, const std::string& profileName, 
-                         std::string assetBasePath, 
-                         std::string userAssetBasePath, 
+                         std::string assetBasePath,
+                         std::string userAssetBasePath,
                          std::string profileBasePath,
                          const std::vector<std::string>& readOnlyProfiles,
                          QWidget* parent)
