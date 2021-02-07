@@ -94,12 +94,15 @@ namespace {
 } // namespace
 
 ProfileEdit::ProfileEdit(Profile& profile, const std::string& profileName, 
-                         std::string assetBasePath, std::string profileBasePath,
+                         std::string assetBasePath, 
+                         std::string userAssetBasePath, 
+                         std::string profileBasePath,
                          const std::vector<std::string>& readOnlyProfiles,
                          QWidget* parent)
     : QDialog(parent)
     , _profile(profile)
     , _assetBasePath(std::move(assetBasePath))
+    , _userAssetBasePath(std::move(userAssetBasePath))
     , _profileBasePath(std::move(profileBasePath))
     , _readOnlyProfiles(readOnlyProfiles)
 {
@@ -427,7 +430,7 @@ void ProfileEdit::openKeybindings() {
 
 void ProfileEdit::openAssets() {
     _errorMsg->clear();
-    AssetsDialog(_profile, _assetBasePath, this).exec();
+    AssetsDialog(_profile, _assetBasePath, _userAssetBasePath, this).exec();
     _assetsLabel->setText(labelText(_profile.assets().size(), "Assets"));
     _assetsEdit->setText(QString::fromStdString(summarizeAssets(_profile.assets())));
 }

@@ -81,16 +81,19 @@ private:
     QWidget* createCentralWidget();
     void setBackgroundImage(const std::string& syncPath);
 
-    void openProfileEditor(const std::string& profile);
+    void openProfileEditor(const std::string& profile, const bool isUserProfile);
 
     void populateProfilesList(std::string preset);
     void populateWindowConfigsList(std::string preset);
 
     const std::string _assetPath;
+    const std::string _userAssetPath;
     const std::string _configPath;
     const std::string _profilePath;
+    const std::string _userProfilePath;
     const std::vector<std::string>& _readOnlyProfiles;
     bool _shouldLaunch = false;
+    int _userAssetCount = 0;
 
     QComboBox* _profileBox = nullptr;
     QComboBox* _windowConfigBox = nullptr;

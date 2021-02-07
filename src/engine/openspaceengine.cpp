@@ -297,8 +297,14 @@ void OpenSpaceEngine::initialize() {
         std::string outputScenePath = absPath("${TEMPORARY}");
         std::string inputProfile = inputProfilePath + "/" + global::configuration->profile
             + ".profile";
+        std::string inputUserProfile = absPath("${USER_PROFILES}") + "/" +
+            global::configuration->profile + ".profile";
         std::string outputAsset = outputScenePath + "/" + global::configuration->profile
             + ".asset";
+
+        if (FileSys.fileExists(inputUserProfile)) {
+            inputProfile = inputUserProfile;
+        }
 
         if (!FileSys.fileExists(inputProfile)) {
             LERROR(fmt::format(

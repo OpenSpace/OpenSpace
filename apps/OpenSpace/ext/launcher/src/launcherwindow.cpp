@@ -37,6 +37,7 @@
 #include <filesystem>
 #include <iostream>
 #include <random>
+#include <QStandardItemModel>
 
 using namespace openspace;
 
@@ -141,8 +142,10 @@ LauncherWindow::LauncherWindow(bool profileEnabled,
                                QWidget* parent)
     : QMainWindow(parent)
     , _assetPath(absPath(globalConfig.pathTokens.at("ASSETS")) + '/')
+    , _userAssetPath(absPath(globalConfig.pathTokens.at("USER_ASSETS")) + '/')
     , _configPath(absPath(globalConfig.pathTokens.at("CONFIG")) + '/')
     , _profilePath(absPath(globalConfig.pathTokens.at("PROFILES")) + '/')
+    , _userProfilePath(absPath(globalConfig.pathTokens.at("USER_PROFILES")) + '/')
     , _readOnlyProfiles(globalConfig.readOnlyProfiles)
 {
     Q_INIT_RESOURCE(resources);
@@ -242,7 +245,7 @@ QWidget* LauncherWindow::createCentralWidget() {
     connect(
         newButton, &QPushButton::released,
         [this]() {
-            openProfileEditor("");
+            openProfileEditor("", true);
         }
     );
     newButton->setObjectName("small");
@@ -254,7 +257,9 @@ QWidget* LauncherWindow::createCentralWidget() {
         editButton, &QPushButton::released,
         [this]() {
             const std::string selection = _profileBox->currentText().toStdString();
-            openProfileEditor(selection);
+            int selectedIndex = _profileBox->currentIndex();
+            bool isUserProfile = selectedIndex <= _userAssetCount;
+            openProfileEditor(selection, isUserProfile);
         }
     );
     editButton->setObjectName("small");
@@ -310,6 +315,7 @@ void LauncherWindow::populateProfilesList(std::string preset) {
     namespace fs = std::filesystem;
     
     _profileBox->clear();
+    _userAssetCount = 0;
 
     if (!std::filesystem::exists(_profilePath)) {
         LINFOC(
@@ -318,6 +324,37 @@ void LauncherWindow::populateProfilesList(std::string preset) {
         );
         return;
     }
+
+    if (!std::filesystem::exists(_userProfilePath)) {
+        LINFOC(
+            "LauncherWindow",
+            fmt::format("Could not find user profile folder '{}'", _userProfilePath)
+        );
+        return;
+    }
+
+    _profileBox->addItem(QString::fromStdString("--- User Profiles ---"));
+    const QStandardItemModel* model = qobject_cast<const QStandardItemModel*>(_profileBox->model());
+    model->item(_userAssetCount)->setEnabled(false);
+    ++_userAssetCount;
+
+
+
+    // Add all the files with the .profile extension to the dropdown
+    for (const fs::directory_entry& p : fs::directory_iterator(_userProfilePath)) {
+        if (p.path().extension() != ".profile") {
+            continue;
+        }
+        _profileBox->addItem(QString::fromStdString(p.path().stem().string()));
+        ++_userAssetCount;
+    }
+
+    _profileBox->addItem(QString::fromStdString("--- OpenSpace Profiles ---"));
+    model = qobject_cast<const QStandardItemModel*>(_profileBox->model());
+    model->item(_userAssetCount)->setEnabled(false);
+    ++_userAssetCount;
+
+
     // Add all the files with the .profile extension to the dropdown
     for (const fs::directory_entry& p : fs::directory_iterator(_profilePath)) {
         if (p.path().extension() != ".profile") {
@@ -368,8 +405,9 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
     }
 }
 
-void LauncherWindow::openProfileEditor(const std::string& profile) {
+void LauncherWindow::openProfileEditor(const std::string& profile, const bool isUserProfile) {
     std::optional<Profile> p;
+    std::string saveProfilePath = isUserProfile ? _userProfilePath : _profilePath;
     if (profile.empty()) {
         // If the requested profile is the empty string, then we want to create a new one
 
@@ -378,17 +416,20 @@ void LauncherWindow::openProfileEditor(const std::string& profile) {
     else {
         // Otherwise, we want to load that profile
 
-        std::string fullProfilePath = _profilePath + profile + ".profile";
+        std::string fullProfilePath = saveProfilePath + profile + ".profile";
         p = loadProfileFromFile(this, fullProfilePath);
         if (!p.has_value()) {
             return;
         }
     }
 
-    ProfileEdit editor(*p, profile, _assetPath, _profilePath, _readOnlyProfiles, this);
+    ProfileEdit editor(*p, profile, _assetPath, _userAssetPath, saveProfilePath, _readOnlyProfiles, this);
     editor.exec();
     if (editor.wasSaved()) {
-        const std::string path = _profilePath + editor.specifiedFilename() + ".profile";
+        if (editor.specifiedFilename() != profile) {
+            saveProfilePath = _userProfilePath;
+        }
+        const std::string path = saveProfilePath + editor.specifiedFilename() + ".profile";
         saveProfile(this, path, *p);
         populateProfilesList(editor.specifiedFilename());
     }
