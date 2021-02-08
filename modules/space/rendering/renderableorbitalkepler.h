@@ -69,6 +69,8 @@ protected:
     std::function<void()> _reinitializeTrailBuffers;
     std::function<void()> _updateStartRenderIdxSelect;
     std::function<void()> _updateRenderSizeSelect;
+    std::function<void()> _updateRenderUpperLimitSelect;
+    std::function<void()> _updateContiguousModeSelect;
 
     struct KeplerParameters {
         double inclination = 0.0;
@@ -98,8 +100,10 @@ protected:
     properties::Property::OnChangeHandle _upperLimitCallbackHandle;
     properties::UIntProperty _startRenderIdx;
     properties::UIntProperty _sizeRender;
+    properties::BoolProperty _contiguousMode;
     properties::Property::OnChangeHandle _startRenderIdxCallbackHandle;
     properties::Property::OnChangeHandle _sizeRenderCallbackHandle;
+    properties::Property::OnChangeHandle _contiguousModeCallbackhandle;
 
 private:
     struct Vertex {

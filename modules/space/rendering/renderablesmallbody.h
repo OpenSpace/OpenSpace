@@ -55,6 +55,7 @@ private:
     /// The index array that is potentially used in the draw call. If this is empty, no
     /// element draw call is used.
     std::vector<unsigned int> _indexBufferData;
+    bool contiguousMode = true;
 };
 
 } // namespace openspace
