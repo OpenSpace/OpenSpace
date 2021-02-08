@@ -120,7 +120,25 @@ documentation::Documentation RenderableSatellites::Documentation() {
 
 RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
     : RenderableOrbitalKepler(dictionary)
-{}
+{
+    addProperty(_startRenderIdx);
+    addProperty(_sizeRender);
+
+    _updateStartRenderIdxSelect = std::function<void()>([this] {
+        if ((_numObjects - _startRenderIdx) < _sizeRender) {
+            _sizeRender = _numObjects - _startRenderIdx;
+        }
+        initializeGL();
+    });
+    _updateRenderSizeSelect = std::function<void()>([this] {
+        if (_sizeRender > (_numObjects - _startRenderIdx)) {
+            _startRenderIdx = _numObjects - _sizeRender;
+        }
+        initializeGL();
+    });
+    _startRenderIdxCallbackHandle = _startRenderIdx.onChange(_updateStartRenderIdxSelect);
+    _sizeRenderCallbackHandle = _sizeRender.onChange(_updateRenderSizeSelect);
+}
 
 void RenderableSatellites::readDataFile(const std::string& filename) {
     if (!FileSys.fileExists(filename)) {
@@ -173,7 +191,7 @@ void RenderableSatellites::readDataFile(const std::string& filename) {
             //     5   12-14   International Designator (Launch number of the year)
             //     6   15-17   International Designator(piece of the launch)    A
             name += " " + line.substr(2, 15);
-            if (_startRenderIdx > 0 && _startRenderIdx == i && _sizeRender == 1) {
+            if (_startRenderIdx == i && _sizeRender == 1) {
                 LINFO(fmt::format(
                     "Set render block to start at object  {}",
                     name

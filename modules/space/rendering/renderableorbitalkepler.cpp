@@ -158,7 +158,7 @@ namespace {
         "be ignored)."
     };
     static const openspace::properties::Property::PropertyInfo RenderSizeInfo = {
-        "RenderSizeInfo",
+        "RenderSize",
         "Size of Render Block",
         "Number of objects to render sequentially from StartRenderIdx"
     };
@@ -168,6 +168,13 @@ namespace {
         "RenderBin Mode",
         "Determines if the trails will be rendered after all other elements, including"
         "atmospheres if needed."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ContiguousModeInfo = {
+        "ContiguousMode",
+        "Contiguous Mode",
+        "If enabled, then if the starting index or render size are used to define a "
+        "subset, then a contiguous subset from the data file will be rendered."
     };
 
     // Count the number of full days since the beginning of 2000 to the beginning of
@@ -368,6 +375,7 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     , _startRenderIdx(StartRenderIdxInfo, 0, 0, 1)
     , _sizeRender(RenderSizeInfo, 1, 1, 2)
     , _path(PathInfo)
+    , _contiguousMode(ContiguousModeInfo, true)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -427,13 +435,6 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     addProperty(_path);
     addProperty(_segmentQuality);
     addProperty(_opacity);
-    addProperty(_startRenderIdx);
-    addProperty(_sizeRender);
-
-    _updateStartRenderIdxSelect = std::function<void()>([this] { initializeGL(); });
-    _updateRenderSizeSelect = std::function<void()>([this] { initializeGL(); });
-    _startRenderIdxCallbackHandle = _startRenderIdx.onChange(_updateStartRenderIdxSelect);
-    _sizeRenderCallbackHandle = _sizeRender.onChange(_updateRenderSizeSelect);
 
     if (dict.hasValue<std::string>(RenderBinModeInfo.identifier)) {
         Renderable::RenderBin cfgRenderBin = RenderBinConversion.at(

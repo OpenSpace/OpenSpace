@@ -84,6 +84,14 @@ namespace {
         "Upper limit on the number of objects for this renderable, regardless of "
         "how many objects are contained in the data file"
     };
+    static const openspace::properties::Property::PropertyInfo ContiguousModeInfo = {
+        "ContiguousMode",
+        "Contiguous Mode",
+        "If enabled, then the contiguous set of objects starting from StartRenderIdx "
+        "of size RenderSize will be rendered. If disabled, then the number of objects "
+        "defined by UpperLimit will rendered from an evenly dispersed sample of the "
+        "full length of the data file."
+    };
 
     double importAngleValue(const std::string& angle) {
         if (angle.empty()) {
@@ -149,6 +157,12 @@ documentation::Documentation RenderableSmallBody::Documentation() {
                 new DoubleVerifier,
                 Optional::Yes,
                 TrailFadeInfo.description
+            },
+            {
+                ContiguousModeInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                ContiguousModeInfo.description
             }
         }
     };
@@ -157,8 +171,38 @@ documentation::Documentation RenderableSmallBody::Documentation() {
 RenderableSmallBody::RenderableSmallBody(const ghoul::Dictionary& dictionary)
     : RenderableOrbitalKepler(dictionary)
 {
-    _upperLimitCallbackHandle = _upperLimit.onChange(_reinitializeTrailBuffers);
+    addProperty(_startRenderIdx);
+    addProperty(_sizeRender);
+    addProperty(_contiguousMode);
     addProperty(_upperLimit);
+
+    _updateStartRenderIdxSelect = std::function<void()>([this] {
+        if ((_numObjects - _startRenderIdx) < _sizeRender) {
+            _sizeRender = _numObjects - _startRenderIdx;
+        }
+        initializeGL();
+    });
+    _updateRenderSizeSelect = std::function<void()>([this] {
+        if (_sizeRender > (_numObjects - _startRenderIdx)) {
+            _startRenderIdx = _numObjects - _sizeRender;
+        }
+        initializeGL();
+    });
+    _updateRenderUpperLimitSelect = std::function<void()>([this] {
+        _startRenderIdx = 0;
+        initializeGL();
+    });
+    _updateContiguousModeSelect = std::function<void()>([this] {
+        if (!_contiguousMode) {
+            _startRenderIdx = 0;
+        }
+    });
+
+    _startRenderIdxCallbackHandle = _startRenderIdx.onChange(_updateStartRenderIdxSelect);
+    _sizeRenderCallbackHandle = _sizeRender.onChange(_updateRenderSizeSelect);
+    _upperLimitCallbackHandle = _upperLimit.onChange(_updateRenderUpperLimitSelect);
+    _contiguousModeCallbackhandle =
+        _contiguousMode.onChange(_updateContiguousModeSelect);
 }
 
 void RenderableSmallBody::readDataFile(const std::string& filename) {
@@ -200,12 +244,15 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
             _isFileReadinitialized = true;
             initializeFileReading();
         }
-        if (_sizeRender < _numObjects || _startRenderIdx > 0) {
+        unsigned int endElement;
+        if (_contiguousMode) {
             lineSkipFraction = 1.0;
+            endElement = _startRenderIdx + _sizeRender - 1;
         }
         else {
             lineSkipFraction = static_cast<float>(_upperLimit)
                 / static_cast<float>(_numObjects);
+            endElement = _numObjects - 1;
         }
 
         if (line.compare(expectedHeaderLine) != 0) {
@@ -217,7 +264,6 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
         }
 
         unsigned int sequentialLineErrors = 0;
-        unsigned int endElement = _startRenderIdx + _sizeRender - 1;
         endElement =
             (endElement >= _numObjects) ?
             static_cast<unsigned int>(_numObjects - 1) :
@@ -287,7 +333,6 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
 }
 
 void RenderableSmallBody::initializeFileReading() {
-    _startRenderIdx.removeOnChange(_startRenderIdxCallbackHandle);
     _startRenderIdx.setMaxValue(static_cast<unsigned int>(_numObjects - 1));
     if (_propsDefinedInAssetFlag.startRenderIdx) {
         _propsDefinedInAssetFlag.startRenderIdx = false;
@@ -295,10 +340,7 @@ void RenderableSmallBody::initializeFileReading() {
     else {
         _startRenderIdx = static_cast<unsigned int>(0);
     }
-    _startRenderIdxCallbackHandle
-        = _startRenderIdx.onChange(_updateStartRenderIdxSelect);
 
-    _sizeRender.removeOnChange(_sizeRenderCallbackHandle);
     _sizeRender.setMaxValue(static_cast<unsigned int>(_numObjects));
     if (_propsDefinedInAssetFlag.sizeRender) {
         _propsDefinedInAssetFlag.sizeRender = false;
@@ -306,9 +348,7 @@ void RenderableSmallBody::initializeFileReading() {
     else {
         _sizeRender = static_cast<unsigned int>(_numObjects);
     }
-    _sizeRenderCallbackHandle = _sizeRender.onChange(_updateRenderSizeSelect);
 
-    _upperLimit.removeOnChange(_upperLimitCallbackHandle);
     _upperLimit.setMaxValue(static_cast<unsigned int>(_numObjects));
     if (_propsDefinedInAssetFlag.upperLimit) {
         _propsDefinedInAssetFlag.upperLimit = false;
@@ -316,7 +356,6 @@ void RenderableSmallBody::initializeFileReading() {
     else {
         _upperLimit = static_cast<unsigned int>(_numObjects);
     }
-    _upperLimitCallbackHandle = _upperLimit.onChange(_reinitializeTrailBuffers);
 }
 
 void RenderableSmallBody::skipSingleLineInFile(std::ifstream& file) {
