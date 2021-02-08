@@ -252,9 +252,17 @@ void SoftwareIntegrationModule::handlePeerMessage(PeerMessage peerMessage) {
             float x = xCoordinates[i];
             float y = yCoordinates[i];
             float z = zCoordinates[i];
+            glm::dvec3 point{ x, y, z };
 
             const std::string key = fmt::format("[{}]", i + 1);
-            pointDataDictonary.setValue<glm::dvec3>(key, { x, y, z });
+
+            // Avoid passing nan values through dictionary
+            if (glm::any(glm::isnan(point))) {
+                point = glm::dvec3(0.0);
+                // @TODO Keep track of invalid indices?
+            }
+
+            pointDataDictonary.setValue<glm::dvec3>(key, point);
         }
 
         // Create a renderable

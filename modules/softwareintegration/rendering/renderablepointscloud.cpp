@@ -123,7 +123,8 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
 
     ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>(DataInfo.identifier);
     for (int i = 0; i < static_cast<int>(d.size()); ++i) {
-        _pointData.push_back(d.value<glm::dvec3>(std::to_string(i + 1)));
+        const std::string key = std::to_string(i + 1);
+        _pointData.push_back(d.value<glm::dvec3>(key));
     }
 
     addProperty(_opacity);
@@ -287,7 +288,7 @@ void RenderablePointsCloud::createDataSlice() {
 
 void RenderablePointsCloud::loadData() {
     if (_pointData.empty()) {
-        LERROR("No point data found");
+        LWARNING("No point data found");
         return;
     }
 
