@@ -101,7 +101,7 @@ namespace {
             return formatArrayAsLuaTable(it->get<nlohmann::json>());
         }
         if (it->is_number()) {
-            return fmt::format("{:E}", it->get<double>());
+            return fmt::format("{:.16f}", it->get<double>());
         }
         if (it->is_string()) {
             return formatLuaString(it->get<std::string>());
