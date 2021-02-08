@@ -311,16 +311,16 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
                  // Combine all models into one ModelGeometry
                  for (unsigned int i = 1; i < geometries.size(); ++i) {
-                    for (const ghoul::io::ModelMesh& mesh : geometries[i]->meshes()) {
+                    for (unsigned int m = 0; m < geometries[i]->meshes().size(); ++m) {
                         combinedGeometry.meshes().push_back(
-                            std::move(mesh)
+                            std::move(geometries[i]->meshes()[m])
                         );
                     }
 
-                    for (const ghoul::modelgeometry::ModelGeometry::TextureEntry& texture
-                        : geometries[i]->textureStorage())
-                    {
-                        combinedGeometry.textureStorage().push_back(std::move(texture));
+                    for (unsigned int t = 0; t < geometries[i]->textureStorage().size(); ++t) {
+                        combinedGeometry.textureStorage().push_back(
+                            std::move(geometries[i]->textureStorage()[t])
+                        );
                     }
                 }
                 _geometry = std::make_unique<ghoul::modelgeometry::ModelGeometry>(
