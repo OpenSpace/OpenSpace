@@ -204,22 +204,22 @@ void SoftwareIntegrationModule::handlePeerMessage(PeerMessage peerMessage) {
 
     switch (messageType) {
     case SoftwareConnection::MessageType::Connection: {
-        std::string software(message.begin(), message.end());
+        const std::string software(message.begin(), message.end());
         LINFO(fmt::format("OpenSpace has connected with {} through socket.", software));
         break;
     }
     case SoftwareConnection::MessageType::ReadPointData: {
-        std::string sgnMessage(message.begin(), message.end());
+        const std::string sgnMessage(message.begin(), message.end());
         LDEBUG(fmt::format("Message recieved.. Point Data: {}", sgnMessage));
 
         // The following order of creating variables is the exact order they're received
         // in the message. If the order is not the same, the global variable
         // 'message offset' will be wrong
-        std::string identifier = readString(message);
-        glm::vec3 color = readColor(message);
-        float opacity = readFloatValue(message);
-        float size = readFloatValue(message);
-        std::string guiName = readString(message);
+        const std::string identifier = readString(message);
+        const glm::vec3 color = readColor(message);
+        const float opacity = readFloatValue(message);
+        const float size = readFloatValue(message);
+        const std::string guiName = readString(message);
 
         // 9 first bytes is the length of the data
         const int lengthOffset = _messageOffset + 9;
@@ -231,9 +231,9 @@ void SoftwareIntegrationModule::handlePeerMessage(PeerMessage peerMessage) {
 
         const int nPoints = stoi(length);
 
-        std::vector<float> xCoordinates = readFloatData(message, nPoints);
-        std::vector<float> yCoordinates = readFloatData(message, nPoints);
-        std::vector<float> zCoordinates = readFloatData(message, nPoints);
+        const std::vector<float> xCoordinates = readFloatData(message, nPoints);
+        const std::vector<float> yCoordinates = readFloatData(message, nPoints);
+        const std::vector<float> zCoordinates = readFloatData(message, nPoints);
 
         // Do some simple checking to make sure the data was loaded correctly
         // @TODO make this check more clever to avoid trying to read all data
@@ -297,7 +297,7 @@ void SoftwareIntegrationModule::handlePeerMessage(PeerMessage peerMessage) {
         break;
     }
     case SoftwareConnection::MessageType::RemoveSceneGraphNode: {
-        std::string identifier(message.begin(), message.end());
+        const std::string identifier(message.begin(), message.end());
         LDEBUG(fmt::format("Message recieved.. Delete SGN: {}", identifier));
 
         const std::string currentAnchor =
@@ -319,10 +319,10 @@ void SoftwareIntegrationModule::handlePeerMessage(PeerMessage peerMessage) {
         break;
     }
     case SoftwareConnection::MessageType::Color: {
-        std::string colorMessage(message.begin(), message.end());
+        const std::string colorMessage(message.begin(), message.end());
         LDEBUG(fmt::format("Message recieved.. New Color: {}", colorMessage));
-        std::string identifier = readString(message);
-        glm::vec3 color = readColor(message);
+        const std::string identifier = readString(message);
+        const glm::vec3 color = readColor(message);
 
         // Get color of renderable
         const Renderable* myRenderable = renderable(identifier);
@@ -338,10 +338,10 @@ void SoftwareIntegrationModule::handlePeerMessage(PeerMessage peerMessage) {
         break;
     }
     case SoftwareConnection::MessageType::Opacity: {
-        std::string opacityMessage(message.begin(), message.end());
+        const std::string opacityMessage(message.begin(), message.end());
         LDEBUG(fmt::format("Message recieved.. New Opacity: {}", opacityMessage));
-        std::string identifier = readString(message);
-        float opacity = readFloatValue(message);
+        const std::string identifier = readString(message);
+        const float opacity = readFloatValue(message);
 
         // Get opacity of renderable
         const Renderable* myRenderable = renderable(identifier);
@@ -357,9 +357,9 @@ void SoftwareIntegrationModule::handlePeerMessage(PeerMessage peerMessage) {
         break;
     }
     case SoftwareConnection::MessageType::Size: {
-        std::string sizeMessage(message.begin(), message.end());
+        const std::string sizeMessage(message.begin(), message.end());
         LDEBUG(fmt::format("Message recieved.. New Size: {}", sizeMessage));
-        std::string identifier = readString(message);
+        const std::string identifier = readString(message);
         float size = readFloatValue(message);
 
         // Get size of renderable
@@ -376,9 +376,9 @@ void SoftwareIntegrationModule::handlePeerMessage(PeerMessage peerMessage) {
         break;
     }
     case SoftwareConnection::MessageType::Visibility: {
-        std::string visibilityMessage(message.begin(), message.end());
+        const std::string visibilityMessage(message.begin(), message.end());
         LDEBUG(fmt::format("Message recieved.. New Visibility: {}", visibilityMessage));
-        std::string identifier = readString(message);
+        const std::string identifier = readString(message);
         std::string visibility;
         visibility.push_back(message[_messageOffset]);
         bool boolValue = (visibility == "F") ? false : true;
@@ -403,8 +403,9 @@ void SoftwareIntegrationModule::handlePeerMessage(PeerMessage peerMessage) {
     }
 }
 
-std::string formatMessage(const std::string& messageType, const std::string& identifier,
-                          const std::string& value)
+std::string formatUpdateMessage(const std::string& messageType,
+                                const std::string& identifier,
+                                const std::string& value)
 {
     const int lengthOfIdentifier = identifier.length();
     const int lengthOfValue = value.length();
@@ -416,7 +417,7 @@ std::string formatMessage(const std::string& messageType, const std::string& ide
     // Format length of subject to always be 4 digits
     std::ostringstream os;
     os << std::setfill('0') << std::setw(4) << subject.length();
-    std::string lengthOfSubject = os.str();
+    const std::string lengthOfSubject = os.str();
 
     return messageType + lengthOfSubject + subject;
 }
@@ -443,8 +444,8 @@ void SoftwareIntegrationModule::subscribeToRenderableUpdates(std::string identif
 
     // Update color of renderable
     auto updateColor = [colorProperty, identifier, peer]() {
-        std::string propertyValue = colorProperty->getStringValue();
-        std::string message = formatMessage("UPCO", identifier, propertyValue);
+        const std::string value = colorProperty->getStringValue();
+        const std::string message = formatUpdateMessage("UPCO", identifier, value);
         peer->connection.sendMessage(message);
     };
     if (colorProperty) {
@@ -453,8 +454,8 @@ void SoftwareIntegrationModule::subscribeToRenderableUpdates(std::string identif
 
     // Update opacity of renderable
     auto updateOpacity = [opacityProperty, identifier, peer]() {
-        std::string propertyValue = opacityProperty->getStringValue();
-        std::string message = formatMessage("UPOP", identifier, propertyValue);
+        const std::string value = opacityProperty->getStringValue();
+        const std::string message = formatUpdateMessage("UPOP", identifier, value);
         peer->connection.sendMessage(message);
     };
     if (opacityProperty) {
@@ -463,8 +464,8 @@ void SoftwareIntegrationModule::subscribeToRenderableUpdates(std::string identif
 
     // Update size of renderable
     auto updateSize = [sizeProperty, identifier, peer]() {
-        std::string propertyValue = sizeProperty->getStringValue();
-        std::string message = formatMessage("UPSI", identifier, propertyValue);
+        const std::string value = sizeProperty->getStringValue();
+        const std::string message = formatUpdateMessage("UPSI", identifier, value);
         peer->connection.sendMessage(message);
     };
     if (sizeProperty) {
@@ -473,24 +474,24 @@ void SoftwareIntegrationModule::subscribeToRenderableUpdates(std::string identif
 
     // Toggle visibility of renderable
     auto toggleVisibility = [visibilityProperty, identifier, peer]() {
-        std::string lengthOfIdentifier = std::to_string(identifier.length());
-        std::string messageType = "TOVI";
+        const std::string lengthOfIdentifier = std::to_string(identifier.length());
+        const std::string messageType = "TOVI";
 
         bool isVisible = visibilityProperty->getStringValue() == "true";
 
-        std::string visibilityFlag = isVisible ? "T" : "F";
-        std::string subject = lengthOfIdentifier + identifier + visibilityFlag;
+        const std::string visibilityFlag = isVisible ? "T" : "F";
+        const std::string subject = lengthOfIdentifier + identifier + visibilityFlag;
         // We don't need a lengthOfValue here because it will always be 1 character
 
        // @TODO (emmbr 2021-02-02) make sure this message has the same format as the
-       // others, so the 'formatMessage(..)' function can be used here
+       // others, so the 'formatUpdateMessage(..)' function can be used here
 
         // Format length of subject to always be 4 digits
         std::ostringstream os;
         os << std::setfill('0') << std::setw(4) << subject.length();
-        std::string lengthOfSubject = os.str();
+        const std::string lengthOfSubject = os.str();
 
-        std::string message = messageType + lengthOfSubject + subject;
+        const std::string message = messageType + lengthOfSubject + subject;
         peer->connection.sendMessage(message);
     };
     if (visibilityProperty) {
@@ -612,7 +613,9 @@ size_t SoftwareIntegrationModule::nConnections() const {
     return _nConnections;
 }
 
-std::vector<documentation::Documentation> SoftwareIntegrationModule::documentations() const {
+std::vector<documentation::Documentation>
+SoftwareIntegrationModule::documentations() const
+{
     return {
         RenderablePointsCloud::Documentation(),
     };
