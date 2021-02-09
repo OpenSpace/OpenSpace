@@ -31,7 +31,6 @@
 #include <glm/gtx/transform.hpp>
 
 namespace {
-
     template <typename T, typename Func>
     T solveIteration(const Func& function, T x0, const T& err = 0.0, int maxIter = 100) {
         T x2 = x0;
@@ -105,6 +104,33 @@ namespace {
         "Orbit period",
         "Specifies the orbital period (in seconds)."
     };
+
+    struct [[codegen::Dictionary(KeplerTranslation)]] Parameters {
+        // [[codegen::verbatim(EccentricityInfo.description)]]
+        double eccentricity [[codegen::inrange(0.0, 1.0)]];
+
+        // [[codegen::verbatim(SemiMajorAxisInfo.description)]]
+        double semiMajorAxis;
+
+        // [[codegen::verbatim(InclinationInfo.description)]]
+        double inclination [[codegen::inrange(0.0, 360.0)]];
+
+        // [[codegen::verbatim(AscendingNodeInfo.description)]]
+        double ascendingNode [[codegen::inrange(0.0, 360.0)]];
+
+        // [[codegen::verbatim(ArgumentOfPeriapsisInfo.description)]]
+        double argumentOfPeriapsis [[codegen::inrange(0.0, 360.0)]];
+
+        // [[codegen::verbatim(MeanAnomalyAtEpochInfo.description)]]
+        double meanAnomaly [[codegen::inrange(0.0, 360.0)]];
+
+        // [[codegen::verbatim(EpochInfo.description)]]
+        std::string epoch;
+
+        // [[codegen::verbatim(PeriodInfo.description)]]
+        double period [[codegen::greater(0.0)]];
+    };
+#include "keplertranslation_codegen.cpp"
 } // namespace
 
 namespace openspace {
@@ -115,66 +141,9 @@ KeplerTranslation::RangeError::RangeError(std::string off)
 {}
 
 documentation::Documentation KeplerTranslation::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "Kepler Translation",
-        "space_transform_kepler",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("KeplerTranslation"),
-                Optional::No
-            },
-            {
-                EccentricityInfo.identifier,
-                new DoubleInRangeVerifier(0.0, 1.0),
-                Optional::No,
-                EccentricityInfo.description
-            },
-            {
-                SemiMajorAxisInfo.identifier,
-                new DoubleVerifier,
-                Optional::No,
-                SemiMajorAxisInfo.description
-            },
-            {
-                InclinationInfo.identifier,
-                new DoubleInRangeVerifier(0.0, 360.0),
-                Optional::No,
-                InclinationInfo.description
-            },
-            {
-                AscendingNodeInfo.identifier,
-                new DoubleInRangeVerifier(0.0, 360.0),
-                Optional::No,
-                AscendingNodeInfo.description
-            },
-            {
-                ArgumentOfPeriapsisInfo.identifier,
-                new DoubleInRangeVerifier(0.0, 360.0),
-                Optional::No,
-                ArgumentOfPeriapsisInfo.description
-            },
-            {
-                MeanAnomalyAtEpochInfo.identifier,
-                new DoubleInRangeVerifier(0.0, 360.0),
-                Optional::No,
-                MeanAnomalyAtEpochInfo.description
-            },
-            {
-                EpochInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                EpochInfo.description
-            },
-            {
-                PeriodInfo.identifier,
-                new DoubleGreaterVerifier(0.0),
-                Optional::No,
-                PeriodInfo.description
-            },
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "space_transform_kepler";
+    return doc;
 }
 
 KeplerTranslation::KeplerTranslation()
@@ -218,21 +187,17 @@ KeplerTranslation::KeplerTranslation()
 KeplerTranslation::KeplerTranslation(const ghoul::Dictionary& dictionary)
     : KeplerTranslation()
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "KeplerTranslation"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     setKeplerElements(
-        dictionary.value<double>(EccentricityInfo.identifier),
-        dictionary.value<double>(SemiMajorAxisInfo.identifier),
-        dictionary.value<double>(InclinationInfo.identifier),
-        dictionary.value<double>(AscendingNodeInfo.identifier),
-        dictionary.value<double>(ArgumentOfPeriapsisInfo.identifier),
-        dictionary.value<double>(MeanAnomalyAtEpochInfo.identifier),
-        dictionary.value<double>(PeriodInfo.identifier),
-        dictionary.value<std::string>(EpochInfo.identifier)
+        p.eccentricity,
+        p.semiMajorAxis,
+        p.inclination,
+        p.ascendingNode,
+        p.argumentOfPeriapsis,
+        p.meanAnomaly,
+        p.period,
+        p.epoch
     );
 }
 

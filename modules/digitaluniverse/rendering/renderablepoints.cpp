@@ -44,6 +44,7 @@
 #include <locale>
 #include <cstdint>
 #include <string>
+#include <optional>
 
 namespace {
     constexpr const char* _loggerCat = "RenderablePoints";
@@ -52,17 +53,6 @@ namespace {
         "modelViewProjectionTransform", "color", "sides", "alphaValue", "scaleFactor",
         "spriteTexture", "hasColorMap"
     };
-
-    constexpr const char* KeyFile = "File";
-    constexpr const char* keyColor = "Color";
-    constexpr const char* keyUnit = "Unit";
-    constexpr const char* MeterUnit = "m";
-    constexpr const char* KilometerUnit = "Km";
-    constexpr const char* ParsecUnit = "pc";
-    constexpr const char* KiloparsecUnit = "Kpc";
-    constexpr const char* MegaparsecUnit = "Mpc";
-    constexpr const char* GigaparsecUnit = "Gpc";
-    constexpr const char* GigalightyearUnit = "Gly";
 
     constexpr int8_t CurrentCacheVersion = 1;
     constexpr double PARSEC = 0.308567756E17;
@@ -91,57 +81,45 @@ namespace {
         "Color Map File",
         "The path to the color map file of the astronomical onject."
     };
+
+    struct [[codegen::Dictionary(RenderablePoints)]] Parameters {
+        // The path to the SPECK file that contains information about the astronomical
+        // object being rendered
+        std::string file;
+
+        // Astronomical Object Color (r,g,b)
+        glm::vec3 color;
+
+        enum class Unit {
+            Meter [[codegen::key("m")]],
+            Kilometer [[codegen::key("Km")]],
+            Parsec [[codegen::key("pc")]],
+            Kiloparsec [[codegen::key("Kpc")]],
+            Megaparsec [[codegen::key("Mpc")]],
+            Gigaparsec [[codegen::key("Gpc")]],
+            Gigalightyears [[codegen::key("Gly")]]
+        };
+        std::optional<Unit> unit;
+
+        // [[codegen::verbatim(SpriteTextureInfo.description)]]
+        std::optional<std::string> texture;
+
+        // [[codegen::verbatim(ScaleFactorInfo.description)]]
+        std::optional<float> scaleFactor;
+
+        // [[codegen::verbatim(ColorMapInfo.description)]]
+        std::optional<std::string> colorMap;
+    };
+#include "renderablepoints_codegen.cpp"
 }  // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderablePoints::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderablePoints",
-        "digitaluniverse_renderablepoints",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("RenderablePoints"),
-                Optional::No
-            },
-            {
-                KeyFile,
-                new StringVerifier,
-                Optional::No,
-                "The path to the SPECK file that contains information about the "
-                "astronomical object being rendered."
-            },
-            {
-                keyColor,
-                new Vector3Verifier<double>,
-                Optional::No,
-                "Astronomical Object Color (r,g,b)."
-            },
-            {
-                SpriteTextureInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                SpriteTextureInfo.description
-            },
-            {
-                ScaleFactorInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                ScaleFactorInfo.description
-            },
-            {
-                ColorMapInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                ColorMapInfo.description
-            },
-
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "digitaluniverse_renderablepoints";
+    return doc;
 }
-
 
 RenderablePoints::RenderablePoints(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
@@ -150,59 +128,52 @@ RenderablePoints::RenderablePoints(const ghoul::Dictionary& dictionary)
         ColorInfo,
         glm::vec3(1.f, 0.4f, 0.2f),
         glm::vec3(0.f, 0.f, 0.f),
-        glm::vec3(1.0f, 1.0f, 1.0f)
+        glm::vec3(1.f, 1.f, 1.f)
     )
     , _spriteTexturePath(SpriteTextureInfo)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderablePoints"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
 
-    _speckFile = absPath(dictionary.value<std::string>(KeyFile));
+    _speckFile = absPath(p.file);
 
-    if (dictionary.hasKey(keyUnit)) {
-        const std::string& unit = dictionary.value<std::string>(keyUnit);
-        if (unit == MeterUnit) {
-            _unit = Meter;
-        }
-        else if (unit == KilometerUnit) {
-            _unit = Kilometer;
-        }
-        else if (unit == ParsecUnit) {
-            _unit = Parsec;
-        }
-        else if (unit == KiloparsecUnit) {
-            _unit = Kiloparsec;
-        }
-        else if (unit == MegaparsecUnit) {
-            _unit = Megaparsec;
-        }
-        else if (unit == GigaparsecUnit) {
-            _unit = Gigaparsec;
-        }
-        else if (unit == GigalightyearUnit) {
-            _unit = GigalightYears;
-        }
-        else {
-            LWARNING("No unit given for RenderablePoints. Using meters as units.");
-            _unit = Meter;
+    if (p.unit.has_value()) {
+        switch (*p.unit) {
+            case Parameters::Unit::Meter:
+                _unit = Meter;
+                break;
+            case Parameters::Unit::Kilometer:
+                _unit = Kilometer;
+                break;
+            case Parameters::Unit::Parsec:
+                _unit = Parsec;
+                break;
+            case Parameters::Unit::Kiloparsec:
+                _unit = Kiloparsec;
+                break;
+            case Parameters::Unit::Megaparsec:
+                _unit = Megaparsec;
+                break;
+            case Parameters::Unit::Gigaparsec:
+                _unit = Gigaparsec;
+                break;
+            case Parameters::Unit::Gigalightyears:
+                _unit = GigalightYears;
+                break;
         }
     }
-
-    if (dictionary.hasKey(keyColor)) {
-        _pointColor = dictionary.value<glm::dvec3>(keyColor);
+    else {
+        LWARNING("No unit given for RenderablePoints. Using meters as units.");
+        _unit = Meter;
     }
+
+    _pointColor = p.color;
     addProperty(_pointColor);
 
-    if (dictionary.hasKey(SpriteTextureInfo.identifier)) {
-        _spriteTexturePath = absPath(dictionary.value<std::string>(
-            SpriteTextureInfo.identifier
-        ));
+    if (p.texture.has_value()) {
+        _spriteTexturePath = absPath(*p.texture);
         _spriteTextureFile = std::make_unique<ghoul::filesystem::File>(
             _spriteTexturePath
         );
@@ -216,18 +187,12 @@ RenderablePoints::RenderablePoints(const ghoul::Dictionary& dictionary)
         _hasSpriteTexture = true;
     }
 
-    if (dictionary.hasKey(ColorMapInfo.identifier)) {
-        _colorMapFile = absPath(dictionary.value<std::string>(
-            ColorMapInfo.identifier
-        ));
+    if (p.colorMap.has_value()) {
+        _colorMapFile = absPath(*p.colorMap);
         _hasColorMapFile = true;
     }
 
-    if (dictionary.hasKey(ScaleFactorInfo.identifier)) {
-        _scaleFactor = static_cast<float>(
-            dictionary.value<double>(ScaleFactorInfo.identifier)
-        );
-    }
+    _scaleFactor = p.scaleFactor.value_or(_scaleFactor);
     addProperty(_scaleFactor);
 }
 

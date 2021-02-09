@@ -30,7 +30,6 @@
 #include <openspace/util/time.h>
 
 namespace {
-    constexpr const char* KeyType = "Type";
     constexpr const char* KeyKeyframes = "Keyframes";
 } // namespace
 
@@ -42,11 +41,6 @@ documentation::Documentation TimelineRotation::Documentation() {
         "Timeline Rotation",
         "base_transform_rotation_keyframe",
         {
-            {
-                KeyType,
-                new StringEqualVerifier("TimelineRotation"),
-                Optional::No
-            },
             {
                 KeyKeyframes,
                 new TableVerifier({

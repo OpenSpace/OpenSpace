@@ -146,12 +146,6 @@ documentation::Documentation RenderablePlanetProjection::Documentation() {
         "newhorizons_renderable_planetprojection",
         {
             {
-                "Type",
-                new StringEqualVerifier("RenderablePlanetProjection"),
-                Optional::No,
-                ""
-            },
-            {
                 KeyGeometry,
                 new ReferencingVerifier("space_geometry_planet"),
                 Optional::No,

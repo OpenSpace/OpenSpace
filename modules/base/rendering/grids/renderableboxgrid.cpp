@@ -55,36 +55,26 @@ namespace {
         "Grid Size",
         "This value species the size of each dimensions of the box"
     };
+
+    struct [[codegen::Dictionary(RenderableBoxGrid)]] Parameters {
+        // [[codegen::verbatim(ColorInfo.description)]]
+        std::optional<glm::vec3> color;
+
+        // [[codegen::verbatim(LineWidthInfo.description)]]
+        std::optional<float> lineWidth;
+
+        // [[codegen::verbatim(SizeInfo.description)]]
+        std::optional<glm::vec3> size;
+    };
+#include "renderableboxgrid_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableBoxGrid::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderableBoxGrid",
-        "base_renderable_boxgrid",
-        {
-            {
-                ColorInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                ColorInfo.description
-            },
-            {
-                LineWidthInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                LineWidthInfo.description
-            },
-            {
-                SizeInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                SizeInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_renderable_boxgrid";
+    return doc;
 }
 
 RenderableBoxGrid::RenderableBoxGrid(const ghoul::Dictionary& dictionary)
@@ -93,31 +83,19 @@ RenderableBoxGrid::RenderableBoxGrid(const ghoul::Dictionary& dictionary)
     , _lineWidth(LineWidthInfo, 0.5f, 0.f, 20.f)
     , _size(SizeInfo, glm::vec3(1.f), glm::vec3(1.f), glm::vec3(100.f))
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableBoxGrid"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
 
-    if (dictionary.hasKey(ColorInfo.identifier)) {
-        _color = dictionary.value<glm::dvec3>(ColorInfo.identifier);
-    }
+    _color = p.color.value_or(_color);
     _color.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_color);
 
-    if (dictionary.hasKey(LineWidthInfo.identifier)) {
-        _lineWidth = static_cast<float>(
-            dictionary.value<double>(LineWidthInfo.identifier)
-        );
-    }
+    _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
 
-    if (dictionary.hasKey(SizeInfo.identifier)) {
-        _size = dictionary.value<glm::dvec3>(SizeInfo.identifier);
-    }
+    _size = p.size.value_or(_size);
     _size.onChange([&]() { _gridIsDirty = true; });
     addProperty(_size);
 }

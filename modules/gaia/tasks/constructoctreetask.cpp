@@ -549,11 +549,6 @@ documentation::Documentation ConstructOctreeTask::Documentation() {
         "gaiamission_constructoctreefrombin",
         {
             {
-                "Type",
-                new StringEqualVerifier("ConstructOctreeTask"),
-                Optional::No
-            },
-            {
                 KeyInFileOrFolderPath,
                 new StringVerifier,
                 Optional::No,

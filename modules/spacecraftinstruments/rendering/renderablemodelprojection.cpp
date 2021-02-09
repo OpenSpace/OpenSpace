@@ -82,11 +82,6 @@ documentation::Documentation RenderableModelProjection::Documentation() {
         "newhorizons_renderable_modelprojection",
         {
             {
-                "Type",
-                new StringEqualVerifier("RenderableModelProjection"),
-                Optional::No
-            },
-            {
                 keyGeometry,
                 new ReferencingVerifier("base_geometry_model"),
                 Optional::No,

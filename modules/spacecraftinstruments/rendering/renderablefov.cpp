@@ -152,6 +152,48 @@ namespace {
             return 0.5 * bisect(p1, half, testFunction, half);
         }
     }
+    // Needs support for std::map first for the frameConversions
+//    struct [[codegen::Dictionary(RenderableFov)]] Parameters {
+//        // The SPICE name of the source body for which the field of view should be
+//        // rendered
+//        std::string body;
+//
+//        // The SPICE name of the source body's frame in which the field of view should be
+//        // rendered
+//        std::string frame;
+//
+//        struct Instrument {
+//            // The SPICE name of the instrument that is rendered
+//            std::string name;
+//
+//            // The aberration correction that is used for this field of view. The default
+//            // is 'NONE'
+//            std::optional<std::string> aberration [[codegen::inlist("NONE",
+//                "LT", "LT+S", "CN", "CN+S", "XLT", "XLT+S", "XCN", "XCN+S")]];
+//        };
+//        // A table describing the instrument whose field of view should be rendered
+//        Instrument instrument;
+//
+//        // A list of potential targets (specified as SPICE names) that the field of view
+//        // should be tested against
+//        std::vector<std::string> potentialTargets;
+//
+//        // A list of frame conversions that should be registered with the SpiceManager
+//        std::optional<std::vector<std::string>> frameConversions;
+//
+//        // [[codegen::verbatim(LineWidthInfo.description)]]
+//        std::optional<double> lineWidth;
+//
+//        // [[codegen::verbatim(StandoffDistanceInfo.description)]]
+//        std::optional<double> standOffDistance;
+//
+//        // If this value is set to 'true' the field-of-views bounds values will be
+//        // simplified on load. Bound vectors will be removed if they are the strict linear
+//        // interpolation between the two neighboring vectors. This value is disabled on
+//        // default
+//        std::optional<bool> simplifyBounds;
+//    };
+//#include "renderablefov_codegen.cpp"
 } // namespace
 
 namespace openspace {

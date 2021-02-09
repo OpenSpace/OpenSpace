@@ -57,12 +57,6 @@ documentation::Documentation KameleonVolumeToRawTask::documentation() {
         "kameleon_metadata_to_json_task",
         {
             {
-                "Type",
-                new StringEqualVerifier("KameleonVolumeToRawTask"),
-                Optional::No,
-                "The type of this task",
-            },
-            {
                 KeyInput,
                 new StringAnnotationVerifier("A file path to a cdf file"),
                 Optional::No,

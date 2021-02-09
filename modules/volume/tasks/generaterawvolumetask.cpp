@@ -183,12 +183,6 @@ documentation::Documentation GenerateRawVolumeTask::documentation() {
         "generate_raw_volume_task",
         {
             {
-                "Type",
-                new StringEqualVerifier("GenerateRawVolumeTask"),
-                Optional::No,
-                "The type of this task",
-            },
-            {
                 KeyValueFunction,
                 new StringAnnotationVerifier("A lua expression that returns a function "
                 "taking three numbers as arguments (x, y, z) and returning a number."),

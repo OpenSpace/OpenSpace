@@ -33,6 +33,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/programobject.h>
 #include <fstream>
+#include <optional>
 #include "SpiceUsr.h"
 
 namespace {
@@ -74,51 +75,33 @@ namespace {
         "Constellation Selection",
         "The constellations that are selected are displayed on the celestial sphere."
     };
+
+    struct [[codegen::Dictionary(RenderableConstellationBounds)]] Parameters {
+        // [[codegen::verbatim(VertexInfo.description)]]
+        std::string file;
+
+        // [[codegen::verbatim(ConstellationInfo.description)]]
+        std::optional<std::string> constellationFile;
+
+        // [[codegen::verbatim(ColorInfo.description)]]
+        std::optional<glm::vec3> color;
+
+        // [[codegen::verbatim(LineWidthInfo.description)]]
+        std::optional<float> lineWidth;
+
+        // [[codegen::verbatim(SelectionInfo.description)]]
+        std::optional<std::vector<std::string>> constellationSelection;
+    };
+#include "renderableconstellationbounds_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableConstellationBounds::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderableConstellationBounds",
-        "space_renderable_constellationbounds",
-        {
-            {
-                VertexInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                VertexInfo.description
-            },
-            {
-                ConstellationInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                "Specifies the file that contains the mapping between constellation "
-                "abbreviations and full name of the constellation. If the file is "
-                "omitted, the abbreviations are used as the full names."
-            },
-            {
-                ColorInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                ColorInfo.description
-            },
-            {
-                LineWidthInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                LineWidthInfo.description
-            },
-            {
-                SelectionInfo.identifier,
-                new StringListVerifier,
-                Optional::Yes,
-                SelectionInfo.description
-            }
-        }
-    };
-}
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "space_renderable_constellationbounds";
+    return doc;
+} // namespace
 
 
 RenderableConstellationBounds::RenderableConstellationBounds(
@@ -130,53 +113,33 @@ RenderableConstellationBounds::RenderableConstellationBounds(
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 32.f)
     , _constellationSelection(SelectionInfo)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableConstellationBounds"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _vertexFilename.onChange([&](){ loadVertexFile(); });
     addProperty(_vertexFilename);
-    _vertexFilename = dictionary.value<std::string>(VertexInfo.identifier);
+    _vertexFilename = p.file;
 
     _constellationFilename.onChange([&](){ loadConstellationFile(); });
+    _constellationFilename = p.constellationFile.value_or(_constellationFilename);
     addProperty(_constellationFilename);
-    if (dictionary.hasKey(ConstellationInfo.identifier)) {
-        _constellationFilename = dictionary.value<std::string>(
-            ConstellationInfo.identifier
-        );
-    }
 
     _color.setViewOption(properties::Property::ViewOptions::Color);
+    _color = p.color.value_or(_color);
     addProperty(_color);
-    if (dictionary.hasKey(ColorInfo.identifier)) {
-        _color = glm::vec3(dictionary.value<glm::dvec3>(ColorInfo.identifier));
-    }
 
+    _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
-    if (dictionary.hasKey(LineWidthInfo.identifier)) {
-        _lineWidth = static_cast<float>(
-            dictionary.value<double>(LineWidthInfo.identifier)
-        );
-    }
 
     fillSelectionProperty();
     _constellationSelection.onChange([this]() { selectionPropertyHasChanged(); });
     addProperty(_constellationSelection);
 
-    if (dictionary.hasKey(SelectionInfo.identifier)) {
-        const ghoul::Dictionary& selection = dictionary.value<ghoul::Dictionary>(
-            SelectionInfo.identifier
-        );
-
+    if (p.constellationSelection.has_value()) {
         std::vector<properties::SelectionProperty::Option> options =
             _constellationSelection.options();
+
         std::vector<int> selectedIndices;
-
-        for (size_t i = 1; i <= selection.size(); ++i) {
-            const std::string& s = selection.value<std::string>(std::to_string(i));
-
+        for (const std::string& s : *p.constellationSelection) {
             const auto it = std::find_if(
                 options.begin(),
                 options.end(),

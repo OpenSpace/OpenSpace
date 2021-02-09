@@ -33,6 +33,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/programobject.h>
+#include <optional>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
@@ -43,30 +44,23 @@ namespace {
         "and displayed. The size of the image will also automatically set the default "
         "size of this plane."
     };
+
+    struct [[codegen::Dictionary(ScreenSpaceImageOnline)]] Parameters {
+        // Specifies the GUI name of the ScreenspaceImage
+        std::optional<std::string> name;
+
+        // [[codegen::verbatim(TextureInfo.description)]]
+        std::optional<std::string> url [[codegen::key("URL")]];
+    };
+#include "screenspaceimageonline_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation ScreenSpaceImageOnline::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "ScreenSpace Online Image",
-        "base_screenspace_image_online",
-        {
-            {
-                KeyName,
-                new StringVerifier,
-                Optional::Yes,
-                "Specifies the GUI name of the ScreenspaceImage"
-            },
-            {
-                TextureInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                TextureInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_screenspace_image_online";
+    return doc;
 }
 
 ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictionary)
@@ -74,11 +68,7 @@ ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictiona
     , _textureIsDirty(false)
     , _texturePath(TextureInfo)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "ScreenSpaceImageOnline"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     std::string identifier;
     if (dictionary.hasValue<std::string>(KeyIdentifier)) {
@@ -92,11 +82,7 @@ ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictiona
 
     _texturePath.onChange([this]() { _textureIsDirty = true; });
     addProperty(_texturePath);
-
-    std::string texturePath;
-    if (dictionary.hasKey(TextureInfo.identifier)) {
-        _texturePath = dictionary.value<std::string>(TextureInfo.identifier);
-    }
+    _texturePath = p.url.value_or(_texturePath);
 }
 
 ScreenSpaceImageOnline::~ScreenSpaceImageOnline() {} // NOLINT

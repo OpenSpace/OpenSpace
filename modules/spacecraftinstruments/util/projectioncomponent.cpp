@@ -42,36 +42,12 @@
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
+#include <optional>
+#include <variant>
 
 namespace {
-    constexpr const char* keyPotentialTargets = "PotentialTargets";
-
-    constexpr const char* keyInstrument = "Instrument.Name";
-    constexpr const char* keyInstrumentFovy = "Instrument.Fovy";
-    constexpr const char* keyInstrumentAspect = "Instrument.Aspect";
-
     constexpr const char* keyTranslation = "DataInputTranslation";
     constexpr const char* keyTimesTranslation = "TimesDataInputTranslation";
-
-    constexpr const char* keyProjObserver = "Observer";
-    constexpr const char* keyProjTarget = "Target";
-    constexpr const char* keyProjAberration = "Aberration";
-
-    constexpr const char* keySequenceDir = "Sequence";
-    constexpr const char* keyTimesSequenceDir = "TimesSequence";
-    constexpr const char* keySequenceType = "SequenceType";
-
-    constexpr const char* keyNeedsTextureMapDilation = "TextureMap";
-    constexpr const char* keyNeedsShadowing = "ShadowMap";
-    constexpr const char* keyTextureMapAspectRatio = "AspectRatio";
-
-    constexpr const char* sequenceTypeImage = "image-sequence";
-    constexpr const char* sequenceTypePlaybook = "playbook";
-    constexpr const char* sequenceTypeHybrid = "hybrid";
-    constexpr const char* sequenceTypeInstrumentTimes = "instrument-times";
-    constexpr const char* sequenceTypeImageAndInstrumentTimes =
-        "image-and-instrument-times";
-
     constexpr const char* placeholderFile = "${DATA}/placeholder.png";
 
     constexpr const char* _loggerCat = "ProjectionComponent";
@@ -113,115 +89,84 @@ namespace {
         "Triggering this property applies a new size to the underlying projection "
         "texture. The old texture is resized and interpolated to fit the new size."
     };
+
+    struct [[codegen::Dictionary(ProjectionComponent)]] Parameters {
+        // This value specifies one or more directories from which images are being used
+        // for image projections. If the sequence type is set to 'playbook', this value is
+        // ignored
+        std::optional<std::variant<std::string, std::vector<std::string>>> sequence;
+
+        struct Instrument {
+            // The instrument that is used to perform the projections
+            std::string name [[codegen::annotation("A SPICE name of an instrument")]];
+
+            // The field of view in degrees along the y axis
+            float fovy;
+
+            // The aspect ratio of the instrument in relation between x and y axis
+            float aspect;
+        };
+        Instrument instrument;
+
+        enum class Type {
+            ImageSequence [[codegen::key("image-sequence")]],
+            Playbook [[codegen::key("playbook")]],
+            Hybrid [[codegen::key("hybrid")]],
+            InstrumentTimes [[codegen::key("instrument-times")]],
+            ImageAndInstrumentTimes [[codegen::key("image-and-instrument-times")]]
+        };
+        // This value determines which type of sequencer is used for generating image 
+        // schedules. The 'playbook' is using a custom format designed by the New Horizons 
+        // team, the 'image-sequence' uses lbl files from a directory, and the 'hybrid'
+        // uses both methods
+        std::optional<Type> sequenceType;
+
+        std::optional<std::string> eventFile;
+
+        // The observer that is doing the projection. This has to be a valid SPICE name
+        // or SPICE integer
+        std::string observer
+            [[codegen::annotation("A SPICE name of the observing object")]];
+
+        std::optional<std::string> timesSequence;
+
+        // The observed object that is projected on. This has to be a valid SPICE name or
+        // SPICE integer
+        std::string target [[codegen::annotation("A SPICE name of the observed object")]];
+
+        // The aberration correction that is supposed to be used for the projection. The 
+        // values for the correction correspond to the SPICE definition as described in
+        // ftp://naif.jpl.nasa.gov/pub/naif/toolkit_docs/IDL/cspice/spkezr_c.html
+        std::string aberration [[codegen::inlist("NONE", "LT", "LT+S", "CN", "CN+S",
+            "XLT", "XLT+S", "XCN", "XCN+S")]];
+
+        // The list of potential targets that are involved with the image projection
+        std::optional<std::vector<std::string>> potentialTargets;
+
+        // Determines whether the object requires a self-shadowing algorithm. This is 
+        // necessary if the object is concave and might cast a shadow on itself during 
+        // presentation. The default value is 'false'
+        std::optional<bool> textureMap;
+
+        // Determines whether the object requires a self-shadowing algorithm. This is 
+        // necessary if the object is concave and might cast a shadow on itself during 
+        // presentation. The default value is 'false'
+        std::optional<bool> shadowMap;
+
+        // Sets the desired aspect ratio of the projected texture. This might be necessary 
+        // as planets usually have 2x1 aspect ratios, whereas this does not hold for 
+        // non-planet objects (comets, asteroids, etc). The default value is '1.0'
+        std::optional<float> aspectRatio;
+    };
+#include "projectioncomponent_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation ProjectionComponent::Documentation() {
-    using namespace documentation;
-    return {
-        "Projection Component",
-        "newhorizons_projectioncomponent",
-        {
-            {
-                keySequenceDir,
-                new OrVerifier({ new StringVerifier, new StringListVerifier }),
-                Optional::Yes,
-                "This value specifies one or more directories from which images are "
-                "being used for image projections. If the sequence type is set to "
-                "'playbook', this value is ignored"
-            },
-            {
-                keyInstrument,
-                new StringAnnotationVerifier("A SPICE name of an instrument"),
-                Optional::No,
-                "The instrument that is used to perform the projections"
-            },
-            {
-                keyInstrumentFovy,
-                new DoubleVerifier,
-                Optional::No,
-                "The field of view in degrees along the y axis"
-            },
-            {
-                keyInstrumentAspect,
-                new DoubleVerifier,
-                Optional::No,
-                "The aspect ratio of the instrument in relation between x and y axis"
-            },
-            {
-                keySequenceType,
-                new StringInListVerifier(
-                    { sequenceTypeImage, sequenceTypePlaybook, sequenceTypeHybrid,
-                      sequenceTypeInstrumentTimes, sequenceTypeImageAndInstrumentTimes }
-                ),
-                Optional::Yes,
-                "This value determines which type of sequencer is used for generating "
-                "image schedules. The 'playbook' is using a custom format designed by "
-                "the New Horizons team, the 'image-sequence' uses lbl files from a "
-                "directory, and the 'hybrid' uses both methods."
-            },
-            {
-                keyProjObserver,
-                new StringAnnotationVerifier("A SPICE name of the observing object"),
-                Optional::No,
-                "The observer that is doing the projection. This has to be a valid SPICE "
-                "name or SPICE integer."
-            },
-            {
-                keyProjTarget,
-                new StringAnnotationVerifier("A SPICE name of the observed object"),
-                Optional::No,
-                "The observed object that is projected on. This has to be a valid SPICE "
-                "name or SPICE integer."
-            },
-            {
-                keyProjAberration,
-                new StringInListVerifier({
-                    // from SpiceManager::AberrationCorrection::AberrationCorrection
-                    "NONE", "LT", "LT+S", "CN", "CN+S", "XLT", "XLT+S", "XCN", "XCN+S"
-                }),
-                Optional::No,
-                "The aberration correction that is supposed to be used for the "
-                "projection. The values for the correction correspond to the SPICE "
-                "definition as described in "
-                "ftp://naif.jpl.nasa.gov/pub/naif/toolkit_docs/IDL/cspice/spkezr_c.html"
-            },
-            {
-                keyPotentialTargets,
-                new StringListVerifier,
-                Optional::Yes,
-                "The list of potential targets that are involved with the image "
-                "projection"
-            },
-            {
-                keyNeedsTextureMapDilation,
-                new BoolVerifier,
-                Optional::Yes,
-                "Determines whether a dilation step of the texture map has to be "
-                "performed after each projection. This is necessary if the texture of "
-                "the projected object is a texture map where the borders are not "
-                "touching. The default value is 'false'."
-            },
-            {
-                keyNeedsShadowing,
-                new BoolVerifier,
-                Optional::Yes,
-                "Determines whether the object requires a self-shadowing algorithm. This "
-                "is necessary if the object is concave and might cast a shadow on itself "
-                "during presentation. The default value is 'false'."
-            },
-            {
-                keyTextureMapAspectRatio,
-                new DoubleVerifier,
-                Optional::Yes,
-                "Sets the desired aspect ratio of the projected texture. This might be "
-                "necessary as planets usually have 2x1 aspect ratios, whereas this does "
-                "not hold for non-planet objects (comets, asteroids, etc). The default "
-                "value is '1.0'."
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "newhorizons_projectioncomponent";
+    return doc;
 }
 
 ProjectionComponent::ProjectionComponent()
@@ -244,162 +189,143 @@ ProjectionComponent::ProjectionComponent()
 void ProjectionComponent::initialize(const std::string& identifier,
                                      const ghoul::Dictionary& dictionary)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "ProjectionComponent"
-    );
-    _instrumentID = dictionary.value<std::string>(keyInstrument);
-    _projectorID = dictionary.value<std::string>(keyProjObserver);
-    _projecteeID = dictionary.value<std::string>(keyProjTarget);
-    _fovy = static_cast<float>(dictionary.value<double>(keyInstrumentFovy));
-    _aspectRatio = static_cast<float>(dictionary.value<double>(keyInstrumentAspect));
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _aberration = SpiceManager::AberrationCorrection(
-        dictionary.value<std::string>(keyProjAberration)
-    );
+    _instrumentID = p.instrument.name;
+    _projectorID = p.observer;
+    _projecteeID = p.target;
+    _fovy = p.instrument.fovy;
+    _aspectRatio = p.instrument.aspect;
 
-    if (dictionary.hasValue<ghoul::Dictionary>(keyPotentialTargets)) {
-        const ghoul::Dictionary& potentialTargets = dictionary.value<ghoul::Dictionary>(
-            keyPotentialTargets
-        );
+    _aberration = SpiceManager::AberrationCorrection(p.aberration);
 
-        _potentialTargets.reserve(potentialTargets.size());
-        for (size_t i = 1; i <= potentialTargets.size(); ++i) {
-            _potentialTargets.emplace_back(
-                potentialTargets.value<std::string>(std::to_string(i))
-            );
-        }
-    }
-
-    if (dictionary.hasValue<bool>(keyNeedsTextureMapDilation)) {
-        _dilation.isEnabled = dictionary.value<bool>(keyNeedsTextureMapDilation);
-    }
-
-    if (dictionary.hasValue<bool>(keyNeedsShadowing)) {
-        _shadowing.isEnabled = dictionary.value<bool>(keyNeedsShadowing);
-    }
-
-    if (dictionary.hasValue<double>(keyTextureMapAspectRatio)) {
-        _projectionTextureAspectRatio =
-            static_cast<float>(dictionary.value<double>(keyTextureMapAspectRatio));
-    }
+    _potentialTargets = p.potentialTargets.value_or(_potentialTargets);
+    _dilation.isEnabled = p.textureMap.value_or(_dilation.isEnabled);
+    _shadowing.isEnabled = p.shadowMap.value_or(_shadowing.isEnabled);
+    _projectionTextureAspectRatio = p.aspectRatio.value_or(_projectionTextureAspectRatio);
 
 
-    if (!dictionary.hasKey(keySequenceDir)) {
+    if (!p.sequence.has_value()) {
+        // we are done here, the rest only applies if we do have a sequence
         return;
     }
+
+    std::variant<std::string, std::vector<std::string>> sequence = *p.sequence;
 
     std::vector<std::string> sequenceSources;
-    // Due to the documentation check above it must either be one or the other
-    if (dictionary.hasValue<std::string>(keySequenceDir)) {
-        sequenceSources.push_back(absPath(dictionary.value<std::string>(keySequenceDir)));
+    if (std::holds_alternative<std::string>(sequence)) {
+        sequenceSources.push_back(absPath(std::get<std::string>(sequence)));
     }
     else {
-        ghoul::Dictionary sourcesDict = dictionary.value<ghoul::Dictionary>(
-            keySequenceDir
+        ghoul_assert(
+            std::holds_alternative<std::vector<std::string>>(sequence),
+            "Something is wrong with the generated documentation"
         );
-        for (int i = 1; i <= static_cast<int>(sourcesDict.size()); ++i) {
-            sequenceSources.push_back(
-                absPath(sourcesDict.value<std::string>(std::to_string(i)))
-            );
+        sequenceSources = std::get<std::vector<std::string>>(sequence);
+        for (std::string& s : sequenceSources) {
+            s = absPath(s);
         }
     }
 
-    const std::string& sequenceType = dictionary.value<std::string>(keySequenceType);
-    // Important: client must define translation-list in mod file IFF playbook
-    if (!dictionary.hasKey(keyTranslation)) {
-        LWARNING("No playbook translation provided, spice calls must match playbook!");
-        return;
+
+    if (!p.sequenceType.has_value()) {
+        throw ghoul::RuntimeError("Missing SequenceType");
     }
 
     ghoul::Dictionary translationDictionary;
     if (dictionary.hasValue<ghoul::Dictionary>(keyTranslation)) {
         translationDictionary = dictionary.value<ghoul::Dictionary>(keyTranslation);
     }
+    else {
+        LWARNING("No playbook translation provided, spice calls must match playbook!");
+        return;
+    }
 
     std::vector<std::unique_ptr<SequenceParser>> parsers;
     for (std::string& sequenceSource : sequenceSources) {
-        if (sequenceType == sequenceTypePlaybook) {
-            parsers.push_back(
-                std::make_unique<HongKangParser>(
-                    identifier,
-                    std::move(sequenceSource),
-                    _projectorID,
-                    translationDictionary,
-                    _potentialTargets
-                )
-            );
-        }
-        else if (sequenceType == sequenceTypeImage) {
-            parsers.push_back(
-                std::make_unique<LabelParser>(
-                    identifier,
-                    std::move(sequenceSource),
-                    translationDictionary
-                )
-            );
-        }
-        else if (sequenceType == sequenceTypeHybrid) {
-            //first read labels
-            parsers.push_back(
-                std::make_unique<LabelParser>(
-                    identifier,
-                    std::move(sequenceSource),
-                    translationDictionary
-                )
-            );
-
-            if (dictionary.hasKey("EventFile")) {
-                std::string eventFile = dictionary.value<std::string>("EventFile");
+        switch (*p.sequenceType) {
+            case Parameters::Type::Playbook:
                 parsers.push_back(
                     std::make_unique<HongKangParser>(
                         identifier,
-                        absPath(eventFile),
+                        std::move(sequenceSource),
                         _projectorID,
                         translationDictionary,
                         _potentialTargets
                     )
                 );
-            }
-            else {
-                LWARNING("No eventfile has been provided, please check modfiles");
-            }
-        }
-        else if (sequenceType == sequenceTypeInstrumentTimes) {
-            parsers.push_back(
-                std::make_unique<InstrumentTimesParser>(
-                    identifier,
-                    std::move(sequenceSource),
-                    translationDictionary
-                )
-            );
-        }
-        else if (sequenceType == sequenceTypeImageAndInstrumentTimes) {
-            parsers.push_back(
-                std::make_unique<LabelParser>(
-                    identifier,
-                    std::move(sequenceSource),
-                    translationDictionary
+                break;
+            case Parameters::Type::ImageSequence:
+                parsers.push_back(
+                    std::make_unique<LabelParser>(
+                        identifier,
+                        std::move(sequenceSource),
+                        translationDictionary
                     )
-            );
+                );
+                break;
+            case Parameters::Type::Hybrid:
+                // first read labels
+                parsers.push_back(
+                    std::make_unique<LabelParser>(
+                        identifier,
+                        std::move(sequenceSource),
+                        translationDictionary
+                    )
+                );
 
-            std::string timesSequenceSource = absPath(
-                dictionary.value<std::string>(keyTimesSequenceDir)
-            );
-            ghoul::Dictionary timesTranslationDictionary;
-            if (dictionary.hasValue<ghoul::Dictionary>(keyTimesTranslation)) {
-                timesTranslationDictionary =
-                    dictionary.value<ghoul::Dictionary>(keyTimesTranslation);
+                if (p.eventFile.has_value()) {
+                    parsers.push_back(
+                        std::make_unique<HongKangParser>(
+                            identifier,
+                            absPath(*p.eventFile),
+                            _projectorID,
+                            translationDictionary,
+                            _potentialTargets
+                        )
+                    );
+                }
+                else {
+                    LWARNING("No eventfile has been provided, please check modfiles");
+                }
+                break;
+            case Parameters::Type::InstrumentTimes:
+                parsers.push_back(
+                    std::make_unique<InstrumentTimesParser>(
+                        identifier,
+                        std::move(sequenceSource),
+                        translationDictionary
+                    )
+                );
+                break;
+            case Parameters::Type::ImageAndInstrumentTimes:
+            {
+                parsers.push_back(
+                    std::make_unique<LabelParser>(
+                        identifier,
+                        std::move(sequenceSource),
+                        translationDictionary
+                    )
+                );
+
+                if (!p.timesSequence.has_value()) {
+                    throw ghoul::RuntimeError("Could not find required TimesSequence");
+                }
+                ghoul::Dictionary timesTranslationDictionary;
+                if (dictionary.hasValue<ghoul::Dictionary>(keyTimesTranslation)) {
+                    timesTranslationDictionary =
+                        dictionary.value<ghoul::Dictionary>(keyTimesTranslation);
+                }
+
+                parsers.push_back(
+                    std::make_unique<InstrumentTimesParser>(
+                        identifier,
+                        absPath(*p.timesSequence),
+                        timesTranslationDictionary
+                    )
+                );
+                break;
             }
-
-            parsers.push_back(
-                std::make_unique<InstrumentTimesParser>(
-                    identifier,
-                    std::move(timesSequenceSource),
-                    timesTranslationDictionary
-                )
-            );
         }
     }
 

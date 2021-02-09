@@ -82,11 +82,6 @@ documentation::Documentation RenderableOrbitDisc::Documentation() {
         "exoplanets_renderable_orbit_disc",
         {
             {
-                "Type",
-                new StringEqualVerifier("RenderableOrbitDisc"),
-                Optional::No
-            },
-            {
                 TextureInfo.identifier,
                 new StringVerifier,
                 Optional::No,
