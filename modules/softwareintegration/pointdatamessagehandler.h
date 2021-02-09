@@ -22,32 +22,39 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
-#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
+#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___POINTDATAMESSAGEHANDLER___H__
+#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___POINTDATAMESSAGEHANDLER___H__
 
-#include <openspace/util/openspacemodule.h>
+#include <openspace/properties/propertyowner.h>
 
-#include <modules/softwareintegration/network/softwareintegrationserver.h>
-#include <openspace/documentation/documentation.h>
+#include <modules/softwareintegration/network/softwareconnection.h>
 
 namespace openspace {
 
-class SoftwareIntegrationModule : public OpenSpaceModule {
+class PointDataMessageHandler {
 public:
-    constexpr static const char* Name = "SoftwareIntegration";
+    void handlePointDataMessage(const std::vector<char>& message,
+        SoftwareConnection& connection);
+    void handleColorMessage(const std::vector<char>& message);
+    void handleOpacityMessage(const std::vector<char>& message);
+    void handlePointSizeMessage(const std::vector<char>& message);
+    void handleVisiblityMessage(const std::vector<char>& message);
 
-    SoftwareIntegrationModule();
-
-    std::vector<documentation::Documentation> documentations() const override;
+    void preSyncUpdate();
 
 private:
+    void subscribeToRenderableUpdates(const std::string& identifier,
+        SoftwareConnection& connection);
 
-    void internalInitialize(const ghoul::Dictionary&) override;
-    void internalDeinitialize() override;
+    float readFloatValue(const std::vector<char>& message, int& offset);
+    glm::vec3 readColor(const std::vector<char>& message, int& offset);
+    std::string readString(const std::vector<char>& message, int& offset);
+    std::vector<float> readFloatData(const std::vector<char>& message,
+        int nValues, int& offset);
 
-    SoftwareIntegrationServer _server;
+    std::unordered_map<std::string, std::function<void()>> _onceNodeExistsCallbacks;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
+#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___POINTDATAMESSAGEHANDLER___H__

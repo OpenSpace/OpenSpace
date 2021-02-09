@@ -22,32 +22,65 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
-#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
+#ifndef __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONSERVER___H__
+#define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONSERVER___H__
 
-#include <openspace/util/openspacemodule.h>
-
-#include <modules/softwareintegration/network/softwareintegrationserver.h>
-#include <openspace/documentation/documentation.h>
+#include <modules/softwareintegration/network/softwareconnection.h>
+#include <modules/softwareintegration/pointdatamessagehandler.h>
+#include <openspace/util/concurrentqueue.h>
+#include <ghoul/io/socket/tcpsocketserver.h>
 
 namespace openspace {
 
-class SoftwareIntegrationModule : public OpenSpaceModule {
+class SoftwareIntegrationServer {
 public:
-    constexpr static const char* Name = "SoftwareIntegration";
+    struct Peer {
+        size_t id;
+        std::string name;
+        std::thread thread;
 
-    SoftwareIntegrationModule();
+        SoftwareConnection connection;
+        SoftwareConnection::Status status;
+    };
 
-    std::vector<documentation::Documentation> documentations() const override;
+    struct PeerMessage {
+        size_t peerId;
+        SoftwareConnection::Message message;
+    };
+
+    void start(int port);
+    void stop();
+    void update();
+
+    size_t nConnections() const;
 
 private:
+    bool isConnected(const Peer& peer) const;
 
-    void internalInitialize(const ghoul::Dictionary&) override;
-    void internalDeinitialize() override;
+    std::shared_ptr<Peer> peer(size_t id);
 
-    SoftwareIntegrationServer _server;
+    void disconnect(Peer& peer);
+    void eventLoop();
+    void handleNewPeers();
+    void handlePeer(size_t id);
+    void handlePeerMessage(PeerMessage peerMessage);
+
+    std::unordered_map<size_t, std::shared_ptr<Peer>> _peers;
+    mutable std::mutex _peerListMutex;
+
+    ghoul::io::TcpSocketServer _socketServer;
+    size_t _nextConnectionId = 1;
+    std::atomic_bool _shouldStop = false;
+    std::atomic_size_t _nConnections = 0;
+    std::thread _eventLoopThread;
+    std::thread _serverThread;
+
+    ConcurrentQueue<PeerMessage> _incomingMessages;
+
+    // Message handlers
+    PointDataMessageHandler _pointDataMessageHandler;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONMODULE___H__
+#endif // __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SOFTWAREINTEGRATIONSERVER___H__

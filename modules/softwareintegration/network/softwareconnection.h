@@ -64,6 +64,7 @@ public:
     SoftwareConnection() = default;
     SoftwareConnection(std::unique_ptr<ghoul::io::TcpSocket> socket);
 
+    bool isConnected() const;
     bool isConnectedOrConnecting() const;
     bool sendMessage(std::string message);
     void disconnect();

@@ -47,6 +47,10 @@ SoftwareConnection::SoftwareConnection(std::unique_ptr<ghoul::io::TcpSocket> soc
     : _socket(std::move(socket))
 {}
 
+bool SoftwareConnection::isConnected() const {
+    return _socket->isConnected();
+}
+
 bool SoftwareConnection::isConnectedOrConnecting() const {
     return _socket->isConnected() || _socket->isConnecting();
 }
@@ -163,4 +167,3 @@ SoftwareConnection::Message SoftwareConnection::receiveMessage() {
 }
 
 } // namespace openspace
-
