@@ -17,10 +17,11 @@ if filename == nil or filename == "" or
   do return "" end
 end
 
+-- Lua doesn't enjoy \ that are used by Windows extensively. So we convert all \ into /
 filename = filename:gsub("\\", "/")
 basename = basename:gsub("\\", "/")
-
 basename_without_extension = basename:sub(0, #basename - extension:len())
+
 if     extension == ".jpg" or extension == ".jpeg" or extension == ".tif" or
        extension == ".png" then
   identifier = basename_without_extension:gsub(" ", "_")
