@@ -28,7 +28,7 @@ local streamnodesDirectory = asset.syncedResource({
     Name = "Bastille Day Stream nodes",
     Type = "HttpSynchronization",
     Identifier = "bastille_day_streamnodes",
-    Version = 4
+    Version = 10
 })
 local streamnodesBinaries = asset.syncedResource({
     Name = "Bastille day Stream nodes binaries",
@@ -36,8 +36,6 @@ local streamnodesBinaries = asset.syncedResource({
     Identifier = "bastille_day_streamnodes_binaries",
     Version = 1
 })
-
-
 
 local sunRadius = 6.957E8
 
@@ -51,18 +49,18 @@ local Streamnodes = {
     Renderable = {
         Type = "RenderableStreamNodes",
         SourceFolder = streamnodesDirectory,
-	BinarySourceFolder = streamnodesBinaries,
+        BinarySourceFolder = streamnodesBinaries,
         -- StreamsEnabled = false,
         -- LineWidth = 1.0;
         -- AlphaBlendlingEnabled = false,
         InputFileType = "json",
         ColorTablePaths = {
-	streamnodeColorTable,
-	streamnodeColorTableCMR,
-	streamnodeColorTableEarth,
-	streamnodeColorTableFlow,
-	--streamnodeColorTableIlluminance,
-	--streamnodeColorTableIlluminance2,
+        	streamnodeColorTable,
+        	streamnodeColorTableCMR,
+        	streamnodeColorTableEarth,
+        	streamnodeColorTableFlow,
+        	--streamnodeColorTableIlluminance,
+        	--streamnodeColorTableIlluminance2,
         },
         --ColorTableMinMax = {
          --   { 0, 1000000 },

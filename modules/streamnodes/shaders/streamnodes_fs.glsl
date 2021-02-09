@@ -44,11 +44,13 @@ in flat double vs_time;
 in float camera_IsCloseEnough;
 
 Fragment getFragment() {
-    if (vs_color.a == 0) {
-        discard;
-    }
 
     vec4 fragColor = vs_color;
+    if (vs_color.a == 0) {
+        discard;
+//        //fragColor = vec4(1.0,1.0,1.0,1.0);
+    }
+   
     vec2 pos = vec2(0.5)-vs_st;
 
     float r = length(pos)*2.0;
@@ -59,7 +61,7 @@ Fragment getFragment() {
     color = vec3( 1.-smoothstep(f,f, r) );
 
     //fragColor = vec4(color, 1.0);
-
+    //hÄr 
     Fragment frag;
     frag.depth = vs_depth;
     frag.color = fragColor;
@@ -79,45 +81,33 @@ Fragment getFragment() {
     }
 
     // if(vs_closeToEarth > 0.5){
-    if(drawHollow && length(coord) < 0.4){
+    if(drawHollow && 
+        length(coord) < 0.4    &&
+        (vs_closeToEarth > 0.5 ||
+        distance(cameraPos, vec3(0)) < 500000000000.0f)){
+
         //frag.color.xyz = streamColor.xyz;
-        if(vs_closeToEarth > 0.5 || distance(cameraPos, vec3(0)) < 500000000000.f){
-            if(usingGaussianPulse && usingCameraPerspective){
-                if(vs_closeToEarth > 0.5){
-                    if(length(coord) < 0.3){
-                        if(pulsatingAlways || camera_IsCloseEnough > 0.5){
-                            float e = 2.718055f;
-                            float y = 1 * pow(e, - (pow(length(coord), 2)) /( 2 * pow(0.2, 2))); 
-                            if(y < 0.05){
-                                discard;
-                            }
-                        frag.color.a = y;
-                        }
-                    }
-                }
-                else{
+        if(usingGaussianPulse          && 
+            usingCameraPerspective     &&
+            vs_closeToEarth > 0.5){
+
+            if(length(coord) < 0.3     &&
+                (pulsatingAlways       || 
+                camera_IsCloseEnough > 0.5)){
+
+                float e = 2.718055f;                            
+                float y = 1 * pow(e, -(pow(length(coord), 2)) /( 2 * pow(0.2, 2))); 
+                if(y < 0.05){
                     discard;
                 }
+                frag.color.a = y;
             }
-            else{
-                discard;
-            }   
+        }
+        else{
+            discard;
         }
     }
 
-    //}
-    // outline
-    /*
-    if(length(coord) > 0.4){
-        frag.color = vec4(1, 1, 1, 1);
-    }
-    */
-    /*
-    if(length(coord) < 0.1){
-        frag.color.a = 1.0;
-    }
-    */
-    //float alphaV = 1 - smoothstep(0, 1, length(coord));
     float e = 2.718055f;
 
    if(useGaussian){
@@ -125,22 +115,22 @@ Fragment getFragment() {
        if(y < 0.05){
            discard;
        }
-   frag.color.a = y;
+       frag.color.a = y;
    }
-    //}
 
-    if(usingPulse && usingCameraPerspective){
-        if(vs_closeToEarth > 0.5){
-            if(pulsatingAlways || camera_IsCloseEnough > 0.5){
-                if(length(coord) > 0.46){ //0.46 (utan vec4(1, 1, 1, 1)), 0.4, 0.32 
-                //frag.color = vec4(1,1,1,1); //HÄR
-                    float speed = 60.f;
-                    int modulusResult = int(double(speed) * vs_time) % 60;
-                    if(modulusResult > 0 && modulusResult < 30){
-                        //discard; 
-                    }
-                }
-            }
+
+    if(usingPulse && 
+        usingCameraPerspective  &&
+        vs_closeToEarth > 0.5   &&
+        (pulsatingAlways || camera_IsCloseEnough > 0.5) &&
+        length(coord) > 0.46){
+
+        //0.46 (without vec4(1, 1, 1, 1)), 0.4, 0.32 
+        //frag.color = vec4(1,1,1,1); //Here!
+        float speed = 60.0f;
+        int modulusResult = int(double(speed) * vs_time) % 60;
+        if(modulusResult > 0 && modulusResult < 30){
+            discard; 
         }
     }
     

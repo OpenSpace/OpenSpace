@@ -156,13 +156,13 @@ const int sizeAndColor = 2;
 const int illuminance = 3;
 
 const float AUtoMeter = 149597871000.0;
-out vec4    vs_color;
-out float   vs_depth;
-out vec2    vs_st;
-out float   camera_IsCloseEnough;
-out float   vs_closeToEarth;
-out double  vs_time;
-out vec3    vs_camerapos;
+varying out vec4    vs_color;
+varying out float   vs_depth;
+varying out vec2    vs_st;
+varying out float   camera_IsCloseEnough;
+varying out float   vs_closeToEarth;
+varying out double  vs_time;
+varying out vec3    vs_camerapos;
 //out vec4 vs_gPosition;
 
 vec4 getTransferFunctionColor(sampler1D InColorTable) {
@@ -299,7 +299,7 @@ void CheckdistanceMethod() {
         }
         if(distance(earthPos, in_position) < AUtoMeter * distanceThreshold){
             if(mod(gl_VertexID, nodeSkipEarth) == 0){
-            DecidehowtoshowClosetoEarth();
+                DecidehowtoshowClosetoEarth();
             }
             else{
             vs_color = vec4(0);
@@ -307,12 +307,12 @@ void CheckdistanceMethod() {
         }
         else{
             if(enhanceMethod == illuminance){
-                 vs_color.a = fluxColorAlphaIlluminance;
+                vs_color.a = fluxColorAlphaIlluminance;
             }
 
-             if(fluxValue < thresholdFlux){
-                    vs_color.a = fluxColorAlpha;  
-              }
+            if(fluxValue < thresholdFlux){
+                vs_color.a = fluxColorAlpha;  
+            }
                 
         }
 }
@@ -324,64 +324,57 @@ void main() {
     // Checking if we should render the vertex dependent on the vertexindex, 
     // by using modulus.
     
-    if(CheckvertexIndex() || distance(earthPos, in_position) < distanceThreshold * AUtoMeter){
-    //Filtering by radius and z-axis
-    if(rValue > filterLower && rValue < filterUpper){ //if(rValue > filterLower){
-        if(in_position.z > (domainLimZ.x * AUtoMeter)  && in_position.z < (domainLimZ.y * AUtoMeter)){
-            // We should color it by flux
-            if(colorMode == 0){
-                //vec4 fluxColor = getTransferFunctionColor(colorTable);
-                vec4 fluxColor = getTransferFunctionColor(colorTableCMR);
-                if(fluxValue > thresholdFlux){
-                    vs_color = vec4(fluxColor.xyz, fluxColor.a);  
-                    gl_PointSize = nodeSizeLargerFlux;
-                }
-                else{
-                    vs_color = vec4(fluxColor.xyz, fluxColorAlpha);
-                    gl_PointSize = nodeSize;
-                }
+    if(CheckvertexIndex() || 
+        distance(earthPos, in_position) < (distanceThreshold * AUtoMeter) &&
+        rValue/AUtoMeter > filterLower && 
+        rValue/AUtoMeter < filterUpper &&
+        in_position.z > (domainLimZ.x * AUtoMeter) &&
+        in_position.z < (domainLimZ.y * AUtoMeter)){
+    
+        // We should color it by flux
+        if(colorMode == 0){
+            //vec4 fluxColor = getTransferFunctionColor(colorTable);
+            vec4 fluxColor = getTransferFunctionColor(colorTableCMR);
+            if(fluxValue > thresholdFlux){
+                vs_color = vec4(fluxColor.xyz, fluxColor.a);  
+                gl_PointSize = nodeSizeLargerFlux;
             }
-            //Uniform coloring
             else{
-                vs_color = streamColor;
+                vs_color = vec4(fluxColor.xyz, fluxColorAlpha);
+                gl_PointSize = nodeSize;
             }
-             CheckdistanceMethod();
         }
         else{
-            vs_color = vec4(0);
-            }
+            //Uniform coloring
+            vs_color = streamColor;
         }
-    else{
-        vs_color = vec4(0);
-        }
+        CheckdistanceMethod();
     }
     else{
         vs_color = vec4(0);
     }
 
     if(usingInterestingStreams){
-      // Draw every other line grey
-      //vs_color = vec4(0.18, 0.18, 0.18, 1*fluxColorAlpha);
+        // Draw every other line grey
+        //vs_color = vec4(0.18, 0.18, 0.18, 1*fluxColorAlpha);
 
-      vs_color = vec4(0);
+        vs_color = vec4(0);
       
-      // Close to Earth (384 nodes)
-      //float interestingStreams[8] = float[](339, 340, 351, 352, 353, 354, 366, 367);
-      //float interestingStreams[6] = float[](154, 156, 153, 157, 158, 163);
-      //float interestingStreams[26] =  float[](135, 138, 145, 146, 147, 149, 153, 154, 155, 156, 157, 158, 159, 160, 167, 163, 168, 169, 170, 172, 174, 180, 181, 183, 356, 364);
-      //float interestingStreams[3] = float[](37, 154, 210);
+        // Close to Earth (384 nodes)
+        //float interestingStreams[8] = float[](339, 340, 351, 352, 353, 354, 366, 367);
+        //float interestingStreams[6] = float[](154, 156, 153, 157, 158, 163);
+        //float interestingStreams[26] =  float[](135, 138, 145, 146, 147, 149, 153, 154, 155, 156, 157, 158, 159, 160, 167, 163, 168, 169, 170, 172, 174, 180, 181, 183, 356, 364);
+        //float interestingStreams[3] = float[](37, 154, 210);
 
-      // Close to Earth (863 nodes)
-      float interestingStreams[7] = float[](340, 350, 351, 352, 353, 363, 364);
-      //float interestingStreams[10] = float[](339, 340, 350, 351, 352, 353, 362, 363, 364, 365);
-      //float interestingStreams[20] = float[](326, 327, 328, 329, 338, 339, 340, 341, 350, 351, 352, 353, 362, 363, 364, 365, 374, 375, 376, 377);
+        // Close to Earth (863 nodes)
+        float interestingStreams[7] = float[](340, 350, 351, 352, 353, 363, 364);
+        //float interestingStreams[10] = float[](339, 340, 350, 351, 352, 353, 362, 363, 364, 365);
+        //float interestingStreams[20] = float[](326, 327, 328, 329, 338, 339, 340, 341, 350, 351, 352, 353, 362, 363, 364, 365, 374, 375, 376, 377);
 
         for(int i = 0; i < interestingStreams.length(); i++){
-            if(Streamnumber == interestingStreams[i]){
-                if(CheckvertexIndex()){
+            if(Streamnumber == interestingStreams[i] && CheckvertexIndex()){
                 vec4 fluxColor3 = getTransferFunctionColor(colorTable);
                 vs_color = vec4(fluxColor3.xyz, 1*fluxColorAlpha);
-                }
             }
         }
     }
@@ -430,12 +423,12 @@ void main() {
         //vs_closeToEarth = 0;
             float distScale = 1 - smoothstep(0, maxDistance, distanceVec);
             //float distMinScale = 1 - smoothstep(0, nodeDistanceThreshold, distanceVec);
-            float factorS = 1.f;
+            float factorS = 1.0;
             if(usingRadiusPerspective){
-                factorS = pow(distScale, 9) * 500.f * pow(rtemp, 2);
+                factorS = pow(distScale, 9) * 500.0 * pow(rtemp, 2);
             }
             else{
-                factorS = pow(distScale, 9) * 500.f;
+                factorS = pow(distScale, 9) * 500.0;
             }
             gl_PointSize = factorS * maxNodeDistanceSize * 0.8; 
         }

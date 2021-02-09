@@ -36,7 +36,6 @@
 
 #include <modules/base/rendering/renderabletrail.h>
 
-namespace { enum class SourceFileType; }
 
 namespace openspace {
 
@@ -86,8 +85,18 @@ private:
         Illuminance = 3,
     };
 
-    UniformCache(streamColor, nodeSize, nodeSizeLargerFlux, thresholdFlux)
+    UniformCache(streamColor, nodeSize, nodeSizeLargerFlux, thresholdFlux, colorMode,
+        filterLower, filterUpper, scalingMode, colorTableRange, domainLimZ, nodeSkip,
+        nodeSkipDefault, nodeSkipEarth, nodeSkipMethod, nodeSkipFluxThreshold, 
+        nodeSkipRadiusThreshold, fluxColorAlpha, fluxColorAlphaIlluminance, earthPos,
+        distanceThreshold, activeStreamNumber, enhanceMethod, flowColor, usingParticles,
+        usingInterestingStreams, particleSize, particleSpacing, particleSpeed)
         _uniformCache;
+    UniformCache(time, flowColoring, maxNodeDistanceSize, usingCameraPerspective,
+        drawCircles, drawHollow, useGaussian, usingRadiusPerspective, 
+        perspectiveDistanceFactor, maxNodeSize, minNodeSize, usingPulse, 
+        usingGaussianPulse, pulsatingAlways) 
+        _uniformCache2;
 
     // ------------------------------------ STRINGS ------------------------------------//
     // Name of the Node
@@ -111,9 +120,9 @@ private:
     bool _isLoadingNewEnergyBin = false;
 
     //can be used when loading in emin03 files for the first time. 
-    bool shouldwritecacheforemin03 = false;
+    bool _shouldwritecacheforemin03 = false;
     //Used for reading directly from sync-folder
-    bool shouldreadBinariesDirectly = true;
+    bool _shouldreadBinariesDirectly = true;
     bool _shouldloademin03directly = true;
 
     // --------------------------------- NUMERICALS ----------------------------------- //
@@ -124,10 +133,13 @@ private:
     // Active index of _startTimes
     int _activeTriggerTimeIndex = -1;
     // Number of states in the sequence
-    size_t _nStates = 274;
+    uint32_t _nStates = 0;
+
     // 383 for lower resolution, 863 for higher resolution.
     //const int _numberofStreams = 383;
-    const int _numberofStreams = 863;
+    //const int _numberofStreams = 863;
+    const int _numberofStreams = 3;
+
     // In setup it is used to scale JSON coordinates. During runtime it is used to scale
     // domain limits.
     float _scalingFactor = 1.f;
@@ -154,6 +166,7 @@ private:
     // The Lua-Modfile-Dictionary used during initialization
     std::unique_ptr<ghoul::Dictionary> _dictionary;
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
+
     // Transfer function used to color lines when _pColorMethod is set to BY_FLUX_VALUE
     std::unique_ptr<TransferFunction> _transferFunction;
     // Transfer function used to color with the CMR map
@@ -172,7 +185,7 @@ private:
     std::vector<std::string> _colorTablePaths;
     // Values represents min & max values represented in the color table
     std::vector<glm::vec2> _colorTableRanges;
-    // Contains the _triggerTimes for all FieldlineStates in the sequence
+    // Contains the _triggerTimes for all streams in the sequence
     std::vector<double> _startTimes;
     // Contains vertexPositions
     std::vector<glm::vec3> _vertexPositions;
@@ -299,21 +312,25 @@ private:
 
     // initialization
     std::vector<std::string> _sourceFiles;
+    std::vector<std::string> _binarySourceFiles;
     // binary files sourcefolder
     std::string _binarySourceFilePath;
+    // meta data file
+    std::string _metaTimeSteps;
 
     // --------------------- FUNCTIONS USED DURING INITIALIZATION --------------------- //    
-    bool extractMandatoryInfoFromDictionary(SourceFileType& sourceFileType);
+    bool extractMandatoryInfoFromDictionary();
     void definePropertyCallbackFunctions();
     bool extractJsonInfoFromDictionary(fls::Model& model);
     std::vector<std::string> LoadJsonfile(std::string filepath);
     void extractTriggerTimesFromFileNames();
+    void populateStartTimes();
     void computeSequenceEndTime();
     void setModelDependentConstants();
     void setupProperties();
 
-    void writeCachedFile(const std::string& file) const;
-    bool readCachedFile(const std::string& file, const std::string& energybin);
+    void writeCachedFile() const;
+    //bool readCachedFile(const std::string& file, const std::string& energybin);
     bool loadFilesIntoRam();
     void loadNodeData();
     void createStreamnumberVector();
