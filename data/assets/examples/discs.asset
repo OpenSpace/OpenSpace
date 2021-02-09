@@ -1,0 +1,25 @@
+local assetHelper = asset.require('util/asset_helper')
+
+local color = {0.0, 1.0, 1.0}
+
+-- @TODO (emmbr 2020-02-03) Potential threading issue later on? This will run on the main thread
+local singeColorTexturePath = openspace.createSingeColorImage("example_ring_color", color)
+
+local BasicDisc = {
+    Identifier = "BasicDisc",
+    Parent = "Root",
+    Renderable = {
+        Type = "RenderableDisc",
+        Texture = singeColorTexturePath,
+        Size = 1e10,
+        Width = 0.5
+    },
+    GUI = {
+        Name = "Basic Disc",
+        Path = "/Examples/Discs"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+    BasicDisc
+})

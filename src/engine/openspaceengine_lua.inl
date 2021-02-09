@@ -294,14 +294,15 @@ int downloadFile(lua_State* L) {
 
 /**
 * \ingroup LuaScripts
-* createPixelImage():
-* Creates a one pixel image with a given color and returns the p
+* createSingeColorImage():
+* Creates a one pixel image with a given color and returns the path to the cached file
 */
-int createPixelImage(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::createPixelImage");
+int createSingeColorImage(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::createSingeColorImage");
 
     const std::string& name = ghoul::lua::value<std::string>(L, 1);
     const ghoul::Dictionary& d = ghoul::lua::value<ghoul::Dictionary>(L, 2);
+    lua_settop(L, 0);
 
     // @TODO (emmbr 2020-12-18) Verify that the input dictionary is a vec3
     // Would like to clean this up with a more direct use of the Verifier in the future
@@ -310,6 +311,9 @@ int createPixelImage(lua_State* L) {
     ghoul::Dictionary colorDict;
     colorDict.setValue(key, d);
     TestResult res = DoubleVector3Verifier()(colorDict, key);
+
+    // @TODO (emmbr 2020-02-04) A 'ColorVerifier' would be really useful here, to easily
+    // check that we have a vector with values in [0, 1]
 
     if (!res.success) {
         return ghoul::lua::luaError(

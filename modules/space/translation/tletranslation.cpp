@@ -29,12 +29,10 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <chrono>
 #include <fstream>
+#include <optional>
 #include <vector>
 
 namespace {
-    constexpr const char* KeyFile = "File";
-    constexpr const char* KeyLineNumber = "LineNumber";
-
     // The list of leap years only goes until 2056 as we need to touch this file then
     // again anyway ;)
     const std::vector<int> LeapYears = {
@@ -211,52 +209,32 @@ namespace {
         // We need the semi major axis in km instead of m
         return semiMajorAxis / 1000.0;
     }
-} // namespace
 
+    struct [[codegen::Dictionary(TLETranslation)]] Parameters {
+        // Specifies the filename of the Two-Line-Element file
+        std::string file;
+
+        // Specifies the line number within the file where the group of 3 TLE lines begins
+        // (1-based). Defaults to 1
+        std::optional<int> lineNumber [[codegen::greater(0)]];
+    };
+#include "tletranslation_codegen.cpp"
+} // namespace
 
 namespace openspace {
 
 documentation::Documentation TLETranslation::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "TLE Translation",
-        "space_transform_tle",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("TLETranslation"),
-               Optional::No
-            },
-            {
-                KeyFile,
-                new StringVerifier,
-                Optional::No,
-                "Specifies the filename of the Two-Line-Element file"
-            },
-            {
-                KeyLineNumber,
-                new DoubleGreaterVerifier(0),
-                Optional::Yes,
-                "Specifies the line number within the file where the group of 3 TLE "
-                "lines begins (1-based). Defaults to 1."
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "space_transform_tle";
+    return doc;
 }
 
 TLETranslation::TLETranslation(const ghoul::Dictionary& dictionary) {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "TLETranslation"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    const std::string& file = dictionary.value<std::string>(KeyFile);
-    int lineNum = 1;
-    if (dictionary.hasValue<double>(KeyLineNumber)) {
-        lineNum = static_cast<int>(dictionary.value<double>(KeyLineNumber));
-    }
-    readTLEFile(file, lineNum);
+
+    int lineNum = p.lineNumber.value_or(1);
+    readTLEFile(p.file, lineNum);
 }
 
 void TLETranslation::readTLEFile(const std::string& filename, int lineNum) {

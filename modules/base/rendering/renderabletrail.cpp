@@ -34,7 +34,6 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
-
 #include <cmath>
 
 namespace {

@@ -32,7 +32,7 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
-#include <openspace/util/spicemanager.h>
+#include <optional>
 
 namespace {
     constexpr const char* ProgramName = "ShadowCylinderProgram";
@@ -104,85 +104,49 @@ namespace {
         "Aberration",
         "This value determines the aberration method that is used to compute the shadow "
         "cylinder."
+    }; 
+
+    struct [[codegen::Dictionary(RenderableShadowCylinder)]] Parameters {
+        // [[codegen::verbatim(NumberPointsInfo.description)]]
+        std::optional<int> numberOfPoints [[codegen::key("AmountOfPoints")]];
+
+        // [[codegen::verbatim(ShadowLengthInfo.description)]]
+        std::optional<float> shadowLength;
+
+        // [[codegen::verbatim(ShadowColorInfo.description)]]
+        std::optional<glm::vec3> shadowColor;
+
+        enum class TerminatorType {
+            Umbral [[codegen::key("UMBRAL")]],
+            Penumbral [[codegen::key("PENUMBRAL")]]
+        };
+        // [[codegen::verbatim(TerminatorTypeInfo.description)]]
+        TerminatorType terminatorType;
+
+        // [[codegen::verbatim(LightSourceInfo.description)]]
+        std::string lightSource;
+
+        // [[codegen::verbatim(ObserverInfo.description)]]
+        std::string observer;
+
+        // [[codegen::verbatim(BodyInfo.description)]]
+        std::string body;
+
+        // [[codegen::verbatim(BodyFrameInfo.description)]]
+        std::string bodyFrame;
+
+        // [[codegen::verbatim(AberrationInfo.description)]]
+        std::string aberration [[codegen::inlist("NONE", "LT", "LT+S", "CN", "CN+S")]];
     };
+#include "renderableshadowcylinder_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableShadowCylinder::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderableShadowCylinder",
-        "newhorizons_renderable_shadowcylinder",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("RenderableShadowCylinder"),
-                Optional::No,
-                ""
-            },
-            {
-                NumberPointsInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                NumberPointsInfo.description
-            },
-            {
-                ShadowLengthInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                ShadowLengthInfo.description
-            },
-            {
-                ShadowColorInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                ShadowColorInfo.description
-            },
-            {
-                TerminatorTypeInfo.identifier,
-                new StringInListVerifier({
-                    // Synchronized with SpiceManager::terminatorTypeFromString
-                    "UMBRAL", "PENUMBRAL"
-                }),
-                Optional::No,
-                TerminatorTypeInfo.description
-            },
-            {
-                LightSourceInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                LightSourceInfo.description
-            },
-            {
-                ObserverInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                ObserverInfo.description
-            },
-            {
-                BodyInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                BodyInfo.description
-            },
-            {
-                BodyFrameInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                BodyFrameInfo.description
-            },
-            {
-                AberrationInfo.identifier,
-                new StringInListVerifier({
-                    // SpiceManager::AberrationCorrection::AberrationCorrection
-                    "NONE", "LT", "LT+S", "CN", "CN+S"
-                }),
-                Optional::No,
-                AberrationInfo.description
-            },
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "newhorizons_renderable_shadowcylinder";
+    return doc;
 }
 
 RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dictionary)
@@ -200,34 +164,18 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
     , _bodyFrame(BodyFrameInfo)
     , _aberration(AberrationInfo)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableShadowCylinder"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
 
-    if (dictionary.hasKey(NumberPointsInfo.identifier)) {
-        _numberOfPoints = static_cast<int>(
-            dictionary.value<double>(NumberPointsInfo.identifier)
-        );
-    }
+    _numberOfPoints = p.numberOfPoints.value_or(_numberOfPoints);
     addProperty(_numberOfPoints);
 
-
-    if (dictionary.hasKey(ShadowLengthInfo.identifier)) {
-        _shadowLength = static_cast<float>(
-            dictionary.value<double>(ShadowLengthInfo.identifier)
-        );
-    }
+    _shadowLength = p.shadowLength.value_or(_shadowLength);
     addProperty(_shadowLength);
 
-
-    if (dictionary.hasKey(ShadowColorInfo.identifier)) {
-        _shadowColor = dictionary.value<glm::dvec3>(ShadowLengthInfo.identifier);
-    }
+    _shadowColor = p.shadowColor.value_or(_shadowColor);
     _shadowColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_shadowColor);
 
@@ -236,16 +184,21 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
         { static_cast<int>(SpiceManager::TerminatorType::Umbral), "Umbral" },
         { static_cast<int>(SpiceManager::TerminatorType::Penumbral), "Penumbral" }
     });
-    _terminatorType = static_cast<int>(SpiceManager::terminatorTypeFromString(
-        dictionary.value<std::string>(TerminatorTypeInfo.identifier)
-    ));
+    switch (p.terminatorType) {
+        case Parameters::TerminatorType::Umbral:
+            _terminatorType = static_cast<int>(SpiceManager::TerminatorType::Umbral);
+            break;
+        case Parameters::TerminatorType::Penumbral:
+            _terminatorType = static_cast<int>(SpiceManager::TerminatorType::Penumbral);
+            break;
+    }
     addProperty(_terminatorType);
 
 
-    _lightSource = dictionary.value<std::string>(LightSourceInfo.identifier);
-    _observer = dictionary.value<std::string>(ObserverInfo.identifier);
-    _body = dictionary.value<std::string>(BodyInfo.identifier);
-    _bodyFrame = dictionary.value<std::string>(BodyFrameInfo.identifier);
+    _lightSource = p.lightSource;
+    _observer = p.observer;
+    _body = p.body;
+    _bodyFrame = p.bodyFrame;
 
     using T = SpiceManager::AberrationCorrection::Type;
     _aberration.addOptions({
@@ -257,7 +210,7 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
 
     });
     SpiceManager::AberrationCorrection aberration = SpiceManager::AberrationCorrection(
-        dictionary.value<std::string>(AberrationInfo.identifier)
+        p.aberration
     );
     _aberration = static_cast<int>(aberration.type);
 }

@@ -55,34 +55,21 @@ namespace {
         }
         return res;
     }
+
+    struct [[codegen::Dictionary(StaticRotation)]] Parameters {
+        // Stores the static rotation as a vector containing Euler angles, a quaternion
+        // or a rotation matrix
+        std::variant<glm::dvec3, glm::dvec4, glm::dmat3x3> rotation;
+    };
+#include "staticrotation_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation StaticRotation::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "Static Rotation",
-        "base_transform_rotation_static",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("StaticRotation"),
-                Optional::No
-            },
-            {
-                RotationInfo.identifier,
-                new OrVerifier({
-                    new DoubleVector3Verifier(),
-                    new DoubleVector4Verifier(),
-                    new DoubleMatrix3Verifier()
-                }),
-                Optional::No,
-                "Stores the static rotation as a vector containing Euler angles, "
-                " a quaternion or a rotation matrix."
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_transform_rotation_static";
+    return doc;
 }
 
 StaticRotation::StaticRotation()
@@ -101,31 +88,21 @@ StaticRotation::StaticRotation()
 }
 
 StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary) : StaticRotation() {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "StaticRotation"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    if (dictionary.hasValue<glm::dvec3>(RotationInfo.identifier)) {
-        _eulerRotation = static_cast<glm::vec3>(
-            dictionary.value<glm::dvec3>(RotationInfo.identifier)
-        );
-        _matrixIsDirty = true;
+    if (std::holds_alternative<glm::dvec3>(p.rotation)) {
+        _eulerRotation = std::get<glm::dvec3>(p.rotation);
     }
-    else if (dictionary.hasValue<glm::dvec4>(RotationInfo.identifier)) {
-        glm::dvec4 data = dictionary.value<glm::dvec4>(RotationInfo.identifier);
+    else if (std::holds_alternative<glm::dvec4>(p.rotation)) {
+        glm::dvec4 data = std::get<glm::dvec4>(p.rotation);
         _eulerRotation = rotationMatrixToEulerAngles(
             glm::mat3_cast(glm::dquat(data.w, data.x, data.y, data.z))
         );
-        _matrixIsDirty = true;
     }
-    else if (dictionary.hasValue<glm::dmat3>(RotationInfo.identifier)) {
-        _eulerRotation = rotationMatrixToEulerAngles(
-            dictionary.value<glm::dmat3>(RotationInfo.identifier)
-        );
-        _matrixIsDirty = true;
+    else if (std::holds_alternative<glm::dmat3>(p.rotation)) {
+        _eulerRotation = rotationMatrixToEulerAngles(std::get<glm::dmat3>(p.rotation));
     }
+    _matrixIsDirty = true;
 }
 
 glm::dmat3 StaticRotation::matrix(const UpdateData&) const {

@@ -42,15 +42,7 @@ namespace {
     constexpr const char* KeyName = "Name";
     constexpr const char* KeyDesc = "Description";
     constexpr const char* KeyLayerGroupID = "LayerGroupID";
-    constexpr const char* KeySettings = "Settings";
     constexpr const char* KeyAdjustment = "Adjustment";
-    constexpr const char* KeyPadTiles = "PadTiles";
-
-    constexpr const char* KeyOpacity = "Opacity";
-    constexpr const char* KeyGamma = "Gamma";
-    constexpr const char* KeyMultiplier = "Multiplier";
-    constexpr const char* KeyOffset = "Offset";
-
 
     constexpr openspace::properties::Property::PropertyInfo TypeInfo = {
         "Type",
@@ -102,114 +94,94 @@ namespace {
         "example: Earth is a special place",
         openspace::properties::Property::Visibility::Hidden
     };
+
+    struct [[codegen::Dictionary(Layer), codegen::noexhaustive()]] Parameters {
+        // The unique identifier for this layer. May not contain '.' or spaces
+        std::string identifier;
+
+        // A human-readable name for the user interface. If this is omitted, the
+        // identifier is used instead
+        std::optional<std::string> name;
+
+        // A human-readable description of the layer to be used in informational texts
+        // presented to the user
+        std::optional<std::string> description;
+
+        // [[codegen::verbatim(ColorInfo.description)]]
+        std::optional<glm::vec3> color;
+
+        // Specifies the type of layer that is to be added. If this value is not
+        // specified, the layer is a DefaultTileLayer
+        std::optional<std::string> type [[codegen::inlist("DefaultTileLayer",
+            "SingleImageTileLayer", "SizeReferenceTileLayer", "TemporalTileLayer",
+            "TileIndexTileLayer", "ByIndexTileLayer", "ByLevelTileLayer", "SolidColor")]];
+
+        // Determine whether the layer is enabled or not. If this value is not specified,
+        // the layer is disabled
+        std::optional<bool> enabled;
+
+        // Determines whether the downloaded tiles should have a padding added to the
+        // borders
+        std::optional<bool> padTiles;
+
+        struct Settings {
+            // The opacity value of the layer
+            std::optional<float> opacity [[codegen::inrange(0.0, 1.0)]];
+
+            // The gamma value that is applied to each pixel of the layer
+            std::optional<float> gamma;
+
+            // The multiplicative factor that is applied to each pixel of the layer
+            std::optional<float> multiplier;
+
+            // An additive offset that is applied to each pixel of the layer
+            std::optional<float> offset;
+        };
+        // Specifies the render settings that should be applied to this layer
+        std::optional<Settings> settings;
+
+        struct LayerAdjustment {
+            enum class Type {
+                None,
+                ChromaKey,
+                TransferFunction
+            };
+
+            // Specifies the type of the adjustment that is applied
+            std::optional<Type> type;
+
+            // Specifies the chroma key used when selecting 'ChromaKey' for the 'Type'
+            std::optional<glm::dvec3> chromaKeyColor;
+
+            // Specifies the tolerance to match the color to the chroma key when the
+            // 'ChromaKey' type is selected for the 'Type'
+            std::optional<double> chromaKeyTolerance;
+        };
+        // Parameters that set individual adjustment parameters for this layer
+        std::optional<LayerAdjustment> adjustment;
+
+        enum class BlendMode {
+            Normal,
+            Multiply,
+            Add,
+            Subtract,
+            Color
+        };
+        // Sets the blend mode of this layer to determine how it interacts with other
+        // layers on top of this
+        std::optional<BlendMode> blendMode;
+
+        // If the primary layer creation fails, this layer is used as a fallback
+        std::optional<std::monostate>
+            fallback [[codegen::reference("globebrowsing_layer")]];
+    };
+#include "layer_codegen.cpp"
 } // namespace
 
 documentation::Documentation Layer::Documentation() {
-    using namespace documentation;
-    return {
-        "Layer",
-        "globebrowsing_layer",
-        {
-            {
-                KeyIdentifier,
-                new StringVerifier,
-                Optional::No,
-                "The unique identifier for this layer. May not contain '.' or spaces."
-            },
-            {
-                KeyName,
-                new StringVerifier,
-                Optional::Yes,
-                "A human-readable name for the user interface. If this is omitted, the "
-                "identifier is used instead."
-            },
-            {
-                KeyDesc,
-                new StringVerifier,
-                Optional::Yes,
-                "A human-readable description of the layer to be used in informational "
-                "texts presented to the user."
-            },
-            {
-                "Type",
-                new StringInListVerifier({
-                    "DefaultTileLayer", "SingleImageTileLayer", "SizeReferenceTileLayer",
-                    "TemporalTileLayer", "TileIndexTileLayer", "ByIndexTileLayer",
-                    "ByLevelTileLayer", "SolidColor"
-                }),
-                Optional::Yes,
-                "Specifies the type of layer that is to be added. If this value is not "
-                "specified, the layer is a DefaultTileLayer."
-            },
-            {
-                EnabledInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                "Determine whether the layer is enabled or not. If this value is not "
-                "specified, the layer is disabled."
-            },
-            {
-                KeyPadTiles,
-                new BoolVerifier,
-                Optional::Yes,
-                "Determines whether the downloaded tiles should have a padding added to "
-                "the borders."
-            },
-            {
-                KeySettings,
-                new TableVerifier({
-                    {
-                        KeyOpacity,
-                        new DoubleInRangeVerifier(0.0, 1.0),
-                        Optional::Yes,
-                        "The opacity value of the layer."
-                    },
-                    {
-                        KeyGamma,
-                        new DoubleVerifier,
-                        Optional::Yes,
-                        "The gamma value that is applied to each pixel of the layer."
-                    },
-                    {
-                        KeyMultiplier,
-                        new DoubleVerifier,
-                        Optional::Yes,
-                        "The multiplicative factor that is applied to each pixel of the "
-                        "layer."
-                    },
-                    {
-                        KeyOffset,
-                        new DoubleVerifier,
-                        Optional::Yes,
-                        "An additive offset that is applied to each pixel of the layer."
-                    }
-                }),
-                Optional::Yes,
-                "Specifies the render settings that should be applied to this layer."
-            },
-            {
-                KeyAdjustment,
-                new ReferencingVerifier("globebrowsing_layeradjustment"),
-                Optional::Yes,
-                ""
-            },
-            {
-                BlendModeInfo.identifier,
-                new StringInListVerifier({
-                    "Normal", "Multiply", "Add", "Subtract", "Color"
-                }),
-                Optional::Yes,
-                "Sets the blend mode of this layer to determine how it interacts with "
-                "other layers on top of this."
-            },
-            {
-                "Fallback",
-                new ReferencingVerifier("globebrowsing_layer"),
-                Optional::Yes,
-                "If the primary layer creation fails, this layer is used as a fallback"
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "globebrowsing_layer";
+    return doc;
 }
 
 Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
@@ -230,59 +202,40 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
     , _layerGroupId(id)
 
 {
-    documentation::testSpecificationAndThrow(Documentation(), layerDict, "Layer");
+    const Parameters p = codegen::bake<Parameters>(layerDict);
 
     layergroupid::TypeID typeID;
-    if (layerDict.hasValue<std::string>("Type")) {
-        const std::string& typeString = layerDict.value<std::string>("Type");
-        typeID = ghoul::from_string<layergroupid::TypeID>(typeString);
+    if (p.type.has_value()) {
+        typeID = ghoul::from_string<layergroupid::TypeID>(*p.type);
+        if (typeID == layergroupid::TypeID::Unknown) {
+            throw ghoul::RuntimeError("Unknown layer type!");
+        }
     }
     else {
         typeID = layergroupid::TypeID::DefaultTileLayer;
     }
-    if (typeID == layergroupid::TypeID::Unknown) {
-        throw ghoul::RuntimeError("Unknown layer type!");
-    }
 
     initializeBasedOnType(typeID, layerDict);
 
-    if (layerDict.hasValue<bool>(EnabledInfo.identifier)) {
-        _enabled = layerDict.value<bool>(EnabledInfo.identifier);
-    }
+    _enabled = p.enabled.value_or(_enabled);
 
-    if (layerDict.hasKey(KeyDesc)) {
+    if (p.description.has_value()) {
         _guiDescription = description();
         addProperty(_guiDescription);
     }
 
-    bool padTiles = true;
-    if (layerDict.hasValue<bool>(KeyPadTiles)) {
-        padTiles = layerDict.value<bool>(KeyPadTiles);
-    }
+    const bool padTiles = p.padTiles.value_or(true);
 
     TileTextureInitData initData = tileTextureInitData(_layerGroupId, padTiles);
     _padTilePixelStartOffset = initData.tilePixelStartOffset;
     _padTilePixelSizeDifference = initData.tilePixelSizeDifference;
 
-    if (layerDict.hasValue<ghoul::Dictionary>(KeySettings)) {
-        ghoul::Dictionary dict = layerDict.value<ghoul::Dictionary>(KeySettings);
-        if (dict.hasValue<double>(KeyOpacity)) {
-            _renderSettings.opacity = static_cast<float>(dict.value<double>(KeyOpacity));
-        }
-
-        if (dict.hasValue<double>(KeyGamma)) {
-            _renderSettings.gamma = static_cast<float>(dict.value<double>(KeyGamma));
-        }
-
-        if (dict.hasValue<double>(KeyMultiplier)) {
-            _renderSettings.multiplier = static_cast<float>(
-                dict.value<double>(KeyMultiplier)
-            );
-        }
-
-        if (dict.hasValue<double>(KeyOffset)) {
-            _renderSettings.offset = static_cast<float>(dict.value<double>(KeyOffset));
-        }
+    if (p.settings.has_value()) {
+        _renderSettings.opacity = p.settings->opacity.value_or(_renderSettings.opacity);
+        _renderSettings.gamma = p.settings->gamma.value_or(_renderSettings.gamma);
+        _renderSettings.multiplier =
+            p.settings->multiplier.value_or(_renderSettings.multiplier);
+        _renderSettings.offset = p.settings->offset.value_or(_renderSettings.offset);
     }
     if (layerDict.hasValue<ghoul::Dictionary>(KeyAdjustment)) {
         _layerAdjustment.setValuesFromDictionary(
@@ -302,11 +255,24 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
     }
 
     // Initialize blend mode
-    if (layerDict.hasValue<std::string>(BlendModeInfo.identifier)) {
-        using namespace layergroupid;
-        std::string blendMode = layerDict.value<std::string>(BlendModeInfo.identifier);
-        BlendModeID blendModeID = ghoul::from_string<BlendModeID>(blendMode);
-        _blendModeOption = static_cast<int>(blendModeID);
+    if (p.blendMode.has_value()) {
+        switch (*p.blendMode) {
+            case Parameters::BlendMode::Normal:
+                _blendModeOption = static_cast<int>(layergroupid::BlendModeID::Normal);
+                break;
+            case Parameters::BlendMode::Multiply:
+                _blendModeOption = static_cast<int>(layergroupid::BlendModeID::Multiply);
+                break;
+            case Parameters::BlendMode::Add:
+                _blendModeOption = static_cast<int>(layergroupid::BlendModeID::Add);
+                break;
+            case Parameters::BlendMode::Subtract:
+                _blendModeOption = static_cast<int>(layergroupid::BlendModeID::Subtract);
+                break;
+            case Parameters::BlendMode::Color:
+                _blendModeOption = static_cast<int>(layergroupid::BlendModeID::Color);
+                break;
+        }
     }
     else {
         _blendModeOption = static_cast<int>(layergroupid::BlendModeID::Normal);

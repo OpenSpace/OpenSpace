@@ -104,59 +104,42 @@ namespace {
         name.erase(name.find_last_not_of(trimChars) + 1);
         return name;
     }
+
+    struct [[codegen::Dictionary(RenderableSmallBody)]] Parameters {
+        // [[codegen::verbatim(SegmentQualityInfo.description)]]
+        double segmentQuality;
+
+        // [[codegen::verbatim(UpperLimitInfo.description)]]
+        std::optional<int> upperLimit;
+
+        // [[codegen::verbatim(PathInfo.description)]]
+        std::string path;
+
+        // [[codegen::verbatim(LineWidthInfo.description)]]
+        std::optional<double> lineWidth;
+
+        // [[codegen::verbatim(LineColorInfo.description)]]
+        glm::dvec3 color;
+
+        // [[codegen::verbatim(TrailFadeInfo.description)]]
+        std::optional<double> trailFade;
+    };
+#include "renderablesmallbody_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableSmallBody::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderableSmallBody",
-        "space_renderable_small_body",
-        {
-            {
-                SegmentQualityInfo.identifier,
-                new DoubleVerifier,
-                Optional::No,
-                SegmentQualityInfo.description
-            },
-            {
-                UpperLimitInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                UpperLimitInfo.description
-            },
-            {
-                PathInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                PathInfo.description
-            },
-            {
-                LineWidthInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                LineWidthInfo.description
-            },
-            {
-                LineColorInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::No,
-                LineColorInfo.description
-            },
-            {
-                TrailFadeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                TrailFadeInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "space_renderable_small_body";
+    return doc;
 }
 
 RenderableSmallBody::RenderableSmallBody(const ghoul::Dictionary& dictionary)
     : RenderableOrbitalKepler(dictionary)
 {
+    codegen::bake<Parameters>(dictionary);
+
     _upperLimitCallbackHandle = _upperLimit.onChange(_reinitializeTrailBuffers);
     addProperty(_upperLimit);
 }

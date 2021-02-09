@@ -84,42 +84,29 @@ namespace {
         glm::dvec3 diffPos = worldPos - anchorNodePos;
         return diffPos;
     }
+
+    struct [[codegen::Dictionary(RenderableNodeLine)]] Parameters {
+        // [[codegen::verbatim(StartNodeInfo.description)]]
+        std::optional<std::string> startNode;
+
+        // [[codegen::verbatim(EndNodeInfo.description)]]
+        std::optional<std::string> endNode;
+
+        // [[codegen::verbatim(LineColorInfo.description)]]
+        std::optional<glm::vec3> color;
+
+        // [[codegen::verbatim(LineWidthInfo.description)]]
+        std::optional<float> lineWidth;
+    };
+#include "renderablenodeline_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableNodeLine::Documentation() {
-    using namespace documentation;
-    return {
-        "Renderable Node Line",
-        "base_renderable_renderablenodeline",
-        {
-            {
-                StartNodeInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                StartNodeInfo.description
-            },
-            {
-                EndNodeInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                EndNodeInfo.description
-            },
-            {
-                LineColorInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                LineColorInfo.description
-            },
-            {
-                LineWidthInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                LineWidthInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_renderable_renderablenodeline";
+    return doc;
 }
 
 RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
@@ -129,36 +116,22 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
     , _lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableNodeLine"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    if (dictionary.hasKey(StartNodeInfo.identifier)) {
-        _start = dictionary.value<std::string>(StartNodeInfo.identifier);
-    }
-
-    if (dictionary.hasKey(EndNodeInfo.identifier)) {
-        _end = dictionary.value<std::string>(EndNodeInfo.identifier);
-    }
-
-    if (dictionary.hasKey(LineColorInfo.identifier)) {
-        _lineColor = dictionary.value<glm::dvec3>(LineColorInfo.identifier);
-    }
-    if (dictionary.hasKey(LineWidthInfo.identifier)) {
-        _lineWidth = static_cast<float>(
-            dictionary.value<double>(LineWidthInfo.identifier)
-        );
-    }
-
+    _start = p.startNode.value_or(_start);
     _start.onChange([&]() { validateNodes(); });
-    _end.onChange([&]() { validateNodes(); });
-
     addProperty(_start);
+
+    _end = p.endNode.value_or(_end);
+    _end.onChange([&]() { validateNodes(); });
     addProperty(_end);
+
+    _lineColor = p.color.value_or(_lineColor);
     addProperty(_lineColor);
+    
+    _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
+
     addProperty(_opacity);
 }
 

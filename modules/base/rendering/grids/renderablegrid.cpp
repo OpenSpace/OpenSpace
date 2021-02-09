@@ -62,43 +62,29 @@ namespace {
         "Grid Size",
         "This value species the size of each dimensions of the grid"
     };
+
+    struct [[codegen::Dictionary(RenderableGrid)]] Parameters {
+        // [[codegen::verbatim(ColorInfo.description)]]
+        std::optional<glm::vec3> color;
+
+        // [[codegen::verbatim(SegmentsInfo.description)]]
+        std::optional<glm::ivec2> segments;
+
+        // [[codegen::verbatim(LineWidthInfo.description)]]
+        std::optional<float> lineWidth;
+
+        // [[codegen::verbatim(SizeInfo.description)]]
+        std::optional<glm::vec2> size;
+    };
+#include "renderablegrid_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableGrid::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderableGrid",
-        "base_renderable_grid",
-        {
-            {
-                ColorInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                ColorInfo.description
-            },
-            {
-                SegmentsInfo.identifier,
-                // @TODO (emmbr 2020-07-07): should be Int, but specification test fails..
-                new DoubleVector2Verifier,
-                Optional::Yes,
-                SegmentsInfo.description
-            },
-            {
-                LineWidthInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                LineWidthInfo.description
-            },
-            {
-                SizeInfo.identifier,
-                new DoubleVector2Verifier,
-                Optional::Yes,
-                SizeInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_renderable_grid";
+    return doc;
 }
 
 RenderableGrid::RenderableGrid(const ghoul::Dictionary& dictionary)
@@ -108,39 +94,23 @@ RenderableGrid::RenderableGrid(const ghoul::Dictionary& dictionary)
     , _lineWidth(LineWidthInfo, 0.5f, 0.f, 20.f)
     , _size(SizeInfo, glm::vec2(1e20f), glm::vec2(1.f), glm::vec2(1e35f))
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableGrid"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
 
-    if (dictionary.hasKey(ColorInfo.identifier)) {
-        _color = dictionary.value<glm::dvec3>(ColorInfo.identifier);
-    }
+    _color = p.color.value_or(_color);
     _color.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_color);
 
-    if (dictionary.hasKey(SegmentsInfo.identifier)) {
-        _segments = static_cast<glm::uvec2>(
-            dictionary.value<glm::dvec2>(SegmentsInfo.identifier)
-        );
-    }
+    _segments = p.segments.value_or(_segments);
     _segments.onChange([&]() { _gridIsDirty = true; });
     addProperty(_segments);
 
-    if (dictionary.hasKey(LineWidthInfo.identifier)) {
-        _lineWidth = static_cast<float>(
-            dictionary.value<double>(LineWidthInfo.identifier)
-        );
-    }
+    _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
 
-    if (dictionary.hasKey(SizeInfo.identifier)) {
-        _size = dictionary.value<glm::dvec2>(SizeInfo.identifier);
-    }
+    _size = p.size.value_or(_size);
     _size.onChange([&]() { _gridIsDirty = true; });
     addProperty(_size);
 }

@@ -448,12 +448,6 @@ documentation::Documentation ExoplanetsDataPreparationTask::documentation() {
         "exoplanets_data_preparation_task",
         {
             {
-                "Type",
-                new StringEqualVerifier("ExoplanetsDataPreparationTask"),
-                Optional::No,
-                ""
-            },
-            {
                 KeyInputDataFile,
                 new StringAnnotationVerifier("A valid filepath"),
                 Optional::No,

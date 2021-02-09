@@ -61,7 +61,7 @@ public:
     };
 
     static ghoul::mm_unique_ptr<Renderable> createFromDictionary(
-        const ghoul::Dictionary& dictionary);
+        ghoul::Dictionary dictionary);
 
     Renderable(const ghoul::Dictionary& dictionary);
     virtual ~Renderable() = default;

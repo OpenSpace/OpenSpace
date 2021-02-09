@@ -328,11 +328,6 @@ documentation::Documentation ReadFitsTask::Documentation() {
         "gaiamission_fitsfiletorawdata",
         {
             {
-                "Type",
-                new StringEqualVerifier("ReadFitsTask"),
-                Optional::No
-            },
-            {
                 KeyInFileOrFolderPath,
                 new StringVerifier,
                 Optional::No,

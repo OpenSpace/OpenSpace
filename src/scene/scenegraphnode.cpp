@@ -35,6 +35,7 @@
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include "scenegraphnode_doc.inl"
@@ -263,16 +264,8 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         ghoul::Dictionary renderableDictionary =
             dictionary.value<ghoul::Dictionary>(KeyRenderable);
 
-        renderableDictionary.setValue(KeyIdentifier, result->_identifier);
-
         result->_renderable = Renderable::createFromDictionary(renderableDictionary);
-        if (result->_renderable == nullptr) {
-            LERROR(fmt::format(
-                "Failed to create renderable for SceneGraphNode '{}'",
-                result->identifier()
-            ));
-            return nullptr;
-        }
+        ghoul_assert(result->_renderable, "Failed to create Renderable");
         result->addPropertySubOwner(result->_renderable.get());
         LDEBUG(fmt::format(
             "Successfully created renderable for '{}'", result->identifier()
@@ -689,7 +682,7 @@ void SceneGraphNode::computeScreenSpaceData(RenderData& newData) {
     glm::ivec2 res = global::windowDelegate->currentSubwindowSize();
 
     // Get the radius of node
-    double nodeRadius = static_cast<double>(this->boundingSphere());
+    double nodeRadius = boundingSphere();
 
     // Distance from the camera to the node
     double distFromCamToNode = glm::distance(cam.positionVec3(), worldPos) - nodeRadius;
