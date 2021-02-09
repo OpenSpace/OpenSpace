@@ -1,4 +1,4 @@
--- this script gets two parameters in its global scope:
+-- This script gets two parameters in its global scope:
 -- filename:   The full path for the file that was dropped on the application.
 --             Example:  C:/OpenSpace/openspace.cfg
 -- basename:   Only the name of the actual file with extension, but without the full rest
