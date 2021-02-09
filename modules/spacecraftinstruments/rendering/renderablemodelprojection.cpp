@@ -136,7 +136,11 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
         if (dictionary.hasValue<std::string>(KeyGeomModelFile)) {
             // Handle single file
             file = absPath(dictionary.value<std::string>(KeyGeomModelFile));
-            _geometry = ghoul::io::ModelReader::ref().loadModel(file, false, true);
+            _geometry = ghoul::io::ModelReader::ref().loadModel(
+                file,
+                ghoul::io::ModelReader::ForceRenderInvisible::No,
+                ghoul::io::ModelReader::NotifyInvisibleDropped::Yes
+            );
         }
         else if (dictionary.hasValue<ghoul::Dictionary>(KeyGeomModelFile)) {
             ghoul::Dictionary fileDictionary = dictionary.value<ghoul::Dictionary>(
@@ -149,33 +153,32 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
                 file = absPath(fileDictionary.value<std::string>(k));
                 geometries.push_back(ghoul::io::ModelReader::ref().loadModel(
                     file,
-                    false,
-                    true
+                    ghoul::io::ModelReader::ForceRenderInvisible::No,
+                    ghoul::io::ModelReader::NotifyInvisibleDropped::Yes
                 ));
             }
 
             if (!geometries.empty()) {
-                ghoul::modelgeometry::ModelGeometry combinedGeometry =
-                    std::move(*geometries[0].release());
+                std::unique_ptr<ghoul::modelgeometry::ModelGeometry> combinedGeometry =
+                    std::move(geometries[0]);
 
                 // Combine all models into one ModelGeometry
                 for (unsigned int i = 1; i < geometries.size(); ++i) {
-                    for (unsigned int m = 0; m < geometries[i]->meshes().size(); ++m) {
-                        combinedGeometry.meshes().push_back(
-                            std::move(geometries[i]->meshes()[m])
+                    for (ghoul::io::ModelMesh& mesh : geometries[i]->meshes()) {
+                        combinedGeometry->meshes().push_back(
+                            std::move(mesh)
                         );
                     }
 
-                    for (unsigned int t = 0; t < geometries[i]->textureStorage().size(); ++t)
+                    for (ghoul::modelgeometry::ModelGeometry::TextureEntry& texture :
+                        geometries[i]->textureStorage())
                     {
-                        combinedGeometry.textureStorage().push_back(
-                            std::move(geometries[i]->textureStorage()[t])
+                        combinedGeometry->textureStorage().push_back(
+                            std::move(texture)
                         );
                     }
                 }
-                _geometry = std::make_unique<ghoul::modelgeometry::ModelGeometry>(
-                    std::move(combinedGeometry)
-                );
+                _geometry = std::move(combinedGeometry);
                 _geometry->calculateBoundingRadius();
             }
         }
