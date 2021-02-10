@@ -22,8 +22,14 @@ filename = filename:gsub("\\", "/")
 basename = basename:gsub("\\", "/")
 basename_without_extension = basename:sub(0, #basename - extension:len())
 
-if     extension == ".jpg" or extension == ".jpeg" or extension == ".tif" or
-       extension == ".png" then
+is_image_file = function(extension)
+  return extension == ".png" or extension == ".jpg" or extension == ".jpeg" or
+         extension == ".tif" or extension == ".tga" or extension == ".bmp" or
+         extension == ".psd" or extension == ".gif" or extension == ".hdr" or
+         extension == ".pic" or extension == ".pnm"
+end
+
+if is_image_file(extension) then
   identifier = basename_without_extension:gsub(" ", "_")
   return [[openspace.addScreenSpaceRenderable({
     Identifier = "]] .. identifier .. [[",
