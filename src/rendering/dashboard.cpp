@@ -27,6 +27,7 @@
 #include <openspace/rendering/dashboarditem.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/profiling.h>
 
 #include "dashboard_lua.inl"
 
@@ -51,7 +52,7 @@ Dashboard::Dashboard()
     : properties::PropertyOwner({ "Dashboard" })
     , _isEnabled(EnabledInfo, true)
     , _startPositionOffset(
-        properties::IVec2Property(StartPositionOffsetInfo, glm::ivec2(10, -10))
+        properties::IVec2Property(StartPositionOffsetInfo, glm::ivec2(10, -25))
     )
 {
     addProperty(_isEnabled);
@@ -127,6 +128,8 @@ void Dashboard::clearDashboardItems() {
 }
 
 void Dashboard::render(glm::vec2& penPosition) {
+    ZoneScoped
+
     if (!_isEnabled) {
         return;
     }

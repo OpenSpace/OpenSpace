@@ -42,7 +42,7 @@ namespace {
         std::string missionHashname = "##" + mission.name();
 
 
-        const double currentTime = openspace::global::timeManager.time().j2000Seconds();
+        const double currentTime = openspace::global::timeManager->time().j2000Seconds();
         openspace::MissionPhase::Trace t = mission.phaseTrace(currentTime, 0);
 
         int treeOption = t.empty() ? 0 : ImGuiTreeNodeFlags_DefaultOpen;
@@ -63,7 +63,7 @@ namespace {
 
             openspace::gui::CaptionText("Mission Progress");
 
-            ImGui::Text("%s", startTime.UTC().c_str());
+            ImGui::Text("%s", std::string(startTime.UTC()).c_str());
             ImGui::SameLine();
             float v = static_cast<float>(currentTime);
             const float s = static_cast<float>(startTime.j2000Seconds());
@@ -74,10 +74,10 @@ namespace {
                 &v,
                 s,
                 e,
-                openspace::global::timeManager.time().UTC().c_str()
+                std::string(openspace::global::timeManager->time().UTC()).c_str()
             );
             ImGui::SameLine();
-            ImGui::Text("%s", endTime.UTC().c_str());
+            ImGui::Text("%s", std::string(endTime.UTC()).c_str());
 
             openspace::gui::CaptionText("Phases");
 
@@ -98,7 +98,7 @@ GuiMissionComponent::GuiMissionComponent()
 {}
 
 void GuiMissionComponent::render() {
-    if (!global::missionManager.hasCurrentMission()) {
+    if (!global::missionManager->hasCurrentMission()) {
         return;
     }
 
@@ -109,7 +109,7 @@ void GuiMissionComponent::render() {
 
     _isCollapsed = ImGui::IsWindowCollapsed();
 
-    const Mission& currentMission = global::missionManager.currentMission();
+    const Mission& currentMission = global::missionManager->currentMission();
     renderMission(currentMission);
 
     ImGui::End();

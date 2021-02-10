@@ -1,11 +1,16 @@
 local assetHelper = asset.require('util/asset_helper')
 local sharedSssb = asset.require('./sssb_shared')
 
-local filepath = sharedSssb.downloadSssbDatabaseFile(asset, 'apollo_asteroid', 'sssb_data_apollo_asteroid')
-local object = sharedSssb.createSssbGroupObject('sssb_data_apollo_asteroid.csv', "Apollo Asteroids", filepath, { 0.7, 0.7, 1.0 })
+local filepath = sharedSssb.downloadSssbDatabaseFile(asset, 'apollo_asteroid',
+    'sssb_data_apollo_asteroid')
+local object = sharedSssb.createSssbGroupObject('sssb_data_apollo_asteroid.csv',
+    "Apollo Asteroids", filepath, { 0.7, 0.7, 1.0 })
 object.Renderable.Enabled = false
 object.Renderable.SegmentQuality = 6
 object.Renderable.TrailFade = 10
+
+object.GUI.Description = [[ Earth-crossing Near-Earth-Asteroids with semi-major axes
+    larger than Earth's. ]]
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })
 
@@ -13,8 +18,12 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { object })
 asset.meta = {
     Name = "Apollo Asteroids",
     Version = "1.0",
-    Description = [[ Earth-crossing Near-Earth-Asteroids with semi-major axes larger than Earth's. ]],
+    Description = [[ RenderableSmallBody asset with data from from JPL Horizons
+        contiaining the Apollo group.]],
     Author = "JPL Small-Body Database hosted by California Institute of Technology",
     URL = "https://ssd.jpl.nasa.gov/sbdb_query.cgi",
-    License = "JPL-authored documents are sponsored by NASA under Contract NAS7-030010. All documents available from this server may be protected under the U.S. and Foreign Copyright Laws."
+    License = [[JPL-authored documents are sponsored by NASA under Contract NAS7-030010.
+        All documents available from this server may be protected under the U.S. and
+        Foreign Copyright Laws.]],
+    Identifiers = {"sssb_sssb_data_apollo_asteroid"}
 }

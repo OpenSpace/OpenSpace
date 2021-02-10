@@ -80,7 +80,7 @@ void RenderablePlaneProjection::initializeGL() {
     glGenVertexArrays(1, &_quad);
     glGenBuffers(1, &_vertexPositionBuffer);
 
-    _shader = global::renderEngine.buildRenderProgram(
+    _shader = global::renderEngine->buildRenderProgram(
         "Image Plane",
         absPath("${MODULE_BASE}/shaders/imageplane_vs.glsl"),
         absPath("${MODULE_BASE}/shaders/imageplane_fs.glsl")
@@ -92,7 +92,7 @@ void RenderablePlaneProjection::initializeGL() {
 
 void RenderablePlaneProjection::deinitializeGL() {
     if (_shader) {
-        global::renderEngine.removeRenderProgram(_shader.get());
+        global::renderEngine->removeRenderProgram(_shader.get());
         _shader = nullptr;
     }
 
@@ -253,8 +253,8 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
     }
 
     if (!_moving) {
-        SceneGraphNode* thisNode = global::renderEngine.scene()->sceneGraphNode(_name);
-        SceneGraphNode* newParent = global::renderEngine.scene()->sceneGraphNode(
+        SceneGraphNode* thisNode = global::renderEngine->scene()->sceneGraphNode(_name);
+        SceneGraphNode* newParent = global::renderEngine->scene()->sceneGraphNode(
             _target.node
         );
         if (thisNode && newParent) {
@@ -313,7 +313,7 @@ void RenderablePlaneProjection::setTarget(std::string body) {
     }
 
     _target.frame =
-        global::moduleEngine.module<SpacecraftInstrumentsModule>()->frameFromBody(body);
+        global::moduleEngine->module<SpacecraftInstrumentsModule>()->frameFromBody(body);
     _target.body = std::move(body);
 }
 

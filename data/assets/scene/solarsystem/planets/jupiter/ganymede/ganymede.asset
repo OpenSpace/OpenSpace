@@ -1,18 +1,9 @@
 local transforms = asset.require('../transforms')
 local assetHelper = asset.require('util/asset_helper')
 asset.require("spice/base")
-asset.request('./trail')
+asset.require('./trail')
 local kernel = asset.require('../kernels').jup310
 local labelsPath = asset.require('../jupiter_globelabels').LabelsPath
-
-
-
-local textures = asset.syncedResource({
-    Name = "Ganymede Textures",
-    Type = "HttpSynchronization",
-    Identifier = "ganymede_textures",
-    Version = 1
-})
 
 local Ganymede = {
     Identifier = "Ganymede",
@@ -35,15 +26,7 @@ local Ganymede = {
         Type = "RenderableGlobe",
         Radii = 2631000,
         SegmentsPerPatch = 64,
-        Layers = {
-            ColorLayers = {
-                {
-                    Identifier = "Texture",
-                    FilePath = textures .. "/ganymede.jpg",
-                    Enabled = true
-                }
-            }
-        },
+        Layers = {},
         Labels = {
             Enable = false,
             FileName = labelsPath .. "/ganymede.labels",
@@ -67,6 +50,15 @@ local Ganymede = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Ganymede })
+
+
+asset.meta = {
+    Name = "Ganymede",
+    Version = "1.0",
+    Description = [[ Ganymede globe with labels.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = {"Ganymede"}
+}

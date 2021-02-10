@@ -219,10 +219,8 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     global::callback::initializeGL.emplace_back([&]() {
         ZoneScopedN("GlobeBrowsingModule")
 
-        _tileCache = std::make_unique<globebrowsing::cache::MemoryAwareTileCache>(
-            _tileCacheSizeMB
-        );
-        addPropertySubOwner(*_tileCache);
+        _tileCache = std::make_unique<cache::MemoryAwareTileCache>(_tileCacheSizeMB);
+        addPropertySubOwner(_tileCache.get());
 
         tileprovider::initializeDefaultTile();
 
@@ -513,7 +511,7 @@ void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
     };
 
     // Compute altitude
-    const glm::dvec3 cameraPosition = global::navigationHandler.camera()->positionVec3();
+    const glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
     SceneGraphNode* globeSceneGraphNode = dynamic_cast<SceneGraphNode*>(globe.owner());
     if (!globeSceneGraphNode) {
         LERROR(
@@ -521,7 +519,9 @@ void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
         );
         return;
     }
-    const glm::dmat4 inverseModelTransform = globeSceneGraphNode->inverseModelTransform();
+    const glm::dmat4 inverseModelTransform = glm::inverse(
+        globeSceneGraphNode->modelTransform()
+    );
     const glm::dvec3 cameraPositionModelSpace =
         glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
     const SurfacePositionHandle posHandle = globe.calculateSurfacePositionHandle(
@@ -545,13 +545,15 @@ void GlobeBrowsingModule::goToGeodetic2(const globebrowsing::RenderableGlobe& gl
 {
     using namespace globebrowsing;
 
-    const glm::dvec3 cameraPosition = global::navigationHandler.camera()->positionVec3();
+    const glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
     SceneGraphNode* globeSceneGraphNode = dynamic_cast<SceneGraphNode*>(globe.owner());
     if (!globeSceneGraphNode) {
         LERROR("Error when going to Geodetic2");
     }
 
-    const glm::dmat4 inverseModelTransform = globeSceneGraphNode->inverseModelTransform();
+    const glm::dmat4 inverseModelTransform = glm::inverse(
+        globeSceneGraphNode->modelTransform()
+    );
 
     const glm::dvec3 cameraPositionModelSpace =
         glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
@@ -583,7 +585,7 @@ void GlobeBrowsingModule::goToGeodetic3(const globebrowsing::RenderableGlobe& gl
     state.position = positionModelSpace;
     state.up = slightlyNorth;
 
-    global::navigationHandler.setNavigationStateNextFrame(state);
+    global::navigationHandler->setNavigationStateNextFrame(state);
 }
 
 glm::dquat GlobeBrowsingModule::lookDownCameraRotation(
@@ -622,7 +624,7 @@ GlobeBrowsingModule::castFocusNodeRenderableToGlobe()
     using namespace globebrowsing;
 
     const Renderable* renderable =
-        global::navigationHandler.orbitalNavigator().anchorNode()->renderable();
+        global::navigationHandler->orbitalNavigator().anchorNode()->renderable();
 
     if (!renderable) {
         return nullptr;

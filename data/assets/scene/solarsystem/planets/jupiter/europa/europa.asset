@@ -1,20 +1,9 @@
 local transforms = asset.require('../transforms')
 local assetHelper = asset.require('util/asset_helper')
 asset.require("spice/base")
-asset.request('./trail')
+asset.require('./trail')
 local kernel = asset.require('../kernels').jup310
 local labelsPath = asset.require('../jupiter_globelabels').LabelsPath
-
-
-local map_service_configs = asset.localResource("map_service_configs")
-
-
-local textures = asset.syncedResource({
-    Name = "Europa Textures",
-    Type = "HttpSynchronization",
-    Identifier = "europa_textures",
-    Version = 1
-})
 
 local Europa = {
     Identifier = "Europa",
@@ -37,22 +26,7 @@ local Europa = {
         Type = "RenderableGlobe",
         Radii = 1560800,
         SegmentsPerPatch = 64,
-        Layers = {
-            ColorLayers = {
-                {
-                    Identifier = "Texture",
-                    FilePath = textures .. "/europa.jpg",
-                    -- Enabled = true
-                },
-                {
-                    Identifier = "Voyager_Global_Mosaic",
-                    Name = "Voyager Global Mosaic [Sweden]",
-                    FilePath = map_service_configs .. "/LiU/Voyager_GalileoSSI_global_mosaic_500m.wms",
-                    BlendMode = "Color",
-                    Enabled = true
-                },
-            }
-        },
+        Layers = {},
         Labels = {
             Enable = false,
             FileName = labelsPath .. "/europa.labels",
@@ -76,6 +50,15 @@ local Europa = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Europa })
+
+
+asset.meta = {
+    Name = "Mimas",
+    Version = "1.0",
+    Description = [[ Europa globe with labels.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = {"Europa"}
+}

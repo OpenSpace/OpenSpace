@@ -40,6 +40,7 @@
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
@@ -197,6 +198,8 @@ RingsComponent::RingsComponent(const ghoul::Dictionary& dictionary)
 }
 
 void RingsComponent::initialize() {
+    ZoneScoped
+
     using ghoul::filesystem::File;
 
     addProperty(_enabled);
@@ -256,11 +259,13 @@ bool RingsComponent::isReady() const {
 }
 
 void RingsComponent::initializeGL() {
+    ZoneScoped
+
     compileShadowShader();
 
     try {
         //global::renderEngine.removeRenderProgram(_geometryOnlyShader.get());
-        _geometryOnlyShader = global::renderEngine.buildRenderProgram(
+        _geometryOnlyShader = global::renderEngine->buildRenderProgram(
             "RingsGeomOnlyProgram",
             absPath("${MODULE_GLOBEBROWSING}/shaders/rings_geom_vs.glsl"),
             absPath("${MODULE_GLOBEBROWSING}/shaders/rings_geom_fs.glsl")
@@ -293,10 +298,10 @@ void RingsComponent::deinitializeGL() {
     _textureFile = nullptr;
     _texture = nullptr;
 
-    global::renderEngine.removeRenderProgram(_shader.get());
+    global::renderEngine->removeRenderProgram(_shader.get());
     _shader = nullptr;
 
-    global::renderEngine.removeRenderProgram(_geometryOnlyShader.get());
+    global::renderEngine->removeRenderProgram(_geometryOnlyShader.get());
     _geometryOnlyShader = nullptr;
 }
 
@@ -379,6 +384,8 @@ void RingsComponent::draw(const RenderData& data,
 }
 
 void RingsComponent::update(const UpdateData& data) {
+    ZoneScoped
+
     if (_shader && _shader->isDirty()) {
         compileShadowShader();
     }
@@ -403,7 +410,7 @@ void RingsComponent::update(const UpdateData& data) {
     }
 
     _sunPosition = glm::normalize(
-        global::renderEngine.scene()->sceneGraphNode("Sun")->worldPosition() -
+        global::renderEngine->scene()->sceneGraphNode("Sun")->worldPosition() -
         data.modelTransform.translation
     );
 }
@@ -481,8 +488,8 @@ void RingsComponent::compileShadowShader() {
     dict.setValue("nShadowSamples", std::to_string(_nShadowSamples - 1));
 
     try {
-        global::renderEngine.removeRenderProgram(_shader.get());
-        _shader = global::renderEngine.buildRenderProgram(
+        global::renderEngine->removeRenderProgram(_shader.get());
+        _shader = global::renderEngine->buildRenderProgram(
             "RingsProgram",
             absPath("${MODULE_GLOBEBROWSING}/shaders/rings_vs.glsl"),
             absPath("${MODULE_GLOBEBROWSING}/shaders/rings_fs.glsl"),

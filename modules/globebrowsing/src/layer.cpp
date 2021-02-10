@@ -94,6 +94,14 @@ namespace {
         "If the 'Type' of this layer is a solid color, this value determines what this "
         "solid color is."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo GuiDescriptionInfo = {
+        "GuiDescription",
+        "Gui Description",
+        "This is the description for the scene graph node to be shown in the gui "
+        "example: Earth is a special place",
+        openspace::properties::Property::Visibility::Hidden
+    };
 } // namespace
 
 documentation::Documentation Layer::Documentation() {
@@ -219,6 +227,8 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
     , _remove(RemoveInfo)
     , _solidColor(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _layerGroupId(id)
+    , _guiDescription(GuiDescriptionInfo)
+
 {
     documentation::testSpecificationAndThrow(Documentation(), layerDict, "Layer");
 
@@ -238,6 +248,11 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
 
     if (layerDict.hasKeyAndValue<bool>(EnabledInfo.identifier)) {
         _enabled = layerDict.value<bool>(EnabledInfo.identifier);
+    }
+
+    if (layerDict.hasKey(KeyDesc)) {
+        _guiDescription = description();
+        addProperty(_guiDescription);
     }
 
     bool padTiles = true;
@@ -374,6 +389,8 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
 }
 
 void Layer::initialize() {
+    ZoneScoped
+
     if (_tileProvider) {
         tileprovider::initialize(*_tileProvider);
     }
@@ -386,16 +403,18 @@ void Layer::deinitialize() {
 }
 
 ChunkTilePile Layer::chunkTilePile(const TileIndex& tileIndex, int pileSize) const {
+    ZoneScoped
+
     if (_tileProvider) {
         return tileprovider::chunkTilePile(*_tileProvider, tileIndex, pileSize);
     }
     else {
         ChunkTilePile chunkTilePile;
-        chunkTilePile.resize(pileSize);
+        std::fill(chunkTilePile.begin(), chunkTilePile.end(), std::nullopt);
         for (int i = 0; i < pileSize; ++i) {
-            chunkTilePile[i].tile = Tile();
-            chunkTilePile[i].uvTransform.uvOffset = { 0, 0 };
-            chunkTilePile[i].uvTransform.uvScale = { 1, 1 };
+            chunkTilePile[i] = ChunkTile {
+                Tile(), TileUvTransform { { 0, 0 }, { 1, 1 } }
+            };
         }
         return chunkTilePile;
     }

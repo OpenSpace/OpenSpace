@@ -1,14 +1,7 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
 asset.require("spice/base")
-asset.request('./trail')
-
-local textures = asset.syncedResource({
-    Name = "Neptune textures",
-    Type = "HttpSynchronization",
-    Identifier = "neptune_textures",
-    Version = 1
-})
+asset.require('./trail')
 
 local Neptune = {
     Identifier = "Neptune",
@@ -24,19 +17,13 @@ local Neptune = {
         Type = "RenderableGlobe",
         Radii = { 24764000.0, 24764000.0, 24314000.0 },
         SegmentsPerPatch = 64,
-        Layers = {
-            ColorLayers = {
-                {
-                    Identifier = "Texture",
-                    FilePath = textures .. "/neptune.jpg",
-                    Enabled = true
-                }
-            }
-        }
+        Layers = {}
     },
     Tag = { "planet_solarSystem", "planet_giants" },
     GUI = {
-        Path = "/Solar System/Planets/Neptune"
+        Name = "Neptune",
+        Path = "/Solar System/Planets/Neptune",
+        Description = [[Neptune globe]]
     }
 }
 
@@ -57,8 +44,20 @@ local NeptuneLabel = {
     Tag = { "solarsystem_labels" },
     GUI = {
         Name = "Neptune Label",
-        Path = "/Solar System/Planets/Neptune"
+        Path = "/Solar System/Planets/Neptune",
+        Description = [[ Main planet label for Neptune.]],
     }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Neptune, NeptuneLabel })
+
+
+asset.meta = {
+    Name = "Neptune",
+    Version = "1.0",
+    Description = [[ Neptune globe, and main planet label.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = {"Neptune"}
+}

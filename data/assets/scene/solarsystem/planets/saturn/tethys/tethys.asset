@@ -1,17 +1,8 @@
 local transforms = asset.require('../transforms')
 local assetHelper = asset.require('util/asset_helper')
 local kernel = asset.require('../kernels').sat375
-asset.request('./trail')
+asset.require('./trail')
 local labelsPath = asset.require('../saturn_globelabels').LabelsPath
-
-
-
-local textures = asset.syncedResource({
-    Name = "Tethys textures",
-    Type = "HttpSynchronization",
-    Identifier = "tethys_textures",
-    Version = 1
-})
 
 local Tethys = {
     Identifier = "Tethys",
@@ -25,7 +16,7 @@ local Tethys = {
         },
         Rotation = {
             Type = "SpiceRotation",
-            SourceFrame = "IAU_ENCELADUS",
+            SourceFrame = "IAU_TETHYS",
             DestinationFrame = "GALACTIC"
         }
     },
@@ -33,15 +24,7 @@ local Tethys = {
         Type = "RenderableGlobe",
         Radii = 531100,
         SegmentsPerPatch = 64,
-        Layers = {
-            ColorLayers = {
-                {
-                    Identifier = "Texture",
-                    FilePath = textures .. "/tethys.jpg",
-                    Enabled = true
-                }
-            }
-        },
+        Layers = {},
         Labels = {
             Enable = false,
             FileName = labelsPath .. "/tethys.labels",
@@ -65,6 +48,14 @@ local Tethys = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Tethys })
+
+
+asset.meta = {
+    Name = "Tethys",
+    Version = "1.0",
+    Description = [[ Tethys globe with labels.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

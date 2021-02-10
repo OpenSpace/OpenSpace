@@ -74,7 +74,7 @@ endif ()
 
 
 #####
-# macos
+# MacOS
 #####
 if (APPLE)
   set(MACOSX_BUNDLE_ICON_FILE openspace.icns)
@@ -101,7 +101,7 @@ target_include_directories(
   ${SPOUT_INCLUDE_DIRS}
 )
 
-target_link_libraries(OpenSpace openspace-core ${OPENVR_LIBRARY} ${SPOUT_LIBRARY})
+target_link_libraries(OpenSpace PUBLIC openspace-core ${OPENVR_LIBRARY} ${SPOUT_LIBRARY})
 
 target_compile_definitions(OpenSpace PRIVATE
   ${SGCT_OPENVR_DEFINITIONS}
@@ -112,10 +112,11 @@ begin_header("Dependency: SGCT")
 
 set(SGCT_TEXT OFF CACHE BOOL "" FORCE)
 set(SGCT_DEP_INCLUDE_FREETYPE OFF CACHE BOOL "" FORCE)
+set(SGCT_DEP_INCLUDE_FMT OFF CACHE BOOL "" FORCE)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct)
 target_include_directories(OpenSpace SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct/include)
-target_link_libraries(OpenSpace sgct)
+target_link_libraries(OpenSpace PUBLIC sgct)
 
 set_folder_location(sgct "External")
 set_folder_location(glfw "External/SGCT")
@@ -127,10 +128,16 @@ set_folder_location(vrpn "External/SGCT")
 set_folder_location(zlibstatic "External/SGCT")
 
 if (UNIX AND (NOT APPLE))
-  target_link_libraries(OpenSpace Xcursor Xinerama X11)
+  target_link_libraries(OpenSpace PUBLIC Xcursor Xinerama X11)
 endif ()
 
 end_header("Dependency: SGCT")
+
+begin_header("Dependency: Profile Editor")
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/launcher)
+# target_include_directories(OpenSpace SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ext/launcher/include)
+target_link_libraries(OpenSpace PUBLIC openspace-ui-launcher)
+end_header("Dependency: Profile Editor")
 
 
 # Web Browser and Web gui
@@ -158,7 +165,7 @@ endif ()
 if (MSVC)
   begin_header("Dependency: Dbghelp")
   # This library is used for being able to output the callstack if an exception escapes
-  target_link_libraries(OpenSpace Dbghelp.lib)
+  target_link_libraries(OpenSpace PUBLIC Dbghelp.lib)
   end_header()
 endif ()
 

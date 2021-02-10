@@ -1,0 +1,15 @@
+local texturesPath = asset.require("./../../mercury_textures").TexturesPath
+local globeIdentifier = asset.require("./../../mercury").Mercury.Identifier
+
+local layer = {
+    Name = "Silicon Abundance",
+    Identifier = "ssimap_02122015",
+    FilePath = texturesPath .. "/ssimap_02122015.png",
+    BlendMode = "Multiply",
+}
+
+asset.onInitialize(function () 
+    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)

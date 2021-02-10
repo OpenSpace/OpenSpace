@@ -32,6 +32,7 @@
 #include <openspace/documentation/verifier.h>
 #include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 
 namespace {
@@ -145,7 +146,7 @@ void RenderableCartesianAxes::initializeGL() {
     _program = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return global::renderEngine.buildRenderProgram(
+            return global::renderEngine->buildRenderProgram(
                 ProgramName,
                 absPath("${MODULE_BASE}/shaders/axes_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/axes_fs.glsl")
@@ -209,7 +210,7 @@ void RenderableCartesianAxes::deinitializeGL() {
     BaseModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
-            global::renderEngine.removeRenderProgram(p);
+            global::renderEngine->removeRenderProgram(p);
         }
     );
     _program = nullptr;
@@ -233,21 +234,6 @@ void RenderableCartesianAxes::render(const RenderData& data, RendererTasks&){
     _program->setUniform("yColor", _yColor);
     _program->setUniform("zColor", _zColor);
 
-    // Saves current state:
-    GLboolean isBlendEnabled = glIsEnabledi(GL_BLEND, 0);
-    GLboolean isLineSmoothEnabled = glIsEnabled(GL_LINE_SMOOTH);
-    GLfloat currentLineWidth;
-    glGetFloatv(GL_LINE_WIDTH, &currentLineWidth);
-
-    GLenum blendEquationRGB, blendEquationAlpha, blendDestAlpha,
-        blendDestRGB, blendSrcAlpha, blendSrcRGB;
-    glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
-    glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
-    glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
-    glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
-    glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
-    glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
-
     // Changes GL state:
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnablei(GL_BLEND, 0);
@@ -261,15 +247,8 @@ void RenderableCartesianAxes::render(const RenderData& data, RendererTasks&){
     _program->deactivate();
 
     // Restores GL State
-    glLineWidth(currentLineWidth);
-    glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
-    glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
-    if (!isBlendEnabled) {
-        glDisablei(GL_BLEND, 0);
-    }
-    if (!isLineSmoothEnabled) {
-        glDisable(GL_LINE_SMOOTH);
-    }
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetLineState();
 }
 
 } // namespace openspace

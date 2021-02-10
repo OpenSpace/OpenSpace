@@ -1,16 +1,7 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
 asset.require("spice/base")
-asset.request('./trail')
-
-
-
-local textures = asset.syncedResource({
-    Name = "Uranus Textures",
-    Type = "HttpSynchronization",
-    Identifier = "uranus_textures",
-    Version = 1
-})
+asset.require('./trail')
 
 local Uranus = {
     Identifier = "Uranus",
@@ -26,19 +17,13 @@ local Uranus = {
         Type = "RenderableGlobe",
         Radii = { 25559000, 25559000, 24973000 },
         SegmentsPerPatch = 64,
-        Layers = {
-            ColorLayers = {
-                {
-                    Identifier = "Texture",
-                    FilePath = textures .. "/uranus.jpg",
-                    Enabled = true
-                }
-            }
-        }
+        Layers = {}
     },
     Tag = { "planet_solarSystem", "planet_giants" },
     GUI = {
-        Path = "/Solar System/Planets/Uranus"
+        Name = "Uranus",
+        Path = "/Solar System/Planets/Uranus",
+        Description = [[Globe for Uranus.]]
     }
 }
 
@@ -59,8 +44,20 @@ local UranusLabel = {
     Tag = { "solarsystem_labels" },
     GUI = {
         Name = "Uranus Label",
-        Path = "/Solar System/Planets/Uranus"
+        Path = "/Solar System/Planets/Uranus",
+        Description = [[ Main planet label for Uranus.]],
     }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Uranus, UranusLabel })
+
+
+asset.meta = {
+    Name = "Uranus",
+    Version = "1.0",
+    Description = [[ Uranus globe, and main planet label.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = {"Uranus" , "UranusLabel"}
+}

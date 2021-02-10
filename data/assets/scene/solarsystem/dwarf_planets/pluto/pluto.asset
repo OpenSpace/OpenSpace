@@ -1,7 +1,7 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
 asset.require("spice/base")
-asset.request('./trail')
+asset.require('./trail')
 local labelsPath = asset.require('./pluto_globelabels').LabelsPath
 
 
@@ -26,16 +26,7 @@ local Pluto = {
         Type = "RenderableGlobe",
         Radii = { 1.173E6, 1.173E6, 1.173E6 },
         SegmentsPerPatch = 64,
-        Layers = {
-            ColorLayers = {
-                {
-                    Identifier = "Greyscale_USGS",
-                    Name = "Black & White [USGS]",
-                    FilePath = "WMS:https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/pluto/pluto_simp_cyl.map&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=NEWHORIZONS_PLUTO_MOSAIC&SRS=EPSG:4326&BBOX=-180,-90,360,90",
-                    Enabled = true
-                }
-            }
-        },
+        Layers = {},
         Labels = {
             Enable = false,
             FileName = labelsPath .. "/pluto.labels",
@@ -81,3 +72,13 @@ local PlutoLabel = {
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Pluto, PlutoLabel })
+
+
+asset.meta = {
+    Name = "Pluto",
+    Version = "1.0",
+    Description = [[ Pluto globe, and main planet label.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

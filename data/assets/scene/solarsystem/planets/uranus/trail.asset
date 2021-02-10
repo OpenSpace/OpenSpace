@@ -20,10 +20,20 @@ local UranusTrail = {
     Tag = { "planetTrail_solarSystem", "planetTrail_giants" },
     GUI = {
         Name = "Uranus Trail",
-        Path = "/Solar System/Planets/Uranus"
+        Path = "/Solar System/Planets/Uranus",
+        Description = [[ Trail of Uranus as observed by the Sun.]],
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { UranusTrail })
+
+
+asset.meta = {
+    Name = "Uranus Trail",
+    Version = "1.0",
+    Description = [[ Main trail of Uranus. Data from NASA Spice (see base spice asset)]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = {"UranusTrail"}
+}

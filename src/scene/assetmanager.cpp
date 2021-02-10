@@ -43,6 +43,8 @@ AssetManager::AssetManager(ghoul::lua::LuaState* state, std::string assetRootDir
 {}
 
 void AssetManager::initialize() {
+    ZoneScoped
+
     _assetLoader.addAssetListener(this);
     _assetLoader.rootAsset().initialize();
 }
@@ -58,20 +60,22 @@ bool AssetManager::update() {
 
     // Add assets
     for (const std::pair<const std::string, bool>& c : _pendingStateChangeCommands) {
+        ZoneScopedN("(add) Pending State Change")
         const std::string& path = c.first;
         const bool add = c.second;
         if (add) {
             _assetLoader.add(path);
-            global::profile.addAsset(path);
+            global::profile->addAsset(path);
         }
     }
     // Remove assets
     for (const std::pair<const std::string, bool>& c : _pendingStateChangeCommands) {
+        ZoneScopedN("(remove) Pending State change")
         const std::string& path = c.first;
         const bool remove = !c.second;
         if (remove && _assetLoader.has(path)) {
             _assetLoader.remove(path);
-            global::profile.removeAsset(path);
+            global::profile->removeAsset(path);
         }
     }
     _pendingStateChangeCommands.clear();

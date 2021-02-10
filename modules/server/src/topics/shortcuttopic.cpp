@@ -47,7 +47,7 @@ std::vector<nlohmann::json> ShortcutTopic::shortcutsJson() const {
     using ShortcutInformation = interaction::ShortcutManager::ShortcutInformation;
 
     const std::vector<ShortcutInformation>& shortcuts =
-        global::shortcutManager.shortcuts();
+        global::shortcutManager->shortcuts();
 
     std::vector<nlohmann::json> json;
     for (const ShortcutInformation& shortcut : shortcuts) {
@@ -64,7 +64,7 @@ std::vector<nlohmann::json> ShortcutTopic::shortcutsJson() const {
     using KeyInformation = interaction::KeybindingManager::KeyInformation;
 
     const std::multimap<KeyWithModifier, KeyInformation>& keyBindings =
-        global::keybindingManager.keyBindings();
+        global::keybindingManager->keyBindings();
 
     for (const std::pair<const KeyWithModifier, KeyInformation>& keyBinding : keyBindings)
     {

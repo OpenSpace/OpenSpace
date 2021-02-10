@@ -27,6 +27,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/glm.h>
 #include <sstream>
 
@@ -52,7 +53,7 @@ void KeybindingManager::keyboardCallback(Key key, KeyModifier modifier, KeyActio
         for (auto it = ret.first; it != ret.second; ++it) {
             using RS = scripting::ScriptEngine::RemoteScripting;
 
-            global::scriptEngine.queueScript(
+            global::scriptEngine->queueScript(
                 it->second.command,
                 it->second.synchronization ? RS::Yes : RS::No
             );
@@ -114,7 +115,7 @@ void KeybindingManager::bindKey(Key key, KeyModifier modifier, std::string luaCo
     if (isShift && isKeypad) {
         LWARNINGC(
             "bindKey",
-            "Windows does not support binding keys to Shift + Keyboard as it will "
+            "Windows does not support binding keys to Shift + Keypad as it will "
             "internally convert these into Home, End, etc, keys."
         );
     }
@@ -133,18 +134,21 @@ void KeybindingManager::bindKey(Key key, KeyModifier modifier, std::string luaCo
 }
 
 void KeybindingManager::removeKeyBinding(const std::string& key) {
-    // Erase-remove idiom does not work for std::multimap so we have to do this on foot
-
     KeyWithModifier k = stringToKey(key);
+    removeKeyBinding(k);
+}
+
+void KeybindingManager::removeKeyBinding(const KeyWithModifier& key) {
+    // Erase-remove idiom does not work for std::multimap so we have to do this on foot
 
     for (auto it = _keyLua.begin(); it != _keyLua.end(); ) {
         // If the current iterator is the key that we are looking for, delete it
         // (std::multimap::erase will return the iterator to the next element for us)
-        if (it->first == k) {
+        if (it->first == key) {
             it = _keyLua.erase(it);
         }
         else {
-            // We if it is not, we continue iteration
+            // If it is not, we continue iteration
             ++it;
         }
     }
@@ -153,10 +157,16 @@ void KeybindingManager::removeKeyBinding(const std::string& key) {
 std::vector<std::pair<KeyWithModifier, KeybindingManager::KeyInformation>>
 KeybindingManager::keyBinding(const std::string& key) const
 {
+    KeyWithModifier k = stringToKey(key);
+    return keyBinding(k);
+}
+
+std::vector<std::pair<KeyWithModifier, KeybindingManager::KeyInformation>>
+KeybindingManager::keyBinding(const KeyWithModifier& key) const
+{
     std::vector<std::pair<KeyWithModifier, KeyInformation>> result;
 
-    KeyWithModifier k = stringToKey(key);
-    auto itRange = _keyLua.equal_range(k);
+    auto itRange = _keyLua.equal_range(key);
     for (auto it = itRange.first; it != itRange.second; ++it) {
         result.emplace_back(it->first, it->second);
     }
@@ -170,6 +180,8 @@ KeybindingManager::keyBindings() const
 }
 
 std::string KeybindingManager::generateJson() const {
+    ZoneScoped
+
     std::stringstream json;
     json << "[";
     bool first = true;

@@ -31,6 +31,7 @@
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/misc/profiling.h>
 
 namespace {
     constexpr const char* KeyFontMono = "Mono";
@@ -70,72 +71,97 @@ namespace {
     constexpr const char* ValueFpsAvg = "Average frames per second";
     constexpr const char* ValueNone = "None";
 
-    std::string formatDt() {
-        return fmt::format(
-            "Avg. Frametime: {:.2f} ms",
-            openspace::global::windowDelegate.averageDeltaTime() * 1000.0
+    [[ nodiscard ]] char* formatDt(std::vector<char>& buffer) {
+        return fmt::format_to(
+            buffer.data(),
+            "Avg. Frametime: {:.2f} ms\0",
+            openspace::global::windowDelegate->averageDeltaTime() * 1000.0
         );
     }
 
-    std::string formatDtExtremes(double minFrametimeCache, double maxFrametimeCache) {
-        return fmt::format(
+    [[ nodiscard ]] char* formatDtExtremes(std::vector<char>& buffer,
+                                           double minFrametimeCache,
+                                           double maxFrametimeCache)
+    {
+        return fmt::format_to(
+            buffer.data(),
             "Last frametimes between: {:.2f} and {:.2f} ms\n"
-            "Overall between: {:.2f} and {:.2f} ms",
-            openspace::global::windowDelegate.minDeltaTime() * 1000.0,
-            openspace::global::windowDelegate.maxDeltaTime() * 1000.0,
+            "Overall between: {:.2f} and {:.2f} ms\0",
+            openspace::global::windowDelegate->minDeltaTime() * 1000.0,
+            openspace::global::windowDelegate->maxDeltaTime() * 1000.0,
             minFrametimeCache,
             maxFrametimeCache
         );
     }
 
-    std::string formatDtStandardDeviation() {
-        return fmt::format(
-            "Frametime standard deviation : {:.2f} ms",
-            openspace::global::windowDelegate.deltaTimeStandardDeviation() * 1000.0
+    [[ nodiscard ]] char* formatDtStandardDeviation(std::vector<char>& buffer) {
+        return fmt::format_to(
+            buffer.data(),
+            "Frametime standard deviation : {:.2f} ms\0",
+            openspace::global::windowDelegate->deltaTimeStandardDeviation() * 1000.0
         );
     }
 
-    std::string formatDtCoefficientOfVariation() {
-        return fmt::format(
-            "Frametime coefficient of variation : {:.2f} %",
-            openspace::global::windowDelegate.deltaTimeStandardDeviation() /
-            openspace::global::windowDelegate.averageDeltaTime() * 100.0
+    [[ nodiscard ]] char* formatDtCoefficientOfVariation(std::vector<char>& buffer) {
+        return fmt::format_to(
+            buffer.data(),
+            "Frametime coefficient of variation : {:.2f} %\0",
+            openspace::global::windowDelegate->deltaTimeStandardDeviation() /
+            openspace::global::windowDelegate->averageDeltaTime() * 100.0
         );
     }
 
-    std::string formatFps() {
-        return fmt::format(
-            "FPS: {:3.2f}",
-            1.0 / openspace::global::windowDelegate.deltaTime()
+    [[ nodiscard ]] char* formatFps(std::vector<char>& buffer) {
+        return fmt::format_to(
+            buffer.data(),
+            "FPS: {:3.2f}\0",
+            1.0 / openspace::global::windowDelegate->deltaTime()
         );
     }
 
-    std::string formatAverageFps() {
-        return fmt::format(
-            "Avg. FPS: {:3.2f}",
-            1.0 / openspace::global::windowDelegate.averageDeltaTime()
+    [[ nodiscard ]] char* formatAverageFps(std::vector<char>& buffer) {
+        return fmt::format_to(
+            buffer.data(),
+            "Avg. FPS: {:3.2f}\0",
+            1.0 / openspace::global::windowDelegate->averageDeltaTime()
         );
     }
 
-    std::string format(openspace::DashboardItemFramerate::FrametimeType frametimeType,
-                       double minFrametimeCache, double maxFrametimeCache)
+    [[ nodiscard ]] char* format(std::vector<char>& buffer,
+                           openspace::DashboardItemFramerate::FrametimeType frametimeType,
+                                       double minFrametimeCache, double maxFrametimeCache)
     {
         using namespace openspace;
         switch (frametimeType) {
             case DashboardItemFramerate::FrametimeType::DtTimeAvg:
-                return formatDt();
+                return formatDt(buffer);
             case DashboardItemFramerate::FrametimeType::DtTimeExtremes:
-                return formatDtExtremes(minFrametimeCache, maxFrametimeCache);
+                return formatDtExtremes(buffer, minFrametimeCache, maxFrametimeCache);
             case DashboardItemFramerate::FrametimeType::DtStandardDeviation:
-                return formatDtStandardDeviation();
+                return formatDtStandardDeviation(buffer);
             case DashboardItemFramerate::FrametimeType::DtCoefficientOfVariation:
-                return formatDtCoefficientOfVariation();
+                return formatDtCoefficientOfVariation(buffer);
             case DashboardItemFramerate::FrametimeType::FPS:
-                return formatFps();
+                return formatFps(buffer);
             case DashboardItemFramerate::FrametimeType::FPSAvg:
-                return formatAverageFps();
+                return formatAverageFps(buffer);
             default:
-                return "";
+                throw ghoul::MissingCaseException();
+        }
+    }
+
+    [[ nodiscard ]] int nLines(
+                           openspace::DashboardItemFramerate::FrametimeType frametimeType)
+    {
+        using FrametimeType = openspace::DashboardItemFramerate::FrametimeType;
+        switch (frametimeType) {
+            case FrametimeType::DtTimeAvg:                return 1;
+            case FrametimeType::DtTimeExtremes:           return 2;
+            case FrametimeType::DtStandardDeviation:      return 1;
+            case FrametimeType::DtCoefficientOfVariation: return 1;
+            case FrametimeType::FPS:                      return 1;
+            case FrametimeType::FPSAvg:                   return 1;
+            default:                                  throw ghoul::MissingCaseException();
         }
     }
 } // namespace
@@ -195,7 +221,7 @@ DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictiona
         _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
     }
     _fontName.onChange([this]() {
-        _font = global::fontManager.font(_fontName, _fontSize);
+        _font = global::fontManager->font(_fontName, _fontSize);
     });
     addProperty(_fontName);
 
@@ -205,7 +231,7 @@ DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictiona
         );
     }
     _fontSize.onChange([this](){
-        _font = global::fontManager.font(_fontName, _fontSize);
+        _font = global::fontManager->font(_fontName, _fontSize);
     });
     addProperty(_fontSize);
 
@@ -261,10 +287,14 @@ DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictiona
     });
     addProperty(_clearCache);
 
-    _font = global::fontManager.font(_fontName, _fontSize);
+    _font = global::fontManager->font(_fontName, _fontSize);
+
+    _buffer.resize(128);
 }
 
 void DashboardItemFramerate::render(glm::vec2& penPosition) {
+    ZoneScoped
+
     if (_shouldClearCache) {
         _minDeltaTimeCache = 1.0;
         _maxDeltaTimeCache = -1.0;
@@ -273,49 +303,47 @@ void DashboardItemFramerate::render(glm::vec2& penPosition) {
 
     _minDeltaTimeCache = std::min(
         _minDeltaTimeCache,
-        global::windowDelegate.minDeltaTime() * 1000.0
+        global::windowDelegate->minDeltaTime() * 1000.0
     );
     _maxDeltaTimeCache = std::max(
         _maxDeltaTimeCache,
-        global::windowDelegate.maxDeltaTime() * 1000.0
+        global::windowDelegate->maxDeltaTime() * 1000.0
     );
 
     FrametimeType frametimeType = FrametimeType(_frametimeType.value());
 
-    const std::string output = format(
+    std::fill(_buffer.begin(), _buffer.end(), 0);
+    char* end = format(
+        _buffer,
         frametimeType,
         _minDeltaTimeCache,
         _maxDeltaTimeCache
     );
+    std::string_view output = std::string_view(_buffer.data(), end - _buffer.data());
 
     int nLines = output.empty() ? 0 :
         static_cast<int>((std::count(output.begin(), output.end(), '\n') + 1));
-
-    penPosition.y -= _font->height() * static_cast<float>(nLines);
 
     ghoul::fontrendering::FontRenderer::defaultRenderer().render(
         *_font,
         penPosition,
         output
     );
+    penPosition.y -= _font->height() * static_cast<float>(nLines);
 }
 
 glm::vec2 DashboardItemFramerate::size() const {
-    FrametimeType frametimeType = FrametimeType(_frametimeType.value());
-    const std::string output = format(
-        frametimeType,
-        _minDeltaTimeCache,
-        _maxDeltaTimeCache
-    );
+    ZoneScoped
+
+    const FrametimeType t = FrametimeType(_frametimeType.value());
+    char* end = format(_buffer, t, _minDeltaTimeCache, _maxDeltaTimeCache);
+    std::string_view output = std::string_view(_buffer.data(), end - _buffer.data());
 
     if (output.empty()) {
         return { 0.f, 0.f };
     }
 
-    return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-        *_font,
-        output
-    ).boundingBox;
+    return _font->boundingBox(output);
 }
 
 } // namespace openspace

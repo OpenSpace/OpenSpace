@@ -1,18 +1,9 @@
 local transforms = asset.require('../transforms')
 local assetHelper = asset.require('util/asset_helper')
 asset.require("spice/base")
-asset.request('./trail')
+asset.require('./trail')
 local kernel = asset.require('../kernels').jup310
 local labelsPath = asset.require('../jupiter_globelabels').LabelsPath
-
-
-
-local textures = asset.syncedResource({
-    Name = "Callisto Textures",
-    Type = "HttpSynchronization",
-    Identifier = "callisto_textures",
-    Version = 1
-})
 
 local Callisto = {
     Identifier = "Callisto",
@@ -35,15 +26,7 @@ local Callisto = {
         Type = "RenderableGlobe",
         Radii = 2410000,
         SegmentsPerPatch = 64,
-        Layers = {
-            ColorLayers = {
-                {
-                    Identifier = "Texture",
-                    FilePath = textures .. "/callisto.jpg",
-                    Enabled = true
-                }
-            }
-        },
+        Layers = {},
         Labels = {
             Enable = false,
             FileName = labelsPath .. "/callisto.labels",
@@ -67,6 +50,15 @@ local Callisto = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Callisto })
+
+
+asset.meta = {
+    Name = "Callisto",
+    Version = "1.0",
+    Description = [[ Callisto globe with labels.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = {"Callisto"}
+}

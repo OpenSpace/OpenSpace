@@ -94,7 +94,7 @@ void SyncAssetTask::perform(const Task::ProgressCallback& progressCallback) {
 
     registerCoreClasses(scriptEngine);
 
-    for (OpenSpaceModule* m : global::moduleEngine.modules()) {
+    for (OpenSpaceModule* m : global::moduleEngine->modules()) {
         scriptEngine.addLibrary(m->luaLibrary());
 
         for (scripting::LuaLibrary& l : m->luaLibraries()) {

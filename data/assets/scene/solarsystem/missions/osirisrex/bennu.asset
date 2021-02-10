@@ -36,9 +36,9 @@ local Bennu = {
         Body = BENNU_BODY,
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/BennuTextured.obj"
-        }, 
-        ColorTexture = textures .. "/gray.png",
+            GeometryFile = models .. "/BennuTextured.obj",
+            ColorTexture = textures .. "/gray.png"
+        },
         Projection = {
             Sequence   = asset.localResource('InstrumentTimes'),
             SequenceType = "instrument-times",
@@ -110,6 +110,5 @@ local BennuTrail = {
     }
 
 }
-
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Bennu, BennuTrail })

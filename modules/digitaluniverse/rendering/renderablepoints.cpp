@@ -34,6 +34,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
@@ -235,6 +236,8 @@ bool RenderablePoints::isReady() const {
 }
 
 void RenderablePoints::initialize() {
+    ZoneScoped
+
     bool success = loadData();
     if (!success) {
         throw ghoul::RuntimeError("Error loading data");
@@ -242,6 +245,8 @@ void RenderablePoints::initialize() {
 }
 
 void RenderablePoints::initializeGL() {
+    ZoneScoped
+
     // OBS:  The ProgramObject name is later used to release the program as well, so the
     //       name parameter to requestProgramObject and the first parameter to
     //       buildRenderProgram has to be the same or an assertion will be thrown at the
@@ -251,7 +256,7 @@ void RenderablePoints::initializeGL() {
         _program = DigitalUniverseModule::ProgramObjectManager.request(
             "RenderablePoints Sprite",
             []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-                return global::renderEngine.buildRenderProgram(
+                return global::renderEngine->buildRenderProgram(
                     "RenderablePoints Sprite",
                     absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_vs.glsl"),
                     absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_sprite_fs.glsl")
@@ -263,7 +268,7 @@ void RenderablePoints::initializeGL() {
         _program = DigitalUniverseModule::ProgramObjectManager.request(
             "RenderablePoints",
             []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-                return global::renderEngine.buildRenderProgram(
+                return global::renderEngine->buildRenderProgram(
                     "RenderablePoints",
                     absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_vs.glsl"),
                     absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_sprite_fs.glsl")
@@ -283,7 +288,7 @@ void RenderablePoints::deinitializeGL() {
     DigitalUniverseModule::ProgramObjectManager.release(
         _program->name(),
         [](ghoul::opengl::ProgramObject* p) {
-            global::renderEngine.removeRenderProgram(p);
+            global::renderEngine->removeRenderProgram(p);
         }
     );
 

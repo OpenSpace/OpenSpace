@@ -31,6 +31,7 @@
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/misc/profiling.h>
 
 namespace {
     constexpr const char* KeyFontMono = "Mono";
@@ -94,7 +95,7 @@ DashboardItemDate::DashboardItemDate(const ghoul::Dictionary& dictionary)
         _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
     }
     _fontName.onChange([this](){
-        _font = global::fontManager.font(_fontName, _fontSize);
+        _font = global::fontManager->font(_fontName, _fontSize);
     });
     addProperty(_fontName);
 
@@ -102,46 +103,56 @@ DashboardItemDate::DashboardItemDate(const ghoul::Dictionary& dictionary)
         _fontSize = static_cast<float>(dictionary.value<double>(FontSizeInfo.identifier));
     }
     _fontSize.onChange([this](){
-        _font = global::fontManager.font(_fontName, _fontSize);
+        _font = global::fontManager->font(_fontName, _fontSize);
     });
     addProperty(_fontSize);
 
-    _font = global::fontManager.font(_fontName, _fontSize);
+    _font = global::fontManager->font(_fontName, _fontSize);
 }
 
 void DashboardItemDate::render(glm::vec2& penPosition) {
-    penPosition.y -= _font->height();
-    std::string timestring = global::timeManager.time().UTC();
-   
-    std::replace(timestring.begin(), timestring.end(), 'T', ' ');
-    timestring.replace(timestring.begin() + 20, timestring.end(), "");
-    double deltatime = global::timeManager.deltaTime();
-    std::string DeltaStringEnd = "";
-    if (deltatime > 60) {
-        deltatime = deltatime / 60;
-        DeltaStringEnd = " MINUTES / SECOND"; 
-    }
-    else {
-        DeltaStringEnd = " SECONDS / SECOND";
-    }
-    if (deltatime != 0) {
-        timestring += '\n';
-        timestring += std::to_string(int(deltatime)) + DeltaStringEnd;
-    }
-
-    RenderFont(
-        *_font,
-        penPosition,
-        fmt::format("{}", timestring)
+//    penPosition.y -= _font->height();
+//    std::string timestring = global::timeManager.time().UTC();
+//   
+//    std::replace(timestring.begin(), timestring.end(), 'T', ' ');
+//    timestring.replace(timestring.begin() + 20, timestring.end(), "");
+//    double deltatime = global::timeManager.deltaTime();
+//   std::string DeltaStringEnd = "";
+//    if (deltatime > 60) {
+//        deltatime = deltatime / 60;
+//        DeltaStringEnd = " MINUTES / SECOND"; 
+//    }
+//    else {
+//        DeltaStringEnd = " SECONDS / SECOND";
+//    }
+//   if (deltatime != 0) {
+//        timestring += '\n';
+//        timestring += std::to_string(int(deltatime)) + DeltaStringEnd;
+//    }
+    ZoneScoped
+    
+    std::string time = SpiceManager::ref().dateFromEphemerisTime(
+        global::timeManager->time().j2000Seconds(),
+        _timeFormat.value().c_str()
     );
+    try{
+        RenderFont(
+            *_font,
+            penPosition,
+            fmt::format(_formatString.value().c_str(), time)
+        );
+    }
+    catch(const fmt::format_error&){
+        LERRORC("DashboardItemDate", "Illegal format string");
+    }
+    penPosition.y -= _font->height();
 }
 
 glm::vec2 DashboardItemDate::size() const {
-    
-    return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-        *_font,
-        fmt::format("{} UTC", global::timeManager.time().UTC())
-    ).boundingBox;
+    ZoneScoped
+
+    std::string_view time = global::timeManager->time().UTC();
+    return _font->boundingBox(fmt::format(_formatString.value().c_str(), time));
 }
 
 } // namespace openspace

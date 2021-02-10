@@ -32,6 +32,7 @@
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/misc/profiling.h>
 
 namespace {
     constexpr const char* KeyFontMono = "Mono";
@@ -136,7 +137,7 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
         _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
     }
     _fontName.onChange([this](){
-        _font = global::fontManager.font(_fontName, _fontSize);
+        _font = global::fontManager->font(_fontName, _fontSize);
     });
     addProperty(_fontName);
 
@@ -144,7 +145,7 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
         _fontSize = static_cast<float>(dictionary.value<double>(FontSizeInfo.identifier));
     }
     _fontSize.onChange([this](){
-        _font = global::fontManager.font(_fontName, _fontSize);
+        _font = global::fontManager->font(_fontName, _fontSize);
     });
     addProperty(_fontSize);
 
@@ -172,12 +173,14 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
     _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
     addProperty(_requestedUnit);
 
-    _font = global::fontManager.font(_fontName, _fontSize);
+    _font = global::fontManager->font(_fontName, _fontSize);
 }
 
 void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
-    const double targetDt = global::timeManager.targetDeltaTime();
-    const double currentDt = global::timeManager.deltaTime();
+    ZoneScoped
+
+    const double targetDt = global::timeManager->targetDeltaTime();
+    const double currentDt = global::timeManager->deltaTime();
     std::pair<double, std::string> targetDeltaTime;
     std::pair<double, std::string> currentDeltaTime;
     if (_doSimplification) {
@@ -198,10 +201,9 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
         }
     }
 
-    std::string pauseText = global::timeManager.isPaused() ? " (Paused)" : "";
+    std::string pauseText = global::timeManager->isPaused() ? " (Paused)" : "";
 
-    penPosition.y -= _font->height();
-    if (targetDt != currentDt && !global::timeManager.isPaused()) {
+    if (targetDt != currentDt && !global::timeManager->isPaused()) {
         // We are in the middle of a transition
         RenderFont(
             *_font,
@@ -224,10 +226,13 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
             )
         );
     }
+    penPosition.y -= _font->height();
 }
 
 glm::vec2 DashboardItemSimulationIncrement::size() const {
-    double t = global::timeManager.targetDeltaTime();
+    ZoneScoped
+
+    double t = global::timeManager->targetDeltaTime();
     std::pair<double, std::string> deltaTime;
     if (_doSimplification) {
         deltaTime = simplifyTime(t);
@@ -238,13 +243,12 @@ glm::vec2 DashboardItemSimulationIncrement::size() const {
         deltaTime = { convertedT, nameForTimeUnit(unit, convertedT != 1.0) };
     }
 
-    return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-        *_font,
+    return _font->boundingBox(
         fmt::format(
             "Simulation increment: {:.1f} {:s} / second",
             deltaTime.first, deltaTime.second
         )
-    ).boundingBox;
+    );
 }
 
 } // namespace openspace

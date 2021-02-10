@@ -1,0 +1,23 @@
+local texturesPath = asset.require("./../../europa_textures").TexturesPath
+local globeIdentifier = asset.require("./../../europa").Europa.Identifier
+
+local layer = {
+    Identifier = "Texture",
+    FilePath = texturesPath .. "/europa.jpg",
+}
+
+asset.onInitialize(function () 
+    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+end)
+
+asset.export("layer", layer)
+
+
+asset.meta = {
+    Name = "Europa Texutre",
+    Version = "1.0",
+    Description = [[ Default jpg texture for Europa]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

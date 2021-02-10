@@ -30,12 +30,13 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <ghoul/misc/managedmemoryuniqueptr.h>
 
 namespace ghoul { class Dictionary; }
 namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
-}
+} // namespace ghoul::opengl
 
 namespace openspace {
 
@@ -58,7 +59,7 @@ public:
         Overlay = 16
     };
 
-    static std::unique_ptr<Renderable> createFromDictionary(
+    static ghoul::mm_unique_ptr<Renderable> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 
     Renderable(const ghoul::Dictionary& dictionary);
@@ -71,6 +72,7 @@ public:
 
     virtual bool isReady() const = 0;
     bool isEnabled() const;
+    bool shouldUpdateIfDisabled() const;
 
     void setBoundingSphere(float boundingSphere);
     float boundingSphere() const;
@@ -97,6 +99,8 @@ protected:
     properties::FloatProperty _opacity;
     properties::FloatProperty _boundingSphere;
     properties::StringProperty _renderableType;
+
+    bool _shouldUpdateIfDisabled = false;
 
     void setRenderBinFromOpacity();
     void registerUpdateRenderBinFromOpacity();

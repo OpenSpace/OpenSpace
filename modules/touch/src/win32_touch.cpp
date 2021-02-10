@@ -121,7 +121,7 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
                 std::unique_ptr<TouchInputHolder> points =
                     std::make_unique<TouchInputHolder>(touchInput);
                 gTouchInputsMap.emplace(info.pointerId, std::move(points));
-                global::openSpaceEngine.touchDetectionCallback(touchInput);
+                global::openSpaceEngine->touchDetectionCallback(touchInput);
 #endif
 #ifdef ENABLE_TUIOMESSAGES
                 // Handle new touchpoint
@@ -139,7 +139,7 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
                 TouchInputHolder* points = gTouchInputsMap[info.pointerId].get();
 
                 if (points->tryAddInput(touchInput)) {
-                    global::openSpaceEngine.touchUpdateCallback(points->latestInput());
+                    global::openSpaceEngine->touchUpdateCallback(points->latestInput());
                 }
 #endif
 #ifdef ENABLE_TUIOMESSAGES
@@ -155,7 +155,7 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
             else if (info.pointerFlags & POINTER_FLAG_UP) {
 #ifdef ENABLE_DIRECTMSG
                 gTouchInputsMap.erase(info.pointerId);
-                global::openSpaceEngine.touchExitCallback(touchInput);
+                global::openSpaceEngine->touchExitCallback(touchInput);
 #endif
 #ifdef ENABLE_TUIOMESSAGES
                 // Handle removed touchpoint

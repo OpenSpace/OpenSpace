@@ -37,6 +37,7 @@
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/misc/profiling.h>
 
 namespace {
     constexpr const char* KeyFontMono = "Mono";
@@ -104,7 +105,7 @@ DashboardItemGlobeLocation::DashboardItemGlobeLocation(
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 10.f, 144.f, 1.f)
     , _significantDigits(SignificantDigitsInfo, 4, 1, 12)
-    , _font(global::fontManager.font(KeyFontMono, 10))
+    , _font(global::fontManager->font(KeyFontMono, 10))
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -126,24 +127,37 @@ DashboardItemGlobeLocation::DashboardItemGlobeLocation(
 
 
     _fontName.onChange([this]() {
-        _font = global::fontManager.font(_fontName, _fontSize);
+        _font = global::fontManager->font(_fontName, _fontSize);
     });
     addProperty(_fontName);
 
     _fontSize.onChange([this]() {
-        _font = global::fontManager.font(_fontName, _fontSize);
+        _font = global::fontManager->font(_fontName, _fontSize);
     });
     addProperty(_fontSize);
 
-    addProperty(_significantDigits);
+    auto updateFormatString = [this]() {
+        using namespace fmt::literals;
 
-    _font = global::fontManager.font(_fontName, _fontSize);
+        _formatString = fmt::format(
+            "Position: {{:03.{0}f}}{{}}, {{:03.{0}f}}{{}}  Altitude: {{:03.{0}f}} {{}}",
+            _significantDigits.value()
+        );
+    };
+    _significantDigits.onChange(updateFormatString);
+    addProperty(_significantDigits);
+    updateFormatString();
+
+    _font = global::fontManager->font(_fontName, _fontSize);
+    _buffer.resize(128);
 }
 
 void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
+    ZoneScoped
+
     using namespace globebrowsing;
 
-    const SceneGraphNode* n = global::navigationHandler.orbitalNavigator().anchorNode();
+    const SceneGraphNode* n = global::navigationHandler->orbitalNavigator().anchorNode();
     if (!n) {
         return;
     }
@@ -152,8 +166,8 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
         return;
     }
 
-    const glm::dvec3 cameraPosition = global::navigationHandler.camera()->positionVec3();
-    const glm::dmat4 inverseModelTransform = n->inverseModelTransform();
+    const glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
+    const glm::dmat4 inverseModelTransform = glm::inverse(n->modelTransform());
     const glm::dvec3 cameraPositionModelSpace =
         glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
     const SurfacePositionHandle posHandle = globe->calculateSurfacePositionHandle(
@@ -185,24 +199,26 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
 
     std::pair<double, std::string> dist = simplifyDistance(altitude);
 
-    penPosition.y -= _font->height();
-    std::string d = std::to_string(_significantDigits);
-    std::string f = "Position: {:03." + d + "f}{}, {:03." + d + "f}{}  Altitude: {} {}";
-    RenderFont(
-        *_font,
-        penPosition,
-        fmt::format(f,
-            lat, isNorth ? "N" : "S",
-            lon, isEast ? "E" : "W",
-            dist.first, dist.second
-        )
+    std::fill(_buffer.begin(), _buffer.end(), 0);
+    char* end = fmt::format_to(
+        _buffer.data(),
+        _formatString.c_str(),
+        lat, isNorth ? "N" : "S",
+        lon, isEast ? "E" : "W",
+        dist.first, dist.second
     );
+    std::string_view text = std::string_view(_buffer.data(), end - _buffer.data());
+
+    RenderFont(*_font, penPosition, text);
+    penPosition.y -= _font->height();
 }
+
 glm::vec2 DashboardItemGlobeLocation::size() const {
-    return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-        *_font,
+    ZoneScoped
+
+    return _font->boundingBox(
         fmt::format("Position: {}, {}  Altitude: {}", 1.f, 1.f, 1.f)
-    ).boundingBox;
+    );
 }
 
 } // namespace openspace

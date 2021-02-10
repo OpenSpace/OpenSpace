@@ -43,6 +43,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
@@ -204,7 +205,7 @@ ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
         _dynamicDepthTextureRes = false;
     }
     else {
-        glm::ivec2 renderingResolution = global::renderEngine.renderingResolution();
+        glm::ivec2 renderingResolution = global::renderEngine->renderingResolution();
         _shadowDepthTextureWidth = renderingResolution.x * 2;
         _shadowDepthTextureHeight = renderingResolution.y * 2;
         _dynamicDepthTextureRes = true;
@@ -226,6 +227,8 @@ bool ShadowComponent::isReady() const {
 }
 
 void ShadowComponent::initializeGL() {
+    ZoneScoped
+
     createDepthTexture();
     createShadowFBO();
 }
@@ -350,7 +353,6 @@ RenderData ShadowComponent::begin(const RenderData& data) {
     RenderData lightRenderData{
         *_lightCamera,
         data.time,
-        data.doPerformanceMeasurement,
         data.renderBinMask,
         data.modelTransform
     };
@@ -411,7 +413,7 @@ void ShadowComponent::end() {
 
     if (_viewDepthMap) {
         if (!_renderDMProgram) {
-            _renderDMProgram = global::renderEngine.buildRenderProgram(
+            _renderDMProgram = global::renderEngine->buildRenderProgram(
                 "ShadowMappingDebuggingProgram",
                 absPath("${MODULE_GLOBEBROWSING}/shaders/smviewer_vs.glsl"),
                 absPath("${MODULE_GLOBEBROWSING}/shaders/smviewer_fs.glsl")
@@ -438,9 +440,11 @@ void ShadowComponent::end() {
 }
 
 void ShadowComponent::update(const UpdateData&) {
-    _sunPosition = global::renderEngine.scene()->sceneGraphNode("Sun")->worldPosition();
+    ZoneScoped
 
-    glm::ivec2 renderingResolution = global::renderEngine.renderingResolution();
+    _sunPosition = global::renderEngine->scene()->sceneGraphNode("Sun")->worldPosition();
+
+    glm::ivec2 renderingResolution = global::renderEngine->renderingResolution();
     if (_dynamicDepthTextureRes && ((_shadowDepthTextureWidth != renderingResolution.x) ||
         (_shadowDepthTextureHeight != renderingResolution.y)))
     {

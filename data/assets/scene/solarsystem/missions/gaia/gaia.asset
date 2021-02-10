@@ -39,11 +39,11 @@ local Gaia = {
     Renderable = {
         Type = "RenderableModel",
         Body = "GAIA",
-        Geometry = {
+        Geometry = {{
             Type = "MultiModelGeometry",
-            GeometryFile = model .. "/gaia.obj"
-        }, 
-        ColorTexture = textures .. "/gaia-baked.png",
+            GeometryFile = model .. "/gaia.obj",
+            ColorTexture = textures .. "/gaia-baked.png"
+        }},
         LightSources = {
             {
                 Type = "SceneGraphLightSource",

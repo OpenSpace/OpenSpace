@@ -110,12 +110,12 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
                 foundMatching = true;
 
                 if (interpolationDuration == 0.0) {
-                    global::renderEngine.scene()->removePropertyInterpolation(prop);
+                    global::renderEngine->scene()->removePropertyInterpolation(prop);
                     prop->setLuaValue(L);
                 }
                 else {
                     prop->setLuaInterpolationTarget(L);
-                    global::renderEngine.scene()->addPropertyInterpolation(
+                    global::renderEngine->scene()->addPropertyInterpolation(
                         prop,
                         static_cast<float>(interpolationDuration),
                         easingFunction
@@ -188,12 +188,12 @@ int setPropertyCall_single(properties::Property& prop, const std::string& uri,
     }
     else {
         if (duration == 0.0) {
-            global::renderEngine.scene()->removePropertyInterpolation(&prop);
+            global::renderEngine->scene()->removePropertyInterpolation(&prop);
             prop.setLuaValue(L);
         }
         else {
             prop.setLuaInterpolationTarget(L);
-            global::renderEngine.scene()->addPropertyInterpolation(
+            global::renderEngine->scene()->addPropertyInterpolation(
                 &prop,
                 static_cast<float>(duration),
                 easingFunction
@@ -378,6 +378,25 @@ int property_setValueSingle(lua_State* L) {
 
 /**
  * \ingroup LuaScripts
+ * hasProperty(string):
+ * Returns whether a property with the given URI exists
+ */
+int property_hasProperty(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::property_hasProperty");
+
+    std::string uri = ghoul::lua::value<std::string>(
+        L,
+        1,
+        ghoul::lua::PopValue::Yes
+    );
+
+    openspace::properties::Property* prop = property(uri);
+    ghoul::lua::push(L, prop != nullptr);
+    return 1;
+}
+
+/**
+ * \ingroup LuaScripts
  * getPropertyValue(string):
  * Returns the value of the property identified by the passed URI as a Lua object that can
  * be passed to the setPropertyValue method.
@@ -389,7 +408,7 @@ int property_getValue(lua_State* L) {
         L,
         1,
         ghoul::lua::PopValue::Yes
-        );
+    );
 
     openspace::properties::Property* prop = property(uri);
     if (!prop) {
@@ -480,7 +499,7 @@ int loadScene(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadScene");
 
     const std::string& sceneFile = ghoul::lua::value<std::string>(L, 1);
-    global::openSpaceEngine.scheduleLoadSingleAsset(sceneFile);
+    global::openSpaceEngine->scheduleLoadSingleAsset(sceneFile);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -499,13 +518,13 @@ int addSceneGraphNode(lua_State* L) {
     }
 
     try {
-        SceneGraphNode* node = global::renderEngine.scene()->loadNode(d);
+        SceneGraphNode* node = global::renderEngine->scene()->loadNode(d);
         if (!node) {
             LERRORC("Scene", "Could not load scene graph node");
             return ghoul::lua::luaError(L, "Error loading scene graph node");
         }
 
-        global::renderEngine.scene()->initializeNode(node);
+        global::renderEngine->scene()->initializeNode(node);
     }
     catch (const documentation::SpecificationError& e) {
         return ghoul::lua::luaError(
@@ -531,8 +550,56 @@ int removeSceneGraphNode(lua_State* L) {
 
     std::string name = ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::Yes);
 
+    SceneGraphNode* foundNode = sceneGraphNode(name);
+    if (!foundNode) {
+        LERRORC(
+            "removeSceneGraphNode",
+            fmt::format("Did not find a match for identifier: {} ", name)
+        );
+        return 0;
+    }
+
+    SceneGraphNode* parent = foundNode->parent();
+    if (!parent) {
+        LERRORC(
+            "removeSceneGraphNode",
+            fmt::format("Cannot remove root node")
+        );
+        return 0;
+    }
+
+    // Remove the node and all its children
+    std::function<void(SceneGraphNode*)> removeNode =
+        [&removeNode](SceneGraphNode* localNode) {
+        std::vector<SceneGraphNode*> children = localNode->children();
+
+        ghoul::mm_unique_ptr<SceneGraphNode> n = localNode->parent()->detachChild(
+            *localNode
+        );
+        ghoul_assert(n.get() == localNode, "Wrong node returned from detaching");
+
+        for (SceneGraphNode* c : children) {
+            removeNode(c);
+        }
+
+        localNode->deinitializeGL();
+        localNode->deinitialize();
+        n = nullptr;
+    };
+
+    removeNode(foundNode);
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
+int removeSceneGraphNodesFromRegex(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeSceneGraphNodesFromRegex");
+
+    std::string name = ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::Yes);
+
     const std::vector<SceneGraphNode*>& nodes =
-        global::renderEngine.scene()->allSceneGraphNodes();
+        global::renderEngine->scene()->allSceneGraphNodes();
 
     // Replace all wildcards * with the correct regex (.*)
     size_t startPos = name.find("*");
@@ -553,8 +620,8 @@ int removeSceneGraphNode(lua_State* L) {
             SceneGraphNode* parent = node->parent();
             if (!parent) {
                 LERRORC(
-                    "removeSceneGraphNode",
-                    fmt::format("{}: Cannot remove root node")
+                    "removeSceneGraphNodesFromRegex",
+                    fmt::format("Cannot remove root node")
                 );
             }
             else {
@@ -565,8 +632,8 @@ int removeSceneGraphNode(lua_State* L) {
 
     if (!foundMatch) {
         LERRORC(
-            "removeSceneGraphNode",
-            "Did not find a match for identifier: " + name
+            "removeSceneGraphNodesFromRegex",
+            fmt::format("Did not find a match for identifier: {}", name)
         );
         return 0;
     }
@@ -594,7 +661,9 @@ int removeSceneGraphNode(lua_State* L) {
         [&removeNode, &markedList](SceneGraphNode* localNode) {
         std::vector<SceneGraphNode*> children = localNode->children();
 
-        std::unique_ptr<SceneGraphNode> n = localNode->parent()->detachChild(*localNode);
+        ghoul::mm_unique_ptr<SceneGraphNode> n = localNode->parent()->detachChild(
+            *localNode
+        );
         ghoul_assert(n.get() == localNode, "Wrong node returned from detaching");
 
         for (SceneGraphNode* c : children) {
@@ -628,7 +697,7 @@ int hasSceneGraphNode(lua_State* L) {
         1,
         ghoul::lua::PopValue::Yes
         );
-    SceneGraphNode* node = global::renderEngine.scene()->sceneGraphNode(nodeName);
+    SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(nodeName);
 
     ghoul::lua::push(L, node != nullptr);
 
@@ -643,7 +712,7 @@ int addInterestingTime(lua_State* L) {
     std::string time = ghoul::lua::value<std::string>(L, 2, ghoul::lua::PopValue::No);
     lua_pop(L, 2);
 
-    global::renderEngine.scene()->addInterestingTime(
+    global::renderEngine->scene()->addInterestingTime(
         { std::move(name), std::move(time) }
     );
 

@@ -36,11 +36,13 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <array>
 #include <cstdint>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <limits>
@@ -687,11 +689,11 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 RenderableStars::~RenderableStars() {}
 
 bool RenderableStars::isReady() const {
-    return _program != nullptr;
+    return _program && _pointSpreadFunctionTexture;
 }
 
 void RenderableStars::initializeGL() {
-    _program = global::renderEngine.buildRenderProgram(
+    _program = global::renderEngine->buildRenderProgram(
         "Star",
         absPath("${MODULE_SPACE}/shaders/star_vs.glsl"),
         absPath("${MODULE_SPACE}/shaders/star_fs.glsl"),
@@ -787,7 +789,7 @@ void RenderableStars::initializeGL() {
     );
 
     //loadShapeTexture();
-
+    loadPSFTexture();
     renderPSFToTexture();
 }
 
@@ -801,9 +803,42 @@ void RenderableStars::deinitializeGL() {
     //_shapeTexture = nullptr;
 
     if (_program) {
-        global::renderEngine.removeRenderProgram(_program.get());
+        global::renderEngine->removeRenderProgram(_program.get());
         _program = nullptr;
     }
+}
+
+void RenderableStars::loadPSFTexture() {
+    _pointSpreadFunctionTexture = nullptr;
+    if (!_pointSpreadFunctionTexturePath.value().empty() &&
+        std::filesystem::exists(_pointSpreadFunctionTexturePath.value()))
+    {
+        _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
+            absPath(_pointSpreadFunctionTexturePath)
+        );
+
+        if (_pointSpreadFunctionTexture) {
+            LDEBUG(fmt::format(
+                "Loaded texture from '{}'",
+                absPath(_pointSpreadFunctionTexturePath)
+            ));
+            _pointSpreadFunctionTexture->uploadTexture();
+        }
+        _pointSpreadFunctionTexture->setFilter(
+            ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
+        );
+
+        _pointSpreadFunctionFile = std::make_unique<ghoul::filesystem::File>(
+            _pointSpreadFunctionTexturePath
+            );
+        _pointSpreadFunctionFile->setCallback(
+            [&](const ghoul::filesystem::File&) {
+            _pointSpreadFunctionTextureIsDirty = true;
+        }
+        );
+    }
+    _pointSpreadFunctionTextureIsDirty = false;
+
 }
 
 void RenderableStars::renderPSFToTexture() {
@@ -811,23 +846,8 @@ void RenderableStars::renderPSFToTexture() {
     GLint defaultFBO;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
 
-    GLint m_viewport[4];
-    glGetIntegerv(GL_VIEWPORT, m_viewport);
-
-    // Saving current OpenGL state
-    GLenum blendEquationRGB;
-    GLenum blendEquationAlpha;
-    GLenum blendDestAlpha;
-    GLenum blendDestRGB;
-    GLenum blendSrcAlpha;
-    GLenum blendSrcRGB;
-
-    glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
-    glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
-    glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
-    glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
-    glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
-    glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
+//    GLint m_viewport[4];
+//    global::renderEngine.openglStateCache().viewPort(m_viewport);
 
     // Creates the FBO for the calculations
     GLuint psfFBO;
@@ -929,8 +949,7 @@ void RenderableStars::renderPSFToTexture() {
     //glDeleteFramebuffers(1, &convolveFBO);
 
     // Restores OpenGL blending state
-    glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
-    glBlendFuncSeparate(blendSrcRGB, blendDestRGB,  blendSrcAlpha, blendDestAlpha);
+    global::renderEngine->openglStateCache().resetBlendState();
 }
 
 void RenderableStars::render(const RenderData& data, RendererTasks&) {
@@ -1228,33 +1247,7 @@ void RenderableStars::update(const UpdateData&) {
 
     if (_pointSpreadFunctionTextureIsDirty) {
         LDEBUG("Reloading Point Spread Function texture");
-        _pointSpreadFunctionTexture = nullptr;
-        if (!_pointSpreadFunctionTexturePath.value().empty()) {
-            _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_pointSpreadFunctionTexturePath)
-            );
-
-            if (_pointSpreadFunctionTexture) {
-                LDEBUG(fmt::format(
-                    "Loaded texture from '{}'",
-                    absPath(_pointSpreadFunctionTexturePath)
-                ));
-                _pointSpreadFunctionTexture->uploadTexture();
-            }
-            _pointSpreadFunctionTexture->setFilter(
-                ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
-            );
-
-            _pointSpreadFunctionFile = std::make_unique<ghoul::filesystem::File>(
-                _pointSpreadFunctionTexturePath
-            );
-            _pointSpreadFunctionFile->setCallback(
-                [&](const ghoul::filesystem::File&) {
-                    _pointSpreadFunctionTextureIsDirty = true;
-                }
-            );
-        }
-        _pointSpreadFunctionTextureIsDirty = false;
+        loadPSFTexture();
     }
 
     if (_colorTextureIsDirty) {

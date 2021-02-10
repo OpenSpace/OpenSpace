@@ -30,6 +30,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/consolelog.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 #include <cpl_conv.h>
 #include <gdal.h>
 
@@ -106,6 +107,8 @@ GdalWrapper::GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize
         1                                           // Step: One MB
     )
 {
+    ZoneScoped
+
     addProperty(_logGdalErrors);
     addProperty(_gdalMaximumCacheSize);
 
@@ -129,12 +132,12 @@ GdalWrapper::GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize
 }
 
 void GdalWrapper::setGdalProxyConfiguration() {
-    if (global::configuration.httpProxy.usingHttpProxy) {
-        const std::string address = global::configuration.httpProxy.address;
-        const unsigned int port = global::configuration.httpProxy.port;
-        const std::string user = global::configuration.httpProxy.user;
-        const std::string password = global::configuration.httpProxy.password;
-        std::string auth = global::configuration.httpProxy.authentication;
+    if (global::configuration->httpProxy.usingHttpProxy) {
+        const std::string address = global::configuration->httpProxy.address;
+        const unsigned int port = global::configuration->httpProxy.port;
+        const std::string user = global::configuration->httpProxy.user;
+        const std::string password = global::configuration->httpProxy.password;
+        std::string auth = global::configuration->httpProxy.authentication;
         std::transform(
             auth.begin(),
             auth.end(),

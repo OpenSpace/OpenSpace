@@ -29,13 +29,14 @@
 
 #include <modules/imgui/include/guiassetcomponent.h>
 #include <modules/imgui/include/guifilepathcomponent.h>
+#include <modules/imgui/include/guigibscomponent.h>
 #include <modules/imgui/include/guiglobebrowsingcomponent.h>
 #include <modules/imgui/include/guihelpcomponent.h>
 #include <modules/imgui/include/guiiswacomponent.h>
 #include <modules/imgui/include/guijoystickcomponent.h>
+#include <modules/imgui/include/guimemorycomponent.h>
 #include <modules/imgui/include/guimissioncomponent.h>
 #include <modules/imgui/include/guiparallelcomponent.h>
-#include <modules/imgui/include/guiperformancecomponent.h>
 #include <modules/imgui/include/guipropertycomponent.h>
 #include <modules/imgui/include/guishortcutscomponent.h>
 #include <modules/imgui/include/guispacetimecomponent.h>
@@ -63,7 +64,7 @@ namespace openspace::gui {
 
 namespace detail {
     constexpr int nComponents() {
-        const int nRegularComponents = 16;
+        const int nRegularComponents = 17;
         int totalComponents = nRegularComponents;
 
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
@@ -105,13 +106,14 @@ public:
     GuiHelpComponent _help;
     GuiFilePathComponent _filePath;
     GuiAssetComponent _asset;
+    GuiGIBSComponent _gibs;
     GuiGlobeBrowsingComponent _globeBrowsing;
-    GuiPerformanceComponent _performance;
 
     GuiPropertyComponent _globalProperty;
     GuiPropertyComponent _sceneProperty;
     GuiPropertyComponent _screenSpaceProperty;
     GuiPropertyComponent _moduleProperty;
+    GuiMemoryComponent _memoryComponent;
 
     GuiPropertyComponent _virtualProperty;
     GuiSpaceTimeComponent _spaceTime;
@@ -139,10 +141,12 @@ private:
         &_virtualProperty,
         &_globalProperty,
         &_moduleProperty,
+        &_memoryComponent,
 
         &_spaceTime,
         &_mission,
         &_parallel,
+        &_gibs,
         &_globeBrowsing,
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
         &_iswa,
@@ -152,8 +156,6 @@ private:
         &_shortcuts,
         &_joystick,
         &_filePath,
-
-        &_performance,
 
         &_help
     };

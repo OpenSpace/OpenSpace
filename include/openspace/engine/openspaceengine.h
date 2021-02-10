@@ -31,6 +31,7 @@
 #include <openspace/util/touch.h>
 #include <openspace/util/versionchecker.h>
 #include <ghoul/glm.h>
+#include <future>
 #include <memory>
 #include <string>
 #include <vector>
@@ -126,6 +127,8 @@ private:
 
     //grabs json from each module to pass to the documentation engine.
     std::string _documentationJson;
+
+    std::future<void> _writeDocumentationTask;
 
     ShutdownInformation _shutdown;
 

@@ -322,15 +322,15 @@ namespace openspace::volume {
             );
 
         _raycaster->initialize();
-        global::raycasterManager.attachRaycaster(*_raycaster.get());
+        global::raycasterManager->attachRaycaster(*_raycaster.get());
         onEnabledChange([&](bool enabled) {
             if (enabled) {
-                global::raycasterManager.attachRaycaster(*_raycaster.get());
+                global::raycasterManager->attachRaycaster(*_raycaster.get());
             }
             else {
-                global::raycasterManager.detachRaycaster(*_raycaster.get());
+                global::raycasterManager->detachRaycaster(*_raycaster.get());
             }
-            });
+        });
 
         _triggerTimeJump.onChange([this]() { jumpToTimestep(_jumpToTimestep); });
 
@@ -391,7 +391,7 @@ namespace openspace::volume {
         if (_volumeTimesteps.empty()) {
             return nullptr;
         }
-        double currentTime = global::timeManager.time().j2000Seconds();
+        double currentTime = global::timeManager->time().j2000Seconds();
 
         // Get the first item with time > currentTime
         auto currentTimestepIt = _volumeTimesteps.upper_bound(currentTime);
@@ -452,7 +452,7 @@ namespace openspace::volume {
     void RenderableTimeVaryingVolume::jumpToTimestep(int target) {
         Timestep* t = timestepFromIndex(target);
         if (t) {
-            global::timeManager.setTimeNextFrame(Time(t->metadata.time));
+            global::timeManager->setTimeNextFrame(Time(t->metadata.time));
         }
     }
 
@@ -512,7 +512,7 @@ namespace openspace::volume {
 
     void RenderableTimeVaryingVolume::deinitializeGL() {
         if (_raycaster) {
-            global::raycasterManager.detachRaycaster(*_raycaster.get());
+            global::raycasterManager->detachRaycaster(*_raycaster.get());
             _raycaster = nullptr;
         }
     }

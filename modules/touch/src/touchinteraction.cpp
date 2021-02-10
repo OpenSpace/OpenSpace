@@ -376,7 +376,7 @@ void TouchInteraction::updateStateFromInput(const std::vector<TouchInputHolder>&
         _time = timestamp;
     }
     // Code for lower-right corner double-tap to zoom-out
-    const glm::vec2 res = global::windowDelegate.currentWindowSize();
+    const glm::vec2 res = global::windowDelegate->currentWindowSize();
     const glm::vec2 pos = list[0].latestInput().screenCoordinates(res);
 
     const float bottomCornerSizeForZoomTap_fraction = 0.08f;
@@ -482,7 +482,7 @@ void TouchInteraction::findSelectedNode(const std::vector<TouchInputHolder>& lis
         "Kerberos", "Hydra", "Charon", "Tethys", "OsirisRex", "Bennu"
     };
     std::vector<SceneGraphNode*> selectableNodes;
-    for (SceneGraphNode* node : global::renderEngine.scene()->allSceneGraphNodes()) {
+    for (SceneGraphNode* node : global::renderEngine->scene()->allSceneGraphNodes()) {
         for (const std::string& name : selectables) {
             if (node->identifier() == name) {
                 selectableNodes.push_back(node);
@@ -755,7 +755,7 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
 {
     const int action = interpretInteraction(list, lastProcessed);
     const SceneGraphNode* anchor =
-        global::navigationHandler.orbitalNavigator().anchorNode();
+        global::navigationHandler->orbitalNavigator().anchorNode();
     if (!anchor) {
         return;
     }
@@ -784,7 +784,7 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
 #endif
 
     const TouchInputHolder& inputHolder = list.at(0);
-    const glm::ivec2 windowSize = global::windowDelegate.currentWindowSize();
+    const glm::ivec2 windowSize = global::windowDelegate->currentWindowSize();
     const float aspectRatio =
         static_cast<float>(windowSize.x) / static_cast<float>(windowSize.y);
     switch (action) {
@@ -917,14 +917,14 @@ double TouchInteraction::computeConstTimeDecayCoefficient(double velocity) {
 
 double TouchInteraction::computeTapZoomDistance(double zoomGain) {
     const SceneGraphNode* anchor =
-        global::navigationHandler.orbitalNavigator().anchorNode();
+        global::navigationHandler->orbitalNavigator().anchorNode();
     if (!anchor) {
         return 0.0;
     }
 
     double dist = glm::distance(
         _camera->positionVec3(),
-        global::navigationHandler.orbitalNavigator().anchorNode()->worldPosition()
+        global::navigationHandler->orbitalNavigator().anchorNode()->worldPosition()
     );
 
     dist -= anchor->boundingSphere();
@@ -942,11 +942,11 @@ void TouchInteraction::step(double dt, bool directTouch) {
     using namespace glm;
 
     const SceneGraphNode* anchor =
-        global::navigationHandler.orbitalNavigator().anchorNode();
+        global::navigationHandler->orbitalNavigator().anchorNode();
 
      // since functions cant be called directly (TouchInteraction not a subclass of
      // InteractionMode)
-    setFocusNode(global::navigationHandler.orbitalNavigator().anchorNode());
+    setFocusNode(global::navigationHandler->orbitalNavigator().anchorNode());
     if (anchor && _camera) {
         // Create variables from current state
         dvec3 camPos = _camera->positionVec3();
@@ -1167,7 +1167,7 @@ void TouchInteraction::resetAfterInput() {
     _debugProperties.interactionMode = "None";
 #endif
     if (_directTouchMode && !_selected.empty() && _lmSuccess) {
-        double spinDelta = _spinSensitivity / global::windowDelegate.averageDeltaTime();
+        double spinDelta = _spinSensitivity / global::windowDelegate->averageDeltaTime();
         if (glm::length(_lastVel.orbit) > _orbitSpeedThreshold) {
              // allow node to start "spinning" after direct-manipulation finger is let go
             _vel.orbit = _lastVel.orbit * spinDelta;
@@ -1225,19 +1225,19 @@ Camera* TouchInteraction::getCamera() {
 }
 
 const SceneGraphNode* TouchInteraction::getFocusNode() {
-    return global::navigationHandler.orbitalNavigator().anchorNode();
+    return global::navigationHandler->orbitalNavigator().anchorNode();
 }
 void TouchInteraction::setCamera(Camera* camera) {
     _camera = camera;
 }
 void TouchInteraction::setFocusNode(const SceneGraphNode* focusNode) {
     if (focusNode) {
-        global::navigationHandler.orbitalNavigator().setAnchorNode(
+        global::navigationHandler->orbitalNavigator().setAnchorNode(
             focusNode->identifier()
         );
     }
     else {
-        global::navigationHandler.orbitalNavigator().setAnchorNode("");
+        global::navigationHandler->orbitalNavigator().setAnchorNode("");
     }
 }
 

@@ -360,7 +360,7 @@ void RenderablePlanetProjection::initializeGL() {
         SpacecraftInstrumentsModule::ProgramObjectManager.request(
             ProjectiveProgramName,
             []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-                return global::renderEngine.buildRenderProgram(
+                return global::renderEngine->buildRenderProgram(
                     ProjectiveProgramName,
                     absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/"
                             "renderablePlanet_vs.glsl"
@@ -450,7 +450,7 @@ void RenderablePlanetProjection::deinitializeGL() {
     SpacecraftInstrumentsModule::ProgramObjectManager.release(
         ProjectiveProgramName,
         [](ghoul::opengl::ProgramObject* p) {
-            global::renderEngine.removeRenderProgram(p);
+            global::renderEngine->removeRenderProgram(p);
         }
     );
     _programObject = nullptr;

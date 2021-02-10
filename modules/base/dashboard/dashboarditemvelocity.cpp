@@ -38,6 +38,7 @@
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
 
 namespace {
     constexpr const char* KeyFontMono = "Mono";
@@ -148,12 +149,12 @@ DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary
     }
 
     _fontName.onChange([this]() {
-        _font = global::fontManager.font(_fontName, _fontSize);
+        _font = global::fontManager->font(_fontName, _fontSize);
     });
     addProperty(_fontName);
 
     _fontSize.onChange([this]() {
-        _font = global::fontManager.font(_fontName, _fontSize);
+        _font = global::fontManager->font(_fontName, _fontSize);
     });
     addProperty(_fontSize);
 
@@ -183,15 +184,17 @@ DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary
     _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
     addProperty(_requestedUnit);
 
-    _font = global::fontManager.font(_fontName, _fontSize);
+    _font = global::fontManager->font(_fontName, _fontSize);
 }
 
 void DashboardItemVelocity::render(glm::vec2& penPosition) {
-    const glm::dvec3 currentPos = global::renderEngine.scene()->camera()->positionVec3();
+    ZoneScoped
+
+    const glm::dvec3 currentPos = global::renderEngine->scene()->camera()->positionVec3();
     const glm::dvec3 dt = currentPos - _prevPosition;
     const double speedPerFrame = glm::length(dt);
 
-    const double secondsPerFrame = global::windowDelegate.averageDeltaTime();
+    const double secondsPerFrame = global::windowDelegate->averageDeltaTime();
 
     const double speedPerSecond = speedPerFrame / secondsPerFrame;
 
@@ -205,7 +208,6 @@ void DashboardItemVelocity::render(glm::vec2& penPosition) {
         dist = { convertedD, nameForDistanceUnit(unit, convertedD != 1.0) };
     }
 
-    penPosition.y -= _font->height();
     RenderFont(
         *_font,
         penPosition,
@@ -213,11 +215,14 @@ void DashboardItemVelocity::render(glm::vec2& penPosition) {
             "Camera velocity: {} {}/s", dist.first, dist.second
         )
     );
+    penPosition.y -= _font->height();
 
     _prevPosition = currentPos;
 }
 
 glm::vec2 DashboardItemVelocity::size() const {
+    ZoneScoped
+
     const double d = glm::length(1e20);
     std::pair<double, std::string> dist;
     if (_doSimplification) {
@@ -229,10 +234,9 @@ glm::vec2 DashboardItemVelocity::size() const {
         dist = { convertedD, nameForDistanceUnit(unit, convertedD != 1.0) };
     }
 
-    return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-        *_font,
+    return _font->boundingBox(
         fmt::format("Camera velocity: {} {}/s", dist.first, dist.second)
-    ).boundingBox;
+    );
 }
 
 } // namespace openspace

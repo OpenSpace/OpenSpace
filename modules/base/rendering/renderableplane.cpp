@@ -34,6 +34,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/defer.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
@@ -166,6 +167,8 @@ bool RenderablePlane::isReady() const {
 }
 
 void RenderablePlane::initializeGL() {
+    ZoneScoped
+
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
     createPlane();
@@ -173,7 +176,7 @@ void RenderablePlane::initializeGL() {
     _shader = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return global::renderEngine.buildRenderProgram(
+            return global::renderEngine->buildRenderProgram(
                 ProgramName,
                 absPath("${MODULE_BASE}/shaders/plane_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/plane_fs.glsl")
@@ -183,6 +186,8 @@ void RenderablePlane::initializeGL() {
 }
 
 void RenderablePlane::deinitializeGL() {
+    ZoneScoped
+
     glDeleteVertexArrays(1, &_quad);
     _quad = 0;
 
@@ -192,15 +197,16 @@ void RenderablePlane::deinitializeGL() {
     BaseModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
-            global::renderEngine.removeRenderProgram(p);
+            global::renderEngine->removeRenderProgram(p);
         }
     );
     _shader = nullptr;
 }
 
 void RenderablePlane::render(const RenderData& data, RendererTasks&) {
-    _shader->activate();
+    ZoneScoped
 
+    _shader->activate();
     _shader->setUniform("opacity", _opacity);
 
     glm::dvec3 objectPositionWorld = glm::dvec3(
@@ -245,10 +251,10 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
 
     _shader->setUniform("texture1", unit);
 
-    bool usingFramebufferRenderer = global::renderEngine.rendererImplementation() ==
+    bool usingFramebufferRenderer = global::renderEngine->rendererImplementation() ==
                                     RenderEngine::RendererImplementation::Framebuffer;
 
-    bool usingABufferRenderer = global::renderEngine.rendererImplementation() ==
+    bool usingABufferRenderer = global::renderEngine->rendererImplementation() ==
                                 RenderEngine::RendererImplementation::ABuffer;
 
     if (usingABufferRenderer) {
@@ -277,6 +283,8 @@ void RenderablePlane::bindTexture() {}
 void RenderablePlane::unbindTexture() {}
 
 void RenderablePlane::update(const UpdateData&) {
+    ZoneScoped
+
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
     }

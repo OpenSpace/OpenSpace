@@ -3,7 +3,7 @@ asset.require('./static_server')
 local guiCustomization = asset.require('customization/gui')
 
 -- Select which commit hashes to use for the frontend and backend
-local frontendHash = "6673d083bf2629502ce7f809610509f29ad444b7"
+local frontendHash = "da6b14e4f2f40a8e6340de3251839ff09970b005"
 local dataProvider = "data.openspaceproject.com/files/webgui"
 
 local frontend = asset.syncedResource({
@@ -40,8 +40,12 @@ asset.onInitialize(function ()
     -- The GUI contains date and simulation increment,
     -- so let's remove these from the dashboard.
     if openspace.getPropertyValue('Modules.CefWebGui.Visible') then
-        openspace.setPropertyValueSingle('Dashboard.Date.Enabled', false)
-        openspace.setPropertyValueSingle('Dashboard.SimulationIncrement.Enabled', false)
+        if openspace.hasProperty('Dashboard.Date.Enabled') then
+            openspace.setPropertyValueSingle('Dashboard.Date.Enabled', false)
+        end
+        if openspace.hasProperty('Dashboard.SimulationIncrement.Enabled') then
+            openspace.setPropertyValueSingle('Dashboard.SimulationIncrement.Enabled', false)
+        end
     end
 end)
 

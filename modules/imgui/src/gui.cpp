@@ -29,7 +29,6 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/mission/missionmanager.h>
-#include <openspace/performance/performancemanager.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/fmt.h>
 #include <ghoul/filesystem/cachemanager.h>
@@ -83,7 +82,7 @@ namespace {
             );
         }
 
-        openspace::global::scriptEngine.queueScript(
+        openspace::global::scriptEngine->queueScript(
             script,
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -114,7 +113,7 @@ namespace {
             );
         }
 
-        openspace::global::scriptEngine.queueScript(
+        openspace::global::scriptEngine->queueScript(
             script,
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -223,7 +222,7 @@ void GUI::initializeGL() {
     strcpy(iniFileBuffer, cachedFile.c_str());
 #endif
 
-    int nWindows = global::windowDelegate.nWindows();
+    int nWindows = global::windowDelegate->nWindows();
     _contexts.resize(nWindows);
 
     for (int i = 0; i < nWindows; ++i) {
@@ -421,7 +420,7 @@ void GUI::startFrame(float deltaTime, const glm::vec2& windowSize,
                      const glm::vec2& dpiScaling, const glm::vec2& mousePos,
                      uint32_t mouseButtonsPressed)
 {
-    const int iWindow = global::windowDelegate.currentWindowId();
+    const int iWindow = global::windowDelegate->currentWindowId();
     ImGui::SetCurrentContext(_contexts[iWindow]);
 
     ImGuiIO& io = ImGui::GetIO();
@@ -443,12 +442,6 @@ void GUI::endFrame() {
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
     }
 
-    _performance.setEnabled(global::performanceManager.isEnabled());
-
-    if (_performance.isEnabled()) {
-        _performance.render();
-    }
-
     if (_isEnabled) {
         render();
 
@@ -461,8 +454,7 @@ void GUI::endFrame() {
 
     ImGui::Render();
 
-    const bool shouldRender = _performance.isEnabled() || _isEnabled;
-    if (!shouldRender) {
+    if (!_isEnabled) {
         return;
     }
 
@@ -760,7 +752,7 @@ void GUI::render() {
 
     bool addDashboard = ImGui::Button("Add New Dashboard");
     if (addDashboard) {
-        global::scriptEngine.queueScript(
+        global::scriptEngine->queueScript(
             "openspace.addScreenSpaceRenderable({ Type = 'ScreenSpaceDashboard' });",
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
@@ -768,7 +760,7 @@ void GUI::render() {
 
     bool addDashboardCopy = ImGui::Button("Add Copy of Main Dashboard");
     if (addDashboardCopy) {
-        global::scriptEngine.queueScript(
+        global::scriptEngine->queueScript(
             "openspace.addScreenSpaceRenderable({ "
                 "Type = 'ScreenSpaceDashboard', UseMainDashboard = true "
             "});",

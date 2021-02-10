@@ -1,0 +1,66 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('../transforms')
+local kernels = asset.require('../kernels').PlutoKernels
+
+
+
+local Hydra = {
+    Identifier = "Hydra",
+    Parent = transforms.PlutoBarycenter.Identifier,
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "HYDRA",
+            Observer = "PLUTO BARYCENTER",
+            Kernels = kernels
+        }
+    },
+    Renderable = {
+        Type = "RenderableGlobe",
+        Radii = { 0.53E5, 0.53E5, 0.53E5 },
+        SegmentsPerPatch = 64,
+        Layers = {}
+    },
+    Tag = { "moon_solarSystem", "moon_dwarf", "moon_pluto" },
+    GUI = {
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
+}
+
+local HydraTrail = {
+    Identifier = "HydraTrail",
+    Parent = transforms.PlutoBarycenter.Identifier,
+    Renderable = {
+        Type = "RenderableTrailOrbit",
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "HYDRA",
+            Observer = "PLUTO BARYCENTER",
+        },
+        Color = { 0.00, 0.62, 1.00 },
+        Period = 38.20177,
+        Resolution = 1000
+    },
+    Tag = { 
+        "moonTrail_solarSystem", 
+        "moonTrail_dwarf", 
+        "moonTrail_pluto", 
+        "moonTrail_minor" },
+    GUI = {
+        Name = "Hydra Trail",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { Hydra, HydraTrail })
+
+
+asset.meta = {
+    Name = "Hydra",
+    Version = "1.0",
+    Description = [[ Globe and trail for Pluto's moon Hydra. Data from
+    NASA Spice (see base spice asset)]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

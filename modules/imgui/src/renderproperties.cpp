@@ -69,14 +69,14 @@ void renderTooltip(Property* prop, double delay) {
 }
 
 void executeScriptSingle(const std::string& id, const std::string& value) {
-    global::scriptEngine.queueScript(
+    global::scriptEngine->queueScript(
         "openspace.setPropertyValueSingle('" + id + "', " + value + ");",
         scripting::ScriptEngine::RemoteScripting::Yes
     );
 }
 
 void executeScriptGroup(const std::string& id, const std::string& value) {
-    global::scriptEngine.queueScript(
+    global::scriptEngine->queueScript(
         "openspace.setPropertyValue('" + id + "', " + value + ");",
         scripting::ScriptEngine::RemoteScripting::Yes
     );

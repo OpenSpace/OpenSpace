@@ -432,7 +432,7 @@ void RenderableOrbitalKepler::initializeGL() {
     _programObject = SpaceModule::ProgramObjectManager.request(
        ProgramName,
        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-           return global::renderEngine.buildRenderProgram(
+           return global::renderEngine->buildRenderProgram(
                ProgramName,
                absPath("${MODULE_SPACE}/shaders/debrisViz_vs.glsl"),
                absPath("${MODULE_SPACE}/shaders/debrisViz_fs.glsl")
@@ -457,7 +457,7 @@ void RenderableOrbitalKepler::deinitializeGL() {
     SpaceModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
-            global::renderEngine.removeRenderProgram(p);
+            global::renderEngine->removeRenderProgram(p);
         }
     );
     _programObject = nullptr;
@@ -546,8 +546,7 @@ void RenderableOrbitalKepler::updateBuffers() {
             glm::dvec3 position = _keplerTranslator.position({
                 {},
                 Time(timeOffset + orbit.epoch),
-                Time(0.0),
-                false
+                Time(0.0)
             });
 
             _vertexBufferData[vertexBufIdx].x = static_cast<float>(position.x);

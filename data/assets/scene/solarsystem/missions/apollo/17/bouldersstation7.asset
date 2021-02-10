@@ -47,12 +47,12 @@ local Station7BoulderModel = {
     },
     Renderable = {
         Type = "RenderableModel",
-        Geometry = {
+        Geometry = {{
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/b7model.obj"
-        },
+            GeometryFile = models .. "/b7model.obj",
+            ColorTexture = models .. "/b7model_u1_v1.jpeg"
+        }},
         RotationVector = { 1.945950,274.378387,212.903214 },
-        ColorTexture = models .. "/b7model_u1_v1.jpeg",
         LightSources = LightSources,
         PerformShading = false,
         DisableFaceCulling = true

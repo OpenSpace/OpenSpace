@@ -38,6 +38,7 @@
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
@@ -248,7 +249,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
 
     _renderOption.addOption(RenderOptionViewDirection, "Camera View Direction");
     _renderOption.addOption(RenderOptionPositionNormal, "Camera Position Normal");
-    if (global::windowDelegate.isFisheyeRendering()) {
+    if (global::windowDelegate->isFisheyeRendering()) {
         _renderOption = RenderOptionPositionNormal;
     }
     else {
@@ -351,7 +352,7 @@ void RenderableDUMeshes::initializeGL() {
     _program = DigitalUniverseModule::ProgramObjectManager.request(
         ProgramObjectName,
         []() {
-            return global::renderEngine.buildRenderProgram(
+            return global::renderEngine->buildRenderProgram(
                 "RenderableDUMeshes",
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/dumesh_vs.glsl"),
                 absPath("${MODULE_DIGITALUNIVERSE}/shaders/dumesh_fs.glsl")
@@ -371,7 +372,7 @@ void RenderableDUMeshes::initializeGL() {
     if (_hasLabel) {
         if (!_font) {
             constexpr const int FontSize = 50;
-            _font = global::fontManager.font(
+            _font = global::fontManager->font(
                 "Mono",
                 static_cast<float>(FontSize),
                 ghoul::fontrendering::FontManager::Outline::Yes,
@@ -392,7 +393,7 @@ void RenderableDUMeshes::deinitializeGL() {
     DigitalUniverseModule::ProgramObjectManager.release(
         ProgramObjectName,
         [](ghoul::opengl::ProgramObject* p) {
-            global::renderEngine.removeRenderProgram(p);
+            global::renderEngine->removeRenderProgram(p);
         }
     );
 }
@@ -401,30 +402,6 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
                                       const glm::dmat4& modelViewMatrix,
                                       const glm::dmat4& projectionMatrix)
 {
-    // Saving current OpenGL state
-    GLfloat lineWidth = 1.0f;
-    glGetFloatv(GL_LINE_WIDTH, &lineWidth);
-
-    GLboolean blendEnabled = glIsEnabledi(GL_BLEND, 0);
-
-    GLenum blendEquationRGB;
-    glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
-
-    GLenum blendEquationAlpha;
-    glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
-
-    GLenum blendDestAlpha;
-    glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
-
-    GLenum blendDestRGB;
-    glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
-
-    GLenum blendSrcAlpha;
-    glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
-
-    GLenum blendSrcRGB;
-    glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
-
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -447,7 +424,7 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
                 case Wire:
                     glLineWidth(_lineWidth);
                     glDrawArrays(GL_LINE_STRIP, 0, pair.second.numV);
-                    glLineWidth(lineWidth);
+                    global::renderEngine->openglStateCache().resetLineState();
                     break;
                 case Point:
                     glDrawArrays(GL_POINTS, 0, pair.second.numV);
@@ -461,15 +438,9 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
     glBindVertexArray(0);
     _program->deactivate();
 
-    // Restores blending state
-    glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
-    glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
-
-    glDepthMask(true);
-
-    if (!blendEnabled) {
-        glDisablei(GL_BLEND, 0);
-    }
+    // Restores GL State
+    global::renderEngine->openglStateCache().resetDepthState();
+    global::renderEngine->openglStateCache().resetBlendState();
 }
 
 void RenderableDUMeshes::renderLabels(const RenderData& data,

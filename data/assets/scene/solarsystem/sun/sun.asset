@@ -1,6 +1,5 @@
 local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("./transforms")
-local textures = asset.require('./sun_textures').TexturesPath
 asset.require("spice/base")
 
 local Sun = {
@@ -11,19 +10,13 @@ local Sun = {
         Enabled = false,
         Radii = { 6.957E8, 6.957E8, 6.957E8 },
         SegmentsPerPatch = 64,
-        Layers = {
-            ColorLayers = {
-                {
-                    Identifier = "Texture",
-                    FilePath = textures .. "/sun.jpg",
-                    Enabled = true
-                }
-            }
-        },
+        Layers = {},
         PerformShading = false
     },
     GUI = {
-        Path = "/Solar System/Sun"
+        Name = "Sun",
+        Path = "/Solar System/Sun",
+        Description = "Globe for the sun in our solar system."
     }
 }
 
@@ -51,8 +44,20 @@ local SunLabel = {
     Tag = { "solarsystem_labels" },
     GUI = {
         Name = "Sun Label",
-        Path = "/Solar System/Sun"
+        Path = "/Solar System/Sun",
+        Description = "Label for the sun in our solar system."
     }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Sun, SunLabel })
+
+
+asset.meta = {
+    Name = "Sun",
+    Version = "1.0",
+    Description = [[ The Sun and label]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = {"Sun" , "SunLabel"}
+}

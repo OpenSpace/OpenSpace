@@ -30,6 +30,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <ghoul/misc/easing.h>
 #include <ghoul/misc/exception.h>
+#include <ghoul/misc/memorypool.h>
 #include <mutex>
 #include <set>
 #include <unordered_map>
@@ -80,12 +81,12 @@ public:
     /**
      * Attach node to the root
      */
-    void attachNode(std::unique_ptr<SceneGraphNode> node);
+    void attachNode(ghoul::mm_unique_ptr<SceneGraphNode> node);
 
     /**
      * Detach node from the root
      */
-    std::unique_ptr<SceneGraphNode> detachNode(SceneGraphNode& node);
+    ghoul::mm_unique_ptr<SceneGraphNode> detachNode(SceneGraphNode& node);
 
     /**
      * Set the camera of the scene
@@ -262,6 +263,8 @@ private:
         bool isExpired = false;
     };
     std::vector<PropertyInterpolationInfo> _propertyInterpolationInfos;
+
+    ghoul::MemoryPool<4096> _memoryPool;
 };
 
 } // namespace openspace

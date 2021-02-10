@@ -187,7 +187,7 @@ void RenderableDebugPlane::initializeGL() {
     createPlane();
 
     if (!_shader) {
-        _shader = global::renderEngine.buildRenderProgram("PlaneProgram",
+        _shader = global::renderEngine->buildRenderProgram("PlaneProgram",
             absPath("${MODULE_BASE}/shaders/plane_vs.glsl"),
             absPath("${MODULE_BASE}/shaders/plane_fs.glsl")
         );
@@ -202,7 +202,7 @@ void RenderableDebugPlane::deinitializeGL() {
     _vertexPositionBuffer = 0;
 
     if (_shader) {
-        global::renderEngine.removeRenderProgram(_shader.get());
+        global::renderEngine->removeRenderProgram(_shader.get());
         _shader = nullptr;
     }
 }

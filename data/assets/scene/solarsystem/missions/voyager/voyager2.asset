@@ -83,11 +83,11 @@ local Voyager2Main = {
     Parent = Voyager2.Identifier,
     Renderable = {
         Type = "RenderableModel",
-        Geometry = {
+        Geometry = {{
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/voyager-main.obj"
-        },
-        ColorTexture = models .. "/voyager-main.jpg",
+            GeometryFile = models .. "/voyager-main.obj",
+            ColorTexture = models .. "/voyager-main.jpg"
+        }},
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -102,11 +102,11 @@ local Voyager2Antenna = {
     Parent = Voyager2.Identifier,
     Renderable = {
         Type = "RenderableModel",
-        Geometry = {
+        Geometry = {{
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/voyager-antenna.obj"
-        },
-        ColorTexture = models .. "/voyager-antenna.png",
+            GeometryFile = models .. "/voyager-antenna.obj",
+            ColorTexture = models .. "/voyager-antenna.png"
+        }},
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -324,8 +324,6 @@ local VoyagerTrailCruiseNeptuneInf = {
         Path = "/Solar System/Missions/Voyager 2"
     }
 }
-
-
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     Voyager2,

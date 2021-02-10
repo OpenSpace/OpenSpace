@@ -1,16 +1,9 @@
 local transforms = asset.require('./transforms')
 local assetHelper = asset.require('util/asset_helper')
 asset.require("spice/base")
-asset.request('./trail')
+asset.require('./trail')
 
-
-
-local textures = asset.syncedResource({
-    Type = "HttpSynchronization",
-    Name = "Saturn textures",
-    Identifier = "saturn_textures",
-    Version = 3
-})
+local texturesPath = asset.require("./saturn_textures").TexturesPath
 
 local Saturn = {
     Identifier = "Saturn",
@@ -26,17 +19,9 @@ local Saturn = {
         Type = "RenderableGlobe",
         Radii = { 60268000, 60268000, 54364000 },
         SegmentsPerPatch = 64,
-        Layers = {
-            ColorLayers = {
-                {
-                    Identifier = "Texture",
-                    FilePath = textures .. "/saturn.jpg",
-                    Enabled = true
-                }
-            }
-        },
+        Layers = {},
         Rings = {
-            Texture = textures .. "/saturn_rings.png",
+            Texture = texturesPath .. "/saturn_rings.png",
             Size = 140445000,
             Offset = { 74500 / 140445.100671159, 1.0 }, -- min / max extend
         },
@@ -47,7 +32,9 @@ local Saturn = {
     },
     Tag = { "planet_solarSystem", "planet_giants" },
     GUI = {
-        Path = "/Solar System/Planets/Saturn"
+        Name = "Saturn",
+        Path = "/Solar System/Planets/Saturn",
+        Description = [[Saturn globe.]]
     }
 }
 
@@ -68,8 +55,20 @@ local SaturnLabel = {
     Tag = { "solarsystem_labels" },
     GUI = {
         Name = "Saturn Label",
-        Path = "/Solar System/Planets/Saturn"
+        Path = "/Solar System/Planets/Saturn",
+        Description = [[ Main planet label for Saturn.]],
     }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Saturn, SaturnLabel })
+
+
+asset.meta = {
+    Name = "Saturn",
+    Version = "1.0",
+    Description = [[ Saturn globe, and main planet label.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = {"Saturn", "SaturnLabel"}
+}

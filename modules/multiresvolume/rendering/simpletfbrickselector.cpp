@@ -29,6 +29,7 @@
 #include <openspace/rendering/transferfunction.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
+#include <algorithm>
 
 namespace {
     constexpr const char* _loggerCat = "SimpleTfBrickSelector";

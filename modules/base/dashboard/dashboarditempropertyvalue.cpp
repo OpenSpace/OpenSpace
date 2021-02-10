@@ -32,6 +32,7 @@
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/misc/profiling.h>
 
 namespace {
     constexpr const char* KeyFontMono = "Mono";
@@ -124,7 +125,7 @@ DashboardItemPropertyValue::DashboardItemPropertyValue(
         _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
     }
     _fontName.onChange([this](){
-        _font = global::fontManager.font(_fontName, _fontSize);
+        _font = global::fontManager->font(_fontName, _fontSize);
     });
     addProperty(_fontName);
 
@@ -132,7 +133,7 @@ DashboardItemPropertyValue::DashboardItemPropertyValue(
         _fontSize = static_cast<float>(dictionary.value<double>(FontSizeInfo.identifier));
     }
     _fontSize.onChange([this](){
-        _font = global::fontManager.font(_fontName, _fontSize);
+        _font = global::fontManager->font(_fontName, _fontSize);
     });
     addProperty(_fontSize);
 
@@ -147,10 +148,12 @@ DashboardItemPropertyValue::DashboardItemPropertyValue(
     }
     addProperty(_displayString);
 
-    _font = global::fontManager.font(_fontName, _fontSize);
+    _font = global::fontManager->font(_fontName, _fontSize);
 }
 
 void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
+    ZoneScoped
+
     if (_propertyIsDirty) {
         _property = openspace::property(_propertyUri);
         _propertyIsDirty = false;
@@ -160,16 +163,15 @@ void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
         std::string value;
         _property->getStringValue(value);
 
-        penPosition.y -= _font->height();
         RenderFont(*_font, penPosition, fmt::format(_displayString.value(), value));
+        penPosition.y -= _font->height();
     }
 }
 
 glm::vec2 DashboardItemPropertyValue::size() const {
-    return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-        *_font,
-        _displayString.value()
-    ).boundingBox;
+    ZoneScoped
+
+    return _font->boundingBox(_displayString.value());
 }
 
 } // namespace openspace

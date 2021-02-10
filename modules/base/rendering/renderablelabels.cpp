@@ -40,6 +40,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/crc32.h>
 #include <ghoul/misc/defer.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
@@ -202,12 +203,6 @@ documentation::Documentation RenderableLabels::Documentation() {
             {
                 LabelColorInfo.identifier,
                 new DoubleVector3Verifier,
-                Optional::Yes,
-                LabelColorInfo.description,
-            },
-            {
-                LabelColorInfo.identifier,
-                new DoubleVector4Verifier,
                 Optional::Yes,
                 LabelColorInfo.description,
             },
@@ -396,7 +391,7 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
 
     _labelColor.setViewOption(properties::Property::ViewOptions::Color);
     if (dictionary.hasKey(LabelColorInfo.identifier)) {
-        _labelColor = dictionary.value<glm::vec4>(LabelColorInfo.identifier);
+        _labelColor = dictionary.value<glm::vec3>(LabelColorInfo.identifier);
     }
     addProperty(_labelColor);
 
@@ -404,7 +399,7 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
         _fontSize = dictionary.value<float>(FontSizeInfo.identifier);
     }
     _fontSize.onChange([&]() {
-        _font = global::fontManager.font(
+        _font = global::fontManager->font(
             "Mono",
             _fontSize,
             ghoul::fontrendering::FontManager::Outline::Yes,
@@ -604,6 +599,8 @@ bool RenderableLabels::isReady() const {
 }
 
 void RenderableLabels::initialize() {
+    ZoneScoped
+
     bool success = true;// loadData();
     if (!success) {
         throw ghoul::RuntimeError("Error loading objects labels data.");
@@ -615,7 +612,7 @@ void RenderableLabels::initialize() {
 void RenderableLabels::initializeGL() {
     if (_font == nullptr) {
         //size_t _fontSize = 50;
-        _font = global::fontManager.font(
+        _font = global::fontManager->font(
             "Mono",
             _fontSize,
             ghoul::fontrendering::FontManager::Outline::Yes,
@@ -719,7 +716,7 @@ void RenderableLabels::renderLabels(const RenderData& data,
     ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
         *_font,
         transformedPos,
-        _labelText,
+        _labelText.value(),
         textColor,
         labelInfo
     );

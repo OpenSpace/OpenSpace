@@ -112,7 +112,7 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
     , _showProgressbar(showProgressbar)
     , _randomEngine(_randomDevice())
 {
-    _loadingFont = global::fontManager.font(
+    _loadingFont = global::fontManager->font(
         "Loading",
         LoadingFontSize,
         ghoul::fontrendering::FontManager::Outline::No,
@@ -120,7 +120,7 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
     );
 
     if (_showMessage) {
-        _messageFont = global::fontManager.font(
+        _messageFont = global::fontManager->font(
             "Loading",
             MessageFontSize,
             ghoul::fontrendering::FontManager::Outline::No,
@@ -129,7 +129,7 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
     }
 
     if (_showNodeNames) {
-        _itemFont = global::fontManager.font(
+        _itemFont = global::fontManager->font(
             "Loading",
             ItemFontSize,
             ghoul::fontrendering::FontManager::Outline::No,
@@ -165,9 +165,9 @@ void LoadingScreen::render() {
     // We have to recalculate the positions here because we will not be informed about a
     // window size change
 
-    const glm::vec2 dpiScaling = global::windowDelegate.dpiScaling();
+    const glm::vec2 dpiScaling = global::windowDelegate->dpiScaling();
     const glm::ivec2 res =
-        glm::vec2(global::windowDelegate.currentSubwindowSize()) * dpiScaling;
+        glm::vec2(global::windowDelegate->currentSubwindowSize()) * dpiScaling;
 
     float screenAspectRatio = static_cast<float>(res.x) / static_cast<float>(res.y);
 
@@ -268,16 +268,15 @@ void LoadingScreen::render() {
         "Loading...";
     // We use "Loading" to center the text, but render "Loading..." to make it look more
     // pleasing
-    const FR::BoundingBoxInformation bbox = renderer.boundingBox(
-        *_loadingFont,
+    const glm::vec2 bbox = _loadingFont->boundingBox(
         headline.substr(0, headline.size() - 2)
     );
 
     const glm::vec2 loadingLl = glm::vec2(
-        res.x / 2.f - bbox.boundingBox.x / 2.f,
+        res.x / 2.f - bbox.x / 2.f,
         res.y * LoadingTextPosition
     );
-    const glm::vec2 loadingUr = loadingLl + bbox.boundingBox;
+    const glm::vec2 loadingUr = loadingLl + bbox;
 
     renderer.render(*_loadingFont, loadingLl, headline);
 
@@ -286,16 +285,13 @@ void LoadingScreen::render() {
     if (_showMessage) {
         std::lock_guard<std::mutex> guard(_messageMutex);
 
-        FR::BoundingBoxInformation bboxMessage = renderer.boundingBox(
-            *_messageFont,
-            _message
-        );
+        const glm::vec2 bboxMessage = _messageFont->boundingBox(_message);
 
         messageLl = glm::vec2(
-            res.x / 2.f - bboxMessage.boundingBox.x / 2.f,
+            res.x / 2.f - bboxMessage.x / 2.f,
             res.y * StatusMessageOffset
         );
-        messageUr = messageLl + bboxMessage.boundingBox;
+        messageUr = messageLl + bboxMessage;
 
 
         renderer.render(*_messageFont, messageLl, _message);
@@ -322,8 +318,7 @@ void LoadingScreen::render() {
             if (!item.hasLocation) {
                 // Compute a new location
 
-                const FR::BoundingBoxInformation b = renderer.boundingBox(
-                    *_itemFont,
+                const glm::vec2 b = _itemFont->boundingBox(
                     (item.name + " 100%\n99999999/99999999")
                 );
 
@@ -338,15 +333,15 @@ void LoadingScreen::render() {
                 for (; i < MaxNumberLocationSamples && !foundSpace; ++i) {
                     std::uniform_int_distribution<int> distX(
                         15,
-                        static_cast<int>(res.x - b.boundingBox.x - 15)
+                        static_cast<int>(res.x - b.x - 15)
                     );
                     std::uniform_int_distribution<int> distY(
                         15,
-                        static_cast<int>(res.y - b.boundingBox.y - 15)
+                        static_cast<int>(res.y - b.y - 15)
                     );
 
                     ll = { distX(_randomEngine), distY(_randomEngine) };
-                    ur = ll + b.boundingBox;
+                    ur = ll + b;
 
                     // Test against logo and text
                     const bool logoOverlap = rectOverlaps(
@@ -490,7 +485,7 @@ void LoadingScreen::render() {
     glEnable(GL_DEPTH_TEST);
 
     std::this_thread::sleep_for(RefreshRate);
-    global::windowDelegate.swapBuffer();
+    global::windowDelegate->swapBuffer();
     FrameMarkEnd("Loading")
 }
 

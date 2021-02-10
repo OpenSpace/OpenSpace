@@ -207,7 +207,7 @@ if(OS_LINUX)
     natives_blob.bin
     snapshot_blob.bin
     v8_context_snapshot.bin
-    swiftshader
+    #swiftshader
     )
 
   # List of CEF resource files.
@@ -464,7 +464,7 @@ if(OS_WINDOWS)
     natives_blob.bin
     snapshot_blob.bin
     v8_context_snapshot.bin
-    swiftshader
+    #swiftshader
     )
 
   # List of CEF resource files.

@@ -264,14 +264,14 @@ void RenderableKameleonVolume::initializeGL() {
 
     _raycaster->initialize();
 
-    global::raycasterManager.attachRaycaster(*_raycaster.get());
+    global::raycasterManager->attachRaycaster(*_raycaster.get());
 
     auto onChange = [&](bool enabled) {
         if (enabled) {
-            global::raycasterManager.attachRaycaster(*_raycaster.get());
+            global::raycasterManager->attachRaycaster(*_raycaster.get());
         }
         else {
-            global::raycasterManager.detachRaycaster(*_raycaster.get());
+            global::raycasterManager->detachRaycaster(*_raycaster.get());
         }
     };
 
@@ -438,7 +438,7 @@ void RenderableKameleonVolume::storeRaw(const std::string& path) {
 
 void RenderableKameleonVolume::deinitializeGL() {
     if (_raycaster) {
-        global::raycasterManager.detachRaycaster(*_raycaster.get());
+        global::raycasterManager->detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;
     }
 }

@@ -34,13 +34,13 @@ local Apollo17LemModel = {
     },
     Renderable = {
         Type = "RenderableModel",
-        Geometry = {
+        Geometry = {{
             Type = "MultiModelGeometry",
-            GeometryFile = model.modelFolder .. "/LM-2_ver2clean.obj"
-        },
+            GeometryFile = model.modelFolder .. "/LM-2_ver2clean.obj",
+            ColorTexture = model.modelFolder .. "/LM-2_ver2clean_u1_v1.jpeg"
+        }},
         SpecularIntensity = 0.0,
         RotationVector = { 110.255219,171.229706,126.666664 },
-        ColorTexture = model.modelFolder .. "/LM-2_ver2clean_u1_v1.jpeg",
         LightSources = asset_helper.getDefaultLightSources(sun_transforms.SolarSystemBarycenter.Identifier)
     },
     GUI = {

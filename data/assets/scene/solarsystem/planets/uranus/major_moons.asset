@@ -9,6 +9,8 @@ local parentIdentifier = transforms.UranusBarycenter.Identifier
 local parentSpice = "URANUS BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major" }
 local trailColor = { 0.60, 0.65, 0.84 }
+local trailTags = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_uranus" }
+
 
 local majorMoons = {
     {
@@ -20,6 +22,7 @@ local majorMoons = {
         Spice = "MIRANDA",
         Radii = { 471600, 468000, 466000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Uranus/Moons/Major Moons"
         },
@@ -36,6 +39,7 @@ local majorMoons = {
         Spice = "ARIEL",
         Radii = { 1162000, 1156000, 1155000 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Uranus/Moons/Major Moons"
         },
@@ -52,6 +56,7 @@ local majorMoons = {
         Spice = "UMBRIEL",
         Radii = { 1169400, 1169400, 1169400 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Uranus/Moons/Major Moons"
         },
@@ -68,6 +73,7 @@ local majorMoons = {
         Spice = "TITANIA",
         Radii = { 1576800, 1576800, 1576800 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Uranus/Moons/Major Moons"
         },
@@ -84,6 +90,7 @@ local majorMoons = {
         Spice = "OBERON",
         Radii = { 1522800, 1522800, 1522800 },
         Tags = tags,
+        TrailTags = trailTags,
         GUI = {
             Path = "/Solar System/Planets/Uranus/Moons/Major Moons"
         },
@@ -93,8 +100,19 @@ local majorMoons = {
     }
 }
 
-
 assetHelper.registerSceneGraphNodesAndExport(
     asset,
     proceduralGlobes.createGlobes(majorMoons)
 )
+
+
+asset.meta = {
+    Name = "Uranus Marjor Moons",
+    Version = "1.0",
+    Description = [[ Procedural Globe asset containing Uranus' major moons: Miranda,
+        Ariel, Umbriel, Titania, and Oberon. Blank globes and SPICE trails are generated
+        for each moon.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+}

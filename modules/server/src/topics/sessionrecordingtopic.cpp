@@ -51,7 +51,7 @@ SessionRecordingTopic::SessionRecordingTopic() {
 
 SessionRecordingTopic::~SessionRecordingTopic() {
     if (_stateCallbackHandle != UnsetOnChangeHandle) {
-        global::sessionRecording.removeStateChangeCallback(_stateCallbackHandle);
+        global::sessionRecording->removeStateChangeCallback(_stateCallbackHandle);
     }
 }
 
@@ -98,10 +98,10 @@ void SessionRecordingTopic::handleJson(const nlohmann::json& json) {
     sendJsonData();
 
     if (event == SubscribeEvent && _sendState) {
-        _stateCallbackHandle = global::sessionRecording.addStateChangeCallback(
+        _stateCallbackHandle = global::sessionRecording->addStateChangeCallback(
             [this]() {
                 interaction::SessionRecording::SessionState currentState =
-                    global::sessionRecording.state();
+                    global::sessionRecording->state();
                 if (currentState != _lastState) {
                     sendJsonData();
                     _lastState = currentState;
@@ -115,7 +115,7 @@ void SessionRecordingTopic::sendJsonData() {
     json stateJson;
     using SessionRecording = openspace::interaction::SessionRecording;
     if (_sendState) {
-        SessionRecording::SessionState state = global::sessionRecording.state();
+        SessionRecording::SessionState state = global::sessionRecording->state();
         std::string stateString;
         switch (state) {
             case SessionRecording::SessionState::Recording:
@@ -131,7 +131,7 @@ void SessionRecordingTopic::sendJsonData() {
         stateJson[StateKey] = stateString;
     };
     if (_sendFiles) {
-        stateJson[FilesKey] = global::sessionRecording.playbackList();
+        stateJson[FilesKey] = global::sessionRecording->playbackList();
     }
     if (!stateJson.empty()) {
         _connection->sendJson(wrappedPayload(stateJson));

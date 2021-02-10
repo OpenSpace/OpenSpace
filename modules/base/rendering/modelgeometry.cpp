@@ -25,14 +25,18 @@
 #include <modules/base/rendering/modelgeometry.h>
 
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/memorymanager.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/invariants.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/misc/templatefactory.h>
 #include <fstream>
 
@@ -41,6 +45,7 @@ namespace {
 
     constexpr const char* KeyType = "Type";
     constexpr const char* KeyGeomModelFile = "GeometryFile";
+    constexpr const char* KeyColorTexture = "ColorTexture";
     constexpr const int8_t CurrentCacheVersion = 3;
 } // namespace
 
@@ -65,13 +70,20 @@ documentation:: Documentation ModelGeometry::Documentation() {
                 "The file that should be loaded in this ModelGeometry. The file can "
                 "contain filesystem tokens or can be specified relatively to the "
                 "location of the .mod file."
+            },
+            {
+                KeyColorTexture,
+                new StringVerifier,
+                Optional::Yes,
+                "This value points to a color texture file that is applied to the "
+                "geometry rendered in this object."
             }
         }
     };
 }
 
-
-std::unique_ptr<ModelGeometry> ModelGeometry::createFromDictionary(
+// Create with ghoul::mm_unique_ptr 
+ghoul::mm_unique_ptr<ModelGeometry> ModelGeometry::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
     if (!dictionary.hasKeyAndValue<std::string>(KeyType)) {
@@ -81,12 +93,15 @@ std::unique_ptr<ModelGeometry> ModelGeometry::createFromDictionary(
     const std::string& geometryType = dictionary.value<std::string>(KeyType);
 
     auto factory = FactoryManager::ref().factory<ModelGeometry>();
-    return factory->create(geometryType, dictionary);;
+    ModelGeometry* geometry = factory->create(
+        geometryType,
+        dictionary,
+        &global::memoryManager->PersistentMemory
+    );
+    return ghoul::mm_unique_ptr<ModelGeometry>(geometry);
 }
 
-ModelGeometry::ModelGeometry(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner({ "ModelGeometry" })
-{
+ModelGeometry::ModelGeometry(const ghoul::Dictionary& dictionary) {
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
@@ -94,10 +109,20 @@ ModelGeometry::ModelGeometry(const ghoul::Dictionary& dictionary)
     );
 
     _file = absPath(dictionary.value<std::string>(KeyGeomModelFile));
+
+    if (dictionary.hasKey(KeyColorTexture)) {
+        _colorTexturePath = absPath(dictionary.value<std::string>(KeyColorTexture));
+    }
 }
 
 double ModelGeometry::boundingRadius() const {
     return _boundingRadius;
+}
+
+void ModelGeometry::bindTexture() {
+    if (_texture) {
+        _texture->bind();
+    }
 }
 
 void ModelGeometry::render() {
@@ -117,6 +142,8 @@ void ModelGeometry::changeRenderMode(GLenum mode) {
 }
 
 bool ModelGeometry::initialize(Renderable* parent) {
+    ZoneScoped
+
     float maximumDistanceSquared = 0;
     for (const Vertex& v : _vertices) {
         maximumDistanceSquared = glm::max(
@@ -175,6 +202,21 @@ bool ModelGeometry::initialize(Renderable* parent) {
 
     glBindVertexArray(0);
 
+    if (!_colorTexturePath.empty()) {
+        _texture = ghoul::io::TextureReader::ref().loadTexture(
+            absPath(_colorTexturePath)
+        );
+        if (_texture) {
+            LDEBUGC(
+                "RenderableModel",
+                fmt::format("Loaded texture from '{}'", absPath(_colorTexturePath))
+            );
+            _texture->uploadTexture();
+            _texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+            _texture->purgeFromRAM();
+        }
+    }
+
     return true;
 }
 
@@ -182,6 +224,8 @@ void ModelGeometry::deinitialize() {
     glDeleteBuffers(1, &_vbo);
     glDeleteVertexArrays(1, &_vaoID);
     glDeleteBuffers(1, &_ibo);
+
+    _texture = nullptr;
 }
 
 bool ModelGeometry::loadObj(const std::string& filename) {

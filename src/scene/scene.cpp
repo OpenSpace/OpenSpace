@@ -90,11 +90,11 @@ Scene::~Scene() {
     _rootDummy.setScene(nullptr);
 }
 
-void Scene::attachNode(std::unique_ptr<SceneGraphNode> node) {
+void Scene::attachNode(ghoul::mm_unique_ptr<SceneGraphNode> node) {
     _rootDummy.attachChild(std::move(node));
 }
 
-std::unique_ptr<SceneGraphNode> Scene::detachNode(SceneGraphNode& node) {
+ghoul::mm_unique_ptr<SceneGraphNode> Scene::detachNode(SceneGraphNode& node) {
     return _rootDummy.detachChild(node);
 }
 
@@ -303,11 +303,11 @@ void Scene::update(const UpdateData& data) {
     ZoneScoped
 
     std::vector<SceneGraphNode*> initializedNodes = _initializer->takeInitializedNodes();
-
     for (SceneGraphNode* node : initializedNodes) {
         try {
             node->initializeGL();
-        } catch (const ghoul::RuntimeError& e) {
+        }
+        catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.message);
         }
     }
@@ -316,9 +316,7 @@ void Scene::update(const UpdateData& data) {
     }
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {
-            LTRACE("Scene::update(begin '" + node->identifier() + "')");
             node->update(data);
-            LTRACE("Scene::update(end '" + node->identifier() + "')");
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.what());
@@ -335,9 +333,7 @@ void Scene::render(const RenderData& data, RendererTasks& tasks) {
 
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {
-            LTRACE("Scene::render(begin '" + node->identifier() + "')");
             node->render(data, tasks);
-            LTRACE("Scene::render(end '" + node->identifier() + "')");
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.what());
@@ -345,20 +341,19 @@ void Scene::render(const RenderData& data, RendererTasks& tasks) {
         if (global::callback::webBrowserPerformanceHotfix) {
             (*global::callback::webBrowserPerformanceHotfix)();
         }
+    }
 
-        {
-            ZoneScopedN("Get Error Hack")
+    {
+        ZoneScopedN("Get Error Hack")
 
-            // @TODO(abock 2019-08-19) This glGetError call is a hack to prevent the GPU
-            // thread and the CPU thread from diverging too much, particularly the
-            // uploading of a lot of textures for the globebrowsing planets can cause a
-            // hard stuttering effect. Asking for a glGetError after every rendering call
-            // will force the threads to implicitly synchronize and thus prevent the
-            // stuttering.  The better solution would be to reduce the number of uploads
-            // per frame, use a staggered buffer, or something else like that preventing a
-            // large spike in uploads
-            glGetError();
-        }
+        // @TODO(abock 2019-08-19) This glGetError call is a hack to prevent the GPU
+        // thread and the CPU thread from diverging too much, particularly the uploading
+        // of a lot of textures for the globebrowsing planets can cause a hard stuttering
+        // effect. Asking for a glGetError after every rendering call will force the
+        // threads to implicitly synchronize and thus prevent the stuttering.  The better
+        // solution would be to reduce the number of uploads per frame, use a staggered
+        // buffer, or something else like that preventing a large spike in uploads
+        glGetError();
     }
 }
 
@@ -419,7 +414,7 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
         }
     }
 
-    std::unique_ptr<SceneGraphNode> node = SceneGraphNode::createFromDictionary(
+    ghoul::mm_unique_ptr<SceneGraphNode> node = SceneGraphNode::createFromDictionary(
         nodeDictionary
     );
     if (!node) {
@@ -642,12 +637,18 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "the fourth argument to setPropertyValue."
             },
             {
+                "hasProperty",
+                &luascriptfunctions::property_hasProperty,
+                {},
+                "string",
+                "Returns whether a property with the given URI exists"
+            },
+            {
                 "getPropertyValue",
                 &luascriptfunctions::property_getValue,
                 {},
                 "string",
-                "Returns the value the property, identified by "
-                "the provided URI."
+                "Returns the value the property, identified by the provided URI."
             },
             {
                 "getProperty",
@@ -679,6 +680,14 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 {},
                 "string",
                 "Removes the SceneGraphNode identified by name"
+            },
+            {
+                "removeSceneGraphNodesFromRegex",
+                &luascriptfunctions::removeSceneGraphNodesFromRegex,
+                {},
+                "string",
+                "Removes all SceneGraphNodes with identifiers matching the input regular "
+                "expression"
             },
             {
                 "hasSceneGraphNode",

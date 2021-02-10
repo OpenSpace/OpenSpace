@@ -1,17 +1,8 @@
 local transforms = asset.require('../transforms')
 local assetHelper = asset.require('util/asset_helper')
 local kernel = asset.require('../kernels').sat375
-asset.request('./trail')
+asset.require('./trail')
 local labelsPath = asset.require('../saturn_globelabels').LabelsPath
-
-
-
-local textures = asset.syncedResource({
-    Name = "Mimas textures",
-    Type = "HttpSynchronization",
-    Identifier = "mimas_textures",
-    Version = 1
-})
 
 local Mimas = {
     Identifier = "Mimas",
@@ -33,15 +24,7 @@ local Mimas = {
         Type = "RenderableGlobe",
         Radii = 198000,
         SegmentsPerPatch = 64,
-        Layers = {
-            ColorLayers = {
-                {
-                    Identifier = "Texture",
-                    FilePath = textures .. "/mimas.jpg",
-                    Enabled = true
-                }
-            }
-        },
+        Layers = { },
         Labels = {
             Enable = false,
             FileName = labelsPath .. "/mimas.labels",
@@ -61,10 +44,21 @@ local Mimas = {
     },
     Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
     GUI = {
-        Path = "/Solar System/Planets/Saturn/Moons"
+        Name = "Mimas",
+        Path = "/Solar System/Planets/Saturn/Moons",
+        Description = [[That's no moon...]]
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Mimas })
+
+
+asset.meta = {
+    Name = "Mimas",
+    Version = "1.0",
+    Description = [[ Mimas globe with labels.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = {"Mimas"}
+}

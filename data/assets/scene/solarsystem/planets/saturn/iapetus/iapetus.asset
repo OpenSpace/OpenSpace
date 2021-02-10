@@ -1,17 +1,8 @@
 local transforms = asset.require('../transforms')
 local assetHelper = asset.require('util/asset_helper')
 local kernel = asset.require('../kernels').sat375
-asset.request('./trail')
+asset.require('./trail')
 local labelsPath = asset.require('../saturn_globelabels').LabelsPath
-
-
-
-local textures = asset.syncedResource({
-    Name = "Iapetus textures",
-    Type = "HttpSynchronization",
-    Identifier = "iapetus_textures",
-    Version = 1
-})
 
 local Iapetus = {
     Identifier = "Iapetus",
@@ -25,7 +16,7 @@ local Iapetus = {
         },
         Rotation = {
             Type = "SpiceRotation",
-            SourceFrame = "IAU_ENCELADUS",
+            SourceFrame = "IAU_IAPETUS",
             DestinationFrame = "GALACTIC"
         }
     },
@@ -33,15 +24,7 @@ local Iapetus = {
         Type = "RenderableGlobe",
         Radii = 734000,
         SegmentsPerPatch = 64,
-        Layers = {
-            ColorLayers = {
-                {
-                    Identifier = "Texture",
-                    FilePath = textures .. "/iapetus.jpg",
-                    Enabled = true
-                }
-            }
-        },
+        Layers = {},
         Labels = {
             Enable = false,
             FileName = labelsPath .. "/iapetus.labels",
@@ -61,10 +44,21 @@ local Iapetus = {
     },
     Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
     GUI = {
-        Path = "/Solar System/Planets/Saturn/Moons"
+        Name = "Iapetus",
+        Path = "/Solar System/Planets/Saturn/Moons",
+        Description = [[Third largest moon of Saturn. ]]
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { Iapetus })
+
+
+asset.meta = {
+    Name = "Iapetus",
+    Version = "1.0",
+    Description = [[ Iapetus globe with labels.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = {"Iapetus"}
+}

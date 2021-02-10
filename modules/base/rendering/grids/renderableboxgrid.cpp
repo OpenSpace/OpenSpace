@@ -33,6 +33,7 @@
 #include <openspace/documentation/verifier.h>
 #include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 
 namespace {
@@ -136,7 +137,7 @@ void RenderableBoxGrid::initializeGL() {
     _gridProgram = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return global::renderEngine.buildRenderProgram(
+            return global::renderEngine->buildRenderProgram(
                 ProgramName,
                 absPath("${MODULE_BASE}/shaders/grid_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/grid_fs.glsl")
@@ -163,7 +164,7 @@ void RenderableBoxGrid::deinitializeGL() {
     BaseModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
-            global::renderEngine.removeRenderProgram(p);
+            global::renderEngine->removeRenderProgram(p);
         }
     );
     _gridProgram = nullptr;
@@ -189,25 +190,6 @@ void RenderableBoxGrid::render(const RenderData& data, RendererTasks&){
 
     _gridProgram->setUniform("gridColor", _gridColor);
 
-    // Saves current state:
-    GLboolean isBlendEnabled = glIsEnabledi(GL_BLEND, 0);
-    GLfloat currentLineWidth;
-    glGetFloatv(GL_LINE_WIDTH, &currentLineWidth);
-    GLboolean isLineSmoothEnabled = glIsEnabled(GL_LINE_SMOOTH);
-
-    GLenum blendEquationRGB;
-    GLenum blendEquationAlpha;
-    GLenum blendDestAlpha;
-    GLenum blendDestRGB;
-    GLenum blendSrcAlpha;
-    GLenum blendSrcRGB;
-    glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
-    glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
-    glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
-    glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
-    glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
-    glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
-
     // Changes GL state:
     glLineWidth(_lineWidth);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -221,17 +203,8 @@ void RenderableBoxGrid::render(const RenderData& data, RendererTasks&){
     _gridProgram->deactivate();
 
     // Restores GL State
-    glLineWidth(currentLineWidth);
-    glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
-    glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
-
-    if (!isBlendEnabled) {
-        glDisablei(GL_BLEND, 0);
-    }
-
-    if (!isLineSmoothEnabled) {
-        glDisable(GL_LINE_SMOOTH);
-    }
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetLineState();
 }
 
 void RenderableBoxGrid::update(const UpdateData&) {
