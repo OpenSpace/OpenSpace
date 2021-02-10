@@ -35,6 +35,63 @@
 #include <ghoul/misc/objectmanager.h>
 #include <ghoul/opengl/programobject.h>
 
+namespace {
+    static const openspace::properties::Property::PropertyInfo PathInfo = {
+        "Path",
+        "Path",
+        "The file path to the data file to read"
+    };
+    static const openspace::properties::Property::PropertyInfo SegmentQualityInfo = {
+        "SegmentQuality",
+        "Segment Quality",
+        "A segment quality value for the orbital trail. A value from 1 (lowest) to "
+        "10 (highest) that controls the number of line segments in the rendering of the "
+        "orbital trail. This does not control the direct number of segments because "
+        "these automatically increase according to the eccentricity of the orbit."
+    };
+    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+        "LineWidth",
+        "Line Width",
+        "This value specifies the line width of the trail if the selected rendering "
+        "method includes lines. If the rendering mode is set to Points, this value is "
+        "ignored."
+    };
+    constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
+        "Color",
+        "Color",
+        "This value determines the RGB main color for the lines and points of the trail."
+    };
+    constexpr openspace::properties::Property::PropertyInfo TrailFadeInfo = {
+        "TrailFade",
+        "Trail Fade",
+        "This value determines how fast the trail fades and is an appearance property. "
+    };
+    static const openspace::properties::Property::PropertyInfo UpperLimitInfo = {
+        "UpperLimit",
+        "Upper Limit",
+        "Upper limit on the number of objects for this renderable, regardless of "
+        "how many objects are contained in the data file. Produces an evenly-distributed"
+        "sample from the data file."
+    };
+    static const openspace::properties::Property::PropertyInfo StartRenderIdxInfo = {
+        "StartRenderIdx",
+        "Contiguous Starting Index of Render",
+        "Index of object in renderable group to start rendering (all prior objects will "
+        "be ignored)."
+    };
+    static const openspace::properties::Property::PropertyInfo RenderSizeInfo = {
+        "RenderSize",
+        "Contiguous Size of Render Block",
+        "Number of objects to render sequentially from StartRenderIdx"
+    };
+    constexpr openspace::properties::Property::PropertyInfo RenderBinModeInfo = {
+        "RenderBinMode",
+        "RenderBin Mode",
+        "Determines if the trails will be rendered after all other elements, including"
+        "atmospheres if needed."
+    };
+}
+
 namespace openspace {
 
 class RenderableOrbitalKepler : public Renderable {
@@ -70,7 +127,6 @@ protected:
     std::function<void()> _updateStartRenderIdxSelect;
     std::function<void()> _updateRenderSizeSelect;
     std::function<void()> _updateRenderUpperLimitSelect;
-    std::function<void()> _updateContiguousModeSelect;
 
     struct KeplerParameters {
         double inclination = 0.0;
@@ -89,6 +145,7 @@ protected:
         bool upperLimit = false;
     } _propsDefinedInAssetFlag;
 
+    bool _updateDataBuffersAtNextRender = false;
     std::streamoff _numObjects;
     bool _isFileReadinitialized = false;
     inline static constexpr double convertAuToKm = 1.496e8;
@@ -100,10 +157,8 @@ protected:
     properties::Property::OnChangeHandle _upperLimitCallbackHandle;
     properties::UIntProperty _startRenderIdx;
     properties::UIntProperty _sizeRender;
-    properties::BoolProperty _contiguousMode;
     properties::Property::OnChangeHandle _startRenderIdxCallbackHandle;
     properties::Property::OnChangeHandle _sizeRenderCallbackHandle;
-    properties::Property::OnChangeHandle _contiguousModeCallbackhandle;
 
 private:
     struct Vertex {

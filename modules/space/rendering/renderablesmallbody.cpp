@@ -48,42 +48,6 @@
 namespace {
     constexpr const char* _loggerCat = "SmallSolarSystemBody";
 
-    static const openspace::properties::Property::PropertyInfo PathInfo = {
-        "Path",
-        "Path",
-        "The file path to the SBDB .csv file to read"
-    };
-    static const openspace::properties::Property::PropertyInfo SegmentQualityInfo = {
-        "SegmentQuality",
-        "Segment Quality",
-        "A segment quality value for the orbital trail. A value from 1 (lowest) to "
-        "100 (highest) that controls the number of line segments in the rendering of the "
-        "orbital trail. This does not control the direct number of segments because "
-        "these automatically increase according to the eccentricity of the orbit."
-    };
-    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
-        "LineWidth",
-        "Line Width",
-        "This value specifies the line width of the trail if the selected rendering "
-        "method includes lines. If the rendering mode is set to Points, this value is "
-        "ignored."
-    };
-    constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
-        "Color",
-        "Color",
-        "This value determines the RGB main color for the lines and points of the trail."
-    };
-    constexpr openspace::properties::Property::PropertyInfo TrailFadeInfo = {
-        "TrailFade",
-        "Trail Fade",
-        "This value determines how fast the trail fades and is an appearance property. "
-    };
-    static const openspace::properties::Property::PropertyInfo UpperLimitInfo = {
-        "UpperLimit",
-        "Upper Limit",
-        "Upper limit on the number of objects for this renderable, regardless of "
-        "how many objects are contained in the data file"
-    };
     static const openspace::properties::Property::PropertyInfo ContiguousModeInfo = {
         "ContiguousMode",
         "Contiguous Mode",
@@ -159,6 +123,18 @@ documentation::Documentation RenderableSmallBody::Documentation() {
                 TrailFadeInfo.description
             },
             {
+                StartRenderIdxInfo.identifier,
+                new IntVerifier,
+                Optional::Yes,
+                StartRenderIdxInfo.description
+            },
+            {
+                RenderSizeInfo.identifier,
+                new IntVerifier,
+                Optional::Yes,
+                RenderSizeInfo.description
+            },
+            {
                 ContiguousModeInfo.identifier,
                 new BoolVerifier,
                 Optional::Yes,
@@ -170,6 +146,7 @@ documentation::Documentation RenderableSmallBody::Documentation() {
 
 RenderableSmallBody::RenderableSmallBody(const ghoul::Dictionary& dictionary)
     : RenderableOrbitalKepler(dictionary)
+    , _contiguousMode(ContiguousModeInfo, false)
 {
     addProperty(_startRenderIdx);
     addProperty(_sizeRender);
@@ -177,25 +154,28 @@ RenderableSmallBody::RenderableSmallBody(const ghoul::Dictionary& dictionary)
     addProperty(_upperLimit);
 
     _updateStartRenderIdxSelect = std::function<void()>([this] {
-        if ((_numObjects - _startRenderIdx) < _sizeRender) {
-            _sizeRender = _numObjects - _startRenderIdx;
+        if (_contiguousMode) {
+            if ((_numObjects - _startRenderIdx) < _sizeRender) {
+                _sizeRender = _numObjects - _startRenderIdx;
+            }
+            _updateDataBuffersAtNextRender = true;
         }
-        initializeGL();
     });
     _updateRenderSizeSelect = std::function<void()>([this] {
-        if (_sizeRender > (_numObjects - _startRenderIdx)) {
-            _startRenderIdx = _numObjects - _sizeRender;
+        if (_contiguousMode) {
+            if (_sizeRender > (_numObjects - _startRenderIdx)) {
+                _startRenderIdx = _numObjects - _sizeRender;
+            }
+            _updateDataBuffersAtNextRender = true;
         }
-        initializeGL();
     });
     _updateRenderUpperLimitSelect = std::function<void()>([this] {
-        _startRenderIdx = 0;
-        initializeGL();
+        if (!_contiguousMode) {
+            _updateDataBuffersAtNextRender = true;
+        }
     });
     _updateContiguousModeSelect = std::function<void()>([this] {
-        if (!_contiguousMode) {
-            _startRenderIdx = 0;
-        }
+        _updateDataBuffersAtNextRender = true;
     });
 
     _startRenderIdxCallbackHandle = _startRenderIdx.onChange(_updateStartRenderIdxSelect);
@@ -244,9 +224,12 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
             _isFileReadinitialized = true;
             initializeFileReading();
         }
+
+        unsigned int startElement = 0;
         unsigned int endElement;
         if (_contiguousMode) {
             lineSkipFraction = 1.0;
+            startElement = _startRenderIdx;
             endElement = _startRenderIdx + _sizeRender - 1;
         }
         else {
@@ -269,12 +252,12 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
             static_cast<unsigned int>(_numObjects - 1) :
             endElement;
         // Burn lines if not starting at first element
-        for (unsigned int k = 0; k < _startRenderIdx; ++k) {
+        for (unsigned int k = 0; k < startElement; ++k) {
             skipSingleLineInFile(file);
         }
         bool firstDataLine = true;
         int lastLineCount = -1;
-        for (csvLine = _startRenderIdx + 1;
+        for (csvLine = startElement + 1;
              csvLine <= endElement + 1;
              csvLine++, sequentialLineErrors++)
         {

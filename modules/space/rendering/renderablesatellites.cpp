@@ -47,32 +47,10 @@
 namespace {
     constexpr const char* _loggerCat = "Satellites";
 
-    static const openspace::properties::Property::PropertyInfo PathInfo = {
-        "Path",
-        "Path",
-        "The file path to the TLE file to read"
-    };
     static const openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Segments",
         "The number of segments to use for each orbit ellipse"
-    };
-    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
-        "LineWidth",
-        "Line Width",
-        "This value specifies the line width of the trail if the selected rendering "
-        "method includes lines. If the rendering mode is set to Points, this value is "
-        "ignored."
-    };
-    constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
-        "Color",
-        "Color",
-        "This value determines the RGB main color for the lines and points of the trail."
-    };
-    constexpr openspace::properties::Property::PropertyInfo TrailFadeInfo = {
-        "TrailFade",
-        "Trail Fade",
-        "This value determines how fast the trail fades and is an appearance property. "
     };
 }
 
