@@ -28,6 +28,8 @@
 #include <openspace/util/openspacemodule.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/stringproperty.h>
 
 namespace openspace {
 
@@ -38,11 +40,30 @@ public:
     ExoplanetsModule();
     virtual ~ExoplanetsModule() = default;
 
+    const std::string exoplanetsDataPath() const;
+    const std::string lookUpTablePath() const;
+    const std::string starTexturePath() const;
+    const std::string noDataTexturePath() const;
+    const std::string orbitDiscTexturePath() const;
+    const std::string habitableZoneTexturePath() const;
+    const bool showComparisonCircle() const;
+    const bool showHabitableZone() const;
+    const bool useOptimisticZone() const;
+
     scripting::LuaLibrary luaLibrary() const override;
     std::vector<documentation::Documentation> documentations() const override;
 
 protected:
-    void internalInitialize(const ghoul::Dictionary&) override;
+    void internalInitialize(const ghoul::Dictionary& dict) override;
+
+    properties::StringProperty _exoplanetsDataFolder;
+    properties::StringProperty _starTexturePath;
+    properties::StringProperty _noDataTexturePath;
+    properties::StringProperty _orbitDiscTexturePath;
+    properties::StringProperty _habitableZoneTexturePath;
+    properties::BoolProperty _showComparisonCircle;
+    properties::BoolProperty _showHabitableZone;
+    properties::BoolProperty _useOptimisticZone;
 };
 
 } // namespace openspace
