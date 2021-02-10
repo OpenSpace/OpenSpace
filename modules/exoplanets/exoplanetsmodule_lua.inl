@@ -52,7 +52,7 @@ constexpr const float SolarRadius = static_cast<float>(distanceconstants::SolarR
 constexpr const float JupiterRadius = static_cast<float>(distanceconstants::JupiterRadius);
 
 ExoplanetSystem findExoplanetSystemInData(std::string_view starName) {
-    ExoplanetsModule* module = global::moduleEngine->module<ExoplanetsModule>();
+    const ExoplanetsModule* module = global::moduleEngine->module<ExoplanetsModule>();
 
     const std::string binPath = module->exoplanetsDataPath();
     std::ifstream data(absPath(binPath), std::ios::in | std::ios::binary);
@@ -546,10 +546,7 @@ int removeExoplanetSystem(lua_State* L) {
 }
 
 std::vector<std::string> hostStarsWithSufficientData() {
-    std::vector<std::string> names;
-    std::string line;
-
-    ExoplanetsModule* module = global::moduleEngine->module<ExoplanetsModule>();
+    const ExoplanetsModule* module = global::moduleEngine->module<ExoplanetsModule>();
 
     const std::string lutPath = module->lookUpTablePath();
     std::ifstream lookupTableFile(absPath(lutPath));
@@ -564,6 +561,9 @@ std::vector<std::string> hostStarsWithSufficientData() {
         LERROR(fmt::format("Failed to open data file '{}'", binPath));
         return {};
     }
+
+    std::vector<std::string> names;
+    std::string line;
 
     // Read number of lines
     int nExoplanets = 0;

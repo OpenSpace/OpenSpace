@@ -40,15 +40,15 @@ public:
     ExoplanetsModule();
     virtual ~ExoplanetsModule() = default;
 
-    const std::string exoplanetsDataPath() const;
-    const std::string lookUpTablePath() const;
-    const std::string starTexturePath() const;
-    const std::string noDataTexturePath() const;
-    const std::string orbitDiscTexturePath() const;
-    const std::string habitableZoneTexturePath() const;
-    const bool showComparisonCircle() const;
-    const bool showHabitableZone() const;
-    const bool useOptimisticZone() const;
+    std::string exoplanetsDataPath() const;
+    std::string lookUpTablePath() const;
+    std::string starTexturePath() const;
+    std::string noDataTexturePath() const;
+    std::string orbitDiscTexturePath() const;
+    std::string habitableZoneTexturePath() const;
+    bool showComparisonCircle() const;
+    bool showHabitableZone() const;
+    bool useOptimisticZone() const;
 
     scripting::LuaLibrary luaLibrary() const override;
     std::vector<documentation::Documentation> documentations() const override;

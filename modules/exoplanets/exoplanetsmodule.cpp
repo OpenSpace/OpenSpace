@@ -159,39 +159,39 @@ ExoplanetsModule::ExoplanetsModule()
     addProperty(_useOptimisticZone);
 }
 
-const std::string ExoplanetsModule::exoplanetsDataPath() const {
+std::string ExoplanetsModule::exoplanetsDataPath() const {
     return fmt::format("{}{}", _exoplanetsDataFolder, ExoplanetsDataFileName);
 };
 
-const std::string ExoplanetsModule::lookUpTablePath() const {
+std::string ExoplanetsModule::lookUpTablePath() const {
     return fmt::format("{}{}", _exoplanetsDataFolder, LookupTableFileName);
 };
 
-const std::string ExoplanetsModule::starTexturePath() const {
+std::string ExoplanetsModule::starTexturePath() const {
     return _starTexturePath;
 }
 
-const std::string ExoplanetsModule::noDataTexturePath() const {
+std::string ExoplanetsModule::noDataTexturePath() const {
     return _noDataTexturePath;
 }
 
-const std::string ExoplanetsModule::orbitDiscTexturePath() const {
+std::string ExoplanetsModule::orbitDiscTexturePath() const {
     return _orbitDiscTexturePath;
 }
 
-const std::string ExoplanetsModule::habitableZoneTexturePath() const {
+std::string ExoplanetsModule::habitableZoneTexturePath() const {
     return _habitableZoneTexturePath;
 }
 
-const bool ExoplanetsModule::showComparisonCircle() const {
+bool ExoplanetsModule::showComparisonCircle() const {
     return _showComparisonCircle;
 }
 
-const bool ExoplanetsModule::showHabitableZone() const {
+bool ExoplanetsModule::showHabitableZone() const {
     return _showHabitableZone;
 }
 
-const bool ExoplanetsModule::useOptimisticZone() const {
+bool ExoplanetsModule::useOptimisticZone() const {
     return _useOptimisticZone;
 }
 
