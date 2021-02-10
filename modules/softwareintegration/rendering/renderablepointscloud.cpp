@@ -29,18 +29,15 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
-
 #include <fstream>
+#include <optional>
 
 namespace {
     constexpr const char* _loggerCat = "PointsCloud";
-
-    constexpr int8_t CurrentCacheVersion = 1;
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
@@ -65,42 +62,29 @@ namespace {
         "Data",
         "Data to use for the positions of the points, given in Parsec."
     };
+
+    struct [[codegen::Dictionary(RenderablePointsCloud)]] Parameters {
+        // [[codegen::verbatim(ColorInfo.description)]]
+        std::optional<glm::vec3> color;
+
+        // [[codegen::verbatim(SizeInfo.description)]]
+        std::optional<float> size;
+
+        // [[codegen::verbatim(ToggleVisibilityInfo.description)]]
+        std::optional<bool> toggleVisiblity;
+
+        // [[codegen::verbatim(DataInfo.description)]]
+        std::vector<glm::vec3> data;
+    };
+#include "renderablepointscloud_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderablePointsCloud::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderablePointsCloud",
-        "softwareintegration_renderable_pointscloud",
-        {
-            {
-                ColorInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                ColorInfo.description
-            },
-            {
-                SizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                SizeInfo.description
-            },
-            {
-                ToggleVisibilityInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                ToggleVisibilityInfo.description
-            },
-            {
-                DataInfo.identifier,
-                new Vector3ListVerifier<double>,
-                Optional::No,
-                DataInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "softwareintegration_renderable_pointscloud";
+    return doc;
 }
 
 RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary)
@@ -109,15 +93,9 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     , _size(SizeInfo, 1.f, 0.f, 150.f)
     , _isVisible(ToggleVisibilityInfo, true)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderablePointsCloud"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    if (dictionary.hasKey(ColorInfo.identifier)) {
-        _color = dictionary.value<glm::dvec3>(ColorInfo.identifier);
-    }
+    _color = p.color.value_or(_color);
     _color.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_color);
 
@@ -127,17 +105,13 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
         _pointData.push_back(d.value<glm::dvec3>(key));
     }
 
-    addProperty(_opacity);
-
-    if (dictionary.hasKey(SizeInfo.identifier)) {
-        _size = static_cast<float>(dictionary.value<double>(SizeInfo.identifier));
-    }
+    _size = p.size.value_or(_size);
     addProperty(_size);
 
-    if (dictionary.hasKey(ToggleVisibilityInfo.identifier)) {
-        _isVisible = dictionary.value<bool>(ToggleVisibilityInfo.identifier);
-    }
+    _isVisible = p.toggleVisiblity.value_or(_isVisible);
     addProperty(_isVisible);
+
+    addProperty(_opacity);
 }
 
 bool RenderablePointsCloud::isReady() const {
