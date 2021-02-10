@@ -47,11 +47,6 @@
 namespace {
     constexpr const char* _loggerCat = "Satellites";
 
-    static const openspace::properties::Property::PropertyInfo PathInfo = {
-        "Path",
-        "Path",
-        "The file path to the TLE file to read"
-    };
     static const openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Segments",

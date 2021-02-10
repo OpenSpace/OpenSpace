@@ -51,11 +51,14 @@ private:
     void skipSingleLineInFile(std::ifstream& file);
 
     std::vector<std::string> _sbNames;
+    std::function<void()> _updateContiguousModeSelect;
 
     /// The index array that is potentially used in the draw call. If this is empty, no
     /// element draw call is used.
     std::vector<unsigned int> _indexBufferData;
     bool contiguousMode = true;
+    properties::BoolProperty _contiguousMode;
+    properties::Property::OnChangeHandle _contiguousModeCallbackhandle;
 };
 
 } // namespace openspace

@@ -114,69 +114,6 @@ namespace {
         LeapSecond{ 2017,   1 }
     };
 
-    static const openspace::properties::Property::PropertyInfo PathInfo = {
-        "Path",
-        "Path",
-        "The file path to the data file to read"
-    };
-    static const openspace::properties::Property::PropertyInfo SegmentQualityInfo = {
-        "SegmentQuality",
-        "Segment Quality",
-        "A segment quality value for the orbital trail. A value from 1 (lowest) to "
-        "10 (highest) that controls the number of line segments in the rendering of the "
-        "orbital trail. This does not control the direct number of segments because "
-        "these automatically increase according to the eccentricity of the orbit."
-    };
-    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
-        "LineWidth",
-        "Line Width",
-        "This value specifies the line width of the trail if the selected rendering "
-        "method includes lines. If the rendering mode is set to Points, this value is "
-        "ignored."
-    };
-    constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
-        "Color",
-        "Color",
-        "This value determines the RGB main color for the lines and points of the trail."
-    };
-    constexpr openspace::properties::Property::PropertyInfo TrailFadeInfo = {
-        "TrailFade",
-        "Trail Fade",
-        "This value determines how fast the trail fades and is an appearance property. "
-    };
-    static const openspace::properties::Property::PropertyInfo UpperLimitInfo = {
-        "UpperLimit",
-        "Upper Limit",
-        "Upper limit on the number of objects for this renderable, regardless of "
-        "how many objects are contained in the data file. Produces an evenly-distributed"
-        "sample from the data file."
-    };
-    static const openspace::properties::Property::PropertyInfo StartRenderIdxInfo = {
-        "StartRenderIdx",
-        "Starting Index of Render",
-        "Index of object in renderable group to start rendering (all prior objects will "
-        "be ignored)."
-    };
-    static const openspace::properties::Property::PropertyInfo RenderSizeInfo = {
-        "RenderSize",
-        "Size of Render Block",
-        "Number of objects to render sequentially from StartRenderIdx"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo RenderBinModeInfo = {
-        "RenderBinMode",
-        "RenderBin Mode",
-        "Determines if the trails will be rendered after all other elements, including"
-        "atmospheres if needed."
-    };
-
-    static const openspace::properties::Property::PropertyInfo ContiguousModeInfo = {
-        "ContiguousMode",
-        "Contiguous Mode",
-        "If enabled, then if the starting index or render size are used to define a "
-        "subset, then a contiguous subset from the data file will be rendered."
-    };
-
     // Count the number of full days since the beginning of 2000 to the beginning of
     // the parameter 'year'
     int countDays(int year) {
@@ -375,7 +312,6 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     , _startRenderIdx(StartRenderIdxInfo, 0, 0, 1)
     , _sizeRender(RenderSizeInfo, 1, 1, 2)
     , _path(PathInfo)
-    , _contiguousMode(ContiguousModeInfo, true)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -492,6 +428,11 @@ bool RenderableOrbitalKepler::isReady() const {
 void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
     if (_data.empty()) {
         return;
+    }
+
+    if (_updateDataBuffersAtNextRender) {
+        _updateDataBuffersAtNextRender = false;
+        initializeGL();
     }
 
     _programObject->activate();
