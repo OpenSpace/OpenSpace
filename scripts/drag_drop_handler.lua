@@ -5,7 +5,7 @@
 --             of the path.
 --             Example:  openspace.cfg
 -- extension:  The extention of the file
---             Example: cfg
+--             Example: .cfg
 --
 -- From this script, we need to return the script that we want to be executed in response
 -- to the drag event.  If we don't want anything to happen, don't return anything or
