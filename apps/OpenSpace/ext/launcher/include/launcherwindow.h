@@ -89,11 +89,13 @@ private:
     const std::string _assetPath;
     const std::string _userAssetPath;
     const std::string _configPath;
+    const std::string _userConfigPath;
     const std::string _profilePath;
     const std::string _userProfilePath;
     const std::vector<std::string>& _readOnlyProfiles;
     bool _shouldLaunch = false;
     int _userAssetCount = 0;
+    int _userConfigCount = 0;
 
     QComboBox* _profileBox = nullptr;
     QComboBox* _windowConfigBox = nullptr;

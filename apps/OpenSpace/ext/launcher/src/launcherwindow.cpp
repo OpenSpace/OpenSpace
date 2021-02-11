@@ -144,6 +144,7 @@ LauncherWindow::LauncherWindow(bool profileEnabled,
     , _assetPath(absPath(globalConfig.pathTokens.at("ASSETS")) + '/')
     , _userAssetPath(absPath(globalConfig.pathTokens.at("USER_ASSETS")) + '/')
     , _configPath(absPath(globalConfig.pathTokens.at("CONFIG")) + '/')
+    , _userConfigPath(absPath(globalConfig.pathTokens.at("USER_CONFIG")) + '/')
     , _profilePath(absPath(globalConfig.pathTokens.at("PROFILES")) + '/')
     , _userProfilePath(absPath(globalConfig.pathTokens.at("USER_PROFILES")) + '/')
     , _readOnlyProfiles(globalConfig.readOnlyProfiles)
@@ -338,8 +339,6 @@ void LauncherWindow::populateProfilesList(std::string preset) {
     model->item(_userAssetCount)->setEnabled(false);
     ++_userAssetCount;
 
-
-
     // Add all the files with the .profile extension to the dropdown
     for (const fs::directory_entry& p : fs::directory_iterator(_userProfilePath)) {
         if (p.path().extension() != ".profile") {
@@ -354,7 +353,6 @@ void LauncherWindow::populateProfilesList(std::string preset) {
     model->item(_userAssetCount)->setEnabled(false);
     ++_userAssetCount;
 
-
     // Add all the files with the .profile extension to the dropdown
     for (const fs::directory_entry& p : fs::directory_iterator(_profilePath)) {
         if (p.path().extension() != ".profile") {
@@ -367,7 +365,6 @@ void LauncherWindow::populateProfilesList(std::string preset) {
     const int idx = _profileBox->findText(QString::fromStdString(std::move(preset)));
     if (idx != -1) {
         _profileBox->setCurrentIndex(idx);
-
     }
 }
 
@@ -375,6 +372,33 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
     namespace fs = std::filesystem;
 
     _windowConfigBox->clear();
+
+    if (std::filesystem::exists(_userConfigPath)) {
+
+        _userConfigCount = 0;
+        _windowConfigBox->addItem(QString::fromStdString("--- User Configurations ---"));
+        const QStandardItemModel* model = qobject_cast<const QStandardItemModel*>(_windowConfigBox->model());
+        model->item(_userConfigCount)->setEnabled(false);
+        ++_userConfigCount;
+        // Add all the files with the .xml extension to the dropdown
+        for (const fs::directory_entry& p : fs::directory_iterator(_userConfigPath)) {
+            if (p.path().extension() != ".xml") {
+                continue;
+            }
+            _windowConfigBox->addItem(QString::fromStdString(p.path().stem().string()));
+            ++_userConfigCount;
+        }
+        _windowConfigBox->addItem(QString::fromStdString("--- OpenSpace Configurations ---"));
+        model = qobject_cast<const QStandardItemModel*>(_windowConfigBox->model());
+        model->item(_userConfigCount)->setEnabled(false);
+    }
+    else {
+        LINFOC(
+            "LauncherWindow",
+            fmt::format("Could not find config folder '{}'", _configPath)
+        );
+    }
+
     if (std::filesystem::exists(_configPath)) {
         // Add all the files with the .xml extension to the dropdown
         for (const fs::directory_entry& p : fs::directory_iterator(_configPath)) {
@@ -448,5 +472,10 @@ std::string LauncherWindow::selectedProfile() const {
 }
 
 std::string LauncherWindow::selectedWindowConfig() const {
-    return _windowConfigBox->currentText().toStdString();
+    if (_windowConfigBox->currentIndex() > _userAssetCount) {
+        return "${CONFIG}/" + _windowConfigBox->currentText().toStdString();
+    }
+    else {
+        return "${USER_CONFIG}/" + _windowConfigBox->currentText().toStdString();
+    }
 }

@@ -1713,7 +1713,10 @@ std::vector<std::string> SessionRecording::playbackList() const {
     std::vector<std::string> allInputFiles = currentDir.readFiles();
     for (const std::string& f : allInputFiles) {
         // Remove path and keep only the filename
-        fileList.push_back(f.substr(path.length() + 1, f.length() - path.length() - 1));
+        const std::string filename = f.substr(path.length() + 1, f.length() - path.length() - 1);
+        if (filename.rfind(".", 0) != 0) { //Don't add hidden files
+            fileList.push_back(filename);
+        }
     }
     return fileList;
 }
