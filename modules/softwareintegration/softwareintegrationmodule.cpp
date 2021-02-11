@@ -28,10 +28,36 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/util/factorymanager.h>
+#include <ghoul/logging/logmanager.h>
+
+namespace {
+    constexpr const char* _loggerCat = "SoftwareIntegrationModule";
+} // namespace
 
 namespace openspace {
 
 SoftwareIntegrationModule::SoftwareIntegrationModule() : OpenSpaceModule(Name) {}
+
+void SoftwareIntegrationModule::storeData(const std::string& key,
+                                          const std::vector<float> data)
+{
+    _temporaryDataStorage.emplace(key, std::move(data));
+}
+
+std::vector<float> SoftwareIntegrationModule::fetchData(const std::string& key) {
+    auto it = _temporaryDataStorage.find(key);
+    if (it == _temporaryDataStorage.end()) {
+        LERROR(fmt::format(
+            "Could not find data with key '{}' in the temporary data storage", key
+        ));
+        return std::vector<float>();
+    }
+
+    std::vector<float> data = it->second;
+    _temporaryDataStorage.erase(it);
+
+    return std::move(data);
+}
 
 void SoftwareIntegrationModule::internalInitialize(const ghoul::Dictionary&) {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();

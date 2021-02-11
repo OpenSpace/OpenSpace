@@ -24,7 +24,9 @@
 
 #include <modules/softwareintegration/pointdatamessagehandler.h>
 
+#include <modules/softwareintegration/softwareintegrationmodule.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
@@ -37,12 +39,14 @@
 
 namespace {
     constexpr const char* _loggerCat = "SoftwareIntegration";
+
+    constexpr const int LargeDatasetThreshold = 5000;
 } // namespace
 
 namespace openspace {
 
 void PointDataMessageHandler::handlePointDataMessage(const std::vector<char>& message,
-                                              SoftwareConnection& connection)
+                                                     SoftwareConnection& connection)
 {
     int messageOffset = 0;
 
@@ -80,25 +84,6 @@ void PointDataMessageHandler::handlePointDataMessage(const std::vector<char>& me
         return;
     }
 
-    // TODO: if huge number of points, save to a file instead
-    ghoul::Dictionary pointDataDictonary;
-    for (int i = 0; i < xCoordinates.size(); i++) {
-        float x = xCoordinates[i];
-        float y = yCoordinates[i];
-        float z = zCoordinates[i];
-        glm::dvec3 point{ x, y, z };
-
-        const std::string key = fmt::format("[{}]", i + 1);
-
-        // Avoid passing nan values through dictionary
-        if (glm::any(glm::isnan(point))) {
-            point = glm::dvec3(0.0);
-            // @TODO Keep track of invalid indices?
-        }
-
-        pointDataDictonary.setValue<glm::dvec3>(key, point);
-    }
-
     using namespace std::string_literals;
 
     // Create a renderable
@@ -107,7 +92,48 @@ void PointDataMessageHandler::handlePointDataMessage(const std::vector<char>& me
     renderable.setValue("Color", static_cast<glm::dvec3>(color));
     renderable.setValue("Opacity", static_cast<double>(opacity));
     renderable.setValue("Size", static_cast<double>(size));
-    renderable.setValue("Data", pointDataDictonary);
+
+    if (nPoints > LargeDatasetThreshold) {
+        // If huge number of points, use the module's temporary data storage
+        const int nValuesPerPoint = 3;
+        const int nValues = nPoints * nValuesPerPoint;
+
+        std::vector<float> data;
+        data.reserve(nValues);
+        for (int i = 0; i < nPoints; i++) {
+            float x = xCoordinates[i];
+            float y = yCoordinates[i];
+            float z = zCoordinates[i];
+            data.insert(data.end(), { x, y, z });
+        }
+
+        // Use the renderable identifier as the data key
+        const std::string key = identifier;
+        auto module = global::moduleEngine->module<SoftwareIntegrationModule>();
+        module->storeData(key, std::move(data));
+
+        renderable.setValue("DataStorageKey", key);
+    }
+    else {
+        ghoul::Dictionary pointDataDictonary;
+        for (int i = 0; i < nPoints; i++) {
+            float x = xCoordinates[i];
+            float y = yCoordinates[i];
+            float z = zCoordinates[i];
+            glm::dvec3 point{ x, y, z };
+
+            const std::string key = fmt::format("[{}]", i + 1);
+
+            // Avoid passing nan values through dictionary
+            if (glm::any(glm::isnan(point))) {
+                point = glm::dvec3(0.0);
+                // @TODO Keep track of invalid indices?
+            }
+
+            pointDataDictonary.setValue<glm::dvec3>(key, std::move(point));
+        }
+        renderable.setValue("Data", pointDataDictonary);
+    }
 
     ghoul::Dictionary gui;
     gui.setValue("Name", guiName);
@@ -230,27 +256,25 @@ void PointDataMessageHandler::preSyncUpdate() {
     }
 }
 
-std::string formatUpdateMessage(const std::string& messageType,
-                                const std::string& identifier,
-                                const std::string& value)
+std::string formatUpdateMessage(std::string_view messageType,
+                                std::string_view identifier, std::string_view value)
 {
-    const int lengthOfIdentifier = identifier.length();
-    const int lengthOfValue = value.length();
-    std::string subject = std::to_string(lengthOfIdentifier);
-    subject += identifier;
-    subject += std::to_string(lengthOfValue);
-    subject += value;
+    const int lengthOfIdentifier = static_cast<int>(identifier.length());
+    const int lengthOfValue = static_cast<int>(value.length());
+    std::string subject = fmt::format(
+        "{}{}{}{}", lengthOfIdentifier, identifier, lengthOfValue, value
+    );
 
     // Format length of subject to always be 4 digits
     std::ostringstream os;
     os << std::setfill('0') << std::setw(4) << subject.length();
     const std::string lengthOfSubject = os.str();
 
-    return messageType + lengthOfSubject + subject;
+    return fmt::format("{}{}{}", messageType, lengthOfSubject, subject);
 }
 
 void PointDataMessageHandler::subscribeToRenderableUpdates(const std::string& identifier,
-                                                    SoftwareConnection& connection)
+                                                          SoftwareConnection& connection)
 {
     const Renderable* aRenderable = renderable(identifier);
     if (!aRenderable) {
@@ -303,13 +327,14 @@ void PointDataMessageHandler::subscribeToRenderableUpdates(const std::string& id
 
     // Toggle visibility of renderable
     auto toggleVisibility = [visibilityProperty, identifier, &connection]() {
-        const std::string lengthOfIdentifier = std::to_string(identifier.length());
-        const std::string messageType = "TOVI";
+        const int lengthOfIdentifier = static_cast<int>(identifier.length());
 
         bool isVisible = visibilityProperty->getStringValue() == "true";
+        std::string_view visibilityFlag = isVisible ? "T" : "F";
 
-        const std::string visibilityFlag = isVisible ? "T" : "F";
-        const std::string subject = lengthOfIdentifier + identifier + visibilityFlag;
+        const std::string subject = fmt::format(
+            "{}{}{}", lengthOfIdentifier, identifier, visibilityFlag
+        );
         // We don't need a lengthOfValue here because it will always be 1 character
 
         // @TODO (emmbr 2021-02-02) make sure this message has the same format as the
@@ -320,7 +345,10 @@ void PointDataMessageHandler::subscribeToRenderableUpdates(const std::string& id
         os << std::setfill('0') << std::setw(4) << subject.length();
         const std::string lengthOfSubject = os.str();
 
-        const std::string message = messageType + lengthOfSubject + subject;
+        const std::string_view messageType = "TOVI";
+        const std::string message = fmt::format(
+            "{}{}{}", messageType, lengthOfSubject, subject
+        );
         connection.sendMessage(message);
     };
     if (visibilityProperty) {
@@ -328,7 +356,9 @@ void PointDataMessageHandler::subscribeToRenderableUpdates(const std::string& id
     }
 }
 
-float PointDataMessageHandler::readFloatValue(const std::vector<char>& message, int& offset) {
+float PointDataMessageHandler::readFloatValue(const std::vector<char>& message,
+                                              int& offset)
+{
     std::string length;
     length.push_back(message[offset]);
     offset++;
@@ -344,7 +374,9 @@ float PointDataMessageHandler::readFloatValue(const std::vector<char>& message, 
     return std::stof(value);
 }
 
-glm::vec3 PointDataMessageHandler::readColor(const std::vector<char>& message, int& offset) {
+glm::vec3 PointDataMessageHandler::readColor(const std::vector<char>& message,
+                                             int& offset)
+{
     std::string lengthOfColor; // Not used for now, but sent in message
     lengthOfColor.push_back(message[offset]);
     offset++;
@@ -388,7 +420,9 @@ glm::vec3 PointDataMessageHandler::readColor(const std::vector<char>& message, i
     return glm::vec3(r, g, b);
 }
 
-std::string PointDataMessageHandler::readString(const std::vector<char>& message, int& offset) {
+std::string PointDataMessageHandler::readString(const std::vector<char>& message,
+                                                int& offset)
+{
     std::string length;
     length.push_back(message[offset]);
     offset++;
@@ -408,8 +442,7 @@ std::string PointDataMessageHandler::readString(const std::vector<char>& message
 }
 
 std::vector<float> PointDataMessageHandler::readFloatData(const std::vector<char>& message,
-                                                   int nValues,
-                                                   int& offset)
+                                                         int nValues, int& offset)
 {
     std::vector<float> data;
 
@@ -426,9 +459,7 @@ std::vector<float> PointDataMessageHandler::readFloatData(const std::vector<char
         }
         catch (const std::invalid_argument& ia) {
             LERROR(fmt::format(
-                "Error reading value {}. Invalid argument: {} ",
-                counter + 1,
-                ia.what()
+                "Error reading value {}. Invalid argument: {} ", counter + 1, ia.what()
             ));
             return std::vector<float>();
         }

@@ -166,9 +166,7 @@ void SoftwareIntegrationServer::handlePeerMessage(PeerMessage peerMessage) {
         break;
     }
     case SoftwareConnection::MessageType::ReadPointData: {
-        const std::string sgnMessage(message.begin(), message.end());
-        LDEBUG(fmt::format("Message recieved.. Point Data: {}", sgnMessage));
-
+        LDEBUG("Message recieved.. Point Data");
         _pointDataMessageHandler.handlePointDataMessage(message, peerPtr->connection);
         break;
     }

@@ -38,14 +38,19 @@ public:
 
     SoftwareIntegrationModule();
 
+    void storeData(const std::string& key, const std::vector<float> data);
+    std::vector<float> fetchData(const std::string& key);
+
     std::vector<documentation::Documentation> documentations() const override;
 
 private:
-
     void internalInitialize(const ghoul::Dictionary&) override;
     void internalDeinitialize() override;
 
     SoftwareIntegrationServer _server;
+
+    // Centralized storage for large datasets
+    std::map<std::string, std::vector<float>> _temporaryDataStorage;
 };
 
 } // namespace openspace

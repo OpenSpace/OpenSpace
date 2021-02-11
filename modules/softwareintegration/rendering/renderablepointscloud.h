@@ -27,8 +27,11 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <optional>
 
 namespace openspace::documentation { struct Documentation; }
 
@@ -69,6 +72,9 @@ protected:
     std::vector<float> _fullData;
     std::vector<float> _slicedData;
 
+    std::optional<std::string> _dataStorageKey = std::nullopt;
+
+    int _nPoints = 0;
     int _nValuesPerPoint = 0;
 
     GLuint _vertexArrayObjectID = 0;

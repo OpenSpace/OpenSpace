@@ -24,8 +24,10 @@
 
 #include <modules/softwareintegration/rendering/renderablepointscloud.h>
 
+#include <modules/softwareintegration/softwareintegrationmodule.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/updatestructures.h>
@@ -63,6 +65,13 @@ namespace {
         "Data to use for the positions of the points, given in Parsec."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo DataStorageKeyInfo = {
+        "DataStorageKey",
+        "Data Storage Key",
+        "Key used to access a dataset in the module's centralized storage. Used for "
+        "big datasets with lots of points."
+    };
+
     struct [[codegen::Dictionary(RenderablePointsCloud)]] Parameters {
         // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec3> color;
@@ -74,7 +83,10 @@ namespace {
         std::optional<bool> toggleVisiblity;
 
         // [[codegen::verbatim(DataInfo.description)]]
-        std::vector<glm::vec3> data;
+        std::optional<std::vector<glm::vec3>> data;
+
+        // [[codegen::verbatim(DataStorageKeyInfo.description)]]
+        std::optional<std::string> dataStorageKey;
     };
 #include "renderablepointscloud_codegen.cpp"
 } // namespace
@@ -99,10 +111,22 @@ RenderablePointsCloud::RenderablePointsCloud(const ghoul::Dictionary& dictionary
     _color.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_color);
 
-    ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>(DataInfo.identifier);
-    for (int i = 0; i < static_cast<int>(d.size()); ++i) {
-        const std::string key = std::to_string(i + 1);
-        _pointData.push_back(d.value<glm::dvec3>(key));
+    // If the data is passed explicitly, use that one. If not, check if a key to data
+    // stored in the module's centralized memory was included
+    if (p.data.has_value()) {
+        ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>(DataInfo.identifier);
+        _pointData.reserve(d.size());
+
+        for (int i = 0; i < static_cast<int>(d.size()); ++i) {
+            const std::string key = std::to_string(i + 1);
+            _pointData.push_back(d.value<glm::dvec3>(key));
+        }
+        _nValuesPerPoint = 3;
+        _nPoints = static_cast<int>(_pointData.size());
+    }
+    else if (p.dataStorageKey.has_value()) {
+        _nValuesPerPoint = 3;
+        _dataStorageKey = p.dataStorageKey.value();
     }
 
     _size = p.size.value_or(_size);
@@ -197,6 +221,8 @@ void RenderablePointsCloud::update(const UpdateData&) {
 
     LDEBUG("Regenerating data");
 
+    // @TODO (emmbr26 2021-02-11) This 'createDataSlice'step doesn't really seem
+    // necessary, but could rather be combined with the loadData() step?
     createDataSlice();
 
     int size = static_cast<int>(_slicedData.size());
@@ -261,26 +287,34 @@ void RenderablePointsCloud::createDataSlice() {
 }
 
 void RenderablePointsCloud::loadData() {
-    if (_pointData.empty()) {
+    if (_pointData.empty() && !_dataStorageKey.has_value()) {
         LWARNING("No point data found");
         return;
     }
 
-    _nValuesPerPoint = 3;
+    // @TODO: potentially combine point data with additional data about the points,
+    // such as luminosity
 
-    int dataSize = _pointData.size();
-    std::vector<float> values(_nValuesPerPoint);
+    if (!_pointData.empty()) {
+        int dataSize = static_cast<int>(_pointData.size());
+        std::vector<float> values;
+        values.reserve(_nValuesPerPoint * _nPoints);
 
-    for (int i = 0; i < dataSize; i++) {
-        for (int j = 0; j < _nValuesPerPoint; j++) {
-            values.push_back(_pointData[i][j]);
+        for (int i = 0; i < dataSize; i++) {
+            for (int j = 0; j < _nValuesPerPoint; j++) {
+                values.push_back(_pointData[i][j]);
+            }
         }
+
+        _fullData.insert(_fullData.end(), values.begin(), values.end());
+    }
+    else {
+        // Fetch data from module's centralized storage
+        auto module = global::moduleEngine->module<SoftwareIntegrationModule>();
+        _fullData = module->fetchData(_dataStorageKey.value());
+        _nPoints = _fullData.size();
     }
 
-    // @TODO: potentially combine with additional data about the points, such as
-    // velocity and luminosity
-
-    _fullData.insert(_fullData.end(), values.begin(), values.end());
     _isDirty = true;
 }
 
