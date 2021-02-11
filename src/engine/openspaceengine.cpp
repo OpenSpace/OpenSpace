@@ -1449,7 +1449,7 @@ void OpenSpaceEngine::handleDragDrop(const std::string& file) {
     std::filesystem::path f(file);
 
     ghoul::lua::LuaState s(ghoul::lua::LuaState::IncludeStandardLibrary::Yes);
-    std::string absolutePath = absPath("${BASE}/scripts/drag_drop_handler.lua");
+    std::string absolutePath = absPath("${SCRIPTS}/drag_drop_handler.lua");
     int status = luaL_loadfile(s, absolutePath.c_str());
     if (status != LUA_OK) {
         std::string error = lua_tostring(s, -1);
