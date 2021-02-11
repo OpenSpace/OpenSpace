@@ -11,7 +11,8 @@ local HabitableZone = {
         Texture = textures .. "/hot_to_cold_faded.png",
         EffectiveTemperature = 5780, -- Kelvin
         Luminosity = 1, -- solar
-        Opacity = 0.1
+        Opacity = 0.1,
+        Optimistic = true
     },
     GUI = {
         Name = "Sun Habitable Zone",

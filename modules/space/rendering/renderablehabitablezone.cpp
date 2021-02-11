@@ -69,10 +69,10 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo KopparapuTeffIntervalInfo = {
         "KopparapuTeffInterval",
-        "Effective Temperature Interval (Kopparapu's formula)" ,
-        "The range for which Kopparapu's formula is used for the habitable zone "
-        "computation. For stars with effective temperatures outside the range, a "
-        "simpler method by Tom E. Harris is used. This method only uses the star "
+        "Kopparapu TEFF" ,
+        "The effective temperature interval for which Kopparapu's formula is used for "
+        "the habitable zone computation. For stars with temperatures outside the range, "
+        "a simpler method by Tom E. Harris is used. This method only uses the star "
         "luminosity and does not include computation of the optimistic boundaries."
     };
 } // namespace
@@ -130,7 +130,7 @@ RenderableHabitableZone::RenderableHabitableZone(const ghoul::Dictionary& dictio
     , _teff(EffectiveTemperatureInfo, 5780.f, 0.f, 7.5e4f)
     , _luminosity(LuminosityInfo, 1.f, 0.f, 1e8f)
     , _showOptimistic(OptimisticInfo, false)
-    , _kopparapuTeffInterval(KopparapuTeffIntervalInfo, glm::vec2(2000.f, 8000.f))
+    , _kopparapuTeffInterval(KopparapuTeffIntervalInfo, glm::vec2(1000.f, 10000.f))
 {
     documentation::testSpecificationAndThrow(
         Documentation(),

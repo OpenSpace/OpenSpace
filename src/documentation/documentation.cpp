@@ -129,17 +129,20 @@ namespace openspace::documentation {
 
 const std::string DocumentationEntry::Wildcard = "*";
 
+std::string concatenate(const std::vector<TestResult::Offense>& offenses) {
+    std::string result = "Error in specification (";
+    for (const TestResult::Offense& o : offenses) {
+        result += o.offender + ',';
+    }
+    result.back() = ')';
+    return result;
+}
+
 SpecificationError::SpecificationError(TestResult res, std::string comp)
-    : ghoul::RuntimeError("Error in specification", std::move(comp))
+    : ghoul::RuntimeError(concatenate(res.offenses), std::move(comp))
     , result(std::move(res))
 {
     ghoul_assert(!result.success, "Result's success must be false");
-
-    message += " (";
-    for (const TestResult::Offense& o : result.offenses) {
-        message += o.offender + ',';
-    }
-    message.back() = ')';
 }
 
 DocumentationEntry::DocumentationEntry(std::string k, std::shared_ptr<Verifier> v,

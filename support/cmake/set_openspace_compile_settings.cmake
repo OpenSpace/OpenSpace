@@ -203,6 +203,7 @@ function (set_openspace_compile_settings target)
     "-Wlogical-op"
     "-Wint-in-bool-context"
     "-Wno-deprecated-copy"
+    "-Wno-float-equal"
     "-Wno-write-strings"
     "-Wnon-virtual-dtor"
     "-Wold-style-cast"

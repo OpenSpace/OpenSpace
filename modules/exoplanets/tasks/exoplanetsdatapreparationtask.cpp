@@ -407,7 +407,7 @@ float ExoplanetsDataPreparationTask::bvFromTeff(float teff) {
     float bv = 0.f;
     float bvUpper = 0.f;
     float bvLower = 0.f;
-    float teffLower;
+    float teffLower = 0.f;
     float teffUpper;
     std::string row;
     while (std::getline(teffToBvFile, row)) {

@@ -203,6 +203,12 @@ begin_header("Configuring Applications")
 add_subdirectory("${OPENSPACE_APPS_DIR}")
 end_header("End: Configuring Applications")
 
+
+if (MSVC AND TARGET OpenSpace)
+  set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT OpenSpace)
+endif()
+
+
 option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
 if (OPENSPACE_HAVE_TESTS)
   begin_header("Generating OpenSpace unit test")

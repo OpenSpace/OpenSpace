@@ -660,6 +660,17 @@ void mainCharCallback(unsigned int codepoint, int modifiers) {
 
 
 
+void mainDropCallback(int amount, const char** paths) {
+    ghoul_assert(amount > 0, "Expected at least one file path");
+    ghoul_assert(paths, "expected non-nullptr");
+
+    for (int i = 0; i < amount; ++i) {
+        global::openSpaceEngine->handleDragDrop(paths[i]);
+    }
+}
+
+
+
 std::vector<std::byte> mainEncodeFun() {
     ZoneScoped
     LTRACE("main::mainEncodeFun(begin)");
@@ -1252,6 +1263,7 @@ int main(int argc, char* argv[]) {
     callbacks.mousePos = mainMousePosCallback;
     callbacks.mouseScroll = mainMouseScrollCallback;
     callbacks.character = mainCharCallback;
+    callbacks.drop = mainDropCallback;
     callbacks.encode = mainEncodeFun;
     callbacks.decode = mainDecodeFun;
     Log::instance().setNotifyLevel(Log::Level::Debug);
