@@ -45,6 +45,9 @@ SceneGraphNode* sceneGraphNode(const std::string& name) {
 
 const Renderable* renderable(const std::string& name) {
     SceneGraphNode* node = sceneGraphNode(name);
+    if (!node) {
+        return nullptr;
+    }
     return node->renderable();
 }
 
