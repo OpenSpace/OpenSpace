@@ -170,14 +170,17 @@ void PointDataMessageHandler::handleColorMessage(const std::vector<char>& messag
     const glm::vec3 color = readColor(message, messageOffset);
 
     // Get color of renderable
-    const Renderable* myRenderable = renderable(identifier);
-    properties::Property* colorProperty = myRenderable->property("Color");
-    auto propertyAny = colorProperty->get();
+    const Renderable* r = renderable(identifier);
+    if (!r) {
+        return;
+    }
+
+    properties::Property* colorProperty = r->property("Color");
+    std::any propertyAny = colorProperty->get();
     glm::vec3 propertyColor = std::any_cast<glm::vec3>(propertyAny);
-    bool isUpdated = (propertyColor != color);
 
     // Update color of renderable
-    if (isUpdated) {
+    if (propertyColor != color) {
         colorProperty->set(color);
     }
 }
@@ -188,14 +191,17 @@ void PointDataMessageHandler::handleOpacityMessage(const std::vector<char>& mess
     const float opacity = readFloatValue(message, messageOffset);
 
     // Get opacity of renderable
-    const Renderable* myRenderable = renderable(identifier);
-    properties::Property* opacityProperty = myRenderable->property("Opacity");
+    const Renderable* r = renderable(identifier);
+    if (!r) {
+        return;
+    }
+
+    properties::Property* opacityProperty = r->property("Opacity");
     auto propertyAny = opacityProperty->get();
     float propertyOpacity = std::any_cast<float>(propertyAny);
-    bool isUpdated = (propertyOpacity != opacity);
 
     // Update opacity of renderable
-    if (isUpdated) {
+    if (propertyOpacity != opacity) {
         opacityProperty->set(opacity);
     }
 }
@@ -206,14 +212,17 @@ void PointDataMessageHandler::handlePointSizeMessage(const std::vector<char>& me
     float size = readFloatValue(message, messageOffset);
 
     // Get size of renderable
-    const Renderable* myRenderable = renderable(identifier);
-    properties::Property* sizeProperty = myRenderable->property("Size");
+    const Renderable* r = renderable(identifier);
+    if (!r) {
+        return;
+    }
+
+    properties::Property* sizeProperty = r->property("Size");
     auto propertyAny = sizeProperty->get();
     float propertySize = std::any_cast<float>(propertyAny);
-    bool isUpdated = (propertySize != size);
 
     // Update size of renderable
-    if (isUpdated) {
+    if (propertySize != size) {
         sizeProperty->set(size);
     }
 }
@@ -223,13 +232,15 @@ void PointDataMessageHandler::handleVisiblityMessage(const std::vector<char>& me
     const std::string identifier = readString(message, messageOffset);
     std::string visibility;
     visibility.push_back(message[messageOffset]);
-    bool boolValue = (visibility == "F") ? false : true;
 
     // Toggle visibility of renderable
-    const Renderable* myRenderable = renderable(identifier);
-    properties::Property* visibilityProperty =
-        myRenderable->property("ToggleVisibility");
+    const Renderable* r = renderable(identifier);
+    if (!r) {
+        return;
+    }
 
+    bool boolValue = (visibility == "F") ? false : true;
+    properties::Property* visibilityProperty = r->property("ToggleVisibility");
     visibilityProperty->set(boolValue);
 }
 
