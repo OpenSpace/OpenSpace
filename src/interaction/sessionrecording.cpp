@@ -49,6 +49,10 @@
 #include <ghoul/misc/profiling.h>
 #include <iomanip>
 
+#ifdef WIN32
+#include <windows.h>
+#endif // WIN32
+
 namespace {
     constexpr const char* _loggerCat = "SessionRecording";
 
@@ -1714,7 +1718,14 @@ std::vector<std::string> SessionRecording::playbackList() const {
     for (const std::string& f : allInputFiles) {
         // Remove path and keep only the filename
         const std::string filename = f.substr(path.length() + 1, f.length() - path.length() - 1);
-        if (filename.rfind(".", 0) != 0) { //Don't add hidden files
+        bool isHidden = false;
+#ifdef WIN32
+        DWORD attributes = GetFileAttributes(f.c_str());
+        isHidden = attributes & FILE_ATTRIBUTE_HIDDEN;
+#else
+        isHidden = filename.rfind(".", 0) != 0;
+#endif // WIN32
+        if (!isHidden) { //Don't add hidden files
             fileList.push_back(filename);
         }
     }

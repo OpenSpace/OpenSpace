@@ -1005,7 +1005,7 @@ std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTC
             }
         }
         else {
-            config = config + xmlExt;
+            config += xmlExt;
         }
         global::configuration->windowConfiguration = config;
     }

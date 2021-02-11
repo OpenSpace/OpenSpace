@@ -49,8 +49,7 @@ std::string FileSystemAccess::useQtFileSystemModelToTraverseDir(std::string dir,
 
 void FileSystemAccess::parseChildDirElements(QFileInfo fileInfo, std::string space,
                                          int level, std::vector<std::string>& dirNames,
-                                         std::vector<std::string>& output,
-                                         bool userAsssets)
+                                         std::vector<std::string>& output, bool userAssets)
 {
     QDir dir(fileInfo.filePath());
     bool hasDirHeaderBeenAdded = false;
@@ -59,13 +58,13 @@ void FileSystemAccess::parseChildDirElements(QFileInfo fileInfo, std::string spa
     for (int i = 0; i < fileList.size(); i++) {
         QFileInfo fi = fileList[i];
         std::string res = space + fi.fileName().toStdString();
-        if (level == 0 && userAsssets) {
+        if (level == 0 && userAssets) {
             res = "${USER_ASSETS}/" + res;
         }
         if (fi.isDir()) {
-            if (level != 0 || (level == 0 && (isApprovedPath(res) || userAsssets))) {
+            if (level != 0 || (level == 0 && (isApprovedPath(res) || userAssets))) {
                 dirNames.push_back(res);
-                parseChildDirElements(fi, (space + " "), level + 1, dirNames, output, userAsssets);
+                parseChildDirElements(fi, (space + " "), level + 1, dirNames, output, userAssets);
             }
         }
         else {

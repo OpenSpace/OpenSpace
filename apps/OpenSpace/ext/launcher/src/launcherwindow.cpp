@@ -374,7 +374,6 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
     _windowConfigBox->clear();
 
     if (std::filesystem::exists(_userConfigPath)) {
-
         _userConfigCount = 0;
         _windowConfigBox->addItem(QString::fromStdString("--- User Configurations ---"));
         const QStandardItemModel* model = qobject_cast<const QStandardItemModel*>(_windowConfigBox->model());

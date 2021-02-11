@@ -81,7 +81,7 @@ private:
     QWidget* createCentralWidget();
     void setBackgroundImage(const std::string& syncPath);
 
-    void openProfileEditor(const std::string& profile, const bool isUserProfile);
+    void openProfileEditor(const std::string& profile, bool isUserProfile);
 
     void populateProfilesList(std::string preset);
     void populateWindowConfigsList(std::string preset);
