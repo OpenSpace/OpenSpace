@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -105,7 +105,8 @@ VertexXYZ convertToXYZ(const Vertex& v);
 
 std::vector<VertexXYZ> convert(std::vector<Vertex> v);
 
-std::vector<Vertex> createRing(int nSegments, float radius, glm::vec4 colors = glm::vec4(1.f));
+std::vector<Vertex> createRing(int nSegments, float radius,
+    glm::vec4 colors = glm::vec4(1.f));
 
 } // namespace openspace::rendering::helper
 

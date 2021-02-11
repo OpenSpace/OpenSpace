@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,7 +48,9 @@ namespace {
 
 namespace openspace::exoplanets {
 
-ExoplanetsDataPreparationTask::ExoplanetsDataPreparationTask(const ghoul::Dictionary& dictionary) {
+ExoplanetsDataPreparationTask::ExoplanetsDataPreparationTask(
+                                                      const ghoul::Dictionary& dictionary)
+{
     openspace::documentation::testSpecificationAndThrow(
         documentation(),
         dictionary,
@@ -71,7 +73,9 @@ std::string ExoplanetsDataPreparationTask::description() {
     );
 }
 
-void ExoplanetsDataPreparationTask::perform(const Task::ProgressCallback& progressCallback) {
+void ExoplanetsDataPreparationTask::perform(
+                                           const Task::ProgressCallback& progressCallback)
+{
     std::ifstream inputDataFile(_inputDataPath);
     if (!inputDataFile.good()) {
         LERROR(fmt::format("Failed to open input file '{}'", _inputDataPath));
@@ -84,25 +88,36 @@ void ExoplanetsDataPreparationTask::perform(const Task::ProgressCallback& progre
     int version = 1;
     binFile.write(reinterpret_cast<char*>(&version), sizeof(int));
 
-    std::string planetRow;
-    getline(inputDataFile, planetRow); // The first line, containing the data names
+    auto readFirstDataRow = [](std::ifstream& file, std::string& line) -> void {
+        while (std::getline(file, line)) {
+            bool shouldSkip = line[0] == '#' || line.empty();
+            if (!shouldSkip) break;
+        }
+    };
+
+    // Find the line containing the data names
+    std::string columnNamesRow;
+    readFirstDataRow(inputDataFile, columnNamesRow);
 
     // Read column names into a vector, for later access
     std::vector<std::string> columnNames;
-    std::stringstream sStream(planetRow);
+    std::stringstream sStream(columnNamesRow);
     std::string colName;
-    while (getline(sStream, colName, ',')) {
+    while (std::getline(sStream, colName, ',')) {
         columnNames.push_back(colName);
     }
 
     // Read total number of items
     int total = 0;
-    while (getline(inputDataFile, planetRow)) {
+    std::string row;
+    while (std::getline(inputDataFile, row)) {
         ++total;
     }
     inputDataFile.clear();
     inputDataFile.seekg(0);
-    getline(inputDataFile, planetRow); // The first line, containing the data names
+
+    // Read past the first line, containing the data names
+    readFirstDataRow(inputDataFile, row);
 
     LINFO(fmt::format("Loading {} exoplanets", total));
 
@@ -149,23 +164,23 @@ void ExoplanetsDataPreparationTask::perform(const Task::ProgressCallback& progre
         return result;
     };
 
-    Exoplanet p;
+    ExoplanetDataEntry p;
     std::string data;
     int exoplanetCount = 0;
-    while (getline(inputDataFile, planetRow)) {
+    while (std::getline(inputDataFile, row)) {
         ++exoplanetCount;
         progressCallback(static_cast<float>(exoplanetCount) / static_cast<float>(total));
 
         std::string component;
-        std::string speckStarname;
+        std::string starName;
 
-        float ra = std::numeric_limits<float>::quiet_NaN();     // decimal degrees
-        float dec = std::numeric_limits<float>::quiet_NaN();    // decimal degrees
+        float ra = std::numeric_limits<float>::quiet_NaN(); // decimal degrees
+        float dec = std::numeric_limits<float>::quiet_NaN(); // decimal degrees
         float distanceInParsec = std::numeric_limits<float>::quiet_NaN();
 
-        std::istringstream lineStream(planetRow);
+        std::istringstream lineStream(row);
         int columnIndex = 0;
-        while (getline(lineStream, data, ',')) {
+        while (std::getline(lineStream, data, ',')) {
             const std::string& column = columnNames[columnIndex];
             columnIndex++;
 
@@ -244,9 +259,8 @@ void ExoplanetsDataPreparationTask::perform(const Task::ProgressCallback& progre
             }
             // Star - name and position
             else if (column == "hostname") {
-                std::string name = readStringData(data);
-                speckStarname = std::string(speckStarName(name));
-                glm::vec3 position = starPosition(speckStarname);
+                starName = readStringData(data);
+                glm::vec3 position = starPosition(starName);
                 p.positionX = position[0];
                 p.positionY = position[1];
                 p.positionZ = position[2];
@@ -270,18 +284,42 @@ void ExoplanetsDataPreparationTask::perform(const Task::ProgressCallback& progre
             else if (column == "st_raderr2") {
                 p.rStarLower = -readFloatData(data);
             }
-            // Color of star (B-V color index computed from star's effective temperature)
+            // Effective temperature and color of star
+            // (B-V color index computed from star's effective temperature)
             else if (column == "st_teff") {
-                float teff = readFloatData(data);
-                p.bmv = bvFromTeff(teff);
+                p.teff = readFloatData(data);
+                p.bmv = bvFromTeff(p.teff);
+            }
+            else if (column == "st_tefferr1") {
+                p.teffUpper = readFloatData(data);
+            }
+            else if (column == "st_tefferr2") {
+                p.teffLower = -readFloatData(data);
+            }
+            // Star luminosity
+            else if (column == "st_lum") {
+                float dataInLogSolar = readFloatData(data);
+                p.luminosity = static_cast<float>(std::pow(10, dataInLogSolar));
+            }
+            else if (column == "st_lumerr1") {
+                float dataInLogSolar = readFloatData(data);
+                p.luminosityUpper = static_cast<float>(std::pow(10, dataInLogSolar));
+            }
+            else if (column == "st_lumerr2") {
+                float dataInLogSolar = readFloatData(data);
+                p.luminosityLower = static_cast<float>(-std::pow(10, dataInLogSolar));
             }
             // Is the planet orbiting a binary system?
             else if (column == "cb_flag") {
                 p.binary = static_cast<bool>(readIntegerData(data));
             }
+            // Number of stars in the system
+            else if (column == "sy_snum") {
+                p.nStars = readIntegerData(data);
+            }
             // Number of planets in the system
             else if (column == "sy_pnum") {
-                p.nComp = readIntegerData(data);
+                p.nPlanets = readIntegerData(data);
             }
         }
 
@@ -304,10 +342,10 @@ void ExoplanetsDataPreparationTask::perform(const Task::ProgressCallback& progre
 
         // Create look-up table
         long pos = static_cast<long>(binFile.tellp());
-        std::string planetName = speckStarname + " " + component;
+        std::string planetName = starName + " " + component;
         lutFile << planetName << "," << pos << std::endl;
 
-        binFile.write(reinterpret_cast<char*>(&p), sizeof(Exoplanet));
+        binFile.write(reinterpret_cast<char*>(&p), sizeof(ExoplanetDataEntry));
     }
 
     progressCallback(1.f);
@@ -322,7 +360,7 @@ glm::vec3 ExoplanetsDataPreparationTask::starPosition(const std::string& starNam
     glm::vec3 position{ std::numeric_limits<float>::quiet_NaN() };
     std::string line;
 
-    while (getline(exoplanetsFile, line)) {
+    while (std::getline(exoplanetsFile, line)) {
         bool shouldSkipLine = (
             line.empty() || line[0] == '#' || line.substr(0, 7) == "datavar" ||
             line.substr(0, 10) == "texturevar" || line.substr(0, 7) == "texture"
@@ -335,18 +373,18 @@ glm::vec3 ExoplanetsDataPreparationTask::starPosition(const std::string& starNam
         std::string data;
         std::string name;
         std::istringstream linestream(line);
-        getline(linestream, data, '#');
-        getline(linestream, name);
+        std::getline(linestream, data, '#');
+        std::getline(linestream, name);
         name.erase(0, 1);
 
         std::string coord;
         if (name == starName) {
             std::stringstream dataStream(data);
-            getline(dataStream, coord, ' ');
+            std::getline(dataStream, coord, ' ');
             position[0] = std::stof(coord.c_str(), nullptr);
-            getline(dataStream, coord, ' ');
+            std::getline(dataStream, coord, ' ');
             position[1] = std::stof(coord.c_str(), nullptr);
-            getline(dataStream, coord, ' ');
+            std::getline(dataStream, coord, ' ');
             position[2] = std::stof(coord.c_str(), nullptr);
             break;
         }
@@ -369,12 +407,15 @@ float ExoplanetsDataPreparationTask::bvFromTeff(float teff) {
     float bv = 0.f;
     float bvUpper = 0.f;
     float bvLower = 0.f;
-    float teffLower, teffUpper;
-    std::string row, teffString, bvString;
-    while (getline(teffToBvFile, row)) {
+    float teffLower = 0.f;
+    float teffUpper;
+    std::string row;
+    while (std::getline(teffToBvFile, row)) {
         std::istringstream lineStream(row);
-        getline(lineStream, teffString, ',');
-        getline(lineStream, bvString);
+        std::string teffString;
+        std::getline(lineStream, teffString, ',');
+        std::string bvString;
+        std::getline(lineStream, bvString);
 
         float teffCurrent = std::stof(teffString.c_str(), nullptr);
         float bvCurrent = std::stof(bvString.c_str(), nullptr);
@@ -406,12 +447,6 @@ documentation::Documentation ExoplanetsDataPreparationTask::documentation() {
         "ExoplanetsDataPreparationTask",
         "exoplanets_data_preparation_task",
         {
-            {
-                "Type",
-                new StringEqualVerifier("ExoplanetsDataPreparationTask"),
-                Optional::No,
-                ""
-            },
             {
                 KeyInputDataFile,
                 new StringAnnotationVerifier("A valid filepath"),

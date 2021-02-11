@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,11 +27,9 @@
 #include <modules/volume/rawvolume.h>
 #include <modules/volume/rawvolumemetadata.h>
 #include <modules/volume/rawvolumewriter.h>
-
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/logging/logmanager.h>
@@ -39,7 +37,6 @@
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
 #include <ghoul/misc/defer.h>
-
 
 #include <fstream>
 
@@ -53,11 +50,9 @@ namespace {
     constexpr const char* KeyUpperDomainBound = "UpperDomainBound";
 } // namespace
 
-namespace openspace {
-namespace volume {
+namespace openspace::volume {
 
-GenerateRawVolumeTask::GenerateRawVolumeTask(const ghoul::Dictionary& dictionary)
-{
+GenerateRawVolumeTask::GenerateRawVolumeTask(const ghoul::Dictionary& dictionary) {
     openspace::documentation::testSpecificationAndThrow(
         documentation(),
         dictionary,
@@ -66,11 +61,11 @@ GenerateRawVolumeTask::GenerateRawVolumeTask(const ghoul::Dictionary& dictionary
 
     _rawVolumeOutputPath = absPath(dictionary.value<std::string>(KeyRawVolumeOutput));
     _dictionaryOutputPath = absPath(dictionary.value<std::string>(KeyDictionaryOutput));
-    _dimensions = glm::uvec3(dictionary.value<glm::vec3>(KeyDimensions));
+    _dimensions = glm::uvec3(dictionary.value<glm::dvec3>(KeyDimensions));
     _time = dictionary.value<std::string>(KeyTime);
     _valueFunctionLua = dictionary.value<std::string>(KeyValueFunction);
-    _lowerDomainBound = dictionary.value<glm::vec3>(KeyLowerDomainBound);
-    _upperDomainBound = dictionary.value<glm::vec3>(KeyUpperDomainBound);
+    _lowerDomainBound = dictionary.value<glm::dvec3>(KeyLowerDomainBound);
+    _upperDomainBound = dictionary.value<glm::dvec3>(KeyUpperDomainBound);
 }
 
 std::string GenerateRawVolumeTask::description() {
@@ -188,12 +183,6 @@ documentation::Documentation GenerateRawVolumeTask::documentation() {
         "generate_raw_volume_task",
         {
             {
-                "Type",
-                new StringEqualVerifier("GenerateRawVolumeTask"),
-                Optional::No,
-                "The type of this task",
-            },
-            {
                 KeyValueFunction,
                 new StringAnnotationVerifier("A lua expression that returns a function "
                 "taking three numbers as arguments (x, y, z) and returning a number."),
@@ -234,5 +223,4 @@ documentation::Documentation GenerateRawVolumeTask::documentation() {
     };
 }
 
-} // namespace volume
-} // namespace openspace
+} // namespace openspace::volume

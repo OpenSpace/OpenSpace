@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -215,7 +215,7 @@ private:
         _onDependencyInitializationFunctionRefs;
     std::unordered_map<Asset*, std::map<Asset*, std::vector<int>>>
         _onDependencyDeinitializationFunctionRefs;
-    
+
     int _assetsTableRef = 0;
 };
 

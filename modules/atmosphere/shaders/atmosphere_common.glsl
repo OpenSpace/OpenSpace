@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -109,7 +109,7 @@ float invSamplesNu = 1.0f / float(SAMPLES_NU);
 float RtMinusRg = float(Rt - Rg);
 float invRtMinusRg = 1.0f / RtMinusRg;
 
-float opticalDepth(const float localH, const float r, const float mu, const float d) {
+float opticalDepth(float localH, float r, float mu, float d) {
   float invH = 1.0/localH;
   float a    = sqrt((0.5 * invH)*r);
   vec2 a01   = a*vec2(mu, mu + d / r);
@@ -120,7 +120,7 @@ float opticalDepth(const float localH, const float r, const float mu, const floa
   return sqrt((6.2831*H)*r) * exp((Rg-r)*invH) * (x + dot(y, vec2(1.0, -1.0)));
 }
 
-vec3 analyticTransmittance(const float r, const float mu, const float d) {
+vec3 analyticTransmittance(float r, float mu, float d) {
   if (ozoneLayerEnabled) {
     return exp(-betaRayleigh * opticalDepth(HR, r, mu, d) -
              betaOzoneExtinction * (0.0000006) * opticalDepth(HO, r, mu, d) -
@@ -132,7 +132,7 @@ vec3 analyticTransmittance(const float r, const float mu, const float d) {
   }
 }
 
-vec3 irradiance(sampler2D sampler, const float r, const float muSun) {
+vec3 irradiance(sampler2D sampler, float r, float muSun) {
   float u_r     = (r - Rg) * invRtMinusRg;
   float u_muSun = (muSun + 0.2) / (1.0 + 0.2);
   return texture(sampler, vec2(u_muSun, u_r)).rgb;
@@ -152,7 +152,7 @@ vec3 irradiance(sampler2D sampler, const float r, const float muSun) {
 // until the planet's ground or top of atmosphere. ---
 // r := || vec(x) || e [0, Rt]
 // mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r 
-float rayDistance(const float r, const float mu) {
+float rayDistance(float r, float mu) {
   // The light ray starting at the observer in/on the atmosphere can
   // have to possible end points: the top of the atmosphere or the
   // planet ground. So the shortest path is the one we are looking for,
@@ -225,7 +225,7 @@ void unmappingRAndMuSunIrradiance(out float r, out float muSun) {
 // nu := cosone of the angle between vec(s) and vec(v)
 // dhdH := it is a vec4. dhdH.x stores the dminT := Rt - r, dhdH.y stores the dH value (see paper),
 // dhdH.z stores dminG := r - Rg and dhdH.w stores dh (see paper).
-void unmappingMuMuSunNu(const float r, vec4 dhdH, out float mu, out float muSun, out float nu) {
+void unmappingMuMuSunNu(float r, vec4 dhdH, out float mu, out float muSun, out float nu) {
   // Window coordinates of pixel (uncentering also)
   float fragmentX = gl_FragCoord.x - 0.5f;
   float fragmentY = gl_FragCoord.y - 0.5f;
@@ -277,7 +277,7 @@ void unmappingMuMuSunNu(const float r, vec4 dhdH, out float mu, out float muSun,
 // the ground or the top of atmosphere. --
 // r := height of starting point vect(x)
 // mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
-vec3 transmittanceLUT(const float r, const float mu) {
+vec3 transmittanceLUT(float r, float mu) {
   // Given the position x (here the altitude r) and the view
   // angle v (here the cosine(v)= mu), we map this
   float u_r  = sqrt((r - Rg) * invRtMinusRg);
@@ -293,7 +293,7 @@ vec3 transmittanceLUT(const float r, const float mu) {
 // of Transmittance: T(a,b) = TableT(a,v)/TableT(b, v) --
 // r := height of starting point vect(x)
 // mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
-vec3 transmittance(const float r, const float mu, const float d) {
+vec3 transmittance(float r, float mu, float d) {
   // Here we use the transmittance property: T(x,v) = T(x,d)*T(d,v)
   // to, given a distance d, calculates that transmittance along
   // that distance starting in x (hight r): T(x,d) = T(x,v)/T(d,v).
@@ -326,7 +326,7 @@ vec3 transmittance(const float r, const float mu, const float d) {
 // -- Calculates Rayleigh phase function given the
 // scattering cosine angle mu --
 // mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
-float rayleighPhaseFunction(const float mu) {
+float rayleighPhaseFunction(float mu) {
     //return (3.0f / (16.0f * M_PI)) * (1.0f + mu * mu);
     return 0.0596831036 * (1.0f + mu * mu);
 }
@@ -334,7 +334,7 @@ float rayleighPhaseFunction(const float mu) {
 // -- Calculates Mie phase function given the
 // scattering cosine angle mu --
 // mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
-float miePhaseFunction(const float mu) {
+float miePhaseFunction(float mu) {
   //return (3.0f / (8.0f * M_PI)) * 
   //      ( ( (1.0f - (mieG * mieG) ) * (1.0f + mu * mu) ) / 
   //      ( (2.0f + mieG * mieG) *
@@ -356,9 +356,7 @@ float miePhaseFunction(const float mu) {
 // mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
 // muSun := cosine of the zeith angle of vec(s). Or muSun = (vec(s) * vec(v))
 // nu := cosine of the angle between vec(s) and vec(v)
-vec4 texture4D(sampler3D table, const float r, const float mu, 
-                const float muSun, const float nu)
-{
+vec4 texture4D(sampler3D table, float r, float mu, float muSun, float nu) {
   //float Rg2    = Rg * Rg;
   //float Rt2    = Rt * Rt;
   float r2     = r * r;
@@ -403,7 +401,7 @@ vec4 texture4D(sampler3D table, const float r, const float mu,
 // lut   := OpenGL texture2D sampler (the irradiance texture deltaE)
 // muSun := cosine of the zeith angle of vec(s). Or muSun = (vec(s) * vec(v))
 // r     := height of starting point vect(x)
-vec3 irradianceLUT(sampler2D lut, const float muSun, const float r) {
+vec3 irradianceLUT(sampler2D lut, float muSun, float r) {
   // See Bruneton paper and Coliene to understand the mapping
   float u_muSun = (muSun + 0.2f) / (1.0f + 0.2f);
   float u_r     = (r - Rg) * invRtMinusRg;

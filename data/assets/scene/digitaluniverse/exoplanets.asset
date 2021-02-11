@@ -13,7 +13,7 @@ local speck = asset.syncedResource({
     Name = "Exoplanets Speck Files",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_exoplanets_speck",
-    Version = 1
+    Version = 2
 })
 
 local object = {
@@ -27,7 +27,7 @@ local object = {
         Texture = textures .. "/target-blue.png",
         File = speck .. "/expl.speck",
         LabelFile = speck .. "/expl.label",
-        ScaleFactor = 392.5,
+        ScaleFactor = 388.67923,
         TextColor = { 0.3, 0.3, 0.8 },
         TextSize = 14.8,
         TextMaxSize = 200.0,
@@ -35,7 +35,7 @@ local object = {
         CorrectionSizeEndDistance = 15.23,
         CorrectionSizeFactor = 13.3,
         Unit = "pc",
-        BillboardMaxSize = 52.0,
+        BillboardMaxSize = 75.0,
         EnablePixelSizeControl = true,
     },
     GUI = {

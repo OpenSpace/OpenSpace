@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -49,12 +49,24 @@ MilkywayConversionTask::MilkywayConversionTask(const ghoul::Dictionary& dictiona
     : _inFirstIndex(0)
     , _inNSlices(0)
 {
-    dictionary.getValue(KeyInFilenamePrefix, _inFilenamePrefix);
-    dictionary.getValue(KeyInFilenameSuffix, _inFilenameSuffix);
-    dictionary.getValue(KeyInFirstIndex, _inFirstIndex);
-    dictionary.getValue(KeyInNSlices, _inNSlices);
-    dictionary.getValue(KeyOutFilename, _outFilename);
-    dictionary.getValue(KeyOutDimensions, _outDimensions);
+    if (dictionary.hasKey(KeyInFilenamePrefix)) {
+        _inFilenamePrefix = dictionary.value<std::string>(KeyInFilenamePrefix);
+    }
+    if (dictionary.hasKey(KeyInFilenameSuffix)) {
+        _inFilenameSuffix = dictionary.value<std::string>(KeyInFilenameSuffix);
+    }
+    if (dictionary.hasKey(KeyInFirstIndex)) {
+        _inFirstIndex = static_cast<size_t>(dictionary.value<int>(KeyInFirstIndex));
+    }
+    if (dictionary.hasKey(KeyInNSlices)) {
+        _inNSlices = static_cast<size_t>(dictionary.value<int>(KeyInNSlices));
+    }
+    if (dictionary.hasKey(KeyOutFilename)) {
+        _outFilename = dictionary.value<std::string>(KeyOutFilename);
+    }
+    if (dictionary.hasKey(KeyOutDimensions)) {
+        _outDimensions = dictionary.value<glm::ivec3>(KeyOutDimensions);
+    }
 }
 
 std::string MilkywayConversionTask::description() {

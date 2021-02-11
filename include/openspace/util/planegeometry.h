@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,17 +22,36 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/src/rawtile.h>
+#ifndef __OPENSPACE_CORE___PLANEGEOMETRY___H__
+#define __OPENSPACE_CORE___PLANEGEOMETRY___H__
 
-namespace openspace::globebrowsing {
+#include <ghoul/glm.h>
+#include <ghoul/opengl/ghoul_gl.h>
 
-RawTile createDefaultTile(TileTextureInitData initData) {
-    RawTile defaultRes;
-    std::byte* data = new std::byte[initData.totalNumBytes];
-    defaultRes.imageData = std::unique_ptr<std::byte[]>(data);
-    std::fill_n(defaultRes.imageData.get(), initData.totalNumBytes, std::byte(0));
-    defaultRes.textureInitData = std::move(initData);
-    return defaultRes;
-}
+namespace openspace {
 
-} // namespace openspace::globebrowsing
+class PlaneGeometry {
+public:
+    PlaneGeometry(glm::vec2 size);
+    PlaneGeometry(float size);
+
+    ~PlaneGeometry();
+
+    void initialize();
+    void deinitialize();
+    void render();
+
+    void updateSize(const glm::vec2& size);
+    void updateSize(const float size);
+
+private:
+    void updateGeometry();
+
+    GLuint _vaoId = 0;
+    GLuint _vBufferId = 0;
+    glm::vec2 _size = glm::vec2(0.f);
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_CORE___PLANEGEOMETRY___H__

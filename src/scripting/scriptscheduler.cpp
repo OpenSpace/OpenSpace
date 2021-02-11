@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,6 +32,13 @@
 
 #include "scriptscheduler_lua.inl"
 
+namespace {
+    constexpr const char* KeyTime = "Time";
+    constexpr const char* KeyForwardScript = "ForwardScript";
+    constexpr const char* KeyBackwardScript = "BackwardScript";
+    constexpr const char* KeyUniversalScript = "Script";
+} // namespace
+
 namespace openspace::scripting {
 
 documentation::Documentation ScriptScheduler::Documentation() {
@@ -40,7 +47,7 @@ documentation::Documentation ScriptScheduler::Documentation() {
     using TimeVerifier = StringVerifier;
     using LuaScriptVerifier = StringVerifier;
 
-    return{
+    return {
         "Scheduled Scripts",
         "core_scheduledscript",
         {
@@ -88,46 +95,7 @@ documentation::Documentation ScriptScheduler::Documentation() {
 
 using namespace openspace::interaction;
 
-ScriptScheduler::ScheduledScript::ScheduledScript(const ghoul::Dictionary& dictionary) {
-    const std::string& timeStr = dictionary.value<std::string>(KeyTime);
-    time = Time::convertTime(timeStr);
-
-    // If a universal script is specified, retrieve it and add a ; as a separator so that
-    // it can be added to the other scripts
-    std::string universal;
-    dictionary.getValue(KeyUniversalScript, universal);
-    if (!universal.empty()) {
-        universal += ";";
-    }
-
-    if (dictionary.hasKeyAndValue<std::string>(KeyForwardScript)) {
-        forwardScript =
-            universal + dictionary.value<std::string>(KeyForwardScript);
-    }
-
-    if (dictionary.hasKeyAndValue<std::string>(KeyBackwardScript)) {
-        backwardScript =
-            universal + dictionary.value<std::string>(KeyBackwardScript);
-    }
-}
-
-void ScriptScheduler::loadScripts(const ghoul::Dictionary& dictionary) {
-    // Check if all of the scheduled scripts are formed correctly
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "ScriptScheduler"
-    );
-
-    // Create all the scheduled script first
-    std::vector<ScheduledScript> scheduledScripts;
-    for (size_t i = 1; i <= dictionary.size(); ++i) {
-        const ghoul::Dictionary& timedScriptDict = dictionary.value<ghoul::Dictionary>(
-            std::to_string(i)
-        );
-        scheduledScripts.emplace_back(timedScriptDict);
-    }
-
+void ScriptScheduler::loadScripts(std::vector<ScheduledScript> scheduledScripts) {
     // Sort scripts by time; use a stable_sort as the user might have had an intention
     // specifying multiple scripts for the same time in a specific order
     std::stable_sort(
@@ -145,12 +113,17 @@ void ScriptScheduler::loadScripts(const ghoul::Dictionary& dictionary) {
     for (ScheduledScript& script : scheduledScripts) {
         _timings.push_back(script.time);
 
-        _forwardScripts.push_back(std::move(script.forwardScript));
+        std::string forward =
+            script.universalScript.empty() ?
+            std::move(script.forwardScript) :
+            std::move(script.universalScript) + ';' + std::move(script.forwardScript);
+        _forwardScripts.push_back(forward);
 
-        _backwardScripts.insert(
-            _backwardScripts.begin(),
-            std::move(script.backwardScript)
-        );
+        std::string backward =
+            script.universalScript.empty() ?
+            std::move(script.backwardScript) :
+            std::move(script.universalScript) + ';' + std::move(script.backwardScript);
+        _backwardScripts.insert(_backwardScripts.begin(), backward);
     }
 
     // Ensure _currentIndex and _currentTime is accurate after new scripts was added

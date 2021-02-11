@@ -2,6 +2,17 @@ local DataPath = asset.syncedResource({
     Name = "Exoplanet Data Files",
     Type = "HttpSynchronization",
     Identifier = "exoplanets_data",
-    Version = 1
+    Version = 2
 })
 asset.export("DataPath", DataPath)
+
+asset.meta = {
+    Name = "Exoplanet Data",
+    Version = "2.0",
+    Description = [[ The data that is used for the exoplanet systems. The data has been 
+    derived from the 'Planetary Systems Composite Data' dataset from the NASA Exoplanet 
+    Archive]],
+    Author = "OpenSpace Team",
+    URL = "https://exoplanetarchive.ipac.caltech.edu/docs/data.html",
+    License = "MIT license",
+}

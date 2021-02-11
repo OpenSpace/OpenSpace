@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -57,6 +57,13 @@ T prevKeyframeObj(unsigned int index, const std::vector<T>& keyframeContainer) {
 
 template <typename T>
 T readFromPlayback(std::ifstream& stream) {
+    T res;
+    stream.read(reinterpret_cast<char*>(&res), sizeof(T));
+    return res;
+}
+
+template <typename T>
+T readFromPlayback(std::stringstream& stream) {
     T res;
     stream.read(reinterpret_cast<char*>(&res), sizeof(T));
     return res;

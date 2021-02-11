@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,10 +29,7 @@
 
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
 #include <utility>
-
-namespace ghoul::fontrendering { class Font; }
 
 namespace openspace {
 
@@ -40,7 +37,7 @@ class SceneGraphNode;
 
 namespace documentation { struct Documentation; }
 
-class DashboardItemAngle : public DashboardItem {
+class DashboardItemAngle : public DashboardTextItem {
 public:
     DashboardItemAngle(const ghoul::Dictionary& dictionary);
     virtual ~DashboardItemAngle() = default;
@@ -70,11 +67,7 @@ private:
     Component _reference;
     Component _destination;
 
-    properties::StringProperty _fontName;
-    properties::FloatProperty _fontSize;
-
     std::vector<char> _buffer;
-    std::shared_ptr<ghoul::fontrendering::Font> _font;
 };
 
 } // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -207,11 +207,8 @@ QString AssetsDialog::createTextSummary() {
         return "";
     }
     QString summary;
-    for (int i = 0; i < summaryItems.size(); ++i) {
+    for (size_t i = 0; i < summaryItems.size(); ++i) {
         bool existsInFilesystem = summaryItems.at(i)->doesExistInFilesystem();
-
-        constexpr const char* ExistsFormat = "{}<br>";
-        constexpr const char* NotExistsFormat = "<font color='{}'>{}</font><br>";
 
         std::string s = existsInFilesystem ?
             fmt::format("{}<br>", summaryPaths.at(i)) :
@@ -233,6 +230,6 @@ void AssetsDialog::parseSelections() {
     accept();
 }
 
-void AssetsDialog::selected(const QModelIndex& sel) {
+void AssetsDialog::selected(const QModelIndex&) {
     _summary->setText(createTextSummary());
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -54,14 +54,14 @@ scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
             {},
             "string or list of strings",
             "Add one or multiple exoplanet systems to the scene, as specified by the "
-            "input. An input string should be the name of the system host star."
+            "input. An input string should be the name of the system host star"
         },
         {
             "removeExoplanetSystem",
             &exoplanets::luascriptfunctions::removeExoplanetSystem,
             {},
             "string",
-            "Removes the nodes of the specified exoplanet system from the scene graph."
+            "Removes the nodes of the specified exoplanet system from the scene graph"
         },
         {
             "listAvailableExoplanetSystems",
@@ -69,14 +69,14 @@ scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
             {},
             "",
             "Prints a list with the names of all exoplanet systems that can be added to "
-            "the scene graph to the OpenSpace Log. "
+            "the scene graph to the OpenSpace Log"
         },
         {
             "getListOfExoplanets",
             &exoplanets::luascriptfunctions::getListOfExoplanets,
             {},
             "",
-            "Gets a list with the names of all exoplanet systems, that can be used by a GUI."
+            "Gets a list with the names of all exoplanet systems"
         }
     };
 
@@ -93,7 +93,8 @@ void ExoplanetsModule::internalInitialize(const ghoul::Dictionary&) {
 
 std::vector<documentation::Documentation> ExoplanetsModule::documentations() const {
     return {
-        ExoplanetsDataPreparationTask::documentation()
+        ExoplanetsDataPreparationTask::documentation(),
+        RenderableOrbitDisc::Documentation()
     };
 }
 

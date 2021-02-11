@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,7 +37,7 @@ out vec4 vs_positionCameraSpace;
 
 uniform mat4 modelViewTransform;
 uniform mat4 projectionTransform;
-uniform mat4 crippedModelViewTransform;
+uniform mat4 normalTransform;
 
 void main() {
     vs_positionCameraSpace = modelViewTransform * in_position;
@@ -48,6 +48,5 @@ void main() {
     vs_st = in_st;
     vs_screenSpaceDepth = positionScreenSpace.w;
     
-    //vs_normalViewSpace = normalize(transpose(inverse(mat3(crippedModelViewTransform))) * in_normal);
-    vs_normalViewSpace = normalize(mat3(crippedModelViewTransform) * in_normal);
+    vs_normalViewSpace = normalize(mat3(normalTransform) * in_normal);
 }

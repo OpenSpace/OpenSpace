@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -127,7 +127,7 @@ public:
      * and all of the property & asset changes that were made since startup.
      */
     void saveCurrentSettingsToProfile(const properties::PropertyOwner& rootOwner,
-        std::string currentTime, 
+        std::string currentTime,
         interaction::NavigationHandler::NavigationState navState);
 
     /// If the value passed to this function is 'true', the addAsset and removeAsset

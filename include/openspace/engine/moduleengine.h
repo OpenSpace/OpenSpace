@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -88,8 +88,7 @@ public:
      *        previously
      * \pre \p module must not be nullptr
      */
-    void registerModule(std::unique_ptr<OpenSpaceModule> module,
-        const ghoul::Dictionary& configuration);
+    void registerModule(std::unique_ptr<OpenSpaceModule> module);
 
     /**
      * Returns a list of all registered OpenSpaceModule%s that have been registered with

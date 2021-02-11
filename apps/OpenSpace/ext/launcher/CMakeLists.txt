@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2020                                                                #
+# Copyright (c) 2014-2021                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -90,3 +90,11 @@ set_openspace_compile_settings(openspace-ui-launcher)
 target_include_directories(openspace-ui-launcher PUBLIC include)
 target_link_libraries(openspace-ui-launcher PUBLIC Qt5::Core Qt5::Gui Qt5::Widgets openspace-core)
 
+if (MSVC)
+set(MSVC_WARNINGS
+  "/wd4619"   # #pragma warning: there is no warning number (raised by Qt headers)
+  "/wd4946"   # reinterpret_cast used between related classes: 
+)
+target_compile_options(openspace-ui-launcher INTERFACE ${MSVC_WARNINGS})
+
+endif ()

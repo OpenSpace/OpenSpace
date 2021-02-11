@@ -42,7 +42,7 @@
       "is_local": false,
       "key": "A",
       "name": "Focus on New Horizons",
-      "script": "\"openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'NewHorizons');openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
+      "script": "openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'NewHorizons');openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
     },
     {
       "documentation": "Anchor at New Horizons, Aim at Pluto",
@@ -194,7 +194,7 @@
       "is_local": false,
       "key": "SHIFT+T",
       "name": "Toggle Shadows",
-      "script": "openspace.setPropertyValueSingle('Scene.PlutoShadow.Renderable.Enabled', not openspace.getPropertyValue('Scene.PlutoShadow.Renderable.Enabled'));"
+      "script": "openspace.setPropertyValueSingle('Scene.PlutoShadow.Renderable.Enabled', not openspace.getPropertyValue('Scene.PlutoShadow.Renderable.Enabled'));openspace.setPropertyValueSingle('Scene.CharonShadow.Renderable.Enabled', not openspace.getPropertyValue('Scene.CharonShadow.Renderable.Enabled'));"
     },
     {
       "documentation": "Toggles the trail of New Horizons",

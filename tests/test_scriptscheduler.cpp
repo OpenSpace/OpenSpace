@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,18 +38,20 @@ TEST_CASE("ScriptScheduler: Simple Forward", "[scriptscheduler]") {
     );
 
     using namespace openspace::scripting;
-    using namespace std::string_literals;
     
     ScriptScheduler scheduler;
 
-    ghoul::Dictionary testDictionary = {
-        { "Time", "2000 JAN 03"s },
-        { "ForwardScript", "ForwardScript1"s },
-        { "BackwardScript", "BackwardScript1"s }
-    };
+    std::vector<ScriptScheduler::ScheduledScript> scripts;
+    {
+        ScriptScheduler::ScheduledScript script;
+        script.time = openspace::Time::convertTime("2000 JAN 03");
+        script.forwardScript = "ForwardScript1";
+        script.backwardScript = "BackwardScript1";
+        scripts.push_back(script);
+    }
     
     scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
-    scheduler.loadScripts({ { "1", testDictionary } });
+    scheduler.loadScripts(scripts);
     
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 02"));
     REQUIRE(res.first == res.second);
@@ -68,28 +70,25 @@ TEST_CASE("ScriptScheduler: Multiple Forward Single Jump", "[scriptscheduler]") 
     );
 
     using namespace openspace::scripting;
-    using namespace std::string_literals;
 
-    ghoul::Dictionary testDictionary1 = {
-        { "Time", "2000 JAN 03"s },
-        { "ForwardScript", "ForwardScript1"s },
-        { "BackwardScript", "BackwardScript1"s }
-    };
-    
-    ghoul::Dictionary testDictionary2 = {
-        { "Time", "2000 JAN 05"s },
-        { "ForwardScript", "ForwardScript2"s },
-        { "BackwardScript", "BackwardScript2"s }
+    std::vector<ScriptScheduler::ScheduledScript> scripts;
+    {
+        ScriptScheduler::ScheduledScript script1;
+        script1.time = openspace::Time::convertTime("2000 JAN 03");
+        script1.forwardScript = "ForwardScript1";
+        script1.backwardScript = "BackwardScript1";
+        scripts.push_back(script1);
 
-    };
-    
+        ScriptScheduler::ScheduledScript script2;
+        script2.time = openspace::Time::convertTime("2000 JAN 05");
+        script2.forwardScript = "ForwardScript2";
+        script2.backwardScript = "BackwardScript2";
+        scripts.push_back(script2);
+    }
     ScriptScheduler scheduler;
 
     scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
-    scheduler.loadScripts({
-        { "1", testDictionary1 },
-        { "2", testDictionary2 }
-    });
+    scheduler.loadScripts(scripts);
 
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 02"));
     REQUIRE(res.first == res.second);
@@ -114,25 +113,24 @@ TEST_CASE("ScriptScheduler: Multiple Forward Ordering", "[scriptscheduler]") {
     using namespace openspace::scripting;
     using namespace std::string_literals;
 
-    ghoul::Dictionary testDictionary1 = {
-        { "Time", "2000 JAN 03"s },
-        { "ForwardScript", "ForwardScript1"s },
-        { "BackwardScript", "BackwardScript1"s }
-    };
-    
-    ghoul::Dictionary testDictionary2 = {
-        { "Time", "2000 JAN 05"s },
-        { "ForwardScript", "ForwardScript2"s },
-        { "BackwardScript", "BackwardScript2"s }
-    };
+    std::vector<ScriptScheduler::ScheduledScript> scripts;
+    {
+        ScriptScheduler::ScheduledScript script1;
+        script1.time = openspace::Time::convertTime("2000 JAN 03");
+        script1.forwardScript = "ForwardScript1";
+        script1.backwardScript = "BackwardScript1";
+        scripts.push_back(script1);
+
+        ScriptScheduler::ScheduledScript script2;
+        script2.time = openspace::Time::convertTime("2000 JAN 05");
+        script2.forwardScript = "ForwardScript2";
+        script2.backwardScript = "BackwardScript2";
+        scripts.push_back(script2);
+    }
     
     ScriptScheduler scheduler;
-
     scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
-    scheduler.loadScripts({
-        { "1", testDictionary1 },
-        { "2", testDictionary2 }
-    });
+    scheduler.loadScripts(scripts);
     
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 02"));
     REQUIRE(res.first == res.second);
@@ -154,18 +152,18 @@ TEST_CASE("ScriptScheduler: Simple Backward", "[scriptscheduler]") {
     using namespace openspace::scripting;
     using namespace std::string_literals;
 
+    std::vector<ScriptScheduler::ScheduledScript> scripts;
+    {
+        ScriptScheduler::ScheduledScript script1;
+        script1.time = openspace::Time::convertTime("2000 JAN 03");
+        script1.forwardScript = "ForwardScript1";
+        script1.backwardScript = "BackwardScript1";
+        scripts.push_back(script1);
+    }
+    
     ScriptScheduler scheduler;
-    
-    ghoul::Dictionary testDictionary = {
-        { "Time", "2000 JAN 03"s },
-        { "ForwardScript", "ForwardScript1"s },
-        { "BackwardScript", "BackwardScript1"s }
-    };
-    
     scheduler.progressTo(openspace::Time::convertTime("2000 JAN 05"));
-    scheduler.loadScripts({
-        { "1", testDictionary }
-    });
+    scheduler.loadScripts(scripts);
     
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 04"));
     REQUIRE(res.first == res.second);
@@ -186,25 +184,24 @@ TEST_CASE("ScriptScheduler: Multiple Backward Single Jump", "[scriptscheduler]")
     using namespace openspace::scripting;
     using namespace std::string_literals;
 
+    std::vector<ScriptScheduler::ScheduledScript> scripts;
+    {
+        ScriptScheduler::ScheduledScript script1;
+        script1.time = openspace::Time::convertTime("2000 JAN 03");
+        script1.forwardScript = "ForwardScript1";
+        script1.backwardScript = "BackwardScript1";
+        scripts.push_back(script1);
+
+        ScriptScheduler::ScheduledScript script2;
+        script2.time = openspace::Time::convertTime("2000 JAN 05");
+        script2.forwardScript = "ForwardScript2";
+        script2.backwardScript = "BackwardScript2";
+        scripts.push_back(script2);
+    }
+    
     ScriptScheduler scheduler;
-    
-    ghoul::Dictionary testDictionary1 = {
-        { "Time", "2000 JAN 03"s },
-        { "ForwardScript", "ForwardScript1"s },
-        { "BackwardScript", "BackwardScript1"s }
-    };
-    
-    ghoul::Dictionary testDictionary2 = {
-        { "Time", "2000 JAN 05"s },
-        { "ForwardScript", "ForwardScript2"s },
-        { "BackwardScript", "BackwardScript2"s }
-    };
-    
     scheduler.progressTo(openspace::Time::convertTime("2000 JAN 07"));
-    scheduler.loadScripts({
-        { "1", testDictionary1 },
-        { "2", testDictionary2 }
-    });
+    scheduler.loadScripts(scripts);
     
     auto res =  scheduler.progressTo(openspace::Time::convertTime("2000 JAN 06"));
     REQUIRE(res.first == res.second);
@@ -229,25 +226,24 @@ TEST_CASE("ScriptScheduler: Multiple Backward Ordering", "[scriptscheduler]") {
     using namespace openspace::scripting;
     using namespace std::string_literals;
 
+    std::vector<ScriptScheduler::ScheduledScript> scripts;
+    {
+        ScriptScheduler::ScheduledScript script1;
+        script1.time = openspace::Time::convertTime("2000 JAN 03");
+        script1.forwardScript = "ForwardScript1";
+        script1.backwardScript = "BackwardScript1";
+        scripts.push_back(script1);
+
+        ScriptScheduler::ScheduledScript script2;
+        script2.time = openspace::Time::convertTime("2000 JAN 05");
+        script2.forwardScript = "ForwardScript2";
+        script2.backwardScript = "BackwardScript2";
+        scripts.push_back(script2);
+    }
+    
     ScriptScheduler scheduler;
-    
-    ghoul::Dictionary testDictionary1 = {
-        { "Time", "2000 JAN 03"s },
-        { "ForwardScript", "ForwardScript1"s },
-        { "BackwardScript", "BackwardScript1"s }
-    };
-    
-    ghoul::Dictionary testDictionary2 = {
-        { "Time", "2000 JAN 05"s },
-        { "ForwardScript", "ForwardScript2"s },
-        { "BackwardScript", "BackwardScript2"s }
-    };
-    
     scheduler.progressTo(openspace::Time::convertTime("2000 JAN 07"));
-    scheduler.loadScripts({
-        { "1", testDictionary1 },
-        { "2", testDictionary2 }
-    });
+    scheduler.loadScripts(scripts);
     
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 06"));
     REQUIRE(res.first == res.second);
@@ -299,25 +295,24 @@ TEST_CASE("ScriptScheduler: Forward Backwards", "[scriptscheduler]") {
     using namespace openspace::scripting;
     using namespace std::string_literals;
     
+    std::vector<ScriptScheduler::ScheduledScript> scripts;
+    {
+        ScriptScheduler::ScheduledScript script1;
+        script1.time = openspace::Time::convertTime("2000 JAN 03");
+        script1.forwardScript = "ForwardScript1";
+        script1.backwardScript = "BackwardScript1";
+        scripts.push_back(script1);
+
+        ScriptScheduler::ScheduledScript script2;
+        script2.time = openspace::Time::convertTime("2000 JAN 05");
+        script2.forwardScript = "ForwardScript2";
+        script2.backwardScript = "BackwardScript2";
+        scripts.push_back(script2);
+    }
+    
     ScriptScheduler scheduler;
-    
-    ghoul::Dictionary testDictionary1 = {
-        { "Time", "2000 JAN 03"s },
-        { "ForwardScript", "ForwardScript1"s },
-        { "BackwardScript", "BackwardScript1"s }
-    };
-    
-    ghoul::Dictionary testDictionary2 = {
-        { "Time", "2000 JAN 05"s },
-        { "ForwardScript", "ForwardScript2"s },
-        { "BackwardScript", "BackwardScript2"s }
-    };
-    
     scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
-    scheduler.loadScripts({
-        { "1", testDictionary1 },
-        { "2", testDictionary2 }
-    });
+    scheduler.loadScripts(scripts);
     
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 04"));
     REQUIRE(std::distance(res.first, res.second) == 1);
@@ -346,25 +341,24 @@ TEST_CASE("ScriptScheduler: Rewind", "[scriptscheduler]") {
     using namespace openspace::scripting;
     using namespace std::string_literals;
 
+    std::vector<ScriptScheduler::ScheduledScript> scripts;
+    {
+        ScriptScheduler::ScheduledScript script1;
+        script1.time = openspace::Time::convertTime("2000 JAN 03");
+        script1.forwardScript = "ForwardScript1";
+        script1.backwardScript = "BackwardScript1";
+        scripts.push_back(script1);
+
+        ScriptScheduler::ScheduledScript script2;
+        script2.time = openspace::Time::convertTime("2000 JAN 05");
+        script2.forwardScript = "ForwardScript2";
+        script2.backwardScript = "BackwardScript2";
+        scripts.push_back(script2);
+    }
+    
     ScriptScheduler scheduler;
-    
-    ghoul::Dictionary testDictionary1 = {
-        { "Time", "2000 JAN 03"s },
-        { "ForwardScript", "ForwardScript1"s },
-        { "BackwardScript", "BackwardScript1"s }
-    };
-    
-    ghoul::Dictionary testDictionary2 = {
-        { "Time", "2000 JAN 05"s },
-        { "ForwardScript", "ForwardScript2"s },
-        { "BackwardScript", "BackwardScript2"s }
-    };
-    
     scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
-    scheduler.loadScripts({
-        { "1", testDictionary1 },
-        { "2", testDictionary2 }
-    });
+    scheduler.loadScripts(scripts);
     
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 07"));
     REQUIRE(std::distance(res.first, res.second) == 2);
@@ -409,31 +403,29 @@ TEST_CASE("ScriptScheduler: All Scripts", "[scriptscheduler]") {
     using namespace openspace::scripting;
     using namespace std::string_literals;
     
-    ScriptScheduler scheduler;
-    
-    ghoul::Dictionary testDictionary1 = {
-        { "Time", "2000 JAN 03"s },
-        { "ForwardScript", "ForwardScript1"s },
-        { "BackwardScript", "BackwardScript1"s }
-    };
-    
-    ghoul::Dictionary testDictionary2 = {
-        { "Time", "2000 JAN 05"s },
-        { "ForwardScript", "ForwardScript2"s },
-        { "BackwardScript", "BackwardScript2"s }
-    };
+    std::vector<ScriptScheduler::ScheduledScript> scripts;
+    {
+        ScriptScheduler::ScheduledScript script1;
+        script1.time = openspace::Time::convertTime("2000 JAN 03");
+        script1.forwardScript = "ForwardScript1";
+        script1.backwardScript = "BackwardScript1";
+        scripts.push_back(script1);
 
-    ghoul::Dictionary testDictionary3 = {
-        { "Time", "2000 JAN 10"s },
-        { "ForwardScript", "ForwardScript3"s },
-        { "BackwardScript", "BackwardScript3"s }
-    };
+        ScriptScheduler::ScheduledScript script2;
+        script2.time = openspace::Time::convertTime("2000 JAN 05");
+        script2.forwardScript = "ForwardScript2";
+        script2.backwardScript = "BackwardScript2";
+        scripts.push_back(script2);
+
+        ScriptScheduler::ScheduledScript script3;
+        script3.time = openspace::Time::convertTime("2000 JAN 10");
+        script3.forwardScript = "ForwardScript3";
+        script3.backwardScript = "BackwardScript3";
+        scripts.push_back(script3);
+    }
     
-    scheduler.loadScripts({
-        { "1", testDictionary1 },
-        { "2", testDictionary2 },
-        { "3", testDictionary3 }
-    });
+    ScriptScheduler scheduler;
+    scheduler.loadScripts(scripts);
 
     auto allScripts = scheduler.allScripts();
     REQUIRE(allScripts.size() == 3);
@@ -453,17 +445,17 @@ TEST_CASE("ScriptScheduler: Jump Equal", "[scriptscheduler]") {
     using namespace openspace::scripting;
     using namespace std::string_literals;
 
+    std::vector<ScriptScheduler::ScheduledScript> scripts;
+    {
+        ScriptScheduler::ScheduledScript script1;
+        script1.time = openspace::Time::convertTime("2000 JAN 03 12:00:00");
+        script1.forwardScript = "ForwardScript1";
+        script1.backwardScript = "BackwardScript1";
+        scripts.push_back(script1);
+    }
+
     ScriptScheduler scheduler;
-
-    ghoul::Dictionary testDictionary1 = {
-        { "Time", "2000 JAN 03 12:00:00"s },
-        { "ForwardScript", "ForwardScript1"s },
-        { "BackwardScript", "BackwardScript1"s }
-    };
-
-    scheduler.loadScripts({
-        { "1", testDictionary1 }
-    });
+    scheduler.loadScripts(scripts);
 
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 03 11:00:00"));
     REQUIRE(res.first == res.second);
@@ -491,15 +483,17 @@ TEST_CASE("ScriptScheduler: Same Time", "[scriptscheduler]") {
     using namespace openspace::scripting;
     using namespace std::string_literals;
 
+    std::vector<ScriptScheduler::ScheduledScript> scripts;
+    {
+        ScriptScheduler::ScheduledScript script1;
+        script1.time = openspace::Time::convertTime("2000 JAN 03 12:00:00");
+        script1.forwardScript = "ForwardScript1";
+        script1.backwardScript = "BackwardScript1";
+        scripts.push_back(script1);
+    }
+
     ScriptScheduler scheduler;
-
-    ghoul::Dictionary testDictionary1 = {
-        { "Time", "2000 JAN 03 12:00:00"s },
-        { "ForwardScript", "ForwardScript1"s },
-        { "BackwardScript", "BackwardScript1"s }
-    };
-
-    scheduler.loadScripts({ { "1", testDictionary1 } });
+    scheduler.loadScripts(scripts);
 
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 03 12:00:00"));
     REQUIRE(std::distance(res.first, res.second) == 1);
@@ -520,15 +514,17 @@ TEST_CASE("ScriptScheduler: Multi Inner Jump", "[scriptscheduler]") {
     using namespace openspace::scripting;
     using namespace std::string_literals;
 
+    std::vector<ScriptScheduler::ScheduledScript> scripts;
+    {
+        ScriptScheduler::ScheduledScript script1;
+        script1.time = openspace::Time::convertTime("2000 JAN 03 12:00:00");
+        script1.forwardScript = "ForwardScript1";
+        script1.backwardScript = "BackwardScript1";
+        scripts.push_back(script1);
+    }
+
     ScriptScheduler scheduler;
-
-    ghoul::Dictionary testDictionary1 = {
-        { "Time", "2000 JAN 03 12:00:00"s },
-        { "ForwardScript", "ForwardScript1"s },
-        { "BackwardScript", "BackwardScript1"s }
-    };
-
-    scheduler.loadScripts({ { "1", testDictionary1 } });
+    scheduler.loadScripts(scripts);
 
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 03 10:00:00"));
     REQUIRE(res.first == res.second);
@@ -558,25 +554,21 @@ TEST_CASE(
     using namespace openspace::scripting;
     using namespace std::string_literals;
 
-    ghoul::Dictionary testDictionary1 = {
-        { "Time", "2000 JAN 03"s },
-        { "ForwardScript", "ForwardScript1"s },
-        { "BackwardScript", "BackwardScript1"s }
-    };
+    ScriptScheduler::ScheduledScript script1;
+    script1.time = openspace::Time::convertTime("2000 JAN 03");
+    script1.forwardScript = "ForwardScript1";
+    script1.backwardScript = "BackwardScript1";
 
-    ghoul::Dictionary testDictionary2 = {
-        { "Time", "2000 JAN 05"s },
-        { "ForwardScript", "ForwardScript2"s },
-        { "BackwardScript", "BackwardScript2"s }
+    ScriptScheduler::ScheduledScript script2;
+    script2.time = openspace::Time::convertTime("2000 JAN 05");
+    script2.forwardScript = "ForwardScript2";
+    script2.backwardScript = "BackwardScript2";
 
-    };
 
     ScriptScheduler scheduler;
-
     scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
-    scheduler.loadScripts({ { "1", testDictionary1 } });
-
-    scheduler.loadScripts({ { "1", testDictionary2 } });
+    scheduler.loadScripts({ script1 });
+    scheduler.loadScripts({ script2 });
 
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 02"));
     REQUIRE(res.first == res.second);
@@ -602,23 +594,20 @@ TEST_CASE("ScriptScheduler: Multiple Forward Ordering Multiple Load" "[scriptsch
     using namespace openspace::scripting;
     using namespace std::string_literals;
 
-    ghoul::Dictionary testDictionary1 = {
-        { "Time", "2000 JAN 03"s },
-        { "ForwardScript", "ForwardScript1"s },
-        { "BackwardScript", "BackwardScript1"s }
-    };
+    ScriptScheduler::ScheduledScript script1;
+    script1.time = openspace::Time::convertTime("2000 JAN 03");
+    script1.forwardScript = "ForwardScript1";
+    script1.backwardScript = "BackwardScript1";
 
-    ghoul::Dictionary testDictionary2 = {
-        { "Time", "2000 JAN 05"s },
-        { "ForwardScript", "ForwardScript2"s },
-        { "BackwardScript", "BackwardScript2"s }
-    };
+    ScriptScheduler::ScheduledScript script2;
+    script2.time = openspace::Time::convertTime("2000 JAN 05");
+    script2.forwardScript = "ForwardScript2";
+    script2.backwardScript = "BackwardScript2";
 
     ScriptScheduler scheduler;
-
     scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
-    scheduler.loadScripts({ { "1", testDictionary1 } });
-    scheduler.loadScripts({ { "1", testDictionary2 } });
+    scheduler.loadScripts({ script1 });
+    scheduler.loadScripts({ script2 });
 
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 02"));
     REQUIRE(res.first == res.second);
@@ -643,23 +632,20 @@ TEST_CASE(
     using namespace openspace::scripting;
     using namespace std::string_literals;
 
+    ScriptScheduler::ScheduledScript script1;
+    script1.time = openspace::Time::convertTime("2000 JAN 03");
+    script1.forwardScript = "ForwardScript1";
+    script1.backwardScript = "BackwardScript1";
+
+    ScriptScheduler::ScheduledScript script2;
+    script2.time = openspace::Time::convertTime("2000 JAN 05");
+    script2.forwardScript = "ForwardScript2";
+    script2.backwardScript = "BackwardScript2";
+
     ScriptScheduler scheduler;
-
-    ghoul::Dictionary testDictionary1 = {
-        { "Time", "2000 JAN 03"s },
-        { "ForwardScript", "ForwardScript1"s },
-        { "BackwardScript", "BackwardScript1"s }
-    };
-
-    ghoul::Dictionary testDictionary2 = {
-        { "Time", "2000 JAN 05"s },
-        { "ForwardScript", "ForwardScript2"s },
-        { "BackwardScript", "BackwardScript2"s }
-    };
-
     scheduler.progressTo(openspace::Time::convertTime("2000 JAN 07"));
-    scheduler.loadScripts({ { "1", testDictionary1 } });
-    scheduler.loadScripts({ { "1", testDictionary2 } });
+    scheduler.loadScripts({ script1 });
+    scheduler.loadScripts({ script2 });
 
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 06"));
     REQUIRE(res.first == res.second);
@@ -689,21 +675,19 @@ TEST_CASE(
 
     ScriptScheduler scheduler;
 
-    ghoul::Dictionary testDictionary1 = {
-        { "Time", "2000 JAN 03"s },
-        { "ForwardScript", "ForwardScript1"s },
-        { "BackwardScript", "BackwardScript1"s }
-    };
+    ScriptScheduler::ScheduledScript script1;
+    script1.time = openspace::Time::convertTime("2000 JAN 03");
+    script1.forwardScript = "ForwardScript1";
+    script1.backwardScript = "BackwardScript1";
 
-    ghoul::Dictionary testDictionary2 = {
-        { "Time", "2000 JAN 05"s },
-        { "ForwardScript", "ForwardScript2"s },
-        { "BackwardScript", "BackwardScript2"s }
-    };
+    ScriptScheduler::ScheduledScript script2;
+    script2.time = openspace::Time::convertTime("2000 JAN 05");
+    script2.forwardScript = "ForwardScript2";
+    script2.backwardScript = "BackwardScript2";
 
     scheduler.progressTo(openspace::Time::convertTime("2000 JAN 07"));
-    scheduler.loadScripts({ { "1", testDictionary1 } });
-    scheduler.loadScripts({ { "1", testDictionary2 } });
+    scheduler.loadScripts({ script1 });
+    scheduler.loadScripts({ script2 });
 
     std::pair<ScriptScheduler::ScriptIt, ScriptScheduler::ScriptIt> res =
         scheduler.progressTo(openspace::Time::convertTime("2000 JAN 06"));
@@ -726,23 +710,20 @@ TEST_CASE("ScriptScheduler: Forward Backwards Multiple Load", "[scriptscheduler]
     using namespace openspace::scripting;
     using namespace std::string_literals;
 
+    ScriptScheduler::ScheduledScript script1;
+    script1.time = openspace::Time::convertTime("2000 JAN 03");
+    script1.forwardScript = "ForwardScript1";
+    script1.backwardScript = "BackwardScript1";
+
+    ScriptScheduler::ScheduledScript script2;
+    script2.time = openspace::Time::convertTime("2000 JAN 05");
+    script2.forwardScript = "ForwardScript2";
+    script2.backwardScript = "BackwardScript2";
+
     ScriptScheduler scheduler;
-
-    ghoul::Dictionary testDictionary1 = {
-        { "Time", "2000 JAN 03"s },
-        { "ForwardScript", "ForwardScript1"s },
-        { "BackwardScript", "BackwardScript1"s }
-    };
-
-    ghoul::Dictionary testDictionary2 = {
-        { "Time", "2000 JAN 05"s },
-        { "ForwardScript", "ForwardScript2"s },
-        { "BackwardScript", "BackwardScript2"s }
-    };
-
     scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
-    scheduler.loadScripts({ { "1", testDictionary1 } });
-    scheduler.loadScripts({ { "1", testDictionary2 } });
+    scheduler.loadScripts({ script1 });
+    scheduler.loadScripts({ script2 });
 
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 04"));
     REQUIRE(std::distance(res.first, res.second) == 1);
@@ -771,23 +752,20 @@ TEST_CASE("ScriptScheduler: Rewind Multiple Load", "[scriptscheduler]") {
     using namespace openspace::scripting;
     using namespace std::string_literals;
 
+    ScriptScheduler::ScheduledScript script1;
+    script1.time = openspace::Time::convertTime("2000 JAN 03");
+    script1.forwardScript = "ForwardScript1";
+    script1.backwardScript = "BackwardScript1";
+
+    ScriptScheduler::ScheduledScript script2;
+    script2.time = openspace::Time::convertTime("2000 JAN 05");
+    script2.forwardScript = "ForwardScript2";
+    script2.backwardScript = "BackwardScript2";
+
     ScriptScheduler scheduler;
-
-    ghoul::Dictionary testDictionary1 = {
-        { "Time", "2000 JAN 03"s },
-        { "ForwardScript", "ForwardScript1"s },
-        { "BackwardScript", "BackwardScript1"s }
-    };
-
-    ghoul::Dictionary testDictionary2 = {
-        { "Time", "2000 JAN 05"s },
-        { "ForwardScript", "ForwardScript2"s },
-        { "BackwardScript", "BackwardScript2"s }
-    };
-
     scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
-    scheduler.loadScripts({ { "1", testDictionary1 } });
-    scheduler.loadScripts({ { "1", testDictionary2 } });
+    scheduler.loadScripts({ script1 });
+    scheduler.loadScripts({ script2 });
 
     auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 07"));
     REQUIRE(std::distance(res.first, res.second) == 2);
@@ -810,30 +788,25 @@ TEST_CASE("ScriptScheduler: All Scripts Multiple Load", "[scriptscheduler]") {
     using namespace openspace::scripting;
     using namespace std::string_literals;
 
+    ScriptScheduler::ScheduledScript script1;
+    script1.time = openspace::Time::convertTime("2000 JAN 03");
+    script1.forwardScript = "ForwardScript1";
+    script1.backwardScript = "BackwardScript1";
+
+    ScriptScheduler::ScheduledScript script2;
+    script2.time = openspace::Time::convertTime("2000 JAN 05");
+    script2.forwardScript = "ForwardScript2";
+    script2.backwardScript = "BackwardScript2";
+
+    ScriptScheduler::ScheduledScript script3;
+    script3.time = openspace::Time::convertTime("2000 JAN 10");
+    script3.forwardScript = "ForwardScript3";
+    script3.backwardScript = "BackwardScript3";
+
     ScriptScheduler scheduler;
-
-
-    ghoul::Dictionary testDictionary1 = {
-        { "Time", "2000 JAN 03"s },
-        { "ForwardScript", "ForwardScript1"s },
-        { "BackwardScript", "BackwardScript1"s }
-    };
-
-    ghoul::Dictionary testDictionary2 = {
-        { "Time", "2000 JAN 05"s },
-        { "ForwardScript", "ForwardScript2"s },
-        { "BackwardScript", "BackwardScript2"s }
-    };
-
-    ghoul::Dictionary testDictionary3 = {
-        { "Time", "2000 JAN 10"s },
-        { "ForwardScript", "ForwardScript3"s },
-        { "BackwardScript", "BackwardScript3"s }
-    };
-
-    scheduler.loadScripts({ { "1", testDictionary1 } });
-    scheduler.loadScripts({ { "1", testDictionary2 } });
-    scheduler.loadScripts({ { "1", testDictionary3 } });
+    scheduler.loadScripts({ script1 });
+    scheduler.loadScripts({ script2 });
+    scheduler.loadScripts({ script3 });
 
     auto allScripts = scheduler.allScripts();
     REQUIRE(allScripts.size() == 3);
@@ -853,29 +826,26 @@ TEST_CASE("ScriptScheduler: All Scripts Mixed Load", "[scriptscheduler]") {
     using namespace openspace::scripting;
     using namespace std::string_literals;
 
+
+
+    ScriptScheduler::ScheduledScript script1;
+    script1.time = openspace::Time::convertTime("2000 JAN 03");
+    script1.forwardScript = "ForwardScript1";
+    script1.backwardScript = "BackwardScript1";
+
+    ScriptScheduler::ScheduledScript script2;
+    script2.time = openspace::Time::convertTime("2000 JAN 05");
+    script2.forwardScript = "ForwardScript2";
+    script2.backwardScript = "BackwardScript2";
+
+    ScriptScheduler::ScheduledScript script3;
+    script3.time = openspace::Time::convertTime("2000 JAN 10");
+    script3.forwardScript = "ForwardScript3";
+    script3.backwardScript = "BackwardScript3";
+
     ScriptScheduler scheduler;
-
-
-    ghoul::Dictionary testDictionary1 = {
-        { "Time", "2000 JAN 03"s },
-        { "ForwardScript", "ForwardScript1"s },
-        { "BackwardScript", "BackwardScript1"s }
-    };
-
-    ghoul::Dictionary testDictionary2 = {
-        { "Time", "2000 JAN 05"s },
-        { "ForwardScript", "ForwardScript2"s },
-        { "BackwardScript", "BackwardScript2"s }
-    };
-
-    ghoul::Dictionary testDictionary3 = {
-        { "Time", "2000 JAN 10"s },
-        { "ForwardScript", "ForwardScript3"s },
-        { "BackwardScript", "BackwardScript3"s }
-    };
-
-    scheduler.loadScripts({ { "1", testDictionary1 } });
-    scheduler.loadScripts({ { "1", testDictionary2 }, { "2", testDictionary3 } });
+    scheduler.loadScripts({ script1 });
+    scheduler.loadScripts({ script2, script3 });
 
     auto allScripts = scheduler.allScripts();
     REQUIRE(allScripts.size() == 3);

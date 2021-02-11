@@ -66,7 +66,8 @@ local sunstar = {
         MagnitudeExponent = 6.2,
         SizeComposition = "Distance Modulus",
         RenderMethod = "Texture Based", -- or PSF
-        FadeInDistances = { 0.0001, 0.1 }
+        FadeInDistances = { 0.0001, 0.1 },
+        RenderableType = "PostDeferredTransparent"
     },
     GUI = {
         Name = "Sun",

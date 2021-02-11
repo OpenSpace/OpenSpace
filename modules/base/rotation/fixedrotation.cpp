@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,16 +32,11 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
+#include <optional>
 #include <string>
+#include <variant>
 
 namespace {
-    constexpr const char* KeyXAxis = "XAxis";
-    constexpr const char* KeyXAxisOrthogonal = "XAxisOrthogonal";
-    constexpr const char* KeyYAxis = "YAxis";
-    constexpr const char* KeyYAxisOrthogonal = "YAxisOrthogonal";
-    constexpr const char* KeyZAxis = "ZAxis";
-    constexpr const char* KeyZAxisOrthogonal = "ZAxisOrthogonal";
-
     constexpr const openspace::properties::Property::PropertyInfo EnableInfo = {
         "Enable",
         "Enabled",
@@ -186,98 +181,59 @@ namespace {
         "only needed if any of the three axis uses the Object type. In this case, the "
         "location of the attached node is required to compute the relative direction."
     };
+
+    struct [[codegen::Dictionary(FixedRotation)]] Parameters {
+        // This value specifies the direction of the new X axis. If this value is not
+        // specified, it will be computed by completing a right handed coordinate system
+        // from the Y and Z axis, which must be specified instead. If this value is a 
+        // string, it is interpreted as the identifier of another scenegraph node. If this
+        // value is a 3-vector, it is interpreted as a direction vector
+        std::optional<std::variant<std::string, glm::vec3>> xAxis;
+
+        // [[codegen::verbatim(XAxisOrthogonalVectorInfo.description)]]
+        std::optional<bool> xAxisOrthogonal;
+
+        // [[codegen::verbatim(XAxisInvertObjectInfo.description)]]
+        std::optional<bool> xAxisInvert [[codegen::key("xAxis - InvertObject")]];
+
+        // This value specifies the direction of the new Y axis. If this value is not
+        // specified, it will be computed by completing a right handed coordinate system
+        // from the X and Z axis, which must be specified instead. If this value is a
+        // string, it is interpreted as the identifier of another scenegraph node. If this
+        // value is a 3-vector, it is interpreted as a direction vector
+        std::optional<std::variant<std::string, glm::vec3>> yAxis;
+
+        // [[codegen::verbatim(YAxisOrthogonalVectorInfo.description)]]
+        std::optional<bool> yAxisOrthogonal;
+
+        // [[codegen::verbatim(YAxisInvertObjectInfo.description)]]
+        std::optional<bool> yAxisInvert [[codegen::key("yAxis - InvertObject")]];
+
+        // This value specifies the direction of the new Z axis. If this value is not
+        // specified, it will be computed by completing a right handed coordinate system
+        // from the X and Y axis, which must be specified instead. If this value is a
+        // string, it is interpreted as the identifier of another scenegraph node. If this
+        // value is a 3-vector, it is interpreted as a direction vector
+        std::optional<std::variant<std::string, glm::vec3>> zAxis;
+
+        // [[codegen::verbatim(ZAxisOrthogonalVectorInfo.description)]]
+        std::optional<bool> zAxisOrthogonal;
+
+        // [[codegen::verbatim(ZAxisInvertObjectInfo.description)]]
+        std::optional<bool> zAxisInvert [[codegen::key("zAxis - InvertObject")]];
+
+        // [[codegen::verbatim(AttachedInfo.description)]]
+        std::optional<std::string> attached;
+    };
+#include "fixedrotation_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation FixedRotation::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "Fixed Rotation",
-        "base_transform_rotation_fixed",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("FixedRotation"),
-                Optional::No
-            },
-            {
-                KeyXAxis,
-                new OrVerifier({ new StringVerifier, new DoubleVector3Verifier, }),
-                Optional::Yes,
-                "This value specifies the direction of the new X axis. If this value is "
-                "not specified, it will be computed by completing a right handed "
-                "coordinate system from the Y and Z axis, which must be specified "
-                "instead. If this value is a string, it is interpreted as the identifier "
-                "of another scenegraph node. If this value is a 3-vector, it is "
-                "interpreted as a direction vector."
-            },
-            {
-                KeyXAxisOrthogonal,
-                new BoolVerifier,
-                Optional::Yes,
-                XAxisOrthogonalVectorInfo.description
-            },
-            {
-                XAxisInvertObjectInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                XAxisInvertObjectInfo.description
-            },
-            {
-                KeyYAxis,
-                new OrVerifier({ new StringVerifier, new DoubleVector3Verifier, }),
-                Optional::Yes,
-                "This value specifies the direction of the new Y axis. If this value is "
-                "not specified, it will be computed by completing a right handed "
-                "coordinate system from the X and Z axis, which must be specified "
-                "instead. If this value is a string, it is interpreted as the identifier "
-                "of another scenegraph node. If this value is a 3-vector, it is "
-                "interpreted as a direction vector."
-            },
-            {
-                KeyYAxisOrthogonal,
-                new BoolVerifier,
-                Optional::Yes,
-                YAxisOrthogonalVectorInfo.description
-            },
-            {
-                YAxisInvertObjectInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                YAxisInvertObjectInfo.description
-            },
-            {
-                KeyZAxis,
-                new OrVerifier({ new StringVerifier, new DoubleVector3Verifier, }),
-                Optional::Yes,
-                "This value specifies the direction of the new Z axis. If this value is "
-                "not specified, it will be computed by completing a right handed "
-                "coordinate system from the X and Y axis, which must be specified "
-                "instead. If this value is a string, it is interpreted as the identifier "
-                "of another scenegraph node. If this value is a 3-vector, it is "
-                "interpreted as a direction vector."
-            },
-            {
-                KeyZAxisOrthogonal,
-                new BoolVerifier,
-                Optional::Yes,
-                ZAxisOrthogonalVectorInfo.description
-            },
-            {
-                ZAxisInvertObjectInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                ZAxisInvertObjectInfo.description
-            },
-            {
-                AttachedInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                AttachedInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_transform_rotation_fixed";
+    return doc;
 }
 
 FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
@@ -332,6 +288,9 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
     }
     , _attachedObject(AttachedInfo, "")
 {
+    // We check the Dictionary here in order to detect the errors early
+    codegen::bake<Parameters>(dictionary);
+
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
@@ -447,103 +406,79 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
 bool FixedRotation::initialize() {
     ZoneScoped
 
+    // We have already checked this before, but still
+    const Parameters p = codegen::bake<Parameters>(_constructorDictionary);
+
     // We need to do this in the initialize and not the constructor as the scene graph
     // nodes referenced in the dictionary might not exist yet at construction time. At
     // initialization time, however, we know that they already have been created
 
     const bool res = Rotation::initialize();
 
-    if (_constructorDictionary.hasKey(AttachedInfo.identifier)) {
-        _attachedObject = _constructorDictionary.value<std::string>(
-            AttachedInfo.identifier
-        );
-    }
+    _attachedObject = p.attached.value_or(_attachedObject);
 
-    const bool hasXAxis = _constructorDictionary.hasKey(KeyXAxis);
-    if (hasXAxis) {
-        if (_constructorDictionary.hasKeyAndValue<std::string>(KeyXAxis)) {
+    if (p.xAxis.has_value()) {
+        if (std::holds_alternative<std::string>(*p.xAxis)) {
             _xAxis.type = Axis::Type::Object;
-            _xAxis.object = _constructorDictionary.value<std::string>(KeyXAxis);
+            _xAxis.object = std::get<std::string>(*p.xAxis);
         }
         else {
-            // We know it has to be a vector now
+            ghoul_assert(std::holds_alternative<glm::vec3>(*p.xAxis), "");
             _xAxis.type = Axis::Type::Vector;
-            _xAxis.vector = _constructorDictionary.value<glm::dvec3>(KeyXAxis);
+            _xAxis.vector = std::get<glm::vec3>(*p.xAxis);
         }
     }
-
-    if (_constructorDictionary.hasKey(KeyXAxisOrthogonal)) {
-        _xAxis.isOrthogonal = _constructorDictionary.value<bool>(KeyXAxisOrthogonal);
-    }
-    if (_constructorDictionary.hasKey(XAxisInvertObjectInfo.identifier)) {
-        _xAxis.invertObject = _constructorDictionary.value<bool>(
-            XAxisInvertObjectInfo.identifier
-        );
-    }
+    _xAxis.isOrthogonal = p.xAxisOrthogonal.value_or(_xAxis.isOrthogonal);
     if (_xAxis.isOrthogonal) {
         _xAxis.type = Axis::Type::OrthogonalVector;
     }
+    _xAxis.invertObject = p.xAxisInvert.value_or(_xAxis.invertObject);
 
-    const bool hasYAxis = _constructorDictionary.hasKey(KeyYAxis);
-    if (hasYAxis) {
-        if (_constructorDictionary.hasKeyAndValue<std::string>(KeyYAxis)) {
+    if (p.yAxis.has_value()) {
+        if (std::holds_alternative<std::string>(*p.yAxis)) {
             _yAxis.type = Axis::Type::Object;
-            _yAxis.object = _constructorDictionary.value<std::string>(KeyYAxis);
+            _yAxis.object = std::get<std::string>(*p.yAxis);
         }
         else {
-            // We know it has to be a vector now
+            ghoul_assert(std::holds_alternative<glm::vec3>(*p.yAxis), "");
             _yAxis.type = Axis::Type::Vector;
-            _yAxis.vector = _constructorDictionary.value<glm::dvec3>(KeyYAxis);
+            _yAxis.vector = std::get<glm::vec3>(*p.yAxis);
         }
     }
-
-    if (_constructorDictionary.hasKey(KeyYAxisOrthogonal)) {
-        _yAxis.isOrthogonal = _constructorDictionary.value<bool>(KeyYAxisOrthogonal);
-    }
-    if (_constructorDictionary.hasKey(YAxisInvertObjectInfo.identifier)) {
-        _yAxis.invertObject = _constructorDictionary.value<bool>(
-            YAxisInvertObjectInfo.identifier
-        );
-    }
+    _yAxis.isOrthogonal = p.yAxisOrthogonal.value_or(_yAxis.isOrthogonal);
     if (_yAxis.isOrthogonal) {
         _yAxis.type = Axis::Type::OrthogonalVector;
     }
+    _yAxis.invertObject = p.yAxisInvert.value_or(_yAxis.invertObject);
 
-    const bool hasZAxis = _constructorDictionary.hasKey(KeyZAxis);
-    if (hasZAxis) {
-        if (_constructorDictionary.hasKeyAndValue<std::string>(KeyZAxis)) {
+    if (p.zAxis.has_value()) {
+        if (std::holds_alternative<std::string>(*p.zAxis)) {
             _zAxis.type = Axis::Type::Object;
-            _zAxis.object = _constructorDictionary.value<std::string>(KeyZAxis);
+            _zAxis.object = std::get<std::string>(*p.zAxis);
         }
         else {
-            // We know it has to be a vector now
+            ghoul_assert(std::holds_alternative<glm::vec3>(*p.zAxis), "");
             _zAxis.type = Axis::Type::Vector;
-            _zAxis.vector = _constructorDictionary.value<glm::dvec3>(KeyZAxis);
+            _zAxis.vector = std::get<glm::vec3>(*p.zAxis);
         }
     }
-
-    if (_constructorDictionary.hasKey(KeyZAxisOrthogonal)) {
-        _zAxis.isOrthogonal = _constructorDictionary.value<bool>(KeyZAxisOrthogonal);
-    }
-    if (_constructorDictionary.hasKey(ZAxisInvertObjectInfo.identifier)) {
-        _yAxis.invertObject = _constructorDictionary.value<bool>(
-            ZAxisInvertObjectInfo.identifier
-        );
-    }
+    _zAxis.isOrthogonal = p.zAxisOrthogonal.value_or(_zAxis.isOrthogonal);
     if (_zAxis.isOrthogonal) {
         _zAxis.type = Axis::Type::OrthogonalVector;
     }
+    _zAxis.invertObject = p.zAxisInvert.value_or(_zAxis.invertObject);
 
 
-    if (!hasXAxis && hasYAxis && hasZAxis) {
+
+    if (!p.xAxis.has_value() && p.yAxis.has_value() && p.zAxis.has_value()) {
         _xAxis.type = Axis::Type::CoordinateSystemCompletion;
     }
 
-    if (hasXAxis && !hasYAxis && hasZAxis) {
+    if (p.xAxis.has_value() && !p.yAxis.has_value() && p.zAxis.has_value()) {
         _yAxis.type = Axis::Type::CoordinateSystemCompletion;
     }
 
-    if (hasXAxis && hasYAxis && !hasZAxis) {
+    if (p.xAxis.has_value() && p.yAxis.has_value() && !p.zAxis.has_value()) {
         _zAxis.type = Axis::Type::CoordinateSystemCompletion;
     }
 
@@ -569,7 +504,11 @@ glm::dmat3 FixedRotation::matrix(const UpdateData&) const {
     {
         LWARNINGC(
             "FixedRotation",
-            fmt::format("Near-collinear vectors detected: x ({}) y ({}) z ({})", x, y, z)
+            fmt::format(
+                "Near-collinear vectors detected: "
+                "x ({}, {}, {}) y ({}, {}, {}) z ({}, {}, {})",
+                x.x, x.y, x.z, y.x, y.y, y.z, z.x, z.y, z.z
+            )
         );
         return glm::dmat3();
     }

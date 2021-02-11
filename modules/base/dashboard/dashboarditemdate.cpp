@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,122 +27,75 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
+#include <openspace/util/spicemanager.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 
 namespace {
-    constexpr const char* KeyFontMono = "Mono";
-    constexpr const float DefaultFontSize = 15.f;
-
-    constexpr openspace::properties::Property::PropertyInfo FontNameInfo = {
-        "FontName",
-        "Font Name",
-        "This value is the name of the font that is used. It can either refer to an "
-        "internal name registered previously, or it can refer to a path that is used."
+    constexpr openspace::properties::Property::PropertyInfo FormatStringInfo = {
+        "FormatString",
+        "Format String",
+        "The format text describing how this dashboard item renders it's text. This text "
+        "must contain exactly one {} which is a placeholder that will contain the date"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
-        "FontSize",
-        "Font Size",
-        "This value determines the size of the font that is used to render the date."
+    constexpr openspace::properties::Property::PropertyInfo TimeFormatInfo = {
+        "TimeFormat",
+        "Time Format",
+        "The format string used for formatting the date/time before being passed to the "
+        "string in FormatString. See "
+        "https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/timout_c.html for full "
+        "information about how to structure this format"
     };
+
+    struct [[codegen::Dictionary(DashboardItemDate)]] Parameters {
+        // [[codegen::verbatim(FormatStringInfo.description)]]
+        std::optional<std::string> formatString;
+        
+        // [[codegen::verbatim(TimeFormatInfo.description)]]
+        std::optional<std::string> timeFormat;
+    };
+#include "dashboarditemdate_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation DashboardItemDate::Documentation() {
-    using namespace documentation;
-    return {
-        "DashboardItem Date",
-        "base_dashboarditem_date",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("DashboardItemDate"),
-                Optional::No
-            },
-            {
-                FontNameInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                FontNameInfo.description
-            },
-            {
-                FontSizeInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                FontSizeInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_dashboarditem_date";
+    return doc;
 }
 
 DashboardItemDate::DashboardItemDate(const ghoul::Dictionary& dictionary)
-    : DashboardItem(dictionary)
-    , _fontName(FontNameInfo, KeyFontMono)
-    , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
+    : DashboardTextItem(dictionary, 15.f)
+    , _formatString(FormatStringInfo, "Date: {} UTC")
+    , _timeFormat(TimeFormatInfo, "YYYY MON DDTHR:MN:SC.### ::RND")
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "DashboardItemDate"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    if (dictionary.hasKey(FontNameInfo.identifier)) {
-        _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
-    }
-    _fontName.onChange([this](){
-        _font = global::fontManager->font(_fontName, _fontSize);
-    });
-    addProperty(_fontName);
+    _formatString = p.formatString.value_or(_formatString);
+    addProperty(_formatString);
 
-    if (dictionary.hasKey(FontSizeInfo.identifier)) {
-        _fontSize = static_cast<float>(dictionary.value<double>(FontSizeInfo.identifier));
-    }
-    _fontSize.onChange([this](){
-        _font = global::fontManager->font(_fontName, _fontSize);
-    });
-    addProperty(_fontSize);
-
-    _font = global::fontManager->font(_fontName, _fontSize);
+    _timeFormat = p.timeFormat.value_or(_timeFormat);
+    addProperty(_timeFormat);
 }
 
 void DashboardItemDate::render(glm::vec2& penPosition) {
-//    penPosition.y -= _font->height();
-//    std::string timestring = global::timeManager.time().UTC();
-//   
-//    std::replace(timestring.begin(), timestring.end(), 'T', ' ');
-//    timestring.replace(timestring.begin() + 20, timestring.end(), "");
-//    double deltatime = global::timeManager.deltaTime();
-//   std::string DeltaStringEnd = "";
-//    if (deltatime > 60) {
-//        deltatime = deltatime / 60;
-//        DeltaStringEnd = " MINUTES / SECOND"; 
-//    }
-//    else {
-//        DeltaStringEnd = " SECONDS / SECOND";
-//    }
-//   if (deltatime != 0) {
-//        timestring += '\n';
-//        timestring += std::to_string(int(deltatime)) + DeltaStringEnd;
-//    }
     ZoneScoped
-    
+
     std::string time = SpiceManager::ref().dateFromEphemerisTime(
         global::timeManager->time().j2000Seconds(),
         _timeFormat.value().c_str()
     );
-    try{
-        RenderFont(
-            *_font,
-            penPosition,
-            fmt::format(_formatString.value().c_str(), time)
-        );
+
+    try {
+        RenderFont(*_font, penPosition, fmt::format(_formatString.value().c_str(), time));
     }
-    catch(const fmt::format_error&){
+    catch (const fmt::format_error&) {
         LERRORC("DashboardItemDate", "Illegal format string");
     }
     penPosition.y -= _font->height();

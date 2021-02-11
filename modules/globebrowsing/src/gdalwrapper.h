@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -50,18 +50,6 @@ public:
     static void destroy();
 
     static GdalWrapper& ref();
-
-    /**
-     * Get the current size of the GDAL in memory cache.
-     * \returns the number of bytes currently in the GDAL memory cache.
-     */
-    static int64_t GDALCacheUsed();
-
-    /**
-     * Get the maximum GDAL in memory cache size.
-     * \returns the maximum number of bytes allowed for the GDAL cache.
-     */
-    static int64_t GDALMaximumCacheSize();
 
     bool logGdalErrors() const;
 

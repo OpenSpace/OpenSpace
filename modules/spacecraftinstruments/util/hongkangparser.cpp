@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -73,28 +73,36 @@ HongKangParser::HongKangParser(std::string name, std::string fileName,
     , _potentialTargets(std::move(potentialTargets))
 {
     //get the different instrument types
-    const std::vector<std::string>& decoders = translationDictionary.keys();
     //for each decoder (assuming might have more if hong makes changes)
-    for (const std::string& decoderType : decoders) {
+    for (std::string_view decoderType : translationDictionary.keys()) {
         //create dictionary containing all {playbookKeys , spice IDs}
         if (decoderType == "Instrument") {
-            ghoul::Dictionary typeDictionary;
-            translationDictionary.getValue(decoderType, typeDictionary);
+            if (!translationDictionary.hasKey(decoderType) ||
+                !translationDictionary.hasValue<ghoul::Dictionary>(decoderType))
+            {
+                continue;
+            }
+
+            ghoul::Dictionary typeDictionary =
+                translationDictionary.value<ghoul::Dictionary>(decoderType);
             // for each playbook call -> create a Decoder object
-            const std::vector<std::string>& keys = typeDictionary.keys();
-            for (const std::string& key : keys) {
-                const std::string& currentKey = decoderType + "." + key;
+            for (std::string_view key : typeDictionary.keys()) {
+                const std::string& currentKey = fmt::format("{}.{}", decoderType, key);
 
                 ghoul::Dictionary decoderDictionary;
-                translationDictionary.getValue(currentKey, decoderDictionary);
+                if (translationDictionary.hasValue<ghoul::Dictionary>(currentKey)) {
+                    decoderDictionary = translationDictionary.value<ghoul::Dictionary>(
+                        currentKey
+                    );
+                }
 
                 std::unique_ptr<Decoder> decoder = Decoder::createFromDictionary(
                     decoderDictionary,
-                    decoderType
+                    std::string(decoderType)
                 );
                 //insert decoder to map - this will be used in the parser to determine
                 //behavioral characteristics of each instrument
-                _fileTranslation[key] = std::move(decoder);
+                _fileTranslation[std::string(key)] = std::move(decoder);
             }
         }
         //Hong's playbook needs _only_ instrument translation though.
@@ -161,12 +169,8 @@ bool HongKangParser::create() {
     std::string previousCamera;
 
     double captureStart = -1.0;
-    double captureStop = -1.0;
-    double scanStart = -1.0;
-    double scanStop = -1.0;
 
     std::string cameraTarget  = "VOID";
-    std::string scannerTarget = "VOID";
 
     std::string line;
     while (!file.eof()) {
@@ -220,7 +224,7 @@ bool HongKangParser::create() {
                 _subsetMap[image.target]._range.include(time);
             }
             if (it->second->decoderType() == "SCANNER") { // SCANNER START
-                scanStart = time;
+                double scanStart = time;
 
                 InstrumentDecoder* scanner = static_cast<InstrumentDecoder*>(
                     it->second.get()
@@ -235,8 +239,11 @@ bool HongKangParser::create() {
                     getline(file, linePeek);
                     if (linePeek.find(endNominal) != std::string::npos) {
                         met = linePeek.substr(25, 9);
-                        scanStop = ephemerisTimeFromMissionElapsedTime(met, _metRef);
-                        scannerTarget = findPlaybookSpecifiedTarget(line);
+                        double scanStop = ephemerisTimeFromMissionElapsedTime(
+                            met,
+                            _metRef
+                        );
+                        std::string scannerTarget = findPlaybookSpecifiedTarget(line);
 
                         TimeRange scanRange = { scanStart, scanStop };
                         ghoul_assert(scanRange.isDefined(), "Invalid time range!");
@@ -264,10 +271,8 @@ bool HongKangParser::create() {
             // we have reached the end of a scan or consecutive capture
             // sequence!
             if (captureStart != -1) {
-                // end of capture sequence for camera, store end time of this
-                // sequence
-                captureStop = time;
-                TimeRange cameraRange = { captureStart, captureStop };
+                // end of capture sequence for camera, store end time of this sequence
+                TimeRange cameraRange = { captureStart, time };
                 ghoul_assert(cameraRange.isDefined(), "Invalid time range!");
                 _instrumentTimes.emplace_back(previousCamera, cameraRange);
                 captureStart = -1;

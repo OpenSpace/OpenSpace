@@ -15,30 +15,26 @@ local Earth = {
         PerformShading = false,
         Layers = {},
         ShadowGroup = {
-            Source1 = {
-                Name = "Sun",
-                -- All radius in meters
-                Radius = 696.3E6
+            Sources = {
+                { Name = "Sun", Radius = 696.3E6 },
             },
-            Caster1 = { 
-                Name = "Moon",
-                -- All radius in meters
-                Radius = 1.737E6
+            Casters = {
+                { Name = "Moon", Radius = 1.737E6 },
             }
         },
         Labels = {
             Enable = false,
             FileName = labelsPath .. "/Earth.labels",
             LabelAlignmentOption = "Horizontally", -- or Circularly
-            LabelsFontSize = 41.0,
-            LabelsSize = 0.52,
+            LabelsFontSize = 40.0,
+            LabelsSize = 4.0,
             LabelsMinSize = 1.0,
             LabelsMaxSize = 1500.0,
             ProximityEnabled = false,
             LabelsFadeInEnabled = true,
-            LabelsFadeOutEnabled = false,
-            FadeInStartingDistance = 50000.0,
-            FadeOutStartingDistance = 80000.0,
+            LabelsFadeOutEnabled = true,
+            FadeInStartingDistance = 300000.0,
+            FadeOutStartingDistance = 10000.0,
             LabelsForceDomeRendering = true,
             LabelsDistanceEPS = 1500000.0,
             LabelsColor = { 1.0, 0.0, 0.0 }

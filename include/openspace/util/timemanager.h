@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -160,7 +160,8 @@ private:
 
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _timeChangeCallbacks;
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _deltaTimeChangeCallbacks;
-    std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _deltaTimeStepsChangeCallbacks;
+    std::vector<std::pair<CallbackHandle, TimeChangeCallback>>
+        _deltaTimeStepsChangeCallbacks;
 
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _timeJumpCallbacks;
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _timelineChangeCallbacks;

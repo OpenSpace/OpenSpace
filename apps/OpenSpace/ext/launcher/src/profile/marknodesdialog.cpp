@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -112,7 +112,7 @@ void MarkNodesDialog::listItemAdded() {
     std::string itemToAdd = _newNode->text().toStdString();
     const auto it = std::find(_data.cbegin(), _data.cend(), itemToAdd);
     if (it != _data.end()) {
-        _list->setCurrentRow(std::distance(_data.cbegin(), it));
+        _list->setCurrentRow(static_cast<int>(std::distance(_data.cbegin(), it)));
     }
     else {
         _data.push_back(itemToAdd);
@@ -131,7 +131,7 @@ void MarkNodesDialog::listItemRemove() {
     QListWidgetItem* item = _list->currentItem();
     int index = _list->row(item);
 
-    if (index < 0 || index >= _markedNodesListItems.size()) {
+    if (index < 0 || index >= static_cast<int>(_markedNodesListItems.size())) {
         return;
     }
 

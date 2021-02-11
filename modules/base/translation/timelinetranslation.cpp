@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,7 +30,6 @@
 #include <openspace/util/time.h>
 
 namespace {
-    constexpr const char* KeyType = "Type";
     constexpr const char* KeyKeyframes = "Keyframes";
 } // namespace
 
@@ -42,11 +41,6 @@ documentation::Documentation TimelineTranslation::Documentation() {
         "Timeline Translation",
         "base_transform_translation_keyframe",
         {
-            {
-                KeyType,
-                new StringEqualVerifier("TimelineTranslation"),
-                Optional::No
-            },
             {
                 KeyKeyframes,
                 new TableVerifier({
@@ -70,9 +64,8 @@ TimelineTranslation::TimelineTranslation(const ghoul::Dictionary& dictionary) {
     const ghoul::Dictionary& keyframes =
         dictionary.value<ghoul::Dictionary>(KeyKeyframes);
 
-    std::vector<std::string> timeStrings = keyframes.keys();
-    for (const std::string& timeString : timeStrings) {
-        const double t = Time::convertTime(timeString);
+    for (std::string_view timeString : keyframes.keys()) {
+        const double t = Time::convertTime(std::string(timeString));
 
         ghoul::mm_unique_ptr<Translation> translation =
             Translation::createFromDictionary(

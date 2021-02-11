@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -66,8 +66,7 @@ public:
      * is set in the OpenSpaceModule constructor. This method will call the
      * internalInitialize method for further customization for each subclass.
      */
-    void initialize(const ModuleEngine* moduleEngine,
-        const ghoul::Dictionary& configuration);
+    void initialize(const ghoul::Dictionary& configuration);
 
     /**
      * This method calls the internalInitializeGL method for further customization for
@@ -168,9 +167,6 @@ protected:
      * Returns a const pointer to the module engine
      */
     const ModuleEngine* moduleEngine() const;
-
-private:
-    const ModuleEngine* _moduleEngine = nullptr;
 };
 
 } // namespace openspace

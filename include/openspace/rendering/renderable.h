@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
@@ -60,7 +61,7 @@ public:
     };
 
     static ghoul::mm_unique_ptr<Renderable> createFromDictionary(
-        const ghoul::Dictionary& dictionary);
+        ghoul::Dictionary dictionary);
 
     Renderable(const ghoul::Dictionary& dictionary);
     virtual ~Renderable() = default;
@@ -74,8 +75,8 @@ public:
     bool isEnabled() const;
     bool shouldUpdateIfDisabled() const;
 
-    void setBoundingSphere(float boundingSphere);
-    float boundingSphere() const;
+    void setBoundingSphere(double boundingSphere);
+    double boundingSphere() const;
 
     virtual void render(const RenderData& data, RendererTasks& rendererTask);
     virtual void update(const UpdateData& data);
@@ -97,7 +98,7 @@ public:
 protected:
     properties::BoolProperty _enabled;
     properties::FloatProperty _opacity;
-    properties::FloatProperty _boundingSphere;
+    properties::DoubleProperty _boundingSphere;
     properties::StringProperty _renderableType;
 
     bool _shouldUpdateIfDisabled = false;

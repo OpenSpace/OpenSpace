@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
+#include <optional>
 
 namespace {
     constexpr const openspace::properties::Property::PropertyInfo HasStartInfo = {
@@ -53,42 +54,23 @@ namespace {
         "End",
         "Specifies the time when this TimeFrame becomes inactive"
     };
+
+    struct [[codegen::Dictionary(TimeFrameInterval)]] Parameters {
+        // [[codegen::verbatim(StartInfo.description)]]
+        std::optional<std::variant<double, std::string>> start;
+
+        // [[codegen::verbatim(EndInfo.description)]]
+        std::optional<std::variant<double, std::string>> end;
+    };
+#include "timeframeinterval_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation TimeFrameInterval::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "Time Frame Interval",
-        "base_time_frame_interval",
-        {
-            {
-                HasStartInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                HasStartInfo.description
-            },
-            {
-                StartInfo.identifier,
-                new OrVerifier({ new DoubleVerifier, new StringVerifier }),
-                Optional::Yes,
-                StartInfo.description
-            },
-            {
-                HasEndInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                HasEndInfo.description
-            },
-            {
-                EndInfo.identifier,
-                new OrVerifier({ new DoubleVerifier, new StringVerifier }),
-                Optional::Yes,
-                EndInfo.description
-            },
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_time_frame_interval";
+    return doc;
 }
 
 bool TimeFrameInterval::isActive(const Time& time) const {
@@ -119,38 +101,35 @@ TimeFrameInterval::TimeFrameInterval(const ghoul::Dictionary& dictionary)
     , _hasEnd(HasEndInfo, false)
     , _end(EndInfo, 0, 0, 1E9)
 {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    if (p.start.has_value()) {
+        if (std::holds_alternative<double>(*p.start)) {
+            _start = std::get<double>(*p.start);
+        }
+        else {
+            _start = SpiceManager::ref().ephemerisTimeFromDate(
+                std::get<std::string>(*p.start)
+            );
+        }
+    }
+    _hasStart = p.start.has_value();
     addProperty(_hasStart);
     addProperty(_start);
+
+    if (p.end.has_value()) {
+        if (std::holds_alternative<double>(*p.end)) {
+            _end = std::get<double>(*p.end);
+        }
+        else {
+            _end = SpiceManager::ref().ephemerisTimeFromDate(
+                std::get<std::string>(*p.end)
+            );
+        }
+    }
+    _hasEnd = p.end.has_value();
     addProperty(_hasEnd);
     addProperty(_end);
-
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "TimeFrameInterval"
-    );
-
-    if (dictionary.hasValue<std::string>(StartInfo.identifier)) {
-        _start = SpiceManager::ref().ephemerisTimeFromDate(
-            dictionary.value<std::string>(StartInfo.identifier)
-        );
-        _hasStart = true;
-    }
-    else if (dictionary.hasValue<double>(StartInfo.identifier)) {
-        _start = dictionary.value<double>(StartInfo.identifier);
-        _hasStart = true;
-    }
-
-    if (dictionary.hasValue<std::string>(EndInfo.identifier)) {
-        _end = SpiceManager::ref().ephemerisTimeFromDate(
-            dictionary.value<std::string>(EndInfo.identifier)
-        );
-        _hasEnd = true;
-    }
-    else if (dictionary.hasValue<double>(EndInfo.identifier)) {
-        _end = dictionary.value<double>(EndInfo.identifier);
-        _hasEnd = true;
-    }
 }
 
 } // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,6 +42,7 @@
 #include <ghoul/opengl/textureunit.h>
 #include <array>
 #include <fstream>
+#include <optional>
 #include <string>
 
 namespace {
@@ -51,16 +52,6 @@ namespace {
     constexpr std::array<const char*, 4> UniformNames = {
         "modelViewProjectionTransform", "alphaValue", "fadeInValue", "galaxyTexture"
     };
-
-    constexpr const char* KeyFile = "File";
-    constexpr const char* keyUnit = "Unit";
-    constexpr const char* MeterUnit = "m";
-    constexpr const char* KilometerUnit = "Km";
-    constexpr const char* ParsecUnit = "pc";
-    constexpr const char* KiloparsecUnit = "Kpc";
-    constexpr const char* MegaparsecUnit = "Mpc";
-    constexpr const char* GigaparsecUnit = "Gpc";
-    constexpr const char* GigalightyearUnit = "Gly";
 
     constexpr int8_t CurrentCacheVersion = 2;
     constexpr double PARSEC = 0.308567756E17;
@@ -180,126 +171,86 @@ namespace {
         "object."
     };
 
+    struct [[codegen::Dictionary(RenderablePlanesCloud)]] Parameters {
+        // The path to the SPECK file that contains information about the astronomical
+        // object being rendered
+        std::optional<std::string> file;
+
+        // [[codegen::verbatim(ScaleFactorInfo.description)]]
+        std::optional<float> scaleFactor;
+
+        // [[codegen::verbatim(TextColorInfo.description)]]
+        std::optional<glm::vec3> textColor;
+
+        // [[codegen::verbatim(TextOpacityInfo.description)]]
+        std::optional<float> textOpacity;
+
+        // [[codegen::verbatim(TextSizeInfo.description)]]
+        std::optional<float> textSize;
+
+        // [[codegen::verbatim(LabelFileInfo.description)]]
+        std::optional<std::string> labelFile;
+
+        // [[codegen::verbatim(LabelMinSizeInfo.description)]]
+        std::optional<int> textMinSize;
+
+        // [[codegen::verbatim(LabelMaxSizeInfo.description)]]
+        std::optional<int> textMaxSize;
+
+        // [[codegen::verbatim(TransformationMatrixInfo.description)]]
+        std::optional<glm::dmat4x4> transformationMatrix;
+
+        enum class BlendMode {
+            Normal,
+            Additive
+        };
+
+        // [[codegen::verbatim(BlendModeInfo.description)]]
+        std::optional<BlendMode> blendMode;
+
+        enum class Unit {
+            Meter [[codegen::key("m")]],
+            Kilometer [[codegen::key("Km")]],
+            Parsec [[codegen::key("pc")]],
+            Kiloparsec [[codegen::key("Kpc")]],
+            Megaparsec [[codegen::key("Mpc")]],
+            Gigaparsec [[codegen::key("Gpc")]],
+            Gigalightyears [[codegen::key("Gly")]]
+        };
+        std::optional<Unit> unit;
+
+        // [[codegen::verbatim(TexturePathInfo.description)]]
+        std::string texturePath;
+
+        // [[codegen::verbatim(LuminosityInfo.description)]]
+        std::optional<std::string> luminosity;
+
+        // [[codegen::verbatim(ScaleLuminosityInfo.description)]]
+        std::optional<float> scaleLuminosity;
+
+        // [[codegen::verbatim(FadeInDistancesInfo.description)]]
+        std::optional<glm::vec2> fadeInDistances;
+
+        // [[codegen::verbatim(DisableFadeInInfo.description)]]
+        std::optional<bool> disableFadeIn;
+
+        // [[codegen::verbatim(PlaneMinSizeInfo.description)]]
+        std::optional<float> planeMinSize;
+    };
+#include "renderableplanescloud_codegen.cpp"
 }  // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderablePlanesCloud::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderablePlanesCloud",
-        "digitaluniverse_RenderablePlanesCloud",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("RenderablePlanesCloud"),
-                Optional::No
-            },
-            {
-                KeyFile,
-                new StringVerifier,
-                Optional::Yes,
-                "The path to the SPECK file that contains information about the "
-                "astronomical object being rendered."
-            },
-            {
-                ScaleFactorInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                ScaleFactorInfo.description
-            },
-            {
-                TextColorInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                TextColorInfo.description
-            },
-            {
-                TextOpacityInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                TextOpacityInfo.description
-            },
-            {
-                TextSizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                TextSizeInfo.description
-            },
-            {
-                LabelFileInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                LabelFileInfo.description
-            },
-            {
-                LabelMinSizeInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                LabelMinSizeInfo.description
-            },
-            {
-                LabelMaxSizeInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                LabelMaxSizeInfo.description
-            },
-            {
-                TransformationMatrixInfo.identifier,
-                new Matrix4x4Verifier<double>,
-                Optional::Yes,
-                TransformationMatrixInfo.description
-            },
-            {
-                BlendModeInfo.identifier,
-                new StringInListVerifier({ "Normal", "Additive" }),
-                Optional::Yes,
-                BlendModeInfo.description, // + " The default value is 'Normal'.",
-            },
-            {
-                TexturePathInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                TexturePathInfo.description,
-            },
-            {
-                LuminosityInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                LuminosityInfo.description,
-            },
-            {
-                ScaleFactorInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                ScaleFactorInfo.description,
-            },
-            {
-                FadeInDistancesInfo.identifier,
-                new Vector2Verifier<float>,
-                Optional::Yes,
-                FadeInDistancesInfo.description
-            },
-            {
-                DisableFadeInInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                DisableFadeInInfo.description
-            },
-            {
-                PlaneMinSizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                PlaneMinSizeInfo.description
-            },
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "digitaluniverse_RenderablePlanesCloud";
+    return doc;
 }
-
 
 RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 100.f)
+    , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 300000.f)
     , _textColor(TextColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _textOpacity(TextOpacityInfo, 1.f, 0.f, 1.f)
     , _textSize(TextSizeInfo, 8.0, 0.5, 24.0)
@@ -315,16 +266,12 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     , _planeMinSize(PlaneMinSizeInfo, 0.5, 0.0, 500.0)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderablePlanesCloud"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(_opacity);
 
-    if (dictionary.hasKey(KeyFile)) {
-        _speckFile = absPath(dictionary.value<std::string>(KeyFile));
+    if (p.file.has_value()) {
+        _speckFile = absPath(*p.file);
         _hasSpeckFile = true;
         _drawElements.onChange([&]() { _hasSpeckFile = !_hasSpeckFile; });
         addProperty(_drawElements);
@@ -337,32 +284,29 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     addProperty(_renderOption);
     //_renderOption.set(1);
 
-    if (dictionary.hasKey(keyUnit)) {
-        const std::string& unit = dictionary.value<std::string>(keyUnit);
-        if (unit == MeterUnit) {
-            _unit = Meter;
-        }
-        else if (unit == KilometerUnit) {
-            _unit = Kilometer;
-        }
-        else if (unit == ParsecUnit) {
-            _unit = Parsec;
-        }
-        else if (unit == KiloparsecUnit) {
-            _unit = Kiloparsec;
-        }
-        else if (unit == MegaparsecUnit) {
-            _unit = Megaparsec;
-        }
-        else if (unit == GigaparsecUnit) {
-            _unit = Gigaparsec;
-        }
-        else if (unit == GigalightyearUnit) {
-            _unit = GigalightYears;
-        }
-        else {
-            LWARNING("No unit given for RenderablePlanesCloud. Using meters as units.");
-            _unit = Meter;
+    if (p.unit.has_value()) {
+        switch (*p.unit) {
+            case Parameters::Unit::Meter:
+                _unit = Meter;
+                break;
+            case Parameters::Unit::Kilometer:
+                _unit = Kilometer;
+                break;
+            case Parameters::Unit::Parsec:
+                _unit = Parsec;
+                break;
+            case Parameters::Unit::Kiloparsec:
+                _unit = Kiloparsec;
+                break;
+            case Parameters::Unit::Megaparsec:
+                _unit = Megaparsec;
+                break;
+            case Parameters::Unit::Gigaparsec:
+                _unit = Gigaparsec;
+                break;
+            case Parameters::Unit::Gigalightyears:
+                _unit = GigalightYears;
+                break;
         }
     }
     else {
@@ -370,56 +314,30 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
         _unit = Meter;
     }
 
-    if (dictionary.hasKey(ScaleFactorInfo.identifier)) {
-        _scaleFactor = static_cast<float>(
-            dictionary.value<double>(ScaleFactorInfo.identifier)
-        );
-    }
+    _scaleFactor = p.scaleFactor.value_or(_scaleFactor);
     addProperty(_scaleFactor);
-    _scaleFactor.onChange([&]() {
-        _dataIsDirty = true;
-    });
+    _scaleFactor.onChange([&]() { _dataIsDirty = true; });
 
-    if (dictionary.hasKey(LabelFileInfo.identifier)) {
-        _labelFile = absPath(dictionary.value<std::string>(LabelFileInfo.identifier));
+    if (p.labelFile.has_value()) {
+        _labelFile = absPath(*p.labelFile);
         _hasLabel = true;
 
-        if (dictionary.hasKey(TextColorInfo.identifier)) {
-            _textColor = dictionary.value<glm::vec3>(TextColorInfo.identifier);
-            _hasLabel = true;
-        }
+        _textColor = p.textColor.value_or(_textColor);
         _textColor.setViewOption(properties::Property::ViewOptions::Color);
         addProperty(_textColor);
         _textColor.onChange([&]() { _textColorIsDirty = true; });
 
-        if (dictionary.hasKey(TextOpacityInfo.identifier)) {
-            _textOpacity = dictionary.value<float>(TextOpacityInfo.identifier);
-        }
+        _textOpacity = p.textOpacity.value_or(_textOpacity);
         addProperty(_textOpacity);
 
-        if (dictionary.hasKey(TextSizeInfo.identifier)) {
-            _textSize = dictionary.value<float>(TextSizeInfo.identifier);
-        }
+        _textSize = p.textSize.value_or(_textSize);
         addProperty(_textSize);
 
-        if (dictionary.hasKey(LabelMinSizeInfo.identifier)) {
-            _textMinSize = static_cast<int>(
-                dictionary.value<float>(LabelMinSizeInfo.identifier)
-            );
-        }
-
-        if (dictionary.hasKey(LabelMaxSizeInfo.identifier)) {
-            _textMaxSize = static_cast<int>(
-                dictionary.value<float>(LabelMaxSizeInfo.identifier)
-            );
-        }
+        _textMinSize = p.textMinSize.value_or(_textMinSize);
+        _textMaxSize = p.textMaxSize.value_or(_textMaxSize);
     }
 
-    if (dictionary.hasKey(TransformationMatrixInfo.identifier)) {
-        _transformationMatrix = dictionary.value<glm::dmat4>(
-            TransformationMatrixInfo.identifier
-        );
-    }
+    _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);
 
     _blendMode.addOptions({
         { BlendModeNormal, "Normal" },
@@ -438,39 +356,33 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
         }
     });
 
-    if (dictionary.hasKey(BlendModeInfo.identifier)) {
-        const std::string& v = dictionary.value<std::string>(BlendModeInfo.identifier);
-        if (v == "Normal") {
-            _blendMode = BlendModeNormal;
+    if (p.blendMode.has_value()) {
+        switch (*p.blendMode) {
+            case Parameters::BlendMode::Normal:
+                _blendMode = BlendModeNormal;
+                break;
+            case Parameters::BlendMode::Additive:
+                _blendMode = BlendModeAdditive;
+                break;
         }
-        else if (v == "Additive") {
-            _blendMode = BlendModeAdditive;
-        }
     }
 
-    _texturesPath = absPath(dictionary.value<std::string>(TexturePathInfo.identifier));
+    _texturesPath = absPath(p.texturePath);
 
-    if (dictionary.hasKey(LuminosityInfo.identifier)) {
-        _luminosityVar = dictionary.value<std::string>(LuminosityInfo.identifier);
-    }
+    _luminosityVar = p.luminosity.value_or(_luminosityVar);
+    _sluminosity = p.scaleLuminosity.value_or(_sluminosity);
 
-    if (dictionary.hasKey(ScaleLuminosityInfo.identifier)) {
-        _sluminosity = static_cast<float>(
-            dictionary.value<double>(ScaleLuminosityInfo.identifier)
-        );
-    }
 
-    if (dictionary.hasKey(FadeInDistancesInfo.identifier)) {
-        _fadeInDistance = dictionary.value<glm::vec2>(FadeInDistancesInfo.identifier);
+    if (p.fadeInDistances.has_value()) {
+        _fadeInDistance = *p.fadeInDistances;
         _disableFadeInDistance = false;
         addProperty(_fadeInDistance);
         addProperty(_disableFadeInDistance);
     }
 
-    if (dictionary.hasKey(PlaneMinSizeInfo.identifier)) {
-        _planeMinSize = static_cast<float>(
-            dictionary.value<double>(PlaneMinSizeInfo.identifier)
-        );
+    _planeMinSize = p.planeMinSize.value_or(_planeMinSize);
+    
+    if (p.planeMinSize.has_value()) {
         addProperty(_planeMinSize);
     }
 }
@@ -562,8 +474,10 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
     _program->setUniform(_uniformCache.alphaValue, _opacity);
     _program->setUniform(_uniformCache.fadeInValue, fadeInVariable);
 
+    glDisable(GL_CULL_FACE);
+
     GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
+    global::renderEngine->openglStateCache().viewport(viewport);
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();
@@ -592,6 +506,7 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
     // Restores OpenGL Rendering State
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetDepthState();
+    global::renderEngine->openglStateCache().resetPolygonAndClippingState();
 }
 
 void RenderablePlanesCloud::renderLabels(const RenderData& data,
@@ -625,15 +540,15 @@ void RenderablePlanesCloud::renderLabels(const RenderData& data,
     }
 
     glm::vec4 textColor = glm::vec4(
-        glm::vec3(_textColor), 
+        glm::vec3(_textColor),
         _textOpacity * fadeInVariable
     );
 
     ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
     labelInfo.orthoRight = orthoRight;
     labelInfo.orthoUp = orthoUp;
-    labelInfo.minSize = static_cast<int>(_textMinSize);
-    labelInfo.maxSize = static_cast<int>(_textMaxSize);
+    labelInfo.minSize = _textMinSize;
+    labelInfo.maxSize = _textMaxSize;
     labelInfo.cameraPos = data.camera.positionVec3();
     labelInfo.cameraLookUp = data.camera.lookUpVectorWorldSpace();
     labelInfo.renderType = _renderOption;
@@ -989,7 +904,6 @@ bool RenderablePlanesCloud::readSpeckFile() {
 
         glm::vec3 u(0.f);
         glm::vec3 v(0.f);
-        int textureIndex = 0;
 
         std::vector<float> values(_nValuesPerAstronomicalObject);
 
@@ -1018,11 +932,6 @@ bool RenderablePlanesCloud::readSpeckFile() {
                         v.z = values[i];
                         break;
                 }
-            }
-
-            // JCC: This should be moved to the RenderablePlanesCloud:
-            if (i == _textureVariableIndex) {
-                textureIndex = static_cast<int>(values[i]);
             }
         }
         _fullData.insert(_fullData.end(), values.begin(), values.end());
