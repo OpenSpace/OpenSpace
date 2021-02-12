@@ -4,6 +4,14 @@ local DataPath = asset.syncedResource({
     Identifier = "exoplanets_data",
     Version = 2
 })
+
+asset.onInitialize(function () 
+    local p = "Modules.Exoplanets.DataFolder";
+    if(openspace.getPropertyValue(p) == "") then
+        openspace.setPropertyValueSingle(p, DataPath)
+    end
+end)
+
 asset.export("DataPath", DataPath)
 
 asset.meta = {
