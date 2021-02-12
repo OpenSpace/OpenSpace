@@ -410,8 +410,8 @@ void createExoplanetSystem(const std::string& starName) {
     const glm::dmat4 rotation = computeOrbitPlaneRotationMatrix(meanInclination);
     const glm::dmat3 meanOrbitPlaneRotationMatrix = static_cast<glm::dmat3>(rotation);
 
-    bool isEnabled = module->showComparisonCircle();
-    const std::string isEnabledString = isEnabled ? "true" : "false";
+    bool isCircleEnabled = module->showComparisonCircle();
+    const std::string isCircleEnabledString = isCircleEnabled ? "true" : "false";
 
     // 1 AU Size Comparison Circle
     const std::string circle = "{"
@@ -419,7 +419,7 @@ void createExoplanetSystem(const std::string& starName) {
         "Parent = '" + starIdentifier + "',"
         "Renderable = {"
             "Type = 'RenderableRadialGrid',"
-            "Enabled = " + isEnabledString + ","
+            "Enabled = " + isCircleEnabledString + ","
             "OuterRadius = " + std::to_string(AU) + ","
             "CircleSegments = 64,"
             "LineWidth = 2.0,"
@@ -458,8 +458,8 @@ void createExoplanetSystem(const std::string& starName) {
 
         const std::string hzTexture = module->habitableZoneTexturePath();
 
-        bool isEnabled = module->showHabitableZone();
-        const std::string isEnabledString = isEnabled ? "true" : "false";
+        bool isHzEnabled = module->showHabitableZone();
+        const std::string isHzEnabledString = isHzEnabled ? "true" : "false";
 
         bool useOptimistic = module->useOptimisticZone();
         const std::string useOptimisticString = useOptimistic ? "true" : "false";
@@ -469,7 +469,7 @@ void createExoplanetSystem(const std::string& starName) {
             "Parent = '" + starIdentifier + "',"
             "Renderable = {"
                 "Type = 'RenderableHabitableZone',"
-                "Enabled = " + isEnabledString + ","
+                "Enabled = " + isHzEnabledString + ","
                 "Texture = openspace.absPath('" + hzTexture + "'),"
                 "Luminosity = " + std::to_string(system.starData.luminosity) + ","
                 "EffectiveTemperature = " + std::to_string(system.starData.teff) + ","
