@@ -120,6 +120,10 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
             else if (!nodeName.empty() && id.find(nodeName) == std::string::npos) {
                 continue;
             }
+            // Match entire string
+            else if (id != propertyName) {
+                continue;
+            }
 
             if (type != prop->typeLua()) {
                 LERRORC(
@@ -490,6 +494,10 @@ int property_getProperty(lua_State* L) {
             else if (!nodeName.empty() && id.find(nodeName) == std::string::npos){
                 continue;
             }
+            // Match entire string
+            else if (id != propertyName) {
+                continue;
+            }
 
             res.push_back(id);
         }
@@ -644,6 +652,10 @@ int removeSceneGraphNodesFromRegex(lua_State* L) {
         if (identifier.find(propertyName) != std::string::npos) {
             // Match node name
             if (!nodeName.empty() && identifier.find(nodeName) == std::string::npos) {
+                continue;
+            }
+            // Match entire string
+            else if (identifier != propertyName) {
                 continue;
             }
 
