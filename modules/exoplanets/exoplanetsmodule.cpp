@@ -106,19 +106,19 @@ namespace {
 
     struct [[codegen::Dictionary(ExoplanetsModule)]] Parameters {
         // [[codegen::verbatim(DataFolderInfo.description)]]
-       std::string dataFolder;
+        std::optional<std::string> dataFolder;
 
        // [[codegen::verbatim(StarTextureInfo.description)]]
-       std::string starTexture;
+       std::optional<std::string> starTexture;
 
        // [[codegen::verbatim(NoDataTextureInfo.description)]]
-       std::string noDataTexture;
+       std::optional<std::string> noDataTexture;
 
        // [[codegen::verbatim(OrbitDiscTextureInfo.description)]]
-       std::string orbitDiscTexture;
+       std::optional<std::string> orbitDiscTexture;
 
        // [[codegen::verbatim(HabitableZoneTextureInfo.description)]]
-       std::string habitableZoneTexture;
+       std::optional<std::string> habitableZoneTexture;
 
        // [[codegen::verbatim(ShowComparisonCircleInfo.description)]]
        std::optional<bool> showComparisonCircle;
@@ -160,11 +160,15 @@ ExoplanetsModule::ExoplanetsModule()
 }
 
 std::string ExoplanetsModule::exoplanetsDataPath() const {
-    return fmt::format("{}{}", _exoplanetsDataFolder, ExoplanetsDataFileName);
+    return absPath(
+        fmt::format("{}/{}", _exoplanetsDataFolder, ExoplanetsDataFileName)
+    );
 };
 
 std::string ExoplanetsModule::lookUpTablePath() const {
-    return fmt::format("{}{}", _exoplanetsDataFolder, LookupTableFileName);
+    return absPath(
+        fmt::format("{}/{}", _exoplanetsDataFolder, LookupTableFileName)
+    );
 };
 
 std::string ExoplanetsModule::starTexturePath() const {
@@ -236,11 +240,11 @@ scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
 
 void ExoplanetsModule::internalInitialize(const ghoul::Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
-    _exoplanetsDataFolder = p.dataFolder;
-    _starTexturePath = p.starTexture;
-    _noDataTexturePath = p.noDataTexture;
-    _orbitDiscTexturePath = p.orbitDiscTexture;
-    _habitableZoneTexturePath = p.habitableZoneTexture;
+    _exoplanetsDataFolder = p.dataFolder.value_or(_exoplanetsDataFolder);
+    _starTexturePath = p.starTexture.value_or(_starTexturePath);
+    _noDataTexturePath = p.noDataTexture.value_or(_noDataTexturePath);
+    _orbitDiscTexturePath = p.orbitDiscTexture.value_or(_orbitDiscTexturePath);
+    _habitableZoneTexturePath = p.habitableZoneTexture.value_or(_habitableZoneTexturePath);
 
     _showComparisonCircle = p.showComparisonCircle.value_or(_showComparisonCircle);
     _showHabitableZone = p.showHabitableZone.value_or(_showHabitableZone);

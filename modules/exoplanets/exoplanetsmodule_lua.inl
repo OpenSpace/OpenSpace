@@ -43,6 +43,13 @@ namespace {
     constexpr const char _loggerCat[] = "ExoplanetsModule";
 
     constexpr const char ExoplanetsGuiPath[] = "/Milky Way/Exoplanets/Exoplanet Systems/";
+
+    // Lua cannot handle backslashes, so replace these with forward slashes
+    std::string formatPathToLua(const std::string& path) {
+        std::string resPath = path;
+        std::replace(resPath.begin(), resPath.end(), '\\', '/');
+        return resPath;
+    }
 } // namespace
 
 namespace openspace::exoplanets::luascriptfunctions {
@@ -184,8 +191,7 @@ void createExoplanetSystem(const std::string& starName) {
             "},"
             "{"
                 "Identifier = 'StarTexture',"
-                "FilePath = " +
-                    fmt::format("openspace.absPath('{}')", starTexture) + ","
+                "FilePath = openspace.absPath('" + formatPathToLua(starTexture) + "'),"
                 "BlendMode = 'Color',"
                 "Enabled = true"
             "}";
@@ -195,8 +201,7 @@ void createExoplanetSystem(const std::string& starName) {
         colorLayers =
             "{"
                 "Identifier = 'NoDataStarTexture',"
-                "FilePath = " +
-                    fmt::format("openspace.absPath('{}')", noDataTexture) + ","
+                "FilePath = openspace.absPath('" + formatPathToLua(noDataTexture) + "'),"
                 "BlendMode = 'Color',"
                 "Enabled = true"
             "}";
@@ -374,7 +379,9 @@ void createExoplanetSystem(const std::string& starName) {
                 "Parent = '" + starIdentifier + "',"
                 "Renderable = {"
                     "Type = 'RenderableOrbitDisc',"
-                    "Texture = openspace.absPath('" + discTexture + "'),"
+                    "Texture = openspace.absPath('" +
+                        formatPathToLua(discTexture) +
+                    "'),"
                     "Size = " + std::to_string(semiMajorAxisInMeter) + ","
                     "Eccentricity = " + std::to_string(planet.ecc) + ","
                     "Offset = { " +
@@ -470,7 +477,7 @@ void createExoplanetSystem(const std::string& starName) {
             "Renderable = {"
                 "Type = 'RenderableHabitableZone',"
                 "Enabled = " + isHzEnabledString + ","
-                "Texture = openspace.absPath('" + hzTexture + "'),"
+                "Texture = openspace.absPath('" + formatPathToLua(hzTexture) + "'),"
                 "Luminosity = " + std::to_string(system.starData.luminosity) + ","
                 "EffectiveTemperature = " + std::to_string(system.starData.teff) + ","
                 "Optimistic = " + useOptimisticString + ","
