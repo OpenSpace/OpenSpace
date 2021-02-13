@@ -27,6 +27,7 @@
 #include <openspace/documentation/documentationengine.h>
 #include <ghoul/misc/misc.h>
 #include <algorithm>
+#include <filesystem>
 
 namespace openspace::documentation {
 
@@ -175,6 +176,46 @@ std::string IntVerifier::type() const {
 
 std::string StringVerifier::type() const {
     return "String";
+}
+
+TestResult FileVerifier::operator()(const ghoul::Dictionary& dict,
+                                    const std::string& key) const
+{
+    TestResult res = StringVerifier::operator()(dict, key);
+    if (!res.success) {
+        return res;
+    }
+
+    std::string file = dict.value<std::string>(key);
+    if (!std::filesystem::exists(file) || !std::filesystem::is_regular_file(file)) {
+        res.success = false;
+        res.offenses.push_back({ key, TestResult::Offense::Reason::Verification });
+    }
+    return res;
+}
+
+std::string FileVerifier::type() const {
+    return "File";
+}
+
+TestResult DirectoryVerifier::operator()(const ghoul::Dictionary& dict,
+                                         const std::string& key) const
+{
+    TestResult res = StringVerifier::operator()(dict, key);
+    if (!res.success) {
+        return res;
+    }
+
+    std::string dir = dict.value<std::string>(key);
+    if (!std::filesystem::exists(dir) || !std::filesystem::is_directory(dir)) {
+        res.success = false;
+        res.offenses.push_back({ key, TestResult::Offense::Reason::Verification });
+    }
+    return res;
+}
+
+std::string DirectoryVerifier::type() const {
+    return "Directory";
 }
 
 TestResult Color3Verifier::operator()(const ghoul::Dictionary& dictionary,

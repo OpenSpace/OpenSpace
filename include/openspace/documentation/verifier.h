@@ -159,6 +159,28 @@ struct StringVerifier : public TemplateVerifier<std::string> {
 };
 
 /**
+ * A Verifier that checks whether a given key inside a ghoul::Dictionary is a string and
+ * refers to an existing file on disk.
+ */
+struct FileVerifier : public StringVerifier {
+    TestResult operator()(const ghoul::Dictionary& dict,
+        const std::string& key) const override;
+
+    std::string type() const override;
+};
+
+/**
+* A Verifier that checks whether a given key inside a ghoul::Dictionary is a string and
+* refers to an existing directory on disk.
+*/
+struct DirectoryVerifier : public StringVerifier {
+    TestResult operator()(const ghoul::Dictionary& dict,
+        const std::string& key) const override;
+
+    std::string type() const override;
+};
+
+/**
  * A Verifier that checks whether a given key inside a ghoul::Dictionary is another
  * ghoul::Dictionary. The constructor takes a list of DocumentationEntry%s, which are used
  * recursively to check the contained table. If this list is empty, a simple type testing
