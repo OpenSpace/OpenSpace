@@ -71,7 +71,6 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
-#include <ghoul/logging/consolelog.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
 #include <ghoul/misc/profiling.h>
@@ -235,7 +234,6 @@ void OpenSpaceEngine::initialize() {
 
     using ImmediateFlush = ghoul::logging::LogManager::ImmediateFlush;
     ghoul::logging::LogManager::initialize(level, ImmediateFlush(immediateFlush));
-    LogMgr.addLog(std::make_unique<ghoul::logging::ConsoleLog>());
 
     for (const ghoul::Dictionary& log : global::configuration->logging.logs) {
         try {

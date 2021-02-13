@@ -1036,7 +1036,6 @@ int main(int argc, char* argv[]) {
     {
         using namespace ghoul::logging;
         LogManager::initialize(LogLevel::Debug, LogManager::ImmediateFlush::Yes);
-        LogMgr.addLog(std::make_unique<ConsoleLog>());
 #ifdef WIN32
         if (IsDebuggerPresent()) {
             LogMgr.addLog(std::make_unique<ghoul::logging::VisualStudioOutputLog>());
