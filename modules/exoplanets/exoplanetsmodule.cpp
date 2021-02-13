@@ -38,11 +38,166 @@
 
 #include "exoplanetsmodule_lua.inl"
 
+namespace {
+    constexpr const openspace::properties::Property::PropertyInfo DataFolderInfo = {
+        "DataFolder",
+        "Data Folder",
+        "The path to the folder containing the exoplanets data and lookup table"
+    };
+
+    constexpr const openspace::properties::Property::PropertyInfo StarTextureInfo = {
+        "StarTexture",
+        "Star Texture",
+        "The path to a grayscale image that is used for the host star surfaces"
+    };
+
+    constexpr const openspace::properties::Property::PropertyInfo NoDataTextureInfo = {
+        "NoDataTexture",
+        "No Data Star Texture",
+        "A path to a texture that is used to represent that there is missing data about "
+        "the star. For example no color information"
+    };
+
+    constexpr const openspace::properties::Property::PropertyInfo OrbitDiscTextureInfo =
+    {
+        "OrbitDiscTexture",
+        "Orbit Disc Texture",
+        "A path to a 1-dimensional image used as a transfer function for the "
+        "exoplanets' orbit uncertainty disc"
+    };
+
+    constexpr const openspace::properties::Property::PropertyInfo
+        HabitableZoneTextureInfo =
+    {
+        "HabitableZoneTexture",
+        "Habitable Zone Texture",
+        "A path to a 1-dimensional image used as a transfer function for the "
+        "habitable zone disc"
+    };
+
+    constexpr const openspace::properties::Property::PropertyInfo
+        ShowComparisonCircleInfo =
+    {
+        "ShowComparisonCircle",
+        "Show Comparison Circle",
+        "If true, the 1 AU size comparison circle is enabled per default when an "
+        "exoplanet system is created"
+    };
+
+    constexpr const openspace::properties::Property::PropertyInfo
+        ShowHabitableZoneInfo =
+    {
+        "ShowHabitableZone",
+        "Show Habitable Zone",
+        "If true, the habitable zone disc is enabled per default when an "
+        "exoplanet system is created"
+    };
+
+    constexpr const openspace::properties::Property::PropertyInfo UseOptimisticZoneInfo =
+    {
+        "UseOptimisticZone",
+        "Use Optimistic Zone Boundaries",
+        "If true, the habitable zone is computed with optimistic boundaries per default "
+        "when an exoplanet system is created"
+    };
+
+    constexpr const char ExoplanetsDataFileName[] = "exoplanets_data.bin";
+    constexpr const char LookupTableFileName[] = "lookup.txt";
+
+    struct [[codegen::Dictionary(ExoplanetsModule)]] Parameters {
+        // [[codegen::verbatim(DataFolderInfo.description)]]
+        std::optional<std::string> dataFolder;
+
+       // [[codegen::verbatim(StarTextureInfo.description)]]
+       std::optional<std::string> starTexture;
+
+       // [[codegen::verbatim(NoDataTextureInfo.description)]]
+       std::optional<std::string> noDataTexture;
+
+       // [[codegen::verbatim(OrbitDiscTextureInfo.description)]]
+       std::optional<std::string> orbitDiscTexture;
+
+       // [[codegen::verbatim(HabitableZoneTextureInfo.description)]]
+       std::optional<std::string> habitableZoneTexture;
+
+       // [[codegen::verbatim(ShowComparisonCircleInfo.description)]]
+       std::optional<bool> showComparisonCircle;
+
+       // [[codegen::verbatim(ShowHabitableZoneInfo.description)]]
+       std::optional<bool> showHabitableZone;
+
+       // [[codegen::verbatim(UseOptimisticZoneInfo.description)]]
+       std::optional<bool> useOptimisticZone;
+    };
+#include "exoplanetsmodule_codegen.cpp"
+} // namespace
+
 namespace openspace {
 
 using namespace exoplanets;
 
-ExoplanetsModule::ExoplanetsModule() : OpenSpaceModule(Name) {}
+ExoplanetsModule::ExoplanetsModule()
+    : OpenSpaceModule(Name)
+    , _exoplanetsDataFolder(DataFolderInfo)
+    , _starTexturePath(StarTextureInfo)
+    , _noDataTexturePath(NoDataTextureInfo)
+    , _orbitDiscTexturePath(OrbitDiscTextureInfo)
+    , _habitableZoneTexturePath(HabitableZoneTextureInfo)
+    , _showComparisonCircle(ShowComparisonCircleInfo, false)
+    , _showHabitableZone(ShowHabitableZoneInfo, true)
+    , _useOptimisticZone(UseOptimisticZoneInfo, true)
+{
+    _exoplanetsDataFolder.setReadOnly(true);
+
+    addProperty(_exoplanetsDataFolder);
+    addProperty(_starTexturePath);
+    addProperty(_noDataTexturePath);
+    addProperty(_orbitDiscTexturePath);
+    addProperty(_habitableZoneTexturePath);
+    addProperty(_showComparisonCircle);
+    addProperty(_showHabitableZone);
+    addProperty(_useOptimisticZone);
+}
+
+std::string ExoplanetsModule::exoplanetsDataPath() const {
+    return absPath(
+        fmt::format("{}/{}", _exoplanetsDataFolder, ExoplanetsDataFileName)
+    );
+};
+
+std::string ExoplanetsModule::lookUpTablePath() const {
+    return absPath(
+        fmt::format("{}/{}", _exoplanetsDataFolder, LookupTableFileName)
+    );
+};
+
+std::string ExoplanetsModule::starTexturePath() const {
+    return _starTexturePath;
+}
+
+std::string ExoplanetsModule::noDataTexturePath() const {
+    return _noDataTexturePath;
+}
+
+std::string ExoplanetsModule::orbitDiscTexturePath() const {
+    return _orbitDiscTexturePath;
+}
+
+std::string ExoplanetsModule::habitableZoneTexturePath() const {
+    return _habitableZoneTexturePath;
+}
+
+bool ExoplanetsModule::showComparisonCircle() const {
+    return _showComparisonCircle;
+}
+
+bool ExoplanetsModule::showHabitableZone() const {
+    return _showHabitableZone;
+}
+
+bool ExoplanetsModule::useOptimisticZone() const {
+    return _useOptimisticZone;
+}
 
 scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
     scripting::LuaLibrary res;
@@ -83,7 +238,18 @@ scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
     return res;
 }
 
-void ExoplanetsModule::internalInitialize(const ghoul::Dictionary&) {
+void ExoplanetsModule::internalInitialize(const ghoul::Dictionary& dict) {
+    const Parameters p = codegen::bake<Parameters>(dict);
+    _exoplanetsDataFolder = p.dataFolder.value_or(_exoplanetsDataFolder);
+    _starTexturePath = p.starTexture.value_or(_starTexturePath);
+    _noDataTexturePath = p.noDataTexture.value_or(_noDataTexturePath);
+    _orbitDiscTexturePath = p.orbitDiscTexture.value_or(_orbitDiscTexturePath);
+    _habitableZoneTexturePath = p.habitableZoneTexture.value_or(_habitableZoneTexturePath);
+
+    _showComparisonCircle = p.showComparisonCircle.value_or(_showComparisonCircle);
+    _showHabitableZone = p.showHabitableZone.value_or(_showHabitableZone);
+    _useOptimisticZone = p.useOptimisticZone.value_or(_useOptimisticZone);
+
     auto fTask = FactoryManager::ref().factory<Task>();
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fTask, "No task factory existed");
