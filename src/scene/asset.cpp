@@ -520,9 +520,8 @@ bool Asset::initialize() {
         loader()->callOnInitialize(this);
     }
     catch (const ghoul::lua::LuaRuntimeException& e) {
-        LERROR(fmt::format(
-            "Failed to initialize asset {}; {}: {}", id(), e.component, e.message
-        ));
+        LERROR(fmt::format("Failed to initialize asset {}", id()));
+        LERROR(fmt::format("{}: {}", e.component, e.message));
         // TODO: rollback;
         setState(State::InitializationFailed);
         return false;

@@ -189,7 +189,11 @@ TestResult FileVerifier::operator()(const ghoul::Dictionary& dict,
     std::string file = dict.value<std::string>(key);
     if (!std::filesystem::exists(file) || !std::filesystem::is_regular_file(file)) {
         res.success = false;
-        res.offenses.push_back({ key, TestResult::Offense::Reason::Verification });
+        TestResult::Offense off;
+        off.offender = key;
+        off.reason = TestResult::Offense::Reason::Verification;
+        off.explanation = "File did not exist";
+        res.offenses.push_back(off);
     }
     return res;
 }
@@ -209,7 +213,11 @@ TestResult DirectoryVerifier::operator()(const ghoul::Dictionary& dict,
     std::string dir = dict.value<std::string>(key);
     if (!std::filesystem::exists(dir) || !std::filesystem::is_directory(dir)) {
         res.success = false;
-        res.offenses.push_back({ key, TestResult::Offense::Reason::Verification });
+        TestResult::Offense off;
+        off.offender = key;
+        off.reason = TestResult::Offense::Reason::Verification;
+        off.explanation = "Directory did not exist";
+        res.offenses.push_back(off);
     }
     return res;
 }

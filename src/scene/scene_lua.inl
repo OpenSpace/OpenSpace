@@ -528,10 +528,10 @@ int addSceneGraphNode(lua_State* L) {
         global::renderEngine->scene()->initializeNode(node);
     }
     catch (const documentation::SpecificationError& e) {
+        LERRORC("Scene", ghoul::to_string(e.result));
         return ghoul::lua::luaError(
             L,
-            fmt::format("Error loading scene graph node: {}: {}",
-                e.what(), ghoul::to_string(e.result))
+            fmt::format("Error loading scene graph node: {}", e.what())
         );
     }
     catch (const ghoul::RuntimeError& e) {
