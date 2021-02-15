@@ -89,6 +89,17 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
             );
             return;
         }
+
+        if (regex.find_first_of("*", wildPos + 1) != std::string::npos) {
+            LERRORC(
+                "applyRegularExpression",
+                fmt::format(
+                    "Malformed regular expression: '{}': "
+                    "Currently only one '*' is supported", regex
+                )
+            );
+            return;
+        }
     }
     // Else search for the literal string without regex
     else {
@@ -468,6 +479,17 @@ int property_getProperty(lua_State* L) {
             );
             return 0;
         }
+
+        if (regex.find_first_of("*", wildPos + 1) != std::string::npos) {
+            LERRORC(
+                "property_getProperty",
+                fmt::format(
+                    "Malformed regular expression: '{}': "
+                    "Currently only one '*' is supported", regex
+                )
+            );
+            return 0;
+        }
     }
     // Else search for the literal string without regex
     else {
@@ -639,6 +661,17 @@ int removeSceneGraphNodesFromRegex(lua_State* L) {
                 fmt::format(
                     "Malformed regular expression: '{}': "
                     "Could not find any propertry name after '*'", name
+                )
+            );
+            return 0;
+        }
+
+        if (name.find_first_of("*", wildPos + 1) != std::string::npos) {
+            LERRORC(
+                "removeSceneGraphNodesFromRegex",
+                fmt::format(
+                    "Malformed regular expression: '{}': "
+                    "Currently only one '*' is supported", name
                 )
             );
             return 0;
