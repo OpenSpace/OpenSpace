@@ -470,11 +470,12 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
     }
 
     rawNodePointer->setDependencies(dependencies);
+    global::eventEngine->publishEvent<events::EventSceneGraphNodeAdded>(rawNodePointer);
     return rawNodePointer;
 }
 
 void Scene::addPropertyInterpolation(properties::Property* prop, float durationSeconds,
-                             ghoul::EasingFunction easingFunction)
+                                     ghoul::EasingFunction easingFunction)
 {
     ghoul_precondition(prop != nullptr, "prop must not be nullptr");
     ghoul_precondition(durationSeconds > 0.f, "durationSeconds must be positive");

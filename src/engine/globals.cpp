@@ -24,14 +24,15 @@
 
 #include <openspace/engine/globals.h>
 
-#include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/configuration.h>
+#include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/events/eventengine.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/joystickinputstate.h>
@@ -75,6 +76,7 @@ namespace {
         sizeof(Dashboard) +
         sizeof(DeferredcasterManager) +
         sizeof(DownloadManager) +
+        sizeof(EventEngine) +
         sizeof(LuaConsole) +
         sizeof(MemoryManager) +
         sizeof(MissionManager) +
@@ -149,6 +151,14 @@ void create() {
     currentPos += sizeof(DownloadManager);
 #else // ^^^ WIN32 / !WIN32 vvv
     downloadManager = new DownloadManager;
+#endif // WIN32
+
+#ifdef WIN32
+    eventEngine = new (currentPos) EventEngine;
+    ghoul_assert(eventEngine, "No eventEngine");
+    currentPos += sizeof(EventEngine);
+#else // ^^^ WIN32 / !WIN32 vvv
+    downloadManager = new EventEngine;
 #endif // WIN32
 
 #ifdef WIN32
@@ -585,6 +595,13 @@ void destroy() {
     luaConsole->~LuaConsole();
 #else // ^^^ WIN32 / !WIN32 vvv
     delete luaConsole;
+#endif // WIN32
+
+    LDEBUGC("Globals", "Destroying 'EventEngine'");
+#ifdef WIN32
+    eventEngine->~EventEngine();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete eventEngine;
 #endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'DownloadManager'");

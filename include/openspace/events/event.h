@@ -22,22 +22,61 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___MEMORYMANAGER___H__
-#define __OPENSPACE_CORE___MEMORYMANAGER___H__
+#ifndef __OPENSPACE_CORE___EVENT___H__
+#define __OPENSPACE_CORE___EVENT___H__
 
-#include <ghoul/misc/memorypool.h>
+#include <ghoul/misc/assert.h>
 
-namespace openspace {
+namespace openspace { class SceneGraphNode; }
 
-class MemoryManager {
-public:
-    ghoul::MemoryPool<8 * 1024 * 1024> PersistentMemory;
+namespace openspace::events {
 
-    // This should be replaced with a std::pmr::memory_resource wrapper around our own
-    // Memory pool so that we can get a high-water mark out of it
-    ghoul::MemoryPool<100 * 4096> TemporaryMemory;
+struct Event {
+    enum class Type {
+        SceneGraphNodeAdded,
+        SceneGraphNodeRemoved
+    };
+    Event(Type type_) : type(type_) {}
+
+    const Type type;
+    Event* next = nullptr;
 };
 
-} // namespace openspace
+template <typename T>
+T* asType(Event* e) {
+    ghoul_assert(e->type == T::Type, "Wrong type requested, check 'isType'");
+    return static_cast<T*>(e);
+}
 
-#endif // __OPENSPACE_CORE___MEMORYMANAGER___H__
+template <typename T>
+bool isType(Event* e) {
+    return e->type == T::Type;
+}
+
+
+struct EventSceneGraphNodeAdded : public Event {
+    static const Type Type = Event::Type::SceneGraphNodeAdded;
+
+    EventSceneGraphNodeAdded(const SceneGraphNode* node_)
+        : Event(Type)
+        , node(node_)
+    {}
+
+    const SceneGraphNode* node = nullptr;
+};
+
+
+struct EventSceneGraphNodeRemoved : public Event {
+    static const Type Type = Event::Type::SceneGraphNodeRemoved;
+    
+    EventSceneGraphNodeRemoved(const SceneGraphNode* node_)
+        : Event(Type::SceneGraphNodeRemoved)
+        , node(node_)
+    {}
+
+    const SceneGraphNode* node = nullptr;
+};
+
+} // namespace openspace::events
+
+#endif // __OPENSPACE_CORE___EVENT___H__

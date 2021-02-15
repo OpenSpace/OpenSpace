@@ -35,6 +35,8 @@
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/events/event.h>
+#include <openspace/events/eventengine.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/sessionrecording.h>
@@ -51,6 +53,7 @@
 #include <openspace/scene/assetloader.h>
 #include <openspace/scene/profile.h>
 #include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scale.h>
 #include <openspace/scene/timeframe.h>
@@ -1181,6 +1184,32 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
         func();
     }
 
+    events::Event* e = global::eventEngine->firstEvent();
+    while (e) {
+        using namespace events;
+        switch (e->type) {
+            case Event::Type::SceneGraphNodeAdded:
+                LINFOC(
+                    "EventInfo",
+                    fmt::format(
+                        "events::EventSceneGraphNodeAdded: {}",
+                        static_cast<EventSceneGraphNodeAdded*>(e)->node->identifier()
+                    )
+                );
+                break;
+            case Event::Type::SceneGraphNodeRemoved:
+                LINFOC(
+                    "EventInfo",
+                    fmt::format(
+                        "events::EventSceneGraphNodeRemoved: {}",
+                        static_cast<EventSceneGraphNodeRemoved*>(e)->node->identifier()
+                    )
+                );
+                break;
+        }
+        e = e->next;
+    }
+
     // Testing this every frame has minimal impact on the performance --- abock
     // Debug build: 1-2 us ; Release build: <= 1 us
     using ghoul::logging::LogManager;
@@ -1274,6 +1303,7 @@ void OpenSpaceEngine::postDraw() {
         _isFirstRenderingFirstFrame = false;
     }
 
+    global::eventEngine->postFrameCleanup();
     global::memoryManager->PersistentMemory.housekeeping();
 
     LTRACE("OpenSpaceEngine::postDraw(end)");

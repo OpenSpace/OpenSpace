@@ -22,22 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___MEMORYMANAGER___H__
-#define __OPENSPACE_CORE___MEMORYMANAGER___H__
-
-#include <ghoul/misc/memorypool.h>
+#include <openspace/events/eventengine.h>
 
 namespace openspace {
 
-class MemoryManager {
-public:
-    ghoul::MemoryPool<8 * 1024 * 1024> PersistentMemory;
+events::Event* EventEngine::firstEvent() const {
+    return _firstEvent;
+}
 
-    // This should be replaced with a std::pmr::memory_resource wrapper around our own
-    // Memory pool so that we can get a high-water mark out of it
-    ghoul::MemoryPool<100 * 4096> TemporaryMemory;
-};
+void EventEngine::postFrameCleanup() {
+    _memory.reset();
+    _firstEvent = nullptr;
+    _lastEvent = nullptr;
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_CORE___MEMORYMANAGER___H__

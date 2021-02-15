@@ -43,6 +43,7 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/engine/openspaceengine_lua.inl
   ${OPENSPACE_BASE_DIR}/src/engine/syncengine.cpp
   ${OPENSPACE_BASE_DIR}/src/engine/virtualpropertymanager.cpp
+  ${OPENSPACE_BASE_DIR}/src/events/eventengine.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/camerainteractionstates.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/interactionmonitor.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/inputstate.cpp
@@ -228,6 +229,8 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/engine/syncengine.h
   ${OPENSPACE_BASE_DIR}/include/openspace/engine/virtualpropertymanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/engine/windowdelegate.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/events/event.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/events/eventengine.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/delayedvariable.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/delayedvariable.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/camerainteractionstates.h
