@@ -34,7 +34,8 @@ namespace openspace::events {
 struct Event {
     enum class Type {
         SceneGraphNodeAdded,
-        SceneGraphNodeRemoved
+        SceneGraphNodeRemoved,
+        OrbitalNavigatorDistance
     };
     Event(Type type_) : type(type_) {}
 
@@ -75,6 +76,20 @@ struct EventSceneGraphNodeRemoved : public Event {
     {}
 
     const SceneGraphNode* node = nullptr;
+};
+
+
+struct EventOrbitalNavigatorDistance : public Event {
+    static const Type Type = Event::Type::OrbitalNavigatorDistance;
+
+    EventOrbitalNavigatorDistance(const float distance_, const bool shouldFollow_)
+        : Event(Type::OrbitalNavigatorDistance)
+        , distance(distance_)
+        , shouldFollow(shouldFollow_)
+    {}
+
+    const float distance = 0;
+    const bool shouldFollow = 0;
 };
 
 } // namespace openspace::events

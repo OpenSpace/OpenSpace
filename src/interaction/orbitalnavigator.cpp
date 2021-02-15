@@ -26,6 +26,9 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/query/query.h>
+#include <openspace/engine/globals.h>
+#include <openspace/events/event.h>
+#include <openspace/events/eventengine.h>
 #include <ghoul/logging/logmanager.h>
 #include <glm/gtx/vector_angle.hpp>
 
@@ -809,8 +812,11 @@ bool OrbitalNavigator::shouldFollowAnchorRotation(const glm::dvec3& cameraPositi
 
     const double distanceToCamera =
         glm::distance(cameraPosition, _anchorNode->worldPosition());
+    bool shouldFollow = distanceToCamera < maximumDistanceForRotation;
 
-    return distanceToCamera < maximumDistanceForRotation;
+    global::eventEngine->publishEvent<events::EventOrbitalNavigatorDistance>(distanceToCamera, shouldFollow);
+
+    return shouldFollow;
 }
 
 
