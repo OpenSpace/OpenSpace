@@ -67,6 +67,7 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
     using ghoul::lua::luaTypeToString;
 
     const bool isGroupMode = !groupName.empty();
+    bool isLiteral = false;
 
     const int type = lua_type(L, -1);
 
@@ -92,6 +93,7 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
     // Else search for the literal string without regex
     else {
         propertyName = regex;
+        isLiteral = true;
     }
 
     // Stores whether we found at least one matching property. If this is false at the end
@@ -121,7 +123,7 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
                 continue;
             }
             // Match entire string
-            else if (id != propertyName) {
+            else if (isLiteral && id != propertyName) {
                 continue;
             }
 
@@ -448,6 +450,7 @@ int property_getProperty(lua_State* L) {
     }
 
     // Extract the property and node name to be searched for from regex
+    bool isLiteral = false;
     std::string propertyName = "";
     std::string nodeName = "";
     size_t wildPos = regex.find_first_of("*");
@@ -469,6 +472,7 @@ int property_getProperty(lua_State* L) {
     // Else search for the literal string without regex
     else {
         propertyName = regex;
+        isLiteral = true;
     }
 
     // Get all matching property uris and save to res
@@ -495,7 +499,7 @@ int property_getProperty(lua_State* L) {
                 continue;
             }
             // Match entire string
-            else if (id != propertyName) {
+            else if (isLiteral && id != propertyName) {
                 continue;
             }
 
@@ -621,6 +625,7 @@ int removeSceneGraphNodesFromRegex(lua_State* L) {
         global::renderEngine->scene()->allSceneGraphNodes();
 
     // Extract the property and node name to be searched for from name
+    bool isLiteral = false;
     std::string propertyName = "";
     std::string nodeName = "";
     size_t wildPos = name.find_first_of("*");
@@ -642,6 +647,7 @@ int removeSceneGraphNodesFromRegex(lua_State* L) {
     // Else search for the literal string without regex
     else {
         propertyName = name;
+        isLiteral = true;
     }
 
     bool foundMatch = false;
@@ -655,7 +661,7 @@ int removeSceneGraphNodesFromRegex(lua_State* L) {
                 continue;
             }
             // Match entire string
-            else if (identifier != propertyName) {
+            else if (isLiteral && identifier != propertyName) {
                 continue;
             }
 
