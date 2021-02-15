@@ -1,0 +1,18 @@
+local transforms = asset.require('../transforms')
+local assetHelper = asset.require('util/asset_helper')
+
+local AirTraffic = {
+    Identifier = "Air Traffic",
+    Parent = transforms.EarthCenter.Identifier,
+    Renderable = {
+        Type = "RenderableAirTraffic"
+        }
+    },
+    GUI = {
+        Name = "Air Traffic",
+        Path = "/Solar System/Planets/Earth/Air Traffic",
+        Description = "Air Traffic"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { AirTraffic })
