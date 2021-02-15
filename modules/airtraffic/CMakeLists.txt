@@ -25,17 +25,19 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-#Add Header files
+  airtrafficmodule.h
+  rendering/renderableairtraffic.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-#Add Source files
+  airtrafficmodule.cpp
+  rendering/renderableairtraffic.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
-#Add Shader files
+  #Add Shader files
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 

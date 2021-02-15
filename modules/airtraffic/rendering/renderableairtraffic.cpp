@@ -22,35 +22,62 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/airtraffic/airtrafficmodule.h>
-#include <modules/airtraffic/rendering/renderableairtraffic.h>
 
+#include <modules/airtraffic/rendering/renderableairtraffic.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/scripting/lualibrary.h>
-#include <openspace/util/factorymanager.h>
+
+namespace ghoul::filesystem { class File; }
+namespace ghoul::opengl {
+    class ProgramObject;
+    class Texture;
+} // namespace ghoul::opengl
 
 namespace openspace {
 
+namespace documentation { struct Documentation; }
 
-    AirTrafficModule::AirTrafficModule() : OpenSpaceModule(Name) {}
+RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
+    : Renderable(dictionary) {}
 
-    void AirTrafficModule::internalInitialize(const ghoul::Dictionary&) {
-        auto fRenderable = FactoryManager::ref().factory<Renderable>();
-        ghoul_assert(fRenderable, "No renderable factory existed");
-        fRenderable->registerClass<RenderableAirTraffic>("RenderableAirTraffic");
-    }
+    void RenderableAirTraffic::initialize() {
+        return;
+    };
+    void RenderableAirTraffic::deinitialize() {
+        return;
+    };
 
-    std::vector<documentation::Documentation> AirTrafficModule::documentations() const {
+    void RenderableAirTraffic::initializeGL() {
+        return;
+    };
+    void RenderableAirTraffic::deinitializeGL() {
+        return;
+    };
+
+    bool RenderableAirTraffic::isReady() const {
+        return true;
+    };
+
+    void RenderableAirTraffic::render(const RenderData& data, RendererTasks& rendererTask) {
+        return;
+    };
+    void RenderableAirTraffic::update(const UpdateData& data) {
+        return;
+    };
+
+    documentation::Documentation RenderableAirTraffic::Documentation() {
+        using namespace documentation;
         return {
-            RenderableAirTraffic::Documentation()
+            "RenderableAirTraffic",
+            "renderableairtraffic",
+            {
+            DocumentationEntry("placeholder",
+                new StringInListVerifier({
+                    "placeholder", "placeholder", "placeholder"
+                }),
+                Optional::Yes)
+            }
         };
     }
-
-    scripting::LuaLibrary AirTrafficModule::luaLibrary() const {
-        scripting::LuaLibrary res;
-        res.name = "air traffic"; // Ok to use whitespaces?
-        return res;
-    }
-
 } // namespace openspace
+

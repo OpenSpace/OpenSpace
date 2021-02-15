@@ -22,35 +22,48 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/airtraffic/airtrafficmodule.h>
-#include <modules/airtraffic/rendering/renderableairtraffic.h>
+#ifndef __OPENSPACE_MODULE_AIRTRAFFIC___RENDERABLEAIRTRAFFIC___H__
+#define __OPENSPACE_MODULE_AIRTRAFFIC___RENDERABLEAIRTRAFFIC___H__
 
-#include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
-#include <openspace/scripting/lualibrary.h>
-#include <openspace/util/factorymanager.h>
+#include <ghoul/opengl/bufferbinding.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/uniformcache.h>
+
+namespace ghoul::filesystem { class File; }
+namespace ghoul::opengl {
+    class ProgramObject;
+    class Texture;
+} // namespace ghoul::opengl
 
 namespace openspace {
 
+namespace documentation { struct Documentation; }
 
-    AirTrafficModule::AirTrafficModule() : OpenSpaceModule(Name) {}
+class RenderableAirTraffic : public Renderable {
+public:
+    explicit RenderableAirTraffic(const ghoul::Dictionary& dictionary);
+    virtual ~RenderableAirTraffic() = default;
 
-    void AirTrafficModule::internalInitialize(const ghoul::Dictionary&) {
-        auto fRenderable = FactoryManager::ref().factory<Renderable>();
-        ghoul_assert(fRenderable, "No renderable factory existed");
-        fRenderable->registerClass<RenderableAirTraffic>("RenderableAirTraffic");
-    }
 
-    std::vector<documentation::Documentation> AirTrafficModule::documentations() const {
-        return {
-            RenderableAirTraffic::Documentation()
-        };
-    }
+    // void initialize() override; Might not need this?
+    void initialize() override;
+    void deinitialize() override;
 
-    scripting::LuaLibrary AirTrafficModule::luaLibrary() const {
-        scripting::LuaLibrary res;
-        res.name = "air traffic"; // Ok to use whitespaces?
-        return res;
-    }
+    void initializeGL() override;
+    void deinitializeGL() override;
+
+    bool isReady() const override;
+
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
+    void update(const UpdateData& data) override;
+
+    
+    static documentation::Documentation Documentation();
+
+private:
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_AIRTRAFFIC___RENDERABLEAIRTRAFFIC___H__
