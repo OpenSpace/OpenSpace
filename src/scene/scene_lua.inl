@@ -114,9 +114,15 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
         // Check the regular expression for all properties
         const std::string& id = prop->fullyQualifiedIdentifier();
 
-        if (id.find(propertyName) != std::string::npos) {
+        size_t propertyPos = id.find(propertyName);
+        if (propertyPos != std::string::npos) {
             // If the fully qualified id matches the regular expression, we queue the
             // value change if the types agree
+
+            // Check that the propertyName fully matches the property in id
+            if ((propertyPos + propertyName.length() + 1) < id.length()) {
+                continue;
+            }
 
             // Check tag
             if (isGroupMode) {
@@ -133,7 +139,7 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
             else if (!nodeName.empty() && id.find(nodeName) == std::string::npos) {
                 continue;
             }
-            // Match entire string
+            // Match entire string if literal
             else if (isLiteral && id != propertyName) {
                 continue;
             }
@@ -504,7 +510,13 @@ int property_getProperty(lua_State* L) {
         // Check the regular expression for all properties
         const std::string& id = prop->fullyQualifiedIdentifier();
 
-        if (id.find(propertyName) != std::string::npos) {
+        size_t propertyPos = id.find(propertyName);
+        if (propertyPos != std::string::npos) {
+            // Check that the propertyName fully matches the property in id
+            if ((propertyPos + propertyName.length() + 1) < id.length()) {
+                continue;
+            }
+
             // Filter on the groupname if there was one
             if (!groupName.empty()) {
                 properties::PropertyOwner* matchingTaggedOwner =
@@ -520,7 +532,7 @@ int property_getProperty(lua_State* L) {
             else if (!nodeName.empty() && id.find(nodeName) == std::string::npos){
                 continue;
             }
-            // Match entire string
+            // Match entire string if literal
             else if (isLiteral && id != propertyName) {
                 continue;
             }
@@ -688,12 +700,18 @@ int removeSceneGraphNodesFromRegex(lua_State* L) {
     for (SceneGraphNode* node : nodes) {
         const std::string& identifier = node->identifier();
 
-        if (identifier.find(propertyName) != std::string::npos) {
+        size_t propertyPos = identifier.find(propertyName);
+        if (propertyPos != std::string::npos) {
+            // Check that the propertyName fully matches the property in id
+            if ((propertyPos + propertyName.length() + 1) < identifier.length()) {
+                continue;
+            }
+
             // Match node name
             if (!nodeName.empty() && identifier.find(nodeName) == std::string::npos) {
                 continue;
             }
-            // Match entire string
+            // Match entire string if literal
             else if (isLiteral && identifier != propertyName) {
                 continue;
             }
