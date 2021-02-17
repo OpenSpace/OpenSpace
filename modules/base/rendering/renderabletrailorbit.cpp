@@ -223,39 +223,6 @@ void RenderableTrailOrbit::deinitializeGL() {
 }
 
 void RenderableTrailOrbit::update(const UpdateData& data) {
-    //TODO this should only happen on if a dictionaryValue
-    //of something like fadeOnAnchor = true or
-    //bool prop fadeOutEnabled || fadeOnAnchor || fadeOnDistance
-    events::Event* e = global::eventEngine->firstEvent();
-    while (e) {
-        using namespace events;
-        switch (e->type) {
-        case Event::Type::OrbitalNavigatorDistance:
-            bool follow = static_cast<EventOrbitalNavigatorDistance*>(e)->shouldFollow;
-            if (follow) {
-                if (_opacity == 1.0) {
-                    _opacity.setInterpolationTarget(0.f);
-                    global::renderEngine->scene()->addPropertyInterpolation(
-                        &_opacity,
-                        2.0,
-                        ghoul::EasingFunction::QuadraticEaseIn
-                    );
-                }
-            }
-            else if (_opacity == 0.0) {
-                _opacity.setInterpolationTarget(1.f);
-                global::renderEngine->scene()->addPropertyInterpolation(
-                    &_opacity,
-                    2.0,
-                    ghoul::EasingFunction::QuadraticEaseIn
-                );
-            }
-
-            break;
-        }
-        e = e->next;
-    }
-
     // Overview:
     // 1. Update trails
     // 2. Update floating position

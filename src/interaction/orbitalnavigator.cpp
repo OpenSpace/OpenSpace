@@ -813,12 +813,8 @@ bool OrbitalNavigator::shouldFollowAnchorRotation(const glm::dvec3& cameraPositi
     const double distanceToCamera =
         glm::distance(cameraPosition, _anchorNode->worldPosition());
     bool shouldFollow = distanceToCamera < maximumDistanceForRotation;
-
-    global::eventEngine->publishEvent<events::EventOrbitalNavigatorDistance>(distanceToCamera, shouldFollow);
-
     return shouldFollow;
 }
-
 
 bool OrbitalNavigator::followingAnchorRotation() const {
     if (_aimNode != nullptr && _aimNode != _anchorNode) {
