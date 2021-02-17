@@ -31,19 +31,19 @@
 
 namespace openspace {
 
-    class AirTrafficModule : public OpenSpaceModule {
-    public:
-        constexpr static const char* Name = "Air Traffic";
+class AirTrafficModule : public OpenSpaceModule {
+public:
+    constexpr static const char* Name = "AirTraffic";
 
-        AirTrafficModule();
-        virtual ~AirTrafficModule() = default;
+    AirTrafficModule();
+    virtual ~AirTrafficModule() = default;
 
-        std::vector<documentation::Documentation> documentations() const override;
-        scripting::LuaLibrary luaLibrary() const override;
+    std::vector<documentation::Documentation> documentations() const override;
+    scripting::LuaLibrary luaLibrary() const override;
 
-    private:
-        void internalInitialize(const ghoul::Dictionary&) override;
-    };
+private:
+    void internalInitialize(const ghoul::Dictionary&) override;
+};
 
 } // namespace openspace
 

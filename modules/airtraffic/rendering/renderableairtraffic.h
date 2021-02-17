@@ -29,6 +29,8 @@
 #include <ghoul/opengl/bufferbinding.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <openspace/util/httprequest.h>
+#include <openspace/json.h>
 
 namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl {
@@ -39,13 +41,12 @@ namespace ghoul::opengl {
 namespace openspace {
 
 namespace documentation { struct Documentation; }
+using json = nlohmann::json;
 
 class RenderableAirTraffic : public Renderable {
 public:
     explicit RenderableAirTraffic(const ghoul::Dictionary& dictionary);
     virtual ~RenderableAirTraffic() = default;
-
-
     // void initialize() override; Might not need this?
     void initialize() override;
     void deinitialize() override;
@@ -53,15 +54,46 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
+    void readDataFile(const std::string& filename);
+    bool fetchData();
+
     bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
+    void updateBuffers();
     
     static documentation::Documentation Documentation();
 
 private:
+
+    struct Vertex {
+        glm::vec3 position = glm::vec3(0.f);
+        glm::vec3 color = glm::vec3(0.f);
+    };
+
+    struct AircraftVBOLayout {
+        float latitude = 0.f;
+        float longitude = 0.f;
+        float barometricAltitude = 0.f;
+        //float geometricAltitude = 0.f; // Not used at the moment
+        float velocity = 0.f; 
+        int lastContact = 0; // Draw only if changed
+        float flightDirection = 0.f; // true_track in data
+        float time = 0.f; // Maybe not needed
+    };
+    
+    
+    // Backend storage for veretex buffer object containing all points for this trail
+    std::vector<AircraftVBOLayout>  _vertexBufferData;
+
+    GLuint _vertexArray;
+    GLuint _vertexBuffer;
+  
+    json _data;
+    const std::string _url = "https://opensky-network.org/api/states/all";
+
 };
 
 } // namespace openspace

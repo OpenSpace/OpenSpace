@@ -26,31 +26,31 @@
 #include <modules/airtraffic/rendering/renderableairtraffic.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/rendering/renderable.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
 
 namespace openspace {
 
 
-    AirTrafficModule::AirTrafficModule() : OpenSpaceModule(Name) {}
+AirTrafficModule::AirTrafficModule() : OpenSpaceModule(Name) {}
 
-    void AirTrafficModule::internalInitialize(const ghoul::Dictionary&) {
-        auto fRenderable = FactoryManager::ref().factory<Renderable>();
-        ghoul_assert(fRenderable, "No renderable factory existed");
-        fRenderable->registerClass<RenderableAirTraffic>("RenderableAirTraffic");
-    }
+void AirTrafficModule::internalInitialize(const ghoul::Dictionary&) {
+    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul_assert(fRenderable, "No renderable factory existed");
+    fRenderable->registerClass<RenderableAirTraffic>("RenderableAirTraffic");
+}
 
-    std::vector<documentation::Documentation> AirTrafficModule::documentations() const {
-        return {
-            RenderableAirTraffic::Documentation()
-        };
-    }
+std::vector<documentation::Documentation> AirTrafficModule::documentations() const {
+    return {
+        RenderableAirTraffic::Documentation()
+    };
+}
 
-    scripting::LuaLibrary AirTrafficModule::luaLibrary() const {
-        scripting::LuaLibrary res;
-        res.name = "air traffic"; // Ok to use whitespaces?
-        return res;
-    }
+scripting::LuaLibrary AirTrafficModule::luaLibrary() const {
+    scripting::LuaLibrary res;
+    res.name = "air_traffic"; // Ok to use whitespaces?
+    return res;
+}
+
 
 } // namespace openspace

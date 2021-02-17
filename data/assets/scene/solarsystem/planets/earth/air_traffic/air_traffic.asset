@@ -1,17 +1,16 @@
-local transforms = asset.require('../transforms')
 local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
 
 local AirTraffic = {
-    Identifier = "Air Traffic",
-    Parent = transforms.EarthCenter.Identifier,
+    Identifier = "AirTraffic",
+    Parent = transforms.EarthInertial.Identifier,
     Renderable = {
-        Type = "RenderableAirTraffic"
-        }
+        Type = "RenderableAirTraffic",
     },
     GUI = {
         Name = "Air Traffic",
         Path = "/Solar System/Planets/Earth/Air Traffic",
-        Description = "Air Traffic"
+        Description = [[ Air Traffic.]],
     }
 }
 
