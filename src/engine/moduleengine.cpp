@@ -24,6 +24,7 @@
 
 #include <openspace/engine/moduleengine.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/moduleregistration.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/openspacemodule.h>
