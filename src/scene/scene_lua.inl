@@ -76,20 +76,22 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
     std::string nodeName = "";
     size_t wildPos = regex.find_first_of("*");
     if (wildPos != std::string::npos) {
-        propertyName = regex.substr(wildPos + 1, regex.length());
         nodeName = regex.substr(0, wildPos);
+        propertyName = regex.substr(wildPos + 1, regex.length());
 
-        if (propertyName.empty()) {
+        // If none then malformed regular expression
+        if (propertyName.empty() && nodeName.empty()) {
             LERRORC(
                 "applyRegularExpression",
                 fmt::format(
                     "Malformed regular expression: '{}': "
-                    "Could not find any propertry name after '*'", regex
+                    "Empty both before and after '*'", regex
                 )
             );
             return;
         }
 
+        // Currently do not support several wildcards
         if (regex.find_first_of("*", wildPos + 1) != std::string::npos) {
             LERRORC(
                 "applyRegularExpression",
@@ -101,10 +103,12 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
             return;
         }
     }
-    // Else search for the literal string without regex
+    // Literal or tag
     else {
         propertyName = regex;
-        isLiteral = true;
+        if (!isGroupMode) {
+            isLiteral = true;
+        }
     }
 
     // Stores whether we found at least one matching property. If this is false at the end
@@ -114,64 +118,93 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
         // Check the regular expression for all properties
         const std::string& id = prop->fullyQualifiedIdentifier();
 
-        size_t propertyPos = id.find(propertyName);
-        if (propertyPos != std::string::npos) {
-            // If the fully qualified id matches the regular expression, we queue the
-            // value change if the types agree
+        if (isLiteral && id != propertyName) {
+            continue;
+        }
+        else if (!propertyName.empty()){
+            size_t propertyPos = id.find(propertyName);
+            if (propertyPos != std::string::npos) {
+                // Check that the propertyName fully matches the property in id
+                if ((propertyPos + propertyName.length() + 1) < id.length()) {
+                    continue;
+                }
 
-            // Check that the propertyName fully matches the property in id
-            if ((propertyPos + propertyName.length() + 1) < id.length()) {
+                // Match node name
+                if (!nodeName.empty() && id.find(nodeName) == std::string::npos) {
+                    continue;
+                }
+
+                // Check tag
+                if (isGroupMode) {
+                    properties::PropertyOwner* matchingTaggedOwner =
+                        findPropertyOwnerWithMatchingGroupTag(
+                            prop,
+                            groupName
+                        );
+                    if (!matchingTaggedOwner) {
+                        continue;
+                    }
+                }
+            }
+            else {
                 continue;
             }
+        }
+        else if (!nodeName.empty()) {
+            size_t nodePos = id.find(nodeName);
+            if (nodePos != std::string::npos) {
 
-            // Check tag
-            if (isGroupMode) {
-                properties::PropertyOwner* matchingTaggedOwner =
-                    findPropertyOwnerWithMatchingGroupTag(
-                        prop,
-                        groupName
-                    );
-                if (!matchingTaggedOwner) {
+                // Check tag
+                if (isGroupMode) {
+                    properties::PropertyOwner* matchingTaggedOwner =
+                        findPropertyOwnerWithMatchingGroupTag(
+                            prop,
+                            groupName
+                        );
+                    if (!matchingTaggedOwner) {
+                        continue;
+                    }
+                }
+                // Check that the nodeName fully matches the node in id
+                else if (nodePos != 0) {
                     continue;
                 }
             }
-            // Match node name
-            else if (!nodeName.empty() && id.find(nodeName) == std::string::npos) {
+            else {
                 continue;
             }
-            // Match entire string if literal
-            else if (isLiteral && id != propertyName) {
-                continue;
-            }
+        }
 
-            if (type != prop->typeLua()) {
-                LERRORC(
-                    "property_setValue",
-                    fmt::format(
-                        "{}: Property '{}' does not accept input of type '{}'. "
-                        "Requested type: '{}'",
-                        errorLocation(L),
-                        prop->fullyQualifiedIdentifier(),
-                        luaTypeToString(type),
-                        luaTypeToString(prop->typeLua())
-                    )
-                );
+        // Check that the types match
+        if (type != prop->typeLua()) {
+            LERRORC(
+                "property_setValue",
+                fmt::format(
+                    "{}: Property '{}' does not accept input of type '{}'. "
+                    "Requested type: '{}'",
+                    errorLocation(L),
+                    prop->fullyQualifiedIdentifier(),
+                    luaTypeToString(type),
+                    luaTypeToString(prop->typeLua())
+                )
+            );
+        }
+        else {
+            // If the fully qualified id matches the regular expression, we queue the
+            // value change if the types agree
+            foundMatching = true;
+
+            if (interpolationDuration == 0.0) {
+                global::renderEngine->scene()->removePropertyInterpolation(prop);
+                prop->setLuaValue(L);
             }
             else {
-                foundMatching = true;
-
-                if (interpolationDuration == 0.0) {
-                    global::renderEngine->scene()->removePropertyInterpolation(prop);
-                    prop->setLuaValue(L);
-                }
-                else {
-                    prop->setLuaInterpolationTarget(L);
-                    global::renderEngine->scene()->addPropertyInterpolation(
-                        prop,
-                        static_cast<float>(interpolationDuration),
-                        easingFunction
-                    );
-                }
+                prop->setLuaInterpolationTarget(L);
+                global::renderEngine->scene()->addPropertyInterpolation(
+                    prop,
+                    static_cast<float>(interpolationDuration),
+                    easingFunction
+                );
             }
         }
     }
@@ -201,10 +234,8 @@ bool doesUriContainGroupTag(const std::string& command, std::string& groupName) 
     }
 }
 
-std::string replaceUriWithGroupName(const std::string& uri, const std::string& ownerName)
-{
-    size_t pos = uri.find_first_of(".");
-    return ownerName + uri.substr(pos);
+std::string removeGroupNameFromUri(const std::string& uri) {
+    return uri.substr(uri.find_first_of("."));
 }
 
 } // namespace
@@ -324,7 +355,7 @@ int property_setValue(lua_State* L) {
         std::string groupName;
         if (doesUriContainGroupTag(uriOrRegex, groupName)) {
             // Remove group name from start of regex and replace with '*'
-            uriOrRegex = replaceUriWithGroupName(uriOrRegex, "*");
+            uriOrRegex = removeGroupNameFromUri(uriOrRegex);
         }
 
         applyRegularExpression(
@@ -463,7 +494,7 @@ int property_getProperty(lua_State* L) {
     std::string groupName;
     if (doesUriContainGroupTag(regex, groupName)) {
         // Remove group name from start of regex and replace with '*'
-        regex = replaceUriWithGroupName(regex, "*");
+        regex = removeGroupNameFromUri(regex);
     }
 
     // Extract the property and node name to be searched for from regex
@@ -472,20 +503,22 @@ int property_getProperty(lua_State* L) {
     std::string nodeName = "";
     size_t wildPos = regex.find_first_of("*");
     if (wildPos != std::string::npos) {
-        propertyName = regex.substr(wildPos + 1, regex.length());
         nodeName = regex.substr(0, wildPos);
+        propertyName = regex.substr(wildPos + 1, regex.length());
 
-        if (propertyName.empty()) {
+        // If none then malformed regular expression
+        if (propertyName.empty() && nodeName.empty()) {
             LERRORC(
                 "property_getProperty",
                 fmt::format(
                     "Malformed regular expression: '{}': "
-                    "Could not find any propertry name after '*'", regex
+                    "Empty both before and after '*'", regex
                 )
             );
             return 0;
         }
 
+        // Currently do not support several wildcards
         if (regex.find_first_of("*", wildPos + 1) != std::string::npos) {
             LERRORC(
                 "property_getProperty",
@@ -497,10 +530,12 @@ int property_getProperty(lua_State* L) {
             return 0;
         }
     }
-    // Else search for the literal string without regex
+    // Literal or tag
     else {
         propertyName = regex;
-        isLiteral = true;
+        if (groupName.empty()) {
+            isLiteral = true;
+        }
     }
 
     // Get all matching property uris and save to res
@@ -510,35 +545,64 @@ int property_getProperty(lua_State* L) {
         // Check the regular expression for all properties
         const std::string& id = prop->fullyQualifiedIdentifier();
 
-        size_t propertyPos = id.find(propertyName);
-        if (propertyPos != std::string::npos) {
-            // Check that the propertyName fully matches the property in id
-            if ((propertyPos + propertyName.length() + 1) < id.length()) {
+        if (isLiteral && id != propertyName) {
+            continue;
+        }
+        else if (!propertyName.empty()) {
+            size_t propertyPos = id.find(propertyName);
+            if (propertyPos != std::string::npos) {
+                // Check that the propertyName fully matches the property in id
+                if ((propertyPos + propertyName.length() + 1) < id.length()) {
+                    continue;
+                }
+
+                // Match node name
+                if (!nodeName.empty() && id.find(nodeName) == std::string::npos) {
+                    continue;
+                }
+
+                // Check tag
+                if (!groupName.empty()) {
+                    properties::PropertyOwner* matchingTaggedOwner =
+                        findPropertyOwnerWithMatchingGroupTag(
+                            prop,
+                            groupName
+                        );
+                    if (!matchingTaggedOwner) {
+                        continue;
+                    }
+                }
+            }
+            else {
                 continue;
             }
+        }
+        else if (!nodeName.empty()) {
+            size_t nodePos = id.find(nodeName);
+            if (nodePos != std::string::npos) {
 
-            // Filter on the groupname if there was one
-            if (!groupName.empty()) {
-                properties::PropertyOwner* matchingTaggedOwner =
-                    findPropertyOwnerWithMatchingGroupTag(
-                        prop,
-                        groupName
-                    );
-                if (!matchingTaggedOwner) {
+                // Check tag
+                if (!groupName.empty()) {
+                    properties::PropertyOwner* matchingTaggedOwner =
+                        findPropertyOwnerWithMatchingGroupTag(
+                            prop,
+                            groupName
+                        );
+                    if (!matchingTaggedOwner) {
+                        continue;
+                    }
+                }
+                // Check that the nodeName fully matches the node in id
+                else if (nodePos != 0) {
                     continue;
                 }
             }
-            // Match node name
-            else if (!nodeName.empty() && id.find(nodeName) == std::string::npos){
+            else {
                 continue;
             }
-            // Match entire string if literal
-            else if (isLiteral && id != propertyName) {
-                continue;
-            }
-
-            res.push_back(id);
         }
+
+        res.push_back(id);
     }
 
     lua_newtable(L);
@@ -664,20 +728,22 @@ int removeSceneGraphNodesFromRegex(lua_State* L) {
     std::string nodeName = "";
     size_t wildPos = name.find_first_of("*");
     if (wildPos != std::string::npos) {
-        propertyName = name.substr(wildPos + 1, name.length());
         nodeName = name.substr(0, wildPos);
+        propertyName = name.substr(wildPos + 1, name.length());
 
-        if (propertyName.empty()) {
+        // If none then malformed regular expression
+        if (propertyName.empty() && nodeName.empty()) {
             LERRORC(
                 "removeSceneGraphNodesFromRegex",
                 fmt::format(
                     "Malformed regular expression: '{}': "
-                    "Could not find any propertry name after '*'", name
+                    "Empty both before and after '*'", name
                 )
             );
             return 0;
         }
 
+        // Currently do not support several wildcards
         if (name.find_first_of("*", wildPos + 1) != std::string::npos) {
             LERRORC(
                 "removeSceneGraphNodesFromRegex",
@@ -689,7 +755,7 @@ int removeSceneGraphNodesFromRegex(lua_State* L) {
             return 0;
         }
     }
-    // Else search for the literal string without regex
+    // Literal or tag
     else {
         propertyName = name;
         isLiteral = true;
@@ -700,33 +766,49 @@ int removeSceneGraphNodesFromRegex(lua_State* L) {
     for (SceneGraphNode* node : nodes) {
         const std::string& identifier = node->identifier();
 
-        size_t propertyPos = identifier.find(propertyName);
-        if (propertyPos != std::string::npos) {
-            // Check that the propertyName fully matches the property in id
-            if ((propertyPos + propertyName.length() + 1) < identifier.length()) {
-                continue;
-            }
+        if (isLiteral && identifier != propertyName) {
+            continue;
+        }
+        else if (!propertyName.empty()) {
+            size_t propertyPos = identifier.find(propertyName);
+            if (propertyPos != std::string::npos) {
+                // Check that the propertyName fully matches the property in id
+                if ((propertyPos + propertyName.length() + 1) < identifier.length()) {
+                    continue;
+                }
 
-            // Match node name
-            if (!nodeName.empty() && identifier.find(nodeName) == std::string::npos) {
-                continue;
-            }
-            // Match entire string if literal
-            else if (isLiteral && identifier != propertyName) {
-                continue;
-            }
-
-            foundMatch = true;
-            SceneGraphNode* parent = node->parent();
-            if (!parent) {
-                LERRORC(
-                    "removeSceneGraphNodesFromRegex",
-                    fmt::format("Cannot remove root node")
-                );
+                // Match node name
+                if (!nodeName.empty() && identifier.find(nodeName) == std::string::npos) {
+                    continue;
+                }
             }
             else {
-                markedList.push_back(node);
+                continue;
             }
+        }
+        else if (!nodeName.empty()) {
+            size_t nodePos = identifier.find(nodeName);
+            if (nodePos != std::string::npos) {
+                // Check that the nodeName fully matches the node in id
+                if (nodePos != 0) {
+                    continue;
+                }
+            }
+            else {
+                continue;
+            }
+        }
+
+        foundMatch = true;
+        SceneGraphNode* parent = node->parent();
+        if (!parent) {
+            LERRORC(
+                "removeSceneGraphNodesFromRegex",
+                fmt::format("Cannot remove root node")
+            );
+        }
+        else {
+            markedList.push_back(node);
         }
     }
 
