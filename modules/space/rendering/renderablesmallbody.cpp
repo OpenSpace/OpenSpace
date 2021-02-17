@@ -56,6 +56,13 @@ namespace {
         "defined by UpperLimit will rendered from an evenly dispersed sample of the "
         "full length of the data file."
     };
+    static const openspace::properties::Property::PropertyInfo UpperLimitInfo = {
+        "UpperLimit",
+        "Upper Limit",
+        "Upper limit on the number of objects for this renderable, regardless of "
+        "how many objects are contained in the data file. Produces an evenly-distributed"
+        "sample from the data file."
+    };
 
     double importAngleValue(const std::string& angle) {
         if (angle.empty()) {
@@ -78,32 +85,11 @@ namespace {
     }
 
     struct [[codegen::Dictionary(RenderableSmallBody)]] Parameters {
-        // [[codegen::verbatim(SegmentQualityInfo.description)]]
-        double segmentQuality;
+        // [[codegen::verbatim(ContiguousModeInfo.description)]]
+        std::optional<bool> contiguousMode;
 
         // [[codegen::verbatim(UpperLimitInfo.description)]]
         std::optional<int> upperLimit;
-
-        // [[codegen::verbatim(PathInfo.description)]]
-        std::string path;
-
-        // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<double> lineWidth;
-
-        // [[codegen::verbatim(LineColorInfo.description)]]
-        glm::dvec3 color;
-
-        // [[codegen::verbatim(TrailFadeInfo.description)]]
-        std::optional<double> trailFade;
-
-	// [[codegen::verbatim(StartRenderIdxInfo.description)]]
-        std::optional<int> startRenderIdx;
-
-	// [[codegen::verbatim(RenderSizeInfo.description)]]
-        std::optional<int> sizeRender;
-
-	// [[codegen::verbatim(ContiguousModeInfo.description)]]
-        std::optional<bool> contiguousMode;
     };
 #include "renderablesmallbody_codegen.cpp"
 } // namespace
@@ -112,12 +98,22 @@ namespace openspace {
 
 documentation::Documentation RenderableSmallBody::Documentation() {
     documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "space_renderable_small_body";
+    doc.id = "space_renderablesmallbody";
+
+    // Insert the parents documentation entries until we have a verifier that can deal
+    // with class hierarchy
+    documentation::Documentation parentDoc = RenderableOrbitalKepler::Documentation();
+    doc.entries.insert(
+        doc.entries.end(),
+        parentDoc.entries.begin(),
+        parentDoc.entries.end()
+    );
     return doc;
 }
 
 RenderableSmallBody::RenderableSmallBody(const ghoul::Dictionary& dictionary)
     : RenderableOrbitalKepler(dictionary)
+    , _upperLimit(UpperLimitInfo, 1000, 1, 1000000)
     , _contiguousMode(ContiguousModeInfo, false)
 {
     codegen::bake<Parameters>(dictionary);
@@ -126,6 +122,22 @@ RenderableSmallBody::RenderableSmallBody(const ghoul::Dictionary& dictionary)
     addProperty(_sizeRender);
     addProperty(_contiguousMode);
     addProperty(_upperLimit);
+
+    if (dictionary.hasValue<double>(UpperLimitInfo.identifier)) {
+        _upperLimit = static_cast<unsigned int>(
+            dictionary.value<double>(UpperLimitInfo.identifier));
+    }
+    else {
+        _upperLimit = 0u;
+    }
+
+    if (dictionary.hasValue<bool>(ContiguousModeInfo.identifier)) {
+        _contiguousMode = static_cast<bool>(
+            dictionary.value<bool>(ContiguousModeInfo.identifier));
+    }
+    else {
+        _contiguousMode = false;
+    }
 
     _updateStartRenderIdxSelect = std::function<void()>([this] {
         if (_contiguousMode) {
@@ -291,26 +303,13 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
 
 void RenderableSmallBody::initializeFileReading() {
     _startRenderIdx.setMaxValue(static_cast<unsigned int>(_numObjects - 1));
-    if (_propsDefinedInAssetFlag.startRenderIdx) {
-        _propsDefinedInAssetFlag.startRenderIdx = false;
-    }
-    else {
-        _startRenderIdx = static_cast<unsigned int>(0);
-    }
-
     _sizeRender.setMaxValue(static_cast<unsigned int>(_numObjects));
-    if (_propsDefinedInAssetFlag.sizeRender) {
-        _propsDefinedInAssetFlag.sizeRender = false;
-    }
-    else {
+    if (_sizeRender == 0u) {
         _sizeRender = static_cast<unsigned int>(_numObjects);
     }
 
     _upperLimit.setMaxValue(static_cast<unsigned int>(_numObjects));
-    if (_propsDefinedInAssetFlag.upperLimit) {
-        _propsDefinedInAssetFlag.upperLimit = false;
-    }
-    else {
+    if (_upperLimit == 0u) {
         _upperLimit = static_cast<unsigned int>(_numObjects);
     }
 }

@@ -56,18 +56,6 @@ namespace {
     struct [[codegen::Dictionary(RenderableSatellites)]] Parameters {
         // [[codegen::verbatim(SegmentsInfo.description)]]
         double segments;
-
-        // [[codegen::verbatim(PathInfo.description)]]
-        std::string path;
-
-        // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<double> lineWidth;
-
-        // [[codegen::verbatim(LineColorInfo.description)]]
-        glm::dvec3 color;
-
-        // [[codegen::verbatim(TrailFadeInfo.description)]]
-        std::optional<double> trailFade;
     };
 #include "renderablesatellites_codegen.cpp"
 }
@@ -76,7 +64,17 @@ namespace openspace {
 
 documentation::Documentation RenderableSatellites::Documentation() {
     documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "space_renderable_satellites";
+    doc.id = "space_renderablesatellites";
+
+    // Insert the parents documentation entries until we have a verifier that can deal
+    // with class hierarchy
+    documentation::Documentation parentDoc = RenderableOrbitalKepler::Documentation();
+    doc.entries.insert(
+        doc.entries.end(),
+        parentDoc.entries.begin(),
+        parentDoc.entries.end()
+    );
+
     return doc;
 }
 
@@ -246,26 +244,11 @@ void RenderableSatellites::readDataFile(const std::string& filename) {
 }
 
 void RenderableSatellites::initializeFileReading() {
-    _startRenderIdx.removeOnChange(_startRenderIdxCallbackHandle);
     _startRenderIdx.setMaxValue(static_cast<unsigned int>(_numObjects - 1));
-    if (_propsDefinedInAssetFlag.startRenderIdx) {
-        _propsDefinedInAssetFlag.startRenderIdx = false;
-    }
-    else {
-        _startRenderIdx = static_cast<unsigned int>(0);
-    }
-    _startRenderIdxCallbackHandle = _startRenderIdx.onChange(
-        _updateStartRenderIdxSelect);
-
-    _sizeRender.removeOnChange(_sizeRenderCallbackHandle);
     _sizeRender.setMaxValue(static_cast<unsigned int>(_numObjects));
-    if (_propsDefinedInAssetFlag.sizeRender) {
-        _propsDefinedInAssetFlag.sizeRender = false;
-    }
-    else {
+    if (_sizeRender == 0u) {
         _sizeRender = static_cast<unsigned int>(_numObjects);
     }
-    _sizeRenderCallbackHandle = _sizeRender.onChange(_updateRenderSizeSelect);
 }
 
 void RenderableSatellites::skipSingleEntryInFile(std::ifstream& file) {
