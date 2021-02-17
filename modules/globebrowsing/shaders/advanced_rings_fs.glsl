@@ -33,11 +33,15 @@ in float vs_screenSpaceDepth;
 in vec4 shadowCoords;
 
 uniform sampler2DShadow shadowMapTexture;
-uniform sampler1D ringTexture;
+uniform sampler1D ringTextureFwrd;
+uniform sampler1D ringTextureBckwrd;
+uniform sampler1D ringTextureUnlit;
+
 uniform vec2 textureOffset;
 uniform float colorFilterValue;
 
 uniform vec3 sunPosition;
+uniform vec3 camPositionObj;
 uniform float _nightFactor;
 uniform float zFightingPercentage;
 
@@ -66,13 +70,25 @@ Fragment getFragment() {
         discard;
     }
 
-    vec4 diffuse = texture(ringTexture, texCoord);
+    vec4 colorBckwrd = vec4(0.95) * texture(ringTextureBckwrd, texCoord);
+    vec4 colorFwrd   = vec4(0.5) * texture(ringTextureFwrd, texCoord);
+    float lerpFactor = (1.f + dot(camPositionObj.xyz, sunPosition.xyz)) * 0.5f;
+
+    // Jon Colors:
+    //vec4 diffuse = mix(colorFwrd * vec4(1, 0.88, 0.82, 1.0), colorBckwrd * vec4(1, 0.88, 0.82, 1.0), lerpFactor);
+    vec4 diffuse = mix(colorFwrd, colorBckwrd, lerpFactor);
+    diffuse.a = 1.f;
+    
     // divided by 3 as length of vec3(1.0, 1.0, 1.0) will return 3 and we want
     // to normalize the alpha value to [0,1]
-    float colorValue = length(diffuse.rgb) / 3.0;
+    float colorValue = length(diffuse.rgb) / 0.57735026919;
     if (colorValue < colorFilterValue) {
         diffuse.a = colorValue * colorFilterValue;
-        if (diffuse.a < 0.65)
+        if (diffuse.a < 0.99)
+            discard;
+    } else {
+        diffuse.a = colorValue;
+        if (diffuse.a + 1 < 1.2)
             discard;
     }
 
@@ -114,7 +130,7 @@ Fragment getFragment() {
     // Reduce the color of the fragment by the user factor
     // if we are facing away from the Sun
     if (dot(sunPosition, normal) < 0) {
-        diffuse.xyz *= _nightFactor;
+        diffuse.xyz = vec3(0.9) * texture(ringTextureUnlit, texCoord).xyz * _nightFactor;
     }
 
     Fragment frag;

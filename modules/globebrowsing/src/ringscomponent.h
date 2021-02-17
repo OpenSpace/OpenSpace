@@ -92,9 +92,12 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     std::unique_ptr<ghoul::opengl::ProgramObject> _geometryOnlyShader;
     UniformCache(modelViewProjectionMatrix, textureOffset, colorFilterValue, nightFactor,
-        sunPosition, camPositionObj, ringTexture, ringTextureFwrd, ringTextureBckwrd, 
-        ringTextureUnlit, shadowMatrix, shadowMapTexture, zFightingPercentage
+        sunPosition, ringTexture, shadowMatrix, shadowMapTexture, zFightingPercentage
     ) _uniformCache;
+    UniformCache(modelViewProjectionMatrix, textureOffset, colorFilterValue, nightFactor,
+        sunPosition, camPositionObj, ringTextureFwrd, ringTextureBckwrd,
+        ringTextureUnlit, shadowMatrix, shadowMapTexture, zFightingPercentage
+    ) _uniformCacheAdvancedRings;
     UniformCache(modelViewProjectionMatrix, textureOffset, ringTexture
     ) _geomUniformCache;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
@@ -108,6 +111,7 @@ private:
 
     ghoul::Dictionary _ringsDictionary;
     bool _textureIsDirty = false;
+    bool _isAdvancedTextureEnabled = false;
     GLuint _quad = 0;
     GLuint _vertexPositionBuffer = 0;
     bool _planeIsDirty = false;
