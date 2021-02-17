@@ -42,6 +42,8 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
+    constexpr const char* _loggerCat = "RenderableModel";
+
     constexpr const char* ProgramName = "ModelProgram";
     constexpr const char* KeyGeomModelFile = "GeometryFile";
     constexpr const char* KeyForceRenderInvisible = "ForceRenderInvisible";
@@ -290,6 +292,10 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
             );
         }
         else if (dictionary.hasValue<ghoul::Dictionary>(KeyGeomModelFile)) {
+            LWARNING("Loading a model with several files is deprecated and will be "
+                "removed in a future release"
+            );
+
             ghoul::Dictionary fileDictionary = dictionary.value<ghoul::Dictionary>(
                 KeyGeomModelFile
             );

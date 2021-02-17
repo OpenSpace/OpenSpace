@@ -143,6 +143,10 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
             );
         }
         else if (dictionary.hasValue<ghoul::Dictionary>(KeyGeomModelFile)) {
+            LWARNING("Loading a model with several files is deprecated and will be "
+                "removed in a future release"
+            );
+
             ghoul::Dictionary fileDictionary = dictionary.value<ghoul::Dictionary>(
                 KeyGeomModelFile
             );
