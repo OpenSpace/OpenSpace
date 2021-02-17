@@ -43,6 +43,7 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/engine/openspaceengine_lua.inl
   ${OPENSPACE_BASE_DIR}/src/engine/syncengine.cpp
   ${OPENSPACE_BASE_DIR}/src/engine/virtualpropertymanager.cpp
+  ${OPENSPACE_BASE_DIR}/src/events/event.cpp
   ${OPENSPACE_BASE_DIR}/src/events/eventengine.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/camerainteractionstates.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/interactionmonitor.cpp

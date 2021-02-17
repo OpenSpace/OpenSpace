@@ -28,10 +28,14 @@
 #include <ghoul/misc/assert.h>
 
 namespace openspace {
+    namespace properties { class Property; }
+
     class Camera;
     class Layer;
+    class Profile;
     class SceneGraphNode;
     class ScreenSpaceRenderable;
+    class Time;
 } // namepsace opensppace
 
 namespace openspace::events {
@@ -51,11 +55,8 @@ struct Event {
         ScreenSpaceRenderableAdded,
         ScreenSpaceRenderableRemoved,
         CameraApproachedSceneGraphNode,
-        CameraMoveAwayFromSceneGraphNode,
+        CameraMovedAwayFromSceneGraphNode,
         TimeOfInterestReached,
-        LayerAdded,
-        LayerRemoved,
-        TemporalLayerUpdated,
         MissionEventReached,
         PlanetEclipsed,
         Custom
@@ -63,7 +64,7 @@ struct Event {
     Event(Type type_) : type(type_) {}
 
     const Type type;
-    Event* next = nullptr;
+    const Event* next = nullptr;
 };
 
 template <typename T>
@@ -77,15 +78,16 @@ bool isType(Event* e) {
     return e->type == T::Type;
 }
 
+void logAllEvents(const Event* e);
+
+//
+//  Events
+//
 
 struct EventSceneGraphNodeAdded : public Event {
     static const Type Type = Event::Type::SceneGraphNodeAdded;
 
-    EventSceneGraphNodeAdded(const SceneGraphNode* node_)
-        : Event(Type)
-        , node(node_)
-    {}
-
+    EventSceneGraphNodeAdded(const SceneGraphNode* node_);
     const SceneGraphNode* node = nullptr;
 };
 
@@ -93,11 +95,7 @@ struct EventSceneGraphNodeAdded : public Event {
 struct EventSceneGraphNodeRemoved : public Event {
     static const Type Type = Event::Type::SceneGraphNodeRemoved;
     
-    EventSceneGraphNodeRemoved(const SceneGraphNode* node_)
-        : Event(Type)
-        , node(node_)
-    {}
-
+    EventSceneGraphNodeRemoved(const SceneGraphNode* node_);
     const SceneGraphNode* node = nullptr;
 };
 
@@ -105,77 +103,66 @@ struct EventSceneGraphNodeRemoved : public Event {
 struct EventPropertyAdded : public Event {
     static const Type Type = Event::Type::PropertyAdded;
 
-    EventPropertyAdded(const Property* property_)
-        : Event(Type)
-        , property(property_)
-    {}
-
-    const Property* property = nullptr;
+    EventPropertyAdded(const properties::Property* property_);
+    const properties::Property* property = nullptr;
 };
 
 
 struct EventPropertyRemoved : public Event {
     static const Type Type = Event::Type::PropertyRemoved;
 
-    EventPropertyRemoved(const Property* property_)
-        : Event(Type)
-        , property(property_)
-    {}
-
-    const Property* property = nullptr;
+    EventPropertyRemoved(const properties::Property* property_);
+    const properties::Property* property = nullptr;
 };
 
 
 struct EventParallelConnectionEstablished : public Event {
     static const Type Type = Event::Type::ParallelConnectionEstablished;
 
-    EventParallelConnectionEstablished() : Event(Type) {}
+    EventParallelConnectionEstablished();
 };
 
 
 struct EventParallelConnectionLost : public Event {
     static const Type Type = Event::Type::ParallelConnectionLost;
 
-    EventParallelConnectionLost() : Event(Type) {}
+    EventParallelConnectionLost();
 };
 
 
 struct EventParallelConnectionHostshipGained : public Event {
     static const Type Type = Event::Type::ParallelConnectionHostshipGained;
 
-    EventParallelConnectionHostshipGained() : Event(Type) {}
+    EventParallelConnectionHostshipGained();
 };
 
 
 struct EventParallelConnectionHostshipLost : public Event {
     static const Type Type = Event::Type::ParallelConnectionHostshipLost;
 
-    EventParallelConnectionHostshipLost() : Event(Type) {}
+    EventParallelConnectionHostshipLost();
 };
 
 
 struct EventProfileLoadingFinished : public Event {
     static const Type Type = Event::Type::ProfileLoadingFinished;
 
-    EventProfileLoadingFinished() : Event(Type) {}
+    EventProfileLoadingFinished(const Profile* profile_);
+    const Profile* profile = nullptr;
 };
 
 
 struct EventApplicationShutdownStarted : public Event {
     static const Type Type = Event::Type::ApplicationShutdownStarted;
 
-    EventApplicationShutdownStarted() : Event(Type) {}
+    EventApplicationShutdownStarted();
 };
 
 
 struct EventScreenSpaceRenderableAdded : public Event {
     static const Type Type = Event::Type::ScreenSpaceRenderableAdded;
 
-    EventScreenSpaceRenderableAdded(const ScreenSpaceRenderable* renderable_)
-        : Event(Type)
-        , renderable(renderable_)
-    {}
-
+    EventScreenSpaceRenderableAdded(const ScreenSpaceRenderable* renderable_);
     const ScreenSpaceRenderable* renderable = nullptr;
 };
 
@@ -183,10 +170,7 @@ struct EventScreenSpaceRenderableAdded : public Event {
 struct EventScreenSpaceRenderableRemoved : public Event {
     static const Type Type = Event::Type::ScreenSpaceRenderableRemoved;
 
-    EventScreenSpaceRenderableRemoved(const ScreenSpaceRenderable* renderable_)
-        : Event(Type)
-        , renderable(renderable_)
-    {}
+    EventScreenSpaceRenderableRemoved(const ScreenSpaceRenderable* renderable_);
 
     const ScreenSpaceRenderable* renderable = nullptr;
 };
@@ -196,26 +180,18 @@ struct EventCameraApproachedSceneGraphNode : public Event {
     static const Type Type = Event::Type::CameraApproachedSceneGraphNode;
 
     EventCameraApproachedSceneGraphNode(const Camera* camera_,
-                                        const SceneGraphNode* node_)
-        : Event(Type)
-        , camera(camera_)
-        , node(node_)
-    {}
+        const SceneGraphNode* node_);
 
     const Camera* camera = nullptr;
     const SceneGraphNode* node = nullptr;
 };
 
 
-struct EventCameraApproachedSceneGraphNode : public Event {
-    static const Type Type = Event::Type::CameraApproachedSceneGraphNode;
+struct EventCameraMovedAwayFromSceneGraphNode : public Event {
+    static const Type Type = Event::Type::CameraMovedAwayFromSceneGraphNode;
 
-    EventCameraApproachedSceneGraphNode(const Camera* camera_,
-                                        const SceneGraphNode* node_)
-        : Event(Type)
-        , camera(camera_)
-        , node(node_)
-    {}
+    EventCameraMovedAwayFromSceneGraphNode(const Camera* camera_,
+        const SceneGraphNode* node_);
 
     const Camera* camera = nullptr;
     const SceneGraphNode* node = nullptr;
@@ -223,45 +199,11 @@ struct EventCameraApproachedSceneGraphNode : public Event {
 
 
 struct EventTimeOfInterestReached : public Event {
+    static const Type Type = Event::Type::TimeOfInterestReached;
 
-};
-
-
-struct EventLayerAdded : public Event {
-    static const Type Type = Event::Type::LayerAdded;
-
-    // Maybe needs RenderableGlobe object as well?
-    EventLayerAdded(const Layer* layer_)
-        : Event(Type)
-        , layer(layer_)
-    {}
-
-    const Layer* layer = nullptr;
-};
-
-
-struct EventLayerRemoved : public Event {
-    static const Type Type = Event::Type::LayerRemoved;
-
-    // Maybe needs RenderableGlobe object as well?
-    EventLayerRemoved(const Layer* layer_)
-        : Event(Type)
-        , layer(layer_)
-    {}
-
-    const Layer* layer = nullptr;
-};
-
-
-struct EventTemporalLayerUpdated : public Event {
-    static const Type Type = Event::Type::TemporalLayerUpdated;
-
-    EventTemporalLayerUpdated(const Layer* layer_)
-        : Event(Type)
-        , layer(layer_)
-    {}
-
-    const Layer* layer = nullptr;
+    EventTimeOfInterestReached(const Time* time_, const Camera* camera_);
+    const Time* time = nullptr;
+    const Camera* camera = nullptr;
 };
 
 
@@ -269,38 +211,26 @@ struct EventMissionEventReached : public Event {
     static const Type Type = Event::Type::MissionEventReached;
 
     // Not sure which kind of parameters we want to pass here
-    EventMissionEventReached()
-        : Event(Type)
-    {}
+    EventMissionEventReached();
 };
 
 
 struct EventPlanetEclipsed : public Event {
     static const Type Type = Event::Type::PlanetEclipsed;
 
-    EventPlanetEclipsed(const SceneGraphNode* eclipsee_, const SceneGraphNode* eclipser)
-        : Event(Type)
-        , eclipsee(eclipsee_)
-        , eclipser(eclipser)
-    {}
-
+    EventPlanetEclipsed(const SceneGraphNode* eclipsee_, const SceneGraphNode* eclipser);
     const SceneGraphNode* eclipsee = nullptr;
     const SceneGraphNode* eclipser = nullptr;
 };
 
 
-template <typename T>
 struct CustomEvent : public Event {
     static const Type Type = Event::Type::Custom;
 
-    CustomEvent(std::string_view type_, const T* payload_)
-        : Event(Type)
-        , type(type_),
-        , payload(payload_)
-    {}
+    CustomEvent(std::string_view subtype_, const void* payload_);
 
-    const std:string_view type;
-    const T* payload = nullptr;
+    const std::string_view subtype;
+    const void* payload = nullptr;
 };
 
 } // namespace openspace::events

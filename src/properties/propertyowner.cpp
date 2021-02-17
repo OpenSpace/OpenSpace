@@ -24,6 +24,9 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/engine/globals.h>
+#include <openspace/events/event.h>
+#include <openspace/events/eventengine.h>
 #include <openspace/properties/property.h>
 #include <openspace/scene/scene.h>
 #include <ghoul/fmt.h>
@@ -314,6 +317,7 @@ void PropertyOwner::addProperty(Property* prop) {
             prop->setPropertyOwner(this);
         }
     }
+    global::eventEngine->publishEvent<events::EventPropertyAdded>(prop);
 }
 
 void PropertyOwner::addProperty(Property& prop) {
@@ -385,6 +389,7 @@ void PropertyOwner::removeProperty(Property* prop) {
             "Property with identifier '{}' not found for removal", prop->identifier()
         ));
     }
+    global::eventEngine->publishEvent<events::EventPropertyRemoved>(prop);
 }
 
 void PropertyOwner::removeProperty(Property& prop) {

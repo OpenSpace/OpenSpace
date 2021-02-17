@@ -119,6 +119,7 @@ void Scene::registerNode(SceneGraphNode* node) {
     _nodesByIdentifier[node->identifier()] = node;
     addPropertySubOwner(node);
     _dirtyNodeRegistry = true;
+    global::eventEngine->publishEvent<events::EventSceneGraphNodeAdded>(node);
 }
 
 void Scene::unregisterNode(SceneGraphNode* node) {
@@ -138,6 +139,7 @@ void Scene::unregisterNode(SceneGraphNode* node) {
     }
     removePropertySubOwner(node);
     _dirtyNodeRegistry = true;
+    global::eventEngine->publishEvent<events::EventSceneGraphNodeRemoved>(node);
 }
 
 void Scene::markNodeRegistryDirty() {
@@ -470,7 +472,6 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
     }
 
     rawNodePointer->setDependencies(dependencies);
-    global::eventEngine->publishEvent<events::EventSceneGraphNodeAdded>(rawNodePointer);
     return rawNodePointer;
 }
 

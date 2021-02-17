@@ -1080,6 +1080,9 @@ void OpenSpaceEngine::preSynchronization() {
         resetPropertyChangeFlagsOfSubowners(global::rootPropertyOwner);
         _hasScheduledAssetLoading = false;
         _scheduledAssetPathToLoad.clear();
+        global::eventEngine->publishEvent<events::EventProfileLoadingFinished>(
+            global::profile
+        );
     }
 
     if (_isFirstRenderingFirstFrame) {
@@ -1185,30 +1188,8 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     }
 
     events::Event* e = global::eventEngine->firstEvent();
-    while (e) {
-        using namespace events;
-        switch (e->type) {
-            case Event::Type::SceneGraphNodeAdded:
-                LINFOC(
-                    "EventInfo",
-                    fmt::format(
-                        "events::EventSceneGraphNodeAdded: {}",
-                        static_cast<EventSceneGraphNodeAdded*>(e)->node->identifier()
-                    )
-                );
-                break;
-            case Event::Type::SceneGraphNodeRemoved:
-                LINFOC(
-                    "EventInfo",
-                    fmt::format(
-                        "events::EventSceneGraphNodeRemoved: {}",
-                        static_cast<EventSceneGraphNodeRemoved*>(e)->node->identifier()
-                    )
-                );
-                break;
-        }
-        e = e->next;
-    }
+    events::logAllEvents(e);
+
 
     // Testing this every frame has minimal impact on the performance --- abock
     // Debug build: 1-2 us ; Release build: <= 1 us
@@ -1542,6 +1523,7 @@ void OpenSpaceEngine::toggleShutdownMode() {
         // Else, we have to enable it
         _shutdown.timer = _shutdown.waitTime;
         _shutdown.inShutdown = true;
+        global::eventEngine->publishEvent<events::EventApplicationShutdownStarted>();
     }
 }
 

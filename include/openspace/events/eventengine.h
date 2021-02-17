@@ -36,17 +36,7 @@ public:
     events::Event* firstEvent() const; // -> begin
 
     template <typename T, typename... Args>
-    void publishEvent(Args&&... args) {
-        T* e = _memory.alloc<T>(args...);
-        if (!_firstEvent) {
-            _firstEvent = e;
-            _lastEvent = e;
-        }
-        else {
-            _lastEvent->next = e;
-            _lastEvent = e;
-        }
-    }
+    void publishEvent(Args&&... args);
 
     void postFrameCleanup();
 
@@ -55,6 +45,23 @@ private:
     events::Event* _firstEvent = nullptr;
     events::Event* _lastEvent = nullptr;
 };
+
+//
+// Implementation
+//
+
+template <typename T, typename... Args>
+void EventEngine::publishEvent(Args&&... args) {
+    T* e = _memory.alloc<T>(args...);
+    if (!_firstEvent) {
+        _firstEvent = e;
+        _lastEvent = e;
+    }
+    else {
+        _lastEvent->next = e;
+        _lastEvent = e;
+    }
+}
 
 } // namespace openspace
 

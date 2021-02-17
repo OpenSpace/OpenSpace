@@ -29,6 +29,8 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/events/event.h>
+#include <openspace/events/eventengine.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/mission/missionmanager.h>
@@ -1156,8 +1158,11 @@ void RenderEngine::addScreenSpaceRenderable(std::unique_ptr<ScreenSpaceRenderabl
     s->initialize();
     s->initializeGL();
 
-    global::screenSpaceRootPropertyOwner->addPropertySubOwner(s.get());
+    ScreenSpaceRenderable* ssr = s.get();
+    global::screenSpaceRootPropertyOwner->addPropertySubOwner(ssr);
     global::screenSpaceRenderables->push_back(std::move(s));
+
+    global::eventEngine->publishEvent<events::EventScreenSpaceRenderableAdded>(ssr);
 }
 
 void RenderEngine::removeScreenSpaceRenderable(ScreenSpaceRenderable* s) {
@@ -1170,9 +1175,10 @@ void RenderEngine::removeScreenSpaceRenderable(ScreenSpaceRenderable* s) {
     if (it != global::screenSpaceRenderables->end()) {
         s->deinitialize();
         global::screenSpaceRootPropertyOwner->removePropertySubOwner(s);
-
         global::screenSpaceRenderables->erase(it);
     }
+
+    global::eventEngine->publishEvent<events::EventScreenSpaceRenderableRemoved>(s);
 }
 
 void RenderEngine::removeScreenSpaceRenderable(const std::string& identifier) {

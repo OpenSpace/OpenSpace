@@ -26,6 +26,9 @@
 
 #include <modules/globebrowsing/src/layer.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/engine/globals.h>
+#include <openspace/events/event.h>
+#include <openspace/events/eventengine.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 
@@ -144,6 +147,7 @@ Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
     }
     addPropertySubOwner(ptr);
     _levelBlendingEnabled.setVisibility(properties::Property::Visibility::User);
+    global::eventEngine->publishEvent<events::CustomEvent>("AddLayer", ptr);
     return ptr;
 }
 
@@ -159,6 +163,10 @@ void LayerGroup::deleteLayer(const std::string& layerName) {
             removePropertySubOwner(it->get());
             (*it)->deinitialize();
             _layers.erase(it);
+            global::eventEngine->publishEvent<events::CustomEvent>(
+                "RemoveLayer",
+                it->get()
+            );
             update();
             if (_onChangeCallback) {
                 _onChangeCallback(nullptr);
