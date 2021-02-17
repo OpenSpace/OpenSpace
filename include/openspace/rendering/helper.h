@@ -61,12 +61,17 @@ void renderBox(const glm::vec2& position, const glm::vec2& size, const glm::vec4
 struct Shaders {
     struct {
         std::unique_ptr<ghoul::opengl::ProgramObject> program;
-        UniformCache(tex, hasTexture, shouldFlipTexture, ortho, color) cache;
+        UniformCache(tex, hasTexture, shouldFlipTexture, proj, color) cache;
     } xyuvrgba;
 
     struct {
         std::unique_ptr<ghoul::opengl::ProgramObject> program;
-        UniformCache(tex, hasTexture, shouldFlipTexture, ortho, color) cache;
+        UniformCache(tex, hasTexture, shouldFlipTexture, proj, color) cache;
+    } xyzuvrgba;
+
+    struct {
+        std::unique_ptr<ghoul::opengl::ProgramObject> program;
+        UniformCache(tex, hasTexture, shouldFlipTexture, proj, color) cache;
     } screenfilling;
 };
 
@@ -75,6 +80,14 @@ struct VertexObjects {
         GLuint vao;
         GLuint vbo;
     } square;
+
+    struct {
+        GLuint vao;
+        GLuint vbo;
+        GLuint ibo;
+
+        int nElements = 64;
+    } sphere;
 
     struct {
         GLuint vao;
@@ -107,6 +120,10 @@ std::vector<VertexXYZ> convert(std::vector<Vertex> v);
 
 std::vector<Vertex> createRing(int nSegments, float radius,
     glm::vec4 colors = glm::vec4(1.f));
+
+
+std::pair<std::vector<Vertex>, std::vector<GLushort>>
+createSphere(int nSegments, glm::vec3 radii, glm::vec4 colors = glm::vec4(1.f));
 
 } // namespace openspace::rendering::helper
 

@@ -50,7 +50,8 @@ struct UpdateData {
 struct RenderData {
     const Camera& camera;
     const Time time;
-    int renderBinMask = -1;
+    int8_t renderBinMask = -1;
+    bool renderDebugSpheres = false;
     TransformData modelTransform;
 };
 

@@ -158,6 +158,9 @@ public:
      */
     unsigned int latestScreenshotNumber() const;
 
+    /// Returns whether scenegraph nodes should render their distance spheres
+    bool renderDistanceSpheres() const;
+
     /**
      * Returns the Lua library that contains all Lua functions available to affect the
      * rendering.
@@ -203,6 +206,7 @@ private:
     properties::BoolProperty _applyWarping;
     properties::BoolProperty _showFrameInformation;
     properties::BoolProperty _disableMasterRendering;
+    properties::BoolProperty _renderDistanceSpheres;
 
     properties::FloatProperty _globalBlackOutFactor;
 

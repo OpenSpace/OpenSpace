@@ -149,6 +149,13 @@ namespace {
         "master node is not required and performance can be gained by disabling it."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo RenderDistanceSpheresInfo = {
+        "RenderDistanceSpheres",
+        "Debug:  Render Distance Spheres",
+        "If this value is set to 'true', the distance spheres for the scene graph nodes "
+        "will be rendered. Currently, the only sphere available is the bounding sphere."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo GlobalRotationInfo = {
         "GlobalRotation",
         "Global Rotation",
@@ -255,6 +262,7 @@ RenderEngine::RenderEngine()
     , _applyWarping(ApplyWarpingInfo, false)
     , _showFrameInformation(ShowFrameNumberInfo, false)
     , _disableMasterRendering(DisableMasterInfo, false)
+    , _renderDistanceSpheres(RenderDistanceSpheresInfo, false)
     , _globalBlackOutFactor(GlobalBlackoutFactorInfo, 1.f, 0.f, 1.f)
     , _enableFXAA(FXAAInfo, true)
     , _disableHDRPipeline(DisableHDRPipelineInfo, false)
@@ -360,6 +368,7 @@ RenderEngine::RenderEngine()
     addProperty(_screenSpaceRotation);
     addProperty(_masterRotation);
     addProperty(_disableMasterRendering);
+    addProperty(_renderDistanceSpheres);
 }
 
 RenderEngine::~RenderEngine() {} // NOLINT
@@ -1057,30 +1066,22 @@ void RenderEngine::takeScreenshot() {
     _latestScreenshotNumber = global::windowDelegate->takeScreenshot(_applyWarping);
 }
 
-/**
- * Get the latest screenshot filename
- */
 unsigned int RenderEngine::latestScreenshotNumber() const {
     return _latestScreenshotNumber;
 }
 
-/**
- * Set raycasting uniforms on the program object, and setup raycasting.
- */
+bool RenderEngine::renderDistanceSpheres() const {
+    return _renderDistanceSpheres;
+}
+
 void RenderEngine::preRaycast(ghoul::opengl::ProgramObject& programObject) {
     _renderer->preRaycast(programObject);
 }
 
-/**
- * Tear down raycasting for the specified program object.
- */
 void RenderEngine::postRaycast(ghoul::opengl::ProgramObject& programObject) {
     _renderer->postRaycast(programObject);
 }
 
-/**
- * Set renderer
- */
 void RenderEngine::setRenderer(std::unique_ptr<Renderer> renderer) {
     ZoneScoped
 

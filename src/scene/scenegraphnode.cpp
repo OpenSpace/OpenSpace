@@ -29,6 +29,7 @@
 #include <modules/base/translation/statictranslation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/rendering/helper.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/timeframe.h>
@@ -137,7 +138,6 @@ namespace {
         "example: false",
         openspace::properties::Property::Visibility::Hidden
     };
-
 } // namespace
 
 namespace openspace {
@@ -514,6 +514,7 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
             data.camera,
             data.time,
             data.renderBinMask,
+            data.renderDebugSpheres,
             { _worldPositionCached, _worldRotationCached, _worldScaleCached }
         };
 
@@ -522,6 +523,62 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
             computeScreenSpaceData(newData);
         }
     }
+
+    if (data.renderDebugSpheres) {
+        double bs = boundingSphere();
+        if (bs > 0.0) {
+            renderDebugSphere(data.camera, bs, glm::vec4(0.5f, 0.15f, 0.5f, 0.75f));
+        }
+
+    }
+}
+void SceneGraphNode::renderDebugSphere(const Camera& camera, double scale,
+                                       glm::vec4 color)
+{
+    glm::dvec3 scaleVec = _worldScaleCached * scale;
+    glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), _worldPositionCached) *
+        glm::dmat4(_worldRotationCached) *
+        glm::scale(glm::dmat4(1.0), scaleVec);
+
+    glm::mat4 modelViewProjection = camera.projectionMatrix() *
+        glm::mat4(camera.combinedViewMatrix() * modelTransform);
+
+    auto& shdr = rendering::helper::shaders.xyzuvrgba;
+    shdr.program->activate();
+    shdr.program->setIgnoreUniformLocationError(
+        ghoul::opengl::ProgramObject::IgnoreError::Yes
+    );
+    shdr.program->setUniform(shdr.cache.hasTexture, 0);
+    shdr.program->setUniform(shdr.cache.proj, modelViewProjection);
+    shdr.program->setUniform(shdr.cache.color, color);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glEnable(GL_DEPTH_TEST);
+
+    glBindVertexArray(rendering::helper::vertexObjects.sphere.vao);
+    //glDrawElements(
+    //    GL_TRIANGLES,
+    //    rendering::helper::vertexObjects.sphere.nElements,
+    //    GL_UNSIGNED_SHORT,
+    //    nullptr
+    //);
+
+    glLineWidth(2.0);
+    shdr.program->setUniform(shdr.cache.color, glm::vec4(1.0, 1.0, 1.0, 1.0));
+    glDrawElements(
+        GL_LINES,
+        rendering::helper::vertexObjects.sphere.nElements,
+        GL_UNSIGNED_SHORT,
+        nullptr
+    );
+
+    glBindVertexArray(0);
+
+    shdr.program->deactivate();
 }
 
 void SceneGraphNode::setParent(SceneGraphNode& parent) {
@@ -879,6 +936,7 @@ std::vector<SceneGraphNode*> SceneGraphNode::children() const {
 }
 
 double SceneGraphNode::boundingSphere() const {
+    // @TODO (abock, 2020-02-16) This should probably take the scale into account
     return _boundingSphere;
 }
 
