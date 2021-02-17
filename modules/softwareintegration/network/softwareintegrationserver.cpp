@@ -162,7 +162,7 @@ void SoftwareIntegrationServer::handlePeerMessage(PeerMessage peerMessage) {
     switch (messageType) {
     case SoftwareConnection::MessageType::Connection: {
         const std::string software(message.begin(), message.end());
-        LINFO(fmt::format("OpenSpace has connected with {} through socket.", software));
+        LINFO(fmt::format("OpenSpace has connected with {} through socket", software));
         break;
     }
     case SoftwareConnection::MessageType::ReadPointData: {

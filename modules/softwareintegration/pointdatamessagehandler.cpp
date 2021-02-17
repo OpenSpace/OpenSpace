@@ -172,6 +172,7 @@ void PointDataMessageHandler::handleColorMessage(const std::vector<char>& messag
     // Get color of renderable
     const Renderable* r = renderable(identifier);
     if (!r) {
+        LWARNING(fmt::format("No renderable with identifier '{}' was found", identifier));
         return;
     }
 
@@ -193,6 +194,7 @@ void PointDataMessageHandler::handleOpacityMessage(const std::vector<char>& mess
     // Get opacity of renderable
     const Renderable* r = renderable(identifier);
     if (!r) {
+        LWARNING(fmt::format("No renderable with identifier '{}' was found", identifier));
         return;
     }
 
@@ -214,6 +216,7 @@ void PointDataMessageHandler::handlePointSizeMessage(const std::vector<char>& me
     // Get size of renderable
     const Renderable* r = renderable(identifier);
     if (!r) {
+        LWARNING(fmt::format("No renderable with identifier '{}' was found", identifier));
         return;
     }
 
@@ -236,6 +239,7 @@ void PointDataMessageHandler::handleVisiblityMessage(const std::vector<char>& me
     // Toggle visibility of renderable
     const Renderable* r = renderable(identifier);
     if (!r) {
+        LWARNING(fmt::format("No renderable with identifier '{}' was found", identifier));
         return;
     }
 
