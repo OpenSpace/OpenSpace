@@ -217,6 +217,9 @@ void Property::setViewOption(std::string option, bool value) {
 }
 
 bool Property::viewOption(const std::string& option, bool defaultValue) const {
+    if (!_metaData.hasValue<ghoul::Dictionary>(_metaDataKeyViewPrefix)) {
+        return defaultValue;
+    }
     ghoul::Dictionary d = _metaData.value<ghoul::Dictionary>(_metaDataKeyViewPrefix);
     if (d.hasKey(option)) {
         return d.value<bool>(option);

@@ -33,24 +33,27 @@
 #include <openspace/util/distanceconstants.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
+    constexpr const std::array<const char*, 6> UniformNames = {
+        "modelViewProjectionTransform", "offset", "opacity",
+        "discTexture", "eccentricity", "semiMajorAxis"
+    };
+
     static const openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
         "This value is the path to a texture on disk that contains a one-dimensional "
-        "texture which is used for these rings."
+        "texture which is used for the color."
     };
 
     static const openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
-        "This value specifies the semi-major axis of the orbit in meter."
+        "This value specifies the semi-major axis of the orbit, in meter."
     };
 
     static const openspace::properties::Property::PropertyInfo EccentricityInfo = {
@@ -63,8 +66,10 @@ namespace {
     static const openspace::properties::Property::PropertyInfo OffsetInfo = {
         "Offset",
         "Offset",
-        "This value is used to limit the width of the rings. Each of the two values is "
-        "the lower and the upper uncertainties of the semi-major axis. "
+        "This property determines the width of the disc. The values specify the lower "
+        "and upper deviation from the semi major axis, respectively. The values are "
+        "relative to the size of the semi-major axis. That is, 0 means no deviation "
+        "from the semi-major axis and 1 is a whole semi-major axis's worth of deviation."
     };
 } // namespace
 
@@ -76,11 +81,6 @@ documentation::Documentation RenderableOrbitDisc::Documentation() {
         "Renderable Orbit Disc",
         "exoplanets_renderable_orbit_disc",
         {
-            {
-                "Type",
-                new StringEqualVerifier("RenderableOrbitDisc"),
-                Optional::No
-            },
             {
                 TextureInfo.identifier,
                 new StringVerifier,
@@ -114,10 +114,8 @@ RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)
     , _texturePath(TextureInfo)
     , _size(SizeInfo, 1.f, 0.f, 3.0e12f)
     , _eccentricity(EccentricityInfo, 0.f, 0.f, 1.f)
-    , _offset(OffsetInfo, glm::vec2(0.f, 1.f), glm::vec2(0.f), glm::vec2(1.f))
+    , _offset(OffsetInfo, glm::vec2(0.f), glm::vec2(0.f), glm::vec2(1.f))
 {
-    using ghoul::filesystem::File;
-
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
@@ -127,23 +125,18 @@ RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)
     if (dictionary.hasKey(OffsetInfo.identifier)) {
         _offset = dictionary.value<glm::dvec2>(OffsetInfo.identifier);
     }
+    _offset.onChange([&]() { _planeIsDirty = true; });
     addProperty(_offset);
 
     _size = static_cast<float>(dictionary.value<double>(SizeInfo.identifier));
-    _size = static_cast<float>(
-        _size + (_offset.value().y * distanceconstants::AstronomicalUnit)
-    );
-    setBoundingSphere(_size);
     _size.onChange([&]() { _planeIsDirty = true; });
     addProperty(_size);
 
+    setBoundingSphere(_size + _offset.value().y * _size);
+
     _texturePath = absPath(dictionary.value<std::string>(TextureInfo.identifier));
-    _textureFile = std::make_unique<File>(_texturePath);
-
-    _texturePath.onChange([&]() { _textureIsDirty = true; });
+    _texturePath.onChange([&]() { _texture->loadFromFile(_texturePath); });
     addProperty(_texturePath);
-
-    _textureFile->setCallback([&](const File&) { _textureIsDirty = true; });
 
     _eccentricity = static_cast<float>(
         dictionary.value<double>(EccentricityInfo.identifier)
@@ -155,40 +148,34 @@ RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)
 }
 
 bool RenderableOrbitDisc::isReady() const {
-    return _shader && _texture;
+    return _shader && _texture && _plane;
+}
+
+void RenderableOrbitDisc::initialize() {
+    _texture = std::make_unique<TextureComponent>();
+    _texture->setFilterMode(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+    _texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
+    _plane = std::make_unique<PlaneGeometry>(planeSize());
 }
 
 void RenderableOrbitDisc::initializeGL() {
     _shader = global::renderEngine->buildRenderProgram(
-        "OrbitdiscProgram",
+        "OrbitDiscProgram",
         absPath("${BASE}/modules/exoplanets/shaders/orbitdisc_vs.glsl"),
         absPath("${BASE}/modules/exoplanets/shaders/orbitdisc_fs.glsl")
     );
 
-    _uniformCache.modelViewProjection = _shader->uniformLocation(
-        "modelViewProjectionTransform"
-    );
-    _uniformCache.textureOffset = _shader->uniformLocation("textureOffset");
-    _uniformCache.opacity = _shader->uniformLocation("opacity");
-    _uniformCache.texture = _shader->uniformLocation("discTexture");
-    _uniformCache.eccentricity = _shader->uniformLocation("eccentricity");
-    _uniformCache.semiMajorAxis = _shader->uniformLocation("semiMajorAxis");
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
 
-    glGenVertexArrays(1, &_quad);
-    glGenBuffers(1, &_vertexPositionBuffer);
+    _texture->loadFromFile(_texturePath);
+    _texture->uploadToGpu();
 
-    createPlane();
-    loadTexture();
+    _plane->initialize();
 }
 
 void RenderableOrbitDisc::deinitializeGL() {
-    glDeleteVertexArrays(1, &_quad);
-    _quad = 0;
-
-    glDeleteBuffers(1, &_vertexPositionBuffer);
-    _vertexPositionBuffer = 0;
-
-    _textureFile = nullptr;
+    _plane->deinitialize();
+    _plane = nullptr;
     _texture = nullptr;
 
     global::renderEngine->removeRenderProgram(_shader.get());
@@ -209,7 +196,7 @@ void RenderableOrbitDisc::render(const RenderData& data, RendererTasks&) {
         _uniformCache.modelViewProjection,
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
     );
-    _shader->setUniform(_uniformCache.textureOffset, _offset);
+    _shader->setUniform(_uniformCache.offset, _offset);
     _shader->setUniform(_uniformCache.opacity, _opacity);
     _shader->setUniform(_uniformCache.eccentricity, _eccentricity);
     _shader->setUniform(_uniformCache.semiMajorAxis, _size);
@@ -224,8 +211,7 @@ void RenderableOrbitDisc::render(const RenderData& data, RendererTasks&) {
     glDepthMask(false);
     glDisable(GL_CULL_FACE);
 
-    glBindVertexArray(_quad);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    _plane->render();
 
     _shader->deactivate();
 
@@ -238,90 +224,21 @@ void RenderableOrbitDisc::render(const RenderData& data, RendererTasks&) {
 void RenderableOrbitDisc::update(const UpdateData&) {
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
-        _uniformCache.modelViewProjection = _shader->uniformLocation(
-            "modelViewProjectionTransform"
-        );
-        _uniformCache.textureOffset = _shader->uniformLocation("textureOffset");
-        _uniformCache.opacity = _shader->uniformLocation("opacity");
-        _uniformCache.texture = _shader->uniformLocation("discTexture");
-        _uniformCache.eccentricity = _shader->uniformLocation("eccentricity");
-        _uniformCache.semiMajorAxis = _shader->uniformLocation("semiMajorAxis");
+        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
     }
 
     if (_planeIsDirty) {
-        createPlane();
+        _plane->updateSize(planeSize());
         _planeIsDirty = false;
     }
 
-    if (_textureIsDirty) {
-        loadTexture();
-        _textureIsDirty = false;
-    }
+    _texture->update();
 }
 
-void RenderableOrbitDisc::loadTexture() {
-    if (!_texturePath.value().empty()) {
-        std::unique_ptr<ghoul::opengl::Texture> texture =
-            ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
-
-        if (texture) {
-            LDEBUGC(
-                "RenderableOrbitDisc",
-                fmt::format("Loaded texture from '{}'", absPath(_texturePath))
-            );
-            _texture = std::move(texture);
-
-            _texture->uploadTexture();
-            _texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-
-            _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
-            _textureFile->setCallback(
-                [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
-            );
-        }
-    }
-}
-
-void RenderableOrbitDisc::createPlane() {
-    const GLfloat size = _size * (1.f + _eccentricity);
-
-    struct VertexData {
-        GLfloat x;
-        GLfloat y;
-        GLfloat s;
-        GLfloat t;
-    };
-
-    VertexData data[] = {
-        { -size, -size, 0.f, 0.f },
-        {  size,  size, 1.f, 1.f },
-        { -size,  size, 0.f, 1.f },
-        { -size, -size, 0.f, 0.f },
-        {  size, -size, 1.f, 0.f },
-        {  size,  size, 1.f, 1.f },
-    };
-
-    glBindVertexArray(_quad);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(
-        0,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(VertexData),
-        nullptr
-    );
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(
-        1,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(VertexData),
-        reinterpret_cast<void*>(offsetof(VertexData, s))
-    );
+float RenderableOrbitDisc::planeSize() const {
+    float maxRadius = _size + _offset.value().y * _size;
+    maxRadius *= (1.f + _eccentricity);
+    return maxRadius;
 }
 
 } // namespace openspace

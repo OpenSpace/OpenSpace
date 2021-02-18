@@ -28,6 +28,8 @@
 #include <openspace/util/openspacemodule.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/stringproperty.h>
 
 namespace openspace {
 
@@ -38,11 +40,30 @@ public:
     ExoplanetsModule();
     virtual ~ExoplanetsModule() = default;
 
+    std::string exoplanetsDataPath() const;
+    std::string lookUpTablePath() const;
+    std::string starTexturePath() const;
+    std::string noDataTexturePath() const;
+    std::string orbitDiscTexturePath() const;
+    std::string habitableZoneTexturePath() const;
+    bool showComparisonCircle() const;
+    bool showHabitableZone() const;
+    bool useOptimisticZone() const;
+
     scripting::LuaLibrary luaLibrary() const override;
     std::vector<documentation::Documentation> documentations() const override;
 
 protected:
-    void internalInitialize(const ghoul::Dictionary&) override;
+    void internalInitialize(const ghoul::Dictionary& dict) override;
+
+    properties::StringProperty _exoplanetsDataFolder;
+    properties::StringProperty _starTexturePath;
+    properties::StringProperty _noDataTexturePath;
+    properties::StringProperty _orbitDiscTexturePath;
+    properties::StringProperty _habitableZoneTexturePath;
+    properties::BoolProperty _showComparisonCircle;
+    properties::BoolProperty _showHabitableZone;
+    properties::BoolProperty _useOptimisticZone;
 };
 
 } // namespace openspace

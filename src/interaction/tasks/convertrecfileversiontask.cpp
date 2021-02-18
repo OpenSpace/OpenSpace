@@ -108,12 +108,6 @@ documentation::Documentation ConvertRecFileVersionTask::documentation() {
         "convert_file_version_task",
         {
             {
-                "Type",
-                new StringEqualVerifier("ConvertRecFileVersionTask"),
-                Optional::No,
-                "The type of this task",
-            },
-            {
                 KeyInFilePath,
                 new StringAnnotationVerifier("A valid filename to convert"),
                 Optional::No,

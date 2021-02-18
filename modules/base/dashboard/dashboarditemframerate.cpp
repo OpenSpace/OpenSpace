@@ -32,6 +32,7 @@
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/misc/profiling.h>
+#include <optional>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo FrametimeInfo = {
@@ -46,14 +47,6 @@ namespace {
         "Clears the cache of this DashboardItemFramerate item. If the selected option "
         "does not use any caching, this trigger does not do anything."
     };
-
-    constexpr const char* ValueDtAvg = "Average Deltatime";
-    constexpr const char* ValueDtExtremes = "Deltatime extremes";
-    constexpr const char* ValueDtStandardDeviation = "Deltatime standard deviation";
-    constexpr const char* ValueDtCov = "Deltatime coefficient of variation";
-    constexpr const char* ValueFps = "Frames per second";
-    constexpr const char* ValueFpsAvg = "Average frames per second";
-    constexpr const char* ValueNone = "None";
 
     [[ nodiscard ]] char* formatDt(std::vector<char>& buffer) {
         return fmt::format_to(
@@ -133,32 +126,30 @@ namespace {
                 throw ghoul::MissingCaseException();
         }
     }
+
+    struct [[codegen::Dictionary(DashboardItemFramerate)]] Parameters {
+        enum class Type {
+            DtAvg [[codegen::key("Average Deltatime")]],
+            DtExtremes [[codegen::key("Deltatime extremes")]],
+            DtStandardDeviation [[codegen::key("Deltatime standard deviation")]],
+            DtCoefficientOfVariation [[codegen::key("Deltatime coefficient of variation")]],
+            FPS [[codegen::key("Frames per second")]],
+            FPSAvg [[codegen::key("Average frames per second")]]
+        };
+
+        // [[codegen::verbatim(FrametimeInfo.description)]]
+        std::optional<Type> frametimeType;
+    };
+#include "dashboarditemframerate_codegen.cpp"
+
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation DashboardItemFramerate::Documentation() {
-    using namespace documentation;
-
-    return {
-        "DashboardItem Framerate",
-        "base_dashboarditem_framerate",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("DashboardItemFramerate"),
-                Optional::No
-            },
-            {
-                FrametimeInfo.identifier,
-                new StringInListVerifier({ ValueDtAvg, ValueDtExtremes,
-                    ValueDtStandardDeviation, ValueDtCov, ValueFps, ValueFpsAvg, ValueNone
-                }),
-                Optional::Yes,
-                FrametimeInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_dashboarditem_framerate";
+    return doc;
 }
 
 DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictionary)
@@ -166,52 +157,44 @@ DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictiona
     , _frametimeType(FrametimeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _clearCache(ClearCacheInfo)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "DashboardItemFramerate"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _frametimeType.addOptions({
-        { static_cast<int>(FrametimeType::DtTimeAvg), ValueDtAvg },
-        { static_cast<int>(FrametimeType::DtTimeExtremes), ValueDtExtremes },
+        { static_cast<int>(FrametimeType::DtTimeAvg), "Average Deltatime" },
+        { static_cast<int>(FrametimeType::DtTimeExtremes), "Deltatime extremes" },
         {
             static_cast<int>(FrametimeType::DtStandardDeviation),
-            ValueDtStandardDeviation
+            "Deltatime standard deviation"
         },
         {
             static_cast<int>(FrametimeType::DtCoefficientOfVariation),
-            ValueDtCov
+            "Deltatime coefficient of variation"
         },
-        { static_cast<int>(FrametimeType::FPS), ValueFps },
-        { static_cast<int>(FrametimeType::FPSAvg), ValueFpsAvg },
-        { static_cast<int>(FrametimeType::None), ValueNone }
+        { static_cast<int>(FrametimeType::FPS), "Frames per second" },
+        { static_cast<int>(FrametimeType::FPSAvg), "Average frames per second" },
+        { static_cast<int>(FrametimeType::None), "None" }
     });
 
-    if (dictionary.hasKey(FrametimeInfo.identifier)) {
-        const std::string& v = dictionary.value<std::string>(FrametimeInfo.identifier);
-        if (v == ValueDtAvg) {
-            _frametimeType = static_cast<int>(FrametimeType::DtTimeAvg);
-        }
-        else if (v == ValueDtExtremes) {
-            _frametimeType = static_cast<int>(FrametimeType::DtTimeExtremes);
-        }
-        else if (v == ValueDtStandardDeviation) {
-            _frametimeType =
-                static_cast<int>(FrametimeType::DtStandardDeviation);
-        }
-        else if (v == ValueDtCov) {
-            _frametimeType =
-                static_cast<int>(FrametimeType::DtCoefficientOfVariation);
-        }
-        else if (v == ValueFps) {
-            _frametimeType = static_cast<int>(FrametimeType::FPS);
-        }
-        else if (v == ValueFpsAvg) {
-            _frametimeType = static_cast<int>(FrametimeType::FPSAvg);
-        }
-        else {
-            _frametimeType = static_cast<int>(FrametimeType::None);
+    if (p.frametimeType.has_value()) {
+        switch (*p.frametimeType) {
+            case Parameters::Type::DtAvg:
+                _frametimeType = static_cast<int>(FrametimeType::DtTimeAvg);
+                break;
+            case Parameters::Type::DtExtremes:
+                _frametimeType = static_cast<int>(FrametimeType::DtTimeExtremes);
+                break;
+            case Parameters::Type::DtStandardDeviation:
+                _frametimeType = static_cast<int>(FrametimeType::DtStandardDeviation);
+                break;
+            case Parameters::Type::DtCoefficientOfVariation:
+                _frametimeType = static_cast<int>(FrametimeType::DtCoefficientOfVariation);
+                break;
+            case Parameters::Type::FPS:
+                _frametimeType = static_cast<int>(FrametimeType::FPS);
+                break;
+            case Parameters::Type::FPSAvg:
+                _frametimeType = static_cast<int>(FrametimeType::FPSAvg);
+                break;
         }
     }
     else {

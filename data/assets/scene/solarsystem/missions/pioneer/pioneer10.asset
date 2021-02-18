@@ -15,7 +15,7 @@ local kernelsList = {kernelsFolder .. '/p10-a.bsp'}
 local Pioneer10NAIF = "-23"
 
 local Pioneer10 = {
-    Identifier = "Pioneer10",
+    Identifier = "Pioneer_10",
     Parent = sunTransforms.SolarSystemBarycenter.Identifier,
     Transform = {
         Translation = {
@@ -27,13 +27,15 @@ local Pioneer10 = {
     },
     Renderable = model.PioneerModel,
     GUI = {
-        Name = "Pioneer 10",
-        Path = "/Solar System/Missions/Pioneer/10"
+        Name = "Pioneer 10 Spacecraft",
+        Path = "/Solar System/Missions/Pioneer",
+        Description = [[Pioneer 10 Spacecraft. Positioned by SPICE data.]]
+
     }
 }
 
 local Pioneer10Trail = {
-    Identifier = "Pioneer10Trail",
+    Identifier = "Pioneer_10Trail",
     Parent = sunTransforms.SolarSystemBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailTrajectory",
@@ -51,8 +53,10 @@ local Pioneer10Trail = {
         -- 6545 is the number of days between the Start and End time (aka sample every 2d)
     },
     GUI = {
-        Name = "Pioneer 10 Trail",
-        Path = "/Solar System/Missions/Pioneer/10"
+        Name = "Pioneer 10 Trail (SPICE)",
+        Path = "/Solar System/Missions/Pioneer",
+        Description = [[Pioneer 10 Trail, spanning March 3rd, 1972 to January 2nd, 1990.
+        Data from SPICE]]
     }
 }
 
@@ -60,3 +64,15 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
     Pioneer10,
     Pioneer10Trail,
 })
+
+
+asset.meta = {
+    Name = "Pioneer 10",
+    Version = "1.0",
+    Description = [[ Pioneer 10 Model and Trail. Driven by SPICE data for high accuracy
+    from March 3rd, 1972 to January 2nd, 1990.]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = {"Pioneer_10", "Pioneer_10Trail"}
+}

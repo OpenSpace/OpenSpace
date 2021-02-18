@@ -311,11 +311,6 @@ documentation::Documentation RenderableGaiaStars::Documentation() {
         "gaiamission_renderablegaiastars",
         {
             {
-                "Type",
-                new StringEqualVerifier("RenderableGaiaStars"),
-                Optional::No
-            },
-            {
                 FilePathInfo.identifier,
                 new StringVerifier,
                 Optional::No,

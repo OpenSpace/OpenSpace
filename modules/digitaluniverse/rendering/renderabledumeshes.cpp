@@ -43,8 +43,9 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <array>
-#include <fstream>
 #include <cstdint>
+#include <fstream>
+#include <optional>
 
 namespace {
     constexpr const char* _loggerCat = "RenderableDUMeshes";
@@ -53,16 +54,6 @@ namespace {
     constexpr const std::array<const char*, 4> UniformNames = {
         "modelViewTransform", "projectionTransform", "alphaValue", "color"
     };
-
-    constexpr const char* KeyFile = "File";
-    constexpr const char* keyUnit = "Unit";
-    constexpr const char* MeterUnit = "m";
-    constexpr const char* KilometerUnit = "Km";
-    constexpr const char* ParsecUnit = "pc";
-    constexpr const char* KiloparsecUnit = "Kpc";
-    constexpr const char* MegaparsecUnit = "Mpc";
-    constexpr const char* GigaparsecUnit = "Gpc";
-    constexpr const char* GigalightyearUnit = "Gly";
 
     constexpr const int RenderOptionViewDirection = 0;
     constexpr const int RenderOptionPositionNormal = 1;
@@ -139,84 +130,59 @@ namespace {
         "Render Option",
         "Debug option for rendering of billboards and texts."
     };
+
+    struct [[codegen::Dictionary(RenderableDUMeshes)]] Parameters {
+        // The path to the SPECK file that contains information about the astronomical
+        // object being rendered
+        std::string file;
+
+        // [[codegen::verbatim(DrawLabelInfo.description)]]
+        std::optional<bool> drawLabels;
+
+        enum class Unit {
+            Meter [[codegen::key("m")]],
+            Kilometer [[codegen::key("Km")]],
+            Parsec [[codegen::key("pc")]],
+            Kiloparsec [[codegen::key("Kpc")]],
+            MegaParsec [[codegen::key("Mpc")]],
+            Gigaparsec [[codegen::key("Gpc")]],
+            Gigalightyears [[codegen::key("Gly")]]
+        };
+        std::optional<Unit> unit;
+
+        // [[codegen::verbatim(TextColorInfo.description)]]
+        std::optional<glm::vec3> textColor;
+
+        // [[codegen::verbatim(TextOpacityInfo.description)]]
+        std::optional<float> textOpacity;
+
+        // [[codegen::verbatim(TextSizeInfo.description)]]
+        std::optional<float> textSize;
+
+        // [[codegen::verbatim(LabelFileInfo.description)]]
+        std::optional<std::string> labelFile;
+
+        // [[codegen::verbatim(LabelMinSizeInfo.description)]]
+        std::optional<float> textMinSize;
+
+        // [[codegen::verbatim(LabelMaxSizeInfo.description)]]
+        std::optional<float> textMaxSize;
+
+        // [[codegen::verbatim(LineWidthInfo.description)]]
+        std::optional<float> lineWidth;
+
+        // [[codegen::verbatim(MeshColorInfo.description)]]
+        std::optional<std::vector<glm::vec3>> meshColor;
+    };
+#include "renderabledumeshes_codegen.cpp"
 }  // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableDUMeshes::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderableDUMeshes",
-        "digitaluniverse_renderabledumeshes",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("RenderableDUMeshes"),
-                Optional::No
-            },
-            {
-                KeyFile,
-                new StringVerifier,
-                Optional::No,
-                "The path to the SPECK file that contains information about the "
-                "astronomical object being rendered."
-            },
-            {
-                DrawLabelInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                DrawLabelInfo.description
-            },
-            {
-                TextColorInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                TextColorInfo.description
-            },
-            {
-                TextOpacityInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                TextOpacityInfo.description
-            },
-            {
-                TextSizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                TextSizeInfo.description
-            },
-            {
-                LabelFileInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                LabelFileInfo.description
-            },
-            {
-                LabelMinSizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                LabelMinSizeInfo.description
-            },
-            {
-                LabelMaxSizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                LabelMaxSizeInfo.description
-            },
-            {
-                LineWidthInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                LineWidthInfo.description
-            },
-            {
-                MeshColorInfo.identifier,
-                new Vector3ListVerifier<double>,
-                Optional::No,
-                MeshColorInfo.description
-            },
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "digitaluniverse_renderabledumeshes";
+    return doc;
 }
 
 RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
@@ -231,24 +197,20 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     , _lineWidth(LineWidthInfo, 2.f, 0.f, 16.f)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableDUMeshes"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
 
-    if (dictionary.hasKey(KeyFile)) {
-        _speckFile = absPath(dictionary.value<std::string>(KeyFile));
-        _hasSpeckFile = true;
-        _drawElements.onChange([&]() { _hasSpeckFile = !_hasSpeckFile; });
-        addProperty(_drawElements);
-    }
+    _speckFile = absPath(p.file);
+    _hasSpeckFile = true;
+    _drawElements.onChange([&]() { _hasSpeckFile = !_hasSpeckFile; });
+    addProperty(_drawElements);
 
     _renderOption.addOption(RenderOptionViewDirection, "Camera View Direction");
     _renderOption.addOption(RenderOptionPositionNormal, "Camera Position Normal");
+    // @TODO (abock. 2021-01-31) In the other DU classes, this is done with an enum, and
+    // doing it based on the fisheye rendering seems a bit brittle?
     if (global::windowDelegate->isFisheyeRendering()) {
         _renderOption = RenderOptionPositionNormal;
     }
@@ -257,96 +219,69 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     }
     addProperty(_renderOption);
 
-    if (dictionary.hasKey(keyUnit)) {
-        std::string unit = dictionary.value<std::string>(keyUnit);
-        if (unit == MeterUnit) {
-            _unit = Meter;
+    if (p.unit.has_value()) {
+        switch (*p.unit) {
+            case Parameters::Unit::Meter:
+                _unit = Meter;
+                break;
+            case Parameters::Unit::Kilometer:
+                _unit = Kilometer;
+                break;
+            case Parameters::Unit::Parsec:
+                _unit = Parsec;
+                break;
+            case Parameters::Unit::Kiloparsec:
+                _unit = Kiloparsec;
+                break;
+            case Parameters::Unit::MegaParsec:
+                _unit = Megaparsec;
+                break;
+            case Parameters::Unit::Gigaparsec:
+                _unit = Gigaparsec;
+                break;
+            case Parameters::Unit::Gigalightyears:
+                _unit = GigalightYears;
+                break;
         }
-        else if (unit == KilometerUnit) {
-            _unit = Kilometer;
-        }
-        else if (unit == ParsecUnit) {
-            _unit = Parsec;
-        }
-        else if (unit == KiloparsecUnit) {
-            _unit = Kiloparsec;
-        }
-        else if (unit == MegaparsecUnit) {
-            _unit = Megaparsec;
-        }
-        else if (unit == GigaparsecUnit) {
-            _unit = Gigaparsec;
-        }
-        else if (unit == GigalightyearUnit) {
-            _unit = GigalightYears;
-        }
-        else {
-            LWARNING("No unit given for RenderableDUMeshes. Using meters as units.");
-            _unit = Meter;
-        }
+    }
+    else {
+        LWARNING("No unit given for RenderableDUMeshes. Using meters as units.");
+        _unit = Meter;
     }
 
-    if (dictionary.hasValue<double>(LineWidthInfo.identifier)) {
-        _lineWidth = static_cast<float>(
-            dictionary.value<double>(LineWidthInfo.identifier)
-        );
-    }
+    _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
 
-    if (dictionary.hasKey(DrawLabelInfo.identifier)) {
-        _drawLabels = dictionary.value<bool>(DrawLabelInfo.identifier);
-    }
+    _drawLabels = p.drawLabels.value_or(_drawLabels);
     addProperty(_drawLabels);
 
-    if (dictionary.hasKey(LabelFileInfo.identifier)) {
-        _labelFile = absPath(dictionary.value<std::string>(LabelFileInfo.identifier));
+    if (p.labelFile.has_value()) {
+        _labelFile = absPath(*p.labelFile);
         _hasLabel = true;
 
-        if (dictionary.hasKey(TextColorInfo.identifier)) {
-            _textColor = dictionary.value<glm::dvec3>(TextColorInfo.identifier);
-            _hasLabel = true;
-        }
+        _textColor = p.textColor.value_or(_textColor);
+        _hasLabel = p.textColor.has_value();
         _textColor.setViewOption(properties::Property::ViewOptions::Color);
         addProperty(_textColor);
         _textColor.onChange([&]() { _textColorIsDirty = true; });
 
-        if (dictionary.hasKey(TextOpacityInfo.identifier)) {
-            _textOpacity = static_cast<float>(
-                dictionary.value<double>(TextOpacityInfo.identifier)
-            );
-        }
+        _textOpacity = p.textOpacity.value_or(_textOpacity);
         addProperty(_textOpacity);
 
-        if (dictionary.hasKey(TextSizeInfo.identifier)) {
-            _textSize = static_cast<float>(
-                dictionary.value<double>(TextSizeInfo.identifier)
-            );
-        }
+        _textSize = p.textSize.value_or(_textSize);
         addProperty(_textSize);
 
-        if (dictionary.hasKey(LabelMinSizeInfo.identifier)) {
-            _textMinSize = static_cast<float>(
-                floor(dictionary.value<double>(LabelMinSizeInfo.identifier))
-            );
-        }
+        _textMinSize = p.textMinSize.value_or(_textMinSize);
         addProperty(_textMinSize);
 
-        if (dictionary.hasKey(LabelMaxSizeInfo.identifier)) {
-            _textMaxSize = static_cast<float>(
-                floor(dictionary.value<double>(LabelMaxSizeInfo.identifier))
-            );
-        }
+        _textMaxSize = p.textMaxSize.value_or(_textMaxSize);
         addProperty(_textMaxSize);
     }
 
-    if (dictionary.hasKey(MeshColorInfo.identifier)) {
-        ghoul::Dictionary colorDict = dictionary.value<ghoul::Dictionary>(
-            MeshColorInfo.identifier
-        );
-        for (int i = 0; i < static_cast<int>(colorDict.size()); ++i) {
-            _meshColorMap.insert(
-                { i + 1, colorDict.value<glm::dvec3>(std::to_string(i + 1)) }
-            );
+    if (p.meshColor.has_value()) {
+        std::vector<glm::vec3> ops = *p.meshColor;
+        for (size_t i = 0; i < ops.size(); ++i) {
+            _meshColorMap.insert({ static_cast<int>(i) + 1, ops[i] });
         }
     }
 }

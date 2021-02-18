@@ -86,6 +86,7 @@ public:
     void touchDetectionCallback(TouchInput input);
     void touchUpdateCallback(TouchInput input);
     void touchExitCallback(TouchInput input);
+    void handleDragDrop(const std::string& file);
     std::vector<std::byte> encode();
     void decode(std::vector<std::byte> data);
 
@@ -138,5 +139,12 @@ private:
 };
 
 } // namespace openspace
+
+// Lua functions - exposed for testing
+namespace openspace::luascriptfunctions {
+
+int createSingeColorImage(lua_State* L);
+
+} // openspace::luascriptfunctions
 
 #endif // __OPENSPACE_CORE___OPENSPACEENGINE___H__
