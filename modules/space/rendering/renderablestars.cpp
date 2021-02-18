@@ -308,10 +308,10 @@ namespace {
 
     struct [[codegen::Dictionary(RenderableStars)]] Parameters {
         // The path to the SPECK file containing information about the stars being rendered
-        std::string speckFile [[codegen::key("File")]];
+        std::filesystem::path speckFile [[codegen::key("File")]];
 
         // [[codegen::verbatim(ColorTextureInfo.description)]]
-        std::string colorMap;
+        std::filesystem::path colorMap;
 
         enum class ColorOption {
             Color,
@@ -350,7 +350,7 @@ namespace {
         std::string renderMethod;
 
         // [[codegen::verbatim(PsfTextureInfo.description)]]
-        std::string texture;
+        std::filesystem::path texture;
 
         // [[codegen::verbatim(SizeCompositionOptionInfo.description)]]
         std::optional<std::string> sizeComposition;
@@ -434,11 +434,11 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
 
-    _speckFile = absPath(p.speckFile);
+    _speckFile = p.speckFile.string();
     _speckFile.onChange([&]() { _speckFileIsDirty = true; });
     addProperty(_speckFile);
 
-    _colorTexturePath = absPath(p.colorMap);
+    _colorTexturePath = p.colorMap.string();
     _colorTextureFile = std::make_unique<File>(_colorTexturePath);
 
     /*_shapeTexturePath = absPath(dictionary.value<std::string>(
@@ -525,7 +525,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         _renderingMethodOption = RenderOptionTexture;
     }
 
-    _pointSpreadFunctionTexturePath = absPath(p.texture);
+    _pointSpreadFunctionTexturePath = absPath(p.texture.string());
     _pointSpreadFunctionFile = std::make_unique<File>(_pointSpreadFunctionTexturePath);
     _pointSpreadFunctionTexturePath.onChange([&]() {
         _pointSpreadFunctionTextureIsDirty = true;
@@ -1237,13 +1237,13 @@ void RenderableStars::loadShapeTexture() {
 */
 
 void RenderableStars::loadData() {
-    std::string _file = _speckFile;
-    if (!FileSys.fileExists(absPath(_file))) {
+    std::string file = absPath(_speckFile);
+    if (!FileSys.fileExists(file)) {
         return;
     }
 
     std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-        _file,
+        file,
         ghoul::filesystem::CacheManager::Persistent::Yes
     );
 
@@ -1255,7 +1255,7 @@ void RenderableStars::loadData() {
     bool hasCachedFile = FileSys.fileExists(cachedFile);
     if (hasCachedFile) {
         LINFO(fmt::format("Cached file '{}' used for Speck file '{}'",
-            cachedFile, _file
+            cachedFile, file
         ));
 
         bool success = loadCachedFile(cachedFile);
@@ -1263,15 +1263,15 @@ void RenderableStars::loadData() {
             return;
         }
         else {
-            FileSys.cacheManager()->removeCacheFile(_file);
+            FileSys.cacheManager()->removeCacheFile(file);
             // Intentional fall-through to the 'else' computation to generate the cache
             // file for the next run
         }
     }
     else {
-        LINFO(fmt::format("Cache for Speck file '{}' not found", _file));
+        LINFO(fmt::format("Cache for Speck file '{}' not found", file));
     }
-    LINFO(fmt::format("Loading Speck file '{}'", _file));
+    LINFO(fmt::format("Loading Speck file '{}'", file));
 
     readSpeckFile();
 

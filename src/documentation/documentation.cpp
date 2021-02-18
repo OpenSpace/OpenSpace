@@ -71,14 +71,18 @@ std::string to_string(const openspace::documentation::TestResult& value) {
     }
     else {
         std::stringstream stream;
-        stream << "Failure." << '\n';
+        stream << "Specification Failure. ";
 
         for (const TestResult::Offense& offense : value.offenses) {
-            stream << "  " << ghoul::to_string(offense) << '\n';
+            stream << fmt::format(" {}", ghoul::to_string(offense));
+            if (!offense.explanation.empty()) {
+                stream << fmt::format(" ({})", offense.explanation);
+            }
+            stream << '\n';
         }
 
         for (const TestResult::Warning& warning : value.warnings) {
-            stream << "  " << ghoul::to_string(warning) << '\n';
+            stream << fmt::format(" {}\n", ghoul::to_string(warning));
         }
 
         return stream.str();
@@ -129,17 +133,26 @@ namespace openspace::documentation {
 
 const std::string DocumentationEntry::Wildcard = "*";
 
+//std::string concatenate(const std::vector<TestResult::Offense>& offenses) {
+//    std::string result = "Error in specification (";
+//    for (const TestResult::Offense& o : offenses) {
+//        if (o.explanation.empty()) {
+//            result += fmt::format("{} ({}), ", o.offender, ghoul::to_string(o.reason));
+//        }
+//        else {
+//            result += fmt::format("{} ({}: {}), ", o.offender, ghoul::to_string(o.reason), o.explanation);
+//        }
+//    }
+//    result.pop_back();
+//    result.back() = ')';
+//    return result;
+//}
+
 SpecificationError::SpecificationError(TestResult res, std::string comp)
     : ghoul::RuntimeError("Error in specification", std::move(comp))
     , result(std::move(res))
 {
     ghoul_assert(!result.success, "Result's success must be false");
-
-    message += " (";
-    for (const TestResult::Offense& o : result.offenses) {
-        message += o.offender + ',';
-    }
-    message.back() = ')';
 }
 
 DocumentationEntry::DocumentationEntry(std::string k, std::shared_ptr<Verifier> v,

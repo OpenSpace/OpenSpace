@@ -159,6 +159,28 @@ struct StringVerifier : public TemplateVerifier<std::string> {
 };
 
 /**
+ * A Verifier that checks whether a given key inside a ghoul::Dictionary is a string and
+ * refers to an existing file on disk.
+ */
+struct FileVerifier : public StringVerifier {
+    TestResult operator()(const ghoul::Dictionary& dict,
+        const std::string& key) const override;
+
+    std::string type() const override;
+};
+
+/**
+* A Verifier that checks whether a given key inside a ghoul::Dictionary is a string and
+* refers to an existing directory on disk.
+*/
+struct DirectoryVerifier : public StringVerifier {
+    TestResult operator()(const ghoul::Dictionary& dict,
+        const std::string& key) const override;
+
+    std::string type() const override;
+};
+
+/**
  * A Verifier that checks whether a given key inside a ghoul::Dictionary is another
  * ghoul::Dictionary. The constructor takes a list of DocumentationEntry%s, which are used
  * recursively to check the contained table. If this list is empty, a simple type testing
@@ -243,27 +265,35 @@ struct IntListVerifier : public TableVerifier {
  */
 struct VectorVerifier {};
 
-/**
- * This Verifier checks whether the value is of type <code>glm::tvec2<T></code>
- */
+/// This Verifier checks whether the value is of type <code>glm::tvec2<T></code>
 template <typename T>
 struct Vector2Verifier : public TemplateVerifier<glm::tvec2<T>>, public VectorVerifier {
     std::string type() const override;
 };
 
-/**
- * This Verifier checks whether the value is of type <code>glm::tvec3<T></code>
- */
+/// This Verifier checks whether the value is of type <code>glm::tvec3<T></code>
 template <typename T>
 struct Vector3Verifier : public TemplateVerifier<glm::tvec3<T>>, public VectorVerifier {
     std::string type() const override;
 };
 
-/**
- * This Verifier checks whether the value is of type <code>glm::tvec4<T></code>
- */
+/// This Verifier checks whether the value is of type <code>glm::tvec4<T></code>
 template <typename T>
 struct Vector4Verifier : public TemplateVerifier<glm::tvec4<T>>, public VectorVerifier {
+    std::string type() const override;
+};
+
+struct Color3Verifier : public Vector3Verifier<double> {
+    TestResult operator()(const ghoul::Dictionary& dictionary,
+        const std::string& key) const override;
+
+    std::string type() const override;
+};
+
+struct Color4Verifier : public Vector4Verifier<double> {
+    TestResult operator()(const ghoul::Dictionary& dictionary,
+        const std::string& key) const override;
+
     std::string type() const override;
 };
 
@@ -273,9 +303,10 @@ struct Vector4Verifier : public TemplateVerifier<glm::tvec4<T>>, public VectorVe
  */
 template <typename T>
 struct Vector2ListVerifier : public TableVerifier {
-    Vector2ListVerifier(std::string elementDocumentation = "") : TableVerifier({
+    Vector2ListVerifier(std::string elementDocumentation = "")
+        : TableVerifier({
             { "*", new Vector2Verifier<T>, Optional::No, std::move(elementDocumentation) }
-    })
+        })
     {}
 
     std::string type() const override {
@@ -289,9 +320,10 @@ struct Vector2ListVerifier : public TableVerifier {
  */
 template <typename T>
 struct Vector3ListVerifier : public TableVerifier {
-    Vector3ListVerifier(std::string elementDocumentation = "") : TableVerifier({
-        { "*", new Vector3Verifier<T>, Optional::No, std::move(elementDocumentation) }
-    })
+    Vector3ListVerifier(std::string elementDocumentation = "")
+        : TableVerifier({
+            { "*", new Vector3Verifier<T>, Optional::No, std::move(elementDocumentation) }
+        })
     {}
 
     std::string type() const override {
@@ -305,15 +337,17 @@ struct Vector3ListVerifier : public TableVerifier {
  */
 template <typename T>
 struct Vector4ListVerifier : public TableVerifier {
-    Vector4ListVerifier(std::string elementDocumentation = "") : TableVerifier({
-        { "*", new Vector4Verifier<T>, Optional::No, std::move(elementDocumentation) }
-    })
+    Vector4ListVerifier(std::string elementDocumentation = "")
+        : TableVerifier({
+            { "*", new Vector4Verifier<T>, Optional::No, std::move(elementDocumentation) }
+        })
     {}
 
     std::string type() const override {
         return "List of ints";
     }
 };
+
 //----------------------------------------------------------------------------------------
 // Matrix verifiers
 //----------------------------------------------------------------------------------------
@@ -330,8 +364,7 @@ struct MatrixVerifier {};
  * This Verifier checks whether the value is of type <code>glm::mat2x2<T></code>
  */
 template <typename T>
-struct Matrix2x2Verifier :
-    public TemplateVerifier<glm::tmat2x2<T>>, public MatrixVerifier
+struct Matrix2x2Verifier : public TemplateVerifier<glm::tmat2x2<T>>, public MatrixVerifier
 {
     std::string type() const override;
 };
@@ -340,8 +373,8 @@ struct Matrix2x2Verifier :
  * This Verifier checks whether the value is of type <code>glm::mat2x3<T></code>
  */
 template <typename T>
-struct Matrix2x3Verifier :
-    public TemplateVerifier<glm::tmat2x3<T>>, public MatrixVerifier {
+struct Matrix2x3Verifier : public TemplateVerifier<glm::tmat2x3<T>>, public MatrixVerifier
+{
     std::string type() const override;
 };
 
@@ -349,8 +382,8 @@ struct Matrix2x3Verifier :
  * This Verifier checks whether the value is of type <code>glm::mat2x4<T></code>
  */
 template <typename T>
-struct Matrix2x4Verifier :
-    public TemplateVerifier<glm::tmat2x4<T>>, public MatrixVerifier {
+struct Matrix2x4Verifier : public TemplateVerifier<glm::tmat2x4<T>>, public MatrixVerifier
+{
     std::string type() const override;
 };
 
@@ -358,8 +391,8 @@ struct Matrix2x4Verifier :
  * This Verifier checks whether the value is of type <code>glm::mat3x2<T></code>
  */
 template <typename T>
-struct Matrix3x2Verifier :
-    public TemplateVerifier<glm::tmat3x2<T>>, public MatrixVerifier {
+struct Matrix3x2Verifier : public TemplateVerifier<glm::tmat3x2<T>>, public MatrixVerifier
+{
     std::string type() const override;
 };
 
@@ -367,8 +400,8 @@ struct Matrix3x2Verifier :
  * This Verifier checks whether the value is of type <code>glm::mat3x3<T></code>
  */
 template <typename T>
-struct Matrix3x3Verifier :
-    public TemplateVerifier<glm::tmat3x3<T>>, public MatrixVerifier {
+struct Matrix3x3Verifier : public TemplateVerifier<glm::tmat3x3<T>>, public MatrixVerifier
+{
     std::string type() const override;
 };
 
@@ -376,8 +409,8 @@ struct Matrix3x3Verifier :
  * This Verifier checks whether the value is of type <code>glm::mat3x4<T></code>
  */
 template <typename T>
-struct Matrix3x4Verifier :
-    public TemplateVerifier<glm::tmat3x4<T>>, public MatrixVerifier {
+struct Matrix3x4Verifier : public TemplateVerifier<glm::tmat3x4<T>>, public MatrixVerifier
+{
     std::string type() const override;
 };
 
@@ -385,8 +418,8 @@ struct Matrix3x4Verifier :
  * This Verifier checks whether the value is of type <code>glm::mat4x2<T></code>
  */
 template <typename T>
-struct Matrix4x2Verifier :
-    public TemplateVerifier<glm::tmat4x2<T>>, public MatrixVerifier {
+struct Matrix4x2Verifier : public TemplateVerifier<glm::tmat4x2<T>>, public MatrixVerifier
+{
     std::string type() const override;
 };
 
@@ -394,8 +427,8 @@ struct Matrix4x2Verifier :
  * This Verifier checks whether the value is of type <code>glm::mat4x3<T></code>
  */
 template <typename T>
-struct Matrix4x3Verifier :
-    public TemplateVerifier<glm::tmat4x3<T>>, public MatrixVerifier {
+struct Matrix4x3Verifier : public TemplateVerifier<glm::tmat4x3<T>>, public MatrixVerifier
+{
     std::string type() const override;
 };
 
@@ -403,8 +436,8 @@ struct Matrix4x3Verifier :
  * This Verifier checks whether the value is of type <code>glm::mat4x4<T></code>
  */
 template <typename T>
-struct Matrix4x4Verifier :
-    public TemplateVerifier<glm::tmat4x4<T>>, public MatrixVerifier {
+struct Matrix4x4Verifier : public TemplateVerifier<glm::tmat4x4<T>>, public MatrixVerifier
+{
     std::string type() const override;
 };
 
@@ -465,18 +498,11 @@ struct OperatorVerifier : public T {
  */
 template <typename T>
 struct LessVerifier : public OperatorVerifier<T, std::less<typename T::Type>> {
+    static_assert(!std::is_base_of<BoolVerifier, T>::value, "T cannot be BoolVerifier");
     static_assert(
-        !std::is_base_of<BoolVerifier, T>::value,
-        "T cannot be BoolVerifier"
+        !std::is_base_of<StringVerifier, T>::value, "T cannot be StringVerifier"
     );
-    static_assert(
-        !std::is_base_of<StringVerifier, T>::value,
-        "T cannot be StringVerifier"
-    );
-    static_assert(
-        !std::is_base_of<TableVerifier, T>::value,
-        "T cannot be TableVerifier"
-    );
+    static_assert(!std::is_base_of<TableVerifier, T>::value, "T cannot be TableVerifier");
     static_assert(
         !std::is_base_of<VectorVerifier, T>::value,
         "T cannot be VectorVerifier"
@@ -496,18 +522,12 @@ struct LessVerifier : public OperatorVerifier<T, std::less<typename T::Type>> {
  */
 template <typename T>
 struct LessEqualVerifier : public OperatorVerifier<T, std::less_equal<typename T::Type>> {
-    static_assert(
-        !std::is_base_of<BoolVerifier, T>::value,
-        "T cannot be BoolVerifier"
-    );
+    static_assert(!std::is_base_of<BoolVerifier, T>::value, "T cannot be BoolVerifier");
     static_assert(
         !std::is_base_of<StringVerifier, T>::value,
         "T cannot be StringVerifier"
     );
-    static_assert(
-        !std::is_base_of<TableVerifier, T>::value,
-        "T cannot be TableVerifier"
-    );
+    static_assert(!std::is_base_of<TableVerifier, T>::value, "T cannot be TableVerifier");
     static_assert(
         !std::is_base_of<VectorVerifier, T>::value,
         "T cannot be VectorVerifier"
@@ -527,22 +547,16 @@ struct LessEqualVerifier : public OperatorVerifier<T, std::less_equal<typename T
  */
 template <typename T>
 struct GreaterVerifier : public OperatorVerifier<T, std::greater<typename T::Type>> {
-    static_assert(
-        !std::is_base_of<BoolVerifier, T>::value,
-        "T cannot be BoolVerifier"
-        );
+    static_assert(!std::is_base_of<BoolVerifier, T>::value, "T cannot be BoolVerifier");
     static_assert(
         !std::is_base_of<StringVerifier, T>::value,
         "T cannot be StringVerifier"
-        );
-    static_assert(
-        !std::is_base_of<TableVerifier, T>::value,
-        "T cannot be TableVerifier"
-        );
+    );
+    static_assert(!std::is_base_of<TableVerifier, T>::value, "T cannot be TableVerifier");
     static_assert(
         !std::is_base_of<VectorVerifier, T>::value,
         "T cannot be VectorVerifier"
-        );
+    );
 
     using OperatorVerifier<T, std::greater<typename T::Type>>::OperatorVerifier;
 
@@ -560,18 +574,12 @@ template <typename T>
 struct GreaterEqualVerifier : public OperatorVerifier<T,
                                                      std::greater_equal<typename T::Type>>
 {
-    static_assert(
-        !std::is_base_of<BoolVerifier, T>::value,
-        "T cannot be BoolVerifier"
-    );
+    static_assert(!std::is_base_of<BoolVerifier, T>::value, "T cannot be BoolVerifier");
     static_assert(
         !std::is_base_of<StringVerifier, T>::value,
         "T cannot be StringVerifier"
     );
-    static_assert(
-        !std::is_base_of<TableVerifier, T>::value,
-        "T cannot be TableVerifier"
-    );
+    static_assert(!std::is_base_of<TableVerifier, T>::value, "T cannot be TableVerifier");
     static_assert(
         !std::is_base_of<VectorVerifier, T>::value,
         "T cannot be VectorVerifier"
