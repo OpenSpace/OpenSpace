@@ -36,6 +36,8 @@ uniform sampler2DShadow shadowMapTexture;
 uniform sampler1D ringTextureFwrd;
 uniform sampler1D ringTextureBckwrd;
 uniform sampler1D ringTextureUnlit;
+uniform sampler1D ringTextureColor;
+uniform sampler1D ringTextureTransparency;
 
 uniform vec2 textureOffset;
 uniform float colorFilterValue;
@@ -70,27 +72,20 @@ Fragment getFragment() {
         discard;
     }
 
-    vec4 colorBckwrd = vec4(0.95) * texture(ringTextureBckwrd, texCoord);
-    vec4 colorFwrd   = vec4(0.5) * texture(ringTextureFwrd, texCoord);
+    vec4 colorBckwrd  = texture(ringTextureBckwrd, texCoord);
+    vec4 colorFwrd    = texture(ringTextureFwrd, texCoord);
+    vec4 colorMult    = texture(ringTextureColor, texCoord);
+    vec4 transparency = texture(ringTextureTransparency, texCoord);
+
     float lerpFactor = (1.f + dot(camPositionObj.xyz, sunPosition.xyz)) * 0.5f;
 
     // Jon Colors:
     //vec4 diffuse = mix(colorFwrd * vec4(1, 0.88, 0.82, 1.0), colorBckwrd * vec4(1, 0.88, 0.82, 1.0), lerpFactor);
-    vec4 diffuse = mix(colorFwrd, colorBckwrd, lerpFactor);
-    diffuse.a = 1.f;
-    
-    // divided by 3 as length of vec3(1.0, 1.0, 1.0) will return 3 and we want
-    // to normalize the alpha value to [0,1]
+    vec4 diffuse = mix(colorFwrd * colorMult, colorBckwrd * colorMult, lerpFactor);
+    diffuse.a =  colorFilterValue * transparency.a;
     float colorValue = length(diffuse.rgb) / 0.57735026919;
-    if (colorValue < colorFilterValue) {
-        diffuse.a = colorValue * colorFilterValue;
-        if (diffuse.a < 0.99)
-            discard;
-    } else {
-        diffuse.a = colorValue;
-        if (diffuse.a + 1 < 1.2)
-            discard;
-    }
+    if (colorValue < 0.1)
+        discard;
 
     // shadow == 1.0 means it is not in shadow
     float shadow = 1.0;
@@ -130,7 +125,9 @@ Fragment getFragment() {
     // Reduce the color of the fragment by the user factor
     // if we are facing away from the Sun
     if (dot(sunPosition, normal) < 0) {
-        diffuse.xyz = vec3(0.9) * texture(ringTextureUnlit, texCoord).xyz * _nightFactor;
+        diffuse.xyz = vec3(1.0, 0.97075, 0.952) * 
+                      texture(ringTextureUnlit, texCoord).xyz * 
+                      _nightFactor;
     }
 
     Fragment frag;

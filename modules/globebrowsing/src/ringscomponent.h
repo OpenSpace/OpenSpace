@@ -81,6 +81,8 @@ private:
     properties::StringProperty _textureFwrdPath;
     properties::StringProperty _textureBckwrdPath;
     properties::StringProperty _textureUnlitPath;
+    properties::StringProperty _textureColorPath;
+    properties::StringProperty _textureTransparencyPath;
     properties::FloatProperty _size;
     properties::Vec2Property _offset;
     properties::FloatProperty _nightFactor;
@@ -96,7 +98,8 @@ private:
     ) _uniformCache;
     UniformCache(modelViewProjectionMatrix, textureOffset, colorFilterValue, nightFactor,
         sunPosition, camPositionObj, ringTextureFwrd, ringTextureBckwrd,
-        ringTextureUnlit, shadowMatrix, shadowMapTexture, zFightingPercentage
+        ringTextureUnlit, ringTextureColor, ringTextureTransparency, shadowMatrix, 
+        shadowMapTexture, zFightingPercentage
     ) _uniformCacheAdvancedRings;
     UniformCache(modelViewProjectionMatrix, textureOffset, ringTexture
     ) _geomUniformCache;
@@ -104,10 +107,14 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _textureForwards;
     std::unique_ptr<ghoul::opengl::Texture> _textureBackwards;
     std::unique_ptr<ghoul::opengl::Texture> _textureUnlit;
+    std::unique_ptr<ghoul::opengl::Texture> _textureTransparency;
+    std::unique_ptr<ghoul::opengl::Texture> _textureColor;
     std::unique_ptr<ghoul::filesystem::File> _textureFile;
     std::unique_ptr<ghoul::filesystem::File> _textureFileForwards;
     std::unique_ptr<ghoul::filesystem::File> _textureFileBackwards;
     std::unique_ptr<ghoul::filesystem::File> _textureFileUnlit;
+    std::unique_ptr<ghoul::filesystem::File> _textureFileColor;
+    std::unique_ptr<ghoul::filesystem::File> _textureFileTransparency;
 
     ghoul::Dictionary _ringsDictionary;
     bool _textureIsDirty = false;

@@ -21,10 +21,18 @@ local Saturn = {
         SegmentsPerPatch = 64,
         Layers = {},
         Rings = {
-            Texture = texturesPath .. "/saturn_rings.png",
-            --TextureFwrd = texturesPath .. "/final_color_forward_os.png",
-            --TextureBckwrd = texturesPath .. "/final_color_backwards_os.png",
-            --TextureUnlit = texturesPath .. "/unlit_final_color_os.png",
+            -- Single Texture Values:
+            --Texture = texturesPath .. "/saturn_rings.png",
+            --ColorFilter = 0.15,
+
+            -- MultiTexture Valeus:
+            TextureFwrd = texturesPath .. "/forward_original_single.png",
+            TextureBckwrd = texturesPath .. "/back_original_single.png",
+            TextureUnlit = texturesPath .. "/unlit_original_single.png",
+            TextureColor = texturesPath .. "/color_original_single.png",
+            TextureTransparency = texturesPath .. "/trans_original_single.png",
+            ColorFilter = 0.8,
+            
             NightFactor = 1.0,
             Size = 140445000,
             Offset = { 74500 / 140445.100671159, 1.0 }, -- min / max extend
