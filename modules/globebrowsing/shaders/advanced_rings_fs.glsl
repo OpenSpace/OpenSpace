@@ -43,6 +43,7 @@ uniform vec2 textureOffset;
 uniform float colorFilterValue;
 
 uniform vec3 sunPosition;
+uniform vec3 sunPositionObj;
 uniform vec3 camPositionObj;
 uniform float _nightFactor;
 uniform float zFightingPercentage;
@@ -73,11 +74,11 @@ Fragment getFragment() {
     }
 
     vec4 colorBckwrd  = texture(ringTextureBckwrd, texCoord);
-    vec4 colorFwrd    = texture(ringTextureFwrd, texCoord);
+    vec4 colorFwrd    = vec4(0.8, 0.8, 0.8, 1.0) * texture(ringTextureFwrd, texCoord);
     vec4 colorMult    = texture(ringTextureColor, texCoord);
     vec4 transparency = texture(ringTextureTransparency, texCoord);
 
-    float lerpFactor = (1.f + dot(camPositionObj.xyz, sunPosition.xyz)) * 0.5f;
+    float lerpFactor =  dot(camPositionObj, sunPositionObj);
 
     // Jon Colors:
     //vec4 diffuse = mix(colorFwrd * vec4(1, 0.88, 0.82, 1.0), colorBckwrd * vec4(1, 0.88, 0.82, 1.0), lerpFactor);

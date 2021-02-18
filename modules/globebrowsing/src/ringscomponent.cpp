@@ -59,11 +59,11 @@ namespace {
         "zFightingPercentage"
     };
 
-    constexpr const std::array<const char*, 14> UniformNamesAdvancedRings = {
+    constexpr const std::array<const char*, 15> UniformNamesAdvancedRings = {
         "modelViewProjectionMatrix", "textureOffset", "colorFilterValue", "_nightFactor",
-        "sunPosition", "camPositionObj", "ringTextureFwrd", "ringTextureBckwrd", 
-        "ringTextureUnlit", "ringTextureColor", "ringTextureTransparency", "shadowMatrix", 
-        "shadowMapTexture", "zFightingPercentage"
+        "sunPosition", "sunPositionObj", "camPositionObj", "ringTextureFwrd", 
+        "ringTextureBckwrd", "ringTextureUnlit", "ringTextureColor", 
+        "ringTextureTransparency", "shadowMatrix", "shadowMapTexture", "zFightingPercentage"
     };
 
     constexpr const std::array<const char*, 3> GeomUniformNames = {
@@ -476,6 +476,17 @@ void RingsComponent::draw(const RenderData& data,
             _shader->setUniform(_uniformCacheAdvancedRings.colorFilterValue, _colorFilter);
             _shader->setUniform(_uniformCacheAdvancedRings.nightFactor, _nightFactor);
             _shader->setUniform(_uniformCacheAdvancedRings.sunPosition, _sunPosition);
+            
+            const glm::dmat4 inverseModelTransform = glm::inverse(modelTransform);
+
+            glm::vec3 sunPositionObjectSpace = glm::normalize(
+                glm::vec3(inverseModelTransform * glm::vec4(_sunPosition, 0.0))
+            );
+
+            _shader->setUniform(
+                _uniformCacheAdvancedRings.sunPositionObj, 
+                sunPositionObjectSpace
+            );
             _shader->setUniform(
                 _uniformCacheAdvancedRings.zFightingPercentage, 
                 _zFightingPercentage

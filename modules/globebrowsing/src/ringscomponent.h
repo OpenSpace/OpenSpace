@@ -97,7 +97,7 @@ private:
         sunPosition, ringTexture, shadowMatrix, shadowMapTexture, zFightingPercentage
     ) _uniformCache;
     UniformCache(modelViewProjectionMatrix, textureOffset, colorFilterValue, nightFactor,
-        sunPosition, camPositionObj, ringTextureFwrd, ringTextureBckwrd,
+        sunPosition, sunPositionObj, camPositionObj, ringTextureFwrd, ringTextureBckwrd,
         ringTextureUnlit, ringTextureColor, ringTextureTransparency, shadowMatrix, 
         shadowMapTexture, zFightingPercentage
     ) _uniformCacheAdvancedRings;
