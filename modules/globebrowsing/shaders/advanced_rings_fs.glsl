@@ -74,7 +74,7 @@ Fragment getFragment() {
     }
 
     vec4 colorBckwrd  = texture(ringTextureBckwrd, texCoord);
-    vec4 colorFwrd    = vec4(0.8, 0.8, 0.8, 1.0) * texture(ringTextureFwrd, texCoord);
+    vec4 colorFwrd    = texture(ringTextureFwrd, texCoord);
     vec4 colorMult    = texture(ringTextureColor, texCoord);
     vec4 transparency = texture(ringTextureTransparency, texCoord);
 
