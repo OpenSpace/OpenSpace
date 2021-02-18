@@ -26,6 +26,10 @@
 
 namespace openspace {
 
+#ifdef _DEBUG
+uint64_t EventEngine::nEvents = 0;
+#endif // _DEBUG
+
 events::Event* EventEngine::firstEvent() const {
     return _firstEvent;
 }
@@ -34,6 +38,9 @@ void EventEngine::postFrameCleanup() {
     _memory.reset();
     _firstEvent = nullptr;
     _lastEvent = nullptr;
+#ifdef _DEBUG
+    nEvents = 0;
+#endif // _DEBUG
 }
 
 } // namespace openspace

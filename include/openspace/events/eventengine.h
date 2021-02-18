@@ -39,11 +39,18 @@ public:
     void publishEvent(Args&&... args);
 
     void postFrameCleanup();
-
+    
 private:
-    ghoul::MemoryPool<4096> _memory;
+    //ghoul::MemoryPool<64> _memory;
+    //ghoul::MemoryPool<4096> _memory;
+    //ghoul::MemoryPool<20480> _memory;
+    ghoul::MemoryPool<40960> _memory;
     events::Event* _firstEvent = nullptr;
     events::Event* _lastEvent = nullptr;
+
+#ifdef _DEBUG
+    static uint64_t nEvents;
+#endif // _DEBUG
 };
 
 //
@@ -61,6 +68,10 @@ void EventEngine::publishEvent(Args&&... args) {
         _lastEvent->next = e;
         _lastEvent = e;
     }
+
+#ifdef _DEBUG
+    nEvents++;
+#endif // _DEBUG
 }
 
 } // namespace openspace

@@ -72,11 +72,11 @@ namespace {
     // in some random global randoms
 #ifdef WIN32
     constexpr const int TotalSize =
+        sizeof(EventEngine) +
         sizeof(ghoul::fontrendering::FontManager) +
         sizeof(Dashboard) +
         sizeof(DeferredcasterManager) +
         sizeof(DownloadManager) +
-        sizeof(EventEngine) +
         sizeof(LuaConsole) +
         sizeof(MemoryManager) +
         sizeof(MissionManager) +
@@ -122,6 +122,14 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
+    eventEngine = new (currentPos) EventEngine;
+    ghoul_assert(eventEngine, "No eventEngine");
+    currentPos += sizeof(EventEngine);
+#else // ^^^ WIN32 / !WIN32 vvv
+    downloadManager = new EventEngine;
+#endif // WIN32
+
+#ifdef WIN32
     fontManager = new (currentPos) ghoul::fontrendering::FontManager({ 1536, 1536, 1 });
     ghoul_assert(fontManager, "No fontManager");
     currentPos += sizeof(ghoul::fontrendering::FontManager);
@@ -151,14 +159,6 @@ void create() {
     currentPos += sizeof(DownloadManager);
 #else // ^^^ WIN32 / !WIN32 vvv
     downloadManager = new DownloadManager;
-#endif // WIN32
-
-#ifdef WIN32
-    eventEngine = new (currentPos) EventEngine;
-    ghoul_assert(eventEngine, "No eventEngine");
-    currentPos += sizeof(EventEngine);
-#else // ^^^ WIN32 / !WIN32 vvv
-    downloadManager = new EventEngine;
 #endif // WIN32
 
 #ifdef WIN32
@@ -597,13 +597,6 @@ void destroy() {
     delete luaConsole;
 #endif // WIN32
 
-    LDEBUGC("Globals", "Destroying 'EventEngine'");
-#ifdef WIN32
-    eventEngine->~EventEngine();
-#else // ^^^ WIN32 / !WIN32 vvv
-    delete eventEngine;
-#endif // WIN32
-
     LDEBUGC("Globals", "Destroying 'DownloadManager'");
 #ifdef WIN32
     downloadManager->~DownloadManager();
@@ -630,6 +623,13 @@ void destroy() {
     fontManager->~FontManager();
 #else // ^^^ WIN32 / !WIN32 vvv
     delete fontManager;
+#endif // WIN32
+
+    LDEBUGC("Globals", "Destroying 'EventEngine'");
+#ifdef WIN32
+    eventEngine->~EventEngine();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete eventEngine;
 #endif // WIN32
 
     callback::destroy();
