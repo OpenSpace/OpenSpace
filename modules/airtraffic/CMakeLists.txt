@@ -37,7 +37,9 @@ set(SOURCE_FILES
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
-  #Add Shader files
+  shaders/airtraffic_vs.glsl
+  shaders/airtraffic_fs.glsl
+  shaders/airtraffic_ge.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 

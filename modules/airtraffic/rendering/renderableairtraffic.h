@@ -79,17 +79,16 @@ private:
         float barometricAltitude = 0.f;
         //float geometricAltitude = 0.f; // Not used at the moment
         float velocity = 0.f; 
-        int lastContact = 0; // Draw only if changed
         float flightDirection = 0.f; // true_track in data
-        float time = 0.f; // Maybe not needed
+        int lastContact = 0; // Draw only if changed
     };
     
     
     // Backend storage for veretex buffer object containing all points for this trail
     std::vector<AircraftVBOLayout>  _vertexBufferData;
 
-    GLuint _vertexArray;
-    GLuint _vertexBuffer;
+    GLuint _vertexArray = 0;
+    GLuint _vertexBuffer = 0;
   
     json _data;
     const std::string _url = "https://opensky-network.org/api/states/all";

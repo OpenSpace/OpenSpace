@@ -41,7 +41,8 @@ namespace openspace {
 namespace documentation { struct Documentation; }
 
 RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
-    : Renderable(dictionary) {}
+    : Renderable(dictionary)
+    {}
 
     void RenderableAirTraffic::initialize() {
         fetchData();
@@ -130,23 +131,14 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
 
 
         for (auto& aircraft : _data["states"]){
-            float latitude = 0.f;
-            float longitude = 0.f;
-            float barometricAltitude = 0.f;
-            //float geometricAltitude = 0.f; // Not used at the moment
-            float velocity = 0.f;
-            int lastContact = 0; // Draw only if changed
-            float flightDirection = 0.f; // true_track in data
-            float time = 0.f; // Maybe not needed
 
-            // Extract data for shader
-            _vertexBufferData[vertexBufIdx].lastContact = _data["states"][vertexBufIdx][4];
-            _vertexBufferData[vertexBufIdx].longitude = _data["states"][vertexBufIdx][5];
-            _vertexBufferData[vertexBufIdx].latitude = _data["states"][vertexBufIdx][6];
-            _vertexBufferData[vertexBufIdx].barometricAltitude = _data["states"][vertexBufIdx][7];
-            _vertexBufferData[vertexBufIdx].velocity = _data["states"][vertexBufIdx][9];
-            _vertexBufferData[vertexBufIdx].flightDirection = _data["states"][vertexBufIdx][10];
-            _vertexBufferData[vertexBufIdx].time = _data["time"];
+            // Extract data and add to vertex buffer
+            _vertexBufferData[vertexBufIdx].lastContact = static_cast<int>(aircraft[4]); // i.e time_position
+            _vertexBufferData[vertexBufIdx].longitude = static_cast<float>(aircraft[5]);
+            _vertexBufferData[vertexBufIdx].latitude = static_cast<float>(aircraft[6]);
+            _vertexBufferData[vertexBufIdx].barometricAltitude = static_cast<float>(aircraft[7]);
+            _vertexBufferData[vertexBufIdx].velocity = static_cast<float>(aircraft[9]);
+            _vertexBufferData[vertexBufIdx].flightDirection = aircraft[10];
 
             vertexBufIdx++;
         }
@@ -161,17 +153,38 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
             GL_STATIC_DRAW
         );
 
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(AircraftVBOLayout),  nullptr);
 
+        // Lat, long, alt: at pos 0 send 3 float from AircraftVBOLayout
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(
+            0, 
+            3, 
+            GL_FLOAT, 
+            GL_FALSE, 
+            sizeof(AircraftVBOLayout),  
+            nullptr
+        );
+
+        // Velocity & flight direction
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(
             1,
             2,
-            GL_DOUBLE,
+            GL_INT,
             GL_FALSE,
             sizeof(AircraftVBOLayout),
-            reinterpret_cast<GLvoid*>(4 * sizeof(GL_FLOAT))
+            reinterpret_cast<GLvoid*>(3 * sizeof(GL_FLOAT)) // star
+        );
+
+        // Last contact
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(
+            2,
+            1,
+            GL_FLOAT,
+            GL_FALSE,
+            sizeof(AircraftVBOLayout),
+            reinterpret_cast<GLvoid*>(5 * sizeof(GL_FLOAT))
         );
 
         glBindVertexArray(0);
