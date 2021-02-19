@@ -128,17 +128,18 @@ Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
     }
 
     if (!layerDict.hasValue<std::string>("Identifier")) {
-        LERROR("'Identifier' must be specified for layer.");
+        LERROR("'Identifier' must be specified for layer");
         return nullptr;
     }
-    std::unique_ptr<Layer> layer = std::make_unique<Layer>(_groupId, layerDict, *this);
-    layer->onChange(_onChangeCallback);
-    if (hasPropertySubOwner(layer->identifier())) {
-        LINFO("Layer with identifier " + layer->identifier() + " already exists.");
+    std::string identifier = layerDict.value<std::string>("Identifier");
+    if (hasPropertySubOwner(identifier)) {
+        LINFO("Layer with identifier '" + identifier + "' already exists");
         _levelBlendingEnabled.setVisibility(properties::Property::Visibility::User);
         return nullptr;
     }
 
+    std::unique_ptr<Layer> layer = std::make_unique<Layer>(_groupId, layerDict, *this);
+    layer->onChange(_onChangeCallback);
     Layer* ptr = layer.get();
     _layers.push_back(std::move(layer));
     update();
