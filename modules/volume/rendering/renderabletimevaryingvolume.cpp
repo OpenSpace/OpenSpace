@@ -219,30 +219,32 @@ namespace openspace::volume {
             });
         _gridType = static_cast<int>(volume::VolumeGridType::Cartesian);
 
-        if (dictionary.hasKeyAndValue<float>(KeyStepSize)) {
-            _stepSize = dictionary.value<float>(KeyStepSize);
+        if (dictionary.hasValue<double>(KeyStepSize)) {
+            _stepSize = static_cast<float>(dictionary.value<double>(KeyStepSize));
         }
 
-        if (dictionary.hasValue<float>(KeyOpacity)) {
-            _opacity = dictionary.value<float>(KeyOpacity) * VolumeMaxOpacity;
+        if (dictionary.hasValue<double>(KeyOpacity)) {
+            _opacity = static_cast<float>(dictionary.value<double>(KeyOpacity) * VolumeMaxOpacity);
         }
 
-        if (dictionary.hasKeyAndValue<float>(KeySecondsBefore)) {
-            _secondsBefore = dictionary.value<float>(KeySecondsBefore);
+        if (dictionary.hasValue<double>(KeySecondsBefore)) {
+            _secondsBefore = static_cast<float>(dictionary.value<double>(KeySecondsBefore));
         }
-        _secondsAfter = dictionary.value<float>(KeySecondsAfter);
+        _secondsAfter = static_cast<float>(dictionary.value<double>(KeySecondsAfter));
 
-        if (dictionary.hasKey(KeyInvertDataAtZ)) {
+        if (dictionary.hasKey(static_cast<std::string>(KeyInvertDataAtZ))) {
             _invertDataAtZ = dictionary.value<bool>(KeyInvertDataAtZ);
         }
 
         ghoul::Dictionary clipPlanesDictionary;
-        dictionary.getValue(KeyClipPlanes, clipPlanesDictionary);
+        if (dictionary.hasValue<ghoul::Dictionary>(KeyClipPlanes)) {
+            clipPlanesDictionary = dictionary.value<ghoul::Dictionary>(KeyClipPlanes);
+        }
         _clipPlanes = std::make_shared<volume::VolumeClipPlanes>(clipPlanesDictionary);
         _clipPlanes->setIdentifier("clipPlanes");
         _clipPlanes->setGuiName("Clip Planes");
 
-        if (dictionary.hasKeyAndValue<std::string>(KeyGridType)) {
+        if (dictionary.hasValue<std::string>(KeyGridType)) {
             VolumeGridType gridType = volume::parseGridType(
                 dictionary.value<std::string>(KeyGridType)
             );
@@ -363,9 +365,9 @@ namespace openspace::volume {
         _transferFunctionPath.onChange([this] {
             _transferFunction = std::make_shared<openspace::TransferFunction>(
                 _transferFunctionPath
-                );
+            );
             _raycaster->setTransferFunction(_transferFunction);
-            });
+        });
     }
 
     void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) {

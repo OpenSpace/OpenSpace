@@ -34,7 +34,7 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/triggerproperty.h>
  // #include <modules/volume/rawvolume.h>
-#include <modules/volume/rawvolumemetadata.h>
+// #include <modules/volume/rawvolumemetadata.h>
 // #include <modules/volume/rendering/basicvolumeraycaster.h>
 // #include <modules/volume/rendering/volumeclipplanes.h>
 
@@ -43,16 +43,16 @@
 // #include <openspace/properties/stringproperty.h>
 // #include <openspace/util/boxgeometry.h>
 // #include <openspace/util/histogram.h>
-// #include <openspace/rendering/transferfunction.h>
+ #include <openspace/rendering/transferfunction.h>
 
 namespace openspace {
     class Histogram;
     struct RenderData;
-    class TransferFunction;
 } // namespace openspace
 
 namespace openspace::volume {
 
+    //class TransferFunction;
     class BasicVolumeRaycaster;
     template <typename T> class RawVolume;
     class VolumeClipPlanes;
