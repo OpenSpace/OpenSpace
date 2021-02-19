@@ -85,8 +85,9 @@ Fragment getFragment() {
     vec4 diffuse = mix(colorFwrd * colorMult, colorBckwrd * colorMult, lerpFactor);
     diffuse.a =  colorFilterValue * transparency.a;
     float colorValue = length(diffuse.rgb) / 0.57735026919;
-    if (colorValue < 0.1)
+    if (colorValue < 0.1) {
         discard;
+    }
 
     // shadow == 1.0 means it is not in shadow
     float shadow = 1.0;

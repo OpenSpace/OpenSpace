@@ -562,7 +562,8 @@ void RingsComponent::draw(const RenderData& data,
             glEnablei(GL_BLEND, 0);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        } else {
+        }
+        else {
             _shader->setUniform(
                 _uniformCache.modelViewProjectionMatrix,
                 modelViewProjectionTransform
@@ -880,14 +881,14 @@ void RingsComponent::compileShadowShader() {
 
     try {
         global::renderEngine->removeRenderProgram(_shader.get());
-       /* _shader = global::renderEngine->buildRenderProgram(
-            "RingsProgram",
-            absPath("${MODULE_GLOBEBROWSING}/shaders/rings_vs.glsl"),
-            absPath("${MODULE_GLOBEBROWSING}/shaders/rings_fs.glsl"),
-            dict
-        );
+        // _shader = global::renderEngine->buildRenderProgram(
+        //     "RingsProgram",
+        //     absPath("${MODULE_GLOBEBROWSING}/shaders/rings_vs.glsl"),
+        //     absPath("${MODULE_GLOBEBROWSING}/shaders/rings_fs.glsl"),
+        //     dict
+        // );
 
-        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);*/
+        // ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
 
         // Uses multiple textures for the Rings
         // See https://bjj.mmedia.is/data/s_rings/index.html for theory behind it
@@ -905,7 +906,8 @@ void RingsComponent::compileShadowShader() {
                 UniformNamesAdvancedRings
             );
         }
-        else { // Uses simple texture for the Rings
+        else {
+            // Uses simple texture for the Rings
             _shader = global::renderEngine->buildRenderProgram(
                 "RingsProgram",
                 absPath("${MODULE_GLOBEBROWSING}/shaders/rings_vs.glsl"),
