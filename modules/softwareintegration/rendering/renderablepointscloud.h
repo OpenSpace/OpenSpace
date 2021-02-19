@@ -31,6 +31,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/uniformcache.h>
 #include <optional>
 
 namespace openspace::documentation { struct Documentation; }
@@ -63,6 +64,8 @@ protected:
     bool _isDirty = true;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram = nullptr;
+    UniformCache(modelViewTransform, modelViewProjectionTransform,
+        color, opacity, size) _uniformCache;
 
     properties::BoolProperty _isVisible;
     properties::FloatProperty _size;

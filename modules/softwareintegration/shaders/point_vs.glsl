@@ -36,15 +36,15 @@ uniform dmat4 MVPTransform;
 uniform float size;
 
 void main() {
-    dvec4 objPosDouble      = dvec4(in_position, 1.0);
-    dvec4 positionViewSpace = modelViewTransform * objPosDouble;
-    dvec4 positionClipSpace = MVPTransform * objPosDouble;
-    
+    dvec4 position = dvec4(in_position, 1.0);
+    dvec4 positionViewSpace = modelViewTransform * position;
+    dvec4 positionClipSpace = MVPTransform * position;
+
     positionClipSpace.z = 0.0;
-    
-    vs_depthClipSpace    = float(positionClipSpace.w);
+
+    vs_depthClipSpace = float(positionClipSpace.w);
     vs_positionViewSpace = vec4(positionViewSpace);
-    
+
     gl_PointSize = size;
     gl_Position = vec4(positionClipSpace);
 }

@@ -41,6 +41,10 @@
 namespace {
     constexpr const char* _loggerCat = "PointsCloud";
 
+    constexpr const std::array<const char*, 5> UniformNames = {
+        "modelViewTransform", "MVPTransform", "color", "opacity", "size",
+    };
+
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
@@ -152,6 +156,8 @@ void RenderablePointsCloud::initializeGL() {
         absPath("${MODULE_SOFTWAREINTEGRATION}/shaders/point_vs.glsl"),
         absPath("${MODULE_SOFTWAREINTEGRATION}/shaders/point_fs.glsl")
     );
+
+    ghoul::opengl::updateUniformLocations(*_shaderProgram, _uniformCache, UniformNames);
 }
 
 void RenderablePointsCloud::deinitializeGL() {
@@ -185,15 +191,15 @@ void RenderablePointsCloud::render(const RenderData& data, RendererTasks&) {
 
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
-    _shaderProgram->setUniform("modelViewTransform", modelViewTransform);
+    _shaderProgram->setUniform(_uniformCache.modelViewTransform, modelViewTransform);
     _shaderProgram->setUniform(
-        "MVPTransform",
+        _uniformCache.modelViewProjectionTransform,
         glm::dmat4(data.camera.projectionMatrix()) * modelViewTransform
     );
 
-    _shaderProgram->setUniform("color", _color);
-    _shaderProgram->setUniform("opacity", _opacity);
-    _shaderProgram->setUniform("size", _size);
+    _shaderProgram->setUniform(_uniformCache.color, _color);
+    _shaderProgram->setUniform(_uniformCache.opacity, _opacity);
+    _shaderProgram->setUniform(_uniformCache.size, _size);
 
     // Changes GL state:
     glEnablei(GL_BLEND, 0);
@@ -214,6 +220,11 @@ void RenderablePointsCloud::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderablePointsCloud::update(const UpdateData&) {
+    if (_shaderProgram->isDirty()) {
+        _shaderProgram->rebuildFromFile();
+        ghoul::opengl::updateUniformLocations(*_shaderProgram, _uniformCache, UniformNames);
+    }
+
     if (!_isDirty) {
         return;
     }

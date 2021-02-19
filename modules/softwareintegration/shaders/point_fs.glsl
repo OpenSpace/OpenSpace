@@ -35,8 +35,10 @@ Fragment getFragment() {
 
     float radius = 0.5;
     float distance = length(gl_PointCoord - vec2(radius));
-    if (distance > pow(radius, 2)) discard;
-    
+
+    if (distance > pow(radius, 2))
+        discard;
+
     Fragment frag;
     frag.color     = vec4(color, opacity);
     frag.depth     = vs_depthClipSpace;
@@ -46,5 +48,4 @@ Fragment getFragment() {
     frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
 
     return frag;
-
 }

@@ -52,5 +52,5 @@ create_new_module(
   "SoftwareIntegration"
   softwareintegration
   STATIC
-  ${HEADER_FILES} ${SOURCE_FILES}
+  ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
