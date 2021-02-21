@@ -32,10 +32,11 @@
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
+#include <functional>
 
 namespace {
     constexpr const char _loggerCat[] = "EventInfo";
-} // 
+} // namespace
 
 namespace openspace::events {
 
@@ -220,7 +221,6 @@ void logAllEvents(const Event* e) {
         e = e->next;
     }
 }
-
 
 EventSceneGraphNodeAdded::EventSceneGraphNodeAdded(const SceneGraphNode* node_)
     : Event(Type)

@@ -1188,8 +1188,7 @@ void RenderEngine::removeScreenSpaceRenderable(const std::string& identifier) {
     }
 }
 
-ScreenSpaceRenderable* RenderEngine::screenSpaceRenderable(
-                                                            const std::string& identifier)
+ScreenSpaceRenderable* RenderEngine::screenSpaceRenderable(const std::string& identifier)
 {
     const auto it = std::find_if(
         global::screenSpaceRenderables->begin(),
