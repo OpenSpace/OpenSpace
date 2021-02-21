@@ -518,7 +518,7 @@ void RenderableStreamNodes::initializeGL() {
         return;
     }
     // Setup shader program
-    _shaderProgram = global::renderEngine.buildRenderProgram(
+    _shaderProgram = global::renderEngine->buildRenderProgram(
         "Streamnodes",
         absPath("${MODULE_STREAMNODES}/shaders/streamnodes_vs.glsl"),
         absPath("${MODULE_STREAMNODES}/shaders/streamnodes_fs.glsl")
@@ -532,8 +532,9 @@ void RenderableStreamNodes::initializeGL() {
     ghoul::opengl::updateUniformLocations(*_shaderProgram, _uniformCache, UniformNames);
     ghoul::opengl::updateUniformLocations(*_shaderProgram, _uniformCache2, UniformNames2);
 
-    ghoul::Dictionary colorTablesPathsDictionary;
-    if (_dictionary->getValue(KeyColorTablePaths, colorTablesPathsDictionary)) {
+    if (_dictionary->hasValue<std::string>((KeyColorTablePaths))) {
+        ghoul::Dictionary colorTablesPathsDictionary =
+            _dictionary->value<ghoul::Dictionary>(KeyColorTablePaths);
         const size_t nProvidedPaths = colorTablesPathsDictionary.size();
         if (nProvidedPaths > 0) {
             // Clear the default! It is already specified in the transferFunction
@@ -938,15 +939,17 @@ bool RenderableStreamNodes::loadBinaryfilesDirectly(const std::string& energybin
 **/
 bool RenderableStreamNodes::extractMandatoryInfoFromDictionary()
 {
-    _dictionary->getValue(SceneGraphNode::KeyIdentifier, _identifier);
+    _identifier = _dictionary->value<std::string>(SceneGraphNode::KeyIdentifier);
 
     // ------------------- EXTRACT MANDATORY VALUES FROM DICTIONARY ------------------- //
     std::string inputFileTypeString;
-    if (!_dictionary->getValue(KeyInputFileType, inputFileTypeString)) {
+    if (!_dictionary->hasValue<std::string>(KeyInputFileType)) {
         LERROR(fmt::format("{}: The field {} is missing", _identifier, KeyInputFileType));
     }
     else {
         // Verify that the input type is corrects
+        inputFileTypeString =
+            _dictionary->value<std::string>(KeyInputFileType);
         if (inputFileTypeString == ValueInputFileTypeJson) {    // == "json" 
         }
         else if(inputFileTypeString == "") {
@@ -962,17 +965,19 @@ bool RenderableStreamNodes::extractMandatoryInfoFromDictionary()
 
     //_colorTableRanges.push_back(glm::vec2(0, 1));   
 
-    std::string sourceFolderPath;
-    if (!_dictionary->getValue(KeySourceFolder, sourceFolderPath)) {
+    if (!_dictionary->hasValue<std::string>(KeySourceFolder)) {
         LERROR(fmt::format("{}: The field {} is missing", _identifier, KeySourceFolder));
         return false;
     }
-    std::string binarySourceFolderPath;
-    if (!_dictionary->getValue(KeyBinarySourceFolder, binarySourceFolderPath)) {
+    if (!_dictionary->hasValue<std::string>(KeyBinarySourceFolder)) {
         LERROR(fmt::format("{}: The field {} is missing", _identifier, KeyBinarySourceFolder));
         return false;
     }
     //constexpr const char temp = '\';
+    std::string sourceFolderPath =
+        _dictionary->value<std::string>(KeySourceFolder);
+    std::string binarySourceFolderPath = 
+        _dictionary->value<std::string>(KeyBinarySourceFolder);
     _binarySourceFilePath = binarySourceFolderPath;
     LDEBUG(binarySourceFolderPath);
     ghoul::filesystem::Directory binarySourceFolder(binarySourceFolderPath);
@@ -1032,7 +1037,8 @@ bool RenderableStreamNodes::extractMandatoryInfoFromDictionary()
 
 bool RenderableStreamNodes::extractJsonInfoFromDictionary(fls::Model& model) {
     std::string modelStr;
-    if (_dictionary->getValue(KeySimulationModel, modelStr)) {
+    if (_dictionary->hasValue<std::string>(KeySimulationModel)) {
+        modelStr = _dictionary->value<std::string>(KeySimulationModel);
         std::transform(
             modelStr.begin(),
             modelStr.end(),
@@ -1047,17 +1053,15 @@ bool RenderableStreamNodes::extractJsonInfoFromDictionary(fls::Model& model) {
             ));
         return false;
     }
-    float lineWidthValue;
-    if (_dictionary->getValue(KeyLineWidth, lineWidthValue)) {
-        _pLineWidth = lineWidthValue;
+
+    if (_dictionary->hasValue<std::string>(KeyLineWidth)) {
+        _pLineWidth = stringToFloat(_dictionary->value<std::string>(KeyLineWidth));
     }
-    float thresholdRadiusValue;
-    if (_dictionary->getValue(KeyThresholdRadius, thresholdRadiusValue)) {
-        _pThresholdFlux = thresholdRadiusValue;
+    if (_dictionary->hasValue<std::string>(KeyThresholdRadius)) {
+        _pThresholdFlux = stringToFloat(_dictionary->value<std::string>(KeyThresholdRadius));
     }
-    float scaleFactor;
-    if (_dictionary->getValue(KeyJsonScalingFactor, scaleFactor)) {
-        _scalingFactor = scaleFactor;
+    if (_dictionary->hasValue<std::string>(KeyJsonScalingFactor)) {
+        _scalingFactor = stringToFloat(_dictionary->value<std::string>(KeyJsonScalingFactor));
     }
     else {
         LWARNING(fmt::format(
@@ -1184,7 +1188,7 @@ void RenderableStreamNodes::deinitializeGL() {
     //_arrow = 0;
 
     if (_shaderProgram) {
-        global::renderEngine.removeRenderProgram(_shaderProgram.get());
+        global::renderEngine->removeRenderProgram(_shaderProgram.get());
         _shaderProgram = nullptr;
     }
 
@@ -1401,7 +1405,7 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
         _shaderProgram->setUniform(_uniformCache.particleSpeed, _pFlowSpeed);
         
         _shaderProgram->setUniform(_uniformCache2.time,
-            global::windowDelegate.applicationTime() * -1);
+            global::windowDelegate->applicationTime() * -1);
         _shaderProgram->setUniform(_uniformCache2.flowColoring, _pUseFlowColor);
         //_shaderProgram->setUniform("minNodeDistanceSize", _pMinNodeDistanceSize);
         _shaderProgram->setUniform(_uniformCache2.maxNodeDistanceSize, 

@@ -154,7 +154,7 @@ namespace openspace {
 
 void RenderableLightTravel::initializeGL() {
     _dictionary.reset();
-    _shaderProgram = global::renderEngine.buildRenderProgram(
+    _shaderProgram = global::renderEngine->buildRenderProgram(
         "Lighttravel",
         absPath("${MODULE_STREAMNODES}/shaders/lighttravel_vs.glsl"),
         absPath("${MODULE_STREAMNODES}/shaders/lighttravel_fs.glsl")
@@ -162,7 +162,7 @@ void RenderableLightTravel::initializeGL() {
 
     if(_font == nullptr){
         size_t _fontSize = 50;
-        _font = global::fontManager.font(
+        _font = global::fontManager->font(
             "Mono",
             static_cast<float>(_fontSize),
             ghoul::fontrendering::FontManager::Outline::Yes,
@@ -252,7 +252,7 @@ void RenderableLightTravel::deinitializeGL()
     _vertexPositionBuffer = 0;
 
     if (_shaderProgram) {
-        global::renderEngine.removeRenderProgram(_shaderProgram.get());
+        global::renderEngine->removeRenderProgram(_shaderProgram.get());
         _shaderProgram = nullptr;
     }
 }

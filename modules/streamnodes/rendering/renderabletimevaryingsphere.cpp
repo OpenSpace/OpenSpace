@@ -311,7 +311,7 @@ void RenderableTimeVaryingSphere::initializeGL() {
     _shader = BaseModule::ProgramObjectManager.request(
         ProgramName,
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return global::renderEngine.buildRenderProgram(
+            return global::renderEngine->buildRenderProgram(
                 ProgramName,
                 absPath("${MODULE_BASE}/shaders/sphere_vs.glsl"),
                 absPath("${MODULE_BASE}/shaders/sphere_fs.glsl")
@@ -346,7 +346,7 @@ void RenderableTimeVaryingSphere::deinitializeGL() {
     BaseModule::ProgramObjectManager.release(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
-            global::renderEngine.removeRenderProgram(p);
+            global::renderEngine->removeRenderProgram(p);
         }
     );
     _textureFiles.clear();
@@ -448,10 +448,10 @@ void RenderableTimeVaryingSphere::render(const RenderData& data, RendererTasks&)
         glDisable(GL_CULL_FACE);
     }
 
-    bool usingFramebufferRenderer = global::renderEngine.rendererImplementation() ==
+    bool usingFramebufferRenderer = global::renderEngine->rendererImplementation() ==
                                     RenderEngine::RendererImplementation::Framebuffer;
 
-    bool usingABufferRenderer = global::renderEngine.rendererImplementation() ==
+    bool usingABufferRenderer = global::renderEngine->rendererImplementation() ==
                                 RenderEngine::RendererImplementation::ABuffer;
 
     if (usingABufferRenderer && _useAdditiveBlending) {

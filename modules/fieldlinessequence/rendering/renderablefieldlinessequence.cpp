@@ -480,17 +480,16 @@ void RenderableFieldlinesSequence::extractOptionalInfoFromDictionary(
 {
 
     // ------------------- EXTRACT OPTIONAL VALUES FROM DICTIONARY ------------------- //
-    bool flowEnabledValue;
-    if (_dictionary->getValue(KeyFlowEnabled, flowEnabledValue)) {
-        _pFlowEnabled = flowEnabledValue;
+    if (_dictionary->hasValue<bool>(KeyFlowEnabled)) {
+        _pFlowEnabled = _dictionary->value<bool>(KeyFlowEnabled);
     }
 
     float lineWidthValue;
-    if (_dictionary->getValue(KeyLineWidth, lineWidthValue)) {
-        _pLineWidth = lineWidthValue;
+    if (_dictionary->hasValue<std::string>(KeyLineWidth)) {
+        _pLineWidth = stringToFloat(_dictionary->value<std::string>(KeyLineWidth));
     }
     
-    if (_dictionary->getValue(KeyOutputFolder, outputFolderPath)) {
+    if (_dictionary->hasValue<std::string>(KeyOutputFolder)) {
         ghoul::filesystem::Directory outputFolder(outputFolderPath);
         if (FileSys.directoryExists(outputFolder)) {
             outputFolderPath = absPath(outputFolderPath);
