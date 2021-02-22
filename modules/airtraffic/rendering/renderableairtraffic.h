@@ -26,11 +26,10 @@
 #define __OPENSPACE_MODULE_AIRTRAFFIC___RENDERABLEAIRTRAFFIC___H__
 
 #include <openspace/rendering/renderable.h>
-#include <ghoul/opengl/bufferbinding.h>
-#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
-#include <openspace/util/httprequest.h>
 #include <openspace/json.h>
+#include <openspace/util/httprequest.h>
+
 
 namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl {
@@ -47,14 +46,13 @@ class RenderableAirTraffic : public Renderable {
 public:
     explicit RenderableAirTraffic(const ghoul::Dictionary& dictionary);
     virtual ~RenderableAirTraffic() = default;
-    // void initialize() override; Might not need this?
+
     void initialize() override;
     void deinitialize() override;
 
     void initializeGL() override;
     void deinitializeGL() override;
 
-    void readDataFile(const std::string& filename);
     bool fetchData();
 
     bool isReady() const override;
@@ -84,8 +82,12 @@ private:
     };
     
     
-    // Backend storage for veretex buffer object containing all points for this trail
+    // Backend storage for vertex buffer object containing all points
     std::vector<AircraftVBOLayout>  _vertexBufferData;
+   
+    std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
+
+    UniformCache(modelViewProjection/*, timeStamp*/) _uniformCache;
 
     GLuint _vertexArray = 0;
     GLuint _vertexBuffer = 0;

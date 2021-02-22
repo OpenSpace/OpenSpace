@@ -3,7 +3,7 @@ local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
 
 local AirTraffic = {
     Identifier = "AirTraffic",
-    Parent = transforms.EarthInertial.Identifier,
+    Parent = transforms.EarthIAU.Identifier,
     Renderable = {
         Type = "RenderableAirTraffic",
     },

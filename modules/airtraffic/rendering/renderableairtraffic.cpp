@@ -24,10 +24,14 @@
 
 
 #include <modules/airtraffic/rendering/renderableairtraffic.h>
+
+#include <openspace/util/updatestructures.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/documentation/documentation.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/filesystem/file.h>
+#include <openspace/util/httprequest.h>
+#include <iostream>
 
 
 namespace ghoul::filesystem { class File; }
@@ -35,6 +39,13 @@ namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
 } // namespace ghoul::opengl
+
+namespace {
+    constexpr const std::array<const char*, 1> UniformNames = {
+        "modelViewProjection"//, "timeStamp"
+    };
+} // namespace
+
 
 namespace openspace {
 
@@ -45,7 +56,7 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
     {}
 
     void RenderableAirTraffic::initialize() {
-        fetchData();
+        //fetchData();
         return;
     };
     void RenderableAirTraffic::deinitialize() {
@@ -53,9 +64,30 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
     };
 
     void RenderableAirTraffic::initializeGL() {
-        return;
+        glGenVertexArrays(1, &_vertexArray);
+        glGenBuffers(1, &_vertexBuffer);
+
+
+        // Setup shaders
+        _shader = global::renderEngine->buildRenderProgram(
+            "AirTrafficProgram",
+            absPath("${MODULE_AIRTRAFFIC}/shaders/airtraffic_vs.glsl"),
+            absPath("${MODULE_AIRTRAFFIC}/shaders/airtraffic_fs.glsl")
+            //absPath("${MODULE_AIRTRAFFIC}/shaders/airtraffic_ge.glsl")
+        );
+       
+        
+        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+
+        updateBuffers();
     };
     void RenderableAirTraffic::deinitializeGL() {
+        glDeleteBuffers(1, &_vertexBuffer);
+        glDeleteVertexArrays(1, &_vertexArray);
+        
+        global::renderEngine->removeRenderProgram(_shader.get());
+        _shader = nullptr;
+        
         return;
     };
 
@@ -64,20 +96,38 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
     };
 
     void RenderableAirTraffic::render(const RenderData& data, RendererTasks& rendererTask) {
-        return;
+        _shader->activate();
+        
+        glm::dmat4 modelTransform =
+            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+            glm::dmat4(data.modelTransform.rotation) *
+            glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+
+        glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+
+        _shader->setUniform(
+            _uniformCache.modelViewProjection,
+            data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
+        );
+
+        
+        //_shader->setUniform(_uniformCache.timeStamp, static_cast<int>(_data["time"]));
+
+        glBindVertexArray(_vertexArray);
+
+        glPointSize(2.0);
+        
+        const GLsizei nAircrafts = static_cast<GLsizei>(_data["states"].size());
+        glDrawArrays(GL_POINTS, 0, nAircrafts);
+
+        glBindVertexArray(0);
+
+        _shader->deactivate();
+
     };
     void RenderableAirTraffic::update(const UpdateData& data) {
         return;
     };
-
-    // Use if we need to go by file 
-    void RenderableAirTraffic::readDataFile(const std::string& filename){
-        if(!FileSys.fileExists(filename)){
-            throw ghoul::RuntimeError(fmt::format(
-                "Air traffic data file does not exist.", filename
-            ));
-        }
-    }
 
     bool RenderableAirTraffic::fetchData() {
 
@@ -86,26 +136,32 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
         timeout.requestTimeoutSeconds = 0; // No timeout limit
         response.download(timeout);
 
-        _data = json::parse(response.downloadedData().begin(), response.downloadedData().end());
+        // Replace null data with 0
+        json::parser_callback_t ReplaceNullCallBack = [](int depth, json::parse_event_t event, json& parsed) {
+            if (event == json::parse_event_t::value and parsed == nullptr) parsed = 0;
+            return true;
+        };
 
+        _data = json::parse(response.downloadedData().begin(), response.downloadedData().end(), ReplaceNullCallBack);
+        
         // JSON structure:
         // time: int,
         // states: [    
         //      (0: icao24)             string,
-        //      (1: callsign)           string,
+        //      (1: callsign)           string, can be null
         //      (2: origin_country)     string,
-        //      (3: time_position)      int,
+        //      (3: time_position)      int,    can be null
         //      (4: last_contact)       int,
-        //      (5: longitude)          float,
-        //      (6: latitude)           float,
-        //      (7: baro_altitude)      float,
+        //      (5: longitude)          float,  can be null
+        //      (6: latitude)           float,  can be null
+        //      (7: baro_altitude)      float,  can be null
         //      (8: on_ground)          bool,
-        //      (9: velocity)           float,
-        //      (10: true_track)        float,
-        //      (11: vertical_rate)     float,
-        //      (12:sensors)            int[],
-        //      (13: geo_altitude)      float,
-        //      (14: squawk)            string,
+        //      (9: velocity)           float,  can be null
+        //      (10: true_track)        float,  can be null
+        //      (11: vertical_rate)     float,  can be null
+        //      (12:sensors)            int[],  can be null 
+        //      (13: geo_altitude)      float,  can be null
+        //      (14: squawk)            string, can be null
         //      (15: spi)               bool,
         //      (16: position_source)   int,
         // ],
@@ -121,24 +177,20 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
 
         fetchData(); 
 
-        size_t nVerticesTotal = 0;
-
         int nAircrafts = static_cast<int>(_data["states"].size());
         
         _vertexBufferData.resize(nAircrafts);
 
         size_t vertexBufIdx = 0;
 
-
         for (auto& aircraft : _data["states"]){
-
             // Extract data and add to vertex buffer
-            _vertexBufferData[vertexBufIdx].lastContact = static_cast<int>(aircraft[4]); // i.e time_position
+            _vertexBufferData[vertexBufIdx].lastContact = static_cast<int>(aircraft[4]);
             _vertexBufferData[vertexBufIdx].longitude = static_cast<float>(aircraft[5]);
             _vertexBufferData[vertexBufIdx].latitude = static_cast<float>(aircraft[6]);
             _vertexBufferData[vertexBufIdx].barometricAltitude = static_cast<float>(aircraft[7]);
             _vertexBufferData[vertexBufIdx].velocity = static_cast<float>(aircraft[9]);
-            _vertexBufferData[vertexBufIdx].flightDirection = aircraft[10];
+            _vertexBufferData[vertexBufIdx].flightDirection = static_cast<float>(aircraft[10]);
 
             vertexBufIdx++;
         }
@@ -170,10 +222,10 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
         glVertexAttribPointer(
             1,
             2,
-            GL_INT,
+            GL_FLOAT,
             GL_FALSE,
             sizeof(AircraftVBOLayout),
-            reinterpret_cast<GLvoid*>(3 * sizeof(GL_FLOAT)) // star
+            reinterpret_cast<GLvoid*>(3 * sizeof(GL_FLOAT)) // start at pos 3
         );
 
         // Last contact
@@ -181,7 +233,7 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
         glVertexAttribPointer(
             2,
             1,
-            GL_FLOAT,
+            GL_INT,
             GL_FALSE,
             sizeof(AircraftVBOLayout),
             reinterpret_cast<GLvoid*>(5 * sizeof(GL_FLOAT))
