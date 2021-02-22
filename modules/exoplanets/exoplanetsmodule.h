@@ -29,6 +29,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/stringproperty.h>
 
 namespace openspace {
@@ -49,6 +50,7 @@ public:
     bool showComparisonCircle() const;
     bool showHabitableZone() const;
     bool useOptimisticZone() const;
+    float habitableZoneOpacity() const;
 
     scripting::LuaLibrary luaLibrary() const override;
     std::vector<documentation::Documentation> documentations() const override;
@@ -64,6 +66,7 @@ protected:
     properties::BoolProperty _showComparisonCircle;
     properties::BoolProperty _showHabitableZone;
     properties::BoolProperty _useOptimisticZone;
+    properties::FloatProperty _habitableZoneOpacity;
 };
 
 } // namespace openspace
