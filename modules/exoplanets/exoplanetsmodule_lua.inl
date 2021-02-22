@@ -471,6 +471,8 @@ void createExoplanetSystem(const std::string& starName) {
         bool useOptimistic = module->useOptimisticZone();
         const std::string useOptimisticString = useOptimistic ? "true" : "false";
 
+        float opacity = module->habitableZoneOpacity();
+
         const std::string zoneDiscNode = "{"
             "Identifier = '" + starIdentifier + "_HZ_Disc',"
             "Parent = '" + starIdentifier + "',"
@@ -481,7 +483,7 @@ void createExoplanetSystem(const std::string& starName) {
                 "Luminosity = " + std::to_string(system.starData.luminosity) + ","
                 "EffectiveTemperature = " + std::to_string(system.starData.teff) + ","
                 "Optimistic = " + useOptimisticString + ","
-                "Opacity = 0.07"
+                "Opacity = " + std::to_string(opacity) + ""
             "},"
             "Transform = {"
                 "Rotation = {"

@@ -101,6 +101,15 @@ namespace {
         "when an exoplanet system is created"
     };
 
+    constexpr const openspace::properties::Property::PropertyInfo
+        HabitableZoneOpacityInfo =
+    {
+        "HabitableZoneOpacity",
+        "Habitable Zone Opacity",
+        "The opacity value used for the habitable zone renderable for a created "
+        "exoplanet system"
+    };
+
     constexpr const char ExoplanetsDataFileName[] = "exoplanets_data.bin";
     constexpr const char LookupTableFileName[] = "lookup.txt";
 
@@ -128,6 +137,9 @@ namespace {
 
        // [[codegen::verbatim(UseOptimisticZoneInfo.description)]]
        std::optional<bool> useOptimisticZone;
+
+       // [[codegen::verbatim(HabitableZoneOpacityInfo.description)]]
+       std::optional<float> habitableZoneOpacity [[codegen::inrange(0, 1)]];
     };
 #include "exoplanetsmodule_codegen.cpp"
 } // namespace
@@ -146,6 +158,7 @@ ExoplanetsModule::ExoplanetsModule()
     , _showComparisonCircle(ShowComparisonCircleInfo, false)
     , _showHabitableZone(ShowHabitableZoneInfo, true)
     , _useOptimisticZone(UseOptimisticZoneInfo, true)
+    , _habitableZoneOpacity(HabitableZoneOpacityInfo, 0.1f, 0.0f, 1.0f)
 {
     _exoplanetsDataFolder.setReadOnly(true);
 
@@ -157,6 +170,7 @@ ExoplanetsModule::ExoplanetsModule()
     addProperty(_showComparisonCircle);
     addProperty(_showHabitableZone);
     addProperty(_useOptimisticZone);
+    addProperty(_habitableZoneOpacity);
 }
 
 std::string ExoplanetsModule::exoplanetsDataPath() const {
@@ -197,6 +211,10 @@ bool ExoplanetsModule::showHabitableZone() const {
 
 bool ExoplanetsModule::useOptimisticZone() const {
     return _useOptimisticZone;
+}
+
+float ExoplanetsModule::habitableZoneOpacity() const {
+    return _habitableZoneOpacity;
 }
 
 scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
