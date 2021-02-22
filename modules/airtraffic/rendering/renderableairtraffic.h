@@ -94,6 +94,7 @@ private:
   
     json _data;
     const std::string _url = "https://opensky-network.org/api/states/all";
+    double _deltaTime; 
 
 };
 

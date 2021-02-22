@@ -78,9 +78,12 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
        
         
         ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+        
+        _deltaTime = Time::now().j2000Seconds(); 
 
         updateBuffers();
     };
+
     void RenderableAirTraffic::deinitializeGL() {
         glDeleteBuffers(1, &_vertexBuffer);
         glDeleteVertexArrays(1, &_vertexArray);
@@ -96,6 +99,15 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
     };
 
     void RenderableAirTraffic::render(const RenderData& data, RendererTasks& rendererTask) {
+        if (_data.empty()) return;
+
+       
+        if (abs(Time::now().j2000Seconds() - _deltaTime) > 10.0){
+            
+            std::cout << "Updated time at: " << Time(_deltaTime).ISO8601() << std::endl;
+            initializeGL();
+        }
+
         _shader->activate();
         
         glm::dmat4 modelTransform =
