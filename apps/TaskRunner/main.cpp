@@ -106,6 +106,10 @@ void performTasks(const std::string& path) {
 int main(int argc, char** argv) {
     using namespace openspace;
 
+    ghoul::logging::LogManager::initialize(
+        ghoul::logging::LogLevel::Debug,
+        ghoul::logging::LogManager::ImmediateFlush::Yes
+    );
     ghoul::initialize();
     global::create();
 
