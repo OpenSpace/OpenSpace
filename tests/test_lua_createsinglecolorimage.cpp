@@ -105,18 +105,14 @@ TEST_CASE("CreateSingleColorImage: Faulty color value (invalid values)",
 {
     ghoul::lua::LuaState L;
     ghoul::lua::push(L, "notCreatedColorFile");
-    ghoul::lua::push(L, std::vector{ 255.0, 0.0, 0.0 });
+    ghoul::lua::push(L, std::vector{ 255.0, 0.0, 0.0 }); // not a valid color
 
-    // @TODO (emmbr 2020-02-04) This test case should be here, but as of now this case is
-    // not handled. Finish it up when we have a better way of verifying that a dictionary
-    // is a color
-
-    //CHECK_THROWS_WITH(
-    //    openspace::luascriptfunctions::createSingeColorImage(L),
-    //    Catch::Matchers::Contains(
-    //        "Invalid color. Expected three double values {r, g, b} in range 0 to 1"
-    //    )
-    //);
+    CHECK_THROWS_WITH(
+        openspace::luascriptfunctions::createSingeColorImage(L),
+        Catch::Matchers::Contains(
+            "Invalid color. Expected three double values {r, g, b} in range 0 to 1"
+        )
+    );
 }
 
 TEST_CASE("CreateSingleColorImage: Check if file was created",

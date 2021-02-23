@@ -80,7 +80,7 @@ namespace {
 
     struct [[codegen::Dictionary(RenderableRadialGrid)]] Parameters {
         // [[codegen::verbatim(ColorInfo.description)]]
-        std::optional<glm::vec3> color;
+        std::optional<glm::vec3> color [[codegen::color()]];
 
         // [[codegen::verbatim(GridSegmentsInfo.description)]]
         std::optional<glm::ivec2> gridSegments;

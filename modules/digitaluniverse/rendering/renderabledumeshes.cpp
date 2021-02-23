@@ -151,7 +151,7 @@ namespace {
         std::optional<Unit> unit;
 
         // [[codegen::verbatim(TextColorInfo.description)]]
-        std::optional<glm::vec3> textColor;
+        std::optional<glm::vec3> textColor [[codegen::color()]];
 
         // [[codegen::verbatim(TextOpacityInfo.description)]]
         std::optional<float> textOpacity;

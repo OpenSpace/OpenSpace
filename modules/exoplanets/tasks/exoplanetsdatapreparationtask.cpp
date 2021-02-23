@@ -449,33 +449,34 @@ documentation::Documentation ExoplanetsDataPreparationTask::documentation() {
         {
             {
                 KeyInputDataFile,
-                new StringAnnotationVerifier("A valid filepath"),
+                new FileVerifier,
                 Optional::No,
                 "The csv file to extract data from"
             },
             {
                 KeyInputSpeck,
-                new StringAnnotationVerifier("A file path to a speck file"),
+                new FileVerifier,
                 Optional::No,
                 "The speck file with star locations"
             },
             {
                 KeyOutputBin,
-                new StringAnnotationVerifier("A valid filepath"),
+                new FileVerifier,
                 Optional::No,
                 "The bin file to export data into"
             },
             {
                 KeyOutputLut,
-                new StringAnnotationVerifier("A valid filepath"),
+                new FileVerifier,
                 Optional::No,
                 "The txt file to write look-up table into"
             },
             {
                 KeyTeffToBv,
-                new StringAnnotationVerifier("A valid filepath"),
+                new FileVerifier,
                 Optional::No,
-                "The path to a teff to bv conversion file"
+                "The path to a teff to bv conversion file. Should be a txt file where "
+                "each line has the format 'teff,bv'"
             }
         }
     };

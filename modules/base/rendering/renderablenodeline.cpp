@@ -93,7 +93,7 @@ namespace {
         std::optional<std::string> endNode;
 
         // [[codegen::verbatim(LineColorInfo.description)]]
-        std::optional<glm::vec3> color;
+        std::optional<glm::vec3> color [[codegen::color()]];
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
@@ -128,7 +128,7 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
 
     _lineColor = p.color.value_or(_lineColor);
     addProperty(_lineColor);
-    
+
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
 
