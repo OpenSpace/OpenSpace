@@ -23,6 +23,8 @@
  ****************************************************************************************/
 
 #include <modules/skybrowser/skybrowsermodule.h>
+ //#include <modules/webbrowser/webbrowsermodule.h>
+ //#include <modules/webbrowser/include/screenspacebrowser.h>
 
 
 #include <openspace/engine/globals.h>
@@ -87,10 +89,11 @@ scripting::LuaLibrary SkybrowserModule::luaLibrary() const {
 void SkybrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
     _testProperty = p.testString.value_or(_testProperty);
-
+    /*
     auto fBrowser = FactoryManager::ref().factory<ScreenSpaceBrowser>();
     ghoul_assert(fBrowser, "No browser factory existed :'-(");
     fBrowser->registerClass<ScreenSpaceBrowser>("ScreenSpaceBrowser");
+    */
 }
 /*
 std::vector<documentation::Documentation> SkybrowserModule::documentations() const {

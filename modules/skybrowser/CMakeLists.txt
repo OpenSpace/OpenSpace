@@ -24,8 +24,6 @@
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
-
-
 set(HEADER_FILES
     
     skybrowsermodule.h
@@ -37,7 +35,6 @@ set(SOURCE_FILES
     
     skybrowsermodule.cpp
     skybrowsermodule_lua.inl
-    
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

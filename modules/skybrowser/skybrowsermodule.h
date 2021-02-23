@@ -27,8 +27,7 @@
 
 
 #include <openspace/util/openspacemodule.h>
-#include <modules/webbrowser/webbrowsermodule.h>
-#include <modules/webbrowser/include/screenspacebrowser.h>
+
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/properties/scalar/boolproperty.h>

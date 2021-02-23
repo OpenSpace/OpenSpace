@@ -64,12 +64,12 @@ namespace openspace::skybrowser::luascriptfunctions {
         node.setValue("Renderable", renderable);
         node.setValue("GUI", gui);
 
-
+        */
         openspace::global::scriptEngine->queueScript(
-            "openspace.addSceneGraphNode(" + ghoul::formatLua(node) + ")",
+            "openspace.addScreenSpaceRenderable(" + ghoul::formatLua(node) + ")",
             scripting::ScriptEngine::RemoteScripting::Yes
         );
-        */
+        
 
         return 1;
     }
