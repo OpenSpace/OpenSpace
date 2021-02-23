@@ -7,7 +7,7 @@ local models = asset.syncedResource({
     Name = "Messenger Models",
     Type = "HttpSynchronization",
     Identifier = "messenger_model",
-    Version = 1
+    Version = 2
 })
 
 local kernels = asset.syncedResource({

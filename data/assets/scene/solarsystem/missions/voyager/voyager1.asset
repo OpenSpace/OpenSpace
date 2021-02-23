@@ -1,14 +1,6 @@
 local assetHelper = asset.require('util/asset_helper')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-
-
-
-local models = asset.syncedResource({
-    Name = "Voyager 1 Models",
-    Type = "HttpSynchronization",
-    Identifier = "voyager1_model",
-    Version = 1
-})
+local models = asset.require("./model" ).modelFolder;
 
 local kernels = asset.syncedResource({
     Name = "Voyager 1 Kernels",

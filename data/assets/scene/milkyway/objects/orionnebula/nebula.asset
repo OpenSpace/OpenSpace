@@ -9,7 +9,7 @@ local sync = asset.syncedResource({
     Name = "Orion Nebula Model",
     Type = "HttpSynchronization",
     Identifier = "orion_nebula_model",
-    Version = 1
+    Version = 2
 })
 
 local NebulaHolder = {

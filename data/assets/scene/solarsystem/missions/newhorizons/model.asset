@@ -2,18 +2,11 @@ local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 
-local textures = asset.syncedResource({
-    Name = "New Horizons Textures",
-    Type = "HttpSynchronization",
-    Identifier = "newhorizons_textures",
-    Version = 3
-})
-
 local models = asset.syncedResource({
     Name = "New Horizons Model",
     Type = "HttpSynchronization",
     Identifier = "newhorizons_model",
-    Version = 1
+    Version = 2
 })
 
 local NewHorizons = {
@@ -47,5 +40,4 @@ local NewHorizons = {
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { NewHorizons })
-asset.export("NewHorizonsTextures", textures)
 asset.export("NewHorizonsModels", models)

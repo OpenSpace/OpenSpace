@@ -2,19 +2,11 @@ local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 
-
-local textures = asset.syncedResource({
-    Name = "Gaia Textures",
-    Type = "HttpSynchronization",
-    Identifier = "gaia_textures",
-    Version = 1
-})
-
 local model = asset.syncedResource({
     Name = "Gaia Model",
     Type = "HttpSynchronization",
     Identifier = "gaia_model",
-    Version = 1
+    Version = 2
 })
 
 

@@ -3,19 +3,11 @@ local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 local transforms = asset.require('./67p')
 
 
-
-local textures = asset.syncedResource({
-    Name = "Rosetta Textures",
-    Type = "HttpSynchronization",
-    Identifier = "rosetta_textures",
-    Version = 2
-})
-
 local models = asset.syncedResource({
     Name = "Rosetta Models",
     Type = "HttpSynchronization",
     Identifier = "rosetta_model",
-    Version = 3
+    Version = 4
 })
 
 local kernels = asset.syncedResource({
@@ -411,7 +403,7 @@ local ImagePlane = {
         Spacecraft = "ROSETTA",
         Instrument = "ROS_NAVCAM-A",
         Moving = false,
-        Texture = textures .. "/defaultProj.png"
+        Texture = models .. "/defaultProj.png"
     },
     GUI = {
         Name = "Rosetta Image Plane",
