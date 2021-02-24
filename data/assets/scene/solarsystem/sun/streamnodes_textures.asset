@@ -1,7 +1,7 @@
 local TexturesPath = asset.syncedResource({
     Type = "HttpSynchronization",
     Name = "Streamnodes textures",
-    Identifier = "streamnodes_textures",
+    Identifier = "streamnodes_legend",
     Version = 4
 })
 

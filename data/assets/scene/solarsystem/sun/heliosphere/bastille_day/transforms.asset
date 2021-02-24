@@ -2,8 +2,8 @@ local assetHelper = asset.require('util/asset_helper')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
 
-local HNMKernel = asset.localResource("kernels/HNM.tf")
-local GSMKernel = asset.localResource("kernels/GSM.ti")
+local HNMKernel = asset.localResource("../../kernels/HNM.tf")
+local GSMKernel = asset.localResource("../../kernels/GSM.ti")
 
 local HNMReferenceFrame = {
     Identifier = "HNMReferenceFrame",

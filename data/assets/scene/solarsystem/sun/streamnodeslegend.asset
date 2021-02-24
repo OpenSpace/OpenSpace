@@ -7,15 +7,22 @@ asset.info = {
     License = ""
 }
 
+local TexturesPath = asset.syncedResource({
+    Type = "HttpSynchronization",
+    Name = "Streamnodes textures",
+    Identifier = "streamnodes_legend",
+    Version = 4
+})
+
 asset.require("spice/base")
 local assetHelper = asset.require("util/asset_helper")
-local textures = asset.require('./streamnodes_textures').TexturesPath
+--local textures = asset.require('./streamnodes_textures').TexturesPath
 
 local legend = {
     Identifier = "Legendstreamnodes",	
     --Type = "ScreenSpaceRenderable",
     Type = "ScreenSpaceImageLocal",
-    TexturePath = textures .. "/CMR_transparent_vittext.png",
+    TexturePath = TexturesPath .. "/CMR_transparent_vittext.png",
 };
 
 openspace.addScreenSpaceRenderable(legend)

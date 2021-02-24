@@ -10,7 +10,7 @@ asset.info = {
 asset.require("spice/base")
 local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("./transforms")
-local transformssun = asset.require("./heliosphere/mas/bastille_day/transforms")
+local transformssun = asset.require("./heliosphere/bastille_day/transforms")
 --15 cmr emin01, 16 cmr emin03
 local TexturesPathEquitorial = asset.syncedResource({
 Type = "HttpSynchronization",

@@ -1,5 +1,5 @@
 local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('../../sun/heliosphere/mas/bastille_day/transforms')
+local transforms = asset.require('../../sun/heliosphere/bastille_day/transforms')
 
 --local fieldlinesDirectory = "C:/Users/elono/Documents/OpenSpace/data/earthMagnetoSphere"
 local fieldlinesDirectory = asset.syncedResource({

@@ -24,12 +24,12 @@ local streamnodeColorTableFlow = transferFunctions .. "/stream_nodes_flow.txt"
 --local streamnodeColorTableIlluminance = transferFunctions .. "/CMR_illuminance.txt"
 --local streamnodeColorTableIlluminance2 = transferFunctions .. "/CMR_illuminance2.txt"
 
-local streamnodesDirectory = asset.syncedResource({
+--[[local streamnodesDirectory = asset.syncedResource({
     Name = "Bastille Day Stream nodes",
     Type = "HttpSynchronization",
     Identifier = "bastille_day_streamnodes",
     Version = 10
-})
+})--]]
 local streamnodesBinaries = asset.syncedResource({
     Name = "Bastille day Stream nodes binaries",
     Type = "HttpSynchronization",
@@ -48,7 +48,7 @@ local Streamnodes = {
     --transforms.asset, referens till suntransforms.solarsystemBarycenter.identifier
     Renderable = {
         Type = "RenderableStreamNodes",
-        SourceFolder = streamnodesDirectory,
+        --SourceFolder = streamnodesDirectory,
         BinarySourceFolder = streamnodesBinaries,
         -- StreamsEnabled = false,
         -- LineWidth = 1.0;

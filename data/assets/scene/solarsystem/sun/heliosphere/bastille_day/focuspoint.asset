@@ -8,7 +8,6 @@ asset.info = {
 }
 
 local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('./transforms')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 openspace.setPropertyValueSingle("Modules.Space.ShowExceptions", false)
 
