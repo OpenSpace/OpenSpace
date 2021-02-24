@@ -32,6 +32,11 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <openspace/util/httprequest.h>
 #include <iostream>
+#include <future>    // std::async, std::future
+#include <chrono> // time stuff
+
+
+using namespace std::chrono;
 
 
 namespace ghoul::filesystem { class File; }
@@ -41,22 +46,55 @@ namespace ghoul::opengl {
 } // namespace ghoul::opengl
 
 namespace {
+    
     constexpr const std::array<const char*, 1> UniformNames = {
-        "modelViewProjection"//, "timeStamp"
+        "modelViewProjection"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo URLPathInfo = {
+       "URL",
+       "URL Path",
+       "The URL used for aircraft data."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo PointSizeInfo = {
+       "PointSize",
+       "Point Size",
+       "The size of the points used to represent aircrafts."
     };
 } // namespace
 
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+documentation::Documentation RenderableAirTraffic::Documentation() {
+    using namespace documentation;
+    return {
+        "Renderable Air Traffic",
+        "renderableairtraffic",
+        {
+            {
+                URLPathInfo.identifier,
+                new StringVerifier,
+                Optional::No,
+                URLPathInfo.description
+            },
+            {
+                PointSizeInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                PointSizeInfo.description
+            },
+        }
+    };
+}
 
 RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
+    , _pointSize(PointSizeInfo, 2.f, 1.f, 10.f)
     {}
 
     void RenderableAirTraffic::initialize() {
-        //fetchData();
         return;
     };
     void RenderableAirTraffic::deinitialize() {
@@ -75,13 +113,12 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
             absPath("${MODULE_AIRTRAFFIC}/shaders/airtraffic_fs.glsl")
             //absPath("${MODULE_AIRTRAFFIC}/shaders/airtraffic_ge.glsl")
         );
-       
         
         ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
         
-        _deltaTime = Time::now().j2000Seconds(); 
-
-        updateBuffers();
+        // First data fetch 
+        _data = fetchData();
+        updateBuffers(true);
     };
 
     void RenderableAirTraffic::deinitializeGL() {
@@ -99,13 +136,19 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
     };
 
     void RenderableAirTraffic::render(const RenderData& data, RendererTasks& rendererTask) {
+
         if (_data.empty()) return;
 
-       
-        if (abs(Time::now().j2000Seconds() - _deltaTime) > 10.0){
-            
-            std::cout << "Updated time at: " << Time(_deltaTime).ISO8601() << std::endl;
-            initializeGL();
+        // Trigger data update
+        if (abs(data.time.j2000Seconds() - _deltaTime) > 10.0) {
+            _deltaTime = data.time.j2000Seconds();
+            fut = std::async(&RenderableAirTraffic::fetchData, this);
+        }
+
+        // Check if new data finished loading. Update buffers ONLY if finished
+        if (fut.valid() && (fut.wait_for(std::chrono::seconds(0)) == std::future_status::ready)) {
+            _data = fut.get();
+            updateBuffers();
         }
 
         _shader->activate();
@@ -122,9 +165,6 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
             data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
         );
 
-        
-        //_shader->setUniform(_uniformCache.timeStamp, static_cast<int>(_data["time"]));
-
         glBindVertexArray(_vertexArray);
 
         glPointSize(2.0);
@@ -135,27 +175,23 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
         glBindVertexArray(0);
 
         _shader->deactivate();
-
     };
+
     void RenderableAirTraffic::update(const UpdateData& data) {
         return;
     };
 
-    bool RenderableAirTraffic::fetchData() {
+    json RenderableAirTraffic::parseData(SyncHttpMemoryDownload& response) {
 
-        SyncHttpMemoryDownload response(_url);
-        HttpRequest::RequestOptions timeout;
-        timeout.requestTimeoutSeconds = 0; // No timeout limit
-        response.download(timeout);
-
-        // Replace null data with 0
+        // Callback to handle NULL data
         json::parser_callback_t ReplaceNullCallBack = [](int depth, json::parse_event_t event, json& parsed) {
             if (event == json::parse_event_t::value and parsed == nullptr) parsed = 0;
             return true;
         };
 
-        _data = json::parse(response.downloadedData().begin(), response.downloadedData().end(), ReplaceNullCallBack);
-        
+        //_data = json::parse(response.downloadedData().begin(), response.downloadedData().end(), ReplaceNullCallBack);
+        return json::parse(response.downloadedData().begin(), response.downloadedData().end(), ReplaceNullCallBack);
+
         // JSON structure:
         // time: int,
         // states: [    
@@ -181,16 +217,35 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
         // .
         // .
         // Example, get latitude for flight#: jsonData["states"][flight#][6]
-
-        return response.hasSucceeded();
     }
 
-    void RenderableAirTraffic::updateBuffers() {
+    json RenderableAirTraffic::fetchData() {
 
-        fetchData(); 
+        /*const double secondsInAYear = 365.25 * 24 * 60 * 60;
+        const double secondsBetween1970And2000 = 30 * secondsInAYear;
+        std::cout << "SecondsBetween1970And2000: " << secondsBetween1970And2000 << std::endl;
+        std::cout << "_deltaTime: " << _deltaTime << std::endl;
+        
+        int t = static_cast<int>(_deltaTime + secondsBetween1970And2000);
+        std::cout << "_deltaTime + secondsBetween1970And2000: " << t << std::endl;
+        std::string time = std::to_string(t);*/
+
+        SyncHttpMemoryDownload response(_url);
+        HttpRequest::RequestOptions timeout;
+        timeout.requestTimeoutSeconds = 0; // No timeout limit
+        response.download(timeout);
+        
+        return parseData(response);
+
+        //return response.hasSucceeded();
+
+    }
+
+    void RenderableAirTraffic::updateBuffers(bool _firstFetch) {
 
         int nAircrafts = static_cast<int>(_data["states"].size());
         
+        _vertexBufferData.clear();
         _vertexBufferData.resize(nAircrafts);
 
         size_t vertexBufIdx = 0;
@@ -208,15 +263,24 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
         }
 
         glBindVertexArray(_vertexArray);
-
         glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
-        glBufferData(
-            GL_ARRAY_BUFFER,
-            _vertexBufferData.size() * sizeof(AircraftVBOLayout),
-            _vertexBufferData.data(),
-            GL_STATIC_DRAW
-        );
 
+        if (_firstFetch) {
+            glBufferData(
+                GL_ARRAY_BUFFER,
+                _vertexBufferData.size() * sizeof(AircraftVBOLayout) * 2,
+                _vertexBufferData.data(),
+                GL_STREAM_DRAW
+            );
+        }
+        else {  
+            glBufferSubData(
+                GL_ARRAY_BUFFER,
+                0,
+                _vertexBufferData.size() * sizeof(AircraftVBOLayout),
+                _vertexBufferData.data()
+            );
+        }
 
         // Lat, long, alt: at pos 0 send 3 float from AircraftVBOLayout
         glEnableVertexAttribArray(0);
@@ -252,21 +316,6 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
         );
 
         glBindVertexArray(0);
-    }
-
-    documentation::Documentation RenderableAirTraffic::Documentation() {
-        using namespace documentation;
-        return {
-            "RenderableAirTraffic",
-            "renderableairtraffic",
-            {
-            DocumentationEntry("placeholder",
-                new StringInListVerifier({
-                    "placeholder", "placeholder", "placeholder"
-                }),
-                Optional::Yes)
-            }
-        };
     }
 } // namespace openspace
 

@@ -3,6 +3,11 @@
     "base",
     "scene/solarsystem/planets/earth/air_traffic/air_traffic",
     "scene/solarsystem/planets/earth/earth",
+    "scene/solarsystem/planets/earth/satellites/debris/debris_asat",
+    "scene/solarsystem/planets/earth/satellites/debris/debris_breezem",
+    "scene/solarsystem/planets/earth/satellites/debris/debris_fengyun",
+    "scene/solarsystem/planets/earth/satellites/debris/debris_iridium33",
+    "scene/solarsystem/planets/earth/satellites/debris/debris_kosmos2251",
     "scene/solarsystem/planets/earth/satellites/satellites"
   ],
   "camera": {

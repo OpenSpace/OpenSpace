@@ -29,6 +29,8 @@
 #include <ghoul/opengl/uniformcache.h>
 #include <openspace/json.h>
 #include <openspace/util/httprequest.h>
+#include <openspace/util/time.h>
+#include <future>
 
 
 namespace ghoul::filesystem { class File; }
@@ -41,6 +43,7 @@ namespace openspace {
 
 namespace documentation { struct Documentation; }
 using json = nlohmann::json;
+using namespace std::chrono_literals;
 
 class RenderableAirTraffic : public Renderable {
 public:
@@ -53,14 +56,16 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    bool fetchData();
+    json fetchData();
+
+    json parseData(SyncHttpMemoryDownload& response);
 
     bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    void updateBuffers();
+    void updateBuffers(bool _firstFetch = false);
     
     static documentation::Documentation Documentation();
 
@@ -91,11 +96,17 @@ private:
 
     GLuint _vertexArray = 0;
     GLuint _vertexBuffer = 0;
-  
-    json _data;
-    const std::string _url = "https://opensky-network.org/api/states/all";
-    double _deltaTime; 
+    std::future<json> fut;
 
+    properties::FloatProperty _pointSize;
+    json _data = json({});
+
+    // Fix secure way to handle credentials
+
+    //const std::string _url = "https://" + _PASSWORD + ":" + _USERNAME + "@opensky-network.org/api/states/all";
+    const std::string _url = "https://opensky-network.org/api/states/all";
+    double _deltaTime = Time::now().j2000Seconds(); 
+  
 };
 
 } // namespace openspace
