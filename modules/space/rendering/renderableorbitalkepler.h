@@ -69,6 +69,7 @@ protected:
     double calculateSemiMajorAxis(double meanMotion) const;
     double epochFromSubstring(const std::string& epochString) const;
     double epochFromYMDdSubstring(const std::string& epochString);
+    void updateBuffers();
 
     std::function<void()> _reinitializeTrailBuffers;
     std::function<void()> _updateStartRenderIdxSelect;
@@ -125,7 +126,6 @@ private:
     GLuint _vertexArray;
     GLuint _vertexBuffer;
 
-    void updateBuffers();
 
     ghoul::opengl::ProgramObject* _programObject;
     properties::StringProperty _path;

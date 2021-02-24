@@ -22,53 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSMODULE___H__
-#define __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSMODULE___H__
+#version __CONTEXT__
 
-#include <openspace/util/openspacemodule.h>
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/stringproperty.h>
+layout(location = 0) in vec2 in_position;
+layout(location = 1) in vec2 in_st;
 
-namespace openspace {
+out vec2 vs_st;
+out float vs_screenSpaceDepth;
+out vec4 vs_positionViewSpace;
+out vec4 shadowCoords;
 
-class ExoplanetsModule : public OpenSpaceModule {
-public:
-    constexpr static const char* Name = "Exoplanets";
+uniform dmat4 modelViewProjectionMatrix;
 
-    ExoplanetsModule();
-    virtual ~ExoplanetsModule() = default;
+// ShadowMatrix is the matrix defined by:
+// textureCoordsMatrix * projectionMatrix * combinedViewMatrix * modelMatrix
+// where textureCoordsMatrix is just a scale and bias computation: [-1,1] to [0,1]
+uniform dmat4 shadowMatrix;
 
-    std::string exoplanetsDataPath() const;
-    std::string lookUpTablePath() const;
-    std::string starTexturePath() const;
-    std::string noDataTexturePath() const;
-    std::string orbitDiscTexturePath() const;
-    std::string habitableZoneTexturePath() const;
-    bool showComparisonCircle() const;
-    bool showHabitableZone() const;
-    bool useOptimisticZone() const;
-    float habitableZoneOpacity() const;
+void main() {
+    vs_st = in_st;
 
-    scripting::LuaLibrary luaLibrary() const override;
-    std::vector<documentation::Documentation> documentations() const override;
-
-protected:
-    void internalInitialize(const ghoul::Dictionary& dict) override;
-
-    properties::StringProperty _exoplanetsDataFolder;
-    properties::StringProperty _starTexturePath;
-    properties::StringProperty _noDataTexturePath;
-    properties::StringProperty _orbitDiscTexturePath;
-    properties::StringProperty _habitableZoneTexturePath;
-    properties::BoolProperty _showComparisonCircle;
-    properties::BoolProperty _showHabitableZone;
-    properties::BoolProperty _useOptimisticZone;
-    properties::FloatProperty _habitableZoneOpacity;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSMODULE___H__
+    dvec4 positionClipSpace  = modelViewProjectionMatrix * dvec4(in_position, 0.0, 1.0);
+    vec4 positionClipSpaceZNorm = z_normalization(vec4(positionClipSpace));
+    
+    shadowCoords = vec4(shadowMatrix * dvec4(in_position, 0.0, 1.0));
+    vs_screenSpaceDepth  = positionClipSpaceZNorm.w;
+    gl_Position = positionClipSpaceZNorm;
+}

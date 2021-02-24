@@ -225,6 +225,7 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         TimelineRotation::Documentation(),
 
         LuaScale::Documentation(),
+        NonUniformStaticScale::Documentation(),
         StaticScale::Documentation(),
         TimeDependentScale::Documentation(),
 
