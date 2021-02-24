@@ -461,13 +461,13 @@ documentation::Documentation ExoplanetsDataPreparationTask::documentation() {
             },
             {
                 KeyOutputBin,
-                new FileVerifier,
+                new StringAnnotationVerifier("A valid filepath"),
                 Optional::No,
                 "The bin file to export data into"
             },
             {
                 KeyOutputLut,
-                new FileVerifier,
+                new StringAnnotationVerifier("A valid filepath"),
                 Optional::No,
                 "The txt file to write look-up table into"
             },
