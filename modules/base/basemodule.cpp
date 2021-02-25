@@ -207,6 +207,8 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         RenderableModel::Documentation(),
         RenderableNodeLine::Documentation(),
         RenderablePlane::Documentation(),
+        RenderablePlaneImageLocal::Documentation(),
+        RenderablePlaneImageOnline::Documentation(),
         RenderableRadialGrid::Documentation(),
         RenderableDisc::Documentation(),
         RenderableSphere::Documentation(),
