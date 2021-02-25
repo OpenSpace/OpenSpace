@@ -24,6 +24,7 @@
 
 #include <openspace/util/taskloader.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/util/task.h>
 #include <ghoul/fmt.h>
 #include <ghoul/filesystem/file.h>
@@ -70,7 +71,7 @@ std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromFile(const std::string& 
     std::string absTasksFile = absPath(path);
     if (!FileSys.fileExists(ghoul::filesystem::File(absTasksFile))) {
         LERROR(fmt::format(
-            "Could not load tasks file '{}. File not found", absTasksFile
+            "Could not load tasks file '{}'. File not found", absTasksFile
         ));
         return std::vector<std::unique_ptr<Task>>();
     }
@@ -78,14 +79,32 @@ std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromFile(const std::string& 
     ghoul::Dictionary tasksDictionary;
     try {
         ghoul::lua::loadDictionaryFromFile(absTasksFile, tasksDictionary);
-    } catch (const ghoul::RuntimeError& e) {
+    }
+    catch (const ghoul::RuntimeError& e) {
         LERROR(fmt::format(
-            "Could not load tasks file '{}. Lua error: {}: {}",
+            "Could not load tasks file '{}'. Lua error: {}: {}",
             absTasksFile, e.message, e.component
         ));
         return std::vector<std::unique_ptr<Task>>();
     }
-    return tasksFromDictionary(tasksDictionary);
+
+    try {
+        return tasksFromDictionary(tasksDictionary);
+    }
+    catch (const documentation::SpecificationError& e) {
+        LERROR(
+            fmt::format("Could not load tasks file '{}'. {}",
+            absTasksFile, e.what())
+        );
+        for (const documentation::TestResult::Offense& o : e.result.offenses) {
+            LERROR(ghoul::to_string(o));
+        }
+        for (const documentation::TestResult::Warning& w : e.result.warnings) {
+            LWARNING(ghoul::to_string(w));
+        }
+
+        return std::vector<std::unique_ptr<Task>>();
+    }
 }
 
 } // namespace openspace
