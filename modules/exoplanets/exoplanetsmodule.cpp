@@ -51,6 +51,13 @@ namespace {
         "The path to a grayscale image that is used for the host star surfaces"
     };
 
+    constexpr const openspace::properties::Property::PropertyInfo StarGlareTextureInfo = {
+        "StarGlareTexture",
+        "Star Glare Texture",
+        "The path to a grayscale image that is used for the glare effect of the "
+        "host stars"
+    };
+
     constexpr const openspace::properties::Property::PropertyInfo NoDataTextureInfo = {
         "NoDataTexture",
         "No Data Star Texture",
@@ -120,6 +127,9 @@ namespace {
        // [[codegen::verbatim(StarTextureInfo.description)]]
        std::optional<std::string> starTexture;
 
+       // [[codegen::verbatim(StarGlareTextureInfo.description)]]
+       std::optional<std::string> starGlareTexture;
+
        // [[codegen::verbatim(NoDataTextureInfo.description)]]
        std::optional<std::string> noDataTexture;
 
@@ -152,6 +162,7 @@ ExoplanetsModule::ExoplanetsModule()
     : OpenSpaceModule(Name)
     , _exoplanetsDataFolder(DataFolderInfo)
     , _starTexturePath(StarTextureInfo)
+    , _starGlareTexturePath(StarGlareTextureInfo)
     , _noDataTexturePath(NoDataTextureInfo)
     , _orbitDiscTexturePath(OrbitDiscTextureInfo)
     , _habitableZoneTexturePath(HabitableZoneTextureInfo)
@@ -164,12 +175,15 @@ ExoplanetsModule::ExoplanetsModule()
 
     addProperty(_exoplanetsDataFolder);
     addProperty(_starTexturePath);
+    addProperty(_starGlareTexturePath);
     addProperty(_noDataTexturePath);
     addProperty(_orbitDiscTexturePath);
     addProperty(_habitableZoneTexturePath);
+
     addProperty(_showComparisonCircle);
     addProperty(_showHabitableZone);
     addProperty(_useOptimisticZone);
+
     addProperty(_habitableZoneOpacity);
 }
 
@@ -187,6 +201,10 @@ std::string ExoplanetsModule::lookUpTablePath() const {
 
 std::string ExoplanetsModule::starTexturePath() const {
     return _starTexturePath;
+}
+
+std::string ExoplanetsModule::starGlareTexturePath() const {
+    return _starGlareTexturePath;
 }
 
 std::string ExoplanetsModule::noDataTexturePath() const {
@@ -260,6 +278,7 @@ void ExoplanetsModule::internalInitialize(const ghoul::Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
     _exoplanetsDataFolder = p.dataFolder.value_or(_exoplanetsDataFolder);
     _starTexturePath = p.starTexture.value_or(_starTexturePath);
+    _starGlareTexturePath = p.starGlareTexture.value_or(_starGlareTexturePath);
     _noDataTexturePath = p.noDataTexture.value_or(_noDataTexturePath);
     _orbitDiscTexturePath = p.orbitDiscTexture.value_or(_orbitDiscTexturePath);
     _habitableZoneTexturePath = p.habitableZoneTexture.value_or(_habitableZoneTexturePath);

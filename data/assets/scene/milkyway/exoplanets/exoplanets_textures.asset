@@ -1,6 +1,8 @@
 local habitableZoneTextures =
     asset.require('./../habitable_zones/habitable_zone_textures').TexturesPath
 
+local sunTextures = asset.require('scene/solarsystem/sun/sun_textures').TexturesPath
+
 local TexturesPath = asset.syncedResource({
     Name = "Exoplanet Textures",
     Type = "HttpSynchronization",
@@ -10,6 +12,7 @@ local TexturesPath = asset.syncedResource({
 
 asset.onInitialize(function ()
     local starTexture = TexturesPath .. "/sun.jpg"
+    local starGlareTexture = sunTextures .. "/halo.png"
     local noDataTexture = TexturesPath .. "/grid-32.png"
     local discTexture = TexturesPath .. "/disc_bw_texture.png"
 
@@ -20,6 +23,11 @@ asset.onInitialize(function ()
     local p = "Modules.Exoplanets.StarTexture";
     if(openspace.getPropertyValue(p) == "") then
         openspace.setPropertyValueSingle(p, starTexture)
+    end
+
+    local p = "Modules.Exoplanets.StarGlareTexture";
+    if(openspace.getPropertyValue(p) == "") then
+        openspace.setPropertyValueSingle(p, starGlareTexture)
     end
 
     p = "Modules.Exoplanets.NoDataTexture";

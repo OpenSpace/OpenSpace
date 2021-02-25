@@ -44,6 +44,7 @@ public:
     std::string exoplanetsDataPath() const;
     std::string lookUpTablePath() const;
     std::string starTexturePath() const;
+    std::string starGlareTexturePath() const;
     std::string noDataTexturePath() const;
     std::string orbitDiscTexturePath() const;
     std::string habitableZoneTexturePath() const;
@@ -60,12 +61,15 @@ protected:
 
     properties::StringProperty _exoplanetsDataFolder;
     properties::StringProperty _starTexturePath;
+    properties::StringProperty _starGlareTexturePath;
     properties::StringProperty _noDataTexturePath;
     properties::StringProperty _orbitDiscTexturePath;
     properties::StringProperty _habitableZoneTexturePath;
+
     properties::BoolProperty _showComparisonCircle;
     properties::BoolProperty _showHabitableZone;
     properties::BoolProperty _useOptimisticZone;
+
     properties::FloatProperty _habitableZoneOpacity;
 };
 
