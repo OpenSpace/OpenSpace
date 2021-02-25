@@ -72,6 +72,8 @@ public:
     void update() override;
     bool isReady() const override;
 
+    void testMessage();
+
 private:
     class ScreenSpaceRenderHandler : public WebRenderHandler {
     public:

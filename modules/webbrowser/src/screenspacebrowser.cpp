@@ -57,6 +57,32 @@ namespace {
 
 namespace openspace {
 
+void ScreenSpaceBrowser::testMessage() {
+    LINFOC(_loggerCat, "TJOHO");
+    //_browserInstance->reshape(glm::ivec2(1000, 1000));
+
+   std::string mes2 = "var frame = document.getElementsByTagName('iframe')[0].contentWindow; const message : CenterOnCoordinatesMessage = { event: 'center_on_coordinates', ra : Number(50) , dec : Number(70), fov : Number(120), instant : false,}; frame.postMessage(message, 'https://web.wwtassets.org/research/latest/');";
+  
+   //std::string thisFrame = "var frame = window.frames[0]; ";
+   //std::string iFrame = "var frame = document.getElementsByTagName('iframe')[0].contentWindow;";
+   std::string mes3 = "var message = {\
+       event: 'center_on_coordinates',\
+       ra : Number(80),\
+       dec : Number(50),\
+       fov : Number(70),\
+       instant : false\
+   };\
+   window.postMessage(message, 'http://localhost:4690');";
+
+
+    CefRefPtr<CefFrame> frame = _browserInstance->getBrowser()->GetMainFrame();
+
+    frame->ExecuteJavaScript(mes3,
+        frame->GetURL(), 0);
+
+
+}
+
 void ScreenSpaceBrowser::ScreenSpaceRenderHandler::draw() {}
 
 void ScreenSpaceBrowser::ScreenSpaceRenderHandler::render() {}

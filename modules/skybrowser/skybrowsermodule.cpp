@@ -44,15 +44,24 @@
 namespace {
     constexpr const openspace::properties::Property::PropertyInfo TestInfo = 
     {
-        "TestInfo",
+        "Test",
         "Test Info",
         "tjobidabidobidabidopp plopp"
+    };
+    constexpr const openspace::properties::Property::PropertyInfo ZoomInfo =
+    {
+        "Zoom",
+        "Zoom Info",
+        "tjobidabidobidabidopp plupp"
     };
 
     struct [[codegen::Dictionary(SkybrowserModule)]] Parameters {
 
         // [[codegen::verbatim(TestInfo.description)]]
-        std::optional<std::string> testString;
+        std::optional<std::string> test;
+
+        // [[codegen::verbatim(ZoomInfo.description)]]
+        std::optional<float> zoom;
     };
     
     #include "skybrowsermodule_codegen.cpp"
@@ -65,9 +74,13 @@ namespace openspace {
 SkybrowserModule::SkybrowserModule()
     : OpenSpaceModule(Name)
     , _testProperty(TestInfo)
+    , _zoomFactor(ZoomInfo, 70.f ,0.f ,150.f)
 {
     addProperty(_testProperty);
+    addProperty(_zoomFactor);
 }
+
+
 
 scripting::LuaLibrary SkybrowserModule::luaLibrary() const {
     scripting::LuaLibrary res;
@@ -80,15 +93,28 @@ scripting::LuaLibrary SkybrowserModule::luaLibrary() const {
             "string or list of strings",
             "Add one or multiple exoplanet systems to the scene, as specified by the "
             "input. An input string should be the name of the system host star"
+        },
+        {
+            "update",
+            &skybrowser::luascriptfunctions::updateFunction,
+            {},
+            "string or list of strings",
+            "Add one or multiple exoplanet systems to the scene, as specified by the "
+            "input. An input string should be the name of the system host star"
         }
     };
 
     return res;
 }
 
+float SkybrowserModule::zoomFactor() const{
+    return _zoomFactor;
+}
+
 void SkybrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
-    _testProperty = p.testString.value_or(_testProperty);
+    _testProperty = p.test.value_or(_testProperty);
+    _zoomFactor = p.zoom.value_or(_zoomFactor);
     /*
     auto fBrowser = FactoryManager::ref().factory<ScreenSpaceBrowser>();
     ghoul_assert(fBrowser, "No browser factory existed :'-(");
