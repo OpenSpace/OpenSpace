@@ -89,9 +89,9 @@ namespace {
     // ----- KEYS POSSIBLE IN MODFILE. EXPECTED DATA TYPE OF VALUE IN [BRACKETS]  ----- //
     // ---------------------------- MANDATORY MODFILE KEYS ---------------------------- //
     // [STRING] "json"
-    constexpr const char* KeyInputFileType = "InputFileType";
+    // constexpr const char* KeyInputFileType = "InputFileType";
     // [STRING] should be path to folder containing the input files
-    constexpr const char* KeySourceFolder = "SourceFolder";
+    //constexpr const char* KeySourceFolder = "SourceFolder";
     // [STRING] should be path to folder containing data in binary format
     constexpr const char* KeyBinarySourceFolder = "BinarySourceFolder";
 
@@ -112,7 +112,7 @@ namespace {
     constexpr const char* KeyLineWidth = "LineWidth";
 
     // ------------- POSSIBLE STRING VALUES FOR CORRESPONDING MODFILE KEY ------------- //
-    constexpr const char* ValueInputFileTypeJson = "json";
+    //constexpr const char* ValueInputFileTypeJson = "json";
 
 
     // --------------------------------- Property Info -------------------------------- //
@@ -532,7 +532,7 @@ void RenderableStreamNodes::initializeGL() {
     ghoul::opengl::updateUniformLocations(*_shaderProgram, _uniformCache, UniformNames);
     ghoul::opengl::updateUniformLocations(*_shaderProgram, _uniformCache2, UniformNames2);
 
-    if (_dictionary->hasValue<std::string>((KeyColorTablePaths))) {
+    if (_dictionary->hasValue<ghoul::Dictionary>((KeyColorTablePaths))) {
         ghoul::Dictionary colorTablesPathsDictionary =
             _dictionary->value<ghoul::Dictionary>(KeyColorTablePaths);
         const size_t nProvidedPaths = colorTablesPathsDictionary.size();
@@ -544,16 +544,16 @@ void RenderableStreamNodes::initializeGL() {
                     colorTablesPathsDictionary.value<std::string>(std::to_string(i)));
             }
         }
+        // Set a default color table, just in case the (optional) user defined paths are
+        // corrupt or not provided!
+        //_colorTablePaths.push_back(FieldlinesSequenceModule::DefaultTransferFunctionFile);
+        _transferFunction = std::make_unique<TransferFunction>(absPath(_colorTablePaths[0]));
+        _transferFunctionCMR = std::make_unique<TransferFunction>(absPath(_colorTablePaths[1]));
+        _transferFunctionEarth = std::make_unique<TransferFunction>(absPath(_colorTablePaths[2]));  // what if not in order?
+        _transferFunctionFlow = std::make_unique<TransferFunction>(absPath(_colorTablePaths[3]));
+        //_transferFunctionIlluminance = std::make_unique<TransferFunction>(absPath(_colorTablePaths[4]));
+        //_transferFunctionIlluminance2 = std::make_unique<TransferFunction>(absPath(_colorTablePaths[5]));
     }
-    // Set a default color table, just in case the (optional) user defined paths are
-    // corrupt or not provided!
-    //_colorTablePaths.push_back(FieldlinesSequenceModule::DefaultTransferFunctionFile);
-    _transferFunction = std::make_unique<TransferFunction>(absPath(_colorTablePaths[0]));
-    _transferFunctionCMR = std::make_unique<TransferFunction>(absPath(_colorTablePaths[1]));
-    _transferFunctionEarth = std::make_unique<TransferFunction>(absPath(_colorTablePaths[2]));  // what if not in order?
-    _transferFunctionFlow = std::make_unique<TransferFunction>(absPath(_colorTablePaths[3]));
-    //_transferFunctionIlluminance = std::make_unique<TransferFunction>(absPath(_colorTablePaths[4]));
-    //_transferFunctionIlluminance2 = std::make_unique<TransferFunction>(absPath(_colorTablePaths[5]));
 
     // EXTRACT OPTIONAL INFORMATION FROM DICTIONARY
     //std::string outputFolderPath;
@@ -568,7 +568,6 @@ void RenderableStreamNodes::initializeGL() {
     //}
     //_nStates = 274;
     setModelDependentConstants();
-    setupProperties();
        
     //extractTriggerTimesFromFileNames();
     populateStartTimes();
@@ -599,6 +598,7 @@ void RenderableStreamNodes::initializeGL() {
 
     // Needed for alpha transparency
     setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
+    setupProperties();
 }
 
 void RenderableStreamNodes::loadNodeData() {
@@ -939,43 +939,43 @@ bool RenderableStreamNodes::loadBinaryfilesDirectly(const std::string& energybin
 **/
 bool RenderableStreamNodes::extractMandatoryInfoFromDictionary()
 {
-    _identifier = _dictionary->value<std::string>(SceneGraphNode::KeyIdentifier);
+    //_identifier = _dictionary->value<std::string>(SceneGraphNode::KeyIdentifier);
 
     // ------------------- EXTRACT MANDATORY VALUES FROM DICTIONARY ------------------- //
-    std::string inputFileTypeString;
-    if (!_dictionary->hasValue<std::string>(KeyInputFileType)) {
-        LERROR(fmt::format("{}: The field {} is missing", _identifier, KeyInputFileType));
-    }
-    else {
-        // Verify that the input type is corrects
-        inputFileTypeString =
-            _dictionary->value<std::string>(KeyInputFileType);
-        if (inputFileTypeString == ValueInputFileTypeJson) {    // == "json" 
-        }
-        else if(inputFileTypeString == "") {
-        }
-        else {
-            LERROR(fmt::format(
-                "{}: {} is not a recognized {}",
-                _identifier, inputFileTypeString, KeyInputFileType
-                ));
-            return false;
-        }
-    }
+    //std::string inputFileTypeString;
+    //if (!_dictionary->hasValue<std::string>(KeyInputFileType)) {
+    //    LERROR(fmt::format("{}: The field {} is missing", _identifier, KeyInputFileType));
+    //}
+    //else {
+    //    // Verify that the input type is corrects
+    //    inputFileTypeString =
+    //        _dictionary->value<std::string>(KeyInputFileType);
+    //    if (inputFileTypeString == ValueInputFileTypeJson) {    // == "json" 
+    //    }
+    //    else if(inputFileTypeString == "") {
+    //    }
+    //    else {
+    //        LERROR(fmt::format(
+    //            "{}: {} is not a recognized {}",
+    //            _identifier, inputFileTypeString, KeyInputFileType
+    //            ));
+    //        return false;
+    //    }
+    //}
 
     //_colorTableRanges.push_back(glm::vec2(0, 1));   
 
-    if (!_dictionary->hasValue<std::string>(KeySourceFolder)) {
-        LERROR(fmt::format("{}: The field {} is missing", _identifier, KeySourceFolder));
-        return false;
-    }
+    //if (!_dictionary->hasValue<std::string>(KeySourceFolder)) {
+    //    LERROR(fmt::format("{}: The field {} is missing", _identifier, KeySourceFolder));
+    //    return false;
+    //}
     if (!_dictionary->hasValue<std::string>(KeyBinarySourceFolder)) {
         LERROR(fmt::format("{}: The field {} is missing", _identifier, KeyBinarySourceFolder));
         return false;
     }
     //constexpr const char temp = '\';
-    std::string sourceFolderPath =
-        _dictionary->value<std::string>(KeySourceFolder);
+    //std::string sourceFolderPath =
+    //    _dictionary->value<std::string>(KeySourceFolder);
     std::string binarySourceFolderPath = 
         _dictionary->value<std::string>(KeyBinarySourceFolder);
     _binarySourceFilePath = binarySourceFolderPath;
@@ -990,8 +990,8 @@ bool RenderableStreamNodes::extractMandatoryInfoFromDictionary()
         // Ensure that there are available and valid source files left
         if (_binarySourceFiles.empty()) {
             LERROR(fmt::format(
-                "{}: {} contains no {} files",
-                _identifier, binarySourceFolderPath, inputFileTypeString
+                "{}: {} contains no files",
+                _identifier, binarySourceFolderPath
             ));
             return false;
         }
@@ -1005,32 +1005,32 @@ bool RenderableStreamNodes::extractMandatoryInfoFromDictionary()
         return false;
     }
 
-    // Ensure that the source folder exists and then extract
-    // the files with the same extension as <inputFileTypeString>
-    ghoul::filesystem::Directory sourceFolder(sourceFolderPath);
-    if (FileSys.directoryExists(sourceFolder)) {
-        // Extract all file paths from the provided folder
-        _sourceFiles = sourceFolder.readFiles(
-            ghoul::filesystem::Directory::Recursive::No,
-            ghoul::filesystem::Directory::Sort::Yes
-        );
-        // Ensure that there are available and valid source files left
-        if (_sourceFiles.empty()) {
-            LERROR(fmt::format(
-                "{}: {} contains no {} files",
-                _identifier, sourceFolderPath, inputFileTypeString
-            ));
-            return false;
-        }
-    }
-    else {
-        LERROR(fmt::format(
-            "{}: SourceFolder {} is not a valid directory",
-            _identifier,
-            sourceFolderPath
-        ));
-        return false;
-    }
+    //// Ensure that the source folder exists and then extract
+    //// the files with the same extension as <inputFileTypeString>
+    //ghoul::filesystem::Directory sourceFolder(sourceFolderPath);
+    //if (FileSys.directoryExists(sourceFolder)) {
+    //    // Extract all file paths from the provided folder
+    //    _sourceFiles = sourceFolder.readFiles(
+    //        ghoul::filesystem::Directory::Recursive::No,
+    //        ghoul::filesystem::Directory::Sort::Yes
+    //    );
+    //    // Ensure that there are available and valid source files left
+    //    if (_sourceFiles.empty()) {
+    //        LERROR(fmt::format(
+    //            "{}: {} contains no {} files",
+    //            _identifier, sourceFolderPath, inputFileTypeString
+    //        ));
+    //        return false;
+    //    }
+    //}
+    //else {
+    //    LERROR(fmt::format(
+    //        "{}: SourceFolder {} is not a valid directory",
+    //        _identifier,
+    //        sourceFolderPath
+    //    ));
+    //    return false;
+    //}
 
     return true;
 }

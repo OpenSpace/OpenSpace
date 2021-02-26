@@ -53,8 +53,8 @@ local Streamnodes = {
         -- StreamsEnabled = false,
         -- LineWidth = 1.0;
         -- AlphaBlendlingEnabled = false,
-        InputFileType = "json",
-        ColorTablePaths = {
+        -- InputFileType = "json",
+        ColorTablePaths = { -- keep order 
         	streamnodeColorTable,
         	streamnodeColorTableCMR,
         	streamnodeColorTableEarth,
