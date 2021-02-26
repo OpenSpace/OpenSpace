@@ -6,6 +6,7 @@
     "scene/solarsystem/sun/streamnodeslegend",
     "scene/solarsystem/sun/streamnodescutplane",
     "scene/solarsystem/sun/sun_textures",
+    "scene/solarsystem/sun/EUV_layer",
 
     "scene/solarsystem/sun/heliosphere/bastille_day/density_volume",
     "scene/solarsystem/sun/heliosphere/bastille_day/bastille_day_sun_textures",
@@ -128,7 +129,7 @@
       "is_local": false,
       "key": "i",
       "name": "Next sun texture",
-      "script": "textureList = openspace.globebrowsing.getLayers('Sun', 'ColorLayers');textureIndex = 2;if (textureIndex == nil) then textureIndex = 1;end; textureIndex = textureIndex + 1;if (textureIndex >= #textureList) then textureIndex = 1;end;if (textureIndex == 1) then openspace.setPropertyValue(\"Scene.Sun.Renderable.Layers.ColorLayers.*.Enabled\", false); openspace.setPropertyValueSingle(\"Scene.Sun.Renderable.Layers.ColorLayers.Texture.Enabled\", true); else openspace.setPropertyValue(\"Scene.Sun.Renderable.Layers.ColorLayers.*.Enabled\", false);str = \"Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-\" .. textureIndex .. \".Enabled\"; openspace.setPropertyValueSingle(str, true);end;"
+      "script": "textureList = openspace.globebrowsing.getLayers('Sun', 'ColorLayers');if (textureIndex == nil) then textureIndex = 2;end;textureIndex = textureIndex + 1;if (textureIndex >= #textureList) then textureIndex = 0;end;if (textureIndex == 0) then openspace.setPropertyValue(\"Scene.Sun.Renderable.Layers.ColorLayers.*.Enabled\", false);openspace.setPropertyValueSingle(\"Scene.Sun.Renderable.Layers.ColorLayers.Texture.Enabled\", true);else openspace.setPropertyValue(\"Scene.Sun.Renderable.Layers.ColorLayers.*.Enabled\", false);str = \"Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-\" .. textureIndex .. \".Enabled\";openspace.setPropertyValueSingle(str, true);end;"
     },    
     {
       "documentation": "Transition Magnetosphere",

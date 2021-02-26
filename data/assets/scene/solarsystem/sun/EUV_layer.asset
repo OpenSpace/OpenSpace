@@ -1,0 +1,48 @@
+asset.meta = {
+    Name = "Predictive Science Inc. Stream nodes Bastille Days",
+    Version = "1.0",
+    Description = "EUV simulation, texture sequence",
+    Author = "CCMC, OpenSpace team",
+    URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
+    License = ""
+}
+
+asset.require("spice/base")
+local assetHelper = asset.require("util/asset_helper")
+local transforms = asset.require("./transforms")
+
+local textureSourcePath = asset.syncedResource({
+    Type = "HttpSynchronization",
+    Name = "euv_textures_bastille_event",
+    Identifier = "euv_textures_bastille_event",
+    Version = 1
+})
+
+local EUV_Layer = {
+    Identifier = "EUV_Layer",
+    Parent = transforms.SunIAU.Identifier,
+    Renderable = {
+	    Type = "RenderableTimeVaryingSphere",
+	    Size = 6.96E8, -- Slightly bigger than the sun renderable,
+	    Enabled = false,
+	    Texture = textureSourcePath, 
+	    --BlendMode = "Additive",
+	    Opacity = 1,
+        Segments = 132
+	},
+    GUI = {
+        Name = "EUV_Layer",
+        Path = "/Solar System/Sun"
+		},
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { EUV_Layer })
+
+
+
+
+
+
+
+
+
