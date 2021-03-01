@@ -72,7 +72,7 @@ public:
     void update() override;
     bool isReady() const override;
 
-    void testMessage();
+    void executeJavascript(std::string &script) const;
 
 private:
     class ScreenSpaceRenderHandler : public WebRenderHandler {

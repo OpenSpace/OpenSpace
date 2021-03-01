@@ -36,6 +36,7 @@
 #include <openspace/util/factorymanager.h>
 #include <thread>
 #include <chrono>
+#include <cmath>
 
 
 #include "skybrowsermodule_lua.inl"
@@ -121,6 +122,24 @@ void SkybrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     fBrowser->registerClass<ScreenSpaceBrowser>("ScreenSpaceBrowser");
     */
 }
+
+glm::dvec2 SkybrowserModule::convertGalacticToCelestial(glm::dvec3 rGal) const {
+    
+    // Used the math from this website: https://gea.esac.esa.int/archive/documentation/GD -->
+    // R2/Data_processing/chap_cu3ast/sec_cu3ast_intro/ssec_cu3ast_intro_tansforms.html#SSS1
+    const glm::dmat3 conversionMatrix = glm::dmat3({
+      -0.0548755604162154,  0.4941094278755837, -0.8676661490190047, // col 0
+      -0.8734370902348850, -0.4448296299600112, -0.1980763734312015, // col 1
+      -0.4838350155487132,  0.7469822444972189,  0.4559837761750669  // col 2
+        });
+   
+    glm::dvec3 rICRS = glm::transpose(conversionMatrix) * rGal;
+    float l = atan2(rICRS[1], rICRS[0]);
+    float b = atan2(rICRS[2], glm::sqrt((rICRS[0] * rICRS[0]) + (rICRS[1] * rICRS[1])));
+
+    return glm::dvec2(glm::degrees(l), glm::degrees(b));
+}
+
 /*
 std::vector<documentation::Documentation> SkybrowserModule::documentations() const {
     return {
