@@ -31,7 +31,7 @@
 #include <openspace/util/httprequest.h>
 #include <openspace/util/time.h>
 #include <future>
-
+#include <list>
 
 namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl {
@@ -71,14 +71,16 @@ public:
 
 private:
 
+    static const int _TRAILSIZE = 5;
+
     struct Vertex {
         glm::vec3 position = glm::vec3(0.f);
         glm::vec3 color = glm::vec3(0.f);
     };
 
     struct AircraftVBOLayout {
-        float latitude = 0.f;
-        float longitude = 0.f;
+        float latitude = 90.f;
+        float longitude =  0.f;
         float barometricAltitude = 0.f;
         //float geometricAltitude = 0.f; // Not used at the moment
         float velocity = 0.f; 
@@ -86,23 +88,28 @@ private:
         int lastContact = 0; // Draw only if changed
     };
     
-    
+    template<size_t N>
+    struct aircraftList {
+        aircraftList() : list(N) {}
+        std::list<AircraftVBOLayout> list;
+    };
+
     // Backend storage for vertex buffer object containing all points
     std::vector<AircraftVBOLayout>  _vertexBufferData;
    
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
 
-    UniformCache(modelViewProjection/*, timeStamp*/) _uniformCache;
+    UniformCache(modelViewProjection, trailSize) _uniformCache;
 
     GLuint _vertexArray = 0;
     GLuint _vertexBuffer = 0;
     std::future<json> fut;
-
+    bool _dataLoading = false;
     properties::FloatProperty _pointSize;
     json _data = json({});
-
+    std::map<std::string, aircraftList<_TRAILSIZE>> aircraftMap;
     // Fix secure way to handle credentials
-
+    
     //const std::string _url = "https://" + _PASSWORD + ":" + _USERNAME + "@opensky-network.org/api/states/all";
     const std::string _url = "https://opensky-network.org/api/states/all";
     double _deltaTime = Time::now().j2000Seconds(); 

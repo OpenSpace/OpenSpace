@@ -38,7 +38,6 @@
 
 using namespace std::chrono;
 
-
 namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl {
     class ProgramObject;
@@ -47,8 +46,8 @@ namespace ghoul::opengl {
 
 namespace {
     
-    constexpr const std::array<const char*, 1> UniformNames = {
-        "modelViewProjection"
+    constexpr const std::array<const char*, 2> UniformNames = {
+        "modelViewProjection", "trailSize"
     };
 
     constexpr openspace::properties::Property::PropertyInfo URLPathInfo = {
@@ -105,7 +104,7 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
         glGenVertexArrays(1, &_vertexArray);
         glGenBuffers(1, &_vertexBuffer);
 
-
+  
         // Setup shaders
         _shader = global::renderEngine->buildRenderProgram(
             "AirTrafficProgram",
@@ -140,15 +139,18 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
         if (_data.empty()) return;
 
         // Trigger data update
-        if (abs(data.time.j2000Seconds() - _deltaTime) > 10.0) {
-            _deltaTime = data.time.j2000Seconds();
-            fut = std::async(&RenderableAirTraffic::fetchData, this);
+        if ( abs(data.time.j2000Seconds() - _deltaTime) > 10.0 && !_dataLoading) {
+            fut = std::async(std::launch::async, &RenderableAirTraffic::fetchData, this);
+            _dataLoading = true;
         }
 
         // Check if new data finished loading. Update buffers ONLY if finished
-        if (fut.valid() && (fut.wait_for(std::chrono::seconds(0)) == std::future_status::ready)) {
+        if (fut.valid() && fut.wait_for(seconds(0)) == std::future_status::ready) { // NOT SO STABLE SOLUTION
             _data = fut.get();
             updateBuffers();
+            std::cout << " BUFFERS UPDATED " << abs(_deltaTime - data.time.j2000Seconds()) << std::endl;
+            _dataLoading = false;
+            _deltaTime = data.time.j2000Seconds();
         }
 
         _shader->activate();
@@ -165,12 +167,31 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
             data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
         );
 
-        glBindVertexArray(_vertexArray);
-
-        glPointSize(2.0);
         
         const GLsizei nAircrafts = static_cast<GLsizei>(_data["states"].size());
-        glDrawArrays(GL_POINTS, 0, nAircrafts);
+        _shader->setUniform(
+            _uniformCache.trailSize,
+            static_cast<float>(_TRAILSIZE)
+        );
+
+        glBindVertexArray(_vertexArray);
+
+        //glPointSize(2.0);
+        glLineWidth(2.0);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_BLEND);
+
+
+
+        //glDrawArrays(GL_LINE_STRIP, 0, _TRAILSIZE * nAircrafts);
+
+
+        for (size_t i = 0; i < nAircrafts; ++i) {
+            glDrawArrays(GL_LINE_STRIP, _TRAILSIZE * i, static_cast<GLsizei>(_TRAILSIZE)/*+ 1*/);   
+        }
+    
+        //glVertexPointer(_TRAILSIZE, GL_FLOAT, 0, _vertexBufferData.data());
+        //glDrawArrays(GL_LINE_STRIP, 0, nAircrafts);
 
         glBindVertexArray(0);
 
@@ -246,33 +267,47 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
         int nAircrafts = static_cast<int>(_data["states"].size());
         
         _vertexBufferData.clear();
-        _vertexBufferData.resize(nAircrafts);
+        _vertexBufferData.resize(_TRAILSIZE * nAircrafts);
 
         size_t vertexBufIdx = 0;
 
-        for (auto& aircraft : _data["states"]){
-            // Extract data and add to vertex buffer
-            _vertexBufferData[vertexBufIdx].lastContact = static_cast<int>(aircraft[4]);
-            _vertexBufferData[vertexBufIdx].longitude = static_cast<float>(aircraft[5]);
-            _vertexBufferData[vertexBufIdx].latitude = static_cast<float>(aircraft[6]);
-            _vertexBufferData[vertexBufIdx].barometricAltitude = static_cast<float>(aircraft[7]);
-            _vertexBufferData[vertexBufIdx].velocity = static_cast<float>(aircraft[9]);
-            _vertexBufferData[vertexBufIdx].flightDirection = static_cast<float>(aircraft[10]);
+        AircraftVBOLayout temp;
 
-            vertexBufIdx++;
+        for (auto& aircraft : _data["states"]) {
+            // Extract data and add to vertex buffer
+            //---
+            std::string icao24 = aircraft[0];
+
+            temp.lastContact = static_cast<int>(aircraft[4]);
+            temp.latitude = static_cast<float>(aircraft[6]);  
+            temp.longitude = static_cast<float>(aircraft[5]);
+            temp.barometricAltitude = static_cast<float>(aircraft[7]);
+            temp.velocity = static_cast<float>(aircraft[9]);
+            temp.flightDirection = static_cast<float>(aircraft[10]);
+            
+            if(temp.latitude != 0.f && temp.longitude != 0.f) {
+                if(aircraftMap[icao24].list.size() >= _TRAILSIZE) aircraftMap[icao24].list.pop_back();
+                aircraftMap[icao24].list.push_front(temp);
+            }
+
+            for (auto& ac : aircraftMap[icao24].list) {
+                _vertexBufferData[vertexBufIdx] = ac;
+                vertexBufIdx++;
+            }  
         }
 
         glBindVertexArray(_vertexArray);
+
         glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
 
-        if (_firstFetch) {
+        //if (_firstFetch) {
             glBufferData(
                 GL_ARRAY_BUFFER,
-                _vertexBufferData.size() * sizeof(AircraftVBOLayout) * 2,
+                _vertexBufferData.size() * sizeof(AircraftVBOLayout),
                 _vertexBufferData.data(),
-                GL_STREAM_DRAW
+                GL_STATIC_DRAW
             );
-        }
+       /* }
         else {  
             glBufferSubData(
                 GL_ARRAY_BUFFER,
@@ -280,7 +315,7 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
                 _vertexBufferData.size() * sizeof(AircraftVBOLayout),
                 _vertexBufferData.data()
             );
-        }
+        }*/
 
         // Lat, long, alt: at pos 0 send 3 float from AircraftVBOLayout
         glEnableVertexAttribArray(0);

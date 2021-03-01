@@ -30,9 +30,12 @@ layout (location = 1) in vec2 vertexInfo; // velocity, true_track
 layout (location = 2) in int vertexLastContact; //   
 
 uniform mat4 modelViewProjection;
+uniform float trailSize;
 //uniform int timeStamp;
-
+out float vertexID;
 out vec4 vs_position;
+out float trailS;
+out vec4 interpColor;
 
 const float RADII = 6378137.0; // Eart is approximated as a sphere update if changed. 
 
@@ -52,6 +55,8 @@ vec4 geoToCartConversion(float lat, float lon, float alt){
 
 void main() {
 
+    vertexID = float(gl_VertexID);
+    interpColor = vec4( 1.0 , 0.0, 0.0, 1.0 - mod(vertexID, trailSize)/(trailSize-1));
     vec4 position = geoToCartConversion(vertexPosition.x, vertexPosition.y, vertexPosition.z);
     vs_position = modelViewProjection * position;
     gl_Position = vs_position;

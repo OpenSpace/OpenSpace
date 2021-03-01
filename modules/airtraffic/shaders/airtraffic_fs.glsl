@@ -25,11 +25,33 @@
 #include "fragment.glsl"
 
 in vec4 vs_position;
+in float vertexID;
+in float trailS;
+in vec4 interpColor;
+uniform float opacity = 1.0;
 
 Fragment getFragment() {
     Fragment frag;
 
-    frag.color = vec4(1.0, 0.0, 0.0, 1.0);
+
+    
+    //float invert = pow((1.0 - vertexDistance_f), lineFade);
+    //float fade = clamp(invert, 0.0, 1.0);
+
+    // Currently even fully transparent lines can occlude other lines, thus we discard
+    // these fragments since debris and satellites are rendered so close to each other
+   // if (interpColor.w < 0.05) {
+     //   discard;
+    //}
+
+    // Use additive blending for some values to make the discarding less abrupt
+    //if (interpColor.w < 0.15) {
+      //  frag.blend = BLEND_MODE_ADDITIVE;
+    //}
+
+    //frag.color = vec4(1.0, 0.0, 0.0, fade * opacity);
+
+    frag.color = interpColor;//vec4(1.0, 0.0, 0.0, distance(vec2(vs_position), gl_PointCoord);
     frag.gPosition = vs_position;
     frag.depth = vs_position.w;
     frag.gNormal = vec4(1.0, 1.0, 1.0, 0.0);
