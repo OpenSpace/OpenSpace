@@ -47,6 +47,7 @@ public:
 
     float zoomFactor() const;
     glm::dvec2 convertGalacticToCelestial(glm::dvec3 coords) const;
+    void WWTfollowCamera() const;
 
     scripting::LuaLibrary luaLibrary() const override;
     //std::vector<documentation::Documentation> documentations() const override;

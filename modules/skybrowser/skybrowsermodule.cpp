@@ -36,8 +36,7 @@
 #include <openspace/util/factorymanager.h>
 #include <thread>
 #include <chrono>
-#include <cmath>
-
+#include <cmath> // For atan2
 
 #include "skybrowsermodule_lua.inl"
 
@@ -88,16 +87,24 @@ scripting::LuaLibrary SkybrowserModule::luaLibrary() const {
     res.name = "skybrowser";
     res.functions = {
         {
-            "test",
-            &skybrowser::luascriptfunctions::testFunction,
+            "create",
+            &skybrowser::luascriptfunctions::createBrowser,
             {},
             "string or list of strings",
             "Add one or multiple exoplanet systems to the scene, as specified by the "
             "input. An input string should be the name of the system host star"
         },
         {
-            "update",
-            &skybrowser::luascriptfunctions::updateFunction,
+            "move",
+            &skybrowser::luascriptfunctions::moveBrowser,
+            {},
+            "string or list of strings",
+            "Add one or multiple exoplanet systems to the scene, as specified by the "
+            "input. An input string should be the name of the system host star"
+        },
+        {
+            "follow",
+            &skybrowser::luascriptfunctions::followCamera,
             {},
             "string or list of strings",
             "Add one or multiple exoplanet systems to the scene, as specified by the "
@@ -121,6 +128,21 @@ void SkybrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     ghoul_assert(fBrowser, "No browser factory existed :'-(");
     fBrowser->registerClass<ScreenSpaceBrowser>("ScreenSpaceBrowser");
     */
+}
+
+void SkybrowserModule::WWTfollowCamera() const {
+    // Get camera view direction
+    const glm::dvec3 viewDirection = global::navigationHandler->camera()->viewDirectionWorldSpace();
+
+    // Convert to celestial coordinates
+    const SkybrowserModule* module = global::moduleEngine->module<SkybrowserModule>();
+    glm::dvec2 celestCoords = module->convertGalacticToCelestial(viewDirection);
+
+    // Execute javascript on browser
+    ScreenSpaceBrowser* browser = dynamic_cast<ScreenSpaceBrowser*>(global::renderEngine->screenSpaceRenderable("ScreenSpaceBowser"));
+    std::string script = "vm.onMessage({event: 'center_on_coordinates', ra : Number(" + std::to_string(celestCoords[0]) + "), dec : Number(" + std::to_string(celestCoords[1]) + "), fov : Number(" + std::to_string(_zoomFactor) + "), instant : false})";
+    browser->executeJavascript(script);
+
 }
 
 glm::dvec2 SkybrowserModule::convertGalacticToCelestial(glm::dvec3 rGal) const {

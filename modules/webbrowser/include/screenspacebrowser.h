@@ -73,6 +73,7 @@ public:
     bool isReady() const override;
 
     void executeJavascript(std::string &script) const;
+    void translate(glm::vec3 translation);
 
 private:
     class ScreenSpaceRenderHandler : public WebRenderHandler {
