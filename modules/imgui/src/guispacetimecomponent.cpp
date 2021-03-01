@@ -80,7 +80,9 @@ GuiSpaceTimeComponent::GuiSpaceTimeComponent()
 void GuiSpaceTimeComponent::render() {
     ImGui::SetNextWindowCollapsed(_isCollapsed);
     bool v = _isEnabled;
-    ImGui::Begin(guiName().c_str(), &v, Size, 0.5f, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::SetNextWindowSize(Size, ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowBgAlpha(0.5f);
+    ImGui::Begin(guiName().c_str(), &v, ImGuiWindowFlags_AlwaysAutoResize);
     _isEnabled = v;
     _isCollapsed = ImGui::IsWindowCollapsed();
 
@@ -366,7 +368,7 @@ void GuiSpaceTimeComponent::render() {
             &_deltaTime,
             1.f,
             100.f,
-            -1,
+            "%.8f",
             ImGuiInputTextFlags_EnterReturnsTrue
         );
         ImGui::SameLine();
