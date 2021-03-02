@@ -176,16 +176,17 @@ void createExoplanetSystem(const std::string& starName) {
     }
 
     std::string colorLayers;
+    std::optional<glm::vec3> starColor = std::nullopt;
     const float bv = system.starData.bv;
 
     if (!std::isnan(bv)) {
-        const glm::vec3 color = starColor(bv);
+        starColor = computeStarColor(bv);
         const std::string starTexture = module->starTexturePath();
         colorLayers =
             "{"
                 "Identifier = 'StarColor',"
                 "Type = 'SolidColor',"
-                "Color = " + ghoul::to_string(color) + ","
+                "Color = " + ghoul::to_string(*starColor) + ","
                 "BlendMode = 'Normal',"
                 "Enabled = true"
             "},"
@@ -502,6 +503,48 @@ void createExoplanetSystem(const std::string& starName) {
             "openspace.addSceneGraphNode(" + zoneDiscNode + ");",
             scripting::ScriptEngine::RemoteScripting::Yes
         );
+
+        // Star glare
+        if (starColor.has_value()) {
+            // This is a little magic to make the size of the glare dependent on the
+            // size and the temperature of the star. It's kind of based on the fact that
+            // the luminosity of a star is proportional to: (radius^2)*(temperature^4)
+            // Maybe a better option would be to compute the size based on the aboslute
+            // magnitude or star luminosity, but for now this looks good enough.
+            float size = 59.f * radiusInMeter;
+            if (hasTeff) {
+                constexpr const float sunTeff = 5780.f;
+                size *= std::pow(system.starData.teff / sunTeff, 2.0);
+            }
+
+            const std::string glareTexture = module->starGlareTexturePath();
+
+            const std::string starGlare = "{"
+                "Identifier = '" + starIdentifier + "_Glare',"
+                "Parent = '" + starIdentifier + "',"
+                "Renderable = {"
+                    "Type = 'RenderablePlaneImageLocal',"
+                    "Size = " + ghoul::to_string(size) + ","
+                    "Origin = 'Center',"
+                    "Billboard = true,"
+                    "Texture = openspace.absPath('"
+                        + formatPathToLua(glareTexture) +
+                    "'),"
+                    "BlendMode = 'Additive',"
+                    "Opacity = 0.65,"
+                    "MultiplyColor = " + ghoul::to_string(*starColor) + ""
+                "},"
+                "GUI = {"
+                    "Name = '" + sanitizedStarName + " Glare',"
+                    "Path = '" + guiPath + "'"
+                "}"
+            "}";
+
+            openspace::global::scriptEngine->queueScript(
+                "openspace.addSceneGraphNode(" + starGlare + ");",
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
+        }
     }
 }
 
