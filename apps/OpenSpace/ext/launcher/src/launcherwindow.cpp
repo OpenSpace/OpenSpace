@@ -314,7 +314,7 @@ void LauncherWindow::setBackgroundImage(const std::string& syncPath) {
 
 void LauncherWindow::populateProfilesList(std::string preset) {
     namespace fs = std::filesystem;
-    
+
     _profileBox->clear();
     _userAssetCount = 0;
 
@@ -331,7 +331,6 @@ void LauncherWindow::populateProfilesList(std::string preset) {
             "LauncherWindow",
             fmt::format("Could not find user profile folder '{}'", _userProfilePath)
         );
-        return;
     }
 
     _profileBox->addItem(QString::fromStdString("--- User Profiles ---"));
