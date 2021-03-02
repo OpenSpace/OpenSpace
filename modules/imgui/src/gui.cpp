@@ -770,7 +770,7 @@ void GUI::render() {
         ImGui::End();
 
         ImGui::Begin("Test Window");
-        ImGui::ShowTestWindow();
+        ImGui::ShowDemoWindow();
         ImGui::End();
 
         ImGui::Begin("Metrics Window");
