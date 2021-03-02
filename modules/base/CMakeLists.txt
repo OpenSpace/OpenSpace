@@ -38,8 +38,6 @@ set(HEADER_FILES
   dashboard/dashboarditemvelocity.h
   lightsource/cameralightsource.h
   lightsource/scenegraphlightsource.h
-  rendering/modelgeometry.h
-  rendering/multimodelgeometry.h
   rendering/grids/renderableboxgrid.h
   rendering/grids/renderablegrid.h
   rendering/grids/renderableradialgrid.h
@@ -91,8 +89,6 @@ set(SOURCE_FILES
   dashboard/dashboarditemvelocity.cpp
   lightsource/cameralightsource.cpp
   lightsource/scenegraphlightsource.cpp
-  rendering/modelgeometry.cpp
-  rendering/multimodelgeometry.cpp
   rendering/grids/renderableboxgrid.cpp
   rendering/grids/renderablegrid.cpp
   rendering/grids/renderableradialgrid.cpp

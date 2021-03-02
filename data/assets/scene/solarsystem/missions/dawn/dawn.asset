@@ -650,11 +650,7 @@ local Dawn = {
     Renderable = {
         Type = "RenderableModel",
         Body = "DAWN",
-        Geometry = {{
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/mainbodydawn.obj",
-            ColorTexture = textures .. "/gray.png"
-        }},
+        GeometryFile = models .. "/mainbodydawn.obj",
         LightSources = LightSources
     },
     GUI = {
@@ -682,11 +678,7 @@ local DawnSolarArray1 = {
     Renderable = {
         Type = "RenderableModel",
         Body = "DAWN",
-        Geometry = {{
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/solarpanelleft.obj",
-            ColorTexture = textures .. "/gray.png"
-        }},
+        GeometryFile = models .. "/solarpanelleft.obj",
         LightSources = LightSources
     },
     GUI = {
@@ -713,11 +705,7 @@ local DawnSolarArray2 = {
     Renderable = {
         Type = "RenderableModel",
         Body = "DAWN",
-        Geometry = {{
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/solarpanelright.obj",
-            ColorTexture = textures .. "/gray.png"
-        }},
+        GeometryFile = models .. "/solarpanelright.obj",
         LightSources = LightSources
     },
     GUI = {

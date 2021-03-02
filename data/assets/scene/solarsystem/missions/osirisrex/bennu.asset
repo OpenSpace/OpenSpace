@@ -2,15 +2,6 @@ local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 
-
-
-local textures = asset.syncedResource({
-    Name = "Bennu Textures",
-    Type = "HttpSynchronization",
-    Identifier = "bennu_textures",
-    Version = 1
-})
-
 local models = asset.syncedResource({
     Name = "Bennu Models",
     Type = "HttpSynchronization",
@@ -34,11 +25,7 @@ local Bennu = {
     Renderable = {
         Type = "RenderableModelProjection",
         Body = BENNU_BODY,
-        Geometry = {
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/BennuTextured.obj",
-            ColorTexture = textures .. "/gray.png"
-        },
+        GeometryFile = models .. "/BennuUntextured.obj",
         Projection = {
             Sequence   = asset.localResource('InstrumentTimes'),
             SequenceType = "instrument-times",
