@@ -51,35 +51,23 @@ namespace {
         "https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/timout_c.html for full "
         "information about how to structure this format"
     };
+
+    struct [[codegen::Dictionary(DashboardItemDate)]] Parameters {
+        // [[codegen::verbatim(FormatStringInfo.description)]]
+        std::optional<std::string> formatString;
+        
+        // [[codegen::verbatim(TimeFormatInfo.description)]]
+        std::optional<std::string> timeFormat;
+    };
+#include "dashboarditemdate_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation DashboardItemDate::Documentation() {
-    using namespace documentation;
-    return {
-        "DashboardItem Date",
-        "base_dashboarditem_date",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("DashboardItemDate"),
-                Optional::No
-            },
-            {
-                FormatStringInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                FormatStringInfo.description
-            },
-            {
-                TimeFormatInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                TimeFormatInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_dashboarditem_date";
+    return doc;
 }
 
 DashboardItemDate::DashboardItemDate(const ghoul::Dictionary& dictionary)
@@ -87,20 +75,12 @@ DashboardItemDate::DashboardItemDate(const ghoul::Dictionary& dictionary)
     , _formatString(FormatStringInfo, "Date: {} UTC")
     , _timeFormat(TimeFormatInfo, "YYYY MON DDTHR:MN:SC.### ::RND")
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "DashboardItemDate"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    if (dictionary.hasKey(FormatStringInfo.identifier)) {
-        _formatString = dictionary.value<std::string>(FormatStringInfo.identifier);
-    }
+    _formatString = p.formatString.value_or(_formatString);
     addProperty(_formatString);
 
-    if (dictionary.hasKey(TimeFormatInfo.identifier)) {
-        _timeFormat = dictionary.value<std::string>(TimeFormatInfo.identifier);
-    }
+    _timeFormat = p.timeFormat.value_or(_timeFormat);
     addProperty(_timeFormat);
 }
 

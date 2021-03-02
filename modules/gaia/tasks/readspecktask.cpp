@@ -99,11 +99,6 @@ documentation::Documentation ReadSpeckTask::Documentation() {
         "gaiamission_speckfiletorawdata",
         {
             {
-                "Type",
-                new StringEqualVerifier("ReadSpeckTask"),
-                Optional::No
-            },
-            {
                 KeyInFilePath,
                 new StringVerifier,
                 Optional::No,

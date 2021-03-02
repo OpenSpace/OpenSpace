@@ -51,7 +51,6 @@ namespace {
         progress.append("|");
         return progress;
     }
-
 } // namespace
 
 namespace openspace {

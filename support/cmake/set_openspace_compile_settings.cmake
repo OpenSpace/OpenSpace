@@ -31,6 +31,7 @@ function (set_openspace_compile_settings target)
     "/w44062"   # enumerator 'identifier' in a switch of enum 'enumeration' is not handled
     "/wd4127"   # conditional expression is constant
     "/wd4201"   # nonstandard extension used : nameless struct/union
+    "/wd5030"   # attribute 'attribute' is not recognized
     "/w44255"   # 'function': no function prototype given: converting '()' to '(void)'
     "/w44263"   # 'function': member function does not override any base class virtual member function
     "/w44264"   # 'virtual_function': no override available for virtual member function from base 'class'; function is hidden
@@ -173,6 +174,7 @@ function (set_openspace_compile_settings target)
     "-Wvla"
     "-Wzero-length-array"
     "-Wno-missing-braces"
+    "-Wno-unknown-attributes"
   )
   if (OPENSPACE_WARNINGS_AS_ERRORS)
     set(CLANG_WARNINGS ${CLANG_WARNINGS} "-Werror")
@@ -201,11 +203,14 @@ function (set_openspace_compile_settings target)
     "-Wlogical-op"
     "-Wint-in-bool-context"
     "-Wno-deprecated-copy"
+    "-Wno-float-equal"
     "-Wno-write-strings"
     "-Wnon-virtual-dtor"
     "-Wold-style-cast"
     "-Woverloaded-virtual"
     "-Wno-long-long"
+    "-Wno-ignored-attributes"
+    "-Wno-attributes"
   )
   if (OPENSPACE_WARNINGS_AS_ERRORS)
     set(GCC_WARNINGS ${CLANG_WARNINGS} "-Werror")

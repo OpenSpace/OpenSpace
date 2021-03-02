@@ -43,6 +43,7 @@ set(HEADER_FILES
   rendering/grids/renderableradialgrid.h
   rendering/grids/renderablesphericalgrid.h
   rendering/renderablecartesianaxes.h
+  rendering/renderabledisc.h
   rendering/renderablelabels.h
   rendering/renderablemodel.h
   rendering/renderablenodeline.h
@@ -93,6 +94,7 @@ set(SOURCE_FILES
   rendering/grids/renderableradialgrid.cpp
   rendering/grids/renderablesphericalgrid.cpp
   rendering/renderablecartesianaxes.cpp
+  rendering/renderabledisc.cpp
   rendering/renderablelabels.cpp
   rendering/renderablemodel.cpp
   rendering/renderablenodeline.cpp
@@ -127,6 +129,8 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 set(SHADER_FILES
   shaders/axes_fs.glsl
   shaders/axes_vs.glsl
+  shaders/disc_fs.glsl
+  shaders/disc_vs.glsl
   shaders/grid_vs.glsl
   shaders/grid_fs.glsl
   shaders/imageplane_fs.glsl

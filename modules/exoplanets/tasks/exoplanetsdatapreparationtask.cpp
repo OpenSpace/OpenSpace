@@ -407,7 +407,7 @@ float ExoplanetsDataPreparationTask::bvFromTeff(float teff) {
     float bv = 0.f;
     float bvUpper = 0.f;
     float bvLower = 0.f;
-    float teffLower;
+    float teffLower = 0.f;
     float teffUpper;
     std::string row;
     while (std::getline(teffToBvFile, row)) {
@@ -448,20 +448,14 @@ documentation::Documentation ExoplanetsDataPreparationTask::documentation() {
         "exoplanets_data_preparation_task",
         {
             {
-                "Type",
-                new StringEqualVerifier("ExoplanetsDataPreparationTask"),
-                Optional::No,
-                ""
-            },
-            {
                 KeyInputDataFile,
-                new StringAnnotationVerifier("A valid filepath"),
+                new FileVerifier,
                 Optional::No,
                 "The csv file to extract data from"
             },
             {
                 KeyInputSpeck,
-                new StringAnnotationVerifier("A file path to a speck file"),
+                new FileVerifier,
                 Optional::No,
                 "The speck file with star locations"
             },
@@ -479,9 +473,10 @@ documentation::Documentation ExoplanetsDataPreparationTask::documentation() {
             },
             {
                 KeyTeffToBv,
-                new StringAnnotationVerifier("A valid filepath"),
+                new FileVerifier,
                 Optional::No,
-                "The path to a teff to bv conversion file"
+                "The path to a teff to bv conversion file. Should be a txt file where "
+                "each line has the format 'teff,bv'"
             }
         }
     };

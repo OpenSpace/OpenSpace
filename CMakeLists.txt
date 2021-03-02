@@ -139,11 +139,28 @@ if (UNIX AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++ -lc++abi")
 endif ()
 
-# Add external dependencies
-add_subdirectory(${OPENSPACE_BASE_DIR}/ext)
+add_subdirectory(ext)
 
-# include(src/CMakeLists.txt)
 add_subdirectory(src)
+
+add_subdirectory(support/coding/codegen)
+# It is important that the __codegen.h do not actually exist so
+# that this target is never considered as finished
+add_custom_target(
+  run_codegen
+  ALL DEPENDS
+    "${CMAKE_CURRENT_BINARY_DIR}/__codegen.h"
+)
+add_dependencies(run_codegen codegen)
+add_custom_command(
+  OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/__codegen.h"
+  COMMAND codegen ARGS "${OPENSPACE_BASE_DIR}/modules" "${OPENSPACE_BASE_DIR}/src"
+  VERBATIM
+)
+set_folder_location(codegen-lib "support")
+set_folder_location(codegen "support")
+set_folder_location(run_codegen "support")
+
 
 # Qt
 # Unfortunately, we have to set this value manually; sigh
@@ -176,9 +193,21 @@ begin_header("Configuring Modules")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/modules")
 end_header("End: Configuring Modules")
 
+
+add_subdirectory(support/coding/codegen/tests)
+set_folder_location(run_test_codegen "Unit Tests/support")
+set_folder_location(codegentest "Unit Tests")
+
+
 begin_header("Configuring Applications")
 add_subdirectory("${OPENSPACE_APPS_DIR}")
 end_header("End: Configuring Applications")
+
+
+if (MSVC AND TARGET OpenSpace)
+  set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT OpenSpace)
+endif()
+
 
 option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
 if (OPENSPACE_HAVE_TESTS)

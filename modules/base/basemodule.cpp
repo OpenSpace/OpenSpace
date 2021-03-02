@@ -42,6 +42,7 @@
 #include <modules/base/rendering/grids/renderableradialgrid.h>
 #include <modules/base/rendering/grids/renderablesphericalgrid.h>
 #include <modules/base/rendering/renderablecartesianaxes.h>
+#include <modules/base/rendering/renderabledisc.h>
 #include <modules/base/rendering/renderablelabels.h>
 #include <modules/base/rendering/renderablemodel.h>
 #include <modules/base/rendering/renderablenodeline.h>
@@ -123,6 +124,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
 
     fRenderable->registerClass<RenderableBoxGrid>("RenderableBoxGrid");
     fRenderable->registerClass<RenderableCartesianAxes>("RenderableCartesianAxes");
+    fRenderable->registerClass<RenderableDisc>("RenderableDisc");
     fRenderable->registerClass<RenderableGrid>("RenderableGrid");
     fRenderable->registerClass<RenderableLabels>("RenderableLabels");
     fRenderable->registerClass<RenderableModel>("RenderableModel");
@@ -195,7 +197,10 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         RenderableModel::Documentation(),
         RenderableNodeLine::Documentation(),
         RenderablePlane::Documentation(),
+        RenderablePlaneImageLocal::Documentation(),
+        RenderablePlaneImageOnline::Documentation(),
         RenderableRadialGrid::Documentation(),
+        RenderableDisc::Documentation(),
         RenderableSphere::Documentation(),
         RenderableSphericalGrid::Documentation(),
         RenderableTrailOrbit::Documentation(),
@@ -212,6 +217,7 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         TimelineRotation::Documentation(),
 
         LuaScale::Documentation(),
+        NonUniformStaticScale::Documentation(),
         StaticScale::Documentation(),
         TimeDependentScale::Documentation(),
 

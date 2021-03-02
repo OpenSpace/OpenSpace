@@ -500,13 +500,11 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     );
     _program->setUniform(
         _uniformCache.lightIntensities,
-        _lightIntensitiesBuffer.data(),
-        nLightSources
+        _lightIntensitiesBuffer
     );
     _program->setUniform(
         _uniformCache.lightDirectionsViewSpace,
-        _lightDirectionsViewSpaceBuffer.data(),
-        nLightSources
+        _lightDirectionsViewSpaceBuffer
     );
     _program->setUniform(
         _uniformCache.modelViewTransform,

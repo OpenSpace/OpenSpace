@@ -17,7 +17,7 @@ local radialGrid = {
         Color = { 0.6, 1.0, 0.7 },
         LineWidth = 3.0,
         GridSegments = { 3, 4 },
-        OuterSize = 1.0,
+        OuterRadius = 1.0,
         InnerRadius = 0.2,
         Enabled = false
     },

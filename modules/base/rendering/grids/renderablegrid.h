@@ -28,8 +28,8 @@
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/uvec2property.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
@@ -61,7 +61,9 @@ protected:
     ghoul::opengl::ProgramObject* _gridProgram = nullptr;
 
     properties::Vec3Property _color;
-    properties::UVec2Property _segments;
+    // @TODO (abock, 2021-01-28)  This was a UVec2Property before, but it wasn't supported
+    // be the codegen.  As soon as it does, this should be changed back
+    properties::IVec2Property _segments;
     properties::FloatProperty _lineWidth;
     properties::Vec2Property _size;
 

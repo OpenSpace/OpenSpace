@@ -86,11 +86,6 @@ documentation::Documentation GlobeTranslation::Documentation() {
         "space_translation_globetranslation",
         {
             {
-                "Type",
-                new StringEqualVerifier("GlobeTranslation"),
-                Optional::No
-            },
-            {
                 GlobeInfo.identifier,
                 new StringAnnotationVerifier(
                     "A valid scene graph node with a RenderableGlobe"

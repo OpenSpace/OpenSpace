@@ -153,12 +153,6 @@ documentation::Documentation KameleonDocumentationTask::documentation() {
         "kameleon_documentation_task",
         {
             {
-                "Type",
-                new StringEqualVerifier("KameleonDocumentationTask"),
-                Optional::No,
-                "The type of this task"
-            },
-            {
                 KeyInput,
                 new StringAnnotationVerifier("A file path to a cdf file"),
                 Optional::No,

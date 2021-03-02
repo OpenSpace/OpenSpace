@@ -30,6 +30,10 @@
 
 namespace openspace {
 
+Topic::~Topic() {
+    _connection = nullptr;
+}
+
 void Topic::initialize(Connection* connection, size_t topicId) {
     _connection = connection;
     _topicId = topicId;

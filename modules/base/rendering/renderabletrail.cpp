@@ -34,8 +34,8 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
-
 #include <cmath>
+#include <optional>
 
 namespace {
     constexpr const char* ProgramName = "EphemerisProgram";
@@ -145,64 +145,44 @@ namespace {
         "atmospheres if needed."
     };
 
+    struct [[codegen::Dictionary(RenderableTrail)]] Parameters {
+        // This object is used to compute locations along the path. Any Translation object
+        // can be used here
+        std::monostate translation [[codegen::reference("core_transform_translation")]];
+
+        // [[codegen::verbatim(LineColorInfo.description)]]
+        glm::vec3 color [[codegen::color()]];
+
+        // [[codegen::verbatim(EnableFadeInfo.description)]]
+        std::optional<bool> enableFade;
+
+        // [[codegen::verbatim(FadeInfo.description)]]
+        std::optional<float> fade;
+
+        // [[codegen::verbatim(LineWidthInfo.description)]]
+        std::optional<float> lineWidth;
+
+        // [[codegen::verbatim(PointSizeInfo.description)]]
+        std::optional<int> pointSize;
+
+        enum class RenderingMode {
+            Lines,
+            Points,
+            LinesPoints [[codegen::key("Lines+Points")]],
+            PointsLines [[codegen::key("Lines+Points")]]
+        };
+        // [[codegen::verbatim(RenderingModeInfo.description)]]
+        std::optional<RenderingMode> renderingMode [[codegen::key("Rendering")]];
+    };
+#include "renderabletrail_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableTrail::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderableTrail",
-        "base_renderable_renderabletrail",
-        {
-            {
-                KeyTranslation,
-                new ReferencingVerifier("core_transform_translation"),
-                Optional::No,
-                "This object is used to compute locations along the path. Any "
-                "Translation object can be used here."
-            },
-            {
-                LineColorInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::No,
-                LineColorInfo.description
-            },
-            {
-                EnableFadeInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                EnableFadeInfo.description
-            },
-            {
-                FadeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                FadeInfo.description
-            },
-            {
-                LineWidthInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                LineWidthInfo.description
-            },
-            {
-                PointSizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                PointSizeInfo.description
-            },
-            {
-                RenderingModeInfo.identifier,
-                new StringInListVerifier(
-                    // Taken from the RenderingModeConversion map above
-                    { "Lines", "Points", "Lines+Points", "Points+Lines" }
-                ),
-                Optional::Yes,
-                RenderingModeInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_renderable_renderabletrail";
+    return doc;
 }
 
 RenderableTrail::Appearance::Appearance()
@@ -234,6 +214,8 @@ RenderableTrail::Appearance::Appearance()
 RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
 {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
     setRenderBin(RenderBin::Overlay);
     addProperty(_opacity);
 
@@ -242,36 +224,25 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     );
     addPropertySubOwner(_translation.get());
 
-    _appearance.lineColor = dictionary.value<glm::dvec3>(LineColorInfo.identifier);
+    _appearance.lineColor = p.color;
+    _appearance.useLineFade = p.enableFade.value_or(_appearance.useLineFade);
+    _appearance.lineFade = p.fade.value_or(_appearance.lineFade);
+    _appearance.lineWidth = p.lineWidth.value_or(_appearance.lineWidth);
+    _appearance.pointSize = p.pointSize.value_or(_appearance.pointSize);
 
-    if (dictionary.hasValue<bool>(EnableFadeInfo.identifier)) {
-        _appearance.useLineFade = dictionary.value<bool>(EnableFadeInfo.identifier);
-    }
-
-    if (dictionary.hasValue<double>(FadeInfo.identifier)) {
-        _appearance.lineFade = static_cast<float>(
-            dictionary.value<double>(FadeInfo.identifier)
-        );
-    }
-
-    if (dictionary.hasValue<double>(LineWidthInfo.identifier)) {
-        _appearance.lineWidth = static_cast<float>(dictionary.value<double>(
-            LineWidthInfo.identifier
-        ));
-    }
-
-    if (dictionary.hasValue<double>(PointSizeInfo.identifier)) {
-        _appearance.pointSize = static_cast<int>(
-            dictionary.value<double>(PointSizeInfo.identifier)
-        );
-    }
-
-    // This map is not accessed out of order as long as the Documentation is adapted
-    // whenever the map changes. The documentation will check for valid values
-    if (dictionary.hasValue<std::string>(RenderingModeInfo.identifier)) {
-        _appearance.renderingModes = RenderingModeConversion.at(
-            dictionary.value<std::string>(RenderingModeInfo.identifier)
-        );
+    if (p.renderingMode.has_value()) {
+        switch (*p.renderingMode) {
+            case Parameters::RenderingMode::Lines:
+                _appearance.renderingModes = RenderingModeLines;
+                break;
+            case Parameters::RenderingMode::Points:
+                _appearance.renderingModes = RenderingModePoints;
+                break;
+            case Parameters::RenderingMode::LinesPoints:
+            case Parameters::RenderingMode::PointsLines:
+                _appearance.renderingModes = RenderingModeLinesPoints;
+                break;
+        }
     }
     else {
         _appearance.renderingModes = RenderingModeLines;

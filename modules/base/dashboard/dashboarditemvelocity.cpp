@@ -68,35 +68,24 @@ namespace {
         );
         return res;
     }
+
+    struct [[codegen::Dictionary(DashboardItemVelocity)]] Parameters {
+        // [[codegen::verbatim(SimplificationInfo.description)]]
+        std::optional<bool> simplification;
+
+        // [[codegen::verbatim(RequestedUnitInfo.description)]]
+        std::optional<std::string> requestedUnit [[codegen::inlist(unitList())]];
+    };
+#include "dashboarditemvelocity_codegen.cpp"
+
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation DashboardItemVelocity::Documentation() {
-    using namespace documentation;
-    return {
-        "DashboardItem Velocity",
-        "base_dashboarditem_velocity",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("DashboardItemVelocity"),
-                Optional::No
-            },
-            {
-                SimplificationInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                SimplificationInfo.description
-            },
-            {
-                RequestedUnitInfo.identifier,
-                new StringInListVerifier(unitList()),
-                Optional::Yes,
-                RequestedUnitInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_dashboarditem_velocity";
+    return doc;
 }
 
 DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary)
@@ -104,15 +93,8 @@ DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary
     , _doSimplification(SimplificationInfo, true)
     , _requestedUnit(RequestedUnitInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "DashboardItemVelocity"
-    );
-
-    if (dictionary.hasKey(SimplificationInfo.identifier)) {
-        _doSimplification = dictionary.value<bool>(SimplificationInfo.identifier);
-    }
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    _doSimplification = p.simplification.value_or(_doSimplification);
     _doSimplification.onChange([this]() {
         _requestedUnit.setVisibility(
             _doSimplification ?
@@ -126,11 +108,8 @@ DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary
         _requestedUnit.addOption(static_cast<int>(u), nameForDistanceUnit(u));
     }
     _requestedUnit = static_cast<int>(DistanceUnit::Meter);
-    if (dictionary.hasKey(RequestedUnitInfo.identifier)) {
-        const std::string& value = dictionary.value<std::string>(
-            RequestedUnitInfo.identifier
-        );
-        DistanceUnit unit = distanceUnitFromString(value.c_str());
+    if (p.requestedUnit.has_value()) {
+        DistanceUnit unit = distanceUnitFromString(p.requestedUnit->c_str());
         _requestedUnit = static_cast<int>(unit);
     }
     _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
