@@ -86,13 +86,13 @@ documentation::Documentation RenderableCrawlingLine::Documentation() {
                 new TableVerifier({
                     {
                         KeyColorStart,
-                        new DoubleVector4Verifier,
+                        new Color4Verifier,
                         Optional::No,
                         "The color at the start of the line",
                     },
                     {
                         KeyColorEnd,
-                        new DoubleVector4Verifier,
+                        new Color4Verifier,
                         Optional::No,
                         "The color at the end of the line"
                     }

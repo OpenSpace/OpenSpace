@@ -76,7 +76,7 @@ namespace {
 
         // [[codegen::verbatim(SizeInfo.description)]]
         float size;
-        
+
         enum class BlendMode {
             Normal,
             Additive

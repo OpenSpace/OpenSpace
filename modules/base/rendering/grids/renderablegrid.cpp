@@ -65,7 +65,7 @@ namespace {
 
     struct [[codegen::Dictionary(RenderableGrid)]] Parameters {
         // [[codegen::verbatim(ColorInfo.description)]]
-        std::optional<glm::vec3> color;
+        std::optional<glm::vec3> color [[codegen::color()]];
 
         // [[codegen::verbatim(SegmentsInfo.description)]]
         std::optional<glm::ivec2> segments;

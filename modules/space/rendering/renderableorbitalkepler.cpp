@@ -242,7 +242,7 @@ namespace {
         std::optional<double> lineWidth;
 
         // [[codegen::verbatim(LineColorInfo.description)]]
-        glm::dvec3 color;
+        glm::dvec3 color [[codegen::color()]];
 
         // [[codegen::verbatim(TrailFadeInfo.description)]]
         std::optional<double> trailFade;
