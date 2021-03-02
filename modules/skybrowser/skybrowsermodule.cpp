@@ -140,9 +140,8 @@ void SkybrowserModule::WWTfollowCamera() const {
 
     // Execute javascript on browser
     ScreenSpaceBrowser* browser = dynamic_cast<ScreenSpaceBrowser*>(global::renderEngine->screenSpaceRenderable("ScreenSpaceBowser"));
-    std::string script = "vm.onMessage({event: 'center_on_coordinates', ra : Number(" + std::to_string(celestCoords[0]) + "), dec : Number(" + std::to_string(celestCoords[1]) + "), fov : Number(" + std::to_string(_zoomFactor) + "), instant : false})";
+    std::string script = "window.frames[0].postMessage({event: 'center_on_coordinates', ra : Number(" + std::to_string(celestCoords[0]) + "), dec : Number(" + std::to_string(celestCoords[1]) + "), fov : Number(" + std::to_string(_zoomFactor) + "), instant : false})";
     browser->executeJavascript(script);
-
 }
 
 glm::dvec2 SkybrowserModule::convertGalacticToCelestial(glm::dvec3 rGal) const {
@@ -156,10 +155,12 @@ glm::dvec2 SkybrowserModule::convertGalacticToCelestial(glm::dvec3 rGal) const {
         });
    
     glm::dvec3 rICRS = glm::transpose(conversionMatrix) * rGal;
-    float l = atan2(rICRS[1], rICRS[0]);
-    float b = atan2(rICRS[2], glm::sqrt((rICRS[0] * rICRS[0]) + (rICRS[1] * rICRS[1])));
+    float ra = atan2(rICRS[1], rICRS[0]);
+    float dec = atan2(rICRS[2], glm::sqrt((rICRS[0] * rICRS[0]) + (rICRS[1] * rICRS[1])));
 
-    return glm::dvec2(glm::degrees(l), glm::degrees(b));
+    std::cout << glm::degrees(dec) << std::endl;
+
+    return glm::dvec2(glm::degrees(ra), glm::degrees(dec));
 }
 
 /*

@@ -58,7 +58,7 @@ namespace openspace::skybrowser::luascriptfunctions {
         node.setValue("Type", "ScreenSpaceBrowser"s);
         node.setValue("Identifier", "ScreenSpaceBowser"s);
         node.setValue("Name", "Screen Space Bowser"s);
-        node.setValue("Url", "http://localhost:8080/?origin=localhost:4690"s);
+        node.setValue("Url", "http://localhost:7800/sky_browser/index.html"s);
        // node.setValue("Dimensions", "glm::ivec2(1000, 1000)");
 
         openspace::global::scriptEngine->queueScript(
