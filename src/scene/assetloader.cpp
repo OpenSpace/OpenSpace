@@ -76,7 +76,8 @@ namespace {
     enum class PathType {
         RelativeToAsset = 0,
         RelativeToAssetRoot,
-        Absolute
+        Absolute,
+        Tokenized
     };
 
     PathType classifyPath(const std::string& path) {
@@ -88,6 +89,9 @@ namespace {
         }
         if (path.size() > 3 && path[1] == ':' && (path[2] == '\\' || path[2] == '/')) {
             return PathType::Absolute;
+        }
+        if (path.size() > 3 && path[0] == '$' && path[1] == '{') {
+            return PathType::Tokenized;
         }
         if (path.size() > 1 && (path[0] == '\\' || path[0] == '/')) {
             return PathType::Absolute;
@@ -394,10 +398,13 @@ std::string AssetLoader::generateAssetPath(const std::string& baseDirectory,
     const bool hasAssetSuffix =
         (assetPath.size() > assetSuffix.size()) &&
         (assetPath.substr(assetPath.size() - assetSuffix.size()) == assetSuffix);
-    const std::string fullAssetPath =
-        hasAssetSuffix ?
-        prefix + assetPath :
-        prefix + assetPath + assetSuffix;
+    std::string fullAssetPath =
+        (pathType == PathType::Tokenized) ?
+        absPath(assetPath) :
+        prefix + assetPath;
+    if (!hasAssetSuffix) {
+        fullAssetPath += assetSuffix;
+    }
     bool fullAssetPathExists = FileSys.fileExists(FileSys.absPath(fullAssetPath));
 
     // Construct the full path including the .scene extension

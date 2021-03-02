@@ -36,6 +36,8 @@
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
+#include <filesystem>
+#include <optional>
 
 namespace {
     constexpr const std::array<const char*, 6> UniformNames = {
@@ -71,42 +73,29 @@ namespace {
         "relative to the size of the semi-major axis. That is, 0 means no deviation "
         "from the semi-major axis and 1 is a whole semi-major axis's worth of deviation."
     };
+
+    struct [[codegen::Dictionary(RenderableOrbitDisc)]] Parameters {
+        // [[codegen::verbatim(TextureInfo.description)]]
+        std::filesystem::path texture;
+
+        // [[codegen::verbatim(SizeInfo.description)]]
+        float size;
+
+        // [[codegen::verbatim(EccentricityInfo.description)]]
+        float eccentricity;
+
+        // [[codegen::verbatim(OffsetInfo.description)]]
+        std::optional<glm::vec2> offset;
+    };
+#include "renderableorbitdisc_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableOrbitDisc::Documentation() {
-    using namespace documentation;
-    return {
-        "Renderable Orbit Disc",
-        "exoplanets_renderable_orbit_disc",
-        {
-            {
-                TextureInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                TextureInfo.description
-            },
-            {
-                SizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::No,
-                SizeInfo.description
-            },
-            {
-                EccentricityInfo.identifier,
-                new DoubleVerifier,
-                Optional::No,
-                EccentricityInfo.description
-            },
-            {
-                OffsetInfo.identifier,
-                new DoubleVector2Verifier,
-                Optional::Yes,
-                OffsetInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "exoplanets_renderableorbitdisc";
+    return doc;
 }
 
 RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)
@@ -116,31 +105,23 @@ RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)
     , _eccentricity(EccentricityInfo, 0.f, 0.f, 1.f)
     , _offset(OffsetInfo, glm::vec2(0.f), glm::vec2(0.f), glm::vec2(1.f))
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableOrbitDisc"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    if (dictionary.hasKey(OffsetInfo.identifier)) {
-        _offset = dictionary.value<glm::dvec2>(OffsetInfo.identifier);
-    }
+    _offset = p.offset.value_or(_offset);
     _offset.onChange([&]() { _planeIsDirty = true; });
     addProperty(_offset);
 
-    _size = static_cast<float>(dictionary.value<double>(SizeInfo.identifier));
+    _size = p.size;
     _size.onChange([&]() { _planeIsDirty = true; });
     addProperty(_size);
 
     setBoundingSphere(_size + _offset.value().y * _size);
 
-    _texturePath = absPath(dictionary.value<std::string>(TextureInfo.identifier));
+    _texturePath = p.texture.string();
     _texturePath.onChange([&]() { _texture->loadFromFile(_texturePath); });
     addProperty(_texturePath);
 
-    _eccentricity = static_cast<float>(
-        dictionary.value<double>(EccentricityInfo.identifier)
-    );
+    _eccentricity = p.eccentricity;
     _eccentricity.onChange([&]() { _planeIsDirty = true; });
     addProperty(_eccentricity);
 

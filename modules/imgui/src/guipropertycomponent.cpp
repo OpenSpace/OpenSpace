@@ -278,7 +278,9 @@ void GuiPropertyComponent::render() {
     ImGui::SetNextWindowCollapsed(_isCollapsed);
 
     bool v = _isEnabled;
-    ImGui::Begin(guiName().c_str(), &v, Size, 0.75f);
+    ImGui::SetNextWindowSize(Size, ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowBgAlpha(0.75f);
+    ImGui::Begin(guiName().c_str(), &v);
     _isEnabled = v;
 
     _isCollapsed = ImGui::IsWindowCollapsed();

@@ -68,7 +68,7 @@ documentation::Documentation LayerAdjustment::Documentation() {
             },
             {
                 KeyChromaKeyColor,
-                new DoubleVector3Verifier,
+                new Color3Verifier,
                 Optional::Yes,
                 "Specifies the chroma key used when selecting 'ChromaKey' for the 'Type'."
             },

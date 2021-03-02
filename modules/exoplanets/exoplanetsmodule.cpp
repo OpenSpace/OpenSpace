@@ -33,8 +33,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/factorymanager.h>
-#include <thread>
-#include <chrono>
+#include <filesystem>
 
 #include "exoplanetsmodule_lua.inl"
 
@@ -122,22 +121,22 @@ namespace {
 
     struct [[codegen::Dictionary(ExoplanetsModule)]] Parameters {
         // [[codegen::verbatim(DataFolderInfo.description)]]
-        std::optional<std::string> dataFolder;
+        std::optional<std::filesystem::path> dataFolder [[codegen::directory()]];
 
        // [[codegen::verbatim(StarTextureInfo.description)]]
-       std::optional<std::string> starTexture;
+       std::optional<std::filesystem::path> starTexture;
 
        // [[codegen::verbatim(StarGlareTextureInfo.description)]]
-       std::optional<std::string> starGlareTexture;
+       std::optional<std::filesystem::path> starGlareTexture;
 
        // [[codegen::verbatim(NoDataTextureInfo.description)]]
-       std::optional<std::string> noDataTexture;
+       std::optional<std::filesystem::path> noDataTexture;
 
        // [[codegen::verbatim(OrbitDiscTextureInfo.description)]]
-       std::optional<std::string> orbitDiscTexture;
+       std::optional<std::filesystem::path> orbitDiscTexture;
 
        // [[codegen::verbatim(HabitableZoneTextureInfo.description)]]
-       std::optional<std::string> habitableZoneTexture;
+       std::optional<std::filesystem::path> habitableZoneTexture;
 
        // [[codegen::verbatim(ShowComparisonCircleInfo.description)]]
        std::optional<bool> showComparisonCircle;
@@ -276,16 +275,36 @@ scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
 
 void ExoplanetsModule::internalInitialize(const ghoul::Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
-    _exoplanetsDataFolder = p.dataFolder.value_or(_exoplanetsDataFolder);
-    _starTexturePath = p.starTexture.value_or(_starTexturePath);
-    _starGlareTexturePath = p.starGlareTexture.value_or(_starGlareTexturePath);
-    _noDataTexturePath = p.noDataTexture.value_or(_noDataTexturePath);
-    _orbitDiscTexturePath = p.orbitDiscTexture.value_or(_orbitDiscTexturePath);
-    _habitableZoneTexturePath = p.habitableZoneTexture.value_or(_habitableZoneTexturePath);
+
+    if (p.dataFolder.has_value()) {
+        _exoplanetsDataFolder = p.dataFolder.value().string();
+    }
+
+    if (p.starTexture.has_value()) {
+        _starTexturePath = p.starTexture.value().string();
+    }
+
+    if (p.starGlareTexture.has_value()) {
+        _starGlareTexturePath = p.starGlareTexture.value().string();
+    }
+
+    if (p.noDataTexture.has_value()) {
+        _noDataTexturePath = p.noDataTexture.value().string();
+    }
+
+    if (p.orbitDiscTexture.has_value()) {
+        _orbitDiscTexturePath = p.orbitDiscTexture.value().string();
+    }
+
+    if (p.habitableZoneTexture.has_value()) {
+        _habitableZoneTexturePath = p.habitableZoneTexture.value().string();
+    }
 
     _showComparisonCircle = p.showComparisonCircle.value_or(_showComparisonCircle);
     _showHabitableZone = p.showHabitableZone.value_or(_showHabitableZone);
     _useOptimisticZone = p.useOptimisticZone.value_or(_useOptimisticZone);
+
+    _habitableZoneOpacity = p.habitableZoneOpacity.value_or(_habitableZoneOpacity);
 
     auto fTask = FactoryManager::ref().factory<Task>();
     auto fRenderable = FactoryManager::ref().factory<Renderable>();

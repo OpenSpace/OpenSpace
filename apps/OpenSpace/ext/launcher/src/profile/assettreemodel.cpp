@@ -145,7 +145,8 @@ AssetTreeModel::AssetTreeModel(QObject* parent)
     );
 }
 
-void AssetTreeModel::importModelData(const std::string& assetBasePath) {
+void AssetTreeModel::importModelData(const std::string& assetBasePath,
+    const std::string& userAssetBasePath) {
     FileSystemAccess assets(
         ".asset",
         { "scene", "global", "customization", "examples", "util" },
@@ -153,7 +154,7 @@ void AssetTreeModel::importModelData(const std::string& assetBasePath) {
         true
     );
     std::string assetList = assets.useQtFileSystemModelToTraverseDir(assetBasePath);
-
+    assetList += assets.useQtFileSystemModelToTraverseDir(userAssetBasePath, true);
     std::istringstream iss(assetList);
     ImportElement rootElem = { "", 0, false };
 
