@@ -6,7 +6,7 @@ local models = asset.syncedResource({
     Name = "Insight Models Chutes",
     Type = "HttpSynchronization",
     Identifier = "insight_models",
-    Version = 1
+    Version = 2
 })
 
 local ikernels = asset.syncedResource({
