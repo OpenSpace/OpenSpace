@@ -1,0 +1,55 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local jwstTransforms = asset.require('scene/solarsystem/missions/jwst/jwst')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+
+local PARSEC_CONSTANT = 3.0856776E16;
+
+-- ra = 3h32m38.92s
+-- dec = -27d47m29.37s
+-- fov = 0.0516666667 degrees
+-- distance = 1 pc (set to an arbitrary distance)
+local HUDFPosition = {
+    Identifier = "HUDFPosition",
+    Parent = transforms.EarthInertial.Identifier,
+    Renderable = {
+        Type = "RenderablePlaneImageLocal",
+        RenderableType = "Opaque",
+        Billboard = false,
+        Size = 27.8252058E12,
+        Texture = "C:/Users/ElmQPC/Desktop/Malin/develop/images/Hubble_ultra_deep_field.jpg",
+        BlendMode = "Normal"
+    },
+    Transform = {
+        Translation = {
+            Type = "StaticTranslation",
+            Position = {
+                0.53039024 * PARSEC_CONSTANT,
+                0.70802069 * PARSEC_CONSTANT,
+                -0.46625412 * PARSEC_CONSTANT
+            }
+        }
+    },
+    GUI = {
+        Name = "Hubble Ultra Deep field",
+        Path = "/Solar System/Missions/JWST",
+    }
+}
+
+local HUDFJWSTLine = {
+    Identifier = "HUDFJWSTLine",
+    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+    Renderable = {
+        Type = "RenderableNodeLine",
+        StartNode = HUDFPosition.Identifier,
+        EndNode = jwstTransforms.JWSTPosition.Identifier,
+        Color = { 0.5, 0.5, 0.5 },
+        LineWidth = 2
+    },
+    GUI = {
+        Name = "JWST to HUDF image line",
+        Path = "/Solar System/Missions/JWST",
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { HUDFPosition, HUDFJWSTLine })
