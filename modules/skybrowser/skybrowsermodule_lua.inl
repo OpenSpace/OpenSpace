@@ -42,6 +42,7 @@ namespace openspace::skybrowser::luascriptfunctions {
         //SkybrowserModule* module = global::moduleEngine->module<SkybrowserModule>();
        // module->skyBrowser()->translate(glm::vec3(-0.8, -0.4, 0.0));
         ScreenSpaceBrowser* browser = dynamic_cast<ScreenSpaceBrowser*>(global::renderEngine->screenSpaceRenderable("ScreenSpaceBowser"));
+        browser->setFaceCameraPropertyToFalse();
         browser->translate(glm::vec3(-0.8, -0.4, 0.0));
         return 1;
     }
@@ -52,6 +53,7 @@ namespace openspace::skybrowser::luascriptfunctions {
 
         SkybrowserModule* module = global::moduleEngine->module<SkybrowserModule>();
 
+
         //std::string _url = "https://wallpaperaccess.com/full/3010132.jpg";
         // 'https://cdn.wallpapersafari.com/6/92/0nbCPw.jpg'
 
@@ -61,7 +63,8 @@ namespace openspace::skybrowser::luascriptfunctions {
         node.setValue("Type", "ScreenSpaceBrowser"s);
         node.setValue("Identifier", "ScreenSpaceBowser"s);
         node.setValue("Name", "Screen Space Bowser"s);
-        node.setValue("Url", "http://localhost:8000/index.html"s);
+        node.setValue("Url", "http://localhost:8000/"s);
+
        // node.setValue("Dimensions", "glm::ivec2(1000, 1000)");
 
         openspace::global::scriptEngine->queueScript(
