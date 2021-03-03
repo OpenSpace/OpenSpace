@@ -30,7 +30,7 @@ namespace openspace::skybrowser::luascriptfunctions {
     int followCamera(lua_State* L) {
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::followCamera");
 
-        const SkybrowserModule* module = global::moduleEngine->module<SkybrowserModule>();
+        SkybrowserModule* module = global::moduleEngine->module<SkybrowserModule>();
         module->WWTfollowCamera();
         
         return 1;
@@ -38,6 +38,9 @@ namespace openspace::skybrowser::luascriptfunctions {
 
     int moveBrowser(lua_State* L) {
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::moveBrowser");
+        
+        //SkybrowserModule* module = global::moduleEngine->module<SkybrowserModule>();
+       // module->skyBrowser()->translate(glm::vec3(-0.8, -0.4, 0.0));
         ScreenSpaceBrowser* browser = dynamic_cast<ScreenSpaceBrowser*>(global::renderEngine->screenSpaceRenderable("ScreenSpaceBowser"));
         browser->translate(glm::vec3(-0.8, -0.4, 0.0));
         return 1;
@@ -47,7 +50,7 @@ namespace openspace::skybrowser::luascriptfunctions {
         ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::createBrowser");
         ghoul::lua::value<std::string>(L, 1);
 
-        const SkybrowserModule* module = global::moduleEngine->module<SkybrowserModule>();
+        SkybrowserModule* module = global::moduleEngine->module<SkybrowserModule>();
 
         //std::string _url = "https://wallpaperaccess.com/full/3010132.jpg";
         // 'https://cdn.wallpapersafari.com/6/92/0nbCPw.jpg'
@@ -58,13 +61,16 @@ namespace openspace::skybrowser::luascriptfunctions {
         node.setValue("Type", "ScreenSpaceBrowser"s);
         node.setValue("Identifier", "ScreenSpaceBowser"s);
         node.setValue("Name", "Screen Space Bowser"s);
-        node.setValue("Url", "http://localhost:7800/sky_browser/index.html"s);
+        node.setValue("Url", "http://localhost:8000/index.html"s);
        // node.setValue("Dimensions", "glm::ivec2(1000, 1000)");
 
         openspace::global::scriptEngine->queueScript(
             "openspace.addScreenSpaceRenderable(" + ghoul::formatLua(node) + ")",
             scripting::ScriptEngine::RemoteScripting::Yes
         );
+        ScreenSpaceBrowser* browser = dynamic_cast<ScreenSpaceBrowser*>(global::renderEngine->screenSpaceRenderable("ScreenSpaceBowser"));
+       // module->initializeBrowser(browser);
+
         return 1;
     }
     

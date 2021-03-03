@@ -23,15 +23,13 @@
  ****************************************************************************************/
 
 #include <modules/skybrowser/skybrowsermodule.h>
- //#include <modules/webbrowser/webbrowsermodule.h>
- //#include <modules/webbrowser/include/screenspacebrowser.h>
-
+#include <openspace/engine/moduleengine.h>
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scenegraphnode.h>
+//#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/factorymanager.h>
 #include <thread>
@@ -39,7 +37,6 @@
 #include <cmath> // For atan2
 
 #include "skybrowsermodule_lua.inl"
-
 
 namespace {
     constexpr const openspace::properties::Property::PropertyInfo TestInfo = 
@@ -75,6 +72,7 @@ SkybrowserModule::SkybrowserModule()
     : OpenSpaceModule(Name)
     , _testProperty(TestInfo)
     , _zoomFactor(ZoomInfo, 70.f ,0.f ,150.f)
+    //, _skyBrowser(nullptr)
 {
     addProperty(_testProperty);
     addProperty(_zoomFactor);
@@ -130,20 +128,46 @@ void SkybrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     */
 }
 
-void SkybrowserModule::WWTfollowCamera() const {
+bool SkybrowserModule::sendMessageToWWT(const std::string& msg) {
+    ScreenSpaceBrowser* browser = dynamic_cast<ScreenSpaceBrowser*>(global::renderEngine->screenSpaceRenderable("ScreenSpaceBowser"));
+    if (browser) {
+        std::string script = "sendMessageToWWT(" + msg + ");";
+        browser->executeJavascript(script);
+        return true;
+    }
+    else {
+        LERROR("No sky browser added! Can't send message.");
+        return false;
+    }
+
+}
+
+void SkybrowserModule::WWTfollowCamera() {
     // Get camera view direction
     const glm::dvec3 viewDirection = global::navigationHandler->camera()->viewDirectionWorldSpace();
 
     // Convert to celestial coordinates
-    const SkybrowserModule* module = global::moduleEngine->module<SkybrowserModule>();
-    glm::dvec2 celestCoords = module->convertGalacticToCelestial(viewDirection);
-
-    // Execute javascript on browser
-    ScreenSpaceBrowser* browser = dynamic_cast<ScreenSpaceBrowser*>(global::renderEngine->screenSpaceRenderable("ScreenSpaceBowser"));
-    std::string script = "window.frames[0].postMessage({event: 'center_on_coordinates', ra : Number(" + std::to_string(celestCoords[0]) + "), dec : Number(" + std::to_string(celestCoords[1]) + "), fov : Number(" + std::to_string(_zoomFactor) + "), instant : false})";
-    browser->executeJavascript(script);
+    glm::dvec2 celestCoords = convertGalacticToCelestial(viewDirection);
+    std::string message = createMessageForMovingWWTCamera(celestCoords, _zoomFactor);
+   
+    sendMessageToWWT(message);
 }
 
+std::string SkybrowserModule::createMessageForMovingWWTCamera(glm::dvec2 celestCoords, float fov, bool moveInstantly) const {
+    std::string moveInstString = moveInstantly ? "true" : "false";
+    std::string script = "{ event: 'center_on_coordinates' , ra: " + std::to_string(celestCoords[0]) + ", dec : " + std::to_string(celestCoords[1]) + ", fov: " + std::to_string(_zoomFactor) + ", instant: " + moveInstString +"}";
+    
+    return script;
+}
+/*
+void SkybrowserModule::initializeBrowser(ScreenSpaceBrowser* skyBrowser) {
+    _skyBrowser = skyBrowser;
+}
+
+ScreenSpaceBrowser* SkybrowserModule::skyBrowser() {
+    return _skyBrowser;
+}
+*/
 glm::dvec2 SkybrowserModule::convertGalacticToCelestial(glm::dvec3 rGal) const {
     
     // Used the math from this website: https://gea.esac.esa.int/archive/documentation/GD -->
@@ -158,7 +182,6 @@ glm::dvec2 SkybrowserModule::convertGalacticToCelestial(glm::dvec3 rGal) const {
     float ra = atan2(rICRS[1], rICRS[0]);
     float dec = atan2(rICRS[2], glm::sqrt((rICRS[0] * rICRS[0]) + (rICRS[1] * rICRS[1])));
 
-    std::cout << glm::degrees(dec) << std::endl;
 
     return glm::dvec2(glm::degrees(ra), glm::degrees(dec));
 }

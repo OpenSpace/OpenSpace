@@ -28,13 +28,10 @@
 
 #include <openspace/util/openspacemodule.h>
 
-
 #include <openspace/documentation/documentation.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/stringproperty.h>
-
-
 
 namespace openspace {
 
@@ -47,8 +44,14 @@ public:
 
     float zoomFactor() const;
     glm::dvec2 convertGalacticToCelestial(glm::dvec3 coords) const;
-    void WWTfollowCamera() const;
+    void WWTfollowCamera();
 
+    std::string createMessageForMovingWWTCamera(glm::dvec2 celestCoords, float fov, bool moveInstantly = false) const;
+
+    bool sendMessageToWWT(const std::string& msg);
+
+    //void initializeBrowser(ScreenSpaceBrowser* skyBrowser_);
+    //ScreenSpaceBrowser* skyBrowser();
     scripting::LuaLibrary luaLibrary() const override;
     //std::vector<documentation::Documentation> documentations() const override;
 
@@ -57,7 +60,7 @@ protected:
 
     properties::StringProperty _testProperty;
     properties::FloatProperty _zoomFactor;
-
+    //ScreenSpaceBrowser* _skyBrowser;
 };
 
 } // namespace openspace
