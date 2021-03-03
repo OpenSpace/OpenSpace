@@ -59,7 +59,7 @@ namespace {
 namespace openspace {
 
 void ScreenSpaceBrowser::executeJavascript(std::string &script) const {
-    LINFOC(_loggerCat, "Executing javascript " + script);
+    //LINFOC(_loggerCat, "Executing javascript " + script);
     
     CefRefPtr<CefFrame> frame = _browserInstance->getBrowser()->GetMainFrame();
     frame->ExecuteJavaScript(script, frame->GetURL(), 0);

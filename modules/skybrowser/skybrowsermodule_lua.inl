@@ -19,6 +19,8 @@
 #include <modules/webbrowser/include/screenspacebrowser.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/util/camera.h>
+#include <thread> 
+
 
 namespace {
     constexpr const char _loggerCat[] = "SkybrowserModule";
@@ -31,17 +33,23 @@ namespace openspace::skybrowser::luascriptfunctions {
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::followCamera");
 
         SkybrowserModule* module = global::moduleEngine->module<SkybrowserModule>();
-        module->WWTfollowCamera();
-        
+        std::thread thread(&SkybrowserModule::WWTfollowCamera, module);
+        thread.detach();
+
         return 1;
     }
 
     int moveBrowser(lua_State* L) {
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::moveBrowser");
         
+       // SkybrowserModule* module = global::moduleEngine->module<SkybrowserModule>();
+       // std::string test = module->createMessageForMovingWWTCamera(glm::dvec2(18, -32), 50);
+       // module->sendMessageToWWT(test);
+        
         //SkybrowserModule* module = global::moduleEngine->module<SkybrowserModule>();
        // module->skyBrowser()->translate(glm::vec3(-0.8, -0.4, 0.0));
         ScreenSpaceBrowser* browser = dynamic_cast<ScreenSpaceBrowser*>(global::renderEngine->screenSpaceRenderable("ScreenSpaceBowser"));
+        
         browser->setFaceCameraPropertyToFalse();
         browser->translate(glm::vec3(-0.8, -0.4, 0.0));
         return 1;

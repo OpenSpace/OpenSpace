@@ -46,7 +46,7 @@ public:
     glm::dvec2 convertGalacticToCelestial(glm::dvec3 coords) const;
     void WWTfollowCamera();
 
-    std::string createMessageForMovingWWTCamera(glm::dvec2 celestCoords, float fov, bool moveInstantly = false) const;
+    std::string createMessageForMovingWWTCamera(glm::dvec2 celestCoords, float fov, bool moveInstantly = true) const;
 
     bool sendMessageToWWT(const std::string& msg);
 

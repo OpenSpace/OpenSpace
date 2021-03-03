@@ -37,6 +37,7 @@
 #include <cmath> // For atan2
 
 #include "skybrowsermodule_lua.inl"
+#include <windows.h> // For sleep
 
 namespace {
     constexpr const openspace::properties::Property::PropertyInfo TestInfo = 
@@ -71,7 +72,7 @@ namespace openspace {
 SkybrowserModule::SkybrowserModule()
     : OpenSpaceModule(Name)
     , _testProperty(TestInfo)
-    , _zoomFactor(ZoomInfo, 70.f ,0.f ,150.f)
+    , _zoomFactor(ZoomInfo, 50.f ,0.1f ,70.f)
     //, _skyBrowser(nullptr)
 {
     addProperty(_testProperty);
@@ -143,14 +144,17 @@ bool SkybrowserModule::sendMessageToWWT(const std::string& msg) {
 }
 
 void SkybrowserModule::WWTfollowCamera() {
-    // Get camera view direction
-    const glm::dvec3 viewDirection = global::navigationHandler->camera()->viewDirectionWorldSpace();
+    while (true) {
+        // Get camera view direction
+        const glm::dvec3 viewDirection = global::navigationHandler->camera()->viewDirectionWorldSpace();
 
-    // Convert to celestial coordinates
-    glm::dvec2 celestCoords = convertGalacticToCelestial(viewDirection);
-    std::string message = createMessageForMovingWWTCamera(celestCoords, _zoomFactor);
-   
-    sendMessageToWWT(message);
+        // Convert to celestial coordinates
+        glm::dvec2 celestCoords = convertGalacticToCelestial(viewDirection);
+        std::string message = createMessageForMovingWWTCamera(celestCoords, _zoomFactor);
+
+        sendMessageToWWT(message);
+        Sleep(50);
+    }
 }
 
 std::string SkybrowserModule::createMessageForMovingWWTCamera(glm::dvec2 celestCoords, float fov, bool moveInstantly) const {
@@ -182,6 +186,7 @@ glm::dvec2 SkybrowserModule::convertGalacticToCelestial(glm::dvec3 rGal) const {
     float ra = atan2(rICRS[1], rICRS[0]);
     float dec = atan2(rICRS[2], glm::sqrt((rICRS[0] * rICRS[0]) + (rICRS[1] * rICRS[1])));
 
+    ra = ra > 0 ? ra : ra + (2 * glm::pi<float>());
 
     return glm::dvec2(glm::degrees(ra), glm::degrees(dec));
 }
