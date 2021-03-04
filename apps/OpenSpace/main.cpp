@@ -1162,7 +1162,6 @@ int main(int argc, char* argv[]) {
 
     global::openSpaceEngine->registerPathTokens();
 
-
     bool hasSGCTConfig = false;
     bool hasProfile = false;
     std::string sgctFunctionName;
@@ -1177,6 +1176,9 @@ int main(int argc, char* argv[]) {
         hasSGCTConfig,
         sgctFunctionName
     );
+
+    //TODO consider LFATAL if ${USER} doens't exist rather then recurisve create.
+    global::openSpaceEngine->createUserDirectoriesIfNecessary();
 
     // (abock, 2020-12-07)  For some reason on Apple the keyboard handler in CEF will call
     // the Qt one even if the QApplication was destroyed, leading to invalid memory
