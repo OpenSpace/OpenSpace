@@ -146,6 +146,7 @@ bool SkybrowserModule::sendMessageToWWT(const ghoul::Dictionary& msg) {
 }
 
 void SkybrowserModule::WWTfollowCamera() {
+    showTarget();
     while (true) {
         // Get camera view direction
         const glm::dvec3 viewDirection = global::navigationHandler->camera()->viewDirectionWorldSpace();
