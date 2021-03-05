@@ -48,10 +48,10 @@ public:
     glm::dvec2 convertGalacticToCelestial(glm::dvec3 coords) const;
     void WWTfollowCamera();
 
-    std::string createMessageForMovingWWTCamera(glm::dvec2 celestCoords, float fov, bool moveInstantly = true) const;
-    std::string createMessageForPausingWWTTime() const;
+    ghoul::Dictionary createMessageForMovingWWTCamera(const glm::dvec2 celestCoords, const float fov, const bool moveInstantly = true) const;
+    ghoul::Dictionary createMessageForPausingWWTTime() const;
 
-    bool sendMessageToWWT(const std::string& msg);
+    bool sendMessageToWWT(const ghoul::Dictionary& msg);
 
     void initializeBrowser(ScreenSpaceBrowser* skyBrowser_);
     ScreenSpaceBrowser* skyBrowser();

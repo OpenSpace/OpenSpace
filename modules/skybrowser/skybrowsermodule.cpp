@@ -29,15 +29,14 @@
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
-//#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/factorymanager.h>
 #include <thread>
 #include <chrono>
-#include <cmath> // For atan2
-
 #include "skybrowsermodule_lua.inl"
-#include <windows.h> // For sleep
+
+#include <cmath> // For atan2
+#include <ghoul/misc/dictionaryjsonformatter.h> // formatJson
 
 namespace {
     constexpr const openspace::properties::Property::PropertyInfo TestInfo = 
@@ -122,25 +121,18 @@ void SkybrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
     _testProperty = p.test.value_or(_testProperty);
     _zoomFactor = p.zoom.value_or(_zoomFactor);
-    /*
-    auto fBrowser = FactoryManager::ref().factory<ScreenSpaceBrowser>();
-    ghoul_assert(fBrowser, "No browser factory existed :'-(");
-    fBrowser->registerClass<ScreenSpaceBrowser>("ScreenSpaceBrowser");
-    */
 }
 
-bool SkybrowserModule::sendMessageToWWT(const std::string& msg) {
-    ScreenSpaceBrowser* browser = dynamic_cast<ScreenSpaceBrowser*>(global::renderEngine->screenSpaceRenderable("ScreenSpaceBowser"));
-    if (browser) {
-        std::string script = "sendMessageToWWT(" + msg + ");";
-        browser->executeJavascript(script);
+bool SkybrowserModule::sendMessageToWWT(const ghoul::Dictionary& msg) {
+    if (_skyBrowser) {
+        std::string script = "sendMessageToWWT(" + ghoul::formatJson(msg) + ");";
+        _skyBrowser->executeJavascript(script);
         return true;
     }
     else {
         LERROR("No sky browser added! Can't send message.");
         return false;
     }
-
 }
 
 void SkybrowserModule::WWTfollowCamera() {
@@ -150,24 +142,31 @@ void SkybrowserModule::WWTfollowCamera() {
 
         // Convert to celestial coordinates
         glm::dvec2 celestCoords = convertGalacticToCelestial(viewDirection);
-        std::string message = createMessageForMovingWWTCamera(celestCoords, _zoomFactor);
+        ghoul::Dictionary message = createMessageForMovingWWTCamera(celestCoords, _zoomFactor);
 
         sendMessageToWWT(message);
-        Sleep(50);
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 }
 
-std::string SkybrowserModule::createMessageForMovingWWTCamera(glm::dvec2 celestCoords, float fov, bool moveInstantly) const {
-    std::string moveInstString = moveInstantly ? "true" : "false";
-    std::string script = "{ event: 'center_on_coordinates' , ra: " + std::to_string(celestCoords[0]) + ", dec : " + std::to_string(celestCoords[1]) + ", fov: " + std::to_string(_zoomFactor) + ", instant: " + moveInstString +"}";
+ghoul::Dictionary SkybrowserModule::createMessageForMovingWWTCamera(const glm::dvec2 celestCoords, const float fov,  const bool moveInstantly) const {
+    using namespace std::string_literals;
+    ghoul::Dictionary msg;
+    msg.setValue("event", "center_on_coordinates"s);
+    msg.setValue("ra", static_cast<double>(celestCoords[0]));
+    msg.setValue("dec", static_cast<double>(celestCoords[1]));
+    msg.setValue("fov", static_cast<double>(fov));
+    msg.setValue("instant", moveInstantly);
     
-    return script;
+    return msg;
 }
 
-std::string SkybrowserModule::createMessageForPausingWWTTime() const {
-    std::string script = "{ event: 'pause_time'}";
+ghoul::Dictionary SkybrowserModule::createMessageForPausingWWTTime() const {
+    using namespace std::string_literals;
+    ghoul::Dictionary msg;
+    msg.setValue("event", "pause_time"s);
 
-    return script;
+    return msg;
 }
 
 

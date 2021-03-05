@@ -33,8 +33,8 @@ namespace openspace::skybrowser::luascriptfunctions {
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::followCamera");
 
         SkybrowserModule* module = global::moduleEngine->module<SkybrowserModule>();
-        std::string message = module->createMessageForPausingWWTTime();
-        module->sendMessageToWWT(message);
+        //ghoul::Dictionary message = module->createMessageForPausingWWTTime();
+        //module->sendMessageToWWT(message);
         std::thread thread(&SkybrowserModule::WWTfollowCamera, module);
         thread.detach();
 
