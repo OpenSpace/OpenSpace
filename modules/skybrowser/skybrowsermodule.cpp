@@ -73,7 +73,7 @@ SkybrowserModule::SkybrowserModule()
     : OpenSpaceModule(Name)
     , _testProperty(TestInfo)
     , _zoomFactor(ZoomInfo, 50.f ,0.1f ,70.f)
-    //, _skyBrowser(nullptr)
+    , _skyBrowser(nullptr)
 {
     addProperty(_testProperty);
     addProperty(_zoomFactor);
@@ -163,7 +163,14 @@ std::string SkybrowserModule::createMessageForMovingWWTCamera(glm::dvec2 celestC
     
     return script;
 }
-/*
+
+std::string SkybrowserModule::createMessageForPausingWWTTime() const {
+    std::string script = "{ event: 'pause_time'}";
+
+    return script;
+}
+
+
 void SkybrowserModule::initializeBrowser(ScreenSpaceBrowser* skyBrowser) {
     _skyBrowser = skyBrowser;
 }
@@ -171,7 +178,7 @@ void SkybrowserModule::initializeBrowser(ScreenSpaceBrowser* skyBrowser) {
 ScreenSpaceBrowser* SkybrowserModule::skyBrowser() {
     return _skyBrowser;
 }
-*/
+
 glm::dvec2 SkybrowserModule::convertGalacticToCelestial(glm::dvec3 rGal) const {
     
     // Used the math from this website: https://gea.esac.esa.int/archive/documentation/GD -->

@@ -35,6 +35,8 @@
 
 namespace openspace {
 
+class ScreenSpaceBrowser;
+
 class SkybrowserModule : public OpenSpaceModule {
 public:
     constexpr static const char* Name = "Skybrowser";
@@ -47,11 +49,12 @@ public:
     void WWTfollowCamera();
 
     std::string createMessageForMovingWWTCamera(glm::dvec2 celestCoords, float fov, bool moveInstantly = true) const;
+    std::string createMessageForPausingWWTTime() const;
 
     bool sendMessageToWWT(const std::string& msg);
 
-    //void initializeBrowser(ScreenSpaceBrowser* skyBrowser_);
-    //ScreenSpaceBrowser* skyBrowser();
+    void initializeBrowser(ScreenSpaceBrowser* skyBrowser_);
+    ScreenSpaceBrowser* skyBrowser();
     scripting::LuaLibrary luaLibrary() const override;
     //std::vector<documentation::Documentation> documentations() const override;
 
@@ -60,7 +63,7 @@ protected:
 
     properties::StringProperty _testProperty;
     properties::FloatProperty _zoomFactor;
-    //ScreenSpaceBrowser* _skyBrowser;
+    ScreenSpaceBrowser* _skyBrowser;
 };
 
 } // namespace openspace

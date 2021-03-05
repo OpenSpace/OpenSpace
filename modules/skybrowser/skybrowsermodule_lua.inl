@@ -33,6 +33,8 @@ namespace openspace::skybrowser::luascriptfunctions {
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::followCamera");
 
         SkybrowserModule* module = global::moduleEngine->module<SkybrowserModule>();
+        std::string message = module->createMessageForPausingWWTTime();
+        module->sendMessageToWWT(message);
         std::thread thread(&SkybrowserModule::WWTfollowCamera, module);
         thread.detach();
 
@@ -42,16 +44,15 @@ namespace openspace::skybrowser::luascriptfunctions {
     int moveBrowser(lua_State* L) {
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::moveBrowser");
         
-       // SkybrowserModule* module = global::moduleEngine->module<SkybrowserModule>();
-       // std::string test = module->createMessageForMovingWWTCamera(glm::dvec2(18, -32), 50);
-       // module->sendMessageToWWT(test);
         
-        //SkybrowserModule* module = global::moduleEngine->module<SkybrowserModule>();
-       // module->skyBrowser()->translate(glm::vec3(-0.8, -0.4, 0.0));
+        SkybrowserModule* module = global::moduleEngine->module<SkybrowserModule>();     
         ScreenSpaceBrowser* browser = dynamic_cast<ScreenSpaceBrowser*>(global::renderEngine->screenSpaceRenderable("ScreenSpaceBowser"));
+        module->initializeBrowser(browser);
+        //ScreenSpaceBrowser* browser = dynamic_cast<ScreenSpaceBrowser*>(global::renderEngine->screenSpaceRenderable("ScreenSpaceBowser"));
         
-        browser->setFaceCameraPropertyToFalse();
-        browser->translate(glm::vec3(-0.8, -0.4, 0.0));
+        module->skyBrowser()->setFaceCameraPropertyToFalse();
+        module->skyBrowser()->translate(glm::vec3(-0.8, -0.4, 0.0));
+       
         return 1;
     }
 
@@ -78,10 +79,8 @@ namespace openspace::skybrowser::luascriptfunctions {
         openspace::global::scriptEngine->queueScript(
             "openspace.addScreenSpaceRenderable(" + ghoul::formatLua(node) + ")",
             scripting::ScriptEngine::RemoteScripting::Yes
-        );
-        ScreenSpaceBrowser* browser = dynamic_cast<ScreenSpaceBrowser*>(global::renderEngine->screenSpaceRenderable("ScreenSpaceBowser"));
-       // module->initializeBrowser(browser);
-
+        );     
+        
         return 1;
     }
     
