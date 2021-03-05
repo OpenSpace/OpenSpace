@@ -31,7 +31,6 @@ namespace openspace::skybrowser::luascriptfunctions {
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::followCamera");
         const SkybrowserModule* module = global::moduleEngine->module<SkybrowserModule>();
         ScreenSpaceBrowser* browser = dynamic_cast<ScreenSpaceBrowser*>(global::renderEngine->screenSpaceRenderable("ScreenSpaceBowser"));
-       
         module->WWTfollowCamera();  
         return 1;
     }
@@ -39,7 +38,6 @@ namespace openspace::skybrowser::luascriptfunctions {
     int moveBrowser(lua_State* L) {
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::moveBrowser");
         ScreenSpaceBrowser* browser = dynamic_cast<ScreenSpaceBrowser*>(global::renderEngine->screenSpaceRenderable("ScreenSpaceBowser"));
-        browser->setFaceCameraPropertyToFalse();
         browser->translate(glm::vec3(-0.8, -0.4, 0.0));
         return 1;
     }
@@ -50,22 +48,29 @@ namespace openspace::skybrowser::luascriptfunctions {
 
         const SkybrowserModule* module = global::moduleEngine->module<SkybrowserModule>();    
 
-        //std::string _url = "https://wallpaperaccess.com/full/3010132.jpg";
-        // 'https://cdn.wallpapersafari.com/6/92/0nbCPw.jpg'
-
         using namespace std::string_literals;
 
+        std::string node = "{"
+            "Type = 'ScreenSpaceBrowser',"
+            "Identifier = 'ScreenSpaceBowser',"
+            "Name = 'Screen Space Bowser',"
+            "Url = 'http://localhost:8000/',"
+            "FaceCamera = false"
+        "}";
+
+        /*
         ghoul::Dictionary node;
         node.setValue("Type", "ScreenSpaceBrowser"s);
         node.setValue("Identifier", "ScreenSpaceBowser"s);
         node.setValue("Name", "Screen Space Bowser"s);
         node.setValue("Url", "http://localhost:8000/"s);
-       // node.setValue("Dimensions", "glm::ivec2(1000, 1000)");
+        */
 
         openspace::global::scriptEngine->queueScript(
-            "openspace.addScreenSpaceRenderable(" + ghoul::formatLua(node) + ")",
+            "openspace.addScreenSpaceRenderable(" + node + ")",
             scripting::ScriptEngine::RemoteScripting::Yes
         );
+   
         return 1;
     }
     

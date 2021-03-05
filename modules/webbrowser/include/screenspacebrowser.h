@@ -74,7 +74,6 @@ public:
 
     void executeJavascript(std::string &script) const;
     void translate(glm::vec3 translation);
-    void setFaceCameraPropertyToFalse();
 
 private:
     class ScreenSpaceRenderHandler : public WebRenderHandler {

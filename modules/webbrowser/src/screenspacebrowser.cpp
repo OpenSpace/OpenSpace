@@ -71,10 +71,6 @@ void ScreenSpaceBrowser::translate(glm::vec3 translation) {
     _cartesianPosition = glm::translate(glm::mat4(1.f), translation) * glm::vec4(position, 1.0f);
 }
 
-void ScreenSpaceBrowser::setFaceCameraPropertyToFalse() {
-    _faceCamera = false;
-}
-
 void ScreenSpaceBrowser::ScreenSpaceRenderHandler::draw() {}
 
 void ScreenSpaceBrowser::ScreenSpaceRenderHandler::render() {}

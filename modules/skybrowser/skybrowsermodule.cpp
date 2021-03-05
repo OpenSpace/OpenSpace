@@ -25,7 +25,11 @@
 #include <modules/skybrowser/skybrowsermodule.h>
  //#include <modules/webbrowser/webbrowsermodule.h>
  //#include <modules/webbrowser/include/screenspacebrowser.h>
+#include <modules/base/rendering/screenspaceimagelocal.h>
+#include <openspace/rendering/screenspacerenderable.h>
 
+#include <openspace/rendering/renderable.h>
+#include <openspace/rendering/renderengine.h>
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
@@ -138,6 +142,7 @@ void SkybrowserModule::WWTfollowCamera() const {
     const SkybrowserModule* module = global::moduleEngine->module<SkybrowserModule>();
     glm::dvec2 celestCoords = module->convertGalacticToCelestial(viewDirection);
 
+    showTarget();
     // Execute javascript on browser
     ScreenSpaceBrowser* browser = dynamic_cast<ScreenSpaceBrowser*>(global::renderEngine->screenSpaceRenderable("ScreenSpaceBowser"));
     std::string script = "window.frames[0].postMessage({event: 'center_on_coordinates', ra : Number(" + std::to_string(celestCoords[0]) + "), dec : Number(" + std::to_string(celestCoords[1]) + "), fov : Number(" + std::to_string(_zoomFactor) + "), instant : false})";
@@ -161,6 +166,25 @@ glm::dvec2 SkybrowserModule::convertGalacticToCelestial(glm::dvec3 rGal) const {
     std::cout << glm::degrees(dec) << std::endl;
 
     return glm::dvec2(glm::degrees(ra), glm::degrees(dec));
+}
+
+void SkybrowserModule::showTarget() const{
+
+    using namespace std::string_literals;
+
+   
+    ghoul::Dictionary node;
+    node.setValue("Type", "ScreenSpaceImageLocal"s);
+    node.setValue("Identifier", "Target"s);
+    node.setValue("TexturePath", "D:/Esters/OpenSpace/modules/skybrowser/target.png"s);
+    node.setValue("Scale", 0.07);
+    
+
+    openspace::global::scriptEngine->queueScript(
+        "openspace.addScreenSpaceRenderable(" + ghoul::formatLua(node) + ")",
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
+
 }
 
 /*
