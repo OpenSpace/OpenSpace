@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <modules/skybrowser/skybrowsermodule.h>
+
  //#include <modules/webbrowser/webbrowsermodule.h>
  //#include <modules/webbrowser/include/screenspacebrowser.h>
 #include <modules/base/rendering/screenspaceimagelocal.h>
@@ -31,19 +32,21 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
 
+#include <openspace/engine/moduleengine.h>
+
+
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/factorymanager.h>
 #include <thread>
 #include <chrono>
-#include <cmath> // For atan2
-
 #include "skybrowsermodule_lua.inl"
 
+#include <cmath> // For atan2
+#include <ghoul/misc/dictionaryjsonformatter.h> // formatJson
 
 namespace {
     constexpr const openspace::properties::Property::PropertyInfo TestInfo = 
@@ -78,7 +81,8 @@ namespace openspace {
 SkybrowserModule::SkybrowserModule()
     : OpenSpaceModule(Name)
     , _testProperty(TestInfo)
-    , _zoomFactor(ZoomInfo, 70.f ,0.f ,150.f)
+    , _zoomFactor(ZoomInfo, 50.f ,0.1f ,70.f)
+    , _skyBrowser(nullptr)
 {
     addProperty(_testProperty);
     addProperty(_zoomFactor);
@@ -127,26 +131,61 @@ void SkybrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
     _testProperty = p.test.value_or(_testProperty);
     _zoomFactor = p.zoom.value_or(_zoomFactor);
-    /*
-    auto fBrowser = FactoryManager::ref().factory<ScreenSpaceBrowser>();
-    ghoul_assert(fBrowser, "No browser factory existed :'-(");
-    fBrowser->registerClass<ScreenSpaceBrowser>("ScreenSpaceBrowser");
-    */
 }
 
-void SkybrowserModule::WWTfollowCamera() const {
-    // Get camera view direction
-    const glm::dvec3 viewDirection = global::navigationHandler->camera()->viewDirectionWorldSpace();
+bool SkybrowserModule::sendMessageToWWT(const ghoul::Dictionary& msg) {
+    if (_skyBrowser) {
+        std::string script = "sendMessageToWWT(" + ghoul::formatJson(msg) + ");";
+        _skyBrowser->executeJavascript(script);
+        return true;
+    }
+    else {
+        LERROR("No sky browser added! Can't send message.");
+        return false;
+    }
+}
 
-    // Convert to celestial coordinates
-    const SkybrowserModule* module = global::moduleEngine->module<SkybrowserModule>();
-    glm::dvec2 celestCoords = module->convertGalacticToCelestial(viewDirection);
+void SkybrowserModule::WWTfollowCamera() {
+    while (true) {
+        // Get camera view direction
+        const glm::dvec3 viewDirection = global::navigationHandler->camera()->viewDirectionWorldSpace();
 
-    showTarget();
-    // Execute javascript on browser
-    ScreenSpaceBrowser* browser = dynamic_cast<ScreenSpaceBrowser*>(global::renderEngine->screenSpaceRenderable("ScreenSpaceBowser"));
-    std::string script = "window.frames[0].postMessage({event: 'center_on_coordinates', ra : Number(" + std::to_string(celestCoords[0]) + "), dec : Number(" + std::to_string(celestCoords[1]) + "), fov : Number(" + std::to_string(_zoomFactor) + "), instant : false})";
-    browser->executeJavascript(script);
+        // Convert to celestial coordinates
+        glm::dvec2 celestCoords = convertGalacticToCelestial(viewDirection);
+        ghoul::Dictionary message = createMessageForMovingWWTCamera(celestCoords, _zoomFactor);
+
+        sendMessageToWWT(message);
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    }
+}
+
+ghoul::Dictionary SkybrowserModule::createMessageForMovingWWTCamera(const glm::dvec2 celestCoords, const float fov,  const bool moveInstantly) const {
+    using namespace std::string_literals;
+    ghoul::Dictionary msg;
+    msg.setValue("event", "center_on_coordinates"s);
+    msg.setValue("ra", static_cast<double>(celestCoords[0]));
+    msg.setValue("dec", static_cast<double>(celestCoords[1]));
+    msg.setValue("fov", static_cast<double>(fov));
+    msg.setValue("instant", moveInstantly);
+    
+    return msg;
+}
+
+ghoul::Dictionary SkybrowserModule::createMessageForPausingWWTTime() const {
+    using namespace std::string_literals;
+    ghoul::Dictionary msg;
+    msg.setValue("event", "pause_time"s);
+
+    return msg;
+}
+
+
+void SkybrowserModule::initializeBrowser(ScreenSpaceBrowser* skyBrowser) {
+    _skyBrowser = skyBrowser;
+}
+
+ScreenSpaceBrowser* SkybrowserModule::skyBrowser() {
+    return _skyBrowser;
 }
 
 glm::dvec2 SkybrowserModule::convertGalacticToCelestial(glm::dvec3 rGal) const {
@@ -163,7 +202,7 @@ glm::dvec2 SkybrowserModule::convertGalacticToCelestial(glm::dvec3 rGal) const {
     float ra = atan2(rICRS[1], rICRS[0]);
     float dec = atan2(rICRS[2], glm::sqrt((rICRS[0] * rICRS[0]) + (rICRS[1] * rICRS[1])));
 
-    std::cout << glm::degrees(dec) << std::endl;
+    ra = ra > 0 ? ra : ra + (2 * glm::pi<float>());
 
     return glm::dvec2(glm::degrees(ra), glm::degrees(dec));
 }

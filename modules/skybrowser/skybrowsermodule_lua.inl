@@ -19,6 +19,8 @@
 #include <modules/webbrowser/include/screenspacebrowser.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/util/camera.h>
+#include <thread> 
+
 
 namespace {
     constexpr const char _loggerCat[] = "SkybrowserModule";
@@ -29,16 +31,25 @@ namespace openspace::skybrowser::luascriptfunctions {
     
     int followCamera(lua_State* L) {
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::followCamera");
-        const SkybrowserModule* module = global::moduleEngine->module<SkybrowserModule>();
-        ScreenSpaceBrowser* browser = dynamic_cast<ScreenSpaceBrowser*>(global::renderEngine->screenSpaceRenderable("ScreenSpaceBowser"));
-        module->WWTfollowCamera();  
+
+        SkybrowserModule* module = global::moduleEngine->module<SkybrowserModule>();
+        //ghoul::Dictionary message = module->createMessageForPausingWWTTime();
+        //module->sendMessageToWWT(message);
+        std::thread thread(&SkybrowserModule::WWTfollowCamera, module);
+        thread.detach();
+
         return 1;
     }
 
     int moveBrowser(lua_State* L) {
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::moveBrowser");
+        
+        SkybrowserModule* module = global::moduleEngine->module<SkybrowserModule>();     
         ScreenSpaceBrowser* browser = dynamic_cast<ScreenSpaceBrowser*>(global::renderEngine->screenSpaceRenderable("ScreenSpaceBowser"));
-        browser->translate(glm::vec3(-0.8, -0.4, 0.0));
+
+        module->initializeBrowser(browser);     
+        module->skyBrowser()->translate(glm::vec3(-0.8, -0.4, 0.0));
+
         return 1;
     }
 
@@ -46,7 +57,8 @@ namespace openspace::skybrowser::luascriptfunctions {
         ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::createBrowser");
         ghoul::lua::value<std::string>(L, 1);
 
-        const SkybrowserModule* module = global::moduleEngine->module<SkybrowserModule>();    
+        SkybrowserModule* module = global::moduleEngine->module<SkybrowserModule>();
+
 
         using namespace std::string_literals;
 
@@ -64,13 +76,14 @@ namespace openspace::skybrowser::luascriptfunctions {
         node.setValue("Identifier", "ScreenSpaceBowser"s);
         node.setValue("Name", "Screen Space Bowser"s);
         node.setValue("Url", "http://localhost:8000/"s);
+
         */
 
         openspace::global::scriptEngine->queueScript(
             "openspace.addScreenSpaceRenderable(" + node + ")",
             scripting::ScriptEngine::RemoteScripting::Yes
         );
-   
+
         return 1;
     }
     
