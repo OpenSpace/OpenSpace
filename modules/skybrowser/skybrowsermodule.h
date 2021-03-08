@@ -35,14 +35,14 @@
 
 namespace openspace {
 
-class ScreenSpaceBrowser;
+class ScreenSpaceSkyBrowser;
 
-class SkybrowserModule : public OpenSpaceModule {
+class SkyBrowserModule : public OpenSpaceModule {
 public:
-    constexpr static const char* Name = "Skybrowser";
+    constexpr static const char* Name = "SkyBrowser";
 
-    SkybrowserModule();
-    virtual ~SkybrowserModule() = default;
+    SkyBrowserModule();
+    virtual ~SkyBrowserModule() = default;
 
     float zoomFactor() const;
     glm::dvec2 convertGalacticToCelestial(glm::dvec3 coords) const;
@@ -55,8 +55,8 @@ public:
 
     bool sendMessageToWWT(const ghoul::Dictionary& msg);
 
-    void initializeBrowser(ScreenSpaceBrowser* skyBrowser_);
-    ScreenSpaceBrowser* skyBrowser();
+    void initializeBrowser(ScreenSpaceSkyBrowser* skyBrowser_);
+    ScreenSpaceSkyBrowser* skyBrowser();
     scripting::LuaLibrary luaLibrary() const override;
     //std::vector<documentation::Documentation> documentations() const override;
 
@@ -65,7 +65,7 @@ protected:
 
     properties::StringProperty _testProperty;
     properties::FloatProperty _zoomFactor;
-    ScreenSpaceBrowser* _skyBrowser;
+    ScreenSpaceSkyBrowser* _skyBrowser;
 };
 
 } // namespace openspace

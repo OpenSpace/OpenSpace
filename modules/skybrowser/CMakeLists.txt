@@ -27,6 +27,7 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 set(HEADER_FILES
     
     skybrowsermodule.h
+    include/screenspaceskybrowser.h
     
 )
 source_group("Header Files" FILES ${HEADER_FILES})
@@ -35,12 +36,13 @@ set(SOURCE_FILES
     
     skybrowsermodule.cpp
     skybrowsermodule_lua.inl
+    src/screenspaceskybrowser.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 
 create_new_module(
-    "Skybrowser"
+    "SkyBrowser"
     skybrowser_module
     STATIC
     ${HEADER_FILES} ${SOURCE_FILES}

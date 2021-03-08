@@ -72,9 +72,9 @@ public:
     void update() override;
     bool isReady() const override;
 
-    void executeJavascript(std::string &script) const;
-    void translate(glm::vec3 translation);
-
+protected:
+    
+    std::unique_ptr<BrowserInstance> _browserInstance;
 private:
     class ScreenSpaceRenderHandler : public WebRenderHandler {
     public:
@@ -92,7 +92,8 @@ private:
 
     CefRefPtr<ScreenSpaceRenderHandler> _renderHandler;
     CefRefPtr<WebKeyboardHandler> _keyboardHandler;
-    std::unique_ptr<BrowserInstance> _browserInstance;
+    
+    
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 
     bool _isUrlDirty = false;
