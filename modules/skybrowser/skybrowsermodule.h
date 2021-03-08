@@ -32,6 +32,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <thread>
 
 namespace openspace {
 
@@ -47,7 +48,6 @@ public:
     float zoomFactor() const;
     glm::dvec2 convertGalacticToCelestial(glm::dvec3 coords) const;
 
-    void showTarget() const;
     void WWTfollowCamera();
     void showTarget() const;
 
@@ -64,10 +64,13 @@ public:
 
 protected:
     void internalInitialize(const ghoul::Dictionary& dict) override;
+    void internalDeinitialize() override;
 
     properties::StringProperty _testProperty;
     properties::FloatProperty _zoomFactor;
     ScreenSpaceBrowser* _skyBrowser;
+    bool _camIsSyncedWWT;
+    std::thread _thread;
 };
 
 } // namespace openspace

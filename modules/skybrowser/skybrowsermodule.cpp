@@ -83,12 +83,19 @@ SkybrowserModule::SkybrowserModule()
     , _testProperty(TestInfo)
     , _zoomFactor(ZoomInfo, 50.f ,0.1f ,70.f)
     , _skyBrowser(nullptr)
+    , _camIsSyncedWWT(true)
 {
     addProperty(_testProperty);
     addProperty(_zoomFactor);
+} 
+
+void SkybrowserModule::internalDeinitialize() {
+    ZoneScoped
+    // Set flag to false so the thread can exit
+    _camIsSyncedWWT = false;
+    _thread.join();
+    LINFO("Joined thread");
 }
-
-
 
 scripting::LuaLibrary SkybrowserModule::luaLibrary() const {
     scripting::LuaLibrary res;
@@ -155,17 +162,31 @@ bool SkybrowserModule::sendMessageToWWT(const ghoul::Dictionary& msg) {
 
 void SkybrowserModule::WWTfollowCamera() {
     showTarget();
-    while (true) {
-        // Get camera view direction
-        const glm::dvec3 viewDirection = global::navigationHandler->camera()->viewDirectionWorldSpace();
+    //std::thread(&SkybrowserModule::WWTfollowCamera, module)
 
-        // Convert to celestial coordinates
-        glm::dvec2 celestCoords = convertGalacticToCelestial(viewDirection);
-        ghoul::Dictionary message = createMessageForMovingWWTCamera(celestCoords, _zoomFactor);
+    // Start a thread to enable user interaction while sending the calls to WWT
+    _thread = std::thread([&] {
+        while (_camIsSyncedWWT) {
 
-        sendMessageToWWT(message);
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    }
+            // Get camera view direction
+            const glm::dvec3 viewDirection = global::navigationHandler->camera()->viewDirectionWorldSpace();
+
+            // Convert to celestial coordinates
+            glm::dvec2 celestCoords = convertGalacticToCelestial(viewDirection);
+            ghoul::Dictionary message = createMessageForMovingWWTCamera(celestCoords, _zoomFactor);
+            if (!_camIsSyncedWWT) {
+                break;
+            }
+            else {
+                std::this_thread::sleep_for(std::chrono::milliseconds(50));
+                sendMessageToWWT(message);
+            }
+            LINFO("Thread running... " + std::to_string(_camIsSyncedWWT));
+
+        }
+        LINFO("Thread finished... " + std::to_string(_camIsSyncedWWT));
+    });
+    
 }
 
 ghoul::Dictionary SkybrowserModule::createMessageForMovingWWTCamera(const glm::dvec2 celestCoords, const float fov,  const bool moveInstantly) const {
@@ -188,8 +209,6 @@ ghoul::Dictionary SkybrowserModule::createMessageForLoadingWWTImgColl(const std:
 
     return msg;
 }
-
-
 
 ghoul::Dictionary SkybrowserModule::createMessageForPausingWWTTime() const {
     using namespace std::string_literals;

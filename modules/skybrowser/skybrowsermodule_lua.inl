@@ -45,8 +45,8 @@ namespace openspace::skybrowser::luascriptfunctions {
         //ghoul::Dictionary message = module->createMessageForPausingWWTTime();
         //module->sendMessageToWWT(message);
         module->showTarget();
-        std::thread thread(&SkybrowserModule::WWTfollowCamera, module);
-        thread.detach();
+        module->WWTfollowCamera();
+        
 
         return 1;
     }
@@ -54,9 +54,10 @@ namespace openspace::skybrowser::luascriptfunctions {
     int moveBrowser(lua_State* L) {
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::moveBrowser");
         
-        SkybrowserModule* module = global::moduleEngine->module<SkybrowserModule>();     
+        SkybrowserModule* module = global::moduleEngine->module<SkybrowserModule>();
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
         ScreenSpaceBrowser* browser = dynamic_cast<ScreenSpaceBrowser*>(global::renderEngine->screenSpaceRenderable("ScreenSpaceBowser"));
-        module->initializeBrowser(browser);     
+        module->initializeBrowser(browser);
         module->skyBrowser()->translate(glm::vec3(-0.8, -0.4, 0.0));
 
         return 1;
@@ -90,6 +91,7 @@ namespace openspace::skybrowser::luascriptfunctions {
             "openspace.addScreenSpaceRenderable(" + node + ")",
             scripting::ScriptEngine::RemoteScripting::Yes
         );
+        
 
         return 1;
     }
