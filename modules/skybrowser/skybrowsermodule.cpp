@@ -23,7 +23,17 @@
  ****************************************************************************************/
 
 #include <modules/skybrowser/skybrowsermodule.h>
+
+ //#include <modules/webbrowser/webbrowsermodule.h>
+ //#include <modules/webbrowser/include/screenspacebrowser.h>
+#include <modules/base/rendering/screenspaceimagelocal.h>
+#include <openspace/rendering/screenspacerenderable.h>
+
+#include <openspace/rendering/renderable.h>
+#include <openspace/rendering/renderengine.h>
+
 #include <openspace/engine/moduleengine.h>
+
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
@@ -144,6 +154,7 @@ bool SkybrowserModule::sendMessageToWWT(const ghoul::Dictionary& msg) {
 }
 
 void SkybrowserModule::WWTfollowCamera() {
+    showTarget();
     while (true) {
         // Get camera view direction
         const glm::dvec3 viewDirection = global::navigationHandler->camera()->viewDirectionWorldSpace();
