@@ -90,11 +90,13 @@ SkyBrowserModule::SkyBrowserModule()
 } 
 
 void SkyBrowserModule::internalDeinitialize() {
-    ZoneScoped
-    // Set flag to false so the thread can exit
+        // Set flag to false so the thread can exit
     _camIsSyncedWWT = false;
-    _thread.join();
-    LINFO("Joined thread");
+    if (_thread.joinable()) {
+        _thread.join();
+        LINFO("Joined thread");
+    }
+  
 }
 
 scripting::LuaLibrary SkyBrowserModule::luaLibrary() const {
