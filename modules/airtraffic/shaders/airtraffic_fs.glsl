@@ -23,38 +23,37 @@
  ****************************************************************************************/
 
 #include "fragment.glsl"
+#include "floatoperations.glsl"
 
-in vec4 vs_position;
-in float vertexID;
-in float trailS;
-in vec4 interpColor;
-uniform float opacity = 1.0;
+//in float ge_vertexID;
+in vec4 ge_position;
+in vec4 ge_interpColor;
+noperspective in vec2 ge_mathLine;
+
+uniform float lineWidth;
 
 Fragment getFragment() {
     Fragment frag;
 
+    frag.gPosition = ge_position;
+    frag.depth = ge_position.w;
+    frag.color = ge_interpColor;
+    frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
+    //frag.blend = BLEND_MODE_ADDITIVE;
 
-    
-    //float invert = pow((1.0 - vertexDistance_f), lineFade);
-    //float fade = clamp(invert, 0.0, 1.0);
-
-    // Currently even fully transparent lines can occlude other lines, thus we discard
-    // these fragments since debris and satellites are rendered so close to each other
-   // if (interpColor.w < 0.05) {
-     //   discard;
-    //}
-
-    // Use additive blending for some values to make the discarding less abrupt
-    //if (interpColor.w < 0.15) {
-      //  frag.blend = BLEND_MODE_ADDITIVE;
-    //}
-
-    //frag.color = vec4(1.0, 0.0, 0.0, fade * opacity);
-
-    frag.color = interpColor;//vec4(1.0, 0.0, 0.0, distance(vec2(vs_position), gl_PointCoord);
-    frag.gPosition = vs_position;
-    frag.depth = vs_position.w;
-    frag.gNormal = vec4(1.0, 1.0, 1.0, 0.0);
+    double distanceCenter = length(ge_mathLine - vec2(gl_FragCoord.xy));
+    double dLineWidth = double(lineWidth);
+    float blendFactor = 20;
+   
+    if(distanceCenter > dLineWidth) {
+        frag.color.a = 0.0;
+        //frag.color = vec4(1.0,0.0,0.0, 1.0);
+    }
+    else {
+        frag.color.a *= pow(float((dLineWidth - distanceCenter) / dLineWidth), blendFactor);
+        //frag.color.a = 1.0; 
+        //frag.color = vec4(0.0,1.0,0.0, 1.0);
+    }
 
     return frag;
 }

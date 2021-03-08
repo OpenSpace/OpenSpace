@@ -71,18 +71,14 @@ public:
 
 private:
 
-    static const int _TRAILSIZE = 5;
-
-    struct Vertex {
-        glm::vec3 position = glm::vec3(0.f);
-        glm::vec3 color = glm::vec3(0.f);
-    };
+    static const int _TRAILSIZE = 10;
+    static const int _THRESHOLD = -9999;
+    const float _LINEWIDTH = std::ceil((2.f + 8.f) * std::sqrt(2.f)); 
 
     struct AircraftVBOLayout {
-        float latitude = 90.f;
-        float longitude =  0.f;
+        float latitude = static_cast<float>(_THRESHOLD);
+        float longitude = static_cast<float>(_THRESHOLD);
         float barometricAltitude = 0.f;
-        //float geometricAltitude = 0.f; // Not used at the moment
         float velocity = 0.f; 
         float flightDirection = 0.f; // true_track in data
         int lastContact = 0; // Draw only if changed
@@ -99,7 +95,7 @@ private:
    
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
 
-    UniformCache(modelViewProjection, trailSize) _uniformCache;
+    UniformCache(modelViewProjection, trailSize, resolution, lineWidth) _uniformCache;
 
     GLuint _vertexArray = 0;
     GLuint _vertexBuffer = 0;
@@ -112,8 +108,7 @@ private:
     
     //const std::string _url = "https://" + _PASSWORD + ":" + _USERNAME + "@opensky-network.org/api/states/all";
     const std::string _url = "https://opensky-network.org/api/states/all";
-    double _deltaTime = Time::now().j2000Seconds(); 
-  
+    double _deltaTime = Time::now().j2000Seconds();
 };
 
 } // namespace openspace

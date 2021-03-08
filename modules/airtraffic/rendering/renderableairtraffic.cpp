@@ -46,8 +46,8 @@ namespace ghoul::opengl {
 
 namespace {
     
-    constexpr const std::array<const char*, 2> UniformNames = {
-        "modelViewProjection", "trailSize"
+    constexpr const std::array<const char*, 4> UniformNames = {
+        "modelViewProjection", "trailSize", "resolution", "lineWidth"
     };
 
     constexpr openspace::properties::Property::PropertyInfo URLPathInfo = {
@@ -91,7 +91,10 @@ documentation::Documentation RenderableAirTraffic::Documentation() {
 RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _pointSize(PointSizeInfo, 2.f, 1.f, 10.f)
-    {}
+    {
+        setRenderBin(RenderBin::PostDeferredTransparent);
+    }
+    
 
     void RenderableAirTraffic::initialize() {
         return;
@@ -109,8 +112,8 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
         _shader = global::renderEngine->buildRenderProgram(
             "AirTrafficProgram",
             absPath("${MODULE_AIRTRAFFIC}/shaders/airtraffic_vs.glsl"),
-            absPath("${MODULE_AIRTRAFFIC}/shaders/airtraffic_fs.glsl")
-            //absPath("${MODULE_AIRTRAFFIC}/shaders/airtraffic_ge.glsl")
+            absPath("${MODULE_AIRTRAFFIC}/shaders/airtraffic_fs.glsl"),
+            absPath("${MODULE_AIRTRAFFIC}/shaders/airtraffic_ge.glsl")
         );
         
         ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
@@ -140,6 +143,7 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
 
         // Trigger data update
         if ( abs(data.time.j2000Seconds() - _deltaTime) > 10.0 && !_dataLoading) {
+            std::cout << "Data loading initialized... ";
             fut = std::async(std::launch::async, &RenderableAirTraffic::fetchData, this);
             _dataLoading = true;
         }
@@ -148,7 +152,7 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
         if (fut.valid() && fut.wait_for(seconds(0)) == std::future_status::ready) { // NOT SO STABLE SOLUTION
             _data = fut.get();
             updateBuffers();
-            std::cout << " BUFFERS UPDATED " << abs(_deltaTime - data.time.j2000Seconds()) << std::endl;
+            std::cout << "finished. Time since last update: " << abs(_deltaTime - data.time.j2000Seconds()) << " seconds." << std::endl;
             _dataLoading = false;
             _deltaTime = data.time.j2000Seconds();
         }
@@ -166,28 +170,46 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
             _uniformCache.modelViewProjection,
             data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
         );
-
-        
+  
         const GLsizei nAircrafts = static_cast<GLsizei>(_data["states"].size());
         _shader->setUniform(
             _uniformCache.trailSize,
             static_cast<float>(_TRAILSIZE)
         );
 
+
+//#if !defined(__APPLE__)
+        glm::ivec2 resolution = global::renderEngine->renderingResolution();
+        _shader->setUniform(_uniformCache.resolution, resolution);
+
+        _shader->setUniform(_uniformCache.lineWidth, _LINEWIDTH);
+//#endif
+
         glBindVertexArray(_vertexArray);
 
         //glPointSize(2.0);
-        glLineWidth(2.0);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glEnable(GL_BLEND);
 
+        //glEnable(GL_BLEND);
+        //glBlendFunc(GL_ONE, GL_ONE);
+        //glBlendEquation(GL_FUNC_ADD);
 
+        //glEnable(GL_BLEND);
+        //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        //glBlendEquation(GL_FUNC_ADD);
+
+        //glShadeModel(GL_SMOOTH);
+        //glEnable (GL_LINE_SMOOTH);
+        //glEnable (GL_BLEND);
+        //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        //glHint (GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
+        
+        glLineWidth(_LINEWIDTH);
 
         //glDrawArrays(GL_LINE_STRIP, 0, _TRAILSIZE * nAircrafts);
 
 
         for (size_t i = 0; i < nAircrafts; ++i) {
-            glDrawArrays(GL_LINE_STRIP, _TRAILSIZE * i, static_cast<GLsizei>(_TRAILSIZE)/*+ 1*/);   
+            glDrawArrays(GL_LINE_STRIP, _TRAILSIZE * i, static_cast<GLsizei>(_TRAILSIZE));   
         }
     
         //glVertexPointer(_TRAILSIZE, GL_FLOAT, 0, _vertexBufferData.data());
@@ -205,8 +227,8 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
     json RenderableAirTraffic::parseData(SyncHttpMemoryDownload& response) {
 
         // Callback to handle NULL data
-        json::parser_callback_t ReplaceNullCallBack = [](int depth, json::parse_event_t event, json& parsed) {
-            if (event == json::parse_event_t::value and parsed == nullptr) parsed = 0;
+        json::parser_callback_t ReplaceNullCallBack = [this](int depth, json::parse_event_t event, json& parsed) {
+            if (event == json::parse_event_t::value and parsed == nullptr) parsed = _THRESHOLD;
             return true;
         };
 
@@ -215,7 +237,8 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
 
         // JSON structure:
         // time: int,
-        // states: [    
+        // states: 
+        // [[    
         //      (0: icao24)             string,
         //      (1: callsign)           string, can be null
         //      (2: origin_country)     string,
@@ -228,38 +251,38 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
         //      (9: velocity)           float,  can be null
         //      (10: true_track)        float,  can be null
         //      (11: vertical_rate)     float,  can be null
-        //      (12:sensors)            int[],  can be null 
+        //      (12: sensors)           int[],  can be null 
         //      (13: geo_altitude)      float,  can be null
         //      (14: squawk)            string, can be null
         //      (15: spi)               bool,
         //      (16: position_source)   int,
-        // ],
-        // .
-        // .
-        // .
+        //  ],
+        //  [
+        //      .
+        //      .
+        //      .
+        //  ],
+        //  .
+        //  .
+        //  .
+        // ]
         // Example, get latitude for flight#: jsonData["states"][flight#][6]
     }
 
     json RenderableAirTraffic::fetchData() {
 
-        /*const double secondsInAYear = 365.25 * 24 * 60 * 60;
-        const double secondsBetween1970And2000 = 30 * secondsInAYear;
-        std::cout << "SecondsBetween1970And2000: " << secondsBetween1970And2000 << std::endl;
-        std::cout << "_deltaTime: " << _deltaTime << std::endl;
-        
-        int t = static_cast<int>(_deltaTime + secondsBetween1970And2000);
-        std::cout << "_deltaTime + secondsBetween1970And2000: " << t << std::endl;
-        std::string time = std::to_string(t);*/
-
         SyncHttpMemoryDownload response(_url);
         HttpRequest::RequestOptions timeout;
         timeout.requestTimeoutSeconds = 0; // No timeout limit
-        response.download(timeout);
         
-        return parseData(response);
+        response.download(timeout);
+     
 
-        //return response.hasSucceeded();
+        if(response.hasSucceeded())
+            return parseData(response);
 
+        // If new data is inaccessible, return current data
+        return _data;
     }
 
     void RenderableAirTraffic::updateBuffers(bool _firstFetch) {
@@ -285,7 +308,7 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
             temp.velocity = static_cast<float>(aircraft[9]);
             temp.flightDirection = static_cast<float>(aircraft[10]);
             
-            if(temp.latitude != 0.f && temp.longitude != 0.f) {
+            if(temp.latitude > _THRESHOLD && temp.longitude > _THRESHOLD) {
                 if(aircraftMap[icao24].list.size() >= _TRAILSIZE) aircraftMap[icao24].list.pop_back();
                 aircraftMap[icao24].list.push_front(temp);
             }
