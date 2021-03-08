@@ -62,7 +62,7 @@ namespace {
         "tjobidabidobidabidopp plupp"
     };
 
-    struct [[codegen::Dictionary(SkybrowserModule)]] Parameters {
+    struct [[codegen::Dictionary(SkyBrowserModule)]] Parameters {
 
         // [[codegen::verbatim(TestInfo.description)]]
         std::optional<std::string> test;
@@ -78,8 +78,8 @@ namespace {
 
 namespace openspace {
 
-SkybrowserModule::SkybrowserModule()
-    : OpenSpaceModule(Name)
+SkyBrowserModule::SkyBrowserModule()
+    : OpenSpaceModule(SkyBrowserModule::Name)
     , _testProperty(TestInfo)
     , _zoomFactor(ZoomInfo, 50.f ,0.1f ,70.f)
     , _skyBrowser(nullptr)
@@ -89,7 +89,7 @@ SkybrowserModule::SkybrowserModule()
     addProperty(_zoomFactor);
 } 
 
-void SkybrowserModule::internalDeinitialize() {
+void SkyBrowserModule::internalDeinitialize() {
     ZoneScoped
     // Set flag to false so the thread can exit
     _camIsSyncedWWT = false;
@@ -97,7 +97,8 @@ void SkybrowserModule::internalDeinitialize() {
     LINFO("Joined thread");
 }
 
-scripting::LuaLibrary SkybrowserModule::luaLibrary() const {
+scripting::LuaLibrary SkyBrowserModule::luaLibrary() const {
+
     scripting::LuaLibrary res;
     res.name = "skybrowser";
     res.functions = {
@@ -138,17 +139,23 @@ scripting::LuaLibrary SkybrowserModule::luaLibrary() const {
     return res;
 }
 
-float SkybrowserModule::zoomFactor() const{
+float SkyBrowserModule::zoomFactor() const{
     return _zoomFactor;
 }
 
-void SkybrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
+void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
+    
     const Parameters p = codegen::bake<Parameters>(dict);
     _testProperty = p.test.value_or(_testProperty);
     _zoomFactor = p.zoom.value_or(_zoomFactor);
+
+    // register ScreenSpaceBrowser
+    auto fScreenSpaceRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
+    ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
+    fScreenSpaceRenderable->registerClass<ScreenSpaceSkyBrowser>("ScreenSpaceSkyBrowser");
 }
 
-bool SkybrowserModule::sendMessageToWWT(const ghoul::Dictionary& msg) {
+bool SkyBrowserModule::sendMessageToWWT(const ghoul::Dictionary& msg) {
     if (_skyBrowser) {
         std::string script = "sendMessageToWWT(" + ghoul::formatJson(msg) + ");";
         _skyBrowser->executeJavascript(script);
@@ -160,9 +167,9 @@ bool SkybrowserModule::sendMessageToWWT(const ghoul::Dictionary& msg) {
     }
 }
 
-void SkybrowserModule::WWTfollowCamera() {
+void SkyBrowserModule::WWTfollowCamera() {
     showTarget();
-    //std::thread(&SkybrowserModule::WWTfollowCamera, module)
+    //std::thread(&SkyBrowserModule::WWTfollowCamera, module)
 
     // Start a thread to enable user interaction while sending the calls to WWT
     _thread = std::thread([&] {
@@ -189,7 +196,7 @@ void SkybrowserModule::WWTfollowCamera() {
     
 }
 
-ghoul::Dictionary SkybrowserModule::createMessageForMovingWWTCamera(const glm::dvec2 celestCoords, const float fov,  const bool moveInstantly) const {
+ghoul::Dictionary SkyBrowserModule::createMessageForMovingWWTCamera(const glm::dvec2 celestCoords, const float fov,  const bool moveInstantly) const {
     using namespace std::string_literals;
     ghoul::Dictionary msg;
     msg.setValue("event", "center_on_coordinates"s);
@@ -201,7 +208,7 @@ ghoul::Dictionary SkybrowserModule::createMessageForMovingWWTCamera(const glm::d
     return msg;
 }
 
-ghoul::Dictionary SkybrowserModule::createMessageForLoadingWWTImgColl(const std::string& url) const {
+ghoul::Dictionary SkyBrowserModule::createMessageForLoadingWWTImgColl(const std::string& url) const {
     using namespace std::string_literals;
     ghoul::Dictionary msg;
     msg.setValue("event", "center_on_coordinates"s);
@@ -210,7 +217,8 @@ ghoul::Dictionary SkybrowserModule::createMessageForLoadingWWTImgColl(const std:
     return msg;
 }
 
-ghoul::Dictionary SkybrowserModule::createMessageForPausingWWTTime() const {
+ghoul::Dictionary SkyBrowserModule::createMessageForPausingWWTTime() const {
+
     using namespace std::string_literals;
     ghoul::Dictionary msg;
     msg.setValue("event", "pause_time"s);
@@ -219,15 +227,15 @@ ghoul::Dictionary SkybrowserModule::createMessageForPausingWWTTime() const {
 }
 
 
-void SkybrowserModule::initializeBrowser(ScreenSpaceBrowser* skyBrowser) {
+void SkyBrowserModule::initializeBrowser(ScreenSpaceSkyBrowser* skyBrowser) {
     _skyBrowser = skyBrowser;
 }
 
-ScreenSpaceBrowser* SkybrowserModule::skyBrowser() {
+ScreenSpaceSkyBrowser* SkyBrowserModule::skyBrowser() {
     return _skyBrowser;
 }
 
-glm::dvec2 SkybrowserModule::convertGalacticToCelestial(glm::dvec3 rGal) const {
+glm::dvec2 SkyBrowserModule::convertGalacticToCelestial(glm::dvec3 rGal) const {
     
     // Used the math from this website: https://gea.esac.esa.int/archive/documentation/GD -->
     // R2/Data_processing/chap_cu3ast/sec_cu3ast_intro/ssec_cu3ast_intro_tansforms.html#SSS1
@@ -246,7 +254,8 @@ glm::dvec2 SkybrowserModule::convertGalacticToCelestial(glm::dvec3 rGal) const {
     return glm::dvec2(glm::degrees(ra), glm::degrees(dec));
 }
 
-void SkybrowserModule::showTarget() const {
+void SkyBrowserModule::showTarget() const {
+
     using namespace std::string_literals;
     ghoul::Dictionary node;
     node.setValue("Type", "ScreenSpaceImageLocal"s);
@@ -260,7 +269,7 @@ void SkybrowserModule::showTarget() const {
 }
 
 /*
-std::vector<documentation::Documentation> SkybrowserModule::documentations() const {
+std::vector<documentation::Documentation> SkyBrowserModule::documentations() const {
     return {
         ExoplanetsDataPreparationTask::documentation(),
         RenderableOrbitDisc::Documentation()

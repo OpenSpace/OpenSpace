@@ -58,25 +58,6 @@ namespace {
 
 namespace openspace {
 
-void ScreenSpaceBrowser::executeJavascript(std::string& script) const {
-    //LINFOC(_loggerCat, "Executing javascript " + script);
-    CefRefPtr<CefFrame> frame;
-    if (_browserInstance && _browserInstance->getBrowser()) {
-        frame = _browserInstance->getBrowser()->GetMainFrame();
-        if (frame) {
-            frame->ExecuteJavaScript(script, frame->GetURL(), 0);
-        }
-    }
-    
-   
-}
-
-void ScreenSpaceBrowser::translate(glm::vec3 translation) {
-    glm::vec4 homogenousCoords(glm::vec4(translation, 1.0));
-    glm::vec3 position = _cartesianPosition;
-    _cartesianPosition = glm::translate(glm::mat4(1.f), translation) * glm::vec4(position, 1.0f);
-}
-
 void ScreenSpaceBrowser::ScreenSpaceRenderHandler::draw() {}
 
 void ScreenSpaceBrowser::ScreenSpaceRenderHandler::render() {}
@@ -84,6 +65,7 @@ void ScreenSpaceBrowser::ScreenSpaceRenderHandler::render() {}
 void ScreenSpaceBrowser::ScreenSpaceRenderHandler::setTexture(GLuint t) {
     _texture = t;
 }
+
 
 ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary &dictionary)
     : ScreenSpaceRenderable(dictionary)
@@ -165,6 +147,7 @@ bool ScreenSpaceBrowser::deinitializeGL() {
 
     return ScreenSpaceRenderable::deinitializeGL();
 }
+
 
 void ScreenSpaceBrowser::render() {
     if (!_renderHandler->isTextureReady()) {
