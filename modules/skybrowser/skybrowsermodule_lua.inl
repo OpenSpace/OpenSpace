@@ -29,6 +29,15 @@ namespace {
 
 
 namespace openspace::skybrowser::luascriptfunctions {
+
+    int loadImgCollection(lua_State* L) {
+        ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadCollection");
+        // https://docs.worldwidetelescope.org/data-guide/1/data-file-formats/collections/sample-blank-collection.wtml
+        std::string url = ghoul::lua::value<std::string>(L, 1);
+        SkybrowserModule* module = global::moduleEngine->module<SkybrowserModule>();
+        module->sendMessageToWWT(module->createMessageForLoadingWWTImgColl(url));
+        return 1;
+    }
     
     int followCamera(lua_State* L) {
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::followCamera");
@@ -36,7 +45,9 @@ namespace openspace::skybrowser::luascriptfunctions {
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
         //ghoul::Dictionary message = module->createMessageForPausingWWTTime();
         //module->sendMessageToWWT(message);
+
         std::thread thread(&SkyBrowserModule::WWTfollowCamera, module);
+
         thread.detach();
 
         return 1;
@@ -44,7 +55,7 @@ namespace openspace::skybrowser::luascriptfunctions {
 
     int moveBrowser(lua_State* L) {
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::moveBrowser");
-        
+
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();     
         ScreenSpaceSkyBrowser* browser = dynamic_cast<ScreenSpaceSkyBrowser*>(global::renderEngine->screenSpaceRenderable("ScreenSpaceBowser"));
 
@@ -55,11 +66,11 @@ namespace openspace::skybrowser::luascriptfunctions {
     }
 
     int createBrowser(lua_State* L) {
+
         ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::createBrowser");
         ghoul::lua::value<std::string>(L, 1);
 
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-
 
         using namespace std::string_literals;
 

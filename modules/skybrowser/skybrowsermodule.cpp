@@ -117,6 +117,14 @@ scripting::LuaLibrary SkyBrowserModule::luaLibrary() const {
             "string or list of strings",
             "Add one or multiple exoplanet systems to the scene, as specified by the "
             "input. An input string should be the name of the system host star"
+        },
+        {
+            "loacImgCollection",
+            &skybrowser::luascriptfunctions::loadImgCollection,
+            {},
+            "string or list of strings",
+            "Add one or multiple exoplanet systems to the scene, as specified by the "
+            "input. An input string should be the name of the system host star"
         }
     };
 
@@ -178,7 +186,17 @@ ghoul::Dictionary SkyBrowserModule::createMessageForMovingWWTCamera(const glm::d
     return msg;
 }
 
+ghoul::Dictionary SkyBrowserModule::createMessageForLoadingWWTImgColl(const std::string& url) const {
+    using namespace std::string_literals;
+    ghoul::Dictionary msg;
+    msg.setValue("event", "center_on_coordinates"s);
+    msg.setValue("url", url);
+
+    return msg;
+}
+
 ghoul::Dictionary SkyBrowserModule::createMessageForPausingWWTTime() const {
+
     using namespace std::string_literals;
     ghoul::Dictionary msg;
     msg.setValue("event", "pause_time"s);
@@ -214,23 +232,18 @@ glm::dvec2 SkyBrowserModule::convertGalacticToCelestial(glm::dvec3 rGal) const {
     return glm::dvec2(glm::degrees(ra), glm::degrees(dec));
 }
 
-void SkyBrowserModule::showTarget() const{
+void SkyBrowserModule::showTarget() const {
 
     using namespace std::string_literals;
-
-   
     ghoul::Dictionary node;
     node.setValue("Type", "ScreenSpaceImageLocal"s);
     node.setValue("Identifier", "Target"s);
-    node.setValue("TexturePath", "D:/Esters/OpenSpace/modules/skybrowser/target.png"s);
+    node.setValue("TexturePath", "D:/Ylvas/OpenSpace/modules/skybrowser/target.png"s);
     node.setValue("Scale", 0.07);
-    
-
     openspace::global::scriptEngine->queueScript(
         "openspace.addScreenSpaceRenderable(" + ghoul::formatLua(node) + ")",
         scripting::ScriptEngine::RemoteScripting::Yes
     );
-
 }
 
 /*
