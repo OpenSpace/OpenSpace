@@ -47,7 +47,6 @@ public:
     float zoomFactor() const;
     glm::dvec2 convertGalacticToCelestial(glm::dvec3 coords) const;
 
-    void showTarget() const;
     void WWTfollowCamera();
     void showTarget() const;
 

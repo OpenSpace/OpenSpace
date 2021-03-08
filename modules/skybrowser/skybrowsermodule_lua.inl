@@ -34,7 +34,7 @@ namespace openspace::skybrowser::luascriptfunctions {
         ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadCollection");
         // https://docs.worldwidetelescope.org/data-guide/1/data-file-formats/collections/sample-blank-collection.wtml
         std::string url = ghoul::lua::value<std::string>(L, 1);
-        SkybrowserModule* module = global::moduleEngine->module<SkybrowserModule>();
+        SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
         module->sendMessageToWWT(module->createMessageForLoadingWWTImgColl(url));
         return 1;
     }
