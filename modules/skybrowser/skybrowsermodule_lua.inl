@@ -28,6 +28,15 @@ namespace {
 
 
 namespace openspace::skybrowser::luascriptfunctions {
+
+    int loadImgCollection(lua_State* L) {
+        ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadCollection");
+        // https://docs.worldwidetelescope.org/data-guide/1/data-file-formats/collections/sample-blank-collection.wtml
+        std::string url = ghoul::lua::value<std::string>(L, 1);
+        SkybrowserModule* module = global::moduleEngine->module<SkybrowserModule>();
+        module->sendMessageToWWT(module->createMessageForLoadingWWTImgColl(url));
+        return 1;
+    }
     
     int followCamera(lua_State* L) {
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::followCamera");
@@ -35,6 +44,7 @@ namespace openspace::skybrowser::luascriptfunctions {
         SkybrowserModule* module = global::moduleEngine->module<SkybrowserModule>();
         //ghoul::Dictionary message = module->createMessageForPausingWWTTime();
         //module->sendMessageToWWT(message);
+        module->showTarget();
         std::thread thread(&SkybrowserModule::WWTfollowCamera, module);
         thread.detach();
 
@@ -48,7 +58,6 @@ namespace openspace::skybrowser::luascriptfunctions {
         SkybrowserModule* module = global::moduleEngine->module<SkybrowserModule>();     
         ScreenSpaceBrowser* browser = dynamic_cast<ScreenSpaceBrowser*>(global::renderEngine->screenSpaceRenderable("ScreenSpaceBowser"));
         module->initializeBrowser(browser);
-        //ScreenSpaceBrowser* browser = dynamic_cast<ScreenSpaceBrowser*>(global::renderEngine->screenSpaceRenderable("ScreenSpaceBowser"));
         
         module->skyBrowser()->setFaceCameraPropertyToFalse();
         module->skyBrowser()->translate(glm::vec3(-0.8, -0.4, 0.0));
@@ -57,9 +66,7 @@ namespace openspace::skybrowser::luascriptfunctions {
     }
 
     int createBrowser(lua_State* L) {
-        ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::createBrowser");
-        ghoul::lua::value<std::string>(L, 1);
-
+        ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::createBrowser");
         SkybrowserModule* module = global::moduleEngine->module<SkybrowserModule>();
 
 

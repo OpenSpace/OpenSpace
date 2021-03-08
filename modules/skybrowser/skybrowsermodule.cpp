@@ -107,6 +107,14 @@ scripting::LuaLibrary SkybrowserModule::luaLibrary() const {
             "string or list of strings",
             "Add one or multiple exoplanet systems to the scene, as specified by the "
             "input. An input string should be the name of the system host star"
+        },
+        {
+            "loacImgCollection",
+            &skybrowser::luascriptfunctions::loadImgCollection,
+            {},
+            "string or list of strings",
+            "Add one or multiple exoplanet systems to the scene, as specified by the "
+            "input. An input string should be the name of the system host star"
         }
     };
 
@@ -161,6 +169,17 @@ ghoul::Dictionary SkybrowserModule::createMessageForMovingWWTCamera(const glm::d
     return msg;
 }
 
+ghoul::Dictionary SkybrowserModule::createMessageForLoadingWWTImgColl(const std::string& url) const {
+    using namespace std::string_literals;
+    ghoul::Dictionary msg;
+    msg.setValue("event", "center_on_coordinates"s);
+    msg.setValue("url", url);
+
+    return msg;
+}
+
+
+
 ghoul::Dictionary SkybrowserModule::createMessageForPausingWWTTime() const {
     using namespace std::string_literals;
     ghoul::Dictionary msg;
@@ -195,6 +214,19 @@ glm::dvec2 SkybrowserModule::convertGalacticToCelestial(glm::dvec3 rGal) const {
     ra = ra > 0 ? ra : ra + (2 * glm::pi<float>());
 
     return glm::dvec2(glm::degrees(ra), glm::degrees(dec));
+}
+
+void SkybrowserModule::showTarget() const {
+    using namespace std::string_literals;
+    ghoul::Dictionary node;
+    node.setValue("Type", "ScreenSpaceImageLocal"s);
+    node.setValue("Identifier", "Target"s);
+    node.setValue("TexturePath", "D:/Ylvas/OpenSpace/modules/skybrowser/target.png"s);
+    node.setValue("Scale", 0.07);
+    openspace::global::scriptEngine->queueScript(
+        "openspace.addScreenSpaceRenderable(" + ghoul::formatLua(node) + ")",
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
 }
 
 /*

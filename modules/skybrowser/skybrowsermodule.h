@@ -47,9 +47,11 @@ public:
     float zoomFactor() const;
     glm::dvec2 convertGalacticToCelestial(glm::dvec3 coords) const;
     void WWTfollowCamera();
+    void showTarget() const;
 
     ghoul::Dictionary createMessageForMovingWWTCamera(const glm::dvec2 celestCoords, const float fov, const bool moveInstantly = true) const;
     ghoul::Dictionary createMessageForPausingWWTTime() const;
+    ghoul::Dictionary createMessageForLoadingWWTImgColl(const std::string& url) const;
 
     bool sendMessageToWWT(const ghoul::Dictionary& msg);
 
