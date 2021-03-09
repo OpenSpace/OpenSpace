@@ -84,7 +84,7 @@ namespace {
         std::optional<std::string> constellationFile;
 
         // [[codegen::verbatim(ColorInfo.description)]]
-        std::optional<glm::vec3> color;
+        std::optional<glm::vec3> color [[codegen::color()]];
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;

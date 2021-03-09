@@ -92,6 +92,8 @@ set(SOURCE_FILES
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
+  shaders/advanced_rings_vs.glsl
+  shaders/advanced_rings_fs.glsl
   shaders/blending.hglsl
   shaders/globalrenderer_vs.glsl
   shaders/localrenderer_vs.glsl

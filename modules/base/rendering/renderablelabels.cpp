@@ -194,7 +194,7 @@ namespace {
         std::optional<Orientation> labelOrientationOption;
 
         // [[codegen::verbatim(LabelColorInfo.description)]]
-        std::optional<glm::vec3> labelColor;
+        std::optional<glm::vec3> labelColor [[codegen::color()]];
 
         // [[codegen::verbatim(LabelTextInfo.description)]]
         std::optional<std::string> labelText;
@@ -511,7 +511,7 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
         _fadeEndUnitOption = AU;
     }
     addProperty(_fadeEndUnitOption);
-    
+
     _fadeEndSpeed = p.fadeEndSpeed.value_or(_fadeEndSpeed);
     addProperty(_fadeEndSpeed);
 }

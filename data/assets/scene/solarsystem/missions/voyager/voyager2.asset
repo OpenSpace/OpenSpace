@@ -1,14 +1,7 @@
 local assetHelper = asset.require('util/asset_helper')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local models = asset.require("./model" ).modelFolder;
 
-
-
-local models = asset.syncedResource({
-    Name = "Voyager 2 Models",
-    Type = "HttpSynchronization",
-    Identifier = "voyager2_model",
-    Version = 1
-})
 
 local kernels = asset.syncedResource({
     Name = "Voyager 2 Kernels",
@@ -83,11 +76,7 @@ local Voyager2Main = {
     Parent = Voyager2.Identifier,
     Renderable = {
         Type = "RenderableModel",
-        Geometry = {{
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/voyager-main.obj",
-            ColorTexture = models .. "/voyager-main.jpg"
-        }},
+        GeometryFile = models .. "/voyager-main.obj",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -102,11 +91,7 @@ local Voyager2Antenna = {
     Parent = Voyager2.Identifier,
     Renderable = {
         Type = "RenderableModel",
-        Geometry = {{
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/voyager-antenna.obj",
-            ColorTexture = models .. "/voyager-antenna.png"
-        }},
+        GeometryFile = models .. "/voyager-antenna.obj",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },

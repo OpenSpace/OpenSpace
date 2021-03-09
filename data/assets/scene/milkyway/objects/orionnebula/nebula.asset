@@ -9,7 +9,7 @@ local sync = asset.syncedResource({
     Name = "Orion Nebula Model",
     Type = "HttpSynchronization",
     Identifier = "orion_nebula_model",
-    Version = 1
+    Version = 2
 })
 
 local NebulaHolder = {
@@ -59,11 +59,7 @@ local OrionNebulaModel = {
     },
     Renderable = {
         Type = "RenderableModel",
-        Geometry = {{
-            Type = "MultiModelGeometry",
-            GeometryFile = sync .. "/orion_nebula.obj",
-            ColorTexture = sync .. "/heic0601a_masked.png"
-        }},
+        GeometryFile = sync .. "/orion_nebula.obj",
         Opacity = 1.0,
         DisableFaceCulling = false,
         SpecularIntensity = 0.0,
@@ -92,11 +88,7 @@ local OrionNebulaShocksModel = {
     },
     Renderable = {
         Type = "RenderableModel",
-        Geometry = {{
-            Type = "MultiModelGeometry",
-            GeometryFile = sync .. "/orishocks.obj",
-            ColorTexture = "${DATA}/colors/pink.png"
-        }},
+        GeometryFile = sync .. "/orishocks.obj",
         Opacity = 1.0, 
         DisableFaceCulling = false,
         SpecularIntensity = 0.0,
@@ -125,11 +117,7 @@ local OrionNebulaProplydsModel = {
     },
     Renderable = {
         Type = "RenderableModel",
-        Geometry = {{
-            Type = "MultiModelGeometry",
-            GeometryFile = sync .. "/proplyds.obj",
-            ColorTexture = "${DATA}/colors/pink.png"
-        }},
+        GeometryFile = sync .. "/proplyds.obj",
         Opacity = 1.0, 
         DisableFaceCulling = false,
         SpecularIntensity = 0.0,

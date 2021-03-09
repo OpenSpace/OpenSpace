@@ -217,7 +217,7 @@ documentation::Documentation GlobeLabelsComponent::Documentation() {
             },
             {
                 LabelsColorInfo.identifier,
-                new DoubleVector3Verifier,
+                new Color3Verifier,
                 Optional::Yes,
                 LabelsColorInfo.description
             },

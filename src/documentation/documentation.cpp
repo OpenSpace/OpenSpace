@@ -91,7 +91,14 @@ std::string to_string(const openspace::documentation::TestResult& value) {
 
 template <>
 std::string to_string(const openspace::documentation::TestResult::Offense& value) {
-    return value.offender + ": " + ghoul::to_string(value.reason);
+    std::stringstream stream;
+    stream << value.offender + ": " + ghoul::to_string(value.reason);
+
+    if (!value.explanation.empty()) {
+        stream << fmt::format(" ({})", value.explanation);
+    }
+
+    return stream.str();
 }
 
 template <>

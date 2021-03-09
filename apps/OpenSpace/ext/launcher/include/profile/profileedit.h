@@ -46,13 +46,15 @@ public:
      *                new or imported profile.
      * \param profileName The name of the profile to create
      * \param assetBasePath The path to the folder where the assets live
+     * \param userAssetBasePath The path to the folder where the user assets live
      * \param profileName The path to the folder in which all profiles live
      * \param profilesReadOnly vector list of profile names that are read-only and must
      *                         not be overwritten
      * \param parent Pointer to parent Qt widget
      */
     ProfileEdit(openspace::Profile& profile, const std::string& profileName,
-        std::string assetBasePath, std::string profileBasePath,
+        std::string assetBasePath, std::string userAssetBasePath,
+        std::string profileBasePath,
         const std::vector<std::string>& profilesReadOnly, QWidget* parent);
 
     /**
@@ -98,6 +100,7 @@ private:
 
     openspace::Profile& _profile;
     const std::string _assetBasePath;
+    const std::string _userAssetBasePath;
     const std::string _profileBasePath;
     bool _saveSelected = false;
     const std::vector<std::string>& _readOnlyProfiles;

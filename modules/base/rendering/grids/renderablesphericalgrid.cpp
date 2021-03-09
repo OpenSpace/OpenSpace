@@ -59,7 +59,7 @@ namespace {
 
     struct [[codegen::Dictionary(RenderableSphericalGrid)]] Parameters {
         // [[codegen::verbatim(ColorInfo.description)]]
-        std::optional<glm::vec3> color;
+        std::optional<glm::vec3> color [[codegen::color()]];
 
         // [[codegen::verbatim(SegmentsInfo.description)]]
         std::optional<int> segments;
