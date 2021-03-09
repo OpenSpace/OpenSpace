@@ -94,14 +94,6 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
     {
         setRenderBin(RenderBin::PostDeferredTransparent);
     }
-    
-
-    void RenderableAirTraffic::initialize() {
-        return;
-    };
-    void RenderableAirTraffic::deinitialize() {
-        return;
-    };
 
     void RenderableAirTraffic::initializeGL() {
         glGenVertexArrays(1, &_vertexArray);
@@ -120,7 +112,7 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
         
         // First data fetch 
         _data = fetchData();
-        updateBuffers(true);
+        updateBuffers();
     };
 
     void RenderableAirTraffic::deinitializeGL() {
@@ -134,7 +126,7 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
     };
 
     bool RenderableAirTraffic::isReady() const {
-        return true;
+        return true; // TODO
     };
 
     void RenderableAirTraffic::render(const RenderData& data, RendererTasks& rendererTask) {
@@ -142,18 +134,18 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
         if (_data.empty()) return;
 
         // Trigger data update
-        if ( abs(data.time.j2000Seconds() - _deltaTime) > 10.0 && !_dataLoading) {
+        if ( abs(data.time.j2000Seconds() - _deltaTime) > 10.0 && !_isDataLoading) {
             std::cout << "Data loading initialized... ";
-            fut = std::async(std::launch::async, &RenderableAirTraffic::fetchData, this);
-            _dataLoading = true;
+            _fut = std::async(std::launch::async, &RenderableAirTraffic::fetchData, this);
+            _isDataLoading = true;
         }
 
         // Check if new data finished loading. Update buffers ONLY if finished
-        if (fut.valid() && fut.wait_for(seconds(0)) == std::future_status::ready) { // NOT SO STABLE SOLUTION
-            _data = fut.get();
+        if (_fut.valid() && _fut.wait_for(seconds(0)) == std::future_status::ready) { // NOT SO STABLE SOLUTION
+            _data = _fut.get();
             updateBuffers();
             std::cout << "finished. Time since last update: " << abs(_deltaTime - data.time.j2000Seconds()) << " seconds." << std::endl;
-            _dataLoading = false;
+            _isDataLoading = false;
             _deltaTime = data.time.j2000Seconds();
         }
 
@@ -177,51 +169,24 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
             static_cast<float>(_TRAILSIZE)
         );
 
-
+// Fix else statement
 //#if !defined(__APPLE__)
         glm::ivec2 resolution = global::renderEngine->renderingResolution();
         _shader->setUniform(_uniformCache.resolution, resolution);
-
         _shader->setUniform(_uniformCache.lineWidth, _LINEWIDTH);
 //#endif
 
         glBindVertexArray(_vertexArray);
-
-        //glPointSize(2.0);
-
-        //glEnable(GL_BLEND);
-        //glBlendFunc(GL_ONE, GL_ONE);
-        //glBlendEquation(GL_FUNC_ADD);
-
-        //glEnable(GL_BLEND);
-        //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-        //glBlendEquation(GL_FUNC_ADD);
-
-        //glShadeModel(GL_SMOOTH);
-        //glEnable (GL_LINE_SMOOTH);
-        //glEnable (GL_BLEND);
-        //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        //glHint (GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
-        
         glLineWidth(_LINEWIDTH);
-
-        //glDrawArrays(GL_LINE_STRIP, 0, _TRAILSIZE * nAircrafts);
 
 
         for (size_t i = 0; i < nAircrafts; ++i) {
             glDrawArrays(GL_LINE_STRIP, _TRAILSIZE * i, static_cast<GLsizei>(_TRAILSIZE));   
         }
-    
-        //glVertexPointer(_TRAILSIZE, GL_FLOAT, 0, _vertexBufferData.data());
-        //glDrawArrays(GL_LINE_STRIP, 0, nAircrafts);
 
         glBindVertexArray(0);
 
         _shader->deactivate();
-    };
-
-    void RenderableAirTraffic::update(const UpdateData& data) {
-        return;
     };
 
     json RenderableAirTraffic::parseData(SyncHttpMemoryDownload& response) {
@@ -285,7 +250,7 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
         return _data;
     }
 
-    void RenderableAirTraffic::updateBuffers(bool _firstFetch) {
+    void RenderableAirTraffic::updateBuffers() {
 
         int nAircrafts = static_cast<int>(_data["states"].size());
         
@@ -309,11 +274,11 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
             temp.flightDirection = static_cast<float>(aircraft[10]);
             
             if(temp.latitude > _THRESHOLD && temp.longitude > _THRESHOLD) {
-                if(aircraftMap[icao24].list.size() >= _TRAILSIZE) aircraftMap[icao24].list.pop_back();
-                aircraftMap[icao24].list.push_front(temp);
+                if(_aircraftMap[icao24].list.size() >= _TRAILSIZE) _aircraftMap[icao24].list.pop_back();
+                _aircraftMap[icao24].list.push_front(temp);
             }
 
-            for (auto& ac : aircraftMap[icao24].list) {
+            for (auto& ac : _aircraftMap[icao24].list) {
                 _vertexBufferData[vertexBufIdx] = ac;
                 vertexBufIdx++;
             }  
@@ -323,22 +288,13 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
 
         glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
 
-        //if (_firstFetch) {
-            glBufferData(
-                GL_ARRAY_BUFFER,
-                _vertexBufferData.size() * sizeof(AircraftVBOLayout),
-                _vertexBufferData.data(),
-                GL_STATIC_DRAW
-            );
-       /* }
-        else {  
-            glBufferSubData(
-                GL_ARRAY_BUFFER,
-                0,
-                _vertexBufferData.size() * sizeof(AircraftVBOLayout),
-                _vertexBufferData.data()
-            );
-        }*/
+      
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            _vertexBufferData.size() * sizeof(AircraftVBOLayout),
+            _vertexBufferData.data(),
+            GL_STATIC_DRAW
+        );
 
         // Lat, long, alt: at pos 0 send 3 float from AircraftVBOLayout
         glEnableVertexAttribArray(0);

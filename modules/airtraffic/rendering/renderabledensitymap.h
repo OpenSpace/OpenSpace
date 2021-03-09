@@ -22,38 +22,71 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/airtraffic/airtrafficmodule.h>
-#include <modules/airtraffic/rendering/renderableairtraffic.h>
-#include <modules/airtraffic/rendering/renderabledensitymap.h>
+#ifndef __OPENSPACE_MODULE_AIRTRAFFIC___RENDERABLEDENSITYMAP___H__
+#define __OPENSPACE_MODULE_AIRTRAFFIC___RENDERABLEDENSITYMAP___H__
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/scripting/lualibrary.h>
-#include <openspace/util/factorymanager.h>
+#include <iomanip>
+#include <openspace/rendering/renderable.h>
+#include <ghoul/misc/csvreader.h>
+#include <ghoul/opengl/uniformcache.h>
+#include <openspace/util/time.h>
+
+namespace ghoul::filesystem { class File; }
+namespace ghoul::opengl {
+    class ProgramObject;
+    class Texture;
+} // namespace ghoul::opengl
 
 namespace openspace {
 
+namespace documentation { struct Documentation; }
 
-AirTrafficModule::AirTrafficModule() : OpenSpaceModule(Name) {}
 
-void AirTrafficModule::internalInitialize(const ghoul::Dictionary&) {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
-    fRenderable->registerClass<RenderableAirTraffic>("RenderableAirTraffic");
-    fRenderable->registerClass<RenderableDensityMap>("RenderableDensityMap");
-}
+class RenderableDensityMap : public Renderable {
+public:
+    explicit RenderableDensityMap(const ghoul::Dictionary& dictionary);
+    virtual ~RenderableDensityMap() = default;
 
-std::vector<documentation::Documentation> AirTrafficModule::documentations() const {
-    return {
-        RenderableAirTraffic::Documentation(),
-        RenderableDensityMap::Documentation()
+    void initialize() override;
+    void deinitialize() override;
+
+    void initializeGL() override;
+    void deinitializeGL() override;
+
+    bool isReady() const override;
+
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
+    void update(const UpdateData& data) override;
+
+    bool fetchData(); 
+
+    bool updateBuffers();
+    
+    static documentation::Documentation Documentation();
+
+private:
+    static const int _THRESHOLD = -9999;
+
+    struct AircraftVBOLayout {
+        float latitude = static_cast<float>(_THRESHOLD);
+        float longitude = static_cast<float>(_THRESHOLD);
+        int firstSeen = 0;
+        int lastSeen = 0;
     };
-}
 
-scripting::LuaLibrary AirTrafficModule::luaLibrary() const {
-    scripting::LuaLibrary res;
-    res.name = "air_traffic"; // Ok to use whitespaces?
-    return res;
-}
+    // Backend storage for vertex buffer object containing all points
+    std::vector<AircraftVBOLayout>  _vertexBufferData;
 
+    std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
+
+    UniformCache(modelViewProjection) _uniformCache;
+    std::vector<std::vector<std::string>> _data;
+    GLuint _vertexArray = 0;
+    GLuint _vertexBuffer = 0;
+    const std::string _PATH = "${MODULE_AIRTRAFFIC}/data/";
+
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_AIRTRAFFIC___RENDERABLEDENSITYMAP___H__

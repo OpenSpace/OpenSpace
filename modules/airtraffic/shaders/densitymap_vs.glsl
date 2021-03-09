@@ -21,39 +21,49 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+ #version __CONTEXT__
 
-#include <modules/airtraffic/airtrafficmodule.h>
-#include <modules/airtraffic/rendering/renderableairtraffic.h>
-#include <modules/airtraffic/rendering/renderabledensitymap.h>
+#define PI 3.1415926538
+const float THRESHOLD = -9998;
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/scripting/lualibrary.h>
-#include <openspace/util/factorymanager.h>
+uniform mat4 modelViewProjection;
 
-namespace openspace {
+out vec4 vs_position;
+out vec4 vs_interpColor;
+out vec2 vs_latlon;
+out float vs_vertexID;
+out float opacity;
 
+layout (location = 0) in vec2 vertexPosition; // lat, lon
+layout (location = 1) in vec2 vertexInfo; // firstSeen, lastSeen
 
-AirTrafficModule::AirTrafficModule() : OpenSpaceModule(Name) {}
+const float RADII = 6378137.0; // Earth is approximated as a sphere update if changed. 
 
-void AirTrafficModule::internalInitialize(const ghoul::Dictionary&) {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
-    fRenderable->registerClass<RenderableAirTraffic>("RenderableAirTraffic");
-    fRenderable->registerClass<RenderableDensityMap>("RenderableDensityMap");
+vec4 geoToCartConversion(float lat, float lon){
+
+    if(lat < THRESHOLD || lon < THRESHOLD) {
+       // Discard in geometry shader
+       return vec4(0.f);
+    }
+
+    float lat_rad = lat * PI / 180.0;
+    float lon_rad = lon * PI / 180.0;
+
+    float x = (RADII + 10000) * cos(lat_rad) * cos(lon_rad);
+    float y = (RADII + 10000) * cos(lat_rad) * sin(lon_rad);
+    float z = (RADII + 10000) * sin(lat_rad);
+
+    return vec4(x, y, z, 1.0);
 }
 
-std::vector<documentation::Documentation> AirTrafficModule::documentations() const {
-    return {
-        RenderableAirTraffic::Documentation(),
-        RenderableDensityMap::Documentation()
-    };
+void main() {
+
+    vs_vertexID = float(gl_VertexID);
+    vec4 position = geoToCartConversion(vertexPosition.x, vertexPosition.y);
+    vs_latlon = vertexPosition;
+    vs_position = modelViewProjection * position;
+    opacity = 0.05;
+    vs_interpColor = vec4(1.0, 1.0, 0.0, opacity);
+    // vec4 vs_positionNDC = vs_position / vs_position.w;
+    gl_Position = vs_position;
 }
-
-scripting::LuaLibrary AirTrafficModule::luaLibrary() const {
-    scripting::LuaLibrary res;
-    res.name = "air_traffic"; // Ok to use whitespaces?
-    return res;
-}
-
-
-} // namespace openspace

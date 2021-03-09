@@ -14,33 +14,17 @@ local AirTraffic = {
     }
 }
 
---[[
-local AirTrafficTrail = {
-    Identifier = AirTraffic.Identifier .. "_trail",
+local DensityMap = {
+    Identifier = "DensityMap",
     Parent = transforms.EarthIAU.Identifier,
     Renderable = {
-        Type = "RenderableTrailOrbit",
-        Translation = {
-          Type = "TLETranslation",
-          Body = AirTraffic.Identifier,
-          Observer = transforms.EarthInertial.Identifier,
-          File = path,
-          LineNumber = 1,
-          RenderBinMode = "PostDeferredTransparent"
-        },
-        Color = { 0.9, 0.6715, 0.0 },
-        Fade = 1.5,
-        Period = period,
-        Resolution = 320
-      },
-    --Tag = { "earth_satellite", "ISS" },
+        Type = "RenderableDensityMap",
+    },
     GUI = {
-      Name = "AirTraffic Trail",
-      Path = "/Solar System/Planets/Earth/Air Traffic"
+        Name = "Density Map",
+        Path = "/Solar System/Planets/Earth/Air Traffic",
+        Description = [[ Density Map.]],
     }
-  }
+}
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { AirTraffic, AirTrafficTrail })
-]]--
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { AirTraffic })
+assetHelper.registerSceneGraphNodesAndExport(asset, { AirTraffic, DensityMap })

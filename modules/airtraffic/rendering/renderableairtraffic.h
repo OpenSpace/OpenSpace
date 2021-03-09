@@ -50,9 +50,6 @@ public:
     explicit RenderableAirTraffic(const ghoul::Dictionary& dictionary);
     virtual ~RenderableAirTraffic() = default;
 
-    void initialize() override;
-    void deinitialize() override;
-
     void initializeGL() override;
     void deinitializeGL() override;
 
@@ -63,9 +60,8 @@ public:
     bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void update(const UpdateData& data) override;
 
-    void updateBuffers(bool _firstFetch = false);
+    void updateBuffers();
     
     static documentation::Documentation Documentation();
 
@@ -99,13 +95,13 @@ private:
 
     GLuint _vertexArray = 0;
     GLuint _vertexBuffer = 0;
-    std::future<json> fut;
-    bool _dataLoading = false;
+    std::future<json> _fut;
+    bool _isDataLoading = false;
     properties::FloatProperty _pointSize;
     json _data = json({});
-    std::map<std::string, aircraftList<_TRAILSIZE>> aircraftMap;
-    // Fix secure way to handle credentials
+    std::map<std::string, aircraftList<_TRAILSIZE>> _aircraftMap;
     
+    // Fix secure way to handle credentials
     //const std::string _url = "https://" + _PASSWORD + ":" + _USERNAME + "@opensky-network.org/api/states/all";
     const std::string _url = "https://opensky-network.org/api/states/all";
     double _deltaTime = Time::now().j2000Seconds();

@@ -22,38 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/airtraffic/airtrafficmodule.h>
-#include <modules/airtraffic/rendering/renderableairtraffic.h>
-#include <modules/airtraffic/rendering/renderabledensitymap.h>
+#include "fragment.glsl"
+#include "floatoperations.glsl"
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/scripting/lualibrary.h>
-#include <openspace/util/factorymanager.h>
+in vec4 ge_position;
+in vec4 ge_interpColor;
 
-namespace openspace {
+Fragment getFragment() {
+    Fragment frag;
+    frag.blend = BLEND_MODE_ADDITIVE;
 
+    frag.gPosition = ge_position;
+    frag.depth = ge_position.w;
+    frag.color = ge_interpColor;
+    frag.gNormal = vec4(1.0, 1.0, 1.0, 1.0);
 
-AirTrafficModule::AirTrafficModule() : OpenSpaceModule(Name) {}
-
-void AirTrafficModule::internalInitialize(const ghoul::Dictionary&) {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
-    fRenderable->registerClass<RenderableAirTraffic>("RenderableAirTraffic");
-    fRenderable->registerClass<RenderableDensityMap>("RenderableDensityMap");
+    
+    return frag;
 }
-
-std::vector<documentation::Documentation> AirTrafficModule::documentations() const {
-    return {
-        RenderableAirTraffic::Documentation(),
-        RenderableDensityMap::Documentation()
-    };
-}
-
-scripting::LuaLibrary AirTrafficModule::luaLibrary() const {
-    scripting::LuaLibrary res;
-    res.name = "air_traffic"; // Ok to use whitespaces?
-    return res;
-}
-
-
-} // namespace openspace
