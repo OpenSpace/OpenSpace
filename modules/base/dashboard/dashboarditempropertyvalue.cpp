@@ -48,35 +48,23 @@ namespace {
         "the value itself will be displayed), or it must contain extact one instance of "
         "{}, which will be replaced with the value of the property during rendering."
     };
+
+    struct [[codegen::Dictionary(DashboardItemPropertyValue)]] Parameters {
+        // [[codegen::verbatim(PropertyUriInfo.description)]]
+        std::optional<std::string> uri [[codegen::key("URI")]];
+
+        // [[codegen::verbatim(DisplayStringInfo.description)]]
+        std::optional<std::string> displayString;
+    };
+#include "dashboarditempropertyvalue_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation DashboardItemPropertyValue::Documentation() {
-    using namespace documentation;
-    return {
-        "DashboardItem PropertyValue",
-        "base_dashboarditem_propertyvalue",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("DashboardItemPropertyValue"),
-                Optional::No
-            },
-            {
-                PropertyUriInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                PropertyUriInfo.description
-            },
-            {
-                DisplayStringInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                DisplayStringInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_dashboarditem_propertyvalue";
+    return doc;
 }
 
 DashboardItemPropertyValue::DashboardItemPropertyValue(
@@ -85,21 +73,13 @@ DashboardItemPropertyValue::DashboardItemPropertyValue(
     , _propertyUri(PropertyUriInfo)
     , _displayString(DisplayStringInfo)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "DashboardItemPropertyValue"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    if (dictionary.hasKey(PropertyUriInfo.identifier)) {
-        _propertyUri = dictionary.value<std::string>(PropertyUriInfo.identifier);
-    }
+    _propertyUri = p.uri.value_or(_propertyUri);
     _propertyUri.onChange([this]() { _propertyIsDirty = true; });
     addProperty(_propertyUri);
 
-    if (dictionary.hasKey(DisplayStringInfo.identifier)) {
-        _displayString = dictionary.value<std::string>(DisplayStringInfo.identifier);
-    }
+    _displayString = p.displayString.value_or(_displayString);
     addProperty(_displayString);
 }
 

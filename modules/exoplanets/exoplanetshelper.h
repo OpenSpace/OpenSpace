@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSHELPER___H__
 
 #include <ghoul/glm.h>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -39,14 +40,15 @@ struct ExoplanetDataEntry {
     float bigOmegaUpper; // Upper uncertainty of longitude of ascending node
     float bigOmegaLower; // Lower uncertainty of longitude of ascending node
     bool binary;        // Star known to be binary?
-    float bmv;          // B − V color
+    float bmv;          // Star B − V color
     float ecc;          // Orbital eccentricity
     float eccUpper;     // Upper uncertainty of orbital eccentricity
     float eccLower;     // Lower uncertainty of orbital eccentricity
     float i;            // Orbital inclination in degrees (for transiting systems only)
     float iUpper;       // Upper uncertainty of orbital inclination
     float iLower;       // Lower uncertainty of orbital inclination
-    int nComp;          // Number of planetary companions known
+    int nPlanets;       // Number of known planets in the planetary system
+    int nStars;         // Number of stars in the planetary system
     float omega;        // Argument of periastron in degrees
     float omegaUpper;   // Upper uncertainty of argument of periastron
     float omegaLower;   // Lower uncertainty of argument of periastron
@@ -59,6 +61,12 @@ struct ExoplanetDataEntry {
     float rStar;        // Estimated radius of the star in solar radii
     float rStarUpper;   // Upper uncertainty of estimated star radius
     float rStarLower;   // Lower uncertainty of estimated star radius
+    float luminosity;      // Star luminosity, in units of solar luminosities
+    float luminosityUpper; // Upper uncertainty of star luminosity
+    float luminosityLower; // Lower uncertainty of star luminosity
+    float teff;         // Star's effective temperature in Kelvin
+    float teffUpper;    // Upper uncertainty of effective temperature
+    float teffLower;    // Lower uncertainty of effective temperature
     double tt;          // Epoch of transit center in HJD-2440000
     float ttUpper;      // Upper uncertainty of epoch of transit center
     float ttLower;      // Lower uncertainty of epoch of transit center
@@ -71,9 +79,11 @@ struct ExoplanetDataEntry {
 };
 
 struct StarData {
-    glm::vec3 position  = glm::vec3(std::numeric_limits<float>::quiet_NaN()); // In parsec
-    float radius        = std::numeric_limits<float>::quiet_NaN(); // In solar radii
-    float bvColorIndex  = std::numeric_limits<float>::quiet_NaN();
+    glm::vec3 position = glm::vec3(std::numeric_limits<float>::quiet_NaN()); // In parsec
+    float radius = std::numeric_limits<float>::quiet_NaN(); // In solar radii
+    float bv = std::numeric_limits<float>::quiet_NaN();
+    float teff = std::numeric_limits<float>::quiet_NaN(); // In Kelvin
+    float luminosity = std::numeric_limits<float>::quiet_NaN(); // In solar luminosities
 };
 
 struct ExoplanetSystem {
@@ -89,9 +99,10 @@ bool isValidPosition(const glm::vec3& pos);
 bool hasSufficientData(const ExoplanetDataEntry& p);
 
 // Compute star color in RGB from b-v color index
-glm::vec3 starColor(float bv);
+glm::vec3 computeStarColor(float bv);
 
-glm::dmat4 computeOrbitPlaneRotationMatrix(float i, float bigom, float omega);
+glm::dmat4 computeOrbitPlaneRotationMatrix(float i, float bigom = 180.f,
+    float omega = 90.f);
 
 // Rotate the original coordinate system (where x is pointing to First Point of Aries)
 // so that x is pointing from star to the sun.

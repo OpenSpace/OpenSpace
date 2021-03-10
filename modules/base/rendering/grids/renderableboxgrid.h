@@ -27,6 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
@@ -59,7 +60,7 @@ protected:
 
     ghoul::opengl::ProgramObject* _gridProgram = nullptr;
 
-    properties::Vec3Property _gridColor;
+    properties::Vec3Property _color;
     properties::FloatProperty _lineWidth;
     properties::Vec3Property _size;
 

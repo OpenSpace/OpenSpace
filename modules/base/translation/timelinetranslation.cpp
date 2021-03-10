@@ -30,7 +30,6 @@
 #include <openspace/util/time.h>
 
 namespace {
-    constexpr const char* KeyType = "Type";
     constexpr const char* KeyKeyframes = "Keyframes";
 } // namespace
 
@@ -42,11 +41,6 @@ documentation::Documentation TimelineTranslation::Documentation() {
         "Timeline Translation",
         "base_transform_translation_keyframe",
         {
-            {
-                KeyType,
-                new StringEqualVerifier("TimelineTranslation"),
-                Optional::No
-            },
             {
                 KeyKeyframes,
                 new TableVerifier({

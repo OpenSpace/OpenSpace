@@ -22,39 +22,36 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/rendering/multimodelgeometry.h>
+#ifndef __OPENSPACE_CORE___PLANEGEOMETRY___H__
+#define __OPENSPACE_CORE___PLANEGEOMETRY___H__
 
-#include <ghoul/io/model/modelreadermultiformat.h>
-#include <cstring>
+#include <ghoul/glm.h>
+#include <ghoul/opengl/ghoul_gl.h>
 
-namespace openspace::modelgeometry {
+namespace openspace {
 
-MultiModelGeometry::MultiModelGeometry(const ghoul::Dictionary& dictionary)
-    : ModelGeometry(dictionary)
-{
-    loadObj(_file);
-}
+class PlaneGeometry {
+public:
+    PlaneGeometry(glm::vec2 size);
+    PlaneGeometry(float size);
 
-bool MultiModelGeometry::loadModel(const std::string& filename) {
-    std::vector<ghoul::io::ModelReaderBase::Vertex> vertices;
-    std::vector<int> indices;
-    ghoul::io::ModelReaderMultiFormat().loadModel(filename, vertices, indices);
+    ~PlaneGeometry();
 
-    _vertices.reserve(vertices.size());
-    for (const ghoul::io::ModelReaderBase::Vertex& v : vertices) {
-        Vertex vv {};
-        memcpy(vv.location, v.location, sizeof(GLfloat) * 3);
-        vv.location[3] = 1.0;
-        //memcpy(vv.location, glm::value_ptr(p.vec4()), sizeof(GLfloat) * 4);
-        memcpy(vv.tex, v.tex, sizeof(GLfloat) * 2);
-        memcpy(vv.normal, v.normal, sizeof(GLfloat) * 3);
-        _vertices.push_back(vv);
-    }
+    void initialize();
+    void deinitialize();
+    void render();
 
-    _indices.resize(indices.size());
-    std::copy(indices.begin(), indices.end(), _indices.begin());
+    void updateSize(const glm::vec2& size);
+    void updateSize(const float size);
 
-    return true;
-}
+private:
+    void updateGeometry();
 
-}  // namespace openspace::modelgeometry
+    GLuint _vaoId = 0;
+    GLuint _vBufferId = 0;
+    glm::vec2 _size = glm::vec2(0.f);
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_CORE___PLANEGEOMETRY___H__

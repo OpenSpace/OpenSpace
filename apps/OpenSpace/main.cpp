@@ -41,11 +41,11 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/boolean.h>
-//#include <ghoul/opengl/ghoul_gl.h>
-#include <GLFW/glfw3.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #ifdef WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32
 #endif
+#include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 #include <sgct/clustermanager.h>
 #include <sgct/commandline.h>
@@ -576,7 +576,7 @@ void mainPostDrawFunc() {
             glBindTexture(GL_TEXTURE_2D, texId);
             w.leftOrMain.handle->SendTexture(
                 texId,
-                GL_TEXTURE_2D,
+                GLuint(GL_TEXTURE_2D),
                 window.framebufferResolution().x,
                 window.framebufferResolution().y
             );
@@ -587,7 +587,7 @@ void mainPostDrawFunc() {
             glBindTexture(GL_TEXTURE_2D, tId);
             w.right.handle->SendTexture(
                 tId,
-                GL_TEXTURE_2D,
+                GLuint(GL_TEXTURE_2D),
                 window.framebufferResolution().x,
                 window.framebufferResolution().y
             );
@@ -656,6 +656,17 @@ void mainCharCallback(unsigned int codepoint, int modifiers) {
 
     const KeyModifier m = KeyModifier(modifiers);
     global::openSpaceEngine->charCallback(codepoint, m);
+}
+
+
+
+void mainDropCallback(int amount, const char** paths) {
+    ghoul_assert(amount > 0, "Expected at least one file path");
+    ghoul_assert(paths, "expected non-nullptr");
+
+    for (int i = 0; i < amount; ++i) {
+        global::openSpaceEngine->handleDragDrop(paths[i]);
+    }
 }
 
 
@@ -1005,7 +1016,7 @@ std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTC
             }
         }
         else {
-            config = "${CONFIG}/" + config + xmlExt;
+            config += xmlExt;
         }
         global::configuration->windowConfiguration = config;
     }
@@ -1013,7 +1024,6 @@ std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTC
 }
 
 int main(int argc, char* argv[]) {
-
 #ifdef WIN32
     SetUnhandledExceptionFilter(generateMiniDump);
 #endif // WIN32
@@ -1026,7 +1036,6 @@ int main(int argc, char* argv[]) {
     {
         using namespace ghoul::logging;
         LogManager::initialize(LogLevel::Debug, LogManager::ImmediateFlush::Yes);
-        LogMgr.addLog(std::make_unique<ConsoleLog>());
 #ifdef WIN32
         if (IsDebuggerPresent()) {
             LogMgr.addLog(std::make_unique<ghoul::logging::VisualStudioOutputLog>());
@@ -1153,7 +1162,6 @@ int main(int argc, char* argv[]) {
 
     global::openSpaceEngine->registerPathTokens();
 
-
     bool hasSGCTConfig = false;
     bool hasProfile = false;
     std::string sgctFunctionName;
@@ -1168,6 +1176,9 @@ int main(int argc, char* argv[]) {
         hasSGCTConfig,
         sgctFunctionName
     );
+
+    //TODO consider LFATAL if ${USER} doens't exist rather then recurisve create.
+    global::openSpaceEngine->createUserDirectoriesIfNecessary();
 
     // (abock, 2020-12-07)  For some reason on Apple the keyboard handler in CEF will call
     // the Qt one even if the QApplication was destroyed, leading to invalid memory
@@ -1253,6 +1264,7 @@ int main(int argc, char* argv[]) {
     callbacks.mousePos = mainMousePosCallback;
     callbacks.mouseScroll = mainMouseScrollCallback;
     callbacks.character = mainCharCallback;
+    callbacks.drop = mainDropCallback;
     callbacks.encode = mainEncodeFun;
     callbacks.decode = mainDecodeFun;
     Log::instance().setNotifyLevel(Log::Level::Debug);

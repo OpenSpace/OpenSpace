@@ -3,19 +3,11 @@ local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 local transforms = asset.require('./67p')
 
 
-
-local textures = asset.syncedResource({
-    Name = "Rosetta Textures",
-    Type = "HttpSynchronization",
-    Identifier = "rosetta_textures",
-    Version = 2
-})
-
 local models = asset.syncedResource({
     Name = "Rosetta Models",
     Type = "HttpSynchronization",
     Identifier = "rosetta_model",
-    Version = 3
+    Version = 4
 })
 
 local kernels = asset.syncedResource({
@@ -138,11 +130,7 @@ local RosettaBlackFoil = {
     Renderable = {
         Type = "RenderableModel",
         Body = "ROSETTA",
-        Geometry = {{
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/black_foil.obj",
-            ColorTexture = textures .. "/foil_silver_ramp.png"
-        }},
+        GeometryFile = models .. "/black_foil.obj",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -158,11 +146,7 @@ local RosettaBlackParts = {
     Renderable = {
         Type = "RenderableModel",
         Body = "ROSETTA",
-        Geometry = {{
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/black_parts.obj",
-            ColorTexture = textures .. "/foil_silver_ramp.png"
-        }},
+        GeometryFile = models .. "/black_parts.obj",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -178,11 +162,7 @@ local RosettaDish = {
     Renderable = {
         Type = "RenderableModel",
         Body = "ROSETTA",
-        Geometry = {{
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/dish.obj",
-            ColorTexture = textures .. "/dish_AO.png"
-        }},
+        GeometryFile = models .. "/dish.obj",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -198,11 +178,7 @@ local RosettaParts = {
     Renderable = {
         Type = "RenderableModel",
         Body = "ROSETTA",
-        Geometry = {{
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/parts.obj",
-            ColorTexture = textures .. "/parts2_AO.png"
-        }},
+        GeometryFile = models .. "/parts.obj",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -218,11 +194,7 @@ local RosettaSilverFoil = {
     Renderable = {
         Type = "RenderableModel",
         Body = "ROSETTA",
-        Geometry = {{
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/silver_foil.obj",
-            ColorTexture = textures .. "/foil_silver_ramp.png"
-        }},
+        GeometryFile = models .. "/silver_foil.obj",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -238,11 +210,7 @@ local RosettaVents = {
     Renderable = {
         Type = "RenderableModel",
         Body = "ROSETTA",
-        Geometry = {{
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/vents.obj",
-            ColorTexture = textures .. "/tex_01.png"
-        }},
+        GeometryFile = models .. "/vents.obj",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -258,11 +226,7 @@ local RosettaWingA = {
     Renderable = {
         Type = "RenderableModel",
         Body = "ROSETTA",
-        Geometry = {{
-            Type = "MultiModelGeometry",
-            GeometryFile = models .."/wingA.obj",
-            ColorTexture = textures .. "/tex_01.png"
-        }},
+        GeometryFile = models .."/wingA.obj",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -278,11 +242,7 @@ local RosettaWingB = {
     Renderable = {
         Type = "RenderableModel",
         Body = "ROSETTA",
-        Geometry = {{
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/wingB.obj",
-            ColorTexture = textures .. "/tex_01.png"
-        }},
+        GeometryFile = models .. "/wingB.obj",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -298,11 +258,7 @@ local RosettaYellowFoil = {
     Renderable = {
         Type = "RenderableModel",
         Body = "ROSETTA",
-        Geometry = {{
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/yellow_foil.obj",
-            ColorTexture = textures .. "/foil_gold_ramp.png"
-        }},
+        GeometryFile = models .. "/yellow_foil.obj",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -347,11 +303,7 @@ local PhilaeFoil = {
     Renderable = {
         Type = "RenderableModel",
         Body = "ROSETTA",
-        Geometry = {{
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/lander_foil.obj",
-            ColorTexture = textures .. "/foil_silver_ramp.png"
-        }},
+        GeometryFile = models .. "/lander_foil.obj",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -367,11 +319,7 @@ local PhilaeLids = {
     Renderable = {
         Type = "RenderableModel",
         Body = "ROSETTA",
-        Geometry = {{
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/lander_lids.obj",
-            ColorTexture = textures .. "/parts2_AO.png"
-        }},
+        GeometryFile = models .. "/lander_lids.obj",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -387,11 +335,7 @@ local PhilaeParts = {
     Renderable = {
         Type = "RenderableModel",
         Body = "ROSETTA",
-        Geometry = {{
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/lander_parts.obj",
-            ColorTexture = textures .. "/foil_silver_ramp.png"
-        }},
+        GeometryFile = models .. "/lander_parts.obj",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -407,11 +351,7 @@ local PhilaeSolarPanels = {
     Renderable = {
         Type = "RenderableModel",
         Body = "ROSETTA",
-        Geometry = {{
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/lander_solarp.obj",
-            ColorTexture = textures .. "/tex_01.png"
-        }},
+        GeometryFile = models .. "/lander_solarp.obj",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -463,7 +403,7 @@ local ImagePlane = {
         Spacecraft = "ROSETTA",
         Instrument = "ROS_NAVCAM-A",
         Moving = false,
-        Texture = textures .. "/defaultProj.png"
+        Texture = models .. "/defaultProj.png"
     },
     GUI = {
         Name = "Rosetta Image Plane",

@@ -22,72 +22,66 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___MODELGEOMETRY___H__
-#define __OPENSPACE_MODULE_BASE___MODELGEOMETRY___H__
+#include "fragment.glsl"
 
-#include <ghoul/misc/managedmemoryuniqueptr.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/texture.h>
-#include <memory>
+in vec2 vs_st;
+in float vs_screenSpaceDepth;
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::opengl { class ProgramObject; }
+uniform sampler1D transferFunctionTexture;
+uniform float width;
+uniform float opacity;
+uniform vec2 conservativeBounds;
+uniform bool showOptimistic;
 
-namespace openspace { class Renderable; }
-namespace openspace::documentation { struct Documentation; }
+// Remap the radius to texture coordinates in the trasfer function texture. The texture
+// is treated as a linear scale where the color represent too cold to too hot. Account
+// for the conservative bounds my mapping one third of the texture ouside each boundary.
+// All parameters \in [0,1], where 1.0 corresponds to the max radius.
+float computeTextureCoord(float radius, float innerRadius,
+                          float conservativeInner, float conservativeOuter)
+{
+    const float t1 = 1.0 / 3.0;
+    const float t2 = 2.0 / 3.0;
 
-namespace openspace::modelgeometry {
+    if (radius < conservativeInner) {
+        float t = (radius - innerRadius) / (conservativeInner - innerRadius);
+        return mix(0.0, t1, t);
+    }
+    else if (radius > conservativeOuter) {
+        float t = (radius - conservativeOuter) / (1.0 - conservativeOuter);
+        return mix(t2, 1.0, t);
+    }
+    else {
+        float t = (radius - conservativeInner) / (conservativeOuter - conservativeInner);
+        return mix(t1, t2, t);
+    }
+}
 
-class ModelGeometry {
-public:
-    struct Vertex {
-        GLfloat location[4];
-        GLfloat tex[2];
-        GLfloat normal[3];
-    };
+Fragment getFragment() {
+    // The length of the texture coordinates vector is our distance from the center
+    float radius = length(vs_st);
+    float innerRadius = 1.0 - width;
 
-    static ghoul::mm_unique_ptr<ModelGeometry> createFromDictionary(
-        const ghoul::Dictionary& dictionary
-    );
+    // We only want to consider ring-like objects so we need to discard everything else
+    if (radius > 1.0 || radius < innerRadius) {
+        discard;
+    }
 
-    ModelGeometry(const ghoul::Dictionary& dictionary);
-    virtual ~ModelGeometry() = default;
+    float consInner = conservativeBounds.x;
+    float consOuter = conservativeBounds.y;
+    bool outsideConservative = (radius < consInner) || (radius > consOuter);
 
-    virtual bool initialize(Renderable* parent);
-    virtual void deinitialize();
-    void bindTexture();
-    void render();
+    if (!showOptimistic && outsideConservative) {
+        discard;
+    }
 
-    virtual bool loadModel(const std::string& filename) = 0;
-    void changeRenderMode(const GLenum mode);
-    //bool getVertices(std::vector<Vertex>* vertexList);
-    //bool getIndices(std::vector<int>* indexList);
+    float texCoord = computeTextureCoord(radius, innerRadius, consInner, consOuter);
 
-    double boundingRadius() const;
+    vec4 diffuse = texture(transferFunctionTexture, texCoord);
+    diffuse.a *= opacity;
 
-    virtual void setUniforms(ghoul::opengl::ProgramObject& program);
-
-    static documentation::Documentation Documentation();
-
-protected:
-    bool loadObj(const std::string& filename);
-    bool loadCachedFile(const std::string& filename);
-    bool saveCachedFile(const std::string& filename);
-
-    GLuint _vaoID = 0;
-    GLuint _vbo = 0;
-    GLuint _ibo = 0 ;
-    GLenum _mode = GL_TRIANGLES;
-
-    double _boundingRadius = 0.0;
-    std::string _colorTexturePath;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
-
-    std::vector<Vertex> _vertices;
-    std::vector<int> _indices;
-    std::string _file;
-};
-
-}  // namespace openspace::modelgeometry
-
-#endif // __OPENSPACE_MODULE_BASE___MODELGEOMETRY___H__
+    Fragment frag;
+    frag.color = diffuse;
+    frag.depth = vs_screenSpaceDepth;
+    return frag;
+}

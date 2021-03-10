@@ -1,6 +1,6 @@
 <GDAL_WMS>
   <Service name="TMS">
-    <ServerUrl>https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/MODIS_Water_Mask/default/2013-08-21/250m/${z}/${y}/${x}.png</ServerUrl>
+    <ServerUrl>https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/MODIS_Terra_L3_Land_Water_Mask/default/2015-08-21/250m/${z}/${y}/${x}.png</ServerUrl>
   </Service>
   <DataWindow>
     <UpperLeftX>-180.0</UpperLeftX>

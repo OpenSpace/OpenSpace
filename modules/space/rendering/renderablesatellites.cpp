@@ -47,85 +47,67 @@
 namespace {
     constexpr const char* _loggerCat = "Satellites";
 
-    static const openspace::properties::Property::PropertyInfo PathInfo = {
-        "Path",
-        "Path",
-        "The file path to the TLE file to read"
-    };
     static const openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Segments",
         "The number of segments to use for each orbit ellipse"
     };
-    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
-        "LineWidth",
-        "Line Width",
-        "This value specifies the line width of the trail if the selected rendering "
-        "method includes lines. If the rendering mode is set to Points, this value is "
-        "ignored."
+
+    struct [[codegen::Dictionary(RenderableSatellites)]] Parameters {
+        // [[codegen::verbatim(SegmentsInfo.description)]]
+        double segments;
     };
-    constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
-        "Color",
-        "Color",
-        "This value determines the RGB main color for the lines and points of the trail."
-    };
-    constexpr openspace::properties::Property::PropertyInfo TrailFadeInfo = {
-        "TrailFade",
-        "Trail Fade",
-        "This value determines how fast the trail fades and is an appearance property. "
-    };
+#include "renderablesatellites_codegen.cpp"
 }
 
 namespace openspace {
 
 documentation::Documentation RenderableSatellites::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderableSatellites",
-        "space_renderable_satellites",
-        {
-            {
-                SegmentsInfo.identifier,
-                new DoubleVerifier,
-                Optional::No,
-                SegmentsInfo.description
-            },
-            {
-                PathInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                PathInfo.description
-            },
-            {
-                LineWidthInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                LineWidthInfo.description
-            },
-            {
-                LineColorInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::No,
-                LineColorInfo.description
-            },
-            {
-                TrailFadeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                TrailFadeInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "space_renderablesatellites";
+
+    // Insert the parents documentation entries until we have a verifier that can deal
+    // with class hierarchy
+    documentation::Documentation parentDoc = RenderableOrbitalKepler::Documentation();
+    doc.entries.insert(
+        doc.entries.end(),
+        parentDoc.entries.begin(),
+        parentDoc.entries.end()
+    );
+
+    return doc;
 }
 
 RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
     : RenderableOrbitalKepler(dictionary)
-{}
+{
+    // Commented out right now as its not super clear how it works with inheritance. We'd
+    // probably want a codegen::check function that only does the checking without
+    // actually creating a Parameter objects
+    // codegen::bake<Parameters>(dictionary);
+    addProperty(_startRenderIdx);
+    addProperty(_sizeRender);
+
+    _updateStartRenderIdxSelect = [this]() {
+        if ((_numObjects - _startRenderIdx) < _sizeRender) {
+            _sizeRender = _numObjects - _startRenderIdx;
+        }
+        updateBuffers();
+    };
+    _updateRenderSizeSelect = [this]() {
+        if (_sizeRender > (_numObjects - _startRenderIdx)) {
+            _startRenderIdx = _numObjects - _sizeRender;
+        }
+        updateBuffers();
+    };
+    _startRenderIdxCallbackHandle = _startRenderIdx.onChange(_updateStartRenderIdxSelect);
+    _sizeRenderCallbackHandle = _sizeRender.onChange(_updateRenderSizeSelect);
+}
 
 void RenderableSatellites::readDataFile(const std::string& filename) {
     if (!FileSys.fileExists(filename)) {
         throw ghoul::RuntimeError(fmt::format(
-            "Satellite TLE file {} does not exist.", filename
+            "Satellite TLE file {} does not exist", filename
         ));
     }
     _data.clear();
@@ -173,7 +155,7 @@ void RenderableSatellites::readDataFile(const std::string& filename) {
             //     5   12-14   International Designator (Launch number of the year)
             //     6   15-17   International Designator(piece of the launch)    A
             name += " " + line.substr(2, 15);
-            if (_startRenderIdx > 0 && _startRenderIdx == i) {
+            if (_startRenderIdx == i && _sizeRender == 1) {
                 LINFO(fmt::format(
                     "Set render block to start at object  {}",
                     name
@@ -262,16 +244,11 @@ void RenderableSatellites::readDataFile(const std::string& filename) {
 }
 
 void RenderableSatellites::initializeFileReading() {
-    _startRenderIdx.removeOnChange(_startRenderIdxCallbackHandle);
-    _sizeRender.removeOnChange(_sizeRenderCallbackHandle);
     _startRenderIdx.setMaxValue(static_cast<unsigned int>(_numObjects - 1));
     _sizeRender.setMaxValue(static_cast<unsigned int>(_numObjects));
-    _startRenderIdx = static_cast<unsigned int>(0);
-    _sizeRender = static_cast<unsigned int>(_numObjects);
-    _startRenderIdxCallbackHandle = _startRenderIdx.onChange(
-        _updateStartRenderIdxSelect);
-    _sizeRenderCallbackHandle = _sizeRender.onChange(
-        _updateRenderSizeSelect);
+    if (_sizeRender == 0u) {
+        _sizeRender = static_cast<unsigned int>(_numObjects);
+    }
 }
 
 void RenderableSatellites::skipSingleEntryInFile(std::ifstream& file) {

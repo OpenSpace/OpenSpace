@@ -33,10 +33,10 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
+#include <optional>
 
 namespace {
     constexpr const char* KeyType = "Type";
-    constexpr const char* KeyTag = "Tag";
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
@@ -63,49 +63,47 @@ namespace {
         "Bounding Sphere",
         "The size of the bounding sphere radius."
     };
+    struct [[codegen::Dictionary(Renderable)]] Parameters {
+        // [[codegen::verbatim(EnabledInfo.description)]]
+        std::optional<bool> enabled;
 
+        // [[codegen::verbatim(OpacityInfo.description)]]
+        std::optional<float> opacity [[codegen::inrange(0.0, 1.0)]];
+
+        // A single tag or a list of tags that this renderable will respond to when
+        // setting properties
+        std::optional<std::variant<std::vector<std::string>, std::string>> tag;
+
+        // [[codegen::verbatim(RenderableTypeInfo.description)]]
+        std::optional<std::string> type;
+
+        // [[codegen::verbatim(BoundingSphereInfo.description)]]
+        std::optional<float> boundingSphere;
+    };
+#include "renderable_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation Renderable::Documentation() {
-    using namespace openspace::documentation;
-
-    return {
-        "Renderable",
-        "renderable",
-        {
-            {
-                KeyType,
-                new StringAnnotationVerifier("A valid Renderable created by a factory"),
-                Optional::No,
-                "This key specifies the type of Renderable that gets created. It has to "
-                "be one of the valid Renderables that are available for creation (see "
-                "the FactoryDocumentation for a list of possible Renderables), which "
-                "depends on the configration of the application"
-            },
-            {
-                EnabledInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                EnabledInfo.description
-            },
-            {
-                OpacityInfo.identifier,
-                new DoubleInRangeVerifier(0.0, 1.0),
-                Optional::Yes,
-                OpacityInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "renderable";
+    return doc;
 }
 
 ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
-                                                      const ghoul::Dictionary& dictionary)
+                                                             ghoul::Dictionary dictionary)
 {
+    if (!dictionary.hasKey(KeyType)) {
+        throw ghoul::RuntimeError("Tried to create Renderable but no 'Type' was found");
+    }
+
+    // This should be done in the constructor instead with noexhaustive
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "Renderable");
 
     std::string renderableType = dictionary.value<std::string>(KeyType);
+    // Now we no longer need the type variable
+    dictionary.removeValue(KeyType);
 
     auto factory = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(factory, "Renderable factory did not exist");
@@ -130,46 +128,34 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     // I can't come up with a good reason not to do this for all renderables
     registerUpdateRenderBinFromOpacity();
 
-    if (dictionary.hasValue<std::string>(KeyTag)) {
-        std::string tagName = dictionary.value<std::string>(KeyTag);
-        if (!tagName.empty()) {
-            addTag(std::move(tagName));
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    
+    if (p.tag.has_value()) {
+        if (std::holds_alternative<std::string>(*p.tag)) {
+            if (!std::get<std::string>(*p.tag).empty()) {
+                addTag(std::get<std::string>(*p.tag));
+            }
         }
-    }
-    else if (dictionary.hasValue<ghoul::Dictionary>(KeyTag)) {
-        const ghoul::Dictionary& tagNames = dictionary.value<ghoul::Dictionary>(KeyTag);
-        for (std::string_view key : tagNames.keys()) {
-            std::string tagName = tagNames.value<std::string>(key);
-            if (!tagName.empty()) {
-                addTag(std::move(tagName));
+        else {
+            ghoul_assert(std::holds_alternative<std::vector<std::string>>(*p.tag), "");
+            for (std::string tag : std::get<std::vector<std::string>>(*p.tag)) {
+                addTag(std::move(tag));
             }
         }
     }
 
-    if (dictionary.hasKey(EnabledInfo.identifier)) {
-        _enabled = dictionary.value<bool>(EnabledInfo.identifier);
-    }
-
-    if (dictionary.hasKey(OpacityInfo.identifier)) {
-        _opacity = static_cast<float>(dictionary.value<double>(OpacityInfo.identifier));
-    }
-
+    _enabled = p.enabled.value_or(_enabled);
     addProperty(_enabled);
 
-    //set type for UI
-    if (dictionary.hasKey(RenderableTypeInfo.identifier)) {
-        _renderableType = dictionary.value<std::string>(
-            RenderableTypeInfo.identifier
-       );
-    }
+    _opacity = p.opacity.value_or(_opacity);
+    // We don't add the property here as subclasses should decide on their own whether
+    // they to expose the opacity or not
 
-    if (dictionary.hasKey(BoundingSphereInfo.identifier)) {
-        _boundingSphere = static_cast<float>(
-            dictionary.value<double>(BoundingSphereInfo.identifier)
-       );
-    }
-
+    // set type for UI
+    _renderableType = p.type.value_or(_renderableType);
     addProperty(_renderableType);
+
+    _boundingSphere = p.boundingSphere.value_or(_boundingSphere);
     addProperty(_boundingSphere);
 }
 
@@ -198,7 +184,7 @@ SurfacePositionHandle Renderable::calculateSurfacePositionHandle(
 {
     const glm::dvec3 directionFromCenterToTarget = glm::normalize(targetModelSpace);
     return {
-        directionFromCenterToTarget * static_cast<double>(boundingSphere()),
+        directionFromCenterToTarget * boundingSphere(),
         directionFromCenterToTarget,
         0.0
     };
@@ -255,7 +241,9 @@ void Renderable::setRenderBinFromOpacity() {
 
 void Renderable::registerUpdateRenderBinFromOpacity() {
     _opacity.onChange([this](){
-        if (_renderBin != Renderable::RenderBin::PostDeferredTransparent) {
+        if ((_renderBin != Renderable::RenderBin::PostDeferredTransparent) &&
+            (_renderBin != Renderable::RenderBin::Overlay))
+        {
             if (_opacity >= 0.f && _opacity < 1.f) {
                 setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
             }

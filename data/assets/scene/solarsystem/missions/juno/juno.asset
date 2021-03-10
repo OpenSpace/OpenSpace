@@ -3,18 +3,11 @@ local transforms = asset.require('scene/solarsystem/planets/jupiter/transforms')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 
 
-local textures = asset.syncedResource({
-    Name = "Juno Textures",
-    Type = "HttpSynchronization",
-    Identifier = "juno_textures",
-    Version = 1
-})
-
 local model = asset.syncedResource({
     Name = "Juno Model",
     Type = "HttpSynchronization",
     Identifier = "juno_model",
-    Version = 1
+    Version = 2
 })
 
 
@@ -157,11 +150,7 @@ local Juno = {
     },
     Renderable = {
         Type = "RenderableModel",
-        Geometry = {{
-            Type = "MultiModelGeometry",
-            GeometryFile = model .. "/Juno.obj",
-            ColorTexture =  textures .. "/gray.png"
-        }},
+        GeometryFile = model .. "/Juno.obj",
         ModelTransform = RotationMatrix,
         LightSources = assetHelper.getDefaultLightSources(sunTransforms.SolarSystemBarycenter.Identifier)
     },
@@ -189,7 +178,7 @@ local JunoTrail = {
         Color = { 0.70, 0.50, 0.20 },
         StartTime = "2016 JUL 01",
         EndTime = "2016 DEC 13",
-        SampleInterval = 2
+        SampleInterval = 3600
     },
     GUI = {
         Name = "Juno Trail",

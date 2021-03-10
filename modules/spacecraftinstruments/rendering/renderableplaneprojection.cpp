@@ -26,6 +26,7 @@
 
 #include <modules/spacecraftinstruments/spacecraftinstrumentsmodule.h>
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/rendering/renderengine.h>
@@ -40,6 +41,7 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <glm/gtx/projection.hpp>
+#include <optional>
 
 namespace {
     constexpr const char* _loggerCat = "RenderablePlaneProjection";
@@ -50,6 +52,16 @@ namespace {
     constexpr const char* KeyName = "Name";
     constexpr const char* KeyTarget = "DefaultTarget";
     constexpr const char* GalacticFrame = "GALACTIC";
+
+    struct [[codegen::Dictionary(RenderablePlaneProjection)]] Parameters {
+        std::optional<std::string> spacecraft;
+        std::optional<std::string> instrument;
+        std::optional<bool> moving;
+        std::optional<std::string> name;
+        std::optional<std::string> defaultTarget;
+        std::optional<std::string> texture;
+    };
+#include "renderableplaneprojection_codegen.cpp"
 } // namespace
 
 namespace openspace {
@@ -57,24 +69,15 @@ namespace openspace {
 RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& dict)
     : Renderable(dict)
 {
-    if (dict.hasValue<std::string>(KeySpacecraft)) {
-        _spacecraft = dict.value<std::string>(KeySpacecraft);
-    }
-    if (dict.hasValue<std::string>(KeyInstrument)) {
-        _instrument = dict.value<std::string>(KeyInstrument);
-    }
-    if (dict.hasValue<bool>(KeyMoving)) {
-        _moving = dict.value<bool>(KeyMoving);
-    }
-    if (dict.hasValue<std::string>(KeyName)) {
-        _name = dict.value<std::string>(KeyName);
-    }
-    if (dict.hasValue<std::string>(KeyTarget)) {
-        _defaultTarget = dict.value<std::string>(KeyTarget);
-    }
-    if (dict.hasValue<std::string>(KeyTexture)) {
-        _texturePath = dict.value<std::string>(KeyTexture);
-        _texturePath = absPath(_texturePath);
+    const Parameters p = codegen::bake<Parameters>(dict);
+    _spacecraft = p.spacecraft.value_or(_spacecraft);
+    _instrument = p.instrument.value_or(_instrument);
+    _moving = p.moving.value_or(_moving);
+    _name = p.name.value_or(_name);
+    _defaultTarget = p.defaultTarget.value_or(_defaultTarget);
+
+    if (p.texture.has_value()) {
+        _texturePath = absPath(*p.texture);
         _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
     }
 }

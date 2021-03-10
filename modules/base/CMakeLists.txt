@@ -38,13 +38,12 @@ set(HEADER_FILES
   dashboard/dashboarditemvelocity.h
   lightsource/cameralightsource.h
   lightsource/scenegraphlightsource.h
-  rendering/modelgeometry.h
-  rendering/multimodelgeometry.h
   rendering/grids/renderableboxgrid.h
   rendering/grids/renderablegrid.h
   rendering/grids/renderableradialgrid.h
   rendering/grids/renderablesphericalgrid.h
   rendering/renderablecartesianaxes.h
+  rendering/renderabledisc.h
   rendering/renderablelabels.h
   rendering/renderablemodel.h
   rendering/renderablenodeline.h
@@ -73,7 +72,6 @@ set(HEADER_FILES
   translation/luatranslation.h
   translation/statictranslation.h
   translation/timelinetranslation.h
-  
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -91,13 +89,12 @@ set(SOURCE_FILES
   dashboard/dashboarditemvelocity.cpp
   lightsource/cameralightsource.cpp
   lightsource/scenegraphlightsource.cpp
-  rendering/modelgeometry.cpp
-  rendering/multimodelgeometry.cpp
   rendering/grids/renderableboxgrid.cpp
   rendering/grids/renderablegrid.cpp
   rendering/grids/renderableradialgrid.cpp
   rendering/grids/renderablesphericalgrid.cpp
   rendering/renderablecartesianaxes.cpp
+  rendering/renderabledisc.cpp
   rendering/renderablelabels.cpp
   rendering/renderablemodel.cpp
   rendering/renderablenodeline.cpp
@@ -132,6 +129,8 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 set(SHADER_FILES
   shaders/axes_fs.glsl
   shaders/axes_vs.glsl
+  shaders/disc_fs.glsl
+  shaders/disc_vs.glsl
   shaders/grid_vs.glsl
   shaders/grid_fs.glsl
   shaders/imageplane_fs.glsl

@@ -50,6 +50,7 @@
 #include <fstream>
 #include <cstdint>
 #include <locale>
+#include <optional>
 #include <string>
 
 namespace {
@@ -64,17 +65,6 @@ namespace {
         "scaleFactor", "up", "right", "fadeInValue", "screenSize", "spriteTexture",
         "hasColorMap", "enabledRectSizeControl", "hasDvarScaling"
     };
-
-    constexpr const char* KeyFile = "File";
-    constexpr const char* keyColor = "Color";
-    constexpr const char* keyUnit = "Unit";
-    constexpr const char* MeterUnit = "m";
-    constexpr const char* KilometerUnit = "Km";
-    constexpr const char* ParsecUnit = "pc";
-    constexpr const char* KiloparsecUnit = "Kpc";
-    constexpr const char* MegaparsecUnit = "Mpc";
-    constexpr const char* GigaparsecUnit = "Gpc";
-    constexpr const char* GigalightyearUnit = "Gly";
 
     constexpr int8_t CurrentCacheVersion = 1;
     constexpr double PARSEC = 0.308567756E17;
@@ -107,26 +97,6 @@ namespace {
         "The path to the color map file of the astronomical object."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ExactColorMapInfo = {
-        "ExactColorMap",
-        "Exact Color Map File",
-        "Set a 1 to 1 relationship between the color index variable and the colormap"
-        " entrered value."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo ColorRangeInfo = {
-        "ColorRange",
-        "Color Range",
-        "This value determines the colormap ranges for the color parameters of the "
-        "astronomical objects."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo PolygonSidesInfo = {
-        "PolygonSides",
-        "Polygon Sides",
-        "The number of sides for the polygon used to represent the astronomical object."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo TextColorInfo = {
         "TextColor",
         "Text Color",
@@ -144,13 +114,6 @@ namespace {
         "TextSize",
         "Text Size",
         "The text size for the astronomical object labels."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo LabelFileInfo = {
-        "LabelFile",
-        "Label File",
-        "The path to the label file that contains information about the astronomical "
-        "objects being rendered."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LabelMinSizeInfo = {
@@ -197,12 +160,6 @@ namespace {
         "Size Option Variable",
         "This value determines which paramenter (datavar) is used for scaling "
         "of the astronomical objects."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
-        "TransformationMatrix",
-        "Transformation Matrix",
-        "Transformation matrix to be applied to each astronomical object."
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
@@ -270,180 +227,120 @@ namespace {
         "Set Data Range from Data",
         "Set the data range based on the available data"
     };
+
+    struct [[codegen::Dictionary(RenderableBillboardsCloud)]] Parameters {
+        // The path to the SPECK file that contains information about the astronomical
+        // object being rendered
+        std::optional<std::string> file;
+
+        // [[codegen::verbatim(ColorInfo.description)]]
+        glm::vec3 color [[codegen::color()]];
+
+        // [[codegen::verbatim(SpriteTextureInfo.description)]]
+        std::optional<std::string> texture;
+
+        // [[codegen::verbatim(DrawElementsInfo.description)]]
+        std::optional<bool> drawElements;
+
+        enum class RenderOption {
+            ViewDirection [[codegen::key("Camera View Direction")]],
+            PositionNormal [[codegen::key("Camera Position Normal")]]
+        };
+        // [[codegen::verbatim(RenderOptionInfo.description)]]
+        std::optional<RenderOption> renderOption;
+
+        enum class Unit {
+            Meter [[codegen::key("m")]],
+            Kilometer [[codegen::key("Km")]],
+            Parsec [[codegen::key("pc")]],
+            Kiloparsec [[codegen::key("Kpc")]],
+            Megaparsec [[codegen::key("Mpc")]],
+            Gigaparsec [[codegen::key("Gpc")]],
+            GigalightYears [[codegen::key("Gly")]]
+        };
+        std::optional<Unit> unit;
+
+        // [[codegen::verbatim(ScaleFactorInfo.description)]]
+        std::optional<float> scaleFactor;
+
+        // [[codegen::verbatim(ColorMapInfo.description)]]
+        std::optional<std::string> colorMap;
+
+        // Set a 1 to 1 relationship between the color index variable and the colormap
+        // entrered value
+        std::optional<bool> exactColorMap;
+
+        // The number of sides for the polygon used to represent the astronomical object
+        std::optional<int> polygonSides;
+
+        // [[codgen::verbatim(DrawLabelInfo.description)]]
+        std::optional<bool> drawLabels;
+
+        // [[codgen::verbatim(TextColorInfo.description)]]
+        std::optional<glm::vec3> textColor [[codegen::color()]];
+
+        // [[codgen::verbatim(TextOpacityInfo.description)]]
+        std::optional<float> textOpacity;
+
+        // [[codgen::verbatim(TextSizeInfo.description)]]
+        std::optional<float> textSize;
+
+        // The path to the label file that contains information about the astronomical
+        // objects being rendered
+        std::optional<std::string> labelFile;
+
+        // [[codgen::verbatim(LabelMinSizeInfo.description)]]
+        std::optional<float> textMinSize;
+
+        // [[codgen::verbatim(LabelMaxSizeInfo.description)]]
+        std::optional<float> textMaxSize;
+
+        // [[codgen::verbatim(ColorOptionInfo.description)]]
+        std::optional<std::vector<std::string>> colorOption;
+
+        // [[codgen::verbatim(SizeOptionInfo.description)]]
+        std::optional<std::vector<std::string>> sizeOption;
+
+        // This value determines the colormap ranges for the color parameters of the
+        // astronomical objects
+        std::optional<std::vector<glm::vec2>> colorRange;
+
+        // Transformation matrix to be applied to each astronomical object
+        std::optional<glm::dmat4x4> transformationMatrix;
+
+        // [[codgen::verbatim(FadeInDistancesInfo.description)]]
+        std::optional<glm::dvec2> fadeInDistances;
+
+        // [[codgen::verbatim(DisableFadeInInfo.description)]]
+        std::optional<bool> disableFadeIn;
+
+        // [[codgen::verbatim(BillboardMaxSizeInfo.description)]]
+        std::optional<float> billboardMaxSize;
+
+        // [[codgen::verbatim(BillboardMinSizeInfo.description)]]
+        std::optional<float> billboardMinSize;
+
+        // [[codgen::verbatim(CorrectionSizeEndDistanceInfo.description)]]
+        std::optional<float> correctionSizeEndDistance;
+
+        // [[codgen::verbatim(CorrectionSizeFactorInfo.description)]]
+        std::optional<float> correctionSizeFactor;
+
+        // [[codgen::verbatim(PixelSizeControlInfo.description)]]
+        std::optional<bool> enablePixelSizeControl;
+
+        // [[codgen::verbatim(UseLinearFiltering.description)]]
+        std::optional<bool> useLinearFiltering;
+    };
+#include "renderablebillboardscloud_codegen.cpp"
 }  // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableBillboardsCloud::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderableBillboardsCloud",
-        "digitaluniverse_RenderableBillboardsCloud",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("RenderableBillboardsCloud"),
-                Optional::No
-            },
-            {
-                KeyFile,
-                new StringVerifier,
-                Optional::Yes,
-                "The path to the SPECK file that contains information about the "
-                "astronomical object being rendered."
-            },
-            {
-                keyColor,
-                new DoubleVector3Verifier,
-                Optional::No,
-                "Astronomical Object Color (r,g,b)."
-            },
-            {
-                SpriteTextureInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                SpriteTextureInfo.description
-            },
-            {
-                ScaleFactorInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                ScaleFactorInfo.description
-            },
-            {
-                ColorMapInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                ColorMapInfo.description
-            },
-            {
-                ExactColorMapInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                ExactColorMapInfo.description
-            },
-            {
-                PolygonSidesInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                PolygonSidesInfo.description
-            },
-            {
-                DrawLabelInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                DrawLabelInfo.description
-            },
-            {
-                TextColorInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                TextColorInfo.description
-            },
-            {
-                TextOpacityInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                TextOpacityInfo.description
-            },
-            {
-                TextSizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                TextSizeInfo.description
-            },
-            {
-                LabelFileInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                LabelFileInfo.description
-            },
-            {
-                LabelMinSizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                LabelMinSizeInfo.description
-            },
-            {
-                LabelMaxSizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                LabelMaxSizeInfo.description
-            },
-            {
-                ColorOptionInfo.identifier,
-                new StringListVerifier,
-                Optional::Yes,
-                ColorOptionInfo.description
-            },
-            {
-                SizeOptionInfo.identifier,
-                new StringListVerifier,
-                Optional::Yes,
-                SizeOptionInfo.description
-            },
-            {
-                ColorRangeInfo.identifier,
-                new Vector2ListVerifier<double>,
-                Optional::Yes,
-                ColorRangeInfo.description
-            },
-            {
-                TransformationMatrixInfo.identifier,
-                new Matrix4x4Verifier<double>,
-                Optional::Yes,
-                TransformationMatrixInfo.description
-            },
-            {
-                FadeInDistancesInfo.identifier,
-                new Vector2Verifier<double>,
-                Optional::Yes,
-                FadeInDistancesInfo.description
-            },
-            {
-                DisableFadeInInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                DisableFadeInInfo.description
-            },
-            {
-                BillboardMaxSizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                BillboardMaxSizeInfo.description
-            },
-            {
-                BillboardMinSizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                BillboardMinSizeInfo.description
-            },
-            {
-                CorrectionSizeEndDistanceInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                CorrectionSizeEndDistanceInfo.description
-            },
-            {
-                CorrectionSizeFactorInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                CorrectionSizeFactorInfo.description
-            },
-            {
-                PixelSizeControlInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                PixelSizeControlInfo.description
-            },
-            {
-                UseLinearFiltering.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                UseLinearFiltering.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "digitaluniverse_RenderableBillboardsCloud";
+    return doc;
 }
 
 RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& dictionary)
@@ -481,98 +378,87 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _setRangeFromData(SetRangeFromData)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableBillboardsCloud"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    if (dictionary.hasKey(KeyFile)) {
-        _speckFile = absPath(dictionary.value<std::string>(KeyFile));
-        _hasSpeckFile = true;
+    if (p.file.has_value()) {
+        _speckFile = absPath(*p.file);
     }
+    _hasSpeckFile = p.file.has_value();
 
-    if (dictionary.hasKey(DrawElementsInfo.identifier)) {
-        _drawElements = dictionary.value<bool>(DrawElementsInfo.identifier);
-    }
-
+    _drawElements = p.drawElements.value_or(_drawElements);
     _drawElements.onChange([&]() { _hasSpeckFile = !_hasSpeckFile; });
     addProperty(_drawElements);
 
     _renderOption.addOption(RenderOptionViewDirection, "Camera View Direction");
     _renderOption.addOption(RenderOptionPositionNormal, "Camera Position Normal");
 
-    _renderOption = RenderOptionViewDirection;
-    if (dictionary.hasValue<std::string>(RenderOptionInfo.identifier)) {
-        const std::string o = dictionary.value<std::string>(RenderOptionInfo.identifier);
-
-        if (o == "Camera View Direction") {
-            _renderOption = RenderOptionViewDirection;
-        }
-        else if (o == "Camera Position Normal") {
-            _renderOption = RenderOptionPositionNormal;
+    if (p.renderOption.has_value()) {
+        switch (*p.renderOption) {
+            case Parameters::RenderOption::ViewDirection:
+                _renderOption = RenderOptionViewDirection;
+                break;
+            case Parameters::RenderOption::PositionNormal:
+                _renderOption = RenderOptionPositionNormal;
+                break;
         }
     }
-
+    else {
+        _renderOption = RenderOptionViewDirection;
+    }
     addProperty(_renderOption);
 
-    if (dictionary.hasKey(keyUnit)) {
-        std::string unit = dictionary.value<std::string>(keyUnit);
-        if (unit == MeterUnit) {
-            _unit = Meter;
-        }
-        else if (unit == KilometerUnit) {
-            _unit = Kilometer;
-        }
-        else if (unit == ParsecUnit) {
-            _unit = Parsec;
-        }
-        else if (unit == KiloparsecUnit) {
-            _unit = Kiloparsec;
-        }
-        else if (unit == MegaparsecUnit) {
-            _unit = Megaparsec;
-        }
-        else if (unit == GigaparsecUnit) {
-            _unit = Gigaparsec;
-        }
-        else if (unit == GigalightyearUnit) {
-            _unit = GigalightYears;
-        }
-        else {
-            LWARNING(
-                "No unit given for RenderableBillboardsCloud. Using meters as units."
-            );
-            _unit = Meter;
+    if (p.unit.has_value()) {
+        switch (*p.unit) {
+            case Parameters::Unit::Meter:
+                _unit = Meter;
+                break;
+            case Parameters::Unit::Kilometer:
+                _unit = Kilometer;
+                break;
+            case Parameters::Unit::Parsec:
+                _unit = Parsec;
+                break;
+            case Parameters::Unit::Kiloparsec:
+                _unit = Kiloparsec;
+                break;
+            case Parameters::Unit::Megaparsec:
+                _unit = Megaparsec;
+                break;
+            case Parameters::Unit::Gigaparsec:
+                _unit = Gigaparsec;
+                break;
+            case Parameters::Unit::GigalightYears:
+                _unit = GigalightYears;
+                break;
         }
     }
+    else {
+        LWARNING("No unit given for RenderableBillboardsCloud. Using meters as units.");
+        _unit = Meter;
+    }
 
-    if (dictionary.hasKey(SpriteTextureInfo.identifier)) {
-        _spriteTexturePath = absPath(dictionary.value<std::string>(
-            SpriteTextureInfo.identifier
-        ));
-
+    if (p.texture.has_value()) {
+        _spriteTexturePath = absPath(*p.texture);
         _spriteTexturePath.onChange([&]() { _spriteTextureIsDirty = true; });
+
+        // @TODO (abock, 2021-01-31) I don't know why we only add this property if the
+        // texture is given, but I think it's a bug
         addProperty(_spriteTexturePath);
 
-        _hasSpriteTexture = true;
     }
+    _hasSpriteTexture = p.texture.has_value();
 
-    if (dictionary.hasKey(ColorMapInfo.identifier)) {
-        _colorMapFile = absPath(dictionary.value<std::string>(ColorMapInfo.identifier));
+
+    if (p.colorMap.has_value()) {
+        _colorMapFile = absPath(*p.colorMap);
         _hasColorMapFile = true;
 
-        if (dictionary.hasKey(ColorOptionInfo.identifier)) {
-            ghoul::Dictionary colorOptionDataDic = dictionary.value<ghoul::Dictionary>(
-                ColorOptionInfo.identifier
-            );
-            for (int i = 0; i < static_cast<int>(colorOptionDataDic.size()); ++i) {
-                std::string colorMapInUseName(
-                    colorOptionDataDic.value<std::string>(std::to_string(i + 1))
-                );
-                _colorOption.addOption(i, colorMapInUseName);
-                _optionConversionMap.insert({ i, colorMapInUseName });
-                _colorOptionString = colorMapInUseName;
+        if (p.colorOption.has_value()) {
+            std::vector<std::string> opts = *p.colorOption;
+            for (size_t i = 0; i < opts.size(); ++i) {
+                _colorOption.addOption(static_cast<int>(i), opts[i]);
+                _optionConversionMap.insert({ static_cast<int>(i), opts[i] });
+                _colorOptionString = opts[i];
             }
         }
         _colorOption.onChange([&]() {
@@ -583,15 +469,8 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         });
         addProperty(_colorOption);
 
-        if (dictionary.hasKey(ColorRangeInfo.identifier)) {
-            ghoul::Dictionary rangeDataDict = dictionary.value<ghoul::Dictionary>(
-                ColorRangeInfo.identifier
-            );
-            for (size_t i = 0; i < rangeDataDict.size(); ++i) {
-                _colorRangeData.push_back(
-                    rangeDataDict.value<glm::dvec2>(std::to_string(i + 1))
-                );
-            }
+        _colorRangeData = p.colorRange.value_or(_colorRangeData);
+        if (!_colorRangeData.empty()) {
             _optionColorRangeData = _colorRangeData[_colorRangeData.size() - 1];
         }
         _optionColorRangeData.onChange([&]() {
@@ -601,36 +480,25 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         });
         addProperty(_optionColorRangeData);
 
-        if (dictionary.hasKey(ExactColorMapInfo.identifier)) {
-            _isColorMapExact = dictionary.value<bool>(ExactColorMapInfo.identifier);
-        }
+        _isColorMapExact = p.exactColorMap.value_or(_isColorMapExact);
     }
-    else if (dictionary.hasKey(keyColor)) {
-        _pointColor = dictionary.value<glm::dvec3>(keyColor);
+    else {
+        _pointColor = p.color;
         _pointColor.setViewOption(properties::Property::ViewOptions::Color);
         addProperty(_pointColor);
     }
 
     addProperty(_opacity);
 
-    if (dictionary.hasKey(ScaleFactorInfo.identifier)) {
-        _scaleFactor = static_cast<float>(
-            dictionary.value<double>(ScaleFactorInfo.identifier)
-        );
-    }
+    _scaleFactor = p.scaleFactor.value_or(_scaleFactor);
     addProperty(_scaleFactor);
 
-    if (dictionary.hasKey(SizeOptionInfo.identifier)) {
-        ghoul::Dictionary sizeOptionDataDic = dictionary.value<ghoul::Dictionary>(
-            SizeOptionInfo.identifier
-            );
-        for (int i = 0; i < static_cast<int>(sizeOptionDataDic.size()); ++i) {
-            std::string datavarSizeInUseName(
-                sizeOptionDataDic.value<std::string>(std::to_string(i + 1))
-            );
-            _datavarSizeOption.addOption(i, datavarSizeInUseName);
-            _optionConversionSizeMap.insert({ i, datavarSizeInUseName });
-            _datavarSizeOptionString = datavarSizeInUseName;
+    if (p.sizeOption.has_value()) {
+        std::vector<std::string> opts = *p.sizeOption;
+        for (size_t i = 0; i < opts.size(); ++i) {
+            _datavarSizeOption.addOption(static_cast<int>(i), opts[i]);
+            _optionConversionSizeMap.insert({ static_cast<int>(i), opts[i] });
+            _datavarSizeOptionString = opts[i];
         }
 
         _datavarSizeOption.onChange([&]() {
@@ -642,104 +510,62 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         _hasDatavarSize = true;
     }
 
-    if (dictionary.hasKey(PolygonSidesInfo.identifier)) {
-        _polygonSides = static_cast<int>(
-            dictionary.value<double>(PolygonSidesInfo.identifier)
-        );
-        _hasPolygon = true;
-    }
+    _polygonSides = p.polygonSides.value_or(_polygonSides);
+    _hasPolygon = p.polygonSides.has_value();
 
-    if (dictionary.hasKey(LabelFileInfo.identifier)) {
-        if (dictionary.hasKey(DrawLabelInfo.identifier)) {
-            _drawLabels = dictionary.value<bool>(DrawLabelInfo.identifier);
-        }
+    if (p.labelFile.has_value()) {
+        _drawLabels = p.drawLabels.value_or(_drawLabels);
         addProperty(_drawLabels);
 
-        _labelFile = absPath(dictionary.value<std::string>(LabelFileInfo.identifier));
+        _labelFile = absPath(*p.labelFile);
         _hasLabel = true;
 
-        if (dictionary.hasKey(TextColorInfo.identifier)) {
-            _textColor = dictionary.value<glm::dvec3>(TextColorInfo.identifier);
-            _hasLabel = true;
-        }
+        _textColor = p.textColor.value_or(_textColor);
+        _hasLabel = p.textColor.has_value();
         _textColor.setViewOption(properties::Property::ViewOptions::Color);
         addProperty(_textColor);
         _textColor.onChange([&]() { _textColorIsDirty = true; });
 
-        if (dictionary.hasKey(TextOpacityInfo.identifier)) {
-            _textOpacity = static_cast<float>(
-                dictionary.value<double>(TextOpacityInfo.identifier)
-            );
-        }
+        _textOpacity = p.textOpacity.value_or(_textOpacity);
         addProperty(_textOpacity);
 
-        if (dictionary.hasKey(TextSizeInfo.identifier)) {
-            _textSize = static_cast<float>(
-                dictionary.value<double>(TextSizeInfo.identifier)
-            );
-        }
+        _textSize = p.textSize.value_or(_textSize);
         addProperty(_textSize);
 
-        if (dictionary.hasKey(LabelMinSizeInfo.identifier)) {
-            _textMinSize = static_cast<float>(
-                dictionary.value<double>(LabelMinSizeInfo.identifier)
-            );
-        }
+        _textMinSize = p.textMinSize.value_or(_textMinSize);
         addProperty(_textMinSize);
 
-        if (dictionary.hasKey(LabelMaxSizeInfo.identifier)) {
-            _textMaxSize = static_cast<float>(
-                dictionary.value<double>(LabelMaxSizeInfo.identifier)
-            );
-        }
+        _textMaxSize = p.textMaxSize.value_or(_textMaxSize);
         addProperty(_textMaxSize);
     }
 
-    if (dictionary.hasKey(TransformationMatrixInfo.identifier)) {
-        _transformationMatrix = dictionary.value<glm::dmat4>(
-            TransformationMatrixInfo.identifier
-        );
-    }
+    _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);
 
-    if (dictionary.hasKey(FadeInDistancesInfo.identifier)) {
-        glm::dvec2 v = dictionary.value<glm::dvec2>(FadeInDistancesInfo.identifier);
-        _fadeInDistance = v;
-        _disableFadeInDistance = false;
+    if (p.fadeInDistances.has_value()) {
+        _fadeInDistance = *p.fadeInDistances;
         addProperty(_fadeInDistance);
+
+        _disableFadeInDistance = false;
         addProperty(_disableFadeInDistance);
     }
 
-    if (dictionary.hasKey(BillboardMaxSizeInfo.identifier)) {
-        _billboardMaxSize = static_cast<float>(
-            dictionary.value<double>(BillboardMaxSizeInfo.identifier)
-        );
-    }
+    _billboardMaxSize = p.billboardMaxSize.value_or(_billboardMaxSize);
     addProperty(_billboardMaxSize);
 
-    if (dictionary.hasKey(BillboardMinSizeInfo.identifier)) {
-        _billboardMinSize = static_cast<float>(
-            dictionary.value<double>(BillboardMinSizeInfo.identifier)
-        );
-    }
+    _billboardMinSize = p.billboardMinSize.value_or(_billboardMinSize);
     addProperty(_billboardMinSize);
 
-    if (dictionary.hasKey(CorrectionSizeEndDistanceInfo.identifier)) {
-        _correctionSizeEndDistance = static_cast<float>(
-            dictionary.value<double>(CorrectionSizeEndDistanceInfo.identifier)
-        );
-    }
+    _correctionSizeEndDistance =
+        p.correctionSizeEndDistance.value_or(_correctionSizeEndDistance);
     addProperty(_correctionSizeEndDistance);
 
-    if (dictionary.hasKey(CorrectionSizeFactorInfo.identifier)) {
-        _correctionSizeFactor = static_cast<float>(
-            dictionary.value<double>(CorrectionSizeFactorInfo.identifier)
-        );
-
+    _correctionSizeFactor = p.correctionSizeFactor.value_or(_correctionSizeFactor);
+    if (p.correctionSizeFactor.has_value()) {
         addProperty(_correctionSizeFactor);
     }
 
-    if (dictionary.hasKey(PixelSizeControlInfo.identifier)) {
-        _pixelSizeControl = dictionary.value<bool>(PixelSizeControlInfo.identifier);
+    _pixelSizeControl = p.enablePixelSizeControl.value_or(_pixelSizeControl);
+    if (p.enablePixelSizeControl.has_value()) {
         addProperty(_pixelSizeControl);
     }
 
@@ -759,9 +585,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     });
     addProperty(_setRangeFromData);
 
-    if (dictionary.hasKey(UseLinearFiltering.identifier)) {
-        _useLinearFiltering = dictionary.value<bool>(UseLinearFiltering.identifier);
-    }
+    _useLinearFiltering = p.useLinearFiltering.value_or(_useLinearFiltering);
     _useLinearFiltering.onChange([&]() { _dataIsDirty = true; });
     addProperty(_useLinearFiltering);
 }

@@ -51,10 +51,6 @@
 namespace {
     constexpr const char* _loggerCat = "RenderableStars";
 
-    constexpr const char* KeyFile = "File";
-    constexpr const char* KeyStaticFilterValue = "StaticFilter";
-    constexpr const char* KeyStaticFilterReplacement = "StaticFilterReplacement";
-
     constexpr const std::array<const char*, 17> UniformNames = {
         "modelMatrix", "cameraUp", "cameraViewProjectionMatrix",
         "colorOption", "magnitudeExponent", "eyePosition", "psfParamConf",
@@ -309,120 +305,71 @@ namespace {
         "Disable Fade-in effect",
         "Enables/Disables the Fade-in effect."
     };
+
+    struct [[codegen::Dictionary(RenderableStars)]] Parameters {
+        // The path to the SPECK file containing information about the stars being rendered
+        std::filesystem::path speckFile [[codegen::key("File")]];
+
+        // [[codegen::verbatim(ColorTextureInfo.description)]]
+        std::filesystem::path colorMap;
+
+        enum class ColorOption {
+            Color,
+            Velocity,
+            Speed,
+            OtherData [[codegen::key("Other Data")]],
+            FixedColor [[codegen::key("Fixed Color")]]
+        };
+        // [[codegen::verbatim(ColorOptionInfo.description)]]
+        std::optional<ColorOption> colorOption;
+
+        // [[codegen::verbatim(OtherDataOptionInfo.description)]]
+        std::optional<std::string> otherData;
+
+        // [[codegen::verbatim(OtherDataColorMapInfo.description)]]
+        std::optional<std::string> otherDataColorMap;
+
+        // [[codegen::verbatim(FilterOutOfRangeInfo.description)]]
+        std::optional<bool> filterOutOfRange;
+
+        // This value specifies a value that is always filtered out of the value ranges on
+        // loading. This can be used to trim the dataset's automatic value range
+        std::optional<float> staticFilter;
+
+        // This is the value that is used to replace statically filtered values. Setting this
+        // value only makes sense if 'StaticFilter' is 'true', as well
+        std::optional<float> staticFilterReplacement;
+
+        // [[codegen::verbatim(MagnitudeExponentInfo.description)]]
+        std::optional<float> magnitudeExponent;
+
+        // [[codegen::verbatim(EnableTestGridInfo.description)]]
+        std::optional<bool> enableTestGrid;
+
+        // [[codegen::verbatim(RenderMethodOptionInfo.description)]]
+        std::string renderMethod;
+
+        // [[codegen::verbatim(PsfTextureInfo.description)]]
+        std::filesystem::path texture;
+
+        // [[codegen::verbatim(SizeCompositionOptionInfo.description)]]
+        std::optional<std::string> sizeComposition;
+
+        // [[codegen::verbatim(FadeInDistancesInfo.description)]]
+        std::optional<glm::dvec2> fadeInDistances;
+
+        // [[codegen::verbatim(DisableFadeInInfo.description)]]
+        std::optional<bool> distableFadeIn;
+    };
+#include "renderablestars_codegen.cpp"
 }  // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableStars::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderableStars",
-        "space_renderablestars",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("RenderableStars"),
-                Optional::No
-            },
-            {
-                KeyFile,
-                new StringVerifier,
-                Optional::No,
-                "The path to the SPECK file that contains information about the stars "
-                "being rendered."
-            },
-            {
-                ColorTextureInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                ColorTextureInfo.description
-            },
-            /*{
-                ShapeTextureInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                ShapeTextureInfo.description
-            },*/
-            {
-                ColorOptionInfo.identifier,
-                new StringInListVerifier({
-                    "Color", "Velocity", "Speed", "Other Data", "Fixed Color"
-                }),
-                Optional::Yes,
-                ColorOptionInfo.description
-            },
-            {
-                OtherDataOptionInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                OtherDataOptionInfo.description
-            },
-            {
-                OtherDataColorMapInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                OtherDataColorMapInfo.description
-            },
-            {
-                FilterOutOfRangeInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                FilterOutOfRangeInfo.description
-            },
-            {
-                KeyStaticFilterValue,
-                new DoubleVerifier,
-                Optional::Yes,
-                "This value specifies a value that is always filtered out of the value "
-                "ranges on loading. This can be used to trim the dataset's automatic "
-                "value range."
-            },
-            {
-                KeyStaticFilterReplacement,
-                new DoubleVerifier,
-                Optional::Yes,
-                "This is the value that is used to replace statically filtered values. "
-                "Setting this value only makes sense if 'StaticFilter' is 'true', as "
-                "well."
-            },
-            {
-                MagnitudeExponentInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                MagnitudeExponentInfo.description
-            },
-            {
-                EnableTestGridInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                EnableTestGridInfo.description
-            },
-            {
-                RenderMethodOptionInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                RenderMethodOptionInfo.description
-            },
-            {
-                SizeCompositionOptionInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                SizeCompositionOptionInfo.description
-            },
-            {
-                FadeInDistancesInfo.identifier,
-                new Vector2Verifier<double>,
-                Optional::Yes,
-                FadeInDistancesInfo.description
-            },
-            {
-                DisableFadeInInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                DisableFadeInInfo.description
-            },
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "space_renderablestars";
+    return doc;
 }
 
 RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
@@ -482,22 +429,16 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 {
     using File = ghoul::filesystem::File;
 
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableStars"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
 
-    _speckFile = absPath(dictionary.value<std::string>(KeyFile));
+    _speckFile = p.speckFile.string();
     _speckFile.onChange([&]() { _speckFileIsDirty = true; });
     addProperty(_speckFile);
 
-    _colorTexturePath = absPath(
-        dictionary.value<std::string>(ColorTextureInfo.identifier)
-    );
+    _colorTexturePath = p.colorMap.string();
     _colorTextureFile = std::make_unique<File>(_colorTexturePath);
 
     /*_shapeTexturePath = absPath(dictionary.value<std::string>(
@@ -505,10 +446,8 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         ));
     _shapeTextureFile = std::make_unique<File>(_shapeTexturePath);*/
 
-    if (dictionary.hasKey(OtherDataColorMapInfo.identifier)) {
-        _otherDataColorMapPath = absPath(
-            dictionary.value<std::string>(OtherDataColorMapInfo.identifier)
-        );
+    if (p.otherDataColorMap.has_value()) {
+        _otherDataColorMapPath = absPath(*p.otherDataColorMap);
     }
 
     _fixedColor.setViewOption(properties::Property::ViewOptions::Color, true);
@@ -521,24 +460,23 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         { ColorOption::OtherData, "Other Data" },
         { ColorOption::FixedColor, "Fixed Color" }
     });
-    if (dictionary.hasKey(ColorOptionInfo.identifier)) {
-        const std::string colorOption = dictionary.value<std::string>(
-            ColorOptionInfo.identifier
-        );
-        if (colorOption == "Color") {
-            _colorOption = ColorOption::Color;
-        }
-        else if (colorOption == "Velocity") {
-            _colorOption = ColorOption::Velocity;
-        }
-        else if (colorOption == "Speed") {
-            _colorOption = ColorOption::Speed;
-        }
-        else if (colorOption == "OtherData") {
-            _colorOption = ColorOption::OtherData;
-        }
-        else {
-            _colorOption = ColorOption::FixedColor;
+    if (p.colorOption.has_value()) {
+        switch (*p.colorOption) {
+            case Parameters::ColorOption::Color:
+                _colorOption = ColorOption::Color;
+                break;
+            case Parameters::ColorOption::Velocity:
+                _colorOption = ColorOption::Velocity;
+                break;
+            case Parameters::ColorOption::Speed:
+                _colorOption = ColorOption::Speed;
+                break;
+            case Parameters::ColorOption::OtherData:
+                _colorOption = ColorOption::OtherData;
+                break;
+            case Parameters::ColorOption::FixedColor:
+                _colorOption = ColorOption::FixedColor;
+                break;
         }
     }
     _colorOption.onChange([&] { _dataIsDirty = true; });
@@ -556,13 +494,8 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         });
     addProperty(_shapeTexturePath);*/
 
-    if (dictionary.hasKey(EnableTestGridInfo.identifier)) {
-        _enableTestGrid = dictionary.value<bool>(EnableTestGridInfo.identifier);
-    }
-
-    if (dictionary.hasKey(OtherDataOptionInfo.identifier)) {
-        _queuedOtherData = dictionary.value<std::string>(OtherDataOptionInfo.identifier);
-    }
+    _enableTestGrid = p.enableTestGrid.value_or(_enableTestGrid);
+    _queuedOtherData = p.otherData.value_or(_queuedOtherData);
 
     _otherDataOption.onChange([&]() { _dataIsDirty = true; });
     addProperty(_otherDataOption);
@@ -572,16 +505,9 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     addProperty(_otherDataColorMapPath);
     _otherDataColorMapPath.onChange([&]() { _otherDataColorMapIsDirty = true; });
 
-    if (dictionary.hasKey(KeyStaticFilterValue)) {
-        _staticFilterValue = static_cast<float>(
-            dictionary.value<double>(KeyStaticFilterValue)
-        );
-    }
-    if (dictionary.hasKey(KeyStaticFilterReplacement)) {
-        _staticFilterReplacementValue = static_cast<float>(
-            dictionary.value<double>(KeyStaticFilterReplacement)
-        );
-    }
+    _staticFilterValue = p.staticFilter;
+    _staticFilterReplacementValue =
+        p.staticFilterReplacement.value_or(_staticFilterReplacementValue);
 
     addProperty(_filterOutOfRange);
 
@@ -592,23 +518,14 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     _renderingMethodOption.addOption(RenderOptionTexture, "Textured Based");
     addProperty(_renderingMethodOption);
 
-    if (dictionary.hasKey(RenderMethodOptionInfo.identifier)) {
-        std::string renderingMethod =
-            dictionary.value<std::string>(RenderMethodOptionInfo.identifier);
-        if (renderingMethod == "PSF") {
-            _renderingMethodOption = RenderOptionPointSpreadFunction;
-        }
-        else if (renderingMethod == "Texture Based") {
-            _renderingMethodOption = RenderOptionTexture;
-        }
+    if (p.renderMethod == "PSF") {
+        _renderingMethodOption = RenderOptionPointSpreadFunction;
     }
-    else {
+    else if (p.renderMethod == "Texture Based") {
         _renderingMethodOption = RenderOptionTexture;
     }
 
-    _pointSpreadFunctionTexturePath = absPath(dictionary.value<std::string>(
-        PsfTextureInfo.identifier
-    ));
+    _pointSpreadFunctionTexturePath = absPath(p.texture.string());
     _pointSpreadFunctionFile = std::make_unique<File>(_pointSpreadFunctionTexturePath);
     _pointSpreadFunctionTexturePath.onChange([&]() {
         _pointSpreadFunctionTextureIsDirty = true;
@@ -631,26 +548,24 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     _psfMultiplyOption.addOption(4, "Apparent Magnitude");
     _psfMultiplyOption.addOption(5, "Distance Modulus");
 
-    if (dictionary.hasKey(MagnitudeExponentInfo.identifier)) {
-        std::string sizeCompositionOption =
-            dictionary.value<std::string>(SizeCompositionOptionInfo.identifier);
 
-        if (sizeCompositionOption == "App Brightness") {
+    if (p.sizeComposition.has_value()) {
+        if (*p.sizeComposition == "App Brightness") {
             _psfMultiplyOption = 0;
         }
-        else if (sizeCompositionOption == "Lum and Size") {
+        else if (*p.sizeComposition == "Lum and Size") {
             _psfMultiplyOption = 1;
         }
-        else if (sizeCompositionOption == "Lum, Size and App Brightness") {
+        else if (*p.sizeComposition == "Lum, Size and App Brightness") {
             _psfMultiplyOption = 2;
         }
-        else if (sizeCompositionOption == "Abs Magnitude") {
+        else if (*p.sizeComposition == "Abs Magnitude") {
             _psfMultiplyOption = 3;
         }
-        else if (sizeCompositionOption == "App Maginitude") {
+        else if (*p.sizeComposition == "App Maginitude") {
             _psfMultiplyOption = 4;
         }
-        else if (sizeCompositionOption == "Distance Modulus") {
+        else if (*p.sizeComposition == "Distance Modulus") {
             _psfMultiplyOption = 5;
         }
     }
@@ -663,11 +578,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     _parametersOwner.addProperty(_radiusCent);
     _parametersOwner.addProperty(_brightnessCent);
 
-    if (dictionary.hasKey(MagnitudeExponentInfo.identifier)) {
-        _magnitudeExponent = static_cast<float>(
-            dictionary.value<double>(MagnitudeExponentInfo.identifier)
-        );
-    }
+    _magnitudeExponent = p.magnitudeExponent.value_or(_magnitudeExponent);
     _parametersOwner.addProperty(_magnitudeExponent);
 
     auto renderPsf = [&]() { renderPSFToTexture(); };
@@ -693,8 +604,8 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     addPropertySubOwner(_parametersOwner);
     addPropertySubOwner(_moffatMethodOwner);
 
-    if (dictionary.hasKey(FadeInDistancesInfo.identifier)) {
-        glm::vec2 v = dictionary.value<glm::dvec2>(FadeInDistancesInfo.identifier);
+    if (p.fadeInDistances.has_value()) {
+        glm::vec2 v = *p.fadeInDistances;
         _fadeInDistance = v;
         _disableFadeInDistance = false;
         addProperty(_fadeInDistance);
@@ -860,7 +771,7 @@ void RenderableStars::loadPSFTexture() {
 void RenderableStars::renderPSFToTexture() {
     // Saves current FBO first
     GLint defaultFBO;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
+    defaultFBO = global::renderEngine->openglStateCache().defaultFramebuffer();
 
 //    GLint m_viewport[4];
 //    global::renderEngine.openglStateCache().viewPort(m_viewport);
@@ -973,24 +884,6 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
         return;
     }
 
-    // Saving current OpenGL state
-    GLenum blendEquationRGB;
-    GLenum blendEquationAlpha;
-    GLenum blendDestAlpha;
-    GLenum blendDestRGB;
-    GLenum blendSrcAlpha;
-    GLenum blendSrcRGB;
-    GLboolean depthMask;
-
-    glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
-    glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
-    glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
-    glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
-    glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
-    glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
-
-    glGetBooleanv(GL_DEPTH_WRITEMASK, &depthMask);
-
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glDepthMask(false);
 
@@ -1093,13 +986,9 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     glBindVertexArray(0);
     _program->deactivate();
 
-    glDepthMask(true);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
     // Restores OpenGL blending state
-    glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
-    glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
-    glDepthMask(depthMask);
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
 }
 
 void RenderableStars::update(const UpdateData&) {
@@ -1348,13 +1237,13 @@ void RenderableStars::loadShapeTexture() {
 */
 
 void RenderableStars::loadData() {
-    std::string _file = _speckFile;
-    if (!FileSys.fileExists(absPath(_file))) {
+    std::string file = absPath(_speckFile);
+    if (!FileSys.fileExists(file)) {
         return;
     }
 
     std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-        _file,
+        file,
         ghoul::filesystem::CacheManager::Persistent::Yes
     );
 
@@ -1366,7 +1255,7 @@ void RenderableStars::loadData() {
     bool hasCachedFile = FileSys.fileExists(cachedFile);
     if (hasCachedFile) {
         LINFO(fmt::format("Cached file '{}' used for Speck file '{}'",
-            cachedFile, _file
+            cachedFile, file
         ));
 
         bool success = loadCachedFile(cachedFile);
@@ -1374,15 +1263,15 @@ void RenderableStars::loadData() {
             return;
         }
         else {
-            FileSys.cacheManager()->removeCacheFile(_file);
+            FileSys.cacheManager()->removeCacheFile(file);
             // Intentional fall-through to the 'else' computation to generate the cache
             // file for the next run
         }
     }
     else {
-        LINFO(fmt::format("Cache for Speck file '{}' not found", _file));
+        LINFO(fmt::format("Cache for Speck file '{}' not found", file));
     }
-    LINFO(fmt::format("Loading Speck file '{}'", _file));
+    LINFO(fmt::format("Loading Speck file '{}'", file));
 
     readSpeckFile();
 

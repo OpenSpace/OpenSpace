@@ -38,6 +38,8 @@
 
 namespace openspace {
 
+namespace documentation { struct Documentation; }
+
 class RenderableSatellites : public RenderableOrbitalKepler {
 public:
     RenderableSatellites(const ghoul::Dictionary& dictionary);

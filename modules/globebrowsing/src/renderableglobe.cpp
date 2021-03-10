@@ -82,8 +82,6 @@ namespace {
     constexpr const char* KeyRadii = "Radii";
     constexpr const char* KeyLayers = "Layers";
     constexpr const char* KeyShadowGroup = "ShadowGroup";
-    constexpr const char* KeyShadowSource = "Source";
-    constexpr const char* KeyShadowCaster = "Caster";
     constexpr const char* KeyLabels = "Labels";
 
     const openspace::globebrowsing::AABB3 CullingFrustum{
@@ -469,12 +467,6 @@ documentation::Documentation RenderableGlobe::Documentation() {
         "globebrowsing_renderableglobe",
         {
             {
-                "Type",
-                new StringEqualVerifier("RenderableGlobe"),
-                Optional::No,
-                ""
-            },
-            {
                 KeyRadii,
                 new OrVerifier({ new DoubleVector3Verifier, new DoubleVerifier }),
                 Optional::Yes,
@@ -575,8 +567,50 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
 
     addProperty(_generalProperties.performShading);
     addProperty(_generalProperties.useAccurateNormals);
-    addProperty(_generalProperties.eclipseShadowsEnabled);
-    addProperty(_generalProperties.eclipseHardShadows);
+
+    // ================================================================
+    // ======== Reads Shadow (Eclipses) Entries in asset file =========
+    // ================================================================
+    if (dictionary.hasValue<ghoul::Dictionary>(KeyShadowGroup)) {
+        ghoul::Dictionary shadowDictionary =
+            dictionary.value<ghoul::Dictionary>(KeyShadowGroup);
+
+        std::vector<std::pair<std::string, double>> sourceArray;
+        ghoul::Dictionary sources = shadowDictionary.value<ghoul::Dictionary>("Sources");
+        for (std::string_view k : sources.keys()) {
+            ghoul::Dictionary source = sources.value<ghoul::Dictionary>(k);
+
+            std::string name = source.value<std::string>("Name");
+            double radius = source.value<double>("Radius");
+            sourceArray.emplace_back(name, radius);
+        }
+
+        std::vector<std::pair<std::string, double>> casterArray;
+        ghoul::Dictionary casters = shadowDictionary.value<ghoul::Dictionary>("Casters");
+        for (std::string_view k : casters.keys()) {
+            ghoul::Dictionary caster = casters.value<ghoul::Dictionary>(k);
+
+            std::string name = caster.value<std::string>("Name");
+            double radius = caster.value<double>("Radius");
+            casterArray.emplace_back(name, radius);
+        }
+
+        std::vector<Ellipsoid::ShadowConfiguration> shadowConfArray;
+        for (const std::pair<std::string, double>& source : sourceArray) {
+            for (const std::pair<std::string, double>& caster : casterArray) {
+                Ellipsoid::ShadowConfiguration sc;
+                sc.source = source;
+                sc.caster = caster;
+                shadowConfArray.push_back(sc);
+            }
+        }
+        _ellipsoid.setShadowConfigurationArray(shadowConfArray);
+    }
+
+    if (!_ellipsoid.shadowConfigurationArray().empty()) {
+        addProperty(_generalProperties.eclipseShadowsEnabled);
+        addProperty(_generalProperties.eclipseHardShadows);
+    }
 
     _shadowMappingPropertyOwner.addProperty(_generalProperties.shadowMapping);
     _shadowMappingPropertyOwner.addProperty(_generalProperties.zFightingPercentage);
@@ -632,45 +666,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _globalChunkBuffer.resize(2048);
     _localChunkBuffer.resize(2048);
     _traversalMemory.resize(512);
-
-    // ================================================================
-    // ======== Reads Shadow (Eclipses) Entries in asset file =========
-    // ================================================================
-    if (dictionary.hasValue<ghoul::Dictionary>(KeyShadowGroup)) {
-        ghoul::Dictionary shadowDictionary =
-            dictionary.value<ghoul::Dictionary>(KeyShadowGroup);
-
-        std::vector<std::pair<std::string, double>> sourceArray;
-        ghoul::Dictionary sources = shadowDictionary.value<ghoul::Dictionary>("Sources");
-        for (std::string_view k : sources.keys()) {
-            ghoul::Dictionary source = sources.value<ghoul::Dictionary>(k);
-
-            std::string name = source.value<std::string>("Name");
-            double radius = source.value<double>("Radius");
-            sourceArray.emplace_back(name, radius);
-        }
-
-        std::vector<std::pair<std::string, double>> casterArray;
-        ghoul::Dictionary casters = shadowDictionary.value<ghoul::Dictionary>("Casters");
-        for (std::string_view k : casters.keys()) {
-            ghoul::Dictionary caster = casters.value<ghoul::Dictionary>(k);
-
-            std::string name = caster.value<std::string>("Name");
-            double radius = caster.value<double>("Radius");
-            casterArray.emplace_back(name, radius);
-        }
-
-        std::vector<Ellipsoid::ShadowConfiguration> shadowConfArray;
-        for (const std::pair<std::string, double>& source : sourceArray) {
-            for (const std::pair<std::string, double>& caster : casterArray) {
-                Ellipsoid::ShadowConfiguration sc;
-                sc.source = source;
-                sc.caster = caster;
-                shadowConfArray.push_back(sc);
-            }
-        }
-        _ellipsoid.setShadowConfigurationArray(shadowConfArray);
-    }
 
     // Labels Dictionary
     if (dictionary.hasValue<ghoul::Dictionary>(KeyLabels)) {

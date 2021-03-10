@@ -57,12 +57,6 @@ documentation::Documentation SyncAssetTask::documentation() {
         "sync_asset_task",
         {
             {
-                "Type",
-                new StringEqualVerifier("SyncAssetTask"),
-                Optional::No,
-                "The type of this task"
-            },
-            {
                 KeyAsset,
                 new StringAnnotationVerifier("A file path to an asset"),
                 Optional::No,

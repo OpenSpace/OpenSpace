@@ -56,7 +56,7 @@ bool hasSufficientData(const ExoplanetDataEntry& p) {
     return validStarPosition && hasSemiMajorAxis && hasOrbitalPeriod;
 }
 
-glm::vec3 starColor(float bv) {
+glm::vec3 computeStarColor(float bv) {
     std::ifstream colorMap(absPath(BvColormapPath), std::ios::in);
 
     if (!colorMap.good()) {

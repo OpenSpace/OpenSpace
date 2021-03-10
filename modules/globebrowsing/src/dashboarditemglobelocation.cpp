@@ -73,11 +73,6 @@ documentation::Documentation DashboardItemGlobeLocation::Documentation() {
         "globebrowsing_dashboarditem_globelocation",
         {
             {
-                "Type",
-                new StringEqualVerifier("DashboardItemGlobeLocation"),
-                Optional::No
-            },
-            {
                 FontNameInfo.identifier,
                 new StringVerifier,
                 Optional::Yes,

@@ -27,6 +27,7 @@
 #include <openspace/documentation/documentationengine.h>
 #include <ghoul/misc/misc.h>
 #include <algorithm>
+#include <filesystem>
 
 namespace openspace::documentation {
 
@@ -133,11 +134,11 @@ std::string DoubleVerifier::type() const {
     return "Double";
 }
 
-TestResult IntVerifier::operator()(const ghoul::Dictionary & dict,
+TestResult IntVerifier::operator()(const ghoul::Dictionary& dict,
                                    const std::string & key) const
 {
     if (dict.hasValue<int>(key)) {
-        // We we have a key and the value is int, we are done
+        // We have a key and the value is int, we are done
         return { true, {}, {} };
     }
     else {
@@ -175,6 +176,235 @@ std::string IntVerifier::type() const {
 
 std::string StringVerifier::type() const {
     return "String";
+}
+
+TestResult FileVerifier::operator()(const ghoul::Dictionary& dict,
+                                    const std::string& key) const
+{
+    TestResult res = StringVerifier::operator()(dict, key);
+    if (!res.success) {
+        return res;
+    }
+
+    std::string file = dict.value<std::string>(key);
+    if (!std::filesystem::exists(file) || !std::filesystem::is_regular_file(file)) {
+        res.success = false;
+        TestResult::Offense off;
+        off.offender = key;
+        off.reason = TestResult::Offense::Reason::Verification;
+        off.explanation = "File did not exist";
+        res.offenses.push_back(off);
+    }
+    return res;
+}
+
+std::string FileVerifier::type() const {
+    return "File";
+}
+
+TestResult DirectoryVerifier::operator()(const ghoul::Dictionary& dict,
+                                         const std::string& key) const
+{
+    TestResult res = StringVerifier::operator()(dict, key);
+    if (!res.success) {
+        return res;
+    }
+
+    std::string dir = dict.value<std::string>(key);
+    if (!std::filesystem::exists(dir) || !std::filesystem::is_directory(dir)) {
+        res.success = false;
+        TestResult::Offense off;
+        off.offender = key;
+        off.reason = TestResult::Offense::Reason::Verification;
+        off.explanation = "Directory did not exist";
+        res.offenses.push_back(off);
+    }
+    return res;
+}
+
+std::string DirectoryVerifier::type() const {
+    return "Directory";
+}
+
+TestResult Color3Verifier::operator()(const ghoul::Dictionary& dictionary,
+                                      const std::string& key) const
+{
+    TestResult res = Vector3Verifier<double>::operator()(dictionary, key);
+    if (!res.success) {
+        return res;
+    }
+
+    glm::dvec3 values = dictionary.value<glm::dvec3>(key);
+    if (values.x < 0.0 || values.x > 1.0) {
+        res.success = false;
+        res.offenses.push_back({ key + ".x", TestResult::Offense::Reason::Verification });
+    }
+
+    if (values.y < 0.0 || values.y > 1.0) {
+        res.success = false;
+        res.offenses.push_back({ key + ".y", TestResult::Offense::Reason::Verification });
+    }
+
+    if (values.z < 0.0 || values.z > 1.0) {
+        res.success = false;
+        res.offenses.push_back({ key + ".z", TestResult::Offense::Reason::Verification });
+    }
+
+    return res;
+}
+
+std::string Color3Verifier::type() const {
+    return std::string("Color3");
+}
+
+TestResult Color4Verifier::operator()(const ghoul::Dictionary& dictionary,
+                                      const std::string& key) const
+{
+    TestResult res = Vector4Verifier<double>::operator()(dictionary, key);
+    if (!res.success) {
+        return res;
+    }
+
+    std::vector<double> values = dictionary.value<std::vector<double>>(key);
+    if (values[0] < 0.0 || values[0] > 1.0) {
+        res.success = false;
+        res.offenses.push_back({ key + ".x", TestResult::Offense::Reason::Verification });
+    }
+
+    if (values[1] < 0.0 || values[1] > 1.0) {
+        res.success = false;
+        res.offenses.push_back({ key + ".y", TestResult::Offense::Reason::Verification });
+    }
+
+    if (values[2] < 0.0 || values[2] > 1.0) {
+        res.success = false;
+        res.offenses.push_back({ key + ".z", TestResult::Offense::Reason::Verification });
+    }
+
+    if (values[3] < 0.0 || values[3] > 1.0) {
+        res.success = false;
+        res.offenses.push_back({ key + ".a", TestResult::Offense::Reason::Verification });
+    }
+    
+    return res;
+}
+
+std::string Color4Verifier::type() const {
+    return std::string("Color4");
+}
+
+template <>
+TestResult TemplateVerifier<glm::ivec2>::operator()(const ghoul::Dictionary& dict,
+                                                    const std::string& key) const
+{
+    if (dict.hasValue<glm::ivec2>(key)) {
+        return { true, {}, {} };
+    }
+    else {
+        if (dict.hasKey(key)) {
+            if (dict.hasValue<glm::dvec2>(key)) {
+                glm::dvec2 value = dict.value<glm::dvec2>(key);
+                glm::dvec2 intPart;
+                glm::bvec2 isInt = {
+                    modf(value.x, &intPart.x) == 0.0,
+                    modf(value.y, &intPart.y) == 0.0
+                };
+                if (isInt.x && isInt.y) {
+                    return { true, {}, {} };
+                }
+                else {
+                    return {
+                        false,
+                        {{ key, TestResult::Offense::Reason::WrongType }},
+                        {}
+                    };
+                }
+            }
+            else {
+                return { false, {{ key, TestResult::Offense::Reason::WrongType }}, {} };
+            }
+        }
+        else {
+            return { false, {{ key, TestResult::Offense::Reason::MissingKey }}, {} };
+        }
+    }
+}
+
+template <>
+TestResult TemplateVerifier<glm::ivec3>::operator()(const ghoul::Dictionary& dict,
+                                                    const std::string& key) const
+{
+    if (dict.hasValue<glm::ivec3>(key)) {
+        return { true, {}, {} };
+    }
+    else {
+        if (dict.hasKey(key)) {
+            if (dict.hasValue<glm::dvec3>(key)) {
+                glm::dvec3 value = dict.value<glm::dvec3>(key);
+                glm::dvec3 intPart;
+                glm::bvec3 isInt = {
+                    modf(value.x, &intPart.x) == 0.0,
+                    modf(value.y, &intPart.y) == 0.0,
+                    modf(value.z, &intPart.z) == 0.0
+                };
+                if (isInt.x && isInt.y && isInt.z) {
+                    return { true, {}, {} };
+                }
+                else {
+                    return {
+                        false,
+                        {{ key, TestResult::Offense::Reason::WrongType }},
+                        {}
+                    };
+                }
+            }
+            else {
+                return { false, {{ key, TestResult::Offense::Reason::WrongType }}, {} };
+            }
+        }
+        else {
+            return { false, {{ key, TestResult::Offense::Reason::MissingKey }}, {} };
+        }
+    }
+}
+
+template <>
+TestResult TemplateVerifier<glm::ivec4>::operator()(const ghoul::Dictionary& dict,
+                                                    const std::string& key) const
+{
+    if (dict.hasValue<glm::ivec4>(key)) {
+        return { true, {}, {} };
+    }
+    else {
+        if (dict.hasKey(key)) {
+            if (dict.hasValue<glm::dvec4>(key)) {
+                glm::dvec4 value = dict.value<glm::dvec4>(key);
+                glm::dvec4 intPart;
+                glm::bvec4 isInt = {
+                    modf(value.x, &intPart.x) == 0.0,
+                    modf(value.y, &intPart.y) == 0.0,
+                    modf(value.z, &intPart.z) == 0.0,
+                    modf(value.w, &intPart.w) == 0.0
+                };
+                if (isInt.x && isInt.y && isInt.z && isInt.w) {
+                    return { true, {}, {} };
+                }
+                else {
+                    return {
+                        false,
+                        {{ key, TestResult::Offense::Reason::WrongType }},
+                        {}
+                    };
+                }
+            }
+            else {
+                return { false, {{ key, TestResult::Offense::Reason::WrongType }}, {} };
+            }
+        }
+        else {
+            return { false, {{ key, TestResult::Offense::Reason::MissingKey }}, {} };
+        }
+    }
 }
 
 TableVerifier::TableVerifier(std::vector<DocumentationEntry> documentationEntries)

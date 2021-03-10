@@ -25,7 +25,6 @@
 #include <modules/base/rendering/renderablemodel.h>
 
 #include <modules/base/basemodule.h>
-#include <modules/base/rendering/modelgeometry.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
@@ -34,17 +33,20 @@
 #include <openspace/util/updatestructures.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/lightsource.h>
+#include <ghoul/io/model/modelgeometry.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/invariants.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/textureunit.h>
 
 namespace {
+    constexpr const char* _loggerCat = "RenderableModel";
+
     constexpr const char* ProgramName = "ModelProgram";
-    constexpr const char* KeyGeometry = "Geometry";
+    constexpr const char* KeyGeomModelFile = "GeometryFile";
+    constexpr const char* KeyForceRenderInvisible = "ForceRenderInvisible";
 
     constexpr const int DefaultBlending = 0;
     constexpr const int AdditiveBlending = 1;
@@ -60,10 +62,10 @@ namespace {
         { "Color Adding", ColorAddingBlending }
     };
 
-    constexpr const std::array<const char*, 13> UniformNames = {
+    constexpr const std::array<const char*, 12> UniformNames = {
         "opacity", "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
         "modelViewTransform", "normalTransform", "projectionTransform",
-        "performShading", "texture1", "ambientIntensity", "diffuseIntensity",
+        "performShading", "ambientIntensity", "diffuseIntensity",
         "specularIntensity", "opacityBlending"
     };
 
@@ -145,16 +147,20 @@ documentation::Documentation RenderableModel::Documentation() {
         "base_renderable_model",
         {
             {
-                KeyGeometry,
-                new TableVerifier({
-                    {
-                        "*",
-                        new ReferencingVerifier("base_geometry_model"),
-                        Optional::Yes
-                    }
-                }),
+                KeyGeomModelFile,
+                new OrVerifier({ new StringVerifier, new StringListVerifier }),
                 Optional::No,
+                "The file or files that should be loaded in this RenderableModel. The file can "
+                "contain filesystem tokens or can be specified relatively to the "
+                "location of the .mod file. "
                 "This specifies the model that is rendered by the Renderable."
+            },
+            {
+                KeyForceRenderInvisible,
+                new BoolVerifier,
+                Optional::Yes,
+                "Set if invisible parts (parts with no textures or materials) of the model "
+                "should be forced to render or not."
             },
             {
                 AmbientIntensityInfo.identifier,
@@ -263,13 +269,71 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
 
+    if (dictionary.hasKey(KeyForceRenderInvisible)) {
+        _forceRenderInvisible = dictionary.value<bool>(KeyForceRenderInvisible);
 
-    if (dictionary.hasKey(KeyGeometry)) {
-        ghoul::Dictionary dict = dictionary.value<ghoul::Dictionary>(KeyGeometry);
-        for (int i = 1; i <= dict.size(); ++i) {
-            std::string key = std::to_string(i);
-            ghoul::Dictionary geom = dict.value<ghoul::Dictionary>(key);
-            _geometry.push_back(modelgeometry::ModelGeometry::createFromDictionary(geom));
+        if (!_forceRenderInvisible) {
+            // Asset file have specifically said to not render invisible parts,
+            // do not notify in the log if invisible parts are detected and dropped
+            _notifyInvisibleDropped = false;
+        }
+    }
+
+    if (dictionary.hasKey(KeyGeomModelFile)) {
+        std::string file;
+
+        if (dictionary.hasValue<std::string>(KeyGeomModelFile)) {
+            // Handle single file
+            file = absPath(dictionary.value<std::string>(KeyGeomModelFile));
+            _geometry = ghoul::io::ModelReader::ref().loadModel(
+                file,
+                ghoul::io::ModelReader::ForceRenderInvisible(_forceRenderInvisible),
+                ghoul::io::ModelReader::NotifyInvisibleDropped(_notifyInvisibleDropped)
+            );
+        }
+        else if (dictionary.hasValue<ghoul::Dictionary>(KeyGeomModelFile)) {
+            LWARNING("Loading a model with several files is deprecated and will be "
+                "removed in a future release"
+            );
+
+            ghoul::Dictionary fileDictionary = dictionary.value<ghoul::Dictionary>(
+                KeyGeomModelFile
+            );
+            std::vector<std::unique_ptr<ghoul::modelgeometry::ModelGeometry>> geometries;
+
+            for (std::string_view k : fileDictionary.keys()) {
+                // Handle each file
+                file = absPath(fileDictionary.value<std::string>(k));
+                geometries.push_back(ghoul::io::ModelReader::ref().loadModel(
+                    file,
+                    ghoul::io::ModelReader::ForceRenderInvisible(_forceRenderInvisible),
+                    ghoul::io::ModelReader::NotifyInvisibleDropped(_notifyInvisibleDropped)
+                ));
+            }
+
+            if (!geometries.empty()) {
+                std::unique_ptr<ghoul::modelgeometry::ModelGeometry> combinedGeometry =
+                    std::move(geometries[0]);
+
+                 // Combine all models into one ModelGeometry
+                 for (unsigned int i = 1; i < geometries.size(); ++i) {
+                    for (ghoul::io::ModelMesh& mesh : geometries[i]->meshes()) {
+                        combinedGeometry->meshes().push_back(
+                            std::move(mesh)
+                        );
+                    }
+
+                    for (ghoul::modelgeometry::ModelGeometry::TextureEntry& texture :
+                        geometries[i]->textureStorage())
+                    {
+                        combinedGeometry->textureStorage().push_back(
+                            std::move(texture)
+                        );
+                    }
+                }
+                 _geometry = std::move(combinedGeometry);
+                _geometry->calculateBoundingRadius();
+            }
         }
     }
 
@@ -383,16 +447,14 @@ void RenderableModel::initializeGL() {
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
-    for (const ghoul::mm_unique_ptr<modelgeometry::ModelGeometry>& geom : _geometry) {
-        geom->initialize(this);
-    }
+    _geometry->initialize();
+    _geometry->calculateBoundingRadius();
+    setBoundingSphere(glm::sqrt(_geometry->boundingRadius()));
 }
 
 void RenderableModel::deinitializeGL() {
-    for (const ghoul::mm_unique_ptr<modelgeometry::ModelGeometry>& geom : _geometry) {
-        geom->deinitialize();
-    }
-    _geometry.clear();
+    _geometry->deinitialize();
+    _geometry.reset();
 
     BaseModule::ProgramObjectManager.release(
         ProgramName,
@@ -438,13 +500,11 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     );
     _program->setUniform(
         _uniformCache.lightIntensities,
-        _lightIntensitiesBuffer.data(),
-        nLightSources
+        _lightIntensitiesBuffer
     );
     _program->setUniform(
         _uniformCache.lightDirectionsViewSpace,
-        _lightDirectionsViewSpaceBuffer.data(),
-        nLightSources
+        _lightDirectionsViewSpaceBuffer
     );
     _program->setUniform(
         _uniformCache.modelViewTransform,
@@ -495,14 +555,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         glDisable(GL_DEPTH_TEST);
     }
 
-    ghoul::opengl::TextureUnit unit;
-    unit.activate();
-    _program->setUniform(_uniformCache.texture, unit);
-    for (const ghoul::mm_unique_ptr<modelgeometry::ModelGeometry>& geom : _geometry) {
-        geom->setUniforms(*_program);
-        geom->bindTexture();
-        geom->render();
-    }
+    _geometry->render(*_program);
     if (_disableFaceCulling) {
         glEnable(GL_CULL_FACE);
     }

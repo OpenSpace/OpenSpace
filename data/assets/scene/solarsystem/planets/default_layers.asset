@@ -8,6 +8,8 @@ asset.require('./jupiter/ganymede/default_layers')
 asset.require('./jupiter/io/default_layers')
 
 asset.require('./mars/default_layers')
+asset.require('./mars/moons/layers/colorlayers/deimos_viking')
+asset.require('./mars/moons/layers/colorlayers/phobos_viking')
 
 asset.require('./mercury/default_layers')
 

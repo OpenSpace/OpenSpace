@@ -213,7 +213,7 @@ Tile tile(TextTileProvider& t, const TileIndex& tileIndex) {
         // Keep track of defaultFBO and viewport to be able to reset state when done
         GLint defaultFBO;
         //GLint viewport[4];
-        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
+        defaultFBO = global::renderEngine->openglStateCache().defaultFramebuffer();
         //glGetIntegerv(GL_VIEWPORT, viewport);
 
         // Render to texture

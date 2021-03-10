@@ -22,26 +22,51 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___MULTIMODELGEOMETRY___H__
-#define __OPENSPACE_MODULE_BASE___MULTIMODELGEOMETRY___H__
+#ifndef __OPENSPACE_CORE___TEXTURECOMPONENT___H__
+#define __OPENSPACE_CORE___TEXTURECOMPONENT___H__
 
-#include <modules/base/rendering/modelgeometry.h>
+#include <ghoul/opengl/texture.h>
+
+namespace ghoul::filesystem { class File; }
+namespace ghoul::opengl {class Texture; }
 
 namespace openspace {
-    class RenderableModel;
-    class RenderableModelProjection;
-} // namespace openspace
 
-namespace openspace::modelgeometry {
-
-class MultiModelGeometry : public ModelGeometry {
+class TextureComponent {
 public:
-    MultiModelGeometry(const ghoul::Dictionary& dictionary);
+    using Texture = ghoul::opengl::Texture;
+
+    const Texture* texture() const;
+    Texture* texture();
+
+    void setFilterMode(Texture::FilterMode filterMode);
+    void setWrapping(Texture::WrappingMode wrapping);
+    void setShouldWatchFileForChanges(bool value);
+    void setShouldPurgeFromRAM(bool value);
+
+    void bind();
+    void uploadToGpu();
+
+    // Loads a texture from a file on disk
+    void loadFromFile(const std::string& path);
+
+    // Function to call in a renderable's update function to make sure
+    // the texture is kept up to date
+    void update();
 
 private:
-    virtual bool loadModel(const std::string& filename) override;
+    std::unique_ptr<ghoul::filesystem::File> _textureFile;
+    std::unique_ptr<Texture> _texture;
+
+    Texture::FilterMode _filterMode = Texture::FilterMode::LinearMipMap;
+    Texture::WrappingMode _wrappingMode = Texture::WrappingMode::Repeat;
+    bool _shouldWatchFile = true;
+    bool _shouldPurgeFromRAM = true;
+
+    bool _fileIsDirty = false;
+    bool _textureIsDirty = false;
 };
 
-}  // namespace openspace::modelgeometry
+} // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___MULTIMODELGEOMETRY___H__
+#endif // __OPENSPACE_CORE___TEXTURECOMPONENT___H__
