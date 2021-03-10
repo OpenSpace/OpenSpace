@@ -28,6 +28,8 @@
 #include <ghoul/misc/misc.h>
 #include <algorithm>
 #include <filesystem>
+#include <iomanip>
+#include <sstream>
 
 namespace openspace::documentation {
 
@@ -224,6 +226,57 @@ TestResult DirectoryVerifier::operator()(const ghoul::Dictionary& dict,
 
 std::string DirectoryVerifier::type() const {
     return "Directory";
+}
+
+TestResult DateTimeVerifier::operator()(const ghoul::Dictionary& dict,
+    const std::string& key) const
+{
+    TestResult res = StringVerifier::operator()(dict, key);
+    if (!res.success) {
+        return res;
+    }
+
+    std::string dateTime = dict.value<std::string>(key);
+    std::string format = "%Y %m %d %H:%M:%S"; // YYYY MM DD hh:mm:ss
+
+    std::tm t = {};
+    std::istringstream ss(dateTime);
+    ss >> std::get_time(&t, format.c_str());
+
+    // first check format (automatically checks if valid time)
+    if (ss.fail()) {
+        res.success = false;
+        TestResult::Offense off;
+        off.offender = key;
+        off.reason = TestResult::Offense::Reason::Verification;
+        off.explanation = "Not a valid format";
+        res.offenses.push_back(off);
+    }
+    // then check if valid date
+    else {
+        // normalize e.g. 29/02/2013 would become 01/03/2013
+        std::tm t_copy(t);
+        time_t when = mktime(&t_copy);
+        std::tm *norm = localtime(&when);
+
+        // validate (is the normalized date still the same?):
+        if (norm->tm_mday != t.tm_mday &&
+            norm->tm_mon != t.tm_mon &&
+            norm->tm_year != t.tm_year)
+        {
+            res.success = false;
+            TestResult::Offense off;
+            off.offender = key;
+            off.reason = TestResult::Offense::Reason::Verification;
+            off.explanation = "Not a valid date";
+            res.offenses.push_back(off);
+        }
+    }
+    return res;
+}
+
+std::string DateTimeVerifier::type() const {
+    return "Date and time";
 }
 
 TestResult Color3Verifier::operator()(const ghoul::Dictionary& dictionary,
