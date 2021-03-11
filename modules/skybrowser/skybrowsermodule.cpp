@@ -99,7 +99,6 @@ SkyBrowserModule::SkyBrowserModule()
     addProperty(_zoomFactor);
 
 
-
     global::callback::mousePosition->emplace_back(
         [&](double x, double y) {      
             glm::vec2 pos = glm::vec2(static_cast<float>(x), static_cast<float>(y));
@@ -146,6 +145,13 @@ SkyBrowserModule::SkyBrowserModule()
                 }
                 else if (mouseIsOnTarget && button == MouseButton::Left) {
                     
+                    startDragMousePosTarget = _mousePosition;
+                    startDragObjectPosTarget = _skyTarget->getScreenSpacePosition();
+                    currentlyDraggingTarget = true;
+                    return true;
+                }
+                else if (mouseIsOnBrowser && button == MouseButton::Right) {
+
                     startDragMousePosTarget = _mousePosition;
                     startDragObjectPosTarget = _skyTarget->getScreenSpacePosition();
                     currentlyDraggingTarget = true;
@@ -267,7 +273,7 @@ void SkyBrowserModule::handleInteractions() {
         while (_listenForInteractions) {
 
             if (currentlyDraggingBrowser) {
-                  _skyBrowser->translate(_mousePosition - startDragMousePosTarget, startDragObjectPosTarget);
+                  _skyBrowser->translate(_mousePosition - startDragMousePosBrowser, startDragObjectPosBrowser);
             }         
             if (currentlyDraggingTarget) {
                  _skyTarget->translate(_mousePosition - startDragMousePosTarget, startDragObjectPosTarget);
