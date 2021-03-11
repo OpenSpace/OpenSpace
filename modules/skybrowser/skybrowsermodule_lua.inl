@@ -57,7 +57,7 @@ namespace openspace::skybrowser::luascriptfunctions {
 
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();     
         ScreenSpaceSkyBrowser* browser = dynamic_cast<ScreenSpaceSkyBrowser*>(global::renderEngine->screenSpaceRenderable("ScreenSpaceBowser"));
-        ScreenSpaceSkyTarget* target = dynamic_cast<ScreenSpaceSkyTarget*>(global::renderEngine->screenSpaceRenderable("Target"));
+        ScreenSpaceSkyTarget* target = dynamic_cast<ScreenSpaceSkyTarget*>(global::renderEngine->screenSpaceRenderable("ScreenSpaceTarget"));
         module->initializeBrowser(browser, target);     
         module->skyBrowser()->translate(glm::vec3(-0.8, -0.4, 0.0));
         module->checkIfTargetExist();

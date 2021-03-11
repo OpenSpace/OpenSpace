@@ -17,7 +17,16 @@ namespace openspace {
     public:
         ScreenSpaceSkyTarget(const ghoul::Dictionary& dictionary);
         virtual ~ScreenSpaceSkyTarget() = default;
-
+        glm::vec2 getScreenSpacePosition();
+       
+        void translate(glm::vec2 translation, glm::vec2 position);
+       
+        glm::vec2 getScreenSpaceDimensions();
+        glm::vec2 getUpperRightCornerScreenSpace();
+        glm::vec2 getLowerLeftCornerScreenSpace();
+        bool coordIsInsideCornersScreenSpace(glm::vec2 coord);
+        
+          
         void bindTexture() override;
     private:
         std::unique_ptr<ghoul::opengl::Texture> _texture;

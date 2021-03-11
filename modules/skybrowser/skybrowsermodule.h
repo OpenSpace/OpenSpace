@@ -82,13 +82,16 @@ protected:
     bool _listenForInteractions;
     std::thread _threadWWTMessages;
     std::thread _threadHandleInteractions;
-    glm::vec2 startDragMousePos;
-    glm::vec2 startDragObjectPos;
+    glm::vec2 startDragMousePosBrowser;
+    glm::vec2 startDragObjectPosBrowser;
+    glm::vec2 startDragMousePosTarget;
+    glm::vec2 startDragObjectPosTarget;
     bool mouseIsClickedPreviouslyLeft;
     bool mouseIsClickedPreviouslyRight;
     glm::vec2 _mousePosition;
     double _mouseScroll;
     bool mouseIsOnBrowser;
+    bool mouseIsOnTarget;
     
 };
 

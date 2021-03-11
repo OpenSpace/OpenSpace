@@ -18,7 +18,7 @@ namespace openspace {
         void sendMouseEvent(CefStructBase<CefMouseEventTraits> event, int x, int y) const;
         glm::vec2 getUpperRightCornerScreenSpace();
         glm::vec2 getLowerLeftCornerScreenSpace();
-        bool coordIsInsideBrowserScreenSpace(glm::vec2 coord);
+        bool coordIsInsideCornersScreenSpace(glm::vec2 coord);
     private:
 
     };
