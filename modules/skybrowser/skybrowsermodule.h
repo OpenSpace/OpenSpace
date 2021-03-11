@@ -61,10 +61,11 @@ public:
 
     bool sendMessageToWWT(const ghoul::Dictionary& msg);
     void handleInteractions();
-    glm::vec2 getMousePositionInScreenSpaceCoords();
+    glm::vec2 getMousePositionInScreenSpaceCoords(glm::vec2& mousePos);
     void dragBrowser();
+    void moveTarget();
 
-    void initializeBrowser(ScreenSpaceSkyBrowser* skyBrowser_);
+    void initializeBrowser(ScreenSpaceSkyBrowser* skyBrowser, ScreenSpaceSkyTarget* skyTarget);
     ScreenSpaceSkyBrowser* skyBrowser();
     scripting::LuaLibrary luaLibrary() const override;
     //std::vector<documentation::Documentation> documentations() const override;
@@ -76,14 +77,19 @@ protected:
     properties::StringProperty _testProperty;
     properties::FloatProperty _zoomFactor;
     ScreenSpaceSkyBrowser* _skyBrowser;
+    ScreenSpaceSkyTarget* _skyTarget;
     bool _camIsSyncedWWT;
     bool _listenForInteractions;
     std::thread _threadWWTMessages;
     std::thread _threadHandleInteractions;
-    glm::dvec2 startDragMousePos;
-    glm::dvec2 startDragObjectPos;
-    bool mouseIsClickedPreviously;
+    glm::vec2 startDragMousePos;
+    glm::vec2 startDragObjectPos;
+    bool mouseIsClickedPreviouslyLeft;
+    bool mouseIsClickedPreviouslyRight;
     glm::vec2 _mousePosition;
+    double _mouseScroll;
+    bool mouseIsOnBrowser;
+    
 };
 
 } // namespace openspace

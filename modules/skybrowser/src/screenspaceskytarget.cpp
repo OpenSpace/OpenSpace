@@ -23,6 +23,8 @@
 #include <ghoul/opengl/openglstatecache.h>
 #include <glm/gtx/string_cast.hpp>
 
+#include <ghoul/filesystem/filesystem.h>
+
 namespace {
     constexpr const char* _loggerCat = "ScreenSpaceSkyTarget";
 
@@ -45,6 +47,23 @@ namespace openspace {
         }
         identifier = makeUniqueIdentifier(identifier);
         setIdentifier(identifier);
+
+        std::unique_ptr<ghoul::opengl::Texture> texture =
+            ghoul::io::TextureReader::ref().loadTexture(absPath("D:/Ylvas/OpenSpace/modules/skybrowser/target.png"));
+
+        if (texture) {
+            // Images don't need to start on 4-byte boundaries, for example if the
+            // image is only RGB
+            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+            texture->uploadTexture();
+            texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+            texture->purgeFromRAM();
+
+            _texture = std::move(texture);
+            _objectSize = _texture->dimensions();
+            _scale = 0.1f;
+        }
     }
 
     void ScreenSpaceSkyTarget::bindTexture() {
