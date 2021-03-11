@@ -14,7 +14,6 @@ namespace openspace {
         void translate(glm::vec3 translation);
     private:
 
-
     };
 }
 

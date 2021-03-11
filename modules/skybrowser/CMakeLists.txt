@@ -28,6 +28,7 @@ set(HEADER_FILES
     
     skybrowsermodule.h
     include/screenspaceskybrowser.h
+    include/screenspaceskytarget.h
     
 )
 source_group("Header Files" FILES ${HEADER_FILES})
@@ -37,6 +38,8 @@ set(SOURCE_FILES
     skybrowsermodule.cpp
     skybrowsermodule_lua.inl
     src/screenspaceskybrowser.cpp
+    src/screenspaceskytarget.cpp
+
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

@@ -18,6 +18,7 @@
 #include <fstream>
 #include <sstream>
 #include <modules/skybrowser/include/screenspaceskybrowser.h>
+#include <modules/skybrowser/include/screenspaceskytarget.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/util/camera.h>
 #include <thread> 
@@ -61,14 +62,14 @@ namespace openspace::skybrowser::luascriptfunctions {
 
         module->initializeBrowser(browser);     
         module->skyBrowser()->translate(glm::vec3(-0.8, -0.4, 0.0));
+        module->checkIfTargetExist();
 
         return 1;
     }
 
     int createBrowser(lua_State* L) {
 
-        ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::createBrowser");
-        ghoul::lua::value<std::string>(L, 1);
+        ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::createBrowser");
 
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 
@@ -96,6 +97,9 @@ namespace openspace::skybrowser::luascriptfunctions {
             scripting::ScriptEngine::RemoteScripting::Yes
         );
 
+        //test create target
+        module->createTarget();
+        
         return 1;
     }
     

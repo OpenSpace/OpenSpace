@@ -26,14 +26,11 @@
 
  //#include <modules/webbrowser/webbrowsermodule.h>
  //#include <modules/webbrowser/include/screenspacebrowser.h>
-#include <modules/base/rendering/screenspaceimagelocal.h>
 #include <openspace/rendering/screenspacerenderable.h>
 
 #include <openspace/rendering/renderable.h>
-#include <openspace/rendering/renderengine.h>
 
 #include <openspace/engine/moduleengine.h>
-
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
@@ -44,6 +41,10 @@
 #include <thread>
 #include <chrono>
 #include "skybrowsermodule_lua.inl"
+
+#include <openspace/engine/windowdelegate.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/texture.h>
 
 #include <cmath> // For atan2
 #include <ghoul/misc/dictionaryjsonformatter.h> // formatJson
@@ -145,6 +146,11 @@ void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     auto fScreenSpaceRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
     ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
     fScreenSpaceRenderable->registerClass<ScreenSpaceSkyBrowser>("ScreenSpaceSkyBrowser");
+
+    // register ScreenSpaceTarget
+    ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
+    fScreenSpaceRenderable->registerClass<ScreenSpaceSkyTarget>("ScreenSpaceSkyTarget");
+
 }
 
 bool SkyBrowserModule::sendMessageToWWT(const ghoul::Dictionary& msg) {
@@ -160,7 +166,6 @@ bool SkyBrowserModule::sendMessageToWWT(const ghoul::Dictionary& msg) {
 }
 
 void SkyBrowserModule::WWTfollowCamera() {
-    showTarget();
     while (true) {
         // Get camera view direction
         const glm::dvec3 viewDirection = global::navigationHandler->camera()->viewDirectionWorldSpace();
@@ -232,19 +237,36 @@ glm::dvec2 SkyBrowserModule::convertGalacticToCelestial(glm::dvec3 rGal) const {
     return glm::dvec2(glm::degrees(ra), glm::degrees(dec));
 }
 
-void SkyBrowserModule::showTarget() const {
+void SkyBrowserModule::checkIfTargetExist() {
+    ScreenSpaceSkyTarget* target = static_cast<ScreenSpaceSkyTarget*>(global::renderEngine->screenSpaceRenderable("ScreenSpaceTarget")); 
+
+    if (target) {
+        LINFO("Target is not null!");
+
+    }
+    LINFO("Target has been checked!");
+}
+
+void SkyBrowserModule::createTarget() {
 
     using namespace std::string_literals;
-    ghoul::Dictionary node;
-    node.setValue("Type", "ScreenSpaceImageLocal"s);
-    node.setValue("Identifier", "Target"s);
-    node.setValue("TexturePath", "D:/Ylvas/OpenSpace/modules/skybrowser/target.png"s);
-    node.setValue("Scale", 0.07);
+
+    // Create target test
+    std::string node = "{"
+        "Type = 'ScreenSpaceSkyTarget',"
+        "Identifier = 'ScreenSpaceTarget',"
+        "Name = 'Screen Space Target',"
+        "FaceCamera = false"
+        "}";
+
     openspace::global::scriptEngine->queueScript(
-        "openspace.addScreenSpaceRenderable(" + ghoul::formatLua(node) + ")",
+        "openspace.addScreenSpaceRenderable(" + node + ")",
         scripting::ScriptEngine::RemoteScripting::Yes
     );
+
 }
+
+
 
 /*
 std::vector<documentation::Documentation> SkyBrowserModule::documentations() const {

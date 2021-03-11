@@ -36,6 +36,7 @@
 namespace openspace {
 
 class ScreenSpaceSkyBrowser;
+class ScreenSpaceSkyTarget;
 
 class SkyBrowserModule : public OpenSpaceModule {
 public:
@@ -48,7 +49,10 @@ public:
     glm::dvec2 convertGalacticToCelestial(glm::dvec3 coords) const;
 
     void WWTfollowCamera();
-    void showTarget() const;
+    
+    // target
+    void createTarget();
+    void checkIfTargetExist();
 
     ghoul::Dictionary createMessageForMovingWWTCamera(const glm::dvec2 celestCoords, const float fov, const bool moveInstantly = true) const;
     ghoul::Dictionary createMessageForPausingWWTTime() const;
