@@ -32,6 +32,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <thread>
 
 namespace openspace {
 
@@ -49,7 +50,7 @@ public:
     glm::dvec2 convertGalacticToCelestial(glm::dvec3 coords) const;
 
     void WWTfollowCamera();
-    
+
     // target
     void createTarget();
     void checkIfTargetExist();
@@ -59,6 +60,9 @@ public:
     ghoul::Dictionary createMessageForLoadingWWTImgColl(const std::string& url) const;
 
     bool sendMessageToWWT(const ghoul::Dictionary& msg);
+    void handleInteractions();
+    glm::vec2 getMousePositionInScreenSpaceCoords();
+    void dragBrowser();
 
     void initializeBrowser(ScreenSpaceSkyBrowser* skyBrowser_);
     ScreenSpaceSkyBrowser* skyBrowser();
@@ -67,10 +71,19 @@ public:
 
 protected:
     void internalInitialize(const ghoul::Dictionary& dict) override;
+    void internalDeinitialize() override;
 
     properties::StringProperty _testProperty;
     properties::FloatProperty _zoomFactor;
     ScreenSpaceSkyBrowser* _skyBrowser;
+    bool _camIsSyncedWWT;
+    bool _listenForInteractions;
+    std::thread _threadWWTMessages;
+    std::thread _threadHandleInteractions;
+    glm::dvec2 startDragMousePos;
+    glm::dvec2 startDragObjectPos;
+    bool mouseIsClickedPreviously;
+    glm::vec2 _mousePosition;
 };
 
 } // namespace openspace

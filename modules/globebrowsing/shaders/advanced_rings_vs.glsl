@@ -22,72 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___MODELGEOMETRY___H__
-#define __OPENSPACE_MODULE_BASE___MODELGEOMETRY___H__
+#version __CONTEXT__
 
-#include <ghoul/misc/managedmemoryuniqueptr.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/texture.h>
-#include <memory>
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::opengl { class ProgramObject; }
+layout(location = 0) in vec2 in_position;
+layout(location = 1) in vec2 in_st;
 
-namespace openspace { class Renderable; }
-namespace openspace::documentation { struct Documentation; }
+out vec2 vs_st;
+out float vs_screenSpaceDepth;
+out vec4 vs_positionViewSpace;
+out vec4 shadowCoords;
 
-namespace openspace::modelgeometry {
+uniform dmat4 modelViewProjectionMatrix;
 
-class ModelGeometry {
-public:
-    struct Vertex {
-        GLfloat location[4];
-        GLfloat tex[2];
-        GLfloat normal[3];
-    };
+// ShadowMatrix is the matrix defined by:
+// textureCoordsMatrix * projectionMatrix * combinedViewMatrix * modelMatrix
+// where textureCoordsMatrix is just a scale and bias computation: [-1,1] to [0,1]
+uniform dmat4 shadowMatrix;
 
-    static ghoul::mm_unique_ptr<ModelGeometry> createFromDictionary(
-        const ghoul::Dictionary& dictionary
-    );
+void main() {
+    vs_st = in_st;
 
-    ModelGeometry(const ghoul::Dictionary& dictionary);
-    virtual ~ModelGeometry() = default;
-
-    virtual bool initialize(Renderable* parent);
-    virtual void deinitialize();
-    void bindTexture();
-    void render();
-
-    virtual bool loadModel(const std::string& filename) = 0;
-    void changeRenderMode(const GLenum mode);
-    //bool getVertices(std::vector<Vertex>* vertexList);
-    //bool getIndices(std::vector<int>* indexList);
-
-    double boundingRadius() const;
-
-    virtual void setUniforms(ghoul::opengl::ProgramObject& program);
-
-    static documentation::Documentation Documentation();
-
-protected:
-    bool loadObj(const std::string& filename);
-    bool loadCachedFile(const std::string& filename);
-    bool saveCachedFile(const std::string& filename);
-
-    GLuint _vaoID = 0;
-    GLuint _vbo = 0;
-    GLuint _ibo = 0 ;
-    GLenum _mode = GL_TRIANGLES;
-
-    double _boundingRadius = 0.0;
-    std::string _colorTexturePath;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
-
-    std::vector<Vertex> _vertices;
-    std::vector<int> _indices;
-    std::string _file;
-};
-
-}  // namespace openspace::modelgeometry
-
-#endif // __OPENSPACE_MODULE_BASE___MODELGEOMETRY___H__
+    dvec4 positionClipSpace  = modelViewProjectionMatrix * dvec4(in_position, 0.0, 1.0);
+    vec4 positionClipSpaceZNorm = z_normalization(vec4(positionClipSpace));
+    
+    shadowCoords = vec4(shadowMatrix * dvec4(in_position, 0.0, 1.0));
+    vs_screenSpaceDepth  = positionClipSpaceZNorm.w;
+    gl_Position = positionClipSpaceZNorm;
+}

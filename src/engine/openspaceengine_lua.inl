@@ -310,10 +310,7 @@ int createSingeColorImage(lua_State* L) {
     const std::string& key = "color";
     ghoul::Dictionary colorDict;
     colorDict.setValue(key, d);
-    TestResult res = DoubleVector3Verifier()(colorDict, key);
-
-    // @TODO (emmbr 2020-02-04) A 'ColorVerifier' would be really useful here, to easily
-    // check that we have a vector with values in [0, 1]
+    TestResult res = Color3Verifier()(colorDict, key);
 
     if (!res.success) {
         return ghoul::lua::luaError(

@@ -59,7 +59,13 @@ namespace {
     void traverseToFindFilesystemMatch(AssetTreeModel& model, QModelIndex parent,
                                        int nRows, const std::string& path)
     {
-        const size_t slash = path.find_first_of('/', 0);
+
+        int startIndex = 0;
+        std::string token = "${USER_ASSETS}/";
+        if (path.find(token) == 0) {
+            startIndex = token.length();
+        }
+        const size_t slash = path.find_first_of('/', startIndex);
         const bool endOfPath = (slash == std::string::npos);
         std::string firstDir = endOfPath ? "" : path.substr(0, slash);
 
@@ -117,12 +123,12 @@ namespace {
 } // namespace
 
 AssetsDialog::AssetsDialog(openspace::Profile& profile, const std::string& assetBasePath,
-                           QWidget* parent)
+                           const std::string& userAssetBasePath, QWidget* parent)
     : QDialog(parent)
     , _profile(profile)
 {
     setWindowTitle("Assets");
-    _assetTreeModel.importModelData(assetBasePath);
+    _assetTreeModel.importModelData(assetBasePath, userAssetBasePath);
     createWidgets();
 }
 

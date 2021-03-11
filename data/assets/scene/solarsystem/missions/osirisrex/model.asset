@@ -12,18 +12,11 @@ local kernels = asset.syncedResource({
     Version = 1
 })
 
-local textures = asset.syncedResource({
-    Name = "Osiris Rex Textures",
-    Type = "HttpSynchronization",
-    Identifier = "osirisrex_textures",
-    Version = 1
-})
-
 local models = asset.syncedResource({
     Name = "Osiris Rex Models",
     Type = "HttpSynchronization",
     Identifier = "osirisrex_models",
-    Version = 1
+    Version = 2
 })
 
 local BENNU_BODY = "2101955"
@@ -216,11 +209,7 @@ local OsirisRex = {
     Renderable = {
         Type = "RenderableModel",
         Body = "OSIRIS-REX",
-        Geometry = {{
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/orx_base_resized_12_sep_2016.obj",
-            ColorTexture = textures .. "/osirisTex.png"
-        }},
+        GeometryFile = models .. "/orx_base_resized_12_sep_2016.obj",
         LightSources = LightSources
     },
     GUI = {
@@ -246,11 +235,7 @@ local PolyCam = {
     Renderable = {
         Type = "RenderableModel",
         Body = "OSIRIS-REX",
-        Geometry = {{
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/orx_polycam_resized_12_sep_2016.obj",
-            ColorTexture = textures .. "/osirisTex.png"
-        }},
+        GeometryFile = models .. "/orx_polycam_resized_12_sep_2016.obj",
         LightSources = LightSources
     },
     GUI = {
@@ -265,11 +250,7 @@ local Rexis = {
     Renderable = {
         Type = "RenderableModel",
         Body = "OSIRIS-REX",
-        Geometry = {{
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/orx_rexis_resized_12_sep_2016.obj",
-            ColorTexture = textures .. "/osirisTex.png"
-        }},
+        GeometryFile = models .. "/orx_rexis_resized_12_sep_2016.obj",
         LightSources = LightSources
     },
     Transform = {

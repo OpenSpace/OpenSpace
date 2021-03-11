@@ -34,6 +34,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
+#include <ghoul/io/model/modelreader.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <memory>
 
@@ -42,6 +43,8 @@ namespace ghoul::opengl {
     class Texture;
 } // namespace ghoul::opengl
 
+namespace ghoul::modelgeometry { class ModelGeometry; }
+
 namespace openspace {
 
 struct RenderData;
@@ -49,7 +52,6 @@ struct UpdateData;
 class LightSource;
 
 namespace documentation { struct Documentation; }
-namespace modelgeometry { class ModelGeometry; }
 
 class RenderableModel : public Renderable {
 public:
@@ -68,7 +70,9 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    std::vector<ghoul::mm_unique_ptr<modelgeometry::ModelGeometry>> _geometry;
+    std::unique_ptr<ghoul::modelgeometry::ModelGeometry> _geometry;
+    bool _forceRenderInvisible = false;
+    bool _notifyInvisibleDropped = true;
 
     properties::FloatProperty _ambientIntensity;
 
@@ -87,7 +91,7 @@ private:
     ghoul::opengl::ProgramObject* _program = nullptr;
     UniformCache(opacity, nLightSources, lightDirectionsViewSpace, lightIntensities,
         modelViewTransform, normalTransform, projectionTransform,
-        performShading, texture, ambientIntensity, diffuseIntensity,
+        performShading, ambientIntensity, diffuseIntensity,
         specularIntensity, opacityBlending) _uniformCache;
 
     std::vector<std::unique_ptr<LightSource>> _lightSources;

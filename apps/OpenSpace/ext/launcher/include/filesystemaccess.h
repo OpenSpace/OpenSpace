@@ -54,11 +54,12 @@ public:
      *
      * \param dir The directory from which to start the search from
      */
-    std::string useQtFileSystemModelToTraverseDir(std::string dir);
+    std::string useQtFileSystemModelToTraverseDir(std::string dir, bool usersAssets = false);
 
 private:
     void parseChildDirElements(QFileInfo item, std::string space, int level,
-        std::vector<std::string>& dirNames, std::vector<std::string>& output);
+        std::vector<std::string>& dirNames, std::vector<std::string>& output,
+        bool userAssets);
     void parseChildFile(std::string res, bool& hasDirHeaderBeenAdded,
         std::vector<std::string>& dirNames, std::vector<std::string>& output);
     bool isApprovedPath(std::string path);

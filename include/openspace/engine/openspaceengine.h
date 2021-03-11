@@ -99,6 +99,7 @@ public:
 
     void writeSceneDocumentation();
     void writeStaticDocumentation();
+    void createUserDirectoriesIfNecessary();
 
     /**
      * Returns the Lua library that contains all Lua functions available to affect the
