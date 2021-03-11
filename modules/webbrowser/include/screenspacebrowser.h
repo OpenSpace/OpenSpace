@@ -73,7 +73,7 @@ public:
     bool isReady() const override;
 
 protected:
-    
+    properties::Vec2Property _dimensions;
     std::unique_ptr<BrowserInstance> _browserInstance;
 private:
     class ScreenSpaceRenderHandler : public WebRenderHandler {
@@ -87,7 +87,7 @@ private:
     void bindTexture() override;
 
     properties::StringProperty _url;
-    properties::Vec2Property _dimensions;
+    
     properties::TriggerProperty _reload;
 
     CefRefPtr<ScreenSpaceRenderHandler> _renderHandler;

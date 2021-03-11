@@ -46,6 +46,7 @@ namespace openspace::skybrowser::luascriptfunctions {
         //ghoul::Dictionary message = module->createMessageForPausingWWTTime();
         //module->sendMessageToWWT(message);
         module->WWTfollowCamera();
+        module->handleInteractions();
         
         return 1;
     }
@@ -62,7 +63,6 @@ namespace openspace::skybrowser::luascriptfunctions {
     }
 
     int createBrowser(lua_State* L) {
-
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::createBrowser");
 
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
@@ -83,14 +83,11 @@ namespace openspace::skybrowser::luascriptfunctions {
         node.setValue("Identifier", "ScreenSpaceBowser"s);
         node.setValue("Name", "Screen Space Bowser"s);
         node.setValue("Url", "http://localhost:8000/"s);
-
         */
-
         openspace::global::scriptEngine->queueScript(
             "openspace.addScreenSpaceRenderable(" + node + ")",
             scripting::ScriptEngine::RemoteScripting::Yes
         );
-        
 
         return 1;
     }

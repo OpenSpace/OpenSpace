@@ -11,7 +11,14 @@ namespace openspace {
         ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary);
         virtual ~ScreenSpaceSkyBrowser() = default;
         void executeJavascript(std::string& script) const;
-        void translate(glm::vec3 translation);
+        void translate(glm::vec2 translation);
+        void translate(glm::vec2 translation, glm::vec2 position);
+        glm::vec2 getScreenSpacePosition();
+        glm::vec2 getScreenSpaceDimensions();
+        void sendMouseEvent(CefStructBase<CefMouseEventTraits> event, int x, int y) const;
+        glm::vec2 getUpperRightCornerScreenSpace();
+        glm::vec2 getLowerLeftCornerScreenSpace();
+        bool coordIsInsideBrowserScreenSpace(glm::vec2 coord);
     private:
 
 

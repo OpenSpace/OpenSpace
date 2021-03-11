@@ -49,13 +49,16 @@ public:
     glm::dvec2 convertGalacticToCelestial(glm::dvec3 coords) const;
 
     void WWTfollowCamera();
-    void showTarget() const;
+    void createTarget();
 
     ghoul::Dictionary createMessageForMovingWWTCamera(const glm::dvec2 celestCoords, const float fov, const bool moveInstantly = true) const;
     ghoul::Dictionary createMessageForPausingWWTTime() const;
     ghoul::Dictionary createMessageForLoadingWWTImgColl(const std::string& url) const;
 
     bool sendMessageToWWT(const ghoul::Dictionary& msg);
+    void handleInteractions();
+    glm::vec2 getMousePositionInScreenSpaceCoords();
+    void dragBrowser();
 
     void initializeBrowser(ScreenSpaceSkyBrowser* skyBrowser_);
     ScreenSpaceSkyBrowser* skyBrowser();
@@ -70,7 +73,13 @@ protected:
     properties::FloatProperty _zoomFactor;
     ScreenSpaceSkyBrowser* _skyBrowser;
     bool _camIsSyncedWWT;
-    std::thread _thread;
+    bool _listenForInteractions;
+    std::thread _threadWWTMessages;
+    std::thread _threadHandleInteractions;
+    glm::dvec2 startDragMousePos;
+    glm::dvec2 startDragObjectPos;
+    bool mouseIsClickedPreviously;
+    glm::vec2 _mousePosition;
 };
 
 } // namespace openspace

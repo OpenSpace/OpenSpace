@@ -38,6 +38,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/interaction/navigationhandler.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/factorymanager.h>
@@ -47,6 +48,8 @@
 
 #include <cmath> // For atan2
 #include <ghoul/misc/dictionaryjsonformatter.h> // formatJson
+#include <glm/gtx/string_cast.hpp>
+
 
 namespace {
     constexpr const openspace::properties::Property::PropertyInfo TestInfo = 
@@ -84,19 +87,32 @@ SkyBrowserModule::SkyBrowserModule()
     , _zoomFactor(ZoomInfo, 50.f ,0.1f ,70.f)
     , _skyBrowser(nullptr)
     , _camIsSyncedWWT(true)
+    , mouseIsClickedPreviously(false)
+    , _listenForInteractions(true)
 {
     addProperty(_testProperty);
     addProperty(_zoomFactor);
+
+    createTarget();
+
+    global::callback::mousePosition->emplace_back(
+        [&](double x, double y) {
+            _mousePosition = glm::vec2(static_cast<float>(x), static_cast<float>(y));
+        }
+    );
 } 
 
 void SkyBrowserModule::internalDeinitialize() {
         // Set flag to false so the thread can exit
     _camIsSyncedWWT = false;
-    if (_thread.joinable()) {
-        _thread.join();
+    if (_threadWWTMessages.joinable()) {
+        _threadWWTMessages.join();
         LINFO("Joined thread");
     }
-  
+    if (_threadHandleInteractions.joinable()) {
+        _threadHandleInteractions.join();
+        LINFO("Joined thread");
+    }
 }
 
 scripting::LuaLibrary SkyBrowserModule::luaLibrary() const {
@@ -169,12 +185,56 @@ bool SkyBrowserModule::sendMessageToWWT(const ghoul::Dictionary& msg) {
     }
 }
 
-void SkyBrowserModule::WWTfollowCamera() {
-    showTarget();
-    //std::thread(&SkyBrowserModule::WWTfollowCamera, module)
+void SkyBrowserModule::handleInteractions() {
+    /*
+   float scroll = global::navigationHandler->inputState().mouseScrollDelta();
+   bool mouseIsOverBrowser = _skyBrowser->coordIsInsideBrowserScreenSpace(getMousePositionInScreenSpaceCoords());
+   LINFO(std::to_string(mouseIsOverBrowser));
+       
+    _zoomFactor = std::clamp(_zoomFactor - scroll, 0.001f, 70.0f);
+    CefStructBase<CefMouseEventTraits> event;
+    _skyBrowser->sendMouseEvent(event, scroll, scroll);
+   */
+    _threadHandleInteractions = std::thread([&] {
+        while (_listenForInteractions) {
+            bool mouseIsClicked = global::navigationHandler->inputState().isMouseButtonPressed(MouseButton::Left);
 
+            if (mouseIsClicked) {
+                dragBrowser();
+            }         
+            else {
+                mouseIsClickedPreviously = false;
+            }
+        }
+    });
+}
+
+glm::vec2 SkyBrowserModule::getMousePositionInScreenSpaceCoords() {
+    glm::vec2 size = glm::vec2(global::windowDelegate->currentWindowSize());
+
+    // Transform pixel coordinates to screen space coordinates [-1,1]
+    return glm::vec2((_mousePosition - (size / 2.0f)) * glm::vec2(1.0f,-1.0f) / (size / 2.0f));
+}
+
+void SkyBrowserModule::dragBrowser() {
+    // First click on browser - user is not holding down the button since last frame
+    glm::dvec2  mouseCoords = getMousePositionInScreenSpaceCoords();
+    bool mouseIsOnBrowser = _skyBrowser->coordIsInsideBrowserScreenSpace(mouseCoords);
+
+    if (mouseIsOnBrowser && !mouseIsClickedPreviously) {
+        mouseIsClickedPreviously = true;
+        startDragMousePos = mouseCoords;
+        startDragObjectPos = _skyBrowser->getScreenSpacePosition();
+    }
+    else if (mouseIsClickedPreviously) {
+        _skyBrowser->translate(mouseCoords - startDragMousePos, startDragObjectPos);
+    }
+}
+
+void SkyBrowserModule::WWTfollowCamera() {
+    
     // Start a thread to enable user interaction while sending the calls to WWT
-    _thread = std::thread([&] {
+    _threadWWTMessages = std::thread([&] {
         while (_camIsSyncedWWT) {
 
             // Get camera view direction
@@ -183,17 +243,12 @@ void SkyBrowserModule::WWTfollowCamera() {
             // Convert to celestial coordinates
             glm::dvec2 celestCoords = convertGalacticToCelestial(viewDirection);
             ghoul::Dictionary message = createMessageForMovingWWTCamera(celestCoords, _zoomFactor);
-            if (!_camIsSyncedWWT) {
-                break;
-            }
-            else {
-                std::this_thread::sleep_for(std::chrono::milliseconds(50));
-                sendMessageToWWT(message);
-            }
-            LINFO("Thread running... " + std::to_string(_camIsSyncedWWT));
 
+            // Sleep so we don't bombard WWT with too many messages
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+            sendMessageToWWT(message);
+            
         }
-        LINFO("Thread finished... " + std::to_string(_camIsSyncedWWT));
     });
     
 }
@@ -256,7 +311,7 @@ glm::dvec2 SkyBrowserModule::convertGalacticToCelestial(glm::dvec3 rGal) const {
     return glm::dvec2(glm::degrees(ra), glm::degrees(dec));
 }
 
-void SkyBrowserModule::showTarget() const {
+void SkyBrowserModule::createTarget() {
 
     using namespace std::string_literals;
     ghoul::Dictionary node;
