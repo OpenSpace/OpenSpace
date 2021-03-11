@@ -123,7 +123,7 @@ SkyBrowserModule::SkyBrowserModule()
     global::callback::mouseScrollWheel->emplace_back(
         [&](double, double scroll) -> bool {
             if (mouseIsOnBrowser) {
-                float zoom = scroll > 0.0 ? -2.0f : 2.0f;
+                float zoom = scroll > 0.0 ? -log(_zoomFactor + 1.1f) : log(_zoomFactor + 1.1f);
                 _zoomFactor = std::clamp(_zoomFactor + zoom, 0.001f, 70.0f);
                 return true;
             }
