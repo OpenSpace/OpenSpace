@@ -96,7 +96,12 @@ namespace openspace {
 
         return translation;
     }
-    
+
+    glm::vec2 ScreenSpaceSkyTarget::getAnglePosition() {
+        glm::vec3 pos = _cartesianPosition.value();
+        return glm::vec2(atan(pos.x / pos.z), atan(pos.y / pos.z));
+    }
+
     glm::vec2  ScreenSpaceSkyTarget::getScreenSpaceDimensions() {
         glm::mat4 modelTransform = globalRotationMatrix() * translationMatrix() *
             localRotationMatrix() * scaleMatrix();

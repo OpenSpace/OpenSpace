@@ -18,6 +18,7 @@ namespace openspace {
         ScreenSpaceSkyTarget(const ghoul::Dictionary& dictionary);
         virtual ~ScreenSpaceSkyTarget() = default;
         glm::vec2 getScreenSpacePosition();
+        glm::vec2 getAnglePosition();
        
         void translate(glm::vec2 translation, glm::vec2 position);
        

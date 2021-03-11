@@ -50,6 +50,7 @@
 #include <cmath> // For atan2
 #include <ghoul/misc/dictionaryjsonformatter.h> // formatJson
 #include <glm/gtx/string_cast.hpp>
+#include <glm/gtx/rotate_vector.hpp >
 
 namespace {
     constexpr const openspace::properties::Property::PropertyInfo TestInfo = 
@@ -295,11 +296,19 @@ void SkyBrowserModule::WWTfollowCamera() {
     _threadWWTMessages = std::thread([&] {
         while (_camIsSyncedWWT) {
 
-            // Get camera view direction
-            const glm::dvec3 viewDirection = global::navigationHandler->camera()->viewDirectionWorldSpace();
+            // Get camera view direction and orthogonal coordinate system of camera view direction
+            glm::vec3 viewDirection = global::navigationHandler->camera()->viewDirectionWorldSpace();
+            glm::vec3 upDirection = global::navigationHandler->camera()->lookUpVectorWorldSpace();
+            glm::vec3 sideDirection = glm::cross(upDirection, viewDirection);
+
+            glm::vec2 angleOffset = _skyTarget->getAnglePosition();
+            // Change view if target is moved
+            glm::vec3 targetDirection = glm::rotate(viewDirection, angleOffset.x, upDirection);
+            targetDirection = glm::rotate(targetDirection, angleOffset.y, sideDirection);
+           
 
             // Convert to celestial coordinates
-            glm::dvec2 celestCoords = convertGalacticToCelestial(viewDirection);
+            glm::dvec2 celestCoords = convertGalacticToCelestial(targetDirection);
             ghoul::Dictionary message = createMessageForMovingWWTCamera(celestCoords, _zoomFactor);
 
             // Sleep so we don't bombard WWT with too many messages
