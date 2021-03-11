@@ -88,23 +88,34 @@ SkyBrowserModule::SkyBrowserModule()
     , _skyBrowser(nullptr)
     , _skyTarget(nullptr)
     , _camIsSyncedWWT(true)
-    , mouseIsClickedPreviouslyLeft(false)
+    , currentlyDraggingBrowser(false)
+    , currentlyDraggingTarget(false)
     , _listenForInteractions(true)
     , mouseIsOnBrowser(false)
     , mouseIsOnTarget(false)
+
 {
     addProperty(_testProperty);
     addProperty(_zoomFactor);
 
+
+
     global::callback::mousePosition->emplace_back(
-        [&](double x, double y) {
+        [&](double x, double y) {      
             glm::vec2 pos = glm::vec2(static_cast<float>(x), static_cast<float>(y));
             _mousePosition = getMousePositionInScreenSpaceCoords(pos);
-            if (_skyBrowser) {
-                mouseIsOnBrowser = _skyBrowser->coordIsInsideCornersScreenSpace(_mousePosition);
-            }
+
             if (_skyTarget) {
-                mouseIsOnTarget = _skyTarget->coordIsInsideCornersScreenSpace(_mousePosition);
+                mouseIsOnTarget = _skyTarget->coordIsInsideCornersScreenSpace(_mousePosition);          
+            }
+            else {
+                mouseIsOnTarget = false;
+            }
+            if (_skyBrowser) {
+                mouseIsOnBrowser = _skyBrowser->coordIsInsideCornersScreenSpace(_mousePosition);               
+            }
+            else {
+                mouseIsOnBrowser = false;
             }
         }
     );
@@ -114,11 +125,49 @@ SkyBrowserModule::SkyBrowserModule()
             if (mouseIsOnBrowser) {
                 float zoom = scroll > 0.0 ? -2.0f : 2.0f;
                 _zoomFactor = std::clamp(_zoomFactor + zoom, 0.001f, 70.0f);
+                return true;
             }
           
-            return true;
+            return false;
         }
     );
+
+    global::callback::mouseButton->emplace_back(
+        [&](MouseButton button, MouseAction action, KeyModifier modifier) -> bool {
+
+            if (action == MouseAction::Press) {
+                
+                if (mouseIsOnBrowser && button == MouseButton::Left) {
+                    
+                    startDragMousePosBrowser = _mousePosition;
+                    startDragObjectPosBrowser = _skyBrowser->getScreenSpacePosition();
+                    currentlyDraggingBrowser = true;
+                    return true;
+                }
+                else if (mouseIsOnTarget && button == MouseButton::Left) {
+                    
+                    startDragMousePosTarget = _mousePosition;
+                    startDragObjectPosTarget = _skyTarget->getScreenSpacePosition();
+                    currentlyDraggingTarget = true;
+                    return true;
+                }
+            }
+            else if (action == MouseAction::Release) {
+                if (currentlyDraggingBrowser) {
+                    currentlyDraggingBrowser = false;
+                    return true;
+                }
+                if (currentlyDraggingTarget) {
+                    currentlyDraggingTarget = false;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    );
+
+    
 } 
 
 void SkyBrowserModule::internalDeinitialize() {
@@ -210,32 +259,18 @@ bool SkyBrowserModule::sendMessageToWWT(const ghoul::Dictionary& msg) {
 }
 
 void SkyBrowserModule::handleInteractions() {
-    /*
-   float scroll = global::navigationHandler->inputState().mouseScrollDelta();
-   bool mouseIsOverBrowser = _skyBrowser->coordIsInsideBrowserScreenSpace(getMousePositionInScreenSpaceCoords());
-   LINFO(std::to_string(mouseIsOverBrowser));
-       
-    _zoomFactor = std::clamp(_zoomFactor - scroll, 0.001f, 70.0f);
+    /*       
     CefStructBase<CefMouseEventTraits> event;
     _skyBrowser->sendMouseEvent(event, scroll, scroll);
    */
     _threadHandleInteractions = std::thread([&] {
         while (_listenForInteractions) {
-            bool mouseIsClickedLeft = global::navigationHandler->inputState().isMouseButtonPressed(MouseButton::Left);
-            bool mouseIsClickedRight = global::navigationHandler->inputState().isMouseButtonPressed(MouseButton::Right);
 
-            if (mouseIsClickedLeft && !mouseIsClickedRight) {
-                dragBrowser();
+            if (currentlyDraggingBrowser) {
+                  _skyBrowser->translate(_mousePosition - startDragMousePosTarget, startDragObjectPosTarget);
             }         
-            else {
-                mouseIsClickedPreviouslyLeft = false;
-                
-            }
-            if (mouseIsClickedRight && !mouseIsClickedLeft) {
-                moveTarget();
-            }
-            else {
-                mouseIsClickedPreviouslyRight = false;
+            if (currentlyDraggingTarget) {
+                 _skyTarget->translate(_mousePosition - startDragMousePosTarget, startDragObjectPosTarget);
             }
         }
     });
@@ -246,31 +281,6 @@ glm::vec2 SkyBrowserModule::getMousePositionInScreenSpaceCoords(glm::vec2& mouse
 
     // Transform pixel coordinates to screen space coordinates [-1,1]
     return glm::vec2((mousePos - (size / 2.0f)) * glm::vec2(1.0f,-1.0f) / (size / 2.0f));
-}
-
-void SkyBrowserModule::dragBrowser() {
-    // First click on browser - user is not holding down the button since last frame
-    if (mouseIsOnBrowser && !mouseIsClickedPreviouslyLeft) {
-        mouseIsClickedPreviouslyLeft = true;
-        startDragMousePosBrowser = _mousePosition;
-        startDragObjectPosBrowser = _skyBrowser->getScreenSpacePosition();
-    }
-    else if (mouseIsClickedPreviouslyLeft) {
-        _skyBrowser->translate(_mousePosition - startDragMousePosBrowser, startDragObjectPosBrowser);
-    }
-}
-
-void SkyBrowserModule::moveTarget() {
-    // First click on browser - user is not holding down the button since last frame
-    if (mouseIsOnTarget && !mouseIsClickedPreviouslyRight) {
-        mouseIsClickedPreviouslyRight = true;
-        startDragMousePosTarget = _mousePosition;
-        startDragObjectPosTarget = _skyTarget->getScreenSpacePosition();
-        LINFO(glm::to_string(startDragObjectPosTarget));
-    }
-    else if (mouseIsClickedPreviouslyRight) {
-        _skyTarget->translate(_mousePosition - startDragMousePosTarget, startDragObjectPosTarget);
-    }
 }
 
 void SkyBrowserModule::WWTfollowCamera() {
@@ -289,8 +299,10 @@ void SkyBrowserModule::WWTfollowCamera() {
             // Sleep so we don't bombard WWT with too many messages
             std::this_thread::sleep_for(std::chrono::milliseconds(50));
             sendMessageToWWT(message);
+            
         }
     });
+    
 }
 
 ghoul::Dictionary SkyBrowserModule::createMessageForMovingWWTCamera(const glm::dvec2 celestCoords, const float fov,  const bool moveInstantly) const {
@@ -322,6 +334,7 @@ ghoul::Dictionary SkyBrowserModule::createMessageForPausingWWTTime() const {
 
     return msg;
 }
+
 
 void SkyBrowserModule::initializeBrowser(ScreenSpaceSkyBrowser* skyBrowser, ScreenSpaceSkyTarget* skyTarget) {
     _skyBrowser = skyBrowser;
@@ -371,8 +384,7 @@ void SkyBrowserModule::createTarget() {
         "Type = 'ScreenSpaceSkyTarget',"
         "Identifier = 'ScreenSpaceTarget',"
         "Name = 'Screen Space Target',"
-        "FaceCamera = false ,"
-        "Scale = 0.25"
+        "FaceCamera = false"
         "}";
 
     openspace::global::scriptEngine->queueScript(

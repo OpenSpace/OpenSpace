@@ -62,8 +62,6 @@ public:
     bool sendMessageToWWT(const ghoul::Dictionary& msg);
     void handleInteractions();
     glm::vec2 getMousePositionInScreenSpaceCoords(glm::vec2& mousePos);
-    void dragBrowser();
-    void moveTarget();
 
     void initializeBrowser(ScreenSpaceSkyBrowser* skyBrowser, ScreenSpaceSkyTarget* skyTarget);
     ScreenSpaceSkyBrowser* skyBrowser();
@@ -86,13 +84,12 @@ protected:
     glm::vec2 startDragObjectPosBrowser;
     glm::vec2 startDragMousePosTarget;
     glm::vec2 startDragObjectPosTarget;
-    bool mouseIsClickedPreviouslyLeft;
-    bool mouseIsClickedPreviouslyRight;
+    bool currentlyDraggingBrowser;
+    bool currentlyDraggingTarget;
     glm::vec2 _mousePosition;
     double _mouseScroll;
     bool mouseIsOnBrowser;
     bool mouseIsOnTarget;
-    
 };
 
 } // namespace openspace
