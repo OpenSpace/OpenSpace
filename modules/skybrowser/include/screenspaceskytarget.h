@@ -18,10 +18,22 @@ namespace openspace {
         ScreenSpaceSkyTarget(const ghoul::Dictionary& dictionary);
         virtual ~ScreenSpaceSkyTarget() = default;
 
+        // from SSR
+        bool initializeGL() override;
+        bool isReady() const override;
+
+        void render() override;
+        void update() override;
+
+        void createShaders();
+
         void bindTexture() override;
     private:
         std::unique_ptr<ghoul::opengl::Texture> _texture;
 
+        UniformCache(modelTransform, viewProj, texture, borderWidth, scale) _uniformCache;
+        GLuint _vertexArray = 0;
+        GLuint _vertexBuffer = 0;
     };
 }
 
