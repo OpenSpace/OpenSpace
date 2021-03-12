@@ -66,7 +66,7 @@
       "is_local": false,
       "key": "F2",
       "name": "Show the legend image",
-      "script": "openspace.setPropertyValueSingle('ScreenSpace.Legendstreamnodes.Alpha', 0.000000);openspace.setPropertyValueSingle('ScreenSpace.Legendstreamnodes.Alpha', 1.000000, 4);openspace.setPropertyValueSingle('ScreenSpace.Legendstreamnodes.Enabled', true);"
+      "script": "openspace.setPropertyValueSingle('ScreenSpace.Legendstreamnodes.Opacity', 0.000000);openspace.setPropertyValueSingle('ScreenSpace.Legendstreamnodes.Opacity', 1.000000, 4);openspace.setPropertyValueSingle('ScreenSpace.Legendstreamnodes.Enabled', true);"
     },
     {
       "documentation": "Hides the legend image",
@@ -74,7 +74,7 @@
       "is_local": false,
       "key": "F3",
       "name": "Hides the legend image",
-      "script": "openspace.setPropertyValueSingle('ScreenSpace.Legendstreamnodes.Alpha', 0.000000, 2);"
+      "script": "openspace.setPropertyValueSingle('ScreenSpace.Legendstreamnodes.Opacity', 0.000000, 2);"
     },
     {
       "documentation": "Start to focus on Earth",

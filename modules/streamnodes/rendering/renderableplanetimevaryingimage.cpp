@@ -79,16 +79,17 @@ namespace openspace {
                     KeyLazyLoading,
                     new BoolVerifier,
                     Optional::Yes,
-                    "If this value is set to 'true', the image for this plane will not be "
-                    "loaded at startup but rather when image is shown for the first time. "
-                    "Additionally, if the plane is hidden, the image will automatically be "
-                    "unloaded"
+                    "If this value is set to 'true', the image for this plane will not"
+                    "be loaded at startup but rather when image is shown for the first "
+                    "time. Additionally, if the plane is hidden, the image will "
+                    "automatically be unloaded"
                 }
             }
         };
     }
 
-    RenderablePlaneTimeVaryingImage::RenderablePlaneTimeVaryingImage(const ghoul::Dictionary& dictionary)
+    RenderablePlaneTimeVaryingImage::RenderablePlaneTimeVaryingImage
+    (const ghoul::Dictionary& dictionary)
         : RenderablePlane(dictionary)
         , _texturePath(TextureInfo)
     {
@@ -154,8 +155,6 @@ namespace openspace {
         return RenderablePlane::isReady();
     }
 
-#pragma optimize ("", off)
-
     void RenderablePlaneTimeVaryingImage::initializeGL() {
         RenderablePlane::initializeGL();
 
@@ -169,86 +168,13 @@ namespace openspace {
         
         _textureFiles.resize(_sourceFiles.size());
         for(int i = 0; i < _sourceFiles.size(); ++i){
-            
-            //unsigned int hash = ghoul::hashCRC32File(_sourceFiles[i]);
 
-            /*
-            _texture = BaseModule::TextureManager.request(
-                    std::to_string(hash),
-                    [path = _sourceFiles[_activeTriggerTimeIndex]]() -> std::unique_ptr<ghoul::opengl::Texture> {
-
-                            ghoul::io::TextureReader::ref().loadTexture(absPath(path));
-
-                _texture = _textureFiles[_activeTriggerTimeIndex];
-                       // LDEBUGC(
-                        //    "RenderableTimeVaryingPlaneImageLocal",
-                        //    fmt::format("Loaded texture from '{}'", absPath(path))
-                        //);
-                
-
-                          texture->uploadTexture();
-                          texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-                          texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
-                        //texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
-
-
-                       // return texture;
-
-               // );
-
-               */
-
-           // std::unique_ptr<ghoul::opengl::Texture> texture =
-         _textureFiles[i] = ghoul::io::TextureReader::ref().loadTexture(absPath(_sourceFiles[i]));
-            //temp* = förra texturen;
-            //texture= 
-           /* _textureFiles[i] = BaseModule::TextureManager.request(
-                std::to_string(hash),
-                [path = _sourceFiles[i]]()->std::unique_ptr<ghoul::opengl::Texture> {
-              
-
-                //std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(path));
-                //texture->uploadTexture();
-                //texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-                //
-                //texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-                //texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
-
-                texture->purgeFromRAM();
-
-                
-                return texture;
-            });
-              */
+            _textureFiles[i] = ghoul::io::TextureReader::ref().loadTexture
+            (absPath(_sourceFiles[i]));
             _textureFiles[i]->setInternalFormat(GL_COMPRESSED_RGBA);
             _textureFiles[i]->uploadTexture();
             _textureFiles[i]->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-            //_textureFiles[i]->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
             _textureFiles[i]->purgeFromRAM();
-            //BaseModule::TextureManager.release(_textureFiles[i]);
-            
-
-           // _textureFiles[i] = ghoul::io::TextureReader::ref().loadTexture(absPath(_sourceFiles[i]));
-            //_textureFiles[i]->uploadTexture();
-            //_textureFiles[i]->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-            //_textureFiles[i]->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
-            //_textureFiles[i]->purgeFromRAM();
-
-            
-            //_textureFiles[i] = std::move(_texture);
-            //BaseModule::TextureManager.release(_texture);
-            /*
-            unsigned int hash = ghoul::hashCRC32File(_sourceFiles[i]);
-
-            _texture = BaseModule::TextureManager.request(
-                std::to_string(hash),
-                [path = _sourceFiles[i]]()->std::unique_ptr<ghoul::opengl::Texture> {
-                std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(path));
-            };
-            */
-            //_textureFiles[i] = texture;
-            //_textureFiles[i] = _texture;
-           // BaseModule::TextureManager.release(_textureFiles[i]);
             }
           
         if (!_isLoadingLazily) {
@@ -260,7 +186,7 @@ namespace openspace {
     bool RenderablePlaneTimeVaryingImage::extractMandatoryInfoFromDictionary()
     {
         // Ensure that the source folder exists and then extract
-       // the files with the same extension as <inputFileTypeString>
+        // the files with the same extension as <inputFileTypeString>
         ghoul::filesystem::Directory sourceFolder(_texturePath);
         if (FileSys.directoryExists(sourceFolder)) {
             // Extract all file paths from the provided folder
@@ -279,7 +205,7 @@ namespace openspace {
         }
         else {
             LERROR(fmt::format(
-                "{}: FieldlinesSequence {} is not a valid directory",
+                "{}: Plane sequence filepath {} is not a valid directory",
                 _identifier,
                 _texturePath
             ));
@@ -291,7 +217,6 @@ namespace openspace {
     }
     void RenderablePlaneTimeVaryingImage::deinitializeGL() {
         _textureFile = nullptr;
-
 
         BaseModule::TextureManager.release(_texture);
 
@@ -316,7 +241,6 @@ namespace openspace {
             (currentTime < _sequenceEndTime);
         //const bool isInInterval = true;
         if (isInInterval) {
-            ZoneScopedN("isInInterval")
             const size_t nextIdx = _activeTriggerTimeIndex + 1;
             if (
                 // true => Previous frame was not within the sequence interval
@@ -327,36 +251,28 @@ namespace openspace {
                 (nextIdx < _nStates && currentTime >= _startTimes[nextIdx]))
             {
                 updateActiveTriggerTimeIndex(currentTime);
-                //LDEBUG("Vi borde uppdatera1");
-
-                // _mustLoadNewStateFromDisk = true;
-                //LDEBUG("vi borde uppdatera");
                 _needsUpdate = true;
 
             } // else we're still in same state as previous frame (no changes needed)
         }
         else {
-            ZoneScopedN("else")
             //not in interval => set everything to false
-        //LDEBUG("not in interval");
             _activeTriggerTimeIndex = 0;
             _needsUpdate = false;
         }
 
         if ((_needsUpdate || _textureIsDirty) && !_isLoadingTexture) {
-            ZoneScopedN("needsupdate")
             _isLoadingTexture = true;
             loadTexture();
             _textureIsDirty = false;
         }
-        glFrontFace(GL_CCW);
+
     }
-    // Extract J2000 time from file names
-    // Requires files to be named as such: 'YYYY-MM-DDTHH-MM-SS-XXX.json'
+
+    // Requires time to be formated as such: 'YYYY-MM-DDTHH-MM-SS-XXX'
     void RenderablePlaneTimeVaryingImage::extractTriggerTimesFromFileNames() {
-        // number of  characters in filename (excluding '.json')
         constexpr const int FilenameSize = 23;
-        // size(".json")
+        // size(.png or .jpg)
         constexpr const int ExtSize = 4;
 
         for (const std::string& filePath : _sourceFiles) {
@@ -378,7 +294,9 @@ namespace openspace {
             _startTimes.push_back(triggerTime);
         }
     }
-    void RenderablePlaneTimeVaryingImage::updateActiveTriggerTimeIndex(double currentTime) {
+
+    void RenderablePlaneTimeVaryingImage::updateActiveTriggerTimeIndex
+    (double currentTime) {
         auto iter = std::upper_bound(_startTimes.begin(), _startTimes.end(), currentTime);
         if (iter != _startTimes.end()) {
             if (iter != _startTimes.begin()) {
@@ -409,59 +327,8 @@ namespace openspace {
     }
     void RenderablePlaneTimeVaryingImage::loadTexture() {
         if (_activeTriggerTimeIndex != -1) {
-           // ghoul::opengl::Texture* t = _texture;
-            //std::unique_ptr<ghoul::opengl::Texture> t = _texture;
-           
             _texture = _textureFiles[_activeTriggerTimeIndex].get();
-            //_texture->uploadTexture();
-            //unsigned int hash = ghoul::hashCRC32File(_sourceFiles[_activeTriggerTimeIndex]);
-
-            //_texture = _textureFiles[_activeTriggerTimeIndex];
-            //_texture->uploadTexture();
-            //_texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-            //_texture->purgeFromRAM();
-           // _textureFiles[_activeTriggerTimeIndex]->uploadTexture();
-           // _textureFiles[_activeTriggerTimeIndex]->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-            //_texture->uploadTexture();
-            //_texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-            //_texture->purgeFromRAM();
-            //_textureFiles[_activeTriggerTimeIndex]->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
-           // _textureFiles[_activeTriggerTimeIndex]->purgeFromRAM();
-            //_texture = _textureFiles[_activeTriggerTimeIndex];
-             
-                        //ghoul::io::TextureReader::ref().loadTexture(absPath(path));
-                        
-           // _texture = _textureFiles[_activeTriggerTimeIndex];
-                   // LDEBUGC(
-                    //    "RenderableTimeVaryingPlaneImageLocal",
-                    //    fmt::format("Loaded texture from '{}'", absPath(path))
-                    //);
-            //_texture _textureFiles[_activeTriggerTimeIndex];
-          
-                    //       texture->uploadTexture();
-                  //  texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-                  //  texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
-                    //texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
-               
-                    
-                   // return texture;
-                
-           // );
-
-            //_textureFiles[_activeTriggerTimeIndex]->uploadTexture();
-            //_textureFiles[_activeTriggerTimeIndex]->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-            //_textureFiles[_activeTriggerTimeIndex]->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
-            //_textureFiles[_activeTriggerTimeIndex]->purgeFromRAM();
-
-            //BaseModule::TextureManager.release(t);
-            /*
-            _textureFile = std::make_unique<ghoul::filesystem::File>(_sourceFiles[_activeTriggerTimeIndex]);
-            _textureFile->setCallback(
-                [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
-            );
-            */
             _isLoadingTexture = false;
-            //glTexParameterf(_texture, GL_TEXTURE_MIN_FILTER, 0);
         }
     }
 
