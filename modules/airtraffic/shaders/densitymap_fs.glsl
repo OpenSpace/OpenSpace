@@ -35,6 +35,7 @@ Fragment getFragment() {
     frag.gPosition = ge_position;
     frag.depth = ge_position.w;
     frag.color = ge_interpColor;
+
     frag.gNormal = vec4(1.0, 1.0, 1.0, 1.0);
 
     

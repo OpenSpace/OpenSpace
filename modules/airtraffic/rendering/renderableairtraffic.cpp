@@ -32,8 +32,9 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <openspace/util/httprequest.h>
 #include <iostream>
-#include <future>    // std::async, std::future
-#include <chrono> // time stuff
+#include <future>
+#include <chrono>
+
 
 
 using namespace std::chrono;
@@ -46,8 +47,15 @@ namespace ghoul::opengl {
 
 namespace {
     
-    constexpr const std::array<const char*, 4> UniformNames = {
-        "modelViewProjection", "trailSize", "resolution", "lineWidth"
+    constexpr const std::array<const char*, 8> UniformNames = {
+        "modelViewProjection", 
+        "trailSize", 
+        "resolution", 
+        "lineWidth", 
+        "color",
+        "opacity",
+        "latitudeThreshold",
+        "longitudeThreshold"
     };
 
     constexpr openspace::properties::Property::PropertyInfo URLPathInfo = {
@@ -56,10 +64,40 @@ namespace {
        "The URL used for aircraft data."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PointSizeInfo = {
-       "PointSize",
-       "Point Size",
-       "The size of the points used to represent aircrafts."
+    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+       "LineWidth",
+       "Line Width",
+       "The width of the lines used to represent aircrafts."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+       "Color",
+       "Color",
+       "The color used to represent aircrafts."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
+       "Opacity",
+       "Opacity",
+       "The opacity of the lines used to represent aircrafts."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo LatitudeThresholdInfo = {
+       "latitudeThreshold",
+       "Latitude Threshold",
+       "Minimum and maximum latitude for aircrafts."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo LongitudeThresholdInfo = {
+       "longitudeThreshold",
+       "Longitude Threshold",
+       "Minimum and maximum longitude for aircrafts."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo RenderedAircraftsInfo = {
+       "RenderedAircrafts",
+       "Rendered Aircrafts",
+       "The number of aircrafts in traffic right now."
     };
 } // namespace
 
@@ -79,10 +117,34 @@ documentation::Documentation RenderableAirTraffic::Documentation() {
                 URLPathInfo.description
             },
             {
-                PointSizeInfo.identifier,
+                LineWidthInfo.identifier,
                 new DoubleVerifier,
                 Optional::Yes,
-                PointSizeInfo.description
+                LineWidthInfo.description
+            },
+            {
+                ColorInfo.identifier,
+                new Vector3Verifier<double>,
+                Optional::Yes,
+                ColorInfo.description
+            },
+            {
+                OpacityInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                OpacityInfo.description
+            },
+            {
+                LatitudeThresholdInfo.identifier,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                LatitudeThresholdInfo.description
+            },
+            {
+                LongitudeThresholdInfo.identifier,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                LongitudeThresholdInfo.description
             },
         }
     };
@@ -90,8 +152,27 @@ documentation::Documentation RenderableAirTraffic::Documentation() {
 
 RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _pointSize(PointSizeInfo, 2.f, 1.f, 10.f)
+    , _lineWidth(LineWidthInfo, 14.14f, 1.f, 30.f) // default, min, max 
+    , _color(ColorInfo, glm::vec3(1.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
+    , _latitudeThreshold(LatitudeThresholdInfo, glm::vec2(-90.f, 90.f), glm::vec2(-90.f), glm::vec2(90.f))
+    , _longitudeThreshold(LongitudeThresholdInfo, glm::vec2(-180.f, 180.f), glm::vec2(-180.f), glm::vec2(180.f))
+    , _nRenderedAircrafts(RenderedAircraftsInfo, 0, 0, 10000)
     {
+        addProperty(_lineWidth);
+        addProperty(_color);
+        addProperty(_opacity);
+        addProperty(_latitudeThreshold);
+        addProperty(_longitudeThreshold);
+        _nRenderedAircrafts.setReadOnly(true);
+        addProperty(_nRenderedAircrafts);
+
+        /*if (dictionary.hasKey(LineWidthInfo.identifier)) {
+            _lineWidth = static_cast<float>(
+                dictionary.value<double>(LineWidthInfo.identifier)
+            );
+        }*/
+ 
         setRenderBin(RenderBin::PostDeferredTransparent);
     }
 
@@ -99,7 +180,6 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
         glGenVertexArrays(1, &_vertexArray);
         glGenBuffers(1, &_vertexBuffer);
 
-  
         // Setup shaders
         _shader = global::renderEngine->buildRenderProgram(
             "AirTrafficProgram",
@@ -162,6 +242,12 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
             _uniformCache.modelViewProjection,
             data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
         );
+
+        _shader->setUniform(_uniformCache.color, _color);
+        _shader->setUniform(_uniformCache.opacity, _opacity);
+        _shader->setUniform(_uniformCache.latitudeThreshold, _latitudeThreshold);
+        _shader->setUniform(_uniformCache.longitudeThreshold, _longitudeThreshold);
+
   
         const GLsizei nAircrafts = static_cast<GLsizei>(_data["states"].size());
         _shader->setUniform(
@@ -173,11 +259,11 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
 //#if !defined(__APPLE__)
         glm::ivec2 resolution = global::renderEngine->renderingResolution();
         _shader->setUniform(_uniformCache.resolution, resolution);
-        _shader->setUniform(_uniformCache.lineWidth, _LINEWIDTH);
+        _shader->setUniform(_uniformCache.lineWidth, _lineWidth);
 //#endif
 
         glBindVertexArray(_vertexArray);
-        glLineWidth(_LINEWIDTH);
+        glLineWidth(_lineWidth);
 
 
         for (size_t i = 0; i < nAircrafts; ++i) {
@@ -252,10 +338,10 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
 
     void RenderableAirTraffic::updateBuffers() {
 
-        int nAircrafts = static_cast<int>(_data["states"].size());
+        _nRenderedAircrafts = _data["states"].size();
         
         _vertexBufferData.clear();
-        _vertexBufferData.resize(_TRAILSIZE * nAircrafts);
+        _vertexBufferData.resize(_TRAILSIZE * _nRenderedAircrafts);
 
         size_t vertexBufIdx = 0;
 

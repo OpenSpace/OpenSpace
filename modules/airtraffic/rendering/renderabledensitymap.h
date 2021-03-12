@@ -30,6 +30,11 @@
 #include <ghoul/misc/csvreader.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <openspace/util/time.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/vector/vec2property.h>
+#include <openspace/properties/optionproperty.h>
 
 namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl {
@@ -72,19 +77,26 @@ private:
         float longitude = static_cast<float>(_THRESHOLD);
         int firstSeen = 0;
         int lastSeen = 0;
+        int identifier = 0; // 0 for aircrafts, 1 for box
     };
+
+    properties::Vec3Property _color;
+    properties::FloatProperty _opacity;
+    properties::Vec2Property _latitudeThreshold; 
+    properties::Vec2Property _longitudeThreshold;
+    properties::IntProperty _nTotalFlights;
 
     // Backend storage for vertex buffer object containing all points
     std::vector<AircraftVBOLayout>  _vertexBufferData;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
+    std::string _currentDate = "";
 
-    UniformCache(modelViewProjection) _uniformCache;
+    UniformCache(modelViewProjection, color, opacity, latitudeThreshold, longitudeThreshold) _uniformCache;
     std::vector<std::vector<std::string>> _data;
     GLuint _vertexArray = 0;
     GLuint _vertexBuffer = 0;
     const std::string _PATH = "${MODULE_AIRTRAFFIC}/data/";
-
 };
 
 } // namespace openspace

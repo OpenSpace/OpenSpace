@@ -48,9 +48,44 @@ namespace ghoul::opengl {
 
 namespace {
     
-    constexpr const std::array<const char*, 1> UniformNames = {
-        "modelViewProjection"
+    constexpr const std::array<const char*, 5> UniformNames = {
+        "modelViewProjection", 
+        "color", 
+        "opacity", 
+        "latitudeThreshold", 
+        "longitudeThreshold"
     };
+
+    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+       "Color",
+       "Color",
+       "The color used to represent aircrafts."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
+       "Opacity",
+       "Opacity",
+       "The opacity of the lines used to represent aircrafts."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo LatitudeThresholdInfo = {
+       "latitudeThreshold",
+       "Latitude Threshold",
+       "Minimum and maximum latitude for aircrafts."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo LongitudeThresholdInfo = {
+       "longitudeThreshold",
+       "Longitude Threshold",
+       "Minimum and maximum longitude for aircrafts."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo TotalFlightsInfo = {
+       "TotalFlights",
+       "Total Flights",
+       "The total number of flights displayed over the duration of the chosen date. Filtration does not affect this value."
+    };
+
 } // namespace
 
 
@@ -68,7 +103,20 @@ documentation::Documentation RenderableDensityMap::Documentation() {
 
 RenderableDensityMap::RenderableDensityMap(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
+    , _color(ColorInfo, glm::vec3(1.f, 1.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _opacity(OpacityInfo, 0.05f, 0.f, 1.f)
+    , _latitudeThreshold(LatitudeThresholdInfo, glm::vec2(-90.f, 90.f), glm::vec2(-90.f), glm::vec2(90.f))
+    , _longitudeThreshold(LongitudeThresholdInfo, glm::vec2(-180.f, 180.f), glm::vec2(-180.f), glm::vec2(180.f))
+    , _nTotalFlights(TotalFlightsInfo, 0, 0, 150000)
     {
+        addProperty(_color);
+        addProperty(_opacity);
+        addProperty(_latitudeThreshold);
+        addProperty(_longitudeThreshold);
+
+        _nTotalFlights.setReadOnly(true);
+        addProperty(_nTotalFlights);
+
         setRenderBin(RenderBin::PostDeferredTransparent);
     };
 
@@ -92,8 +140,6 @@ RenderableDensityMap::RenderableDensityMap(const ghoul::Dictionary& dictionary)
         );
 
         ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
-
-        updateBuffers();
     };
 
     void RenderableDensityMap::deinitializeGL() {
@@ -112,7 +158,15 @@ RenderableDensityMap::RenderableDensityMap(const ghoul::Dictionary& dictionary)
 
     void RenderableDensityMap::render(const RenderData& data, RendererTasks& rendererTask) {
         
-        if (_data.empty()) return;
+        // YYYY-MM-DD
+        std::string_view date = data.time.ISO8601().substr(0, 10);
+        
+        if (_currentDate != date) {
+            _currentDate = date;
+            updateBuffers();
+        }
+        
+        if (_vertexBufferData.empty()) return;
 
         _shader->activate();
 
@@ -128,10 +182,14 @@ RenderableDensityMap::RenderableDensityMap(const ghoul::Dictionary& dictionary)
             data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
         );
 
-        glBindVertexArray(_vertexArray);
-        glLineWidth(3.f);
-        
+        _shader->setUniform(_uniformCache.color, _color);
+        _shader->setUniform(_uniformCache.opacity, _opacity);
+        _shader->setUniform(_uniformCache.latitudeThreshold, _latitudeThreshold);
+        _shader->setUniform(_uniformCache.longitudeThreshold, _longitudeThreshold);
 
+        glBindVertexArray(_vertexArray);
+        glLineWidth(1.f);
+        
         glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(_vertexBufferData.size()));
 
         glBindVertexArray(0);
@@ -145,23 +203,24 @@ RenderableDensityMap::RenderableDensityMap(const ghoul::Dictionary& dictionary)
 
     bool RenderableDensityMap::updateBuffers() {
 
-        bool success = fetchData();
-
-        if (success) {
-            std::cout << "Successful data loading" << std::endl; 
+        if (fetchData()) {
 
             _vertexBufferData.clear();
-            _vertexBufferData.resize(2 * _data.size());
 
-            size_t vertexBufIdx = 0;
+            _nTotalFlights = _data.size();
+            _vertexBufferData.resize(2 * _nTotalFlights + 2);
+
+            AircraftVBOLayout bBoxVBO;
+            bBoxVBO.identifier = 1;
+            _vertexBufferData.push_back(bBoxVBO);
+            _vertexBufferData.push_back(bBoxVBO);
 
             AircraftVBOLayout startVBO;
             AircraftVBOLayout endVBO;
 
             std::tm timeFirst = {};
             std::tm timeLast = {};
-
-            // 2020-12-31 06:22:20+00:00
+            
             for (auto dataLine : _data) {
                 std::istringstream ssFirst(dataLine[0]);
                 ssFirst >> std::get_time(&timeFirst, "%Y-%m-%d %H:%M:%S");
@@ -177,21 +236,16 @@ RenderableDensityMap::RenderableDensityMap(const ghoul::Dictionary& dictionary)
                 startVBO.longitude = dataLine[3] == "" ? _THRESHOLD : std::stof(dataLine[3]);
                 startVBO.firstSeen = first;
                 startVBO.lastSeen = last;
-                _vertexBufferData[vertexBufIdx] = startVBO;
+                _vertexBufferData.push_back(startVBO);//[vertexBufIdx] = startVBO;
 
                 endVBO.latitude = dataLine[4] == "" ? _THRESHOLD : std::stof(dataLine[4]);
                 endVBO.longitude = dataLine[5] == "" ? _THRESHOLD : std::stof(dataLine[5]);
                 endVBO.firstSeen = first;
                 endVBO.lastSeen = last;
-                _vertexBufferData[vertexBufIdx + 1] = endVBO;
-
-                vertexBufIdx += 2;
+                _vertexBufferData.push_back(endVBO);//[vertexBufIdx + 1] = endVBO;
             }
         }
-        else { 
-            std::cout << "ERROR loading data" << std::endl;
-            return success;
-        } 
+        else return false;
 
         glBindVertexArray(_vertexArray);
         glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
@@ -217,33 +271,49 @@ RenderableDensityMap::RenderableDensityMap(const ghoul::Dictionary& dictionary)
 
         // firstseen & lastseen as vec2 at pos 1 from AircraftVBOLayout
         glEnableVertexAttribArray(1);
-        glVertexAttribPointer(
+        glVertexAttribIPointer(
             1,
             2,
-            GL_FLOAT,
-            GL_FALSE,
+            GL_INT,
             sizeof(AircraftVBOLayout),
             reinterpret_cast<GLvoid*>(2 * sizeof(GL_FLOAT))
         );
 
+        // interval . 
+        glEnableVertexAttribArray(2);
+        glVertexAttribIPointer(
+            2,
+            1,
+            GL_INT,
+            sizeof(AircraftVBOLayout),
+            reinterpret_cast<GLvoid*>(2 * sizeof(GL_FLOAT) + 2 * sizeof(GL_INT))
+        );
+
         glBindVertexArray(0);
         
-        return success;
+        return true;
     }
 
     bool RenderableDensityMap::fetchData(){
 
+        std::string fileName = _currentDate.substr(0, 4) + "/" 
+        + _currentDate.substr(5, 2) + "/" + _currentDate.substr(8, 2) + ".csv";
+
         _data.clear();
 
-        std::string fileName = "flightlist_20190101_20190131.csv";
-        _data = ghoul::loadCSVFile(absPath(_PATH + fileName), {
-            "firstseen",
-            "lastseen",
-            "latitude_1", 
-            "longitude_1", 
-            "latitude_2", 
-            "longitude_2"
-        }, false);
+        try {
+            _data = ghoul::loadCSVFile(absPath(_PATH + fileName), {
+                "firstseen",
+                "lastseen",
+                "latitude_1",
+                "longitude_1",
+                "latitude_2",
+                "longitude_2"
+                }, false);
+        }
+        catch(ghoul::RuntimeError&){
+            std::cout << "Invalid date" << std::endl;
+        }
 
         return !_data.empty();
     }

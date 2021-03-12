@@ -24,46 +24,60 @@
  #version __CONTEXT__
 
 #define PI 3.1415926538
-const float THRESHOLD = -9998;
 
 uniform mat4 modelViewProjection;
+uniform vec3 color;
+uniform float opacity;
+uniform vec2 latitudeThreshold;
+uniform vec2 longitudeThreshold;
 
 out vec4 vs_position;
 out vec4 vs_interpColor;
 out vec2 vs_latlon;
 out float vs_vertexID;
-out float opacity;
+out int vs_identifier;
 
 layout (location = 0) in vec2 vertexPosition; // lat, lon
 layout (location = 1) in vec2 vertexInfo; // firstSeen, lastSeen
+layout (location = 2) in int identifier;
 
 const float RADII = 6378137.0; // Earth is approximated as a sphere update if changed. 
 
-vec4 geoToCartConversion(float lat, float lon){
+vec4 geoToCartConversion(float lat, float lon, float alt){
+    if(latitudeThreshold.x < lat && lat < latitudeThreshold.y 
+    && longitudeThreshold.x < lon && lon < longitudeThreshold.y) {
 
-    if(lat < THRESHOLD || lon < THRESHOLD) {
-       // Discard in geometry shader
-       return vec4(0.f);
+        float lat_rad = lat * PI / 180.0;
+        float lon_rad = lon * PI / 180.0;
+
+        float x = (RADII + alt) * cos(lat_rad) * cos(lon_rad);
+        float y = (RADII + alt) * cos(lat_rad) * sin(lon_rad);
+        float z = (RADII + alt) * sin(lat_rad);
+
+        return vec4(x, y, z, 1.0);
     }
-
-    float lat_rad = lat * PI / 180.0;
-    float lon_rad = lon * PI / 180.0;
-
-    float x = (RADII + 10000) * cos(lat_rad) * cos(lon_rad);
-    float y = (RADII + 10000) * cos(lat_rad) * sin(lon_rad);
-    float z = (RADII + 10000) * sin(lat_rad);
-
-    return vec4(x, y, z, 1.0);
+    else return vec4(0.f);
 }
 
 void main() {
 
     vs_vertexID = float(gl_VertexID);
-    vec4 position = geoToCartConversion(vertexPosition.x, vertexPosition.y);
+    vec4 position;
+
+   // Box
+   if(identifier == 1){ 
+        position = vec4(0.f);
+        vs_interpColor = vec4(1.0, 0.0, 0.0, 1.0);//opacity/1000);
+    }
+    // Flight
+    else {
+        position = geoToCartConversion(vertexPosition.x, vertexPosition.y, 10000);
+        vs_interpColor = vec4(color, opacity/1000);
+    }
+    
+    vs_identifier = identifier; 
     vs_latlon = vertexPosition;
     vs_position = modelViewProjection * position;
-    opacity = 0.05;
-    vs_interpColor = vec4(1.0, 1.0, 0.0, opacity);
     // vec4 vs_positionNDC = vs_position / vs_position.w;
     gl_Position = vs_position;
 }

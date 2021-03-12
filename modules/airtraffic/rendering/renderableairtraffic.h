@@ -32,6 +32,10 @@
 #include <openspace/util/time.h>
 #include <future>
 #include <list>
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/vector/vec2property.h>
 
 namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl {
@@ -69,7 +73,12 @@ private:
 
     static const int _TRAILSIZE = 10;
     static const int _THRESHOLD = -9999;
-    const float _LINEWIDTH = std::ceil((2.f + 8.f) * std::sqrt(2.f)); 
+    properties::FloatProperty _lineWidth;
+    properties::Vec3Property _color;
+    properties::FloatProperty _opacity;
+    properties::Vec2Property _latitudeThreshold; 
+    properties::Vec2Property _longitudeThreshold;
+    properties::IntProperty _nRenderedAircrafts;
 
     struct AircraftVBOLayout {
         float latitude = static_cast<float>(_THRESHOLD);
@@ -91,13 +100,12 @@ private:
    
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
 
-    UniformCache(modelViewProjection, trailSize, resolution, lineWidth) _uniformCache;
+    UniformCache(modelViewProjection, trailSize, resolution, lineWidth, color, opacity, latitudeThreshold, longitudeThreshold) _uniformCache;
 
     GLuint _vertexArray = 0;
     GLuint _vertexBuffer = 0;
     std::future<json> _fut;
     bool _isDataLoading = false;
-    properties::FloatProperty _pointSize;
     json _data = json({});
     std::map<std::string, aircraftList<_TRAILSIZE>> _aircraftMap;
     
