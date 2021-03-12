@@ -119,7 +119,7 @@ namespace openspace {
         return getScreenSpacePosition() - (getScreenSpaceDimensions()/2.0f);
     }
 
-    bool ScreenSpaceSkyBrowser::coordIsInsideBrowserScreenSpace(glm::vec2 coord) {
+    bool ScreenSpaceSkyBrowser::coordIsInsideCornersScreenSpace(glm::vec2 coord) {
         bool lessThanUpperRight = coord.x < getUpperRightCornerScreenSpace().x && coord.y < getUpperRightCornerScreenSpace().y;
         bool moreThanLowerLeft = coord.x > getLowerLeftCornerScreenSpace().x && coord.y > getLowerLeftCornerScreenSpace().y;
         return  lessThanUpperRight && moreThanLowerLeft;
