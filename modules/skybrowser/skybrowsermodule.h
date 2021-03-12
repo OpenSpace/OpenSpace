@@ -53,7 +53,6 @@ public:
 
     // target
     void createTarget();
-    void checkIfTargetExist();
 
     ghoul::Dictionary createMessageForMovingWWTCamera(const glm::dvec2 celestCoords, const float fov, const bool moveInstantly = true) const;
     ghoul::Dictionary createMessageForPausingWWTTime() const;
