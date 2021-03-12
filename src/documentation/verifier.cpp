@@ -249,7 +249,7 @@ TestResult DateTimeVerifier::operator()(const ghoul::Dictionary& dict,
         TestResult::Offense off;
         off.offender = key;
         off.reason = TestResult::Offense::Reason::Verification;
-        off.explanation = "Not a valid format";
+        off.explanation = "Not a valid format, should be: YYYY MM DD hh:mm:ss";
         res.offenses.push_back(off);
     }
     // then check if valid date

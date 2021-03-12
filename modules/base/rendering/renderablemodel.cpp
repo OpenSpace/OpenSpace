@@ -40,13 +40,11 @@
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
+#include <optional>
 
 namespace {
     constexpr const char* _loggerCat = "RenderableModel";
-
     constexpr const char* ProgramName = "ModelProgram";
-    constexpr const char* KeyGeomModelFile = "GeometryFile";
-    constexpr const char* KeyForceRenderInvisible = "ForceRenderInvisible";
 
     constexpr const int DefaultBlending = 0;
     constexpr const int AdditiveBlending = 1;
@@ -126,7 +124,7 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo BlendingOptionInfo = {
-        "BledingOption",
+        "BlendingOption",
         "Blending Options",
         "Debug option for blending colors."
     };
@@ -136,106 +134,64 @@ namespace {
         "Enable Opacity Blending",
         "Enable Opacity Blending."
     };
+
+    struct [[codegen::Dictionary(RenderableModel)]] Parameters {
+        // The file or files that should be loaded in this RenderableModel. The file can
+        // contain filesystem tokens or can be specified relatively to the
+        // location of the .mod file.
+        // This specifies the model that is rendered by the Renderable.
+        std::variant<std::string, std::vector<std::string>> geometryFile;
+
+        // Set if invisible parts (parts with no textures or materials) of the model
+        // should be forced to render or not.
+        std::optional<bool> forceRenderInvisible;
+
+        // The date and time that the model animation should start.
+        // In format 'YYYY MM DD hh:mm:ss'.
+        std::optional<std::string> animationStartTime [[codegen::dateTime()]];
+
+        // [[codegen::verbatim(AmbientIntensityInfo.description)]]
+        std::optional<double> ambientIntensity;
+
+        // [[codegen::verbatim(DiffuseIntensityInfo.description)]]
+        std::optional<double> diffuseIntensity;
+
+        // [[codegen::verbatim(SpecularIntensityInfo.description)]]
+        std::optional<double> specularIntensity;
+
+        // [[codegen::verbatim(ShadingInfo.description)]]
+        std::optional<bool> performShading;
+
+        // [[codegen::verbatim(DisableFaceCullingInfo.description)]]
+        std::optional<bool> disableFaceCulling;
+
+        // [[codegen::verbatim(ModelTransformInfo.description)]]
+        std::optional<glm::dmat3x3> modelTransform;
+
+        // [[codegen::verbatim(RotationVecInfo.description)]]
+        std::optional<glm::dvec3> rotationVector;
+
+        // [[codegen::verbatim(LightSourcesInfo.description)]]
+        std::optional<std::vector<std::monostate>> lightSources [[codegen::reference("core_light_source")]];
+
+        // [[codegen::verbatim(DisableDepthTestInfo.description)]]
+        std::optional<bool> disableDepthTest;
+
+        // [[codegen::verbatim(BlendingOptionInfo.description)]]
+        std::optional<std::string> blendingOption;
+
+        // [[codegen::verbatim(EnableOpacityBlendingInfo.description)]]
+        std::optional<bool> enableOpacityBlending;
+    };
+#include "renderablemodel_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableModel::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderableModel",
-        "base_renderable_model",
-        {
-            {
-                KeyGeomModelFile,
-                new OrVerifier({ new StringVerifier, new StringListVerifier }),
-                Optional::No,
-                "The file or files that should be loaded in this RenderableModel. The file can "
-                "contain filesystem tokens or can be specified relatively to the "
-                "location of the .mod file. "
-                "This specifies the model that is rendered by the Renderable."
-            },
-            {
-                KeyForceRenderInvisible,
-                new BoolVerifier,
-                Optional::Yes,
-                "Set if invisible parts (parts with no textures or materials) of the model "
-                "should be forced to render or not."
-            },
-            {
-                AmbientIntensityInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                AmbientIntensityInfo.description
-            },
-            {
-                DiffuseIntensityInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                DiffuseIntensityInfo.description
-            },
-            {
-                SpecularIntensityInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                SpecularIntensityInfo.description
-            },
-            {
-                ShadingInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                ShadingInfo.description
-            },
-            {
-                DisableFaceCullingInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                DisableFaceCullingInfo.description
-            },
-            {
-                ModelTransformInfo.identifier,
-                new DoubleMatrix3Verifier,
-                Optional::Yes,
-                ModelTransformInfo.description
-            },
-           {
-                RotationVecInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                RotationVecInfo.description
-            },
-            {
-                LightSourcesInfo.identifier,
-                new TableVerifier({
-                    {
-                        "*",
-                        new ReferencingVerifier("core_light_source"),
-                        Optional::Yes
-                    }
-                }),
-                Optional::Yes,
-                LightSourcesInfo.description
-            },
-            {
-                DisableDepthTestInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                DisableDepthTestInfo.description
-            },
-            {
-                BlendingOptionInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                BlendingOptionInfo.description
-            },
-            {
-                EnableOpacityBlendingInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                EnableOpacityBlendingInfo.description
-            },
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_renderable_model";
+    return doc;
 }
 
 RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
@@ -260,17 +216,13 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     )
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableModel"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
 
-    if (dictionary.hasKey(KeyForceRenderInvisible)) {
-        _forceRenderInvisible = dictionary.value<bool>(KeyForceRenderInvisible);
+    if (p.forceRenderInvisible.has_value()) {
+        _forceRenderInvisible = *p.forceRenderInvisible;
 
         if (!_forceRenderInvisible) {
             // Asset file have specifically said to not render invisible parts,
@@ -279,88 +231,87 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         }
     }
 
-    if (dictionary.hasKey(KeyGeomModelFile)) {
+    if (std::holds_alternative<std::string>(p.geometryFile)) {
+        // Handle single file
         std::string file;
+        file = absPath(std::get<std::string>(p.geometryFile));
+        _geometry = ghoul::io::ModelReader::ref().loadModel(
+            file,
+            ghoul::io::ModelReader::ForceRenderInvisible(_forceRenderInvisible),
+            ghoul::io::ModelReader::NotifyInvisibleDropped(_notifyInvisibleDropped)
+        );
+    }
+    else if (std::holds_alternative<std::vector<std::string>>(p.geometryFile)){
+        LWARNING("Loading a model with several files is deprecated and will be "
+            "removed in a future release TESTING"
+        );
+        /*
+        //TODO: update to use new codegen stuff
+        std::string file;
+        ghoul::Dictionary fileDictionary = dictionary.value<ghoul::Dictionary>(
+            KeyGeomModelFile
+        );
+        std::vector<std::unique_ptr<ghoul::modelgeometry::ModelGeometry>> geometries;
 
-        if (dictionary.hasValue<std::string>(KeyGeomModelFile)) {
-            // Handle single file
-            file = absPath(dictionary.value<std::string>(KeyGeomModelFile));
-            _geometry = ghoul::io::ModelReader::ref().loadModel(
+        for (std::string_view k : fileDictionary.keys()) {
+            // Handle each file
+            file = absPath(fileDictionary.value<std::string>(k));
+            geometries.push_back(ghoul::io::ModelReader::ref().loadModel(
                 file,
                 ghoul::io::ModelReader::ForceRenderInvisible(_forceRenderInvisible),
                 ghoul::io::ModelReader::NotifyInvisibleDropped(_notifyInvisibleDropped)
-            );
+            ));
         }
-        else if (dictionary.hasValue<ghoul::Dictionary>(KeyGeomModelFile)) {
-            LWARNING("Loading a model with several files is deprecated and will be "
-                "removed in a future release"
-            );
 
-            ghoul::Dictionary fileDictionary = dictionary.value<ghoul::Dictionary>(
-                KeyGeomModelFile
-            );
-            std::vector<std::unique_ptr<ghoul::modelgeometry::ModelGeometry>> geometries;
+        if (!geometries.empty()) {
+            std::unique_ptr<ghoul::modelgeometry::ModelGeometry> combinedGeometry =
+                std::move(geometries[0]);
 
-            for (std::string_view k : fileDictionary.keys()) {
-                // Handle each file
-                file = absPath(fileDictionary.value<std::string>(k));
-                geometries.push_back(ghoul::io::ModelReader::ref().loadModel(
-                    file,
-                    ghoul::io::ModelReader::ForceRenderInvisible(_forceRenderInvisible),
-                    ghoul::io::ModelReader::NotifyInvisibleDropped(_notifyInvisibleDropped)
-                ));
-            }
-
-            if (!geometries.empty()) {
-                std::unique_ptr<ghoul::modelgeometry::ModelGeometry> combinedGeometry =
-                    std::move(geometries[0]);
-
-                 // Combine all models into one ModelGeometry
-                 for (unsigned int i = 1; i < geometries.size(); ++i) {
-                    for (ghoul::io::ModelMesh& mesh : geometries[i]->meshes()) {
-                        combinedGeometry->meshes().push_back(
-                            std::move(mesh)
-                        );
-                    }
-
-                    for (ghoul::modelgeometry::ModelGeometry::TextureEntry& texture :
-                        geometries[i]->textureStorage())
-                    {
-                        combinedGeometry->textureStorage().push_back(
-                            std::move(texture)
-                        );
-                    }
+                // Combine all models into one ModelGeometry
+                for (unsigned int i = 1; i < geometries.size(); ++i) {
+                for (ghoul::io::ModelMesh& mesh : geometries[i]->meshes()) {
+                    combinedGeometry->meshes().push_back(
+                        std::move(mesh)
+                    );
                 }
-                 _geometry = std::move(combinedGeometry);
-                _geometry->calculateBoundingRadius();
+
+                for (ghoul::modelgeometry::ModelGeometry::TextureEntry& texture :
+                    geometries[i]->textureStorage())
+                {
+                    combinedGeometry->textureStorage().push_back(
+                        std::move(texture)
+                    );
+                }
             }
-        }
+                _geometry = std::move(combinedGeometry);
+            _geometry->calculateBoundingRadius();
+        }*/
     }
 
-    if (dictionary.hasKey(ModelTransformInfo.identifier)) {
-        _modelTransform = dictionary.value<glm::dmat3>(ModelTransformInfo.identifier);
+    if (p.modelTransform.has_value()) {
+        _modelTransform = *p.modelTransform;
     }
 
-    if (dictionary.hasKey(AmbientIntensityInfo.identifier)) {
-        _ambientIntensity = dictionary.value<double>(AmbientIntensityInfo.identifier);
+    if (p.ambientIntensity.has_value()) {
+        _ambientIntensity = *p.ambientIntensity;
     }
-    if (dictionary.hasKey(DiffuseIntensityInfo.identifier)) {
-        _diffuseIntensity = dictionary.value<double>(DiffuseIntensityInfo.identifier);
+    if (p.diffuseIntensity.has_value()) {
+        _diffuseIntensity = *p.diffuseIntensity;
     }
-    if (dictionary.hasKey(SpecularIntensityInfo.identifier)) {
-        _specularIntensity = dictionary.value<double>(SpecularIntensityInfo.identifier);
-    }
-
-    if (dictionary.hasKey(ShadingInfo.identifier)) {
-        _performShading = dictionary.value<bool>(ShadingInfo.identifier);
+    if (p.specularIntensity.has_value()) {
+        _specularIntensity = *p.specularIntensity;
     }
 
-    if (dictionary.hasKey(DisableDepthTestInfo.identifier)) {
-        _disableDepthTest = dictionary.value<bool>(DisableDepthTestInfo.identifier);
+    if (p.performShading.has_value()) {
+        _performShading = *p.performShading;
     }
 
-    if (dictionary.hasKey(DisableFaceCullingInfo.identifier)) {
-        _disableFaceCulling = dictionary.value<bool>(DisableFaceCullingInfo.identifier);
+    if (p.disableDepthTest.has_value()) {
+        _disableDepthTest = *p.disableDepthTest;
+    }
+
+    if (p.disableFaceCulling.has_value()) {
+        _disableFaceCulling = *p.disableFaceCulling;
     }
 
     if (dictionary.hasKey(LightSourcesInfo.identifier)) {
@@ -391,8 +342,8 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     });
 
 
-    if (dictionary.hasKey(RotationVecInfo.identifier)) {
-        _rotationVec = dictionary.value<glm::dvec3>(RotationVecInfo.identifier);
+    if (p.rotationVector.has_value()) {
+        _rotationVec = *p.rotationVector;
     }
 
     _blendingFuncOption.addOption(DefaultBlending, "Default");
@@ -403,17 +354,13 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
     addProperty(_blendingFuncOption);
 
-    if (dictionary.hasKey(BlendingOptionInfo.identifier)) {
-        const std::string blendingOpt = dictionary.value<std::string>(
-            BlendingOptionInfo.identifier
-        );
+    if (p.blendingOption.has_value()) {
+        const std::string blendingOpt = *p.blendingOption;
         _blendingFuncOption.set(BlendingMapping[blendingOpt]);
     }
 
-    if (dictionary.hasKey(DisableDepthTestInfo.identifier)) {
-        _enableOpacityBlending = dictionary.value<bool>(
-            EnableOpacityBlendingInfo.identifier
-        );
+    if (p.enableOpacityBlending.has_value()) {
+        _enableOpacityBlending = *p.enableOpacityBlending;
     }
 
     addProperty(_enableOpacityBlending);
