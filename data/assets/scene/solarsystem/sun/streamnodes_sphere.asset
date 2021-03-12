@@ -16,7 +16,7 @@ local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("./transforms")
 local default_opacity = 0.99
 --textureversion 1 has purple for low flux, 2 has transparent. 3 for new, 4 for emin01 -2 - 4, 5 for emin01 -2 -4.5,  6 for emin03 cmr -2 -4.5. 7 with -2 - 4 cmr emin03. 8 emin01 transparent, 9 emin03 transparent 
-local textureversion = 8
+local textureversion = 1
 
 local TexturesPathEarth = asset.syncedResource({
     Type = "HttpSynchronization",

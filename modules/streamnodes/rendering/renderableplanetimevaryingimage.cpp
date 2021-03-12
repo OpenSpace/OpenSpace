@@ -1,4 +1,4 @@
-#include <modules/streamnodes/rendering/renderabletimevaryingplaneimagelocal.h>
+#include <modules/streamnodes/rendering/renderableplanetimevaryingimage.h>
 #include <ghoul/misc/profiling.h>
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
@@ -57,7 +57,7 @@ namespace {
 
 namespace openspace {
 
-    documentation::Documentation RenderableTimeVaryingPlaneImageLocal::Documentation() {
+    documentation::Documentation RenderablePlaneTimeVaryingImage::Documentation() {
         using namespace documentation;
         return {
             "Renderable Plane Image Local",
@@ -88,7 +88,7 @@ namespace openspace {
         };
     }
 
-    RenderableTimeVaryingPlaneImageLocal::RenderableTimeVaryingPlaneImageLocal(const ghoul::Dictionary& dictionary)
+    RenderablePlaneTimeVaryingImage::RenderablePlaneTimeVaryingImage(const ghoul::Dictionary& dictionary)
         : RenderablePlane(dictionary)
         , _texturePath(TextureInfo)
     {
@@ -150,13 +150,13 @@ namespace openspace {
         }
     }
 
-    bool RenderableTimeVaryingPlaneImageLocal::isReady() const {
+    bool RenderablePlaneTimeVaryingImage::isReady() const {
         return RenderablePlane::isReady();
     }
 
 #pragma optimize ("", off)
 
-    void RenderableTimeVaryingPlaneImageLocal::initializeGL() {
+    void RenderablePlaneTimeVaryingImage::initializeGL() {
         RenderablePlane::initializeGL();
 
         LDEBUG("sourcefiles size:" + std::to_string(_sourceFiles.size()));
@@ -254,9 +254,10 @@ namespace openspace {
         if (!_isLoadingLazily) {
             loadTexture();
         }
+ 
     }
 
-    bool RenderableTimeVaryingPlaneImageLocal::extractMandatoryInfoFromDictionary()
+    bool RenderablePlaneTimeVaryingImage::extractMandatoryInfoFromDictionary()
     {
         // Ensure that the source folder exists and then extract
        // the files with the same extension as <inputFileTypeString>
@@ -288,24 +289,21 @@ namespace openspace {
         LDEBUG("returning true");
         return true;
     }
-    void RenderableTimeVaryingPlaneImageLocal::deinitializeGL() {
+    void RenderablePlaneTimeVaryingImage::deinitializeGL() {
         _textureFile = nullptr;
 
 
         BaseModule::TextureManager.release(_texture);
-      //  for (int i = 0; i < _textureFiles.size(); ++i) {
-           // BaseModule::TextureManager.release(_textureFiles[i]);
-      //  }
+
         _textureFiles.clear();
         RenderablePlane::deinitializeGL();
     }
 
-    void RenderableTimeVaryingPlaneImageLocal::bindTexture() {
+    void RenderablePlaneTimeVaryingImage::bindTexture() {
         _texture->bind();
-      //  _textureFiles[_activeTriggerTimeIndex]->bind();
     }
 
-    void RenderableTimeVaryingPlaneImageLocal::update(const UpdateData& data) {
+    void RenderablePlaneTimeVaryingImage::update(const UpdateData& data) {
         ZoneScoped
         RenderablePlane::update(data);
         
@@ -313,49 +311,49 @@ namespace openspace {
             return;
         }
 
-        
-            const double currentTime = data.time.j2000Seconds();
-            const bool isInInterval = (currentTime >= _startTimes[0]) &&
-                (currentTime < _sequenceEndTime);
-            //const bool isInInterval = true;
-            if (isInInterval) {
-                ZoneScopedN("isInInterval")
-                const size_t nextIdx = _activeTriggerTimeIndex + 1;
-                if (
-                    // true => Previous frame was not within the sequence interval
-                    //_activeTriggerTimeIndex < 0 ||
-                    // true => We stepped back to a time represented by another state
-                    currentTime < _startTimes[_activeTriggerTimeIndex] ||
-                    // true => We stepped forward to a time represented by another state
-                    (nextIdx < _nStates && currentTime >= _startTimes[nextIdx]))
-                {
-                    updateActiveTriggerTimeIndex(currentTime);
-                    //LDEBUG("Vi borde uppdatera1");
+        const double currentTime = data.time.j2000Seconds();
+        const bool isInInterval = (currentTime >= _startTimes[0]) &&
+            (currentTime < _sequenceEndTime);
+        //const bool isInInterval = true;
+        if (isInInterval) {
+            ZoneScopedN("isInInterval")
+            const size_t nextIdx = _activeTriggerTimeIndex + 1;
+            if (
+                // true => Previous frame was not within the sequence interval
+                //_activeTriggerTimeIndex < 0 ||
+                // true => We stepped back to a time represented by another state
+                currentTime < _startTimes[_activeTriggerTimeIndex] ||
+                // true => We stepped forward to a time represented by another state
+                (nextIdx < _nStates && currentTime >= _startTimes[nextIdx]))
+            {
+                updateActiveTriggerTimeIndex(currentTime);
+                //LDEBUG("Vi borde uppdatera1");
 
-                    // _mustLoadNewStateFromDisk = true;
-                    //LDEBUG("vi borde uppdatera");
-                    _needsUpdate = true;
+                // _mustLoadNewStateFromDisk = true;
+                //LDEBUG("vi borde uppdatera");
+                _needsUpdate = true;
 
-                } // else {we're still in same state as previous frame (no changes needed)}
-            }
-            else {
-                ZoneScopedN("else")
-                //not in interval => set everything to false
-            //LDEBUG("not in interval");
-                _activeTriggerTimeIndex = 0;
-                _needsUpdate = false;
-            }
+            } // else we're still in same state as previous frame (no changes needed)
+        }
+        else {
+            ZoneScopedN("else")
+            //not in interval => set everything to false
+        //LDEBUG("not in interval");
+            _activeTriggerTimeIndex = 0;
+            _needsUpdate = false;
+        }
 
-            if ((_needsUpdate || _textureIsDirty) && !_isLoadingTexture) {
-                ZoneScopedN("needsupdate")
-                _isLoadingTexture = true;
-                loadTexture();
-                _textureIsDirty = false;
-            }
+        if ((_needsUpdate || _textureIsDirty) && !_isLoadingTexture) {
+            ZoneScopedN("needsupdate")
+            _isLoadingTexture = true;
+            loadTexture();
+            _textureIsDirty = false;
+        }
+        glFrontFace(GL_CCW);
     }
     // Extract J2000 time from file names
     // Requires files to be named as such: 'YYYY-MM-DDTHH-MM-SS-XXX.json'
-    void RenderableTimeVaryingPlaneImageLocal::extractTriggerTimesFromFileNames() {
+    void RenderablePlaneTimeVaryingImage::extractTriggerTimesFromFileNames() {
         // number of  characters in filename (excluding '.json')
         constexpr const int FilenameSize = 23;
         // size(".json")
@@ -380,7 +378,7 @@ namespace openspace {
             _startTimes.push_back(triggerTime);
         }
     }
-    void RenderableTimeVaryingPlaneImageLocal::updateActiveTriggerTimeIndex(double currentTime) {
+    void RenderablePlaneTimeVaryingImage::updateActiveTriggerTimeIndex(double currentTime) {
         auto iter = std::upper_bound(_startTimes.begin(), _startTimes.end(), currentTime);
         if (iter != _startTimes.end()) {
             if (iter != _startTimes.begin()) {
@@ -396,7 +394,7 @@ namespace openspace {
             _activeTriggerTimeIndex = static_cast<int>(_nStates) - 1;
         }
     }
-    void RenderableTimeVaryingPlaneImageLocal::computeSequenceEndTime() {
+    void RenderablePlaneTimeVaryingImage::computeSequenceEndTime() {
         if (_nStates > 1) {
             const double lastTriggerTime = _startTimes[_nStates - 1];
             const double sequenceDuration = lastTriggerTime - _startTimes[0];
@@ -409,7 +407,7 @@ namespace openspace {
             _sequenceEndTime = DBL_MAX;
         }
     }
-    void RenderableTimeVaryingPlaneImageLocal::loadTexture() {
+    void RenderablePlaneTimeVaryingImage::loadTexture() {
         if (_activeTriggerTimeIndex != -1) {
            // ghoul::opengl::Texture* t = _texture;
             //std::unique_ptr<ghoul::opengl::Texture> t = _texture;

@@ -43,6 +43,7 @@ class RenderableStreamNodes : public Renderable {
 public:
     RenderableStreamNodes(const ghoul::Dictionary& dictionary);
 
+    void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
 

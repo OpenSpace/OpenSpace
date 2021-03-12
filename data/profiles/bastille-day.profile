@@ -23,9 +23,10 @@
     "scene/solarsystem/planets/earth/satellites/misc/iss"
   ],
   "camera": {
+    "altitude": 3400000000.0,
     "anchor": "Sun",
-    "latitude": 58.5877,
-    "longitude": 16.1924,
+    "latitude": 20.5877,
+    "longitude": -35.1924,
     "type": "goToGeo"
   },
   "delta_times": [

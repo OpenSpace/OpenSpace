@@ -25,7 +25,7 @@
 #include <modules/streamnodes/streamnodesmodule.h>
 #include <modules/streamnodes/rendering/renderablestreamnodes.h>
 #include <modules/streamnodes/rendering/renderablelighttravel.h>
-#include <modules/streamnodes/rendering/renderabletimevaryingplaneimagelocal.h>
+#include <modules/streamnodes/rendering/renderableplanetimevaryingimage.h>
 #include <modules/streamnodes/rendering/renderabletimevaryingsphere.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -64,7 +64,8 @@ void StreamNodesModule::internalInitialize(const ghoul::Dictionary&) {
 
     factory->registerClass<RenderableStreamNodes>("RenderableStreamNodes");
     factory->registerClass<RenderableLightTravel>("RenderableLightTravel");
-    factory->registerClass<RenderableTimeVaryingPlaneImageLocal>("RenderableTimeVaryingPlaneImageLocal");
+    factory->registerClass<RenderablePlaneTimeVaryingImage>
+        ("RenderablePlaneTimeVaryingImage");
     factory->registerClass<RenderableTimeVaryingSphere>("RenderableTimeVaryingSphere");
 }
 

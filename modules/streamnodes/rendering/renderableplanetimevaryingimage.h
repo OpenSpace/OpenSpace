@@ -37,9 +37,9 @@ namespace openspace {
 
     namespace documentation { struct Documentation; }
 
-    class RenderableTimeVaryingPlaneImageLocal : public RenderablePlane {
+    class RenderablePlaneTimeVaryingImage : public RenderablePlane {
     public:
-        RenderableTimeVaryingPlaneImageLocal(const ghoul::Dictionary& dictionary);
+        RenderablePlaneTimeVaryingImage(const ghoul::Dictionary& dictionary);
 
         void initializeGL() override;
         void deinitializeGL() override;

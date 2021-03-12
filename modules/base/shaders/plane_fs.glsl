@@ -32,6 +32,7 @@ in vec3 vs_gNormal;
 uniform sampler2D texture1;
 uniform bool additiveBlending;
 uniform float opacity = 1.0;
+uniform bool mirrorBackside = true;
 
 
 Fragment getFragment() {
@@ -40,7 +41,12 @@ Fragment getFragment() {
         frag.color = texture(texture1, vs_st);
     }
     else {
-        frag.color = texture(texture1, vec2(1 - vs_st.s, vs_st.t));
+        if (mirrorBackside){
+            frag.color = texture(texture1, vec2(1 - vs_st.s, vs_st.t));
+        }
+        else {
+            frag.color = texture(texture1, vs_st);
+        }
     }
 
     frag.color.a *= opacity;

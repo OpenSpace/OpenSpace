@@ -479,6 +479,8 @@ void RenderableTimeVaryingSphere::render(const RenderData& data, RendererTasks&)
     else if (orientation == Orientation::Both) {
         glEnable(GL_CULL_FACE);
     }
+    glDisable(GL_CULL_FACE);
+
 }
 bool RenderableTimeVaryingSphere::extractMandatoryInfoFromDictionary()
 {

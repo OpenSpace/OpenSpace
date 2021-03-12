@@ -59,15 +59,7 @@ local densityVolume = {
                 XAxis = {-1.0, 0.0, 0.0},
                 YAxis = {0.0, 1.0, 0.0},
                 ZAxis = {0.0, 0.0, -1.0}
-
-            --XAxis = {1.0, 0.0, 0.0},
-            --YAxis = {0.0, 1.0, 0.0},
-            --ZAxis = {0.0, 0.0, -1.0}
-
-            --XAxis = {1.0, 0.0, 0.0},
-            --YAxis = {0.0, 1.0, 0.0},
-            --ZAxis = {0.0, 0.0, -1.0}
-
+                
             --Script = asset.localResource("kernels/carringtonRotation.lua")
         }       
     },

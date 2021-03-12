@@ -50,10 +50,11 @@
 #include <openspace/json.h>
 #include <openspace/query/query.h>
 #include <sys/stat.h>
-// This is a call to use the nlohmann json file
 #pragma
 
+// This is a call to use the nlohmann json file
 using json = nlohmann::json;
+
 #pragma optimize("", off)
 
 namespace {
@@ -75,9 +76,9 @@ namespace {
         "filterLower", "filterUpper", "scalingMode", "colorTableRange", "domainLimZ",
         "nodeSkip", "nodeSkipDefault", "nodeSkipEarth", "nodeSkipMethod", 
         "nodeSkipFluxThreshold", "nodeSkipRadiusThreshold", "fluxColorAlpha", 
-        "fluxColorAlphaIlluminance", "earthPos", "distanceThreshold", "activeStreamNumber",
-        "enhanceMethod", "flowColor", "usingParticles", "usingInterestingStreams",
-        "particleSize", "particleSpacing", "particleSpeed"
+        "fluxColorAlphaIlluminance", "earthPos", "distanceThreshold", 
+        "activeStreamNumber", "enhanceMethod", "flowColor", "usingParticles", 
+        "usingInterestingStreams","particleSize", "particleSpacing", "particleSpeed"
     };
     constexpr const std::array<const char*, 14> UniformNames2 = {
         "time", "flowColoring", "maxNodeDistanceSize", "usingCameraPerspective",
@@ -209,7 +210,9 @@ namespace {
         "Flux Color Alpha",
         "The value of alpha for the flux color mode."
     };
-    constexpr openspace::properties::Property::PropertyInfo FluxColorAlphaIlluminanceInfo = {
+    constexpr openspace::properties::Property::PropertyInfo 
+    FluxColorAlphaIlluminanceInfo = 
+    {
         "fluxColorAlphaIlluminance",
         "Flux Color Alpha for illuminance",
         "The value of alpha for the flux color mode."
@@ -219,7 +222,9 @@ namespace {
         "Skipping Nodes By Flux",
         "Select nodes to skip depending on flux value."
     };
-    constexpr openspace::properties::Property::PropertyInfo RadiusNodeSkipThresholdInfo = {
+    constexpr openspace::properties::Property::PropertyInfo 
+    RadiusNodeSkipThresholdInfo = 
+    {
         "skippingNodesByRadius",
         "Skipping Nodes By Radius",
         "Select nodes to skip depending on Radius."
@@ -305,10 +310,13 @@ namespace {
         "Node Distance Threshold",
         "Threshold for where to interpolate between the max and min node distance."
     };
-    constexpr openspace::properties::Property::PropertyInfo CameraPerspectiveEnabledInfo = {
+    constexpr openspace::properties::Property::PropertyInfo 
+    CameraPerspectiveEnabledInfo = 
+    {
         "cameraPerspectiveEnabled",
         "Use Camera perspective",
-        "Camera perspective changes the size of the nodes dependent on distance from camera."
+        "Camera perspective changes the size of the nodes dependent on "
+        "distance from camera."
     };
     constexpr openspace::properties::Property::PropertyInfo DrawingCirclesInfo = {
         "renderingcircles",
@@ -326,15 +334,21 @@ namespace {
         "Using fragment shader to draw nodes with Gaussian filter for alpha value."
 
     };
-    constexpr openspace::properties::Property::PropertyInfo RadiusPerspectiveEnabledInfo = {
+    constexpr openspace::properties::Property::PropertyInfo 
+    RadiusPerspectiveEnabledInfo = 
+    {
         "radiusPerspectiveEnabled",
         "Include radius with cameraperspective",
-        "If false, then nodes closer to the sun will not be larger regardless of distance to camera."
+        "If false, then nodes closer to the sun will not be larger "
+        "regardless of distance to camera."
     };
-    constexpr openspace::properties::Property::PropertyInfo PerspectiveDistanceFactorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo 
+    PerspectiveDistanceFactorInfo = 
+    {
         "perspectiveDistanceFactor",
         "Perspective Distance factor",
-        "This value decides how far away the camera must be to start impacting the node size."
+        "This value decides how far away the camera must be to start "
+        "impacting the node size."
     };
     constexpr openspace::properties::Property::PropertyInfo MinNodeSizeInfo = {
         "minNodeSize",
@@ -472,15 +486,15 @@ void RenderableStreamNodes::definePropertyCallbackFunctions() {
     });
 
     _pGoesEnergyBins.onChange([this] {
-        if (_pGoesEnergyBins == 1) {  // 1 == Emin03 == Mev > 100
+        if (_pGoesEnergyBins.option().value == 1) {  // 1 == Emin03 == Mev > 100
             if (_shouldreadBinariesDirectly) {
-                bool success = loadBinaryfilesDirectly("_emin03");
+                bool success = loadBinaryfilesDirectly(""); // empty string == emin03 for default
                 if (success) return;
             }                         
         }
-        else if(_pGoesEnergyBins == 0) {  // 0 == Emin01 == Mev > 10
+        else if(_pGoesEnergyBins.option().value == 0) {  // 0 == Emin01 == Mev > 10
             if (_shouldreadBinariesDirectly) {
-                bool success = loadBinaryfilesDirectly("");
+                bool success = loadBinaryfilesDirectly("_emin01");
                 if (success) return;
             }
         }
@@ -509,10 +523,13 @@ void RenderableStreamNodes::setModelDependentConstants() {
     _pDomainZ.setMaxValue(glm::vec2(limitZMax));
     _pDomainZ = glm::vec2(limitZMin, limitZMax);
 }
+
+void RenderableStreamNodes::initialize() {
+
+}
     
 void RenderableStreamNodes::initializeGL() {
     // EXTRACT MANDATORY INFORMATION FROM DICTIONARY
-    // std::string filepath = "C:/Users/chrad171//openspace/OpenSpace/sync/http/bastille_day_streamnodes/1/datawithoutprettyprint_newmethod.json";
        
     if (!extractMandatoryInfoFromDictionary()) {
         return;
@@ -606,11 +623,11 @@ void RenderableStreamNodes::loadNodeData() {
     if (_shouldreadBinariesDirectly) {
         bool success = false;
         if(_shouldloademin03directly){
-            success = loadBinaryfilesDirectly("_emin03");
-            _pGoesEnergyBins = 1;
+            success = loadBinaryfilesDirectly("");
+            //_pGoesEnergyBins.addOption(1,"");
         }
         else {
-            success = loadBinaryfilesDirectly("");
+            success = loadBinaryfilesDirectly("_emin01");
         }
         if(success) return;
     }
@@ -655,7 +672,7 @@ void RenderableStreamNodes::loadNodeData() {
             cachedFile, _file
         ));
          //Read in the data from the cached file
-        bool success = loadBinaryfilesDirectly("_emin03"); //readCachedFile(cachedfile, "")
+        bool success = loadBinaryfilesDirectly(""); //readCachedFile(cachedfile, "")
         if (!success) {
             // If something went wrong it is probably because we changed 
             // the cache version or some file was not found.
@@ -849,9 +866,9 @@ bool RenderableStreamNodes::loadBinaryfilesDirectly(const std::string& energybin
     //std::string _file2 = _binarySourceFilePath + "\\StreamnodesCacheColorv3" + energybin;
     //std::string _file3 = _binarySourceFilePath + "\\StreamnodesCacheRadiusv3" + energybin;
 
-    std::string _file = _binarySourceFilePath + "\\positions";
-    std::string _file2 = _binarySourceFilePath + "\\fluxes";
-    std::string _file3 = _binarySourceFilePath + "\\radiuses";
+    std::string _file = _binarySourceFilePath + "\\positions" + energybin;
+    std::string _file2 = _binarySourceFilePath + "\\fluxes" + energybin;
+    std::string _file3 = _binarySourceFilePath + "\\radiuses" + energybin;
     //ghoul::filesystem::File file(_file);
 
     //std::string cachedFile = FileSys.cacheManager()->cachedFilename(

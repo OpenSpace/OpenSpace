@@ -74,6 +74,7 @@ private:
     void createPlane();
 
     properties::BoolProperty _billboard;
+    properties::BoolProperty _mirrorBackside;
     properties::FloatProperty _size;
 
     ghoul::opengl::ProgramObject* _shader = nullptr;
