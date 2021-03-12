@@ -481,7 +481,7 @@ void RenderablePlanetProjection::imageProjectGPU(
     if (_geometry->hasProperty("Radius")) {
         std::any r = _geometry->property("Radius")->get();
         if (glm::vec3* radius = std::any_cast<glm::vec3>(&r)){
-            _fboProgramObject->setUniform(_fboUniformCache.radius, radius);
+            _fboProgramObject->setUniform(_fboUniformCache.radius, *radius);
         }
     }
     else {

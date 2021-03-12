@@ -71,7 +71,6 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
-#include <ghoul/logging/consolelog.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
 #include <ghoul/misc/profiling.h>
@@ -83,6 +82,7 @@
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <glbinding/glbinding.h>
 #include <glbinding-aux/types_to_string.h>
+#include <filesystem>
 #include <future>
 #include <numeric>
 #include <sstream>
@@ -234,7 +234,6 @@ void OpenSpaceEngine::initialize() {
 
     using ImmediateFlush = ghoul::logging::LogManager::ImmediateFlush;
     ghoul::logging::LogManager::initialize(level, ImmediateFlush(immediateFlush));
-    LogMgr.addLog(std::make_unique<ghoul::logging::ConsoleLog>());
 
     for (const ghoul::Dictionary& log : global::configuration->logging.logs) {
         try {
@@ -1444,6 +1443,52 @@ void OpenSpaceEngine::touchExitCallback(TouchInput input) {
     }
 }
 
+void OpenSpaceEngine::handleDragDrop(const std::string& file) {
+    std::filesystem::path f(file);
+
+    ghoul::lua::LuaState s(ghoul::lua::LuaState::IncludeStandardLibrary::Yes);
+    std::string absolutePath = absPath("${SCRIPTS}/drag_drop_handler.lua");
+    int status = luaL_loadfile(s, absolutePath.c_str());
+    if (status != LUA_OK) {
+        std::string error = lua_tostring(s, -1);
+        LERROR(error);
+        return;
+    }
+
+    ghoul::lua::push(s, file);
+    lua_setglobal(s, "filename");
+
+    std::string basename = f.filename().string();
+    ghoul::lua::push(s, basename);
+    lua_setglobal(s, "basename");
+
+    std::string extension = f.extension().string();
+    std::transform(
+        extension.begin(), extension.end(),
+        extension.begin(),
+        [](char c) { return static_cast<char>(::tolower(c)); }
+    );
+    ghoul::lua::push(s, extension);
+    lua_setglobal(s, "extension");
+
+    status = lua_pcall(s, 0, 1, 0);
+    if (status != LUA_OK) {
+        std::string error = lua_tostring(s, -1);
+        LERROR(error);
+        return;
+    }
+
+    if (lua_isnil(s, -1)) {
+        LWARNING(fmt::format("Unhandled file dropped: {}", file));
+        return;
+    }
+
+    std::string script = ghoul::lua::value<std::string>(s);
+    global::scriptEngine->queueScript(
+        script,
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
+}
 
 std::vector<std::byte> OpenSpaceEngine::encode() {
     ZoneScoped
