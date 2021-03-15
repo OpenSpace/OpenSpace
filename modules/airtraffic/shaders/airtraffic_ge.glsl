@@ -65,7 +65,6 @@ float greatCircleDistance(float lat1, float lon1, float lat2, float lon2) {
 
  void main(){
 
-
     float dist = greatCircleDistance(vs_latlon[0].x, vs_latlon[0].y, vs_latlon[1].x, vs_latlon[1].y);
     vec4 color = vs_interpColor[0];
     

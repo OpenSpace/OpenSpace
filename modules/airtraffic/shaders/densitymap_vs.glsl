@@ -26,10 +26,12 @@
 #define PI 3.1415926538
 
 uniform mat4 modelViewProjection;
-uniform vec3 color;
+uniform vec3 maximumColor;
+uniform vec3 minimumColor;
 uniform float opacity;
 uniform vec2 latitudeThreshold;
 uniform vec2 longitudeThreshold;
+uniform int totalFlights;
 
 out vec4 vs_position;
 out vec4 vs_interpColor;
@@ -61,6 +63,9 @@ vec4 geoToCartConversion(float lat, float lon, float alt){
 
 void main() {
 
+    const float maxFlights = 103637.0f; // Maximum daily flights in dataset
+    const float minFlights = 19732.0f; // Minimum daily flights in dataset (not counting erronous data)
+
     vs_vertexID = float(gl_VertexID);
     vec4 position;
 
@@ -72,7 +77,10 @@ void main() {
     // Flight
     else {
         position = geoToCartConversion(vertexPosition.x, vertexPosition.y, 10000);
-        vs_interpColor = vec4(color, opacity/1000);
+
+        float t = clamp((float(totalFlights) - minFlights) / (maxFlights - minFlights), 0.0f, 1.0f);
+
+        vs_interpColor = vec4(minimumColor * (1.0-t) +  t * maximumColor, opacity/1000);
     }
     
     vs_identifier = identifier; 

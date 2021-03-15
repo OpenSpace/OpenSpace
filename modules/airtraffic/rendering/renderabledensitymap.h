@@ -35,6 +35,7 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/optionproperty.h>
+#include <future>
 
 namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl {
@@ -80,7 +81,8 @@ private:
         int identifier = 0; // 0 for aircrafts, 1 for box
     };
 
-    properties::Vec3Property _color;
+    properties::Vec3Property _maximumColor;
+    properties::Vec3Property _minimumColor;
     properties::FloatProperty _opacity;
     properties::Vec2Property _latitudeThreshold; 
     properties::Vec2Property _longitudeThreshold;
@@ -91,12 +93,15 @@ private:
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
     std::string _currentDate = "";
+    std::future<bool> _future;
+    bool _isDataLoading = false;
 
-    UniformCache(modelViewProjection, color, opacity, latitudeThreshold, longitudeThreshold) _uniformCache;
+    UniformCache(modelViewProjection, maximumColor, minimumColor, opacity, latitudeThreshold, longitudeThreshold, totalFlights) _uniformCache;
     std::vector<std::vector<std::string>> _data;
     GLuint _vertexArray = 0;
     GLuint _vertexBuffer = 0;
     const std::string _PATH = "${MODULE_AIRTRAFFIC}/data/";
+
 };
 
 } // namespace openspace

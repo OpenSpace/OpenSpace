@@ -48,18 +48,26 @@ namespace ghoul::opengl {
 
 namespace {
     
-    constexpr const std::array<const char*, 5> UniformNames = {
+    constexpr const std::array<const char*, 7> UniformNames = {
         "modelViewProjection", 
-        "color", 
+        "maximumColor",
+        "minimumColor",
         "opacity", 
         "latitudeThreshold", 
-        "longitudeThreshold"
+        "longitudeThreshold",
+        "totalFlights"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
-       "Color",
-       "Color",
-       "The color used to represent aircrafts."
+    constexpr openspace::properties::Property::PropertyInfo MaximumColorInfo = {
+       "MaximumColor",
+       "Maximum Color",
+       "The color used to represent the maximum number of flights. This value is used to interpolate a color between max and min."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MinimumColorInfo = {
+       "MinimumColor",
+       "Minimum Color",
+       "The color used to represent the minimum number of flights. This value is used to interpolate a color between max and min."
     };
 
     constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
@@ -103,13 +111,15 @@ documentation::Documentation RenderableDensityMap::Documentation() {
 
 RenderableDensityMap::RenderableDensityMap(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _color(ColorInfo, glm::vec3(1.f, 1.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _maximumColor(MaximumColorInfo, glm::vec3(0.7f, 0.f, 1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _minimumColor(MinimumColorInfo, glm::vec3(1.f, 0.7f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
     , _opacity(OpacityInfo, 0.05f, 0.f, 1.f)
     , _latitudeThreshold(LatitudeThresholdInfo, glm::vec2(-90.f, 90.f), glm::vec2(-90.f), glm::vec2(90.f))
     , _longitudeThreshold(LongitudeThresholdInfo, glm::vec2(-180.f, 180.f), glm::vec2(-180.f), glm::vec2(180.f))
     , _nTotalFlights(TotalFlightsInfo, 0, 0, 150000)
     {
-        addProperty(_color);
+        addProperty(_maximumColor);
+        addProperty(_minimumColor);
         addProperty(_opacity);
         addProperty(_latitudeThreshold);
         addProperty(_longitudeThreshold);
@@ -157,15 +167,28 @@ RenderableDensityMap::RenderableDensityMap(const ghoul::Dictionary& dictionary)
     };
 
     void RenderableDensityMap::render(const RenderData& data, RendererTasks& rendererTask) {
-        
+
+
         // YYYY-MM-DD
         std::string_view date = data.time.ISO8601().substr(0, 10);
         
-        if (_currentDate != date) {
+        //std::cout << "Current date: " << _currentDate << "        date: " << date << std::endl; 
+        if (_currentDate != date && !_isDataLoading) {
+            std::cout << "Async..." << std::endl; 
             _currentDate = date;
-            updateBuffers();
+            _future = std::async(std::launch::async, &RenderableDensityMap::fetchData, this);
+            _isDataLoading = true;
         }
-        
+
+        // Check if new data finished loading. Update buffers ONLY if finished
+        if (_future.valid() && _future.wait_for(seconds(0)) == std::future_status::ready) { // NOT SO STABLE SOLUTION
+            if(_future.get()) {
+                updateBuffers();
+                std::cout << "New data loaded" << std::endl;
+            }
+            _isDataLoading = false;
+        }
+
         if (_vertexBufferData.empty()) return;
 
         _shader->activate();
@@ -182,10 +205,12 @@ RenderableDensityMap::RenderableDensityMap(const ghoul::Dictionary& dictionary)
             data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
         );
 
-        _shader->setUniform(_uniformCache.color, _color);
+        _shader->setUniform(_uniformCache.maximumColor, _maximumColor);
+        _shader->setUniform(_uniformCache.minimumColor, _minimumColor);
         _shader->setUniform(_uniformCache.opacity, _opacity);
         _shader->setUniform(_uniformCache.latitudeThreshold, _latitudeThreshold);
         _shader->setUniform(_uniformCache.longitudeThreshold, _longitudeThreshold);
+        _shader->setUniform(_uniformCache.totalFlights, _nTotalFlights);
 
         glBindVertexArray(_vertexArray);
         glLineWidth(1.f);
@@ -203,49 +228,45 @@ RenderableDensityMap::RenderableDensityMap(const ghoul::Dictionary& dictionary)
 
     bool RenderableDensityMap::updateBuffers() {
 
-        if (fetchData()) {
+        _vertexBufferData.clear();
 
-            _vertexBufferData.clear();
+        _nTotalFlights = _data.size();
+        _vertexBufferData.resize(2 * _nTotalFlights + 2);
 
-            _nTotalFlights = _data.size();
-            _vertexBufferData.resize(2 * _nTotalFlights + 2);
+        AircraftVBOLayout bBoxVBO;
+        bBoxVBO.identifier = 1;
+        _vertexBufferData.push_back(bBoxVBO);
+        _vertexBufferData.push_back(bBoxVBO);
 
-            AircraftVBOLayout bBoxVBO;
-            bBoxVBO.identifier = 1;
-            _vertexBufferData.push_back(bBoxVBO);
-            _vertexBufferData.push_back(bBoxVBO);
+        AircraftVBOLayout startVBO;
+        AircraftVBOLayout endVBO;
 
-            AircraftVBOLayout startVBO;
-            AircraftVBOLayout endVBO;
-
-            std::tm timeFirst = {};
-            std::tm timeLast = {};
+        std::tm timeFirst = {};
+        std::tm timeLast = {};
             
-            for (auto dataLine : _data) {
-                std::istringstream ssFirst(dataLine[0]);
-                ssFirst >> std::get_time(&timeFirst, "%Y-%m-%d %H:%M:%S");
-                std::time_t first = _mkgmtime(&timeFirst);
+        for (auto dataLine : _data) {
+            std::istringstream ssFirst(dataLine[0]);
+            ssFirst >> std::get_time(&timeFirst, "%Y-%m-%d %H:%M:%S");
+            std::time_t first = _mkgmtime(&timeFirst);
 
-                std::istringstream ssLast(dataLine[1]);
-                ssLast >> std::get_time(&timeFirst, "%Y-%m-%d %H:%M:%S");
-                std::time_t last = _mkgmtime(&timeFirst);
+            std::istringstream ssLast(dataLine[1]);
+            ssLast >> std::get_time(&timeFirst, "%Y-%m-%d %H:%M:%S");
+            std::time_t last = _mkgmtime(&timeFirst);
 
-                if (ssFirst.fail() || ssLast.fail()) throw std::runtime_error{ "Failed to parse time string." };
+            if (ssFirst.fail() || ssLast.fail()) throw std::runtime_error{ "Failed to parse time string." };
 
-                startVBO.latitude = dataLine[2] == "" ? _THRESHOLD : std::stof(dataLine[2]);
-                startVBO.longitude = dataLine[3] == "" ? _THRESHOLD : std::stof(dataLine[3]);
-                startVBO.firstSeen = first;
-                startVBO.lastSeen = last;
-                _vertexBufferData.push_back(startVBO);//[vertexBufIdx] = startVBO;
+            startVBO.latitude = dataLine[2] == "" ? _THRESHOLD : std::stof(dataLine[2]);
+            startVBO.longitude = dataLine[3] == "" ? _THRESHOLD : std::stof(dataLine[3]);
+            startVBO.firstSeen = first;
+            startVBO.lastSeen = last;
+            _vertexBufferData.push_back(startVBO);//[vertexBufIdx] = startVBO;
 
-                endVBO.latitude = dataLine[4] == "" ? _THRESHOLD : std::stof(dataLine[4]);
-                endVBO.longitude = dataLine[5] == "" ? _THRESHOLD : std::stof(dataLine[5]);
-                endVBO.firstSeen = first;
-                endVBO.lastSeen = last;
-                _vertexBufferData.push_back(endVBO);//[vertexBufIdx + 1] = endVBO;
-            }
+            endVBO.latitude = dataLine[4] == "" ? _THRESHOLD : std::stof(dataLine[4]);
+            endVBO.longitude = dataLine[5] == "" ? _THRESHOLD : std::stof(dataLine[5]);
+            endVBO.firstSeen = first;
+            endVBO.lastSeen = last;
+            _vertexBufferData.push_back(endVBO);//[vertexBufIdx + 1] = endVBO;
         }
-        else return false;
 
         glBindVertexArray(_vertexArray);
         glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
@@ -309,7 +330,7 @@ RenderableDensityMap::RenderableDensityMap(const ghoul::Dictionary& dictionary)
                 "longitude_1",
                 "latitude_2",
                 "longitude_2"
-                }, false);
+            }, false);
         }
         catch(ghoul::RuntimeError&){
             std::cout << "Invalid date" << std::endl;

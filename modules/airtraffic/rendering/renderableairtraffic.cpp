@@ -211,23 +211,25 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
 
     void RenderableAirTraffic::render(const RenderData& data, RendererTasks& rendererTask) {
 
-        if (_data.empty()) return;
+        // Return if data is empty or time is from more than 3 minutes ago
+        if (_data.empty() || abs(Time::now().j2000Seconds() - data.time.j2000Seconds()) > 60 * 3) return;
 
         // Trigger data update
-        if ( abs(data.time.j2000Seconds() - _deltaTime) > 10.0 && !_isDataLoading) {
+        if (abs(data.time.j2000Seconds() - _deltaTime) > 10.0 && !_isDataLoading) {
             std::cout << "Data loading initialized... ";
-            _fut = std::async(std::launch::async, &RenderableAirTraffic::fetchData, this);
+            _future = std::async(std::launch::async, &RenderableAirTraffic::fetchData, this);
             _isDataLoading = true;
         }
 
         // Check if new data finished loading. Update buffers ONLY if finished
-        if (_fut.valid() && _fut.wait_for(seconds(0)) == std::future_status::ready) { // NOT SO STABLE SOLUTION
-            _data = _fut.get();
+        if (_future.valid() && _future.wait_for(seconds(0)) == std::future_status::ready) { // NOT SO STABLE SOLUTION
+            _data = _future.get();
             updateBuffers();
             std::cout << "finished. Time since last update: " << abs(_deltaTime - data.time.j2000Seconds()) << " seconds." << std::endl;
             _isDataLoading = false;
             _deltaTime = data.time.j2000Seconds();
         }
+
 
         _shader->activate();
         
@@ -322,12 +324,19 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
 
     json RenderableAirTraffic::fetchData() {
 
+        // Start timer
+        auto start = std::chrono::steady_clock::now();
+    
         SyncHttpMemoryDownload response(_url);
         HttpRequest::RequestOptions timeout;
         timeout.requestTimeoutSeconds = 0; // No timeout limit
         
         response.download(timeout);
-     
+        
+        auto end = std::chrono::steady_clock::now();
+        // End timer
+        auto t = duration_cast<milliseconds>(end - start);
+        std::cout << "fetchData: " << t.count() << " milliseconds." << std::endl;
 
         if(response.hasSucceeded())
             return parseData(response);
@@ -349,7 +358,7 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
 
         for (auto& aircraft : _data["states"]) {
             // Extract data and add to vertex buffer
-            //---
+            // ---
             std::string icao24 = aircraft[0];
 
             temp.lastContact = static_cast<int>(aircraft[4]);

@@ -104,7 +104,7 @@ private:
 
     GLuint _vertexArray = 0;
     GLuint _vertexBuffer = 0;
-    std::future<json> _fut;
+    std::future<json> _future;
     bool _isDataLoading = false;
     json _data = json({});
     std::map<std::string, aircraftList<_TRAILSIZE>> _aircraftMap;

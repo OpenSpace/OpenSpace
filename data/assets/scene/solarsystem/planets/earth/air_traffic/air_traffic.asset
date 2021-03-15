@@ -10,7 +10,7 @@ local AirTraffic = {
     GUI = {
         Name = "Air Traffic",
         Path = "/Solar System/Planets/Earth/Air Traffic",
-        Description = [[ Air Traffic.]],
+        Description = [[ Live air traffic.]],
     }
 }
 
@@ -20,10 +20,15 @@ local DensityMap = {
     Renderable = {
         Type = "RenderableDensityMap",
     },
+    TimeFrame = {
+        Type = "TimeFrameInterval",
+        Start = "2019-01-01",
+        End = "2021-01-31"
+    },
     GUI = {
         Name = "Density Map",
         Path = "/Solar System/Planets/Earth/Air Traffic",
-        Description = [[ Density Map.]],
+        Description = [[ Daily accumulated flights.]],
     }
 }
 
