@@ -134,6 +134,13 @@ namespace {
         "interface."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo ScreenshotUseDateInfo = {
+        "ScreenshotUseDate",
+        "Screenshot Folder uses Date",
+        "If this value is set to 'true', screenshots will be saved to a folder that "
+        "contains the time at which this value was enabled"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo ShowFrameNumberInfo = {
         "ShowFrameInformation",
         "Show Frame Information",
@@ -255,6 +262,7 @@ RenderEngine::RenderEngine()
     , _showVersionInfo(ShowVersionInfo, true)
     , _showCameraInfo(ShowCameraInfo, true)
     , _applyWarping(ApplyWarpingInfo, false)
+    , _screenshotUseDate(ScreenshotUseDateInfo, false)
     , _showFrameInformation(ShowFrameNumberInfo, false)
     , _disableMasterRendering(DisableMasterInfo, false)
     , _globalBlackOutFactor(GlobalBlackoutFactorInfo, 1.f, 0.f, 1.f)
@@ -347,6 +355,39 @@ RenderEngine::RenderEngine()
 
     addProperty(_globalBlackOutFactor);
     addProperty(_applyWarping);
+
+    _screenshotUseDate.onChange([this]() {
+        if (_screenshotUseDate) {
+            // Going from 'false' -> 'true'
+            // We might need to create the folder first
+
+            std::time_t now = std::time(nullptr);
+            std::tm* nowTime = std::localtime(&now);
+            char date[128];
+            strftime(date, sizeof(date), "%Y-%m-%d-%H-%M", nowTime);
+
+            std::string newFolder = absPath("${STARTUP_SCREENSHOT}/" + std::string(date));
+            if (!FileSys.directoryExists(newFolder)) {
+                FileSys.createDirectory(newFolder);
+            }
+            FileSys.registerPathToken(
+                "${SCREENSHOTS}",
+                newFolder,
+                ghoul::filesystem::FileSystem::Override::Yes
+            );
+        }
+        else {
+            // Going from 'true' -> 'false'
+            // We reset the screenshot folder back to what it was in the beginning
+            FileSys.registerPathToken(
+                "${SCREENSHOTS}",
+                absPath("${STARTUP_SCREENSHOT}"),
+                ghoul::filesystem::FileSystem::Override::Yes
+            );
+        }
+        global::windowDelegate->setScreenshotFolder(absPath("${SCREENSHOTS}"));
+    });
+    addProperty(_screenshotUseDate);
 
     _horizFieldOfView.onChange([this]() {
         if (global::windowDelegate->isMaster()) {
@@ -447,6 +488,8 @@ void RenderEngine::initialize() {
             );
         }
     }
+
+    _screenshotUseDate = global::configuration->shouldUseScreenshotDate;
 }
 
 void RenderEngine::initializeGL() {

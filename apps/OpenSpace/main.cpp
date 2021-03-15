@@ -218,6 +218,15 @@ void mainInitFunc(GLFWwindow*) {
 
     LTRACE("main::mainInitFunc(begin)");
 
+    //
+    //  Screenshots
+    //
+    // We save the startup value of the screenshots just in case we want to add a date
+    // to them later in the RenderEngine
+    std::string screenshotPath = absPath("${SCREENSHOTS}");
+    FileSys.registerPathToken("${STARTUP_SCREENSHOT}", screenshotPath);
+    Settings::instance().setCapturePath(screenshotPath);
+
     LDEBUG("Initializing OpenSpace Engine started");
     global::openSpaceEngine->initialize();
     LDEBUG("Initializing OpenSpace Engine finished");
@@ -320,27 +329,6 @@ void mainInitFunc(GLFWwindow*) {
         LWARNING("Spout was requested, but program was compiled without Spout support");
 #endif // OPENSPACE_HAS_SPOUT
     }
-
-
-    //
-    //  Screenshots
-    //
-    std::string screenshotPath = "${SCREENSHOTS}";
-    if (global::configuration->shouldUseScreenshotDate) {
-        std::time_t now = std::time(nullptr);
-        std::tm* nowTime = std::localtime(&now);
-        char mbstr[128];
-        strftime(mbstr, sizeof(mbstr), "%Y-%m-%d-%H-%M", nowTime);
-
-        FileSys.registerPathToken(
-            "${SCREENSHOTS}",
-            absPath(screenshotPath + '/' + std::string(mbstr)),
-            ghoul::filesystem::FileSystem::Override::Yes
-        );
-    }
-
-    Settings::instance().setCapturePath(absPath(screenshotPath));
-
 
     LTRACE("main::mainInitFunc(end)");
 }
