@@ -1120,19 +1120,9 @@ int main(int argc, char* argv[]) {
         // Loading configuration from disk
         LDEBUG("Loading configuration from disk");
         *global::configuration = configuration::loadConfigurationFromFile(
-            configurationFilePath
+            configurationFilePath,
+            commandlineArguments.configurationOverride
         );
-        // If the user requested a commandline-based configuration script that should
-        // overwrite some of the values, this is the time to do it
-        if (!commandlineArguments.configurationOverride.empty()) {
-            LDEBUG("Executing Lua script passed through the commandline:");
-            LDEBUG(commandlineArguments.configurationOverride);
-            ghoul::lua::runScript(
-                global::configuration->state,
-                commandlineArguments.configurationOverride
-            );
-            parseLuaState(*global::configuration);
-        }
 
         // Determining SGCT configuration file
         LDEBUG("SGCT Configuration file: " + global::configuration->windowConfiguration);

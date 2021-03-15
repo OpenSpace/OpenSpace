@@ -130,9 +130,8 @@ struct Configuration {
 
 std::string findConfiguration(const std::string& filename = "openspace.cfg");
 
-Configuration loadConfigurationFromFile(const std::string& filename);
-
-void parseLuaState(Configuration& configuration);
+Configuration loadConfigurationFromFile(const std::string& filename,
+    const std::string& overrideScript);
 
 } // namespace openspace::configuration
 
