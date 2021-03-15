@@ -15,7 +15,7 @@ asset.meta = {
     Description = [[A lookup table that maps a B-V color index to an RGB color. 
         The B-V values are in the range (-0.4, 2.0) and each line maps a value 
         in that range to a color]],
-    Author = "Brian Abbott (AMNH)",
+    Author = "OpenSpace Team",
     URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
     License = "AMNH Digital Universe"
 }

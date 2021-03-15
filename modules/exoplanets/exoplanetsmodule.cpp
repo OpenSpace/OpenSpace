@@ -44,7 +44,7 @@ namespace {
         "The path to the folder containing the exoplanets data and lookup table"
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo BVColorMapInfo = {
+    constexpr const openspace::properties::Property::PropertyInfo BvColorMapInfo = {
         "BvColormap",
         "B-V Colormap",
         "The path to a cmap file that maps a B-V color index to an RGB color"
@@ -129,7 +129,7 @@ namespace {
         // [[codegen::verbatim(DataFolderInfo.description)]]
         std::optional<std::filesystem::path> dataFolder [[codegen::directory()]];
 
-        // [[codegen::verbatim(StarTextureInfo.description)]]
+        // [[codegen::verbatim(BvColorMapInfo.description)]]
         std::optional<std::filesystem::path> bvColormap;
 
        // [[codegen::verbatim(StarTextureInfo.description)]]
@@ -169,7 +169,7 @@ using namespace exoplanets;
 ExoplanetsModule::ExoplanetsModule()
     : OpenSpaceModule(Name)
     , _exoplanetsDataFolder(DataFolderInfo)
-    , _bvColorMapPath(BVColorMapInfo)
+    , _bvColorMapPath(BvColorMapInfo)
     , _starTexturePath(StarTextureInfo)
     , _starGlareTexturePath(StarGlareTextureInfo)
     , _noDataTexturePath(NoDataTextureInfo)

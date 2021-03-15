@@ -74,7 +74,7 @@ glm::vec3 computeStarColor(float bv) {
     // Interpret the colormap cmap file
     std::string line;
     while (std::getline(colorMap, line)) {
-        if ((line[0] == '#') || line.empty()) {
+        if (line.empty() || (line[0] == '#')) {
             continue;
         }
         break;

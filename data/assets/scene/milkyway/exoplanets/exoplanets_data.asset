@@ -9,12 +9,12 @@ local DataPath = asset.syncedResource({
 
 asset.onInitialize(function () 
     local p = "Modules.Exoplanets.DataFolder";
-    if(openspace.getPropertyValue(p) == "") then
+    if (openspace.getPropertyValue(p) == "") then
         openspace.setPropertyValueSingle(p, DataPath)
     end
 
     p = "Modules.Exoplanets.BvColormap";
-    if(openspace.getPropertyValue(p) == "") then
+    if (openspace.getPropertyValue(p) == "") then
         openspace.setPropertyValueSingle(p, bvColorLUT .. "/colorbv.cmap")
     end
 end)
@@ -29,5 +29,5 @@ asset.meta = {
     Archive]],
     Author = "OpenSpace Team",
     URL = "https://exoplanetarchive.ipac.caltech.edu/docs/data.html",
-    License = "MIT license",
+    License = "MIT license"
 }
