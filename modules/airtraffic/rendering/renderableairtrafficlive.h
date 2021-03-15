@@ -22,20 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_AIRTRAFFIC___RENDERABLEDENSITYMAP___H__
-#define __OPENSPACE_MODULE_AIRTRAFFIC___RENDERABLEDENSITYMAP___H__
+#ifndef __OPENSPACE_MODULE_AIRTRAFFIC___RENDERABLEAIRTRAFFICLIVE___H__
+#define __OPENSPACE_MODULE_AIRTRAFFIC___RENDERABLEAIRTRAFFICLIVE___H__
 
-#include <iomanip>
 #include <openspace/rendering/renderable.h>
-#include <ghoul/misc/csvreader.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <openspace/json.h>
+#include <openspace/util/httprequest.h>
 #include <openspace/util/time.h>
+#include <future>
+#include <list>
+#include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec2property.h>
-#include <openspace/properties/optionproperty.h>
-#include <future>
 
 namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl {
@@ -46,64 +46,75 @@ namespace ghoul::opengl {
 namespace openspace {
 
 namespace documentation { struct Documentation; }
+using json = nlohmann::json;
+using namespace std::chrono_literals;
 
-
-class RenderableDensityMap : public Renderable {
+class RenderableAirTrafficLive : public Renderable {
 public:
-    explicit RenderableDensityMap(const ghoul::Dictionary& dictionary);
-    virtual ~RenderableDensityMap() = default;
-
-    void initialize() override;
-    void deinitialize() override;
+    explicit RenderableAirTrafficLive(const ghoul::Dictionary& dictionary);
+    virtual ~RenderableAirTrafficLive() = default;
 
     void initializeGL() override;
     void deinitializeGL() override;
 
+    json fetchData();
+
+    json parseData(SyncHttpMemoryDownload& response);
+
     bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void update(const UpdateData& data) override;
 
-    bool fetchData(); 
-
-    bool updateBuffers();
+    void updateBuffers();
     
     static documentation::Documentation Documentation();
 
 private:
+
+    static const int _TRAILSIZE = 10;
     static const int _THRESHOLD = -9999;
+    properties::FloatProperty _lineWidth;
+    properties::Vec3Property _color;
+    properties::FloatProperty _opacity;
+    properties::Vec2Property _latitudeThreshold; 
+    properties::Vec2Property _longitudeThreshold;
+    properties::IntProperty _nRenderedAircrafts;
 
     struct AircraftVBOLayout {
         float latitude = static_cast<float>(_THRESHOLD);
         float longitude = static_cast<float>(_THRESHOLD);
-        int firstSeen = 0;
-        int lastSeen = 0;
-        int identifier = 0; // 0 for aircrafts, 1 for box
+        float barometricAltitude = 0.f;
+        float velocity = 0.f; 
+        float flightDirection = 0.f; // true_track in data
+        int lastContact = 0; // Draw only if changed
     };
-
-    properties::Vec3Property _maximumColor;
-    properties::Vec3Property _minimumColor;
-    properties::FloatProperty _opacity;
-    properties::Vec2Property _latitudeThreshold; 
-    properties::Vec2Property _longitudeThreshold;
-    properties::IntProperty _nTotalFlights;
+    
+    template<size_t N>
+    struct aircraftList {
+        aircraftList() : list(N) {}
+        std::list<AircraftVBOLayout> list;
+    };
 
     // Backend storage for vertex buffer object containing all points
     std::vector<AircraftVBOLayout>  _vertexBufferData;
-
+   
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
-    std::string _currentDate = "";
-    std::future<bool> _future;
-    bool _isDataLoading = false;
 
-    UniformCache(modelViewProjection, maximumColor, minimumColor, opacity, latitudeThreshold, longitudeThreshold, totalFlights) _uniformCache;
-    std::vector<std::vector<std::string>> _data;
+    UniformCache(modelViewProjection, trailSize, resolution, lineWidth, color, opacity, latitudeThreshold, longitudeThreshold) _uniformCache;
+
     GLuint _vertexArray = 0;
     GLuint _vertexBuffer = 0;
-    const std::string _PATH = "${MODULE_AIRTRAFFIC}/data/";
-
+    std::future<json> _future;
+    bool _isDataLoading = false;
+    json _data = json({});
+    std::map<std::string, aircraftList<_TRAILSIZE>> _aircraftMap;
+    
+    // Fix secure way to handle credentials
+    //const std::string _url = "https://" + _PASSWORD + ":" + _USERNAME + "@opensky-network.org/api/states/all";
+    const std::string _url = "https://opensky-network.org/api/states/all";
+    double _deltaTime = Time::now().j2000Seconds();
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_AIRTRAFFIC___RENDERABLEDENSITYMAP___H__
+#endif // __OPENSPACE_MODULE_AIRTRAFFIC___RENDERABLEAIRTRAFFICLIVE___H__

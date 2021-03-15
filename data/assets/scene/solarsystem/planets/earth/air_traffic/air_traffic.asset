@@ -1,24 +1,24 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
 
-local AirTraffic = {
-    Identifier = "AirTraffic",
+local LiveAirTraffic = {
+    Identifier = "LiveAirTraffic",
     Parent = transforms.EarthIAU.Identifier,
     Renderable = {
-        Type = "RenderableAirTraffic",
+        Type = "RenderableAirTrafficLive",
     },
     GUI = {
-        Name = "Air Traffic",
+        Name = "Live Air Traffic",
         Path = "/Solar System/Planets/Earth/Air Traffic",
         Description = [[ Live air traffic.]],
     }
 }
 
-local DensityMap = {
-    Identifier = "DensityMap",
+local HistoricalAirTraffic = {
+    Identifier = "HistoricalAirTraffic",
     Parent = transforms.EarthIAU.Identifier,
     Renderable = {
-        Type = "RenderableDensityMap",
+        Type = "RenderableAirTrafficHistorical",
     },
     TimeFrame = {
         Type = "TimeFrameInterval",
@@ -26,10 +26,10 @@ local DensityMap = {
         End = "2021-01-31"
     },
     GUI = {
-        Name = "Density Map",
+        Name = "Historical Air Traffic",
         Path = "/Solar System/Planets/Earth/Air Traffic",
         Description = [[ Daily accumulated flights.]],
     }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { AirTraffic, DensityMap })
+assetHelper.registerSceneGraphNodesAndExport(asset, { LiveAirTraffic, HistoricalAirTraffic })

@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 
-#include <modules/airtraffic/rendering/renderableairtraffic.h>
+#include <modules/airtraffic/rendering/renderableairtrafficlive.h>
 
 #include <openspace/util/updatestructures.h>
 #include <openspace/rendering/renderengine.h>
@@ -104,7 +104,7 @@ namespace {
 
 namespace openspace {
 
-documentation::Documentation RenderableAirTraffic::Documentation() {
+documentation::Documentation RenderableAirTrafficLive::Documentation() {
     using namespace documentation;
     return {
         "Renderable Air Traffic",
@@ -150,7 +150,7 @@ documentation::Documentation RenderableAirTraffic::Documentation() {
     };
 }
 
-RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
+RenderableAirTrafficLive::RenderableAirTrafficLive(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _lineWidth(LineWidthInfo, 14.14f, 1.f, 30.f) // default, min, max 
     , _color(ColorInfo, glm::vec3(1.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
@@ -176,16 +176,16 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
         setRenderBin(RenderBin::PostDeferredTransparent);
     }
 
-    void RenderableAirTraffic::initializeGL() {
+    void RenderableAirTrafficLive::initializeGL() {
         glGenVertexArrays(1, &_vertexArray);
         glGenBuffers(1, &_vertexBuffer);
 
         // Setup shaders
         _shader = global::renderEngine->buildRenderProgram(
             "AirTrafficProgram",
-            absPath("${MODULE_AIRTRAFFIC}/shaders/airtraffic_vs.glsl"),
-            absPath("${MODULE_AIRTRAFFIC}/shaders/airtraffic_fs.glsl"),
-            absPath("${MODULE_AIRTRAFFIC}/shaders/airtraffic_ge.glsl")
+            absPath("${MODULE_AIRTRAFFIC}/shaders/airtrafficlive_vs.glsl"),
+            absPath("${MODULE_AIRTRAFFIC}/shaders/airtrafficlive_fs.glsl"),
+            absPath("${MODULE_AIRTRAFFIC}/shaders/airtrafficlive_ge.glsl")
         );
         
         ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
@@ -195,7 +195,7 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
         updateBuffers();
     };
 
-    void RenderableAirTraffic::deinitializeGL() {
+    void RenderableAirTrafficLive::deinitializeGL() {
         glDeleteBuffers(1, &_vertexBuffer);
         glDeleteVertexArrays(1, &_vertexArray);
         
@@ -205,11 +205,11 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
         return;
     };
 
-    bool RenderableAirTraffic::isReady() const {
+    bool RenderableAirTrafficLive::isReady() const {
         return true; // TODO
     };
 
-    void RenderableAirTraffic::render(const RenderData& data, RendererTasks& rendererTask) {
+    void RenderableAirTrafficLive::render(const RenderData& data, RendererTasks& rendererTask) {
 
         // Return if data is empty or time is from more than 3 minutes ago
         if (_data.empty() || abs(Time::now().j2000Seconds() - data.time.j2000Seconds()) > 60 * 3) return;
@@ -217,7 +217,7 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
         // Trigger data update
         if (abs(data.time.j2000Seconds() - _deltaTime) > 10.0 && !_isDataLoading) {
             std::cout << "Data loading initialized... ";
-            _future = std::async(std::launch::async, &RenderableAirTraffic::fetchData, this);
+            _future = std::async(std::launch::async, &RenderableAirTrafficLive::fetchData, this);
             _isDataLoading = true;
         }
 
@@ -277,7 +277,7 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
         _shader->deactivate();
     };
 
-    json RenderableAirTraffic::parseData(SyncHttpMemoryDownload& response) {
+    json RenderableAirTrafficLive::parseData(SyncHttpMemoryDownload& response) {
 
         // Callback to handle NULL data
         json::parser_callback_t ReplaceNullCallBack = [this](int depth, json::parse_event_t event, json& parsed) {
@@ -322,7 +322,7 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
         // Example, get latitude for flight#: jsonData["states"][flight#][6]
     }
 
-    json RenderableAirTraffic::fetchData() {
+    json RenderableAirTrafficLive::fetchData() {
 
         // Start timer
         auto start = std::chrono::steady_clock::now();
@@ -345,7 +345,7 @@ RenderableAirTraffic::RenderableAirTraffic(const ghoul::Dictionary& dictionary)
         return _data;
     }
 
-    void RenderableAirTraffic::updateBuffers() {
+    void RenderableAirTrafficLive::updateBuffers() {
 
         _nRenderedAircrafts = _data["states"].size();
         

@@ -23,8 +23,7 @@
  ****************************************************************************************/
 
 
-#include <modules/airtraffic/rendering/RenderableDensityMap.h>
-
+#include <modules/airtraffic/rendering/renderableairtraffichistorical.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/engine/globals.h>
@@ -99,17 +98,17 @@ namespace {
 
 namespace openspace {
 
-documentation::Documentation RenderableDensityMap::Documentation() {
+documentation::Documentation RenderableAirTrafficHistorical::Documentation() {
     using namespace documentation;
     return {
-        "Renderable Density Map",
-        "renderabledensitymap",
+        "Renderable Air Traffic Historical",
+        "RenderableAirTrafficHistorical",
         {
         }
     };
 }
 
-RenderableDensityMap::RenderableDensityMap(const ghoul::Dictionary& dictionary)
+RenderableAirTrafficHistorical::RenderableAirTrafficHistorical(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _maximumColor(MaximumColorInfo, glm::vec3(0.7f, 0.f, 1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _minimumColor(MinimumColorInfo, glm::vec3(1.f, 0.7f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
@@ -130,29 +129,29 @@ RenderableDensityMap::RenderableDensityMap(const ghoul::Dictionary& dictionary)
         setRenderBin(RenderBin::PostDeferredTransparent);
     };
 
-    void RenderableDensityMap::initialize() {
+    void RenderableAirTrafficHistorical::initialize() {
         return;
     };
 
-    void RenderableDensityMap::deinitialize() {
+    void RenderableAirTrafficHistorical::deinitialize() {
         return;
     };
 
-    void RenderableDensityMap::initializeGL() {
+    void RenderableAirTrafficHistorical::initializeGL() {
         glGenVertexArrays(1, &_vertexArray);
         glGenBuffers(1, &_vertexBuffer);
 
         _shader = global::renderEngine->buildRenderProgram(
             "DensityMapProgram",
-            absPath("${MODULE_AIRTRAFFIC}/shaders/densitymap_vs.glsl"),
-            absPath("${MODULE_AIRTRAFFIC}/shaders/densitymap_fs.glsl"),
-            absPath("${MODULE_AIRTRAFFIC}/shaders/densitymap_ge.glsl")
+            absPath("${MODULE_AIRTRAFFIC}/shaders/airtraffichistorical_vs.glsl"),
+            absPath("${MODULE_AIRTRAFFIC}/shaders/airtraffichistorical_fs.glsl"),
+            absPath("${MODULE_AIRTRAFFIC}/shaders/airtraffichistorical_ge.glsl")
         );
 
         ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
     };
 
-    void RenderableDensityMap::deinitializeGL() {
+    void RenderableAirTrafficHistorical::deinitializeGL() {
         glDeleteBuffers(1, &_vertexBuffer);
         glDeleteVertexArrays(1, &_vertexArray);
 
@@ -162,11 +161,11 @@ RenderableDensityMap::RenderableDensityMap(const ghoul::Dictionary& dictionary)
         return;
     };
 
-    bool RenderableDensityMap::isReady() const {
+    bool RenderableAirTrafficHistorical::isReady() const {
         return true;
     };
 
-    void RenderableDensityMap::render(const RenderData& data, RendererTasks& rendererTask) {
+    void RenderableAirTrafficHistorical::render(const RenderData& data, RendererTasks& rendererTask) {
 
 
         // YYYY-MM-DD
@@ -176,7 +175,7 @@ RenderableDensityMap::RenderableDensityMap(const ghoul::Dictionary& dictionary)
         if (_currentDate != date && !_isDataLoading) {
             std::cout << "Async..." << std::endl; 
             _currentDate = date;
-            _future = std::async(std::launch::async, &RenderableDensityMap::fetchData, this);
+            _future = std::async(std::launch::async, &RenderableAirTrafficHistorical::fetchData, this);
             _isDataLoading = true;
         }
 
@@ -222,11 +221,11 @@ RenderableDensityMap::RenderableDensityMap(const ghoul::Dictionary& dictionary)
         _shader->deactivate();
     };
 
-    void RenderableDensityMap::update(const UpdateData& data) {
+    void RenderableAirTrafficHistorical::update(const UpdateData& data) {
         return;
     };
 
-    bool RenderableDensityMap::updateBuffers() {
+    bool RenderableAirTrafficHistorical::updateBuffers() {
 
         _vertexBufferData.clear();
 
@@ -315,7 +314,7 @@ RenderableDensityMap::RenderableDensityMap(const ghoul::Dictionary& dictionary)
         return true;
     }
 
-    bool RenderableDensityMap::fetchData(){
+    bool RenderableAirTrafficHistorical::fetchData(){
 
         std::string fileName = _currentDate.substr(0, 4) + "/" 
         + _currentDate.substr(5, 2) + "/" + _currentDate.substr(8, 2) + ".csv";

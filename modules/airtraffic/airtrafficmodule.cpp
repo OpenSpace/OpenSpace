@@ -23,8 +23,8 @@
  ****************************************************************************************/
 
 #include <modules/airtraffic/airtrafficmodule.h>
-#include <modules/airtraffic/rendering/renderableairtraffic.h>
-#include <modules/airtraffic/rendering/renderabledensitymap.h>
+#include <modules/airtraffic/rendering/renderableairtrafficlive.h>
+#include <modules/airtraffic/rendering/renderableairtraffichistorical.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/scripting/lualibrary.h>
@@ -38,20 +38,20 @@ AirTrafficModule::AirTrafficModule() : OpenSpaceModule(Name) {}
 void AirTrafficModule::internalInitialize(const ghoul::Dictionary&) {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
-    fRenderable->registerClass<RenderableAirTraffic>("RenderableAirTraffic");
-    fRenderable->registerClass<RenderableDensityMap>("RenderableDensityMap");
+    fRenderable->registerClass<RenderableAirTrafficLive>("RenderableAirTrafficLive");
+    fRenderable->registerClass<RenderableAirTrafficHistorical>("RenderableAirTrafficHistorical");
 }
 
 std::vector<documentation::Documentation> AirTrafficModule::documentations() const {
     return {
-        RenderableAirTraffic::Documentation(),
-        RenderableDensityMap::Documentation()
+        RenderableAirTrafficLive::Documentation(),
+        RenderableAirTrafficHistorical::Documentation()
     };
 }
 
 scripting::LuaLibrary AirTrafficModule::luaLibrary() const {
     scripting::LuaLibrary res;
-    res.name = "air_traffic"; // Ok to use whitespaces?
+    res.name = "air_traffic"; 
     return res;
 }
 
