@@ -22,16 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_AIRTRAFFIC___RENDERABLEAIRTRAFFICLIVE___H__
-#define __OPENSPACE_MODULE_AIRTRAFFIC___RENDERABLEAIRTRAFFICLIVE___H__
+#ifndef __OPENSPACE_MODULE_AIRTRAFFIC___RENDERABLEAIRTRAFFICBOUND___H__
+#define __OPENSPACE_MODULE_AIRTRAFFIC___RENDERABLEAIRTRAFFICBOUND___H__
 
 #include <openspace/rendering/renderable.h>
 #include <ghoul/opengl/uniformcache.h>
-#include <openspace/json.h>
-#include <openspace/util/httprequest.h>
 #include <openspace/util/time.h>
-#include <future>
-#include <list>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
@@ -46,73 +42,55 @@ namespace ghoul::opengl {
 namespace openspace {
 
 namespace documentation { struct Documentation; }
-using json = nlohmann::json;
-using namespace std::chrono_literals;
 
-class RenderableAirTrafficLive : public Renderable {
+class RenderableAirTrafficBound : public Renderable {
 public:
-    explicit RenderableAirTrafficLive(const ghoul::Dictionary& dictionary);
-    virtual ~RenderableAirTrafficLive() = default;
+    explicit RenderableAirTrafficBound(const ghoul::Dictionary& dictionary);
+    virtual ~RenderableAirTrafficBound() = default;
 
     void initializeGL() override;
     void deinitializeGL() override;
 
-    json fetchData();
-
-    json parseData(SyncHttpMemoryDownload& response);
-
     bool isReady() const override;
+    void update(const UpdateData& data) override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
+
+    static glm::vec2 getLatBound();
+    static glm::vec2 getLonBound();
 
     void updateBuffers();
     
     static documentation::Documentation Documentation();
 
 private:
-
-    static const int _TRAILSIZE = 10;
-    static const int _THRESHOLD = -9999;
+    
     properties::FloatProperty _lineWidth;
     properties::Vec3Property _color;
     properties::FloatProperty _opacity;
-    properties::IntProperty _nRenderedAircrafts;
+    properties::Vec2Property _latitudeThreshold;
+    properties::Vec2Property _longitudeThreshold;
 
-    struct AircraftVBOLayout {
-        float latitude = static_cast<float>(_THRESHOLD);
-        float longitude = static_cast<float>(_THRESHOLD);
-        float barometricAltitude = 0.f;
-        float velocity = 0.f; 
-        float flightDirection = 0.f; // true_track in data
-        int lastContact = 0; // Draw only if changed
-    };
-    
-    template<size_t N>
-    struct aircraftList {
-        aircraftList() : list(N) {}
-        std::list<AircraftVBOLayout> list;
+    static glm::vec2 _lat;
+    static glm::vec2 _lon;
+
+    struct BoundVBOLayout {
+        float latitude = 0.f;
+        float longitude = 0.f;
     };
 
     // Backend storage for vertex buffer object containing all points
-    std::vector<AircraftVBOLayout>  _vertexBufferData;
+    std::vector<BoundVBOLayout>  _vertexBufferData;
    
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
 
-    UniformCache(modelViewProjection, trailSize, resolution, lineWidth, color, opacity, latitudeThreshold, longitudeThreshold) _uniformCache;
+    UniformCache(modelViewProjection, color, opacity, lineWidth, latitudeThreshold, longitudeThreshold) _uniformCache;
 
     GLuint _vertexArray = 0;
     GLuint _vertexBuffer = 0;
-    std::future<json> _future;
-    bool _isDataLoading = false;
-    json _data = json({});
-    std::map<std::string, aircraftList<_TRAILSIZE>> _aircraftMap;
     
-    // Fix secure way to handle credentials
-    //const std::string _url = "https://" + _PASSWORD + ":" + _USERNAME + "@opensky-network.org/api/states/all";
-    const std::string _url = "https://opensky-network.org/api/states/all";
-    double _deltaTime = Time::now().j2000Seconds();
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_AIRTRAFFIC___RENDERABLEAIRTRAFFICLIVE___H__
+#endif // __OPENSPACE_MODULE_AIRTRAFFIC___RENDERABLEAIRTRAFFICBOUND___H__

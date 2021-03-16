@@ -26,25 +26,30 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
   airtrafficmodule.h
-  rendering/renderableairtraffic.h
-  rendering/renderabledensitymap.h
+  rendering/renderableairtrafficlive.h
+  rendering/renderableairtraffichistorical.h
+  rendering/renderableairtrafficbound.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
   airtrafficmodule.cpp
-  rendering/renderableairtraffic.cpp
-  rendering/renderabledensitymap.cpp
+  rendering/renderableairtrafficlive.cpp
+  rendering/renderableairtraffichistorical.cpp
+  rendering/renderableairtrafficbound.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
-  shaders/airtraffic_vs.glsl
-  shaders/airtraffic_fs.glsl
-  shaders/airtraffic_ge.glsl
-  shaders/densitymap_vs.glsl
-  shaders/densitymap_fs.glsl
-  shaders/densitymap_ge.glsl
+  shaders/airtrafficlive_vs.glsl
+  shaders/airtrafficlive_fs.glsl
+  shaders/airtrafficlive_ge.glsl
+  shaders/airtraffichistorical_vs.glsl
+  shaders/airtraffichistorical_fs.glsl
+  shaders/airtraffichistorical_ge.glsl
+  shaders/airtrafficbound_vs.glsl
+  shaders/airtrafficbound_fs.glsl
+  shaders/airtrafficbound_ge.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 

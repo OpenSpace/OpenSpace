@@ -32,4 +32,17 @@ local HistoricalAirTraffic = {
     }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { LiveAirTraffic, HistoricalAirTraffic })
+local BoundAirTraffic = {
+    Identifier = "BoundAirTraffic",
+    Parent = transforms.EarthIAU.Identifier,
+    Renderable = {
+        Type = "RenderableAirTrafficBound",
+    },
+    GUI = {
+        Name = "Air Traffic Boundaries",
+        Path = "/Solar System/Planets/Earth/Air Traffic",
+        Description = [[ Spatial filtering for air traffic.]],
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { LiveAirTraffic, HistoricalAirTraffic, BoundAirTraffic })

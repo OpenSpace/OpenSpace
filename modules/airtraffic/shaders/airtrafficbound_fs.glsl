@@ -22,46 +22,19 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/airtraffic/airtrafficmodule.h>
-#include <modules/airtraffic/rendering/renderableairtrafficlive.h>
-#include <modules/airtraffic/rendering/renderableairtraffichistorical.h>
-#include <modules/airtraffic/rendering/renderableairtrafficbound.h>
+#include "fragment.glsl"
+#include "floatoperations.glsl"
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/documentation/documentation.h>
-#include <openspace/scripting/lualibrary.h>
-#include <openspace/util/factorymanager.h>
+in vec4 ge_position;
+in vec4 ge_interpColor;
 
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
+Fragment getFragment() {
+    Fragment frag;
 
-namespace openspace {
+    frag.gPosition = ge_position;
+    frag.depth = ge_position.w;
+    frag.color = ge_interpColor;
+    frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
 
-
-AirTrafficModule::AirTrafficModule() : OpenSpaceModule(Name) {}
-
-void AirTrafficModule::internalInitialize(const ghoul::Dictionary&) {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
-
-    fRenderable->registerClass<RenderableAirTrafficLive>("RenderableAirTrafficLive");
-    fRenderable->registerClass<RenderableAirTrafficHistorical>("RenderableAirTrafficHistorical");
-    fRenderable->registerClass<RenderableAirTrafficBound>("RenderableAirTrafficBound");
+    return frag;
 }
-
-std::vector<documentation::Documentation> AirTrafficModule::documentations() const {
-    return {
-        RenderableAirTrafficLive::Documentation(),
-        RenderableAirTrafficHistorical::Documentation(),
-        RenderableAirTrafficBound::Documentation()
-    };
-}
-
-scripting::LuaLibrary AirTrafficModule::luaLibrary() const {
-    scripting::LuaLibrary res;
-    res.name = "air_traffic";
-    return res;
-}
-
-
-} // namespace openspace

@@ -22,46 +22,23 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/airtraffic/airtrafficmodule.h>
-#include <modules/airtraffic/rendering/renderableairtrafficlive.h>
-#include <modules/airtraffic/rendering/renderableairtraffichistorical.h>
-#include <modules/airtraffic/rendering/renderableairtrafficbound.h>
+#version __CONTEXT__
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/documentation/documentation.h>
-#include <openspace/scripting/lualibrary.h>
-#include <openspace/util/factorymanager.h>
+layout (location = 0) in vec2 vertexLatLong; // latlong
 
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
+uniform vec3 color;
+uniform float opacity;
 
-namespace openspace {
+out vec4 vs_interpColor;
+out vec2 vs_latlon;
+out float vs_vertexID;
 
-
-AirTrafficModule::AirTrafficModule() : OpenSpaceModule(Name) {}
-
-void AirTrafficModule::internalInitialize(const ghoul::Dictionary&) {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
-
-    fRenderable->registerClass<RenderableAirTrafficLive>("RenderableAirTrafficLive");
-    fRenderable->registerClass<RenderableAirTrafficHistorical>("RenderableAirTrafficHistorical");
-    fRenderable->registerClass<RenderableAirTrafficBound>("RenderableAirTrafficBound");
-}
-
-std::vector<documentation::Documentation> AirTrafficModule::documentations() const {
-    return {
-        RenderableAirTrafficLive::Documentation(),
-        RenderableAirTrafficHistorical::Documentation(),
-        RenderableAirTrafficBound::Documentation()
-    };
-}
-
-scripting::LuaLibrary AirTrafficModule::luaLibrary() const {
-    scripting::LuaLibrary res;
-    res.name = "air_traffic";
-    return res;
+void main() {
+    vs_vertexID = float(gl_VertexID);
+    vs_interpColor = vec4(color, opacity);
+    vs_latlon = vertexLatLong;
+    gl_Position = vec4(0.f);
 }
 
 
-} // namespace openspace
+

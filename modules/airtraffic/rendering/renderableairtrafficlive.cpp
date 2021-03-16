@@ -24,6 +24,7 @@
 
 
 #include <modules/airtraffic/rendering/renderableairtrafficlive.h>
+#include <modules/airtraffic/rendering/renderableairtrafficbound.h>
 
 #include <openspace/util/updatestructures.h>
 #include <openspace/rendering/renderengine.h>
@@ -82,18 +83,6 @@ namespace {
        "The opacity of the lines used to represent aircrafts."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LatitudeThresholdInfo = {
-       "latitudeThreshold",
-       "Latitude Threshold",
-       "Minimum and maximum latitude for aircrafts."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo LongitudeThresholdInfo = {
-       "longitudeThreshold",
-       "Longitude Threshold",
-       "Minimum and maximum longitude for aircrafts."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo RenderedAircraftsInfo = {
        "RenderedAircrafts",
        "Rendered Aircrafts",
@@ -134,18 +123,6 @@ documentation::Documentation RenderableAirTrafficLive::Documentation() {
                 Optional::Yes,
                 OpacityInfo.description
             },
-            {
-                LatitudeThresholdInfo.identifier,
-                new Vector2Verifier<double>,
-                Optional::Yes,
-                LatitudeThresholdInfo.description
-            },
-            {
-                LongitudeThresholdInfo.identifier,
-                new Vector2Verifier<double>,
-                Optional::Yes,
-                LongitudeThresholdInfo.description
-            },
         }
     };
 }
@@ -155,23 +132,13 @@ RenderableAirTrafficLive::RenderableAirTrafficLive(const ghoul::Dictionary& dict
     , _lineWidth(LineWidthInfo, 14.14f, 1.f, 30.f) // default, min, max 
     , _color(ColorInfo, glm::vec3(1.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
     , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
-    , _latitudeThreshold(LatitudeThresholdInfo, glm::vec2(-90.f, 90.f), glm::vec2(-90.f), glm::vec2(90.f))
-    , _longitudeThreshold(LongitudeThresholdInfo, glm::vec2(-180.f, 180.f), glm::vec2(-180.f), glm::vec2(180.f))
     , _nRenderedAircrafts(RenderedAircraftsInfo, 0, 0, 10000)
     {
         addProperty(_lineWidth);
         addProperty(_color);
         addProperty(_opacity);
-        addProperty(_latitudeThreshold);
-        addProperty(_longitudeThreshold);
         _nRenderedAircrafts.setReadOnly(true);
         addProperty(_nRenderedAircrafts);
-
-        /*if (dictionary.hasKey(LineWidthInfo.identifier)) {
-            _lineWidth = static_cast<float>(
-                dictionary.value<double>(LineWidthInfo.identifier)
-            );
-        }*/
  
         setRenderBin(RenderBin::PostDeferredTransparent);
     }
@@ -182,7 +149,7 @@ RenderableAirTrafficLive::RenderableAirTrafficLive(const ghoul::Dictionary& dict
 
         // Setup shaders
         _shader = global::renderEngine->buildRenderProgram(
-            "AirTrafficProgram",
+            "AirTrafficLiveProgram",
             absPath("${MODULE_AIRTRAFFIC}/shaders/airtrafficlive_vs.glsl"),
             absPath("${MODULE_AIRTRAFFIC}/shaders/airtrafficlive_fs.glsl"),
             absPath("${MODULE_AIRTRAFFIC}/shaders/airtrafficlive_ge.glsl")
@@ -222,7 +189,7 @@ RenderableAirTrafficLive::RenderableAirTrafficLive(const ghoul::Dictionary& dict
         }
 
         // Check if new data finished loading. Update buffers ONLY if finished
-        if (_future.valid() && _future.wait_for(seconds(0)) == std::future_status::ready) { // NOT SO STABLE SOLUTION
+        if (_future.valid() && _future.wait_for(seconds(0)) == std::future_status::ready) { 
             _data = _future.get();
             updateBuffers();
             std::cout << "finished. Time since last update: " << abs(_deltaTime - data.time.j2000Seconds()) << " seconds." << std::endl;
@@ -247,8 +214,8 @@ RenderableAirTrafficLive::RenderableAirTrafficLive(const ghoul::Dictionary& dict
 
         _shader->setUniform(_uniformCache.color, _color);
         _shader->setUniform(_uniformCache.opacity, _opacity);
-        _shader->setUniform(_uniformCache.latitudeThreshold, _latitudeThreshold);
-        _shader->setUniform(_uniformCache.longitudeThreshold, _longitudeThreshold);
+        _shader->setUniform(_uniformCache.latitudeThreshold, RenderableAirTrafficBound::getLatBound());
+        _shader->setUniform(_uniformCache.longitudeThreshold, RenderableAirTrafficBound::getLonBound());
 
   
         const GLsizei nAircrafts = static_cast<GLsizei>(_data["states"].size());

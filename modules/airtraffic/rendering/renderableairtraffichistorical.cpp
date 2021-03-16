@@ -24,6 +24,9 @@
 
 
 #include <modules/airtraffic/rendering/renderableairtraffichistorical.h>
+#include <modules/airtraffic/rendering/renderableairtrafficbound.h>
+
+
 #include <openspace/util/updatestructures.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/engine/globals.h>
@@ -75,18 +78,6 @@ namespace {
        "The opacity of the lines used to represent aircrafts."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LatitudeThresholdInfo = {
-       "latitudeThreshold",
-       "Latitude Threshold",
-       "Minimum and maximum latitude for aircrafts."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo LongitudeThresholdInfo = {
-       "longitudeThreshold",
-       "Longitude Threshold",
-       "Minimum and maximum longitude for aircrafts."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo TotalFlightsInfo = {
        "TotalFlights",
        "Total Flights",
@@ -113,15 +104,11 @@ RenderableAirTrafficHistorical::RenderableAirTrafficHistorical(const ghoul::Dict
     , _maximumColor(MaximumColorInfo, glm::vec3(0.7f, 0.f, 1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _minimumColor(MinimumColorInfo, glm::vec3(1.f, 0.7f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
     , _opacity(OpacityInfo, 0.05f, 0.f, 1.f)
-    , _latitudeThreshold(LatitudeThresholdInfo, glm::vec2(-90.f, 90.f), glm::vec2(-90.f), glm::vec2(90.f))
-    , _longitudeThreshold(LongitudeThresholdInfo, glm::vec2(-180.f, 180.f), glm::vec2(-180.f), glm::vec2(180.f))
     , _nTotalFlights(TotalFlightsInfo, 0, 0, 150000)
     {
         addProperty(_maximumColor);
         addProperty(_minimumColor);
         addProperty(_opacity);
-        addProperty(_latitudeThreshold);
-        addProperty(_longitudeThreshold);
 
         _nTotalFlights.setReadOnly(true);
         addProperty(_nTotalFlights);
@@ -142,7 +129,7 @@ RenderableAirTrafficHistorical::RenderableAirTrafficHistorical(const ghoul::Dict
         glGenBuffers(1, &_vertexBuffer);
 
         _shader = global::renderEngine->buildRenderProgram(
-            "DensityMapProgram",
+            "AirTrafficHistoricalProgram",
             absPath("${MODULE_AIRTRAFFIC}/shaders/airtraffichistorical_vs.glsl"),
             absPath("${MODULE_AIRTRAFFIC}/shaders/airtraffichistorical_fs.glsl"),
             absPath("${MODULE_AIRTRAFFIC}/shaders/airtraffichistorical_ge.glsl")
@@ -207,8 +194,8 @@ RenderableAirTrafficHistorical::RenderableAirTrafficHistorical(const ghoul::Dict
         _shader->setUniform(_uniformCache.maximumColor, _maximumColor);
         _shader->setUniform(_uniformCache.minimumColor, _minimumColor);
         _shader->setUniform(_uniformCache.opacity, _opacity);
-        _shader->setUniform(_uniformCache.latitudeThreshold, _latitudeThreshold);
-        _shader->setUniform(_uniformCache.longitudeThreshold, _longitudeThreshold);
+        _shader->setUniform(_uniformCache.latitudeThreshold, RenderableAirTrafficBound::getLatBound());
+        _shader->setUniform(_uniformCache.longitudeThreshold, RenderableAirTrafficBound::getLonBound());
         _shader->setUniform(_uniformCache.totalFlights, _nTotalFlights);
 
         glBindVertexArray(_vertexArray);
@@ -230,12 +217,7 @@ RenderableAirTrafficHistorical::RenderableAirTrafficHistorical(const ghoul::Dict
         _vertexBufferData.clear();
 
         _nTotalFlights = _data.size();
-        _vertexBufferData.resize(2 * _nTotalFlights + 2);
-
-        AircraftVBOLayout bBoxVBO;
-        bBoxVBO.identifier = 1;
-        _vertexBufferData.push_back(bBoxVBO);
-        _vertexBufferData.push_back(bBoxVBO);
+        _vertexBufferData.resize(2 * _nTotalFlights);
 
         AircraftVBOLayout startVBO;
         AircraftVBOLayout endVBO;

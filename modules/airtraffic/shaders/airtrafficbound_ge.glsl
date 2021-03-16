@@ -22,7 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
- #version __CONTEXT__
+#version __CONTEXT__
+
 #define PI 3.1415926538
 
 layout (lines) in;
@@ -33,19 +34,17 @@ const float RADII = 6378137.0; // Earth is approximated as a sphere update if ch
 const float THRESHOLD = -9998;
 
 uniform mat4 modelViewProjection;
-uniform float opacity;
 uniform vec2 latitudeThreshold;
 uniform vec2 longitudeThreshold;
 
-//in float vs_vertexID[];
-in vec4 vs_position[];
 in vec4 vs_interpColor[];
 in vec2 vs_latlon[];
 in float vs_vertexID[];
-in int vs_identifier[];
+
 
 out vec4 ge_position;
 out vec4 ge_interpColor;
+
 
 float greatCircleDistance(float lat1, float lon1, float lat2, float lon2) {
     // distance between latitudes 
@@ -94,36 +93,54 @@ vec4 geoToCartConversion(float lat, float lon, float alt){
 
 
  void main(){
-    
-    
-    if(length(gl_in[0].gl_Position) < EPSILON || length(gl_in[1].gl_Position) < EPSILON) {
-            return;
-    }
 
-    // Start point
-    ge_position = vs_position[0];
-    ge_interpColor = vec4(vec3(vs_interpColor[0]), opacity);
-    gl_Position = gl_in[0].gl_Position;
-    EmitVertex();
+    // remove seam
+    if(length(latitudeThreshold - vec2(-90.f, 90.f)) < EPSILON &&
+       length(longitudeThreshold - vec2(-180.f, 180.f)) < EPSILON) return;
 
-    float alt = 10000; 
+    vec2 position1 = vec2(latitudeThreshold.x, longitudeThreshold.x) * PI / 180.0;
+    vec2 position2 = vec2(latitudeThreshold.y, longitudeThreshold.x) * PI / 180.0;
+    vec2 position3 = vec2(latitudeThreshold.y, longitudeThreshold.y) * PI / 180.0;
+    vec2 position4 = vec2(latitudeThreshold.x, longitudeThreshold.y) * PI / 180.0;
+
+    float alt = 150000;
+
     // Mid points
-    for(int i = 1; i < 10; ++i) {
-        vec2 point = findIntermediatePoint(vs_latlon[0], vs_latlon[1], float(i)/10.f);
+    for(int i = 0; i <= 10; ++i) {
+        vec2 point = position1 + float(i)/10*(position2-position1);
         vec4 position = geoToCartConversion(point.x, point.y, alt);
         ge_position = modelViewProjection * position;
-        float midOpacity = 0.2;
-        ge_interpColor = vec4(vec3(vs_interpColor[0]), midOpacity*opacity);
+        ge_interpColor = vs_interpColor[0];
         gl_Position = ge_position;
         EmitVertex();
     }
 
-    // End point
-    ge_position = vs_position[1];
-    ge_interpColor = vec4(vec3(vs_interpColor[1]), opacity);
-    gl_Position = gl_in[1].gl_Position;
-    EmitVertex();
-    
+    for(int i = 0; i <= 10; ++i) {
+        vec2 point = position2 + float(i)/10.f*(position3-position2);
+        vec4 position = geoToCartConversion(point.x, point.y, alt);
+        ge_position = modelViewProjection * position;
+        ge_interpColor = vs_interpColor[0];
+        gl_Position = ge_position;
+        EmitVertex();
+    }
 
+    for(int i = 0; i <= 10; ++i) {
+        vec2 point = position3 + float(i)/10.f*(position4-position3);
+        vec4 position = geoToCartConversion(point.x, point.y, alt);
+        ge_position = modelViewProjection * position;
+        ge_interpColor = vs_interpColor[0];
+        gl_Position = ge_position;
+        EmitVertex();
+    }
+
+    for(int i = 0; i <= 10; ++i) {
+        vec2 point = position4 + float(i)/10.f*(position1-position4);
+        vec4 position = geoToCartConversion(point.x, point.y, alt);
+        ge_position = modelViewProjection * position;
+        ge_interpColor = vs_interpColor[0];
+        gl_Position = ge_position;
+        EmitVertex();
+    }
+    
     EndPrimitive();
  }

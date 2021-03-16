@@ -84,8 +84,8 @@ private:
     properties::Vec3Property _maximumColor;
     properties::Vec3Property _minimumColor;
     properties::FloatProperty _opacity;
-    properties::Vec2Property _latitudeThreshold; 
-    properties::Vec2Property _longitudeThreshold;
+    //properties::Vec2Property _latitudeThreshold; 
+    //properties::Vec2Property _longitudeThreshold;
     properties::IntProperty _nTotalFlights;
 
     // Backend storage for vertex buffer object containing all points
