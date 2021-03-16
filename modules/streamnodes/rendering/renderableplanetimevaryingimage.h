@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RenderableTimeVaryingPlaneImageLocal___H__
-#define __OPENSPACE_MODULE_BASE___RenderableTimeVaryingPlaneImageLocal___H__
+#ifndef __OPENSPACE_MODULE_BASE___RenderablePlaneTimeVaryingImage___H__
+#define __OPENSPACE_MODULE_BASE___RenderablePlaneTimeVaryingImage___H__
 
 #include <modules/base/rendering/renderableplane.h>
 
@@ -41,6 +41,7 @@ namespace openspace {
     public:
         RenderablePlaneTimeVaryingImage(const ghoul::Dictionary& dictionary);
 
+        void initialize() override;
         void initializeGL() override;
         void deinitializeGL() override;
 
@@ -65,10 +66,9 @@ namespace openspace {
         std::vector<std::string> _sourceFiles;
         std::vector<double> _startTimes;
         int _activeTriggerTimeIndex = 0;
-        // Number of states in the sequence
-        size_t _nStates = 273;
+        // Number of states in the sequence/ number of images.
+        size_t _nStates;
         properties::StringProperty _texturePath;
-        //properties::StringProperty _timestapsPath;
         ghoul::opengl::Texture* _texture = nullptr;
        // std::unique_ptr<ghoul::opengl::Texture> _texture;
         std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textureFiles;
@@ -80,4 +80,4 @@ namespace openspace {
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RenderableTimeVaryingPlaneImageLocal___H__
+#endif // __OPENSPACE_MODULE_BASE___RenderablePlaneTimeVaryingImage___H__

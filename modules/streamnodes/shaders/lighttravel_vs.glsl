@@ -35,22 +35,13 @@ out vec4        vs_color;
 out float       vs_depth;
 
 uniform float   in_time_since_start;
-/*uniform float in_dist_from_start;
-uniform float in_transmission_time;
-uniform float in_light_travel_time;
-*/
+
 uniform vec3    normalizedVectorFromSunToEarth;
 uniform int     renderMode;
 uniform float   pointSize;
 uniform vec4    defaultColor;
 uniform vec4    lightColor;
 uniform float   distanceFactor;
-/*
-layout(location = 1) in float in_dist_from_start;
-layout(location = 2) in float in_time_since_start;
-layout(location = 3) in float in_transmission_time;
-layout(location = 4) in float in_light_travel_time;
-*/
 
 out float   distanceFromStart;
 out float   timeSinceStart;
@@ -64,66 +55,52 @@ float       maxDistance = distanceFactor * 1000000000.f;
 const float lightSpeed = 299792458.0;
 
 bool calculateDistance(vec3 inposition) {
- vec3 newpos = vec3(0, 0, 0);
- //float temptime = 200;
- //float temptime = in_time_since_start;
- newpos.x = normalizedVectorFromSunToEarth.x * in_time_since_start * lightSpeed;
- newpos.y = normalizedVectorFromSunToEarth.y * in_time_since_start * lightSpeed;
- newpos.z = normalizedVectorFromSunToEarth.z * in_time_since_start * lightSpeed;
+    vec3 newpos = vec3(0, 0, 0);
 
- if(newpos.y < inposition.y && newpos.x < inposition.x && newpos.z > inposition.z){
+    newpos.x = normalizedVectorFromSunToEarth.x * in_time_since_start * lightSpeed;
+    newpos.y = normalizedVectorFromSunToEarth.y * in_time_since_start * lightSpeed;
+    newpos.z = normalizedVectorFromSunToEarth.z * in_time_since_start * lightSpeed;
+
+    if(newpos.y < inposition.y && newpos.x < inposition.x && newpos.z > inposition.z){
+        return false;
+    }
+    if(distance(newpos, inposition) < maxDistance){
+        return true;
+    }
+
     return false;
- }
- if(distance(newpos, inposition) < maxDistance){
-     //if(inposition.x > 50000000000.f){
-     return true;
- }
-
- return false;
 }
+
 float smoothmotion(){
     vec3 newpos = vec3(0,0,0);
     newpos.x = normalizedVectorFromSunToEarth.x * in_time_since_start * lightSpeed;
     newpos.y = normalizedVectorFromSunToEarth.y * in_time_since_start * lightSpeed;
     newpos.z = normalizedVectorFromSunToEarth.z * in_time_since_start * lightSpeed; 
-
     
     float smoothFront = 1 - smoothstep(0, maxDistance, distance(newpos, in_position));
-    //smoothFront = smoothstep(0, 1, smoothFront);
-    //smoothFront = 1 / smoothFront;
+
     if(smoothFront < 0.95f){
-    float alphaV = 0.1 * smoothFront * smoothFront;
-    if(alphaV < 0.01){
-    return 0; 
-    }
-    return alphaV;
+        float alphaV = 0.1 * smoothFront * smoothFront;
+        if(alphaV < 0.01){
+            return 0; 
+        }
+        return alphaV;
     }
     return smoothFront;
 }
+
 vec4 z_normalization(vec4 v_in) {
     vec4 v_out = v_in;
     v_out.z = 0;
-    //if ( v_out.z < -v_out.w )
-    //  v_out.z = -v_out.w;
-    //else if (v_out.z > v_out.w)
-    //  v_out.z = v_out.w;
     return v_out;
 }
+
 void main() {
    if(calculateDistance(in_position)){
-   //float smoothFront = smoothstep(0, 199999999999.0f, in_position.x);
-  // vs_color = vec4(1.0, 1.0, 1.0, 1.0);
-   vs_color = lightColor;
-   //vs_color.x = vs_color.x * smoothmotion();
-   //vs_color.y = vs_color.y * smoothmotion();
-   //vs_color.z = vs_color.z * smoothmotion();
-   vs_color.a = vs_color.a * smoothmotion();
-   //vs_color = vec4(0.2, 0.3, 0.4, 1.0);
+       vs_color = lightColor;
+       vs_color.a = vs_color.a * smoothmotion();
    }
    else{
-   //float smoothFront = smoothstep(0, 199999999999.0f, in_position.x);
-   //vs_color = vec4(1.0, 1.0, 1.0, smoothFront*1.0);
-   //vs_color = vec4(0.2, 0.3, 0.4, 1.0);
        if(renderMode == 3){
             vs_color = vec4(0);
        }
@@ -134,28 +111,15 @@ void main() {
  
    if(renderMode == 2 || renderMode == 3){
         gl_PointSize = pointSize;
-   //gl_PointSize = 4;
    }
    
-   //vs_color = vec4(1.0, 1.0, 1.0, 1.0);
    vec4 position_in_meters = vec4(in_position.xyz, 1);
    vec4 positionClipSpace = modelViewProjection * position_in_meters;
-   //vec4 positionClipSpace = modelViewProjectionTransform * position_in_meters;
-   //vec4 positionScreenSpace = z_normalization(positionClipSpace);
 
-
-   //gl_Position = vec4(positionClipSpace.xy, 0, positionClipSpace.w);
    gl_Position = positionClipSpace;
 
    vs_depth = gl_Position.w;
    timeSinceStart = in_time_since_start;  
-   /*
-    lightTravelTime = in_light_travel_time;
-     
-    transmissionTime = in_transmission_time;
-    distanceFromStart = in_dist_from_start;
-    */
-    //vs_gPosition = vec4(modelViewTransform * position_in_meters);
-    render_mode = renderMode;
-    vs_st = in_st;
+   render_mode = renderMode;
+   vs_st = in_st;
 }

@@ -27,7 +27,7 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablestreamnodes.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablelighttravel.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletimevaryingplaneimagelocal.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplanetimevaryingimage.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletimevaryingsphere.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
@@ -35,7 +35,7 @@ source_group("Header Files" FILES ${HEADER_FILES})
 set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablestreamnodes.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablelighttravel.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletimevaryingplaneimagelocal.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplanetimevaryingimage.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletimevaryingsphere.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})

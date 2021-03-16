@@ -2,7 +2,7 @@
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
-* Copyright (c) 2014-2020                                                               *
+* Copyright (c) 2014-2021                                                               *
 *                                                                                       *
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
 * software and associated documentation files (the "Software"), to deal in the Software *
@@ -88,15 +88,15 @@ namespace openspace {
         properties::IntProperty _pTimeStep;
         properties::FloatProperty _pDistanceFactor;
         
-        properties::BoolProperty _pShowLabel;
-        properties::BoolProperty _pShouldFollowLight;
-        properties::FloatProperty _pFadeDistance;
+        //properties::BoolProperty _pShowLabel;
+        //properties::BoolProperty _pShouldFollowLight;
+        //properties::FloatProperty _pFadeDistance;
 
         properties::Vec4Property _pDefaultColor;
         properties::Vec4Property _pLightColor;
 
-        properties::IntProperty _pTextMinSize;
-        properties::IntProperty _pTextMaxSize;
+        //properties::IntProperty _pTextMinSize;
+        //properties::IntProperty _pTextMaxSize;
         std::unique_ptr<ghoul::Dictionary> _dictionary;
         std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
 
@@ -106,12 +106,11 @@ namespace openspace {
         
         glm::vec3 _labelPos;
         GLuint _quad = 0;
-       // void createPlane();
-        void renderLabels(const RenderData& data,
+     /*   void renderLabels(const RenderData& data,
             const glm::dmat4& modelViewProjectionMatrix,
             const glm::dvec3& orthoRight,
             const glm::dvec3& orthoUp,
-            float fadeInVariable);
+            float fadeInVariable);*/
         double calculateEndTime(const double starttime, const glm::vec3 startpos, const glm::vec3 endpos);
     };
 }

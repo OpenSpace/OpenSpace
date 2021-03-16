@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -21,40 +21,24 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
- //including our own h file
 #include <modules/streamnodes/rendering/renderablelighttravel.h>
 
-// Includes from fieldlinessequence, might not need all of them
-#include <modules/fieldlinessequence/fieldlinessequencemodule.h>
-#include <modules/fieldlinessequence/util/kameleonfieldlinehelper.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/windowdelegate.h>
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
-#include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-// Test debugging tools more then logmanager
-#include <ghoul/logging/consolelog.h>
-#include <ghoul/logging/visualstudiooutputlog.h>
-#include <ghoul/filesystem/cachemanager.h>
 
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/textureunit.h>
-#include <fstream>
-#include <thread>
-#include <openspace/json.h>
+// Test debugging tools more then logmanager
+//#include <ghoul/logging/logmanager.h>
+//#include <ghoul/logging/consolelog.h>
+//#include <ghoul/logging/visualstudiooutputlog.h>
+
+//#include <thread>
 #include <openspace/query/query.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scene.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/io/texture/texturereader.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
 
 namespace {
     constexpr const char* _loggerCat = "renderableLightTravel";
@@ -100,31 +84,7 @@ namespace {
         "The distance factor for what to show as default vs light",
         "This value is multiplicated by a maximum distance of 1000000000.f meters."
     };
-    constexpr openspace::properties::Property::PropertyInfo LabelInfo = {
-        "label",
-        "Render label",
-        "Bool property for rendering labels."
-    };
-    constexpr openspace::properties::Property::PropertyInfo FollowLightInfo = {
-        "followLight",
-        "Light following label",
-        "Changes position of the label with the lights movement."
-    };
-    constexpr openspace::properties::Property::PropertyInfo FadeDistanceInfo = {
-        "fadeDistance",
-        "Fade Distance",
-        "Distance which the nodes fade given with the power of 10."
-    };
-    constexpr openspace::properties::Property::PropertyInfo TextMinSizeInfo = {
-        "minTextSize",
-        "Min text size",
-        "The lowest value for text size for label."
-    };
-    constexpr openspace::properties::Property::PropertyInfo TextMaxSizeInfo = {
-        "maxTextSize",
-        "Max text size",
-        "The highest value for text size for label."
-    };
+
 }
 
 namespace openspace {
@@ -132,7 +92,7 @@ namespace openspace {
     RenderableLightTravel::RenderableLightTravel(const ghoul::Dictionary& dictionary)
         : Renderable(dictionary)
         , _pLightSpeed(LightSpeedInfo, 299792458.f, 0, 299792458.f)
-        , _pLineWidth(LineWidthInfo, 5, 0, 20)
+        , _pLineWidth(LineWidthInfo, 5, 0.1, 20)
         , _pRenderMode(RenderModeInfo, OptionProperty::DisplayType::Dropdown)
         , _pDefaultColor(DefaultcolorInfo, glm::vec4(0.3, 0.3, 0.3, 0),
             glm::vec4(0.f),
@@ -143,11 +103,6 @@ namespace openspace {
         , _pPointSize(PointSizeInfo, 2.f, 0, 20)
         , _pTimeStep(TimeStepInfo, 1, 1, 30)
         , _pDistanceFactor(DistanceFactorInfo, 20, 1, 30)
-        , _pShowLabel(LabelInfo, false)
-        , _pShouldFollowLight(FollowLightInfo, false)
-        , _pFadeDistance(FadeDistanceInfo, 10.f, 9.f, 20.f)
-        , _pTextMinSize(TextMinSizeInfo, 1, 1, 20)
-        , _pTextMaxSize(TextMaxSizeInfo, 30, 10, 100)
     {
         _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
     }
@@ -160,62 +115,20 @@ void RenderableLightTravel::initializeGL() {
         absPath("${MODULE_STREAMNODES}/shaders/lighttravel_fs.glsl")
     );
 
-    if(_font == nullptr){
-        size_t _fontSize = 50;
-        _font = global::fontManager->font(
-            "Mono",
-            static_cast<float>(_fontSize),
-            ghoul::fontrendering::FontManager::Outline::Yes,
-            ghoul::fontrendering::FontManager::LoadGlyphs::No
-        );
-    }
-
     glGenVertexArrays(1, &_vertexArrayObject);
     glGenBuffers(1, &_vertexPositionBuffer);
-    //createPlane();
 
     setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
     glm::vec3 currentpos = glm::vec3(0.0, 0.0, 0.0);
-    //positions.push_back(currentpos);
     addProperty(_pLightSpeed);
     addProperty(_pLineWidth);
     addProperty(_pDistanceFactor);
-    addProperty(_pShowLabel);
-    addProperty(_pShouldFollowLight);
-    addProperty(_pFadeDistance);
-    //addProperty(_textMinSize);
-    //addProperty(_textMaxSize);
-    //_lightspeed = 300 * 10e6;
-    _pLightSpeed = 299792458.f;
-    SceneGraphNode* earthNode = sceneGraphNode("Earth");
-    // glm::vec3 earthPos = earthNode->worldPosition();
-    glm::vec3 earthPos = glm::vec3(94499869340, -115427843118, 11212075887.3);
-    glm::vec3 earthToSun = glm::vec3(earthPos);
-    glm::vec3 newpos = glm::vec3(0.0, 0.0, 0.0);
-    /// should probably be distance from points to earth
-    /*
-    while(currentpos.x < 94499869340){
-        newpos = currentpos + (_lightspeed / glm::length(earthToSun)) * earthToSun;
-        positions.push_back(newpos);
-        earthToSun = earthPos - newpos;
-        currentpos = newpos;
-    }
-    */
-    //positions.push_back(glm::vec3(94499869340 / 2, -115427843118 / 2, 11212075887.3 / 2));
-    // positions.push_back(earthPos);
 
-    //_triggerTime = Time::convertTime("2000-07-14T10:03:44.00");
-    _triggerTime = -1;
-    //LDEBUG("_triggertime: " + std::to_string(_triggerTime));
-    //_endTime = _triggerTime + 599;
-        
+    _pLightSpeed = 299792458.f;
+   
+    _triggerTime = -1;        
     //Earthnode worldposition, is not aligned with the actual position shown as it seems right now.
        
-    //glm::vec3 earthPos = earthNode->position();
-    // positions.push_back(earthPos);
-    // positions.push_back(earthPos);
-
-    //createPlane();
     _spriteTexture = nullptr;
     std::string texturepath = absPath("${SYNC}/http/stars_textures/1/halo.png");
         
@@ -223,11 +136,8 @@ void RenderableLightTravel::initializeGL() {
         texturepath
     );
     if (_spriteTexture) {
-        //_spriteTexture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
         _spriteTexture->uploadTexture();
     }
-
-    LDEBUG("vi kom in i init");
 
     _pRenderMode.addOption(static_cast<int>(RenderMethod::LineStrip), "LineStrip");
     _pRenderMode.addOption(static_cast<int>(RenderMethod::Lines), "Lines");
@@ -238,9 +148,6 @@ void RenderableLightTravel::initializeGL() {
     addProperty(_pDefaultColor);
     addProperty(_pPointSize);
     addProperty(_pTimeStep);
-        
-        
-   
 
 }
 void RenderableLightTravel::deinitializeGL()
@@ -256,22 +163,22 @@ void RenderableLightTravel::deinitializeGL()
         _shaderProgram = nullptr;
     }
 }
-double RenderableLightTravel::calculateEndTime(const double starttime, const glm::vec3 startpos, const glm::vec3 endpos) {
+double RenderableLightTravel::calculateEndTime(const double starttime, 
+    const glm::vec3 startpos, const glm::vec3 endpos) {
+
     glm::vec3 newpos = glm::vec3(0, 0, 0);
     glm::vec3 normalizedVector = glm::normalize(endpos);
     _normalizedVector = normalizedVector;
     double endtime = starttime;
-    //LDEBUG("distance" + std::to_string(glm::distance(newpos, endpos)));
     int counter = 0;
     positions.clear();
     positions.push_back(startpos);
-    //while (glm::distance(newpos, endpos) > 100000) {
     glm::vec3 newpos2 = glm::vec3(0, 0, 0);
     newpos2.x = normalizedVector.x * _Timesincestart * _pLightSpeed;
     newpos2.y = normalizedVector.y * _Timesincestart * _pLightSpeed;
     newpos2.z = normalizedVector.z * _Timesincestart * _pLightSpeed;
-    _labelPos = newpos2;
     int interval = _pTimeStep;
+
     while(endtime - starttime < 500){
         newpos.x += interval * _pLightSpeed * normalizedVector.x;
         newpos.y += interval * _pLightSpeed * normalizedVector.y;
@@ -279,9 +186,7 @@ double RenderableLightTravel::calculateEndTime(const double starttime, const glm
 
         endtime += interval;
         ++counter;
-        //LDEBUG("newpos.y" + std::to_string(newpos.y));
-        //LDEBUG("newpos.x" + std::to_string(newpos.x));
-        //LDEBUG("endtime" + std::to_string(endtime));
+
         if (newpos.x > endpos.x) {
             newpos = endpos;
             positions.push_back(newpos);
@@ -291,10 +196,6 @@ double RenderableLightTravel::calculateEndTime(const double starttime, const glm
     }
     positions.push_back(endpos);
        
-    //LDEBUG("endtime" + std::to_string(endtime));
-    //LDEBUG("newpos.y" + std::to_string(newpos.y));
-    //LDEBUG("newpos.x" + std::to_string(newpos.x));
-    //LDEBUG("position size" + std::to_string(positions.size()));
     _needPositionUpdate = true;
     return endtime;
 }
@@ -310,204 +211,130 @@ void RenderableLightTravel::render(const RenderData& data, RendererTasks& render
         _endTime = _triggerTime + 599;
     }
        
-_shaderProgram->activate();
-//LDEBUG("vi kom in i render");
-// Calculate Model View MatrixProjection
+    _shaderProgram->activate();
+    // Calculate Model View MatrixProjection
 
-const glm::dmat4 rotMat = glm::dmat4(data.modelTransform.rotation);
-const glm::dmat4 modelMat =
-glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-rotMat *
-glm::dmat4(glm::scale(glm::dmat4(1), glm::dvec3(data.modelTransform.scale)));
-const glm::dmat4 modelViewMat = data.camera.combinedViewMatrix() * modelMat;
+    const glm::dmat4 rotMat = glm::dmat4(data.modelTransform.rotation);
+    const glm::dmat4 modelMat =
+    glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+    rotMat *
+    glm::dmat4(glm::scale(glm::dmat4(1), glm::dvec3(data.modelTransform.scale)));
+    const glm::dmat4 modelViewMat = data.camera.combinedViewMatrix() * modelMat;
 
-_shaderProgram->setUniform("modelViewProjection",
-    data.camera.sgctInternal.projectionMatrix()* glm::mat4(modelViewMat));
+    _shaderProgram->setUniform("modelViewProjection",
+        data.camera.sgctInternal.projectionMatrix()* glm::mat4(modelViewMat));
 
-glm::dmat4 modelMatrix =
-glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
-glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+    glm::dmat4 modelMatrix =
+    glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
+    glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
+    glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
-glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
-glm::mat4 projectionMatrix = data.camera.projectionMatrix();
+    glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
+    glm::mat4 projectionMatrix = data.camera.projectionMatrix();
 
-glm::dmat4 modelViewProjectionMatrix = glm::dmat4(projectionMatrix) * modelViewMatrix;
+    glm::dmat4 modelViewProjectionMatrix = glm::dmat4(projectionMatrix) * modelViewMatrix;
 
-glm::dvec3 cameraViewDirectionWorld = -data.camera.viewDirectionWorldSpace();
-glm::dvec3 cameraUpDirectionWorld = data.camera.lookUpVectorWorldSpace();
-glm::dvec3 orthoRight = glm::normalize(
-    glm::cross(cameraUpDirectionWorld, cameraViewDirectionWorld)
-);
-if (orthoRight == glm::dvec3(0.0)) {
-    glm::dvec3 otherVector(
-        cameraUpDirectionWorld.y,
-        cameraUpDirectionWorld.x,
-        cameraUpDirectionWorld.z
+    glm::dvec3 cameraViewDirectionWorld = -data.camera.viewDirectionWorldSpace();
+    glm::dvec3 cameraUpDirectionWorld = data.camera.lookUpVectorWorldSpace();
+    glm::dvec3 orthoRight = glm::normalize(
+        glm::cross(cameraUpDirectionWorld, cameraViewDirectionWorld)
     );
-    orthoRight = glm::normalize(glm::cross(otherVector, cameraViewDirectionWorld));
-}
-glm::dvec3 orthoUp = glm::normalize(glm::cross(cameraViewDirectionWorld, orthoRight));
-
-glBindVertexArray(_vertexArrayObject);
-
-if (positions.size() > 2) {
-    const double currentTime = data.time.j2000Seconds();
-    _Timesincestart = currentTime - _triggerTime;
-    float dist_from_start = glm::distance(positions[0], positions[positions.size()]);
-    float transmissiontime = _endTime - _triggerTime;
-    _shaderProgram->setUniform("in_time_since_start", _Timesincestart);
-    //_shaderProgram->setUniform("in_dist_from_start", dist_from_start);
-    //_shaderProgram->setUniform("in_transmission_time", transmissiontime);
-    //_shaderProgram->setUniform("in_light_travel_time", timeSinceStart);
-    _shaderProgram->setUniform("normalizedVectorFromSunToEarth", _normalizedVector);
-    _shaderProgram->setUniform("renderMode", _pRenderMode);
-    _shaderProgram->setUniform("pointSize", _pPointSize);
-    _shaderProgram->setUniform("defaultColor", _pDefaultColor);
-    _shaderProgram->setUniform("lightColor", _pLightColor);
-    _shaderProgram->setUniform("distanceFactor", _pDistanceFactor);
-    if(_pShowLabel){
-        renderLabels(data, modelViewProjectionMatrix, orthoRight, orthoUp, _pFadeDistance);
+    if (orthoRight == glm::dvec3(0.0)) {
+        glm::dvec3 otherVector(
+            cameraUpDirectionWorld.y,
+            cameraUpDirectionWorld.x,
+            cameraUpDirectionWorld.z
+        );
+        orthoRight = glm::normalize(glm::cross(otherVector, cameraViewDirectionWorld));
     }
+    glm::dvec3 orthoUp = glm::normalize(glm::cross(cameraViewDirectionWorld, orthoRight));
+
+    glBindVertexArray(_vertexArrayObject);
+
+    if (positions.size() > 2) {
+        const double currentTime = data.time.j2000Seconds();
+        _Timesincestart = currentTime - _triggerTime;
+        float dist_from_start = glm::distance(positions[0], positions[positions.size()]);
+        float transmissiontime = _endTime - _triggerTime;
+        _shaderProgram->setUniform("in_time_since_start", _Timesincestart);
+        _shaderProgram->setUniform("normalizedVectorFromSunToEarth", _normalizedVector);
+        _shaderProgram->setUniform("renderMode", _pRenderMode);
+        _shaderProgram->setUniform("pointSize", _pPointSize);
+        _shaderProgram->setUniform("defaultColor", _pDefaultColor);
+        _shaderProgram->setUniform("lightColor", _pLightColor);
+        _shaderProgram->setUniform("distanceFactor", _pDistanceFactor);
+
+    }
+
+    if(_pRenderMode == 0){
+        glLineWidth(_pLineWidth);
+        GLint temp = 0;
+        glDrawArrays(
+            GL_LINE_STRIP,
+            temp,
+            static_cast<GLsizei>(positions.size())
+        );
+    }
+    else if(_pRenderMode == 1){
+        glLineWidth(_pLineWidth);
+        GLint temp = 0;
+        glDrawArrays(
+            GL_LINES,
+            temp,
+            static_cast<GLsizei>(positions.size())
+        );
+    }
+    else if(_pRenderMode == 2){
+        GLint temp = 0;
+        glEnable(GL_PROGRAM_POINT_SIZE);
+        glDrawArrays(
+            GL_POINTS,
+            temp,
+            static_cast<GLsizei>(positions.size())
+        );
+    }
+    else if(_pRenderMode == 3){
+        ghoul::opengl::TextureUnit spriteTextureUnit;
+        spriteTextureUnit.activate();
+        _spriteTexture->bind();
+        _shaderProgram->setUniform("spriteTexture", spriteTextureUnit);
+        glEnable(GL_PROGRAM_POINT_SIZE);
+
+        glDrawArrays(
+            GL_POINTS,
+            0,
+            static_cast<GLsizei>(positions.size())
+        );
+    }
+    glBindVertexArray(0);
+    _shaderProgram->deactivate();
 }
 
-if(_pRenderMode == 0){
-    glLineWidth(_pLineWidth);
-    GLint temp = 0;
-    glDrawArrays(
-        GL_LINE_STRIP,
-        //GL_LINES,
-        temp,
-        static_cast<GLsizei>(positions.size())
-    );
-}
-else if(_pRenderMode == 1){
-    glLineWidth(_pLineWidth);
-    GLint temp = 0;
-    glDrawArrays(
-        GL_LINES,
-        temp,
-        static_cast<GLsizei>(positions.size())
-    );
-}
-else if(_pRenderMode == 2){
-    GLint temp = 0;
-    glEnable(GL_PROGRAM_POINT_SIZE);
-    glDrawArrays(
-        GL_POINTS,
-        temp,
-        static_cast<GLsizei>(positions.size())
-    );
-}
-else if(_pRenderMode == 3){
-    ghoul::opengl::TextureUnit spriteTextureUnit;
-    spriteTextureUnit.activate();
-    _spriteTexture->bind();
-    _shaderProgram->setUniform("spriteTexture", spriteTextureUnit);
-    glEnable(GL_PROGRAM_POINT_SIZE);
-
-    glDrawArrays(
-        GL_POINTS,
-        0,
-        static_cast<GLsizei>(positions.size())
-    );
-    /*
-    createPlane();
-    glBindVertexArray(_quad);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    */
-}
-glBindVertexArray(0);
-_shaderProgram->deactivate();
-}
 inline void unbindGL() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
-void RenderableLightTravel::renderLabels(const RenderData& data,
-    const glm::dmat4& modelViewProjectionMatrix,
-    const glm::dvec3& orthoRight,
-    const glm::dvec3& orthoUp,
-    float fadeInVariable){
 
-    //glm::vec4 textColor = _pLightColor;
-    glm::vec4 textColor = glm::vec4(1.0, 1.0, 1.0, 1.0);
-    ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
-    labelInfo.orthoRight = orthoRight;
-    labelInfo.orthoUp = orthoUp;
-    labelInfo.minSize = static_cast<int>(1);
-    labelInfo.maxSize = static_cast<int>(30);
-    labelInfo.cameraPos = data.camera.positionVec3();
-    labelInfo.cameraLookUp = data.camera.lookUpVectorWorldSpace();
-    //labelInfo.renderType = _renderOption;
-    labelInfo.mvpMatrix = modelViewProjectionMatrix;
-    labelInfo.scale = pow(10.f, fadeInVariable);
-    labelInfo.enableDepth = true;
-    labelInfo.enableFalseDepth = false;
-
-    if (!_pShouldFollowLight) {
-        _labelPos = positions[positions.size() / 2];
-    }
-
-    std::string text = "Speed of Light";
-        
-    ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
-        *_font,
-        _labelPos,
-        text,
-        textColor,
-        labelInfo
-    );
-    /*
-    ghoul::fontrendering::FontRenderer::defaultRenderer().render(
-        *_font,
-        _labelPos,
-        text,
-        textColor,
-        labelInfo
-    );
-    */
-}
 void RenderableLightTravel::update(const UpdateData& data)
 {
     if (!this->_enabled) return;
     if (_shaderProgram->isDirty()) {
         _shaderProgram->rebuildFromFile();
     }
-    /*
-    if (_Timesincestart == -1) {
-        _Timesincestart =
-    }
-    */
+
     const double currentTime = data.time.j2000Seconds();
 
     if (_needPositionUpdate) {
         SceneGraphNode* earthNode = sceneGraphNode("Earth");
         glm::vec3 earthPos = earthNode->worldPosition();
         glm::vec3 currentpos = glm::vec3(0.0, 0.0, 0.0);
-        /*
-        positions.push_back(currentpos);
-        positions.push_back(earthPos);
-        _needPositionUpdate = false;
-        */
+
         _needPositionUpdate = false;
         _endTime = calculateEndTime(_triggerTime, currentpos, earthPos);
 
     }
     if (_triggerTime < currentTime && _endTime > currentTime) {
 
-
-        // glm::vec3 earthPos = 
-        //     global::renderEngine.scene()->sceneGraphNode("Earth")->worldPosition();
-        //positions.push_back(earthPos);
-        //_endTime = calculateEndTime(_triggerTime, currentpos, earthPos);
-
-        //LDEBUG("position size:" + std::to_string(positions.size()));
-        /*
-        if (_rendermode == 3) {
-               
-        }
-        */
         glBindVertexArray(_vertexArrayObject);
         glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
 
@@ -544,39 +371,9 @@ void RenderableLightTravel::update(const UpdateData& data)
 
         unbindGL();
     }
-        else {
-            _needPositionUpdate = true;
-            _triggerTime = data.time.j2000Seconds();
-        }
+    else {
+        _needPositionUpdate = true;
+        _triggerTime = data.time.j2000Seconds();
+    }
 }
-/*
-void RenderableLightTravel::createPlane() {
-    const GLfloat size = 10000000000;
-    const GLfloat vertexData[] = {
-        //      x      y     z     w     s     t
-        -size, -size, 0.f, 0.f, 0.f, 0.f,
-        size, size, 0.f, 0.f, 1.f, 1.f,
-        -size, size, 0.f, 0.f, 0.f, 1.f,
-        -size, -size, 0.f, 0.f, 0.f, 0.f,
-        size, -size, 0.f, 0.f, 1.f, 0.f,
-        size, size, 0.f, 0.f, 1.f, 1.f,
-    };
-
-    glBindVertexArray(_quad);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, nullptr);
-
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(
-        1,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(GLfloat) * 6,
-        reinterpret_cast<void*>(sizeof(GLfloat) * 4)
-    );
-}
-*/
 }
