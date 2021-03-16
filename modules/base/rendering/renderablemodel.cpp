@@ -150,6 +150,10 @@ namespace {
         // In format 'YYYY MM DD hh:mm:ss'.
         std::optional<std::string> animationStartTime [[codegen::dateTime()]];
 
+        // The time scale for the animation relative to seconds.
+        // Ex if animation is in milli seconds then AnimationTimeScale = 1000
+        std::optional<float> animationTimeScale;
+
         // [[codegen::verbatim(AmbientIntensityInfo.description)]]
         std::optional<double> ambientIntensity;
 
@@ -231,6 +235,10 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         }
     }
 
+    if (p.animationStartTime.has_value()) {
+        _animationStart = *p.animationStartTime;
+    }
+
     if (std::holds_alternative<std::string>(p.geometryFile)) {
         // Handle single file
         std::string file;
@@ -286,6 +294,10 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
                 _geometry = std::move(combinedGeometry);
             _geometry->calculateBoundingRadius();
         }*/
+    }
+
+    if (p.animationTimeScale.has_value()) {
+        _geometry->setTimeScale(*p.animationTimeScale);
     }
 
     if (p.modelTransform.has_value()) {
@@ -516,10 +528,15 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     _program->deactivate();
 }
 
-void RenderableModel::update(const UpdateData&) {
+void RenderableModel::update(const UpdateData& data) {
     if (_program->isDirty()) {
         _program->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+    }
+
+    double realtiveTime = data.time.j2000Seconds() - data.time.convertTime(_animationStart);
+    if (_geometry->hasAnimation()) {
+        _geometry->update(realtiveTime);
     }
 }
 
