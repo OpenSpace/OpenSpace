@@ -44,6 +44,12 @@ namespace {
         "The path to the folder containing the exoplanets data and lookup table"
     };
 
+    constexpr const openspace::properties::Property::PropertyInfo BvColorMapInfo = {
+        "BvColormap",
+        "B-V Colormap",
+        "The path to a cmap file that maps a B-V color index to an RGB color"
+    };
+
     constexpr const openspace::properties::Property::PropertyInfo StarTextureInfo = {
         "StarTexture",
         "Star Texture",
@@ -123,6 +129,9 @@ namespace {
         // [[codegen::verbatim(DataFolderInfo.description)]]
         std::optional<std::filesystem::path> dataFolder [[codegen::directory()]];
 
+        // [[codegen::verbatim(BvColorMapInfo.description)]]
+        std::optional<std::filesystem::path> bvColormap;
+
        // [[codegen::verbatim(StarTextureInfo.description)]]
        std::optional<std::filesystem::path> starTexture;
 
@@ -160,6 +169,7 @@ using namespace exoplanets;
 ExoplanetsModule::ExoplanetsModule()
     : OpenSpaceModule(Name)
     , _exoplanetsDataFolder(DataFolderInfo)
+    , _bvColorMapPath(BvColorMapInfo)
     , _starTexturePath(StarTextureInfo)
     , _starGlareTexturePath(StarGlareTextureInfo)
     , _noDataTexturePath(NoDataTextureInfo)
@@ -173,6 +183,7 @@ ExoplanetsModule::ExoplanetsModule()
     _exoplanetsDataFolder.setReadOnly(true);
 
     addProperty(_exoplanetsDataFolder);
+    addProperty(_bvColorMapPath);
     addProperty(_starTexturePath);
     addProperty(_starGlareTexturePath);
     addProperty(_noDataTexturePath);
@@ -197,6 +208,10 @@ std::string ExoplanetsModule::lookUpTablePath() const {
         fmt::format("{}/{}", _exoplanetsDataFolder, LookupTableFileName)
     );
 };
+
+std::string ExoplanetsModule::bvColormapPath() const {
+    return _bvColorMapPath;
+}
 
 std::string ExoplanetsModule::starTexturePath() const {
     return _starTexturePath;
@@ -278,6 +293,10 @@ void ExoplanetsModule::internalInitialize(const ghoul::Dictionary& dict) {
 
     if (p.dataFolder.has_value()) {
         _exoplanetsDataFolder = p.dataFolder.value().string();
+    }
+
+    if (p.bvColormap.has_value()) {
+        _bvColorMapPath = p.bvColormap.value().string();
     }
 
     if (p.starTexture.has_value()) {

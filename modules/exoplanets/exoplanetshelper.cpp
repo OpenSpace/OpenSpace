@@ -24,6 +24,9 @@
 
 #include <modules/exoplanets/exoplanetshelper.h>
 
+#include <modules/exoplanets/exoplanetsmodule.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/util/spicemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/fmt.h>
@@ -36,8 +39,6 @@
 
 namespace {
     constexpr const char* _loggerCat = "ExoplanetsModule";
-
-    constexpr const char* BvColormapPath = "${SYNC}/http/stars_colormap/2/colorbv.cmap";
 }
 
 namespace openspace::exoplanets {
@@ -57,19 +58,37 @@ bool hasSufficientData(const ExoplanetDataEntry& p) {
 }
 
 glm::vec3 computeStarColor(float bv) {
-    std::ifstream colorMap(absPath(BvColormapPath), std::ios::in);
+    const ExoplanetsModule* module = global::moduleEngine->module<ExoplanetsModule>();
+    const std::string bvColormapPath = module->bvColormapPath();
+
+    std::ifstream colorMap(absPath(bvColormapPath), std::ios::in);
 
     if (!colorMap.good()) {
         LERROR(fmt::format(
             "Failed to open colormap data file: '{}'",
-            absPath(BvColormapPath)
+            absPath(bvColormapPath)
         ));
-        return glm::vec3(0.f, 0.f, 0.f);
+        return glm::vec3(0.f);
     }
 
-    const int t = static_cast<int>(round(((bv + 0.4) / (2.0 + 0.4)) * 255));
+    // Interpret the colormap cmap file
+    std::string line;
+    while (std::getline(colorMap, line)) {
+        if (line.empty() || (line[0] == '#')) {
+            continue;
+        }
+        break;
+    }
+
+    // The first line is the width of the image, i.e number of values
+    std::istringstream ss(line);
+    int nValues;
+    ss >> nValues;
+
+    // Find the line matching the input B-V value (B-V is in [-0.4,2.0])
+    const int t = static_cast<int>(round(((bv + 0.4) / (2.0 + 0.4)) * (nValues - 1)));
     std::string color;
-    for (int i = 0; i < t + 12; i++) {
+    for (int i = 0; i < t + 1; i++) {
         getline(colorMap, color);
     }
     colorMap.close();
