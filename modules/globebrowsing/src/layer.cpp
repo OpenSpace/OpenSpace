@@ -172,7 +172,7 @@ namespace {
         std::optional<BlendMode> blendMode;
 
         // If the primary layer creation fails, this layer is used as a fallback
-        std::optional<std::monostate>
+        std::optional<ghoul::Dictionary>
             fallback [[codegen::reference("globebrowsing_layer")]];
     };
 #include "layer_codegen.cpp"
