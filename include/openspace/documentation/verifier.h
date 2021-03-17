@@ -29,6 +29,7 @@
 #include <ghoul/glm.h>
 #include <functional>
 #include <type_traits>
+#include <variant>
 
 namespace openspace::documentation {
 
@@ -994,8 +995,15 @@ struct OrVerifier : public Verifier {
      * \param values The list of Verifiers that are to be tested
      *
      * \pre values must contain at least two values
+     *
+     * \todo:  The use of the variant to use both raw pointers and shared pointers is
+     *         definitely undesired. At the momement we are not handling the ownership of
+     *         the verifiers very well and this must be cleaned up when doing a pass over
+     *         the entire ownership model of the documentation/verifiers. For now it was
+     *         necessary to make the codegen work in all cases without complications there
      */
-    OrVerifier(const std::vector<Verifier*> values);
+    OrVerifier(const std::vector<std::variant<Verifier*,
+        std::shared_ptr<Verifier>>> values);
 
     /**
      * Checks whether the \p dictionary contains the \p key and whether this key passes

@@ -584,10 +584,17 @@ std::string AndVerifier::documentation() const {
     return ghoul::join(documentations, ", ");
 }
 
-OrVerifier::OrVerifier(const std::vector<Verifier*> values_) {
+OrVerifier::OrVerifier(
+            const std::vector<std::variant<Verifier*, std::shared_ptr<Verifier>>> values_)
+{
     ghoul_assert(!values_.empty(), "values must not be empty");
-    for (Verifier* v : values_) {
-        this->values.push_back(std::shared_ptr<Verifier>(v));
+    for (const std::variant<Verifier*, std::shared_ptr<Verifier>>& v : values_) {
+        if (std::holds_alternative<Verifier*>(v)) {
+            this->values.push_back(std::shared_ptr<Verifier>(std::get<Verifier*>(v)));
+        }
+        else {
+            this->values.push_back(std::get<std::shared_ptr<Verifier>>(v));
+        }
     }
 }
 
