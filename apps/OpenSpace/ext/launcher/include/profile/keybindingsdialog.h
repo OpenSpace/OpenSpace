@@ -58,6 +58,13 @@ public:
      */
     virtual void keyPressEvent(QKeyEvent* evt) override;
 
+    /**
+     * Adds scripts to the _scriptEdit from outside dialogs
+     *
+     * \param scripts #std::string scripts to be appended
+     */
+    void appendScriptsToKeybind(std::string scripts);
+
 private slots:
     void listItemSelected();
     void listItemAdded();
@@ -66,6 +73,7 @@ private slots:
     void listItemCancelSave();
     void transitionToEditMode();
     void parseSelections();
+    void chooseScripts();
     void keySelected(int index);
 
 private:
@@ -99,6 +107,7 @@ private:
     
     QPushButton* _addButton = nullptr;
     QPushButton* _removeButton = nullptr;
+    QPushButton* _chooseScriptsButton = nullptr;
     QPushButton* _saveButton = nullptr;
     QPushButton* _cancelButton = nullptr;
     QDialogButtonBox* _buttonBox = nullptr;
