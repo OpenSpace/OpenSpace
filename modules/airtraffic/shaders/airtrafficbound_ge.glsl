@@ -27,10 +27,10 @@
 #define PI 3.1415926538
 
 layout (lines) in;
-layout (line_strip, max_vertices = 44) out;
+layout (line_strip, max_vertices = 88) out;
 
 const float EPSILON = 1e-5;
-const float RADII = 6378137.0; // Earth is approximated as a sphere update if changed. 
+const float RADII = 6378137.0; // Earth is approximated as a sphere, update if changed. 
 const float THRESHOLD = -9998;
 
 uniform mat4 modelViewProjection;
@@ -103,11 +103,15 @@ vec4 geoToCartConversion(float lat, float lon, float alt){
     vec2 position3 = vec2(latitudeThreshold.y, longitudeThreshold.y) * PI / 180.0;
     vec2 position4 = vec2(latitudeThreshold.x, longitudeThreshold.y) * PI / 180.0;
 
-    float alt = 150000;
+    // Sets the "altitude" of the boundaries
+    float alt = 100000;
+
+    // Sets the number of points per line segment
+    float nPoints = 20;
 
     // Mid points
-    for(int i = 0; i <= 10; ++i) {
-        vec2 point = position1 + float(i)/10*(position2-position1);
+    for(int i = 0; i <= nPoints; ++i) {
+        vec2 point = position1 + float(i)/nPoints*(position2-position1);
         vec4 position = geoToCartConversion(point.x, point.y, alt);
         ge_position = modelViewProjection * position;
         ge_interpColor = vs_interpColor[0];
@@ -115,8 +119,8 @@ vec4 geoToCartConversion(float lat, float lon, float alt){
         EmitVertex();
     }
 
-    for(int i = 0; i <= 10; ++i) {
-        vec2 point = position2 + float(i)/10.f*(position3-position2);
+    for(int i = 0; i <= nPoints; ++i) {
+        vec2 point = position2 + float(i)/nPoints*(position3-position2);
         vec4 position = geoToCartConversion(point.x, point.y, alt);
         ge_position = modelViewProjection * position;
         ge_interpColor = vs_interpColor[0];
@@ -124,8 +128,8 @@ vec4 geoToCartConversion(float lat, float lon, float alt){
         EmitVertex();
     }
 
-    for(int i = 0; i <= 10; ++i) {
-        vec2 point = position3 + float(i)/10.f*(position4-position3);
+    for(int i = 0; i <= nPoints; ++i) {
+        vec2 point = position3 + float(i)/nPoints*(position4-position3);
         vec4 position = geoToCartConversion(point.x, point.y, alt);
         ge_position = modelViewProjection * position;
         ge_interpColor = vs_interpColor[0];
@@ -133,8 +137,8 @@ vec4 geoToCartConversion(float lat, float lon, float alt){
         EmitVertex();
     }
 
-    for(int i = 0; i <= 10; ++i) {
-        vec2 point = position4 + float(i)/10.f*(position1-position4);
+    for(int i = 0; i <= nPoints; ++i) {
+        vec2 point = position4 + float(i)/nPoints*(position1-position4);
         vec4 position = geoToCartConversion(point.x, point.y, alt);
         ge_position = modelViewProjection * position;
         ge_interpColor = vs_interpColor[0];

@@ -47,6 +47,60 @@ namespace openspace {
 
 namespace documentation { struct Documentation; }
 
+struct Date {
+    int year = 0;
+    int month = 0;
+    int day = 0;
+
+    Date getTomorrow() {
+        const int days[12] = {
+        31,28,31,30,31,30,31,31,30,31,30,31
+        };
+
+        // Just blindly add a day with no checks.
+        Date tomorrow;
+        tomorrow.year = year;
+        tomorrow.month = month;
+        tomorrow.day = day + 1;
+
+        // Allow Feb 29 in leap year if needed.
+        if (tomorrow.month == 2 && tomorrow.day == 29) {
+            if (tomorrow.year % 400 == 0)
+                return tomorrow;
+            if ((tomorrow.year % 4 == 0) && (tomorrow.year % 100 != 0))
+                return tomorrow;
+        }
+
+        // Catch rolling into new month.
+        if (tomorrow.day > days[tomorrow.month - 1]) {
+            tomorrow.day = 1;
+            tomorrow.month++;
+
+            // Catch rolling into new year.
+            if (tomorrow.month == 13) {
+                tomorrow.month = 1;
+                tomorrow.year++;
+            }
+        }
+
+        return tomorrow;
+    }
+
+    bool operator==(const Date& d) const {
+        return (year == d.year && month == d.month && day == d.day);
+    }
+
+    bool operator!=(const Date& d) const {
+        return !(*this == d);
+    }
+
+    Date& operator=(const Date& d) {
+        year = d.year;
+        month = d.month;
+        day = d.day;
+        return *this;
+    }
+};
 
 class RenderableAirTrafficHistorical : public Renderable {
 public:
@@ -64,9 +118,9 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    bool fetchData(); 
+    bool fetchData(const Date& date); 
 
-    bool updateBuffers();
+    bool updateBuffers(const Date& date);
     
     static documentation::Documentation Documentation();
 
@@ -78,28 +132,37 @@ private:
         float longitude = static_cast<float>(_THRESHOLD);
         int firstSeen = 0;
         int lastSeen = 0;
-        int identifier = 0; // 0 for aircrafts, 1 for box
+    };
+
+    struct Buffer {
+        std::vector<AircraftVBOLayout>  vertexBufferData;
+        Date date;
     };
 
     properties::Vec3Property _maximumColor;
     properties::Vec3Property _minimumColor;
     properties::FloatProperty _opacity;
-    //properties::Vec2Property _latitudeThreshold; 
-    //properties::Vec2Property _longitudeThreshold;
-    properties::IntProperty _nTotalFlights;
+    properties::IntProperty _nDailyFlights;
 
     // Backend storage for vertex buffer object containing all points
-    std::vector<AircraftVBOLayout>  _vertexBufferData;
+    //std::vector<AircraftVBOLayout>  _vertexBufferData;
+    Buffer _bufferA;
+    Buffer _bufferB;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
-    std::string _currentDate = "";
+    //std::string _currentDate = "";
+    //std::string _nextDate = "";
+    Date _currentDate;
+    Date _nextDate;
     std::future<bool> _future;
     bool _isDataLoading = false;
 
-    UniformCache(modelViewProjection, maximumColor, minimumColor, opacity, latitudeThreshold, longitudeThreshold, totalFlights) _uniformCache;
+    UniformCache(modelViewProjection, maximumColor, minimumColor, opacity, latitudeThreshold, longitudeThreshold, dailyFlights, time) _uniformCache;
     std::vector<std::vector<std::string>> _data;
-    GLuint _vertexArray = 0;
-    GLuint _vertexBuffer = 0;
+    GLuint _vertexArrayA = 0;
+    GLuint _vertexArrayB = 1;
+    GLuint _vertexBufferA = 0;
+    GLuint _vertexBufferB = 1;
     const std::string _PATH = "${MODULE_AIRTRAFFIC}/data/";
 
 };

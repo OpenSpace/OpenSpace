@@ -197,7 +197,6 @@ RenderableAirTrafficLive::RenderableAirTrafficLive(const ghoul::Dictionary& dict
             _deltaTime = data.time.j2000Seconds();
         }
 
-
         _shader->activate();
         
         glm::dmat4 modelTransform =

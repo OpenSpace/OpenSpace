@@ -31,17 +31,16 @@ uniform vec3 minimumColor;
 uniform float opacity;
 uniform vec2 latitudeThreshold;
 uniform vec2 longitudeThreshold;
-uniform int totalFlights;
+uniform int dailyFlights;
 
 out vec4 vs_position;
 out vec4 vs_interpColor;
 out vec2 vs_latlon;
 out float vs_vertexID;
-out int vs_identifier;
+out ivec2 vs_vertexInfo;
 
 layout (location = 0) in vec2 vertexPosition; // lat, lon
-layout (location = 1) in vec2 vertexInfo; // firstSeen, lastSeen
-layout (location = 2) in int identifier;
+layout (location = 1) in ivec2 vertexInfo; // firstSeen, lastSeen
 
 const float RADII = 6378137.0; // Earth is approximated as a sphere update if changed. 
 
@@ -69,23 +68,14 @@ void main() {
     vs_vertexID = float(gl_VertexID);
     vec4 position;
 
-   // Box
-   if(identifier == 1){ 
-        position = vec4(0.f);
-        vs_interpColor = vec4(1.0, 0.0, 0.0, 1.0);//opacity/1000);
-    }
-    // Flight
-    else {
-        position = geoToCartConversion(vertexPosition.x, vertexPosition.y, 10000);
+    position = geoToCartConversion(vertexPosition.x, vertexPosition.y, 10000.0);
 
-        float t = clamp((float(totalFlights) - minFlights) / (maxFlights - minFlights), 0.0f, 1.0f);
+    float t = clamp((float(dailyFlights) - minFlights) / (maxFlights - minFlights), 0.0, 1.0);
 
-        vs_interpColor = vec4(minimumColor * (1.0-t) +  t * maximumColor, opacity/1000);
-    }
+    vs_interpColor = vec4(minimumColor * (1.0-t) +  t * maximumColor, opacity/1000.0);
     
-    vs_identifier = identifier; 
-    vs_latlon = vertexPosition;
+    vs_latlon = vertexPosition * PI / 180.0;
     vs_position = modelViewProjection * position;
-    // vec4 vs_positionNDC = vs_position / vs_position.w;
+    vs_vertexInfo = vertexInfo;
     gl_Position = vs_position;
 }

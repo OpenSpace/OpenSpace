@@ -194,7 +194,6 @@ namespace openspace {
         glBindVertexArray(0);
 
         _shader->deactivate();
-        
     };
 
     glm::vec2 RenderableAirTrafficBound::getLatBound() {
