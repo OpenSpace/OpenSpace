@@ -148,7 +148,8 @@ namespace {
     struct [[codegen::Dictionary(RenderableTrail)]] Parameters {
         // This object is used to compute locations along the path. Any Translation object
         // can be used here
-        std::monostate translation [[codegen::reference("core_transform_translation")]];
+        ghoul::Dictionary translation
+            [[codegen::reference("core_transform_translation")]];
 
         // [[codegen::verbatim(LineColorInfo.description)]]
         glm::vec3 color [[codegen::color()]];
