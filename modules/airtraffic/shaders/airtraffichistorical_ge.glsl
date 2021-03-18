@@ -55,16 +55,14 @@ float greatCircleDistance(float lat1, float lon1, float lat2, float lon2) {
     float dLon = (lon2 - lon1);
   
     // apply formulae 
-    float a = pow(sin(dLat / 2.f), 2.f) +  pow(sin(dLon / 2.f), 2.f) *  cos(lat1) * cos(lat2); 
+    float a = pow(sin(dLat / 2.0), 2.0) +  pow(sin(dLon / 2.0), 2.0) *  cos(lat1) * cos(lat2); 
      
-    float c = 2 * asin(sqrt(a)); 
+    float c = 2.0 * asin(sqrt(a)); 
  
     return RADII * c; 
 }
 
 vec2 findIntermediatePoint(vec2 latlon1, vec2 latlon2, float f) {
-    //vec2 latlonR1 = latlon1 * PI / 180.0;
-    //vec2 latlonR2 = latlon2 * PI / 180.0;
 
     float phi1 = latlon1.x; float lambda1 = latlon1.y;
     float phi2 = latlon2.x; float lambda2 = latlon2.y;
@@ -74,14 +72,14 @@ vec2 findIntermediatePoint(vec2 latlon1, vec2 latlon2, float f) {
     float a = (sin(1-f)*delta) / sin(delta);
     float b = sin(f*delta) / sin(delta);
 
-     float x = a*cos(phi1)*cos(lambda1) +  b*cos(phi2)*cos(lambda2);
-     float y = a*cos(phi1)*sin(lambda1) +  b*cos(phi2)*sin(lambda2);
-     float z = a*sin(phi1) + b*sin(phi2);
+    float x = a*cos(phi1)*cos(lambda1) +  b*cos(phi2)*cos(lambda2);
+    float y = a*cos(phi1)*sin(lambda1) +  b*cos(phi2)*sin(lambda2);
+    float z = a*sin(phi1) + b*sin(phi2);
      
-     float phi3 = atan(z,sqrt(x*x+y*y));
-     float lambda3 = atan(y,x);
+    float phi3 = atan(z,sqrt(x*x+y*y));
+    float lambda3 = atan(y,x);
 
-     return vec2(phi3, lambda3);
+    return vec2(phi3, lambda3);
 }
 
 vec4 geoToCartConversion(float lat, float lon, float alt){
@@ -92,6 +90,7 @@ vec4 geoToCartConversion(float lat, float lon, float alt){
 
     return vec4(x, y, z, 1.0);
 }
+
 
  void main(){
     
@@ -104,26 +103,33 @@ vec4 geoToCartConversion(float lat, float lon, float alt){
     float lastSeen = vs_vertexInfo[0].y;
 
     if(firstSeen < float(time) && float(time) < lastSeen) {
-        
         // Start point
-        ge_position = vs_position[0];
-        ge_interpColor = vec4(vec3(vs_interpColor[0]), opacity);
         gl_Position = gl_in[0].gl_Position;
+        ge_position = vs_position[0];
+        vec4 startColor = vs_interpColor[0];
+        ge_interpColor = startColor;
         EmitVertex();
 
         // Calculate current position
         float t = clamp((float(time) - firstSeen) / (lastSeen - firstSeen), 0.0, 1.0);
         vec2 pointCurrent = findIntermediatePoint(vs_latlon[0], vs_latlon[1], t);
         
+        // Interpolate color for current position
+        vec4 endColor = vs_interpColor[1];
+        endColor = vec4(startColor * (1.0-t) +  t * endColor);
+        
         float alt = 10000.0;
         
-        // Mid points, start to current
+        // Mid points
         for(int i = 1; i < 20; ++i) {
             vec2 point = findIntermediatePoint(vs_latlon[0], pointCurrent, float(i)/20.0);
             vec4 position = geoToCartConversion(point.x, point.y, alt);
             ge_position = modelViewProjection * position;
-            float midOpacity = 0.2;
-            ge_interpColor = vec4(vec3(vs_interpColor[0]), midOpacity*opacity);
+            ge_interpColor = vec4(startColor * (1.0-float(i)/20.0) +  float(i)/20.0 * endColor);
+            
+            //if(i == 19) ge_interpColor = vec4(1.0); // set last strip to white
+
+            ge_interpColor.w = 0.2 * opacity;
             gl_Position = ge_position;
             EmitVertex();
         }
@@ -131,7 +137,7 @@ vec4 geoToCartConversion(float lat, float lon, float alt){
         // End point
         vec4 position = geoToCartConversion(pointCurrent.x, pointCurrent.y, alt);
         ge_position = modelViewProjection * position;
-        ge_interpColor = vec4(vec3(vs_interpColor[1]), opacity);
+        ge_interpColor = vec4(1.0);
         gl_Position = ge_position;
         EmitVertex();
 

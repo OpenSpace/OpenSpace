@@ -52,7 +52,6 @@ public:
     void deinitializeGL() override;
 
     bool isReady() const override;
-    void update(const UpdateData& data) override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 

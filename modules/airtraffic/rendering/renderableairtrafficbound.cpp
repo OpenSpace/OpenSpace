@@ -86,7 +86,6 @@ namespace {
 
 } // namespace
 
-
 namespace openspace {
 
     documentation::Documentation RenderableAirTrafficBound::Documentation() {
@@ -140,12 +139,9 @@ namespace openspace {
         _lon = glm::vec2(-180.f, 180.f);
 
         updateBuffers();
-
-        
     };
 
     void RenderableAirTrafficBound::deinitializeGL() {
-        
         glDeleteBuffers(1, &_vertexBuffer);
         glDeleteVertexArrays(1, &_vertexArray);
 
@@ -153,15 +149,10 @@ namespace openspace {
         _shader = nullptr;
         
         return;
-        
     };
 
     bool RenderableAirTrafficBound::isReady() const {
-        return true;
-    }
-
-    void RenderableAirTrafficBound::update(const UpdateData& data) {
-        return;
+        return _shader != nullptr;
     }
 
     void RenderableAirTrafficBound::render(const RenderData& data, RendererTasks& rendererTask) {
@@ -235,7 +226,6 @@ namespace openspace {
         );
 
         glBindVertexArray(0);
-        
     }
 
 } // namespace openspace

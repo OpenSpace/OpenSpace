@@ -86,6 +86,44 @@ struct Date {
         return tomorrow;
     }
 
+    Date getYesterday() {
+        const int days[12] = {
+        31,28,31,30,31,30,31,31,30,31,30,31
+        };
+
+        // Just blindly add a day with no checks
+        Date yesterday;
+        yesterday.year = year;
+        yesterday.month = month;
+        yesterday.day = day - 1;
+
+        // Catch rolling into new month
+        if (yesterday.day == 0) {
+            yesterday.month--;
+            yesterday.day = days[yesterday.month];
+
+            // Allow Feb 29 in leap year if needed
+            if (yesterday.month == 2) {
+                if (yesterday.year % 400 == 0) {
+                    yesterday.day = 29;
+                    return yesterday;
+                }
+                if ((yesterday.year % 4 == 0) && (yesterday.year % 100 != 0)) {
+                    yesterday.day = 29;
+                    return yesterday;
+                }
+            }
+
+            // Catch rolling into new year
+            if (yesterday.month == 0) {
+                yesterday.month = 12;
+                yesterday.year--;
+            }
+        }
+
+        return yesterday;
+    }
+
     bool operator==(const Date& d) const {
         return (year == d.year && month == d.month && day == d.day);
     }
@@ -107,21 +145,17 @@ public:
     explicit RenderableAirTrafficHistorical(const ghoul::Dictionary& dictionary);
     virtual ~RenderableAirTrafficHistorical() = default;
 
-    void initialize() override;
-    void deinitialize() override;
-
     void initializeGL() override;
     void deinitializeGL() override;
 
     bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void update(const UpdateData& data) override;
 
     bool fetchData(const Date& date); 
-
-    bool updateBuffers(const Date& date);
     
+    void updateBuffers(const Date& date);
+
     static documentation::Documentation Documentation();
 
 private:
@@ -139,6 +173,8 @@ private:
         Date date;
     };
 
+    void fillBuffer(Buffer& buffer, GLuint& vertexArray, GLuint& vertexBuffer);
+    
     properties::Vec3Property _maximumColor;
     properties::Vec3Property _minimumColor;
     properties::FloatProperty _opacity;
@@ -156,6 +192,7 @@ private:
     Date _nextDate;
     std::future<bool> _future;
     bool _isDataLoading = false;
+    double _lastUpdate = 0.0;
 
     UniformCache(modelViewProjection, maximumColor, minimumColor, opacity, latitudeThreshold, longitudeThreshold, dailyFlights, time) _uniformCache;
     std::vector<std::vector<std::string>> _data;

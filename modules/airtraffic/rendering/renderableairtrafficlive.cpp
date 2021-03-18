@@ -173,7 +173,7 @@ RenderableAirTrafficLive::RenderableAirTrafficLive(const ghoul::Dictionary& dict
     };
 
     bool RenderableAirTrafficLive::isReady() const {
-        return true; // TODO
+        return _shader != nullptr;
     };
 
     void RenderableAirTrafficLive::render(const RenderData& data, RendererTasks& rendererTask) {
