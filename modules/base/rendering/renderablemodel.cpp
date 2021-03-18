@@ -372,14 +372,12 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         _disableFaceCulling = *p.disableFaceCulling;
     }
 
-    if (dictionary.hasKey(LightSourcesInfo.identifier)) {
-        const ghoul::Dictionary& lsDictionary =
-            dictionary.value<ghoul::Dictionary>(LightSourcesInfo.identifier);
+    if (p.lightSources.has_value()) {
+        std::vector<ghoul::Dictionary> lightsources = *p.lightSources;
 
-        for (std::string_view k : lsDictionary.keys()) {
-            std::unique_ptr<LightSource> lightSource = LightSource::createFromDictionary(
-                lsDictionary.value<ghoul::Dictionary>(k)
-            );
+        for (const ghoul::Dictionary& lsDictionary : lightsources) {
+            std::unique_ptr<LightSource> lightSource =
+                LightSource::createFromDictionary(lsDictionary);
             _lightSourcePropertyOwner.addPropertySubOwner(lightSource.get());
             _lightSources.push_back(std::move(lightSource));
         }
