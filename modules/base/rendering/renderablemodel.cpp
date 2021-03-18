@@ -163,6 +163,7 @@ namespace {
         enum class AnimationMode {
             Once,
             LoopFromStart,
+            LoopInfinitely,
             Bounce
         };
 
@@ -335,6 +336,9 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         switch (*p.animationMode) {
         case Parameters::AnimationMode::LoopFromStart:
             _animationMode = AnimationMode::LoopFromStart;
+            break;
+        case Parameters::AnimationMode::LoopInfinitely:
+            _animationMode = AnimationMode::LoopInfinitely;
             break;
         case Parameters::AnimationMode::Bounce:
             _animationMode = AnimationMode::Bounce;
@@ -586,6 +590,16 @@ void RenderableModel::update(const UpdateData& data) {
                     data.time.j2000Seconds() - data.time.convertTime(_animationStart),
                     _geometry->animationDuration()
                 );
+                break;
+            case AnimationMode::LoopInfinitely:
+                realtiveTime = std::fmod(
+                    data.time.j2000Seconds() - data.time.convertTime(_animationStart),
+                    _geometry->animationDuration()
+                );
+
+                if (realtiveTime < 0) {
+                    realtiveTime += _geometry->animationDuration();
+                }
                 break;
             case AnimationMode::Once:
             default:

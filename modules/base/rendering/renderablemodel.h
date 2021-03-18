@@ -73,6 +73,7 @@ private:
     enum class AnimationMode {
         Once = 0,
         LoopFromStart,
+        LoopInfinitely,
         Bounce
     };
 
