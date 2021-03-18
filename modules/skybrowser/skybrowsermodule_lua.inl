@@ -59,7 +59,6 @@ namespace openspace::skybrowser::luascriptfunctions {
         ScreenSpaceSkyTarget* target = dynamic_cast<ScreenSpaceSkyTarget*>(global::renderEngine->screenSpaceRenderable("ScreenSpaceTarget"));
         module->initializeBrowser(browser, target);     
         module->skyBrowser()->translate(glm::vec3(-0.8, -0.4, 0.0));
-        module->checkIfTargetExist();
 
         return 1;
     }
@@ -89,11 +88,7 @@ namespace openspace::skybrowser::luascriptfunctions {
         openspace::global::scriptEngine->queueScript(
             "openspace.addScreenSpaceRenderable(" + node + ")",
             scripting::ScriptEngine::RemoteScripting::Yes
-        );
-
-        //test create target
-        module->createTarget();
-        
+        );    
         return 1;
     }
     

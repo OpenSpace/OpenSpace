@@ -100,7 +100,6 @@ SkyBrowserModule::SkyBrowserModule()
     addProperty(_testProperty);
     addProperty(_zoomFactor);
 
-
     global::callback::mousePosition->emplace_back(
         [&](double x, double y) {      
             glm::vec2 pos = glm::vec2(static_cast<float>(x), static_cast<float>(y));
@@ -377,7 +376,9 @@ ghoul::Dictionary SkyBrowserModule::createMessageForPausingWWTTime() const {
 }
 
 
+
 void SkyBrowserModule::initializeBrowser(ScreenSpaceSkyBrowser* skyBrowser, ScreenSpaceSkyTarget* skyTarget) {
+
     _skyBrowser = skyBrowser;
     _skyTarget = skyTarget;
 }
@@ -405,36 +406,24 @@ glm::dvec2 SkyBrowserModule::convertGalacticToCelestial(glm::dvec3 rGal) const {
     return glm::dvec2(glm::degrees(ra), glm::degrees(dec));
 }
 
-
-void SkyBrowserModule::checkIfTargetExist() {
-    ScreenSpaceSkyTarget* target = static_cast<ScreenSpaceSkyTarget*>(global::renderEngine->screenSpaceRenderable("ScreenSpaceTarget")); 
-
-    if (target) {
-        LINFO("Target is not null!");
-
-    }
-    LINFO("Target has been checked!");
-}
-
 void SkyBrowserModule::createTarget() {
 
     using namespace std::string_literals;
 
-    // Create target test
     std::string node = "{"
         "Type = 'ScreenSpaceSkyTarget',"
         "Identifier = 'ScreenSpaceTarget',"
         "Name = 'Screen Space Target',"
-        "FaceCamera = false"
+        "FaceCamera = false,"
+        "Scale = 0.04,"
         "}";
 
     openspace::global::scriptEngine->queueScript(
         "openspace.addScreenSpaceRenderable(" + node + ")",
         scripting::ScriptEngine::RemoteScripting::Yes
     );
-
+    
 }
-
 
 
 /*
