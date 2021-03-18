@@ -19,8 +19,16 @@ namespace openspace {
         glm::vec2 getUpperRightCornerScreenSpace();
         glm::vec2 getLowerLeftCornerScreenSpace();
         bool coordIsInsideCornersScreenSpace(glm::vec2 coord);
-    private:
+        bool coordIsOnResizeButton(glm::vec2 coord);
 
+        void scale(glm::vec2 scalingFactor);
+        glm::mat4 scaleMatrix() override;
+        void saveResizeStartSize();
+        void updateBrowserSize();
+        void scale(float scalingFactor);
+    private:
+        glm::vec2 _startSize;
+        float _startScale;
     };
 }
 

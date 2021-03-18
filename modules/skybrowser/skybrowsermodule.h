@@ -84,7 +84,9 @@ protected:
     glm::vec2 startDragObjectPosBrowser;
     glm::vec2 startDragMousePosTarget;
     glm::vec2 startDragObjectPosTarget;
+    glm::vec2 startResizeBrowserSize;
     bool currentlyDraggingBrowser;
+    bool currentlyResizingBrowser;
     bool currentlyDraggingTarget;
     glm::vec2 _mousePosition;
     double _mouseScroll;

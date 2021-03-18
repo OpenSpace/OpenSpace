@@ -91,6 +91,7 @@ SkyBrowserModule::SkyBrowserModule()
     , _camIsSyncedWWT(true)
     , currentlyDraggingBrowser(false)
     , currentlyDraggingTarget(false)
+    , currentlyResizingBrowser(false)
     , _listenForInteractions(true)
     , mouseIsOnBrowser(false)
     , mouseIsOnTarget(false)
@@ -103,6 +104,7 @@ SkyBrowserModule::SkyBrowserModule()
     global::callback::mousePosition->emplace_back(
         [&](double x, double y) {      
             glm::vec2 pos = glm::vec2(static_cast<float>(x), static_cast<float>(y));
+
             _mousePosition = getMousePositionInScreenSpaceCoords(pos);
 
             if (_skyTarget) {
@@ -112,7 +114,7 @@ SkyBrowserModule::SkyBrowserModule()
                 mouseIsOnTarget = false;
             }
             if (_skyBrowser) {
-                mouseIsOnBrowser = _skyBrowser->coordIsInsideCornersScreenSpace(_mousePosition);               
+                mouseIsOnBrowser = _skyBrowser->coordIsInsideCornersScreenSpace(_mousePosition);       
             }
             else {
                 mouseIsOnBrowser = false;
@@ -141,7 +143,16 @@ SkyBrowserModule::SkyBrowserModule()
                     
                     startDragMousePosBrowser = _mousePosition;
                     startDragObjectPosBrowser = _skyBrowser->getScreenSpacePosition();
-                    currentlyDraggingBrowser = true;
+                    // Resize browser if mouse is over resize button
+                    if (_skyBrowser->coordIsOnResizeButton(_mousePosition)) {
+                        _skyBrowser->saveResizeStartSize();
+                        startResizeBrowserSize = _skyBrowser->getScreenSpaceDimensions();
+                        currentlyResizingBrowser = true;
+                    }
+                    else {
+                        currentlyDraggingBrowser = true;
+                    }
+                    
                     return true;
                 }
                 else if (mouseIsOnTarget && button == MouseButton::Left) {
@@ -168,13 +179,16 @@ SkyBrowserModule::SkyBrowserModule()
                     currentlyDraggingTarget = false;
                     return true;
                 }
+                if (currentlyResizingBrowser) {
+                    currentlyResizingBrowser = false;
+                    _skyBrowser->updateBrowserSize();
+                    return true;
+                }
             }
 
             return false;
         }
     );
-
-    
 } 
 
 void SkyBrowserModule::internalDeinitialize() {
@@ -279,15 +293,27 @@ void SkyBrowserModule::handleInteractions() {
             if (currentlyDraggingTarget) {
                  _skyTarget->translate(_mousePosition - startDragMousePosTarget, startDragObjectPosTarget);
             }
+            if (currentlyResizingBrowser) {
+                // Calculate scaling factor
+                glm::vec2 mouseDragVector = _mousePosition - startDragMousePosBrowser;
+
+                glm::vec2 newSizeRelToOld = (startResizeBrowserSize + mouseDragVector) / startResizeBrowserSize;
+                _skyBrowser->scale(newSizeRelToOld);
+                _skyBrowser->translate(mouseDragVector/2.f, startDragObjectPosBrowser); 
+            }
         }
     });
 }
 
 glm::vec2 SkyBrowserModule::getMousePositionInScreenSpaceCoords(glm::vec2& mousePos) {
-    glm::vec2 size = glm::vec2(global::windowDelegate->currentWindowSize());
-
-    // Transform pixel coordinates to screen space coordinates [-1,1]
-    return glm::vec2((mousePos - (size / 2.0f)) * glm::vec2(1.0f,-1.0f) / (size / 2.0f));
+    glm::vec2 size = global::windowDelegate->currentWindowSize();
+    // Change origin to middle of the window
+    glm::vec2 screenSpacePos = glm::vec2((mousePos - (size / 2.0f)));
+    // Ensure the upper right corner is positive on the y axis
+    screenSpacePos *= glm::vec2(1.0f, -1.0f);
+    // Transform pixel coordinates to screen space coordinates [-1,1][-ratio, ratio]
+    screenSpacePos /= (0.5f*size.y);
+    return screenSpacePos;
 }
 
 void SkyBrowserModule::WWTfollowCamera() {

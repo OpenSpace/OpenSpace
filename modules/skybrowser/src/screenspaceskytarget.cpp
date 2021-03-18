@@ -65,6 +65,7 @@ namespace openspace {
             _texture = std::move(texture);
             _objectSize = _texture->dimensions();
         }
+        _cartesianPosition.setValue(glm::vec3(_cartesianPosition.value().x, _cartesianPosition.value().y, -2.1f));
     }
 
     void ScreenSpaceSkyTarget::bindTexture() {
@@ -74,27 +75,7 @@ namespace openspace {
     }
 
     void ScreenSpaceSkyTarget::translate(glm::vec2 translation, glm::vec2 position) {
-
-        glm::vec2 windowRatio = global::windowDelegate->currentWindowSize();
-        windowRatio /= windowRatio.y;
-
-        _cartesianPosition = glm::translate(glm::mat4(1.f), glm::vec3(translation * windowRatio, 0.0f)) * glm::vec4(position * windowRatio, _cartesianPosition.value().z, 1.0f);
-    }
-    
-    glm::vec2 ScreenSpaceSkyTarget::getScreenSpacePosition() {
-        glm::mat4 modelTransform = globalRotationMatrix() * translationMatrix() *
-            localRotationMatrix() * scaleMatrix();
-        glm::mat4 viewProj = global::renderEngine->scene()->camera()->viewProjectionMatrix();
-        glm::mat4 screenSpaceTransform = viewProj * modelTransform;
-
-        glm::vec3 scale;
-        glm::quat rotation;
-        glm::vec3 translation;
-        glm::vec3 skew;
-        glm::vec4 perspective;
-        glm::decompose(screenSpaceTransform, scale, rotation, translation, skew, perspective);
-
-        return translation;
+        _cartesianPosition = glm::translate(glm::mat4(1.f), glm::vec3(translation, 0.0f)) * glm::vec4(position, _cartesianPosition.value().z, 1.0f);
     }
 
     glm::vec2 ScreenSpaceSkyTarget::getAnglePosition() {
@@ -102,26 +83,12 @@ namespace openspace {
         return glm::vec2(atan(pos.x / pos.z), atan(pos.y / pos.z));
     }
 
+    glm::vec2  ScreenSpaceSkyTarget::getScreenSpacePosition() {
+        return glm::vec2(_cartesianPosition.value().x, _cartesianPosition.value().y);
+    }
+
     glm::vec2  ScreenSpaceSkyTarget::getScreenSpaceDimensions() {
-        glm::mat4 modelTransform = globalRotationMatrix() * translationMatrix() *
-            localRotationMatrix() * scaleMatrix();
-        glm::mat4 viewProj = global::renderEngine->scene()->camera()->viewProjectionMatrix();
-        glm::mat4 screenSpaceTransform = viewProj * modelTransform;
-
-
-        glm::vec3 scale;
-        glm::quat rotation;
-        glm::vec3 translation;
-        glm::vec3 skew;
-        glm::vec4 perspective;
-        glm::decompose(screenSpaceTransform, scale, rotation, translation, skew, perspective);
-
-        // Scale is negative and relative to the whole screen
-        // Changing to positive and View Coordinates [-1,1] 
-        // E.g. a full screen screenspacebrowser will have [2,2]
-        scale = -2.0f * scale;
-
-        return scale;
+        return glm::vec2(2.f * _scale * static_cast<float>(_objectSize.x) / static_cast<float>(_objectSize.y), 2.f * _scale);
     }
 
     glm::vec2 ScreenSpaceSkyTarget::getUpperRightCornerScreenSpace() {
@@ -138,4 +105,5 @@ namespace openspace {
         bool moreThanLowerLeft = coord.x > getLowerLeftCornerScreenSpace().x && coord.y > getLowerLeftCornerScreenSpace().y;
         return  lessThanUpperRight && moreThanLowerLeft;
     }
+  
 }
