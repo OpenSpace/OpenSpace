@@ -64,7 +64,8 @@ namespace {
         std::optional<std::variant<std::vector<std::string>, std::string>> kernels;
 
         // [[codegen::verbatim(TimeFrameInfo.description)]]
-        std::optional<std::monostate> timeFrame [[codegen::reference("core_time_frame")]];
+        std::optional<ghoul::Dictionary> timeFrame
+            [[codegen::reference("core_time_frame")]];
     };
 #include "spicerotation_codegen.cpp"
 } // namespace
