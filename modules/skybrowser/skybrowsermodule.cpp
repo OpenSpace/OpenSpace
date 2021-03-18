@@ -143,7 +143,9 @@ SkyBrowserModule::SkyBrowserModule()
                     startDragMousePosBrowser = _mousePosition;
                     startDragObjectPosBrowser = _skyBrowser->getScreenSpacePosition();
                     // Resize browser if mouse is over resize button
-                    if (_skyBrowser->coordIsOnResizeButton(_mousePosition)) {
+                    resizeVector = _skyBrowser->coordIsOnResizeArea(_mousePosition);
+
+                    if (resizeVector != glm::vec2{0}) {
                         _skyBrowser->saveResizeStartSize();
                         startResizeBrowserSize = _skyBrowser->getScreenSpaceDimensions();
                         currentlyResizingBrowser = true;
@@ -294,11 +296,13 @@ void SkyBrowserModule::handleInteractions() {
             }
             if (currentlyResizingBrowser) {
                 // Calculate scaling factor
-                glm::vec2 mouseDragVector = _mousePosition - startDragMousePosBrowser;
+                glm::vec2 mouseDragVector = (_mousePosition - startDragMousePosBrowser);
+                glm::vec2 scalingVector = mouseDragVector * resizeVector;
 
-                glm::vec2 newSizeRelToOld = (startResizeBrowserSize + mouseDragVector) / startResizeBrowserSize;
+                glm::vec2 newSizeRelToOld = (startResizeBrowserSize + (scalingVector)) / startResizeBrowserSize;
                 _skyBrowser->scale(newSizeRelToOld);
-                _skyBrowser->translate(mouseDragVector/2.f, startDragObjectPosBrowser); 
+                // Make sure the browser doesn't move in directions it's not supposed to 
+                _skyBrowser->translate(mouseDragVector * abs(resizeVector) /2.f, startDragObjectPosBrowser);
             }
         }
     });

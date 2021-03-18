@@ -77,7 +77,7 @@ protected:
     void createShaders();
     std::string makeUniqueIdentifier(std::string name);
 
-    glm::mat4 scaleMatrix();
+    virtual glm::mat4 scaleMatrix();
     glm::mat4 globalRotationMatrix();
     glm::mat4 translationMatrix();
     glm::mat4 localRotationMatrix();

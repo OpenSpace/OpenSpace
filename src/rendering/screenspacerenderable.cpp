@@ -553,17 +553,9 @@ glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
 
     glm::mat4 scale = glm::scale(
         glm::mat4(1.f),
-        glm::vec3(_scale, _scale * textureRatio, 1.f)
+        glm::vec3(_scale, textureRatio*_scale, 1.f)
     );
-
-    // Simulate orthographic projection by distance to plane.
-    if (!_usePerspectiveProjection) {
-        float distance = _useRadiusAzimuthElevation ?
-            _raePosition.value().x :
-            -_cartesianPosition.value().z;
-        scale = glm::scale(scale, glm::vec3(distance));
-    }
-
+  
     return scale;
 }
 

@@ -90,30 +90,43 @@ namespace openspace {
         return  lessThanUpperRight && moreThanLowerLeft;
     }
 
-    bool ScreenSpaceSkyBrowser::coordIsOnResizeButton(glm::vec2 coord) {
-        float resizeButtonSize = 0.05f;
-        bool lessThanUpperRight = coord.x < getUpperRightCornerScreenSpace().x && coord.y < getUpperRightCornerScreenSpace().y;
-        bool moreThanLowerLeft = coord.x > getUpperRightCornerScreenSpace().x - (getScreenSpaceDimensions().x * resizeButtonSize) && 
-                                 coord.y > getLowerLeftCornerScreenSpace().y - (getScreenSpaceDimensions().y * resizeButtonSize);
-        return  lessThanUpperRight && moreThanLowerLeft;
+    glm::vec2 ScreenSpaceSkyBrowser::coordIsOnResizeArea(glm::vec2 coord) {
+        glm::vec2 resizePosition = glm::vec2{ 0 };
+        // Make sure coord is on browser
+        if (!coordIsInsideCornersScreenSpace(coord)) return resizePosition;
+
+        float resizeButtonSize = 0.1f;
+       
+        bool isOnTop = coord.y > getUpperRightCornerScreenSpace().y - (getScreenSpaceDimensions().y * resizeButtonSize);
+        bool isOnBottom = coord.y < getLowerLeftCornerScreenSpace().y + (getScreenSpaceDimensions().y * resizeButtonSize);
+        bool isOnRight = coord.x > getUpperRightCornerScreenSpace().x - (getScreenSpaceDimensions().x * resizeButtonSize);
+        bool isOnLeft = coord.x < getLowerLeftCornerScreenSpace().x + (getScreenSpaceDimensions().x * resizeButtonSize);
+
+        resizePosition.x = isOnRight ? 1.f : isOnLeft ? -1.f : 0.f;
+        resizePosition.y = isOnTop ? 1.f : isOnBottom ? -1.f : 0.f;
+
+        return  resizePosition;
     }
     // Scales the ScreenSpaceBrowser to a new ratio
     void ScreenSpaceSkyBrowser::scale(glm::vec2 scalingFactor) {       
-        // Resize the dimensions of the texture on the x axis
-        glm::vec2 newSize = abs(scalingFactor) * _startSize;
-        _texture->setDimensions(glm::ivec3(newSize, 1));
+       
         // Scale on the y axis, this is to ensure that _scale = 1 is
         // equal to the height of the window
         scale(abs(scalingFactor.y)); 
+        // Resize the dimensions of the texture on the x axis
+        glm::vec2 newSize = abs(scalingFactor) * _startSize;
+        _texture->setDimensions(glm::ivec3(newSize, 1));
+        // To not make it glitch... Makes it glitch in other ways however
+        //updateBrowserSize();
     }
 
     glm::mat4 ScreenSpaceSkyBrowser::scaleMatrix() {
         // To ensure the plane has the right ratio
-        // The _scale us how much of the windows height the
+        // The _scale tells us how much of the windows height the
         // browser covers: eg a browser that covers 0.25 of the 
         // height of the window will have scale = 0.25
         float textureRatio =
-            static_cast<float>(_objectSize.x) / static_cast<float>(_objectSize.y);
+            static_cast<float>(_texture->dimensions().x) / static_cast<float>(_texture->dimensions().y);
 
         glm::mat4 scale = glm::scale(
             glm::mat4(1.f),

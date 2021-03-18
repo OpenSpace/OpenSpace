@@ -19,7 +19,7 @@ namespace openspace {
         glm::vec2 getUpperRightCornerScreenSpace();
         glm::vec2 getLowerLeftCornerScreenSpace();
         bool coordIsInsideCornersScreenSpace(glm::vec2 coord);
-        bool coordIsOnResizeButton(glm::vec2 coord);
+        glm::vec2 coordIsOnResizeArea(glm::vec2 coord);
 
         void scale(glm::vec2 scalingFactor);
         glm::mat4 scaleMatrix() override;
