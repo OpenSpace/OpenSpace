@@ -70,10 +70,17 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    enum class AnimationMode {
+        Once = 0,
+        LoopFromStart,
+        Bounce
+    };
+
     std::unique_ptr<ghoul::modelgeometry::ModelGeometry> _geometry;
     bool _forceRenderInvisible = false;
     bool _notifyInvisibleDropped = true;
     std::string _animationStart;
+    AnimationMode _animationMode;
 
     properties::FloatProperty _ambientIntensity;
 

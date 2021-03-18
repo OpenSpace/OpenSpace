@@ -150,9 +150,25 @@ namespace {
         // In format 'YYYY MM DD hh:mm:ss'.
         std::optional<std::string> animationStartTime [[codegen::dateTime()]];
 
+        enum class TimeUnit {
+            Millisecond,
+            Second
+        };
+
         // The time scale for the animation relative to seconds.
-        // Ex if animation is in milli seconds then AnimationTimeScale = 1000
-        std::optional<float> animationTimeScale;
+        // Ex, if animation is in milliseconds then AnimationTimeScale = 0.001 or
+        // AnimationTimeScale = "Millisecond", default is "Second"
+        std::optional<std::variant<TimeUnit, float>> animationTimeScale;
+
+        enum class AnimationMode {
+            Once,
+            LoopFromStart,
+            Bounce
+        };
+
+        // The mode of how the animation should be played back.
+        // Default is animation is played back once at the start time
+        std::optional<AnimationMode> animationMode;
 
         // [[codegen::verbatim(AmbientIntensityInfo.description)]]
         std::optional<double> ambientIntensity;
@@ -176,7 +192,7 @@ namespace {
         std::optional<glm::dvec3> rotationVector;
 
         // [[codegen::verbatim(LightSourcesInfo.description)]]
-        std::optional<std::vector<std::monostate>> lightSources [[codegen::reference("core_light_source")]];
+        std::optional<std::vector<ghoul::Dictionary>> lightSources [[codegen::reference("core_light_source")]];
 
         // [[codegen::verbatim(DisableDepthTestInfo.description)]]
         std::optional<bool> disableDepthTest;
@@ -297,7 +313,37 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     }
 
     if (p.animationTimeScale.has_value()) {
-        _geometry->setTimeScale(*p.animationTimeScale);
+        if (std::holds_alternative<float>(*p.animationTimeScale)) {
+            _geometry->setTimeScale(std::get<float>(*p.animationTimeScale));
+        }
+        else if (std::holds_alternative<Parameters::TimeUnit>(*p.animationTimeScale)) {
+            Parameters::TimeUnit timeUnit =
+                std::get<Parameters::TimeUnit>(*p.animationTimeScale);
+
+            switch (timeUnit) {
+                case Parameters::TimeUnit::Millisecond:
+                    _geometry->setTimeScale(0.001);
+                    break;
+                case Parameters::TimeUnit::Second:
+                    _geometry->setTimeScale(1.0);
+                    break;
+            }
+        }
+    }
+
+    if (p.animationMode.has_value()) {
+        switch (*p.animationMode) {
+        case Parameters::AnimationMode::LoopFromStart:
+            _animationMode = AnimationMode::LoopFromStart;
+            break;
+        case Parameters::AnimationMode::Bounce:
+            _animationMode = AnimationMode::Bounce;
+            break;
+        case Parameters::AnimationMode::Once:
+        default:
+            _animationMode = AnimationMode::Once;
+            break;
+        }
     }
 
     if (p.modelTransform.has_value()) {
@@ -534,8 +580,22 @@ void RenderableModel::update(const UpdateData& data) {
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
     }
 
-    double realtiveTime = data.time.j2000Seconds() - data.time.convertTime(_animationStart);
     if (_geometry->hasAnimation()) {
+        double realtiveTime;
+        switch (_animationMode) {
+            case AnimationMode::LoopFromStart:
+                realtiveTime = std::fmod(
+                    data.time.j2000Seconds() - data.time.convertTime(_animationStart),
+                    _geometry->animationDuration()
+                );
+                break;
+            case AnimationMode::Once:
+            default:
+                realtiveTime =
+                    data.time.j2000Seconds() - data.time.convertTime(_animationStart);
+                break;
+        }
+
         _geometry->update(realtiveTime);
     }
 }
