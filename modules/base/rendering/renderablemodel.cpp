@@ -157,7 +157,7 @@ namespace {
 
         // The time scale for the animation relative to seconds.
         // Ex, if animation is in milliseconds then AnimationTimeScale = 0.001 or
-        // AnimationTimeScale = "Millisecond", default is "Second"
+        // AnimationTimeScale = Millisecond, default is Second
         std::optional<std::variant<TimeUnit, float>> animationTimeScale;
 
         enum class AnimationMode {
