@@ -67,28 +67,9 @@ namespace openspace::skybrowser::luascriptfunctions {
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::createBrowser");
 
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-
-        using namespace std::string_literals;
-
-        std::string node = "{"
-            "Type = 'ScreenSpaceSkyBrowser',"
-            "Identifier = 'ScreenSpaceBowser',"
-            "Name = 'Screen Space Bowser',"
-            "Url = 'http://localhost:8000/',"
-            "FaceCamera = false"
-        "}";
-
-        /*
-        ghoul::Dictionary node;
-        node.setValue("Type", "ScreenSpaceBrowser"s);
-        node.setValue("Identifier", "ScreenSpaceBowser"s);
-        node.setValue("Name", "Screen Space Bowser"s);
-        node.setValue("Url", "http://localhost:8000/"s);
-        */
-        openspace::global::scriptEngine->queueScript(
-            "openspace.addScreenSpaceRenderable(" + node + ")",
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );    
+        module->createBrowser();
+        module->createTarget();
+        
         return 1;
     }
     
