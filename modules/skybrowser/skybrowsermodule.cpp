@@ -116,7 +116,6 @@ SkyBrowserModule::SkyBrowserModule()
         }
     });
 
-
     global::callback::mousePosition->emplace_back(
         [&](double x, double y) {      
             glm::vec2 pos = glm::vec2(static_cast<float>(x), static_cast<float>(y));

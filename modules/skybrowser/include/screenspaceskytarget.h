@@ -35,6 +35,7 @@ namespace openspace {
 
         glm::vec2 getScreenSpacePosition();
         glm::vec2 getAnglePosition();
+        void setScale(float scale);
        
         void translate(glm::vec2 translation, glm::vec2 position);
        

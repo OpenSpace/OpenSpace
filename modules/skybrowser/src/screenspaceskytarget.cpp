@@ -102,6 +102,10 @@ namespace openspace {
         }
     }
 
+    void ScreenSpaceSkyTarget::setScale(float scale) {
+        _scale = scale;
+    }
+
     bool ScreenSpaceSkyTarget::isReady() const {
         return _shader != nullptr;
     }
