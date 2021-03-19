@@ -75,9 +75,7 @@ namespace openspace::skybrowser::luascriptfunctions {
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::createBrowser");
 
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-
         module->createBrowser();
-        module->createTarget();
 
         return 1;
     }
