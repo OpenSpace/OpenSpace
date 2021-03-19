@@ -32,6 +32,7 @@ namespace openspace {
         void createShaders();
 
         void setScreenSpaceTargetDimension(glm::vec2 currentBrowserDimension);
+        void updateFOV(float fov);
 
         glm::vec2 getScreenSpacePosition();
         glm::vec2 getAnglePosition();
@@ -48,14 +49,14 @@ namespace openspace {
         
         void bindTexture() override;
     private:
-
+    
         properties::Vec2Property _targetDimensions;
-
         std::unique_ptr<ghoul::opengl::Texture> _texture;
         //glm::vec2 _browserDimension = glm::vec2(0);
-        UniformCache(modelTransform, viewProj, texture, borderWidth, targetRatio) _uniformCache;
+        UniformCache(modelTransform, viewProj, texture, fieldOfView, borderWidth, targetRatio) _uniformCache;
         GLuint _vertexArray = 0;
         GLuint _vertexBuffer = 0;
+        float _fieldOfView = 100.f;
     };
 }
 

@@ -86,7 +86,7 @@ namespace openspace {
 SkyBrowserModule::SkyBrowserModule()
     : OpenSpaceModule(SkyBrowserModule::Name)
     , _showBrowserAndTarget(ShowSkyBrowserInfo)
-    , _zoomFactor(ZoomInfo, 50.f ,0.1f ,70.f)
+    , _fieldOfView(ZoomInfo, 50.f ,0.1f ,70.f)
     , _skyBrowser(nullptr)
     , _skyTarget(nullptr)
     , _camIsSyncedWWT(true)
@@ -98,8 +98,19 @@ SkyBrowserModule::SkyBrowserModule()
     , mouseIsOnTarget(false)
 
 {
+
     addProperty(_showBrowserAndTarget);
-    addProperty(_zoomFactor);
+    addProperty(_fieldOfView);
+
+    _fieldOfView.onChange([&]() {
+        if (_skyTarget) {
+            _skyTarget->updateFOV(_fieldOfView);
+            float scaleWhenFovIs10 = static_cast<float>(10.f / global::windowDelegate->getHorizFieldOfView());
+            _skyTarget->setScale(std::max(static_cast<float>(_fieldOfView / global::windowDelegate->getHorizFieldOfView()), scaleWhenFovIs10));
+        }
+    });
+    
+
 
     _showBrowserAndTarget.onChange([&]() {
         if (_showBrowserAndTarget) {
@@ -140,8 +151,8 @@ SkyBrowserModule::SkyBrowserModule()
     global::callback::mouseScrollWheel->emplace_back(
         [&](double, double scroll) -> bool {
             if (mouseIsOnBrowser) {
-                float zoom = scroll > 0.0 ? -log(_zoomFactor + 1.1f) : log(_zoomFactor + 1.1f);
-                _zoomFactor = std::clamp(_zoomFactor + zoom, 0.001f, 70.0f);
+                float zoom = scroll > 0.0 ? -log(_fieldOfView + 1.1f) : log(_fieldOfView + 1.1f);
+                _fieldOfView = std::clamp(_fieldOfView + zoom, 0.001f, 70.0f);
                 return true;
             }
           
@@ -264,15 +275,15 @@ scripting::LuaLibrary SkyBrowserModule::luaLibrary() const {
     return res;
 }
 
-float SkyBrowserModule::zoomFactor() const{
-    return _zoomFactor;
+float SkyBrowserModule::fieldOfView() const{
+    return _fieldOfView;
 }
 
 void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     
     const Parameters p = codegen::bake<Parameters>(dict);
     _showBrowserAndTarget = p.show.value_or(_showBrowserAndTarget);
-    _zoomFactor = p.zoom.value_or(_zoomFactor);
+    _fieldOfView = p.zoom.value_or(_fieldOfView);
 
     // register ScreenSpaceBrowser
     auto fScreenSpaceRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
@@ -359,7 +370,7 @@ void SkyBrowserModule::WWTfollowCamera() {
 
             // Convert to celestial coordinates
             glm::dvec2 celestCoords = convertGalacticToCelestial(targetDirection);
-            ghoul::Dictionary message = createMessageForMovingWWTCamera(celestCoords, _zoomFactor);
+            ghoul::Dictionary message = createMessageForMovingWWTCamera(celestCoords, _fieldOfView);
 
             // Sleep so we don't bombard WWT with too many messages
             std::this_thread::sleep_for(std::chrono::milliseconds(50));

@@ -37,8 +37,8 @@ namespace {
         "Set the dimensions of the SkyTarget according to the SkyBrowser ratio "
     };
 
-    constexpr const std::array<const char*, 5> UniformNames = {
-        "ModelTransform", "ViewProjectionMatrix", "texture1", "borderWidth", "targetRatio"
+    constexpr const std::array<const char*, 6> UniformNames = {
+        "ModelTransform", "ViewProjectionMatrix", "texture1", "fieldOfView", "borderWidth", "targetRatio"
     };
 
     struct [[codegen::Dictionary(ScreenSpaceSkyTarget)]] Parameters {
@@ -169,12 +169,13 @@ namespace openspace {
         glDisable(GL_CULL_FACE);
        
         glm::mat4 modelTransform = globalRotationMatrix() * translationMatrix() * localRotationMatrix() * scaleMatrix();
-        float borderWidth = 0.005f / _scale.value();
+        float borderWidth = 0.005f / (_scale.value() * 2.f);
         glm::vec2 targetRatio;
-
+        float fov = _fieldOfView; 
         _targetDimensions.value() == glm::vec2(0) ? targetRatio = glm::vec2(1) : targetRatio = _targetDimensions.value() / _targetDimensions.value().y;
         _shader->activate();
 
+        _shader->setUniform(_uniformCache.fieldOfView, fov);
         _shader->setUniform(_uniformCache.borderWidth, borderWidth);
         _shader->setUniform(_uniformCache.targetRatio, targetRatio);
         _shader->setUniform(_uniformCache.modelTransform, modelTransform);
@@ -236,7 +237,11 @@ namespace openspace {
     }
 
     void ScreenSpaceSkyTarget::setScreenSpaceTargetDimension(glm::vec2 currentBrowserDimension) {
-        _targetDimensions = currentBrowserDimension;    // TA IN SOM EN PROP!
+        _targetDimensions = currentBrowserDimension;    
+    }
+
+    void ScreenSpaceSkyTarget::updateFOV(float fov) {
+        _fieldOfView = fov;
     }
     
   

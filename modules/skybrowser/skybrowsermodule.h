@@ -46,7 +46,7 @@ public:
     SkyBrowserModule();
     virtual ~SkyBrowserModule() = default;
 
-    float zoomFactor() const;
+    float fieldOfView() const;
     glm::dvec2 convertGalacticToCelestial(glm::dvec3 coords) const;
 
     void WWTfollowCamera();
@@ -72,7 +72,7 @@ protected:
     void internalDeinitialize() override;
 
     properties::BoolProperty _showBrowserAndTarget;
-    properties::FloatProperty _zoomFactor;
+    properties::FloatProperty _fieldOfView;
     ScreenSpaceSkyBrowser* _skyBrowser;
     ScreenSpaceSkyTarget* _skyTarget;
     bool _camIsSyncedWWT;
