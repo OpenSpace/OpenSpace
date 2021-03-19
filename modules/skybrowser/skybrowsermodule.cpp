@@ -182,6 +182,7 @@ SkyBrowserModule::SkyBrowserModule()
                 }
                 if (currentlyResizingBrowser) {
                     currentlyResizingBrowser = false;
+                    _skyBrowser->_browserDimIsDirty = false;
                     _skyBrowser->updateBrowserSize();
                     return true;
                 }
@@ -301,8 +302,12 @@ void SkyBrowserModule::handleInteractions() {
 
                 glm::vec2 newSizeRelToOld = (startResizeBrowserSize + (scalingVector)) / startResizeBrowserSize;
                 _skyBrowser->scale(newSizeRelToOld);
+
                 // Make sure the browser doesn't move in directions it's not supposed to 
                 _skyBrowser->translate(mouseDragVector * abs(resizeVector) /2.f, startDragObjectPosBrowser);
+
+                _skyTarget->setScreenSpaceTargetDimension(_skyBrowser->getScreenSpaceBrowserDimension());
+
             }
         }
     });
@@ -330,7 +335,7 @@ void SkyBrowserModule::WWTfollowCamera() {
             glm::vec3 upDirection = global::navigationHandler->camera()->lookUpVectorWorldSpace();
             glm::vec3 sideDirection = glm::cross(upDirection, viewDirection);
 
-            glm::vec2 angleOffset = _skyTarget->getAnglePosition();
+            glm::vec2 angleOffset = _skyTarget ? _skyTarget->getAnglePosition() : glm::vec2(0);
             // Change view if target is moved
             glm::vec3 targetDirection = glm::rotate(viewDirection, angleOffset.x, upDirection);
             targetDirection = glm::rotate(targetDirection, angleOffset.y, sideDirection);
@@ -410,23 +415,26 @@ glm::dvec2 SkyBrowserModule::convertGalacticToCelestial(glm::dvec3 rGal) const {
     return glm::dvec2(glm::degrees(ra), glm::degrees(dec));
 }
 
-void SkyBrowserModule::createTarget() {
+void SkyBrowserModule::createTarget(glm::ivec2 dimension) {
 
+    std::string browserDim = fmt::format("{{{},{}}}", dimension.x, dimension.y);
+
+    LINFO(browserDim);
     using namespace std::string_literals;
+
 
     std::string node = "{"
         "Type = 'ScreenSpaceSkyTarget',"
         "Identifier = 'ScreenSpaceTarget',"
         "Name = 'Screen Space Target',"
         "FaceCamera = false,"
-        "Scale = 0.04,"
+        "TargetDimensions = " + browserDim + ""
         "}";
 
     openspace::global::scriptEngine->queueScript(
         "openspace.addScreenSpaceRenderable(" + node + ")",
         scripting::ScriptEngine::RemoteScripting::Yes
     );
-    
 }
 
 

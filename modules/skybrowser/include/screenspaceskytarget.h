@@ -3,7 +3,11 @@
 
 #include <openspace/rendering/screenspacerenderable.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec2property.h>
+#include <openspace/properties/numericalproperty.h>
+
 #include <ghoul/opengl/ghoul_gl.h>
 
 #include <ghoul/opengl/texture.h>
@@ -27,6 +31,8 @@ namespace openspace {
 
         void createShaders();
 
+        void setScreenSpaceTargetDimension(glm::vec2 currentBrowserDimension);
+
         glm::vec2 getScreenSpacePosition();
         glm::vec2 getAnglePosition();
        
@@ -36,12 +42,17 @@ namespace openspace {
         glm::vec2 getUpperRightCornerScreenSpace();
         glm::vec2 getLowerLeftCornerScreenSpace();
         bool coordIsInsideCornersScreenSpace(glm::vec2 coord);
+
+        glm::mat4 scaleMatrix() override;
         
         void bindTexture() override;
     private:
-        std::unique_ptr<ghoul::opengl::Texture> _texture;
 
-        UniformCache(modelTransform, viewProj, texture, borderWidth, scale) _uniformCache;
+        properties::Vec2Property _targetDimensions;
+
+        std::unique_ptr<ghoul::opengl::Texture> _texture;
+        //glm::vec2 _browserDimension = glm::vec2(0);
+        UniformCache(modelTransform, viewProj, texture, borderWidth, targetRatio) _uniformCache;
         GLuint _vertexArray = 0;
         GLuint _vertexBuffer = 0;
     };

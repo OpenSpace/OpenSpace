@@ -76,8 +76,8 @@ protected:
     properties::Vec2Property _dimensions;
     std::unique_ptr<BrowserInstance> _browserInstance;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
-   
 
+private:
 
     class ScreenSpaceRenderHandler : public WebRenderHandler {
     public:

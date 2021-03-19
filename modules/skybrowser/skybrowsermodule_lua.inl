@@ -44,6 +44,14 @@ namespace openspace::skybrowser::luascriptfunctions {
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::followCamera");
 
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+        ScreenSpaceSkyTarget* target = nullptr;
+        while (!target) {
+            target = dynamic_cast<ScreenSpaceSkyTarget*>(global::renderEngine->screenSpaceRenderable("ScreenSpaceTarget"));
+        }
+
+        ScreenSpaceSkyBrowser* browser = dynamic_cast<ScreenSpaceSkyBrowser*>(global::renderEngine->screenSpaceRenderable("ScreenSpaceBowser"));
+        module->initializeBrowser(browser, target);
+        module->skyBrowser()->translate(glm::vec3(-0.8, -0.4, 0.0));
 
         module->WWTfollowCamera();
         module->handleInteractions();
@@ -54,11 +62,11 @@ namespace openspace::skybrowser::luascriptfunctions {
     int moveBrowser(lua_State* L) {
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::moveBrowser");
 
-        SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();     
+        SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();    
         ScreenSpaceSkyBrowser* browser = dynamic_cast<ScreenSpaceSkyBrowser*>(global::renderEngine->screenSpaceRenderable("ScreenSpaceBowser"));
-        ScreenSpaceSkyTarget* target = dynamic_cast<ScreenSpaceSkyTarget*>(global::renderEngine->screenSpaceRenderable("ScreenSpaceTarget"));
-        module->initializeBrowser(browser, target);     
-        module->skyBrowser()->translate(glm::vec3(-0.8, -0.4, 0.0));
+
+        // target test
+        module->createTarget(browser->getScreenSpaceBrowserDimension());
 
         return 1;
     }
@@ -67,9 +75,10 @@ namespace openspace::skybrowser::luascriptfunctions {
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::createBrowser");
 
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+
         module->createBrowser();
         module->createTarget();
-        
+
         return 1;
     }
     

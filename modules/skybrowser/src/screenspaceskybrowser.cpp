@@ -20,12 +20,33 @@
 namespace {
     constexpr const char* _loggerCat = "ScreenSpaceSkyBrowser";
 
+    constexpr const openspace::properties::Property::PropertyInfo BrowserDimensionInfo =
+    {
+        "BrowserDimensions",
+        "Browser Dimensions Info",
+        "Set the dimensions of the SkyTarget according to the SkyBrowser ratio "
+    };
+
+    struct [[codegen::Dictionary(ScreenSpaceSkyBrowser)]] Parameters {
+
+        // [[codegen::verbatim(BrowserDimensionInfo.description)]]
+        std::optional<glm::vec2> browserDimensions;
+    };
+
+#include "screenspaceskybrowser_codegen.cpp"
 } // namespace
 
 namespace openspace {
     ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary) 
         : ScreenSpaceBrowser(dictionary)
+        , _browserDimensions(BrowserDimensionInfo, _dimensions, glm::ivec2(0.f), glm::ivec2(300.f))
     {
+        // Handle target dimension property
+        const Parameters p = codegen::bake<Parameters>(dictionary);
+        _browserDimensions = p.browserDimensions.value_or(_browserDimensions);
+        _browserDimensions.onChange([&]() { _browserDimIsDirty = true; });
+        addProperty(_browserDimensions);
+
         std::string identifier;
         if (dictionary.hasValue<std::string>(KeyIdentifier)) {
             identifier = dictionary.value<std::string>(KeyIdentifier);
@@ -109,13 +130,14 @@ namespace openspace {
     }
     // Scales the ScreenSpaceBrowser to a new ratio
     void ScreenSpaceSkyBrowser::scale(glm::vec2 scalingFactor) {       
-       
+
         // Scale on the y axis, this is to ensure that _scale = 1 is
         // equal to the height of the window
         scale(abs(scalingFactor.y)); 
         // Resize the dimensions of the texture on the x axis
         glm::vec2 newSize = abs(scalingFactor) * _startSize;
         _texture->setDimensions(glm::ivec3(newSize, 1));
+        _browserDimensions = newSize;
         // To not make it glitch... Makes it glitch in other ways however
         //updateBrowserSize();
     }
@@ -145,5 +167,9 @@ namespace openspace {
     }
     void ScreenSpaceSkyBrowser::scale(float scalingFactor) {
         _scale = _startScale * scalingFactor;
+    }
+
+    glm::vec2 ScreenSpaceSkyBrowser::getScreenSpaceBrowserDimension() {
+        return _browserDimensions.value();
     }
 }
