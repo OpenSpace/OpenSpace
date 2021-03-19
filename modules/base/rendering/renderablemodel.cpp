@@ -612,30 +612,29 @@ void RenderableModel::update(const UpdateData& data) {
 
     if (_geometry->hasAnimation()) {
         double realtiveTime;
+        double now = data.time.j2000Seconds();
+        double startTime = data.time.convertTime(_animationStart);
+        double duration = _geometry->animationDuration();
+
         switch (_animationMode) {
             case AnimationMode::LoopFromStart:
-                realtiveTime = std::fmod(
-                    data.time.j2000Seconds() - data.time.convertTime(_animationStart),
-                    _geometry->animationDuration()
-                );
+                realtiveTime = std::fmod(now - startTime, duration);
                 break;
             case AnimationMode::LoopInfinitely:
-                realtiveTime = std::fmod(
-                    data.time.j2000Seconds() - data.time.convertTime(_animationStart),
-                    _geometry->animationDuration()
-                );
-
+                realtiveTime = std::fmod(now - startTime, duration);
                 if (realtiveTime < 0) {
-                    realtiveTime += _geometry->animationDuration();
+                    realtiveTime += duration;
                 }
+                break;
+            case AnimationMode::Bounce:
+                realtiveTime =
+                    duration - abs(fmod(now - startTime, 2 * duration) - duration);
                 break;
             case AnimationMode::Once:
             default:
-                realtiveTime =
-                    data.time.j2000Seconds() - data.time.convertTime(_animationStart);
+                realtiveTime = now - startTime;
                 break;
         }
-
         _geometry->update(realtiveTime);
     }
 }
