@@ -60,6 +60,12 @@ namespace {
         { "Color Adding", ColorAddingBlending }
     };
 
+    constexpr openspace::properties::Property::PropertyInfo enableAnimationInfo = {
+        "EnableAnimation",
+        "Enable Animation",
+        "Enable Animation"
+    };
+
     constexpr const std::array<const char*, 12> UniformNames = {
         "opacity", "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
         "modelViewTransform", "normalTransform", "projectionTransform",
@@ -146,6 +152,9 @@ namespace {
         // should be forced to render or not.
         std::optional<bool> forceRenderInvisible;
 
+        // [[codegen::verbatim(enableAnimationInfo.description)]]
+        std::optional<bool> enableAnimation;
+
         // The date and time that the model animation should start.
         // In format 'YYYY MM DD hh:mm:ss'.
         std::optional<std::string> animationStartTime [[codegen::dateTime()]];
@@ -217,6 +226,7 @@ documentation::Documentation RenderableModel::Documentation() {
 
 RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
+    , _enableAnimation(enableAnimationInfo, false)
     , _ambientIntensity(AmbientIntensityInfo, 0.2f, 0.f, 1.f)
     , _diffuseIntensity(DiffuseIntensityInfo, 1.f, 0.f, 1.f)
     , _specularIntensity(SpecularIntensityInfo, 1.f, 0.f, 1.f)
@@ -313,6 +323,11 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         }*/
     }
 
+    if (p.enableAnimation.has_value()) {
+        _enableAnimation = *p.enableAnimation;
+        _geometry->enableAnimation(_enableAnimation.value());
+    }
+
     if (p.animationTimeScale.has_value()) {
         if (std::holds_alternative<float>(*p.animationTimeScale)) {
             _geometry->setTimeScale(std::get<float>(*p.animationTimeScale));
@@ -387,6 +402,10 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         }
     }
 
+    if (_geometry->hasAnimation()) {
+        addProperty(_enableAnimation);
+    }
+
     addPropertySubOwner(_lightSourcePropertyOwner);
     addProperty(_ambientIntensity);
     addProperty(_diffuseIntensity);
@@ -399,6 +418,15 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
     _rotationVec.onChange([this]() {
         _modelTransform = glm::mat4_cast(glm::quat(glm::radians(_rotationVec.value())));
+    });
+
+    _enableAnimation.onChange([this]() {
+        if (_enableAnimation.value() && !_geometry->hasAnimation()) {
+            LWARNING("Attempting to enable animation for a model that does not have any");
+            _enableAnimation = false;
+        }
+
+        _geometry->enableAnimation(_enableAnimation.value());
     });
 
 

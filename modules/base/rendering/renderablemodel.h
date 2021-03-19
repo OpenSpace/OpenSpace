@@ -82,6 +82,7 @@ private:
     bool _notifyInvisibleDropped = true;
     std::string _animationStart;
     AnimationMode _animationMode;
+    properties::BoolProperty _enableAnimation;
 
     properties::FloatProperty _ambientIntensity;
 
