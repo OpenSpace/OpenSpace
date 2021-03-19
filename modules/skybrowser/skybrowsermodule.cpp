@@ -51,13 +51,14 @@
 #include <ghoul/misc/dictionaryjsonformatter.h> // formatJson
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtx/rotate_vector.hpp >
+#include <ghoul/filesystem/filesystem.h>
 
 namespace {
-    constexpr const openspace::properties::Property::PropertyInfo TestInfo = 
+    constexpr const openspace::properties::Property::PropertyInfo ShowSkyBrowserInfo =
     {
-        "Test",
-        "Test Info",
-        "tjobidabidobidabidopp plopp"
+        "Show Sky Browser",
+        "Show Sky Browser",
+        "Show sky browser and target for WorldWide Telescope imagery."
     };
     constexpr const openspace::properties::Property::PropertyInfo ZoomInfo =
     {
@@ -68,8 +69,8 @@ namespace {
 
     struct [[codegen::Dictionary(SkyBrowserModule)]] Parameters {
 
-        // [[codegen::verbatim(TestInfo.description)]]
-        std::optional<std::string> test;
+        // [[codegen::verbatim(ShowSkyBrowserInfo.description)]]
+        std::optional<bool> show;
 
         // [[codegen::verbatim(ZoomInfo.description)]]
         std::optional<float> zoom;
@@ -84,7 +85,7 @@ namespace openspace {
 
 SkyBrowserModule::SkyBrowserModule()
     : OpenSpaceModule(SkyBrowserModule::Name)
-    , _testProperty(TestInfo)
+    , _showBrowserAndTarget(ShowSkyBrowserInfo)
     , _zoomFactor(ZoomInfo, 50.f ,0.1f ,70.f)
     , _skyBrowser(nullptr)
     , _skyTarget(nullptr)
@@ -97,8 +98,24 @@ SkyBrowserModule::SkyBrowserModule()
     , mouseIsOnTarget(false)
 
 {
-    addProperty(_testProperty);
+    addProperty(_showBrowserAndTarget);
     addProperty(_zoomFactor);
+
+    _showBrowserAndTarget.onChange([&]() {
+        if (_showBrowserAndTarget) {
+            std::string skyBrowserID;
+            // Tried thread so that the browser would be instantiated... didn't work
+            std::thread createBrowser = std::thread([&] {
+                skyBrowserID = this->createBrowser();
+                });
+            createBrowser.join();
+            // Sky browser is still nullptr
+            _skyBrowser = dynamic_cast<ScreenSpaceSkyBrowser*>(global::renderEngine->screenSpaceRenderable(skyBrowserID));
+            std::string skyTargetID = createTarget(_skyBrowser->getScreenSpaceDimensions());
+            _skyTarget = dynamic_cast<ScreenSpaceSkyTarget*>(global::renderEngine->screenSpaceRenderable(skyTargetID));
+        }
+    });
+
 
     global::callback::mousePosition->emplace_back(
         [&](double x, double y) {      
@@ -255,7 +272,7 @@ float SkyBrowserModule::zoomFactor() const{
 void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     
     const Parameters p = codegen::bake<Parameters>(dict);
-    _testProperty = p.test.value_or(_testProperty);
+    _showBrowserAndTarget = p.show.value_or(_showBrowserAndTarget);
     _zoomFactor = p.zoom.value_or(_zoomFactor);
 
     // register ScreenSpaceBrowser
@@ -384,8 +401,6 @@ ghoul::Dictionary SkyBrowserModule::createMessageForPausingWWTTime() const {
     return msg;
 }
 
-
-
 void SkyBrowserModule::initializeBrowser(ScreenSpaceSkyBrowser* skyBrowser, ScreenSpaceSkyTarget* skyTarget) {
 
     _skyBrowser = skyBrowser;
@@ -415,17 +430,18 @@ glm::dvec2 SkyBrowserModule::convertGalacticToCelestial(glm::dvec3 rGal) const {
     return glm::dvec2(glm::degrees(ra), glm::degrees(dec));
 }
 
-void SkyBrowserModule::createTarget(glm::ivec2 dimension) {
+std::string SkyBrowserModule::createTarget(glm::ivec2 dimension) {
 
     std::string browserDim = fmt::format("{{{},{}}}", dimension.x, dimension.y);
 
     LINFO(browserDim);
     using namespace std::string_literals;
 
+    std::string ID = "'ScreenSpaceTarget'";
 
     std::string node = "{"
         "Type = 'ScreenSpaceSkyTarget',"
-        "Identifier = 'ScreenSpaceTarget',"
+        "Identifier = " + ID + ","
         "Name = 'Screen Space Target',"
         "FaceCamera = false,"
         "TargetDimensions = " + browserDim + ""
@@ -435,15 +451,13 @@ void SkyBrowserModule::createTarget(glm::ivec2 dimension) {
         "openspace.addScreenSpaceRenderable(" + node + ")",
         scripting::ScriptEngine::RemoteScripting::Yes
     );
+    return ID;
 }
 
 
-void SkyBrowserModule::createBrowser() {
-
-    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+std::string SkyBrowserModule::createBrowser() {
 
     using namespace std::string_literals;
-
     std::string node = "{"
         "Type = 'ScreenSpaceSkyBrowser',"
         "Identifier = 'ScreenSpaceBowser',"
@@ -451,19 +465,21 @@ void SkyBrowserModule::createBrowser() {
         "Url = 'http://localhost:8000/',"
         "FaceCamera = false"
         "}";
-
     /*
-    ghoul::Dictionary node;
-    node.setValue("Type", "ScreenSpaceBrowser"s);
-    node.setValue("Identifier", "ScreenSpaceBowser"s);
-    node.setValue("Name", "Screen Space Bowser"s);
-    node.setValue("Url", "http://localhost:8000/"s);
+    ghoul::Dictionary skyBrowser;
+    std::string ID = "ScreenSpaceSkyBrowser1";
+    skyBrowser.setValue("Type", "ScreenSpaceSkyBrowser"s);
+    skyBrowser.setValue("Identifier", "ScreenSpaceSkyBrowser1"s);
+    skyBrowser.setValue("Name", "Sky Browser"s);
+    skyBrowser.setValue("Url", "http://localhost:8000/"s);
+    skyBrowser.setValue("FaceCamera", "False"s);
     */
+   
     openspace::global::scriptEngine->queueScript(
         "openspace.addScreenSpaceRenderable(" + node + ")",
         scripting::ScriptEngine::RemoteScripting::Yes
     );
-
+    return "ScreenSpaceBowser";
 }
 
 

@@ -44,12 +44,9 @@ namespace openspace::skybrowser::luascriptfunctions {
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::followCamera");
 
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-        ScreenSpaceSkyTarget* target = nullptr;
-        while (!target) {
-            target = dynamic_cast<ScreenSpaceSkyTarget*>(global::renderEngine->screenSpaceRenderable("ScreenSpaceTarget"));
-        }
-
+        ScreenSpaceSkyTarget* target = dynamic_cast<ScreenSpaceSkyTarget*>(global::renderEngine->screenSpaceRenderable("ScreenSpaceTarget"));
         ScreenSpaceSkyBrowser* browser = dynamic_cast<ScreenSpaceSkyBrowser*>(global::renderEngine->screenSpaceRenderable("ScreenSpaceBowser"));
+
         module->initializeBrowser(browser, target);
         module->skyBrowser()->translate(glm::vec3(-0.8, -0.4, 0.0));
 

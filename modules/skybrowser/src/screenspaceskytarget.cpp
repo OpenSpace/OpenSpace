@@ -18,7 +18,6 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureconversion.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <optional>
 #include <ghoul/opengl/openglstatecache.h>
 #include <glm/gtx/string_cast.hpp>

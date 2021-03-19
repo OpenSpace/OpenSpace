@@ -51,8 +51,8 @@ public:
 
     void WWTfollowCamera();
 
-    void createBrowser();
-    void createTarget(glm::ivec2 dimension);
+    std::string createBrowser();
+    std::string createTarget(glm::ivec2 dimension);
 
     ghoul::Dictionary createMessageForMovingWWTCamera(const glm::dvec2 celestCoords, const float fov, const bool moveInstantly = true) const;
     ghoul::Dictionary createMessageForPausingWWTTime() const;
@@ -71,7 +71,7 @@ protected:
     void internalInitialize(const ghoul::Dictionary& dict) override;
     void internalDeinitialize() override;
 
-    properties::StringProperty _testProperty;
+    properties::BoolProperty _showBrowserAndTarget;
     properties::FloatProperty _zoomFactor;
     ScreenSpaceSkyBrowser* _skyBrowser;
     ScreenSpaceSkyTarget* _skyTarget;

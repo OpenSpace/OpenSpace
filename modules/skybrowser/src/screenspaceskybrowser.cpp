@@ -137,9 +137,8 @@ namespace openspace {
         // Resize the dimensions of the texture on the x axis
         glm::vec2 newSize = abs(scalingFactor) * _startSize;
         _texture->setDimensions(glm::ivec3(newSize, 1));
+        _objectSize = _texture->dimensions();
         _browserDimensions = newSize;
-        // To not make it glitch... Makes it glitch in other ways however
-        //updateBrowserSize();
     }
 
     glm::mat4 ScreenSpaceSkyBrowser::scaleMatrix() {
