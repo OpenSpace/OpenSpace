@@ -34,7 +34,6 @@
 #include <optional>
 
 namespace {
-    constexpr const char* BasePathToken = "${BASE}";
     // We can't use ${SCRIPTS} here as that hasn't been defined by this point
     constexpr const char* InitialConfigHelper =
                                                "${BASE}/scripts/configuration_helper.lua";
@@ -43,13 +42,6 @@ namespace {
         // The SGCT configuration file that determines the window and view frustum
         // settings that are being used when OpenSpace is started
         std::optional<std::string> windowConfiguration [[codegen::key("SGCTConfig")]];
-
-        // The SGCT configuration can be defined from an .xml file, or auto-generated
-        // by an sgct.config.* lua function. If a lua function is used to generate the
-        // SGCT configuration, then this key contains the name of the function, otherwise
-        // is blank
-        std::optional<std::string> sgctConfigString
-            [[codegen::key("sgctconfiginitializeString")]];
 
         // The scene description that is used to populate the application after startup.
         // The scene determines which objects are loaded, the startup time and other
@@ -199,7 +191,7 @@ namespace {
             std::string address;
 
             // The port of the http proxy
-            int port;
+            int port [[codegen::inrange(0, 65536)]];
 
             enum class Authentication {
                 Basic [[codegen::key("basic")]],
@@ -654,10 +646,6 @@ Configuration loadConfigurationFromFile(const std::string& filename,
     ghoul_assert(FileSys.fileExists(filename), "File must exist");
 
     Configuration result;
-
-    // Register the base path as the directory where 'filename' lives
-    std::string basePath = ghoul::filesystem::File(filename).directoryName();
-    FileSys.registerPathToken(BasePathToken, basePath);
 
     // If there is an initial config helper file, load it into the state
     if (FileSys.fileExists(absPath(InitialConfigHelper))) {

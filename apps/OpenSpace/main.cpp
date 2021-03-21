@@ -1117,6 +1117,11 @@ int main(int argc, char* argv[]) {
         }
         LINFO(fmt::format("Configuration Path: '{}'", configurationFilePath));
 
+        // Register the base path as the directory where 'filename' lives
+        std::string base = ghoul::filesystem::File(configurationFilePath).directoryName();
+        constexpr const char* BasePathToken = "${BASE}";
+        FileSys.registerPathToken(BasePathToken, base);
+
         // Loading configuration from disk
         LDEBUG("Loading configuration from disk");
         *global::configuration = configuration::loadConfigurationFromFile(
