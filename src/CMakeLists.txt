@@ -32,7 +32,6 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/documentation/documentationgenerator.cpp
   ${OPENSPACE_BASE_DIR}/src/documentation/verifier.cpp
   ${OPENSPACE_BASE_DIR}/src/engine/configuration.cpp
-  ${OPENSPACE_BASE_DIR}/src/engine/configuration_doc.inl
   ${OPENSPACE_BASE_DIR}/src/engine/downloadmanager.cpp
   ${OPENSPACE_BASE_DIR}/src/engine/globals.cpp
   ${OPENSPACE_BASE_DIR}/src/engine/globalscallbacks.cpp

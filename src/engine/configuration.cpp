@@ -39,275 +39,10 @@ namespace {
     constexpr const char* InitialConfigHelper =
                                                "${BASE}/scripts/configuration_helper.lua";
 
-    // Variable names for the openspace.cfg file
-    // These are also used in the _doc include file
-    constexpr const char* KeySGCTConfig = "SGCTConfig";
-    constexpr const char* KeyAsset = "Asset";
-    constexpr const char* KeyProfile = "Profile";
-    constexpr const char* KeyGlobalCustomizationScripts = "GlobalCustomizationScripts";
-    constexpr const char* KeyPaths = "Paths";
-    constexpr const char* KeyFonts = "Fonts";
-    constexpr const char* KeyLogging = "Logging";
-    // @TODO remove; KeyLogDir is not used
-    constexpr const char* KeyLogDir = "LogDir";
-    constexpr const char* KeyPerformancePrefix = "PerformancePrefix";
-    constexpr const char* KeyLogLevel = "LogLevel";
-    constexpr const char* KeyImmediateFlush = "ImmediateFlush";
-    constexpr const char* KeyLogs = "Logs";
-    constexpr const char* KeyCapabilitiesVerbosity = "CapabilitiesVerbosity";
-    constexpr const char* KeyDocumentationPath = "Path";
-    constexpr const char* KeyDocumentation = "Documentation";
-    constexpr const char* KeyScriptLog = "ScriptLog";
-    constexpr const char* KeyShutdownCountdown = "ShutdownCountdown";
-    constexpr const char* KeyPerSceneCache = "PerSceneCache";
-    constexpr const char* KeyOnScreenTextScaling = "OnScreenTextScaling";
-    constexpr const char* KeyRenderingMethod = "RenderingMethod";
-    constexpr const char* KeyDisableRenderingOnMaster = "DisableRenderingOnMaster";
-    constexpr const char* KeyGlobalRotation = "GlobalRotation";
-    constexpr const char* KeyScreenSpaceRotation = "ScreenSpaceRotation";
-    constexpr const char* KeyMasterRotation = "MasterRotation";
-    constexpr const char* KeyDisableInGameConsole = "DisableInGameConsole";
-    constexpr const char* KeyScreenshotUseDate = "ScreenshotUseDate";
-    constexpr const char* KeyHttpProxy = "HttpProxy";
-    constexpr const char* KeyAddress = "Address";
-    constexpr const char* KeyPort = "Port";
-    constexpr const char* KeyAuthentication = "Authentication";
-    constexpr const char* KeyUser = "User";
-    constexpr const char* KeyPassword = "Password";
-    constexpr const char* KeyOpenGLDebugContext = "OpenGLDebugContext";
-    constexpr const char* KeyActivate = "Activate";
-    constexpr const char* KeySynchronous = "Synchronous";
-    constexpr const char* KeyFilterIdentifier = "FilterIdentifier";
-    constexpr const char* KeyIdentifier = "Identifier";
-    constexpr const char* KeySource = "Source";
-    constexpr const char* KeyType = "Type";
-    constexpr const char* KeyFilterSeverity = "FilterSeverity";
-    constexpr const char* KeyCheckOpenGLState = "CheckOpenGLState";
-    constexpr const char* KeyLogEachOpenGLCall = "LogEachOpenGLCall";
-    constexpr const char* KeyVersionCheckUrl = "VersionCheckUrl";
-    constexpr const char* KeyUseMultithreadedInitialization =
-                                                         "UseMultithreadedInitialization";
-    constexpr const char* KeyLoadingScreen = "LoadingScreen";
-    constexpr const char* KeyShowMessage = "ShowMessage";
-    constexpr const char* KeyShowNodeNames = "ShowNodeNames";
-    constexpr const char* KeyShowProgressbar = "ShowProgressbar";
-    constexpr const char* KeyModuleConfigurations = "ModuleConfigurations";
-
-    constexpr const char* KeySgctConfigNameInitialized = "sgctconfiginitializeString";
-    constexpr const char* KeyReadOnlyProfiles = "ReadOnlyProfiles";
-    constexpr const char* KeyBypassLauncher = "BypassLauncher";
-
-    template <typename T>
-    void getValue(ghoul::lua::LuaState& L, const char* name, T& value) {
-        using namespace openspace::configuration;
-
-        auto it = std::find_if(
-            Configuration::Documentation.entries.begin(),
-            Configuration::Documentation.entries.end(),
-            [name](const openspace::documentation::DocumentationEntry& e) {
-            return e.key == name;
-        }
-        );
-
-        bool isOptional =
-            it != Configuration::Documentation.entries.end()
-            ? it->optional :
-            true;
-
-        lua_getglobal(L, name);
-        if (isOptional && lua_isnil(L, -1)) {
-            return;
-        }
-
-        if (!isOptional && lua_isnil(L, -1)) {
-            openspace::documentation::TestResult testResult = {
-                false,
-                { {
-                    name,
-                    openspace::documentation::TestResult::Offense::Reason::MissingKey
-                }},
-                {}
-            };
-            throw openspace::documentation::SpecificationError(
-                std::move(testResult),
-                "Configuration"
-            );
-        }
-
-        if constexpr (std::is_same_v<T, glm::dvec3>) {
-            ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
-            glm::dvec3 res;
-            res.x = d.value<double>("1");
-            res.y = d.value<double>("2");
-            res.z = d.value<double>("3");
-            value = res;
-        }
-        // NOLINTNEXTLINE
-        else if constexpr (std::is_same_v<T, std::vector<std::string>>) {
-            ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
-
-            std::vector<std::string> res;
-            for (size_t i = 1; i <= d.size(); ++i) {
-                res.push_back(d.value<std::string>(std::to_string(i)));
-            }
-            value = std::move(res);
-        }
-        // NOLINTNEXTLINE
-        else if constexpr (std::is_same_v<T, std::map<std::string, std::string>>) {
-            ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
-
-            std::map<std::string, std::string> res;
-            std::vector<std::string_view> keys = d.keys();
-            for (size_t i = 0; i < d.size(); ++i) {
-                std::string_view key = keys[i];
-                std::string v = d.value<std::string>(key);
-                res[std::string(key)] = std::move(v);
-            }
-            value = std::move(res);
-        }
-        // NOLINTNEXTLINE
-        else if constexpr (std::is_same_v<T, std::map<std::string, ghoul::Dictionary>>) {
-            ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
-
-            std::map<std::string, ghoul::Dictionary> res;
-            std::vector<std::string_view> keys = d.keys();
-            for (size_t i = 0; i < d.size(); ++i) {
-                std::string_view key = keys[i];
-                ghoul::Dictionary v = d.value<ghoul::Dictionary>(key);
-                res[std::string(key)] = std::move(v);
-            }
-            value = std::move(res);
-        }
-        // NOLINTNEXTLINE
-        else if constexpr (std::is_same_v<T, Configuration::Logging>) {
-            Configuration::Logging& v = static_cast<Configuration::Logging&>(value);
-            ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
-
-            if (d.hasValue<std::string>(KeyLogLevel)) {
-                v.level = d.value<std::string>(KeyLogLevel);
-            }
-            if (d.hasValue<bool>(KeyImmediateFlush)) {
-                v.forceImmediateFlush = d.value<bool>(KeyImmediateFlush);
-            }
-            if (d.hasValue<std::string>(KeyCapabilitiesVerbosity)) {
-                v.capabilitiesVerbosity = d.value<std::string>(KeyCapabilitiesVerbosity);
-            }
-
-            if (d.hasValue<ghoul::Dictionary>(KeyLogs)) {
-                ghoul::Dictionary l = d.value<ghoul::Dictionary>(KeyLogs);
-                std::vector<ghoul::Dictionary> res;
-                for (size_t i = 1; i <= l.size(); ++i) {
-                    res.push_back(l.value<ghoul::Dictionary>(std::to_string(i)));
-                }
-                v.logs = res;
-            }
-        }
-        // NOLINTNEXTLINE
-        else if constexpr (std::is_same_v<T, Configuration::DocumentationInfo>) {
-            Configuration::DocumentationInfo& v =
-                static_cast<Configuration::DocumentationInfo&>(value);
-            ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
-            if (d.hasValue<std::string>(KeyDocumentationPath)) {
-                v.path = d.value<std::string>(KeyDocumentationPath);
-            }
-        }
-        // NOLINTNEXTLINE
-        else if constexpr (std::is_same_v<T, Configuration::LoadingScreen>) {
-            Configuration::LoadingScreen& v =
-                static_cast<Configuration::LoadingScreen&>(value);
-            ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
-            if (d.hasValue<bool>(KeyShowMessage)) {
-                v.isShowingMessages = d.value<bool>(KeyShowMessage);
-            }
-            if (d.hasValue<bool>(KeyShowNodeNames)) {
-                v.isShowingNodeNames = d.value<bool>(KeyShowNodeNames);
-            }
-            if (d.hasValue<bool>(KeyShowProgressbar)) {
-                v.isShowingProgressbar = d.value<bool>(KeyShowProgressbar);
-            }
-        }
-        // NOLINTNEXTLINE
-        else if constexpr (std::is_same_v<T, Configuration::OpenGLDebugContext>) {
-            Configuration::OpenGLDebugContext& v =
-                static_cast<Configuration::OpenGLDebugContext&>(value);
-            ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
-
-            if (d.hasValue<bool>(KeyActivate)) {
-                v.isActive = d.value<bool>(KeyActivate);
-            }
-            if (d.hasValue<bool>(KeySynchronous)) {
-                v.isSynchronous = d.value<bool>(KeySynchronous);
-            }
-
-            if (d.hasValue<ghoul::Dictionary>(KeyFilterIdentifier)) {
-                ghoul::Dictionary f = d.value<ghoul::Dictionary>(KeyFilterIdentifier);
-
-                std::vector<Configuration::OpenGLDebugContext::IdentifierFilter> res;
-                for (size_t i = 1; i <= f.size(); ++i) {
-                    Configuration::OpenGLDebugContext::IdentifierFilter filter;
-                    ghoul::Dictionary fi = f.value<ghoul::Dictionary>(std::to_string(i));
-
-                    if (fi.hasValue<double>(KeyIdentifier)) {
-                        filter.identifier = static_cast<unsigned int>(
-                            fi.value<double>(KeyIdentifier)
-                        );
-                    }
-                    if (fi.hasValue<std::string>(KeySource)) {
-                        filter.source = fi.value<std::string>(KeySource);
-                    }
-                    if (fi.hasValue<std::string>(KeyType)) {
-                        filter.type = fi.value<std::string>(KeyType);
-                    }
-
-                    res.push_back(std::move(filter));
-                }
-
-                v.identifierFilters = res;
-            }
-
-            if (d.hasValue<ghoul::Dictionary>(KeyFilterSeverity)) {
-                ghoul::Dictionary f = d.value<ghoul::Dictionary>(KeyFilterSeverity);
-
-                std::vector<std::string> res;
-                for (size_t i = 1; i <= f.size(); ++i) {
-                    res.push_back(f.value<std::string>(std::to_string(i)));
-                }
-                v.severityFilters = res;
-            }
-        }
-        // NOLINTNEXTLINE
-        else if constexpr (std::is_same_v<T, Configuration::HTTPProxy>) {
-            Configuration::HTTPProxy& v = static_cast<Configuration::HTTPProxy&>(value);
-            ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
-
-            if (d.hasValue<bool>(KeyActivate)) {
-                v.usingHttpProxy = d.value<bool>(KeyActivate);
-            }
-            if (d.hasValue<std::string>(KeyAddress)) {
-                v.address = d.value<std::string>(KeyAddress);
-            }
-            if (d.hasValue<double>(KeyPort)) {
-                v.port = static_cast<unsigned int>(d.value<double>(KeyPort));
-            }
-            if (d.hasValue<std::string>(KeyAuthentication)) {
-                v.authentication = d.value<std::string>(KeyAuthentication);
-            }
-            if (d.hasValue<std::string>(KeyUser)) {
-                v.user = d.value<std::string>(KeyUser);
-            }
-            if (d.hasValue<std::string>(KeyPassword)) {
-                v.password = d.value<std::string>(KeyPassword);
-            }
-        }
-        else {
-            value = ghoul::lua::value<T>(L);
-        }
-    }
-
     struct [[codegen::Dictionary(Configuration)]] Parameters {
         // The SGCT configuration file that determines the window and view frustum
         // settings that are being used when OpenSpace is started
-        std::optional<std::string> sgctConfig [[codegen::key("SGCTConfig")]];
+        std::optional<std::string> windowConfiguration [[codegen::key("SGCTConfig")]];
 
         // The SGCT configuration can be defined from an .xml file, or auto-generated
         // by an sgct.config.* lua function. If a lua function is used to generate the
@@ -319,8 +54,13 @@ namespace {
         // The scene description that is used to populate the application after startup.
         // The scene determines which objects are loaded, the startup time and other
         // scene-specific settings. More information is provided in the Scene
-        // documentation
+        // documentation. If the 'Asset' and the 'Profile' values are specified, the asset
+        // is silently ignored
         std::optional<std::string> asset;
+
+        // The profile that should be loaded at the startup. The profile determines which
+        // assets are loaded, the startup time, keyboard shortcuts, and other settings.
+        std::optional<std::string> profile;
 
         // This value names a list of scripts that get executed after initialization of
         // any scene. These scripts can be used for user-specific customization, such as a
@@ -338,13 +78,6 @@ namespace {
         std::optional<std::map<std::string, std::string>> fonts;
 
         struct Logging {
-            // The directory for logs. Default value is \"${BASE}\"
-            std::optional<std::string> logDir;
-
-            // A string to prefix PerformanceMeasurement logfiles. Default value is
-            // \"PM-\"
-            std::optional<std::string> performancePrefix;
-
             // List from logmanager.cpp::levelFromString
             enum class Level {
                 Trace,
@@ -370,7 +103,7 @@ namespace {
             // Per default, log messages are written to the console, the onscreen text,
             // and (if available) the Visual Studio output window. This table can define
             // other logging methods that will be used additionally
-            std::optional<std::vector<std::monostate>> logs
+            std::optional<std::vector<ghoul::Dictionary>> logs
                 [[codegen::reference("core_logfactory")]];
 
             // List from OpenspaceEngine::initialize
@@ -402,7 +135,7 @@ namespace {
 
         // The countdown that the application will wait between pressing ESC and actually
         // shutting down. If ESC is pressed again in this time, the shutdown is aborted
-        std::optional<double> shutdownCountdown [[codegen::greater(0.0)]];
+        std::optional<float> shutdownCountdown [[codegen::greater(0.0)]];
 
         // If this is set to 'true', the name of the scene will be appended to the cache
         // directory, thus not reusing the same directory. This is useful in cases where
@@ -412,7 +145,7 @@ namespace {
 
         enum class Scaling {
             Window [[codegen::key("window")]],
-            FrameBuffer [[codegen::key("framebuffer")]]
+            Framebuffer [[codegen::key("framebuffer")]]
         };
         // The method for scaling the onscreen text in the window. As the resolution of
         // the rendering can be different from the size of the window, the onscreen text
@@ -571,7 +304,7 @@ namespace {
 
         // The URL that is pinged to check which version of OpenSpace is the most current
         // if you don't want this request to happen, this value should not be set at all
-        std::optional<std::string> versionCheckUrl [[codegen::key("VersionCheckUrl")]];
+        std::optional<std::string> versionCheckUrl;
 
         struct LoadingScreen {
             // If this value is set to 'true', the loading screen will display a message
@@ -593,15 +326,14 @@ namespace {
 
         // List of profiles that cannot be overwritten by user
         std::optional<std::vector<std::string>> readOnlyProfiles;
+
+        // Configurations for each module
+        std::optional<std::map<std::string, ghoul::Dictionary>> moduleConfigurations;
     };
-
-    //// Configurations for each module
-    //std::optional<std::map<std::string, ghoul::Dictionary>> moduleConfigurations;
-
 #include "configuration_codegen.cpp"
 } // namespace
 
-#include "configuration_doc.inl"
+//#include "configuration_doc.inl"
 
 namespace openspace::configuration {
 
@@ -612,62 +344,276 @@ void parseLuaState(Configuration& configuration) {
     Configuration& c = configuration;
     LuaState& s = c.state;
 
+    // The sgctConfigNameInitialized is a bit special
+    lua_getglobal(s, "sgctconfiginitializeString");
+    c.sgctConfigNameInitialized = ghoul::lua::value<std::string>(
+        s,
+        ghoul::lua::PopValue::Yes
+    );
+
+
     // The configuration file sets all values as global variables, so we need to pull them
     // into a table first so that we can pass that table to the dictionary constructor
     lua_newtable(s);
 
-    // We go through all of the entries and lift them from global scope into the stack
+    // We go through all of the entries and lift them from global scope into the table on
+    // the stack so taht we can create a ghoul::Dictionary from this new table
     documentation::Documentation doc = codegen::doc<Parameters>();
     for (const documentation::DocumentationEntry& e : doc.entries) {
         lua_pushstring(s, e.key.c_str());
         lua_getglobal(s, e.key.c_str());
         lua_settable(s, -3);
     }
-    // @TODO (abock, 2020-03-16)  We are naughty about the module configuration right now,
-    // so we need to handle this separately
-    lua_pushstring(s, "ModuleConfigurations");
-    lua_getglobal(s, "ModuleConfigurations");
-    lua_settable(s, -3);
 
 
     ghoul::Dictionary d;
     ghoul::lua::luaDictionaryFromState(s, d);
     lua_settop(s, 0);
-    Parameters p = codegen::bake<Parameters>(d);
+    const Parameters p = codegen::bake<Parameters>(d);
 
+    c.windowConfiguration = p.windowConfiguration.value_or(c.windowConfiguration);
+    c.asset = p.asset.value_or(c.asset);
+    c.profile = p.profile.value_or(c.profile);
+    c.globalCustomizationScripts =
+        p.globalCustomizationScripts.value_or(c.globalCustomizationScripts);
+    c.pathTokens = p.paths;
+    c.fonts = p.fonts.value_or(c.fonts);
+    c.scriptLog = p.scriptLog.value_or(c.scriptLog);
+    c.versionCheckUrl = p.versionCheckUrl.value_or(c.versionCheckUrl);
+    c.useMultithreadedInitialization =
+        p.useMultithreadedInitialization.value_or(c.useMultithreadedInitialization);
+    c.isCheckingOpenGLState = p.checkOpenGLState.value_or(c.isCheckingOpenGLState);
+    c.isLoggingOpenGLCalls = p.logEachOpenGLCall.value_or(c.isLoggingOpenGLCalls);
+    c.shutdownCountdown = p.shutdownCountdown.value_or(c.shutdownCountdown);
+    c.shouldUseScreenshotDate = p.screenshotUseDate.value_or(c.shouldUseScreenshotDate);
+    if (p.onScreenTextScaling.has_value()) {
+        switch (*p.onScreenTextScaling) {
+            case Parameters::Scaling::Window:
+                c.onScreenTextScaling = "window";
+                break;
+            case Parameters::Scaling::Framebuffer:
+                c.onScreenTextScaling = "framebuffer";
+                break;
+            default:
+                throw ghoul::MissingCaseException();
+        }
+    }
+    c.usePerSceneCache = p.perSceneCache.value_or(c.usePerSceneCache);
+    c.isRenderingOnMasterDisabled =
+        p.disableRenderingOnMaster.value_or(c.isRenderingOnMasterDisabled);
+    c.globalRotation = p.globalRotation.value_or(c.globalRotation);
+    c.masterRotation = p.masterRotation.value_or(c.masterRotation);
+    c.screenSpaceRotation = p.screenSpaceRotation.value_or(c.screenSpaceRotation);
+    if (p.renderingMethod.has_value()) {
+        switch (*p.renderingMethod) {
+            case Parameters::RenderingMethod::Framebuffer:
+                c.renderingMethod = "Framebuffer";
+                break;
+            case Parameters::RenderingMethod::ABuffer:
+                c.renderingMethod = "ABuffer";
+                break;
+            default:
+                throw ghoul::MissingCaseException();
+        }
+    }
+    c.isConsoleDisabled = p.disableInGameConsole.value_or(c.isConsoleDisabled);
+    if (p.logging.has_value()) {
+        if (p.logging->logLevel.has_value()) {
+            switch (*p.logging->logLevel) {
+                case Parameters::Logging::Level::Trace:
+                    c.logging.level = "Trace";
+                    break;
+                case Parameters::Logging::Level::Debug:
+                    c.logging.level = "Debug";
+                    break;
+                case Parameters::Logging::Level::Info:
+                    c.logging.level = "Info";
+                    break;
+                case Parameters::Logging::Level::Warning:
+                    c.logging.level = "Warning";
+                    break;
+                case Parameters::Logging::Level::Error:
+                    c.logging.level = "Error";
+                    break;
+                case Parameters::Logging::Level::Fatal:
+                    c.logging.level = "Fatal";
+                    break;
+                case Parameters::Logging::Level::None:
+                    c.logging.level = "None";
+                    break;
+                default:
+                    throw ghoul::MissingCaseException();
+            }
+        }
 
-    getValue(s, KeySGCTConfig, c.windowConfiguration);
-    getValue(s, KeyAsset, c.asset);
-    getValue(s, KeyProfile, c.profile);
-    getValue(s, KeyGlobalCustomizationScripts, c.globalCustomizationScripts);
-    getValue(s, KeyPaths, c.pathTokens);
-    getValue(s, KeyFonts, c.fonts);
-    getValue(s, KeyScriptLog, c.scriptLog);
-    getValue(s, KeyVersionCheckUrl, c.versionCheckUrl);
-    getValue(s, KeyUseMultithreadedInitialization, c.useMultithreadedInitialization);
-    getValue(s, KeyCheckOpenGLState, c.isCheckingOpenGLState);
-    getValue(s, KeyLogEachOpenGLCall, c.isLoggingOpenGLCalls);
-    getValue(s, KeyShutdownCountdown, c.shutdownCountdown);
-    getValue(s, KeyScreenshotUseDate, c.shouldUseScreenshotDate);
-    getValue(s, KeyOnScreenTextScaling, c.onScreenTextScaling);
-    getValue(s, KeyPerSceneCache, c.usePerSceneCache);
-    getValue(s, KeyDisableRenderingOnMaster, c.isRenderingOnMasterDisabled);
+        c.logging.forceImmediateFlush =
+            p.logging->immediateFlush.value_or(c.logging.forceImmediateFlush);
+        c.logging.logs = p.logging->logs.value_or(c.logging.logs);
+        if (p.logging->capabilitiesVerbosity.has_value()) {
+            switch (*p.logging->capabilitiesVerbosity) {
+                case Parameters::Logging::Verbosity::None:
+                    c.logging.capabilitiesVerbosity = "None";
+                    break;
+                case Parameters::Logging::Verbosity::Minimal:
+                    c.logging.capabilitiesVerbosity = "Minimal";
+                    break;
+                case Parameters::Logging::Verbosity::Default:
+                    c.logging.capabilitiesVerbosity = "Default";
+                    break;
+                case Parameters::Logging::Verbosity::Full:
+                    c.logging.capabilitiesVerbosity = "Full";
+                    break;
+                default:
+                    throw ghoul::MissingCaseException();
+            }
+        }
+    }
+    
+    if (p.documentation.has_value()) {
+        c.documentation.path = p.documentation->path.value_or(c.documentation.path);
+    }
 
-    getValue(s, KeyGlobalRotation, c.globalRotation);
-    getValue(s, KeyScreenSpaceRotation, c.screenSpaceRotation);
-    getValue(s, KeyMasterRotation, c.masterRotation);
-    getValue(s, KeyDisableInGameConsole, c.isConsoleDisabled);
-    getValue(s, KeyRenderingMethod, c.renderingMethod);
-    getValue(s, KeyLogging, c.logging);
-    getValue(s, KeyDocumentation, c.documentation);
-    getValue(s, KeyLoadingScreen, c.loadingScreen);
-    getValue(s, KeyModuleConfigurations, c.moduleConfigurations);
-    getValue(s, KeyOpenGLDebugContext, c.openGLDebugContext);
-    getValue(s, KeyHttpProxy, c.httpProxy);
+    if (p.loadingScreen.has_value()) {
+        const Parameters::LoadingScreen& l = *p.loadingScreen;
+        c.loadingScreen.isShowingMessages =
+            l.showMessage.value_or(c.loadingScreen.isShowingMessages);
+        c.loadingScreen.isShowingProgressbar =
+            l.showProgressbar.value_or(c.loadingScreen.isShowingProgressbar);
+        c.loadingScreen.isShowingNodeNames =
+            l.showNodeNames.value_or(c.loadingScreen.isShowingNodeNames);
+    }
 
-    getValue(s, KeyReadOnlyProfiles, c.readOnlyProfiles);
-    getValue(s, KeyBypassLauncher, c.bypassLauncher);
+    c.moduleConfigurations = p.moduleConfigurations.value_or(c.moduleConfigurations);
+
+    if (p.openGLDebugContext.has_value()) {
+        const Parameters::OpenGLDebugContext& l = *p.openGLDebugContext;
+        c.openGLDebugContext.isActive = l.activate;
+        c.openGLDebugContext.isSynchronous = l.synchronous.value_or(
+            c.openGLDebugContext.isSynchronous
+        );
+        if (l.filterIdentifier.has_value()) {
+            for (const Parameters::OpenGLDebugContext::Filter& f : *l.filterIdentifier) {
+                Configuration::OpenGLDebugContext::IdentifierFilter filter;
+                filter.identifier = static_cast<unsigned int>(f.identifier);
+                switch (f.source) {
+                    case Parameters::OpenGLDebugContext::Filter::Source::API:
+                        filter.source = "API";
+                        break;
+                    case Parameters::OpenGLDebugContext::Filter::Source::WindowSystem:
+                        filter.source = "Window System";
+                        break;
+                    case Parameters::OpenGLDebugContext::Filter::Source::ShaderCompiler:
+                        filter.source = "Shader Compiler";
+                        break;
+                    case Parameters::OpenGLDebugContext::Filter::Source::ThirdParty:
+                        filter.source = "Third Party";
+                        break;
+                    case Parameters::OpenGLDebugContext::Filter::Source::Application:
+                        filter.source = "Application";
+                        break;
+                    case Parameters::OpenGLDebugContext::Filter::Source::Other:
+                        filter.source = "Other";
+                        break;
+                    case Parameters::OpenGLDebugContext::Filter::Source::DontCare:
+                        filter.source = "Don't care";
+                        break;
+                    default:
+                        throw ghoul::MissingCaseException();
+                }
+                switch (f.type) {
+                    case Parameters::OpenGLDebugContext::Filter::Type::Error:
+                        filter.type = "Error";
+                        break;
+                    case Parameters::OpenGLDebugContext::Filter::Type::Deprecated:
+                        filter.type = "Deprecated";
+                        break;
+                    case Parameters::OpenGLDebugContext::Filter::Type::Undefined:
+                        filter.type = "Undefined";
+                        break;
+                    case Parameters::OpenGLDebugContext::Filter::Type::Portability:
+                        filter.type = "Portability";
+                        break;
+                    case Parameters::OpenGLDebugContext::Filter::Type::Performance:
+                        filter.type = "Performance";
+                        break;
+                    case Parameters::OpenGLDebugContext::Filter::Type::Marker:
+                        filter.type = "Marker";
+                        break;
+                    case Parameters::OpenGLDebugContext::Filter::Type::PushGroup:
+                        filter.type = "Push group";
+                        break;
+                    case Parameters::OpenGLDebugContext::Filter::Type::PopGroup:
+                        filter.type = "Pop group";
+                        break;
+                    case Parameters::OpenGLDebugContext::Filter::Type::Other:
+                        filter.type = "Other";
+                        break;
+                    case Parameters::OpenGLDebugContext::Filter::Type::DontCare:
+                        filter.type = "Don't care";
+                        break;
+                    default:
+                        throw ghoul::MissingCaseException();
+                }
+
+                c.openGLDebugContext.identifierFilters.push_back(filter);
+            }
+        }
+        if (l.filterSeverity.has_value()) {
+            for (Parameters::OpenGLDebugContext::Severity sev : *l.filterSeverity) {
+                std::string severity;
+                switch (sev) {
+                    case Parameters::OpenGLDebugContext::Severity::High:
+                        severity = "High";
+                        break;
+                    case Parameters::OpenGLDebugContext::Severity::Medium:
+                        severity = "Medium";
+                        break;
+                    case Parameters::OpenGLDebugContext::Severity::Low:
+                        severity = "Low";
+                        break;
+                    case Parameters::OpenGLDebugContext::Severity::Notification:
+                        severity = "Notification";
+                        break;
+                    default:
+                        throw ghoul::MissingCaseException();
+                }
+                c.openGLDebugContext.severityFilters.push_back(severity);
+            }
+        }
+    }
+
+    if (p.httpProxy.has_value()) {
+        c.httpProxy.usingHttpProxy =
+            p.httpProxy->activate.value_or(c.httpProxy.usingHttpProxy);
+        c.httpProxy.address = p.httpProxy->address;
+        c.httpProxy.port = static_cast<unsigned int>(p.httpProxy->port);
+        if (p.httpProxy->authentication.has_value()) {
+            switch (*p.httpProxy->authentication) {
+                case Parameters::HttpProxy::Authentication::Basic:
+                    c.httpProxy.authentication = "basic";
+                    break;
+                case Parameters::HttpProxy::Authentication::Ntlm:
+                    c.httpProxy.authentication = "ntlm";
+                    break;
+                case Parameters::HttpProxy::Authentication::Digest:
+                    c.httpProxy.authentication = "digest";
+                    break;
+                case Parameters::HttpProxy::Authentication::Any:
+                    c.httpProxy.authentication = "any";
+                    break;
+                default:
+                    throw ghoul::MissingCaseException();
+            }
+        }
+        c.httpProxy.user = p.httpProxy->user.value_or(c.httpProxy.user);
+        c.httpProxy.password = p.httpProxy->password.value_or(c.httpProxy.password);
+    }
+
+    c.readOnlyProfiles = p.readOnlyProfiles.value_or(c.readOnlyProfiles);
+    c.bypassLauncher = p.bypassLauncher.value_or(c.bypassLauncher);
 }
+
+documentation::Documentation Configuration::Documentation = codegen::doc<Parameters>();
 
 std::string findConfiguration(const std::string& filename) {
     using ghoul::filesystem::Directory;

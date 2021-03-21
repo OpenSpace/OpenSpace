@@ -43,7 +43,6 @@ struct Configuration {
     Configuration& operator=(Configuration&&) = default;
 
     std::string windowConfiguration = "${CONFIG}/single.xml";
-    std::string sgctConfigNameInitialized;
     std::string asset;
     std::string profile;
     std::vector<std::string> readOnlyProfiles;
@@ -93,7 +92,6 @@ struct Configuration {
     glm::dvec3 screenSpaceRotation = glm::dvec3(0.0);
     glm::dvec3 masterRotation = glm::dvec3(0.0);
     bool isConsoleDisabled = false;
-    bool usingProfile = false;
     bool bypassLauncher = false;
 
     std::map<std::string, ghoul::Dictionary> moduleConfigurations;
@@ -122,6 +120,11 @@ struct Configuration {
         std::string password;
     };
     HTTPProxy httpProxy;
+
+    // Values not read from the openspace.cfg file
+    bool usingProfile = false;
+    std::string sgctConfigNameInitialized;
+
 
 
     static documentation::Documentation Documentation;
