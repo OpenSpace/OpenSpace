@@ -262,10 +262,6 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         }
     }
 
-    if (p.animationStartTime.has_value()) {
-        _animationStart = *p.animationStartTime;
-    }
-
     if (std::holds_alternative<std::string>(p.geometryFile)) {
         // Handle single file
         std::string file;
@@ -323,12 +319,32 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         }*/
     }
 
+    if (p.animationStartTime.has_value()) {
+        if (!_geometry->hasAnimation()) {
+            LWARNING("Animation start time given to model without animation");
+        }
+        _animationStart = *p.animationStartTime;
+        _enableAnimation = true;
+    }
+
     if (p.enableAnimation.has_value()) {
-        _enableAnimation = *p.enableAnimation;
-        _geometry->enableAnimation(_enableAnimation.value());
+        if (!_geometry->hasAnimation()) {
+            LWARNING("Attempting to enable animation for a model that does not have any");
+        }
+        else if (*p.enableAnimation &&_animationStart == "") {
+            LWARNING("Cannot enable animation without a given start time");
+        }
+        else {
+            _enableAnimation = *p.enableAnimation;
+            _geometry->enableAnimation(_enableAnimation.value());
+        }
     }
 
     if (p.animationTimeScale.has_value()) {
+        if (!_geometry->hasAnimation()) {
+            LWARNING("Animation time scale given to model without animation");
+        }
+
         if (std::holds_alternative<float>(*p.animationTimeScale)) {
             _geometry->setTimeScale(std::get<float>(*p.animationTimeScale));
         }
@@ -348,6 +364,10 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     }
 
     if (p.animationMode.has_value()) {
+        if (!_geometry->hasAnimation()) {
+            LWARNING("Animation mode given to model without animation");
+        }
+
         switch (*p.animationMode) {
         case Parameters::AnimationMode::LoopFromStart:
             _animationMode = AnimationMode::LoopFromStart;
@@ -421,12 +441,16 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     });
 
     _enableAnimation.onChange([this]() {
-        if (_enableAnimation.value() && !_geometry->hasAnimation()) {
+        if (!_geometry->hasAnimation()) {
             LWARNING("Attempting to enable animation for a model that does not have any");
+        }
+        else if (_enableAnimation.value() && _animationStart == "") {
+            LWARNING("Cannot enable animation without a given start time");
             _enableAnimation = false;
         }
-
-        _geometry->enableAnimation(_enableAnimation.value());
+        else {
+            _geometry->enableAnimation(_enableAnimation.value());
+        }
     });
 
 
@@ -460,6 +484,10 @@ bool RenderableModel::isReady() const {
 
 void RenderableModel::initialize() {
     ZoneScoped
+
+    if (_geometry->hasAnimation() && _enableAnimation.value() && _animationStart == "") {
+        LWARNING("Model with animation not given any start time");
+    }
 
     for (const std::unique_ptr<LightSource>& ls : _lightSources) {
         ls->initialize();
@@ -610,7 +638,7 @@ void RenderableModel::update(const UpdateData& data) {
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
     }
 
-    if (_geometry->hasAnimation()) {
+    if (_geometry->hasAnimation() && _animationStart != "") {
         double realtiveTime;
         double now = data.time.j2000Seconds();
         double startTime = data.time.convertTime(_animationStart);

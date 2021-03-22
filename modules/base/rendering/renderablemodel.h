@@ -80,7 +80,7 @@ private:
     std::unique_ptr<ghoul::modelgeometry::ModelGeometry> _geometry;
     bool _forceRenderInvisible = false;
     bool _notifyInvisibleDropped = true;
-    std::string _animationStart;
+    std::string _animationStart = "";
     AnimationMode _animationMode;
     properties::BoolProperty _enableAnimation;
 
