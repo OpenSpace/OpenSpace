@@ -103,7 +103,6 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
     bool dateStamp = p.dateStamping.value_or(true);
     bool categoryStamp = p.categoryStamping.value_or(true);
     bool logLevelStamp = p.logLevelStamping.value_or(true);
-    Parameters::LogLevel logLevel = p.logLevel.value_or(Parameters::LogLevel::AllLogging);
     ghoul::logging::LogLevel level = [](Parameters::LogLevel l) {
         switch (l) {
             case Parameters::LogLevel::AllLogging:

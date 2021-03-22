@@ -174,6 +174,33 @@ std::string IntVerifier::type() const {
     return "Integer";
 }
 
+StringVerifier::StringVerifier(bool mustBeNotEmpty)
+    : TemplateVerifier<std::string>()
+    , _mustBeNotEmpty(mustBeNotEmpty)
+{}
+
+TestResult StringVerifier::operator()(const ghoul::Dictionary& dictionary,
+                                      const std::string& key) const
+{
+    TestResult res = TemplateVerifier<std::string>::operator()(dictionary, key);
+    if (!res.success) {
+        return res;
+    }
+
+    std::string value = dictionary.value<std::string>(key);
+    if (value.empty() && _mustBeNotEmpty) {
+        res.success = false;
+        res.offenses.push_back({
+            key, TestResult::Offense::Reason::Verification, "value must not be empty"
+        });
+    }
+    return res;
+}
+
+bool StringVerifier::mustBeNotEmpty() const {
+    return _mustBeNotEmpty;
+}
+
 std::string StringVerifier::type() const {
     return "String";
 }
