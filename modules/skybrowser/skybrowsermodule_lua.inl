@@ -36,7 +36,7 @@ namespace openspace::skybrowser::luascriptfunctions {
         // https://docs.worldwidetelescope.org/data-guide/1/data-file-formats/collections/sample-blank-collection.wtml
         std::string url = ghoul::lua::value<std::string>(L, 1);
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-        module->sendMessageToWWT(module->createMessageForLoadingWWTImgColl(url));
+        module->skyBrowser()->sendMessageToWWT(module->skyBrowser()->createMessageForLoadingWWTImgColl(url));
         return 1;
     }
     
@@ -50,8 +50,7 @@ namespace openspace::skybrowser::luascriptfunctions {
         module->initializeBrowser(browser, target);
         module->skyBrowser()->translate(glm::vec3(-0.8, -0.4, 0.0));
 
-        module->WWTfollowCamera();
-        module->handleInteractions();
+        browser->WWTfollowCamera();
         
         return 1;
     }

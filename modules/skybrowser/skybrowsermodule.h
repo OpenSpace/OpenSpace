@@ -45,21 +45,8 @@ public:
 
     SkyBrowserModule();
     virtual ~SkyBrowserModule() = default;
-
-    float fieldOfView() const;
-    glm::dvec2 convertGalacticToCelestial(glm::dvec3 coords) const;
-
-    void WWTfollowCamera();
-
     std::string createBrowser();
     std::string createTarget(glm::ivec2 dimension);
-
-    ghoul::Dictionary createMessageForMovingWWTCamera(const glm::dvec2 celestCoords, const float fov, const bool moveInstantly = true) const;
-    ghoul::Dictionary createMessageForPausingWWTTime() const;
-    ghoul::Dictionary createMessageForLoadingWWTImgColl(const std::string& url) const;
-
-    bool sendMessageToWWT(const ghoul::Dictionary& msg);
-    void handleInteractions();
     glm::vec2 getMousePositionInScreenSpaceCoords(glm::vec2& mousePos);
 
     void initializeBrowser(ScreenSpaceSkyBrowser* skyBrowser, ScreenSpaceSkyTarget* skyTarget);
@@ -70,15 +57,9 @@ public:
 protected:
     void internalInitialize(const ghoul::Dictionary& dict) override;
     void internalDeinitialize() override;
-
     properties::BoolProperty _showBrowserAndTarget;
-    properties::FloatProperty _fieldOfView;
     ScreenSpaceSkyBrowser* _skyBrowser;
     ScreenSpaceSkyTarget* _skyTarget;
-    bool _camIsSyncedWWT;
-    bool _listenForInteractions;
-    std::thread _threadWWTMessages;
-    std::thread _threadHandleInteractions;
     glm::vec2 startDragMousePosBrowser;
     glm::vec2 startDragObjectPosBrowser;
     glm::vec2 startDragMousePosTarget;
@@ -89,7 +70,6 @@ protected:
     bool currentlyResizingBrowser;
     bool currentlyDraggingTarget;
     glm::vec2 _mousePosition;
-    double _mouseScroll;
     bool mouseIsOnBrowser;
     bool mouseIsOnTarget;
 };
