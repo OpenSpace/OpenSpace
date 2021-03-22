@@ -701,6 +701,14 @@ void SessionRecording::saveScriptKeyframeAscii(Timestamps& times,
     saveKeyframeToFile(keyframeLine.str(), file);
 }
 
+void SessionRecording::savePropertyBaseline(properties::Property& prop) {
+    std::string initialScriptCommand = fmt::format(
+        "openspace.setPropertyValueSingle(\"{}\", {})",
+        prop.fullyQualifiedIdentifier(), prop.getStringValue()
+    );
+    _keyframesSavePropertiesBaseline.push_back(initialScriptCommand);
+}
+
 void SessionRecording::preSynchronization() {
     ZoneScoped
 

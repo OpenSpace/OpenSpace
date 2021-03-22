@@ -421,6 +421,18 @@ public:
         datamessagestructures::ScriptMessage& sm, std::ofstream& file);
 
     /**
+     * Since session recordings only record changes, the initial conditions aren't
+     * preserved when a playback starts. This function is called whenever a property
+     * value is set and a recording is in progress. Before the set happens, this
+     * function will read the current value of the property and store it so that when
+     * the recording is finished, the initial state will be added as a set property
+     * command at the beginning of the recording file, to be applied when playback
+     * starts.
+     *
+     * \param prop The property being set
+     */
+    void savePropertyBaseline(properties::Property& prop);
+    /**
      * Reads header information from a session recording file
      *
      * \param stream reference to ifstream that contains the session recording file data
@@ -658,6 +670,7 @@ protected:
     std::vector<datamessagestructures::TimeKeyframe> _keyframesTime;
     std::vector<std::string> _keyframesScript;
     std::vector<timelineEntry> _timeline;
+    std::vector<std::string> _keyframesSavePropertiesBaseline;
 
     unsigned int _idxTimeline_nonCamera = 0;
     unsigned int _idxTime = 0;
