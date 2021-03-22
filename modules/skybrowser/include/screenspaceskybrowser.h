@@ -2,6 +2,7 @@
 #define __OPENSPACE_MODULE_SKYBROWSER___SCREENSPACESKYBROWSER___H__
 
 #include <modules/webbrowser/include/screenspacebrowser.h>
+#include <openspace/properties/stringproperty.h>
 
 namespace openspace {
     class ScreenSpaceSkyTarget;
@@ -12,7 +13,9 @@ namespace openspace {
         ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary);
         virtual ~ScreenSpaceSkyBrowser() = default;
 
+        bool initializeGL() override;
         bool deinitializeGL() override;
+        bool setConnectedTarget();
 
         // Communication with the webpage and WWT
         void executeJavascript(std::string& script) const;
@@ -35,7 +38,7 @@ namespace openspace {
         glm::vec2 getUpperRightCornerScreenSpace();
         glm::vec2 getLowerLeftCornerScreenSpace();
         glm::vec2 getScreenSpaceBrowserDimension();
-       
+
         // Mouse interaction
         bool coordIsInsideCornersScreenSpace(glm::vec2 coord);
         glm::vec2 coordIsOnResizeArea(glm::vec2 coord);
@@ -49,13 +52,13 @@ namespace openspace {
         // Flag for dimensions
         bool _browserDimIsDirty;
         properties::FloatProperty _fieldOfView;
-        ScreenSpaceSkyTarget* _skyTarget;
+        properties::StringProperty _skyTargetID;
     private:
         glm::vec2 _startSize;
         float _startScale;
         properties::Vec2Property _browserDimensions;
         bool _camIsSyncedWWT;
-        
+        ScreenSpaceSkyTarget* _skyTarget;
         std::thread _threadWWTMessages;
        
     };

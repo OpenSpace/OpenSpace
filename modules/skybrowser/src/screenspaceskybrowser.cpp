@@ -1,5 +1,6 @@
 #include <modules/skybrowser/include/screenspaceskybrowser.h>
 #include <modules/skybrowser/include/screenspaceskytarget.h>
+#include <modules/skybrowser/skybrowsermodule.h>
 #include <modules/webbrowser/include/webkeyboardhandler.h>
 #include <modules/webbrowser/include/browserinstance.h>
 #include <modules/webbrowser/include/screenspacebrowser.h>
@@ -8,6 +9,7 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/util/camera.h>
 #include <openspace/scene/scene.h>
 #include <ghoul/misc/dictionaryjsonformatter.h> // formatJson
@@ -35,6 +37,12 @@ namespace {
         "Zoom Info",
         "tjobidabidobidabidopp plupp"
     };
+    constexpr const openspace::properties::Property::PropertyInfo TargetIDInfo =
+    {
+        "TargetID",
+        "Target Info",
+        "tjobidabidobidabidopp plupp"
+    };
 
 
     struct [[codegen::Dictionary(ScreenSpaceSkyBrowser)]] Parameters {
@@ -44,6 +52,9 @@ namespace {
 
         // [[codegen::verbatim(ZoomInfo.description)]]
         std::optional<float> zoom;
+
+        // [[codegen::verbatim(TargetIDInfo.description)]]
+        std::optional<std::string> targetID;
     };
 
 #include "screenspaceskybrowser_codegen.cpp"
@@ -54,16 +65,32 @@ namespace openspace {
         : ScreenSpaceBrowser(dictionary)
         , _browserDimensions(BrowserDimensionInfo, _dimensions, glm::ivec2(0.f), glm::ivec2(300.f))
         , _fieldOfView(ZoomInfo, 50.f, 0.1f, 70.f)
+        , _skyTargetID(TargetIDInfo)
         , _camIsSyncedWWT(true)
+        , _skyTarget(nullptr)
     {
         // Handle target dimension property
         const Parameters p = codegen::bake<Parameters>(dictionary);
         _browserDimensions = p.browserDimensions.value_or(_browserDimensions);
-        _browserDimensions.onChange([&]() { _browserDimIsDirty = true; });
+        _browserDimensions.onChange([&]() { 
+            if (!_skyTarget) {
+                setConnectedTarget();
+            }
+            else {
+                _skyTarget->setDimensions(getScreenSpaceBrowserDimension());
+            }
+            });
         addProperty(_browserDimensions);
 
         _fieldOfView = p.zoom.value_or(_fieldOfView);
         addProperty(_fieldOfView);
+
+        _skyTargetID = p.targetID.value_or(_skyTargetID);
+        addProperty(_skyTargetID);
+
+        _skyTargetID.onChange([&]() {
+            setConnectedTarget();
+            });
 
         _fieldOfView.onChange([&]() {
             if (_skyTarget) {
@@ -72,7 +99,7 @@ namespace openspace {
                 _skyTarget->setScale(std::max(static_cast<float>(_fieldOfView / global::windowDelegate->getHorizFieldOfView()), scaleWhenFovIs10));
             }
             });
-
+        
         std::string identifier;
         if (dictionary.hasValue<std::string>(KeyIdentifier)) {
             identifier = dictionary.value<std::string>(KeyIdentifier);
@@ -87,6 +114,18 @@ namespace openspace {
         _cartesianPosition.setValue(glm::vec3(_cartesianPosition.value().x, _cartesianPosition.value().y, -2.1f));
     }
 
+    bool ScreenSpaceSkyBrowser::initializeGL() {
+        global::moduleEngine->module<SkyBrowserModule>()->addSkyBrowser(this);
+        setConnectedTarget();
+        if (_skyTarget) {    
+            _skyTarget->setDimensions(getScreenSpaceBrowserDimension());
+        }
+
+        WWTfollowCamera();
+
+        return ScreenSpaceBrowser::initializeGL();
+    }
+
     bool ScreenSpaceSkyBrowser::deinitializeGL() {
         // Set flag to false so the thread can exit
         _camIsSyncedWWT = false;
@@ -96,6 +135,11 @@ namespace openspace {
         }
         return ScreenSpaceBrowser::deinitializeGL();
     }   
+
+    bool ScreenSpaceSkyBrowser::setConnectedTarget() {
+        _skyTarget = dynamic_cast<ScreenSpaceSkyTarget*>(global::renderEngine->screenSpaceRenderable(_skyTargetID.value()));
+        return _skyTarget != nullptr;
+    }
 
     float ScreenSpaceSkyBrowser::fieldOfView() const {
         return _fieldOfView;
@@ -133,6 +177,7 @@ namespace openspace {
     }
 
     ghoul::Dictionary ScreenSpaceSkyBrowser::createMessageForLoadingWWTImgColl(const std::string& url) const {
+        // https://docs.worldwidetelescope.org/data-guide/1/data-file-formats/collections/sample-blank-collection.wtml
         using namespace std::string_literals;
         ghoul::Dictionary msg;
         msg.setValue("event", "center_on_coordinates"s);
@@ -184,9 +229,8 @@ namespace openspace {
                 // Sleep so we don't bombard WWT with too many messages
                 std::this_thread::sleep_for(std::chrono::milliseconds(50));
                 sendMessageToWWT(message);
-
             }
-            });
+        });
 
     }
 

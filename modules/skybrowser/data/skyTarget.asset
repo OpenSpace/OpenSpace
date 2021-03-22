@@ -1,0 +1,10 @@
+local assetHelper = asset.require('util/asset_helper')
+
+     local spec = {
+         Type = "ScreenSpaceSkyTarget",
+         Identifier = "SkyTarget1",
+         Name = "Target",
+         FaceCamera = false
+     };
+
+assetHelper.registerScreenSpaceRenderables(asset, { spec })

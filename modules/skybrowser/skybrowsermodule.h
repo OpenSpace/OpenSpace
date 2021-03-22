@@ -45,12 +45,10 @@ public:
 
     SkyBrowserModule();
     virtual ~SkyBrowserModule() = default;
-    std::string createBrowser();
-    std::string createTarget(glm::ivec2 dimension);
     glm::vec2 getMousePositionInScreenSpaceCoords(glm::vec2& mousePos);
 
-    void initializeBrowser(ScreenSpaceSkyBrowser* skyBrowser, ScreenSpaceSkyTarget* skyTarget);
-    ScreenSpaceSkyBrowser* skyBrowser();
+    void addSkyBrowser(ScreenSpaceSkyBrowser* browser);
+    void addSkyTarget(ScreenSpaceSkyTarget* target);
     scripting::LuaLibrary luaLibrary() const override;
     //std::vector<documentation::Documentation> documentations() const override;
 

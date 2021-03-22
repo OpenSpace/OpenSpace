@@ -125,16 +125,8 @@ SkyBrowserModule::SkyBrowserModule()
 
     _showBrowserAndTarget.onChange([&]() {
         if (_showBrowserAndTarget) {
-            std::string skyBrowserID;
-            // Tried thread so that the browser would be instantiated... didn't work
-            std::thread createBrowser = std::thread([&] {
-                skyBrowserID = this->createBrowser();
-                });
-            createBrowser.join();
-            // Sky browser is still nullptr
-            _skyBrowser = dynamic_cast<ScreenSpaceSkyBrowser*>(global::renderEngine->screenSpaceRenderable(skyBrowserID));
-            std::string skyTargetID = createTarget(_skyBrowser->getScreenSpaceDimensions());
-            _skyTarget = dynamic_cast<ScreenSpaceSkyTarget*>(global::renderEngine->screenSpaceRenderable(skyTargetID));
+            _skyBrowser->setConnectedTarget();
+            _skyTarget->setConnectedBrowser();
         }
     });
 
@@ -174,7 +166,7 @@ SkyBrowserModule::SkyBrowserModule()
                 // Make sure the browser doesn't move in directions it's not supposed to 
                 _skyBrowser->translate(mouseDragVector * abs(resizeVector) / 2.f, startDragObjectPosBrowser);
 
-                _skyTarget->setScreenSpaceTargetDimension(_skyBrowser->getScreenSpaceBrowserDimension());
+               // _skyTarget->setDimensions(_skyBrowser->getScreenSpaceBrowserDimension());
 
             }
         }
@@ -240,7 +232,6 @@ SkyBrowserModule::SkyBrowserModule()
                 }
                 if (currentlyResizingBrowser) {
                     currentlyResizingBrowser = false;
-                    _skyBrowser->_browserDimIsDirty = false;
                     _skyBrowser->updateBrowserSize();
                     return true;
                 }
@@ -283,67 +274,13 @@ glm::vec2 SkyBrowserModule::getMousePositionInScreenSpaceCoords(glm::vec2& mouse
     return screenSpacePos;
 }
 
-void SkyBrowserModule::initializeBrowser(ScreenSpaceSkyBrowser* skyBrowser, ScreenSpaceSkyTarget* skyTarget) {
-
-    _skyBrowser = skyBrowser;
-    _skyTarget = skyTarget;
-    _skyBrowser->_skyTarget = _skyTarget;
-}
-
-ScreenSpaceSkyBrowser* SkyBrowserModule::skyBrowser() {
-    return _skyBrowser;
-}
-
-std::string SkyBrowserModule::createTarget(glm::ivec2 dimension) {
-
-    std::string browserDim = fmt::format("{{{},{}}}", dimension.x, dimension.y);
-
-    LINFO(browserDim);
-    using namespace std::string_literals;
-
-    std::string ID = "'ScreenSpaceTarget'";
-
-    std::string node = "{"
-        "Type = 'ScreenSpaceSkyTarget',"
-        "Identifier = " + ID + ","
-        "Name = 'Screen Space Target',"
-        "FaceCamera = false,"
-        "TargetDimensions = " + browserDim + ""
-        "}";
-
-    openspace::global::scriptEngine->queueScript(
-        "openspace.addScreenSpaceRenderable(" + node + ")",
-        scripting::ScriptEngine::RemoteScripting::Yes
-    );
-    return ID;
+void SkyBrowserModule::addSkyBrowser(ScreenSpaceSkyBrowser* browser) {
+    _skyBrowser = browser;
 }
 
 
-std::string SkyBrowserModule::createBrowser() {
-
-    using namespace std::string_literals;
-    std::string node = "{"
-        "Type = 'ScreenSpaceSkyBrowser',"
-        "Identifier = 'ScreenSpaceBowser',"
-        "Name = 'Screen Space Bowser',"
-        "Url = 'http://localhost:8000/',"
-        "FaceCamera = false"
-        "}";
-    /*
-    ghoul::Dictionary skyBrowser;
-    std::string ID = "ScreenSpaceSkyBrowser1";
-    skyBrowser.setValue("Type", "ScreenSpaceSkyBrowser"s);
-    skyBrowser.setValue("Identifier", "ScreenSpaceSkyBrowser1"s);
-    skyBrowser.setValue("Name", "Sky Browser"s);
-    skyBrowser.setValue("Url", "http://localhost:8000/"s);
-    skyBrowser.setValue("FaceCamera", "False"s);
-    */
-   
-    openspace::global::scriptEngine->queueScript(
-        "openspace.addScreenSpaceRenderable(" + node + ")",
-        scripting::ScriptEngine::RemoteScripting::Yes
-    );
-    return "ScreenSpaceBowser";
+void SkyBrowserModule::addSkyTarget(ScreenSpaceSkyTarget* target) {
+    _skyTarget = target;
 }
 
 

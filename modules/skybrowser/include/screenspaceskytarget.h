@@ -2,19 +2,19 @@
 #define __OPENSPACE_MODULE_SKYBROWSER___SCREENSPACESKYTARGET___H__
 
 #include <openspace/rendering/screenspacerenderable.h>
-
 #include <openspace/documentation/documentation.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/numericalproperty.h>
-
 #include <ghoul/opengl/ghoul_gl.h>
-
 #include <ghoul/opengl/texture.h>
 
 namespace openspace::documentation { struct Documentation; }
 
 namespace openspace {
+
+    class ScreenSpaceSkyBrowser;
 
     class ScreenSpaceSkyTarget : public ScreenSpaceRenderable {
     
@@ -31,12 +31,15 @@ namespace openspace {
 
         void createShaders();
 
-        void setScreenSpaceTargetDimension(glm::vec2 currentBrowserDimension);
+        void setBrowser(ScreenSpaceSkyBrowser* browser);
+
+        void setDimensions(glm::vec2 currentBrowserDimensions);
         void updateFOV(float fov);
 
         glm::vec2 getScreenSpacePosition();
         glm::vec2 getAnglePosition();
         void setScale(float scale);
+        void setConnectedBrowser();
        
         void translate(glm::vec2 translation, glm::vec2 position);
        
@@ -48,15 +51,16 @@ namespace openspace {
         glm::mat4 scaleMatrix() override;
         
         void bindTexture() override;
+        properties::StringProperty _skyBrowserID;
     private:
     
         properties::Vec2Property _targetDimensions;
         std::unique_ptr<ghoul::opengl::Texture> _texture;
-        //glm::vec2 _browserDimension = glm::vec2(0);
         UniformCache(modelTransform, viewProj, texture, fieldOfView, borderWidth, targetRatio) _uniformCache;
         GLuint _vertexArray = 0;
         GLuint _vertexBuffer = 0;
         float _fieldOfView = 100.f;
+        ScreenSpaceSkyBrowser* _skyBrowser;
     };
 }
 

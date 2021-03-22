@@ -1,5 +1,6 @@
 #include <modules/skybrowser/include/screenspaceskytarget.h>
-
+#include <modules/skybrowser/include/screenspaceskybrowser.h>
+#include <modules/skybrowser/skybrowsermodule.h>
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
@@ -14,6 +15,7 @@
 
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/engine/moduleengine.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/texture.h>
@@ -41,10 +43,20 @@ namespace {
         "ModelTransform", "ViewProjectionMatrix", "texture1", "fieldOfView", "borderWidth", "targetRatio"
     };
 
+    constexpr const openspace::properties::Property::PropertyInfo BrowserIDInfo =
+    {
+        "BrowserID",
+        "Browser Info",
+        "tjobidabidobidabidopp plupp"
+    };
+
     struct [[codegen::Dictionary(ScreenSpaceSkyTarget)]] Parameters {
 
         // [[codegen::verbatim(TargetDimensionInfo.description)]]
         std::optional<glm::vec2> targetDimensions;
+
+        // [[codegen::verbatim(BrowserIDInfo.description)]]
+        std::optional<std::string> browserID;
     };
 
 #include "screenspaceskytarget_codegen.cpp"
@@ -55,12 +67,19 @@ namespace openspace {
     ScreenSpaceSkyTarget::ScreenSpaceSkyTarget(const ghoul::Dictionary& dictionary)
         : ScreenSpaceRenderable(dictionary)
         , _targetDimensions(TargetDimensionInfo, glm::ivec2(1000.f), glm::ivec2(0.f), glm::ivec2(6000.f))
+        , _skyBrowserID(BrowserIDInfo)
     {
         // Handle target dimension property
         const Parameters p = codegen::bake<Parameters>(dictionary);
         _targetDimensions = p.targetDimensions.value_or(_targetDimensions);
         
         addProperty(_targetDimensions);
+        _skyBrowserID = p.browserID.value_or(_skyBrowserID);
+        addProperty(_skyBrowserID);
+
+        _skyBrowserID.onChange([&]() {
+            setConnectedBrowser();
+            });
 
 
         std::string identifier;
@@ -73,25 +92,6 @@ namespace openspace {
         identifier = makeUniqueIdentifier(identifier);
         setIdentifier(identifier);
 
-       
-
-        /*
-        std::unique_ptr<ghoul::opengl::Texture> texture =
-            ghoul::io::TextureReader::ref().loadTexture(absPath("D:/Ylvas/OpenSpace/modules/skybrowser/target.png"));
-
-        if (texture) {
-            // Images don't need to start on 4-byte boundaries, for example if the
-            // image is only RGB
-            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-            texture->uploadTexture();
-            texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-            texture->purgeFromRAM();
-
-            _texture = std::move(texture);
-            _objectSize = _texture->dimensions();
-        }
-        */
         _cartesianPosition.setValue(glm::vec3(_cartesianPosition.value().x, _cartesianPosition.value().y, -2.1f));
 
     }
@@ -106,11 +106,18 @@ namespace openspace {
         _scale = scale;
     }
 
+    void ScreenSpaceSkyTarget::setConnectedBrowser() {
+        _skyBrowser = dynamic_cast<ScreenSpaceSkyBrowser*>(global::renderEngine->screenSpaceRenderable(_skyBrowserID.value()));
+    }
+
     bool ScreenSpaceSkyTarget::isReady() const {
         return _shader != nullptr;
     }
 
     bool ScreenSpaceSkyTarget::initializeGL() {
+        global::moduleEngine->module<SkyBrowserModule>()->addSkyTarget(this);
+
+        setConnectedBrowser();
 
         glGenVertexArrays(1, &_vertexArray);
         glGenBuffers(1, &_vertexBuffer);
@@ -162,6 +169,10 @@ namespace openspace {
 
         ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
 
+    }
+
+    void ScreenSpaceSkyTarget::setBrowser(ScreenSpaceSkyBrowser* browser) {
+        _skyBrowser = browser;
     }
 
     void ScreenSpaceSkyTarget::render() {
@@ -236,8 +247,8 @@ namespace openspace {
         return  lessThanUpperRight && moreThanLowerLeft;
     }
 
-    void ScreenSpaceSkyTarget::setScreenSpaceTargetDimension(glm::vec2 currentBrowserDimension) {
-        _targetDimensions = currentBrowserDimension;    
+    void ScreenSpaceSkyTarget::setDimensions(glm::vec2 currentBrowserDimensions) {
+        _targetDimensions = currentBrowserDimensions;    
     }
 
     void ScreenSpaceSkyTarget::updateFOV(float fov) {
