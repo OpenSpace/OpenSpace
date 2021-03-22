@@ -144,7 +144,7 @@ private:
 // Lua functions - exposed for testing
 namespace openspace::luascriptfunctions {
 
-int createSingeColorImage(lua_State* L);
+int createSingleColorImage(lua_State* L);
 
 } // openspace::luascriptfunctions
 
