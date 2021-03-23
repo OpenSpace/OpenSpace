@@ -1660,6 +1660,11 @@ void RenderableBillboardsCloud::createDataSlice() {
     ZoneScoped
 
     _slicedData.clear();
+
+    if (_fullData.empty() || _nValuesPerAstronomicalObject == 0) {
+        return;
+    }
+
     if (_hasColorMapFile) {
         _slicedData.reserve(8 * (_fullData.size() / _nValuesPerAstronomicalObject));
     }
