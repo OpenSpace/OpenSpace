@@ -77,7 +77,8 @@ namespace openspace {
                 setConnectedTarget();
             }
             else {
-                _skyTarget->setDimensions(getScreenSpaceBrowserDimension());
+                glm::vec2 dim = getScreenSpaceBrowserDimension();
+                _skyTarget->setDimensions(dim);
             }
             });
         addProperty(_browserDimensions);
@@ -95,8 +96,6 @@ namespace openspace {
         _fieldOfView.onChange([&]() {
             if (_skyTarget) {
                 _skyTarget->updateFOV(_fieldOfView);
-                float scaleWhenFovIs10 = static_cast<float>(10.f / global::windowDelegate->getHorizFieldOfView());
-                _skyTarget->setScale(std::max(static_cast<float>(_fieldOfView / global::windowDelegate->getHorizFieldOfView()), scaleWhenFovIs10));
             }
             });
         

@@ -34,11 +34,10 @@ namespace openspace {
         void setBrowser(ScreenSpaceSkyBrowser* browser);
 
         void setDimensions(glm::vec2 currentBrowserDimensions);
-        void updateFOV(float fov);
+        void updateFOV(float browserFOV);
 
         glm::vec2 getScreenSpacePosition();
         glm::vec2 getAnglePosition();
-        void setScale(float scale);
         void setConnectedBrowser();
        
         void translate(glm::vec2 translation, glm::vec2 position);
@@ -55,8 +54,9 @@ namespace openspace {
     private:
     
         properties::Vec2Property _targetDimensions;
+        properties::FloatProperty _showCrosshairThreshold;
         std::unique_ptr<ghoul::opengl::Texture> _texture;
-        UniformCache(modelTransform, viewProj, texture, fieldOfView, borderWidth, targetRatio) _uniformCache;
+        UniformCache(modelTransform, viewProj, texture, showCrosshair, borderWidth, targetDimensions) _uniformCache;
         GLuint _vertexArray = 0;
         GLuint _vertexBuffer = 0;
         float _fieldOfView = 100.f;

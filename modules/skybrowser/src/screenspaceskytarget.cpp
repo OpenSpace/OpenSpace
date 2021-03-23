@@ -2,32 +2,26 @@
 #include <modules/skybrowser/include/screenspaceskybrowser.h>
 #include <modules/skybrowser/skybrowsermodule.h>
 #include <openspace/engine/globals.h>
-#include <openspace/scripting/scriptengine.h>
-#include <ghoul/misc/dictionaryluaformatter.h>
-#include <openspace/rendering/renderengine.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <openspace/util/factorymanager.h>
-#include <openspace/rendering/helper.h>
-#include <ghoul/opengl/textureunit.h>
-#include <openspace/scene/scene.h>
-#include <openspace/util/camera.h>
-#include <ghoul/logging/logmanager.h>
-
-#include <openspace/scripting/scriptengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/rendering/helper.h>
+#include <openspace/scripting/scriptengine.h>
+#include <openspace/scene/scene.h>
+#include <openspace/util/camera.h>
+#include <openspace/util/factorymanager.h>
+#include <ghoul/misc/dictionaryluaformatter.h>
+#include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureconversion.h>
-#include <optional>
 #include <ghoul/opengl/openglstatecache.h>
-#include <glm/gtx/string_cast.hpp>
-
 #include <ghoul/filesystem/filesystem.h>
-#include <openspace/engine/windowdelegate.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/io/texture/texturereader.h>
+#include <glm/gtx/string_cast.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
-
+#include <optional>
 
 namespace {
     constexpr const char* _loggerCat = "ScreenSpaceSkyTarget";
@@ -40,13 +34,20 @@ namespace {
     };
 
     constexpr const std::array<const char*, 6> UniformNames = {
-        "ModelTransform", "ViewProjectionMatrix", "texture1", "fieldOfView", "borderWidth", "targetRatio"
+        "ModelTransform", "ViewProjectionMatrix", "texture1", "showCrosshair", "borderWidth", "targetDimensions"
     };
 
     constexpr const openspace::properties::Property::PropertyInfo BrowserIDInfo =
     {
         "BrowserID",
         "Browser Info",
+        "tjobidabidobidabidopp plupp"
+    };
+
+    constexpr const openspace::properties::Property::PropertyInfo CrosshairThresholdInfo =
+    {
+        "CrosshairThreshold",
+        "Crosshair Threshold Info",
         "tjobidabidobidabidopp plupp"
     };
 
@@ -57,6 +58,9 @@ namespace {
 
         // [[codegen::verbatim(BrowserIDInfo.description)]]
         std::optional<std::string> browserID;
+
+        // [[codegen::verbatim(CrosshairThresholdInfo.description)]]
+        std::optional<float> crosshairThreshold;
     };
 
 #include "screenspaceskytarget_codegen.cpp"
@@ -68,14 +72,17 @@ namespace openspace {
         : ScreenSpaceRenderable(dictionary)
         , _targetDimensions(TargetDimensionInfo, glm::ivec2(1000.f), glm::ivec2(0.f), glm::ivec2(6000.f))
         , _skyBrowserID(BrowserIDInfo)
+        , _showCrosshairThreshold(CrosshairThresholdInfo, 3.f, 1.f, 70.f)
     {
         // Handle target dimension property
         const Parameters p = codegen::bake<Parameters>(dictionary);
         _targetDimensions = p.targetDimensions.value_or(_targetDimensions);
-        
-        addProperty(_targetDimensions);
         _skyBrowserID = p.browserID.value_or(_skyBrowserID);
+        _showCrosshairThreshold = p.crosshairThreshold.value_or(_showCrosshairThreshold);
+        
+        addProperty(_targetDimensions);  
         addProperty(_skyBrowserID);
+        addProperty(_showCrosshairThreshold);
 
         _skyBrowserID.onChange([&]() {
             setConnectedBrowser();
@@ -100,10 +107,6 @@ namespace openspace {
         if (_texture) {
             _texture->bind();
         }
-    }
-
-    void ScreenSpaceSkyTarget::setScale(float scale) {
-        _scale = scale;
     }
 
     void ScreenSpaceSkyTarget::setConnectedBrowser() {
@@ -137,7 +140,7 @@ namespace openspace {
             _texture = std::move(texture);
             _objectSize = _texture->dimensions();
         }
-    
+
         createShaders();
 
         return isReady();
@@ -180,15 +183,19 @@ namespace openspace {
         glDisable(GL_CULL_FACE);
        
         glm::mat4 modelTransform = globalRotationMatrix() * translationMatrix() * localRotationMatrix() * scaleMatrix();
-        float borderWidth = 0.005f / (_scale.value() * 2.f);
-        glm::vec2 targetRatio;
-        float fov = _fieldOfView; 
-        _targetDimensions.value() == glm::vec2(0) ? targetRatio = glm::vec2(1) : targetRatio = _targetDimensions.value() / _targetDimensions.value().y;
+        float borderWidth = 0.004f /(_scale.value());
+        glm::vec2 targetDim;
+        bool showCrosshair;
+        _targetDimensions.value() == glm::vec2(0) ? targetDim = glm::vec2(1) : targetDim = _targetDimensions.value();
         _shader->activate();
 
-        _shader->setUniform(_uniformCache.fieldOfView, fov);
+        LINFO(glm::to_string(targetDim));
+
+        _fieldOfView < _showCrosshairThreshold ? showCrosshair = true : showCrosshair = false;
+
+        _shader->setUniform(_uniformCache.showCrosshair, showCrosshair);
         _shader->setUniform(_uniformCache.borderWidth, borderWidth);
-        _shader->setUniform(_uniformCache.targetRatio, targetRatio);
+        _shader->setUniform(_uniformCache.targetDimensions, targetDim);
         _shader->setUniform(_uniformCache.modelTransform, modelTransform);
 
         _shader->setUniform(
@@ -201,6 +208,7 @@ namespace openspace {
         bindTexture();
         _shader->setUniform(_uniformCache.texture, unit);
 
+
         glBindVertexArray(rendering::helper::vertexObjects.square.vao);
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -208,11 +216,6 @@ namespace openspace {
 
         _shader->deactivate();
         unbindTexture();
-    }
-
-    void ScreenSpaceSkyTarget::update() {
-
-
     }
 
     void ScreenSpaceSkyTarget::translate(glm::vec2 translation, glm::vec2 position) {
@@ -248,13 +251,14 @@ namespace openspace {
     }
 
     void ScreenSpaceSkyTarget::setDimensions(glm::vec2 currentBrowserDimensions) {
-        _targetDimensions = currentBrowserDimensions;    
+        _targetDimensions = currentBrowserDimensions;
+
     }
 
-    void ScreenSpaceSkyTarget::updateFOV(float fov) {
-        _fieldOfView = fov;
+    void ScreenSpaceSkyTarget::updateFOV(float browserFOV) {
+        float horizFOV = global::windowDelegate->getHorizFieldOfView();
+        _scale = std::max((browserFOV/horizFOV),(_showCrosshairThreshold.value()/horizFOV));
+        _fieldOfView = browserFOV;
     }
     
-  
-
 }
