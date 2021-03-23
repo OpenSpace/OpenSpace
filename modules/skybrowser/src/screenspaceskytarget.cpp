@@ -39,8 +39,8 @@ namespace {
         "Set the dimensions of the SkyTarget according to the SkyBrowser ratio "
     };
 
-    constexpr const std::array<const char*, 6> UniformNames = {
-        "ModelTransform", "ViewProjectionMatrix", "texture1", "fieldOfView", "borderWidth", "targetRatio"
+    constexpr const std::array<const char*, 7> UniformNames = {
+        "ModelTransform", "ViewProjectionMatrix", "texture1", "fieldOfView", "borderWidth", "targetRatio", "borderColor"
     };
 
     constexpr const openspace::properties::Property::PropertyInfo BrowserIDInfo =
@@ -68,6 +68,7 @@ namespace openspace {
         : ScreenSpaceRenderable(dictionary)
         , _targetDimensions(TargetDimensionInfo, glm::ivec2(1000.f), glm::ivec2(0.f), glm::ivec2(6000.f))
         , _skyBrowserID(BrowserIDInfo)
+        , _borderColor(220.f, 220.f, 220.f)
     {
         // Handle target dimension property
         const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -179,6 +180,14 @@ namespace openspace {
 
     }
 
+    void ScreenSpaceSkyTarget::setBorderColor(glm::ivec3 color) {
+        _borderColor = color;
+    }
+
+    glm::ivec3 ScreenSpaceSkyTarget::getColor() {
+        return _borderColor;
+    }
+
     void ScreenSpaceSkyTarget::setBrowser(ScreenSpaceSkyBrowser* browser) {
         _skyBrowser = browser;
     }
@@ -202,6 +211,7 @@ namespace openspace {
         _shader->setUniform(_uniformCache.borderWidth, borderWidth);
         _shader->setUniform(_uniformCache.targetRatio, targetRatio);
         _shader->setUniform(_uniformCache.modelTransform, modelTransform);
+        _shader->setUniform(_uniformCache.borderColor, _borderColor);
 
         _shader->setUniform(
             _uniformCache.viewProj,

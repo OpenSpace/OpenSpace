@@ -41,6 +41,8 @@ namespace openspace {
         glm::vec2 getAnglePosition();
         void setScale(float scale);
         void setConnectedBrowser();
+        void setBorderColor(glm::ivec3 color);
+        glm::ivec3 getColor();
        
         void translate(glm::vec2 translation, glm::vec2 position);
        
@@ -57,11 +59,12 @@ namespace openspace {
     
         properties::Vec2Property _targetDimensions;
         std::unique_ptr<ghoul::opengl::Texture> _texture;
-        UniformCache(modelTransform, viewProj, texture, fieldOfView, borderWidth, targetRatio) _uniformCache;
+        UniformCache(modelTransform, viewProj, texture, fieldOfView, borderWidth, targetRatio, borderColor) _uniformCache;
         GLuint _vertexArray = 0;
         GLuint _vertexBuffer = 0;
         float _fieldOfView = 100.f;
         ScreenSpaceSkyBrowser* _skyBrowser;
+        glm::vec3 _borderColor;
     };
 }
 

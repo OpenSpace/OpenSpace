@@ -143,10 +143,35 @@ SkyBrowserModule::SkyBrowserModule()
             }
             // If there is no dragging or resizing, look for new objects
             else {
+                // Save old selection for removing highlight
+                ScreenSpaceRenderable* lastObj = _mouseOnObject;
+
+                // Find and save what mouse is currently hovering on
                 auto currentlyOnObject = std::find_if(renderables.begin(), renderables.end(), [&](ScreenSpaceRenderable* obj) {
                     return obj->coordIsInsideCornersScreenSpace(_mousePosition);
                     });
                 _mouseOnObject = currentlyOnObject != renderables.end() ? *currentlyOnObject : nullptr;
+
+                // Selection has changed
+                if (lastObj != _mouseOnObject) {
+                    glm::ivec3 highlightAddition{ 35, 35, 35 };
+                    // Remove highlight
+                    if (to_browser(lastObj)) {
+                        to_browser(lastObj)->setBorderColor(to_browser(lastObj)->getColor() - highlightAddition);
+                    }
+                    else if (to_target(lastObj)) {
+                        to_target(lastObj)->setBorderColor(to_target(lastObj)->getColor() - highlightAddition);
+                    }
+
+                    // Add highlight
+                    if (to_browser(_mouseOnObject)) {
+                        to_browser(_mouseOnObject)->setBorderColor(to_browser(_mouseOnObject)->getColor() + highlightAddition);
+                    }
+                    else if (to_target(_mouseOnObject)) {
+                        to_target(_mouseOnObject)->setBorderColor(to_target(_mouseOnObject)->getColor() + highlightAddition);
+                    }
+                }
+                
             }
         }
     );

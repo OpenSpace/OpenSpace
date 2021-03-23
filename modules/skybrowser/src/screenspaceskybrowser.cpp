@@ -69,6 +69,7 @@ namespace openspace {
         , _skyTargetID(TargetIDInfo)
         , _camIsSyncedWWT(true)
         , _skyTarget(nullptr)
+        , _borderColor(220, 220, 220)
     {
         // Handle target dimension property
         const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -119,7 +120,7 @@ namespace openspace {
             if (_skyTarget) {
                 _skyTarget->property("Enabled")->set(_enabled.value());
             }
-            });
+        });
     }
 
     bool ScreenSpaceSkyBrowser::initializeGL() {
@@ -165,6 +166,17 @@ namespace openspace {
             frame->ExecuteJavaScript(script, frame->GetURL(), 0);
         }      
     }
+
+    glm::ivec3 ScreenSpaceSkyBrowser::getColor() {
+        return _borderColor;
+    }
+
+    void ScreenSpaceSkyBrowser::setBorderColor(glm::ivec3 col)  {
+        std::string stringColor = std::to_string(col.x) + "," + std::to_string(col.y) + "," + std::to_string(col.z);
+        std::string script = "document.body.style.backgroundColor = 'rgb(" + stringColor + ")';";
+        executeJavascript(script);
+    }
+
     bool ScreenSpaceSkyBrowser::sendMessageToWWT(const ghoul::Dictionary& msg) {
             std::string script = "sendMessageToWWT(" + ghoul::formatJson(msg) + ");";
             executeJavascript(script);

@@ -44,6 +44,8 @@ namespace openspace {
         // Resizing
         void saveResizeStartSize();
         void updateBrowserSize();
+        void setBorderColor(glm::ivec3 addColor);
+        glm::ivec3 getColor();
         // Flag for dimensions
         bool _browserDimIsDirty;
         properties::FloatProperty _fieldOfView;
@@ -55,6 +57,7 @@ namespace openspace {
         bool _camIsSyncedWWT;
         ScreenSpaceSkyTarget* _skyTarget;
         std::thread _threadWWTMessages;
+        glm::ivec3 _borderColor;
        
     };
 }
