@@ -61,6 +61,7 @@ namespace {
 } // namespace
 
 namespace openspace {
+
     ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary) 
         : ScreenSpaceBrowser(dictionary)
         , _browserDimensions(BrowserDimensionInfo, _dimensions, glm::ivec2(0.f), glm::ivec2(300.f))
@@ -68,6 +69,7 @@ namespace openspace {
         , _skyTargetID(TargetIDInfo)
         , _camIsSyncedWWT(true)
         , _skyTarget(nullptr)
+        , _borderColor(220, 220, 220)
     {
         // Handle target dimension property
         const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -111,10 +113,17 @@ namespace openspace {
         // The projection plane seems to be located at z = -2.1 so at that place the ScreenSpaceRenderables behaves like
         // they are in screen space
         _cartesianPosition.setValue(glm::vec3(_cartesianPosition.value().x, _cartesianPosition.value().y, -2.1f));
+
+        // Always make sure that the target and browser are visible together
+        _enabled.onChange([&]() {
+            if (_skyTarget) {
+                _skyTarget->property("Enabled")->set(_enabled.value());
+            }
+        });
     }
 
     bool ScreenSpaceSkyBrowser::initializeGL() {
-        global::moduleEngine->module<SkyBrowserModule>()->addSkyBrowser(this);
+        global::moduleEngine->module<SkyBrowserModule>()->addRenderable(this);
         setConnectedTarget();
         if (_skyTarget) {    
             _skyTarget->setDimensions(getScreenSpaceBrowserDimension());
@@ -156,6 +165,17 @@ namespace openspace {
             frame->ExecuteJavaScript(script, frame->GetURL(), 0);
         }      
     }
+
+    glm::ivec3 ScreenSpaceSkyBrowser::getColor() {
+        return _borderColor;
+    }
+
+    void ScreenSpaceSkyBrowser::setBorderColor(glm::ivec3 col)  {
+        std::string stringColor = std::to_string(col.x) + "," + std::to_string(col.y) + "," + std::to_string(col.z);
+        std::string script = "document.body.style.backgroundColor = 'rgb(" + stringColor + ")';";
+        executeJavascript(script);
+    }
+
     bool ScreenSpaceSkyBrowser::sendMessageToWWT(const ghoul::Dictionary& msg) {
             std::string script = "sendMessageToWWT(" + ghoul::formatJson(msg) + ");";
             executeJavascript(script);
@@ -228,13 +248,13 @@ namespace openspace {
                 // Sleep so we don't bombard WWT with too many messages
                 std::this_thread::sleep_for(std::chrono::milliseconds(50));
                 sendMessageToWWT(message);
+                
             }
         });
 
     }
 
-    glm::dvec2 ScreenSpaceSkyBrowser::convertGalacticToCelestial(glm::dvec3 rGal) const {
-
+    glm::dvec2 ScreenSpaceSkyBrowser::convertGalacticToCelestial(glm::dvec3 rGal) const {          
         // Used the math from this website: https://gea.esac.esa.int/archive/documentation/GD -->
         // R2/Data_processing/chap_cu3ast/sec_cu3ast_intro/ssec_cu3ast_intro_tansforms.html#SSS1
         const glm::dmat3 conversionMatrix = glm::dmat3({
@@ -251,37 +271,14 @@ namespace openspace {
 
         return glm::dvec2(glm::degrees(ra), glm::degrees(dec));
     }
-
+    /*
     void ScreenSpaceSkyBrowser::translate(glm::vec2 translation) {
         glm::vec3 position = _cartesianPosition;     
         _cartesianPosition = glm::translate(glm::mat4(1.f), glm::vec3(translation, 0.0f)) * glm::vec4(position, 1.0f);
-    }
+    }*/
 
-    void ScreenSpaceSkyBrowser::translate(glm::vec2 translation, glm::vec2 position) {
-        _cartesianPosition = glm::translate(glm::mat4(1.f), glm::vec3(translation, 0.0f)) * glm::vec4(position, _cartesianPosition.value().z, 1.0f);
-    }
 
-    glm::vec2  ScreenSpaceSkyBrowser::getScreenSpacePosition() {
-       return glm::vec2(_cartesianPosition.value().x, _cartesianPosition.value().y);
-    }
 
-    glm::vec2  ScreenSpaceSkyBrowser::getScreenSpaceDimensions() {
-         return glm::vec2(2.f*_scale* static_cast<float>(_objectSize.x) / static_cast<float>(_objectSize.y), 2.f*_scale);
-    }
-
-    glm::vec2 ScreenSpaceSkyBrowser::getUpperRightCornerScreenSpace() {
-        return getScreenSpacePosition() + (getScreenSpaceDimensions()/2.0f);
-    }
-
-    glm::vec2 ScreenSpaceSkyBrowser::getLowerLeftCornerScreenSpace() {
-        return getScreenSpacePosition() - (getScreenSpaceDimensions()/2.0f);
-    }
-
-    bool ScreenSpaceSkyBrowser::coordIsInsideCornersScreenSpace(glm::vec2 coord) {
-        bool lessThanUpperRight = coord.x < getUpperRightCornerScreenSpace().x && coord.y < getUpperRightCornerScreenSpace().y;
-        bool moreThanLowerLeft = coord.x > getLowerLeftCornerScreenSpace().x && coord.y > getLowerLeftCornerScreenSpace().y;
-        return  lessThanUpperRight && moreThanLowerLeft;
-    }
 
     glm::vec2 ScreenSpaceSkyBrowser::coordIsOnResizeArea(glm::vec2 coord) {
         glm::vec2 resizePosition = glm::vec2{ 0 };
@@ -307,7 +304,7 @@ namespace openspace {
         // equal to the height of the window
         scale(abs(scalingFactor.y)); 
         // Resize the dimensions of the texture on the x axis
-        glm::vec2 newSize = abs(scalingFactor) * _startSize;
+        glm::vec2 newSize = abs(scalingFactor) * _startDimensionsSize;
         _texture->setDimensions(glm::ivec3(newSize, 1));
         _objectSize = _texture->dimensions();
         _browserDimensions = newSize;
@@ -329,9 +326,10 @@ namespace openspace {
     }
 
     void ScreenSpaceSkyBrowser::saveResizeStartSize() {
-        _startSize = glm::vec2(_dimensions.value().x, _dimensions.value().y);
+        _startDimensionsSize = glm::vec2(_dimensions.value().x, _dimensions.value().y);
         _startScale = _scale.value();
     }
+
     // Updates the browser size to match the size of the texture
     void ScreenSpaceSkyBrowser::updateBrowserSize() {
         _dimensions = _texture->dimensions();

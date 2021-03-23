@@ -558,6 +558,36 @@ glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
   
     return scale;
 }
+glm::vec2  ScreenSpaceRenderable::getScreenSpacePosition() {
+    return glm::vec2(_cartesianPosition.value().x, _cartesianPosition.value().y);
+}
+
+glm::vec2  ScreenSpaceRenderable::getScreenSpaceDimensions() {
+    return glm::vec2(2.f * _scale * static_cast<float>(_objectSize.x) / static_cast<float>(_objectSize.y), 2.f * _scale);
+}
+
+glm::vec2 ScreenSpaceRenderable::getUpperRightCornerScreenSpace() {
+    return getScreenSpacePosition() + (getScreenSpaceDimensions() / 2.0f);
+}
+
+glm::vec2 ScreenSpaceRenderable::getLowerLeftCornerScreenSpace() {
+    return getScreenSpacePosition() - (getScreenSpaceDimensions() / 2.0f);
+}
+
+bool ScreenSpaceRenderable::coordIsInsideCornersScreenSpace(glm::vec2 coord) {
+    bool lessThanUpperRight = coord.x < getUpperRightCornerScreenSpace().x && coord.y < getUpperRightCornerScreenSpace().y;
+    bool moreThanLowerLeft = coord.x > getLowerLeftCornerScreenSpace().x && coord.y > getLowerLeftCornerScreenSpace().y;
+    return  lessThanUpperRight && moreThanLowerLeft;
+}
+
+void ScreenSpaceRenderable::translate(glm::vec2 translation, glm::vec2 position) {
+    _cartesianPosition = glm::translate(glm::mat4(1.f), glm::vec3(translation, 0.0f)) * glm::vec4(position, _cartesianPosition.value().z, 1.0f);
+}
+
+bool operator<(const ScreenSpaceRenderable& lhs, const ScreenSpaceRenderable& rhs) {
+    // Sort on depth coordinate, larger values are closer to camera
+    return lhs._cartesianPosition.value().z > rhs._cartesianPosition.value().z; 
+}
 
 glm::mat4 ScreenSpaceRenderable::globalRotationMatrix() {
     // We do not want the screen space planes to be affected by

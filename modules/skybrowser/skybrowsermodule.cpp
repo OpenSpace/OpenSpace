@@ -31,14 +31,13 @@
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
-#include <openspace/interaction/navigationhandler.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/interaction/navigationhandler.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/factorymanager.h>
-
 #include "skybrowsermodule_lua.inl"
-#include <openspace/engine/windowdelegate.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
 #include <cmath> // For atan2
@@ -46,26 +45,18 @@
 #include <ghoul/filesystem/filesystem.h>
 
 namespace {
-    constexpr const openspace::properties::Property::PropertyInfo ShowSkyBrowserInfo =
-    {
-        "Show Sky Browser",
-        "Show Sky Browser",
-        "Show sky browser and target for WorldWide Telescope imagery."
-    };
+    struct [[codegen::Dictionary(ScreenSpaceSkyBrowser)]] Parameters {
 
-    struct [[codegen::Dictionary(SkyBrowserModule)]] Parameters {
-
-        // [[codegen::verbatim(ShowSkyBrowserInfo.description)]]
-        std::optional<bool> show;
     };
     
     #include "skybrowsermodule_codegen.cpp"
     
     
+    
 } // namespace
 
 namespace openspace {
-
+  
     scripting::LuaLibrary SkyBrowserModule::luaLibrary() const {
 
         scripting::LuaLibrary res;
@@ -111,74 +102,91 @@ namespace openspace {
 
 SkyBrowserModule::SkyBrowserModule()
     : OpenSpaceModule(SkyBrowserModule::Name)
-    , _showBrowserAndTarget(ShowSkyBrowserInfo)
-    , _skyBrowser(nullptr)
-    , _skyTarget(nullptr)
-    , currentlyDraggingBrowser(false)
-    , currentlyDraggingTarget(false)
+    , _mouseOnObject(nullptr)
     , currentlyResizingBrowser(false)
-    , mouseIsOnBrowser(false)
-    , mouseIsOnTarget(false)
-
+    , currentlyDraggingObject(false)
+    , resizeVector(0.f, 0.f)
+    , shouldInitialize(true)
 {
-    addProperty(_showBrowserAndTarget);
-
-    _showBrowserAndTarget.onChange([&]() {
-        if (_showBrowserAndTarget) {
-            _skyBrowser->setConnectedTarget();
-            _skyTarget->setConnectedBrowser();
-        }
-    });
-
     global::callback::mousePosition->emplace_back(
-        [&](double x, double y) {      
+        [&](double x, double y) {    
+            // Quick fix to make all renderables find its corresponding partner
+            if (shouldInitialize) {
+                std::for_each(renderables.begin(), renderables.end(), [&](ScreenSpaceRenderable* obj) {
+                    if (to_target(obj)) {
+                        to_target(obj)->setConnectedBrowser();
+                    }
+                    else if (to_browser(obj)) {
+                        to_browser(obj)->setConnectedTarget();
+                    }
+                    });
+                shouldInitialize = false;
+            }
+            
             glm::vec2 pos = glm::vec2(static_cast<float>(x), static_cast<float>(y));
-
             _mousePosition = getMousePositionInScreenSpaceCoords(pos);
 
-            if (_skyTarget) {
-                mouseIsOnTarget = _skyTarget->coordIsInsideCornersScreenSpace(_mousePosition);          
+            if (currentlyDraggingObject) {
+                _mouseOnObject->translate(_mousePosition - startDragMousePos, startDragObjectPos);
             }
-            else {
-                mouseIsOnTarget = false;
-            }
-            if (_skyBrowser) {
-                mouseIsOnBrowser = _skyBrowser->coordIsInsideCornersScreenSpace(_mousePosition);       
-            }
-            else {
-                mouseIsOnBrowser = false;
-            }
-
-            if (currentlyDraggingBrowser) {
-                _skyBrowser->translate(_mousePosition - startDragMousePosBrowser, startDragObjectPosBrowser);
-            }
-            if (currentlyDraggingTarget) {
-                _skyTarget->translate(_mousePosition - startDragMousePosTarget, startDragObjectPosTarget);
-            }
-            if (currentlyResizingBrowser) {
+            else if (currentlyResizingBrowser) {
                 // Calculate scaling factor
-                glm::vec2 mouseDragVector = (_mousePosition - startDragMousePosBrowser);
+                glm::vec2 mouseDragVector = (_mousePosition - startDragMousePos);
                 glm::vec2 scalingVector = mouseDragVector * resizeVector;
-
                 glm::vec2 newSizeRelToOld = (startResizeBrowserSize + (scalingVector)) / startResizeBrowserSize;
-                _skyBrowser->scale(newSizeRelToOld);
+                // Scale the browser
+                to_browser(_mouseOnObject)->scale(newSizeRelToOld);
 
+                // For dragging functionality, translate so it looks like the browser isn't moving
                 // Make sure the browser doesn't move in directions it's not supposed to 
-                _skyBrowser->translate(mouseDragVector * abs(resizeVector) / 2.f, startDragObjectPosBrowser);
+                _mouseOnObject->translate(mouseDragVector * abs(resizeVector) / 2.f, startDragObjectPos);
+            }
+            // If there is no dragging or resizing, look for new objects
+            else {
+                // Save old selection for removing highlight
+                ScreenSpaceRenderable* lastObj = _mouseOnObject;
 
-               // _skyTarget->setDimensions(_skyBrowser->getScreenSpaceBrowserDimension());
+                // Find and save what mouse is currently hovering on
+                auto currentlyOnObject = std::find_if(renderables.begin(), renderables.end(), [&](ScreenSpaceRenderable* obj) {
+                    return obj->coordIsInsideCornersScreenSpace(_mousePosition);
+                    });
+                _mouseOnObject = currentlyOnObject != renderables.end() ? *currentlyOnObject : nullptr;
 
+                // Selection has changed
+                if (lastObj != _mouseOnObject) {
+                    glm::ivec3 highlightAddition{ 35, 35, 35 };
+                    // Remove highlight
+                    if (to_browser(lastObj)) {
+                        to_browser(lastObj)->setBorderColor(to_browser(lastObj)->getColor() - highlightAddition);
+                    }
+                    else if (to_target(lastObj)) {
+                        to_target(lastObj)->setBorderColor(to_target(lastObj)->getColor() - highlightAddition);
+                    }
+
+                    // Add highlight
+                    if (to_browser(_mouseOnObject)) {
+                        to_browser(_mouseOnObject)->setBorderColor(to_browser(_mouseOnObject)->getColor() + highlightAddition);
+                    }
+                    else if (to_target(_mouseOnObject)) {
+                        to_target(_mouseOnObject)->setBorderColor(to_target(_mouseOnObject)->getColor() + highlightAddition);
+                    }
+                }
+                
             }
         }
     );
 
     global::callback::mouseScrollWheel->emplace_back(
         [&](double, double scroll) -> bool {
-            if (mouseIsOnBrowser) {
-                _skyBrowser->scrollZoom(scroll);
+            // If mouse is on browser, apply zoom
+            if (to_browser(_mouseOnObject)) {
+                to_browser(_mouseOnObject)->scrollZoom(scroll);
                 return true;
             }
-          
+            else if (to_target(_mouseOnObject) && to_target(_mouseOnObject)->getSkyBrowser()) {
+                to_target(_mouseOnObject)->getSkyBrowser()->scrollZoom(scroll);
+            }
+
             return false;
         }
     );
@@ -187,52 +195,42 @@ SkyBrowserModule::SkyBrowserModule()
         [&](MouseButton button, MouseAction action, KeyModifier modifier) -> bool {
 
             if (action == MouseAction::Press) {
-                
-                if (mouseIsOnBrowser && button == MouseButton::Left) {
-                    
-                    startDragMousePosBrowser = _mousePosition;
-                    startDragObjectPosBrowser = _skyBrowser->getScreenSpacePosition();
-                    // Resize browser if mouse is over resize button
-                    resizeVector = _skyBrowser->coordIsOnResizeArea(_mousePosition);
 
-                    if (resizeVector != glm::vec2{0}) {
-                        _skyBrowser->saveResizeStartSize();
-                        startResizeBrowserSize = _skyBrowser->getScreenSpaceDimensions();
-                        currentlyResizingBrowser = true;
+                if (_mouseOnObject && button == MouseButton::Left) {
+                    startDragMousePos = _mousePosition;
+                    startDragObjectPos = _mouseOnObject->getScreenSpacePosition();
+
+                    // If current object is browser, check for resizing
+                    if (to_browser(_mouseOnObject)) {
+                        // Resize browser if mouse is over resize button
+                        resizeVector = to_browser(_mouseOnObject)->coordIsOnResizeArea(_mousePosition);
+                        if (resizeVector != glm::vec2{ 0 }) {
+                            to_browser(_mouseOnObject)->saveResizeStartSize();
+                            startResizeBrowserSize = to_browser(_mouseOnObject)->getScreenSpaceDimensions();
+                            currentlyResizingBrowser = true;
+                            return true;
+                        }
                     }
-                    else {
-                        currentlyDraggingBrowser = true;
-                    }
-                    
+                    currentlyDraggingObject = true;
+
                     return true;
                 }
-                else if (mouseIsOnTarget && button == MouseButton::Left) {
-                    
-                    startDragMousePosTarget = _mousePosition;
-                    startDragObjectPosTarget = _skyTarget->getScreenSpacePosition();
-                    currentlyDraggingTarget = true;
-                    return true;
-                }
-                else if (mouseIsOnBrowser && button == MouseButton::Right) {
+                else if (to_browser(_mouseOnObject) && button == MouseButton::Right) {
 
-                    startDragMousePosTarget = _mousePosition;
-                    startDragObjectPosTarget = _skyTarget->getScreenSpacePosition();
-                    currentlyDraggingTarget = true;
+                    //startDragMousePos = _mousePosition;
+                    //startDragObjectPos = dynamic_cast<ScreenSpaceSkyBrowser*>(_mouseOnObject)->->getScreenSpacePosition();
+                    //currentlyDraggingObject = true;
                     return true;
                 }
             }
             else if (action == MouseAction::Release) {
-                if (currentlyDraggingBrowser) {
-                    currentlyDraggingBrowser = false;
-                    return true;
-                }
-                if (currentlyDraggingTarget) {
-                    currentlyDraggingTarget = false;
+                if (currentlyDraggingObject) {
+                    currentlyDraggingObject = false;
                     return true;
                 }
                 if (currentlyResizingBrowser) {
                     currentlyResizingBrowser = false;
-                    _skyBrowser->updateBrowserSize();
+                    to_browser(_mouseOnObject)->updateBrowserSize();
                     return true;
                 }
             }
@@ -250,7 +248,6 @@ void SkyBrowserModule::internalDeinitialize() {
 void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     
     const Parameters p = codegen::bake<Parameters>(dict);
-    _showBrowserAndTarget = p.show.value_or(_showBrowserAndTarget);
 
     // register ScreenSpaceBrowser
     auto fScreenSpaceRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
@@ -274,13 +271,17 @@ glm::vec2 SkyBrowserModule::getMousePositionInScreenSpaceCoords(glm::vec2& mouse
     return screenSpacePos;
 }
 
-void SkyBrowserModule::addSkyBrowser(ScreenSpaceSkyBrowser* browser) {
-    _skyBrowser = browser;
+void SkyBrowserModule::addRenderable(ScreenSpaceRenderable* object) {
+    renderables.push_back(object);
+    // Sort on z coordinate, objects closer to camera are in beginning of list
+    std::sort(renderables.begin(), renderables.end());
 }
 
-
-void SkyBrowserModule::addSkyTarget(ScreenSpaceSkyTarget* target) {
-    _skyTarget = target;
+ScreenSpaceSkyBrowser* SkyBrowserModule::to_browser(ScreenSpaceRenderable* ptr) {
+    return dynamic_cast<ScreenSpaceSkyBrowser*>(ptr);
+}
+ScreenSpaceSkyTarget* SkyBrowserModule::to_target(ScreenSpaceRenderable* ptr) {
+    return dynamic_cast<ScreenSpaceSkyTarget*>(ptr);
 }
 
 

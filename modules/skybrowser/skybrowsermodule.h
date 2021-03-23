@@ -38,6 +38,7 @@ namespace openspace {
 
 class ScreenSpaceSkyBrowser;
 class ScreenSpaceSkyTarget;
+class ScreenSpaceRenderable;
 
 class SkyBrowserModule : public OpenSpaceModule {
 public:
@@ -46,30 +47,34 @@ public:
     SkyBrowserModule();
     virtual ~SkyBrowserModule() = default;
     glm::vec2 getMousePositionInScreenSpaceCoords(glm::vec2& mousePos);
+    void addRenderable(ScreenSpaceRenderable* object);
 
-    void addSkyBrowser(ScreenSpaceSkyBrowser* browser);
-    void addSkyTarget(ScreenSpaceSkyTarget* target);
     scripting::LuaLibrary luaLibrary() const override;
     //std::vector<documentation::Documentation> documentations() const override;
 
 protected:
     void internalInitialize(const ghoul::Dictionary& dict) override;
     void internalDeinitialize() override;
-    properties::BoolProperty _showBrowserAndTarget;
-    ScreenSpaceSkyBrowser* _skyBrowser;
-    ScreenSpaceSkyTarget* _skyTarget;
-    glm::vec2 startDragMousePosBrowser;
-    glm::vec2 startDragObjectPosBrowser;
-    glm::vec2 startDragMousePosTarget;
-    glm::vec2 startDragObjectPosTarget;
+    // Using snake case on these casting functions to make them similar to eg std::to_string
+    ScreenSpaceSkyBrowser* to_browser(ScreenSpaceRenderable* ptr);
+    ScreenSpaceSkyTarget* to_target(ScreenSpaceRenderable* ptr);
+
+    bool shouldInitialize;
+
+    // Renderable vector and ptr to where mouse is
+    std::vector<ScreenSpaceRenderable*> renderables;
+    ScreenSpaceRenderable* _mouseOnObject;
+    // Dragging
+    glm::vec2 startDragMousePos;
+    glm::vec2 startDragObjectPos;
+    // Resizing
     glm::vec2 startResizeBrowserSize;
     glm::vec2 resizeVector;
-    bool currentlyDraggingBrowser;
-    bool currentlyResizingBrowser;
-    bool currentlyDraggingTarget;
+    // The current mouse position in screenspace coordinates
     glm::vec2 _mousePosition;
-    bool mouseIsOnBrowser;
-    bool mouseIsOnTarget;
+    // Current interaction status
+    bool currentlyResizingBrowser;
+    bool currentlyDraggingObject;
 };
 
 } // namespace openspace
