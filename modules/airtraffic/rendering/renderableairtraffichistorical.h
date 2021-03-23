@@ -37,6 +37,7 @@
 #include <openspace/properties/optionproperty.h>
 #include <future>
 
+
 namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl {
     class ProgramObject;
@@ -154,7 +155,7 @@ public:
 
     bool fetchData(const Date& date); 
     
-    void updateBuffers(const Date& date);
+    bool updateBuffers(const Date& date, const bool async = false);
 
     static documentation::Documentation Documentation();
 
@@ -171,9 +172,16 @@ private:
     struct Buffer {
         std::vector<AircraftVBOLayout>  vertexBufferData;
         Date date;
+        GLuint vertexArray;
+        GLuint vertexBuffer;
+
+        Buffer(int idx)
+        :vertexArray(idx), vertexBuffer(idx)
+        {}
     };
 
-    void fillBuffer(Buffer& buffer, GLuint& vertexArray, GLuint& vertexBuffer);
+    void fillBuffer(Buffer& buffer);
+    void sendToGLBuffer(Buffer& buffer);
     
     properties::Vec3Property _maximumColor;
     properties::Vec3Property _minimumColor;
@@ -182,24 +190,21 @@ private:
 
     // Backend storage for vertex buffer object containing all points
     //std::vector<AircraftVBOLayout>  _vertexBufferData;
-    Buffer _bufferA;
-    Buffer _bufferB;
+    Buffer _bufferA = Buffer(0);
+    Buffer _bufferB = Buffer(1); 
+    Buffer _bufferC = Buffer(2);
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
-    //std::string _currentDate = "";
-    //std::string _nextDate = "";
     Date _currentDate;
     Date _nextDate;
+    Date _nextNextDate;
     std::future<bool> _future;
     bool _isDataLoading = false;
     double _lastUpdate = 0.0;
 
     UniformCache(modelViewProjection, maximumColor, minimumColor, opacity, latitudeThreshold, longitudeThreshold, dailyFlights, time) _uniformCache;
     std::vector<std::vector<std::string>> _data;
-    GLuint _vertexArrayA = 0;
-    GLuint _vertexArrayB = 1;
-    GLuint _vertexBufferA = 0;
-    GLuint _vertexBufferB = 1;
+   
     const std::string _PATH = "${MODULE_AIRTRAFFIC}/data/";
 
 };

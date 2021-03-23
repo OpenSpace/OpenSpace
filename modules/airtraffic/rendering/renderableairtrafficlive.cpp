@@ -346,7 +346,6 @@ RenderableAirTrafficLive::RenderableAirTrafficLive(const ghoul::Dictionary& dict
         }
 
         glBindVertexArray(_vertexArray);
-
         glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
 
       
