@@ -33,8 +33,8 @@ namespace {
         "Set the dimensions of the SkyTarget according to the SkyBrowser ratio "
     };
 
-    constexpr const std::array<const char*, 6> UniformNames = {
-        "ModelTransform", "ViewProjectionMatrix", "texture1", "showCrosshair", "borderWidth", "targetDimensions"
+    constexpr const std::array<const char*, 7> UniformNames = {
+        "ModelTransform", "ViewProjectionMatrix", "texture1", "showCrosshair", "borderWidth", "targetDimensions", "borderColor"
     };
 
     constexpr const openspace::properties::Property::PropertyInfo BrowserIDInfo =
@@ -73,6 +73,7 @@ namespace openspace {
         , _targetDimensions(TargetDimensionInfo, glm::ivec2(1000.f), glm::ivec2(0.f), glm::ivec2(6000.f))
         , _skyBrowserID(BrowserIDInfo)
         , _showCrosshairThreshold(CrosshairThresholdInfo, 3.f, 1.f, 70.f)
+        , _borderColor(220.f, 220.f, 220.f)
     {
         // Handle target dimension property
         const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -99,7 +100,15 @@ namespace openspace {
         identifier = makeUniqueIdentifier(identifier);
         setIdentifier(identifier);
 
-        _cartesianPosition.setValue(glm::vec3(_cartesianPosition.value().x, _cartesianPosition.value().y, -2.1f));
+        // Projection plane seems to be at -2.1. The browser is at -2.1 and the browser should have precedence over target
+        _cartesianPosition.setValue(glm::vec3(_cartesianPosition.value().x, _cartesianPosition.value().y, -2.11f));
+
+        // Always make sure that the target and browser are visible together
+        _enabled.onChange([&]() {
+            if (_skyBrowser) {
+                _skyBrowser->property("Enabled")->set(_enabled.value());
+            }
+            });
 
     }
 
@@ -118,7 +127,7 @@ namespace openspace {
     }
 
     bool ScreenSpaceSkyTarget::initializeGL() {
-        global::moduleEngine->module<SkyBrowserModule>()->addSkyTarget(this);
+        global::moduleEngine->module<SkyBrowserModule>()->addRenderable(this);
 
         setConnectedBrowser();
 
@@ -174,8 +183,20 @@ namespace openspace {
 
     }
 
+    void ScreenSpaceSkyTarget::setBorderColor(glm::ivec3 color) {
+        _borderColor = color;
+    }
+
+    glm::ivec3 ScreenSpaceSkyTarget::getColor() {
+        return _borderColor;
+    }
+
     void ScreenSpaceSkyTarget::setBrowser(ScreenSpaceSkyBrowser* browser) {
         _skyBrowser = browser;
+    }
+
+    ScreenSpaceSkyBrowser* ScreenSpaceSkyTarget::getSkyBrowser() {
+        return _skyBrowser;
     }
 
     void ScreenSpaceSkyTarget::render() {
@@ -197,6 +218,7 @@ namespace openspace {
         _shader->setUniform(_uniformCache.borderWidth, borderWidth);
         _shader->setUniform(_uniformCache.targetDimensions, targetDim);
         _shader->setUniform(_uniformCache.modelTransform, modelTransform);
+        _shader->setUniform(_uniformCache.borderColor, _borderColor);
 
         _shader->setUniform(
             _uniformCache.viewProj,
