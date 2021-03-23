@@ -492,6 +492,11 @@ void RenderableModel::initialize() {
     if (_geometry->hasAnimation() && _enableAnimation.value() && _animationStart == "") {
         LWARNING("Model with animation not given any start time");
     }
+    else if (_geometry->hasAnimation() && !_enableAnimation.value()) {
+        LINFO("Model with deactivated animation was found. "
+            "The animation could be activated by entering a start time in the asset file"
+        );
+    }
 
     for (const std::unique_ptr<LightSource>& ls : _lightSources) {
         ls->initialize();
