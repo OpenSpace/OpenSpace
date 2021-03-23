@@ -74,7 +74,8 @@ private:
         Once = 0,
         LoopFromStart,
         LoopInfinitely,
-        Bounce
+        BounceFromStart,
+        BounceInfinitely
     };
 
     std::unique_ptr<ghoul::modelgeometry::ModelGeometry> _geometry;

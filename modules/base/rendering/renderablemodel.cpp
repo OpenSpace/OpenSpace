@@ -173,7 +173,8 @@ namespace {
             Once,
             LoopFromStart,
             LoopInfinitely,
-            Bounce
+            BounceFromStart,
+            BounceInfinitely
         };
 
         // The mode of how the animation should be played back.
@@ -375,8 +376,11 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         case Parameters::AnimationMode::LoopInfinitely:
             _animationMode = AnimationMode::LoopInfinitely;
             break;
-        case Parameters::AnimationMode::Bounce:
-            _animationMode = AnimationMode::Bounce;
+        case Parameters::AnimationMode::BounceFromStart:
+            _animationMode = AnimationMode::BounceFromStart;
+            break;
+        case Parameters::AnimationMode::BounceInfinitely:
+            _animationMode = AnimationMode::BounceInfinitely;
             break;
         case Parameters::AnimationMode::Once:
         default:
@@ -654,10 +658,19 @@ void RenderableModel::update(const UpdateData& data) {
                     realtiveTime += duration;
                 }
                 break;
-            case AnimationMode::Bounce:
+            case AnimationMode::BounceFromStart:
                 realtiveTime =
                     duration - abs(fmod(now - startTime, 2 * duration) - duration);
                 break;
+            case AnimationMode::BounceInfinitely: {
+                double modulo = fmod(now - startTime, 2 * duration);
+                if (modulo < 0) {
+                    modulo += 2 * duration;
+                }
+                realtiveTime =
+                    duration - abs(modulo - duration);
+                break;
+            }
             case AnimationMode::Once:
             default:
                 realtiveTime = now - startTime;
