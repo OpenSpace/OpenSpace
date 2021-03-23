@@ -113,6 +113,13 @@ namespace openspace {
         // The projection plane seems to be located at z = -2.1 so at that place the ScreenSpaceRenderables behaves like
         // they are in screen space
         _cartesianPosition.setValue(glm::vec3(_cartesianPosition.value().x, _cartesianPosition.value().y, -2.1f));
+
+        // Always make sure that the target and browser are visible together
+        _enabled.onChange([&]() {
+            if (_skyTarget) {
+                _skyTarget->property("Enabled")->set(_enabled.value());
+            }
+            });
     }
 
     bool ScreenSpaceSkyBrowser::initializeGL() {

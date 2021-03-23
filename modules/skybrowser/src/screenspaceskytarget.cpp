@@ -92,7 +92,15 @@ namespace openspace {
         identifier = makeUniqueIdentifier(identifier);
         setIdentifier(identifier);
 
+        // Projection plane seems to be at -2.1. The browser is at -2.1 and the browser should have precedence over target
         _cartesianPosition.setValue(glm::vec3(_cartesianPosition.value().x, _cartesianPosition.value().y, -2.11f));
+
+        // Always make sure that the target and browser are visible together
+        _enabled.onChange([&]() {
+            if (_skyBrowser) {
+                _skyBrowser->property("Enabled")->set(_enabled.value());
+            }
+            });
 
     }
 
