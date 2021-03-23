@@ -32,6 +32,7 @@ namespace openspace {
         void createShaders();
 
         void setBrowser(ScreenSpaceSkyBrowser* browser);
+        ScreenSpaceSkyBrowser* getSkyBrowser();
 
         void setDimensions(glm::vec2 currentBrowserDimensions);
         void updateFOV(float fov);

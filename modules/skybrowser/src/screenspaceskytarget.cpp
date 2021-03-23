@@ -92,7 +92,7 @@ namespace openspace {
         identifier = makeUniqueIdentifier(identifier);
         setIdentifier(identifier);
 
-        _cartesianPosition.setValue(glm::vec3(_cartesianPosition.value().x, _cartesianPosition.value().y, -2.1f));
+        _cartesianPosition.setValue(glm::vec3(_cartesianPosition.value().x, _cartesianPosition.value().y, -2.11f));
 
     }
 
@@ -115,7 +115,7 @@ namespace openspace {
     }
 
     bool ScreenSpaceSkyTarget::initializeGL() {
-        global::moduleEngine->module<SkyBrowserModule>()->addSkyTarget(this);
+        global::moduleEngine->module<SkyBrowserModule>()->addRenderable(this);
 
         setConnectedBrowser();
 
@@ -173,6 +173,10 @@ namespace openspace {
 
     void ScreenSpaceSkyTarget::setBrowser(ScreenSpaceSkyBrowser* browser) {
         _skyBrowser = browser;
+    }
+
+    ScreenSpaceSkyBrowser* ScreenSpaceSkyTarget::getSkyBrowser() {
+        return _skyBrowser;
     }
 
     void ScreenSpaceSkyTarget::render() {
