@@ -108,7 +108,7 @@ KeybindingsDialog::KeybindingsDialog(Profile& profile, QWidget *parent)
     transitionFromEditMode();
 }
 
-void KeybindingsDialog::appendScriptsToKeybind(std::string scripts) {
+void KeybindingsDialog::appendScriptsToKeybind(const std::string& scripts) {
     _scriptEdit->append(QString::fromStdString(scripts));
 }
 

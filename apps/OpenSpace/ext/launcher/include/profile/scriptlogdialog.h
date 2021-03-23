@@ -25,18 +25,17 @@
 #ifndef __OPENSPACE_UI_LAUNCHER___SCRIPTLOG___H__
 #define __OPENSPACE_UI_LAUNCHER___SCRIPTLOG___H__
 
+#include "profile/keybindingsdialog.h"
 #include <QDialog>
 #include <QListWidget>
-#include "profile/keybindingsdialog.h"
 
 class ScriptlogDialog : public QDialog {
 Q_OBJECT
 public:
     /**
-     * Constructor for addedScripts class
+     * Constructor for ScriptlogDialog class
      *
-     * \param profile The #openspace::Profile object containing all data of the
-     *                new or imported profile.
+     * \param bindingDialog keybindingDialog that openend this window.
      * \param parent Pointer to parent Qt widget
      */
     ScriptlogDialog(KeybindingsDialog* bindingDialog, QWidget* parent);
@@ -47,8 +46,8 @@ private slots:
 private:
     void createWidgets();
 
-    KeybindingsDialog* _bindingDialog;
-    QListWidget * _scriptlogList = nullptr;
+    KeybindingsDialog* _bindingDialog = nullptr;
+    QListWidget* _scriptlogList = nullptr;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___SCRIPTLOG___H__

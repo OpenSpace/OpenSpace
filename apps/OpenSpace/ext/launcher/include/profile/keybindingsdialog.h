@@ -63,7 +63,7 @@ public:
      *
      * \param scripts #std::string scripts to be appended
      */
-    void appendScriptsToKeybind(std::string scripts);
+    void appendScriptsToKeybind(const std::string& scripts);
 
 private slots:
     void listItemSelected();
