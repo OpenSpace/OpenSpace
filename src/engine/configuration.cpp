@@ -325,8 +325,6 @@ namespace {
 #include "configuration_codegen.cpp"
 } // namespace
 
-//#include "configuration_doc.inl"
-
 namespace openspace::configuration {
 
 void parseLuaState(Configuration& configuration) {
@@ -349,7 +347,7 @@ void parseLuaState(Configuration& configuration) {
     lua_newtable(s);
 
     // We go through all of the entries and lift them from global scope into the table on
-    // the stack so taht we can create a ghoul::Dictionary from this new table
+    // the stack so that we can create a ghoul::Dictionary from this new table
     documentation::Documentation doc = codegen::doc<Parameters>();
     for (const documentation::DocumentationEntry& e : doc.entries) {
         lua_pushstring(s, e.key.c_str());

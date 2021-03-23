@@ -125,8 +125,6 @@ struct Configuration {
     bool usingProfile = false;
     std::string sgctConfigNameInitialized;
 
-
-
     static documentation::Documentation Documentation;
     ghoul::lua::LuaState state;
 };
