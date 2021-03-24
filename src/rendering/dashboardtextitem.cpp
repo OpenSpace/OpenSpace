@@ -22,25 +22,67 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___DASHBOARDITEMMISSION___H__
-#define __OPENSPACE_MODULE_BASE___DASHBOARDITEMMISSION___H__
-
 #include <openspace/rendering/dashboardtextitem.h>
+
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
+#include <ghoul/font/fontmanager.h>
+#include <optional>
+
+namespace {
+    constexpr openspace::properties::Property::PropertyInfo FontNameInfo = {
+        "FontName",
+        "Font Name",
+        "This value is the name of the font that is used. It can either refer to an "
+        "internal name registered previously, or it can refer to a path that is used."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
+        "FontSize",
+        "Font Size",
+        "This value determines the size of the font that is used to render the distance."
+    };
+
+    struct [[codegen::Dictionary(DashboardTextItem)]] Parameters {
+        // [[codegen::verbatim(FontNameInfo.description)]]
+        std::optional<std::string> fontName;
+
+        // [[codegen::verbatim(FontSizeInfo.description)]]
+        std::optional<float> fontSize;
+    };
+#include "dashboardtextitem_codegen.cpp"
+} // namespace
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+documentation::Documentation DashboardTextItem::Documentation() {
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "dashboardtextitem";
+    return doc;
+}
 
-class DashboardItemMission : public DashboardTextItem {
-public:
-    DashboardItemMission(const ghoul::Dictionary& dictionary);
-    virtual ~DashboardItemMission() = default;
+DashboardTextItem::DashboardTextItem(const ghoul::Dictionary& dictionary, float fontSize,
+                                     const std::string& fontName)
+    : DashboardItem(dictionary)
+    , _fontName(FontNameInfo, fontName)
+    , _fontSize(FontSizeInfo, fontSize, 6.f, 144.f, 1.f)
+{
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    void render(glm::vec2& penPosition) override;
+    _fontName = p.fontName.value_or(_fontName);
+    _fontName.onChange([this]() {
+        _font = global::fontManager->font(_fontName, _fontSize);
+    });
+    addProperty(_fontName);
 
-    glm::vec2 size() const override;
-};
+    _fontSize = p.fontSize.value_or(_fontSize);
+    _fontSize.onChange([this]() {
+        _font = global::fontManager->font(_fontName, _fontSize);
+    });
+    addProperty(_fontSize);
+
+    _font = global::fontManager->font(_fontName, _fontSize);
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___DASHBOARDITEMMISSION___H__

@@ -22,25 +22,35 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___DASHBOARDITEMMISSION___H__
-#define __OPENSPACE_MODULE_BASE___DASHBOARDITEMMISSION___H__
+#ifndef __OPENSPACE_CORE___DASHBOARDTEXTITEM___H__
+#define __OPENSPACE_CORE___DASHBOARDTEXTITEM___H__
 
-#include <openspace/rendering/dashboardtextitem.h>
+#include <openspace/rendering/dashboarditem.h>
+
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/stringproperty.h>
+
+namespace ghoul { class Dictionary; }
+namespace ghoul::fontrendering { class Font; }
 
 namespace openspace {
 
 namespace documentation { struct Documentation; }
 
-class DashboardItemMission : public DashboardTextItem {
+class DashboardTextItem : public DashboardItem {
 public:
-    DashboardItemMission(const ghoul::Dictionary& dictionary);
-    virtual ~DashboardItemMission() = default;
+    static documentation::Documentation Documentation();
 
-    void render(glm::vec2& penPosition) override;
+    DashboardTextItem(const ghoul::Dictionary& dictionary, float fontSize = 10.f,
+        const std::string& fontName = "Mono");
 
-    glm::vec2 size() const override;
+protected:
+    properties::StringProperty _fontName;
+    properties::FloatProperty _fontSize;
+
+    std::shared_ptr<ghoul::fontrendering::Font> _font;
 };
 
-} // namespace openspace
+} // openspace
 
-#endif // __OPENSPACE_MODULE_BASE___DASHBOARDITEMMISSION___H__
+#endif // __OPENSPACE_CORE___DASHBOARDITEM___H__
