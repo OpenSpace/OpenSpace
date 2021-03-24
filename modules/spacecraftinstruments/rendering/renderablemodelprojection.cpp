@@ -42,6 +42,7 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
+#include <filesystem>
 #include <optional>
 
 namespace {
@@ -80,7 +81,7 @@ namespace {
         // contain filesystem tokens or can be specified relatively to the
         // location of the .mod file.
         // This specifies the model that is rendered by the Renderable.
-        std::variant<std::string, std::vector<std::string>> geometryFile;
+        std::filesystem::path geometryFile;
 
         // Contains information about projecting onto this planet.
         ghoul::Dictionary projection [[codegen::reference("newhorizons_projectioncomponent")]];
@@ -111,60 +112,14 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    if (std::holds_alternative<std::string>(p.geometryFile)) {
-        // Handle single file
-        std::string file;
-        file = absPath(std::get<std::string>(p.geometryFile));
-        _geometry = ghoul::io::ModelReader::ref().loadModel(
-            file,
-            ghoul::io::ModelReader::ForceRenderInvisible::No,
-            ghoul::io::ModelReader::NotifyInvisibleDropped::Yes
-        );
-    }
-    else if (std::holds_alternative<std::vector<std::string>>(p.geometryFile)) {
-        LWARNING("Loading a model with several files is deprecated and will be "
-            "removed in a future release, TESTING"
-        );
-        /*
-        ghoul::Dictionary fileDictionary = dictionary.value<ghoul::Dictionary>(
-            KeyGeomModelFile
-        );
-        std::vector<std::unique_ptr<ghoul::modelgeometry::ModelGeometry>> geometries;
-
-        for (std::string_view k : fileDictionary.keys()) {
-            // Handle each file
-            file = absPath(fileDictionary.value<std::string>(k));
-            geometries.push_back(ghoul::io::ModelReader::ref().loadModel(
-                file,
-                ghoul::io::ModelReader::ForceRenderInvisible::No,
-                ghoul::io::ModelReader::NotifyInvisibleDropped::Yes
-            ));
-        }
-
-        if (!geometries.empty()) {
-            std::unique_ptr<ghoul::modelgeometry::ModelGeometry> combinedGeometry =
-                std::move(geometries[0]);
-
-            // Combine all models into one ModelGeometry
-            for (unsigned int i = 1; i < geometries.size(); ++i) {
-                for (ghoul::io::ModelMesh& mesh : geometries[i]->meshes()) {
-                    combinedGeometry->meshes().push_back(
-                        std::move(mesh)
-                    );
-                }
-
-                for (ghoul::modelgeometry::ModelGeometry::TextureEntry& texture :
-                    geometries[i]->textureStorage())
-                {
-                    combinedGeometry->textureStorage().push_back(
-                        std::move(texture)
-                    );
-                }
-            }
-            _geometry = std::move(combinedGeometry);
-            _geometry->calculateBoundingRadius();
-        }*/
-    }
+    // Import Model from file
+    std::string file;
+    file = absPath(p.geometryFile.string());
+    _geometry = ghoul::io::ModelReader::ref().loadModel(
+        file,
+        ghoul::io::ModelReader::ForceRenderInvisible::No,
+        ghoul::io::ModelReader::NotifyInvisibleDropped::Yes
+    );
 
     addPropertySubOwner(_projectionComponent);
 

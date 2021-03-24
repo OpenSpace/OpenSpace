@@ -41,6 +41,7 @@
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
+#include <filesystem>
 #include <optional>
 
 namespace {
@@ -147,7 +148,7 @@ namespace {
         // contain filesystem tokens or can be specified relatively to the
         // location of the .mod file.
         // This specifies the model that is rendered by the Renderable.
-        std::variant<std::string, std::vector<std::string>> geometryFile;
+        std::filesystem::path geometryFile;
 
         enum class ScaleUnit {
             Nanometer,
@@ -281,62 +282,14 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         }
     }
 
-    if (std::holds_alternative<std::string>(p.geometryFile)) {
-        // Handle single file
-        std::string file;
-        file = absPath(std::get<std::string>(p.geometryFile));
-        _geometry = ghoul::io::ModelReader::ref().loadModel(
-            file,
-            ghoul::io::ModelReader::ForceRenderInvisible(_forceRenderInvisible),
-            ghoul::io::ModelReader::NotifyInvisibleDropped(_notifyInvisibleDropped)
-        );
-    }
-    else if (std::holds_alternative<std::vector<std::string>>(p.geometryFile)){
-        LWARNING("Loading a model with several files is deprecated and will be "
-            "removed in a future release TESTING"
-        );
-        /*
-        //TODO: update to use new codegen stuff
-        std::string file;
-        ghoul::Dictionary fileDictionary = dictionary.value<ghoul::Dictionary>(
-            KeyGeomModelFile
-        );
-        std::vector<std::unique_ptr<ghoul::modelgeometry::ModelGeometry>> geometries;
-
-        for (std::string_view k : fileDictionary.keys()) {
-            // Handle each file
-            file = absPath(fileDictionary.value<std::string>(k));
-            geometries.push_back(ghoul::io::ModelReader::ref().loadModel(
-                file,
-                ghoul::io::ModelReader::ForceRenderInvisible(_forceRenderInvisible),
-                ghoul::io::ModelReader::NotifyInvisibleDropped(_notifyInvisibleDropped)
-            ));
-        }
-
-        if (!geometries.empty()) {
-            std::unique_ptr<ghoul::modelgeometry::ModelGeometry> combinedGeometry =
-                std::move(geometries[0]);
-
-                // Combine all models into one ModelGeometry
-                for (unsigned int i = 1; i < geometries.size(); ++i) {
-                for (ghoul::io::ModelMesh& mesh : geometries[i]->meshes()) {
-                    combinedGeometry->meshes().push_back(
-                        std::move(mesh)
-                    );
-                }
-
-                for (ghoul::modelgeometry::ModelGeometry::TextureEntry& texture :
-                    geometries[i]->textureStorage())
-                {
-                    combinedGeometry->textureStorage().push_back(
-                        std::move(texture)
-                    );
-                }
-            }
-                _geometry = std::move(combinedGeometry);
-            _geometry->calculateBoundingRadius();
-        }*/
-    }
+    // Import Model from file
+    std::string file;
+    file = absPath(p.geometryFile.string());
+    _geometry = ghoul::io::ModelReader::ref().loadModel(
+        file,
+        ghoul::io::ModelReader::ForceRenderInvisible(_forceRenderInvisible),
+        ghoul::io::ModelReader::NotifyInvisibleDropped(_notifyInvisibleDropped)
+    );
 
     if (p.modelScale.has_value()) {
         Parameters::ScaleUnit scaleUnit = *p.modelScale;
@@ -395,8 +348,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         if (!_geometry->hasAnimation()) {
             LWARNING("Animation time scale given to model without animation");
         }
-
-        if (std::holds_alternative<float>(*p.animationTimeScale)) {
+        else if (std::holds_alternative<float>(*p.animationTimeScale)) {
             _geometry->setTimeScale(std::get<float>(*p.animationTimeScale));
         }
         else if (std::holds_alternative<Parameters::AnimationTimeUnit>(*p.animationTimeScale)) {
