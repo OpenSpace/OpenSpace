@@ -357,6 +357,11 @@ RenderEngine::RenderEngine()
     addProperty(_applyWarping);
 
     _screenshotUseDate.onChange([this]() {
+        // If there is no screenshot folder, don't bother with handling the change
+        if (!FileSys.hasRegisteredToken("${STARTUP_SCREENSHOT}")) {
+            return;
+        }
+
         if (_screenshotUseDate) {
             // Going from 'false' -> 'true'
             // We might need to create the folder first
