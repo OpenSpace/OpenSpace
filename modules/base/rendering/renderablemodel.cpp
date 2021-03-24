@@ -30,6 +30,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/time.h>
+#include <openspace/util/timeconversion.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/lightsource.h>
@@ -149,13 +150,13 @@ namespace {
         std::variant<std::string, std::vector<std::string>> geometryFile;
 
         enum class ScaleUnit {
-            Nanometer [[codegen::key("nm")]],
-            Micrometer [[codegen::key("um")]],
-            Millimeter [[codegen::key("mm")]],
-            Centimeter [[codegen::key("cm")]],
-            Decimeter [[codegen::key("dm")]],
-            Meter [[codegen::key("m")]],
-            Kilometer [[codegen::key("km")]]
+            Nanometer,
+            Micrometer,
+            Millimeter,
+            Centimeter,
+            Decimeter,
+            Meter,
+            Kilometer
         };
 
         // The scale of the model. For example if the model is in centimeters
@@ -173,15 +174,18 @@ namespace {
         // In format 'YYYY MM DD hh:mm:ss'.
         std::optional<std::string> animationStartTime [[codegen::dateTime()]];
 
-        enum class TimeUnit {
+        enum class AnimationTimeUnit {
+            Nanosecond,
+            Microsecond,
             Millisecond,
-            Second
+            Second,
+            Minute
         };
 
         // The time scale for the animation relative to seconds.
         // Ex, if animation is in milliseconds then AnimationTimeScale = 0.001 or
         // AnimationTimeScale = Millisecond, default is Second
-        std::optional<std::variant<TimeUnit, float>> animationTimeScale;
+        std::optional<std::variant<AnimationTimeUnit, float>> animationTimeScale;
 
         enum class AnimationMode {
             Once,
@@ -395,18 +399,32 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         if (std::holds_alternative<float>(*p.animationTimeScale)) {
             _geometry->setTimeScale(std::get<float>(*p.animationTimeScale));
         }
-        else if (std::holds_alternative<Parameters::TimeUnit>(*p.animationTimeScale)) {
-            Parameters::TimeUnit timeUnit =
-                std::get<Parameters::TimeUnit>(*p.animationTimeScale);
+        else if (std::holds_alternative<Parameters::AnimationTimeUnit>(*p.animationTimeScale)) {
+            Parameters::AnimationTimeUnit animationTimeUnit =
+                std::get<Parameters::AnimationTimeUnit>(*p.animationTimeScale);
+            TimeUnit timeUnit;
 
-            switch (timeUnit) {
-                case Parameters::TimeUnit::Millisecond:
-                    _geometry->setTimeScale(0.001);
+            switch (animationTimeUnit) {
+                case Parameters::AnimationTimeUnit::Nanosecond:
+                    timeUnit = TimeUnit::Nanosecond;
                     break;
-                case Parameters::TimeUnit::Second:
-                    _geometry->setTimeScale(1.0);
+                case Parameters::AnimationTimeUnit::Microsecond:
+                    timeUnit = TimeUnit::Microsecond;
                     break;
+                case Parameters::AnimationTimeUnit::Millisecond:
+                    timeUnit = TimeUnit::Millisecond;
+                    break;
+                case Parameters::AnimationTimeUnit::Second:
+                    timeUnit = TimeUnit::Second;
+                    break;
+                case Parameters::AnimationTimeUnit::Minute:
+                    timeUnit = TimeUnit::Minute;
+                    break;
+                default:
+                    throw ghoul::MissingCaseException();
             }
+
+            _geometry->setTimeScale(convertTime(1.0, timeUnit, TimeUnit::Second));
         }
     }
 
