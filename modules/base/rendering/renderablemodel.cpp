@@ -148,6 +148,20 @@ namespace {
         // This specifies the model that is rendered by the Renderable.
         std::variant<std::string, std::vector<std::string>> geometryFile;
 
+        enum class ScaleUnit {
+            Nanometer [[codegen::key("nm")]],
+            Micrometer [[codegen::key("um")]],
+            Millimeter [[codegen::key("mm")]],
+            Centimeter [[codegen::key("cm")]],
+            Decimeter [[codegen::key("dm")]],
+            Meter [[codegen::key("m")]],
+            Kilometer [[codegen::key("km")]]
+        };
+
+        // The scale of the model. For example if the model is in centimeters
+        // then ModelScale=cm
+        std::optional<ScaleUnit> modelScale;
+
         // Set if invisible parts (parts with no textures or materials) of the model
         // should be forced to render or not.
         std::optional<bool> forceRenderInvisible;
@@ -318,6 +332,38 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
                 _geometry = std::move(combinedGeometry);
             _geometry->calculateBoundingRadius();
         }*/
+    }
+
+    if (p.modelScale.has_value()) {
+        Parameters::ScaleUnit scaleUnit = *p.modelScale;
+
+        switch (scaleUnit) {
+            case Parameters::ScaleUnit::Nanometer:
+                _modelScale = DistanceUnit::Nanometer;
+                break;
+            case Parameters::ScaleUnit::Micrometer:
+                _modelScale = DistanceUnit::Micrometer;
+                break;
+            case Parameters::ScaleUnit::Millimeter:
+                _modelScale = DistanceUnit::Millimeter;
+                break;
+            case Parameters::ScaleUnit::Centimeter:
+                _modelScale = DistanceUnit::Centimeter;
+                break;
+            case Parameters::ScaleUnit::Decimeter:
+                _modelScale = DistanceUnit::Decimeter;
+                break;
+            case Parameters::ScaleUnit::Meter:
+                _modelScale = DistanceUnit::Meter;
+                break;
+            case Parameters::ScaleUnit::Kilometer:
+                _modelScale = DistanceUnit::Kilometer;
+                break;
+            default:
+                throw ghoul::MissingCaseException();
+        }
+
+        _scaleVector = glm::dvec3(convertUnit(_modelScale, DistanceUnit::Meter));
     }
 
     if (p.animationStartTime.has_value()) {
@@ -546,9 +592,8 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     const glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-        glm::scale(
-            glm::dmat4(_modelTransform.value()), glm::dvec3(data.modelTransform.scale)
-        );
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)) *
+        glm::scale(glm::dmat4(_modelTransform.value()), _scaleVector); // Model scale unit
     const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
                                           modelTransform;
 

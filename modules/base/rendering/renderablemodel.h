@@ -33,6 +33,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <openspace/util/distanceconversion.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <ghoul/io/model/modelreader.h>
 #include <ghoul/opengl/uniformcache.h>
@@ -79,6 +80,8 @@ private:
     };
 
     std::unique_ptr<ghoul::modelgeometry::ModelGeometry> _geometry;
+    DistanceUnit _modelScale;
+    glm::dvec3 _scaleVector = glm::dvec3(1.0, 1.0, 1.0);
     bool _forceRenderInvisible = false;
     bool _notifyInvisibleDropped = true;
     std::string _animationStart = "";
