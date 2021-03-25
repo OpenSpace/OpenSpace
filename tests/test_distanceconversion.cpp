@@ -55,55 +55,55 @@ TEST_CASE("DistanceConversion: Convert to meters", "[distanceconversion]") {
     REQUIRE(res == Approx(1000.0));
 
     res = convertDistance(unit, DistanceUnit::AU, DistanceUnit::Meter);
-    REQUIRE(res == Approx(openspace::distanceconstants::AstronomicalUnit));
+    REQUIRE(res == Approx(1.495978707E11));
 
     res = convertDistance(unit, DistanceUnit::Lighthour, DistanceUnit::Meter);
-    REQUIRE(res == Approx(openspace::distanceconstants::LightHour));
+    REQUIRE(res == Approx(1.0799921E12));
 
     res = convertDistance(unit, DistanceUnit::Lightday, DistanceUnit::Meter);
-    REQUIRE(res == Approx(openspace::distanceconstants::LightDay));
+    REQUIRE(res == Approx(2.591981E13));
 
     res = convertDistance(unit, DistanceUnit::Lightmonth, DistanceUnit::Meter);
-    REQUIRE(res == Approx(openspace::distanceconstants::LightMonth));
+    REQUIRE(res == Approx(7.8839421E14));
 
     res = convertDistance(unit, DistanceUnit::Lightyear, DistanceUnit::Meter);
-    REQUIRE(res == Approx(openspace::distanceconstants::LightYear));
+    REQUIRE(res == Approx(9.4607304725808E15));
 
     res = convertDistance(unit, DistanceUnit::Parsec, DistanceUnit::Meter);
-    REQUIRE(res == Approx(openspace::distanceconstants::Parsec));
+    REQUIRE(res == Approx(3.0856776E16));
 
     res = convertDistance(unit, DistanceUnit::Kiloparsec, DistanceUnit::Meter);
-    REQUIRE(res == Approx(1e3 * distanceconstants::Parsec));
+    REQUIRE(res == Approx(1e3 * 3.0856776E16));
 
     res = convertDistance(unit, DistanceUnit::Megaparsec, DistanceUnit::Meter);
-    REQUIRE(res == Approx(1e6 * distanceconstants::Parsec));
+    REQUIRE(res == Approx(1e6 * 3.0856776E16));
 
     res = convertDistance(unit, DistanceUnit::Gigaparsec, DistanceUnit::Meter);
-    REQUIRE(res == Approx(1e9 * distanceconstants::Parsec));
+    REQUIRE(res == Approx(1e9 * 3.0856776E16));
 
     res = convertDistance(unit, DistanceUnit::Thou, DistanceUnit::Meter);
-    REQUIRE(res == Approx(1e-3 * distanceconstants::Inch));
+    REQUIRE(res == Approx(1e-3 * 0.0254));
 
     res = convertDistance(unit, DistanceUnit::Inch, DistanceUnit::Meter);
-    REQUIRE(res == Approx(distanceconstants::Inch));
+    REQUIRE(res == Approx(0.0254));
 
     res = convertDistance(unit, DistanceUnit::Foot, DistanceUnit::Meter);
-    REQUIRE(res == Approx(distanceconstants::Foot));
+    REQUIRE(res == Approx(0.3048));
 
     res = convertDistance(unit, DistanceUnit::Yard, DistanceUnit::Meter);
-    REQUIRE(res == Approx(distanceconstants::Yard));
+    REQUIRE(res == Approx(0.9144));
 
     res = convertDistance(unit, DistanceUnit::Chain, DistanceUnit::Meter);
-    REQUIRE(res == Approx(distanceconstants::Chain));
+    REQUIRE(res == Approx(20.1168));
 
     res = convertDistance(unit, DistanceUnit::Furlong, DistanceUnit::Meter);
-    REQUIRE(res == Approx(10.0 * distanceconstants::Chain));
+    REQUIRE(res == Approx(10.0 * 20.1168));
 
     res = convertDistance(unit, DistanceUnit::Mile, DistanceUnit::Meter);
-    REQUIRE(res == Approx(distanceconstants::Mile));
+    REQUIRE(res == Approx(1609.344));
 
     res = convertDistance(unit, DistanceUnit::League, DistanceUnit::Meter);
-    REQUIRE(res == Approx(3.0 * distanceconstants::Mile));
+    REQUIRE(res == Approx(3.0 * 1609.344));
 }
 
 TEST_CASE("DistanceConversion: Convert from meters", "[distanceconversion]") {
@@ -132,55 +132,55 @@ TEST_CASE("DistanceConversion: Convert from meters", "[distanceconversion]") {
     REQUIRE(res == Approx(meters / 1000.0));
 
     res = convertDistance(meters, DistanceUnit::Meter, DistanceUnit::AU);
-    REQUIRE(res == Approx(meters / openspace::distanceconstants::AstronomicalUnit));
+    REQUIRE(res == Approx(meters / 1.495978707E11));
 
     res = convertDistance(meters, DistanceUnit::Meter, DistanceUnit::Lighthour);
-    REQUIRE(res == Approx(meters / openspace::distanceconstants::LightHour));
+    REQUIRE(res == Approx(meters / 1.0799921E12));
 
     res = convertDistance(meters, DistanceUnit::Meter, DistanceUnit::Lightday);
-    REQUIRE(res == Approx(meters / openspace::distanceconstants::LightDay));
+    REQUIRE(res == Approx(meters / 2.591981E13));
 
     res = convertDistance(meters, DistanceUnit::Meter, DistanceUnit::Lightmonth);
-    REQUIRE(res == Approx(meters / openspace::distanceconstants::LightMonth));
+    REQUIRE(res == Approx(meters / 7.8839421E14));
 
     res = convertDistance(meters, DistanceUnit::Meter, DistanceUnit::Lightyear);
-    REQUIRE(res == Approx(meters / openspace::distanceconstants::LightYear));
+    REQUIRE(res == Approx(meters / 9.4607304725808E15));
 
     res = convertDistance(meters, DistanceUnit::Meter, DistanceUnit::Parsec);
-    REQUIRE(res == Approx(meters / openspace::distanceconstants::Parsec));
+    REQUIRE(res == Approx(meters / 3.0856776E16));
 
     res = convertDistance(meters, DistanceUnit::Meter, DistanceUnit::Kiloparsec);
-    REQUIRE(res == Approx(meters / (1e3 * distanceconstants::Parsec)));
+    REQUIRE(res == Approx(meters / (1e3 * 3.0856776E16)));
 
     res = convertDistance(meters, DistanceUnit::Meter, DistanceUnit::Megaparsec);
-    REQUIRE(res == Approx(meters / (1e6 * distanceconstants::Parsec)));
+    REQUIRE(res == Approx(meters / (1e6 * 3.0856776E16)));
 
     res = convertDistance(meters, DistanceUnit::Meter, DistanceUnit::Gigaparsec);
-    REQUIRE(res == Approx(meters / (1e9 * distanceconstants::Parsec)));
+    REQUIRE(res == Approx(meters / (1e9 * 3.0856776E16)));
 
     res = convertDistance(meters, DistanceUnit::Meter, DistanceUnit::Thou);
-    REQUIRE(res == Approx(meters / (1e-3 * distanceconstants::Inch)));
+    REQUIRE(res == Approx(meters / (1e-3 * 0.0254)));
 
     res = convertDistance(meters, DistanceUnit::Meter, DistanceUnit::Inch);
-    REQUIRE(res == Approx(meters / distanceconstants::Inch));
+    REQUIRE(res == Approx(meters / 0.0254));
 
     res = convertDistance(meters, DistanceUnit::Meter, DistanceUnit::Foot);
-    REQUIRE(res == Approx(meters / distanceconstants::Foot));
+    REQUIRE(res == Approx(meters / 0.3048));
 
     res = convertDistance(meters, DistanceUnit::Meter, DistanceUnit::Yard);
-    REQUIRE(res == Approx(meters / distanceconstants::Yard));
+    REQUIRE(res == Approx(meters / 0.9144));
 
     res = convertDistance(meters, DistanceUnit::Meter, DistanceUnit::Chain);
-    REQUIRE(res == Approx(meters / distanceconstants::Chain));
+    REQUIRE(res == Approx(meters / 20.1168));
 
     res = convertDistance(meters, DistanceUnit::Meter, DistanceUnit::Furlong);
-    REQUIRE(res == Approx(meters / (10.0 * distanceconstants::Chain)));
+    REQUIRE(res == Approx(meters / (10.0 * 20.1168)));
 
     res = convertDistance(meters, DistanceUnit::Meter, DistanceUnit::Mile);
-    REQUIRE(res == Approx(meters / distanceconstants::Mile));
+    REQUIRE(res == Approx(meters / 1609.344));
 
     res = convertDistance(meters, DistanceUnit::Meter, DistanceUnit::League);
-    REQUIRE(res == Approx(meters / (3.0 * distanceconstants::Mile)));
+    REQUIRE(res == Approx(meters / (3.0 * 1609.344)));
 }
 
 
