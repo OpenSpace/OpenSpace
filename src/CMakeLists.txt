@@ -161,7 +161,6 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/scene/sceneinitializer.cpp
   ${OPENSPACE_BASE_DIR}/src/scene/scenelicensewriter.cpp
   ${OPENSPACE_BASE_DIR}/src/scene/scenegraphnode.cpp
-  ${OPENSPACE_BASE_DIR}/src/scene/scenegraphnode_doc.inl
   ${OPENSPACE_BASE_DIR}/src/scene/timeframe.cpp
   ${OPENSPACE_BASE_DIR}/src/scene/translation.cpp
   ${OPENSPACE_BASE_DIR}/src/scripting/lualibrary.cpp

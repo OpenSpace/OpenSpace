@@ -42,9 +42,6 @@
 #include <variant>
 
 namespace {
-    constexpr const char* KeyType = "Type";
-    constexpr const char* KeyTag = "Tag";
-
     constexpr const std::array<const char*, 4> UniformNames = {
         "Alpha", "ModelTransform", "ViewProjectionMatrix", "texture1"
     };

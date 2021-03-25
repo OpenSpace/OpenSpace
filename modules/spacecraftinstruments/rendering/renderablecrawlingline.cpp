@@ -34,19 +34,38 @@
 #include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
+#include <optional>
 
 namespace {
-    constexpr const char* KeySource = "Source";
-    constexpr const char* KeyTarget = "Target";
-    constexpr const char* KeyInstrument = "Instrument";
-    constexpr const char* KeyColor = "Color";
-    constexpr const char* KeyColorStart = "Start";
-    constexpr const char* KeyColorEnd = "End";
-
     struct VBOData {
         float position[3];
         float color[4];
     };
+
+    struct [[codegen::Dictionary(RenderableCrawlingLine)]] Parameters {
+        // Denotes the SPICE name of the source of the renderable crawling line, for
+        // example, the spacecraft
+        std::string source;
+
+        // Denotes the SPICE name of the target of the crawling line
+        std::string target;
+
+        // Denotes the SPICE name of the instrument that is used to render the crawling
+        // line
+        std::string instrument;
+
+        struct Color {
+            // The color at the start of the line
+            glm::vec4 start [[codegen::color()]];
+
+            // The color at the end of the line
+            glm::vec4 end [[codegen::color()]];
+        };
+        // Specifies the colors that are used for the crawling line. One value determines
+        // the starting color of the line, the second value is the color at the end
+        Color color;
+    };
+#include "renderablecrawlingline_codegen.cpp"
 } // namespace
 
 // @TODO:  This class is not properly working anymore and needs to be substantially
@@ -56,76 +75,21 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableCrawlingLine::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderableCrawlingLine",
-        "newhorizons_renderable_crawlingline",
-        {
-            {
-                KeySource,
-                new StringVerifier,
-                Optional::No,
-                "Denotes the SPICE name of the source of the renderable crawling line, "
-                "for example, the space craft"
-            },
-            {
-                KeyTarget,
-                new StringVerifier,
-                Optional::Yes,
-                "Denotes the SPICE name of the target of the crawling line"
-            },
-            {
-                KeyInstrument,
-                new StringVerifier,
-                Optional::No,
-                "Denotes the SPICE name of the instrument that is used to render the "
-                "crawling line"
-            },
-            {
-                KeyColor,
-                new TableVerifier({
-                    {
-                        KeyColorStart,
-                        new Color4Verifier,
-                        Optional::No,
-                        "The color at the start of the line",
-                    },
-                    {
-                        KeyColorEnd,
-                        new Color4Verifier,
-                        Optional::No,
-                        "The color at the end of the line"
-                    }
-                }),
-                Optional::No,
-                "Specifies the colors that are used for the crawling line. One value "
-                "determines the starting color of the line, the second value is the "
-                "color at the end of the line."
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "newhorizons_renderable_crawlingline";
+    return doc;
 }
 
 RenderableCrawlingLine::RenderableCrawlingLine(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableCrawlingLine"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _source = dictionary.value<std::string>(KeySource);
-    _target = dictionary.value<std::string>(KeyTarget);
-    _instrumentName = dictionary.value<std::string>(KeyInstrument);
-
-    _lineColorBegin = dictionary.value<glm::dvec4>(
-        std::string(KeyColor) + "." + KeyColorStart
-    );
-
-    _lineColorEnd = dictionary.value<glm::dvec4>(
-        std::string(KeyColor) + "." + KeyColorEnd
-    );
+    _source = p.source;
+    _target = p.target;
+    _instrumentName = p.instrument;
+    _lineColorBegin = p.color.start;
+    _lineColorEnd = p.color.end;
 }
 
 bool RenderableCrawlingLine::isReady() const {

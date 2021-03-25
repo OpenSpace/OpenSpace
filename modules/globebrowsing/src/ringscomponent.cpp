@@ -229,6 +229,9 @@ RingsComponent::RingsComponent(const ghoul::Dictionary& dictionary)
         // term and rather extract the values directly here.  This would require a bit of
         // a rewrite in the RenderableGlobe class to not create the RingsComponent in the
         // class-initializer list though
+        // @TODO (abock, 2021-03-25) Righto!  The RenderableGlobe passes this dictionary
+        // in as-is so it would be easy to just pass it directly to the initialize method
+        // instead
         _ringsDictionary = dictionary.value<ghoul::Dictionary>("Rings");
     }
 

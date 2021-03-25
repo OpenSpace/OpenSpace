@@ -35,17 +35,10 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <glm/gtx/projection.hpp>
+#include <optional>
 
 namespace {
     constexpr const char* ProgramName = "FovProgram";
-    constexpr const char* KeyBody = "Body";
-    constexpr const char* KeyFrame = "Frame";
-    constexpr const char* KeyInstrument = "Instrument";
-    constexpr const char* KeyInstrumentName = "Name";
-    constexpr const char* KeyInstrumentAberration = "Aberration";
-    constexpr const char* KeyPotentialTargets = "PotentialTargets";
-    constexpr const char* KeyFrameConversions = "FrameConversions";
-    constexpr const char* KeyBoundsSimplification = "SimplifyBounds";
 
     constexpr const std::array<const char*, 9> UniformNames = {
         "modelViewProjectionTransform", "defaultColorStart", "defaultColorEnd",
@@ -153,142 +146,55 @@ namespace {
         }
     }
     // Needs support for std::map first for the frameConversions
-//    struct [[codegen::Dictionary(RenderableFov)]] Parameters {
-//        // The SPICE name of the source body for which the field of view should be
-//        // rendered
-//        std::string body;
-//
-//        // The SPICE name of the source body's frame in which the field of view should be
-//        // rendered
-//        std::string frame;
-//
-//        struct Instrument {
-//            // The SPICE name of the instrument that is rendered
-//            std::string name;
-//
-//            // The aberration correction that is used for this field of view. The default
-//            // is 'NONE'
-//            std::optional<std::string> aberration [[codegen::inlist("NONE",
-//                "LT", "LT+S", "CN", "CN+S", "XLT", "XLT+S", "XCN", "XCN+S")]];
-//        };
-//        // A table describing the instrument whose field of view should be rendered
-//        Instrument instrument;
-//
-//        // A list of potential targets (specified as SPICE names) that the field of view
-//        // should be tested against
-//        std::vector<std::string> potentialTargets;
-//
-//        // A list of frame conversions that should be registered with the SpiceManager
-//        std::optional<std::vector<std::string>> frameConversions;
-//
-//        // [[codegen::verbatim(LineWidthInfo.description)]]
-//        std::optional<double> lineWidth;
-//
-//        // [[codegen::verbatim(StandoffDistanceInfo.description)]]
-//        std::optional<double> standOffDistance;
-//
-//        // If this value is set to 'true' the field-of-views bounds values will be
-//        // simplified on load. Bound vectors will be removed if they are the strict linear
-//        // interpolation between the two neighboring vectors. This value is disabled on
-//        // default
-//        std::optional<bool> simplifyBounds;
-//    };
-//#include "renderablefov_codegen.cpp"
+    struct [[codegen::Dictionary(RenderableFov)]] Parameters {
+        // The SPICE name of the source body for which the field of view should be
+        // rendered
+        std::string body;
+
+        // The SPICE name of the source body's frame in which the field of view should be
+        // rendered
+        std::string frame;
+
+        struct Instrument {
+            // The SPICE name of the instrument that is rendered
+            std::string name;
+
+            // The aberration correction that is used for this field of view. The default
+            // is 'NONE'
+            std::optional<std::string> aberration [[codegen::inlist("NONE",
+                "LT", "LT+S", "CN", "CN+S", "XLT", "XLT+S", "XCN", "XCN+S")]];
+        };
+        // A table describing the instrument whose field of view should be rendered
+        Instrument instrument;
+
+        // A list of potential targets (specified as SPICE names) that the field of view
+        // should be tested against
+        std::vector<std::string> potentialTargets;
+
+        // A list of frame conversions that should be registered with the SpiceManager
+        std::optional<std::map<std::string, std::string>> frameConversions;
+
+        // [[codegen::verbatim(LineWidthInfo.description)]]
+        std::optional<float> lineWidth;
+
+        // [[codegen::verbatim(StandoffDistanceInfo.description)]]
+        std::optional<float> standOffDistance;
+
+        // If this value is set to 'true' the field-of-views bounds values will be
+        // simplified on load. Bound vectors will be removed if they are the strict linear
+        // interpolation between the two neighboring vectors. This value is disabled on
+        // default
+        std::optional<bool> simplifyBounds;
+    };
+#include "renderablefov_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableFov::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderableFieldOfView",
-        "newhorizons_renderable_fieldofview",
-        {
-            {
-                KeyBody,
-                new StringVerifier,
-                Optional::No,
-                "The SPICE name of the source body for which the field of view should be "
-                "rendered."
-            },
-            {
-                KeyFrame,
-                new StringVerifier,
-                Optional::No,
-                "The SPICE name of the source body's frame in which the field of view "
-                "should be rendered."
-            },
-            {
-                KeyInstrument,
-                new TableVerifier({
-                    {
-                        KeyInstrumentName,
-                        new StringVerifier,
-                        Optional::No,
-                        "The SPICE name of the instrument that is rendered"
-                    },
-                    {
-                        KeyInstrumentAberration,
-                        new StringInListVerifier({
-                            // Taken from SpiceManager::AberrationCorrection
-                                "NONE",
-                                "LT", "LT+S",
-                                "CN", "CN+S",
-                                "XLT", "XLT+S",
-                                "XCN", "XCN+S"
-                        }),
-                        Optional::Yes,
-                        "The aberration correction that is used for this field of view. "
-                        "The default is 'NONE'."
-                    }
-                }),
-                Optional::No,
-                "A table describing the instrument whose field of view should be "
-                "rendered."
-            },
-            {
-                KeyPotentialTargets,
-                new StringListVerifier,
-                Optional::No,
-                "A list of potential targets (specified as SPICE names) that the field "
-                "of view should be tested against."
-            },
-            {
-                KeyFrameConversions,
-                new TableVerifier({
-                    {
-                        DocumentationEntry::Wildcard,
-                        new StringVerifier,
-                        Optional::No
-                    }
-                }),
-                Optional::Yes,
-                "A list of frame conversions that should be registered with the "
-                "SpiceManager."
-            },
-            {
-                LineWidthInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                LineWidthInfo.description
-            },
-            {
-                StandoffDistanceInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                StandoffDistanceInfo.description
-            },
-            {
-                KeyBoundsSimplification,
-                new BoolVerifier,
-                Optional::Yes,
-                "If this value is set to 'true' the field-of-views bounds values will be "
-                "simplified on load. Bound vectors will be removed if they are the "
-                "strict linear interpolation between the two neighboring vectors. This "
-                "value is disabled on default."
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "newhorizons_renderable_fieldofview";
+    return doc;
 }
 
 
@@ -342,61 +248,37 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
         }
     })
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableFov"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _instrument.spacecraft = dictionary.value<std::string>(KeyBody);
-    _instrument.referenceFrame = dictionary.value<std::string>(KeyFrame);
-
-    _instrument.name = dictionary.value<std::string>(
-        std::string(KeyInstrument) + "." + KeyInstrumentName
-    );
-
-    std::string ia = std::string(KeyInstrument) + "." + KeyInstrumentAberration;
-    if (dictionary.hasValue<std::string>(ia)) {
-        const std::string& ac = dictionary.value<std::string>(ia);
-        _instrument.aberrationCorrection = SpiceManager::AberrationCorrection(ac);
+    _instrument.spacecraft = p.body;
+    _instrument.referenceFrame = p.frame;
+    _instrument.name = p.instrument.name;
+    if (p.instrument.aberration.has_value()) {
+        _instrument.aberrationCorrection = SpiceManager::AberrationCorrection(
+            *p.instrument.aberration
+        );
     }
 
-    ghoul::Dictionary pt = dictionary.value<ghoul::Dictionary>(KeyPotentialTargets);
-    _instrument.potentialTargets.reserve(pt.size());
-    for (size_t i = 1; i <= pt.size(); ++i) {
-        std::string target = pt.value<std::string>(std::to_string(i));
-        _instrument.potentialTargets.push_back(std::move(target));
-    }
+    _instrument.potentialTargets = p.potentialTargets;
 
-    if (dictionary.hasKey(KeyFrameConversions)) {
-        ghoul::Dictionary fc = dictionary.value<ghoul::Dictionary>(KeyFrameConversions);
-        for (std::string_view key : fc.keys()) {
+    if (p.frameConversions.has_value()) {
+        for (const std::pair<const std::string, std::string>& fc : *p.frameConversions) {
             global::moduleEngine->module<SpacecraftInstrumentsModule>()->addFrame(
-                std::string(key),
-                fc.value<std::string>(key)
+                fc.first,
+                fc.second
             );
         }
     }
 
-    if (dictionary.hasKey(LineWidthInfo.identifier)) {
-        _lineWidth = static_cast<float>(dictionary.value<double>(
-            LineWidthInfo.identifier
-        ));
-    }
-
-    if (dictionary.hasKey(StandoffDistanceInfo.identifier)) {
-        _standOffDistance = static_cast<float>(dictionary.value<double>(
-            StandoffDistanceInfo.identifier
-        ));
-    }
-
-    if (dictionary.hasKey(KeyBoundsSimplification)) {
-        _simplifyBounds = dictionary.value<bool>(KeyBoundsSimplification);
-    }
-
+    _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
-    addProperty(_drawSolid);
+
+    _standOffDistance = p.standOffDistance.value_or(_lineWidth);
     addProperty(_standOffDistance);
+    
+    _simplifyBounds = p.simplifyBounds.value_or(_simplifyBounds);
+
+    addProperty(_drawSolid);
 
     addProperty(_colors.defaultStart);
     addProperty(_colors.defaultEnd);
