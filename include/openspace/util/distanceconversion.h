@@ -278,26 +278,21 @@ constexpr double convertMeters(double meters, DistanceUnit requestedUnit) {
         case DistanceUnit::Gigaparsec:
             return meters / (1e9 * distanceconstants::Parsec);
         case DistanceUnit::Thou:
-            return (meters * 1000.0 / 25.4) * 1000.0; // m -> mm -> inch -> thou
+            return meters / (1e-3 * distanceconstants::Inch);
         case DistanceUnit::Inch:
-            return (meters * 1000.0 / 25.4); // m -> mm -> inch
+            return meters / distanceconstants::Inch;
         case DistanceUnit::Foot:
-            return (meters * 1000.0 / 25.4) / 12.0; // m -> mm -> inch -> feet
+            return meters / distanceconstants::Foot;
         case DistanceUnit::Yard:
-            // m -> mm -> inch -> feet -> yard
-            return (meters * 1000.0 / 25.4) / 12.0 / 3.0;
+            return meters / distanceconstants::Yard;
         case DistanceUnit::Chain:
-            // m -> mm -> inch -> feet -> yard -> chain
-            return (meters * 1000.0 / 25.4) / 12.0 / 3.0 / 22.0;
+            return meters / distanceconstants::Chain;
         case DistanceUnit::Furlong:
-            // m -> mm -> inch -> feet -> yard -> chain -> furlong
-            return (meters * 1000.0 / 25.4) / 12.0 / 3.0 / 22.0 / 10.0;
+            return meters / (10.0 * distanceconstants::Chain);
         case DistanceUnit::Mile:
-            // m -> mm -> inch -> feet -> yard -> chain -> furlong -> mile
-            return (meters * 1000.0 / 25.4) / 12.0 / 3.0 / 22.0 / 10.0 / 8.0;
+            return meters / distanceconstants::Mile;
         case DistanceUnit::League:
-            // m -> mm -> inch -> feet -> yard -> chain -> furlong -> mile -> league
-            return (meters * 1000.0 / 25.4) / 12.0 / 3.0 / 22.0 / 10.0 / 8.0 / 3.0;
+            return meters / (3.0 * distanceconstants::Mile);
         default:
             throw ghoul::MissingCaseException();
     }
