@@ -22,25 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___DASHBOARDITEMMISSION___H__
-#define __OPENSPACE_MODULE_BASE___DASHBOARDITEMMISSION___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___SCRIPTLOG___H__
+#define __OPENSPACE_UI_LAUNCHER___SCRIPTLOG___H__
 
-#include <openspace/rendering/dashboardtextitem.h>
+#include "profile/keybindingsdialog.h"
+#include <QDialog>
+#include <QListWidget>
 
-namespace openspace {
-
-namespace documentation { struct Documentation; }
-
-class DashboardItemMission : public DashboardTextItem {
+class ScriptlogDialog : public QDialog {
+Q_OBJECT
 public:
-    DashboardItemMission(const ghoul::Dictionary& dictionary);
-    virtual ~DashboardItemMission() = default;
+    /**
+     * Constructor for ScriptlogDialog class
+     *
+     * \param bindingDialog keybindingDialog that openend this window.
+     * \param parent Pointer to parent Qt widget
+     */
+    ScriptlogDialog(KeybindingsDialog* bindingDialog, QWidget* parent);
 
-    void render(glm::vec2& penPosition) override;
+private slots:
+    void saveChosenScripts();
 
-    glm::vec2 size() const override;
+private:
+    void createWidgets();
+
+    KeybindingsDialog* _bindingDialog = nullptr;
+    QListWidget* _scriptlogList = nullptr;
 };
 
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___DASHBOARDITEMMISSION___H__
+#endif // __OPENSPACE_UI_LAUNCHER___SCRIPTLOG___H__

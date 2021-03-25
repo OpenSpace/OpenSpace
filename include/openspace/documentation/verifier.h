@@ -156,7 +156,17 @@ struct IntVerifier : public TemplateVerifier<int> {
  * <code>std::string</code>. No implicit conversion is considered in this testing.
  */
 struct StringVerifier : public TemplateVerifier<std::string> {
+    StringVerifier(bool mustBeNotEmpty = false);
+
+    TestResult operator()(const ghoul::Dictionary& dictionary,
+        const std::string& key) const override;
+
     std::string type() const override;
+
+    bool mustBeNotEmpty() const;
+
+private:
+    bool _mustBeNotEmpty = false;
 };
 
 /**
