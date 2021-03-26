@@ -22,63 +22,19 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___SERVERINTERFACE___H__
-#define __OPENSPACE_MODULE_SERVER___SERVERINTERFACE___H__
+#include <vector>
 
-#include <openspace/properties/propertyowner.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/list/stringlistproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
+namespace openspace::properties {
 
-namespace ghoul::io { class SocketServer; }
+template <typename T>
+ListProperty<T>::ListProperty(Property::PropertyInfo info)
+    : TemplateProperty<std::vector<T>>(std::move(info))
+{}
 
-namespace openspace {
+template <typename T>
+ListProperty<T>::ListProperty(Property::PropertyInfo info, std::vector<T> values)
+    : TemplateProperty<std::vector<T>>(std::move(info), std::move(values))
+{}
 
-class ServerInterface : public properties::PropertyOwner {
-public:
-    static std::unique_ptr<ServerInterface> createFromDictionary(
-        const ghoul::Dictionary& dictionary);
+} // namespace openspace::properties
 
-    ServerInterface(const ghoul::Dictionary& dictionary);
-    ~ServerInterface();
-
-    void initialize();
-    void deinitialize();
-    bool isEnabled() const;
-    bool isActive() const;
-    int port() const;
-    std::string password() const;
-    bool clientHasAccessWithoutPassword(const std::string& address) const;
-    bool clientIsBlocked(const std::string& address) const;
-
-    ghoul::io::SocketServer* server();
-
-private:
-    enum class InterfaceType : int {
-        TcpSocket = 0,
-        WebSocket
-    };
-
-    enum class Access : int {
-        Deny = 0,
-        RequirePassword,
-        Allow
-    };
-
-    properties::OptionProperty _type;
-    properties::IntProperty _port;
-    properties::BoolProperty _enabled;
-    properties::StringListProperty _allowAddresses;
-    properties::StringListProperty _requirePasswordAddresses;
-    properties::StringListProperty _denyAddresses;
-    properties::OptionProperty _defaultAccess;
-    properties::StringProperty _password;
-
-    std::unique_ptr<ghoul::io::SocketServer> _socketServer;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_SERVER___SERVERINTERFACE___H__

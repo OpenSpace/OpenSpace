@@ -22,13 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/properties/stringlistproperty.h>
+#include <openspace/properties/list/stringlistproperty.h>
 
+#include <openspace/json.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/misc/misc.h>
 #include <numeric>
-
-#include <openspace/json.h>
 
 namespace {
 
@@ -58,8 +57,8 @@ bool toLuaConversion(lua_State* state, std::vector<std::string> val) {
     lua_createtable(state, static_cast<int>(val.size()), 0);
 
     int i = 1;
-    for (std::string& v : val) {
-        lua_pushnumber(state, i);
+    for (const std::string& v : val) {
+        lua_pushinteger(state, i);
         lua_pushstring(state, v.c_str());
         lua_settable(state, -3);
         ++i;
@@ -71,6 +70,7 @@ bool toLuaConversion(lua_State* state, std::vector<std::string> val) {
 std::vector<std::string> fromStringConversion(const std::string& val, bool& success) {
     std::vector<std::string> tokens = ghoul::tokenizeString(val, ',');
     for (std::string& token : tokens) {
+        ghoul::trimWhitespace(token);
         // Each incoming string is of the form "value"
         // so we want to remove the leading and trailing " characters
         if (token.size() > 2 && (token[0] == '"' && token[token.size() - 1] == '"')) {
@@ -83,33 +83,26 @@ std::vector<std::string> fromStringConversion(const std::string& val, bool& succ
 }
 
 bool toStringConversion(std::string& outValue, const std::vector<std::string>& inValue) {
-    outValue = "[";
-    for (const std::string& v : inValue) {
-        std::string str;
-        nlohmann::json json;
-        nlohmann::to_json(json, v);
-        str = json.dump();
-        if (&v != &*inValue.cbegin()) {
-            outValue += ", ";
-        }
-        outValue += str;
-    }
-    outValue += "]";
+    // We want the output to be valid json
+    nlohmann::json json;
+    nlohmann::to_json(json, inValue);
+    outValue = json.dump();
 
-    // outValue = std::accumulate(
-    //     inValue.begin(),
-    //     inValue.end(),
-    //     std::string(""),
-    //     [](std::string lhs, std::string rhs) {
-    //         return lhs + "," + "\"" + rhs + "\"";
-    //     }
-    // );
     return true;
 }
 
 } // namespace
 
 namespace openspace::properties {
+
+StringListProperty::StringListProperty(Property::PropertyInfo info)
+    : ListProperty(std::move(info))
+{}
+
+StringListProperty::StringListProperty(Property::PropertyInfo info,
+                                       std::vector<std::string> values)
+    : ListProperty(std::move(info), std::move(values))
+{}
 
 REGISTER_TEMPLATEPROPERTY_SOURCE(
     StringListProperty,

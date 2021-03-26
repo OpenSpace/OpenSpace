@@ -22,63 +22,26 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___SERVERINTERFACE___H__
-#define __OPENSPACE_MODULE_SERVER___SERVERINTERFACE___H__
+#ifndef __OPENSPACE_CORE___LISTPROPERTY___H__
+#define __OPENSPACE_CORE___LISTPROPERTY___H__
 
-#include <openspace/properties/propertyowner.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/list/stringlistproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/templateproperty.h>
 
-namespace ghoul::io { class SocketServer; }
+#include <vector>
 
-namespace openspace {
+namespace openspace::properties {
 
-class ServerInterface : public properties::PropertyOwner {
+template <typename T>
+class ListProperty : public TemplateProperty<std::vector<T>> {
 public:
-    static std::unique_ptr<ServerInterface> createFromDictionary(
-        const ghoul::Dictionary& dictionary);
+    ListProperty(Property::PropertyInfo info);
+    ListProperty(Property::PropertyInfo info, std::vector<T> values);
 
-    ServerInterface(const ghoul::Dictionary& dictionary);
-    ~ServerInterface();
-
-    void initialize();
-    void deinitialize();
-    bool isEnabled() const;
-    bool isActive() const;
-    int port() const;
-    std::string password() const;
-    bool clientHasAccessWithoutPassword(const std::string& address) const;
-    bool clientIsBlocked(const std::string& address) const;
-
-    ghoul::io::SocketServer* server();
-
-private:
-    enum class InterfaceType : int {
-        TcpSocket = 0,
-        WebSocket
-    };
-
-    enum class Access : int {
-        Deny = 0,
-        RequirePassword,
-        Allow
-    };
-
-    properties::OptionProperty _type;
-    properties::IntProperty _port;
-    properties::BoolProperty _enabled;
-    properties::StringListProperty _allowAddresses;
-    properties::StringListProperty _requirePasswordAddresses;
-    properties::StringListProperty _denyAddresses;
-    properties::OptionProperty _defaultAccess;
-    properties::StringProperty _password;
-
-    std::unique_ptr<ghoul::io::SocketServer> _socketServer;
+    virtual ~ListProperty() = 0 {}; // TODO: remove definition
 };
 
-} // namespace openspace
+} // namespace openspace::properties
 
-#endif // __OPENSPACE_MODULE_SERVER___SERVERINTERFACE___H__
+#include "openspace/properties/listproperty.inl"
+
+#endif // __OPENSPACE_CORE___LISTPROPERTY___H__
