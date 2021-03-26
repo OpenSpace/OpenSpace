@@ -233,13 +233,13 @@ RingsComponent::RingsComponent(const ghoul::Dictionary& dictionary)
         // in as-is so it would be easy to just pass it directly to the initialize method
         // instead
         _ringsDictionary = dictionary.value<ghoul::Dictionary>("Rings");
-    }
 
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        _ringsDictionary,
-        "RingsComponent"
-    );
+        documentation::testSpecificationAndThrow(
+            Documentation(),
+            _ringsDictionary,
+            "RingsComponent"
+        );
+    }
 }
 
 void RingsComponent::initialize() {

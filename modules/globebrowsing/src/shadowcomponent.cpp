@@ -172,6 +172,9 @@ ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
     // coded into the RenderableGlobe. Instead, the parent should unpack the dictionary
     // and pass the unpacked dictionary in here;  Or maybe we don't want a dictionary at
     // this state anyway?
+    if (!dictionary.hasValue<ghoul::Dictionary>("Shadows")) {
+        return;
+    }
     ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>("Shadows");
     
     const Parameters p = codegen::bake<Parameters>(d);
