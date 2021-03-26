@@ -41,12 +41,9 @@ Africa2 32.4,-39.2,53.5,12.8
 */
 
 uniform mat4 modelViewProjection;
-uniform vec3 maximumColor;
-uniform vec3 minimumColor;
 uniform float opacity;
 uniform vec2 latitudeThreshold;
 uniform vec2 longitudeThreshold;
-uniform int dailyFlights;
 
 out vec4 vs_position;
 out vec2 vs_latlon;
@@ -116,8 +113,6 @@ void main() {
     vec4 position;
 
     position = geoToCartConversion(vertexPosition.x, vertexPosition.y, 10000.0);
-
-    float t = clamp((float(dailyFlights) - minFlights) / (maxFlights - minFlights), 0.0, 1.0);
    
     vs_interpColor = continentColor(vertexPosition);
     vs_latlon = vertexPosition * PI / 180.0;

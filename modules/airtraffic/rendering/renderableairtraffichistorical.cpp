@@ -53,27 +53,12 @@ namespace ghoul::opengl {
 
 namespace {
     
-    constexpr const std::array<const char*, 8> UniformNames = {
+    constexpr const std::array<const char*, 5> UniformNames = {
         "modelViewProjection", 
-        "maximumColor",
-        "minimumColor",
         "opacity", 
         "latitudeThreshold", 
         "longitudeThreshold",
-        "dailyFlights",
         "time"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo MaximumColorInfo = {
-       "MaximumColor",
-       "Maximum Color",
-       "The color used to represent the maximum number of flights. This value is used to interpolate a color between max and min."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo MinimumColorInfo = {
-       "MinimumColor",
-       "Minimum Color",
-       "The color used to represent the minimum number of flights. This value is used to interpolate a color between max and min."
     };
 
     constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
@@ -105,13 +90,9 @@ documentation::Documentation RenderableAirTrafficHistorical::Documentation() {
 
 RenderableAirTrafficHistorical::RenderableAirTrafficHistorical(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _maximumColor(MaximumColorInfo, glm::vec3(0.7f, 0.f, 1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _minimumColor(MinimumColorInfo, glm::vec3(1.f, 0.7f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
     , _opacity(OpacityInfo, 0.4f, 0.f, 1.f)
     , _nDailyFlights(DailyFlightsInfo, 0, 0, 150000)
     {
-        addProperty(_maximumColor);
-        addProperty(_minimumColor);
         addProperty(_opacity);
 
         _nDailyFlights.setReadOnly(true);
@@ -160,42 +141,62 @@ RenderableAirTrafficHistorical::RenderableAirTrafficHistorical(const ghoul::Dict
         return _shader != nullptr;
     };
 
+    // The main render function
     void RenderableAirTrafficHistorical::render(const RenderData& data, RendererTasks& rendererTask) {
         
+        // Keep track of the current time in openspace to fetch correct data
         // YYYY-MM-DD
         double timeNow = data.time.j2000Seconds();
-        std::time_t date = static_cast<time_t>(timeNow + 365.25 * 24 * 60 * 60 * 30);
-        tm* tempTime = gmtime(&date);
-        Date inDate; 
-        inDate.year = tempTime->tm_year + 1900;
-        inDate.month = tempTime->tm_mon + 1;
-        inDate.day = tempTime->tm_mday;
- 
+        Date inDate = convertDate(timeNow);
 
-        if (inDate == _nextDate && !_isDataLoading) {
- //           std::cout << std::endl << "Fetching day after next day" << std::endl;
-            _currentDate = _nextDate;
-            _nextDate = _currentDate.getTomorrow(); //_lastUpdate < timeNow ? _currentDate.getTomorrow() : _currentDate.getYesterday();
-            _nextNextDate = _nextDate.getTomorrow(); //_lastUpdate < timeNow ? _nextDate.getTomorrow() : _nextDate.getYesterday();
-            //fetchData(_nextDate); updateBuffers(_nextDate);
-            //fetchData(_nextNextDate); updateBuffers(_nextNextDate);
+        bool reverseTime = _lastUpdate > timeNow;
+
+        // Update one buffer if time moves forward
+        if (inDate == _nextDate && !_isDataLoading && !reverseTime) {
             
+            _currentDate = _nextDate;
+            _nextDate = _currentDate.getTomorrow();
+            _nextNextDate = _nextDate.getTomorrow();
+
             _isDataLoading = true;
+
+            // Fetch day after next day async to avoid lag
             _future = std::async(std::launch::async, &RenderableAirTrafficHistorical::updateBuffers, this, _nextNextDate, true);
             _lastUpdate = timeNow;
         }
-        else if (inDate != _currentDate && !_isDataLoading) {
-            //std::cout << "Fetching three days" << std::endl;
-            
-            _currentDate = inDate;
-            _nextDate = _currentDate.getTomorrow(); //_lastUpdate < timeNow ? _currentDate.getTomorrow() : _currentDate.getYesterday();
-            _nextNextDate = _nextDate.getTomorrow(); //_lastUpdate < timeNow ? _nextDate.getTomorrow() : _nextDate.getYesterday();
+        // Update one buffer if time moves in reverse
+        else if(inDate == _nextNextDate && !_isDataLoading && reverseTime){
+            _currentDate = _nextDate;
+            _nextDate = _currentDate.getYesterday();
+            _nextNextDate = _nextDate.getYesterday();
+
+            _isDataLoading = true;
+
+            // Fetch day after next day async to avoid lag
+            _future = std::async(std::launch::async, &RenderableAirTrafficHistorical::updateBuffersReverse, this, _nextNextDate, true);
+            _lastUpdate = timeNow;
+        }
+        // Update all three buffers
+        // This is performed if the date changes 
+        // with more than one day in one step
+        else if ((inDate != _currentDate && !_isDataLoading && !reverseTime) || (inDate != _nextDate && !_isDataLoading && reverseTime)) {
             _bufferA.date = Date(); _bufferB.date = Date(); _bufferC.date = Date();
-            
-            updateBuffers(_currentDate); 
+
+            if(!reverseTime) {
+                _currentDate = inDate;
+                _nextDate = _currentDate.getTomorrow(); 
+                _nextNextDate = _nextDate.getTomorrow();
+            }
+            else {
+                _currentDate = inDate.getTomorrow();
+                _nextDate = inDate;
+                _nextNextDate = _nextDate.getYesterday();
+            }
+
+            updateBuffers(_currentDate);
             updateBuffers(_nextDate);
             updateBuffers(_nextNextDate);
-            
+
             _lastUpdate = timeNow;
 
         }
@@ -203,9 +204,9 @@ RenderableAirTrafficHistorical::RenderableAirTrafficHistorical(const ghoul::Dict
         // Check if new data finished loading. Update buffers ONLY if finished
         if (_future.valid() && _future.wait_for(seconds(0)) == std::future_status::ready) {
             _future.get();
+            // As the asynchronous stage is finished, send to glBindBuffer on the main thread and context
             sendToGLBuffer(_bufferA.date == _nextNextDate ? _bufferA : _bufferB.date == _nextNextDate ? _bufferB : _bufferC);
             _isDataLoading = false;
-            //std::cout << "async finished" << std::endl;
         }
 
         if (_bufferA.vertexBufferData.empty() && _bufferB.vertexBufferData.empty() && _bufferC.vertexBufferData.empty()) return;
@@ -224,33 +225,30 @@ RenderableAirTrafficHistorical::RenderableAirTrafficHistorical(const ghoul::Dict
             data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
         );
 
-        _shader->setUniform(_uniformCache.maximumColor, _maximumColor);
-        _shader->setUniform(_uniformCache.minimumColor, _minimumColor);
         _shader->setUniform(_uniformCache.opacity, _opacity);
         _shader->setUniform(_uniformCache.latitudeThreshold, RenderableAirTrafficBound::getLatBound());
         _shader->setUniform(_uniformCache.longitudeThreshold, RenderableAirTrafficBound::getLonBound());
-        _shader->setUniform(_uniformCache.dailyFlights, _nDailyFlights);
+        // Time is sent to the shaders as a UNIX timestamp for easy interpolation
         _shader->setUniform(_uniformCache.time, static_cast<int>(data.time.j2000Seconds() + 365.25 * 24 * 60 * 60 * 30)); 
 
         glLineWidth(1.f);
         
+        // Draw the two buffers whos date is current and next
         if (_bufferA.date ==_currentDate || _bufferA.date == _nextDate) {
-            // Draw B and C
-            //std::cout << "  Rendering buffer with dates: " << _bufferB.date.year << " - " << _bufferB.date.month << " - " << _bufferB.date.day << std::endl;
+            // Draw A
             glBindVertexArray(_bufferA.vertexArray);
             glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(_bufferA.vertexBufferData.size()));
             glBindVertexArray(0);
         }
         if (_bufferB.date == _currentDate || _bufferB.date == _nextDate) {
-            // Draw A and C
-            //std::cout << "  Rendering buffer with dates: " << _bufferB.date.year << " - " << _bufferB.date.month << " - " << _bufferB.date.day << std::endl;
+            // Draw B
             glBindVertexArray(_bufferB.vertexArray);
             glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(_bufferB.vertexBufferData.size()));
             glBindVertexArray(0);
            
         }
         if (_bufferC.date == _currentDate || _bufferC.date == _nextDate) {
-            //std::cout << "  Rendering buffer with dates: " << _bufferC.date.year << " - " << _bufferC.date.month << " - " << _bufferC.date.day << std::endl;
+            // Draw C
             glBindVertexArray(_bufferC.vertexArray);
             glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(_bufferC.vertexBufferData.size()));
             glBindVertexArray(0);
@@ -261,40 +259,83 @@ RenderableAirTrafficHistorical::RenderableAirTrafficHistorical(const ghoul::Dict
     };
 
 
-    bool RenderableAirTrafficHistorical::updateBuffers(const Date& date, const bool async) {
+   Date RenderableAirTrafficHistorical::convertDate(double timeNow) {
 
+        std::time_t date = static_cast<time_t>(timeNow + 365.25 * 24 * 60 * 60 * 30);
+        tm* tempTime = gmtime(&date);
+        
+        Date inDate;
+
+        inDate.year = tempTime->tm_year + 1900;
+        inDate.month = tempTime->tm_mon + 1;
+        inDate.day = tempTime->tm_mday;
+
+        return inDate;
+    }
+
+    // Updating buffers and handles both async and sync cases
+    void RenderableAirTrafficHistorical::updateBuffersReverse(const Date& date, const bool async) {
+
+        // Load data for the specific date
         fetchData(date);
 
-   //     std::cout << "Entering update buffer with date: " << date.year << " - " << date.month << " - " << date.day << std::endl;
+        // Fill the un-used buffer
+        if (_bufferA.date != _nextDate && _bufferA.date != _nextNextDate) {
+            // Fill A
+            fillBuffer(_bufferA);
+            if (!async) sendToGLBuffer(_bufferA);
+            _bufferA.date = date;
+        }
+        else if (_bufferB.date != _nextDate && _bufferB.date != _nextNextDate) {
+            // Fill B
+            fillBuffer(_bufferB);
+            if (!async) sendToGLBuffer(_bufferB);
+            _bufferB.date = date;
+        }
+        else {
+            // Fill C
+            fillBuffer(_bufferC);
+            if (!async) sendToGLBuffer(_bufferC);
+            _bufferC.date = date;
+        }
 
+        // Update the number of flights according to what date it is
+        _nDailyFlights = _bufferA.date == _nextDate ? _bufferA.vertexBufferData.size() / 2 :
+            _bufferB.date == _nextDate ? _bufferB.vertexBufferData.size() / 2 : _bufferC.vertexBufferData.size() / 2;
+    }
+
+    // Updating buffers and handles both async and sync cases
+    void RenderableAirTrafficHistorical::updateBuffers(const Date& date, const bool async) {
+
+        // Load data for the specific date
+        fetchData(date);
+
+        // Fill the buffer
         if(_bufferA.date != _currentDate && _bufferA.date != _nextDate) {
             // Fill A
-     //       std::cout << "Filling buffer A" << std::endl;
             fillBuffer(_bufferA); 
             if(!async) sendToGLBuffer(_bufferA);
             _bufferA.date = date;
         }
         else if(_bufferB.date != _currentDate && _bufferB.date != _nextDate) {
             // Fill B
-       //     std::cout << "Filling buffer B" << std::endl;
             fillBuffer(_bufferB); 
             if (!async) sendToGLBuffer(_bufferB);
             _bufferB.date = date;
         } 
         else {
             // Fill C
-         //   std::cout << "Filling buffer C" << std::endl;
             fillBuffer(_bufferC); 
             if (!async) sendToGLBuffer(_bufferC);
             _bufferC.date = date;
         }
 
+        // Update the number of flights according to what date it is
         _nDailyFlights = _bufferA.date == _currentDate ? _bufferA.vertexBufferData.size() / 2 : 
-           _bufferB.date == _currentDate ? _bufferB.vertexBufferData.size() / 2 : _bufferC.vertexBufferData.size() / 2;
-
-        return true;
+            _bufferB.date == _currentDate ? _bufferB.vertexBufferData.size() / 2 : _bufferC.vertexBufferData.size() / 2;
     }
 
+    // This function will fill the backend storage with data
     void RenderableAirTrafficHistorical::fillBuffer(Buffer& buffer){
         int bufIdx = 0;
 
@@ -335,6 +376,9 @@ RenderableAirTrafficHistorical::RenderableAirTrafficHistorical(const ghoul::Dict
         }
     }
 
+    // glBindBuffer is a critical section and needs to be performed 
+    // on the same thread and context which is why this code is not 
+    // executed directly in updateBuffers()
     void RenderableAirTrafficHistorical::sendToGLBuffer(Buffer &buffer) {
         glBindVertexArray(buffer.vertexArray);
         glBindBuffer(GL_ARRAY_BUFFER, buffer.vertexBuffer);
@@ -346,7 +390,7 @@ RenderableAirTrafficHistorical::RenderableAirTrafficHistorical(const ghoul::Dict
             GL_STATIC_DRAW
         );
 
-        // lat and long
+        // lat & long
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(
             0,
@@ -370,6 +414,8 @@ RenderableAirTrafficHistorical::RenderableAirTrafficHistorical(const ghoul::Dict
         glBindVertexArray(0);
     }
 
+    // Fetches a new day of flight data from csv file in 
+    // directory structure
     bool RenderableAirTrafficHistorical::fetchData( const Date& date ){
 
         std::string strMonth = std::to_string(date.month);

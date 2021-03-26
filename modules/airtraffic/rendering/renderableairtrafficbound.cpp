@@ -45,11 +45,10 @@ namespace ghoul::opengl {
 
 namespace {
 
-    constexpr const std::array<const char*, 6> UniformNames = {
+    constexpr const std::array<const char*, 5> UniformNames = {
         "modelViewProjection",
         "color",
         "opacity",
-        "lineWidth",
         "latitudeThreshold",
         "longitudeThreshold",
     };
@@ -111,6 +110,20 @@ namespace openspace {
         addProperty(_lineWidth);
         addProperty(_latitudeThreshold);
         addProperty(_longitudeThreshold);
+
+
+        auto onChange = [&](bool enabled) {
+            if (enabled) {
+                RenderableAirTrafficBound::_lat = _latitudeThreshold;
+                RenderableAirTrafficBound::_lon = _longitudeThreshold;
+            }
+            else {
+                RenderableAirTrafficBound::_lat = glm::vec2(-90.f, 90.f);
+                RenderableAirTrafficBound::_lon = glm::vec2(-180.f, 180.f);
+            }
+        };
+
+        onEnabledChange(onChange);
         
         setRenderBin(RenderBin::PostDeferredTransparent);
 
@@ -173,7 +186,6 @@ namespace openspace {
 
         _shader->setUniform(_uniformCache.color, _color);
         _shader->setUniform(_uniformCache.opacity, _opacity);
-        _shader->setUniform(_uniformCache.lineWidth, _lineWidth);
         _shader->setUniform(_uniformCache.latitudeThreshold, _latitudeThreshold);
         _shader->setUniform(_uniformCache.longitudeThreshold, _longitudeThreshold);
 

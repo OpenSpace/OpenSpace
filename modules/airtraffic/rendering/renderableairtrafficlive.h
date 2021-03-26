@@ -82,9 +82,9 @@ private:
         float latitude = static_cast<float>(_THRESHOLD);
         float longitude = static_cast<float>(_THRESHOLD);
         float barometricAltitude = 0.f;
-        float velocity = 0.f; 
-        float flightDirection = 0.f; // true_track in data
-        int lastContact = 0; // Draw only if changed
+        //float velocity = 0.f; 
+        //float flightDirection = 0.f; // true_track in data
+        //int lastContact = 0; // Draw only if changed
     };
     
     template<size_t N>

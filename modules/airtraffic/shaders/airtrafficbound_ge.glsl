@@ -41,10 +41,8 @@ in vec4 vs_interpColor[];
 in vec2 vs_latlon[];
 in float vs_vertexID[];
 
-
 out vec4 ge_position;
 out vec4 ge_interpColor;
-
 
 float greatCircleDistance(float lat1, float lon1, float lat2, float lon2) {
     // distance between latitudes 

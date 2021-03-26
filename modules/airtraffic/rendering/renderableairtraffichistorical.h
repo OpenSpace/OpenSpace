@@ -48,6 +48,10 @@ namespace openspace {
 
 namespace documentation { struct Documentation; }
 
+// Defines a date
+// with only year, month, and day.
+// Also defines operator==, operator!=
+// and operator=
 struct Date {
     int year = 0;
     int month = 0;
@@ -155,11 +159,14 @@ public:
 
     bool fetchData(const Date& date); 
     
-    bool updateBuffers(const Date& date, const bool async = false);
+    void updateBuffers(const Date& date, const bool async = false);
+    void updateBuffersReverse(const Date& date, const bool async = false);
 
     static documentation::Documentation Documentation();
 
 private:
+    // Stores some number outside the latitude and longitude 
+    // interval used for validation 
     static const int _THRESHOLD = -9999;
 
     struct AircraftVBOLayout {
@@ -169,6 +176,9 @@ private:
         int lastSeen = 0;
     };
 
+    // Stores the backend storage in vertexBufferData
+    // also contains the vertexArray, vertexBuffer,
+    // and a Date struct for the day the data is valid
     struct Buffer {
         std::vector<AircraftVBOLayout>  vertexBufferData;
         Date date;
@@ -182,31 +192,38 @@ private:
 
     void fillBuffer(Buffer& buffer);
     void sendToGLBuffer(Buffer& buffer);
+    Date convertDate(double timeNow); 
     
-    properties::Vec3Property _maximumColor;
-    properties::Vec3Property _minimumColor;
+    // GUI properties
     properties::FloatProperty _opacity;
     properties::IntProperty _nDailyFlights;
 
-    // Backend storage for vertex buffer object containing all points
-    //std::vector<AircraftVBOLayout>  _vertexBufferData;
+    // Initilising backend storage for 
+    // vertex buffer object containing all points
     Buffer _bufferA = Buffer(0);
     Buffer _bufferB = Buffer(1); 
     Buffer _bufferC = Buffer(2);
 
+    // Initilize shader program an set Uniforms 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
+    UniformCache(modelViewProjection, opacity, latitudeThreshold, longitudeThreshold, time) _uniformCache;
+    
+    // Date structs,
+    // these will correspond to "today", "tomorrow",
+    // and day after "tomorrow" for the date set in OpenSpace
+    // and reverse
     Date _currentDate;
     Date _nextDate;
     Date _nextNextDate;
-    std::future<bool> _future;
+    
+    // Stuff related to the data loading
+    std::future<void> _future;
     bool _isDataLoading = false;
-    double _lastUpdate = 0.0;
-
-    UniformCache(modelViewProjection, maximumColor, minimumColor, opacity, latitudeThreshold, longitudeThreshold, dailyFlights, time) _uniformCache;
     std::vector<std::vector<std::string>> _data;
-   
     const std::string _PATH = "${MODULE_AIRTRAFFIC}/data/";
-
+   
+    // Used to keep track of time direction
+    double _lastUpdate = 0.0;
 };
 
 } // namespace openspace

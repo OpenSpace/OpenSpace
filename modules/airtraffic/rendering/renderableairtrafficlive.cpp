@@ -327,12 +327,9 @@ RenderableAirTrafficLive::RenderableAirTrafficLive(const ghoul::Dictionary& dict
             // ---
             std::string icao24 = aircraft[0];
 
-            temp.lastContact = static_cast<int>(aircraft[4]);
             temp.latitude = static_cast<float>(aircraft[6]);  
             temp.longitude = static_cast<float>(aircraft[5]);
             temp.barometricAltitude = static_cast<float>(aircraft[7]);
-            temp.velocity = static_cast<float>(aircraft[9]);
-            temp.flightDirection = static_cast<float>(aircraft[10]);
             
             if(temp.latitude > _THRESHOLD && temp.longitude > _THRESHOLD) {
                 if(_aircraftMap[icao24].list.size() >= _TRAILSIZE) _aircraftMap[icao24].list.pop_back();
@@ -365,28 +362,6 @@ RenderableAirTrafficLive::RenderableAirTrafficLive(const ghoul::Dictionary& dict
             GL_FALSE, 
             sizeof(AircraftVBOLayout),  
             nullptr
-        );
-
-        // Velocity & flight direction
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(
-            1,
-            2,
-            GL_FLOAT,
-            GL_FALSE,
-            sizeof(AircraftVBOLayout),
-            reinterpret_cast<GLvoid*>(3 * sizeof(GL_FLOAT)) // start at pos 3
-        );
-
-        // Last contact
-        glEnableVertexAttribArray(2);
-        glVertexAttribPointer(
-            2,
-            1,
-            GL_INT,
-            GL_FALSE,
-            sizeof(AircraftVBOLayout),
-            reinterpret_cast<GLvoid*>(5 * sizeof(GL_FLOAT))
         );
 
         glBindVertexArray(0);
