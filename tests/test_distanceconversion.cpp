@@ -183,4 +183,76 @@ TEST_CASE("DistanceConversion: Convert from meters", "[distanceconversion]") {
     REQUIRE(res == Approx(meters / (3.0 * 1609.344)));
 }
 
+TEST_CASE("DistanceConversion: Cross convertions", "[distanceconversion]") {
+    const double unit = 1.0;
+    double res;
 
+    res = convertDistance(unit, DistanceUnit::Nanometer, DistanceUnit::Kilometer);
+    REQUIRE(res == Approx(1e-12));
+
+    res = convertDistance(unit, DistanceUnit::Micrometer, DistanceUnit::Decimeter);
+    REQUIRE(res == Approx(1e-5));
+
+    res = convertDistance(unit, DistanceUnit::Millimeter, DistanceUnit::Nanometer);
+    REQUIRE(res == Approx(1e6));
+
+    res = convertDistance(unit, DistanceUnit::Centimeter, DistanceUnit::Micrometer);
+    REQUIRE(res == Approx(1e4));
+
+    res = convertDistance(unit, DistanceUnit::Decimeter, DistanceUnit::Millimeter);
+    REQUIRE(res == Approx(1e2));
+
+    res = convertDistance(unit, DistanceUnit::Kilometer, DistanceUnit::Centimeter);
+    REQUIRE(res == Approx(1e5));
+
+    res = convertDistance(unit, DistanceUnit::AU, DistanceUnit::Parsec);
+    REQUIRE(res == Approx(4.84813681e-6));
+
+    res = convertDistance(unit, DistanceUnit::Lighthour, DistanceUnit::Lightmonth);
+    REQUIRE(res == Approx(1.36986305e-3));
+
+    res = convertDistance(unit, DistanceUnit::Lightday, DistanceUnit::Kiloparsec);
+    REQUIRE(res == Approx(8.40003829e-7));
+
+    res = convertDistance(unit, DistanceUnit::Lightmonth, DistanceUnit::Lightday);
+    REQUIRE(res == Approx(30.4166662487));
+
+    res = convertDistance(unit, DistanceUnit::Lightyear, DistanceUnit::Gigaparsec);
+    REQUIRE(res == Approx(3.0660139e-10));
+
+    res = convertDistance(unit, DistanceUnit::Parsec, DistanceUnit::Lightyear);
+    REQUIRE(res == Approx(3.26156379673));
+
+    res = convertDistance(unit, DistanceUnit::Kiloparsec, DistanceUnit::AU);
+    REQUIRE(res == Approx(2.06264806E8));
+
+    res = convertDistance(unit, DistanceUnit::Megaparsec, DistanceUnit::Lighthour);
+    REQUIRE(res == Approx(2.85712978826E10));
+
+    res = convertDistance(unit, DistanceUnit::Gigaparsec, DistanceUnit::Megaparsec);
+    REQUIRE(res == Approx(1e3));
+
+    res = convertDistance(unit, DistanceUnit::Thou, DistanceUnit::Yard);
+    REQUIRE(res == Approx(2.77777778e-5));
+
+    res = convertDistance(unit, DistanceUnit::Inch, DistanceUnit::Foot);
+    REQUIRE(res == Approx(8.33333333e-2));
+
+    res = convertDistance(unit, DistanceUnit::Foot, DistanceUnit::Mile);
+    REQUIRE(res == Approx(1.89393939e-4));
+
+    res = convertDistance(unit, DistanceUnit::Yard, DistanceUnit::Chain);
+    REQUIRE(res == Approx(4.54545455e-2));
+
+    res = convertDistance(unit, DistanceUnit::Chain, DistanceUnit::League);
+    REQUIRE(res == Approx(4.16666666e-3));
+
+    res = convertDistance(unit, DistanceUnit::Furlong, DistanceUnit::Thou);
+    REQUIRE(res == Approx(7.92E6));
+
+    res = convertDistance(unit, DistanceUnit::Mile, DistanceUnit::Inch);
+    REQUIRE(res == Approx(6.3360E4));
+
+    res = convertDistance(unit, DistanceUnit::League, DistanceUnit::Furlong);
+    REQUIRE(res == Approx(24.0));
+}
