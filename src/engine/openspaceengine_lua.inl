@@ -306,11 +306,10 @@ int createSingleColorImage(lua_State* L) {
 
     // @TODO (emmbr 2020-12-18) Verify that the input dictionary is a vec3
     // Would like to clean this up with a more direct use of the Verifier in the future
-    using namespace openspace::documentation;
     const std::string& key = "color";
     ghoul::Dictionary colorDict;
     colorDict.setValue(key, d);
-    TestResult res = Color3Verifier()(colorDict, key);
+    documentation::TestResult res = documentation::Color3Verifier()(colorDict, key);
 
     if (!res.success) {
         return ghoul::lua::luaError(

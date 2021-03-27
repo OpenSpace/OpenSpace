@@ -312,7 +312,7 @@ TestResult Color4Verifier::operator()(const ghoul::Dictionary& dictionary,
         res.success = false;
         res.offenses.push_back({ key + ".a", TestResult::Offense::Reason::Verification });
     }
-    
+
     return res;
 }
 

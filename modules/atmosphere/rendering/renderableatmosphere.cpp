@@ -179,7 +179,8 @@ namespace {
             // A list of objects that cast light on this atmosphere
             std::vector<CasterElement> casters;
         };
-        // Declares shadow groups, meaning which nodes are considered in shadow calculations
+        // Declares shadow groups, meaning which nodes are considered in shadow
+        // calculations
         std::optional<ShadowGroup> shadowGroup;
 
         // [[codegen::verbatim(AtmosphereHeightInfo.description)]]
@@ -360,7 +361,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
 
     _mieScatteringExtinctionPropCoefficient.onChange(updateWithCalculation);
     addProperty(_mieScatteringExtinctionPropCoefficient);
-    
+
     if (p.debug.has_value()) {
         _preCalculatedTexturesScale =
             p.debug->preCalculatedTextureScale.value_or(_preCalculatedTexturesScale);

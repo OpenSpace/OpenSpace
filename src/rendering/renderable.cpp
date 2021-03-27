@@ -129,7 +129,7 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     registerUpdateRenderBinFromOpacity();
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
-    
+
     if (p.tag.has_value()) {
         if (std::holds_alternative<std::string>(*p.tag)) {
             if (!std::get<std::string>(*p.tag).empty()) {
