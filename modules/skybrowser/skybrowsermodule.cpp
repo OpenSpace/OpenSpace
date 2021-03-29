@@ -87,7 +87,7 @@ namespace openspace {
                 "input. An input string should be the name of the system host star"
             },
             {
-                "loacImgCollection",
+                "loadCollection",
                 &skybrowser::luascriptfunctions::loadImgCollection,
                 {},
                 "string or list of strings",

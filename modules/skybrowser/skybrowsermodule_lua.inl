@@ -32,8 +32,14 @@ namespace {
 namespace openspace::skybrowser::luascriptfunctions {
 
     int loadImgCollection(lua_State* L) {
-        ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadCollection");
+        ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::loadCollection");
 
+        ScreenSpaceSkyBrowser* browser = dynamic_cast<ScreenSpaceSkyBrowser*>(global::renderEngine->screenSpaceRenderable("SkyBrowser1"));
+        std::string url = "http://www.worldwidetelescope.org/wwtweb/catalog.aspx?W=wise";
+        browser->sendMessageToWWT(browser->createMessageForLoadingWWTImgColl(url));
+        browser->sendMessageToWWT(browser->createMessageForSettingForegroundWWT("Andromeda Galaxy"));
+       // browser->sendMessageToWWT(browser->createMessageForMovingWWTCamera(glm::vec2(0.712305533333333, 41.269167), 24.0f));
+        browser->sendMessageToWWT(browser->createMessageForSettingForegroundOpacityWWT(100));
         return 1;
     }
     
