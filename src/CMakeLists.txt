@@ -207,6 +207,10 @@ if (APPLE)
     ${OPENSPACE_SOURCE}
     ${OPENSPACE_BASE_DIR}/src/interaction/touchbar.mm
   )
+  set_source_files_properties(
+    ${OPENSPACE_BASE_DIR}/src/interaction/touchbar.mm
+    PROPERTIES SKIP_PRECOMPILE_HEADERS ON
+  )
 endif ()
 set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/json.h
