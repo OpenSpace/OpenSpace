@@ -161,7 +161,7 @@ namespace {
         };
 
         // The scale of the model. For example if the model is in centimeters
-        // then ModelScale=cm
+        // then ModelScale = Centimeter
         std::optional<ScaleUnit> modelScale;
 
         // Set if invisible parts (parts with no textures or materials) of the model
@@ -283,8 +283,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     }
 
     // Import Model from file
-    std::string file;
-    file = absPath(p.geometryFile.string());
+    std::string file = absPath(p.geometryFile.string());
     _geometry = ghoul::io::ModelReader::ref().loadModel(
         file,
         ghoul::io::ModelReader::ForceRenderInvisible(_forceRenderInvisible),
@@ -386,22 +385,22 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         }
 
         switch (*p.animationMode) {
-        case Parameters::AnimationMode::LoopFromStart:
-            _animationMode = AnimationMode::LoopFromStart;
-            break;
-        case Parameters::AnimationMode::LoopInfinitely:
-            _animationMode = AnimationMode::LoopInfinitely;
-            break;
-        case Parameters::AnimationMode::BounceFromStart:
-            _animationMode = AnimationMode::BounceFromStart;
-            break;
-        case Parameters::AnimationMode::BounceInfinitely:
-            _animationMode = AnimationMode::BounceInfinitely;
-            break;
-        case Parameters::AnimationMode::Once:
-        default:
-            _animationMode = AnimationMode::Once;
-            break;
+            case Parameters::AnimationMode::LoopFromStart:
+                _animationMode = AnimationMode::LoopFromStart;
+                break;
+            case Parameters::AnimationMode::LoopInfinitely:
+                _animationMode = AnimationMode::LoopInfinitely;
+                break;
+            case Parameters::AnimationMode::BounceFromStart:
+                _animationMode = AnimationMode::BounceFromStart;
+                break;
+            case Parameters::AnimationMode::BounceInfinitely:
+                _animationMode = AnimationMode::BounceInfinitely;
+                break;
+            case Parameters::AnimationMode::Once:
+            default:
+                _animationMode = AnimationMode::Once;
+                break;
         }
     }
 
@@ -510,7 +509,7 @@ void RenderableModel::initialize() {
     }
     else if (_geometry->hasAnimation() && !_enableAnimation.value()) {
         LINFO("Model with deactivated animation was found. "
-            "The animation could be activated by entering a start time in the asset file"
+            "The animation can be activated by entering a start time in the asset file"
         );
     }
 
@@ -687,8 +686,7 @@ void RenderableModel::update(const UpdateData& data) {
                 if (modulo < 0) {
                     modulo += 2 * duration;
                 }
-                realtiveTime =
-                    duration - abs(modulo - duration);
+                realtiveTime = duration - abs(modulo - duration);
                 break;
             }
             case AnimationMode::Once:
