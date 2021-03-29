@@ -105,8 +105,6 @@ private:
     properties::IntProperty _distanceFraction;
     properties::BoolProperty _enabled;
 
-    ghoul::Dictionary _shadowMapDictionary;
-
     int _shadowDepthTextureHeight = 4096;
     int _shadowDepthTextureWidth = 4096;
     bool _dynamicDepthTextureRes = true;

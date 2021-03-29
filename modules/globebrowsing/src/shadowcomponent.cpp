@@ -141,30 +141,23 @@ namespace {
             }
         }
     }
+
+    struct [[codegen::Dictionary(ShadowComponent)]] Parameters {
+        // [[codegen::verbatim(DistanceFractionInfo.description)]]
+        std::optional<int> distanceFraction;
+
+        // [[codegen::verbatim(DepthMapSizeInfo.description)]]
+        std::optional<glm::ivec2> depthMapSize;
+    };
+#include "shadowcomponent_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation ShadowComponent::Documentation() {
-    using namespace documentation;
-    return {
-        "ShadowsRing Component",
-        "globebrowsing_shadows_component",
-        {
-            {
-                DistanceFractionInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                DistanceFractionInfo.description
-            },
-            {
-                DepthMapSizeInfo.identifier,
-                new Vector2ListVerifier<double>,
-                Optional::Yes,
-                DepthMapSizeInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "globebrowsing_shadows_component";
+    return doc;
 }
 
 ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
@@ -172,37 +165,30 @@ ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
     , _saveDepthTexture(SaveDepthTextureInfo)
     , _distanceFraction(DistanceFractionInfo, 20, 1, 10000)
     , _enabled({ "Enabled", "Enabled", "Enable/Disable Shadows" }, true)
-    , _shadowMapDictionary(dictionary)
 {
     using ghoul::filesystem::File;
 
-    if (dictionary.hasValue<ghoul::Dictionary>("Shadows")) {
-        // @TODO (abock, 2019-12-16) It would be better to not store the dictionary long
-        // term and rather extract the values directly here.  This would require a bit of
-        // a rewrite in the RenderableGlobe class to not create the ShadowComponent in the
-        // class-initializer list though
-        _shadowMapDictionary = dictionary.value<ghoul::Dictionary>("Shadows");
+    // @TODO (abock, 2021-03-25)  This is not really a nice solution as this key name is
+    // coded into the RenderableGlobe. Instead, the parent should unpack the dictionary
+    // and pass the unpacked dictionary in here;  Or maybe we don't want a dictionary at
+    // this state anyway?
+    if (!dictionary.hasValue<ghoul::Dictionary>("Shadows")) {
+        return;
     }
+    ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>("Shadows");
+    
+    const Parameters p = codegen::bake<Parameters>(d);
 
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        _shadowMapDictionary,
-        "ShadowComponent"
-    );
+    addProperty(_enabled);
 
-    if (_shadowMapDictionary.hasKey(DistanceFractionInfo.identifier)) {
-        _distanceFraction = static_cast<int>(
-            _shadowMapDictionary.value<double>(DistanceFractionInfo.identifier)
-        );
-    }
+    _distanceFraction = p.distanceFraction.value_or(_distanceFraction);
+    addProperty(_distanceFraction);
+
     _saveDepthTexture.onChange([&]() { _executeDepthTextureSave = true; });
 
-
-    if (_shadowMapDictionary.hasKey(DepthMapSizeInfo.identifier)) {
-        glm::dvec2 depthMapSize =
-            _shadowMapDictionary.value<glm::dvec2>(DepthMapSizeInfo.identifier);
-        _shadowDepthTextureWidth = static_cast<int>(depthMapSize.x);
-        _shadowDepthTextureHeight = static_cast<int>(depthMapSize.y);
+    if (p.depthMapSize.has_value()) {
+        _shadowDepthTextureWidth = p.depthMapSize->x;
+        _shadowDepthTextureHeight = p.depthMapSize->y;
         _dynamicDepthTextureRes = false;
     }
     else {
@@ -212,13 +198,7 @@ ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
         _dynamicDepthTextureRes = true;
     }
 
-    _saveDepthTexture.onChange([&]() { _executeDepthTextureSave = true; });
-
-    _viewDepthMap = false;
-
-    addProperty(_enabled);
     addProperty(_saveDepthTexture);
-    addProperty(_distanceFraction);
 }
 
 void ShadowComponent::initialize() {

@@ -28,20 +28,35 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/util/time.h>
 #include <ghoul/misc/dictionary.h>
+#include <optional>
 
 namespace {
-    constexpr const char* KeyDimensions = "Dimensions";
-    constexpr const char* KeyLowerDomainBound = "LowerDomainBound";
-    constexpr const char* KeyUpperDomainBound = "UpperDomainBound";
+    struct [[codegen::Dictionary(RawVolumeMetaData)]] Parameters {
+        // Specifies the number of grid cells in each dimension
+        glm::ivec3 dimensions;
 
-    constexpr const char* KeyMinValue = "MinValue";
-    constexpr const char* KeyMaxValue = "MaxValue";
+        // Specifies the unit used to specity the domain
+        std::optional<std::string> domainUnit;
 
-    constexpr const char* KeyTime = "Time";
-    constexpr const char* KeyDomainUnit = "DomainUnit";
-    constexpr const char* KeyValueUnit = "ValueUnit";
+        // Specifies the lower domain bounds in the model coordinate system
+        std::optional<glm::vec3> lowerDomainBound;
 
-    constexpr const char* KeyGridType = "GridType";
+        // Specifies the upper domain bounds in the model coordinate system
+        std::optional<glm::vec3> upperDomainBound;
+
+        // Specifies the time on the format YYYY-MM-DDTHH:MM:SS.000Z
+        std::optional<std::string> time;
+
+        // Specifies the unit used to specity the value
+        std::optional<std::string> valueUnit;
+
+        // Specifies the minimum value stored in the volume
+        std::optional<float> minValue;
+
+        // Specifies the maximum value stored in the volume
+        std::optional<float> maxValue;
+   };
+#include "rawvolumemetadata_codegen.cpp"
 } // namespace
 
 namespace openspace::volume {
@@ -49,51 +64,53 @@ namespace openspace::volume {
 RawVolumeMetadata RawVolumeMetadata::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RawVolumeMetadata"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     RawVolumeMetadata metadata;
-    metadata.dimensions = dictionary.value<glm::dvec3>(KeyDimensions);
+    metadata.dimensions = p.dimensions;
 
-    metadata.hasDomainBounds = dictionary.hasValue<glm::dvec3>(KeyLowerDomainBound) &&
-            dictionary.hasValue<glm::dvec3>(KeyUpperDomainBound);
+    metadata.hasDomainBounds =
+        p.lowerDomainBound.has_value() &&
+        p.upperDomainBound.has_value();
 
     if (metadata.hasDomainBounds) {
-        metadata.lowerDomainBound = dictionary.value<glm::dvec3>(KeyLowerDomainBound);
-        metadata.upperDomainBound = dictionary.value<glm::dvec3>(KeyUpperDomainBound);
+        metadata.lowerDomainBound = *p.lowerDomainBound;
+        metadata.upperDomainBound = *p.upperDomainBound;
     }
-    metadata.hasDomainUnit = static_cast<float>(
-        dictionary.hasValue<double>(KeyDomainUnit)
-    );
+    metadata.hasDomainUnit = p.domainUnit.has_value();
     if (metadata.hasDomainUnit) {
-        metadata.domainUnit = dictionary.value<std::string>(KeyDomainUnit);
+        metadata.domainUnit = *p.domainUnit;
     }
 
-    metadata.hasValueRange = dictionary.hasValue<double>(KeyMinValue) &&
-        dictionary.hasValue<double>(KeyMaxValue);
-
+    metadata.hasValueRange = p.minValue.has_value() && p.maxValue.has_value();
     if (metadata.hasValueRange) {
-        metadata.minValue = static_cast<float>(dictionary.value<double>(KeyMinValue));
-        metadata.maxValue = static_cast<float>(dictionary.value<double>(KeyMaxValue));
+        metadata.minValue = *p.minValue;
+        metadata.maxValue = *p.maxValue;
     }
-    metadata.hasValueUnit = static_cast<float>(dictionary.hasValue<double>(KeyValueUnit));
+    metadata.hasValueUnit = p.valueUnit.has_value();
     if (metadata.hasValueUnit) {
-        metadata.valueUnit = dictionary.value<std::string>(KeyValueUnit);
+        metadata.valueUnit = *p.valueUnit;
     }
 
-    metadata.hasTime = dictionary.hasValue<std::string>(KeyTime);
+    metadata.hasTime = p.time.has_value();
     if (metadata.hasTime) {
-        std::string timeString = dictionary.value<std::string>(KeyTime);
-        metadata.time = Time::convertTime(timeString);
+        metadata.time = Time::convertTime(*p.time);
     }
 
     return metadata;
 }
 
 ghoul::Dictionary RawVolumeMetadata::dictionary() {
+    constexpr const char* KeyDimensions = "Dimensions";
+    constexpr const char* KeyLowerDomainBound = "LowerDomainBound";
+    constexpr const char* KeyUpperDomainBound = "UpperDomainBound";
+    constexpr const char* KeyMinValue = "MinValue";
+    constexpr const char* KeyMaxValue = "MaxValue";
+    constexpr const char* KeyTime = "Time";
+    constexpr const char* KeyDomainUnit = "DomainUnit";
+    constexpr const char* KeyValueUnit = "ValueUnit";
+    constexpr const char* KeyGridType = "GridType";
+
     ghoul::Dictionary dict;
     dict.setValue(KeyDimensions, glm::dvec3(dimensions));
     dict.setValue(KeyGridType, gridTypeToString(gridType));
@@ -126,61 +143,9 @@ ghoul::Dictionary RawVolumeMetadata::dictionary() {
 }
 
 documentation::Documentation RawVolumeMetadata::Documentation() {
-    using namespace documentation;
-    return {
-        "RawVolumeMetadata",
-        "volume_rawvolumemetadata",
-        {
-            {
-                KeyDimensions,
-                new DoubleVector3Verifier,
-                Optional::No,
-                "Specifies the number of grid cells in each dimension",
-            },
-            {
-                KeyDomainUnit,
-                new StringVerifier,
-                Optional::Yes,
-                "Specifies the unit used to specity the domain",
-            },
-            {
-                KeyLowerDomainBound,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                "Specifies the lower domain bounds in the model coordinate system",
-            },
-            {
-                KeyUpperDomainBound,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                "Specifies the upper domain bounds in the model coordinate system",
-            },
-            {
-                KeyTime,
-                new StringVerifier,
-                Optional::Yes,
-                "Specifies the time on the format YYYY-MM-DDTHH:MM:SS.000Z",
-            },
-            {
-                KeyValueUnit,
-                new StringVerifier,
-                Optional::Yes,
-                "Specifies the unit used to specity the value",
-            },
-            {
-                KeyMinValue,
-                new DoubleVerifier,
-                Optional::Yes,
-                "Specifies the minimum value stored in the volume"
-            },
-            {
-                KeyMaxValue,
-                new DoubleVerifier,
-                Optional::Yes,
-                "Specifies the maximum value stored in the volume"
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "volume_rawvolumemetadata";
+    return doc;
 }
 
 } // namespace openspace::volume
