@@ -1,3 +1,4 @@
+
 /*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
@@ -22,51 +23,45 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/streamnodes/streamnodesmodule.h>
-#include <modules/streamnodes/rendering/renderablestreamnodes.h>
-#include <modules/streamnodes/rendering/renderableplanetimevaryingimage.h>
-#include <modules/streamnodes/rendering/renderabletravelspeed.h>
-#include <modules/streamnodes/rendering/renderabletimevaryingsphere.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/templatefactory.h>
-#include <fstream>
+#version __CONTEXT__
 
-namespace {
-    constexpr const char* DefaultTransferfunctionSource =
-R"(
-width 5
-lower 0.0
-upper 1.0
-mappingkey 0.0   0    0    0    255
-mappingkey 0.25  255  0    0    255
-mappingkey 0.5   255  140  0    255
-mappingkey 0.75  255  255  0    255
-mappingkey 1.0   255  255  255  255
-)";
-} // namespace
+layout(location = 0) in vec3 in_position;
 
-namespace openspace {
+out float t;
+out float vs_depth;
+out vec4 vs_positionViewSpace;
+out vec4 smoothColor;
 
-std::string StreamNodesModule::DefaultTransferFunctionFile = "";
+uniform vec3 lineColor;
+uniform float opacity;
+uniform mat4 modelViewTransform;
+uniform mat4 projectionTransform;
 
-StreamNodesModule::StreamNodesModule() : OpenSpaceModule(Name) {
-    DefaultTransferFunctionFile = absPath("${TEMPORARY}/default_transfer_function.txt");
+void main(){
 
-    std::ofstream file(DefaultTransferFunctionFile);
-    file << DefaultTransferfunctionSource;
+    vs_positionViewSpace = vec4(modelViewTransform * dvec4(in_position, 1));
+    vec4 positionScreenSpace = projectionTransform * vs_positionViewSpace;
+    vs_depth = positionScreenSpace.w;
+    gl_Position = positionScreenSpace;
+
+    t = 1.f;
+
+    if (gl_VertexID == 0) {
+        smoothColor = vec4(0.0, 0.0, 0.0, opacity);
+    }
+    
+    else if (gl_VertexID == 1) {
+        smoothColor = vec4(lineColor, opacity);
+    }
+
+    else if (gl_VertexID == 2 ) {
+        smoothColor = vec4(lineColor, opacity);
+    }
+
+    else {
+        smoothColor = vec4(1.0, 1.0, 0.0, 1.0);
+    }
+
+    gl_Position.z = 0.f;
+    
 }
-
-void StreamNodesModule::internalInitialize(const ghoul::Dictionary&) {
-    auto factory = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(factory, "No renderable factory existed");
-
-    factory->registerClass<RenderableStreamNodes>("RenderableStreamNodes");
-    factory->registerClass<RenderablePlaneTimeVaryingImage>
-        ("RenderablePlaneTimeVaryingImage");
-    factory->registerClass<RenderableTravelSpeed>("RenderableTravelSpeed");
-    factory->registerClass<RenderableTimeVaryingSphere>("RenderableTimeVaryingSphere");
-}
-
-} // namespace openspace

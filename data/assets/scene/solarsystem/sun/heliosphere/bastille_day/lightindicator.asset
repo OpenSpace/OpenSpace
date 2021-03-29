@@ -1,0 +1,32 @@
+asset.info = {
+    Name = "Lighttravel sun to earth",
+    Version = "1.0",
+    Description = "Speed of light from sun to earth",
+    Author = "Christian Adamsson, Emilie Ho",
+    URL = "",
+    License = ""
+}
+
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('./transforms')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
+
+--openspace.setPropertyValueSingle("Modules.Space.ShowExceptions", false)
+
+local travelSpeedIndicator = {
+    Identifier = "travelSpeedIndicator",
+    Parent =  earthTransforms.EarthCenter.Identifier,-- sunTransforms.SolarSystemBarycenter.Identifier,
+    Renderable = {
+        Type = "RenderableTravelSpeed",
+        Target = "Moon",    --name of scene graph node. Earth by default
+        
+    },
+     GUI = {
+        Path = "/Solar System/Heliosphere",
+        Name = "Travel Speed"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { travelSpeedIndicator })
+
