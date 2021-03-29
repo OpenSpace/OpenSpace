@@ -139,7 +139,9 @@ TestResult IntVerifier::operator()(const ghoul::Dictionary& dict,
 {
     if (dict.hasValue<int>(key)) {
         // We have a key and the value is int, we are done
-        return { true, {}, {} };
+        TestResult res;
+        res.success = true;
+        return res;
     }
     else {
         if (dict.hasKey(key)) {
@@ -149,19 +151,29 @@ TestResult IntVerifier::operator()(const ghoul::Dictionary& dict,
                 double intPart;
                 bool isInt = modf(value, &intPart) == 0.0;
                 if (isInt) {
-                    return { true, {}, {} };
+                    TestResult res;
+                    res.success = true;
+                    return res;
                 }
                 else {
-                    return {
-                        false,
-                        { { key, TestResult::Offense::Reason::WrongType } },
-                        {}
-                    };
+                    TestResult res;
+                    res.success = false;
+                    TestResult::Offense o;
+                    o.offender = key;
+                    o.reason = TestResult::Offense::Reason::WrongType;
+                    res.offenses.push_back(o);
+                    return res;
                 }
             }
             else {
                 // If we don't have a double value, we cannot have an int value
-                return { false, {{ key, TestResult::Offense::Reason::WrongType }}, {} };
+                TestResult res;
+                res.success = false;
+                TestResult::Offense o;
+                o.offender = key;
+                o.reason = TestResult::Offense::Reason::WrongType;
+                res.offenses.push_back(o);
+                return res;
             }
         }
         else {
@@ -264,17 +276,26 @@ TestResult Color3Verifier::operator()(const ghoul::Dictionary& dictionary,
     glm::dvec3 values = dictionary.value<glm::dvec3>(key);
     if (values.x < 0.0 || values.x > 1.0) {
         res.success = false;
-        res.offenses.push_back({ key + ".x", TestResult::Offense::Reason::Verification });
+        TestResult::Offense o;
+        o.offender = key + ".x";
+        o.reason = TestResult::Offense::Reason::Verification;
+        res.offenses.push_back(o);
     }
 
     if (values.y < 0.0 || values.y > 1.0) {
         res.success = false;
-        res.offenses.push_back({ key + ".y", TestResult::Offense::Reason::Verification });
+        TestResult::Offense o;
+        o.offender = key + ".y";
+        o.reason = TestResult::Offense::Reason::Verification;
+        res.offenses.push_back(o);
     }
 
     if (values.z < 0.0 || values.z > 1.0) {
         res.success = false;
-        res.offenses.push_back({ key + ".z", TestResult::Offense::Reason::Verification });
+        TestResult::Offense o;
+        o.offender = key + ".z";
+        o.reason = TestResult::Offense::Reason::Verification;
+        res.offenses.push_back(o);
     }
 
     return res;
@@ -295,22 +316,34 @@ TestResult Color4Verifier::operator()(const ghoul::Dictionary& dictionary,
     glm::dvec4 values = dictionary.value<glm::dvec4>(key);
     if (values.x < 0.0 || values.x > 1.0) {
         res.success = false;
-        res.offenses.push_back({ key + ".x", TestResult::Offense::Reason::Verification });
+        TestResult::Offense o;
+        o.offender = key + ".x";
+        o.reason = TestResult::Offense::Reason::Verification;
+        res.offenses.push_back(o);
     }
 
     if (values.y < 0.0 || values.y > 1.0) {
         res.success = false;
-        res.offenses.push_back({ key + ".y", TestResult::Offense::Reason::Verification });
+        TestResult::Offense o;
+        o.offender = key + ".y";
+        o.reason = TestResult::Offense::Reason::Verification;
+        res.offenses.push_back(o);
     }
 
     if (values.z < 0.0 || values.z > 1.0) {
         res.success = false;
-        res.offenses.push_back({ key + ".z", TestResult::Offense::Reason::Verification });
+        TestResult::Offense o;
+        o.offender = key + ".z";
+        o.reason = TestResult::Offense::Reason::Verification;
+        res.offenses.push_back(o);
     }
 
     if (values.w < 0.0 || values.w > 1.0) {
         res.success = false;
-        res.offenses.push_back({ key + ".a", TestResult::Offense::Reason::Verification });
+        TestResult::Offense o;
+        o.offender = key + ".a";
+        o.reason = TestResult::Offense::Reason::Verification;
+        res.offenses.push_back(o);
     }
 
     return res;
@@ -325,7 +358,9 @@ TestResult TemplateVerifier<glm::ivec2>::operator()(const ghoul::Dictionary& dic
                                                     const std::string& key) const
 {
     if (dict.hasValue<glm::ivec2>(key)) {
-        return { true, {}, {} };
+        TestResult res;
+        res.success = true;
+        return res;
     }
     else {
         if (dict.hasKey(key)) {
@@ -337,22 +372,38 @@ TestResult TemplateVerifier<glm::ivec2>::operator()(const ghoul::Dictionary& dic
                     modf(value.y, &intPart.y) == 0.0
                 };
                 if (isInt.x && isInt.y) {
-                    return { true, {}, {} };
+                    TestResult res;
+                    res.success = true;
+                    return res;
                 }
                 else {
-                    return {
-                        false,
-                        {{ key, TestResult::Offense::Reason::WrongType }},
-                        {}
-                    };
+                    TestResult res;
+                    res.success = false;
+                    TestResult::Offense o;
+                    o.offender = key;
+                    o.reason = TestResult::Offense::Reason::WrongType;
+                    res.offenses.push_back(o);
+                    return res;
                 }
             }
             else {
-                return { false, {{ key, TestResult::Offense::Reason::WrongType }}, {} };
+                TestResult res;
+                res.success = false;
+                TestResult::Offense o;
+                o.offender = key;
+                o.reason = TestResult::Offense::Reason::WrongType;
+                res.offenses.push_back(o);
+                return res;
             }
         }
         else {
-            return { false, {{ key, TestResult::Offense::Reason::MissingKey }}, {} };
+            TestResult res;
+            res.success = false;
+            TestResult::Offense o;
+            o.offender = key;
+            o.reason = TestResult::Offense::Reason::MissingKey;
+            res.offenses.push_back(o);
+            return res;            
         }
     }
 }
@@ -362,7 +413,9 @@ TestResult TemplateVerifier<glm::ivec3>::operator()(const ghoul::Dictionary& dic
                                                     const std::string& key) const
 {
     if (dict.hasValue<glm::ivec3>(key)) {
-        return { true, {}, {} };
+        TestResult res;
+        res.success = true;
+        return res;
     }
     else {
         if (dict.hasKey(key)) {
@@ -375,22 +428,38 @@ TestResult TemplateVerifier<glm::ivec3>::operator()(const ghoul::Dictionary& dic
                     modf(value.z, &intPart.z) == 0.0
                 };
                 if (isInt.x && isInt.y && isInt.z) {
-                    return { true, {}, {} };
+                    TestResult res;
+                    res.success = true;
+                    return res;
                 }
                 else {
-                    return {
-                        false,
-                        {{ key, TestResult::Offense::Reason::WrongType }},
-                        {}
-                    };
+                    TestResult res;
+                    res.success = false;
+                    TestResult::Offense o;
+                    o.offender = key;
+                    o.reason = TestResult::Offense::Reason::WrongType;
+                    res.offenses.push_back(o);
+                    return res;  
                 }
             }
             else {
-                return { false, {{ key, TestResult::Offense::Reason::WrongType }}, {} };
+                TestResult res;
+                res.success = false;
+                TestResult::Offense o;
+                o.offender = key;
+                o.reason = TestResult::Offense::Reason::WrongType;
+                res.offenses.push_back(o);
+                return res;  
             }
         }
         else {
-            return { false, {{ key, TestResult::Offense::Reason::MissingKey }}, {} };
+            TestResult res;
+            res.success = false;
+            TestResult::Offense o;
+            o.offender = key;
+            o.reason = TestResult::Offense::Reason::MissingKey;
+            res.offenses.push_back(o);
+            return res;
         }
     }
 }
@@ -400,7 +469,9 @@ TestResult TemplateVerifier<glm::ivec4>::operator()(const ghoul::Dictionary& dic
                                                     const std::string& key) const
 {
     if (dict.hasValue<glm::ivec4>(key)) {
-        return { true, {}, {} };
+        TestResult res;
+        res.success = true;
+        return res;
     }
     else {
         if (dict.hasKey(key)) {
@@ -414,22 +485,38 @@ TestResult TemplateVerifier<glm::ivec4>::operator()(const ghoul::Dictionary& dic
                     modf(value.w, &intPart.w) == 0.0
                 };
                 if (isInt.x && isInt.y && isInt.z && isInt.w) {
-                    return { true, {}, {} };
+                    TestResult res;
+                    res.success = true;
+                    return res;
                 }
                 else {
-                    return {
-                        false,
-                        {{ key, TestResult::Offense::Reason::WrongType }},
-                        {}
-                    };
+                    TestResult res;
+                    res.success = false;
+                    TestResult::Offense o;
+                    o.offender = key;
+                    o.reason = TestResult::Offense::Reason::WrongType;
+                    res.offenses.push_back(o);
+                    return res;
                 }
             }
             else {
-                return { false, {{ key, TestResult::Offense::Reason::WrongType }}, {} };
+                TestResult res;
+                res.success = false;
+                TestResult::Offense o;
+                o.offender = key;
+                o.reason = TestResult::Offense::Reason::WrongType;
+                res.offenses.push_back(o);
+                return res;                
             }
         }
         else {
-            return { false, {{ key, TestResult::Offense::Reason::MissingKey }}, {} };
+            TestResult res;
+            res.success = false;
+            TestResult::Offense o;
+            o.offender = key;
+            o.reason = TestResult::Offense::Reason::MissingKey;
+            res.offenses.push_back(o);
+            return res;                
         }
     }
 }
@@ -459,11 +546,22 @@ TestResult TableVerifier::operator()(const ghoul::Dictionary& dictionary,
     }
     else {
         if (dictionary.hasKey(key)) {
-            return { false, { { key, TestResult::Offense::Reason::WrongType } }, {} };
-
+            TestResult res;
+            res.success = false;
+            TestResult::Offense o;
+            o.offender = key;
+            o.reason = TestResult::Offense::Reason::WrongType;
+            res.offenses.push_back(o);
+            return res;
         }
         else {
-            return { false, { { key, TestResult::Offense::Reason::MissingKey } }, {} };
+            TestResult res;
+            res.success = false;
+            TestResult::Offense o;
+            o.offender = key;
+            o.reason = TestResult::Offense::Reason::MissingKey;
+            res.offenses.push_back(o);
+            return res;
         }
     }
 }
@@ -512,11 +610,11 @@ TestResult ReferencingVerifier::operator()(const ghoul::Dictionary& dictionary,
         );
 
         if (it == docs.end()) {
-            res.offenses.push_back({
-                key,
-                TestResult::Offense::Reason::UnknownIdentifier
-            });
             res.success = false;
+            TestResult::Offense o;
+            o.offender = key;
+            o.reason = TestResult::Offense::Reason::UnknownIdentifier;
+            res.offenses.push_back(o);
             return res;
         }
 
@@ -576,10 +674,18 @@ TestResult AndVerifier::operator()(const ghoul::Dictionary& dictionary,
     );
 
     if (success) {
-        return { true, {}, {} };
+        TestResult res;
+        res.success = true;
+        return res;
     }
     else {
-        return { false, { { key, TestResult::Offense::Reason::Verification } }, {} };
+        TestResult res;
+        res.success = false;
+        TestResult::Offense o;
+        o.offender = key;
+        o.reason = TestResult::Offense::Reason::Verification;
+        res.offenses.push_back(o);
+        return res;
     }
 }
 
@@ -645,10 +751,18 @@ TestResult OrVerifier::operator()(const ghoul::Dictionary& dictionary,
     );
 
     if (success) {
-        return { true, {}, {} };
+        TestResult res;
+        res.success = true;
+        return res;
     }
     else {
-        return { false, { { key, TestResult::Offense::Reason::Verification } }, {} };
+        TestResult res;
+        res.success = false;
+        TestResult::Offense o;
+        o.offender = key;
+        o.reason = TestResult::Offense::Reason::Verification;
+        res.offenses.push_back(o);
+        return res;
     }
 }
 
