@@ -204,7 +204,7 @@ namespace openspace {
         glDisable(GL_CULL_FACE);
        
         glm::mat4 modelTransform = globalRotationMatrix() * translationMatrix() * localRotationMatrix() * scaleMatrix();
-        float borderWidth = 0.004f /(_scale.value());
+        float borderWidth = 0.005f/_scale.value();
         glm::vec2 targetDim;
         bool showCrosshair;
         _targetDimensions.value() == glm::vec2(0) ? targetDim = glm::vec2(1) : targetDim = _targetDimensions.value();

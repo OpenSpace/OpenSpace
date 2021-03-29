@@ -10,12 +10,9 @@ in vec4 vs_position;
 
 
 float crossLine(in float _width, in float _coord) {
-
     float center = 0.5f;
-
     float line = smoothstep(center, center+(_width/2) , _coord) - 
                  smoothstep(center-(_width/2), center, _coord);    
-    
     return line;
 }
 
@@ -24,23 +21,23 @@ float crossLine(in float _width, in float _coord) {
 Fragment getFragment() {
     Fragment frag;
 
+    float ratio = targetDimensions.y / targetDimensions.x;
+
     // draw crosshair
     float crossWidth = 0.1f;
-    float ratio = targetDimensions.y / targetDimensions.x;
     vec3 crosshair = vec3(crossLine(crossWidth*ratio, (vs_st).x) + crossLine(crossWidth, (vs_st).y));
 
     // draw square border
-    vec2 bl = step(vec2(borderWidth),(1.0-vs_st));         // bottom-left line 
-    vec2 tr = step(vec2(borderWidth),vs_st);               // top-right line 
-    vec3 border = vec3(tr.x * tr.y * bl.x * bl.y);
+    float borderBottomLeft = step(borderWidth*ratio, vs_st.x) * step(borderWidth*ratio, (1.0)-vs_st.x);
+    float borderTopRight = step(borderWidth, vs_st.y) * step(borderWidth, (1.0)-vs_st.y);
+    vec3 border = vec3(borderBottomLeft*borderTopRight);
 
     // show crosshair or border 
     frag.color = vec4(1,1,1,1);
     frag.color.rgb = vec3(borderColor / 255);
 
     if(showCrosshair) {
-
-        frag.color = vec4(1,1,1,1);
+        frag.color.rgb = vec3(borderColor / 255);
         if(crosshair == vec3(0.0)) {
             frag.color.a = 0.0;
         }
