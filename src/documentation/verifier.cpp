@@ -177,7 +177,13 @@ TestResult IntVerifier::operator()(const ghoul::Dictionary& dict,
             }
         }
         else {
-            return { false, {{ key, TestResult::Offense::Reason::MissingKey }}, {} };
+            TestResult res;
+            res.success = false;
+            TestResult::Offense o;
+            o.offender = key;
+            o.reason = TestResult::Offense::Reason::MissingKey;
+            res.offenses.push_back(o);
+            return res;
         }
     }
 }

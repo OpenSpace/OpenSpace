@@ -33,11 +33,6 @@
 #include "scriptscheduler_lua.inl"
 
 namespace {
-    constexpr const char* KeyTime = "Time";
-    constexpr const char* KeyForwardScript = "ForwardScript";
-    constexpr const char* KeyBackwardScript = "BackwardScript";
-    constexpr const char* KeyUniversalScript = "Script";
-
     struct [[codegen::Dictionary(ScheduledScript)]] Parameters {
         // The time at which, when the in game time passes it, the two scripts will
         // be executed. If the traversal is forwards (towards + infinity), the
