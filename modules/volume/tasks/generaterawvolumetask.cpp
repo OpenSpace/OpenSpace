@@ -30,6 +30,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
+#include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/logging/logmanager.h>
@@ -37,7 +38,6 @@
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
 #include <ghoul/misc/defer.h>
-#include <ghoul/fmt.h>
 #include <fstream>
 
 namespace {
@@ -61,6 +61,7 @@ namespace {
         // The lua dictionary file to export metadata to
         std::string dictionaryOutput [[codegen::annotation("A valid filepath")]];
 
+        // The timestamp that is written to the metadata of this volume
         std::string time;
 
         // A vector representing the number of cells in each dimension

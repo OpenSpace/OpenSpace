@@ -43,8 +43,8 @@ namespace {
 
     struct [[codegen::Dictionary(LightSource)]] Parameters {
         // The type of the light source that is described in this element. The available
-        //types of light sources depend on the configuration of the application and can be 
-        // written to disk on application startup into the FactoryDocumentation
+        // types of light sources depend on the configuration of the application and can
+        // be written to disk on application startup into the FactoryDocumentation
         std::string type [[codegen::annotation("Must name a valid LightSource type")]];
 
         // The identifier of the light source

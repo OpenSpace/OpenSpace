@@ -61,10 +61,10 @@ namespace {
         std::optional<std::string> identifier;
 
         // If this value is set to 'true' and it is not overwritten by the global
-        //settings, the file(s) pointed to by this URLSynchronization will always be 
+        // settings, the file(s) pointed to by this URLSynchronization will always be 
         // downloaded, thus overwriting the local files. This is useful for files that are 
         // updated regularly remotely and should be fetch at every startup
-        std::optional<bool> override;
+        std::optional<bool> forceOverride [[codegen::key("override")]];
 
         // If this value is set to 'true' (the default), the hash of the URL is appended
         // to the directory name to produce a unique directory under all circumstances. If 
@@ -137,7 +137,7 @@ UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dict,
         }
     }
 
-    _forceOverride = p.override.value_or(_forceOverride);
+    _forceOverride = p.forceOverride.value_or(_forceOverride);
 }
 
 UrlSynchronization::~UrlSynchronization() {

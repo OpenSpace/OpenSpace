@@ -273,7 +273,7 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
 
-    _standOffDistance = p.standOffDistance.value_or(_lineWidth);
+    _standOffDistance = p.standOffDistance.value_or(_standOffDistance);
     addProperty(_standOffDistance);
     
     _simplifyBounds = p.simplifyBounds.value_or(_simplifyBounds);

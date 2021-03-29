@@ -40,15 +40,11 @@ int loadFile(lua_State* L) {
 
     ghoul::Dictionary scriptsDict;
     scriptsDict.setValue("Scripts", ghoul::lua::loadDictionaryFromFile(fileName, L));
-
-
-
     documentation::testSpecificationAndThrow(
         scripting::ScriptScheduler::Documentation(),
         scriptsDict,
         "ScriptScheduler"
     );
-
 
     std::vector<scripting::ScriptScheduler::ScheduledScript> scripts;
     for (int i = 1; i <= scriptsDict.size(); ++i) {

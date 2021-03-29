@@ -139,8 +139,6 @@ NavigationHandler::NavigationState::NavigationState(const ghoul::Dictionary& dic
     referenceFrame = p.referenceFrame.value_or(anchor);
     aim = p.aim.value_or(aim);
 
-    // @TODO (abock, 2021-03-24) This seems a bit odd;  is it correct that we only want to
-    // consider the yaw and pitch if we also provide the up paramneter?
     if (p.up.has_value()) {
         up = *p.up;
 
