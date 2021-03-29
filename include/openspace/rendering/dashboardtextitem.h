@@ -53,4 +53,4 @@ protected:
 
 } // openspace
 
-#endif // __OPENSPACE_CORE___DASHBOARDITEM___H__
+#endif // __OPENSPACE_CORE___DASHBOARDTEXTITEM___H__

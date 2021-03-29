@@ -303,7 +303,7 @@ RenderData ShadowComponent::begin(const RenderData& data) {
     // Saves current state
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_currentFBO);
     global::renderEngine->openglStateCache().viewport(_mViewport);
-    
+
     glBindFramebuffer(GL_FRAMEBUFFER, _shadowFBO);
     GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_NONE, GL_NONE };
     glDrawBuffers(3, drawBuffers);

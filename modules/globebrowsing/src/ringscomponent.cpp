@@ -415,7 +415,7 @@ void RingsComponent::draw(const RenderData& data,
             _shader->setUniform(_uniformCacheAdvancedRings.colorFilterValue, _colorFilter);
             _shader->setUniform(_uniformCacheAdvancedRings.nightFactor, _nightFactor);
             _shader->setUniform(_uniformCacheAdvancedRings.sunPosition, _sunPosition);
-            
+
             const glm::dmat4 inverseModelTransform = glm::inverse(modelTransform);
 
             glm::vec3 sunPositionObjectSpace = glm::normalize(
@@ -553,7 +553,7 @@ void RingsComponent::draw(const RenderData& data,
         else {
             _texture->bind();
         }
-        
+
         _geometryOnlyShader->setUniform(_geomUniformCache.ringTexture, ringTextureUnit);
     }
 
@@ -612,7 +612,7 @@ void RingsComponent::loadTexture() {
     using namespace ghoul::opengl;
 
     if (!_texturePath.value().empty()) {
-        
+
         std::unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
             absPath(_texturePath)
         );

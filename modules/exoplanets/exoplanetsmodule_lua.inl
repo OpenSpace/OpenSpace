@@ -56,7 +56,8 @@ namespace openspace::exoplanets::luascriptfunctions {
 
 constexpr const float AU = static_cast<float>(distanceconstants::AstronomicalUnit);
 constexpr const float SolarRadius = static_cast<float>(distanceconstants::SolarRadius);
-constexpr const float JupiterRadius = static_cast<float>(distanceconstants::JupiterRadius);
+constexpr const float JupiterRadius =
+    static_cast<float>(distanceconstants::JupiterRadius);
 
 ExoplanetSystem findExoplanetSystemInData(std::string_view starName) {
     const ExoplanetsModule* module = global::moduleEngine->module<ExoplanetsModule>();

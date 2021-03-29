@@ -1459,7 +1459,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
 
         program.setUniform("shadowMapTexture", shadowMapUnit);
         program.setUniform("zFightingPercentage", _generalProperties.zFightingPercentage);
-    } 
+    }
     else if (_generalProperties.shadowMapping) {
         shadowMapUnit.activate();
         // JCC: Avoiding a to recompiling the shaders or having more than one

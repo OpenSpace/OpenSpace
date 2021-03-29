@@ -107,7 +107,7 @@ linux_gcc_make: {
       }
       stage('linux-gcc-make/build') {
           def cmakeCompileOptions = moduleCMakeFlags();
-          cmakeCompileOptions += ' -DMAKE_BUILD_TYPE=Release';
+          cmakeCompileOptions += ' -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS:STRING="-DGLM_ENABLE_EXPERIMENTAL" -DOpenGL_GL_PREFERENCE:STRING=GLVND';
           // Not sure why the linking of OpenSpaceTest takes so long
           compileHelper.build(compileHelper.Make(), compileHelper.Gcc(), cmakeCompileOptions, 'OpenSpace', 'build-make');
           compileHelper.recordCompileIssues(compileHelper.Gcc());

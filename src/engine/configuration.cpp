@@ -60,7 +60,7 @@ namespace {
         std::optional<std::vector<std::string>> globalCustomizationScripts;
 
         // A list of paths that are automatically registered with the file system. If a
-        // key X is used in the table, it is then useable by referencing ${X} in all other 
+        // key X is used in the table, it is then useable by referencing ${X} in all other
         // configuration files or scripts
         std::map<std::string, std::string> paths;
 
@@ -277,7 +277,7 @@ namespace {
         // errors easier. This defaults to 'false'
         std::optional<bool> checkOpenGLState;
 
-        // Determines whether each OpenGL call that happens should be logged using the 
+        // Determines whether each OpenGL call that happens should be logged using the
         // 'TRACE' loglevel. This will bring the rendering to a crawl but provides useful
         // debugging features for the order in which OpenGL calls occur. This defaults to
         // 'false'
@@ -312,7 +312,7 @@ namespace {
             // bar that gives an estimate of the loading progression
             std::optional<bool> showProgressbar;
         };
-        // Values in this table describe the behavior of the loading screen that is 
+        // Values in this table describe the behavior of the loading screen that is
         // displayed while the scene graph is created and initialized
         std::optional<LoadingScreen> loadingScreen;
 
@@ -458,7 +458,7 @@ void parseLuaState(Configuration& configuration) {
             }
         }
     }
-    
+
     if (p.documentation.has_value()) {
         c.documentation.path = p.documentation->path.value_or(c.documentation.path);
     }

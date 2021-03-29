@@ -129,10 +129,10 @@ UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dict,
         else {
             documentation::TestResult res;
             res.success = false;
-            res.offenses.push_back({
-                std::string(KeyIdentifier) + "|" + KeyUseHash,
-                documentation::TestResult::Offense::Reason::MissingKey
-            });
+            documentation::TestResult::Offense o;
+            o.offender = std::string(KeyIdentifier) + "|" + KeyUseHash;
+            o.reason = documentation::TestResult::Offense::Reason::MissingKey;
+            res.offenses.push_back(o);
             throw documentation::SpecificationError(std::move(res), "UrlSynchronization");
         }
     }
