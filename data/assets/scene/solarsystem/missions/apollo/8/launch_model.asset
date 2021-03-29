@@ -1,7 +1,14 @@
 local asset_helper = asset.require('util/asset_helper')
 local earth_transforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local sun_transforms = asset.require('scene/solarsystem/sun/transforms')
 local kernels = asset.require('./kernels').kernels
-local csm = asset.require('../apollo_csm')
+
+local models = asset.syncedResource({
+    Name = "Apollo Models",
+    Type = "HttpSynchronization",
+    Identifier = "apollo_models",
+    Version = 2
+})
 
 local apolloSpiceId = "-908"
 
@@ -47,6 +54,20 @@ local Apollo8LaunchModel = {
             Rotation = {0.0, 0.0, -3.1415 / 2}
         }
     },
+    Renderable = {
+        Type = "RenderableModel",
+        GeometryFile = models .. "/ApolloCSM.fbx",
+        LightSources = {
+            {
+                Type = "SceneGraphLightSource",
+                Identifier = "Sun",
+                Node = sun_transforms.SolarSystemBarycenter.Identifier,
+                Intensity = 1.0
+            }
+        },
+        PerformShading = true,
+        DisableFaceCulling = true
+    },
     GUI = {
         Hidden = true,
         Name = "Apollo 8 Launch Model",
@@ -54,12 +75,6 @@ local Apollo8LaunchModel = {
     }
 }
 
-local launch_model_part = csm.createCsmModel(Apollo8LaunchModel.Identifier)
-
 local list = { Apollo8Launch, Apollo8LaunchModel }
-for k,v in pairs(launch_model_part) do
-    v.GUI.Path = "/Solar System/Missions/Apollo/8/Model"
-    table.insert(list, v)
-end
 
 asset_helper.registerSceneGraphNodesAndExport(asset, list)
