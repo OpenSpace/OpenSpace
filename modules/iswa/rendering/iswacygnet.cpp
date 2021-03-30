@@ -184,7 +184,8 @@ void IswaCygnet::render(const RenderData& data, RendererTasks&) {
             _data.spatialScale.x * _data.offset,
             _data.spatialScale.w
         );
-    glm::vec3 position = glm::vec3(pposition) * static_cast<float>(pow(10.f, pposition.w));
+    glm::vec3 position =
+        glm::vec3(pposition) * static_cast<float>(pow(10.f, pposition.w));
 
     // Activate shader
     _shader->activate();

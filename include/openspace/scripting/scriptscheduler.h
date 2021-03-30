@@ -47,6 +47,8 @@ struct LuaLibrary;
 class ScriptScheduler {
 public:
     struct ScheduledScript {
+        ScheduledScript() = default;
+        ScheduledScript(const ghoul::Dictionary& dict);
 
         double time = -std::numeric_limits<double>::max();
         std::string forwardScript;

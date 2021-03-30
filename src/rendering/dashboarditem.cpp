@@ -89,7 +89,7 @@ DashboardItem::DashboardItem(const ghoul::Dictionary& dictionary)
     , _isEnabled(EnabledInfo, true)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-    
+
     setIdentifier(p.identifier);
     if (p.guiName.has_value()) {
         setGuiName(*p.guiName);

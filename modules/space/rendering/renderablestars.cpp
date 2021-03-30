@@ -307,7 +307,8 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableStars)]] Parameters {
-        // The path to the SPECK file containing information about the stars being rendered
+        // The path to the SPECK file containing information about the stars being
+        // rendered
         std::filesystem::path speckFile [[codegen::key("File")]];
 
         // [[codegen::verbatim(ColorTextureInfo.description)]]
@@ -336,8 +337,8 @@ namespace {
         // loading. This can be used to trim the dataset's automatic value range
         std::optional<float> staticFilter;
 
-        // This is the value that is used to replace statically filtered values. Setting this
-        // value only makes sense if 'StaticFilter' is 'true', as well
+        // This is the value that is used to replace statically filtered values. Setting
+        // this value only makes sense if 'StaticFilter' is 'true', as well
         std::optional<float> staticFilterReplacement;
 
         // [[codegen::verbatim(MagnitudeExponentInfo.description)]]

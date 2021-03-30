@@ -453,7 +453,9 @@ std::vector<documentation::Documentation> GlobeBrowsingModule::documentations() 
         globebrowsing::Layer::Documentation(),
         globebrowsing::LayerAdjustment::Documentation(),
         globebrowsing::LayerManager::Documentation(),
-        GlobeLabelsComponent::Documentation()
+        GlobeLabelsComponent::Documentation(),
+        RingsComponent::Documentation(),
+        ShadowComponent::Documentation()
     };
 }
 
