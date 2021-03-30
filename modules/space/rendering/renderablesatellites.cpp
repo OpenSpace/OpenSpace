@@ -90,13 +90,13 @@ RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
 
     _updateStartRenderIdxSelect = [this]() {
         if ((_numObjects - _startRenderIdx) < _sizeRender) {
-            _sizeRender = _numObjects - _startRenderIdx;
+            _sizeRender = static_cast<unsigned int>(_numObjects - _startRenderIdx);
         }
         updateBuffers();
     };
     _updateRenderSizeSelect = [this]() {
         if (_sizeRender > (_numObjects - _startRenderIdx)) {
-            _startRenderIdx = _numObjects - _sizeRender;
+            _startRenderIdx = static_cast<unsigned int>(_numObjects - _sizeRender);
         }
         updateBuffers();
     };

@@ -45,12 +45,6 @@
 
 namespace {
     constexpr const char* _loggerCat = "RenderablePlaneProjection";
-    constexpr const char* KeySpacecraft = "Spacecraft";
-    constexpr const char* KeyInstrument = "Instrument";
-    constexpr const char* KeyMoving = "Moving";
-    constexpr const char* KeyTexture = "Texture";
-    constexpr const char* KeyName = "Name";
-    constexpr const char* KeyTarget = "DefaultTarget";
     constexpr const char* GalacticFrame = "GALACTIC";
 
     struct [[codegen::Dictionary(RenderablePlaneProjection)]] Parameters {

@@ -123,14 +123,6 @@ private:
     GLboolean _depthIsEnabled;
     GLboolean _blendIsEnabled = false;
 
-    GLenum _faceToCull;
-    GLenum _depthFunction;
-
-    GLfloat _polygonOffSetFactor;
-    GLfloat _polygonOffSetUnits;
-    GLfloat _colorClearValue[4];
-    GLfloat _depthClearValue;
-
     glm::vec3 _sunPosition = glm::vec3(0.f);
 
     glm::dmat4 _shadowMatrix = glm::dmat4(1.0);
