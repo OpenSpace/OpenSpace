@@ -2,13 +2,7 @@ local asset_helper = asset.require('util/asset_helper')
 local earth_transforms = asset.require('scene/solarsystem/planets/earth/transforms')
 local sun_transforms = asset.require('scene/solarsystem/sun/transforms')
 local kernels = asset.require('./kernels').kernels
-
-local models = asset.syncedResource({
-    Name = "Apollo Models",
-    Type = "HttpSynchronization",
-    Identifier = "apollo_models",
-    Version = 2
-})
+local models = asset.require('scene/solarsystem/missions/apollo/csm_model').models
 
 local apolloSpiceId = "-908"
 
