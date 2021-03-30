@@ -47,6 +47,7 @@
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/dictionaryluaformatter.h>
 #include <ghoul/misc/misc.h>
 
 namespace openspace {
@@ -188,32 +189,34 @@ void renderSelectionProperty(Property* prop, const std::string& ownerName,
     const std::string& name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
 
-    if (ImGui::TreeNode(name.c_str())) {
-        const std::vector<SelectionProperty::Option>& options = p->options();
-        std::vector<int> newSelectedIndices;
+    bool selectionChanged = false;
+    std::set<std::string> newSelected;
 
-        std::vector<int> selectedIndices = p->value();
+    if (ImGui::TreeNode(name.c_str())) {
+        std::set<std::string> selected = p->value();
+        const std::vector<std::string>& options = p->options();
 
         for (int i = 0; i < static_cast<int>(options.size()); ++i) {
-            std::string description = options[i].description;
-            bool selected = std::find(
-                selectedIndices.begin(), selectedIndices.end(), i
-            ) != selectedIndices.end();
+            const std::string key = options[i];
+            bool isSelected = p->isSelected(key);
 
-            ImGui::Checkbox(description.c_str(), &selected);
+            selectionChanged |= ImGui::Checkbox(key.c_str(), &isSelected);
             if (showTooltip) {
                 renderTooltip(prop, tooltipDelay);
             }
 
-            if (selected) {
-                newSelectedIndices.push_back(i);
+            if (isSelected) {
+                newSelected.insert(key);
             }
         }
 
-        if (newSelectedIndices != p->value()) {
+        if (selectionChanged) {
             std::string parameters = "{";
-            for (int i : newSelectedIndices) {
-                parameters += std::to_string(i) + ",";
+            for (const std::string& s : newSelected) {
+                parameters += fmt::format("'{}',", s);
+            }
+            if (!newSelected.empty()) {
+                parameters.pop_back();
             }
             parameters += "}";
             executeScript(p->fullyQualifiedIdentifier(), parameters, isRegular);

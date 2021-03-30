@@ -194,11 +194,7 @@ std::any TemplateProperty<T>::get() const {
 template <typename T>
 void TemplateProperty<T>::set(std::any value) {
     T v = std::any_cast<T>(std::move(value));
-    if (v != _value) {
-        _value = std::move(v);
-        notifyChangeListeners();
-        _isValueDirty = true;
-    }
+    setValue(v);
 }
 
 template <typename T>

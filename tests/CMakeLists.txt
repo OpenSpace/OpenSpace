@@ -45,6 +45,7 @@ add_executable(
 
   property/test_property_optionproperty.cpp
   property/test_property_listproperties.cpp
+  property/test_property_selectionproperty.cpp
 
   regression/517.cpp
 )
