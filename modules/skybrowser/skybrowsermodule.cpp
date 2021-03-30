@@ -23,6 +23,9 @@
  ****************************************************************************************/
 
 #include <modules/skybrowser/skybrowsermodule.h>
+#include <modules/skybrowser/rapidxmlparser/rapidxml.hpp> // For parsing xml
+#include <modules/skybrowser/rapidxmlparser/rapidxml_utils.hpp> // For parsing xml
+#include <modules/skybrowser/rapidxmlparser/rapidxml_print.hpp> // For parsing xml
 
  //#include <modules/webbrowser/webbrowsermodule.h>
  //#include <modules/webbrowser/include/screenspacebrowser.h>
@@ -41,8 +44,11 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
 #include <cmath> // For atan2
-#include <glm/gtx/string_cast.hpp>
+#include <glm/gtx/string_cast.hpp> // For printing glm data
 #include <ghoul/filesystem/filesystem.h>
+#include <openspace/util/httprequest.h> // For downloading files from url
+#include <fstream>    
+
 
 namespace {
     struct [[codegen::Dictionary(ScreenSpaceSkyBrowser)]] Parameters {
@@ -284,6 +290,74 @@ ScreenSpaceSkyTarget* SkyBrowserModule::to_target(ScreenSpaceRenderable* ptr) {
     return dynamic_cast<ScreenSpaceSkyTarget*>(ptr);
 }
 
+void SkyBrowserModule::loadImages(std::string url, std::string fileDestination) {
+    // Get the webpage and save to file
+    HttpRequest::RequestOptions opt{0};
+    SyncHttpFileDownload wtml_root(url, fileDestination, HttpFileDownload::Overwrite::Yes);
+    wtml_root.download(opt);
+    // Parse XML document
+    using namespace rapidxml;
+    rapidxml::file<> xmlFile(fileDestination.c_str()); // Default template is char
+    rapidxml::xml_document<> doc;
+    doc.parse<0>(xmlFile.data());
+
+    // Get child of node until we find the "Place" node
+    xml_node<>* place = getChildNode(doc.first_node(), "Place");
+   
+    // Iterate through all the places and load as images
+    while (place) {
+        loadImage(place);
+        place = place->next_sibling();
+    }
+    LINFO(images[55].thumbnailUrl);
+}
+
+int SkyBrowserModule::loadImage(rapidxml::xml_node<>* imgNode) {
+    ImageData image;
+    using namespace rapidxml;
+    // Get all attributes for the <Place>
+    for (xml_attribute<>* attr = imgNode->first_attribute(); attr; attr = attr->next_attribute())
+    {
+        if (attr->name() == "RA") {
+            image.celestCoords.x = std::stof(attr->value());
+        }
+        else if (attr->name() == "DEC") {
+            image.celestCoords.y = std::stof(attr->value());
+        }
+        else if (attr->name() == "Classification") {
+            image.name = attr->value();
+        }
+    }
+    xml_node<>* imageSet = getChildNode(imgNode, "ImageSet");
+    if (!imageSet) return -1;
+    // Get all attributes for the <ImageSet>
+    for (xml_attribute<>* attr = imageSet->first_attribute(); attr; attr = attr->next_attribute()) {
+        if (attr->name() == "Name") {
+            image.name = attr->value();
+            break;
+        }
+    }
+    // The thumbnail is the last node so traverse backwards for speed
+    xml_node<>* imageSetChild = imageSet->last_node();
+    while (imageSetChild) {
+        if (std::string(imageSetChild->name()) == "ThumbnailUrl") {
+            image.thumbnailUrl = imageSetChild->value();
+            break;
+        }
+        imageSetChild = imageSetChild->previous_sibling();
+    }
+    
+    images.push_back(image);
+    // Return index of image in vector
+    return images.size();
+}
+
+rapidxml::xml_node<>* SkyBrowserModule::getChildNode(rapidxml::xml_node<>* node, std::string name) {
+    while (node && std::string(node->name()) != name) {
+        node = node->first_node();
+    }
+    return node;
+}
 
 /*
 std::vector<documentation::Documentation> SkyBrowserModule::documentations() const {

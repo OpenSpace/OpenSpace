@@ -27,7 +27,7 @@
 
 
 #include <openspace/util/openspacemodule.h>
-
+#include <modules/skybrowser/rapidxmlparser/rapidxml.hpp> // For parsing xml
 #include <openspace/documentation/documentation.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -40,6 +40,14 @@ class ScreenSpaceSkyBrowser;
 class ScreenSpaceSkyTarget;
 class ScreenSpaceRenderable;
 
+struct ImageData {
+    std::string name;
+    std::string thumbnailUrl;
+    glm::vec2 celestCoords;
+    std::string classification;
+    float zoom;
+};
+
 class SkyBrowserModule : public OpenSpaceModule {
 public:
     constexpr static const char* Name = "SkyBrowser";
@@ -48,6 +56,7 @@ public:
     virtual ~SkyBrowserModule() = default;
     glm::vec2 getMousePositionInScreenSpaceCoords(glm::vec2& mousePos);
     void addRenderable(ScreenSpaceRenderable* object);
+    void loadImages(std::string url, std::string fileDestination);
 
     scripting::LuaLibrary luaLibrary() const override;
     //std::vector<documentation::Documentation> documentations() const override;
@@ -55,6 +64,8 @@ public:
 protected:
     void internalInitialize(const ghoul::Dictionary& dict) override;
     void internalDeinitialize() override;
+    int loadImage(rapidxml::xml_node<>* imgNode);
+    rapidxml::xml_node<>* getChildNode(rapidxml::xml_node<>* node, std::string name);
     // Using snake case on these casting functions to make them similar to eg std::to_string
     ScreenSpaceSkyBrowser* to_browser(ScreenSpaceRenderable* ptr);
     ScreenSpaceSkyTarget* to_target(ScreenSpaceRenderable* ptr);
@@ -75,6 +86,8 @@ protected:
     // Current interaction status
     bool currentlyResizingBrowser;
     bool currentlyDraggingObject;
+
+    std::vector<ImageData> images;
 };
 
 } // namespace openspace

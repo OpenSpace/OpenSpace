@@ -29,6 +29,7 @@ set(HEADER_FILES
     skybrowsermodule.h
     include/screenspaceskybrowser.h
     include/screenspaceskytarget.h
+    rapidxmlparser/rapidxml.hpp
     
 )
 source_group("Header Files" FILES ${HEADER_FILES})
