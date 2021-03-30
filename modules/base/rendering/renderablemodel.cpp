@@ -161,8 +161,8 @@ namespace {
         };
 
         // The scale of the model. For example if the model is in centimeters
-        // then ModelScale = Centimeter
-        std::optional<ScaleUnit> modelScale;
+        // then ModelScale = Centimeter or ModelScale = 0.01
+        std::optional<std::variant<ScaleUnit, float>> modelScale;
 
         // Set if invisible parts (parts with no textures or materials) of the model
         // should be forced to render or not.
@@ -291,35 +291,40 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     );
 
     if (p.modelScale.has_value()) {
-        Parameters::ScaleUnit scaleUnit = *p.modelScale;
+        if (std::holds_alternative<Parameters::ScaleUnit>(*p.modelScale)) {
+            Parameters::ScaleUnit scaleUnit =
+                std::get<Parameters::ScaleUnit>(*p.modelScale);
 
-        switch (scaleUnit) {
-            case Parameters::ScaleUnit::Nanometer:
-                _modelScale = DistanceUnit::Nanometer;
-                break;
-            case Parameters::ScaleUnit::Micrometer:
-                _modelScale = DistanceUnit::Micrometer;
-                break;
-            case Parameters::ScaleUnit::Millimeter:
-                _modelScale = DistanceUnit::Millimeter;
-                break;
-            case Parameters::ScaleUnit::Centimeter:
-                _modelScale = DistanceUnit::Centimeter;
-                break;
-            case Parameters::ScaleUnit::Decimeter:
-                _modelScale = DistanceUnit::Decimeter;
-                break;
-            case Parameters::ScaleUnit::Meter:
-                _modelScale = DistanceUnit::Meter;
-                break;
-            case Parameters::ScaleUnit::Kilometer:
-                _modelScale = DistanceUnit::Kilometer;
-                break;
-            default:
-                throw ghoul::MissingCaseException();
+            switch (scaleUnit) {
+                case Parameters::ScaleUnit::Nanometer:
+                    _modelScale = DistanceUnit::Nanometer;
+                    break;
+                case Parameters::ScaleUnit::Micrometer:
+                    _modelScale = DistanceUnit::Micrometer;
+                    break;
+                case Parameters::ScaleUnit::Millimeter:
+                    _modelScale = DistanceUnit::Millimeter;
+                    break;
+                case Parameters::ScaleUnit::Centimeter:
+                    _modelScale = DistanceUnit::Centimeter;
+                    break;
+                case Parameters::ScaleUnit::Decimeter:
+                    _modelScale = DistanceUnit::Decimeter;
+                    break;
+                case Parameters::ScaleUnit::Meter:
+                    _modelScale = DistanceUnit::Meter;
+                    break;
+                case Parameters::ScaleUnit::Kilometer:
+                    _modelScale = DistanceUnit::Kilometer;
+                    break;
+                default:
+                    throw ghoul::MissingCaseException();
+            }
+            _scaleVector = glm::dvec3(convertUnit(_modelScale, DistanceUnit::Meter));
         }
-
-        _scaleVector = glm::dvec3(convertUnit(_modelScale, DistanceUnit::Meter));
+        else if (std::holds_alternative<float>(*p.modelScale)) {
+            _scaleVector = glm::dvec3(std::get<float>(*p.modelScale));
+        }
     }
 
     if (p.animationStartTime.has_value()) {
