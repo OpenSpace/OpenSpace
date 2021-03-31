@@ -29,7 +29,7 @@ set(HEADER_FILES
     skybrowsermodule.h
     include/screenspaceskybrowser.h
     include/screenspaceskytarget.h
-    rapidxmlparser/rapidxml.hpp
+    tinyxml2/tinyxml2.h
     
 )
 source_group("Header Files" FILES ${HEADER_FILES})
@@ -40,6 +40,7 @@ set(SOURCE_FILES
     skybrowsermodule_lua.inl
     src/screenspaceskybrowser.cpp
     src/screenspaceskytarget.cpp
+    tinyxml2/tinyxml2.cpp
 
 )
 source_group("Source Files" FILES ${SOURCE_FILES})

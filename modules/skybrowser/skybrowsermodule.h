@@ -25,9 +25,8 @@
 #ifndef __OPENSPACE_MODULE_SKYBROWSER___SKYBROWSERMODULE___H__
 #define __OPENSPACE_MODULE_SKYBROWSER___SKYBROWSERMODULE___H__
 
-
 #include <openspace/util/openspacemodule.h>
-#include <modules/skybrowser/rapidxmlparser/rapidxml.hpp> // For parsing xml
+#include <modules/skybrowser/tinyxml2/tinyxml2.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -44,8 +43,7 @@ struct ImageData {
     std::string name;
     std::string thumbnailUrl;
     glm::vec2 celestCoords;
-    std::string classification;
-    float zoom;
+    std::string collection;
 };
 
 class SkyBrowserModule : public OpenSpaceModule {
@@ -53,10 +51,16 @@ public:
     constexpr static const char* Name = "SkyBrowser";
 
     SkyBrowserModule();
-    virtual ~SkyBrowserModule() = default;
+    virtual ~SkyBrowserModule();
     glm::vec2 getMousePositionInScreenSpaceCoords(glm::vec2& mousePos);
     void addRenderable(ScreenSpaceRenderable* object);
-    void loadImages(std::string url, std::string fileDestination);
+    // Image downloading and xml parsing
+    bool downloadFile(std::string& url, std::string& fileDestination);
+    void loadImagesFromXML(tinyxml2::XMLElement* node, std::string collectionName);
+    void loadWTMLCollectionsFromURL(std::string url, std::string fileName);
+    void loadWTMLCollectionsFromDirectory(std::string directory);
+    int loadAllImagesFromXMLs();
+    void printAllUrls();
 
     scripting::LuaLibrary luaLibrary() const override;
     //std::vector<documentation::Documentation> documentations() const override;
@@ -64,8 +68,10 @@ public:
 protected:
     void internalInitialize(const ghoul::Dictionary& dict) override;
     void internalDeinitialize() override;
-    int loadImage(rapidxml::xml_node<>* imgNode);
-    rapidxml::xml_node<>* getChildNode(rapidxml::xml_node<>* node, std::string name);
+    int loadPlace(tinyxml2::XMLElement* place, std::string collectionName);
+    int loadImageSet(tinyxml2::XMLElement* imageSet, std::string collectionName);
+    std::string getURLFromImageSet(tinyxml2::XMLElement* imageSet);
+    tinyxml2::XMLElement* getChildNode(tinyxml2::XMLElement* node, std::string name);
     // Using snake case on these casting functions to make them similar to eg std::to_string
     ScreenSpaceSkyBrowser* to_browser(ScreenSpaceRenderable* ptr);
     ScreenSpaceSkyTarget* to_target(ScreenSpaceRenderable* ptr);
@@ -88,6 +94,8 @@ protected:
     bool currentlyDraggingObject;
 
     std::vector<ImageData> images;
+    std::vector<std::string> imageUrls;
+    std::vector<tinyxml2::XMLDocument*> xmls;
 };
 
 } // namespace openspace

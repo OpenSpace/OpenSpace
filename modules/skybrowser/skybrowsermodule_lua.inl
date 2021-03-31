@@ -47,16 +47,21 @@ namespace openspace::skybrowser::luascriptfunctions {
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::followCamera");
 
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-        std::string url = "http://www.worldwidetelescope.org/wwtweb/catalog.aspx?W=vampfeeds";
-        url = "http://www.worldwidetelescope.org/wwtweb/catalog.aspx?W=wise";
-        std::string fileDestination = absPath("${MODULE_SKYBROWSER}/WWTimagedata/wise.aspx");
-        module->loadImages(url, fileDestination);
-        
+        std::string root = "https://raw.githubusercontent.com/WorldWideTelescope/wwt-web-client/master/assets/webclient-explore-root.wtml";
+
+        module->loadWTMLCollectionsFromURL(root, "root");
+        module->printAllUrls();
+        LINFO(std::to_string( module->loadAllImagesFromXMLs()));
+
         return 1;
     }
 
     int moveBrowser(lua_State* L) {
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::moveBrowser");
+        SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+        module->loadWTMLCollectionsFromDirectory(absPath("${MODULE_SKYBROWSER}/WWTimagedata/"));
+        module->printAllUrls();
+        LINFO(std::to_string(module->loadAllImagesFromXMLs()));
         return 1;
     }
 
