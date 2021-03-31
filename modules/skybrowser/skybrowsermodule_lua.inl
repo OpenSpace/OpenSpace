@@ -49,9 +49,9 @@ namespace openspace::skybrowser::luascriptfunctions {
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
         std::string root = "https://raw.githubusercontent.com/WorldWideTelescope/wwt-web-client/master/assets/webclient-explore-root.wtml";
 
-        module->loadWTMLCollectionsFromURL(root, "root");
-        module->printAllUrls();
-        LINFO(std::to_string( module->loadAllImagesFromXMLs()));
+        module->getWWTDataHandler()->loadWTMLCollectionsFromURL(root, "root");
+        module->getWWTDataHandler()->printAllUrls();
+        LINFO(std::to_string( module->getWWTDataHandler()->loadAllImagesFromXMLs()));
 
         return 1;
     }
@@ -59,9 +59,9 @@ namespace openspace::skybrowser::luascriptfunctions {
     int moveBrowser(lua_State* L) {
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::moveBrowser");
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-        module->loadWTMLCollectionsFromDirectory(absPath("${MODULE_SKYBROWSER}/WWTimagedata/"));
-        module->printAllUrls();
-        LINFO(std::to_string(module->loadAllImagesFromXMLs()));
+        module->getWWTDataHandler()->loadWTMLCollectionsFromDirectory(absPath("${MODULE_SKYBROWSER}/WWTimagedata/"));
+        module->getWWTDataHandler()->printAllUrls();
+        LINFO(std::to_string(module->getWWTDataHandler()->loadAllImagesFromXMLs()));
         return 1;
     }
 

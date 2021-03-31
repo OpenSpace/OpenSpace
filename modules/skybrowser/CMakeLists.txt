@@ -29,6 +29,7 @@ set(HEADER_FILES
     skybrowsermodule.h
     include/screenspaceskybrowser.h
     include/screenspaceskytarget.h
+    include/wwtdatahandler.h
     tinyxml2/tinyxml2.h
     
 )
@@ -40,6 +41,7 @@ set(SOURCE_FILES
     skybrowsermodule_lua.inl
     src/screenspaceskybrowser.cpp
     src/screenspaceskytarget.cpp
+    src/wwtdatahandler.cpp
     tinyxml2/tinyxml2.cpp
 
 )

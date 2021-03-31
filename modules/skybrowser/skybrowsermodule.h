@@ -26,7 +26,7 @@
 #define __OPENSPACE_MODULE_SKYBROWSER___SKYBROWSERMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
-#include <modules/skybrowser/tinyxml2/tinyxml2.h>
+
 #include <openspace/documentation/documentation.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -38,40 +38,25 @@ namespace openspace {
 class ScreenSpaceSkyBrowser;
 class ScreenSpaceSkyTarget;
 class ScreenSpaceRenderable;
+class WWTDataHandler;
 
-struct ImageData {
-    std::string name;
-    std::string thumbnailUrl;
-    glm::vec2 celestCoords;
-    std::string collection;
-};
 
 class SkyBrowserModule : public OpenSpaceModule {
 public:
     constexpr static const char* Name = "SkyBrowser";
 
     SkyBrowserModule();
-    virtual ~SkyBrowserModule();
+    virtual ~SkyBrowserModule() = default;
     glm::vec2 getMousePositionInScreenSpaceCoords(glm::vec2& mousePos);
     void addRenderable(ScreenSpaceRenderable* object);
-    // Image downloading and xml parsing
-    bool downloadFile(std::string& url, std::string& fileDestination);
-    void loadImagesFromXML(tinyxml2::XMLElement* node, std::string collectionName);
-    void loadWTMLCollectionsFromURL(std::string url, std::string fileName);
-    void loadWTMLCollectionsFromDirectory(std::string directory);
-    int loadAllImagesFromXMLs();
-    void printAllUrls();
-
+    WWTDataHandler* getWWTDataHandler();
     scripting::LuaLibrary luaLibrary() const override;
     //std::vector<documentation::Documentation> documentations() const override;
 
 protected:
     void internalInitialize(const ghoul::Dictionary& dict) override;
     void internalDeinitialize() override;
-    int loadPlace(tinyxml2::XMLElement* place, std::string collectionName);
-    int loadImageSet(tinyxml2::XMLElement* imageSet, std::string collectionName);
-    std::string getURLFromImageSet(tinyxml2::XMLElement* imageSet);
-    tinyxml2::XMLElement* getChildNode(tinyxml2::XMLElement* node, std::string name);
+    
     // Using snake case on these casting functions to make them similar to eg std::to_string
     ScreenSpaceSkyBrowser* to_browser(ScreenSpaceRenderable* ptr);
     ScreenSpaceSkyTarget* to_target(ScreenSpaceRenderable* ptr);
@@ -92,10 +77,7 @@ protected:
     // Current interaction status
     bool currentlyResizingBrowser;
     bool currentlyDraggingObject;
-
-    std::vector<ImageData> images;
-    std::vector<std::string> imageUrls;
-    std::vector<tinyxml2::XMLDocument*> xmls;
+    WWTDataHandler* dataHandler; 
 };
 
 } // namespace openspace
