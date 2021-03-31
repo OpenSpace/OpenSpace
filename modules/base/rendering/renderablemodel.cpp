@@ -332,7 +332,6 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
             LWARNING("Animation start time given to model without animation");
         }
         _animationStart = *p.animationStartTime;
-        _enableAnimation = true;
     }
 
     if (p.enableAnimation.has_value()) {
@@ -541,7 +540,7 @@ void RenderableModel::initializeGL() {
 
     _geometry->initialize();
     _geometry->calculateBoundingRadius();
-    setBoundingSphere(glm::sqrt(_geometry->boundingRadius()));
+    setBoundingSphere(glm::sqrt(_geometry->boundingRadius()) * _scaleVector.x);
 }
 
 void RenderableModel::deinitializeGL() {
@@ -558,73 +557,87 @@ void RenderableModel::deinitializeGL() {
 }
 
 void RenderableModel::render(const RenderData& data, RendererTasks&) {
-    _program->activate();
+    const double distanceToCamera = glm::distance(
+        data.camera.positionVec3(),
+        data.modelTransform.translation
+    );
 
-    _program->setUniform(_uniformCache.opacity, _opacity);
+    // This distance will be enough to render the globe as one pixel if the field of
+    // view is 'fov' radians and the screen resolution is 'res' pixels.
+    //constexpr double fov = 2 * glm::pi<double>() / 6; // 60 degrees
+    //constexpr double tfov = tan(fov / 2.0); // doesn't work unfortunately
+    constexpr double tfov = 0.5773502691896257;
+    constexpr int res = 2880;
+    const double maxDistance = res * boundingSphere()/ tfov;
 
-    // Model transform and view transform needs to be in double precision
-    const glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
-        glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)) *
-        glm::scale(glm::dmat4(_modelTransform.value()), _scaleVector); // Model scale unit
-    const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
-                                          modelTransform;
+    if (distanceToCamera < maxDistance) {
+        _program->activate();
 
-    int nLightSources = 0;
-    _lightIntensitiesBuffer.resize(_lightSources.size());
-    _lightDirectionsViewSpaceBuffer.resize(_lightSources.size());
-    for (const std::unique_ptr<LightSource>& lightSource : _lightSources) {
-        if (!lightSource->isEnabled()) {
-            continue;
+        _program->setUniform(_uniformCache.opacity, _opacity);
+
+        // Model transform and view transform needs to be in double precision
+        const glm::dmat4 modelTransform =
+            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
+            glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
+            glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)) *
+            glm::scale(glm::dmat4(_modelTransform.value()), _scaleVector); // Model scale unit
+        const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
+            modelTransform;
+
+        int nLightSources = 0;
+        _lightIntensitiesBuffer.resize(_lightSources.size());
+        _lightDirectionsViewSpaceBuffer.resize(_lightSources.size());
+        for (const std::unique_ptr<LightSource>& lightSource : _lightSources) {
+            if (!lightSource->isEnabled()) {
+                continue;
+            }
+            _lightIntensitiesBuffer[nLightSources] = lightSource->intensity();
+            _lightDirectionsViewSpaceBuffer[nLightSources] =
+                lightSource->directionViewSpace(data);
+
+            ++nLightSources;
         }
-        _lightIntensitiesBuffer[nLightSources] = lightSource->intensity();
-        _lightDirectionsViewSpaceBuffer[nLightSources] =
-            lightSource->directionViewSpace(data);
 
-        ++nLightSources;
-    }
+        _program->setUniform(
+            _uniformCache.nLightSources,
+            nLightSources
+        );
+        _program->setUniform(
+            _uniformCache.lightIntensities,
+            _lightIntensitiesBuffer
+        );
+        _program->setUniform(
+            _uniformCache.lightDirectionsViewSpace,
+            _lightDirectionsViewSpaceBuffer
+        );
+        _program->setUniform(
+            _uniformCache.modelViewTransform,
+            glm::mat4(modelViewTransform)
+        );
 
-    _program->setUniform(
-        _uniformCache.nLightSources,
-        nLightSources
-    );
-    _program->setUniform(
-        _uniformCache.lightIntensities,
-        _lightIntensitiesBuffer
-    );
-    _program->setUniform(
-        _uniformCache.lightDirectionsViewSpace,
-        _lightDirectionsViewSpaceBuffer
-    );
-    _program->setUniform(
-        _uniformCache.modelViewTransform,
-        glm::mat4(modelViewTransform)
-    );
+        glm::dmat4 normalTransform = glm::transpose(glm::inverse(modelViewTransform));
 
-    glm::dmat4 normalTransform = glm::transpose(glm::inverse(modelViewTransform));
+        _program->setUniform(
+            _uniformCache.normalTransform,
+            glm::mat4(normalTransform)
+        );
 
-    _program->setUniform(
-        _uniformCache.normalTransform,
-        glm::mat4(normalTransform)
-    );
+        _program->setUniform(
+            _uniformCache.projectionTransform,
+            data.camera.projectionMatrix()
+        );
+        _program->setUniform(_uniformCache.ambientIntensity, _ambientIntensity);
+        _program->setUniform(_uniformCache.diffuseIntensity, _diffuseIntensity);
+        _program->setUniform(_uniformCache.specularIntensity, _specularIntensity);
+        _program->setUniform(_uniformCache.performShading, _performShading);
+        _program->setUniform(_uniformCache.opacityBlending, _enableOpacityBlending);
 
-    _program->setUniform(
-        _uniformCache.projectionTransform,
-        data.camera.projectionMatrix()
-    );
-    _program->setUniform(_uniformCache.ambientIntensity, _ambientIntensity);
-    _program->setUniform(_uniformCache.diffuseIntensity, _diffuseIntensity);
-    _program->setUniform(_uniformCache.specularIntensity, _specularIntensity);
-    _program->setUniform(_uniformCache.performShading, _performShading);
-    _program->setUniform(_uniformCache.opacityBlending, _enableOpacityBlending);
+        if (_disableFaceCulling) {
+            glDisable(GL_CULL_FACE);
+        }
 
-    if (_disableFaceCulling) {
-        glDisable(GL_CULL_FACE);
-    }
-
-    glEnablei(GL_BLEND, 0);
-    switch (_blendingFuncOption) {
+        glEnablei(GL_BLEND, 0);
+        switch (_blendingFuncOption) {
         case DefaultBlending:
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             break;
@@ -640,24 +653,25 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         case ColorAddingBlending:
             glBlendFunc(GL_SRC_COLOR, GL_DST_COLOR);
             break;
-    };
+        };
 
-    if (_disableDepthTest) {
-        glDisable(GL_DEPTH_TEST);
+        if (_disableDepthTest) {
+            glDisable(GL_DEPTH_TEST);
+        }
+
+        _geometry->render(*_program);
+        if (_disableFaceCulling) {
+            glEnable(GL_CULL_FACE);
+        }
+
+        global::renderEngine->openglStateCache().resetBlendState();
+
+        if (_disableDepthTest) {
+            glEnable(GL_DEPTH_TEST);
+        }
+
+        _program->deactivate();
     }
-
-    _geometry->render(*_program);
-    if (_disableFaceCulling) {
-        glEnable(GL_CULL_FACE);
-    }
-
-    global::renderEngine->openglStateCache().resetBlendState();
-
-    if (_disableDepthTest) {
-        glEnable(GL_DEPTH_TEST);
-    }
-
-    _program->deactivate();
 }
 
 void RenderableModel::update(const UpdateData& data) {
