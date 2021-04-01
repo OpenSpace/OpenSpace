@@ -118,7 +118,7 @@ public:
     bool getLuaValue(lua_State* state) const override;
 
     /**
-     * Sets the value of this TemplateProprty by decoding the object at the top of the Lua
+     * Sets the value of this TemplateProperty by decoding the object at the top of the Lua
      * stack and, if successful, assigning it using the Property::set method. The decoding
      * is performed by calling the PropertyDelegate::fromLuaValue with the template
      * parameter <code>T</code> as argument. If the decoding is successful, the new value
@@ -132,6 +132,16 @@ public:
     /// \see Property::typeLua
     int typeLua() const override;
 
+    /**
+     * This method encodes the stored value into a std::string object. The encoding is
+     * performed by calling PropertyDelegate::toStringValue with the template parameter
+     * <code>T</code> as an argument. This method has to be specialized for each new
+     * type, or a compile-time error will occur. The resulting encoding must also be a
+     * valid JSON representation fo the property.
+     *
+     * \param value The string object in which to store the resulting encoding
+     * \return \c true if the encoding succeeded; \c false otherwise
+     */
     bool getStringValue(std::string& value) const override;
 
     bool setStringValue(std::string value) override;
@@ -169,15 +179,15 @@ public:
      * the TemplateProperty::set method. It will be done internally by this method and it
      * allows assignments such as <code>prop = T(1)</code>.
      *
-     * \param val The value that should be set.
+     * \param val The value that should be set
      */
     TemplateProperty<T>& operator=(T val);
 
     /**
-     * These method sets the stored value to the provided value <code>val</code>,
-     * moving it into place. This move only happens if the provided value <code>val</code>
+     * This method sets the stored value to the provided value <code>val</code>,
+     * moving it into place. The move only happens if the provided value <code>val</code>
      * is different from the stored value, which needs an operator== to exist for the type
-     * <code>T</code>. If the value are different, the listeners are notified.
+     * <code>T</code>. If the value is different, the listeners are notified.
      *
      * \param val The new value for this TemplateProperty
      */
