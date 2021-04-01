@@ -22,20 +22,85 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/properties/list/doublelistproperty.h>
+
+#include <openspace/json.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/misc/misc.h>
+
+namespace {
+    constexpr const char* _loggerCat = "DoubleListProperty";
+} // namespace
+
+namespace {
+
+std::vector<double> fromLuaConversion(lua_State* state, bool& success) {
+    if (!lua_istable(state, -1)) {
+        success = false;
+        LERROR("Conversion from Lua failed. The input was not a table");
+        return {};
+    }
+
+    std::vector<double> result;
+    lua_pushnil(state);
+    while (lua_next(state, -2) != 0) {
+        if (lua_isnumber(state, -1)) {
+            result.emplace_back(lua_tonumber(state, -1));
+        }
+        else {
+            success = false;
+            LERROR(
+                "Conversion from Lua failed. The input table contains non-number values"
+            );
+            return {};
+        }
+        lua_pop(state, 1);
+    }
+    success = true;
+    return result;
+}
+
+bool toLuaConversion(lua_State* state, std::vector<double> val) {
+    lua_createtable(state, static_cast<int>(val.size()), 0);
+
+    int i = 1;
+    for (const int& v : val) {
+        lua_pushinteger(state, i);
+        lua_pushinteger(state, v);
+        lua_settable(state, -3);
+        ++i;
+    }
+
+    return true;
+}
+
+bool toStringConversion(std::string& outValue, const std::vector<double>& inValue) {
+    nlohmann::json json(inValue);
+    outValue = json.dump();
+    return true;
+}
+
+} // namespace
+
 namespace openspace::properties {
 
-template <typename T>
-ListProperty<T>::ListProperty(Property::PropertyInfo info)
-    : TemplateProperty<std::vector<T>>(std::move(info))
+DoubleListProperty::DoubleListProperty(Property::PropertyInfo info)
+    : ListProperty(std::move(info))
 {}
 
-template <typename T>
-ListProperty<T>::ListProperty(Property::PropertyInfo info, std::vector<T> values)
-    : TemplateProperty<std::vector<T>>(std::move(info), std::move(values))
+DoubleListProperty::DoubleListProperty(Property::PropertyInfo info, std::vector<double> values)
+    : ListProperty(std::move(info), std::move(values))
 {}
 
-template <typename T>
-ListProperty<T>::~ListProperty() {}
+REGISTER_TEMPLATEPROPERTY_SOURCE(
+    DoubleListProperty,
+    std::vector<double>,
+    std::vector<double>(),
+    fromLuaConversion,
+    toLuaConversion,
+    toStringConversion,
+    LUA_TTABLE
+)
 
 } // namespace openspace::properties
-

@@ -22,20 +22,44 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifndef __OPENSPACE_CORE___DOUBLELISTPROPERTY___H__
+#define __OPENSPACE_CORE___DOUBLELISTPROPERTY___H__
+
+#include <openspace/properties/listproperty.h>
+
 namespace openspace::properties {
 
-template <typename T>
-ListProperty<T>::ListProperty(Property::PropertyInfo info)
-    : TemplateProperty<std::vector<T>>(std::move(info))
-{}
+class DoubleListProperty : public ListProperty<double> {
+public:
+    DoubleListProperty(Property::PropertyInfo info);
+    DoubleListProperty(Property::PropertyInfo info, std::vector<double> values);
 
-template <typename T>
-ListProperty<T>::ListProperty(Property::PropertyInfo info, std::vector<T> values)
-    : TemplateProperty<std::vector<T>>(std::move(info), std::move(values))
-{}
+    using TemplateProperty<std::vector<double>>::operator std::vector<double>;
+    using TemplateProperty<std::vector<double>>::operator=;
+};
 
-template <typename T>
-ListProperty<T>::~ListProperty() {}
+template <>
+std::string PropertyDelegate<TemplateProperty<std::vector<double>>>::className();
+
+template <>
+template <>
+std::vector<double>
+PropertyDelegate<TemplateProperty<std::vector<double>>>::fromLuaValue(
+    lua_State* state, bool& success);
+
+template <>
+template <>
+bool PropertyDelegate<TemplateProperty<std::vector<double>>>::toLuaValue(
+    lua_State* state, const std::vector<double>& value);
+
+template <>
+int PropertyDelegate<TemplateProperty<std::vector<double>>>::typeLua();
+
+template <>
+template <>
+bool PropertyDelegate<TemplateProperty<std::vector<double>>>::toString(
+    std::string& outValue, const std::vector<double>& inValue);
 
 } // namespace openspace::properties
 
+#endif // __OPENSPACE_CORE___DOUBLELISTPROPERTY___H__

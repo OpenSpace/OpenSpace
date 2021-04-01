@@ -25,15 +25,20 @@
 #include <openspace/properties/list/stringlistproperty.h>
 
 #include <openspace/json.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/misc/misc.h>
-#include <numeric>
+
+namespace {
+    constexpr const char* _loggerCat = "IntListProperty";
+} // namespace
 
 namespace {
 
 std::vector<std::string> fromLuaConversion(lua_State* state, bool& success) {
     if (!lua_istable(state, -1)) {
         success = false;
+        LERROR("Conversion from Lua failed. The input was not a table");
         return {};
     }
 
@@ -68,11 +73,8 @@ bool toLuaConversion(lua_State* state, std::vector<std::string> val) {
 }
 
 bool toStringConversion(std::string& outValue, const std::vector<std::string>& inValue) {
-    // We want the output to be valid json
-    nlohmann::json json;
-    nlohmann::to_json(json, inValue);
+    nlohmann::json json(inValue);
     outValue = json.dump();
-
     return true;
 }
 

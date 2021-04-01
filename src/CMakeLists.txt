@@ -77,6 +77,8 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/properties/selectionproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/stringproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/triggerproperty.cpp
+  ${OPENSPACE_BASE_DIR}/src/properties/list/doublelistproperty.cpp
+  ${OPENSPACE_BASE_DIR}/src/properties/list/intlistproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/list/stringlistproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat2property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat2x3property.cpp
@@ -271,6 +273,8 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/templateproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/templateproperty.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/triggerproperty.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/properties/list/doublelistproperty.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/properties/list/intlistproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/list/stringlistproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat2property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat2x3property.h

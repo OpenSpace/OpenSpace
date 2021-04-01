@@ -26,7 +26,6 @@
 #define __OPENSPACE_CORE___LISTPROPERTY___H__
 
 #include <openspace/properties/templateproperty.h>
-
 #include <vector>
 
 namespace openspace::properties {
@@ -37,7 +36,7 @@ public:
     ListProperty(Property::PropertyInfo info);
     ListProperty(Property::PropertyInfo info, std::vector<T> values);
 
-    virtual ~ListProperty() = 0 {}; // TODO: remove definition
+    virtual ~ListProperty() = 0;
 };
 
 } // namespace openspace::properties

@@ -22,20 +22,43 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifndef __OPENSPACE_CORE___INTLISTPROPERTY___H__
+#define __OPENSPACE_CORE___INTLISTPROPERTY___H__
+
+#include <openspace/properties/listproperty.h>
+
 namespace openspace::properties {
 
-template <typename T>
-ListProperty<T>::ListProperty(Property::PropertyInfo info)
-    : TemplateProperty<std::vector<T>>(std::move(info))
-{}
+class IntListProperty : public ListProperty<int> {
+public:
+    IntListProperty(Property::PropertyInfo info);
+    IntListProperty(Property::PropertyInfo info, std::vector<int> values);
 
-template <typename T>
-ListProperty<T>::ListProperty(Property::PropertyInfo info, std::vector<T> values)
-    : TemplateProperty<std::vector<T>>(std::move(info), std::move(values))
-{}
+    using TemplateProperty<std::vector<int>>::operator std::vector<int>;
+    using TemplateProperty<std::vector<int>>::operator=;
+};
 
-template <typename T>
-ListProperty<T>::~ListProperty() {}
+template <>
+std::string PropertyDelegate<TemplateProperty<std::vector<int>>>::className();
+
+template <>
+template <>
+std::vector<int> PropertyDelegate<TemplateProperty<std::vector<int>>>::fromLuaValue(
+    lua_State* state, bool& success);
+
+template <>
+template <>
+bool PropertyDelegate<TemplateProperty<std::vector<int>>>::toLuaValue(
+    lua_State* state, const std::vector<int>& value);
+
+template <>
+int PropertyDelegate<TemplateProperty<std::vector<int>>>::typeLua();
+
+template <>
+template <>
+bool PropertyDelegate<TemplateProperty<std::vector<int>>>::toString(
+    std::string& outValue, const std::vector<int>& inValue);
 
 } // namespace openspace::properties
 
+#endif // __OPENSPACE_CORE___INTLISTPROPERTY___H__
