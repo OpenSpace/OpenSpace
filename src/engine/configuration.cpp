@@ -37,6 +37,7 @@ namespace {
     // We can't use ${SCRIPTS} here as that hasn't been defined by this point
     constexpr const char* InitialConfigHelper =
                                                "${BASE}/scripts/configuration_helper.lua";
+    constexpr const char* StrictLuaScript = "${BASE}/scripts/strict.lua";
 
     struct [[codegen::Dictionary(Configuration)]] Parameters {
         // The SGCT configuration file that determines the window and view frustum
@@ -648,6 +649,9 @@ Configuration loadConfigurationFromFile(const std::string& filename,
     // If there is an initial config helper file, load it into the state
     if (FileSys.fileExists(absPath(InitialConfigHelper))) {
         ghoul::lua::runScriptFile(result.state, absPath(InitialConfigHelper));
+    }
+    if (FileSys.fileExists(absPath(StrictLuaScript))) {
+        ghoul::lua::runScriptFile(result.state, absPath(StrictLuaScript));
     }
 
     // Load the configuration file into the state
