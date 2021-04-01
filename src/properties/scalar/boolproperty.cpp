@@ -46,19 +46,6 @@ bool toLuaConversion(lua_State* state, bool value) {
     return true;
 }
 
-bool fromStringConversion(const std::string& val, bool& success) {
-    std::stringstream s(val);
-    bool v;
-    s >> v;
-    success = !s.fail();
-    if (success) {
-        return v;
-    }
-    else {
-        throw ghoul::RuntimeError("Conversion error for string: " + val);
-    }
-}
-
 bool toStringConversion(std::string& outValue, bool inValue) {
     outValue = inValue ? "true" : "false";
     return true;
@@ -74,7 +61,6 @@ REGISTER_TEMPLATEPROPERTY_SOURCE(
     false,
     fromLuaConversion,
     toLuaConversion,
-    fromStringConversion,
     toStringConversion,
     LUA_TBOOLEAN
 )

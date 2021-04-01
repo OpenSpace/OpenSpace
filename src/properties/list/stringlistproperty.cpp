@@ -67,21 +67,6 @@ bool toLuaConversion(lua_State* state, std::vector<std::string> val) {
     return true;
 }
 
-std::vector<std::string> fromStringConversion(const std::string& val, bool& success) {
-    std::vector<std::string> tokens = ghoul::tokenizeString(val, ',');
-    for (std::string& token : tokens) {
-        ghoul::trimWhitespace(token);
-        // Each incoming string is of the form "value"
-        // so we want to remove the leading and trailing " characters
-        if (token.size() > 2 && (token[0] == '"' && token[token.size() - 1] == '"')) {
-            token = token.substr(1, token.size() - 2);
-        }
-    }
-
-    success = true;
-    return tokens;
-}
-
 bool toStringConversion(std::string& outValue, const std::vector<std::string>& inValue) {
     // We want the output to be valid json
     nlohmann::json json;
@@ -110,7 +95,6 @@ REGISTER_TEMPLATEPROPERTY_SOURCE(
     std::vector<std::string>(),
     fromLuaConversion,
     toLuaConversion,
-    fromStringConversion,
     toStringConversion,
     LUA_TTABLE
 )

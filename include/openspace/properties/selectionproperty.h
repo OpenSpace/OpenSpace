@@ -137,12 +137,6 @@ int PropertyDelegate<TemplateProperty<std::set<std::string>>>::typeLua();
 
 template <>
 template <>
-std::set<std::string>
-PropertyDelegate<TemplateProperty<std::set<std::string>>>::fromString(
-    const std::string& value, bool& success);
-
-template <>
-template <>
 bool PropertyDelegate<TemplateProperty<std::set<std::string>>>::toString(
     std::string& outValue, const std::set<std::string>& inValue);
 

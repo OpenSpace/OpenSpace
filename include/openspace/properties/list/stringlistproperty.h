@@ -60,12 +60,6 @@ int PropertyDelegate<TemplateProperty<std::vector<std::string>>>::typeLua();
 
 template <>
 template <>
-std::vector<std::string>
-PropertyDelegate<TemplateProperty<std::vector<std::string>>>::fromString(
-    const std::string& value, bool& success);
-
-template <>
-template <>
 bool PropertyDelegate<TemplateProperty<std::vector<std::string>>>::toString(
     std::string& outValue, const std::vector<std::string>& inValue);
 

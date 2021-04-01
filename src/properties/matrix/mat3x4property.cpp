@@ -74,33 +74,6 @@ bool toLuaConversion(lua_State* state, glm::mat3x4 value) {
     return true;
 }
 
-glm::mat3x4 fromStringConversion(const std::string& val, bool& success) {
-    glm::mat3x4 result = glm::mat3x4(1.f);
-    std::vector<std::string> tokens = ghoul::tokenizeString(val, ',');
-    if (tokens.size() != ghoul::glm_components<glm::mat3x4>::value) {
-        success = false;
-        return result;
-    }
-    int number = 0;
-    for (glm::length_t i = 0; i < glm::mat3x4::row_type::length(); ++i) {
-        for (glm::length_t j = 0; j < glm::mat3x4::col_type::length(); ++j) {
-            std::stringstream s(tokens[number]);
-            glm::mat3x4::value_type v;
-            s >> v;
-            if (s.fail()) {
-                success = false;
-                return result;
-            }
-            else {
-                result[i][j] = v;
-                ++number;
-            }
-        }
-    }
-    success = true;
-    return result;
-}
-
 bool toStringConversion(std::string& outValue, glm::mat3x4 inValue) {
     outValue = "[";
     for (glm::length_t i = 0; i < glm::mat3x4::row_type::length(); ++i) {
@@ -143,7 +116,6 @@ REGISTER_NUMERICALPROPERTY_SOURCE(
     ),
     fromLuaConversion,
     toLuaConversion,
-    fromStringConversion,
     toStringConversion,
     LUA_TTABLE
 )

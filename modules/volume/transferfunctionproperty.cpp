@@ -38,12 +38,6 @@ bool toLuaConversion(lua_State* state, openspace::volume::TransferFunction value
     return value.envelopesToLua(state);
 }
 
-openspace::volume::TransferFunction fromStringConversion(std::string val, bool& success) {
-    openspace::volume::TransferFunction tf;
-    success = tf.setEnvelopesFromString(val);
-    return tf;
-}
-
 bool toStringConversion(std::string& outValue,
                         openspace::volume::TransferFunction inValue)
 {
@@ -59,7 +53,6 @@ REGISTER_TEMPLATEPROPERTY_SOURCE(TransferFunctionProperty, volume::TransferFunct
     volume::TransferFunction(),
     fromLuaConversion,
     toLuaConversion,
-    fromStringConversion,
     toStringConversion,
     LUA_TTABLE
 )

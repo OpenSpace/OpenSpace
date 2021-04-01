@@ -52,20 +52,6 @@ TEST_CASE("StringListProperty: Set Value", "[stringlistproperty]") {
     REQUIRE(p.value() == std::vector<std::string>());
 }
 
-TEST_CASE("StringListProperty: Set String Value", "[stringlistproperty]") {
-    openspace::properties::StringListProperty p({ "id", "gui", "desc" });
-
-    const std::vector<std::string> list{ "a", "b", "c" };
-
-    // no whitespaces
-    p.setStringValue("\"a\",\"b\",\"c\"");
-    REQUIRE(p.value() == list);
-
-    // whitespaces
-    p.setStringValue("\"a\", \"b\", \"c\"");
-    REQUIRE(p.value() == list);
-}
-
 TEST_CASE("StringListProperty: Get String Value", "[stringlistproperty]") {
     openspace::properties::StringListProperty p({ "id", "gui", "desc" });
 

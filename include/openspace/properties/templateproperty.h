@@ -144,8 +144,6 @@ public:
      */
     bool getStringValue(std::string& value) const override;
 
-    bool setStringValue(std::string value) override;
-
     /**
      * Returns the description for this TemplateProperty as a Lua script that returns a
      * table on execution.

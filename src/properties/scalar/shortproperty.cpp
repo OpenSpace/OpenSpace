@@ -47,19 +47,6 @@ bool toLuaConversion(lua_State* state, short value) {
     return true;
 }
 
-short fromStringConversion(const std::string& val, bool& success) {
-    std::stringstream s(val);
-    short v;
-    s >> v;
-    success = !s.fail();
-    if (success) {
-        return v;
-    }
-    else {
-        throw ghoul::RuntimeError("Conversion error for string: " + val);
-    }
-}
-
 bool toStringConversion(std::string& outValue, short inValue) {
     outValue = std::to_string(inValue);
     return true;
@@ -78,7 +65,6 @@ REGISTER_NUMERICALPROPERTY_SOURCE(
     short(1),
     fromLuaConversion,
     toLuaConversion,
-    fromStringConversion,
     toStringConversion,
     LUA_TNUMBER
 )

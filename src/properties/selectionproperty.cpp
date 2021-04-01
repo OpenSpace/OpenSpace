@@ -200,21 +200,6 @@ int PropertyDelegate<TemplateProperty<std::set<std::string>>>::typeLua() {
 
 template <>
 template <>
-std::set<std::string>
-PropertyDelegate<TemplateProperty<std::set<std::string>>>::fromString(
-                                                 const std::string& value, bool& success)
-{
-    std::vector<std::string> tokens = ghoul::tokenizeString(value, ',');
-    std::set<std::string> result;
-
-    // TODO: this function should be removed entirely
-
-    success = true;
-    return result;
-}
-
-template <>
-template <>
 bool PropertyDelegate<TemplateProperty<std::set<std::string>>>::toString(
                        std::string& outValue, const std::set<std::string>& inValue)
 {

@@ -59,11 +59,6 @@ namespace openspace::properties {
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
-    TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromString(const std::string& value,  \
-                                                              bool& success);            \
-                                                                                         \
-    template <>                                                                          \
-    template <>                                                                          \
     bool PropertyDelegate<TemplateProperty<TYPE>>::toString(std::string& outValue,       \
                                                             const TYPE& inValue);
 
@@ -86,7 +81,6 @@ namespace openspace::properties {
 #define REGISTER_TEMPLATEPROPERTY_SOURCE(CLASS_NAME, TYPE, DEFAULT_VALUE,                \
                                          FROM_LUA_LAMBDA_EXPRESSION,                     \
                                          TO_LUA_LAMBDA_EXPRESSION,                       \
-                                         FROM_STRING_LAMBDA_EXPRESSION,                  \
                                          TO_STRING_LAMBDA_EXPRESSION, LUA_TYPE)          \
     template <>                                                                          \
     std::string PropertyDelegate<TemplateProperty<TYPE>>::className()                    \
@@ -120,14 +114,6 @@ namespace openspace::properties {
     template <>                                                                          \
     int PropertyDelegate<TemplateProperty<TYPE>>::typeLua() {                            \
         return LUA_TYPE;                                                                 \
-    }                                                                                    \
-                                                                                         \
-    template <>                                                                          \
-    template <>                                                                          \
-    TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromString(const std::string& value,  \
-                                                                 bool& success)          \
-    {                                                                                    \
-        return FROM_STRING_LAMBDA_EXPRESSION(value, success);                            \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \
@@ -235,19 +221,6 @@ bool TemplateProperty<T>::getStringValue(std::string& value) const {
         value,
         _value
     );
-    return success;
-}
-
-template <typename T>
-bool TemplateProperty<T>::setStringValue(std::string value) {
-    bool success = false;
-    T thisValue = PropertyDelegate<TemplateProperty<T>>::template fromString<T>(
-        value,
-        success
-    );
-    if (success) {
-        set(std::any(thisValue));
-    }
     return success;
 }
 
