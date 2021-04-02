@@ -118,7 +118,7 @@ end
 
 openspace.globebrowsing.createTemporalGibsGdalXml = function (layerName, startDate, endDate, timeResolution, resolution, format, temporalFormat)
     temporalFormat = temporalFormat or 'YYYY-MM-DD'
-    temporalTemplate =
+    local temporalTemplate =
         "<OpenSpaceTemporalGDALDataset>" ..
         "<OpenSpaceTimeStart>" .. startDate .. "</OpenSpaceTimeStart>" ..
         "<OpenSpaceTimeEnd>" .. endDate .. "</OpenSpaceTimeEnd>" ..
@@ -130,7 +130,7 @@ openspace.globebrowsing.createTemporalGibsGdalXml = function (layerName, startDa
 end
 
 openspace.globebrowsing.createGibsGdalXml = function (layerName, date, resolution, format)
-    tileLevel = 5
+    local tileLevel = 5
     -- These resolutions are defined by GIBS: https://wiki.earthdata.nasa.gov/display/GIBS/GIBS+API+for+Developers#GIBSAPIforDevelopers-Script-levelAccessviaGDAL
     if resolution == "2km" then
         tileLevel = 5
@@ -153,7 +153,7 @@ openspace.globebrowsing.createGibsGdalXml = function (layerName, date, resolutio
         return ""
     end
 
-    rasterCount = 3
+    local rasterCount = 3
     if format == "jpg" then
         if layerName == "ASTER_GDEM_Greyscale_Shaded_Relief" then
             rasterCount = 1
@@ -167,7 +167,7 @@ openspace.globebrowsing.createGibsGdalXml = function (layerName, date, resolutio
         return ""
     end
 
-    gdalWmsTemplate =
+    local gdalWmsTemplate =
     "<GDAL_WMS>" ..
         "<Service name=\"TMS\">" ..
             "<ServerUrl>https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/" ..
@@ -198,14 +198,21 @@ openspace.globebrowsing.createGibsGdalXml = function (layerName, date, resolutio
 end
 
 openspace.globebrowsing.parseInfoFile = function (file)
-    Name = nil
-    Identifier = nil
-    Description = nil
-    ColorFile = nil
-    HeightFile = nil
+    -- We are loading these values from an external info file and since we are switching
+    -- to a strict Lua, we need to predefine these global variables
+    local function declare(name)
+        rawset(_G, name, "")
+    end
+
+    declare("Name")
+    declare("Identifier")
+    declare("Description")
+    declare("ColorFile")
+    declare("HeightFile")
+    declare("Location")
 
     local dir = openspace.directoryForPath(file)
-    file_func, error = loadfile(file)
+    local file_func, error = loadfile(file)
     if file_func then
         file_func()
     else
@@ -213,6 +220,15 @@ openspace.globebrowsing.parseInfoFile = function (file)
         return nil, nil, nil, nil
     end
 
+    -- Hoist the global variables into local space
+    local Name = rawget(_G, "Name")
+    local Identifier = rawget(_G, "Identifier")
+    local Description = rawget(_G, "Description")
+    local ColorFile = rawget(_G, "ColorFile")
+    local HeightFile = rawget(_G, "HeightFile")
+    local Location = rawget(_G, "Location")
+
+    -- Now we can start
     local name = Name or Identifier
     local identifier = Identifier or Name
 
@@ -222,7 +238,7 @@ openspace.globebrowsing.parseInfoFile = function (file)
     end
 
     local color = nil
-    if ColorFile then
+    if ColorFile and ColorFile ~= "" then
         color = {
             Identifier = identifier,
             Name = name,
@@ -233,7 +249,7 @@ openspace.globebrowsing.parseInfoFile = function (file)
     end
 
     local height = nil
-    if HeightFile then
+    if HeightFile and HeightFile ~= "" then
         height = {
             Identifier = identifier,
             Name = name,
