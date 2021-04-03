@@ -88,18 +88,18 @@ RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
     addProperty(_startRenderIdx);
     addProperty(_sizeRender);
 
-    _updateStartRenderIdxSelect = std::function<void()>([this] {
+    _updateStartRenderIdxSelect = [this]() {
         if ((_numObjects - _startRenderIdx) < _sizeRender) {
-            _sizeRender = _numObjects - _startRenderIdx;
+            _sizeRender = static_cast<unsigned int>(_numObjects - _startRenderIdx);
         }
-        initializeGL();
-    });
-    _updateRenderSizeSelect = std::function<void()>([this] {
+        updateBuffers();
+    };
+    _updateRenderSizeSelect = [this]() {
         if (_sizeRender > (_numObjects - _startRenderIdx)) {
-            _startRenderIdx = _numObjects - _sizeRender;
+            _startRenderIdx = static_cast<unsigned int>(_numObjects - _sizeRender);
         }
-        initializeGL();
-    });
+        updateBuffers();
+    };
     _startRenderIdxCallbackHandle = _startRenderIdx.onChange(_updateStartRenderIdxSelect);
     _sizeRenderCallbackHandle = _sizeRender.onChange(_updateRenderSizeSelect);
 }
@@ -107,7 +107,7 @@ RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
 void RenderableSatellites::readDataFile(const std::string& filename) {
     if (!FileSys.fileExists(filename)) {
         throw ghoul::RuntimeError(fmt::format(
-            "Satellite TLE file {} does not exist.", filename
+            "Satellite TLE file {} does not exist", filename
         ));
     }
     _data.clear();

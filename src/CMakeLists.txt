@@ -32,7 +32,6 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/documentation/documentationgenerator.cpp
   ${OPENSPACE_BASE_DIR}/src/documentation/verifier.cpp
   ${OPENSPACE_BASE_DIR}/src/engine/configuration.cpp
-  ${OPENSPACE_BASE_DIR}/src/engine/configuration_doc.inl
   ${OPENSPACE_BASE_DIR}/src/engine/downloadmanager.cpp
   ${OPENSPACE_BASE_DIR}/src/engine/globals.cpp
   ${OPENSPACE_BASE_DIR}/src/engine/globalscallbacks.cpp
@@ -135,6 +134,7 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/rendering/dashboard.cpp
   ${OPENSPACE_BASE_DIR}/src/rendering/dashboard_lua.inl
   ${OPENSPACE_BASE_DIR}/src/rendering/dashboarditem.cpp
+  ${OPENSPACE_BASE_DIR}/src/rendering/dashboardtextitem.cpp
   ${OPENSPACE_BASE_DIR}/src/rendering/framebufferrenderer.cpp
   ${OPENSPACE_BASE_DIR}/src/rendering/deferredcastermanager.cpp
   ${OPENSPACE_BASE_DIR}/src/rendering/helper.cpp
@@ -163,7 +163,6 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/scene/sceneinitializer.cpp
   ${OPENSPACE_BASE_DIR}/src/scene/scenelicensewriter.cpp
   ${OPENSPACE_BASE_DIR}/src/scene/scenegraphnode.cpp
-  ${OPENSPACE_BASE_DIR}/src/scene/scenegraphnode_doc.inl
   ${OPENSPACE_BASE_DIR}/src/scene/timeframe.cpp
   ${OPENSPACE_BASE_DIR}/src/scene/translation.cpp
   ${OPENSPACE_BASE_DIR}/src/scripting/lualibrary.cpp
@@ -209,6 +208,10 @@ if (APPLE)
   set(OPENSPACE_SOURCE
     ${OPENSPACE_SOURCE}
     ${OPENSPACE_BASE_DIR}/src/interaction/touchbar.mm
+  )
+  set_source_files_properties(
+    ${OPENSPACE_BASE_DIR}/src/interaction/touchbar.mm
+    PROPERTIES SKIP_PRECOMPILE_HEADERS ON
   )
 endif ()
 set(OPENSPACE_HEADER
@@ -327,6 +330,7 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/abufferrenderer.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/dashboard.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/dashboarditem.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/rendering/dashboardtextitem.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/framebufferrenderer.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/deferredcaster.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/deferredcasterlistener.h

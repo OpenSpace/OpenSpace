@@ -96,10 +96,10 @@ namespace {
         std::optional<float> fontSize;
 
         // [[codegen::verbatim(ActiveColorInfo.description)]]
-        std::optional<glm::dvec3> activeColor;
+        std::optional<glm::dvec3> activeColor [[codegen::color()]];
 
         // [[codegen::verbatim(FlashColorInfo.description)]]
-        std::optional<glm::dvec3> flashColor;
+        std::optional<glm::dvec3> flashColor [[codegen::color()]];
     };
 #include "dashboarditeminstruments_codegen.cpp"
 } // namespace

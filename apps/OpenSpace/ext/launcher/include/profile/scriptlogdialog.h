@@ -22,72 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___MODELGEOMETRY___H__
-#define __OPENSPACE_MODULE_BASE___MODELGEOMETRY___H__
+#ifndef __OPENSPACE_UI_LAUNCHER___SCRIPTLOG___H__
+#define __OPENSPACE_UI_LAUNCHER___SCRIPTLOG___H__
 
-#include <ghoul/misc/managedmemoryuniqueptr.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/texture.h>
-#include <memory>
+#include "profile/keybindingsdialog.h"
+#include <QDialog>
+#include <QListWidget>
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::opengl { class ProgramObject; }
-
-namespace openspace { class Renderable; }
-namespace openspace::documentation { struct Documentation; }
-
-namespace openspace::modelgeometry {
-
-class ModelGeometry {
+class ScriptlogDialog : public QDialog {
+Q_OBJECT
 public:
-    struct Vertex {
-        GLfloat location[4];
-        GLfloat tex[2];
-        GLfloat normal[3];
-    };
+    /**
+     * Constructor for ScriptlogDialog class
+     *
+     * \param bindingDialog keybindingDialog that openend this window.
+     * \param parent Pointer to parent Qt widget
+     */
+    ScriptlogDialog(KeybindingsDialog* bindingDialog, QWidget* parent);
 
-    static ghoul::mm_unique_ptr<ModelGeometry> createFromDictionary(
-        const ghoul::Dictionary& dictionary
-    );
+private slots:
+    void saveChosenScripts();
 
-    ModelGeometry(const ghoul::Dictionary& dictionary);
-    virtual ~ModelGeometry() = default;
+private:
+    void createWidgets();
 
-    virtual bool initialize(Renderable* parent);
-    virtual void deinitialize();
-    void bindTexture();
-    void render();
-
-    virtual bool loadModel(const std::string& filename) = 0;
-    void changeRenderMode(const GLenum mode);
-    //bool getVertices(std::vector<Vertex>* vertexList);
-    //bool getIndices(std::vector<int>* indexList);
-
-    double boundingRadius() const;
-
-    virtual void setUniforms(ghoul::opengl::ProgramObject& program);
-
-    static documentation::Documentation Documentation();
-
-protected:
-    bool loadObj(const std::string& filename);
-    bool loadCachedFile(const std::string& filename);
-    bool saveCachedFile(const std::string& filename);
-
-    GLuint _vaoID = 0;
-    GLuint _vbo = 0;
-    GLuint _ibo = 0 ;
-    GLenum _mode = GL_TRIANGLES;
-
-    double _boundingRadius = 0.0;
-    std::string _colorTexturePath;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
-
-    std::vector<Vertex> _vertices;
-    std::vector<int> _indices;
-    std::string _file;
+    KeybindingsDialog* _bindingDialog = nullptr;
+    QListWidget* _scriptlogList = nullptr;
 };
 
-}  // namespace openspace::modelgeometry
-
-#endif // __OPENSPACE_MODULE_BASE___MODELGEOMETRY___H__
+#endif // __OPENSPACE_UI_LAUNCHER___SCRIPTLOG___H__

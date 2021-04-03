@@ -22,39 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/rendering/multimodelgeometry.h>
+#version __CONTEXT__
 
-#include <ghoul/io/model/modelreadermultiformat.h>
-#include <cstring>
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-namespace openspace::modelgeometry {
+layout(location = 0) in vec2 in_position;
+layout(location = 1) in vec2 in_st;
 
-MultiModelGeometry::MultiModelGeometry(const ghoul::Dictionary& dictionary)
-    : ModelGeometry(dictionary)
-{
-    loadObj(_file);
+out vec2 vs_st;
+out float vs_screenSpaceDepth;
+out vec4 vs_positionViewSpace;
+out vec4 shadowCoords;
+
+uniform dmat4 modelViewProjectionMatrix;
+
+// ShadowMatrix is the matrix defined by:
+// textureCoordsMatrix * projectionMatrix * combinedViewMatrix * modelMatrix
+// where textureCoordsMatrix is just a scale and bias computation: [-1,1] to [0,1]
+uniform dmat4 shadowMatrix;
+
+void main() {
+    vs_st = in_st;
+
+    dvec4 positionClipSpace  = modelViewProjectionMatrix * dvec4(in_position, 0.0, 1.0);
+    vec4 positionClipSpaceZNorm = z_normalization(vec4(positionClipSpace));
+    
+    shadowCoords = vec4(shadowMatrix * dvec4(in_position, 0.0, 1.0));
+    vs_screenSpaceDepth  = positionClipSpaceZNorm.w;
+    gl_Position = positionClipSpaceZNorm;
 }
-
-bool MultiModelGeometry::loadModel(const std::string& filename) {
-    std::vector<ghoul::io::ModelReaderBase::Vertex> vertices;
-    std::vector<int> indices;
-    ghoul::io::ModelReaderMultiFormat().loadModel(filename, vertices, indices);
-
-    _vertices.reserve(vertices.size());
-    for (const ghoul::io::ModelReaderBase::Vertex& v : vertices) {
-        Vertex vv {};
-        memcpy(vv.location, v.location, sizeof(GLfloat) * 3);
-        vv.location[3] = 1.0;
-        //memcpy(vv.location, glm::value_ptr(p.vec4()), sizeof(GLfloat) * 4);
-        memcpy(vv.tex, v.tex, sizeof(GLfloat) * 2);
-        memcpy(vv.normal, v.normal, sizeof(GLfloat) * 3);
-        _vertices.push_back(vv);
-    }
-
-    _indices.resize(indices.size());
-    std::copy(indices.begin(), indices.end(), _indices.begin());
-
-    return true;
-}
-
-}  // namespace openspace::modelgeometry

@@ -54,11 +54,7 @@ local Comet67P = {
     },
     Renderable = {
         Type = "RenderableModelProjection",
-        Geometry = {
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/67P_rotated_5_130.obj",
-            ColorTexture = textures .. "/gray.jpg"
-        },
+        GeometryFile = models .. "/67P_rotated_5_130.obj",
         Projection = {
             Sequence   = { imagesDestination },
             SequenceType = "image-sequence",

@@ -29,11 +29,13 @@
 layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
 layout(location = 2) in vec3 in_normal;
+layout(location = 3) in vec3 in_tangent;
 
 out vec2 vs_st;
 out vec3 vs_normalViewSpace;
 out float vs_screenSpaceDepth;
 out vec4 vs_positionCameraSpace;
+out mat3 TBN;
 
 uniform mat4 modelViewTransform;
 uniform mat4 projectionTransform;
@@ -49,4 +51,16 @@ void main() {
     vs_screenSpaceDepth = positionScreenSpace.w;
     
     vs_normalViewSpace = normalize(mat3(normalTransform) * in_normal);
+
+	// TBN matrix for normal mapping
+	vec3 T = normalize(vec3(modelViewTransform * vec4(in_tangent, 0.0)));
+	vec3 N = normalize(vec3(modelViewTransform * vec4(in_normal, 0.0)));
+
+	// Re-orthogonalize T with respect to N
+	T = normalize(T - dot(T, N) * N);
+
+	// Retrieve perpendicular vector B with cross product of T and N
+	vec3 B = normalize(cross(N, T));
+
+	TBN = mat3(T, B, N);
 }

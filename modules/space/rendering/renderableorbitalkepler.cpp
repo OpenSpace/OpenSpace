@@ -242,7 +242,7 @@ namespace {
         std::optional<double> lineWidth;
 
         // [[codegen::verbatim(LineColorInfo.description)]]
-        glm::dvec3 color;
+        glm::dvec3 color [[codegen::color()]];
 
         // [[codegen::verbatim(TrailFadeInfo.description)]]
         std::optional<double> trailFade;
@@ -452,6 +452,8 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
 }
 
 void RenderableOrbitalKepler::initializeGL() {
+    ghoul_assert(_vertexArray == 0, "Vertex array object already existed");
+    ghoul_assert(_vertexBuffer == 0, "Vertex buffer object already existed");
     glGenVertexArrays(1, &_vertexArray);
     glGenBuffers(1, &_vertexBuffer);
 

@@ -42,9 +42,14 @@
 
 int main(int argc, char** argv) {
     using namespace openspace;
+
+    ghoul::logging::LogManager::initialize(
+        ghoul::logging::LogLevel::Info,
+        ghoul::logging::LogManager::ImmediateFlush::Yes
+    );
     ghoul::initialize();
     global::create();
-    
+
     // Register the path of the executable,
     // to make it possible to find other files in the same directory.
     FileSys.registerPathToken(
@@ -54,9 +59,20 @@ int main(int argc, char** argv) {
     );
 
     std::string configFile = configuration::findConfiguration();
-    *global::configuration = configuration::loadConfigurationFromFile(configFile);
+    // Register the base path as the directory where 'filename' lives
+    std::string base = ghoul::filesystem::File(configFile).directoryName();
+    constexpr const char* BasePathToken = "${BASE}";
+    FileSys.registerPathToken(BasePathToken, base);
+
+    *global::configuration = configuration::loadConfigurationFromFile(configFile, "");
     global::openSpaceEngine->registerPathTokens();
     global::openSpaceEngine->initialize();
+
+    ghoul::logging::LogManager::deinitialize();
+    ghoul::logging::LogManager::initialize(
+        ghoul::logging::LogLevel::Info,
+        ghoul::logging::LogManager::ImmediateFlush::Yes
+    );
 
     FileSys.registerPathToken("${TESTDIR}", "${BASE}/tests");
 

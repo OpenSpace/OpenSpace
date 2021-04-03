@@ -234,7 +234,7 @@ namespace {
         std::optional<std::string> file;
 
         // [[codegen::verbatim(ColorInfo.description)]]
-        glm::vec3 color;
+        glm::vec3 color [[codegen::color()]];
 
         // [[codegen::verbatim(SpriteTextureInfo.description)]]
         std::optional<std::string> texture;
@@ -277,7 +277,7 @@ namespace {
         std::optional<bool> drawLabels;
 
         // [[codgen::verbatim(TextColorInfo.description)]]
-        std::optional<glm::vec3> textColor;
+        std::optional<glm::vec3> textColor [[codegen::color()]];
 
         // [[codgen::verbatim(TextOpacityInfo.description)]]
         std::optional<float> textOpacity;
@@ -1492,6 +1492,11 @@ void RenderableBillboardsCloud::createDataSlice() {
     ZoneScoped
 
     _slicedData.clear();
+
+    if (_fullData.empty() || _nValuesPerAstronomicalObject == 0) {
+        return;
+    }
+
     if (_hasColorMapFile) {
         _slicedData.reserve(8 * (_fullData.size() / _nValuesPerAstronomicalObject));
     }

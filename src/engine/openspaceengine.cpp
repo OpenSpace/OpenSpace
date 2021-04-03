@@ -223,6 +223,7 @@ void OpenSpaceEngine::initialize() {
     }
 
 
+
     // Initialize the requested logs from the configuration file
     // We previously initialized the LogManager with a console log to provide some logging
     // until we know which logs should be added
@@ -299,8 +300,14 @@ void OpenSpaceEngine::initialize() {
         std::string outputScenePath = absPath("${TEMPORARY}");
         std::string inputProfile = inputProfilePath + "/" + global::configuration->profile
             + ".profile";
+        std::string inputUserProfile = absPath("${USER_PROFILES}") + "/" +
+            global::configuration->profile + ".profile";
         std::string outputAsset = outputScenePath + "/" + global::configuration->profile
             + ".asset";
+
+        if (FileSys.fileExists(inputUserProfile)) {
+            inputProfile = inputUserProfile;
+        }
 
         if (!FileSys.fileExists(inputProfile)) {
             LERROR(fmt::format(
@@ -947,6 +954,23 @@ void OpenSpaceEngine::writeStaticDocumentation() {
         _documentationJson += "\"identifier\":\"" + FactoryManager::ref().jsonName();
         _documentationJson += "\",\"data\":" + FactoryManager::ref().generateJson();
         _documentationJson += "},";
+    }
+}
+
+void OpenSpaceEngine::createUserDirectoriesIfNecessary() {
+    LTRACE(absPath("${USER}"));
+
+    if (!std::filesystem::exists(absPath("${USER_ASSETS}"))) {
+        FileSys.createDirectory(absPath("${USER_ASSETS}"),
+            ghoul::filesystem::FileSystem::Recursive::Yes);
+    }
+    if (!std::filesystem::exists(absPath("${USER_PROFILES}"))) {
+        FileSys.createDirectory(absPath("${USER_PROFILES}"),
+            ghoul::filesystem::FileSystem::Recursive::Yes);
+    }
+    if (!std::filesystem::exists(absPath("${USER_CONFIG}"))) {
+        FileSys.createDirectory(absPath("${USER_CONFIG}"),
+            ghoul::filesystem::FileSystem::Recursive::Yes);
     }
 }
 
@@ -1597,8 +1621,8 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
                 "Removes a tag (second argument) from a scene graph node (first argument)"
             },
             {
-                "createSingeColorImage",
-                &luascriptfunctions::createSingeColorImage,
+                "createSingleColorImage",
+                &luascriptfunctions::createSingleColorImage,
                 {},
                 "string, vec3",
                 "Creates a 1 pixel image with a certain color in the cache folder and "

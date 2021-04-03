@@ -104,7 +104,7 @@ namespace {
         "Aberration",
         "This value determines the aberration method that is used to compute the shadow "
         "cylinder."
-    }; 
+    };
 
     struct [[codegen::Dictionary(RenderableShadowCylinder)]] Parameters {
         // [[codegen::verbatim(NumberPointsInfo.description)]]
@@ -114,7 +114,7 @@ namespace {
         std::optional<float> shadowLength;
 
         // [[codegen::verbatim(ShadowColorInfo.description)]]
-        std::optional<glm::vec3> shadowColor;
+        std::optional<glm::vec3> shadowColor [[codegen::color()]];
 
         enum class TerminatorType {
             Umbral [[codegen::key("UMBRAL")]],

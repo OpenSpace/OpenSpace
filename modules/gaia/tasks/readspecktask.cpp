@@ -34,23 +34,30 @@
 #include <fstream>
 
 namespace {
-    constexpr const char* KeyInFilePath = "InFilePath";
-    constexpr const char* KeyOutFilePath = "OutFilePath";
-
     constexpr const char* _loggerCat = "ReadSpeckTask";
+
+    struct [[codegen::Dictionary(ReadSpeckTask)]] Parameters {
+        // The path to the SPECK file that are to be read
+        std::string inFilePath;
+        
+        // The path to the file to export raw VBO data to
+        std::string outFilePath;
+    };
+#include "readspecktask_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
-ReadSpeckTask::ReadSpeckTask(const ghoul::Dictionary& dictionary) {
-    openspace::documentation::testSpecificationAndThrow(
-        documentation(),
-        dictionary,
-        "ReadSpeckTask"
-    );
+documentation::Documentation ReadSpeckTask::Documentation() {
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "gaiamission_speckfiletorawdata";
+    return doc;
+}
 
-    _inFilePath = absPath(dictionary.value<std::string>(KeyInFilePath));
-    _outFilePath = absPath(dictionary.value<std::string>(KeyOutFilePath));
+ReadSpeckTask::ReadSpeckTask(const ghoul::Dictionary& dictionary) {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    _inFilePath = absPath(p.inFilePath);
+    _outFilePath = absPath(p.outFilePath);
 }
 
 std::string ReadSpeckTask::description() {
@@ -90,28 +97,6 @@ void ReadSpeckTask::perform(const Task::ProgressCallback& onProgress) {
     }
 
     onProgress(1.f);
-}
-
-documentation::Documentation ReadSpeckTask::Documentation() {
-    using namespace documentation;
-    return {
-        "ReadSpeckTask",
-        "gaiamission_speckfiletorawdata",
-        {
-            {
-                KeyInFilePath,
-                new StringVerifier,
-                Optional::No,
-                "The path to the SPECK file that are to be read.",
-            },
-            {
-                KeyOutFilePath,
-                new StringVerifier,
-                Optional::No,
-                "The path to the file to export raw VBO data to.",
-            },
-        }
-    };
 }
 
 } // namespace openspace

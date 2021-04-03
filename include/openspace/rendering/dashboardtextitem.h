@@ -22,26 +22,35 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___MULTIMODELGEOMETRY___H__
-#define __OPENSPACE_MODULE_BASE___MULTIMODELGEOMETRY___H__
+#ifndef __OPENSPACE_CORE___DASHBOARDTEXTITEM___H__
+#define __OPENSPACE_CORE___DASHBOARDTEXTITEM___H__
 
-#include <modules/base/rendering/modelgeometry.h>
+#include <openspace/rendering/dashboarditem.h>
+
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/stringproperty.h>
+
+namespace ghoul { class Dictionary; }
+namespace ghoul::fontrendering { class Font; }
 
 namespace openspace {
-    class RenderableModel;
-    class RenderableModelProjection;
-} // namespace openspace
 
-namespace openspace::modelgeometry {
+namespace documentation { struct Documentation; }
 
-class MultiModelGeometry : public ModelGeometry {
+class DashboardTextItem : public DashboardItem {
 public:
-    MultiModelGeometry(const ghoul::Dictionary& dictionary);
+    static documentation::Documentation Documentation();
 
-private:
-    virtual bool loadModel(const std::string& filename) override;
+    DashboardTextItem(const ghoul::Dictionary& dictionary, float fontSize = 10.f,
+        const std::string& fontName = "Mono");
+
+protected:
+    properties::StringProperty _fontName;
+    properties::FloatProperty _fontSize;
+
+    std::shared_ptr<ghoul::fontrendering::Font> _font;
 };
 
-}  // namespace openspace::modelgeometry
+} // openspace
 
-#endif // __OPENSPACE_MODULE_BASE___MULTIMODELGEOMETRY___H__
+#endif // __OPENSPACE_CORE___DASHBOARDTEXTITEM___H__

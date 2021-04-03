@@ -54,6 +54,8 @@
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/io/texture/texturereadercmap.h>
+#include <ghoul/io/model/modelreader.h>
+#include <ghoul/io/model/modelreaderassimp.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringconversion.h>
@@ -132,6 +134,13 @@ namespace {
         "screenshot. If it is enabled, all post processing is applied as well, which "
         "includes everything rendered on top of the rendering, such as the user "
         "interface."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ScreenshotUseDateInfo = {
+        "ScreenshotUseDate",
+        "Screenshot Folder uses Date",
+        "If this value is set to 'true', screenshots will be saved to a folder that "
+        "contains the time at which this value was enabled"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowFrameNumberInfo = {
@@ -255,6 +264,7 @@ RenderEngine::RenderEngine()
     , _showVersionInfo(ShowVersionInfo, true)
     , _showCameraInfo(ShowCameraInfo, true)
     , _applyWarping(ApplyWarpingInfo, false)
+    , _screenshotUseDate(ScreenshotUseDateInfo, false)
     , _showFrameInformation(ShowFrameNumberInfo, false)
     , _disableMasterRendering(DisableMasterInfo, false)
     , _globalBlackOutFactor(GlobalBlackoutFactorInfo, 1.f, 0.f, 1.f)
@@ -348,6 +358,44 @@ RenderEngine::RenderEngine()
     addProperty(_globalBlackOutFactor);
     addProperty(_applyWarping);
 
+    _screenshotUseDate.onChange([this]() {
+        // If there is no screenshot folder, don't bother with handling the change
+        if (!FileSys.hasRegisteredToken("${STARTUP_SCREENSHOT}")) {
+            return;
+        }
+
+        if (_screenshotUseDate) {
+            // Going from 'false' -> 'true'
+            // We might need to create the folder first
+
+            std::time_t now = std::time(nullptr);
+            std::tm* nowTime = std::localtime(&now);
+            char date[128];
+            strftime(date, sizeof(date), "%Y-%m-%d-%H-%M", nowTime);
+
+            std::string newFolder = absPath("${STARTUP_SCREENSHOT}/" + std::string(date));
+            if (!FileSys.directoryExists(newFolder)) {
+                FileSys.createDirectory(newFolder);
+            }
+            FileSys.registerPathToken(
+                "${SCREENSHOTS}",
+                newFolder,
+                ghoul::filesystem::FileSystem::Override::Yes
+            );
+        }
+        else {
+            // Going from 'true' -> 'false'
+            // We reset the screenshot folder back to what it was in the beginning
+            FileSys.registerPathToken(
+                "${SCREENSHOTS}",
+                absPath("${STARTUP_SCREENSHOT}"),
+                ghoul::filesystem::FileSystem::Override::Yes
+            );
+        }
+        global::windowDelegate->setScreenshotFolder(absPath("${SCREENSHOTS}"));
+    });
+    addProperty(_screenshotUseDate);
+
     _horizFieldOfView.onChange([this]() {
         if (global::windowDelegate->isMaster()) {
             global::windowDelegate->setHorizFieldOfView(_horizFieldOfView);
@@ -428,6 +476,10 @@ void RenderEngine::initialize() {
         std::make_unique<ghoul::io::TextureReaderCMAP>()
     );
 
+    ghoul::io::ModelReader::ref().addReader(
+        std::make_unique<ghoul::io::ModelReaderAssimp>()
+    );
+
     _versionString = OPENSPACE_VERSION_STRING_FULL;
     if (global::versionChecker->hasLatestVersionInfo()) {
         VersionChecker::SemanticVersion latest = global::versionChecker->latestVersion();
@@ -443,6 +495,8 @@ void RenderEngine::initialize() {
             );
         }
     }
+
+    _screenshotUseDate = global::configuration->shouldUseScreenshotDate;
 }
 
 void RenderEngine::initializeGL() {

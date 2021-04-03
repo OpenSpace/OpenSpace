@@ -33,13 +33,13 @@ FileSystemAccess::FileSystemAccess(std::string fileExtension,
     , _useCheckboxes(useCheckboxes)
 {}
 
-std::string FileSystemAccess::useQtFileSystemModelToTraverseDir(std::string dir) {
+std::string FileSystemAccess::useQtFileSystemModelToTraverseDir(std::string dir, bool userAssets) {
     _filesystemModel.setRootPath(QString::fromStdString(dir));
     QModelIndex index = _filesystemModel.index(_filesystemModel.rootPath());
     QFileInfo fileInfo = _filesystemModel.fileInfo(index);
     std::vector<std::string> dirsNested;
     std::vector<std::string> out;
-    parseChildDirElements(fileInfo, "", 0, dirsNested, out);
+    parseChildDirElements(fileInfo, "", 0, dirsNested, out, userAssets);
     std::string combined;
     for (const std::string& o : out) {
         combined += o + "\n";
@@ -49,7 +49,7 @@ std::string FileSystemAccess::useQtFileSystemModelToTraverseDir(std::string dir)
 
 void FileSystemAccess::parseChildDirElements(QFileInfo fileInfo, std::string space,
                                          int level, std::vector<std::string>& dirNames,
-                                         std::vector<std::string>& output)
+                                         std::vector<std::string>& output, bool userAssets)
 {
     QDir dir(fileInfo.filePath());
     bool hasDirHeaderBeenAdded = false;
@@ -58,11 +58,13 @@ void FileSystemAccess::parseChildDirElements(QFileInfo fileInfo, std::string spa
     for (int i = 0; i < fileList.size(); i++) {
         QFileInfo fi = fileList[i];
         std::string res = space + fi.fileName().toStdString();
-
+        if (level == 0 && userAssets) {
+            res = "${USER_ASSETS}/" + res;
+        }
         if (fi.isDir()) {
-            if (level != 0 || (level == 0 && isApprovedPath(res))) {
+            if (level != 0 || (level == 0 && (isApprovedPath(res) || userAssets))) {
                 dirNames.push_back(res);
-                parseChildDirElements(fi, (space + " "), level + 1, dirNames, output);
+                parseChildDirElements(fi, (space + " "), level + 1, dirNames, output, userAssets);
             }
         }
         else {
