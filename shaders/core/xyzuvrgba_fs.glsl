@@ -22,78 +22,53 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___UPDATESTRUCTURES___H__
-#define __OPENSPACE_CORE___UPDATESTRUCTURES___H__
+#include "fragment.glsl"
 
-#include <openspace/util/camera.h>
-#include <openspace/util/time.h>
+uniform bool hasTexture = false;
+uniform bvec2 shouldFlipTexture = bvec2(false, false);
+uniform sampler2D tex;
+uniform vec4 color = vec4(1.0, 1.0, 1.0, 1.0);
 
-namespace openspace {
+in float depth;
+in vec2 out_uv;
+in vec4 out_color;
 
-class Deferredcaster;
-class VolumeRaycaster;
+Fragment getFragment() {
+    Fragment frag;
 
-struct InitializeData {};
+    if (hasTexture) {
+        vec2 uv = out_uv;
+        if (shouldFlipTexture.x) {
+            uv.x = 1.0 - uv.x;
+        }
+        if (shouldFlipTexture.y) {
+            uv.y = 1.0 - uv.y;
+        }
+        frag.color = out_color * color * texture(tex, uv);
+    }
+    else {
+        frag.color = out_color * color;
+    }
+    frag.depth = depth;
+    return frag;
+}
 
-struct TransformData {
-    glm::dvec3 translation = glm::dvec3(0.0);
-    glm::dmat3 rotation = glm::dmat3(1.0);
-    glm::dvec3 scale = glm::dvec3(1.0);
-};
+/*
+out vec4 FragColor;
 
-struct UpdateData {
-    TransformData modelTransform;
-    const Time time;
-    const Time previousFrameTime;
-};
-
-struct RenderData {
-    const Camera& camera;
-    const Time time;
-    int8_t renderBinMask = -1;
-    TransformData modelTransform;
-};
-
-struct RaycasterTask {
-    VolumeRaycaster* raycaster;
-    RenderData renderData;
-};
-
-struct DeferredcasterTask {
-    Deferredcaster* deferredcaster;
-    RenderData renderData;
-};
-
-struct RendererTasks {
-    std::vector<RaycasterTask> raycasterTasks;
-    std::vector<DeferredcasterTask> deferredcasterTasks;
-};
-
-struct RaycastData {
-    int id = -1;
-    std::string namespaceName;
-};
-
-struct DeferredcastData {
-    int id = -1;
-    std::string namespaceName;
-};
-
-/**
- * Defines the position of an object relative to a surface. The surface is defined as
- * a reference surface together with a height offset from that reference surface.
- */
-struct SurfacePositionHandle {
-    /// Vector from the center of the object to the reference surface of the object
-    glm::dvec3 centerToReferenceSurface = glm::dvec3(0.0);
-    /// Direction out from the reference. Can conincide with the surface normal but does
-    /// not have to.
-    glm::dvec3 referenceSurfaceOutDirection = glm::dvec3(0.0);
-    /// Height from the reference surface out to the actual surface in the direction of
-    /// the surface normal. Can be positive or negative.
-    double heightToSurface = 0.0;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_CORE___UPDATESTRUCTURES___H__
+void main() {
+    if (hasTexture) {
+        vec2 uv = out_uv;
+        if (shouldFlipTexture.x) {
+            uv.x = 1.0 - uv.x;
+        }
+        if (shouldFlipTexture.y) {
+            uv.y = 1.0 - uv.y;
+        }
+        FragColor = out_color * color * texture(tex, uv);
+    }
+    else {
+        FragColor = out_color * color;
+    }
+}
+*/

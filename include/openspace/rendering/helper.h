@@ -67,11 +67,6 @@ struct Shaders {
     struct {
         std::unique_ptr<ghoul::opengl::ProgramObject> program;
         UniformCache(tex, hasTexture, shouldFlipTexture, proj, color) cache;
-    } xyzuvrgba;
-
-    struct {
-        std::unique_ptr<ghoul::opengl::ProgramObject> program;
-        UniformCache(tex, hasTexture, shouldFlipTexture, proj, color) cache;
     } screenfilling;
 };
 

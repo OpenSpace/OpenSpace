@@ -63,6 +63,14 @@ namespace {
         "Bounding Sphere",
         "The size of the bounding sphere radius."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo InteractionSphereInfo = {
+        "InteractionSphere",
+        "Interaction Sphere",
+        "The minimum radius that the camera is allowed to get close to this scene graph "
+        "node."
+    };
+
     struct [[codegen::Dictionary(Renderable)]] Parameters {
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
@@ -121,6 +129,7 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     , _enabled(EnabledInfo, true)
     , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
     , _boundingSphere(BoundingSphereInfo, 0.f, 0.f, 3e10f)
+    , _interactionSphere(InteractionSphereInfo, 0.f, 0.f, 3e10f)
     , _renderableType(RenderableTypeInfo, "Renderable")
 {
     ZoneScoped
@@ -157,6 +166,8 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
 
     _boundingSphere = p.boundingSphere.value_or(_boundingSphere);
     addProperty(_boundingSphere);
+
+    addProperty(_interactionSphere);
 }
 
 void Renderable::initialize() {}
@@ -179,12 +190,16 @@ double Renderable::boundingSphere() const {
     return _boundingSphere;
 }
 
+double Renderable::interactionSphere() const {
+    return _interactionSphere;
+}
+
 SurfacePositionHandle Renderable::calculateSurfacePositionHandle(
                                                  const glm::dvec3& targetModelSpace) const
 {
     const glm::dvec3 directionFromCenterToTarget = glm::normalize(targetModelSpace);
     return {
-        directionFromCenterToTarget * boundingSphere(),
+        directionFromCenterToTarget * _parent->interactionSphere(),
         directionFromCenterToTarget,
         0.0
     };

@@ -31,6 +31,7 @@
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
 
 namespace ghoul { class Dictionary; }
@@ -75,8 +76,8 @@ public:
     bool isEnabled() const;
     bool shouldUpdateIfDisabled() const;
 
-    void setBoundingSphere(double boundingSphere);
     double boundingSphere() const;
+    double interactionSphere() const;
 
     virtual void render(const RenderData& data, RendererTasks& rendererTask);
     virtual void update(const UpdateData& data);
@@ -99,14 +100,23 @@ protected:
     properties::BoolProperty _enabled;
     properties::FloatProperty _opacity;
     properties::DoubleProperty _boundingSphere;
+    properties::DoubleProperty _interactionSphere;
     properties::StringProperty _renderableType;
 
-    bool _shouldUpdateIfDisabled = false;
-
+    void setBoundingSphere(double boundingSphere);
+   
     void setRenderBinFromOpacity();
     void registerUpdateRenderBinFromOpacity();
 
+    SceneGraphNode* _parent = nullptr;
+    bool _shouldUpdateIfDisabled = false;
+
 private:
+    // We only want the SceneGraphNode to manipulate the parent, so we don't want to
+    // provide a set method for
+    friend ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
+        const ghoul::Dictionary&);
+
     RenderBin _renderBin = RenderBin::Opaque;
 };
 

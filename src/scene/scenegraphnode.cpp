@@ -33,11 +33,13 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/helper.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/timeframe.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/ghoul_gl.h>
@@ -87,15 +89,21 @@ namespace {
         openspace::properties::Property::Visibility::Hidden
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BoundingSphereInfo = {
-        "BoundingSphere",
-        "Bounding Sphere",
-        "The bounding sphere of the scene graph node. This can be the "
-        "bounding sphere of an attached renderable or directly specified to the node. "
-        "If there is a boundingsphere on both the renderable and the node, the largest "
-        "number will be picked.",
-        openspace::properties::Property::Visibility::Hidden
-    };
+    //constexpr openspace::properties::Property::PropertyInfo BoundingSphereInfo = {
+    //    "BoundingSphere",
+    //    "Bounding Sphere",
+    //    "The bounding sphere of the scene graph node meaning that everything that this "
+    //    "scene graph node renders must be contained within this sphere",
+    //    openspace::properties::Property::Visibility::Hidden
+    //};
+
+    //constexpr openspace::properties::Property::PropertyInfo InteractionSphereInfo = {
+    //    "InteractionSphere",
+    //    "Interaction Sphere",
+    //    "The minimum radius that the camera is allowed to get close to this scene graph "
+    //    "node.",
+    //    openspace::properties::Property::Visibility::Hidden
+    //};
 
     constexpr openspace::properties::Property::PropertyInfo GuiPathInfo = {
         "GuiPath",
@@ -127,6 +135,13 @@ namespace {
         "This represents if the scene graph node should be shown in the gui "
         "example: false",
         openspace::properties::Property::Visibility::Hidden
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ShowDebugSphereInfo = {
+        "ShowDebugSphere",
+        "Show Debug Sphere",
+        "If enabled the bounding sphere of this scene graph node is rendered as a debug "
+        "method"
     };
 
     struct [[codegen::Dictionary(SceneGraphNode)]] Parameters {
@@ -259,10 +274,10 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         }
     }
 
-    if (p.boundingSphere.has_value()) {
-        result->_boundingSphere = *p.boundingSphere;
-        result->_boundingSphere.setVisibility(properties::Property::Visibility::All);
-    }
+    //if (p.boundingSphere.has_value()) {
+    //    result->_boundingSphere = *p.boundingSphere;
+    //    result->_boundingSphere.setVisibility(properties::Property::Visibility::All);
+    //}
 
     if (p.transform.has_value()) {
         if (p.transform->translation.has_value()) {
@@ -346,23 +361,24 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     if (p.renderable.has_value()) {
         result->_renderable = Renderable::createFromDictionary(*p.renderable);
         ghoul_assert(result->_renderable, "Failed to create Renderable");
+        result->_renderable->_parent = result.get();
         result->addPropertySubOwner(result->_renderable.get());
         LDEBUG(fmt::format(
             "Successfully created renderable for '{}'", result->identifier()
         ));
 
         // If the renderable child has a larger bounding sphere, we allow it to override
-        if (result->_renderable->boundingSphere() > result->_boundingSphere) {
-            result->_boundingSphere = result->_renderable->boundingSphere();
+        //if (result->_renderable->boundingSphere() > result->_boundingSphere) {
+        //    result->_boundingSphere = result->_renderable->boundingSphere();
 
-            if (p.boundingSphere.has_value()) {
-                LWARNING(fmt::format(
-                    "The specified property 'BoundingSphere' for '{}' was overwritten "
-                    "by a child renderable",
-                    result->_identifier
-                ));
-            }
-        }
+        //    if (p.boundingSphere.has_value()) {
+        //        LWARNING(fmt::format(
+        //            "The specified property 'BoundingSphere' for '{}' was overwritten "
+        //            "by a child renderable",
+        //            result->_identifier
+        //        ));
+        //    }
+        //}
     }
 
     if (p.tag.has_value()) {
@@ -393,6 +409,8 @@ documentation::Documentation SceneGraphNode::Documentation() {
     return doc;
 }
 
+ghoul::opengl::ProgramObject* SceneGraphNode::_debugSphereProgram = nullptr;
+
 SceneGraphNode::SceneGraphNode()
     : properties::PropertyOwner({ "" })
     , _guiHidden(GuiHiddenInfo)
@@ -410,13 +428,15 @@ SceneGraphNode::SceneGraphNode()
             global::memoryManager->PersistentMemory.alloc<StaticScale>()
         )
     }
-    , _boundingSphere(BoundingSphereInfo, 0.0)
+    //, _boundingSphere(BoundingSphereInfo, 0.0)
+    //, _interactionSphere(InteractionSphereInfo, 0.0)
     , _computeScreenSpaceValues(ComputeScreenSpaceInfo, false)
     , _screenSpacePosition(ScreenSpacePositionInfo, glm::ivec2(-1, -1))
     , _screenVisibility(ScreenVisibilityInfo, false)
     , _distFromCamToNode(DistanceFromCamToNodeInfo, -1.0)
     , _screenSizeRadius(ScreenSizeRadiusInfo, 0)
     , _visibilityDistance(VisibilityDistanceInfo, 6e10f)
+    , _showDebugSphere(ShowDebugSphereInfo, false)
 {
     addProperty(_computeScreenSpaceValues);
     addProperty(_screenSpacePosition);
@@ -424,7 +444,9 @@ SceneGraphNode::SceneGraphNode()
     addProperty(_distFromCamToNode);
     addProperty(_screenSizeRadius);
     addProperty(_visibilityDistance);
-    addProperty(_boundingSphere);
+    //addProperty(_boundingSphere);
+    //addProperty(_interactionSphere);
+    addProperty(_showDebugSphere);
 }
 
 SceneGraphNode::~SceneGraphNode() {} // NOLINT
@@ -462,6 +484,25 @@ void SceneGraphNode::initializeGL() {
     if (_renderable) {
         _renderable->initializeGL();
     }
+
+    // The first one to get here will create program shared between all scene graph nodes
+    if (_debugSphereProgram == nullptr) {
+        std::unique_ptr<ghoul::opengl::ProgramObject> shader =
+            global::renderEngine->buildRenderProgram(
+                "DebugSphere",
+                absPath("${SHADERS}/core/xyzuvrgba_vs.glsl"),
+                absPath("${SHADERS}/core/xyzuvrgba_fs.glsl")
+            );
+        // Since we are only going to create a single of these shaders for the lifetime of
+        // the program, we are not bothering with freeing it as the overhead of detecting
+        // when the last scenegraph node will be destroyed would be a bit too much for the
+        // benefit that we would gain from it
+        _debugSphereProgram = shader.release();
+        _debugSphereProgram->setIgnoreUniformLocationError(
+            ghoul::opengl::ProgramObject::IgnoreError::Yes
+        );
+    }
+
     _state = State::GLInitialized;
 
     LDEBUG(fmt::format("Finished initializating GL: {}", identifier()));
@@ -591,7 +632,6 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
             data.camera,
             data.time,
             data.renderBinMask,
-            data.renderDebugSpheres,
             { _worldPositionCached, _worldRotationCached, _worldScaleCached }
         };
 
@@ -601,18 +641,19 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
         }
     }
 
-    if (data.renderDebugSpheres) {
-        double bs = boundingSphere();
-        if (bs > 0.0) {
+    if (_showDebugSphere) {
+        if (const double bs = boundingSphere();  bs > 0.0) {
             renderDebugSphere(data.camera, bs, glm::vec4(0.5f, 0.15f, 0.5f, 0.75f));
         }
 
+        if (const double is = interactionSphere();  is > 0.0) {
+            renderDebugSphere(data.camera, is, glm::vec4(0.15f, 0.35f, 0.85f, 0.75f));
+        }
     }
 }
-void SceneGraphNode::renderDebugSphere(const Camera& camera, double scale,
-                                       glm::vec4 color)
+void SceneGraphNode::renderDebugSphere(const Camera& camera, double size, glm::vec4 color)
 {
-    glm::dvec3 scaleVec = _worldScaleCached * scale;
+    glm::dvec3 scaleVec = _worldScaleCached * size;
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), _worldPositionCached) *
         glm::dmat4(_worldRotationCached) *
@@ -621,14 +662,10 @@ void SceneGraphNode::renderDebugSphere(const Camera& camera, double scale,
     glm::mat4 modelViewProjection = camera.projectionMatrix() *
         glm::mat4(camera.combinedViewMatrix() * modelTransform);
 
-    auto& shdr = rendering::helper::shaders.xyzuvrgba;
-    shdr.program->activate();
-    shdr.program->setIgnoreUniformLocationError(
-        ghoul::opengl::ProgramObject::IgnoreError::Yes
-    );
-    shdr.program->setUniform(shdr.cache.hasTexture, 0);
-    shdr.program->setUniform(shdr.cache.proj, modelViewProjection);
-    shdr.program->setUniform(shdr.cache.color, color);
+    _debugSphereProgram->activate();
+    _debugSphereProgram->setUniform("hasTexture", 0);
+    _debugSphereProgram->setUniform("proj", modelViewProjection);
+    _debugSphereProgram->setUniform("color", color);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -637,15 +674,15 @@ void SceneGraphNode::renderDebugSphere(const Camera& camera, double scale,
     glEnable(GL_DEPTH_TEST);
 
     glBindVertexArray(rendering::helper::vertexObjects.sphere.vao);
-    //glDrawElements(
-    //    GL_TRIANGLES,
-    //    rendering::helper::vertexObjects.sphere.nElements,
-    //    GL_UNSIGNED_SHORT,
-    //    nullptr
-    //);
+    glDrawElements(
+        GL_TRIANGLES,
+        rendering::helper::vertexObjects.sphere.nElements,
+        GL_UNSIGNED_SHORT,
+        nullptr
+    );
 
     glLineWidth(2.0);
-    shdr.program->setUniform(shdr.cache.color, glm::vec4(1.0, 1.0, 1.0, 1.0));
+    _debugSphereProgram->setUniform("color", glm::vec4(1.f, 1.f, 1.f, 1.f));
     glDrawElements(
         GL_LINES,
         rendering::helper::vertexObjects.sphere.nElements,
@@ -655,7 +692,7 @@ void SceneGraphNode::renderDebugSphere(const Camera& camera, double scale,
 
     glBindVertexArray(0);
 
-    shdr.program->deactivate();
+    _debugSphereProgram->deactivate();
 }
 
 void SceneGraphNode::setParent(SceneGraphNode& parent) {
@@ -1013,8 +1050,21 @@ std::vector<SceneGraphNode*> SceneGraphNode::children() const {
 }
 
 double SceneGraphNode::boundingSphere() const {
-    // @TODO (abock, 2020-02-16) This should probably take the scale into account
-    return _boundingSphere;
+    if (_renderable) {
+        return glm::compMax(scale() * _renderable->boundingSphere());
+    }
+    else {
+        return 0.0;
+    }
+}
+
+double SceneGraphNode::interactionSphere() const {
+    if (_renderable) {
+        return glm::compMax(scale() * _renderable->interactionSphere());
+    }
+    else {
+        return 0.0;
+    }
 }
 
 const Renderable* SceneGraphNode::renderable() const {

@@ -42,8 +42,6 @@ bool isInitialized = false;
 
 std::string xyuvrgbaVertexFile;
 std::string xyuvrgbaFragmentFile;
-std::string xyzuvrgbaVertexFile;
-std::string xyzuvrgbaFragmentFile;
 
 std::string screenFillingVertexFile;
 std::string screenFillingFragmentFile;
@@ -67,29 +65,6 @@ void main() {
     out_uv = in_uv;
     out_color = in_color;
     vec4 p = proj * vec4(in_position, 0.0, 1.0);
-    gl_Position = p
-    depth = p.w;
-}
-
-)";
-
-constexpr const char* XyzuvrgbaVertexCode = R"(
-#version __CONTEXT__
-
-layout(location = 0) in vec3 in_position;
-layout(location = 1) in vec2 in_uv;
-layout(location = 2) in vec4 in_color;
-
-out float depth;
-out vec2 out_uv;
-out vec4 out_color;
-
-uniform mat4 proj;
-
-void main() {
-    out_uv = in_uv;
-    out_color = in_color;
-    vec4 p = proj * vec4(in_position, 1.0);
     gl_Position = p;
     depth = p.w;
 }
@@ -129,27 +104,6 @@ in float depth;
 in vec2 out_uv;
 in vec4 out_color;
 
-Fragment getFragment() {
-    Fragment frag;
-
-    if (hasTexture) {
-        vec2 uv = out_uv;
-        if (shouldFlipTexture.x) {
-            uv.x = 1.0 - uv.x;
-        }
-        if (shouldFlipTexture.y) {
-            uv.y = 1.0 - uv.y;
-        }
-        frag.color = out_color * color * texture(tex, uv);
-    }
-    else {
-        frag.color = out_color * color;
-    }
-    frag.depth = depth;
-    return frag;
-}
-
-/*
 out vec4 FragColor;
 
 void main() {
@@ -167,7 +121,6 @@ void main() {
         FragColor = out_color * color;
     }
 }
-*/
 )";
 
 } // namespace
@@ -223,37 +176,6 @@ void initialize() {
         shaders.xyuvrgba.cache,
         { "tex", "hasTexture", "shouldFlipTexture", "proj", "color" }
     );
-
-    //
-    // XYZUVRGBA shader
-    //
-    xyzuvrgbaVertexFile = absPath("${TEMPORARY}/xyzuvrgba.vert");
-    {
-        std::fstream vertexFile;
-        vertexFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-        vertexFile.open(xyzuvrgbaVertexFile, std::fstream::out);
-        vertexFile << XyzuvrgbaVertexCode;
-    }
-
-    xyzuvrgbaFragmentFile = absPath("${TEMPORARY}/xyzuvrgba.frag");
-    {
-        std::fstream fragmentFile;
-        fragmentFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-        fragmentFile.open(xyzuvrgbaFragmentFile, std::fstream::out);
-        // No spelling error; we can reuse the fragment shader from the xyuvrgba
-        fragmentFile << XyuvrgbaFragmentCode;
-    }
-    shaders.xyzuvrgba.program = ghoul::opengl::ProgramObject::Build(
-        "xyzuvrgba",
-        xyzuvrgbaVertexFile,
-        xyzuvrgbaFragmentFile
-    );
-    ghoul::opengl::updateUniformLocations(
-        *shaders.xyzuvrgba.program,
-        shaders.xyzuvrgba.cache,
-        { "tex", "hasTexture", "shouldFlipTexture", "proj", "color" }
-    );
-
 
     //
     // Screenfilling shader
@@ -379,11 +301,6 @@ void deinitialize() {
         FileSys.deleteFile(xyuvrgbaFragmentFile);
     }
     shaders.xyuvrgba.program = nullptr;
-
-    if (!xyzuvrgbaVertexFile.empty()) {
-        FileSys.deleteFile(xyzuvrgbaVertexFile);
-    }
-    shaders.xyzuvrgba.program = nullptr;
 
     if (!screenFillingVertexFile.empty()) {
         FileSys.deleteFile(screenFillingVertexFile);

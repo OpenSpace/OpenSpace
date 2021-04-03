@@ -416,8 +416,6 @@ void OpenSpaceEngine::initializeGL() {
     glbinding::Binding::initialize(global::windowDelegate->openGLProcedureAddress);
     //glbinding::Binding::useCurrentContext();
 
-    rendering::helper::initialize();
-
     LDEBUG("Adding system components");
     // Detect and log OpenCL and OpenGL versions and available devices
     SysCap.addComponent(
@@ -427,7 +425,6 @@ void OpenSpaceEngine::initializeGL() {
         std::make_unique<ghoul::systemcapabilities::OpenGLCapabilitiesComponent>()
     );
 
-    // @BUG:  This will call OpenGL functions, should it should be in the initializeGL
     LDEBUG("Detecting capabilities");
     SysCap.detectCapabilities();
 
@@ -466,6 +463,8 @@ void OpenSpaceEngine::initializeGL() {
             }
         }
     }
+
+    rendering::helper::initialize();
 
     loadFonts();
 

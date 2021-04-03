@@ -1132,7 +1132,6 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         *camera,
         std::move(time),
         0,
-        global::renderEngine->renderDistanceSpheres(),
         {}
     };
     RendererTasks tasks;

@@ -327,7 +327,6 @@ RenderData ShadowComponent::begin(const RenderData& data) {
         *_lightCamera,
         data.time,
         data.renderBinMask,
-        data.renderDebugSpheres,
         data.modelTransform
     };
 

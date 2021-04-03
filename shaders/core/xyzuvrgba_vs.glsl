@@ -22,78 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___UPDATESTRUCTURES___H__
-#define __OPENSPACE_CORE___UPDATESTRUCTURES___H__
+#version __CONTEXT__
 
-#include <openspace/util/camera.h>
-#include <openspace/util/time.h>
+layout(location = 0) in vec3 in_position;
+layout(location = 1) in vec2 in_uv;
+layout(location = 2) in vec4 in_color;
 
-namespace openspace {
+out float depth;
+out vec2 out_uv;
+out vec4 out_color;
 
-class Deferredcaster;
-class VolumeRaycaster;
+uniform mat4 proj;
 
-struct InitializeData {};
-
-struct TransformData {
-    glm::dvec3 translation = glm::dvec3(0.0);
-    glm::dmat3 rotation = glm::dmat3(1.0);
-    glm::dvec3 scale = glm::dvec3(1.0);
-};
-
-struct UpdateData {
-    TransformData modelTransform;
-    const Time time;
-    const Time previousFrameTime;
-};
-
-struct RenderData {
-    const Camera& camera;
-    const Time time;
-    int8_t renderBinMask = -1;
-    TransformData modelTransform;
-};
-
-struct RaycasterTask {
-    VolumeRaycaster* raycaster;
-    RenderData renderData;
-};
-
-struct DeferredcasterTask {
-    Deferredcaster* deferredcaster;
-    RenderData renderData;
-};
-
-struct RendererTasks {
-    std::vector<RaycasterTask> raycasterTasks;
-    std::vector<DeferredcasterTask> deferredcasterTasks;
-};
-
-struct RaycastData {
-    int id = -1;
-    std::string namespaceName;
-};
-
-struct DeferredcastData {
-    int id = -1;
-    std::string namespaceName;
-};
-
-/**
- * Defines the position of an object relative to a surface. The surface is defined as
- * a reference surface together with a height offset from that reference surface.
- */
-struct SurfacePositionHandle {
-    /// Vector from the center of the object to the reference surface of the object
-    glm::dvec3 centerToReferenceSurface = glm::dvec3(0.0);
-    /// Direction out from the reference. Can conincide with the surface normal but does
-    /// not have to.
-    glm::dvec3 referenceSurfaceOutDirection = glm::dvec3(0.0);
-    /// Height from the reference surface out to the actual surface in the direction of
-    /// the surface normal. Can be positive or negative.
-    double heightToSurface = 0.0;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_CORE___UPDATESTRUCTURES___H__
+void main() {
+    out_uv = in_uv;
+    out_color = in_color;
+    vec4 p = proj * vec4(in_position, 1.0);
+    gl_Position = p;
+    depth = p.w;
+}

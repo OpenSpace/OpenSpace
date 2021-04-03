@@ -449,7 +449,7 @@ void RenderableModel::initializeGL() {
 
     _geometry->initialize();
     _geometry->calculateBoundingRadius();
-    setBoundingSphere(glm::sqrt(_geometry->boundingRadius()));
+    setBoundingSphere(_geometry->boundingRadius());
 }
 
 void RenderableModel::deinitializeGL() {

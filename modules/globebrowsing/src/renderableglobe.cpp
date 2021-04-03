@@ -544,12 +544,12 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     if (p.radii.has_value()) {
         if (std::holds_alternative<glm::dvec3>(*p.radii)) {
             _ellipsoid = Ellipsoid(std::get<glm::dvec3>(*p.radii));
-            setBoundingSphere(static_cast<float>(_ellipsoid.maximumRadius()));
+            setBoundingSphere(_ellipsoid.maximumRadius());
         }
         else if (std::holds_alternative<double>(*p.radii)) {
             const double radius = std::get<double>(*p.radii);
             _ellipsoid = Ellipsoid({ radius, radius, radius });
-            setBoundingSphere(static_cast<float>(_ellipsoid.maximumRadius()));
+            setBoundingSphere(_ellipsoid.maximumRadius());
         }
         else {
             throw ghoul::MissingCaseException();

@@ -44,6 +44,7 @@
  //#define Debugging_Core_SceneGraphNode_Indices
 
 namespace ghoul { class Dictionary; }
+namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
@@ -127,6 +128,7 @@ public:
     std::vector<SceneGraphNode*> children() const;
 
     double boundingSphere() const;
+    double interactionSphere() const;
 
     SceneGraphNode* childNode(const std::string& identifier);
 
@@ -143,7 +145,7 @@ private:
     glm::dmat3 calculateWorldRotation() const;
     glm::dvec3 calculateWorldScale() const;
     void computeScreenSpaceData(RenderData& newData);
-    void renderDebugSphere(const Camera& camera, double scale, glm::vec4 color);
+    void renderDebugSphere(const Camera& camera, double size, glm::vec4 color);
 
     std::atomic<State> _state = State::Loaded;
     std::vector<ghoul::mm_unique_ptr<SceneGraphNode>> _children;
@@ -178,7 +180,8 @@ private:
 
     glm::dmat4 _modelTransformCached = glm::dmat4(1.0);
 
-    properties::DoubleProperty _boundingSphere;
+    //properties::DoubleProperty _boundingSphere;
+    //properties::DoubleProperty _interactionSphere;
     properties::BoolProperty _computeScreenSpaceValues;
     properties::IVec2Property _screenSpacePosition;
     properties::BoolProperty _screenVisibility;
@@ -189,6 +192,9 @@ private:
     // This variable is used for the rate-limiting of the screenspace positions (if they
     // are calculated when _computeScreenSpaceValues is true)
     std::chrono::high_resolution_clock::time_point _lastScreenSpaceUpdateTime;
+
+    properties::BoolProperty _showDebugSphere;
+    static ghoul::opengl::ProgramObject* _debugSphereProgram;
 
 #ifdef Debugging_Core_SceneGraphNode_Indices
     int index = 0;
