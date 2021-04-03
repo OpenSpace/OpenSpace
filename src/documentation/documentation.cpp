@@ -91,7 +91,14 @@ std::string to_string(const openspace::documentation::TestResult& value) {
 
 template <>
 std::string to_string(const openspace::documentation::TestResult::Offense& value) {
-    return value.offender + ": " + ghoul::to_string(value.reason);
+    std::stringstream stream;
+    stream << value.offender + ": " + ghoul::to_string(value.reason);
+
+    if (!value.explanation.empty()) {
+        stream << fmt::format(" ({})", value.explanation);
+    }
+
+    return stream.str();
 }
 
 template <>
@@ -132,21 +139,6 @@ std::string to_string(const openspace::documentation::TestResult::Warning::Reaso
 namespace openspace::documentation {
 
 const std::string DocumentationEntry::Wildcard = "*";
-
-//std::string concatenate(const std::vector<TestResult::Offense>& offenses) {
-//    std::string result = "Error in specification (";
-//    for (const TestResult::Offense& o : offenses) {
-//        if (o.explanation.empty()) {
-//            result += fmt::format("{} ({}), ", o.offender, ghoul::to_string(o.reason));
-//        }
-//        else {
-//            result += fmt::format("{} ({}: {}), ", o.offender, ghoul::to_string(o.reason), o.explanation);
-//        }
-//    }
-//    result.pop_back();
-//    result.back() = ')';
-//    return result;
-//}
 
 SpecificationError::SpecificationError(TestResult res, std::string comp)
     : ghoul::RuntimeError("Error in specification", std::move(comp))

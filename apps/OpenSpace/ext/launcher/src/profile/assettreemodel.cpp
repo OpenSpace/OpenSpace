@@ -145,15 +145,18 @@ AssetTreeModel::AssetTreeModel(QObject* parent)
     );
 }
 
-void AssetTreeModel::importModelData(const std::string& assetBasePath) {
+void AssetTreeModel::importModelData(const std::string& assetBasePath,
+    const std::string& userAssetBasePath) {
     FileSystemAccess assets(
         ".asset",
-        { "scene", "global", "customization", "examples", "util" },
+        // @TODO (abock, 2021-03-24) We need some better solution for this;  what is the
+        // problem of just including all subfolders instead?
+        { "scene", "global", "customization", "dashboard", "examples", "util" },
         true,
         true
     );
     std::string assetList = assets.useQtFileSystemModelToTraverseDir(assetBasePath);
-
+    assetList += assets.useQtFileSystemModelToTraverseDir(userAssetBasePath, true);
     std::istringstream iss(assetList);
     ImportElement rootElem = { "", 0, false };
 

@@ -148,8 +148,10 @@ public:
       * Imports asset tree data for this model by recursively traversing the folder
       * structure.
       * \param assetBasePath The base path where to find all assets
+      * \param assetBasePath The base path where to find user assets
       */
-    void importModelData(const std::string& assetBasePath);
+    void importModelData(const std::string& assetBasePath,
+        const std::string& userAssetBasePath);
 
     /**
       * Returns bool for if item is checked/selected

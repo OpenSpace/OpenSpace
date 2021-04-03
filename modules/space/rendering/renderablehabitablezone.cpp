@@ -37,6 +37,7 @@
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
+#include <optional>
 
 namespace {
     constexpr const char _loggerCat[] = "RenderableHabitableZone";
@@ -75,42 +76,28 @@ namespace {
         "a simpler method by Tom E. Harris is used. This method only uses the star "
         "luminosity and does not include computation of the optimistic boundaries."
     };
+
+    struct [[codegen::Dictionary(RenderableHabitableZone)]] Parameters {
+        // [[codegen::verbatim(EffectiveTemperatureInfo.description)]]
+        float effectiveTemperature;
+
+        // [[codegen::verbatim(LuminosityInfo.description)]]
+        float luminosity;
+
+        // [[codegen::verbatim(OptimisticInfo.description)]]
+        std::optional<bool> optimistic;
+
+        // [[codegen::verbatim(KopparapuTeffIntervalInfo.description)]]
+        std::optional<glm::vec2> kopparapuTeffInterval;
+    };
+#include "renderablehabitablezone_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableHabitableZone::Documentation() {
-    using namespace documentation;
-    documentation::Documentation doc {
-        "Renderable Habitable Zone",
-        "exoplanets_renderable_habitable_zone",
-        {
-            {
-                EffectiveTemperatureInfo.identifier,
-                new DoubleVerifier,
-                Optional::No,
-                EffectiveTemperatureInfo.description
-            },
-            {
-                LuminosityInfo.identifier,
-                new DoubleVerifier,
-                Optional::No,
-                LuminosityInfo.description
-            },
-            {
-                OptimisticInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                OptimisticInfo.description
-            },
-            {
-                KopparapuTeffIntervalInfo.identifier,
-                new DoubleVector2Verifier,
-                Optional::Yes,
-                KopparapuTeffIntervalInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "space_renderablehabitablezone";
 
     // @TODO cleanup
     // Insert the parents documentation entries until we have a verifier that can deal
@@ -132,31 +119,17 @@ RenderableHabitableZone::RenderableHabitableZone(const ghoul::Dictionary& dictio
     , _showOptimistic(OptimisticInfo, false)
     , _kopparapuTeffInterval(KopparapuTeffIntervalInfo, glm::vec2(1000.f, 10000.f))
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableHabitableZone"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    if (dictionary.hasKey(EffectiveTemperatureInfo.identifier)) {
-        _teff = static_cast<float>(
-            dictionary.value<double>(EffectiveTemperatureInfo.identifier)
-        );
-    }
+    _teff = p.effectiveTemperature;
     _teff.onChange([this]() { computeZone(); });
     addProperty(_teff);
 
-    if (dictionary.hasKey(LuminosityInfo.identifier)) {
-        _luminosity = static_cast<float>(
-            dictionary.value<double>(LuminosityInfo.identifier)
-        );
-    }
+    _luminosity = p.luminosity;
     _luminosity.onChange([this]() { computeZone(); });
     addProperty(_luminosity);
 
-    if (dictionary.hasKey(OptimisticInfo.identifier)) {
-        _showOptimistic = dictionary.value<bool>(OptimisticInfo.identifier);
-    }
+    _showOptimistic = p.optimistic.value_or(_showOptimistic);
     addProperty(_showOptimistic);
 
     // The user should not be able to change this property. It's just used to communicate

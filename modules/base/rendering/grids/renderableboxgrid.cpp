@@ -58,7 +58,7 @@ namespace {
 
     struct [[codegen::Dictionary(RenderableBoxGrid)]] Parameters {
         // [[codegen::verbatim(ColorInfo.description)]]
-        std::optional<glm::vec3> color;
+        std::optional<glm::vec3> color [[codegen::color()]];
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;

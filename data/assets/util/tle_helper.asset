@@ -85,7 +85,9 @@ function satellites(title, file, color, group)
             SegmentQuality = 3,
             Color = color,
             Fade = 1.5,
-            RenderBinMode = "PostDeferredTransparent"
+            RenderBinMode = "PostDeferredTransparent",
+            StartRenderIdx = group.StartRenderIdx,
+            RenderSize = group.RenderSize
         },
         Tag = { "earth_satellites" },
         GUI = {

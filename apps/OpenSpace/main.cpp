@@ -218,6 +218,15 @@ void mainInitFunc(GLFWwindow*) {
 
     LTRACE("main::mainInitFunc(begin)");
 
+    //
+    //  Screenshots
+    //
+    // We save the startup value of the screenshots just in case we want to add a date
+    // to them later in the RenderEngine
+    std::string screenshotPath = absPath("${SCREENSHOTS}");
+    FileSys.registerPathToken("${STARTUP_SCREENSHOT}", screenshotPath);
+    Settings::instance().setCapturePath(screenshotPath);
+
     LDEBUG("Initializing OpenSpace Engine started");
     global::openSpaceEngine->initialize();
     LDEBUG("Initializing OpenSpace Engine finished");
@@ -320,27 +329,6 @@ void mainInitFunc(GLFWwindow*) {
         LWARNING("Spout was requested, but program was compiled without Spout support");
 #endif // OPENSPACE_HAS_SPOUT
     }
-
-
-    //
-    //  Screenshots
-    //
-    std::string screenshotPath = "${SCREENSHOTS}";
-    if (global::configuration->shouldUseScreenshotDate) {
-        std::time_t now = std::time(nullptr);
-        std::tm* nowTime = std::localtime(&now);
-        char mbstr[128];
-        strftime(mbstr, sizeof(mbstr), "%Y-%m-%d-%H-%M", nowTime);
-
-        FileSys.registerPathToken(
-            "${SCREENSHOTS}",
-            absPath(screenshotPath + '/' + std::string(mbstr)),
-            ghoul::filesystem::FileSystem::Override::Yes
-        );
-    }
-
-    Settings::instance().setCapturePath(absPath(screenshotPath));
-
 
     LTRACE("main::mainInitFunc(end)");
 }
@@ -1016,7 +1004,7 @@ std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTC
             }
         }
         else {
-            config = "${CONFIG}/" + config + xmlExt;
+            config += xmlExt;
         }
         global::configuration->windowConfiguration = config;
     }
@@ -1117,22 +1105,17 @@ int main(int argc, char* argv[]) {
         }
         LINFO(fmt::format("Configuration Path: '{}'", configurationFilePath));
 
+        // Register the base path as the directory where the configuration file lives
+        std::string base = ghoul::filesystem::File(configurationFilePath).directoryName();
+        constexpr const char* BasePathToken = "${BASE}";
+        FileSys.registerPathToken(BasePathToken, base);
+
         // Loading configuration from disk
         LDEBUG("Loading configuration from disk");
         *global::configuration = configuration::loadConfigurationFromFile(
-            configurationFilePath
+            configurationFilePath,
+            commandlineArguments.configurationOverride
         );
-        // If the user requested a commandline-based configuration script that should
-        // overwrite some of the values, this is the time to do it
-        if (!commandlineArguments.configurationOverride.empty()) {
-            LDEBUG("Executing Lua script passed through the commandline:");
-            LDEBUG(commandlineArguments.configurationOverride);
-            ghoul::lua::runScript(
-                global::configuration->state,
-                commandlineArguments.configurationOverride
-            );
-            parseLuaState(*global::configuration);
-        }
 
         // Determining SGCT configuration file
         LDEBUG("SGCT Configuration file: " + global::configuration->windowConfiguration);
@@ -1162,7 +1145,6 @@ int main(int argc, char* argv[]) {
 
     global::openSpaceEngine->registerPathTokens();
 
-
     bool hasSGCTConfig = false;
     bool hasProfile = false;
     std::string sgctFunctionName;
@@ -1177,6 +1159,9 @@ int main(int argc, char* argv[]) {
         hasSGCTConfig,
         sgctFunctionName
     );
+
+    //TODO consider LFATAL if ${USER} doens't exist rather then recurisve create.
+    global::openSpaceEngine->createUserDirectoriesIfNecessary();
 
     // (abock, 2020-12-07)  For some reason on Apple the keyboard handler in CEF will call
     // the Qt one even if the QApplication was destroyed, leading to invalid memory

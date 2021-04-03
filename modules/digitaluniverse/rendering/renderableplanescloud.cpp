@@ -180,7 +180,7 @@ namespace {
         std::optional<float> scaleFactor;
 
         // [[codegen::verbatim(TextColorInfo.description)]]
-        std::optional<glm::vec3> textColor;
+        std::optional<glm::vec3> textColor [[codegen::color()]];
 
         // [[codegen::verbatim(TextOpacityInfo.description)]]
         std::optional<float> textOpacity;
@@ -381,7 +381,7 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     }
 
     _planeMinSize = p.planeMinSize.value_or(_planeMinSize);
-    
+
     if (p.planeMinSize.has_value()) {
         addProperty(_planeMinSize);
     }

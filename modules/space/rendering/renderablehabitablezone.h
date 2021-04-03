@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEHABITABLEZONE___H__
-#define __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEHABITABLEZONE___H__
+#ifndef __OPENSPACE_MODULE_SPACE___RENDERABLEHABITABLEZONE___H__
+#define __OPENSPACE_MODULE_SPACE___RENDERABLEHABITABLEZONE___H__
 
 #include <modules/base/rendering/renderabledisc.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -72,4 +72,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEHABITABLEZONE___H__
+#endif // __OPENSPACE_MODULE_SPACE___RENDERABLEHABITABLEZONE___H__
