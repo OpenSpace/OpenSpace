@@ -75,7 +75,7 @@ local registerDashboardItems = function (dashboardAsset, items)
     )
     dashboardAsset.onDeinitialize(function ()
         for i = #items, 1, -1 do
-            item = items[i]
+            local item = items[i]
             openspace.dashboard.removeDashboardItem(item.Identifier)
         end
     end)

@@ -3,6 +3,7 @@ local proceduralGlobes = asset.require('util/procedural_globe')
 local transforms = asset.require('./transforms')
 local kernels = asset.require('./kernels')
 local kernel081 = kernels.nep081
+local kernel086 = kernels.nep086
 local kernel087 = kernels.nep087
 local kernel088 = kernels.nep088
 
@@ -35,7 +36,7 @@ local irregularProgradeMoons = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 1879.08,
-        Kernels = kernel086
+        Kernels = kernel087
     },
     {
         Identifier = "Psamathe",
