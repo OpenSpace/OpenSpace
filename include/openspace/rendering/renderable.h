@@ -99,8 +99,6 @@ public:
 protected:
     properties::BoolProperty _enabled;
     properties::FloatProperty _opacity;
-    properties::DoubleProperty _boundingSphere;
-    properties::DoubleProperty _interactionSphere;
     properties::StringProperty _renderableType;
 
     void setBoundingSphere(double boundingSphere);
@@ -108,6 +106,8 @@ protected:
     void setRenderBinFromOpacity();
     void registerUpdateRenderBinFromOpacity();
 
+    double _boundingSphere = 0.0;
+    double _interactionSphere = 0.0;
     SceneGraphNode* _parent = nullptr;
     bool _shouldUpdateIfDisabled = false;
 

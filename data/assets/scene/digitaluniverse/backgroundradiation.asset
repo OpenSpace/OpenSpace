@@ -84,7 +84,7 @@ local planck = {
         Name = "Planck",
         Path = "/Universe/Cosmic Microwave Background"
     }
-}
+} 
 
 
 local Halpha = {

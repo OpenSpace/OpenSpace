@@ -89,21 +89,21 @@ namespace {
         openspace::properties::Property::Visibility::Hidden
     };
 
-    //constexpr openspace::properties::Property::PropertyInfo BoundingSphereInfo = {
-    //    "BoundingSphere",
-    //    "Bounding Sphere",
-    //    "The bounding sphere of the scene graph node meaning that everything that this "
-    //    "scene graph node renders must be contained within this sphere",
-    //    openspace::properties::Property::Visibility::Hidden
-    //};
+    constexpr openspace::properties::Property::PropertyInfo BoundingSphereInfo = {
+        "BoundingSphere",
+        "Bounding Sphere",
+        "The bounding sphere of the scene graph node meaning that everything that this "
+        "scene graph node renders must be contained within this sphere",
+        openspace::properties::Property::Visibility::Developer
+    };
 
-    //constexpr openspace::properties::Property::PropertyInfo InteractionSphereInfo = {
-    //    "InteractionSphere",
-    //    "Interaction Sphere",
-    //    "The minimum radius that the camera is allowed to get close to this scene graph "
-    //    "node.",
-    //    openspace::properties::Property::Visibility::Hidden
-    //};
+    constexpr openspace::properties::Property::PropertyInfo InteractionSphereInfo = {
+        "InteractionSphere",
+        "Interaction Sphere",
+        "The minimum radius that the camera is allowed to get close to this scene graph "
+        "node.",
+        openspace::properties::Property::Visibility::Developer
+    };
 
     constexpr openspace::properties::Property::PropertyInfo GuiPathInfo = {
         "GuiPath",
@@ -141,7 +141,8 @@ namespace {
         "ShowDebugSphere",
         "Show Debug Sphere",
         "If enabled the bounding sphere of this scene graph node is rendered as a debug "
-        "method"
+        "method",
+        openspace::properties::Property::Visibility::Developer
     };
 
     struct [[codegen::Dictionary(SceneGraphNode)]] Parameters {
@@ -171,6 +172,10 @@ namespace {
         // not able to provide a reasonable bounding sphere or the calculated bounding
         // sphere needs to be overwritten for some reason
         std::optional<double> boundingSphere;
+
+        // A hard-coded radius for limiting the interaction radius, meaning the minimal
+        // distance that the camera can approach this scene graph node
+        std::optional<double> interactionSphere;
 
         struct Transform {
             // This node describes a translation that is applied to the scenegraph node
@@ -274,10 +279,8 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         }
     }
 
-    //if (p.boundingSphere.has_value()) {
-    //    result->_boundingSphere = *p.boundingSphere;
-    //    result->_boundingSphere.setVisibility(properties::Property::Visibility::All);
-    //}
+    result->_overrideBoundingSphere = p.boundingSphere;
+    result->_overrideInteractionSphere = p.interactionSphere;
 
     if (p.transform.has_value()) {
         if (p.transform->translation.has_value()) {
@@ -366,19 +369,6 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         LDEBUG(fmt::format(
             "Successfully created renderable for '{}'", result->identifier()
         ));
-
-        // If the renderable child has a larger bounding sphere, we allow it to override
-        //if (result->_renderable->boundingSphere() > result->_boundingSphere) {
-        //    result->_boundingSphere = result->_renderable->boundingSphere();
-
-        //    if (p.boundingSphere.has_value()) {
-        //        LWARNING(fmt::format(
-        //            "The specified property 'BoundingSphere' for '{}' was overwritten "
-        //            "by a child renderable",
-        //            result->_identifier
-        //        ));
-        //    }
-        //}
     }
 
     if (p.tag.has_value()) {
@@ -428,8 +418,8 @@ SceneGraphNode::SceneGraphNode()
             global::memoryManager->PersistentMemory.alloc<StaticScale>()
         )
     }
-    //, _boundingSphere(BoundingSphereInfo, 0.0)
-    //, _interactionSphere(InteractionSphereInfo, 0.0)
+    , _boundingSphere(BoundingSphereInfo, -1.0, -1.0, 1e12)
+    , _interactionSphere(InteractionSphereInfo, -1.0, -1.0, -1.0, 1e12)
     , _computeScreenSpaceValues(ComputeScreenSpaceInfo, false)
     , _screenSpacePosition(ScreenSpacePositionInfo, glm::ivec2(-1, -1))
     , _screenVisibility(ScreenVisibilityInfo, false)
@@ -444,8 +434,24 @@ SceneGraphNode::SceneGraphNode()
     addProperty(_distFromCamToNode);
     addProperty(_screenSizeRadius);
     addProperty(_visibilityDistance);
-    //addProperty(_boundingSphere);
-    //addProperty(_interactionSphere);
+    _boundingSphere.onChange([this]() {
+        if (_boundingSphere >= 0.0) {
+            _overrideBoundingSphere = _boundingSphere;
+        }
+        else {
+            _overrideBoundingSphere = std::nullopt;
+        }
+    });
+    addProperty(_boundingSphere);
+    _interactionSphere.onChange([this]() {
+        if (_interactionSphere >= 0.0) {
+            _overrideInteractionSphere = _interactionSphere;
+        }
+        else {
+            _overrideInteractionSphere = std::nullopt;
+        }
+        });
+    addProperty(_interactionSphere);
     addProperty(_showDebugSphere);
 }
 
@@ -669,8 +675,7 @@ void SceneGraphNode::renderDebugSphere(const Camera& camera, double size, glm::v
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
+    glDisable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
 
     glBindVertexArray(rendering::helper::vertexObjects.sphere.vao);
@@ -1050,6 +1055,10 @@ std::vector<SceneGraphNode*> SceneGraphNode::children() const {
 }
 
 double SceneGraphNode::boundingSphere() const {
+    if (_overrideBoundingSphere.has_value()) {
+        return glm::compMax(scale() * *_overrideBoundingSphere);
+    }
+
     if (_renderable) {
         return glm::compMax(scale() * _renderable->boundingSphere());
     }
@@ -1059,6 +1068,10 @@ double SceneGraphNode::boundingSphere() const {
 }
 
 double SceneGraphNode::interactionSphere() const {
+    if (_overrideInteractionSphere.has_value()) {
+        return glm::compMax(scale() * *_overrideInteractionSphere);
+    }
+
     if (_renderable) {
         return glm::compMax(scale() * _renderable->interactionSphere());
     }

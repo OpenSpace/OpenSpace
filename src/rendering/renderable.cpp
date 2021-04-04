@@ -58,19 +58,6 @@ namespace {
         openspace::properties::Property::Visibility::Hidden
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BoundingSphereInfo = {
-        "BoundingSphere",
-        "Bounding Sphere",
-        "The size of the bounding sphere radius."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo InteractionSphereInfo = {
-        "InteractionSphere",
-        "Interaction Sphere",
-        "The minimum radius that the camera is allowed to get close to this scene graph "
-        "node."
-    };
-
     struct [[codegen::Dictionary(Renderable)]] Parameters {
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
@@ -84,9 +71,6 @@ namespace {
 
         // [[codegen::verbatim(RenderableTypeInfo.description)]]
         std::optional<std::string> type;
-
-        // [[codegen::verbatim(BoundingSphereInfo.description)]]
-        std::optional<float> boundingSphere;
     };
 #include "renderable_codegen.cpp"
 } // namespace
@@ -128,8 +112,6 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "Renderable" })
     , _enabled(EnabledInfo, true)
     , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
-    , _boundingSphere(BoundingSphereInfo, 0.f, 0.f, 3e10f)
-    , _interactionSphere(InteractionSphereInfo, 0.f, 0.f, 3e10f)
     , _renderableType(RenderableTypeInfo, "Renderable")
 {
     ZoneScoped
@@ -163,11 +145,6 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     // set type for UI
     _renderableType = p.type.value_or(_renderableType);
     addProperty(_renderableType);
-
-    _boundingSphere = p.boundingSphere.value_or(_boundingSphere);
-    addProperty(_boundingSphere);
-
-    addProperty(_interactionSphere);
 }
 
 void Renderable::initialize() {}

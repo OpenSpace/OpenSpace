@@ -36,10 +36,11 @@
 #include <ghoul/misc/boolean.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <atomic>
+#include <chrono>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <vector>
-#include <chrono>
 
  //#define Debugging_Core_SceneGraphNode_Indices
 
@@ -180,8 +181,8 @@ private:
 
     glm::dmat4 _modelTransformCached = glm::dmat4(1.0);
 
-    //properties::DoubleProperty _boundingSphere;
-    //properties::DoubleProperty _interactionSphere;
+    properties::DoubleProperty _boundingSphere;
+    properties::DoubleProperty _interactionSphere;
     properties::BoolProperty _computeScreenSpaceValues;
     properties::IVec2Property _screenSpacePosition;
     properties::BoolProperty _screenVisibility;
@@ -195,6 +196,9 @@ private:
 
     properties::BoolProperty _showDebugSphere;
     static ghoul::opengl::ProgramObject* _debugSphereProgram;
+
+    std::optional<double> _overrideBoundingSphere;
+    std::optional<double> _overrideInteractionSphere;
 
 #ifdef Debugging_Core_SceneGraphNode_Indices
     int index = 0;
