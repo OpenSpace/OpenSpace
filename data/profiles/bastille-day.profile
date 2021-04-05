@@ -12,9 +12,9 @@
     "scene/solarsystem/sun/heliosphere/bastille_day/lightindicator",
     "scene/solarsystem/sun/heliosphere/bastille_day/magnetogram",
     "scene/solarsystem/sun/heliosphere/bastille_day/magnetogram_textures",
-    "scene/solarsystem/sun/heliosphere/bastille_day/streamnodes",
-    "scene/solarsystem/sun/heliosphere/bastille_day/streamnodescutplane",
-    "scene/solarsystem/sun/heliosphere/bastille_day/streamnodeslegend",
+    "scene/solarsystem/sun/heliosphere/bastille_day/fluxnodes",
+    "scene/solarsystem/sun/heliosphere/bastille_day/fluxnodescutplane",
+    "scene/solarsystem/sun/heliosphere/bastille_day/fluxnodeslegend",
 
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/magnetosphere",
@@ -65,7 +65,7 @@
       "is_local": false,
       "key": "F2",
       "name": "Show the legend image",
-      "script": "openspace.setPropertyValueSingle('ScreenSpace.Legendstreamnodes.Opacity', 0.000000);openspace.setPropertyValueSingle('ScreenSpace.Legendstreamnodes.Opacity', 1.000000, 4);openspace.setPropertyValueSingle('ScreenSpace.Legendstreamnodes.Enabled', true);"
+      "script": "openspace.setPropertyValueSingle('ScreenSpace.Legendfluxnodes.Opacity', 0.000000);openspace.setPropertyValueSingle('ScreenSpace.Legendfluxnodes.Opacity', 1.000000, 4);openspace.setPropertyValueSingle('ScreenSpace.Legendfluxnodes.Enabled', true);"
     },
     {
       "documentation": "Hides the legend image",
@@ -73,7 +73,7 @@
       "is_local": false,
       "key": "F3",
       "name": "Hides the legend image",
-      "script": "openspace.setPropertyValueSingle('ScreenSpace.Legendstreamnodes.Opacity', 0.000000, 2);"
+      "script": "openspace.setPropertyValueSingle('ScreenSpace.Legendfluxnodes.Opacity', 0.000000, 2);"
     },
     {
       "documentation": "Start to focus on Earth",
@@ -81,7 +81,7 @@
       "is_local": false,
       "key": "F4",
       "name": "Change to Earth focus",
-      "script": "openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Earthfocus.distancePlanetThreshold', 155022826061.149994);openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Earthfocus.enhanceMethod', 0.000000);openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth');openspace.navigation.loadNavigationState('Earth');"
+      "script": "openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Earthfocus.distancePlanetThreshold', 155022826061.149994);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Earthfocus.enhanceMethod', 0.000000);openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth');openspace.navigation.loadNavigationState('Earth');"
     },
     {
       "documentation": "Toggle volume rendering of CME",
@@ -145,7 +145,7 @@
       "is_local": false,
       "key": "Shift+b",
       "name": "Transition zooming out nodes + cutplane",
-      "script": "openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.filterUpper', 5, 5);openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.thresholdFlux', -1);openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.Enabled', false);openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.nodeSizeLargerFlux', 2.00000, 10);"
+      "script": "openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Streams.filterUpper', 5, 5);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Streams.thresholdFlux', -1);openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.Enabled', false);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.NodeGroup.nodeSizeLargerFlux', 2.00000, 10);"
     },
     {
       "documentation": "New loop: Restarts time at 10:03 and stops at 10:40, sets delta time to 4 min/ second (240 seconds/ second)",
@@ -169,7 +169,7 @@
       "is_local": false,
       "key": "Shift+h",
       "name": "Last transition Emilie",
-      "script": "openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Enabled', true);openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.nodeSize', 5.200000);openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.nodeSizeLargerFlux', 5.200000);openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.filterUpper', 0.190000);"
+      "script": "openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Enabled', true);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.NodeGroup.nodeSize', 5.200000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.NodeGroup.nodeSizeLargerFlux', 5.200000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Streams.filterUpper', 0.190000);"
     },
     {
       "documentation": "New loop: Restarts time at 10:03 and stops at 10:16, sets delta time to 2 min/ second (120 seconds/ second)",
@@ -185,7 +185,7 @@
       "is_local": false,
       "key": "Shift+n",
       "name": "Transition cutplane to nodes",
-      "script": "openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.zLimit', {-2.00000,2.000000});openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Earthfocus.enhanceMethod', 3.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Color.fluxColorAlphaIlluminance', 1, 5);openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.nodeSkipEarth', 11.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable. CameraPerspective.maxNodeSize', 40.0000);openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.thresholdFlux', -1.00000);openspace.setPropertyValueSingle('Scene.SunGlare.Renderable.Enabled', true);openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.amountOfNodes', 17.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable. CameraPerspective.renderingcircles', true);openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable. CameraPerspective.cameraPerspectiveEnabled', true);openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth');openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.nodeSkip', 17.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Earthfocus.distancePlanetThreshold', 0.20000, 10);openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable. CameraPerspective.minNodeSize', 3.00000);openspace.setPropertyValueSingle('Scene.Cutplane.Renderable.Opacity', 0.000000, 7);"
+      "script": "openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Streams.zLimit', {-2.00000,2.000000});openspace.setPropertyValueSingle('Scene.NodesMAS_MHD_FluxNodes.Renderable.Earthfocus.enhanceMethod', 3.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Color.fluxColorAlphaIlluminance', 1, 5);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.NodeGroup.nodeSkipEarth', 11.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable. CameraPerspective.maxNodeSize', 40.0000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Streams.thresholdFlux', -1.00000);openspace.setPropertyValueSingle('Scene.SunGlare.Renderable.Enabled', true);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.NodeGroup.amountOfNodes', 17.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable. CameraPerspective.renderingcircles', true);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.CameraPerspective.cameraPerspectiveEnabled', true);openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth');openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.NodeGroup.nodeSkip', 17.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Earthfocus.distancePlanetThreshold', 0.20000, 10);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable. CameraPerspective.minNodeSize', 3.00000);openspace.setPropertyValueSingle('Scene.Cutplane.Renderable.Opacity', 0.000000, 7);"
     },
     {
       "documentation": "Appearance change for trails",
@@ -196,12 +196,12 @@
       "script": "openspace.setPropertyValueSingle('Scene.MercuryTrail.Renderable.Appearance.EnableFade', true);openspace.setPropertyValueSingle('Scene.MercuryTrail.Renderable.Appearance.Color', {0.700000,0.700000,0.700000});openspace.setPropertyValueSingle('Scene.MercuryTrail.Renderable.Appearance.LineWidth', 10.000000)openspace.setPropertyValueSingle('Scene.MercuryTrail.Renderable.Appearance.Fade', 2.270000);openspace.setPropertyValueSingle('Scene.MarsTrail.Renderable.Appearance.EnableFade', true);openspace.setPropertyValueSingle('Scene.MarsTrail.Renderable.Appearance.LineWidth', 10.000000);openspace.setPropertyValueSingle('Scene.MarsTrail.Renderable.Appearance.Fade', 2.710000);openspace.setPropertyValueSingle('Scene.VenusTrail.Renderable.Appearance.EnableFade', true);openspace.setPropertyValueSingle('Scene.VenusTrail.Renderable.Appearance.LineWidth', 10.000000);openspace.setPropertyValueSingle('Scene.VenusTrail.Renderable.Appearance.Fade', 1.830000);openspace.setPropertyValueSingle('Scene.EarthTrail.Renderable.Appearance.EnableFade', true);openspace.setPropertyValueSingle('Scene.EarthTrail.Renderable.Appearance.LineWidth', 10.000000);openspace.setPropertyValueSingle('Scene.EarthTrail.Renderable.Appearance.Fade', 3.440000);openspace.setPropertyValueSingle('Scene.MoonTrail.Renderable.Appearance.Color', {1.000000,1.000000,1.000000});openspace.setPropertyValueSingle('Scene.MoonTrail.Renderable.Appearance.LineWidth', 10.00000);openspace.setPropertyValueSingle('Scene.MoonTrail.Renderable.Appearance.Fade', 5.420000);"
     },
     {
-      "documentation": "Resets the visualisation of streamnodes",
+      "documentation": "Resets the visualisation of fluxnodes",
       "gui_path": "/CCMC/Nodes",
       "is_local": false,
       "key": "Shift+r",
-      "name": "Reset Streamnodes Vis back",
-      "script": "openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Color.colorMode', 0.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.skippingNodes', 1.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.amountOfNodes', 1.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Color.fluxColorAlphaIlluminance', 1.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.nodeSkip', 1.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.nodeSize', 2.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.nodeSizeLargerFlux', 2.00000);openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.skippingNodesByFlux', 0.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.NodeGroup.skippingNodesByRadius', 0.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.thresholdFlux', 0.800000);openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.filterLower', 0.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.zLimit', {-2.00000,2.000000});openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Earthfocus.distancePlanetThreshold', 0.000000);openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Sun');openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.zLimit', {-2.00000,2.000000});openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Streams.filterUpper', 5.000000);"
+      "name": "Reset Fluxnodes Vis back",
+      "script": "openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Color.colorMode', 0.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.NodeGroup.skippingNodes', 1.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.NodeGroup.amountOfNodes', 1.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Color.fluxColorAlphaIlluminance', 1.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.NodeGroup.nodeSkip', 1.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.NodeGroup.nodeSize', 2.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.NodeGroup.nodeSizeLargerFlux', 2.00000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.NodeGroup.skippingNodesByFlux', 0.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.NodeGroup.skippingNodesByRadius', 0.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Streams.thresholdFlux', 0.800000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Streams.filterLower', 0.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Streams.zLimit', {-2.00000,2.000000});openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Earthfocus.distancePlanetThreshold', 0.000000);openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Sun');openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Streams.zLimit', {-2.00000,2.000000});openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Streams.filterUpper', 5.000000);"
     },
     {
       "documentation": "New loop: Restarts time at 10:03 and stops at 11:00, delta time to 4 min/ second (240 seconds/ second)",
@@ -217,7 +217,7 @@
       "is_local": false,
       "key": "Shift+t",
       "name": "Transition nodeviz to cutplane",
-      "script": "openspace.setPropertyValueSingle('Scene.Cutplane.Renderable.Enabled', true);openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Earthfocus.distancePlanetThreshold', 0.000000, 5);openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Earthfocus.enhanceMethod', 3.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Color.fluxColorAlphaIlluminance', 0.0, 6);openspace.setPropertyValueSingle('Scene.Cutplane.Renderable.Opacity', 1.000000, 10);"
+      "script": "openspace.setPropertyValueSingle('Scene.Cutplane.Renderable.Enabled', true);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Earthfocus.distancePlanetThreshold', 0.000000, 5);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Earthfocus.enhanceMethod', 3.000000);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Color.fluxColorAlphaIlluminance', 0.0, 6);openspace.setPropertyValueSingle('Scene.Cutplane.Renderable.Opacity', 1.000000, 10);"
     },
     {
       "documentation": "Fast loop: Starts from 10:03 and sets delta time to 15 min/ second (900 seconds/ second)",
@@ -241,7 +241,7 @@
       "is_local": false,
       "key": "Shift+w",
       "name": "First transition Emilie",
-      "script": "openspace.time.setDeltaTime(0);openspace.time.setTime('2000-JUL-14 08:42:00.00');openspace.setPropertyValueSingle('Scene.SunGlare.Renderable.Enabled', true);openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.lineWidth', 1);openspace.setPropertyValueSingle('Scene.Cutplane.Renderable.Enabled', false);openspace.setPropertyValueSingle('Scene.MAS_MHD_density.Renderable.Enabled', false);openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.Enabled', false);openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Enabled', false);openspace.setPropertyValueSingle('Scene.travelSpeedIndicator.Renderable.Enabled', false);openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.Enabled', false);openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.maskingEnabled', true);openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.Masking.maskingQuantity', 5.000000);openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.Masking.maskingMinLimit', '0');openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.Masking.maskingMaxLimit', '0.5');openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-1.Enabled', false);openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-2.Enabled', false);openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-3.Enabled', false);openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-4.Enabled', false);openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-5.Enabled', false);openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-6.Enabled', false);openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.Texture.Enabled', true);"
+      "script": "openspace.time.setDeltaTime(0);openspace.time.setTime('2000-JUL-14 08:42:00.00');openspace.setPropertyValueSingle('Scene.SunGlare.Renderable.Enabled', true);openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.lineWidth', 1);openspace.setPropertyValueSingle('Scene.Cutplane.Renderable.Enabled', false);openspace.setPropertyValueSingle('Scene.MAS_MHD_density.Renderable.Enabled', false);openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.Enabled', false);openspace.setPropertyValueSingle('Scene.MAS_MHD_FluxNodes.Renderable.Enabled', false);openspace.setPropertyValueSingle('Scene.travelSpeedIndicator.Renderable.Enabled', false);openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.Enabled', false);openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.maskingEnabled', true);openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.Masking.maskingQuantity', 5.000000);openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.Masking.maskingMinLimit', '0');openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.Masking.maskingMaxLimit', '0.5');openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-1.Enabled', false);openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-2.Enabled', false);openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-3.Enabled', false);openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-4.Enabled', false);openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-5.Enabled', false);openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-6.Enabled', false);openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.Texture.Enabled', true);"
     },
     {
       "documentation": "Long loop: Restarts time at 09:30 and stops at 11:50, delta time to 4 min/ second (240 seconds/ second)",

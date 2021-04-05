@@ -21,7 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
-#include <modules/streamnodes/rendering/renderablestreamnodes.h>
+#include <modules/fluxnodes/rendering/renderablefluxnodes.h>
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
@@ -55,7 +55,7 @@ using json = nlohmann::json;
 
 namespace {
     // log category
-    constexpr const char* _loggerCat = "renderableStreamNodes";
+    constexpr const char* _loggerCat = "renderableFluxNodes";
 
     // GL variables for shaders, probably needed some of them atleast
     constexpr const GLuint VaPosition   = 0;    // MUST CORRESPOND TO THE SHADER PROGRAM
@@ -248,7 +248,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MisalignedIndexInfo = {
         "misalignedIndex",
         "Index to shift sequence number",
-        "The misalignement number for sequence for streamnodes vs Fieldlines"
+        "The misalignement number for sequence for fluxnodes vs Fieldlines"
     };
     constexpr openspace::properties::Property::PropertyInfo FlowColorInfo = {
         "flowcolor",
@@ -403,7 +403,7 @@ namespace {
 
 namespace openspace {
 using namespace properties;
-RenderableStreamNodes::RenderableStreamNodes(const ghoul::Dictionary& dictionary)
+RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
 
     : Renderable(dictionary)
     , _pGoesEnergyBins(GoesEnergyBinsInfo, OptionProperty::DisplayType::Radio)
@@ -473,7 +473,7 @@ RenderableStreamNodes::RenderableStreamNodes(const ghoul::Dictionary& dictionary
     _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
 }
 
-void RenderableStreamNodes::definePropertyCallbackFunctions() {
+void RenderableFluxNodes::definePropertyCallbackFunctions() {
 // Add Property Callback Functions
 
     _pColorTablePath.onChange([this] {
@@ -502,7 +502,7 @@ void RenderableStreamNodes::definePropertyCallbackFunctions() {
      });
 }
 
-void RenderableStreamNodes::setModelDependentConstants() {
+void RenderableFluxNodes::setModelDependentConstants() {
     // Just used as a default value.
     float limit = 8.f; 
     _pColorTableRange.setMinValue(glm::vec2(-limit));
@@ -517,11 +517,11 @@ void RenderableStreamNodes::setModelDependentConstants() {
     _pDomainZ = glm::vec2(limitZMin, limitZMax);
 }
 
-void RenderableStreamNodes::initialize() {
+void RenderableFluxNodes::initialize() {
 
 }
     
-void RenderableStreamNodes::initializeGL() {
+void RenderableFluxNodes::initializeGL() {
     // EXTRACT MANDATORY INFORMATION FROM DICTIONARY
        
     if (!extractMandatoryInfoFromDictionary()) {
@@ -529,9 +529,9 @@ void RenderableStreamNodes::initializeGL() {
     }
     // Setup shader program
     _shaderProgram = global::renderEngine->buildRenderProgram(
-        "Streamnodes",
-        absPath("${MODULE_STREAMNODES}/shaders/streamnodes_vs.glsl"),
-        absPath("${MODULE_STREAMNODES}/shaders/streamnodes_fs.glsl")
+        "Fluxnodes",
+        absPath("${MODULE_FLUXNODES}/shaders/fluxnodes_vs.glsl"),
+        absPath("${MODULE_FLUXNODES}/shaders/fluxnodes_fs.glsl")
     );
 
     _uniformCache.streamColor = _shaderProgram->uniformLocation("streamColor");
@@ -604,7 +604,7 @@ void RenderableStreamNodes::initializeGL() {
     setupProperties();
 }
 
-void RenderableStreamNodes::loadNodeData() {
+void RenderableFluxNodes::loadNodeData() {
 
     if (_shouldreadBinariesDirectly) {
         bool success = false;
@@ -678,7 +678,7 @@ void RenderableStreamNodes::loadNodeData() {
 
 }
 
-void RenderableStreamNodes::createStreamnumberVector() {
+void RenderableFluxNodes::createStreamnumberVector() {
     int nPoints = 1999;
     int lineStartIdx = 0;
     
@@ -695,7 +695,7 @@ void RenderableStreamNodes::createStreamnumberVector() {
     }
 }
 
-bool RenderableStreamNodes::loadFilesIntoRam() {
+bool RenderableFluxNodes::loadFilesIntoRam() {
     LDEBUG("Did not find cached file, loading in data and converting only for this run, this step wont be needed next time you run Openspace ");
     // Loop through all the files dependent on how many states we would like to read in
     for (size_t j = 0; j < _nStates; ++j) {
@@ -772,7 +772,7 @@ bool RenderableStreamNodes::loadFilesIntoRam() {
     return true;
 }
 
-void RenderableStreamNodes::writeCachedFile() const {
+void RenderableFluxNodes::writeCachedFile() const {
     // Todo, write all of the vertexobjects into here 
     std::string _file = "StreamnodesCachePositionv3";
     std::string _file2 = "StreamnodesCacheColorv3";
@@ -832,7 +832,7 @@ void RenderableStreamNodes::writeCachedFile() const {
     }
 }
 
-bool RenderableStreamNodes::loadBinaryfilesDirectly(const std::string& energybin) { // on init
+bool RenderableFluxNodes::loadBinaryfilesDirectly(const std::string& energybin) { // on init
     constexpr const float AuToMeter = 149597870700.f;  // Astronomical Units
 
     LDEBUG("Loading in binary files directly from sync folder");
@@ -928,7 +928,7 @@ bool RenderableStreamNodes::loadBinaryfilesDirectly(const std::string& energybin
 * to function; such as the file type and the location of the source files.
 * Returns false if it fails to extract mandatory information!
 **/
-bool RenderableStreamNodes::extractMandatoryInfoFromDictionary()
+bool RenderableFluxNodes::extractMandatoryInfoFromDictionary()
 {
     //_identifier = _dictionary->value<std::string>(SceneGraphNode::KeyIdentifier);
 
@@ -1026,7 +1026,7 @@ bool RenderableStreamNodes::extractMandatoryInfoFromDictionary()
     return true;
 }
 
-bool RenderableStreamNodes::extractJsonInfoFromDictionary(fls::Model& model) {
+bool RenderableFluxNodes::extractJsonInfoFromDictionary(fls::Model& model) {
     std::string modelStr;
     if (_dictionary->hasValue<std::string>(KeySimulationModel)) {
         modelStr = _dictionary->value<std::string>(KeySimulationModel);
@@ -1063,7 +1063,7 @@ bool RenderableStreamNodes::extractJsonInfoFromDictionary(fls::Model& model) {
     return true;
 }
 
-void RenderableStreamNodes::setupProperties() {
+void RenderableFluxNodes::setupProperties() {
 
     // -------------- Add non-grouped properties (enablers and buttons) -------------- //
     addProperty(_pGoesEnergyBins);
@@ -1159,7 +1159,7 @@ void RenderableStreamNodes::setupProperties() {
     _pColorTablePath = _colorTablePaths[0];
 }
 
-void RenderableStreamNodes::deinitializeGL() {
+void RenderableFluxNodes::deinitializeGL() {
     glDeleteVertexArrays(1, &_vertexArrayObject);
     _vertexArrayObject = 0;
 
@@ -1195,13 +1195,13 @@ void RenderableStreamNodes::deinitializeGL() {
     }
 }
 
-bool RenderableStreamNodes::isReady() const {
+bool RenderableFluxNodes::isReady() const {
     return _shaderProgram != nullptr;
 }
 
                 //// Extract J2000 time from file names
                 //// Requires files to be named as such: 'YYYY-MM-DDTHH-MM-SS-XXX.json'
-                //void RenderableStreamNodes::extractTriggerTimesFromFileNames() {
+                //void RenderableFluxNodes::extractTriggerTimesFromFileNames() {
                 //    // number of  characters in filename (excluding '.json')
                 //    constexpr const int FilenameSize = 23;
                 //    // size(".json")
@@ -1227,7 +1227,7 @@ bool RenderableStreamNodes::isReady() const {
                 //    }
                 //}
 
-void RenderableStreamNodes::populateStartTimes() {
+void RenderableFluxNodes::populateStartTimes() {
 
     // number of  characters in UTC ISO8601 format (without additional Z)
     // 'YYYY-MM-DDTHH-MM-SS-XXX'
@@ -1315,7 +1315,7 @@ void RenderableStreamNodes::populateStartTimes() {
     }
 }
 
-void RenderableStreamNodes::updateActiveTriggerTimeIndex(double currentTime) {
+void RenderableFluxNodes::updateActiveTriggerTimeIndex(double currentTime) {
     auto iter = std::upper_bound(_startTimes.begin(), _startTimes.end(), currentTime);
     if (iter != _startTimes.end()) {
         if (iter != _startTimes.begin()) {
@@ -1331,7 +1331,7 @@ void RenderableStreamNodes::updateActiveTriggerTimeIndex(double currentTime) {
         _activeTriggerTimeIndex = static_cast<int>(_nStates) - 1;
     }
 }
-void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
+void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
     if (_activeTriggerTimeIndex != -1) {
         _shaderProgram->activate();
 
@@ -1455,7 +1455,7 @@ inline void unbindGL() {
     glBindVertexArray(0);
 }
 
-void RenderableStreamNodes::computeSequenceEndTime() {
+void RenderableFluxNodes::computeSequenceEndTime() {
     if (_nStates > 1) {
         const double lastTriggerTime = _startTimes[_nStates - 1];
         const double sequenceDuration = lastTriggerTime - _startTimes[0];
@@ -1472,7 +1472,7 @@ void RenderableStreamNodes::computeSequenceEndTime() {
     }
 }
 
-void RenderableStreamNodes::update(const UpdateData& data) {
+void RenderableFluxNodes::update(const UpdateData& data) {
     if (!this->_enabled) return;
     if (_shaderProgram->isDirty()) {
         _shaderProgram->rebuildFromFile();
@@ -1561,7 +1561,7 @@ void RenderableStreamNodes::update(const UpdateData& data) {
     }
 }
 
-std::vector<std::string> RenderableStreamNodes::LoadJsonfile(std::string filepath) {
+std::vector<std::string> RenderableFluxNodes::LoadJsonfile(std::string filepath) {
        
     std::ifstream streamdata(filepath);
     if (!streamdata.is_open())
@@ -1624,7 +1624,7 @@ std::vector<std::string> RenderableStreamNodes::LoadJsonfile(std::string filepat
 
     return std::vector<std::string>();
 }
-void RenderableStreamNodes::updatePositionBuffer() {
+void RenderableFluxNodes::updatePositionBuffer() {
     glBindVertexArray(_vertexArrayObject);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
 
@@ -1643,7 +1643,7 @@ void RenderableStreamNodes::updatePositionBuffer() {
 
     unbindGL();
 }
-void RenderableStreamNodes::updateVertexColorBuffer() {
+void RenderableFluxNodes::updateVertexColorBuffer() {
     glBindVertexArray(_vertexArrayObject);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexColorBuffer);
 
@@ -1661,7 +1661,7 @@ void RenderableStreamNodes::updateVertexColorBuffer() {
 
         unbindGL();
 }
-void RenderableStreamNodes::updateVertexFilteringBuffer() {
+void RenderableFluxNodes::updateVertexFilteringBuffer() {
         glBindVertexArray(_vertexArrayObject);
         glBindBuffer(GL_ARRAY_BUFFER, _vertexFilteringBuffer);
 
@@ -1679,7 +1679,7 @@ void RenderableStreamNodes::updateVertexFilteringBuffer() {
 
         unbindGL();
 }
-void RenderableStreamNodes::updateVertexStreamNumberBuffer() {
+void RenderableFluxNodes::updateVertexStreamNumberBuffer() {
     glBindVertexArray(_vertexArrayObject);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexStreamNumberBuffer);
 

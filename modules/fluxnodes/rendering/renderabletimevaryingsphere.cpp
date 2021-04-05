@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/streamnodes/rendering/renderabletimevaryingsphere.h>
+#include <modules/fluxnodes/rendering/renderabletimevaryingsphere.h>
 
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>

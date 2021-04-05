@@ -22,51 +22,25 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/streamnodes/streamnodesmodule.h>
-#include <modules/streamnodes/rendering/renderablestreamnodes.h>
-#include <modules/streamnodes/rendering/renderableplanetimevaryingimage.h>
-#include <modules/streamnodes/rendering/renderabletravelspeed.h>
-#include <modules/streamnodes/rendering/renderabletimevaryingsphere.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/templatefactory.h>
-#include <fstream>
+#ifndef __OPENSPACE_MODULE_FLUXNODES___FLUXNODESMODULE___H__
+#define __OPENSPACE_MODULE_FLUXNODES___FLUXNODESMODULE___H__
 
-namespace {
-    constexpr const char* DefaultTransferfunctionSource =
-R"(
-width 5
-lower 0.0
-upper 1.0
-mappingkey 0.0   0    0    0    255
-mappingkey 0.25  255  0    0    255
-mappingkey 0.5   255  140  0    255
-mappingkey 0.75  255  255  0    255
-mappingkey 1.0   255  255  255  255
-)";
-} // namespace
+#include <openspace/util/openspacemodule.h>
 
 namespace openspace {
 
-std::string StreamNodesModule::DefaultTransferFunctionFile = "";
+class FluxNodesModule : public OpenSpaceModule {
+public:
+    constexpr static const char* Name = "FluxNodes";
 
-StreamNodesModule::StreamNodesModule() : OpenSpaceModule(Name) {
-    DefaultTransferFunctionFile = absPath("${TEMPORARY}/default_transfer_function.txt");
+    FluxNodesModule();
 
-    std::ofstream file(DefaultTransferFunctionFile);
-    file << DefaultTransferfunctionSource;
-}
+    static std::string DefaultTransferFunctionFile;
 
-void StreamNodesModule::internalInitialize(const ghoul::Dictionary&) {
-    auto factory = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(factory, "No renderable factory existed");
-
-    factory->registerClass<RenderableStreamNodes>("RenderableStreamNodes");
-    factory->registerClass<RenderablePlaneTimeVaryingImage>
-        ("RenderablePlaneTimeVaryingImage");
-    factory->registerClass<RenderableTravelSpeed>("RenderableTravelSpeed");
-    factory->registerClass<RenderableTimeVaryingSphere>("RenderableTimeVaryingSphere");
-}
+private:
+    void internalInitialize(const ghoul::Dictionary&) override;
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_FLUXNODES___FLUXNODESMODULE___H__

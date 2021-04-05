@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -58,7 +58,7 @@ uniform vec2      domainLimY;
 uniform vec2      domainLimZ;
 uniform vec2      domainLimR;
 
-// Streamnodes specific uniforms
+// Fluxnodes specific uniforms
 uniform float   nodeSize;
 uniform float   nodeSizeLargerFlux;
 uniform vec4    streamColor;
@@ -121,12 +121,12 @@ layout(location = 2)
 in float rValue;
 
 // The vertex index of every node. Location must correspond to 
-// _VA_INDEX in renderableStreamNodes.h
+// _VA_INDEX in renderableFluxNodes.h
 //Using built in gl_vertexID in stead. 
 //layout(location = 3)
 //in int nodeIndex;
 // The vertex streamnumber of every node. Location must correspond to 
-// VaStreamnumber in renderableStreamNodes.h
+// VaStreamnumber in renderableFluxNodes.h
 layout(location = 3)
 in int Streamnumber;
 layout(location = 4) 
@@ -135,7 +135,7 @@ in vec2 in_st;
 //layout(location = 5) 
 //in vec2 arrow;
 
-// These should correspond to the enum 'ColorMode' in renderablestreamnodes.cpp
+// These should correspond to the enum 'ColorMode' in renderablefluxnodes.cpp
 const int colorByFluxValue  = 0;
 const int uniformColor     = 1;
 

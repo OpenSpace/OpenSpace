@@ -3,21 +3,21 @@ local assetHelper = asset.require('util/asset_helper')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 
 local transferFunctions = asset.localResource("transferfunctions")
-local streamnodeColorTable = transferFunctions .. "/stream_nodes.txt"
-local streamnodeColorTableCMR = transferFunctions .. "/CMR.txt"
-local streamnodeColorTableEarth = transferFunctions .. "/stream_nodes_grey_scale.txt"
-local streamnodeColorTableFlow = transferFunctions .. "/stream_nodes_flow.txt"
---local streamnodeColorTableIlluminance = transferFunctions .. "/CMR_illuminance.txt"
---local streamnodeColorTableIlluminance2 = transferFunctions .. "/CMR_illuminance2.txt"
+local fluxnodeColorTable = transferFunctions .. "/flux_nodes.txt"
+local fluxnodeColorTableCMR = transferFunctions .. "/CMR.txt"
+local fluxnodeColorTableEarth = transferFunctions .. "/flux_nodes_grey_scale.txt"
+local fluxnodeColorTableFlow = transferFunctions .. "/flux_nodes_flow.txt"
+--local fluxnodeColorTableIlluminance = transferFunctions .. "/CMR_illuminance.txt"
+--local fluxnodeColorTableIlluminance2 = transferFunctions .. "/CMR_illuminance2.txt"
 
---[[local streamnodesDirectory = asset.syncedResource({
-    Name = "Bastille Day Stream nodes",
+--[[local fluxnodesDirectory = asset.syncedResource({
+    Name = "Bastille Day Flux nodes",
     Type = "HttpSynchronization",
     Identifier = "bastille_day_streamnodes",
     Version = 10
 })--]]
-local streamnodesBinaries = asset.syncedResource({
-    Name = "Bastille day Stream nodes binaries",
+local fluxnodesBinaries = asset.syncedResource({
+    Name = "Bastille day Flux nodes binaries",
     Type = "HttpSynchronization",
     Identifier = "bastille_day_streamnodes_binaries",
     Version = 1
@@ -25,28 +25,28 @@ local streamnodesBinaries = asset.syncedResource({
 
 local sunRadius = 6.957E8
 
--- Streamnodes from binaries
-local Streamnodes = {
-    Identifier = "MAS_MHD_StreamNodes",
+-- Fluxnodes from binaries
+local Fluxnodes = {
+    Identifier = "MAS_MHD_FluxNodes",
     Parent = sunTransforms.HNMReferenceFrame.Identifier,
     --Parent = sunTransforms.SunIAU.Identifier,
     --Parent = sunTransforms.SolarSystemBarycenter.Identifier,
     --transforms.asset, referens to suntransforms.solarsystemBarycenter.identifier
     Renderable = {
-        Type = "RenderableStreamNodes",
-        --SourceFolder = streamnodesDirectory,
-        BinarySourceFolder = streamnodesBinaries,
-        -- StreamsEnabled = false,
+        Type = "RenderableFluxNodes",
+        --SourceFolder = fluxnodesDirectory,
+        BinarySourceFolder = fluxnodesBinaries,
+        -- interestingStreamsEnabled = false,
         -- LineWidth = 1.0;
         -- AlphaBlendlingEnabled = false,
         -- InputFileType = "json",
         ColorTablePaths = { -- keep order 
-        	streamnodeColorTable,
-        	streamnodeColorTableCMR,
-        	streamnodeColorTableEarth,
-        	streamnodeColorTableFlow,
-        	--streamnodeColorTableIlluminance,
-        	--streamnodeColorTableIlluminance2,
+        	fluxnodeColorTable,
+        	fluxnodeColorTableCMR,
+        	fluxnodeColorTableEarth,
+        	fluxnodeColorTableFlow,
+        	--fluxnodeColorTableIlluminance,
+        	--fluxnodeColorTableIlluminance2,
         },
         LoadAtRuntime = true,
         ScaleToMeters = 1.0,
@@ -57,7 +57,7 @@ local Streamnodes = {
     },
     GUI = {
         Path = "/Solar System/Heliosphere",
-        Name = "Streamnodes"
+        Name = "Fluxnodes"
     },
     Transform = {
         Scale = {
@@ -82,13 +82,13 @@ local Streamnodes = {
     }
 } 
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Streamnodes })
+assetHelper.registerSceneGraphNodesAndExport(asset, { Fluxnodes })
 
 
 asset.meta = {
-    Name = "Predictive Science Inc. Stream nodes Bastille Day",
+    Name = "Predictive Science Inc. Flux nodes Bastille Day",
     Version = "1.0",
-    Description = " Stream nodes for the bastille day CME event ",
+    Description = " Flux nodes for the bastille day CME event ",
     Author = "CCMC, Christian Adamsson, Emilie Ho",
     URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
     License = ""

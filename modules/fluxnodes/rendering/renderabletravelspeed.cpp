@@ -21,7 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
-#include <modules/streamnodes/rendering/renderabletravelspeed.h>
+#include <modules/fluxnodes/rendering/renderabletravelspeed.h>
 
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
@@ -188,8 +188,8 @@ void RenderableTravelSpeed::initializeGL() {
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
                 "Travelspeed",
-                absPath("${MODULE_STREAMNODES}/shaders/travelspeed_vs.glsl"),
-                absPath("${MODULE_STREAMNODES}/shaders/travelspeed_fs.glsl")
+                absPath("${MODULE_FLUXNODES}/shaders/travelspeed_vs.glsl"),
+                absPath("${MODULE_FLUXNODES}/shaders/travelspeed_fs.glsl")
             );
         }
     );

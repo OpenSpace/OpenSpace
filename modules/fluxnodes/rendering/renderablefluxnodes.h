@@ -39,9 +39,9 @@
 
 namespace openspace {
 
-class RenderableStreamNodes : public Renderable {
+class RenderableFluxNodes : public Renderable {
 public:
-    RenderableStreamNodes(const ghoul::Dictionary& dictionary);
+    RenderableFluxNodes(const ghoul::Dictionary& dictionary);
 
     void initialize() override;
     void initializeGL() override;
@@ -277,7 +277,7 @@ private:
     //The active stream that we want to look at
     properties::IntProperty _pActiveStreamNumber;
 
-    //Misaligned index for fieldlines vs Streamnodes
+    //Misaligned index for fieldlines vs Fluxnodes
     properties::IntProperty _pMisalignedIndex;
 
     // Flow Properties

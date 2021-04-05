@@ -25,7 +25,7 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablestreamnodes.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablefluxnodes.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplanetimevaryingimage.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletravelspeed.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletimevaryingsphere.h
@@ -33,7 +33,7 @@ set(HEADER_FILES
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablestreamnodes.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablefluxnodes.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplanetimevaryingimage.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletravelspeed.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletimevaryingsphere.cpp
@@ -41,15 +41,15 @@ set(SOURCE_FILES
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/streamnodes_fs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/streamnodes_vs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fluxnodes_fs.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fluxnodes_vs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/travelspeed_fs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/travelspeed_vs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 
 create_new_module(
-  "StreamNodes"
-  streamnodes_module
+  "FluxNodes"
+  Fluxnodes_module
   ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )

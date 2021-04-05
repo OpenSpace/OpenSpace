@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/streamnodes/rendering/renderableplanetimevaryingimage.h>
+#include <modules/fluxnodes/rendering/renderableplanetimevaryingimage.h>
 #include <modules/base/basemodule.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
