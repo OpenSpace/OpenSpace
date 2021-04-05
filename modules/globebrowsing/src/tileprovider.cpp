@@ -88,12 +88,20 @@ namespace defaultprovider {
     constexpr const char* KeyPerformPreProcessing = "PerformPreProcessing";
     constexpr const char* KeyTilePixelSize = "TilePixelSize";
     constexpr const char* KeyPadTiles = "PadTiles";
+    constexpr const char* KeyMinLevel = "MinLevel";
 
     constexpr openspace::properties::Property::PropertyInfo FilePathInfo = {
         "FilePath",
         "File Path",
         "The path of the GDAL file or the image file that is to be used in this tile "
         "provider."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MinLevelInfo = {
+        "MinLevel",
+        "Min Level",
+        "The minimum level for which this layer should be shown."
+        "Default is 0 (always showing)."
     };
 
     constexpr openspace::properties::Property::PropertyInfo TilePixelSizeInfo = {
@@ -584,6 +592,13 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
         padTiles = dictionary.value<bool>(defaultprovider::KeyPadTiles);
     }
 
+    if (dictionary.hasKey(defaultprovider::KeyMinLevel)) {
+        double floatMinLevel = dictionary.value<double>(
+            defaultprovider::KeyMinLevel
+            );
+        minLevel = static_cast<int>(std::round(floatMinLevel));
+    }
+
     TileTextureInitData initData(
         tileTextureInitData(layerGroupID, padTiles, pixelSize)
     );
@@ -955,6 +970,9 @@ Tile tile(TileProvider& tp, const TileIndex& tileIndex) {
             ZoneScopedN("Type::DefaultTileProvider")
             DefaultTileProvider& t = static_cast<DefaultTileProvider&>(tp);
             if (t.asyncTextureDataProvider) {
+                if (tileIndex.level < minLevel(t)) {
+                    return Tile{ nullptr, std::nullopt, Tile::Status::OutOfRange };
+                }
                 if (tileIndex.level > maxLevel(t)) {
                     return Tile { nullptr, std::nullopt, Tile::Status::OutOfRange };
                 }
@@ -1376,6 +1394,16 @@ int maxLevel(TileProvider& tp) {
     }
 }
 
+int minLevel(TileProvider& tp) {
+    switch (tp.type) {
+        case Type::DefaultTileProvider: {
+            DefaultTileProvider& t = static_cast<DefaultTileProvider&>(tp);
+            return static_cast<int>(t.minLevel);
+        }
+        default:
+            return 0;
+    }
+}
 
 
 

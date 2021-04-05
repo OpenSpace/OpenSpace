@@ -92,6 +92,8 @@ struct DefaultTileProvider : public TileProvider {
     layergroupid::GroupID layerGroupID = layergroupid::GroupID::Unknown;
     bool performPreProcessing = false;
     bool padTiles = true;
+    int minLevel;
+
 };
 
 struct SingleImageProvider : public TileProvider {
@@ -239,6 +241,12 @@ void reset(TileProvider& tp);
  * that this TileProvider is able provide.
  */
 int maxLevel(TileProvider& tp);
+
+/**
+ * \returns The minumum level as defined by <code>TileIndex</code>
+ * that this TileProvider is able provide.
+ */
+int minLevel(TileProvider& tp);
 
 /**
  * \returns the no data value for the dataset. Default is the minimum float avalue.
