@@ -59,6 +59,7 @@ private:
     properties::IntProperty _indicatorLength;
     properties::IntProperty _fadeLength;
     properties::FloatProperty _lineWidth;
+    properties::FloatProperty _opacity;
     properties::Vec3Property _lineColor;
 
 

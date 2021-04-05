@@ -130,7 +130,7 @@ RenderableTravelSpeed::RenderableTravelSpeed(const ghoul::Dictionary& dictionary
     , _indicatorLength(IndicatorLengthInfo, 1, 1, 360)
     , _fadeLength(FadeLengthInfo, 1, 0, 360)
     , _lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-   // , _opacity(LineOpacityInfo, 1.0, 0.0, 1.0)
+    , _opacity(LineOpacityInfo, 1.0, 0.0, 1.0)
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
 
 {
@@ -228,10 +228,10 @@ void RenderableTravelSpeed::calculateVerticesPositions() {
     _verticesPositions[2].x = _travelSpeed * _timeSinceStart * _directionVector.x;
     _verticesPositions[2].y = _travelSpeed * _timeSinceStart * _directionVector.y;
     _verticesPositions[2].z = _travelSpeed * _timeSinceStart * _directionVector.z;
-    //_verticesPositions[2] += _sourcePosition;
 
+    // This if statment is there to not start the line from behind the source node
     if (_timeSinceStart < _indicatorLength) {
-        _verticesPositions[1] = glm::vec3(0.0, 0.0, 0.0); //_sourcePosition;
+        _verticesPositions[1] = glm::vec3(0.0, 0.0, 0.0); // = source node
     }
     else {
         _verticesPositions[1].x =
@@ -240,12 +240,12 @@ void RenderableTravelSpeed::calculateVerticesPositions() {
             _travelSpeed * _directionVector.y * (_timeSinceStart - _indicatorLength);
         _verticesPositions[1].z =
             _travelSpeed * _directionVector.z * (_timeSinceStart - _indicatorLength);
-        //_verticesPositions[1] += _sourcePosition;
 
     }
 
+    // This if statment is there to not start the line from behind the source node
     if (_timeSinceStart < (_indicatorLength + _fadeLength)) {
-        _verticesPositions[0] = glm::vec3(0.0, 0.0, 0.0); // _sourcePosition;
+        _verticesPositions[0] = glm::vec3(0.0, 0.0, 0.0); // = source node
     }
     else {
         _verticesPositions[0].x =
@@ -257,13 +257,10 @@ void RenderableTravelSpeed::calculateVerticesPositions() {
         _verticesPositions[0].z =
             _travelSpeed * _directionVector.z * 
             (_timeSinceStart - _indicatorLength - _fadeLength);
-        //_verticesPositions[0] += _sourcePosition;
     }
 }
 
 void RenderableTravelSpeed::updateVertexData() {
-    //glm::vec3 z = glm::vec3(0.0);
-    //std::fill(std::begin(_verticesPositions), std::end(_verticesPositions), z);
 
     calculateVerticesPositions();
 
@@ -307,6 +304,7 @@ void RenderableTravelSpeed::update(const UpdateData& data) {
     );
 
     const double currentTime = data.time.j2000Seconds();
+    // Unless we've reached the target
     if (_initiationTime < currentTime && _arrivalTime > currentTime) {
 
         _timeSinceStart = currentTime - _initiationTime;
@@ -314,14 +312,12 @@ void RenderableTravelSpeed::update(const UpdateData& data) {
         updateVertexData();
 
     }
-    else {
+    else { // in case we've reached the target
         reinitiateTravel();
     }
 
-    //_shaderProgram->setUniform(_uniformCache.travelTime, _lightTravelTime);
     _shaderProgram->setUniform("lineColor", _lineColor);
     _shaderProgram->setUniform("opacity", _opacity);
-    //_shaderProgram->setUniform(_uniformCache.travelTime, _lightTravelTime);
 
 } // update
 
@@ -341,10 +337,10 @@ void RenderableTravelSpeed::render(const RenderData& data, RendererTasks& ) {
     _shaderProgram->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
     _shaderProgram->setUniform("projectionTransform", data.camera.projectionMatrix());
 
+    glLineWidth(_lineWidth);
 #ifdef __APPLE__
     glLineWidth(1);
 #endif
-    glLineWidth(_lineWidth);
     glBindVertexArray(_vaoId);
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
     glDrawArrays(

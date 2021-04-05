@@ -27,10 +27,9 @@
 
 layout(location = 0) in vec3 in_position;
 
-out float t;
 out float vs_depth;
 out vec4 vs_positionViewSpace;
-out vec4 smoothColor;
+out vec4 finalColor;
 
 uniform vec3 lineColor;
 uniform float opacity;
@@ -44,24 +43,23 @@ void main(){
     vs_depth = positionScreenSpace.w;
     gl_Position = positionScreenSpace;
 
-    t = 1.f;
-
+    // Makes it liniarly fade betweet vertex 0 and 1
     if (gl_VertexID == 0) {
-        smoothColor = vec4(0.0, 0.0, 0.0, opacity);
+        finalColor = vec4(0.0, 0.0, 0.0, 0.0);
     }
     
+    // Makes sure the line between index 1 and 2 is uniformly colored
     else if (gl_VertexID == 1) {
-        smoothColor = vec4(lineColor, opacity);
+        finalColor = vec4(lineColor, opacity);
     }
-
     else if (gl_VertexID == 2 ) {
-        smoothColor = vec4(lineColor, opacity);
+        finalColor = vec4(lineColor, opacity);
     }
-
+    
+    // should never hit else
     else {
-        smoothColor = vec4(1.0, 1.0, 0.0, 1.0);
+        finalColor = vec4(1.0, 1.0, 0.0, 1.0);
     }
 
     gl_Position.z = 0.f;
-    
 }

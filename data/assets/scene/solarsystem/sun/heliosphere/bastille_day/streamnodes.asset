@@ -1,14 +1,5 @@
-asset.info = {
-    Name = "Predictive Science Inc. Stream nodes Bastille Day",
-    Version = "1.0",
-    Description = " Stream nodes for the bastille day CME event ",
-    Author = "CCMC, Christian Adamsson, Emilie Ho",
-    URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
-    License = ""
-}
-
 local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('./transforms')
+--local transforms = asset.require('./transforms')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 
 local transferFunctions = asset.localResource("transferfunctions")
@@ -37,7 +28,7 @@ local sunRadius = 6.957E8
 -- Streamnodes from binaries
 local Streamnodes = {
     Identifier = "MAS_MHD_StreamNodes",
-    Parent = transforms.HNMReferenceFrame.Identifier,
+    Parent = sunTransforms.HNMReferenceFrame.Identifier,
     --Parent = sunTransforms.SunIAU.Identifier,
     --Parent = sunTransforms.SolarSystemBarycenter.Identifier,
     --transforms.asset, referens to suntransforms.solarsystemBarycenter.identifier
@@ -92,3 +83,13 @@ local Streamnodes = {
 } 
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Streamnodes })
+
+
+asset.meta = {
+    Name = "Predictive Science Inc. Stream nodes Bastille Day",
+    Version = "1.0",
+    Description = " Stream nodes for the bastille day CME event ",
+    Author = "CCMC, Christian Adamsson, Emilie Ho",
+    URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
+    License = ""
+}

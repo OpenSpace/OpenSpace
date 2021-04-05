@@ -1147,6 +1147,9 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
 
         glBindVertexArray(_vertexArrayObject);
         glLineWidth(_pLineWidth);
+#ifdef __APPLE__
+        glLineWidth(1);
+#endif
 
         glMultiDrawArrays(
             GL_LINE_STRIP, //_drawingOutputType,

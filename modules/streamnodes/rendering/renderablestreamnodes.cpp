@@ -21,12 +21,8 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
- //including our own h file
 #include <modules/streamnodes/rendering/renderablestreamnodes.h>
 
-// Includes from fieldlinessequence, might not need all of them
-//#include <modules/fieldlinessequence/fieldlinessequencemodule.h>
-//#include <modules/fieldlinessequence/util/kameleonfieldlinehelper.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/navigationhandler.h>
@@ -513,10 +509,7 @@ void RenderableStreamNodes::setModelDependentConstants() {
     _pColorTableRange.setMaxValue(glm::vec2(limit));
     _pColorTableRange = glm::vec2(-2, 4);
 
-    //float limitZMin = -1000000000000;
     float limitZMin = -2.5f;
-    //float limitZMax = 1000000000000;
-    //float limitZMax = 1000000000000;
     float limitZMax = 2.5f;
 
     _pDomainZ.setMinValue(glm::vec2(limitZMin));
@@ -583,7 +576,6 @@ void RenderableStreamNodes::initializeGL() {
     //if (!_loadingStatesDynamically) {
     //    _sourceFiles.clear();
     //}
-    //_nStates = 274;
     setModelDependentConstants();
        
     //extractTriggerTimesFromFileNames();
@@ -595,13 +587,7 @@ void RenderableStreamNodes::initializeGL() {
     if (!_loadingStatesDynamically) {
         loadNodeData();
     }
-    computeSequenceEndTime();
-
-    //float distanceThreshold = 65525112832.f;
-    //float distanceThreshold = 33561643008.f;
-    //ExtractandwriteInterestingStreams(distanceThreshold);
-    //ReadInterestingStreamsFromJson();
-    
+    computeSequenceEndTime();   
 
     // If we are loading in states dynamically we would read new states during runtime, 
     // parsing json files pretty slowly.
@@ -722,14 +708,6 @@ bool RenderableStreamNodes::loadFilesIntoRam() {
         }
         json jsonobj = json::parse(streamdata);
            
-        //const char* sNode = "node0";
-        //const char* sStream = "stream0";
-        //const char* sData = "data";
-
-        //const json& jTmp = *(jsonobj.begin()); // First node in the file
-        //const char* sTime = "time";
-        //std::string testtime = jsonobj["time"];
-          
         size_t lineStartIdx = 0;
         //const int _numberofStreams = 383;
        // const int _numberofStreams = 863;
@@ -741,8 +719,6 @@ bool RenderableStreamNodes::loadFilesIntoRam() {
         _lineStart.clear();
         _vertexRadius.clear();
         _vertexColor.clear();
-
-        int counter = 0;
 
         const size_t nPoints = 1;
 
@@ -765,8 +741,6 @@ bool RenderableStreamNodes::loadFilesIntoRam() {
                 float phiValue = stringToFloat(phi);
                 float thetaValue = stringToFloat(theta);
                 float fluxValue = stringToFloat(flux);
-                //float ninetyDeToRad = 1.57079633f * 2;
-                //const float pi = 3.14159265359f;
 
                 // Push back values in order to be able to filter and color nodes 
                 // by different threshold etc.
@@ -1225,40 +1199,39 @@ bool RenderableStreamNodes::isReady() const {
     return _shaderProgram != nullptr;
 }
 
-// Extract J2000 time from file names
-// Requires files to be named as such: 'YYYY-MM-DDTHH-MM-SS-XXX.json'
-void RenderableStreamNodes::extractTriggerTimesFromFileNames() {
-    // number of  characters in filename (excluding '.json')
-    constexpr const int FilenameSize = 23;
-    // size(".json")
-    constexpr const int ExtSize = 5;
-
-    for (const std::string& filePath : _sourceFiles) {
-        LDEBUG("filepath " + filePath);
-        const size_t strLength = filePath.size();
-        // Extract the filename from the path (without extension)
-        std::string timeString = filePath.substr(
-            strLength - FilenameSize - ExtSize,
-            FilenameSize - 1
-            );
-        // Ensure the separators are correct
-        timeString.replace(4, 1, "-");
-        timeString.replace(7, 1, "-");
-        timeString.replace(13, 1, ":");
-        timeString.replace(16, 1, ":");
-        timeString.replace(19, 1, ".");
-        const double triggerTime = Time::convertTime(timeString);
-        LDEBUG("timestring " + timeString);
-        _startTimes.push_back(triggerTime);
-    }
-}
+                //// Extract J2000 time from file names
+                //// Requires files to be named as such: 'YYYY-MM-DDTHH-MM-SS-XXX.json'
+                //void RenderableStreamNodes::extractTriggerTimesFromFileNames() {
+                //    // number of  characters in filename (excluding '.json')
+                //    constexpr const int FilenameSize = 23;
+                //    // size(".json")
+                //    constexpr const int ExtSize = 5;
+                //
+                //    for (const std::string& filePath : _sourceFiles) {
+                //        LDEBUG("filepath " + filePath);
+                //        const size_t strLength = filePath.size();
+                //        // Extract the filename from the path (without extension)
+                //        std::string timeString = filePath.substr(
+                //            strLength - FilenameSize - ExtSize,
+                //            FilenameSize - 1
+                //            );
+                //        // Ensure the separators are correct
+                //        timeString.replace(4, 1, "-");
+                //        timeString.replace(7, 1, "-");
+                //        timeString.replace(13, 1, ":");
+                //        timeString.replace(16, 1, ":");
+                //        timeString.replace(19, 1, ".");
+                //        const double triggerTime = Time::convertTime(timeString);
+                //        LDEBUG("timestring " + timeString);
+                //        _startTimes.push_back(triggerTime);
+                //    }
+                //}
 
 void RenderableStreamNodes::populateStartTimes() {
 
     // number of  characters in UTC ISO8601 format (without additional Z)
     // 'YYYY-MM-DDTHH-MM-SS-XXX'
     constexpr const int timeFormatSize = 23;
-    // size(".json")
     int ExtSize = 3;
 
     std::string timeFile = "";
@@ -1299,7 +1272,7 @@ void RenderableStreamNodes::populateStartTimes() {
 
     if (timeFile.empty()) {
         LERROR("Could not find a metadata file with time steps,", 
-            " such as a csv, dat, txt or no file extention with /"time/" in filename");
+            " such as a csv, dat, txt or no file extention with 'time' in filename");
     }
     // time filestream
     std::ifstream tfs(timeFile);
@@ -1333,8 +1306,8 @@ void RenderableStreamNodes::populateStartTimes() {
                     _startTimes.push_back(triggerTime);
                 }
                 else {
-                    LERROR(fmt::format("Error in file formating. Last column in file '{}'",
-                        " is not on UTC ISO8601 format", timeFile
+                    LERROR(fmt::format("Error in file formating. Last column in ",
+                        "file '{}' is not on UTC ISO8601 format", timeFile
                     ));
                 }
             }
@@ -1376,15 +1349,8 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
 
         //glm::vec3 earthPos = glm::vec3(94499869340, -115427843118, 11212075887.3);
         SceneGraphNode* earthNode = sceneGraphNode("Earth");
-        //earthNode->position() = 
-        //Earthnode worldposition, is not aligned with the actual position shown as it seems right now.
         glm::vec3 earthPos = earthNode->worldPosition() * data.modelTransform.rotation;
     
-        // this returns a value that goes from the sun, prolly because it is the root node. 
-        //glm::vec3 earthPos = earthNode->position();
-        //earthPos : 136665866240.000000, 44111921152.000000, -49989160960.000000
-        //     Jon : 94499869340,         -115427843118,       11212075887.3 
-
         _shaderProgram->setUniform(_uniformCache.streamColor, _pStreamColor);
         _shaderProgram->setUniform(_uniformCache.nodeSize, _pNodeSize);
         _shaderProgram->setUniform(_uniformCache.nodeSizeLargerFlux, 
@@ -1444,84 +1410,11 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
         _shaderProgram->setUniform(_uniformCache2.usingGaussianPulse, 
             _pGaussianPulseEnabled);
         _shaderProgram->setUniform(_uniformCache2.pulsatingAlways, _pPulseAlways);
-        //////// test for camera perspective: 
-        /*
-        glm::dmat4 modelMatrix =
-            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
-            glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-            glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-    
-        glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
-        glm::mat4 projectionMatrix = data.camera.projectionMatrix();
-
-        glm::dmat4 modelViewProjectionMatrix = glm::dmat4(projectionMatrix) * modelViewMatrix;
-
-        glm::dvec3 cameraViewDirectionWorld = -data.camera.viewDirectionWorldSpace();
-        glm::dvec3 cameraUpDirectionWorld = data.camera.lookUpVectorWorldSpace();
-        glm::dvec3 orthoRight = glm::normalize(
-            glm::cross(cameraUpDirectionWorld, cameraViewDirectionWorld)
-        );
-        if (orthoRight == glm::dvec3(0.0)) {
-            glm::dvec3 otherVector(
-                cameraUpDirectionWorld.y,
-                cameraUpDirectionWorld.x,
-                cameraUpDirectionWorld.z
-            );
-            orthoRight = glm::normalize(glm::cross(otherVector, cameraViewDirectionWorld));
-        }
-        glm::dvec3 orthoUp = glm::normalize(glm::cross(cameraViewDirectionWorld, orthoRight));
-        */
+        
         glm::vec3 cameraPos = data.camera.positionVec3() * data.modelTransform.rotation;
     
-        //this gives the same referenceframe as the nodes and makes it possible to see the
-        //the distance between the camera and the nodes. 
-        //cameraPos = cameraPos * data.modelTransform.rotation;
-    
         _shaderProgram->setUniform("cameraPos", cameraPos);
-        //glm::vec3 cameraPos = data.camera.unsynchedPositionVec3();
-        //LDEBUG("camerapos x: " + std::to_string(cameraPos.x));
-        //LDEBUG("camerapos y: " + std::to_string(cameraPos.z));
-        //LDEBUG("camerapos z: " + std::to_string(cameraPos.y));
     
-       // glm::vec4 cameraPostemp = glm::vec4(cameraPos, 1.0) * modelMatrix;
-        
-       // cameraPostemp = cameraPostemp * glm::dmat4(glm::dmat4(glm::inverse(data.camera.projectionMatrix())) * glm::inverse(data.camera.combinedViewMatrix()));
-       // cameraPostemp = cameraPostemp * glm::dmat4(glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix());
-       // cameraPos.x = cameraPostemp.x;
-       // cameraPos.y = cameraPostemp.y;
-       // cameraPos.z = cameraPostemp.z;
-       // _shaderProgram->setUniform("scaleFactor", _scaleFactor);
-       /* _shaderProgram->setUniform(
-    
-            "up",
-            glm::vec3(data.camera.lookUpVectorWorldSpace())
-        ); 
-        _shaderProgram->setUniform("modelMatrix", modelMatrix);
-        _shaderProgram->setUniform(
-            "cameraViewProjectionMatrix",
-            glm::mat4(
-                glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix()
-            )
-        );
-    
-        //_shaderProgram->setUniform("minPointSize", 3.f); // in pixels
-        //_shaderProgram->setUniform("maxPointSize", 30.f); // in pixels
-        _shaderProgram->setUniform("up", glm::vec3(orthoUp));
-        _shaderProgram->setUniform("right", glm::vec3(orthoRight));
-        //_shaderProgram->setUniform(_uniformCache.fadeInValue, fadeInVariable);
-        _shaderProgram->setUniform(
-            "correctionSizeEndDistance",
-            17.f
-        );
-        GLint viewport[4];
-        glGetIntegerv(GL_VIEWPORT, viewport);
-        */
-       // _shaderProgram->setUniform("screenSize", glm::vec2(viewport[2], viewport[3]));
-
-        //_shaderProgram->setUniform("camerapos", data.camera.)
-        //data.camera.
-        //glm::vec3 testvec = data.camera.positionVec3();
-        //LDEBUG("test: " + std::to_string(testvec.x));
         if (_pColorMode == static_cast<int>(ColorMethod::ByFluxValue)) {
             ghoul::opengl::TextureUnit textureUnit;
             textureUnit.activate();
@@ -1543,18 +1436,8 @@ void RenderableStreamNodes::render(const RenderData& data, RendererTasks&) {
             _transferFunctionFlow->bind(); // Calls update internally
             _shaderProgram->setUniform("colorTableFlow", textureUnitFlow);
 
-            /*ghoul::opengl::TextureUnit textureUnitIlluminance;
-            textureUnitIlluminance.activate();
-            _transferFunctionIlluminance->bind(); // Calls update internally
-            _shaderProgram->setUniform("colorTableIlluminance", textureUnitIlluminance);
-
-            ghoul::opengl::TextureUnit textureUnitIlluminance2;
-            textureUnitIlluminance2.activate();
-            _transferFunctionIlluminance2->bind(); // Calls update internally
-            _shaderProgram->setUniform("colorTableIlluminance2", textureUnitIlluminance2);*/
         }
 
-        //const std::vector<glm::vec3>& vertPos = _vertexPositions;
         glBindVertexArray(_vertexArrayObject);
 
         glDrawArrays(
@@ -1588,59 +1471,6 @@ void RenderableStreamNodes::computeSequenceEndTime() {
         LWARNING("Start up or error?");
     }
 }
-//void RenderableStreamNodes::ExtractandwriteInterestingStreams(float distanceThreshold) {
-//    LDEBUG("we entered the extract function");
-//    glm::vec3 earthPos = glm::vec3(94499869340, -115427843118, 11212075887.3);
-//    //65525112832
-//    std::vector<std::string> interestingStreams;
-//    //for (int i = 0; i < _nStates; i++) {
-//    _vertexPositions = _statesPos[100];
-//    //for(int j = 0; j < 383; j++){
-//    int counter = 0;
-//    int streamnumber = 0;
-//
-//    for (int k = 0; k < _vertexPositions.size(); k++) {
-//        if (counter > 1999) {
-//            counter = 0;
-//            streamnumber++;
-//        }
-//        //LDEBUG("Vi kom in i extract function test2");
-//        if (glm::distance(_vertexPositions[k], earthPos) < distanceThreshold) {
-//            // k++;
-//            interestingStreams.push_back(std::to_string(streamnumber));
-//            LDEBUG("We pushed back: " + std::to_string(streamnumber));
-//
-//            k = k + (1999 - counter);
-//            streamnumber++;
-//            //break;
-//        }
-//        counter++;
-//    }
-//
-//    std::string fileoutputpath = absPath("${ASSETS}") +
-//        "/scene/solarsystem/sun/heliosphere/mas/bastille_day/StreamSelection/streamSelection1.json";
-//    std::ofstream streamdata(fileoutputpath);
-//    json jsonobj;
-//    jsonobj["test"] = interestingStreams;
-//    //interestingStreams << jsonobj;
-//    streamdata << jsonobj << std::endl;
-//}
-//void RenderableStreamNodes::ReadInterestingStreamsFromJson() {
-//
-//    std::string fileinputpath = absPath("${ASSETS}") +
-//        "/scene/solarsystem/sun/heliosphere/mas/bastille_day/StreamSelection/streamSelection1.json";
-//    std::ifstream streamdata(fileinputpath);
-//    json jsonobj = json::parse(streamdata);
-//    for (json::iterator lineIter = jsonobj["test"].begin();
-//        lineIter != jsonobj["test"].end(); ++lineIter) {
-//        std::string streamnumber = (*lineIter).get<std::string>();
-//        
-//        //LDEBUG("interestingstreams: " + std::to_string(_interestingStreams[1]));
-//        LDEBUG("Interestingstreams: " + streamnumber);
-//        int sn = std::stoi(streamnumber);
-//        _interestingStreams.push_back(sn);
-//    }
-//}
 
 void RenderableStreamNodes::update(const UpdateData& data) {
     if (!this->_enabled) return;

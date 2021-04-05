@@ -26,20 +26,14 @@
  #include "floatoperations.glsl"
 
  in float vs_depth;
- in float t;
- in vec4 smoothColor;
+ in vec4 finalColor;
  in vec4 vs_positionViewSpace;
 
  Fragment getFragment() {
  
     Fragment frag;
-   //  vec4 fragColor = smoothColor;
-//    frag.color.x = 1.0; //t*vs_color.x;
-//    frag.color.y = 0.0;//t*vs_color.y;
-//    frag.color.z = 1.0;//t*vs_color.z;
-//    frag.color.a = vs_opacity;
 
-    frag.color = smoothColor;
+    frag.color = finalColor;
     frag.depth = vs_depth;
     frag.gPosition = vs_positionViewSpace;
     frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);

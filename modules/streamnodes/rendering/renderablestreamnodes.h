@@ -324,7 +324,7 @@ private:
     void definePropertyCallbackFunctions();
     bool extractJsonInfoFromDictionary(fls::Model& model);
     std::vector<std::string> LoadJsonfile(std::string filepath);
-    void extractTriggerTimesFromFileNames();
+                                                //void extractTriggerTimesFromFileNames();
     void populateStartTimes();
     void computeSequenceEndTime();
     void setModelDependentConstants();
@@ -335,8 +335,6 @@ private:
     bool loadFilesIntoRam();
     void loadNodeData();
     void createStreamnumberVector();
-    void ExtractandwriteInterestingStreams(float distanceThreshold);
-    void ReadInterestingStreamsFromJson();
     bool loadBinaryfilesDirectly(const std::string& energybin);
     // ------------------------- FUNCTIONS USED DURING RUNTIME ------------------------ //
     void updatePositionBuffer();

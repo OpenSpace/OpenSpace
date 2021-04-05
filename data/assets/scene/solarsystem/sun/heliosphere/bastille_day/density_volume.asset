@@ -1,6 +1,5 @@
 local assetHelper = asset.require("util/asset_helper")
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local transforms = asset.require('./transforms')
 
 local densityDirectory = asset.syncedResource({
     Name = "Bastille Day MAS Density",

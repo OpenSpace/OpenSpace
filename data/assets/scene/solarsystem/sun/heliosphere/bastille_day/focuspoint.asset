@@ -1,14 +1,4 @@
-asset.info = {
-    Name = "Focus point",
-    Version = "1.0",
-    Description = "Speed of light from sun to earth",
-    Author = "Christian Adamsson, Emilie Ho",
-    URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
-    License = ""
-}
-
 local assetHelper = asset.require('util/asset_helper')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 openspace.setPropertyValueSingle("Modules.Space.ShowExceptions", false)
 
 local focusPoint = {
@@ -38,3 +28,12 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { focusPoint })
 -- z = R * sin(lat)              =>     z = 696340000 * sin(0.31741081375) =                            217333118.755
 -- Lat = 18.1863        =>       18.1863 * PI/180 = 0.31741081375 rad
 -- Long = 47.7823       =>       18.1863 * PI/180 = 0.83395845917 rad
+
+asset.meta = {
+    Name = "Focus point",
+    Version = "1.0",
+    Description = "Speed of light from sun to earth",
+    Author = "Christian Adamsson, Emilie Ho",
+    URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
+    License = ""
+}

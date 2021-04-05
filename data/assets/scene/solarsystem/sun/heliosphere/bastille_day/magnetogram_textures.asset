@@ -2,8 +2,8 @@ local assetHelper = asset.require('util/asset_helper')
 local sun = asset.require('scene/solarsystem/sun/sun')
 
 -- synced directories
-local textureDirectory = asset.require('./heliosphere/bastille_day/bastille_day_sun_textures').TexturesPath;
-local magnetogramDirectory = asset.require('./heliosphere/bastille_day/magnetogram').TexturesPath;
+local textureDirectory = asset.require('./bastille_day_sun_textures').TexturesPath;
+local magnetogramDirectory = asset.require('./magnetogram').TexturesPath;
 
 -- lists of paths 
 local magnetograms = openspace.walkDirectoryFiles(magnetogramDirectory);

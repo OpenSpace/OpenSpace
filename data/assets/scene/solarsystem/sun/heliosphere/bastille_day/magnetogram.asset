@@ -1,16 +1,3 @@
--- Torok, T., Downs, C., Linker, J. A., Lionello, R., Titov, V. S., Mikic, Z., Riley, P., Caplan, R. M., and Wijaya, J. (2018). 
--- Sun-to-Earth MHD Simulation of the 2000 July 14 Bastille Day Eruption. 
--- ApJ, 
--- 856:75.
-asset.info = {
-    Name = "Predictive Science Inc. MAS Bastille Day Textures",
-    Version = "1.0",
-    Description = " Magnetograms of the sun ",
-    Author = "Jonathan Grangien, Matthias Berg, Elon Olsson",
-    URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
-    License = ""
-}
-
 local TexturesPath = asset.syncedResource({
     Name = "Bastille Day Magnetogram",
     Type = "HttpSynchronization",
@@ -19,3 +6,16 @@ local TexturesPath = asset.syncedResource({
 })
 
 asset.export("TexturesPath", TexturesPath)
+
+-- Torok, T., Downs, C., Linker, J. A., Lionello, R., Titov, V. S., Mikic, Z., Riley, P., Caplan, R. M., and Wijaya, J. (2018). 
+-- Sun-to-Earth MHD Simulation of the 2000 July 14 Bastille Day Eruption. 
+-- ApJ, 
+-- 856:75.
+asset.meta = {
+    Name = "Predictive Science Inc. MAS Bastille Day Textures",
+    Version = "1.0",
+    Description = " Magnetograms of the sun ",
+    Author = "Jonathan Grangien, Matthias Berg",
+    URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
+    License = ""
+}

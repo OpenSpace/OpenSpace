@@ -29,14 +29,14 @@ local GSMReferenceFrame = {
     Transform = {
         Rotation = {
             Type = "SpiceRotation",
-            SourceFrame = "GSM",
+            SourceFrame = "GSM", --Geocentric Solar Magnetospheric
             DestinationFrame = "GALACTIC",
             Kernels = GSMKernel
         }
     },
     GUI = {
         Name = "GSM Reference Frame",
-        Path = "/Solar System/Sun",
+        Path = "/Solar System/Planets/Earth",
         Hidden = true
     }
 }

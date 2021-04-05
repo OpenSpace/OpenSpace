@@ -2,20 +2,19 @@
   "assets": [
     "base",
     "util/default_dashboard",
-    "scene/solarsystem/sun/magnetogram_textures",
-    "scene/solarsystem/sun/streamnodeslegend",
-    "scene/solarsystem/sun/streamnodescutplane",
     "scene/solarsystem/sun/sun_textures",
     "scene/solarsystem/sun/EUV_layer",
 
-    "scene/solarsystem/sun/heliosphere/bastille_day/density_volume",
     "scene/solarsystem/sun/heliosphere/bastille_day/bastille_day_sun_textures",
+    "scene/solarsystem/sun/heliosphere/bastille_day/density_volume",
     "scene/solarsystem/sun/heliosphere/bastille_day/fieldlines",
     "scene/solarsystem/sun/heliosphere/bastille_day/focuspoint",
-    "scene/solarsystem/sun/heliosphere/bastille_day/lighttravel",
+    "scene/solarsystem/sun/heliosphere/bastille_day/lightindicator",
     "scene/solarsystem/sun/heliosphere/bastille_day/magnetogram",
+    "scene/solarsystem/sun/heliosphere/bastille_day/magnetogram_textures",
     "scene/solarsystem/sun/heliosphere/bastille_day/streamnodes",
-    "scene/solarsystem/sun/heliosphere/bastille_day/transforms",
+    "scene/solarsystem/sun/heliosphere/bastille_day/streamnodescutplane",
+    "scene/solarsystem/sun/heliosphere/bastille_day/streamnodeslegend",
 
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/magnetosphere",
@@ -242,7 +241,7 @@
       "is_local": false,
       "key": "Shift+w",
       "name": "First transition Emilie",
-      "script": "openspace.time.setDeltaTime(0);openspace.time.setTime('2000-JUL-14 08:42:00.00');openspace.setPropertyValueSingle('Scene.SunGlare.Renderable.Enabled', true);openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.lineWidth', 1);openspace.setPropertyValueSingle('Scene.Cutplane.Renderable.Enabled', false);openspace.setPropertyValueSingle('Scene.MAS_MHD_density.Renderable.Enabled', false);openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.Enabled', false);openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Enabled', false);openspace.setPropertyValueSingle('Scene.SpeedofLight.Renderable.Enabled', false);openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.Enabled', false);openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.maskingEnabled', true);openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.Masking.maskingQuantity', 5.000000);openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.Masking.maskingMinLimit', '0');openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.Masking.maskingMaxLimit', '0.5');openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-1.Enabled', false);openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-2.Enabled', false);openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-3.Enabled', false);openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-4.Enabled', false);openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-5.Enabled', false);openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-6.Enabled', false);openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.Texture.Enabled', true);"
+      "script": "openspace.time.setDeltaTime(0);openspace.time.setTime('2000-JUL-14 08:42:00.00');openspace.setPropertyValueSingle('Scene.SunGlare.Renderable.Enabled', true);openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.lineWidth', 1);openspace.setPropertyValueSingle('Scene.Cutplane.Renderable.Enabled', false);openspace.setPropertyValueSingle('Scene.MAS_MHD_density.Renderable.Enabled', false);openspace.setPropertyValueSingle('Scene.MAS_MHD_Fieldlines.Renderable.Enabled', false);openspace.setPropertyValueSingle('Scene.MAS_MHD_StreamNodes.Renderable.Enabled', false);openspace.setPropertyValueSingle('Scene.travelSpeedIndicator.Renderable.Enabled', false);openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.Enabled', false);openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.maskingEnabled', true);openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.Masking.maskingQuantity', 5.000000);openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.Masking.maskingMinLimit', '0');openspace.setPropertyValueSingle('Scene.Earths_Magnetosphere.Renderable.Masking.maskingMaxLimit', '0.5');openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-1.Enabled', false);openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-2.Enabled', false);openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-3.Enabled', false);openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-4.Enabled', false);openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-5.Enabled', false);openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.magnetogram-6.Enabled', false);openspace.setPropertyValueSingle('Scene.Sun.Renderable.Layers.ColorLayers.Texture.Enabled', true);"
     },
     {
       "documentation": "Long loop: Restarts time at 09:30 and stops at 11:50, delta time to 4 min/ second (240 seconds/ second)",
