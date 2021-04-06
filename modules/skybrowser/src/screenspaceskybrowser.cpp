@@ -18,10 +18,11 @@
 #include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtx/rotate_vector.hpp >
-#include <glm/gtx/string_cast.hpp>
 #include <thread>
 #include <chrono> // Milliseconds
 
+#include <openspace/util/coordinateconversion.h> // to adjust camera angle
+#include <glm/gtx/vector_angle.hpp>
 namespace {
     constexpr const char* _loggerCat = "ScreenSpaceSkyBrowser";
 
@@ -79,7 +80,7 @@ namespace openspace {
                 setConnectedTarget();
             }
             else {
-                glm::vec2 dim = getScreenSpaceBrowserDimension();
+                glm::vec2 dim = getBrowserPixelDimensions();
                 _skyTarget->setDimensions(dim);
             }
             });
@@ -126,7 +127,7 @@ namespace openspace {
         global::moduleEngine->module<SkyBrowserModule>()->addRenderable(this);
         setConnectedTarget();
         if (_skyTarget) {    
-            _skyTarget->setDimensions(getScreenSpaceBrowserDimension());
+            _skyTarget->setDimensions(getBrowserPixelDimensions());
         }
 
         WWTfollowCamera();
@@ -149,12 +150,18 @@ namespace openspace {
         return _skyTarget != nullptr;
     }
 
+    ScreenSpaceSkyTarget* ScreenSpaceSkyBrowser::getSkyTarget() {
+        return _skyTarget;
+    }
+
     float ScreenSpaceSkyBrowser::fieldOfView() const {
         return _fieldOfView;
     }
 
     void ScreenSpaceSkyBrowser::scrollZoom(float scroll) {
-        float zoom = scroll > 0.0 ? -log(_fieldOfView + 1.1f) : log(_fieldOfView + 1.1f);
+       
+        float zoomFactor = log(_fieldOfView + 1.1f);
+        float zoom = scroll > 0.0 ? -zoomFactor : zoomFactor;
         _fieldOfView = std::clamp(_fieldOfView + zoom, 0.001f, 70.0f);
     }
 
@@ -277,9 +284,6 @@ namespace openspace {
         _cartesianPosition = glm::translate(glm::mat4(1.f), glm::vec3(translation, 0.0f)) * glm::vec4(position, 1.0f);
     }*/
 
-
-
-
     glm::vec2 ScreenSpaceSkyBrowser::coordIsOnResizeArea(glm::vec2 coord) {
         glm::vec2 resizePosition = glm::vec2{ 0 };
         // Make sure coord is on browser
@@ -338,7 +342,7 @@ namespace openspace {
         _scale = _startScale * scalingFactor;
     }
 
-    glm::vec2 ScreenSpaceSkyBrowser::getScreenSpaceBrowserDimension() {
+    glm::vec2 ScreenSpaceSkyBrowser::getBrowserPixelDimensions() {
         return _browserDimensions.value();
     }
 }

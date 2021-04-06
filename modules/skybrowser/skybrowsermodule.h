@@ -49,10 +49,12 @@ public:
     glm::vec2 getMousePositionInScreenSpaceCoords(glm::vec2& mousePos);
     void addRenderable(ScreenSpaceRenderable* object);
 
+    glm::dvec2 convertGalacticToCelestial(glm::dvec3 coords) const;
+
     scripting::LuaLibrary luaLibrary() const override;
     //std::vector<documentation::Documentation> documentations() const override;
 
-protected:
+protected: 
     void internalInitialize(const ghoul::Dictionary& dict) override;
     void internalDeinitialize() override;
     // Using snake case on these casting functions to make them similar to eg std::to_string
@@ -67,6 +69,7 @@ protected:
     // Dragging
     glm::vec2 startDragMousePos;
     glm::vec2 startDragObjectPos;
+    bool changeViewWithinBrowser;
     // Resizing
     glm::vec2 startResizeBrowserSize;
     glm::vec2 resizeVector;

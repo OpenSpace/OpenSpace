@@ -93,7 +93,15 @@ namespace openspace {
                 "string or list of strings",
                 "Add one or multiple exoplanet systems to the scene, as specified by the "
                 "input. An input string should be the name of the system host star"
-            }
+            },
+            {
+                "adjustCamera",
+                & skybrowser::luascriptfunctions::adjustCamera,
+                {},
+                "string or list of strings",
+                "Add one or multiple exoplanet systems to the scene, as specified by the "
+                "input. An input string should be the name of the system host star"
+            },
         };
 
         return res;
@@ -107,6 +115,7 @@ SkyBrowserModule::SkyBrowserModule()
     , currentlyDraggingObject(false)
     , resizeVector(0.f, 0.f)
     , shouldInitialize(true)
+    , changeViewWithinBrowser(false)
 {
     global::callback::mousePosition->emplace_back(
         [&](double x, double y) {    
@@ -127,7 +136,37 @@ SkyBrowserModule::SkyBrowserModule()
             _mousePosition = getMousePositionInScreenSpaceCoords(pos);
 
             if (currentlyDraggingObject) {
-                _mouseOnObject->translate(_mousePosition - startDragMousePos, startDragObjectPos);
+
+                glm::dvec2 move = _mousePosition - startDragMousePos;
+                
+                // Change view within the browser and move target accordingly to mousedrag movement
+                if (changeViewWithinBrowser) {
+                    // WWT FOV
+                    double WWTVerticalFOV = to_browser(_mouseOnObject)->fieldOfView();
+                    glm::dvec2 browserDim = to_browser(_mouseOnObject)->getScreenSpaceDimensions();
+                    double browserRatio = browserDim.x / browserDim.y;
+                    glm::dvec2 WWTFOV = glm::dvec2(WWTVerticalFOV * browserRatio, WWTVerticalFOV);
+
+                    // OpenSpace FOV
+                    glm::dvec2 windowDim = global::windowDelegate->currentWindowSize();
+                    double windowRatio = windowDim.y / windowDim.x;
+                    double OpenSpaceHorizontalFOV = global::windowDelegate->getHorizFieldOfView();
+                    glm::dvec2 OpenSpaceFOV = glm::dvec2(OpenSpaceHorizontalFOV, OpenSpaceHorizontalFOV * windowRatio);
+
+
+                    glm::dvec2 angleResult = WWTFOV * (move / browserDim);
+                    glm::dvec2 OSresult = angleResult / OpenSpaceFOV;
+                    
+                    // Calculate translation in ScreenSpaceCoordinates
+                    glm::dvec2 screenSpaceCoord{ (2 / windowRatio), 2.f };
+                    glm::dvec2 result = screenSpaceCoord * OSresult;
+
+                    to_browser(_mouseOnObject)->getSkyTarget()->translate(-result, startDragObjectPos);
+                    
+                }
+                // Move browser or target
+                else _mouseOnObject->translate(move, startDragObjectPos);
+               
             }
             else if (currentlyResizingBrowser) {
                 // Calculate scaling factor
@@ -214,18 +253,22 @@ SkyBrowserModule::SkyBrowserModule()
                     currentlyDraggingObject = true;
 
                     return true;
-                }
+                }  
                 else if (to_browser(_mouseOnObject) && button == MouseButton::Right) {
 
-                    //startDragMousePos = _mousePosition;
-                    //startDragObjectPos = dynamic_cast<ScreenSpaceSkyBrowser*>(_mouseOnObject)->->getScreenSpacePosition();
-                    //currentlyDraggingObject = true;
+                    // Change view (by moving target) within browser if right mouse click on browser
+                    startDragMousePos = _mousePosition;
+                    startDragObjectPos = to_browser(_mouseOnObject)->getSkyTarget()->getScreenSpacePosition();
+                    changeViewWithinBrowser = true;
+                    currentlyDraggingObject = true;
+
                     return true;
                 }
             }
             else if (action == MouseAction::Release) {
                 if (currentlyDraggingObject) {
                     currentlyDraggingObject = false;
+                    changeViewWithinBrowser = false;
                     return true;
                 }
                 if (currentlyResizingBrowser) {
@@ -285,6 +328,23 @@ ScreenSpaceSkyTarget* SkyBrowserModule::to_target(ScreenSpaceRenderable* ptr) {
 }
 
 
+glm::dvec2 SkyBrowserModule::convertGalacticToCelestial(glm::dvec3 rGal) const {
+    // Used the math from this website: https://gea.esac.esa.int/archive/documentation/GD -->
+    // R2/Data_processing/chap_cu3ast/sec_cu3ast_intro/ssec_cu3ast_intro_tansforms.html#SSS1
+    const glm::dmat3 conversionMatrix = glm::dmat3({
+      -0.0548755604162154,  0.4941094278755837, -0.8676661490190047, // col 0
+      -0.8734370902348850, -0.4448296299600112, -0.1980763734312015, // col 1
+      -0.4838350155487132,  0.7469822444972189,  0.4559837761750669  // col 2
+        });
+
+    glm::dvec3 rICRS = glm::transpose(conversionMatrix) * rGal;
+    float ra = atan2(rICRS[1], rICRS[0]);
+    float dec = atan2(rICRS[2], glm::sqrt((rICRS[0] * rICRS[0]) + (rICRS[1] * rICRS[1])));
+
+    ra = ra > 0 ? ra : ra + (2 * glm::pi<float>());
+
+    return glm::dvec2(glm::degrees(ra), glm::degrees(dec));
+}
 /*
 std::vector<documentation::Documentation> SkyBrowserModule::documentations() const {
     return {

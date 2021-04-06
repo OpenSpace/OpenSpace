@@ -28,14 +28,13 @@ namespace openspace {
         glm::dvec2 convertGalacticToCelestial(glm::dvec3 coords) const;
         float fieldOfView() const;
         void scrollZoom(float scroll);
+        ScreenSpaceSkyTarget* getSkyTarget();
 
         // Translation
         //void translate(glm::vec2 translation);
 
         // Position and dimension and corners
-
-        glm::vec2 getScreenSpaceBrowserDimension();
-
+        glm::vec2 getBrowserPixelDimensions();
         glm::vec2 coordIsOnResizeArea(glm::vec2 coord);
         // Scaling
         void scale(glm::vec2 scalingFactor);
