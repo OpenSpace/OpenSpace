@@ -22,6 +22,8 @@ namespace openspace {
         ghoul::Dictionary createMessageForMovingWWTCamera(const glm::dvec2 celestCoords, const float fov, const bool moveInstantly = true) const;
         ghoul::Dictionary createMessageForPausingWWTTime() const;
         ghoul::Dictionary createMessageForLoadingWWTImgColl(const std::string& url) const;
+        ghoul::Dictionary createMessageForSettingForegroundWWT(const std::string& name) const;
+        ghoul::Dictionary createMessageForSettingForegroundOpacityWWT(double val) const;
         bool sendMessageToWWT(const ghoul::Dictionary& msg);
         void sendMouseEvent(CefStructBase<CefMouseEventTraits> event, int x, int y) const;
         void WWTfollowCamera();

@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 #include <modules/skybrowser/skybrowsermodule.h>
-
+#include <modules/skybrowser/include/wwtdatahandler.h>
  //#include <modules/webbrowser/webbrowsermodule.h>
  //#include <modules/webbrowser/include/screenspacebrowser.h>
 #include <openspace/rendering/screenspacerenderable.h>
@@ -41,8 +41,10 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
 #include <cmath> // For atan2
-#include <glm/gtx/string_cast.hpp>
-#include <ghoul/filesystem/filesystem.h>
+#include <glm/gtx/string_cast.hpp> // For printing glm data
+
+#include <fstream>    
+
 
 namespace {
     struct [[codegen::Dictionary(ScreenSpaceSkyBrowser)]] Parameters {
@@ -87,7 +89,7 @@ namespace openspace {
                 "input. An input string should be the name of the system host star"
             },
             {
-                "loacImgCollection",
+                "loadCollection",
                 &skybrowser::luascriptfunctions::loadImgCollection,
                 {},
                 "string or list of strings",
@@ -284,7 +286,7 @@ SkyBrowserModule::SkyBrowserModule()
 } 
 
 void SkyBrowserModule::internalDeinitialize() {
-
+    delete dataHandler;
 
 }
 
@@ -301,6 +303,7 @@ void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
     fScreenSpaceRenderable->registerClass<ScreenSpaceSkyTarget>("ScreenSpaceSkyTarget");
 
+    dataHandler = new WWTDataHandler();
 }
 
 glm::vec2 SkyBrowserModule::getMousePositionInScreenSpaceCoords(glm::vec2& mousePos) {
@@ -327,6 +330,9 @@ ScreenSpaceSkyTarget* SkyBrowserModule::to_target(ScreenSpaceRenderable* ptr) {
     return dynamic_cast<ScreenSpaceSkyTarget*>(ptr);
 }
 
+WWTDataHandler* SkyBrowserModule::getWWTDataHandler() {
+    return dataHandler;
+}
 
 glm::dvec2 SkyBrowserModule::convertGalacticToCelestial(glm::dvec3 rGal) const {
     // Used the math from this website: https://gea.esac.esa.int/archive/documentation/GD -->

@@ -95,7 +95,7 @@ namespace openspace {
         _skyTargetID.onChange([&]() {
             setConnectedTarget();
             });
-
+        
         _fieldOfView.onChange([&]() {
             if (_skyTarget) {
                 _skyTarget->updateFOV(_fieldOfView);
@@ -206,11 +206,33 @@ namespace openspace {
         // https://docs.worldwidetelescope.org/data-guide/1/data-file-formats/collections/sample-blank-collection.wtml
         using namespace std::string_literals;
         ghoul::Dictionary msg;
-        msg.setValue("event", "center_on_coordinates"s);
+        msg.setValue("event", "load_image_collection"s);
         msg.setValue("url", url);
 
         return msg;
     }
+
+    ghoul::Dictionary ScreenSpaceSkyBrowser::createMessageForSettingForegroundWWT(const std::string& name) const {
+        // https://docs.worldwidetelescope.org/data-guide/1/data-file-formats/collections/sample-blank-collection.wtml
+        using namespace std::string_literals;
+        ghoul::Dictionary msg;
+        msg.setValue("event", "set_foreground_by_name"s);
+        msg.setValue("name", name);
+
+        return msg;
+    }
+
+    ghoul::Dictionary ScreenSpaceSkyBrowser::createMessageForSettingForegroundOpacityWWT(double val) const {
+        // https://docs.worldwidetelescope.org/data-guide/1/data-file-formats/collections/sample-blank-collection.wtml
+        using namespace std::string_literals;
+        ghoul::Dictionary msg;
+        msg.setValue("event", "set_foreground_opacity"s);
+        msg.setValue("value", val);
+
+        return msg;
+    }
+
+    
 
     ghoul::Dictionary ScreenSpaceSkyBrowser::createMessageForPausingWWTTime() const {
 

@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_MODULE_SKYBROWSER___SKYBROWSERMODULE___H__
 #define __OPENSPACE_MODULE_SKYBROWSER___SKYBROWSERMODULE___H__
 
-
 #include <openspace/util/openspacemodule.h>
 
 #include <openspace/documentation/documentation.h>
@@ -39,6 +38,8 @@ namespace openspace {
 class ScreenSpaceSkyBrowser;
 class ScreenSpaceSkyTarget;
 class ScreenSpaceRenderable;
+class WWTDataHandler;
+
 
 class SkyBrowserModule : public OpenSpaceModule {
 public:
@@ -48,8 +49,8 @@ public:
     virtual ~SkyBrowserModule() = default;
     glm::vec2 getMousePositionInScreenSpaceCoords(glm::vec2& mousePos);
     void addRenderable(ScreenSpaceRenderable* object);
-
     glm::dvec2 convertGalacticToCelestial(glm::dvec3 coords) const;
+    WWTDataHandler* getWWTDataHandler();
 
     scripting::LuaLibrary luaLibrary() const override;
     //std::vector<documentation::Documentation> documentations() const override;
@@ -57,6 +58,7 @@ public:
 protected: 
     void internalInitialize(const ghoul::Dictionary& dict) override;
     void internalDeinitialize() override;
+    
     // Using snake case on these casting functions to make them similar to eg std::to_string
     ScreenSpaceSkyBrowser* to_browser(ScreenSpaceRenderable* ptr);
     ScreenSpaceSkyTarget* to_target(ScreenSpaceRenderable* ptr);
@@ -78,6 +80,7 @@ protected:
     // Current interaction status
     bool currentlyResizingBrowser;
     bool currentlyDraggingObject;
+    WWTDataHandler* dataHandler; 
 };
 
 } // namespace openspace
