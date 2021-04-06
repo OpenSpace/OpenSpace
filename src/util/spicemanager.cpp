@@ -586,7 +586,7 @@ std::string SpiceManager::dateFromEphemerisTime(double ephemerisTime, const char
             ephemerisTime, format
         ));
     }
-    
+
     return std::string(Buffer);
 }
 

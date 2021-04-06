@@ -38,35 +38,20 @@ int loadFile(lua_State* L) {
         return ghoul::lua::luaError(L, "filepath string is empty");
     }
 
-    ghoul::Dictionary scriptsDict = ghoul::lua::loadDictionaryFromFile(fileName, L);
+    ghoul::Dictionary scriptsDict;
+    scriptsDict.setValue("Scripts", ghoul::lua::loadDictionaryFromFile(fileName, L));
     documentation::testSpecificationAndThrow(
         scripting::ScriptScheduler::Documentation(),
         scriptsDict,
         "ScriptScheduler"
     );
 
-
     std::vector<scripting::ScriptScheduler::ScheduledScript> scripts;
-    for (int i = 1; i <= scriptsDict.size(); ++i) {
+    for (size_t i = 1; i <= scriptsDict.size(); ++i) {
         ghoul::Dictionary d = scriptsDict.value<ghoul::Dictionary>(std::to_string(i));
 
-        scripting::ScriptScheduler::ScheduledScript script;
-        constexpr const char* KeyTime = "Time";
-        if (d.hasValue<std::string>(KeyTime)) {
-            script.time = Time::convertTime(d.value<std::string>(KeyTime));
-        }
-        constexpr const char* KeyForwardScript = "ForwardScript";
-        if (d.hasValue<std::string>(KeyForwardScript)) {
-            script.forwardScript = d.value<std::string>(KeyForwardScript);
-        }
-        constexpr const char* KeyBackwardScript = "BackwardScript";
-        if (d.hasValue<std::string>(KeyBackwardScript)) {
-            script.backwardScript = d.value<std::string>(KeyBackwardScript);
-        }
-        constexpr const char* KeyUniversalScript = "Script";
-        if (d.hasValue<std::string>(KeyUniversalScript)) {
-            script.universalScript = d.value<std::string>(KeyUniversalScript);
-        }
+        scripting::ScriptScheduler::ScheduledScript script = 
+            scripting::ScriptScheduler::ScheduledScript(d);
         scripts.push_back(script);
     }
 

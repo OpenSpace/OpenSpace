@@ -702,7 +702,7 @@ function sgct.config.single(arg)
     )
     sgctconfiginitializeString = "sgct.config.single"
 
-    trackedSpecifier = "tracked=\"true\""
+    local trackedSpecifier = "tracked=\"true\""
 
     if (arg["tracked"] ~= nil and arg["tracked"] == false) then
         trackedSpecifier = "tracked=\"false\""

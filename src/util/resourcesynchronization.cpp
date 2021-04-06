@@ -30,67 +30,41 @@
 #include <ghoul/misc/templatefactory.h>
 
 namespace {
-    constexpr const char* KeyType = "Type";
-    constexpr const char* KeyName = "Name";
+    struct [[codegen::Dictionary(ResourceSynchronization)]] Parameters {
+        // This key specifies the type of ResourceSyncrhonization that gets created. It
+        // has to be one of the valid ResourceSyncrhonizations that are available for
+        // creation (see the FactoryDocumentation for a list of possible 
+        // ResourceSyncrhonizations), which depends on the configration of the application
+        std::string type
+            [[codegen::annotation("A ResourceSynchronization created by a factory")]];
+
+        // A user readable name of this synchronization
+        std::string name;
+    };
+#include "resourcesynchronization_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation ResourceSynchronization::Documentation() {
-    using namespace openspace::documentation;
-
-    return {
-        "ResourceSynchronization",
-        "resourceSynchronization",
-        {
-            {
-                KeyType,
-                new StringAnnotationVerifier(
-                    "A valid ResourceSyncrhonization created by a factory"
-                ),
-                Optional::No,
-                "This key specifies the type of ResourceSyncrhonization that gets "
-                "created. It has to be one of the valid ResourceSyncrhonizations that "
-                "are available for creation (see the FactoryDocumentation for a list of "
-                "possible ResourceSyncrhonizations), which depends on the configration "
-                "of the application"
-            },
-            {
-                KeyName,
-                new StringVerifier,
-                Optional::No,
-                "A user readable name of this synchronization"
-            },
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "resourceSynchronization";
+    return doc;
 }
 
 std::unique_ptr<ResourceSynchronization> ResourceSynchronization::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "ResourceSynchronization"
-    );
-
-    const std::string& synchronizationType = dictionary.value<std::string>(KeyType);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     auto factory = FactoryManager::ref().factory<ResourceSynchronization>();
     ghoul_assert(factory, "ResourceSynchronization factory did not exist");
-    ResourceSynchronization* sync = factory->create(synchronizationType, dictionary);
+    ResourceSynchronization* sync = factory->create(p.type, dictionary);
+    sync->_name = p.name;
     return std::unique_ptr<ResourceSynchronization>(sync);
 }
 
-ResourceSynchronization::ResourceSynchronization(const ghoul::Dictionary& dictionary) {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "ResourceSynchronization"
-    );
-
-    _name = dictionary.value<std::string>(KeyName);
-}
+ResourceSynchronization::ResourceSynchronization(const ghoul::Dictionary&) {}
 
 ResourceSynchronization::State ResourceSynchronization::state() const {
     return _state;
@@ -111,14 +85,14 @@ bool ResourceSynchronization::isSyncing() const {
 ResourceSynchronization::CallbackHandle
 ResourceSynchronization::addStateChangeCallback(StateChangeCallback cb)
 {
-    std::lock_guard<std::mutex> guard(_callbackMutex);
+    std::lock_guard guard(_callbackMutex);
     CallbackHandle callbackId = _nextCallbackId++;
     _stateChangeCallbacks[callbackId] = std::move(cb);
     return callbackId;
 }
 
 void ResourceSynchronization::removeStateChangeCallback(CallbackHandle id) {
-    std::lock_guard<std::mutex> guard(_callbackMutex);
+    std::lock_guard guard(_callbackMutex);
     _stateChangeCallbacks.erase(id);
 }
 

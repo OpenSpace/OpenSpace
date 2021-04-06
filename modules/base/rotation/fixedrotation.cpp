@@ -185,7 +185,7 @@ namespace {
     struct [[codegen::Dictionary(FixedRotation)]] Parameters {
         // This value specifies the direction of the new X axis. If this value is not
         // specified, it will be computed by completing a right handed coordinate system
-        // from the Y and Z axis, which must be specified instead. If this value is a 
+        // from the Y and Z axis, which must be specified instead. If this value is a
         // string, it is interpreted as the identifier of another scenegraph node. If this
         // value is a 3-vector, it is interpreted as a direction vector
         std::optional<std::variant<std::string, glm::vec3>> xAxis;
