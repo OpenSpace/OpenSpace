@@ -23,6 +23,9 @@
 #include <openspace/util/camera.h>
 #include <thread> 
 
+#include <openspace/util/coordinateconversion.h>
+#include <glm/gtx/rotate_vector.hpp>
+
 
 namespace {
     constexpr const char _loggerCat[] = "SkyBrowserModule";
@@ -77,6 +80,11 @@ namespace openspace::skybrowser::luascriptfunctions {
             lua_rawseti(L, -2, number);
             ++number;
         }
+
+        return 1;
+    }
+    int adjustCamera(lua_State* L) {
+        ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::adjustCamera");
 
         return 1;
     }

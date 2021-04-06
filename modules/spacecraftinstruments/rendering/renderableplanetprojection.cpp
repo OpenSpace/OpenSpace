@@ -39,6 +39,7 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureconversion.h>
 #include <ghoul/opengl/textureunit.h>
+#include <optional>
 
 namespace {
     constexpr const char* _loggerCat = "RenderablePlanetProjection";
@@ -56,8 +57,6 @@ namespace {
         "boresight", "_radius", "_segments"
     };
 
-    constexpr const char* KeyGeometry = "Geometry";
-    constexpr const char* KeyProjection = "Projection";
     constexpr const char* KeyRadius = "Geometry.Radius";
     constexpr const char* _mainFrame = "GALACTIC";
 
@@ -134,67 +133,42 @@ namespace {
         "Clear Projection Buffer",
         "Remove all pending projections from the buffer"
     };
+    
+    struct [[codegen::Dictionary(RenderablePlanetProjection)]] Parameters {
+        // The geometry that is used for rendering this planet
+        ghoul::Dictionary geometry [[codegen::reference("space_geometry_planet")]];
 
+        // Contains information about projecting onto this planet
+        ghoul::Dictionary projection
+            [[codegen::reference("newhorizons_projectioncomponent")]];
+
+        // [[codegen::verbatim(ColorTexturePathsInfo.description)]]
+        std::vector<std::string> colorTexturePaths;
+
+        // [[codegen::verbatim(HeightTexturePathsInfo.description)]]
+        std::vector<std::string> heightTexturePaths;
+
+        // [[codegen::verbatim(HeightExaggerationInfo.description)]]
+        std::optional<float> heightExaggeration;
+
+        // [[codegen::verbatim(MeridianShiftInfo.description)]]
+        std::optional<bool> meridianShift;
+
+        // [[codegen::verbatim(AmbientBrightnessInfo.description)]]
+        std::optional<double> ambientBrightness;
+
+        // [[codegen::verbatim(MaxProjectionsPerFrameInfo.description)]]
+        std::optional<int> maxProjectionsPerFrame;
+    };
+#include "renderableplanetprojection_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderablePlanetProjection::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "Renderable Planet Projection",
-        "newhorizons_renderable_planetprojection",
-        {
-            {
-                KeyGeometry,
-                new ReferencingVerifier("space_geometry_planet"),
-                Optional::No,
-                "The geometry that is used for rendering this planet.",
-            },
-            {
-                KeyProjection,
-                new ReferencingVerifier("newhorizons_projectioncomponent"),
-                Optional::No,
-                "Contains information about projecting onto this planet.",
-            },
-            {
-                ColorTexturePathsInfo.identifier,
-                new StringListVerifier,
-                Optional::No,
-                ColorTexturePathsInfo.description
-            },
-            {
-                HeightTexturePathsInfo.identifier,
-                new StringListVerifier,
-                Optional::Yes,
-                HeightTexturePathsInfo.description
-            },
-            {
-                HeightExaggerationInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                HeightExaggerationInfo.description
-            },
-            {
-                MeridianShiftInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                MeridianShiftInfo.description
-            },
-            {
-                AmbientBrightnessInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                AmbientBrightnessInfo.description
-            },
-            {
-                MaxProjectionsPerFrameInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                MaxProjectionsPerFrameInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "newhorizons_renderable_planetprojection";
+    return doc;
 }
 
 RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& dict)
@@ -210,43 +184,24 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     , _projectionsInBuffer(ProjectionsInBufferInfo, 0, 1, 32)
     , _clearProjectionBuffer(ClearProjectionBufferInfo)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dict,
-        "RenderablePlanetProjection"
-    );
+    const Parameters p = codegen::bake<Parameters>(dict);
 
-    ghoul::Dictionary geometryDictionary = dict.value<ghoul::Dictionary>(KeyGeometry);
-    _geometry = planetgeometry::PlanetGeometry::createFromDictionary(geometryDictionary);
-
-    _projectionComponent.initialize(
-        identifier(),
-        dict.value<ghoul::Dictionary>(KeyProjection)
-    );
+    _geometry = planetgeometry::PlanetGeometry::createFromDictionary(p.geometry);
+    _projectionComponent.initialize(identifier(), p.projection);
 
     _colorTexturePaths.addOption(0, NoImageText);
     _colorTexturePaths.onChange([this](){ _colorTextureDirty = true; });
     addProperty(_colorTexturePaths);
 
-    if (dict.hasValue<ghoul::Dictionary>(ColorTexturePathsInfo.identifier)) {
-        const ghoul::Dictionary& value = dict.value<ghoul::Dictionary>(
-            ColorTexturePathsInfo.identifier
+    for (const std::string& t : p.colorTexturePaths) {
+        _colorTexturePaths.addOption(
+            static_cast<int>(_colorTexturePaths.options().size()),
+            t
         );
-
-        for (size_t i = 1; i <= value.size(); ++i) {
-            std::string texture = absPath(value.value<std::string>(std::to_string(i)));
-
-            _colorTexturePaths.addOption(
-                // as we started with 0, this works
-                static_cast<int>(_colorTexturePaths.options().size()),
-                texture
-            );
-
-            _colorTexturePaths = static_cast<int>(
-                _colorTexturePaths.options().size() - 1
-            );
-        }
     }
+    _colorTexturePaths = static_cast<int>(
+        _colorTexturePaths.options().size() - 1
+    );
 
     _addColorTexturePath.onChange([this]() {
         if (!_addColorTexturePath.value().empty()) {
@@ -271,27 +226,15 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     _heightMapTexturePaths.onChange([this]() { _heightMapTextureDirty = true; });
     addProperty(_heightMapTexturePaths);
 
-
-    if (dict.hasValue<ghoul::Dictionary>(HeightTexturePathsInfo.identifier)) {
-        const ghoul::Dictionary& value = dict.value<ghoul::Dictionary>(
-            HeightTexturePathsInfo.identifier
+    for (const std::string& t : p.heightTexturePaths) {
+        _heightMapTexturePaths.addOption(
+            static_cast<int>(_heightMapTexturePaths.options().size()),
+            t
         );
-
-        for (size_t i = 1; i <= value.size(); ++i) {
-            std::string texture = absPath(value.value<std::string>(std::to_string(i)));
-
-            _heightMapTexturePaths.addOption(
-                // as we started with 0, this works
-                static_cast<int>(_heightMapTexturePaths.options().size()),
-                texture
-            );
-
-            _heightMapTexturePaths = static_cast<int>(
-                _heightMapTexturePaths.options().size() - 1
-            );
-        }
     }
-
+    _heightMapTexturePaths = static_cast<int>(
+        _heightMapTexturePaths.options().size() - 1
+    );
     _addHeightMapTexturePath.onChange([this]() {
         if (!_addHeightMapTexturePath.value().empty()) {
             _heightMapTexturePaths.addOption(
@@ -308,11 +251,12 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     });
     addProperty(_addHeightMapTexturePath);
 
+    _meridianShift = p.meridianShift.value_or(_meridianShift);
+    addProperty(_meridianShift);
 
-    if (dict.hasValue<bool>(MeridianShiftInfo.identifier)) {
-        _meridianShift = dict.value<bool>(MeridianShiftInfo.identifier);
-    }
-
+    // @TODO (abock, 2021-03-26)  Poking into the Geometry dictionary is not really
+    // optimal as we don't have local control over how the dictionary is checked. We
+    // should instead ask the geometry whether it has a radius or not
     double radius = std::pow(10.0, 9.0);
     if (dict.hasValue<double>(KeyRadius)) {
         radius = dict.value<double>(KeyRadius);
@@ -322,24 +266,15 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     addPropertySubOwner(_geometry.get());
     addPropertySubOwner(_projectionComponent);
 
-    if (dict.hasKey(HeightExaggerationInfo.identifier)) {
-        _heightExaggeration = static_cast<float>(
-            dict.value<double>(HeightExaggerationInfo.identifier)
-        );
-    }
-
-    if (dict.hasKey(MaxProjectionsPerFrameInfo.identifier)) {
-        _maxProjectionsPerFrame = static_cast<int>(
-            dict.value<double>(MaxProjectionsPerFrameInfo.identifier)
-        );
-    }
-
+    _heightExaggeration = p.heightExaggeration.value_or(_heightExaggeration);
     addProperty(_heightExaggeration);
-    addProperty(_meridianShift);
-    addProperty(_ambientBrightness);
-
+    
+    _maxProjectionsPerFrame = p.maxProjectionsPerFrame.value_or(_maxProjectionsPerFrame);
     addProperty(_maxProjectionsPerFrame);
+
+    addProperty(_ambientBrightness);
     addProperty(_projectionsInBuffer);
+
 
     _clearProjectionBuffer.onChange([this]() {
         _imageTimes.clear();

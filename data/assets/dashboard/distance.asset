@@ -1,0 +1,13 @@
+local item = {
+    Type = "DashboardItemDistance",
+    Identifier = "Distance",
+    GuiName = "Distance"
+}
+
+asset.onInitialize(function()
+    openspace.dashboard.addDashboardItem(item)
+end)
+
+asset.onDeinitialize(function()
+    openspace.dashboard.removeDashboardItem(item.Identifier)
+end)

@@ -348,8 +348,8 @@ local Rex = {
         Target = "EARTH",
         Instrument = "NH_REX",
         Color = {
-            Start = { 1.0, 0.7, 0.0, 1.0},
-            End = {0.0, 0.0, 0.0, 0.0 }
+            Start = { 1.0, 0.7, 0.0, 1.0 },
+            End = { 0.0, 0.0, 0.0, 0.0 }
         }
     },
     Transform = {

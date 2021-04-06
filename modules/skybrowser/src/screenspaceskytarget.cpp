@@ -72,7 +72,7 @@ namespace openspace {
         : ScreenSpaceRenderable(dictionary)
         , _targetDimensions(TargetDimensionInfo, glm::ivec2(1000.f), glm::ivec2(0.f), glm::ivec2(6000.f))
         , _skyBrowserID(BrowserIDInfo)
-        , _showCrosshairThreshold(CrosshairThresholdInfo, 3.f, 1.f, 70.f)
+        , _showCrosshairThreshold(CrosshairThresholdInfo, 2.f, 1.f, 70.f)
         , _borderColor(220.f, 220.f, 220.f)
     {
         // Handle target dimension property
@@ -204,7 +204,7 @@ namespace openspace {
         glDisable(GL_CULL_FACE);
        
         glm::mat4 modelTransform = globalRotationMatrix() * translationMatrix() * localRotationMatrix() * scaleMatrix();
-        float borderWidth = 0.005f/_scale.value();
+        float borderWidth = 0.002f/_scale.value();
         glm::vec2 targetDim;
         bool showCrosshair;
         _targetDimensions.value() == glm::vec2(0) ? targetDim = glm::vec2(1) : targetDim = _targetDimensions.value();
