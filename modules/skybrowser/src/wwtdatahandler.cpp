@@ -209,4 +209,12 @@ namespace openspace {
         return node;
     }
 
+    std::vector<std::string> WWTDataHandler::getAllThumbnailUrls() {
+        std::vector<std::string> imgUrls;
+        std::for_each(images.begin(), images.end(), [&](ImageData obj) {
+            imgUrls.push_back(obj.thumbnailUrl); 
+            });
+        return imgUrls;
+    }
+
 }

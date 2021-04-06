@@ -67,7 +67,16 @@ namespace openspace::skybrowser::luascriptfunctions {
 
     int createBrowser(lua_State* L) {
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::createBrowser");
+        SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+        std::vector<std::string> names = module->getWWTDataHandler()->getAllThumbnailUrls();
 
+        lua_newtable(L);
+        int number = 1;
+        for (const std::string& s : names) {
+            lua_pushstring(L, s.c_str());
+            lua_rawseti(L, -2, number);
+            ++number;
+        }
 
         return 1;
     }
