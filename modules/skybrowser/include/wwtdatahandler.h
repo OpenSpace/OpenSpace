@@ -27,7 +27,8 @@ namespace openspace {
         void loadWTMLCollectionsFromDirectory(std::string directory);
         int loadAllImagesFromXMLs();
         void printAllUrls();
-        std::vector<std::string> getAllThumbnailUrls();
+        std::vector < std::pair < std::string, std::string> > getAllThumbnailUrls();
+        const std::vector<ImageData>& getImages() const;
 
     private:
         int loadPlace(tinyxml2::XMLElement* place, std::string collectionName);

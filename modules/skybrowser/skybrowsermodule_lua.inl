@@ -63,24 +63,36 @@ namespace openspace::skybrowser::luascriptfunctions {
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::moveBrowser");
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
         module->getWWTDataHandler()->loadWTMLCollectionsFromDirectory(absPath("${MODULE_SKYBROWSER}/WWTimagedata/"));
-        module->getWWTDataHandler()->printAllUrls();
-        LINFO(std::to_string(module->getWWTDataHandler()->loadAllImagesFromXMLs()));
+        std::string noOfLoadedImgs = std::to_string(module->getWWTDataHandler()->loadAllImagesFromXMLs());
+        LINFO("Loaded " + noOfLoadedImgs + " WorldWide Telescope images.");
         return 1;
     }
 
     int createBrowser(lua_State* L) {
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::createBrowser");
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-        std::vector<std::string> names = module->getWWTDataHandler()->getAllThumbnailUrls();
+        // If no data has been loaded yet, load it!
+        if (module->getWWTDataHandler()->getImages().size() == 0) {
+            moveBrowser(L);
+        }
+       
+        std::vector<std::pair<std::string, std::string>> names = module->getWWTDataHandler()->getAllThumbnailUrls();
 
         lua_newtable(L);
+
         int number = 1;
-        for (const std::string& s : names) {
-            lua_pushstring(L, s.c_str());
+        for (const std::pair<std::string, std::string>& s : names) {
+
+            lua_newtable(L);
+            lua_pushstring(L, s.first.c_str());
+            lua_rawseti(L, -2, 1);
+            lua_pushstring(L, s.second.c_str());
+            lua_rawseti(L, -2, 2);
+
             lua_rawseti(L, -2, number);
             ++number;
         }
-
+        
         return 1;
     }
     int adjustCamera(lua_State* L) {
