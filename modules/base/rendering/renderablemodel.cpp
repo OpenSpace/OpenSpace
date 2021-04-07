@@ -62,10 +62,10 @@ namespace {
         { "Color Adding", ColorAddingBlending }
     };
 
-    constexpr openspace::properties::Property::PropertyInfo enableAnimationInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EnableAnimationInfo = {
         "EnableAnimation",
         "Enable Animation",
-        "Enable Animation"
+        "Enable or disable the animation for the model if it has any"
     };
 
     constexpr const std::array<const char*, 12> UniformNames = {
@@ -145,9 +145,8 @@ namespace {
 
     struct [[codegen::Dictionary(RenderableModel)]] Parameters {
         // The file or files that should be loaded in this RenderableModel. The file can
-        // contain filesystem tokens or can be specified relatively to the
-        // location of the .mod file.
-        // This specifies the model that is rendered by the Renderable.
+        // contain filesystem tokens. This specifies the model that is rendered by
+        // the Renderable.
         std::filesystem::path geometryFile;
 
         enum class ScaleUnit {
@@ -162,18 +161,18 @@ namespace {
 
         // The scale of the model. For example if the model is in centimeters
         // then ModelScale = Centimeter or ModelScale = 0.01
-        std::optional<std::variant<ScaleUnit, float>> modelScale;
+        std::optional<std::variant<ScaleUnit, double>> modelScale;
 
         // Set if invisible parts (parts with no textures or materials) of the model
         // should be forced to render or not.
         std::optional<bool> forceRenderInvisible;
 
-        // [[codegen::verbatim(enableAnimationInfo.description)]]
+        // [[codegen::verbatim(EnableAnimationInfo.description)]]
         std::optional<bool> enableAnimation;
 
         // The date and time that the model animation should start.
         // In format 'YYYY MM DD hh:mm:ss'.
-        std::optional<std::string> animationStartTime [[codegen::dateTime()]];
+        std::optional<std::string> animationStartTime [[codegen::datetime()]];
 
         enum class AnimationTimeUnit {
             Nanosecond,
@@ -222,7 +221,8 @@ namespace {
         std::optional<glm::dvec3> rotationVector;
 
         // [[codegen::verbatim(LightSourcesInfo.description)]]
-        std::optional<std::vector<ghoul::Dictionary>> lightSources [[codegen::reference("core_light_source")]];
+        std::optional<std::vector<ghoul::Dictionary>> lightSources
+            [[codegen::reference("core_light_source")]];
 
         // [[codegen::verbatim(DisableDepthTestInfo.description)]]
         std::optional<bool> disableDepthTest;
@@ -246,7 +246,7 @@ documentation::Documentation RenderableModel::Documentation() {
 
 RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _enableAnimation(enableAnimationInfo, false)
+    , _enableAnimation(EnableAnimationInfo, false)
     , _ambientIntensity(AmbientIntensityInfo, 0.2f, 0.f, 1.f)
     , _diffuseIntensity(DiffuseIntensityInfo, 1.f, 0.f, 1.f)
     , _specularIntensity(SpecularIntensityInfo, 1.f, 0.f, 1.f)
@@ -294,36 +294,40 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         if (std::holds_alternative<Parameters::ScaleUnit>(*p.modelScale)) {
             Parameters::ScaleUnit scaleUnit =
                 std::get<Parameters::ScaleUnit>(*p.modelScale);
+            DistanceUnit distanceUnit;
 
             switch (scaleUnit) {
                 case Parameters::ScaleUnit::Nanometer:
-                    _modelScale = DistanceUnit::Nanometer;
+                    distanceUnit = DistanceUnit::Nanometer;
                     break;
                 case Parameters::ScaleUnit::Micrometer:
-                    _modelScale = DistanceUnit::Micrometer;
+                    distanceUnit = DistanceUnit::Micrometer;
                     break;
                 case Parameters::ScaleUnit::Millimeter:
-                    _modelScale = DistanceUnit::Millimeter;
+                    distanceUnit = DistanceUnit::Millimeter;
                     break;
                 case Parameters::ScaleUnit::Centimeter:
-                    _modelScale = DistanceUnit::Centimeter;
+                    distanceUnit = DistanceUnit::Centimeter;
                     break;
                 case Parameters::ScaleUnit::Decimeter:
-                    _modelScale = DistanceUnit::Decimeter;
+                    distanceUnit = DistanceUnit::Decimeter;
                     break;
                 case Parameters::ScaleUnit::Meter:
-                    _modelScale = DistanceUnit::Meter;
+                    distanceUnit = DistanceUnit::Meter;
                     break;
                 case Parameters::ScaleUnit::Kilometer:
-                    _modelScale = DistanceUnit::Kilometer;
+                    distanceUnit = DistanceUnit::Kilometer;
                     break;
                 default:
                     throw ghoul::MissingCaseException();
             }
-            _scaleVector = glm::dvec3(convertUnit(_modelScale, DistanceUnit::Meter));
+            _modelScale = convertUnit(distanceUnit, DistanceUnit::Meter);
         }
-        else if (std::holds_alternative<float>(*p.modelScale)) {
-            _scaleVector = glm::dvec3(std::get<float>(*p.modelScale));
+        else if (std::holds_alternative<double>(*p.modelScale)) {
+            _modelScale = std::get<double>(*p.modelScale);
+        }
+        else {
+            throw ghoul::MissingCaseException();
         }
     }
 
@@ -338,12 +342,12 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         if (!_geometry->hasAnimation()) {
             LWARNING("Attempting to enable animation for a model that does not have any");
         }
-        else if (*p.enableAnimation &&_animationStart == "") {
+        else if (*p.enableAnimation && _animationStart.empty()) {
             LWARNING("Cannot enable animation without a given start time");
         }
         else {
             _enableAnimation = *p.enableAnimation;
-            _geometry->enableAnimation(_enableAnimation.value());
+            _geometry->enableAnimation(_enableAnimation);
         }
     }
 
@@ -381,6 +385,9 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
             _geometry->setTimeScale(convertTime(1.0, timeUnit, TimeUnit::Second));
         }
+        else {
+            throw ghoul::MissingCaseException();
+        }
     }
 
     if (p.animationMode.has_value()) {
@@ -402,9 +409,10 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
                 _animationMode = AnimationMode::BounceInfinitely;
                 break;
             case Parameters::AnimationMode::Once:
-            default:
                 _animationMode = AnimationMode::Once;
                 break;
+            default:
+                throw ghoul::MissingCaseException();
         }
     }
 
@@ -412,27 +420,12 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         _modelTransform = *p.modelTransform;
     }
 
-    if (p.ambientIntensity.has_value()) {
-        _ambientIntensity = *p.ambientIntensity;
-    }
-    if (p.diffuseIntensity.has_value()) {
-        _diffuseIntensity = *p.diffuseIntensity;
-    }
-    if (p.specularIntensity.has_value()) {
-        _specularIntensity = *p.specularIntensity;
-    }
-
-    if (p.performShading.has_value()) {
-        _performShading = *p.performShading;
-    }
-
-    if (p.disableDepthTest.has_value()) {
-        _disableDepthTest = *p.disableDepthTest;
-    }
-
-    if (p.disableFaceCulling.has_value()) {
-        _disableFaceCulling = *p.disableFaceCulling;
-    }
+    _ambientIntensity = p.ambientIntensity.value_or(_ambientIntensity);
+    _diffuseIntensity = p.diffuseIntensity.value_or(_diffuseIntensity);
+    _specularIntensity = p.specularIntensity.value_or(_specularIntensity);
+    _performShading = p.performShading.value_or(_performShading);
+    _disableDepthTest = p.disableDepthTest.value_or(_disableDepthTest);
+    _disableFaceCulling = p.disableFaceCulling.value_or(_disableFaceCulling);
 
     if (p.lightSources.has_value()) {
         std::vector<ghoul::Dictionary> lightsources = *p.lightSources;
@@ -467,15 +460,14 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         if (!_geometry->hasAnimation()) {
             LWARNING("Attempting to enable animation for a model that does not have any");
         }
-        else if (_enableAnimation.value() && _animationStart == "") {
+        else if (_enableAnimation && _animationStart.empty()) {
             LWARNING("Cannot enable animation without a given start time");
             _enableAnimation = false;
         }
         else {
-            _geometry->enableAnimation(_enableAnimation.value());
+            _geometry->enableAnimation(_enableAnimation);
         }
     });
-
 
     if (p.rotationVector.has_value()) {
         _rotationVec = *p.rotationVector;
@@ -494,9 +486,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         _blendingFuncOption.set(BlendingMapping[blendingOpt]);
     }
 
-    if (p.enableOpacityBlending.has_value()) {
-        _enableOpacityBlending = *p.enableOpacityBlending;
-    }
+    _enableOpacityBlending = p.enableOpacityBlending.value_or(_enableOpacityBlending);
 
     addProperty(_enableOpacityBlending);
 }
@@ -508,10 +498,10 @@ bool RenderableModel::isReady() const {
 void RenderableModel::initialize() {
     ZoneScoped
 
-    if (_geometry->hasAnimation() && _enableAnimation.value() && _animationStart == "") {
+    if (_geometry->hasAnimation() && _enableAnimation && _animationStart.empty()) {
         LWARNING("Model with animation not given any start time");
     }
-    else if (_geometry->hasAnimation() && !_enableAnimation.value()) {
+    else if (_geometry->hasAnimation() && !_enableAnimation) {
         LINFO("Model with deactivated animation was found. "
             "The animation can be activated by entering a start time in the asset file"
         );
@@ -540,7 +530,7 @@ void RenderableModel::initializeGL() {
 
     _geometry->initialize();
     _geometry->calculateBoundingRadius();
-    setBoundingSphere(glm::sqrt(_geometry->boundingRadius()) * _scaleVector.x);
+    setBoundingSphere(glm::sqrt(_geometry->boundingRadius()) * _modelScale);
 }
 
 void RenderableModel::deinitializeGL() {
@@ -568,7 +558,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     //constexpr double tfov = tan(fov / 2.0); // doesn't work unfortunately
     constexpr double tfov = 0.5773502691896257;
     constexpr int res = 2880;
-    const double maxDistance = res * boundingSphere()/ tfov;
+    const double maxDistance = res * boundingSphere() / tfov;
 
     if (distanceToCamera < maxDistance) {
         _program->activate();
@@ -580,7 +570,10 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
             glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
             glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
             glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)) *
-            glm::scale(glm::dmat4(_modelTransform.value()), _scaleVector); // Model scale unit
+            glm::scale(
+                glm::dmat4(_modelTransform.value()),
+                glm::dvec3(_modelScale) // Model scale unit
+            );
         const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
             modelTransform;
 
@@ -638,21 +631,21 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 
         glEnablei(GL_BLEND, 0);
         switch (_blendingFuncOption) {
-        case DefaultBlending:
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            break;
-        case AdditiveBlending:
-            glBlendFunc(GL_ONE, GL_ONE);
-            break;
-        case PointsAndLinesBlending:
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            break;
-        case PolygonBlending:
-            glBlendFunc(GL_SRC_ALPHA_SATURATE, GL_ONE);
-            break;
-        case ColorAddingBlending:
-            glBlendFunc(GL_SRC_COLOR, GL_DST_COLOR);
-            break;
+            case DefaultBlending:
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                break;
+            case AdditiveBlending:
+                glBlendFunc(GL_ONE, GL_ONE);
+                break;
+            case PointsAndLinesBlending:
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                break;
+            case PolygonBlending:
+                glBlendFunc(GL_SRC_ALPHA_SATURATE, GL_ONE);
+                break;
+            case ColorAddingBlending:
+                glBlendFunc(GL_SRC_COLOR, GL_DST_COLOR);
+                break;
         };
 
         if (_disableDepthTest) {
@@ -680,40 +673,60 @@ void RenderableModel::update(const UpdateData& data) {
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
     }
 
-    if (_geometry->hasAnimation() && _animationStart != "") {
-        double realtiveTime;
+    if (_geometry->hasAnimation() && !_animationStart.empty()) {
+        double relativeTime;
         double now = data.time.j2000Seconds();
         double startTime = data.time.convertTime(_animationStart);
         double duration = _geometry->animationDuration();
 
         switch (_animationMode) {
             case AnimationMode::LoopFromStart:
-                realtiveTime = std::fmod(now - startTime, duration);
+                // Start looping from the start time
+                // s////
+                relativeTime = std::fmod(now - startTime, duration);
                 break;
             case AnimationMode::LoopInfinitely:
-                realtiveTime = std::fmod(now - startTime, duration);
-                if (realtiveTime < 0) {
-                    realtiveTime += duration;
+                // Loop both before and after the start time where the model is
+                // in the initial position at the start time. std::fmod is not a
+                // true modulo function, it just calculates the remainder of the division
+                // which can be negative. To make it true modulo it is bumped up to
+                // possitive values when it is negative.
+                // //s//
+                relativeTime = std::fmod(now - startTime, duration);
+                if (relativeTime < 0.0) {
+                    relativeTime += duration;
                 }
                 break;
             case AnimationMode::BounceFromStart:
-                realtiveTime =
+                // Bounce from the start position. Bounce means to do the animation
+                // and when it ends, play the animation in reverse to make sure the model
+                // goes back to its initial position bofore starting again. Avoids a
+                // visible jump from the last position to the first position when loop
+                // starts again
+                // s/\/\/\/\ 
+                relativeTime =
                     duration - abs(fmod(now - startTime, 2 * duration) - duration);
                 break;
             case AnimationMode::BounceInfinitely: {
+                // Bounce both before and after the start time where the model is
+                // in the initial position at the start time
+                // /\/\s/\/\ 
                 double modulo = fmod(now - startTime, 2 * duration);
-                if (modulo < 0) {
+                if (modulo < 0.0) {
                     modulo += 2 * duration;
                 }
-                realtiveTime = duration - abs(modulo - duration);
+                relativeTime = duration - abs(modulo - duration);
                 break;
             }
             case AnimationMode::Once:
-            default:
-                realtiveTime = now - startTime;
+                // Play animation once starting from the start time
+                // s/
+                relativeTime = now - startTime;
                 break;
+            default:
+                throw ghoul::MissingCaseException();
         }
-        _geometry->update(realtiveTime);
+        _geometry->update(relativeTime);
     }
 }
 

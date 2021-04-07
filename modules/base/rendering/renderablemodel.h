@@ -80,11 +80,10 @@ private:
     };
 
     std::unique_ptr<ghoul::modelgeometry::ModelGeometry> _geometry;
-    DistanceUnit _modelScale;
-    glm::dvec3 _scaleVector = glm::dvec3(1.0, 1.0, 1.0);
+    double _modelScale = 1.0;
     bool _forceRenderInvisible = false;
     bool _notifyInvisibleDropped = true;
-    std::string _animationStart = "";
+    std::string _animationStart;
     AnimationMode _animationMode;
     properties::BoolProperty _enableAnimation;
 

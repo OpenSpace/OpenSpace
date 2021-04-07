@@ -127,15 +127,10 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
         p.projection
     );
 
-    double boundingSphereRadius = 1.0e9;
-    if (p.boundingSphereRadius.has_value()) {
-        boundingSphereRadius = *p.boundingSphereRadius;
-    }
+    double boundingSphereRadius = p.boundingSphereRadius.value_or(1.0e9);
     setBoundingSphere(boundingSphereRadius);
 
-    if (p.performShading.has_value()) {
-        _performShading = *p.performShading;
-    }
+    _performShading = p.performShading.value_or(_performShading);
 
     addProperty(_performShading);
 }

@@ -274,7 +274,7 @@ std::string DirectoryVerifier::type() const {
 }
 
 TestResult DateTimeVerifier::operator()(const ghoul::Dictionary& dict,
-    const std::string& key) const
+                                        const std::string& key) const
 {
     TestResult res = StringVerifier::operator()(dict, key);
     if (!res.success) {
@@ -302,7 +302,7 @@ TestResult DateTimeVerifier::operator()(const ghoul::Dictionary& dict,
         // normalize e.g. 29/02/2013 would become 01/03/2013
         std::tm t_copy(t);
         time_t when = mktime(&t_copy);
-        std::tm *norm = localtime(&when);
+        std::tm* norm = localtime(&when);
 
         // validate (is the normalized date still the same?):
         if (norm->tm_mday != t.tm_mday &&
