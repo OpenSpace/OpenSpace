@@ -114,6 +114,8 @@ private:
     void sortOptions();
     bool removeInvalidKeys(std::set<std::string>& keys);
 
+    std::string generateAdditionalJsonDescription() const override;
+
     // A list of all available options that can be selected
     std::vector<std::string> _options;
 };

@@ -33,6 +33,8 @@
 
 namespace {
     constexpr const char* _loggerCat = "SelectionProperty";
+
+    constexpr const char* OptionsKey = "Options";
 } // namespace
 
 namespace openspace::properties {
@@ -137,6 +139,14 @@ bool SelectionProperty::removeInvalidKeys(std::set<std::string>& keys) {
         it++;
     }
     return changed;
+}
+
+std::string SelectionProperty::generateAdditionalJsonDescription() const {
+    nlohmann::json optionsJson(_options);
+    std::string result = "{ ";
+    result += fmt::format("\"{}\": {}", OptionsKey, optionsJson.dump());
+    result += " }";
+    return result;
 }
 
 template <>
