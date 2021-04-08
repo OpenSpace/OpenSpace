@@ -82,7 +82,7 @@ namespace openspace::skybrowser::luascriptfunctions {
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::createBrowser");
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
         // If no data has been loaded yet, load it!
-        if (module->getWWTDataHandler()->getImages().size() == 0) {
+        if (module->getWWTDataHandler()->getLoadedImages().size() == 0) {
             moveBrowser(L);
         }
        

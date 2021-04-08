@@ -25,15 +25,20 @@ namespace openspace {
         void loadImagesFromXML(tinyxml2::XMLElement* node, std::string collectionName);
         void loadWTMLCollectionsFromURL(std::string url, std::string fileName);
         void loadWTMLCollectionsFromDirectory(std::string directory);
+        
         int loadAllImagesFromXMLs();
         const std::vector<std::string>& getAllImageCollectionUrls() const;
         std::vector < std::pair < std::string, std::string> > getAllThumbnailUrls();
-        const std::vector<ImageData>& getImages() const;
+        const std::vector<ImageData>& getLoadedImages() const;
 
     private:
-        int loadPlace(tinyxml2::XMLElement* place, std::string collectionName);
-        int loadImageSet(tinyxml2::XMLElement* imageSet, std::string collectionName);
+        
+        int loadImage(tinyxml2::XMLElement* imageSet, std::string collectionName);
+        void setImageDataValues(tinyxml2::XMLElement* node, std::string thumbnail, std::string collectionName, ImageData& img);
+
         std::string getURLFromImageSet(tinyxml2::XMLElement* imageSet);
+        std::string getURLFromPlace(tinyxml2::XMLElement* place);
+        tinyxml2::XMLElement* getDirectChildNode(tinyxml2::XMLElement* node, std::string name);
         tinyxml2::XMLElement* getChildNode(tinyxml2::XMLElement* node, std::string name);
 
         std::vector<ImageData> images;
