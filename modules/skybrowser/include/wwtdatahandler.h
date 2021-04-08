@@ -26,7 +26,7 @@ namespace openspace {
         void loadWTMLCollectionsFromURL(std::string url, std::string fileName);
         void loadWTMLCollectionsFromDirectory(std::string directory);
         int loadAllImagesFromXMLs();
-        void printAllUrls();
+        const std::vector<std::string>& getAllImageCollectionUrls() const;
         std::vector < std::pair < std::string, std::string> > getAllThumbnailUrls();
         const std::vector<ImageData>& getImages() const;
 

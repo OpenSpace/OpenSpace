@@ -94,10 +94,8 @@ namespace openspace {
         return images.size();
     }
 
-    void WWTDataHandler::printAllUrls() {
-        for (auto it = imageUrls.begin(); it != imageUrls.end(); it++) {
-            LINFO(*it);
-        }
+    const std::vector<std::string>& WWTDataHandler::getAllImageCollectionUrls() const {
+        return imageUrls;
     }
 
     void WWTDataHandler::loadImagesFromXML(tinyxml2::XMLElement* node, std::string collectionName) {
@@ -108,22 +106,23 @@ namespace openspace {
         // Terminate recursion if no folders
         if (!folder) {
             // When we are at leaf folder
-            // Iterate through all the places and load as images
-            // Prefer places over Image Sets as they contain same info
-            XMLElement* place = getChildNode(node->FirstChildElement(), "Place");
-            // No place found - look for images instead
-            if (!place) {
-                XMLElement* imageSet = getChildNode(node->FirstChildElement(), "ImageSet");
-                while (imageSet) {
-                    loadImageSet(imageSet, collectionName);
-                    imageSet = imageSet->NextSiblingElement();
+            // Iterate through all the <Place>:s and <ImageSet>:s and load as images
+            // Go down to the level where places and image sets are
+            XMLElement* ptr = getChildNode(node->FirstChildElement(), "Place");
+            if (!ptr) {
+                ptr = getChildNode(node->FirstChildElement(), "ImageSet");
+            }
+            // Iterate through all siblings at same level and load
+            while (ptr) {
+                if (std::string(ptr->Name()) == "ImageSet") {
+                    loadImageSet(ptr, collectionName);
                 }
-            }
-            // Place found - look through places
-            while (place) {
-                loadPlace(place, collectionName);
-                place = place->NextSiblingElement();
-            }
+                else if (std::string(ptr->Name()) == "Place") {
+                    loadPlace(ptr, collectionName);
+                }
+
+                ptr = ptr->NextSiblingElement();
+            }            
         }
         else {
             // Open all folders at same level

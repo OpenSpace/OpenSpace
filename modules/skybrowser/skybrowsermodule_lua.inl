@@ -35,40 +35,50 @@ namespace {
 namespace openspace::skybrowser::luascriptfunctions {
 
     int loadImgCollection(lua_State* L) {
-        ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::loadCollection");
+        // Load image
+        ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadCollection");
+        const std::string& imageName = ghoul::lua::value<std::string>(L, 1);
 
         ScreenSpaceSkyBrowser* browser = dynamic_cast<ScreenSpaceSkyBrowser*>(global::renderEngine->screenSpaceRenderable("SkyBrowser1"));
-        std::string url = "http://www.worldwidetelescope.org/wwtweb/catalog.aspx?W=wise";
-        browser->sendMessageToWWT(browser->createMessageForLoadingWWTImgColl(url));
-        browser->sendMessageToWWT(browser->createMessageForSettingForegroundWWT("Andromeda Galaxy"));
+       
+        browser->sendMessageToWWT(browser->createMessageForSettingForegroundWWT(imageName));
+        LINFO("Loading image " + imageName);
        // browser->sendMessageToWWT(browser->createMessageForMovingWWTCamera(glm::vec2(0.712305533333333, 41.269167), 24.0f));
         browser->sendMessageToWWT(browser->createMessageForSettingForegroundOpacityWWT(100));
         return 1;
     }
     
     int followCamera(lua_State* L) {
+        // Load images from url
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::followCamera");
 
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
         std::string root = "https://raw.githubusercontent.com/WorldWideTelescope/wwt-web-client/master/assets/webclient-explore-root.wtml";
 
         module->getWWTDataHandler()->loadWTMLCollectionsFromURL(root, "root");
-        module->getWWTDataHandler()->printAllUrls();
         LINFO(std::to_string( module->getWWTDataHandler()->loadAllImagesFromXMLs()));
 
         return 1;
     }
 
     int moveBrowser(lua_State* L) {
+        // Load images from local directory
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::moveBrowser");
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
         module->getWWTDataHandler()->loadWTMLCollectionsFromDirectory(absPath("${MODULE_SKYBROWSER}/WWTimagedata/"));
         std::string noOfLoadedImgs = std::to_string(module->getWWTDataHandler()->loadAllImagesFromXMLs());
         LINFO("Loaded " + noOfLoadedImgs + " WorldWide Telescope images.");
+
+        ScreenSpaceSkyBrowser* browser = dynamic_cast<ScreenSpaceSkyBrowser*>(global::renderEngine->screenSpaceRenderable("SkyBrowser1"));
+        const std::vector<std::string>& imageUrls = module->getWWTDataHandler()->getAllImageCollectionUrls();
+        for (const std::string url : imageUrls) {
+            browser->sendMessageToWWT(browser->createMessageForLoadingWWTImgColl(url));
+        }
         return 1;
     }
 
     int createBrowser(lua_State* L) {
+        // Send image list to GUI
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::createBrowser");
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
         // If no data has been loaded yet, load it!
@@ -82,7 +92,7 @@ namespace openspace::skybrowser::luascriptfunctions {
 
         int number = 1;
         for (const std::pair<std::string, std::string>& s : names) {
-
+            // Push a table { image name, image url } with index : number
             lua_newtable(L);
             lua_pushstring(L, s.first.c_str());
             lua_rawseti(L, -2, 1);
