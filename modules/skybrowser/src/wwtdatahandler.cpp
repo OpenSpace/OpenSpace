@@ -101,17 +101,10 @@ namespace openspace {
     void WWTDataHandler::loadImagesFromXML(tinyxml2::XMLElement* node, std::string collectionName) {
         // Get direct child of node called "Place"
         using namespace tinyxml2;
-        XMLElement* folder = getChildNode(node->FirstChildElement(), "Folder");
+        XMLElement* ptr = node->FirstChildElement();
 
-        // Terminate recursion if no folders
-        if (!folder) {
-            // When we are at leaf folder
-            // Iterate through all the <Place>:s and <ImageSet>:s and load as images
-            // Go down to the level where places and image sets are
-            XMLElement* ptr = getChildNode(node->FirstChildElement(), "Place");
-            if (!ptr) {
-                ptr = getChildNode(node->FirstChildElement(), "ImageSet");
-            }
+        // Go through all siblings of ptr and open folders recursively
+        while (ptr) {
             // Iterate through all siblings at same level and load
             while (ptr) {
                 if (std::string(ptr->Name()) == "ImageSet") {
@@ -120,20 +113,16 @@ namespace openspace {
                 else if (std::string(ptr->Name()) == "Place") {
                     loadPlace(ptr, collectionName);
                 }
+                else if (std::string(ptr->Name()) == "Folder") {
+                    std::string newCollectionName = collectionName + "/";
+                    if (ptr->FindAttribute("Name")) {
+                        newCollectionName += std::string(ptr->FindAttribute("Name")->Value());
+                    }
+                    loadImagesFromXML(ptr, newCollectionName);
+                }
 
                 ptr = ptr->NextSiblingElement();
             }            
-        }
-        else {
-            // Open all folders at same level
-            while (folder) {
-                std::string newCollectionName = collectionName + "/";
-                if (folder->FindAttribute("Name")) {
-                    newCollectionName += std::string(folder->FindAttribute("Name")->Value());
-                }
-                loadImagesFromXML(folder, newCollectionName);
-                folder = folder->NextSiblingElement();
-            }
         }
     }
 
@@ -187,6 +176,10 @@ namespace openspace {
         image.celestCoords.x = imageSet->FindAttribute("RA") ? std::stof(imageSet->FindAttribute("RA")->Value()) : 0.f;
         image.celestCoords.y = imageSet->FindAttribute("Dec") ? std::stof(imageSet->FindAttribute("Dec")->Value()) : 0.f;
         image.thumbnailUrl = getURLFromImageSet(imageSet);
+        // Only load images that have a thumbnail
+        if (image.thumbnailUrl == "") {
+            return -1;
+        }
         image.collection = collectionName;
 
         images.push_back(image);
