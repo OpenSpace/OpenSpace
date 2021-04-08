@@ -1,7 +1,6 @@
 asset.require("spice/base")
 local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require('scene/solarsystem/sun/transforms')
---local transformssun = asset.require("./heliosphere/bastille_day/transforms")
 --15 cmr emin01, 16 cmr emin03
 local TexturesPathEquitorial = asset.syncedResource({
 Type = "HttpSynchronization",
@@ -80,9 +79,9 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { Cutplane, Cutplane2})
 --assetHelper.registerSceneGraphNodesAndExport(asset, { Cutplane})
 
 asset.meta = {
-    Name = "Predictive Science Inc. Stream nodes Bastille Days",
+    Name = "Predictive Science Inc. Flux nodes Bastille Days",
     Version = "1.0",
-    Description = " Stream nodes for the bastille day CME events ",
+    Description = " Flux nodes for the bastille day CME events ",
     Author = "Christian Adamsson, Emilie Ho",
     URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
     License = ""

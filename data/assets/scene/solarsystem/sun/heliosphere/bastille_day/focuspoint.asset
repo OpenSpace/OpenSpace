@@ -15,7 +15,7 @@ local focusPoint = {
             Altitude = 102000000
         }
     },
- GUI = {
+    GUI = {
         Path = "/Solar System/Heliosphere",
         Name = "Focus point"
     }

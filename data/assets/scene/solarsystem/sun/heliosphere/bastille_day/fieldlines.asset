@@ -7,7 +7,7 @@ local masVelocityColorTable = transferFunctions .. "/velocity_fieldlines.txt"
 local masDensityColorTable = transferFunctions .. "/density_fieldlines.txt"
 
 local fieldlinesDirectory = asset.syncedResource({
-    Name = "Bastille Day MAS Fieldlies",
+    Name = "Bastille Day MAS Fieldlines",
     Type = "HttpSynchronization",
     Identifier = "bastille_day_mas_fieldlines",
     Version = 1
