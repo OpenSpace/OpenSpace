@@ -60,6 +60,7 @@ local initializeAndAddNodes = function()
       Renderable = {
         Type = "RenderableModel",
         GeometryFile = models .. "/ISS.fbx",
+        ModelScale = "Centimeter",
         LightSources = {
           {
             Type = "SceneGraphLightSource",
