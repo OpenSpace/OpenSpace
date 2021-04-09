@@ -7,7 +7,6 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/util/camera.h>
@@ -20,9 +19,9 @@
 #include <glm/gtx/rotate_vector.hpp >
 #include <thread>
 #include <chrono> // Milliseconds
-
+#include <optional>
 #include <openspace/util/coordinateconversion.h> // to adjust camera angle
-#include <glm/gtx/vector_angle.hpp>
+
 namespace {
     constexpr const char* _loggerCat = "ScreenSpaceSkyBrowser";
 
@@ -158,6 +157,10 @@ namespace openspace {
         return _fieldOfView;
     }
 
+    void ScreenSpaceSkyBrowser::setFieldOfView(float fov) {
+        _fieldOfView = fov;
+    }
+
     void ScreenSpaceSkyBrowser::scrollZoom(float scroll) {
        
         float zoomFactor = log(_fieldOfView + 1.1f);
@@ -260,19 +263,8 @@ namespace openspace {
         _threadWWTMessages = std::thread([&] {
             while (_camIsSyncedWWT) {
 
-                // Get camera view direction and orthogonal coordinate system of camera view direction
-                glm::vec3 viewDirection = global::navigationHandler->camera()->viewDirectionWorldSpace();
-                glm::vec3 upDirection = global::navigationHandler->camera()->lookUpVectorWorldSpace();
-                glm::vec3 sideDirection = glm::cross(upDirection, viewDirection);
-
-                glm::vec2 angleOffset = _skyTarget ? _skyTarget->getAnglePosition() : glm::vec2(0);
-                // Change view if target is moved
-                glm::vec3 targetDirection = glm::rotate(viewDirection, angleOffset.x, upDirection);
-                targetDirection = glm::rotate(targetDirection, angleOffset.y, sideDirection);
-
-                // Convert to celestial coordinates
-                glm::dvec2 celestCoords = convertGalacticToCelestial(targetDirection);
-                ghoul::Dictionary message = createMessageForMovingWWTCamera(celestCoords, _fieldOfView);
+                glm::vec2 celestCoordsTarget = _skyTarget ? _skyTarget->getCelestialCoords() : glm::vec2(0.f);
+                ghoul::Dictionary message = createMessageForMovingWWTCamera(celestCoordsTarget, _fieldOfView);
 
                 // Sleep so we don't bombard WWT with too many messages
                 std::this_thread::sleep_for(std::chrono::milliseconds(50));
@@ -282,24 +274,7 @@ namespace openspace {
         });
 
     }
-
-    glm::dvec2 ScreenSpaceSkyBrowser::convertGalacticToCelestial(glm::dvec3 rGal) const {          
-        // Used the math from this website: https://gea.esac.esa.int/archive/documentation/GD -->
-        // R2/Data_processing/chap_cu3ast/sec_cu3ast_intro/ssec_cu3ast_intro_tansforms.html#SSS1
-        const glm::dmat3 conversionMatrix = glm::dmat3({
-          -0.0548755604162154,  0.4941094278755837, -0.8676661490190047, // col 0
-          -0.8734370902348850, -0.4448296299600112, -0.1980763734312015, // col 1
-          -0.4838350155487132,  0.7469822444972189,  0.4559837761750669  // col 2
-            });
-
-        glm::dvec3 rICRS = glm::transpose(conversionMatrix) * rGal;
-        float ra = atan2(rICRS[1], rICRS[0]);
-        float dec = atan2(rICRS[2], glm::sqrt((rICRS[0] * rICRS[0]) + (rICRS[1] * rICRS[1])));
-
-        ra = ra > 0 ? ra : ra + (2 * glm::pi<float>());
-
-        return glm::dvec2(glm::degrees(ra), glm::degrees(dec));
-    }
+        
     /*
     void ScreenSpaceSkyBrowser::translate(glm::vec2 translation) {
         glm::vec3 position = _cartesianPosition;     

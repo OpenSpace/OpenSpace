@@ -2,6 +2,7 @@
 #include <modules/skybrowser/include/screenspaceskybrowser.h>
 #include <modules/skybrowser/skybrowsermodule.h>
 #include <openspace/engine/globals.h>
+#include <openspace/interaction/navigationhandler.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/rendering/renderengine.h>
@@ -21,6 +22,7 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
+#include <glm/gtx/vector_angle.hpp>
 #include <optional>
 
 namespace {
@@ -241,6 +243,9 @@ namespace openspace {
     void ScreenSpaceSkyTarget::translate(glm::vec2 translation, glm::vec2 position) {
         _cartesianPosition = glm::translate(glm::mat4(1.f), glm::vec3(translation, 0.0f)) * glm::vec4(position, _cartesianPosition.value().z, 1.0f);
     }
+    void ScreenSpaceSkyTarget::setPosition(glm::vec3 pos) {
+        _cartesianPosition = pos;
+    }
 
     glm::vec2 ScreenSpaceSkyTarget::getAnglePosition() {
         glm::vec3 pos = _cartesianPosition.value();
@@ -273,6 +278,39 @@ namespace openspace {
     void ScreenSpaceSkyTarget::setDimensions(glm::vec2 currentBrowserDimensions) {
         _targetDimensions = currentBrowserDimensions;
 
+    }
+
+    glm::vec2 ScreenSpaceSkyTarget::getCelestialCoords() {
+        // Get camera view direction and orthogonal coordinate system of camera view direction
+        glm::vec3 viewDirection = global::navigationHandler->camera()->viewDirectionWorldSpace();
+        glm::vec3 upDirection = global::navigationHandler->camera()->lookUpVectorWorldSpace();
+        glm::vec3 sideDirection = glm::cross(upDirection, viewDirection);
+
+        glm::vec2 angleOffset = getAnglePosition();
+        // Change view if target is moved
+        glm::vec3 targetDirection = glm::rotate(viewDirection, angleOffset.x, upDirection);
+        targetDirection = glm::rotate(targetDirection, angleOffset.y, sideDirection);
+
+        // Convert to celestial coordinates
+        return convertGalacticToCelestial(targetDirection);
+    }
+
+    glm::dvec2 ScreenSpaceSkyTarget::convertGalacticToCelestial(glm::dvec3 rGal) const {
+        // Used the math from this website: https://gea.esac.esa.int/archive/documentation/GD -->
+        // R2/Data_processing/chap_cu3ast/sec_cu3ast_intro/ssec_cu3ast_intro_tansforms.html#SSS1
+        const glm::dmat3 conversionMatrix = glm::dmat3({
+          -0.0548755604162154,  0.4941094278755837, -0.8676661490190047, // col 0
+          -0.8734370902348850, -0.4448296299600112, -0.1980763734312015, // col 1
+          -0.4838350155487132,  0.7469822444972189,  0.4559837761750669  // col 2
+            });
+
+        glm::dvec3 rICRS = glm::transpose(conversionMatrix) * rGal;
+        float ra = atan2(rICRS[1], rICRS[0]);
+        float dec = atan2(rICRS[2], glm::sqrt((rICRS[0] * rICRS[0]) + (rICRS[1] * rICRS[1])));
+
+        ra = ra > 0 ? ra : ra + (2 * glm::pi<float>());
+
+        return glm::dvec2(glm::degrees(ra), glm::degrees(dec));
     }
 
     void ScreenSpaceSkyTarget::updateFOV(float browserFOV) {

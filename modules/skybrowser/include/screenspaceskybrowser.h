@@ -27,8 +27,8 @@ namespace openspace {
         bool sendMessageToWWT(const ghoul::Dictionary& msg);
         void sendMouseEvent(CefStructBase<CefMouseEventTraits> event, int x, int y) const;
         void WWTfollowCamera();
-        glm::dvec2 convertGalacticToCelestial(glm::dvec3 coords) const;
         float fieldOfView() const;
+        void setFieldOfView(float fov);
         void scrollZoom(float scroll);
         ScreenSpaceSkyTarget* getSkyTarget();
 

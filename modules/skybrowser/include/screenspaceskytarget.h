@@ -33,11 +33,15 @@ namespace openspace {
         void setDimensions(glm::vec2 currentBrowserDimensions);
         void updateFOV(float browserFOV);
 
+        glm::dvec2 convertGalacticToCelestial(glm::dvec3 rGal) const;
+        glm::vec2 getCelestialCoords();
         glm::vec2 getScreenSpacePosition();
         glm::vec2 getAnglePosition();
         void setConnectedBrowser();
         void setBorderColor(glm::ivec3 color);
         glm::ivec3 getColor();
+
+        void setPosition(glm::vec3 pos);
        
         void translate(glm::vec2 translation, glm::vec2 position);
        
