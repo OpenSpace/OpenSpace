@@ -66,7 +66,7 @@ namespace openspace {
 
         for (const auto& entry : std::filesystem::directory_iterator(directory)) {
             tinyxml2::XMLDocument* doc = new tinyxml2::XMLDocument();
-            std::cout << entry.path().u8string().c_str() << std::endl;
+          
             if (doc->LoadFile(entry.path().u8string().c_str()) == tinyxml2::XMLError::XML_SUCCESS) {
                 xmls.push_back(doc);
             }
@@ -86,10 +86,6 @@ namespace openspace {
             tinyxml2::XMLElement* root = doc->FirstChildElement();
             std::string collectionName = root->FindAttribute("Name") ? root->FindAttribute("Name")->Value() : "";
             loadImagesFromXML(root, collectionName);
-        }
-
-        for (ImageData img : images) {
-            std::cout << img;
         }
         return images.size();
     }
@@ -192,21 +188,17 @@ namespace openspace {
         return imageSet;
     }
 
-    std::vector < std::pair < std::string, std::string> > WWTDataHandler::getAllThumbnailUrls() {
-        std::vector < std::pair < std::string, std::string> >  imgResult;
-        std::for_each(images.begin(), images.end(), [&](ImageData obj) {
-            imgResult.push_back(std::pair(obj.name, obj.thumbnailUrl));
-            });
-        return imgResult;
-    }
-
     void WWTDataHandler::setImageDataValues(tinyxml2::XMLElement* node, std::string thumbnail, std::string collectionName, ImageData& img) {
         // Get attributes for the image
         img.name = node->FindAttribute("Name") ? node->FindAttribute("Name")->Value() : "";
-        img.celestCoords.x = node->FindAttribute("RA") ? std::stof(node->FindAttribute("RA")->Value()) : 0.f;
-        img.celestCoords.y = node->FindAttribute("Dec") ? std::stof(node->FindAttribute("Dec")->Value()) : 0.f;
+        img.hasCoords = node->FindAttribute("RA") && node->FindAttribute("Dec");
+        if (img.hasCoords) {
+            img.celestCoords.x = std::stof(node->FindAttribute("RA")->Value());
+            img.celestCoords.y = std::stof(node->FindAttribute("Dec")->Value());
+        }
         img.collection = collectionName;
         img.thumbnailUrl = thumbnail;
+        img.zoomLevel = node->FindAttribute("ZoomLevel") ? std::stof(node->FindAttribute("ZoomLevel")->Value()) : 0.f;
     }
     
     const std::vector<ImageData>& WWTDataHandler::getLoadedImages() const {

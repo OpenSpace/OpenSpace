@@ -13,6 +13,8 @@ namespace openspace {
         std::string thumbnailUrl;
         glm::vec2 celestCoords;
         std::string collection;
+        float zoomLevel;
+        bool hasCoords;
     };
 
     class WWTDataHandler {
@@ -28,7 +30,6 @@ namespace openspace {
         
         int loadAllImagesFromXMLs();
         const std::vector<std::string>& getAllImageCollectionUrls() const;
-        std::vector < std::pair < std::string, std::string> > getAllThumbnailUrls();
         const std::vector<ImageData>& getLoadedImages() const;
 
     private:

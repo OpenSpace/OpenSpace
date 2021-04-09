@@ -1,15 +1,11 @@
 #include <openspace/util/openspacemodule.h>
-
-
 #include <openspace/documentation/documentation.h>
 #include <modules/skybrowser/skybrowsermodule.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/rendering/renderengine.h>
-
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/fmt.h>
 #include <ghoul/glm.h>
@@ -22,9 +18,8 @@
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/util/camera.h>
 #include <thread> 
-
+#include <glm/gtx/string_cast.hpp>
 #include <openspace/util/coordinateconversion.h>
-#include <glm/gtx/rotate_vector.hpp>
 
 
 namespace {
@@ -37,13 +32,14 @@ namespace openspace::skybrowser::luascriptfunctions {
     int loadImgCollection(lua_State* L) {
         // Load image
         ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadCollection");
-        const std::string& imageName = ghoul::lua::value<std::string>(L, 1);
-
-        ScreenSpaceSkyBrowser* browser = dynamic_cast<ScreenSpaceSkyBrowser*>(global::renderEngine->screenSpaceRenderable("SkyBrowser1"));
+        const int i = ghoul::lua::value<int>(L, 1);
        
-        browser->sendMessageToWWT(browser->createMessageForSettingForegroundWWT(imageName));
-        LINFO("Loading image " + imageName);
-       // browser->sendMessageToWWT(browser->createMessageForMovingWWTCamera(glm::vec2(0.712305533333333, 41.269167), 24.0f));
+        ScreenSpaceSkyBrowser* browser = dynamic_cast<ScreenSpaceSkyBrowser*>(global::renderEngine->screenSpaceRenderable("SkyBrowser1"));
+        SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+        const ImageData& resultImage = module->getWWTDataHandler()->getLoadedImages()[i];
+        browser->sendMessageToWWT(browser->createMessageForSettingForegroundWWT(resultImage.name));
+        LINFO("Loading image " + resultImage.name);
+       
         browser->sendMessageToWWT(browser->createMessageForSettingForegroundOpacityWWT(100));
         return 1;
     }
@@ -70,10 +66,12 @@ namespace openspace::skybrowser::luascriptfunctions {
         LINFO("Loaded " + noOfLoadedImgs + " WorldWide Telescope images.");
 
         ScreenSpaceSkyBrowser* browser = dynamic_cast<ScreenSpaceSkyBrowser*>(global::renderEngine->screenSpaceRenderable("SkyBrowser1"));
-        const std::vector<std::string>& imageUrls = module->getWWTDataHandler()->getAllImageCollectionUrls();
-        for (const std::string url : imageUrls) {
-            browser->sendMessageToWWT(browser->createMessageForLoadingWWTImgColl(url));
-        }
+        //const std::vector<std::string>& imageUrls = module->getWWTDataHandler()->getAllImageCollectionUrls();
+        //for (const std::string url : imageUrls) {
+        //    browser->sendMessageToWWT(browser->createMessageForLoadingWWTImgColl(url));
+        //}
+        std::string root = "https://raw.githubusercontent.com/WorldWideTelescope/wwt-web-client/master/assets/webclient-explore-root.wtml";
+        browser->sendMessageToWWT(browser->createMessageForLoadingWWTImgColl(root));
         return 1;
     }
 
@@ -86,21 +84,19 @@ namespace openspace::skybrowser::luascriptfunctions {
             moveBrowser(L);
         }
        
-        std::vector<std::pair<std::string, std::string>> names = module->getWWTDataHandler()->getAllThumbnailUrls();
+        const std::vector<ImageData>& images = module->getWWTDataHandler()->getLoadedImages();
 
         lua_newtable(L);
 
-        int number = 1;
-        for (const std::pair<std::string, std::string>& s : names) {
+        for (int i = 0; i < images.size(); i++) {
             // Push a table { image name, image url } with index : number
             lua_newtable(L);
-            lua_pushstring(L, s.first.c_str());
+            lua_pushstring(L, images[i].name.c_str());
             lua_rawseti(L, -2, 1);
-            lua_pushstring(L, s.second.c_str());
+            lua_pushstring(L, images[i].thumbnailUrl.c_str());
             lua_rawseti(L, -2, 2);
 
-            lua_rawseti(L, -2, number);
-            ++number;
+            lua_rawseti(L, -2, i+1);
         }
         
         return 1;
