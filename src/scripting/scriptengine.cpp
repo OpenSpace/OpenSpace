@@ -694,7 +694,7 @@ void ScriptEngine::preSync(bool isMaster) {
             global::parallelPeer->sendScript(item.script);
         }
         if (global::sessionRecording->isRecording()) {
-            global::sessionRecording->saveScriptKeyframe(item.script);
+            global::sessionRecording->saveScriptKeyframeToTimeline(item.script);
         }
     }
 }

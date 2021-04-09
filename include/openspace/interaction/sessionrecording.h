@@ -220,13 +220,13 @@ public:
      * whether it is following the rotation of a node, and timestamp). The data will be
      * saved to the recording file only if a recording is currently in progress.
      */
-    void saveCameraKeyframe();
+    void saveCameraKeyframeToTimeline();
 
     /**
      * Used to trigger a save of the current timing states. The data will be saved to the
      * recording file only if a recording is currently in progress.
      */
-    void saveTimeKeyframe();
+    void saveTimeKeyframeToTimeline();
 
     /**
      * Used to trigger a save of a script to the recording file, but only if a recording
@@ -234,7 +234,7 @@ public:
      *
      * \param scriptToSave String of the Lua command to be saved
      */
-    void saveScriptKeyframe(std::string scriptToSave);
+    void saveScriptKeyframeToTimeline(std::string scriptToSave);
 
     /**
      * \return The Lua library that contains all Lua functions available to affect the
@@ -551,7 +551,7 @@ protected:
     struct timelineEntry {
         RecordedType keyframeType;
         unsigned int idxIntoKeyframeTypeArray;
-        double timestamp;
+        Timestamps t3stamps;
     };
     ExternInteraction _externInteract;
     double _timestampRecordStarted = 0.0;
@@ -559,9 +559,11 @@ protected:
     double _timestampPlaybackStarted_simulation = 0.0;
     double _timestampApplicationStarted_simulation = 0.0;
     bool hasCameraChangedFromPrev(datamessagestructures::CameraKeyframe kfNew);
-    double appropriateTimestamp(double timeOs, double timeRec, double timeSim);
+    double appropriateTimestamp(Timestamps t3stamps);
     double equivalentSimulationTime(double timeOs, double timeRec, double timeSim);
     double equivalentApplicationTime(double timeOs, double timeRec, double timeSim);
+    void recordCurrentTimePauseState(const Timestamps tripleTimestamp);
+    void recordCurrentTimeRate(const Timestamps tripleTimestamp);
     bool handleRecordingFile(std::string filenameIn);
     static bool isPath(std::string& filename);
     void removeTrailingPathSlashes(std::string& filename);
@@ -572,18 +574,21 @@ protected:
     bool playbackAddEntriesToTimeline();
     void signalPlaybackFinishedForComponent(RecordedType type);
     void findFirstCameraKeyframeInTimeline();
+    Timestamps generateCurrentTimestamp3(double keyframeTime);
     static void saveStringToFile(const std::string& s, unsigned char* kfBuffer,
         size_t& idx, std::ofstream& file);
     static void saveKeyframeToFileBinary(unsigned char* bufferSource, size_t size,
         std::ofstream& file);
 
-    bool addKeyframe(double timestamp,
+    bool addKeyframe(Timestamps t3stamps,
         interaction::KeyframeNavigator::CameraPose keyframe, int lineNum);
-    bool addKeyframe(double timestamp, datamessagestructures::TimeKeyframe keyframe,
-        int lineNum);
-    bool addKeyframe(double timestamp, std::string scriptToQueue, int lineNum);
-    bool addKeyframeToTimeline(RecordedType type, size_t indexIntoTypeKeyframes,
-        double timestamp, int lineNum);
+    bool addKeyframe(Timestamps t3stamps,
+        datamessagestructures::TimeKeyframe keyframe, int lineNum);
+    bool addKeyframe(Timestamps t3stamps,
+        std::string scriptToQueue, int lineNum);
+    bool addKeyframeToTimeline(std::vector<timelineEntry>& timeline, RecordedType type,
+            size_t indexIntoTypeKeyframes, Timestamps t3stamps, int lineNum);
+
     void moveAheadInTime();
     void lookForNonCameraKeyframesThatHaveComeDue(double currTime);
     void updateCameraWithOrWithoutNewKeyframes(double currTime);
@@ -607,6 +612,7 @@ protected:
         const int lineNum);
     void saveSingleKeyframeScript(datamessagestructures::ScriptMessage& kf,
         Timestamps& times, DataMode mode, std::ofstream& file, unsigned char* buffer);
+    void saveScriptKeyframeToPropertiesBaseline(std::string script);
     unsigned int findIndexOfLastCameraKeyframeInTimeline();
     bool doesTimelineEntryContainCamera(unsigned int index) const;
     std::vector<std::pair<CallbackHandle, StateChangeCallback>> _stateChangeCallbacks;
@@ -643,6 +649,7 @@ protected:
     std::string _playbackLineParsing;
     std::ofstream _recordFile;
     int _playbackLineNum = 1;
+    int _recordingEntryNum = 1;
     KeyframeTimeRef _playbackTimeReferenceMode;
     datamessagestructures::CameraKeyframe _prevRecordedCameraKeyframe;
     bool _playbackActive_camera = false;
@@ -670,7 +677,12 @@ protected:
     std::vector<datamessagestructures::TimeKeyframe> _keyframesTime;
     std::vector<std::string> _keyframesScript;
     std::vector<timelineEntry> _timeline;
-    std::vector<std::string> _keyframesSavePropertiesBaseline;
+
+    std::vector<std::string> _keyframesSavePropertiesBaseline_scripts;
+    std::vector<timelineEntry> _keyframesSavePropertiesBaseline_timeline;
+
+    std::vector<Timestamps> _keyframesSavePropertiesTripleTimestamps;
+    std::vector<std::string> _propertyBaselinesSaved;
 
     unsigned int _idxTimeline_nonCamera = 0;
     unsigned int _idxTime = 0;
