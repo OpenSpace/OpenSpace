@@ -76,7 +76,7 @@ private:
     properties::FloatProperty _lineWidth;
     properties::Vec3Property _color;
     properties::FloatProperty _opacity;
-    properties::IntProperty _nRenderedAircrafts;
+    properties::IntProperty _nRenderedAircraft;
 
     struct AircraftVBOLayout {
         float latitude = static_cast<float>(_THRESHOLD);

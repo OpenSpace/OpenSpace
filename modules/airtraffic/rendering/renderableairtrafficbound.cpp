@@ -45,12 +45,14 @@ namespace ghoul::opengl {
 
 namespace {
 
-    constexpr const std::array<const char*, 5> UniformNames = {
+    constexpr const std::array<const char*, 7> UniformNames = {
         "modelViewProjection",
         "color",
         "opacity",
         "latitudeThreshold",
         "longitudeThreshold",
+        "cameraPosition",
+        "modelTransform"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
@@ -62,19 +64,19 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
        "Opacity",
        "Opacity",
-       "The opacity of the lines used to represent aircrafts."
+       "The opacity of the lines used to represent the bounding box."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LatitudeThresholdInfo = {
        "latitudeThreshold",
        "Latitude Threshold",
-       "Minimum and maximum latitude for aircrafts."
+       "Minimum and maximum latitude for all aircraft."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LongitudeThresholdInfo = {
        "longitudeThreshold",
        "Longitude Threshold",
-       "Minimum and maximum longitude for aircrafts."
+       "Minimum and maximum longitude for all aircraft."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
@@ -188,11 +190,18 @@ namespace openspace {
         _shader->setUniform(_uniformCache.opacity, _opacity);
         _shader->setUniform(_uniformCache.latitudeThreshold, _latitudeThreshold);
         _shader->setUniform(_uniformCache.longitudeThreshold, _longitudeThreshold);
+        _shader->setUniform(_uniformCache.cameraPosition, glm::vec3(data.camera.positionVec3()));
+        _shader->setUniform(_uniformCache.modelTransform, glm::mat4(modelTransform));
+
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_ALWAYS);
 
         glBindVertexArray(_vertexArray);
         glLineWidth(_lineWidth);
 
         glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(_vertexBufferData.size()));
+
+        glDepthFunc(GL_LESS);
 
         glBindVertexArray(0);
 

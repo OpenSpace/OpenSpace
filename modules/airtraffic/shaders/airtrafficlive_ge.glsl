@@ -23,13 +23,14 @@
  ****************************************************************************************/
 #version __CONTEXT__
 #define PI 3.1415926538
+#include "airtraffic_utilities.glsl"
 
 layout (lines) in;
 layout (line_strip, max_vertices = 2) out;
 
 const float EPSILON = 1e-5;
-const float Parsec = 3.0856776e16;
-const float RADII = 6378137.0; // Earth is approximated as a sphere update if changed. 
+const float distThreshold = 20000.0;
+
 
 //in float vs_vertexID[];
 in vec4 vs_position[];
@@ -44,31 +45,12 @@ noperspective out vec2 ge_mathLine;
 
 uniform float trailSize; 
 
-// Uses haversine formula, in meters
-float greatCircleDistance(float lat1, float lon1, float lat2, float lon2) {
-    // distance between latitudes 
-    // and longitudes 
-    float dLat = (lat2 - lat1) * PI / 180.0; 
-    float dLon = (lon2 - lon1) * PI / 180.0; 
-  
-    // convert to radians 
-    lat1 = (lat1) * PI / 180.0; 
-    lat2 = (lat2) * PI / 180.0; 
-  
-    // apply formulae 
-    float a = pow(sin(dLat / 2), 2) +  pow(sin(dLon / 2), 2) *  cos(lat1) * cos(lat2); 
-     
-    float c = 2 * asin(sqrt(a)); 
- 
-    return RADII * c; 
-}
-
  void main(){
 
     float dist = greatCircleDistance(vs_latlon[0].x, vs_latlon[0].y, vs_latlon[1].x, vs_latlon[1].y);
     vec4 color = vs_interpColor[0];
     
-    if(length(gl_in[0].gl_Position) < EPSILON || length(gl_in[1].gl_Position) < EPSILON || dist > 20000.0) {
+    if(length(gl_in[0].gl_Position) < EPSILON || length(gl_in[1].gl_Position) < EPSILON || dist > distThreshold) {
          return;
     }
 

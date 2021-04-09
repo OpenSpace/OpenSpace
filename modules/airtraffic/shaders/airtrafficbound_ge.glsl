@@ -24,14 +24,14 @@
 
 #version __CONTEXT__
 
-#define PI 3.1415926538
+#include "airtraffic_utilities.glsl"
 
+// max_vertices seems toi be limited by hardware
+// more segments would be preffered for a smoother line
 layout (lines) in;
-layout (line_strip, max_vertices = 88) out;
+layout (line_strip, max_vertices = 64) out;
 
 const float EPSILON = 1e-5;
-const float RADII = 6378137.0; // Earth is approximated as a sphere, update if changed. 
-const float THRESHOLD = -9998;
 
 uniform mat4 modelViewProjection;
 uniform vec2 latitudeThreshold;
@@ -43,74 +43,26 @@ in float vs_vertexID[];
 
 out vec4 ge_position;
 out vec4 ge_interpColor;
-
-float greatCircleDistance(float lat1, float lon1, float lat2, float lon2) {
-    // distance between latitudes 
-    // and longitudes 
-    float dLat = (lat2 - lat1); 
-    float dLon = (lon2 - lon1);
-  
-    // apply formulae 
-    float a = pow(sin(dLat / 2.f), 2.f) +  pow(sin(dLon / 2.f), 2.f) *  cos(lat1) * cos(lat2); 
-     
-    float c = 2 * asin(sqrt(a)); 
- 
-    return RADII * c; 
-}
-
-vec2 findIntermediatePoint(vec2 latlon1, vec2 latlon2, float f) {
-    vec2 latlonR1 = latlon1 * PI / 180.0;
-    vec2 latlonR2 = latlon2 * PI / 180.0;
-
-    float phi1 = latlonR1.x; float lambda1 = latlonR1.y;
-    float phi2 = latlonR2.x; float lambda2 = latlonR2.y;
-
-    float delta = greatCircleDistance(phi1, lambda1, phi2, lambda2) / RADII; 
-    
-    float a = (sin(1-f)*delta) / sin(delta);
-    float b = sin(f*delta) / sin(delta);
-
-     float x = a*cos(phi1)*cos(lambda1) +  b*cos(phi2)*cos(lambda2);
-     float y = a*cos(phi1)*sin(lambda1) +  b*cos(phi2)*sin(lambda2);
-     float z = a*sin(phi1) + b*sin(phi2);
-     
-     float phi3 = atan(z,sqrt(x*x+y*y));
-     float lambda3 = atan(y,x);
-
-     return vec2(phi3, lambda3);
-}
-
-vec4 geoToCartConversion(float lat, float lon, float alt){
-
-    float x = (RADII + alt) * cos(lat) * cos(lon);
-    float y = (RADII + alt)* cos(lat) * sin(lon);
-    float z = (RADII + alt)* sin(lat);
-
-    return vec4(x, y, z, 1.0);
-}
-
+out vec4 position;
 
  void main(){
 
-    // remove seam
-    if(length(latitudeThreshold - vec2(-90.f, 90.f)) < EPSILON &&
-       length(longitudeThreshold - vec2(-180.f, 180.f)) < EPSILON) return;
+    // Remove seam
+    if(length(latitudeThreshold - vec2(-90.0, 90.0)) < EPSILON &&
+       length(longitudeThreshold - vec2(-180., 180.0)) < EPSILON) return;
 
-    vec2 position1 = vec2(latitudeThreshold.x, longitudeThreshold.x) * PI / 180.0;
-    vec2 position2 = vec2(latitudeThreshold.y, longitudeThreshold.x) * PI / 180.0;
-    vec2 position3 = vec2(latitudeThreshold.y, longitudeThreshold.y) * PI / 180.0;
-    vec2 position4 = vec2(latitudeThreshold.x, longitudeThreshold.y) * PI / 180.0;
-
-    // Sets the "altitude" of the boundaries
-    float alt = 100000;
+    vec2 position1 = radians(vec2(latitudeThreshold.x, longitudeThreshold.x));
+    vec2 position2 = radians(vec2(latitudeThreshold.y, longitudeThreshold.x));
+    vec2 position3 = radians(vec2(latitudeThreshold.y, longitudeThreshold.y));
+    vec2 position4 = radians(vec2(latitudeThreshold.x, longitudeThreshold.y));
 
     // Sets the number of points per line segment
-    float nPoints = 20;
+    float nPoints = 15; // Total #vertices is 4 * nPoints
+    float alt = 0.0; // zero altitude i.e on the surface
 
-    // Mid points
     for(int i = 0; i <= nPoints; ++i) {
         vec2 point = position1 + float(i)/nPoints*(position2-position1);
-        vec4 position = geoToCartConversion(point.x, point.y, alt);
+        position = geoToCartConversion(point.x, point.y, alt);
         ge_position = modelViewProjection * position;
         ge_interpColor = vs_interpColor[0];
         gl_Position = ge_position;
@@ -119,7 +71,7 @@ vec4 geoToCartConversion(float lat, float lon, float alt){
 
     for(int i = 0; i <= nPoints; ++i) {
         vec2 point = position2 + float(i)/nPoints*(position3-position2);
-        vec4 position = geoToCartConversion(point.x, point.y, alt);
+        position = geoToCartConversion(point.x, point.y, alt);
         ge_position = modelViewProjection * position;
         ge_interpColor = vs_interpColor[0];
         gl_Position = ge_position;
@@ -128,7 +80,7 @@ vec4 geoToCartConversion(float lat, float lon, float alt){
 
     for(int i = 0; i <= nPoints; ++i) {
         vec2 point = position3 + float(i)/nPoints*(position4-position3);
-        vec4 position = geoToCartConversion(point.x, point.y, alt);
+        position = geoToCartConversion(point.x, point.y, alt);
         ge_position = modelViewProjection * position;
         ge_interpColor = vs_interpColor[0];
         gl_Position = ge_position;
@@ -137,7 +89,7 @@ vec4 geoToCartConversion(float lat, float lon, float alt){
 
     for(int i = 0; i <= nPoints; ++i) {
         vec2 point = position4 + float(i)/nPoints*(position1-position4);
-        vec4 position = geoToCartConversion(point.x, point.y, alt);
+        position = geoToCartConversion(point.x, point.y, alt);
         ge_position = modelViewProjection * position;
         ge_interpColor = vs_interpColor[0];
         gl_Position = ge_position;

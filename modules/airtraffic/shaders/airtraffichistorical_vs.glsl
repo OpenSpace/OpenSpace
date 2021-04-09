@@ -24,7 +24,7 @@
  #version __CONTEXT__
 
 #define PI 3.1415926538
-
+#include "airtraffic_utilities.glsl"
 
 /*
 Continents:       lon1,  lat1,    lon2, lat2
@@ -54,8 +54,9 @@ out vec4 vs_interpColor;
 layout (location = 0) in vec2 vertexPosition; // lat, lon
 layout (location = 1) in ivec2 vertexInfo; // firstSeen, lastSeen
 
-const float RADII = 6378137.0; // Earth is approximated as a sphere update if changed. 
+//const float RADII = 6378137.0; // Earth is approximated as a sphere update if changed. 
 
+/*
 vec4 geoToCartConversion(float lat, float lon, float alt){
     if(latitudeThreshold.x < lat && lat < latitudeThreshold.y 
     && longitudeThreshold.x < lon && lon < longitudeThreshold.y) {
@@ -71,6 +72,7 @@ vec4 geoToCartConversion(float lat, float lon, float alt){
     }
     else return vec4(0.f);
 }
+*/
 
 // Set color based on continent
 vec4 continentColor(vec2 latlon) {
@@ -106,16 +108,18 @@ vec4 continentColor(vec2 latlon) {
 
 void main() {
 
-    const float maxFlights = 103637.0; // Maximum daily flights in dataset
-    const float minFlights = 19732.0; // Minimum daily flights in dataset (not counting erronous data)
-
     vs_vertexID = float(gl_VertexID);
     vec4 position;
 
-    position = geoToCartConversion(vertexPosition.x, vertexPosition.y, 10000.0);
+    if(latitudeThreshold.x < vertexPosition.x && vertexPosition.x < latitudeThreshold.y 
+        && longitudeThreshold.x < vertexPosition.y && vertexPosition.y < longitudeThreshold.y) 
+    {
+        position = geoToCartConversion(radians(vertexPosition.x), radians(vertexPosition.y), 0.0);
+    }
+    else position = vec4(0.0);
    
     vs_interpColor = continentColor(vertexPosition);
-    vs_latlon = vertexPosition * PI / 180.0;
+    vs_latlon = radians(vertexPosition);
     vs_position = modelViewProjection * position;
     vs_vertexInfo = vertexInfo;
     gl_Position = vs_position;

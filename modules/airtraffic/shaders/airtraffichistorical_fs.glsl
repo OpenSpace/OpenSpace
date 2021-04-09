@@ -24,9 +24,14 @@
 
 #include "fragment.glsl"
 #include "floatoperations.glsl"
+#include "airtraffic_utilities.glsl"
+
+uniform vec3 cameraPosition;
+uniform mat4 modelTransform;
 
 in vec4 ge_position;
 in vec4 ge_interpColor;
+in vec4 position;
 
 Fragment getFragment() {
     Fragment frag;
@@ -37,6 +42,9 @@ Fragment getFragment() {
     frag.color = ge_interpColor;
 
     frag.gNormal = vec4(1.0, 1.0, 1.0, 1.0);
+
+    // Discard lines hidden by Earth
+    if(!visible(position, modelTransform, cameraPosition)) {  discard;  }
 
     
     return frag;

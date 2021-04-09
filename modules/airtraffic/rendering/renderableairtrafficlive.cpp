@@ -68,25 +68,25 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
        "LineWidth",
        "Line Width",
-       "The width of the lines used to represent aircrafts."
+       "The width of the lines used to represent aircraft."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
        "Color",
        "Color",
-       "The color used to represent aircrafts."
+       "The color used to represent aircraft."
     };
 
     constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
        "Opacity",
        "Opacity",
-       "The opacity of the lines used to represent aircrafts."
+       "The opacity of the lines used to represent aircraft."
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderedAircraftsInfo = {
        "RenderedAircrafts",
-       "Rendered Aircrafts",
-       "The number of aircrafts in traffic right now."
+       "Live Aircraft",
+       "The number of live aircraft in traffic right now."
     };
 } // namespace
 
@@ -132,13 +132,13 @@ RenderableAirTrafficLive::RenderableAirTrafficLive(const ghoul::Dictionary& dict
     , _lineWidth(LineWidthInfo, 14.14f, 1.f, 30.f) // default, min, max 
     , _color(ColorInfo, glm::vec3(1.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
     , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
-    , _nRenderedAircrafts(RenderedAircraftsInfo, 0, 0, 10000)
+    , _nRenderedAircraft(RenderedAircraftsInfo, 0, 0, 10000)
     {
         addProperty(_lineWidth);
         addProperty(_color);
         addProperty(_opacity);
-        _nRenderedAircrafts.setReadOnly(true);
-        addProperty(_nRenderedAircrafts);
+        _nRenderedAircraft.setReadOnly(true);
+        addProperty(_nRenderedAircraft);
  
         setRenderBin(RenderBin::PostDeferredTransparent);
     }
@@ -179,7 +179,10 @@ RenderableAirTrafficLive::RenderableAirTrafficLive(const ghoul::Dictionary& dict
     void RenderableAirTrafficLive::render(const RenderData& data, RendererTasks& rendererTask) {
 
         // Return if data is empty or time is from more than 3 minutes ago
-        if (_data.empty() || abs(Time::now().j2000Seconds() - data.time.j2000Seconds()) > 60 * 3) return;
+        if (_data.empty() || abs(Time::now().j2000Seconds() - data.time.j2000Seconds()) > 60 * 3) { 
+            _nRenderedAircraft = 0;
+            return;
+        }
 
         // Trigger data update
         if (abs(data.time.j2000Seconds() - _deltaTime) > 10.0 && !_isDataLoading) {
@@ -313,10 +316,10 @@ RenderableAirTrafficLive::RenderableAirTrafficLive(const ghoul::Dictionary& dict
 
     void RenderableAirTrafficLive::updateBuffers() {
 
-        _nRenderedAircrafts = _data["states"].size();
+        _nRenderedAircraft = _data["states"].size();
         
         _vertexBufferData.clear();
-        _vertexBufferData.resize(_TRAILSIZE * _nRenderedAircrafts);
+        _vertexBufferData.resize(_TRAILSIZE * _nRenderedAircraft);
 
         size_t vertexBufIdx = 0;
 

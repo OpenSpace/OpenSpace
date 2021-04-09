@@ -41,6 +41,7 @@ set(SOURCE_FILES
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
+  shaders/airtraffic_utilities.glsl
   shaders/airtrafficlive_vs.glsl
   shaders/airtrafficlive_fs.glsl
   shaders/airtrafficlive_ge.glsl

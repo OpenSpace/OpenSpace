@@ -83,7 +83,7 @@ private:
    
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
 
-    UniformCache(modelViewProjection, color, opacity, latitudeThreshold, longitudeThreshold) _uniformCache;
+    UniformCache(modelViewProjection, color, opacity, latitudeThreshold, longitudeThreshold, cameraPosition, modelTransform) _uniformCache;
 
     GLuint _vertexArray = 0;
     GLuint _vertexBuffer = 0;

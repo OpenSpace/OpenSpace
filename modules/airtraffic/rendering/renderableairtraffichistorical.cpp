@@ -53,18 +53,20 @@ namespace ghoul::opengl {
 
 namespace {
     
-    constexpr const std::array<const char*, 5> UniformNames = {
+    constexpr const std::array<const char*, 7> UniformNames = {
         "modelViewProjection", 
         "opacity", 
         "latitudeThreshold", 
         "longitudeThreshold",
-        "time"
+        "time",
+        "cameraPosition",
+        "modelTransform"
     };
 
     constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
        "Opacity",
        "Opacity",
-       "The opacity of the lines used to represent aircrafts."
+       "The opacity of the lines used to represent aircraft."
     };
 
     constexpr openspace::properties::Property::PropertyInfo DailyFlightsInfo = {
@@ -229,9 +231,14 @@ RenderableAirTrafficHistorical::RenderableAirTrafficHistorical(const ghoul::Dict
         _shader->setUniform(_uniformCache.latitudeThreshold, RenderableAirTrafficBound::getLatBound());
         _shader->setUniform(_uniformCache.longitudeThreshold, RenderableAirTrafficBound::getLonBound());
         // Time is sent to the shaders as a UNIX timestamp for easy interpolation
-        _shader->setUniform(_uniformCache.time, static_cast<int>(data.time.j2000Seconds() + 365.25 * 24 * 60 * 60 * 30)); 
+        _shader->setUniform(_uniformCache.time, static_cast<int>(data.time.j2000Seconds() + 365.25 * 24 * 60 * 60 * 30));
+        _shader->setUniform(_uniformCache.cameraPosition, glm::vec3(data.camera.positionVec3()));
+        _shader->setUniform(_uniformCache.modelTransform, glm::mat4(modelTransform));
 
         glLineWidth(1.f);
+
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_ALWAYS);
         
         // Draw the two buffers whos date is current and next
         if (_bufferA.date ==_currentDate || _bufferA.date == _nextDate) {
@@ -253,6 +260,8 @@ RenderableAirTrafficHistorical::RenderableAirTrafficHistorical(const ghoul::Dict
             glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(_bufferC.vertexBufferData.size()));
             glBindVertexArray(0);
         }
+
+        glDepthFunc(GL_LESS);
 
         _shader->deactivate();
         

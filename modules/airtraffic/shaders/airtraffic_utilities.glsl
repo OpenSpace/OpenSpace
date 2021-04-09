@@ -22,48 +22,43 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#include "fragment.glsl"
+#include "floatoperations.glsl"
 
-#include "airtraffic_utilities.glsl"
+const float RADII = 6378137.0;
 
-layout (location = 0) in vec3 vertexPosition; // lat, long, alt 
-
-uniform mat4 modelViewProjection;
-uniform float trailSize;
-uniform ivec2 resolution;
-uniform vec3 color;
-uniform float opacity;
-uniform vec2 latitudeThreshold;
-uniform vec2 longitudeThreshold;
-
-noperspective out vec2 mathLine;
-out vec4 vs_position;
-out vec4 vs_interpColor;
-out vec2 vs_latlon;
-out float vs_vertexID;
-
-void main() {
-
-    vs_vertexID = float(gl_VertexID);
-    vs_interpColor = vec4(color, opacity * pow(1.0 - mod(vs_vertexID, trailSize)/(trailSize-1), 2.0));
-    vec4 position;
-
-    if(latitudeThreshold.x < vertexPosition.x && vertexPosition.x < latitudeThreshold.y 
-        && longitudeThreshold.x < vertexPosition.y && vertexPosition.y < longitudeThreshold.y) 
-    {
-        position = geoToCartConversion(radians(vertexPosition.x), radians(vertexPosition.y), vertexPosition.z);
-    }
-    else position = vec4(0.0);
+bool visible(vec4 pos, mat4 modelTransform, vec3 cameraPosition) {
     
-    
-    vs_latlon = vec2(radians(vertexPosition.x), radians(vertexPosition.y));
+    vec3 earthPosition = vec3(0.0); // Earth it positioned at 0,0,0 in its local coordinate system
 
-    vs_position = modelViewProjection * position;
-    vec4 vs_positionNDC = vs_position / vs_position.w;
-    gl_Position = vs_position;
-    
-    mathLine = 0.5 * (vs_positionNDC.xy + vec2(1.0)) * vec2(resolution);
+    vec3 cameraInLocal = vec3(inverse(modelTransform) * vec4(cameraPosition, 1.0));
+
+    float cameraToFrag = length(vec3(vec3(pos) - cameraInLocal));
+    float cameraToEarth = length(cameraInLocal);
+    float L = sqrt(cameraToEarth * cameraToEarth - RADII * RADII);
+
+    return cameraToFrag < L;
 }
 
+float greatCircleDistance(float lat1, float lon1, float lat2, float lon2) {
+    // distance between latitudes 
+    // and longitudes 
+    float dLat = (lat2 - lat1); 
+    float dLon = (lon2 - lon1);
+  
+    // apply formulae 
+    float a = pow(sin(dLat / 2.f), 2.f) +  pow(sin(dLon / 2.f), 2.f) *  cos(lat1) * cos(lat2); 
+     
+    float c = 2 * asin(sqrt(a)); 
+ 
+    return RADII * c; 
+}
 
+vec4 geoToCartConversion(float lat, float lon, float alt){
 
+    float x = (RADII + alt) * cos(lat) * cos(lon);
+    float y = (RADII + alt) * cos(lat) * sin(lon);
+    float z = (RADII + alt) * sin(lat);
+
+    return vec4(x, y, z, 1.0);
+}

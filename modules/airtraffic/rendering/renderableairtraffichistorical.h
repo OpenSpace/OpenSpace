@@ -206,7 +206,7 @@ private:
 
     // Initilize shader program an set Uniforms 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
-    UniformCache(modelViewProjection, opacity, latitudeThreshold, longitudeThreshold, time) _uniformCache;
+    UniformCache(modelViewProjection, opacity, latitudeThreshold, longitudeThreshold, time, cameraPosition, modelTransform) _uniformCache;
     
     // Date structs,
     // these will correspond to "today", "tomorrow",
