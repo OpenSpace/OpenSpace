@@ -29,6 +29,8 @@
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/selectionproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/list/doublelistproperty.h>
+#include <openspace/properties/list/intlistproperty.h>
 #include <openspace/properties/list/stringlistproperty.h>
 #include <openspace/properties/matrix/dmat2property.h>
 #include <openspace/properties/matrix/dmat3property.h>
@@ -265,18 +267,13 @@ void renderStringProperty(Property* prop, const std::string& ownerName,
     ImGui::PopID();
 }
 
-void renderStringListProperty(Property* prop, const std::string& ownerName,
-                              IsRegularProperty isRegular, ShowToolTip showTooltip,
-                              double tooltipDelay)
+void renderListProperty(const std::string& name, const std::string& fullIdentifier,
+                        const std::string& stringValue, IsRegularProperty isRegular)
 {
-    ghoul_assert(prop, "prop must not be nullptr");
-    StringListProperty* p = static_cast<StringListProperty*>(prop);
-    const std::string& name = p->guiName();
-    ImGui::PushID((ownerName + "." + name).c_str());
+    ghoul_assert(stringValue.size() > 2, "an empty list should have the string value '[]'");
 
-    std::string value;
-    p->getStringValue(value);
-    // const std::string value = p->value();
+    // Remove brackets from the string value
+    std::string value = stringValue.substr(1, stringValue.size() - 2);
 
     static const int bufferSize = 512;
     static char buffer[bufferSize];
@@ -291,9 +288,6 @@ void renderStringListProperty(Property* prop, const std::string& ownerName,
         bufferSize,
         ImGuiInputTextFlags_EnterReturnsTrue
     );
-    if (showTooltip) {
-        renderTooltip(prop, tooltipDelay);
-    }
 
     if (hasNewValue) {
         std::vector<std::string> tokens = ghoul::tokenizeString(std::string(buffer), ',');
@@ -301,16 +295,77 @@ void renderStringListProperty(Property* prop, const std::string& ownerName,
         for (std::string& token : tokens) {
             if (!token.empty()) {
                 ghoul::trimWhitespace(token);
-                script += "[[" + token + "]],";
+                script += "" + token + ",";
             }
         }
         script += "}";
 
         executeScript(
-            p->fullyQualifiedIdentifier(),
+            fullIdentifier,
             std::move(script),
             isRegular
         );
+    }
+}
+
+void renderDoubleListProperty(Property* prop, const std::string& ownerName,
+                              IsRegularProperty isRegular, ShowToolTip showTooltip,
+                              double tooltipDelay)
+{
+    ghoul_assert(prop, "prop must not be nullptr");
+    DoubleListProperty* p = static_cast<DoubleListProperty*>(prop);
+    const std::string& name = p->guiName();
+    ImGui::PushID((ownerName + "." + name).c_str());
+
+    std::string value;
+    p->getStringValue(value);
+
+    renderListProperty(name, p->fullyQualifiedIdentifier(), value, isRegular);
+
+    if (showTooltip) {
+        renderTooltip(prop, tooltipDelay);
+    }
+
+    ImGui::PopID();
+}
+
+void renderIntListProperty(Property* prop, const std::string& ownerName,
+                           IsRegularProperty isRegular, ShowToolTip showTooltip,
+                           double tooltipDelay)
+{
+    ghoul_assert(prop, "prop must not be nullptr");
+    IntListProperty* p = static_cast<IntListProperty*>(prop);
+    const std::string& name = p->guiName();
+    ImGui::PushID((ownerName + "." + name).c_str());
+
+    std::string value;
+    p->getStringValue(value);
+
+    renderListProperty(name, p->fullyQualifiedIdentifier(), value, isRegular);
+
+    if (showTooltip) {
+        renderTooltip(prop, tooltipDelay);
+    }
+
+    ImGui::PopID();
+}
+
+void renderStringListProperty(Property* prop, const std::string& ownerName,
+                              IsRegularProperty isRegular, ShowToolTip showTooltip,
+                              double tooltipDelay)
+{
+    ghoul_assert(prop, "prop must not be nullptr");
+    StringListProperty* p = static_cast<StringListProperty*>(prop);
+    const std::string& name = p->guiName();
+    ImGui::PushID((ownerName + "." + name).c_str());
+
+    std::string value;
+    p->getStringValue(value);
+
+    renderListProperty(name, p->fullyQualifiedIdentifier(), value, isRegular);
+
+    if (showTooltip) {
+        renderTooltip(prop, tooltipDelay);
     }
 
     ImGui::PopID();
