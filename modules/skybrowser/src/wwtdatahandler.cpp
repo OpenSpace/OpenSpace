@@ -43,8 +43,12 @@ namespace openspace {
         XMLElement* element = root->FirstChildElement(std::string("Folder").c_str());
         // If there are no folders, or there are folder but without urls, stop recursion
         if (!element || (element && !element->FindAttribute("Url"))) {
-
-            imageUrls.push_back(url);
+            // Save the url
+            std::string collectionName = root->FindAttribute("Name") ? root->FindAttribute("Name")->Value() : "";
+            if (collectionName != "") {
+                ImageCollection newCollection{ collectionName, url };
+                imageUrls.push_back(newCollection);
+            }
             xmls.push_back(doc);
             LINFO("Saving " + url);
 
@@ -68,6 +72,12 @@ namespace openspace {
             tinyxml2::XMLDocument* doc = new tinyxml2::XMLDocument();
           
             if (doc->LoadFile(entry.path().u8string().c_str()) == tinyxml2::XMLError::XML_SUCCESS) {
+                tinyxml2::XMLElement* root = doc->RootElement();
+                std::string collectionName = root->FindAttribute("Name") ? root->FindAttribute("Name")->Value() : "";
+                if (collectionName != "") {
+                    ImageCollection newCollection{collectionName, entry.path().u8string()};               
+                    imageUrls.push_back(newCollection);
+                }
                 xmls.push_back(doc);
             }
         }
@@ -90,7 +100,7 @@ namespace openspace {
         return images.size();
     }
 
-    const std::vector<std::string>& WWTDataHandler::getAllImageCollectionUrls() const {
+    const std::vector<ImageCollection>& WWTDataHandler::getAllImageCollectionUrls() const {
         return imageUrls;
     }
 

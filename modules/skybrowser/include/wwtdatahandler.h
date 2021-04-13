@@ -17,6 +17,12 @@ namespace openspace {
         bool hasCoords;
     };
 
+    struct ImageCollection {
+        std::string name;
+        std::string url;
+        bool loaded = false;
+    };
+
     class WWTDataHandler {
     
     public:
@@ -29,7 +35,7 @@ namespace openspace {
         void loadWTMLCollectionsFromDirectory(std::string directory);
         
         int loadAllImagesFromXMLs();
-        const std::vector<std::string>& getAllImageCollectionUrls() const;
+        const std::vector<ImageCollection>& getAllImageCollectionUrls() const;
         const std::vector<ImageData>& getLoadedImages() const;
 
     private:
@@ -43,7 +49,7 @@ namespace openspace {
         tinyxml2::XMLElement* getChildNode(tinyxml2::XMLElement* node, std::string name);
 
         std::vector<ImageData> images;
-        std::vector<std::string> imageUrls;
+        std::vector<ImageCollection> imageUrls;
         std::vector<tinyxml2::XMLDocument*> xmls;
 
     };

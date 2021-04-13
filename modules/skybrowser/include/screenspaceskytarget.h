@@ -44,7 +44,9 @@ namespace openspace {
         void setPosition(glm::vec3 pos);
        
         void translate(glm::vec2 translation, glm::vec2 position);
-       
+        // Only works for galactic coords outside of the solar system
+        void lookAtGalacticCoord(glm::dvec3 galacticCoord);
+
         glm::vec2 getScreenSpaceDimensions();
         glm::vec2 getUpperRightCornerScreenSpace();
         glm::vec2 getLowerLeftCornerScreenSpace();

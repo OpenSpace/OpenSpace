@@ -294,6 +294,18 @@ namespace openspace {
         // Convert to celestial coordinates
         return convertGalacticToCelestial(targetDirection);
     }
+    
+    void ScreenSpaceSkyTarget::lookAtGalacticCoord(glm::dvec3 galacticCoord) {
+
+        glm::dmat4 cameraInvRotMat = global::navigationHandler->camera()->viewRotationMatrix();
+        glm::dvec3 viewDirectionLocal = cameraInvRotMat * glm::dvec4(galacticCoord, 1.f);
+
+        glm::dvec2 angleCoordsLocal = glm::dvec2(atan(viewDirectionLocal.x / viewDirectionLocal.z), atan(viewDirectionLocal.y / viewDirectionLocal.z));
+        double projPlaneDistance = -2.1f;
+        glm::dvec2 imageCoordsScreenSpace = glm::dvec2(projPlaneDistance * tan(angleCoordsLocal.x), projPlaneDistance * tan(angleCoordsLocal.y));
+        // Translate target
+        translate(glm::vec2(imageCoordsScreenSpace) - getScreenSpacePosition(), getScreenSpacePosition());
+    }
 
     glm::dvec2 ScreenSpaceSkyTarget::convertGalacticToCelestial(glm::dvec3 rGal) const {
         // Used the math from this website: https://gea.esac.esa.int/archive/documentation/GD -->
