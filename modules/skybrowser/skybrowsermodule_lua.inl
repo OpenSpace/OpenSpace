@@ -57,7 +57,7 @@ namespace openspace::skybrowser::luascriptfunctions {
 			browser->getSkyTarget()->lookAtGalacticCoord(imageCoordsGalactic);
 
 			// In WWT, VFOV = ZoomLevel * 6
-			//browser->setFieldOfView(resultImage.zoomLevel * 6);
+			browser->setFieldOfView(resultImage.zoomLevel / 6);
 		} 
 		browser->sendMessageToWWT(browser->createMessageForSettingForegroundOpacityWWT(100));
 		return 1;
