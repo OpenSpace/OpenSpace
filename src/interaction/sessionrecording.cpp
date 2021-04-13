@@ -212,7 +212,8 @@ bool SessionRecording::startRecording(const std::string& filename) {
         _playbackActive_time = false;
         _playbackActive_script = false;
         _propertyBaselinesSaved.clear();
-        _keyframesSavePropertiesBaseline.clear();
+        _keyframesSavePropertiesBaseline_scripts.clear();
+        _keyframesSavePropertiesBaseline_timeline.clear();
         _recordingEntryNum = 1;
 
         _recordFile << FileHeaderTitle;
@@ -246,7 +247,7 @@ bool SessionRecording::startRecording(const std::string& filename) {
 void SessionRecording::recordCurrentTimePauseState(const Timestamps tripleTimestamp) {
     bool isPaused = global::timeManager->isPaused();
     std::string initialTimePausedCommand = "openspace.setPause(" +
-        isPaused ? "true" : "false" + ")";
+        std::string(isPaused ? "true" : "false") + ")";
     saveScriptKeyframeToPropertiesBaseline(initialTimePausedCommand);
 }
 
@@ -259,17 +260,86 @@ void SessionRecording::recordCurrentTimeRate(const Timestamps tripleTimestamp) {
 
 void SessionRecording::stopRecording() {
     if (_state == SessionState::Recording) {
-        for (std::string initPropScripts : _keyframesSavePropertiesBaseline) {
-            saveScriptKeyframeToTimeline(initPropScripts);
+        //Add all property baseline scripts to the beginning of the recording file
+        datamessagestructures::ScriptMessage smTmp;
+        for (timelineEntry initPropScripts : _keyframesSavePropertiesBaseline_timeline) {
+            if (initPropScripts.keyframeType == RecordedType::Script) {
+                smTmp._script = _keyframesSavePropertiesBaseline_scripts
+                    [initPropScripts.idxIntoKeyframeTypeArray];
+                saveSingleKeyframeScript(
+                    smTmp,
+                    initPropScripts.t3stamps,
+                    _recordingDataMode,
+                    _recordFile,
+                    _keyframeBuffer
+                );
+            }
         }
         for (timelineEntry entry : _timeline) {
-//TODO: Write each keyframe here
+            switch (entry.keyframeType) {
+            case RecordedType::Camera:
+                {
+                    interaction::KeyframeNavigator::CameraPose kf
+                        = _keyframesCamera[entry.idxIntoKeyframeTypeArray];
+                    glm::dquat tmpRotation(
+                        std::move(kf.rotation.w),
+                        std::move(kf.rotation.x),
+                        std::move(kf.rotation.y),
+                        std::move(kf.rotation.z)
+                    );
+                    datamessagestructures::CameraKeyframe kfMsg(
+                        std::move(kf.position),
+                        std::move(tmpRotation),
+                        std::move(kf.focusNode),
+                        std::move(kf.followFocusNodeRotation),
+                        std::move(kf.scale)
+                    );
+                    saveSingleKeyframeCamera(
+                        kfMsg,
+                        entry.t3stamps,
+                        _recordingDataMode,
+                        _recordFile,
+                        _keyframeBuffer
+                    );
+                    break;
+                }
+            case RecordedType::Time:
+                {
+                    datamessagestructures::TimeKeyframe tf
+                        = _keyframesTime[entry.idxIntoKeyframeTypeArray];
+                    saveSingleKeyframeTime(
+                        tf,
+                        entry.t3stamps,
+                        _recordingDataMode,
+                        _recordFile,
+                        _keyframeBuffer
+                    );
+                    break;
+                }
+            case RecordedType::Script:
+                {
+                    smTmp._script = _keyframesScript[entry.idxIntoKeyframeTypeArray];
+                    saveSingleKeyframeScript(
+                        smTmp,
+                        entry.t3stamps,
+                        _recordingDataMode,
+                        _recordFile,
+                        _keyframeBuffer
+                    );
+                    break;
+                }
+            default:
+                {
+                    break;
+                }
+            }
         }
         _state = SessionState::Idle;
         LINFO("Session recording stopped");
     }
     // Close the recording file
     _recordFile.close();
+    _cleanupNeeded = true;
 }
 
 bool SessionRecording::startPlayback(std::string& filename,
@@ -486,6 +556,9 @@ void SessionRecording::cleanUpPlayback() {
     _keyframesCamera.clear();
     _keyframesTime.clear();
     _keyframesScript.clear();
+    _keyframesSavePropertiesBaseline_scripts.clear();
+    _keyframesSavePropertiesBaseline_timeline.clear();
+    _propertyBaselinesSaved.clear();
     _idxTimeline_nonCamera = 0;
     _idxTime = 0;
     _idxScript = 0;

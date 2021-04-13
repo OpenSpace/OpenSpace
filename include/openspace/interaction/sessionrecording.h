@@ -680,8 +680,6 @@ protected:
 
     std::vector<std::string> _keyframesSavePropertiesBaseline_scripts;
     std::vector<timelineEntry> _keyframesSavePropertiesBaseline_timeline;
-
-    std::vector<Timestamps> _keyframesSavePropertiesTripleTimestamps;
     std::vector<std::string> _propertyBaselinesSaved;
 
     unsigned int _idxTimeline_nonCamera = 0;
