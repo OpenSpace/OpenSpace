@@ -112,7 +112,6 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    // Import Model from file
     std::string file = absPath(p.geometryFile.string());
     _geometry = ghoul::io::ModelReader::ref().loadModel(
         file,

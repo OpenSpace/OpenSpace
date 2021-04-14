@@ -183,7 +183,7 @@ TEST_CASE("DistanceConversion: Convert from meters", "[distanceconversion]") {
     REQUIRE(res == Approx(meters / (3.0 * 1609.344)));
 }
 
-TEST_CASE("DistanceConversion: Cross convertions", "[distanceconversion]") {
+TEST_CASE("DistanceConversion: Cross conversion", "[distanceconversion]") {
     const double unit = 1.0;
     double res;
 

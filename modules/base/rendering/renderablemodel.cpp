@@ -282,7 +282,6 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         }
     }
 
-    // Import Model from file
     std::string file = absPath(p.geometryFile.string());
     _geometry = ghoul::io::ModelReader::ref().loadModel(
         file,
@@ -552,10 +551,9 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         data.modelTransform.translation
     );
 
-    // This distance will be enough to render the globe as one pixel if the field of
+    // This distance will be enough to render the model as one pixel if the field of
     // view is 'fov' radians and the screen resolution is 'res' pixels.
-    //constexpr double fov = 2 * glm::pi<double>() / 6; // 60 degrees
-    //constexpr double tfov = tan(fov / 2.0); // doesn't work unfortunately
+    // Formula from RenderableGlobe
     constexpr double tfov = 0.5773502691896257;
     constexpr int res = 2880;
     const double maxDistance = res * boundingSphere() / tfov;
@@ -679,6 +677,13 @@ void RenderableModel::update(const UpdateData& data) {
         double startTime = data.time.convertTime(_animationStart);
         double duration = _geometry->animationDuration();
 
+        // The animation works in a time range 0 to duration where 0 in the animation is
+        // the given _animationStart time in OpenSpace. The time in OpenSpace then has to
+        // be converted to the animation time range, so the animation knows which
+        // keyframes it should interpolate between for each frame. The conversion is
+        // done in different ways depending on the animation mode.
+        // Explanation: s indicates start time, / indicates animation is played once forwards,
+        // \ indicates animation is played once backwards, time moves to the right.
         switch (_animationMode) {
             case AnimationMode::LoopFromStart:
                 // Start looping from the start time
@@ -690,7 +695,7 @@ void RenderableModel::update(const UpdateData& data) {
                 // in the initial position at the start time. std::fmod is not a
                 // true modulo function, it just calculates the remainder of the division
                 // which can be negative. To make it true modulo it is bumped up to
-                // possitive values when it is negative.
+                // positive values when it is negative
                 // //s//
                 relativeTime = std::fmod(now - startTime, duration);
                 if (relativeTime < 0.0) {
@@ -700,7 +705,7 @@ void RenderableModel::update(const UpdateData& data) {
             case AnimationMode::BounceFromStart:
                 // Bounce from the start position. Bounce means to do the animation
                 // and when it ends, play the animation in reverse to make sure the model
-                // goes back to its initial position bofore starting again. Avoids a
+                // goes back to its initial position before starting again. Avoids a
                 // visible jump from the last position to the first position when loop
                 // starts again
                 // s/\/\/\/\ 
