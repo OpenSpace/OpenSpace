@@ -57,6 +57,18 @@ struct Date {
     int month = 0;
     int day = 0;
 
+    Date() = default;
+
+    Date(double timeNow) {
+
+        std::time_t date = static_cast<time_t>(timeNow + 365.25 * 24 * 60 * 60 * 30);
+        tm* tempTime = gmtime(&date);
+
+        year = tempTime->tm_year + 1900;
+        month = tempTime->tm_mon + 1;
+        day = tempTime->tm_mday;
+    }
+
     Date getTomorrow() {
         const int days[12] = {
         31,28,31,30,31,30,31,31,30,31,30,31
@@ -192,7 +204,6 @@ private:
 
     void fillBuffer(Buffer& buffer);
     void sendToGLBuffer(Buffer& buffer);
-    Date convertDate(double timeNow); 
     
     // GUI properties
     properties::FloatProperty _opacity;
@@ -206,7 +217,7 @@ private:
 
     // Initilize shader program an set Uniforms 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
-    UniformCache(modelViewProjection, opacity, latitudeThreshold, longitudeThreshold, time, cameraPosition, modelTransform) _uniformCache;
+    UniformCache(modelViewProjection, opacity, latitudeThreshold, longitudeThreshold, time, cameraPosition, modelTransform, clipping) _uniformCache;
     
     // Date structs,
     // these will correspond to "today", "tomorrow",

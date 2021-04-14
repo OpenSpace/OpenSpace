@@ -24,6 +24,7 @@
 
 
 #include <modules/airtraffic/rendering/renderableairtrafficbound.h>
+#include <openspace/query/query.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/engine/globals.h>
@@ -45,14 +46,15 @@ namespace ghoul::opengl {
 
 namespace {
 
-    constexpr const std::array<const char*, 7> UniformNames = {
+    constexpr const std::array<const char*, 8> UniformNames = {
         "modelViewProjection",
         "color",
         "opacity",
         "latitudeThreshold",
         "longitudeThreshold",
         "cameraPosition",
-        "modelTransform"
+        "modelTransform",
+        "clipping"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
@@ -192,6 +194,15 @@ namespace openspace {
         _shader->setUniform(_uniformCache.longitudeThreshold, _longitudeThreshold);
         _shader->setUniform(_uniformCache.cameraPosition, glm::vec3(data.camera.positionVec3()));
         _shader->setUniform(_uniformCache.modelTransform, glm::mat4(modelTransform));
+
+           // Check if Earth is enabled and if clipping should be enabled or not
+        const Renderable* Earth = renderable("Earth");
+        if (Earth != nullptr) {
+            _shader->setUniform(_uniformCache.clipping, Earth->isEnabled());
+        }
+        else {
+            _shader->setUniform(_uniformCache.clipping, true);
+        }
 
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_ALWAYS);

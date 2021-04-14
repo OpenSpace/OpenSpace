@@ -26,7 +26,7 @@
 #include <modules/airtraffic/rendering/renderableairtraffichistorical.h>
 #include <modules/airtraffic/rendering/renderableairtrafficbound.h>
 
-
+#include <openspace/query/query.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/engine/globals.h>
@@ -53,14 +53,15 @@ namespace ghoul::opengl {
 
 namespace {
     
-    constexpr const std::array<const char*, 7> UniformNames = {
+    constexpr const std::array<const char*, 8> UniformNames = {
         "modelViewProjection", 
         "opacity", 
         "latitudeThreshold", 
         "longitudeThreshold",
         "time",
         "cameraPosition",
-        "modelTransform"
+        "modelTransform",
+        "clipping"
     };
 
     constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
@@ -104,6 +105,7 @@ RenderableAirTrafficHistorical::RenderableAirTrafficHistorical(const ghoul::Dict
     };
 
     void RenderableAirTrafficHistorical::initializeGL() {
+
         glGenVertexArrays(1, &_bufferA.vertexArray);
         glGenBuffers(1, &_bufferA.vertexBuffer);
 
@@ -145,11 +147,11 @@ RenderableAirTrafficHistorical::RenderableAirTrafficHistorical(const ghoul::Dict
 
     // The main render function
     void RenderableAirTrafficHistorical::render(const RenderData& data, RendererTasks& rendererTask) {
-        
+
         // Keep track of the current time in openspace to fetch correct data
         // YYYY-MM-DD
         double timeNow = data.time.j2000Seconds();
-        Date inDate = convertDate(timeNow);
+        Date inDate = Date(timeNow);
 
         bool reverseTime = _lastUpdate > timeNow;
 
@@ -235,12 +237,22 @@ RenderableAirTrafficHistorical::RenderableAirTrafficHistorical(const ghoul::Dict
         _shader->setUniform(_uniformCache.cameraPosition, glm::vec3(data.camera.positionVec3()));
         _shader->setUniform(_uniformCache.modelTransform, glm::mat4(modelTransform));
 
+
+        // Check if Earth is enabled and if clipping should be enabled or not
+        const Renderable* Earth = renderable("Earth");
+        if (Earth != nullptr) {
+            _shader->setUniform(_uniformCache.clipping, Earth->isEnabled());
+        }
+        else {
+            _shader->setUniform(_uniformCache.clipping, true);
+        }
+
         glLineWidth(1.f);
 
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_ALWAYS);
         
-        // Draw the two buffers whos date is current and next
+        // Draw the two buffers with dates that are either current or next
         if (_bufferA.date ==_currentDate || _bufferA.date == _nextDate) {
             // Draw A
             glBindVertexArray(_bufferA.vertexArray);
@@ -266,21 +278,6 @@ RenderableAirTrafficHistorical::RenderableAirTrafficHistorical(const ghoul::Dict
         _shader->deactivate();
         
     };
-
-
-   Date RenderableAirTrafficHistorical::convertDate(double timeNow) {
-
-        std::time_t date = static_cast<time_t>(timeNow + 365.25 * 24 * 60 * 60 * 30);
-        tm* tempTime = gmtime(&date);
-        
-        Date inDate;
-
-        inDate.year = tempTime->tm_year + 1900;
-        inDate.month = tempTime->tm_mon + 1;
-        inDate.day = tempTime->tm_mday;
-
-        return inDate;
-    }
 
     // Updating buffers and handles both async and sync cases
     void RenderableAirTrafficHistorical::updateBuffersReverse(const Date& date, const bool async) {

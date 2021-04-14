@@ -32,6 +32,7 @@ in vec4 position;
 
 uniform vec3 cameraPosition;
 uniform mat4 modelTransform;
+uniform bool clipping;
 
 
 Fragment getFragment() {
@@ -44,7 +45,7 @@ Fragment getFragment() {
     frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0); 
     
     // Discard lines hidden by Earth
-    if(!visible(position, modelTransform, cameraPosition)) {  discard;  }
+    if(clipping && !visible(position, modelTransform, cameraPosition)) {  discard;  }
 
     return frag;
 }
