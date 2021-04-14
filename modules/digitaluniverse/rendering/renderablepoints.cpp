@@ -170,6 +170,7 @@ RenderablePoints::RenderablePoints(const ghoul::Dictionary& dictionary)
     }
 
     _pointColor = p.color;
+    _pointColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_pointColor);
 
     if (p.texture.has_value()) {

@@ -153,6 +153,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     }
 
     _multiplyColor = p.multiplyColor.value_or(_multiplyColor);
+    _multiplyColor.setViewOption(properties::Property::ViewOptions::Color);
 
     addProperty(_billboard);
 
