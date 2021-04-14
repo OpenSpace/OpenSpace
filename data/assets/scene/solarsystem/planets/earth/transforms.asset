@@ -2,7 +2,7 @@ local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('scene/solarsystem/sun/transforms')
 asset.require("spice/base")
 
-
+local GSMKernel = asset.localResource("./kernels/GSM.ti")
 
 local EarthBarycenter = {
     Identifier = "EarthBarycenter",
@@ -73,11 +73,30 @@ local EarthIAU = {
     }
 }
 
+local GSMReferenceFrame = {
+    Identifier = "GSMReferenceFrame",
+    Parent = EarthBarycenter.Identifier,
+    Transform = {
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "GSM", --Geocentric Solar Magnetospheric
+            DestinationFrame = "GALACTIC",
+            Kernels = GSMKernel
+        }
+    },
+    GUI = {
+        Name = "GSM Reference Frame",
+        Path = "/Solar System/Planets/Earth",
+        Hidden = true
+    }
+}
+
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     EarthBarycenter,
     EarthCenter,
     EarthInertial,
-    EarthIAU
+    EarthIAU,
+    GSMReferenceFrame
 })
 
 

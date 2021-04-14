@@ -81,6 +81,8 @@ namespace {
     // [STRING] Value should be path to folder where states are saved (JSON/CDF input
     // => osfls output & oslfs input => JSON output)
     constexpr const char* KeyOutputFolder = "OutputFolder";
+    //[INT] Line Width should have a range
+    constexpr const char* KeyLineWidth = "LineWidth";
 
     // ------------- POSSIBLE STRING VALUES FOR CORRESPONDING MODFILE KEY ------------- //
     constexpr const char* ValueInputFileTypeCdf = "cdf";
@@ -203,6 +205,12 @@ namespace {
         "Quantity used for Masking",
         "Quantity used for masking."
     };
+    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+        "lineWidth",
+        "Line Width",
+        "This value specifies the line width of the field lines if the "
+        "selected rendering method includes lines."
+    };
     constexpr openspace::properties::Property::PropertyInfo OriginButtonInfo = {
         "focusCameraOnParent",
         "Focus Camera",
@@ -250,7 +258,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     , _pColorTablePath(ColorTablePathInfo)
     , _pColorUniform(
         ColorUniformInfo,
-        glm::vec4(0.75f, 0.5f, 0.f, 0.5f),
+        glm::vec4(0.3f, 0.57f, 0.75f, 0.5f),
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
@@ -263,11 +271,11 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     , _pDomainR(DomainRInfo)
     , _pFlowColor(
         FlowColorInfo,
-        glm::vec4(0.8f, 0.7f, 0.f, 0.6f),
+        glm::vec4(0.96f, 0.88f, 0.8f, 0.5f),
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
-    , _pFlowEnabled(FlowEnabledInfo, true)
+    , _pFlowEnabled(FlowEnabledInfo, false)
     , _pFlowGroup({ "Flow" })
     , _pFlowParticleSize(FlowParticleSizeInfo, 5, 0, 500)
     , _pFlowParticleSpacing(FlowParticleSpacingInfo, 60, 0, 500)
@@ -278,6 +286,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     , _pMaskingMin(MaskingMinInfo)
     , _pMaskingMax(MaskingMaxInfo)
     , _pMaskingQuantity(MaskingQuantityInfo, OptionProperty::DisplayType::Dropdown)
+    , _pLineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
     , _pFocusOnOriginBtn(OriginButtonInfo)
     , _pJumpToStartBtn(TimeJumpButtonInfo)
 {
@@ -469,6 +478,10 @@ void RenderableFieldlinesSequence::extractOptionalInfoFromDictionary(
 {
 
     // ------------------- EXTRACT OPTIONAL VALUES FROM DICTIONARY ------------------- //
+    float lineWidthValue;
+    if (_dictionary->hasValue<std::string>(KeyLineWidth)) {
+        _pLineWidth = stringToFloat(_dictionary->value<std::string>(KeyLineWidth));
+    }
     if (_dictionary->hasValue<std::string>(KeyOutputFolder)) {
         outputFolderPath = _dictionary->value<std::string>(KeyOutputFolder);
         ghoul::filesystem::Directory outputFolder(outputFolderPath);
@@ -637,6 +650,7 @@ void RenderableFieldlinesSequence::setupProperties() {
     if (hasExtras) {
         addProperty(_pMaskingEnabled);
     }
+    addProperty(_pLineWidth);
     addProperty(_pFocusOnOriginBtn);
     addProperty(_pJumpToStartBtn);
 
@@ -1126,6 +1140,11 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
         }
 
         glBindVertexArray(_vertexArrayObject);
+        glLineWidth(_pLineWidth);
+#ifdef __APPLE__
+        glLineWidth(1);
+#endif
+
         glMultiDrawArrays(
             GL_LINE_STRIP, //_drawingOutputType,
             _states[_activeStateIndex].lineStart().data(),
