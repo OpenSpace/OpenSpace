@@ -65,8 +65,8 @@ namespace openspace {
         res.name = "skybrowser";
         res.functions = {
             {
-                "create",
-                &skybrowser::luascriptfunctions::createBrowser,
+                "getListOfImages",
+                &skybrowser::luascriptfunctions::getListOfImages,
                 {},
                 "string or list of strings",
                 "Add one or multiple exoplanet systems to the scene, as specified by the "
@@ -89,8 +89,8 @@ namespace openspace {
                 "input. An input string should be the name of the system host star"
             },
             {
-                "loadCollection",
-                &skybrowser::luascriptfunctions::loadImgCollection,
+                "selectImage",
+                &skybrowser::luascriptfunctions::selectImage,
                 {},
                 "string or list of strings",
                 "Add one or multiple exoplanet systems to the scene, as specified by the "

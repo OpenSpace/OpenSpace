@@ -203,7 +203,8 @@ namespace openspace {
         img.name = node->FindAttribute("Name") ? node->FindAttribute("Name")->Value() : "";
         img.hasCoords = node->FindAttribute("RA") && node->FindAttribute("Dec");
         if (img.hasCoords) {
-            img.celestCoords.x = std::stof(node->FindAttribute("RA")->Value());
+            // The RA from WWT is in the unit hours: to convert to degrees, multiply with 360 (deg) /24 (h) = 15
+            img.celestCoords.x = 15.0f * std::stof(node->FindAttribute("RA")->Value());
             img.celestCoords.y = std::stof(node->FindAttribute("Dec")->Value());
         }
         img.collection = collectionName;
