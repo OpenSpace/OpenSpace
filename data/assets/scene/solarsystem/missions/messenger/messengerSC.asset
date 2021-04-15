@@ -172,7 +172,7 @@ local MessengerTrail = {
             Type = "SpiceTranslation",
             Target = "MESSENGER",
             Observer = "MERCURY BARYCENTER",
-            Kernels = Kernels
+            Kernels = LocalKernels
         },
         Color = { 0.288, 0.375, 0.934 },
         EnableFade = false,

@@ -13,7 +13,7 @@ local speck = asset.syncedResource({
     Name = "Kepler Speck Files",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_kepler_speck",
-    Version = 2
+    Version = 3
 })
 
 local object = {
