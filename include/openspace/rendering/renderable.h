@@ -102,7 +102,7 @@ protected:
     properties::StringProperty _renderableType;
 
     void setBoundingSphere(double boundingSphere);
-   
+
     void setRenderBinFromOpacity();
     void registerUpdateRenderBinFromOpacity();
 

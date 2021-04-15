@@ -52,23 +52,3 @@ Fragment getFragment() {
     frag.depth = depth;
     return frag;
 }
-
-/*
-out vec4 FragColor;
-
-void main() {
-    if (hasTexture) {
-        vec2 uv = out_uv;
-        if (shouldFlipTexture.x) {
-            uv.x = 1.0 - uv.x;
-        }
-        if (shouldFlipTexture.y) {
-            uv.y = 1.0 - uv.y;
-        }
-        FragColor = out_color * color * texture(tex, uv);
-    }
-    else {
-        FragColor = out_color * color;
-    }
-}
-*/
