@@ -1,0 +1,70 @@
+local assetHelper = asset.require('util/asset_helper')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
+
+local transferFunctions = asset.localResource("transferfunctions")
+local masVelocityColorTable = transferFunctions .. "/velocity_fieldlines.txt"
+local masDensityColorTable = transferFunctions .. "/density_fieldlines.txt"
+
+local fieldlinesDirectory = 'D:/data/2000_01_01_event/cdf'
+local seedPointFile = 'D:/data/2000_01_01_event/seedpoints/mp_position_257532008271_20000101_040000.txt'
+
+--local sunRadius = 6.957E8
+local earthRadius = 6378137
+
+
+-- Fieldlies from binaries
+local fieldlines = {
+    Identifier = "MAS_MHD_Fieldlines",
+    --wrong Parent = sunTransforms.HNMReferenceFrame.Identifier,
+    Parent = transforms.GSMReferenceFrame.Identifier,
+    Renderable = {
+        Type = "RenderableFieldlinesSequence",
+        SourceFolder = fieldlinesDirectory,
+        SeedPointFile = seedPointFile,
+        TracingVariable = 'b',
+        
+        -- FlowEnabled = false,
+        -- LineWidth = 1.0;
+        AlphaBlendlingEnabled = false,
+        InputFileType = "cdf",
+
+        ColorTablePaths = {
+            masDensityColorTable,
+            masVelocityColorTable,
+        },
+        ColorTableMinMax = {
+            { 0, 1000000 },
+            { 100, 2000 }
+        },
+        LoadAtRuntime = true,
+        ScaleToMeters = 1.0,
+        SecondsBefore = 24*60*60,
+        SecondsAfter = 24*60*60,
+        SimulationModel = "batsrus",
+        Color = {
+            Uniform = {1.0, 0.0, 0.5, 1}
+        }
+    },
+    GUI = {
+        Path = "/Solar System/Heliosphere",
+        Name = "Batsrus Fieldlines"
+    },
+    Transform = {
+        Scale = {
+            Type = "StaticScale",
+            Scale = 1
+        }
+    }
+} 
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { fieldlines })
+
+asset.meta = {
+    Name = "CDF fieldlines files Bastille Day",
+    Version = "1.0",
+    Description = " Magnetic fieldlines",
+    Author = "OpenSpace team",
+    URL = "",
+    License = ""
+}

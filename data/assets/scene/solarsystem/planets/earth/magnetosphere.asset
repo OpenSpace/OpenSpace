@@ -23,7 +23,7 @@ local earthMagnetosphere = {
         -- FlowEnabled = false,
         LineWidth = 3.0,
         AlphaBlendlingEnabled = false,
-        InputFileType = "osfls",
+        InputFileType = "osfls",    -- openspace Field lines Sequence
         --ColorTablePaths = {
         --    masDensityColorTable,
         --    masVelocityColorTable,

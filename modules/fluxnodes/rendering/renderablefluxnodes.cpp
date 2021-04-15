@@ -821,7 +821,7 @@ void RenderableFluxNodes::writeCachedFile() const {
 
     fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
 
-    for(int i = 0; i < _nStates; ++i){
+    for(unsigned int i = 0; i < _nStates; ++i){
         fileStream.write(reinterpret_cast<const char*>(_statesPos[i].data()),
             nValues * sizeof(glm::vec3));
         fileStream2.write(reinterpret_cast<const char*>(_statesColor[i].data()), 
@@ -886,7 +886,7 @@ bool RenderableFluxNodes::loadBinaryfilesDirectly(const std::string& energybin) 
         _statesPos.clear();
         _statesRadius.clear();
 
-        for (int i = 0; i < _nStates; ++i) {
+        for (unsigned int i = 0; i < _nStates; ++i) {
             _vertexPositions.resize(nNodesPerTimestep);
             fileStream.read(reinterpret_cast<char*>(
                 _vertexPositions.data()),
@@ -895,7 +895,7 @@ bool RenderableFluxNodes::loadBinaryfilesDirectly(const std::string& energybin) 
             _statesPos.push_back(_vertexPositions);
             _vertexPositions.clear();
         }
-        for (int i = 0; i < _nStates; ++i) {
+        for (unsigned int i = 0; i < _nStates; ++i) {
             _vertexColor.resize(nNodesPerTimestep);
             fileStream2.read(reinterpret_cast<char*>(
                 _vertexColor.data()),
@@ -904,7 +904,7 @@ bool RenderableFluxNodes::loadBinaryfilesDirectly(const std::string& energybin) 
             _statesColor.push_back(_vertexColor);
             _vertexColor.clear();
         }
-        for (int i = 0; i < _nStates; ++i) {
+        for (unsigned int i = 0; i < _nStates; ++i) {
             _vertexRadius.resize(nNodesPerTimestep);
             fileStream3.read(reinterpret_cast<char*>(
                 _vertexRadius.data()),
@@ -1271,7 +1271,7 @@ void RenderableFluxNodes::populateStartTimes() {
     }
 
     if (timeFile.empty()) {
-        LERROR("Could not find a metadata file with time steps,", 
+        LERROR("Could not find a metadata file with time steps," 
             " such as a csv, dat, txt or no file extention with 'time' in filename");
     }
     // time filestream

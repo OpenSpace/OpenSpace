@@ -1,8 +1,8 @@
 local TexturesPath = asset.syncedResource({
     Name = "PREDSCI MAS Bastille Day Textures",
     Type = "HttpSynchronization",
-    Identifier = "mas_bastille_day_2000_sun_textures",
-    Version = 2
+    Identifier = "bastille_day_magnetogram",
+    Version = 4
  })
 
 asset.export("TexturesPath", TexturesPath)

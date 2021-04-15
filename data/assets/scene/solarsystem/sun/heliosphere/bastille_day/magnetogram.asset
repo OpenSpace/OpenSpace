@@ -2,7 +2,7 @@ local TexturesPath = asset.syncedResource({
     Name = "Bastille Day Magnetogram",
     Type = "HttpSynchronization",
     Identifier = "bastille_day_magnetogram",
-    Version = 2
+    Version = 3
 })
 
 asset.export("TexturesPath", TexturesPath)
