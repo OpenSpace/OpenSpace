@@ -1507,7 +1507,7 @@ void RenderableBillboardsCloud::createDataSlice() {
         glm::vec4 position(transformedPos, static_cast<float>(_unit));
 
         const double unitMeter = unitToMeter(_unit);
-        glm::dvec3 p = glm::dvec3(glm::dvec3(position) * unitMeter);
+        glm::dvec3 p = glm::dvec3(position) * unitMeter;
         const double r = glm::length(p);
         if (r > maxRadius) {
             maxRadius = r;
