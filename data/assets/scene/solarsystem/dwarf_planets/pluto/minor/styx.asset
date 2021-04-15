@@ -3,7 +3,6 @@ local transforms = asset.require('../transforms')
 local kernels = asset.require('../kernels').PlutoKernels
 
 
-
 local Styx = {
     Identifier = "Styx",
     Parent = transforms.PlutoBarycenter.Identifier,
@@ -11,8 +10,7 @@ local Styx = {
         Translation = {
             Type = "SpiceTranslation",
             Target = "STYX",
-            Observer = "PLUTO BARYCENTER",
-            Kernels = PlutoKernels
+            Observer = "PLUTO BARYCENTER"
         }
     },
     Renderable = {

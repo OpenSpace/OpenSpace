@@ -13,7 +13,7 @@ local registerSpiceKernels = function (spiceAsset, kernels)
     end)
     spiceAsset.onDeinitialize(function ()
         for i = #kernels, 1, -1 do
-            kernel = kernels[i]
+            local kernel = kernels[i]
             openspace.spice.unloadKernel(kernel) 
         end
     end)
@@ -75,7 +75,7 @@ local registerDashboardItems = function (dashboardAsset, items)
     )
     dashboardAsset.onDeinitialize(function ()
         for i = #items, 1, -1 do
-            item = items[i]
+            local item = items[i]
             openspace.dashboard.removeDashboardItem(item.Identifier)
         end
     end)
@@ -103,7 +103,7 @@ local registerSceneGraphNodesAndExport = function (sceneAsset, nodes, override)
     end)
     sceneAsset.onDeinitialize(function ()
         for i = #nodes, 1, -1 do
-            node = nodes[i]
+            local node = nodes[i]
             openspace.removeSceneGraphNode(node.Identifier)
         end
     end)
