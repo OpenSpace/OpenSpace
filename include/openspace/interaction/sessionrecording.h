@@ -613,6 +613,7 @@ protected:
     void saveSingleKeyframeScript(datamessagestructures::ScriptMessage& kf,
         Timestamps& times, DataMode mode, std::ofstream& file, unsigned char* buffer);
     void saveScriptKeyframeToPropertiesBaseline(std::string script);
+    bool isPropertyAllowedForBaseline(const std::string& propString);
     unsigned int findIndexOfLastCameraKeyframeInTimeline();
     bool doesTimelineEntryContainCamera(unsigned int index) const;
     std::vector<std::pair<CallbackHandle, StateChangeCallback>> _stateChangeCallbacks;
@@ -681,6 +682,19 @@ protected:
     std::vector<std::string> _keyframesSavePropertiesBaseline_scripts;
     std::vector<timelineEntry> _keyframesSavePropertiesBaseline_timeline;
     std::vector<std::string> _propertyBaselinesSaved;
+    std::vector<std::string> _propertyBaselineRejects = {
+        "NavigationHandler.OrbitalNavigator.Anchor",
+        "NavigationHandler.OrbitalNavigator.Aim",
+        "NavigationHandler.OrbitalNavigator.RetargetAnchor",
+        "NavigationHandler.OrbitalNavigator.RetargetAim"
+    };
+    std::vector<std::string> _scriptRejects = {
+        "openspace.sessionRecording",
+        "openspace.time.interpolatePause",
+        "openspace.time.interpolateTogglePause",
+        "openspace.time.setPause",
+        "openspace.time.togglePause"
+    };
 
     unsigned int _idxTimeline_nonCamera = 0;
     unsigned int _idxTime = 0;

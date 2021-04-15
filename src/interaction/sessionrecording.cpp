@@ -236,7 +236,6 @@ bool SessionRecording::startRecording(const std::string& filename) {
             global::timeManager->time().j2000Seconds()
         };
 
-        recordCurrentTimePauseState(timestampsRecStarted);
         recordCurrentTimeRate(timestampsRecStarted);
         LINFO("Session recording started");
     }
@@ -246,14 +245,14 @@ bool SessionRecording::startRecording(const std::string& filename) {
 
 void SessionRecording::recordCurrentTimePauseState(const Timestamps tripleTimestamp) {
     bool isPaused = global::timeManager->isPaused();
-    std::string initialTimePausedCommand = "openspace.setPause(" +
+    std::string initialTimePausedCommand = "openspace.time.setPause(" +
         std::string(isPaused ? "true" : "false") + ")";
     saveScriptKeyframeToPropertiesBaseline(initialTimePausedCommand);
 }
 
 void SessionRecording::recordCurrentTimeRate(const Timestamps tripleTimestamp) {
     std::string initialTimeRateCommand = fmt::format(
-        "openspace.setDeltaTime({})", global::timeManager->deltaTime()
+        "openspace.time.setDeltaTime({})", global::timeManager->deltaTime()
     );
     saveScriptKeyframeToPropertiesBaseline(initialTimeRateCommand);
 }
@@ -262,13 +261,14 @@ void SessionRecording::stopRecording() {
     if (_state == SessionState::Recording) {
         //Add all property baseline scripts to the beginning of the recording file
         datamessagestructures::ScriptMessage smTmp;
+        Timestamps timeRecStart = generateCurrentTimestamp3(_timestampRecordStarted);
         for (timelineEntry initPropScripts : _keyframesSavePropertiesBaseline_timeline) {
             if (initPropScripts.keyframeType == RecordedType::Script) {
                 smTmp._script = _keyframesSavePropertiesBaseline_scripts
                     [initPropScripts.idxIntoKeyframeTypeArray];
                 saveSingleKeyframeScript(
                     smTmp,
-                    initPropScripts.t3stamps,
+                    timeRecStart,
                     _recordingDataMode,
                     _recordFile,
                     _keyframeBuffer
@@ -748,6 +748,16 @@ void SessionRecording::saveTimeKeyframeAscii(Timestamps& times,
 
 void SessionRecording::saveScriptKeyframeToTimeline(std::string scriptToSave)
 {
+    const std::string returnPrefix = "return ";
+    size_t substringStartIdx = 0;
+    if (scriptToSave.substr(0, returnPrefix.length()) == returnPrefix) {
+        substringStartIdx += returnPrefix.length();
+    }
+    for (auto reject : _scriptRejects) {
+        if (scriptToSave.substr(substringStartIdx, reject.length()) == reject) {
+            return;
+        }
+    }
     datamessagestructures::ScriptMessage sm
         = _externInteract.generateScriptMessage(scriptToSave);
 
@@ -797,20 +807,35 @@ void SessionRecording::saveScriptKeyframeAscii(Timestamps& times,
 }
 
 void SessionRecording::savePropertyBaseline(properties::Property& prop) {
-    bool isPropAlreadySaved = (
-        std::find(
-            _propertyBaselinesSaved.begin(),
-            _propertyBaselinesSaved.end(),
-            prop.fullyQualifiedIdentifier()
-        ) != _propertyBaselinesSaved.end()
-    );
-    if( !isPropAlreadySaved ) {
-        std::string initialScriptCommand = fmt::format(
-            "openspace.setPropertyValueSingle(\"{}\", {})",
-            prop.fullyQualifiedIdentifier(), prop.getStringValue()
-        );
-        saveScriptKeyframeToPropertiesBaseline(initialScriptCommand);
+    std::string propIdentifier = prop.fullyQualifiedIdentifier();
+    if (isPropertyAllowedForBaseline(propIdentifier)) {
+        bool isPropAlreadySaved = (
+            std::find(
+                _propertyBaselinesSaved.begin(),
+                _propertyBaselinesSaved.end(),
+                propIdentifier
+            )
+            != _propertyBaselinesSaved.end()
+            );
+        if (!isPropAlreadySaved) {
+            std::string initialScriptCommand = fmt::format(
+                "openspace.setPropertyValueSingle(\"{}\", {})",
+                propIdentifier, prop.getStringValue()
+            );
+            saveScriptKeyframeToPropertiesBaseline(initialScriptCommand);
+            _propertyBaselinesSaved.push_back(propIdentifier);
+        }
     }
+}
+
+bool SessionRecording::isPropertyAllowedForBaseline(const std::string& propString) {
+    for (auto reject : _propertyBaselineRejects) {
+        if (propString.substr(0, reject.length()) == reject)
+        {
+            return false;
+        }
+    }
+    return true;
 }
 
 void SessionRecording::preSynchronization() {
