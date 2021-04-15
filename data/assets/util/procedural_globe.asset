@@ -68,7 +68,7 @@ local createGlobes = function(t)
         end
     end
 
-    result = {}
+    local result = {}
 
     for i, v in ipairs(t) do
         local globe = nil
