@@ -110,7 +110,7 @@ namespace openspace {
         XMLElement* ptr = node->FirstChildElement();
 
         // Go through all siblings of ptr and open folders recursively
-        while (ptr) {
+
             // Iterate through all siblings at same level and load
             while (ptr) {
                 // If node is an image or place, load it 
@@ -128,7 +128,7 @@ namespace openspace {
 
                 ptr = ptr->NextSiblingElement();
             }            
-        }
+        
     }
 
     int WWTDataHandler::loadImage(tinyxml2::XMLElement* node, std::string collectionName) {
