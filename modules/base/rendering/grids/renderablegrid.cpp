@@ -91,7 +91,7 @@ RenderableGrid::RenderableGrid(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
     , _segments(SegmentsInfo, glm::uvec2(10), glm::uvec2(1), glm::uvec2(200))
-    , _lineWidth(LineWidthInfo, 0.5f, 0.f, 20.f)
+    , _lineWidth(LineWidthInfo, 0.5f, 1.f, 20.f)
     , _size(SizeInfo, glm::vec2(1e20f), glm::vec2(1.f), glm::vec2(1e35f))
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
