@@ -215,6 +215,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     }
     addProperty(_orientation);
 
+    _size.setViewOption(properties::Property::ViewOptions::Logarithmic);
     addProperty(_size);
     _size.onChange([this]() { _sphereIsDirty = true; });
 

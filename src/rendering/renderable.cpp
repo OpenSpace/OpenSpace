@@ -155,6 +155,7 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     _renderableType = p.type.value_or(_renderableType);
     addProperty(_renderableType);
 
+    _boundingSphere.setViewOption(properties::Property::ViewOptions::Logarithmic);
     _boundingSphere = p.boundingSphere.value_or(_boundingSphere);
     addProperty(_boundingSphere);
 }

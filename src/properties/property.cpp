@@ -43,7 +43,7 @@ Property::OnChangeHandle Property::OnChangeHandleAll =
                                                std::numeric_limits<OnChangeHandle>::max();
 
 const char* Property::ViewOptions::Color = "Color";
-const char* Property::ViewOptions::LightPosition = "LightPosition";
+const char* Property::ViewOptions::Logarithmic = "Logarithmic";
 
 const char* Property::IdentifierKey = "Identifier";
 const char* Property::NameKey = "Name";

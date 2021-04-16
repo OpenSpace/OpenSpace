@@ -157,6 +157,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
 
     addProperty(_billboard);
 
+    _size.setViewOption(properties::Property::ViewOptions::Logarithmic);
     addProperty(_size);
     _size.onChange([this](){ _planeIsDirty = true; });
 

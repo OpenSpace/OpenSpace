@@ -395,22 +395,21 @@ public:
 
     /**
     * Default view options that can be used in the Property::setViewOption method. The
-    * values are: Property::ViewOptions::Color = \c color,
-    * Property::ViewOptions::LightPosition = \c lightPosition
+    * values are: Property::ViewOptions::Color = \c Color,
+    * Property::ViewOptions::Logarithmic = \c Logarithmic
     */
     struct ViewOptions {
         static const char* Color;
-        static const char* LightPosition;
+        static const char* Logarithmic;
     };
 
     /**
      * This method allows the developer to give hints to the GUI about different
      * representations for the GUI. The same Property (for example Vec4Property) can be
      * used in different ways, each requiring a different input method. These values are
-     * stored in the metaData object using the <code>views.</code> prefix in front of the
-     * <code>option</code> parameter. See Property::ViewOptions for a default list of
-     * possible options. As these are only hints, the GUI is free to ignore any suggestion
-     * by the developer.
+     * stored in the metaData object under <code>ViewOptions</code>.
+     * See Property::ViewOptions for a default list of possible options. As these are
+     * only hints, the GUI is free to ignore any suggestion by the developer.
      * \param option The view option that should be modified
      * \param value Determines if the view option should be active (<code>true</code>) or
      * deactivated (<code>false</code>)
