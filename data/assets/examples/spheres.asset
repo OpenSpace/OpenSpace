@@ -18,7 +18,7 @@ for z=1,3 do
                     Size = 0.20 + i * 0.01,
                     Segments = 80,
                     Opacity = 1,
-                    Texture = "${DATA}/test2.jpg",
+                    Texture = openspace.absPath("${DATA}/test2.jpg"),
                     Orientation = "Both",
                 },
                 GUI = {
