@@ -134,7 +134,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo BlendingOptionInfo = {
         "BlendingOption",
         "Blending Options",
-        "Debug option for blending colors."
+        "Changes the blending function used to calculate the colors of the model with "
+        "respect to the opacity."
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableOpacityBlendingInfo = {
@@ -196,7 +197,9 @@ namespace {
         };
 
         // The mode of how the animation should be played back.
-        // Default is animation is played back once at the start time
+        // Default is animation is played back once at the start time.
+        // For a more detailed description see:
+        // http://wiki.openspaceproject.com/docs/builders/model-animation
         std::optional<AnimationMode> animationMode;
 
         // [[codegen::verbatim(AmbientIntensityInfo.description)]]
@@ -724,9 +727,13 @@ void RenderableModel::update(const UpdateData& data) {
                 break;
             }
             case AnimationMode::Once:
-                // Play animation once starting from the start time
+                // Play animation once starting from the start time and stay at the
+                // animation's last position when animation is over
                 // s/
                 relativeTime = now - startTime;
+                if (relativeTime > duration) {
+                    relativeTime = duration;
+                }
                 break;
             default:
                 throw ghoul::MissingCaseException();
