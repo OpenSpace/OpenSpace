@@ -13,7 +13,7 @@ local models = asset.syncedResource({
     Name = "ISS Models",
     Type = "HttpSynchronization",
     Identifier = "iss_model",
-    Version = 2
+    Version = 3
 })
 
 local initializeAndAddNodes = function()
@@ -59,37 +59,7 @@ local initializeAndAddNodes = function()
       },
       Renderable = {
         Type = "RenderableModel",
-        GeometryFile = {
-          models .. "/0.obj",
-          models .. "/1.obj",
-          models .. "/2.obj",
-          models .. "/3.obj",
-          models .. "/4.obj",
-          models .. "/5.obj",
-          models .. "/6.obj",
-          models .. "/7.obj",
-          models .. "/8.obj",
-          models .. "/10.obj",
-          models .. "/11.obj",
-          models .. "/13.obj",
-          models .. "/14.obj",
-          models .. "/15.obj",
-          models .. "/16.obj",
-          models .. "/17.obj",
-          models .. "/19.obj",
-          models .. "/21.obj",
-          models .. "/22.obj",
-          models .. "/23.obj",
-          models .. "/24.obj",
-          models .. "/25.obj",
-          models .. "/foilsilver.obj",
-          models .. "/olive.obj",
-          models .. "/basemetal.obj",
-          models .. "/white_20.obj",
-          models .. "/plasticblack.obj",
-          models .. "/ecostresswhite.obj",
-          models .. "/plain.obj"
-        },
+        GeometryFile = models .. "/ISS.fbx",
         LightSources = {
           {
             Type = "SceneGraphLightSource",

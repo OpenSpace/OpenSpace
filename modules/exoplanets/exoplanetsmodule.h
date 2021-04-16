@@ -43,6 +43,7 @@ public:
 
     std::string exoplanetsDataPath() const;
     std::string lookUpTablePath() const;
+    std::string bvColormapPath() const;
     std::string starTexturePath() const;
     std::string starGlareTexturePath() const;
     std::string noDataTexturePath() const;
@@ -60,6 +61,7 @@ protected:
     void internalInitialize(const ghoul::Dictionary& dict) override;
 
     properties::StringProperty _exoplanetsDataFolder;
+    properties::StringProperty _bvColorMapPath;
     properties::StringProperty _starTexturePath;
     properties::StringProperty _starGlareTexturePath;
     properties::StringProperty _noDataTexturePath;

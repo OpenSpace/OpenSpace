@@ -11,8 +11,7 @@ local Nix = {
         Translation = {
             Type = "SpiceTranslation",
             Target = "NIX",
-            Observer = "PLUTO BARYCENTER",
-            Kernels = PlutoKernels
+            Observer = "PLUTO BARYCENTER"
         }
     },
     Renderable = {

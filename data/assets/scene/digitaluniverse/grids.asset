@@ -104,12 +104,6 @@ local ecliptic = {
 local eclipticLabels = {
     Identifier = "EclipticSphereLabels",
     Parent = transforms.SolarSystemBarycenter.Name,
-    Transform = {
-        Rotation = {
-            Type = "StaticRotation",
-            Rotation = eclipticRotationMatrix
-        }
-    },
     Renderable = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
@@ -122,6 +116,12 @@ local eclipticLabels = {
         TextMinSize = 1.3,
         TextMaxSize = 50.0,
         Unit = "pc",
+        TransformationMatrix = {
+            -0.05487554,  0.4941095, -0.8676661,    0.0,
+            -0.9938214 , -0.1109906, -0.0003515167, 0.0,
+            -0.09647644,  0.8622859,  0.4971472,    0.0,
+            0.0,          0.0,        0.0,          1.0
+        }
     },
     GUI = {
         Name = "Ecliptic Sphere Labels",
@@ -158,12 +158,6 @@ local equatorial = {
 local equatorialLabels = {
     Identifier = "EquatorialSphereLabels",
     Parent = transforms.SolarSystemBarycenter.Name,
-    Transform = {
-        Rotation = {
-            Type = "StaticRotation",
-            Rotation = equatorialRotationMatrix
-        }
-    },
     Renderable = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
@@ -176,6 +170,12 @@ local equatorialLabels = {
         TextMinSize = 1.7,
         TextMaxSize = 70.0,
         Unit = "pc",
+        TransformationMatrix = {
+            -0.05487554,  0.4941095, -0.8676661, 0.0,
+            -0.8734371 , -0.4448296, -0.1980764, 0.0,
+            -0.483835  ,  0.7469823,  0.4559838, 0.0,
+             0.0       ,  0.0      ,  0.0      , 1.0
+        }
     },
     GUI = {
         Name = "Equatorial Sphere Labels",

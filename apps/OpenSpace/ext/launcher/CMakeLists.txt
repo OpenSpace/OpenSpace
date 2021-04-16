@@ -34,6 +34,7 @@ set(HEADER_FILES
   include/profile/cameradialog.h
   include/profile/deltatimesdialog.h
   include/profile/keybindingsdialog.h
+  include/profile/scriptlogdialog.h
   include/profile/line.h
   include/profile/marknodesdialog.h
   include/profile/metadialog.h
@@ -53,6 +54,7 @@ set(SOURCE_FILES
   src/profile/cameradialog.cpp
   src/profile/deltatimesdialog.cpp
   src/profile/keybindingsdialog.cpp
+  src/profile/scriptlogdialog.cpp
   src/profile/line.cpp
   src/profile/marknodesdialog.cpp
   src/profile/metadialog.cpp
@@ -74,6 +76,7 @@ qt5_wrap_cpp(
   include/profile/cameradialog.h
   include/profile/deltatimesdialog.h
   include/profile/keybindingsdialog.h
+  include/profile/scriptlogdialog.h
   include/profile/marknodesdialog.h
   include/profile/metadialog.h
   include/profile/modulesdialog.h

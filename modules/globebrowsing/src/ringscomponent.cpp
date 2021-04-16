@@ -46,6 +46,7 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/io/texture/texturereader.h>
+#include <filesystem>
 #include <fstream>
 #include <cstdlib>
 #include <locale>
@@ -155,90 +156,53 @@ namespace {
         "The number of samples used during shadow mapping calculation "
         "(Percentage Closer Filtering)."
     };
+
+    struct [[codegen::Dictionary(RingsComponent)]] Parameters {
+        // [[codegen::verbatim(TextureInfo.description)]]
+        std::optional<std::filesystem::path> texture;
+
+        // [[codegen::verbatim(TextureFwrdInfo.description)]]
+        std::optional<std::filesystem::path> textureFwrd;
+
+        // [[codegen::verbatim(TextureBckwrdInfo.description)]]
+        std::optional<std::filesystem::path> textureBckwrd;
+
+        // [[codegen::verbatim(TextureUnlitInfo.description)]]
+        std::optional<std::filesystem::path> textureUnlit;
+
+        // [[codegen::verbatim(TextureColorInfo.description)]]
+        std::optional<std::filesystem::path> textureColor;
+
+        // [[codegen::verbatim(TextureTransparencyInfo.description)]]
+        std::optional<std::filesystem::path> textureTransparency;
+
+        // [[codegen::verbatim(SizeInfo.description)]]
+        std::optional<float> size;
+
+        // [[codegen::verbatim(OffsetInfo.description)]]
+        std::optional<glm::vec2> offset;
+
+        // [[codegen::verbatim(NightFactorInfo.description)]]
+        std::optional<float> nightFactor;
+
+        // [[codegen::verbatim(ColorFilterInfo.description)]]
+        std::optional<float> colorFilter;
+
+        // [[codegen::verbatim(ZFightingPercentageInfo.description)]]
+        std::optional<float> zFightingPercentage;
+
+        // [[codegen::verbatim(NumberShadowSamplesInfo.description)]]
+        std::optional<int> numberShadowSamples;
+    };
+#include "ringscomponent_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RingsComponent::Documentation() {
-    using namespace documentation;
-    return {
-        "Rings Component",
-        "globebrowsing_rings_component",
-        {
-            {
-                TextureInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                TextureInfo.description
-            },
-            {
-                TextureFwrdInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                TextureFwrdInfo.description
-            },
-            {
-                TextureBckwrdInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                TextureBckwrdInfo.description
-            },
-            {
-                TextureUnlitInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                TextureUnlitInfo.description
-            },
-            {
-                TextureColorInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                TextureColorInfo.description
-            },
-            {
-                TextureTransparencyInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                TextureTransparencyInfo.description
-            },
-            {
-                SizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                SizeInfo.description
-            },
-            {
-                OffsetInfo.identifier,
-                new DoubleVector2Verifier,
-                Optional::Yes,
-                OffsetInfo.description
-            },
-            {
-                NightFactorInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                NightFactorInfo.description
-            },
-            {
-                ColorFilterInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                ColorFilterInfo.description
-            },
-            {
-                ZFightingPercentageInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                ZFightingPercentageInfo.description
-            },
-            {
-                NumberShadowSamplesInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                NumberShadowSamplesInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "globebrowsing_rings_component";
+    return doc;
 }
 
 RingsComponent::RingsComponent(const ghoul::Dictionary& dictionary)
@@ -265,14 +229,17 @@ RingsComponent::RingsComponent(const ghoul::Dictionary& dictionary)
         // term and rather extract the values directly here.  This would require a bit of
         // a rewrite in the RenderableGlobe class to not create the RingsComponent in the
         // class-initializer list though
+        // @TODO (abock, 2021-03-25) Righto!  The RenderableGlobe passes this dictionary
+        // in as-is so it would be easy to just pass it directly to the initialize method
+        // instead
         _ringsDictionary = dictionary.value<ghoul::Dictionary>("Rings");
-    }
 
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        _ringsDictionary,
-        "RingsComponent"
-    );
+        documentation::testSpecificationAndThrow(
+            Documentation(),
+            _ringsDictionary,
+            "RingsComponent"
+        );
+    }
 }
 
 void RingsComponent::initialize() {
@@ -280,106 +247,78 @@ void RingsComponent::initialize() {
 
     using ghoul::filesystem::File;
 
+    const Parameters p = codegen::bake<Parameters>(_ringsDictionary);
+
     addProperty(_enabled);
 
-    _size = static_cast<float>(_ringsDictionary.value<double>(SizeInfo.identifier));
-    //setBoundingSphere(_size);
+    _size = p.size.value_or(_size);
     _size.onChange([&]() { _planeIsDirty = true; });
     addProperty(_size);
 
-    if (_ringsDictionary.hasKey(TextureInfo.identifier)) {
-        _texturePath = absPath(
-            _ringsDictionary.value<std::string>(TextureInfo.identifier)
-        );
+    if (p.texture.has_value()) {
+        _texturePath = absPath(p.texture->string());
         _textureFile = std::make_unique<File>(_texturePath);
         _texturePath.onChange([&]() { loadTexture(); });
         addProperty(_texturePath);
         _textureFile->setCallback([&](const File&) { _textureIsDirty = true; });
     }
     
-    if (_ringsDictionary.hasKey(TextureFwrdInfo.identifier)) {
-        _textureFwrdPath = absPath(
-            _ringsDictionary.value<std::string>(TextureFwrdInfo.identifier)
-        );
+    if (p.textureFwrd.has_value()) {
+        _textureFwrdPath = absPath(p.textureFwrd->string());
         _textureFileForwards = std::make_unique<File>(_textureFwrdPath);
         _textureFwrdPath.onChange([&]() { loadTexture(); });
         addProperty(_textureFwrdPath);
         _textureFileForwards->setCallback([&](const File&) { _textureIsDirty = true; });
     }
-    
-    if (_ringsDictionary.hasKey(TextureBckwrdInfo.identifier)) {
-        _textureBckwrdPath = absPath(
-            _ringsDictionary.value<std::string>(TextureBckwrdInfo.identifier)
-        );
+
+    if (p.textureBckwrd.has_value()) {
+        _textureBckwrdPath = absPath(p.textureBckwrd->string());
         _textureFileBackwards = std::make_unique<File>(_textureBckwrdPath);
         _textureBckwrdPath.onChange([&]() { loadTexture(); });
         addProperty(_textureBckwrdPath);
         _textureFileBackwards->setCallback([&](const File&) { _textureIsDirty = true; });
     }
 
-    if (_ringsDictionary.hasKey(TextureUnlitInfo.identifier)) {
-        _textureUnlitPath = absPath(
-            _ringsDictionary.value<std::string>(TextureUnlitInfo.identifier)
-        );
+    if (p.textureUnlit.has_value()) {
+        _textureUnlitPath = absPath(p.textureUnlit->string());
         _textureFileUnlit = std::make_unique<File>(_textureUnlitPath);
         _textureUnlitPath.onChange([&]() { loadTexture(); });
         addProperty(_textureUnlitPath);
         _textureFileUnlit->setCallback([&](const File&) { _textureIsDirty = true; });
     }
 
-    if (_ringsDictionary.hasKey(TextureColorInfo.identifier)) {
-        _textureColorPath = absPath(
-            _ringsDictionary.value<std::string>(TextureColorInfo.identifier)
-        );
+    if (p.textureColor.has_value()) {
+        _textureColorPath = absPath(p.textureColor->string());
         _textureFileColor = std::make_unique<File>(_textureColorPath);
         _textureColorPath.onChange([&]() { loadTexture(); });
         addProperty(_textureColorPath);
         _textureFileColor->setCallback([&](const File&) { _textureIsDirty = true; });
     }
 
-    if (_ringsDictionary.hasKey(TextureTransparencyInfo.identifier)) {
-        _textureTransparencyPath = absPath(
-            _ringsDictionary.value<std::string>(TextureTransparencyInfo.identifier)
-        );
+    if (p.textureTransparency.has_value()) {
+        _textureTransparencyPath = absPath(p.textureTransparency->string());
         _textureFileTransparency = std::make_unique<File>(_textureTransparencyPath);
         _textureTransparencyPath.onChange([&]() { loadTexture(); });
         addProperty(_textureTransparencyPath);
         _textureFileTransparency->setCallback([&](const File&) { _textureIsDirty = true; });
     }
 
-    if (_ringsDictionary.hasValue<glm::dvec2>(OffsetInfo.identifier)) {
-        _offset = _ringsDictionary.value<glm::dvec2>(OffsetInfo.identifier);
-    }
+    _offset = p.offset.value_or(_offset);
     addProperty(_offset);
 
-    if (_ringsDictionary.hasValue<double>(NightFactorInfo.identifier)) {
-        _nightFactor = static_cast<float>(
-            _ringsDictionary.value<double>(NightFactorInfo.identifier)
-        );
-    }
+    _nightFactor = p.nightFactor.value_or(_nightFactor);
     addProperty(_nightFactor);
 
-    if (_ringsDictionary.hasValue<double>(ColorFilterInfo.identifier)) {
-        _colorFilter = static_cast<float>(
-            _ringsDictionary.value<double>(ColorFilterInfo.identifier)
-        );
-    }
+    _colorFilter = p.colorFilter.value_or(_colorFilter);
+    addProperty(_colorFilter);
 
     // Shadow Mapping Quality Controls
-    if (_ringsDictionary.hasKey(ZFightingPercentageInfo.identifier)) {
-        _zFightingPercentage = static_cast<float>(
-            _ringsDictionary.value<double>(ZFightingPercentageInfo.identifier)
-        );
-    }
+    _zFightingPercentage = p.zFightingPercentage.value_or(_zFightingPercentage);
     addProperty(_zFightingPercentage);
 
-    if (_ringsDictionary.hasKey(NumberShadowSamplesInfo.identifier)) {
-        _nShadowSamples = _ringsDictionary.value<int>(NumberShadowSamplesInfo.identifier);
-    }
+    _nShadowSamples = p.numberShadowSamples.value_or(_nShadowSamples);
     _nShadowSamples.onChange([this]() { compileShadowShader(); });
     addProperty(_nShadowSamples);
-
-    addProperty(_colorFilter);
 }
 
 bool RingsComponent::isReady() const {
@@ -476,7 +415,7 @@ void RingsComponent::draw(const RenderData& data,
             _shader->setUniform(_uniformCacheAdvancedRings.colorFilterValue, _colorFilter);
             _shader->setUniform(_uniformCacheAdvancedRings.nightFactor, _nightFactor);
             _shader->setUniform(_uniformCacheAdvancedRings.sunPosition, _sunPosition);
-            
+
             const glm::dmat4 inverseModelTransform = glm::inverse(modelTransform);
 
             glm::vec3 sunPositionObjectSpace = glm::normalize(
@@ -614,7 +553,7 @@ void RingsComponent::draw(const RenderData& data,
         else {
             _texture->bind();
         }
-        
+
         _geometryOnlyShader->setUniform(_geomUniformCache.ringTexture, ringTextureUnit);
     }
 
@@ -673,7 +612,7 @@ void RingsComponent::loadTexture() {
     using namespace ghoul::opengl;
 
     if (!_texturePath.value().empty()) {
-        
+
         std::unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
             absPath(_texturePath)
         );

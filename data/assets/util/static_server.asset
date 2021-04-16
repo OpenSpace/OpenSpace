@@ -10,7 +10,7 @@ local backend = asset.syncedResource({
 
 asset.onInitialize(function ()
     -- Unzip the server bundle
-    dest = backend .. "/backend"
+    local dest = backend .. "/backend"
     if not openspace.directoryExists(dest) then
         openspace.unzipFile(backend .. "/backend.zip", dest, true)
     end
