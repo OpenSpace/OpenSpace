@@ -577,7 +577,7 @@ void RenderablePlanesCloud::render(const RenderData& data, RendererTasks&) {
     float fadeInVariable = 1.f;
     if (!_disableFadeInDistance) {
         float distCamera = static_cast<float>(glm::length(data.camera.positionVec3()));
-        distCamera = static_cast<float>(distCamera * scale);
+        distCamera = static_cast<float>(distCamera / scale);
         const glm::vec2 fadeRange = _fadeInDistance;
         //const float a = 1.f / ((fadeRange.y - fadeRange.x) * scale);
         const float a = 1.f / ((fadeRange.y - fadeRange.x));
@@ -1225,7 +1225,7 @@ void RenderablePlanesCloud::createPlanes() {
 
         _dataIsDirty = false;
 
-        setBoundingSphere(maxRadius);
+        setBoundingSphere(maxRadius * _scaleFactor);
         _fadeInDistance.setMaxValue(glm::vec2(10.f * maxSize));
     }
 

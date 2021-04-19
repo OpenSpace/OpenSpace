@@ -93,7 +93,10 @@ namespace {
         "BoundingSphere",
         "Bounding Sphere",
         "The bounding sphere of the scene graph node meaning that everything that this "
-        "scene graph node renders must be contained within this sphere",
+        "scene graph node renders must be contained within this sphere. This value is "
+        "only used as an override to the bounding sphere calculated by the Renderable, "
+        "if present. If this value is -1, the Renderable's computed bounding sphere is "
+        "used",
         openspace::properties::Property::Visibility::Developer
     };
 
@@ -101,7 +104,10 @@ namespace {
         "InteractionSphere",
         "Interaction Sphere",
         "The minimum radius that the camera is allowed to get close to this scene graph "
-        "node.",
+        "node. This value is "
+        "only used as an override to the bounding sphere calculated by the Renderable, "
+        "if present. If this value is -1, the Renderable's computed interaction sphere "
+        "is used",
         openspace::properties::Property::Visibility::Developer
     };
 
@@ -657,6 +663,7 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
         }
     }
 }
+
 void SceneGraphNode::renderDebugSphere(const Camera& camera, double size, glm::vec4 color)
 {
     glm::dvec3 scaleVec = _worldScaleCached * size;

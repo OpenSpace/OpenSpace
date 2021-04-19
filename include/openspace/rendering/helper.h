@@ -116,7 +116,6 @@ std::vector<VertexXYZ> convert(std::vector<Vertex> v);
 std::vector<Vertex> createRing(int nSegments, float radius,
     glm::vec4 colors = glm::vec4(1.f));
 
-
 std::pair<std::vector<Vertex>, std::vector<GLushort>>
 createSphere(int nSegments, glm::vec3 radii, glm::vec4 colors = glm::vec4(1.f));
 
