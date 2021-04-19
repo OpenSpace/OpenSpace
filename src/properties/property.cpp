@@ -168,10 +168,6 @@ std::string Property::getStringValue() const {
     return value;
 }
 
-bool Property::setStringValue(std::string) { // NOLINT
-    return false;
-}
-
 const std::string& Property::guiName() const {
     return _guiName;
 }
@@ -383,7 +379,6 @@ std::string Property::generateAdditionalJsonDescription() const {
 
 void Property::setInterpolationTarget(std::any) {} // NOLINT
 void Property::setLuaInterpolationTarget(lua_State*) {}
-void Property::setStringInterpolationTarget(std::string) {} // NOLINT
 void Property::interpolateValue(float, ghoul::EasingFunc<float>) {}
 
 } // namespace openspace::properties

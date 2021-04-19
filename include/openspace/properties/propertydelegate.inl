@@ -91,11 +91,4 @@ bool PropertyDelegate<T>::toString(std::string&, const U&) {
     return false;
 }
 
-template <typename T>
-template <typename U>
-U PropertyDelegate<T>::fromString(const std::string&, bool&) {
-    static_assert(sizeof(T) == 0,
-        "Unimplemented PropertyDelegate::fromString specialization");
-}
-
 } // namespace openspace::properties

@@ -22,51 +22,44 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/properties/scalar/ulonglongproperty.h>
+#ifndef __OPENSPACE_CORE___DOUBLELISTPROPERTY___H__
+#define __OPENSPACE_CORE___DOUBLELISTPROPERTY___H__
 
-#include <ghoul/lua/ghoul_lua.h>
-
-#include <limits>
-#include <sstream>
-
-namespace {
-
-unsigned long long fromLuaConversion(lua_State* state, bool& success) {
-    success = (lua_isnumber(state, -1) == 1);
-    if (success) {
-        unsigned long long val = static_cast<unsigned long long>(lua_tonumber(state, -1));
-        return val;
-    }
-    else {
-        return 0ull;
-    }
-}
-
-bool toLuaConversion(lua_State* state, unsigned long long value) {
-    lua_pushnumber(state, static_cast<lua_Number>(value));
-    return true;
-}
-
-bool toStringConversion(std::string& outValue, unsigned long long inValue) {
-    outValue = std::to_string(inValue);
-    return true;
-}
-
-} // namespace
+#include <openspace/properties/listproperty.h>
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_SOURCE(
-    ULongLongProperty,
-    unsigned long long,
-    1ull,
-    std::numeric_limits<unsigned long long>::lowest(),
-    std::numeric_limits<unsigned long long>::max(),
-    1ull,
-    fromLuaConversion,
-    toLuaConversion,
-    toStringConversion,
-    LUA_TNUMBER
-)
+class DoubleListProperty : public ListProperty<double> {
+public:
+    DoubleListProperty(Property::PropertyInfo info);
+    DoubleListProperty(Property::PropertyInfo info, std::vector<double> values);
+
+    using TemplateProperty<std::vector<double>>::operator std::vector<double>;
+    using TemplateProperty<std::vector<double>>::operator=;
+};
+
+template <>
+std::string PropertyDelegate<TemplateProperty<std::vector<double>>>::className();
+
+template <>
+template <>
+std::vector<double>
+PropertyDelegate<TemplateProperty<std::vector<double>>>::fromLuaValue(
+    lua_State* state, bool& success);
+
+template <>
+template <>
+bool PropertyDelegate<TemplateProperty<std::vector<double>>>::toLuaValue(
+    lua_State* state, const std::vector<double>& value);
+
+template <>
+int PropertyDelegate<TemplateProperty<std::vector<double>>>::typeLua();
+
+template <>
+template <>
+bool PropertyDelegate<TemplateProperty<std::vector<double>>>::toString(
+    std::string& outValue, const std::vector<double>& inValue);
 
 } // namespace openspace::properties
+
+#endif // __OPENSPACE_CORE___DOUBLELISTPROPERTY___H__

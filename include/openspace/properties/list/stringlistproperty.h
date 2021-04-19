@@ -22,51 +22,45 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/properties/scalar/ulonglongproperty.h>
+#ifndef __OPENSPACE_CORE___STRINGLISTPROPERTY___H__
+#define __OPENSPACE_CORE___STRINGLISTPROPERTY___H__
 
-#include <ghoul/lua/ghoul_lua.h>
-
-#include <limits>
-#include <sstream>
-
-namespace {
-
-unsigned long long fromLuaConversion(lua_State* state, bool& success) {
-    success = (lua_isnumber(state, -1) == 1);
-    if (success) {
-        unsigned long long val = static_cast<unsigned long long>(lua_tonumber(state, -1));
-        return val;
-    }
-    else {
-        return 0ull;
-    }
-}
-
-bool toLuaConversion(lua_State* state, unsigned long long value) {
-    lua_pushnumber(state, static_cast<lua_Number>(value));
-    return true;
-}
-
-bool toStringConversion(std::string& outValue, unsigned long long inValue) {
-    outValue = std::to_string(inValue);
-    return true;
-}
-
-} // namespace
+#include <openspace/properties/listproperty.h>
+#include <string>
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_SOURCE(
-    ULongLongProperty,
-    unsigned long long,
-    1ull,
-    std::numeric_limits<unsigned long long>::lowest(),
-    std::numeric_limits<unsigned long long>::max(),
-    1ull,
-    fromLuaConversion,
-    toLuaConversion,
-    toStringConversion,
-    LUA_TNUMBER
-)
+class StringListProperty : public ListProperty<std::string> {
+public:
+    StringListProperty(Property::PropertyInfo info);
+    StringListProperty(Property::PropertyInfo info, std::vector<std::string> values);
+
+    using TemplateProperty<std::vector<std::string>>::operator std::vector<std::string>;
+    using TemplateProperty<std::vector<std::string>>::operator=;
+};
+
+template <>
+std::string PropertyDelegate<TemplateProperty<std::vector<std::string>>>::className();
+
+template <>
+template <>
+std::vector<std::string>
+PropertyDelegate<TemplateProperty<std::vector<std::string>>>::fromLuaValue(
+    lua_State* state, bool& success);
+
+template <>
+template <>
+bool PropertyDelegate<TemplateProperty<std::vector<std::string>>>::toLuaValue(
+    lua_State* state, const std::vector<std::string>& value);
+
+template <>
+int PropertyDelegate<TemplateProperty<std::vector<std::string>>>::typeLua();
+
+template <>
+template <>
+bool PropertyDelegate<TemplateProperty<std::vector<std::string>>>::toString(
+    std::string& outValue, const std::vector<std::string>& inValue);
 
 } // namespace openspace::properties
+
+#endif // __OPENSPACE_CORE___STRINGLISTPROPERTY___H__

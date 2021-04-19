@@ -46,7 +46,6 @@ public:
     int typeLua() const override;
 
     bool getStringValue(std::string& value) const override;
-    bool setStringValue(std::string value) override;
 
     T minValue() const;
     void setMinValue(T value);
@@ -66,10 +65,8 @@ public:
 
     using TemplateProperty<T>::operator=;
 
-
     void setInterpolationTarget(std::any value) override;
     void setLuaInterpolationTarget(lua_State* state) override;
-    void setStringInterpolationTarget(std::string value) override;
 
     void interpolateValue(float t,
         ghoul::EasingFunc<float> easingFunc = nullptr) override;

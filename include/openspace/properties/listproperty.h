@@ -22,51 +22,25 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/properties/scalar/ulonglongproperty.h>
+#ifndef __OPENSPACE_CORE___LISTPROPERTY___H__
+#define __OPENSPACE_CORE___LISTPROPERTY___H__
 
-#include <ghoul/lua/ghoul_lua.h>
-
-#include <limits>
-#include <sstream>
-
-namespace {
-
-unsigned long long fromLuaConversion(lua_State* state, bool& success) {
-    success = (lua_isnumber(state, -1) == 1);
-    if (success) {
-        unsigned long long val = static_cast<unsigned long long>(lua_tonumber(state, -1));
-        return val;
-    }
-    else {
-        return 0ull;
-    }
-}
-
-bool toLuaConversion(lua_State* state, unsigned long long value) {
-    lua_pushnumber(state, static_cast<lua_Number>(value));
-    return true;
-}
-
-bool toStringConversion(std::string& outValue, unsigned long long inValue) {
-    outValue = std::to_string(inValue);
-    return true;
-}
-
-} // namespace
+#include <openspace/properties/templateproperty.h>
+#include <vector>
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_SOURCE(
-    ULongLongProperty,
-    unsigned long long,
-    1ull,
-    std::numeric_limits<unsigned long long>::lowest(),
-    std::numeric_limits<unsigned long long>::max(),
-    1ull,
-    fromLuaConversion,
-    toLuaConversion,
-    toStringConversion,
-    LUA_TNUMBER
-)
+template <typename T>
+class ListProperty : public TemplateProperty<std::vector<T>> {
+public:
+    ListProperty(Property::PropertyInfo info);
+    ListProperty(Property::PropertyInfo info, std::vector<T> values);
+
+    virtual ~ListProperty() = 0;
+};
 
 } // namespace openspace::properties
+
+#include "openspace/properties/listproperty.inl"
+
+#endif // __OPENSPACE_CORE___LISTPROPERTY___H__

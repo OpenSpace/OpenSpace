@@ -22,33 +22,59 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/properties/scalar/ulonglongproperty.h>
+#include <openspace/properties/list/stringlistproperty.h>
 
+#include <openspace/json.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/misc/misc.h>
 
-#include <limits>
-#include <sstream>
+namespace {
+    constexpr const char* _loggerCat = "IntListProperty";
+} // namespace
 
 namespace {
 
-unsigned long long fromLuaConversion(lua_State* state, bool& success) {
-    success = (lua_isnumber(state, -1) == 1);
-    if (success) {
-        unsigned long long val = static_cast<unsigned long long>(lua_tonumber(state, -1));
-        return val;
+std::vector<std::string> fromLuaConversion(lua_State* state, bool& success) {
+    if (!lua_istable(state, -1)) {
+        success = false;
+        LERROR("Conversion from Lua failed. The input was not a table");
+        return {};
     }
-    else {
-        return 0ull;
+
+    std::vector<std::string> result;
+    lua_pushnil(state);
+    while (lua_next(state, -2) != 0) {
+        if (lua_isstring(state, -1)) {
+            result.emplace_back(lua_tostring(state, -1));
+        }
+        else {
+            success = false;
+            return {};
+        }
+        lua_pop(state, 1);
     }
+    success = true;
+    return result;
 }
 
-bool toLuaConversion(lua_State* state, unsigned long long value) {
-    lua_pushnumber(state, static_cast<lua_Number>(value));
+bool toLuaConversion(lua_State* state, std::vector<std::string> val) {
+    lua_createtable(state, static_cast<int>(val.size()), 0);
+
+    int i = 1;
+    for (const std::string& v : val) {
+        lua_pushinteger(state, i);
+        lua_pushstring(state, v.c_str());
+        lua_settable(state, -3);
+        ++i;
+    }
+
     return true;
 }
 
-bool toStringConversion(std::string& outValue, unsigned long long inValue) {
-    outValue = std::to_string(inValue);
+bool toStringConversion(std::string& outValue, const std::vector<std::string>& inValue) {
+    nlohmann::json json(inValue);
+    outValue = json.dump();
     return true;
 }
 
@@ -56,17 +82,23 @@ bool toStringConversion(std::string& outValue, unsigned long long inValue) {
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_SOURCE(
-    ULongLongProperty,
-    unsigned long long,
-    1ull,
-    std::numeric_limits<unsigned long long>::lowest(),
-    std::numeric_limits<unsigned long long>::max(),
-    1ull,
+StringListProperty::StringListProperty(Property::PropertyInfo info)
+    : ListProperty(std::move(info))
+{}
+
+StringListProperty::StringListProperty(Property::PropertyInfo info,
+                                       std::vector<std::string> values)
+    : ListProperty(std::move(info), std::move(values))
+{}
+
+REGISTER_TEMPLATEPROPERTY_SOURCE(
+    StringListProperty,
+    std::vector<std::string>,
+    std::vector<std::string>(),
     fromLuaConversion,
     toLuaConversion,
     toStringConversion,
-    LUA_TNUMBER
+    LUA_TTABLE
 )
 
 } // namespace openspace::properties
