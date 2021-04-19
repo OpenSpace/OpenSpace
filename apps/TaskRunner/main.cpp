@@ -122,7 +122,13 @@ int main(int argc, char** argv) {
     );
 
     std::string configFile = configuration::findConfiguration();
-    *global::configuration = configuration::loadConfigurationFromFile(configFile);
+
+    // Register the base path as the directory where the configuration file lives
+    std::string base = ghoul::filesystem::File(configFile).directoryName();
+    constexpr const char* BasePathToken = "${BASE}";
+    FileSys.registerPathToken(BasePathToken, base);
+
+    *global::configuration = configuration::loadConfigurationFromFile(configFile, "");
     openspace::global::openSpaceEngine->registerPathTokens();
     global::openSpaceEngine->initialize();
 
@@ -131,7 +137,7 @@ int main(int argc, char** argv) {
         ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
     );
 
-    std::string tasksPath = "";
+    std::string tasksPath;
     commandlineParser.addCommand(
         std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
             tasksPath,
@@ -146,7 +152,7 @@ int main(int argc, char** argv) {
 
     //FileSys.setCurrentDirectory(launchDirectory);
 
-    if (tasksPath != "") {
+    if (!tasksPath.empty()) {
         performTasks(tasksPath);
         return 0;
     }

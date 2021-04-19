@@ -13,8 +13,7 @@ local Pluto = {
         Translation = {
             Type = "SpiceTranslation",
             Target = "PLUTO",
-            Observer = "PLUTO BARYCENTER",
-            Kernels = NewHorizonsKernels
+            Observer = "PLUTO BARYCENTER"
         },
         Rotation = {
             Type = "SpiceRotation",

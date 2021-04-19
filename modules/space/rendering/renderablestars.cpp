@@ -771,8 +771,8 @@ void RenderableStars::loadPSFTexture() {
 
 void RenderableStars::renderPSFToTexture() {
     // Saves current FBO first
-    GLint defaultFBO;
-    defaultFBO = global::renderEngine->openglStateCache().defaultFramebuffer();
+    // GLint defaultFBO;
+    // defaultFBO = global::renderEngine->openglStateCache().defaultFramebuffer();
 
 //    GLint m_viewport[4];
 //    global::renderEngine.openglStateCache().viewPort(m_viewport);

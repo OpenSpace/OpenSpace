@@ -163,7 +163,6 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/scene/sceneinitializer.cpp
   ${OPENSPACE_BASE_DIR}/src/scene/scenelicensewriter.cpp
   ${OPENSPACE_BASE_DIR}/src/scene/scenegraphnode.cpp
-  ${OPENSPACE_BASE_DIR}/src/scene/scenegraphnode_doc.inl
   ${OPENSPACE_BASE_DIR}/src/scene/timeframe.cpp
   ${OPENSPACE_BASE_DIR}/src/scene/translation.cpp
   ${OPENSPACE_BASE_DIR}/src/scripting/lualibrary.cpp
@@ -209,6 +208,10 @@ if (APPLE)
   set(OPENSPACE_SOURCE
     ${OPENSPACE_SOURCE}
     ${OPENSPACE_BASE_DIR}/src/interaction/touchbar.mm
+  )
+  set_source_files_properties(
+    ${OPENSPACE_BASE_DIR}/src/interaction/touchbar.mm
+    PROPERTIES SKIP_PRECOMPILE_HEADERS ON
   )
 endif ()
 set(OPENSPACE_HEADER

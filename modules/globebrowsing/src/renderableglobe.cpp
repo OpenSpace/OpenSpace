@@ -79,11 +79,6 @@ namespace {
         bool isShadowing = false;
     };
 
-    constexpr const char* KeyRadii = "Radii";
-    constexpr const char* KeyLayers = "Layers";
-    constexpr const char* KeyShadowGroup = "ShadowGroup";
-    constexpr const char* KeyLabels = "Labels";
-
     const openspace::globebrowsing::AABB3 CullingFrustum{
         glm::vec3(-1.f, -1.f, 0.f),
         glm::vec3( 1.f,  1.f, 1e35)
@@ -232,6 +227,47 @@ namespace {
         "This is the number of currently active layers, if this value reaches the "
         "maximum, bad things will happen."
     };
+
+    struct [[codegen::Dictionary(RenderableGlobe)]] Parameters {
+        // Specifies the radii for this planet. If the Double version of this is used, all
+        // three radii are assumed to be equal
+        std::optional<std::variant<glm::dvec3, double>> radii;
+
+        // Specifies whether the planet should be shaded by the primary light source or
+        // not. If it is disabled, all parts of the planet are illuminated
+        std::optional<bool> performShading;
+
+        // A list of all the layers that should be added
+        std::map<std::string, ghoul::Dictionary> layers
+            [[codegen::reference("globebrowsing_layermanager")]];
+
+        // Specifies information about planetary labels that can be rendered on the
+        // object's surface
+        std::optional<ghoul::Dictionary> labels
+            [[codegen::reference("globebrowsing_globelabelscomponent")]];
+
+        struct ShadowGroup {
+            struct Source {
+                std::string name;
+                double radius;
+            };
+            std::vector<Source> sources;
+
+            struct Caster {
+                std::string name;
+                double radius;
+            };
+            std::vector<Caster> casters;
+        };
+        std::optional<ShadowGroup> shadowGroup;
+
+        std::optional<ghoul::Dictionary> rings
+            [[codegen::reference("globebrowsing_rings_component")]];
+
+        std::optional<ghoul::Dictionary> shadows
+            [[codegen::reference("globebrowsing_shadows_component")]];
+    };
+#include "renderableglobe_codegen.cpp"
 } // namespace
 
 using namespace openspace::properties;
@@ -461,48 +497,9 @@ Chunk::Chunk(const TileIndex& ti)
 {}
 
 documentation::Documentation RenderableGlobe::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderableGlobe",
-        "globebrowsing_renderableglobe",
-        {
-            {
-                KeyRadii,
-                new OrVerifier({ new DoubleVector3Verifier, new DoubleVerifier }),
-                Optional::Yes,
-                "Specifies the radii for this planet. If the Double version of this is "
-                "used, all three radii are assumed to be equal."
-            },
-            {
-                "PerformShading",
-                new BoolVerifier,
-                Optional::Yes,
-                "Specifies whether the planet should be shaded by the primary light "
-                "source or not. If it is disabled, all parts of the planet are "
-                "illuminated."
-            },
-            {
-                KeyLayers,
-                new TableVerifier({
-                    {
-                        "*",
-                        new ReferencingVerifier("globebrowsing_layermanager"),
-                        Optional::Yes,
-                        "Descriptions of the individual layer groups"
-                    }
-                }),
-                Optional::Yes,
-                "A list of all the layers that should be added"
-            },
-            {
-                KeyLabels,
-                new ReferencingVerifier("globebrowsing_globelabelscomponent"),
-                Optional::Yes,
-                "Specifies information about planetary labels that can be rendered on "
-                "the object's surface."
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "globebrowsing_renderableglobe";
+    return doc;
 }
 
 RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
@@ -539,75 +536,52 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     , _ringsComponent(dictionary)
     , _shadowComponent(dictionary)
 {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
     _generalProperties.currentLodScaleFactor.setReadOnly(true);
 
     // Read the radii in to its own dictionary
-    if (dictionary.hasValue<glm::dvec3>(KeyRadii)) {
-        _ellipsoid = Ellipsoid(dictionary.value<glm::dvec3>(KeyRadii));
-        setBoundingSphere(static_cast<float>(_ellipsoid.maximumRadius()));
-    }
-    else if (dictionary.hasValue<double>(KeyRadii)) {
-        const double radius = dictionary.value<double>(KeyRadii);
-        _ellipsoid = Ellipsoid({ radius, radius, radius });
-        setBoundingSphere(static_cast<float>(_ellipsoid.maximumRadius()));
+    if (p.radii.has_value()) {
+        if (std::holds_alternative<glm::dvec3>(*p.radii)) {
+            _ellipsoid = Ellipsoid(std::get<glm::dvec3>(*p.radii));
+            setBoundingSphere(static_cast<float>(_ellipsoid.maximumRadius()));
+        }
+        else if (std::holds_alternative<double>(*p.radii)) {
+            const double radius = std::get<double>(*p.radii);
+            _ellipsoid = Ellipsoid({ radius, radius, radius });
+            setBoundingSphere(static_cast<float>(_ellipsoid.maximumRadius()));
+        }
+        else {
+            throw ghoul::MissingCaseException();
+        }
     }
 
-    if (dictionary.hasKey("PerformShading")) {
-        _generalProperties.performShading = dictionary.value<bool>("PerformShading");
-    }
+    _generalProperties.performShading =
+        p.performShading.value_or(_generalProperties.performShading);
+
 
     // Init layer manager
-    ghoul::Dictionary layersDictionary;
-    if (!dictionary.hasValue<ghoul::Dictionary>(KeyLayers)) {
-        throw ghoul::RuntimeError(std::string(KeyLayers) + " must be specified");
-    }
-    layersDictionary = dictionary.value<ghoul::Dictionary>(KeyLayers);
-
+    // @TODO (abock, 2021-03-25) The layermanager should be changed to take a
+    // std::map<std::string, ghoul::Dictionary> instead and then we don't need to get it
+    // as a bare dictionary anymore and can use the value from the struct directly
+    ghoul::Dictionary layersDictionary = dictionary.value<ghoul::Dictionary>("Layers");
     _layerManager.initialize(layersDictionary);
 
     addProperty(_generalProperties.performShading);
     addProperty(_generalProperties.useAccurateNormals);
 
-    // ================================================================
-    // ======== Reads Shadow (Eclipses) Entries in asset file =========
-    // ================================================================
-    if (dictionary.hasValue<ghoul::Dictionary>(KeyShadowGroup)) {
-        ghoul::Dictionary shadowDictionary =
-            dictionary.value<ghoul::Dictionary>(KeyShadowGroup);
-
-        std::vector<std::pair<std::string, double>> sourceArray;
-        ghoul::Dictionary sources = shadowDictionary.value<ghoul::Dictionary>("Sources");
-        for (std::string_view k : sources.keys()) {
-            ghoul::Dictionary source = sources.value<ghoul::Dictionary>(k);
-
-            std::string name = source.value<std::string>("Name");
-            double radius = source.value<double>("Radius");
-            sourceArray.emplace_back(name, radius);
-        }
-
-        std::vector<std::pair<std::string, double>> casterArray;
-        ghoul::Dictionary casters = shadowDictionary.value<ghoul::Dictionary>("Casters");
-        for (std::string_view k : casters.keys()) {
-            ghoul::Dictionary caster = casters.value<ghoul::Dictionary>(k);
-
-            std::string name = caster.value<std::string>("Name");
-            double radius = caster.value<double>("Radius");
-            casterArray.emplace_back(name, radius);
-        }
-
+    if (p.shadowGroup.has_value()) {
         std::vector<Ellipsoid::ShadowConfiguration> shadowConfArray;
-        for (const std::pair<std::string, double>& source : sourceArray) {
-            for (const std::pair<std::string, double>& caster : casterArray) {
+        for (const Parameters::ShadowGroup::Source& source : p.shadowGroup->sources) {
+            for (const Parameters::ShadowGroup::Caster& caster : p.shadowGroup->casters) {
                 Ellipsoid::ShadowConfiguration sc;
-                sc.source = source;
-                sc.caster = caster;
+                sc.source = std::pair<std::string, double>(source.name, source.radius);
+                sc.caster = std::pair<std::string, double>(source.name, source.radius);
                 shadowConfArray.push_back(sc);
             }
         }
         _ellipsoid.setShadowConfigurationArray(shadowConfArray);
-    }
 
-    if (!_ellipsoid.shadowConfigurationArray().empty()) {
         addProperty(_generalProperties.eclipseShadowsEnabled);
         addProperty(_generalProperties.eclipseHardShadows);
     }
@@ -667,22 +641,20 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _localChunkBuffer.resize(2048);
     _traversalMemory.resize(512);
 
-    // Labels Dictionary
-    if (dictionary.hasValue<ghoul::Dictionary>(KeyLabels)) {
-        _labelsDictionary = dictionary.value<ghoul::Dictionary>(KeyLabels);
-    }
+    _labelsDictionary = p.labels.value_or(_labelsDictionary);
+
 
     // Components
-    if (dictionary.hasValue<ghoul::Dictionary>("Rings")) {
+    _hasRings = p.rings.has_value();
+    if (_hasRings) {
         _ringsComponent.initialize();
         addPropertySubOwner(_ringsComponent);
-        _hasRings = true;
     }
 
-    if (dictionary.hasKey("Shadows")) {
+    _hasShadows = p.shadows.has_value();
+    if (_hasShadows) {
         _shadowComponent.initialize();
         addPropertySubOwner(_shadowComponent);
-        _hasShadows = true;
         _generalProperties.shadowMapping = true;
     }
     _generalProperties.shadowMapping.onChange(notifyShaderRecompilation);

@@ -105,8 +105,6 @@ private:
     properties::IntProperty _distanceFraction;
     properties::BoolProperty _enabled;
 
-    ghoul::Dictionary _shadowMapDictionary;
-
     int _shadowDepthTextureHeight = 4096;
     int _shadowDepthTextureWidth = 4096;
     bool _dynamicDepthTextureRes = true;
@@ -124,14 +122,6 @@ private:
     GLboolean _polygonOffSet;
     GLboolean _depthIsEnabled;
     GLboolean _blendIsEnabled = false;
-
-    GLenum _faceToCull;
-    GLenum _depthFunction;
-
-    GLfloat _polygonOffSetFactor;
-    GLfloat _polygonOffSetUnits;
-    GLfloat _colorClearValue[4];
-    GLfloat _depthClearValue;
 
     glm::vec3 _sunPosition = glm::vec3(0.f);
 

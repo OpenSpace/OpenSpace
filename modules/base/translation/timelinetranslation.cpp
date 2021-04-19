@@ -30,48 +30,31 @@
 #include <openspace/util/time.h>
 
 namespace {
-    constexpr const char* KeyKeyframes = "Keyframes";
+    struct [[codegen::Dictionary(TimelineTranslation)]] Parameters {
+        // A table of keyframes, with keys formatted as YYYY-MM-DDTHH:MM:SS and values
+        // that are valid Translation objects
+        std::map<std::string, ghoul::Dictionary> keyframes
+            [[codegen::reference("core_transform_translation")]];
+    };
+#include "timelinetranslation_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation TimelineTranslation::Documentation() {
-    using namespace documentation;
-    return {
-        "Timeline Translation",
-        "base_transform_translation_keyframe",
-        {
-            {
-                KeyKeyframes,
-                new TableVerifier({
-                    { "*", new TableVerifier(), Optional::No, "Any translation object" }
-                }),
-                Optional::No,
-                "A table of keyframes, with keys formatted as YYYY-MM-DDTHH:MM:SS"
-                "and values that are valid Translation objects."
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_transform_translation_keyframe";
+    return doc;
 }
 
 TimelineTranslation::TimelineTranslation(const ghoul::Dictionary& dictionary) {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "TimelineTranslation"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    const ghoul::Dictionary& keyframes =
-        dictionary.value<ghoul::Dictionary>(KeyKeyframes);
-
-    for (std::string_view timeString : keyframes.keys()) {
-        const double t = Time::convertTime(std::string(timeString));
+    for (const std::pair<const std::string, ghoul::Dictionary>& kf : p.keyframes) {
+        const double t = Time::convertTime(kf.first);
 
         ghoul::mm_unique_ptr<Translation> translation =
-            Translation::createFromDictionary(
-                keyframes.value<ghoul::Dictionary>(timeString)
-            );
-
+            Translation::createFromDictionary(kf.second);
         if (translation) {
             _timeline.addKeyframe(t, std::move(translation));
         }
