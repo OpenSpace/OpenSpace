@@ -81,6 +81,12 @@ public:
 
     virtual void render(const RenderData& data, RendererTasks& rendererTask);
     virtual void update(const UpdateData& data);
+
+    // The 'surface' in this case is the interaction sphere of this renderable. In some
+    // cases (i.e., planets) this corresponds directly to the physical surface, but in
+    // many cases, models, volumetric data, this will not. Regardless of what the physical
+    // representation is, the 'surface' is always the sphere around which interaction is
+    // handled
     virtual SurfacePositionHandle calculateSurfacePositionHandle(
                                                 const glm::dvec3& targetModelSpace) const;
 
