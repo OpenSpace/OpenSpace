@@ -150,8 +150,7 @@ std::string SelectionProperty::generateAdditionalJsonDescription() const {
 }
 
 template <>
-std::string PropertyDelegate<TemplateProperty<std::set<std::string>>>::className()
-{
+std::string PropertyDelegate<TemplateProperty<std::set<std::string>>>::className() {
     return "SelectionProperty";
 }
 

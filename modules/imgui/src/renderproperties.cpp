@@ -104,7 +104,7 @@ void renderBoolProperty(Property* prop, const std::string& ownerName,
 
     BoolProperty* p = static_cast<BoolProperty*>(prop);
     const std::string& name = p->guiName();
-    ImGui::PushID((ownerName + "." + name).c_str());
+    ImGui::PushID((ownerName + '.' + name).c_str());
 
     BoolProperty::ValueType value = *p;
     ImGui::Checkbox(name.c_str(), &value);
@@ -126,7 +126,7 @@ void renderOptionProperty(Property* prop, const std::string& ownerName,
 
     OptionProperty* p = static_cast<OptionProperty*>(prop);
     const std::string& name = p->guiName();
-    ImGui::PushID((ownerName + "." + name).c_str());
+    ImGui::PushID((ownerName + '.' + name).c_str());
     bool isReadOnly = false;
     if (p->metaData().hasValue<bool>("isReadOnly")) {
         isReadOnly = p->metaData().value<bool>("isReadOnly");
@@ -189,7 +189,7 @@ void renderSelectionProperty(Property* prop, const std::string& ownerName,
     ghoul_assert(prop, "prop must not be nullptr");
     SelectionProperty* p = static_cast<SelectionProperty*>(prop);
     const std::string& name = p->guiName();
-    ImGui::PushID((ownerName + "." + name).c_str());
+    ImGui::PushID((ownerName + '.' + name).c_str());
 
     bool selectionChanged = false;
     std::set<std::string> newSelected;
@@ -235,7 +235,7 @@ void renderStringProperty(Property* prop, const std::string& ownerName,
     ghoul_assert(prop, "prop must not be nullptr");
     StringProperty* p = static_cast<StringProperty*>(prop);
     const std::string& name = p->guiName();
-    ImGui::PushID((ownerName + "." + name).c_str());
+    ImGui::PushID((ownerName + '.' + name).c_str());
 
     const std::string value = p->value();
 
@@ -295,10 +295,10 @@ void renderListProperty(const std::string& name, const std::string& fullIdentifi
         for (std::string& token : tokens) {
             if (!token.empty()) {
                 ghoul::trimWhitespace(token);
-                script += "" + token + ",";
+                script += token + ',';
             }
         }
-        script += "}";
+        script += '}';
 
         executeScript(
             fullIdentifier,
@@ -315,7 +315,7 @@ void renderDoubleListProperty(Property* prop, const std::string& ownerName,
     ghoul_assert(prop, "prop must not be nullptr");
     DoubleListProperty* p = static_cast<DoubleListProperty*>(prop);
     const std::string& name = p->guiName();
-    ImGui::PushID((ownerName + "." + name).c_str());
+    ImGui::PushID((ownerName + '.' + name).c_str());
 
     std::string value;
     p->getStringValue(value);
@@ -336,7 +336,7 @@ void renderIntListProperty(Property* prop, const std::string& ownerName,
     ghoul_assert(prop, "prop must not be nullptr");
     IntListProperty* p = static_cast<IntListProperty*>(prop);
     const std::string& name = p->guiName();
-    ImGui::PushID((ownerName + "." + name).c_str());
+    ImGui::PushID((ownerName + '.' + name).c_str());
 
     std::string value;
     p->getStringValue(value);
@@ -357,7 +357,7 @@ void renderStringListProperty(Property* prop, const std::string& ownerName,
     ghoul_assert(prop, "prop must not be nullptr");
     StringListProperty* p = static_cast<StringListProperty*>(prop);
     const std::string& name = p->guiName();
-    ImGui::PushID((ownerName + "." + name).c_str());
+    ImGui::PushID((ownerName + '.' + name).c_str());
 
     std::string value;
     p->getStringValue(value);
@@ -378,7 +378,7 @@ void renderDoubleProperty(properties::Property* prop, const std::string& ownerNa
     ghoul_assert(prop, "prop must not be nullptr");
     DoubleProperty* p = static_cast<DoubleProperty*>(prop);
     std::string name = p->guiName();
-    ImGui::PushID((ownerName + "." + name).c_str());
+    ImGui::PushID((ownerName + '.' + name).c_str());
 
     float value = static_cast<float>(*p);
     float min = static_cast<float>(p->minValue());
@@ -410,7 +410,7 @@ void renderIntProperty(Property* prop, const std::string& ownerName,
     ghoul_assert(prop, "prop must not be nullptr");
     IntProperty* p = static_cast<IntProperty*>(prop);
     std::string name = p->guiName();
-    ImGui::PushID((ownerName + "." + name).c_str());
+    ImGui::PushID((ownerName + '.' + name).c_str());
 
     IntProperty::ValueType value = *p;
     int min = p->minValue();
@@ -435,7 +435,7 @@ void renderIVec2Property(Property* prop, const std::string& ownerName,
     ghoul_assert(prop, "prop must not be nullptr");
     IVec2Property* p = static_cast<IVec2Property*>(prop);
     std::string name = p->guiName();
-    ImGui::PushID((ownerName + "." + name).c_str());
+    ImGui::PushID((ownerName + '.' + name).c_str());
 
     IVec2Property::ValueType value = *p;
     int min = glm::compMin(p->minValue());
@@ -468,7 +468,7 @@ void renderIVec3Property(Property* prop, const std::string& ownerName,
     ghoul_assert(prop, "prop must not be nullptr");
     IVec3Property* p = static_cast<IVec3Property*>(prop);
     std::string name = p->guiName();
-    ImGui::PushID((ownerName + "." + name).c_str());
+    ImGui::PushID((ownerName + '.' + name).c_str());
 
     IVec3Property::ValueType value = *p;
     int min = glm::compMin(p->minValue());
@@ -501,7 +501,7 @@ void renderIVec4Property(Property* prop, const std::string& ownerName,
     ghoul_assert(prop, "prop must not be nullptr");
     IVec4Property* p = static_cast<IVec4Property*>(prop);
     std::string name = p->guiName();
-    ImGui::PushID((ownerName + "." + name).c_str());
+    ImGui::PushID((ownerName + '.' + name).c_str());
 
     IVec4Property::ValueType value = *p;
     int min = glm::compMin(p->minValue());
@@ -534,7 +534,7 @@ void renderFloatProperty(Property* prop, const std::string& ownerName,
     ghoul_assert(prop, "prop must not be nullptr");
     FloatProperty* p = static_cast<FloatProperty*>(prop);
     std::string name = p->guiName();
-    ImGui::PushID((ownerName + "." + name).c_str());
+    ImGui::PushID((ownerName + '.' + name).c_str());
 
     FloatProperty::ValueType value = *p;
     float min = p->minValue();
@@ -565,7 +565,7 @@ void renderVec2Property(Property* prop, const std::string& ownerName,
     ghoul_assert(prop, "prop must not be nullptr");
     Vec2Property* p = static_cast<Vec2Property*>(prop);
     std::string name = p->guiName();
-    ImGui::PushID((ownerName + "." + name).c_str());
+    ImGui::PushID((ownerName + '.' + name).c_str());
 
     Vec2Property::ValueType value = *p;
     float min = glm::compMin(p->minValue());
@@ -601,7 +601,7 @@ void renderVec3Property(Property* prop, const std::string& ownerName,
     ghoul_assert(prop, "prop must not be nullptr");
     Vec3Property* p = static_cast<Vec3Property*>(prop);
     std::string name = p->guiName();
-    ImGui::PushID((ownerName + "." + name).c_str());
+    ImGui::PushID((ownerName + '.' + name).c_str());
 
     Vec3Property::ValueType value = *p;
     float min = glm::compMin(p->minValue());
@@ -646,7 +646,7 @@ void renderVec4Property(Property* prop, const std::string& ownerName,
     ghoul_assert(prop, "prop must not be nullptr");
     Vec4Property* p = static_cast<Vec4Property*>(prop);
     std::string name = p->guiName();
-    ImGui::PushID((ownerName + "." + name).c_str());
+    ImGui::PushID((ownerName + '.' + name).c_str());
 
     Vec4Property::ValueType value = *p;
     float min = glm::compMin(p->minValue());
@@ -691,7 +691,7 @@ void renderDVec2Property(Property* prop, const std::string& ownerName,
     ghoul_assert(prop, "prop must not be nullptr");
     DVec2Property* p = static_cast<DVec2Property*>(prop);
     std::string name = p->guiName();
-    ImGui::PushID((ownerName + "." + name).c_str());
+    ImGui::PushID((ownerName + '.' + name).c_str());
 
     glm::vec2 value = glm::dvec2(*p);
     float min = static_cast<float>(glm::compMin(p->minValue()));
@@ -726,7 +726,7 @@ void renderDVec3Property(Property* prop, const std::string& ownerName,
     ghoul_assert(prop, "prop must not be nullptr");
     DVec3Property* p = static_cast<DVec3Property*>(prop);
     std::string name = p->guiName();
-    ImGui::PushID((ownerName + "." + name).c_str());
+    ImGui::PushID((ownerName + '.' + name).c_str());
 
     glm::vec3 value = glm::dvec3(*p);
     float min = static_cast<float>(glm::compMin(p->minValue()));
@@ -762,7 +762,7 @@ void renderDVec4Property(Property* prop, const std::string& ownerName,
     ghoul_assert(prop, "prop must not be nullptr");
     DVec4Property* p = static_cast<DVec4Property*>(prop);
     std::string name = p->guiName();
-    ImGui::PushID((ownerName + "." + name).c_str());
+    ImGui::PushID((ownerName + '.' + name).c_str());
 
     glm::vec4 value = glm::dvec4(*p);
     float min = static_cast<float>(glm::compMin(p->minValue()));
@@ -799,7 +799,7 @@ void renderDMat2Property(Property* prop, const std::string& ownerName,
     DMat2Property* p = static_cast<DMat2Property*>(prop);
 
     std::string name = p->guiName();
-    ImGui::PushID((ownerName + "." + name).c_str());
+    ImGui::PushID((ownerName + '.' + name).c_str());
     ImGui::Text("%s", name.c_str());
 
     glm::mat2 value = glm::dmat2(*p);
@@ -856,7 +856,7 @@ void renderDMat3Property(Property* prop, const std::string& ownerName,
     DMat3Property* p = static_cast<DMat3Property*>(prop);
 
     std::string name = p->guiName();
-    ImGui::PushID((ownerName + "." + name).c_str());
+    ImGui::PushID((ownerName + '.' + name).c_str());
     ImGui::Text("%s", name.c_str());
 
     glm::mat3 value = glm::dmat3(*p);
@@ -923,7 +923,7 @@ void renderDMat4Property(Property* prop, const std::string& ownerName,
     DMat4Property* p = static_cast<DMat4Property*>(prop);
 
     std::string name = p->guiName();
-    ImGui::PushID((ownerName + "." + name).c_str());
+    ImGui::PushID((ownerName + '.' + name).c_str());
     ImGui::Text("%s", name.c_str());
 
     glm::mat4 value = glm::dmat4(*p);
@@ -998,7 +998,7 @@ void renderTriggerProperty(Property* prop, const std::string& ownerName,
 {
     ghoul_assert(prop, "prop must not be nullptr");
     std::string name = prop->guiName();
-    ImGui::PushID((ownerName + "." + name).c_str());
+    ImGui::PushID((ownerName + '.' + name).c_str());
 
     bool pressed = ImGui::Button(name.c_str());
     if (pressed) {

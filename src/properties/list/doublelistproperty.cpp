@@ -30,10 +30,8 @@
 #include <ghoul/misc/misc.h>
 
 namespace {
-    constexpr const char* _loggerCat = "DoubleListProperty";
-} // namespace
 
-namespace {
+constexpr const char* _loggerCat = "DoubleListProperty";
 
 std::vector<double> fromLuaConversion(lua_State* state, bool& success) {
     if (!lua_istable(state, -1)) {
@@ -65,7 +63,7 @@ bool toLuaConversion(lua_State* state, std::vector<double> val) {
     lua_createtable(state, static_cast<int>(val.size()), 0);
 
     int i = 1;
-    for (const int& v : val) {
+    for (int v : val) {
         lua_pushinteger(state, i);
         lua_pushinteger(state, v);
         lua_settable(state, -3);

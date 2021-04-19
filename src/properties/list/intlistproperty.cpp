@@ -30,10 +30,8 @@
 #include <ghoul/misc/misc.h>
 
 namespace {
-    constexpr const char* _loggerCat = "IntListProperty";
-} // namespace
 
-namespace {
+constexpr const char* _loggerCat = "IntListProperty";
 
 std::vector<int> fromLuaConversion(lua_State* state, bool& success) {
     if (!lua_istable(state, -1)) {
