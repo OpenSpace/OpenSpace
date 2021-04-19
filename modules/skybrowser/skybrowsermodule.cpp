@@ -104,6 +104,14 @@ namespace openspace {
                 "Add one or multiple exoplanet systems to the scene, as specified by the "
                 "input. An input string should be the name of the system host star"
             },
+            {
+                "getTargetData",
+                &skybrowser::luascriptfunctions::getTargetData,
+                {},
+                "string or list of strings",
+                "Add one or multiple exoplanet systems to the scene, as specified by the "
+                "input. An input string should be the name of the system host star"
+            },
         };
 
         return res;

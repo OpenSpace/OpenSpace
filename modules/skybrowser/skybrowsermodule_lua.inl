@@ -55,7 +55,7 @@ namespace openspace::skybrowser::luascriptfunctions {
 			glm::dvec3 imageCoordsGalactic = icrsToGalacticCartesian(resultImage.celestCoords.x, resultImage.celestCoords.y, 1.0);	
 			browser->getSkyTarget()->lookAtGalacticCoord(imageCoordsGalactic);
 
-			// In WWT, VFOV = ZoomLevel / 6
+			// In WWT, the definition of ZoomLevel is: VFOV = ZoomLevel / 6
 			browser->setFieldOfView(resultImage.zoomLevel / 6);
 		} 
 		browser->sendMessageToWWT(browser->createMessageForSettingForegroundOpacityWWT(100));
@@ -121,9 +121,15 @@ namespace openspace::skybrowser::luascriptfunctions {
             lua_settable(L, -3);
             ghoul::lua::push(L, "Thumbnail", url);
             lua_settable(L, -3);
-            ghoul::lua::push(L, "Ra", images[i].celestCoords.x);
+            ghoul::lua::push(L, "RA", images[i].celestCoords.x);
             lua_settable(L, -3);
             ghoul::lua::push(L, "Dec", images[i].celestCoords.y);
+            lua_settable(L, -3);
+            ghoul::lua::push(L, "HasCoords", images[i].hasCoords);
+            lua_settable(L, -3);
+            ghoul::lua::push(L, "Credits", images[i].credits);
+            lua_settable(L, -3);
+            ghoul::lua::push(L, "CreditsUrl", images[i].creditsUrl);
             lua_settable(L, -3);
             // Set table for the current ImageData
             lua_settable(L, -3);    
@@ -131,6 +137,36 @@ namespace openspace::skybrowser::luascriptfunctions {
 		
 		return 1;
 	}
+
+    int getTargetData(lua_State* L) {
+        // Send image list to GUI
+        ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::getTargetData");
+
+        ScreenSpaceSkyBrowser* browser = dynamic_cast<ScreenSpaceSkyBrowser*>(global::renderEngine->screenSpaceRenderable("SkyBrowser1"));
+        ScreenSpaceSkyTarget* target = dynamic_cast<ScreenSpaceSkyTarget*>(global::renderEngine->screenSpaceRenderable("SkyTarget1"));
+
+        float FOV = browser->fieldOfView();
+        
+        glm::vec2 coords = target->getCelestialCoords();
+        lua_newtable(L);
+
+        // Index for many browsers 
+        // For now it's only one
+        ghoul::lua::push(L, 1);
+        lua_newtable(L);
+        // Push ("Key", value)
+        ghoul::lua::push(L, "FOV", FOV);
+        lua_settable(L, -3);
+        ghoul::lua::push(L, "RA", coords.x);
+        lua_settable(L, -3);
+        ghoul::lua::push(L, "Dec", coords.y);
+        lua_settable(L, -3);
+       
+        // Set table for the current ImageData
+        lua_settable(L, -3);
+
+        return 1;
+    }
 	int adjustCamera(lua_State* L) {
 		ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::adjustCamera");
 

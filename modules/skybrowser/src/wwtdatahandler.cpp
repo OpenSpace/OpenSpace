@@ -137,31 +137,42 @@ namespace openspace {
             return -1;
 
         std::string url;
-        // Get url
-        if (std::string(node->Name()) == "ImageSet") {
-            url = getURLFromImageSet(node);
+        std::string credits;
+        std::string creditsUrl;
+        tinyxml2::XMLElement* imageSet = nullptr;
+        // Get url. The thumbnail can be located either in the Place or the ImageSet
+        if (std::string(node->Name()) == "ImageSet") {       
+            url = getChildNodeContentFromImageSet(node, "ThumbnailUrl");
+            imageSet = node;
         }
         else if (std::string(node->Name()) == "Place") {
             url = getURLFromPlace(node);
+            imageSet = getChildNode(node, "ImageSet");
         }
-        
-        // Only load images that have a thumbnail
-        if (url == "") {
+        else {
             return -1;
         }
 
+        // Only load images that have a thumbnail
+        if (url == "" || !imageSet) {
+            return -1;
+        }
+        // The credits are always children nodes of ImageSet
+        credits = getChildNodeContentFromImageSet(imageSet, "Credits");
+        creditsUrl = getChildNodeContentFromImageSet(imageSet, "CreditsUrl");
+
         ImageData image{};
-        setImageDataValues(node, url, collectionName, image);
+        setImageDataValues(node, credits, creditsUrl, url, collectionName, image);
 
         images.push_back(image);
         // Return index of image in vector
         return images.size();
     }
 
-    std::string WWTDataHandler::getURLFromImageSet(tinyxml2::XMLElement* imageSet) {
+    std::string WWTDataHandler::getChildNodeContentFromImageSet(tinyxml2::XMLElement* imageSet, std::string elementName) {
         // FInd the thumbnail image url
        // The thumbnail is the last node so traverse backwards for speed
-        tinyxml2::XMLElement* imageSetChild = imageSet->FirstChildElement("ThumbnailUrl");
+        tinyxml2::XMLElement* imageSetChild = imageSet->FirstChildElement(elementName.c_str());
         return imageSetChild ? imageSetChild->GetText() ? imageSetChild->GetText() : "" : "";
     }
 
@@ -176,7 +187,7 @@ namespace openspace {
         tinyxml2::XMLElement* imageSet = getChildNode(place, "ImageSet");
         // If it doesn't contain an ImageSet, it doesn't have an url -> return empty string
         // If there is an imageSet, collect thumbnail url
-        return imageSet ? getURLFromImageSet(imageSet) : "";
+        return imageSet ? getChildNodeContentFromImageSet(imageSet, "ThumbnailUrl") : "";
     }
 
     tinyxml2::XMLElement* WWTDataHandler::getDirectChildNode(tinyxml2::XMLElement* node, std::string name) {
@@ -198,7 +209,7 @@ namespace openspace {
         return imageSet;
     }
 
-    void WWTDataHandler::setImageDataValues(tinyxml2::XMLElement* node, std::string thumbnail, std::string collectionName, ImageData& img) {
+    void WWTDataHandler::setImageDataValues(tinyxml2::XMLElement* node, std::string credits, std::string creditsUrl, std::string thumbnail, std::string collectionName, ImageData& img) {
         // Get attributes for the image
         img.name = node->FindAttribute("Name") ? node->FindAttribute("Name")->Value() : "";
         img.hasCoords = node->FindAttribute("RA") && node->FindAttribute("Dec");
@@ -210,6 +221,8 @@ namespace openspace {
         img.collection = collectionName;
         img.thumbnailUrl = thumbnail;
         img.zoomLevel = node->FindAttribute("ZoomLevel") ? std::stof(node->FindAttribute("ZoomLevel")->Value()) : 0.f;
+        img.credits = credits;
+        img.creditsUrl = creditsUrl;
     }
     
     const std::vector<ImageData>& WWTDataHandler::getLoadedImages() const {

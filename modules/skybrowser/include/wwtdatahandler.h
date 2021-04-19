@@ -11,6 +11,8 @@ namespace openspace {
     struct ImageData {
         std::string name;
         std::string thumbnailUrl;
+        std::string credits;
+        std::string creditsUrl;
         glm::vec2 celestCoords;
         std::string collection;
         float zoomLevel;
@@ -41,9 +43,9 @@ namespace openspace {
     private:
         
         int loadImage(tinyxml2::XMLElement* imageSet, std::string collectionName);
-        void setImageDataValues(tinyxml2::XMLElement* node, std::string thumbnail, std::string collectionName, ImageData& img);
+        void setImageDataValues(tinyxml2::XMLElement* node, std::string credits, std::string creditsUrl, std::string thumbnail, std::string collectionName, ImageData& img);
 
-        std::string getURLFromImageSet(tinyxml2::XMLElement* imageSet);
+        std::string getChildNodeContentFromImageSet(tinyxml2::XMLElement* imageSet, std::string elementName);
         std::string getURLFromPlace(tinyxml2::XMLElement* place);
         tinyxml2::XMLElement* getDirectChildNode(tinyxml2::XMLElement* node, std::string name);
         tinyxml2::XMLElement* getChildNode(tinyxml2::XMLElement* node, std::string name);
