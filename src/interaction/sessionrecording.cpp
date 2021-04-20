@@ -748,10 +748,9 @@ void SessionRecording::saveTimeKeyframeAscii(Timestamps& times,
 
 void SessionRecording::saveScriptKeyframeToTimeline(std::string scriptToSave)
 {
-    const std::string returnPrefix = "return ";
     size_t substringStartIdx = 0;
-    if (scriptToSave.substr(0, returnPrefix.length()) == returnPrefix) {
-        substringStartIdx += returnPrefix.length();
+    if (scriptToSave.substr(0, scriptReturnPrefix.length()) == scriptReturnPrefix) {
+        substringStartIdx += scriptReturnPrefix.length();
     }
     for (auto reject : _scriptRejects) {
         if (scriptToSave.substr(substringStartIdx, reject.length()) == reject) {
@@ -1361,6 +1360,8 @@ bool SessionRecording::playbackScript() {
         _playbackLineNum
     );
 
+    success = checkIfScriptUsesScenegraphNode(kf._script);
+
     if (success) {
         success = addKeyframe(
             {times.timeOs, times.timeRec, times.timeSim},
@@ -1369,6 +1370,102 @@ bool SessionRecording::playbackScript() {
         );
     }
     return success;
+}
+
+void SessionRecording::getListofLoadedSceneGraphNodes() {
+    std::vector<SceneGraphNode*> nodes =
+        global::renderEngine->scene()->allSceneGraphNodes();
+    for (SceneGraphNode* n : nodes) {
+        _loadedSceneGraphNodes.push_back(n->guiName());
+    }
+}
+
+bool SessionRecording::checkIfScriptUsesScenegraphNode(std::string s) {
+    if (s.rfind(scriptReturnPrefix, 0) == 0) {
+        s.erase(0, scriptReturnPrefix.length());
+    }
+    //This works for both setPropertyValue and setPropertyValueSingle
+    if (s.rfind("openspace.setPropertyValue", 0) == 0) {
+        std::string found;
+        if (s.find("(\"") != std::string::npos) {
+            std::string subj = s.substr(s.find("(\"") + 2);
+            checkForScenegraphNodeAccess_Scene(subj, found);
+            checkForScenegraphNodeAccess_Nav(subj, found);
+            if (found != "") {
+                if (std::find(_loadedSceneGraphNodes.begin(),
+                              _loadedSceneGraphNodes.end(),
+                              found)
+                    == _loadedSceneGraphNodes.end())
+                {
+                    LERROR(fmt::format(
+                        "Playback file requires scenegraph node {}, which is "
+                        "not currently loaded", subj
+                    ));
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
+}
+
+std::string SessionRecording::checkForScenegraphNodeAccess_Scene(std::string& s,
+                                                                 std::string& result)
+{
+    const std::string scene = "Scene.";
+    auto posScene = s.find(scene);
+    if (posScene != std::string::npos) {
+        auto posDot = s.rfind(".", posScene + scene.length());
+        result = s.substr(posScene + scene.length(), posDot - posScene);
+    }
+}
+
+std::string SessionRecording::checkForScenegraphNodeAccess_Nav(std::string& s,
+                                                               std::string& result)
+{
+    std::string nextTerm = "NavigationHandler.OrbitalNavigator.";
+    std::vector<const std::string> navScriptsUsingNodes = {
+        ".RetargetAnchor",
+        ".Anchor",
+        ".Aim"
+    };
+    auto posNav = s.find(nextTerm);
+    if (posNav != std::string::npos) {
+        auto posDot = s.rfind(".", posNav + nextTerm.length());
+        if (posDot != std::string::npos) {
+            for (std::string accessName : navScriptsUsingNodes) {
+                if (s.substr(posDot).rfind(accessName) == 0) {
+                    std::string postName = s.substr(posDot + accessName.length() + 1);
+                    eraseSpacesFromString(postName, 0);
+                    result = getNameFromSurroundingQuotes(postName, s.at(0));
+                }
+            }
+        }
+    }
+}
+
+void SessionRecording::eraseSpacesFromString(std::string& s, size_t pos) {
+    s.erase(
+        s.begin(),
+        std::find_if(
+            s.begin(),
+            s.end(),
+            std::not1(std::ptr_fun<int, int>(std::isspace))
+        )
+    );
+}
+
+std::string SessionRecording::getNameFromSurroundingQuotes(std::string& s, char quote) {
+    std::string result;
+    //Handle either ' or " marks
+    if (quote == '\'' || quote == '\"') {
+        size_t quoteCount = std::count(s.begin(), s.end(), s);
+        //Must be an opening and closing quote char
+        if (quoteCount == 2) {
+            result = s.substr(1, s.rfind(2, quote));
+        }
+    }
+    return result;
 }
 
 bool SessionRecording::convertScript(std::stringstream& inStream, DataMode mode,

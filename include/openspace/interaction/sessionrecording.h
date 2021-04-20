@@ -634,6 +634,13 @@ protected:
     DataMode readModeFromHeader(std::string filename);
     void readPlaybackHeader_stream(std::stringstream& conversionInStream,
         std::string& version, DataMode& mode);
+    void getListofLoadedSceneGraphNodes();
+
+    bool checkIfScriptUsesScenegraphNode(std::string s);
+    std::string checkForScenegraphNodeAccess_Scene(std::string& s, std::string& result);
+    std::string checkForScenegraphNodeAccess_Nav(std::string& s, std::string& result);
+    void eraseSpacesFromString(std::string& s, size_t pos);
+    std::string getNameFromSurroundingQuotes(std::string& s, char quote);
 
     static void writeToFileBuffer(unsigned char* buf, size_t& idx, double src);
     static void writeToFileBuffer(unsigned char* buf, size_t& idx, std::vector<char>& cv);
@@ -673,6 +680,12 @@ protected:
     unsigned char _keyframeBuffer[_saveBufferMaxSize_bytes];
 
     bool _cleanupNeeded = false;
+    const std::string scriptReturnPrefix = "return ";
+    std::vector<const std::string> scriptsUsingScenegraphNodesNavAccess = {
+        "RetargetAnchor",
+        "Anchor",
+        "Aim"
+    };
 
     std::vector<interaction::KeyframeNavigator::CameraPose> _keyframesCamera;
     std::vector<datamessagestructures::TimeKeyframe> _keyframesTime;
@@ -690,11 +703,13 @@ protected:
     };
     std::vector<std::string> _scriptRejects = {
         "openspace.sessionRecording",
+        "openspace.scriptScheduler.clear",
         "openspace.time.interpolatePause",
         "openspace.time.interpolateTogglePause",
         "openspace.time.setPause",
         "openspace.time.togglePause"
     };
+    std::vector<std::string> _loadedSceneGraphNodes;
 
     unsigned int _idxTimeline_nonCamera = 0;
     unsigned int _idxTime = 0;
