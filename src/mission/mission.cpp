@@ -29,73 +29,47 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/lua/lua_helper.h>
 #include <algorithm>
+#include <optional>
 
 namespace {
-    constexpr const char* KeyName = "Name";
-    constexpr const char* KeyDescription = "Description";
-    constexpr const char* KeyPhases = "Phases";
-    constexpr const char* KeyTimeRange = "TimeRange";
+    struct [[codegen::Dictionary(MissionPhase)]] Parameters {
+        // The human readable name of this mission or mission phase that is displayed to
+        // the user
+        std::string name;
+
+        // A description of this mission or mission phase
+        std::optional<std::string> description;
+
+        // The time range for which this mission or mission phase is valid. If no time
+        // range is specified, the ranges of sub mission phases are used instead
+        std::optional<ghoul::Dictionary> timeRange
+            [[codegen::reference("core_util_timerange")]];
+
+        // The phases into which this mission or mission phase is separated
+        std::optional<std::vector<ghoul::Dictionary>> phases
+            [[codegen::reference("core_mission_mission")]];
+    };
+#include "mission_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation MissionPhase::Documentation() {
-    using namespace documentation;
-
-    return {
-        "Missions and Mission Phases",
-        "core_mission_mission",
-        {
-            {
-                KeyName,
-                new StringVerifier,
-                Optional::No,
-                "The human readable name of this mission or mission phase that is "
-                "displayed to the user."
-            },
-            {
-                KeyDescription,
-                new StringVerifier,
-                Optional::Yes,
-                "A description of this mission or mission phase."
-            },
-            {
-                KeyTimeRange,
-                new ReferencingVerifier("core_util_timerange"),
-                Optional::Yes,
-                "The time range for which this mission or mission phase is valid. If no "
-                "time range is specified, the ranges of sub mission phases are used "
-                "instead."
-            },
-            {
-                KeyPhases,
-                new TableVerifier({
-                    {
-                        "*",
-                        new ReferencingVerifier("core_mission_mission"),
-                        Optional::Yes
-                    }
-                }),
-                Optional::Yes,
-                "The phases into which this mission or mission phase is separated."
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "core_mission_mission";
+    return doc;
 }
 
 MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
-    _name = dictionary.value<std::string>(KeyName);
-    if (dictionary.hasValue<std::string>(KeyDescription)) {
-        _description = dictionary.value<std::string>(KeyDescription);
-    }
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    if (dictionary.hasValue<ghoul::Dictionary>(KeyPhases)) {
-        ghoul::Dictionary childDicts = dictionary.value<ghoul::Dictionary>(KeyPhases);
-        // This is a nested mission phase
-        _subphases.reserve(childDicts.size());
-        for (size_t i = 0; i < childDicts.size(); ++i) {
-            std::string key = std::to_string(i + 1);
-            _subphases.emplace_back(childDicts.value<ghoul::Dictionary>(key));
+    _name = p.name;
+    _description = p.description.value_or(_description);
+
+    if (p.phases.has_value()) {
+        _subphases.reserve(p.phases->size());
+        for (const ghoul::Dictionary& phase : *p.phases) {
+            _subphases.emplace_back(phase);
         }
 
         // Ensure subphases are sorted
@@ -112,15 +86,14 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
         timeRangeSubPhases.start = _subphases[0].timeRange().start;
         timeRangeSubPhases.end = _subphases.back().timeRange().end;
 
-        // user may specify an overall time range. In that case expand this timerange.
-        if (dictionary.hasValue<ghoul::Dictionary>(KeyTimeRange)) {
-            ghoul::Dictionary range = dictionary.value<ghoul::Dictionary>(KeyTimeRange);
-            TimeRange overallTimeRange(range);
+        // user may specify an overall time range. In that case expand this timerange
+        if (p.timeRange.has_value()) {
+            TimeRange overallTimeRange(*p.timeRange);
             if (!overallTimeRange.includes(timeRangeSubPhases)) {
-                throw ghoul::RuntimeError(
+                throw ghoul::RuntimeError(fmt::format(
                     "User specified time range must at least include its subphases'",
-                    "Mission (" + _name + ")"
-                );
+                    "Mission ({})", _name
+                ));
             }
 
             _timeRange.include(overallTimeRange);
@@ -132,16 +105,14 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
         }
     }
     else {
-        if (dictionary.hasValue<ghoul::Dictionary>(KeyTimeRange)) {
-            ghoul::Dictionary timeRangeDict =
-                dictionary.value<ghoul::Dictionary>(KeyTimeRange);
-            _timeRange = TimeRange(timeRangeDict); // throws exception if unable to parse
+        if (p.timeRange.has_value()) {
+            _timeRange = TimeRange(*p.timeRange); // throws exception if unable to parse
         }
         else {
-            throw ghoul::RuntimeError(
+            throw ghoul::RuntimeError(fmt::format(
                 "If there are no subphases specified, the time range has to be specified",
-                "Mission (" + _name + ")"
-            );
+                "Mission ({})", _name
+            ));
         }
     }
 }

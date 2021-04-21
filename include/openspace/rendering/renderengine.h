@@ -201,6 +201,7 @@ private:
     properties::BoolProperty _showCameraInfo;
 
     properties::BoolProperty _applyWarping;
+    properties::BoolProperty _screenshotUseDate;
     properties::BoolProperty _showFrameInformation;
     properties::BoolProperty _disableMasterRendering;
 

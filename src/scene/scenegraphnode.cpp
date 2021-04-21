@@ -27,6 +27,8 @@
 #include <modules/base/scale/staticscale.h>
 #include <modules/base/rotation/staticrotation.h>
 #include <modules/base/translation/statictranslation.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderable.h>
@@ -38,23 +40,11 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/ghoul_gl.h>
-#include "scenegraphnode_doc.inl"
-
 #include <cmath>
+#include <optional>
 
 namespace {
     constexpr const char* _loggerCat = "SceneGraphNode";
-    constexpr const char* KeyRenderable = "Renderable";
-    constexpr const char* KeyGuiName = "GUI.Name";
-    constexpr const char* KeyGuiPath = "GUI.Path";
-    constexpr const char* KeyGuiHidden = "GUI.Hidden";
-    constexpr const char* KeyGuiDescription = "GUI.Description";
-
-    constexpr const char* KeyTransformTranslation = "Transform.Translation";
-    constexpr const char* KeyTransformRotation = "Transform.Rotation";
-    constexpr const char* KeyTransformScale = "Transform.Scale";
-
-    constexpr const char* KeyTimeFrame = "TimeFrame";
 
     constexpr openspace::properties::Property::PropertyInfo ComputeScreenSpaceInfo =
     {
@@ -138,6 +128,90 @@ namespace {
         openspace::properties::Property::Visibility::Hidden
     };
 
+    struct [[codegen::Dictionary(SceneGraphNode)]] Parameters {
+        // The identifier of this scenegraph node. This name must be unique among all
+        // scene graph nodes that are loaded in a specific scene. If a duplicate is
+        // detected the loading of the node will fail, as will all childing that depend on
+        // the node. The identifier must not contain any whitespaces or '.'
+        std::string identifier;
+
+        // This names the parent of the currently specified scenegraph node. The parent
+        // must already exist in the scene graph. If not specified, the node will be
+        // attached to the root of the scenegraph
+        std::optional<std::string> parent
+            [[codegen::annotation(
+                "If specified, this must be a name for another scenegraph node"
+            )]];
+
+        // The renderable that is to be created for this scenegraph node. A renderable is
+        // a component of a scenegraph node that will lead to some visual result on the
+        // screen. The specifics heavily depend on the 'Type' of the renderable. If no
+        // Renderable is specified, this scenegraph node is an internal node and can be
+        // used for either group children, or apply common transformations to a group of
+        // children
+        std::optional<ghoul::Dictionary> renderable [[codegen::reference("renderable")]];
+
+        // A hard-coded bounding sphere to be used for the cases where the Renderable is
+        // not able to provide a reasonable bounding sphere or the calculated bounding
+        // sphere needs to be overwritten for some reason
+        std::optional<double> boundingSphere;
+
+        struct Transform {
+            // This node describes a translation that is applied to the scenegraph node
+            // and all its children. Depending on the 'Type' of the translation, this can
+            // either be a static translation or a time-varying one
+            std::optional<ghoul::Dictionary> translation
+                [[codegen::reference("core_transform_translation")]];
+
+            // This nodes describes a rotation that is applied to the scenegraph node and
+            // all its children. Depending on the 'Type' of the rotation, this can either
+            // be a static rotation or a time-varying one
+            std::optional<ghoul::Dictionary> rotation
+                [[codegen::reference("core_transform_rotation")]];
+
+            // This node describes a scaling that is applied to the scenegraph node and
+            // all its children. Depending on the 'Type' of the scaling, this can either
+            // be a static scaling or a time-varying one
+            std::optional<ghoul::Dictionary> scale
+                [[codegen::reference("core_transform_scaling")]];
+        };
+
+        // This describes a set of transformations that are applied to this scenegraph
+        // node and all of its children. There are only three possible values
+        // corresponding to a 'Translation', a 'Rotation', and a 'Scale'
+        std::optional<Transform> transform;
+
+        // Specifies the time frame for when this node should be active
+        std::optional<ghoul::Dictionary> timeFrame
+            [[codegen::reference("core_time_frame")]];
+
+        // A tag or list of tags that can be used to reference to a group of scenegraph
+        // nodes.
+        std::optional<std::variant<std::string, std::vector<std::string>>> tag;
+
+        struct Gui {
+            // An optional user-facing name for this SceneGraphNode, which does not have
+            // to be unique, though it is recommended, and can contain any characters
+            std::optional<std::string> name;
+
+            // If this value is specified, this '/' separated URI specifies the location
+            // of this scenegraph node in a GUI representation, for instance
+            // '/SolarSystem/Earth/Moon'
+            std::optional<std::string> path;
+
+            // A user-facing description about this scene graph node
+            std::optional<std::string> description;
+
+            // If this value is specified, GUI applications are incouraged to ignore this 
+            // scenegraph node. This is most useful to trim collective lists of nodes and
+            // not display, for example, barycenters
+            std::optional<bool> hidden;
+        };
+        // Additional information that is passed to GUI applications. These are all hints
+        // and do not have any impact on the actual function of the scenegraph node
+        std::optional<Gui> gui [[codegen::key("GUI")]];
+    };
+#include "scenegraphnode_codegen.cpp"
 } // namespace
 
 namespace openspace {
@@ -149,11 +223,7 @@ int SceneGraphNode::nextIndex = 0;
 ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
-    openspace::documentation::testSpecificationAndThrow(
-        SceneGraphNode::Documentation(),
-        dictionary,
-        "SceneGraphNode"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     SceneGraphNode* n = global::memoryManager->PersistentMemory.alloc<SceneGraphNode>();
     ghoul::mm_unique_ptr<SceneGraphNode> result = ghoul::mm_unique_ptr<SceneGraphNode>(n);
@@ -162,89 +232,102 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     result->index = nextIndex++;
 #endif // Debugging_Core_SceneGraphNode_Indices
 
-    std::string identifier = dictionary.value<std::string>(KeyIdentifier);
-    result->setIdentifier(std::move(identifier));
+    result->setIdentifier(p.identifier);
 
-    if (dictionary.hasKey(KeyGuiName)) {
-        result->setGuiName(dictionary.value<std::string>(KeyGuiName));
-        result->_guiDisplayName = result->guiName();
-        result->addProperty(result->_guiDisplayName);
+    if (p.gui.has_value()) {
+        if (p.gui->name.has_value()) {
+            result->setGuiName(*p.gui->name);
+            result->_guiDisplayName = result->guiName();
+            result->addProperty(result->_guiDisplayName);
+        }
+
+        if (p.gui->description.has_value()) {
+            result->setDescription(*p.gui->description);
+            result->_guiDescription = result->description();
+            result->addProperty(result->_guiDescription);
+        }
+
+        if (p.gui->hidden.has_value()) {
+            result->_guiHidden = *p.gui->hidden;
+            result->addProperty(result->_guiHidden);
+        }
+
+        if (p.gui->path.has_value()) {
+            result->_guiPath = *p.gui->path;
+            result->addProperty(result->_guiPath);
+        }
     }
 
-    if (dictionary.hasKey(KeyGuiDescription)) {
-        result->setDescription(dictionary.value<std::string>(KeyGuiDescription));
-        result->_guiDescription = result->description();
-        result->addProperty(result->_guiDescription);
-    }
-
-    if (dictionary.hasKey(KeyGuiHidden)) {
-        result->_guiHidden = dictionary.value<bool>(KeyGuiHidden);
-        result->addProperty(result->_guiHidden);
-    }
-
-    if (dictionary.hasKey(BoundingSphereInfo.identifier)) {
-        result->_boundingSphere = dictionary.value<double>(BoundingSphereInfo.identifier);
+    if (p.boundingSphere.has_value()) {
+        result->_boundingSphere = *p.boundingSphere;
         result->_boundingSphere.setVisibility(properties::Property::Visibility::All);
     }
 
-    if (dictionary.hasKey(KeyTransformTranslation)) {
-        ghoul::Dictionary translationDictionary =
-            dictionary.value<ghoul::Dictionary>(KeyTransformTranslation);
-        result->_transform.translation = Translation::createFromDictionary(
-            translationDictionary
-        );
-        if (result->_transform.translation == nullptr) {
-            LERROR(fmt::format(
-                "Failed to create ephemeris for SceneGraphNode '{}'", result->identifier()
+    if (p.transform.has_value()) {
+        if (p.transform->translation.has_value()) {
+            result->_transform.translation = Translation::createFromDictionary(
+                *p.transform->translation
+            );
+
+            // @TODO(abock, 2021-03-05)  I don't think this is necessary anymore as we
+            // transitioned to throwing exceptions when the construction fails
+            if (result->_transform.translation == nullptr) {
+                LERROR(fmt::format(
+                    "Failed to create ephemeris for SceneGraphNode '{}'",
+                    result->identifier()
+                ));
+                return nullptr;
+            }
+            LDEBUG(fmt::format(
+                "Successfully created ephemeris for '{}'", result->identifier()
             ));
-            return nullptr;
+            result->addPropertySubOwner(result->_transform.translation.get());
         }
-        LDEBUG(fmt::format(
-            "Successfully created ephemeris for '{}'", result->identifier()
-        ));
-    }
-    if (result->_transform.translation) {
-        result->addPropertySubOwner(result->_transform.translation.get());
+
+        if (p.transform->rotation.has_value()) {
+            result->_transform.rotation = Rotation::createFromDictionary(
+                *p.transform->rotation
+            );
+
+            // @TODO(abock, 2021-03-05)  I don't think this is necessary anymore as we
+            // transitioned to throwing exceptions when the construction fails
+            if (result->_transform.rotation == nullptr) {
+                LERROR(fmt::format(
+                    "Failed to create rotation for SceneGraphNode '{}'",
+                    result->identifier()
+                ));
+                return nullptr;
+            }
+            LDEBUG(fmt::format(
+                "Successfully created rotation for '{}'", result->identifier()
+            ));
+            result->addPropertySubOwner(result->_transform.rotation.get());
+        }
+
+        if (p.transform->scale.has_value()) {
+            result->_transform.scale = Scale::createFromDictionary(*p.transform->scale);
+
+            // @TODO(abock, 2021-03-05)  I don't think this is necessary anymore as we
+            // transitioned to throwing exceptions when the construction fails
+            if (result->_transform.scale == nullptr) {
+                LERROR(fmt::format(
+                    "Failed to create scale for SceneGraphNode '{}'",
+                    result->identifier()
+                ));
+                return nullptr;
+            }
+            LDEBUG(fmt::format(
+                "Successfully created scale for '{}'", result->identifier()
+            ));
+            result->addPropertySubOwner(result->_transform.scale.get());
+        }
     }
 
-    if (dictionary.hasKey(KeyTransformRotation)) {
-        ghoul::Dictionary rotationDictionary =
-            dictionary.value<ghoul::Dictionary>(KeyTransformRotation);
-        result->_transform.rotation = Rotation::createFromDictionary(rotationDictionary);
-        if (result->_transform.rotation == nullptr) {
-            LERROR(fmt::format(
-                "Failed to create rotation for SceneGraphNode '{}'", result->identifier()
-            ));
-            return nullptr;
-        }
-        LDEBUG(fmt::format(
-            "Successfully created rotation for '{}'", result->identifier()
-        ));
-    }
-    if (result->_transform.rotation) {
-        result->addPropertySubOwner(result->_transform.rotation.get());
-    }
+    if (p.timeFrame.has_value()) {
+        result->_timeFrame = TimeFrame::createFromDictionary(*p.timeFrame);
 
-    if (dictionary.hasKey(KeyTransformScale)) {
-        ghoul::Dictionary scaleDictionary =
-            dictionary.value<ghoul::Dictionary>(KeyTransformScale);
-        result->_transform.scale = Scale::createFromDictionary(scaleDictionary);
-        if (result->_transform.scale == nullptr) {
-            LERROR(fmt::format(
-                "Failed to create scale for SceneGraphNode '{}'", result->identifier()
-            ));
-            return nullptr;
-        }
-        LDEBUG(fmt::format("Successfully created scale for '{}'", result->identifier()));
-    }
-    if (result->_transform.scale) {
-        result->addPropertySubOwner(result->_transform.scale.get());
-    }
-
-    if (dictionary.hasKey(KeyTimeFrame)) {
-        ghoul::Dictionary timeFrameDictionary =
-            dictionary.value<ghoul::Dictionary>(KeyTimeFrame);
-        result->_timeFrame = TimeFrame::createFromDictionary(timeFrameDictionary);
+        // @TODO(abock, 2021-03-05)  I don't think this is necessary anymore as we
+        // transitioned to throwing exceptions when the construction fails
         if (result->_timeFrame == nullptr) {
             LERROR(fmt::format(
                 "Failed to create time frame for SceneGraphNode '{}'",
@@ -252,30 +335,26 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
             ));
             return nullptr;
         }
-        result->addPropertySubOwner(result->_timeFrame.get());
         LDEBUG(fmt::format(
-            "Successfully created time frame for '{}'",
-            result->identifier()
+            "Successfully created time frame for '{}'", result->identifier()
         ));
+        result->addPropertySubOwner(result->_timeFrame.get());
     }
 
     // We initialize the renderable last as it probably has the most dependencies
-    if (dictionary.hasValue<ghoul::Dictionary>(KeyRenderable)) {
-        ghoul::Dictionary renderableDictionary =
-            dictionary.value<ghoul::Dictionary>(KeyRenderable);
-
-        result->_renderable = Renderable::createFromDictionary(renderableDictionary);
+    if (p.renderable.has_value()) {
+        result->_renderable = Renderable::createFromDictionary(*p.renderable);
         ghoul_assert(result->_renderable, "Failed to create Renderable");
         result->addPropertySubOwner(result->_renderable.get());
         LDEBUG(fmt::format(
             "Successfully created renderable for '{}'", result->identifier()
         ));
 
-        // If the renderable child has a larger bounding sphere, we allow it tooverride
+        // If the renderable child has a larger bounding sphere, we allow it to override
         if (result->_renderable->boundingSphere() > result->_boundingSphere) {
             result->_boundingSphere = result->_renderable->boundingSphere();
 
-            if (dictionary.hasKey(BoundingSphereInfo.identifier)) {
+            if (p.boundingSphere.has_value()) {
                 LWARNING(fmt::format(
                     "The specified property 'BoundingSphere' for '{}' was overwritten "
                     "by a child renderable",
@@ -285,35 +364,32 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         }
     }
 
-    if (dictionary.hasKey(KeyTag)) {
-        if (dictionary.hasValue<std::string>(KeyTag)) {
-            std::string tagName = dictionary.value<std::string>(KeyTag);
-            if (!tagName.empty()) {
-                result->addTag(std::move(tagName));
-            }
+    if (p.tag.has_value()) {
+        if (std::holds_alternative<std::string>(*p.tag)) {
+            result->addTag(std::get<std::string>(*p.tag));
         }
-        else if (dictionary.hasValue<ghoul::Dictionary>(KeyTag)) {
-            ghoul::Dictionary tagNames = dictionary.value<ghoul::Dictionary>(KeyTag);
-            std::string tagName;
-            for (std::string_view key : tagNames.keys()) {
-                tagName = tagNames.value<std::string>(key);
-                if (!tagName.empty()) {
-                    result->addTag(std::move(tagName));
+        else if (std::holds_alternative<std::vector<std::string>>(*p.tag)) {
+            for (const std::string& tag : std::get<std::vector<std::string>>(*p.tag)) {
+                if (!tag.empty()) {
+                    result->addTag(tag);
                 }
             }
         }
+        else {
+            throw ghoul::MissingCaseException();
+        }
     }
-
-    if (dictionary.hasKey(KeyGuiPath)) {
-        result->_guiPath = dictionary.value<std::string>(KeyGuiPath);
-        result->addProperty(result->_guiPath);
-    }
-
 
     LDEBUG(fmt::format("Successfully created SceneGraphNode '{}'", result->identifier()));
 
     result->_lastScreenSpaceUpdateTime = std::chrono::high_resolution_clock::now();
     return result;
+}
+
+documentation::Documentation SceneGraphNode::Documentation() {
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "core_scene_node";
+    return doc;
 }
 
 SceneGraphNode::SceneGraphNode()

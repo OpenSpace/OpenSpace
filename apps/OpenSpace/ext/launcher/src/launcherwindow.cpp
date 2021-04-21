@@ -172,7 +172,6 @@ LauncherWindow::LauncherWindow(bool profileEnabled,
 
     setCentralWidget(createCentralWidget());
 
-
     populateProfilesList(globalConfig.profile);
     _profileBox->setEnabled(profileEnabled);
 
@@ -326,14 +325,6 @@ void LauncherWindow::populateProfilesList(std::string preset) {
         return;
     }
 
-    if (!std::filesystem::exists(_userProfilePath)) {
-        LINFOC(
-            "LauncherWindow",
-            fmt::format("Could not find user profile folder '{}'", _userProfilePath)
-        );
-        return;
-    }
-
     _profileBox->addItem(QString::fromStdString("--- User Profiles ---"));
     const QStandardItemModel* model = qobject_cast<const QStandardItemModel*>(_profileBox->model());
     model->item(_userAssetCount)->setEnabled(false);
@@ -373,30 +364,22 @@ void LauncherWindow::populateWindowConfigsList(std::string preset) {
 
     _windowConfigBox->clear();
 
-    if (std::filesystem::exists(_userConfigPath)) {
-        _userConfigCount = 0;
-        _windowConfigBox->addItem(QString::fromStdString("--- User Configurations ---"));
-        const QStandardItemModel* model = qobject_cast<const QStandardItemModel*>(_windowConfigBox->model());
-        model->item(_userConfigCount)->setEnabled(false);
-        ++_userConfigCount;
-        // Add all the files with the .xml extension to the dropdown
-        for (const fs::directory_entry& p : fs::directory_iterator(_userConfigPath)) {
-            if (p.path().extension() != ".xml") {
-                continue;
-            }
-            _windowConfigBox->addItem(QString::fromStdString(p.path().stem().string()));
-            ++_userConfigCount;
+    _userConfigCount = 0;
+    _windowConfigBox->addItem(QString::fromStdString("--- User Configurations ---"));
+    const QStandardItemModel* model = qobject_cast<const QStandardItemModel*>(_windowConfigBox->model());
+    model->item(_userConfigCount)->setEnabled(false);
+    ++_userConfigCount;
+    // Add all the files with the .xml extension to the dropdown
+    for (const fs::directory_entry& p : fs::directory_iterator(_userConfigPath)) {
+        if (p.path().extension() != ".xml") {
+            continue;
         }
-        _windowConfigBox->addItem(QString::fromStdString("--- OpenSpace Configurations ---"));
-        model = qobject_cast<const QStandardItemModel*>(_windowConfigBox->model());
-        model->item(_userConfigCount)->setEnabled(false);
+        _windowConfigBox->addItem(QString::fromStdString(p.path().stem().string()));
+         ++_userConfigCount;
     }
-    else {
-        LINFOC(
-            "LauncherWindow",
-            fmt::format("Could not find config folder '{}'", _configPath)
-        );
-    }
+    _windowConfigBox->addItem(QString::fromStdString("--- OpenSpace Configurations ---"));
+    model = qobject_cast<const QStandardItemModel*>(_windowConfigBox->model());
+    model->item(_userConfigCount)->setEnabled(false);
 
     if (std::filesystem::exists(_configPath)) {
         // Add all the files with the .xml extension to the dropdown

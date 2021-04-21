@@ -38,11 +38,10 @@
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
+#include <optional>
+#include <variant>
 
 namespace {
-    constexpr const char* KeyType = "Type";
-    constexpr const char* KeyTag = "Tag";
-
     constexpr const std::array<const char*, 4> UniformNames = {
         "Alpha", "ModelTransform", "ViewProjectionMatrix", "texture1"
     };
@@ -207,109 +206,72 @@ namespace {
             wrap(elevation, -glm::pi<float>(), glm::pi<float>())
         );
     }
+
+    struct [[codegen::Dictionary(ScreenSpaceRenderable)]] Parameters {
+        // The type of the Screenspace renderable that is to be created. The available
+        // types of Screenspace renderable depend on the configuration of the application
+        // and can be written to disk on application startup into the FactoryDocumentation
+        std::string type
+            [[codegen::annotation("Must name a valid Screenspace renderable")]];
+
+        // Specifies the name of this screenspace renderable. This does not have to be
+        // unique to the scene, but it is recommended to be
+        std::optional<std::string> name;
+
+        // This is the unique identifier for this screenspace renderable. It has to be
+        // unique amongst all existing screenspace nodes that already have been added to
+        // the scene. The identifier is not allowed to have any whitespace or '.' and must
+        // not be empty
+        std::optional<std::string> identifier;
+
+        // [[codegen::verbatim(EnabledInfo.description)]]
+        std::optional<bool> enabled;
+
+        // [[codegen::verbatim(UseRadiusAzimuthElevationInfo.description)]]
+        std::optional<bool> useRadiusAzimuthElevation;
+
+        // [[codegen::verbatim(FaceCameraInfo.description)]]
+        std::optional<bool> faceCamera;
+
+        // [[codegen::verbatim(CartesianPositionInfo.description)]]
+        std::optional<glm::vec3> cartesianPosition;
+
+        // [[codegen::verbatim(RadiusAzimuthElevationInfo.description)]]
+        std::optional<glm::vec3> radiusAzimuthElevation;
+
+        // [[codegen::verbatim(ScaleInfo.description)]]
+        std::optional<float> scale;
+
+        // [[codegen::verbatim(UsePerspectiveProjectionInfo.description)]]
+        std::optional<bool> usePerspectiveProjection;
+
+        // [codegen::verbatim(OpacityInfo.description)]]
+        std::optional<float> opacity [[codegen::inrange(0.f, 1.f)]];
+
+        // Defines either a single or multiple tags that apply to this
+        // ScreenSpaceRenderable, thus making it possible to address multiple, separate 
+        // Renderables with a single property change
+        std::optional<std::variant<std::string, std::vector<std::string>>> tag;
+    };
+#include "screenspacerenderable_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation ScreenSpaceRenderable::Documentation() {
-    using namespace openspace::documentation;
-
-    return {
-        "Screenspace Renderable",
-        "core_screenspacerenderable",
-        {
-            {
-                KeyType,
-                new StringAnnotationVerifier("Must name a valid Screenspace renderable"),
-                Optional::No,
-                "The type of the Screenspace renderable that is to be created. The "
-                "available types of Screenspace renderable depend on the configuration of"
-                "the application and can be written to disk on application startup into "
-                "the FactoryDocumentation."
-            },
-            {
-                KeyName,
-                new StringVerifier,
-                Optional::Yes,
-                "Specifies the name of this screenspace renderable. This does not have "
-                "to be unique to the scene, but it is recommended to be."
-            },
-            {
-                KeyIdentifier,
-                new StringVerifier,
-                Optional::Yes,
-                "This is the unique identifier for this screenspace renderable. It has "
-                "to be unique amongst all existing screenspace nodes that already have "
-                "been added to the scene. The identifier is not allowed to have any "
-                "whitespace or '.' and must not be empty."
-            },
-            {
-                EnabledInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                EnabledInfo.description
-            },
-            {
-                UseRadiusAzimuthElevationInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                UseRadiusAzimuthElevationInfo.description
-            },
-            {
-                FaceCameraInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                FaceCameraInfo.description
-            },
-            {
-                CartesianPositionInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                CartesianPositionInfo.description
-            },
-            {
-                RadiusAzimuthElevationInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                RadiusAzimuthElevationInfo.description
-            },
-            {
-                ScaleInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                ScaleInfo.description
-            },
-            {
-                OpacityInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                OpacityInfo.description
-            },
-            {
-                KeyTag,
-                new OrVerifier({ new StringVerifier, new StringListVerifier }),
-                Optional::Yes,
-                "Defines either a single or multiple tags that apply to this "
-                "ScreenSpaceRenderable, thus making it possible to address multiple, "
-                "seprate Renderables with a single property change."
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "core_screenspacerenderable";
+    return doc;
 }
 
 std::unique_ptr<ScreenSpaceRenderable> ScreenSpaceRenderable::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "ScreenSpaceRenderable"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    const std::string& renderableType = dictionary.value<std::string>(KeyType);
     ScreenSpaceRenderable* ssr =
         FactoryManager::ref().factory<ScreenSpaceRenderable>()->create(
-            renderableType,
+            p.type,
             dictionary
         );
     return std::unique_ptr<ScreenSpaceRenderable>(ssr);
@@ -365,12 +327,14 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
     , _delete(DeleteInfo)
 {
-    if (dictionary.hasKey(KeyIdentifier)) {
-        setIdentifier(dictionary.value<std::string>(KeyIdentifier));
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    if (p.identifier.has_value()) {
+        setIdentifier(*p.identifier);
     }
 
-    if (dictionary.hasKey(KeyName)) {
-        setGuiName(dictionary.value<std::string>(KeyName));
+    if (p.name.has_value()) {
+        setGuiName(*p.name);
     }
 
     addProperty(_enabled);
@@ -394,61 +358,37 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     addProperty(_opacity);
     addProperty(_localRotation);
 
-    if (dictionary.hasKey(EnabledInfo.identifier)) {
-        _enabled = dictionary.value<bool>(EnabledInfo.identifier);
-    }
-
-    if (dictionary.hasKey(UseRadiusAzimuthElevationInfo.identifier)) {
-        _useRadiusAzimuthElevation = dictionary.value<bool>(
-            UseRadiusAzimuthElevationInfo.identifier
-        );
-    }
+    _enabled = p.enabled.value_or(_enabled);
+    _useRadiusAzimuthElevation =
+        p.useRadiusAzimuthElevation.value_or(_useRadiusAzimuthElevation);
 
     if (_useRadiusAzimuthElevation) {
-        if (dictionary.hasKey(RadiusAzimuthElevationInfo.identifier)) {
-            _raePosition = dictionary.value<glm::dvec3>(
-                RadiusAzimuthElevationInfo.identifier
-            );
-        }
+        _raePosition = p.radiusAzimuthElevation.value_or(_raePosition);
     }
     else {
-        if (dictionary.hasKey(CartesianPositionInfo.identifier)) {
-            _cartesianPosition = dictionary.value<glm::dvec3>(
-                CartesianPositionInfo.identifier
-            );
+        _cartesianPosition = p.cartesianPosition.value_or(_cartesianPosition);
+    }
+
+    _scale = p.scale.value_or(_scale);
+    _opacity = p.opacity.value_or(_opacity);
+    _usePerspectiveProjection =
+        p.usePerspectiveProjection.value_or(_usePerspectiveProjection);
+
+    _faceCamera = p.faceCamera.value_or(_faceCamera);
+
+    if (p.tag.has_value()) {
+        if (std::holds_alternative<std::string>(*p.tag)) {
+            addTag(std::get<std::string>(*p.tag));
         }
-    }
-
-    if (dictionary.hasKey(ScaleInfo.identifier)) {
-        _scale = static_cast<float>(dictionary.value<double>(ScaleInfo.identifier));
-    }
-
-    if (dictionary.hasKey(OpacityInfo.identifier)) {
-        _opacity = static_cast<float>(dictionary.value<double>(OpacityInfo.identifier));
-    }
-
-    if (dictionary.hasKey(UsePerspectiveProjectionInfo.identifier)) {
-        _usePerspectiveProjection =
-            dictionary.value<bool>(UsePerspectiveProjectionInfo.identifier);
-    }
-
-    if (dictionary.hasKey(FaceCameraInfo.identifier)) {
-        _faceCamera = dictionary.value<bool>(FaceCameraInfo.identifier);
-    }
-
-    if (dictionary.hasValue<std::string>(KeyTag)) {
-        std::string tagName = dictionary.value<std::string>(KeyTag);
-        if (!tagName.empty()) {
-            addTag(std::move(tagName));
-        }
-    }
-    else if (dictionary.hasValue<ghoul::Dictionary>(KeyTag)) {
-        const ghoul::Dictionary& tagNames = dictionary.value<ghoul::Dictionary>(KeyTag);
-        for (std::string_view key : tagNames.keys()) {
-            std::string tagName = tagNames.value<std::string>(key);
-            if (!tagName.empty()) {
-                addTag(std::move(tagName));
+        else if (std::holds_alternative<std::vector<std::string>>(*p.tag)) {
+            for (const std::string& t : std::get<std::vector<std::string>>(*p.tag)) {
+                if (!t.empty()) {
+                    addTag(t);
+                }
             }
+        }
+        else {
+            throw ghoul::MissingCaseException();
         }
     }
 

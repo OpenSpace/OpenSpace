@@ -63,7 +63,6 @@ void ModuleEngine::initialize(
             m->initialize(configuration);
         }
         catch (const documentation::SpecificationError& e) {
-            //LFATALC(e.component, e.message); 
             for (const documentation::TestResult::Offense& o : e.result.offenses) {
                 LERRORC(e.component, o.offender + ": " + ghoul::to_string(o.reason));
             }

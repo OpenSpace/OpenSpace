@@ -99,6 +99,7 @@ public:
 
     void writeSceneDocumentation();
     void writeStaticDocumentation();
+    void createUserDirectoriesIfNecessary();
 
     /**
      * Returns the Lua library that contains all Lua functions available to affect the
@@ -143,7 +144,7 @@ private:
 // Lua functions - exposed for testing
 namespace openspace::luascriptfunctions {
 
-int createSingeColorImage(lua_State* L);
+int createSingleColorImage(lua_State* L);
 
 } // openspace::luascriptfunctions
 

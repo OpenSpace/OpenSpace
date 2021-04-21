@@ -273,32 +273,32 @@ namespace {
         // The number of sides for the polygon used to represent the astronomical object
         std::optional<int> polygonSides;
 
-        // [[codgen::verbatim(DrawLabelInfo.description)]]
+        // [[codegen::verbatim(DrawLabelInfo.description)]]
         std::optional<bool> drawLabels;
 
-        // [[codgen::verbatim(TextColorInfo.description)]]
+        // [[codegen::verbatim(TextColorInfo.description)]]
         std::optional<glm::vec3> textColor [[codegen::color()]];
 
-        // [[codgen::verbatim(TextOpacityInfo.description)]]
+        // [[codegen::verbatim(TextOpacityInfo.description)]]
         std::optional<float> textOpacity;
 
-        // [[codgen::verbatim(TextSizeInfo.description)]]
+        // [[codegen::verbatim(TextSizeInfo.description)]]
         std::optional<float> textSize;
 
         // The path to the label file that contains information about the astronomical
         // objects being rendered
         std::optional<std::string> labelFile;
 
-        // [[codgen::verbatim(LabelMinSizeInfo.description)]]
+        // [[codegen::verbatim(LabelMinSizeInfo.description)]]
         std::optional<float> textMinSize;
 
-        // [[codgen::verbatim(LabelMaxSizeInfo.description)]]
+        // [[codegen::verbatim(LabelMaxSizeInfo.description)]]
         std::optional<float> textMaxSize;
 
-        // [[codgen::verbatim(ColorOptionInfo.description)]]
+        // [[codegen::verbatim(ColorOptionInfo.description)]]
         std::optional<std::vector<std::string>> colorOption;
 
-        // [[codgen::verbatim(SizeOptionInfo.description)]]
+        // [[codegen::verbatim(SizeOptionInfo.description)]]
         std::optional<std::vector<std::string>> sizeOption;
 
         // This value determines the colormap ranges for the color parameters of the
@@ -308,28 +308,28 @@ namespace {
         // Transformation matrix to be applied to each astronomical object
         std::optional<glm::dmat4x4> transformationMatrix;
 
-        // [[codgen::verbatim(FadeInDistancesInfo.description)]]
+        // [[codegen::verbatim(FadeInDistancesInfo.description)]]
         std::optional<glm::dvec2> fadeInDistances;
 
-        // [[codgen::verbatim(DisableFadeInInfo.description)]]
+        // [[codegen::verbatim(DisableFadeInInfo.description)]]
         std::optional<bool> disableFadeIn;
 
-        // [[codgen::verbatim(BillboardMaxSizeInfo.description)]]
+        // [[codegen::verbatim(BillboardMaxSizeInfo.description)]]
         std::optional<float> billboardMaxSize;
 
-        // [[codgen::verbatim(BillboardMinSizeInfo.description)]]
+        // [[codegen::verbatim(BillboardMinSizeInfo.description)]]
         std::optional<float> billboardMinSize;
 
-        // [[codgen::verbatim(CorrectionSizeEndDistanceInfo.description)]]
+        // [[codegen::verbatim(CorrectionSizeEndDistanceInfo.description)]]
         std::optional<float> correctionSizeEndDistance;
 
-        // [[codgen::verbatim(CorrectionSizeFactorInfo.description)]]
+        // [[codegen::verbatim(CorrectionSizeFactorInfo.description)]]
         std::optional<float> correctionSizeFactor;
 
-        // [[codgen::verbatim(PixelSizeControlInfo.description)]]
+        // [[codegen::verbatim(PixelSizeControlInfo.description)]]
         std::optional<bool> enablePixelSizeControl;
 
-        // [[codgen::verbatim(UseLinearFiltering.description)]]
+        // [[codegen::verbatim(UseLinearFiltering.description)]]
         std::optional<bool> useLinearFiltering;
     };
 #include "renderablebillboardscloud_codegen.cpp"
@@ -1492,6 +1492,11 @@ void RenderableBillboardsCloud::createDataSlice() {
     ZoneScoped
 
     _slicedData.clear();
+
+    if (_fullData.empty() || _nValuesPerAstronomicalObject == 0) {
+        return;
+    }
+
     if (_hasColorMapFile) {
         _slicedData.reserve(8 * (_fullData.size() / _nValuesPerAstronomicalObject));
     }

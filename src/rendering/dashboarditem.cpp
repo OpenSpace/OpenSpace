@@ -28,8 +28,8 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/font/fontmanager.h>
 #include <ghoul/misc/templatefactory.h>
+#include <optional>
 
 namespace {
     constexpr const char* KeyType = "Type";
@@ -38,12 +38,6 @@ namespace {
         "Enabled",
         "Is Enabled",
         "If this value is set to 'true' this dashboard item is shown in the dashboard"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo TypeInfo = {
-        "Type",
-        "Type",
-        ""
     };
 
     constexpr openspace::properties::Property::PropertyInfo IdentifierInfo = {
@@ -57,36 +51,25 @@ namespace {
         "Gui Name",
         ""
     };
+
+    struct [[codegen::Dictionary(DashboardItem)]] Parameters {
+        std::string type;
+
+        // [[codegen::verbatim(IdentifierInfo.description)]]
+        std::string identifier;
+
+        // [[codegen::verbatim(GuiNameInfo.description)]]
+        std::optional<std::string> guiName;
+    };
+#include "dashboarditem_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation DashboardItem::Documentation() {
-    using namespace documentation;
-    return {
-        "DashboardItem",
-        "dashboarditem",
-        {
-            {
-                TypeInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                TypeInfo.description
-            },
-            {
-                IdentifierInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                IdentifierInfo.description
-            },
-            {
-                GuiNameInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                GuiNameInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "dashboarditem";
+    return doc;
 }
 
 std::unique_ptr<DashboardItem> DashboardItem::createFromDictionary(
@@ -105,18 +88,11 @@ DashboardItem::DashboardItem(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "", "" })
     , _isEnabled(EnabledInfo, true)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "DashboardItem"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    std::string identifier = dictionary.value<std::string>(IdentifierInfo.identifier);
-    setIdentifier(std::move(identifier));
-
-    if (dictionary.hasValue<std::string>(GuiNameInfo.identifier)) {
-        std::string guiName = dictionary.value<std::string>(GuiNameInfo.identifier);
-        setGuiName(std::move(guiName));
+    setIdentifier(p.identifier);
+    if (p.guiName.has_value()) {
+        setGuiName(*p.guiName);
     }
 
     addProperty(_isEnabled);
@@ -124,75 +100,6 @@ DashboardItem::DashboardItem(const ghoul::Dictionary& dictionary)
 
 bool DashboardItem::isEnabled() const {
     return _isEnabled;
-}
-
-
-namespace {
-    constexpr openspace::properties::Property::PropertyInfo FontNameInfo = {
-        "FontName",
-        "Font Name",
-        "This value is the name of the font that is used. It can either refer to an "
-        "internal name registered previously, or it can refer to a path that is used."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
-        "FontSize",
-        "Font Size",
-        "This value determines the size of the font that is used to render the distance."
-    };
-} // namespace
-
-documentation::Documentation DashboardTextItem::Documentation() {
-    using namespace documentation;
-    return {
-        "DashboardTextItem",
-        "dashboardtextitem",
-        {
-            {
-                FontNameInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                FontNameInfo.description
-            },
-            {
-                FontSizeInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                FontSizeInfo.description
-            }
-        }
-    };
-}
-
-DashboardTextItem::DashboardTextItem(const ghoul::Dictionary& dictionary, float fontSize,
-                                     const std::string& fontName)
-    : DashboardItem(dictionary)
-    , _fontName(FontNameInfo, fontName)
-    , _fontSize(FontSizeInfo, fontSize, 6.f, 144.f, 1.f)
-{
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "DashboardTextItem"
-    );
-
-    if (dictionary.hasKey(FontNameInfo.identifier)) {
-        _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
-    }
-    _fontName.onChange([this]() {
-        _font = global::fontManager->font(_fontName, _fontSize);
-    });
-    addProperty(_fontName);
-
-    if (dictionary.hasKey(FontSizeInfo.identifier)) {
-        _fontSize = static_cast<float>(dictionary.value<double>(FontSizeInfo.identifier));
-    }
-    _fontSize.onChange([this]() {
-        _font = global::fontManager->font(_fontName, _fontSize);
-    });
-    addProperty(_fontSize);
-
-    _font = global::fontManager->font(_fontName, _fontSize);
 }
 
 } // namespace openspace
