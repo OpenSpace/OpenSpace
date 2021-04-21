@@ -28,6 +28,7 @@ add_executable(
   test_assetloader.cpp
   test_concurrentjobmanager.cpp
   test_concurrentqueue.cpp
+  test_distanceconversion.cpp
   test_configuration.cpp
   test_documentation.cpp
   test_iswamanager.cpp
