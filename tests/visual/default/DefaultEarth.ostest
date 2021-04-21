@@ -1,0 +1,8 @@
+[ 
+    { "type": "time", 
+      "value": "2019-01-01T05:00:00.00"}, 
+    { "type": "wait", 
+      "value": "20"}, 
+    { "type": "screenshot", 
+      "value": "Earth"}
+] 
