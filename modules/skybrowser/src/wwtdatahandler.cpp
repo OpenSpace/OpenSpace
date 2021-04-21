@@ -6,10 +6,6 @@
 
 namespace {
     constexpr const char* _loggerCat = "WWTDataHandler";
-
-
-
-
 } //namespace
 
 namespace openspace {

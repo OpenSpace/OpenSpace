@@ -1,0 +1,12 @@
+local assetHelper = asset.require('util/asset_helper')
+
+  local spec = {
+      Identifier = "HoverCircle",
+      Type = "ScreenSpaceImageLocal",
+      Name = "HoverCircle",
+      FaceCamera = false,
+      Scale= 0.015,
+      Enabled = false,
+      TexturePath = "D:/Ylvas/OpenSpace/data/assets/circle.png"
+  };
+assetHelper.registerScreenSpaceRenderables(asset, { spec })

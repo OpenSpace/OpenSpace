@@ -15,6 +15,7 @@
 #include <sstream>
 #include <modules/skybrowser/include/screenspaceskybrowser.h>
 #include <modules/skybrowser/include/screenspaceskytarget.h>
+#include <modules/base/rendering/screenspaceimagelocal.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/util/camera.h>
 #include <thread> 
@@ -61,6 +62,45 @@ namespace openspace::skybrowser::luascriptfunctions {
 		browser->sendMessageToWWT(browser->createMessageForSettingForegroundOpacityWWT(100));
 		return 1;
 	}
+
+    int moveCircleToHoverImage(lua_State* L) {
+        // Load image
+        ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::moveCircleToHoverImage");
+        const int i = ghoul::lua::value<int>(L, 1);
+
+        ScreenSpaceImageLocal* hoverCircle = dynamic_cast<ScreenSpaceImageLocal*>(global::renderEngine->screenSpaceRenderable("HoverCircle"));
+        hoverCircle->property("Enabled")->set(true);
+        SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+        const ImageData& resultImage = module->getWWTDataHandler()->getLoadedImages()[i];
+
+        if (resultImage.hasCoords) {
+
+            glm::dvec3 imageCoordsGalactic = icrsToGalacticCartesian(resultImage.celestCoords.x, resultImage.celestCoords.y, 1.0);
+            // This is a duplicate of target function "lookAtGalacticCoord". Probably should rewrite this so there are no duplicates...
+            glm::dmat4 cameraInvRotMat = global::navigationHandler->camera()->viewRotationMatrix();
+            glm::dvec3 viewDirectionLocal = cameraInvRotMat * glm::dvec4(imageCoordsGalactic, 1.f);
+
+            glm::dvec2 angleCoordsLocal = glm::dvec2(atan(viewDirectionLocal.x / viewDirectionLocal.z), atan(viewDirectionLocal.y / viewDirectionLocal.z));
+            double projPlaneDistance = -2.1f;
+            glm::dvec2 imageCoordsScreenSpace = glm::dvec2(projPlaneDistance * tan(angleCoordsLocal.x), projPlaneDistance * tan(angleCoordsLocal.y));
+            // Translate target
+            hoverCircle->translate(glm::vec2(imageCoordsScreenSpace) - hoverCircle->getScreenSpacePosition(), hoverCircle->getScreenSpacePosition());
+        }
+        
+        return 1;
+    }
+
+    int disableHoverCircle(lua_State* L) {
+        // Load image
+        ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::disableHoverCircle");
+        LINFO("YO");
+        ScreenSpaceImageLocal* hoverCircle = dynamic_cast<ScreenSpaceImageLocal*>(global::renderEngine->screenSpaceRenderable("HoverCircle"));
+        LINFO("YAH");
+        hoverCircle->property("Enabled")->set(false);
+        LINFO("Yu");
+        return 1;
+    }
+
 	
 	int followCamera(lua_State* L) {
 		// Load images from url
