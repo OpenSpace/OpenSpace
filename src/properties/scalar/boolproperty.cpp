@@ -58,7 +58,6 @@ namespace openspace::properties {
 REGISTER_TEMPLATEPROPERTY_SOURCE(
     BoolProperty,
     bool,
-    false,
     fromLuaConversion,
     toLuaConversion,
     toStringConversion,

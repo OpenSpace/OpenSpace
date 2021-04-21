@@ -85,7 +85,6 @@ namespace openspace::properties {
 REGISTER_TEMPLATEPROPERTY_SOURCE(
     BVec3Property,
     glm::bvec3,
-    glm::bvec3(false),
     fromLuaConversion,
     toLuaConversion,
     toStringConversion,

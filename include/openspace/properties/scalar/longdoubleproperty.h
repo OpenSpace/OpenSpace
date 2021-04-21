@@ -44,7 +44,14 @@
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(LongDoubleProperty, long double)
+REGISTER_NUMERICALPROPERTY_HEADER(
+    LongDoubleProperty,
+    long double,
+    0l,
+    std::numeric_limits<long double>::lowest(),
+    std::numeric_limits<long double>::max(),
+    0.01l
+)
 
 } // namespace openspace::properties
 

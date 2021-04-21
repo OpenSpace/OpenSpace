@@ -32,20 +32,18 @@ namespace openspace::properties {
 template <typename T>
 class NumericalProperty : public TemplateProperty<T> {
 public:
-    NumericalProperty(Property::PropertyInfo info);
-    NumericalProperty(Property::PropertyInfo info, T value);
-    NumericalProperty(Property::PropertyInfo info, T value, T minimumValue,
-        T maximumValue);
     NumericalProperty(Property::PropertyInfo info, T value, T minimumValue,
         T maximumValue, T steppingValue);
     NumericalProperty(Property::PropertyInfo info, T value, T minimumValue,
         T maximumValue, T steppingValue, float exponent);
 
-    bool getLuaValue(lua_State* state) const override;
-    bool setLuaValue(lua_State* state) override;
-    int typeLua() const override;
+    virtual std::string className() const override = 0;
+    int typeLua() const override = 0;
 
-    bool getStringValue(std::string& value) const override;
+    bool getLuaValue(lua_State* state) const override = 0;
+    bool setLuaValue(lua_State* state) override = 0;
+
+    bool getStringValue(std::string& value) const override = 0;
 
     T minValue() const;
     void setMinValue(T value);
@@ -59,8 +57,6 @@ public:
     float exponent() const;
     void setExponent(float exponent);
 
-    virtual std::string className() const override;
-
     std::string jsonValue() const override;
 
     using TemplateProperty<T>::operator=;
@@ -71,7 +67,6 @@ public:
     void interpolateValue(float t,
         ghoul::EasingFunc<float> easingFunc = nullptr) override;
 
-
 protected:
     static const std::string MinimumValueKey;
     static const std::string MaximumValueKey;
@@ -79,6 +74,8 @@ protected:
     static const std::string ExponentValueKey;
 
     std::string generateAdditionalJsonDescription() const override;
+
+    virtual T fromLuaValue(lua_State* state, bool& success) const = 0;
 
     /**
      * convert a lua formatted value to a JSON formatted value

@@ -91,24 +91,9 @@ bool toStringConversion(std::string& outValue, glm::mat2x2 inValue) {
 
 namespace openspace::properties {
 
-using nl = std::numeric_limits<float>;
-
 REGISTER_NUMERICALPROPERTY_SOURCE(
     Mat2Property,
     glm::mat2x2,
-    glm::mat2x2(1.f),
-    glm::mat2x2(
-        nl::lowest(), nl::lowest(),
-        nl::lowest(), nl::lowest()
-    ),
-    glm::mat2x2(
-        nl::max(), nl::max(),
-        nl::max(), nl::max()
-    ),
-    glm::mat2x2(
-        0.01f, 0.01f,
-        0.01f, 0.01f
-    ),
     fromLuaConversion,
     toLuaConversion,
     toStringConversion,

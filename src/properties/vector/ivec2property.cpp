@@ -85,10 +85,6 @@ namespace openspace::properties {
 REGISTER_NUMERICALPROPERTY_SOURCE(
     IVec2Property,
     glm::ivec2,
-    glm::ivec2(0),
-    glm::ivec2(std::numeric_limits<int>::lowest()),
-    glm::ivec2(std::numeric_limits<int>::max()),
-    glm::ivec2(1),
     fromLuaConversion,
     toLuaConversion,
     toStringConversion,

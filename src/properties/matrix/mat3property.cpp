@@ -90,27 +90,9 @@ bool toStringConversion(std::string& outValue, glm::mat3x3 inValue) {
 
 namespace openspace::properties {
 
-using nl = std::numeric_limits<float>;
-
 REGISTER_NUMERICALPROPERTY_SOURCE(
     Mat3Property,
     glm::mat3x3,
-    glm::mat3x3(1.f),
-    glm::mat3x3(
-        nl::lowest(), nl::lowest(), nl::lowest(),
-        nl::lowest(), nl::lowest(), nl::lowest(),
-        nl::lowest(), nl::lowest(), nl::lowest()
-    ),
-    glm::mat3x3(
-        nl::max(), nl::max(), nl::max(),
-        nl::max(), nl::max(), nl::max(),
-        nl::max(), nl::max(), nl::max()
-    ),
-    glm::mat3x3(
-        0.01f, 0.01f, 0.01f,
-        0.01f, 0.01f, 0.01f,
-        0.01f, 0.01f, 0.01f
-    ),
     fromLuaConversion,
     toLuaConversion,
     toStringConversion,

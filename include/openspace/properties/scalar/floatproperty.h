@@ -44,7 +44,14 @@
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(FloatProperty, float)
+REGISTER_NUMERICALPROPERTY_HEADER(
+    FloatProperty,
+    float,
+    0.f,
+    std::numeric_limits<float>::lowest(),
+    std::numeric_limits<float>::max(),
+    0.01f
+)
 
 } // namespace openspace::properties
 

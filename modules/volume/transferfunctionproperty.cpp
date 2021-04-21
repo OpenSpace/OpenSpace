@@ -49,8 +49,9 @@ bool toStringConversion(std::string& outValue,
 
 namespace openspace::properties {
 
-REGISTER_TEMPLATEPROPERTY_SOURCE(TransferFunctionProperty, volume::TransferFunction,
-    volume::TransferFunction(),
+REGISTER_TEMPLATEPROPERTY_SOURCE(
+    TransferFunctionProperty,
+    volume::TransferFunction,
     fromLuaConversion,
     toLuaConversion,
     toStringConversion,

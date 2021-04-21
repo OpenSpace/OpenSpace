@@ -30,7 +30,8 @@
 
 namespace openspace::properties {
 
-REGISTER_TEMPLATEPROPERTY_HEADER(TransferFunctionProperty, volume::TransferFunction)
+REGISTER_TEMPLATEPROPERTY_HEADER(TransferFunctionProperty, volume::TransferFunction,
+    volume::TransferFunction())
 
 } // namespace openspace::properties
 

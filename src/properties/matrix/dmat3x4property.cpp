@@ -89,30 +89,9 @@ bool toStringConversion(std::string& outValue, glm::dmat3x4 inValue) {
 
 namespace openspace::properties {
 
-using nl = std::numeric_limits<double>;
-
 REGISTER_NUMERICALPROPERTY_SOURCE(
     DMat3x4Property,
     glm::dmat3x4,
-    glm::dmat3x4(0.0),
-    glm::dmat3x4(
-        nl::lowest(), nl::lowest(), nl::lowest(),
-        nl::lowest(), nl::lowest(), nl::lowest(),
-        nl::lowest(), nl::lowest(), nl::lowest(),
-        nl::lowest(), nl::lowest(), nl::lowest()
-    ),
-    glm::dmat3x4(
-        nl::max(), nl::max(), nl::max(),
-        nl::max(), nl::max(), nl::max(),
-        nl::max(), nl::max(), nl::max(),
-        nl::max(), nl::max(), nl::max()
-    ),
-    glm::dmat3x4(
-        0.01, 0.01, 0.01,
-        0.01, 0.01, 0.01,
-        0.01, 0.01, 0.01,
-        0.01, 0.01, 0.01
-    ),
     fromLuaConversion,
     toLuaConversion,
     toStringConversion,

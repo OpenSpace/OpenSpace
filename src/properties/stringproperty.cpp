@@ -58,7 +58,6 @@ namespace openspace::properties {
 REGISTER_TEMPLATEPROPERTY_SOURCE(
     StringProperty,
     std::string,
-    "",
     fromLuaConversion,
     toLuaConversion,
     toStringConversion,

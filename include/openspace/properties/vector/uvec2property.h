@@ -31,7 +31,14 @@
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(UVec2Property, glm::uvec2)
+REGISTER_NUMERICALPROPERTY_HEADER(
+    UVec2Property,
+    glm::uvec2,
+    glm::uvec2(0),
+    glm::uvec2(std::numeric_limits<unsigned int>::lowest()),
+    glm::uvec2(std::numeric_limits<unsigned int>::max()),
+    glm::uvec2(1)
+)
 
 } // namespace openspace::properties
 

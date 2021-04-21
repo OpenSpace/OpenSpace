@@ -35,6 +35,52 @@ namespace {
     constexpr const char* _loggerCat = "SelectionProperty";
 
     constexpr const char* OptionsKey = "Options";
+
+    std::set<std::string> fromLuaConversion(lua_State* state, bool& success) {
+        static const int KEY = -2;
+        static const int VAL = -1;
+
+        if (!lua_istable(state, VAL)) {
+            LERROR("Parameter passed to the property is not a table");
+            success = false;
+            return {};
+        }
+
+        std::set<std::string> result;
+        lua_pushnil(state);
+        while (lua_next(state, KEY) != 0) {
+            if (lua_isstring(state, VAL)) {
+                result.insert(lua_tostring(state, -1));
+            }
+            else {
+                success = false;
+                return {};
+            }
+            lua_pop(state, 1);
+        }
+
+        success = true;
+        return result;
+    }
+
+    bool toLuaConversion(lua_State* state, const std::set<std::string>& value) {
+        lua_newtable(state);
+        int i = 1;
+        for (const std::string& v : value) {
+            lua_pushinteger(state, i);
+            lua_pushstring(state, v.c_str());
+            lua_settable(state, -3);
+            ++i;
+        }
+        return true;
+    }
+
+    bool toStringConversion(std::string& outValue, const std::set<std::string>& inValue)
+    {
+        nlohmann::json json(inValue);
+        outValue = json.dump();
+        return true;
+    }
 } // namespace
 
 namespace openspace::properties {
@@ -42,6 +88,14 @@ namespace openspace::properties {
 SelectionProperty::SelectionProperty(Property::PropertyInfo info)
     : TemplateProperty(std::move(info), std::set<std::string>())
 {}
+
+std::string SelectionProperty::className() const {
+    return "SelectionProperty";
+}
+
+int SelectionProperty::typeLua() const {
+    return LUA_TTABLE;
+}
 
 void SelectionProperty::setValue(std::set<std::string> val) {
     ghoul_assert(!_options.empty(), "Cannot set selection before options have been set");
@@ -55,6 +109,25 @@ void SelectionProperty::setValue(std::set<std::string> val) {
     _value = std::move(val);
     notifyChangeListeners();
     _isValueDirty = true;
+}
+
+bool SelectionProperty::setLuaValue(lua_State* state) {
+    bool success = false;
+    std::set<std::string> thisValue = fromLuaConversion(state, success);
+    if (success) {
+        set(std::any(thisValue));
+    }
+    return success;
+}
+
+bool SelectionProperty::getLuaValue(lua_State* state) const {
+    bool success = toLuaConversion(state, _value);
+    return success;
+}
+
+bool SelectionProperty::getStringValue(std::string& outValue) const {
+    bool success = toStringConversion(outValue, _value);
+    return success;
 }
 
 bool SelectionProperty::hasOption(const std::string& key) const {
@@ -152,69 +225,6 @@ std::string SelectionProperty::generateAdditionalJsonDescription() const {
 template <>
 std::string PropertyDelegate<TemplateProperty<std::set<std::string>>>::className() {
     return "SelectionProperty";
-}
-
-template <>
-template <>
-std::set<std::string>
-PropertyDelegate<TemplateProperty<std::set<std::string>>>::fromLuaValue(
-                                                         lua_State* state, bool& success)
-{
-    static const int KEY = -2;
-    static const int VAL = -1;
-
-    if (!lua_istable(state, VAL)) {
-        LERROR("Parameter passed to the property is not a table");
-        success = false;
-        return {};
-    }
-
-    std::set<std::string> result;
-    lua_pushnil(state);
-    while (lua_next(state, KEY) != 0) {
-        if (lua_isstring(state, VAL)) {
-            result.insert(lua_tostring(state, -1));
-        }
-        else {
-            success = false;
-            return {};
-        }
-        lua_pop(state, 1);
-    }
-
-    success = true;
-    return result;
-}
-
-template <>
-template <>
-bool PropertyDelegate<TemplateProperty<std::set<std::string>>>::toLuaValue(
-                              lua_State* state, const std::set<std::string>& value)
-{
-    lua_newtable(state);
-    int i = 1;
-    for (const std::string& v : value) {
-        lua_pushinteger(state, i);
-        lua_pushstring(state, v.c_str());
-        lua_settable(state, -3);
-        ++i;
-    }
-    return true;
-}
-
-template <>
-int PropertyDelegate<TemplateProperty<std::set<std::string>>>::typeLua() {
-    return LUA_TTABLE;
-}
-
-template <>
-template <>
-bool PropertyDelegate<TemplateProperty<std::set<std::string>>>::toString(
-                       std::string& outValue, const std::set<std::string>& inValue)
-{
-    nlohmann::json json(inValue);
-    outValue = json.dump();
-    return true;
 }
 
 } // namespace openspace::properties

@@ -59,10 +59,6 @@ namespace openspace::properties {
 REGISTER_NUMERICALPROPERTY_SOURCE(
     LongProperty,
     long,
-    long(0),
-    std::numeric_limits<long>::lowest(),
-    std::numeric_limits<long>::max(),
-    long(1),
     fromLuaConversion,
     toLuaConversion,
     toStringConversion,

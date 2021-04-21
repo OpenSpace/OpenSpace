@@ -31,7 +31,14 @@
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(Vec3Property, glm::vec3)
+REGISTER_NUMERICALPROPERTY_HEADER(
+    Vec3Property,
+    glm::vec3,
+    glm::vec3(0.f),
+    glm::vec3(std::numeric_limits<float>::lowest()),
+    glm::vec3(std::numeric_limits<float>::max()),
+    glm::vec3(0.01f)
+)
 
 } // namespace openspace::properties
 

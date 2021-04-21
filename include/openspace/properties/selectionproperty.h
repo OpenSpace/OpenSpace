@@ -37,6 +37,13 @@ class SelectionProperty : public TemplateProperty<std::set<std::string>> {
 public:
     SelectionProperty(Property::PropertyInfo info);
 
+    std::string className() const override;
+    int typeLua() const override;
+
+    bool setLuaValue(lua_State* state) override;
+    bool getLuaValue(lua_State* state) const override;
+    bool getStringValue(std::string& outValue) const override;
+
     /**
      * This method sets the stored value to the provided value <code>val</code>.
      * If the value is different, the listeners are notified. It also removes any

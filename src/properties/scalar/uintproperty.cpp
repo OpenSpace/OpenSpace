@@ -57,12 +57,8 @@ bool toStringConversion(std::string& outValue, unsigned int inValue) {
 namespace openspace::properties {
 
 REGISTER_NUMERICALPROPERTY_SOURCE(
-    UCharProperty,
+    UIntProperty,
     unsigned int,
-    0,
-    std::numeric_limits<unsigned int>::lowest(),
-    std::numeric_limits<unsigned int>::max(),
-    1,
     fromLuaConversion,
     toLuaConversion,
     toStringConversion,

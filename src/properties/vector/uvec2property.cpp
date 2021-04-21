@@ -85,10 +85,6 @@ namespace openspace::properties {
 REGISTER_NUMERICALPROPERTY_SOURCE(
     UVec2Property,
     glm::uvec2,
-    glm::uvec2(0),
-    glm::uvec2(std::numeric_limits<unsigned int>::lowest()),
-    glm::uvec2(std::numeric_limits<unsigned int>::max()),
-    glm::uvec2(1),
     fromLuaConversion,
     toLuaConversion,
     toStringConversion,

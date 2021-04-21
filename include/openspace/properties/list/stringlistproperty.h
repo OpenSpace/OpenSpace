@@ -32,34 +32,19 @@ namespace openspace::properties {
 
 class StringListProperty : public ListProperty<std::string> {
 public:
-    StringListProperty(Property::PropertyInfo info);
-    StringListProperty(Property::PropertyInfo info, std::vector<std::string> values);
+    StringListProperty(Property::PropertyInfo info,
+        std::vector<std::string> values = std::vector<std::string>());
+
+    std::string className() const override;
+    int typeLua() const override;
+
+    bool setLuaValue(lua_State* state) override;
+    bool getLuaValue(lua_State* state) const override;
+    bool getStringValue(std::string& outValue) const override;
 
     using TemplateProperty<std::vector<std::string>>::operator std::vector<std::string>;
     using TemplateProperty<std::vector<std::string>>::operator=;
 };
-
-template <>
-std::string PropertyDelegate<TemplateProperty<std::vector<std::string>>>::className();
-
-template <>
-template <>
-std::vector<std::string>
-PropertyDelegate<TemplateProperty<std::vector<std::string>>>::fromLuaValue(
-    lua_State* state, bool& success);
-
-template <>
-template <>
-bool PropertyDelegate<TemplateProperty<std::vector<std::string>>>::toLuaValue(
-    lua_State* state, const std::vector<std::string>& value);
-
-template <>
-int PropertyDelegate<TemplateProperty<std::vector<std::string>>>::typeLua();
-
-template <>
-template <>
-bool PropertyDelegate<TemplateProperty<std::vector<std::string>>>::toString(
-    std::string& outValue, const std::vector<std::string>& inValue);
 
 } // namespace openspace::properties
 

@@ -31,7 +31,7 @@
 
 namespace openspace::properties {
 
-REGISTER_TEMPLATEPROPERTY_HEADER(BVec2Property, glm::bvec2)
+REGISTER_TEMPLATEPROPERTY_HEADER(BVec2Property, glm::bvec2, glm::bvec2(false))
 
 } // namespace openspace::properties
 

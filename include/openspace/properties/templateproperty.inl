@@ -34,33 +34,24 @@ namespace openspace::properties {
     // CLASS_NAME = The string that the Property::className() should return as well as the
     //              C++ class name for which a typedef will be created
     // TYPE       = The template parameter T for which the TemplateProperty is specialized
-#define REGISTER_TEMPLATEPROPERTY_HEADER(CLASS_NAME, TYPE)                               \
-    using CLASS_NAME = TemplateProperty<TYPE>;                                           \
+#define REGISTER_TEMPLATEPROPERTY_HEADER(CLASS_NAME, TYPE, DEFAULT_VALUE)                \
                                                                                          \
-    template <>                                                                          \
-    std::string PropertyDelegate<TemplateProperty<TYPE>>::className();                   \
+    class CLASS_NAME : public TemplateProperty<TYPE> {                                   \
+    public:                                                                              \
+        CLASS_NAME(Property::PropertyInfo info, TYPE value = DEFAULT_VALUE);             \
                                                                                          \
-    template <>                                                                          \
-    template <>                                                                          \
-    TYPE PropertyDelegate<TemplateProperty<TYPE>>::defaultValue<TYPE>();                 \
+        std::string className() const override;                                          \
                                                                                          \
-    template <>                                                                          \
-    template <>                                                                          \
-    TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromLuaValue(lua_State* state,        \
-                                                                bool& success);          \
+        bool setLuaValue(lua_State* state) override;                                     \
                                                                                          \
-    template <>                                                                          \
-    template <>                                                                          \
-    bool PropertyDelegate<TemplateProperty<TYPE>>::toLuaValue(lua_State* state,          \
-                                                              const TYPE& value);        \
+        bool getLuaValue(lua_State* state) const override;                               \
                                                                                          \
-    template <>                                                                          \
-    int PropertyDelegate<TemplateProperty<TYPE>>::typeLua();                             \
+        int typeLua() const override;                                                    \
                                                                                          \
-    template <>                                                                          \
-    template <>                                                                          \
-    bool PropertyDelegate<TemplateProperty<TYPE>>::toString(std::string& outValue,       \
-                                                            const TYPE& inValue);
+        bool getStringValue(std::string& outValue) const override;                       \
+                                                                                         \
+        using TemplateProperty<TYPE>::operator=;                                         \
+    };                                                                                   \
 
 
 // CLASS_NAME = The string that the Property::className() should return as well as the
@@ -78,50 +69,44 @@ namespace openspace::properties {
 //                              value T onto the lua_State stack and return the success
 // LUA_TYPE                 = The Lua type that will be produced/consumed by the previous
 //                            Lambda expressions
-#define REGISTER_TEMPLATEPROPERTY_SOURCE(CLASS_NAME, TYPE, DEFAULT_VALUE,                \
+#define REGISTER_TEMPLATEPROPERTY_SOURCE(CLASS_NAME, TYPE,                               \
                                          FROM_LUA_LAMBDA_EXPRESSION,                     \
                                          TO_LUA_LAMBDA_EXPRESSION,                       \
                                          TO_STRING_LAMBDA_EXPRESSION, LUA_TYPE)          \
-    template <>                                                                          \
-    std::string PropertyDelegate<TemplateProperty<TYPE>>::className()                    \
+                                                                                         \
+    CLASS_NAME::CLASS_NAME(Property::PropertyInfo info, TYPE value)                      \
+        : TemplateProperty<TYPE>(info, value)                                            \
+    {}                                                                                   \
+                                                                                         \
+    std::string CLASS_NAME::className() const                                            \
     {                                                                                    \
         return #CLASS_NAME;                                                              \
     }                                                                                    \
                                                                                          \
-    template <>                                                                          \
-    template <>                                                                          \
-    TYPE PropertyDelegate<TemplateProperty<TYPE>>::defaultValue<TYPE>()                  \
+    bool CLASS_NAME::setLuaValue(lua_State* state)                                       \
     {                                                                                    \
-        return DEFAULT_VALUE;                                                            \
+        bool success = false;                                                            \
+        TYPE thisValue = FROM_LUA_LAMBDA_EXPRESSION(state, success);                     \
+        if (success) {                                                                   \
+            set(std::any(thisValue));                                                    \
+        }                                                                                \
+        return success;                                                                  \
     }                                                                                    \
                                                                                          \
-    template <>                                                                          \
-    template <>                                                                          \
-    TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromLuaValue<TYPE>(lua_State* state,  \
-                                                                      bool& success)     \
+    bool CLASS_NAME::getLuaValue(lua_State* state) const                                 \
     {                                                                                    \
-        return FROM_LUA_LAMBDA_EXPRESSION(state, success);                               \
+        bool success = TO_LUA_LAMBDA_EXPRESSION(state, _value);                          \
+        return success;                                                                  \
     }                                                                                    \
                                                                                          \
-    template <>                                                                          \
-    template <>                                                                          \
-    bool PropertyDelegate<TemplateProperty<TYPE>>::toLuaValue<TYPE>(lua_State* state,    \
-                                                                    const TYPE& value)   \
-    {                                                                                    \
-        return TO_LUA_LAMBDA_EXPRESSION(state, value);                                   \
-    }                                                                                    \
-                                                                                         \
-    template <>                                                                          \
-    int PropertyDelegate<TemplateProperty<TYPE>>::typeLua() {                            \
+    int CLASS_NAME::typeLua() const {                                                    \
         return LUA_TYPE;                                                                 \
     }                                                                                    \
                                                                                          \
-    template <>                                                                          \
-    template <>                                                                          \
-    bool PropertyDelegate<TemplateProperty<TYPE>>::toString(std::string& outValue,       \
-                                                            const TYPE& inValue)         \
+    bool CLASS_NAME::getStringValue(std::string& outValue) const                         \
     {                                                                                    \
-        return TO_STRING_LAMBDA_EXPRESSION(outValue, inValue);                           \
+        bool success = TO_STRING_LAMBDA_EXPRESSION(outValue, _value);                    \
+        return success;                                                                  \
     }                                                                                    \
 
 
@@ -130,11 +115,6 @@ TemplateProperty<T>::TemplateProperty(Property::PropertyInfo info, T value)
     : Property(std::move(info))
     , _value(std::move(value))
 {}
-
-template <typename T>
-std::string TemplateProperty<T>::className() const {
-    return PropertyDelegate<TemplateProperty<T>>::className();
-}
 
 template <typename T>
 TemplateProperty<T>::operator T() {
@@ -186,42 +166,6 @@ void TemplateProperty<T>::set(std::any value) {
 template <typename T>
 const std::type_info& TemplateProperty<T>::type() const {
     return typeid(T);
-}
-
-template <typename T>
-bool TemplateProperty<T>::getLuaValue(lua_State* state) const {
-    bool success = PropertyDelegate<TemplateProperty<T>>::template toLuaValue<T>(
-        state,
-        _value
-    );
-    return success;
-}
-
-template <typename T>
-bool TemplateProperty<T>::setLuaValue(lua_State* state) {
-    bool success = false;
-    T thisValue = PropertyDelegate<TemplateProperty<T>>::template fromLuaValue<T>(
-        state,
-        success
-    );
-    if (success) {
-        set(std::any(thisValue));
-    }
-    return success;
-}
-
-template <typename T>
-int TemplateProperty<T>::typeLua() const {
-    return PropertyDelegate<TemplateProperty<T>>::typeLua();
-}
-
-template <typename T>
-bool TemplateProperty<T>::getStringValue(std::string& value) const {
-    bool success = PropertyDelegate<TemplateProperty<T>>::template toString<T>(
-        value,
-        _value
-    );
-    return success;
 }
 
 }  // namespace openspace::properties

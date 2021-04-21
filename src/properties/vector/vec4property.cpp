@@ -85,10 +85,6 @@ namespace openspace::properties {
 REGISTER_NUMERICALPROPERTY_SOURCE(
     Vec4Property,
     glm::vec4,
-    glm::vec4(0.f),
-    glm::vec4(std::numeric_limits<float>::lowest()),
-    glm::vec4(std::numeric_limits<float>::max()),
-    glm::vec4(0.01f),
     fromLuaConversion,
     toLuaConversion,
     toStringConversion,

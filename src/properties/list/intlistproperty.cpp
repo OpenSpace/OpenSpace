@@ -83,22 +83,35 @@ bool toStringConversion(std::string& outValue, const std::vector<int>& inValue) 
 
 namespace openspace::properties {
 
-IntListProperty::IntListProperty(Property::PropertyInfo info)
-    : ListProperty(std::move(info))
-{}
-
 IntListProperty::IntListProperty(Property::PropertyInfo info, std::vector<int> values)
     : ListProperty(std::move(info), std::move(values))
 {}
 
-REGISTER_TEMPLATEPROPERTY_SOURCE(
-    IntListProperty,
-    std::vector<int>,
-    std::vector<int>(),
-    fromLuaConversion,
-    toLuaConversion,
-    toStringConversion,
-    LUA_TTABLE
-)
+std::string IntListProperty::className() const {
+    return "IntListProperty";
+}
+
+int IntListProperty::typeLua() const {
+    return LUA_TTABLE;
+}
+
+bool IntListProperty::setLuaValue(lua_State* state) {
+    bool success = false;
+    std::vector<int> thisValue = fromLuaConversion(state, success);
+    if (success) {
+        set(std::any(thisValue));
+    }
+    return success;
+}
+
+bool IntListProperty::getLuaValue(lua_State* state) const {
+    bool success = toLuaConversion(state, _value);
+    return success;
+}
+
+bool IntListProperty::getStringValue(std::string& outValue) const {
+    bool success = toStringConversion(outValue, _value);
+    return success;
+}
 
 } // namespace openspace::properties

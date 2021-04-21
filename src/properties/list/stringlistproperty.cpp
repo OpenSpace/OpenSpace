@@ -30,7 +30,7 @@
 #include <ghoul/misc/misc.h>
 
 namespace {
-    constexpr const char* _loggerCat = "IntListProperty";
+    constexpr const char* _loggerCat = "StringListProperty";
 } // namespace
 
 namespace {
@@ -82,23 +82,36 @@ bool toStringConversion(std::string& outValue, const std::vector<std::string>& i
 
 namespace openspace::properties {
 
-StringListProperty::StringListProperty(Property::PropertyInfo info)
-    : ListProperty(std::move(info))
-{}
-
 StringListProperty::StringListProperty(Property::PropertyInfo info,
                                        std::vector<std::string> values)
     : ListProperty(std::move(info), std::move(values))
 {}
 
-REGISTER_TEMPLATEPROPERTY_SOURCE(
-    StringListProperty,
-    std::vector<std::string>,
-    std::vector<std::string>(),
-    fromLuaConversion,
-    toLuaConversion,
-    toStringConversion,
-    LUA_TTABLE
-)
+std::string StringListProperty::className() const {
+    return "StringListProperty";
+}
+
+int StringListProperty::typeLua() const {
+    return LUA_TTABLE;
+}
+
+bool StringListProperty::setLuaValue(lua_State* state) {
+    bool success = false;
+    std::vector<std::string> thisValue = fromLuaConversion(state, success);
+    if (success) {
+       set(std::any(thisValue));
+    }
+    return success;
+}
+
+bool StringListProperty::getLuaValue(lua_State* state) const {
+    bool success = toLuaConversion(state, _value);
+    return success;
+}
+
+bool StringListProperty::getStringValue(std::string& outValue) const {
+    bool success = toStringConversion(outValue, _value);
+    return success;
+}
 
 } // namespace openspace::properties

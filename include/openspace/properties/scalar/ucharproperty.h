@@ -44,7 +44,14 @@
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(UCharProperty, unsigned char)
+REGISTER_NUMERICALPROPERTY_HEADER(
+    UCharProperty,
+    unsigned char,
+    0,
+    std::numeric_limits<unsigned char>::lowest(),
+    std::numeric_limits<unsigned char>::max(),
+    1
+)
 
 } // namespace openspace::properties
 

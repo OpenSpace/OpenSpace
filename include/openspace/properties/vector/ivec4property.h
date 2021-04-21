@@ -31,7 +31,14 @@
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(IVec4Property, glm::ivec4)
+REGISTER_NUMERICALPROPERTY_HEADER(
+    IVec4Property,
+    glm::ivec4,
+    glm::ivec4(0),
+    glm::ivec4(std::numeric_limits<int>::lowest()),
+    glm::ivec4(std::numeric_limits<int>::max()),
+    glm::ivec4(1)
+)
 
 } // namespace openspace::properties
 

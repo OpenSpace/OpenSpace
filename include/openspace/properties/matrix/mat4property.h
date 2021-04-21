@@ -31,7 +31,14 @@
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(Mat4Property, glm::mat4x4)
+REGISTER_NUMERICALPROPERTY_HEADER(
+    Mat4Property,
+    glm::mat4x4,
+    glm::mat4x4(1.f),
+    ghoul::createFillMat4x4<float>(std::numeric_limits<float>::lowest()),
+    ghoul::createFillMat4x4<float>(std::numeric_limits<float>::lowest()),
+    ghoul::createFillMat4x4<float>(0.01f)
+)
 
 } // namespace openspace::properties
 

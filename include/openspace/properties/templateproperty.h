@@ -67,8 +67,7 @@ public:
      * \pre \p info.identifier must not be empty
      * \pre \p info.guiName must not be empty
      */
-    TemplateProperty(Property::PropertyInfo info,
-        T value = PropertyDelegate<TemplateProperty<T>>::template defaultValue<T>());
+    TemplateProperty(Property::PropertyInfo info, T value);
 
     /**
      * Returns the class name for this TemplateProperty. The default implementation makes
@@ -79,7 +78,7 @@ public:
      *
      * \return The class name for the TemplateProperty
      */
-    virtual std::string className() const override;
+    virtual std::string className() const override = 0;
 
     /**
      * Returns the stored value packed into a ghoul::any object.
@@ -115,7 +114,7 @@ public:
      * \param state The Lua state onto which the encoded object will be pushed
      * \return \c true if the encoding succeeded; \c false otherwise
      */
-    bool getLuaValue(lua_State* state) const override;
+    virtual bool getLuaValue(lua_State* state) const override = 0;
 
     /**
      * Sets the value of this TemplateProperty by decoding the object at the top of the Lua
@@ -127,10 +126,10 @@ public:
      * \param state The Lua state from which the value will be decoded
      * \return \c true if the decoding succeeded; \c false otherwise
      */
-    bool setLuaValue(lua_State* state) override;
+    virtual bool setLuaValue(lua_State* state) override = 0;
 
     /// \see Property::typeLua
-    int typeLua() const override;
+    virtual int typeLua() const override = 0;
 
     /**
      * This method encodes the stored value into a std::string object. The encoding is
@@ -142,7 +141,7 @@ public:
      * \param value The string object in which to store the resulting encoding
      * \return \c true if the encoding succeeded; \c false otherwise
      */
-    bool getStringValue(std::string& value) const override;
+    virtual bool getStringValue(std::string& value) const override = 0;
 
     /**
      * Returns the description for this TemplateProperty as a Lua script that returns a

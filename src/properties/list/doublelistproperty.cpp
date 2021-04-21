@@ -63,7 +63,7 @@ bool toLuaConversion(lua_State* state, std::vector<double> val) {
     lua_createtable(state, static_cast<int>(val.size()), 0);
 
     int i = 1;
-    for (int v : val) {
+    for (double v : val) {
         lua_pushinteger(state, i);
         lua_pushinteger(state, v);
         lua_settable(state, -3);
@@ -83,22 +83,35 @@ bool toStringConversion(std::string& outValue, const std::vector<double>& inValu
 
 namespace openspace::properties {
 
-DoubleListProperty::DoubleListProperty(Property::PropertyInfo info)
-    : ListProperty(std::move(info))
-{}
-
 DoubleListProperty::DoubleListProperty(Property::PropertyInfo info, std::vector<double> values)
     : ListProperty(std::move(info), std::move(values))
 {}
 
-REGISTER_TEMPLATEPROPERTY_SOURCE(
-    DoubleListProperty,
-    std::vector<double>,
-    std::vector<double>(),
-    fromLuaConversion,
-    toLuaConversion,
-    toStringConversion,
-    LUA_TTABLE
-)
+std::string DoubleListProperty::className() const {
+    return "DoubleListProperty";
+}
+
+int DoubleListProperty::typeLua() const {
+    return LUA_TTABLE;
+}
+
+bool DoubleListProperty::setLuaValue(lua_State* state) {
+    bool success = false;
+    std::vector<double> thisValue = fromLuaConversion(state, success);
+    if (success) {
+        set(std::any(thisValue));
+    }
+    return success;
+}
+
+bool DoubleListProperty::getLuaValue(lua_State* state) const {
+    bool success = toLuaConversion(state, _value);
+    return success;
+}
+
+bool DoubleListProperty::getStringValue(std::string& outValue) const {
+    bool success = toStringConversion(outValue, _value);
+    return success;
+}
 
 } // namespace openspace::properties
