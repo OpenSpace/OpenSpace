@@ -77,10 +77,11 @@ namespace {
         else if (value.is_number()) {
             return std::to_string(value.get<double>());
         }
-        else if (value.empty()) {
-            return "{}";
-        }
         else if (value.is_array()) {
+            if (value.empty()) {
+                return "{}";
+            }
+
             std::string literal = "{";
             for (nlohmann::json::iterator it = value.begin(); it != value.end(); ++it) {
                 literal += luaLiteralFromJson(it.value()) += ",";
@@ -90,6 +91,10 @@ namespace {
             return literal;
         }
         else if (value.is_object()) {
+            if (value.empty()) {
+                return "{}";
+            }
+
             std::string literal = "{";
             for (nlohmann::json::iterator it = value.begin(); it != value.end(); ++it) {
                 literal += it.key() + "=" + luaLiteralFromJson(it.value()) += ",";
