@@ -56,8 +56,7 @@ void JoystickCameraStates::updateStateFromInput(const InputState& inputState,
         float value = inputState.joystickAxis(i);
 
         if (std::fabs(value) <= t.deadzone) {
-            value = 0.f;
-            hasValue = false;
+            continue;
         }
 
         if (t.normalize) {

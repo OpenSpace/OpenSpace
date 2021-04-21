@@ -13,8 +13,7 @@ local Charon = {
         Translation = {
             Type = "SpiceTranslation",
             Target = "CHARON",
-            Observer = "PLUTO BARYCENTER",
-            Kernels = NewHorizonsKernels
+            Observer = "PLUTO BARYCENTER"
         },
         Rotation = {
             Type = "SpiceRotation",

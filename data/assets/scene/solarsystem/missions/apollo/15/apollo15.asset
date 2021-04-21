@@ -1,8 +1,8 @@
 local assetHelper = asset.require('util/asset_helper')
 local moon_transforms = asset.require('scene/solarsystem/planets/earth/moon/moon')
 local sun_transforms = asset.require('scene/solarsystem/sun/transforms')
-local csm = asset.require('../apollo_csm')
 asset.require('spice/base')
+local models = asset.require('scene/solarsystem/missions/apollo/csm_model').models
 
 local kernels = asset.require('scene/solarsystem/missions/apollo/15/kernels').kernels
 
@@ -46,6 +46,20 @@ local Apollo15 = {
             SourceFrame = "A15_METRIC",
             DestinationFrame = "GALACTIC"
         }
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        GeometryFile = models .. "/ApolloCSM.fbx",
+        LightSources = {
+            {
+                Type = "SceneGraphLightSource",
+                Identifier = "Sun",
+                Node = sun_transforms.SolarSystemBarycenter.Identifier,
+                Intensity = 1.0
+            }
+        },
+        PerformShading = true,
+        DisableFaceCulling = true
     },
     TimeFrame = {
         Type = "TimeFrameInterval",
@@ -101,13 +115,6 @@ local Apollo15Trail = {
     }
 }
 
-
-local model_part = csm.createCsmModel(Apollo15.Identifier)
-
 local list = { Apollo15, Apollo15Trail }
-for k,v in pairs(model_part) do
-    v.GUI.Path = "/Solar System/Missions/Apollo/15/Model"
-    table.insert(list, v)
-end
 
 assetHelper.registerSceneGraphNodesAndExport(asset, list)

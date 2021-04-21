@@ -68,29 +68,6 @@ bool toLuaConversion(lua_State* state, glm::bvec4 val) {
     return true;
 }
 
-glm::bvec4 fromStringConversion(const std::string& val, bool& success) {
-    glm::bvec4 result = glm::bvec4(false);
-    std::vector<std::string> tokens = ghoul::tokenizeString(val, ',');
-    if (tokens.size() != static_cast<size_t>(result.length())) {
-        success = false;
-        return result;
-    }
-    for (glm::length_t i = 0; i < ghoul::glm_components<glm::bvec4>::value; ++i) {
-        std::stringstream s(tokens[i]);
-        glm::bvec4::value_type v;
-        s >> v;
-        if (s.fail()) {
-            success = false;
-            return result;
-        }
-        else {
-            result[i] = v;
-        }
-    }
-    success = true;
-    return result;
-}
-
 bool toStringConversion(std::string& outValue, glm::bvec4 inValue) {
     outValue = "{";
     for (glm::length_t i = 0; i < ghoul::glm_components<glm::bvec4>::value; ++i) {
@@ -111,7 +88,6 @@ REGISTER_TEMPLATEPROPERTY_SOURCE(
     glm::bvec4(false),
     fromLuaConversion,
     toLuaConversion,
-    fromStringConversion,
     toStringConversion,
     LUA_TTABLE
 )

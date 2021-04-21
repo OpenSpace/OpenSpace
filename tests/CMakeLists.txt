@@ -36,7 +36,6 @@ add_executable(
   test_lrucache.cpp
   test_luaconversions.cpp
   test_lua_createsinglecolorimage.cpp
-  test_optionproperty.cpp
   test_profile.cpp
   test_rawvolumeio.cpp
   test_scriptscheduler.cpp
@@ -44,6 +43,10 @@ add_executable(
   test_temporaltileprovider.cpp
   test_timequantizer.cpp
   test_timeline.cpp
+
+  property/test_property_optionproperty.cpp
+  property/test_property_listproperties.cpp
+  property/test_property_selectionproperty.cpp
 
   regression/517.cpp
 )

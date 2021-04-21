@@ -41,12 +41,6 @@
 #include <variant>
 
 namespace {
-    constexpr const char* KeyUrl = "Url";
-    constexpr const char* KeyIdentifier = "Identifier";
-    constexpr const char* KeyOverride = "Override";
-    constexpr const char* KeyUseHash = "UseHash";
-    constexpr const char* KeyFilename = "Filename";
-
     constexpr const char* TempSuffix = ".tmp";
 
     struct [[codegen::Dictionary(UrlSynchronization)]] Parameters {
@@ -130,7 +124,7 @@ UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dict,
             documentation::TestResult res;
             res.success = false;
             documentation::TestResult::Offense o;
-            o.offender = std::string(KeyIdentifier) + "|" + KeyUseHash;
+            o.offender = "Identifier|UseHash";
             o.reason = documentation::TestResult::Offense::Reason::MissingKey;
             res.offenses.push_back(o);
             throw documentation::SpecificationError(std::move(res), "UrlSynchronization");

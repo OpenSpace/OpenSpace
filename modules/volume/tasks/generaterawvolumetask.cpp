@@ -41,14 +41,6 @@
 #include <fstream>
 
 namespace {
-    constexpr const char* KeyRawVolumeOutput = "RawVolumeOutput";
-    constexpr const char* KeyDictionaryOutput = "DictionaryOutput";
-    constexpr const char* KeyDimensions = "Dimensions";
-    constexpr const char* KeyTime = "Time";
-    constexpr const char* KeyValueFunction = "ValueFunction";
-    constexpr const char* KeyLowerDomainBound = "LowerDomainBound";
-    constexpr const char* KeyUpperDomainBound = "UpperDomainBound";
-
     struct [[codegen::Dictionary(GenerateRawVolumeTask)]] Parameters {
         // The Lua function used to compute the cell values
         std::string valueFunction [[codegen::annotation("A Lua expression that returns a "

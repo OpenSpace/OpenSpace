@@ -657,6 +657,10 @@ SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& di
     if (dictionary.hasValue<glm::dvec3>(sizereferenceprovider::KeyRadii)) {
         ellipsoid = dictionary.value<glm::dvec3>(sizereferenceprovider::KeyRadii);
     }
+    else if (dictionary.hasValue<double>(sizereferenceprovider::KeyRadii)) {
+        const double r = dictionary.value<double>(sizereferenceprovider::KeyRadii);
+        ellipsoid = glm::dvec3(r, r, r);
+    }
 }
 
 
