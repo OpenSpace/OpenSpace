@@ -28,7 +28,7 @@ namespace openspace {
         void sendMouseEvent(CefStructBase<CefMouseEventTraits> event, int x, int y) const;
         void WWTfollowCamera();
         float fieldOfView() const;
-        void setFieldOfView(float fov);
+        void setVerticalFieldOfView(float fov);
         void scrollZoom(float scroll);
         ScreenSpaceSkyTarget* getSkyTarget();
 
@@ -49,7 +49,7 @@ namespace openspace {
         glm::ivec3 getColor();
         // Flag for dimensions
         bool _browserDimIsDirty;
-        properties::FloatProperty _fieldOfView;
+        properties::FloatProperty _vfieldOfView;
         properties::StringProperty _skyTargetID;
     private:
         glm::vec2 _startDimensionsSize;

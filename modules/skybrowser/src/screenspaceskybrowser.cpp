@@ -65,7 +65,7 @@ namespace openspace {
     ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary) 
         : ScreenSpaceBrowser(dictionary)
         , _browserDimensions(BrowserDimensionInfo, _dimensions, glm::ivec2(0.f), glm::ivec2(300.f))
-        , _fieldOfView(ZoomInfo, 50.f, 0.1f, 70.f)
+        , _vfieldOfView(ZoomInfo, 50.f, 0.1f, 70.f)
         , _skyTargetID(TargetIDInfo)
         , _camIsSyncedWWT(true)
         , _skyTarget(nullptr)
@@ -85,8 +85,8 @@ namespace openspace {
             });
         addProperty(_browserDimensions);
 
-        _fieldOfView = p.zoom.value_or(_fieldOfView);
-        addProperty(_fieldOfView);
+        _vfieldOfView = p.zoom.value_or(_vfieldOfView);
+        addProperty(_vfieldOfView);
 
         _skyTargetID = p.targetID.value_or(_skyTargetID);
         addProperty(_skyTargetID);
@@ -95,9 +95,9 @@ namespace openspace {
             setConnectedTarget();
             });
         
-        _fieldOfView.onChange([&]() {
+        _vfieldOfView.onChange([&]() {
             if (_skyTarget) {
-                _skyTarget->updateFOV(_fieldOfView);
+                _skyTarget->updateFOV(_vfieldOfView);
             }
             });
         
@@ -154,18 +154,18 @@ namespace openspace {
     }
 
     float ScreenSpaceSkyBrowser::fieldOfView() const {
-        return _fieldOfView;
+        return _vfieldOfView;
     }
 
-    void ScreenSpaceSkyBrowser::setFieldOfView(float fov) {
-        _fieldOfView = fov;
+    void ScreenSpaceSkyBrowser::setVerticalFieldOfView(float fov) {
+        _vfieldOfView = fov;
     }
 
     void ScreenSpaceSkyBrowser::scrollZoom(float scroll) {
        
-        float zoomFactor = log(_fieldOfView + 1.1f);
+        float zoomFactor = log(_vfieldOfView + 1.1f);
         float zoom = scroll > 0.0 ? -zoomFactor : zoomFactor;
-        _fieldOfView = std::clamp(_fieldOfView + zoom, 0.001f, 70.0f);
+        _vfieldOfView = std::clamp(_vfieldOfView + zoom, 0.001f, 70.0f);
     }
 
     void ScreenSpaceSkyBrowser::executeJavascript(std::string& script) const {
@@ -196,6 +196,7 @@ namespace openspace {
     ghoul::Dictionary ScreenSpaceSkyBrowser::createMessageForMovingWWTCamera(const glm::dvec2 celestCoords, const float fov, const bool moveInstantly) const {
         using namespace std::string_literals;
         ghoul::Dictionary msg;
+
         msg.setValue("event", "center_on_coordinates"s);
         msg.setValue("ra", static_cast<double>(celestCoords[0]));
         msg.setValue("dec", static_cast<double>(celestCoords[1]));
@@ -264,7 +265,7 @@ namespace openspace {
             while (_camIsSyncedWWT) {
 
                 glm::vec2 celestCoordsTarget = _skyTarget ? _skyTarget->getCelestialCoords() : glm::vec2(0.f);
-                ghoul::Dictionary message = createMessageForMovingWWTCamera(celestCoordsTarget, _fieldOfView);
+                ghoul::Dictionary message = createMessageForMovingWWTCamera(celestCoordsTarget, _vfieldOfView);
 
                 // Sleep so we don't bombard WWT with too many messages
                 std::this_thread::sleep_for(std::chrono::milliseconds(50));

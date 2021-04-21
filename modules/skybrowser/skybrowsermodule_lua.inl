@@ -56,7 +56,7 @@ namespace openspace::skybrowser::luascriptfunctions {
 			browser->getSkyTarget()->lookAtGalacticCoord(imageCoordsGalactic);
 
 			// In WWT, the definition of ZoomLevel is: VFOV = ZoomLevel / 6
-			browser->setFieldOfView(resultImage.zoomLevel / 6);
+			browser->setVerticalFieldOfView(resultImage.zoomLevel / 6);
 		} 
 		browser->sendMessageToWWT(browser->createMessageForSettingForegroundOpacityWWT(100));
 		return 1;
@@ -64,8 +64,8 @@ namespace openspace::skybrowser::luascriptfunctions {
 	
 	int followCamera(lua_State* L) {
 		// Load images from url
-		ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::followCamera");
-
+		ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::followCamera");
+        LINFO("Loading images from url");
 		SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 		std::string root = "https://raw.githubusercontent.com/WorldWideTelescope/wwt-web-client/master/assets/webclient-explore-root.wtml";
 

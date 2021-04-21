@@ -325,10 +325,14 @@ namespace openspace {
         return glm::dvec2(glm::degrees(ra), glm::degrees(dec));
     }
 
-    void ScreenSpaceSkyTarget::updateFOV(float browserFOV) {
+    void ScreenSpaceSkyTarget::updateFOV(float VFOV) {
         float horizFOV = global::windowDelegate->getHorizFieldOfView();
-        _scale = std::max((browserFOV/horizFOV),(_showCrosshairThreshold.value()/horizFOV));
-        _fieldOfView = browserFOV;
+        glm::ivec2 windowRatio = global::windowDelegate->currentWindowSize();
+
+        float verticFOV = horizFOV * (static_cast<float>(windowRatio.y) / static_cast<float>(windowRatio.x));
+        _scale = std::max((VFOV / verticFOV),(_showCrosshairThreshold.value()/ verticFOV));
+        
+        _fieldOfView = VFOV;
     }
     
 }
