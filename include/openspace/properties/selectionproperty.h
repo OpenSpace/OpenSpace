@@ -127,28 +127,6 @@ private:
     std::vector<std::string> _options;
 };
 
-template <>
-std::string PropertyDelegate<TemplateProperty<std::set<std::string>>>::className();
-
-template <>
-template <>
-std::set<std::string>
-PropertyDelegate<TemplateProperty<std::set<std::string>>>::fromLuaValue(lua_State* state,
-    bool& success);
-
-template <>
-template <>
-bool PropertyDelegate<TemplateProperty<std::set<std::string>>>::toLuaValue(
-    lua_State* state, const std::set<std::string>& value);
-
-template <>
-int PropertyDelegate<TemplateProperty<std::set<std::string>>>::typeLua();
-
-template <>
-template <>
-bool PropertyDelegate<TemplateProperty<std::set<std::string>>>::toString(
-    std::string& outValue, const std::set<std::string>& inValue);
-
 } // namespace openspace::properties
 
 #endif // __OPENSPACE_CORE___SELECTIONPROPERTY___H__

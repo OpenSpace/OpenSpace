@@ -268,8 +268,6 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/numericalproperty.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/optionproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/propertydelegate.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/propertydelegate.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/propertyowner.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/selectionproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/stringproperty.h

@@ -27,12 +27,10 @@
 
 #include <openspace/properties/property.h>
 
-#include <openspace/properties/propertydelegate.h>
-
 namespace openspace::properties {
 
 /**
- * This concrete subclass of Property handles a single parameter value that is of type
+ * This subclass of Property handles a single parameter value that is of type
  * <code>T</code>. It provides all the necessary methods to automatically access the
  * value. One notable instantiation of this class is StringProperty, using
  * <code>T = std::string</code> while NumericalProperty is a templated subclass dealing
@@ -40,16 +38,14 @@ namespace openspace::properties {
  * The accessor operator and assignment operators are overloaded, so that the
  * TemplateProperty can be used just in the same way as a regular member variable. In the
  * case that these cannot not be used inline, the Property::get method will work.
- * The default value for the stored value of this TemplateProperty is retrieved via a call
- * to the PropertyDelegate::defaultValue method, providing the template parameter
- * <code>T</code> as argument. When a new TemplateProperty is required, that method needs
- * to be specialized for the new type or a compile-time error will occur
- * (See https://github.com/OpenSpace/OpenSpace/wiki/Concepts-Properties).
+ *
+ * Each instantiation of this class should provide a constructor that deals with the
+ * default value for that specific type <code>T</code>, so that a property can be
+ * created from just a Property::PropertyInfo object.
  *
  * \tparam T The type of value that is stored in this TemplateProperty
  * \see Property
  * \see NumericalProperty
- * \see PropertyDelegate
  */
 template <typename T>
 class TemplateProperty : public Property {
@@ -70,11 +66,8 @@ public:
     TemplateProperty(Property::PropertyInfo info, T value);
 
     /**
-     * Returns the class name for this TemplateProperty. The default implementation makes
-     * a call to the PropertyDelegate::className method with the template parameter
-     * <code>T</code> as argument. For this to work, that method needs to be specialized
-     * to return the correct class name for the new template parameter T, or a
-     * compile-time error will occur.
+     * Returns the class name for this TemplateProperty. This method has to be
+     * specialized for each new type.
      *
      * \return The class name for the TemplateProperty
      */
@@ -107,9 +100,7 @@ public:
 
     /**
      * This method encodes the stored value into a Lua object and pushes that object onto
-     * the stack. The encoding is performed by calling PropertyDelegate::toLuaValue with
-     * the template parameter <code>T</code> as an argument. This method has to be
-     * specialized for each new type, or a compile-time error will occur.
+     * the stack. This method has to be specialized for each new type.
      *
      * \param state The Lua state onto which the encoded object will be pushed
      * \return \c true if the encoding succeeded; \c false otherwise
@@ -118,10 +109,9 @@ public:
 
     /**
      * Sets the value of this TemplateProperty by decoding the object at the top of the Lua
-     * stack and, if successful, assigning it using the Property::set method. The decoding
-     * is performed by calling the PropertyDelegate::fromLuaValue with the template
-     * parameter <code>T</code> as argument. If the decoding is successful, the new value
-     * is set, otherwise it remains unchanged.
+     * stack and, if successful, assigning it using the Property::set method. If the decoding
+     * is successful, the new value should be set, otherwise it should remain unchanged.
+     * This method has to be specialized for each new type.
      *
      * \param state The Lua state from which the value will be decoded
      * \return \c true if the decoding succeeded; \c false otherwise
@@ -132,10 +122,8 @@ public:
     virtual int typeLua() const override = 0;
 
     /**
-     * This method encodes the stored value into a std::string object. The encoding is
-     * performed by calling PropertyDelegate::toStringValue with the template parameter
-     * <code>T</code> as an argument. This method has to be specialized for each new
-     * type, or a compile-time error will occur. The resulting encoding must also be a
+     * This method encodes the stored value into a std::string object. This method has
+     * to be specialized for each new type. The resulting encoding must also be a
      * valid JSON representation fo the property.
      *
      * \param value The string object in which to store the resulting encoding

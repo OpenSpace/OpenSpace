@@ -222,9 +222,4 @@ std::string SelectionProperty::generateAdditionalJsonDescription() const {
     return result;
 }
 
-template <>
-std::string PropertyDelegate<TemplateProperty<std::set<std::string>>>::className() {
-    return "SelectionProperty";
-}
-
 } // namespace openspace::properties
