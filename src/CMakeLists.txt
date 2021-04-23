@@ -81,22 +81,10 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/properties/list/intlistproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/list/stringlistproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat2property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat2x3property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat2x4property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat3x2property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat3property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat3x4property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat4x2property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat4x3property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat4property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/matrix/mat2property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/matrix/mat2x3property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/matrix/mat2x4property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/matrix/mat3x2property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/matrix/mat3property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/matrix/mat3x4property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/matrix/mat4x2property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/matrix/mat4x3property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/matrix/mat4property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/scalar/boolproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/scalar/doubleproperty.cpp
@@ -268,22 +256,10 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/list/intlistproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/list/stringlistproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat2property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat2x3property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat2x4property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat3x2property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat3property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat3x4property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat4x2property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat4x3property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat4property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/mat2property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/mat2x3property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/mat2x4property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/mat3x2property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/mat3property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/mat3x4property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/mat4x2property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/mat4x3property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/mat4property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/boolproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/doubleproperty.h
