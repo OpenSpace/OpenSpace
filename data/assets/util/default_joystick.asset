@@ -45,10 +45,10 @@ local PS4Controller = {
     RightThumbStick = { 2, 5 },
     LeftTrigger = 3,
     RightTrigger = 4,
-    A = 3, -- Triangle
-    B = 0, -- Square
-    X = 2, -- Circle
-    Y = 1, -- Cross
+    A = 1, -- Cross
+    B = 2, -- Circle
+    X = 0, -- Square
+    Y = 3, -- Triangle
     LB = 4,
     RB = 5,
     Select = 9, -- options
@@ -117,13 +117,12 @@ asset.onInitialize(function()
     -- Currently:  XBoxController, PS4Controller or SpaceMouse
     local controller = XBoxController;
 
+    -- Case of XBoxController or PS4Controller
     if(controller.A ~= nil) then
         openspace.navigation.setAxisDeadZone(controller.LeftThumbStick[1], 0.15)
         openspace.navigation.setAxisDeadZone(controller.LeftThumbStick[2], 0.15)
         openspace.navigation.setAxisDeadZone(controller.RightThumbStick[1], 0.15)
         openspace.navigation.setAxisDeadZone(controller.RightThumbStick[2], 0.15)
-        openspace.navigation.setAxisDeadZone(controller.LeftTrigger, 0.15)
-        openspace.navigation.setAxisDeadZone(controller.RightTrigger, 0.15)
 
         openspace.navigation.bindJoystickAxis(controller.LeftThumbStick[1], "Orbit X");
         openspace.navigation.bindJoystickAxis(controller.LeftThumbStick[2], "Orbit Y", true);
@@ -173,14 +172,19 @@ asset.onInitialize(function()
 
         openspace.navigation.bindJoystickButton(
             controller.X,
-            "openspace.setPropertyValue('NavigationHandler.Origin', 'Earth')",
+            "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');" ..
+            "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth');" ..
+            "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);",
             "Switch target to Earth"
         )
         openspace.navigation.bindJoystickButton(
             controller.Y,
-            "openspace.setPropertyValue('NavigationHandler.Origin', 'Mars')",
+            "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');" ..
+            "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Mars');" ..
+            "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);",
             "Switch target to Mars"
         )
+    -- Case of SpaceMouse
     elseif (controller.LeftButton ~= nil) then
         openspace.navigation.bindJoystickAxis(controller.Push[1], "Orbit X", false, false, true, 40.0);
         openspace.navigation.bindJoystickAxis(controller.Push[2], "Orbit Y", false, false, true, 40.0);
