@@ -335,8 +335,8 @@ TimeQuantizer::TimeQuantizer(std::string start, std::string end,
     : _start(start)
     , _timerange(std::move(start), std::move(end))
 {
-    verifyStartTimeRestrictions();
     _resolution = parseTimeResolutionStr(resolution);
+    verifyStartTimeRestrictions();
 }
 
 double TimeQuantizer::parseTimeResolutionStr(const std::string& resolutionStr) {
@@ -366,13 +366,17 @@ void TimeQuantizer::setStartEndRange(const std::string& start, const std::string
 
 void TimeQuantizer::setResolution(const std::string& resolutionString) {
     _resolution = parseTimeResolutionStr(resolutionString);
+    verifyStartTimeRestrictions();
 }
 
 void TimeQuantizer::verifyStartTimeRestrictions() {
-    if (_start.day() < 1 || _start.day() > 28) {
+    //If monthly time resolution then restrict to 28 days so every month is consistent
+    unsigned int dayUpperLimit = (_resolutionUnit == 'M') ? 28 : 31;
+    if (_start.day() < 1 || _start.day() > dayUpperLimit) {
         throw ghoul::RuntimeError(fmt::format(
-            "Invalid start day value of {} for day of month. Valid days are 1 - 28",
-            _start.day()
+            "Invalid start day value of {} for day of month. Valid days are 1 - {}",
+            _start.day(),
+            dayUpperLimit
         ));
     }
     if (_start.hour() != 0 || _start.minute() != 0 || _start.second() != 0) {
