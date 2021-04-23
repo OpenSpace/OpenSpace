@@ -71,6 +71,10 @@ struct JoystickInputState {
     /// \c nAxes values are defined values, the rest are undefined
     std::array<float, MaxAxes> axes;
 
+    /// The axis values can either go back to 0 when the joystick is released or it can
+    /// stay at the value it was. The latter is static
+    bool isStatic = false;
+
     /// The number of buttons that this joystick possesses
     int nButtons = 0;
     /// The status of each button. Only the first \c nButtons values are defined, the rest
@@ -94,6 +98,12 @@ struct JoystickInputStates : public std::array<JoystickInputState, MaxJoysticks>
      * \pre \p axis must be 0 or positive
      */
     float axis(int axis) const;
+
+    /**
+    * This function checks whether this joystick input has static axis or not
+    * \return If this joystick input has static axis or not
+    */
+    bool isStatic() const;
 
     /**
      * This functions checks whether any connected joystick has its \p button in the

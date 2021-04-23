@@ -43,6 +43,7 @@ public:
         OrbitY,
         ZoomIn,
         ZoomOut,
+        Zoom,
         LocalRollX,
         LocalRollY,
         GlobalRollX,
@@ -60,7 +61,14 @@ public:
         AxisInvert invert = AxisInvert::No;
         AxisNormalize normalize = AxisNormalize::No;
 
+        // The axis values can either go back to 0 when the joystick is released or it can
+        // stay at the value it was. The latter is static
+        bool isStatic = false;
+
         float deadzone = 0.f;
+
+        // Every axis can have their own sensitivity
+        double sensitivity = 0.0;
     };
 
     JoystickCameraStates(double sensitivity, double velocityScaleFactor);
@@ -69,7 +77,8 @@ public:
 
     void setAxisMapping(int axis, AxisType mapping,
         AxisInvert shouldInvert = AxisInvert::No,
-        AxisNormalize shouldNormalize = AxisNormalize::No
+        AxisNormalize shouldNormalize = AxisNormalize::No,
+        bool isStatic = false, double sensitivity = 0.0
     );
 
     AxisInformation axisMapping(int axis) const;
@@ -90,6 +99,8 @@ private:
     // location in a potential map each frame, however, would
 
     std::array<AxisInformation, JoystickInputState::MaxAxes> _axisMapping;
+
+    std::array<float, JoystickInputState::MaxAxes> _prevAxisValues;
 
     struct ButtonInformation {
         std::string command;
@@ -135,6 +146,7 @@ from_string(std::string_view string)
     if (string == "None") { return T::None; }
     if (string == "Orbit X") { return T::OrbitX; }
     if (string == "Orbit Y") { return T::OrbitY; }
+    if (string == "Zoom") { return T::Zoom; }
     if (string == "Zoom In") { return T::ZoomIn; }
     if (string == "Zoom Out") { return T::ZoomOut; }
     if (string == "LocalRoll X") { return T::LocalRollX; }

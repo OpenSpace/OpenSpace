@@ -492,13 +492,17 @@ void NavigationHandler::loadNavigationState(const std::string& filepath) {
 void NavigationHandler::setJoystickAxisMapping(int axis,
                                                JoystickCameraStates::AxisType mapping,
                                             JoystickCameraStates::AxisInvert shouldInvert,
-                                      JoystickCameraStates::AxisNormalize shouldNormalize)
+                                      JoystickCameraStates::AxisNormalize shouldNormalize,
+                                               bool isStatic,
+                                               double sensitivity)
 {
     _orbitalNavigator.joystickStates().setAxisMapping(
         axis,
         mapping,
         shouldInvert,
-        shouldNormalize
+        shouldNormalize,
+        isStatic,
+        sensitivity
     );
 }
 

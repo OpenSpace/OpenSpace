@@ -190,7 +190,7 @@ int retargetAim(lua_State* L) {
 int bindJoystickAxis(lua_State* L) {
     const int n = ghoul::lua::checkArgumentsAndThrow(
         L,
-        { 2, 4 },
+        { 2, 6 },
         "lua::bindJoystickAxis"
     );
 
@@ -199,12 +199,16 @@ int bindJoystickAxis(lua_State* L) {
 
     const bool shouldInvert = n > 2 ? ghoul::lua::value<bool>(L, 3) : false;
     const bool shouldNormalize = n > 3 ? ghoul::lua::value<bool>(L, 4) : false;
+    const bool isStatic = n > 4 ? ghoul::lua::value<bool>(L, 5) : false;
+    const double sensitivity = n > 5 ? ghoul::lua::value<double>(L, 6) : 0.0;
 
     global::navigationHandler->setJoystickAxisMapping(
         axis,
         ghoul::from_string<interaction::JoystickCameraStates::AxisType>(axisType),
         interaction::JoystickCameraStates::AxisInvert(shouldInvert),
-        interaction::JoystickCameraStates::AxisNormalize(shouldNormalize)
+        interaction::JoystickCameraStates::AxisNormalize(shouldNormalize),
+        isStatic,
+        sensitivity
     );
 
     lua_settop(L, 0);

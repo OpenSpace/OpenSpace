@@ -54,6 +54,17 @@ float JoystickInputStates::axis(int axis) const {
     return res;
 }
 
+bool JoystickInputStates::isStatic() const {
+    bool res = std::any_of(
+        begin(),
+        end(),
+        [](const JoystickInputState& state) {
+            return state.isStatic;
+        }
+    );
+    return res;
+}
+
 bool JoystickInputStates::button(int button, JoystickAction action) const {
     ghoul_precondition(button >= 0, "button must be 0 or positive");
 
