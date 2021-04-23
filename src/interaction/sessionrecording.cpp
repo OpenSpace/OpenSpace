@@ -236,21 +236,21 @@ bool SessionRecording::startRecording(const std::string& filename) {
             global::timeManager->time().j2000Seconds()
         };
 
-        recordCurrentTimeRate(timestampsRecStarted);
+        recordCurrentTimeRate();
         LINFO("Session recording started");
     }
 
     return recordingFileOK;
 }
 
-void SessionRecording::recordCurrentTimePauseState(const Timestamps tripleTimestamp) {
+void SessionRecording::recordCurrentTimePauseState() {
     bool isPaused = global::timeManager->isPaused();
     std::string initialTimePausedCommand = "openspace.time.setPause(" +
         std::string(isPaused ? "true" : "false") + ")";
     saveScriptKeyframeToPropertiesBaseline(initialTimePausedCommand);
 }
 
-void SessionRecording::recordCurrentTimeRate(const Timestamps tripleTimestamp) {
+void SessionRecording::recordCurrentTimeRate() {
     std::string initialTimeRateCommand = fmt::format(
         "openspace.time.setDeltaTime({})", global::timeManager->deltaTime()
     );
@@ -449,6 +449,8 @@ bool SessionRecording::startPlayback(std::string& filename,
 
     global::navigationHandler->keyframeNavigator().setTimeReferenceMode(timeMode, now);
     global::scriptScheduler->setTimeReferenceMode(timeMode);
+    _loadedNodes.clear();
+    populateListofLoadedSceneGraphNodes();
 
     _setSimulationTimeWithNextCameraKeyframe = forceSimTimeAtStart;
     if (!playbackAddEntriesToTimeline()) {
@@ -457,7 +459,10 @@ bool SessionRecording::startPlayback(std::string& filename,
     }
 
     _hasHitEndOfCameraKeyframes = false;
-    findFirstCameraKeyframeInTimeline();
+    if (!findFirstCameraKeyframeInTimeline()) {
+        cleanUpPlayback();
+        return false;
+    }
 
     LINFO(fmt::format(
         "Playback session started: ({:8.3f},0.0,{:13.3f}) with {}/{}/{} entries, "
@@ -474,7 +479,7 @@ bool SessionRecording::startPlayback(std::string& filename,
     return true;
 }
 
-void SessionRecording::findFirstCameraKeyframeInTimeline() {
+bool SessionRecording::findFirstCameraKeyframeInTimeline() {
     bool foundCameraKeyframe = false;
     for (unsigned int i = 0; i < _timeline.size(); i++) {
         if (doesTimelineEntryContainCamera(i)) {
@@ -490,6 +495,10 @@ void SessionRecording::findFirstCameraKeyframeInTimeline() {
 
     if (!foundCameraKeyframe) {
         signalPlaybackFinishedForComponent(RecordedType::Camera);
+        return true;
+    }
+    else {
+        return checkIfInitialFocusNodeIsLoaded(_idxTimeline_cameraFirstInTimeline);
     }
 }
 
@@ -541,10 +550,17 @@ void SessionRecording::cleanUpPlayback() {
     ghoul_assert(camera != nullptr, "Camera must not be nullptr");
     Scene* scene = camera->parent()->scene();
     if (!_timeline.empty()) {
-        unsigned int p = _timeline[_idxTimeline_cameraPtrPrev].idxIntoKeyframeTypeArray;
-        const SceneGraphNode* n = scene->sceneGraphNode(_keyframesCamera[p].focusNode);
-        if (n) {
-            global::navigationHandler->orbitalNavigator().setFocusNode(n->identifier());
+        if (_timeline.size() > 0) {
+            unsigned int p =
+                _timeline[_idxTimeline_cameraPtrPrev].idxIntoKeyframeTypeArray;
+            if (_keyframesCamera.size() > 0) {
+                const SceneGraphNode* n = scene->sceneGraphNode(
+                    _keyframesCamera[p].focusNode);
+                if (n) {
+                    global::navigationHandler->orbitalNavigator().setFocusNode(
+                        n->identifier());
+                }
+            }
         }
     }
     global::scriptScheduler->stopPlayback();
@@ -559,6 +575,7 @@ void SessionRecording::cleanUpPlayback() {
     _keyframesSavePropertiesBaseline_scripts.clear();
     _keyframesSavePropertiesBaseline_timeline.clear();
     _propertyBaselinesSaved.clear();
+    _loadedNodes.clear();
     _idxTimeline_nonCamera = 0;
     _idxTime = 0;
     _idxScript = 0;
@@ -746,19 +763,19 @@ void SessionRecording::saveTimeKeyframeAscii(Timestamps& times,
     saveKeyframeToFile(keyframeLine.str(), file);
 }
 
-void SessionRecording::saveScriptKeyframeToTimeline(std::string scriptToSave)
+void SessionRecording::saveScriptKeyframeToTimeline(std::string script)
 {
     size_t substringStartIdx = 0;
-    if (scriptToSave.substr(0, scriptReturnPrefix.length()) == scriptReturnPrefix) {
+    if (script.substr(0, scriptReturnPrefix.length()).compare(scriptReturnPrefix) == 0) {
         substringStartIdx += scriptReturnPrefix.length();
     }
-    for (auto reject : _scriptRejects) {
-        if (scriptToSave.substr(substringStartIdx, reject.length()) == reject) {
+    for (std::string reject : _scriptRejects) {
+        if (script.substr(substringStartIdx, reject.length()).compare(reject) == 0) {
             return;
         }
     }
     datamessagestructures::ScriptMessage sm
-        = _externInteract.generateScriptMessage(scriptToSave);
+        = _externInteract.generateScriptMessage(script);
 
     Timestamps times = generateCurrentTimestamp3(sm._timestamp);
     addKeyframe(times, sm._script, _playbackLineNum);
@@ -828,8 +845,8 @@ void SessionRecording::savePropertyBaseline(properties::Property& prop) {
 }
 
 bool SessionRecording::isPropertyAllowedForBaseline(const std::string& propString) {
-    for (auto reject : _propertyBaselineRejects) {
-        if (propString.substr(0, reject.length()) == reject)
+    for (std::string reject : _propertyBaselineRejects) {
+        if (propString.substr(0, reject.length()).compare(reject) == 0)
         {
             return false;
         }
@@ -1372,11 +1389,11 @@ bool SessionRecording::playbackScript() {
     return success;
 }
 
-void SessionRecording::getListofLoadedSceneGraphNodes() {
+void SessionRecording::populateListofLoadedSceneGraphNodes() {
     std::vector<SceneGraphNode*> nodes =
         global::renderEngine->scene()->allSceneGraphNodes();
     for (SceneGraphNode* n : nodes) {
-        _loadedSceneGraphNodes.push_back(n->guiName());
+        _loadedNodes.push_back(n->identifier());
     }
 }
 
@@ -1391,15 +1408,13 @@ bool SessionRecording::checkIfScriptUsesScenegraphNode(std::string s) {
             std::string subj = s.substr(s.find("(\"") + 2);
             checkForScenegraphNodeAccess_Scene(subj, found);
             checkForScenegraphNodeAccess_Nav(subj, found);
-            if (found != "") {
-                if (std::find(_loadedSceneGraphNodes.begin(),
-                              _loadedSceneGraphNodes.end(),
-                              found)
-                    == _loadedSceneGraphNodes.end())
+            if (found.length() > 0) {
+                auto it = std::find(_loadedNodes.begin(), _loadedNodes.end(), found);
+                if (it == _loadedNodes.end())
                 {
                     LERROR(fmt::format(
-                        "Playback file requires scenegraph node {}, which is "
-                        "not currently loaded", subj
+                        "Playback file requires scenegraph node '{}', which is "
+                        "not currently loaded", found
                     ));
                     return false;
                 }
@@ -1409,64 +1424,70 @@ bool SessionRecording::checkIfScriptUsesScenegraphNode(std::string s) {
     return true;
 }
 
-std::string SessionRecording::checkForScenegraphNodeAccess_Scene(std::string& s,
-                                                                 std::string& result)
+void SessionRecording::checkForScenegraphNodeAccess_Scene(std::string& s,
+                                                          std::string& result)
 {
     const std::string scene = "Scene.";
     auto posScene = s.find(scene);
     if (posScene != std::string::npos) {
-        auto posDot = s.rfind(".", posScene + scene.length());
-        result = s.substr(posScene + scene.length(), posDot - posScene);
-    }
-}
-
-std::string SessionRecording::checkForScenegraphNodeAccess_Nav(std::string& s,
-                                                               std::string& result)
-{
-    std::string nextTerm = "NavigationHandler.OrbitalNavigator.";
-    std::vector<const std::string> navScriptsUsingNodes = {
-        ".RetargetAnchor",
-        ".Anchor",
-        ".Aim"
-    };
-    auto posNav = s.find(nextTerm);
-    if (posNav != std::string::npos) {
-        auto posDot = s.rfind(".", posNav + nextTerm.length());
-        if (posDot != std::string::npos) {
-            for (std::string accessName : navScriptsUsingNodes) {
-                if (s.substr(posDot).rfind(accessName) == 0) {
-                    std::string postName = s.substr(posDot + accessName.length() + 1);
-                    eraseSpacesFromString(postName, 0);
-                    result = getNameFromSurroundingQuotes(postName, s.at(0));
-                }
-            }
+        auto posDot = s.find(".", posScene + scene.length() + 1);
+        if (posDot > posScene && posDot != std::string::npos) {
+            result = s.substr(posScene + scene.length(), posDot
+                - (posScene + scene.length()));
         }
     }
 }
 
-void SessionRecording::eraseSpacesFromString(std::string& s, size_t pos) {
-    s.erase(
-        s.begin(),
-        std::find_if(
-            s.begin(),
-            s.end(),
-            std::not1(std::ptr_fun<int, int>(std::isspace))
-        )
-    );
+void SessionRecording::checkForScenegraphNodeAccess_Nav(std::string& s,
+                                                        std::string& result)
+{
+    const std::string nextTerm = "NavigationHandler.OrbitalNavigator.";
+    auto posNav = s.find(nextTerm);
+    for (std::string accessName : _navScriptsUsingNodes) {
+        if (s.substr(posNav + nextTerm.length()).rfind(accessName) == 0) {
+            std::string postName = s.substr(posNav + nextTerm.length()
+                + accessName.length() + 2);
+            eraseSpacesFromString(postName);
+            result = getNameFromSurroundingQuotes(postName);
+        }
+    }
 }
 
-std::string SessionRecording::getNameFromSurroundingQuotes(std::string& s, char quote) {
+void SessionRecording::eraseSpacesFromString(std::string& s) {
+    s.erase(std::remove_if(s.begin(), s.end(), std::isspace), s.end());
+}
+
+std::string SessionRecording::getNameFromSurroundingQuotes(std::string& s) {
     std::string result;
+    char quote = s.at(0);
     //Handle either ' or " marks
     if (quote == '\'' || quote == '\"') {
-        size_t quoteCount = std::count(s.begin(), s.end(), s);
+        size_t quoteCount = std::count(s.begin(), s.end(), quote);
         //Must be an opening and closing quote char
         if (quoteCount == 2) {
-            result = s.substr(1, s.rfind(2, quote));
+            result = s.substr(1, s.rfind(quote) - 1);
         }
     }
     return result;
 }
+
+bool SessionRecording::checkIfInitialFocusNodeIsLoaded(unsigned int camIdx1) {
+    if (_keyframesCamera.size() > 0) {
+        std::string startFocusNode
+            = _keyframesCamera[_timeline[camIdx1].idxIntoKeyframeTypeArray].focusNode;
+        auto it = std::find(_loadedNodes.begin(), _loadedNodes.end(), startFocusNode);
+        if (it == _loadedNodes.end())
+        {
+            LERROR(fmt::format(
+                "Playback file requires scenegraph node '{}', which is "
+                "not currently loaded", startFocusNode
+            ));
+            return false;
+        }
+    }
+    return true;
+}
+
 
 bool SessionRecording::convertScript(std::stringstream& inStream, DataMode mode,
                                      int lineNum, std::string& inputLine,

@@ -562,8 +562,8 @@ protected:
     double appropriateTimestamp(Timestamps t3stamps);
     double equivalentSimulationTime(double timeOs, double timeRec, double timeSim);
     double equivalentApplicationTime(double timeOs, double timeRec, double timeSim);
-    void recordCurrentTimePauseState(const Timestamps tripleTimestamp);
-    void recordCurrentTimeRate(const Timestamps tripleTimestamp);
+    void recordCurrentTimePauseState();
+    void recordCurrentTimeRate();
     bool handleRecordingFile(std::string filenameIn);
     static bool isPath(std::string& filename);
     void removeTrailingPathSlashes(std::string& filename);
@@ -573,7 +573,7 @@ protected:
     bool playbackScript();
     bool playbackAddEntriesToTimeline();
     void signalPlaybackFinishedForComponent(RecordedType type);
-    void findFirstCameraKeyframeInTimeline();
+    bool findFirstCameraKeyframeInTimeline();
     Timestamps generateCurrentTimestamp3(double keyframeTime);
     static void saveStringToFile(const std::string& s, unsigned char* kfBuffer,
         size_t& idx, std::ofstream& file);
@@ -634,13 +634,14 @@ protected:
     DataMode readModeFromHeader(std::string filename);
     void readPlaybackHeader_stream(std::stringstream& conversionInStream,
         std::string& version, DataMode& mode);
-    void getListofLoadedSceneGraphNodes();
+    void populateListofLoadedSceneGraphNodes();
 
     bool checkIfScriptUsesScenegraphNode(std::string s);
-    std::string checkForScenegraphNodeAccess_Scene(std::string& s, std::string& result);
-    std::string checkForScenegraphNodeAccess_Nav(std::string& s, std::string& result);
-    void eraseSpacesFromString(std::string& s, size_t pos);
-    std::string getNameFromSurroundingQuotes(std::string& s, char quote);
+    void checkForScenegraphNodeAccess_Scene(std::string& s, std::string& result);
+    void checkForScenegraphNodeAccess_Nav(std::string& s, std::string& result);
+    bool checkIfInitialFocusNodeIsLoaded(unsigned int firstCamIndex);
+    void eraseSpacesFromString(std::string& s);
+    std::string getNameFromSurroundingQuotes(std::string& s);
 
     static void writeToFileBuffer(unsigned char* buf, size_t& idx, double src);
     static void writeToFileBuffer(unsigned char* buf, size_t& idx, std::vector<char>& cv);
@@ -681,7 +682,7 @@ protected:
 
     bool _cleanupNeeded = false;
     const std::string scriptReturnPrefix = "return ";
-    std::vector<const std::string> scriptsUsingScenegraphNodesNavAccess = {
+    std::vector<std::string> scriptsUsingScenegraphNodesNavAccess = {
         "RetargetAnchor",
         "Anchor",
         "Aim"
@@ -695,13 +696,13 @@ protected:
     std::vector<std::string> _keyframesSavePropertiesBaseline_scripts;
     std::vector<timelineEntry> _keyframesSavePropertiesBaseline_timeline;
     std::vector<std::string> _propertyBaselinesSaved;
-    std::vector<std::string> _propertyBaselineRejects = {
+    const std::vector<std::string> _propertyBaselineRejects = {
         "NavigationHandler.OrbitalNavigator.Anchor",
         "NavigationHandler.OrbitalNavigator.Aim",
         "NavigationHandler.OrbitalNavigator.RetargetAnchor",
         "NavigationHandler.OrbitalNavigator.RetargetAim"
     };
-    std::vector<std::string> _scriptRejects = {
+    const std::vector<std::string> _scriptRejects = {
         "openspace.sessionRecording",
         "openspace.scriptScheduler.clear",
         "openspace.time.interpolatePause",
@@ -709,7 +710,12 @@ protected:
         "openspace.time.setPause",
         "openspace.time.togglePause"
     };
-    std::vector<std::string> _loadedSceneGraphNodes;
+    const std::vector<std::string> _navScriptsUsingNodes = {
+    "RetargetAnchor",
+    "Anchor",
+    "Aim"
+    };
+    std::vector<std::string> _loadedNodes;
 
     unsigned int _idxTimeline_nonCamera = 0;
     unsigned int _idxTime = 0;
