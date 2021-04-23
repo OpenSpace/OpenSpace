@@ -33,17 +33,10 @@ template <typename T>
 class NumericalProperty : public TemplateProperty<T> {
 public:
     NumericalProperty(Property::PropertyInfo info, T value, T minimumValue,
-        T maximumValue, T steppingValue);
-    NumericalProperty(Property::PropertyInfo info, T value, T minimumValue,
-        T maximumValue, T steppingValue, float exponent);
+        T maximumValue, T steppingValue, float exponent = 1.f);
 
     virtual std::string className() const override = 0;
-    int typeLua() const override = 0;
-
-    bool getLuaValue(lua_State* state) const override = 0;
-    bool setLuaValue(lua_State* state) override = 0;
-
-    bool getStringValue(std::string& value) const override = 0;
+    virtual int typeLua() const override = 0;
 
     T minValue() const;
     void setMinValue(T value);
@@ -73,9 +66,11 @@ protected:
     static const std::string SteppingValueKey;
     static const std::string ExponentValueKey;
 
-    std::string generateAdditionalJsonDescription() const override;
+    virtual T fromLuaConversion(lua_State* state, bool& success) const override = 0;
+    virtual bool toLuaConversion(lua_State* state) const override = 0;
+    virtual bool toStringConversion(std::string& outValue) const override = 0;
 
-    virtual T fromLuaValue(lua_State* state, bool& success) const = 0;
+    std::string generateAdditionalJsonDescription() const override;
 
     /**
      * convert a lua formatted value to a JSON formatted value

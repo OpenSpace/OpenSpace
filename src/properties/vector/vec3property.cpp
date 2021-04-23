@@ -23,16 +23,43 @@
  ****************************************************************************************/
 
 #include <openspace/properties/vector/vec3property.h>
-
-#include <ghoul/glm.h>
 #include <ghoul/lua/ghoul_lua.h>
-#include <ghoul/misc/misc.h>
-#include <limits>
-#include <sstream>
 
-namespace {
+namespace openspace::properties {
 
-glm::vec3 fromLuaConversion(lua_State* state, bool& success) {
+Vec3Property::Vec3Property(Property::PropertyInfo info, glm::vec3 value,
+                           glm::vec3 minValue, glm::vec3 maxValue, glm::vec3 stepValue)
+    : NumericalProperty<glm::vec3>(
+        std::move(info),
+        std::move(value),
+        std::move(minValue),
+        std::move(maxValue),
+        std::move(stepValue)
+    )
+{}
+
+Vec3Property::Vec3Property(Property::PropertyInfo info, glm::vec3 value,
+                           glm::vec3 minValue, glm::vec3 maxValue, glm::vec3 stepValue,
+                           float exponent)
+    : NumericalProperty<glm::vec3>(
+        std::move(info),
+        std::move(value),
+        std::move(minValue),
+        std::move(maxValue),
+        std::move(stepValue),
+        exponent
+    )
+{}
+
+std::string Vec3Property::className() const {
+    return "Vec3Property";
+}
+
+int Vec3Property::typeLua() const {
+    return LUA_TTABLE;
+}
+
+glm::vec3 Vec3Property::fromLuaConversion(lua_State* state, bool& success) const {
     glm::vec3 result = glm::vec3(0.f);
     lua_pushnil(state);
     for (glm::length_t i = 0; i < ghoul::glm_components<glm::vec3>::value; ++i) {
@@ -50,44 +77,32 @@ glm::vec3 fromLuaConversion(lua_State* state, bool& success) {
             lua_pop(state, 1);
         }
     }
+
     // The last accessor argument is still on the stack
     lua_pop(state, 1);
     success = true;
     return result;
 }
 
-bool toLuaConversion(lua_State* state, glm::vec3 value) {
+bool Vec3Property::toLuaConversion(lua_State* state) const {
     lua_newtable(state);
     int number = 1;
     for (glm::length_t i = 0; i < ghoul::glm_components<glm::vec3>::value; ++i) {
-        lua_pushnumber(state, static_cast<lua_Number>(value[i]));
+        lua_pushnumber(state, static_cast<lua_Number>(_value[i]));
         lua_rawseti(state, -2, number);
         ++number;
     }
     return true;
 }
 
-bool toStringConversion(std::string& outValue, glm::vec3 inValue) {
+bool Vec3Property::toStringConversion(std::string& outValue) const {
     outValue = "{";
     for (glm::length_t i = 0; i < ghoul::glm_components<glm::vec3>::value; ++i) {
-        outValue += std::to_string(inValue[i]) + ",";
+        outValue += std::to_string(_value[i]) + ",";
     }
     outValue.pop_back();
     outValue += "}";
     return true;
 }
-
-} // namespace
-
-namespace openspace::properties {
-
-REGISTER_NUMERICALPROPERTY_SOURCE(
-    Vec3Property,
-    glm::vec3,
-    fromLuaConversion,
-    toLuaConversion,
-    toStringConversion,
-    LUA_TTABLE
-)
 
 } // namespace openspace::properties

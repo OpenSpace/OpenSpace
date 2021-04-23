@@ -29,7 +29,20 @@
 
 namespace openspace::properties {
 
-REGISTER_TEMPLATEPROPERTY_HEADER(StringProperty, std::string, "")
+class StringProperty : public TemplateProperty<std::string> {
+public:
+    StringProperty(Property::PropertyInfo info, std::string value = "");
+
+    std::string className() const override;
+    int typeLua() const override;
+
+    using TemplateProperty<std::string>::operator=;
+
+protected:
+    std::string fromLuaConversion(lua_State* state, bool& success) const override;
+    bool toLuaConversion(lua_State* state) const override;
+    bool toStringConversion(std::string& outValue) const override;
+};
 
 } // namespace openspace::properties
 

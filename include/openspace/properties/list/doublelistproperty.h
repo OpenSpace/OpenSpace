@@ -37,12 +37,13 @@ public:
     std::string className() const override;
     int typeLua() const override;
 
-    bool setLuaValue(lua_State* state) override;
-    bool getLuaValue(lua_State* state) const override;
-    bool getStringValue(std::string& outValue) const override;
-
     using TemplateProperty<std::vector<double>>::operator std::vector<double>;
     using TemplateProperty<std::vector<double>>::operator=;
+
+protected:
+    std::vector<double> fromLuaConversion(lua_State* state, bool& success) const override;
+    bool toLuaConversion(lua_State* state) const override;
+    bool toStringConversion(std::string& outValue) const override;
 };
 
 } // namespace openspace::properties

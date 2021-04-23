@@ -23,16 +23,23 @@
  ****************************************************************************************/
 
 #include <openspace/properties/vector/bvec2property.h>
-
-#include <ghoul/glm.h>
 #include <ghoul/lua/ghoul_lua.h>
-#include <ghoul/misc/misc.h>
-#include <limits>
-#include <sstream>
 
-namespace {
+namespace openspace::properties {
 
-glm::bvec2 fromLuaConversion(lua_State* state, bool& success) {
+BVec2Property::BVec2Property(Property::PropertyInfo info, glm::bvec2 value)
+    : TemplateProperty<glm::bvec2>(info, value)
+{}
+
+std::string BVec2Property::className() const {
+    return "BVec2Property";
+}
+
+int BVec2Property::typeLua() const {
+    return LUA_TTABLE;
+}
+
+glm::bvec2 BVec2Property::fromLuaConversion(lua_State* state, bool& success) const {
     glm::bvec2 result = glm::bvec2(false);
     lua_pushnil(state);
     for (glm::length_t i = 0; i < ghoul::glm_components<glm::bvec2>::value; ++i) {
@@ -57,38 +64,24 @@ glm::bvec2 fromLuaConversion(lua_State* state, bool& success) {
     return result;
 }
 
-bool toLuaConversion(lua_State* state, glm::bvec2 val) {
+bool BVec2Property::toLuaConversion(lua_State* state) const {
     lua_newtable(state);
     int number = 1;
     for (glm::length_t i = 0; i < ghoul::glm_components<glm::bvec2>::value; ++i) {
-        lua_pushnumber(state, static_cast<lua_Number>(val[i]));
+        lua_pushnumber(state, static_cast<lua_Number>(_value[i]));
         lua_setfield(state, -2, std::to_string(number).c_str());
         ++number;
     }
     return true;
 }
 
-bool toStringConversion(std::string& outValue, glm::bvec2 inValue) {
+bool BVec2Property::toStringConversion(std::string& outValue) const {
     outValue = "{";
     for (glm::length_t i = 0; i < ghoul::glm_components<glm::bvec2>::value; ++i) {
-        outValue += std::to_string(inValue[i]) + ",";
+        outValue += std::to_string(_value[i]) + ",";
     }
     outValue.pop_back();
     outValue += "}";
     return true;
 }
-
-} // namespace
-
-namespace openspace::properties {
-
-REGISTER_TEMPLATEPROPERTY_SOURCE(
-    BVec2Property,
-    glm::bvec2,
-    fromLuaConversion,
-    toLuaConversion,
-    toStringConversion,
-    LUA_TTABLE
-)
-
 } // namespace openspace::properties

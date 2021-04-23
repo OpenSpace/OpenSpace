@@ -23,16 +23,44 @@
  ****************************************************************************************/
 
 #include <openspace/properties/vector/dvec3property.h>
-
-#include <ghoul/glm.h>
 #include <ghoul/lua/ghoul_lua.h>
-#include <ghoul/misc/misc.h>
-#include <limits>
-#include <sstream>
 
-namespace {
+namespace openspace::properties {
 
-glm::dvec3 fromLuaConversion(lua_State* state, bool& success) {
+DVec3Property::DVec3Property(Property::PropertyInfo info, glm::dvec3 value,
+                             glm::dvec3 minValue, glm::dvec3 maxValue,
+                             glm::dvec3 stepValue)
+    : NumericalProperty<glm::dvec3>(
+        std::move(info),
+        std::move(value),
+        std::move(minValue),
+        std::move(maxValue),
+        std::move(stepValue)
+    )
+{}
+
+DVec3Property::DVec3Property(Property::PropertyInfo info, glm::dvec3 value,
+                             glm::dvec3 minValue, glm::dvec3 maxValue,
+                             glm::dvec3 stepValue, float exponent)
+    : NumericalProperty<glm::dvec3>(
+        std::move(info),
+        std::move(value),
+        std::move(minValue),
+        std::move(maxValue),
+        std::move(stepValue),
+        exponent
+    )
+{}
+
+std::string DVec3Property::className() const {
+    return "DVec3Property";
+}
+
+int DVec3Property::typeLua() const {
+    return LUA_TTABLE;
+}
+
+glm::dvec3 DVec3Property::fromLuaConversion(lua_State* state, bool& success) const {
     glm::dvec3 result = glm::dvec3(0.0);
     lua_pushnil(state);
     for (glm::length_t i = 0; i < ghoul::glm_components<glm::dvec3>::value; ++i) {
@@ -57,38 +85,25 @@ glm::dvec3 fromLuaConversion(lua_State* state, bool& success) {
     return result;
 }
 
-bool toLuaConversion(lua_State* state, glm::dvec3 value) {
+bool DVec3Property::toLuaConversion(lua_State* state) const {
     lua_newtable(state);
     int number = 1;
     for (glm::length_t i = 0; i < ghoul::glm_components<glm::dvec3>::value; ++i) {
-        lua_pushnumber(state, value[i]);
+        lua_pushnumber(state, _value[i]);
         lua_rawseti(state, -2, number);
         ++number;
     }
     return true;
 }
 
-bool toStringConversion(std::string& outValue, glm::dvec3 inValue) {
+bool DVec3Property::toStringConversion(std::string& outValue) const {
     outValue = "{";
     for (glm::length_t i = 0; i < ghoul::glm_components<glm::dvec3>::value; ++i) {
-        outValue += std::to_string(inValue[i]) + ",";
+        outValue += std::to_string(_value[i]) + ",";
     }
     outValue.pop_back();
     outValue += "}";
     return true;
 }
-
-} // namespace
-
-namespace openspace::properties {
-
-REGISTER_NUMERICALPROPERTY_SOURCE(
-    DVec3Property,
-    glm::dvec3,
-    fromLuaConversion,
-    toLuaConversion,
-    toStringConversion,
-    LUA_TTABLE
-)
 
 } // namespace openspace::properties

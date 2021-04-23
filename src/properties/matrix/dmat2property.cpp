@@ -23,16 +23,44 @@
  ****************************************************************************************/
 
 #include <openspace/properties/matrix/dmat2property.h>
+#include <ghoul/lua/ghoul_lua.h>
 
-#include <ghoul/misc/misc.h>
+namespace openspace::properties {
 
-#include <limits>
-#include <sstream>
-#include <vector>
+DMat2Property::DMat2Property(Property::PropertyInfo info, glm::dmat2x2 value,
+                             glm::dmat2x2 minValue, glm::dmat2x2 maxValue,
+                             glm::dmat2x2 stepValue)
+    : NumericalProperty<glm::dmat2x2>(
+        std::move(info),
+        std::move(value),
+        std::move(minValue),
+        std::move(maxValue),
+        std::move(stepValue)
+    )
+{}
 
-namespace {
+DMat2Property::DMat2Property(Property::PropertyInfo info, glm::dmat2x2 value,
+                             glm::dmat2x2 minValue, glm::dmat2x2 maxValue,
+                             glm::dmat2x2 stepValue, float exponent)
+    : NumericalProperty<glm::dmat2x2>(
+        std::move(info),
+        std::move(value),
+        std::move(minValue),
+        std::move(maxValue),
+        std::move(stepValue),
+        exponent
+    )
+{}
 
-glm::dmat2x2 fromLuaConversion(lua_State* state, bool& success) {
+std::string DMat2Property::className() const {
+    return "DMat2Property";
+}
+
+int DMat2Property::typeLua() const {
+    return LUA_TTABLE;
+}
+
+glm::dmat2x2 DMat2Property::fromLuaConversion(lua_State* state, bool& success) const {
     glm::dmat2x2 result;
     lua_pushnil(state);
     int number = 1;
@@ -60,12 +88,12 @@ glm::dmat2x2 fromLuaConversion(lua_State* state, bool& success) {
     return result;
 }
 
-bool toLuaConversion(lua_State* state, glm::dmat2x2 value) {
+bool DMat2Property::toLuaConversion(lua_State* state) const {
     lua_newtable(state);
     int number = 1;
     for (glm::length_t i = 0; i < glm::dmat2x2::row_type::length(); ++i) {
         for (glm::length_t j = 0; j < glm::dmat2x2::col_type::length(); ++j) {
-            lua_pushnumber(state, value[i][j]);
+            lua_pushnumber(state, _value[i][j]);
             lua_rawseti(state, -2, number);
             ++number;
         }
@@ -73,29 +101,16 @@ bool toLuaConversion(lua_State* state, glm::dmat2x2 value) {
     return true;
 }
 
-bool toStringConversion(std::string& outValue, glm::dmat2x2 inValue) {
+bool DMat2Property::toStringConversion(std::string& outValue) const {
     outValue = "[";
     for (glm::length_t i = 0; i < glm::dmat2x2::row_type::length(); ++i) {
         for (glm::length_t j = 0; j < glm::dmat2x2::col_type::length(); ++j) {
-            outValue += std::to_string(inValue[i][j]) + ",";
+            outValue += std::to_string(_value[i][j]) + ",";
         }
     }
     outValue.pop_back();
     outValue += "]";
     return true;
 }
-
-} // namespace
-
-namespace openspace::properties {
-
-REGISTER_NUMERICALPROPERTY_SOURCE(
-    DMat2Property,
-    glm::dmat2x2,
-    fromLuaConversion,
-    toLuaConversion,
-    toStringConversion,
-    LUA_TTABLE
-)
 
 }  // namespace openspace::properties

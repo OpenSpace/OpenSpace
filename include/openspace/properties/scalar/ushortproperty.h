@@ -41,17 +41,31 @@
  */
 
 #include <openspace/properties/numericalproperty.h>
+#include <limits>
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(
-    UShortProperty,
-    unsigned short,
-    0,
-    std::numeric_limits<unsigned short>::lowest(),
-    std::numeric_limits<unsigned short>::max(),
-    1
-)
+class UShortProperty : public NumericalProperty<unsigned short> {
+public:
+    UShortProperty(Property::PropertyInfo info, unsigned short value = 0,
+        unsigned short minValue = std::numeric_limits<unsigned short>::lowest(),
+        unsigned short maxValue = std::numeric_limits<unsigned short>::max(),
+        unsigned short stepValue = 1);
+
+    UShortProperty(Property::PropertyInfo info, unsigned short value,
+        unsigned short minValue, unsigned short maxValue, unsigned short stepValue,
+        float exponent);
+
+    std::string className() const override;
+    int typeLua() const override;
+
+    using TemplateProperty<unsigned short>::operator=;
+
+protected:
+    unsigned short fromLuaConversion(lua_State* state, bool& success) const override;
+    bool toLuaConversion(lua_State* state) const override;
+    bool toStringConversion(std::string& outValue) const override;
+};
 
 } // namespace openspace::properties
 

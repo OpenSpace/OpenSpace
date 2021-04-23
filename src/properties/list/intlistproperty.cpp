@@ -29,58 +29,6 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/misc/misc.h>
 
-namespace {
-
-constexpr const char* _loggerCat = "IntListProperty";
-
-std::vector<int> fromLuaConversion(lua_State* state, bool& success) {
-    if (!lua_istable(state, -1)) {
-        success = false;
-        LERROR("Conversion from Lua failed. The input was not a table");
-        return {};
-    }
-
-    std::vector<int> result;
-    lua_pushnil(state);
-    while (lua_next(state, -2) != 0) {
-        if (lua_isnumber(state, -1)) {
-            result.emplace_back(lua_tonumber(state, -1));
-        }
-        else {
-            success = false;
-            LERROR(
-                "Conversion from Lua failed. The input table contains non-number values"
-            );
-            return {};
-        }
-        lua_pop(state, 1);
-    }
-    success = true;
-    return result;
-}
-
-bool toLuaConversion(lua_State* state, std::vector<int> val) {
-    lua_createtable(state, static_cast<int>(val.size()), 0);
-
-    int i = 1;
-    for (const int& v : val) {
-        lua_pushinteger(state, i);
-        lua_pushinteger(state, v);
-        lua_settable(state, -3);
-        ++i;
-    }
-
-    return true;
-}
-
-bool toStringConversion(std::string& outValue, const std::vector<int>& inValue) {
-    nlohmann::json json(inValue);
-    outValue = json.dump();
-    return true;
-}
-
-} // namespace
-
 namespace openspace::properties {
 
 IntListProperty::IntListProperty(Property::PropertyInfo info, std::vector<int> values)
@@ -95,23 +43,52 @@ int IntListProperty::typeLua() const {
     return LUA_TTABLE;
 }
 
-bool IntListProperty::setLuaValue(lua_State* state) {
-    bool success = false;
-    std::vector<int> thisValue = fromLuaConversion(state, success);
-    if (success) {
-        set(std::any(thisValue));
+std::vector<int> IntListProperty::fromLuaConversion(lua_State* state,
+                                                    bool& success) const
+{
+    if (!lua_istable(state, -1)) {
+        success = false;
+        LERRORC(className(), "Conversion from Lua failed. The input was not a table");
+        return {};
     }
-    return success;
+
+    std::vector<int> result;
+    lua_pushnil(state);
+    while (lua_next(state, -2) != 0) {
+        if (lua_isnumber(state, -1)) {
+            result.emplace_back(lua_tonumber(state, -1));
+        }
+        else {
+            success = false;
+            LERRORC(
+                className(),
+                "Conversion from Lua failed. The input table contains non-number values"
+            );
+            return {};
+        }
+        lua_pop(state, 1);
+    }
+    success = true;
+    return result;
 }
 
-bool IntListProperty::getLuaValue(lua_State* state) const {
-    bool success = toLuaConversion(state, _value);
-    return success;
+bool IntListProperty::toLuaConversion(lua_State* state) const {
+    lua_createtable(state, static_cast<int>(_value.size()), 0);
+
+    int i = 1;
+    for (int v : _value) {
+        lua_pushinteger(state, i);
+        lua_pushinteger(state, v);
+        lua_settable(state, -3);
+        ++i;
+    }
+    return true;
 }
 
-bool IntListProperty::getStringValue(std::string& outValue) const {
-    bool success = toStringConversion(outValue, _value);
-    return success;
+bool IntListProperty::toStringConversion(std::string& outValue) const {
+    nlohmann::json json(_value);
+    outValue = json.dump();
+    return true;
 }
 
 } // namespace openspace::properties

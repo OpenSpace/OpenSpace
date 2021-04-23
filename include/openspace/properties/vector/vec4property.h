@@ -28,17 +28,30 @@
 #include <openspace/properties/numericalproperty.h>
 
 #include <ghoul/glm.h>
+#include <limits>
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(
-    Vec4Property,
-    glm::vec4,
-    glm::vec4(0.f),
-    glm::vec4(std::numeric_limits<float>::lowest()),
-    glm::vec4(std::numeric_limits<float>::max()),
-    glm::vec4(0.01f)
-)
+class Vec4Property : public NumericalProperty<glm::vec4> {
+public:
+    Vec4Property(Property::PropertyInfo info, glm::vec4 value = glm::vec4(0.f),
+        glm::vec4 minValue = glm::vec4(std::numeric_limits<float>::lowest()),
+        glm::vec4 maxValue = glm::vec4(std::numeric_limits<float>::max()),
+        glm::vec4 stepValue = glm::vec4(0.01f));
+
+    Vec4Property(Property::PropertyInfo info, glm::vec4 value, glm::vec4 minValue,
+        glm::vec4 maxValue, glm::vec4 stepValue, float exponent);
+
+    std::string className() const override;
+    int typeLua() const override;
+
+    using TemplateProperty<glm::vec4>::operator=;
+
+protected:
+    glm::vec4 fromLuaConversion(lua_State* state, bool& success) const override;
+    bool toLuaConversion(lua_State* state) const override;
+    bool toStringConversion(std::string& outValue) const override;
+};
 
 } // namespace openspace::properties
 

@@ -23,15 +23,36 @@
  ****************************************************************************************/
 
 #include <openspace/properties/scalar/longproperty.h>
-
 #include <ghoul/lua/ghoul_lua.h>
 
-#include <limits>
-#include <sstream>
+namespace openspace::properties {
 
-namespace {
+LongProperty::LongProperty(Property::PropertyInfo info, long value,
+                           long minValue, long maxValue, long stepValue)
+    : NumericalProperty<long>(std::move(info), value, minValue, maxValue, stepValue)
+{}
 
-long fromLuaConversion(lua_State* state, bool& success) {
+LongProperty::LongProperty(Property::PropertyInfo info, long value, long minValue,
+                           long maxValue, long stepValue, float exponent)
+    : NumericalProperty<long>(
+        std::move(info),
+        value,
+        minValue,
+        maxValue,
+        stepValue,
+        exponent
+    )
+{}
+
+std::string LongProperty::className() const {
+    return "LongProperty";
+}
+
+int LongProperty::typeLua() const {
+    return LUA_TNUMBER;
+}
+
+long LongProperty::fromLuaConversion(lua_State* state, bool& success) const {
     success = (lua_isnumber(state, -1) == 1);
     if (success) {
         long val = static_cast<long>(lua_tonumber(state, -1));
@@ -42,27 +63,14 @@ long fromLuaConversion(lua_State* state, bool& success) {
     }
 }
 
-bool toLuaConversion(lua_State* state, long value) {
-    lua_pushnumber(state, static_cast<lua_Number>(value));
+bool LongProperty::toLuaConversion(lua_State* state) const {
+    lua_pushnumber(state, static_cast<lua_Number>(_value));
     return true;
 }
 
-bool toStringConversion(std::string& outValue, long inValue) {
-    outValue = std::to_string(inValue);
+bool LongProperty::toStringConversion(std::string& outValue) const {
+    outValue = std::to_string(_value);
     return true;
 }
-
-} // namespace
-
-namespace openspace::properties {
-
-REGISTER_NUMERICALPROPERTY_SOURCE(
-    LongProperty,
-    long,
-    fromLuaConversion,
-    toLuaConversion,
-    toStringConversion,
-    LUA_TNUMBER
-)
 
 } // namespace openspace::properties

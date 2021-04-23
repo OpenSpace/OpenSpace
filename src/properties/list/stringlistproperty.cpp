@@ -29,16 +29,27 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/misc/misc.h>
 
-namespace {
-    constexpr const char* _loggerCat = "StringListProperty";
-} // namespace
+namespace openspace::properties {
 
-namespace {
+StringListProperty::StringListProperty(Property::PropertyInfo info,
+                                       std::vector<std::string> values)
+    : ListProperty(std::move(info), std::move(values))
+{}
 
-std::vector<std::string> fromLuaConversion(lua_State* state, bool& success) {
+std::string StringListProperty::className() const {
+    return "StringListProperty";
+}
+
+int StringListProperty::typeLua() const {
+    return LUA_TTABLE;
+}
+
+std::vector<std::string> StringListProperty::fromLuaConversion(lua_State* state,
+                                                               bool& success) const
+{
     if (!lua_istable(state, -1)) {
         success = false;
-        LERROR("Conversion from Lua failed. The input was not a table");
+        LERRORC(className(), "Conversion from Lua failed. The input was not a table");
         return {};
     }
 
@@ -58,11 +69,11 @@ std::vector<std::string> fromLuaConversion(lua_State* state, bool& success) {
     return result;
 }
 
-bool toLuaConversion(lua_State* state, std::vector<std::string> val) {
-    lua_createtable(state, static_cast<int>(val.size()), 0);
+bool StringListProperty::toLuaConversion(lua_State* state) const {
+    lua_createtable(state, static_cast<int>(_value.size()), 0);
 
     int i = 1;
-    for (const std::string& v : val) {
+    for (const std::string& v : _value) {
         lua_pushinteger(state, i);
         lua_pushstring(state, v.c_str());
         lua_settable(state, -3);
@@ -72,46 +83,10 @@ bool toLuaConversion(lua_State* state, std::vector<std::string> val) {
     return true;
 }
 
-bool toStringConversion(std::string& outValue, const std::vector<std::string>& inValue) {
-    nlohmann::json json(inValue);
+bool StringListProperty::toStringConversion(std::string& outValue) const {
+    nlohmann::json json(_value);
     outValue = json.dump();
     return true;
-}
-
-} // namespace
-
-namespace openspace::properties {
-
-StringListProperty::StringListProperty(Property::PropertyInfo info,
-                                       std::vector<std::string> values)
-    : ListProperty(std::move(info), std::move(values))
-{}
-
-std::string StringListProperty::className() const {
-    return "StringListProperty";
-}
-
-int StringListProperty::typeLua() const {
-    return LUA_TTABLE;
-}
-
-bool StringListProperty::setLuaValue(lua_State* state) {
-    bool success = false;
-    std::vector<std::string> thisValue = fromLuaConversion(state, success);
-    if (success) {
-       set(std::any(thisValue));
-    }
-    return success;
-}
-
-bool StringListProperty::getLuaValue(lua_State* state) const {
-    bool success = toLuaConversion(state, _value);
-    return success;
-}
-
-bool StringListProperty::getStringValue(std::string& outValue) const {
-    bool success = toStringConversion(outValue, _value);
-    return success;
 }
 
 } // namespace openspace::properties

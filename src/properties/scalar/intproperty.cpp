@@ -23,15 +23,36 @@
  ****************************************************************************************/
 
 #include <openspace/properties/scalar/intproperty.h>
-
 #include <ghoul/lua/ghoul_lua.h>
 
-#include <limits>
-#include <sstream>
+namespace openspace::properties {
 
-namespace {
+IntProperty::IntProperty(Property::PropertyInfo info, int value,
+                         int minValue, int maxValue, int stepValue)
+    : NumericalProperty<int>(std::move(info), value, minValue, maxValue, stepValue)
+{}
 
-int fromLuaConversion(lua_State* state, bool& success) {
+IntProperty::IntProperty(Property::PropertyInfo info, int value, int minValue,
+                         int maxValue, int stepValue, float exponent)
+    : NumericalProperty<int>(
+        std::move(info),
+        value,
+        minValue,
+        maxValue,
+        stepValue,
+        exponent
+    )
+{}
+
+std::string IntProperty::className() const {
+    return "IntProperty";
+}
+
+int IntProperty::typeLua() const {
+    return LUA_TNUMBER;
+}
+
+int IntProperty::fromLuaConversion(lua_State* state, bool& success) const {
     success = (lua_isnumber(state, -1) == 1);
     if (success) {
         int val = static_cast<int>(lua_tonumber(state, -1));
@@ -42,27 +63,14 @@ int fromLuaConversion(lua_State* state, bool& success) {
     }
 }
 
-bool toLuaConversion(lua_State* state, int value) {
-    lua_pushnumber(state, static_cast<lua_Number>(value));
+bool IntProperty::toLuaConversion(lua_State* state) const {
+    lua_pushnumber(state, static_cast<lua_Number>(_value));
     return true;
 }
 
-bool toStringConversion(std::string& outValue, int inValue) {
-    outValue = std::to_string(inValue);
+bool IntProperty::toStringConversion(std::string& outValue) const {
+    outValue = std::to_string(_value);
     return true;
 }
-
-} // namespace
-
-namespace openspace::properties {
-
-REGISTER_NUMERICALPROPERTY_SOURCE(
-    IntProperty,
-    int,
-    fromLuaConversion,
-    toLuaConversion,
-    toStringConversion,
-    LUA_TNUMBER
-)
 
 } // namespace openspace::properties

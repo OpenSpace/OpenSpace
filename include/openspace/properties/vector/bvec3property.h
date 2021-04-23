@@ -31,7 +31,20 @@
 
 namespace openspace::properties {
 
-REGISTER_TEMPLATEPROPERTY_HEADER(BVec3Property, glm::bvec3, glm::bvec3(false))
+class BVec3Property : public TemplateProperty<glm::bvec3> {
+public:
+    BVec3Property(Property::PropertyInfo info, glm::bvec3 value = glm::bvec3(false));
+
+    std::string className() const override;
+    int typeLua() const override;
+
+    using TemplateProperty<glm::bvec3>::operator=;
+
+protected:
+    glm::bvec3 fromLuaConversion(lua_State* state, bool& success) const override;
+    bool toLuaConversion(lua_State* state) const override;
+    bool toStringConversion(std::string& outValue) const override;
+};
 
 } // namespace openspace::properties
 

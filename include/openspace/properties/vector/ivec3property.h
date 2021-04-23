@@ -28,17 +28,30 @@
 #include <openspace/properties/numericalproperty.h>
 
 #include <ghoul/glm.h>
+#include <limits>
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(
-    IVec3Property,
-    glm::ivec3,
-    glm::ivec3(0),
-    glm::ivec3(std::numeric_limits<int>::lowest()),
-    glm::ivec3(std::numeric_limits<int>::max()),
-    glm::ivec3(1)
-)
+class IVec3Property : public NumericalProperty<glm::ivec3> {
+public:
+    IVec3Property(Property::PropertyInfo info, glm::ivec3 value = glm::ivec3(0),
+        glm::ivec3 minValue = glm::ivec3(std::numeric_limits<int>::lowest()),
+        glm::ivec3 maxValue = glm::ivec3(std::numeric_limits<int>::max()),
+        glm::ivec3 stepValue = glm::ivec3(1));
+
+    IVec3Property(Property::PropertyInfo info, glm::ivec3 value, glm::ivec3 minValue,
+        glm::ivec3 maxValue, glm::ivec3 stepValue, float exponent);
+
+    std::string className() const override;
+    int typeLua() const override;
+
+    using TemplateProperty<glm::ivec3>::operator=;
+
+protected:
+    glm::ivec3 fromLuaConversion(lua_State* state, bool& success) const override;
+    bool toLuaConversion(lua_State* state) const override;
+    bool toStringConversion(std::string& outValue) const override;
+};
 
 } // namespace openspace::properties
 

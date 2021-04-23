@@ -40,10 +40,6 @@ public:
     std::string className() const override;
     int typeLua() const override;
 
-    bool setLuaValue(lua_State* state) override;
-    bool getLuaValue(lua_State* state) const override;
-    bool getStringValue(std::string& outValue) const override;
-
     /**
      * This method sets the stored value to the provided value <code>val</code>.
      * If the value is different, the listeners are notified. It also removes any
@@ -116,6 +112,13 @@ public:
     using TemplateProperty<std::set<std::string>>::operator std::set<std::string>;
 
     using TemplateProperty<std::set<std::string>>::operator=;
+
+protected:
+    std::set<std::string> fromLuaConversion(lua_State* state, bool& success) const override;
+
+    bool toLuaConversion(lua_State* state) const override;
+
+    bool toStringConversion(std::string& outValue) const override;
 
 private:
     void sortOptions();

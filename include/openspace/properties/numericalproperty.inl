@@ -27,88 +27,6 @@
 
 namespace openspace::properties {
 
-#define REGISTER_NUMERICALPROPERTY_HEADER(CLASS_NAME, TYPE, DEFAULT_VALUE,               \
-                                          DEFAULT_MIN_VALUE, DEFAULT_MAX_VALUE,          \
-                                          DEFAULT_STEPPING)                              \
-                                                                                         \
-    class CLASS_NAME : public NumericalProperty<TYPE> {                                  \
-    public:                                                                              \
-        CLASS_NAME(Property::PropertyInfo info, TYPE value = DEFAULT_VALUE,              \
-            TYPE minValue = DEFAULT_MIN_VALUE, TYPE maxValue = DEFAULT_MAX_VALUE,        \
-            TYPE stepValue = DEFAULT_STEPPING);                                          \
-                                                                                         \
-        CLASS_NAME(Property::PropertyInfo info, TYPE value, TYPE minValue,               \
-            TYPE maxValue, TYPE stepValue, float exponent);                              \
-                                                                                         \
-        std::string className() const override;                                          \
-                                                                                         \
-        bool setLuaValue(lua_State* state) override;                                     \
-                                                                                         \
-        bool getLuaValue(lua_State* state) const override;                               \
-                                                                                         \
-        int typeLua() const override;                                                    \
-                                                                                         \
-        bool getStringValue(std::string& outValue) const override;                       \
-                                                                                         \
-        using TemplateProperty<TYPE>::operator=;                                         \
-                                                                                         \
-    private:                                                                             \
-        TYPE fromLuaValue(lua_State* state, bool& success) const override;               \
-    };                                                                                   \
-
-#define REGISTER_NUMERICALPROPERTY_SOURCE(CLASS_NAME, TYPE,                              \
-                                          FROM_LUA_LAMBDA_EXPRESSION,                    \
-                                          TO_LUA_LAMBDA_EXPRESSION,                      \
-                                          TO_STRING_LAMBDA_EXPRESSION, LUA_TYPE)         \
-                                                                                         \
-    CLASS_NAME::CLASS_NAME(Property::PropertyInfo info, TYPE value, TYPE minValue,       \
-                           TYPE maxValue, TYPE stepValue)                                \
-        : NumericalProperty<TYPE>(info, value, minValue, maxValue, stepValue)            \
-    {}                                                                                   \
-                                                                                         \
-    CLASS_NAME::CLASS_NAME(Property::PropertyInfo info, TYPE value, TYPE minValue,       \
-                           TYPE maxValue, TYPE stepValue, float exponent)                \
-        : NumericalProperty<TYPE>(info, value, minValue, maxValue, stepValue, exponent)  \
-    {}                                                                                   \
-                                                                                         \
-    std::string CLASS_NAME::className() const                                            \
-    {                                                                                    \
-        return #CLASS_NAME;                                                              \
-    }                                                                                    \
-                                                                                         \
-    bool CLASS_NAME::setLuaValue(lua_State* state)                                       \
-    {                                                                                    \
-        bool success = false;                                                            \
-        TYPE thisValue = FROM_LUA_LAMBDA_EXPRESSION(state, success);                     \
-        if (success) {                                                                   \
-            set(std::any(thisValue));                                                    \
-        }                                                                                \
-        return success;                                                                  \
-    }                                                                                    \
-                                                                                         \
-    bool CLASS_NAME::getLuaValue(lua_State* state) const                                 \
-    {                                                                                    \
-        bool success = TO_LUA_LAMBDA_EXPRESSION(state, _value);                          \
-        return success;                                                                  \
-    }                                                                                    \
-                                                                                         \
-    int CLASS_NAME::typeLua() const {                                                    \
-        return LUA_TYPE;                                                                 \
-    }                                                                                    \
-                                                                                         \
-    bool CLASS_NAME::getStringValue(std::string& outValue) const                         \
-    {                                                                                    \
-        bool success = TO_STRING_LAMBDA_EXPRESSION(outValue, _value);                    \
-        return success;                                                                  \
-    }                                                                                    \
-                                                                                         \
-    TYPE CLASS_NAME::fromLuaValue(lua_State* state, bool& success) const                 \
-    {                                                                                    \
-        TYPE value = FROM_LUA_LAMBDA_EXPRESSION(state, success);                         \
-        return value;                                                                    \
-    }                                                                                    \
-
-
 template <typename T>
 const std::string NumericalProperty<T>::MinimumValueKey = "MinimumValue";
 
@@ -120,19 +38,6 @@ const std::string NumericalProperty<T>::SteppingValueKey = "SteppingValue";
 
 template <typename T>
 const std::string NumericalProperty<T>::ExponentValueKey = "Exponent";
-
-template <typename T>
-NumericalProperty<T>::NumericalProperty(Property::PropertyInfo info, T value,
-                                        T minimumValue, T maximumValue, T steppingValue)
-    : NumericalProperty<T>(
-        std::move(info),
-        std::move(value),
-        std::move(minimumValue),
-        std::move(maximumValue),
-        std::move(steppingValue),
-        1.f
-    )
-{}
 
 template <typename T>
 NumericalProperty<T>::NumericalProperty(Property::PropertyInfo info, T value,
@@ -214,7 +119,7 @@ std::string NumericalProperty<T>::luaToJson(std::string luaValue) const {
 template <typename T>
 std::string NumericalProperty<T>::jsonValue() const {
     std::string value;
-    getStringValue(value);
+    toStringConversion(value);
     return luaToJson(value);
 }
 
@@ -229,7 +134,7 @@ void NumericalProperty<T>::setInterpolationTarget(std::any value) {
 template <typename T>
 void NumericalProperty<T>::setLuaInterpolationTarget(lua_State* state) {
     bool success = false;
-    T targetValue = fromLuaValue(state, success);
+    T targetValue = fromLuaConversion(state, success);
     if (success) {
         _interpolationStart = TemplateProperty<T>::_value;
         _interpolationEnd = std::move(targetValue);

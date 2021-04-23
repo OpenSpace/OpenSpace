@@ -90,7 +90,7 @@ bool TransferFunction::setEnvelopesFromLua(lua_State* state) {
     return success;
 }
 
-bool TransferFunction::envelopesToLua(lua_State* state) {
+bool TransferFunction::envelopesToLua(lua_State* state) const {
     lua_newtable(state);
     for (auto iter = _envelopes.begin(); iter != _envelopes.end(); ++iter) {
         lua_newtable(state);

@@ -23,45 +23,38 @@
  ****************************************************************************************/
 
 #include <openspace/properties/stringproperty.h>
-
 #include <ghoul/lua/ghoul_lua.h>
 #include <openspace/json.h>
 
-namespace {
+namespace openspace::properties {
 
-std::string fromLuaConversion(lua_State* state, bool& success) {
-    success = lua_isstring(state, -1) == 1;
-    if (success) {
-        return lua_tostring(state, -1);
-    }
-    else {
-        return "";
-    }
+StringProperty::StringProperty(Property::PropertyInfo info, std::string value)
+    : TemplateProperty<std::string>(info, value)
+{}
+
+std::string StringProperty::className() const {
+    return "StringProperty";
 }
 
-bool toLuaConversion(lua_State* state, const std::string& val) {
-    lua_pushstring(state, val.c_str());
+int StringProperty::typeLua() const {
+    return LUA_TSTRING;
+}
+
+std::string StringProperty::fromLuaConversion(lua_State* state, bool& success) const {
+    success = lua_isstring(state, -1) == 1;
+    return success ? lua_tostring(state, -1) : "";
+}
+
+bool StringProperty::toLuaConversion(lua_State* state) const {
+    lua_pushstring(state, _value.c_str());
     return true;
 }
 
-bool toStringConversion(std::string& outValue, std::string inValue) {
+bool StringProperty::toStringConversion(std::string& outValue) const {
     nlohmann::json json;
-    nlohmann::to_json(json, inValue);
+    nlohmann::to_json(json, _value);
     outValue = json.dump();
     return true;
 }
-
-} // namespace
-
-namespace openspace::properties {
-
-REGISTER_TEMPLATEPROPERTY_SOURCE(
-    StringProperty,
-    std::string,
-    fromLuaConversion,
-    toLuaConversion,
-    toStringConversion,
-    LUA_TSTRING
-)
 
 } // namespace openspace::properties

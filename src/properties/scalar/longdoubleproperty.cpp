@@ -23,15 +23,44 @@
  ****************************************************************************************/
 
 #include <openspace/properties/scalar/longdoubleproperty.h>
-
 #include <ghoul/lua/ghoul_lua.h>
 
-#include <limits>
-#include <sstream>
+namespace openspace::properties {
 
-namespace {
+LongDoubleProperty::LongDoubleProperty(Property::PropertyInfo info, long double value,
+                                       long double minValue, long double maxValue,
+                                       long double stepValue)
+    : NumericalProperty<long double>(
+        std::move(info),
+        value,
+        minValue,
+        maxValue,
+        stepValue
+    )
+{}
 
-long double fromLuaConversion(lua_State* state, bool& success) {
+LongDoubleProperty::LongDoubleProperty(Property::PropertyInfo info, long double value,
+                                       long double minValue, long double maxValue,
+                                       long double stepValue, float exponent)
+    : NumericalProperty<long double>(
+        std::move(info),
+        value,
+        minValue,
+        maxValue,
+        stepValue,
+        exponent
+    )
+{}
+
+std::string LongDoubleProperty::className() const {
+    return "LongDoubleProperty";
+}
+
+int LongDoubleProperty::typeLua() const {
+    return LUA_TNUMBER;
+}
+
+long double LongDoubleProperty::fromLuaConversion(lua_State* state, bool& success) const {
     success = (lua_isnumber(state, -1) == 1);
     if (success) {
         long double val = static_cast<long double>(lua_tonumber(state, -1));
@@ -42,27 +71,14 @@ long double fromLuaConversion(lua_State* state, bool& success) {
     }
 }
 
-bool toLuaConversion(lua_State* state, long double value) {
-    lua_pushnumber(state, static_cast<lua_Number>(value));
+bool LongDoubleProperty::toLuaConversion(lua_State* state) const {
+    lua_pushnumber(state, static_cast<lua_Number>(_value));
     return true;
 }
 
-bool toStringConversion(std::string& outValue, long double inValue) {
-    outValue = std::to_string(inValue);
+bool LongDoubleProperty::toStringConversion(std::string& outValue) const {
+    outValue = std::to_string(_value);
     return true;
 }
-
-} // namespace
-
-namespace openspace::properties {
-
-REGISTER_NUMERICALPROPERTY_SOURCE(
-    LongDoubleProperty,
-    long double,
-    fromLuaConversion,
-    toLuaConversion,
-    toStringConversion,
-    LUA_TNUMBER
-)
 
 } // namespace openspace::properties

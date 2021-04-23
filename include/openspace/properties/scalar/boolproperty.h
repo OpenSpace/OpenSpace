@@ -44,7 +44,20 @@
 
 namespace openspace::properties {
 
-REGISTER_TEMPLATEPROPERTY_HEADER(BoolProperty, bool, false)
+class BoolProperty : public TemplateProperty<bool> {
+public:
+    BoolProperty(Property::PropertyInfo info, bool value = false);
+
+    std::string className() const override;
+    int typeLua() const override;
+
+    using TemplateProperty<bool>::operator=;
+
+protected:
+    bool fromLuaConversion(lua_State* state, bool& success) const override;
+    bool toLuaConversion(lua_State* state) const override;
+    bool toStringConversion(std::string& outValue) const override;
+};
 
 } // namespace openspace::properties
 

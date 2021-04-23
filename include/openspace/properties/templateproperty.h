@@ -100,36 +100,34 @@ public:
 
     /**
      * This method encodes the stored value into a Lua object and pushes that object onto
-     * the stack. This method has to be specialized for each new type.
+     * the stack.
      *
      * \param state The Lua state onto which the encoded object will be pushed
      * \return \c true if the encoding succeeded; \c false otherwise
      */
-    virtual bool getLuaValue(lua_State* state) const override = 0;
+    virtual bool getLuaValue(lua_State* state) const override;
 
     /**
-     * Sets the value of this TemplateProperty by decoding the object at the top of the Lua
-     * stack and, if successful, assigning it using the Property::set method. If the decoding
-     * is successful, the new value should be set, otherwise it should remain unchanged.
-     * This method has to be specialized for each new type.
+     * Sets the value of this TemplateProperty by decoding the object at the top of the
+     * stack and, if successful, assigning it using the Property::set method. If the
+     * decoding is successful, the new value is set, otherwise it remains unchanged.
      *
      * \param state The Lua state from which the value will be decoded
      * \return \c true if the decoding succeeded; \c false otherwise
      */
-    virtual bool setLuaValue(lua_State* state) override = 0;
+    virtual bool setLuaValue(lua_State* state) override;
 
     /// \see Property::typeLua
     virtual int typeLua() const override = 0;
 
     /**
-     * This method encodes the stored value into a std::string object. This method has
-     * to be specialized for each new type. The resulting encoding must also be a
-     * valid JSON representation fo the property.
+     * This method encodes the stored value into a std::string object. The resulting
+     * encoding must also be a valid JSON representation fo the property.
      *
      * \param value The string object in which to store the resulting encoding
      * \return \c true if the encoding succeeded; \c false otherwise
      */
-    virtual bool getStringValue(std::string& value) const override = 0;
+    virtual bool getStringValue(std::string& value) const override;
 
     /**
      * Returns the description for this TemplateProperty as a Lua script that returns a
@@ -186,6 +184,35 @@ public:
     T value() const;
 
 protected:
+    /**
+     * Decodes the object at the top of the stack to a value of the type <code>T</code>
+     * and returns it. This method has to be specialized for each new type.
+     *
+     * \param state The Lua state from which the value will be decoded
+     * \param success Set to true \c true if the decoding succeeded; \c false otherwise
+     * \return the decoded value
+     */
+    virtual T fromLuaConversion(lua_State* state, bool& success) const = 0;
+
+    /**
+     * Encodes the stored value into a Lua object and pushes that object onto
+     * the stack. This method has to be specialized for each new type.
+     *
+     * \param state The Lua state onto which the encoded object will be pushed
+     * \return \c true if the encoding succeeded; \c false otherwise
+     */
+    virtual bool toLuaConversion(lua_State* state) const = 0;
+
+    /**
+     * Encodes the stored value into a std::string object, in a format that is a valid
+     * JSON representation of the property. This method has to be specialized for each
+     * new type.
+     *
+     * \param outValue The string object in which to store the resulting encoding
+     * \return \c true if the encoding succeeded; \c false otherwise
+     */
+    virtual bool toStringConversion(std::string& outValue) const = 0;
+
     /// The value that this TemplateProperty currently stores
     T _value;
 };

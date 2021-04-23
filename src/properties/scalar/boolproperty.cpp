@@ -23,45 +23,35 @@
  ****************************************************************************************/
 
 #include <openspace/properties/scalar/boolproperty.h>
-
 #include <ghoul/lua/ghoul_lua.h>
-
-#include <limits>
-#include <sstream>
-
-namespace {
-
-bool fromLuaConversion(lua_State* state, bool& success) {
-    success = (lua_isboolean(state, -1) == 1);
-    if (success) {
-        return lua_toboolean(state, -1) == 1;
-    }
-    else {
-        return false;
-    }
-}
-
-bool toLuaConversion(lua_State* state, bool value) {
-    lua_pushboolean(state, value);
-    return true;
-}
-
-bool toStringConversion(std::string& outValue, bool inValue) {
-    outValue = inValue ? "true" : "false";
-    return true;
-}
-
-} // namespace
 
 namespace openspace::properties {
 
-REGISTER_TEMPLATEPROPERTY_SOURCE(
-    BoolProperty,
-    bool,
-    fromLuaConversion,
-    toLuaConversion,
-    toStringConversion,
-    LUA_TBOOLEAN
-)
+BoolProperty::BoolProperty(Property::PropertyInfo info, bool value)
+    : TemplateProperty<bool>(std::move(info), value)
+{}
+
+std::string BoolProperty::className() const {
+    return "BoolProperty";
+}
+
+int BoolProperty::typeLua() const {
+    return LUA_TBOOLEAN;
+}
+
+bool BoolProperty::fromLuaConversion(lua_State* state, bool& success) const {
+    success = (lua_isboolean(state, -1) == 1);
+    return success ? (lua_toboolean(state, -1) == 1) : false;
+}
+
+bool BoolProperty::toLuaConversion(lua_State* state) const {
+    lua_pushboolean(state, _value);
+    return true;
+}
+
+bool BoolProperty::toStringConversion(std::string& outValue) const {
+    outValue = _value ? "true" : "false";
+    return true;
+}
 
 } // namespace openspace::properties

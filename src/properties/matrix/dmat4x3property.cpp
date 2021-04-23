@@ -23,16 +23,44 @@
  ****************************************************************************************/
 
 #include <openspace/properties/matrix/dmat4x3property.h>
+#include <ghoul/lua/ghoul_lua.h>
 
-#include <ghoul/misc/misc.h>
+namespace openspace::properties {
 
-#include <limits>
-#include <sstream>
-#include <vector>
+DMat4x3Property::DMat4x3Property(Property::PropertyInfo info, glm::dmat4x3 value,
+                                 glm::dmat4x3 minValue, glm::dmat4x3 maxValue,
+                                 glm::dmat4x3 stepValue)
+    : NumericalProperty<glm::dmat4x3>(
+        std::move(info),
+        std::move(value),
+        std::move(minValue),
+        std::move(maxValue),
+        std::move(stepValue)
+    )
+{}
 
-namespace {
+DMat4x3Property::DMat4x3Property(Property::PropertyInfo info, glm::dmat4x3 value,
+                                 glm::dmat4x3 minValue, glm::dmat4x3 maxValue,
+                                 glm::dmat4x3 stepValue, float exponent)
+    : NumericalProperty<glm::dmat4x3>(
+        std::move(info),
+        std::move(value),
+        std::move(minValue),
+        std::move(maxValue),
+        std::move(stepValue),
+        exponent
+    )
+{}
 
-glm::dmat4x3 fromLuaConversion(lua_State* state, bool& success) {
+std::string DMat4x3Property::className() const {
+    return "DMat4x3Property";
+}
+
+int DMat4x3Property::typeLua() const {
+    return LUA_TTABLE;
+}
+
+glm::dmat4x3 DMat4x3Property::fromLuaConversion(lua_State* state, bool& success) const {
     glm::dmat4x3 result;
     lua_pushnil(state);
     int number = 1;
@@ -60,12 +88,12 @@ glm::dmat4x3 fromLuaConversion(lua_State* state, bool& success) {
     return result;
 }
 
-bool toLuaConversion(lua_State* state, glm::dmat4x3 value) {
+bool DMat4x3Property::toLuaConversion(lua_State* state) const {
     lua_newtable(state);
     int number = 1;
     for (glm::length_t i = 0; i < glm::dmat4x3::row_type::length(); ++i) {
         for (glm::length_t j = 0; j < glm::dmat4x3::col_type::length(); ++j) {
-            lua_pushnumber(state, value[i][j]);
+            lua_pushnumber(state, _value[i][j]);
             lua_rawseti(state, -2, number);
             ++number;
         }
@@ -73,29 +101,16 @@ bool toLuaConversion(lua_State* state, glm::dmat4x3 value) {
     return true;
 }
 
-bool toStringConversion(std::string& outValue, glm::dmat4x3 inValue) {
+bool DMat4x3Property::toStringConversion(std::string& outValue) const {
     outValue = "[";
     for (glm::length_t i = 0; i < glm::dmat4x3::row_type::length(); ++i) {
         for (glm::length_t j = 0; j < glm::dmat4x3::col_type::length(); ++j) {
-            outValue += std::to_string(inValue[i][j]) + ",";
+            outValue += std::to_string(_value[i][j]) + ",";
         }
     }
     outValue.pop_back();
     outValue += "]";
     return true;
 }
-
-} // namespace
-
-namespace openspace::properties {
-
-REGISTER_NUMERICALPROPERTY_SOURCE(
-    DMat4x3Property,
-    glm::dmat4x3,
-    fromLuaConversion,
-    toLuaConversion,
-    toStringConversion,
-    LUA_TTABLE
-)
 
 }  // namespace openspace::properties

@@ -28,17 +28,33 @@
 #include <openspace/properties/numericalproperty.h>
 
 #include <ghoul/glm.h>
+#include <limits>
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(
-    DMat2x4Property,
-    glm::dmat2x4,
-    glm::dmat2x4(0.0),
-    ghoul::createFillMat2x4<double>(std::numeric_limits<double>::lowest()),
-    ghoul::createFillMat2x4<double>(std::numeric_limits<double>::lowest()),
-    ghoul::createFillMat2x4<double>(0.01)
-)
+class DMat2x4Property : public NumericalProperty<glm::dmat2x4> {
+public:
+    DMat2x4Property(Property::PropertyInfo info, glm::dmat2x4 value = glm::dmat2x4(0.0),
+        glm::dmat2x4 minValue =
+            ghoul::createFillMat2x4<double>(std::numeric_limits<double>::lowest()),
+        glm::dmat2x4 maxValue =
+            ghoul::createFillMat2x4<double>(std::numeric_limits<double>::max()),
+        glm::dmat2x4 stepValue = ghoul::createFillMat2x4<double>(0.01));
+
+    DMat2x4Property(Property::PropertyInfo info, glm::dmat2x4 value,
+        glm::dmat2x4 minValue, glm::dmat2x4 maxValue, glm::dmat2x4 stepValue,
+        float exponent);
+
+    std::string className() const override;
+    int typeLua() const override;
+
+    using TemplateProperty<glm::dmat2x4>::operator=;
+
+protected:
+    glm::dmat2x4 fromLuaConversion(lua_State* state, bool& success) const override;
+    bool toLuaConversion(lua_State* state) const override;
+    bool toStringConversion(std::string& outValue) const override;
+};
 
 } // namespace openspace::properties
 
