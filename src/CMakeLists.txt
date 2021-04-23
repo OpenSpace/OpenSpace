@@ -102,17 +102,11 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/properties/scalar/doubleproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/scalar/floatproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/scalar/intproperty.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/scalar/longdoubleproperty.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/scalar/longlongproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/scalar/longproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/scalar/shortproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/scalar/uintproperty.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/scalar/ulonglongproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/scalar/ulongproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/scalar/ushortproperty.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/vector/bvec2property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/vector/bvec3property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/vector/bvec4property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/vector/dvec2property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/vector/dvec3property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/vector/dvec4property.cpp
@@ -295,17 +289,11 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/doubleproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/floatproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/intproperty.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/longdoubleproperty.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/longlongproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/longproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/shortproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/uintproperty.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/ulonglongproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/ulongproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/ushortproperty.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/bvec2property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/bvec3property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/bvec4property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/dvec2property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/dvec3property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/dvec4property.h
