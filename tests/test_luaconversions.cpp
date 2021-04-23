@@ -28,17 +28,11 @@
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/scalar/longdoubleproperty.h>
-#include <openspace/properties/scalar/longlongproperty.h>
 #include <openspace/properties/scalar/longproperty.h>
 #include <openspace/properties/scalar/shortproperty.h>
 #include <openspace/properties/scalar/uintproperty.h>
-#include <openspace/properties/scalar/ulonglongproperty.h>
 #include <openspace/properties/scalar/ulongproperty.h>
 #include <openspace/properties/scalar/ushortproperty.h>
-#include <openspace/properties/vector/bvec2property.h>
-#include <openspace/properties/vector/bvec3property.h>
-#include <openspace/properties/vector/bvec4property.h>
 #include <openspace/properties/vector/dvec2property.h>
 #include <openspace/properties/vector/dvec3property.h>
 #include <openspace/properties/vector/dvec4property.h>
