@@ -182,34 +182,23 @@ asset.onInitialize(function()
             "Switch target to Mars"
         )
     elseif (controller.LeftButton ~= nil) then
-        openspace.navigation.bindJoystickAxis(controller.Push[1], "Orbit X", false, false, true, 25.0);
-        openspace.navigation.bindJoystickAxis(controller.Push[2], "Orbit Y", false, false, true, 25.0);
-        openspace.navigation.bindJoystickAxis(controller.Twist[1], "Pan X", true, false, true, 25.0);
-        openspace.navigation.bindJoystickAxis(controller.Tilt[2], "Pan Y", false, false, true, 25.0);
-        openspace.navigation.bindJoystickAxis(controller.Push[3], "Zoom", false, false, true, 25.0);
+        openspace.navigation.bindJoystickAxis(controller.Push[1], "Orbit X", false, false, true, 40.0);
+        openspace.navigation.bindJoystickAxis(controller.Push[2], "Orbit Y", false, false, true, 40.0);
+        openspace.navigation.bindJoystickAxis(controller.Twist[1], "Pan X", true, false, true, 40.0);
+        openspace.navigation.bindJoystickAxis(controller.Tilt[2], "Pan Y", false, false, true, 35.0);
+        openspace.navigation.bindJoystickAxis(controller.Push[3], "Zoom", false, false, true, 40.0);
+        openspace.navigation.bindJoystickAxis(controller.Tilt[1], "LocalRoll X", false, false, true, 35.0);
 
-        openspace.navigation.bindJoystickButton(
-            controller.LeftButton,
-            bindLocalRoll(controller.Twist[1]),
-            "Switch to local roll mode"
-        )
-        openspace.navigation.bindJoystickButton(
-            controller.LeftButton,
-            unbindRoll(controller.Twist[1]),
-            "Switch back to normal mode",
-            "Release"
-        )
+        --openspace.navigation.bindJoystickButton(
+            --controller.LeftButton,
+            --bindLocalRoll(controller.Tilt[1]),
+            --"Switch to local roll mode"
+        --)
 
-        openspace.navigation.bindJoystickButton(
-            controller.RightButton,
-            bindGlobalRoll(controller.Twist[1]),
-            "Switch to global roll mode"
-        )
-        openspace.navigation.bindJoystickButton(
-            controller.RightButton,
-            unbindRoll(controller.Twist[1]),
-            "Switch back to normal mode",
-            "Release"
-        )
+        --openspace.navigation.bindJoystickButton(
+            --controller.RightButton,
+            --bindGlobalRoll(controller.Tilt[1]),
+            --"Switch to global roll mode"
+        --)
     end
 end)
