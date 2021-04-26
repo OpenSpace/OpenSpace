@@ -123,6 +123,11 @@ void ConvertRecFormatTask::convert() {
     }
 
     if (_fileFormatType == SessionRecording::DataMode::Ascii) {
+        _iFile.close();
+        _iFile.open(_inFilePath, std::ifstream::in);
+        //Throw out first line
+        std::string throw_out;
+        std::getline(_iFile, throw_out);
         _oFile.open(_outFilePath);
     }
     else if (_fileFormatType == SessionRecording::DataMode::Binary) {
