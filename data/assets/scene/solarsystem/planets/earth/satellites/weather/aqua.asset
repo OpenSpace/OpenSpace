@@ -19,7 +19,7 @@ asset.onInitialize(function ()
   local Aqua = {
     Identifier = "Aqua",
     Parent = transforms.EarthInertial.Identifier,
-    BoundingSphere = 30,
+    InteractionSphere = 30,
     Transform = {
       Translation = {
         Type = "TLETranslation",

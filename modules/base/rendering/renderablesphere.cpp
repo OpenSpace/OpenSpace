@@ -215,8 +215,11 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     }
     addProperty(_orientation);
 
+    _size.onChange([this]() {
+        setBoundingSphere(_size);
+        _sphereIsDirty = true;
+    });
     addProperty(_size);
-    _size.onChange([this]() { _sphereIsDirty = true; });
 
     addProperty(_segments);
     _segments.onChange([this]() { _sphereIsDirty = true; });
@@ -257,6 +260,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
         setRenderBin(Renderable::RenderBin::Background);
     }
 
+    setBoundingSphere(_size);
     setRenderBinFromOpacity();
 }
 

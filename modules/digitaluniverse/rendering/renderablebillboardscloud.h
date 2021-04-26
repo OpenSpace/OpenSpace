@@ -76,6 +76,7 @@ private:
         Gigaparsec = 5,
         GigalightYears = 6
     };
+    double unitToMeter(Unit unit) const;
 
     void createDataSlice();
     void createPolygonTexture();
