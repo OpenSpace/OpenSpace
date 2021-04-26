@@ -31,6 +31,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <vector>
 
 namespace ghoul::opengl { class ProgramObject; }
 

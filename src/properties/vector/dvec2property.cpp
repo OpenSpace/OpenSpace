@@ -68,29 +68,6 @@ bool toLuaConversion(lua_State* state, glm::dvec2 value) {
     return true;
 }
 
-glm::dvec2 fromStringConversion(const std::string& val, bool& success) {
-    glm::dvec2 result = glm::dvec2(0.0);
-    std::vector<std::string> tokens = ghoul::tokenizeString(val, ',');
-    if (tokens.size() != static_cast<size_t>(result.length())) {
-        success = false;
-        return result;
-    }
-    for (glm::length_t i = 0; i < ghoul::glm_components<glm::dvec2>::value; ++i) {
-        std::stringstream s(tokens[i]);
-        glm::dvec2::value_type v;
-        s >> v;
-        if (s.fail()) {
-            success = false;
-            return result;
-        }
-        else {
-            result[i] = v;
-        }
-    }
-    success = true;
-    return result;
-}
-
 bool toStringConversion(std::string& outValue, glm::dvec2 inValue) {
     outValue = "{";
     for (glm::length_t i = 0; i < ghoul::glm_components<glm::dvec2>::value; ++i) {
@@ -114,7 +91,6 @@ REGISTER_NUMERICALPROPERTY_SOURCE(
     glm::dvec2(0.01),
     fromLuaConversion,
     toLuaConversion,
-    fromStringConversion,
     toStringConversion,
     LUA_TTABLE
 )

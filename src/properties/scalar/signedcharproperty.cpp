@@ -47,19 +47,6 @@ bool toLuaConversion(lua_State* state, signed char value) {
     return true;
 }
 
-signed char fromStringConversion(const std::string& val, bool& success) {
-    std::stringstream s(val);
-    signed char v = 0;
-    s >> v;
-    success = !s.fail();
-    if (success) {
-        return v;
-    }
-    else {
-        throw ghoul::RuntimeError("Conversion error for string: " + val);
-    }
-}
-
 bool toStringConversion(std::string& outValue, signed char inValue) {
     outValue = std::to_string(inValue);
     return true;
@@ -78,7 +65,6 @@ REGISTER_NUMERICALPROPERTY_SOURCE(
     0,
     fromLuaConversion,
     toLuaConversion,
-    fromStringConversion,
     toStringConversion,
     LUA_TNUMBER
 )

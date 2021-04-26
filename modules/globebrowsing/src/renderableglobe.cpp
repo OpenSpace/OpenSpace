@@ -567,6 +567,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     ghoul::Dictionary layersDictionary = dictionary.value<ghoul::Dictionary>("Layers");
     _layerManager.initialize(layersDictionary);
 
+    addProperty(_opacity);
     addProperty(_generalProperties.performShading);
     addProperty(_generalProperties.useAccurateNormals);
 
@@ -975,6 +976,9 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         _localRenderer.program->setUniform("orenNayarRoughness", onr);
         _globalRenderer.program->setUniform("orenNayarRoughness", onr);
     }
+
+    _localRenderer.program->setUniform("opacity", _opacity);
+    _globalRenderer.program->setUniform("opacity", _opacity);
 
 
     if (_globalRenderer.updatedSinceLastCall) {
