@@ -24,6 +24,7 @@
 
 #include <openspace/properties/vector/ivec2property.h>
 #include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/lua/lua_helper.h>
 
 namespace openspace::properties {
 
@@ -61,38 +62,11 @@ int IVec2Property::typeLua() const {
 }
 
 glm::ivec2 IVec2Property::fromLuaConversion(lua_State* state, bool& success) const {
-    glm::ivec2 result = glm::ivec2(0);
-    lua_pushnil(state);
-    for (glm::length_t i = 0; i < ghoul::glm_components<glm::ivec2>::value; ++i) {
-        int hasNext = lua_next(state, -2);
-        if (hasNext != 1) {
-            success = false;
-            return glm::ivec2(0);
-        }
-        if (lua_isnumber(state, -1) != 1) {
-            success = false;
-            return glm::ivec2(0);
-        }
-        else {
-            result[i] = static_cast<glm::ivec2::value_type>(lua_tonumber(state, -1));
-            lua_pop(state, 1);
-        }
-    }
-
-    // The last accessor argument is still on the stack
-    lua_pop(state, 1);
-    success = true;
-    return result;
+    return ghoul::lua::tryGetValue<glm::ivec2>(state, success);
 }
 
 bool IVec2Property::toLuaConversion(lua_State* state) const {
-    lua_newtable(state);
-    int number = 1;
-    for (glm::length_t i = 0; i < ghoul::glm_components<glm::ivec2>::value; ++i) {
-        lua_pushnumber(state, static_cast<lua_Number>(_value[i]));
-        lua_rawseti(state, -2, number);
-        ++number;
-    }
+    ghoul::lua::push(state, _value);
     return true;
 }
 

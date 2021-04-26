@@ -24,6 +24,7 @@
 
 #include <openspace/properties/vector/uvec4property.h>
 #include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/lua/lua_helper.h>
 
 namespace openspace::properties {
 
@@ -61,38 +62,11 @@ int UVec4Property::typeLua() const {
 }
 
 glm::uvec4 UVec4Property::fromLuaConversion(lua_State* state, bool& success) const {
-    glm::uvec4 result = glm::uvec4(0);
-    lua_pushnil(state);
-    for (glm::length_t i = 0; i < ghoul::glm_components<glm::uvec4>::value; ++i) {
-        int hasNext = lua_next(state, -2);
-        if (hasNext != 1) {
-            success = false;
-            return glm::uvec4(0);
-        }
-        if (lua_isnumber(state, -1) != 1) {
-            success = false;
-            return glm::uvec4(0);
-        }
-        else {
-            result[i] = static_cast<glm::uvec4::value_type>(lua_tonumber(state, -1));
-            lua_pop(state, 1);
-        }
-    }
-
-    // The last accessor argument is still on the stack
-    lua_pop(state, 1);
-    success = true;
-    return result;
+    return ghoul::lua::tryGetValue<glm::uvec4>(state, success);
 }
 
 bool UVec4Property::toLuaConversion(lua_State* state) const {
-    lua_newtable(state);
-    int number = 1;
-    for (glm::length_t i = 0; i < ghoul::glm_components<glm::uvec4>::value; ++i) {
-        lua_pushnumber(state, static_cast<lua_Number>(_value[i]));
-        lua_rawseti(state, -2, number);
-        ++number;
-    }
+    ghoul::lua::push(state, _value);
     return true;
 }
 

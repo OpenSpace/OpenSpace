@@ -24,6 +24,7 @@
 
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/lua/lua_helper.h>
 
 namespace openspace::properties {
 
@@ -60,38 +61,11 @@ int Vec3Property::typeLua() const {
 }
 
 glm::vec3 Vec3Property::fromLuaConversion(lua_State* state, bool& success) const {
-    glm::vec3 result = glm::vec3(0.f);
-    lua_pushnil(state);
-    for (glm::length_t i = 0; i < ghoul::glm_components<glm::vec3>::value; ++i) {
-        int hasNext = lua_next(state, -2);
-        if (hasNext != 1) {
-            success = false;
-            return glm::vec3(0.f);
-        }
-        if (lua_isnumber(state, -1) != 1) {
-            success = false;
-            return glm::vec3(0.f);
-        }
-        else {
-            result[i] = static_cast<glm::vec3::value_type>(lua_tonumber(state, -1));
-            lua_pop(state, 1);
-        }
-    }
-
-    // The last accessor argument is still on the stack
-    lua_pop(state, 1);
-    success = true;
-    return result;
+    return ghoul::lua::tryGetValue<glm::vec3>(state, success);
 }
 
 bool Vec3Property::toLuaConversion(lua_State* state) const {
-    lua_newtable(state);
-    int number = 1;
-    for (glm::length_t i = 0; i < ghoul::glm_components<glm::vec3>::value; ++i) {
-        lua_pushnumber(state, static_cast<lua_Number>(_value[i]));
-        lua_rawseti(state, -2, number);
-        ++number;
-    }
+    ghoul::lua::push(state, _value);
     return true;
 }
 

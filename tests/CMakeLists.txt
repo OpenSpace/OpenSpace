@@ -33,7 +33,6 @@ add_executable(
   test_iswamanager.cpp
   test_latlonpatch.cpp
   test_lrucache.cpp
-  test_luaconversions.cpp
   test_lua_createsinglecolorimage.cpp
   test_profile.cpp
   test_rawvolumeio.cpp

@@ -24,6 +24,7 @@
 
 #include <openspace/properties/matrix/mat4property.h>
 #include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/lua/lua_helper.h>
 
 namespace openspace::properties {
 
@@ -61,44 +62,11 @@ int Mat4Property::typeLua() const {
 }
 
 glm::mat4x4 Mat4Property::fromLuaConversion(lua_State* state, bool& success) const {
-    glm::mat4x4 result = glm::mat4x4(1.f);
-    lua_pushnil(state);
-    int number = 1;
-    for (glm::length_t i = 0; i < glm::mat4x4::row_type::length(); ++i) {
-        for (glm::length_t j = 0; j < glm::mat4x4::col_type::length(); ++j) {
-            int hasNext = lua_next(state, -2);
-            if (hasNext != 1) {
-                success = false;
-                return glm::mat4x4(1.f);
-            }
-            if (lua_isnumber(state, -1) != 1) {
-                success = false;
-                return glm::mat4x4(1.f);
-            }
-            else {
-                result[i][j]
-                    = static_cast<glm::mat4x4::value_type>(lua_tonumber(state, -1));
-                lua_pop(state, 1);
-                ++number;
-            }
-        }
-    }
-    // The last accessor argument and the table are still on the stack
-    lua_pop(state, 1);
-    success = true;
-    return result;
+    return ghoul::lua::tryGetValue<glm::mat4x4>(state, success);
 }
 
 bool Mat4Property::toLuaConversion(lua_State* state) const {
-    lua_newtable(state);
-    int number = 1;
-    for (glm::length_t i = 0; i < glm::mat4x4::row_type::length(); ++i) {
-        for (glm::length_t j = 0; j < glm::mat4x4::col_type::length(); ++j) {
-            lua_pushnumber(state, static_cast<lua_Number>(_value[i][j]));
-            lua_rawseti(state, -2, number);
-            ++number;
-        }
-    }
+    ghoul::lua::push(state, _value);
     return true;
 }
 

@@ -24,6 +24,7 @@
 
 #include <openspace/properties/vector/dvec2property.h>
 #include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/lua/lua_helper.h>
 
 namespace openspace::properties {
 
@@ -61,38 +62,11 @@ int DVec2Property::typeLua() const {
 }
 
 glm::dvec2 DVec2Property::fromLuaConversion(lua_State* state, bool& success) const {
-    glm::dvec2 result = glm::dvec2(0.0);
-    lua_pushnil(state);
-    for (glm::length_t i = 0; i < ghoul::glm_components<glm::dvec2>::value; ++i) {
-        int hasNext = lua_next(state, -2);
-        if (hasNext != 1) {
-            success = false;
-            return glm::dvec2(0.0);
-        }
-        if (lua_isnumber(state, -1) != 1) {
-            success = false;
-            return glm::dvec2(0.0);
-        }
-        else {
-            result[i] = lua_tonumber(state, -1);
-            lua_pop(state, 1);
-        }
-    }
-
-    // The last accessor argument is still on the stack
-    lua_pop(state, 1);
-    success = true;
-    return result;
+    return ghoul::lua::tryGetValue<glm::dvec2>(state, success);
 }
 
 bool DVec2Property::toLuaConversion(lua_State* state) const {
-    lua_newtable(state);
-    int number = 1;
-    for (glm::length_t i = 0; i < ghoul::glm_components<glm::dvec2>::value; ++i) {
-        lua_pushnumber(state, _value[i]);
-        lua_rawseti(state, -2, number);
-        ++number;
-    }
+    ghoul::lua::push(state, _value);
     return true;
 }
 
