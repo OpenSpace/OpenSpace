@@ -143,6 +143,7 @@ RenderableHabitableZone::RenderableHabitableZone(const ghoul::Dictionary& dictio
     _width.setReadOnly(true);
 
     computeZone();
+    setBoundingSphere(_size);
 }
 
 void RenderableHabitableZone::render(const RenderData& data, RendererTasks&) {

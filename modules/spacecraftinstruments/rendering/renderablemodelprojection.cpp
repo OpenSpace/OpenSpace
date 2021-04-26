@@ -42,6 +42,8 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
+#include <filesystem>
+#include <optional>
 
 namespace {
     constexpr const char* _loggerCat = "RenderableModelProjection";
@@ -73,132 +75,61 @@ namespace {
         "location to the Sun. If this value is disabled, shading is disabled and the "
         "entire model is rendered brightly."
     };
+
+    struct [[codegen::Dictionary(RenderableModelProjection)]] Parameters {
+        // The file or files that should be loaded in this RenderableModel. The file can
+        // contain filesystem tokens or can be specified relatively to the
+        // location of the .mod file.
+        // This specifies the model that is rendered by the Renderable.
+        std::filesystem::path geometryFile;
+
+        // Contains information about projecting onto this planet.
+        ghoul::Dictionary projection [[codegen::reference("newhorizons_projectioncomponent")]];
+
+        // [[codegen::verbatim(PerformShadingInfo.description)]]
+        std::optional<bool> performShading;
+
+        // The radius of the bounding sphere of this object. This has to be a
+        // radius that is larger than anything that is rendered by it. It has to
+        // be at least as big as the convex hull of the object. The default value
+        // is 10e9 meters.
+        std::optional<double> boundingSphereRadius;
+    };
+#include "renderablemodelprojection_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableModelProjection::Documentation() {
-    using namespace documentation;
-
-    return {
-        "Renderable Model Projection",
-        "newhorizons_renderable_modelprojection",
-        {
-            {
-                KeyGeomModelFile,
-                new OrVerifier({ new StringVerifier, new StringListVerifier }),
-                Optional::No,
-                "The file or files that are used for rendering of this model"
-            },
-            {
-                keyProjection,
-                new ReferencingVerifier("newhorizons_projectioncomponent"),
-                Optional::No,
-                "Contains information about projecting onto this planet."
-            },
-            {
-                PerformShadingInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                PerformShadingInfo.description
-            },
-            {
-                keyBoundingSphereRadius,
-                new DoubleVerifier,
-                Optional::Yes,
-                "The radius of the bounding sphere of this object. This has to be a "
-                "radius that is larger than anything that is rendered by it. It has to "
-                "be at least as big as the convex hull of the object. The default value "
-                "is 10e9 meters."
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "newhorizons_renderable_modelprojection";
+    return doc;
 }
 
 RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _performShading(PerformShadingInfo, true)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableModelProjection"
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    std::string file = absPath(p.geometryFile.string());
+    _geometry = ghoul::io::ModelReader::ref().loadModel(
+        file,
+        ghoul::io::ModelReader::ForceRenderInvisible::No,
+        ghoul::io::ModelReader::NotifyInvisibleDropped::Yes
     );
-
-    if (dictionary.hasKey(KeyGeomModelFile)) {
-        std::string file;
-
-        if (dictionary.hasValue<std::string>(KeyGeomModelFile)) {
-            // Handle single file
-            file = absPath(dictionary.value<std::string>(KeyGeomModelFile));
-            _geometry = ghoul::io::ModelReader::ref().loadModel(
-                file,
-                ghoul::io::ModelReader::ForceRenderInvisible::No,
-                ghoul::io::ModelReader::NotifyInvisibleDropped::Yes
-            );
-        }
-        else if (dictionary.hasValue<ghoul::Dictionary>(KeyGeomModelFile)) {
-            LWARNING("Loading a model with several files is deprecated and will be "
-                "removed in a future release"
-            );
-
-            ghoul::Dictionary fileDictionary = dictionary.value<ghoul::Dictionary>(
-                KeyGeomModelFile
-            );
-            std::vector<std::unique_ptr<ghoul::modelgeometry::ModelGeometry>> geometries;
-
-            for (std::string_view k : fileDictionary.keys()) {
-                // Handle each file
-                file = absPath(fileDictionary.value<std::string>(k));
-                geometries.push_back(ghoul::io::ModelReader::ref().loadModel(
-                    file,
-                    ghoul::io::ModelReader::ForceRenderInvisible::No,
-                    ghoul::io::ModelReader::NotifyInvisibleDropped::Yes
-                ));
-            }
-
-            if (!geometries.empty()) {
-                std::unique_ptr<ghoul::modelgeometry::ModelGeometry> combinedGeometry =
-                    std::move(geometries[0]);
-
-                // Combine all models into one ModelGeometry
-                for (unsigned int i = 1; i < geometries.size(); ++i) {
-                    for (ghoul::io::ModelMesh& mesh : geometries[i]->meshes()) {
-                        combinedGeometry->meshes().push_back(
-                            std::move(mesh)
-                        );
-                    }
-
-                    for (ghoul::modelgeometry::ModelGeometry::TextureEntry& texture :
-                        geometries[i]->textureStorage())
-                    {
-                        combinedGeometry->textureStorage().push_back(
-                            std::move(texture)
-                        );
-                    }
-                }
-                _geometry = std::move(combinedGeometry);
-                _geometry->calculateBoundingRadius();
-            }
-        }
-    }
 
     addPropertySubOwner(_projectionComponent);
 
     _projectionComponent.initialize(
         identifier(),
-        dictionary.value<ghoul::Dictionary>(keyProjection)
+        p.projection
     );
 
-    double boundingSphereRadius = 1.0e9;
-    if (dictionary.hasValue<double>(keyBoundingSphereRadius)) {
-        boundingSphereRadius = dictionary.value<double>(keyBoundingSphereRadius);
-    }
+    double boundingSphereRadius = p.boundingSphereRadius.value_or(1.0e9);
     setBoundingSphere(boundingSphereRadius);
 
-    if (dictionary.hasValue<bool>(PerformShadingInfo.identifier)) {
-        _performShading = dictionary.value<bool>(PerformShadingInfo.identifier);
-    }
+    _performShading = p.performShading.value_or(_performShading);
 
     addProperty(_performShading);
 }

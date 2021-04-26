@@ -381,6 +381,8 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         _hardShadowsEnabled.onChange(updateWithoutCalculation);
         addProperty(_hardShadowsEnabled);
     }
+
+    setBoundingSphere(_planetRadius * 1000.0);
 }
 
 void RenderableAtmosphere::deinitializeGL() {
