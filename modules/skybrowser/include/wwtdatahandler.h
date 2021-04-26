@@ -13,7 +13,7 @@ namespace openspace {
         std::string thumbnailUrl;
         std::string credits;
         std::string creditsUrl;
-        glm::vec2 celestCoords;
+        glm::dvec2 celestCoords;
         std::string collection;
         float zoomLevel;
         bool hasCoords;

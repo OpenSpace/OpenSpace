@@ -50,6 +50,7 @@ public:
     glm::vec2 getMousePositionInScreenSpaceCoords(glm::vec2& mousePos);
     void addRenderable(ScreenSpaceRenderable* object);
     glm::dvec2 convertGalacticToCelestial(glm::dvec3 coords) const;
+    glm::dvec3 icrsToGalacticCartesian(double ra, double dec, double distance);
     WWTDataHandler* getWWTDataHandler();
 
     scripting::LuaLibrary luaLibrary() const override;

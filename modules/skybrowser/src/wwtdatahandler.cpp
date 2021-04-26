@@ -106,24 +106,23 @@ namespace openspace {
         XMLElement* ptr = node->FirstChildElement();
 
         // Go through all siblings of ptr and open folders recursively
-
-            // Iterate through all siblings at same level and load
-            while (ptr) {
-                // If node is an image or place, load it 
-                if (std::string(ptr->Name()) == "ImageSet" || std::string(ptr->Name()) == "Place") {
-                    loadImage(ptr, collectionName);
+        // Iterate through all siblings at same level and load
+        while (ptr) {
+            // If node is an image or place, load it 
+            if (std::string(ptr->Name()) == "ImageSet" || std::string(ptr->Name()) == "Place") {
+                loadImage(ptr, collectionName);
+            }
+            // If node is another folder, open recursively
+            else if (std::string(ptr->Name()) == "Folder") {
+                std::string newCollectionName = collectionName + "/";
+                if (ptr->FindAttribute("Name")) {
+                    newCollectionName += std::string(ptr->FindAttribute("Name")->Value());
                 }
-                // If node is another folder, open recursively
-                else if (std::string(ptr->Name()) == "Folder") {
-                    std::string newCollectionName = collectionName + "/";
-                    if (ptr->FindAttribute("Name")) {
-                        newCollectionName += std::string(ptr->FindAttribute("Name")->Value());
-                    }
-                    loadImagesFromXML(ptr, newCollectionName);
-                }
+                loadImagesFromXML(ptr, newCollectionName);
+            }
 
-                ptr = ptr->NextSiblingElement();
-            }            
+            ptr = ptr->NextSiblingElement();
+        }            
         
     }
 

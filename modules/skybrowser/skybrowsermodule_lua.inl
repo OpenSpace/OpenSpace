@@ -53,14 +53,14 @@ namespace openspace::skybrowser::luascriptfunctions {
 		 
 		if (resultImage.hasCoords) {
 
-			glm::dvec3 imageCoordsGalactic = icrsToGalacticCartesian(resultImage.celestCoords.x, resultImage.celestCoords.y, 1.0);	
+			glm::dvec3 imageCoordsGalactic = module->icrsToGalacticCartesian(resultImage.celestCoords.x, resultImage.celestCoords.y, 1.0);	
 			browser->getSkyTarget()->lookAtGalacticCoord(imageCoordsGalactic);
 
 			// In WWT, the definition of ZoomLevel is: VFOV = ZoomLevel / 6
 			browser->setVerticalFieldOfView(resultImage.zoomLevel / 6);
 		} 
 		browser->sendMessageToWWT(browser->createMessageForSettingForegroundOpacityWWT(100));
-		return 1;
+		return 0;
 	}
 
     int moveCircleToHoverImage(lua_State* L) {
@@ -75,7 +75,7 @@ namespace openspace::skybrowser::luascriptfunctions {
 
         if (resultImage.hasCoords) {
 
-            glm::dvec3 imageCoordsGalactic = icrsToGalacticCartesian(resultImage.celestCoords.x, resultImage.celestCoords.y, 1.0);
+            glm::dvec3 imageCoordsGalactic = module->icrsToGalacticCartesian(resultImage.celestCoords.x, resultImage.celestCoords.y, 1.0);
             // This is a duplicate of target function "lookAtGalacticCoord". Probably should rewrite this so there are no duplicates...
             glm::dmat4 cameraInvRotMat = global::navigationHandler->camera()->viewRotationMatrix();
             glm::dvec3 viewDirectionLocal = cameraInvRotMat * glm::dvec4(imageCoordsGalactic, 1.f);
@@ -87,18 +87,15 @@ namespace openspace::skybrowser::luascriptfunctions {
             hoverCircle->translate(glm::vec2(imageCoordsScreenSpace) - hoverCircle->getScreenSpacePosition(), hoverCircle->getScreenSpacePosition());
         }
         
-        return 1;
+        return 0;
     }
 
     int disableHoverCircle(lua_State* L) {
-        // Load image
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::disableHoverCircle");
-        LINFO("YO");
         ScreenSpaceImageLocal* hoverCircle = dynamic_cast<ScreenSpaceImageLocal*>(global::renderEngine->screenSpaceRenderable("HoverCircle"));
-        LINFO("YAH");
         hoverCircle->property("Enabled")->set(false);
-        LINFO("Yu");
-        return 1;
+        
+        return 0;
     }
 
 	
@@ -108,8 +105,9 @@ namespace openspace::skybrowser::luascriptfunctions {
         LINFO("Loading images from url");
 		SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 		std::string root = "https://raw.githubusercontent.com/WorldWideTelescope/wwt-web-client/master/assets/webclient-explore-root.wtml";
+        std::string hubble = "http://www.worldwidetelescope.org/wwtweb/catalog.aspx?W=hubble";
 
-		module->getWWTDataHandler()->loadWTMLCollectionsFromURL(root, "root");
+		module->getWWTDataHandler()->loadWTMLCollectionsFromURL(hubble, "root");
 		LINFO(std::to_string( module->getWWTDataHandler()->loadAllImagesFromXMLs()));
 
 		return 1;
@@ -129,7 +127,8 @@ namespace openspace::skybrowser::luascriptfunctions {
 		//    browser->sendMessageToWWT(browser->createMessageForLoadingWWTImgColl(url));
 		//}
 		std::string root = "https://raw.githubusercontent.com/WorldWideTelescope/wwt-web-client/master/assets/webclient-explore-root.wtml";
-		browser->sendMessageToWWT(browser->createMessageForLoadingWWTImgColl(root));
+        std::string hubble = "http://www.worldwidetelescope.org/wwtweb/catalog.aspx?W=hubble";
+		browser->sendMessageToWWT(browser->createMessageForLoadingWWTImgColl(hubble));
 		return 1;
 	}
 
@@ -140,9 +139,9 @@ namespace openspace::skybrowser::luascriptfunctions {
 		// If no data has been loaded yet, load it!
 		if (module->getWWTDataHandler()->getLoadedImages().size() == 0) {
             // Read from disc
-			moveBrowser(L);
+			//moveBrowser(L);
             // Read from URL
-			// followCamera(L);
+			 followCamera(L);
 		}
 	    
         // Create Lua table to send to the GUI
@@ -170,6 +169,8 @@ namespace openspace::skybrowser::luascriptfunctions {
             ghoul::lua::push(L, "Credits", images[i].credits);
             lua_settable(L, -3);
             ghoul::lua::push(L, "CreditsUrl", images[i].creditsUrl);
+            lua_settable(L, -3);
+            ghoul::lua::push(L, "Index", i);
             lua_settable(L, -3);
             // Set table for the current ImageData
             lua_settable(L, -3);    
@@ -210,7 +211,7 @@ namespace openspace::skybrowser::luascriptfunctions {
 	int adjustCamera(lua_State* L) {
 		ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::adjustCamera");
 
-		return 1;
+		return 0;
 	}
 	
 }
