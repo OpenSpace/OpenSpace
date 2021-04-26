@@ -69,7 +69,7 @@ std::vector<std::string> StringListProperty::fromLuaConversion(lua_State* state,
     return result;
 }
 
-bool StringListProperty::toLuaConversion(lua_State* state) const {
+void StringListProperty::toLuaConversion(lua_State* state) const {
     lua_createtable(state, static_cast<int>(_value.size()), 0);
 
     int i = 1;
@@ -79,14 +79,11 @@ bool StringListProperty::toLuaConversion(lua_State* state) const {
         lua_settable(state, -3);
         ++i;
     }
-
-    return true;
 }
 
-bool StringListProperty::toStringConversion(std::string& outValue) const {
+std::string StringListProperty::toStringConversion() const {
     nlohmann::json json(_value);
-    outValue = json.dump();
-    return true;
+    return json.dump();
 }
 
 } // namespace openspace::properties

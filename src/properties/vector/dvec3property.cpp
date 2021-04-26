@@ -65,19 +65,18 @@ glm::dvec3 DVec3Property::fromLuaConversion(lua_State* state, bool& success) con
     return ghoul::lua::tryGetValue<glm::dvec3>(state, success);
 }
 
-bool DVec3Property::toLuaConversion(lua_State* state) const {
+void DVec3Property::toLuaConversion(lua_State* state) const {
     ghoul::lua::push(state, _value);
-    return true;
 }
 
-bool DVec3Property::toStringConversion(std::string& outValue) const {
-    outValue = "{";
+std::string DVec3Property::toStringConversion() const {
+    std::string outValue = "{";
     for (glm::length_t i = 0; i < ghoul::glm_components<glm::dvec3>::value; ++i) {
         outValue += std::to_string(_value[i]) + ",";
     }
     outValue.pop_back();
     outValue += "}";
-    return true;
+    return outValue;
 }
 
 } // namespace openspace::properties

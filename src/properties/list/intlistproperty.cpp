@@ -72,7 +72,7 @@ std::vector<int> IntListProperty::fromLuaConversion(lua_State* state,
     return result;
 }
 
-bool IntListProperty::toLuaConversion(lua_State* state) const {
+void IntListProperty::toLuaConversion(lua_State* state) const {
     lua_createtable(state, static_cast<int>(_value.size()), 0);
 
     int i = 1;
@@ -82,13 +82,11 @@ bool IntListProperty::toLuaConversion(lua_State* state) const {
         lua_settable(state, -3);
         ++i;
     }
-    return true;
 }
 
-bool IntListProperty::toStringConversion(std::string& outValue) const {
+std::string IntListProperty::toStringConversion() const {
     nlohmann::json json(_value);
-    outValue = json.dump();
-    return true;
+    return json.dump();
 }
 
 } // namespace openspace::properties

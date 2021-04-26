@@ -63,14 +63,12 @@ double DoubleProperty::fromLuaConversion(lua_State* state, bool& success) const 
     }
 }
 
-bool DoubleProperty::toLuaConversion(lua_State* state) const {
+void DoubleProperty::toLuaConversion(lua_State* state) const {
     lua_pushnumber(state, _value);
-    return true;
 }
 
-bool DoubleProperty::toStringConversion(std::string& outValue) const {
-    outValue = std::to_string(_value);
-    return true;
+std::string DoubleProperty::toStringConversion() const {
+    return std::to_string(_value);
 }
 
 } // namespace openspace::properties

@@ -65,19 +65,18 @@ glm::ivec4 IVec4Property::fromLuaConversion(lua_State* state, bool& success) con
     return ghoul::lua::tryGetValue<glm::ivec4>(state, success);
 }
 
-bool IVec4Property::toLuaConversion(lua_State* state) const {
+void IVec4Property::toLuaConversion(lua_State* state) const {
     ghoul::lua::push(state, _value);
-    return true;
 }
 
-bool IVec4Property::toStringConversion(std::string& outValue) const {
-    outValue = "{";
+std::string IVec4Property::toStringConversion() const {
+    std::string outValue = "{";
     for (glm::length_t i = 0; i < ghoul::glm_components<glm::ivec4>::value; ++i) {
         outValue += std::to_string(_value[i]) + ",";
     }
     outValue.pop_back();
     outValue += "}";
-    return true;
+    return outValue;
 }
 
 } // namespace openspace::properties

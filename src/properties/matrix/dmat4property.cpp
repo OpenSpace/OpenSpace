@@ -65,13 +65,12 @@ glm::dmat4x4 DMat4Property::fromLuaConversion(lua_State* state, bool& success) c
     return ghoul::lua::tryGetValue<glm::dmat4x4>(state, success);
 }
 
-bool DMat4Property::toLuaConversion(lua_State* state) const {
+void DMat4Property::toLuaConversion(lua_State* state) const {
     ghoul::lua::push(state, _value);
-    return true;
 }
 
-bool DMat4Property::toStringConversion(std::string& outValue) const {
-    outValue = "[";
+std::string DMat4Property::toStringConversion() const {
+    std::string outValue = "[";
     for (glm::length_t i = 0; i < glm::dmat4x4::row_type::length(); ++i) {
         for (glm::length_t j = 0; j < glm::dmat4x4::col_type::length(); ++j) {
             outValue += std::to_string(_value[i][j]) + ",";
@@ -79,7 +78,7 @@ bool DMat4Property::toStringConversion(std::string& outValue) const {
     }
     outValue.pop_back();
     outValue += "]";
-    return true;
+    return outValue;
 }
 
 }  // namespace openspace::properties

@@ -71,14 +71,12 @@ unsigned long ULongProperty::fromLuaConversion(lua_State* state, bool& success) 
     }
 }
 
-bool ULongProperty::toLuaConversion(lua_State* state) const {
+void ULongProperty::toLuaConversion(lua_State* state) const {
     lua_pushnumber(state, static_cast<lua_Number>(_value));
-    return true;
 }
 
-bool ULongProperty::toStringConversion(std::string& outValue) const {
-    outValue = std::to_string(_value);
-    return true;
+std::string ULongProperty::toStringConversion() const {
+    return std::to_string(_value);
 }
 
 } // namespace openspace::properties

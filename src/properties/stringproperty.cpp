@@ -45,16 +45,14 @@ std::string StringProperty::fromLuaConversion(lua_State* state, bool& success) c
     return success ? lua_tostring(state, -1) : "";
 }
 
-bool StringProperty::toLuaConversion(lua_State* state) const {
+void StringProperty::toLuaConversion(lua_State* state) const {
     lua_pushstring(state, _value.c_str());
-    return true;
 }
 
-bool StringProperty::toStringConversion(std::string& outValue) const {
+std::string StringProperty::toStringConversion() const {
     nlohmann::json json;
     nlohmann::to_json(json, _value);
-    outValue = json.dump();
-    return true;
+    return json.dump();
 }
 
 } // namespace openspace::properties

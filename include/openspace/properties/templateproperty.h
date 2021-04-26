@@ -199,19 +199,17 @@ protected:
      * the stack. This method has to be specialized for each new type.
      *
      * \param state The Lua state onto which the encoded object will be pushed
-     * \return \c true if the encoding succeeded; \c false otherwise
      */
-    virtual bool toLuaConversion(lua_State* state) const = 0;
+    virtual void toLuaConversion(lua_State* state) const = 0;
 
     /**
      * Encodes the stored value into a std::string object, in a format that is a valid
      * JSON representation of the property. This method has to be specialized for each
      * new type.
      *
-     * \param outValue The string object in which to store the resulting encoding
-     * \return \c true if the encoding succeeded; \c false otherwise
+     * \return The resulting encoding
      */
-    virtual bool toStringConversion(std::string& outValue) const = 0;
+    virtual std::string toStringConversion() const = 0;
 
     /// The value that this TemplateProperty currently stores
     T _value;

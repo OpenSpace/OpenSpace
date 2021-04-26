@@ -84,8 +84,8 @@ const std::type_info& TemplateProperty<T>::type() const {
 
 template <typename T>
 bool TemplateProperty<T>::getLuaValue(lua_State* state) const {
-    bool success = toLuaConversion(state);
-    return success;
+    toLuaConversion(state);
+    return true;
 }
 
 template <typename T>
@@ -100,8 +100,8 @@ bool TemplateProperty<T>::setLuaValue(lua_State* state) {
 
 template <typename T>
 bool TemplateProperty<T>::getStringValue(std::string& outValue) const {
-    bool success = toStringConversion(outValue);
-    return success;
+    outValue = toStringConversion();
+    return true;
 }
 
 }  // namespace openspace::properties

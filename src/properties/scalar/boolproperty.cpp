@@ -44,14 +44,12 @@ bool BoolProperty::fromLuaConversion(lua_State* state, bool& success) const {
     return success ? (lua_toboolean(state, -1) == 1) : false;
 }
 
-bool BoolProperty::toLuaConversion(lua_State* state) const {
+void BoolProperty::toLuaConversion(lua_State* state) const {
     lua_pushboolean(state, _value);
-    return true;
 }
 
-bool BoolProperty::toStringConversion(std::string& outValue) const {
-    outValue = _value ? "true" : "false";
-    return true;
+std::string BoolProperty::toStringConversion() const {
+    return _value ? "true" : "false";
 }
 
 } // namespace openspace::properties

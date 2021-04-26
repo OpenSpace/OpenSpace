@@ -158,7 +158,7 @@ std::set<std::string> SelectionProperty::fromLuaConversion(lua_State* state,
     return result;
 }
 
-bool SelectionProperty::toLuaConversion(lua_State* state) const {
+void SelectionProperty::toLuaConversion(lua_State* state) const {
     lua_newtable(state);
     int i = 1;
     for (const std::string& v : _value) {
@@ -167,13 +167,11 @@ bool SelectionProperty::toLuaConversion(lua_State* state) const {
         lua_settable(state, -3);
         ++i;
     }
-    return true;
 }
 
-bool SelectionProperty::toStringConversion(std::string& outValue) const {
+std::string SelectionProperty::toStringConversion() const {
     nlohmann::json json(_value);
-    outValue = json.dump();
-    return true;
+    return json.dump();
 }
 
 void SelectionProperty::sortOptions() {

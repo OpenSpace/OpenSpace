@@ -71,14 +71,12 @@ unsigned short UShortProperty::fromLuaConversion(lua_State* state, bool& success
     }
 }
 
-bool UShortProperty::toLuaConversion(lua_State* state) const {
+void UShortProperty::toLuaConversion(lua_State* state) const {
     lua_pushnumber(state, static_cast<lua_Number>(_value));
-    return true;
 }
 
-bool UShortProperty::toStringConversion(std::string& outValue) const {
-    outValue = std::to_string(_value);
-    return true;
+std::string UShortProperty::toStringConversion() const {
+    return std::to_string(_value);
 }
 
 

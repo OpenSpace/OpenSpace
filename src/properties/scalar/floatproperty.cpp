@@ -63,14 +63,12 @@ float FloatProperty::fromLuaConversion(lua_State* state, bool& success) const {
     }
 }
 
-bool FloatProperty::toLuaConversion(lua_State* state) const {
+void FloatProperty::toLuaConversion(lua_State* state) const {
     lua_pushnumber(state, static_cast<lua_Number>(_value));
-    return true;
 }
 
-bool FloatProperty::toStringConversion(std::string& outValue) const {
-    outValue = std::to_string(_value);
-    return true;
+std::string FloatProperty::toStringConversion() const {
+    return std::to_string(_value);
 }
 
 } // namespace openspace::properties

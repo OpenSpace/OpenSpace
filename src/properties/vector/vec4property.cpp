@@ -64,19 +64,18 @@ glm::vec4 Vec4Property::fromLuaConversion(lua_State* state, bool& success) const
     return ghoul::lua::tryGetValue<glm::vec4>(state, success);
 }
 
-bool Vec4Property::toLuaConversion(lua_State* state) const {
+void Vec4Property::toLuaConversion(lua_State* state) const {
     ghoul::lua::push(state, _value);
-    return true;
 }
 
-bool Vec4Property::toStringConversion(std::string& outValue) const {
-    outValue = "{";
+std::string Vec4Property::toStringConversion() const {
+    std::string outValue = "{";
     for (glm::length_t i = 0; i < ghoul::glm_components<glm::vec4>::value; ++i) {
         outValue += std::to_string(_value[i]) + ",";
     }
     outValue.pop_back();
     outValue += "}";
-    return true;
+    return outValue;
 }
 
 } // namespace openspace::properties

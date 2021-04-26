@@ -42,9 +42,10 @@ public:
     using TemplateProperty<std::vector<std::string>>::operator=;
 
 protected:
-    std::vector<std::string> fromLuaConversion(lua_State* state, bool& success) const override;
-    bool toLuaConversion(lua_State* state) const override;
-    bool toStringConversion(std::string& outValue) const override;
+    std::vector<std::string> fromLuaConversion(lua_State* state,
+        bool& success) const override;
+    void toLuaConversion(lua_State* state) const override;
+    std::string toStringConversion() const override;
 };
 
 } // namespace openspace::properties
