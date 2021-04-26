@@ -48,14 +48,12 @@ TransferFunctionProperty::fromLuaConversion(lua_State* state, bool& success) con
     return tf;
 }
 
-bool TransferFunctionProperty::toLuaConversion(lua_State* state) const {
-    return _value.envelopesToLua(state);
+void TransferFunctionProperty::toLuaConversion(lua_State* state) const {
+    _value.envelopesToLua(state);
 }
 
-bool TransferFunctionProperty::toStringConversion() const {
-    outValue = _value.serializedToString();
-    return true;
+std::string TransferFunctionProperty::toStringConversion() const {
+    return _value.serializedToString();
 }
-
 
 } // namespace openspace::properties

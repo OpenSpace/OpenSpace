@@ -118,8 +118,7 @@ std::string NumericalProperty<T>::luaToJson(std::string luaValue) const {
 
 template <typename T>
 std::string NumericalProperty<T>::jsonValue() const {
-    std::string value;
-    toStringConversion(value);
+    std::string value = toStringConversion();
     return luaToJson(value);
 }
 
