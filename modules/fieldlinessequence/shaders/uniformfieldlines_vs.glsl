@@ -22,48 +22,62 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/fieldlinessequence/fieldlinessequencemodule.h>
+#version __CONTEXT__
+layout(location = 0) in vec3 in_position;
 
-#include <modules/fieldlinessequence/rendering/renderableuniformfieldlines.h>
-#include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/templatefactory.h>
-#include <fstream>
+out float vs_depth;
+out vec4 vs_positionViewSpace;
+out vec4 vs_color;
 
-namespace {
-    constexpr const char* DefaultTransferfunctionSource =
-R"(
-width 5
-lower 0.0
-upper 1.0
-mappingkey 0.0   0    0    0    255
-mappingkey 0.25  255  0    0    255
-mappingkey 0.5   255  140  0    255
-mappingkey 0.75  255  255  0    255
-mappingkey 1.0   255  255  255  255
-)";
-} // namespace
 
-namespace openspace {
+uniform mat4 modelViewTransform;
+uniform mat4 projectionTransform;
+// General Uniforms that's always needed
+uniform vec4      lineColor;
 
-std::string FieldlinesSequenceModule::DefaultTransferFunctionFile = "";
+// Uniforms needed for Particle Flow
+uniform vec4      flowColor;
+uniform float     particleSize;
+uniform float     particleSpeed;
+uniform float     particleSpacing;
+uniform double    time;
+uniform bool      usingParticles;
 
-FieldlinesSequenceModule::FieldlinesSequenceModule() : OpenSpaceModule(Name) {
-    DefaultTransferFunctionFile = absPath("${TEMPORARY}/default_transfer_function.txt");
 
-    std::ofstream file(DefaultTransferFunctionFile);
-    file << DefaultTransferfunctionSource;
+
+bool isPartOfParticle(double time, int vertexId, float particleSize,
+                      float particleSpeed, float particleSpacing)
+{
+    int modulusResult = int(particleSpeed * time + vertexId) % int(particleSpacing);
+    return modulusResult > 0 && modulusResult <= particleSize;
 }
 
-void FieldlinesSequenceModule::internalInitialize(const ghoul::Dictionary&) {
-    auto factory = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(factory, "No renderable factory existed");
+void main() {
+    bool hasColor = true;
 
-    factory->registerClass<RenderableFieldlinesSequence>("RenderableFieldlinesSequence");
-    factory->registerClass<RenderableUniformFieldlines>("RenderableUniformFieldlines");
+    if (hasColor) {
+        bool isParticle = usingParticles && isPartOfParticle(time, gl_VertexID,
+                                                                    particleSize,
+                                                                    particleSpeed,
+                                                                    particleSpacing);
+        if (isParticle) {
+            vs_color = flowColor;
+        }
+        else {
+            vs_color = lineColor;
+        }
 
+    }
+    else {
+        vs_color = vec4(0);
+    }
+
+    vs_positionViewSpace = vec4(modelViewTransform * dvec4(in_position, 1));
+    vec4 positionScreenSpace = projectionTransform * vs_positionViewSpace;
+    vs_depth = positionScreenSpace.w;
+    gl_Position  = positionScreenSpace;
+
+    // Set z to 0 to disable near and far plane, unique handling for perspective in space
+    gl_Position.z = 0.f;
 }
 
-} // namespace openspace

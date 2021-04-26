@@ -1,0 +1,35 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('scene/solarsystem/sun/transforms')
+asset.require("spice/base")
+
+
+local UniformFieldlines = {
+    Identifier = "UniformFieldlines",
+    Parent = transforms.SolarSystemBarycenter.Identifier,
+    Renderable = {
+        Type = "RenderableUniformFieldlines",
+        StartNode = "Earth",
+        EndNode = "Sun",
+        Color = {1.0, 1.0, 1.0},
+        LineWidth = 5,
+        Tag = { "planetTrail_solarSystem", "planetTrail_terrestrial" }
+    },
+    GUI = {
+        Name = "Uniform Fieldlines",
+        Path = "/Solar System/Planets/Earth"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { UniformFieldlines })
+
+
+asset.meta = {
+    Name = "Unifrom Fieldlines",
+    Version = "1.0",
+    Description = [[ Trail of Earth as observed by the Sun. Data from NASA Spice (see
+        base spice asset)]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = {"UniformFieldlines"}
+}

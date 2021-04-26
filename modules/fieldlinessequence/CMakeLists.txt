@@ -25,6 +25,7 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
+  rendering/renderableuniformfieldlines.h
   rendering/renderablefieldlinessequence.h
   util/fieldlinesstate.h
   util/commons.h
@@ -33,6 +34,7 @@ set(HEADER_FILES
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
+  rendering/renderableuniformfieldlines.cpp
   rendering/renderablefieldlinessequence.cpp
   util/fieldlinesstate.cpp
   util/commons.cpp
@@ -43,6 +45,8 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 set(SHADER_FILES
   shaders/fieldlinessequence_vs.glsl
   shaders/fieldlinessequence_fs.glsl
+  shaders/uniformfieldlines_vs.glsl
+  shaders/uniformfieldlines_fs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 
