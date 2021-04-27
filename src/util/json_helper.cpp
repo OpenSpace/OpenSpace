@@ -22,37 +22,57 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/properties/scalar/doubleproperty.h>
-#include <ghoul/lua/ghoul_lua.h>
+namespace openspace {
 
-namespace openspace::properties {
-
-DoubleProperty::DoubleProperty(Property::PropertyInfo info, double value,
-                               double minValue, double maxValue, double stepValue)
-    : NumericalProperty<double>(std::move(info), value, minValue, maxValue, stepValue)
-{}
-
-std::string DoubleProperty::className() const {
-    return "DoubleProperty";
-}
-
-int DoubleProperty::typeLua() const {
-    return LUA_TNUMBER;
-}
-
-double DoubleProperty::fromLuaConversion(lua_State* state, bool& success) const {
-    success = (lua_isnumber(state, -1) == 1);
-    if (success) {
-        double val = lua_tonumber(state, -1);
-        return val;
+std::string escapedJson(const std::string& text) {
+    std::string jsonString;
+    for (const char& c : text) {
+        switch (c) {
+        case '\t':
+            jsonString += "\\t"; // Replace tab with \t.
+            break;
+        case '"':
+            jsonString += "\\\""; // Replace " with \".
+            break;
+        case '\\':
+            jsonString += "\\\\"; // Replace \ with \\.
+            break;
+        case '\n':
+            jsonString += "\\\\n"; // Replace newline with \n.
+            break;
+        case '\r':
+            jsonString += "\\r"; // Replace carriage return with \r.
+            break;
+        default:
+            jsonString += c;
+        }
     }
-    else {
-        return 0.0;
+    return jsonString;
+}
+
+std::string escapedJson(const std::vector<std::string>& list) {
+    std::string jsonString;
+    jsonString += "[";
+    for (const std::string& text : list) {
+        jsonString += "\\\"";
+        jsonString += escapedJson(text);
+        jsonString += "\\\",";
     }
+    if (jsonString.length() > 1) {
+        jsonString.pop_back();
+    }
+    jsonString += "]";
+
+    return jsonString;
 }
 
-void DoubleProperty::toLuaConversion(lua_State* state) const {
-    lua_pushnumber(state, _value);
+std::string formatJsonNumber(double d) {
+    // to_string will represent infinite values with 'inf' and NaNs with 'nan'.
+    // These are not valid in JSON, so use 'null' instead
+    if (!std::isfinite(d)) {
+        return "null";
+    }
+    return std::to_string(d);
 }
 
-} // namespace openspace::properties
+}  // namespace openspace

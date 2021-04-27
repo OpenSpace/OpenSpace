@@ -56,16 +56,4 @@ void DMat4Property::toLuaConversion(lua_State* state) const {
     ghoul::lua::push(state, _value);
 }
 
-std::string DMat4Property::toStringConversion() const {
-    std::string outValue = "[";
-    for (glm::length_t i = 0; i < glm::dmat4x4::row_type::length(); ++i) {
-        for (glm::length_t j = 0; j < glm::dmat4x4::col_type::length(); ++j) {
-            outValue += std::to_string(_value[i][j]) + ",";
-        }
-    }
-    outValue.pop_back();
-    outValue += "]";
-    return outValue;
-}
-
 }  // namespace openspace::properties

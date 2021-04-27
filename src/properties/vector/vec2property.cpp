@@ -55,14 +55,4 @@ void Vec2Property::toLuaConversion(lua_State* state) const {
     ghoul::lua::push(state, _value);
 }
 
-std::string Vec2Property::toStringConversion() const {
-    std::string outValue = "{";
-    for (glm::length_t i = 0; i < ghoul::glm_components<glm::vec2>::value; ++i) {
-        outValue += std::to_string(_value[i]) + ",";
-    }
-    outValue.pop_back();
-    outValue += "}";
-    return outValue;
-}
-
 } // namespace openspace::properties

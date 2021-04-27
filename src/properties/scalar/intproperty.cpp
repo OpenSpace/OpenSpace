@@ -55,8 +55,4 @@ void IntProperty::toLuaConversion(lua_State* state) const {
     lua_pushnumber(state, static_cast<lua_Number>(_value));
 }
 
-std::string IntProperty::toStringConversion() const {
-    return std::to_string(_value);
-}
-
 } // namespace openspace::properties

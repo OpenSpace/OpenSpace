@@ -22,6 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/util/json_helper.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <glm/ext/matrix_common.hpp>
 
@@ -150,6 +151,11 @@ void NumericalProperty<T>::interpolateValue(float t,
     TemplateProperty<T>::setValue(static_cast<T>(
         glm::mix(_interpolationStart, _interpolationEnd, t)
     ));
+}
+
+template <typename T>
+std::string NumericalProperty<T>::toStringConversion() const {
+    return formatJson(TemplateProperty<T>::_value);
 }
 
 } // namespace openspace::properties

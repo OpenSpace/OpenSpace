@@ -49,7 +49,6 @@ public:
 protected:
     glm::mat4x4 fromLuaConversion(lua_State* state, bool& success) const override;
     void toLuaConversion(lua_State* state) const override;
-    std::string toStringConversion() const override;
 };
 
 } // namespace openspace::properties

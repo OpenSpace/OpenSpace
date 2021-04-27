@@ -22,37 +22,47 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/properties/scalar/doubleproperty.h>
-#include <ghoul/lua/ghoul_lua.h>
+#ifndef __OPENSPACE_CORE___JSON_HELPER___H__
+#define __OPENSPACE_CORE___JSON_HELPER___H__
 
-namespace openspace::properties {
+#include <string>
 
-DoubleProperty::DoubleProperty(Property::PropertyInfo info, double value,
-                               double minValue, double maxValue, double stepValue)
-    : NumericalProperty<double>(std::move(info), value, minValue, maxValue, stepValue)
-{}
+namespace openspace {
 
-std::string DoubleProperty::className() const {
-    return "DoubleProperty";
-}
+/**
+ * This function takes a \p text and escapes all necessary characters () that JSON
+ * does not want in its strings.
+ * \param text The text that is to be escaped
+ * \return The same text with all required characteres escaped
+ */
+std::string escapedJson(const std::string& text);
 
-int DoubleProperty::typeLua() const {
-    return LUA_TNUMBER;
-}
+/**
+ * This function takes a \p list of text and escapes all necessary characters () that
+ * JSON does not want in its strings.
+ * \param text The list of text that is to be escaped
+ * \return The same text with all required characteres escaped
+ */
+std::string escapedJson(const std::vector<std::string>& list);
 
-double DoubleProperty::fromLuaConversion(lua_State* state, bool& success) const {
-    success = (lua_isnumber(state, -1) == 1);
-    if (success) {
-        double val = lua_tonumber(state, -1);
-        return val;
-    }
-    else {
-        return 0.0;
-    }
-}
+/**
+ * Convert the input value to a valid JSON formatted string. Nan and Inf values
+ * are not vald JSON and will be represented by 'null'
+ * \param d The value to format
+ * \return The resulting JSON formatted string
+ */
+std::string formatJsonNumber(double d);
 
-void DoubleProperty::toLuaConversion(lua_State* state) const {
-    lua_pushnumber(state, _value);
-}
+/**
+ * Convert the input value to a valid JSON formatted string
+ * \param value The value to be converted
+ * \return The resulting JSON formatted string
+ */
+template <typename T>
+std::string formatJson(T value);
 
-} // namespace openspace::properties
+} // namespace openspace
+
+#include "json_helper.inl"
+
+#endif // __OPENSPACE_CORE___JSON_HELPER___H__

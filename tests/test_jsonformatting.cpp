@@ -22,37 +22,47 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/properties/scalar/doubleproperty.h>
-#include <ghoul/lua/ghoul_lua.h>
+#include "catch2/catch.hpp"
 
-namespace openspace::properties {
+#include <openspace/json.h>
+#include <openspace/util/json_helper.h>
+#include <vector>
 
-DoubleProperty::DoubleProperty(Property::PropertyInfo info, double value,
-                               double minValue, double maxValue, double stepValue)
-    : NumericalProperty<double>(std::move(info), value, minValue, maxValue, stepValue)
-{}
+// Note: Dictionary formatting is tested in Ghoul
 
-std::string DoubleProperty::className() const {
-    return "DoubleProperty";
+TEMPLATE_TEST_CASE("FormatJson", "[formatjson]", glm::vec2, glm::vec3,
+    glm::vec4, glm::dvec2, glm::dvec3, glm::dvec4, glm::ivec2, glm::ivec3, glm::ivec4,
+    glm::uvec2, glm::uvec3, glm::uvec4, glm::mat2x2, glm::mat2x3, glm::mat2x4,
+    glm::mat3x2, glm::mat3x3, glm::mat3x4, glm::mat4x2, glm::mat4x3, glm::mat4x4,
+    glm::dmat2x2, glm::dmat2x3, glm::dmat2x4, glm::dmat3x2, glm::dmat3x3, glm::dmat3x4,
+    glm::dmat4x2, glm::dmat4x3, glm::dmat4x4)
+{
+    using T = TestType;
+
+    const T val(1);
+
+    std::string json = openspace::formatJson(val);
+
+    // Compare with Ghoul's Lua conversions. Note that Lua uses '{' for arrays,
+    // while we here expect '[' for all glm types
+    std::string luaValue = ghoul::to_string(val);
+    luaValue.replace(0, 1, "[");
+    luaValue.replace(luaValue.size() - 1, 1, "]");
+
+    REQUIRE(json == luaValue);
 }
 
-int DoubleProperty::typeLua() const {
-    return LUA_TNUMBER;
+TEST_CASE("FormatJson - Bool", "[formatjson]") {
+    bool trueVal = true;
+    bool falseVal = false;
+
+    REQUIRE(openspace::formatJson(trueVal) == "true");
+    REQUIRE(openspace::formatJson(falseVal) == "false");
 }
 
-double DoubleProperty::fromLuaConversion(lua_State* state, bool& success) const {
-    success = (lua_isnumber(state, -1) == 1);
-    if (success) {
-        double val = lua_tonumber(state, -1);
-        return val;
-    }
-    else {
-        return 0.0;
-    }
+TEST_CASE("FormatJson - Infinity & Nan", "[formatjson]") {
+    REQUIRE(openspace::formatJson(std::numeric_limits<double>::infinity()) == "null");
+    REQUIRE(openspace::formatJson(std::numeric_limits<double>::quiet_NaN()) == "null");
 }
 
-void DoubleProperty::toLuaConversion(lua_State* state) const {
-    lua_pushnumber(state, _value);
-}
-
-} // namespace openspace::properties
+// @TODO(emmbr 2021-04-29) Add more tests at some point, if we find it necessary
