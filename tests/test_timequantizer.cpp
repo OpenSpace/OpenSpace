@@ -148,6 +148,15 @@ TEST_CASE("TimeQuantizer: Test years resolution", "[timequantizer]") {
     singleTimeTest(testT, t1, true, "2028-12-08T23:59:59", "2025-12-09T00:00:00.000");
     singleTimeTest(testT, t1, true, "2028-12-09T00:00:01", "2028-12-09T00:00:00.000");
 
+    try {
+        t1.setStartEndRange("2020-02-29T00:00:00", "2030-02-29T00:00:00");
+    }
+    catch (const ghoul::RuntimeError& e) {
+        REQUIRE(e.message.find("Invalid start day value of 29 for the selected month "
+            "on a yearly increment, valid days are 1 - 28") != std::string::npos);
+    }
+    t1.setStartEndRange("2020-02-28T00:00:00", "2030-02-28T00:00:00");
+
     SpiceManager::deinitialize();
 }
 
@@ -216,7 +225,8 @@ TEST_CASE("TimeQuantizer: Test months resolution", "[timequantizer]") {
         t1.setStartEndRange("2017-01-30T00:00:00", "2020-09-01T00:00:00");
     }
     catch (const ghoul::RuntimeError& e) {
-        REQUIRE(e.message.find("Invalid start day value of 30 for day of month. Valid days are 1 - 28") != std::string::npos);
+        REQUIRE(e.message.find("Invalid start day value of 30 for monthly increment, "
+                               "valid days are 1 - 28") != std::string::npos);
     }
 
     t1.setStartEndRange("2016-01-17T00:00:00", "2020-09-01T00:00:00");
