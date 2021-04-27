@@ -371,17 +371,31 @@ void TimeQuantizer::setResolution(const std::string& resolutionString) {
 
 void TimeQuantizer::verifyStartTimeRestrictions() {
     //If monthly time resolution then restrict to 28 days so every month is consistent
-    unsigned int dayUpperLimit = (_resolutionUnit == 'M') ? 28 : 31;
+    unsigned int dayUpperLimit;
+    std::string helpfulDescription = "the selected month";
+    if (_resolutionUnit == 'M') {
+        dayUpperLimit = 28;
+        helpfulDescription = "monthly increment";
+    }
+    else if (_resolutionUnit == 'y') {
+        //Get month sizes using a fixed non-leap year
+        dayUpperLimit = monthSize(_start.month(), 2001);
+        helpfulDescription += " on a yearly increment";
+    }
+    else {
+        dayUpperLimit = 31;
+    }
     if (_start.day() < 1 || _start.day() > dayUpperLimit) {
         throw ghoul::RuntimeError(fmt::format(
-            "Invalid start day value of {} for day of month. Valid days are 1 - {}",
+            "Invalid start day value of {} for {}, valid days are 1 - {}",
             _start.day(),
+            helpfulDescription,
             dayUpperLimit
         ));
     }
     if (_start.hour() != 0 || _start.minute() != 0 || _start.second() != 0) {
         throw ghoul::RuntimeError(fmt::format(
-            "Invalid start time value of {}:{}:{}. Time must be 00:00:00",
+            "Invalid start time value of {}:{}:{}, time must be 00:00:00",
             _start.hour(), _start.minute(), _start.second()
         ));
     }
