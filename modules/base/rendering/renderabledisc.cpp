@@ -99,6 +99,7 @@ RenderableDisc::RenderableDisc(const ghoul::Dictionary& dictionary)
     _texturePath.onChange([&]() { _texture->loadFromFile(_texturePath); });
     addProperty(_texturePath);
 
+    _size.setViewOption(properties::Property::ViewOptions::Logarithmic);
     _size = p.size.value_or(_size);
     setBoundingSphere(_size);
     _size.onChange([&]() { _planeIsDirty = true; });
