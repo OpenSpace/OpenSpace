@@ -24,7 +24,7 @@ local initializeAndAddNodes = function()
   local iss = {
     Identifier = "ISS",
     Parent = transforms.EarthInertial.Identifier,
-    BoundingSphere = 30,
+    InteractionSphere = 30,
     Transform = {
       Translation = {
         Type = "TLETranslation",
@@ -60,6 +60,7 @@ local initializeAndAddNodes = function()
       Renderable = {
         Type = "RenderableModel",
         GeometryFile = models .. "/ISS.fbx",
+        ModelScale = "Centimeter",
         LightSources = {
           {
             Type = "SceneGraphLightSource",

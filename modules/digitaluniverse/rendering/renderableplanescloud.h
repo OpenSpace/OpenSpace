@@ -80,6 +80,7 @@ private:
         Gigaparsec = 5,
         GigalightYears = 6
     };
+    double unitToMeter(Unit unit) const;
 
     struct PlaneAggregate {
         int textureIndex;

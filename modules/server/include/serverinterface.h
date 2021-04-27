@@ -27,8 +27,8 @@
 
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/stringproperty.h>
-#include <openspace/properties/stringlistproperty.h>
 #include <openspace/properties/optionproperty.h>
+#include <openspace/properties/list/stringlistproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 

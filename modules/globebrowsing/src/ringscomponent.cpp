@@ -867,4 +867,8 @@ bool RingsComponent::isEnabled() const {
     return _enabled;
 }
 
+double RingsComponent::size() const {
+    return _size;
+}
+
 } // namespace openspace

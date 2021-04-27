@@ -39,10 +39,12 @@ uniform mat4 modelViewTransform;
 uniform mat4 projectionTransform;
 uniform vec3 cameraDirectionWorldSpace;
 uniform float _magnification;
+uniform mat4 meshTransform;
+uniform mat4 meshNormalTransform;
 
 
 void main() {
-    vec4 position = in_position; // Position already in homogenous coordinates
+    vec4 position = meshTransform * in_position; // Position already in homogenous coordinates
     position.xyz *= pow(10, _magnification);
     vs_positionCameraSpace = modelViewTransform * position;
     vec4 positionClipSpace = projectionTransform * vs_positionCameraSpace;
@@ -52,5 +54,5 @@ void main() {
     gl_Position = vs_positionScreenSpace;
     
     // The normal transform should be the transposed inverse of the model transform?
-    vs_normalViewSpace = normalize(mat3(modelViewTransform) * in_normal);
+    vs_normalViewSpace = normalize(mat3(modelViewTransform) * (mat3(meshNormalTransform) * in_normal));
 }

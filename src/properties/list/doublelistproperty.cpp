@@ -22,30 +22,35 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/properties/stringlistproperty.h>
-
-#include <ghoul/lua/ghoul_lua.h>
-#include <ghoul/misc/misc.h>
-#include <numeric>
+#include <openspace/properties/list/doublelistproperty.h>
 
 #include <openspace/json.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/misc/misc.h>
 
 namespace {
 
-std::vector<std::string> fromLuaConversion(lua_State* state, bool& success) {
+constexpr const char* _loggerCat = "DoubleListProperty";
+
+std::vector<double> fromLuaConversion(lua_State* state, bool& success) {
     if (!lua_istable(state, -1)) {
         success = false;
+        LERROR("Conversion from Lua failed. The input was not a table");
         return {};
     }
 
-    std::vector<std::string> result;
+    std::vector<double> result;
     lua_pushnil(state);
     while (lua_next(state, -2) != 0) {
-        if (lua_isstring(state, -1)) {
-            result.emplace_back(lua_tostring(state, -1));
+        if (lua_isnumber(state, -1)) {
+            result.emplace_back(lua_tonumber(state, -1));
         }
         else {
             success = false;
+            LERROR(
+                "Conversion from Lua failed. The input table contains non-number values"
+            );
             return {};
         }
         lua_pop(state, 1);
@@ -54,13 +59,13 @@ std::vector<std::string> fromLuaConversion(lua_State* state, bool& success) {
     return result;
 }
 
-bool toLuaConversion(lua_State* state, std::vector<std::string> val) {
+bool toLuaConversion(lua_State* state, std::vector<double> val) {
     lua_createtable(state, static_cast<int>(val.size()), 0);
 
     int i = 1;
-    for (std::string& v : val) {
-        lua_pushnumber(state, i);
-        lua_pushstring(state, v.c_str());
+    for (int v : val) {
+        lua_pushinteger(state, i);
+        lua_pushinteger(state, v);
         lua_settable(state, -3);
         ++i;
     }
@@ -68,42 +73,9 @@ bool toLuaConversion(lua_State* state, std::vector<std::string> val) {
     return true;
 }
 
-std::vector<std::string> fromStringConversion(const std::string& val, bool& success) {
-    std::vector<std::string> tokens = ghoul::tokenizeString(val, ',');
-    for (std::string& token : tokens) {
-        // Each incoming string is of the form "value"
-        // so we want to remove the leading and trailing " characters
-        if (token.size() > 2 && (token[0] == '"' && token[token.size() - 1] == '"')) {
-            token = token.substr(1, token.size() - 2);
-        }
-    }
-
-    success = true;
-    return tokens;
-}
-
-bool toStringConversion(std::string& outValue, const std::vector<std::string>& inValue) {
-    outValue = "[";
-    for (const std::string& v : inValue) {
-        std::string str;
-        nlohmann::json json;
-        nlohmann::to_json(json, v);
-        str = json.dump();
-        if (&v != &*inValue.cbegin()) {
-            outValue += ", ";
-        }
-        outValue += str;
-    }
-    outValue += "]";
-
-    // outValue = std::accumulate(
-    //     inValue.begin(),
-    //     inValue.end(),
-    //     std::string(""),
-    //     [](std::string lhs, std::string rhs) {
-    //         return lhs + "," + "\"" + rhs + "\"";
-    //     }
-    // );
+bool toStringConversion(std::string& outValue, const std::vector<double>& inValue) {
+    nlohmann::json json(inValue);
+    outValue = json.dump();
     return true;
 }
 
@@ -111,13 +83,20 @@ bool toStringConversion(std::string& outValue, const std::vector<std::string>& i
 
 namespace openspace::properties {
 
+DoubleListProperty::DoubleListProperty(Property::PropertyInfo info)
+    : ListProperty(std::move(info))
+{}
+
+DoubleListProperty::DoubleListProperty(Property::PropertyInfo info, std::vector<double> values)
+    : ListProperty(std::move(info), std::move(values))
+{}
+
 REGISTER_TEMPLATEPROPERTY_SOURCE(
-    StringListProperty,
-    std::vector<std::string>,
-    std::vector<std::string>(),
+    DoubleListProperty,
+    std::vector<double>,
+    std::vector<double>(),
     fromLuaConversion,
     toLuaConversion,
-    fromStringConversion,
     toStringConversion,
     LUA_TTABLE
 )
