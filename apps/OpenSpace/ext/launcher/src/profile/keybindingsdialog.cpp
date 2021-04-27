@@ -108,8 +108,8 @@ KeybindingsDialog::KeybindingsDialog(Profile& profile, QWidget *parent)
     transitionFromEditMode();
 }
 
-void KeybindingsDialog::appendScriptsToKeybind(const std::string& scripts) {
-    _scriptEdit->append(QString::fromStdString(scripts));
+void KeybindingsDialog::appendScriptsToKeybind(std::string scripts) {
+    _scriptEdit->append(QString::fromStdString(std::move(scripts)));
 }
 
 void KeybindingsDialog::createWidgets() {
@@ -525,7 +525,9 @@ void KeybindingsDialog::parseSelections() {
 
 void KeybindingsDialog::chooseScripts() {
     _errorMsg->clear();
-    ScriptlogDialog(this, this).exec();
+    ScriptlogDialog d(this);
+    connect(&d, &ScriptlogDialog::scriptsSelected, this, &KeybindingsDialog::appendScriptsToKeybind);
+    d.exec();
 }
 
 void KeybindingsDialog::keyPressEvent(QKeyEvent* evt) {

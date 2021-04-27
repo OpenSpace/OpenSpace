@@ -33,10 +33,8 @@
 #include <QTextStream>
 #include <QVBoxLayout>
 
-ScriptlogDialog::ScriptlogDialog(KeybindingsDialog* bindingDialog,
-                                                 QWidget* parent)
+ScriptlogDialog::ScriptlogDialog(QWidget* parent)
     : QDialog(parent)
-    , _bindingDialog(bindingDialog)
 {
     setWindowTitle("Scriptlog");
     createWidgets();
@@ -93,7 +91,7 @@ void ScriptlogDialog::saveChosenScripts() {
             chosenScripts += "\n";
         }
     }
-    _bindingDialog->appendScriptsToKeybind(chosenScripts);
+    emit scriptsSelected(chosenScripts);
 
     accept();
 }
