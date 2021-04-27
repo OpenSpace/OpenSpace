@@ -230,7 +230,7 @@ bool SessionRecording::startRecording(const std::string& filename) {
 
         //Record the current delta time as the first property to save in the file.
         //This needs to be saved as a baseline whether or not it changes during recording.
-        Timestamps timestampsRecStarted = {
+        _timestamps3RecordStarted = {
             _timestampRecordStarted,
             0.0,
             global::timeManager->time().j2000Seconds()
@@ -261,14 +261,13 @@ void SessionRecording::stopRecording() {
     if (_state == SessionState::Recording) {
         //Add all property baseline scripts to the beginning of the recording file
         datamessagestructures::ScriptMessage smTmp;
-        Timestamps timeRecStart = generateCurrentTimestamp3(_timestampRecordStarted);
         for (timelineEntry initPropScripts : _keyframesSavePropertiesBaseline_timeline) {
             if (initPropScripts.keyframeType == RecordedType::Script) {
                 smTmp._script = _keyframesSavePropertiesBaseline_scripts
                     [initPropScripts.idxIntoKeyframeTypeArray];
                 saveSingleKeyframeScript(
                     smTmp,
-                    timeRecStart,
+                    _timestamps3RecordStarted,
                     _recordingDataMode,
                     _recordFile,
                     _keyframeBuffer
@@ -452,7 +451,6 @@ bool SessionRecording::startPlayback(std::string& filename,
     _loadedNodes.clear();
     populateListofLoadedSceneGraphNodes();
 
-    _setSimulationTimeWithNextCameraKeyframe = forceSimTimeAtStart;
     if (!playbackAddEntriesToTimeline()) {
         cleanUpPlayback();
         return false;
@@ -462,6 +460,11 @@ bool SessionRecording::startPlayback(std::string& filename,
     if (!findFirstCameraKeyframeInTimeline()) {
         cleanUpPlayback();
         return false;
+    }
+    if (forceSimTimeAtStart) {
+        Timestamps times = _timeline[_idxTimeline_cameraFirstInTimeline].t3stamps;
+        global::timeManager->setTimeNextFrame(Time(times.timeSim));
+        _saveRenderingCurrentRecordedTime = times.timeRec;
     }
 
     LINFO(fmt::format(
@@ -1090,11 +1093,6 @@ bool SessionRecording::playbackCamera() {
         _playbackLineNum
     );
 
-    if (_setSimulationTimeWithNextCameraKeyframe) {
-        global::timeManager->setTimeNextFrame(Time(times.timeSim));
-        _setSimulationTimeWithNextCameraKeyframe = false;
-        _saveRenderingCurrentRecordedTime = times.timeRec;
-    }
     interaction::KeyframeNavigator::CameraPose pbFrame(std::move(kf));
     if (success) {
         success = addKeyframe(
@@ -1184,7 +1182,7 @@ bool SessionRecording::readCameraKeyframeBinary(Timestamps& times,
         ));
         return false;
     }
-    times.timeOs = kf._timestamp;
+    //times.timeOs = kf._timestamp;
 
     if (!file) {
         LINFO(fmt::format(

@@ -555,6 +555,7 @@ protected:
     };
     ExternInteraction _externInteract;
     double _timestampRecordStarted = 0.0;
+    Timestamps _timestamps3RecordStarted;
     double _timestampPlaybackStarted_application = 0.0;
     double _timestampPlaybackStarted_simulation = 0.0;
     double _timestampApplicationStarted_simulation = 0.0;
@@ -665,7 +666,6 @@ protected:
     bool _playbackActive_time = false;
     bool _playbackActive_script = false;
     bool _hasHitEndOfCameraKeyframes = false;
-    bool _setSimulationTimeWithNextCameraKeyframe = false;
     bool _playbackStartedPaused = false;
     double _playbackPauseOffset = 0.0;
     double _previousTime = 0.0;
@@ -702,6 +702,7 @@ protected:
         "NavigationHandler.OrbitalNavigator.RetargetAnchor",
         "NavigationHandler.OrbitalNavigator.RetargetAim"
     };
+    //A script that begins with an exact match of any of the strings contained in _scriptRejects will not be recorded
     const std::vector<std::string> _scriptRejects = {
         "openspace.sessionRecording",
         "openspace.scriptScheduler.clear",
