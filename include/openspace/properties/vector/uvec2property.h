@@ -39,9 +39,6 @@ public:
         glm::uvec2 maxValue = glm::uvec2(std::numeric_limits<unsigned int>::max()),
         glm::uvec2 stepValue = glm::uvec2(1));
 
-    UVec2Property(Property::PropertyInfo info, glm::uvec2 value, glm::uvec2 minValue,
-        glm::uvec2 maxValue, glm::uvec2 stepValue, float exponent);
-
     std::string className() const override;
     int typeLua() const override;
 

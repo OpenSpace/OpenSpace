@@ -51,9 +51,6 @@ public:
         double minValue = std::numeric_limits<double>::lowest(),
         double maxValue = std::numeric_limits<double>::max(), double stepValue = 0.01);
 
-    DoubleProperty(Property::PropertyInfo info, double value, double minValue,
-        double maxValue, double stepValue, float exponent);
-
     std::string className() const override;
     int typeLua() const override;
 

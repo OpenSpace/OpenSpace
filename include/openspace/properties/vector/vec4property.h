@@ -39,9 +39,6 @@ public:
         glm::vec4 maxValue = glm::vec4(std::numeric_limits<float>::max()),
         glm::vec4 stepValue = glm::vec4(0.01f));
 
-    Vec4Property(Property::PropertyInfo info, glm::vec4 value, glm::vec4 minValue,
-        glm::vec4 maxValue, glm::vec4 stepValue, float exponent);
-
     std::string className() const override;
     int typeLua() const override;
 

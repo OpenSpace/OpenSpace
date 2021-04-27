@@ -39,9 +39,6 @@ public:
         glm::dvec2 maxValue = glm::dvec2(std::numeric_limits<double>::max()),
         glm::dvec2 stepValue = glm::dvec2(0.01));
 
-    DVec2Property(Property::PropertyInfo info, glm::dvec2 value, glm::dvec2 minValue,
-        glm::dvec2 maxValue, glm::dvec2 stepValue, float exponent);
-
     std::string className() const override;
     int typeLua() const override;
 

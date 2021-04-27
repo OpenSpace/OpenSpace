@@ -52,9 +52,6 @@ public:
         unsigned int maxValue = std::numeric_limits<unsigned int>::max(),
         unsigned int stepValue = 1);
 
-    UIntProperty(Property::PropertyInfo info, unsigned int value, unsigned int minValue,
-        unsigned int maxValue, unsigned int stepValue, float exponent);
-
     std::string className() const override;
     int typeLua() const override;
 

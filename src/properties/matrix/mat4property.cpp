@@ -40,19 +40,6 @@ Mat4Property::Mat4Property(Property::PropertyInfo info, glm::mat4x4 value,
     )
 {}
 
-Mat4Property::Mat4Property(Property::PropertyInfo info, glm::mat4x4 value,
-                           glm::mat4x4 minValue, glm::mat4x4 maxValue,
-                           glm::mat4x4 stepValue, float exponent)
-    : NumericalProperty<glm::mat4x4>(
-        std::move(info),
-        std::move(value),
-        std::move(minValue),
-        std::move(maxValue),
-        std::move(stepValue),
-        exponent
-    )
-{}
-
 std::string Mat4Property::className() const {
     return "Mat4Property";
 }

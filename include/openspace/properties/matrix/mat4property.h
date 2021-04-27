@@ -41,9 +41,6 @@ public:
             ghoul::createFillMat4x4<float>(std::numeric_limits<float>::max()),
         glm::mat4x4 stepValue = ghoul::createFillMat4x4<float>(0.01f));
 
-    Mat4Property(Property::PropertyInfo info, glm::mat4x4 value, glm::mat4x4 minValue,
-        glm::mat4x4 maxValue, glm::mat4x4 stepValue, float exponent);
-
     std::string className() const override;
     int typeLua() const override;
 

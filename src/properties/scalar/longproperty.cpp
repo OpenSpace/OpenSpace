@@ -32,18 +32,6 @@ LongProperty::LongProperty(Property::PropertyInfo info, long value,
     : NumericalProperty<long>(std::move(info), value, minValue, maxValue, stepValue)
 {}
 
-LongProperty::LongProperty(Property::PropertyInfo info, long value, long minValue,
-                           long maxValue, long stepValue, float exponent)
-    : NumericalProperty<long>(
-        std::move(info),
-        value,
-        minValue,
-        maxValue,
-        stepValue,
-        exponent
-    )
-{}
-
 std::string LongProperty::className() const {
     return "LongProperty";
 }

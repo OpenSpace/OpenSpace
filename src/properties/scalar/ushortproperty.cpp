@@ -39,19 +39,6 @@ UShortProperty::UShortProperty(Property::PropertyInfo info, unsigned short value
     )
 {}
 
-UShortProperty::UShortProperty(Property::PropertyInfo info, unsigned short value,
-                               unsigned short minValue, unsigned short maxValue,
-                               unsigned short stepValue, float exponent)
-    : NumericalProperty<unsigned short>(
-        std::move(info),
-        value,
-        minValue,
-        maxValue,
-        stepValue,
-        exponent
-    )
-{}
-
 std::string UShortProperty::className() const {
     return "UShortProperty";
 }

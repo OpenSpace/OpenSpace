@@ -39,19 +39,6 @@ UIntProperty::UIntProperty(Property::PropertyInfo info, unsigned int value,
     )
 {}
 
-UIntProperty::UIntProperty(Property::PropertyInfo info, unsigned int value,
-                           unsigned int minValue, unsigned int maxValue,
-                           unsigned int stepValue, float exponent)
-    : NumericalProperty<unsigned int>(
-        std::move(info),
-        value,
-        minValue,
-        maxValue,
-        stepValue,
-        exponent
-    )
-{}
-
 std::string UIntProperty::className() const {
     return "UIntProperty";
 }

@@ -40,19 +40,6 @@ Mat3Property::Mat3Property(Property::PropertyInfo info, glm::mat3x3 value,
     )
 {}
 
-Mat3Property::Mat3Property(Property::PropertyInfo info, glm::mat3x3 value,
-                           glm::mat3x3 minValue, glm::mat3x3 maxValue,
-                           glm::mat3x3 stepValue, float exponent)
-    : NumericalProperty<glm::mat3x3>(
-        std::move(info),
-        std::move(value),
-        std::move(minValue),
-        std::move(maxValue),
-        std::move(stepValue),
-        exponent
-    )
-{}
-
 std::string Mat3Property::className() const {
     return "Mat3Property";
 }

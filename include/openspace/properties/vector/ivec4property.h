@@ -39,9 +39,6 @@ public:
         glm::ivec4 maxValue = glm::ivec4(std::numeric_limits<int>::max()),
         glm::ivec4 stepValue = glm::ivec4(1));
 
-    IVec4Property(Property::PropertyInfo info, glm::ivec4 value, glm::ivec4 minValue,
-        glm::ivec4 maxValue, glm::ivec4 stepValue, float exponent);
-
     std::string className() const override;
     int typeLua() const override;
 

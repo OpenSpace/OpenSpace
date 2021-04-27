@@ -40,19 +40,6 @@ IVec4Property::IVec4Property(Property::PropertyInfo info, glm::ivec4 value,
     )
 {}
 
-IVec4Property::IVec4Property(Property::PropertyInfo info, glm::ivec4 value,
-                             glm::ivec4 minValue, glm::ivec4 maxValue,
-                             glm::ivec4 stepValue, float exponent)
-    : NumericalProperty<glm::ivec4>(
-        std::move(info),
-        std::move(value),
-        std::move(minValue),
-        std::move(maxValue),
-        std::move(stepValue),
-        exponent
-    )
-{}
-
 std::string IVec4Property::className() const {
     return "IVec4Property";
 }

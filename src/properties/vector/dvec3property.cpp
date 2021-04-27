@@ -40,19 +40,6 @@ DVec3Property::DVec3Property(Property::PropertyInfo info, glm::dvec3 value,
     )
 {}
 
-DVec3Property::DVec3Property(Property::PropertyInfo info, glm::dvec3 value,
-                             glm::dvec3 minValue, glm::dvec3 maxValue,
-                             glm::dvec3 stepValue, float exponent)
-    : NumericalProperty<glm::dvec3>(
-        std::move(info),
-        std::move(value),
-        std::move(minValue),
-        std::move(maxValue),
-        std::move(stepValue),
-        exponent
-    )
-{}
-
 std::string DVec3Property::className() const {
     return "DVec3Property";
 }

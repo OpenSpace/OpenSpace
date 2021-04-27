@@ -51,9 +51,6 @@ public:
         float minValue = std::numeric_limits<float>::lowest(),
         float maxValue = std::numeric_limits<float>::max(), float stepValue = 0.01f);
 
-    FloatProperty(Property::PropertyInfo info, float value, float minValue,
-        float maxValue, float stepValue, float exponent);
-
     std::string className() const override;
     int typeLua() const override;
 

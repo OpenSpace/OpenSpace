@@ -39,19 +39,6 @@ Vec2Property::Vec2Property(Property::PropertyInfo info, glm::vec2 value,
     )
 {}
 
-Vec2Property::Vec2Property(Property::PropertyInfo info, glm::vec2 value,
-                           glm::vec2 minValue, glm::vec2 maxValue, glm::vec2 stepValue,
-                           float exponent)
-    : NumericalProperty<glm::vec2>(
-        std::move(info),
-        std::move(value),
-        std::move(minValue),
-        std::move(maxValue),
-        std::move(stepValue),
-        exponent
-    )
-{}
-
 std::string Vec2Property::className() const {
     return "Vec2Property";
 }

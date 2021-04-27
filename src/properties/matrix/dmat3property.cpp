@@ -40,19 +40,6 @@ DMat3Property::DMat3Property(Property::PropertyInfo info, glm::dmat3x3 value,
     )
 {}
 
-DMat3Property::DMat3Property(Property::PropertyInfo info, glm::dmat3x3 value,
-                             glm::dmat3x3 minValue, glm::dmat3x3 maxValue,
-                             glm::dmat3x3 stepValue, float exponent)
-    : NumericalProperty<glm::dmat3x3>(
-        std::move(info),
-        std::move(value),
-        std::move(minValue),
-        std::move(maxValue),
-        std::move(stepValue),
-        exponent
-    )
-{}
-
 std::string DMat3Property::className() const {
     return "DMat3Property";
 }

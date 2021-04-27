@@ -52,10 +52,6 @@ public:
         long maxValue = std::numeric_limits<long>::max(),
         long stepValue = long(1));
 
-    LongProperty(Property::PropertyInfo info, long value,
-        long minValue, long maxValue, long stepValue,
-        float exponent);
-
     std::string className() const override;
     int typeLua() const override;
 

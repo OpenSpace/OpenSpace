@@ -52,10 +52,6 @@ public:
         unsigned long maxValue = std::numeric_limits<unsigned long>::max(),
         unsigned long stepValue = 1ul);
 
-    ULongProperty(Property::PropertyInfo info, unsigned long value,
-        unsigned long minValue, unsigned long maxValue, unsigned long stepValue,
-        float exponent);
-
     std::string className() const override;
     int typeLua() const override;
 

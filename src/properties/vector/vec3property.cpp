@@ -39,19 +39,6 @@ Vec3Property::Vec3Property(Property::PropertyInfo info, glm::vec3 value,
     )
 {}
 
-Vec3Property::Vec3Property(Property::PropertyInfo info, glm::vec3 value,
-                           glm::vec3 minValue, glm::vec3 maxValue, glm::vec3 stepValue,
-                           float exponent)
-    : NumericalProperty<glm::vec3>(
-        std::move(info),
-        std::move(value),
-        std::move(minValue),
-        std::move(maxValue),
-        std::move(stepValue),
-        exponent
-    )
-{}
-
 std::string Vec3Property::className() const {
     return "Vec3Property";
 }

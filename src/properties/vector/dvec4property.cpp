@@ -40,19 +40,6 @@ DVec4Property::DVec4Property(Property::PropertyInfo info, glm::dvec4 value,
     )
 {}
 
-DVec4Property::DVec4Property(Property::PropertyInfo info, glm::dvec4 value,
-                             glm::dvec4 minValue, glm::dvec4 maxValue,
-                             glm::dvec4 stepValue, float exponent)
-    : NumericalProperty<glm::dvec4>(
-        std::move(info),
-        std::move(value),
-        std::move(minValue),
-        std::move(maxValue),
-        std::move(stepValue),
-        exponent
-    )
-{}
-
 std::string DVec4Property::className() const {
     return "DVec4Property";
 }

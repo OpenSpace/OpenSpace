@@ -39,9 +39,6 @@ public:
         glm::dvec4 maxValue = glm::dvec4(std::numeric_limits<double>::max()),
         glm::dvec4 stepValue = glm::dvec4(0.01));
 
-    DVec4Property(Property::PropertyInfo info, glm::dvec4 value, glm::dvec4 minValue,
-        glm::dvec4 maxValue, glm::dvec4 stepValue, float exponent);
-
     std::string className() const override;
     int typeLua() const override;
 

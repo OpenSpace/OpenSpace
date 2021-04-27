@@ -40,19 +40,6 @@ UVec2Property::UVec2Property(Property::PropertyInfo info, glm::uvec2 value,
     )
 {}
 
-UVec2Property::UVec2Property(Property::PropertyInfo info, glm::uvec2 value,
-                             glm::uvec2 minValue, glm::uvec2 maxValue,
-                             glm::uvec2 stepValue, float exponent)
-    : NumericalProperty<glm::uvec2>(
-        std::move(info),
-        std::move(value),
-        std::move(minValue),
-        std::move(maxValue),
-        std::move(stepValue),
-        exponent
-    )
-{}
-
 std::string UVec2Property::className() const {
     return "UVec2Property";
 }

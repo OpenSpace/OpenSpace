@@ -39,19 +39,6 @@ Vec4Property::Vec4Property(Property::PropertyInfo info, glm::vec4 value,
     )
 {}
 
-Vec4Property::Vec4Property(Property::PropertyInfo info, glm::vec4 value,
-                           glm::vec4 minValue, glm::vec4 maxValue, glm::vec4 stepValue,
-                           float exponent)
-    : NumericalProperty<glm::vec4>(
-        std::move(info),
-        std::move(value),
-        std::move(minValue),
-        std::move(maxValue),
-        std::move(stepValue),
-        exponent
-    )
-{}
-
 std::string Vec4Property::className() const {
     return "Vec4Property";
 }

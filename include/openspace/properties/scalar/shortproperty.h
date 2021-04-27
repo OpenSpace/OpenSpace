@@ -52,9 +52,6 @@ public:
         short maxValue = std::numeric_limits<short>::max(),
         short stepValue = short(1));
 
-    ShortProperty(Property::PropertyInfo info, short value, short minValue,
-        short maxValue, short stepValue, float exponent);
-
     std::string className() const override;
     int typeLua() const override;
 

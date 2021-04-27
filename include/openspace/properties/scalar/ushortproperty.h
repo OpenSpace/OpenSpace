@@ -52,10 +52,6 @@ public:
         unsigned short maxValue = std::numeric_limits<unsigned short>::max(),
         unsigned short stepValue = 1);
 
-    UShortProperty(Property::PropertyInfo info, unsigned short value,
-        unsigned short minValue, unsigned short maxValue, unsigned short stepValue,
-        float exponent);
-
     std::string className() const override;
     int typeLua() const override;
 

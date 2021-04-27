@@ -32,18 +32,6 @@ DoubleProperty::DoubleProperty(Property::PropertyInfo info, double value,
     : NumericalProperty<double>(std::move(info), value, minValue, maxValue, stepValue)
 {}
 
-DoubleProperty::DoubleProperty(Property::PropertyInfo info, double value, double minValue,
-                               double maxValue, double stepValue, float exponent)
-    : NumericalProperty<double>(
-        std::move(info),
-        value,
-        minValue,
-        maxValue,
-        stepValue,
-        exponent
-    )
-{}
-
 std::string DoubleProperty::className() const {
     return "DoubleProperty";
 }

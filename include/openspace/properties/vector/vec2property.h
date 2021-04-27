@@ -39,9 +39,6 @@ public:
         glm::vec2 maxValue = glm::vec2(std::numeric_limits<float>::max()),
         glm::vec2 stepValue = glm::vec2(0.01f));
 
-    Vec2Property(Property::PropertyInfo info, glm::vec2 value, glm::vec2 minValue,
-        glm::vec2 maxValue, glm::vec2 stepValue, float exponent);
-
     std::string className() const override;
     int typeLua() const override;
 

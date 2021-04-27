@@ -32,18 +32,6 @@ ShortProperty::ShortProperty(Property::PropertyInfo info, short value, short min
     : NumericalProperty<short>(std::move(info), value, minValue, maxValue, stepValue)
 {}
 
-ShortProperty::ShortProperty(Property::PropertyInfo info, short value, short minValue,
-                             short maxValue, short stepValue, float exponent)
-    : NumericalProperty<short>(
-        std::move(info),
-        value,
-        minValue,
-        maxValue,
-        stepValue,
-        exponent
-    )
-{}
-
 std::string ShortProperty::className() const {
     return "ShortProperty";
 }

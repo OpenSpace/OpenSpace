@@ -41,9 +41,6 @@ public:
             ghoul::createFillMat3x3<float>(std::numeric_limits<float>::max()),
         glm::mat3x3 stepValue = ghoul::createFillMat3x3<float>(0.01f));
 
-    Mat3Property(Property::PropertyInfo info, glm::mat3x3 value, glm::mat3x3 minValue,
-        glm::mat3x3 maxValue, glm::mat3x3 stepValue, float exponent);
-
     std::string className() const override;
     int typeLua() const override;
 

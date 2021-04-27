@@ -40,19 +40,6 @@ Mat2Property::Mat2Property(Property::PropertyInfo info, glm::mat2x2 value,
     )
 {}
 
-Mat2Property::Mat2Property(Property::PropertyInfo info, glm::mat2x2 value,
-                           glm::mat2x2 minValue, glm::mat2x2 maxValue,
-                           glm::mat2x2 stepValue, float exponent)
-    : NumericalProperty<glm::mat2x2>(
-        std::move(info),
-        std::move(value),
-        std::move(minValue),
-        std::move(maxValue),
-        std::move(stepValue),
-        exponent
-    )
-{}
-
 std::string Mat2Property::className() const {
     return "Mat2Property";
 }

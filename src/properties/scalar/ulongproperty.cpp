@@ -39,19 +39,6 @@ ULongProperty::ULongProperty(Property::PropertyInfo info, unsigned long value,
     )
 {}
 
-ULongProperty::ULongProperty(Property::PropertyInfo info, unsigned long value,
-                             unsigned long minValue, unsigned long maxValue,
-                             unsigned long stepValue, float exponent)
-    : NumericalProperty<unsigned long>(
-        std::move(info),
-        value,
-        minValue,
-        maxValue,
-        stepValue,
-        exponent
-    )
-{}
-
 std::string ULongProperty::className() const {
     return "ULongProperty";
 }

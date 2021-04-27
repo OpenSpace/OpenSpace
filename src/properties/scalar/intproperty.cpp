@@ -32,18 +32,6 @@ IntProperty::IntProperty(Property::PropertyInfo info, int value,
     : NumericalProperty<int>(std::move(info), value, minValue, maxValue, stepValue)
 {}
 
-IntProperty::IntProperty(Property::PropertyInfo info, int value, int minValue,
-                         int maxValue, int stepValue, float exponent)
-    : NumericalProperty<int>(
-        std::move(info),
-        value,
-        minValue,
-        maxValue,
-        stepValue,
-        exponent
-    )
-{}
-
 std::string IntProperty::className() const {
     return "IntProperty";
 }

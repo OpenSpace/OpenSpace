@@ -32,18 +32,6 @@ FloatProperty::FloatProperty(Property::PropertyInfo info, float value,
     : NumericalProperty<float>(std::move(info), value, minValue, maxValue, stepValue)
 {}
 
-FloatProperty::FloatProperty(Property::PropertyInfo info, float value, float minValue,
-                             float maxValue, float stepValue, float exponent)
-    : NumericalProperty<float>(
-        std::move(info),
-        value,
-        minValue,
-        maxValue,
-        stepValue,
-        exponent
-    )
-{}
-
 std::string FloatProperty::className() const {
     return "FloatProperty";
 }

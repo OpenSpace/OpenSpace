@@ -41,9 +41,6 @@ public:
             ghoul::createFillMat2x2<double>(std::numeric_limits<double>::max()),
         glm::dmat2x2 stepValue = ghoul::createFillMat2x2<double>(0.01));
 
-    DMat2Property(Property::PropertyInfo info, glm::dmat2x2 value, glm::dmat2x2 minValue,
-        glm::dmat2x2 maxValue, glm::dmat2x2 stepValue, float exponent);
-
     std::string className() const override;
     int typeLua() const override;
 
