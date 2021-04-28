@@ -58,6 +58,7 @@ StaticTranslation::StaticTranslation()
         glm::dvec3(std::numeric_limits<double>::max())
     )
 {
+    _position.setViewOption(properties::Property::ViewOptions::Logarithmic);
     addProperty(_position);
 
     _position.onChange([this]() {

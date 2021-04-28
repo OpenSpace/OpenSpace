@@ -544,12 +544,12 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     if (p.radii.has_value()) {
         if (std::holds_alternative<glm::dvec3>(*p.radii)) {
             _ellipsoid = Ellipsoid(std::get<glm::dvec3>(*p.radii));
-            setBoundingSphere(static_cast<float>(_ellipsoid.maximumRadius()));
+            setBoundingSphere(_ellipsoid.maximumRadius());
         }
         else if (std::holds_alternative<double>(*p.radii)) {
             const double radius = std::get<double>(*p.radii);
             _ellipsoid = Ellipsoid({ radius, radius, radius });
-            setBoundingSphere(static_cast<float>(_ellipsoid.maximumRadius()));
+            setBoundingSphere(_ellipsoid.maximumRadius());
         }
         else {
             throw ghoul::MissingCaseException();
@@ -843,9 +843,14 @@ void RenderableGlobe::update(const UpdateData& data) {
         );
     }
 
-    setBoundingSphere(static_cast<float>(
-        _ellipsoid.maximumRadius() * glm::compMax(data.modelTransform.scale)
-    ));
+    double bs = _ellipsoid.maximumRadius() * glm::compMax(data.modelTransform.scale);
+    if (_hasRings) {
+        const double ringSize = _ringsComponent.size();
+        if (ringSize > bs) {
+            bs = ringSize;
+        }
+    }
+    setBoundingSphere(bs);
 
     glm::dmat4 translation =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation);
@@ -1831,7 +1836,7 @@ SurfacePositionHandle RenderableGlobe::calculateSurfacePositionHandle(
     double heightToSurface = getHeight(targetModelSpace);
     heightToSurface = glm::isnan(heightToSurface) ? 0.0 : heightToSurface;
     centerToEllipsoidSurface = glm::isnan(glm::length(centerToEllipsoidSurface)) ?
-        (glm::dvec3(0.0, 1.0, 0.0) * static_cast<double>(boundingSphere())) :
+        (glm::dvec3(0.0, 1.0, 0.0) * interactionSphere()) :
         centerToEllipsoidSurface;
     ellipsoidSurfaceOutDirection = glm::isnan(glm::length(ellipsoidSurfaceOutDirection)) ?
         glm::dvec3(0.0, 1.0, 0.0) : ellipsoidSurfaceOutDirection;

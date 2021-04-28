@@ -71,6 +71,7 @@ public:
     static documentation::Documentation Documentation();
 
     bool isEnabled() const;
+    double size() const;
 
 private:
     void loadTexture();

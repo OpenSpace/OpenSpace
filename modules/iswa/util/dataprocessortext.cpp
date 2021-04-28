@@ -142,6 +142,10 @@ std::vector<float*> DataProcessorText::processData(const std::string& data,
                                                    properties::SelectionProperty& options,
                                                                  glm::size3_t& dimensions)
 {
+    // The update of the selection properties broke this and we don't have the data to
+    // actually test whether this update works. So if you are getting a crash around here
+    // this is why
+
     if (data.empty()) {
         return std::vector<float*>();
     }
@@ -149,11 +153,20 @@ std::vector<float*> DataProcessorText::processData(const std::string& data,
     std::string line;
     std::stringstream memorystream(data);
 
-    const std::vector<int>& selectedOptions = options.value();
+    const std::set<std::string>& selectedOptions = options.value();
+    const std::vector<std::string>& allOptions = options.options();
+    std::vector<int> selectedOptionsIndices;
 
     std::vector<float*> dataOptions(options.options().size(), nullptr);
-    for (int o : selectedOptions) {
-        dataOptions[o] = new float[dimensions.x * dimensions.y] { 0.f };
+    for (const std::string& o : selectedOptions) {
+        auto it = std::find(allOptions.begin(), allOptions.end(), o);
+        ghoul_assert(
+            it != allOptions.end(),
+            "Selected option must be in list of all options"
+        );
+        int idx = static_cast<int>(std::distance(allOptions.begin(), it));
+        selectedOptionsIndices.push_back(idx);
+        dataOptions[idx] = new float[dimensions.x * dimensions.y] { 0.f };
     }
 
     int numValues = 0;
@@ -172,11 +185,11 @@ std::vector<float*> DataProcessorText::processData(const std::string& data,
             last = (last > 0)? last : lineSize;
 
             const auto it = std::find(
-                selectedOptions.begin(),
-                selectedOptions.end(),
+                selectedOptionsIndices.begin(),
+                selectedOptionsIndices.end(),
                 option
             );
-            if (option >= 0 && it != selectedOptions.end()) {
+            if (option >= 0 && it != selectedOptionsIndices.end()) {
                 const float value = std::stof(line.substr(first, last));
                 dataOptions[option][numValues] = processDataPoint(value, option);
             }
@@ -187,9 +200,10 @@ std::vector<float*> DataProcessorText::processData(const std::string& data,
         numValues++;
     }
 
-    calculateFilterValues(selectedOptions);
+    calculateFilterValues(selectedOptionsIndices);
 
     return dataOptions;
+//#endif
 }
 
 } //namespace openspace

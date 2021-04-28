@@ -690,7 +690,7 @@ void RenderableModel::update(const UpdateData& data) {
         switch (_animationMode) {
             case AnimationMode::LoopFromStart:
                 // Start looping from the start time
-                // s////
+                // s//// ...
                 relativeTime = std::fmod(now - startTime, duration);
                 break;
             case AnimationMode::LoopInfinitely:
@@ -699,7 +699,7 @@ void RenderableModel::update(const UpdateData& data) {
                 // true modulo function, it just calculates the remainder of the division
                 // which can be negative. To make it true modulo it is bumped up to
                 // positive values when it is negative
-                // //s//
+                // //s// ...
                 relativeTime = std::fmod(now - startTime, duration);
                 if (relativeTime < 0.0) {
                     relativeTime += duration;
@@ -711,14 +711,14 @@ void RenderableModel::update(const UpdateData& data) {
                 // goes back to its initial position before starting again. Avoids a
                 // visible jump from the last position to the first position when loop
                 // starts again
-                // s/\/\/\/\ 
+                // s/\/\/\/\ ...
                 relativeTime =
                     duration - abs(fmod(now - startTime, 2 * duration) - duration);
                 break;
             case AnimationMode::BounceInfinitely: {
                 // Bounce both before and after the start time where the model is
                 // in the initial position at the start time
-                // /\/\s/\/\ 
+                // /\/\s/\/\ ...
                 double modulo = fmod(now - startTime, 2 * duration);
                 if (modulo < 0.0) {
                     modulo += 2 * duration;

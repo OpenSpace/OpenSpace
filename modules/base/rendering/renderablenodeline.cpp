@@ -127,6 +127,7 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
     addProperty(_end);
 
     _lineColor = p.color.value_or(_lineColor);
+    _lineColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_lineColor);
 
     _lineWidth = p.lineWidth.value_or(_lineWidth);
