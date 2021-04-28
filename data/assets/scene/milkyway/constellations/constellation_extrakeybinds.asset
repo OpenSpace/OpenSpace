@@ -1,7 +1,6 @@
 local scene_helper = asset.require('util/scene_helper')
 
 local Keybindings = {
-
   {
     Key = "v",
     Name = "Show Constellation Art",
