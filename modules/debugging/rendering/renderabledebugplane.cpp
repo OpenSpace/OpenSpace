@@ -116,12 +116,13 @@ RenderableDebugPlane::RenderableDebugPlane(const ghoul::Dictionary& dictionary)
 
     _texture = p.texture.value_or(_texture);
     addProperty(_texture);
-    
+
+    _size.setViewOption(properties::Property::ViewOptions::Logarithmic);
     _size.onChange([this](){ _planeIsDirty = true; });
     _size = p.size.value_or(_size);
     setBoundingSphere(_size);
     addProperty(_size);
-    
+
     _billboard = p.billboard.value_or(_billboard);
     addProperty(_billboard);
 

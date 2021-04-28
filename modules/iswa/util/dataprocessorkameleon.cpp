@@ -80,15 +80,14 @@ void DataProcessorKameleon::addDataValues(const std::string& path,
 
     std::vector<float> sum(numOptions, 0.f);
     std::vector<std::vector<float>> optionValues(numOptions, std::vector<float>());
-    const std::vector<properties::SelectionProperty::Option>& options =
-                                                                    dataOptions.options();
+    const std::vector<std::string>& options = dataOptions.options();
 
     const int numValues = static_cast<int>(_dimensions.x * _dimensions.y * _dimensions.z);
 
     for (int i = 0; i < numOptions; ++i) {
         //0.5 to gather interesting values for the normalization/histograms.
         float* values = _kw->uniformSliceValues(
-            options[i].description,
+            options[i],
             _dimensions,
             0.5f
         );
@@ -120,17 +119,22 @@ std::vector<float*> DataProcessorKameleon::processData(const std::string& path,
         initializeKameleonWrapper(path);
     }
 
-    const std::vector<int>& selectedOptions = optionProp;
-
-    const std::vector<properties::SelectionProperty::Option>& options =
-        optionProp.options();
+    const std::set<std::string>& selectedOptions = optionProp;
+    const std::vector<std::string>& options = optionProp.options();
+    std::vector<int> selectedOptionsIndices;
+    for (const std::string& option : selectedOptions) {
+        auto it = std::find(options.begin(), options.end(), option);
+        ghoul_assert(it != options.end(), "Selected option must be in all options");
+        int idx = static_cast<int>(std::distance(options.begin(), it));
+        selectedOptionsIndices.push_back(idx);
+    }
 
     const int numValues = static_cast<int>(glm::compMul(dimensions));
 
     std::vector<float*> dataOptions(numOptions, nullptr);
-    for (int option : selectedOptions) {
+    for (int option : selectedOptionsIndices) {
         dataOptions[option] = _kw->uniformSliceValues(
-            options[option].description,
+            options[option],
             dimensions,
             _slice
         );
@@ -141,7 +145,7 @@ std::vector<float*> DataProcessorKameleon::processData(const std::string& path,
         }
     }
 
-    calculateFilterValues(selectedOptions);
+    calculateFilterValues(selectedOptionsIndices);
     return dataOptions;
 }
 

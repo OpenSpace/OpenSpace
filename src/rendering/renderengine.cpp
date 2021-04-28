@@ -1116,30 +1116,18 @@ void RenderEngine::takeScreenshot() {
     _latestScreenshotNumber = global::windowDelegate->takeScreenshot(_applyWarping);
 }
 
-/**
- * Get the latest screenshot filename
- */
 unsigned int RenderEngine::latestScreenshotNumber() const {
     return _latestScreenshotNumber;
 }
 
-/**
- * Set raycasting uniforms on the program object, and setup raycasting.
- */
 void RenderEngine::preRaycast(ghoul::opengl::ProgramObject& programObject) {
     _renderer->preRaycast(programObject);
 }
 
-/**
- * Tear down raycasting for the specified program object.
- */
 void RenderEngine::postRaycast(ghoul::opengl::ProgramObject& programObject) {
     _renderer->postRaycast(programObject);
 }
 
-/**
- * Set renderer
- */
 void RenderEngine::setRenderer(std::unique_ptr<Renderer> renderer) {
     ZoneScoped
 

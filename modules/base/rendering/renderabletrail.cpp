@@ -204,6 +204,7 @@ RenderableTrail::Appearance::Appearance()
         { RenderingModeLinesPoints, "Lines+Points" }
     });
 
+    lineColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(lineColor);
     addProperty(useLineFade);
     addProperty(lineFade);
