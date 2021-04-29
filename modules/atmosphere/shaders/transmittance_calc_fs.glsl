@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,7 +35,7 @@ out vec4 renderTableColor;
 // mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
 // H := Thickness of atmosphere if its density were uniform (can be used
 //      for Rayleigh and Mie.
-float opticalDepth(const float r, const float mu, const float H) {    
+float opticalDepth(float r, float mu, float H) {    
   float r2 = r*r;
   // Is ray below horizon? The transmittance table will have only
   // the values for transmittance starting at r (x) until the
@@ -71,9 +71,8 @@ float opticalDepth(const float r, const float mu, const float H) {
 }
 
 
-void main(void) {
+void main() {
   float r, muSun;    
-
   unmappingRAndMu(r, muSun);
   
   vec3 opDepth = vec3(0.0);
@@ -88,5 +87,5 @@ void main(void) {
     betaRayleigh * opticalDepth(r, muSun, HR);
   }
   
-  renderTableColor = vec4( exp( -opDepth ), 0.0f );
+  renderTableColor = vec4(exp(-opDepth), 0.0f);
 }

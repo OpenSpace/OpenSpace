@@ -24,7 +24,7 @@ end
 
 -- Check format of a set of 3 TLE file lines and return nonzero if there is a format error
 function isValidTLEFileFormat(lineArr)
-    function isEmpty(s) return s == nil or s == '' end
+    local function isEmpty(s) return s == nil or s == '' end
 
     if isEmpty(lineArr[1]) or isEmpty(lineArr[2]) or isEmpty(lineArr[3]) then
         return false
@@ -85,7 +85,9 @@ function satellites(title, file, color, group)
             SegmentQuality = 3,
             Color = color,
             Fade = 1.5,
-            RenderBinMode = "PostDeferredTransparent"
+            RenderBinMode = "PostDeferredTransparent",
+            StartRenderIdx = group.StartRenderIdx,
+            RenderSize = group.RenderSize
         },
         Tag = { "earth_satellites" },
         GUI = {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,8 +35,23 @@
 #include <string>
 #include <vector>
 #include <set>
+
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wold-style-cast"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#endif
+
 #include "SpiceUsr.h"
 #include "SpiceZpr.h"
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 
 namespace openspace {
 
@@ -227,6 +242,18 @@ public:
     bool hasSpkCoverage(const std::string& target, double et) const;
 
     /**
+     * Returns a list of loaded SPK coverage intervals for \p target
+     *
+     * \param target The body to be examined. The target has to name a valid SPICE object
+     *        with respect to the kernels that have been loaded
+     * \return \c list of SPK kernels for \p target , \c empty list if none loaded.
+     *
+     * \throw SpiceException If \p target does not name a valid SPICE object
+     * \pre \p target must not be empty.
+     */
+    std::vector<std::pair<double, double>> spkCoverage(const std::string& target) const;
+
+    /**
      * Returns whether a given \p frame has a CK kernel covering it at the designated
      * \p et ephemeris time.
      *
@@ -241,6 +268,27 @@ public:
      * \pre \p target must not be empty.
      */
     bool hasCkCoverage(const std::string& frame, double et) const;
+
+    /**
+    * Returns a list of loaded CK coverage intervals for \p target
+    *
+    * \param target The body to be examined. The target has to name a valid SPICE object
+    *        with respect to the kernels that have been loaded
+    * \return \c list of CK kernels for \p target , \c empty list if none loaded.
+    *
+    * \throw SpiceException If \p target does not name a valid SPICE object
+    * \pre \p target must not be empty.
+    */
+    std::vector<std::pair<double, double>> ckCoverage(const std::string& target) const;
+
+    /**
+   * Returns a list of loaded spice frames,
+   *
+   * \param builtInFrames Boolean representing if builtIn or LoadedFrames should be used
+   * \return \c list of Spice frames with ID(int) and Name(string).
+   *
+   */
+    std::vector<std::pair<int, std::string>> spiceBodies(bool builtInFrames) const;
 
     /**
      * Determines whether values exist for some \p item for any body, identified by its
@@ -510,6 +558,8 @@ public:
             ));
         }
     }
+
+    std::string dateFromEphemerisTime(double ephemerisTime, const char* format);
 
     /**
      * Returns the \p position of a \p target body relative to an \p observer in a

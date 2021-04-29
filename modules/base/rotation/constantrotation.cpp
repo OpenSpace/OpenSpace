@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
 #include <glm/gtx/quaternion.hpp>
+#include <optional>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo RotationInfo = {
@@ -41,35 +42,22 @@ namespace {
         "Rotation Rate",
         "This value determines the number of revolutions per in-game second"
     };
+
+    struct [[codegen::Dictionary(ConstantRotation)]] Parameters {
+        // [[codegen::verbatim(RotationInfo.description)]]
+        std::optional<glm::dvec3> rotationAxis;
+        // [[codegen::verbatim(RotationRateInfo.description)]]
+        std::optional<float> rotationRate;
+    };
+#include "constantrotation_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation ConstantRotation::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "Static Rotation",
-        "base_transform_rotation_constant",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("ConstantRotation"),
-                Optional::No
-            },
-            {
-                RotationInfo.identifier,
-                new DoubleVector3Verifier(),
-                Optional::Yes,
-                RotationInfo.description
-            },
-            {
-                RotationRateInfo.identifier,
-                new DoubleVerifier(),
-                Optional::Yes,
-                RotationRateInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_transform_rotation_constant";
+    return doc;
 }
 
 ConstantRotation::ConstantRotation(const ghoul::Dictionary& dictionary)
@@ -81,18 +69,13 @@ ConstantRotation::ConstantRotation(const ghoul::Dictionary& dictionary)
     )
     , _rotationRate(RotationRateInfo, 1.f, -1000.f, 1000.f)
 {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    _rotationAxis = p.rotationAxis.value_or(_rotationAxis);
     addProperty(_rotationAxis);
+
+    _rotationRate = p.rotationRate.value_or(_rotationRate);
     addProperty(_rotationRate);
-
-    if (dictionary.hasKeyAndValue<glm::dvec3>(RotationInfo.identifier)) {
-        _rotationAxis = dictionary.value<glm::dvec3>(RotationInfo.identifier);
-    }
-
-    if (dictionary.hasKeyAndValue<double>(RotationRateInfo.identifier)) {
-        _rotationRate = static_cast<float>(
-            dictionary.value<double>(RotationRateInfo.identifier)
-        );
-    }
 }
 
 glm::dmat3 ConstantRotation::matrix(const UpdateData& data) const {

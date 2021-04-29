@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -101,7 +101,7 @@ namespace {
             return formatArrayAsLuaTable(it->get<nlohmann::json>());
         }
         if (it->is_number()) {
-            return fmt::format("{:E}", it->get<double>());
+            return fmt::format("{}", it->get<double>());
         }
         if (it->is_string()) {
             return formatLuaString(it->get<std::string>());
@@ -180,9 +180,11 @@ void LuaScriptTopic::runScript(const std::string& script, bool shouldReturn) {
     scripting::ScriptEngine::ScriptCallback callback;
     if (shouldReturn) {
         callback = [this](ghoul::Dictionary data) {
-            nlohmann::json j = data;
-            _connection->sendJson(wrappedPayload(j));
-            _waitingForReturnValue = false;
+            if (_connection) {
+                nlohmann::json j = data;
+                _connection->sendJson(wrappedPayload(j));
+                _waitingForReturnValue = false;
+            }
         };
         _waitingForReturnValue = true;
     }

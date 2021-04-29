@@ -13,7 +13,7 @@ local speck = asset.syncedResource({
     Name = "Kepler Speck Files",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_kepler_speck",
-    Version = 2
+    Version = 3
 })
 
 local object = {
@@ -29,7 +29,7 @@ local object = {
         CorrectionSizeEndDistance = 15.86,
         CorrectionSizeFactor = 8.59,
         Unit = "pc",
-        BillboardMaxSize = 23.0,
+        BillboardMaxSize = 30.0,
         EnablePixelSizeControl = true
     },
     GUI = {

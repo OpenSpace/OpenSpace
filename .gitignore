@@ -32,9 +32,11 @@ Thumbs.db
 /logs/
 /screenshots/
 /recordings/
+/user/
 /sync/
 /temp/
 # Customization is not supposed to be committed
 customization.lua
 # The COMMIT info is generated everytime CMake is run
 COMMIT.md
+*_codegen.cpp

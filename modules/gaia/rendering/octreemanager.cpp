@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -407,7 +407,7 @@ std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::dmat4& 
          removedKey != _removedKeysInPrevCall.rend(); ++removedKey) {
 
         // Uses a reverse loop to try to decrease the biggest chunk.
-        if (*removedKey == _biggestChunkIndexInUse - 1) {
+        if (*removedKey == static_cast<int>(_biggestChunkIndexInUse) - 1) {
             _biggestChunkIndexInUse = *removedKey;
             LDEBUG(fmt::format(
                 "Decreased size to: {} Free Spots in VBO: {}",
@@ -611,7 +611,7 @@ int OctreeManager::readFromFile(std::ifstream& inFileStream, bool readData,
     ));
 
     // Octree Manager root halfDistance must be updated before any nodes are created!
-    if (MAX_DIST != oldMaxdist) {
+    if (static_cast<int>(MAX_DIST) != oldMaxdist) {
         for (size_t i = 0; i < 8; ++i) {
             _root->Children[i]->halfDimension = MAX_DIST / 2.f;
             _root->Children[i]->originX = (i % 2 == 0) ?
@@ -963,7 +963,7 @@ bool OctreeManager::insertInNode(OctreeNode& node, const std::vector<float>& sta
         // Node is a leaf and it's not yet full -> insert star.
         storeStarData(node, starValues);
 
-        if (depth > _totalDepth) {
+        if (depth > static_cast<int>(_totalDepth)) {
             _totalDepth = depth;
         }
         return true;
@@ -1355,7 +1355,7 @@ bool OctreeManager::updateBufferIndex(OctreeNode& node) {
     if (_freeSpotsInBuffer.empty()) {
         _biggestChunkIndexInUse++;
     }
-    else if (_freeSpotsInBuffer.top() > _biggestChunkIndexInUse) {
+    else if (_freeSpotsInBuffer.top() > static_cast<int>(_biggestChunkIndexInUse)) {
         _biggestChunkIndexInUse = _freeSpotsInBuffer.top();
     }
     return true;

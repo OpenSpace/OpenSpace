@@ -1,6 +1,6 @@
 local assetHelper = asset.require('util/asset_helper')
 
-
+local colorLUT = asset.require('./stars_colormap').BvColorLUT
 
 local textures = asset.syncedResource({
     Name = "Stars Textures",
@@ -21,13 +21,6 @@ local sunspeck = asset.syncedResource({
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_sunstar_speck",
     Version = 1
-})
-
-local colorLUT = asset.syncedResource({
-    Name = "Stars Color Table",
-    Type = "HttpSynchronization",
-    Identifier = "stars_colormap",
-    Version = 2
 })
 
 local stars = {

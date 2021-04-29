@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -98,7 +98,10 @@ int main(int argc, char** argv) {
 
         settings.changeHostPassword = defaultChangeHostPassword.str();
     }
-
+    ghoul::logging::LogManager::initialize(
+        ghoul::logging::LogLevel::Debug,
+        ghoul::logging::LogManager::ImmediateFlush::Yes
+    );
     LINFO(fmt::format("Connection password: {}", settings.password));
     LINFO(fmt::format("Host password: {}", settings.changeHostPassword));
 

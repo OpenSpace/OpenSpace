@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -53,17 +53,20 @@ layout(location = 0) in vec2 in_position;
 layout(location = 1) in vec2 in_uv;
 layout(location = 2) in vec4 in_color;
 
+out float depth;
 out vec2 out_position;
 out vec2 out_uv;
 out vec4 out_color;
 
-uniform mat4 ortho;
+uniform mat4 proj;
 
 void main() {
     out_position = in_position;
     out_uv = in_uv;
     out_color = in_color;
-    gl_Position = ortho * vec4(in_position, 0.0, 1.0);
+    vec4 p = proj * vec4(in_position, 0.0, 1.0);
+    gl_Position = p;
+    depth = p.w;
 }
 
 )";
@@ -90,11 +93,14 @@ void main() {
 constexpr const char* XyuvrgbaFragmentCode = R"(
 #version __CONTEXT__
 
+#include "fragment.glsl"
+
 uniform bool hasTexture = false;
 uniform bvec2 shouldFlipTexture = bvec2(false, false);
 uniform sampler2D tex;
 uniform vec4 color = vec4(1.0, 1.0, 1.0, 1.0);
 
+in float depth;
 in vec2 out_uv;
 in vec4 out_color;
 
@@ -119,6 +125,7 @@ void main() {
 
 } // namespace
 
+#pragma optimize ("", off)
 namespace openspace::rendering::helper {
 
 namespace detail {
@@ -150,7 +157,6 @@ void initialize() {
         vertexFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
         vertexFile.open(xyuvrgbaVertexFile, std::fstream::out);
         vertexFile << XyuvrgbaVertexCode;
-        vertexFile.close();
     }
 
     xyuvrgbaFragmentFile = absPath("${TEMPORARY}/xyuvrgba.frag");
@@ -159,13 +165,17 @@ void initialize() {
         fragmentFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
         fragmentFile.open(xyuvrgbaFragmentFile, std::fstream::out);
         fragmentFile << XyuvrgbaFragmentCode;
-        fragmentFile.close();
     }
     shaders.xyuvrgba.program = ghoul::opengl::ProgramObject::Build(
-        "xyuvrgba", xyuvrgbaVertexFile, xyuvrgbaFragmentFile);
-    ghoul::opengl::updateUniformLocations(*shaders.xyuvrgba.program,
+        "xyuvrgba",
+        xyuvrgbaVertexFile,
+        xyuvrgbaFragmentFile
+    );
+    ghoul::opengl::updateUniformLocations(
+        *shaders.xyuvrgba.program,
         shaders.xyuvrgba.cache,
-        { "tex", "hasTexture", "shouldFlipTexture", "ortho", "color" });
+        { "tex", "hasTexture", "shouldFlipTexture", "proj", "color" }
+    );
 
     //
     // Screenfilling shader
@@ -176,7 +186,6 @@ void initialize() {
         vertexFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
         vertexFile.open(screenFillingVertexFile, std::fstream::out);
         vertexFile << ScreenFillingQuadVertexCode;
-        vertexFile.close();
     }
 
     screenFillingFragmentFile = absPath("${TEMPORARY}/screenfilling.frag");
@@ -185,14 +194,18 @@ void initialize() {
         fragmentFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
         fragmentFile.open(screenFillingFragmentFile, std::fstream::out);
         fragmentFile << XyuvrgbaFragmentCode;
-        fragmentFile.close();
     }
 
     shaders.screenfilling.program = ghoul::opengl::ProgramObject::Build(
-        "screenfilling", xyuvrgbaVertexFile, xyuvrgbaFragmentFile);
-    ghoul::opengl::updateUniformLocations(*shaders.screenfilling.program,
+        "screenfilling",
+        xyuvrgbaVertexFile,
+        xyuvrgbaFragmentFile
+    );
+    ghoul::opengl::updateUniformLocations(
+        *shaders.screenfilling.program,
         shaders.screenfilling.cache,
-        { "tex", "hasTexture", "shouldFlipTexture", "ortho", "color" });
+        { "tex", "hasTexture", "shouldFlipTexture", "proj", "color" }
+    );
 
 
     //
@@ -204,12 +217,12 @@ void initialize() {
     glBindVertexArray(vertexObjects.square.vao);
     glBindBuffer(GL_ARRAY_BUFFER, vertexObjects.square.vbo);
 
-    struct Vertex {
+    struct VertexXYUVRGBA {
         GLfloat xy[2];
         GLfloat uv[2];
         GLfloat rgba[4];
     };
-    Vertex data[] = {
+    VertexXYUVRGBA data[] = {
         // X     Y    U    V    R    G    B    A
         -1.f, -1.f, 0.f, 0.f, 1.f, 1.f, 1.f, 1.f,
         -1.f,  1.f, 0.f, 1.f, 1.f, 1.f, 1.f, 1.f,
@@ -219,10 +232,47 @@ void initialize() {
          1.f,  1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f,
          1.f, -1.f, 1.f, 0.f, 1.f, 1.f, 1.f, 1.f
     };
-    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(Vertex), data, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(VertexXYUVRGBA), data, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexXYUVRGBA), nullptr);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VertexXYUVRGBA),
+        reinterpret_cast<GLvoid*>(offsetof(VertexXYUVRGBA, uv)));
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(VertexXYUVRGBA),
+        reinterpret_cast<GLvoid*>(offsetof(VertexXYUVRGBA, rgba)));
+    glBindVertexArray(0);
+
+    //
+    // Sphere vertex array object
+    //
+    std::pair<std::vector<Vertex>, std::vector<GLushort>> sphereData = createSphere(
+        64, glm::vec3(1.f, 1.f, 1.f), glm::vec4(1.f, 1.f, 1.f, 1.f)
+    );
+
+    glGenVertexArrays(1, &vertexObjects.sphere.vao);
+    glGenBuffers(1, &vertexObjects.sphere.vbo);
+    glGenBuffers(1, &vertexObjects.sphere.ibo);
+
+    glBindVertexArray(vertexObjects.sphere.vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexObjects.sphere.vbo);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        sphereData.first.size() * sizeof(Vertex),
+        sphereData.first.data(),
+        GL_STATIC_DRAW
+    );
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertexObjects.sphere.ibo);
+    glBufferData(
+        GL_ELEMENT_ARRAY_BUFFER,
+        sphereData.second.size() * sizeof(GLushort),
+        sphereData.second.data(),
+        GL_STATIC_DRAW
+    );
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
         reinterpret_cast<GLvoid*>(offsetof(Vertex, uv)));
@@ -230,6 +280,8 @@ void initialize() {
     glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
         reinterpret_cast<GLvoid*>(offsetof(Vertex, rgba)));
     glBindVertexArray(0);
+    vertexObjects.sphere.nElements = static_cast<int>(sphereData.second.size());
+
 
     //
     // Empty vertex array objects
@@ -261,6 +313,10 @@ void deinitialize() {
 
     glDeleteVertexArrays(1, &vertexObjects.square.vao);
     glDeleteBuffers(1, &vertexObjects.square.vbo);
+
+    glDeleteVertexArrays(1, &vertexObjects.sphere.vao);
+    glDeleteBuffers(1, &vertexObjects.sphere.vbo);
+    glDeleteBuffers(1, &vertexObjects.sphere.ibo);
 
     glDeleteVertexArrays(1, &vertexObjects.empty.vao);
 
@@ -316,14 +372,14 @@ void renderBox(ghoul::opengl::ProgramObject& program, GLint orthoLocation,
 }
 
 void renderBox(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color,
-    Anchor anchor)
+               Anchor anchor)
 {
     auto& shdr = shaders.xyuvrgba;
     shdr.program->activate();
     shdr.program->setUniform(shdr.cache.hasTexture, 0);
     renderBox(
         *shdr.program,
-        shdr.cache.ortho,
+        shdr.cache.proj,
         shdr.cache.color,
         position, size,
         color,
@@ -345,7 +401,7 @@ void renderBox(const glm::vec2& position, const glm::vec2& size, const glm::vec4
     shdr.program->setUniform(shdr.cache.tex, unit);
     renderBox(
         *shdr.program,
-        shdr.cache.ortho,
+        shdr.cache.proj,
         shdr.cache.color,
         position,
         size,
@@ -386,6 +442,65 @@ std::vector<Vertex> createRing(int nSegments, float radius, glm::vec4 colors) {
         vertices[i] = { x, y, z, u, v, colors.r, colors.g, colors.b, colors.a };
     }
     return vertices;
+}
+
+std::pair<std::vector<Vertex>, std::vector<GLushort>> createSphere(int nSegments,
+                                                                   glm::vec3 radii,
+                                                                   glm::vec4 colors)
+{
+    std::vector<Vertex> vertices;
+    vertices.reserve(nSegments * nSegments);
+    for (int i = 0; i <= nSegments; i++) {
+        for (int j = 0; j <= nSegments; j++) {
+            const float fi = static_cast<float>(i);
+            const float fj = static_cast<float>(j);
+            // inclination angle (north to south)
+            // 0 -> PI
+            // azimuth angle (east to west)
+            const float theta = fi * glm::pi<float>() / nSegments;
+                                                                    
+            // 0 -> 2*PI
+            const float phi = fj * glm::pi<float>() * 2.f / nSegments;
+
+            const float x = radii[0] * sin(theta) * cos(phi);
+            const float y = radii[1] * sin(theta) * sin(phi);
+            const float z = radii[2] * cos(theta); // Z points towards pole (theta = 0)
+
+            Vertex v;
+            v.xyz[0] = x;
+            v.xyz[1] = y;
+            v.xyz[2] = z;
+
+            const float t1 = fj / nSegments;
+            const float t2 = 1.f - (fi / nSegments);
+
+            v.uv[0] = t1;
+            v.uv[1] = t2;
+
+            v.rgba[0] = colors.r;
+            v.rgba[1] = colors.g;
+            v.rgba[2] = colors.b;
+            v.rgba[3] = colors.a;
+
+            vertices.push_back(v);
+        }
+    }
+
+    std::vector<GLushort> indices;
+    indices.reserve(vertices.size() * 3);
+    for (int i = 1; i <= nSegments; i++) {
+        for (int j = 0; j < nSegments; j++) {
+            const int t = nSegments + 1;
+            indices.push_back(static_cast<GLushort>(t * (i - 1) + j + 0));
+            indices.push_back(static_cast<GLushort>(t * (i + 0) + j + 0));
+            indices.push_back(static_cast<GLushort>(t * (i + 0) + j + 1));
+            indices.push_back(static_cast<GLushort>(t * (i - 1) + j + 0));
+            indices.push_back(static_cast<GLushort>(t * (i + 0) + j + 1));
+            indices.push_back(static_cast<GLushort>(t * (i - 1) + j + 1));
+        }
+    }
+
+    return { vertices, indices };
 }
 
 } // namespace openspace::rendering::helper

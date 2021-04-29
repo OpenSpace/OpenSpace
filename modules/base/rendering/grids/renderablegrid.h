@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,14 +28,13 @@
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/properties/stringproperty.h>
-#include <openspace/properties/matrix/dmat4property.h>
-#include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/vector/uvec2property.h>
+#include <openspace/properties/vector/ivec2property.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
-namespace ghoul::opengl { class ProgramObject; } 
+namespace ghoul::opengl { class ProgramObject; }
 namespace openspace::documentation { struct Documentation; }
 
 namespace openspace {
@@ -61,8 +60,10 @@ protected:
 
     ghoul::opengl::ProgramObject* _gridProgram = nullptr;
 
-    properties::Vec3Property _gridColor;
-    properties::UVec2Property _segments;
+    properties::Vec3Property _color;
+    // @TODO (abock, 2021-01-28)  This was a UVec2Property before, but it wasn't supported
+    // be the codegen.  As soon as it does, this should be changed back
+    properties::IVec2Property _segments;
     properties::FloatProperty _lineWidth;
     properties::Vec2Property _size;
 

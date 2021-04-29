@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -148,8 +148,10 @@ public:
       * Imports asset tree data for this model by recursively traversing the folder
       * structure.
       * \param assetBasePath The base path where to find all assets
+      * \param assetBasePath The base path where to find user assets
       */
-    void importModelData(const std::string& assetBasePath);
+    void importModelData(const std::string& assetBasePath,
+        const std::string& userAssetBasePath);
 
     /**
       * Returns bool for if item is checked/selected

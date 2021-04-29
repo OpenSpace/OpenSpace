@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -52,6 +52,8 @@
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/io/texture/texturereadercmap.h>
+#include <ghoul/io/model/modelreader.h>
+#include <ghoul/io/model/modelreaderassimp.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringconversion.h>
@@ -86,15 +88,6 @@ namespace {
 
     constexpr const char* KeyFontMono = "Mono";
     constexpr const char* KeyFontLight = "Light";
-
-    constexpr openspace::properties::Property::PropertyInfo PerformanceInfo = {
-        "PerformanceMeasurements",
-        "Performance Measurements",
-        "If this value is enabled, detailed performance measurements about the updates "
-        "and rendering of the scene graph nodes are collected each frame. These values "
-        "provide some information about the impact of individual nodes on the overall "
-        "performance."
-    };
 
     constexpr openspace::properties::Property::PropertyInfo ShowOverlaySlavesInfo = {
         "ShowOverlayOnSlaves",
@@ -141,20 +134,19 @@ namespace {
         "interface."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo ScreenshotUseDateInfo = {
+        "ScreenshotUseDate",
+        "Screenshot Folder uses Date",
+        "If this value is set to 'true', screenshots will be saved to a folder that "
+        "contains the time at which this value was enabled"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo ShowFrameNumberInfo = {
         "ShowFrameInformation",
         "Show Frame Information",
         "If this value is enabled, the current frame number and frame times are rendered "
         "into the window."
     };
-
-#ifdef OPENSPACE_WITH_INSTRUMENTATION
-    constexpr openspace::properties::Property::PropertyInfo SaveFrameInfo = {
-        "SaveFrameInformation",
-        "Save Frame Information",
-        "Saves the frame information to disk"
-    };
-#endif // OPENSPACE_WITH_INSTRUMENTATION
 
     constexpr openspace::properties::Property::PropertyInfo DisableMasterInfo = {
         "DisableMasterRendering",
@@ -270,10 +262,8 @@ RenderEngine::RenderEngine()
     , _showVersionInfo(ShowVersionInfo, true)
     , _showCameraInfo(ShowCameraInfo, true)
     , _applyWarping(ApplyWarpingInfo, false)
+    , _screenshotUseDate(ScreenshotUseDateInfo, false)
     , _showFrameInformation(ShowFrameNumberInfo, false)
-#ifdef OPENSPACE_WITH_INSTRUMENTATION
-    , _saveFrameInformation(SaveFrameInfo, false)
-#endif // OPENSPACE_WITH_INSTRUMENTATION
     , _disableMasterRendering(DisableMasterInfo, false)
     , _globalBlackOutFactor(GlobalBlackoutFactorInfo, 1.f, 0.f, 1.f)
     , _enableFXAA(FXAAInfo, true)
@@ -283,7 +273,7 @@ RenderEngine::RenderEngine()
     , _hue(HueInfo, 0.f, 0.f, 360.f)
     , _saturation(SaturationInfo, 1.f, 0.0f, 2.f)
     , _value(ValueInfo, 1.f, 0.f, 2.f)
-    , _framerateLimit(FramerateLimitInfo, 0.f, 0.f, 500.f)
+    , _framerateLimit(FramerateLimitInfo, 0, 0, 500)
     , _horizFieldOfView(HorizFieldOfViewInfo, 80.f, 1.f, 179.f)
     , _globalRotation(
         GlobalRotationInfo,
@@ -309,12 +299,6 @@ RenderEngine::RenderEngine()
     addProperty(_verticalLogOffset);
     addProperty(_showVersionInfo);
     addProperty(_showCameraInfo);
-
-    // @TODO (maci 2019-08-23) disabling FXAA on
-    // MacOS for now until we have fix or MSAA option.
-#ifdef __APPLE__
-    _enableFXAA = false;
-#endif
 
     _enableFXAA.onChange([this]() {
         if (_renderer) {
@@ -372,6 +356,44 @@ RenderEngine::RenderEngine()
     addProperty(_globalBlackOutFactor);
     addProperty(_applyWarping);
 
+    _screenshotUseDate.onChange([this]() {
+        // If there is no screenshot folder, don't bother with handling the change
+        if (!FileSys.hasRegisteredToken("${STARTUP_SCREENSHOT}")) {
+            return;
+        }
+
+        if (_screenshotUseDate) {
+            // Going from 'false' -> 'true'
+            // We might need to create the folder first
+
+            std::time_t now = std::time(nullptr);
+            std::tm* nowTime = std::localtime(&now);
+            char date[128];
+            strftime(date, sizeof(date), "%Y-%m-%d-%H-%M", nowTime);
+
+            std::string newFolder = absPath("${STARTUP_SCREENSHOT}/" + std::string(date));
+            if (!FileSys.directoryExists(newFolder)) {
+                FileSys.createDirectory(newFolder);
+            }
+            FileSys.registerPathToken(
+                "${SCREENSHOTS}",
+                newFolder,
+                ghoul::filesystem::FileSystem::Override::Yes
+            );
+        }
+        else {
+            // Going from 'true' -> 'false'
+            // We reset the screenshot folder back to what it was in the beginning
+            FileSys.registerPathToken(
+                "${SCREENSHOTS}",
+                absPath("${STARTUP_SCREENSHOT}"),
+                ghoul::filesystem::FileSystem::Override::Yes
+            );
+        }
+        global::windowDelegate->setScreenshotFolder(absPath("${SCREENSHOTS}"));
+    });
+    addProperty(_screenshotUseDate);
+
     _horizFieldOfView.onChange([this]() {
         if (global::windowDelegate->isMaster()) {
             global::windowDelegate->setHorizFieldOfView(_horizFieldOfView);
@@ -380,14 +402,6 @@ RenderEngine::RenderEngine()
     addProperty(_horizFieldOfView);
 
     addProperty(_showFrameInformation);
-#ifdef OPENSPACE_WITH_INSTRUMENTATION
-    _saveFrameInformation.onChange([&]() {
-        if (_saveFrameInformation) {
-            _frameInfo.lastSavedFrame = frameNumber();
-        }
-    });
-    addProperty(_saveFrameInformation);
-#endif // OPENSPACE_WITH_INSTRUMENTATION
 
     addProperty(_framerateLimit);
     addProperty(_globalRotation);
@@ -460,6 +474,10 @@ void RenderEngine::initialize() {
         std::make_unique<ghoul::io::TextureReaderCMAP>()
     );
 
+    ghoul::io::ModelReader::ref().addReader(
+        std::make_unique<ghoul::io::ModelReaderAssimp>()
+    );
+
     _versionString = OPENSPACE_VERSION_STRING_FULL;
     if (global::versionChecker->hasLatestVersionInfo()) {
         VersionChecker::SemanticVersion latest = global::versionChecker->latestVersion();
@@ -475,6 +493,8 @@ void RenderEngine::initialize() {
             );
         }
     }
+
+    _screenshotUseDate = global::configuration->shouldUseScreenshotDate;
 }
 
 void RenderEngine::initializeGL() {
@@ -714,12 +734,12 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
 
         std::string fn = std::to_string(_frameNumber);
         WindowDelegate::Frustum frustum = global::windowDelegate->frustumMode();
-        std::string fr = [](WindowDelegate::Frustum frustum) -> std::string {
-            switch (frustum) {
-                case WindowDelegate::Frustum::Mono: return "";
-                case WindowDelegate::Frustum::LeftEye: return "(left)";
+        std::string fr = [](WindowDelegate::Frustum f) -> std::string {
+            switch (f) {
+                case WindowDelegate::Frustum::Mono:     return "";
+                case WindowDelegate::Frustum::LeftEye:  return "(left)";
                 case WindowDelegate::Frustum::RightEye: return "(right)";
-                default: throw std::logic_error("Unhandled case label");
+                default:                              throw ghoul::MissingCaseException();
             }
         }(frustum);
 
@@ -727,9 +747,10 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         std::string dt = std::to_string(global::windowDelegate->deltaTime());
         std::string avgDt = std::to_string(global::windowDelegate->averageDeltaTime());
 
-        std::string res = "Frame: " + fn + ' ' + fr + '\n' +
-                          "Swap group frame: " + sgFn + '\n' +
-                          "Dt: " + dt + '\n' + "Avg Dt: " + avgDt;
+        std::string res = fmt::format(
+            "Frame: {} {}\nSwap group frame: {}\nDt: {}\nAvg Dt: {}",
+            fn, fr, sgFn, dt, avgDt
+        );
         RenderFont(*_fontFrameInfo, penPosition, res);
     }
 
@@ -848,7 +869,6 @@ void RenderEngine::renderEndscreen() {
         glm::vec2(global::windowDelegate->currentSubwindowSize()) / dpiScaling;
     glViewport(0, 0, res.x, res.y);
 
-    using FR = ghoul::fontrendering::FontRenderer;
     const glm::vec2 size = _fontDate->boundingBox("Shutting down");
     glm::vec2 penPosition = glm::vec2(
         fontResolution().x / 2 - size.x / 2,
@@ -919,35 +939,6 @@ void RenderEngine::postDraw() {
     ZoneScoped
 
     ++_frameNumber;
-
-#ifdef OPENSPACE_WITH_INSTRUMENTATION
-    if (_saveFrameInformation) {
-        _frameInfo.frames.push_back({
-            frameNumber(),
-            global::windowDelegate.deltaTime(),
-            global::windowDelegate.averageDeltaTime()
-        });
-    }
-
-    const uint16_t next = _frameInfo.lastSavedFrame + _frameInfo.saveEveryNthFrame;
-    const bool shouldSave = _saveFrameInformation && frameNumber() >= next;
-    if (shouldSave) {
-        std::string filename = fmt::format(
-            "_inst_renderengine_{}_{}.txt",
-            _frameInfo.lastSavedFrame, _frameInfo.saveEveryNthFrame
-        );
-        std::ofstream file(absPath("${BIN}/" + filename));
-        for (const FrameInfo& i : _frameInfo.frames) {
-            std::string line = fmt::format(
-                "{}\t{}\t{}", i.iFrame, i.deltaTime, i.avgDeltaTime
-            );
-            file << line << '\n';
-        }
-
-        _frameInfo.frames.clear();
-        _frameInfo.lastSavedFrame = frameNumber();
-    }
-#endif // OPENSPACE_WITH_INSTRUMENTATION
 }
 
 Scene* RenderEngine::scene() {
@@ -1120,30 +1111,18 @@ void RenderEngine::takeScreenshot() {
     _latestScreenshotNumber = global::windowDelegate->takeScreenshot(_applyWarping);
 }
 
-/**
- * Get the latest screenshot filename
- */
 unsigned int RenderEngine::latestScreenshotNumber() const {
     return _latestScreenshotNumber;
 }
 
-/**
- * Set raycasting uniforms on the program object, and setup raycasting.
- */
 void RenderEngine::preRaycast(ghoul::opengl::ProgramObject& programObject) {
     _renderer->preRaycast(programObject);
 }
 
-/**
- * Tear down raycasting for the specified program object.
- */
 void RenderEngine::postRaycast(ghoul::opengl::ProgramObject& programObject) {
     _renderer->postRaycast(programObject);
 }
 
-/**
- * Set renderer
- */
 void RenderEngine::setRenderer(std::unique_ptr<Renderer> renderer) {
     ZoneScoped
 
@@ -1314,7 +1293,7 @@ void RenderEngine::renderCameraInformation() {
         global::navigationHandler->orbitalNavigator();
 
     using FR = ghoul::fontrendering::FontRenderer;
-    
+
     _cameraButtonLocations.rotation = {
         fontResolution().x - rotationBox.x - XSeparation,
         fontResolution().y - penPosY,

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,7 +24,6 @@
 
 #include <modules/spacecraftinstruments/rendering/renderablemodelprojection.h>
 
-#include <modules/base/rendering/modelgeometry.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
@@ -35,17 +34,21 @@
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/io/model/modelgeometry.h>
+#include <ghoul/io/model/modelreader.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
+#include <filesystem>
+#include <optional>
 
 namespace {
     constexpr const char* _loggerCat = "RenderableModelProjection";
 
-    constexpr const char* keyGeometry = "Geometry";
+    constexpr const char* KeyGeomModelFile = "GeometryFile";
     constexpr const char* keyProjection = "Projection";
     constexpr const char* keyBoundingSphereRadius = "BoundingSphereRadius";
 
@@ -72,80 +75,61 @@ namespace {
         "location to the Sun. If this value is disabled, shading is disabled and the "
         "entire model is rendered brightly."
     };
+
+    struct [[codegen::Dictionary(RenderableModelProjection)]] Parameters {
+        // The file or files that should be loaded in this RenderableModel. The file can
+        // contain filesystem tokens or can be specified relatively to the
+        // location of the .mod file.
+        // This specifies the model that is rendered by the Renderable.
+        std::filesystem::path geometryFile;
+
+        // Contains information about projecting onto this planet.
+        ghoul::Dictionary projection [[codegen::reference("newhorizons_projectioncomponent")]];
+
+        // [[codegen::verbatim(PerformShadingInfo.description)]]
+        std::optional<bool> performShading;
+
+        // The radius of the bounding sphere of this object. This has to be a
+        // radius that is larger than anything that is rendered by it. It has to
+        // be at least as big as the convex hull of the object. The default value
+        // is 10e9 meters.
+        std::optional<double> boundingSphereRadius;
+    };
+#include "renderablemodelprojection_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableModelProjection::Documentation() {
-    using namespace documentation;
-
-    return {
-        "Renderable Model Projection",
-        "newhorizons_renderable_modelprojection",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("RenderableModelProjection"),
-                Optional::No
-            },
-            {
-                keyGeometry,
-                new ReferencingVerifier("base_geometry_model"),
-                Optional::No,
-                "The geometry that is used for rendering this model."
-            },
-            {
-                keyProjection,
-                new ReferencingVerifier("newhorizons_projectioncomponent"),
-                Optional::No,
-                "Contains information about projecting onto this planet."
-            },
-            {
-                PerformShadingInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                PerformShadingInfo.description
-            },
-            {
-                keyBoundingSphereRadius,
-                new DoubleVerifier,
-                Optional::Yes,
-                "The radius of the bounding sphere of this object. This has to be a "
-                "radius that is larger than anything that is rendered by it. It has to "
-                "be at least as big as the convex hull of the object. The default value "
-                "is 10e9 meters."
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "newhorizons_renderable_modelprojection";
+    return doc;
 }
 
 RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _performShading(PerformShadingInfo, true)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableModelProjection"
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    std::string file = absPath(p.geometryFile.string());
+    _geometry = ghoul::io::ModelReader::ref().loadModel(
+        file,
+        ghoul::io::ModelReader::ForceRenderInvisible::No,
+        ghoul::io::ModelReader::NotifyInvisibleDropped::Yes
     );
-    using ghoul::Dictionary;
-    Dictionary geometryDictionary = dictionary.value<Dictionary>(keyGeometry);
-    _geometry = modelgeometry::ModelGeometry::createFromDictionary(geometryDictionary);
 
     addPropertySubOwner(_projectionComponent);
 
     _projectionComponent.initialize(
         identifier(),
-        dictionary.value<ghoul::Dictionary>(keyProjection)
+        p.projection
     );
 
-    float boundingSphereRadius = 1.0e9;
-    dictionary.getValue(keyBoundingSphereRadius, boundingSphereRadius);
+    double boundingSphereRadius = p.boundingSphereRadius.value_or(1.0e9);
     setBoundingSphere(boundingSphereRadius);
 
-    if (dictionary.hasKeyAndValue<bool>(PerformShadingInfo.identifier)) {
-        _performShading = dictionary.value<bool>(PerformShadingInfo.identifier);
-    }
+    _performShading = p.performShading.value_or(_performShading);
 
     addProperty(_performShading);
 }
@@ -200,7 +184,7 @@ void RenderableModelProjection::initializeGL() {
     _projectionComponent.initializeGL();
 
     float bs = boundingSphere();
-    _geometry->initialize(this);
+    _geometry->initialize();
     setBoundingSphere(bs); // ignore bounding sphere set by geometry.
 }
 
@@ -272,11 +256,8 @@ void RenderableModelProjection::render(const RenderData& data, RendererTasks&) {
         _projectionComponent.projectionFading()
     );
 
-    _geometry->setUniforms(*_programObject);
-
     ghoul::opengl::TextureUnit baseUnit;
     baseUnit.activate();
-    _geometry->bindTexture();
     _programObject->setUniform(_mainUniformCache.baseTexture, baseUnit);
 
     ghoul::opengl::TextureUnit projectionUnit;
@@ -284,7 +265,7 @@ void RenderableModelProjection::render(const RenderData& data, RendererTasks&) {
     _projectionComponent.projectionTexture().bind();
     _programObject->setUniform(_mainUniformCache.projectionTexture, projectionUnit);
 
-    _geometry->render();
+    _geometry->render(*_programObject, false);
 
     _programObject->deactivate();
 }
@@ -368,9 +349,8 @@ void RenderableModelProjection::imageProjectGPU(
             _depthFboUniformCache.ModelTransform,
             _transform
         );
-        _geometry->setUniforms(*_fboProgramObject);
 
-        _geometry->render();
+        _geometry->render(*_fboProgramObject, false);
 
         _depthFboProgramObject->deactivate();
         _projectionComponent.depthMapRenderEnd();
@@ -400,8 +380,7 @@ void RenderableModelProjection::imageProjectGPU(
     _fboProgramObject->setUniform(_fboUniformCache.ModelTransform, _transform);
     _fboProgramObject->setUniform(_fboUniformCache.boresight, _boresight);
 
-    _geometry->setUniforms(*_fboProgramObject);
-    _geometry->render();
+    _geometry->render(*_fboProgramObject, false);
 
     _fboProgramObject->deactivate();
 
@@ -438,7 +417,7 @@ void RenderableModelProjection::attitudeParameters(double time) {
     const glm::vec3 cpos = p * 10000.0;
 
     const float distance = glm::length(cpos);
-    const float radius = boundingSphere();
+    const double radius = boundingSphere();
 
     _projectorMatrix = _projectionComponent.computeProjectorMatrix(
         cpos,
@@ -447,8 +426,8 @@ void RenderableModelProjection::attitudeParameters(double time) {
         _instrumentMatrix,
         _projectionComponent.fieldOfViewY(),
         _projectionComponent.aspectRatio(),
-        distance - radius,
-        distance + radius,
+        static_cast<float>(distance - radius),
+        static_cast<float>(distance + radius),
         _boresight
     );
 }

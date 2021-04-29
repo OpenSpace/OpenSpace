@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2020                                                                #
+# Copyright (c) 2014-2021                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -26,14 +26,14 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
 
 set(HEADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/fitsfilereadermodule.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/fitsfilereader.h
+  fitsfilereadermodule.h
+  include/fitsfilereader.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES 
-  ${CMAKE_CURRENT_SOURCE_DIR}/fitsfilereadermodule.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/fitsfilereader.cpp
+  fitsfilereadermodule.cpp
+  src/fitsfilereader.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
@@ -59,10 +59,8 @@ add_subdirectory(${CCFITS_ROOT_DIR})
 set_folder_location(CCfits "External")
 set(CCfits_BUILD_SHARED_LIBS OFF)
 
-if (GHOUL_DISABLE_EXTERNAL_WARNINGS)
-    disable_external_warnings(cfitsio)
-    disable_external_warnings(CCfits)
-endif ()
+disable_external_warnings(cfitsio)
+disable_external_warnings(CCfits)
 
-target_include_directories(${MODULE_NAME} SYSTEM PUBLIC ${INCLUDES_FOR_TARGET})
-target_link_libraries(${MODULE_NAME} PRIVATE CCfits)
+target_include_directories(openspace-module-fitsfilereader SYSTEM PRIVATE ${INCLUDES_FOR_TARGET})
+target_link_libraries(openspace-module-fitsfilereader PRIVATE cfitsio CCfits)

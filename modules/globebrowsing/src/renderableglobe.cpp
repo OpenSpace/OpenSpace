@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -79,13 +79,6 @@ namespace {
         bool isShadowing = false;
     };
 
-    constexpr const char* KeyRadii = "Radii";
-    constexpr const char* KeyLayers = "Layers";
-    constexpr const char* KeyShadowGroup = "ShadowGroup";
-    constexpr const char* KeyShadowSource = "Source";
-    constexpr const char* KeyShadowCaster = "Caster";
-    constexpr const char* KeyLabels = "Labels";
-
     const openspace::globebrowsing::AABB3 CullingFrustum{
         glm::vec3(-1.f, -1.f, 0.f),
         glm::vec3( 1.f,  1.f, 1e35)
@@ -120,12 +113,6 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ShowChunkBoundsInfo = {
         "ShowChunkBounds",
         "Show chunk bounds",
-        "" // @TODO Missing documentation
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo ShowChunkAABBInfo = {
-        "ShowChunkAABB",
-        "Show chunk AABB",
         "" // @TODO Missing documentation
     };
 
@@ -240,6 +227,47 @@ namespace {
         "This is the number of currently active layers, if this value reaches the "
         "maximum, bad things will happen."
     };
+
+    struct [[codegen::Dictionary(RenderableGlobe)]] Parameters {
+        // Specifies the radii for this planet. If the Double version of this is used, all
+        // three radii are assumed to be equal
+        std::optional<std::variant<glm::dvec3, double>> radii;
+
+        // Specifies whether the planet should be shaded by the primary light source or
+        // not. If it is disabled, all parts of the planet are illuminated
+        std::optional<bool> performShading;
+
+        // A list of all the layers that should be added
+        std::map<std::string, ghoul::Dictionary> layers
+            [[codegen::reference("globebrowsing_layermanager")]];
+
+        // Specifies information about planetary labels that can be rendered on the
+        // object's surface
+        std::optional<ghoul::Dictionary> labels
+            [[codegen::reference("globebrowsing_globelabelscomponent")]];
+
+        struct ShadowGroup {
+            struct Source {
+                std::string name;
+                double radius;
+            };
+            std::vector<Source> sources;
+
+            struct Caster {
+                std::string name;
+                double radius;
+            };
+            std::vector<Caster> casters;
+        };
+        std::optional<ShadowGroup> shadowGroup;
+
+        std::optional<ghoul::Dictionary> rings
+            [[codegen::reference("globebrowsing_rings_component")]];
+
+        std::optional<ghoul::Dictionary> shadows
+            [[codegen::reference("globebrowsing_shadows_component")]];
+    };
+#include "renderableglobe_codegen.cpp"
 } // namespace
 
 using namespace openspace::properties;
@@ -273,7 +301,8 @@ const Chunk& findChunkNode(const Chunk& node, const Geodetic2& location) {
 #if defined(__APPLE__) || (defined(__linux__) && defined(__clang__))
 using ChunkTileVector = std::vector<std::pair<ChunkTile, const LayerRenderSettings*>>;
 #else
-using ChunkTileVector = std::pmr::vector<std::pair<ChunkTile, const LayerRenderSettings*>>;
+using ChunkTileVector =
+    std::pmr::vector<std::pair<ChunkTile, const LayerRenderSettings*>>;
 #endif
 
 ChunkTileVector tilesAndSettingsUnsorted(const LayerGroup& layerGroup,
@@ -468,54 +497,9 @@ Chunk::Chunk(const TileIndex& ti)
 {}
 
 documentation::Documentation RenderableGlobe::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderableGlobe",
-        "globebrowsing_renderableglobe",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("RenderableGlobe"),
-                Optional::No,
-                ""
-            },
-            {
-                KeyRadii,
-                new OrVerifier({ new DoubleVector3Verifier, new DoubleVerifier }),
-                Optional::Yes,
-                "Specifies the radii for this planet. If the Double version of this is "
-                "used, all three radii are assumed to be equal."
-            },
-            {
-                "PerformShading",
-                new BoolVerifier,
-                Optional::Yes,
-                "Specifies whether the planet should be shaded by the primary light "
-                "source or not. If it is disabled, all parts of the planet are "
-                "illuminated."
-            },
-            {
-                KeyLayers,
-                new TableVerifier({
-                    {
-                        "*",
-                        new ReferencingVerifier("globebrowsing_layermanager"),
-                        Optional::Yes,
-                        "Descriptions of the individual layer groups"
-                    }
-                }),
-                Optional::Yes,
-                "A list of all the layers that should be added"
-            },
-            {
-                KeyLabels,
-                new ReferencingVerifier("globebrowsing_globelabelscomponent"),
-                Optional::Yes,
-                "Specifies information about planetary labels that can be rendered on "
-                "the object's surface."
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "globebrowsing_renderableglobe";
+    return doc;
 }
 
 RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
@@ -523,7 +507,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     , _debugProperties({
         BoolProperty(ShowChunkEdgeInfo, false),
         BoolProperty(ShowChunkBoundsInfo, false),
-        BoolProperty(ShowChunkAABBInfo, false),
         BoolProperty(HeightResolutionInfo, false),
         BoolProperty(HeightIntensityInfo, false),
         BoolProperty(LevelProjectedAreaInfo, true),
@@ -553,35 +536,56 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     , _ringsComponent(dictionary)
     , _shadowComponent(dictionary)
 {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
     _generalProperties.currentLodScaleFactor.setReadOnly(true);
 
     // Read the radii in to its own dictionary
-    if (dictionary.hasKeyAndValue<glm::dvec3>(KeyRadii)) {
-        _ellipsoid = Ellipsoid(dictionary.value<glm::vec3>(KeyRadii));
-        setBoundingSphere(static_cast<float>(_ellipsoid.maximumRadius()));
-    }
-    else if (dictionary.hasKeyAndValue<double>(KeyRadii)) {
-        const double radius = dictionary.value<double>(KeyRadii);
-        _ellipsoid = Ellipsoid({ radius, radius, radius });
-        setBoundingSphere(static_cast<float>(_ellipsoid.maximumRadius()));
+    if (p.radii.has_value()) {
+        if (std::holds_alternative<glm::dvec3>(*p.radii)) {
+            _ellipsoid = Ellipsoid(std::get<glm::dvec3>(*p.radii));
+            setBoundingSphere(_ellipsoid.maximumRadius());
+        }
+        else if (std::holds_alternative<double>(*p.radii)) {
+            const double radius = std::get<double>(*p.radii);
+            _ellipsoid = Ellipsoid({ radius, radius, radius });
+            setBoundingSphere(_ellipsoid.maximumRadius());
+        }
+        else {
+            throw ghoul::MissingCaseException();
+        }
     }
 
-    if (dictionary.hasValue<bool>("PerformShading")) {
-        _generalProperties.performShading = dictionary.value<bool>("PerformShading");
-    }
+    _generalProperties.performShading =
+        p.performShading.value_or(_generalProperties.performShading);
+
 
     // Init layer manager
-    ghoul::Dictionary layersDictionary;
-    if (!dictionary.getValue(KeyLayers, layersDictionary)) {
-        throw ghoul::RuntimeError(std::string(KeyLayers) + " must be specified");
-    }
-
+    // @TODO (abock, 2021-03-25) The layermanager should be changed to take a
+    // std::map<std::string, ghoul::Dictionary> instead and then we don't need to get it
+    // as a bare dictionary anymore and can use the value from the struct directly
+    ghoul::Dictionary layersDictionary = dictionary.value<ghoul::Dictionary>("Layers");
     _layerManager.initialize(layersDictionary);
 
+    addProperty(_opacity);
     addProperty(_generalProperties.performShading);
     addProperty(_generalProperties.useAccurateNormals);
-    addProperty(_generalProperties.eclipseShadowsEnabled);
-    addProperty(_generalProperties.eclipseHardShadows);
+
+    if (p.shadowGroup.has_value()) {
+        std::vector<Ellipsoid::ShadowConfiguration> shadowConfArray;
+        for (const Parameters::ShadowGroup::Source& source : p.shadowGroup->sources) {
+            for (const Parameters::ShadowGroup::Caster& caster : p.shadowGroup->casters) {
+                Ellipsoid::ShadowConfiguration sc;
+                sc.source = std::pair<std::string, double>(source.name, source.radius);
+                sc.caster = std::pair<std::string, double>(source.name, source.radius);
+                shadowConfArray.push_back(sc);
+            }
+        }
+        _ellipsoid.setShadowConfigurationArray(shadowConfArray);
+
+        addProperty(_generalProperties.eclipseShadowsEnabled);
+        addProperty(_generalProperties.eclipseHardShadows);
+    }
 
     _shadowMappingPropertyOwner.addProperty(_generalProperties.shadowMapping);
     _shadowMappingPropertyOwner.addProperty(_generalProperties.zFightingPercentage);
@@ -638,105 +642,27 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _localChunkBuffer.resize(2048);
     _traversalMemory.resize(512);
 
-    //================================================================
-    //======== Reads Shadow (Eclipses) Entries in mod file ===========
-    //================================================================
-    ghoul::Dictionary shadowDictionary;
-    bool success = dictionary.getValue(KeyShadowGroup, shadowDictionary);
-    bool disableShadows = false;
-    if (success) {
-        std::vector<std::pair<std::string, double>> sourceArray;
-        unsigned int sourceCounter = 1;
-        while (success) {
-            std::string sourceName;
-            success = shadowDictionary.getValue(KeyShadowSource +
-                std::to_string(sourceCounter) + ".Name", sourceName);
-            if (success) {
-                double sourceRadius;
-                success = shadowDictionary.getValue(KeyShadowSource +
-                    std::to_string(sourceCounter) + ".Radius", sourceRadius);
-                if (success) {
-                    sourceArray.emplace_back(sourceName, sourceRadius);
-                }
-                else {
-                    //LWARNING("No Radius value expecified for Shadow Source Name "
-                    //    << sourceName << " from " << name
-                    //    << " planet.\nDisabling shadows for this planet.");
-                    disableShadows = true;
-                    break;
-                }
-            }
-            sourceCounter++;
-        }
+    _labelsDictionary = p.labels.value_or(_labelsDictionary);
 
-        if (!disableShadows && !sourceArray.empty()) {
-            success = true;
-            std::vector<std::pair<std::string, double>> casterArray;
-            unsigned int casterCounter = 1;
-            while (success) {
-                std::string casterName;
-                success = shadowDictionary.getValue(KeyShadowCaster +
-                    std::to_string(casterCounter) + ".Name", casterName);
-                if (success) {
-                    double casterRadius;
-                    success = shadowDictionary.getValue(KeyShadowCaster +
-                        std::to_string(casterCounter) + ".Radius", casterRadius);
-                    if (success) {
-                        casterArray.emplace_back(casterName, casterRadius);
-                    }
-                    else {
-                        //LWARNING("No Radius value expecified for Shadow Caster Name "
-                        //    << casterName << " from " << name
-                        //    << " planet.\nDisabling shadows for this planet.");
-                        disableShadows = true;
-                        break;
-                    }
-                }
-
-                casterCounter++;
-            }
-
-            std::vector<Ellipsoid::ShadowConfiguration> shadowConfArray;
-            if (!disableShadows && (!sourceArray.empty() && !casterArray.empty())) {
-                for (const std::pair<std::string, double>& source : sourceArray) {
-                    for (const std::pair<std::string, double>& caster : casterArray) {
-                        Ellipsoid::ShadowConfiguration sc;
-                        sc.source = source;
-                        sc.caster = caster;
-                        shadowConfArray.push_back(sc);
-                    }
-                }
-                _ellipsoid.setShadowConfigurationArray(shadowConfArray);
-            }
-        }
-    }
-
-    // Labels Dictionary
-    if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyLabels)) {
-        _labelsDictionary = dictionary.value<ghoul::Dictionary>(KeyLabels);
-    }
 
     // Components
-    if (dictionary.hasKey("Rings")) {
+    _hasRings = p.rings.has_value();
+    if (_hasRings) {
         _ringsComponent.initialize();
         addPropertySubOwner(_ringsComponent);
-        _hasRings = true;
-
-        ghoul::Dictionary ringsDic;
-        dictionary.getValue("Rings", ringsDic);
     }
 
-    if (dictionary.hasKey("Shadows")) {
+    _hasShadows = p.shadows.has_value();
+    if (_hasShadows) {
         _shadowComponent.initialize();
         addPropertySubOwner(_shadowComponent);
-        _hasShadows = true;
         _generalProperties.shadowMapping = true;
     }
     _generalProperties.shadowMapping.onChange(notifyShaderRecompilation);
 }
 
 void RenderableGlobe::initializeGL() {
-    if (!_labelsDictionary.empty()) {
+    if (!_labelsDictionary.isEmpty()) {
         _globeLabelsComponent.initialize(_labelsDictionary, this);
         addPropertySubOwner(_globeLabelsComponent);
     }
@@ -917,9 +843,14 @@ void RenderableGlobe::update(const UpdateData& data) {
         );
     }
 
-    setBoundingSphere(static_cast<float>(
-        _ellipsoid.maximumRadius() * glm::compMax(data.modelTransform.scale)
-    ));
+    double bs = _ellipsoid.maximumRadius() * glm::compMax(data.modelTransform.scale);
+    if (_hasRings) {
+        const double ringSize = _ringsComponent.size();
+        if (ringSize > bs) {
+            bs = ringSize;
+        }
+    }
+    setBoundingSphere(bs);
 
     glm::dmat4 translation =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation);
@@ -1046,6 +977,9 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         _globalRenderer.program->setUniform("orenNayarRoughness", onr);
     }
 
+    _localRenderer.program->setUniform("opacity", _opacity);
+    _globalRenderer.program->setUniform("opacity", _opacity);
+
 
     if (_globalRenderer.updatedSinceLastCall) {
         const std::array<LayerGroup*, LayerManager::NumLayerGroups>& layerGroups =
@@ -1139,14 +1073,6 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         modelViewProjectionTransform
     );
 
-    const bool hasNightLayers = !_layerManager.layerGroup(
-        layergroupid::GroupID::NightLayers
-    ).activeLayers().empty();
-
-    const bool hasWaterLayer = !_layerManager.layerGroup(
-        layergroupid::GroupID::WaterMasks
-    ).activeLayers().empty();
-
     _globalRenderer.program->setUniform("modelViewTransform", modelViewTransform);
 
     const bool hasHeightLayer = !_layerManager.layerGroup(
@@ -1223,7 +1149,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
     int localCount = 0;
 
     auto traversal = [](const Chunk& node, std::vector<const Chunk*>& global,
-        int& globalCount, std::vector<const Chunk*>& local, int& localCount, int cutoff,
+        int& iGlobal, std::vector<const Chunk*>& local, int& iLocal, int cutoff,
         std::vector<const Chunk*>& traversalMemory)
     {
         ZoneScopedN("traversal")
@@ -1238,12 +1164,12 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
 
             if (isLeaf(*n) && n->isVisible) {
                 if (n->tileIndex.level < cutoff) {
-                    global[globalCount] = n;
-                    ++globalCount;
+                    global[iGlobal] = n;
+                    ++iGlobal;
                 }
                 else {
-                    local[localCount] = n;
-                    ++localCount;
+                    local[iLocal] = n;
+                    ++iLocal;
                 }
             }
 
@@ -1290,13 +1216,12 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
     }
     _localRenderer.program->deactivate();
 
-    if (_debugProperties.showChunkBounds || _debugProperties.showChunkAABB) {
+    if (_debugProperties.showChunkBounds) {
         for (int i = 0; i < globalCount; ++i) {
             debugRenderChunk(
                 *_globalChunkBuffer[i],
                 mvp,
-                _debugProperties.showChunkBounds,
-                _debugProperties.showChunkAABB
+                _debugProperties.showChunkBounds
             );
         }
 
@@ -1304,8 +1229,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
             debugRenderChunk(
                 *_localChunkBuffer[i],
                 mvp,
-                _debugProperties.showChunkBounds,
-                _debugProperties.showChunkAABB
+                _debugProperties.showChunkBounds
             );
         }
     }
@@ -1315,7 +1239,8 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
     // After certain number of iterations(_debugProperties.dynamicLodIterationCount) of
     // unavailable/available data in a row, we assume that a change could be made.
     const int iterCount = _debugProperties.dynamicLodIterationCount;
-    const bool exceededIterations = _iterationsOfUnavailableData > iterCount;
+    const bool exceededIterations =
+        static_cast<int>(_iterationsOfUnavailableData) > iterCount;
     const float clf = _generalProperties.currentLodScaleFactor;
     const float clfMin = _generalProperties.currentLodScaleFactor.minValue();
     const float targetLod = _generalProperties.targetLodScaleFactor;
@@ -1326,7 +1251,9 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         _iterationsOfUnavailableData = 0;
         _lodScaleFactorDirty = true;
     } // Make 2 times the iterations with available data to move it up again
-    else if (_iterationsOfAvailableData > (iterCount * 2) && clf < targetLod) {
+    else if (static_cast<int>(_iterationsOfAvailableData) >
+             (iterCount * 2) && clf < targetLod)
+    {
         _generalProperties.currentLodScaleFactor =
             _generalProperties.currentLodScaleFactor + 0.1f;
         _iterationsOfAvailableData = 0;
@@ -1402,6 +1329,13 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
 
         program.setUniform("shadowMapTexture", shadowMapUnit);
         program.setUniform("zFightingPercentage", _generalProperties.zFightingPercentage);
+    }
+    else if (_generalProperties.shadowMapping) {
+        shadowMapUnit.activate();
+        // JCC: Avoiding a to recompiling the shaders or having more than one
+        // set of shaders for this step.
+        glBindTexture(GL_TEXTURE_2D, _shadowComponent.dDepthTexture());
+        program.setUniform("shadowMapTexture", shadowMapUnit);
     }
 
     glEnable(GL_DEPTH_TEST);
@@ -1535,6 +1469,13 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
         program.setUniform("shadowMapTexture", shadowMapUnit);
         program.setUniform("zFightingPercentage", _generalProperties.zFightingPercentage);
     }
+    else if (_generalProperties.shadowMapping) {
+        shadowMapUnit.activate();
+        // JCC: Avoiding a to recompiling the shaders or having more than one
+        // set of shaders for this step.
+        glBindTexture(GL_TEXTURE_2D, _shadowComponent.dDepthTexture());
+        program.setUniform("shadowMapTexture", shadowMapUnit);
+    }
 
     glEnable(GL_DEPTH_TEST);
     if (!renderGeomOnly) {
@@ -1550,7 +1491,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
 }
 
 void RenderableGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp,
-                                       bool renderBounds, bool renderAABB) const
+                                       bool renderBounds) const
 {
     ZoneScoped
 
@@ -1578,12 +1519,6 @@ void RenderableGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp
 
     if (renderBounds) {
         DebugRenderer::ref().renderNiceBox(clippingSpaceCorners, color);
-    }
-
-    if (renderAABB) {
-        const std::vector<glm::vec4>& screenSpacePoints =
-            DebugRenderer::ref().verticesFor(screenSpaceBounds);
-        DebugRenderer::ref().renderNiceBox(screenSpacePoints, color);
     }
 }
 
@@ -1695,8 +1630,12 @@ void RenderableGlobe::recompileShaders() {
     std::vector<std::pair<std::string, std::string>>& pairs =
         preprocessingData.keyValuePairs;
 
+    const bool hasHeightLayer = !_layerManager.layerGroup(
+        layergroupid::HeightLayers
+    ).activeLayers().empty();
+
     pairs.emplace_back("useAccurateNormals",
-        std::to_string(_generalProperties.useAccurateNormals)
+        std::to_string(_generalProperties.useAccurateNormals && hasHeightLayer)
     );
     pairs.emplace_back(
         "performShading",
@@ -1797,7 +1736,7 @@ void RenderableGlobe::recompileShaders() {
     for (int i = 0; i < layergroupid::NUM_LAYER_GROUPS; ++i) {
         layerGroupNames.setValue(
             std::to_string(i),
-            layergroupid::LAYER_GROUP_IDENTIFIERS[i]
+            std::string(layergroupid::LAYER_GROUP_IDENTIFIERS[i])
         );
     }
     shaderDictionary.setValue("layerGroups", layerGroupNames);
@@ -1810,6 +1749,9 @@ void RenderableGlobe::recompileShaders() {
     // Shadow Mapping Samples
     shaderDictionary.setValue("nShadowSamples", _generalProperties.nShadowSamples - 1);
 
+    // Exclise Shadow Samples
+    int nEclipseShadows = static_cast<int>(_ellipsoid.shadowConfigurationArray().size());
+    shaderDictionary.setValue("nEclipseShadows", nEclipseShadows - 1);
     //
     // Create local shader
     //
@@ -1894,7 +1836,7 @@ SurfacePositionHandle RenderableGlobe::calculateSurfacePositionHandle(
     double heightToSurface = getHeight(targetModelSpace);
     heightToSurface = glm::isnan(heightToSurface) ? 0.0 : heightToSurface;
     centerToEllipsoidSurface = glm::isnan(glm::length(centerToEllipsoidSurface)) ?
-        (glm::dvec3(0.0, 1.0, 0.0) * static_cast<double>(boundingSphere())) :
+        (glm::dvec3(0.0, 1.0, 0.0) * interactionSphere()) :
         centerToEllipsoidSurface;
     ellipsoidSurfaceOutDirection = glm::isnan(glm::length(ellipsoidSurfaceOutDirection)) ?
         glm::dvec3(0.0, 1.0, 0.0) : ellipsoidSurfaceOutDirection;
@@ -1961,7 +1903,8 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
     const int x = static_cast<int>(floor(xIndexSpace));
     const int y = static_cast<int>(floor(yIndexSpace));
 
-    const TileIndex tileIndex(x, y, chunkLevel);
+    ghoul_assert(chunkLevel < std::numeric_limits<uint8_t>::max(), "Too high level");
+    const TileIndex tileIndex(x, y, static_cast<uint8_t>(chunkLevel));
     const GeodeticPatch patch = GeodeticPatch(tileIndex);
 
     const Geodetic2 northEast = patch.corner(Quad::NORTH_EAST);
@@ -2396,7 +2339,7 @@ int RenderableGlobe::desiredLevelByAvailableTileData(const Chunk& chunk) const {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 bool RenderableGlobe::isCullableByFrustum(const Chunk& chunk,
-                                          const RenderData& renderData,
+                                          const RenderData&,
                                           const glm::dmat4& mvp) const
 {
     ZoneScoped

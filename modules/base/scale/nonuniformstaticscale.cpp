@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,24 +34,20 @@ namespace {
         "These values are used as scaling factors for the scene graph node that this "
         "transformation is attached to relative to its parent."
     };
+
+    struct [[codegen::Dictionary(NonUniformStaticScale)]] Parameters {
+        // [[codegen::verbatim(ScaleInfo.description)]]
+        glm::dvec3 scale;
+    };
+#include "nonuniformstaticscale_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation NonUniformStaticScale::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "Static Scaling",
-        "base_scale_static",
-        {
-            {
-                ScaleInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::No,
-                ScaleInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_scale_nonuniformstatic";
+    return doc;
 }
 
 glm::dvec3 NonUniformStaticScale::scaleValue(const UpdateData&) const {
@@ -71,9 +67,8 @@ NonUniformStaticScale::NonUniformStaticScale()
 NonUniformStaticScale::NonUniformStaticScale(const ghoul::Dictionary& dictionary)
     : NonUniformStaticScale()
 {
-    documentation::testSpecificationAndThrow(Documentation(), dictionary, "StaticScale");
-
-    _scaleValue = dictionary.value<glm::dvec3>(ScaleInfo.identifier);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    _scaleValue = p.scale;
 }
 
 } // namespace openspace

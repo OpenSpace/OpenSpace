@@ -23,7 +23,7 @@ local tullyPoints = {
         Enabled = true,
         Color = { 1.0, 0.4, 0.2 },
         Opacity = 0.99,
-        ScaleFactor = 500.0,
+        ScaleFactor = 504.0,
         File = speck .. "/tully.speck",
         Texture = textures .. "/point3A.png",
         --ColorMap = speck .. "/tully.cmap",
@@ -46,7 +46,7 @@ local tullyPoints = {
         -- Fade in value in the same unit as "Unit"
         FadeInDistances = { 0.001, 1.0 },
         -- Max size in pixels
-        BillboardMaxSize = 5,
+        BillboardMaxSize = 7,
         BillboardMinSize = 0,
         --CorrectionSizeEndDistance = 22.0,
         --CorrectionSizeFactor = 10.45

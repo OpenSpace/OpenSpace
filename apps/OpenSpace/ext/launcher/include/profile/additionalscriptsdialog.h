@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,12 +45,21 @@ public:
 
 private slots:
     void parseScript();
+    void chooseScripts();
+
+    /**
+     * Adds scripts to the _scriptEdit from outside dialogs
+     *
+     * \param scripts #std::string scripts to be appended
+     */
+    void appendScriptsToTextfield(std::string scripts);
 
 private:
     void createWidgets();
 
     openspace::Profile& _profile;
     QTextEdit* _textScripts = nullptr;
+    QPushButton* _chooseScriptsButton = nullptr;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___ADDITIONALSCRIPTS___H__

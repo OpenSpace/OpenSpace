@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -74,13 +74,18 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
     addProperty(_slice);
     addProperty(_fieldlines);
 
-    dictionary.getValue("kwPath", _kwPath);
+    if (dictionary.hasValue<std::string>("kwPath")) {
+        _kwPath = dictionary.value<std::string>("kwPath");
+    }
 
-    std::string fieldlineIndexFile;
-    dictionary.getValue("fieldlineSeedsIndexFile", _fieldlineIndexFile);
+    if (dictionary.hasValue<std::string>("fieldlineSeedsIndexFile")) {
+        _fieldlineIndexFile = dictionary.value<std::string>("fieldlineSeedsIndexFile");
+    }
 
     std::string axis;
-    dictionary.getValue("axisCut", axis);
+    if (dictionary.hasValue<std::string>("axisCut")) {
+        axis = dictionary.value<std::string>("axisCut");
+    }
 
     if (axis == "x") {
         _cut = Cut::X;
@@ -107,7 +112,7 @@ KameleonPlane::~KameleonPlane() {}
 
 void KameleonPlane::deinitializeGL() {
     IswaCygnet::deinitialize();
-    _fieldlines = std::vector<int>();
+    _fieldlines = std::set<std::string>();
 }
 
 void KameleonPlane::initializeGL() {
@@ -263,16 +268,16 @@ void KameleonPlane::setUniforms() {
 }
 
 void KameleonPlane::updateFieldlineSeeds() {
-    std::vector<int> selectedOptions = _fieldlines.value();
+    std::set<std::string> selectedOptions = _fieldlines;
+    std::vector<std::string> opts = _fieldlines.options();
 
     // seedPath == map<int selectionValue, tuple<string name, string path, bool active>>
-    for (auto& seedPath : _fieldlineState) {
+    using K = int;
+    using V = std::tuple<std::string, std::string, bool>;
+    for (std::pair<const K, V>& seedPath : _fieldlineState) {
         // if this option was turned off
-        const auto it = std::find(
-            selectedOptions.begin(),
-            selectedOptions.end(),
-            seedPath.first
-        );
+        std::string o = opts[seedPath.first];
+        const auto it = std::find(selectedOptions.begin(), selectedOptions.end(), o);
         if (it == selectedOptions.end() && std::get<2>(seedPath.second)) {
             SceneGraphNode* n = global::renderEngine->scene()->sceneGraphNode(
                 std::get<0>(seedPath.second)
@@ -331,7 +336,7 @@ void KameleonPlane::readFieldlinePaths(const std::string& indexFile) {
             const std::string& fullName = identifier();
             std::string partName = fullName.substr(0,fullName.find_last_of("-"));
             for (json::iterator it = fieldlines.begin(); it != fieldlines.end(); ++it) {
-                _fieldlines.addOption({i, it.key()});
+                _fieldlines.addOption(it.key());
                 _fieldlineState[i] = std::make_tuple<std::string, std::string, bool>(
                     partName + "/" + it.key(),
                     it.value(),
@@ -356,14 +361,14 @@ void KameleonPlane::subscribeToGroup() {
     ghoul::Event<ghoul::Dictionary>& groupEvent = _group->groupEvent();
     groupEvent.subscribe(identifier(), "resolutionChanged", [&](ghoul::Dictionary dict) {
         LDEBUG(identifier() + " Event resolutionChanged");
-        if (dict.hasKeyAndValue<float>("resolution")) {
-            _resolution = dict.value<float>("resolution");
+        if (dict.hasKey("resolution") && dict.hasValue<double>("resolution")) {
+            _resolution = static_cast<float>(dict.value<double>("resolution"));
         }
     });
 
     groupEvent.subscribe(identifier(), "cdfChanged", [&](ghoul::Dictionary dict) {
         LDEBUG(identifier() + " Event cdfChanged");
-        if (dict.hasKeyAndValue<std::string>("path")) {
+        if (dict.hasKey("path") && dict.hasValue<std::string>("path")) {
             const std::string& path = dict.value<std::string>("path");
             changeKwPath(path);
         }

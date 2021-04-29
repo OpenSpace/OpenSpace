@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -72,18 +72,19 @@ vec4 getTransferFunctionColor() {
     return texture(colorTable, lookUpVal);
 }
 
-bool isPartOfParticle(const double time, const int vertexId, const int particleSize,
-                      const int particleSpeed, const int particleSpacing) {
+bool isPartOfParticle(double time, int vertexId, int particleSize,
+                      int particleSpeed, int particleSpacing)
+{
     int modulusResult = int(double(particleSpeed) * time + vertexId) % particleSpacing;
     return modulusResult > 0 && modulusResult <= particleSize;
 }
 
 void main() {
-
     bool hasColor = true;
 
     if (usingMasking && (in_masking_scalar < maskingRange.x ||
-                         in_masking_scalar > maskingRange.y )) {
+                         in_masking_scalar > maskingRange.y ))
+    {
         hasColor = false;
     }
 
@@ -93,8 +94,8 @@ void main() {
         if (in_position.x < domainLimX.x || in_position.x > domainLimX.y ||
             in_position.y < domainLimY.x || in_position.y > domainLimY.y ||
             in_position.z < domainLimZ.x || in_position.z > domainLimZ.y ||
-            radius        < domainLimR.x || radius        > domainLimR.y) {
-
+            radius        < domainLimR.x || radius        > domainLimR.y)
+        {
             hasColor = false;
         }
     }

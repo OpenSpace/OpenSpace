@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,20 +25,17 @@
 #ifndef __OPENSPACE_MODULE_BASE___DASHBOARDITEMSIMULATIONINCREMENT___H__
 #define __OPENSPACE_MODULE_BASE___DASHBOARDITEMSIMULATIONINCREMENT___H__
 
-#include <openspace/rendering/dashboarditem.h>
+#include <openspace/rendering/dashboardtextitem.h>
 
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-
-namespace ghoul::fontrendering { class Font; }
 
 namespace openspace {
 
 namespace documentation { struct Documentation; }
 
-class DashboardItemSimulationIncrement : public DashboardItem {
+class DashboardItemSimulationIncrement : public DashboardTextItem {
 public:
     DashboardItemSimulationIncrement(const ghoul::Dictionary& dictionary);
     virtual ~DashboardItemSimulationIncrement() = default;
@@ -49,12 +46,11 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    properties::StringProperty _fontName;
-    properties::FloatProperty _fontSize;
     properties::BoolProperty _doSimplification;
     properties::OptionProperty _requestedUnit;
 
-    std::shared_ptr<ghoul::fontrendering::Font> _font;
+    properties::StringProperty _transitionFormat;
+    properties::StringProperty _regularFormat;
 };
 
 } // namespace openspace

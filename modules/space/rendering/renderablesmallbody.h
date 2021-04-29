@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,7 +38,7 @@
 
 namespace openspace {
 
-static double importAngleValue(const std::string& angle);
+namespace documentation { struct Documentation; }
 
 class RenderableSmallBody : public RenderableOrbitalKepler {
 public:
@@ -48,19 +48,22 @@ public:
 private:
     void readOrbitalParamsFromThisLine(bool firstDataLine, int& fieldCount,
         unsigned int& csvLine, std::ifstream& file);
-    void readDataFile(const std::string& filename);
+    virtual void readDataFile(const std::string& filename) override;
     void initializeFileReading();
     void skipSingleLineInFile(std::ifstream& file);
 
     std::vector<std::string> _sbNames;
+    std::function<void()> _updateContiguousModeSelect;
+    std::function<void()> _updateRenderUpperLimitSelect;
 
     /// The index array that is potentially used in the draw call. If this is empty, no
     /// element draw call is used.
     std::vector<unsigned int> _indexBufferData;
+    properties::BoolProperty _contiguousMode;
+    properties::UIntProperty _upperLimit;
+    properties::Property::OnChangeHandle _contiguousModeCallbackhandle;
+    properties::Property::OnChangeHandle _upperLimitCallbackHandle;
 };
-
-static double importAngleValue(const std::string& angle);
-static std::string& formatObjectName(std::string& name);
 
 } // namespace openspace
 

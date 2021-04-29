@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,8 +40,6 @@
 namespace openspace {
 
 namespace {
-    constexpr const char* _loggerCat = "Profile";
-
     // Helper structs for the visitor pattern of the std::variant
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
     template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
@@ -792,7 +790,7 @@ std::string Profile::convertToScene() const {
                     );
                     if (camera.up.has_value()) {
                         result += fmt::format(
-                            "Up = {{ {}, {}, {} }}, ", 
+                            "Up = {{ {}, {}, {} }}, ",
                             camera.up->x, camera.up->y, camera.up->z
                         );
                     }
@@ -809,7 +807,8 @@ std::string Profile::convertToScene() const {
                     if (camera.altitude.has_value()) {
                         return fmt::format(
                             "openspace.globebrowsing.goToGeo([[{}]], {}, {}, {});\n",
-                            camera.anchor, camera.latitude, camera.longitude, *camera.altitude
+                            camera.anchor,
+                            camera.latitude, camera.longitude, *camera.altitude
                         );
                     }
                     else {

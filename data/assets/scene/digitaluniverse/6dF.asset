@@ -30,7 +30,7 @@ local object = {
         ColorRange = { { 0.0, 0.075 }, { 1.0, 10.0 } },
         Unit = "Mpc",
         ScaleFactor = 534.0,
-        BillboardMaxSize = 7.0,
+        BillboardMaxSize = 9.0,
         EnablePixelSizeControl = true,
     },
     GUI = {

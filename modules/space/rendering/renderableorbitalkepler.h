@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,6 +37,8 @@
 
 namespace openspace {
 
+namespace documentation { struct Documentation; }
+
 class RenderableOrbitalKepler : public Renderable {
 public:
     RenderableOrbitalKepler(const ghoul::Dictionary& dictionary);
@@ -62,9 +64,12 @@ public:
     virtual void readDataFile(const std::string& filename) = 0;
 
 protected:
+    static documentation::Documentation Documentation();
+
     double calculateSemiMajorAxis(double meanMotion) const;
     double epochFromSubstring(const std::string& epochString) const;
     double epochFromYMDdSubstring(const std::string& epochString);
+    void updateBuffers();
 
     std::function<void()> _reinitializeTrailBuffers;
     std::function<void()> _updateStartRenderIdxSelect;
@@ -81,15 +86,15 @@ protected:
         double epoch = 0.0;
         double period = 0.0;
     };
+
+    bool _updateDataBuffersAtNextRender = false;
     std::streamoff _numObjects;
     bool _isFileReadinitialized = false;
     inline static constexpr double convertAuToKm = 1.496e8;
     inline static constexpr double convertDaysToSecs = 86400.0;
     std::vector<KeplerParameters> _data;
     std::vector<size_t> _segmentSize;
-    properties::UIntProperty _upperLimit;
     properties::UIntProperty _segmentQuality;
-    properties::Property::OnChangeHandle _upperLimitCallbackHandle;
     properties::UIntProperty _startRenderIdx;
     properties::UIntProperty _sizeRender;
     properties::Property::OnChangeHandle _startRenderIdxCallbackHandle;
@@ -120,9 +125,7 @@ private:
 
     GLuint _vertexArray;
     GLuint _vertexBuffer;
-    GLuint _indexBuffer;
 
-    void updateBuffers();
 
     ghoul::opengl::ProgramObject* _programObject;
     properties::StringProperty _path;

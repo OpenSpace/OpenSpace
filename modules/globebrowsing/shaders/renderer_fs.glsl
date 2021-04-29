@@ -1,26 +1,26 @@
 /*****************************************************************************************
- *                                                                                       *
- * OpenSpace                                                                             *
- *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
- *                                                                                       *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
- * software and associated documentation files (the "Software"), to deal in the Software *
- * without restriction, including without limitation the rights to use, copy, modify,    *
- * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
- * permit persons to whom the Software is furnished to do so, subject to the following   *
- * conditions:                                                                           *
- *                                                                                       *
- * The above copyright notice and this permission notice shall be included in all copies *
- * or substantial portions of the Software.                                              *
- *                                                                                       *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
- * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
- * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
- * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
- * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
- ****************************************************************************************/
+    *                                                                                       *
+    * OpenSpace                                                                             *
+    *                                                                                       *
+    * Copyright (c) 2014-2021                                                               *
+    *                                                                                       *
+    * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+    * software and associated documentation files (the "Software"), to deal in the Software *
+    * without restriction, including without limitation the rights to use, copy, modify,    *
+    * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+    * permit persons to whom the Software is furnished to do so, subject to the following   *
+    * conditions:                                                                           *
+    *                                                                                       *
+    * The above copyright notice and this permission notice shall be included in all copies *
+    * or substantial portions of the Software.                                              *
+    *                                                                                       *
+    * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+    * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+    * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+    * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+    * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+    * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+    ****************************************************************************************/
 
 #include "fragment.glsl"
 
@@ -71,13 +71,13 @@ uniform float zFightingPercentage;
 
 #if USE_ECLIPSE_SHADOWS
 
-/*******************************************************************************
- ***** ALL CALCULATIONS FOR ECLIPSE ARE IN METERS AND IN WORLD SPACE SYSTEM ****
- *******************************************************************************/
-// JCC: Remove and use dictionary to 
-// decides the number of shadows
-const uint numberOfShadows = 1;
 
+#define NSEclipseShadowsMinusOne #{nEclipseShadows}
+#define NSEclipseShadows (NSEclipseShadowsMinusOne + 1)
+
+/*******************************************************************************
+    ***** ALL CALCULATIONS FOR ECLIPSE ARE IN METERS AND IN WORLD SPACE SYSTEM ****
+    *******************************************************************************/
 struct ShadowRenderingStruct {
     double xu, xp;
     double rs, rc;
@@ -89,51 +89,54 @@ struct ShadowRenderingStruct {
 // Eclipse shadow data
 // JCC: Remove and use dictionary to
 // decides the number of shadows
-uniform ShadowRenderingStruct shadowDataArray[numberOfShadows];
+uniform ShadowRenderingStruct shadowDataArray[NSEclipseShadows];
 uniform int shadows;
 uniform bool hardShadows;
 
-vec4 calcShadow(const ShadowRenderingStruct shadowInfoArray[numberOfShadows],
+vec4 calcShadow(const ShadowRenderingStruct shadowInfoArray[NSEclipseShadows],
                 const dvec3 position, const bool ground)
 {
-    if (shadowInfoArray[0].isShadowing) {
-        dvec3 pc = shadowInfoArray[0].casterPositionVec - position;
-        dvec3 sc_norm = shadowInfoArray[0].sourceCasterVec;
-        dvec3 pc_proj = dot(pc, sc_norm) * sc_norm;
-        dvec3 d = pc - pc_proj;
+    #for i in 0..#{nEclipseShadows}
+        if (shadowInfoArray[#{i}].isShadowing) {
+            dvec3 pc = shadowInfoArray[#{i}].casterPositionVec - position;
+            dvec3 sc_norm = shadowInfoArray[#{i}].sourceCasterVec;
+            dvec3 pc_proj = dot(pc, sc_norm) * sc_norm;
+            dvec3 d = pc - pc_proj;
 
-        float length_d = float(length(d));
-        double length_pc_proj = length(pc_proj);
 
-        float r_p_pi = float(shadowInfoArray[0].rc * (length_pc_proj + shadowInfoArray[0].xp) / shadowInfoArray[0].xp);
-        float r_u_pi = float(shadowInfoArray[0].rc * (shadowInfoArray[0].xu - length_pc_proj) / shadowInfoArray[0].xu);
+            float length_d = float(length(d));
+            double length_pc_proj = length(pc_proj);
 
-        if (length_d < r_u_pi) { // umbra
-            if (ground) {
-#if USE_ECLIPSE_HARD_SHADOWS
-                return vec4(0.2, 0.2, 0.2, 1.0);
-#else
-                // butterworthFunc
-                return vec4(vec3(sqrt(r_u_pi / (r_u_pi + pow(length_d, 2.0)))), 1.0);
-#endif
+            float r_p_pi = float(shadowInfoArray[#{i}].rc * (length_pc_proj + shadowInfoArray[#{i}].xp) / shadowInfoArray[#{i}].xp);
+            float r_u_pi = float(shadowInfoArray[#{i}].rc * (shadowInfoArray[#{i}].xu - length_pc_proj) / shadowInfoArray[#{i}].xu);
+
+            if (length_d < r_u_pi) { // umbra
+                if (ground) {
+    #if USE_ECLIPSE_HARD_SHADOWS
+                    return vec4(0.2, 0.2, 0.2, 1.0);
+    #else
+                    // butterworthFunc
+                    return vec4(vec3(sqrt(r_u_pi / (r_u_pi + pow(length_d, 2.0)))), 1.0);
+    #endif
+                }
+                else {
+    #if USE_ECLIPSE_HARD_SHADOWS
+                    return vec4(0.5, 0.5, 0.5, 1.0);
+    #else
+                    return vec4(vec3(length_d / r_p_pi), 1.0);
+    #endif
+                }
             }
-            else {
-#if USE_ECLIPSE_HARD_SHADOWS
-                return vec4(0.5, 0.5, 0.5, 1.0);
-#else
+            else if (length_d < r_p_pi) {// penumbra
+    #if USE_ECLIPSE_HARD_SHADOWS
+                return vec4(0.5, 0.5, 0.5, 1.0); 
+    #else
                 return vec4(vec3(length_d / r_p_pi), 1.0);
-#endif
+    #endif
             }
         }
-        else if (length_d < r_p_pi) {// penumbra
-#if USE_ECLIPSE_HARD_SHADOWS
-            return vec4(0.5, 0.5, 0.5, 1.0); 
-#else
-            return vec4(vec3(length_d / r_p_pi), 1.0);
-#endif
-        }
-    }
 
+    #endfor
     return vec4(1.0);
 }
 #endif
@@ -153,6 +156,7 @@ in vec3 positionCameraSpace;
 in vec3 positionWorldSpace;
 #endif // USE_ECLIPSE_SHADOWS
 
+uniform float opacity;
 
 
 Fragment getFragment() {
@@ -292,6 +296,8 @@ Fragment getFragment() {
     }
     frag.color.xyz *= shadow < 0.99 ? clamp(shadow + 0.3, 0.0, 1.0) : shadow;
 #endif
+
+    frag.color.a *= opacity;
 
     return frag;
 }

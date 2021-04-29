@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2020                                                                #
+# Copyright (c) 2014-2021                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -25,19 +25,19 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablefieldlines.h
+  rendering/renderablefieldlines.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablefieldlines.cpp
+  rendering/renderablefieldlines.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fieldline_fs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fieldline_gs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fieldline_vs.glsl
+  shaders/fieldline_fs.glsl
+  shaders/fieldline_gs.glsl
+  shaders/fieldline_vs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,17 +24,18 @@
 
 #include <modules/volume/rendering/basicvolumeraycaster.h>
 
+#include <modules/volume/rendering/volumeclipplanes.h>
+#include <modules/volume/transferfunctionhandler.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/rendering/transferfunction.h>
+#include <openspace/util/updatestructures.h>
 #include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <sstream>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
-#include <openspace/util/updatestructures.h>
-#include <openspace/rendering/renderable.h>
-#include <modules/volume/transferfunctionhandler.h>
-#include <modules/volume/rendering/volumeclipplanes.h>
 #include <ghoul/opengl/texture.h>
+#include <sstream>
 
 namespace {
     constexpr const char* GlslRaycastPath = "${MODULE_VOLUME}/shaders/raycast.glsl";
@@ -134,8 +135,8 @@ void BasicVolumeRaycaster::preRaycast(const RaycastData& data,
     int nClips = static_cast<int>(clipNormals.size());
 
     program.setUniform("nClips_" + id, nClips);
-    program.setUniform("clipNormals_" + id, clipNormals.data(), nClips);
-    program.setUniform("clipOffsets_" + id, clipOffsets.data(), nClips);
+    program.setUniform("clipNormals_" + id, clipNormals);
+    program.setUniform("clipOffsets_" + id, clipOffsets);
     program.setUniform("opacity_" + id, _opacity);
     program.setUniform("rNormalization_" + id, _rNormalization);
     program.setUniform("rUpperBound_" + id, _rUpperBound);

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -126,12 +126,8 @@ private:
 
     std::shared_ptr<TransferFunction> _transferFunction;
 
-    float _spatialTolerance;
-    float _temporalTolerance;
-
     std::shared_ptr<TSP> _tsp;
     std::vector<int> _brickIndices;
-    int _atlasMapSize = 0;
 
     std::shared_ptr<AtlasManager> _atlasManager;
 

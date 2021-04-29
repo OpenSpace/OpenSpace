@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -123,7 +123,8 @@ glm::vec4 Envelope::valueAtPosition(float pos) const {
                 beforeIter->color * (std::fabs(pos - afterIter->position.first) / dist) +
                 afterIter->color * (std::fabs(pos - beforeIter->position.first) / dist)
             ),
-            beforeIter->position.second * (std::fabs(pos - afterIter->position.first) / dist) +
+            beforeIter->position.second *
+                (std::fabs(pos - afterIter->position.first) / dist) +
                 afterIter->position.second *
                 (std::fabs(pos - beforeIter->position.first) / dist)
         };
@@ -155,11 +156,9 @@ std::string EnvelopePoint::decimalToHexadecimal(int dec) const {
         return "00";
     }
 
-    int hex = dec;
     std::string hexStr;
-
     while (dec > 0) {
-        hex = dec % 16;
+        int hex = dec % 16;
 
         if (hex < 10) {
             hexStr = hexStr.insert(0, std::string(1, static_cast<char>(hex + 48)));

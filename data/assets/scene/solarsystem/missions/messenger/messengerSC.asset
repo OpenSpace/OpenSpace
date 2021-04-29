@@ -7,7 +7,7 @@ local models = asset.syncedResource({
     Name = "Messenger Models",
     Type = "HttpSynchronization",
     Identifier = "messenger_model",
-    Version = 1
+    Version = 2
 })
 
 local kernels = asset.syncedResource({
@@ -92,11 +92,7 @@ local MessengerProbeBlack = {
     Parent = Messenger.Identifier,
     Renderable = {
         Type = "RenderableModel",
-        Geometry = {{
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/MessengerProbe_black.obj",
-            ColorTexture = models .. "/Tex_black.png"
-        }},
+        GeometryFile = models .. "/MessengerProbe_black.obj",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -111,11 +107,7 @@ local MessengerProbeFoil = {
     Parent = Messenger.Identifier,
     Renderable = {
         Type = "RenderableModel",
-        Geometry = {{
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/MessengerProbe_foil.obj",
-            ColorTexture = models .. "/foil_n2.png"
-        }},
+        GeometryFile = models .. "/MessengerProbe_foil.obj",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -130,11 +122,7 @@ local MessengerProbeHeatShield = {
     Parent = Messenger.Identifier,
     Renderable = {
         Type = "RenderableModel",
-        Geometry = {{
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/MessengerProbe_heatShield.obj",
-            ColorTexture = models .. "/AO_heatshield4.png"
-        }},
+        GeometryFile = models .. "/MessengerProbe_heatShield.obj",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -149,11 +137,7 @@ local MessengerProbeMetal = {
     Parent = Messenger.Identifier,
     Renderable = {
         Type = "RenderableModel",
-        Geometry = {{
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/MessengerProbe_metal.obj",
-            ColorTexture = models .. "/Tex_grey.png"
-        }},
+        GeometryFile = models .. "/MessengerProbe_metal.obj",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -169,11 +153,7 @@ local MessengerProbePanels = {
     Parent = Messenger.Identifier,
     Renderable = {
         Type = "RenderableModel",
-        Geometry = {{
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/MessengerProbe_panels.obj",
-            ColorTexture = models .. "/Messenger_tex.png"
-        }},
+        GeometryFile = models .. "/MessengerProbe_panels.obj",
         ModelTransform = RotationMatrix,
         LightSources = LightSources
     },
@@ -192,7 +172,7 @@ local MessengerTrail = {
             Type = "SpiceTranslation",
             Target = "MESSENGER",
             Observer = "MERCURY BARYCENTER",
-            Kernels = Kernels
+            Kernels = LocalKernels
         },
         Color = { 0.288, 0.375, 0.934 },
         EnableFade = false,

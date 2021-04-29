@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,6 +23,8 @@
  ****************************************************************************************/
 
 #include <ghoul/filesystem/filesystem.h>
+#include <openspace/engine/globals.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace openspace::luascriptfunctions {
 
@@ -101,6 +103,131 @@ int unloadKernel(lua_State* L) {
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
+}
+
+/**
+ * spiceBodies():
+ * Returns the list of bodies loaded into the spicemanager
+ */
+int spiceBodies(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, { 1,2 }, "lua::getSpiceBodies");
+    bool isBool = (lua_isboolean(L, 1) == 1);
+    const bool buildInBodies = isBool ? ghoul::lua::value<bool>(L, 1) : false;
+
+    isBool = (lua_isboolean(L, 2) == 1);
+    bool printValues = isBool ? ghoul::lua::value<bool>(L, 2) : false;
+    lua_settop(L, 0);
+    std::vector<std::pair<int, std::string>> bodies = SpiceManager::ref().spiceBodies(
+        buildInBodies
+    );
+
+    lua_newtable(L);
+    int number = 1;
+    for (const std::pair<int, std::string>& body : bodies) {
+        lua_newtable(L);
+        ghoul::lua::push(L, 1, body.first);
+        lua_rawset(L, -3);
+        ghoul::lua::push(L, 2, body.second);
+        lua_rawset(L, -3);
+        lua_rawseti(L, -2, number);
+        ++number;
+
+        if (printValues) {
+            LINFO(fmt::format("Body id '{}' and name: {}", body.first, body.second));
+        }
+    }
+
+    return 1;
+}
+
+//internal function for getSpk and getCk coverages
+void buildLuaCoverageStack(lua_State* L,
+                           const std::vector<std::pair<double, double>>& coverage,
+                           bool printValues)
+{
+    lua_settop(L, 0);
+    lua_newtable(L);
+    int number = 1;
+    for (const std::pair<double, double>& window : coverage) {
+        std::string start = SpiceManager::ref().dateFromEphemerisTime(window.first);
+        std::string end = SpiceManager::ref().dateFromEphemerisTime(window.second);
+
+        if (printValues) {
+            LINFO(fmt::format(
+                "Coverage start {} and end: {}",
+                SpiceManager::ref().dateFromEphemerisTime(window.first),
+                SpiceManager::ref().dateFromEphemerisTime(window.second)
+            ));
+        }
+
+        lua_newtable(L);
+        ghoul::lua::push(L, 1, start);
+        lua_rawset(L, -3);
+        ghoul::lua::push(L, 2, end);
+        lua_rawset(L, -3);
+        lua_rawseti(L, -2, number);
+        ++number;
+    }
+}
+
+/**
+ * getSpkCoverage({string, bool(optional)}):
+ * Returns the spk coverage for given body
+ */
+int spkCoverage(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, { 1, 2 }, "lua::getSpkCoverage");
+    const bool isString = (lua_isstring(L, 1) == 1);
+    const bool isBool = (lua_isboolean(L, 2) == 1);
+
+    if (!isString) {
+        LERRORC(
+            "getSpkCoverage",
+            fmt::format(
+                "{}: Expected argument of type 'string'",
+                ghoul::lua::errorLocation(L)
+            )
+        );
+        lua_settop(L, 0);
+        ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+        return 0;
+    }
+
+    std::string argument = ghoul::lua::value<std::string>(L, 1);
+
+    bool printValues = isBool ? ghoul::lua::value<bool>(L, 2) : false;
+    buildLuaCoverageStack(L, SpiceManager::ref().spkCoverage(argument), printValues);
+
+    return 1;
+}
+
+/**
+ * getCkCoverage({string, bool(optional)}):
+ * Returns the spk coverage for given body
+ */
+int ckCoverage(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, { 1, 2 }, "lua::getCkCoverage");
+
+    const bool isString = (lua_isstring(L, 1) == 1);
+    const bool isBool = (lua_isboolean(L, 2) == 1);
+
+    if (!isString) {
+        LERRORC(
+            "getCkCoverage",
+            fmt::format(
+                "{}: Expected argument of type 'string'",
+                ghoul::lua::errorLocation(L)
+            )
+        );
+        lua_settop(L, 0);
+        ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+        return 0;
+    }
+
+    std::string argument = ghoul::lua::value<std::string>(L, 1);
+    bool printValues = isBool ? ghoul::lua::value<bool>(L, 2) : false;
+    buildLuaCoverageStack(L, SpiceManager::ref().ckCoverage(argument), printValues);
+
+    return 1;
 }
 
 } // namespace openspace::luascriptfunctions

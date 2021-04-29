@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -71,7 +71,6 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
-#include <ghoul/logging/consolelog.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
 #include <ghoul/misc/profiling.h>
@@ -83,6 +82,7 @@
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <glbinding/glbinding.h>
 #include <glbinding-aux/types_to_string.h>
+#include <filesystem>
 #include <future>
 #include <numeric>
 #include <sstream>
@@ -220,6 +220,7 @@ void OpenSpaceEngine::initialize() {
     }
 
 
+
     // Initialize the requested logs from the configuration file
     // We previously initialized the LogManager with a console log to provide some logging
     // until we know which logs should be added
@@ -234,7 +235,6 @@ void OpenSpaceEngine::initialize() {
 
     using ImmediateFlush = ghoul::logging::LogManager::ImmediateFlush;
     ghoul::logging::LogManager::initialize(level, ImmediateFlush(immediateFlush));
-    LogMgr.addLog(std::make_unique<ghoul::logging::ConsoleLog>());
 
     for (const ghoul::Dictionary& log : global::configuration->logging.logs) {
         try {
@@ -297,8 +297,14 @@ void OpenSpaceEngine::initialize() {
         std::string outputScenePath = absPath("${TEMPORARY}");
         std::string inputProfile = inputProfilePath + "/" + global::configuration->profile
             + ".profile";
+        std::string inputUserProfile = absPath("${USER_PROFILES}") + "/" +
+            global::configuration->profile + ".profile";
         std::string outputAsset = outputScenePath + "/" + global::configuration->profile
             + ".asset";
+
+        if (FileSys.fileExists(inputUserProfile)) {
+            inputProfile = inputUserProfile;
+        }
 
         if (!FileSys.fileExists(inputProfile)) {
             LERROR(fmt::format(
@@ -370,7 +376,7 @@ void OpenSpaceEngine::initialize() {
 
     global::renderEngine->initialize();
 
-    for (const std::function<void()>& func : global::callback::initialize) {
+    for (const std::function<void()>& func : *global::callback::initialize) {
         ZoneScopedN("[Module] initialize")
 
         func();
@@ -410,8 +416,6 @@ void OpenSpaceEngine::initializeGL() {
     glbinding::Binding::initialize(global::windowDelegate->openGLProcedureAddress);
     //glbinding::Binding::useCurrentContext();
 
-    rendering::helper::initialize();
-
     LDEBUG("Adding system components");
     // Detect and log OpenCL and OpenGL versions and available devices
     SysCap.addComponent(
@@ -421,7 +425,6 @@ void OpenSpaceEngine::initializeGL() {
         std::make_unique<ghoul::systemcapabilities::OpenGLCapabilitiesComponent>()
     );
 
-    // @BUG:  This will call OpenGL functions, should it should be in the initializeGL
     LDEBUG("Detecting capabilities");
     SysCap.detectCapabilities();
 
@@ -460,6 +463,8 @@ void OpenSpaceEngine::initializeGL() {
             }
         }
     }
+
+    rendering::helper::initialize();
 
     loadFonts();
 
@@ -633,7 +638,7 @@ void OpenSpaceEngine::initializeGL() {
                     call.parameters.begin(),
                     call.parameters.end(),
                     std::string("("),
-                    [](std::string a, const std::unique_ptr<AbstractValue>& v) {
+                    [](const std::string& a, const std::unique_ptr<AbstractValue>& v) {
                         std::stringstream s;
                         s << v.get();
                         return a + s.str() + ", ";
@@ -663,7 +668,7 @@ void OpenSpaceEngine::initializeGL() {
     global::moduleEngine->initializeGL();
 
 
-    for (const std::function<void()>& func : global::callback::initializeGL) {
+    for (const std::function<void()>& func : *global::callback::initializeGL) {
         ZoneScopedN("[Module] initializeGL")
         func();
     }
@@ -793,12 +798,8 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
                 progressInfo.progress = (*it)->progress();
 
                 if ((*it)->nTotalBytesIsKnown()) {
-                    progressInfo.currentSize = static_cast<uint64_t>(
-                        (*it)->nSynchronizedBytes()
-                    );
-                    progressInfo.totalSize = static_cast<uint64_t>(
-                        (*it)->nTotalBytes()
-                    );
+                    progressInfo.currentSize = (*it)->nSynchronizedBytes();
+                    progressInfo.totalSize = (*it)->nTotalBytes();
                 }
 
                 loading = true;
@@ -865,7 +866,7 @@ void OpenSpaceEngine::deinitialize() {
 
     LTRACE("OpenSpaceEngine::deinitialize(begin)");
 
-    for (const std::function<void()>& func : global::callback::deinitialize) {
+    for (const std::function<void()>& func : *global::callback::deinitialize) {
         func();
     }
 
@@ -914,7 +915,7 @@ void OpenSpaceEngine::deinitializeGL() {
     global::openSpaceEngine->_scene = nullptr;
     global::renderEngine->setScene(nullptr);
 
-    for (const std::function<void()>& func : global::callback::deinitializeGL) {
+    for (const std::function<void()>& func : *global::callback::deinitializeGL) {
         func();
     }
 
@@ -949,6 +950,23 @@ void OpenSpaceEngine::writeStaticDocumentation() {
         _documentationJson += "\"identifier\":\"" + FactoryManager::ref().jsonName();
         _documentationJson += "\",\"data\":" + FactoryManager::ref().generateJson();
         _documentationJson += "},";
+    }
+}
+
+void OpenSpaceEngine::createUserDirectoriesIfNecessary() {
+    LTRACE(absPath("${USER}"));
+
+    if (!std::filesystem::exists(absPath("${USER_ASSETS}"))) {
+        FileSys.createDirectory(absPath("${USER_ASSETS}"),
+            ghoul::filesystem::FileSystem::Recursive::Yes);
+    }
+    if (!std::filesystem::exists(absPath("${USER_PROFILES}"))) {
+        FileSys.createDirectory(absPath("${USER_PROFILES}"),
+            ghoul::filesystem::FileSystem::Recursive::Yes);
+    }
+    if (!std::filesystem::exists(absPath("${USER_CONFIG}"))) {
+        FileSys.createDirectory(absPath("${USER_CONFIG}"),
+            ghoul::filesystem::FileSystem::Recursive::Yes);
     }
 }
 
@@ -1017,7 +1035,7 @@ void OpenSpaceEngine::writeSceneDocumentation() {
             &properties::PropertyOwner::generateJson,
             global::rootPropertyOwner
         );
-        
+
         std::future<std::string> scene = std::async(
             &properties::PropertyOwner::generateJson,
             _scene.get()
@@ -1125,7 +1143,7 @@ void OpenSpaceEngine::preSynchronization() {
         global::interactionMonitor->updateActivityState();
     }
 
-    for (const std::function<void()>& func : global::callback::preSync) {
+    for (const std::function<void()>& func : *global::callback::preSync) {
         ZoneScopedN("[Module] preSync")
 
         func();
@@ -1180,7 +1198,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
         _scene->camera()->invalidateCache();
     }
 
-    for (const std::function<void()>& func : global::callback::postSyncPreDraw) {
+    for (const std::function<void()>& func : *global::callback::postSyncPreDraw) {
         ZoneScopedN("[Module] postSyncPreDraw")
 
         func();
@@ -1226,7 +1244,7 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& view
 
     global::renderEngine->render(sceneMatrix, viewMatrix, projectionMatrix);
 
-    for (const std::function<void()>& func : global::callback::render) {
+    for (const std::function<void()>& func : *global::callback::render) {
         ZoneScopedN("[Module] render")
 
         func();
@@ -1251,7 +1269,7 @@ void OpenSpaceEngine::drawOverlays() {
         global::sessionRecording->render();
     }
 
-    for (const std::function<void()>& func : global::callback::draw2D) {
+    for (const std::function<void()>& func : *global::callback::draw2D) {
         ZoneScopedN("[Module] draw2D")
 
         func();
@@ -1267,7 +1285,7 @@ void OpenSpaceEngine::postDraw() {
 
     global::renderEngine->postDraw();
 
-    for (const std::function<void()>& func : global::callback::postDraw) {
+    for (const std::function<void()>& func : *global::callback::postDraw) {
         ZoneScopedN("[Module] postDraw")
 
         func();
@@ -1317,7 +1335,7 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
     }
 
     using F = std::function<bool (Key, KeyModifier, KeyAction)>;
-    for (const F& func : global::callback::keyboard) {
+    for (const F& func : *global::callback::keyboard) {
         const bool isConsumed = func(key, mod, action);
         if (isConsumed) {
             return;
@@ -1340,7 +1358,7 @@ void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier)
     ZoneScoped
 
     using F = std::function<bool (unsigned int, KeyModifier)>;
-    for (const F& func : global::callback::character) {
+    for (const F& func : *global::callback::character) {
         bool isConsumed = func(codepoint, modifier);
         if (isConsumed) {
             return;
@@ -1358,7 +1376,7 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button,
     ZoneScoped
 
     using F = std::function<bool (MouseButton, MouseAction, KeyModifier)>;
-    for (const F& func : global::callback::mouseButton) {
+    for (const F& func : *global::callback::mouseButton) {
         bool isConsumed = func(button, action, mods);
         if (isConsumed) {
             // If the mouse was released, we still want to forward it to the navigation
@@ -1390,7 +1408,7 @@ void OpenSpaceEngine::mousePositionCallback(double x, double y) {
     ZoneScoped
 
     using F = std::function<void (double, double)>;
-    for (const F& func : global::callback::mousePosition) {
+    for (const F& func : *global::callback::mousePosition) {
         func(x, y);
     }
 
@@ -1404,7 +1422,7 @@ void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY) {
     ZoneScoped
 
     using F = std::function<bool (double, double)>;
-    for (const F& func : global::callback::mouseScrollWheel) {
+    for (const F& func : *global::callback::mouseScrollWheel) {
         bool isConsumed = func(posX, posY);
         if (isConsumed) {
             return;
@@ -1419,7 +1437,7 @@ void OpenSpaceEngine::touchDetectionCallback(TouchInput input) {
     ZoneScoped
 
     using F = std::function<bool (TouchInput)>;
-    for (const F& func : global::callback::touchDetected) {
+    for (const F& func : *global::callback::touchDetected) {
         bool isConsumed = func(input);
         if (isConsumed) {
             return;
@@ -1431,7 +1449,7 @@ void OpenSpaceEngine::touchUpdateCallback(TouchInput input) {
     ZoneScoped
 
     using F = std::function<bool(TouchInput)>;
-    for (const F& func : global::callback::touchUpdated) {
+    for (const F& func : *global::callback::touchUpdated) {
         bool isConsumed = func(input);
         if (isConsumed) {
             return;
@@ -1443,11 +1461,57 @@ void OpenSpaceEngine::touchExitCallback(TouchInput input) {
     ZoneScoped
 
     using F = std::function<void(TouchInput)>;
-    for (const F& func : global::callback::touchExit) {
+    for (const F& func : *global::callback::touchExit) {
         func(input);
     }
 }
 
+void OpenSpaceEngine::handleDragDrop(const std::string& file) {
+    std::filesystem::path f(file);
+
+    ghoul::lua::LuaState s(ghoul::lua::LuaState::IncludeStandardLibrary::Yes);
+    std::string absolutePath = absPath("${SCRIPTS}/drag_drop_handler.lua");
+    int status = luaL_loadfile(s, absolutePath.c_str());
+    if (status != LUA_OK) {
+        std::string error = lua_tostring(s, -1);
+        LERROR(error);
+        return;
+    }
+
+    ghoul::lua::push(s, file);
+    lua_setglobal(s, "filename");
+
+    std::string basename = f.filename().string();
+    ghoul::lua::push(s, basename);
+    lua_setglobal(s, "basename");
+
+    std::string extension = f.extension().string();
+    std::transform(
+        extension.begin(), extension.end(),
+        extension.begin(),
+        [](char c) { return static_cast<char>(::tolower(c)); }
+    );
+    ghoul::lua::push(s, extension);
+    lua_setglobal(s, "extension");
+
+    status = lua_pcall(s, 0, 1, 0);
+    if (status != LUA_OK) {
+        std::string error = lua_tostring(s, -1);
+        LERROR(error);
+        return;
+    }
+
+    if (lua_isnil(s, -1)) {
+        LWARNING(fmt::format("Unhandled file dropped: {}", file));
+        return;
+    }
+
+    std::string script = ghoul::lua::value<std::string>(s);
+    global::scriptEngine->queueScript(
+        script,
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
+}
 
 std::vector<std::byte> OpenSpaceEngine::encode() {
     ZoneScoped
@@ -1542,6 +1606,17 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
                 {},
                 "string, string",
                 "Removes a tag (second argument) from a scene graph node (first argument)"
+            },
+            {
+                "createSingleColorImage",
+                &luascriptfunctions::createSingleColorImage,
+                {},
+                "string, vec3",
+                "Creates a 1 pixel image with a certain color in the cache folder and "
+                "returns the path to the file. If a cached file with the given name "
+                "already exists, the path to that file is returned. The first argument "
+                "is the name of the file, without extension. The second is the RGB "
+                "color, given as {r, g, b} with values between 0 and 1."
             },
             {
                 "isMaster",

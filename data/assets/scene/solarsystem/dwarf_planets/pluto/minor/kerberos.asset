@@ -11,8 +11,7 @@ local Kerberos = {
         Translation = {
             Type = "SpiceTranslation",
             Target = "KERBEROS",
-            Observer = "PLUTO BARYCENTER",
-            Kernels = PlutoKernels
+            Observer = "PLUTO BARYCENTER"
         }
     },
     Renderable = {

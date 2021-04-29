@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,8 +34,8 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
-
 #include <cmath>
+#include <optional>
 
 namespace {
     constexpr const char* ProgramName = "EphemerisProgram";
@@ -71,11 +71,17 @@ namespace {
     };
 
     // Fragile! Keep in sync with documentation
-    const std::map<std::string, openspace::Renderable::RenderBin> RenderBinModeConversion = {
+    const std::map<std::string, openspace::Renderable::RenderBin> RenderBinConversion = {
         { "Background", openspace::Renderable::RenderBin::Background },
         { "Opaque", openspace::Renderable::RenderBin::Opaque },
-        { "PreDeferredTransparent", openspace::Renderable::RenderBin::PreDeferredTransparent},
-        { "PostDeferredTransparent", openspace::Renderable::RenderBin::PostDeferredTransparent}
+        {
+            "PreDeferredTransparent",
+            openspace::Renderable::RenderBin::PreDeferredTransparent
+        },
+        {
+            "PostDeferredTransparent",
+            openspace::Renderable::RenderBin::PostDeferredTransparent
+        }
     };
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
@@ -139,64 +145,45 @@ namespace {
         "atmospheres if needed."
     };
 
+    struct [[codegen::Dictionary(RenderableTrail)]] Parameters {
+        // This object is used to compute locations along the path. Any Translation object
+        // can be used here
+        ghoul::Dictionary translation
+            [[codegen::reference("core_transform_translation")]];
+
+        // [[codegen::verbatim(LineColorInfo.description)]]
+        glm::vec3 color [[codegen::color()]];
+
+        // [[codegen::verbatim(EnableFadeInfo.description)]]
+        std::optional<bool> enableFade;
+
+        // [[codegen::verbatim(FadeInfo.description)]]
+        std::optional<float> fade;
+
+        // [[codegen::verbatim(LineWidthInfo.description)]]
+        std::optional<float> lineWidth;
+
+        // [[codegen::verbatim(PointSizeInfo.description)]]
+        std::optional<int> pointSize;
+
+        enum class RenderingMode {
+            Lines,
+            Points,
+            LinesPoints [[codegen::key("Lines+Points")]],
+            PointsLines [[codegen::key("Lines+Points")]]
+        };
+        // [[codegen::verbatim(RenderingModeInfo.description)]]
+        std::optional<RenderingMode> renderingMode [[codegen::key("Rendering")]];
+    };
+#include "renderabletrail_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableTrail::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderableTrail",
-        "base_renderable_renderabletrail",
-        {
-            {
-                KeyTranslation,
-                new ReferencingVerifier("core_transform_translation"),
-                Optional::No,
-                "This object is used to compute locations along the path. Any "
-                "Translation object can be used here."
-            },
-            {
-                LineColorInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::No,
-                LineColorInfo.description
-            },
-            {
-                EnableFadeInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                EnableFadeInfo.description
-            },
-            {
-                FadeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                FadeInfo.description
-            },
-            {
-                LineWidthInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                LineWidthInfo.description
-            },
-            {
-                PointSizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                PointSizeInfo.description
-            },
-            {
-                RenderingModeInfo.identifier,
-                new StringInListVerifier(
-                    // Taken from the RenderingModeConversion map above
-                    { "Lines", "Points", "Lines+Points", "Points+Lines" }
-                ),
-                Optional::Yes,
-                RenderingModeInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_renderable_renderabletrail";
+    return doc;
 }
 
 RenderableTrail::Appearance::Appearance()
@@ -217,6 +204,7 @@ RenderableTrail::Appearance::Appearance()
         { RenderingModeLinesPoints, "Lines+Points" }
     });
 
+    lineColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(lineColor);
     addProperty(useLineFade);
     addProperty(lineFade);
@@ -228,6 +216,8 @@ RenderableTrail::Appearance::Appearance()
 RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
 {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
     setRenderBin(RenderBin::Overlay);
     addProperty(_opacity);
 
@@ -236,36 +226,25 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     );
     addPropertySubOwner(_translation.get());
 
-    _appearance.lineColor = dictionary.value<glm::vec3>(LineColorInfo.identifier);
+    _appearance.lineColor = p.color;
+    _appearance.useLineFade = p.enableFade.value_or(_appearance.useLineFade);
+    _appearance.lineFade = p.fade.value_or(_appearance.lineFade);
+    _appearance.lineWidth = p.lineWidth.value_or(_appearance.lineWidth);
+    _appearance.pointSize = p.pointSize.value_or(_appearance.pointSize);
 
-    if (dictionary.hasKeyAndValue<bool>(EnableFadeInfo.identifier)) {
-        _appearance.useLineFade = dictionary.value<bool>(EnableFadeInfo.identifier);
-    }
-
-    if (dictionary.hasKeyAndValue<double>(FadeInfo.identifier)) {
-        _appearance.lineFade = static_cast<float>(
-            dictionary.value<double>(FadeInfo.identifier)
-        );
-    }
-
-    if (dictionary.hasKeyAndValue<double>(LineWidthInfo.identifier)) {
-        _appearance.lineWidth = static_cast<float>(dictionary.value<double>(
-            LineWidthInfo.identifier
-        ));
-    }
-
-    if (dictionary.hasKeyAndValue<double>(PointSizeInfo.identifier)) {
-        _appearance.pointSize = static_cast<int>(
-            dictionary.value<double>(PointSizeInfo.identifier)
-        );
-    }
-
-    // This map is not accessed out of order as long as the Documentation is adapted
-    // whenever the map changes. The documentation will check for valid values
-    if (dictionary.hasKeyAndValue<std::string>(RenderingModeInfo.identifier)) {
-        _appearance.renderingModes = RenderingModeConversion.at(
-            dictionary.value<std::string>(RenderingModeInfo.identifier)
-        );
+    if (p.renderingMode.has_value()) {
+        switch (*p.renderingMode) {
+            case Parameters::RenderingMode::Lines:
+                _appearance.renderingModes = RenderingModeLines;
+                break;
+            case Parameters::RenderingMode::Points:
+                _appearance.renderingModes = RenderingModePoints;
+                break;
+            case Parameters::RenderingMode::LinesPoints:
+            case Parameters::RenderingMode::PointsLines:
+                _appearance.renderingModes = RenderingModeLinesPoints;
+                break;
+        }
     }
     else {
         _appearance.renderingModes = RenderingModeLines;
@@ -273,8 +252,8 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
 
     addPropertySubOwner(_appearance);
 
-    if (dictionary.hasKeyAndValue<std::string>(RenderBinModeInfo.identifier)) {
-        openspace::Renderable::RenderBin cfgRenderBin = RenderBinModeConversion.at(
+    if (dictionary.hasValue<std::string>(RenderBinModeInfo.identifier)) {
+        openspace::Renderable::RenderBin cfgRenderBin = RenderBinConversion.at(
             dictionary.value<std::string>(RenderBinModeInfo.identifier)
         );
         setRenderBin(cfgRenderBin);
@@ -327,7 +306,7 @@ bool RenderableTrail::isReady() const {
 
 void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
                                      const RenderData& data,
-                                     const glm::dmat4& modelTransform, 
+                                     const glm::dmat4& modelTransform,
                                      RenderInformation& info, int nVertices, int offset)
 {
     ZoneScoped
@@ -340,11 +319,12 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
         data.camera.combinedViewMatrix() * modelTransform * info._localTransform
     );
 
-    const int sorting = [](RenderInformation::VertexSorting sorting) {
-        switch (sorting) {
+    const int sorting = [](RenderInformation::VertexSorting s) {
+        switch (s) {
             case RenderInformation::VertexSorting::NewestFirst: return 0;
             case RenderInformation::VertexSorting::OldestFirst: return 1;
-            case RenderInformation::VertexSorting::NoSorting: return 2;
+            case RenderInformation::VertexSorting::NoSorting:   return 2;
+            default:                                  throw ghoul::MissingCaseException();
         }
     }(info.sorting);
 
@@ -420,7 +400,7 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
         }
     }
 }
-#pragma optimize("", off)
+
 void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     ZoneScoped
 

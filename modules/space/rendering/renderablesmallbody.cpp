@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,100 +46,129 @@
 #include <vector>
 
 namespace {
-    constexpr const char* ProgramName = "RenderableSmallBody";
     constexpr const char* _loggerCat = "SmallSolarSystemBody";
 
-    static const openspace::properties::Property::PropertyInfo PathInfo = {
-        "Path",
-        "Path",
-        "The file path to the SBDB .csv file to read"
-    };
-    static const openspace::properties::Property::PropertyInfo SegmentQualityInfo = {
-        "SegmentQuality",
-        "Segment Quality",
-        "A segment quality value for the orbital trail. A value from 1 (lowest) to "
-        "100 (highest) that controls the number of line segments in the rendering of the "
-        "orbital trail. This does not control the direct number of segments because "
-        "these automatically increase according to the eccentricity of the orbit."
-    };
-    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
-        "LineWidth",
-        "Line Width",
-        "This value specifies the line width of the trail if the selected rendering "
-        "method includes lines. If the rendering mode is set to Points, this value is "
-        "ignored."
-    };
-    constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
-        "Color",
-        "Color",
-        "This value determines the RGB main color for the lines and points of the trail."
-    };
-    constexpr openspace::properties::Property::PropertyInfo TrailFadeInfo = {
-        "TrailFade",
-        "Trail Fade",
-        "This value determines how fast the trail fades and is an appearance property. "
+    static const openspace::properties::Property::PropertyInfo ContiguousModeInfo = {
+        "ContiguousMode",
+        "Contiguous Mode",
+        "If enabled, then the contiguous set of objects starting from StartRenderIdx "
+        "of size RenderSize will be rendered. If disabled, then the number of objects "
+        "defined by UpperLimit will rendered from an evenly dispersed sample of the "
+        "full length of the data file."
     };
     static const openspace::properties::Property::PropertyInfo UpperLimitInfo = {
         "UpperLimit",
         "Upper Limit",
         "Upper limit on the number of objects for this renderable, regardless of "
-        "how many objects are contained in the data file"
+        "how many objects are contained in the data file. Produces an evenly-distributed"
+        "sample from the data file."
     };
+
+    double importAngleValue(const std::string& angle) {
+        if (angle.empty()) {
+            return 0.0;
+        }
+
+        double output = std::stod(angle);
+        output = std::fmod(output, 360.0);
+        if (output < 0.0) {
+            output += 360.0;
+        }
+        return output;
+    }
+
+    std::string& formatObjectName(std::string& name) {
+        const std::string trimChars = "\t\n\v\f\r\" ";
+        name.erase(0, name.find_first_not_of(trimChars));
+        name.erase(name.find_last_not_of(trimChars) + 1);
+        return name;
+    }
+
+    struct [[codegen::Dictionary(RenderableSmallBody)]] Parameters {
+        // [[codegen::verbatim(ContiguousModeInfo.description)]]
+        std::optional<bool> contiguousMode;
+
+        // [[codegen::verbatim(UpperLimitInfo.description)]]
+        std::optional<int> upperLimit;
+    };
+#include "renderablesmallbody_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableSmallBody::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderableSmallBody",
-        "space_renderable_small_body",
-        {
-            {
-                SegmentQualityInfo.identifier,
-                new DoubleVerifier,
-                Optional::No,
-                SegmentQualityInfo.description
-            },
-            {
-                UpperLimitInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                UpperLimitInfo.description
-            },
-            {
-                PathInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                PathInfo.description
-            },
-            {
-                LineWidthInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                LineWidthInfo.description
-            },
-            {
-                LineColorInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::No,
-                LineColorInfo.description
-            },
-            {
-                TrailFadeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                TrailFadeInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "space_renderablesmallbody";
+
+    // Insert the parents documentation entries until we have a verifier that can deal
+    // with class hierarchy
+    documentation::Documentation parentDoc = RenderableOrbitalKepler::Documentation();
+    doc.entries.insert(
+        doc.entries.end(),
+        parentDoc.entries.begin(),
+        parentDoc.entries.end()
+    );
+    return doc;
 }
 
 RenderableSmallBody::RenderableSmallBody(const ghoul::Dictionary& dictionary)
     : RenderableOrbitalKepler(dictionary)
+    , _contiguousMode(ContiguousModeInfo, false)
+    , _upperLimit(UpperLimitInfo, 1000, 1, 1000000)
 {
-    _upperLimitCallbackHandle = _upperLimit.onChange(_reinitializeTrailBuffers);
+    codegen::bake<Parameters>(dictionary);
+
+    addProperty(_startRenderIdx);
+    addProperty(_sizeRender);
+    addProperty(_contiguousMode);
     addProperty(_upperLimit);
+
+    if (dictionary.hasValue<double>(UpperLimitInfo.identifier)) {
+        _upperLimit = static_cast<unsigned int>(
+            dictionary.value<double>(UpperLimitInfo.identifier));
+    }
+    else {
+        _upperLimit = 0u;
+    }
+
+    if (dictionary.hasValue<bool>(ContiguousModeInfo.identifier)) {
+        _contiguousMode = static_cast<bool>(
+            dictionary.value<bool>(ContiguousModeInfo.identifier));
+    }
+    else {
+        _contiguousMode = false;
+    }
+
+    _updateStartRenderIdxSelect = std::function<void()>([this] {
+        if (_contiguousMode) {
+            if ((_numObjects - _startRenderIdx) < _sizeRender) {
+                _sizeRender = static_cast<unsigned int>(_numObjects - _startRenderIdx);
+            }
+            _updateDataBuffersAtNextRender = true;
+        }
+    });
+    _updateRenderSizeSelect = std::function<void()>([this] {
+        if (_contiguousMode) {
+            if (_sizeRender > (_numObjects - _startRenderIdx)) {
+                _startRenderIdx = static_cast<unsigned int>(_numObjects - _sizeRender);
+            }
+            _updateDataBuffersAtNextRender = true;
+        }
+    });
+    _updateRenderUpperLimitSelect = std::function<void()>([this] {
+        if (!_contiguousMode) {
+            _updateDataBuffersAtNextRender = true;
+        }
+    });
+    _updateContiguousModeSelect = std::function<void()>([this] {
+        _updateDataBuffersAtNextRender = true;
+    });
+
+    _startRenderIdxCallbackHandle = _startRenderIdx.onChange(_updateStartRenderIdxSelect);
+    _sizeRenderCallbackHandle = _sizeRender.onChange(_updateRenderSizeSelect);
+    _upperLimitCallbackHandle = _upperLimit.onChange(_updateRenderUpperLimitSelect);
+    _contiguousModeCallbackhandle =
+        _contiguousMode.onChange(_updateContiguousModeSelect);
 }
 
 void RenderableSmallBody::readDataFile(const std::string& filename) {
@@ -166,8 +195,6 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
     std::string line;
     unsigned int csvLine = 0;
     int fieldCount = 0;
-    float lineSkipFraction = 1.0;
-    int lastLineCount = -1;
     const std::string expectedHeaderLine = "full_name,epoch_cal,e,a,i,om,w,ma,per";
 
     try {
@@ -178,18 +205,23 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
         }
         _numObjects = numberOfLines;
 
+        float lineSkipFraction = 1.0;
         if (!_isFileReadinitialized) {
             _isFileReadinitialized = true;
             initializeFileReading();
         }
+
+        unsigned int startElement = 0;
+        unsigned int endElement;
+        if (_contiguousMode) {
+            lineSkipFraction = 1.0;
+            startElement = _startRenderIdx;
+            endElement = _startRenderIdx + _sizeRender - 1;
+        }
         else {
-            if (_sizeRender < _numObjects || _startRenderIdx > 0) {
-                lineSkipFraction = 1.0;
-            }
-            else {
-                lineSkipFraction = static_cast<float>(_upperLimit)
-                    / static_cast<float>(_numObjects);
-            }
+            lineSkipFraction = static_cast<float>(_upperLimit)
+                / static_cast<float>(_numObjects);
+            endElement = static_cast<unsigned int>(_numObjects - 1);
         }
 
         if (line.compare(expectedHeaderLine) != 0) {
@@ -201,17 +233,17 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
         }
 
         unsigned int sequentialLineErrors = 0;
-        unsigned int endElement = _startRenderIdx + _sizeRender - 1;
         endElement =
             (endElement >= _numObjects) ?
             static_cast<unsigned int>(_numObjects - 1) :
             endElement;
         // Burn lines if not starting at first element
-        for (unsigned int k = 0; k < _startRenderIdx; ++k) {
+        for (unsigned int k = 0; k < startElement; ++k) {
             skipSingleLineInFile(file);
         }
         bool firstDataLine = true;
-        for (csvLine = _startRenderIdx + 1;
+        int lastLineCount = -1;
+        for (csvLine = startElement + 1;
              csvLine <= endElement + 1;
              csvLine++, sequentialLineErrors++)
         {
@@ -239,8 +271,8 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
                         fieldCount, csvLine + 1, numberOfLines, filename
                     ));
                 }
-                catch (std::ios_base::failure& f) {
-                    throw f;
+                catch (std::ios_base::failure&) {
+                    throw;
                 }
 
                 if (sequentialLineErrors == 4) {
@@ -270,20 +302,16 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
 }
 
 void RenderableSmallBody::initializeFileReading() {
-    _startRenderIdx.removeOnChange(_startRenderIdxCallbackHandle);
-    _sizeRender.removeOnChange(_sizeRenderCallbackHandle);
     _startRenderIdx.setMaxValue(static_cast<unsigned int>(_numObjects - 1));
     _sizeRender.setMaxValue(static_cast<unsigned int>(_numObjects));
-    _startRenderIdx = static_cast<unsigned int>(0);
-    _sizeRender = static_cast<unsigned int>(_numObjects);
-    _startRenderIdxCallbackHandle = _startRenderIdx.onChange(_updateStartRenderIdxSelect);
-    _sizeRenderCallbackHandle = _sizeRender.onChange(_updateRenderSizeSelect);
-    // If a limit wasn't specified in dictionary, set it to # lines in file
-    // minus the header line (but temporarily disable callback to avoid 2nd call)
-    _upperLimit.removeOnChange(_upperLimitCallbackHandle);
+    if (_sizeRender == 0u) {
+        _sizeRender = static_cast<unsigned int>(_numObjects);
+    }
+
     _upperLimit.setMaxValue(static_cast<unsigned int>(_numObjects));
-    _upperLimit = static_cast<unsigned int>(_numObjects);
-    _upperLimitCallbackHandle = _upperLimit.onChange(_reinitializeTrailBuffers);
+    if (_upperLimit == 0u) {
+        _upperLimit = static_cast<unsigned int>(_numObjects);
+    }
 }
 
 void RenderableSmallBody::skipSingleLineInFile(std::ifstream& file) {
@@ -310,7 +338,7 @@ void RenderableSmallBody::readOrbitalParamsFromThisLine(bool firstDataLine,
 
     // Object designator string
     std::getline(file, name, ',');
-    if (_startRenderIdx > 0 && _startRenderIdx == (csvLine - 1)) {
+    if (_startRenderIdx > 0 && _startRenderIdx == (csvLine - 1) && _sizeRender == 1) {
         formatObjectName(name);
         LINFO(fmt::format("Set render block to start at object  {}", name));
     }
@@ -396,26 +424,6 @@ void RenderableSmallBody::readOrbitalParamsFromThisLine(bool firstDataLine,
     _segmentSize.push_back(
         static_cast<size_t>(scale + (scale / pow(1 - keplerElements.eccentricity, 1.2)))
     );
-}
-
-static double importAngleValue(const std::string& angle) {
-    if (angle.empty()) {
-        return 0.0;
-    }
-
-    double output = std::stod(angle);
-    output = std::fmod(output, 360.0);
-    if (output < 0.0) {
-        output += 360.0;
-    }
-    return output;
-}
-
-static std::string& formatObjectName(std::string& name) {
-    const std::string trimChars = "\t\n\v\f\r\" ";
-    name.erase(0, name.find_first_not_of(trimChars));
-    name.erase(name.find_last_not_of(trimChars) + 1);
-    return name;
 }
 
 } // namespace openspace

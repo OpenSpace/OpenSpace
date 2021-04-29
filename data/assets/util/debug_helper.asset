@@ -41,7 +41,7 @@ local addGrid = function (specification)
             Type = "RenderableSphericalGrid",
             Enabled = true,
             LineWidth = 2.0,
-            GridColor = color
+            Color = color
         },
         GUI = {
             Name = name,

@@ -13,8 +13,7 @@ local Charon = {
         Translation = {
             Type = "SpiceTranslation",
             Target = "CHARON",
-            Observer = "PLUTO BARYCENTER",
-            Kernels = NewHorizonsKernels
+            Observer = "PLUTO BARYCENTER"
         },
         Rotation = {
             Type = "SpiceRotation",
@@ -31,16 +30,17 @@ local Charon = {
             Enable = false,
             FileName = labelsPath .. "/charon.labels",
             LabelAlignmentOption = "Horizontally", -- or Circularly
-            LabelsFontSize = 14.0,
+            LabelsFontSize = 40.0,
             LabelsSize = 8.0,
             LabelsMinSize = 1.0,
             LabelsMaxSize = 1500.0,
             ProximityEnabled = false,
             LabelsFadeInEnabled = true,
-            FadeInStartingDistance = 500000.0,
-            FadeOutStartingDistance = 1000000.0,
+            LabelsFadeOutEnabled = true,
+            FadeInStartingDistance = 2000000.0,
+            FadeOutStartingDistance = 800000.0,
             LabelsForceDomeRendering = true,
-            LabelsDistanceEPS = 1350000.0,
+            LabelsDistanceEPS = 250000.0,
             LabelsColor = { 1.0, 1.0, 0.0 }
         }
     },

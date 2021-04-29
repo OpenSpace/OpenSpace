@@ -1,0 +1,10 @@
+[ 
+    { "type": "time", 
+      "value": "2019-01-01T00:00:00.00"}, 
+    { "type": "recording", 
+      "value": "RecordingDefaultSolarSystem"}, 
+    { "type": "wait", 
+      "value": "2"}, 
+    { "type": "screenshot", 
+      "value": "SolarSystem"}
+] 

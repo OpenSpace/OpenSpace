@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -79,10 +79,13 @@ public:
 
     void setViewDepthMap(bool enable);
 
+    GLuint dDepthTexture() const;
+
 private:
     void createDepthTexture();
     void createShadowFBO();
     void updateDepthTexture();
+    void buildDDepthTexture();
 
     // Debug
     void saveDepthBuffer();
@@ -102,30 +105,23 @@ private:
     properties::IntProperty _distanceFraction;
     properties::BoolProperty _enabled;
 
-    ghoul::Dictionary _shadowMapDictionary;
-
     int _shadowDepthTextureHeight = 4096;
     int _shadowDepthTextureWidth = 4096;
     bool _dynamicDepthTextureRes = true;
 
     GLuint _shadowDepthTexture = 0;
+    // JCC: Used to avoid recompilation of Globebrowsing's shaders
+    // and incorrect binding of texture type
+    GLuint _dDepthTexture = 0;
     GLuint _positionInLightSpaceTexture = 0;
     GLuint _shadowFBO = 0;
-    GLint _defaultFBO = 0;
+    GLint _currentFBO = 0;
     GLint _mViewport[4];
 
     GLboolean _faceCulling;
     GLboolean _polygonOffSet;
     GLboolean _depthIsEnabled;
     GLboolean _blendIsEnabled = false;
-
-    GLenum _faceToCull;
-    GLenum _depthFunction;
-
-    GLfloat _polygonOffSetFactor;
-    GLfloat _polygonOffSetUnits;
-    GLfloat _colorClearValue[4];
-    GLfloat _depthClearValue;
 
     glm::vec3 _sunPosition = glm::vec3(0.f);
 

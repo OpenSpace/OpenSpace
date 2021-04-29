@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,10 +41,12 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/io/texture/texturereader.h>
+#include <filesystem>
 #include <fstream>
 #include <cstdlib>
 #include <locale>
@@ -58,6 +60,13 @@ namespace {
         "zFightingPercentage"
     };
 
+    constexpr const std::array<const char*, 15> UniformNamesAdvancedRings = {
+        "modelViewProjectionMatrix", "textureOffset", "colorFilterValue", "_nightFactor",
+        "sunPosition", "sunPositionObj", "camPositionObj", "ringTextureFwrd",
+        "ringTextureBckwrd", "ringTextureUnlit", "ringTextureColor",
+        "ringTextureTransparency", "shadowMatrix", "shadowMapTexture", "zFightingPercentage"
+    };
+
     constexpr const std::array<const char*, 3> GeomUniformNames = {
         "modelViewProjectionMatrix", "textureOffset", "ringTexture"
     };
@@ -67,6 +76,41 @@ namespace {
         "Texture",
         "This value is the path to a texture on disk that contains a one-dimensional "
         "texture which is used for these rings."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo TextureFwrdInfo = {
+        "TextureFwrd",
+        "TextureFwrd",
+        "This value is the path to a texture on disk that contains a one-dimensional "
+        "texture which is used for forward scattering light in these rings."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo TextureBckwrdInfo = {
+        "TextureBckwrd",
+        "TextureBckwrd",
+        "This value is the path to a texture on disk that contains a one-dimensional "
+        "texture which is used for backward scattering light in these rings."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo TextureUnlitInfo = {
+        "TextureUnlit",
+        "TextureUnlit",
+        "This value is the path to a texture on disk that contains a one-dimensional "
+        "texture which is used for unlit part in these rings."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo TextureColorInfo = {
+        "TextureColor",
+        "TextureColor",
+        "This value is the path to a texture on disk that contains a one-dimensional "
+        "texture color which is used for unlit part in these rings."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo TextureTransparencyInfo = {
+        "TextureTransparency",
+        "TextureTransparency",
+        "This value is the path to a texture on disk that contains a one-dimensional "
+        "texture transparency which is used for unlit part in these rings."
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
@@ -112,65 +156,63 @@ namespace {
         "The number of samples used during shadow mapping calculation "
         "(Percentage Closer Filtering)."
     };
+
+    struct [[codegen::Dictionary(RingsComponent)]] Parameters {
+        // [[codegen::verbatim(TextureInfo.description)]]
+        std::optional<std::filesystem::path> texture;
+
+        // [[codegen::verbatim(TextureFwrdInfo.description)]]
+        std::optional<std::filesystem::path> textureFwrd;
+
+        // [[codegen::verbatim(TextureBckwrdInfo.description)]]
+        std::optional<std::filesystem::path> textureBckwrd;
+
+        // [[codegen::verbatim(TextureUnlitInfo.description)]]
+        std::optional<std::filesystem::path> textureUnlit;
+
+        // [[codegen::verbatim(TextureColorInfo.description)]]
+        std::optional<std::filesystem::path> textureColor;
+
+        // [[codegen::verbatim(TextureTransparencyInfo.description)]]
+        std::optional<std::filesystem::path> textureTransparency;
+
+        // [[codegen::verbatim(SizeInfo.description)]]
+        std::optional<float> size;
+
+        // [[codegen::verbatim(OffsetInfo.description)]]
+        std::optional<glm::vec2> offset;
+
+        // [[codegen::verbatim(NightFactorInfo.description)]]
+        std::optional<float> nightFactor;
+
+        // [[codegen::verbatim(ColorFilterInfo.description)]]
+        std::optional<float> colorFilter;
+
+        // [[codegen::verbatim(ZFightingPercentageInfo.description)]]
+        std::optional<float> zFightingPercentage;
+
+        // [[codegen::verbatim(NumberShadowSamplesInfo.description)]]
+        std::optional<int> numberShadowSamples;
+    };
+#include "ringscomponent_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RingsComponent::Documentation() {
-    using namespace documentation;
-    return {
-        "Rings Component",
-        "globebrowsing_rings_component",
-        {
-            {
-                TextureInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                TextureInfo.description
-            },
-            {
-                SizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                SizeInfo.description
-            },
-            {
-                OffsetInfo.identifier,
-                new DoubleVector2Verifier,
-                Optional::Yes,
-                OffsetInfo.description
-            },
-            {
-                NightFactorInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                NightFactorInfo.description
-            },
-            {
-                ColorFilterInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                ColorFilterInfo.description
-            },
-            {
-                ZFightingPercentageInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                ZFightingPercentageInfo.description
-            },
-            {
-                NumberShadowSamplesInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                NumberShadowSamplesInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "globebrowsing_rings_component";
+    return doc;
 }
 
 RingsComponent::RingsComponent(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "Rings" })
     , _texturePath(TextureInfo)
+    , _textureFwrdPath(TextureFwrdInfo)
+    , _textureBckwrdPath(TextureBckwrdInfo)
+    , _textureUnlitPath(TextureUnlitInfo)
+    , _textureColorPath(TextureColorInfo)
+    , _textureTransparencyPath(TextureTransparencyInfo)
     , _size(SizeInfo, 1.f, 0.f, 1e25f)
     , _offset(OffsetInfo, glm::vec2(0.f, 1.f), glm::vec2(0.f), glm::vec2(1.f))
     , _nightFactor(NightFactorInfo, 0.33f, 0.f, 1.f)
@@ -182,19 +224,22 @@ RingsComponent::RingsComponent(const ghoul::Dictionary& dictionary)
 {
     using ghoul::filesystem::File;
 
-    if (dictionary.hasKey("Rings")) {
+    if (dictionary.hasValue<ghoul::Dictionary>("Rings")) {
         // @TODO (abock, 2019-12-16) It would be better to not store the dictionary long
         // term and rather extract the values directly here.  This would require a bit of
         // a rewrite in the RenderableGlobe class to not create the RingsComponent in the
         // class-initializer list though
-        dictionary.getValue("Rings", _ringsDictionary);
-    }
+        // @TODO (abock, 2021-03-25) Righto!  The RenderableGlobe passes this dictionary
+        // in as-is so it would be easy to just pass it directly to the initialize method
+        // instead
+        _ringsDictionary = dictionary.value<ghoul::Dictionary>("Rings");
 
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        _ringsDictionary,
-        "RingsComponent"
-    );
+        documentation::testSpecificationAndThrow(
+            Documentation(),
+            _ringsDictionary,
+            "RingsComponent"
+        );
+    }
 }
 
 void RingsComponent::initialize() {
@@ -202,56 +247,79 @@ void RingsComponent::initialize() {
 
     using ghoul::filesystem::File;
 
+    const Parameters p = codegen::bake<Parameters>(_ringsDictionary);
+
     addProperty(_enabled);
 
-    _size = static_cast<float>(_ringsDictionary.value<double>(SizeInfo.identifier));
-    //setBoundingSphere(_size);
+    _size.setViewOption(properties::Property::ViewOptions::Logarithmic);
+    _size = p.size.value_or(_size);
     _size.onChange([&]() { _planeIsDirty = true; });
     addProperty(_size);
 
-    _texturePath = absPath(
-        _ringsDictionary.value<std::string>(TextureInfo.identifier)
-    );
-    _textureFile = std::make_unique<File>(_texturePath);
-
-    if (_ringsDictionary.hasKeyAndValue<glm::vec2>(OffsetInfo.identifier)) {
-        _offset = _ringsDictionary.value<glm::vec2>(OffsetInfo.identifier);
+    if (p.texture.has_value()) {
+        _texturePath = absPath(p.texture->string());
+        _textureFile = std::make_unique<File>(_texturePath);
+        _texturePath.onChange([&]() { loadTexture(); });
+        addProperty(_texturePath);
+        _textureFile->setCallback([&](const File&) { _textureIsDirty = true; });
     }
+
+    if (p.textureFwrd.has_value()) {
+        _textureFwrdPath = absPath(p.textureFwrd->string());
+        _textureFileForwards = std::make_unique<File>(_textureFwrdPath);
+        _textureFwrdPath.onChange([&]() { loadTexture(); });
+        addProperty(_textureFwrdPath);
+        _textureFileForwards->setCallback([&](const File&) { _textureIsDirty = true; });
+    }
+
+    if (p.textureBckwrd.has_value()) {
+        _textureBckwrdPath = absPath(p.textureBckwrd->string());
+        _textureFileBackwards = std::make_unique<File>(_textureBckwrdPath);
+        _textureBckwrdPath.onChange([&]() { loadTexture(); });
+        addProperty(_textureBckwrdPath);
+        _textureFileBackwards->setCallback([&](const File&) { _textureIsDirty = true; });
+    }
+
+    if (p.textureUnlit.has_value()) {
+        _textureUnlitPath = absPath(p.textureUnlit->string());
+        _textureFileUnlit = std::make_unique<File>(_textureUnlitPath);
+        _textureUnlitPath.onChange([&]() { loadTexture(); });
+        addProperty(_textureUnlitPath);
+        _textureFileUnlit->setCallback([&](const File&) { _textureIsDirty = true; });
+    }
+
+    if (p.textureColor.has_value()) {
+        _textureColorPath = absPath(p.textureColor->string());
+        _textureFileColor = std::make_unique<File>(_textureColorPath);
+        _textureColorPath.onChange([&]() { loadTexture(); });
+        addProperty(_textureColorPath);
+        _textureFileColor->setCallback([&](const File&) { _textureIsDirty = true; });
+    }
+
+    if (p.textureTransparency.has_value()) {
+        _textureTransparencyPath = absPath(p.textureTransparency->string());
+        _textureFileTransparency = std::make_unique<File>(_textureTransparencyPath);
+        _textureTransparencyPath.onChange([&]() { loadTexture(); });
+        addProperty(_textureTransparencyPath);
+        _textureFileTransparency->setCallback([&](const File&) { _textureIsDirty = true; });
+    }
+
+    _offset = p.offset.value_or(_offset);
     addProperty(_offset);
 
-    _texturePath.onChange([&]() { loadTexture(); });
-    addProperty(_texturePath);
-
-    _textureFile->setCallback([&](const File&) { _textureIsDirty = true; });
-
-    if (_ringsDictionary.hasKeyAndValue<double>(NightFactorInfo.identifier)) {
-        _nightFactor = static_cast<float>(
-            _ringsDictionary.value<double>(NightFactorInfo.identifier)
-        );
-    }
+    _nightFactor = p.nightFactor.value_or(_nightFactor);
     addProperty(_nightFactor);
 
-    if (_ringsDictionary.hasKeyAndValue<double>(ColorFilterInfo.identifier)) {
-        _colorFilter = static_cast<float>(
-            _ringsDictionary.value<double>(ColorFilterInfo.identifier)
-        );
-    }
+    _colorFilter = p.colorFilter.value_or(_colorFilter);
+    addProperty(_colorFilter);
 
     // Shadow Mapping Quality Controls
-    if (_ringsDictionary.hasKey(ZFightingPercentageInfo.identifier)) {
-        _zFightingPercentage = _ringsDictionary.value<float>(
-            ZFightingPercentageInfo.identifier
-        );
-    }
+    _zFightingPercentage = p.zFightingPercentage.value_or(_zFightingPercentage);
     addProperty(_zFightingPercentage);
 
-    if (_ringsDictionary.hasKey(NumberShadowSamplesInfo.identifier)) {
-        _nShadowSamples = _ringsDictionary.value<int>(NumberShadowSamplesInfo.identifier);
-    }
+    _nShadowSamples = p.numberShadowSamples.value_or(_nShadowSamples);
     _nShadowSamples.onChange([this]() { compileShadowShader(); });
     addProperty(_nShadowSamples);
-
-    addProperty(_colorFilter);
 }
 
 bool RingsComponent::isReady() const {
@@ -261,6 +329,7 @@ bool RingsComponent::isReady() const {
 void RingsComponent::initializeGL() {
     ZoneScoped
 
+    loadTexture();
     compileShadowShader();
 
     try {
@@ -285,7 +354,6 @@ void RingsComponent::initializeGL() {
     glGenBuffers(1, &_vertexPositionBuffer);
 
     createPlane();
-    loadTexture();
 }
 
 void RingsComponent::deinitializeGL() {
@@ -297,6 +365,13 @@ void RingsComponent::deinitializeGL() {
 
     _textureFile = nullptr;
     _texture = nullptr;
+    _textureFileForwards = nullptr;
+    _textureForwards = nullptr;
+    _textureFileBackwards = nullptr;
+    _textureBackwards = nullptr;
+    _textureFileUnlit = nullptr;
+    _textureUnlit = nullptr;
+
 
     global::renderEngine->removeRenderProgram(_shader.get());
     _shader = nullptr;
@@ -326,34 +401,144 @@ void RingsComponent::draw(const RenderData& data,
         * modelTransform;
 
     ghoul::opengl::TextureUnit ringTextureUnit;
+    ghoul::opengl::TextureUnit ringTextureFwrdUnit;
+    ghoul::opengl::TextureUnit ringTextureBckwrdUnit;
+    ghoul::opengl::TextureUnit ringTextureUnlitUnit;
+    ghoul::opengl::TextureUnit ringTextureColorUnit;
+    ghoul::opengl::TextureUnit ringTextureTransparencyUnit;
     if (renderPass == GeometryAndShading) {
-        _shader->setUniform(
-            _uniformCache.modelViewProjectionMatrix,
-            modelViewProjectionTransform
-        );
-        _shader->setUniform(_uniformCache.textureOffset, _offset);
-        _shader->setUniform(_uniformCache.colorFilterValue, _colorFilter);
-        _shader->setUniform(_uniformCache.nightFactor, _nightFactor);
-        _shader->setUniform(_uniformCache.sunPosition, _sunPosition);
-        _shader->setUniform(_uniformCache.zFightingPercentage, _zFightingPercentage);
+        if (_isAdvancedTextureEnabled) {
+            _shader->setUniform(
+                _uniformCacheAdvancedRings.modelViewProjectionMatrix,
+                modelViewProjectionTransform
+            );
+            _shader->setUniform(_uniformCacheAdvancedRings.textureOffset, _offset);
+            _shader->setUniform(_uniformCacheAdvancedRings.colorFilterValue, _colorFilter);
+            _shader->setUniform(_uniformCacheAdvancedRings.nightFactor, _nightFactor);
+            _shader->setUniform(_uniformCacheAdvancedRings.sunPosition, _sunPosition);
 
-        ringTextureUnit.activate();
-        _texture->bind();
-        _shader->setUniform(_uniformCache.ringTexture, ringTextureUnit);
+            const glm::dmat4 inverseModelTransform = glm::inverse(modelTransform);
 
-        // Adding the model transformation to the final shadow matrix so we have a
-        // complete transformation from the model coordinates to the clip space of
-        // the light position.
-        _shader->setUniform(
-            _uniformCache.shadowMatrix,
-            shadowData.shadowMatrix * modelTransform
-        );
+            glm::vec3 sunPositionObjectSpace = glm::normalize(
+                glm::vec3(inverseModelTransform * glm::vec4(_sunPosition, 0.0))
+            );
 
-        ghoul::opengl::TextureUnit shadowMapUnit;
-        shadowMapUnit.activate();
-        glBindTexture(GL_TEXTURE_2D, shadowData.shadowDepthTexture);
+            _shader->setUniform(
+                _uniformCacheAdvancedRings.sunPositionObj,
+                sunPositionObjectSpace
+            );
+            _shader->setUniform(
+                _uniformCacheAdvancedRings.zFightingPercentage,
+                _zFightingPercentage
+            );
+            _shader->setUniform(
+                _uniformCacheAdvancedRings.modelViewProjectionMatrix,
+                modelViewProjectionTransform
+            );
 
-        _shader->setUniform(_uniformCache.shadowMapTexture, shadowMapUnit);
+            ringTextureFwrdUnit.activate();
+            _textureForwards->bind();
+            _shader->setUniform(
+                _uniformCacheAdvancedRings.ringTextureFwrd,
+                ringTextureFwrdUnit
+            );
+
+            ringTextureBckwrdUnit.activate();
+            _textureBackwards->bind();
+            _shader->setUniform(
+                _uniformCacheAdvancedRings.ringTextureBckwrd,
+                ringTextureBckwrdUnit
+            );
+
+            ringTextureUnlitUnit.activate();
+            _textureUnlit->bind();
+            _shader->setUniform(
+                _uniformCacheAdvancedRings.ringTextureUnlit,
+                ringTextureUnlitUnit
+            );
+
+            ringTextureColorUnit.activate();
+            _textureColor->bind();
+            _shader->setUniform(
+                _uniformCacheAdvancedRings.ringTextureColor,
+                ringTextureColorUnit
+            );
+
+            ringTextureTransparencyUnit.activate();
+            _textureTransparency->bind();
+            _shader->setUniform(
+                _uniformCacheAdvancedRings.ringTextureTransparency,
+                ringTextureTransparencyUnit
+            );
+
+            // Adding the model transformation to the final shadow matrix so we have a
+            // complete transformation from the model coordinates to the clip space of
+            // the light position.
+            _shader->setUniform(
+                _uniformCacheAdvancedRings.shadowMatrix,
+                shadowData.shadowMatrix * modelTransform
+            );
+
+            const glm::dmat4 camToObjectTransform = glm::inverse(
+                data.camera.combinedViewMatrix()
+                * modelTransform
+            );
+
+            _camPositionObjectSpace = glm::normalize(
+                glm::vec3(camToObjectTransform * glm::dvec4(0.0, 0.0, 0.0, 1.0))
+            );
+
+            _shader->setUniform(
+                _uniformCacheAdvancedRings.camPositionObj,
+                _camPositionObjectSpace
+            );
+
+            ghoul::opengl::TextureUnit shadowMapUnit;
+            shadowMapUnit.activate();
+            glBindTexture(GL_TEXTURE_2D, shadowData.shadowDepthTexture);
+            _shader->setUniform(_uniformCacheAdvancedRings.shadowMapTexture, shadowMapUnit);
+
+            glEnable(GL_DEPTH_TEST);
+            glEnablei(GL_BLEND, 0);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        }
+        else {
+            _shader->setUniform(
+                _uniformCache.modelViewProjectionMatrix,
+                modelViewProjectionTransform
+            );
+            _shader->setUniform(_uniformCache.textureOffset, _offset);
+            _shader->setUniform(_uniformCache.colorFilterValue, _colorFilter);
+            _shader->setUniform(_uniformCache.nightFactor, _nightFactor);
+            _shader->setUniform(_uniformCache.sunPosition, _sunPosition);
+            _shader->setUniform(_uniformCache.zFightingPercentage, _zFightingPercentage);
+            _shader->setUniform(
+                _uniformCache.modelViewProjectionMatrix,
+                modelViewProjectionTransform
+            );
+
+            ringTextureUnit.activate();
+            _texture->bind();
+            _shader->setUniform(_uniformCache.ringTexture, ringTextureUnit);
+
+            // Adding the model transformation to the final shadow matrix so we have a
+            // complete transformation from the model coordinates to the clip space of
+            // the light position.
+            _shader->setUniform(
+                _uniformCache.shadowMatrix,
+                shadowData.shadowMatrix * modelTransform
+            );
+
+            ghoul::opengl::TextureUnit shadowMapUnit;
+            shadowMapUnit.activate();
+            glBindTexture(GL_TEXTURE_2D, shadowData.shadowDepthTexture);
+            _shader->setUniform(_uniformCache.shadowMapTexture, shadowMapUnit);
+        }
+
+        glEnable(GL_DEPTH_TEST);
+        glEnablei(GL_BLEND, 0);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
     else if (renderPass == GeometryOnly) {
         _geometryOnlyShader->setUniform(
@@ -363,8 +548,14 @@ void RingsComponent::draw(const RenderData& data,
         _geometryOnlyShader->setUniform(_geomUniformCache.textureOffset, _offset);
 
         ringTextureUnit.activate();
-        _texture->bind();
-        _shader->setUniform(_geomUniformCache.ringTexture, ringTextureUnit);
+        if (_isAdvancedTextureEnabled) {
+            _textureForwards->bind();
+        }
+        else {
+            _texture->bind();
+        }
+
+        _geometryOnlyShader->setUniform(_geomUniformCache.ringTexture, ringTextureUnit);
     }
 
     glEnable(GL_DEPTH_TEST);
@@ -377,6 +568,8 @@ void RingsComponent::draw(const RenderData& data,
 
     if (renderPass == GeometryAndShading) {
         _shader->deactivate();
+        global::renderEngine->openglStateCache().resetBlendState();
+        //global::renderEngine->openglStateCache().resetDepthState();
     }
     else if (renderPass == GeometryOnly) {
         _geometryOnlyShader->deactivate();
@@ -416,9 +609,11 @@ void RingsComponent::update(const UpdateData& data) {
 }
 
 void RingsComponent::loadTexture() {
+    using namespace ghoul::io;
+    using namespace ghoul::opengl;
+
     if (!_texturePath.value().empty()) {
-        using namespace ghoul::io;
-        using namespace ghoul::opengl;
+
         std::unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
             absPath(_texturePath)
         );
@@ -439,6 +634,143 @@ void RingsComponent::loadTexture() {
             );
         }
     }
+
+    if (!_textureFwrdPath.value().empty()) {
+        std::unique_ptr<Texture> textureForwards = TextureReader::ref().loadTexture(
+            absPath(_textureFwrdPath)
+        );
+
+        if (textureForwards) {
+            LDEBUGC(
+                "RingsComponent",
+                fmt::format(
+                    "Loaded forwards scattering texture from '{}'",
+                    absPath(_textureFwrdPath)
+                )
+            );
+            _textureForwards = std::move(textureForwards);
+
+            _textureForwards->uploadTexture();
+            _textureForwards->setFilter(
+                ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+
+            _textureFileForwards = std::make_unique<ghoul::filesystem::File>(
+                _textureFwrdPath
+                );
+            _textureFileForwards->setCallback(
+                [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
+            );
+        }
+    }
+
+    if (!_textureBckwrdPath.value().empty()) {
+        std::unique_ptr<Texture> textureBackwards = TextureReader::ref().loadTexture(
+            absPath(_textureBckwrdPath)
+        );
+
+        if (textureBackwards) {
+            LDEBUGC(
+                "RingsComponent",
+                fmt::format(
+                    "Loaded backwards scattering texture from '{}'",
+                    absPath(_textureBckwrdPath)
+                )
+            );
+            _textureBackwards = std::move(textureBackwards);
+
+            _textureBackwards->uploadTexture();
+            _textureBackwards->setFilter(
+                ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+
+            _textureFileBackwards = std::make_unique<ghoul::filesystem::File>(
+                _textureBckwrdPath
+                );
+            _textureFileBackwards->setCallback(
+                [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
+            );
+        }
+    }
+
+    if (!_textureUnlitPath.value().empty()) {
+        std::unique_ptr<Texture> textureUnlit = TextureReader::ref().loadTexture(
+            absPath(_textureUnlitPath)
+        );
+
+        if (textureUnlit) {
+            LDEBUGC(
+                "RingsComponent",
+                fmt::format(
+                    "Loaded unlit texture from '{}'",
+                    absPath(_textureUnlitPath)
+                )
+            );
+            _textureUnlit = std::move(textureUnlit);
+
+            _textureUnlit->uploadTexture();
+            _textureUnlit->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+
+            _textureFileUnlit = std::make_unique<ghoul::filesystem::File>(_textureUnlitPath);
+            _textureFileUnlit->setCallback(
+                [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
+            );
+        }
+    }
+
+    if (!_textureColorPath.value().empty()) {
+        std::unique_ptr<Texture> textureColor = TextureReader::ref().loadTexture(
+            absPath(_textureColorPath)
+        );
+
+        if (textureColor) {
+            LDEBUGC(
+                "RingsComponent",
+                fmt::format(
+                    "Loaded color texture from '{}'",
+                    absPath(_textureColorPath)
+                )
+            );
+            _textureColor = std::move(textureColor);
+
+            _textureColor->uploadTexture();
+            _textureColor->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+
+            _textureFileColor = std::make_unique<ghoul::filesystem::File>(_textureColorPath);
+            _textureFileColor->setCallback(
+                [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
+            );
+        }
+    }
+
+    if (!_textureTransparencyPath.value().empty()) {
+        std::unique_ptr<Texture> textureTransparency = TextureReader::ref().loadTexture(
+            absPath(_textureTransparencyPath)
+        );
+
+        if (textureTransparency) {
+            LDEBUGC(
+                "RingsComponent",
+                fmt::format(
+                    "Loaded unlit texture from '{}'",
+                    absPath(_textureUnlitPath)
+                )
+            );
+            _textureTransparency = std::move(textureTransparency);
+
+            _textureTransparency->uploadTexture();
+            _textureTransparency->setFilter(
+                ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
+            );
+
+            _textureFileTransparency = std::make_unique<ghoul::filesystem::File>(
+                _textureTransparencyPath
+            );
+            _textureFileTransparency->setCallback(
+                [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
+            );
+        }
+    }
+
+    _isAdvancedTextureEnabled = _textureForwards && _textureBackwards && _textureUnlit;
 }
 
 void RingsComponent::createPlane() {
@@ -489,14 +821,42 @@ void RingsComponent::compileShadowShader() {
 
     try {
         global::renderEngine->removeRenderProgram(_shader.get());
-        _shader = global::renderEngine->buildRenderProgram(
-            "RingsProgram",
-            absPath("${MODULE_GLOBEBROWSING}/shaders/rings_vs.glsl"),
-            absPath("${MODULE_GLOBEBROWSING}/shaders/rings_fs.glsl"),
-            dict
-        );
+        // _shader = global::renderEngine->buildRenderProgram(
+        //     "RingsProgram",
+        //     absPath("${MODULE_GLOBEBROWSING}/shaders/rings_vs.glsl"),
+        //     absPath("${MODULE_GLOBEBROWSING}/shaders/rings_fs.glsl"),
+        //     dict
+        // );
 
-        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+        // ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+
+        // Uses multiple textures for the Rings
+        // See https://bjj.mmedia.is/data/s_rings/index.html for theory behind it
+        if (_isAdvancedTextureEnabled) {
+            _shader = global::renderEngine->buildRenderProgram(
+                "AdvancedRingsProgram",
+                absPath("${MODULE_GLOBEBROWSING}/shaders/advanced_rings_vs.glsl"),
+                absPath("${MODULE_GLOBEBROWSING}/shaders/advanced_rings_fs.glsl"),
+                dict
+            );
+
+            ghoul::opengl::updateUniformLocations(
+                *_shader,
+                _uniformCacheAdvancedRings,
+                UniformNamesAdvancedRings
+            );
+        }
+        else {
+            // Uses simple texture for the Rings
+            _shader = global::renderEngine->buildRenderProgram(
+                "RingsProgram",
+                absPath("${MODULE_GLOBEBROWSING}/shaders/rings_vs.glsl"),
+                absPath("${MODULE_GLOBEBROWSING}/shaders/rings_fs.glsl"),
+                dict
+            );
+
+            ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+        }
     }
     catch (const ghoul::RuntimeError& e) {
         LERROR(e.message);
@@ -505,6 +865,10 @@ void RingsComponent::compileShadowShader() {
 
 bool RingsComponent::isEnabled() const {
     return _enabled;
+}
+
+double RingsComponent::size() const {
+    return _size;
 }
 
 } // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,23 +41,6 @@
 #include <ghoul/misc/profiling.h>
 
 namespace {
-    constexpr const char* KeyFontMono = "Mono";
-
-    constexpr const float DefaultFontSize = 10.f;
-
-    constexpr openspace::properties::Property::PropertyInfo FontNameInfo = {
-        "FontName",
-        "Font Name",
-        "This value is the name of the font that is used. It can either refer to an "
-        "internal name registered previously, or it can refer to a path that is used."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
-        "FontSize",
-        "Font Size",
-        "This value determines the size of the font that is used to render the distance."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo SourceTypeInfo = {
         "SourceType",
         "Source Type",
@@ -101,6 +84,14 @@ namespace {
         "to convert the meters into."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo FormatStringInfo = {
+        "FormatString",
+        "Format String",
+        "The format string that is used for formatting the distance string.  This format "
+        "receives four parameters:  The name of the source, the name of the destination "
+        "the value of the distance and the unit of the distance"
+    };
+
     std::vector<std::string> unitList() {
         std::vector<std::string> res(openspace::DistanceUnits.size());
         std::transform(
@@ -113,83 +104,52 @@ namespace {
         );
         return res;
     }
+
+    struct [[codegen::Dictionary(DashboardItemDistance)]] Parameters {
+        enum class TypeInfo {
+            Node,
+            NodeSurface [[codegen::key("Node Surface")]],
+            Focus,
+            Camera
+        };
+
+        // [[codegen::verbatim(SourceTypeInfo.description)]]
+        std::optional<TypeInfo> sourceType;
+
+        // [[codegen::verbatim(SourceNodeNameInfo.description)]]
+        std::optional<std::string> sourceNodeName;
+
+        // [[codegen::verbatim(DestinationTypeInfo.description)]]
+        std::optional<TypeInfo> destinationType;
+
+        // [[codegen::verbatim(DestinationNodeNameInfo.description)]]
+        std::optional<std::string> destinationNodeName;
+
+        // [[codegen::verbatim(SimplificationInfo.description)]]
+        std::optional<bool> simplification;
+
+        // [[codegen::verbatim(RequestedUnitInfo.description)]]
+        std::optional<std::string> requestedUnit [[codegen::inlist(unitList())]];
+
+        // [[codegen::verbatim(FormatStringInfo.description)]]
+        std::optional<std::string> formatString;
+    };
+#include "dashboarditemdistance_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation DashboardItemDistance::Documentation() {
-    using namespace documentation;
-    return {
-        "DashboardItem Distance",
-        "base_dashboarditem_distance",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("DashboardItemDistance"),
-                Optional::No
-            },
-            {
-                FontNameInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                FontNameInfo.description
-            },
-            {
-                FontSizeInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                FontSizeInfo.description
-            },
-            {
-                SourceTypeInfo.identifier,
-                new StringInListVerifier({
-                    "Node", "Node Surface", "Focus", "Camera"
-                }),
-                Optional::Yes,
-                    SourceTypeInfo.description
-            },
-            {
-                SourceNodeNameInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                SourceNodeNameInfo.description
-            },
-            {
-                DestinationTypeInfo.identifier,
-                new StringInListVerifier({
-                    "Node", "Node Surface", "Focus", "Camera"
-                }),
-                Optional::Yes,
-                DestinationTypeInfo.description
-            },
-            {
-                DestinationNodeNameInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                DestinationNodeNameInfo.description
-            },
-            {
-                SimplificationInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                SimplificationInfo.description
-            },
-            {
-                RequestedUnitInfo.identifier,
-                new StringInListVerifier(unitList()),
-                Optional::Yes,
-                RequestedUnitInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_dashboarditem_distance";
+    return doc;
 }
 
 DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary)
-    : DashboardItem(dictionary)
-    , _fontName(FontNameInfo, KeyFontMono)
-    , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
+    : DashboardTextItem(dictionary)
     , _doSimplification(SimplificationInfo, true)
     , _requestedUnit(RequestedUnitInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _formatString(FormatStringInfo, "Distance from {} to {}: {:f} {}")
     , _source{
         properties::OptionProperty(
             SourceTypeInfo,
@@ -207,28 +167,7 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
         nullptr
     }
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "DashboardItemDistance"
-    );
-
-    if (dictionary.hasKey(FontNameInfo.identifier)) {
-        _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
-    }
-    if (dictionary.hasKey(FontSizeInfo.identifier)) {
-        _fontSize = static_cast<float>(dictionary.value<double>(FontSizeInfo.identifier));
-    }
-
-    _fontName.onChange([this]() {
-        _font = global::fontManager->font(_fontName, _fontSize);
-    });
-    addProperty(_fontName);
-
-    _fontSize.onChange([this]() {
-        _font = global::fontManager->font(_fontName, _fontSize);
-    });
-    addProperty(_fontSize);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _source.type.addOptions({
         { Type::Node, "Node" },
@@ -243,22 +182,20 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
             )
         );
     });
-    if (dictionary.hasKey(SourceTypeInfo.identifier)) {
-        const std::string& value = dictionary.value<std::string>(
-            SourceTypeInfo.identifier
-        );
-
-        if (value == "Node") {
-            _source.type = Type::Node;
-        }
-        else if (value == "Node Surface") {
-            _source.type = Type::NodeSurface;
-        }
-        else if (value == "Focus") {
-            _source.type = Type::Focus;
-        }
-        else {
-            _source.type = Type::Camera;
+    if (p.sourceType.has_value()) {
+        switch (*p.sourceType) {
+            case Parameters::TypeInfo::Node:
+                _source.type = Type::Node;
+                break;
+            case Parameters::TypeInfo::NodeSurface:
+                _source.type = Type::NodeSurface;
+                break;
+            case Parameters::TypeInfo::Focus:
+                _source.type = Type::Focus;
+                break;
+            case Parameters::TypeInfo::Camera:
+                _source.type = Type::Camera;
+                break;
         }
     }
     else {
@@ -268,10 +205,8 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
 
     _source.nodeName.onChange([this]() { _source.node = nullptr; });
     if (_source.type == Type::Node || _source.type == Type::NodeSurface) {
-        if (dictionary.hasKey(SourceNodeNameInfo.identifier)) {
-            _source.nodeName = dictionary.value<std::string>(
-                SourceNodeNameInfo.identifier
-            );
+        if (p.sourceNodeName.has_value()) {
+            _source.nodeName = *p.sourceNodeName;
         }
         else {
             LERRORC(
@@ -295,21 +230,20 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
             )
         );
     });
-    if (dictionary.hasKey(DestinationTypeInfo.identifier)) {
-        const std::string& value = dictionary.value<std::string>(
-            DestinationTypeInfo.identifier
-        );
-        if (value == "Node") {
-            _destination.type = Type::Node;
-        }
-        else if (value == "Node Surface") {
-            _destination.type = Type::NodeSurface;
-        }
-        else if (value == "Focus") {
-            _destination.type = Type::Focus;
-        }
-        else {
-            _destination.type = Type::Camera;
+    if (p.destinationType.has_value()) {
+        switch (*p.destinationType) {
+            case Parameters::TypeInfo::Node:
+                _destination.type = Type::Node;
+                break;
+            case Parameters::TypeInfo::NodeSurface:
+                _destination.type = Type::NodeSurface;
+                break;
+            case Parameters::TypeInfo::Focus:
+                _destination.type = Type::Focus;
+                break;
+            case Parameters::TypeInfo::Camera:
+                _destination.type = Type::Camera;
+                break;
         }
     }
     else {
@@ -318,10 +252,8 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
     addProperty(_destination.type);
     _destination.nodeName.onChange([this]() { _destination.node = nullptr; });
     if (_destination.type == Type::Node || _destination.type == Type::NodeSurface) {
-        if (dictionary.hasKey(DestinationNodeNameInfo.identifier)) {
-            _destination.nodeName = dictionary.value<std::string>(
-                DestinationNodeNameInfo.identifier
-            );
+        if (p.destinationNodeName.has_value()) {
+            _destination.nodeName = *p.destinationNodeName;
         }
         else {
             LERRORC(
@@ -332,9 +264,7 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
     }
     addProperty(_destination.nodeName);
 
-    if (dictionary.hasKey(SimplificationInfo.identifier)) {
-        _doSimplification = dictionary.value<bool>(SimplificationInfo.identifier);
-    }
+    _doSimplification = p.simplification.value_or(_doSimplification);
     _doSimplification.onChange([this]() {
         _requestedUnit.setVisibility(
             _doSimplification ?
@@ -348,17 +278,15 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
         _requestedUnit.addOption(static_cast<int>(u), nameForDistanceUnit(u));
     }
     _requestedUnit = static_cast<int>(DistanceUnit::Meter);
-    if (dictionary.hasKey(RequestedUnitInfo.identifier)) {
-        const std::string& value = dictionary.value<std::string>(
-            RequestedUnitInfo.identifier
-        );
-        DistanceUnit unit = distanceUnitFromString(value.c_str());
+    if (p.requestedUnit.has_value()) {
+        DistanceUnit unit = distanceUnitFromString(p.requestedUnit->c_str());
         _requestedUnit = static_cast<int>(unit);
     }
     _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
     addProperty(_requestedUnit);
 
-    _font = global::fontManager->font(_fontName, _fontSize);
+    _formatString = p.formatString.value_or(_formatString);
+    addProperty(_formatString);
 
     _buffer.resize(256);
 }
@@ -388,7 +316,7 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
             return { mainComp.node->worldPosition(), mainComp.node->guiName() };
         case Type::NodeSurface:
         {
-            glm::dvec3 otherPos = glm::dvec3(0.0);
+            glm::dvec3 otherPos;
             if (otherComp.type == Type::NodeSurface) {
                 // We are only interested in the direction, and we want to prevent
                 // infinite recursion
@@ -440,19 +368,24 @@ void DashboardItemDistance::render(glm::vec2& penPosition) {
     }
     else {
         const DistanceUnit unit = static_cast<DistanceUnit>(_requestedUnit.value());
-        const double convertedD = convertDistance(d, unit);
+        const double convertedD = convertMeters(d, unit);
         dist = { convertedD, nameForDistanceUnit(unit, convertedD != 1.0) };
     }
 
-    std::fill(_buffer.begin(), _buffer.end(), 0);
-    char* end = fmt::format_to(
-        _buffer.data(),
-        "Distance from {} to {}: {:f} {}\0",
-        sourceInfo.second, destinationInfo.second, dist.first, dist.second
-    );
+    std::fill(_buffer.begin(), _buffer.end(), char(0));
+    try {
+        char* end = fmt::format_to(
+            _buffer.data(),
+            _formatString.value().c_str(),
+            sourceInfo.second, destinationInfo.second, dist.first, dist.second
+        );
 
-    std::string_view text = std::string_view(_buffer.data(), end - _buffer.data());
-    RenderFont(*_font, penPosition, text);
+        std::string_view text = std::string_view(_buffer.data(), end - _buffer.data());
+        RenderFont(*_font, penPosition, text);
+    }
+    catch (const fmt::format_error&) {
+        LERRORC("DashboardItemDate", "Illegal format string");
+    }
     penPosition.y -= _font->height();
 }
 
@@ -466,7 +399,7 @@ glm::vec2 DashboardItemDistance::size() const {
     }
     else {
         DistanceUnit unit = static_cast<DistanceUnit>(_requestedUnit.value());
-        double convertedD = convertDistance(d, unit);
+        double convertedD = convertMeters(d, unit);
         dist = { convertedD, nameForDistanceUnit(unit, convertedD != 1.0) };
     }
 

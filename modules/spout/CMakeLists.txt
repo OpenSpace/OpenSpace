@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2020                                                                #
+# Copyright (c) 2014-2021                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -25,15 +25,15 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/renderableplanespout.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/screenspacespout.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/spoutlibrary.h
+  renderableplanespout.h
+  screenspacespout.h
+  spoutlibrary.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/renderableplanespout.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/screenspacespout.cpp
+  renderableplanespout.cpp
+  screenspacespout.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
@@ -46,7 +46,7 @@ create_new_module(
   ${HEADER_FILES} ${SOURCE_FILES}
 )
 
-target_include_directories(openspace-module-spout SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ext/spout)
+target_include_directories(openspace-module-spout SYSTEM PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ext/spout)
 target_link_libraries(openspace-module-spout PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ext/spout/SpoutLibrary.lib)
 register_external_libraries("${CMAKE_CURRENT_SOURCE_DIR}/ext/spout/SpoutLibrary.dll")
 
