@@ -24,7 +24,7 @@ local Atmosphere = {
           -- In Rayleigh scattering, the coefficients of 
           -- absorption and scattering are the same.
         },
-    -- Thichkness of atmosphere if its density were uniform, in Km
+      -- Thickness of atmosphere if its density were uniform, in Km
         H_R = 10.43979
       },
       -- Default

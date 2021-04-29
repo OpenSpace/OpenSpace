@@ -6,6 +6,7 @@ asset.require('./mimas/mimas')
 asset.require('./rhea/rhea')
 asset.require('./tethys/tethys')
 asset.require('./titan/titan')
+asset.require('./titan/atmosphere')
 
 
 asset.meta = {

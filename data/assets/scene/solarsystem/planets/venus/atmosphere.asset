@@ -23,8 +23,9 @@ local Atmosphere = {
           -- In Rayleigh scattering, the coefficients of 
           -- absorption and scattering are the same.
       },
-      -- Thichkness of atmosphere if its density were uniform, in Km
-      H_R = 3.53
+      -- Thickness of atmosphere if its density were uniform, in Km
+      H_R = 15.9 -- from https://nssdc.gsfc.nasa.gov/planetary/factsheet/venusfact.html
+      -- H_R = 3.53
     },
     -- Default
     Mie = {
