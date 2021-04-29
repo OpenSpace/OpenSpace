@@ -27,9 +27,9 @@
 
 #include <modules/autonavigation/atnodenavigator.h>
 #include <modules/autonavigation/pathsegment.h>
+#include <openspace/properties/list/stringlistproperty.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/propertyowner.h>
-#include <openspace/properties/stringlistproperty.h>
 #include <ghoul/glm.h>
 
 namespace openspace {

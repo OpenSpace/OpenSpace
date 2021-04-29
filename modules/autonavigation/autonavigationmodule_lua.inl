@@ -207,7 +207,7 @@ int goToGeo(lua_State* L) {
     }
 
     // Compute the relative position based on the input values
-    glm::vec3 positionModelCoords = global::moduleEngine->module<GlobeBrowsingModule>()
+    glm::dvec3 positionModelCoords = global::moduleEngine->module<GlobeBrowsingModule>()
         ->cartesianCoordinatesFromGeo(
         *globe,
         latitude,
