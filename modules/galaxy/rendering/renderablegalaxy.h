@@ -75,7 +75,6 @@ private:
     properties::FloatProperty _emissionMultiply;
     properties::OptionProperty _starRenderingMethod;
     properties::FloatProperty _enabledPointsRatio;
-    properties::Vec3Property _translation;
     properties::Vec3Property _rotation;
     properties::FloatProperty _downScaleVolumeRendering;
     properties::FloatProperty _numberOfRayCastingSteps;

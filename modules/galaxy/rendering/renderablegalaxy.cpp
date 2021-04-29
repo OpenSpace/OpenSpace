@@ -97,12 +97,6 @@ namespace {
         "" // @TODO Missing documentation
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TranslationInfo = {
-        "Translation",
-        "Translation",
-        "" // @TODO Missing documentation
-    };
-
     constexpr openspace::properties::Property::PropertyInfo RotationInfo = {
         "Rotation",
         "Euler rotation",
@@ -159,9 +153,6 @@ namespace {
         };
         // [[codegen::verbatim(StarRenderingMethodInfo.description)]]
         std::optional<StarRenderingMethod> starRenderingMethod;
-
-        // [[codegen::verbatim(TranslationInfo.description)]]
-        std::optional<glm::vec3> translation;
 
         // [[codegen::verbatim(RotationInfo.description)]]
         std::optional<glm::vec3> rotation;
@@ -244,7 +235,6 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
         properties::OptionProperty::DisplayType::Dropdown
     )
     , _enabledPointsRatio(EnabledPointsRatioInfo, 0.5f, 0.01f, 1.0f)
-    , _translation(TranslationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
     , _rotation(
         RotationInfo,
         glm::vec3(0.f),
@@ -278,7 +268,6 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
         }
     }
 
-    _translation = p.translation.value_or(_translation);
     _rotation = p.rotation.value_or(_rotation);
 
     _volumeFilename = p.volume.filename.string();
@@ -312,7 +301,6 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     addProperty(_emissionMultiply);
     addProperty(_starRenderingMethod);
     addProperty(_enabledPointsRatio);
-    addProperty(_translation);
     addProperty(_rotation);
     _downScaleVolumeRendering.setVisibility(properties::Property::Visibility::Developer);
     addProperty(_downScaleVolumeRendering);
@@ -506,7 +494,6 @@ void RenderableGalaxy::update(const UpdateData& data) {
     if (!_raycaster) {
         return;
     }
-    //glm::mat4 transform = glm::translate(, static_cast<glm::vec3>(_translation));
     const glm::vec3 eulerRotation = static_cast<glm::vec3>(_rotation);
     glm::mat4 transform = glm::rotate(
         glm::mat4(1.f),
@@ -518,14 +505,6 @@ void RenderableGalaxy::update(const UpdateData& data) {
 
     glm::mat4 volumeTransform = glm::scale(transform, _volumeSize);
     _pointTransform = transform;
-    //_pointTransform = glm::scale(transform, _pointScaling);
-
-    const glm::vec4 translation = glm::vec4(_translation.value()*_volumeSize, 0.f);
-
-    // Todo: handle floating point overflow, to actually support translation.
-
-    volumeTransform[3] += translation;
-    _pointTransform[3] += translation;
 
     _raycaster->setDownscaleRender(_downScaleVolumeRendering);
     _raycaster->setMaxSteps(static_cast<int>(_numberOfRayCastingSteps));
@@ -546,7 +525,7 @@ void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
         const float length = safeLength(position);
         const glm::vec3 galaxySize = _volumeSize;
 
-        const float maxDim = std::max(std::max(galaxySize.x, galaxySize.y), galaxySize.z);
+        const float maxDim = glm::compMax(galaxySize);
 
         const float lowerRampStart = maxDim * 0.01f;
         const float lowerRampEnd = maxDim * 0.1f;
@@ -567,7 +546,7 @@ void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
         }
         else if (length < upperRampEnd) {
             opacityCoefficient = 1.f - (length - upperRampStart) /
-                                 (upperRampEnd - upperRampStart); //fade out
+                                 (upperRampEnd - upperRampStart); // fade out
         }
         else {
             opacityCoefficient = 0;
@@ -729,11 +708,11 @@ RenderableGalaxy::Result RenderableGalaxy::loadPointFile() {
     _nPoints = static_cast<size_t>(nPoints);
 
     // Read points
-    float x, y, z, r, g, b, a;
     for (size_t i = 0;
         i < static_cast<size_t>(_nPoints * _enabledPointsRatio.maxValue()) + 1;
         ++i)
     {
+        float x, y, z, r, g, b, a;
         std::getline(pointFile, line);
         std::istringstream issp(line);
         issp >> x >> y >> z >> r >> g >> b >> a;
@@ -788,10 +767,7 @@ RenderableGalaxy::Result RenderableGalaxy::loadCachedFile(const std::string& fil
     fileStream.read(reinterpret_cast<char*>(&nColors), sizeof(uint64_t));
     std::vector<glm::vec3> colors;
     colors.resize(nColors);
-    fileStream.read(
-        reinterpret_cast<char*>(colors.data()),
-        nColors * sizeof(glm::vec3)
-    );
+    fileStream.read(reinterpret_cast<char*>(colors.data()), nColors * sizeof(glm::vec3));
 
     Result result;
     result.success = true;
