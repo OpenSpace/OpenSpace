@@ -108,6 +108,7 @@ protected:
     properties::StringProperty _renderableType;
 
     void setBoundingSphere(double boundingSphere);
+    void setInteractionSphere(double interactionSphere);
 
     void setRenderBinFromOpacity();
     void registerUpdateRenderBinFromOpacity();

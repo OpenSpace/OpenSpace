@@ -3,62 +3,62 @@ local assetHelper = asset.require('util/asset_helper')
 
 
 local textures = asset.syncedResource({
-    Name = "Planetary Nebulae Textures",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_planetarynebulae_textures",
-    Version = 1
+  Name = "Planetary Nebulae Textures",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_planetarynebulae_textures",
+  Version = 1
 })
 
 local speck = asset.syncedResource({
-    Name = "Planetary Nebulae Speck Files",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_planetarynebulae_speck",
-    Version = 2
+  Name = "Planetary Nebulae Speck Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_planetarynebulae_speck",
+  Version = 2
 })
 
 local object = {
-    Identifier = "PlanetaryNebulae",
-    Renderable = {
-        Type = "RenderableBillboardsCloud",
-        Enabled = false,
-        Color = { 0.4, 0.4, 0.9 },
-        Opacity = 0.65,
-        File = speck .. "/pn.speck",
-        Texture = textures .. "/point4.png",
-        PolygonSides = 3,
-        LabelFile = speck .. "/pn.label",
-        TextColor = { 0.25, 0.25, 0.65 },
-        ScaleFactor = 425.0,
-        TextSize = 16.24,
-        TextMinSize = 4.5,
-        TextMaxSize = 25.0,
-        Unit = "pc",
-        BillboardMaxSize = 500,
-        EnablePixelSizeControl = true
-    },
-    GUI = {
-        Name = "Planetary Nebulae",
-        Path = "/Milky Way",
-        Description = [[Census: 283 nebulae. DU Version 2.8. <br> A planetary nebula is an
-            expanding shell of gas ejected from a star late in its life cycle. Appearing
-            like greenish disks to a telescopic observer, planetary nebulae received their
-            name from their resemblance to the gaseous planets of our solar system. In no
-            way are they related to planets, rather, they are products of dying stars.
-            (Description from URL) <br><br> Data Reference: Planetary Nebulae distances
-            in Gaia DR2 (Kimeswenger+, 2018), Strasbourg-ESO Catalog of Planetary Nebulae
-            (Acker+ 1992)]],
-    }
+  Identifier = "PlanetaryNebulae",
+  Renderable = {
+    Type = "RenderableBillboardsCloud",
+    Enabled = false,
+    Color = { 0.4, 0.4, 0.9 },
+    Opacity = 0.65,
+    File = speck .. "/pn.speck",
+    Texture = textures .. "/point4.png",
+    PolygonSides = 3,
+    LabelFile = speck .. "/pn.label",
+    TextColor = { 0.25, 0.25, 0.65 },
+    ScaleFactor = 425.0,
+    TextSize = 16.24,
+    TextMinSize = 4.5,
+    TextMaxSize = 25.0,
+    Unit = "pc",
+    BillboardMaxSize = 500,
+    EnablePixelSizeControl = true
+  },
+  GUI = {
+    Name = "Planetary Nebulae",
+    Path = "/Milky Way",
+    Description = [[Census: 283 nebulae. DU Version 2.8. <br> A planetary nebula is an
+      expanding shell of gas ejected from a star late in its life cycle. Appearing
+      like greenish disks to a telescopic observer, planetary nebulae received their
+      name from their resemblance to the gaseous planets of our solar system. In no
+      way are they related to planets, rather, they are products of dying stars.
+      (Description from URL) <br><br> Data Reference: Planetary Nebulae distances
+      in Gaia DR2 (Kimeswenger+, 2018), Strasbourg-ESO Catalog of Planetary Nebulae
+      (Acker+ 1992)]],
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })
 
 
 asset.meta = {
-    Name = "Planetary Nebulae",
-    Version = "2.0",
-    Description = [[Digital Universe asset for Planetary Nebulae]],
-    Author = "Brian Abbott (AMNH)",
-    URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-    License = "AMNH Digital Universe",
-    Identifiers = {"PlanetaryNebulae"}
+  Name = "Planetary Nebulae",
+  Version = "2.0",
+  Description = [[Digital Universe asset for Planetary Nebulae]],
+  Author = "Brian Abbott (AMNH)",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe",
+  Identifiers = {"PlanetaryNebulae"}
 }

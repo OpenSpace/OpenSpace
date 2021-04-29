@@ -6,69 +6,68 @@ local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 -- asset.require('./fov')
 
 local LightSources = {
-    {
-        Type = "SceneGraphLightSource",
-        Identifier = "Sun",
-        Node = sunTransforms.SolarSystemBarycenter.Identifier,
-        Intensity = 1.0
-    },
-    {
-        Identifier = "Camera",
-        Type = "CameraLightSource",
-        Intensity = 0.5
-    }
+  {
+    Type = "SceneGraphLightSource",
+    Identifier = "Sun",
+    Node = sunTransforms.SolarSystemBarycenter.Identifier,
+    Intensity = 1.0
+  },
+  {
+    Identifier = "Camera",
+    Type = "CameraLightSource",
+    Intensity = 0.5
+  }
 }
 
 local models = asset.syncedResource({
-    Name = "Mars 2020 Kernels",
-    Type = "HttpSynchronization",
-    Identifier = "perseverance_models",
-    Version = 2
+  Name = "Mars 2020 Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "perseverance_models",
+  Version = 2
 })
 
 -- Perseverance Model --
 local Perseverance = {
-    Identifier = "Perseverance",
-    Parent = transforms.MSL_Body.Identifier,
-    GUI = {
-        Name = "Perseverance",
-        Path = "/Solar System/Missions/Perseverance"
-    }
+  Identifier = "Perseverance",
+  Parent = transforms.MSL_Body.Identifier,
+  GUI = {
+    Name = "Perseverance",
+    Path = "/Solar System/Missions/Perseverance"
+  }
 }
 
 -- Perseverance Model --
 local PerseveranceModel = {
-    Identifier = "PerseveranceModel",
-    Parent = Perseverance.Identifier,
-    GUI = {
-        Name = "Perseverance Model",
-        Path = "/Solar System/Missions/Perseverance",
-        Hidden = true,
-    }
+  Identifier = "PerseveranceModel",
+  Parent = Perseverance.Identifier,
+  GUI = {
+    Name = "Perseverance Model",
+    Path = "/Solar System/Missions/Perseverance",
+    Hidden = true
+  }
 }
 
 -- Perseverance Model Instruments --
 local Body = {
-    Identifier = "Perseverance_body",
-    Parent = PerseveranceModel.Identifier,
-    Renderable = {
-        Type = "RenderableModel",
-        Body = "MARS SCIENCE LABORATORY",
-        GeometryFile = models .. "/Perseverance.obj",
-        LightSources = LightSources,
-        PerformShading = false,
-    },
-    GUI = {
-        Name = "Perseverance Model Body",
-        Path = "/Solar System/Missions/Perseverance/Model",
-        Hidden = true,
-    }
-
+  Identifier = "Perseverance_body",
+  Parent = PerseveranceModel.Identifier,
+  Renderable = {
+    Type = "RenderableModel",
+    Body = "MARS SCIENCE LABORATORY",
+    GeometryFile = models .. "/Perseverance.obj",
+    LightSources = LightSources,
+    PerformShading = false
+  },
+  GUI = {
+    Name = "Perseverance Model Body",
+    Path = "/Solar System/Missions/Perseverance/Model",
+    Hidden = true
+  }
 }
 
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { 
-    Perseverance,
-    PerseveranceModel,
-    Body
+  Perseverance,
+  PerseveranceModel,
+  Body
 })

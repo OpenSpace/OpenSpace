@@ -5,32 +5,32 @@ local texturesPath = asset.require('./earth_textures').TexturesPath
 
 
 local EarthMarker = {
-    Identifier = "EarthMarker",
-    Parent = transforms.EarthIAU.Identifier,
-    Renderable = {
-        Type = "RenderablePlaneImageLocal",
-        Enabled = false,
-        Size = 3.0E11,
-        Origin = "Center",
-        Billboard = true,
-        Texture = texturesPath .. "/marker.png",
-        BlendMode = "Additive"
-    },
-    GUI = {
-        Name = "Earth Marker",
-        Path = "/Solar System/Planets/Earth"
-    }
+  Identifier = "EarthMarker",
+  Parent = transforms.EarthIAU.Identifier,
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Enabled = false,
+    Size = 3.0E11,
+    Origin = "Center",
+    Billboard = true,
+    Texture = texturesPath .. "/marker.png",
+    BlendMode = "Additive"
+  },
+  GUI = {
+    Name = "Earth Marker",
+    Path = "/Solar System/Planets/Earth"
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { EarthMarker })
 
 
 asset.meta = {
-    Name = "Earth marker",
-    Version = "1.0",
-    Description = [[ Earth marker with name, sized for Solar System view]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license",
-    Identifiers = {"EarthMarker"}
+  Name = "Earth marker",
+  Version = "1.0",
+  Description = [[ Earth marker with name, sized for Solar System view]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license",
+  Identifiers = {"EarthMarker"}
 }

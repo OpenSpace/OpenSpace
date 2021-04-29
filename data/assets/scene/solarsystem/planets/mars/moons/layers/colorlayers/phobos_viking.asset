@@ -1,26 +1,25 @@
 local globeIdentifier = asset.require("./../../phobos").Phobos.Identifier
 
 local layer = {
-    Identifier = "Phobos_Global_Shaded_Relief_USGS",
-    Name = "Phobos Global Shaded Relief [USGS]",
-    Enabled = true,
-    FilePath = "WMS:https://wms.wr.usgs.gov/cgi-bin/mapserv?map=/maps/mars/phobos_simp_cyl.map&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=Phobos_Simple_Cylindrical_Rasters&SRS=EPSG:4326&BBOX=-180,-90,360,90",
-    Description = [[ Viking-base Phobos shaded relief created by USGS.]]
+  Identifier = "Phobos_Global_Shaded_Relief_USGS",
+  Name = "Phobos Global Shaded Relief [USGS]",
+  Enabled = true,
+  FilePath = "WMS:https://wms.wr.usgs.gov/cgi-bin/mapserv?map=/maps/mars/phobos_simp_cyl.map&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=Phobos_Simple_Cylindrical_Rasters&SRS=EPSG:4326&BBOX=-180,-90,360,90",
+  Description = [[ Viking-base Phobos shaded relief created by USGS.]]
 }
 
 asset.onInitialize(function () 
-    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)
 
 
 asset.meta = {
-    Name = "Phobos Global Shaded Relief [USGS]",
-    Version = "1.0",
-    Author = "USGS/NASA",
-    URL = "https://astrowebmaps.wr.usgs.gov/webmapatlas/Layers/maps.html",
-    License = "NASA/PDS",
-    Identifiers = {'Phobos_Global_Shaded_Relief_USGS'}
-
+  Name = "Phobos Global Shaded Relief [USGS]",
+  Version = "1.0",
+  Author = "USGS/NASA",
+  URL = "https://astrowebmaps.wr.usgs.gov/webmapatlas/Layers/maps.html",
+  License = "NASA/PDS",
+  Identifiers = {'Phobos_Global_Shaded_Relief_USGS'}
 }

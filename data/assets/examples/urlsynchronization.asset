@@ -3,48 +3,48 @@
 local assetHelper = asset.require("util/asset_helper")
 
 asset.syncedResource({
-    Name = "Example Single",
-    Type = "UrlSynchronization",
-    Identifier = "example_single",
-    Url = "http://celestrak.com/NORAD/elements/geo.txt"
+  Name = "Example Single",
+  Type = "UrlSynchronization",
+  Identifier = "example_single",
+  Url = "http://celestrak.com/NORAD/elements/geo.txt"
 })
 
 asset.syncedResource({
-    Name = "Example Multiple",
-    Type = "UrlSynchronization",
-    Identifier = "example_multiple",
-    Url = {
-        "http://celestrak.com/NORAD/elements/stations.txt",
-        "http://celestrak.com/NORAD/elements/gps-ops.txt",
-    }
+  Name = "Example Multiple",
+  Type = "UrlSynchronization",
+  Identifier = "example_multiple",
+  Url = {
+    "http://celestrak.com/NORAD/elements/stations.txt",
+    "http://celestrak.com/NORAD/elements/gps-ops.txt",
+  }
 })
 
 asset.syncedResource({
-    Name = "Example Large",
-    Type = "UrlSynchronization",
-    Identifier = "example_large",
-    Url = "http://ipv4.download.thinkbroadband.com/100MB.zip",
-    Override = true
+  Name = "Example Large",
+  Type = "UrlSynchronization",
+  Identifier = "example_large",
+  Url = "http://ipv4.download.thinkbroadband.com/100MB.zip",
+  Override = true
 })
 
 asset.syncedResource({
-    Name = "Example Medium",
-    Type = "UrlSynchronization",
-    Identifier = "example_medium",
-    Url = "http://ipv4.download.thinkbroadband.com/5MB.zip",
-    Override = true
+  Name = "Example Medium",
+  Type = "UrlSynchronization",
+  Identifier = "example_medium",
+  Url = "http://ipv4.download.thinkbroadband.com/5MB.zip",
+  Override = true
 })
 
 asset.syncedResource({
-    Name = "Example No ident",
-    Type = "UrlSynchronization",
-    Url = "http://ipv4.download.thinkbroadband.com/5MB.zip"
+  Name = "Example No ident",
+  Type = "UrlSynchronization",
+  Url = "http://ipv4.download.thinkbroadband.com/5MB.zip"
 })
 
 asset.syncedResource({
-    Name = "Example No Hash",
-    Type = "UrlSynchronization",
-    Identifier = "no_hash",
-    Url = "http://wms.itn.liu.se/Mercury/Messenger_Mosaic/Messenger_Mosaic.wms",
-    UseHash = false
+  Name = "Example No Hash",
+  Type = "UrlSynchronization",
+  Identifier = "no_hash",
+  Url = "http://wms.itn.liu.se/Mercury/Messenger_Mosaic/Messenger_Mosaic.wms",
+  UseHash = false
 })
