@@ -40,7 +40,7 @@ openspace.autonavigation.renderPath = function (nrLinesPerSegment, renderPoints,
     local label_line = "Line"
     local lineColor = {1.0, 1.0, 0.0}
     local lineWidth = 4
-    local sphereTexture = "${MODULES}/autonavigation/textures/red.png" 
+    local sphereTexture = openspace.absPath("${MODULES}/autonavigation/textures/red.png")
     local sphereSegments = 50
     local label_orientation = "Orientation"
     local orientationLineColor = {1.0, 0.0, 0.0}
@@ -164,7 +164,7 @@ end
 openspace.autonavigation.renderControlPoints = function (sphereRadius)
     local base_identifier = "Path_Control_Points"
     local label_point = "ControlPoint"
-    local sphereTexture = "${MODULES}/autonavigation/textures/yellow.png" 
+    local sphereTexture = openspace.absPath("${MODULES}/autonavigation/textures/yellow.png") 
     local sphereSegments = 50
 
     if (sphereRadius == nil) then 
