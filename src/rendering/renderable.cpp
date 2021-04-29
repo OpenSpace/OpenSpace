@@ -167,6 +167,10 @@ double Renderable::boundingSphere() const {
     return _boundingSphere;
 }
 
+void Renderable::setInteractionSphere(double interactionSphere) {
+    _interactionSphere = interactionSphere;
+}
+
 double Renderable::interactionSphere() const {
     return _interactionSphere;
 }
