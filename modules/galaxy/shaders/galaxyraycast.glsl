@@ -29,17 +29,13 @@ uniform float absorptionMultiply#{id} = 50.0;
 uniform float emissionMultiply#{id} = 1500.0;
 uniform sampler3D galaxyTexture#{id};
 
-void sample#{id}(
-  vec3 samplePos,
-  vec3 dir,
-  inout vec3 accumulatedColor,
-  inout vec3 accumulatedAlpha,
-  inout float stepSize
-  ) {
+void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
+                 inout vec3 accumulatedAlpha, inout float stepSize)
+{
     vec3 aspect = aspect#{id};
     stepSize = maxStepSize#{id} / length(dir / aspect);
 
-    //Early ray termination on black parts of the data
+    // Early ray termination on black parts of the data
     vec3 normalizedPos = samplePos * 2.f - 1.f;
     if (normalizedPos.x * normalizedPos.x + normalizedPos.y * normalizedPos.y > 0.7) {
         return;

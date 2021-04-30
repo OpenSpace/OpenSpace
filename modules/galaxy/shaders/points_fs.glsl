@@ -37,7 +37,11 @@ Fragment getFragment() {
 
     float multipliedOpacityCoefficient = opacityCoefficient*opacityCoefficient;
     vec3 extinction = exp(vec3(0.6, 0.2, 0.3) - vs_color);
-    vec4 fullColor = vec4(vs_color*extinction*vs_starBrightness*multipliedOpacityCoefficient, opacityCoefficient);
+
+    // We use the star brightness as the alpha value here to dim the stars as the camera
+    // moves further away.  Otherwise they would occlude the main milkway image even though
+    // they themselves nolonger have any color contribution left
+    vec4 fullColor = vec4(vs_color*extinction*vs_starBrightness*multipliedOpacityCoefficient, vs_starBrightness);
     frag.color = fullColor;
 
     frag.depth = vs_screenSpaceDepth;
