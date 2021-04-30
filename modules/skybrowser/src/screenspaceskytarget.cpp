@@ -241,9 +241,6 @@ namespace openspace {
         unbindTexture();
     }
 
-    void ScreenSpaceSkyTarget::translate(glm::dvec2 translation, glm::dvec2 position) {
-        _cartesianPosition = glm::translate(glm::dmat4(1.f), glm::dvec3(translation, 0.0f)) * glm::dvec4(position, _cartesianPosition.value().z, 1.0f);
-    }
     glm::dvec2  ScreenSpaceSkyTarget::getScreenSpacePosition() {
         return glm::vec2(_cartesianPosition.value().x, _cartesianPosition.value().y);
     }
