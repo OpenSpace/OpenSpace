@@ -368,11 +368,12 @@ std::vector<glm::dvec3> AutoNavigationHandler::curvePositions(int nPerSegment) {
     const double du = 1.0 / nPerSegment;
 
     for (std::unique_ptr<PathSegment>& p : _pathSegments) {
+        const double length = p->pathLength();
         for (double u = 0.0; u < 1.0; u += du) {
-            glm::dvec3 position = p->interpolatedPose(u).position;
+            glm::dvec3 position = p->interpolatedPose(u * length).position;
             positions.push_back(position);
         }
-        positions.push_back(p->interpolatedPose(1.0).position);
+        positions.push_back(p->end().position());
     }
 
     return positions;
@@ -391,11 +392,12 @@ std::vector<glm::dquat> AutoNavigationHandler::curveOrientations(int nPerSegment
     const double du = 1.0 / nPerSegment;
 
     for (std::unique_ptr<PathSegment>& p : _pathSegments) {
+        const double length = p->pathLength();
         for (double u = 0.0; u <= 1.0; u += du) {
-            const glm::dquat orientation = p->interpolatedPose(u).rotation;
+            const glm::dquat orientation = p->interpolatedPose(u * length).rotation;
             orientations.push_back(orientation);
         }
-        orientations.push_back(p->interpolatedPose(1.0).rotation);
+        orientations.push_back(p->end().rotation());
     }
 
     return orientations;
