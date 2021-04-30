@@ -6,7 +6,8 @@ local assetHelper = asset.require('util/asset_helper')
          Name = "SkyBrowser",
          Url = "http://localhost:8000/",
          FaceCamera = false,
-         TargetID = "SkyTarget1"
+         TargetID = "SkyTarget1",
+         CartesianPosition = {-1.0, -0.5, -2.1}
      };
 
 assetHelper.registerScreenSpaceRenderables(asset, { spec })
