@@ -3,52 +3,52 @@ local assetHelper = asset.require('util/asset_helper')
 
 
 local speck = asset.syncedResource({
-    Name = "Galaxy Groups Speck Files",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_groups_speck",
-    Version = 1
+  Name = "Galaxy Groups Speck Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_groups_speck",
+  Version = 1
 })
 
 local object = {
-    Identifier = "NearbyGalaxyGroups",
-    Renderable = {
-        Type = "RenderableBillboardsCloud",
-        Enabled = false,
-        Color = { 1.0, 1.0, 1.0 },
-        Opacity = 0.65,
-        --ScaleFactor = 10.0,
-        LabelFile = speck .. "/groups.label",
-        TextColor = { 0.1, 0.6, 0.2 },
-        TextSize = 21.5,
-        TextMinSize = 8.0,
-        Unit = "Mpc",
-        DrawLabels = true,
-        TransformationMatrix = {
-            -0.7357425748,    0.67726129641,  0.0,           0.0,
-            -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
-            0.67314530211,    0.73127116582,  0.11008126223, 0.0,
-            0.0,              0.0,            0.0,           1.0
-        },
-    },
-    GUI = {
-        Name = "Galaxy Group Labels",
-        Path = "/Universe/Galaxies",
-        Description = [[Census: 62 galaxy group labels. DU Version 1.2. <br> The Galaxy
-        Groups data are a set of labels that mark the nearby galaxy groups. The Milky Way
-        is in the Local Group, and we are surrounded by many other groups.(Description
-        from URL) <br><br> Data Reference: Brian Abbott (AMNH)]]
+  Identifier = "NearbyGalaxyGroups",
+  Renderable = {
+    Type = "RenderableBillboardsCloud",
+    Enabled = false,
+    Color = { 1.0, 1.0, 1.0 },
+    Opacity = 0.65,
+    --ScaleFactor = 10.0,
+    LabelFile = speck .. "/groups.label",
+    TextColor = { 0.1, 0.6, 0.2 },
+    TextSize = 21.5,
+    TextMinSize = 8.0,
+    Unit = "Mpc",
+    DrawLabels = true,
+    TransformationMatrix = {
+      -0.7357425748,    0.67726129641,  0.0,           0.0,
+      -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
+      0.67314530211,    0.73127116582,  0.11008126223, 0.0,
+      0.0,              0.0,            0.0,           1.0
     }
+  },
+  GUI = {
+    Name = "Galaxy Group Labels",
+    Path = "/Universe/Galaxies",
+    Description = [[Census: 62 galaxy group labels. DU Version 1.2. <br> The Galaxy
+    Groups data are a set of labels that mark the nearby galaxy groups. The Milky Way
+    is in the Local Group, and we are surrounded by many other groups.(Description
+    from URL) <br><br> Data Reference: Brian Abbott (AMNH)]]
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })
 
 
 asset.meta = {
-    Name = "Galaxy Group Labels",
-    Version = "1.0",
-    Author = "Brian Abbott (AMNH)",
-    Description = [[Digital Universe asset for Galaxy Groups]],
-    URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-    License = "AMNH Digital Universe",
-    Identifiers = {"NearbyGalaxyGroups"}
+  Name = "Galaxy Group Labels",
+  Version = "1.0",
+  Author = "Brian Abbott (AMNH)",
+  Description = [[Digital Universe asset for Galaxy Groups]],
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe",
+  Identifiers = {"NearbyGalaxyGroups"}
 }

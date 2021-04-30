@@ -1,13 +1,13 @@
 local item = {
-    Type = "DashboardItemFramerate",
-    Identifier = "Framerate",
-    GuiName = "Framerate"
+  Type = "DashboardItemFramerate",
+  Identifier = "Framerate",
+  GuiName = "Framerate"
 }
 
 asset.onInitialize(function()
-    openspace.dashboard.addDashboardItem(item)
+  openspace.dashboard.addDashboardItem(item)
 end)
 
 asset.onDeinitialize(function()
-    openspace.dashboard.removeDashboardItem(item.Identifier)
+  openspace.dashboard.removeDashboardItem(item.Identifier)
 end)

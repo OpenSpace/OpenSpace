@@ -76,8 +76,10 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/properties/propertyowner.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/selectionproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/stringproperty.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/stringlistproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/triggerproperty.cpp
+  ${OPENSPACE_BASE_DIR}/src/properties/list/doublelistproperty.cpp
+  ${OPENSPACE_BASE_DIR}/src/properties/list/intlistproperty.cpp
+  ${OPENSPACE_BASE_DIR}/src/properties/list/stringlistproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat2property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat2x3property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat2x4property.cpp
@@ -260,6 +262,8 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelpeer.h
   ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelserver.h
   ${OPENSPACE_BASE_DIR}/include/openspace/network/messagestructures.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/properties/listproperty.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/properties/listproperty.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/numericalproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/numericalproperty.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/optionproperty.h
@@ -269,10 +273,12 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/propertyowner.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/selectionproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/stringproperty.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/stringlistproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/templateproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/templateproperty.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/triggerproperty.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/properties/list/doublelistproperty.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/properties/list/intlistproperty.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/properties/list/stringlistproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat2property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat2x3property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat2x4property.h

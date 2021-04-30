@@ -10,45 +10,45 @@ local parentSpice = "JUPITER BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_carpo" }
 local trailColor = { 0.4, 0.3, 0.01 }
 local trailTags = {
-    "moonTrail_solarSystem",
-    "moonTrail_giants",
-    "moonTrail_jupiter",
-    "moonTrail_minor"
+  "moonTrail_solarSystem",
+  "moonTrail_giants",
+  "moonTrail_jupiter",
+  "moonTrail_minor"
 }
 
 local carpoGroup = {
-    {
-        Identifier = "Carpo",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "CARPO",
-        Radii = { 3000, 3000, 3000 },
-        Tags = tags,
-        TrailTags = trailTags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Carpo Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 458.62,
-        Kernels = kernel
-    }
+  {
+    Identifier = "Carpo",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "CARPO",
+    Radii = { 3000, 3000, 3000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Carpo Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 458.62,
+    Kernels = kernel
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(
-    asset,
-    proceduralGlobes.createGlobes(carpoGroup)
+  asset,
+  proceduralGlobes.createGlobes(carpoGroup)
 )
 
 
 asset.meta = {
-    Name = "Jupiter Carpo Group Moons",
-    Version = "1.0",
-    Description = [[ Procedural Globe asset containing Jupiter's Carpo Group
-        moons: Carpo. Blank globes and SPICE trails
-        are generated for each moon.]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license"
+  Name = "Jupiter Carpo Group Moons",
+  Version = "1.0",
+  Description = [[ Procedural Globe asset containing Jupiter's Carpo Group
+    moons: Carpo. Blank globes and SPICE trails
+    are generated for each moon.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
 }

@@ -38,9 +38,8 @@ public:
     IswaDataGroup(std::string name, std::string type);
     ~IswaDataGroup();
 
-    void registerOptions(
-        const std::vector<properties::SelectionProperty::Option>& options);
-    std::vector<int> dataOptionsValue() const;
+    void registerOptions(const std::vector<std::string>& options);
+    std::set<std::string> dataOptionsValue() const;
 
 protected:
     void registerProperties();

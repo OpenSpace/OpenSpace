@@ -156,6 +156,7 @@ in vec3 positionCameraSpace;
 in vec3 positionWorldSpace;
 #endif // USE_ECLIPSE_SHADOWS
 
+uniform float opacity;
 
 
 Fragment getFragment() {
@@ -295,6 +296,8 @@ Fragment getFragment() {
     }
     frag.color.xyz *= shadow < 0.99 ? clamp(shadow + 0.3, 0.0, 1.0) : shadow;
 #endif
+
+    frag.color.a *= opacity;
 
     return frag;
 }

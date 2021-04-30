@@ -1,0 +1,10 @@
+[ 
+    { "type": "pause", 
+      "value": "true"},
+    { "type": "keys", 
+      "value": "e"},
+    { "type": "wait", 
+      "value": "60"}, 
+    { "type": "screenshot", 
+      "value": ""}
+] 

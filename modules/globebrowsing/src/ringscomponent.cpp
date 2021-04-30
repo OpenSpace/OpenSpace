@@ -56,14 +56,14 @@ namespace {
 
     constexpr const std::array<const char*, 9> UniformNames = {
         "modelViewProjectionMatrix", "textureOffset", "colorFilterValue", "_nightFactor",
-        "sunPosition", "ringTexture", "shadowMatrix", "shadowMapTexture", 
+        "sunPosition", "ringTexture", "shadowMatrix", "shadowMapTexture",
         "zFightingPercentage"
     };
 
     constexpr const std::array<const char*, 15> UniformNamesAdvancedRings = {
         "modelViewProjectionMatrix", "textureOffset", "colorFilterValue", "_nightFactor",
-        "sunPosition", "sunPositionObj", "camPositionObj", "ringTextureFwrd", 
-        "ringTextureBckwrd", "ringTextureUnlit", "ringTextureColor", 
+        "sunPosition", "sunPositionObj", "camPositionObj", "ringTextureFwrd",
+        "ringTextureBckwrd", "ringTextureUnlit", "ringTextureColor",
         "ringTextureTransparency", "shadowMatrix", "shadowMapTexture", "zFightingPercentage"
     };
 
@@ -251,6 +251,7 @@ void RingsComponent::initialize() {
 
     addProperty(_enabled);
 
+    _size.setViewOption(properties::Property::ViewOptions::Logarithmic);
     _size = p.size.value_or(_size);
     _size.onChange([&]() { _planeIsDirty = true; });
     addProperty(_size);
@@ -262,7 +263,7 @@ void RingsComponent::initialize() {
         addProperty(_texturePath);
         _textureFile->setCallback([&](const File&) { _textureIsDirty = true; });
     }
-    
+
     if (p.textureFwrd.has_value()) {
         _textureFwrdPath = absPath(p.textureFwrd->string());
         _textureFileForwards = std::make_unique<File>(_textureFwrdPath);
@@ -423,11 +424,11 @@ void RingsComponent::draw(const RenderData& data,
             );
 
             _shader->setUniform(
-                _uniformCacheAdvancedRings.sunPositionObj, 
+                _uniformCacheAdvancedRings.sunPositionObj,
                 sunPositionObjectSpace
             );
             _shader->setUniform(
-                _uniformCacheAdvancedRings.zFightingPercentage, 
+                _uniformCacheAdvancedRings.zFightingPercentage,
                 _zFightingPercentage
             );
             _shader->setUniform(
@@ -438,21 +439,21 @@ void RingsComponent::draw(const RenderData& data,
             ringTextureFwrdUnit.activate();
             _textureForwards->bind();
             _shader->setUniform(
-                _uniformCacheAdvancedRings.ringTextureFwrd, 
+                _uniformCacheAdvancedRings.ringTextureFwrd,
                 ringTextureFwrdUnit
             );
 
             ringTextureBckwrdUnit.activate();
             _textureBackwards->bind();
             _shader->setUniform(
-                _uniformCacheAdvancedRings.ringTextureBckwrd, 
+                _uniformCacheAdvancedRings.ringTextureBckwrd,
                 ringTextureBckwrdUnit
             );
 
             ringTextureUnlitUnit.activate();
             _textureUnlit->bind();
             _shader->setUniform(
-                _uniformCacheAdvancedRings.ringTextureUnlit, 
+                _uniformCacheAdvancedRings.ringTextureUnlit,
                 ringTextureUnlitUnit
             );
 
@@ -488,7 +489,7 @@ void RingsComponent::draw(const RenderData& data,
             );
 
             _shader->setUniform(
-                _uniformCacheAdvancedRings.camPositionObj, 
+                _uniformCacheAdvancedRings.camPositionObj,
                 _camPositionObjectSpace
             );
 
@@ -513,7 +514,7 @@ void RingsComponent::draw(const RenderData& data,
             _shader->setUniform(_uniformCache.sunPosition, _sunPosition);
             _shader->setUniform(_uniformCache.zFightingPercentage, _zFightingPercentage);
             _shader->setUniform(
-                _uniformCache.modelViewProjectionMatrix, 
+                _uniformCache.modelViewProjectionMatrix,
                 modelViewProjectionTransform
             );
 
@@ -533,7 +534,7 @@ void RingsComponent::draw(const RenderData& data,
             shadowMapUnit.activate();
             glBindTexture(GL_TEXTURE_2D, shadowData.shadowDepthTexture);
             _shader->setUniform(_uniformCache.shadowMapTexture, shadowMapUnit);
-        }        
+        }
 
         glEnable(GL_DEPTH_TEST);
         glEnablei(GL_BLEND, 0);
@@ -831,7 +832,7 @@ void RingsComponent::compileShadowShader() {
 
         // Uses multiple textures for the Rings
         // See https://bjj.mmedia.is/data/s_rings/index.html for theory behind it
-        if (_isAdvancedTextureEnabled) { 
+        if (_isAdvancedTextureEnabled) {
             _shader = global::renderEngine->buildRenderProgram(
                 "AdvancedRingsProgram",
                 absPath("${MODULE_GLOBEBROWSING}/shaders/advanced_rings_vs.glsl"),
@@ -840,8 +841,8 @@ void RingsComponent::compileShadowShader() {
             );
 
             ghoul::opengl::updateUniformLocations(
-                *_shader, 
-                _uniformCacheAdvancedRings, 
+                *_shader,
+                _uniformCacheAdvancedRings,
                 UniformNamesAdvancedRings
             );
         }
@@ -864,6 +865,10 @@ void RingsComponent::compileShadowShader() {
 
 bool RingsComponent::isEnabled() const {
     return _enabled;
+}
+
+double RingsComponent::size() const {
+    return _size;
 }
 
 } // namespace openspace

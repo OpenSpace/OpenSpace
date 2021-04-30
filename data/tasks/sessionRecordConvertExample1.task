@@ -1,7 +1,7 @@
 return {
-    {
-        Type = "ConvertRecFormatTask",
-        InputFilePath = "../../recordings/input",
-        OutputFilePath = "../../recordings/output"
-    }
+  {
+    Type = "ConvertRecFormatTask",
+    InputFilePath = "../../recordings/input",
+    OutputFilePath = "../../recordings/output"
+  }
 }

@@ -192,6 +192,17 @@ struct DirectoryVerifier : public StringVerifier {
 };
 
 /**
+ * A Verifier that checks whether a given key inside a ghoul::Dictionary is a string and
+ * a valid date time
+ */
+struct DateTimeVerifier : public StringVerifier {
+    TestResult operator()(const ghoul::Dictionary& dict,
+        const std::string& key) const override;
+
+    std::string type() const override;
+};
+
+/**
  * A Verifier that checks whether a given key inside a ghoul::Dictionary is another
  * ghoul::Dictionary. The constructor takes a list of DocumentationEntry%s, which are used
  * recursively to check the contained table. If this list is empty, a simple type testing
