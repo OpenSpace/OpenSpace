@@ -162,8 +162,9 @@ namespace openspace {
     }
 
     void ScreenSpaceSkyBrowser::scrollZoom(float scroll) {
-       
-        float zoomFactor = 0.25f*log(_vfieldOfView + 1.1f);
+        // Make scroll more sensitive the smaller the FOV
+        float x = _vfieldOfView;
+        float zoomFactor = atan(x / 50.0) + exp(x / 40) - 0.999999;
         float zoom = scroll > 0.0 ? -zoomFactor : zoomFactor;
         _vfieldOfView = std::clamp(_vfieldOfView + zoom, 0.001f, 70.0f);
     }
