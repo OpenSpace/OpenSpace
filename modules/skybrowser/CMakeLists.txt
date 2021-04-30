@@ -31,6 +31,7 @@ set(HEADER_FILES
     include/screenspaceskytarget.h
     include/wwtdatahandler.h
     tinyxml2/tinyxml2.h
+    include/utility.h
     
 )
 source_group("Header Files" FILES ${HEADER_FILES})
@@ -43,6 +44,7 @@ set(SOURCE_FILES
     src/screenspaceskytarget.cpp
     src/wwtdatahandler.cpp
     tinyxml2/tinyxml2.cpp
+    src/utility.cpp
 
 )
 source_group("Source Files" FILES ${SOURCE_FILES})

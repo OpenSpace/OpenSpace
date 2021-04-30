@@ -18,8 +18,8 @@ namespace openspace {
         bool setConnectedTarget();
 
         // Communication with the webpage and WWT
-        void executeJavascript(std::string& script) const;
-        ghoul::Dictionary createMessageForMovingWWTCamera(const glm::dvec2 celestCoords, const float fov, const bool moveInstantly = true) const;
+        void executeJavascript(std::string script) const;
+        ghoul::Dictionary createMessageForMovingWWTCamera(const glm::dvec2 celestCoords, const double fov, const bool moveInstantly = true) const;
         ghoul::Dictionary createMessageForPausingWWTTime() const;
         ghoul::Dictionary createMessageForLoadingWWTImgColl(const std::string& url) const;
         ghoul::Dictionary createMessageForSettingForegroundWWT(const std::string& name) const;

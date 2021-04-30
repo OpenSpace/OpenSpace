@@ -33,24 +33,18 @@ namespace openspace {
         void setDimensions(glm::vec2 currentBrowserDimensions);
         void updateFOV(float browserFOV);
 
-        glm::dvec2 convertGalacticToCelestial(glm::dvec3 rGal) const;
-        glm::vec2 getCelestialCoords();
-        glm::vec2 getScreenSpacePosition();
-        glm::vec2 getAnglePosition();
+        glm::dvec3 getTargetDirection();
+        glm::dvec2 getScreenSpacePosition();
         void setConnectedBrowser();
         void setBorderColor(glm::ivec3 color);
         glm::ivec3 getColor();
-
-        void setPosition(glm::vec3 pos);
        
-        void translate(glm::vec2 translation, glm::vec2 position);
-        // Only works for galactic coords outside of the solar system
-        void lookAtGalacticCoord(glm::dvec3 galacticCoord);
+        void translate(glm::dvec2 translation, glm::dvec2 position);
 
-        glm::vec2 getScreenSpaceDimensions();
-        glm::vec2 getUpperRightCornerScreenSpace();
-        glm::vec2 getLowerLeftCornerScreenSpace();
-        bool coordIsInsideCornersScreenSpace(glm::vec2 coord);
+        glm::dvec2 getScreenSpaceDimensions();
+        glm::dvec2 getUpperRightCornerScreenSpace();
+        glm::dvec2 getLowerLeftCornerScreenSpace();
+        bool coordIsInsideCornersScreenSpace(glm::dvec2 coord);
 
         glm::mat4 scaleMatrix() override;
         

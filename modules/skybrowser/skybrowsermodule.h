@@ -33,6 +33,10 @@
 #include <openspace/properties/stringproperty.h>
 #include <thread>
 
+
+#include <iostream>
+#include <fstream>
+
 namespace openspace {
 
 class ScreenSpaceSkyBrowser;
@@ -49,8 +53,6 @@ public:
     virtual ~SkyBrowserModule() = default;
     glm::vec2 getMousePositionInScreenSpaceCoords(glm::vec2& mousePos);
     void addRenderable(ScreenSpaceRenderable* object);
-    glm::dvec2 convertGalacticToCelestial(glm::dvec3 coords) const;
-    glm::dvec3 icrsToGalacticCartesian(double ra, double dec, double distance);
     WWTDataHandler* getWWTDataHandler();
 
     scripting::LuaLibrary luaLibrary() const override;

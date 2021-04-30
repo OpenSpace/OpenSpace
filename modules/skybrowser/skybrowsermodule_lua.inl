@@ -1,6 +1,7 @@
 #include <openspace/util/openspacemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <modules/skybrowser/skybrowsermodule.h>
+#include <modules/skybrowser/include/utility.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/rendering/renderengine.h>
@@ -16,12 +17,13 @@
 #include <modules/skybrowser/include/screenspaceskybrowser.h>
 #include <modules/skybrowser/include/screenspaceskytarget.h>
 #include <modules/base/rendering/screenspaceimagelocal.h>
+#include <modules/base/rendering/renderableplaneimagelocal.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/util/camera.h>
 #include <thread> 
 #include <glm/gtx/string_cast.hpp>
-#include <openspace/util/coordinateconversion.h>
 #include <glm/gtx/vector_angle.hpp>
+#include <limits>
 
 namespace {
 	constexpr const char _loggerCat[] = "SkyBrowserModule";
@@ -39,6 +41,7 @@ namespace openspace::skybrowser::luascriptfunctions {
 		SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 		const ImageData& resultImage = module->getWWTDataHandler()->getLoadedImages()[i];
 		// Load image collection, if it isn't loaded already
+        // TODO: Update or remove with new WWT API
 		const std::vector<ImageCollection>& collections = module->getWWTDataHandler()->getAllImageCollectionUrls();
 		auto it = std::find_if(collections.begin(), collections.end(), [&](const ImageCollection& coll) {
 				return coll.name == resultImage.collection;
@@ -46,20 +49,18 @@ namespace openspace::skybrowser::luascriptfunctions {
 		if (!it->loaded) {
 			browser->sendMessageToWWT(browser->createMessageForLoadingWWTImgColl(it->url));
 		}
+        LINFO("Loading image " + resultImage.name);
 		browser->sendMessageToWWT(browser->createMessageForSettingForegroundWWT(resultImage.name));
-
-		LINFO("Loading image " + resultImage.name);
-		// Only move camera if the image has coordinates
-		 
+        browser->sendMessageToWWT(browser->createMessageForSettingForegroundOpacityWWT(100));
+		
+		// Only move target if the image has coordinates	 
 		if (resultImage.hasCoords) {
-
-			glm::dvec3 imageCoordsGalactic = module->icrsToGalacticCartesian(resultImage.celestCoords.x, resultImage.celestCoords.y, 1.0);	
-			browser->getSkyTarget()->lookAtGalacticCoord(imageCoordsGalactic);
-
+            glm::dvec2 imageCoordsScreenSpace = skybrowser::J2000ToScreenSpace(resultImage.celestCoords.x, resultImage.celestCoords.y);
+            browser->getSkyTarget()->property("CartesianPosition")->set(glm::vec3 {imageCoordsScreenSpace, skybrowser::SCREENSPACE_Z });
+                 
 			// In WWT, the definition of ZoomLevel is: VFOV = ZoomLevel / 6
-			browser->setVerticalFieldOfView(resultImage.zoomLevel / 6);
+			browser->setVerticalFieldOfView(resultImage.zoomLevel / 6); 
 		} 
-		browser->sendMessageToWWT(browser->createMessageForSettingForegroundOpacityWWT(100));
 		return 0;
 	}
 
@@ -67,24 +68,17 @@ namespace openspace::skybrowser::luascriptfunctions {
         // Load image
         ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::moveCircleToHoverImage");
         const int i = ghoul::lua::value<int>(L, 1);
-
-        ScreenSpaceImageLocal* hoverCircle = dynamic_cast<ScreenSpaceImageLocal*>(global::renderEngine->screenSpaceRenderable("HoverCircle"));
-        hoverCircle->property("Enabled")->set(true);
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
         const ImageData& resultImage = module->getWWTDataHandler()->getLoadedImages()[i];
 
+        // Only move and show circle if the image has coordinates
         if (resultImage.hasCoords) {
-
-            glm::dvec3 imageCoordsGalactic = module->icrsToGalacticCartesian(resultImage.celestCoords.x, resultImage.celestCoords.y, 1.0);
-            // This is a duplicate of target function "lookAtGalacticCoord". Probably should rewrite this so there are no duplicates...
-            glm::dmat4 cameraInvRotMat = global::navigationHandler->camera()->viewRotationMatrix();
-            glm::dvec3 viewDirectionLocal = cameraInvRotMat * glm::dvec4(imageCoordsGalactic, 1.f);
-
-            glm::dvec2 angleCoordsLocal = glm::dvec2(atan(viewDirectionLocal.x / viewDirectionLocal.z), atan(viewDirectionLocal.y / viewDirectionLocal.z));
-            double projPlaneDistance = -2.1f;
-            glm::dvec2 imageCoordsScreenSpace = glm::dvec2(projPlaneDistance * tan(angleCoordsLocal.x), projPlaneDistance * tan(angleCoordsLocal.y));
-            // Translate target
-            hoverCircle->translate(glm::vec2(imageCoordsScreenSpace) - hoverCircle->getScreenSpacePosition(), hoverCircle->getScreenSpacePosition());
+            // Make circle visible
+            ScreenSpaceImageLocal* hoverCircle = dynamic_cast<ScreenSpaceImageLocal*>(global::renderEngine->screenSpaceRenderable("HoverCircle"));
+            hoverCircle->property("Enabled")->set(true);
+            // Calculate coords for the circle and translate
+            glm::vec2 imageCoordsScreenSpace = skybrowser::J2000ToScreenSpace(resultImage.celestCoords.x, resultImage.celestCoords.y);
+            hoverCircle->property("CartesianPosition")->set(glm::vec3 {imageCoordsScreenSpace, skybrowser::SCREENSPACE_Z });
         }
         
         return 0;
@@ -122,6 +116,7 @@ namespace openspace::skybrowser::luascriptfunctions {
 		LINFO("Loaded " + noOfLoadedImgs + " WorldWide Telescope images.");
 
 		ScreenSpaceSkyBrowser* browser = dynamic_cast<ScreenSpaceSkyBrowser*>(global::renderEngine->screenSpaceRenderable("SkyBrowser1"));
+        // Load all image collection urls
 		//const std::vector<std::string>& imageUrls = module->getWWTDataHandler()->getAllImageCollectionUrls();
 		//for (const std::string url : imageUrls) {
 		//    browser->sendMessageToWWT(browser->createMessageForLoadingWWTImgColl(url));
@@ -188,7 +183,8 @@ namespace openspace::skybrowser::luascriptfunctions {
 
         float FOV = browser->fieldOfView();
         
-        glm::vec2 coords = target->getCelestialCoords();
+        glm::dvec3 coords = target->getTargetDirection();
+        glm::dvec2 celestCoords = skybrowser::galacticCartesianToJ2000(coords);
         lua_newtable(L);
 
         // Index for many browsers 
@@ -198,9 +194,9 @@ namespace openspace::skybrowser::luascriptfunctions {
         // Push ("Key", value)
         ghoul::lua::push(L, "FOV", FOV);
         lua_settable(L, -3);
-        ghoul::lua::push(L, "RA", coords.x);
+        ghoul::lua::push(L, "RA", celestCoords.x);
         lua_settable(L, -3);
-        ghoul::lua::push(L, "Dec", coords.y);
+        ghoul::lua::push(L, "Dec", celestCoords.y);
         lua_settable(L, -3);
        
         // Set table for the current ImageData
@@ -210,7 +206,6 @@ namespace openspace::skybrowser::luascriptfunctions {
     }
 	int adjustCamera(lua_State* L) {
 		ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::adjustCamera");
-
 		return 0;
 	}
 	

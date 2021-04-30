@@ -45,8 +45,6 @@
 
 #include <fstream>    
 
-#define _USE_MATH_DEFINES
-#include <math.h>
 
 namespace {
     struct [[codegen::Dictionary(ScreenSpaceSkyBrowser)]] Parameters {
@@ -313,7 +311,6 @@ SkyBrowserModule::SkyBrowserModule()
 
 void SkyBrowserModule::internalDeinitialize() {
     delete dataHandler;
-
 }
 
 void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
@@ -330,27 +327,6 @@ void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     fScreenSpaceRenderable->registerClass<ScreenSpaceSkyTarget>("ScreenSpaceSkyTarget");
 
     dataHandler = new WWTDataHandler();
-}
-
-glm::dvec3 SkyBrowserModule::icrsToGalacticCartesian(double ra, double dec, double distance) {
-    // Convert to Galactic Coordinates from ICRS right ascension and declination
-    // https://gea.esac.esa.int/archive/documentation/GDR2/Data_processing/
-    // chap_cu3ast/sec_cu3ast_intro/ssec_cu3ast_intro_tansforms.html#SSS1
-    const glm::dmat3 conversionMatrix = glm::dmat3({
-        -0.0548755604162154,  0.4941094278755837, -0.8676661490190047, // col 0
-        -0.8734370902348850, -0.4448296299600112, -0.1980763734312015, // col 1
-        -0.4838350155487132,  0.7469822444972189,  0.4559837761750669  // col 2
-        });
-    double degToRad = M_PI / 180.0;
-
-    glm::dvec3 rICRS = glm::dvec3(
-        cos(ra * degToRad) * cos(dec * degToRad),
-        sin(ra * degToRad) * cos(dec * degToRad),
-        sin(dec * degToRad)
-    );
-    glm::dvec3 rGalactic = conversionMatrix * rICRS; // on the unit sphere
-
-    return distance * rGalactic;
 }
 
 glm::vec2 SkyBrowserModule::getMousePositionInScreenSpaceCoords(glm::vec2& mousePos) {
@@ -381,23 +357,6 @@ WWTDataHandler* SkyBrowserModule::getWWTDataHandler() {
     return dataHandler;
 }
 
-glm::dvec2 SkyBrowserModule::convertGalacticToCelestial(glm::dvec3 rGal) const {
-    // Used the math from this website: https://gea.esac.esa.int/archive/documentation/GD -->
-    // R2/Data_processing/chap_cu3ast/sec_cu3ast_intro/ssec_cu3ast_intro_tansforms.html#SSS1
-    const glm::dmat3 conversionMatrix = glm::dmat3({
-      -0.0548755604162154,  0.4941094278755837, -0.8676661490190047, // col 0
-      -0.8734370902348850, -0.4448296299600112, -0.1980763734312015, // col 1
-      -0.4838350155487132,  0.7469822444972189,  0.4559837761750669  // col 2
-        });
-
-    glm::dvec3 rICRS = glm::transpose(conversionMatrix) * rGal;
-    float ra = atan2(rICRS[1], rICRS[0]);
-    float dec = atan2(rICRS[2], glm::sqrt((rICRS[0] * rICRS[0]) + (rICRS[1] * rICRS[1])));
-
-    ra = ra > 0 ? ra : ra + (2 * glm::pi<float>());
-
-    return glm::dvec2(glm::degrees(ra), glm::degrees(dec));
-}
 /*
 std::vector<documentation::Documentation> SkyBrowserModule::documentations() const {
     return {

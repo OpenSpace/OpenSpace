@@ -1,5 +1,6 @@
 #include <modules/skybrowser/include/screenspaceskybrowser.h>
 #include <modules/skybrowser/include/screenspaceskytarget.h>
+#include <modules/skybrowser/include/utility.h>
 #include <modules/skybrowser/skybrowsermodule.h>
 #include <modules/webbrowser/include/webkeyboardhandler.h>
 #include <modules/webbrowser/include/browserinstance.h>
@@ -64,7 +65,7 @@ namespace openspace {
 
     ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary) 
         : ScreenSpaceBrowser(dictionary)
-        , _browserDimensions(BrowserDimensionInfo, _dimensions, glm::ivec2(0.f), glm::ivec2(300.f))
+        , _browserDimensions(BrowserDimensionInfo, _dimensions, glm::ivec2(0), glm::ivec2(300))
         , _vfieldOfView(ZoomInfo, 50.f, 0.1f, 70.f)
         , _skyTargetID(TargetIDInfo)
         , _camIsSyncedWWT(true)
@@ -110,9 +111,8 @@ namespace openspace {
         }
         identifier = makeUniqueIdentifier(identifier);
         setIdentifier(identifier);
-        // The projection plane seems to be located at z = -2.1 so at that place the ScreenSpaceRenderables behaves like
-        // they are in screen space
-        _cartesianPosition.setValue(glm::vec3(_cartesianPosition.value().x, _cartesianPosition.value().y, -2.1f));
+
+        _cartesianPosition.setValue(glm::dvec3(_cartesianPosition.value().x, _cartesianPosition.value().y, skybrowser::SCREENSPACE_Z));
 
         // Always make sure that the target and browser are visible together
         _enabled.onChange([&]() {
@@ -168,7 +168,7 @@ namespace openspace {
         _vfieldOfView = std::clamp(_vfieldOfView + zoom, 0.001f, 70.0f);
     }
 
-    void ScreenSpaceSkyBrowser::executeJavascript(std::string& script) const {
+    void ScreenSpaceSkyBrowser::executeJavascript(std::string script) const {
         //LINFOC(_loggerCat, "Executing javascript " + script);
         if (_browserInstance && _browserInstance->getBrowser() && _browserInstance->getBrowser()->GetMainFrame()) {
             CefRefPtr<CefFrame> frame = _browserInstance->getBrowser()->GetMainFrame();
@@ -193,14 +193,14 @@ namespace openspace {
     }
 
 
-    ghoul::Dictionary ScreenSpaceSkyBrowser::createMessageForMovingWWTCamera(const glm::dvec2 celestCoords, const float fov, const bool moveInstantly) const {
+    ghoul::Dictionary ScreenSpaceSkyBrowser::createMessageForMovingWWTCamera(const glm::dvec2 celestCoords, const double fov, const bool moveInstantly) const {
         using namespace std::string_literals;
         ghoul::Dictionary msg;
 
         msg.setValue("event", "center_on_coordinates"s);
-        msg.setValue("ra", static_cast<double>(celestCoords[0]));
-        msg.setValue("dec", static_cast<double>(celestCoords[1]));
-        msg.setValue("fov", static_cast<double>(fov));
+        msg.setValue("ra", celestCoords.x);
+        msg.setValue("dec", celestCoords.y);
+        msg.setValue("fov", fov);
         msg.setValue("instant", moveInstantly);
 
         return msg;
@@ -236,8 +236,6 @@ namespace openspace {
         return msg;
     }
 
-    
-
     ghoul::Dictionary ScreenSpaceSkyBrowser::createMessageForPausingWWTTime() const {
 
         using namespace std::string_literals;
@@ -263,14 +261,20 @@ namespace openspace {
         // Start a thread to enable user interaction while sending the calls to WWT
         _threadWWTMessages = std::thread([&] {
             while (_camIsSyncedWWT) {
+                if (_skyTarget) {
+                    // Calculate the galactic coordinate of the target direction 
+                    // with infinite radius
+                    glm::dvec3 camPos = global::navigationHandler->camera()->positionVec3();
+                    constexpr double infinity = std::numeric_limits<float>::max();
+                    glm::dvec3 galCoord = camPos + (infinity * _skyTarget->getTargetDirection());
+                    glm::dvec2 celestCoordsTarget = skybrowser::galacticCartesianToJ2000(galCoord);
+                    ghoul::Dictionary message = createMessageForMovingWWTCamera(celestCoordsTarget, _vfieldOfView);
 
-                glm::vec2 celestCoordsTarget = _skyTarget ? _skyTarget->getCelestialCoords() : glm::vec2(0.f);
-                ghoul::Dictionary message = createMessageForMovingWWTCamera(celestCoordsTarget, _vfieldOfView);
-
+                    sendMessageToWWT(message);
+                }
+                
                 // Sleep so we don't bombard WWT with too many messages
                 std::this_thread::sleep_for(std::chrono::milliseconds(50));
-                sendMessageToWWT(message);
-                
             }
         });
 
