@@ -4,14 +4,4 @@ asset.require('./trail')
 asset.require('scene/solarsystem/sun/marker')
 
 asset.require('./script_schedule')
-
-local mission = asset.localResource('osirisrex.mission')
-local missionName
-
-asset.onInitialize(function()
-  missionName = openspace.loadMission(mission)
-end)
-
-asset.onDeinitialize(function()
-  openspace.unloadMission(missionName)
-end)
+asset.require('./mission')

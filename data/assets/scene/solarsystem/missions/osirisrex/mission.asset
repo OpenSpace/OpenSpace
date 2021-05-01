@@ -24,7 +24,7 @@ References:
 
 --]]
 
-return {
+local Mission = {
   Name = "OSIRIS-REx",
   Phases = {
     -- All 1-level phases based on [1] 
@@ -384,3 +384,12 @@ return {
   -- End of [1]
   }
 }
+
+
+asset.onInitialize(function()
+  openspace.loadMission(Mission)
+end)
+
+asset.onDeinitialize(function()
+  openspace.unloadMission(Mission.Name)
+end)

@@ -55,15 +55,9 @@ bool MissionManager::hasCurrentMission() const {
     return _currentMission != _missionMap.end();
 }
 
-std::string MissionManager::loadMission(const std::string& filename) {
-    ghoul_assert(!filename.empty(), "filename must not be empty");
-    ghoul_assert(!FileSys.containsToken(filename), "filename must not contain tokens");
-    ghoul_assert(FileSys.fileExists(filename), "filename " + filename + " must exist");
+void MissionManager::loadMission(Mission mission) {
+    std::string currentMission = hasCurrentMission() ? _currentMission->first : "";
 
-    // Changing the values might invalidate the _currentMission iterator
-    std::string currentMission =  hasCurrentMission() ? _currentMission->first : "";
-
-    Mission mission = missionFromFile(filename);
     std::string missionName = mission.name();
     _missionMap.insert({ missionName, std::move(mission) });
     if (_missionMap.size() == 1) {
@@ -73,8 +67,6 @@ std::string MissionManager::loadMission(const std::string& filename) {
     if (!currentMission.empty()) {
         setCurrentMission(currentMission);
     }
-
-    return missionName;
 }
 
 void MissionManager::unloadMission(const std::string& missionName) {
@@ -109,7 +101,7 @@ scripting::LuaLibrary MissionManager::luaLibrary() {
                 &luascriptfunctions::loadMission,
                 {},
                 "string",
-                "Load mission phases from file"
+                "Load mission phases specified in a dictionary"
             },
             {
                 "unloadMission",
@@ -123,14 +115,14 @@ scripting::LuaLibrary MissionManager::luaLibrary() {
                 &luascriptfunctions::hasMission,
                 {},
                 "string",
-                "Returns whether a mission with the provided name has been loaded"
+                "Returns whether a mission with the provided identifier has been loaded"
             },
             {
                 "setCurrentMission",
                 &luascriptfunctions::setCurrentMission,
                 {},
                 "string",
-                "Set the currnet mission"
+                "Set the current mission"
             },
         }
     };

@@ -48,16 +48,11 @@ public:
     MissionManager();
 
     /**
-    * Reads a mission from file and maps the mission name to the Mission object. If
-    * this is the first mission to be loaded, the mission will also be set as the
-    * current active mission.
-    * \param filename The file that contains the mission that is to be loaded
-    * \return The name of the mission that was loaded
-    * \pre \p filename must not be empty
-    * \pre \p filename must not contain tokens
-    * \pre \p filename must exist
-    */
-    std::string loadMission(const std::string& filename);
+     * Loads a mission into the mission manager.
+     * 
+     * \param mission The mission to be loaded
+     */
+    void loadMission(Mission mission);
 
     /**
      * Unloads a previously loaded mission identified by the provided \p missionName.
@@ -76,31 +71,29 @@ public:
     bool hasMission(const std::string& missionName);
 
     /**
-    * Sets the mission with the name <missionName> as the current mission. The current
-    * mission is what is return by `currentMission()`.
-    * \pre missionName must not be empty
-    */
+     * Sets the mission with the name <missionName> as the current mission. The current
+     * mission is what is return by `currentMission()`.
+     * \pre missionName must not be empty
+     */
     void setCurrentMission(const std::string& missionName);
 
     /**
-    * Returns true if a current mission exists
-    */
+     * Returns true if a current mission exists
+     */
     bool hasCurrentMission() const;
 
     /**
-    * Returns the latest mission specified to `setCurrentMission()`. If no mission has
-    * been specified, the first mission loaded will be returned. If no mission has been
-    * loaded, a warning will be printed and a dummy mission will be returned.
-    */
+     * Returns the latest mission specified to `setCurrentMission()`. If no mission has
+     * been specified, the first mission loaded will be returned. If no mission has been
+     * loaded, a warning will be printed and a dummy mission will be returned.
+     */
     const Mission& currentMission();
 
     static scripting::LuaLibrary luaLibrary();
 
 private:
-    using MissionMap = std::map<std::string, Mission>;
-    MissionMap _missionMap;
-
-    MissionMap::iterator _currentMission;
+    std::map<std::string, Mission> _missionMap;
+    std::map<std::string, Mission>::iterator _currentMission;
 };
 
 } // namespace openspace

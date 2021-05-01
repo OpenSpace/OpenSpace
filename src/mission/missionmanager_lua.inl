@@ -29,20 +29,17 @@ namespace openspace::luascriptfunctions {
 int loadMission(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadMission");
 
-    const std::string& missionFileName = ghoul::lua::value<std::string>(
+    ghoul::Dictionary dict = ghoul::lua::value<ghoul::Dictionary>(
         L,
         1,
         ghoul::lua::PopValue::Yes
     );
-    if (missionFileName.empty()) {
-        return ghoul::lua::luaError(L, "Filepath is empty");
-    }
 
-    std::string name = global::missionManager->loadMission(absPath(missionFileName));
-    ghoul::lua::push(L, name);
+    Mission mission = Mission(dict);
+    global::missionManager->loadMission(mission);
 
-    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
-    return 1;
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
 }
 
 int unloadMission(lua_State* L) {

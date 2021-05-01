@@ -162,21 +162,21 @@ void MissionPhase::phaseTrace(double time, Trace& trace, int maxDepth) const {
     }
 }
 
-Mission missionFromFile(const std::string& filename) {
-    ghoul_assert(!filename.empty(), "filename must not be empty");
-    ghoul_assert(!FileSys.containsToken(filename), "filename must not contain tokens");
-    ghoul_assert(FileSys.fileExists(filename), "filename must exist");
-
-    ghoul::Dictionary missionDict;
-    ghoul::lua::loadDictionaryFromFile(filename, missionDict);
-
-    documentation::testSpecificationAndThrow(
-        MissionPhase::Documentation(),
-        missionDict,
-        "Mission"
-    );
-
-    return MissionPhase(missionDict);
-}
+//Mission missionFromFile(const std::string& filename) {
+//    ghoul_assert(!filename.empty(), "filename must not be empty");
+//    ghoul_assert(!FileSys.containsToken(filename), "filename must not contain tokens");
+//    ghoul_assert(FileSys.fileExists(filename), "filename must exist");
+//
+//    ghoul::Dictionary missionDict;
+//    ghoul::lua::loadDictionaryFromFile(filename, missionDict);
+//
+//    documentation::testSpecificationAndThrow(
+//        MissionPhase::Documentation(),
+//        missionDict,
+//        "Mission"
+//    );
+//
+//    return MissionPhase(missionDict);
+//}
 
 }  // namespace openspace

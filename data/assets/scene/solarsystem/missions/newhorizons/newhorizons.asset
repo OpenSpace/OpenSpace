@@ -8,13 +8,4 @@ asset.require('./charon')
 
 asset.require('./othermoons')
 
-local mission = asset.localResource("newhorizons.mission")
-local missionName
-
-asset.onInitialize(function()
- missionName = openspace.loadMission(mission)
-end)
-
-asset.onDeinitialize(function()
- openspace.unloadMission(missionName)
-end)
+asset.require('./mission')
