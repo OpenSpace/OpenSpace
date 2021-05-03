@@ -177,7 +177,7 @@ scripting::LuaLibrary AutoNavigationModule::luaLibrary() const {
 }
 
 void AutoNavigationModule::internalInitialize(const ghoul::Dictionary&) {
-    global::callback::preSync.emplace_back([this]() {
+    global::callback::preSync->emplace_back([this]() {
         _autoNavigationHandler.updateCamera(global::windowDelegate->deltaTime());
     });
 }

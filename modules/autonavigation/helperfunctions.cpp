@@ -95,7 +95,7 @@ namespace openspace::autonavigation::helpers {
     }
 
     double simpsonsRule(double t0, double t1, int n, std::function<double(double)> f) {
-        double h = (t1 - t0) / n;
+        double h = (t1 - t0) / static_cast<double>(n);
         double times4 = 0.0;
         double times2 = 0.0;
         double endpoints = f(t0) + f(t1);
