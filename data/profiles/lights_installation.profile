@@ -184,6 +184,31 @@
       "value": "{1.0, 0.0, 0.0}"
     },
     {
+      "name": "Scene.sssb_sssb_data_aten_asteroid.Renderable.UpperLimit",
+      "type": "setPropertyValueSingle",
+      "value": "1000"
+    },
+    {
+      "name": "Scene.sssb_sssb_data_apollo_asteroid.Renderable.UpperLimit",
+      "type": "setPropertyValueSingle",
+      "value": "4000"
+    },
+    {
+      "name": "Scene.sssb_sssb_data_inner_main_belt_asteroid.Renderable.UpperLimit",
+      "type": "setPropertyValueSingle",
+      "value": "6000"
+    },
+    {
+      "name": "Scene.sssb_sssb_data_main_belt_asteroid.Renderable.UpperLimit",
+      "type": "setPropertyValueSingle",
+      "value": "10000"
+    },
+    {
+      "name": "Scene.sssb_sssb_data_outer_main_belt_asteroid.Renderable.UpperLimit",
+      "type": "setPropertyValueSingle",
+      "value": "7000"
+    },
+    {
       "name": "ScreenSpace.text-earth.Enabled",
       "type": "setPropertyValueSingle",
       "value": "true"
