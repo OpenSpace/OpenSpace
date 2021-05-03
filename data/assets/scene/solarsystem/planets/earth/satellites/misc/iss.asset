@@ -34,9 +34,9 @@ local initializeAndAddNodes = function()
         LineNumber = 1
       },
       Rotation = {
-          Type = "SpiceRotation",
-          SourceFrame = "GALACTIC",
-          DestinationFrame = "J2000",
+        Type = "SpiceRotation",
+        SourceFrame = "GALACTIC",
+        DestinationFrame = "J2000",
       }
     },
     Tag = { "earth_satellite", "ISS" },
@@ -50,11 +50,11 @@ local initializeAndAddNodes = function()
       Parent = iss.Identifier,
       Transform = {
         Rotation = {
-            Type = "FixedRotation",
-            Attached = "ISSparentNode",
-            XAxis = { 0.01, -1.0, 0.56 },
-            XAxisOrthogonal = true,
-            YAxis = transforms.EarthInertial.Identifier
+          Type = "FixedRotation",
+          Attached = "ISSparentNode",
+          XAxis = { 0.01, -1.0, 0.56 },
+          XAxisOrthogonal = true,
+          YAxis = transforms.EarthInertial.Identifier
         }
       },
       Renderable = {
@@ -73,9 +73,9 @@ local initializeAndAddNodes = function()
         DisableFaceCulling = true
       },
       GUI = {
-          Name = "ISSparentNode",
-          Path = "/Solar System/Planets/Earth/Satellites/ISS",
-          Hidden = true,
+        Name = "ISSparentNode",
+        Path = "/Solar System/Planets/Earth/Satellites/ISS",
+        Hidden = true,
       }
   }
 
@@ -83,20 +83,20 @@ local initializeAndAddNodes = function()
     Identifier = identifier .. "_trail",
     Parent = transforms.EarthInertial.Identifier,
     Renderable = {
-        Type = "RenderableTrailOrbit",
-        Translation = {
-          Type = "TLETranslation",
-          Body = identifier,
-          Observer = transforms.EarthInertial.Identifier,
-          File = path,
-          LineNumber = 1,
-          RenderBinMode = "PostDeferredTransparent"
-        },
-        Color = { 0.9, 0.6715, 0.0 },
-        Fade = 1.5,
-        Period = period,
-        Resolution = 320
+      Type = "RenderableTrailOrbit",
+      Translation = {
+        Type = "TLETranslation",
+        Body = identifier,
+        Observer = transforms.EarthInertial.Identifier,
+        File = path,
+        LineNumber = 1,
+        RenderBinMode = "PostDeferredTransparent"
       },
+      Color = { 0.9, 0.6715, 0.0 },
+      Fade = 1.5,
+      Period = period,
+      Resolution = 320
+    },
     Tag = { "earth_satellite", "ISS" },
     GUI = {
       Name = "ISS Trail",
@@ -109,27 +109,27 @@ local initializeAndAddNodes = function()
     Parent = iss.Identifier,
 
     Renderable = {
-        Enabled = false,
-        Type = "RenderableLabels",
-        LabelText = "ISS",
-        FontSize = 100.0,
-        LabelSize = 3.4,
-        LabelMaxSize = 100.0,
-        LabelMinSize = 1.0,
-        LabelOrientationOption = "Camera View Direction",
-        BlendMode = "Additive",
-        EnableFading = true,
-        FadeStartUnit = "au",
-        FadeStartDistance = 0.15,
-        FadeStartSpeed = 1.0,
-        FadeEndUnit = "au",
-        FadeEndDistance = 15.0,
-        FadeEndSpeed = 25.0
+      Enabled = false,
+      Type = "RenderableLabels",
+      LabelText = "ISS",
+      FontSize = 100.0,
+      LabelSize = 3.4,
+      LabelMaxSize = 100.0,
+      LabelMinSize = 1.0,
+      LabelOrientationOption = "Camera View Direction",
+      BlendMode = "Additive",
+      EnableFading = true,
+      FadeStartUnit = "au",
+      FadeStartDistance = 0.15,
+      FadeStartSpeed = 1.0,
+      FadeEndUnit = "au",
+      FadeEndDistance = 15.0,
+      FadeEndSpeed = 25.0
     },
     Tag = { "solarsystem_labels" },
     GUI = {
-        Name = "ISS Label",
-        Path = "/Solar System/Planets/Earth/Satellites"
+      Name = "ISS Label",
+      Path = "/Solar System/Planets/Earth/Satellites"
     }
 }
 
@@ -141,7 +141,7 @@ asset.onInitialize(function ()
   for _, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)
   end
-  openspace.setPropertyValueSingle("Scene.ISSparentNode.Rotation.yAxis-InvertObject", true)
+  openspace.setPropertyValueSingle("Scene.ISSparentNode.Rotation.yAxisInvertObject", true)
 
 end)
 
@@ -154,11 +154,11 @@ end)
 
 
 asset.meta = {
-    Name = "ISS",
-    Version = "1.0",
-    Description = [[ Model and Trail for ISS. Model from NASA 3D models, trail from
-    CELESTRAK]],
-    Author = "OpenSpace Team",
-    URL = "https://celestrak.com/",
-    License = "NASA"
+  Name = "ISS",
+  Version = "1.0",
+  Description = [[ Model and Trail for ISS. Model from NASA 3D models, trail from
+  CELESTRAK]],
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.com/",
+  License = "NASA"
 }

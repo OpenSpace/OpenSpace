@@ -556,6 +556,9 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         }
     }
 
+    // For globes, the interaction sphere is always the same as the bounding sphere
+    setInteractionSphere(boundingSphere());
+
     _generalProperties.performShading =
         p.performShading.value_or(_generalProperties.performShading);
 
@@ -851,6 +854,7 @@ void RenderableGlobe::update(const UpdateData& data) {
         }
     }
     setBoundingSphere(bs);
+    setInteractionSphere(bs);
 
     glm::dmat4 translation =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation);

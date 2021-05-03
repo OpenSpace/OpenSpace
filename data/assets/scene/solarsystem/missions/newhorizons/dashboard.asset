@@ -1,24 +1,24 @@
 local assetHelper = asset.require('util/asset_helper')
 
 assetHelper.registerDashboardItems(asset, {
-    {
-        Type = "DashboardItemSpacing",
-        Identifier = "NewHorizonsSpacing",
-        GuiName = "New Horizons Spacing",
-        Spacing = 25
-    },
-    {
-        Type = "DashboardItemDistance",
-        Identifier = "NewHorizonsPlutoDistance",
-        GuiName = "New Horizons Pluto Distance",
-        SourceType = "Node",
-        SourceNodeName = "NewHorizons",
-        DestinationType = "Node Surface",
-        DestinationNodeName = "PlutoProjection"
-    },
-    {
-        Type = "DashboardItemInstruments",
-        Identifier = "NewHorizonsInstruments",
-        GuiName = "NewHorizons Instruments",
-    }
+  {
+    Type = "DashboardItemSpacing",
+    Identifier = "NewHorizonsSpacing",
+    GuiName = "New Horizons Spacing",
+    Spacing = 25
+  },
+  {
+    Type = "DashboardItemDistance",
+    Identifier = "NewHorizonsPlutoDistance",
+    GuiName = "New Horizons Pluto Distance",
+    SourceType = "Node",
+    SourceNodeName = "NewHorizons",
+    DestinationType = "Node Surface",
+    DestinationNodeName = "PlutoProjection"
+  },
+  {
+    Type = "DashboardItemInstruments",
+    Identifier = "NewHorizonsInstruments",
+    GuiName = "NewHorizons Instruments"
+  }
 })

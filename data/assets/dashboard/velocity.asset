@@ -1,14 +1,14 @@
 local item = {
-    Type = "DashboardItemVelocity",
-    Identifier = "GlobeLocation",
-    Simplification = true,
-    GuiName = "Velocity"
+  Type = "DashboardItemVelocity",
+  Identifier = "GlobeLocation",
+  Simplification = true,
+  GuiName = "Velocity"
 }
 
 asset.onInitialize(function()
-    openspace.dashboard.addDashboardItem(item)
+  openspace.dashboard.addDashboardItem(item)
 end)
 
 asset.onDeinitialize(function()
-    openspace.dashboard.removeDashboardItem(item.Identifier)
+  openspace.dashboard.removeDashboardItem(item.Identifier)
 end)
