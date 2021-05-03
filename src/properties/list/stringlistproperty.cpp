@@ -27,6 +27,7 @@
 #include <openspace/json.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/misc.h>
 
 namespace openspace::properties {
@@ -74,8 +75,8 @@ void StringListProperty::toLuaConversion(lua_State* state) const {
 
     int i = 1;
     for (const std::string& v : _value) {
-        lua_pushinteger(state, i);
-        lua_pushstring(state, v.c_str());
+        ghoul::lua::push(state, i);
+        ghoul::lua::push(state, v.c_str());
         lua_settable(state, -3);
         ++i;
     }
