@@ -119,7 +119,7 @@ TEST_CASE("SelectionProperty: Add Options", "[selectionproperty]") {
 
     const int nOptions = static_cast<int>(p.options().size());
     REQUIRE(nOptions == 2);
-    REQUIRE((p.hasOption("a") && p.hasOption("b")));
+    REQUIRE(p.options() == std::vector<std::string>{ "a", "b" });
 }
 
 TEST_CASE("SelectionProperty: Get String Value", "[selectionproperty]") {
@@ -168,7 +168,7 @@ TEST_CASE("SelectionProperty: Set Lua Value - Invalid Key", "[selectionproperty]
     p.setOptions({ "a", "b", "c" });
 
     ghoul::lua::LuaState L;
-    ghoul::lua::push(L, std::vector{ "a", "d" }); //
+    ghoul::lua::push(L, std::vector{ "a", "d" });
 
     p.setLuaValue(L);
 
@@ -218,8 +218,19 @@ TEST_CASE("SelectionProperty: Value From Copying Variable", "[selectionproperty]
     openspace::properties::SelectionProperty p({ "id", "gui", "desc" });
     p.setOptions({ "a", "b", "c" });
 
-    const std::set<std::string> list{ "a", "b" };
-    p = list;
+    p = { "a", "b" };
 
-    REQUIRE(p.value() == list);
+    REQUIRE(p.value() == std::set<std::string>{ "a", "b" });
+}
+
+TEST_CASE("SelectionProperty: Re-set Options After Selection", "[selectionproperty]") {
+    openspace::properties::SelectionProperty p({ "id", "gui", "desc" });
+    p.setOptions({ "a", "b", "c" });
+
+    p = { "a", "b" };
+
+    p.setOptions({ "a", "c", "d" }); // b no longer included
+                                     // => should be removed from selection
+
+    REQUIRE(p.value() == std::set<std::string>{ "a" });
 }

@@ -84,18 +84,18 @@ const std::vector<std::string>& SelectionProperty::options() const {
 }
 
 void SelectionProperty::setOptions(const std::vector<std::string>& keys) {
-    std::vector<std::string> options;
-    options.reserve(keys.size());
+    _options.clear();
+    _options.reserve(keys.size());
 
     for (const std::string& key : keys) {
         if (!hasOption(key)) {
-            options.push_back(key);
+            _options.push_back(key);
         }
         else {
             LWARNING(fmt::format("Ignoring duplicated key '{}'", key));
         }
     }
-    _options = std::move(options);
+    _options.shrink_to_fit();
     sortOptions();
 
     // In case we have a selection, remove non-existing options
@@ -186,10 +186,12 @@ bool SelectionProperty::removeInvalidKeys(std::set<std::string>& keys) {
             LWARNING(fmt::format(
                 "Key '{}' is not a valid option and is removed from selection", *it
             ));
-            keys.erase(it);
+            it = keys.erase(it);
             changed = true;
         }
-        it++;
+        else {
+            it++;
+        }
     }
     return changed;
 }
