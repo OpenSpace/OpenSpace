@@ -28,6 +28,9 @@
 #include <modules/fieldlinessequence/util/commons.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include "Kameleon.h"
+#include "Interpolator.h"
+#include "Point3f.h"
 #include <string>
 #include <vector>
 
@@ -58,12 +61,17 @@ public:
     // Special getter. Returns extraQuantities[index].
     std::vector<float> extraQuantity(size_t index, bool& isSuccesful) const;
 
+
     void setModel(fls::Model m);
     void setTriggerTime(double t);
     void setExtraQuantityNames(std::vector<std::string> names);
 
     void addLine(std::vector<glm::vec3>& line);
     void appendToExtra(size_t idx, float val);
+
+    void moveLine();
+
+    cartesianTrace(const std::string& variable, const float& startComponent1, const float& startComponent2, const float& startComponent3, Interpolator* interpolator);
 
 private:
     bool _isMorphable = false;

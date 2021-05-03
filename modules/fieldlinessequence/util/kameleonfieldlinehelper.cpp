@@ -156,41 +156,67 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
             return false;
     }
 
-    // ---------------------------- LOAD TRACING VARIABLE ---------------------------- //
+    // ---------------------------- LOAD TRACING VARIABLE ----------------------------  //
     if (!kameleon->loadVariable(tracingVar)) {
         LERROR("Failed to load tracing variable: " + tracingVar);
         return false;
     }
 
+    bool solarWind = true;
     bool success = false;
-    LINFO("Tracing field lines!");
-    // LOOP THROUGH THE SEED POINTS, TRACE LINES, CONVERT POINTS TO glm::vec3 AND STORE //
-    for (const glm::vec3& seed : seedPoints) {
-        //--------------------------------------------------------------------------//
-        // We have to create a new tracer (or actually a new interpolator) for each //
-        // new line, otherwise some issues occur                                    //
-        //--------------------------------------------------------------------------//
-        std::unique_ptr<ccmc::Interpolator> interpolator =
-                std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
-        ccmc::Tracer tracer(kameleon, interpolator.get());
-        tracer.setInnerBoundary(innerBoundaryLimit); // TODO specify in Lua?
-        ccmc::Fieldline ccmcFieldline = tracer.bidirectionalTrace(
-            tracingVar,
-            seed.x,
-            seed.y,
-            seed.z
-        );
-        const std::vector<ccmc::Point3f>& positions = ccmcFieldline.getPositions();
 
-        const size_t nLinePoints = positions.size();
+    if (solarWind) {
+        
+        ccmc::Fieldline seedPointLine(seedPoints.size());
 
-        std::vector<glm::vec3> vertices;
-        vertices.reserve(nLinePoints);
-        for (const ccmc::Point3f& p : positions) {
-            vertices.emplace_back(p.component1, p.component2, p.component3);
+        for (const glm::vec3& seed : seedPoints) {
+            LDEBUG(fmt::format(
+                "SeedPoints: {} {} {}",
+                seed.x, seed.y, seed.z));
+                                                                    //value? 0 for now
+            seedPointLine.insertPointData(ccmc::Point3f(seed.x, seed.y, seed.z), 0.0f);
+
+            const std::vector<ccmc::Point3f>& positions = seedPointLine.getPositions();
+
+            std::vector<glm::vec3> vertices;
+            for (const ccmc::Point3f& p : positions) {
+                vertices.emplace_back(p.component1, p.component2, p.component3);
+            }
+            state.addLine(vertices);
+            success = true;
         }
-        state.addLine(vertices);
-        success |= (nLinePoints > 0);
+    }
+    else {
+
+        LINFO("Tracing field lines!");
+        // LOOP  SEED POINTS, TRACE LINES, CONVERT POINTS TO glm::vec3 AND STORE //
+        for (const glm::vec3& seed : seedPoints) {
+            //--------------------------------------------------------------------------//
+            // We have to create a new tracer (or actually a new interpolator) for each //
+            // new line, otherwise some issues occur                                    //
+            //--------------------------------------------------------------------------//
+            std::unique_ptr<ccmc::Interpolator> interpolator =
+                std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
+            ccmc::Tracer tracer(kameleon, interpolator.get());
+            tracer.setInnerBoundary(innerBoundaryLimit); // TODO specify in Lua?
+            ccmc::Fieldline ccmcFieldline = tracer.bidirectionalTrace(
+                tracingVar,
+                seed.x,
+                seed.y,
+                seed.z
+            );
+            const std::vector<ccmc::Point3f>& positions = ccmcFieldline.getPositions();
+
+            const size_t nLinePoints = positions.size();
+
+            std::vector<glm::vec3> vertices;
+            vertices.reserve(nLinePoints);
+            for (const ccmc::Point3f& p : positions) {
+                vertices.emplace_back(p.component1, p.component2, p.component3);
+            }
+            state.addLine(vertices);
+            success |= (nLinePoints > 0);
+        }
     }
 
     return success;

@@ -23,43 +23,89 @@
  ****************************************************************************************/
 
 #version __CONTEXT__
-layout(location = 0) in vec3 in_position;
 
-out float vs_depth;
-out vec4 vs_positionViewSpace;
-out vec4 vs_color;
-
-
-uniform mat4 modelViewTransform;
-uniform mat4 projectionTransform;
 // General Uniforms that's always needed
 uniform vec4      lineColor;
+uniform mat4      modelViewProjection;
+
+// Uniforms needed to color by quantity
+uniform int       colorMethod;
+uniform sampler1D colorTable;
+uniform vec2      colorTableRange;
 
 // Uniforms needed for Particle Flow
 uniform vec4      flowColor;
-uniform float     particleSize;
-uniform float     particleSpeed;
-uniform float     particleSpacing;
+uniform int       particleSize;
+uniform int       particleSpeed;
+uniform int       particleSpacing;
 uniform double    time;
 uniform bool      usingParticles;
 
+// Masking Uniforms
+uniform bool      usingMasking;
+uniform vec2      maskingRange;
 
+// Domain Uniforms
+uniform bool      usingDomain;
+uniform vec2      domainLimX;
+uniform vec2      domainLimY;
+uniform vec2      domainLimZ;
+uniform vec2      domainLimR;
 
-bool isPartOfParticle(double time, int vertexId, float particleSize,
-                      float particleSpeed, float particleSpacing)
+// Inputs
+layout(location = 0) in vec3 in_position;        // Should be provided in meters
+layout(location = 1) in float in_color_scalar;   // The extra value used to color lines. Location must correspond to _VA_COLOR in renderablefieldlinessequence.h
+layout(location = 2) in float in_masking_scalar; // The extra value used to mask out parts of lines. Location must correspond to _VA_MASKING in renderablefieldlinessequence.h
+
+// These should correspond to the enum 'ColorMethod' in renderablefieldlinesequence.cpp
+const int uniformColor     = 0;
+const int colorByQuantity  = 1;
+
+out vec4 vs_color;
+out float vs_depth;
+//out vec4 vs_gPosition;
+
+vec4 getTransferFunctionColor() {
+    // Remap the color scalar to a [0,1] range
+    float lookUpVal = (in_color_scalar - colorTableRange.x) /
+                            (colorTableRange.y - colorTableRange.x);
+    return texture(colorTable, lookUpVal);
+}
+
+bool isPartOfParticle(double time, int vertexId, int particleSize,
+                      int particleSpeed, int particleSpacing)
 {
-    int modulusResult = int(particleSpeed * time + vertexId) % int(particleSpacing);
+    int modulusResult = int(double(particleSpeed) * time + vertexId) % particleSpacing;
     return modulusResult > 0 && modulusResult <= particleSize;
 }
 
 void main() {
     bool hasColor = true;
 
+    if (usingMasking && (in_masking_scalar < maskingRange.x ||
+                         in_masking_scalar > maskingRange.y ))
+    {
+        hasColor = false;
+    }
+
+    if (usingDomain && hasColor) {
+        float radius = length(in_position);
+
+        if (in_position.x < domainLimX.x || in_position.x > domainLimX.y ||
+            in_position.y < domainLimY.x || in_position.y > domainLimY.y ||
+            in_position.z < domainLimZ.x || in_position.z > domainLimZ.y ||
+            radius        < domainLimR.x || radius        > domainLimR.y)
+        {
+            hasColor = false;
+        }
+    }
+
     if (hasColor) {
         bool isParticle = usingParticles && isPartOfParticle(time, gl_VertexID,
                                                                     particleSize,
                                                                     particleSpeed,
                                                                     particleSpacing);
+
         if (isParticle) {
             vs_color = flowColor;
         }
@@ -67,17 +113,19 @@ void main() {
             vs_color = lineColor;
         }
 
+        if (colorMethod == colorByQuantity) {
+            vec4 quantityColor = getTransferFunctionColor();
+            vs_color = vec4(quantityColor.xyz, vs_color.a * quantityColor.a);
+        }
     }
     else {
         vs_color = vec4(0);
     }
 
-    vs_positionViewSpace = vec4(modelViewTransform * dvec4(in_position, 1));
-    vec4 positionScreenSpace = projectionTransform * vs_positionViewSpace;
-    vs_depth = positionScreenSpace.w;
-    gl_Position  = positionScreenSpace;
+    vec4 position_in_meters = vec4(in_position, 1);
+    vec4 positionClipSpace = modelViewProjection * position_in_meters;
+    //vs_gPosition = vec4(modelViewTransform * dvec4(in_point_position, 1));
+    gl_Position = vec4(positionClipSpace.xy, 0, positionClipSpace.w);
 
-    // Set z to 0 to disable near and far plane, unique handling for perspective in space
-    gl_Position.z = 0.f;
+    vs_depth = gl_Position.w;
 }
-
