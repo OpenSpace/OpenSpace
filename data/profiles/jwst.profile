@@ -9,8 +9,8 @@
   "camera": {
     "altitude": 17000000.0,
     "anchor": "Earth",
-    "latitude": 58.5877,
-    "longitude": 16.1924,
+    "latitude": 3.5559,
+    "longitude": -53.0515,
     "type": "goToGeo"
   },
   "delta_times": [
@@ -46,8 +46,8 @@
     }
   ],
   "mark_nodes": [
-    "James Webb Space Telecope",
-    "James Webb Space Telescope Trail",
+    "JWSTModel",
+    "JWSTTrail",
     "L2",
     "Earth",
     "Moon",
@@ -69,8 +69,8 @@
     }
   ],
   "time": {
-    "type": "relative",
-    "value": "-1d"
+    "type": "absolute",
+    "value": "2021-10-31T00:00:00"
   },
   "version": {
     "major": 1,
