@@ -54,12 +54,12 @@ local L2Label = {
     }
 }
 
-local L2EarthLine = {
-    Identifier = "L2EarthLine",
+local L2SunLine = {
+    Identifier = "L2SunLine",
     Parent = transforms.SolarSystemBarycenter.Identifier,
     Renderable = {
         Type = "RenderableNodeLine",
-        StartNode = "Earth",
+        StartNode = "Sun",
         EndNode = "L2",
         Color = { 0.5, 0.5, 0.5 },
         LineWidth = 2
@@ -72,6 +72,6 @@ local L2EarthLine = {
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     L2,
-    L2EarthLine,
+    L2SunLine,
     L2Label
 })
