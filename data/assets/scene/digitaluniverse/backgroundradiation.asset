@@ -1,265 +1,135 @@
 local assetHelper = asset.require('util/asset_helper')
-
-
-
-local textures = asset.syncedResource({
-    Name = "Background Radiation Textures",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_backgroundradiation_textures",
-    Version = 2
-})
+local textures = asset.require('./backgroundradiation_textures').textures
 
 local speck = asset.syncedResource({
-    Name = "Background Radiation Speck Files",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_backgroundradiation_speck",
-    Version = 1
+  Name = "Background Radiation Speck Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_backgroundradiation_speck",
+  Version = 1
 })
 
 local wmap = {
-    Identifier = "WMAP",
-    Transform = {
-        Rotation = {
-            Type = "StaticRotation",
-            Rotation = { 0, 0, 3.14159265359 }
-        }
-    },
-    Renderable = {
-        Type = "RenderableSphere",
-        Enabled = false,
-        Size = 3975.41417036064E23,
-        Segments = 80,
-        Opacity = 0.5,
-        Texture = textures .. "/wmap_ilc_7yr_v4_200uK_RGB_sos.png",
-        Orientation = "Both",
-        MirrorTexture = true,
-        UseAdditiveBlending = true,
-        FadeInThreshold = 0.4
-    },
-    GUI = {
-        Name = "Wilkinson Microwave Anisotropy Probe (WMAP)",
-        Path = "/Universe/Cosmic Microwave Background"
+  Identifier = "WMAP",
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { 0, 0, 3.14159265359 }
     }
+  },
+  Renderable = {
+    Type = "RenderableSphere",
+    Enabled = false,
+    Size = 3975.41417036064E23,
+    Segments = 80,
+    Opacity = 0.5,
+    Texture = textures .. "/wmap_ilc_7yr_v4_200uK_RGB_sos.png",
+    Orientation = "Both",
+    MirrorTexture = true,
+    UseAdditiveBlending = true,
+    FadeInThreshold = 0.4
+  },
+  GUI = {
+    Name = "Wilkinson Microwave Anisotropy Probe (WMAP)",
+    Path = "/Universe/Cosmic Microwave Background"
+  }
 }
 
 local cbe = {
-    Identifier = "CBE",
-    Transform = {
-        Rotation = {
-            Type = "StaticRotation",
-            Rotation = { 0, 0, 3.14159265359 }
-        }
-    },
-    Renderable = {
-        Type = "RenderableSphere",
-        Enabled = false,
-        Size = 3975.41417036064E23,
-        Segments = 80,
-        Opacity = 0.5,
-        Texture = textures .. "/COBErect.png",
-        Orientation = "Both",
-        MirrorTexture = true,
-        UseAdditiveBlending = true,
-        FadeInThreshold = 0.4
-    },
-    GUI = {
-        Name = "Cosmic Background Explorer",
-        Path = "/Universe/Cosmic Microwave Background"
+  Identifier = "CBE",
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { 0, 0, 3.14159265359 }
     }
+  },
+  Renderable = {
+    Type = "RenderableSphere",
+    Enabled = false,
+    Size = 3975.41417036064E23,
+    Segments = 80,
+    Opacity = 0.5,
+    Texture = textures .. "/COBErect.png",
+    Orientation = "Both",
+    MirrorTexture = true,
+    UseAdditiveBlending = true,
+    FadeInThreshold = 0.4
+  },
+  GUI = {
+    Name = "Cosmic Background Explorer",
+    Path = "/Universe/Cosmic Microwave Background"
+  }
 }
 
 local planck = {
-    Identifier = "Planck",
-    Transform = {
-        Rotation = {
-            Type = "StaticRotation",
-            Rotation = { 0, 0, 3.14159265359 }
-        }
-    },
-    Renderable = {
-        Type = "RenderableSphere",
-        Enabled = true,
-        Size = 3975.41417036064E23,
-        Segments = 80,
-        Opacity = 0.3,
-        Texture = textures .. "/cmb4k.jpg",
-        Orientation = "Both",
-        MirrorTexture = true,
-        UseAdditiveBlending = true,
-        FadeInThreshold = 0.4
-    },
-    GUI = {
-        Name = "Planck",
-        Path = "/Universe/Cosmic Microwave Background"
+  Identifier = "Planck",
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { 0, 0, 3.14159265359 }
     }
-}
-
-local multiverse_planck_1 = {
-    Identifier = "PlanckMultiverse1",
-    Transform = {
-        Translation = {
-            Type = "StaticTranslation",
-            Position = { 0.0, 0.0, 2000E23}
-        },
-        Rotation = {
-            Type = "StaticRotation",
-            Rotation = { 0, 0, 3.14159265359 }
-        }
-    },
-    Renderable = {
-        Type = "RenderableSphere",
-        Enabled = false,
-        Size = 3975.41417036064E23,
-        Segments = 80,
-        Opacity = 0.3,
-        Texture = textures .. "/cmb4k.jpg",
-        Orientation = "Both",
-        MirrorTexture = true,
-        UseAdditiveBlending = true,
-        FadeInThreshold = 0.4
-    },
-    GUI = {
-        Name = "Planck Multiverse 1",
-        Path = "/Universe/Cosmic Microwave Background"
-    }
-}
-
-local multiverse_planck_2 = {
-    Identifier = "PlanckMultiverse2",
-    Transform = {
-        Translation = {
-            Type = "StaticTranslation",
-            Position = { 2500E23, 0.0, 2000E23}
-        },
-        Rotation = {
-            Type = "StaticRotation",
-            Rotation = { 0, 0, 3.14159265359 }
-        }
-    },
-    Renderable = {
-        Type = "RenderableSphere",
-        Enabled = false,
-        Size = 3975.41417036064E23,
-        Segments = 80,
-        Opacity = 0.3,
-        Texture = textures .. "/cmb4k.jpg",
-        Orientation = "Both",
-        MirrorTexture = true,
-        UseAdditiveBlending = true,
-        FadeInThreshold = 0.4
-    },
-    GUI = {
-        Name = "Planck Multiverse 2",
-        Path = "/Universe/Cosmic Microwave Background"
-    }
-}
-
-local multiverse_planck_3 = {
-    Identifier = "PlanckMultiverse3",
-    Transform = {
-        Translation = {
-            Type = "StaticTranslation",
-            Position = { 2500E23, 5000E23, 2000E23}
-        },
-        Rotation = {
-            Type = "StaticRotation",
-            Rotation = { 0, 0, 3.14159265359 }
-        }
-    },
-    Renderable = {
-        Type = "RenderableSphere",
-        Enabled = false,
-        Size = 3975.41417036064E23,
-        Segments = 80,
-        Opacity = 0.3,
-        Texture = textures .. "/cmb4k.jpg",
-        Orientation = "Both",
-        MirrorTexture = true,
-        UseAdditiveBlending = true,
-        FadeInThreshold = 0.4
-    },
-    GUI = {
-        Name = "Planck Multiverse 3",
-        Path = "/Universe/Cosmic Microwave Background"
-    }
-}
-
-local multiverse_planck_4 = {
-    Identifier = "PlanckMultiverse4",
-    Transform = {
-        Translation = {
-            Type = "StaticTranslation",
-            Position = { 0.0, 10000E23, 0.0 }
-        },
-        Rotation = {
-            Type = "StaticRotation",
-            Rotation = { 0, 0, 3.14159265359 }
-        }
-    },
-    Renderable = {
-        Type = "RenderableSphere",
-        Enabled = false,
-        Size = 3975.41417036064E23,
-        Segments = 80,
-        Opacity = 0.3,
-        Texture = textures .. "/cmb4k.jpg",
-        Orientation = "Both",
-        MirrorTexture = true,
-        UseAdditiveBlending = true,
-        FadeInThreshold = 0.4
-    },
-    GUI = {
-        Name = "Planck Multiverse 4",
-        Path = "/Universe/Cosmic Microwave Background"
-    }
+  },
+  Renderable = {
+    Type = "RenderableSphere",
+    Enabled = true,
+    Size = 3975.41417036064E23,
+    Segments = 80,
+    Opacity = 0.3,
+    Texture = textures .. "/cmb4k.jpg",
+    Orientation = "Both",
+    MirrorTexture = true,
+    UseAdditiveBlending = true,
+    FadeInThreshold = 0.4
+  },
+  GUI = {
+    Name = "Planck",
+    Path = "/Universe/Cosmic Microwave Background"
+  }
 }
 
 
 local Halpha = {
-    Identifier = "HAlpha",
-    Transform = {
-        Rotation = {
-            Type = "StaticRotation",
-            Rotation = {0, 0, 3.14159265359}
-        }
-    },
-    Renderable = {
-        Type = "RenderableSphere",
-        Enabled = false,
-        Size = 9.2E21,
-        Segments = 40,
-        Opacity = 0.4,
-        Texture = textures .. "/mwHalpha-f.png",
-        Orientation = "Inside",
-        UseAdditiveBlending = true,
-        MirrorTexture = true,
-        FadeOutThreshold = 0.025,
-        Background = true
-    },
-    GUI = {
-        Name = "H Alpha",
-        Path = "/Milky Way/All Sky Images"
+  Identifier = "HAlpha",
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = {0, 0, 3.14159265359}
     }
+  },
+  Renderable = {
+    Type = "RenderableSphere",
+    Enabled = false,
+    Size = 9.2E21,
+    Segments = 40,
+    Opacity = 0.4,
+    Texture = textures .. "/mwHalpha-f.png",
+    Orientation = "Inside",
+    UseAdditiveBlending = true,
+    MirrorTexture = true,
+    FadeOutThreshold = 0.025,
+    Background = true
+  },
+  GUI = {
+    Name = "H Alpha",
+    Path = "/Milky Way/All Sky Images"
+  }
 }
 
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
-    wmap, cbe, planck, multiverse_planck_1, multiverse_planck_2, multiverse_planck_3,
-    multiverse_planck_4, Halpha
+  wmap, cbe, planck, Halpha
 })
 
 
 asset.meta = {
-    Name = "Background Radiation",
-    Version = "2.0",
-    Description = [[Various AllSky images for the Milky Way and observable Universe.
-        Included: Wilkinson Microwave Anisotropy Probe (WMAP), Cosmic Background Explorer,
-        Planck, Planck Multiverse 1-4, and H Alpha <br><br> Data Reference: Planck/ESA and
-        the Planck Collaboration, Wilkinson Microwave Anisotropy Probe/NASA, Doug
-        Finkbeiner (Princeton)]],
-    Author = "Brian Abbott (AMNH), OpenSpace Team",
-    URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-    License = "AMNH Digital Universe",
-    Identifiers = {"WMAP", "CBE", "Planck", "PlanckMultiverse1", "PlanckMultiverse2",
-        "PlanckMultiverse3", "PlanckMultiverse4", "HAlpha"}
+  Name = "Background Radiation",
+  Version = "2.0",
+  Description = [[Various AllSky images for the Milky Way and observable Universe.
+      Included: Wilkinson Microwave Anisotropy Probe (WMAP), Cosmic Background Explorer,
+      Planck, and H Alpha <br><br> Data Reference: Planck/ESA and the Planck
+      Collaboration, Wilkinson Microwave Anisotropy Probe/NASA, Doug
+      Finkbeiner (Princeton)]],
+  Author = "Brian Abbott (AMNH), OpenSpace Team",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe",
+  Identifiers = {"WMAP", "CBE", "Planck", "HAlpha"}
 }

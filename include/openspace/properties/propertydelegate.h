@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -149,9 +149,6 @@ public:
      * PropertyDelegate::toLuaValue and PropertyDelegate::fromLuaValue methods.
      */
     static int typeLua();
-
-    template <typename U>
-    static U fromString(const std::string& value, bool& success);
 
     template <typename U>
     static bool toString(std::string& outValue, const U& inValue);

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -124,7 +124,6 @@ private:
     struct {
         properties::BoolProperty showChunkEdges;
         properties::BoolProperty showChunkBounds;
-        properties::BoolProperty showChunkAABB;
         properties::BoolProperty showHeightResolution;
         properties::BoolProperty showHeightIntensities;
         properties::BoolProperty levelByProjectedAreaElseDistance;
@@ -220,9 +219,10 @@ private:
     );
 
     void debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp,
-        bool renderBounds, bool renderAABB) const;
+        bool renderBounds) const;
 
-    bool isCullableByFrustum(const Chunk& chunk, const RenderData& renderData, const glm::dmat4& mvp) const;
+    bool isCullableByFrustum(const Chunk& chunk, const RenderData& renderData,
+        const glm::dmat4& mvp) const;
     bool isCullableByHorizon(const Chunk& chunk, const RenderData& renderData,
         const BoundingHeights& heights) const;
 

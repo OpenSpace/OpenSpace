@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2020                                                                #
+# Copyright (c) 2014-2021                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -25,20 +25,20 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabledebugplane.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/debugrenderer.h
+  rendering/renderabledebugplane.h
+  rendering/debugrenderer.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabledebugplane.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/debugrenderer.cpp
+  rendering/renderabledebugplane.cpp
+  rendering/debugrenderer.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/debugshader_vs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/debugshader_fs.glsl
+  rendering/debugshader_vs.glsl
+  rendering/debugshader_fs.glsl
 )
 
 source_group("Shader Files" FILES ${SHADER_FILES})

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,25 +32,10 @@
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 
 namespace {
-    constexpr const char* KeyFontMono = "Mono";
-    constexpr const float DefaultFontSize = 10.f;
-
-    constexpr openspace::properties::Property::PropertyInfo FontNameInfo = {
-        "FontName",
-        "Font Name",
-        "This value is the name of the font that is used. It can either refer to an "
-        "internal name registered previously, or it can refer to a path that is used."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
-        "FontSize",
-        "Font Size",
-        "This value determines the size of the font that is used to render the date."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo SimplificationInfo = {
         "Simplification",
         "Time Simplification",
@@ -66,6 +51,26 @@ namespace {
         "convert the seconds into."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo TransitionFormatInfo = {
+        "TransitionFormat",
+        "Transition Format",
+        "Format string used to format the text used while in a delta time transition, "
+        "that is if the current delta time is being interpolated to reach a target "
+        "delta time. This format gets five parameters in this order:  The target delta "
+        "time value, the target delta time unit, the string 'Paused' if the delta time "
+        "is paused or the empty string otherwise, the current delta time value, and the "
+        "current delta time unit"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo RegularFormatInfo = {
+        "RegularFormat",
+        "Regular Format",
+        "The format string used to format the text if the target delta time is the same "
+        "as the current delta time. This format gets three parameters in this order:  "
+        "The target delta value, the target delta unit, and the string 'Paused' if the "
+        "delta time is paused or the empty string otherwise"
+    };
+
     std::vector<std::string> unitList() {
         std::vector<std::string> res(openspace::TimeUnits.size());
         std::transform(
@@ -76,82 +81,45 @@ namespace {
         );
         return res;
     }
+
+    struct [[codegen::Dictionary(DashboardItemSimulationIncrement)]] Parameters {
+        // [[codegen::verbatim(SimplificationInfo.description)]]
+        std::optional<bool> simplification;
+
+        // [[codegen::verbatim(RequestedUnitInfo.description)]]
+        std::optional<std::string> requestedUnit [[codegen::inlist(unitList())]];
+
+        // [[codegen::verbatim(TransitionFormatInfo.description)]]
+        std::optional<std::string> transitionFormat;
+
+        // [[codegen::verbatim(RegularFormatInfo.description)]]
+        std::optional<std::string> regularFormat;
+    };
+#include "dashboarditemsimulationincrement_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation DashboardItemSimulationIncrement::Documentation() {
-    using namespace documentation;
-    return {
-        "DashboardItem Simulation Increment",
-        "base_dashboarditem_simulationincrement",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("DashboardItemSimulationIncrement"),
-                Optional::No
-            },
-            {
-                FontNameInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                FontNameInfo.description
-            },
-            {
-                FontSizeInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                FontSizeInfo.description
-            },
-            {
-                SimplificationInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                SimplificationInfo.description
-            },
-            {
-                RequestedUnitInfo.identifier,
-                new StringInListVerifier(unitList()),
-                Optional::Yes,
-                RequestedUnitInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_dashboarditem_simulationincrement";
+    return doc;
 }
 
 DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
                                                       const ghoul::Dictionary& dictionary)
-    : DashboardItem(dictionary)
-    , _fontName(FontNameInfo, KeyFontMono)
-    , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
+    : DashboardTextItem(dictionary)
     , _doSimplification(SimplificationInfo, true)
     , _requestedUnit(RequestedUnitInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _transitionFormat(
+        TransitionFormatInfo,
+        "Simulation increment: {:.1f} {:s} / second{:s} (current: {:.1f} {:s})"
+    )
+    , _regularFormat(RegularFormatInfo, "Simulation increment: {:.1f} {:s} / second{:s}")
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "DashboardItemSimulationIncrement"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    if (dictionary.hasKey(FontNameInfo.identifier)) {
-        _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
-    }
-    _fontName.onChange([this](){
-        _font = global::fontManager->font(_fontName, _fontSize);
-    });
-    addProperty(_fontName);
-
-    if (dictionary.hasKey(FontSizeInfo.identifier)) {
-        _fontSize = static_cast<float>(dictionary.value<double>(FontSizeInfo.identifier));
-    }
-    _fontSize.onChange([this](){
-        _font = global::fontManager->font(_fontName, _fontSize);
-    });
-    addProperty(_fontSize);
-
-    if (dictionary.hasKey(SimplificationInfo.identifier)) {
-        _doSimplification = dictionary.value<bool>(SimplificationInfo.identifier);
-    }
+    _doSimplification = p.simplification.value_or(_doSimplification);
     _doSimplification.onChange([this]() {
         _requestedUnit.setVisibility(
             _doSimplification ?
@@ -165,15 +133,18 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
         _requestedUnit.addOption(static_cast<int>(u), nameForTimeUnit(u));
     }
     _requestedUnit = static_cast<int>(TimeUnit::Second);
-    if (dictionary.hasKey(RequestedUnitInfo.identifier)) {
-        std::string value = dictionary.value<std::string>(RequestedUnitInfo.identifier);
-        TimeUnit unit = timeUnitFromString(value.c_str());
+    if (p.requestedUnit.has_value()) {
+        TimeUnit unit = timeUnitFromString(p.requestedUnit->c_str());
         _requestedUnit = static_cast<int>(unit);
     }
     _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
     addProperty(_requestedUnit);
 
-    _font = global::fontManager->font(_fontName, _fontSize);
+    _transitionFormat = p.transitionFormat.value_or(_transitionFormat);
+    addProperty(_transitionFormat);
+
+    _regularFormat = p.regularFormat.value_or(_regularFormat);
+    addProperty(_regularFormat);
 }
 
 void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
@@ -203,28 +174,33 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
 
     std::string pauseText = global::timeManager->isPaused() ? " (Paused)" : "";
 
-    if (targetDt != currentDt && !global::timeManager->isPaused()) {
-        // We are in the middle of a transition
-        RenderFont(
-            *_font,
-            penPosition,
-            fmt::format(
-                "Simulation increment: {:.1f} {:s} / second{:s} (current: {:.1f} {:s})",
-                targetDeltaTime.first, targetDeltaTime.second,
-                pauseText,
-                currentDeltaTime.first, currentDeltaTime.second
-            )
-        );
+    try {
+        if (targetDt != currentDt && !global::timeManager->isPaused()) {
+            // We are in the middle of a transition
+            RenderFont(
+                *_font,
+                penPosition,
+                fmt::format(
+                    _transitionFormat.value().c_str(),
+                    targetDeltaTime.first, targetDeltaTime.second,
+                    pauseText,
+                    currentDeltaTime.first, currentDeltaTime.second
+                )
+            );
+        }
+        else {
+            RenderFont(
+                *_font,
+                penPosition,
+                fmt::format(
+                    _regularFormat.value().c_str(),
+                    targetDeltaTime.first, targetDeltaTime.second, pauseText
+                )
+            );
+        }
     }
-    else {
-        RenderFont(
-            *_font,
-            penPosition,
-            fmt::format(
-                "Simulation increment: {:.1f} {:s} / second{:s}",
-                targetDeltaTime.first, targetDeltaTime.second, pauseText
-            )
-        );
+    catch (const fmt::format_error&) {
+        LERRORC("DashboardItemDate", "Illegal format string");
     }
     penPosition.y -= _font->height();
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -86,6 +86,7 @@ public:
     void touchDetectionCallback(TouchInput input);
     void touchUpdateCallback(TouchInput input);
     void touchExitCallback(TouchInput input);
+    void handleDragDrop(const std::string& file);
     std::vector<std::byte> encode();
     void decode(std::vector<std::byte> data);
 
@@ -98,6 +99,7 @@ public:
 
     void writeSceneDocumentation();
     void writeStaticDocumentation();
+    void createUserDirectoriesIfNecessary();
 
     /**
      * Returns the Lua library that contains all Lua functions available to affect the
@@ -138,5 +140,12 @@ private:
 };
 
 } // namespace openspace
+
+// Lua functions - exposed for testing
+namespace openspace::luascriptfunctions {
+
+int createSingleColorImage(lua_State* L);
+
+} // openspace::luascriptfunctions
 
 #endif // __OPENSPACE_CORE___OPENSPACEENGINE___H__

@@ -6,90 +6,86 @@ local labelsPath = asset.require('./earth_globelabels').LabelsPath
 local earthEllipsoid = { 6378137.0, 6378137.0, 6378137.0 }
 
 local Earth = {
-    Identifier = "Earth",
-    Parent = transforms.EarthIAU.Identifier,
-    Renderable = {
-        Type = "RenderableGlobe",
-        Radii = earthEllipsoid,
-        SegmentsPerPatch = 64,
-        PerformShading = false,
-        Layers = {},
-        ShadowGroup = {
-            Source1 = {
-                Name = "Sun",
-                -- All radius in meters
-                Radius = 696.3E6
-            },
-            Caster1 = { 
-                Name = "Moon",
-                -- All radius in meters
-                Radius = 1.737E6
-            }
-        },
-        Labels = {
-            Enable = false,
-            FileName = labelsPath .. "/Earth.labels",
-            LabelAlignmentOption = "Horizontally", -- or Circularly
-            LabelsFontSize = 41.0,
-            LabelsSize = 0.52,
-            LabelsMinSize = 1.0,
-            LabelsMaxSize = 1500.0,
-            ProximityEnabled = false,
-            LabelsFadeInEnabled = true,
-            LabelsFadeOutEnabled = false,
-            FadeInStartingDistance = 50000.0,
-            FadeOutStartingDistance = 80000.0,
-            LabelsForceDomeRendering = true,
-            LabelsDistanceEPS = 1500000.0,
-            LabelsColor = { 1.0, 0.0, 0.0 }
-        }
+  Identifier = "Earth",
+  Parent = transforms.EarthIAU.Identifier,
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = earthEllipsoid,
+    SegmentsPerPatch = 64,
+    PerformShading = false,
+    Layers = {},
+    ShadowGroup = {
+      Sources = {
+        { Name = "Sun", Radius = 696.3E6 },
+      },
+      Casters = {
+        { Name = "Moon", Radius = 1.737E6 },
+      }
     },
-    Tag = { "planet_solarSystem", "planet_terrestrial" },
-    GUI = {
-        Name = "Earth",
-        Path = "/Solar System/Planets/Earth",
-        Description = "Third rock from the Sun"
+    Labels = {
+      Enable = false,
+      FileName = labelsPath .. "/Earth.labels",
+      LabelAlignmentOption = "Horizontally", -- or Circularly
+      LabelsFontSize = 40.0,
+      LabelsSize = 4.0,
+      LabelsMinSize = 1.0,
+      LabelsMaxSize = 1500.0,
+      ProximityEnabled = false,
+      LabelsFadeInEnabled = true,
+      LabelsFadeOutEnabled = true,
+      FadeInStartingDistance = 300000.0,
+      FadeOutStartingDistance = 10000.0,
+      LabelsForceDomeRendering = true,
+      LabelsDistanceEPS = 1500000.0,
+      LabelsColor = { 1.0, 0.0, 0.0 }
     }
+  },
+  Tag = { "planet_solarSystem", "planet_terrestrial" },
+  GUI = {
+    Name = "Earth",
+    Path = "/Solar System/Planets/Earth",
+    Description = "Third rock from the Sun"
+  }
 }
 
 local EarthLabel = {
-    Identifier = "EarthLabel",
-    Parent = Earth.Identifier,
-    Renderable = {
-        Enabled = false,
-        Type = "RenderableLabels",
-        LabelText = "Earth",
-        FontSize = 100.0,
-        LabelSize = 8.6,
-        LabelMaxSize = 100.0,
-        LabelMinSize = 1.0,
-        LabelOrientationOption = "Camera View Direction",
-        BlendMode = "Additive",
-        EnableFading = true,
-        FadeStartUnit = "au",
-        FadeStartDistance = 1.5,
-        FadeStartSpeed = 1.0,
-        FadeEndUnit = "au",
-        FadeEndDistance = 15.0,
-        FadeEndSpeed = 25.0
-    },
-    Tag = { "solarsystem_labels" },
-    GUI = {
-        Name = "Earth Label",
-        Path = "/Solar System/Planets/Earth",
-        Description = "Main label for Earth"
-    }
+  Identifier = "EarthLabel",
+  Parent = Earth.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableLabels",
+    LabelText = "Earth",
+    FontSize = 100.0,
+    LabelSize = 8.6,
+    LabelMaxSize = 100.0,
+    LabelMinSize = 1.0,
+    LabelOrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeStartUnit = "au",
+    FadeStartDistance = 1.5,
+    FadeStartSpeed = 1.0,
+    FadeEndUnit = "au",
+    FadeEndDistance = 15.0,
+    FadeEndSpeed = 25.0
+  },
+  Tag = { "solarsystem_labels" },
+  GUI = {
+    Name = "Earth Label",
+    Path = "/Solar System/Planets/Earth",
+    Description = "Main label for Earth"
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Earth, EarthLabel })
 
 
 asset.meta = {
-    Name = "Earth",
-    Version = "1.0",
-    Description = [[ Earth is a special planet with special needs ]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license",
-    Identifiers = {"Earth", "EarthLabel"}
+  Name = "Earth",
+  Version = "1.0",
+  Description = [[ Earth is a special planet with special needs ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license",
+  Identifiers = {"Earth", "EarthLabel"}
 }

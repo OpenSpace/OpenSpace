@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,7 +46,9 @@ void GuiJoystickComponent::render() {
     ImGui::SetNextWindowCollapsed(_isCollapsed);
 
     bool v = _isEnabled;
-    ImGui::Begin("Joystick Information", &v, Size, 0.5f);
+    ImGui::SetNextWindowSize(Size, ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowBgAlpha(0.5f);
+    ImGui::Begin("Joystick Information", &v);
     _isEnabled = v;
     _isCollapsed = ImGui::IsWindowCollapsed();
 

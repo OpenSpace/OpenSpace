@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,8 @@
 #include "profile/keybindingsdialog.h"
 
 #include "profile/line.h"
+#include "profile/scriptlogdialog.h"
+
 #include <openspace/scene/profile.h>
 #include <openspace/util/keys.h>
 #include <qevent.h>
@@ -104,6 +106,10 @@ KeybindingsDialog::KeybindingsDialog(Profile& profile, QWidget *parent)
     createWidgets();
 
     transitionFromEditMode();
+}
+
+void KeybindingsDialog::appendScriptsToKeybind(std::string scripts) {
+    _scriptEdit->append(QString::fromStdString(std::move(scripts)));
 }
 
 void KeybindingsDialog::createWidgets() {
@@ -220,6 +226,14 @@ void KeybindingsDialog::createWidgets() {
 
         _scriptLabel = new QLabel("Script");
         box->addWidget(_scriptLabel, 6, 0, 1, 2);
+
+        _chooseScriptsButton = new QPushButton("Choose Scripts");
+        connect(
+            _chooseScriptsButton, &QPushButton::clicked,
+            this, &KeybindingsDialog::chooseScripts
+        );
+        box->addWidget(_chooseScriptsButton, 6, 1, 1, 1);
+
         _scriptEdit = new QTextEdit;
         _scriptEdit->setAcceptRichText(false);
         _scriptEdit->setToolTip("Command(s) to execute at keypress event");
@@ -323,7 +337,7 @@ void KeybindingsDialog::keySelected(int index) {
 
 int KeybindingsDialog::indexInKeyMapping(std::vector<int>& mapVector, int keyInt) {
     const auto it = std::find(mapVector.cbegin(), mapVector.cend(), keyInt);
-    return std::distance(mapVector.cbegin(), it);
+    return static_cast<int>(std::distance(mapVector.cbegin(), it));
 }
 
 bool KeybindingsDialog::isLineEmpty(int index) {
@@ -338,8 +352,6 @@ bool KeybindingsDialog::isLineEmpty(int index) {
 }
 
 void KeybindingsDialog::listItemAdded() {
-    int currentListSize = _list->count();
-
     _data.push_back(BlankKey);
     _list->addItem(new QListWidgetItem("  (Enter details below & click 'Save')"));
     // Scroll down to that blank line highlighted
@@ -499,6 +511,7 @@ void KeybindingsDialog::editBoxDisabled(bool disabled) {
     _scriptEdit->setDisabled(disabled);
     _cancelButton->setDisabled(disabled);
     _saveButton->setDisabled(disabled);
+    _chooseScriptsButton->setDisabled(disabled);
 }
 
 void KeybindingsDialog::parseSelections() {
@@ -508,6 +521,13 @@ void KeybindingsDialog::parseSelections() {
     }
     _profile.setKeybindings(_data);
     accept();
+}
+
+void KeybindingsDialog::chooseScripts() {
+    _errorMsg->clear();
+    ScriptlogDialog d(this);
+    connect(&d, &ScriptlogDialog::scriptsSelected, this, &KeybindingsDialog::appendScriptsToKeybind);
+    d.exec();
 }
 
 void KeybindingsDialog::keyPressEvent(QKeyEvent* evt) {

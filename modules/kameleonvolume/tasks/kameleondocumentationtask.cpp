@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,6 @@
 #include <modules/kameleonvolume/kameleonvolumereader.h>
 #include <openspace/openspace.h>
 #include <openspace/documentation/verifier.h>
-#include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/dictionaryjsonformatter.h>
 #include <fstream>
@@ -68,15 +67,10 @@ void KameleonDocumentationTask::perform(const Task::ProgressCallback & progressC
     ghoul::Dictionary kameleonDictionary = reader.readMetaData();
     progressCallback(0.33f);
 
-    ghoul::Dictionary dictionary = {
-        { "kameleon", std::move(kameleonDictionary) },
-        { "version",
-            std::to_string(OPENSPACE_VERSION_MAJOR) + "." +
-            std::to_string(OPENSPACE_VERSION_MINOR) + "." +
-            std::to_string(OPENSPACE_VERSION_PATCH)
-        },
-        { "input", _inputPath }
-    };
+    ghoul::Dictionary dictionary;
+    dictionary.setValue("kameleon", std::move(kameleonDictionary));
+    dictionary.setValue("version", std::string(OPENSPACE_VERSION_NUMBER));
+    dictionary.setValue("input", _inputPath);
 
     std::string json = ghoul::formatJson(dictionary);
     progressCallback(0.66f);
@@ -158,12 +152,6 @@ documentation::Documentation KameleonDocumentationTask::documentation() {
         "KameleonDocumentationTask",
         "kameleon_documentation_task",
         {
-            {
-                "Type",
-                new StringEqualVerifier("KameleonDocumentationTask"),
-                Optional::No,
-                "The type of this task"
-            },
             {
                 KeyInput,
                 new StringAnnotationVerifier("A file path to a cdf file"),

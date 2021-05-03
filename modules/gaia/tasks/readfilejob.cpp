@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,11 +39,11 @@ ReadFileJob::ReadFileJob(std::string filePath, std::vector<std::string> allColum
                          int firstRow, int lastRow, size_t nDefaultCols,
                          int nValuesPerStar, std::shared_ptr<FitsFileReader> fitsReader)
     : _inFilePath(std::move(filePath))
-    , _allColumns(std::move(allColumns))
     , _firstRow(firstRow)
     , _lastRow(lastRow)
     , _nDefaultCols(nDefaultCols)
     , _nValuesPerStar(nValuesPerStar)
+    , _allColumns(std::move(allColumns))
     , _fitsFileReader(std::move(fitsReader))
     , _octants(8)
 {}
@@ -203,9 +203,15 @@ void ReadFileJob::execute() {
             float radVelZ = 1000.f * radial_vel[i] * rGal.z;
 
             // Use Pythagoras theorem for the final Space Velocity [m/s].
-            values[idx++] = sqrt(pow(radVelX, 2) + pow(tanVelX, 2)); // Vel X [U]
-            values[idx++] = sqrt(pow(radVelY, 2) + pow(tanVelY, 2)); // Vel Y [V]
-            values[idx++] = sqrt(pow(radVelZ, 2) + pow(tanVelZ, 2)); // Vel Z [W]
+            values[idx++] = static_cast<float>(
+                std::sqrt(std::pow(radVelX, 2) + std::pow(tanVelX, 2)) // Vel X [U]
+            );
+            values[idx++] = static_cast<float>(
+                std::sqrt(std::pow(radVelY, 2) + std::pow(tanVelY, 2)) // Vel Y [V]
+            );
+            values[idx++] = static_cast<float>(
+                std::sqrt(std::pow(radVelZ, 2) + std::pow(tanVelZ, 2)) // Vel Z [W]
+            );
         }
         // Otherwise use the vector [m/s] we got from proper motion.
         else {

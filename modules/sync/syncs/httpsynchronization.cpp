@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,39 +38,29 @@
 namespace {
     constexpr const char* _loggerCat = "HttpSynchronization";
 
-    constexpr const char* KeyIdentifier = "Identifier";
-    constexpr const char* KeyVersion = "Version";
-
     constexpr const char* TempSuffix = ".tmp";
 
     constexpr const char* QueryKeyIdentifier = "identifier";
     constexpr const char* QueryKeyFileVersion = "file_version";
     constexpr const char* QueryKeyApplicationVersion = "application_version";
     constexpr const int ApplicationVersion = 1;
+
+    struct [[codegen::Dictionary(HttpSynchronization)]] Parameters {
+        // A unique identifier for this resource
+        std::string identifier;
+
+        // The version of this resource
+        int version;
+    };
+#include "httpsynchronization_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation HttpSynchronization::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "HttpSynchronization",
-        "http_synchronization",
-    {
-        {
-            KeyIdentifier,
-            new StringVerifier,
-            Optional::No,
-            "A unique identifier for this resource"
-        },
-        {
-            KeyVersion,
-            new IntVerifier,
-            Optional::No,
-            "The version of this resource"
-        }
-    }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "http_synchronization";
+    return doc;
 }
 
 HttpSynchronization::HttpSynchronization(const ghoul::Dictionary& dict,
@@ -81,14 +71,10 @@ HttpSynchronization::HttpSynchronization(const ghoul::Dictionary& dict,
     , _synchronizationRoot(std::move(synchronizationRoot))
     , _synchronizationRepositories(std::move(synchronizationRepositories))
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dict,
-        "HttpSynchronization"
-    );
+    const Parameters p = codegen::bake<Parameters>(dict);
 
-    _identifier = dict.value<std::string>(KeyIdentifier);
-    _version = static_cast<int>(dict.value<double>(KeyVersion));
+    _identifier = p.identifier;
+    _version = p.version;
 }
 
 HttpSynchronization::~HttpSynchronization() {

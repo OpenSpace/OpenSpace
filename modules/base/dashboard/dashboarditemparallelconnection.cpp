@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,83 +36,12 @@
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/misc/profiling.h>
 
-namespace {
-    constexpr const char* KeyFontMono = "Mono";
-    constexpr const float DefaultFontSize = 10.f;
-
-    constexpr openspace::properties::Property::PropertyInfo FontNameInfo = {
-        "FontName",
-        "Font Name",
-        "This value is the name of the font that is used. It can either refer to an "
-        "internal name registered previously, or it can refer to a path that is used."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
-        "FontSize",
-        "Font Size",
-        "This value determines the size of the font that is used to render the date."
-    };
-} // namespace
-
 namespace openspace {
-
-documentation::Documentation DashboardItemParallelConnection::Documentation() {
-    using namespace documentation;
-    return {
-        "DashboardItem Parallel Connection",
-        "base_dashboarditem_parallelconnection",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("DashboardItemParallelConnection"),
-                Optional::No
-            },
-            {
-                FontNameInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                FontNameInfo.description
-            },
-            {
-                FontSizeInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                FontSizeInfo.description
-            }
-        }
-    };
-}
 
 DashboardItemParallelConnection::DashboardItemParallelConnection(
                                                       const ghoul::Dictionary& dictionary)
-    : DashboardItem(dictionary)
-    , _fontName(FontNameInfo, KeyFontMono)
-    , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
-{
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "DashboardItemParallelConnection"
-    );
-
-    if (dictionary.hasKey(FontNameInfo.identifier)) {
-        _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
-    }
-    _fontName.onChange([this](){
-        _font = global::fontManager->font(_fontName, _fontSize);
-    });
-    addProperty(_fontName);
-
-    if (dictionary.hasKey(FontSizeInfo.identifier)) {
-        _fontSize = static_cast<float>(dictionary.value<double>(FontSizeInfo.identifier));
-    }
-    _fontSize.onChange([this](){
-        _font = global::fontManager->font(_fontName, _fontSize);
-    });
-    addProperty(_fontSize);
-
-    _font = global::fontManager->font(_fontName, _fontSize);
-}
+    : DashboardTextItem(dictionary)
+{}
 
 void DashboardItemParallelConnection::render(glm::vec2& penPosition) {
     ZoneScoped
@@ -146,15 +75,14 @@ void DashboardItemParallelConnection::render(glm::vec2& penPosition) {
     if (status == ParallelConnection::Status::ClientWithHost ||
         status == ParallelConnection::Status::ClientWithoutHost)
     {
-        constexpr const char* Singular = "You and {} more client are tuned in";
-        constexpr const char* Plural = "You and {} more clients are tuned in";
-
         connectionInfo += "\n";
 
         if (nClients > 2) {
+            constexpr const char* Plural = "You and {} more clients are tuned in";
             connectionInfo += fmt::format(Plural, nClients - 1);
         }
         else if (nClients == 2) {
+            constexpr const char* Singular = "You and {} more client are tuned in";
             connectionInfo += fmt::format(Singular, nClients - 1);
         }
         else if (nClients == 1) {
@@ -199,16 +127,13 @@ glm::vec2 DashboardItemParallelConnection::size() const {
     if (status == ParallelConnection::Status::ClientWithHost ||
         status == ParallelConnection::Status::ClientWithoutHost)
     {
-        constexpr const char* Singular = "You and {} more client are tuned in";
-        constexpr const char* Plural = "You and {} more clients are tuned in";
-
         connectionInfo += "\n";
         if (nClients > 2) {
-            std::string c = std::to_string(nClients - 1);
+            constexpr const char* Plural = "You and {} more clients are tuned in";
             connectionInfo += fmt::format(Plural, nClients);
         }
         else if (nClients == 2) {
-            std::string c = std::to_string(nClients - 1);
+            constexpr const char* Singular = "You and {} more client are tuned in";
             connectionInfo += fmt::format(Singular, nClients - 1);
         }
         else if (nClients == 1) {

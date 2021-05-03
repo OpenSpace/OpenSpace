@@ -13,106 +13,106 @@ local trailTags = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_uran
 
 
 local majorMoons = {
-    {
-        Identifier = "Miranda",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "MIRANDA",
-        Radii = { 471600, 468000, 466000 },
-        Tags = tags,
-        TrailTags = trailTags,
-        GUI = {
-            Path = "/Solar System/Planets/Uranus/Moons/Major Moons"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 1.413479,
-        Kernels = kernel
+  {
+    Identifier = "Miranda",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
     },
-    {
-        Identifier = "Ariel",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "ARIEL",
-        Radii = { 1162000, 1156000, 1155000 },
-        Tags = tags,
-        TrailTags = trailTags,
-        GUI = {
-            Path = "/Solar System/Planets/Uranus/Moons/Major Moons"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 2.520379,
-        Kernels = kernel
+    Spice = "MIRANDA",
+    Radii = { 471600, 468000, 466000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Uranus/Moons/Major Moons"
     },
-    {
-        Identifier = "Umbriel",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "UMBRIEL",
-        Radii = { 1169400, 1169400, 1169400 },
-        Tags = tags,
-        TrailTags = trailTags,
-        GUI = {
-            Path = "/Solar System/Planets/Uranus/Moons/Major Moons"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 4.144177,
-        Kernels = kernel
+    TrailColor = trailColor,
+    OrbitPeriod = 1.413479,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Ariel",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
     },
-    {
-        Identifier = "Titania",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "TITANIA",
-        Radii = { 1576800, 1576800, 1576800 },
-        Tags = tags,
-        TrailTags = trailTags,
-        GUI = {
-            Path = "/Solar System/Planets/Uranus/Moons/Major Moons"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 8.705872,
-        Kernels = kernel
+    Spice = "ARIEL",
+    Radii = { 1162000, 1156000, 1155000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Uranus/Moons/Major Moons"
     },
-    {
-        Identifier = "Oberon",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "OBERON",
-        Radii = { 1522800, 1522800, 1522800 },
-        Tags = tags,
-        TrailTags = trailTags,
-        GUI = {
-            Path = "/Solar System/Planets/Uranus/Moons/Major Moons"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 13.463239,
-        Kernels = kernel
-    }
+    TrailColor = trailColor,
+    OrbitPeriod = 2.520379,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Umbriel",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "UMBRIEL",
+    Radii = { 1169400, 1169400, 1169400 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Uranus/Moons/Major Moons"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 4.144177,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Titania",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "TITANIA",
+    Radii = { 1576800, 1576800, 1576800 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Uranus/Moons/Major Moons"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 8.705872,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Oberon",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "OBERON",
+    Radii = { 1522800, 1522800, 1522800 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Uranus/Moons/Major Moons"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 13.463239,
+    Kernels = kernel
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(
-    asset,
-    proceduralGlobes.createGlobes(majorMoons)
+  asset,
+  proceduralGlobes.createGlobes(majorMoons)
 )
 
 
 asset.meta = {
-    Name = "Uranus Marjor Moons",
-    Version = "1.0",
-    Description = [[ Procedural Globe asset containing Uranus' major moons: Miranda,
-        Ariel, Umbriel, Titania, and Oberon. Blank globes and SPICE trails are generated
-        for each moon.]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license"
+  Name = "Uranus Marjor Moons",
+  Version = "1.0",
+  Description = [[ Procedural Globe asset containing Uranus' major moons: Miranda,
+    Ariel, Umbriel, Titania, and Oberon. Blank globes and SPICE trails are generated
+    for each moon.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
 }

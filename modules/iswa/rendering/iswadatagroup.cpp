@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -110,21 +110,19 @@ IswaDataGroup::~IswaDataGroup() {}
 void IswaDataGroup::registerProperties() {
     _useLog.onChange([this]() {
         LDEBUG("Group " + identifier() + " published useLogChanged");
-        _groupEvent.publish(
-            "useLogChanged",
-            ghoul::Dictionary({ { "useLog", _useLog.value() } })
-        );
+        ghoul::Dictionary d;
+        d.setValue("useLog", _useLog.value());
+        _groupEvent.publish("useLogChanged", d);
     });
 
     _useHistogram.onChange([this]() {
         LDEBUG("Group " + identifier() + " published useHistogramChanged");
-        _groupEvent.publish(
-            "useHistogramChanged",
-            ghoul::Dictionary({ { "useHistogram", _useHistogram.value() } })
-        );
+        ghoul::Dictionary d;
+        d.setValue("useHistogram", _useHistogram.value());
+        _groupEvent.publish("useHistogramChanged", d);
     });
 
-    //If autofiler is on, background values property should be hidden
+    // If autofiler is on, background values property should be hidden
     _autoFilter.onChange([this]() {
         LDEBUG("Group " + identifier() + " published autoFilterChanged");
         // If autofiler is selected, use _dataProcessor to set backgroundValues
@@ -139,56 +137,52 @@ void IswaDataGroup::registerProperties() {
             _backgroundValues.setVisibility(properties::Property::Visibility::All);
             //_backgroundValues.setVisible(true);
         }
-        _groupEvent.publish(
-            "autoFilterChanged",
-            ghoul::Dictionary({ { "autoFilter", _autoFilter.value() } })
-        );
+        ghoul::Dictionary d;
+        d.setValue("autoFilter", _autoFilter.value());
+        _groupEvent.publish("autoFilterChanged", d);
     });
 
     _normValues.onChange([this]() {
         LDEBUG("Group " + identifier() + " published normValuesChanged");
-        _groupEvent.publish(
-            "normValuesChanged",
-            ghoul::Dictionary({ { "normValues", _normValues.value() } })
-        );
+        ghoul::Dictionary d;
+        d.setValue("normValues", glm::dvec2(_normValues.value()));
+        _groupEvent.publish("normValuesChanged", d);
     });
 
     _backgroundValues.onChange([this]() {
         LDEBUG("Group " + identifier() + " published backgroundValuesChanged");
-        _groupEvent.publish(
-            "backgroundValuesChanged",
-            ghoul::Dictionary({ { "backgroundValues", _backgroundValues.value() } })
-        );
+        ghoul::Dictionary d;
+        d.setValue("backgroundValues", glm::dvec2(_backgroundValues.value()));
+        _groupEvent.publish("backgroundValuesChanged", d);
     });
 
     _transferFunctionsFile.onChange([this]() {
         LDEBUG("Group " + identifier() + " published transferFunctionsChanged");
-        _groupEvent.publish(
-            "transferFunctionsChanged",
-            ghoul::Dictionary({ { "transferFunctions", _transferFunctionsFile.value() } })
-        );
+        ghoul::Dictionary d;
+        d.setValue("transferFunctionsChanged", _transferFunctionsFile.value());
+        _groupEvent.publish("transferFunctionsChanged", d);
     });
 
     _dataOptions.onChange([this]() {
         LDEBUG("Group " + identifier() + " published dataOptionsChanged");
         ghoul::Dictionary dict;
-        dict.setValue<std::vector<int>>("dataOptions", _dataOptions.value());
+        std::set<std::string> set = _dataOptions;
+        std::vector<std::string> vec(set.begin(), set.end());
+        dict.setValue("dataOptions", vec);
         _groupEvent.publish("dataOptionsChanged", dict);
     });
 }
 
-void IswaDataGroup::registerOptions(
-                        const std::vector<properties::SelectionProperty::Option>& options)
-{
+void IswaDataGroup::registerOptions(const std::vector<std::string>& options) {
     if (!_registered) {
         registerProperties();
     }
 
     if (_dataOptions.options().empty()) {
-        for (properties::SelectionProperty::Option option : options) {
-            _dataOptions.addOption({ option.value, option.description });
+        for (const std::string& option : options) {
+            _dataOptions.addOption(option);
         }
-        _dataOptions.setValue(std::vector<int>(1, 0));
+        _dataOptions.setValue({ options.front() });
     }
 }
 
@@ -204,7 +198,7 @@ void IswaDataGroup::createDataProcessor() {
     }
 }
 
-std::vector<int> IswaDataGroup::dataOptionsValue() const {
+std::set<std::string> IswaDataGroup::dataOptionsValue() const {
     return _dataOptions;
 }
 

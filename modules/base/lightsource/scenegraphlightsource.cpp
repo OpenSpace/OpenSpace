@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,6 +31,7 @@
 #include <openspace/scene/scene.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/misc/profiling.h>
+#include <optional>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo IntensityInfo = {
@@ -44,36 +45,23 @@ namespace {
         "Node",
         "The identifier of the scene graph node to follow"
     };
+
+    struct [[codegen::Dictionary(SceneGraphLightSource)]] Parameters {
+        // [[codegen::verbatim(IntensityInfo.description)]]
+        std::optional<float> intensity;
+
+        // [[codegen::verbatim(NodeInfo.description)]]
+        std::string node;
+    };
+#include "scenegraphlightsource_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation SceneGraphLightSource::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "Scene Graph Light Source",
-        "base_scene_graph_light_source",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("SceneGraphLightSource"),
-                Optional::No,
-                "The type of this light source"
-            },
-            {
-                IntensityInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                IntensityInfo.description
-            },
-            {
-                NodeInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                NodeInfo.description
-            },
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_scene_graph_light_source";
+    return doc;
 }
 
 SceneGraphLightSource::SceneGraphLightSource()
@@ -89,30 +77,17 @@ SceneGraphLightSource::SceneGraphLightSource(const ghoul::Dictionary& dictionary
     , _intensity(IntensityInfo, 1.f, 0.f, 1.f)
     , _sceneGraphNodeReference(NodeInfo, "")
 {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    _intensity = p.intensity.value_or(_intensity);
     addProperty(_intensity);
-    addProperty(_sceneGraphNodeReference);
 
-    documentation::testSpecificationAndThrow(Documentation(),
-                                             dictionary,
-                                             "SceneGraphLightSource");
-
-
-    if (dictionary.hasValue<double>(IntensityInfo.identifier)) {
-        _intensity = static_cast<float>(
-            dictionary.value<double>(IntensityInfo.identifier)
-        );
-    }
-
-    if (dictionary.hasValue<std::string>(NodeInfo.identifier)) {
-        _sceneGraphNodeReference =
-            dictionary.value<std::string>(NodeInfo.identifier);
-    }
-
+    _sceneGraphNodeReference = p.node;
     _sceneGraphNodeReference.onChange([this]() {
         _sceneGraphNode =
             global::renderEngine->scene()->sceneGraphNode(_sceneGraphNodeReference);
     });
-
+    addProperty(_sceneGraphNodeReference);
 }
 
 bool SceneGraphLightSource::initialize() {

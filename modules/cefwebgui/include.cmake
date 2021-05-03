@@ -7,6 +7,4 @@ endif ()
 
 set(OPENSPACE_DEPENDENCIES
   webbrowser
-  webgui
-  server
 )

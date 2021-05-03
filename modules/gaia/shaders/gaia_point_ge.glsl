@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,7 +46,6 @@ uniform float viewScaling;
 uniform float cutOffThreshold;
 
 void main() {
-
     ge_brightness = vs_brightness[0];
     ge_starDistFromSun = vs_starDistFromSun[0];
     ge_cameraDistFromSun = vs_cameraDistFromSun[0];

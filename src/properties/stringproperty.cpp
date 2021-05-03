@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,25 +44,10 @@ bool toLuaConversion(lua_State* state, const std::string& val) {
     return true;
 }
 
-std::string fromStringConversion(std::string val, bool& success) {
-    // An incoming string is of the form
-    // "value"
-    // so we want to remove the leading and trailing " characters
-    if (val.size() > 2 && (val[0] == '"' && val[val.size() - 1] == '"')) {
-        // Removing the first and last "
-        success = true;
-        return val.substr(1, val.size() - 2);
-    }
-    success = false;
-    return val;
-}
-
 bool toStringConversion(std::string& outValue, std::string inValue) {
-    std::string str;
     nlohmann::json json;
     nlohmann::to_json(json, inValue);
     outValue = json.dump();
-
     return true;
 }
 
@@ -76,7 +61,6 @@ REGISTER_TEMPLATEPROPERTY_SOURCE(
     "",
     fromLuaConversion,
     toLuaConversion,
-    fromStringConversion,
     toStringConversion,
     LUA_TSTRING
 )

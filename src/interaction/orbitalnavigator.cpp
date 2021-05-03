@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -101,13 +101,6 @@ namespace {
         "Mouse Sensitivity",
         "Determines the sensitivity of the camera motion thorugh the mouse. The lower "
         "the sensitivity is the less impact a mouse motion will have."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo JoystickEnabledInfo = {
-        "JoystickEnabled",
-        "Joystick Control Enabled",
-        "If this is selected, a connected joystick will be used as an optional input "
-        "device. If this is deselected, any joystick input will be ignored"
     };
 
     constexpr openspace::properties::Property::PropertyInfo JoystickSensitivityInfo = {
@@ -256,7 +249,7 @@ OrbitalNavigator::OrbitalNavigator()
     , _flightDestinationDistance(FlightDestinationDistInfo, 2e8f, 0.0f, 1e10f)
     , _flightDestinationFactor(FlightDestinationFactorInfo, 1E-4, 1E-6, 0.5)
     , _applyLinearFlight(ApplyLinearFlightInfo, false)
-    , _velocitySensitivity(VelocityZoomControlInfo, 3.5f, 0.001f, 20.f)      
+    , _velocitySensitivity(VelocityZoomControlInfo, 3.5f, 0.001f, 20.f)
     , _mouseSensitivity(MouseSensitivityInfo, 15.f, 1.f, 50.f)
     , _joystickSensitivity(JoystickSensitivityInfo, 10.f, 1.0f, 50.f)
     , _websocketSensitivity(WebsocketSensitivityInfo, 5.f, 1.0f, 50.f)
@@ -466,8 +459,8 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     if (_applyLinearFlight) {
         // Calculate a position handle based on the camera position in world space
         glm::dvec3 camPosToAnchorPosDiff = prevCameraPosition - anchorPos;
-        // Use the boundingsphere to get an approximate distance to the node surface
-        double nodeRadius = static_cast<double>(_anchorNode->boundingSphere());
+        // Use the interaction sphere to get an approximate distance to the node surface
+        double nodeRadius = static_cast<double>(_anchorNode->interactionSphere());
         double distFromCameraToFocus =
             glm::distance(prevCameraPosition, anchorPos) - nodeRadius;
 
@@ -476,7 +469,9 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
 
         // Fly towards the flight destination distance. When getting closer than
         // arrivalThreshold terminate the flight
-        if (std::fabs(distFromCameraToFocus - _flightDestinationDistance) > arrivalThreshold) {
+        if (std::fabs(distFromCameraToFocus - _flightDestinationDistance) >
+            arrivalThreshold)
+        {
             pose.position = moveCameraAlongVector(
                 pose.position,
                 distFromCameraToFocus,
@@ -1280,12 +1275,7 @@ glm::dvec3 OrbitalNavigator::moveCameraAlongVector(const glm::dvec3& camPos,
         velocity = 1.0 - destination / distFromCameraToFocus;
     }
     else { // When flying away from anchor
-        if (destination == 0.0) {
-            velocity = -1.0;
-        }
-        else {
-            velocity = distFromCameraToFocus / destination - 1.0;
-        }
+        velocity = distFromCameraToFocus / destination - 1.0;
     }
     velocity *= _velocitySensitivity * deltaTime;
 

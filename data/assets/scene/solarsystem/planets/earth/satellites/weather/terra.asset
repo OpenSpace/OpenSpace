@@ -3,7 +3,7 @@ local satelliteHelper = asset.require('util/tle_helper')
 local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 
-local url = "https://celestrak.com/satcat/tle.php?CATNR=25994"
+local url = "http://celestrak.com/satcat/tle.php?CATNR=25994"
 local identifier = "Terra"
 local filename = "Terra.txt"
 local nodes = {}
@@ -19,7 +19,7 @@ asset.onInitialize(function ()
   local Terra = {
     Identifier = "Terra",
     Parent = transforms.EarthInertial.Identifier,
-    BoundingSphere = 30,
+    InteractionSphere = 30,
     Transform = {
       Translation = {
         Type = "TLETranslation",
@@ -29,9 +29,9 @@ asset.onInitialize(function ()
         LineNumber = 1
       },
       Rotation = {
-          Type = "SpiceRotation",
-          SourceFrame = "GALACTIC",
-          DestinationFrame = "J2000",
+        Type = "SpiceRotation",
+        SourceFrame = "GALACTIC",
+        DestinationFrame = "J2000",
       }
     },
     Tag = { "earth_satellite", "Terra" },
@@ -45,20 +45,20 @@ asset.onInitialize(function ()
     Identifier = identifier .. "_trail",
     Parent = transforms.EarthInertial.Identifier,
     Renderable = {
-        Type = "RenderableTrailOrbit",
-        Translation = {
-          Type = "TLETranslation",
-          Body = identifier,
-          Observer = transforms.EarthInertial.Identifier,
-          File = path,
-          LineNumber = 1,
-          RenderBinMode = "PostDeferredTransparent"
-        },
-        Color = { 0.9, 0.6715, 0.0 },
-        Fade = 1.5,
-        Period = period,
-        Resolution = 320
+      Type = "RenderableTrailOrbit",
+      Translation = {
+        Type = "TLETranslation",
+        Body = identifier,
+        Observer = transforms.EarthInertial.Identifier,
+        File = path,
+        LineNumber = 1,
+        RenderBinMode = "PostDeferredTransparent"
       },
+      Color = { 0.9, 0.6715, 0.0 },
+      Fade = 1.5,
+      Period = period,
+      Resolution = 320
+    },
     Tag = { "earth_satellite", "Terra" },
     GUI = {
       Name = "Terra Trail",
@@ -71,27 +71,27 @@ asset.onInitialize(function ()
       Parent = Terra.Identifier,
 
       Renderable = {
-          Enabled = false,
-          Type = "RenderableLabels",
-          LabelText = "SNPP",
-          FontSize = 100.0,
-          LabelSize = 4.0,
-          LabelMaxSize = 100.0,
-          LabelMinSize = 1.0,
-          LabelOrientationOption = "Camera View Direction",
-          BlendMode = "Additive",
-          EnableFading = true,
-          FadeStartUnit = "au",
-          FadeStartDistance = 0.15,
-          FadeStartSpeed = 1.0,
-          FadeEndUnit = "au",
-          FadeEndDistance = 15.0,
-          FadeEndSpeed = 25.0
+        Enabled = false,
+        Type = "RenderableLabels",
+        LabelText = "SNPP",
+        FontSize = 100.0,
+        LabelSize = 4.0,
+        LabelMaxSize = 100.0,
+        LabelMinSize = 1.0,
+        LabelOrientationOption = "Camera View Direction",
+        BlendMode = "Additive",
+        EnableFading = true,
+        FadeStartUnit = "au",
+        FadeStartDistance = 0.15,
+        FadeStartSpeed = 1.0,
+        FadeEndUnit = "au",
+        FadeEndDistance = 15.0,
+        FadeEndSpeed = 25.0
       },
       Tag = { "solarsystem_labels" },
       GUI = {
-          Name = "Terra Label",
-          Path = "/Solar System/Planets/Earth"
+        Name = "Terra Label",
+        Path = "/Solar System/Planets/Earth"
       }
   }
 
@@ -112,11 +112,11 @@ end)
 
 
 asset.meta = {
-    Name = "Terra",
-    Version = "1.0",
-    Description = [[ Trail for Terra. trail from
+  Name = "Terra",
+  Version = "1.0",
+  Description = [[ Trail for Terra. trail from
     CELESTRAK. Can be used in conjuntion with Terra Modis (Temporal) layer for Earth]],
-    Author = "OpenSpace Team",
-    URL = "https://celestrak.com/",
-    License = "NASA"
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.com/",
+  License = "NASA"
 }

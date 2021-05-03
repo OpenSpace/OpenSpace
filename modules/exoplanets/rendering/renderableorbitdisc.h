@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,14 +29,13 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/texturecomponent.h>
+#include <openspace/util/planegeometry.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/uniformcache.h>
 
 namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl {
-    class ProgramObject;
-} // namespace ghoul::opengl
+namespace ghoul::opengl { class ProgramObject; } // namespace ghoul::opengl
 
 namespace openspace {
 
@@ -46,6 +45,7 @@ class RenderableOrbitDisc : public Renderable {
 public:
     RenderableOrbitDisc(const ghoul::Dictionary& dictionary);
 
+    void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
 
@@ -57,8 +57,8 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    void loadTexture();
-    void createPlane();
+    // Computes the size of the plane quad using the relevant properties
+    float planeSize() const;
 
     properties::StringProperty _texturePath;
     properties::FloatProperty _size;
@@ -66,15 +66,13 @@ private:
     properties::Vec2Property _offset;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
-    UniformCache(modelViewProjection, textureOffset, opacity,
-         texture, eccentricity, semiMajorAxis) _uniformCache;
-    std::unique_ptr<ghoul::opengl::Texture> _texture = nullptr;
-    std::unique_ptr<ghoul::filesystem::File> _textureFile;
+    UniformCache(modelViewProjection, offset, opacity, texture,
+        eccentricity, semiMajorAxis) _uniformCache;
 
-    bool _textureIsDirty = false;
+    std::unique_ptr<PlaneGeometry> _plane;
+    std::unique_ptr<TextureComponent> _texture;
+
     bool _planeIsDirty = false;
-    GLuint _quad = 0;
-    GLuint _vertexPositionBuffer = 0;
 };
 
 } // namespace openspace

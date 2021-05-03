@@ -10,218 +10,218 @@ local parentSpice = "JUPITER BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_ananke"}
 local trailColor = { 0.4, 0.3, 0.01 }
 local trailTags = {
-    "moonTrail_solarSystem",
-    "moonTrail_giants",
-    "moonTrail_jupiter",
-    "moonTrail_minor"
+  "moonTrail_solarSystem",
+  "moonTrail_giants",
+  "moonTrail_jupiter",
+  "moonTrail_minor"
 }
 
 local anankeGroup = {
-    {
-        Identifier = "S2010J2",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "552",
-        Radii = { 1000, 1000, 1000 },
-        Tags = tags,
-        TrailTags = trailTags,
-        GUI = {
-            Name = "S/2010 J 2",
-            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 588.36,
-        Kernels = kernel
+  {
+    Identifier = "S2010J2",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
     },
-    {
-        Identifier = "Thelxinoe",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "THELXINOE",
-        Radii = { 2000, 2000, 2000 },
-        Tags = tags,
-        TrailTags = trailTags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 597.61,
-        Kernels = kernel
+    Spice = "552",
+    Radii = { 1000, 1000, 1000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2010 J 2",
+      Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
     },
-    {
-        Identifier = "Euanthe",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "EUANTHE",
-        Radii = { 3000, 3000, 3000 },
-        Tags = tags,
-        TrailTags = trailTags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 598.09,
-        Kernels = kernel
+    TrailColor = trailColor,
+    OrbitPeriod = 588.36,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Thelxinoe",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
     },
-    {
-        Identifier = "Iocaste",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "IOCASTE",
-        Radii = { 5000, 5000, 5000 },
-        Tags = tags,
-        TrailTags = trailTags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 609.43,
-        Kernels = kernel
+    Spice = "THELXINOE",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
     },
-    {
-        Identifier = "S2003J16",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "55068",
-        Radii = { 2000, 2000, 2000 },
-        Tags = tags,
-        TrailTags = trailTags,
-        GUI = {
-            Name = "S/2003 J 16",
-            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 610.36,
-        Kernels = kernel
+    TrailColor = trailColor,
+    OrbitPeriod = 597.61,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Euanthe",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
     },
-    {
-        Identifier = "Praxidike",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "PRAXIDIKE",
-        Radii = { 7000, 7000, 7000 },
-        Tags = tags,
-        TrailTags = trailTags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 613.90,
-        Kernels = kernel
+    Spice = "EUANTHE",
+    Radii = { 3000, 3000, 3000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
     },
-    {
-        Identifier = "Harpalyke",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "HARPALYKE",
-        Radii = { 4000, 4000, 4000 },
-        Tags = tags,
-        TrailTags = trailTags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 624.54,
-        Kernels = kernel
+    TrailColor = trailColor,
+    OrbitPeriod = 598.09,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Iocaste",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
     },
-    {
-        Identifier = "Mneme",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "MNEME",
-        Radii = { 2000, 2000, 2000 },
-        Tags = tags,
-        TrailTags = trailTags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 627.48,
-        Kernels = kernel
+    Spice = "IOCASTE",
+    Radii = { 5000, 5000, 5000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
     },
-    {
-        Identifier = "Hermippe",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "HERMIPPE",
-        Radii = { 4000, 4000, 4000 },
-        Tags = tags,
-        TrailTags = trailTags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 629.81,
-        Kernels = kernel
+    TrailColor = trailColor,
+    OrbitPeriod = 609.43,
+    Kernels = kernel
+  },
+  {
+    Identifier = "S2003J16",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
     },
-    {
-        Identifier = "Thyone",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "THYONE",
-        Radii = { 4000, 4000, 4000 },
-        Tags = tags,
-        TrailTags = trailTags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 639.80,
-        Kernels = kernel
+    Spice = "55068",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2003 J 16",
+      Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
     },
-    {
-        Identifier = "Ananke",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "ANANKE",
-        Radii = { 28000, 28000, 28000 },
-        TrailTags = trailTags,
-        Tags = tags,
-        GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 640.38,
-        Kernels = kernel
-    }
+    TrailColor = trailColor,
+    OrbitPeriod = 610.36,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Praxidike",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "PRAXIDIKE",
+    Radii = { 7000, 7000, 7000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 613.90,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Harpalyke",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "HARPALYKE",
+    Radii = { 4000, 4000, 4000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 624.54,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Mneme",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "MNEME",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 627.48,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Hermippe",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "HERMIPPE",
+    Radii = { 4000, 4000, 4000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 629.81,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Thyone",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "THYONE",
+    Radii = { 4000, 4000, 4000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 639.80,
+    Kernels = kernel
+  },
+  {
+    Identifier = "Ananke",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "ANANKE",
+    Radii = { 28000, 28000, 28000 },
+    TrailTags = trailTags,
+    Tags = tags,
+    GUI = {
+      Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 640.38,
+    Kernels = kernel
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(
-    asset,
-    proceduralGlobes.createGlobes(anankeGroup)
+  asset,
+  proceduralGlobes.createGlobes(anankeGroup)
 )
 
 
 asset.meta = {
-    Name = "Jupiter Ananke Group Moons",
-    Version = "1.0",
-    Description = [[ Procedural Globe asset containing Jupiter's Ananke Group
-        moons: S2010J2, Thelxinoe, Euanthe, Iocaste, S2003J16, Praxidike, Harpalyke,
-        Mneme, Hermippe, Thyone, and Ananke. Blank globes
-        and SPICE trails are generated for each moon.]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license"
+  Name = "Jupiter Ananke Group Moons",
+  Version = "1.0",
+  Description = [[ Procedural Globe asset containing Jupiter's Ananke Group
+    moons: S2010J2, Thelxinoe, Euanthe, Iocaste, S2003J16, Praxidike, Harpalyke,
+    Mneme, Hermippe, Thyone, and Ananke. Blank globes
+    and SPICE trails are generated for each moon.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
 }

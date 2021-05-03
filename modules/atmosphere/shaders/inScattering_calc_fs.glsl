@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,8 +33,8 @@ uniform vec4 dhdH;
 
 //uniform sampler2D transmittanceTexture;
 
-void integrand(const float r, const float mu, const float muSun, const float nu, 
-                const float y, out vec3 S_R, out vec3 S_M) {
+void integrand(float r, float mu, float muSun, float nu, 
+               float y, out vec3 S_R, out vec3 S_M) {
   // The integral's integrand is the single inscattering radiance:
   // S[L0] = P_M*S_M[L0] + P_R*S_R[L0]
   // where S_M[L0] = T*(betaMScattering * exp(-h/H_M))*L0 and
@@ -77,8 +77,7 @@ void integrand(const float r, const float mu, const float muSun, const float nu,
   }
 }
 
-void inscatter(const float r, const float mu, const float muSun, const float nu,
-               out vec3 S_R, out vec3 S_M) {
+void inscatter(float r, float mu, float muSun, float nu, out vec3 S_R, out vec3 S_M) {
   // Let's calculate S_M and S_R by integration along the eye ray path inside
   // the atmosphere, given a position r, a view angle (cosine) mu, a sun
   // position angle (cosine) muSun, and the angle (cosine) between the sun position
@@ -108,7 +107,7 @@ void inscatter(const float r, const float mu, const float muSun, const float nu,
   S_M *= betaMieScattering * (rayDist / (2.0f * float(INSCATTER_INTEGRAL_SAMPLES)));
 }
 
-void main(void) {
+void main() {
   vec3 S_R; // First Order Rayleigh InScattering 
   vec3 S_M; // First Order Mie InScattering
   float mu, muSun, nu; // parametrization angles

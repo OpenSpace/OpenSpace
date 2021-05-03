@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -201,21 +201,8 @@ private:
     properties::BoolProperty _showCameraInfo;
 
     properties::BoolProperty _applyWarping;
+    properties::BoolProperty _screenshotUseDate;
     properties::BoolProperty _showFrameInformation;
-#ifdef OPENSPACE_WITH_INSTRUMENTATION
-    struct FrameInfo {
-        uint64_t iFrame;
-        double deltaTime;
-        double avgDeltaTime;
-    };
-
-    struct {
-        std::vector<FrameInfo> frames;
-        uint64_t lastSavedFrame = 0;
-        uint16_t saveEveryNthFrame = 2048;
-    } _frameInfo;
-    properties::BoolProperty _saveFrameInformation;
-#endif // OPENSPACE_WITH_INSTRUMENTATION
     properties::BoolProperty _disableMasterRendering;
 
     properties::FloatProperty _globalBlackOutFactor;

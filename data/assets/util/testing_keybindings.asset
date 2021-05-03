@@ -4,20 +4,20 @@ local sceneHelper = asset.require('./scene_helper')
 local propertyHelper = asset.require('./property_helper')
 
 local Keybindings = {
-    {
-        Key = "F7",
-        Name = "Take Screenshot",
-        Command = "openspace.takeScreenshot()",
-        Documentation = "Saves the contents of the screen to a file in the ${SCREENSHOTS} directory.",
-        GuiPath = "/Rendering",
-        Local = true
-    }
+  {
+    Key = "F7",
+    Name = "Take Screenshot",
+    Command = "openspace.takeScreenshot()",
+    Documentation = "Saves the contents of the screen to a file in the ${SCREENSHOTS} directory.",
+    GuiPath = "/Rendering",
+    Local = true
+  }
 }
 
 asset.onInitialize(function()
-    Keys = sceneHelper.bindKeys(Keybindings)
+  Keys = sceneHelper.bindKeys(Keybindings)
 end)
 
 asset.onDeinitialize(function ()
-    sceneHelper.unbindKeys(Keybindings)
+  sceneHelper.unbindKeys(Keybindings)
 end)

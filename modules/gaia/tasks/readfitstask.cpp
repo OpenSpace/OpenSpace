@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,61 +36,67 @@
 
 #include <fstream>
 #include <set>
+#include <optional>
 
 namespace {
-    constexpr const char* KeyInFileOrFolderPath = "InFileOrFolderPath";
-    constexpr const char* KeyOutFileOrFolderPath = "OutFileOrFolderPath";
-    constexpr const char* KeySingleFileProcess = "SingleFileProcess";
-    constexpr const char* KeyThreadsToUse = "ThreadsToUse";
-    constexpr const char* KeyFirstRow = "FirstRow";
-    constexpr const char* KeyLastRow = "LastRow";
     constexpr const char* KeyFilterColumnNames = "FilterColumnNames";
 
     constexpr const char* _loggerCat = "ReadFitsTask";
+
+    struct [[codegen::Dictionary(ReadFitsTask)]] Parameters {
+        // If SingleFileProcess is set to true then this specifies the path to a single
+        // FITS file that will be read. Otherwise it specifies the path to a folder with
+        // multiple FITS files that are to be read
+        std::string inFileOrFolderPath;
+
+        // If SingleFileProcess is set to true then this specifies the name (including
+        // entire path) to the output file. Otherwise it specifies the path to the output
+        // folder which to export binary star data to
+        std::string outFileOrFolderPath;
+
+        // If true then task will read from a single FITS file and output a single binary
+        // file. If false then task will read all files in specified folder and output
+        // multiple files sorted by location
+        std::optional<bool> singleFileProcess;
+
+        // Defines how many threads to use when reading from multiple files
+        std::optional<int> threadsToUse [[codegen::greater(1)]];
+
+        // Defines the first row that will be read from the specified FITS file(s). If not
+        // defined then reading will start at first row
+        std::optional<int> firstRow;
+
+        // Defines the last row that will be read from the specified FITS file(s). If not
+        // defined (or less than FirstRow) then full file(s) will be read
+        std::optional<int> lastRow;
+
+        // A list of strings with the names of all the additional columns that are to be
+        // read from the specified FITS file(s). These columns can be used for filtering
+        // while constructing Octree later
+        std::optional<std::vector<std::string>> filterColumnNames;
+    };
+#include "readfitstask_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 ReadFitsTask::ReadFitsTask(const ghoul::Dictionary& dictionary) {
-    openspace::documentation::testSpecificationAndThrow(
-        documentation(),
-        dictionary,
-        "ReadFitsTask"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _inFileOrFolderPath = absPath(dictionary.value<std::string>(KeyInFileOrFolderPath));
-    _outFileOrFolderPath = absPath(dictionary.value<std::string>(KeyOutFileOrFolderPath));
+    _inFileOrFolderPath = absPath(p.inFileOrFolderPath);
+    _outFileOrFolderPath = absPath(p.outFileOrFolderPath);
+    _singleFileProcess = p.singleFileProcess.value_or(_singleFileProcess);
+    _threadsToUse = p.threadsToUse.value_or(_threadsToUse);
+    _firstRow = p.firstRow.value_or(_firstRow);
+    _lastRow = p.lastRow.value_or(_lastRow);
 
-    if (dictionary.hasKey(KeySingleFileProcess)) {
-        _singleFileProcess = dictionary.value<bool>(KeySingleFileProcess);
-    }
-
-    if (dictionary.hasKey(KeyThreadsToUse)) {
-        _threadsToUse = static_cast<size_t>(dictionary.value<double>(KeyThreadsToUse));
-        if (_threadsToUse < 1) {
-            LINFO(fmt::format(
-                "User defined ThreadsToUse was: {}. Will be set to 1", _threadsToUse
-            ));
-            _threadsToUse = 1;
-        }
-    }
-
-    if (dictionary.hasKey(KeyFirstRow)) {
-        _firstRow = static_cast<int>(dictionary.value<double>(KeyFirstRow));
-    }
-
-    if (dictionary.hasKey(KeyLastRow)) {
-        _lastRow = static_cast<int>(dictionary.value<double>(KeyLastRow));
-    }
-
-
-    if (dictionary.hasKey(KeyFilterColumnNames)) {
+    if (p.filterColumnNames.has_value()) {
         ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>(KeyFilterColumnNames);
 
         // Ugly fix for ASCII sorting when there are more columns read than 10.
         std::set<int> intKeys;
-        for (const std::string& key : d.keys()) {
-            intKeys.insert(std::stoi(key));
+        for (std::string_view key : d.keys()) {
+            intKeys.insert(std::stoi(std::string(key)));
         }
 
         for (int key : intKeys) {
@@ -322,71 +328,9 @@ int ReadFitsTask::writeOctantToFile(const std::vector<float>& octantData, int in
 }
 
 documentation::Documentation ReadFitsTask::Documentation() {
-    using namespace documentation;
-    return {
-        "ReadFitsFile",
-        "gaiamission_fitsfiletorawdata",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("ReadFitsTask"),
-                Optional::No
-            },
-            {
-                KeyInFileOrFolderPath,
-                new StringVerifier,
-                Optional::No,
-                "If SingleFileProcess is set to true then this specifies the path to a "
-                "single FITS file that will be read. Otherwise it specifies the path to "
-                "a folder with multiple FITS files that are to be read.",
-            },
-            {
-                KeyOutFileOrFolderPath,
-                new StringVerifier,
-                Optional::No,
-                "If SingleFileProcess is set to true then this specifies the name "
-                "(including entire path) to the output file. Otherwise it specifies the "
-                "path to the output folder which to export binary star data to.",
-            },
-            {
-                KeySingleFileProcess,
-                new BoolVerifier,
-                Optional::Yes,
-                "If true then task will read from a single FITS file and output a single "
-                "binary file. If false then task will read all files in specified folder "
-                "and output multiple files sorted by location."
-            },
-            {
-                KeyThreadsToUse,
-                new IntVerifier,
-                Optional::Yes,
-                "Defines how many threads to use when reading from multiple files."
-            },
-            {
-                KeyFirstRow,
-                new IntVerifier,
-                Optional::Yes,
-                "Defines the first row that will be read from the specified FITS "
-                "file(s). If not defined then reading will start at first row.",
-            },
-            {
-                KeyLastRow,
-                new IntVerifier,
-                Optional::Yes,
-                "Defines the last row that will be read from the specified FITS file(s). "
-                "If not defined (or less than FirstRow) then full file(s) will be read.",
-            },
-            {
-                KeyFilterColumnNames,
-                new StringListVerifier,
-                Optional::Yes,
-                "A list of strings with the names of all the additional columns that are "
-                "to be read from the specified FITS file(s). These columns can be used "
-                "for filtering while constructing Octree later.",
-            },
-
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "gaiamission_fitsfiletorawdata";
+    return doc;
 }
 
 } // namespace openspace

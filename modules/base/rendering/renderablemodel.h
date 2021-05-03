@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,7 +33,9 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <openspace/util/distanceconversion.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
+#include <ghoul/io/model/modelreader.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <memory>
 
@@ -42,6 +44,8 @@ namespace ghoul::opengl {
     class Texture;
 } // namespace ghoul::opengl
 
+namespace ghoul::modelgeometry { class ModelGeometry; }
+
 namespace openspace {
 
 struct RenderData;
@@ -49,7 +53,6 @@ struct UpdateData;
 class LightSource;
 
 namespace documentation { struct Documentation; }
-namespace modelgeometry { class ModelGeometry; }
 
 class RenderableModel : public Renderable {
 public:
@@ -68,7 +71,21 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    std::vector<ghoul::mm_unique_ptr<modelgeometry::ModelGeometry>> _geometry;
+    enum class AnimationMode {
+        Once = 0,
+        LoopFromStart,
+        LoopInfinitely,
+        BounceFromStart,
+        BounceInfinitely
+    };
+
+    std::unique_ptr<ghoul::modelgeometry::ModelGeometry> _geometry;
+    double _modelScale = 1.0;
+    bool _forceRenderInvisible = false;
+    bool _notifyInvisibleDropped = true;
+    std::string _animationStart;
+    AnimationMode _animationMode = AnimationMode::Once;
+    properties::BoolProperty _enableAnimation;
 
     properties::FloatProperty _ambientIntensity;
 
@@ -86,8 +103,8 @@ private:
 
     ghoul::opengl::ProgramObject* _program = nullptr;
     UniformCache(opacity, nLightSources, lightDirectionsViewSpace, lightIntensities,
-        modelViewTransform, normalTransform, projectionTransform, 
-        performShading, texture, ambientIntensity, diffuseIntensity, 
+        modelViewTransform, normalTransform, projectionTransform,
+        performShading, ambientIntensity, diffuseIntensity,
         specularIntensity, opacityBlending) _uniformCache;
 
     std::vector<std::unique_ptr<LightSource>> _lightSources;

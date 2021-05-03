@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,21 +28,13 @@
 #include <ghoul/glm.h>
 #include <memory>
 #include <string>
+#include <vector>
 
-#ifdef WIN32
-#pragma warning (push)
-#pragma warning (disable : 4619) // #pragma warning: there is no warning number '4619'
-#pragma warning (disable : 4675) // #pragma warning: there is no warning number '4675'
-#pragma warning (disable : 4800) // #pragma warning: there is no warning number '4800'
-#endif // WIN32
-
-#include <ccmc/Kameleon.h>
-
-#ifdef WIN32
-#pragma warning (pop)
-#endif // WIN32
-
-namespace ccmc { class Interpolator; }
+namespace ccmc {
+    class Attribute;
+    class Interpolator;
+    class Kameleon;
+} // namespce ccmc
 
 namespace ghoul { class Dictionary; }
 namespace openspace::volume { template <typename T> class RawVolume; }
@@ -52,6 +44,7 @@ namespace openspace::kameleonvolume {
 class KameleonVolumeReader {
 public:
     KameleonVolumeReader(std::string path);
+    ~KameleonVolumeReader();
 
     std::unique_ptr<volume::RawVolume<float>> readFloatVolume(
         const glm::uvec3& dimensions, const std::string& variable,
@@ -83,7 +76,7 @@ private:
         const std::string& key, ccmc::Attribute& attr);
 
     std::string _path;
-    ccmc::Kameleon _kameleon;
+    std::unique_ptr<ccmc::Kameleon> _kameleon;
     std::unique_ptr<ccmc::Interpolator> _interpolator;
 };
 

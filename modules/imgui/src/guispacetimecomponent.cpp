@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -80,7 +80,9 @@ GuiSpaceTimeComponent::GuiSpaceTimeComponent()
 void GuiSpaceTimeComponent::render() {
     ImGui::SetNextWindowCollapsed(_isCollapsed);
     bool v = _isEnabled;
-    ImGui::Begin(guiName().c_str(), &v, Size, 0.5f, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::SetNextWindowSize(Size, ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowBgAlpha(0.5f);
+    ImGui::Begin(guiName().c_str(), &v, ImGuiWindowFlags_AlwaysAutoResize);
     _isEnabled = v;
     _isCollapsed = ImGui::IsWindowCollapsed();
 
@@ -366,7 +368,7 @@ void GuiSpaceTimeComponent::render() {
             &_deltaTime,
             1.f,
             100.f,
-            -1,
+            "%.8f",
             ImGuiInputTextFlags_EnterReturnsTrue
         );
         ImGui::SameLine();
@@ -393,7 +395,7 @@ void GuiSpaceTimeComponent::render() {
             // value to the new unit
 
             _deltaTime = static_cast<float>(
-                convertTime(dt, TimeUnit::Second, static_cast<TimeUnit>(_deltaTimeUnit))
+                convertTime(dt, TimeUnit::Second, _deltaTimeUnit)
             );
         }
     }
@@ -461,7 +463,7 @@ void GuiSpaceTimeComponent::render() {
             const double newDeltaTime = convertTime(
                 _deltaTime +
                     _accelerationDelta * global::windowDelegate->deltaTime() * 10,
-                static_cast<TimeUnit>(_deltaTimeUnit),
+                _deltaTimeUnit,
                 TimeUnit::Second
             );
 

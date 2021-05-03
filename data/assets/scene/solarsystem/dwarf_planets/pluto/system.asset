@@ -10,11 +10,11 @@ asset.require('./minor/styx')
 
 
 asset.meta = {
-    Name = "Pluto System",
-    Version = "1.0",
-    Description = [[ Meta asset for the Pluto system, containing : Pluto, Pluto Trail,
-        Charon, Charon Trail, Hydra, Kerberos, Nix, and Styx]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license"
+  Name = "Pluto System",
+  Version = "1.0",
+  Description = [[ Meta asset for the Pluto system, containing : Pluto, Pluto Trail,
+    Charon, Charon Trail, Hydra, Kerberos, Nix, and Styx]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
 }

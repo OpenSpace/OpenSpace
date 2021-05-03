@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -56,7 +56,7 @@ public:
      *
      * \param evt #QKeyEvent object for the key press event
      */
-    void keyPressEvent(QKeyEvent* evt);
+    virtual void keyPressEvent(QKeyEvent* evt) override;
 
 private slots:
     void listItemSelected();
@@ -66,7 +66,15 @@ private slots:
     void listItemCancelSave();
     void transitionToEditMode();
     void parseSelections();
+    void chooseScripts();
     void keySelected(int index);
+
+    /**
+     * Adds scripts to the _scriptEdit from outside dialogs
+     *
+     * \param scripts #std::string scripts to be appended
+     */
+    void appendScriptsToKeybind(std::string scripts);
 
 private:
     void createWidgets();
@@ -99,6 +107,7 @@ private:
     
     QPushButton* _addButton = nullptr;
     QPushButton* _removeButton = nullptr;
+    QPushButton* _chooseScriptsButton = nullptr;
     QPushButton* _saveButton = nullptr;
     QPushButton* _cancelButton = nullptr;
     QDialogButtonBox* _buttonBox = nullptr;

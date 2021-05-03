@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,6 +31,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec3property.h>
 #include <openspace/util/updatestructures.h>
 
 #include <ghoul/opengl/textureunit.h>
@@ -42,7 +43,7 @@
 namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
-}
+} // namespace ghoul::opengl
 
 namespace openspace {
 
@@ -86,46 +87,26 @@ private:
     glm::dmat4 computeModelTransformMatrix(const openspace::TransformData& transformData);
     void updateAtmosphereParameters();
 
-    properties::FloatProperty _atmosphereHeightP;
-    properties::FloatProperty _groundAverageReflectanceP;
-    properties::FloatProperty _groundRadianceEmittionP;
-    properties::FloatProperty _rayleighHeightScaleP;
-    properties::FloatProperty _rayleighScatteringCoeffXP;
-    properties::FloatProperty _rayleighScatteringCoeffYP;
-    properties::FloatProperty _rayleighScatteringCoeffZP;
-    properties::BoolProperty  _ozoneEnabledP;
-    properties::FloatProperty _ozoneHeightScaleP;
-    properties::FloatProperty _ozoneCoeffXP;
-    properties::FloatProperty _ozoneCoeffYP;
-    properties::FloatProperty _ozoneCoeffZP;
-    properties::FloatProperty _mieHeightScaleP;
-    properties::FloatProperty _mieScatteringCoeffXP;
-    properties::FloatProperty _mieScatteringCoeffYP;
-    properties::FloatProperty _mieScatteringCoeffZP;
-    properties::FloatProperty _mieScatteringExtinctionPropCoefficientP;
-    properties::FloatProperty _mieAsymmetricFactorGP;
-    properties::FloatProperty _sunIntensityP;
-    properties::BoolProperty  _sunFollowingCameraEnabledP;
-    properties::BoolProperty  _hardShadowsEnabledP;
+    properties::FloatProperty _atmosphereHeight;
+    properties::FloatProperty _groundAverageReflectance;
+    properties::FloatProperty _groundRadianceEmission;
+    properties::FloatProperty _rayleighHeightScale;
+    properties::Vec3Property _rayleighScatteringCoeff;
+    properties::BoolProperty _ozoneEnabled;
+    properties::FloatProperty _ozoneHeightScale;
+    properties::Vec3Property _ozoneCoeff;
+    properties::FloatProperty _mieHeightScale;
+    properties::Vec3Property _mieScatteringCoeff;
+    properties::FloatProperty _mieScatteringExtinctionPropCoefficient;
+    properties::FloatProperty _miePhaseConstant;
+    properties::FloatProperty _sunIntensity;
+    properties::BoolProperty _sunFollowingCameraEnabled;
+    properties::BoolProperty _hardShadowsEnabled;
 
-    bool _atmosphereEnabled = false;
-    bool _ozoneLayerEnabled = false;
-    bool _sunFollowingCameraEnabled = false;
-    float _atmosphereRadius = 0.f;
-    float _atmospherePlanetRadius = 0.f;
-    float _planetAverageGroundReflectance = 0.f;
-    float _planetGroundRadianceEmittion = 0.f;
-    float _rayleighHeightScale = 0.f;
-    float _ozoneHeightScale = 0.f;
-    float _mieHeightScale = 0.f;
-    float _miePhaseConstant = 0.f;
-    float _sunRadianceIntensity = 5.f;
+    float _planetRadius = 0.f;
     float _mieScattExtPropCoefProp = 1.f;
 
     glm::vec3 _mieExtinctionCoeff = glm::vec3(0.f);
-    glm::vec3 _rayleighScatteringCoeff = glm::vec3(0.f);
-    glm::vec3 _ozoneExtinctionCoeff = glm::vec3(0.f);
-    glm::vec3 _mieScatteringCoeff = glm::dvec3(0.f);
 
     // Atmosphere Debug
     bool _saveCalculationsToTexture = false;
@@ -134,9 +115,8 @@ private:
     std::unique_ptr<AtmosphereDeferredcaster> _deferredcaster;
 
     bool _shadowEnabled = false;
-    bool _hardShadows = false;
-
-    glm::dmat3 _stateMatrix = glm::dmat3(1.0);
+    bool _deferredCasterNeedsUpdate = false;
+    bool _deferredCasterNeedsCalculation = false;
 
     std::vector<ShadowConfiguration> _shadowConfArray;
 };

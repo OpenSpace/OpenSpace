@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2020                                                                #
+# Copyright (c) 2014-2021                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -29,5 +29,7 @@ add_library(Imgui
     ${PROJECT_SOURCE_DIR}/imgui.cpp
     ${PROJECT_SOURCE_DIR}/imgui_demo.cpp
     ${PROJECT_SOURCE_DIR}/imgui_draw.cpp
+    ${PROJECT_SOURCE_DIR}/imgui_tables.cpp
+    ${PROJECT_SOURCE_DIR}/imgui_widgets.cpp
 )
 target_include_directories(Imgui PUBLIC ${PROJECT_SOURCE_DIR})

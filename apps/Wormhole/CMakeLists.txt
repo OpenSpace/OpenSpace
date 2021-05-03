@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2020                                                                #
+# Copyright (c) 2014-2021                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -38,7 +38,7 @@ create_new_application(
   ${CMAKE_CURRENT_SOURCE_DIR}/openspace.icns
 )
 
-target_link_libraries(Wormhole PUBLIC openspace-core)
+target_link_libraries(Wormhole PRIVATE openspace-core openspace-module-collection)
 
 # Web Browser and Web gui
 # Why not put these in the module's path? Because they do not have access to the

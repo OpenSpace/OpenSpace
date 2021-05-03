@@ -4,65 +4,65 @@ local moon_asset = asset.require('scene/solarsystem/planets/earth/moon/moon')
 local models = asset.require('./boulder_models').models
 
 local LightSources = {
-    {
-        Type = "SceneGraphLightSource",
-        Identifier = "Sun",
-        Node = sun_transforms.SolarSystemBarycenter.Identifier,
-        Intensity = 1.0
-    },
-    {
-        Identifier = "Camera",
-        Type = "CameraLightSource",
-        Intensity = 0.5
-    }
+  {
+    Type = "SceneGraphLightSource",
+    Identifier = "Sun",
+    Node = sun_transforms.SolarSystemBarycenter.Identifier,
+    Intensity = 1.0
+  },
+  {
+    Identifier = "Camera",
+    Type = "CameraLightSource",
+    Intensity = 0.5
+  }
 }
 
 local Station7BoulderHolder = {
-    Identifier = "Station_7_Boulder",
-    Parent = moon_asset.Moon.Identifier,
-    Transform = {
-        Translation = {
-            Type = "GlobeTranslation",
-            Globe = moon_asset.Moon.Identifier,
-            Longitude = -360+30.8165882,
-            Latitude = 20.2908556,
-            Altitude = -2593.5,
-            UseHeightMap = true
-        }
-    },
-    GUI = {
-        Name = "Station 7 Boulder",
-        Path = "/Solar System/Missions/Apollo/17/Station 7"
+  Identifier = "Station_7_Boulder",
+  Parent = moon_asset.Moon.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = moon_asset.Moon.Identifier,
+      Longitude = -360+30.8165882,
+      Latitude = 20.2908556,
+      Altitude = -2593.5,
+      UseHeightMap = true
     }
+  },
+  GUI = {
+    Name = "Station 7 Boulder",
+    Path = "/Solar System/Missions/Apollo/17/Station 7"
+  }
 }
 
 local Station7BoulderModel = {
-    Identifier = "Station7BoulderModel",
-    Parent = Station7BoulderHolder.Identifier,
-    Transform = {
-          Scale = {
-            Type = "StaticScale",
-            Scale = 0.1
-        },
+  Identifier = "Station7BoulderModel",
+  Parent = Station7BoulderHolder.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 0.1
     },
-    Renderable = {
-        Type = "RenderableModel",
-        Geometry = {{
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/b7model.obj",
-            ColorTexture = models .. "/b7model_u1_v1.jpeg"
-        }},
-        RotationVector = { 1.945950,274.378387,212.903214 },
-        LightSources = LightSources,
-        PerformShading = false,
-        DisableFaceCulling = true
-    },
-    GUI = {
-        Name = "Station 7 Boulder Model",
-        Path = "/Solar System/Missions/Apollo/17/Station 7"
-    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    Geometry = {{
+      Type = "MultiModelGeometry",
+      GeometryFile = models .. "/b7model.obj",
+      ColorTexture = models .. "/b7model_u1_v1.jpeg"
+    }},
+    RotationVector = { 1.945950,274.378387,212.903214 },
+    LightSources = LightSources,
+    PerformShading = false,
+    DisableFaceCulling = true
+  },
+  GUI = {
+    Name = "Station 7 Boulder Model",
+    Path = "/Solar System/Missions/Apollo/17/Station 7"
+  }
 }
 
 asset_helper.registerSceneGraphNodesAndExport(asset, {
-    Station7BoulderHolder, Station7BoulderModel
+  Station7BoulderHolder, Station7BoulderModel
 })

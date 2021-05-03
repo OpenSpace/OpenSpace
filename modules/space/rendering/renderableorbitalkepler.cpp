@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,17 +45,21 @@
 #include <vector>
 
 namespace {
-    constexpr const char* ProgramName = "OrbitalKepler";
     constexpr const char* _loggerCat = "OrbitalKepler";
-    constexpr const char* KeyFile = "Path";
-    constexpr const char* KeyLineNum = "LineNumber";
+    constexpr const char* ProgramName = "OrbitalKepler";
 
     // Fragile! Keep in sync with documentation
-    const std::map<std::string, openspace::Renderable::RenderBin> RenderBinModeConversion = {
+    const std::map<std::string, openspace::Renderable::RenderBin> RenderBinConversion = {
         { "Background", openspace::Renderable::RenderBin::Background },
         { "Opaque", openspace::Renderable::RenderBin::Opaque },
-        { "PreDeferredTransparent", openspace::Renderable::RenderBin::PreDeferredTransparent},
-        { "PostDeferredTransparent", openspace::Renderable::RenderBin::PostDeferredTransparent}
+        {
+            "PreDeferredTransparent",
+            openspace::Renderable::RenderBin::PreDeferredTransparent
+        },
+        {
+            "PostDeferredTransparent",
+            openspace::Renderable::RenderBin::PostDeferredTransparent
+        }
     };
 
     constexpr const std::array<int, 36> LeapYears = {
@@ -109,62 +113,6 @@ namespace {
         LeapSecond{ 2012, 183 },
         LeapSecond{ 2015, 182 },
         LeapSecond{ 2017,   1 }
-    };
-
-    static const openspace::properties::Property::PropertyInfo PathInfo = {
-        "Path",
-        "Path",
-        "The file path to the data file to read"
-    };
-    static const openspace::properties::Property::PropertyInfo SegmentQualityInfo = {
-        "SegmentQuality",
-        "Segment Quality",
-        "A segment quality value for the orbital trail. A value from 1 (lowest) to "
-        "10 (highest) that controls the number of line segments in the rendering of the "
-        "orbital trail. This does not control the direct number of segments because "
-        "these automatically increase according to the eccentricity of the orbit."
-    };
-    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
-        "LineWidth",
-        "Line Width",
-        "This value specifies the line width of the trail if the selected rendering "
-        "method includes lines. If the rendering mode is set to Points, this value is "
-        "ignored."
-    };
-    constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
-        "Color",
-        "Color",
-        "This value determines the RGB main color for the lines and points of the trail."
-    };
-    constexpr openspace::properties::Property::PropertyInfo TrailFadeInfo = {
-        "TrailFade",
-        "Trail Fade",
-        "This value determines how fast the trail fades and is an appearance property. "
-    };
-    static const openspace::properties::Property::PropertyInfo UpperLimitInfo = {
-        "UpperLimit",
-        "Upper Limit",
-        "Upper limit on the number of objects for this renderable, regardless of "
-        "how many objects are contained in the data file. Produces an evenly-distributed"
-        "sample from the data file."
-    };
-    static const openspace::properties::Property::PropertyInfo StartRenderIdxInfo = {
-        "StartRenderIdx",
-        "Starting Index of Render",
-        "Index of object in renderable group to start rendering (all prior objects will "
-        "be ignored)."
-    };
-    static const openspace::properties::Property::PropertyInfo RenderSizeInfo = {
-        "RenderSizeInfo",
-        "Size of Render Block",
-        "Number of objects to render sequentially from StartRenderIdx"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo RenderBinModeInfo = {
-        "RenderBinMode",
-        "RenderBin Mode",
-        "Determines if the trails will be rendered after all other elements, including"
-        "atmospheres if needed."
     };
 
     // Count the number of full days since the beginning of 2000 to the beginning of
@@ -235,9 +183,89 @@ namespace {
         return dayCount;
     }
 
+    static const openspace::properties::Property::PropertyInfo PathInfo = {
+        "Path",
+        "Path",
+        "The file path to the data file to read"
+    };
+    static const openspace::properties::Property::PropertyInfo SegmentQualityInfo = {
+        "SegmentQuality",
+        "Segment Quality",
+        "A segment quality value for the orbital trail. A value from 1 (lowest) to "
+        "10 (highest) that controls the number of line segments in the rendering of the "
+        "orbital trail. This does not control the direct number of segments because "
+        "these automatically increase according to the eccentricity of the orbit."
+    };
+    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+        "LineWidth",
+        "Line Width",
+        "This value specifies the line width of the trail if the selected rendering "
+        "method includes lines. If the rendering mode is set to Points, this value is "
+        "ignored."
+    };
+    constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
+        "Color",
+        "Color",
+        "This value determines the RGB main color for the lines and points of the trail."
+    };
+    constexpr openspace::properties::Property::PropertyInfo TrailFadeInfo = {
+        "TrailFade",
+        "Trail Fade",
+        "This value determines how fast the trail fades and is an appearance property. "
+    };
+    static const openspace::properties::Property::PropertyInfo StartRenderIdxInfo = {
+        "StartRenderIdx",
+        "Contiguous Starting Index of Render",
+        "Index of object in renderable group to start rendering (all prior objects will "
+        "be ignored)."
+    };
+    static const openspace::properties::Property::PropertyInfo RenderSizeInfo = {
+        "RenderSize",
+        "Contiguous Size of Render Block",
+        "Number of objects to render sequentially from StartRenderIdx"
+    };
+    constexpr openspace::properties::Property::PropertyInfo RenderBinModeInfo = {
+        "RenderBinMode",
+        "RenderBin Mode",
+        "Determines if the trails will be rendered after all other elements, including"
+        "atmospheres if needed."
+    };
+
+    struct [[codegen::Dictionary(RenderableOrbitalKepler)]] Parameters {
+        // [[codegen::verbatim(PathInfo.description)]]
+        std::string path;
+
+        // [[codegen::verbatim(SegmentQualityInfo.description)]]
+        double segmentQuality;
+
+        // [[codegen::verbatim(LineWidthInfo.description)]]
+        std::optional<double> lineWidth;
+
+        // [[codegen::verbatim(LineColorInfo.description)]]
+        glm::dvec3 color [[codegen::color()]];
+
+        // [[codegen::verbatim(TrailFadeInfo.description)]]
+        std::optional<double> trailFade;
+
+        // [[codegen::verbatim(StartRenderIdxInfo.description)]]
+        std::optional<int> startRenderIdx;
+
+        // [[codegen::verbatim(RenderSizeInfo.description)]]
+        std::optional<int> renderSize;
+
+        // [[codegen::verbatim(RenderBinModeInfo.description)]]
+        std::optional<std::string> renderBinMode;
+    };
+#include "renderableorbitalkepler_codegen.cpp"
 } // namespace
 
 namespace openspace {
+
+documentation::Documentation RenderableOrbitalKepler::Documentation() {
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "space_renderableorbitalkepler";
+    return doc;
+}
 
 double RenderableOrbitalKepler::calculateSemiMajorAxis(double meanMotion) const {
     constexpr const double GravitationalConstant = 6.6740831e-11;
@@ -361,41 +389,45 @@ double RenderableOrbitalKepler::epochFromYMDdSubstring(const std::string& epochS
 RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     : Renderable(dict)
     , _segmentQuality(SegmentQualityInfo, 2, 1, 10)
-    , _path(PathInfo)
-    , _upperLimit(UpperLimitInfo, 1000, 1, 1000000)
     , _startRenderIdx(StartRenderIdxInfo, 0, 0, 1)
     , _sizeRender(RenderSizeInfo, 1, 1, 2)
+    , _path(PathInfo)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
         dict,
         "RenderableOrbitalKepler"
     );
-
     _path = dict.value<std::string>(PathInfo.identifier);
     _segmentQuality = static_cast<int>(dict.value<double>(SegmentQualityInfo.identifier));
 
-    if (dict.hasKeyAndValue<glm::vec3>(LineColorInfo.identifier)) {
-        _appearance.lineColor = dict.value<glm::vec3>(LineColorInfo.identifier);
+    if (dict.hasValue<glm::dvec3>(LineColorInfo.identifier)) {
+        _appearance.lineColor = dict.value<glm::dvec3>(LineColorInfo.identifier);
     }
 
-    _appearance.lineFade = dict.hasKeyAndValue<double>(TrailFadeInfo.identifier) ?
+    _appearance.lineFade =
+        dict.hasValue<double>(TrailFadeInfo.identifier) ?
         static_cast<float>(dict.value<double>(TrailFadeInfo.identifier)) :
         20.f;
 
-    _upperLimit = dict.hasKeyAndValue<double>(UpperLimitInfo.identifier) ?
-        static_cast<unsigned int>(dict.value<double>(UpperLimitInfo.identifier)) :
-        0u;
+    if (dict.hasValue<double>(StartRenderIdxInfo.identifier)) {
+        _startRenderIdx = static_cast<unsigned int>(
+            dict.value<double>(StartRenderIdxInfo.identifier));
+    }
+    else {
+        _startRenderIdx = 0u;
+    }
 
-    _startRenderIdx = dict.hasKeyAndValue<double>(StartRenderIdxInfo.identifier) ?
-        static_cast<unsigned int>(dict.value<double>(StartRenderIdxInfo.identifier)) :
-        0u;
+    if (dict.hasValue<double>(RenderSizeInfo.identifier)) {
+        _sizeRender = static_cast<unsigned int>(
+            dict.value<double>(RenderSizeInfo.identifier));
+    }
+    else {
+        _sizeRender = 0u;
+    }
 
-    _sizeRender = dict.hasKeyAndValue<double>(RenderSizeInfo.identifier) ?
-        static_cast<unsigned int>(dict.value<double>(RenderSizeInfo.identifier)) :
-        0u;
-
-    _appearance.lineWidth = dict.hasKeyAndValue<double>(LineWidthInfo.identifier) ?
+    _appearance.lineWidth =
+        dict.hasValue<double>(LineWidthInfo.identifier) ?
         static_cast<float>(dict.value<double>(LineWidthInfo.identifier)) :
         2.f;
 
@@ -407,25 +439,21 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     addProperty(_path);
     addProperty(_segmentQuality);
     addProperty(_opacity);
-    addProperty(_startRenderIdx);
-    addProperty(_sizeRender);
 
-    _updateStartRenderIdxSelect = std::function<void()>([this] { initializeGL(); });
-    _updateRenderSizeSelect = std::function<void()>([this] { initializeGL(); });
-    _startRenderIdxCallbackHandle = _startRenderIdx.onChange(_updateStartRenderIdxSelect);
-    _sizeRenderCallbackHandle = _sizeRender.onChange(_updateRenderSizeSelect);
-
-    if (dict.hasKeyAndValue<std::string>(RenderBinModeInfo.identifier)) {
-        openspace::Renderable::RenderBin cfgRenderBin = RenderBinModeConversion.at(
+    if (dict.hasValue<std::string>(RenderBinModeInfo.identifier)) {
+        Renderable::RenderBin cfgRenderBin = RenderBinConversion.at(
             dict.value<std::string>(RenderBinModeInfo.identifier)
         );
         setRenderBin(cfgRenderBin);
-    } else {
+    }
+    else {
         setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
     }
 }
 
 void RenderableOrbitalKepler::initializeGL() {
+    ghoul_assert(_vertexArray == 0, "Vertex array object already existed");
+    ghoul_assert(_vertexBuffer == 0, "Vertex buffer object already existed");
     glGenVertexArrays(1, &_vertexArray);
     glGenBuffers(1, &_vertexBuffer);
 
@@ -448,6 +476,14 @@ void RenderableOrbitalKepler::initializeGL() {
     _uniformCache.opacity = _programObject->uniformLocation("opacity");
 
     updateBuffers();
+
+    double maxSemiMajorAxis = 0.0;
+    for (const KeplerParameters& kp : _data) {
+        if (kp.semiMajorAxis > maxSemiMajorAxis) {
+            maxSemiMajorAxis = kp.semiMajorAxis;
+        }
+    }
+    setBoundingSphere(maxSemiMajorAxis * 1000);
 }
 
 void RenderableOrbitalKepler::deinitializeGL() {
@@ -470,6 +506,11 @@ bool RenderableOrbitalKepler::isReady() const {
 void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
     if (_data.empty()) {
         return;
+    }
+
+    if (_updateDataBuffersAtNextRender) {
+        _updateDataBuffersAtNextRender = false;
+        initializeGL();
     }
 
     _programObject->activate();
@@ -519,13 +560,13 @@ void RenderableOrbitalKepler::updateBuffers() {
     size_t nVerticesTotal = 0;
 
     int numOrbits = static_cast<int>(_data.size());
-    for (size_t i = 0; i < numOrbits; ++i) {
+    for (int i = 0; i < numOrbits; ++i) {
         nVerticesTotal += _segmentSize[i] + 1;
     }
     _vertexBufferData.resize(nVerticesTotal);
 
     size_t vertexBufIdx = 0;
-    for (size_t orbitIdx = 0; orbitIdx < numOrbits; ++orbitIdx) {
+    for (int orbitIdx = 0; orbitIdx < numOrbits; ++orbitIdx) {
         const KeplerParameters& orbit = _data[orbitIdx];
 
         _keplerTranslator.setKeplerElements(

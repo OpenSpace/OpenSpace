@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,21 +23,17 @@
  ****************************************************************************************/
 
 #include <openspace/properties/property.h>
-
 #include <openspace/properties/propertyowner.h>
-
-#include <ghoul/lua/ghoul_lua.h>
-
-#include <algorithm>
-
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/misc/dictionaryjsonformatter.h>
+#include <algorithm>
 
 namespace {
     constexpr const char* MetaDataKeyGroup = "Group";
-    constexpr const char* MetaDataKeyVisibility = "Visibility";
     constexpr const char* MetaDataKeyReadOnly = "isReadOnly";
-
-    constexpr const char* _metaDataKeyViewPrefix = "view.";
+    constexpr const char* MetaDataKeyViewOptions = "ViewOptions";
+    constexpr const char* MetaDataKeyVisibility = "Visibility";
 
 } // namespace
 
@@ -46,8 +42,8 @@ namespace openspace::properties {
 Property::OnChangeHandle Property::OnChangeHandleAll =
                                                std::numeric_limits<OnChangeHandle>::max();
 
-const char* Property::ViewOptions::Color = "color";
-const char* Property::ViewOptions::LightPosition = "lightPosition";
+const char* Property::ViewOptions::Color = "Color";
+const char* Property::ViewOptions::Logarithmic = "Logarithmic";
 
 const char* Property::IdentifierKey = "Identifier";
 const char* Property::NameKey = "Name";
@@ -168,10 +164,6 @@ std::string Property::getStringValue() const {
     return value;
 }
 
-bool Property::setStringValue(std::string) { // NOLINT
-    return false;
-}
-
 const std::string& Property::guiName() const {
     return _guiName;
 }
@@ -185,9 +177,12 @@ void Property::setGroupIdentifier(std::string groupId) {
 }
 
 std::string Property::groupIdentifier() const {
-    std::string result;
-    _metaData.getValue(MetaDataKeyGroup, result);
-    return result;
+    if (_metaData.hasValue<std::string>(MetaDataKeyGroup)) {
+        return _metaData.value<std::string>(MetaDataKeyGroup);
+    }
+    else {
+        return "";
+    }
 }
 
 void Property::setVisibility(Visibility visibility) {
@@ -208,17 +203,22 @@ void Property::setReadOnly(bool state) {
 }
 
 void Property::setViewOption(std::string option, bool value) {
-    _metaData.setValue(
-        _metaDataKeyViewPrefix + std::move(option),
-        value,
-        ghoul::Dictionary::CreateIntermediate::Yes
-    );
+    ghoul::Dictionary d;
+    d.setValue(option, value);
+    _metaData.setValue(MetaDataKeyViewOptions, d);
 }
 
 bool Property::viewOption(const std::string& option, bool defaultValue) const {
-    bool v = defaultValue;
-    _metaData.getValue(_metaDataKeyViewPrefix + option, v);
-    return v;
+    if (!_metaData.hasValue<ghoul::Dictionary>(MetaDataKeyViewOptions)) {
+        return defaultValue;
+    }
+    ghoul::Dictionary d = _metaData.value<ghoul::Dictionary>(MetaDataKeyViewOptions);
+    if (d.hasKey(option)) {
+        return d.value<bool>(option);
+    }
+    else {
+        return defaultValue;
+    }
 }
 
 const ghoul::Dictionary& Property::metaData() const {
@@ -350,21 +350,26 @@ std::string Property::generateMetaDataJsonDescription() const {
     const std::string& vis = VisibilityConverter.at(visibility);
 
     bool isReadOnly = false;
-    if (_metaData.hasKey(MetaDataKeyReadOnly)) {
+    if (_metaData.hasValue<bool>(MetaDataKeyReadOnly)) {
         isReadOnly = _metaData.value<bool>(MetaDataKeyReadOnly);
     }
+    std::string isReadOnlyString = (isReadOnly ? "true" : "false");
 
-    std::string gIdent = groupIdentifier();
-    std::string gIdentSan = sanitizeString(gIdent);
+    std::string groupId = groupIdentifier();
+    std::string sanitizedGroupId = sanitizeString(groupId);
+
+    std::string viewOptions = "{}";
+   if (_metaData.hasValue<ghoul::Dictionary>(MetaDataKeyViewOptions)) {
+       viewOptions = ghoul::formatJson(
+           _metaData.value<ghoul::Dictionary>(MetaDataKeyViewOptions)
+       );
+   }
 
     std::string result = "{ ";
-    result +=
-        "\"" + std::string(MetaDataKeyGroup) + "\": \"" + gIdentSan + "\", ";
-    result +=
-        "\"" + std::string(MetaDataKeyVisibility) + "\": \"" + vis + "\", ";
-    result +=
-        "\"" + std::string(MetaDataKeyReadOnly) + "\": " +
-        (isReadOnly ? "true" : "false");
+    result += fmt::format("\"{}\": \"{}\",", MetaDataKeyGroup, sanitizedGroupId);
+    result += fmt::format("\"{}\": \"{}\",", MetaDataKeyVisibility, vis);
+    result += fmt::format("\"{}\": {},", MetaDataKeyReadOnly, isReadOnlyString);
+    result += fmt::format("\"{}\": {}", MetaDataKeyViewOptions, viewOptions);
     result += " }";
     return result;
 }
@@ -375,7 +380,6 @@ std::string Property::generateAdditionalJsonDescription() const {
 
 void Property::setInterpolationTarget(std::any) {} // NOLINT
 void Property::setLuaInterpolationTarget(lua_State*) {}
-void Property::setStringInterpolationTarget(std::string) {} // NOLINT
 void Property::interpolateValue(float, ghoul::EasingFunc<float>) {}
 
 } // namespace openspace::properties

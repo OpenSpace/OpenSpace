@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -50,7 +50,7 @@
 using namespace openspace;
 
 namespace {
-    QString labelText(int size, QString title) {
+    QString labelText(size_t size, QString title) {
         QString label;
         if (size > 0) {
             label = title + " (" + QString::number(size) + ")";
@@ -94,13 +94,16 @@ namespace {
 } // namespace
 
 ProfileEdit::ProfileEdit(Profile& profile, const std::string& profileName, 
-                         std::string assetBasePath, std::string profileBasePath,
+                         std::string assetBasePath,
+                         std::string userAssetBasePath,
+                         std::string profileBasePath,
                          const std::vector<std::string>& readOnlyProfiles,
                          QWidget* parent)
     : QDialog(parent)
-    , _assetBasePath(std::move(assetBasePath))
-    , _profileBasePath(std::move(profileBasePath))
     , _profile(profile)
+    , _assetBasePath(std::move(assetBasePath))
+    , _userAssetBasePath(std::move(userAssetBasePath))
+    , _profileBasePath(std::move(profileBasePath))
     , _readOnlyProfiles(readOnlyProfiles)
 {
     setWindowTitle("Profile Editor");
@@ -373,7 +376,7 @@ void ProfileEdit::duplicateProfile() {
             // will remove the suffix here first
             profile = profile.substr(0, it);
         }
-        catch (const std::invalid_argument& e) {
+        catch (const std::invalid_argument&) {
             // If this exception is thrown, we did find a separator character but the
             // substring afterwards was not a number, so the user just added a separator
             // by themselves. In this case we don't do anything
@@ -427,7 +430,7 @@ void ProfileEdit::openKeybindings() {
 
 void ProfileEdit::openAssets() {
     _errorMsg->clear();
-    AssetsDialog(_profile, _assetBasePath, this).exec();
+    AssetsDialog(_profile, _assetBasePath, _userAssetBasePath, this).exec();
     _assetsLabel->setText(labelText(_profile.assets().size(), "Assets"));
     _assetsEdit->setText(QString::fromStdString(summarizeAssets(_profile.assets())));
 }

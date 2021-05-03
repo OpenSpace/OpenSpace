@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,80 +24,161 @@
 
 #include <openspace/properties/selectionproperty.h>
 
+#include <openspace/json.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/misc.h>
+#include <string>
 
 namespace {
     constexpr const char* _loggerCat = "SelectionProperty";
 
-    const char Delimiter = ',';
+    constexpr const char* OptionsKey = "Options";
 } // namespace
 
 namespace openspace::properties {
 
-const std::string SelectionProperty::OptionsKey = "Options";
-
 SelectionProperty::SelectionProperty(Property::PropertyInfo info)
-    : TemplateProperty(std::move(info), std::vector<int>())
+    : TemplateProperty(std::move(info), std::set<std::string>())
 {}
 
-void SelectionProperty::addOption(Option option) {
-    // @REFACTOR from optionproperty.cpp, possible refactoring? ---abock
-    for (const Option& o : _options) {
-        if (o.value == option.value) {
-            LWARNINGC(
-                "SelectionProperty",
-                fmt::format("The value of option {{ {} -> {} }} was already registered "
-                    "when trying to add option {{ {} -> {} }}",
-                    o.value, o.description, option.value, option.description
-                )
-            );
-            return;
-        }
+void SelectionProperty::setValue(std::set<std::string> val) {
+    ghoul_assert(!_options.empty(), "Cannot set selection before options have been set");
+
+    if (val == _value) {
+        return;
     }
-    _options.push_back(std::move(option));
+
+    removeInvalidKeys(val);
+
+    _value = std::move(val);
+    notifyChangeListeners();
+    _isValueDirty = true;
 }
 
-void SelectionProperty::removeOptions() {
-    _options.clear();
+bool SelectionProperty::hasOption(const std::string& key) const {
+    auto it = std::find(_options.begin(), _options.end(), key);
+    return it != _options.end();
 }
 
-const std::vector<SelectionProperty::Option>& SelectionProperty::options() const {
+bool SelectionProperty::isSelected(const std::string& key) const {
+    auto it = std::find(_value.begin(), _value.end(), key);
+    return it != _value.end();
+}
+
+bool SelectionProperty::hasSelected() const {
+    return !_value.empty();
+}
+
+const std::vector<std::string>& SelectionProperty::options() const {
     return _options;
 }
 
+void SelectionProperty::setOptions(const std::vector<std::string>& keys) {
+    std::vector<std::string> options;
+    options.reserve(keys.size());
+
+    for (const std::string& key : keys) {
+        if (!hasOption(key)) {
+            options.push_back(key);
+        }
+        else {
+            LWARNING(fmt::format("Ignoring duplicated key '{}'", key));
+        }
+    }
+    _options = std::move(options);
+    sortOptions();
+
+    // In case we have a selection, remove non-existing options
+    bool changed = removeInvalidKeys(_value);
+    if (changed) {
+        _isValueDirty = true;
+    }
+
+    notifyChangeListeners();
+}
+
+void SelectionProperty::addOption(const std::string& key) {
+    if (hasOption(key)) {
+        LWARNING(fmt::format("Cannot add option. Key '{}' already exists", key));
+        return;
+    }
+
+    _options.push_back(key);
+    sortOptions();
+    notifyChangeListeners();
+}
+
+void SelectionProperty::clearSelection() {
+    _value.clear();
+    notifyChangeListeners();
+    _isValueDirty = true;
+}
+
+void SelectionProperty::clearOptions() {
+    _options.clear();
+    clearSelection();
+}
+
+void SelectionProperty::sortOptions() {
+    std::sort(_options.begin(), _options.end());
+}
+
+bool SelectionProperty::removeInvalidKeys(std::set<std::string>& keys) {
+    bool changed = false;
+    std::set<std::string>::iterator it = keys.begin();
+    while (it != keys.end()) {
+        if (!hasOption(*it)) {
+            LWARNING(fmt::format(
+                "Key '{}' is not a valid option and is removed from selection", *it
+            ));
+            keys.erase(it);
+            changed = true;
+        }
+        it++;
+    }
+    return changed;
+}
+
+std::string SelectionProperty::generateAdditionalJsonDescription() const {
+    nlohmann::json optionsJson(_options);
+    std::string result = "{ ";
+    result += fmt::format("\"{}\": {}", OptionsKey, optionsJson.dump());
+    result += " }";
+    return result;
+}
+
 template <>
-std::string PropertyDelegate<TemplateProperty<std::vector<int>>>::className() {
+std::string PropertyDelegate<TemplateProperty<std::set<std::string>>>::className() {
     return "SelectionProperty";
 }
 
 template <>
 template <>
-std::vector<int> PropertyDelegate<TemplateProperty<std::vector<int>>>::fromLuaValue(
-                                                          lua_State* state, bool& success)
+std::set<std::string>
+PropertyDelegate<TemplateProperty<std::set<std::string>>>::fromLuaValue(
+                                                         lua_State* state, bool& success)
 {
     static const int KEY = -2;
     static const int VAL = -1;
 
-    std::vector<int> result;
-
     if (!lua_istable(state, VAL)) {
         LERROR("Parameter passed to the property is not a table");
         success = false;
-        return result;
+        return {};
     }
 
+    std::set<std::string> result;
     lua_pushnil(state);
     while (lua_next(state, KEY) != 0) {
-        if (lua_isnumber(state, VAL)) {
-            int number = static_cast<int>(lua_tonumber(state, VAL));
-            result.push_back(number);
+        if (lua_isstring(state, VAL)) {
+            result.insert(lua_tostring(state, -1));
         }
         else {
             success = false;
-            return std::vector<int>();
+            return {};
         }
-
         lua_pop(state, 1);
     }
 
@@ -107,73 +188,33 @@ std::vector<int> PropertyDelegate<TemplateProperty<std::vector<int>>>::fromLuaVa
 
 template <>
 template <>
-bool PropertyDelegate<TemplateProperty<std::vector<int>>>::toLuaValue(
-                                          lua_State* state, const std::vector<int>& value)
+bool PropertyDelegate<TemplateProperty<std::set<std::string>>>::toLuaValue(
+                              lua_State* state, const std::set<std::string>& value)
 {
-    //@NOTE Untested ---abock
     lua_newtable(state);
-    for (size_t i = 0; i < value.size(); ++i) {
-        int v = value[i];
-        lua_pushinteger(state, v);
-        lua_setfield(state, -2, std::to_string(i).c_str());
+    int i = 1;
+    for (const std::string& v : value) {
+        lua_pushinteger(state, i);
+        lua_pushstring(state, v.c_str());
+        lua_settable(state, -3);
+        ++i;
     }
     return true;
 }
 
 template <>
-int PropertyDelegate<TemplateProperty<std::vector<int>>>::typeLua() {
+int PropertyDelegate<TemplateProperty<std::set<std::string>>>::typeLua() {
     return LUA_TTABLE;
 }
 
 template <>
 template <>
-std::vector<int> PropertyDelegate<TemplateProperty<std::vector<int>>>::fromString(
-                                                  const std::string& value, bool& success)
+bool PropertyDelegate<TemplateProperty<std::set<std::string>>>::toString(
+                       std::string& outValue, const std::set<std::string>& inValue)
 {
-    std::string v = value;
-    std::vector<int> result;
-    size_t pos = 0;
-    while ((pos = v.find(Delimiter)) != std::string::npos) {
-        std::string token = v.substr(0, pos);
-        result.push_back(std::stoi(token));
-        v.erase(0, pos + 1); // 1: Delimiter.length()
-    }
-    success = true;
-    return result;
-}
-
-template <>
-template <>
-bool PropertyDelegate<TemplateProperty<std::vector<int>>>::toString(
-                                   std::string& outValue, const std::vector<int>& inValue)
-{
-    outValue = "[";
-    for (int i : inValue) {
-        outValue += std::to_string(i) + Delimiter;
-    }
-    outValue += "]";
+    nlohmann::json json(inValue);
+    outValue = json.dump();
     return true;
-}
-
-std::string SelectionProperty::generateAdditionalJsonDescription() const {
-    std::string result = "{ \"" + OptionsKey + "\": [";
-    for (size_t i = 0; i < _options.size(); ++i) {
-        const Option& o = _options[i];
-        std::string v = std::to_string(o.value);
-        std::string vSan = sanitizeString(v);
-        std::string d = o.description;
-        std::string dSan = sanitizeString(d);
-
-        result += "{";
-        result += fmt::format(R"("{}": "{}")", vSan, dSan);
-        result += "}";
-        if (i != _options.size() - 1) {
-            result += ",";
-        }
-    }
-
-    result += "] }";
-    return result;
 }
 
 } // namespace openspace::properties
