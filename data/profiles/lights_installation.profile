@@ -189,7 +189,7 @@
       "value": "true"
     },
     {
-      "name": "ScreenSpace.text-earth.Alpha",
+      "name": "ScreenSpace.text-earth.Opacity",
       "type": "setPropertyValueSingle",
       "value": "1.0"
     },
