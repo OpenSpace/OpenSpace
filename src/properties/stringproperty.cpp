@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/properties/stringproperty.h>
+
 #include <ghoul/lua/ghoul_lua.h>
 #include <openspace/json.h>
 

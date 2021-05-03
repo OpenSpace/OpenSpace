@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/properties/scalar/longproperty.h>
+
 #include <ghoul/lua/ghoul_lua.h>
 
 namespace openspace::properties {
