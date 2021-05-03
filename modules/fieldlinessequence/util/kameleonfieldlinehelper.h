@@ -36,8 +36,9 @@ class FieldlinesState;
 namespace fls {
 
 bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfPath,
-    const std::vector<glm::vec3>& seedPoints, const std::string& tracingVar,
-    std::vector<std::string>& extraVars, std::vector<std::string>& extraMagVars);
+    const std::unordered_map<std::string, std::vector<glm::vec3>>& seedMap, 
+    const std::string& tracingVar, std::vector<std::string>& extraVars, 
+    std::vector<std::string>& extraMagVars);
 
 } // namespace fls
 } // namespace openspace

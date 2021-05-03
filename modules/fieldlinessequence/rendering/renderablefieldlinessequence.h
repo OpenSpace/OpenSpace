@@ -204,7 +204,7 @@ private:
     void addStateToSequence(FieldlinesState& STATE);
     void computeSequenceEndTime();
     void definePropertyCallbackFunctions();
-    bool extractCdfInfoFromDictionary(std::string& seedFilePath, std::string& tracingVar,
+    bool extractCdfInfoFromDictionary(std::string& tracingVar,
         std::vector<std::string>& extraVars);
     bool extractJsonInfoFromDictionary(fls::Model& model);
     void extractMagnitudeVarsFromStrings(std::vector<std::string>& extraVars,
@@ -212,8 +212,8 @@ private:
     bool extractMandatoryInfoFromDictionary(SourceFileType& sourceFileType);
     void extractOptionalInfoFromDictionary(std::string& outputFolderPath);
     void extractOsflsInfoFromDictionary();
-    bool extractSeedPointsFromFile(const std::string& path,
-        std::vector<glm::vec3>& outVec);
+    bool extractSeedPointsFromFiles(std::string& path,
+        std::unordered_map<std::string, std::vector<glm::vec3>>& outVec);
     void extractTriggerTimesFromFileNames();
     bool loadJsonStatesIntoRAM(const std::string& outputFolder);
     void loadOsflsStatesIntoRAM(const std::string& outputFolder);

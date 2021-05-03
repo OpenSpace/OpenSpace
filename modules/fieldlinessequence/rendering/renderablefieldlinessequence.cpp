@@ -24,6 +24,7 @@
 
 #include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
 
+#include <map>
 #include <modules/fieldlinessequence/fieldlinessequencemodule.h>
 #include <modules/fieldlinessequence/util/kameleonfieldlinehelper.h>
 #include <openspace/engine/globals.h>
@@ -57,7 +58,7 @@ namespace {
 
     // ---------------------- MANDATORY INPUT TYPE SPECIFIC KEYS ---------------------- //
     // [STRING] Path to a .txt file containing seed points
-    constexpr const char* KeyCdfSeedPointFile = "SeedPointFile";
+    constexpr const char* KeyCdfSeedPointDirectory = "SeedPointDirectory";
     // [STRING] Currently supports: "batsrus", "enlil" & "pfss"
     constexpr const char* KeyJsonSimulationModel = "SimulationModel";
 
@@ -315,6 +316,7 @@ void RenderableFieldlinesSequence::initializeGL() {
     // SOURCE
     switch (sourceFileType) {
         case SourceFileType::Cdf:
+
             if (!getStatesFromCdfFiles(outputFolderPath)) {
                 return;
             }
@@ -484,15 +486,15 @@ void RenderableFieldlinesSequence::extractOptionalInfoFromDictionary(
         _pFlowEnabled = _dictionary->value<bool>(KeyFlowEnabled);
     }
 
-    float lineWidthValue;
     if (_dictionary->hasValue<std::string>(KeyLineWidth)) {
         _pLineWidth = stringToFloat(_dictionary->value<std::string>(KeyLineWidth));
     }
     
     if (_dictionary->hasValue<std::string>(KeyOutputFolder)) {
-        ghoul::filesystem::Directory outputFolder(outputFolderPath);
+        std::string temp = _dictionary->value<std::string>(KeyOutputFolder);
+        ghoul::filesystem::Directory outputFolder(temp);
         if (FileSys.directoryExists(outputFolder)) {
-            outputFolderPath = absPath(outputFolderPath);
+            outputFolderPath = absPath(outputFolder);
         }
         else {
             LERROR(fmt::format(
@@ -890,20 +892,20 @@ void RenderableFieldlinesSequence::addStateToSequence(FieldlinesState& state) {
 
 bool RenderableFieldlinesSequence::getStatesFromCdfFiles(const std::string& outputFolder)
 {
-    std::string seedFilePath;
     std::string tracingVar;
     std::vector<std::string> extraVars;
-    if (!extractCdfInfoFromDictionary(seedFilePath, tracingVar, extraVars)) {
-        return false;
-    }
-
-    std::vector<glm::vec3> seedPoints;
-    if (!extractSeedPointsFromFile(seedFilePath, seedPoints)) {
+    if (!extractCdfInfoFromDictionary(tracingVar, extraVars)) {
         return false;
     }
 
     std::vector<std::string> extraMagVars;
     extractMagnitudeVarsFromStrings(extraVars, extraMagVars);
+
+    std::unordered_map<std::string, std::vector<glm::vec3>> seedsPerFiles;
+    std::string seedDirectoryPath;
+    if (!extractSeedPointsFromFiles(seedDirectoryPath, seedsPerFiles)) {
+        return false;
+    }
 
     // Load states into RAM!
     for (const std::string& cdfPath : _sourceFiles) {
@@ -911,7 +913,7 @@ bool RenderableFieldlinesSequence::getStatesFromCdfFiles(const std::string& outp
         bool isSuccessful = fls::convertCdfToFieldlinesState(
             newState,
             cdfPath,
-            seedPoints,
+            seedsPerFiles,
             tracingVar,
             extraVars,
             extraMagVars
@@ -930,28 +932,9 @@ bool RenderableFieldlinesSequence::getStatesFromCdfFiles(const std::string& outp
 /*
 * Returns false if it fails to extract mandatory information!
 */
-bool RenderableFieldlinesSequence::extractCdfInfoFromDictionary(std::string& seedFilePath,
-                                                                std::string& tracingVar,
+bool RenderableFieldlinesSequence::extractCdfInfoFromDictionary(std::string& tracingVar,
                                                       std::vector<std::string>& extraVars)
 {
-    if (_dictionary->hasValue<std::string>(KeyCdfSeedPointFile)) {
-        seedFilePath = _dictionary->value<std::string>(KeyCdfSeedPointFile);
-        ghoul::filesystem::File seedPointFile(seedFilePath);
-        if (FileSys.fileExists(seedPointFile)) {
-            seedFilePath = absPath(seedFilePath);
-        }
-        else {
-            LERROR(fmt::format(
-                "{}: The specified seed poitn file: '{}' does not exist",
-                _identifier, seedFilePath
-            ));
-            return false;
-        }
-    }
-    else {
-        LERROR(fmt::format("{}: Must specify '{}'", _identifier, KeyCdfSeedPointFile));
-        return false;
-    }
 
     if (_dictionary->hasValue<std::string>(KeyCdfTracingVariable)) {
         tracingVar = _dictionary->value<std::string>(KeyCdfTracingVariable);
@@ -978,30 +961,75 @@ bool RenderableFieldlinesSequence::extractCdfInfoFromDictionary(std::string& see
     return true;
 }
 
-bool RenderableFieldlinesSequence::extractSeedPointsFromFile(const std::string& path,
-                                                           std::vector<glm::vec3>& outVec)
+bool RenderableFieldlinesSequence::extractSeedPointsFromFiles( std::string& path,
+                                                        std::unordered_map<std::string,
+                                                        std::vector<glm::vec3>>& outMap)
 {
+    std::vector<std::string> files;
 
-    std::ifstream seedFile(FileSys.relativePath(path));
-    if (!seedFile.good()) {
-        LERROR(fmt::format("Could not open seed points file '{}'", path));
+    if (_dictionary->hasValue<std::string>(KeyCdfSeedPointDirectory)) {
+        path = _dictionary->value<std::string>(KeyCdfSeedPointDirectory);
+        ghoul::filesystem::Directory seedPointDir(path);
+        if (FileSys.directoryExists(seedPointDir)) {
+            path = absPath(path);
+            files = seedPointDir.readFiles(
+                ghoul::filesystem::Directory::Recursive::No,
+                ghoul::filesystem::Directory::Sort::Yes);
+        }
+        else {
+            LERROR(fmt::format(
+                "{}: The specified seed point directory: '{}' does not exist",
+                _identifier, path
+            ));
+            return false;
+        }
+    }
+    else {
+        LERROR(fmt::format("{}: Must specify '{}'",
+            _identifier, KeyCdfSeedPointDirectory));
         return false;
     }
 
-    LDEBUG(fmt::format("Reading seed points from file '{}'", path));
-    std::string line;
-    while (std::getline(seedFile, line)) {
-        std::stringstream ss(line);
-        glm::vec3 point;
-        ss >> point.x;
-        ss >> point.y;
-        ss >> point.z;
-        outVec.push_back(std::move(point));
-    }
+    for (const std::string& seedFilePath : files) {
 
-    if (outVec.size() == 0) {
-        LERROR(fmt::format("Found no seed points in: {}", path));
-        return false;
+        if (seedFilePath.find("mp_position") == std::string::npos) {
+            continue;
+        }
+
+
+        size_t lastIndex = seedFilePath.find_last_of('.');
+        std::string name = seedFilePath.substr(0, lastIndex);   // remove file extention
+        size_t dateAndTimeSeperator = name.find_last_of('_');
+        std::string time = name.substr(dateAndTimeSeperator+1, name.length());
+        std::string date = name.substr(dateAndTimeSeperator - 8, 8);    //8 for yyyymmdd
+        std::string dateAndTime = date + time;
+
+        std::ifstream seedFile(FileSys.relativePath(seedFilePath));
+        if (!seedFile.good()) {
+            LERROR(fmt::format("Could not open seed points file '{}'", seedFilePath));
+            return false;
+        }
+
+        LDEBUG(fmt::format("Reading seed points from file '{}'", seedFilePath));
+        std::string line;
+        std::vector<glm::vec3> outVec;
+        while (std::getline(seedFile, line)) {
+            std::stringstream ss(line);
+            glm::vec3 point;
+            ss >> point.x;
+            ss >> point.y;
+            ss >> point.z;
+            outVec.push_back(std::move(point));
+        }
+
+        if (outVec.size() == 0) {
+            LERROR(fmt::format("Found no seed points in: {}", seedFilePath));
+            return false;
+        }
+    
+        // add outVec as value and time stamp as int as key
+        outMap[dateAndTime] = outVec;
+
     }
 
     return true;

@@ -26,6 +26,7 @@
 
 #include <modules/fieldlinessequence/util/commons.h>
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
+#include <openspace/util/spicemanager.h>
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <memory>
@@ -88,10 +89,11 @@ namespace openspace::fls {
  *        vector at each line vertex
  */
 bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfPath,
-                                 const std::vector<glm::vec3>& seedPoints,
-                                 const std::string& tracingVar,
-                                 std::vector<std::string>& extraVars,
-                                 std::vector<std::string>& extraMagVars)
+                        const std::unordered_map<std::string, 
+                                                 std::vector<glm::vec3>>& seedMap,
+                        const std::string& tracingVar,
+                        std::vector<std::string>& extraVars,
+                        std::vector<std::string>& extraMagVars)
 {
 
 #ifndef OPENSPACE_MODULE_KAMELEON_ENABLED
@@ -104,7 +106,15 @@ bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfP
     );
 
     state.setModel(fls::stringToModel(kameleon->getModelName()));
-    state.setTriggerTime(kameleonHelper::getTime(kameleon.get()));
+    double cdfDoubleTime = kameleonHelper::getTime(kameleon.get());
+    state.setTriggerTime(cdfDoubleTime);
+
+    //get time as string.
+    std::string cdfStringTime = SpiceManager::ref().dateFromEphemerisTime(cdfDoubleTime,
+        "YYYYMMDDHRMNSC::RND"); //YYYY MM DD HOUR MIN SEC ROUNDED
+
+    // use time as string for picking seedpoints from seedm
+    std::vector<glm::vec3> seedPoints = seedMap.at(cdfStringTime);
 
     if (addLinesToState(kameleon.get(), seedPoints, tracingVar, state)) {
         // The line points are in their RAW format (unscaled & maybe spherical)

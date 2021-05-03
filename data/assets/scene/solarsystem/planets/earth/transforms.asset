@@ -75,7 +75,7 @@ local EarthIAU = {
 
 local GSMReferenceFrame = {
     Identifier = "GSMReferenceFrame",
-    Parent = EarthBarycenter.Identifier,
+    Parent = EarthCenter.Identifier,
     Transform = {
         Rotation = {
             Type = "SpiceRotation",

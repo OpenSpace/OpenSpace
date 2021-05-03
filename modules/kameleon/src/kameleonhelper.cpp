@@ -159,7 +159,7 @@ double getTime(ccmc::Kameleon* kameleon) {
                      "The current state starts the same time as the sequence!");
         }
 
-    return seqStartDbl + stateStartOffset;
+    return seqStartDbl + stateStartOffset - 14400;
 }
 
 } // namespace openspace::kameleonHelper {
