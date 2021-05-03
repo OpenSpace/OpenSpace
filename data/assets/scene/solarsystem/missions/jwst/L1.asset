@@ -1,12 +1,12 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('scene/solarsystem/sun/transforms')
 
-local L2Kernel = {
-    "C:/Users/ElmQPC/Desktop/Malin/develop/OpenSpace/sync/http/L2_kernels/1/L2_de431.bsp"
+local L1Kernel = {
+    "C:/Users/ElmQPC/Desktop/Malin/develop/WIP/data/Lagrangian_Kernels/L1_de431.bsp"
 }
 
-local L2 = {
-    Identifier = "L2",
+local L1 = {
+    Identifier = "L1",
     Parent = transforms.SolarSystemBarycenter.Identifier,
     Renderable = {
         Type = "RenderablePlaneImageLocal",
@@ -19,25 +19,25 @@ local L2 = {
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
-            Target = "392", -- L2
+            Target = "391", -- L1
             Observer = "SUN",
-            Kernels = L2Kernel
+            Kernels = L1Kernel
         }
     },
     GUI = {
-        Name = "L2",
+        Name = "L1",
         Path = "/Solar System/Missions/JWST",
     }
 }
 
-local L2Label = {
-    Identifier = "L2Label",
-    Parent = L2.Identifier,
+local L1Label = {
+    Identifier = "L1Label",
+    Parent = L1.Identifier,
     Renderable = {
         Enabled = true,
         Type = "RenderableLabels",
-        LabelText = "L2",
-        FontSize = 14.0,
+        LabelText = "L1",
+        FontSize = 14,
         LabelSize = 6.4,
         LabelMaxSize = 100.0,
         LabelMinSize = 1.0,
@@ -47,30 +47,13 @@ local L2Label = {
     },
     Tag = { "solarsystem_labels" },
     GUI = {
-        Name = "L2 Label",
+        Name = "L1 Label",
         Path = "/Solar System/Missions/JWST",
-        Description = "Main label for L2"
-    }
-}
-
-local L2SunLine = {
-    Identifier = "L2SunLine",
-    Parent = transforms.SolarSystemBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableNodeLine",
-        StartNode = "Sun",
-        EndNode = "L2",
-        Color = { 0.5, 0.5, 0.5 },
-        LineWidth = 2
-    },
-    GUI = {
-        Name = "Earth to L2 Line",
-        Path = "/Solar System/Missions/JWST",
+        Description = "Main label for L1"
     }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
-    L2,
-    L2SunLine,
-    L2Label
+    L1,
+    L1Label
 })

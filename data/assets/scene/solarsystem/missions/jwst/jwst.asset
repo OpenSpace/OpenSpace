@@ -1,7 +1,9 @@
 local assetHelper = asset.require('util/asset_helper')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local transforms = asset.require('scene/solarsystem/missions/jwst/L2')
+
 asset.require("spice/base")
+asset.require('scene/solarsystem/missions/jwst/Lagrange_points')
+local transforms = asset.require('scene/solarsystem/missions/jwst/L2')
 
 local JWSTKernel = {
     "C:/Users/ElmQPC/Desktop/Malin/develop/OpenSpace/sync/http/JWST_kernels/1/jwst_horizons_20200101_20240101_v01.bsp"

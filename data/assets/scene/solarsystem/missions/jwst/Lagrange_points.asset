@@ -1,0 +1,3 @@
+asset.require('scene/solarsystem/missions/jwst/L1')
+asset.require('scene/solarsystem/missions/jwst/L4')
+asset.require('scene/solarsystem/missions/jwst/L5')
