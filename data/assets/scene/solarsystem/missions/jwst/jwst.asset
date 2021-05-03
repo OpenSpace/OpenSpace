@@ -34,13 +34,13 @@ local JWSTModel = {
             Attached = "JWSTModel",
             XAxis = { 0.01, -1.0, 0.56 },
             XAxisOrthogonal = true,
-            YAxisInverted = true,
+            YAxisInvert = true,
             YAxis = sunTransforms.SolarSystemBarycenter.Identifier
         }
     },
     Renderable = {
         Type = "RenderableModel",
-        GeometryFile = "C:/Users/ElmQPC/Desktop/Malin/develop/OpenSpace/sync/http/JWST_model/1/JWST_a1.gltf",
+        GeometryFile = "C:/Users/ElmQPC/Desktop/Malin/develop/WIP/data/JWST_model/3/JWSTFBX.fbx",
         LightSources = {
             {
                 Type = "SceneGraphLightSource",
