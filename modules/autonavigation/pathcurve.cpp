@@ -46,7 +46,7 @@ const double PathCurve::length() const {
 }
 
 glm::dvec3 PathCurve::positionAt(double relativeLength) {
-    double u = curveParameter(relativeLength * _totalLength); // TODO: only use relative length?
+    double u = curveParameter(relativeLength * _totalLength);
     return interpolate(u);
 }
 
@@ -61,54 +61,94 @@ double PathCurve::curveParameter(double s) {
 
     unsigned int segmentIndex;
     for (segmentIndex = 1; segmentIndex < _nSegments; ++segmentIndex) {
-        if (s <= _lengthSums[segmentIndex])
+        if (s <= _lengthSums[segmentIndex]) {
             break;
+        }
     }
 
-    // initial guess for Newton's method
     double segmentS = s - _lengthSums[segmentIndex - 1];
     double segmentLength = _lengths[segmentIndex];
 
     const double uMin = _parameterIntervals[segmentIndex - 1];
     const double uMax = _parameterIntervals[segmentIndex];
-    double u = uMin + (uMax - uMin) * (segmentS / segmentLength);
 
-    const int nIterations = 40;
+    // Compute curve parameter through linerar interpolation. This adds some variations 
+    // in speed, especially in breakpoints between curve segments, but compared to the 
+    // root bounding approach below the motion becomes much smoother. 
+    // The root finding simply does not work well enough as of now.
+    return uMin + (uMax - uMin) * (segmentS / segmentLength);
 
-    // initialize root bounding limits for bisection
-    double lower = uMin;
-    double upper = uMax;
 
-    for (int i = 0; i < nIterations; ++i) {
-        double F = arcLength(uMin, u) - segmentS;
+    // ROOT FINDING USING NEWTON'S METHOD BELOW
 
-        const double tolerance = 0.1; // meters. Note that distances are very large
-        if (std::abs(F) <= tolerance) {
-            return u;
-        }
+    //// Initialize root bounding limits for bisection
+    //double lower = uMin;
+    //double upper = uMax;
+    //double u = uMin;
 
-        // generate a candidate for Newton's method
-        double dfdu = approximatedDerivative(u, Epsilon); // > 0
-        double uCandidate = u - F / dfdu;
+    //LINFO(fmt::format("Segment: {}", segmentIndex));
+    //LINFO(fmt::format("Intitial guess u: {}", u));
 
-        // update root-bounding interval and test candidate
-        if (F > 0) {  // => candidate < u <= upper
-            upper = u;
-            u = (uCandidate <= lower) ? (upper + lower) / 2.0 : uCandidate;
-        }
-        else { // F < 0 => lower <= u < candidate
-            lower = u;
-            u = (uCandidate >= upper) ? (upper + lower) / 2.0 : uCandidate;
-        }
-    }
+    //// The function we want to find the root for
+    //auto F = [this, segmentS, uMin](double u) -> double {
+    //    return (arcLength(uMin, u) - segmentS);
+    //};
 
-    // No root was found based on the number of iterations and tolerance. However, it is
-    // safe to report the last computed u value, since it is within the segment interval
-    return u;
+    //// Start by doing a few bisections to find a good estimate 
+    // (could potentially use linear guess as well)
+    //int counter = 0;
+    //while (upper - lower > 0.0001) {
+    //    u = (upper + lower) / 2.0;
+
+    //    if (F(u) * F(lower) < 0.0) {
+    //        upper = u;
+    //    }
+    //    else {
+    //        lower = u;
+    //    }
+    //    counter++;
+    //}
+
+    // OBS!! It actually seems like just using bisection returns a better, or at least as
+    // good, result compared to Newton's method. Is this because of a problem with the 
+    // derivative or arc length computation?
+
+    //LINFO(fmt::format("Bisected u: {}", u));
+    //LINFO(fmt::format("nBisections: {}", counter));
+
+    //const int nIterations = 100;
+
+    //for (int i = 0; i < nIterations; ++i) {
+    //    double function = F(u);
+
+    //    const double tolerance = 0.001; 
+    //    if (std::abs(function) <= tolerance) {
+    //        LINFO(fmt::format("nIterations: {}", i));
+    //        return u;
+    //    }
+
+    //    // Generate a candidate for Newton's method
+    //    double dfdu = approximatedDerivative(u, Epsilon); // > 0
+    //    double uCandidate = u - function / dfdu;
+
+    //    // Update root-bounding interval and test candidate
+    //    if (function > 0) {  // => candidate < u <= upper
+    //        upper = u;
+    //        u = (uCandidate <= lower) ? (upper + lower) / 2.0 : uCandidate;
+    //    }
+    //    else { // F < 0 => lower <= u < candidate
+    //        lower = u;
+    //        u = (uCandidate >= upper) ? (upper + lower) / 2.0 : uCandidate;
+    //    }
+    //}
+
+    ////LINFO(fmt::format("Max iterations! ({})", nIterations));
+
+    //// No root was found based on the number of iterations and tolerance. However, it is
+    //// safe to report the last computed u value, since it is within the segment interval
+    //return u;
 }
 
-// TODO: remove when not needed
-// Created for debugging
 std::vector<glm::dvec3> PathCurve::points() {
     return _points;
 }
@@ -118,7 +158,7 @@ void PathCurve::initParameterIntervals() {
     _parameterIntervals.clear();
     _parameterIntervals.reserve(_nSegments + 1);
 
-    // compute initial values, to be able to compute lengths
+    // Space out parameter intervals
     double dt = 1.0 / _nSegments;
     _parameterIntervals.push_back(0.0);
     for (unsigned int i = 1; i < _nSegments; i++) {
@@ -126,7 +166,7 @@ void PathCurve::initParameterIntervals() {
     }
     _parameterIntervals.push_back(1.0);
 
-    // lengths
+    // Lengths
     _lengths.clear();
     _lengths.reserve(_nSegments + 1);
     _lengthSums.clear();
@@ -141,11 +181,6 @@ void PathCurve::initParameterIntervals() {
         _lengthSums.push_back(_lengthSums[i - 1] + _lengths[i]);
     }
     _totalLength = _lengthSums.back();
-
-    // scale parameterIntervals to better match arc lengths
-    for (unsigned int i = 1; i <= _nSegments; i++) {
-        _parameterIntervals[i] = _lengthSums[i] / _totalLength;
-    }
 }
 
 double PathCurve::approximatedDerivative(double u, double h) {

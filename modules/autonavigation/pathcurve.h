@@ -44,12 +44,12 @@ public:
     const double length() const;
     glm::dvec3 positionAt(double relativeLength);
 
-    // compute curve parameter that matches the input arc length s
+    // Compute curve parameter that matches the input arc length s
     double curveParameter(double s);
 
     virtual glm::dvec3 interpolate(double u) = 0;
 
-    std::vector<glm::dvec3> points(); // for debugging
+    std::vector<glm::dvec3> points();
 
 protected:
     void initParameterIntervals();
