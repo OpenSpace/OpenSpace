@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2020                                                                #
+# Copyright (c) 2014-2021                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -32,7 +32,6 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/documentation/documentationgenerator.cpp
   ${OPENSPACE_BASE_DIR}/src/documentation/verifier.cpp
   ${OPENSPACE_BASE_DIR}/src/engine/configuration.cpp
-  ${OPENSPACE_BASE_DIR}/src/engine/configuration_doc.inl
   ${OPENSPACE_BASE_DIR}/src/engine/downloadmanager.cpp
   ${OPENSPACE_BASE_DIR}/src/engine/globals.cpp
   ${OPENSPACE_BASE_DIR}/src/engine/globalscallbacks.cpp
@@ -63,6 +62,7 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/interaction/shortcutmanager_lua.inl
   ${OPENSPACE_BASE_DIR}/src/interaction/websocketinputstate.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/websocketcamerastates.cpp
+  ${OPENSPACE_BASE_DIR}/src/interaction/tasks/convertrecfileversiontask.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/tasks/convertrecformattask.cpp
   ${OPENSPACE_BASE_DIR}/src/mission/mission.cpp
   ${OPENSPACE_BASE_DIR}/src/mission/missionmanager.cpp
@@ -76,8 +76,10 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/properties/propertyowner.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/selectionproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/stringproperty.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/stringlistproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/triggerproperty.cpp
+  ${OPENSPACE_BASE_DIR}/src/properties/list/doublelistproperty.cpp
+  ${OPENSPACE_BASE_DIR}/src/properties/list/intlistproperty.cpp
+  ${OPENSPACE_BASE_DIR}/src/properties/list/stringlistproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat2property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat2x3property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat2x4property.cpp
@@ -132,6 +134,7 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/rendering/dashboard.cpp
   ${OPENSPACE_BASE_DIR}/src/rendering/dashboard_lua.inl
   ${OPENSPACE_BASE_DIR}/src/rendering/dashboarditem.cpp
+  ${OPENSPACE_BASE_DIR}/src/rendering/dashboardtextitem.cpp
   ${OPENSPACE_BASE_DIR}/src/rendering/framebufferrenderer.cpp
   ${OPENSPACE_BASE_DIR}/src/rendering/deferredcastermanager.cpp
   ${OPENSPACE_BASE_DIR}/src/rendering/helper.cpp
@@ -142,6 +145,7 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/rendering/renderengine.cpp
   ${OPENSPACE_BASE_DIR}/src/rendering/renderengine_lua.inl
   ${OPENSPACE_BASE_DIR}/src/rendering/screenspacerenderable.cpp
+  ${OPENSPACE_BASE_DIR}/src/rendering/texturecomponent.cpp
   ${OPENSPACE_BASE_DIR}/src/rendering/transferfunction.cpp
   ${OPENSPACE_BASE_DIR}/src/rendering/volumeraycaster.cpp
   ${OPENSPACE_BASE_DIR}/src/scene/asset.cpp
@@ -159,7 +163,6 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/scene/sceneinitializer.cpp
   ${OPENSPACE_BASE_DIR}/src/scene/scenelicensewriter.cpp
   ${OPENSPACE_BASE_DIR}/src/scene/scenegraphnode.cpp
-  ${OPENSPACE_BASE_DIR}/src/scene/scenegraphnode_doc.inl
   ${OPENSPACE_BASE_DIR}/src/scene/timeframe.cpp
   ${OPENSPACE_BASE_DIR}/src/scene/translation.cpp
   ${OPENSPACE_BASE_DIR}/src/scripting/lualibrary.cpp
@@ -177,6 +180,7 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/util/httprequest.cpp
   ${OPENSPACE_BASE_DIR}/src/util/keys.cpp
   ${OPENSPACE_BASE_DIR}/src/util/openspacemodule.cpp
+  ${OPENSPACE_BASE_DIR}/src/util/planegeometry.cpp
   ${OPENSPACE_BASE_DIR}/src/util/progressbar.cpp
   ${OPENSPACE_BASE_DIR}/src/util/resourcesynchronization.cpp
   ${OPENSPACE_BASE_DIR}/src/util/screenlog.cpp
@@ -204,6 +208,10 @@ if (APPLE)
   set(OPENSPACE_SOURCE
     ${OPENSPACE_SOURCE}
     ${OPENSPACE_BASE_DIR}/src/interaction/touchbar.mm
+  )
+  set_source_files_properties(
+    ${OPENSPACE_BASE_DIR}/src/interaction/touchbar.mm
+    PROPERTIES SKIP_PRECOMPILE_HEADERS ON
   )
 endif ()
 set(OPENSPACE_HEADER
@@ -246,6 +254,7 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/shortcutmanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/websocketinputstate.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/websocketcamerastates.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/tasks/convertrecfileversiontask.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/tasks/convertrecformattask.h
   ${OPENSPACE_BASE_DIR}/include/openspace/mission/mission.h
   ${OPENSPACE_BASE_DIR}/include/openspace/mission/missionmanager.h
@@ -253,6 +262,8 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelpeer.h
   ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelserver.h
   ${OPENSPACE_BASE_DIR}/include/openspace/network/messagestructures.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/properties/listproperty.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/properties/listproperty.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/numericalproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/numericalproperty.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/optionproperty.h
@@ -262,10 +273,12 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/propertyowner.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/selectionproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/stringproperty.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/stringlistproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/templateproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/templateproperty.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/triggerproperty.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/properties/list/doublelistproperty.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/properties/list/intlistproperty.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/properties/list/stringlistproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat2property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat2x3property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat2x4property.h
@@ -319,7 +332,9 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/abufferrenderer.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/dashboard.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/dashboarditem.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/rendering/dashboardtextitem.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/framebufferrenderer.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/rendering/deferredcaster.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/deferredcasterlistener.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/deferredcastermanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/loadingscreen.h
@@ -330,11 +345,11 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/renderable.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/renderer.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/renderengine.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/rendering/volume.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/screenspacerenderable.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/rendering/deferredcaster.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/rendering/volumeraycaster.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/rendering/texturecomponent.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/transferfunction.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/rendering/volume.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/rendering/volumeraycaster.h
   ${OPENSPACE_BASE_DIR}/include/openspace/scene/asset.h
   ${OPENSPACE_BASE_DIR}/include/openspace/scene/assetlistener.h
   ${OPENSPACE_BASE_DIR}/include/openspace/scene/assetloader.h
@@ -371,6 +386,7 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/util/memorymanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/mouse.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/openspacemodule.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/util/planegeometry.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/progressbar.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/resourcesynchronization.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/screenlog.h
@@ -432,18 +448,45 @@ endforeach ()
 # Create OpenSpace target
 ##########################################################################################
 add_library(openspace-core STATIC ${OPENSPACE_HEADER} ${OPENSPACE_SOURCE})
-target_include_directories(openspace-core PUBLIC
-  # In order to be able to include openspace-core files
-  ${OPENSPACE_BASE_DIR}/include
-  # In order to be able to include module files
-  ${OPENSPACE_BASE_DIR}
-  # In order to use the date library
-  ${OPENSPACE_BASE_DIR}/ext/date/include
-  # In order to use the nlohmann JSON library
-  ${OPENSPACE_BASE_DIR}/ext
-  # In order to be able to include the module_registration file
-  ${CMAKE_BINARY_DIR}/_generated/include
+target_include_directories(openspace-core SYSTEM
+  PUBLIC
+    # In order to use the date library
+    ${OPENSPACE_BASE_DIR}/ext/date/include
+    # In order to use the nlohmann JSON library
+    ${OPENSPACE_BASE_DIR}/ext
 )
+
+target_include_directories(openspace-core
+  PUBLIC
+    # In order to be able to include openspace-core files
+    ${OPENSPACE_BASE_DIR}/include
+    # In order to be able to include the module_registration file
+    ${CMAKE_BINARY_DIR}/_generated/include
+
+  PRIVATE
+    # In order to be able to include module files.  This is a temporary fix as this
+    # introduces a dependency from the opnspace-core onto the modules
+    ${OPENSPACE_BASE_DIR}
+)
+
+target_precompile_headers(openspace-core PRIVATE
+  [["ghoul/fmt.h"]]
+  [["ghoul/glm.h"]]
+  [["ghoul/misc/assert.h"]]
+  [["ghoul/misc/boolean.h"]]
+  [["ghoul/misc/exception.h"]]
+  [["ghoul/misc/invariants.h"]]
+  [["ghoul/misc/profiling.h"]]
+  <algorithm>
+  <array>
+  <map>
+  <memory>
+  <string>
+  <utility>
+  <vector>
+)
+
+add_dependencies(openspace-core run_codegen)
 
 configure_file(
   ${OPENSPACE_CMAKE_EXT_DIR}/openspace_header.template
@@ -458,8 +501,18 @@ configure_file(
 )
 
 if (APPLE)
-  find_library(APPKIT_LIBRARY AppKit REQUIRED)
-  target_link_libraries(openspace-core PUBLIC ${APPKIT_LIBRARY})
+  target_link_libraries(openspace-core INTERFACE external-system-apple)
 endif ()
 
 set_openspace_compile_settings(openspace-core)
+target_link_libraries(openspace-core PUBLIC Ghoul spice external-curl)
+
+if (OPENSPACE_WITH_ABUFFER_RENDERER)
+  target_compile_definitions(openspace-core PUBLIC "OPENSPACE_WITH_ABUFFER_RENDERER")
+endif ()
+
+# Just in case, create the bin directory
+add_custom_command(
+  TARGET openspace-core
+  PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+)

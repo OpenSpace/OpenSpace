@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -107,11 +107,11 @@ void main() {
     
     vec4 initialPosition, secondPosition, thirdPosition, crossCorner;
   
-    if (renderOption == 0) {
+    if (renderOption == 0) { // Camera View Direction
         scaledRight = scaleMultiply * right * 0.5f;
         scaledUp    = scaleMultiply * up * 0.5f;
     }
-    else if (renderOption == 1) {
+    else if (renderOption == 1) { // Camera Position Normal
         vec3 normal   = vec3(normalize(cameraPosition - dpos.xyz));
         vec3 newRight = normalize(cross(cameraLookUp, normal));
         vec3 newUp    = cross(normal, newRight);
@@ -144,12 +144,8 @@ void main() {
         // width and height
         vec2 sizes = abs(halfViewSize * (topRight - bottomLeft));
         
-        if (enabledRectSizeControl && ((sizes.y > maxBillboardSize) ||
-            (sizes.x > maxBillboardSize))) {        
-            //Set maximum size as Carter's instructions
-            float correctionScale = 
-                sizes.y > maxBillboardSize ? maxBillboardSize / sizes.y :
-                                             maxBillboardSize / sizes.x;
+        if (enabledRectSizeControl && (length(sizes) > maxBillboardSize)) {
+            float correctionScale = maxBillboardSize / length(sizes);
             
             scaledRight *= correctionScale;
             scaledUp    *= correctionScale;

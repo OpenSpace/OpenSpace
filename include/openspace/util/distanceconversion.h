@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,6 +39,8 @@ enum class DistanceUnit {
     Nanometer = 0,
     Micrometer,
     Millimeter,
+    Centimeter,
+    Decimeter,
     Meter,
     Kilometer,
     AU,
@@ -66,6 +68,8 @@ enum class DistanceUnit {
 constexpr const char* DistanceUnitNanometer = "nanometer";
 constexpr const char* DistanceUnitMicrometer = "micrometer";
 constexpr const char* DistanceUnitMillimeter = "millimeter";
+constexpr const char* DistanceUnitCentimeter = "centimeter";
+constexpr const char* DistanceUnitDecimeter = "decimeter";
 constexpr const char* DistanceUnitMeter = "meter";
 constexpr const char* DistanceUnitKilometer = "km";
 constexpr const char* DistanceUnitAU = "AU";
@@ -91,6 +95,8 @@ constexpr const char* DistanceUnitLeague = "league";
 constexpr const char* DistanceUnitNanometers = "nanometers";
 constexpr const char* DistanceUnitMicrometers = "micrometers";
 constexpr const char* DistanceUnitMillimeters = "millimeters";
+constexpr const char* DistanceUnitCentimeters = "centimeters";
+constexpr const char* DistanceUnitDecimeters = "decimeters";
 constexpr const char* DistanceUnitMeters = "meters";
 constexpr const char* DistanceUnitKilometers = "km";
 constexpr const char* DistanceUnitAUs = "AU";
@@ -114,18 +120,20 @@ constexpr const char* DistanceUnitLeagues = "leagues";
 constexpr const std::array<DistanceUnit, static_cast<int>(DistanceUnit::League) + 1>
 DistanceUnits = {
     DistanceUnit::Nanometer, DistanceUnit::Micrometer, DistanceUnit::Millimeter,
-    DistanceUnit::Meter, DistanceUnit::Kilometer, DistanceUnit::AU,
-    DistanceUnit::Lighthour, DistanceUnit::Lightday, DistanceUnit::Lightmonth,
-    DistanceUnit::Lightyear, DistanceUnit::Parsec, DistanceUnit::Kiloparsec,
-    DistanceUnit::Megaparsec, DistanceUnit::Gigaparsec, DistanceUnit::Thou,
-    DistanceUnit::Inch, DistanceUnit::Foot, DistanceUnit::Yard, DistanceUnit::Chain,
-    DistanceUnit::Furlong, DistanceUnit::Mile, DistanceUnit::League
+    DistanceUnit::Centimeter, DistanceUnit::Decimeter, DistanceUnit::Meter,
+    DistanceUnit::Kilometer, DistanceUnit::AU, DistanceUnit::Lighthour,
+    DistanceUnit::Lightday, DistanceUnit::Lightmonth, DistanceUnit::Lightyear,
+    DistanceUnit::Parsec, DistanceUnit::Kiloparsec, DistanceUnit::Megaparsec,
+    DistanceUnit::Gigaparsec, DistanceUnit::Thou, DistanceUnit::Inch,
+    DistanceUnit::Foot, DistanceUnit::Yard, DistanceUnit::Chain, DistanceUnit::Furlong,
+    DistanceUnit::Mile, DistanceUnit::League
 };
 
 constexpr const std::array<const char*, static_cast<int>(DistanceUnit::League) + 1>
 DistanceUnitNamesSingular = {
     DistanceUnitNanometer, DistanceUnitMicrometer, DistanceUnitMillimeter,
-    DistanceUnitMeter, DistanceUnitKilometer, DistanceUnitAU, DistanceUnitLighthour,
+    DistanceUnitCentimeter, DistanceUnitDecimeter, DistanceUnitMeter,
+    DistanceUnitKilometer, DistanceUnitAU, DistanceUnitLighthour,
     DistanceUnitLightday, DistanceUnitLightmonth, DistanceUnitLightyear,
     DistanceUnitParsec, DistanceUnitKiloparsec, DistanceUnitMegaparsec,
     DistanceUnitGigaparsec, DistanceUnitThou, DistanceUnitInch, DistanceUnitFoot,
@@ -136,7 +144,8 @@ DistanceUnitNamesSingular = {
 constexpr const std::array<const char*, static_cast<int>(DistanceUnit::League) + 1>
 DistanceUnitNamesPlural = {
     DistanceUnitNanometers, DistanceUnitMicrometers, DistanceUnitMillimeters,
-    DistanceUnitMeters, DistanceUnitKilometers, DistanceUnitAUs, DistanceUnitLighthours,
+    DistanceUnitCentimeters, DistanceUnitDecimeters, DistanceUnitMeters,
+    DistanceUnitKilometers, DistanceUnitAUs, DistanceUnitLighthours,
     DistanceUnitLightdays, DistanceUnitLightmonths, DistanceUnitLightyears,
     DistanceUnitParsecs, DistanceUnitKiloparsecs, DistanceUnitMegaparsecs,
     DistanceUnitGigaparsecs, DistanceUnitThous, DistanceUnitInches, DistanceUnitFeet,
@@ -168,6 +177,8 @@ constexpr const char* nameForDistanceUnit(DistanceUnit unit, bool pluralForm = f
         case DistanceUnit::Nanometer:
         case DistanceUnit::Micrometer:
         case DistanceUnit::Millimeter:
+        case DistanceUnit::Centimeter:
+        case DistanceUnit::Decimeter:
         case DistanceUnit::Meter:
         case DistanceUnit::Kilometer:
         case DistanceUnit::AU:
@@ -232,7 +243,7 @@ constexpr DistanceUnit distanceUnitFromString(const char* unitName) {
 std::pair<double, std::string> simplifyDistance(double meters,
     bool forceSingularForm = false);
 
-constexpr double convertDistance(double meters, DistanceUnit requestedUnit) {
+constexpr double convertMeters(double meters, DistanceUnit requestedUnit) {
     switch (requestedUnit) {
         case DistanceUnit::Nanometer:
             return meters / 1e-9;
@@ -240,6 +251,10 @@ constexpr double convertDistance(double meters, DistanceUnit requestedUnit) {
             return meters / 1e-6;
         case DistanceUnit::Millimeter:
             return meters / 1e-3;
+        case DistanceUnit::Centimeter:
+            return meters / 1e-2;
+        case DistanceUnit::Decimeter:
+            return meters / 1e-1;
         case DistanceUnit::Meter:
             return meters;
         case DistanceUnit::Kilometer:
@@ -262,31 +277,88 @@ constexpr double convertDistance(double meters, DistanceUnit requestedUnit) {
             return meters / (1e6 * distanceconstants::Parsec);
         case DistanceUnit::Gigaparsec:
             return meters / (1e9 * distanceconstants::Parsec);
-        // Such wow, such coefficients
         case DistanceUnit::Thou:
-            return (meters * 1000.0 / 25.4) * 1000.0; // m -> mm -> inch -> thou
+            return meters / (1e-3 * distanceconstants::Inch);
         case DistanceUnit::Inch:
-            return (meters * 1000.0 / 25.4); // m -> mm -> inch
+            return meters / distanceconstants::Inch;
         case DistanceUnit::Foot:
-            return (meters * 1000.0 / 25.4) / 12.0; // m -> mm -> inch -> feet
+            return meters / distanceconstants::Foot;
         case DistanceUnit::Yard:
-            // m -> mm -> inch -> feet -> yard
-            return (meters * 1000.0 / 25.4) / 12.0 / 3.0;
+            return meters / distanceconstants::Yard;
         case DistanceUnit::Chain:
-            // m -> mm -> inch -> feet -> yard -> chain
-            return (meters * 1000.0 / 25.4) / 12.0 / 3.0 / 22.0;
+            return meters / distanceconstants::Chain;
         case DistanceUnit::Furlong:
-            // m -> mm -> inch -> feet -> yard -> chain -> furlong
-            return (meters * 1000.0 / 25.4) / 12.0 / 3.0 / 22.0 / 10.0;
+            return meters / (10.0 * distanceconstants::Chain);
         case DistanceUnit::Mile:
-            // m -> mm -> inch -> feet -> yard -> chain -> furlong -> mile
-            return (meters * 1000.0 / 25.4) / 12.0 / 3.0 / 22.0 / 10.0 / 8.0;
+            return meters / distanceconstants::Mile;
         case DistanceUnit::League:
-            // m -> mm -> inch -> feet -> yard -> chain -> furlong -> mile -> league
-            return (meters * 1000.0 / 25.4) / 12.0 / 3.0 / 22.0 / 10.0 / 8.0 / 3.0;
+            return meters / (3.0 * distanceconstants::Mile);
         default:
             throw ghoul::MissingCaseException();
     }
+}
+
+constexpr double toMeter(DistanceUnit unit) {
+    switch (unit) {
+        case DistanceUnit::Nanometer:
+            return 1e-9;
+        case DistanceUnit::Micrometer:
+            return 1e-6;
+        case DistanceUnit::Millimeter:
+            return 1e-3;
+        case DistanceUnit::Centimeter:
+            return 1e-2;
+        case DistanceUnit::Decimeter:
+            return 1e-1;
+        case DistanceUnit::Meter:
+            return 1.0;
+        case DistanceUnit::Kilometer:
+            return 1000.0;
+        case DistanceUnit::AU:
+            return distanceconstants::AstronomicalUnit;
+        case DistanceUnit::Lighthour:
+            return distanceconstants::LightHour;
+        case DistanceUnit::Lightday:
+            return distanceconstants::LightDay;
+        case DistanceUnit::Lightmonth:
+            return distanceconstants::LightMonth;
+        case DistanceUnit::Lightyear:
+            return distanceconstants::LightYear;
+        case DistanceUnit::Parsec:
+            return distanceconstants::Parsec;
+        case DistanceUnit::Kiloparsec:
+            return 1e3 * distanceconstants::Parsec;
+        case DistanceUnit::Megaparsec:
+            return 1e6 * distanceconstants::Parsec;
+        case DistanceUnit::Gigaparsec:
+            return 1e9 * distanceconstants::Parsec;
+        case DistanceUnit::Thou:
+            return 1e-3 * distanceconstants::Inch;
+        case DistanceUnit::Inch:
+            return distanceconstants::Inch;
+        case DistanceUnit::Foot:
+            return distanceconstants::Foot;
+        case DistanceUnit::Yard:
+            return distanceconstants::Yard;
+        case DistanceUnit::Chain:
+            return distanceconstants::Chain;
+        case DistanceUnit::Furlong:
+            return 10.0 * distanceconstants::Chain;
+        case DistanceUnit::Mile:
+            return distanceconstants::Mile;
+        case DistanceUnit::League:
+            return 3.0 * distanceconstants::Mile;
+        default:
+            throw ghoul::MissingCaseException();
+    }
+}
+
+constexpr double convertUnit(DistanceUnit fromUnit, DistanceUnit toUnit) {
+    return convertMeters(toMeter(fromUnit), toUnit);
+}
+
+constexpr double convertDistance(double distance, DistanceUnit fromUnit, DistanceUnit toUnit) {
+    return distance * convertUnit(fromUnit, toUnit);
 }
 
 float convertMasPerYearToMeterPerSecond(float masPerYear, float parallax);

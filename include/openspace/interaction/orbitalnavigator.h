@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -268,7 +268,7 @@ private:
     */
     glm::dvec3 moveCameraAlongVector(const glm::dvec3& camPos,
         double distFromCameraToFocus, const glm::dvec3& camPosToCenterPosDiff,
-        double destination) const;
+        double destination, double deltaTime) const;
 
     /*
      * Adds rotation to the camera position so that it follows the rotation of the anchor

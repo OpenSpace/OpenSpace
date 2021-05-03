@@ -5,49 +5,50 @@ asset.require('./trail')
 local labelsPath = asset.require('../saturn_globelabels').LabelsPath
 
 local Iapetus = {
-    Identifier = "Iapetus",
-    Parent = transforms.SaturnBarycenter.Identifier,
-    Transform = {
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "IAPETUS",
-            Observer = "SATURN BARYCENTER",
-            Kernels = kernel
-        },
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "IAU_IAPETUS",
-            DestinationFrame = "GALACTIC"
-        }
+  Identifier = "Iapetus",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "IAPETUS",
+      Observer = "SATURN BARYCENTER",
+      Kernels = kernel
     },
-    Renderable = {
-        Type = "RenderableGlobe",
-        Radii = 734000,
-        SegmentsPerPatch = 64,
-        Layers = {},
-        Labels = {
-            Enable = false,
-            FileName = labelsPath .. "/iapetus.labels",
-            LabelAlignmentOption = "Horizontally", -- or Circularly
-            LabelsFontSize = 14.0,
-            LabelsSize = 8.0,
-            LabelsMinSize = 1.0,
-            LabelsMaxSize = 1500.0,
-            ProximityEnabled = false,
-            LabelsFadeInEnabled = true,
-            FadeInStartingDistance = 500000.0,
-            FadeOutStartingDistance = 1000000.0,
-            LabelsForceDomeRendering = true,
-            LabelsDistanceEPS = 1350000.0,
-            LabelsColor = { 1.0, 1.0, 0.0 }
-        }
-    },
-    Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
-    GUI = {
-        Name = "Iapetus",
-        Path = "/Solar System/Planets/Saturn/Moons",
-        Description = [[Third largest moon of Saturn. ]]
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "IAU_IAPETUS",
+      DestinationFrame = "GALACTIC"
     }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = 734000,
+    SegmentsPerPatch = 64,
+    Layers = {},
+    Labels = {
+      Enable = false,
+      FileName = labelsPath .. "/iapetus.labels",
+      LabelAlignmentOption = "Horizontally", -- or Circularly
+      LabelsFontSize = 30.0,
+      LabelsSize = 8.0,
+      LabelsMinSize = 1.0,
+      LabelsMaxSize = 1500.0,
+      ProximityEnabled = false,
+      LabelsFadeInEnabled = true,
+      LabelsFadeOutEnabled = true,
+      FadeInStartingDistance = 3500000.0,
+      FadeOutStartingDistance = 600000.0,
+      LabelsForceDomeRendering = true,
+      LabelsDistanceEPS = 250000.0,
+      LabelsColor = { 1.0, 1.0, 0.0 }
+    }
+  },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
+  GUI = {
+    Name = "Iapetus",
+    Path = "/Solar System/Planets/Saturn/Moons",
+    Description = [[Third largest moon of Saturn.]]
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Iapetus })

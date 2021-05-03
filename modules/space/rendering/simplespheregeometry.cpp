@@ -1,8 +1,8 @@
-﻿/****************************************************************************************
+/****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,30 +41,23 @@ namespace {
         "Segments",
         "This value specifies the number of segments that this sphere is split into."
     };
+
+    struct [[codegen::Dictionary(SimpleSphereGeometry)]] Parameters {
+        // [[codegen::verbatim(RadiusInfo.description)]]
+        std::variant<float, glm::vec3> radius;
+
+        // [[codegen::verbatim(SegmentsInfo.description)]]
+        int segments;
+    };
+#include "simplespheregeometry_codegen.cpp"
 } // namespace
 
 namespace openspace::planetgeometry {
 
 documentation::Documentation SimpleSphereGeometry::Documentation() {
-    using namespace documentation;
-    return {
-        "SimpleSphereGeometry",
-        "space_geometry_simplesphere",
-        {
-            {
-                RadiusInfo.identifier,
-                new OrVerifier({ new DoubleVerifier, new DoubleVector3Verifier }),
-                Optional::No,
-                RadiusInfo.description
-            },
-            {
-                SegmentsInfo.identifier,
-                new IntVerifier,
-                Optional::No,
-                SegmentsInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "space_geometry_simplesphere";
+    return doc;
 }
 
 SimpleSphereGeometry::SimpleSphereGeometry(const ghoul::Dictionary& dictionary)
@@ -72,23 +65,17 @@ SimpleSphereGeometry::SimpleSphereGeometry(const ghoul::Dictionary& dictionary)
     , _segments(SegmentsInfo, 20, 1, 5000)
     , _sphere(nullptr)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "SimpleSphereGeometry"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    if (dictionary.hasKeyAndValue<double>(RadiusInfo.identifier)) {
-        const float r = static_cast<float>(
-            dictionary.value<double>(RadiusInfo.identifier)
-        );
-        _radius = { r, r, r };
+    if (std::holds_alternative<float>(p.radius)) {
+        const float radius = std::get<float>(p.radius);
+        _radius = glm::dvec3(radius, radius, radius);
     }
     else {
-        _radius = dictionary.value<glm::vec3>(RadiusInfo.identifier);
+        _radius = std::get<glm::vec3>(p.radius);
     }
 
-    _segments = static_cast<int>(dictionary.value<double>(SegmentsInfo.identifier));
+    _segments = p.segments;
 
     // The shader need the radii values but they are not changeable runtime
     // TODO: Possibly add a scaling property @AA

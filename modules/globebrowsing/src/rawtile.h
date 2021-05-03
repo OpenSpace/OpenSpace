@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -54,8 +54,6 @@ struct RawTile {
     ReadError error = ReadError::None;
     GLuint pbo = 0;
 };
-
-RawTile createDefaultTile(TileTextureInitData initData);
 
 } // namespace openspace::globebrowsing
 

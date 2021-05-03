@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -56,8 +56,7 @@ void JoystickCameraStates::updateStateFromInput(const InputState& inputState,
         float value = inputState.joystickAxis(i);
 
         if (std::fabs(value) <= t.deadzone) {
-            value = 0.f;
-            hasValue = false;
+            continue;
         }
 
         if (t.normalize) {

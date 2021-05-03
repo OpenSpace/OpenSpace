@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,21 +29,43 @@
 
 namespace openspace::documentation {
 
+template <>
+TestResult TemplateVerifier<glm::ivec2>::operator()(const ghoul::Dictionary& dict,
+    const std::string& key) const;
+
+template <>
+TestResult TemplateVerifier<glm::ivec3>::operator()(const ghoul::Dictionary& dict,
+    const std::string& key) const;
+
+template <>
+TestResult TemplateVerifier<glm::ivec4>::operator()(const ghoul::Dictionary& dict,
+    const std::string& key) const;
+
 template <typename T>
 TestResult TemplateVerifier<T>::operator()(const ghoul::Dictionary& dict,
                                            const std::string& key) const
 {
-    if (dict.hasKeyAndValue<Type>(key)) {
-        return { true, {}, {} };
+    TestResult res;
+    if (dict.hasValue<Type>(key)) {
+        res.success = true;
     }
     else {
+        res.success = false;
+
         if (dict.hasKey(key)) {
-            return { false, { { key, TestResult::Offense::Reason::WrongType } }, {} };
+            TestResult::Offense o;
+            o.offender = key;
+            o.reason = TestResult::Offense::Reason::WrongType;
+            res.offenses.push_back(o);
         }
         else {
-            return { false, { { key, TestResult::Offense::Reason::MissingKey } }, {} };
+            TestResult::Offense o;
+            o.offender = key;
+            o.reason = TestResult::Offense::Reason::MissingKey;
+            res.offenses.push_back(o);
         }
     }
+    return res;
 }
 
 template <typename T>
@@ -122,11 +144,38 @@ TestResult OperatorVerifier<T, Operator>::operator()(const ghoul::Dictionary& di
 {
     TestResult res = T::operator()(dict, key);
     if (res.success) {
-        if (Operator()(dict.value<typename T::Type>(key), value)) {
+        typename T::Type val;
+        if constexpr (std::is_same_v<typename T::Type, int>) {
+            const double d = dict.value<double>(key);
+            double intPart;
+            bool isInt = modf(d, &intPart) == 0.0;
+            if (isInt) {
+                val = static_cast<int>(d);
+            }
+            else {
+                TestResult r;
+                r.success = false;
+                TestResult::Offense o;
+                o.offender = key;
+                o.reason = TestResult::Offense::Reason::WrongType;
+                r.offenses.push_back(o);
+                return r;
+            }
+        }
+        else {
+            val = dict.value<typename T::Type>(key);
+        }
+        if (Operator()(val, value)) {
             return { true, {}, {} };
         }
         else {
-            return { false, { { key, TestResult::Offense::Reason::Verification } }, {} };
+            TestResult r;
+            r.success = false;
+            TestResult::Offense o;
+            o.offender = key;
+            o.reason = TestResult::Offense::Reason::Verification;
+            r.offenses.push_back(o);
+            return r;            
         }
     }
     else {
@@ -183,7 +232,13 @@ TestResult InListVerifier<T>::operator()(const ghoul::Dictionary& dict,
             return { true, {}, {} };
         }
         else {
-            return { false, { { key, TestResult::Offense::Reason::Verification } }, {} };
+            TestResult r;
+            r.success = false;
+            TestResult::Offense o;
+            o.offender = key;
+            o.reason = TestResult::Offense::Reason::Verification;
+            r.offenses.push_back(o);
+            return r;
         }
     }
     else {
@@ -229,7 +284,13 @@ TestResult NotInListVerifier<T>::operator()(const ghoul::Dictionary& dict,
             return { true, {}, {} };
         }
         else {
-            return { false, { { key, TestResult::Offense::Reason::Verification } }, {} };
+            TestResult r;
+            r.success = false;
+            TestResult::Offense o;
+            o.offender = key;
+            o.reason = TestResult::Offense::Reason::Verification;
+            r.offenses.push_back(o);
+            return r;            
         }
     }
     else {
@@ -270,13 +331,39 @@ TestResult InRangeVerifier<T>::operator()(const ghoul::Dictionary& dict,
 {
     TestResult res = T::operator()(dict, key);
     if (res.success) {
-        typename T::Type val = dict.value<typename T::Type>(key);
+        typename T::Type val;
+        if constexpr (std::is_same_v<typename T::Type, int>) {
+            const double d = dict.value<double>(key);
+            double intPart;
+            bool isInt = modf(d, &intPart) == 0.0;
+            if (isInt) {
+                val = static_cast<int>(d);
+            }
+            else {
+                TestResult r;
+                r.success = false;
+                TestResult::Offense o;
+                o.offender = key;
+                o.reason = TestResult::Offense::Reason::WrongType;
+                r.offenses.push_back(o);
+                return r;                    
+            }
+        }
+        else {
+            val = dict.value<typename T::Type>(key);
+        }
 
         if (val >= lower && val <= upper) {
             return { true, {}, {} };
         }
         else {
-            return { false, { { key, TestResult::Offense::Reason::Verification } }, {} };
+            TestResult r;
+            r.success = false;
+            TestResult::Offense o;
+            o.offender = key;
+            o.reason = TestResult::Offense::Reason::Verification;
+            r.offenses.push_back(o);
+            return r;               
         }
     }
     else {
@@ -303,10 +390,36 @@ TestResult NotInRangeVerifier<T>::operator()(const ghoul::Dictionary& dict,
                                              const std::string& key) const {
     TestResult res = T::operator()(dict, key);
     if (res.success) {
-        typename T::Type val = dict.value<typename T::Type>(key);
+        typename T::Type val;
+        if constexpr (std::is_same_v<typename T::Type, int>) {
+            const double d = dict.value<double>(key);
+            double intPart;
+            bool isInt = modf(d, &intPart) == 0.0;
+            if (isInt) {
+                val = static_cast<int>(d);
+            }
+            else {
+                TestResult r;
+                r.success = false;
+                TestResult::Offense o;
+                o.offender = key;
+                o.reason = TestResult::Offense::Reason::WrongType;
+                r.offenses.push_back(o);
+                return r;                    
+            }
+        }
+        else {
+            val = dict.value<typename T::Type>(key);
+        }
 
         if (val >= lower && val <= upper) {
-            return { false, { { key, TestResult::Offense::Reason::Verification } }, {} };
+            TestResult r;
+            r.success = false;
+            TestResult::Offense o;
+            o.offender = key;
+            o.reason = TestResult::Offense::Reason::Verification;
+            r.offenses.push_back(o);
+            return r;                
         }
         else {
             return { true, {}, {} };
@@ -328,7 +441,7 @@ template <typename T>
 AnnotationVerifier<T>::AnnotationVerifier(std::string a)
     : annotation(std::move(a))
 {
-    ghoul_assert(!annotation.empty(), "Annotation must not be empty");
+
 }
 
 template <typename T>
@@ -341,9 +454,10 @@ TestResult DeprecatedVerifier<T>::operator()(const ghoul::Dictionary& dict,
                                              const std::string& key) const
 {
     TestResult res = T::operator()(dict, key);
-    res.warnings.push_back(
-        TestResult::Warning{ key, TestResult::Warning::Reason::Deprecated }
-    );
+    TestResult::Warning w;
+    w.offender = key;
+    w.reason = TestResult::Warning::Reason::Deprecated;
+    res.warnings.push_back(w);
     return res;
 }
 

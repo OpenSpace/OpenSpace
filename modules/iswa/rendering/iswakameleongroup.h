@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,7 +36,7 @@ public:
 
     virtual void clearGroup() override;
 
-    std::vector<int> fieldlineValue() const;
+    std::set<std::string> fieldlineValue() const;
     void setFieldlineInfo(std::string fieldlineIndexFile, std::string kameleonPath);
     void changeCdf(std::string path);
 

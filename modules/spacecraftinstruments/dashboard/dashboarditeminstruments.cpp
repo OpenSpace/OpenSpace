@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -87,47 +87,29 @@ namespace {
     glm::vec2 addToBoundingbox(glm::vec2 lhs, glm::vec2 rhs) {
         return { std::max(lhs.x, rhs.x), lhs.y + rhs.y };
     }
+
+    struct [[codegen::Dictionary(DashboardItemInstruments)]] Parameters {
+        // [[codegen::verbatim(FontNameInfo.description)]]
+        std::optional<std::string> fontName;
+
+        // [[codegen::verbatim(FontSizeInfo.description)]]
+        std::optional<float> fontSize;
+
+        // [[codegen::verbatim(ActiveColorInfo.description)]]
+        std::optional<glm::dvec3> activeColor [[codegen::color()]];
+
+        // [[codegen::verbatim(FlashColorInfo.description)]]
+        std::optional<glm::dvec3> flashColor [[codegen::color()]];
+    };
+#include "dashboarditeminstruments_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation DashboardItemInstruments::Documentation() {
-    using namespace documentation;
-    return {
-        "DashboardItem Instruments",
-        "spacecraftinstruments_dashboarditem_instuments",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("DashboardItemInstruments"),
-                Optional::No
-            },
-            {
-                FontNameInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                FontNameInfo.description
-            },
-            {
-                FontSizeInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                FontSizeInfo.description
-            },
-            {
-                ActiveColorInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                ActiveColorInfo.description
-            },
-            {
-                FlashColorInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::Yes,
-                FlashColorInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "spacecraftinstruments_dashboarditem_instuments";
+    return doc;
 }
 
 DashboardItemInstruments::DashboardItemInstruments(const ghoul::Dictionary& dictionary)
@@ -147,24 +129,15 @@ DashboardItemInstruments::DashboardItemInstruments(const ghoul::Dictionary& dict
     )
     , _font(global::fontManager->font(KeyFontMono, 10))
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "DashboardItemInstruments"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    if (dictionary.hasKey(FontNameInfo.identifier)) {
-        _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
-    }
-    if (dictionary.hasKey(FontSizeInfo.identifier)) {
-        _fontSize = static_cast<float>(dictionary.value<double>(FontSizeInfo.identifier));
-    }
-
+    _fontName = p.fontName.value_or(_fontName);
     _fontName.onChange([this]() {
         _font = global::fontManager->font(_fontName, _fontSize);
     });
     addProperty(_fontName);
 
+    _fontSize = p.fontSize.value_or(_fontSize);
     _fontSize.onChange([this]() {
         _font = global::fontManager->font(_fontName, _fontSize);
     });
@@ -275,7 +248,6 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
         sequencer.activeInstruments(currentTime);
 
     glm::vec4 firing(0.58f - t, 1.f - t, 1.f - t, 1.f);
-    glm::vec4 notFiring(0.5f, 0.5f, 0.5f, 1.f);
 
     RenderFont(
         *_font,
@@ -334,7 +306,6 @@ glm::vec2 DashboardItemInstruments::size() const {
 
 
     if (remaining > 0) {
-        using FR = ghoul::fontrendering::FontRenderer;
         std::string progress = progressToStr(25, t);
 
         size = addToBoundingbox(

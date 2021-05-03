@@ -4,136 +4,132 @@ local kernels = asset.require('./dawn_kernels').Kernels
 
 
 local textures = asset.syncedResource({
-    Name = "Vesta Textures",
-    Type = "HttpSynchronization",
-    Identifier = "vesta_textures",
-    Version = 1
+  Name = "Vesta Textures",
+  Type = "HttpSynchronization",
+  Identifier = "vesta_textures",
+  Version = 1
 })
 
 local images = asset.syncedResource({
-    Name = "Vesta Images",
-    Type = "HttpSynchronization",
-    Identifier = "vesta_images",
-    Version = 1
+  Name = "Vesta Images",
+  Type = "HttpSynchronization",
+  Identifier = "vesta_images",
+  Version = 1
 })
 
 local models = asset.syncedResource({
-    Name = "Vesta Models",
-    Type = "HttpSynchronization",
-    Identifier = "vesta_model",
-    Version = 1
+  Name = "Vesta Models",
+  Type = "HttpSynchronization",
+  Identifier = "vesta_model",
+  Version = 1
 })
 
 local Vesta = {
-    Identifier = "Vesta",
-    Parent = transforms.SolarSystemBarycenter.Identifier,
-    Transform = {
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "VESTA",
-            Observer = "SUN",
-            Kernels = {
-                --kernels .. "/dawn_vesta_v06.tpc",
-                kernels .. "/sb_vesta_071107.bsp"
-            }
-        },
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "IAU_VESTA",
-            DestinationFrame = "GALACTIC"
-        }
+  Identifier = "Vesta",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "VESTA",
+      Observer = "SUN",
+      Kernels = {
+        --kernels .. "/dawn_vesta_v06.tpc",
+        kernels .. "/sb_vesta_071107.bsp"
+      }
     },
-    Renderable = {
-        Type = "RenderableModelProjection",
-        Geometry = {
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/VestaComet_5000.obj",
-            ColorTexture = textures .. "/dummy.jpg"
-        },
-        BoundingSphereRadius = 10.0,
-        Projection = {
-            Sequence   = images,
-            SequenceType = "image-sequence",
-            Observer   = "DAWN",
-            Target     = "VESTA",
-            Aberration = "NONE",
-            
-            DataInputTranslation = {
-                Instrument = {
-                    -- FC1 = {
-                    --     DetectorType  = "Camera",
-                    --     Spice = { "DAWN_FC1" },
-                    -- },
-                    FC2 = {
-                        DetectorType  = "Camera",
-                        Spice = { "DAWN_FC2" }
-                    }
-                },
-                Target = { 
-                    Read  = {
-                        "TARGET_NAME",
-                        "INSTRUMENT_HOST_NAME",
-                        "INSTRUMENT_ID",
-                        "START_TIME",
-                        "STOP_TIME",
-                        --"DETECTOR_TYPE",
-                        --"SEQUENCE_ID"
-                    },
-                    Convert = {
-                        VESTA           = { "VESTA" },
-                        DAWN            = { "DAWN" },
-                        --FRAMINGCAMERA1  = { "DAWN_FC1" },
-                        FRAMINGCAMERA2  = { "DAWN_FC2" },
-                        --FC1           = { "DAWN_FC1" },
-                        FC2             = { "DAWN_FC2" }
-                    }
-                }
-            },
-            Instrument = {
-                Name       = "DAWN_FC2",
-                Method     = "ELLIPSOID",
-                Aberration = "NONE",
-                Fovy       = 5.46,
-                Aspect     = 1
-            },
-            
-            --[[ Instrument = {
-                Name       = "DAWN_FC1",
-                Method     = "ELLIPSOID",
-                Aberration = "NONE",
-                Fovy       = 5.46,
-                Aspect     = 1,
-                Near       = 0.2,
-                Far        = 10000
-            },--]]
-            PotentialTargets = { "VESTA" }
-        }
-    },
-    GUI = {
-        Path = "/Solar System/Asteroid Belt/Vesta"
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "IAU_VESTA",
+      DestinationFrame = "GALACTIC"
     }
+  },
+  Renderable = {
+    Type = "RenderableModelProjection",
+    GeometryFile = models .. "/VestaComet_5000.obj",
+    BoundingSphereRadius = 10.0,
+    Projection = {
+      Sequence   = images,
+      SequenceType = "image-sequence",
+      Observer   = "DAWN",
+      Target     = "VESTA",
+      Aberration = "NONE",
+      
+      DataInputTranslation = {
+        Instrument = {
+          -- FC1 = {
+          --   DetectorType  = "Camera",
+          --   Spice = { "DAWN_FC1" },
+          -- },
+          FC2 = {
+            DetectorType  = "Camera",
+            Spice = { "DAWN_FC2" }
+          }
+        },
+        Target = { 
+          Read  = {
+            "TARGET_NAME",
+            "INSTRUMENT_HOST_NAME",
+            "INSTRUMENT_ID",
+            "START_TIME",
+            "STOP_TIME",
+            --"DETECTOR_TYPE",
+            --"SEQUENCE_ID"
+          },
+          Convert = {
+            VESTA           = { "VESTA" },
+            DAWN            = { "DAWN" },
+            --FRAMINGCAMERA1  = { "DAWN_FC1" },
+            FRAMINGCAMERA2  = { "DAWN_FC2" },
+            --FC1           = { "DAWN_FC1" },
+            FC2             = { "DAWN_FC2" }
+          }
+        }
+      },
+      Instrument = {
+        Name       = "DAWN_FC2",
+        Method     = "ELLIPSOID",
+        Aberration = "NONE",
+        Fovy       = 5.46,
+        Aspect     = 1
+      },
+      
+      --[[ Instrument = {
+          Name       = "DAWN_FC1",
+          Method     = "ELLIPSOID",
+          Aberration = "NONE",
+          Fovy       = 5.46,
+          Aspect     = 1,
+          Near       = 0.2,
+          Far        = 10000
+      },--]]
+      PotentialTargets = { "VESTA" }
+    }
+  },
+  GUI = {
+    Path = "/Solar System/Asteroid Belt/Vesta"
+  }
 }
 
 local VestaTrail = {
-    Identifier = "VestaTrail",
-    Parent = transforms.SolarSystemBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailOrbit",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "VESTA",
-            Observer = "SUN"
-        },
-        Color = { 0.7, 0.8, 0.7 },
-        StartTime = "2007 JUL 20 12:00:00",
-        EndTime = "2018 JAN 22 12:00:00",
-        Period = 1325.0,
-        Resolution = 3600 * 24
+  Identifier = "VestaTrail",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "VESTA",
+      Observer = "SUN"
     },
-    GUI = {
-        Name = "Vesta Trail",
-        Path = "/Solar System/Asteroid Belt/Vesta"
-    }
+    Color = { 0.7, 0.8, 0.7 },
+    StartTime = "2007 JUL 20 12:00:00",
+    EndTime = "2018 JAN 22 12:00:00",
+    Period = 1325.0,
+    Resolution = 3600 * 24
+  },
+  GUI = {
+    Name = "Vesta Trail",
+    Path = "/Solar System/Asteroid Belt/Vesta"
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Vesta, VestaTrail })

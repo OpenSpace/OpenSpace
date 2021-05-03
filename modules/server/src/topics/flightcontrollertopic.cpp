@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -47,8 +47,6 @@
 #include <unordered_map>
 
 namespace {
-    constexpr const char* BasePathToken = "${BASE}";
-
     enum class Command {
         Connect = 0,
         Disconnect,
@@ -90,12 +88,7 @@ namespace {
     constexpr const char* AutopilotEngagedKey = "engaged";
     constexpr const char* AutopilotInputKey = "autopilotInput";
 
-    constexpr const char* FlightControllerType = "flightcontroller";
-
     // Friction JSON Keys
-    constexpr const char* FrictionEngagedKey = "engaged";
-    constexpr const char* FrictionPropertyUri =
-        "NavigationHandler.OrbitalNavigator.Friction";
     constexpr const char* FrictionRotationKey = "rotation";
     constexpr const char* FrictionZoomKey = "zoom";
     constexpr const char* FrictionRollKey = "roll";
@@ -104,7 +97,6 @@ namespace {
     constexpr const char* RollFriction = "Friction.RollFriction";
 
     // Friction Lua Keys
-    constexpr const char* LuaKey = "lua";
     constexpr const char* LuaScript = "script";
 
     constexpr const char* OrbitX = "orbitX";
@@ -148,9 +140,6 @@ namespace {
         { Friction, Command::Friction },
         { Lua, Command::Lua }
     });
-
-    const int Axes = 10;
-
 } // namespace
 
 using nlohmann::json;

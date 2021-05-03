@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <ghoul/misc/assert.h>
+#include <ghoul/glm.h>
 #include <cstring>
 
 namespace openspace {
@@ -36,7 +37,7 @@ void SyncBuffer::encode(const T& v) {
         _dataStream.resize(anticpatedBufferSize);
     }
 
-    memcpy(_dataStream.data() + _encodeOffset, &v, size);
+    std::memcpy(_dataStream.data() + _encodeOffset, &v, size);
     _encodeOffset += size;
 }
 
@@ -45,7 +46,7 @@ T SyncBuffer::decode() {
     const size_t size = sizeof(T);
     ghoul_assert(_decodeOffset + size < _n, "");
     T value;
-    memcpy(&value, _dataStream.data() + _decodeOffset, size);
+    std::memcpy(&value, _dataStream.data() + _decodeOffset, size);
     _decodeOffset += size;
     return value;
 }
@@ -54,7 +55,7 @@ template <typename T>
 void SyncBuffer::decode(T& value) {
     const size_t size = sizeof(T);
     ghoul_assert(_decodeOffset + size < _n, "");
-    memcpy(&value, _dataStream.data() + _decodeOffset, size);
+    std::memcpy(&value, _dataStream.data() + _decodeOffset, size);
     _decodeOffset += size;
 }
 

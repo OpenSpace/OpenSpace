@@ -4,27 +4,27 @@ local globeIdentifier = asset.require("./../../earth").Earth.Identifier
 local fallBackLayer = asset.require("./fallbacks/earth_night_texture").layer
 
 local layer = {
-    Identifier = "Earth_at_Night_2012",
-    Name = "Earth at Night 2012",
-    FilePath = mapServiceConfigsPath .. "/GIBS/night/VIIRS_CityLights_2012.wms",
-    Fallback = fallBackLayer,
-    Description = [[ The lights of cities and villages trace the outlines of civilization
-        in this global view. ]],
+  Identifier = "Earth_at_Night_2012",
+  Name = "Earth at Night 2012",
+  FilePath = mapServiceConfigsPath .. "/GIBS/night/VIIRS_CityLights_2012.wms",
+  Fallback = fallBackLayer,
+  Description = [[ The lights of cities and villages trace the outlines of civilization
+    in this global view. ]],
 }
 
 asset.onInitialize(function () 
-    openspace.globebrowsing.addLayer(globeIdentifier, "NightLayers", layer)
+  openspace.globebrowsing.addLayer(globeIdentifier, "NightLayers", layer)
 end)
 
 asset.export("layer", layer)
 
 
 asset.meta = {
-    Name = "Earth at Night 2012",
-    Version = "1.0",
-    Description = [[Main web loaded night layer for Earth. This layer is hosted by GIBS.]],
-    Author = "OpenSpace Team",
-    URL = "https://visibleearth.nasa.gov/images/79765/night-lights-2012-map",
-    License = "NASA",
-    Identifiers = {"Earth_at_Night_2012"}
+  Name = "Earth at Night 2012",
+  Version = "1.0",
+  Description = [[Main web loaded night layer for Earth. This layer is hosted by GIBS.]],
+  Author = "OpenSpace Team",
+  URL = "https://visibleearth.nasa.gov/images/79765/night-lights-2012-map",
+  License = "NASA",
+  Identifiers = {"Earth_at_Night_2012"}
 }

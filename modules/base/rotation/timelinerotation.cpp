@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,55 +30,32 @@
 #include <openspace/util/time.h>
 
 namespace {
-    constexpr const char* KeyType = "Type";
-    constexpr const char* KeyKeyframes = "Keyframes";
+    struct [[codegen::Dictionary(TimelineRotation)]] Parameters {
+        // A table of keyframes, with keys formatted as YYYY-MM-DDTHH:MM:SS and values
+        // that are valid Rotation objects
+        std::map<std::string, ghoul::Dictionary> keyframes
+            [[codegen::reference("core_transform_rotation")]];
+    };
+#include "timelinerotation_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation TimelineRotation::Documentation() {
-    using namespace documentation;
-    return {
-        "Timeline Rotation",
-        "base_transform_rotation_keyframe",
-        {
-            {
-                KeyType,
-                new StringEqualVerifier("TimelineRotation"),
-                Optional::No
-            },
-            {
-                KeyKeyframes,
-                new TableVerifier({
-                    { "*", new TableVerifier(), Optional::No, "Any translation object" }
-                }),
-                Optional::No,
-                "A table of keyframes, with keys formatted as YYYY-MM-DDTHH:MM:SS"
-                "and values that are valid Rotation objects."
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_transform_rotation_keyframe";
+    return doc;
 }
 
 TimelineRotation::TimelineRotation(const ghoul::Dictionary& dictionary) {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "TimelineTranslation"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    const ghoul::Dictionary& keyframes =
-        dictionary.value<ghoul::Dictionary>(KeyKeyframes);
+    for (const std::pair<const std::string, ghoul::Dictionary>& kf : p.keyframes) {
+        const double t = Time::convertTime(kf.first);
 
-    std::vector<std::string> timeStrings = keyframes.keys();
-    for (const std::string& timeString : timeStrings) {
-        const double t = Time::convertTime(timeString);
-
-        ghoul::mm_unique_ptr<Rotation> rotation =
-            Rotation::createFromDictionary(
-                keyframes.value<ghoul::Dictionary>(timeString)
-            );
-
+        ghoul::mm_unique_ptr<Rotation> rotation = Rotation::createFromDictionary(
+            kf.second
+        );
         if (rotation) {
             _timeline.addKeyframe(t, std::move(rotation));
         }

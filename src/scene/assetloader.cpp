@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -76,7 +76,8 @@ namespace {
     enum class PathType {
         RelativeToAsset = 0,
         RelativeToAssetRoot,
-        Absolute
+        Absolute,
+        Tokenized
     };
 
     PathType classifyPath(const std::string& path) {
@@ -88,6 +89,9 @@ namespace {
         }
         if (path.size() > 3 && path[1] == ':' && (path[2] == '\\' || path[2] == '/')) {
             return PathType::Absolute;
+        }
+        if (path.size() > 3 && path[0] == '$' && path[1] == '{') {
+            return PathType::Tokenized;
         }
         if (path.size() > 1 && (path[0] == '\\' || path[0] == '/')) {
             return PathType::Absolute;
@@ -299,15 +303,33 @@ bool AssetLoader::loadAsset(Asset* asset) {
             ghoul::lua::luaDictionaryFromState(*_luaState, metaDict);
 
             Asset::MetaInformation meta;
-            metaDict.getValue(MetaInformationName, meta.name);
-            metaDict.getValue(MetaInformationVersion, meta.version);
-            metaDict.getValue(MetaInformationDescription, meta.description);
-            metaDict.getValue(MetaInformationAuthor, meta.author);
-            metaDict.getValue(MetaInformationURL, meta.url);
-            metaDict.getValue(MetaInformationLicense, meta.license);
-            if (metaDict.hasKey(MetaInformationIdentifiers)) {
-                ghoul::Dictionary iddict = metaDict.value<ghoul::Dictionary>(MetaInformationIdentifiers);
-                for (int i = 1; i <= iddict.size(); ++i) {
+            if (metaDict.hasValue<std::string>(MetaInformationName)) {
+                meta.name = metaDict.value<std::string>(MetaInformationName);
+
+            }
+            if (metaDict.hasValue<std::string>(MetaInformationVersion)) {
+                meta.version = metaDict.value<std::string>(MetaInformationVersion);
+
+            }
+            if (metaDict.hasValue<std::string>(MetaInformationDescription)) {
+                meta.description =
+                    metaDict.value<std::string>(MetaInformationDescription);
+
+            }
+            if (metaDict.hasValue<std::string>(MetaInformationAuthor)) {
+                meta.author = metaDict.value<std::string>(MetaInformationAuthor);
+
+            }
+            if (metaDict.hasValue<std::string>(MetaInformationURL)) {
+                meta.url = metaDict.value<std::string>(MetaInformationURL);
+            }
+            if (metaDict.hasValue<std::string>(MetaInformationLicense)) {
+                meta.license = metaDict.value<std::string>(MetaInformationLicense);
+            }
+            if (metaDict.hasValue<ghoul::Dictionary>(MetaInformationIdentifiers)) {
+                ghoul::Dictionary iddict =
+                    metaDict.value<ghoul::Dictionary>(MetaInformationIdentifiers);
+                for (size_t i = 1; i <= iddict.size(); ++i) {
                     std::string key = std::to_string(i);
                     std::string identifier = iddict.value<std::string>(key);
                     meta.identifiers.push_back(identifier);
@@ -332,7 +354,7 @@ void AssetLoader::unloadAsset(Asset* asset) {
     }
     _onDeinitializationFunctionRefs[asset].clear();
 
-    for (const std::pair<const Asset*, std::vector<int>>& it :
+    for (std::pair<Asset*, std::vector<int>> it :
          _onDependencyInitializationFunctionRefs[asset])
     {
         for (int ref : it.second) {
@@ -341,7 +363,7 @@ void AssetLoader::unloadAsset(Asset* asset) {
     }
     _onDependencyInitializationFunctionRefs.erase(asset);
 
-    for (const std::pair<Asset*, std::vector<int>>& it :
+    for (std::pair<Asset*, std::vector<int>> it :
          _onDependencyDeinitializationFunctionRefs[asset])
     {
         for (int ref : it.second) {
@@ -376,10 +398,13 @@ std::string AssetLoader::generateAssetPath(const std::string& baseDirectory,
     const bool hasAssetSuffix =
         (assetPath.size() > assetSuffix.size()) &&
         (assetPath.substr(assetPath.size() - assetSuffix.size()) == assetSuffix);
-    const std::string fullAssetPath =
-        hasAssetSuffix ?
-        prefix + assetPath :
-        prefix + assetPath + assetSuffix;
+    std::string fullAssetPath =
+        (pathType == PathType::Tokenized) ?
+        absPath(assetPath) :
+        prefix + assetPath;
+    if (!hasAssetSuffix) {
+        fullAssetPath += assetSuffix;
+    }
     bool fullAssetPathExists = FileSys.fileExists(FileSys.absPath(fullAssetPath));
 
     // Construct the full path including the .scene extension

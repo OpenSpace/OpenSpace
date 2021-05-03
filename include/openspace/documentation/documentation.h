@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -66,6 +66,8 @@ struct TestResult {
         std::string offender;
         /// The Reason that caused this offense
         Reason reason;
+        /// An optional explanation for when a verification fails
+        std::string explanation;
     };
 
     /**
@@ -79,7 +81,7 @@ struct TestResult {
          * The reason for the warning
          */
         enum class Reason {
-            Deprecated          ///< The value is marked as deprecated and should not used
+            Deprecated ///< The value is marked as deprecated and should not used
         };
 
         /// The offending key that caused the Warning. In the case of a nested table,
@@ -322,5 +324,12 @@ template <>
 std::string to_string(const openspace::documentation::TestResult::Warning::Reason& value);
 
 } // namespace ghoul
+
+// The verifier header depends on the classes defined in here, but we want to make it
+// easier for consumers of this header to just have access to all verifiers without
+// needing to include this file separately.  Particularly with the use of the codegen, it
+// might lead to some unexcepted error messages about recognized identifiers in the
+// generated code which look scary
+#include <openspace/documentation/verifier.h>
 
 #endif // __OPENSPACE_CORE___DOCUMENTATION___H__

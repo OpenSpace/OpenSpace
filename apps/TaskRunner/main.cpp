@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -106,7 +106,12 @@ void performTasks(const std::string& path) {
 int main(int argc, char** argv) {
     using namespace openspace;
 
+    ghoul::logging::LogManager::initialize(
+        ghoul::logging::LogLevel::Debug,
+        ghoul::logging::LogManager::ImmediateFlush::Yes
+    );
     ghoul::initialize();
+    global::create();
 
     // Register the path of the executable,
     // to make it possible to find other files in the same directory.
@@ -117,16 +122,22 @@ int main(int argc, char** argv) {
     );
 
     std::string configFile = configuration::findConfiguration();
-    global::configuration = configuration::loadConfigurationFromFile(configFile);
-    openspace::global::openSpaceEngine.registerPathTokens();
-    global::openSpaceEngine.initialize();
+
+    // Register the base path as the directory where the configuration file lives
+    std::string base = ghoul::filesystem::File(configFile).directoryName();
+    constexpr const char* BasePathToken = "${BASE}";
+    FileSys.registerPathToken(BasePathToken, base);
+
+    *global::configuration = configuration::loadConfigurationFromFile(configFile, "");
+    openspace::global::openSpaceEngine->registerPathTokens();
+    global::openSpaceEngine->initialize();
 
     ghoul::cmdparser::CommandlineParser commandlineParser(
         "OpenSpace TaskRunner",
         ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
     );
 
-    std::string tasksPath = "";
+    std::string tasksPath;
     commandlineParser.addCommand(
         std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
             tasksPath,
@@ -141,7 +152,7 @@ int main(int argc, char** argv) {
 
     //FileSys.setCurrentDirectory(launchDirectory);
 
-    if (tasksPath != "") {
+    if (!tasksPath.empty()) {
         performTasks(tasksPath);
         return 0;
     }
@@ -157,5 +168,7 @@ int main(int argc, char** argv) {
         std::cout << "TASK > ";
     }
 
+    global::destroy();
+    ghoul::deinitialize();
     return 0;
 };

@@ -8,6 +8,8 @@ asset.require('./jupiter/ganymede/default_layers')
 asset.require('./jupiter/io/default_layers')
 
 asset.require('./mars/default_layers')
+asset.require('./mars/moons/layers/colorlayers/deimos_viking')
+asset.require('./mars/moons/layers/colorlayers/phobos_viking')
 
 asset.require('./mercury/default_layers')
 
@@ -29,11 +31,11 @@ asset.require('./venus/default_layers')
 
 
 asset.meta = {
-    Name = "Default Solar System Layers",
-    Version = "1.0",
-    Description = [[ Adds default layers for all planets. Remove this asset and include
-        individual layers for planets to customize planet layers]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license"
+  Name = "Default Solar System Layers",
+  Version = "1.0",
+  Description = [[ Adds default layers for all planets. Remove this asset and include
+    individual layers for planets to customize planet layers]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -50,7 +50,7 @@ struct UpdateData {
 struct RenderData {
     const Camera& camera;
     const Time time;
-    int renderBinMask = -1;
+    int8_t renderBinMask = -1;
     TransformData modelTransform;
 };
 

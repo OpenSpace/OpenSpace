@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,35 +38,6 @@
 #include <openspace/util/timemanager.h>
 
 #include <ghoul/logging/logmanager.h>
-
-namespace {
-    constexpr const uint32_t ProtocolVersion = 3;
-    constexpr const size_t MaxLatencyDiffs = 64;
-
-    constexpr openspace::properties::Property::PropertyInfo BufferTimeInfo = {
-        "BufferTime",
-        "Buffer Time",
-        "" // @TODO Missing documentation
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo TimeKeyFrameInfo = {
-        "TimeKeyframeInterval",
-        "Time keyframe interval",
-        "" // @TODO Missing documentation
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo CameraKeyFrameInfo = {
-        "CameraKeyframeInterval",
-        "Camera Keyframe interval",
-        "" // @TODO Missing documentation
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo TimeToleranceInfo = {
-        "TimeTolerance",
-        "Time tolerance",
-        "" // @TODO Missing documentation
-    };
-} // namespace
 
 namespace openspace {
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 
 #include <modules/spacecraftinstruments/spacecraftinstrumentsmodule.h>
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/rendering/renderengine.h>
@@ -40,32 +41,37 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <glm/gtx/projection.hpp>
+#include <optional>
 
 namespace {
     constexpr const char* _loggerCat = "RenderablePlaneProjection";
-    constexpr const char* KeySpacecraft = "Spacecraft";
-    constexpr const char* KeyInstrument = "Instrument";
-    constexpr const char* KeyMoving = "Moving";
-    constexpr const char* KeyTexture = "Texture";
-    constexpr const char* KeyName = "Name";
-    constexpr const char* KeyTarget = "DefaultTarget";
     constexpr const char* GalacticFrame = "GALACTIC";
+
+    struct [[codegen::Dictionary(RenderablePlaneProjection)]] Parameters {
+        std::optional<std::string> spacecraft;
+        std::optional<std::string> instrument;
+        std::optional<bool> moving;
+        std::optional<std::string> name;
+        std::optional<std::string> defaultTarget;
+        std::optional<std::string> texture;
+    };
+#include "renderableplaneprojection_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
-RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& dictionary)
-    : Renderable(dictionary)
+RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& dict)
+    : Renderable(dict)
 {
-    dictionary.getValue(KeySpacecraft, _spacecraft);
-    dictionary.getValue(KeyInstrument, _instrument);
-    dictionary.getValue(KeyMoving, _moving);
-    dictionary.getValue(KeyName, _name);
-    dictionary.getValue(KeyTarget, _defaultTarget);
+    const Parameters p = codegen::bake<Parameters>(dict);
+    _spacecraft = p.spacecraft.value_or(_spacecraft);
+    _instrument = p.instrument.value_or(_instrument);
+    _moving = p.moving.value_or(_moving);
+    _name = p.name.value_or(_name);
+    _defaultTarget = p.defaultTarget.value_or(_defaultTarget);
 
-    if (dictionary.hasKeyAndValue<std::string>(KeyTexture)) {
-        _texturePath = dictionary.value<std::string>(KeyTexture);
-        _texturePath = absPath(_texturePath);
+    if (p.texture.has_value()) {
+        _texturePath = absPath(*p.texture);
         _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
     }
 }
@@ -267,7 +273,6 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
         glm::vec3(projection[1]),
         glm::vec3(projection[2]),
         glm::vec3(projection[3])
-
     };
     const GLfloat vertex_data[] = {
         // square of two triangles drawn within fov in target coordinates

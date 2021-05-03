@@ -5,57 +5,58 @@ asset.require('./trail')
 local labelsPath = asset.require('../saturn_globelabels').LabelsPath
 
 local Tethys = {
-    Identifier = "Tethys",
-    Parent = transforms.SaturnBarycenter.Identifier,
-    Transform = {
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "TETHYS",
-            Observer = "SATURN BARYCENTER",
-            Kernels = kernel
-        },
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "IAU_TETHYS",
-            DestinationFrame = "GALACTIC"
-        }
+  Identifier = "Tethys",
+  Parent = transforms.SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "TETHYS",
+      Observer = "SATURN BARYCENTER",
+      Kernels = kernel
     },
-    Renderable = {
-        Type = "RenderableGlobe",
-        Radii = 531100,
-        SegmentsPerPatch = 64,
-        Layers = {},
-        Labels = {
-            Enable = false,
-            FileName = labelsPath .. "/tethys.labels",
-            LabelAlignmentOption = "Horizontally", -- or Circularly
-            LabelsFontSize = 14.0,
-            LabelsSize = 8.0,
-            LabelsMinSize = 1.0,
-            LabelsMaxSize = 1500.0,
-            ProximityEnabled = false,
-            LabelsFadeInEnabled = true,
-            FadeInStartingDistance = 500000.0,
-            FadeOutStartingDistance = 1000000.0,
-            LabelsForceDomeRendering = true,
-            LabelsDistanceEPS = 1350000.0,
-            LabelsColor = { 1.0, 1.0, 0.0 }
-        }
-    },
-    Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
-    GUI = {
-        Path = "/Solar System/Planets/Saturn/Moons"
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "IAU_TETHYS",
+      DestinationFrame = "GALACTIC"
     }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = 531100,
+    SegmentsPerPatch = 64,
+    Layers = {},
+    Labels = {
+      Enable = false,
+      FileName = labelsPath .. "/tethys.labels",
+      LabelAlignmentOption = "Horizontally", -- or Circularly
+      LabelsFontSize = 24.0,
+      LabelsSize = 8.0,
+      LabelsMinSize = 1.0,
+      LabelsMaxSize = 1500.0,
+      ProximityEnabled = false,
+      LabelsFadeInEnabled = true,
+      LabelsFadeOutEnabled = true,
+      FadeInStartingDistance = 1500000.0,
+      FadeOutStartingDistance = 500000.0,
+      LabelsForceDomeRendering = true,
+      LabelsDistanceEPS = 200000.0,
+      LabelsColor = { 1.0, 1.0, 0.0 }
+    }
+  },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
+  GUI = {
+    Path = "/Solar System/Planets/Saturn/Moons"
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Tethys })
 
 
 asset.meta = {
-    Name = "Tethys",
-    Version = "1.0",
-    Description = [[ Tethys globe with labels.]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license"
+  Name = "Tethys",
+  Version = "1.0",
+  Description = [[ Tethys globe with labels.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
 }

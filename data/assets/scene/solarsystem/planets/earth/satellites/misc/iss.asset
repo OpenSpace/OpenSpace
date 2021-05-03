@@ -3,7 +3,7 @@ local satelliteHelper = asset.require('util/tle_helper')
 local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 
-local url = "https://celestrak.com/satcat/tle.php?CATNR=25544"
+local url = "http://celestrak.com/satcat/tle.php?CATNR=25544"
 local identifier = "ISS"
 local filename = "ISS.txt"
 local nodes = {}
@@ -13,7 +13,7 @@ local models = asset.syncedResource({
     Name = "ISS Models",
     Type = "HttpSynchronization",
     Identifier = "iss_model",
-    Version = 2
+    Version = 3
 })
 
 local initializeAndAddNodes = function()
@@ -24,7 +24,7 @@ local initializeAndAddNodes = function()
   local iss = {
     Identifier = "ISS",
     Parent = transforms.EarthInertial.Identifier,
-    BoundingSphere = 30,
+    InteractionSphere = 30,
     Transform = {
       Translation = {
         Type = "TLETranslation",
@@ -34,9 +34,9 @@ local initializeAndAddNodes = function()
         LineNumber = 1
       },
       Rotation = {
-          Type = "SpiceRotation",
-          SourceFrame = "GALACTIC",
-          DestinationFrame = "J2000",
+        Type = "SpiceRotation",
+        SourceFrame = "GALACTIC",
+        DestinationFrame = "J2000",
       }
     },
     Tag = { "earth_satellite", "ISS" },
@@ -50,163 +50,17 @@ local initializeAndAddNodes = function()
       Parent = iss.Identifier,
       Transform = {
         Rotation = {
-            Type = "FixedRotation",
-            Attached = "ISSparentNode",
-            XAxis = { 0.01, -1.0, 0.56 },
-            XAxisOrthogonal = true,
-            YAxis = transforms.EarthInertial.Identifier
+          Type = "FixedRotation",
+          Attached = "ISSparentNode",
+          XAxis = { 0.01, -1.0, 0.56 },
+          XAxisOrthogonal = true,
+          YAxis = transforms.EarthInertial.Identifier
         }
       },
       Renderable = {
         Type = "RenderableModel",
-        Geometry = {
-          {
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/0.obj",
-            ColorTexture = models .. "/0.png"
-          },
-          {
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/1.obj",
-            ColorTexture = models .. "/1.png"
-          },
-          {
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/2.obj",
-            ColorTexture = models .. "/2.png"
-          },
-          {
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/3.obj",
-            ColorTexture = models .. "/3.png"
-          },
-          {
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/4.obj",
-            ColorTexture = models .. "/4.png"
-          },
-          {
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/5.obj",
-            ColorTexture = models .. "/5.png"
-          },
-          {
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/6.obj",
-            ColorTexture = models .. "/6.png"
-          },
-          {
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/7.obj",
-            ColorTexture = models .. "/7.png"
-          },
-          {
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/8.obj",
-            ColorTexture = models .. "/8.png"
-          },
-          {
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/10.obj",
-            ColorTexture = models .. "/10.png"
-          },
-          {
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/11.obj",
-            ColorTexture = models .. "/11.png"
-          },
-          {
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/13.obj",
-            ColorTexture = models .. "/13.png"
-          },
-          {
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/14.obj",
-            ColorTexture = models .. "/14.png"
-          },
-          {
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/15.obj",
-            ColorTexture = models .. "/15.png"
-          },
-          {
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/16.obj",
-            ColorTexture = models .. "/16.png"
-          },
-          {
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/17.obj",
-            ColorTexture = models .. "/17.png"
-          },
-          {
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/19.obj",
-            ColorTexture = models .. "/19.png"
-          },
-          {
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/21.obj",
-            ColorTexture = models .. "/21.png"
-          },
-          {
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/22.obj",
-            ColorTexture = models .. "/22.png"
-          },
-          {
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/23.obj",
-            ColorTexture = models .. "/23.png"
-          },
-          {
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/24.obj",
-            ColorTexture = models .. "/24.png"
-          },
-          {
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/25.obj",
-            ColorTexture = models .. "/25.png"
-          },
-          {
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/foilsilver.obj",
-            ColorTexture = models .. "/foilsilver.png"
-          },
-          {
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/olive.obj",
-            ColorTexture = models .. "/olive.png"
-          },
-          {
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/basemetal.obj",
-            ColorTexture = models .. "/basemetal.png"
-          },
-          {
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/white_20.obj",
-            ColorTexture = models .. "/white_20.png"
-          },
-          {
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/plasticblack.obj",
-            ColorTexture = models .. "/plasticblack.png"
-          },
-          {
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/ecostresswhite.obj",
-            ColorTexture = models .. "/ecostresswhite.png"
-          },
-          {
-            Type = "MultiModelGeometry",
-            GeometryFile = models .. "/plain.obj",
-            ColorTexture = models .. "/plain.png"
-          },
-          
-        },
+        GeometryFile = models .. "/ISS.fbx",
+        ModelScale = "Centimeter",
         LightSources = {
           {
             Type = "SceneGraphLightSource",
@@ -219,9 +73,9 @@ local initializeAndAddNodes = function()
         DisableFaceCulling = true
       },
       GUI = {
-          Name = "ISSparentNode",
-          Path = "/Solar System/Planets/Earth/Satellites/ISS",
-          Hidden = true,
+        Name = "ISSparentNode",
+        Path = "/Solar System/Planets/Earth/Satellites/ISS",
+        Hidden = true,
       }
   }
 
@@ -229,20 +83,20 @@ local initializeAndAddNodes = function()
     Identifier = identifier .. "_trail",
     Parent = transforms.EarthInertial.Identifier,
     Renderable = {
-        Type = "RenderableTrailOrbit",
-        Translation = {
-          Type = "TLETranslation",
-          Body = identifier,
-          Observer = transforms.EarthInertial.Identifier,
-          File = path,
-          LineNumber = 1,
-          RenderBinMode = "PostDeferredTransparent"
-        },
-        Color = { 0.9, 0.6715, 0.0 },
-        Fade = 1.5,
-        Period = period,
-        Resolution = 320
+      Type = "RenderableTrailOrbit",
+      Translation = {
+        Type = "TLETranslation",
+        Body = identifier,
+        Observer = transforms.EarthInertial.Identifier,
+        File = path,
+        LineNumber = 1,
+        RenderBinMode = "PostDeferredTransparent"
       },
+      Color = { 0.9, 0.6715, 0.0 },
+      Fade = 1.5,
+      Period = period,
+      Resolution = 320
+    },
     Tag = { "earth_satellite", "ISS" },
     GUI = {
       Name = "ISS Trail",
@@ -255,27 +109,27 @@ local initializeAndAddNodes = function()
     Parent = iss.Identifier,
 
     Renderable = {
-        Enabled = false,
-        Type = "RenderableLabels",
-        LabelText = "ISS",
-        FontSize = 100.0,
-        LabelSize = 3.4,
-        LabelMaxSize = 100.0,
-        LabelMinSize = 1.0,
-        LabelOrientationOption = "Camera View Direction",
-        BlendMode = "Additive",
-        EnableFading = true,
-        FadeStartUnit = "au",
-        FadeStartDistance = 0.15,
-        FadeStartSpeed = 1.0,
-        FadeEndUnit = "au",
-        FadeEndDistance = 15.0,
-        FadeEndSpeed = 25.0
+      Enabled = false,
+      Type = "RenderableLabels",
+      LabelText = "ISS",
+      FontSize = 100.0,
+      LabelSize = 3.4,
+      LabelMaxSize = 100.0,
+      LabelMinSize = 1.0,
+      LabelOrientationOption = "Camera View Direction",
+      BlendMode = "Additive",
+      EnableFading = true,
+      FadeStartUnit = "au",
+      FadeStartDistance = 0.15,
+      FadeStartSpeed = 1.0,
+      FadeEndUnit = "au",
+      FadeEndDistance = 15.0,
+      FadeEndSpeed = 25.0
     },
     Tag = { "solarsystem_labels" },
     GUI = {
-        Name = "ISS Label",
-        Path = "/Solar System/Planets/Earth/Satellites"
+      Name = "ISS Label",
+      Path = "/Solar System/Planets/Earth/Satellites"
     }
 }
 
@@ -287,7 +141,7 @@ asset.onInitialize(function ()
   for _, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)
   end
-  openspace.setPropertyValueSingle("Scene.ISSparentNode.Rotation.yAxis-InvertObject", true)
+  openspace.setPropertyValueSingle("Scene.ISSparentNode.Rotation.yAxisInvertObject", true)
 
 end)
 
@@ -300,11 +154,11 @@ end)
 
 
 asset.meta = {
-    Name = "ISS",
-    Version = "1.0",
-    Description = [[ Model and Trail for ISS. Model from NASA 3D models, trail from
-    CELESTRAK]],
-    Author = "OpenSpace Team",
-    URL = "https://celestrak.com/",
-    License = "NASA"
+  Name = "ISS",
+  Version = "1.0",
+  Description = [[ Model and Trail for ISS. Model from NASA 3D models, trail from
+  CELESTRAK]],
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.com/",
+  License = "NASA"
 }

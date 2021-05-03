@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,13 +37,15 @@ out vec4 vs_ndc;
 
 uniform mat4 ProjectorMatrix;
 uniform mat4 ModelTransform;
+uniform mat4 meshTransform;
+uniform mat4 meshNormalTransform;
 
 uniform vec3 boresight;
 
 void main() {
-    vec4 raw_pos = psc_to_meter(in_position, vec2(1.0, 0.0));
+    vec4 raw_pos = psc_to_meter((meshTransform * in_position), vec2(1.0, 0.0));
     vs_position = ProjectorMatrix * ModelTransform * raw_pos;
-    vs_normal = normalize(ModelTransform * vec4(in_normal,0));
+    vs_normal = normalize(ModelTransform * meshNormalTransform * vec4(in_normal,0));
     vs_ndc = vs_position / vs_position.w;
 
     //match clipping plane

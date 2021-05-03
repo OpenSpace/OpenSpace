@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,10 +35,9 @@
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/texture.h>
 #include <fstream>
+#include <optional>
 
 namespace {
-    constexpr const char* KeyLazyLoading = "LazyLoading";
-
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
@@ -47,105 +46,104 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderableTypeInfo = {
-       "RenderableType",
-       "RenderableType",
-       "This value specifies if the plane should be rendered in the Background,"
-       "Opaque, Transparent, or Overlay rendering step."
+        "RenderableType",
+        "RenderableType",
+        "This value specifies if the plane should be rendered in the Background,"
+        "Opaque, Transparent, or Overlay rendering step."
     };
+
+    struct [[codegen::Dictionary(RenderablePlaneImageLocal)]] Parameters {
+        // [[codegen::verbatim(TextureInfo.description)]]
+        std::string texture;
+
+        enum class RenderType {
+            Background,
+            Opaque,
+            PreDeferredTransparency,
+            PostDeferredTransparency,
+            Overlay
+        };
+
+        // [[codegen::verbatim(RenderableTypeInfo.description)]]
+        std::optional<RenderType> renderType [[codegen::key("RenderableType")]];
+
+        // If this value is set to 'true', the image for this plane will not be loaded at
+        // startup but rather when image is shown for the first time. Additionally, if the
+        // plane is hidden, the image will automatically be unloaded
+        std::optional<bool> lazyLoading;
+    };
+#include "renderableplaneimagelocal_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderablePlaneImageLocal::Documentation() {
-    using namespace documentation;
-    return {
-        "Renderable Plane Image Local",
-        "base_renderable_plane_image_local",
-        {
-            {
-                TextureInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                TextureInfo.description
-            },
-            {
-                RenderableTypeInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                RenderableTypeInfo.description
-            },
-            {
-                KeyLazyLoading,
-                new BoolVerifier,
-                Optional::Yes,
-                "If this value is set to 'true', the image for this plane will not be "
-                "loaded at startup but rather when image is shown for the first time. "
-                "Additionally, if the plane is hidden, the image will automatically be "
-                "unloaded"
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_renderable_plane_image_local";
+
+    // @TODO cleanup
+    // Insert the parents documentation entries until we have a verifier that can deal
+    // with class hierarchy
+    documentation::Documentation parentDoc = RenderablePlane::Documentation();
+    doc.entries.insert(
+        doc.entries.end(),
+        parentDoc.entries.begin(),
+        parentDoc.entries.end()
+    );
+    return doc;
 }
 
 RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& dictionary)
     : RenderablePlane(dictionary)
     , _texturePath(TextureInfo)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderablePlaneImageLocal"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(_blendMode);
 
-    _texturePath = absPath(dictionary.value<std::string>(TextureInfo.identifier));
+    _texturePath = absPath(p.texture);
     _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
 
     addProperty(_texturePath);
-    _texturePath.onChange([this]() {loadTexture(); });
+    _texturePath.onChange([this]() { loadTexture(); });
     _textureFile->setCallback(
         [this](const ghoul::filesystem::File&) { _textureIsDirty = true; }
     );
 
-    if (dictionary.hasKey(RenderableTypeInfo.identifier)) {
-        std::string renderType = dictionary.value<std::string>(
-            RenderableTypeInfo.identifier
-        );
-        if (renderType == "Background") {
-            setRenderBin(Renderable::RenderBin::Background);
-        }
-        else if (renderType == "Opaque") {
-            setRenderBin(Renderable::RenderBin::Opaque);
-        }
-        else if (renderType == "PreDeferredTransparent") {
-            setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
-        }
-        else if (renderType == "PostDeferredTransparent") {
-            setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
-        }
-        else if (renderType == "Overlay") {
-            setRenderBin(Renderable::RenderBin::Overlay);
+    if (p.renderType.has_value()) {
+        switch (*p.renderType) {
+            case Parameters::RenderType::Background:
+                setRenderBin(Renderable::RenderBin::Background);
+                break;
+            case Parameters::RenderType::Opaque:
+                setRenderBin(Renderable::RenderBin::Opaque);
+                break;
+            case Parameters::RenderType::PreDeferredTransparency:
+                setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
+                break;
+            case Parameters::RenderType::PostDeferredTransparency:
+                setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
+                break;
+            case Parameters::RenderType::Overlay:
+                setRenderBin(Renderable::RenderBin::Overlay);
+                break;
         }
     }
     else {
         setRenderBin(Renderable::RenderBin::Opaque);
     }
 
-    if (dictionary.hasKey(KeyLazyLoading)) {
-        _isLoadingLazily = dictionary.value<bool>(KeyLazyLoading);
-
-        if (_isLoadingLazily) {
-            _enabled.onChange([this]() {
-                if (!_enabled) {
-                    BaseModule::TextureManager.release(_texture);
-                    _texture = nullptr;
-                }
-                if (_enabled) {
-                    _textureIsDirty = true;
-                }
-            });
-        }
+    _isLoadingLazily = p.lazyLoading.value_or(_isLoadingLazily);
+    if (_isLoadingLazily) {
+        _enabled.onChange([this]() {
+            if (!_enabled) {
+                BaseModule::TextureManager.release(_texture);
+                _texture = nullptr;
+            }
+            if (_enabled) {
+                _textureIsDirty = true;
+            }
+        });
     }
 }
 

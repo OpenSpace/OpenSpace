@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,6 +39,7 @@
 #pragma warning (disable : 4800) // #pragma warning: there is no warning number '4800'
 #endif // WIN32
 
+#include <ccmc/Kameleon.h>
 #include <ccmc/Model.h>
 #include <ccmc/BATSRUS.h>
 #include <ccmc/ENLIL.h>
@@ -78,7 +79,7 @@ KameleonVolumeReader::KameleonVolumeReader(std::string path) : _path(std::move(p
         throw ghoul::FileNotFoundError(_path);
     }
 
-    const long status = _kameleon.open(_path);
+    const long status = _kameleon->open(_path);
     if (status != ccmc::FileReader::OK) {
         LERROR(fmt::format("Failed to open file '{}' with Kameleon", _path));
         throw ghoul::RuntimeError("Failed to open file: " + _path + " with Kameleon");
@@ -86,9 +87,11 @@ KameleonVolumeReader::KameleonVolumeReader(std::string path) : _path(std::move(p
 
     // Possibly use a kameleon interpolator instead of a model interpolator?
     _interpolator = std::unique_ptr<ccmc::Interpolator>(
-        _kameleon.model->createNewInterpolator()
+        _kameleon->model->createNewInterpolator()
     );
 }
+
+KameleonVolumeReader::~KameleonVolumeReader() {}
 
 std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
                                                             const glm::uvec3 & dimensions,
@@ -145,28 +148,28 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
 
 std::vector<std::string> KameleonVolumeReader::variableNames() const {
     std::vector<std::string> variableNames;
-    const int nVariables = _kameleon.model->getNumberOfVariables();
+    const int nVariables = _kameleon->model->getNumberOfVariables();
     for (int i = 0; i < nVariables; ++i) {
-        variableNames.push_back(_kameleon.model->getVariableName(i));
+        variableNames.push_back(_kameleon->model->getVariableName(i));
     }
     return variableNames;
 }
 
 std::vector<std::string> KameleonVolumeReader::variableAttributeNames() const {
-    return _kameleon.model->getVariableAttributeNames();
+    return _kameleon->model->getVariableAttributeNames();
 }
 
 std::vector<std::string> KameleonVolumeReader::globalAttributeNames() const {
     std::vector<std::string> attributeNames;
-    const int nAttributes = _kameleon.model->getNumberOfGlobalAttributes();
+    const int nAttributes = _kameleon->model->getNumberOfGlobalAttributes();
     for (int i = 0; i < nAttributes; ++i) {
-        attributeNames.push_back(_kameleon.model->getGlobalAttributeName(i));
+        attributeNames.push_back(_kameleon->model->getGlobalAttributeName(i));
     }
     return attributeNames;
 }
 
 std::array<std::string, 3> KameleonVolumeReader::gridVariableNames() const {
-    return openspace::gridVariables(_kameleon.model);
+    return openspace::gridVariables(_kameleon->model);
 }
 
 void KameleonVolumeReader::addAttributeToDictionary(ghoul::Dictionary& dictionary,
@@ -176,13 +179,13 @@ void KameleonVolumeReader::addAttributeToDictionary(ghoul::Dictionary& dictionar
     ccmc::Attribute::AttributeType type = attr.getAttributeType();
     switch (type) {
         case ccmc::Attribute::AttributeType::FLOAT:
-            dictionary.setValue<float>(key, attr.getAttributeFloat());
+            dictionary.setValue(key, static_cast<double>(attr.getAttributeFloat()));
             return;
         case ccmc::Attribute::AttributeType::INT:
-            dictionary.setValue<int>(key, attr.getAttributeInt());
+            dictionary.setValue(key, attr.getAttributeInt());
             return;
         case ccmc::Attribute::AttributeType::STRING:
-            dictionary.setValue<std::string>(key, attr.getAttributeString());
+            dictionary.setValue(key, attr.getAttributeString());
             return;
     }
 }
@@ -190,7 +193,7 @@ void KameleonVolumeReader::addAttributeToDictionary(ghoul::Dictionary& dictionar
 ghoul::Dictionary KameleonVolumeReader::readMetaData() const {
     ghoul::Dictionary globalAttributesDictionary;
     for (const std::string& attributeName : globalAttributeNames()) {
-        ccmc::Attribute attribute = _kameleon.model->getGlobalAttribute(attributeName);
+        ccmc::Attribute attribute = _kameleon->model->getGlobalAttribute(attributeName);
         addAttributeToDictionary(globalAttributesDictionary, attributeName, attribute);
     }
 
@@ -199,7 +202,7 @@ ghoul::Dictionary KameleonVolumeReader::readMetaData() const {
     for (const std::string& variableName : variableNames()) {
         ghoul::Dictionary variableAttributesDictionary;
         for (const std::string& attributeName : varAttrNames) {
-            ccmc::Attribute attribute = _kameleon.model->getVariableAttribute(
+            ccmc::Attribute attribute = _kameleon->model->getVariableAttribute(
                 variableName,
                 attributeName
             );
@@ -212,19 +215,19 @@ ghoul::Dictionary KameleonVolumeReader::readMetaData() const {
         variableDictionary.setValue(variableName, variableAttributesDictionary);
     }
 
-    return {
-        { "globalAttributes", std::move(globalAttributesDictionary) },
-        { "variableAttributes", std::move(variableDictionary) }
-    };
+    ghoul::Dictionary res;
+    res.setValue("globalAttributes", std::move(globalAttributesDictionary));
+    res.setValue("variableAttributes", std::move(variableDictionary));
+    return res;
 }
 
 std::string KameleonVolumeReader::simulationStart() const {
     std::string startTime;
-    if (_kameleon.model->doesAttributeExist("start_time")) {
-        startTime = globalAttribute<std::string>(*_kameleon.model, "start_time");
+    if (_kameleon->model->doesAttributeExist("start_time")) {
+        startTime = globalAttribute<std::string>(*_kameleon->model, "start_time");
     }
-    else if (_kameleon.model->doesAttributeExist("tim_rundate_cal")) {
-        startTime = globalAttribute<std::string>(*_kameleon.model, "tim_rundate_cal");
+    else if (_kameleon->model->doesAttributeExist("tim_rundate_cal")) {
+        startTime = globalAttribute<std::string>(*_kameleon->model, "tim_rundate_cal");
         size_t numChars = startTime.length();
         if (numChars < 19) {
             // Fall through to add the required characters
@@ -249,11 +252,11 @@ std::string KameleonVolumeReader::simulationStart() const {
             }
         }
     }
-    else if (_kameleon.model->doesAttributeExist("tim_obsdate_cal")) {
-        startTime = globalAttribute<std::string>(*_kameleon.model, "tim_obsdate_cal");
+    else if (_kameleon->model->doesAttributeExist("tim_obsdate_cal")) {
+        startTime = globalAttribute<std::string>(*_kameleon->model, "tim_obsdate_cal");
     }
-    else if (_kameleon.model->doesAttributeExist("tim_crstart_cal")) {
-        startTime = globalAttribute<std::string>(*_kameleon.model, "tim_crstart_cal");
+    else if (_kameleon->model->doesAttributeExist("tim_crstart_cal")) {
+        startTime = globalAttribute<std::string>(*_kameleon->model, "tim_crstart_cal");
     }
 
     if (startTime.length() == 19) {
@@ -264,21 +267,21 @@ std::string KameleonVolumeReader::simulationStart() const {
 }
 
 float KameleonVolumeReader::elapsedTime() const {
-    if (_kameleon.model->doesAttributeExist("elapsed_time_in_seconds")) {
-        return globalAttribute<float>(*_kameleon.model, "elapsed_time_in_seconds");
+    if (_kameleon->model->doesAttributeExist("elapsed_time_in_seconds")) {
+        return globalAttribute<float>(*_kameleon->model, "elapsed_time_in_seconds");
     }
-    else if (_kameleon.model->doesAttributeExist("time_physical_time")) {
-        return globalAttribute<float>(*_kameleon.model, "time_physical_time");
+    else if (_kameleon->model->doesAttributeExist("time_physical_time")) {
+        return globalAttribute<float>(*_kameleon->model, "time_physical_time");
     }
     return 0.f;
 }
 
 std::string KameleonVolumeReader::simulationEnd() const {
-    return globalAttribute<std::string>(*_kameleon.model, "end_time");
+    return globalAttribute<std::string>(*_kameleon->model, "end_time");
 }
 
 std::string KameleonVolumeReader::getVisUnit(const std::string& variable) const {
-    return _kameleon.model->getNativeUnit(variable);
+    return _kameleon->model->getNativeUnit(variable);
 }
 
 std::string KameleonVolumeReader::time() const {
@@ -290,12 +293,12 @@ std::string KameleonVolumeReader::time() const {
 }
 
 double KameleonVolumeReader::minValue(const std::string & variable) const {
-    ccmc::Model& m = *_kameleon.model;
+    ccmc::Model& m = *_kameleon->model;
     return m.getVariableAttribute(variable, "actual_min").getAttributeFloat();
 }
 
 double KameleonVolumeReader::maxValue(const std::string & variable) const {
-    ccmc::Model& m = *_kameleon.model;
+    ccmc::Model& m = *_kameleon->model;
     return m.getVariableAttribute(variable, "actual_max").getAttributeFloat();
 }
 

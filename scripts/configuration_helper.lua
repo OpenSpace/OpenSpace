@@ -345,7 +345,6 @@ function generateCluster(arg)
 <?xml version="1.0" ?>
 <Cluster
     masterAddress="localhost"
-    externalControlPort="20500"
     debug="]] .. tostring(arg["sgctDebug"]) .. [["
 >
 ]] .. (arg["settings"] or "") .. [[
@@ -703,7 +702,7 @@ function sgct.config.single(arg)
     )
     sgctconfiginitializeString = "sgct.config.single"
 
-    trackedSpecifier = "tracked=\"true\""
+    local trackedSpecifier = "tracked=\"true\""
 
     if (arg["tracked"] ~= nil and arg["tracked"] == false) then
         trackedSpecifier = "tracked=\"false\""

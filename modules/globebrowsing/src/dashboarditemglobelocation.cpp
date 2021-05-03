@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -62,41 +62,25 @@ namespace {
         "Determines the number of significant digits that are shown in the location text."
     };
 
+    struct [[codegen::Dictionary(DashboardItemGlobeLocation)]] Parameters {
+        // [[codegen::verbatim(FontNameInfo.description)]]
+        std::optional<std::string> fontName;
+
+        // [[codegen::verbatim(FontSizeInfo.description)]]
+        std::optional<float> fontSize;
+
+        // [[codegen::verbatim(SignificantDigitsInfo.description)]]
+        std::optional<int> significantDigits;
+    };
+#include "dashboarditemglobelocation_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation DashboardItemGlobeLocation::Documentation() {
-    using namespace documentation;
-    return {
-        "DashboardItem Globe Location",
-        "globebrowsing_dashboarditem_globelocation",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("DashboardItemGlobeLocation"),
-                Optional::No
-            },
-            {
-                FontNameInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                FontNameInfo.description
-            },
-            {
-                FontSizeInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                FontSizeInfo.description
-            },
-            {
-                SignificantDigitsInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                SignificantDigitsInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "globebrowsing_dashboarditem_globelocation";
+    return doc;
 }
 
 DashboardItemGlobeLocation::DashboardItemGlobeLocation(
@@ -107,30 +91,15 @@ DashboardItemGlobeLocation::DashboardItemGlobeLocation(
     , _significantDigits(SignificantDigitsInfo, 4, 1, 12)
     , _font(global::fontManager->font(KeyFontMono, 10))
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "DashboardItemGlobeLocation"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    if (dictionary.hasKey(FontNameInfo.identifier)) {
-        _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
-    }
-    if (dictionary.hasKey(FontSizeInfo.identifier)) {
-        _fontSize = static_cast<float>(dictionary.value<double>(FontSizeInfo.identifier));
-    }
-    if (dictionary.hasKey(SignificantDigitsInfo.identifier)) {
-        _significantDigits = static_cast<int>(
-            dictionary.value<double>(SignificantDigitsInfo.identifier)
-        );
-    }
-
-
+    _fontName = p.fontName.value_or(_fontName);
     _fontName.onChange([this]() {
         _font = global::fontManager->font(_fontName, _fontSize);
     });
     addProperty(_fontName);
 
+    _fontSize = p.fontSize.value_or(_fontSize);
     _fontSize.onChange([this]() {
         _font = global::fontManager->font(_fontName, _fontSize);
     });
@@ -144,6 +113,7 @@ DashboardItemGlobeLocation::DashboardItemGlobeLocation(
             _significantDigits.value()
         );
     };
+    _significantDigits = p.significantDigits.value_or(_significantDigits);
     _significantDigits.onChange(updateFormatString);
     addProperty(_significantDigits);
     updateFormatString();
@@ -199,7 +169,7 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
 
     std::pair<double, std::string> dist = simplifyDistance(altitude);
 
-    std::fill(_buffer.begin(), _buffer.end(), 0);
+    std::fill(_buffer.begin(), _buffer.end(), char(0));
     char* end = fmt::format_to(
         _buffer.data(),
         _formatString.c_str(),

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -52,6 +52,14 @@ void renderSelectionProperty(properties::Property* prop, const std::string& owne
     ShowToolTip showTooltip = ShowToolTip::Yes, double tooltipDelay = 1.0);
 
 void renderStringProperty(properties::Property* prop, const std::string& ownerName,
+    IsRegularProperty isRegular = IsRegularProperty::Yes,
+    ShowToolTip showTooltip = ShowToolTip::Yes, double tooltipDelay = 1.0);
+
+void renderIntListProperty(properties::Property* prop, const std::string& ownerName,
+    IsRegularProperty isRegular = IsRegularProperty::Yes,
+    ShowToolTip showTooltip = ShowToolTip::Yes, double tooltipDelay = 1.0);
+
+void renderDoubleListProperty(properties::Property* prop, const std::string& ownerName,
     IsRegularProperty isRegular = IsRegularProperty::Yes,
     ShowToolTip showTooltip = ShowToolTip::Yes, double tooltipDelay = 1.0);
 

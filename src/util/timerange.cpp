@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -73,13 +73,9 @@ TimeRange::TimeRange(const ghoul::Dictionary& dict) {
 bool TimeRange::initializeFromDictionary(const ghoul::Dictionary& dict,
                                          TimeRange& timeRange)
 {
-    std::string startTimeStr;
-    std::string endTimeStr;
-
-    bool success = true;
-    success &= dict.getValue(KeyStart, startTimeStr);
-    success &= dict.getValue(KeyEnd, endTimeStr);
-    if (success) {
+    if (dict.hasValue<std::string>(KeyStart) && dict.hasValue<std::string>(KeyEnd)) {
+        std::string startTimeStr = dict.value<std::string>(KeyStart);
+        std::string endTimeStr = dict.value<std::string>(KeyEnd);
         // Parse to date.
         // @TODO converting string to time stamp should not rely on Spice
         timeRange.start = SpiceManager::ref().ephemerisTimeFromDate(startTimeStr);

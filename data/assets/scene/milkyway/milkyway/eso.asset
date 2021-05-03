@@ -3,36 +3,36 @@ local assetHelper = asset.require('util/asset_helper')
 
 
 local textures = asset.syncedResource({
-    Name = "ESO Milky Way Textures",
-    Type = "HttpSynchronization",
-    Identifier = "milkyway-eso_textures",
-    Version = 1
+  Name = "ESO Milky Way Textures",
+  Type = "HttpSynchronization",
+  Identifier = "milkyway-eso_textures",
+  Version = 1
 })
 
 local object = {
-    Identifier = "MilkyWay-ESO",
-    Transform = {
-        Rotation = {
-            Type = "StaticRotation",
-            Rotation = {0, 0, 3.14159265359}
-        }
-    },
-    Renderable = {
-        Type = "RenderableSphere",
-        Size = 9.2E20,
-        Segments = 40,
-        Opacity = 0.4,
-        Texture = textures .. "/eso0932a_blend.png",
-        UseAdditiveBlending = true,
-        Orientation = "Inside",
-        MirrorTexture = true,
-        FadeOutThreshold = 0.01,
-        Background = true
-    },
-    GUI = {
-        Name = "Milky Way (ESO)",
-        Path = "/Milky Way/Milky Way"
+  Identifier = "MilkyWay-ESO",
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = {0, 0, 3.14159265359}
     }
+  },
+  Renderable = {
+    Type = "RenderableSphere",
+    Size = 9.2E20,
+    Segments = 40,
+    Opacity = 0.4,
+    Texture = textures .. "/eso0932a_blend.png",
+    UseAdditiveBlending = true,
+    Orientation = "Inside",
+    MirrorTexture = true,
+    FadeOutThreshold = 0.01,
+    Background = true
+  },
+  GUI = {
+    Name = "Milky Way (ESO)",
+    Path = "/Milky Way/Milky Way"
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })

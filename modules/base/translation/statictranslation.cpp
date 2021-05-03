@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,31 +34,21 @@ namespace {
         "This value is used as a static offset (in meters) that is applied to the scene "
         "graph node that this transformation is attached to relative to its parent."
     };
+
+    struct [[codegen::Dictionary(StaticTranslation)]] Parameters {
+        // [[codegen::verbatim(PositionInfo.description)]]
+        glm::dvec3 position;
+    };
+#include "statictranslation_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation StaticTranslation::Documentation() {
-    using namespace documentation;
-    return {
-        "Static Translation",
-        "base_transform_translation_static",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("StaticTranslation"),
-                Optional::No
-            },
-            {
-                PositionInfo.identifier,
-                new DoubleVector3Verifier,
-                Optional::No,
-                PositionInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_transform_translation_static";
+    return doc;
 }
-
 
 StaticTranslation::StaticTranslation()
     : _position(
@@ -68,6 +58,7 @@ StaticTranslation::StaticTranslation()
         glm::dvec3(std::numeric_limits<double>::max())
     )
 {
+    _position.setViewOption(properties::Property::ViewOptions::Logarithmic);
     addProperty(_position);
 
     _position.onChange([this]() {
@@ -79,13 +70,8 @@ StaticTranslation::StaticTranslation()
 StaticTranslation::StaticTranslation(const ghoul::Dictionary& dictionary)
     : StaticTranslation()
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "StaticTranslation"
-    );
-
-    _position = dictionary.value<glm::dvec3>(PositionInfo.identifier);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    _position = p.position;
 }
 
 glm::dvec3 StaticTranslation::position(const UpdateData&) const {

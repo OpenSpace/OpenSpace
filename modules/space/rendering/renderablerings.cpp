@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,11 +36,12 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
+#include <optional>
 
 namespace {
     constexpr const std::array<const char*, 6> UniformNames = {
-        "modelViewProjectionTransform", "textureOffset", "colorFilterValue", "_nightFactor",
-        "sunPosition", "texture1"
+        "modelViewProjectionTransform", "textureOffset", "colorFilterValue",
+        "_nightFactor", "sunPosition", "texture1"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
@@ -79,53 +80,32 @@ namespace {
         "This value affects the filtering out of part of the rings depending on the "
         "color values of the texture. The higher value, the more rings are filtered out."
     };
+
+    struct [[codegen::Dictionary(RenderableRings)]] Parameters {
+        // [[codegen::verbatim(TextureInfo.description)]]
+        std::string texture;
+
+        // [[codegen::verbatim(SizeInfo.description)]]
+        float size;
+
+        // [[codegen::verbatim(OffsetInfo.description)]]
+        std::optional<glm::vec2> offset;
+
+        // [[codegen::verbatim(NightFactorInfo.description)]]
+        std::optional<float> nightFactor;
+
+        // [[codegen::verbatim(ColorFilterInfo.description)]]
+        std::optional<float> colorFilter;
+    };
+#include "renderablerings_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableRings::Documentation() {
-    using namespace documentation;
-    return {
-        "Renderable Rings",
-        "space_renderable_rings",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("RenderableRings"),
-                Optional::No
-            },
-            {
-                TextureInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                TextureInfo.description
-            },
-            {
-                SizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::No,
-                SizeInfo.description
-            },
-            {
-                OffsetInfo.identifier,
-                new DoubleVector2Verifier,
-                Optional::Yes,
-                OffsetInfo.description
-            },
-            {
-                NightFactorInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                NightFactorInfo.description
-            },
-            {
-                ColorFilterInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                ColorFilterInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "space_renderable_rings";
+    return doc;
 }
 
 RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
@@ -138,23 +118,17 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
 {
     using ghoul::filesystem::File;
 
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableRings"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _size = static_cast<float>(dictionary.value<double>(SizeInfo.identifier));
+    _size = p.size;
     setBoundingSphere(_size);
     _size.onChange([&]() { _planeIsDirty = true; });
     addProperty(_size);
 
-    _texturePath = absPath(dictionary.value<std::string>(TextureInfo.identifier));
+    _texturePath = absPath(p.texture);
     _textureFile = std::make_unique<File>(_texturePath);
 
-    if (dictionary.hasKeyAndValue<glm::vec2>(OffsetInfo.identifier)) {
-        _offset = dictionary.value<glm::vec2>(OffsetInfo.identifier);
-    }
+    _offset = p.offset.value_or(_offset);
     addProperty(_offset);
 
     _texturePath.onChange([&]() { loadTexture(); });
@@ -162,18 +136,10 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
 
     _textureFile->setCallback([&](const File&) { _textureIsDirty = true; });
 
-    if (dictionary.hasKeyAndValue<double>(NightFactorInfo.identifier)) {
-        _nightFactor = static_cast<float>(
-            dictionary.value<double>(NightFactorInfo.identifier)
-        );
-    }
+    _nightFactor = p.nightFactor.value_or(_nightFactor);
     addProperty(_nightFactor);
 
-    if (dictionary.hasKeyAndValue<double>(ColorFilterInfo.identifier)) {
-        _colorFilter = static_cast<float>(
-            dictionary.value<double>(ColorFilterInfo.identifier)
-        );
-    }
+    _colorFilter = p.colorFilter.value_or(_colorFilter);
     addProperty(_colorFilter);
 }
 

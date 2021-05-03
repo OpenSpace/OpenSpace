@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2021                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -196,8 +196,10 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
         }
     );
 
-    if (configuration.hasValue<float>(GuiScaleInfo.identifier)) {
-        _guiScale = configuration.value<float>(GuiScaleInfo.identifier);
+    if (configuration.hasValue<double>(GuiScaleInfo.identifier)) {
+        _guiScale = static_cast<float>(
+            configuration.value<double>(GuiScaleInfo.identifier)
+        );
     }
 
     _enabled = configuration.hasValue<bool>(EnabledInfo.identifier) &&
@@ -206,11 +208,11 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
     _visible = configuration.hasValue<bool>(VisibleInfo.identifier) &&
                configuration.value<bool>(VisibleInfo.identifier);
 
-    global::callback::initializeGL.emplace_back([this]() {
+    global::callback::initializeGL->emplace_back([this]() {
         startOrStopGui();
     });
 
-    global::callback::draw2D.emplace_back([this](){
+    global::callback::draw2D->emplace_back([this](){
         ZoneScopedN("CefWebGuiModule")
 
         const bool isGuiWindow =
@@ -233,7 +235,7 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
         }
     });
 
-    global::callback::deinitializeGL.emplace_back([this]() {
+    global::callback::deinitializeGL->emplace_back([this]() {
         ZoneScopedN("CefWebGuiModule")
 
         if (_endpointCallback != -1) {

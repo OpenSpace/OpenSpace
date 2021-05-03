@@ -6,66 +6,65 @@ asset.require('spice/base')
 local labelsPath = asset.require('./moon_labels').LabelsPath
 
 local Moon = {
-    Identifier = "Moon",
-    Parent = transforms.EarthBarycenter.Identifier,
-    Transform = {
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "MOON",
-            Observer = "EARTH BARYCENTER"
-        },
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "IAU_MOON",
-            DestinationFrame = "GALACTIC"
-        }
+  Identifier = "Moon",
+  Parent = transforms.EarthBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "MOON",
+      Observer = "EARTH BARYCENTER"
     },
-    Renderable = {
-        Type = "RenderableGlobe",
-        Radii = 1738140,
-        SegmentsPerPatch = 64,
-        Layers = {},
-        ShadowGroup = {
-            Source1 = {
-                Name = sunAsset.Sun.Name,
-                Radius = 696.3E6
-            },
-            Caster1 = { 
-                Name = earthAsset.Earth.Name,
-                Radius = 6.371E6
-            }
-        },
-        Labels = {
-            Enable = false,
-            FileName = labelsPath .. "/moon.labels",
-            LabelAlignmentOption = "Horizontally", -- or Circularly
-            LabelsFontSize = 14.0,
-            LabelsSize = 8.0,
-            LabelsMinSize = 1.0,
-            LabelsMaxSize = 1500.0,
-            ProximityEnabled = false,
-            LabelsFadeInEnabled = true,
-            FadeInStartingDistance = 500000.0,
-            FadeOutStartingDistance = 1000000.0,
-            LabelsForceDomeRendering = true,
-            LabelsDistanceEPS = 1350000.0,
-            LabelsColor = { 1.0, 1.0, 0.0 }
-        }
-    },
-    GUI = {
-        Path = "/Solar System/Planets/Earth/Moon"
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "IAU_MOON",
+      DestinationFrame = "GALACTIC"
     }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = 1738140,
+    SegmentsPerPatch = 64,
+    Layers = {},
+    ShadowGroup = {
+      Sources = {
+        { Name = sunAsset.Sun.Identifier, Radius = 696.3E6 },
+      },
+      Casters = {
+        { Name = earthAsset.Earth.Identifier, Radius = 6.371E6 },
+      }
+    },        
+    Labels = {
+      Enable = false,
+      FileName = labelsPath .. "/moon.labels",
+      LabelAlignmentOption = "Horizontally", -- or Circularly
+      LabelsFontSize = 14.0,
+      LabelsSize = 8.0,
+      LabelsMinSize = 1.0,
+      LabelsMaxSize = 1500.0,
+      ProximityEnabled = false,
+      LabelsFadeInEnabled = true,
+      LabelsFadeOutEnabled = true,
+      FadeInStartingDistance = 500000.0,
+      FadeOutStartingDistance = 100000.0,
+      LabelsForceDomeRendering = true,
+      LabelsDistanceEPS = 1350000.0,
+      LabelsColor = { 1.0, 1.0, 0.0 }
+    }
+  },
+  GUI = {
+    Path = "/Solar System/Planets/Earth/Moon"
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Moon })
 
 
 asset.meta = {
-    Name = "Moon",
-    Version = "1.0",
-    Description = [[ Moon globe with labels. ]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license",
-    Identifiers = {"Moon"}
+  Name = "Moon",
+  Version = "1.0",
+  Description = [[ Moon globe with labels. ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license",
+  Identifiers = {"Moon"}
 }
