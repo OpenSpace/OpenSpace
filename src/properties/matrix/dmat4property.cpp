@@ -53,8 +53,4 @@ glm::dmat4x4 DMat4Property::fromLuaConversion(lua_State* state, bool& success) c
     return ghoul::lua::tryGetValue<glm::dmat4x4>(state, success);
 }
 
-void DMat4Property::toLuaConversion(lua_State* state) const {
-    ghoul::lua::push(state, _value);
-}
-
 }  // namespace openspace::properties

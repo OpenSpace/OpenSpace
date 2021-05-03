@@ -59,8 +59,4 @@ unsigned long ULongProperty::fromLuaConversion(lua_State* state, bool& success) 
     }
 }
 
-void ULongProperty::toLuaConversion(lua_State* state) const {
-    lua_pushnumber(state, static_cast<lua_Number>(_value));
-}
-
 } // namespace openspace::properties

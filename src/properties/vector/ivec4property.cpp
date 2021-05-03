@@ -53,8 +53,4 @@ glm::ivec4 IVec4Property::fromLuaConversion(lua_State* state, bool& success) con
     return ghoul::lua::tryGetValue<glm::ivec4>(state, success);
 }
 
-void IVec4Property::toLuaConversion(lua_State* state) const {
-    ghoul::lua::push(state, _value);
-}
-
 } // namespace openspace::properties

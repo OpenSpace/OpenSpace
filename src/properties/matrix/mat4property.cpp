@@ -53,8 +53,4 @@ glm::mat4x4 Mat4Property::fromLuaConversion(lua_State* state, bool& success) con
     return ghoul::lua::tryGetValue<glm::mat4x4>(state, success);
 }
 
-void Mat4Property::toLuaConversion(lua_State* state) const {
-    ghoul::lua::push(state, _value);
-}
-
 }  // namespace openspace::properties

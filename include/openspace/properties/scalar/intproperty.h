@@ -58,7 +58,6 @@ public:
 
 protected:
     int fromLuaConversion(lua_State* state, bool& success) const override;
-    void toLuaConversion(lua_State* state) const override;
 };
 
 } // namespace openspace::properties

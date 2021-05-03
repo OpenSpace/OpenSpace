@@ -25,6 +25,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 
 #include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/lua/lua_helper.h>
 
 namespace openspace::properties {
 
@@ -46,7 +47,7 @@ bool BoolProperty::fromLuaConversion(lua_State* state, bool& success) const {
 }
 
 void BoolProperty::toLuaConversion(lua_State* state) const {
-    lua_pushboolean(state, _value);
+    ghoul::lua::push(state, _value);
 }
 
 std::string BoolProperty::toStringConversion() const {

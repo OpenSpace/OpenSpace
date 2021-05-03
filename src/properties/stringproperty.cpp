@@ -25,6 +25,7 @@
 #include <openspace/properties/stringproperty.h>
 
 #include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/lua/lua_helper.h>
 #include <openspace/json.h>
 
 namespace openspace::properties {
@@ -47,7 +48,7 @@ std::string StringProperty::fromLuaConversion(lua_State* state, bool& success) c
 }
 
 void StringProperty::toLuaConversion(lua_State* state) const {
-    lua_pushstring(state, _value.c_str());
+    ghoul::lua::push(state, _value);
 }
 
 std::string StringProperty::toStringConversion() const {

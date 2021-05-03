@@ -53,8 +53,4 @@ glm::mat2x2 Mat2Property::fromLuaConversion(lua_State* state, bool& success) con
     return ghoul::lua::tryGetValue<glm::mat2x2>(state, success);
 }
 
-void Mat2Property::toLuaConversion(lua_State* state) const {
-    ghoul::lua::push(state, _value);
-}
-
 }  // namespace openspace::properties

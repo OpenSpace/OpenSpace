@@ -52,8 +52,4 @@ short ShortProperty::fromLuaConversion(lua_State* state, bool& success) const {
     }
 }
 
-void ShortProperty::toLuaConversion(lua_State* state) const {
-    lua_pushnumber(state, static_cast<lua_Number>(_value));
-}
-
 } // namespace openspace::properties

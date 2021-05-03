@@ -154,6 +154,11 @@ void NumericalProperty<T>::interpolateValue(float t,
 }
 
 template <typename T>
+void NumericalProperty<T>::toLuaConversion(lua_State* state) const {
+    ghoul::lua::push(state, TemplateProperty<T>::_value);
+}
+
+template <typename T>
 std::string NumericalProperty<T>::toStringConversion() const {
     return formatJson(TemplateProperty<T>::_value);
 }

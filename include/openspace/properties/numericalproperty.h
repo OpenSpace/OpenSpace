@@ -67,7 +67,7 @@ protected:
     static const std::string ExponentValueKey;
 
     virtual T fromLuaConversion(lua_State* state, bool& success) const override = 0;
-    virtual void toLuaConversion(lua_State* state) const override = 0;
+    virtual void toLuaConversion(lua_State* state) const override;
     virtual std::string toStringConversion() const override;
 
     std::string generateAdditionalJsonDescription() const override;
