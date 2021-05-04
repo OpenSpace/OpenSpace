@@ -178,29 +178,41 @@ namespace openspace::skybrowser::luascriptfunctions {
         // Send image list to GUI
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::getTargetData");
 
-        ScreenSpaceSkyBrowser* browser = dynamic_cast<ScreenSpaceSkyBrowser*>(global::renderEngine->screenSpaceRenderable("SkyBrowser1"));
-        ScreenSpaceSkyTarget* target = dynamic_cast<ScreenSpaceSkyTarget*>(global::renderEngine->screenSpaceRenderable("SkyTarget1"));
+        SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 
-        float FOV = browser->fieldOfView();
-        
-        glm::dvec3 coords = target->getTargetDirection();
-        glm::dvec2 celestCoords = skybrowser::galacticCartesianToJ2000(coords);
         lua_newtable(L);
+        int index = 1;
+        // Pass data for all the browsers and the corresponding targets
+        std::vector<ScreenSpaceSkyBrowser*> browsers = module->getSkyBrowsers();
 
-        // Index for many browsers 
-        // For now it's only one
-        ghoul::lua::push(L, 1);
-        lua_newtable(L);
-        // Push ("Key", value)
-        ghoul::lua::push(L, "FOV", FOV);
-        lua_settable(L, -3);
-        ghoul::lua::push(L, "RA", celestCoords.x);
-        lua_settable(L, -3);
-        ghoul::lua::push(L, "Dec", celestCoords.y);
-        lua_settable(L, -3);
-       
-        // Set table for the current ImageData
-        lua_settable(L, -3);
+        for (int i = 0; i < browsers.size(); i++) {
+            // Only add browsers that have an initialized target
+            ScreenSpaceSkyTarget* target = browsers[i]->getSkyTarget();
+            if (target) {
+                glm::dvec3 coords = target->getTargetDirection();
+                glm::dvec2 celestCoords = skybrowser::galacticCartesianToJ2000(coords);
+                // Convert color to vector so ghoul can read it
+                glm::ivec3 color = browsers[i]->_borderColor.value();
+                std::vector<int> colorVec = { color.r, color.g, color.b };
+
+                ghoul::lua::push(L, index);
+                index++;
+                lua_newtable(L);
+                // Push ("Key", value)
+                ghoul::lua::push(L, "FOV", browsers[i]->fieldOfView());
+                lua_settable(L, -3);
+                ghoul::lua::push(L, "RA", celestCoords.x);
+                lua_settable(L, -3);
+                ghoul::lua::push(L, "Dec", celestCoords.y);
+                lua_settable(L, -3);
+                ghoul::lua::push(L, "Color", colorVec);
+                lua_settable(L, -3);
+
+                // Set table for the current ImageData
+                lua_settable(L, -3);
+            }
+        }
+            
 
         return 1;
     }

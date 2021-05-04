@@ -59,7 +59,7 @@ namespace openspace {
         GLuint _vertexBuffer = 0;
         float _fieldOfView = 100.f;
         ScreenSpaceSkyBrowser* _skyBrowser;
-        glm::vec3 _borderColor;
+        glm::ivec3 _borderColor;
     };
 }
 

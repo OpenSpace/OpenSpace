@@ -76,7 +76,7 @@ namespace openspace {
         , _targetDimensions(TargetDimensionInfo, glm::ivec2(1000.f), glm::ivec2(0.f), glm::ivec2(6000.f))
         , _skyBrowserID(BrowserIDInfo)
         , _showCrosshairThreshold(CrosshairThresholdInfo, 2.f, 1.f, 70.f)
-        , _borderColor(220.f, 220.f, 220.f)
+        , _borderColor(220, 220, 220)
     {
         // Handle target dimension property
         const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -123,6 +123,12 @@ namespace openspace {
 
     void ScreenSpaceSkyTarget::setConnectedBrowser() {
         _skyBrowser = dynamic_cast<ScreenSpaceSkyBrowser*>(global::renderEngine->screenSpaceRenderable(_skyBrowserID.value()));
+        if (_skyBrowser) {
+            _skyBrowser->setBorderColor(_skyBrowser->getColor());
+            _borderColor = _skyBrowser->getColor();
+            updateFOV(_skyBrowser->_vfieldOfView.value());
+            _targetDimensions = _skyBrowser->getBrowserPixelDimensions();
+        }
     }
 
     bool ScreenSpaceSkyTarget::isReady() const {
@@ -219,7 +225,7 @@ namespace openspace {
         _shader->setUniform(_uniformCache.borderWidth, borderWidth);
         _shader->setUniform(_uniformCache.targetDimensions, targetDim);
         _shader->setUniform(_uniformCache.modelTransform, modelTransform);
-        _shader->setUniform(_uniformCache.borderColor, _borderColor);
+        _shader->setUniform(_uniformCache.borderColor, glm::vec3(_borderColor));
 
         _shader->setUniform(
             _uniformCache.viewProj,

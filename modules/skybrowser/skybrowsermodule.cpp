@@ -357,6 +357,16 @@ WWTDataHandler* SkyBrowserModule::getWWTDataHandler() {
     return dataHandler;
 }
 
+std::vector<ScreenSpaceSkyBrowser*> SkyBrowserModule::getSkyBrowsers() {
+    std::vector<ScreenSpaceSkyBrowser*> browsers;
+    for (ScreenSpaceRenderable* renderable : renderables) {
+        if (to_browser(renderable)) {
+            browsers.push_back(to_browser(renderable));
+        }
+    }
+    return browsers;
+}
+
 /*
 std::vector<documentation::Documentation> SkyBrowserModule::documentations() const {
     return {

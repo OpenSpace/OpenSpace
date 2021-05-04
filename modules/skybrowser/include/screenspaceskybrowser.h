@@ -51,15 +51,14 @@ namespace openspace {
         bool _browserDimIsDirty;
         properties::FloatProperty _vfieldOfView;
         properties::StringProperty _skyTargetID;
+        properties::Vec3Property _borderColor;
     private:
         glm::vec2 _startDimensionsSize;
         float _startScale;
         properties::Vec2Property _browserDimensions;
         bool _camIsSyncedWWT;
         ScreenSpaceSkyTarget* _skyTarget;
-        std::thread _threadWWTMessages;
-        glm::ivec3 _borderColor;
-       
+        std::thread _threadWWTMessages;       
     };
 }
 

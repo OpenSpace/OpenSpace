@@ -44,6 +44,12 @@ namespace {
         "Target Info",
         "tjobidabidobidabidopp plupp"
     };
+    constexpr const openspace::properties::Property::PropertyInfo BorderColorInfo =
+    {
+        "BorderColor",
+        "Border color Info",
+        "tjobidabidobidabidopp plupp"
+    };
 
 
     struct [[codegen::Dictionary(ScreenSpaceSkyBrowser)]] Parameters {
@@ -56,6 +62,9 @@ namespace {
 
         // [[codegen::verbatim(TargetIDInfo.description)]]
         std::optional<std::string> targetID;
+
+        // [[codegen::verbatim(BorderColorInfo.description)]]
+        std::optional<glm::ivec3> borderColor;
     };
 
 #include "screenspaceskybrowser_codegen.cpp"
@@ -66,12 +75,19 @@ namespace openspace {
     ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary) 
         : ScreenSpaceBrowser(dictionary)
         , _browserDimensions(BrowserDimensionInfo, _dimensions, glm::ivec2(0), glm::ivec2(300))
-        , _vfieldOfView(ZoomInfo, 50.f, 0.1f, 70.f)
+        , _vfieldOfView(ZoomInfo, 10.f, 0.1f, 70.f)
+        , _borderColor(BorderColorInfo, glm::ivec3(rand() % 256, rand() % 256, rand() % 256))
         , _skyTargetID(TargetIDInfo)
         , _camIsSyncedWWT(true)
         , _skyTarget(nullptr)
-        , _borderColor(220, 220, 220)
     {
+        // Ensure the color of the border is bright enough.
+        // Make sure the RGB color at least is 50% brightness
+        // By making each channel 50% bright in general
+        // 222 = sqrt(3*(0.5*256)^2)
+        while (glm::length(_borderColor.value()) < 222) {
+            _borderColor = glm::ivec3(rand() % 256, rand() % 256, rand() % 256);
+        }
         // Handle target dimension property
         const Parameters p = codegen::bake<Parameters>(dictionary);
         _browserDimensions = p.browserDimensions.value_or(_browserDimensions);
@@ -145,7 +161,13 @@ namespace openspace {
     }   
 
     bool ScreenSpaceSkyBrowser::setConnectedTarget() {
+        setBorderColor(_borderColor.value());
         _skyTarget = dynamic_cast<ScreenSpaceSkyTarget*>(global::renderEngine->screenSpaceRenderable(_skyTargetID.value()));
+        if (_skyTarget) {
+            _skyTarget->setBorderColor(_borderColor.value());
+            _skyTarget->updateFOV(_vfieldOfView.value());
+            _skyTarget->setDimensions(getBrowserPixelDimensions());
+        }
         return _skyTarget != nullptr;
     }
 
@@ -178,7 +200,7 @@ namespace openspace {
     }
 
     glm::ivec3 ScreenSpaceSkyBrowser::getColor() {
-        return _borderColor;
+        return _borderColor.value();
     }
 
     void ScreenSpaceSkyBrowser::setBorderColor(glm::ivec3 col)  {
@@ -188,9 +210,9 @@ namespace openspace {
     }
 
     bool ScreenSpaceSkyBrowser::sendMessageToWWT(const ghoul::Dictionary& msg) {
-            std::string script = "sendMessageToWWT(" + ghoul::formatJson(msg) + ");";
-            executeJavascript(script);
-            return true;
+        std::string script = "sendMessageToWWT(" + ghoul::formatJson(msg) + ");";
+        executeJavascript(script);
+        return true;
     }
 
 
