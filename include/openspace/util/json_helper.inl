@@ -68,7 +68,7 @@ std::string formatJson(T value) {
         return escapedJson(value);
     }
     else if constexpr (std::is_same_v<T, ghoul::Dictionary>) {
-        return return ghoul::formatJson(value);
+        return ghoul::formatJson(value);
     }
     else if constexpr (internal::isGlmVector<T>()) {
         std::string values;
