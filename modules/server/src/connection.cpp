@@ -30,6 +30,7 @@
 #include <modules/server/include/topics/flightcontrollertopic.h>
 #include <modules/server/include/topics/getpropertytopic.h>
 #include <modules/server/include/topics/luascripttopic.h>
+#include <modules/server/include/topics/missiontopic.h>
 #include <modules/server/include/topics/sessionrecordingtopic.h>
 #include <modules/server/include/topics/setpropertytopic.h>
 #include <modules/server/include/topics/shortcuttopic.h>
@@ -54,19 +55,20 @@ namespace {
     constexpr const char* MessageKeyPayload = "payload";
     constexpr const char* MessageKeyTopic = "topic";
 
-    constexpr const char* VersionTopicKey = "version";
     constexpr const char* AuthenticationTopicKey = "authorize";
+    constexpr const char* BounceTopicKey = "bounce";
     constexpr const char* DocumentationTopicKey = "documentation";
+    constexpr const char* FlightControllerTopicKey = "flightcontroller";
     constexpr const char* GetPropertyTopicKey = "get";
     constexpr const char* LuaScriptTopicKey = "luascript";
+    constexpr const char* MissionTopicKey = "missions";
     constexpr const char* SessionRecordingTopicKey = "sessionRecording";
     constexpr const char* SetPropertyTopicKey = "set";
     constexpr const char* ShortcutTopicKey = "shortcuts";
     constexpr const char* SubscriptionTopicKey = "subscribe";
     constexpr const char* TimeTopicKey = "time";
     constexpr const char* TriggerPropertyTopicKey = "trigger";
-    constexpr const char* BounceTopicKey = "bounce";
-    constexpr const char* FlightControllerTopicKey = "flightcontroller";
+    constexpr const char* VersionTopicKey = "version";
 } // namespace
 
 namespace openspace {
@@ -97,6 +99,7 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s,
     _topicFactory.registerClass<DocumentationTopic>(DocumentationTopicKey);
     _topicFactory.registerClass<GetPropertyTopic>(GetPropertyTopicKey);
     _topicFactory.registerClass<LuaScriptTopic>(LuaScriptTopicKey);
+    _topicFactory.registerClass<MissionTopic>(MissionTopicKey);
     _topicFactory.registerClass<SessionRecordingTopic>(SessionRecordingTopicKey);
     _topicFactory.registerClass<SetPropertyTopic>(SetPropertyTopicKey);
     _topicFactory.registerClass<ShortcutTopic>(ShortcutTopicKey);

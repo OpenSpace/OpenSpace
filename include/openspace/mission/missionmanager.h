@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_CORE___MISSIONMANAGER___H__
 #define __OPENSPACE_CORE___MISSIONMANAGER___H__
 
+#include <openspace/documentation/documentationgenerator.h>
 #include <openspace/mission/mission.h>
 
 #include <ghoul/misc/assert.h>
@@ -88,6 +89,12 @@ public:
      * loaded, a warning will be printed and a dummy mission will be returned.
      */
     const Mission& currentMission();
+
+    /**
+     * Returns the mission map.
+     */
+    const std::map<std::string, Mission>& missionMap();
+
 
     static scripting::LuaLibrary luaLibrary();
 

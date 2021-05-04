@@ -92,6 +92,11 @@ const Mission& MissionManager::currentMission() {
     return _currentMission->second;
 }
 
+const std::map<std::string, Mission>& MissionManager::missionMap() {
+    return _missionMap;
+}
+
+
 scripting::LuaLibrary MissionManager::luaLibrary() {
     return {
         "",
