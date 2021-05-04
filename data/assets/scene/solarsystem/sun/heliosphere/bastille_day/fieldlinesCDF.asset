@@ -22,7 +22,7 @@ local fieldlines = {
     Renderable = {
         Type = "RenderableFieldlinesSequence",
         SourceFolder = fieldlinesDirectory,
-        SeedPointDirectory = seedPointDirectory,
+        --SeedPointDirectory = seedPointDirectory,
         TracingVariable = 'b',
         --OutputFolder = "C:/Users/eolsson/Documents/openspace/data/20000101/osfls/",
         

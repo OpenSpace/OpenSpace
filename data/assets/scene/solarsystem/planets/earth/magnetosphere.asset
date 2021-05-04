@@ -58,10 +58,10 @@ local earthMagnetosphere = {
 assetHelper.registerSceneGraphNodesAndExport(asset, { earthMagnetosphere })
 
 asset.meta = {
-    Name = "Predictive Science Inc. Fieldlines Bastille Day",
+    Name = "",
     Version = "1.0",
     Description = " Magnetic fieldlines for the bastille day CME event ",
     Author = "OpenSpace team",
-    URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",
+    URL = "",
     License = ""
 }
