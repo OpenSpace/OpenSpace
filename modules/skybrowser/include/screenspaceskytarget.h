@@ -20,7 +20,7 @@ namespace openspace {
     
     public:
         ScreenSpaceSkyTarget(const ghoul::Dictionary& dictionary);
-        virtual ~ScreenSpaceSkyTarget() = default;
+        virtual ~ScreenSpaceSkyTarget();
 
         bool initializeGL() override;
         bool isReady() const override;
@@ -33,7 +33,7 @@ namespace openspace {
         void setDimensions(glm::vec2 currentBrowserDimensions);
         void updateFOV(float browserFOV);
 
-        glm::dvec3 getTargetDirection();
+        glm::dvec3 getTargetDirectionGalactic();
         glm::dvec2 getScreenSpacePosition();
         void setConnectedBrowser();
         void setBorderColor(glm::ivec3 color);
@@ -43,11 +43,15 @@ namespace openspace {
         glm::dvec2 getUpperRightCornerScreenSpace();
         glm::dvec2 getLowerLeftCornerScreenSpace();
         bool coordIsInsideCornersScreenSpace(glm::dvec2 coord);
+        glm::dvec2 getTargetDirectionCelestial();
+        void unlock();
+        void lock();
 
         glm::mat4 scaleMatrix() override;
         
         void bindTexture() override;
         properties::StringProperty _skyBrowserID;
+
     private:
     
         properties::Vec2Property _targetDimensions;
@@ -60,6 +64,9 @@ namespace openspace {
         float _fieldOfView = 100.f;
         ScreenSpaceSkyBrowser* _skyBrowser;
         glm::ivec3 _borderColor;
+        bool isLocked;
+        glm::dvec2 lockedCelestialCoords;
+        std::thread _lockTargetThread;
     };
 }
 

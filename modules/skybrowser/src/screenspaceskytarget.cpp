@@ -115,6 +115,12 @@ namespace openspace {
 
     }
 
+    ScreenSpaceSkyTarget::~ScreenSpaceSkyTarget() {
+        if (_lockTargetThread.joinable()) {
+            _lockTargetThread.join();
+        }
+    }
+
     void ScreenSpaceSkyTarget::bindTexture() {
         if (_texture) {
             _texture->bind();
@@ -274,7 +280,7 @@ namespace openspace {
         _targetDimensions = currentBrowserDimensions;
     }
 
-    glm::dvec3 ScreenSpaceSkyTarget::getTargetDirection() {
+    glm::dvec3 ScreenSpaceSkyTarget::getTargetDirectionGalactic() {
         // Get camera view direction and orthogonal coordinate system of camera view direction
         glm::dvec3 camPos = global::navigationHandler->camera()->positionVec3();
         glm::dvec3 targetPosWorldSpace = glm::inverse(global::navigationHandler->camera()->combinedViewMatrix()) * glm::dvec4(_cartesianPosition.value(), 1.0);
@@ -282,8 +288,6 @@ namespace openspace {
 
         return targetDirection;
     }
-    
-
 
     void ScreenSpaceSkyTarget::updateFOV(float VFOV) {
         float horizFOV = global::windowDelegate->getHorizFieldOfView();
@@ -294,5 +298,33 @@ namespace openspace {
         
         _fieldOfView = VFOV;
     }
-    
+
+    void ScreenSpaceSkyTarget::unlock() {
+        isLocked = false;
+        if (_lockTargetThread.joinable()) {
+            _lockTargetThread.join();
+        }
+    }
+
+    void ScreenSpaceSkyTarget::lock() {
+        isLocked = true;
+        lockedCelestialCoords = getTargetDirectionCelestial();
+
+        // Start a thread to enable user interactions while locking target
+        _lockTargetThread = std::thread([&] {
+            while (isLocked) {
+                glm::dvec2 imageCoordsScreenSpace = skybrowser::J2000ToScreenSpace(lockedCelestialCoords.x, lockedCelestialCoords.y);
+                property("CartesianPosition")->set(glm::vec3 {imageCoordsScreenSpace, skybrowser::SCREENSPACE_Z });
+            }
+        });
+    }
+
+    glm::dvec2 ScreenSpaceSkyTarget::getTargetDirectionCelestial() {
+        // Calculate the galactic coordinate of the target direction 
+        // with infinite radius
+        glm::dvec3 camPos = global::navigationHandler->camera()->positionVec3();
+        constexpr double infinity = std::numeric_limits<float>::max();
+        glm::dvec3 galCoord = camPos + (infinity * getTargetDirectionGalactic());
+        return skybrowser::galacticCartesianToJ2000(galCoord);
+    }
 }

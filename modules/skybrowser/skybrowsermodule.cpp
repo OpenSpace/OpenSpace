@@ -128,6 +128,22 @@ namespace openspace {
                 "Add one or multiple exoplanet systems to the scene, as specified by the "
                 "input. An input string should be the name of the system host star"
             },
+            {
+                "lockTarget",
+                &skybrowser::luascriptfunctions::lockTarget,
+                {},
+                "string or list of strings",
+                "Add one or multiple exoplanet systems to the scene, as specified by the "
+                "input. An input string should be the name of the system host star"
+            },
+            {
+                "unlockTarget",
+                &skybrowser::luascriptfunctions::unlockTarget,
+                {},
+                "string or list of strings",
+                "Add one or multiple exoplanet systems to the scene, as specified by the "
+                "input. An input string should be the name of the system host star"
+            },
         };
 
         return res;
@@ -275,6 +291,10 @@ SkyBrowserModule::SkyBrowserModule()
                             currentlyResizingBrowser = true;
                             return true;
                         }
+                    }
+                    // If you start dragging around the target, it should unlock
+                    if (to_target(_mouseOnObject)) {
+                        to_target(_mouseOnObject)->unlock();
                     }
                     currentlyDraggingObject = true;
 

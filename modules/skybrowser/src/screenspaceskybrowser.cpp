@@ -285,14 +285,7 @@ namespace openspace {
         _threadWWTMessages = std::thread([&] {
             while (_camIsSyncedWWT) {
                 if (_skyTarget) {
-                    // Calculate the galactic coordinate of the target direction 
-                    // with infinite radius
-                    glm::dvec3 camPos = global::navigationHandler->camera()->positionVec3();
-                    constexpr double infinity = std::numeric_limits<float>::max();
-                    glm::dvec3 galCoord = camPos + (infinity * _skyTarget->getTargetDirection());
-                    glm::dvec2 celestCoordsTarget = skybrowser::galacticCartesianToJ2000(galCoord);
-                    ghoul::Dictionary message = createMessageForMovingWWTCamera(celestCoordsTarget, _vfieldOfView);
-
+                    ghoul::Dictionary message = createMessageForMovingWWTCamera(_skyTarget->getTargetDirectionCelestial(), _vfieldOfView);
                     sendMessageToWWT(message);
                 }
                 

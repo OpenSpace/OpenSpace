@@ -92,6 +92,35 @@ namespace openspace::skybrowser::luascriptfunctions {
         return 0;
     }
 
+    int lockTarget(lua_State* L) {
+        ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::lockTarget");
+        const int i = ghoul::lua::value<int>(L, 1);
+        SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+        std::vector<ScreenSpaceSkyBrowser*> browsers = module->getSkyBrowsers();
+        ScreenSpaceSkyTarget* target = browsers[i]->getSkyTarget();
+        if (i < browsers.size()) {
+            ScreenSpaceSkyTarget* target = browsers[i]->getSkyTarget();
+            if (target) {
+                target->lock();
+            }
+        }
+        return 0;
+    }
+
+    int unlockTarget(lua_State* L) {
+        ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::unlockTarget");
+        const int i = ghoul::lua::value<int>(L, 1);
+        SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+        std::vector<ScreenSpaceSkyBrowser*> browsers = module->getSkyBrowsers();
+        if (i < browsers.size()) {
+            ScreenSpaceSkyTarget* target = browsers[i]->getSkyTarget();
+            if (target) {
+                target->unlock();
+            }
+        }
+        return 0;
+    }
+
 	
 	int followCamera(lua_State* L) {
 		// Load images from url
@@ -189,7 +218,7 @@ namespace openspace::skybrowser::luascriptfunctions {
             // Only add browsers that have an initialized target
             ScreenSpaceSkyTarget* target = browsers[i]->getSkyTarget();
             if (target) {
-                glm::dvec3 coords = target->getTargetDirection();
+                glm::dvec3 coords = target->getTargetDirectionGalactic();
                 glm::dvec2 celestCoords = skybrowser::galacticCartesianToJ2000(coords);
                 // Convert color to vector so ghoul can read it
                 glm::ivec3 color = browsers[i]->_borderColor.value();
