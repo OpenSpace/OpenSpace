@@ -22,86 +22,75 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace openspace::properties {
+#include <ghoul/fmt.h>
+#include <ghoul/glm.h>
+#include <ghoul/misc/dictionaryjsonformatter.h>
+#include <type_traits>
+
+namespace openspace {
+
+namespace internal {
+
+template <class T, class... Ts>
+struct is_any : std::disjunction<std::is_same<T, Ts>...> {};
 
 template <typename T>
-TemplateProperty<T>::TemplateProperty(Property::PropertyInfo info, T value)
-    : Property(std::move(info))
-    , _value(std::move(value))
-{}
-
-template <typename T>
-TemplateProperty<T>::operator T() {
-    return _value;
+constexpr bool isGlmMatrix() {
+    return is_any<T,
+        glm::mat2x2, glm::mat2x3, glm::mat2x4,
+        glm::mat3x2, glm::mat3x3, glm::mat3x4,
+        glm::mat4x2, glm::mat4x3, glm::mat4x4,
+        glm::dmat2x2, glm::dmat2x3, glm::dmat2x4,
+        glm::dmat3x2, glm::dmat3x3, glm::dmat3x4,
+        glm::dmat4x2, glm::dmat4x3, glm::dmat4x4>::value;
 }
 
 template <typename T>
-TemplateProperty<T>::operator T() const {
-    return _value;
+constexpr bool isGlmVector() {
+    return is_any<T,
+        glm::vec2, glm::vec3, glm::vec4,
+        glm::ivec2, glm::ivec3, glm::ivec4,
+        glm::dvec2, glm::dvec3, glm::dvec4,
+        glm::uvec2, glm::uvec3, glm::uvec4>::value;
 }
 
-template <typename T>
-TemplateProperty<T>& TemplateProperty<T>::operator=(T val) {
-    setValue(val);
-    return *this;
-}
+} // namespace internal
 
 template <typename T>
-T openspace::properties::TemplateProperty<T>::value() const {
-    return _value;
-}
-
-template <typename T>
-void openspace::properties::TemplateProperty<T>::setValue(T val) {
-    if (val != _value) {
-        _value = std::move(val);
-        notifyChangeListeners();
-        _isValueDirty = true;
+std::string formatJson(T value) {
+    if constexpr (std::is_same_v<T, bool>) {
+        return value ? "true" : "false";
+    }
+    else if constexpr (std::is_arithmetic_v<T>) {
+        return formatJsonNumber(static_cast<double>(value));
+    }
+    else if constexpr (std::is_same_v<T, std::string>) {
+        return escapedJson(value);
+    }
+    else if constexpr (std::is_same_v<T, ghoul::Dictionary>) {
+        return return ghoul::formatJson(value);
+    }
+    else if constexpr (internal::isGlmVector<T>()) {
+        std::string values;
+        for (glm::length_t i = 0; i < ghoul::glm_components<T>::value; ++i) {
+            values += std::to_string(value[i]) + ',';
+        }
+        values.pop_back();
+        return fmt::format("[{}]", values);
+    }
+    else if constexpr (internal::isGlmMatrix<T>()) {
+        std::string values;
+        for (glm::length_t i = 0; i < T::type::row_type::length(); ++i) {
+            for (glm::length_t j = 0; j < T::type::col_type::length(); ++j) {
+                values += std::to_string(value[i][j]) + ',';
+            }
+        }
+        values.pop_back();
+        return fmt::format("[{}]", values);
+    }
+    else {
+        static_assert(sizeof(T) == 0, "JSON formatting of type T not implemented");
     }
 }
 
-template <typename T>
-std::ostream& operator<<(std::ostream& os, const TemplateProperty<T>& obj) {
-    os << obj.value();
-    return os;
-}
-
-template <typename T>
-std::any TemplateProperty<T>::get() const {
-    return std::any(_value);
-}
-
-template <typename T>
-void TemplateProperty<T>::set(std::any value) {
-    T v = std::any_cast<T>(std::move(value));
-    setValue(v);
-}
-
-template <typename T>
-const std::type_info& TemplateProperty<T>::type() const {
-    return typeid(T);
-}
-
-template <typename T>
-bool TemplateProperty<T>::getLuaValue(lua_State* state) const {
-    toLuaConversion(state);
-    return true;
-}
-
-template <typename T>
-bool TemplateProperty<T>::setLuaValue(lua_State* state) {
-    bool success = false;
-    T thisValue = fromLuaConversion(state, success);
-    if (success) {
-        set(std::any(thisValue));
-    }
-    return success;
-}
-
-template <typename T>
-bool TemplateProperty<T>::getStringValue(std::string& outValue) const {
-    outValue = toStringConversion();
-    return true;
-}
-
-}  // namespace openspace::properties
+}  // namespace openspace

@@ -27,6 +27,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/util/json_helper.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/glm.h>
 #include <sstream>
@@ -195,7 +196,8 @@ std::string KeybindingManager::generateJson() const {
         json << R"("script": ")" << escapedJson(p.second.command) << "\",";
         json << R"("remoteScripting": )"
              << (p.second.synchronization ? "true," : "false,");
-        json << R"("documentation": ")" << escapedJson(p.second.documentation) << "\",";
+        json << R"("documentation": ")"
+             << escapedJson(p.second.documentation) << "\",";
         json << R"("name": ")" << escapedJson(p.second.name) << "\"";
         json << "}";
     }

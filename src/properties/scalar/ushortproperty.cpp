@@ -26,12 +26,29 @@
 
 #include <ghoul/lua/ghoul_lua.h>
 
-#include <limits>
-#include <sstream>
+namespace openspace::properties {
 
-namespace {
+UShortProperty::UShortProperty(Property::PropertyInfo info, unsigned short value,
+                               unsigned short minValue, unsigned short maxValue,
+                               unsigned short stepValue)
+    : NumericalProperty<unsigned short>(
+        std::move(info),
+        value,
+        minValue,
+        maxValue,
+        stepValue
+    )
+{}
 
-unsigned short fromLuaConversion(lua_State* state, bool& success) {
+std::string UShortProperty::className() const {
+    return "UShortProperty";
+}
+
+int UShortProperty::typeLua() const {
+    return LUA_TNUMBER;
+}
+
+unsigned short UShortProperty::fromLuaConversion(lua_State* state, bool& success) const {
     success = (lua_isnumber(state, -1) == 1);
     if (success) {
         unsigned short val = static_cast<unsigned short>(lua_tonumber(state, -1));
@@ -41,32 +58,5 @@ unsigned short fromLuaConversion(lua_State* state, bool& success) {
         return 0;
     }
 }
-
-bool toLuaConversion(lua_State* state, unsigned short value) {
-    lua_pushnumber(state, static_cast<lua_Number>(value));
-    return true;
-}
-
-bool toStringConversion(std::string& outValue, unsigned short inValue) {
-    outValue = std::to_string(inValue);
-    return true;
-}
-
-} // namespace
-
-namespace openspace::properties {
-
-REGISTER_NUMERICALPROPERTY_SOURCE(
-    UShortProperty,
-    unsigned short,
-    0,
-    std::numeric_limits<unsigned short>::lowest(),
-    std::numeric_limits<unsigned short>::max(),
-    1,
-    fromLuaConversion,
-    toLuaConversion,
-    toStringConversion,
-    LUA_TNUMBER
-)
 
 } // namespace openspace::properties

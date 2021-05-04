@@ -37,6 +37,9 @@ class SelectionProperty : public TemplateProperty<std::set<std::string>> {
 public:
     SelectionProperty(Property::PropertyInfo info);
 
+    std::string className() const override;
+    int typeLua() const override;
+
     /**
      * This method sets the stored value to the provided value <code>val</code>.
      * If the value is different, the listeners are notified. It also removes any
@@ -110,6 +113,13 @@ public:
 
     using TemplateProperty<std::set<std::string>>::operator=;
 
+protected:
+    std::set<std::string> fromLuaConversion(lua_State* state, bool& success) const override;
+
+    void toLuaConversion(lua_State* state) const override;
+
+    std::string toStringConversion() const override;
+
 private:
     void sortOptions();
     bool removeInvalidKeys(std::set<std::string>& keys);
@@ -119,28 +129,6 @@ private:
     // A list of all available options that can be selected
     std::vector<std::string> _options;
 };
-
-template <>
-std::string PropertyDelegate<TemplateProperty<std::set<std::string>>>::className();
-
-template <>
-template <>
-std::set<std::string>
-PropertyDelegate<TemplateProperty<std::set<std::string>>>::fromLuaValue(lua_State* state,
-    bool& success);
-
-template <>
-template <>
-bool PropertyDelegate<TemplateProperty<std::set<std::string>>>::toLuaValue(
-    lua_State* state, const std::set<std::string>& value);
-
-template <>
-int PropertyDelegate<TemplateProperty<std::set<std::string>>>::typeLua();
-
-template <>
-template <>
-bool PropertyDelegate<TemplateProperty<std::set<std::string>>>::toString(
-    std::string& outValue, const std::set<std::string>& inValue);
 
 } // namespace openspace::properties
 

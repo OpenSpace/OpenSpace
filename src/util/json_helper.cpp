@@ -22,30 +22,58 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___LONGDOUBLEPROPERTY___H__
-#define __OPENSPACE_CORE___LONGDOUBLEPROPERTY___H__
+namespace openspace {
 
- /**
- * \file longdoubleproperty.h
- *
- * \addtogroup openspace
- * @{
- * \addtogroup properties
- * @{
+std::string escapedJson(const std::string& text) {
+    std::string jsonString;
+    jsonString.reserve(text.size());
+    for (const char& c : text) {
+        switch (c) {
+            case '\t':
+                jsonString += "\\t"; // Replace tab with \t.
+                break;
+            case '"':
+                jsonString += "\\\""; // Replace " with \".
+                break;
+            case '\\':
+                jsonString += "\\\\"; // Replace \ with \\.
+                break;
+            case '\n':
+                jsonString += "\\\\n"; // Replace newline with \n.
+                break;
+            case '\r':
+                jsonString += "\\r"; // Replace carriage return with \r.
+                break;
+            default:
+                jsonString += c;
+        }
+    }
+    return jsonString;
+}
 
- * \class LongDoubleProperty
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type <code>long double</code>.
+std::string escapedJson(const std::vector<std::string>& list) {
+    std::string jsonString;
+    jsonString += "[";
+    for (const std::string& text : list) {
+        jsonString += "\\\"";
+        jsonString += escapedJson(text);
+        jsonString += "\\\",";
+    }
+    if (jsonString.length() > 1) {
+        jsonString.pop_back();
+    }
+    jsonString += "]";
 
- * @} @}
- */
+    return jsonString;
+}
 
-#include <openspace/properties/numericalproperty.h>
+std::string formatJsonNumber(double d) {
+    // to_string will represent infinite values with 'inf' and NaNs with 'nan'.
+    // These are not valid in JSON, so use 'null' instead
+    if (!std::isfinite(d)) {
+        return "null";
+    }
+    return std::to_string(d);
+}
 
-namespace openspace::properties {
-
-REGISTER_NUMERICALPROPERTY_HEADER(LongDoubleProperty, long double)
-
-} // namespace openspace::properties
-
-#endif // __OPENSPACE_CORE___LONGDOUBLEPROPERTY___H__
+}  // namespace openspace

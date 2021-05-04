@@ -31,34 +31,20 @@ namespace openspace::properties {
 
 class DoubleListProperty : public ListProperty<double> {
 public:
-    DoubleListProperty(Property::PropertyInfo info);
-    DoubleListProperty(Property::PropertyInfo info, std::vector<double> values);
+    DoubleListProperty(Property::PropertyInfo info,
+        std::vector<double> values = std::vector<double>());
+
+    std::string className() const override;
+    int typeLua() const override;
 
     using TemplateProperty<std::vector<double>>::operator std::vector<double>;
     using TemplateProperty<std::vector<double>>::operator=;
+
+protected:
+    std::vector<double> fromLuaConversion(lua_State* state, bool& success) const override;
+    void toLuaConversion(lua_State* state) const override;
+    std::string toStringConversion() const override;
 };
-
-template <>
-std::string PropertyDelegate<TemplateProperty<std::vector<double>>>::className();
-
-template <>
-template <>
-std::vector<double>
-PropertyDelegate<TemplateProperty<std::vector<double>>>::fromLuaValue(
-    lua_State* state, bool& success);
-
-template <>
-template <>
-bool PropertyDelegate<TemplateProperty<std::vector<double>>>::toLuaValue(
-    lua_State* state, const std::vector<double>& value);
-
-template <>
-int PropertyDelegate<TemplateProperty<std::vector<double>>>::typeLua();
-
-template <>
-template <>
-bool PropertyDelegate<TemplateProperty<std::vector<double>>>::toString(
-    std::string& outValue, const std::vector<double>& inValue);
 
 } // namespace openspace::properties
 
