@@ -207,7 +207,7 @@ private:
     
     // GUI properties
     properties::FloatProperty _opacity;
-    properties::IntProperty _nDailyFlights;
+    properties::IntProperty _nRenderedFlights;
 
     // Initilising backend storage for 
     // vertex buffer object containing all points
@@ -226,6 +226,11 @@ private:
     Date _currentDate;
     Date _nextDate;
     Date _nextNextDate;
+
+    // SSBO
+    GLuint _ssbo = 1;
+    int _nFilteredAircraft = 0;
+    int* _ptr;
     
     // Stuff related to the data loading
     std::future<void> _future;

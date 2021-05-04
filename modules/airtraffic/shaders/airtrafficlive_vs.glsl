@@ -26,7 +26,8 @@
 
 #include "airtraffic_utilities.glsl"
 
-layout (location = 0) in vec3 vertexPosition; // lat, long, alt 
+layout (location = 0) in vec3 vertexPosition; // lat, long, alt
+layout (binding = 5, offset = 0) uniform atomic_uint counter;
 
 uniform mat4 modelViewProjection;
 uniform float trailSize;
@@ -43,18 +44,22 @@ out vec2 vs_latlon;
 out float vs_vertexID;
 
 void main() {
-
     vs_vertexID = float(gl_VertexID);
     vs_interpColor = vec4(color, opacity * pow(1.0 - mod(vs_vertexID, trailSize)/(trailSize-1), 2.0));
     vec4 position;
 
     if(latitudeThreshold.x < vertexPosition.x && vertexPosition.x < latitudeThreshold.y 
-        && longitudeThreshold.x < vertexPosition.y && vertexPosition.y < longitudeThreshold.y) 
+        && longitudeThreshold.x < vertexPosition.y && vertexPosition.y < longitudeThreshold.y
+        && vertexPosition.z > -EPSILON)
     {
         position = geoToCartConversion(radians(vertexPosition.x), radians(vertexPosition.y), vertexPosition.z);
     }
-    else position = vec4(0.0);
-    
+    else 
+    {
+        position = vec4(0.0);
+    }
+
+    atomicCounterIncrement(counter);
     
     vs_latlon = vec2(radians(vertexPosition.x), radians(vertexPosition.y));
 

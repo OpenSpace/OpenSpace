@@ -31,8 +31,6 @@
 layout (lines) in;
 layout (line_strip, max_vertices = 64) out;
 
-const float EPSILON = 1e-5;
-
 uniform mat4 modelViewProjection;
 uniform vec2 latitudeThreshold;
 uniform vec2 longitudeThreshold;

@@ -24,8 +24,10 @@
 
 #include "fragment.glsl"
 #include "floatoperations.glsl"
+#define PI 3.1415926538
 
 const float RADII = 6378137.0;
+const float EPSILON = 1e-5;
 
 bool visible(vec4 pos, mat4 modelTransform, vec3 cameraPosition) {
     

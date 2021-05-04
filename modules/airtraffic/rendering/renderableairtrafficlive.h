@@ -82,15 +82,6 @@ private:
         float latitude = static_cast<float>(_THRESHOLD);
         float longitude = static_cast<float>(_THRESHOLD);
         float barometricAltitude = 0.f;
-        //float velocity = 0.f; 
-        //float flightDirection = 0.f; // true_track in data
-        //int lastContact = 0; // Draw only if changed
-    };
-    
-    template<size_t N>
-    struct aircraftList {
-        aircraftList() : list(N) {}
-        std::list<AircraftVBOLayout> list;
     };
 
     // Backend storage for vertex buffer object containing all points
@@ -102,13 +93,15 @@ private:
 
     GLuint _vertexArray = 0;
     GLuint _vertexBuffer = 0;
+    
     std::future<json> _future;
     bool _isDataLoading = false;
     json _data = json({});
-    std::map<std::string, aircraftList<_TRAILSIZE>> _aircraftMap;
+
+    // For storing the trails of each aircraft
+    std::unordered_map<std::string, std::list<AircraftVBOLayout>> _aircraftMap;
     
     // Fix secure way to handle credentials
-    //const std::string _url = "https://" + _PASSWORD + ":" + _USERNAME + "@opensky-network.org/api/states/all";
     const std::string _url = "https://opensky-network.org/api/states/all";
     double _deltaTime = Time::now().j2000Seconds();
 };

@@ -70,10 +70,10 @@ namespace {
        "The opacity of the lines used to represent aircraft."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DailyFlightsInfo = {
-       "DailyFlights",
-       "Daily Flights",
-       "The daily number of flights. Filtration does not affect this value."
+    constexpr openspace::properties::Property::PropertyInfo RenderedFlightsInfo = {
+       "RenderedFlights",
+       "Rendered Flights",
+       "The rendered number of flights."
     };
 
 } // namespace
@@ -94,12 +94,12 @@ documentation::Documentation RenderableAirTrafficHistorical::Documentation() {
 RenderableAirTrafficHistorical::RenderableAirTrafficHistorical(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _opacity(OpacityInfo, 0.4f, 0.f, 1.f)
-    , _nDailyFlights(DailyFlightsInfo, 0, 0, 150000)
+    , _nRenderedFlights(RenderedFlightsInfo, 0, 0, 10000)
     {
         addProperty(_opacity);
 
-        _nDailyFlights.setReadOnly(true);
-        addProperty(_nDailyFlights);
+        _nRenderedFlights.setReadOnly(true);
+        addProperty(_nRenderedFlights);
 
         setRenderBin(RenderBin::PostDeferredTransparent);
     };
@@ -114,6 +114,9 @@ RenderableAirTrafficHistorical::RenderableAirTrafficHistorical(const ghoul::Dict
 
         glGenVertexArrays(1, &_bufferC.vertexArray);
         glGenBuffers(1, &_bufferC.vertexBuffer);
+
+        // SSBO
+        glGenBuffers(1, &_ssbo);
 
         _shader = global::renderEngine->buildRenderProgram(
             "AirTrafficHistoricalProgram",
@@ -135,6 +138,8 @@ RenderableAirTrafficHistorical::RenderableAirTrafficHistorical(const ghoul::Dict
         glDeleteBuffers(1, &_bufferC.vertexBuffer);
         glDeleteVertexArrays(1, &_bufferC.vertexArray);
 
+        glDeleteBuffers(1, &_ssbo);
+
         global::renderEngine->removeRenderProgram(_shader.get());
         _shader = nullptr;
 
@@ -154,6 +159,11 @@ RenderableAirTrafficHistorical::RenderableAirTrafficHistorical(const ghoul::Dict
         Date inDate = Date(timeNow);
 
         bool reverseTime = _lastUpdate > timeNow;
+
+        // SSBO
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssbo);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(int), &_nFilteredAircraft, GL_STATIC_DRAW);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, _ssbo);
 
         // Update one buffer if time moves forward
         if (inDate == _nextDate && !_isDataLoading && !reverseTime) {
@@ -273,6 +283,13 @@ RenderableAirTrafficHistorical::RenderableAirTrafficHistorical(const ghoul::Dict
             glBindVertexArray(0);
         }
 
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssbo);
+        _ptr = (int*)glMapBuffer(
+            GL_SHADER_STORAGE_BUFFER,
+            GL_READ_ONLY
+        );
+        _nRenderedFlights = *_ptr;
+
         glDepthFunc(GL_LESS);
 
         _shader->deactivate();
@@ -306,7 +323,7 @@ RenderableAirTrafficHistorical::RenderableAirTrafficHistorical(const ghoul::Dict
         }
 
         // Update the number of flights according to what date it is
-        _nDailyFlights = _bufferA.date == _nextDate ? _bufferA.vertexBufferData.size() / 2 :
+        _nRenderedFlights = _bufferA.date == _nextDate ? _bufferA.vertexBufferData.size() / 2 :
             _bufferB.date == _nextDate ? _bufferB.vertexBufferData.size() / 2 : _bufferC.vertexBufferData.size() / 2;
     }
 
@@ -337,7 +354,7 @@ RenderableAirTrafficHistorical::RenderableAirTrafficHistorical(const ghoul::Dict
         }
 
         // Update the number of flights according to what date it is
-        _nDailyFlights = _bufferA.date == _currentDate ? _bufferA.vertexBufferData.size() / 2 : 
+        _nRenderedFlights = _bufferA.date == _currentDate ? _bufferA.vertexBufferData.size() / 2 : 
             _bufferB.date == _currentDate ? _bufferB.vertexBufferData.size() / 2 : _bufferC.vertexBufferData.size() / 2;
     }
 

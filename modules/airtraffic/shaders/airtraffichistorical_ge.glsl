@@ -27,8 +27,11 @@
 
 layout (lines) in;
 layout (line_strip, max_vertices = 88) out;
+layout(std430, binding = 5) buffer buf
+{
+    int nFlights;
+};
 
-const float EPSILON = 1e-5;
 
 uniform mat4 modelViewProjection;
 uniform float opacity;
@@ -112,6 +115,8 @@ vec2 findIntermediatePoint(vec2 latlon1, vec2 latlon2, float f) {
         ge_interpColor = vec4(1.0);
         gl_Position = ge_position;
         EmitVertex();
+
+        atomicAdd(nFlights, 1);
 
         EndPrimitive();
     }

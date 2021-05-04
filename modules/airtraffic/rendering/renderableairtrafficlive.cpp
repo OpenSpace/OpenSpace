@@ -35,7 +35,11 @@
 #include <iostream>
 #include <future>
 #include <chrono>
+#include<fstream>
 
+#include <sstream>
+
+#include <iomanip>
 
 
 using namespace std::chrono;
@@ -84,9 +88,9 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderedAircraftsInfo = {
-       "RenderedAircrafts",
-       "Live Aircraft",
-       "The number of live aircraft in traffic right now."
+       "RenderedAircraft",
+       "Rendered Aircraft",
+       "The number of aircraft in traffic right now. This value is not affected by filtering."
     };
 } // namespace
 
@@ -220,7 +224,7 @@ RenderableAirTrafficLive::RenderableAirTrafficLive(const ghoul::Dictionary& dict
         _shader->setUniform(_uniformCache.longitudeThreshold, RenderableAirTrafficBound::getLonBound());
 
   
-        const GLsizei nAircrafts = static_cast<GLsizei>(_data["states"].size());
+        const GLsizei nAircraft = static_cast<GLsizei>(_data["states"].size());
         _shader->setUniform(
             _uniformCache.trailSize,
             static_cast<float>(_TRAILSIZE)
@@ -236,10 +240,18 @@ RenderableAirTrafficLive::RenderableAirTrafficLive(const ghoul::Dictionary& dict
         glBindVertexArray(_vertexArray);
         glLineWidth(_lineWidth);
 
+        // Upper limit on number of aircraft
+        GLint firsts[10000];
+        GLsizei counts[10000];
 
-        for (size_t i = 0; i < nAircrafts; ++i) {
-            glDrawArrays(GL_LINE_STRIP, _TRAILSIZE * i, static_cast<GLsizei>(_TRAILSIZE));   
+        for (int i = 0; i < nAircraft; i++) {
+            firsts[i] = _TRAILSIZE * i;
+            counts[i] = _TRAILSIZE;
         }
+
+        glMultiDrawArrays(GL_LINE_STRIP, firsts, counts, nAircraft);
+
+        _nRenderedAircraft = nAircraft;
 
         glBindVertexArray(0);
 
@@ -254,7 +266,6 @@ RenderableAirTrafficLive::RenderableAirTrafficLive(const ghoul::Dictionary& dict
             return true;
         };
 
-        //_data = json::parse(response.downloadedData().begin(), response.downloadedData().end(), ReplaceNullCallBack);
         return json::parse(response.downloadedData().begin(), response.downloadedData().end(), ReplaceNullCallBack);
 
         // JSON structure:
@@ -295,18 +306,15 @@ RenderableAirTrafficLive::RenderableAirTrafficLive(const ghoul::Dictionary& dict
 
         // Start timer
         auto start = std::chrono::steady_clock::now();
-    
+        
+        
         SyncHttpMemoryDownload response(_url);
         HttpRequest::RequestOptions timeout;
         timeout.requestTimeoutSeconds = 0; // No timeout limit
         
         response.download(timeout);
         
-        auto end = std::chrono::steady_clock::now();
-        // End timer
-        auto t = duration_cast<milliseconds>(end - start);
-        std::cout << "fetchData: " << t.count() << " milliseconds." << std::endl;
-
+        
         if(response.hasSucceeded())
             return parseData(response);
 
@@ -315,11 +323,9 @@ RenderableAirTrafficLive::RenderableAirTrafficLive(const ghoul::Dictionary& dict
     }
 
     void RenderableAirTrafficLive::updateBuffers() {
-
-        _nRenderedAircraft = _data["states"].size();
         
         _vertexBufferData.clear();
-        _vertexBufferData.resize(_TRAILSIZE * _nRenderedAircraft);
+        _vertexBufferData.resize(_TRAILSIZE * _data["states"].size());
 
         size_t vertexBufIdx = 0;
 
@@ -327,28 +333,31 @@ RenderableAirTrafficLive::RenderableAirTrafficLive(const ghoul::Dictionary& dict
 
         for (auto& aircraft : _data["states"]) {
             // Extract data and add to vertex buffer
-            // ---
             std::string icao24 = aircraft[0];
 
             temp.latitude = static_cast<float>(aircraft[6]);  
             temp.longitude = static_cast<float>(aircraft[5]);
             temp.barometricAltitude = static_cast<float>(aircraft[7]);
-            
-            if(temp.latitude > _THRESHOLD && temp.longitude > _THRESHOLD) {
-                if(_aircraftMap[icao24].list.size() >= _TRAILSIZE) _aircraftMap[icao24].list.pop_back();
-                _aircraftMap[icao24].list.push_front(temp);
+
+            while(_aircraftMap[icao24].size() < _TRAILSIZE) {
+                _aircraftMap[icao24].push_front(temp);
             }
 
-            for (auto& ac : _aircraftMap[icao24].list) {
+            if(temp.latitude > _THRESHOLD && temp.longitude > _THRESHOLD && temp.barometricAltitude > _THRESHOLD) {
+                _aircraftMap[icao24].pop_back();
+                _aircraftMap[icao24].push_front(temp);
+            }
+
+            for (auto& ac : _aircraftMap[icao24]) {
                 _vertexBufferData[vertexBufIdx] = ac;
                 vertexBufIdx++;
-            }  
+            }
         }
+
 
         glBindVertexArray(_vertexArray);
         glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
 
-      
         glBufferData(
             GL_ARRAY_BUFFER,
             _vertexBufferData.size() * sizeof(AircraftVBOLayout),

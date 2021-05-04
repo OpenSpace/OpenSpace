@@ -22,13 +22,17 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 #version __CONTEXT__
-#define PI 3.1415926538
 #include "airtraffic_utilities.glsl"
 
 layout (lines) in;
 layout (line_strip, max_vertices = 2) out;
+/*
+layout(std430, binding = 5) buffer buf
+{
+    int nVertices;
+};
+*/
 
-const float EPSILON = 1e-5;
 const float distThreshold = 20000.0;
 
 
@@ -43,7 +47,7 @@ out vec4 ge_position;
 out vec4 ge_interpColor;
 noperspective out vec2 ge_mathLine;
 
-uniform float trailSize; 
+uniform float trailSize;
 
  void main(){
 
@@ -51,8 +55,10 @@ uniform float trailSize;
     vec4 color = vs_interpColor[0];
     
     if(length(gl_in[0].gl_Position) < EPSILON || length(gl_in[1].gl_Position) < EPSILON || dist > distThreshold) {
-         return;
+        return;
     }
+
+    //atomicAdd(nVertices, 1);
 
     ge_position = vs_position[0];
     ge_interpColor = vs_interpColor[0];
