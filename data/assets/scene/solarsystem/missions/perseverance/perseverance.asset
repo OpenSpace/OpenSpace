@@ -1,3 +1,4 @@
 --perseverance.asset
+asset.require('./mission')
 asset.require('./model')
 asset.require('./trail')

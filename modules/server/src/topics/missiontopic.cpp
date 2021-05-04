@@ -70,13 +70,16 @@ nlohmann::json MissionTopic::createPhaseJson(const MissionPhase& phase) const {
     }
 
     nlohmann::json phaseJson = {
-        {"name", phase.name()},
-        {"description", phase.description()},
-        {"timerange",  
-            {"start" ,phase.timeRange().start},
-            {"end" ,phase.timeRange().end}
+        { "name", phase.name() },
+        { "description", phase.description() },
+        { "timerange",  
+            { "start" ,phase.timeRange().start },
+            { "end" ,phase.timeRange().end }
         },
-        {"phases", phases}
+        { "phases", phases },
+        { "media",
+            { "image", phase.image() }
+        }
     };
 
     return phaseJson;

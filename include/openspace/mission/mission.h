@@ -82,6 +82,13 @@ public:
     const std::string& description() const;
 
     /**
+     * Returns the associated image of this MissionPhase. If no image is associated, this
+     * string will be empty.
+     * \return The associated image of the MissionPhase or the empty string
+     */
+    const std::string& image() const;
+
+    /**
      * Returns all subphases sorted by start time.
      *
      * \return All subphases sorted by start time
@@ -131,6 +138,8 @@ protected:
     TimeRange _timeRange;
     /// A list of subphases into which this MissionPhase is separated
     std::vector<MissionPhase> _subphases;
+    /// Image that is associated with this phase
+    std::string _image;
 };
 
 /**

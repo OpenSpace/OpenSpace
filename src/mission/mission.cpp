@@ -25,6 +25,7 @@
 #include <openspace/mission/mission.h>
 
 #include <openspace/documentation/verifier.h>
+#include <openspace/util/spicemanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/lua/lua_helper.h>
@@ -40,14 +41,24 @@ namespace {
         // A description of this mission or mission phase
         std::optional<std::string> description;
 
+        struct TimeRange {
+            std::string start [[codegen::annotation("A string representing a valid date")]];
+            std::optional<std::string> end
+                [[codegen::annotation("A string representing a valid date")]];
+        };
         // The time range for which this mission or mission phase is valid. If no time
         // range is specified, the ranges of sub mission phases are used instead
-        std::optional<ghoul::Dictionary> timeRange
-            [[codegen::reference("core_util_timerange")]];
+        std::optional<TimeRange> timeRange;
 
         // The phases into which this mission or mission phase is separated
         std::optional<std::vector<ghoul::Dictionary>> phases
             [[codegen::reference("core_mission_mission")]];
+
+        struct Media {
+            // An image that can be presented to the user during this phase of a mission
+            std::optional<std::string> image;
+        };
+        std::optional<Media> media;
     };
 #include "mission_codegen.cpp"
 } // namespace
@@ -65,6 +76,9 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
 
     _name = p.name;
     _description = p.description.value_or(_description);
+    if (p.media.has_value()) {
+        _image = p.media->image.value_or(_image);
+    }
 
     if (p.phases.has_value()) {
         _subphases.reserve(p.phases->size());
@@ -88,7 +102,14 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
 
         // user may specify an overall time range. In that case expand this timerange
         if (p.timeRange.has_value()) {
-            TimeRange overallTimeRange(*p.timeRange);
+            std::string start = p.timeRange->start;
+            std::string end = p.timeRange->end.value_or(start);
+
+            TimeRange overallTimeRange = TimeRange(
+                SpiceManager::ref().ephemerisTimeFromDate(start),
+                SpiceManager::ref().ephemerisTimeFromDate(end)
+            );
+
             if (!overallTimeRange.includes(timeRangeSubPhases)) {
                 throw ghoul::RuntimeError(fmt::format(
                     "User specified time range must at least include its subphases'",
@@ -106,7 +127,13 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
     }
     else {
         if (p.timeRange.has_value()) {
-            _timeRange = TimeRange(*p.timeRange); // throws exception if unable to parse
+            std::string start = p.timeRange->start;
+            std::string end = p.timeRange->end.value_or(start);
+
+            _timeRange = TimeRange(
+                SpiceManager::ref().ephemerisTimeFromDate(start),
+                SpiceManager::ref().ephemerisTimeFromDate(end)
+            );
         }
         else {
             throw ghoul::RuntimeError(fmt::format(
@@ -127,6 +154,10 @@ const TimeRange& MissionPhase::timeRange() const {
 
 const std::string& MissionPhase::description() const {
     return _description;
+}
+
+const std::string& MissionPhase::image() const {
+    return _image;
 }
 
 const std::vector<MissionPhase>& MissionPhase::phases() const {
