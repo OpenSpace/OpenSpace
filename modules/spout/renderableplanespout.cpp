@@ -29,11 +29,10 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <ghoul/logging/logmanager.h>
+#include <optional>
 
 namespace {
     constexpr const char* LoggerCat = "ScreenSpaceSpout";
-
-    constexpr const char* KeyName = "Name";
 
     constexpr openspace::properties::Property::PropertyInfo NameInfo = {
         "SpoutName",
@@ -56,30 +55,23 @@ namespace {
         "If this property is trigged, the 'SpoutSelection' options will be refreshed."
     };
 
+    struct [[codegen::Dictionary(RenderablePlaneSpout)]] Parameters {
+        // Specifies the GUI name of the ScreenspaceSpout
+        std::optional<std::string> name;
+
+        // [[codegen::verbatim(NameInfo.description)]]
+        std::optional<std::string> spoutName;
+    };
+#include "renderableplanespout_codegen.cpp"
+
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderablePlaneSpout::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "ScreenSpace Spout",
-        "spout_screenspace_spout",
-        {
-            {
-                KeyName,
-                new StringVerifier,
-                Optional::Yes,
-                "Specifies the GUI name of the ScreenspaceSpout"
-            },
-            {
-                NameInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                NameInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "spout_screenspace_spout";
+    return doc;
 }
 
 RenderablePlaneSpout::RenderablePlaneSpout(const ghoul::Dictionary& dictionary)
@@ -89,11 +81,7 @@ RenderablePlaneSpout::RenderablePlaneSpout(const ghoul::Dictionary& dictionary)
     , _updateSelection(UpdateInfo)
     , _receiver(GetSpout())
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderablePlaneSpout"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     int iIdentifier = 0;
     if (_identifier.empty()) {
@@ -114,10 +102,7 @@ RenderablePlaneSpout::RenderablePlaneSpout(const ghoul::Dictionary& dictionary)
         setGuiName("RenderablePlaneSpout " + std::to_string(iIdentifier));
     }
 
-    if (dictionary.hasKey(NameInfo.identifier)) {
-        _spoutName = dictionary.value<std::string>(NameInfo.identifier);
-    }
-
+    _spoutName = p.spoutName.value_or(_spoutName);
     _spoutName.onChange([this]() {
         _isSpoutDirty = true;
         _isErrorMessageDisplayed = false;
