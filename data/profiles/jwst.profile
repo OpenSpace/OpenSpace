@@ -43,6 +43,22 @@
       "key": "S",
       "name": "Toggle satellite trails",
       "script": "local list = openspace.getProperty('{earth_satellites}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
+    },
+    {
+      "documentation": "Toggle points and labels for the Lagrangian points for Earth Sun system",
+      "gui_path": "/JWST",
+      "is_local": false,
+      "key": "P",
+      "name": "Toggle Lagrangian points",
+      "script": "local list = openspace.getProperty('{lagrange_points}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
+    },
+    {
+      "documentation": "Toggle Hubble Ultra Deep Field image and line towards its coordinate",
+      "gui_path": "/JWST",
+      "is_local": false,
+      "key": "U",
+      "name": "Toggle Hubble Ultra Deep Field",
+      "script": "local list = openspace.getProperty('{hudf}.*.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
     }
   ],
   "mark_nodes": [

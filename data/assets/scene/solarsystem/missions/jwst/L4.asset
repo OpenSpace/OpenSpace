@@ -9,6 +9,7 @@ local L4 = {
     Identifier = "L4",
     Parent = transforms.SolarSystemBarycenter.Identifier,
     Renderable = {
+        Enabled = false,
         Type = "RenderablePlaneImageLocal",
         RenderableType = "Opaque",
         Billboard = true,
@@ -24,6 +25,7 @@ local L4 = {
             Kernels = L4Kernel
         }
     },
+    Tag = { "lagrange_points" },
     GUI = {
         Name = "L4",
         Path = "/Solar System/Missions/JWST",
@@ -34,7 +36,7 @@ local L4Label = {
     Identifier = "L4Label",
     Parent = L4.Identifier,
     Renderable = {
-        Enabled = true,
+        Enabled = false,
         Type = "RenderableLabels",
         LabelText = "L4",
         FontSize = 20,
@@ -45,7 +47,7 @@ local L4Label = {
         BlendMode = "Normal",
         EnableFading = false
     },
-    Tag = { "solarsystem_labels" },
+    Tag = { "lagrange_points" },
     GUI = {
         Name = "L4 Label",
         Path = "/Solar System/Missions/JWST",

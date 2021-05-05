@@ -9,6 +9,7 @@ local L5 = {
     Identifier = "L5",
     Parent = transforms.SolarSystemBarycenter.Identifier,
     Renderable = {
+        Enabled = false,
         Type = "RenderablePlaneImageLocal",
         RenderableType = "Opaque",
         Billboard = true,
@@ -24,6 +25,7 @@ local L5 = {
             Kernels = L5Kernel
         }
     },
+    Tag = { "lagrange_points" },
     GUI = {
         Name = "L5",
         Path = "/Solar System/Missions/JWST",
@@ -34,7 +36,7 @@ local L5Label = {
     Identifier = "L5Label",
     Parent = L5.Identifier,
     Renderable = {
-        Enabled = true,
+        Enabled = false,
         Type = "RenderableLabels",
         LabelText = "L5",
         FontSize = 20,
@@ -45,7 +47,7 @@ local L5Label = {
         BlendMode = "Normal",
         EnableFading = false
     },
-    Tag = { "solarsystem_labels" },
+    Tag = { "lagrange_points" },
     GUI = {
         Name = "L5 Label",
         Path = "/Solar System/Missions/JWST",
