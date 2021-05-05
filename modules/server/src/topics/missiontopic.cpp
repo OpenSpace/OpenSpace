@@ -52,7 +52,7 @@ nlohmann::json MissionTopic::missionJson() const {
     const std::map<std::string, Mission>& missions =
         global::missionManager->missionMap();
 
-    std::vector<nlohmann::json> json;
+    json json;
     for (auto const& [name, mission] : missions) {
         nlohmann::json missionJson = createPhaseJson(mission);
         json.push_back(missionJson);
@@ -63,9 +63,9 @@ nlohmann::json MissionTopic::missionJson() const {
 
 nlohmann::json MissionTopic::createPhaseJson(const MissionPhase& phase) const {
 
-    std::vector<nlohmann::json> phases;
+    json phases = json::array();
     for (const MissionPhase& missionPhase : phase.phases()) {
-        std::vector<nlohmann::json> subphaseJson = createPhaseJson(missionPhase);
+        json subphaseJson = createPhaseJson(missionPhase);
         phases.push_back(subphaseJson);
     }
 
