@@ -129,11 +129,11 @@ namespace {
         // shutting down. If ESC is pressed again in this time, the shutdown is aborted
         std::optional<float> shutdownCountdown [[codegen::greater(0.0)]];
 
-        // If this is set to 'true', the name of the scene will be appended to the cache
+        // If this is set to 'true', the name of the profile will be appended to the cache
         // directory, thus not reusing the same directory. This is useful in cases where
-        // the same instance of OpenSpace is run with multiple scenes, but the caches
+        // the same instance of OpenSpace is run with multiple profiles, but the caches
         // should be retained. This value defaults to 'false'
-        std::optional<bool> perSceneCache;
+        std::optional<bool> perProfileCache;
 
         enum class Scaling {
             Window [[codegen::key("window")]],
@@ -388,7 +388,7 @@ void parseLuaState(Configuration& configuration) {
                 throw ghoul::MissingCaseException();
         }
     }
-    c.usePerSceneCache = p.perSceneCache.value_or(c.usePerSceneCache);
+    c.usePerProfileCache = p.perProfileCache.value_or(c.usePerProfileCache);
     c.isRenderingOnMasterDisabled =
         p.disableRenderingOnMaster.value_or(c.isRenderingOnMasterDisabled);
     c.globalRotation = p.globalRotation.value_or(c.globalRotation);

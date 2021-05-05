@@ -190,9 +190,14 @@ void OpenSpaceEngine::initialize() {
     }
 
     std::string cacheFolder = absPath("${CACHE}");
-    if (global::configuration->usePerSceneCache) {
-        std::string scene = global::configuration->asset;
-        cacheFolder += "-" + ghoul::filesystem::File(scene).baseName();
+    if (global::configuration->usePerProfileCache) {
+        std::string profile = global::configuration->profile;
+        if (profile.empty()) {
+            throw ghoul::RuntimeError(
+                "Unexpected error: Configuration file profile was empty"
+            );
+        }
+        cacheFolder = cacheFolder + "-" + profile;
 
         LINFO(fmt::format("Old cache: {}", absPath("${CACHE}")));
         LINFO(fmt::format("New cache: {}", cacheFolder));
