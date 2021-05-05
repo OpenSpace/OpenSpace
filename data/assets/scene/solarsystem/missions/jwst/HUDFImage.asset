@@ -12,14 +12,6 @@ local PARSEC_CONSTANT = 3.0856776E16;
 local HUDFPosition = {
     Identifier = "HUDFPosition",
     Parent = transforms.EarthInertial.Identifier,
-    Renderable = {
-        Type = "RenderablePlaneImageLocal",
-        RenderableType = "Opaque",
-        Billboard = false,
-        Size = 27.8252058E12,
-        Texture = "C:/Users/ElmQPC/Desktop/Malin/develop/images/Hubble_ultra_deep_field.jpg",
-        BlendMode = "Normal"
-    },
     Transform = {
         Translation = {
             Type = "StaticTranslation",
@@ -31,25 +23,51 @@ local HUDFPosition = {
         }
     },
     GUI = {
-        Name = "Hubble Ultra Deep field",
+        Name = "Hubble Ultra Deep field Position",
         Path = "/Solar System/Missions/JWST",
+        Hidden = true
     }
+}
+
+local HUDFImage = {
+    Identifier = "HUDFImage",
+    Enabled = false,
+    Type = "ScreenSpaceImageLocal",
+    Name = "Hubble Ultra Deep field",
+    UseRadiusAzimuthElevation = true,
+    FaceCamera = false,
+    RadiusAzimuthElevation = {
+        200.0, 0.5, 0.15
+    },
+    UsePerspectiveProjection = false,
+    Opacity = 1.0,
+    TexturePath = "C:/Users/ElmQPC/Desktop/Malin/develop/images/Hubble_ultra_deep_field.jpg",
+    Tag = { "hudf" },
 }
 
 local HUDFJWSTLine = {
     Identifier = "HUDFJWSTLine",
     Parent = sunTransforms.SolarSystemBarycenter.Identifier,
     Renderable = {
+        Enabled = false,
         Type = "RenderableNodeLine",
         StartNode = HUDFPosition.Identifier,
         EndNode = jwstTransforms.JWSTPosition.Identifier,
         Color = { 0.5, 0.5, 0.5 },
         LineWidth = 2
     },
+    Tag = { "hudf" },
     GUI = {
         Name = "JWST to HUDF image line",
         Path = "/Solar System/Missions/JWST",
     }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { HUDFPosition, HUDFJWSTLine })
+assetHelper.registerSceneGraphNodesAndExport(asset, { HUDFPosition, HUDFImage, HUDFJWSTLine })
+
+asset.onInitialize(function()
+    openspace.addScreenSpaceRenderable(HUDFImage)
+end)
+asset.onDeinitialize(function()
+    openspace.removeScreenSpaceRenderable(HUDFImage.Identifier)
+end)
