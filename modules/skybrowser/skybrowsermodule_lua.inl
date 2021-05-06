@@ -212,6 +212,29 @@ namespace openspace::skybrowser::luascriptfunctions {
 
         lua_newtable(L);
         int index = 1;
+        
+        // Add the window data for OpenSpace
+        ghoul::lua::push(L, index);
+        index++;
+        lua_newtable(L);
+        // Calculate camera view direction in celestial spherical coordinates
+        glm::dvec3 viewDir = global::navigationHandler->camera()->viewDirectionWorldSpace();
+        glm::dvec2 viewDirCelest = skybrowser::galacticCartesianToJ2000(viewDir);
+        // Convert to vector so ghoul can read it
+        std::vector<double> viewDirCelestVec = { viewDirCelest.x, viewDirCelest.y };
+        // Calculate the smallest FOV of vertical and horizontal
+        float HFOV = global::windowDelegate->getHorizFieldOfView();
+        glm::vec2 windowRatio = global::windowDelegate->currentWindowSize();
+        float VFOV = HFOV * (windowRatio.y / windowRatio.x);
+        double FOV = std::min(HFOV, VFOV);
+        // Push window data
+        ghoul::lua::push(L, "WindowHFOV", FOV);
+        lua_settable(L, -3);
+        ghoul::lua::push(L, "WindowDirection", viewDirCelestVec);
+        lua_settable(L, -3);
+        // Set table for the current ImageData
+        lua_settable(L, -3);
+
         // Pass data for all the browsers and the corresponding targets
         std::vector<ScreenSpaceSkyBrowser*> browsers = module->getSkyBrowsers();
 
@@ -238,7 +261,7 @@ namespace openspace::skybrowser::luascriptfunctions {
                 ghoul::lua::push(L, "Color", colorVec);
                 lua_settable(L, -3);
 
-                // Set table for the current ImageData
+                // Set table for the current target
                 lua_settable(L, -3);
             }
         }
