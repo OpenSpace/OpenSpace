@@ -110,6 +110,7 @@ bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfP
     state.setModel(fls::stringToModel(kameleon->getModelName()));
     state.setTriggerTime(kameleonHelper::getTime(kameleon.get()));
 
+
     if (addLinesToState(kameleon.get(), seedPoints, tracingVar, state)) {
         // The line points are in their RAW format (unscaled & maybe spherical)
         // Before we scale to meters (and maybe cartesian) we must extract
@@ -195,10 +196,14 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
         const std::vector<ccmc::Point3f>& positions = magneticFieldline.getPositions();
 
         const size_t nLinePoints = positions.size();
+        std::vector<glm::vec3> initialFieldline;
+
         std::vector<glm::vec3> vertices;
 
         for (const ccmc::Point3f& p : positions) {
-            //vertices.emplace_back(p.component1, p.component2, p.component3);
+
+            //add the magentic fieldline to the state
+            initialFieldline.emplace_back(p.component1, p.component2, p.component3);
 
             std::unique_ptr<ccmc::Interpolator> interpolator2 =
                 std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
@@ -207,15 +212,14 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
 
             //trace every vertex from the magnetic fieldline
             //with the velocity flow variable "u". change to u_perp later
-            ccmc::Fieldline vFlowFieldline = tracer2.bidirectionalTrace(
+            ccmc::Fieldline vFlowFieldline = tracer2.unidirectionalTrace(
                 "u",
-                p.component1, //do they need to be in Re coordinates?
+                p.component1,
                 p.component2,
                 p.component3
             );
 
             const std::vector<ccmc::Point3f>& positions2 = vFlowFieldline.getPositions();
-
 
             for (const ccmc::Point3f& p2 : positions2) {
 
@@ -226,9 +230,10 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
             vertices.clear();
 
         }
+        state.addLine(initialFieldline);
+        initialFieldline.clear();
         
         success |= (nLinePoints > 0);
-
 
     }
 
