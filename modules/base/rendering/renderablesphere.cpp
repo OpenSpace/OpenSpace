@@ -171,7 +171,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _texturePath(TextureInfo)
     , _orientation(OrientationInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _size(SizeInfo, 1.f, 0.f, 1e35f)
+    , _size(SizeInfo, 1.f, 0.f, 1e25f)
     , _segments(SegmentsInfo, 8, 4, 1000)
     , _mirrorTexture(MirrorTextureInfo, false)
     , _useAdditiveBlending(UseAdditiveBlendingInfo, false)
@@ -215,7 +215,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     }
     addProperty(_orientation);
 
-    _size.setViewOption(properties::Property::ViewOptions::Logarithmic);
+    _size.setExponent(15.f);
     _size.onChange([this]() {
         setBoundingSphere(_size);
         _sphereIsDirty = true;

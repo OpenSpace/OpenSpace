@@ -381,12 +381,10 @@ public:
 
     /**
     * Default view options that can be used in the Property::setViewOption method. The
-    * values are: Property::ViewOptions::Color = \c Color,
-    * Property::ViewOptions::Logarithmic = \c Logarithmic
+    * values are: Property::ViewOptions::Color = \c Color
     */
     struct ViewOptions {
         static const char* Color;
-        static const char* Logarithmic;
     };
 
     /**

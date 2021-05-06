@@ -251,7 +251,7 @@ void RingsComponent::initialize() {
 
     addProperty(_enabled);
 
-    _size.setViewOption(properties::Property::ViewOptions::Logarithmic);
+    _size.setExponent(15.f);
     _size = p.size.value_or(_size);
     _size.onChange([&]() { _planeIsDirty = true; });
     addProperty(_size);

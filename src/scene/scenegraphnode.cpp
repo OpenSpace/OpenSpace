@@ -449,6 +449,7 @@ SceneGraphNode::SceneGraphNode()
             _overrideBoundingSphere = std::nullopt;
         }
     });
+    _boundingSphere.setExponent(10.f);
     addProperty(_boundingSphere);
     _interactionSphere.onChange([this]() {
         if (_interactionSphere >= 0.0) {
@@ -458,6 +459,7 @@ SceneGraphNode::SceneGraphNode()
             _overrideInteractionSphere = std::nullopt;
         }
         });
+    _interactionSphere.setExponent(10.f);
     addProperty(_interactionSphere);
     addProperty(_showDebugSphere);
 }
