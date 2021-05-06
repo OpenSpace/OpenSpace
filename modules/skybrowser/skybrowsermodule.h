@@ -85,6 +85,9 @@ protected:
     bool currentlyResizingBrowser;
     bool currentlyDraggingObject;
     WWTDataHandler* dataHandler; 
+    // For capping the calls to change the zoom from scrolling
+    constexpr static const std::chrono::milliseconds TimeUpdateInterval{ 50 };
+    std::chrono::system_clock::time_point _lastUpdateTime;
 };
 
 } // namespace openspace

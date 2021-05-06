@@ -195,7 +195,6 @@ SkyBrowserModule::SkyBrowserModule()
                     double OpenSpaceHorizontalFOV = global::windowDelegate->getHorizFieldOfView();
                     glm::dvec2 OpenSpaceFOV = glm::dvec2(OpenSpaceHorizontalFOV, OpenSpaceHorizontalFOV * windowRatio);
 
-
                     glm::dvec2 angleResult = WWTFOV * (move / browserDim);
                     glm::dvec2 OSresult = angleResult / OpenSpaceFOV;
                     
@@ -259,15 +258,19 @@ SkyBrowserModule::SkyBrowserModule()
 
     global::callback::mouseScrollWheel->emplace_back(
         [&](double, double scroll) -> bool {
-            // If mouse is on browser, apply zoom
-            if (to_browser(_mouseOnObject)) {
-                to_browser(_mouseOnObject)->scrollZoom(scroll);
-                return true;
+            // Cap how often the zoom is allowed to update
+            std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+            if (now - _lastUpdateTime > TimeUpdateInterval) {
+                // If mouse is on browser or target, apply zoom
+                if (to_browser(_mouseOnObject)) {
+                    to_browser(_mouseOnObject)->scrollZoom(scroll);
+                    return true;
+                }
+                else if (to_target(_mouseOnObject) && to_target(_mouseOnObject)->getSkyBrowser()) {
+                    to_target(_mouseOnObject)->getSkyBrowser()->scrollZoom(scroll);
+                }
+                _lastUpdateTime = std::chrono::system_clock::now();
             }
-            else if (to_target(_mouseOnObject) && to_target(_mouseOnObject)->getSkyBrowser()) {
-                to_target(_mouseOnObject)->getSkyBrowser()->scrollZoom(scroll);
-            }
-
             return false;
         }
     );
