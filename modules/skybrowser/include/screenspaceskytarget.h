@@ -46,6 +46,9 @@ namespace openspace {
         glm::dvec2 getTargetDirectionCelestial();
         void unlock();
         void lock();
+        void animateToCoord(double deltaTime);
+        void startAnimation(glm::dvec2 coordsEnd, float FOVEnd);
+        bool animateFOV(float endFOV, float deltaTime);
 
         glm::mat4 scaleMatrix() override;
         
@@ -64,9 +67,18 @@ namespace openspace {
         float _fieldOfView = 100.f;
         ScreenSpaceSkyBrowser* _skyBrowser;
         glm::ivec3 _borderColor;
+        // Locking target to a coordinate on the sky
         bool isLocked;
         glm::dvec2 lockedCelestialCoords;
         std::thread _lockTargetThread;
+        // Animating the target
+        bool isAnimated = false;
+        // Cartesian celestial coords
+        glm::dvec3 _coordsToAnimateTo;
+        glm::dvec3 _coordsStartAnimation;
+        double animationTime = 1.0;
+        float FOVToAnimateTo;
+        float currentFOV;
     };
 }
 

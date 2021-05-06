@@ -55,11 +55,12 @@ namespace openspace::skybrowser::luascriptfunctions {
 		
 		// Only move target if the image has coordinates	 
 		if (resultImage.hasCoords) {
-            glm::dvec2 imageCoordsScreenSpace = skybrowser::J2000ToScreenSpace(resultImage.celestCoords.x, resultImage.celestCoords.y);
-            browser->getSkyTarget()->property("CartesianPosition")->set(glm::vec3 {imageCoordsScreenSpace, skybrowser::SCREENSPACE_Z });
-                 
-			// In WWT, the definition of ZoomLevel is: VFOV = ZoomLevel / 6
-			browser->setVerticalFieldOfView(resultImage.zoomLevel / 6); 
+            // Animate the target to the image coord position
+            // In WWT, the definition of ZoomLevel is: VFOV = ZoomLevel / 6
+            if (browser->getSkyTarget()) {
+                browser->getSkyTarget()->unlock();
+                browser->getSkyTarget()->startAnimation(resultImage.celestCoords, resultImage.zoomLevel / 6);
+            }
 		} 
 		return 0;
 	}
@@ -77,8 +78,8 @@ namespace openspace::skybrowser::luascriptfunctions {
             ScreenSpaceImageLocal* hoverCircle = dynamic_cast<ScreenSpaceImageLocal*>(global::renderEngine->screenSpaceRenderable("HoverCircle"));
             hoverCircle->property("Enabled")->set(true);
             // Calculate coords for the circle and translate
-            glm::vec2 imageCoordsScreenSpace = skybrowser::J2000ToScreenSpace(resultImage.celestCoords.x, resultImage.celestCoords.y);
-            hoverCircle->property("CartesianPosition")->set(glm::vec3 {imageCoordsScreenSpace, skybrowser::SCREENSPACE_Z });
+            glm::vec3 imageCoordsScreenSpace = skybrowser::J2000SphericalToScreenSpace(resultImage.celestCoords);
+            hoverCircle->property("CartesianPosition")->set(imageCoordsScreenSpace);
         }
         
         return 0;

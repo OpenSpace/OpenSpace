@@ -25,6 +25,8 @@
 #include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtx/vector_angle.hpp>
 #include <optional>
+#define _USE_MATH_DEFINES
+#include <cmath>
 
 namespace {
     constexpr const char* _loggerCat = "ScreenSpaceSkyTarget";
@@ -307,14 +309,17 @@ namespace openspace {
     }
 
     void ScreenSpaceSkyTarget::lock() {
+        if (isLocked) {
+            unlock();
+        }
         isLocked = true;
         lockedCelestialCoords = getTargetDirectionCelestial();
 
         // Start a thread to enable user interactions while locking target
         _lockTargetThread = std::thread([&] {
             while (isLocked) {
-                glm::dvec2 imageCoordsScreenSpace = skybrowser::J2000ToScreenSpace(lockedCelestialCoords.x, lockedCelestialCoords.y);
-                property("CartesianPosition")->set(glm::vec3 {imageCoordsScreenSpace, skybrowser::SCREENSPACE_Z });
+                glm::vec3 imageCoordsScreenSpace = skybrowser::J2000SphericalToScreenSpace(lockedCelestialCoords);
+                _cartesianPosition = imageCoordsScreenSpace;
             }
         });
     }
@@ -327,4 +332,58 @@ namespace openspace {
         glm::dvec3 galCoord = camPos + (infinity * getTargetDirectionGalactic());
         return skybrowser::galacticCartesianToJ2000(galCoord);
     }
+
+    void ScreenSpaceSkyTarget::animateToCoord(double deltaTime) {
+        if (isAnimated) {
+            // Find smallest angle between the two vectors
+            double smallestAngle = std::acos(glm::dot(_coordsStartAnimation, _coordsToAnimateTo) / (glm::length(_coordsStartAnimation) * glm::length(_coordsToAnimateTo)));
+            // Only keep animating when target is not at final position
+            if (abs(smallestAngle) > 0.0005) {
+                // Calculate rotation this frame
+                double rotationAngle = smallestAngle * deltaTime * 5.0;
+                // Create the rotation matrix
+                glm::dvec3 rotationAxis = glm::normalize(glm::cross(_coordsStartAnimation, _coordsToAnimateTo));
+                glm::dmat4 rotmat = glm::rotate(rotationAngle, rotationAxis);
+                // Rotate target direction
+                glm::dvec3 newDir = rotmat * glm::dvec4(_coordsStartAnimation, 1.0);
+                // Convert to screenspace
+                _cartesianPosition = skybrowser::J2000CartesianToScreenSpace(newDir);
+                // Update position
+                _coordsStartAnimation = glm::normalize(newDir);
+            }
+            else {
+                // Set the exact target position and lock target when it first arrives
+                // to the position
+                if (!isLocked) {
+                    _cartesianPosition = skybrowser::J2000CartesianToScreenSpace(_coordsToAnimateTo);
+                    lock();
+                }
+                // When target is in position, animate the FOV until it has finished
+                if(animateFOV(FOVToAnimateTo, deltaTime)) {
+                    isAnimated = false;
+                }
+            }
+        }
+    }
+
+    bool ScreenSpaceSkyTarget::animateFOV(float endFOV, float deltaTime) {
+        double distance = static_cast<double>(_skyBrowser->_vfieldOfView.value()) - endFOV;
+        // If distance is too large, keep animating
+        if (abs(distance) > 0.01) {
+            _skyBrowser->setVerticalFieldOfView(_skyBrowser->_vfieldOfView.value() - (distance * deltaTime * 2.0));
+            return false;
+        }
+        // Animation is finished
+        return true;
+    }
+
+    void ScreenSpaceSkyTarget::startAnimation(glm::dvec2 coordsEnd, float FOVEnd) {
+        // Save the Cartesian celestial coordinates for animation
+        // to make sure wrap around works
+        _coordsToAnimateTo = glm::normalize(skybrowser::sphericalToCartesian(coordsEnd));
+        _coordsStartAnimation = glm::normalize(skybrowser::sphericalToCartesian(getTargetDirectionCelestial()));
+        FOVToAnimateTo = FOVEnd;
+        isAnimated = true;
+    }
+   
 }

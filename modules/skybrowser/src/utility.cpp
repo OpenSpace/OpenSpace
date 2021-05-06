@@ -38,12 +38,17 @@ namespace openspace::skybrowser {
             return cartesianToSpherical(J2000);
         }
 
-        glm::dvec3 J2000ToGalacticCartesian(double ra, double dec, double distance) {
-            glm::dvec3 rGalactic = conversionMatrix * sphericalToCartesian(glm::dvec2(ra, dec)); // on the unit sphere
+        glm::dvec3 J2000SphericalToGalacticCartesian(glm::dvec2 coords, double distance) {
+            glm::dvec3 rGalactic = conversionMatrix * sphericalToCartesian(coords); // on the unit sphere
             return distance * rGalactic;
         }
         
-        glm::dvec2 galacticToScreenSpace(glm::dvec3 imageCoordsGalacticCartesian) {
+        glm::dvec3 J2000CartesianToGalacticCartesian(glm::dvec3 coords, double distance) {
+            glm::dvec3 rGalactic = conversionMatrix * glm::normalize(coords); // on the unit sphere
+            return distance * rGalactic;
+        }
+        
+        glm::dvec3 galacticToScreenSpace(glm::dvec3 imageCoordsGalacticCartesian) {
 
             // Transform vector to camera's local coordinate system
             glm::dvec3 camPos = global::navigationHandler->camera()->positionVec3();
@@ -51,24 +56,34 @@ namespace openspace::skybrowser {
             glm::dmat4 camMat = global::navigationHandler->camera()->viewRotationMatrix();
             glm::dvec3 viewDirectionLocal = camMat * glm::dvec4(camToCoordsDir, 1.0);
             viewDirectionLocal = glm::normalize(viewDirectionLocal);
+            // Ensure that if the coord is behind the camera, the converted coord will be there too
+            double zCoord = viewDirectionLocal.z > 0 ? -SCREENSPACE_Z : SCREENSPACE_Z;
 
             // Calculate screen space coords x and y
             long double tan_x = viewDirectionLocal.x / viewDirectionLocal.z;
             long double tan_y = viewDirectionLocal.y / viewDirectionLocal.z;
 
             glm::dvec2 angleCoordsLocal = glm::dvec2(std::atanl(tan_x), std::atanl(tan_y));
-            glm::dvec2 imageCoordsScreenSpace = glm::dvec2(SCREENSPACE_Z * static_cast<double>(std::tanl(angleCoordsLocal.x)), SCREENSPACE_Z * static_cast<double>(std::tanl(angleCoordsLocal.y)));
+            glm::dvec3 imageCoordsScreenSpace = glm::dvec3(zCoord * static_cast<double>(std::tanl(angleCoordsLocal.x)), zCoord * static_cast<double>(std::tanl(angleCoordsLocal.y)), zCoord);
             
             return imageCoordsScreenSpace;
         }
 
-        glm::dvec2 J2000ToScreenSpace(double ra, double dec) {
+        glm::dvec3 J2000CartesianToScreenSpace(glm::dvec3 coords) {
             // Transform equatorial J2000 to galactic coord with infinite radius
             constexpr double infinity = std::numeric_limits<float>::max();
-            glm::dvec3 imageCoordsGalacticCartesian = J2000ToGalacticCartesian(ra, dec, infinity);
+            glm::dvec3 imageCoordsGalacticCartesian = J2000CartesianToGalacticCartesian(coords, infinity);
             // Transform galactic coord to screen space
-            glm::dvec2 imageCoordsScreenSpace = galacticToScreenSpace(imageCoordsGalacticCartesian);
-            return imageCoordsScreenSpace;
+            return galacticToScreenSpace(imageCoordsGalacticCartesian);
+        }
+
+        glm::dvec3 J2000SphericalToScreenSpace(glm::dvec2 coords) {
+            
+            // Transform equatorial J2000 to galactic coord with infinite radius
+            constexpr double infinity = std::numeric_limits<float>::max();
+            glm::dvec3 imageCoordsGalacticCartesian = J2000SphericalToGalacticCartesian(coords, infinity);
+            // Transform galactic coord to screen space
+            return galacticToScreenSpace(imageCoordsGalacticCartesian);
         }
 
     }

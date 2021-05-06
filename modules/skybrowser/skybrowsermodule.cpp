@@ -327,6 +327,14 @@ SkyBrowserModule::SkyBrowserModule()
             return false;
         }
     );
+
+    global::callback::preSync->emplace_back([this]() {
+        for (ScreenSpaceSkyBrowser* browser : getSkyBrowsers()) {
+            if (browser->getSkyTarget()) {
+                browser->getSkyTarget()->animateToCoord(global::windowDelegate->deltaTime());
+            }
+        }
+    });
 } 
 
 void SkyBrowserModule::internalDeinitialize() {

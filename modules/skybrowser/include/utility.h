@@ -8,6 +8,8 @@
 
 
 namespace openspace::skybrowser {
+    const bool SPHERICAL = true;
+    const bool CARTESIAN = false;
     const double SCREENSPACE_Z = -2.1;
     const double RAD_TO_DEG = 180.0 / M_PI;
     const double DEG_TO_RAD = M_PI / 180.0;
@@ -23,10 +25,13 @@ namespace openspace::skybrowser {
     glm::dvec2 cartesianToSpherical(glm::dvec3 cartesianCoords);
     glm::dvec3 sphericalToCartesian(glm::dvec2 sphericalCoords);
     glm::dvec2 galacticCartesianToJ2000(glm::dvec3 rGal);
-    glm::dvec3 J2000ToGalacticCartesian(double ra, double dec, double distance);
-    glm::dvec2 J2000ToScreenSpace(double ra, double dec);
+    glm::dvec3 J2000SphericalToGalacticCartesian(glm::dvec2 coords, double distance);
+    glm::dvec3 J2000CartesianToGalacticCartesian(glm::dvec3 coords, double distance);
+    // Convert J2000, spherical or Cartesian, to screen space
+    glm::dvec3 J2000SphericalToScreenSpace(glm::dvec2 coords);
+    glm::dvec3 J2000CartesianToScreenSpace(glm::dvec3 coords);
     
-    glm::dvec2 galacticToScreenSpace(glm::dvec3 galacticCoord);
+    glm::dvec3 galacticToScreenSpace(glm::dvec3 galacticCoord);
 }
     
     
