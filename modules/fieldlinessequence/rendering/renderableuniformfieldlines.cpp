@@ -1195,7 +1195,8 @@ namespace openspace {
                 }
             } // else {we're still in same state as previous frame (no changes needed)}
 
-            updateVertexPositionBuffer();
+            //To update vertex positions every frame
+            //updateVertexPositionBuffer();
 
         }
         else {
@@ -1282,7 +1283,8 @@ namespace openspace {
         glBindVertexArray(_vertexArrayObject);
         glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
 
-        _states[_activeStateIndex].moveLine();
+        //This could be used to move the fieldlines in real time
+        //_states[_activeStateIndex].moveLine();
         const std::vector<glm::vec3>& vertPos = _states[_activeStateIndex].vertexPositions();
 
         glBufferData(

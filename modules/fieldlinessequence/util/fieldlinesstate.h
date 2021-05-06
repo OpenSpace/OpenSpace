@@ -28,9 +28,7 @@
 #include <modules/fieldlinessequence/util/commons.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
-#include "Kameleon.h"
-#include "Interpolator.h"
-#include "Point3f.h"
+
 #include <string>
 #include <vector>
 
@@ -69,9 +67,10 @@ public:
     void addLine(std::vector<glm::vec3>& line);
     void appendToExtra(size_t idx, float val);
 
+    //if we want to move it in real-time
     void moveLine();
 
-    cartesianTrace(const std::string& variable, const float& startComponent1, const float& startComponent2, const float& startComponent3, Interpolator* interpolator);
+    //cartesianTrace(const std::string& variable, const float& startComponent1, const float& startComponent2, const float& startComponent3, Interpolator* interpolator);
 
 private:
     bool _isMorphable = false;

@@ -1,0 +1,33 @@
+local assetHelper = asset.require('util/asset_helper')
+
+
+
+local NodeLine = {
+    Identifier = "NodeLine",
+    Renderable = {
+        Type = "RenderableNodeLine",
+        Tag = { "planetTrail_solarSystem", "planetTrail_terrestrial" },
+        StartNode = "Earth",
+        EndNode = "Mars",
+        Color = {0.5, 0.8, 1.0},
+        LineWidth = 5.0
+    },
+    GUI = {
+        Name = "Node Line",
+        Path = "/Solar System/Planets/Earth"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { NodeLine })
+
+
+asset.meta = {
+    Name = "Node Line",
+    Version = "1.0",
+    Description = [[ Trail of Earth as observed by the Sun. Data from NASA Spice (see
+        base spice asset)]],
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license",
+    Identifiers = {"EarthTrail"}
+}
