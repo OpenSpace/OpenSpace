@@ -176,6 +176,8 @@ namespace openspace::skybrowser::luascriptfunctions {
 		for (int i = 0; i < images.size(); i++) {
             std::string name = images[i].name != "" ? images[i].name : "undefined";
             std::string url = images[i].thumbnailUrl != "" ? images[i].thumbnailUrl : "undefined";
+            glm::dvec3 cartCoords = skybrowser::sphericalToCartesian(images[i].celestCoords);
+            std::vector<double> cartCoordsVec = { cartCoords.x, cartCoords.y, cartCoords.z };
             
             // Index for current ImageData 
             ghoul::lua::push(L, i + 1); 
@@ -188,6 +190,8 @@ namespace openspace::skybrowser::luascriptfunctions {
             ghoul::lua::push(L, "RA", images[i].celestCoords.x);
             lua_settable(L, -3);
             ghoul::lua::push(L, "Dec", images[i].celestCoords.y);
+            lua_settable(L, -3);
+            ghoul::lua::push(L, "CartesianDirection", cartCoordsVec);
             lua_settable(L, -3);
             ghoul::lua::push(L, "HasCoords", images[i].hasCoords);
             lua_settable(L, -3);
@@ -217,11 +221,14 @@ namespace openspace::skybrowser::luascriptfunctions {
         ghoul::lua::push(L, index);
         index++;
         lua_newtable(L);
-        // Calculate camera view direction in celestial spherical coordinates
-        glm::dvec3 viewDir = global::navigationHandler->camera()->viewDirectionWorldSpace();
-        glm::dvec2 viewDirCelest = skybrowser::galacticCartesianToJ2000(viewDir);
+        // Get the view direction of the screen in cartesian J2000 coordinates
+        
+        glm::dvec2 sphericalJ2000 = galacticCartesianToJ2000(global::navigationHandler->camera()->viewDirectionWorldSpace());
+        glm::dvec3 cartesianJ2000 = skybrowser::sphericalToCartesian(sphericalJ2000);
         // Convert to vector so ghoul can read it
-        std::vector<double> viewDirCelestVec = { viewDirCelest.x, viewDirCelest.y };
+        std::vector<double> viewDirCelestVec = { cartesianJ2000.x, cartesianJ2000.y, cartesianJ2000.z };
+        
+
         // Calculate the smallest FOV of vertical and horizontal
         float HFOV = global::windowDelegate->getHorizFieldOfView();
         glm::vec2 windowRatio = global::windowDelegate->currentWindowSize();
@@ -230,7 +237,11 @@ namespace openspace::skybrowser::luascriptfunctions {
         // Push window data
         ghoul::lua::push(L, "WindowHFOV", FOV);
         lua_settable(L, -3);
-        ghoul::lua::push(L, "WindowDirection", viewDirCelestVec);
+        ghoul::lua::push(L, "CartesianDirection", viewDirCelestVec);
+        lua_settable(L, -3);
+        ghoul::lua::push(L, "RA", sphericalJ2000.x);
+        lua_settable(L, -3);
+        ghoul::lua::push(L, "Dec", sphericalJ2000.y);
         lua_settable(L, -3);
         // Set table for the current ImageData
         lua_settable(L, -3);
@@ -242,8 +253,9 @@ namespace openspace::skybrowser::luascriptfunctions {
             // Only add browsers that have an initialized target
             ScreenSpaceSkyTarget* target = browsers[i]->getSkyTarget();
             if (target) {
-                glm::dvec3 coords = target->getTargetDirectionGalactic();
-                glm::dvec2 celestCoords = skybrowser::galacticCartesianToJ2000(coords);
+                glm::dvec2 celestialSpherical = target->getTargetDirectionCelestial();
+                glm::dvec3 celestialCart = skybrowser::sphericalToCartesian(celestialSpherical);
+                std::vector<double> celestialCartVec = { celestialCart.x, celestialCart.y, celestialCart.z };
                 // Convert color to vector so ghoul can read it
                 glm::ivec3 color = browsers[i]->_borderColor.value();
                 std::vector<int> colorVec = { color.r, color.g, color.b };
@@ -254,9 +266,11 @@ namespace openspace::skybrowser::luascriptfunctions {
                 // Push ("Key", value)
                 ghoul::lua::push(L, "FOV", browsers[i]->fieldOfView());
                 lua_settable(L, -3);
-                ghoul::lua::push(L, "RA", celestCoords.x);
+                ghoul::lua::push(L, "CartesianDirection", celestialCartVec);
                 lua_settable(L, -3);
-                ghoul::lua::push(L, "Dec", celestCoords.y);
+                ghoul::lua::push(L, "RA", celestialSpherical.x);
+                lua_settable(L, -3);
+                ghoul::lua::push(L, "Dec", celestialSpherical.y);
                 lua_settable(L, -3);
                 ghoul::lua::push(L, "Color", colorVec);
                 lua_settable(L, -3);
