@@ -60,6 +60,15 @@ namespace openspace::skybrowser::luascriptfunctions {
             if (browser->getSkyTarget()) {
                 browser->getSkyTarget()->unlock();
                 browser->getSkyTarget()->startAnimation(resultImage.celestCoords, resultImage.zoomLevel / 6);
+                glm::dvec3 imgCoordsOnScreen = J2000SphericalToScreenSpace(resultImage.celestCoords);
+                glm::vec2 windowRatio = global::windowDelegate->currentWindowSize();
+                float r = windowRatio.x / windowRatio.y;
+                // Check if image coordinate is within current FOV
+                if (!(abs(imgCoordsOnScreen.x) < r && abs(imgCoordsOnScreen.y) < 1.f && imgCoordsOnScreen.z < 0)
+                    || imgCoordsOnScreen.z > 0) {
+                    module->startRotation(resultImage.celestCoords);
+                }
+
             }
 		} 
 		return 0;
