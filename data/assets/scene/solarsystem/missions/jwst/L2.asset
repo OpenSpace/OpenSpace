@@ -45,7 +45,6 @@ local L2Label = {
         BlendMode = "Normal",
         EnableFading = false
     },
-    Tag = { "solarsystem_labels" },
     GUI = {
         Name = "L2 Label",
         Path = "/Solar System/Missions/JWST",
