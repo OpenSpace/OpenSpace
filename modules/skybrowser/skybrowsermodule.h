@@ -55,6 +55,8 @@ public:
     void addRenderable(ScreenSpaceRenderable* object);
     WWTDataHandler* getWWTDataHandler();
     std::vector<ScreenSpaceSkyBrowser*> getSkyBrowsers();
+    void startRotation(glm::dvec2 coordsEnd);
+    void rotateCamera(double deltaTime);
 
     scripting::LuaLibrary luaLibrary() const override;
     //std::vector<documentation::Documentation> documentations() const override;
@@ -88,6 +90,10 @@ protected:
     // For capping the calls to change the zoom from scrolling
     constexpr static const std::chrono::milliseconds TimeUpdateInterval{ 50 };
     std::chrono::system_clock::time_point _lastUpdateTime;
+    // For animating rotation of camera to look at coordinate
+    glm::dvec3 _coordsToAnimateTo;
+    glm::dvec3 _coordsStartAnimation;
+    bool isRotating = false;
 };
 
 } // namespace openspace

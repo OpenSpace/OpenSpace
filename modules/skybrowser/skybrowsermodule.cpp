@@ -337,6 +337,9 @@ SkyBrowserModule::SkyBrowserModule()
                 browser->getSkyTarget()->animateToCoord(global::windowDelegate->deltaTime());
             }
         }
+        if (isRotating) {
+            rotateCamera(global::windowDelegate->deltaTime());
+        }
     });
 } 
 
@@ -396,6 +399,40 @@ std::vector<ScreenSpaceSkyBrowser*> SkyBrowserModule::getSkyBrowsers() {
         }
     }
     return browsers;
+}
+
+void SkyBrowserModule::startRotation(glm::dvec2 coordsEnd) {
+    
+    // Save coordinates to rotate to in galactic world coordinates
+    glm::dvec3 camPos = global::navigationHandler->camera()->positionVec3();
+    _coordsToAnimateTo = skybrowser::J2000SphericalToGalacticCartesian(coordsEnd);
+    _coordsStartAnimation = (global::navigationHandler->camera()->viewDirectionWorldSpace() * skybrowser::infinity) + camPos;
+    isRotating = true;
+}
+
+void SkyBrowserModule::rotateCamera(double deltaTime) {
+    
+    // Find smallest angle between the two vectors
+    double smallestAngle = std::acos(glm::dot(_coordsStartAnimation, _coordsToAnimateTo) / (glm::length(_coordsStartAnimation) * glm::length(_coordsToAnimateTo)));
+    // Only keep animating when target is not at final position
+    if (abs(smallestAngle) > 0.0001) {
+        // Calculate rotation this frame
+        double rotationAngle = smallestAngle * deltaTime;
+        // Create the rotation matrix for local camera space
+        glm::dvec3 rotationAxis = glm::normalize(glm::cross(_coordsStartAnimation, _coordsToAnimateTo));
+        glm::dmat4 camMat = global::navigationHandler->camera()->viewRotationMatrix();
+        glm::dvec3 viewDirectionLocal = camMat * glm::dvec4(rotationAxis, 1.0);
+        glm::dmat4 rotmat = glm::rotate(rotationAngle, rotationAxis);
+        // Rotate
+        global::navigationHandler->camera()->rotate(glm::quat_cast(rotmat));
+
+        // Update camera direction
+        glm::dvec3 camPos = global::navigationHandler->camera()->positionVec3();
+        _coordsStartAnimation = (global::navigationHandler->camera()->viewDirectionWorldSpace() * skybrowser::infinity) + camPos;
+    }
+    else {
+        isRotating = false;
+    }
 }
 
 /*

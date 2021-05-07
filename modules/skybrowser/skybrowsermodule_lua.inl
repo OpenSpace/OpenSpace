@@ -284,7 +284,14 @@ namespace openspace::skybrowser::luascriptfunctions {
         return 1;
     }
 	int adjustCamera(lua_State* L) {
-		ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::adjustCamera");
+		ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::adjustCamera");
+        const int i = ghoul::lua::value<int>(L, 1);
+        SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+        //module->getSkyBrowsers()[0]->getSkyTarget()->lock();
+        if (module->getSkyBrowsers().size() > i) {
+            module->startRotation(module->getSkyBrowsers()[i]->getSkyTarget()->getTargetDirectionCelestial());
+        }
+
 		return 0;
 	}
 	
