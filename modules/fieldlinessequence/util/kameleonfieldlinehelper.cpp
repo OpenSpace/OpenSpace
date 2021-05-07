@@ -173,135 +173,107 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
     }
 
     bool success = false;
+
+    // fieldlines = true will trace the magnetic fieldline (b) for every vertex of a 
+    // velocity flowline (u) from the seedpoint. false will do vice versa.
     bool fieldlines = true;
-
+    std::string mainTraceVar;
+    std::string secondaryTraceVar;
     if (fieldlines) {
-        LINFO("Tracing field lines!");
-        // LOOP  SEED POINTS, TRACE LINES, CONVERT POINTS TO glm::vec3 AND STORE //
-        for (const glm::vec3& seed : seedPoints) {
-            //--------------------------------------------------------------------------//
-            // We have to create a new tracer (or actually a new interpolator) for each //
-            // new line, otherwise some issues occur                                    //
-            //--------------------------------------------------------------------------//
-            std::unique_ptr<ccmc::Interpolator> interpolator =
-                std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
-            ccmc::Tracer tracer(kameleon, interpolator.get());
-            tracer.setInnerBoundary(innerBoundaryLimit); // TODO specify in Lua?
-            ccmc::Fieldline vFlowline = tracer.unidirectionalTrace(
-                "u",
-                seed.x,
-                seed.y,
-                seed.z
-            );
-
-            const std::vector<ccmc::Point3f>& positions = vFlowline.getPositions();
-
-            const size_t nLinePoints = positions.size();
-            std::vector<glm::vec3> vertices;
-            std::vector<glm::vec3> flowlines;
-
-            for (const ccmc::Point3f& p : positions) {
-                flowlines.emplace_back(p.component1, p.component2, p.component3);
-
-                std::unique_ptr<ccmc::Interpolator> interpolator2 =
-                    std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
-                ccmc::Tracer tracer2(kameleon, interpolator2.get());
-                tracer2.setInnerBoundary(innerBoundaryLimit); // TODO specify in Lua?
-
-                //trace every vertex from the velocity flowline
-                //with the magnetic field variable "b".
-                ccmc::Fieldline Fieldline = tracer2.bidirectionalTrace(
-                    tracingVar,
-                    p.component1,
-                    p.component2,
-                    p.component3
-                );
-
-                const std::vector<ccmc::Point3f>& positions2 = Fieldline.getPositions();
-
-
-                for (const ccmc::Point3f& p2 : positions2) {
-
-                    vertices.emplace_back(p2.component1, p2.component2, p2.component3);
-
-                }
-                state.addLine(vertices);
-                vertices.clear();
-
-            }
-            //add the initial magnetic fieldlines to the state
-            state.addLine(flowlines);
-            flowlines.clear();
-
-            success |= (nLinePoints > 0);
-
-        }
-
-        return success;
+        mainTraceVar = "u";
+        secondaryTraceVar = "b";
     }
     else {
-        LINFO("Tracing flow lines!");
-        // LOOP  SEED POINTS, TRACE LINES, CONVERT POINTS TO glm::vec3 AND STORE //
-        for (const glm::vec3& seed : seedPoints) {
-            //--------------------------------------------------------------------------//
-            // We have to create a new tracer (or actually a new interpolator) for each //
-            // new line, otherwise some issues occur                                    //
-            //--------------------------------------------------------------------------//
-            std::unique_ptr<ccmc::Interpolator> interpolator =
-                std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
-            ccmc::Tracer tracer(kameleon, interpolator.get());
-            tracer.setInnerBoundary(innerBoundaryLimit); // TODO specify in Lua?
-            ccmc::Fieldline magneticFieldline = tracer.bidirectionalTrace(
-                tracingVar,
+        mainTraceVar = "b";
+        secondaryTraceVar = "u";
+    }
+
+    LINFO("Tracing field lines!");
+    // LOOP  SEED POINTS, TRACE LINES, CONVERT POINTS TO glm::vec3 AND STORE //
+    for (const glm::vec3& seed : seedPoints) {
+        //--------------------------------------------------------------------------//
+        // We have to create a new tracer (or actually a new interpolator) for each //
+        // new line, otherwise some issues occur                                    //
+        //--------------------------------------------------------------------------//
+        std::unique_ptr<ccmc::Interpolator> interpolator =
+            std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
+        ccmc::Tracer tracer(kameleon, interpolator.get());
+        tracer.setInnerBoundary(innerBoundaryLimit); // TODO specify in Lua?
+
+        ccmc::Fieldline vFlowline;
+        if (mainTraceVar == "u") {
+            vFlowline = tracer.unidirectionalTrace(
+                mainTraceVar,
                 seed.x,
                 seed.y,
                 seed.z
             );
+        }
+        else {
+            vFlowline = tracer.bidirectionalTrace(
+                mainTraceVar,
+                seed.x,
+                seed.y,
+                seed.z
+            );
+        }
 
-            const std::vector<ccmc::Point3f>& positions = magneticFieldline.getPositions();
 
-            const size_t nLinePoints = positions.size();
-            std::vector<glm::vec3> vertices;
-            std::vector<glm::vec3> fieldline;
+        const std::vector<ccmc::Point3f>& positions = vFlowline.getPositions();
 
-            for (const ccmc::Point3f& p : positions) {
-                fieldline.emplace_back(p.component1, p.component2, p.component3);
+        const size_t nLinePoints = positions.size();
+        std::vector<glm::vec3> vertices;
+        std::vector<glm::vec3> flowline;
 
-                std::unique_ptr<ccmc::Interpolator> interpolator2 =
-                    std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
-                ccmc::Tracer tracer2(kameleon, interpolator2.get());
-                tracer2.setInnerBoundary(innerBoundaryLimit); // TODO specify in Lua?
+        for (const ccmc::Point3f& p : positions) {
+            flowline.emplace_back(p.component1, p.component2, p.component3);
 
-                //trace every vertex from the magnetic fieldline
-                //with the velocity flow variable "u". change to u_perp later
-                ccmc::Fieldline vFlowFieldline = tracer2.unidirectionalTrace(
-                    "u",
+            std::unique_ptr<ccmc::Interpolator> interpolator2 =
+                std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
+            ccmc::Tracer tracer2(kameleon, interpolator2.get());
+            tracer2.setInnerBoundary(innerBoundaryLimit); // TODO specify in Lua?
+
+            //trace every vertex from the main trace with the secondary trace var
+            ccmc::Fieldline Fieldline;
+            if (secondaryTraceVar == "b") {
+                Fieldline = tracer2.bidirectionalTrace(
+                    secondaryTraceVar,
                     p.component1,
                     p.component2,
                     p.component3
                 );
+            }
+            else {
+                Fieldline = tracer2.unidirectionalTrace(
+                    secondaryTraceVar,
+                    p.component1,
+                    p.component2,
+                    p.component3
+                );
+            }
 
-                const std::vector<ccmc::Point3f>& positions2 = vFlowFieldline.getPositions();
+
+            const std::vector<ccmc::Point3f>& positions2 = Fieldline.getPositions();
 
 
-                for (const ccmc::Point3f& p2 : positions2) {
+            for (const ccmc::Point3f& p2 : positions2) {
 
-                    vertices.emplace_back(p2.component1, p2.component2, p2.component3);
-
-                }
-                state.addLine(vertices);
-                vertices.clear();
+                vertices.emplace_back(p2.component1, p2.component2, p2.component3);
 
             }
-            //add the initial magnetic fieldlines to the state
-            state.addLine(fieldline);
-
-            success |= (nLinePoints > 0);
+            state.addLine(vertices);
+            vertices.clear();
 
         }
+        //add the initial magnetic fieldlines to the state
+        state.addLine(flowline);
+        flowline.clear();
 
-        return success;
+        success |= (nLinePoints > 0);
+
     }
+
+    return success; 
     
 }
 #endif // OPENSPACE_MODULE_KAMELEON_ENABLED
