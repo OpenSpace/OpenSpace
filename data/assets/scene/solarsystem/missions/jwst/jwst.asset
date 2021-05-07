@@ -84,8 +84,33 @@ local JWSTTrail = {
     }
 }
 
+local JWSTFov = {
+    Identifier = "JWSTFov",
+    Parent = JWSTModel.Identifier,
+    Renderable = {
+        Type = "RenderablePrism",
+        StartNode = "JWSTModel",
+        Segments = 6,
+        Radius = 3.5,
+        Lines = 7,
+        LineWidth = 1.5,
+        Color = {
+            1.0, 1.0, 1.0
+        },
+        LineLength = 1000000,
+        Direction = {
+            1.0, 0.0, 0.0
+        }
+    },
+    GUI = {
+        Name = "James Webb Space Telecope Field of View",
+        Path = "/Solar System/Missions/JWST",
+    }
+}
+
 assetHelper.registerSceneGraphNodesAndExport(asset, {
 	JWSTTrail,
     JWSTPosition,
-    JWSTModel
+    JWSTModel,
+    JWSTFov
 })
