@@ -161,10 +161,10 @@ namespace {
             std::filesystem::path filename;
             glm::ivec3 dimensions;
             glm::vec3 size;
-            
+
             // [[codegen::verbatim(NumberOfRayCastingStepsInfo.description)]]
             std::optional<float> steps;
-            
+
             // [[codegen::verbatim(DownscaleVolumeRenderingInfo.description)]]
             std::optional<float> downscale;
         };
@@ -227,7 +227,7 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _volumeRenderingEnabled(VolumeRenderingEnabledInfo, true)
     , _starRenderingEnabled(StarRenderingEnabledInfo, true)
-    , _stepSize(StepSizeInfo, 0.01f, 0.0005f, 0.05f, 0.001f)
+    , _stepSize(StepSizeInfo, 0.01f, 0.001f, 0.05f, 0.001f)
     , _absorptionMultiply(AbsorptionMultiplyInfo, 40.f, 0.0f, 200.0f)
     , _emissionMultiply(EmissionMultiplyInfo, 200.f, 0.0f, 1000.0f)
     , _starRenderingMethod(
