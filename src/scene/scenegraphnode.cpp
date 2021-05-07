@@ -425,7 +425,7 @@ SceneGraphNode::SceneGraphNode()
         )
     }
     , _boundingSphere(BoundingSphereInfo, -1.0, -1.0, 1e12)
-    , _interactionSphere(InteractionSphereInfo, -1.0, -1.0, -1.0, 1e12)
+    , _interactionSphere(InteractionSphereInfo, -1.0, -1.0, 1e12)
     , _computeScreenSpaceValues(ComputeScreenSpaceInfo, false)
     , _screenSpacePosition(ScreenSpacePositionInfo, glm::ivec2(-1, -1))
     , _screenVisibility(ScreenVisibilityInfo, false)

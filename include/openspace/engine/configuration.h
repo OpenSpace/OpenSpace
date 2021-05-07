@@ -85,7 +85,7 @@ struct Configuration {
     bool shouldUseScreenshotDate = false;
 
     std::string onScreenTextScaling = "window";
-    bool usePerSceneCache = false;
+    bool usePerProfileCache = false;
 
     bool isRenderingOnMasterDisabled = false;
     glm::dvec3 globalRotation = glm::dvec3(0.0);

@@ -300,10 +300,10 @@ TEST_CASE("Configuration: onScreenTextScaling", "[configuration]") {
     CHECK(c.onScreenTextScaling == "framebuffer");
 }
 
-TEST_CASE("Configuration: usePerSceneCache", "[configuration]") {
-    constexpr const char Extra[] = R"(PerSceneCache = true)";
-    const Configuration c = loadConfiguration("usePerSceneCache", Extra);
-    CHECK(c.usePerSceneCache == true);
+TEST_CASE("Configuration: usePerProfileCache", "[configuration]") {
+    constexpr const char Extra[] = R"(PerProfileCache = true)";
+    const Configuration c = loadConfiguration("usePerProfileCache", Extra);
+    CHECK(c.usePerProfileCache == true);
 }
 
 TEST_CASE("Configuration: isRenderingOnMasterDisabled", "[configuration]") {

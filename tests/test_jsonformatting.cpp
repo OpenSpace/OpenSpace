@@ -22,51 +22,47 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/properties/scalar/ulonglongproperty.h>
+#include "catch2/catch.hpp"
 
-#include <ghoul/lua/ghoul_lua.h>
+#include <openspace/json.h>
+#include <openspace/util/json_helper.h>
+#include <vector>
 
-#include <limits>
-#include <sstream>
+// Note: Dictionary formatting is tested in Ghoul
 
-namespace {
+TEMPLATE_TEST_CASE("FormatJson", "[formatjson]", glm::vec2, glm::vec3,
+    glm::vec4, glm::dvec2, glm::dvec3, glm::dvec4, glm::ivec2, glm::ivec3, glm::ivec4,
+    glm::uvec2, glm::uvec3, glm::uvec4, glm::mat2x2, glm::mat2x3, glm::mat2x4,
+    glm::mat3x2, glm::mat3x3, glm::mat3x4, glm::mat4x2, glm::mat4x3, glm::mat4x4,
+    glm::dmat2x2, glm::dmat2x3, glm::dmat2x4, glm::dmat3x2, glm::dmat3x3, glm::dmat3x4,
+    glm::dmat4x2, glm::dmat4x3, glm::dmat4x4)
+{
+    using T = TestType;
 
-unsigned long long fromLuaConversion(lua_State* state, bool& success) {
-    success = (lua_isnumber(state, -1) == 1);
-    if (success) {
-        unsigned long long val = static_cast<unsigned long long>(lua_tonumber(state, -1));
-        return val;
-    }
-    else {
-        return 0ull;
-    }
+    const T val(1);
+
+    std::string json = openspace::formatJson(val);
+
+    // Compare with Ghoul's Lua conversions. Note that Lua uses '{' for arrays,
+    // while we here expect '[' for all glm types
+    std::string luaValue = ghoul::to_string(val);
+    luaValue.replace(0, 1, "[");
+    luaValue.replace(luaValue.size() - 1, 1, "]");
+
+    REQUIRE(json == luaValue);
 }
 
-bool toLuaConversion(lua_State* state, unsigned long long value) {
-    lua_pushnumber(state, static_cast<lua_Number>(value));
-    return true;
+TEST_CASE("FormatJson - Bool", "[formatjson]") {
+    bool trueVal = true;
+    bool falseVal = false;
+
+    REQUIRE(openspace::formatJson(trueVal) == "true");
+    REQUIRE(openspace::formatJson(falseVal) == "false");
 }
 
-bool toStringConversion(std::string& outValue, unsigned long long inValue) {
-    outValue = std::to_string(inValue);
-    return true;
+TEST_CASE("FormatJson - Infinity & Nan", "[formatjson]") {
+    REQUIRE(openspace::formatJson(std::numeric_limits<double>::infinity()) == "null");
+    REQUIRE(openspace::formatJson(std::numeric_limits<double>::quiet_NaN()) == "null");
 }
 
-} // namespace
-
-namespace openspace::properties {
-
-REGISTER_NUMERICALPROPERTY_SOURCE(
-    ULongLongProperty,
-    unsigned long long,
-    1ull,
-    std::numeric_limits<unsigned long long>::lowest(),
-    std::numeric_limits<unsigned long long>::max(),
-    1ull,
-    fromLuaConversion,
-    toLuaConversion,
-    toStringConversion,
-    LUA_TNUMBER
-)
-
-} // namespace openspace::properties
+// @TODO(emmbr 2021-04-29) Add more tests at some point, if we find it necessary

@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/properties/property.h>
+
 #include <openspace/properties/propertyowner.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>

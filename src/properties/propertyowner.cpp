@@ -26,6 +26,7 @@
 
 #include <openspace/properties/property.h>
 #include <openspace/scene/scene.h>
+#include <openspace/util/json_helper.h>
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
@@ -35,32 +36,6 @@
 
 namespace {
     constexpr const char* _loggerCat = "PropertyOwner";
-
-    std::string escapedJson(const std::string& text) {
-        std::string jsonString;
-        for (const char& c : text) {
-            switch (c) {
-                case '\t':
-                    jsonString += "\\t"; // Replace tab with \t.
-                    break;
-                case '"':
-                    jsonString += "\\\""; // Replace " with \".
-                    break;
-                case '\\':
-                    jsonString += "\\\\"; // Replace \ with \\.
-                    break;
-                case '\n':
-                    jsonString += "\\\\n"; // Replace newline with \n.
-                    break;
-                case '\r':
-                    jsonString += "\\r"; // Replace carriage return with \r.
-                    break;
-                default:
-                    jsonString += c;
-            }
-        }
-        return jsonString;
-    }
 
     void createJson(openspace::properties::PropertyOwner* owner, std::vector<char>& buf) {
         ZoneScoped
