@@ -54,7 +54,7 @@ public:
     glm::vec2 getMousePositionInScreenSpaceCoords(glm::vec2& mousePos);
     void addRenderable(ScreenSpaceRenderable* object);
     WWTDataHandler* getWWTDataHandler();
-    std::vector<ScreenSpaceSkyBrowser*> getSkyBrowsers();
+    std::vector<ScreenSpaceSkyBrowser*>* getSkyBrowsers();
     void startRotation(glm::dvec2 coordsEnd);
     void rotateCamera(double deltaTime);
     void setSelectedBrowser(ScreenSpaceRenderable* ptr);
@@ -76,6 +76,7 @@ protected:
 
     // Renderable vector and ptr to where mouse is
     std::vector<ScreenSpaceRenderable*> renderables;
+    std::vector<ScreenSpaceSkyBrowser*> browsers;
     ScreenSpaceRenderable* _mouseOnObject;
     // Dragging
     glm::vec2 startDragMousePos;

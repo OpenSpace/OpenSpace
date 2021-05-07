@@ -340,7 +340,7 @@ SkyBrowserModule::SkyBrowserModule()
     );
 
     global::callback::preSync->emplace_back([this]() {
-        for (ScreenSpaceSkyBrowser* browser : getSkyBrowsers()) {
+        for (ScreenSpaceSkyBrowser* browser : browsers) {
             if (browser->getSkyTarget()) {
                 browser->getSkyTarget()->animateToCoord(global::windowDelegate->deltaTime());
             }
@@ -387,6 +387,9 @@ void SkyBrowserModule::addRenderable(ScreenSpaceRenderable* object) {
     renderables.push_back(object);
     // Sort on z coordinate, objects closer to camera are in beginning of list
     std::sort(renderables.begin(), renderables.end());
+    if (to_browser(object)) {
+        browsers.push_back(to_browser(object));
+    }
 }
 
 ScreenSpaceSkyBrowser* SkyBrowserModule::to_browser(ScreenSpaceRenderable* ptr) {
@@ -400,14 +403,8 @@ WWTDataHandler* SkyBrowserModule::getWWTDataHandler() {
     return dataHandler;
 }
 
-std::vector<ScreenSpaceSkyBrowser*> SkyBrowserModule::getSkyBrowsers() {
-    std::vector<ScreenSpaceSkyBrowser*> browsers;
-    for (ScreenSpaceRenderable* renderable : renderables) {
-        if (to_browser(renderable)) {
-            browsers.push_back(to_browser(renderable));
-        }
-    }
-    return browsers;
+std::vector<ScreenSpaceSkyBrowser*>* SkyBrowserModule::getSkyBrowsers() {
+    return &browsers;
 }
 
 void SkyBrowserModule::startRotation(glm::dvec2 coordsEnd) {
@@ -446,7 +443,6 @@ void SkyBrowserModule::rotateCamera(double deltaTime) {
 
 void SkyBrowserModule::setSelectedBrowser(ScreenSpaceRenderable* ptr) {
     ScreenSpaceSkyBrowser* browser = to_browser(ptr) ? to_browser(ptr) : to_target(ptr)->getSkyBrowser();
-    std::vector<ScreenSpaceSkyBrowser*> browsers = getSkyBrowsers();
     auto it = std::find(browsers.begin(), browsers.end(), browser);
     // Get index
     selectedBrowser = std::distance(browsers.begin(), it);
