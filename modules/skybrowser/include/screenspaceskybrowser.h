@@ -59,6 +59,9 @@ namespace openspace {
         bool _camIsSyncedWWT;
         ScreenSpaceSkyTarget* _skyTarget;
         std::thread _threadWWTMessages;       
+        // For capping the calls to change the zoom from scrolling
+        constexpr static const std::chrono::milliseconds TimeUpdateInterval{ 25 };
+        std::chrono::system_clock::time_point _lastUpdateTime;
     };
 }
 

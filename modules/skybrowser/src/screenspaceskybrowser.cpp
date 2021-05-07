@@ -184,11 +184,16 @@ namespace openspace {
     }
 
     void ScreenSpaceSkyBrowser::scrollZoom(float scroll) {
-        // Make scroll more sensitive the smaller the FOV
-        float x = _vfieldOfView;
-        float zoomFactor = atan(x / 50.0) + exp(x / 40) - 0.999999;
-        float zoom = scroll > 0.0 ? -zoomFactor : zoomFactor;
-        _vfieldOfView = std::clamp(_vfieldOfView + zoom, 0.001f, 70.0f);
+        // Cap how often the zoom is allowed to update
+        std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+        if (now - _lastUpdateTime > TimeUpdateInterval) {
+            // Make scroll more sensitive the smaller the FOV
+            float x = _vfieldOfView;
+            float zoomFactor = atan(x / 50.0) + exp(x / 40) - 0.999999;
+            float zoom = scroll > 0.0 ? -zoomFactor : zoomFactor;
+            _vfieldOfView = std::clamp(_vfieldOfView + zoom, 0.001f, 70.0f);
+            _lastUpdateTime = std::chrono::system_clock::now();
+        }
     }
 
     void ScreenSpaceSkyBrowser::executeJavascript(std::string script) const {

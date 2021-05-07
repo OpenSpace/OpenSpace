@@ -57,6 +57,9 @@ public:
     std::vector<ScreenSpaceSkyBrowser*> getSkyBrowsers();
     void startRotation(glm::dvec2 coordsEnd);
     void rotateCamera(double deltaTime);
+    void setSelectedBrowser(ScreenSpaceRenderable* ptr);
+    void setSelectedBrowser(int i);
+    int getSelectedBrowserIndex();
 
     scripting::LuaLibrary luaLibrary() const override;
     //std::vector<documentation::Documentation> documentations() const override;
@@ -86,14 +89,16 @@ protected:
     // Current interaction status
     bool currentlyResizingBrowser;
     bool currentlyDraggingObject;
+    // Data handler
     WWTDataHandler* dataHandler; 
-    // For capping the calls to change the zoom from scrolling
-    constexpr static const std::chrono::milliseconds TimeUpdateInterval{ 50 };
-    std::chrono::system_clock::time_point _lastUpdateTime;
+    
     // For animating rotation of camera to look at coordinate
     glm::dvec3 _coordsToAnimateTo;
     glm::dvec3 _coordsStartAnimation;
     bool isRotating = false;
+    // For tracking the currently selected browser
+    int selectedBrowser{ -1 };
+    glm::ivec3 highlightAddition{ 35, 35, 35 };
 };
 
 } // namespace openspace

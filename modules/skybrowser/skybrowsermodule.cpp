@@ -121,6 +121,14 @@ namespace openspace {
                 "input. An input string should be the name of the system host star"
             },
             {
+                "setSelectedBrowser",
+                & skybrowser::luascriptfunctions::setSelectedBrowser,
+                {},
+                "string or list of strings",
+                "Add one or multiple exoplanet systems to the scene, as specified by the "
+                "input. An input string should be the name of the system host star"
+            },
+            {
                 "getTargetData",
                 &skybrowser::luascriptfunctions::getTargetData,
                 {},
@@ -234,7 +242,6 @@ SkyBrowserModule::SkyBrowserModule()
 
                 // Selection has changed
                 if (lastObj != _mouseOnObject) {
-                    glm::ivec3 highlightAddition{ 35, 35, 35 };
                     // Remove highlight
                     if (to_browser(lastObj)) {
                         to_browser(lastObj)->setBorderColor(to_browser(lastObj)->getColor() - highlightAddition);
@@ -258,19 +265,16 @@ SkyBrowserModule::SkyBrowserModule()
 
     global::callback::mouseScrollWheel->emplace_back(
         [&](double, double scroll) -> bool {
-            // Cap how often the zoom is allowed to update
-            std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-            if (now - _lastUpdateTime > TimeUpdateInterval) {
-                // If mouse is on browser or target, apply zoom
-                if (to_browser(_mouseOnObject)) {
-                    to_browser(_mouseOnObject)->scrollZoom(scroll);
-                    return true;
-                }
-                else if (to_target(_mouseOnObject) && to_target(_mouseOnObject)->getSkyBrowser()) {
-                    to_target(_mouseOnObject)->getSkyBrowser()->scrollZoom(scroll);
-                }
-                _lastUpdateTime = std::chrono::system_clock::now();
+            
+            // If mouse is on browser or target, apply zoom
+            if (to_browser(_mouseOnObject)) {
+                to_browser(_mouseOnObject)->scrollZoom(scroll);
+                return true;
             }
+            else if (to_target(_mouseOnObject) && to_target(_mouseOnObject)->getSkyBrowser()) {
+                to_target(_mouseOnObject)->getSkyBrowser()->scrollZoom(scroll);
+            }
+            
             return false;
         }
     );
@@ -278,9 +282,13 @@ SkyBrowserModule::SkyBrowserModule()
     global::callback::mouseButton->emplace_back(
         [&](MouseButton button, MouseAction action, KeyModifier modifier) -> bool {
 
-            if (action == MouseAction::Press) {
+            if (_mouseOnObject && action == MouseAction::Press) {
 
-                if (_mouseOnObject && button == MouseButton::Left) {
+                // Get the currently selected browser
+                setSelectedBrowser(_mouseOnObject);
+
+
+                if (button == MouseButton::Left) {
                     startDragMousePos = _mousePosition;
                     startDragObjectPos = _mouseOnObject->getScreenSpacePosition();
 
@@ -435,6 +443,21 @@ void SkyBrowserModule::rotateCamera(double deltaTime) {
     }
 }
 
+void SkyBrowserModule::setSelectedBrowser(ScreenSpaceRenderable* ptr) {
+    ScreenSpaceSkyBrowser* browser = to_browser(ptr) ? to_browser(ptr) : to_target(ptr)->getSkyBrowser();
+    std::vector<ScreenSpaceSkyBrowser*> browsers = getSkyBrowsers();
+    auto it = std::find(browsers.begin(), browsers.end(), browser);
+    // Get index
+    selectedBrowser = std::distance(browsers.begin(), it);
+}
+
+void SkyBrowserModule::setSelectedBrowser(int i) {
+    selectedBrowser = i;
+}
+
+int SkyBrowserModule::getSelectedBrowserIndex() {
+    return selectedBrowser;
+}
 /*
 std::vector<documentation::Documentation> SkyBrowserModule::documentations() const {
     return {

@@ -36,9 +36,9 @@ namespace openspace::skybrowser::luascriptfunctions {
 		// Load image
 		ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::selectImage");
 		const int i = ghoul::lua::value<int>(L, 1);
-	   
-		ScreenSpaceSkyBrowser* browser = dynamic_cast<ScreenSpaceSkyBrowser*>(global::renderEngine->screenSpaceRenderable("SkyBrowser1"));
-		SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+        SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+		ScreenSpaceSkyBrowser* browser = module->getSkyBrowsers()[module->getSelectedBrowserIndex()];
+		
 		const ImageData& resultImage = module->getWWTDataHandler()->getLoadedImages()[i];
 		// Load image collection, if it isn't loaded already
         // TODO: Update or remove with new WWT API
@@ -252,6 +252,8 @@ namespace openspace::skybrowser::luascriptfunctions {
         lua_settable(L, -3);
         ghoul::lua::push(L, "Dec", sphericalJ2000.y);
         lua_settable(L, -3);
+        ghoul::lua::push(L, "SelectedBrowserIndex", module->getSelectedBrowserIndex());
+        lua_settable(L, -3);
         // Set table for the current ImageData
         lua_settable(L, -3);
 
@@ -296,13 +298,22 @@ namespace openspace::skybrowser::luascriptfunctions {
 		ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::adjustCamera");
         const int i = ghoul::lua::value<int>(L, 1);
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-        //module->getSkyBrowsers()[0]->getSkyTarget()->lock();
         if (module->getSkyBrowsers().size() > i) {
             module->startRotation(module->getSkyBrowsers()[i]->getSkyTarget()->getTargetDirectionCelestial());
         }
 
 		return 0;
 	}
+
+    int setSelectedBrowser(lua_State* L) {
+        ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::setSelectedBrowser");
+        const int i = ghoul::lua::value<int>(L, 1);
+        SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+        if (module->getSkyBrowsers().size() < i) {
+            module->setSelectedBrowser(i);
+        }
+        return 0;
+    }
 	
 }
 

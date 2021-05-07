@@ -367,14 +367,18 @@ namespace openspace {
     }
 
     bool ScreenSpaceSkyTarget::animateFOV(float endFOV, float deltaTime) {
-        double distance = static_cast<double>(_skyBrowser->_vfieldOfView.value()) - endFOV;
-        // If distance is too large, keep animating
-        if (abs(distance) > 0.01) {
-            _skyBrowser->setVerticalFieldOfView(_skyBrowser->_vfieldOfView.value() - (distance * deltaTime * 2.0));
-            return false;
+        if (_skyBrowser) {
+            double distance = static_cast<double>(_skyBrowser->_vfieldOfView.value()) - endFOV;
+            // If distance is too large, keep animating
+            if (abs(distance) > 0.01) {
+                _skyBrowser->scrollZoom(distance);
+                return false;
+            }
+            // Animation is finished
+            return true;
         }
-        // Animation is finished
-        return true;
+        LINFO("Browser not connected to target!");
+        return true;     
     }
 
     void ScreenSpaceSkyTarget::startAnimation(glm::dvec2 coordsEnd, float FOVEnd) {
