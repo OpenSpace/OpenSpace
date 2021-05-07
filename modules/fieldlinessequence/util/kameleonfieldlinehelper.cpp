@@ -175,6 +175,20 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
 
     bool success = false;
 
+    // fieldlines = true will trace the magnetic fieldline (b) for every vertex of a 
+    // velocity flowline (u) from the seedpoint. false will do vice versa.
+    bool fieldlines = true;
+    std::string mainTraceVar;
+    std::string secondaryTraceVar;
+    if (fieldlines) {
+        mainTraceVar = "u";
+        secondaryTraceVar = "b";
+    }
+    else {
+        mainTraceVar = "b";
+        secondaryTraceVar = "u";
+    }
+
     LINFO("Tracing field lines!");
     // LOOP  SEED POINTS, TRACE LINES, CONVERT POINTS TO glm::vec3 AND STORE //
     for (const glm::vec3& seed : seedPoints) {
@@ -186,21 +200,38 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
             std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
         ccmc::Tracer tracer(kameleon, interpolator.get());
         tracer.setInnerBoundary(innerBoundaryLimit); // TODO specify in Lua?
-        ccmc::Fieldline magneticFieldline = tracer.bidirectionalTrace(
-            tracingVar,
-            seed.x,
-            seed.y,
-            seed.z
-        );
-        
-        const std::vector<ccmc::Point3f>& positions = magneticFieldline.getPositions();
+
+
+        //traces with "u" need unidirectioalTrace, while "b" needs bidirectionalTrace
+        ccmc::Fieldline vFlowline;
+        if (mainTraceVar == "u") {
+            vFlowline = tracer.unidirectionalTrace(
+                mainTraceVar,
+                seed.x,
+                seed.y,
+                seed.z
+            );
+        }
+        else {
+            vFlowline = tracer.bidirectionalTrace(
+                mainTraceVar,
+                seed.x,
+                seed.y,
+                seed.z
+            );
+        }
+
+
+        const std::vector<ccmc::Point3f>& positions = vFlowline.getPositions();
 
         const size_t nLinePoints = positions.size();
         std::vector<glm::vec3> initialFieldline;
 
         std::vector<glm::vec3> vertices;
+        std::vector<glm::vec3> flowline;
 
         for (const ccmc::Point3f& p : positions) {
+            //vertices.emplace_back(p.component1, p.component2, p.component3);
 
             //add the magentic fieldline to the state
             initialFieldline.emplace_back(p.component1, p.component2, p.component3);
@@ -210,16 +241,29 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
             ccmc::Tracer tracer2(kameleon, interpolator2.get());
             tracer2.setInnerBoundary(innerBoundaryLimit); // TODO specify in Lua?
 
-            //trace every vertex from the magnetic fieldline
-            //with the velocity flow variable "u". change to u_perp later
-            ccmc::Fieldline vFlowFieldline = tracer2.unidirectionalTrace(
-                "u",
-                p.component1,
-                p.component2,
-                p.component3
-            );
+            //trace every vertex from the main trace with the secondary trace var
+            //traces with "u" need unidirectioalTrace, while "b" needs bidirectionalTrace
 
-            const std::vector<ccmc::Point3f>& positions2 = vFlowFieldline.getPositions();
+            ccmc::Fieldline Fieldline;
+            if (secondaryTraceVar == "b") {
+                Fieldline = tracer2.bidirectionalTrace(
+                    secondaryTraceVar,
+                    p.component1,
+                    p.component2,
+                    p.component3
+                );
+            }
+            else {
+                Fieldline = tracer2.unidirectionalTrace(
+                    secondaryTraceVar,
+                    p.component1,
+                    p.component2,
+                    p.component3
+                );
+            }
+
+
+            const std::vector<ccmc::Point3f>& positions2 = Fieldline.getPositions();
 
             for (const ccmc::Point3f& p2 : positions2) {
 
@@ -230,14 +274,16 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
             vertices.clear();
 
         }
-        state.addLine(initialFieldline);
-        initialFieldline.clear();
-        
+        //add the initial magnetic fieldlines to the state
+        state.addLine(flowline);
+        flowline.clear();
+
         success |= (nLinePoints > 0);
 
     }
 
-    return success;
+    return success; 
+    
 }
 #endif // OPENSPACE_MODULE_KAMELEON_ENABLED
 
