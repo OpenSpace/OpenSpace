@@ -367,7 +367,8 @@ void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {
     // register ScreenSpaceTarget
     ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
     fScreenSpaceRenderable->registerClass<ScreenSpaceSkyTarget>("ScreenSpaceSkyTarget");
-
+    // Create data handler dynamically to avoid the linking error that
+    // came up when including the include file in the module header file
     dataHandler = new WWTDataHandler();
 }
 
