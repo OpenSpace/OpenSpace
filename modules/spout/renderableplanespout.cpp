@@ -56,9 +56,6 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderablePlaneSpout)]] Parameters {
-        // Specifies the GUI name of the ScreenspaceSpout
-        std::optional<std::string> name;
-
         // [[codegen::verbatim(NameInfo.description)]]
         std::optional<std::string> spoutName;
     };
