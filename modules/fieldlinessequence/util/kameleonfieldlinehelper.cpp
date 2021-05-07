@@ -200,6 +200,8 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
         ccmc::Tracer tracer(kameleon, interpolator.get());
         tracer.setInnerBoundary(innerBoundaryLimit); // TODO specify in Lua?
 
+
+        //traces with "u" need unidirectioalTrace, while "b" needs bidirectionalTrace
         ccmc::Fieldline vFlowline;
         if (mainTraceVar == "u") {
             vFlowline = tracer.unidirectionalTrace(
@@ -234,6 +236,8 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
             tracer2.setInnerBoundary(innerBoundaryLimit); // TODO specify in Lua?
 
             //trace every vertex from the main trace with the secondary trace var
+            //traces with "u" need unidirectioalTrace, while "b" needs bidirectionalTrace
+
             ccmc::Fieldline Fieldline;
             if (secondaryTraceVar == "b") {
                 Fieldline = tracer2.bidirectionalTrace(
