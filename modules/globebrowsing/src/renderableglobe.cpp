@@ -34,6 +34,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
+#include <openspace/interaction/sessionrecording.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
@@ -140,7 +141,8 @@ namespace {
         "DynamicLodIterationCount",
         "Data availability checks before LOD factor impact",
         "The number of checks that have to fail/succeed in a row before the dynamic "
-        "level-of-detail adjusts the actual level-of-detail up or down"
+        "level-of-detail adjusts the actual level-of-detail up or down during a session "
+        "recording"
     };
 
     constexpr openspace::properties::Property::PropertyInfo PerformShadingInfo = {
@@ -1187,30 +1189,32 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
     }
     _localRenderer.program->deactivate();
 
-    // If our tile cache is very full, we assume we need to adjust the level of detail
-    // dynamically to not keep rendering frames with unavailable data
-    // After certain number of iterations(_debugProperties.dynamicLodIterationCount) of
-    // unavailable/available data in a row, we assume that a change could be made.
-    const int iterCount = _debugProperties.dynamicLodIterationCount;
-    const bool exceededIterations =
-        static_cast<int>(_iterationsOfUnavailableData) > iterCount;
-    const float clf = _generalProperties.currentLodScaleFactor;
-    const float clfMin = _generalProperties.currentLodScaleFactor.minValue();
-    const float targetLod = _generalProperties.targetLodScaleFactor;
-    const bool validLodFactor = clf > clfMin;
-    if (exceededIterations && validLodFactor) {
-        _generalProperties.currentLodScaleFactor =
-            _generalProperties.currentLodScaleFactor - 0.1f;
-        _iterationsOfUnavailableData = 0;
-        _lodScaleFactorDirty = true;
-    } // Make 2 times the iterations with available data to move it up again
-    else if (static_cast<int>(_iterationsOfAvailableData) >
-             (iterCount * 2) && clf < targetLod)
-    {
-        _generalProperties.currentLodScaleFactor =
-            _generalProperties.currentLodScaleFactor + 0.1f;
-        _iterationsOfAvailableData = 0;
-        _lodScaleFactorDirty = true;
+    if (global::sessionRecording->isSavingFramesDuringPlayback()) {
+        // If our tile cache is very full, we assume we need to adjust the level of detail
+        // dynamically to not keep rendering frames with unavailable data
+        // After certain number of iterations(_debugProperties.dynamicLodIterationCount) of
+        // unavailable/available data in a row, we assume that a change could be made.
+        const int iterCount = _debugProperties.dynamicLodIterationCount;
+        const bool exceededIterations =
+            static_cast<int>(_iterationsOfUnavailableData) > iterCount;
+        const float clf = _generalProperties.currentLodScaleFactor;
+        const float clfMin = _generalProperties.currentLodScaleFactor.minValue();
+        const float targetLod = _generalProperties.targetLodScaleFactor;
+        const bool validLodFactor = clf > clfMin;
+        if (exceededIterations && validLodFactor) {
+            _generalProperties.currentLodScaleFactor =
+                _generalProperties.currentLodScaleFactor - 0.1f;
+            _iterationsOfUnavailableData = 0;
+            _lodScaleFactorDirty = true;
+        } // Make 2 times the iterations with available data to move it up again
+        else if (static_cast<int>(_iterationsOfAvailableData) >
+            (iterCount * 2) && clf < targetLod)
+        {
+            _generalProperties.currentLodScaleFactor =
+                _generalProperties.currentLodScaleFactor + 0.1f;
+            _iterationsOfAvailableData = 0;
+            _lodScaleFactorDirty = true;
+        }
     }
 }
 
