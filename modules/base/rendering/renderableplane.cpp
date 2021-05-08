@@ -91,7 +91,7 @@ namespace {
         // [[codegen::verbatim(BlendModeInfo.description)]]
         std::optional<BlendMode> blendMode;
 
-        // [[codegen::verbatim(BlendModeInfo.description)]]
+        // [[codegen::verbatim(MultiplyColorInfo.description)]]
         std::optional<glm::vec3> multiplyColor [[codegen::color()]];
     };
 #include "renderableplane_codegen.cpp"
