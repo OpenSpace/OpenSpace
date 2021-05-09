@@ -27,6 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <modules/space/speckloader.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -142,8 +143,7 @@ private:
     bool _dataIsDirty = true;
     bool _otherDataColorMapIsDirty = true;
 
-    // Test Grid Enabled
-    bool _enableTestGrid = false;
+    speck::Dataset _dataset;
 
     std::vector<float> _slicedData;
     std::vector<float> _fullData;

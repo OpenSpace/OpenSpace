@@ -59,7 +59,7 @@ namespace {
         "filterOutOfRange", "fixedColor"
     };
 
-    constexpr int8_t CurrentCacheVersion = 3;
+    constexpr int8_t CurrentCacheVersion = 4;
 
     constexpr const int RenderOptionPointSpreadFunction = 0;
     constexpr const int RenderOptionTexture = 1;
@@ -157,12 +157,6 @@ namespace {
         "Filter Out of Range",
         "Determines whether other data values outside the value range should be visible "
         "or filtered away"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo EnableTestGridInfo = {
-        "EnableTestGrid",
-        "Enable Test Grid",
-        "Set it to true for rendering the test grid."
     };
 
     // Old Method
@@ -344,9 +338,6 @@ namespace {
         // [[codegen::verbatim(MagnitudeExponentInfo.description)]]
         std::optional<float> magnitudeExponent;
 
-        // [[codegen::verbatim(EnableTestGridInfo.description)]]
-        std::optional<bool> enableTestGrid;
-
         // [[codegen::verbatim(RenderMethodOptionInfo.description)]]
         std::string renderMethod;
 
@@ -495,7 +486,6 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         });
     addProperty(_shapeTexturePath);*/
 
-    _enableTestGrid = p.enableTestGrid.value_or(_enableTestGrid);
     _queuedOtherData = p.otherData.value_or(_queuedOtherData);
 
     _otherDataOption.onChange([&]() { _dataIsDirty = true; });
@@ -1276,206 +1266,106 @@ void RenderableStars::loadData() {
 
     readSpeckFile();
 
+
+
     LINFO("Saving cache");
     saveCachedFile(cachedFile);
 }
 
 void RenderableStars::readSpeckFile() {
-    std::string _file = _speckFile;
-    std::ifstream file(_file);
-    if (!file.good()) {
-        LERROR(fmt::format("Failed to open Speck file '{}'", _file));
+    _dataset = speck::loadSpeckFile(_speckFile.value());
+    if (_dataset.entries.empty()) {
         return;
     }
 
-    // The beginning of the speck file has a header that either contains comments
-    // (signaled by a preceding '#') or information about the structure of the file
-    // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
-    std::string line;
-    while (true) {
-        std::streampos position = file.tellg();
-        std::getline(file, line, '\n');
-
-        if (line[0] == '#' || line.empty()) {
-            continue;
-        }
-
-        if (line.substr(0, 7) != "datavar" &&
-            line.substr(0, 10) != "texturevar" &&
-            line.substr(0, 7) != "texture")
-        {
-            // we read a line that doesn't belong to the header, so we have to jump back
-            // before the beginning of the current line
-            if (_enableTestGrid) {
-                file.seekg(position - std::streamoff(8));
-            }
-            break;
-        }
-
-        if (line.substr(0, 7) == "datavar") {
-            // datavar lines are structured as follows:
-            // datavar # description
-            // where # is the index of the data variable; so if we repeatedly overwrite
-            // the 'nValues' variable with the latest index, we will end up with the total
-            // number of values (+3 since X Y Z are not counted in the Speck file index)
-            std::stringstream str(line);
-
-            std::string dummy;
-            str >> dummy;
-            str >> _nValuesPerStar;
-
-            std::string name;
-            str >> name;
-            _dataNames.push_back(name);
-
-            // +3 because the position x, y, z
-            if (name == "lum") {
-                _lumArrayPos = _nValuesPerStar + 3;
-            }
-            else if (name == "absmag") {
-                _absMagArrayPos = _nValuesPerStar + 3;
-            }
-            else if (name == "appmag") {
-                _appMagArrayPos = _nValuesPerStar + 3;
-            }
-            else if (name == "colorb_v") {
-                _bvColorArrayPos = _nValuesPerStar + 3;
-            }
-            else if (name == "vx") {
-                _velocityArrayPos = _nValuesPerStar + 3;
-            }
-            else if (name == "speed") {
-                _speedArrayPos = _nValuesPerStar + 3;
-            }
-            _nValuesPerStar += 1; // We want the number, but the index is 0 based
-        }
+    bool success = speck::normalizeVariable(_dataset, "lum");
+    if (!success) {
+        throw ghoul::RuntimeError("Could not find required variable 'luminosity'");
     }
 
-    _nValuesPerStar += 3; // X Y Z are not counted in the Speck file indices
-    _otherDataOption.addOptions(_dataNames);
+    // This is an assumption that we are making. I'm not sure if it is guaranteed by the 
+    // SPECK format that all values have the same number of values.  In debug mode, we are
+    // checking whether that is the case or not in the Speckloading, though
+    // The +3 is for the position information that is not included in the `data` vector
+    _nValuesPerStar = _dataset.entries[0].data.size() + 3;
 
-    float minLumValue = std::numeric_limits<float>::max();
-    float maxLumValue = std::numeric_limits<float>::min();
+    std::vector<std::string> variableNames;
+    variableNames.reserve(_dataset.variables.size());
+    for (const speck::Dataset::Variable& v : _dataset.variables) {
+        if (v.name == "lum")           { _lumArrayPos = v.index + 3; }
+        else if (v.name == "absmag")   { _absMagArrayPos = v.index + 3; }
+        else if (v.name == "appmag")   { _appMagArrayPos = v.index + 3; }
+        else if (v.name == "colorb_v") { _bvColorArrayPos = v.index + 3; }
+        else if (v.name == "vx")       { _velocityArrayPos = v.index + 3; }
+        else if (v.name == "speed")    { _speedArrayPos = v.index + 3; }
 
-    do {
-        std::vector<float> values(_nValuesPerStar);
-        std::stringstream str(line);
+        variableNames.push_back(v.name);
+    }
+    _otherDataOption.addOptions(variableNames);
 
-        for (int i = 0; i < _nValuesPerStar; ++i) {
-            str >> values[i];
+
+    // Temporary:
+    //std::vector<float> _fullData;
+    for (const speck::Dataset::Entry& e : _dataset.entries) {
+        _fullData.push_back(e.position.x);
+        _fullData.push_back(e.position.y);
+        _fullData.push_back(e.position.z);
+
+        for (double d : e.data) {
+            _fullData.push_back(d);
         }
-
-        bool nullArray = true;
-        for (float v : values) {
-            if (v != 0.0) {
-                nullArray = false;
-                break;
-            }
-        }
-        minLumValue = values[_lumArrayPos] < minLumValue ?
-            values[_lumArrayPos] : minLumValue;
-        maxLumValue = values[_lumArrayPos] > maxLumValue ?
-            values[_lumArrayPos] : maxLumValue;
-        if (!nullArray) {
-            _fullData.insert(_fullData.end(), values.begin(), values.end());
-        }
-
-        std::getline(file, line, '\n');
-
-    } while (!file.eof());
-
-    // Normalize Luminosity:
-    for (size_t i = 0; i < _fullData.size(); i += _nValuesPerStar) {
-        _fullData[i + _lumArrayPos] =
-            (_fullData[i + _lumArrayPos] - minLumValue) / (maxLumValue - minLumValue);
     }
 }
 
 bool RenderableStars::loadCachedFile(const std::string& file) {
-    std::ifstream fileStream(file, std::ifstream::binary);
-    if (fileStream.good()) {
-        int8_t version = 0;
-        fileStream.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
-        if (version != CurrentCacheVersion) {
-            LINFO("The format of the cached file has changed: deleting old cache");
-            fileStream.close();
-            FileSys.deleteFile(file);
-            return false;
+    try {
+        _dataset = speck::loadCachedFile(file);
+
+
+        // This is an assumption that we are making. I'm not sure if it is guaranteed by the 
+        // SPECK format that all values have the same number of values.  In debug mode, we are
+        // checking whether that is the case or not in the Speckloading, though
+        // The +3 is for the position information that is not included in the `data` vector
+        _nValuesPerStar = _dataset.entries[0].data.size() + 3;
+
+        std::vector<std::string> variableNames;
+        variableNames.reserve(_dataset.variables.size());
+        for (const speck::Dataset::Variable& v : _dataset.variables) {
+            if (v.name == "lum")           { _lumArrayPos = v.index + 3; }
+            else if (v.name == "absmag")   { _absMagArrayPos = v.index + 3; }
+            else if (v.name == "appmag")   { _appMagArrayPos = v.index + 3; }
+            else if (v.name == "colorb_v") { _bvColorArrayPos = v.index + 3; }
+            else if (v.name == "vx")       { _velocityArrayPos = v.index + 3; }
+            else if (v.name == "speed")    { _speedArrayPos = v.index + 3; }
+
+            variableNames.push_back(v.name);
+        }
+        _otherDataOption.addOptions(variableNames);
+
+
+        // Temporary:
+        //std::vector<float> _fullData;
+        for (const speck::Dataset::Entry& e : _dataset.entries) {
+            _fullData.push_back(e.position.x);
+            _fullData.push_back(e.position.y);
+            _fullData.push_back(e.position.z);
+
+            for (double d : e.data) {
+                _fullData.push_back(d);
+            }
         }
 
-        int32_t nValues = 0;
-        fileStream.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
-        fileStream.read(reinterpret_cast<char*>(&_nValuesPerStar), sizeof(int32_t));
 
-        fileStream.read(reinterpret_cast<char*>(&_lumArrayPos), sizeof(int32_t));
-        fileStream.read(reinterpret_cast<char*>(&_absMagArrayPos), sizeof(int32_t));
-        fileStream.read(reinterpret_cast<char*>(&_appMagArrayPos), sizeof(int32_t));
-        fileStream.read(reinterpret_cast<char*>(&_bvColorArrayPos), sizeof(int32_t));
-        fileStream.read(reinterpret_cast<char*>(&_velocityArrayPos), sizeof(int32_t));
-        fileStream.read(reinterpret_cast<char*>(&_speedArrayPos), sizeof(int32_t));
-
-        for (int i = 0; i < _nValuesPerStar - 3; ++i) {
-            uint16_t len;
-            fileStream.read(reinterpret_cast<char*>(&len), sizeof(uint16_t));
-            std::vector<char> buffer(len);
-            fileStream.read(buffer.data(), len);
-            std::string value(buffer.begin(), buffer.end());
-            _dataNames.push_back(value);
-        }
-        _otherDataOption.addOptions(_dataNames);
-
-        _fullData.resize(nValues);
-        fileStream.read(reinterpret_cast<char*>(
-            _fullData.data()),
-            nValues * sizeof(_fullData[0])
-        );
-
-        bool success = fileStream.good();
-        return success;
+        return true;
     }
-    else {
+    catch (const ghoul::RuntimeError& e) {
         LERROR(fmt::format("Error opening file '{}' for loading cache file", file));
         return false;
     }
 }
 
 void RenderableStars::saveCachedFile(const std::string& file) const {
-    std::ofstream fileStream(file, std::ofstream::binary);
-
-    if (!fileStream.good()) {
-        LERROR(fmt::format("Error opening file '{}' for save cache file", file));
-        return;
-    }
-
-    fileStream.write(
-        reinterpret_cast<const char*>(&CurrentCacheVersion),
-        sizeof(int8_t)
-    );
-
-    int32_t nValues = static_cast<int32_t>(_fullData.size());
-    if (nValues == 0) {
-        throw ghoul::RuntimeError("Error writing cache: No values were loaded");
-    }
-    fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
-
-    int32_t nValuesPerStar = static_cast<int32_t>(_nValuesPerStar);
-    fileStream.write(reinterpret_cast<const char*>(&nValuesPerStar), sizeof(int32_t));
-    fileStream.write(reinterpret_cast<const char*>(&_lumArrayPos), sizeof(int32_t));
-    fileStream.write(reinterpret_cast<const char*>(&_absMagArrayPos), sizeof(int32_t));
-    fileStream.write(reinterpret_cast<const char*>(&_appMagArrayPos), sizeof(int32_t));
-    fileStream.write(reinterpret_cast<const char*>(&_bvColorArrayPos), sizeof(int32_t));
-    fileStream.write(reinterpret_cast<const char*>(&_velocityArrayPos), sizeof(int32_t));
-    fileStream.write(reinterpret_cast<const char*>(&_speedArrayPos), sizeof(int32_t));
-
-    // -3 as we don't want to save the xyz values that are in the beginning of the file
-    for (int i = 0; i < _nValuesPerStar - 3; ++i) {
-        uint16_t len = static_cast<uint16_t>(_dataNames[i].size());
-        fileStream.write(reinterpret_cast<const char*>(&len), sizeof(uint16_t));
-        fileStream.write(_dataNames[i].c_str(), len);
-    }
-
-    size_t nBytes = nValues * sizeof(_fullData[0]);
-    fileStream.write(reinterpret_cast<const char*>(_fullData.data()), nBytes);
+    speck::saveCachedFile(_dataset, file);
 }
 
 void RenderableStars::createDataSlice(ColorOption option) {
@@ -1516,13 +1406,7 @@ void RenderableStars::createDataSlice(ColorOption option) {
                     static_cast<float>(position[2])
                 }};
 
-                if (_enableTestGrid) {
-                    float sunColor = 0.650f;
-                    layout.value.value = sunColor;// _fullData[i + 3];
-                }
-                else {
-                    layout.value.value = _fullData[i + _bvColorArrayPos];
-                }
+                layout.value.value = _fullData[i + _bvColorArrayPos];
 
                 layout.value.luminance = _fullData[i + _lumArrayPos];
                 layout.value.absoluteMagnitude = _fullData[i + _absMagArrayPos];
