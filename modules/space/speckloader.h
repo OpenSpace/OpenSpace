@@ -53,8 +53,8 @@ struct Dataset {
     int orientationDataIndex = -1;
 
     struct Entry {
-        glm::dvec3 position;
-        std::vector<double> data;
+        glm::vec3 position;
+        std::vector<float> data;
         std::optional<std::string> comment;
     };
     std::vector<Entry> entries;
@@ -69,6 +69,7 @@ Dataset loadCachedFile(std::filesystem::path path);
 void saveCachedFile(const Dataset& dataset, std::filesystem::path path);
 
 // Misc
+int indexForVariable(const Dataset& dataset, std::string_view variableName);
 bool normalizeVariable(Dataset& dataset, std::string_view variableName);
 
 } // namespace openspace::speck

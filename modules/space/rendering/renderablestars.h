@@ -75,10 +75,8 @@ private:
         FixedColor = 4
     };
 
-    static const int _psfTextureSize = 64;
-    static const int _convolvedfTextureSize = 257;
 
-    void createDataSlice(ColorOption option);
+    std::vector<float> createDataSlice(ColorOption option);
 
     void loadData();
     void readSpeckFile();
@@ -90,10 +88,6 @@ private:
     properties::StringProperty _colorTexturePath;
     std::unique_ptr<ghoul::opengl::Texture> _colorTexture;
     std::unique_ptr<ghoul::filesystem::File> _colorTextureFile;
-
-    //properties::StringProperty _shapeTexturePath;
-    //std::unique_ptr<ghoul::opengl::Texture> _shapeTexture;
-    //std::unique_ptr<ghoul::filesystem::File> _shapeTextureFile;
 
     properties::OptionProperty _colorOption;
     properties::OptionProperty _otherDataOption;
@@ -145,22 +139,11 @@ private:
 
     speck::Dataset _dataset;
 
-    std::vector<float> _slicedData;
-    std::vector<float> _fullData;
-
-    int _nValuesPerStar = 0;
     std::string _queuedOtherData;
     std::vector<std::string> _dataNames;
 
     std::optional<float> _staticFilterValue;
     float _staticFilterReplacementValue = 0.f;
-
-    std::size_t _lumArrayPos = 0;
-    std::size_t _absMagArrayPos = 0;
-    std::size_t _appMagArrayPos = 0;
-    std::size_t _bvColorArrayPos = 0;
-    std::size_t _velocityArrayPos = 0;
-    std::size_t _speedArrayPos = 0;
 
     GLuint _vao = 0;
     GLuint _vbo = 0;

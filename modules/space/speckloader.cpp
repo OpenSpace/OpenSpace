@@ -238,7 +238,7 @@ Dataset loadSpeckFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLi
         std::stringstream str(line);
         Dataset::Entry entry;
         str >> entry.position.x >> entry.position.y >> entry.position.z;
-        allZero &= (entry.position == glm::dvec3(0.0));
+        allZero &= (entry.position == glm::vec3(0.0));
 
         entry.data.resize(nDataValues);
         for (int i = 0; i < nDataValues; i += 1) {
@@ -341,14 +341,14 @@ Dataset loadCachedFile(std::filesystem::path path) {
     result.entries.resize(nEntries);
     for (int i = 0; i < nEntries; i += 1) {
         Dataset::Entry e;
-        file.read(reinterpret_cast<char*>(&e.position.x), sizeof(double));
-        file.read(reinterpret_cast<char*>(&e.position.y), sizeof(double));
-        file.read(reinterpret_cast<char*>(&e.position.z), sizeof(double));
+        file.read(reinterpret_cast<char*>(&e.position.x), sizeof(float));
+        file.read(reinterpret_cast<char*>(&e.position.y), sizeof(float));
+        file.read(reinterpret_cast<char*>(&e.position.z), sizeof(float));
 
         uint16_t nValues;
         file.read(reinterpret_cast<char*>(&nValues), sizeof(uint16_t));
         e.data.resize(nValues);
-        file.read(reinterpret_cast<char*>(e.data.data()), nValues * sizeof(double));
+        file.read(reinterpret_cast<char*>(e.data.data()), nValues * sizeof(float));
 
         uint16_t len;
         file.read(reinterpret_cast<char*>(&len), sizeof(uint16_t));
@@ -417,16 +417,16 @@ void saveCachedFile(const Dataset& dataset, std::filesystem::path path) {
     uint64_t nEntries = static_cast<uint64_t>(dataset.entries.size());
     file.write(reinterpret_cast<const char*>(&nEntries), sizeof(uint64_t));
     for (const Dataset::Entry& e : dataset.entries) {
-        file.write(reinterpret_cast<const char*>(&e.position.x), sizeof(double));
-        file.write(reinterpret_cast<const char*>(&e.position.y), sizeof(double));
-        file.write(reinterpret_cast<const char*>(&e.position.z), sizeof(double));
+        file.write(reinterpret_cast<const char*>(&e.position.x), sizeof(float));
+        file.write(reinterpret_cast<const char*>(&e.position.y), sizeof(float));
+        file.write(reinterpret_cast<const char*>(&e.position.z), sizeof(float));
 
         checkSize<uint16_t>(e.data.size(), "Too many data variables");
         uint16_t nValues = static_cast<uint16_t>(e.data.size());
         file.write(reinterpret_cast<const char*>(&nValues), sizeof(uint16_t));
         file.write(
             reinterpret_cast<const char*>(e.data.data()),
-            e.data.size() * sizeof(double)
+            e.data.size() * sizeof(float)
         );
 
         if (e.comment.has_value()) {
@@ -440,6 +440,15 @@ void saveCachedFile(const Dataset& dataset, std::filesystem::path path) {
             file.write(e.comment->data(), e.comment->size());
         }
     }
+}
+
+int indexForVariable(const Dataset& dataset, std::string_view variableName) {
+    for (const Dataset::Variable& v : dataset.variables) {
+        if (v.name == variableName) {
+            return v.index;
+        }
+    }
+    return -1;
 }
 
 bool normalizeVariable(Dataset& dataset, std::string_view variableName) {
@@ -456,8 +465,8 @@ bool normalizeVariable(Dataset& dataset, std::string_view variableName) {
         return false;
     }
 
-    double minValue = std::numeric_limits<double>::max();
-    double maxValue = -std::numeric_limits<double>::max();
+    float minValue = std::numeric_limits<float>::max();
+    float maxValue = -std::numeric_limits<float>::max();
     for (Dataset::Entry& e : dataset.entries) {
         minValue = std::min(minValue, e.data[*idx]);
         maxValue = std::max(maxValue, e.data[*idx]);
