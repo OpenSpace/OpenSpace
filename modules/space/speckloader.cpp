@@ -25,6 +25,10 @@
 #include <modules/space/speckloader.h>
 
 #include <ghoul/fmt.h>
+#include <ghoul/filesystem/cachemanager.h>
+#include <ghoul/filesystem/file.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <cctype>
 #include <fstream>
@@ -440,6 +444,39 @@ void saveCachedFile(const Dataset& dataset, std::filesystem::path path) {
             file.write(e.comment->data(), e.comment->size());
         }
     }
+}
+
+Dataset loadSpeckFileWithCache(std::filesystem::path speckPath,
+                               SkipAllZeroLines skipAllZeroLines)
+{
+    std::string cachePath = FileSys.cacheManager()->cachedFilename(
+        speckPath.string(),
+        ghoul::filesystem::CacheManager::Persistent::Yes
+    );
+
+    if (std::filesystem::exists(cachePath)) {
+        LINFOC(
+            "SpeckLoader",
+            fmt::format("Cached file '{}' used for Speck file '{}'", cachePath, speckPath
+        ));
+
+        try {
+            // We could load the cache file and we are now done with this
+            Dataset dataset = loadCachedFile(cachePath);
+            return dataset;
+        }
+        catch (const ghoul::RuntimeError&) {
+            FileSys.cacheManager()->removeCacheFile(speckPath.string());
+        }
+    }
+    LINFOC("SpeckLoader", fmt::format("Loading Speck file '{}'", speckPath));
+    Dataset dataset = loadSpeckFile(speckPath);
+
+    if (!dataset.entries.empty()) {
+        LINFOC("SpeckLoader", "Saving cache");
+        speck::saveCachedFile(dataset, cachePath);
+    }
+    return dataset;
 }
 
 int indexForVariable(const Dataset& dataset, std::string_view variableName) {

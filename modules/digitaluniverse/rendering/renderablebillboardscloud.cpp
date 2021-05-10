@@ -991,7 +991,9 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
 bool RenderableBillboardsCloud::loadData() {
     bool success = true;
 
-    success &= loadSpeckData();
+    if (_hasSpeckFile) {
+        _dataset = speck::loadSpeckFileWithCache(_speckFile);
+    }
 
     if (_hasColorMapFile) {
         if (!_hasSpeckFile) {
@@ -1005,55 +1007,12 @@ bool RenderableBillboardsCloud::loadData() {
     return success;
 }
 
-bool RenderableBillboardsCloud::loadSpeckData() {
-    if (!_hasSpeckFile) {
-        return true;
-    }
-
-    bool success = true;
-    const std::string& cachedFile = FileSys.cacheManager()->cachedFilename(
-        ghoul::filesystem::File(_speckFile),
-        "RenderableDUMeshes|" + identifier(),
-        ghoul::filesystem::CacheManager::Persistent::Yes
-    );
-
-    const bool hasCachedFile = FileSys.fileExists(cachedFile);
-    if (hasCachedFile) {
-        LINFO(fmt::format(
-            "Cached file '{}' used for Speck file '{}'", cachedFile, _speckFile
-        ));
-
-        success = loadCachedFile(cachedFile);
-        if (success) {
-            return true;
-        }
-        else {
-            FileSys.cacheManager()->removeCacheFile(_speckFile);
-            // Intentional fall-through to the 'else' to generate the cache
-            // file for the next run
-        }
-    }
-    else {
-        LINFO(fmt::format("Cache for Speck file '{}' not found", _speckFile));
-    }
-    LINFO(fmt::format("Loading Speck file '{}'", _speckFile));
-
-    success = readSpeckFile();
-    if (!success) {
-        return false;
-    }
-
-    speck::saveCachedFile(_dataset, cachedFile);
-    return success;
-}
-
 bool RenderableBillboardsCloud::loadLabelData() {
     if (_labelFile.empty()) {
         return true;
     }
 
     bool success = true;
-    // I disabled the cache as it didn't work on Mac --- abock
     const std::string& cachedFile = FileSys.cacheManager()->cachedFilename(
         ghoul::filesystem::File(_labelFile),
         ghoul::filesystem::CacheManager::Persistent::Yes
@@ -1086,11 +1045,6 @@ bool RenderableBillboardsCloud::loadLabelData() {
     }
 
     return success;
-}
-
-bool RenderableBillboardsCloud::readSpeckFile() {
-    _dataset = speck::loadSpeckFile(_speckFile);
-    return !_dataset.entries.empty();
 }
 
 bool RenderableBillboardsCloud::readColorMapFile() {

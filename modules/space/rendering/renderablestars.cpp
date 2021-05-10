@@ -52,11 +52,10 @@ namespace {
     constexpr const char* _loggerCat = "RenderableStars";
 
     constexpr const std::array<const char*, 17> UniformNames = {
-        "modelMatrix", "cameraUp", "cameraViewProjectionMatrix",
-        "colorOption", "magnitudeExponent", "eyePosition", "psfParamConf",
-        "lumCent", "radiusCent", "brightnessCent", "colorTexture",
-        "alphaValue", "psfTexture", "otherDataTexture", "otherDataRange",
-        "filterOutOfRange", "fixedColor"
+        "modelMatrix", "cameraUp", "cameraViewProjectionMatrix", "colorOption",
+        "magnitudeExponent", "eyePosition", "psfParamConf", "lumCent", "radiusCent",
+        "brightnessCent", "colorTexture", "alphaValue", "psfTexture", "otherDataTexture",
+        "otherDataRange", "filterOutOfRange", "fixedColor"
     };
 
     constexpr const int RenderOptionPointSpreadFunction = 0;
@@ -339,14 +338,28 @@ namespace {
         // [[codegen::verbatim(MagnitudeExponentInfo.description)]]
         std::optional<float> magnitudeExponent;
 
+        enum class RenderMethod {
+            PSF,
+            TextureBased [[codegen::key("Texture Based")]]
+        };
+
         // [[codegen::verbatim(RenderMethodOptionInfo.description)]]
-        std::string renderMethod;
+        RenderMethod renderMethod;
 
         // [[codegen::verbatim(PsfTextureInfo.description)]]
         std::filesystem::path texture;
 
+        enum class SizeComposition {
+            AppBrightness [[codegen::key("App Brightness")]],
+            LumSize [[codegen::key("Lum and Size")]],
+            LumSizeAppBrightness [[codegen::key("Lum, Size and App Brightness")]],
+            AbsMagnitude [[codegen::key("Abs Magnitude")]],
+            AppMagnitude [[codegen::key("App Magnitude")]],
+            DistanceModulus [[codegen::key("Distance Modulus")]]
+        };
+
         // [[codegen::verbatim(SizeCompositionOptionInfo.description)]]
-        std::optional<std::string> sizeComposition;
+        std::optional<SizeComposition> sizeComposition;
 
         // [[codegen::verbatim(FadeInDistancesInfo.description)]]
         std::optional<glm::dvec2> fadeInDistances;
@@ -434,10 +447,10 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     _colorTexturePath = p.colorMap.string();
     _colorTextureFile = std::make_unique<File>(_colorTexturePath);
 
-    /*_shapeTexturePath = absPath(dictionary.value<std::string>(
-        ShapeTextureInfo.identifier
-        ));
-    _shapeTextureFile = std::make_unique<File>(_shapeTexturePath);*/
+    //_shapeTexturePath = absPath(dictionary.value<std::string>(
+    //    ShapeTextureInfo.identifier
+    //    ));
+    //_shapeTextureFile = std::make_unique<File>(_shapeTexturePath);
 
     if (p.otherDataColorMap.has_value()) {
         _otherDataColorMapPath = absPath(*p.otherDataColorMap);
@@ -504,10 +517,10 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     _renderingMethodOption.addOption(RenderOptionTexture, "Textured Based");
     addProperty(_renderingMethodOption);
 
-    if (p.renderMethod == "PSF") {
+    if (p.renderMethod == Parameters::RenderMethod::PSF) {
         _renderingMethodOption = RenderOptionPointSpreadFunction;
     }
-    else if (p.renderMethod == "Texture Based") {
+    else {
         _renderingMethodOption = RenderOptionTexture;
     }
 
@@ -536,23 +549,25 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 
 
     if (p.sizeComposition.has_value()) {
-        if (*p.sizeComposition == "App Brightness") {
-            _psfMultiplyOption = 0;
-        }
-        else if (*p.sizeComposition == "Lum and Size") {
-            _psfMultiplyOption = 1;
-        }
-        else if (*p.sizeComposition == "Lum, Size and App Brightness") {
-            _psfMultiplyOption = 2;
-        }
-        else if (*p.sizeComposition == "Abs Magnitude") {
-            _psfMultiplyOption = 3;
-        }
-        else if (*p.sizeComposition == "App Maginitude") {
-            _psfMultiplyOption = 4;
-        }
-        else if (*p.sizeComposition == "Distance Modulus") {
-            _psfMultiplyOption = 5;
+        switch (*p.sizeComposition) {
+            case Parameters::SizeComposition::AppBrightness:
+                _psfMultiplyOption = 0;
+                break;
+            case Parameters::SizeComposition::LumSize:
+                _psfMultiplyOption = 1;
+                break;
+            case Parameters::SizeComposition::LumSizeAppBrightness:
+                _psfMultiplyOption = 2;
+                break;
+            case Parameters::SizeComposition::AbsMagnitude:
+                _psfMultiplyOption = 3;
+                break;
+            case Parameters::SizeComposition::AppMagnitude:
+                _psfMultiplyOption = 4;
+                break;
+            case Parameters::SizeComposition::DistanceModulus:
+                _psfMultiplyOption = 5;
+                break;
         }
     }
     else {
@@ -617,13 +632,16 @@ void RenderableStars::initializeGL() {
 
     loadData();
 
+    // We need to wait until after loading the data until we can see if the requested
+    // data value actually exists or not.  Once we determine the index, we no longer
+    // need the value and can clear it
     if (!_queuedOtherData.empty()) {
-        auto it = std::find(_dataNames.begin(), _dataNames.end(), _queuedOtherData);
-        if (it == _dataNames.end()) {
+        int idx = speck::indexForVariable(_dataset, _queuedOtherData);
+        if (idx == -1) {
             LERROR(fmt::format("Could not find other data column {}", _queuedOtherData));
         }
         else {
-            _otherDataOption = static_cast<int>(std::distance(_dataNames.begin(), it));
+            _otherDataOption = idx;
             _queuedOtherData.clear();
         }
     }
@@ -1197,50 +1215,9 @@ void RenderableStars::loadData() {
         return;
     }
 
-    std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-        file,
-        ghoul::filesystem::CacheManager::Persistent::Yes
-    );
-
-    _dataNames.clear();
-
-    bool hasCachedFile = FileSys.fileExists(cachedFile);
-    if (hasCachedFile) {
-        LINFO(fmt::format("Cached file '{}' used for Speck file '{}'",
-            cachedFile, file
-        ));
-
-        bool success = loadCachedFile(cachedFile);
-        if (success) {
-            return;
-        }
-        else {
-            FileSys.cacheManager()->removeCacheFile(file);
-            // Intentional fall-through to the 'else' computation to generate the cache
-            // file for the next run
-        }
-    }
-    else {
-        LINFO(fmt::format("Cache for Speck file '{}' not found", file));
-    }
-    LINFO(fmt::format("Loading Speck file '{}'", file));
-
-    readSpeckFile();
-
-
-    LINFO("Saving cache");
-    speck::saveCachedFile(_dataset, cachedFile);
-}
-
-void RenderableStars::readSpeckFile() {
-    _dataset = speck::loadSpeckFile(_speckFile.value());
+    _dataset = speck::loadSpeckFileWithCache(file);
     if (_dataset.entries.empty()) {
         return;
-    }
-
-    bool success = speck::normalizeVariable(_dataset, "lum");
-    if (!success) {
-        throw ghoul::RuntimeError("Could not find required variable 'luminosity'");
     }
 
     std::vector<std::string> variableNames;
@@ -1249,24 +1226,10 @@ void RenderableStars::readSpeckFile() {
         variableNames.push_back(v.name);
     }
     _otherDataOption.addOptions(variableNames);
-}
 
-bool RenderableStars::loadCachedFile(const std::string& file) {
-    try {
-        _dataset = speck::loadCachedFile(file);
-
-        std::vector<std::string> variableNames;
-        variableNames.reserve(_dataset.variables.size());
-        for (const speck::Dataset::Variable& v : _dataset.variables) {
-            variableNames.push_back(v.name);
-        }
-        _otherDataOption.addOptions(variableNames);
-
-        return true;
-    }
-    catch (const ghoul::RuntimeError&) {
-        LERROR(fmt::format("Error opening file '{}' for loading cache file", file));
-        return false;
+    bool success = speck::normalizeVariable(_dataset, "lum");
+    if (!success) {
+        throw ghoul::RuntimeError("Could not find required variable 'luminosity'");
     }
 }
 
@@ -1288,6 +1251,8 @@ std::vector<float> RenderableStars::createDataSlice(ColorOption option) {
     double maxRadius = 0.0;
 
     std::vector<float> result;
+    // 7 for the default Color option of 3 positions + bv + lum + abs + app magnitude
+    result.reserve(_dataset.entries.size() * 7);
     for (const speck::Dataset::Entry& e : _dataset.entries) {
         glm::dvec3 position = e.position;
         position *= openspace::distanceconstants::Parsec;

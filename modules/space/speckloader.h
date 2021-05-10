@@ -63,12 +63,15 @@ struct Dataset {
 };
 
 // In-out methods
-
 Dataset loadSpeckFile(std::filesystem::path path,
     SkipAllZeroLines skipAllZeroLines = SkipAllZeroLines::Yes);
 
 Dataset loadCachedFile(std::filesystem::path path);
 void saveCachedFile(const Dataset& dataset, std::filesystem::path path);
+
+Dataset loadSpeckFileWithCache(std::filesystem::path speckPath,
+    SkipAllZeroLines skipAllZeroLines = SkipAllZeroLines::Yes);
+
 
 // Misc
 int indexForVariable(const Dataset& dataset, std::string_view variableName);

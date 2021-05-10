@@ -609,38 +609,10 @@ void RenderablePlanesCloud::update(const UpdateData&) {
 
 bool RenderablePlanesCloud::loadData() {
     if (_hasSpeckFile && FileSys.fileExists(_speckFile)) {
-        std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-            _speckFile,
-            ghoul::filesystem::CacheManager::Persistent::Yes
-        );
-
-        bool hasCachedFile = FileSys.fileExists(cachedFile);
-        if (hasCachedFile) {
-            LINFO(fmt::format(
-                "Cached file '{}' used for Speck file '{}'", cachedFile, _speckFile
-            ));
-
-            try {
-                _dataset = speck::loadCachedFile(cachedFile);
-            }
-            catch (const ghoul::RuntimeError&) {
-                FileSys.cacheManager()->removeCacheFile(_speckFile);
-                // Intentional fall-through to the 'else' to generate the cache
-                // file for the next run
-            }
-        }
-        else {
-            LINFO(fmt::format("Cache for Speck file '{}' not found", _speckFile));
-        }
-
-        LINFO(fmt::format("Loading Speck file '{}'", _speckFile));
-        _dataset = speck::loadSpeckFile(_speckFile);
+        _dataset = speck::loadSpeckFileWithCache(_speckFile);
         if (_dataset.entries.empty()) {
             return false;
         }
-        
-        LINFO("Saving cache");
-        speck::saveCachedFile(_dataset, cachedFile);
     }
 
     if (!_labelFile.empty()) {

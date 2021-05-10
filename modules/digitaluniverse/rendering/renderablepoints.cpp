@@ -204,9 +204,10 @@ bool RenderablePoints::isReady() const {
 void RenderablePoints::initialize() {
     ZoneScoped
 
-    bool success = loadData();
-    if (!success) {
-        throw ghoul::RuntimeError("Error loading data");
+    _dataset = speck::loadSpeckFileWithCache(_speckFile);
+
+    if (_hasColorMapFile) {
+         readColorMapFile();
     }
 }
 
@@ -375,128 +376,12 @@ void RenderablePoints::update(const UpdateData&) {
     }
 }
 
-bool RenderablePoints::loadData() {
-    std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-        _speckFile,
-        ghoul::filesystem::CacheManager::Persistent::Yes
-    );
-
-    bool hasCachedFile = FileSys.fileExists(cachedFile);
-    if (hasCachedFile) {
-        LINFO(fmt::format(
-            "Cached file '{}' used for Speck file '{}'",
-            cachedFile, _speckFile
-        ));
-
-        bool success = loadCachedFile(cachedFile);
-        if (success) {
-            if (_hasColorMapFile) {
-                success &= readColorMapFile();
-            }
-            return success;
-        }
-        else {
-            FileSys.cacheManager()->removeCacheFile(_speckFile);
-            // Intentional fall-through to the 'else' to generate the cache file for
-            // the next run
-        }
-    }
-    else {
-        LINFO(fmt::format("Cache for Speck file '{}' not found", _speckFile));
-    }
-    LINFO(fmt::format("Loading Speck file '{}'", _speckFile));
-
-    bool success = readSpeckFile();
-    if (!success) {
-        return false;
-    }
-
-    LINFO("Saving cache");
-    speck::saveCachedFile(_dataset, cachedFile);
-
-    if (_hasColorMapFile) {
-        success &= readColorMapFile();
-    }
-
-    return success;
-}
-
-bool RenderablePoints::readSpeckFile() {
-    _dataset = speck::loadSpeckFile(_speckFile);
-
-
-
-    //std::ifstream file(_speckFile);
-    //if (!file.good()) {
-    //    LERROR(fmt::format("Failed to open Speck file '{}'", _speckFile));
-    //    return false;
-    //}
-
-    //_nValuesPerAstronomicalObject = 0;
-
-    //// The beginning of the speck file has a header that either contains comments
-    //// (signaled by a preceding '#') or information about the structure of the file
-    //// (signaled by the keywords 'datavar', 'texturevar', and 'texture')
-    //std::string line;
-    //while (true) {
-    //    std::streampos position = file.tellg();
-    //    std::getline(file, line);
-
-    //    if (line[0] == '#' || line.empty()) {
-    //        continue;
-    //    }
-
-    //    if (line.substr(0, 7) != "datavar" &&
-    //        line.substr(0, 10) != "texturevar" &&
-    //        line.substr(0, 7) != "texture")
-    //    {
-    //        // we read a line that doesn't belong to the header, so we have to jump
-    //        // back before the beginning of the current line
-    //        file.seekg(position);
-    //        break;
-    //    }
-
-    //    if (line.substr(0, 7) == "datavar") {
-    //        // datavar lines are structured as follows:
-    //        // datavar # description
-    //        // where # is the index of the data variable; so if we repeatedly
-    //        // overwrite the 'nValues' variable with the latest index, we will end up
-    //        // with the total number of values (+3 since X Y Z are not counted in the
-    //        // Speck file index)
-    //        std::stringstream str(line);
-
-    //        std::string dummy;
-    //        str >> dummy;
-    //        str >> _nValuesPerAstronomicalObject;
-    //        // We want the number, but the index is 0 based
-    //        _nValuesPerAstronomicalObject += 1;
-    //    }
-    //}
-
-    //// X Y Z are not counted in the Speck file indices
-    //_nValuesPerAstronomicalObject += 3;
-
-    //do {
-    //    std::vector<float> values(_nValuesPerAstronomicalObject);
-
-    //    std::getline(file, line);
-    //    std::stringstream str(line);
-
-    //    for (int i = 0; i < _nValuesPerAstronomicalObject; ++i) {
-    //        str >> values[i];
-    //    }
-
-    //    _fullData.insert(_fullData.end(), values.begin(), values.end());
-    //} while (!file.eof());
-
-    return true;
-}
-
-bool RenderablePoints::readColorMapFile() {
+void RenderablePoints::readColorMapFile() {
     std::ifstream file(_colorMapFile);
     if (!file.good()) {
-        LERROR(fmt::format("Failed to open Color Map file '{}'", _colorMapFile));
-        return false;
+        throw ghoul::RuntimeError(fmt::format(
+            "Failed to open Color Map file '{}'", _colorMapFile
+        ));
     }
 
     std::size_t numberOfColors = 0;
@@ -521,7 +406,9 @@ bool RenderablePoints::readColorMapFile() {
             break;
         }
         else if (file.eof()) {
-            return false;
+            throw ghoul::RuntimeError(fmt::format(
+                "Failed to load colors from Color Map file '{}'", _colorMapFile
+            ));
         }
     }
 
@@ -535,19 +422,6 @@ bool RenderablePoints::readColorMapFile() {
         }
 
         _colorMapData.push_back(color);
-    }
-
-    return true;
-}
-
-bool RenderablePoints::loadCachedFile(const std::string& file) {
-    try {
-        _dataset = speck::loadCachedFile(file);
-        return true;
-    }
-    catch (const ghoul::RuntimeError&) {
-        LERROR(fmt::format("Error opening file '{}' for loading cache file", file));
-        return false;
     }
 }
 

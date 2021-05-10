@@ -64,7 +64,6 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-
     enum Unit {
         Meter = 0,
         Kilometer = 1,
@@ -77,10 +76,7 @@ private:
 
     std::vector<double> createDataSlice();
 
-    bool loadData();
-    bool readSpeckFile();
-    bool readColorMapFile();
-    bool loadCachedFile(const std::string& file);
+    void readColorMapFile();
 
     bool _dataIsDirty = true;
     bool _hasSpriteTexture = false;

@@ -79,8 +79,6 @@ private:
     std::vector<float> createDataSlice(ColorOption option);
 
     void loadData();
-    void readSpeckFile();
-    bool loadCachedFile(const std::string& file);
 
     properties::StringProperty _speckFile;
 
@@ -139,7 +137,6 @@ private:
     speck::Dataset _dataset;
 
     std::string _queuedOtherData;
-    std::vector<std::string> _dataNames;
 
     std::optional<float> _staticFilterValue;
     float _staticFilterReplacementValue = 0.f;

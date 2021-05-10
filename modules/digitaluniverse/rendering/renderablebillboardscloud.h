@@ -91,9 +91,7 @@ private:
         const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
 
     bool loadData();
-    bool loadSpeckData();
     bool loadLabelData();
-    bool readSpeckFile();
     bool readColorMapFile();
     bool readLabelFile();
     bool loadCachedFile(const std::string& file);
