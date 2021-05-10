@@ -312,7 +312,10 @@ SkyBrowserModule::SkyBrowserModule()
                     return true;
                 }  
                 else if (to_browser(_mouseOnObject) && button == MouseButton::Right) {
-
+                    // If you start dragging around on the browser, the target should unlock
+                    if (to_browser(_mouseOnObject) && to_browser(_mouseOnObject)->getSkyTarget()) {
+                        to_browser(_mouseOnObject)->getSkyTarget()->unlock();
+                    }
                     // Change view (by moving target) within browser if right mouse click on browser
                     startDragMousePos = _mousePosition;
                     startDragObjectPos = to_browser(_mouseOnObject)->getSkyTarget()->getScreenSpacePosition();
@@ -403,8 +406,8 @@ WWTDataHandler* SkyBrowserModule::getWWTDataHandler() {
     return dataHandler;
 }
 
-std::vector<ScreenSpaceSkyBrowser*>* SkyBrowserModule::getSkyBrowsers() {
-    return &browsers;
+std::vector<ScreenSpaceSkyBrowser*>& SkyBrowserModule::getSkyBrowsers() {
+    return browsers;
 }
 
 void SkyBrowserModule::startRotation(glm::dvec2 coordsEnd) {

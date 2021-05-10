@@ -37,7 +37,7 @@ namespace openspace::skybrowser::luascriptfunctions {
 		ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::selectImage");
 		const int i = ghoul::lua::value<int>(L, 1);
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-		ScreenSpaceSkyBrowser* browser = (*module->getSkyBrowsers())[module->getSelectedBrowserIndex()];
+		ScreenSpaceSkyBrowser* browser = module->getSkyBrowsers()[module->getSelectedBrowserIndex()];
 		
 		const ImageData& resultImage = module->getWWTDataHandler()->getLoadedImages()[i];
 		// Load image collection, if it isn't loaded already
@@ -106,10 +106,10 @@ namespace openspace::skybrowser::luascriptfunctions {
         ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::lockTarget");
         const int i = ghoul::lua::value<int>(L, 1);
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-        std::vector<ScreenSpaceSkyBrowser*>* browsers = module->getSkyBrowsers();
-        ScreenSpaceSkyTarget* target = (*browsers)[i]->getSkyTarget();
-        if (i < browsers->size()) {
-            ScreenSpaceSkyTarget* target = (*browsers)[i]->getSkyTarget();
+        std::vector<ScreenSpaceSkyBrowser*> browsers = module->getSkyBrowsers();
+        ScreenSpaceSkyTarget* target = browsers[i]->getSkyTarget();
+        if (i < browsers.size()) {
+            ScreenSpaceSkyTarget* target = browsers[i]->getSkyTarget();
             if (target) {
                 target->lock();
             }
@@ -121,9 +121,9 @@ namespace openspace::skybrowser::luascriptfunctions {
         ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::unlockTarget");
         const int i = ghoul::lua::value<int>(L, 1);
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-        std::vector<ScreenSpaceSkyBrowser*>* browsers = module->getSkyBrowsers();
-        if (i < browsers->size()) {
-            ScreenSpaceSkyTarget* target = (*browsers)[i]->getSkyTarget();
+        std::vector<ScreenSpaceSkyBrowser*> browsers = module->getSkyBrowsers();
+        if (i < browsers.size()) {
+            ScreenSpaceSkyTarget* target = browsers[i]->getSkyTarget();
             if (target) {
                 target->unlock();
             }
@@ -258,9 +258,9 @@ namespace openspace::skybrowser::luascriptfunctions {
         lua_settable(L, -3);
 
         // Pass data for all the browsers and the corresponding targets
-         std::vector<ScreenSpaceSkyBrowser*>* browsers = module->getSkyBrowsers();
+         std::vector<ScreenSpaceSkyBrowser*> browsers = module->getSkyBrowsers();
 
-        for (ScreenSpaceSkyBrowser* browser : *browsers) {
+        for (ScreenSpaceSkyBrowser* browser : browsers) {
             // Only add browsers that have an initialized target
             ScreenSpaceSkyTarget* target = browser->getSkyTarget();
             if (target) {
@@ -298,8 +298,8 @@ namespace openspace::skybrowser::luascriptfunctions {
 		ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::adjustCamera");
         const int i = ghoul::lua::value<int>(L, 1);
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-        if (module->getSkyBrowsers()->size() > i) {
-            module->startRotation((*module->getSkyBrowsers())[i]->getSkyTarget()->getTargetDirectionCelestial());
+        if (module->getSkyBrowsers().size() > i) {
+            module->startRotation(module->getSkyBrowsers()[i]->getSkyTarget()->getTargetDirectionCelestial());
         }
 
 		return 0;
@@ -309,7 +309,7 @@ namespace openspace::skybrowser::luascriptfunctions {
         ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::setSelectedBrowser");
         const int i = ghoul::lua::value<int>(L, 1);
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-        if (module->getSkyBrowsers()->size() < i) {
+        if (module->getSkyBrowsers().size() < i) {
             module->setSelectedBrowser(i);
         }
         return 0;

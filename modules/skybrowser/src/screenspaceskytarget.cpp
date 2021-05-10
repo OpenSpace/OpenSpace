@@ -367,6 +367,10 @@ namespace openspace {
     }
 
     bool ScreenSpaceSkyTarget::animateFOV(float endFOV, float deltaTime) {
+        if (!_skyBrowser) {
+            ScreenSpaceSkyBrowser* browser = dynamic_cast<ScreenSpaceSkyBrowser*>(global::renderEngine->screenSpaceRenderable(_skyBrowserID.value()));
+            setBrowser(browser);
+        }
         if (_skyBrowser) {
             double distance = static_cast<double>(_skyBrowser->_vfieldOfView.value()) - endFOV;
             // If distance is too large, keep animating
@@ -377,7 +381,10 @@ namespace openspace {
             // Animation is finished
             return true;
         }
-        LINFO("Browser not connected to target!");
+        else {
+            LINFO("Target can't connect to browser!");
+        }
+        
         return true;     
     }
 
