@@ -27,6 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <modules/space/speckloader.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -74,13 +75,12 @@ private:
         GigalightYears = 6
     };
 
-    void createDataSlice();
+    std::vector<double> createDataSlice();
 
     bool loadData();
     bool readSpeckFile();
     bool readColorMapFile();
     bool loadCachedFile(const std::string& file);
-    bool saveCachedFile(const std::string& file) const;
 
     bool _dataIsDirty = true;
     bool _hasSpriteTexture = false;
@@ -102,11 +102,11 @@ private:
 
     Unit _unit = Parsec;
 
-    std::vector<double> _slicedData;
+    speck::Dataset _dataset;
     std::vector<float> _fullData;
     std::vector<glm::vec4> _colorMapData;
 
-    int _nValuesPerAstronomicalObject = 0;
+    //int _nValuesPerAstronomicalObject = 0;
 
     GLuint _vao = 0;
     GLuint _vbo = 0;

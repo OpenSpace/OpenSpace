@@ -289,10 +289,7 @@ void RenderablePoints::render(const RenderData& data, RendererTasks&) {
 
     glEnable(GL_PROGRAM_POINT_SIZE);
     glBindVertexArray(_vao);
-    const GLsizei nAstronomicalObjects = static_cast<GLsizei>(
-        _fullData.size() / _nValuesPerAstronomicalObject
-    );
-    glDrawArrays(GL_POINTS, 0, nAstronomicalObjects);
+    glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_dataset.entries.size()));
 
     glDisable(GL_PROGRAM_POINT_SIZE);
     glBindVertexArray(0);
@@ -305,7 +302,7 @@ void RenderablePoints::update(const UpdateData&) {
     if (_dataIsDirty) {
         LDEBUG("Regenerating data");
 
-        createDataSlice();
+        std::vector<double> slice = createDataSlice();
 
         if (_vao == 0) {
             glGenVertexArrays(1, &_vao);
@@ -318,19 +315,13 @@ void RenderablePoints::update(const UpdateData&) {
         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
         glBufferData(
             GL_ARRAY_BUFFER,
-            _slicedData.size() * sizeof(double),
-            &_slicedData[0],
+            slice.size() * sizeof(double),
+            slice.data(),
             GL_STATIC_DRAW
         );
         GLint positionAttrib = _program->attributeLocation("in_position");
 
         if (_hasColorMapFile) {
-
-            // const size_t nAstronomicalObjects = _fullData.size() /
-                                                        // _nValuesPerAstronomicalObject;
-            // const size_t nValues = _slicedData.size() / nAstronomicalObjects;
-            // GLsizei stride = static_cast<GLsizei>(sizeof(double) * nValues);
-
             glEnableVertexAttribArray(positionAttrib);
             glVertexAttribLPointer(
                 positionAttrib, 4, GL_DOUBLE, sizeof(double) * 8, nullptr
@@ -421,7 +412,7 @@ bool RenderablePoints::loadData() {
     }
 
     LINFO("Saving cache");
-    success = saveCachedFile(cachedFile);
+    speck::saveCachedFile(_dataset, cachedFile);
 
     if (_hasColorMapFile) {
         success &= readColorMapFile();
@@ -431,68 +422,72 @@ bool RenderablePoints::loadData() {
 }
 
 bool RenderablePoints::readSpeckFile() {
-    std::ifstream file(_speckFile);
-    if (!file.good()) {
-        LERROR(fmt::format("Failed to open Speck file '{}'", _speckFile));
-        return false;
-    }
+    _dataset = speck::loadSpeckFile(_speckFile);
 
-    _nValuesPerAstronomicalObject = 0;
 
-    // The beginning of the speck file has a header that either contains comments
-    // (signaled by a preceding '#') or information about the structure of the file
-    // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
-    std::string line;
-    while (true) {
-        std::streampos position = file.tellg();
-        std::getline(file, line);
 
-        if (line[0] == '#' || line.empty()) {
-            continue;
-        }
+    //std::ifstream file(_speckFile);
+    //if (!file.good()) {
+    //    LERROR(fmt::format("Failed to open Speck file '{}'", _speckFile));
+    //    return false;
+    //}
 
-        if (line.substr(0, 7) != "datavar" &&
-            line.substr(0, 10) != "texturevar" &&
-            line.substr(0, 7) != "texture")
-        {
-            // we read a line that doesn't belong to the header, so we have to jump
-            // back before the beginning of the current line
-            file.seekg(position);
-            break;
-        }
+    //_nValuesPerAstronomicalObject = 0;
 
-        if (line.substr(0, 7) == "datavar") {
-            // datavar lines are structured as follows:
-            // datavar # description
-            // where # is the index of the data variable; so if we repeatedly
-            // overwrite the 'nValues' variable with the latest index, we will end up
-            // with the total number of values (+3 since X Y Z are not counted in the
-            // Speck file index)
-            std::stringstream str(line);
+    //// The beginning of the speck file has a header that either contains comments
+    //// (signaled by a preceding '#') or information about the structure of the file
+    //// (signaled by the keywords 'datavar', 'texturevar', and 'texture')
+    //std::string line;
+    //while (true) {
+    //    std::streampos position = file.tellg();
+    //    std::getline(file, line);
 
-            std::string dummy;
-            str >> dummy;
-            str >> _nValuesPerAstronomicalObject;
-            // We want the number, but the index is 0 based
-            _nValuesPerAstronomicalObject += 1;
-        }
-    }
+    //    if (line[0] == '#' || line.empty()) {
+    //        continue;
+    //    }
 
-    // X Y Z are not counted in the Speck file indices
-    _nValuesPerAstronomicalObject += 3;
+    //    if (line.substr(0, 7) != "datavar" &&
+    //        line.substr(0, 10) != "texturevar" &&
+    //        line.substr(0, 7) != "texture")
+    //    {
+    //        // we read a line that doesn't belong to the header, so we have to jump
+    //        // back before the beginning of the current line
+    //        file.seekg(position);
+    //        break;
+    //    }
 
-    do {
-        std::vector<float> values(_nValuesPerAstronomicalObject);
+    //    if (line.substr(0, 7) == "datavar") {
+    //        // datavar lines are structured as follows:
+    //        // datavar # description
+    //        // where # is the index of the data variable; so if we repeatedly
+    //        // overwrite the 'nValues' variable with the latest index, we will end up
+    //        // with the total number of values (+3 since X Y Z are not counted in the
+    //        // Speck file index)
+    //        std::stringstream str(line);
 
-        std::getline(file, line);
-        std::stringstream str(line);
+    //        std::string dummy;
+    //        str >> dummy;
+    //        str >> _nValuesPerAstronomicalObject;
+    //        // We want the number, but the index is 0 based
+    //        _nValuesPerAstronomicalObject += 1;
+    //    }
+    //}
 
-        for (int i = 0; i < _nValuesPerAstronomicalObject; ++i) {
-            str >> values[i];
-        }
+    //// X Y Z are not counted in the Speck file indices
+    //_nValuesPerAstronomicalObject += 3;
 
-        _fullData.insert(_fullData.end(), values.begin(), values.end());
-    } while (!file.eof());
+    //do {
+    //    std::vector<float> values(_nValuesPerAstronomicalObject);
+
+    //    std::getline(file, line);
+    //    std::stringstream str(line);
+
+    //    for (int i = 0; i < _nValuesPerAstronomicalObject; ++i) {
+    //        str >> values[i];
+    //    }
+
+    //    _fullData.insert(_fullData.end(), values.begin(), values.end());
+    //} while (!file.eof());
 
     return true;
 }
@@ -546,93 +541,28 @@ bool RenderablePoints::readColorMapFile() {
 }
 
 bool RenderablePoints::loadCachedFile(const std::string& file) {
-    std::ifstream fileStream(file, std::ifstream::binary);
-    if (fileStream.good()) {
-        int8_t version = 0;
-        fileStream.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
-        if (version != CurrentCacheVersion) {
-            LINFO("The format of the cached file has changed: deleting old cache");
-            fileStream.close();
-            FileSys.deleteFile(file);
-            return false;
-        }
-
-        int32_t nValues = 0;
-        fileStream.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
-        fileStream.read(
-            reinterpret_cast<char*>(&_nValuesPerAstronomicalObject),
-            sizeof(int32_t)
-        );
-
-        _fullData.resize(nValues);
-        fileStream.read(reinterpret_cast<char*>(
-            &_fullData[0]),
-            nValues * sizeof(_fullData[0])
-        );
-
-        const bool success = fileStream.good();
-        return success;
+    try {
+        _dataset = speck::loadCachedFile(file);
+        return true;
     }
-    else {
-        LERROR(fmt::format(
-            "Error opening file '{}' for loading cache file",
-            file
-        ));
+    catch (const ghoul::RuntimeError&) {
+        LERROR(fmt::format("Error opening file '{}' for loading cache file", file));
         return false;
     }
 }
 
-bool RenderablePoints::saveCachedFile(const std::string& file) const {
-    std::ofstream fileStream(file, std::ofstream::binary);
-    if (fileStream.good()) {
-        fileStream.write(
-            reinterpret_cast<const char*>(&CurrentCacheVersion),
-            sizeof(int8_t)
-        );
-
-        const int32_t nValues = static_cast<int32_t>(_fullData.size());
-        if (nValues == 0) {
-            LERROR("Error writing cache: No values were loaded");
-            return false;
-        }
-        fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
-
-        const int32_t nValuesPerAstronomicalObject = static_cast<int32_t>(
-            _nValuesPerAstronomicalObject
-        );
-        fileStream.write(
-            reinterpret_cast<const char*>(&nValuesPerAstronomicalObject),
-            sizeof(int32_t)
-        );
-
-        const size_t nBytes = nValues * sizeof(_fullData[0]);
-        fileStream.write(reinterpret_cast<const char*>(&_fullData[0]), nBytes);
-
-        const bool success = fileStream.good();
-        return success;
-    }
-    else {
-        LERROR(fmt::format("Error opening file '{}' for save cache file", file));
-        return false;
-    }
-}
-
-void RenderablePoints::createDataSlice() {
-    _slicedData.clear();
+std::vector<double> RenderablePoints::createDataSlice() {
+    std::vector<double> slice;
     if (_hasColorMapFile) {
-        _slicedData.reserve(8 * (_fullData.size() / _nValuesPerAstronomicalObject));
+        slice.reserve(8 * _dataset.entries.size());
     }
     else {
-        _slicedData.reserve(4 * (_fullData.size()/_nValuesPerAstronomicalObject));
+        slice.reserve(4 * _dataset.entries.size());
     }
 
     int colorIndex = 0;
-    for (size_t i = 0; i < _fullData.size(); i += _nValuesPerAstronomicalObject) {
-        glm::dvec3 p = glm::dvec3(
-            _fullData[i + 0],
-            _fullData[i + 1],
-            _fullData[i + 2]
-        );
+    for (const speck::Dataset::Entry& e : _dataset.entries) {
+        glm::dvec3 p = e.position;
 
         // Converting untis
         if (_unit == Kilometer) {
@@ -658,15 +588,15 @@ void RenderablePoints::createDataSlice() {
 
         if (_hasColorMapFile) {
             for (int j = 0; j < 4; ++j) {
-                _slicedData.push_back(position[j]);
+                slice.push_back(position[j]);
             }
             for (int j = 0; j < 4; ++j) {
-                _slicedData.push_back(_colorMapData[colorIndex][j]);
+                slice.push_back(_colorMapData[colorIndex][j]);
             }
         }
         else {
             for (int j = 0; j < 4; ++j) {
-                _slicedData.push_back(position[j]);
+                slice.push_back(position[j]);
             }
         }
 
@@ -674,6 +604,8 @@ void RenderablePoints::createDataSlice() {
             0 :
             colorIndex + 1;
     }
+
+    return slice;
 }
 
 } // namespace openspace
