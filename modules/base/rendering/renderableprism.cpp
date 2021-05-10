@@ -80,11 +80,10 @@ namespace {
         float sectorStep = 2 * M_PI / sectorCount;
         float sectorAngle;  // in radians
 
-        for (int i = 0; i <= sectorCount; ++i) {
+        for (int i = 0; i < sectorCount; ++i) {
             sectorAngle = i * sectorStep;
             vertices.push_back(cos(sectorAngle)); // x
             vertices.push_back(sin(sectorAngle)); // y
-            vertices.push_back(0);                // z
         }
     }
 
@@ -172,8 +171,6 @@ void RenderablePrism::initializeGL() {
 
     glGenVertexArrays(1, &_vaoId);
     glGenBuffers(1, &_vboId);
-
-    updateBufferData();
 }
 
 void RenderablePrism::deinitializeGL() {
@@ -188,50 +185,38 @@ void RenderablePrism::deinitializeGL() {
 }
 
 void RenderablePrism::updateVertexData() {
-    _vertexArray.clear();
+    _baseVertexArray.clear();
+    _topVertexArray.clear();
+    _linesVertexArray.clear();
 
     // Get unit circle vertices on the XY-plane
     std::vector<float> unitVertices;
-    unitVertices.reserve(3 * _nShapeSegments);
+    unitVertices.reserve(2 * _nShapeSegments);
     getUnitCircleVertices(unitVertices, _nShapeSegments);
 
-    // Put base and top shape vertices into array
-    for (int i = 0; i < 2; ++i) {
-        float h = i * _length; // z value, 0 to _length
+    for (int j = 0, k = 0; j < _nShapeSegments && k < unitVertices.size(); ++j) {
+        float ux = unitVertices[k++];
+        float uy = unitVertices[k++];
 
-        // Center point
-        _vertexArray.push_back(0.f); // x
-        _vertexArray.push_back(0.f); // y
-        _vertexArray.push_back(h);   // z
+        // Base
+        _baseVertexArray.push_back(ux * _radius); // x
+        _baseVertexArray.push_back(uy * _radius); // y
+        _baseVertexArray.push_back(0.f);          // z
 
-        for (int j = 0, k = 0; j < _nShapeSegments; ++j, k += 3) {
-            float ux = unitVertices[k];
-            float uy = unitVertices[k + 1];
-            // Skip the z point that is 0.f
+        // Top
+        _topVertexArray.push_back(ux * _radius); // x
+        _topVertexArray.push_back(uy * _radius); // y
+        _topVertexArray.push_back(_length);      // z
 
-            _vertexArray.push_back(ux * _radius); // x
-            _vertexArray.push_back(uy * _radius); // y
-            _vertexArray.push_back(h);            // z
-        }
+        // Lines
+        _linesVertexArray.push_back(ux * _radius); // x
+        _linesVertexArray.push_back(uy * _radius); // y
+        _linesVertexArray.push_back(0.f);          // z
+
+        _linesVertexArray.push_back(ux * _radius); // x
+        _linesVertexArray.push_back(uy * _radius); // y
+        _linesVertexArray.push_back(_length);      // z
     }
-
-    // vertices for the lines connecting the shapes
-}
-
-void RenderablePrism::updateBufferData() {
-    bindGL();
-
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        _vertexArray.size() * sizeof(float),
-        _vertexArray.data(),
-        GL_STREAM_DRAW
-    );
-
-    glEnableVertexAttribArray(_locVertex);
-    glVertexAttribPointer(_locVertex, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
-
-    unbindGL();
 }
 
 void RenderablePrism::render(const RenderData& data, RendererTasks&) {
@@ -255,7 +240,38 @@ void RenderablePrism::render(const RenderData& data, RendererTasks&) {
     glLineWidth(_lineWidth);
     bindGL();
 
-    glDrawArrays(GL_LINE_LOOP, 0, static_cast<int>(_vertexArray.size()));
+    // Base
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        _baseVertexArray.size() * sizeof(float),
+        _baseVertexArray.data(),
+        GL_STREAM_DRAW
+    );
+
+    glEnableVertexAttribArray(_locVertex);
+    glVertexAttribPointer(_locVertex, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+
+    glDrawArrays(GL_LINE_LOOP, 0, static_cast<int>(_nShapeSegments));
+
+    // Top
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        _topVertexArray.size() * sizeof(float),
+        _topVertexArray.data(),
+        GL_STREAM_DRAW
+    );
+
+    glDrawArrays(GL_LINE_LOOP, 0, static_cast<int>(_nShapeSegments));
+
+    // Lines
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        _linesVertexArray.size() * sizeof(float),
+        _linesVertexArray.data(),
+        GL_STREAM_DRAW
+    );
+
+    glDrawArrays(GL_LINES, 0, static_cast<int>(2 * _nShapeSegments));
 
     unbindGL();
     global::renderEngine->openglStateCache().resetLineState();
@@ -270,7 +286,6 @@ void RenderablePrism::update(const UpdateData&) {
     }
     if (_prismIsDirty) {
         updateVertexData();
-        updateBufferData();
         _prismIsDirty = false;
     }
 }

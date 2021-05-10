@@ -75,8 +75,9 @@ private:
     const GLuint _locVertex = 0;
     GLuint _vaoId = 0;
     GLuint _vboId = 0;
-    std::vector<float> _vertexArray;
-    glm::dvec3 _startPos = glm::dvec3(0.0);
+    std::vector<float> _baseVertexArray;
+    std::vector<float> _topVertexArray;
+    std::vector<float> _linesVertexArray;
 
     bool _prismIsDirty = false;
 };
