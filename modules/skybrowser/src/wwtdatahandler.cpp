@@ -93,6 +93,18 @@ namespace openspace {
             std::string collectionName = root->FindAttribute("Name") ? root->FindAttribute("Name")->Value() : "";
             loadImagesFromXML(root, collectionName);
         }
+        // Sort images in alphabetial order
+        std::sort(images.begin(), images.end(), [](ImageData a, ImageData b) {
+            // If the first charachter in the names are lowercase, make it upper case
+            if (std::islower(a.name[0])) {
+                // convert string to upper case
+                a.name[0] = ::toupper(a.name[0]);
+            }
+            if (std::islower(b.name[0])) {
+                b.name[0] = ::toupper(b.name[0]);
+            }
+            return a.name < b.name;
+            });
         return images.size();
     }
 
