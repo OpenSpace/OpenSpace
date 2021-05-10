@@ -90,8 +90,10 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _spriteTexture;
     std::unique_ptr<ghoul::filesystem::File> _spriteTextureFile;
     ghoul::opengl::ProgramObject* _program = nullptr;
-    UniformCache(modelViewProjectionTransform, color, sides, alphaValue, scaleFactor,
-        spriteTexture, hasColorMap) _uniformCache;
+    UniformCache(
+        modelViewProjectionTransform, color, sides, alphaValue, scaleFactor,
+        spriteTexture, hasColorMap
+    ) _uniformCache;
 
     std::string _speckFile;
     std::string _colorMapFile;

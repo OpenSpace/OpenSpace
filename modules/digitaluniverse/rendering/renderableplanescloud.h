@@ -124,8 +124,9 @@ private:
     properties::OptionProperty _renderOption;
 
     ghoul::opengl::ProgramObject* _program = nullptr;
-    UniformCache(modelViewProjectionTransform, alphaValue, fadeInValue,
-        galaxyTexture) _uniformCache;
+    UniformCache(
+        modelViewProjectionTransform, alphaValue, fadeInValue, galaxyTexture
+    ) _uniformCache;
     std::shared_ptr<ghoul::fontrendering::Font> _font = nullptr;
     std::unordered_map<int, std::unique_ptr<ghoul::opengl::Texture>> _textureMap;
     std::unordered_map<int, std::string> _textureFileMap;
@@ -146,7 +147,6 @@ private:
 
     glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
 };
-
 
 } // namespace openspace
 

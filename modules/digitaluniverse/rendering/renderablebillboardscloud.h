@@ -140,8 +140,9 @@ private:
     ghoul::opengl::ProgramObject* _program = nullptr;
     ghoul::opengl::ProgramObject* _renderToPolygonProgram = nullptr;
 
-    UniformCache(cameraViewProjectionMatrix, modelMatrix, cameraPos, cameraLookup,
-        renderOption, minBillboardSize, maxBillboardSize, correctionSizeEndDistance,
+    UniformCache(
+        cameraViewProjectionMatrix, modelMatrix, cameraPos, cameraLookup, renderOption, 
+        minBillboardSize, maxBillboardSize, correctionSizeEndDistance,
         correctionSizeFactor, color, alphaValue, scaleFactor, up, right, fadeInValue,
         screenSize, spriteTexture, hasColormap, enabledRectSizeControl, hasDvarScaling
     ) _uniformCache;

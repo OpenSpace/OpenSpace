@@ -75,10 +75,8 @@ private:
         FixedColor = 4
     };
 
-
-    std::vector<float> createDataSlice(ColorOption option);
-
     void loadData();
+    std::vector<float> createDataSlice(ColorOption option);
 
     properties::StringProperty _speckFile;
 
@@ -120,11 +118,10 @@ private:
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(
-        modelMatrix, cameraUp, cameraViewProjectionMatrix,
-        colorOption, magnitudeExponent, eyePosition, psfParamConf,
-        lumCent, radiusCent, brightnessCent, colorTexture,
-        alphaValue, psfTexture, otherDataTexture, otherDataRange,
-        filterOutOfRange, fixedColor
+        modelMatrix, cameraUp, cameraViewProjectionMatrix, colorOption, magnitudeExponent,
+        eyePosition, psfParamConf, lumCent, radiusCent, brightnessCent, colorTexture,
+        alphaValue, psfTexture, otherDataTexture, otherDataRange, filterOutOfRange,
+        fixedColor
     ) _uniformCache;
 
     bool _speckFileIsDirty = true;

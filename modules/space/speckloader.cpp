@@ -470,7 +470,7 @@ Dataset loadSpeckFileWithCache(std::filesystem::path speckPath,
         }
     }
     LINFOC("SpeckLoader", fmt::format("Loading Speck file '{}'", speckPath));
-    Dataset dataset = loadSpeckFile(speckPath);
+    Dataset dataset = loadSpeckFile(speckPath, skipAllZeroLines);
 
     if (!dataset.entries.empty()) {
         LINFOC("SpeckLoader", "Saving cache");
