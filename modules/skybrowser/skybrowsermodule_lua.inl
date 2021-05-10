@@ -130,7 +130,6 @@ namespace openspace::skybrowser::luascriptfunctions {
         }
         return 0;
     }
-
 	
 	int followCamera(lua_State* L) {
 		// Load images from url
@@ -170,6 +169,16 @@ namespace openspace::skybrowser::luascriptfunctions {
 		// Send image list to GUI
 		ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::getListOfImages");
 		SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+        // Load speck files for 3D positions
+        std::filesystem::path globularClusters = absPath("${BASE}/sync/http/digitaluniverse_globularclusters_speck/2/gc.speck");
+        std::filesystem::path openClusters = absPath("${BASE}/sync/http/digitaluniverse_openclusters_speck/2/oc.speck");
+
+        speck::Dataset speckGlobularClusters = speck::loadSpeckFile(globularClusters);
+        speck::Dataset speckOpenClusters = speck::loadSpeckFile(openClusters);
+
+        module->getWWTDataHandler()->loadSpeckData(speckGlobularClusters);
+        module->getWWTDataHandler()->loadSpeckData(speckOpenClusters);
+
 		// If no data has been loaded yet, load it!
 		if (module->getWWTDataHandler()->getLoadedImages().size() == 0) {
             // Read from disc
