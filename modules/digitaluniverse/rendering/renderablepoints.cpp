@@ -198,7 +198,7 @@ RenderablePoints::RenderablePoints(const ghoul::Dictionary& dictionary)
 }
 
 bool RenderablePoints::isReady() const {
-    return (_program != nullptr) && (!_fullData.empty());
+    return (_program != nullptr) && (!_dataset.entries.empty());
 }
 
 void RenderablePoints::initialize() {

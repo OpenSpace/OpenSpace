@@ -103,7 +103,6 @@ private:
     Unit _unit = Parsec;
 
     speck::Dataset _dataset;
-    std::vector<float> _fullData;
     std::vector<glm::vec4> _colorMapData;
 
     //int _nValuesPerAstronomicalObject = 0;
