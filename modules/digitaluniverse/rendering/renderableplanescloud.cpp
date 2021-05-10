@@ -30,6 +30,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
@@ -53,7 +54,6 @@ namespace {
         "modelViewProjectionTransform", "alphaValue", "fadeInValue", "galaxyTexture"
     };
 
-    constexpr int8_t CurrentCacheVersion = 2;
     constexpr double PARSEC = 0.308567756E17;
 
     enum BlendMode {
@@ -417,7 +417,6 @@ void RenderablePlanesCloud::initializeGL() {
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
     createPlanes();
-
     loadTextures();
 
     if (_hasLabel) {
@@ -484,8 +483,7 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
     _program->setUniform(_uniformCache.galaxyTexture, unit);
     int currentTextureIndex = -1;
 
-    for (std::unordered_map<int, PlaneAggregate>::reference pAMapItem : _planesMap)
-    {
+    for (std::unordered_map<int, PlaneAggregate>::reference pAMapItem : _planesMap) {
         // For planes with undefined textures references
         if (pAMapItem.first == 30) {
             continue;
@@ -514,35 +512,8 @@ void RenderablePlanesCloud::renderLabels(const RenderData& data,
                                          const glm::dvec3& orthoRight,
                                          const glm::dvec3& orthoUp, float fadeInVariable)
 {
-    float scale = 0.f;
-    switch (_unit) {
-        case Meter:
-            scale = 1.f;
-            break;
-        case Kilometer:
-            scale = 1e3f;
-            break;
-        case Parsec:
-            scale = static_cast<float>(PARSEC);
-            break;
-        case Kiloparsec:
-            scale = static_cast<float>(1e3 * PARSEC);
-            break;
-        case Megaparsec:
-            scale = static_cast<float>(1e6 * PARSEC);
-            break;
-        case Gigaparsec:
-            scale = static_cast<float>(1e9 * PARSEC);
-            break;
-        case GigalightYears:
-            scale = static_cast<float>(306391534.73091 * PARSEC);
-            break;
-    }
-
-    glm::vec4 textColor = glm::vec4(
-        glm::vec3(_textColor),
-        _textOpacity * fadeInVariable
-    );
+    double scale = unitToMeter(_unit);
+    glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), _textOpacity * fadeInVariable);
 
     ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
     labelInfo.orthoRight = orthoRight;
@@ -558,9 +529,7 @@ void RenderablePlanesCloud::renderLabels(const RenderData& data,
     labelInfo.enableFalseDepth = false;
 
     for (const std::pair<glm::vec3, std::string>& pair : _labelData) {
-        //glm::vec3 scaledPos(_transformationMatrix * glm::dvec4(pair.first, 1.0));
-        glm::vec3 scaledPos(pair.first);
-        scaledPos *= scale;
+        glm::dvec3 scaledPos = glm::dvec3(pair.first) * scale;
         ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
             *_font,
             scaledPos,
@@ -639,326 +608,90 @@ void RenderablePlanesCloud::update(const UpdateData&) {
 }
 
 bool RenderablePlanesCloud::loadData() {
-    bool success = false;
-    if (_hasSpeckFile) {
-        // I disabled the cache as it didn't work on Mac --- abock
-        // std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-        //     _speckFile,
-        //     ghoul::filesystem::CacheManager::Persistent::Yes
-        // );
+    if (_hasSpeckFile && FileSys.fileExists(_speckFile)) {
+        std::string cachedFile = FileSys.cacheManager()->cachedFilename(
+            _speckFile,
+            ghoul::filesystem::CacheManager::Persistent::Yes
+        );
 
-        // bool hasCachedFile = FileSys.fileExists(cachedFile);
-        // if (hasCachedFile) {
-        //     LINFO(
-        //         "Cached file '" << cachedFile <<
-        //         "' used for Speck file '" << _speckFile << "'"
-        //     );
+        bool hasCachedFile = FileSys.fileExists(cachedFile);
+        if (hasCachedFile) {
+            LINFO(fmt::format(
+                "Cached file '{}' used for Speck file '{}'", cachedFile, _speckFile
+            ));
 
-        //     success = loadCachedFile(cachedFile);
-        //     if (!success) {
-        //         FileSys.cacheManager()->removeCacheFile(_speckFile);
-        //         // Intentional fall-through to the 'else' to generate the cache
-        //         // file for the next run
-        //     }
-        // }
-        // else
-        // {
-        //     LINFO("Cache for Speck file '" << _speckFile << "' not found");
-        LINFO(fmt::format("Loading Speck file '{}'", _speckFile));
-
-            success = readSpeckFile();
-            if (!success) {
-                return false;
+            try {
+                _dataset = speck::loadCachedFile(cachedFile);
             }
+            catch (const ghoul::RuntimeError&) {
+                FileSys.cacheManager()->removeCacheFile(_speckFile);
+                // Intentional fall-through to the 'else' to generate the cache
+                // file for the next run
+            }
+        }
+        else {
+            LINFO(fmt::format("Cache for Speck file '{}' not found", _speckFile));
+        }
 
-            // LINFO("Saving cache");
-            //success &= saveCachedFile(cachedFile);
-        // }
+        LINFO(fmt::format("Loading Speck file '{}'", _speckFile));
+        _dataset = speck::loadSpeckFile(_speckFile);
+        if (_dataset.entries.empty()) {
+            return false;
+        }
+        
+        LINFO("Saving cache");
+        speck::saveCachedFile(_dataset, cachedFile);
     }
 
     if (!_labelFile.empty()) {
-        // I disabled the cache as it didn't work on Mac --- abock
-        // std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-        //     _labelFile,
-        //     ghoul::filesystem::CacheManager::Persistent::Yes
-        // );
-        // bool hasCachedFile = FileSys.fileExists(cachedFile);
-        // if (hasCachedFile) {
-        //     LINFO(
-        //         "Cached file '" << cachedFile <<
-        //         "' used for Label file '" << _labelFile << "'"
-        //     );
-        //
-        //     success &= loadCachedFile(cachedFile);
-        //     if (!success) {
-        //         FileSys.cacheManager()->removeCacheFile(_labelFile);
-        //         // Intentional fall-through to the 'else' to generate the cache
-        //         // file for the next run
-        //     }
-        // }
-        // else
-        // {
-        //     LINFO("Cache for Label file '" << _labelFile << "' not found");
-            LINFO(fmt::format("Loading Label file '{}'", _labelFile));
+        LINFO(fmt::format("Loading Label file '{}'", _labelFile));
 
-            success &= readLabelFile();
-            if (!success) {
-                return false;
-            }
-
-        // }
-    }
-
-    return success;
-}
-
-bool RenderablePlanesCloud::loadTextures() {
-    if (!_textureFileMap.empty()) {
-        for (const std::pair<const int, std::string>& pair : _textureFileMap) {
-            const auto& p = _textureMap.insert(std::make_pair(
-                pair.first,
-                ghoul::io::TextureReader::ref().loadTexture(pair.second)
-            ));
-            if (p.second) {
-                LINFOC(
-                    "RenderablePlanesCloud",
-                    fmt::format("Loaded texture from '{}'", pair.second)
-                );
-                p.first->second->uploadTexture();
-                p.first->second->setFilter(
-                    ghoul::opengl::Texture::FilterMode::LinearMipMap
-                );
-                p.first->second->purgeFromRAM();
-            }
+        bool success = readLabelFile();
+        if (!success) {
+            return false;
         }
     }
-    else {
-        return false;
-    }
+
     return true;
 }
 
-bool RenderablePlanesCloud::readSpeckFile() {
-    _dataset = speck::loadSpeckFile(_speckFile);
-    if (_dataset.entries.empty()) {
-        return false;
-    }
-
-
-    // TEMP
-    _nValuesPerAstronomicalObject = _dataset.entries[0].data.size() + 3;
-    _planeStartingIndexPos = _dataset.orientationDataIndex;
-    _textureVariableIndex = _dataset.textureDataIndex;
-
+void RenderablePlanesCloud::loadTextures() {
     for (const speck::Dataset::Texture& tex : _dataset.textures) {
         std::string fullPath = absPath(_texturesPath + '/' + tex.file);
         std::string pngPath = ghoul::filesystem::File(fullPath).fullBaseName() + ".png";
 
+        std::string path;
         if (FileSys.fileExists(fullPath)) {
-            _textureFileMap.insert({ tex.index, fullPath });
-
+            path = fullPath;
         }
         else if (FileSys.fileExists(pngPath)) {
-            _textureFileMap.insert({ tex.index, pngPath });
+            path = pngPath;
         }
         else {
-            LWARNING(fmt::format("Could not find image file {}", tex.file));
-            _textureFileMap.insert({ tex.index, "" });
+            // We can't really recover from this as it would crash during rendering anyway
+            throw ghoul::RuntimeError(fmt::format(
+                "Could not find image file '{}'", tex.file
+            ));
         }
-    }
 
-    for (const speck::Dataset::Entry& e : _dataset.entries) {
-        _fullData.push_back(e.position.x);
-        _fullData.push_back(e.position.y);
-        _fullData.push_back(e.position.z);
-        for (float f : e.data) {
-            _fullData.push_back(f);
+        std::unique_ptr<ghoul::opengl::Texture> t =
+            ghoul::io::TextureReader::ref().loadTexture(path);
+
+        if (t) {
+            LINFOC("RenderablePlanesCloud", fmt::format("Loaded texture '{}'", path));
+            t->uploadTexture();
+            t->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+            t->purgeFromRAM();
         }
+        else {
+            // Same here, we won't be able to recover from this nullptr
+            throw ghoul::RuntimeError(fmt::format(
+                "Could not find image file '{}'", tex.file
+            ));
+        }
+
+        _textureMap.insert(std::pair(tex.index, std::move(t)));
     }
-
-
-
-
-
-    //std::ifstream file(_speckFile);
-    //if (!file.good()) {
-    //    LERROR(fmt::format("Failed to open Speck file '{}'", _speckFile));
-    //    return false;
-    //}
-
-    //_nValuesPerAstronomicalObject = 0;
-
-    //// The beginning of the speck file has a header that either contains comments
-    //// (signaled by a preceding '#') or information about the structure of the file
-    //// (signaled by the keywords 'datavar', 'texturevar', and 'texture')
-    //std::string line;
-    //while (true) {
-    //    std::getline(file, line);
-
-    //    // Guard against wrong line endings (copying files from Windows to Mac) causes
-    //    // lines to have a final \r
-    //    if (!line.empty() && line.back() == '\r') {
-    //        line = line.substr(0, line.length() -1);
-    //    }
-
-    //    if (line.empty() || line[0] == '#') {
-    //        continue;
-    //    }
-
-    //    if (line.substr(0, 7) != "datavar" &&
-    //        line.substr(0, 10) != "texturevar" &&
-    //        line.substr(0, 7) != "texture" &&
-    //        line.substr(0, 10) != "polyorivar" &&
-    //        line.substr(0, 10) != "maxcomment")
-    //    {
-    //        // Started reading data
-    //        break;
-    //    }
-
-    //    if (line.substr(0, 7) == "datavar") {
-    //        // datavar lines are structured as follows:
-    //        // datavar # description
-    //        // where # is the index of the data variable; so if we repeatedly overwrite
-    //        // the 'nValues' variable with the latest index, we will end up with the total
-    //        // number of values (+3 since X Y Z are not counted in the Speck file index)
-    //        std::stringstream str(line);
-
-    //        std::string dummy;
-    //        str >> dummy; // command
-    //        str >> _nValuesPerAstronomicalObject; // variable index
-    //        dummy.clear();
-    //        str >> dummy; // variable name
-
-    //        // +3 because of the x, y and z at the begining of each line.
-    //        _variableDataPositionMap.insert({ dummy, _nValuesPerAstronomicalObject + 3});
-
-    //        if ((dummy == "orientation") || (dummy == "ori")) { // 3d vectors u and v
-    //            // We want the number, but the index is 0 based
-    //            _nValuesPerAstronomicalObject += 6;
-    //        }
-    //        else {
-    //            // We want the number, but the index is 0 based
-    //            _nValuesPerAstronomicalObject += 1;
-    //        }
-    //    }
-
-    //    if (line.substr(0, 10) == "polyorivar") {
-    //        _planeStartingIndexPos = 0;
-    //        std::stringstream str(line);
-
-    //        std::string dummy;
-    //        str >> dummy; // command
-    //        str >> _planeStartingIndexPos;
-    //        _planeStartingIndexPos += 3; // 3 for xyz
-    //    }
-
-    //    if (line.substr(0, 10) == "texturevar") {
-    //        _textureVariableIndex = 0;
-    //        std::stringstream str(line);
-
-    //        std::string dummy;
-    //        str >> dummy; // command
-    //        str >> _textureVariableIndex;
-    //        _textureVariableIndex += 3; // 3 for xyz
-    //    }
-
-    //    if (line.substr(0, 8) == "texture ") {
-    //        std::stringstream str(line);
-
-    //        std::size_t found = line.find('-');
-
-    //        int textureIndex = 0;
-
-    //        std::string dummy;
-    //        str >> dummy; // command
-
-    //        if (found != std::string::npos) {
-    //            std::string option; // Not being used right now.
-    //            str >> option;
-    //        }
-
-    //        str >> textureIndex;
-    //        std::string fileName;
-    //        str >> fileName; // texture file name
-
-    //        std::string fullPath = absPath(_texturesPath + '/' + fileName);
-    //        std::string pngPath =
-    //            ghoul::filesystem::File(fullPath).fullBaseName() + ".png";
-
-    //        if (FileSys.fileExists(fullPath)) {
-    //            _textureFileMap.insert({ textureIndex, fullPath });
-
-    //        }
-    //        else if (FileSys.fileExists(pngPath)) {
-    //            _textureFileMap.insert({ textureIndex, pngPath });
-    //        }
-    //        else {
-    //            LWARNING(fmt::format("Could not find image file {}", fileName));
-    //            _textureFileMap.insert({ textureIndex, "" });
-    //        }
-    //    }
-    //}
-
-    //_nValuesPerAstronomicalObject += 3; // X Y Z are not counted in the Speck file indices
-
-    //do {
-
-    //    // Guard against wrong line endings (copying files from Windows to Mac) causes
-    //    // lines to have a final \r
-    //    if (!line.empty() && line.back() == '\r') {
-    //        line = line.substr(0, line.length() -1);
-    //    }
-
-    //    if (line.empty()) {
-    //        std::getline(file, line);
-    //        continue;
-    //    }
-    //    else if (line[0] == '#') {
-    //        std::getline(file, line);
-    //        continue;
-    //    }
-
-    //    std::stringstream str(line);
-
-    //    glm::vec3 u(0.f);
-    //    glm::vec3 v(0.f);
-
-    //    std::vector<float> values(_nValuesPerAstronomicalObject);
-
-    //    for (int i = 0; i < _nValuesPerAstronomicalObject; ++i) {
-    //        str >> values[i];
-    //        if ((i >= _planeStartingIndexPos) &&
-    //            (i <= _planeStartingIndexPos + 6)) { // vectors u and v
-    //            int index = i - _planeStartingIndexPos;
-    //            switch (index) {
-    //                case 0:
-    //                    u.x = values[i];
-    //                    break;
-    //                case 1:
-    //                    u.y = values[i];
-    //                    break;
-    //                case 2:
-    //                    u.z = values[i];
-    //                    break;
-    //                case 3:
-    //                    v.x = values[i];
-    //                    break;
-    //                case 4:
-    //                    v.y = values[i];
-    //                    break;
-    //                case 5:
-    //                    v.z = values[i];
-    //                    break;
-    //            }
-    //        }
-    //    }
-    //    _fullData.insert(_fullData.end(), values.begin(), values.end());
-
-    //    // reads new line
-    //    std::getline(file, line);
-    //} while (!file.eof());
-
-    return true;
 }
 
 bool RenderablePlanesCloud::readLabelFile() {
@@ -1046,84 +779,8 @@ bool RenderablePlanesCloud::readLabelFile() {
     return true;
 }
 
-bool RenderablePlanesCloud::loadCachedFile(const std::string& file) {
-    try {
-        _dataset = speck::loadCachedFile(file);
-        return true;
-    }
-    catch (const ghoul::RuntimeError&) {
-        LERROR(fmt::format("Error opening file '{}' for loading cache file", file));
-        return false;
-    }
-
-    //std::ifstream fileStream(file, std::ifstream::binary);
-    //if (fileStream.good()) {
-    //    int8_t version = 0;
-    //    fileStream.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
-    //    if (version != CurrentCacheVersion) {
-    //        LINFO("The format of the cached file has changed: deleting old cache");
-    //        fileStream.close();
-    //        FileSys.deleteFile(file);
-    //        return false;
-    //    }
-
-    //    int32_t nValues = 0;
-    //    fileStream.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
-    //    fileStream.read(reinterpret_cast<char*>(
-    //        &_nValuesPerAstronomicalObject),
-    //        sizeof(int32_t)
-    //    );
-
-    //    _fullData.resize(nValues);
-    //    fileStream.read(reinterpret_cast<char*>(&_fullData[0]),
-    //        nValues * sizeof(_fullData[0]));
-
-    //    bool success = fileStream.good();
-    //    return success;
-    //}
-    //else {
-    //    LERROR(fmt::format("Error opening file '{}' for loading cache file", file));
-    //    return false;
-    //}
-}
-
-bool RenderablePlanesCloud::saveCachedFile(const std::string& file) const {
-    speck::saveCachedFile(_dataset, file);
-    return true;
-    //std::ofstream fileStream(file, std::ofstream::binary);
-    //if (fileStream.good()) {
-    //    fileStream.write(reinterpret_cast<const char*>(&CurrentCacheVersion),
-    //        sizeof(int8_t));
-
-    //    const int32_t nValues = static_cast<int32_t>(_fullData.size());
-    //    if (nValues == 0) {
-    //        LERROR("Error writing cache: No values were loaded");
-    //        return false;
-    //    }
-    //    fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
-
-    //    const int32_t nValuesPerAstronomicalObject = static_cast<int32_t>(
-    //        _nValuesPerAstronomicalObject
-    //    );
-    //    fileStream.write(reinterpret_cast<const char*>(
-    //        &nValuesPerAstronomicalObject),
-    //        sizeof(int32_t)
-    //    );
-
-    //    const size_t nBytes = nValues * sizeof(_fullData[0]);
-    //    fileStream.write(reinterpret_cast<const char*>(&_fullData[0]), nBytes);
-
-    //    bool success = fileStream.good();
-    //    return success;
-    //}
-    //else {
-    //    LERROR(fmt::format("Error opening file '{}' for save cache file", file));
-    //    return false;
-    //}
-}
-
 double RenderablePlanesCloud::unitToMeter(Unit unit) const {
-    switch (_unit) {
+    switch (unit) {
         case Meter:          return 1.0;
         case Kilometer:      return 1e3;
         case Parsec:         return PARSEC;
@@ -1137,6 +794,7 @@ double RenderablePlanesCloud::unitToMeter(Unit unit) const {
 
 void RenderablePlanesCloud::createPlanes() {
     if (_dataIsDirty && _hasSpeckFile) {
+        const int lumIdx = std::max(speck::indexForVariable(_dataset, _luminosityVar), 0);
         const double scale = unitToMeter(_unit);
 
         LDEBUG("Creating planes...");
@@ -1156,9 +814,9 @@ void RenderablePlanesCloud::createPlanes() {
             glm::vec4 u = glm::vec4(
                 _transformationMatrix *
                 glm::dvec4(
-                    _fullData[p + _planeStartingIndexPos + 0],
-                    _fullData[p + _planeStartingIndexPos + 1],
-                    _fullData[p + _planeStartingIndexPos + 2],
+                    e.data[_dataset.orientationDataIndex + 0],
+                    e.data[_dataset.orientationDataIndex + 1],
+                    e.data[_dataset.orientationDataIndex + 2],
                     1.f
                 )
             );
@@ -1168,9 +826,9 @@ void RenderablePlanesCloud::createPlanes() {
             glm::vec4 v = glm::vec4(
                 _transformationMatrix *
                 glm::dvec4(
-                    _fullData[p + _planeStartingIndexPos + 3],
-                    _fullData[p + _planeStartingIndexPos + 4],
-                    _fullData[p + _planeStartingIndexPos + 5],
+                    e.data[_dataset.orientationDataIndex + 3],
+                    e.data[_dataset.orientationDataIndex + 4],
+                    e.data[_dataset.orientationDataIndex + 5],
                     1.f
                 )
             );
@@ -1178,8 +836,7 @@ void RenderablePlanesCloud::createPlanes() {
             v.w = 0.f;
 
             if (!_luminosityVar.empty()) {
-                float lumS = _fullData[p + _variableDataPositionMap[_luminosityVar]] *
-                             _sluminosity;
+                float lumS = e.data[lumIdx] * _sluminosity;
                 u *= lumS;
                 v *= lumS;
             }
@@ -1214,7 +871,7 @@ void RenderablePlanesCloud::createPlanes() {
                 vertex1.x, vertex1.y, vertex1.z, 1.f, 1.f, 1.f,
             };
 
-            int textureIndex = static_cast<int>(_fullData[p + _textureVariableIndex]);
+            int textureIndex = static_cast<int>(e.data[_dataset.textureDataIndex]);
             std::unordered_map<int, PlaneAggregate>::iterator found =
                 _planesMap.find(textureIndex);
             if (found != _planesMap.end()) {

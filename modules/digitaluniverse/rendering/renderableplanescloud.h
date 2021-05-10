@@ -100,11 +100,8 @@ private:
         const glm::dvec3& orthoUp, float fadeInVariable);
 
     bool loadData();
-    bool loadTextures();
-    bool readSpeckFile();
+    void loadTextures();
     bool readLabelFile();
-    bool loadCachedFile(const std::string& file);
-    bool saveCachedFile(const std::string& file) const;
 
     bool _hasSpeckFile = false;
     bool _dataIsDirty = true;
@@ -114,8 +111,6 @@ private:
 
     int _textMinSize = 0;
     int _textMaxSize = 200;
-    int _planeStartingIndexPos = 0;
-    int _textureVariableIndex = 0;
 
     properties::FloatProperty _scaleFactor;
     properties::Vec3Property _textColor;
@@ -126,8 +121,6 @@ private:
     properties::Vec2Property _fadeInDistance;
     properties::BoolProperty _disableFadeInDistance;
     properties::FloatProperty _planeMinSize;
-
-    // DEBUG:
     properties::OptionProperty _renderOption;
 
     ghoul::opengl::ProgramObject* _program = nullptr;
@@ -147,11 +140,7 @@ private:
 
     speck::Dataset _dataset;
 
-    std::vector<float> _fullData;
     std::vector<std::pair<glm::vec3, std::string>> _labelData;
-    std::unordered_map<std::string, int> _variableDataPositionMap;
-
-    int _nValuesPerAstronomicalObject = 0;
 
     float _sluminosity = 1.f;
 

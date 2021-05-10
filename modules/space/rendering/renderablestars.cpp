@@ -59,8 +59,6 @@ namespace {
         "filterOutOfRange", "fixedColor"
     };
 
-    constexpr int8_t CurrentCacheVersion = 4;
-
     constexpr const int RenderOptionPointSpreadFunction = 0;
     constexpr const int RenderOptionTexture = 1;
 
