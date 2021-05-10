@@ -81,7 +81,6 @@ private:
     void loadData();
     void readSpeckFile();
     bool loadCachedFile(const std::string& file);
-    void saveCachedFile(const std::string& file) const;
 
     properties::StringProperty _speckFile;
 

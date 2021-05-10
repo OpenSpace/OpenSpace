@@ -1231,7 +1231,7 @@ void RenderableStars::loadData() {
 
 
     LINFO("Saving cache");
-    saveCachedFile(cachedFile);
+    speck::saveCachedFile(_dataset, cachedFile);
 }
 
 void RenderableStars::readSpeckFile() {
@@ -1270,10 +1270,6 @@ bool RenderableStars::loadCachedFile(const std::string& file) {
         LERROR(fmt::format("Error opening file '{}' for loading cache file", file));
         return false;
     }
-}
-
-void RenderableStars::saveCachedFile(const std::string& file) const {
-    speck::saveCachedFile(_dataset, file);
 }
 
 std::vector<float> RenderableStars::createDataSlice(ColorOption option) {

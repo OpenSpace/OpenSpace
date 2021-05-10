@@ -36,6 +36,8 @@ namespace openspace::speck {
 
 BooleanType(SkipAllZeroLines);
 
+// @TODO Add loading for label files (from RenderableBillboardsCloud)
+
 struct Dataset {
     struct Variable {
         int index;

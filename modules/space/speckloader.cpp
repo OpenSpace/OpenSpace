@@ -113,15 +113,8 @@ Dataset loadSpeckFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLi
             Dataset::Variable v;
             str >> dummy >> v.index >> v.name;
 
-            //if (v.name == "orientation" || v.name == "ori" || v.name == "texture") {
-            //    // The values for orientation and the texture indices are handled by
-            //    // their own keywords
-            //}
-            //else {
-                nDataValues += 1;
-                res.variables.push_back(v);
-            //}
-
+            nDataValues += 1;
+            res.variables.push_back(v);
             continue;
         }
 
@@ -140,7 +133,6 @@ Dataset loadSpeckFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLi
             std::string dummy;
             str >> dummy >> res.textureDataIndex;
             
-            //nDataValues += 1;
             continue;
         }
 
@@ -161,7 +153,6 @@ Dataset loadSpeckFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLi
             std::string dummy;
             str >> dummy >> res.orientationDataIndex;
             
-            //nDataValues += 6;
             continue;
         }
 
@@ -277,6 +268,8 @@ Dataset loadSpeckFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLi
 }
 
 Dataset loadCachedFile(std::filesystem::path path) {
+    // @TODO read cache version number
+
     Dataset result;
 
     std::ifstream file(path, std::ios::binary);
