@@ -27,6 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <modules/space/speckloader.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -143,6 +144,8 @@ private:
     std::string _luminosityVar;
 
     Unit _unit = Parsec;
+
+    speck::Dataset _dataset;
 
     std::vector<float> _fullData;
     std::vector<std::pair<glm::vec3, std::string>> _labelData;

@@ -388,7 +388,7 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
 }
 
 bool RenderablePlanesCloud::isReady() const {
-    return ((_program != nullptr) && (!_fullData.empty())) || (!_labelData.empty());
+    return ((_program != nullptr) && (!_dataset.entries.empty())) || (!_labelData.empty());
 }
 
 void RenderablePlanesCloud::initialize() {
@@ -739,183 +739,224 @@ bool RenderablePlanesCloud::loadTextures() {
 }
 
 bool RenderablePlanesCloud::readSpeckFile() {
-    std::ifstream file(_speckFile);
-    if (!file.good()) {
-        LERROR(fmt::format("Failed to open Speck file '{}'", _speckFile));
+    _dataset = speck::loadSpeckFile(_speckFile);
+    if (_dataset.entries.empty()) {
         return false;
     }
 
-    _nValuesPerAstronomicalObject = 0;
 
-    // The beginning of the speck file has a header that either contains comments
-    // (signaled by a preceding '#') or information about the structure of the file
-    // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
-    std::string line;
-    while (true) {
-        std::getline(file, line);
+    // TEMP
+    _nValuesPerAstronomicalObject = _dataset.entries[0].data.size() + 3;
+    _planeStartingIndexPos = _dataset.orientationDataIndex;
+    _textureVariableIndex = _dataset.textureDataIndex;
 
-        // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r
-        if (!line.empty() && line.back() == '\r') {
-            line = line.substr(0, line.length() -1);
+    for (const speck::Dataset::Texture& tex : _dataset.textures) {
+        std::string fullPath = absPath(_texturesPath + '/' + tex.file);
+        std::string pngPath = ghoul::filesystem::File(fullPath).fullBaseName() + ".png";
+
+        if (FileSys.fileExists(fullPath)) {
+            _textureFileMap.insert({ tex.index, fullPath });
+
         }
-
-        if (line.empty() || line[0] == '#') {
-            continue;
+        else if (FileSys.fileExists(pngPath)) {
+            _textureFileMap.insert({ tex.index, pngPath });
         }
-
-        if (line.substr(0, 7) != "datavar" &&
-            line.substr(0, 10) != "texturevar" &&
-            line.substr(0, 7) != "texture" &&
-            line.substr(0, 10) != "polyorivar" &&
-            line.substr(0, 10) != "maxcomment")
-        {
-            // Started reading data
-            break;
-        }
-
-        if (line.substr(0, 7) == "datavar") {
-            // datavar lines are structured as follows:
-            // datavar # description
-            // where # is the index of the data variable; so if we repeatedly overwrite
-            // the 'nValues' variable with the latest index, we will end up with the total
-            // number of values (+3 since X Y Z are not counted in the Speck file index)
-            std::stringstream str(line);
-
-            std::string dummy;
-            str >> dummy; // command
-            str >> _nValuesPerAstronomicalObject; // variable index
-            dummy.clear();
-            str >> dummy; // variable name
-
-            // +3 because of the x, y and z at the begining of each line.
-            _variableDataPositionMap.insert({ dummy, _nValuesPerAstronomicalObject + 3});
-
-            if ((dummy == "orientation") || (dummy == "ori")) { // 3d vectors u and v
-                // We want the number, but the index is 0 based
-                _nValuesPerAstronomicalObject += 6;
-            }
-            else {
-                // We want the number, but the index is 0 based
-                _nValuesPerAstronomicalObject += 1;
-            }
-        }
-
-        if (line.substr(0, 10) == "polyorivar") {
-            _planeStartingIndexPos = 0;
-            std::stringstream str(line);
-
-            std::string dummy;
-            str >> dummy; // command
-            str >> _planeStartingIndexPos;
-            _planeStartingIndexPos += 3; // 3 for xyz
-        }
-
-        if (line.substr(0, 10) == "texturevar") {
-            _textureVariableIndex = 0;
-            std::stringstream str(line);
-
-            std::string dummy;
-            str >> dummy; // command
-            str >> _textureVariableIndex;
-            _textureVariableIndex += 3; // 3 for xyz
-        }
-
-        if (line.substr(0, 8) == "texture ") {
-            std::stringstream str(line);
-
-            std::size_t found = line.find('-');
-
-            int textureIndex = 0;
-
-            std::string dummy;
-            str >> dummy; // command
-
-            if (found != std::string::npos) {
-                std::string option; // Not being used right now.
-                str >> option;
-            }
-
-            str >> textureIndex;
-            std::string fileName;
-            str >> fileName; // texture file name
-
-            std::string fullPath = absPath(_texturesPath + '/' + fileName);
-            std::string pngPath =
-                ghoul::filesystem::File(fullPath).fullBaseName() + ".png";
-
-            if (FileSys.fileExists(fullPath)) {
-                _textureFileMap.insert({ textureIndex, fullPath });
-
-            }
-            else if (FileSys.fileExists(pngPath)) {
-                _textureFileMap.insert({ textureIndex, pngPath });
-            }
-            else {
-                LWARNING(fmt::format("Could not find image file {}", fileName));
-                _textureFileMap.insert({ textureIndex, "" });
-            }
+        else {
+            LWARNING(fmt::format("Could not find image file {}", tex.file));
+            _textureFileMap.insert({ tex.index, "" });
         }
     }
 
-    _nValuesPerAstronomicalObject += 3; // X Y Z are not counted in the Speck file indices
-
-    do {
-
-        // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r
-        if (!line.empty() && line.back() == '\r') {
-            line = line.substr(0, line.length() -1);
+    for (const speck::Dataset::Entry& e : _dataset.entries) {
+        _fullData.push_back(e.position.x);
+        _fullData.push_back(e.position.y);
+        _fullData.push_back(e.position.z);
+        for (float f : e.data) {
+            _fullData.push_back(f);
         }
+    }
 
-        if (line.empty()) {
-            std::getline(file, line);
-            continue;
-        }
-        else if (line[0] == '#') {
-            std::getline(file, line);
-            continue;
-        }
 
-        std::stringstream str(line);
 
-        glm::vec3 u(0.f);
-        glm::vec3 v(0.f);
 
-        std::vector<float> values(_nValuesPerAstronomicalObject);
 
-        for (int i = 0; i < _nValuesPerAstronomicalObject; ++i) {
-            str >> values[i];
-            if ((i >= _planeStartingIndexPos) &&
-                (i <= _planeStartingIndexPos + 6)) { // vectors u and v
-                int index = i - _planeStartingIndexPos;
-                switch (index) {
-                    case 0:
-                        u.x = values[i];
-                        break;
-                    case 1:
-                        u.y = values[i];
-                        break;
-                    case 2:
-                        u.z = values[i];
-                        break;
-                    case 3:
-                        v.x = values[i];
-                        break;
-                    case 4:
-                        v.y = values[i];
-                        break;
-                    case 5:
-                        v.z = values[i];
-                        break;
-                }
-            }
-        }
-        _fullData.insert(_fullData.end(), values.begin(), values.end());
+    //std::ifstream file(_speckFile);
+    //if (!file.good()) {
+    //    LERROR(fmt::format("Failed to open Speck file '{}'", _speckFile));
+    //    return false;
+    //}
 
-        // reads new line
-        std::getline(file, line);
-    } while (!file.eof());
+    //_nValuesPerAstronomicalObject = 0;
+
+    //// The beginning of the speck file has a header that either contains comments
+    //// (signaled by a preceding '#') or information about the structure of the file
+    //// (signaled by the keywords 'datavar', 'texturevar', and 'texture')
+    //std::string line;
+    //while (true) {
+    //    std::getline(file, line);
+
+    //    // Guard against wrong line endings (copying files from Windows to Mac) causes
+    //    // lines to have a final \r
+    //    if (!line.empty() && line.back() == '\r') {
+    //        line = line.substr(0, line.length() -1);
+    //    }
+
+    //    if (line.empty() || line[0] == '#') {
+    //        continue;
+    //    }
+
+    //    if (line.substr(0, 7) != "datavar" &&
+    //        line.substr(0, 10) != "texturevar" &&
+    //        line.substr(0, 7) != "texture" &&
+    //        line.substr(0, 10) != "polyorivar" &&
+    //        line.substr(0, 10) != "maxcomment")
+    //    {
+    //        // Started reading data
+    //        break;
+    //    }
+
+    //    if (line.substr(0, 7) == "datavar") {
+    //        // datavar lines are structured as follows:
+    //        // datavar # description
+    //        // where # is the index of the data variable; so if we repeatedly overwrite
+    //        // the 'nValues' variable with the latest index, we will end up with the total
+    //        // number of values (+3 since X Y Z are not counted in the Speck file index)
+    //        std::stringstream str(line);
+
+    //        std::string dummy;
+    //        str >> dummy; // command
+    //        str >> _nValuesPerAstronomicalObject; // variable index
+    //        dummy.clear();
+    //        str >> dummy; // variable name
+
+    //        // +3 because of the x, y and z at the begining of each line.
+    //        _variableDataPositionMap.insert({ dummy, _nValuesPerAstronomicalObject + 3});
+
+    //        if ((dummy == "orientation") || (dummy == "ori")) { // 3d vectors u and v
+    //            // We want the number, but the index is 0 based
+    //            _nValuesPerAstronomicalObject += 6;
+    //        }
+    //        else {
+    //            // We want the number, but the index is 0 based
+    //            _nValuesPerAstronomicalObject += 1;
+    //        }
+    //    }
+
+    //    if (line.substr(0, 10) == "polyorivar") {
+    //        _planeStartingIndexPos = 0;
+    //        std::stringstream str(line);
+
+    //        std::string dummy;
+    //        str >> dummy; // command
+    //        str >> _planeStartingIndexPos;
+    //        _planeStartingIndexPos += 3; // 3 for xyz
+    //    }
+
+    //    if (line.substr(0, 10) == "texturevar") {
+    //        _textureVariableIndex = 0;
+    //        std::stringstream str(line);
+
+    //        std::string dummy;
+    //        str >> dummy; // command
+    //        str >> _textureVariableIndex;
+    //        _textureVariableIndex += 3; // 3 for xyz
+    //    }
+
+    //    if (line.substr(0, 8) == "texture ") {
+    //        std::stringstream str(line);
+
+    //        std::size_t found = line.find('-');
+
+    //        int textureIndex = 0;
+
+    //        std::string dummy;
+    //        str >> dummy; // command
+
+    //        if (found != std::string::npos) {
+    //            std::string option; // Not being used right now.
+    //            str >> option;
+    //        }
+
+    //        str >> textureIndex;
+    //        std::string fileName;
+    //        str >> fileName; // texture file name
+
+    //        std::string fullPath = absPath(_texturesPath + '/' + fileName);
+    //        std::string pngPath =
+    //            ghoul::filesystem::File(fullPath).fullBaseName() + ".png";
+
+    //        if (FileSys.fileExists(fullPath)) {
+    //            _textureFileMap.insert({ textureIndex, fullPath });
+
+    //        }
+    //        else if (FileSys.fileExists(pngPath)) {
+    //            _textureFileMap.insert({ textureIndex, pngPath });
+    //        }
+    //        else {
+    //            LWARNING(fmt::format("Could not find image file {}", fileName));
+    //            _textureFileMap.insert({ textureIndex, "" });
+    //        }
+    //    }
+    //}
+
+    //_nValuesPerAstronomicalObject += 3; // X Y Z are not counted in the Speck file indices
+
+    //do {
+
+    //    // Guard against wrong line endings (copying files from Windows to Mac) causes
+    //    // lines to have a final \r
+    //    if (!line.empty() && line.back() == '\r') {
+    //        line = line.substr(0, line.length() -1);
+    //    }
+
+    //    if (line.empty()) {
+    //        std::getline(file, line);
+    //        continue;
+    //    }
+    //    else if (line[0] == '#') {
+    //        std::getline(file, line);
+    //        continue;
+    //    }
+
+    //    std::stringstream str(line);
+
+    //    glm::vec3 u(0.f);
+    //    glm::vec3 v(0.f);
+
+    //    std::vector<float> values(_nValuesPerAstronomicalObject);
+
+    //    for (int i = 0; i < _nValuesPerAstronomicalObject; ++i) {
+    //        str >> values[i];
+    //        if ((i >= _planeStartingIndexPos) &&
+    //            (i <= _planeStartingIndexPos + 6)) { // vectors u and v
+    //            int index = i - _planeStartingIndexPos;
+    //            switch (index) {
+    //                case 0:
+    //                    u.x = values[i];
+    //                    break;
+    //                case 1:
+    //                    u.y = values[i];
+    //                    break;
+    //                case 2:
+    //                    u.z = values[i];
+    //                    break;
+    //                case 3:
+    //                    v.x = values[i];
+    //                    break;
+    //                case 4:
+    //                    v.y = values[i];
+    //                    break;
+    //                case 5:
+    //                    v.z = values[i];
+    //                    break;
+    //            }
+    //        }
+    //    }
+    //    _fullData.insert(_fullData.end(), values.begin(), values.end());
+
+    //    // reads new line
+    //    std::getline(file, line);
+    //} while (!file.eof());
 
     return true;
 }
@@ -964,8 +1005,6 @@ bool RenderablePlanesCloud::readLabelFile() {
     }
 
     do {
-        std::vector<float> values(_nValuesPerAstronomicalObject);
-
         std::getline(file, line);
 
         // Guard against wrong line endings (copying files from Windows to Mac) causes
@@ -1008,68 +1047,79 @@ bool RenderablePlanesCloud::readLabelFile() {
 }
 
 bool RenderablePlanesCloud::loadCachedFile(const std::string& file) {
-    std::ifstream fileStream(file, std::ifstream::binary);
-    if (fileStream.good()) {
-        int8_t version = 0;
-        fileStream.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
-        if (version != CurrentCacheVersion) {
-            LINFO("The format of the cached file has changed: deleting old cache");
-            fileStream.close();
-            FileSys.deleteFile(file);
-            return false;
-        }
-
-        int32_t nValues = 0;
-        fileStream.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
-        fileStream.read(reinterpret_cast<char*>(
-            &_nValuesPerAstronomicalObject),
-            sizeof(int32_t)
-        );
-
-        _fullData.resize(nValues);
-        fileStream.read(reinterpret_cast<char*>(&_fullData[0]),
-            nValues * sizeof(_fullData[0]));
-
-        bool success = fileStream.good();
-        return success;
+    try {
+        _dataset = speck::loadCachedFile(file);
+        return true;
     }
-    else {
+    catch (const ghoul::RuntimeError&) {
         LERROR(fmt::format("Error opening file '{}' for loading cache file", file));
         return false;
     }
+
+    //std::ifstream fileStream(file, std::ifstream::binary);
+    //if (fileStream.good()) {
+    //    int8_t version = 0;
+    //    fileStream.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
+    //    if (version != CurrentCacheVersion) {
+    //        LINFO("The format of the cached file has changed: deleting old cache");
+    //        fileStream.close();
+    //        FileSys.deleteFile(file);
+    //        return false;
+    //    }
+
+    //    int32_t nValues = 0;
+    //    fileStream.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
+    //    fileStream.read(reinterpret_cast<char*>(
+    //        &_nValuesPerAstronomicalObject),
+    //        sizeof(int32_t)
+    //    );
+
+    //    _fullData.resize(nValues);
+    //    fileStream.read(reinterpret_cast<char*>(&_fullData[0]),
+    //        nValues * sizeof(_fullData[0]));
+
+    //    bool success = fileStream.good();
+    //    return success;
+    //}
+    //else {
+    //    LERROR(fmt::format("Error opening file '{}' for loading cache file", file));
+    //    return false;
+    //}
 }
 
 bool RenderablePlanesCloud::saveCachedFile(const std::string& file) const {
-    std::ofstream fileStream(file, std::ofstream::binary);
-    if (fileStream.good()) {
-        fileStream.write(reinterpret_cast<const char*>(&CurrentCacheVersion),
-            sizeof(int8_t));
+    speck::saveCachedFile(_dataset, file);
+    return true;
+    //std::ofstream fileStream(file, std::ofstream::binary);
+    //if (fileStream.good()) {
+    //    fileStream.write(reinterpret_cast<const char*>(&CurrentCacheVersion),
+    //        sizeof(int8_t));
 
-        const int32_t nValues = static_cast<int32_t>(_fullData.size());
-        if (nValues == 0) {
-            LERROR("Error writing cache: No values were loaded");
-            return false;
-        }
-        fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
+    //    const int32_t nValues = static_cast<int32_t>(_fullData.size());
+    //    if (nValues == 0) {
+    //        LERROR("Error writing cache: No values were loaded");
+    //        return false;
+    //    }
+    //    fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
 
-        const int32_t nValuesPerAstronomicalObject = static_cast<int32_t>(
-            _nValuesPerAstronomicalObject
-        );
-        fileStream.write(reinterpret_cast<const char*>(
-            &nValuesPerAstronomicalObject),
-            sizeof(int32_t)
-        );
+    //    const int32_t nValuesPerAstronomicalObject = static_cast<int32_t>(
+    //        _nValuesPerAstronomicalObject
+    //    );
+    //    fileStream.write(reinterpret_cast<const char*>(
+    //        &nValuesPerAstronomicalObject),
+    //        sizeof(int32_t)
+    //    );
 
-        const size_t nBytes = nValues * sizeof(_fullData[0]);
-        fileStream.write(reinterpret_cast<const char*>(&_fullData[0]), nBytes);
+    //    const size_t nBytes = nValues * sizeof(_fullData[0]);
+    //    fileStream.write(reinterpret_cast<const char*>(&_fullData[0]), nBytes);
 
-        bool success = fileStream.good();
-        return success;
-    }
-    else {
-        LERROR(fmt::format("Error opening file '{}' for save cache file", file));
-        return false;
-    }
+    //    bool success = fileStream.good();
+    //    return success;
+    //}
+    //else {
+    //    LERROR(fmt::format("Error opening file '{}' for save cache file", file));
+    //    return false;
+    //}
 }
 
 double RenderablePlanesCloud::unitToMeter(Unit unit) const {
@@ -1092,10 +1142,9 @@ void RenderablePlanesCloud::createPlanes() {
         LDEBUG("Creating planes...");
         float maxSize = 0.f;
         double maxRadius = 0.0;
-        for (size_t p = 0; p < _fullData.size(); p += _nValuesPerAstronomicalObject) {
+        for (const speck::Dataset::Entry& e : _dataset.entries) {
             const glm::vec4 transformedPos = glm::vec4(
-                _transformationMatrix *
-                glm::dvec4(_fullData[p + 0], _fullData[p + 1], _fullData[p + 2], 1.0)
+                _transformationMatrix * glm::dvec4(e.position, 1.0)
             );
 
             const double r = glm::length(glm::dvec3(transformedPos) * scale);

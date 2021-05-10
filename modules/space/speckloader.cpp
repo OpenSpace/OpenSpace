@@ -113,7 +113,14 @@ Dataset loadSpeckFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLi
             Dataset::Variable v;
             str >> dummy >> v.index >> v.name;
 
-            nDataValues += 1;
+            // Sigh; Why can't speck be consistent?  Let's hope no other variable uses
+            // more than one value per 'datavar' entry
+            if (v.name == "orientation") {
+                nDataValues += 6;
+            }
+            else {
+                nDataValues += 1;
+            }
             res.variables.push_back(v);
             continue;
         }
