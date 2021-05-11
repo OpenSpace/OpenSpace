@@ -167,11 +167,11 @@ namespace {
         "stars."
     };
 
-    /*constexpr openspace::properties::Property::PropertyInfo ShapeTextureInfo = {
-        "ShapeTexture",
-        "Shape Texture to be convolved",
-        "The path to the texture that should be used as the base shape for the stars."
-    };*/
+    //constexpr openspace::properties::Property::PropertyInfo ShapeTextureInfo = {
+    //    "ShapeTexture",
+    //    "Shape Texture to be convolved",
+    //    "The path to the texture that should be used as the base shape for the stars."
+    //};
 
     // PSF
     constexpr openspace::properties::Property::PropertyInfo MagnitudeExponentInfo = {
@@ -636,7 +636,7 @@ void RenderableStars::initializeGL() {
     // data value actually exists or not.  Once we determine the index, we no longer
     // need the value and can clear it
     if (!_queuedOtherData.empty()) {
-        int idx = speck::indexForVariable(_dataset, _queuedOtherData);
+        int idx = _dataset.index(_queuedOtherData);
         if (idx == -1) {
             LERROR(fmt::format("Could not find other data column {}", _queuedOtherData));
         }
@@ -654,7 +654,7 @@ void RenderableStars::initializeGL() {
     glBindVertexArray(_psfVao);
     glBindBuffer(GL_ARRAY_BUFFER, _psfVbo);
 
-    const GLfloat vertexData[] = {
+    constexpr const std::array<GLfloat, 24> VertexData = {
         //x      y     s     t
         -1.f, -1.f, 0.f, 0.f,
          1.f,  1.f, 1.f, 1.f,
@@ -664,15 +664,8 @@ void RenderableStars::initializeGL() {
          1.f,  1.f, 1.f, 1.f
     };
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
-    glVertexAttribPointer(
-        0,
-        4,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(GLfloat) * 4,
-        nullptr
-    );
+    glBufferData(GL_ARRAY_BUFFER, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), nullptr);
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
 
@@ -750,8 +743,7 @@ void RenderableStars::loadPSFTexture() {
 
         if (_pointSpreadFunctionTexture) {
             LDEBUG(fmt::format(
-                "Loaded texture from '{}'",
-                absPath(_pointSpreadFunctionTexturePath)
+                "Loaded texture from '{}'", absPath(_pointSpreadFunctionTexturePath)
             ));
             _pointSpreadFunctionTexture->uploadTexture();
         }
@@ -769,17 +761,9 @@ void RenderableStars::loadPSFTexture() {
         );
     }
     _pointSpreadFunctionTextureIsDirty = false;
-
 }
 
 void RenderableStars::renderPSFToTexture() {
-    // Saves current FBO first
-    // GLint defaultFBO;
-    // defaultFBO = global::renderEngine->openglStateCache().defaultFramebuffer();
-
-//    GLint m_viewport[4];
-//    global::renderEngine.openglStateCache().viewPort(m_viewport);
-
     // Creates the FBO for the calculations
     GLuint psfFBO;
     glGenFramebuffers(1, &psfFBO);
@@ -788,9 +772,7 @@ void RenderableStars::renderPSFToTexture() {
     glDrawBuffers(1, drawBuffers);
 
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _psfTexture, 0);
-
     glViewport(0, 0, PsfTextureSize, PsfTextureSize);
-
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     std::unique_ptr<ghoul::opengl::ProgramObject> program =
@@ -801,8 +783,8 @@ void RenderableStars::renderPSFToTexture() {
         );
 
     program->activate();
-    constexpr const float black[] = { 0.f, 0.f, 0.f, 0.f };
-    glClearBufferfv(GL_COLOR, 0, black);
+    constexpr const std::array<float, 4> Black = { 0.f, 0.f, 0.f, 0.f };
+    glClearBufferfv(GL_COLOR, 0, Black.data());
 
     program->setUniform("psfMethod", _psfMethodOption.value());
     program->setUniform("p0Param", _p0Param);
@@ -876,7 +858,7 @@ void RenderableStars::renderPSFToTexture() {
     //    m_viewport[2],
     //    m_viewport[3]
     //);
-    //glDeleteFramebuffers(1, &psfFBO);
+    glDeleteFramebuffers(1, &psfFBO);
     //glDeleteFramebuffers(1, &convolveFBO);
 
     // Restores OpenGL blending state
@@ -1227,21 +1209,21 @@ void RenderableStars::loadData() {
     }
     _otherDataOption.addOptions(variableNames);
 
-    bool success = speck::normalizeVariable(_dataset, "lum");
+    bool success = _dataset.normalizeVariable("lum");
     if (!success) {
         throw ghoul::RuntimeError("Could not find required variable 'luminosity'");
     }
 }
 
 std::vector<float> RenderableStars::createDataSlice(ColorOption option) {
-    const int bvIdx = std::max(speck::indexForVariable(_dataset, "colorb_v"), 0);
-    const int lumIdx = std::max(speck::indexForVariable(_dataset, "lum"), 0);
-    const int absMagIdx = std::max(speck::indexForVariable(_dataset, "absmag"), 0);
-    const int appMagIdx = std::max(speck::indexForVariable(_dataset, "appmag"), 0);
-    const int vxIdx = std::max(speck::indexForVariable(_dataset, "vx"), 0);
-    const int vyIdx = std::max(speck::indexForVariable(_dataset, "vy"), 0);
-    const int vzIdx = std::max(speck::indexForVariable(_dataset, "vz"), 0);
-    const int speedIdx = std::max(speck::indexForVariable(_dataset, "speed"), 0);
+    const int bvIdx = std::max(_dataset.index("colorb_v"), 0);
+    const int lumIdx = std::max(_dataset.index("lum"), 0);
+    const int absMagIdx = std::max(_dataset.index("absmag"), 0);
+    const int appMagIdx = std::max(_dataset.index("appmag"), 0);
+    const int vxIdx = std::max(_dataset.index("vx"), 0);
+    const int vyIdx = std::max(_dataset.index("vy"), 0);
+    const int vzIdx = std::max(_dataset.index("vz"), 0);
+    const int speedIdx = std::max(_dataset.index("speed"), 0);
 
     _otherDataRange = glm::vec2(
         std::numeric_limits<float>::max(),
@@ -1254,13 +1236,8 @@ std::vector<float> RenderableStars::createDataSlice(ColorOption option) {
     // 7 for the default Color option of 3 positions + bv + lum + abs + app magnitude
     result.reserve(_dataset.entries.size() * 7);
     for (const speck::Dataset::Entry& e : _dataset.entries) {
-        glm::dvec3 position = e.position;
-        position *= openspace::distanceconstants::Parsec;
-
-        const double r = glm::length(position);
-        if (r > maxRadius) {
-            maxRadius = r;
-        }
+        glm::dvec3 position = glm::dvec3(e.position) * distanceconstants::Parsec;
+        maxRadius = std::max(maxRadius, glm::length(position));
 
         switch (option) {
             case ColorOption::Color:
@@ -1349,8 +1326,7 @@ std::vector<float> RenderableStars::createDataSlice(ColorOption option) {
                 // plus 3 because of the position
                 layout.value.value = e.data[index];
 
-                if (_staticFilterValue.has_value() &&
-                    layout.value.value == _staticFilterValue)
+                if (_staticFilterValue.has_value() && e.data[index] == _staticFilterValue)
                 {
                     layout.value.value = _staticFilterReplacementValue;
                 }

@@ -433,7 +433,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         }
     }
     else {
-        LWARNING("No unit given for RenderableBillboardsCloud. Using meters as units.");
+        LWARNING("No unit given for RenderableBillboardsCloud. Using meters as units");
         _unit = Meter;
     }
 
@@ -444,10 +444,8 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         // @TODO (abock, 2021-01-31) I don't know why we only add this property if the
         // texture is given, but I think it's a bug
         addProperty(_spriteTexturePath);
-
     }
     _hasSpriteTexture = p.texture.has_value();
-
 
     if (p.colorMap.has_value()) {
         _colorMapFile = absPath(*p.colorMap);
@@ -571,7 +569,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
 
     _setRangeFromData.onChange([this]() {
         const int colorMapInUse =
-            _hasColorMapFile ? speck::indexForVariable(_dataset, _colorOptionString) : 0;
+            _hasColorMapFile ? _dataset.index(_colorOptionString) : 0;
 
         float minValue = std::numeric_limits<float>::max();
         float maxValue = -std::numeric_limits<float>::max();
@@ -591,15 +589,25 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
 }
 
 bool RenderableBillboardsCloud::isReady() const {
-    return ((_program != nullptr) && (!_dataset.entries.empty())) || (!_labelset.entries.empty());
+    return (_program && (!_dataset.entries.empty())) || (!_labelset.entries.empty());
 }
 
 void RenderableBillboardsCloud::initialize() {
     ZoneScoped
 
-    bool success = loadData();
-    if (!success) {
-        throw ghoul::RuntimeError("Error loading data");
+    if (_hasSpeckFile) {
+        _dataset = speck::data::loadFileWithCache(_speckFile);
+    }
+
+    if (_hasColorMapFile) {
+        _colorMap = speck::color::loadFileWithCache(_colorMapFile);
+    }
+
+    if (!_labelFile.empty()) {
+        _labelset = speck::label::loadFileWithCache(_labelFile);
+        for (speck::Labelset::Entry& e : _labelset.entries) {
+            e.position = glm::vec3(_transformationMatrix * glm::dvec4(e.position, 1.0));
+        }
     }
 
     if (!_colorOptionString.empty() && (_colorRangeData.size() > 1)) {
@@ -645,7 +653,7 @@ void RenderableBillboardsCloud::initializeGL() {
     }
 
     if (_hasLabel) {
-        if (_font == nullptr) {
+        if (!_font) {
             size_t _fontSize = 50;
             _font = global::fontManager->font(
                 "Mono",
@@ -875,7 +883,7 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
                 4,
                 GL_FLOAT,
                 GL_FALSE,
-                sizeof(float) * 9,
+                9 * sizeof(float),
                 nullptr
             );
 
@@ -886,8 +894,8 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
                 4,
                 GL_FLOAT,
                 GL_FALSE,
-                sizeof(float) * 9,
-                reinterpret_cast<void*>(sizeof(float) * 4)
+                9 * sizeof(float),
+                reinterpret_cast<void*>(4 * sizeof(float))
             );
 
             GLint dvarScalingAttrib = _program->attributeLocation("in_dvarScaling");
@@ -897,8 +905,8 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
                 1,
                 GL_FLOAT,
                 GL_FALSE,
-                sizeof(float) * 9,
-                reinterpret_cast<void*>(sizeof(float) * 8)
+                9 * sizeof(float),
+                reinterpret_cast<void*>(8 * sizeof(float))
             );
         }
         else if (_hasColorMapFile) {
@@ -908,7 +916,7 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
                 4,
                 GL_FLOAT,
                 GL_FALSE,
-                sizeof(float) * 8,
+                8 * sizeof(float),
                 nullptr
             );
 
@@ -919,8 +927,8 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
                 4,
                 GL_FLOAT,
                 GL_FALSE,
-                sizeof(float) * 8,
-                reinterpret_cast<void*>(sizeof(float) * 4)
+                8 * sizeof(float),
+                reinterpret_cast<void*>(4 * sizeof(float))
             );
         }
         else if (_hasDatavarSize) {
@@ -930,7 +938,7 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
                 4,
                 GL_FLOAT,
                 GL_FALSE,
-                sizeof(float) * 8,
+                8 * sizeof(float),
                 nullptr
             );
 
@@ -941,8 +949,8 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
                 1,
                 GL_FLOAT,
                 GL_FALSE,
-                sizeof(float) * 5,
-                reinterpret_cast<void*>(sizeof(float) * 4)
+                5 * sizeof(float),
+                reinterpret_cast<void*>(4 * sizeof(float))
             );
         }
         else {
@@ -989,33 +997,8 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
     }
 }
 
-bool RenderableBillboardsCloud::loadData() {
-    bool success = true;
-
-    if (_hasSpeckFile) {
-        _dataset = speck::data::loadFileWithCache(_speckFile);
-    }
-
-    if (_hasColorMapFile) {
-        if (!_hasSpeckFile) {
-            success = true;
-        }
-        _colorMap = speck::color::loadFileWithCache(_colorMapFile);
-    }
-
-    if (!_labelFile.empty()) {
-        _labelset = speck::label::loadFileWithCache(_labelFile);
-        for (speck::Labelset::Entry& e : _labelset.entries) {
-            e.position = glm::vec3(_transformationMatrix * glm::dvec4(e.position, 1.0));
-        }
-    }
-
-    return success;
-}
-
 double RenderableBillboardsCloud::unitToMeter(Unit unit) const {
-    // @TODO (abock, 2021-05-10)  This should move the centralized distance conversion
-    // code
+    // @TODO (abock, 2021-05-10)  This should be moved to a centralized conversion code
     switch (unit) {
         case Meter:          return 1.0;
         case Kilometer:      return 1e3;
@@ -1031,7 +1014,6 @@ double RenderableBillboardsCloud::unitToMeter(Unit unit) const {
 std::vector<float> RenderableBillboardsCloud::createDataSlice() {
     ZoneScoped
 
-
     if (_dataset.entries.empty()) {
         return std::vector<float>();
     }
@@ -1045,12 +1027,11 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
     }
 
     // what datavar in use for the index color
-    int colorMapInUse =
-        _hasColorMapFile ? speck::indexForVariable(_dataset, _colorOptionString) : 0;
+    int colorMapInUse = _hasColorMapFile ? _dataset.index(_colorOptionString) : 0;
 
     // what datavar in use for the size scaling (if present)
-    int sizeScalingInUse = _hasDatavarSize ?
-        speck::indexForVariable(_dataset, _datavarSizeOptionString) : -1;
+    int sizeScalingInUse =
+        _hasDatavarSize ? _dataset.index(_datavarSizeOptionString) : -1;
 
     float minColorIdx = std::numeric_limits<float>::max();
     float maxColorIdx = -std::numeric_limits<float>::max();
@@ -1072,15 +1053,13 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
         const double unitMeter = unitToMeter(_unit);
         glm::dvec3 p = glm::dvec3(position) * unitMeter;
         const double r = glm::length(p);
-        if (r > maxRadius) {
-            maxRadius = r;
-        }
+        maxRadius = std::max(maxRadius, r);
 
         if (_hasColorMapFile) {
             for (int j = 0; j < 4; ++j) {
                 result.push_back(position[j]);
-                biggestCoord = biggestCoord < position[j] ? position[j] : biggestCoord;
             }
+            biggestCoord = std::max(biggestCoord, glm::compMax(position));
             // Note: if exact colormap option is not selected, the first color and the
             // last color in the colormap file are the outliers colors.
             float variableColor = e.data[colorMapInUse];
@@ -1104,9 +1083,7 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
             }
             else {
                 if (_useLinearFiltering) {
-                    const float value = variableColor;
-
-                    float valueT = (value - cmin) / (cmax - cmin); // in [0, 1)
+                    float valueT = (variableColor - cmin) / (cmax - cmin); // in [0, 1)
                     valueT = std::clamp(valueT, 0.f, 1.f);
 
                     const float idx = valueT * (_colorMap.entries.size() - 1);
@@ -1222,20 +1199,13 @@ void RenderableBillboardsCloud::loadPolygonGeometryForRendering() {
     glBindVertexArray(_polygonVao);
     glBindBuffer(GL_ARRAY_BUFFER, _polygonVbo);
 
-    const GLfloat vertex_data[] = {
+    constexpr const std::array<GLfloat, 4> VertexData = {
         //      x      y     z     w
         0.f, 0.f, 0.f, 1.f,
     };
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
-    glVertexAttribPointer(
-        0,
-        4,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(GLfloat) * 4,
-        nullptr
-    );
+    glBufferData(GL_ARRAY_BUFFER, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), nullptr);
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
 }
@@ -1250,8 +1220,8 @@ void RenderableBillboardsCloud::renderPolygonGeometry(GLuint vao) {
         );
 
     program->activate();
-    static const float black[] = { 0.f, 0.f, 0.f, 0.f };
-    glClearBufferfv(GL_COLOR, 0, black);
+    constexpr const glm::vec4 Black = glm::vec4(0.f, 0.f, 0.f, 0.f);
+    glClearBufferfv(GL_COLOR, 0, glm::value_ptr(Black));
 
     program->setUniform("sides", _polygonSides);
     program->setUniform("polygonColor", _pointColor);

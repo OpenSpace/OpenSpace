@@ -90,8 +90,6 @@ private:
     void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
         const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
 
-    bool loadData();
-
     bool _hasSpeckFile = false;
     bool _dataIsDirty = true;
     bool _textColorIsDirty = true;

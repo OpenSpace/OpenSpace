@@ -50,6 +50,8 @@ namespace {
     constexpr const char* _loggerCat = "RenderablePlanesCloud";
     constexpr const char* ProgramObjectName = "RenderablePlanesCloud";
 
+    constexpr const int PlanesVertexDataSize = 36;
+
     constexpr std::array<const char*, 4> UniformNames = {
         "modelViewProjectionTransform", "alphaValue", "fadeInValue", "galaxyTexture"
     };
@@ -372,7 +374,6 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     _luminosityVar = p.luminosity.value_or(_luminosityVar);
     _sluminosity = p.scaleLuminosity.value_or(_sluminosity);
 
-
     if (p.fadeInDistances.has_value()) {
         _fadeInDistance = *p.fadeInDistances;
         _disableFadeInDistance = false;
@@ -394,9 +395,19 @@ bool RenderablePlanesCloud::isReady() const {
 void RenderablePlanesCloud::initialize() {
     ZoneScoped
 
-    const bool success = loadData();
-    if (!success) {
-        throw ghoul::RuntimeError("Error loading data");
+    if (_hasSpeckFile && FileSys.fileExists(_speckFile)) {
+        _dataset = speck::data::loadFileWithCache(_speckFile);
+        if (_dataset.entries.empty()) {
+            throw ghoul::RuntimeError("Error loading data");
+        }
+    }
+
+    if (!_labelFile.empty()) {
+        LINFO(fmt::format("Loading Label file '{}'", _labelFile));
+        _labelset = speck::label::loadFileWithCache(_labelFile);
+        for (speck::Labelset::Entry& e : _labelset.entries) {
+            e.position = glm::vec3(_transformationMatrix * glm::dvec4(e.position, 1.0));
+        }
     }
 }
 
@@ -431,7 +442,6 @@ void RenderablePlanesCloud::initializeGL() {
         }
     }
 }
-
 
 void RenderablePlanesCloud::deleteDataGPUAndCPU() {
     for (std::unordered_map<int, PlaneAggregate>::reference pAMapItem : _planesMap) {
@@ -566,8 +576,7 @@ void RenderablePlanesCloud::render(const RenderData& data, RendererTasks&) {
 
     const glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
     const glm::mat4 projectionMatrix = data.camera.projectionMatrix();
-    const glm::dmat4 modelViewProjectionMatrix = glm::dmat4(projectionMatrix) *
-                                                 modelViewMatrix;
+    const glm::dmat4 mvpMatrix = glm::dmat4(projectionMatrix) * modelViewMatrix;
 
     const glm::dmat4 invMVPParts = glm::inverse(modelMatrix) *
                                    glm::inverse(data.camera.combinedViewMatrix()) *
@@ -584,13 +593,7 @@ void RenderablePlanesCloud::render(const RenderData& data, RendererTasks&) {
     }
 
     if (_hasLabel) {
-        renderLabels(
-            data,
-            modelViewProjectionMatrix,
-            orthoRight,
-            orthoUp,
-            fadeInVariable
-        );
+        renderLabels(data, mvpMatrix, orthoRight, orthoUp, fadeInVariable);
     }
 }
 
@@ -605,25 +608,6 @@ void RenderablePlanesCloud::update(const UpdateData&) {
         _program->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
     }
-}
-
-bool RenderablePlanesCloud::loadData() {
-    if (_hasSpeckFile && FileSys.fileExists(_speckFile)) {
-        _dataset = speck::data::loadFileWithCache(_speckFile);
-        if (_dataset.entries.empty()) {
-            return false;
-        }
-    }
-
-    if (!_labelFile.empty()) {
-        LINFO(fmt::format("Loading Label file '{}'", _labelFile));
-        _labelset = speck::label::loadFileWithCache(_labelFile);
-        for (speck::Labelset::Entry& e : _labelset.entries) {
-            e.position = glm::vec3(_transformationMatrix * glm::dvec4(e.position, 1.0));
-        }
-    }
-
-    return true;
 }
 
 void RenderablePlanesCloud::loadTextures() {
@@ -680,7 +664,7 @@ double RenderablePlanesCloud::unitToMeter(Unit unit) const {
 
 void RenderablePlanesCloud::createPlanes() {
     if (_dataIsDirty && _hasSpeckFile) {
-        const int lumIdx = std::max(speck::indexForVariable(_dataset, _luminosityVar), 0);
+        const int lumIdx = std::max(_dataset.index(_luminosityVar), 0);
         const double scale = unitToMeter(_unit);
 
         LDEBUG("Creating planes...");
@@ -692,9 +676,7 @@ void RenderablePlanesCloud::createPlanes() {
             );
 
             const double r = glm::length(glm::dvec3(transformedPos) * scale);
-            if (r > maxRadius) {
-                maxRadius = r;
-            }
+            maxRadius = std::max(maxRadius, r);
 
             // Plane vectors u and v
             glm::vec4 u = glm::vec4(
@@ -747,7 +729,7 @@ void RenderablePlanesCloud::createPlanes() {
             vertex2 *= scale;
             vertex4 *= scale;
 
-            GLfloat vertexData[] = {
+            const std::array<GLfloat, 36> VertexData = {
                 //  x          y          z       w    s    t
                 vertex0.x, vertex0.y, vertex0.z, 1.f, 0.f, 0.f,
                 vertex1.x, vertex1.y, vertex1.z, 1.f, 1.f, 1.f,
@@ -761,8 +743,8 @@ void RenderablePlanesCloud::createPlanes() {
             std::unordered_map<int, PlaneAggregate>::iterator found =
                 _planesMap.find(textureIndex);
             if (found != _planesMap.end()) {
-                for (int i = 0; i < PLANES_VERTEX_DATA_SIZE; ++i) {
-                    found->second.planesCoordinates.push_back(vertexData[i]);
+                for (int i = 0; i < PlanesVertexDataSize; ++i) {
+                    found->second.planesCoordinates.push_back(VertexData[i]);
                 }
                 found->second.numberOfPlanes++;
             }
@@ -772,10 +754,10 @@ void RenderablePlanesCloud::createPlanes() {
                 glGenVertexArrays(1, &pA.vao);
                 glGenBuffers(1, &pA.vbo);
                 pA.numberOfPlanes = 1;
-                for (int i = 0; i < PLANES_VERTEX_DATA_SIZE; ++i) {
-                    pA.planesCoordinates.push_back(vertexData[i]);
+                for (int i = 0; i < PlanesVertexDataSize; ++i) {
+                    pA.planesCoordinates.push_back(VertexData[i]);
                 }
-                _planesMap.insert(std::pair<int, PlaneAggregate>(textureIndex, pA));
+                _planesMap.insert(std::pair(textureIndex, pA));
             }
         }
 
@@ -785,21 +767,13 @@ void RenderablePlanesCloud::createPlanes() {
             glBindBuffer(GL_ARRAY_BUFFER, pAMapItem.second.vbo);
             glBufferData(
                 GL_ARRAY_BUFFER,
-                sizeof(GLfloat) * PLANES_VERTEX_DATA_SIZE *
-                    pAMapItem.second.numberOfPlanes,
+                sizeof(GLfloat) * PlanesVertexDataSize * pAMapItem.second.numberOfPlanes,
                 pAMapItem.second.planesCoordinates.data(),
                 GL_STATIC_DRAW
             );
             // in_position
             glEnableVertexAttribArray(0);
-            glVertexAttribPointer(
-                0,
-                4,
-                GL_FLOAT,
-                GL_FALSE,
-                sizeof(GLfloat) * 6,
-                nullptr
-            );
+            glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), nullptr);
 
             // texture coords
             glEnableVertexAttribArray(1);
@@ -808,8 +782,8 @@ void RenderablePlanesCloud::createPlanes() {
                 2,
                 GL_FLOAT,
                 GL_FALSE,
-                sizeof(GLfloat) * 6,
-                reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 4)
+                6 * sizeof(GLfloat),
+                reinterpret_cast<GLvoid*>(4 * sizeof(GLfloat))
             );
 
             glBindVertexArray(0);

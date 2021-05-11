@@ -118,7 +118,7 @@ namespace {
                 return *dataset;
             }
             else {
-                FileSys.cacheManager()->removeCacheFile(speckPath.string());
+                FileSys.cacheManager()->removeCacheFile(cachePath);
             }
         }
         LINFOC("SpeckLoader", fmt::format("Loading file '{}'", speckPath));
@@ -801,6 +801,14 @@ ColorMap loadFile(std::filesystem::path path, SkipAllZeroLines) {
         }
     }
 
+    if (nColorLines != res.entries.size()) {
+        LWARNINGC("SpeckLoader", fmt::format(
+            "While loading color map, the expected number of color values '{}' was "
+            "different from the actual number of color values '{}'",
+            nColorLines, res.entries.size()
+        ));
+    }
+
     return res;
 }
 
@@ -861,8 +869,8 @@ ColorMap loadFileWithCache(std::filesystem::path path, SkipAllZeroLines skipAllZ
 
 } // namespace color
 
-int indexForVariable(const Dataset& dataset, std::string_view variableName) {
-    for (const Dataset::Variable& v : dataset.variables) {
+int Dataset::index(std::string_view variableName) const {
+    for (const Dataset::Variable& v : variables) {
         if (v.name == variableName) {
             return v.index;
         }
@@ -870,9 +878,9 @@ int indexForVariable(const Dataset& dataset, std::string_view variableName) {
     return -1;
 }
 
-bool normalizeVariable(Dataset& dataset, std::string_view variableName) {
+bool Dataset::normalizeVariable(std::string_view variableName) {
     std::optional<int> idx;
-    for (const Dataset::Variable& var : dataset.variables) {
+    for (const Dataset::Variable& var : variables) {
         if (var.name == variableName) {
             idx = var.index;
             break;
@@ -886,12 +894,12 @@ bool normalizeVariable(Dataset& dataset, std::string_view variableName) {
 
     float minValue = std::numeric_limits<float>::max();
     float maxValue = -std::numeric_limits<float>::max();
-    for (Dataset::Entry& e : dataset.entries) {
+    for (Dataset::Entry& e : entries) {
         minValue = std::min(minValue, e.data[*idx]);
         maxValue = std::max(maxValue, e.data[*idx]);
     }
 
-    for (Dataset::Entry& e : dataset.entries) {
+    for (Dataset::Entry& e : entries) {
         e.data[*idx] = (e.data[*idx] - minValue) / (maxValue - minValue);
     }
 

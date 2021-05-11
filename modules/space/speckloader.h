@@ -58,6 +58,9 @@ struct Dataset {
         std::optional<std::string> comment;
     };
     std::vector<Entry> entries;
+
+    int index(std::string_view variableName) const;
+    bool normalizeVariable(std::string_view variableName);
 };
 
 struct Labelset {
@@ -113,9 +116,6 @@ namespace color {
 
 } // namespace color
 
-// Misc
-int indexForVariable(const Dataset& dataset, std::string_view variableName);
-bool normalizeVariable(Dataset& dataset, std::string_view variableName);
 
 } // namespace openspace::speck
 

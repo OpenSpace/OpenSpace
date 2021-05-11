@@ -51,7 +51,6 @@ namespace ghoul::opengl {
 namespace openspace {
 
 // (x, y, z, w, s, t) * 6 = 36
-const int PLANES_VERTEX_DATA_SIZE = 36;
 
 namespace documentation { struct Documentation; }
 
@@ -99,7 +98,6 @@ private:
         const glm::dmat4& modelViewProjectionMatrix, const glm::dvec3& orthoRight,
         const glm::dvec3& orthoUp, float fadeInVariable);
 
-    bool loadData();
     void loadTextures();
 
     bool _hasSpeckFile = false;
