@@ -225,10 +225,15 @@ namespace openspace {
         using namespace std::string_literals;
         ghoul::Dictionary msg;
 
+        glm::dvec3 camUpJ2000 = skybrowser::galacticCartesianToJ2000Cartesian(global::navigationHandler->camera()->lookUpVectorWorldSpace());
+        glm::dvec3 camForwardJ2000 = skybrowser::galacticCartesianToJ2000Cartesian(global::navigationHandler->camera()->viewDirectionWorldSpace());     
+        double angle = glm::degrees(atan2(glm::dot(glm::cross(camUpJ2000, skybrowser::NORTH_POLE), camForwardJ2000), glm::dot(skybrowser::NORTH_POLE, camUpJ2000)));
+
         msg.setValue("event", "center_on_coordinates"s);
         msg.setValue("ra", celestCoords.x);
         msg.setValue("dec", celestCoords.y);
         msg.setValue("fov", fov);
+        msg.setValue("roll", angle);
         msg.setValue("instant", moveInstantly);
 
         return msg;
