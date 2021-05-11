@@ -54,7 +54,6 @@ namespace {
         "spriteTexture", "hasColorMap"
     };
 
-    constexpr int8_t CurrentCacheVersion = 1;
     constexpr double PARSEC = 0.308567756E17;
 
     constexpr openspace::properties::Property::PropertyInfo SpriteTextureInfo = {
@@ -198,7 +197,7 @@ RenderablePoints::RenderablePoints(const ghoul::Dictionary& dictionary)
 }
 
 bool RenderablePoints::isReady() const {
-    return (_program != nullptr) && (!_dataset.entries.empty());
+    return _program && (!_dataset.entries.empty());
 }
 
 void RenderablePoints::initialize() {
@@ -213,11 +212,6 @@ void RenderablePoints::initialize() {
 
 void RenderablePoints::initializeGL() {
     ZoneScoped
-
-    // OBS:  The ProgramObject name is later used to release the program as well, so the
-    //       name parameter to requestProgramObject and the first parameter to
-    //       buildRenderProgram has to be the same or an assertion will be thrown at the
-    //       end of the program.
 
     if (_hasSpriteTexture) {
         _program = DigitalUniverseModule::ProgramObjectManager.request(
@@ -334,8 +328,8 @@ void RenderablePoints::update(const UpdateData&) {
                 colorMapAttrib,
                 4,
                 GL_DOUBLE,
-                sizeof(double) * 8,
-                reinterpret_cast<void*>(sizeof(double) * 4)
+                8 * sizeof(double),
+                reinterpret_cast<void*>(4 * sizeof(double))
             );
         }
         else {
@@ -417,9 +411,7 @@ void RenderablePoints::readColorMapFile() {
         std::stringstream str(line);
 
         glm::vec4 color;
-        for (int j = 0; j < 4; ++j) {
-            str >> color[j];
-        }
+        str >> color.r >> color.g >> color.b >> color.a;
 
         _colorMapData.push_back(color);
     }
@@ -438,7 +430,7 @@ std::vector<double> RenderablePoints::createDataSlice() {
     for (const speck::Dataset::Entry& e : _dataset.entries) {
         glm::dvec3 p = e.position;
 
-        // Converting untis
+        // Converting units
         if (_unit == Kilometer) {
             p *= 1E3;
         }
