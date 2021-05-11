@@ -32,6 +32,7 @@ set(HEADER_FILES
     include/wwtdatahandler.h
     tinyxml2/tinyxml2.h
     include/utility.h
+    include/renderableskybrowser.h
     
 )
 source_group("Header Files" FILES ${HEADER_FILES})
@@ -45,6 +46,7 @@ set(SOURCE_FILES
     src/wwtdatahandler.cpp
     tinyxml2/tinyxml2.cpp
     src/utility.cpp
+    src/renderableskybrowser.cpp
 
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
