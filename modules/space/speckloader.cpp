@@ -108,7 +108,7 @@ namespace {
             LINFOC(
                 "SpeckLoader",
                 fmt::format(
-                    "Cached file '{}' used for Speck file '{}'", cachePath, speckPath
+                    "Cached file '{}' used for file '{}'", cachePath, speckPath
                 )
             );
 
@@ -121,7 +121,7 @@ namespace {
                 FileSys.cacheManager()->removeCacheFile(speckPath.string());
             }
         }
-        LINFOC("SpeckLoader", fmt::format("Loading Speck file '{}'", speckPath));
+        LINFOC("SpeckLoader", fmt::format("Loading file '{}'", speckPath));
         T dataset = loadSpeckFunction(speckPath, skipAllZeroLines);
 
         if (!dataset.entries.empty()) {

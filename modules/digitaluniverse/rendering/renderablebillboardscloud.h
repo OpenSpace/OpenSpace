@@ -158,7 +158,6 @@ private:
     speck::ColorMap _colorMap;
 
     std::vector<glm::vec2> _colorRangeData;
-    //std::vector<std::pair<glm::vec3, std::string>> _labelData;
     std::unordered_map<int, std::string> _optionConversionMap;
     std::unordered_map<int, std::string> _optionConversionSizeMap;
 
