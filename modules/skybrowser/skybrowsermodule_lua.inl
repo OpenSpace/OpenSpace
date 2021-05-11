@@ -139,8 +139,12 @@ namespace openspace::skybrowser::luascriptfunctions {
 		std::string root = "https://raw.githubusercontent.com/WorldWideTelescope/wwt-web-client/master/assets/webclient-explore-root.wtml";
         std::string hubble = "http://www.worldwidetelescope.org/wwtweb/catalog.aspx?W=hubble";
 
-		module->getWWTDataHandler()->loadWTMLCollectionsFromURL(hubble, "root");
+		module->getWWTDataHandler()->loadWTMLCollectionsFromURL(root, "root");
 		LINFO(std::to_string( module->getWWTDataHandler()->loadAllImagesFromXMLs()));
+
+        for (ScreenSpaceSkyBrowser* browser : module->getSkyBrowsers()) {
+            browser->sendMessageToWWT(browser->createMessageForLoadingWWTImgColl(root));
+        }
 
 		return 1;
 	}

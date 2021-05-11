@@ -245,22 +245,53 @@ namespace openspace {
         ghoul::Dictionary msg;
         msg.setValue("event", "load_image_collection"s);
         msg.setValue("url", url);
+        msg.setValue("loadChildFolders", true);
 
         return msg;
     }
 
     ghoul::Dictionary ScreenSpaceSkyBrowser::createMessageForSettingForegroundWWT(const std::string& name) const {
-        // https://docs.worldwidetelescope.org/data-guide/1/data-file-formats/collections/sample-blank-collection.wtml
         using namespace std::string_literals;
         ghoul::Dictionary msg;
         msg.setValue("event", "set_foreground_by_name"s);
         msg.setValue("name", name);
 
         return msg;
+    }  
+    
+    ghoul::Dictionary ScreenSpaceSkyBrowser::createMessageForAddingImageLayerWWT(const std::string& url) {
+        using namespace std::string_literals;
+        ghoul::Dictionary msg;
+        msg.setValue("event", "image_layer_create"s);
+        msg.setValue("id", std::to_string(imageId));
+        msg.setValue("name", url);
+        // Update ID to ensure that all ID's are unique
+        imageId++;
+
+        return msg;
+    }
+
+    ghoul::Dictionary ScreenSpaceSkyBrowser::createMessageForRemovingImageLayerWWT(int id) const {
+        using namespace std::string_literals;
+        ghoul::Dictionary msg;
+        msg.setValue("event", "image_layer_remove"s);
+        msg.setValue("id", std::to_string(id));
+
+        return msg;
+    }
+
+    ghoul::Dictionary ScreenSpaceSkyBrowser::createMessageForSettingOpacityLayerWWT(int id, double opacity) const {
+        using namespace std::string_literals;
+        ghoul::Dictionary msg;
+        msg.setValue("event", "image_layer_set"s);
+        msg.setValue("id", std::to_string(id));
+        msg.setValue("setting", "opacity"s);
+        msg.setValue("value", opacity);
+
+        return msg;
     }
 
     ghoul::Dictionary ScreenSpaceSkyBrowser::createMessageForSettingForegroundOpacityWWT(double val) const {
-        // https://docs.worldwidetelescope.org/data-guide/1/data-file-formats/collections/sample-blank-collection.wtml
         using namespace std::string_literals;
         ghoul::Dictionary msg;
         msg.setValue("event", "set_foreground_opacity"s);
