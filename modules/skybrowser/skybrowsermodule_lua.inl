@@ -240,9 +240,11 @@ namespace openspace::skybrowser::luascriptfunctions {
         index++;
         lua_newtable(L);
         // Get the view direction of the screen in cartesian J2000 coordinates
-        
-        glm::dvec2 sphericalJ2000 = galacticCartesianToJ2000(global::navigationHandler->camera()->viewDirectionWorldSpace());
-        glm::dvec3 cartesianJ2000 = skybrowser::sphericalToCartesian(sphericalJ2000);
+        glm::dvec3 camPos = global::navigationHandler->camera()->positionVec3();
+        constexpr double infinity = std::numeric_limits<float>::max();
+        glm::dvec3 galCoord = camPos + (infinity * global::navigationHandler->camera()->viewDirectionWorldSpace());
+        glm::dvec3 cartesianJ2000 = skybrowser::galacticCartesianToJ2000Cartesian(galCoord);
+        glm::dvec2 sphericalJ2000 = skybrowser::cartesianToSpherical(cartesianJ2000);
         // Convert to vector so ghoul can read it
         std::vector<double> viewDirCelestVec = { cartesianJ2000.x, cartesianJ2000.y, cartesianJ2000.z };
         

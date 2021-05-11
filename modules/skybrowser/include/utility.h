@@ -11,6 +11,7 @@ namespace openspace::skybrowser {
     const double SCREENSPACE_Z = -2.1;
     const double RAD_TO_DEG = 180.0 / M_PI;
     const double DEG_TO_RAD = M_PI / 180.0;
+    const glm::dvec3 NORTH_POLE = { 0.0 , 0.0 , 1.0 };
     constexpr double infinity = std::numeric_limits<float>::max();
 
     // Conversion matrix from this paper: https://arxiv.org/abs/1010.3773v1
@@ -23,7 +24,8 @@ namespace openspace::skybrowser {
     // J2000 to galactic conversion and vice versa
     glm::dvec2 cartesianToSpherical(glm::dvec3 cartesianCoords);
     glm::dvec3 sphericalToCartesian(glm::dvec2 sphericalCoords);
-    glm::dvec2 galacticCartesianToJ2000(glm::dvec3 rGal);
+    glm::dvec3 galacticCartesianToJ2000Cartesian(glm::dvec3 rGal);
+    glm::dvec2 galacticCartesianToJ2000Spherical(glm::dvec3 rGal);
     glm::dvec3 galacticCartesianToCameraLocalCartesian(glm::dvec3 galCoords);
     glm::dvec3 J2000SphericalToGalacticCartesian(glm::dvec2 coords, double distance = infinity);
     glm::dvec3 J2000CartesianToGalacticCartesian(glm::dvec3 coords, double distance = infinity);

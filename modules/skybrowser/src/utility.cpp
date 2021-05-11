@@ -33,9 +33,12 @@ namespace openspace::skybrowser {
             return glm::dvec2(RAD_TO_DEG * ra, RAD_TO_DEG * dec);
         }
 
-        glm::dvec2 galacticCartesianToJ2000(glm::dvec3 rGal) {
-            glm::dvec3 J2000 = glm::transpose(conversionMatrix) * rGal;
-            return cartesianToSpherical(J2000);
+        glm::dvec3 galacticCartesianToJ2000Cartesian(glm::dvec3 rGal) {
+            return glm::transpose(conversionMatrix) * rGal;
+        }
+
+        glm::dvec2 galacticCartesianToJ2000Spherical(glm::dvec3 rGal) {
+            return cartesianToSpherical(galacticCartesianToJ2000Cartesian(rGal));
         }
 
         glm::dvec3 J2000SphericalToGalacticCartesian(glm::dvec2 coords, double distance) {

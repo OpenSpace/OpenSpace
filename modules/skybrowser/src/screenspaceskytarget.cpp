@@ -330,7 +330,7 @@ namespace openspace {
         glm::dvec3 camPos = global::navigationHandler->camera()->positionVec3();
         constexpr double infinity = std::numeric_limits<float>::max();
         glm::dvec3 galCoord = camPos + (infinity * getTargetDirectionGalactic());
-        return skybrowser::galacticCartesianToJ2000(galCoord);
+        return skybrowser::galacticCartesianToJ2000Spherical(galCoord);
     }
 
     void ScreenSpaceSkyTarget::animateToCoord(double deltaTime) {
