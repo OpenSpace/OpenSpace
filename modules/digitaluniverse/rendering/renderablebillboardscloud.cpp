@@ -591,7 +591,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
 }
 
 bool RenderableBillboardsCloud::isReady() const {
-    return ((_program != nullptr) && (!_dataset.entries.empty())) || (!_labelData.empty());
+    return ((_program != nullptr) && (!_dataset.entries.empty())) || (!_labelset.entries.empty());
 }
 
 void RenderableBillboardsCloud::initialize() {
@@ -778,14 +778,13 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data,
     labelInfo.enableDepth = true;
     labelInfo.enableFalseDepth = false;
 
-    for (const std::pair<glm::vec3, std::string>& pair : _labelData) {
-        //glm::vec3 scaledPos(_transformationMatrix * glm::dvec4(pair.first, 1.0));
-        glm::vec3 scaledPos(pair.first);
+    for (const speck::Labelset::Entry& e : _labelset.entries) {
+        glm::vec3 scaledPos(e.position);
         scaledPos *= unitToMeter(_unit);
         ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
             *_font,
             scaledPos,
-            pair.second,
+            e.text,
             textColor,
             labelInfo
         );
@@ -797,7 +796,9 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
     if (!_disableFadeInDistance) {
         float distCamera = static_cast<float>(glm::length(data.camera.positionVec3()));
         const glm::vec2 fadeRange = _fadeInDistance;
-        const float a = 1.f / ((fadeRange.y - fadeRange.x) * unitToMeter(_unit));
+        const float a = static_cast<float>(
+            1.f / ((fadeRange.y - fadeRange.x) * unitToMeter(_unit))
+        );
         const float b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
         const float funcValue = a * distCamera + b;
         fadeInVar *= funcValue > 1.f ? 1.f : funcValue;
@@ -992,210 +993,24 @@ bool RenderableBillboardsCloud::loadData() {
     bool success = true;
 
     if (_hasSpeckFile) {
-        _dataset = speck::loadSpeckFileWithCache(_speckFile);
+        _dataset = speck::data::loadFileWithCache(_speckFile);
     }
 
     if (_hasColorMapFile) {
         if (!_hasSpeckFile) {
             success = true;
         }
-        success &= readColorMapFile();
+        _colorMap = speck::color::loadFileWithCache(_colorMapFile);
     }
 
-    success &= loadLabelData();
-
-    return success;
-}
-
-bool RenderableBillboardsCloud::loadLabelData() {
-    if (_labelFile.empty()) {
-        return true;
-    }
-
-    bool success = true;
-    const std::string& cachedFile = FileSys.cacheManager()->cachedFilename(
-        ghoul::filesystem::File(_labelFile),
-        ghoul::filesystem::CacheManager::Persistent::Yes
-    );
-    if (!_hasSpeckFile && !_hasColorMapFile) {
-        success = true;
-    }
-    const bool hasCachedFile = FileSys.fileExists(cachedFile);
-    if (hasCachedFile) {
-        LINFO(fmt::format(
-            "Cached file '{}' used for Label file '{}'",
-            cachedFile, _labelFile
-        ));
-
-        success &= loadCachedFile(cachedFile);
-        if (!success) {
-            FileSys.cacheManager()->removeCacheFile(_labelFile);
-            // Intentional fall-through to the 'else' to generate the cache
-            // file for the next run
-        }
-    }
-    else {
-        LINFO(fmt::format("Cache for Label file '{}' not found", _labelFile));
-        LINFO(fmt::format("Loading Label file '{}'", _labelFile));
-
-        success &= readLabelFile();
-        if (!success) {
-            return false;
+    if (!_labelFile.empty()) {
+        _labelset = speck::label::loadFileWithCache(_labelFile);
+        for (speck::Labelset::Entry& e : _labelset.entries) {
+            e.position = glm::vec3(_transformationMatrix * glm::dvec4(e.position, 1.0));
         }
     }
 
     return success;
-}
-
-bool RenderableBillboardsCloud::readColorMapFile() {
-    std::string _file = _colorMapFile;
-    std::ifstream file(_file);
-    if (!file.good()) {
-        LERROR(fmt::format("Failed to open Color Map file '{}'", _file));
-        return false;
-    }
-
-    std::size_t numberOfColors = 0;
-
-    // The beginning of the speck file has a header that either contains comments
-    // (signaled by a preceding '#') or information about the structure of the file
-    // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
-    std::string line;
-    while (true) {
-        // std::streampos position = file.tellg();
-        std::getline(file, line);
-
-        if (line[0] == '#' || line.empty()) {
-            continue;
-        }
-
-        // Initial number of colors
-        std::locale loc;
-        if (std::isdigit(line[0], loc)) {
-            std::string::size_type sz;
-            numberOfColors = std::stoi(line, &sz);
-            break;
-        }
-        else if (file.eof()) {
-            return false;
-        }
-    }
-
-    for (size_t i = 0; i < numberOfColors; ++i) {
-        std::getline(file, line);
-        std::stringstream str(line);
-
-        glm::vec4 color;
-        // Each color in the colormap must be defined as (R,G,B,A)
-        for (int j = 0; j < 4; ++j) {
-            str >> color[j];
-        }
-
-        _colorMapData.push_back(color);
-    }
-
-    return true;
-}
-
-bool RenderableBillboardsCloud::readLabelFile() {
-    std::string _file = _labelFile;
-    std::ifstream file(_file);
-    if (!file.good()) {
-        LERROR(fmt::format("Failed to open Label file '{}'", _file));
-        return false;
-    }
-
-    // The beginning of the speck file has a header that either contains comments
-    // (signaled by a preceding '#') or information about the structure of the file
-    // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
-    std::string line;
-    while (true) {
-        std::streampos position = file.tellg();
-        std::getline(file, line);
-
-        // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r
-        if (!line.empty() && line.back() == '\r') {
-            line = line.substr(0, line.length() - 1);
-        }
-
-        if (line.empty() || line[0] == '#') {
-            continue;
-        }
-
-        if (line.substr(0, 9) != "textcolor") {
-            // we read a line that doesn't belong to the header, so we have to jump back
-            // before the beginning of the current line
-            file.seekg(position);
-            continue;
-        }
-
-        if (line.substr(0, 9) == "textcolor") {
-            // textcolor lines are structured as follows:
-            // textcolor # description
-            // where # is color text defined in configuration file
-            std::stringstream str(line);
-
-            // TODO: handle cases of labels with different colors
-            break;
-        }
-    }
-
-
-    do {
-        std::getline(file, line);
-
-        // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r
-        if (!line.empty() && line.back() == '\r') {
-            line = line.substr(0, line.length() - 1);
-        }
-
-        if (line.empty()) {
-            continue;
-        }
-
-        std::stringstream str(line);
-
-        glm::vec3 position = glm::vec3(0.f);
-        for (int j = 0; j < 3; ++j) {
-            str >> position[j];
-        }
-
-        std::string dummy;
-        str >> dummy; // text keyword
-
-        std::string label;
-        str >> label;
-        dummy.clear();
-
-        while (str >> dummy) {
-            if (dummy == "#") {
-                break;
-            }
-
-            label += " " + dummy;
-            dummy.clear();
-        }
-
-        glm::vec3 transformedPos = glm::vec3(
-            _transformationMatrix * glm::dvec4(position, 1.0)
-        );
-        _labelData.emplace_back(std::make_pair(transformedPos, label));
-    } while (!file.eof());
-
-    return true;
-}
-
-bool RenderableBillboardsCloud::loadCachedFile(const std::string& file) {
-    try {
-        _dataset = speck::loadCachedFile(file);
-        return true;
-    }
-    catch (const ghoul::RuntimeError&) {
-        LERROR(fmt::format("Error opening file '{}' for loading cache file", file));
-        return false;
-    }
 }
 
 double RenderableBillboardsCloud::unitToMeter(Unit unit) const {
@@ -1284,7 +1099,7 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
             if (_isColorMapExact) {
                 int colorIndex = variableColor + cmin;
                 for (int j = 0; j < 4; ++j) {
-                    result.push_back(_colorMapData[colorIndex][j]);
+                    result.push_back(_colorMap.entries[colorIndex][j]);
                 }
             }
             else {
@@ -1294,12 +1109,12 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
                     float valueT = (value - cmin) / (cmax - cmin); // in [0, 1)
                     valueT = std::clamp(valueT, 0.f, 1.f);
 
-                    const float idx = valueT * (_colorMapData.size() - 1);
+                    const float idx = valueT * (_colorMap.entries.size() - 1);
                     const int floorIdx = static_cast<int>(std::floor(idx));
                     const int ceilIdx = static_cast<int>(std::ceil(idx));
 
-                    const glm::vec4 floorColor = _colorMapData[floorIdx];
-                    const glm::vec4 ceilColor = _colorMapData[ceilIdx];
+                    const glm::vec4 floorColor = _colorMap.entries[floorIdx];
+                    const glm::vec4 ceilColor = _colorMap.entries[ceilIdx];
 
                     if (floorColor != ceilColor) {
                         const glm::vec4 c = floorColor + idx * (ceilColor - floorColor);
@@ -1316,7 +1131,7 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
                     }
                 }
                 else {
-                    float ncmap = static_cast<float>(_colorMapData.size());
+                    float ncmap = static_cast<float>(_colorMap.entries.size());
                     float normalization = ((cmax != cmin) && (ncmap > 2)) ?
                         (ncmap - 2) / (cmax - cmin) : 0;
                     int colorIndex = (variableColor - cmin) * normalization + 1;
@@ -1324,7 +1139,7 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
                     colorIndex = colorIndex >= ncmap ? ncmap - 1 : colorIndex;
 
                     for (int j = 0; j < 4; ++j) {
-                        result.push_back(_colorMapData[colorIndex][j]);
+                        result.push_back(_colorMap.entries[colorIndex][j]);
                     }
                 }
             }

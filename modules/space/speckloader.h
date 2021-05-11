@@ -62,16 +62,58 @@ struct Dataset {
     std::vector<Entry> entries;
 };
 
-// In-out methods
-Dataset loadSpeckFile(std::filesystem::path path,
-    SkipAllZeroLines skipAllZeroLines = SkipAllZeroLines::Yes);
+struct Labelset {
+    int textColorIndex = -1;
 
-Dataset loadCachedFile(std::filesystem::path path);
-void saveCachedFile(const Dataset& dataset, std::filesystem::path path);
+    struct Entry {
+        glm::vec3 position;
+        std::string text;
+    };
+    std::vector<Entry> entries;
+};
 
-Dataset loadSpeckFileWithCache(std::filesystem::path speckPath,
-    SkipAllZeroLines skipAllZeroLines = SkipAllZeroLines::Yes);
+struct ColorMap {
+    std::vector<glm::vec4> entries;
+};
 
+namespace data {
+
+    Dataset loadFile(std::filesystem::path path,
+        SkipAllZeroLines skipAllZeroLines = SkipAllZeroLines::Yes);
+
+    std::optional<Dataset> loadCachedFile(std::filesystem::path path);
+    void saveCachedFile(const Dataset& dataset, std::filesystem::path path);
+
+    Dataset loadFileWithCache(std::filesystem::path speckPath,
+        SkipAllZeroLines skipAllZeroLines = SkipAllZeroLines::Yes);
+
+} // namespace data
+
+namespace label {
+
+    Labelset loadFile(std::filesystem::path path,
+        SkipAllZeroLines skipAllZeroLines = SkipAllZeroLines::Yes);
+
+    std::optional<Labelset> loadCachedFile(std::filesystem::path path);
+    void saveCachedFile(const Labelset& labelset, std::filesystem::path path);
+
+    Labelset loadFileWithCache(std::filesystem::path speckPath,
+        SkipAllZeroLines skipAllZeroLines = SkipAllZeroLines::Yes);
+
+} // namespace label
+
+namespace color {
+
+    ColorMap loadFile(std::filesystem::path path,
+        SkipAllZeroLines skipAllZeroLines = SkipAllZeroLines::Yes);
+
+    std::optional<ColorMap> loadCachedFile(std::filesystem::path path);
+    void saveCachedFile(const ColorMap& colorMap, std::filesystem::path path);
+
+    ColorMap loadFileWithCache(std::filesystem::path path,
+        SkipAllZeroLines skipAllZeroLines = SkipAllZeroLines::Yes);
+
+} // namespace color
 
 // Misc
 int indexForVariable(const Dataset& dataset, std::string_view variableName);

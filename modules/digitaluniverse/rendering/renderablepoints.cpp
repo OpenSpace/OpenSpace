@@ -204,7 +204,7 @@ bool RenderablePoints::isReady() const {
 void RenderablePoints::initialize() {
     ZoneScoped
 
-    _dataset = speck::loadSpeckFileWithCache(_speckFile);
+    _dataset = speck::data::loadFileWithCache(_speckFile);
 
     if (_hasColorMapFile) {
          readColorMapFile();

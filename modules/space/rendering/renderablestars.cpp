@@ -1215,7 +1215,7 @@ void RenderableStars::loadData() {
         return;
     }
 
-    _dataset = speck::loadSpeckFileWithCache(file);
+    _dataset = speck::data::loadFileWithCache(file);
     if (_dataset.entries.empty()) {
         return;
     }

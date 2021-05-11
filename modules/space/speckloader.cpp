@@ -32,9 +32,14 @@
 #include <ghoul/misc/assert.h>
 #include <cctype>
 #include <fstream>
+#include <functional>
 #include <string_view>
 
 namespace {
+    constexpr const int8_t DataCacheFileVersion = 10;
+    constexpr const int8_t LabelCacheFileVersion = 10;
+    constexpr const int8_t ColorCacheFileVersion = 10;
+
     constexpr bool startsWith(std::string_view lhs, std::string_view rhs) noexcept {
         return (rhs.size() <= lhs.size()) && (lhs.substr(0, rhs.size()) == rhs);
     }
@@ -58,7 +63,7 @@ namespace {
         }
 
         while (!line.empty() && line.back() == ' ') {
-            line = line.substr(0, line.size() - 2);
+            line = line.substr(0, line.size() - 1);
         }
     }
 
@@ -68,11 +73,70 @@ namespace {
             throw ghoul::RuntimeError(fmt::format("Error saving file: {}", message));
         }
     }
+
+    template <typename T>
+    using LoadCacheFunc = std::function<std::optional<T>(std::filesystem::path)>;
+
+    template <typename T>
+    using SaveCacheFunc = std::function<void(const T&, std::filesystem::path)>;
+
+    template <typename T>
+    using LoadSpeckFunc = std::function<T(
+        std::filesystem::path, openspace::speck::SkipAllZeroLines)>;
+
+
+
+    template <typename T>
+    T internalLoadFileWithCache(std::filesystem::path speckPath,
+                                     openspace::speck::SkipAllZeroLines skipAllZeroLines,
+                                     LoadSpeckFunc<T> loadSpeckFunction,
+                                     LoadCacheFunc<T> loadCacheFunction,
+                                     SaveCacheFunc<T> saveCacheFunction)
+    {
+        static_assert(
+            std::is_same_v<T, openspace::speck::Dataset> ||
+            std::is_same_v<T, openspace::speck::Labelset> ||
+            std::is_same_v<T, openspace::speck::ColorMap>
+        );
+
+        std::string cachePath = FileSys.cacheManager()->cachedFilename(
+            speckPath.string(),
+            ghoul::filesystem::CacheManager::Persistent::Yes
+        );
+
+        if (std::filesystem::exists(cachePath)) {
+            LINFOC(
+                "SpeckLoader",
+                fmt::format(
+                    "Cached file '{}' used for Speck file '{}'", cachePath, speckPath
+                )
+            );
+
+            std::optional<T> dataset = loadCacheFunction(cachePath);
+            if (dataset.has_value()) {
+                // We could load the cache file and we are now done with this
+                return *dataset;
+            }
+            else {
+                FileSys.cacheManager()->removeCacheFile(speckPath.string());
+            }
+        }
+        LINFOC("SpeckLoader", fmt::format("Loading Speck file '{}'", speckPath));
+        T dataset = loadSpeckFunction(speckPath, skipAllZeroLines);
+
+        if (!dataset.entries.empty()) {
+            LINFOC("SpeckLoader", "Saving cache");
+            saveCacheFunction(dataset, cachePath);
+        }
+        return dataset;
+    }
 } // namespace
 
 namespace openspace::speck {
 
-Dataset loadSpeckFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLines) {
+namespace data {
+
+Dataset loadFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLines) {
     ghoul_assert(std::filesystem::exists(path), "File must exist");
 
     std::ifstream file(path);
@@ -117,14 +181,7 @@ Dataset loadSpeckFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLi
             Dataset::Variable v;
             str >> dummy >> v.index >> v.name;
 
-            // Sigh; Why can't speck be consistent?  Let's hope no other variable uses
-            // more than one value per 'datavar' entry
-            if (v.name == "orientation") {
-                nDataValues += 6;
-            }
-            else {
-                nDataValues += 1;
-            }
+            nDataValues += 1;
             res.variables.push_back(v);
             continue;
         }
@@ -135,8 +192,7 @@ Dataset loadSpeckFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLi
             // where <idx> is the data value index where the texture index is stored
             if (res.textureDataIndex != -1) {
                 throw ghoul::RuntimeError(fmt::format(
-                    "Error loading speck file '{}': Texturevar defined twice",
-                    path
+                    "Error loading speck file '{}': Texturevar defined twice", path
                 ));
             }
 
@@ -148,7 +204,7 @@ Dataset loadSpeckFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLi
         }
 
         if (startsWith(line, "polyorivar")) {
-            // each texturevar line is following the form:
+            // each polyorivar line is following the form:
             // texturevar <idx>
             // where <idx> is the data value index where the orientation index storage
             // starts. There are 6 values stored in total, xyz + uvw
@@ -164,6 +220,16 @@ Dataset loadSpeckFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLi
             std::string dummy;
             str >> dummy >> res.orientationDataIndex;
             
+            // Ok.. this is kind of weird.  Speck unfortunately doesn't tell us in the 
+            // specification how many values a datavar has. Usually this is 1 value per
+            // datavar, unless it is a polygon orientation thing. Now, the datavar name
+            // for these can be anything (have seen 'orientation' and 'ori' before, so we
+            // can't really check by name for these or we will miss some if they are
+            // mispelled or whatever. So we have to go the roundabout way of adding the
+            // 5 remaining values (the 6th nDataValue was already added in the
+            // corresponding 'datavar' section) here
+            nDataValues += 5;
+
             continue;
         }
 
@@ -184,6 +250,16 @@ Dataset loadSpeckFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLi
 
             Dataset::Texture texture;
             str >> texture.index >> texture.file;
+
+            for (const Dataset::Texture& t : res.textures) {
+                if (t.index == texture.index) {
+                    throw ghoul::RuntimeError(fmt::format(
+                        "Error loading speck file '{}': Texture index '{}' defined twice",
+                        path, texture.index
+                    ));
+                }
+            }
+
             res.textures.push_back(texture);
             continue;
         }
@@ -265,7 +341,8 @@ Dataset loadSpeckFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLi
 
 #ifdef _DEBUG
     if (!res.entries.empty()) {
-        size_t nDataValues = res.entries[0].data.size();
+        size_t nValues = res.entries[0].data.size();
+        ghoul_assert(nDataValues == nValues, "nDataValues calculation went wrong");
         for (const Dataset::Entry& e : res.entries) {
             ghoul_assert(
                 e.data.size() == nDataValues,
@@ -278,14 +355,19 @@ Dataset loadSpeckFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLi
     return res;
 }
 
-Dataset loadCachedFile(std::filesystem::path path) {
-    // @TODO read cache version number
-
-    Dataset result;
-
+std::optional<Dataset> loadCachedFile(std::filesystem::path path) {
     std::ifstream file(path, std::ios::binary);
     if (!file.good()) {
-        throw ghoul::RuntimeError(fmt::format("Error opening cache file '{}', path"));
+        return std::nullopt;
+    }
+    
+    Dataset result;
+
+    int8_t fileVersion;
+    file.read(reinterpret_cast<char*>(&fileVersion), sizeof(int8_t));
+    if (fileVersion != DataCacheFileVersion) {
+        // Incompatible version and we won't be able to read the file
+        return std::nullopt;
     }
 
     //
@@ -342,7 +424,7 @@ Dataset loadCachedFile(std::filesystem::path path) {
     // Read entries
     uint64_t nEntries;
     file.read(reinterpret_cast<char*>(&nEntries), sizeof(uint64_t));
-    result.entries.resize(nEntries);
+    result.entries.reserve(nEntries);
     for (int i = 0; i < nEntries; i += 1) {
         Dataset::Entry e;
         file.read(reinterpret_cast<char*>(&e.position.x), sizeof(float));
@@ -363,7 +445,7 @@ Dataset loadCachedFile(std::filesystem::path path) {
             e.comment = std::move(comment);
         }
 
-        result.entries[i] = std::move(e);
+        result.entries.push_back(std::move(e));
     }
 
     return result;
@@ -371,6 +453,8 @@ Dataset loadCachedFile(std::filesystem::path path) {
 
 void saveCachedFile(const Dataset& dataset, std::filesystem::path path) {
     std::ofstream file(path, std::ofstream::binary);
+
+    file.write(reinterpret_cast<const char*>(&DataCacheFileVersion), sizeof(int8_t));
 
     //
     // Store variables
@@ -446,38 +530,336 @@ void saveCachedFile(const Dataset& dataset, std::filesystem::path path) {
     }
 }
 
-Dataset loadSpeckFileWithCache(std::filesystem::path speckPath,
+Dataset loadFileWithCache(std::filesystem::path speckPath,
                                SkipAllZeroLines skipAllZeroLines)
 {
-    std::string cachePath = FileSys.cacheManager()->cachedFilename(
-        speckPath.string(),
-        ghoul::filesystem::CacheManager::Persistent::Yes
+    return internalLoadFileWithCache<Dataset>(
+        speckPath,
+        skipAllZeroLines,
+        &loadFile,
+        &loadCachedFile,
+        &saveCachedFile
     );
-
-    if (std::filesystem::exists(cachePath)) {
-        LINFOC(
-            "SpeckLoader",
-            fmt::format("Cached file '{}' used for Speck file '{}'", cachePath, speckPath
-        ));
-
-        try {
-            // We could load the cache file and we are now done with this
-            Dataset dataset = loadCachedFile(cachePath);
-            return dataset;
-        }
-        catch (const ghoul::RuntimeError&) {
-            FileSys.cacheManager()->removeCacheFile(speckPath.string());
-        }
-    }
-    LINFOC("SpeckLoader", fmt::format("Loading Speck file '{}'", speckPath));
-    Dataset dataset = loadSpeckFile(speckPath, skipAllZeroLines);
-
-    if (!dataset.entries.empty()) {
-        LINFOC("SpeckLoader", "Saving cache");
-        speck::saveCachedFile(dataset, cachePath);
-    }
-    return dataset;
 }
+
+} // namespace data
+
+namespace label {
+
+Labelset loadFile(std::filesystem::path path, SkipAllZeroLines) {
+    ghoul_assert(std::filesystem::exists(path), "File must exist");
+
+    std::ifstream file(path);
+    if (!file.good()) {
+        throw ghoul::RuntimeError(fmt::format("Failed to open speck file '{}'", path));
+    }
+
+    Labelset res;
+
+    std::string line;
+    // First phase: Loading the header information
+    while (std::getline(file, line)) {
+        // Ignore empty line or commented-out lines
+        if (line.empty() || line[0] == '#') {
+            continue;
+        }
+
+        // Guard against wrong line endings (copying files from Windows to Mac) causes
+        // lines to have a final \r
+        if (line.back() == '\r') {
+            line = line.substr(0, line.length() - 1);
+        }
+
+        strip(line);
+
+        // If the first character is a digit, we have left the preamble and are in the
+        // data section of the file
+        if (std::isdigit(line[0]) || line[0] == '-') {
+            break;
+        }
+
+        if (startsWith(line, "textcolor")) {
+            // each textcolor line is following the form:
+            // textcolor <idx>
+            // with <idx> being the index of the color into some configuration file (not
+            // really sure how these configuration files work, but they don't seem to be
+            // included in the speck file)
+            if (res.textColorIndex != -1) {
+                throw ghoul::RuntimeError(fmt::format(
+                    "Error loading label file '{}': Textcolor defined twice", path
+                ));
+            }
+
+
+            std::stringstream str(line);
+            std::string dummy;
+            str >> dummy >> res.textColorIndex;
+            continue;
+        }
+    }
+
+    // For the first line, we already loaded it and rejected it above, so if we do another
+    // std::getline, we'd miss the first data value line
+    bool isFirst = true;
+    while (isFirst || std::getline(file, line)) {
+        isFirst = false;
+
+        // Ignore empty line or commented-out lines
+        if (line.empty() || line[0] == '#') {
+            continue;
+        }
+
+        // Guard against wrong line endings (copying files from Windows to Mac) causes
+        // lines to have a final \r
+        if (line.back() == '\r') {
+            line = line.substr(0, line.length() - 1);
+        }
+
+        strip(line);
+
+        if (line.empty()) {
+            continue;
+        }
+
+        // If the first character is a digit, we have left the preamble and are in the
+        // data section of the file
+        if (!std::isdigit(line[0]) && line[0] != '-') {
+            throw ghoul::RuntimeError(fmt::format(
+                "Error loading label file '{}': Header information and datasegment "
+                "intermixed", path
+            ));
+        }
+
+        // Each line looks like this:
+        // <x> <y> <z> text <label> # potential comment
+        // so we want to get the position, remove the 'text' text and the potential
+        // comment at the end
+        std::stringstream str(line);
+        Labelset::Entry entry;
+        str >> entry.position.x >> entry.position.y >> entry.position.z;
+
+        std::string rest;
+        std::getline(str, rest);
+        strip(rest);
+
+        if (!startsWith(rest, "text")) {
+            throw ghoul::RuntimeError(fmt::format(
+                "Error loading label file '{}': File contains some value between "
+                "positions and text label, which is unsupported", path
+            ));
+        }
+
+        // Remove the 'text' text
+        rest = rest.substr(std::string_view("text ").size());
+
+        // Remove the trailing comment
+        for (size_t i = 0; i < rest.size(); i += 1) {
+            if (rest[i] == '#') {
+                rest = rest.substr(0, i);
+                break;
+            }
+        }
+
+        strip(rest);
+
+        entry.text = rest;
+        if (!rest.empty()) {
+            res.entries.push_back(std::move(entry));
+        }
+    }
+
+    return res;
+}
+
+std::optional<Labelset> loadCachedFile(std::filesystem::path path) {
+    std::ifstream file(path, std::ios::binary);
+    if (!file.good()) {
+        return std::nullopt;
+    }
+
+    int8_t fileVersion;
+    file.read(reinterpret_cast<char*>(&fileVersion), sizeof(int8_t));
+    if (fileVersion != LabelCacheFileVersion) {
+        // Incompatible version and we won't be able to read the file
+        return std::nullopt;
+    }
+
+    Labelset result;
+
+    int16_t textColorIdx;
+    file.read(reinterpret_cast<char*>(&textColorIdx), sizeof(int16_t));
+    result.textColorIndex = textColorIdx;
+
+    uint32_t nEntries;
+    file.read(reinterpret_cast<char*>(&nEntries), sizeof(uint32_t));
+    result.entries.reserve(nEntries);
+    for (unsigned int i = 0; i < nEntries; i += 1) {
+        Labelset::Entry e;
+        file.read(reinterpret_cast<char*>(&e.position.x), sizeof(float));
+        file.read(reinterpret_cast<char*>(&e.position.y), sizeof(float));
+        file.read(reinterpret_cast<char*>(&e.position.z), sizeof(float));
+
+        uint16_t len;
+        file.read(reinterpret_cast<char*>(&len), sizeof(uint16_t));
+        e.text.resize(len);
+        file.read(e.text.data(), len);
+
+        result.entries.push_back(e);
+    }
+
+    return result;
+}
+
+void saveCachedFile(const Labelset& labelset, std::filesystem::path path) {
+    std::ofstream file(path, std::ofstream::binary);
+
+    file.write(reinterpret_cast<const char*>(&LabelCacheFileVersion), sizeof(int8_t));
+
+    //
+    // Storage text color
+    checkSize<int16_t>(labelset.textColorIndex, "Too high text color");
+    int16_t textColorIdx = static_cast<int16_t>(labelset.textColorIndex);
+    file.write(reinterpret_cast<const char*>(&textColorIdx), sizeof(int16_t));
+
+    //
+    // Storage text lines
+    checkSize<uint32_t>(labelset.entries.size(), "Too many entries");
+    uint32_t nEntries = static_cast<uint32_t>(labelset.entries.size());
+    file.write(reinterpret_cast<const char*>(&nEntries), sizeof(uint32_t));
+    for (const Labelset::Entry& e : labelset.entries) {
+        file.write(reinterpret_cast<const char*>(&e.position.x), sizeof(float));
+        file.write(reinterpret_cast<const char*>(&e.position.y), sizeof(float));
+        file.write(reinterpret_cast<const char*>(&e.position.z), sizeof(float));
+
+        checkSize<uint16_t>(e.text.size(), "Text too long");
+        uint16_t len = static_cast<uint16_t>(e.text.size());
+        file.write(reinterpret_cast<const char*>(&len), sizeof(uint16_t));
+        file.write(e.text.data(), len);
+    }
+}
+
+Labelset loadFileWithCache(std::filesystem::path speckPath,
+                                SkipAllZeroLines skipAllZeroLines)
+{
+    return internalLoadFileWithCache<Labelset>(
+        speckPath,
+        skipAllZeroLines,
+        &loadFile,
+        &loadCachedFile,
+        &saveCachedFile
+    );
+}
+
+} // namespace label
+
+namespace color {
+
+ColorMap loadFile(std::filesystem::path path, SkipAllZeroLines) {
+    ghoul_assert(std::filesystem::exists(path), "File must exist");
+
+    std::ifstream file(path);
+    if (!file.good()) {
+        throw ghoul::RuntimeError(fmt::format("Failed to open speck file '{}'", path));
+    }
+
+    ColorMap res;
+    int nColorLines = -1;
+
+    // The beginning of the speck file has a header that either contains comments
+    // (signaled by a preceding '#') or information about the structure of the file
+    // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
+    std::string line;
+    while (std::getline(file, line)) {
+        // Ignore empty line or commented-out lines
+        if (line.empty() || line[0] == '#') {
+            continue;
+        }
+
+        // Guard against wrong line endings (copying files from Windows to Mac) causes
+        // lines to have a final \r
+        if (line.back() == '\r') {
+            line = line.substr(0, line.length() - 1);
+        }
+
+        strip(line);
+
+        std::stringstream str(line);
+        if (nColorLines == -1) {
+            // This is the first time we get this far, it will have to be the first number
+            // meaning that it is the number of color values
+            
+            str >> nColorLines;
+            res.entries.reserve(nColorLines);
+        }
+        else {
+            // We have already read the number of color lines, so we are in the process of
+            // reading the individual value lines
+
+            glm::vec4 color;
+            str >> color.x >> color.y >> color.z >> color.w;
+            res.entries.push_back(std::move(color));
+        }
+    }
+
+    return res;
+}
+
+std::optional<ColorMap> loadCachedFile(std::filesystem::path path) {
+    std::ifstream file(path, std::ios::binary);
+    if (!file.good()) {
+        return std::nullopt;
+    }
+
+    int8_t fileVersion;
+    file.read(reinterpret_cast<char*>(&fileVersion), sizeof(int8_t));
+    if (fileVersion != ColorCacheFileVersion) {
+        // Incompatible version and we won't be able to read the file
+        return std::nullopt;
+    }
+
+    ColorMap result;
+
+    uint32_t nColors;
+    file.read(reinterpret_cast<char*>(&nColors), sizeof(uint32_t));
+    result.entries.reserve(nColors);
+    for (unsigned int i = 0; i < nColors; i += 1) {
+        glm::vec4 color;
+        file.read(reinterpret_cast<char*>(&color.x), sizeof(float));
+        file.read(reinterpret_cast<char*>(&color.y), sizeof(float));
+        file.read(reinterpret_cast<char*>(&color.z), sizeof(float));
+        file.read(reinterpret_cast<char*>(&color.w), sizeof(float));
+        result.entries.push_back(color);
+    }
+    return result;
+}
+
+void saveCachedFile(const ColorMap& colorMap, std::filesystem::path path) {
+    std::ofstream file(path, std::ofstream::binary);
+
+    file.write(reinterpret_cast<const char*>(&ColorCacheFileVersion), sizeof(int8_t));
+
+    uint32_t nColors = static_cast<uint32_t>(colorMap.entries.size());
+    file.write(reinterpret_cast<const char*>(&nColors), sizeof(uint32_t));
+    for (const glm::vec4& color : colorMap.entries) {
+        file.write(reinterpret_cast<const char*>(&color.x), sizeof(float));
+        file.write(reinterpret_cast<const char*>(&color.y), sizeof(float));
+        file.write(reinterpret_cast<const char*>(&color.z), sizeof(float));
+        file.write(reinterpret_cast<const char*>(&color.w), sizeof(float));
+    }
+}
+
+ColorMap loadFileWithCache(std::filesystem::path path, SkipAllZeroLines skipAllZeroLines)
+{
+    return internalLoadFileWithCache<ColorMap>(
+        path,
+        skipAllZeroLines,
+        &loadFile,
+        &loadCachedFile,
+        &saveCachedFile
+    );
+}
+
+} // namespace color
 
 int indexForVariable(const Dataset& dataset, std::string_view variableName) {
     for (const Dataset::Variable& v : dataset.variables) {

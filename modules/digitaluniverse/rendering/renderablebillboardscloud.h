@@ -91,10 +91,6 @@ private:
         const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
 
     bool loadData();
-    bool loadLabelData();
-    bool readColorMapFile();
-    bool readLabelFile();
-    bool loadCachedFile(const std::string& file);
 
     bool _hasSpeckFile = false;
     bool _dataIsDirty = true;
@@ -158,10 +154,11 @@ private:
     Unit _unit = Parsec;
 
     speck::Dataset _dataset;
+    speck::Labelset _labelset;
+    speck::ColorMap _colorMap;
 
-    std::vector<glm::vec4> _colorMapData;
     std::vector<glm::vec2> _colorRangeData;
-    std::vector<std::pair<glm::vec3, std::string>> _labelData;
+    //std::vector<std::pair<glm::vec3, std::string>> _labelData;
     std::unordered_map<int, std::string> _optionConversionMap;
     std::unordered_map<int, std::string> _optionConversionSizeMap;
 

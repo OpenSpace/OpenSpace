@@ -101,7 +101,6 @@ private:
 
     bool loadData();
     void loadTextures();
-    bool readLabelFile();
 
     bool _hasSpeckFile = false;
     bool _dataIsDirty = true;
@@ -140,8 +139,7 @@ private:
     Unit _unit = Parsec;
 
     speck::Dataset _dataset;
-
-    std::vector<std::pair<glm::vec3, std::string>> _labelData;
+    speck::Labelset _labelset;
 
     float _sluminosity = 1.f;
 

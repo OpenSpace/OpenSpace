@@ -388,7 +388,7 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
 }
 
 bool RenderablePlanesCloud::isReady() const {
-    return ((_program != nullptr) && (!_dataset.entries.empty())) || (!_labelData.empty());
+    return (_program && (!_dataset.entries.empty())) || (!_labelset.entries.empty());
 }
 
 void RenderablePlanesCloud::initialize() {
@@ -528,12 +528,12 @@ void RenderablePlanesCloud::renderLabels(const RenderData& data,
     labelInfo.enableDepth = true;
     labelInfo.enableFalseDepth = false;
 
-    for (const std::pair<glm::vec3, std::string>& pair : _labelData) {
-        glm::dvec3 scaledPos = glm::dvec3(pair.first) * scale;
+    for (const speck::Labelset::Entry& e : _labelset.entries) {
+        glm::dvec3 scaledPos = glm::dvec3(e.position) * scale;
         ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
             *_font,
             scaledPos,
-            pair.second,
+            e.text,
             textColor,
             labelInfo
         );
@@ -609,7 +609,7 @@ void RenderablePlanesCloud::update(const UpdateData&) {
 
 bool RenderablePlanesCloud::loadData() {
     if (_hasSpeckFile && FileSys.fileExists(_speckFile)) {
-        _dataset = speck::loadSpeckFileWithCache(_speckFile);
+        _dataset = speck::data::loadFileWithCache(_speckFile);
         if (_dataset.entries.empty()) {
             return false;
         }
@@ -617,10 +617,9 @@ bool RenderablePlanesCloud::loadData() {
 
     if (!_labelFile.empty()) {
         LINFO(fmt::format("Loading Label file '{}'", _labelFile));
-
-        bool success = readLabelFile();
-        if (!success) {
-            return false;
+        _labelset = speck::label::loadFileWithCache(_labelFile);
+        for (speck::Labelset::Entry& e : _labelset.entries) {
+            e.position = glm::vec3(_transformationMatrix * glm::dvec4(e.position, 1.0));
         }
     }
 
@@ -664,91 +663,6 @@ void RenderablePlanesCloud::loadTextures() {
 
         _textureMap.insert(std::pair(tex.index, std::move(t)));
     }
-}
-
-bool RenderablePlanesCloud::readLabelFile() {
-    std::ifstream file(_labelFile);
-    if (!file.good()) {
-        LERROR(fmt::format("Failed to open Label file '{}'", _labelFile));
-        return false;
-    }
-
-    // The beginning of the speck file has a header that either contains comments
-    // (signaled by a preceding '#') or information about the structure of the file
-    // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
-    std::string line;
-    while (true) {
-        std::streampos position = file.tellg();
-        std::getline(file, line);
-
-        // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r
-        if (!line.empty() && line.back() == '\r') {
-            line = line.substr(0, line.length() -1);
-        }
-
-        if (line.empty() || line[0] == '#') {
-            continue;
-        }
-
-        if (line.substr(0, 9) != "textcolor") {
-            // we read a line that doesn't belong to the header, so we have to jump back
-            // before the beginning of the current line
-            file.seekg(position);
-            continue;
-        }
-
-        if (line.substr(0, 9) == "textcolor") {
-            // textcolor lines are structured as follows:
-            // textcolor # description
-            // where # is color text defined in configuration file
-            std::stringstream str(line);
-
-            // TODO: handle cases of labels with different colors
-            break;
-        }
-    }
-
-    do {
-        std::getline(file, line);
-
-        // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r
-        if (!line.empty() && line.back() == '\r') {
-            line = line.substr(0, line.length() -1);
-        }
-
-        if (line.empty()) {
-            continue;
-        }
-
-        std::stringstream str(line);
-
-        glm::vec3 position = glm::vec3(0.f);
-        for (int j = 0; j < 3; ++j) {
-            str >> position[j];
-        }
-
-        std::string dummy;
-        str >> dummy; // text keyword
-
-        std::string label;
-        str >> label;
-        dummy.clear();
-
-        while (str >> dummy) {
-            label += " " + dummy;
-            dummy.clear();
-        }
-
-        glm::vec3 transformedPos = glm::vec3(
-            _transformationMatrix * glm::dvec4(position, 1.0)
-        );
-        _labelData.emplace_back(std::make_pair(transformedPos, label));
-
-    } while (!file.eof());
-
-    return true;
 }
 
 double RenderablePlanesCloud::unitToMeter(Unit unit) const {
