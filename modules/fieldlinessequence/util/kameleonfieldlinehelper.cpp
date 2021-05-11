@@ -203,9 +203,9 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
 
 
         //traces with "u" need unidirectioalTrace, while "b" needs bidirectionalTrace
-        ccmc::Fieldline vFlowline;
+        ccmc::Fieldline fieldline;
         if (mainTraceVar == "u") {
-            vFlowline = tracer.unidirectionalTrace(
+            fieldline = tracer.unidirectionalTrace(
                 mainTraceVar,
                 seed.x,
                 seed.y,
@@ -213,7 +213,7 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
             );
         }
         else {
-            vFlowline = tracer.bidirectionalTrace(
+            fieldline = tracer.bidirectionalTrace(
                 mainTraceVar,
                 seed.x,
                 seed.y,
@@ -222,7 +222,7 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
         }
 
 
-        const std::vector<ccmc::Point3f>& positions = vFlowline.getPositions();
+        const std::vector<ccmc::Point3f>& positions = fieldline.getPositions();
 
         const size_t nLinePoints = positions.size();
         std::vector<glm::vec3> initialFieldline;
@@ -233,7 +233,7 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
         for (const ccmc::Point3f& p : positions) {
             //vertices.emplace_back(p.component1, p.component2, p.component3);
 
-            //add the magentic fieldline to the state
+            //add vertices to initial fieldline so it can be rendered as well
             initialFieldline.emplace_back(p.component1, p.component2, p.component3);
 
             std::unique_ptr<ccmc::Interpolator> interpolator2 =
@@ -244,9 +244,9 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
             //trace every vertex from the main trace with the secondary trace var
             //traces with "u" need unidirectioalTrace, while "b" needs bidirectionalTrace
 
-            ccmc::Fieldline Fieldline;
+            ccmc::Fieldline secondFieldline;
             if (secondaryTraceVar == "b") {
-                Fieldline = tracer2.bidirectionalTrace(
+                secondFieldline = tracer2.bidirectionalTrace(
                     secondaryTraceVar,
                     p.component1,
                     p.component2,
@@ -254,7 +254,7 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
                 );
             }
             else {
-                Fieldline = tracer2.unidirectionalTrace(
+                secondFieldline = tracer2.unidirectionalTrace(
                     secondaryTraceVar,
                     p.component1,
                     p.component2,
@@ -263,7 +263,7 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
             }
 
 
-            const std::vector<ccmc::Point3f>& positions2 = Fieldline.getPositions();
+            const std::vector<ccmc::Point3f>& positions2 = secondFieldline.getPositions();
 
             for (const ccmc::Point3f& p2 : positions2) {
 
@@ -274,9 +274,8 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
             vertices.clear();
 
         }
-        //add the initial magnetic fieldlines to the state
-        state.addLine(flowline);
-        flowline.clear();
+        //add the initial  fieldlines to the state
+        state.addLine(initialFieldline);
 
         success |= (nLinePoints > 0);
 
