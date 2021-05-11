@@ -39,6 +39,7 @@
 #include <ghoul/misc/dictionaryluaformatter.h>
 #include <ghoul/misc/profiling.h>
 #include <glm/gtx/vector_angle.hpp>
+#include <filesystem>
 #include <fstream>
 
 namespace {
@@ -470,7 +471,7 @@ void NavigationHandler::loadNavigationState(const std::string& filepath) {
     const std::string absolutePath = absPath(filepath);
     LINFO(fmt::format("Reading camera state from file: {}", absolutePath));
 
-    if (!FileSys.fileExists(absolutePath)) {
+    if (!std::filesystem::is_regular_file(absolutePath)) {
         throw ghoul::FileNotFoundError(absolutePath, "NavigationState");
     }
 

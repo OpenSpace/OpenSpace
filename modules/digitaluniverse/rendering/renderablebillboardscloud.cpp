@@ -47,6 +47,7 @@
 #include <ghoul/glm.h>
 #include <glm/gtx/string_cast.hpp>
 #include <array>
+#include <filesystem>
 #include <fstream>
 #include <cstdint>
 #include <locale>
@@ -1040,7 +1041,7 @@ bool RenderableBillboardsCloud::loadSpeckData() {
         ghoul::filesystem::CacheManager::Persistent::Yes
     );
 
-    const bool hasCachedFile = FileSys.fileExists(cachedFile);
+    const bool hasCachedFile = std::filesystem::is_regular_file(cachedFile);
     if (hasCachedFile) {
         LINFO(fmt::format(
             "Cached file '{}' used for Speck file '{}'",
@@ -1084,7 +1085,7 @@ bool RenderableBillboardsCloud::loadLabelData() {
     if (!_hasSpeckFile && !_hasColorMapFile) {
         success = true;
     }
-    const bool hasCachedFile = FileSys.fileExists(cachedFile);
+    const bool hasCachedFile = std::filesystem::is_regular_file(cachedFile);
     if (hasCachedFile) {
         LINFO(fmt::format(
             "Cached file '{}' used for Label file '{}'",

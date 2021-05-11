@@ -372,8 +372,8 @@ RenderEngine::RenderEngine()
             strftime(date, sizeof(date), "%Y-%m-%d-%H-%M", nowTime);
 
             std::string newFolder = absPath("${STARTUP_SCREENSHOT}/" + std::string(date));
-            if (!FileSys.directoryExists(newFolder)) {
-                FileSys.createDirectory(newFolder);
+            if (!std::filesystem::is_directory(newFolder)) {
+                std::filesystem::create_directory(newFolder);
             }
             FileSys.registerPathToken(
                 "${SCREENSHOTS}",
@@ -1101,11 +1101,8 @@ void RenderEngine::takeScreenshot() {
     // screenshot folder everytime we start OpenSpace even when we are not taking any
     // screenshots. So the first time we actually take one, we create the folder:
 
-    if (!FileSys.directoryExists(absPath("${SCREENSHOTS}"))) {
-        FileSys.createDirectory(
-            absPath("${SCREENSHOTS}"),
-            ghoul::filesystem::FileSystem::Recursive::Yes
-        );
+    if (!std::filesystem::is_directory(absPath("${SCREENSHOTS}"))) {
+        std::filesystem::create_directories(absPath("${SCREENSHOTS}"));
     }
 
     _latestScreenshotNumber = global::windowDelegate->takeScreenshot(_applyWarping);

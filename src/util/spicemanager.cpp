@@ -32,6 +32,7 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
 #include <algorithm>
+#include <filesystem>
 #include "SpiceUsr.h"
 #include "SpiceZpr.h"
 
@@ -202,11 +203,11 @@ void throwSpiceError(const std::string& errorMessage) {
 SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
     ghoul_assert(!filePath.empty(), "Empty file path");
     ghoul_assert(
-        FileSys.fileExists(filePath),
+        std::filesystem::is_regular_file(filePath),
         fmt::format("File '{}' ('{}') does not exist", filePath, absPath(filePath))
     );
     ghoul_assert(
-        FileSys.directoryExists(ghoul::filesystem::File(filePath).directoryName()),
+        std::filesystem::is_directory(std::filesystem::path(filePath).parent_path()),
         fmt::format(
             "File '{}' exists, but directory '{}' doesn't",
             absPath(filePath), ghoul::filesystem::File(filePath).directoryName()
@@ -228,29 +229,23 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
     // We need to set the current directory as meta-kernels are usually defined relative
     // to the directory they reside in. The directory change is not necessary for regular
     // kernels
-    ghoul::filesystem::Directory currentDirectory = FileSys.currentDirectory();
-    using RawPath = ghoul::filesystem::File::RawPath;
-    std::string fileDirectory = ghoul::filesystem::File(
-        path,
-        RawPath::Yes
-    ).directoryName();
-    FileSys.setCurrentDirectory(fileDirectory);
+    std::filesystem::path currentDirectory = std::filesystem::current_path();
+
+    std::filesystem::path p = std::filesystem::path(path).parent_path();
+    std::filesystem::current_path(p);
 
     LINFO(fmt::format("Loading SPICE kernel '{}'", path));
     // Load the kernel
     furnsh_c(path.c_str());
 
     // Reset the current directory to the previous one
-    FileSys.setCurrentDirectory(currentDirectory);
+    std::filesystem::current_path(currentDirectory);
 
     if (failed_c()) {
         throwSpiceError("Kernel loading");
     }
 
-    std::string fileExtension = ghoul::filesystem::File(
-        path,
-        RawPath::Yes
-    ).fileExtension();
+    std::string fileExtension = ghoul::filesystem::File(path).fileExtension();
     if (fileExtension == "bc" || fileExtension == "BC") {
         findCkCoverage(path); // binary ck kernel
     }
@@ -1006,7 +1001,10 @@ SpiceManager::TerminatorEllipseResult SpiceManager::terminatorEllipse(
 
 void SpiceManager::findCkCoverage(const std::string& path) {
     ghoul_assert(!path.empty(), "Empty file path");
-    ghoul_assert(FileSys.fileExists(path), fmt::format("File '{}' does not exist", path));
+    ghoul_assert(
+        std::filesystem::is_regular_file(path),
+        fmt::format("File '{}' does not exist", path)
+    );
 
     constexpr unsigned int MaxObj = 256;
     constexpr unsigned int WinSiz = 10000;
@@ -1062,7 +1060,10 @@ void SpiceManager::findCkCoverage(const std::string& path) {
 
 void SpiceManager::findSpkCoverage(const std::string& path) {
     ghoul_assert(!path.empty(), "Empty file path");
-    ghoul_assert(FileSys.fileExists(path), fmt::format("File '{}' does not exist", path));
+    ghoul_assert(
+        std::filesystem::is_regular_file(path),
+        fmt::format("File '{}' does not exist", path)
+    );
 
     constexpr unsigned int MaxObj = 256;
     constexpr unsigned int WinSiz = 10000;

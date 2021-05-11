@@ -343,7 +343,7 @@ bool GlobeLabelsComponent::loadLabelsData(const std::string& file) {
         ghoul::filesystem::CacheManager::Persistent::Yes
     );
 
-    bool hasCachedFile = FileSys.fileExists(cachedFile);
+    bool hasCachedFile = std::filesystem::is_regular_file(cachedFile);
     if (hasCachedFile) {
         LINFO(fmt::format("Cached file '{}' used for labels file: {}", cachedFile, file));
 

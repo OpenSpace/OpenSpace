@@ -32,6 +32,7 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
 #include <algorithm>
+#include <filesystem>
 
 #include <openspace/modulepath.h>
 
@@ -123,13 +124,13 @@ std::string OpenSpaceModule::modulePath() const {
     );
 
     // First try the internal module directory
-    if (FileSys.directoryExists(absPath("${MODULES}/" + moduleIdentifier))) {
+    if (std::filesystem::is_directory(absPath("${MODULES}/" + moduleIdentifier))) {
         return absPath("${MODULES}/" + moduleIdentifier);
     }
     else { // Otherwise, it might be one of the external directories
         for (const char* dir : ModulePaths) {
             const std::string& path = std::string(dir) + '/' + moduleIdentifier;
-            if (FileSys.directoryExists(absPath(path))) {
+            if (std::filesystem::is_directory(absPath(path))) {
                 return absPath(path);
             }
         }

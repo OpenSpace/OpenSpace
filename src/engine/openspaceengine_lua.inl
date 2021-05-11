@@ -338,7 +338,7 @@ int createSingleColorImage(lua_State* L) {
         ghoul::filesystem::CacheManager::Persistent::Yes
     );
 
-    const bool hasCachedFile = FileSys.fileExists(fileName);
+    const bool hasCachedFile = std::filesystem::is_regular_file(fileName);
     if (hasCachedFile) {
         LDEBUGC("OpenSpaceEngine", fmt::format("Cached file '{}' used", fileName));
         ghoul::lua::push(L, fileName);

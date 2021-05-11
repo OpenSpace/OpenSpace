@@ -1239,7 +1239,7 @@ void RenderableStars::loadShapeTexture() {
 
 void RenderableStars::loadData() {
     std::string file = absPath(_speckFile);
-    if (!FileSys.fileExists(file)) {
+    if (!std::filesystem::is_regular_file(file)) {
         return;
     }
 
@@ -1253,7 +1253,7 @@ void RenderableStars::loadData() {
     _fullData.clear();
     _dataNames.clear();
 
-    bool hasCachedFile = FileSys.fileExists(cachedFile);
+    bool hasCachedFile = std::filesystem::is_regular_file(cachedFile);
     if (hasCachedFile) {
         LINFO(fmt::format("Cached file '{}' used for Speck file '{}'",
             cachedFile, file

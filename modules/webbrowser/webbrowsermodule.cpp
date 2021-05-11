@@ -37,6 +37,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
+#include <filesystem>
 
 namespace {
     constexpr const char* _loggerCat = "WebBrowser";
@@ -117,7 +118,7 @@ void WebBrowserModule::internalDeinitialize() {
 
 std::string WebBrowserModule::findHelperExecutable() {
     std::string execLocation = absPath("${BIN}/" + std::string(SubprocessPath));
-    if (!FileSys.fileExists(execLocation)) {
+    if (!std::filesystem::is_regular_file(execLocation)) {
         LERROR(fmt::format(
             "Could not find web helper executable at location: {}" , execLocation
         ));

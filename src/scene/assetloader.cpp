@@ -36,6 +36,7 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/defer.h>
 #include <ghoul/misc/profiling.h>
+#include <filesystem>
 
 #include "assetloader_lua.inl"
 
@@ -265,7 +266,7 @@ bool AssetLoader::loadAsset(Asset* asset) {
         setCurrentAsset(parentAsset);
     };
 
-    if (!FileSys.fileExists(asset->assetFilePath())) {
+    if (!std::filesystem::is_regular_file(asset->assetFilePath())) {
         LERROR(fmt::format(
             "Could not load asset '{}': File does not exist", asset->assetFilePath())
         );
@@ -405,7 +406,7 @@ std::string AssetLoader::generateAssetPath(const std::string& baseDirectory,
     if (!hasAssetSuffix) {
         fullAssetPath += assetSuffix;
     }
-    bool fullAssetPathExists = FileSys.fileExists(FileSys.absPath(fullAssetPath));
+    bool fullAssetPathExists = std::filesystem::is_regular_file(absPath(fullAssetPath));
 
     // Construct the full path including the .scene extension
     const std::string sceneSuffix = std::string(".") + SceneFileSuffix;
@@ -416,7 +417,8 @@ std::string AssetLoader::generateAssetPath(const std::string& baseDirectory,
         hasSceneSuffix ?
         prefix + assetPath :
         prefix + assetPath + sceneSuffix;
-    const bool fullScenePathExists = FileSys.fileExists(FileSys.absPath(fullScenePath));
+    const bool fullScenePathExists =
+        std::filesystem::is_regular_file(absPath(fullScenePath));
 
     if (fullAssetPathExists && fullScenePathExists) {
         LWARNING(fmt::format(
@@ -746,7 +748,7 @@ int AssetLoader::existsLua(Asset*) {
     const std::string path = generateAssetPath(directory, assetName);
 
     lua_settop(*_luaState, 0);
-    lua_pushboolean(*_luaState, FileSys.fileExists(path));
+    lua_pushboolean(*_luaState, std::filesystem::is_regular_file(path));
     ghoul_assert(lua_gettop(*_luaState) == 1, "Incorrect number of items left on stack");
     return 1;
 }

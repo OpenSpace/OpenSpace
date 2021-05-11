@@ -605,31 +605,25 @@ void parseLuaState(Configuration& configuration) {
 
 documentation::Documentation Configuration::Documentation = codegen::doc<Parameters>();
 
-std::string findConfiguration(const std::string& filename) {
+std::filesystem::path findConfiguration(const std::string& filename) {
     using ghoul::filesystem::Directory;
 
-    Directory directory = FileSys.absolutePath("${BIN}");
+    std::filesystem::path directory = FileSys.absolutePath("${BIN}");
 
     while (true) {
-        std::string fullPath = FileSys.pathByAppendingComponent(
-            directory,
-            filename
-        );
-
-        if (FileSys.fileExists(fullPath)) {
+        std::filesystem::path p = directory / filename;
+        if (std::filesystem::exists(p) && std::filesystem::is_regular_file(p)) {
             // We have found the configuration file and can bail out
-            return fullPath;
+            return p;
         }
 
         // Otherwise, we traverse the directory tree up
-        Directory nextDirectory = directory.parentDirectory(
-            ghoul::filesystem::Directory::AbsolutePath::Yes
-        );
+        std::filesystem::path nextDirectory = directory.parent_path();
 
-        if (directory.path() == nextDirectory.path()) {
+        if (directory == nextDirectory) {
             // We have reached the root of the file system and did not find the file
             throw ghoul::RuntimeError(
-                "Could not find configuration file '" + filename + "'",
+                fmt::format("Could not find configuration file '{}'", filename),
                 "ConfigurationManager"
             );
         }
@@ -641,12 +635,12 @@ Configuration loadConfigurationFromFile(const std::string& filename,
                                         const std::string& overrideScript)
 {
     ghoul_assert(!filename.empty(), "Filename must not be empty");
-    ghoul_assert(FileSys.fileExists(filename), "File must exist");
+    ghoul_assert(std::filesystem::is_regular_file(filename), "File must exist");
 
     Configuration result;
 
     // If there is an initial config helper file, load it into the state
-    if (FileSys.fileExists(absPath(InitialConfigHelper))) {
+    if (std::filesystem::is_regular_file(absPath(InitialConfigHelper))) {
         ghoul::lua::runScriptFile(result.state, absPath(InitialConfigHelper));
     }
 

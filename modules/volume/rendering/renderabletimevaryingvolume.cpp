@@ -44,6 +44,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
+#include <filesystem>
 #include <optional>
 
 namespace {
@@ -210,17 +211,18 @@ RenderableTimeVaryingVolume::~RenderableTimeVaryingVolume() {}
 
 void RenderableTimeVaryingVolume::initializeGL() {
     using RawPath = ghoul::filesystem::Directory::RawPath;
-    ghoul::filesystem::Directory sequenceDir(_sourceDirectory, RawPath::Yes);
+    std::string sequenceDir = absPath(_sourceDirectory);
 
-    if (!FileSys.directoryExists(sequenceDir)) {
-        LERROR(fmt::format("Could not load sequence directory '{}'", sequenceDir.path()));
+    if (!std::filesystem::is_directory(sequenceDir)) {
+        LERROR(fmt::format("Could not load sequence directory '{}'", sequenceDir));
         return;
     }
 
     using Recursive = ghoul::filesystem::Directory::Recursive;
     using Sort = ghoul::filesystem::Directory::Sort;
 
-    std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::Yes, Sort::No);
+    std::vector<std::string> sequencePaths =
+        ghoul::filesystem::Directory(sequenceDir).read(Recursive::Yes, Sort::No);
     for (const std::string& path : sequencePaths) {
         ghoul::filesystem::File currentFile(path);
         std::string extension = currentFile.fileExtension();

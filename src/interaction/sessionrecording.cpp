@@ -47,6 +47,7 @@
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
+#include <filesystem>
 #include <iomanip>
 
 #ifdef WIN32
@@ -165,7 +166,7 @@ bool SessionRecording::handleRecordingFile(std::string filenameIn) {
 
     std::string absFilename = absPath("${RECORDINGS}/" + filenameIn);
 
-    if (FileSys.fileExists(absFilename)) {
+    if (std::filesystem::is_regular_file(absFilename)) {
         LERROR(fmt::format(
             "Unable to start recording; file {} already exists.", absFilename.c_str()
         ));
@@ -196,11 +197,8 @@ bool SessionRecording::startRecording(const std::string& filename) {
         LERROR("Unable to start recording while in session playback mode");
         return false;
     }
-    if (!FileSys.directoryExists(absPath("${RECORDINGS}"))) {
-        FileSys.createDirectory(
-            absPath("${RECORDINGS}"),
-            ghoul::filesystem::FileSystem::Recursive::Yes
-        );
+    if (!std::filesystem::is_directory(absPath("${RECORDINGS}"))) {
+        std::filesystem::create_directories(absPath("${RECORDINGS}"));
     }
 
     bool recordingFileOK = handleRecordingFile(filename);
@@ -256,7 +254,7 @@ bool SessionRecording::startPlayback(std::string& filename,
     //Run through conversion in case file is older. Does nothing if the file format
     // is up-to-date
     filename = convertFile(filename);
-    if (FileSys.fileExists(filename)) {
+    if (std::filesystem::is_regular_file(filename)) {
         absFilename = filename;
     }
     else {
@@ -272,7 +270,7 @@ bool SessionRecording::startPlayback(std::string& filename,
         return false;
     }
 
-    if (!FileSys.fileExists(absFilename)) {
+    if (!std::filesystem::is_regular_file(absFilename)) {
         LERROR("Cannot find the specified playback file.");
         cleanUpPlayback();
         return false;
@@ -1794,7 +1792,7 @@ void SessionRecording::readFileIntoStringStream(std::string filename,
         throw ConversionError("Playback filename must not contain path (/) elements");
     }
     std::string conversionInFilename = absPath("${RECORDINGS}/" + filename);
-    if (!FileSys.fileExists(conversionInFilename)) {
+    if (!std::filesystem::is_regular_file(conversionInFilename)) {
         throw ConversionError(fmt::format(
             "Cannot find the specified playback file '{}' to convert.",
             conversionInFilename

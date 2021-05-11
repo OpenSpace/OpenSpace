@@ -44,6 +44,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/openglstatecache.h>
+#include <filesystem>
 #include <fstream>
 #include "cpl_minixml.h"
 
@@ -513,9 +514,9 @@ bool readFilePath(TemporalTileProvider& t) {
     }
 
     // File path was not a path to a file but a GDAL config or empty
-    ghoul::filesystem::File f(t.filePath);
-    if (FileSys.fileExists(f)) {
-        t.initDict.setValue(temporal::KeyBasePath, f.directoryName());
+    std::filesystem::path f(t.filePath.value());
+    if (std::filesystem::is_regular_file(f)) {
+        t.initDict.setValue(temporal::KeyBasePath, f.parent_path().string());
     }
 
     t.gdalXmlTemplate = consumeTemporalMetaData(t, xml);

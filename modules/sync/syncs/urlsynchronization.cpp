@@ -34,6 +34,7 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/dictionary.h>
+#include <filesystem>
 #include <fstream>
 #include <numeric>
 #include <memory>
@@ -288,7 +289,7 @@ bool UrlSynchronization::nTotalBytesIsKnown() {
 void UrlSynchronization::createSyncFile() {
     std::string dir = directory();
     std::string filepath = dir + ".ossync";
-    FileSys.createDirectory(dir, ghoul::filesystem::FileSystem::Recursive::Yes);
+    std::filesystem::create_directories(dir);
     std::ofstream syncFile(filepath, std::ofstream::out);
     syncFile << "Synchronized";
     syncFile.close();
@@ -296,7 +297,7 @@ void UrlSynchronization::createSyncFile() {
 
 bool UrlSynchronization::hasSyncFile() {
     const std::string& path = directory() + ".ossync";
-    return FileSys.fileExists(path);
+    return std::filesystem::is_regular_file(path);
 }
 
 std::string UrlSynchronization::directory() {

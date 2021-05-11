@@ -54,6 +54,7 @@
 #include <ghoul/opengl/texture.h>
 #include <algorithm>
 #include <chrono>
+#include <filesystem>
 #include <fstream>
 #include <iterator>
 
@@ -629,7 +630,7 @@ void RenderableMultiresVolume::update(const UpdateData& data) {
         // Make sure that the directory exists
         ghoul::filesystem::File file(_statsFileName);
         ghoul::filesystem::Directory directory(file.directoryName());
-        FileSys.createDirectory(directory, ghoul::filesystem::FileSystem::Recursive::Yes);
+        std::filesystem::create_directories(directory.path());
 
         std::ofstream ofs(_statsFileName, std::ofstream::out);
 

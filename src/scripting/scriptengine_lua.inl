@@ -24,6 +24,7 @@
 
 #include <ghoul/filesystem/directory.h>
 #include <ghoul/filesystem/file.h>
+#include <filesystem>
 
 #include <ghoul/ext/assimp/contrib/zip/src/zip.h>
 
@@ -245,7 +246,7 @@ int fileExists(lua_State* L) {
         1,
         ghoul::lua::PopValue::Yes
     );
-    const bool e = FileSys.fileExists(absPath(file));
+    const bool e = std::filesystem::is_regular_file(absPath(file));
 
     ghoul::lua::push(L, e);
 
@@ -266,7 +267,7 @@ int directoryExists(lua_State* L) {
         1,
         ghoul::lua::PopValue::Yes
     );
-    const bool e = FileSys.directoryExists(absPath(file));
+    const bool e = std::filesystem::is_directory(absPath(file));
 
     ghoul::lua::push(L, e);
 

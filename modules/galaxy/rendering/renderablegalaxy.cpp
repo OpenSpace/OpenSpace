@@ -325,7 +325,7 @@ void RenderableGalaxy::initialize() {
         _pointsFilename,
         ghoul::filesystem::CacheManager::Persistent::Yes
     );
-    const bool hasCachedFile = FileSys.fileExists(cachedPointsFile);
+    const bool hasCachedFile = std::filesystem::is_regular_file(cachedPointsFile);
     if (hasCachedFile) {
         LINFO(fmt::format("Cached file '{}' used for galaxy point file '{}'",
             cachedPointsFile, _pointsFilename

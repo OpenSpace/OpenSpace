@@ -40,6 +40,7 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <array>
+#include <filesystem>
 #include <fstream>
 #include <locale>
 #include <cstdint>
@@ -390,7 +391,7 @@ bool RenderablePoints::loadData() {
         ghoul::filesystem::CacheManager::Persistent::Yes
     );
 
-    bool hasCachedFile = FileSys.fileExists(cachedFile);
+    bool hasCachedFile = std::filesystem::is_regular_file(cachedFile);
     if (hasCachedFile) {
         LINFO(fmt::format(
             "Cached file '{}' used for Speck file '{}'",

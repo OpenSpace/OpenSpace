@@ -31,6 +31,7 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/thread.h>
 #include <chrono>
+#include <filesystem>
 #include <thread>
 
 #ifdef OPENSPACE_CURL_ENABLED
@@ -140,7 +141,7 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
                                                 DownloadFinishedCallback finishedCallback,
                                                 DownloadProgressCallback progressCallback)
 {
-    if (!overrideFile && FileSys.fileExists(file)) {
+    if (!overrideFile && std::filesystem::is_regular_file(file.path())) {
         return nullptr;
     }
 

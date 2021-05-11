@@ -29,6 +29,7 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <filesystem>
 
 #ifdef OPENSPACE_CURL_ENABLED
 #ifdef WIN32
@@ -349,7 +350,7 @@ HttpFileDownload::HttpFileDownload(std::string destination,
 {}
 
 bool HttpFileDownload::initDownload() {
-    if (!_overwrite && FileSys.fileExists(_destination)) {
+    if (!_overwrite && std::filesystem::is_regular_file(_destination)) {
         LWARNING(fmt::format("File {} already exists", _destination));
         return false;
     }
@@ -359,8 +360,8 @@ bool HttpFileDownload::initDownload() {
 
     {
         std::lock_guard<std::mutex> g(_directoryCreationMutex);
-        if (!FileSys.directoryExists(d)) {
-            FileSys.createDirectory(d, ghoul::filesystem::FileSystem::Recursive::Yes);
+        if (!std::filesystem::is_directory(d.path())) {
+            std::filesystem::create_directories(d.path());
         }
     }
 

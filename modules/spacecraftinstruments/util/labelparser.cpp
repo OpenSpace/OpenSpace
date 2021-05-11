@@ -32,6 +32,7 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <filesystem>
 #include <fstream>
 
 namespace {
@@ -141,9 +142,9 @@ std::string LabelParser::encode(const std::string& line) const {
 
 bool LabelParser::create() {
     using RawPath = ghoul::filesystem::Directory::RawPath;
-    ghoul::filesystem::Directory sequenceDir(_fileName, RawPath::Yes);
-    if (!FileSys.directoryExists(sequenceDir)) {
-        LERROR(fmt::format("Could not load Label Directory '{}'", sequenceDir.path()));
+    std::string sequenceDir = absPath(_fileName);
+    if (!std::filesystem::is_directory(sequenceDir)) {
+        LERROR(fmt::format("Could not load Label Directory '{}'", sequenceDir));
         return false;
     }
 
@@ -153,7 +154,8 @@ bool LabelParser::create() {
 
     using Recursive = ghoul::filesystem::Directory::Recursive;
     using Sort = ghoul::filesystem::Directory::Sort;
-    std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::Yes, Sort::No);
+    std::vector<std::string> sequencePaths =
+        ghoul::filesystem::Directory(sequenceDir).read(Recursive::Yes, Sort::No);
     for (const std::string& path : sequencePaths) {
         size_t position = path.find_last_of('.') + 1;
         if (position == 0 || position == std::string::npos) {
@@ -274,7 +276,7 @@ bool LabelParser::create() {
                 std::string p = path.substr(0, path.size() - ("lbl"s).size());
                 for (const std::string& ext : extensions) {
                     std::string imagePath = p + ext;
-                    if (FileSys.fileExists(imagePath)) {
+                    if (std::filesystem::is_regular_file(imagePath)) {
                         std::vector<std::string> spiceInstrument;
                         spiceInstrument.push_back(_instrumentID);
 

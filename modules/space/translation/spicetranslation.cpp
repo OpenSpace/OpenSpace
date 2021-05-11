@@ -33,6 +33,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
+#include <filesystem>
 #include <optional>
 
 namespace {
@@ -97,7 +98,7 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     auto loadKernel = [](const std::string& kernel) {
-        if (!FileSys.fileExists(kernel)) {
+        if (!std::filesystem::is_regular_file(kernel)) {
             throw SpiceManager::SpiceException(fmt::format(
                 "Kernel '{}' does not exist", kernel
             ));

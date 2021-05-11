@@ -32,6 +32,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
 #include <iterator>
+#include <filesystem>
 #include <fstream>
 #include <string>
 
@@ -70,7 +71,7 @@ void TransferFunction::setPath(const std::string& filepath) {
         _file = nullptr;
     }
     std::string f = absPath(filepath);
-    if (!FileSys.fileExists(f)) {
+    if (!std::filesystem::is_regular_file(f)) {
         LERROR("Could not find transfer function file.");
         _file = nullptr;
         return;

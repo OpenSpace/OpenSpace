@@ -32,6 +32,7 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <filesystem>
 #include <fstream>
 #include <numeric>
 
@@ -157,7 +158,7 @@ void HttpSynchronization::createSyncFile() {
     const std::string& directoryName = directory();
     const std::string& filepath = directoryName + ".ossync";
 
-    FileSys.createDirectory(directoryName, ghoul::filesystem::FileSystem::Recursive::Yes);
+    std::filesystem::create_directories(directoryName);
 
     std::ofstream syncFile(filepath, std::ofstream::out);
     syncFile << "Synchronized";
@@ -166,7 +167,7 @@ void HttpSynchronization::createSyncFile() {
 
 bool HttpSynchronization::hasSyncFile() {
     const std::string& path = directory() + ".ossync";
-    return FileSys.fileExists(path);
+    return std::filesystem::is_regular_file(path);
 }
 
 bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {

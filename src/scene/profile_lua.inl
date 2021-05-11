@@ -71,7 +71,7 @@ int saveSettingsToProfile(lua_State* L) {
             absPath("${USER_PROFILES}"), global::configuration->profile);
         std::string destPath = fmt::format("{}/{}.profile",
             absPath("${PROFILES}"), global::configuration->profile);
-        if (!FileSys.fileExists(sourcePath)) {
+        if (!std::filesystem::is_regular_file(sourcePath)) {
             sourcePath = absPath("${USER_PROFILES}")
                 + '/' + global::configuration->profile + ".profile";
         }
@@ -105,12 +105,12 @@ int saveSettingsToProfile(lua_State* L) {
 
     std::string absFilename = fmt::format("{}/{}.profile",
         absPath("${PROFILES}"), saveFilePath);
-    if (!FileSys.fileExists(absFilename)) {
+    if (!std::filesystem::is_regular_file(absFilename)) {
         absFilename = absPath("${USER_PROFILES}/" + saveFilePath + ".profile");
     }
     const bool overwrite = (n == 2) ? ghoul::lua::value<bool>(L, 2) : true;
 
-    if (FileSys.fileExists(absFilename) && !overwrite) {
+    if (std::filesystem::is_regular_file(absFilename) && !overwrite) {
         return luaL_error(
             L,
             fmt::format(

@@ -33,6 +33,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
+#include <filesystem>
 #include <fstream>
 
 namespace {
@@ -113,7 +114,7 @@ glm::dvec3 HorizonsTranslation::position(const UpdateData& data) const {
 
 void HorizonsTranslation::loadData() {
     std::string file = _horizonsTextFile;
-    if (!FileSys.fileExists(absPath(file))) {
+    if (!std::filesystem::is_regular_file(absPath(file))) {
         return;
     }
 
@@ -122,7 +123,7 @@ void HorizonsTranslation::loadData() {
         ghoul::filesystem::CacheManager::Persistent::Yes
     );
 
-    bool hasCachedFile = FileSys.fileExists(cachedFile);
+    bool hasCachedFile = std::filesystem::is_regular_file(cachedFile);
     if (hasCachedFile) {
         LINFO(fmt::format(
             "Cached file '{}' used for Horizon file '{}'", cachedFile, file

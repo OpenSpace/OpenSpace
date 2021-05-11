@@ -33,6 +33,7 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/misc/dictionary.h>
 #include <algorithm>
+#include <filesystem>
 
 namespace {
     constexpr const char* _loggerCat = "TaskRunner";
@@ -69,7 +70,7 @@ std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromDictionary(
 
 std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromFile(const std::string& path) {
     std::string absTasksFile = absPath(path);
-    if (!FileSys.fileExists(ghoul::filesystem::File(absTasksFile))) {
+    if (!std::filesystem::is_regular_file(absTasksFile)) {
         LERROR(fmt::format(
             "Could not load tasks file '{}'. File not found", absTasksFile
         ));

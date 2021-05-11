@@ -61,6 +61,7 @@
 #include <Tracy.hpp>
 #include <chrono>
 #include <ctime>
+#include <filesystem>
 #include <memory>
 
 #ifdef WIN32
@@ -1095,11 +1096,11 @@ int main(int argc, char* argv[]) {
         std::string configurationFilePath = commandlineArguments.configurationName;
         if (commandlineArguments.configurationName.empty()) {
             LDEBUG("Finding configuration");
-            configurationFilePath = configuration::findConfiguration();
+            configurationFilePath = configuration::findConfiguration().string();
         }
         configurationFilePath = absPath(configurationFilePath);
 
-        if (!FileSys.fileExists(configurationFilePath)) {
+        if (!std::filesystem::is_regular_file(configurationFilePath)) {
             LFATALC("main", "Could not find configuration: " + configurationFilePath);
             exit(EXIT_FAILURE);
         }

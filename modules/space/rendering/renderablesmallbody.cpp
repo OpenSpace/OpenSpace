@@ -41,6 +41,7 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/logging/logmanager.h>
 #include <chrono>
+#include <filesystem>
 #include <fstream>
 #include <math.h>
 #include <vector>
@@ -172,7 +173,7 @@ RenderableSmallBody::RenderableSmallBody(const ghoul::Dictionary& dictionary)
 }
 
 void RenderableSmallBody::readDataFile(const std::string& filename) {
-    if (!FileSys.fileExists(filename)) {
+    if (!std::filesystem::is_regular_file(filename)) {
         throw ghoul::RuntimeError(fmt::format(
             "JPL SBDB file {} does not exist.", filename
         ));

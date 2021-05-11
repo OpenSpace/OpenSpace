@@ -29,6 +29,7 @@
 #include <openspace/engine/globals.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <filesystem>
 #include <iomanip>
 #include <ghoul/logging/logmanager.h>
 
@@ -51,8 +52,8 @@ ConvertRecFormatTask::ConvertRecFormatTask(const ghoul::Dictionary& dictionary) 
     _inFilePath = absPath(dictionary.value<std::string>(KeyInFilePath));
     _outFilePath = absPath(dictionary.value<std::string>(KeyOutFilePath));
 
-    ghoul_assert(FileSys.fileExists(_inFilePath), "The filename must exist");
-    if (!FileSys.fileExists(_inFilePath)) {
+    ghoul_assert(std::filesystem::is_regular_file(_inFilePath), "The file must exist");
+    if (!std::filesystem::is_regular_file(_inFilePath)) {
         LERROR(fmt::format("Failed to load session recording file: {}", _inFilePath));
     }
     else {

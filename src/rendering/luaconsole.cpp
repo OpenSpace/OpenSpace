@@ -38,6 +38,7 @@
 #include <ghoul/misc/profiling.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/programobject.h>
+#include <filesystem>
 #include <fstream>
 
 namespace {
@@ -175,7 +176,7 @@ void LuaConsole::initialize() {
         ghoul::filesystem::CacheManager::Persistent::Yes
     );
 
-    if (FileSys.fileExists(filename)) {
+    if (std::filesystem::is_regular_file(filename)) {
         std::ifstream file(filename, std::ios::binary | std::ios::in);
 
         if (file.good()) {

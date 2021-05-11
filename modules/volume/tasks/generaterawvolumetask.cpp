@@ -38,6 +38,7 @@
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
 #include <ghoul/misc/defer.h>
+#include <filesystem>
 #include <fstream>
 
 namespace {
@@ -166,8 +167,8 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
 
     ghoul::filesystem::File file(_rawVolumeOutputPath);
     const std::string directory = file.directoryName();
-    if (!FileSys.directoryExists(directory)) {
-        FileSys.createDirectory(directory, ghoul::filesystem::FileSystem::Recursive::Yes);
+    if (!std::filesystem::is_directory(directory)) {
+        std::filesystem::create_directories(directory);
     }
 
     volume::RawVolumeWriter<float> writer(_rawVolumeOutputPath);

@@ -34,6 +34,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/profiling.h>
+#include <filesystem>
 #include <fstream>
 
 #include "scriptengine_lua.inl"
@@ -211,7 +212,7 @@ bool ScriptEngine::runScriptFile(const std::string& filename) {
         LWARNING("Filename was empty");
         return false;
     }
-    if (!FileSys.fileExists(filename)) {
+    if (!std::filesystem::is_regular_file(filename)) {
         LERROR(fmt::format("Script with name '{}' did not exist", filename));
         return false;
     }

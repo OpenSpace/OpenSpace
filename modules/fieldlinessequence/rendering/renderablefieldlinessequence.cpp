@@ -38,6 +38,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
+#include <filesystem>
 #include <fstream>
 #include <thread>
 
@@ -417,10 +418,9 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
 
     // Ensure that the source folder exists and then extract
     // the files with the same extension as <inputFileTypeString>
-    ghoul::filesystem::Directory sourceFolder(sourceFolderPath);
-    if (FileSys.directoryExists(sourceFolder)) {
+    if (std::filesystem::is_directory(sourceFolderPath)) {
         // Extract all file paths from the provided folder
-        _sourceFiles = sourceFolder.readFiles(
+        _sourceFiles = ghoul::filesystem::Directory(sourceFolderPath).readFiles(
             ghoul::filesystem::Directory::Recursive::No,
             ghoul::filesystem::Directory::Sort::Yes
         );
@@ -471,8 +471,7 @@ void RenderableFieldlinesSequence::extractOptionalInfoFromDictionary(
     // ------------------- EXTRACT OPTIONAL VALUES FROM DICTIONARY ------------------- //
     if (_dictionary->hasValue<std::string>(KeyOutputFolder)) {
         outputFolderPath = _dictionary->value<std::string>(KeyOutputFolder);
-        ghoul::filesystem::Directory outputFolder(outputFolderPath);
-        if (FileSys.directoryExists(outputFolder)) {
+        if (std::filesystem::is_directory(outputFolderPath)) {
             outputFolderPath = absPath(outputFolderPath);
         }
         else {
@@ -916,8 +915,7 @@ bool RenderableFieldlinesSequence::extractCdfInfoFromDictionary(std::string& see
 {
     if (_dictionary->hasValue<std::string>(KeyCdfSeedPointFile)) {
         seedFilePath = _dictionary->value<std::string>(KeyCdfSeedPointFile);
-        ghoul::filesystem::File seedPointFile(seedFilePath);
-        if (FileSys.fileExists(seedPointFile)) {
+        if (std::filesystem::is_regular_file(seedFilePath)) {
             seedFilePath = absPath(seedFilePath);
         }
         else {

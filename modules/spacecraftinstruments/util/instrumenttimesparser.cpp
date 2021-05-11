@@ -31,6 +31,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/directory.h>
 #include <ghoul/misc/dictionary.h>
+#include <filesystem>
 #include <fstream>
 
 namespace {
@@ -68,9 +69,9 @@ InstrumentTimesParser::InstrumentTimesParser(std::string name, std::string seque
 
 bool InstrumentTimesParser::create() {
     using RawPath = ghoul::filesystem::Directory::RawPath;
-    ghoul::filesystem::Directory sequenceDir(_fileName, RawPath::Yes);
-    if (!FileSys.directoryExists(sequenceDir)) {
-        LERROR(fmt::format("Could not load Label Directory '{}'", sequenceDir.path()));
+    std::string sequenceDir = absPath(_fileName);
+    if (!std::filesystem::is_directory(sequenceDir)) {
+        LERROR(fmt::format("Could not load Label Directory '{}'", sequenceDir));
         return false;
     }
 
@@ -80,11 +81,11 @@ bool InstrumentTimesParser::create() {
         const std::string& instrumentID = p.first;
         for (std::string filename : p.second) {
             std::string filepath = FileSys.pathByAppendingComponent(
-                sequenceDir.path(),
+                sequenceDir,
                 std::move(filename)
             );
 
-            if (!FileSys.fileExists(filepath)) {
+            if (!std::filesystem::is_regular_file(filepath)) {
                 LERROR(fmt::format("Unable to read file '{}'. Skipping file", filepath));
                 continue;
             }
