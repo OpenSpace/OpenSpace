@@ -31,6 +31,7 @@
 #include <openspace/mission/missionmanager.h>
 
 #include <ghoul/logging/logmanager.h>
+#include <include/openspace/util/time.h>
 
 
 using nlohmann::json;
@@ -69,12 +70,15 @@ nlohmann::json MissionTopic::createPhaseJson(const MissionPhase& phase) const {
         phases.push_back(subphaseJson);
     }
 
+    std::string startTimeString = std::string(Time(phase.timeRange().start).ISO8601());
+    std::string endTimeString = std::string(Time(phase.timeRange().end).ISO8601());
+
     nlohmann::json phaseJson = {
         { "name", phase.name() },
         { "description", phase.description() },
         { "timerange", {
-            { "start" ,phase.timeRange().start },
-            { "end" ,phase.timeRange().end }
+            { "start" ,startTimeString },
+            { "end" ,endTimeString }
         }},
         { "phases", phases },
         { "media",{
