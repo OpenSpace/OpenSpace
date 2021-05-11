@@ -27,12 +27,9 @@
 #include <modules/server/include/connection.h>
 #include <modules/server/include/jsonconverters.h>
 #include <openspace/engine/globals.h>
-
 #include <openspace/mission/missionmanager.h>
-
+#include <openspace/util/time.h>
 #include <ghoul/logging/logmanager.h>
-#include <include/openspace/util/time.h>
-
 
 using nlohmann::json;
 
