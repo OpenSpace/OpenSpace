@@ -81,8 +81,8 @@ namespace openspace {
 		~WWTDataHandler();
 		// Image downloading and xml parsing
 		bool downloadFile(std::string& url, std::string& fileDestination);
-		void loadWTMLCollectionsFromURL(std::string url, std::string fileName);
-		void loadWTMLCollectionsFromDirectory(std::string directory);
+		void loadWTMLCollectionsFromURL(std::string directory, std::string url, std::string fileName);
+		bool loadWTMLCollectionsFromDirectory(std::string directory);
 		int loadImagesFromLoadedXMLs();
 
 		const std::vector<ImageCollection>& getAllImageCollectionUrls() const;
@@ -101,6 +101,7 @@ namespace openspace {
                                 std::string collectionName,
                                 std::string imageUrl,
                                 ImageData& img);
+        bool directoryExists(std::string& path);
 
 		std::string getChildNodeContentFromImageSet(tinyxml2::XMLElement* imageSet, 
                                                     std::string elementName);

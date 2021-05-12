@@ -62,7 +62,7 @@ public:
     void setSelectedBrowser(ScreenSpaceRenderable* ptr);
     void setSelectedBrowser(int i);
     int getSelectedBrowserIndex();
-    int loadImages(const std::string& root, int readingMode = FROM_URL);
+    int loadImages(const std::string& root, const std::string& directory);
 
     scripting::LuaLibrary luaLibrary() const override;
     //std::vector<documentation::Documentation> documentations() const override;

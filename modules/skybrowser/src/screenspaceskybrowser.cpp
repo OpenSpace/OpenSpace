@@ -177,6 +177,14 @@ namespace openspace {
         return _skyTarget;
     }
 
+    bool ScreenSpaceSkyBrowser::hasLoadedCollections() {
+        return _hasLoadedCollections;
+    }
+
+    void ScreenSpaceSkyBrowser::setHasLoadedCollections(bool isLoaded) {
+        _hasLoadedCollections = isLoaded;
+    }
+
     float ScreenSpaceSkyBrowser::fieldOfView() const {
         return _vfieldOfView;
     }

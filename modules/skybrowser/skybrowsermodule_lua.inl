@@ -45,8 +45,7 @@ namespace openspace::skybrowser::luascriptfunctions {
         // Load image, if the image has not been loaded yet
         if (resultImage.id == ImageData::NO_ID) {
             LINFO("Loading image " + resultImage.name);
-            ghoul::Dictionary msg = selectedBrowser->createMessageForAddingImageLayerWWT(resultImage);
-            selectedBrowser->sendMessageToWWT(msg);
+            selectedBrowser->sendMessageToWWT(selectedBrowser->createMessageForAddingImageLayerWWT(resultImage));
             selectedBrowser->sendMessageToWWT(selectedBrowser->createMessageForSettingOpacityLayerWWT(resultImage, 1.0));
         }
         
@@ -138,17 +137,13 @@ namespace openspace::skybrowser::luascriptfunctions {
         // Load the collections here because here we know that the browser can execute javascript
          std::string root = "https://raw.githubusercontent.com/WorldWideTelescope/wwt-web-client/master/assets/webclient-explore-root.wtml";
          for (ScreenSpaceSkyBrowser* browser : module->getSkyBrowsers()) {
-             browser->sendMessageToWWT(browser->createMessageForLoadingWWTImgColl(root));
+             if (!browser->hasLoadedCollections()) {
+                 browser->sendMessageToWWT(browser->createMessageForLoadingWWTImgColl(root));
+                 browser->setHasLoadedCollections(true);
+             }
          }
 
-		return 1;
-	}
-
-	int moveBrowser(lua_State* L) {
-		// Load images from local directory
-		ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::moveBrowser");
-		
-		return 1;
+		return 0;
 	}
 
 	int getListOfImages(lua_State* L) {
@@ -158,12 +153,11 @@ namespace openspace::skybrowser::luascriptfunctions {
 
         std::string root = "https://raw.githubusercontent.com/WorldWideTelescope/wwt-web-client/master/assets/webclient-explore-root.wtml";
         std::string hubble = "http://www.worldwidetelescope.org/wwtweb/catalog.aspx?W=hubble";
-
-        module->loadImages(root, SkyBrowserModule::FROM_DIRECTORY);
+        std::string directory = absPath("${MODULE_SKYBROWSER}/WWTimagedata/");
 
 		// If no data has been loaded yet, download the data from the web!
 		if (module->getWWTDataHandler()->getLoadedImages().size() == 0) {
-            module->loadImages(root, SkyBrowserModule::FROM_URL);
+            module->loadImages(root, directory);
 		}
 	    
         // Create Lua table to send to the GUI

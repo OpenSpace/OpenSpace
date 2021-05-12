@@ -36,6 +36,8 @@ namespace openspace {
         void setVerticalFieldOfView(float fov);
         void scrollZoom(float scroll);
         ScreenSpaceSkyTarget* getSkyTarget();
+        bool hasLoadedCollections();
+        void setHasLoadedCollections(bool isLoaded);
 
         // Translation
         //void translate(glm::vec2 translation);
@@ -68,6 +70,7 @@ namespace openspace {
         constexpr static const std::chrono::milliseconds TimeUpdateInterval{ 10 };
         std::chrono::system_clock::time_point _lastUpdateTime;
         int _imageId{ 0 };
+        bool _hasLoadedCollections{ false };
     };
 }
 

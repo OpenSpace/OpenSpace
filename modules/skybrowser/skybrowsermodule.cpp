@@ -89,14 +89,6 @@ namespace openspace {
                 "input. An input string should be the name of the system host star"
             },
             {
-                "move",
-                &skybrowser::luascriptfunctions::moveBrowser,
-                {},
-                "string or list of strings",
-                "Add one or multiple exoplanet systems to the scene, as specified by the "
-                "input. An input string should be the name of the system host star"
-            },
-            {
                 "loadImagesToWWT",
                 &skybrowser::luascriptfunctions::loadImagesToWWT,
                 {},
@@ -459,7 +451,7 @@ int SkyBrowserModule::getSelectedBrowserIndex() {
     return selectedBrowser;
 }
 
-int SkyBrowserModule::loadImages(const std::string& root, int readingMode) {
+int SkyBrowserModule::loadImages(const std::string& root, const std::string& directory) {
    
     // Load speck files for 3D positions
     std::filesystem::path globularClusters = absPath("${BASE}/sync/http/digitaluniverse_globularclusters_speck/2/gc.speck");
@@ -473,16 +465,17 @@ int SkyBrowserModule::loadImages(const std::string& root, int readingMode) {
 
     int nLoadedImages;
     // Read from disc
-    if (readingMode == FROM_DIRECTORY) {
+    
+    bool loadedImages = dataHandler->loadWTMLCollectionsFromDirectory(directory);
+    // Reading from url if there is no directory
+    if (loadedImages) {
         LINFO("Loading images from directory");
-        dataHandler->loadWTMLCollectionsFromDirectory(absPath("${MODULE_SKYBROWSER}/WWTimagedata/"));
-        
     }
-    // Reading from url
-    else if (readingMode == FROM_URL) {
+    else {
         LINFO("Loading images from url");
-        dataHandler->loadWTMLCollectionsFromURL(root, "root");
+        dataHandler->loadWTMLCollectionsFromURL(directory, root, "root");
     }
+
     nLoadedImages = dataHandler->loadImagesFromLoadedXMLs();
     LINFO("Loaded " + std::to_string(nLoadedImages) + " WorldWide Telescope images.");
    

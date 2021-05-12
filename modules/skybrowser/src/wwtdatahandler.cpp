@@ -3,6 +3,8 @@
 #include <filesystem> // To iterate through files in directory
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 // For loading the speck files
 #include <ghoul/fmt.h>
@@ -30,17 +32,25 @@ namespace openspace {
         return wtml_root.hasSucceeded();
     }
 
-    void WWTDataHandler::loadWTMLCollectionsFromURL(std::string url, std::string fileName) {
+    void WWTDataHandler::loadWTMLCollectionsFromURL(std::string directory, std::string url, std::string fileName) {
+        // Look for WWT image data folder
+        if (!directoryExists(directory)) {
+            std::string newDir = directory;
+            newDir.pop_back();
+            LINFO("Creating directory WWTimagedata");
+            std::filesystem::create_directory(newDir);
+        }
+
         // Get file
-        std::string fileDestination = absPath("${MODULE_SKYBROWSER}/WWTimagedata/") + fileName + ".aspx";
-        if (!downloadFile(url, fileDestination)) {
+        std::string file = directory + fileName + ".aspx";
+        if (!downloadFile(url, file)) {
             LINFO("Couldn't download file " + url);
             return;
         }
         // Parse to XML
         using namespace tinyxml2;
         tinyxml2::XMLDocument* doc = new tinyxml2::XMLDocument();
-        doc->LoadFile(fileDestination.c_str());
+        doc->LoadFile(file.c_str());
 
         XMLElement* root = doc->RootElement();
         XMLElement* element = root->FirstChildElement(std::string("Folder").c_str());
@@ -63,13 +73,33 @@ namespace openspace {
             std::string subUrl = element->FindAttribute("Url") ? element->FindAttribute("Url")->Value() : "";
             std::string subName = element->FindAttribute("Name") ? element->FindAttribute("Name")->Value() : "";
             if (subUrl != "" && subName != "") {
-                loadWTMLCollectionsFromURL(subUrl, subName);
+                loadWTMLCollectionsFromURL(directory, subUrl, subName);
             }
             element = element->NextSiblingElement();
         }
     }
 
-    void WWTDataHandler::loadWTMLCollectionsFromDirectory(std::string directory) {
+
+    bool WWTDataHandler::directoryExists(std::string& path)
+    {
+        struct stat info;
+
+        int statRC = stat(path.c_str(), &info);
+        if (statRC != 0)
+        {
+            if (errno == ENOENT) { return false; } // something along the path does not exist
+            if (errno == ENOTDIR) { return false; } // something in path prefix is not a dir
+            return false;
+        }
+
+        bool directoryExists = (info.st_mode & S_IFDIR);
+
+        return  directoryExists;
+    }
+
+    bool WWTDataHandler::loadWTMLCollectionsFromDirectory(std::string directory) {
+       
+        if (!directoryExists(directory)) return false;
 
         for (const auto& entry : std::filesystem::directory_iterator(directory)) {
             tinyxml2::XMLDocument* doc = new tinyxml2::XMLDocument();
@@ -84,6 +114,7 @@ namespace openspace {
                 xmls.push_back(doc);
             }
         }
+        return true;
     }
 
     std::ostream& operator<<(std::ostream& os, const ImageData& img) {
