@@ -456,8 +456,8 @@ bool RenderableMultiresVolume::initializeSelector() {
         case Selector::TF:
             if (_errorHistogramManager) {
                 std::stringstream cacheName;
-                ghoul::filesystem::File f = _filename;
-                cacheName << f.baseName() << "_" << nHistograms << "_errorHistograms";
+                cacheName << std::filesystem::path(_filename).stem().string() << "_" <<
+                    nHistograms << "_errorHistograms";
                 std::string cacheFilename;
                 cacheFilename = FileSys.cacheManager()->cachedFilename(
                     cacheName.str(),
@@ -496,8 +496,8 @@ bool RenderableMultiresVolume::initializeSelector() {
         case Selector::SIMPLE:
             if (_histogramManager) {
                 std::stringstream cacheName;
-                ghoul::filesystem::File f = _filename;
-                cacheName << f.baseName() << "_" << nHistograms << "_histograms";
+                cacheName << std::filesystem::path(_filename).stem().string() << "_" <<
+                    nHistograms << "_histograms";
                 std::string cacheFilename;
                 cacheFilename = FileSys.cacheManager()->cachedFilename(
                     cacheName.str(),
@@ -529,10 +529,12 @@ bool RenderableMultiresVolume::initializeSelector() {
 
         case Selector::LOCAL:
             if (_localErrorHistogramManager) {
-                ghoul::filesystem::File f = _filename;
                 std::string cacheFilename;
                 cacheFilename = FileSys.cacheManager()->cachedFilename(
-                    fmt::format("{}_{}_localErrorHistograms", f.baseName(), nHistograms),
+                    fmt::format(
+                        "{}_{}_localErrorHistograms",
+                        std::filesystem::path(_filename).stem().string(), nHistograms
+                    ),
                     "",
                     ghoul::filesystem::CacheManager::Persistent::Yes
                 );
@@ -629,8 +631,9 @@ void RenderableMultiresVolume::update(const UpdateData& data) {
 
         // Make sure that the directory exists
         ghoul::filesystem::File file(_statsFileName);
-        ghoul::filesystem::Directory directory(file.directoryName());
-        std::filesystem::create_directories(directory.path());
+        std::filesystem::path directory =
+            std::filesystem::path(_statsFileName).parent_path();
+        std::filesystem::create_directories(directory);
 
         std::ofstream ofs(_statsFileName, std::ofstream::out);
 

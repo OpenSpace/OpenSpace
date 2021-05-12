@@ -145,7 +145,9 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
         return nullptr;
     }
 
-    std::shared_ptr<FileFuture> future = std::make_shared<FileFuture>(file.filename());
+    std::shared_ptr<FileFuture> future = std::make_shared<FileFuture>(
+        std::filesystem::path(file.path()).filename().string()
+    );
     errno = 0;
 #ifdef WIN32
     FILE* fp;

@@ -604,8 +604,9 @@ void RenderableFieldlinesSequence::loadOsflsStatesIntoRAM(const std::string& out
         if (newState.loadStateFromOsfls(filePath)) {
             addStateToSequence(newState);
             if (!outputFolder.empty()) {
-                ghoul::filesystem::File tmpFile(filePath);
-                newState.saveStateToJson(outputFolder + tmpFile.baseName());
+                newState.saveStateToJson(
+                    outputFolder + std::filesystem::path(filePath).stem().string()
+                );
             }
         }
         else {

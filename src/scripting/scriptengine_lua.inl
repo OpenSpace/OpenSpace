@@ -331,7 +331,7 @@ int directoryForPath(lua_State* L) {
         1,
         ghoul::lua::PopValue::Yes
     );
-    std::string path = ghoul::filesystem::File(std::move(file)).directoryName();
+    std::string path = std::filesystem::path(std::move(file)).parent_path().string();
 
     ghoul::lua::push(L, path);
 

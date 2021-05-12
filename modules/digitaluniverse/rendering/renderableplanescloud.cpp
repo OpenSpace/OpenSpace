@@ -843,7 +843,7 @@ bool RenderablePlanesCloud::readSpeckFile() {
 
             std::string fullPath = absPath(_texturesPath + '/' + fileName);
             std::string pngPath =
-                ghoul::filesystem::File(fullPath).fullBaseName() + ".png";
+                std::filesystem::path(fullPath).replace_extension(".png").string();
 
             if (std::filesystem::is_regular_file(fullPath)) {
                 _textureFileMap.insert({ textureIndex, fullPath });

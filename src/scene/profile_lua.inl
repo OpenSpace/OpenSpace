@@ -51,8 +51,6 @@ int saveSettingsToProfile(lua_State* L) {
 
     std::string saveFilePath;
     if (n == 0) {
-        const ghoul::filesystem::File f = global::configuration->profile;
-
         std::time_t t = std::time(nullptr);
         std::tm* utcTime = std::gmtime(&t);
         ghoul_assert(utcTime, "Conversion to UTC failed");
@@ -66,7 +64,9 @@ int saveSettingsToProfile(lua_State* L) {
             utcTime->tm_min,
             utcTime->tm_sec
         );
-        std::string newFile = fmt::format("{}_{}", f.fullBaseName(), time);
+        std::filesystem::path path = global::configuration->profile;
+        path.replace_extension();
+        std::string newFile = fmt::format("{}_{}", path, time);
         std::string sourcePath = fmt::format("{}/{}.profile",
             absPath("${USER_PROFILES}"), global::configuration->profile);
         std::string destPath = fmt::format("{}/{}.profile",

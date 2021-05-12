@@ -224,9 +224,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
     std::vector<std::string> sequencePaths =
         ghoul::filesystem::Directory(sequenceDir).read(Recursive::Yes, Sort::No);
     for (const std::string& path : sequencePaths) {
-        ghoul::filesystem::File currentFile(path);
-        std::string extension = currentFile.fileExtension();
-        if (extension == "dictionary") {
+        if (std::filesystem::path(path).extension() == ".dictionary") {
             loadTimestepMetadata(path);
         }
     }
@@ -334,7 +332,7 @@ void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) 
 
     Timestep t;
     t.metadata = metadata;
-    t.baseName = ghoul::filesystem::File(path).baseName();
+    t.baseName = std::filesystem::path(path).stem().string();
     t.inRam = false;
     t.onGpu = false;
 

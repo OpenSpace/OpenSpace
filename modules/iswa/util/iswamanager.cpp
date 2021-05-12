@@ -411,9 +411,9 @@ std::string IswaManager::parseKWToLuaTable(const CdfInfo& info, const std::strin
         return "";
     }
 
-    const std::string& extension =
-        ghoul::filesystem::File(absPath(info.path)).fileExtension();
-    if (extension == "cdf") {
+    std::string extension =
+        std::filesystem::path(absPath(info.path)).extension().string();
+    if (extension == ".cdf") {
         KameleonWrapper kw = KameleonWrapper(absPath(info.path));
 
         std::string parent = kw.parent();
@@ -588,10 +588,9 @@ void IswaManager::createSphere(MetadataFuture& data) {
 }
 
 void IswaManager::createKameleonPlane(CdfInfo info, std::string cut) {
-    const std::string& extension = ghoul::filesystem::File(
-        absPath(info.path)
-    ).fileExtension();
-    if (std::filesystem::is_regular_file(absPath(info.path)) && extension == "cdf") {
+    std::string extension =
+        std::filesystem::path(absPath(info.path)).extension().string();
+    if (std::filesystem::is_regular_file(absPath(info.path)) && extension == ".cdf") {
         if (!info.group.empty()) {
             std::string type = typeid(KameleonPlane).name();
             registerGroup(info.group, type);
@@ -629,9 +628,8 @@ void IswaManager::createKameleonPlane(CdfInfo info, std::string cut) {
 void IswaManager::createFieldline(std::string name, std::string cdfPath,
                                   std::string seedPath)
 {
-    const std::string& ext = ghoul::filesystem::File(absPath(cdfPath)).fileExtension();
-
-    if (std::filesystem::is_regular_file(absPath(cdfPath)) && ext == "cdf") {
+    std::string extension = std::filesystem::path(absPath(cdfPath)).extension().string();
+    if (std::filesystem::is_regular_file(absPath(cdfPath)) && extension == ".cdf") {
         std::string luaTable = "{"
             "Name = '" + name + "',"
             "Parent = 'Earth',"

@@ -90,7 +90,7 @@ void GuiAssetComponent::renderTree(const Asset& asset, const std::string& relati
     using namespace ghoul::filesystem;
 
     std::string assetPath = asset.assetFilePath();
-    const std::string& assetDirectory = File(assetPath).directoryName();
+    std::string assetDirectory = std::filesystem::path(assetPath).parent_path().string();
 
     if (!relativeToPath.empty()) {
         assetPath = std::filesystem::relative(assetPath, relativeToPath).string();

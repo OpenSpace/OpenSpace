@@ -332,9 +332,8 @@ void RenderableKameleonVolume::load() {
         loadFromPath(_sourcePath);
         return;
     }
-    ghoul::filesystem::File sourceFile(_sourcePath);
     std::string cachePath = FileSys.cacheManager()->cachedFilename(
-        sourceFile.baseName(),
+        std::filesystem::path(_sourcePath.value()).stem().string(),
         cacheSuffix(),
         ghoul::filesystem::CacheManager::Persistent::Yes
     );
@@ -353,15 +352,14 @@ std::string RenderableKameleonVolume::cacheSuffix() const {
 }
 
 void RenderableKameleonVolume::loadFromPath(const std::string& path) {
-    ghoul::filesystem::File file(path);
-    std::string extension = file.fileExtension();
+    std::string extension = std::filesystem::path(path).extension().string();
     std::transform(
         extension.begin(),
         extension.end(),
         extension.begin(),
         [](char v) { return static_cast<char>(tolower(v)); }
     );
-    if (extension == "cdf") {
+    if (extension == ".cdf") {
         loadCdf(path);
     }
     else {

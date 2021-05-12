@@ -1040,7 +1040,7 @@ int main(int argc, char* argv[]) {
     // to make it possible to find other files in the same directory.
     FileSys.registerPathToken(
         "${BIN}",
-        ghoul::filesystem::File(argv[0]).directoryName(),
+        std::filesystem::path(argv[0]).parent_path().string(),
         ghoul::filesystem::FileSystem::Override::Yes
     );
 
@@ -1107,7 +1107,8 @@ int main(int argc, char* argv[]) {
         LINFO(fmt::format("Configuration Path: '{}'", configurationFilePath));
 
         // Register the base path as the directory where the configuration file lives
-        std::string base = ghoul::filesystem::File(configurationFilePath).directoryName();
+        std::string base =
+            std::filesystem::path(configurationFilePath).parent_path().string();
         constexpr const char* BasePathToken = "${BASE}";
         FileSys.registerPathToken(BasePathToken, base);
 

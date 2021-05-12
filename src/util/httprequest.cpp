@@ -356,7 +356,8 @@ bool HttpFileDownload::initDownload() {
     }
 
     ghoul::filesystem::File destinationFile = _destination;
-    ghoul::filesystem::Directory d = destinationFile.directoryName();
+    ghoul::filesystem::Directory d =
+        std::filesystem::path(_destination).parent_path().string();
 
     {
         std::lock_guard<std::mutex> g(_directoryCreationMutex);

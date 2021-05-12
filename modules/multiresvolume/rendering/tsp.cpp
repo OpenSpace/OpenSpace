@@ -30,6 +30,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/logging/logmanager.h>
+#include <filesystem>
 #include <numeric>
 #include <queue>
 
@@ -508,7 +509,7 @@ bool TSP::readCache() {
 
     ghoul::filesystem::File f = _filename;
     std::string cacheFilename = FileSys.cacheManager()->cachedFilename(
-        f.baseName(),
+        std::filesystem::path(_filename).stem().string(),
         "",
         ghoul::filesystem::CacheManager::Persistent::Yes
     );
@@ -548,7 +549,7 @@ bool TSP::writeCache() {
 
     ghoul::filesystem::File f = _filename;
     std::string cacheFilename = FileSys.cacheManager()->cachedFilename(
-        f.baseName(),
+        std::filesystem::path(_filename).stem().string(),
         "",
         ghoul::filesystem::CacheManager::Persistent::Yes
     );

@@ -162,17 +162,16 @@ bool LabelParser::create() {
             continue;
         }
 
-        ghoul::filesystem::File currentFile(path);
-        const std::string& extension = currentFile.fileExtension();
+        std::string extension = std::filesystem::path(path).extension().string();
 
-        if (extension != "lbl" && extension != "LBL") {
+        if (extension != ".lbl" && extension != ".LBL") {
             continue;
         }
 
-        std::ifstream file(currentFile.path());
+        std::ifstream file(path);
 
         if (!file.good()) {
-            LERROR(fmt::format("Failed to open label file '{}'", currentFile.path()));
+            LERROR(fmt::format("Failed to open label file '{}'", path));
             return false;
         }
 
@@ -258,7 +257,7 @@ bool LabelParser::create() {
                 }
                 else{
                     LERROR(fmt::format(
-                        "Label file {} deviates from generic standard", currentFile.path()
+                        "Label file {} deviates from generic standard", path
                     ));
                     LINFO(
                         "Please make sure input data adheres to format from \

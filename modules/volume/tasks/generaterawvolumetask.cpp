@@ -165,8 +165,8 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
 
     luaL_unref(state, LUA_REGISTRYINDEX, functionReference);
 
-    ghoul::filesystem::File file(_rawVolumeOutputPath);
-    const std::string directory = file.directoryName();
+    const std::filesystem::path directory =
+        std::filesystem::path(_rawVolumeOutputPath).parent_path();
     if (!std::filesystem::is_directory(directory)) {
         std::filesystem::create_directories(directory);
     }
