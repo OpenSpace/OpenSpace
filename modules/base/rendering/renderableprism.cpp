@@ -51,6 +51,12 @@ namespace {
         "The number of segments the shape of the prism should have."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo LinesInfo = {
+        "NumLines",
+        "Number of Lines",
+        "The number of lines connecting the two shapes of the prism."
+    };
+
     static const openspace::properties::Property::PropertyInfo RadiusInfo = {
         "Radius",
         "Radius",
@@ -91,6 +97,9 @@ namespace {
         // [[codegen::verbatim(SegmentsInfo.description)]]
         int segments;
 
+        // [[codegen::verbatim(LinesInfo.description)]]
+        std::optional<int> lines;
+
         // [[codegen::verbatim(RadiusInfo.description)]]
         std::optional<float> radius;
 
@@ -117,6 +126,7 @@ documentation::Documentation RenderablePrism::Documentation() {
 RenderablePrism::RenderablePrism(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _nShapeSegments(SegmentsInfo, 6, 3, 32)
+    , _nLines(LinesInfo, 6, 0, 32)
     , _radius(RadiusInfo, 10.f, 0.f, 3.0e12f)
     , _lineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
     , _lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
@@ -130,16 +140,19 @@ RenderablePrism::RenderablePrism(const ghoul::Dictionary& dictionary)
     _length.setViewOption(properties::Property::ViewOptions::Logarithmic);
 
     _nShapeSegments.onChange([&]() { _prismIsDirty = true; });
+    _nLines.onChange([&]() { _prismIsDirty = true; });
     _radius.onChange([&]() { _prismIsDirty = true; });
     _length.onChange([&]() { _prismIsDirty = true; });
 
     _nShapeSegments = p.segments;
+    _nLines = p.lines.value_or(_nShapeSegments);
     _radius = p.radius.value_or(_radius);
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     _lineColor = p.color.value_or(_lineColor);
     _length = p.length.value_or(_length);
 
     addProperty(_nShapeSegments);
+    addProperty(_nLines);
     addProperty(_radius);
     addProperty(_lineWidth);
     addProperty(_lineColor);
@@ -192,8 +205,11 @@ void RenderablePrism::updateVertexData() {
 
     // Get unit circle vertices on the XY-plane
     std::vector<float> unitVertices;
+    std::vector<float> unitVerticesLines;
     unitVertices.reserve(2 * _nShapeSegments);
+    unitVerticesLines.reserve(2 * _nLines);
     getUnitCircleVertices(unitVertices, _nShapeSegments);
+    getUnitCircleVertices(unitVerticesLines, _nLines);
 
     // Put base and top shape vertices into array
     for (int i = 0; i < 2; ++i) {
@@ -206,6 +222,36 @@ void RenderablePrism::updateVertexData() {
             _vertexArray.push_back(ux * _radius); // x
             _vertexArray.push_back(uy * _radius); // y
             _vertexArray.push_back(h);            // z
+        }
+    }
+
+    // Put the vertices for the connecting lines  into array
+    if (_nLines == 1) {
+        // In the case of just one line then connect the center points instead
+        // Center for base shape
+        _vertexArray.push_back(0.f);
+        _vertexArray.push_back(0.f);
+        _vertexArray.push_back(0.f);
+
+        // Center for top shape
+        _vertexArray.push_back(0.f);
+        _vertexArray.push_back(0.f);
+        _vertexArray.push_back(_length);
+    }
+    else {
+        for (int j = 0, k = 0; j < _nLines && k < unitVerticesLines.size(); ++j) {
+            float ux = unitVerticesLines[k++];
+            float uy = unitVerticesLines[k++];
+
+            // Base
+            _vertexArray.push_back(ux * _radius); // x
+            _vertexArray.push_back(uy * _radius); // y
+            _vertexArray.push_back(0.f);          // z
+
+            // Top
+            _vertexArray.push_back(ux * _radius); // x
+            _vertexArray.push_back(uy * _radius); // y
+            _vertexArray.push_back(_length);      // z
         }
     }
 
@@ -223,12 +269,12 @@ void RenderablePrism::updateVertexData() {
     }
 
     // Indices for connecting lines
-    for (uint8_t i = 0; i < _nShapeSegments; ++i) {
+    for (int i = 0, k = 0; i < _nLines; ++i) {
         // Reset
         _indexArray.push_back(255);
 
-        _indexArray.push_back(i);
-        _indexArray.push_back(i + _nShapeSegments);
+        _indexArray.push_back(2 * _nShapeSegments + k++);
+        _indexArray.push_back(2 * _nShapeSegments + k++);
     }
 }
 

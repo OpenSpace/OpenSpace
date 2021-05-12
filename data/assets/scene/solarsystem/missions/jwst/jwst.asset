@@ -92,8 +92,8 @@ local JWSTFov = {
     Renderable = {
         Type = "RenderablePrism",
         Segments = 6,
+        Lines = 3,
         Radius = 3.25,
-        Lines = 7,
         LineWidth = 1.0,
         Color = {
             1.0, 1.0, 1.0

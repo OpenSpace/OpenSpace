@@ -62,6 +62,7 @@ private:
 
     // Properties
     properties::IntProperty _nShapeSegments;
+    properties::IntProperty _nLines;
     properties::FloatProperty _radius;
     properties::FloatProperty _lineWidth;
     properties::Vec3Property _lineColor;
