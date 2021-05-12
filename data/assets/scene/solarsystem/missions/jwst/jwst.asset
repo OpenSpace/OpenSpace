@@ -43,6 +43,8 @@ local JWSTModel = {
     Renderable = {
         Type = "RenderableModel",
         GeometryFile = "C:/Users/ElmQPC/Desktop/Malin/develop/WIP/data/JWST_model/3/JWSTFBX.fbx",
+        ModelScale = "Foot",
+        InvertModelScale = true,
         EnableAnimation = true,
         AnimationStartTime = "2021 10 31 00:00:00",
         AnimationMode = "BounceFromStart",
@@ -89,18 +91,22 @@ local JWSTFov = {
     Parent = JWSTModel.Identifier,
     Renderable = {
         Type = "RenderablePrism",
-        StartNode = "JWSTModel",
         Segments = 6,
-        Radius = 3.5,
+        Radius = 3.25,
         Lines = 7,
-        LineWidth = 1.5,
+        LineWidth = 1.0,
         Color = {
             1.0, 1.0, 1.0
         },
-        LineLength = 1000000,
-        Direction = {
-            1.0, 0.0, 0.0
-        }
+        Length = 30
+    },
+    Transform = {
+        Rotation = {
+            Type = "StaticRotation",
+            Rotation = {
+                0, 0, 0.523598776 -- 30 deg around Z-axis in radians
+            }
+        },
     },
     GUI = {
         Name = "James Webb Space Telecope Field of View",
