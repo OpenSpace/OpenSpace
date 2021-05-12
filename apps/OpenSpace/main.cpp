@@ -1040,7 +1040,7 @@ int main(int argc, char* argv[]) {
     // to make it possible to find other files in the same directory.
     FileSys.registerPathToken(
         "${BIN}",
-        ghoul::filesystem::File(absPath(argv[0])).directoryName(),
+        ghoul::filesystem::File(argv[0]).directoryName(),
         ghoul::filesystem::FileSystem::Override::Yes
     );
 

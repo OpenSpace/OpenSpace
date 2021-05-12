@@ -1399,7 +1399,9 @@ bool RenderableStars::loadCachedFile(const std::string& file) {
         if (version != CurrentCacheVersion) {
             LINFO("The format of the cached file has changed: deleting old cache");
             fileStream.close();
-            FileSys.deleteFile(file);
+            if (std::filesystem::is_regular_file(file)) {
+                std::filesystem::remove(file);
+            }
             return false;
         }
 

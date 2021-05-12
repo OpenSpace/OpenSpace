@@ -960,7 +960,7 @@ bool RenderableFieldlinesSequence::extractSeedPointsFromFile(const std::string& 
                                                            std::vector<glm::vec3>& outVec)
 {
 
-    std::ifstream seedFile(FileSys.relativePath(path));
+    std::ifstream seedFile(path);
     if (!seedFile.good()) {
         LERROR(fmt::format("Could not open seed points file '{}'", path));
         return false;

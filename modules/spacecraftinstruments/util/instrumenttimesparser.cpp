@@ -80,10 +80,7 @@ bool InstrumentTimesParser::create() {
     for (const std::pair<const K, V>& p : _instrumentFiles) {
         const std::string& instrumentID = p.first;
         for (std::string filename : p.second) {
-            std::string filepath = FileSys.pathByAppendingComponent(
-                sequenceDir,
-                std::move(filename)
-            );
+            std::string filepath = fmt::format("{}/{}", sequenceDir, std::move(filename));
 
             if (!std::filesystem::is_regular_file(filepath)) {
                 LERROR(fmt::format("Unable to read file '{}'. Skipping file", filepath));

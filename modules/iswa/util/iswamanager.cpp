@@ -42,6 +42,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/constexpr.h>
+#include <filesystem>
 #include <fstream>
 
 #include "iswamanager_lua.inl"
@@ -590,7 +591,7 @@ void IswaManager::createKameleonPlane(CdfInfo info, std::string cut) {
     const std::string& extension = ghoul::filesystem::File(
         absPath(info.path)
     ).fileExtension();
-    if (FileSys.fileExists(absPath(info.path)) && extension == "cdf") {
+    if (std::filesystem::is_regular_file(absPath(info.path)) && extension == "cdf") {
         if (!info.group.empty()) {
             std::string type = typeid(KameleonPlane).name();
             registerGroup(info.group, type);
@@ -630,7 +631,7 @@ void IswaManager::createFieldline(std::string name, std::string cdfPath,
 {
     const std::string& ext = ghoul::filesystem::File(absPath(cdfPath)).fileExtension();
 
-    if (FileSys.fileExists(absPath(cdfPath)) && ext == "cdf") {
+    if (std::filesystem::is_regular_file(absPath(cdfPath)) && ext == "cdf") {
         std::string luaTable = "{"
             "Name = '" + name + "',"
             "Parent = 'Earth',"
@@ -701,7 +702,7 @@ ghoul::Event<>& IswaManager::iswaEvent() {
 
 void IswaManager::addCdfFiles(std::string cdfpath) {
     cdfpath = absPath(cdfpath);
-    if (FileSys.fileExists(cdfpath)) {
+    if (std::filesystem::is_regular_file(cdfpath)) {
         //std::string basePath = path.substr(0, path.find_last_of("/\\"));
         std::ifstream jsonFile(cdfpath);
 

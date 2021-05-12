@@ -279,7 +279,9 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
                 tempName.size() - strlen(TempSuffix)
             );
 
-            FileSys.deleteFile(originalName);
+            if (std::filesystem::is_regular_file(originalName)) {
+                std::filesystem::remove(originalName);
+            }
             int success = rename(tempName.c_str(), originalName.c_str());
             if (success != 0) {
                 LERROR(fmt::format(

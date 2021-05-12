@@ -370,8 +370,8 @@ int unzipFile(lua_State* L) {
     int arg = 2;
     zip_extract(source.c_str(), dest.c_str(), onExtractEntry, &arg);
 
-    if (deleteSource) {
-        FileSys.deleteFile(source);
+    if (deleteSource && std::filesystem::is_regular_file(source)) {
+        std::filesystem::remove(source);
     }
 
     lua_settop(L, 0);
@@ -437,7 +437,9 @@ int saveLastChangeToProfile(lua_State* L) {
     filein.close();
     fileout.close();
     if (found) {
-        FileSys.deleteFile(assetPath);
+        if (std::filesystem::is_regular_file(assetPath)) {
+            std::filesystem::remove(assetPath);
+        }
         int success = rename(tempAssetPath.c_str(), assetPath.c_str());
         if (success != 0) {
             std::string error = fmt::format("Error renaming file {} to {}",
@@ -446,7 +448,9 @@ int saveLastChangeToProfile(lua_State* L) {
             printInternal(ghoul::logging::LogLevel::Error, L);
             return -1;
         }
-        FileSys.deleteFile(tempAssetPath);
+        if (std::filesystem::is_regular_file(tempAssetPath)) {
+            std::filesystem::remove(tempAssetPath);
+        }
         return 0;
     }
     else {
