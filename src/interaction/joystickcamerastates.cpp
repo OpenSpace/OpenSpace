@@ -73,7 +73,7 @@ void JoystickCameraStates::updateStateFromInput(const InputState& inputState,
         }
 
         if (std::fabs(t.sensitivity) > std::numeric_limits<double>().epsilon()) {
-            value = static_cast<float>(value * t.sensitivity);
+            value = static_cast<float>(value * t.sensitivity * _sensitivity);
         }
         else {
             value = static_cast<float>(value * _sensitivity);
