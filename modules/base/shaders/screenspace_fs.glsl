@@ -29,13 +29,13 @@ in vec2 vs_st;
 in vec4 vs_position;
 
 uniform sampler2D texture1;
-uniform float Alpha;
+uniform vec3 MultiplyColor = vec3(1.0, 1.0, 1.0);
+uniform float Alpha = 1.0;
 
 Fragment getFragment() {
     Fragment frag;
 
-    frag.color = texture(texture1, vs_st);
-    frag.color.a = Alpha * frag.color.a;
+    frag.color = texture(texture1, vs_st) * vec4(MultiplyColor, Alpha);
     if (frag.color.a == 0.0) {
         discard;
     }

@@ -306,7 +306,6 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
             LDEBUG(fmt::format(
                 "Successfully created ephemeris for '{}'", result->identifier()
             ));
-            result->addPropertySubOwner(result->_transform.translation.get());
         }
 
         if (p.transform->rotation.has_value()) {
@@ -326,7 +325,6 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
             LDEBUG(fmt::format(
                 "Successfully created rotation for '{}'", result->identifier()
             ));
-            result->addPropertySubOwner(result->_transform.rotation.get());
         }
 
         if (p.transform->scale.has_value()) {
@@ -344,9 +342,12 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
             LDEBUG(fmt::format(
                 "Successfully created scale for '{}'", result->identifier()
             ));
-            result->addPropertySubOwner(result->_transform.scale.get());
         }
     }
+    result->addPropertySubOwner(result->_transform.translation.get());
+    result->addPropertySubOwner(result->_transform.rotation.get());
+    result->addPropertySubOwner(result->_transform.scale.get());
+
 
     if (p.timeFrame.has_value()) {
         result->_timeFrame = TimeFrame::createFromDictionary(*p.timeFrame);

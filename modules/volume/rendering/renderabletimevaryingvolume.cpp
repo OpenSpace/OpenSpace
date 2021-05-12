@@ -44,6 +44,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
+#include <optional>
 
 namespace {
     constexpr const char* _loggerCat = "RenderableTimeVaryingVolume";
@@ -54,11 +55,6 @@ namespace {
     const char* KeyStepSize = "StepSize";
     const char* KeyGridType = "GridType";
     const char* KeyTransferFunction = "TransferFunction";
-    const char* KeySourceDirectory = "SourceDirectory";
-
-    const char* KeyClipPlanes = "ClipPlanes";
-    const char* KeySecondsBefore = "SecondsBefore";
-    const char* KeySecondsAfter = "SecondsAfter";
 
     const float SecondsInOneDay = 60 * 60 * 24;
     constexpr const float VolumeMaxOpacity = 500;
@@ -129,44 +125,33 @@ namespace {
         "Radius upper bound",
         "" // @TODO Missing documentation
     };
+
+    struct [[codegen::Dictionary(RenderableTimeVaryingVolume)]] Parameters {
+        // Specifies the path to load timesteps from
+        std::string sourceDirectory;
+
+        // Specifies the transfer function file path
+        std::string transferFunction;
+
+        // Specifies the number of seconds to show the the first timestep before its
+        // actual time. The default value is 0
+        std::optional<float> secondsBefore;
+
+        // Specifies the number of seconds to show the the last timestep after its 
+        // actual time
+        float secondsAfter;
+
+        std::optional<ghoul::Dictionary> clipPlanes;
+    };
+#include "renderabletimevaryingvolume_codegen.cpp"
 } // namespace
 
 namespace openspace::volume {
 
-    documentation::Documentation RenderableTimeVaryingVolume::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderableTimevaryingVolume",
-        "volume_renderable_timevaryingvolume",
-        {
-            {
-                KeySourceDirectory,
-                new StringVerifier,
-                Optional::No,
-                "Specifies the path to load timesteps from"
-            },
-            {
-                KeyTransferFunction,
-                new StringVerifier,
-                Optional::No,
-                "Specifies the transfer function file path"
-            },
-            {
-                KeySecondsBefore,
-                new DoubleVerifier,
-                Optional::Yes,
-                "Specifies the number of seconds to show the the first timestep before "
-                "its actual time. The default value is 0."
-            },
-            {
-                KeySecondsAfter,
-                new DoubleVerifier,
-                Optional::No,
-                "Specifies the number of seconds to show the the last timestep after its "
-                "actual time"
-            }
-        }
-    };
+documentation::Documentation RenderableTimeVaryingVolume::Documentation() {
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "volume_renderable_timevaryingvolume";
+    return doc;
 }
 
 RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
@@ -184,14 +169,10 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     , _jumpToTimestep(JumpToTimestepInfo, 0, 0, 256)
     , _currentTimestep(CurrentTimeStepInfo, 0, 0, 256)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableTimeVaryingVolume"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _sourceDirectory = absPath(dictionary.value<std::string>(KeySourceDirectory));
-    _transferFunctionPath = absPath(dictionary.value<std::string>(KeyTransferFunction));
+    _sourceDirectory = absPath(p.sourceDirectory);
+    _transferFunctionPath = absPath(p.transferFunction);
     _transferFunction = std::make_shared<openspace::TransferFunction>(
         _transferFunctionPath,
         [](const openspace::TransferFunction&) {}
@@ -207,15 +188,10 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
         _stepSize = static_cast<float>(dictionary.value<double>(KeyStepSize));
     }
 
-    if (dictionary.hasValue<double>(KeySecondsBefore)) {
-        _secondsBefore = static_cast<float>(dictionary.value<double>(KeySecondsBefore));
-    }
-    _secondsAfter = static_cast<float>(dictionary.value<double>(KeySecondsAfter));
+    _secondsBefore = p.secondsBefore.value_or(_secondsBefore);
+    _secondsAfter = p.secondsAfter;
 
-    ghoul::Dictionary clipPlanesDictionary;
-    if (dictionary.hasValue<ghoul::Dictionary>(KeyClipPlanes)) {
-        clipPlanesDictionary.value<ghoul::Dictionary>(KeyClipPlanes);
-    }
+    ghoul::Dictionary clipPlanesDictionary = p.clipPlanes.value_or(ghoul::Dictionary());
     _clipPlanes = std::make_shared<volume::VolumeClipPlanes>(clipPlanesDictionary);
     _clipPlanes->setIdentifier("clipPlanes");
     _clipPlanes->setGuiName("Clip Planes");
