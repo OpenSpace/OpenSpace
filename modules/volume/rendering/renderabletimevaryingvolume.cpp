@@ -220,11 +220,11 @@ void RenderableTimeVaryingVolume::initializeGL() {
     using Recursive = ghoul::filesystem::Directory::Recursive;
     using Sort = ghoul::filesystem::Directory::Sort;
 
-    std::vector<std::string> sequencePaths =
-        ghoul::filesystem::Directory(sequenceDir).read(Recursive::Yes, Sort::No);
-    for (const std::string& path : sequencePaths) {
-        if (std::filesystem::path(path).extension() == ".dictionary") {
-            loadTimestepMetadata(path);
+    //std::vector<std::string> sequencePaths;
+    namespace fs = std::filesystem;
+    for (const fs::directory_entry& e : fs::recursive_directory_iterator(sequenceDir)) {
+        if (e.is_regular_file() || e.path().extension() == ".dictionary") {
+            loadTimestepMetadata(e.path().string());
         }
     }
 

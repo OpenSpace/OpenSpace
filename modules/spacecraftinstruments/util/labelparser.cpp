@@ -151,11 +151,14 @@ bool LabelParser::create() {
     std::string lblName;
 
 
-    using Recursive = ghoul::filesystem::Directory::Recursive;
-    using Sort = ghoul::filesystem::Directory::Sort;
-    std::vector<std::string> sequencePaths =
-        ghoul::filesystem::Directory(sequenceDir).read(Recursive::Yes, Sort::No);
-    for (const std::string& path : sequencePaths) {
+    namespace fs = std::filesystem;
+    for (const fs::directory_entry& e : fs::recursive_directory_iterator(sequenceDir)) {
+        if (!e.is_regular_file()) {
+            continue;
+        }
+
+        std::string path = e.path().string();
+
         size_t position = path.find_last_of('.') + 1;
         if (position == 0 || position == std::string::npos) {
             continue;
