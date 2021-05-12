@@ -60,9 +60,6 @@ private:
     void updateBufferData();
     void updateUniformLocations();
 
-    void bindGL();
-    void unbindGL();
-
     // Properties
     properties::IntProperty _nShapeSegments;
     properties::FloatProperty _radius;
@@ -75,9 +72,9 @@ private:
     const GLuint _locVertex = 0;
     GLuint _vaoId = 0;
     GLuint _vboId = 0;
-    std::vector<float> _baseVertexArray;
-    std::vector<float> _topVertexArray;
-    std::vector<float> _linesVertexArray;
+    GLuint _iboId = 0;
+    std::vector<float> _vertexArray;
+    std::vector<uint8_t> _indexArray;
 
     bool _prismIsDirty = false;
 };

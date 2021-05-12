@@ -151,16 +151,6 @@ bool RenderablePrism::isReady() const {
     return _shader != nullptr;
 }
 
-void RenderablePrism::bindGL() {
-    glBindVertexArray(_vaoId);
-    glBindBuffer(GL_ARRAY_BUFFER, _vboId);
-}
-
-void RenderablePrism::unbindGL() {
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-}
-
 void RenderablePrism::initialize() {
     updateVertexData();
 }
@@ -171,6 +161,15 @@ void RenderablePrism::initializeGL() {
 
     glGenVertexArrays(1, &_vaoId);
     glGenBuffers(1, &_vboId);
+    glGenBuffers(1, &_iboId);
+
+    glBindVertexArray(_vaoId);
+
+    updateBufferData();
+
+    glEnableVertexAttribArray(_locVertex);
+    glVertexAttribPointer(_locVertex, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+    glBindVertexArray(0);
 }
 
 void RenderablePrism::deinitializeGL() {
@@ -182,41 +181,73 @@ void RenderablePrism::deinitializeGL() {
 
     glDeleteBuffers(1, &_vboId);
     _vboId = 0;
+
+    glDeleteBuffers(1, &_iboId);
+    _iboId = 0;
 }
 
 void RenderablePrism::updateVertexData() {
-    _baseVertexArray.clear();
-    _topVertexArray.clear();
-    _linesVertexArray.clear();
+    _vertexArray.clear();
+    _indexArray.clear();
 
     // Get unit circle vertices on the XY-plane
     std::vector<float> unitVertices;
     unitVertices.reserve(2 * _nShapeSegments);
     getUnitCircleVertices(unitVertices, _nShapeSegments);
 
-    for (int j = 0, k = 0; j < _nShapeSegments && k < unitVertices.size(); ++j) {
-        float ux = unitVertices[k++];
-        float uy = unitVertices[k++];
+    // Put base and top shape vertices into array
+    for (int i = 0; i < 2; ++i) {
+        float h = i * _length; // z value, 0 to _length
 
-        // Base
-        _baseVertexArray.push_back(ux * _radius); // x
-        _baseVertexArray.push_back(uy * _radius); // y
-        _baseVertexArray.push_back(0.f);          // z
+        for (int j = 0, k = 0; j < _nShapeSegments && k < unitVertices.size(); ++j) {
+            float ux = unitVertices[k++];
+            float uy = unitVertices[k++];
 
-        // Top
-        _topVertexArray.push_back(ux * _radius); // x
-        _topVertexArray.push_back(uy * _radius); // y
-        _topVertexArray.push_back(_length);      // z
-
-        // Lines
-        _linesVertexArray.push_back(ux * _radius); // x
-        _linesVertexArray.push_back(uy * _radius); // y
-        _linesVertexArray.push_back(0.f);          // z
-
-        _linesVertexArray.push_back(ux * _radius); // x
-        _linesVertexArray.push_back(uy * _radius); // y
-        _linesVertexArray.push_back(_length);      // z
+            _vertexArray.push_back(ux * _radius); // x
+            _vertexArray.push_back(uy * _radius); // y
+            _vertexArray.push_back(h);            // z
+        }
     }
+
+    // Indices for Base shape
+    for (uint8_t i = 0; i < _nShapeSegments; ++i) {
+        _indexArray.push_back(i);
+    }
+
+    // Reset
+    _indexArray.push_back(255);
+
+    // Indices for Top shape
+    for (uint8_t i = _nShapeSegments; i < 2 * _nShapeSegments; ++i) {
+        _indexArray.push_back(i);
+    }
+
+    // Indices for connecting lines
+    for (uint8_t i = 0; i < _nShapeSegments; ++i) {
+        // Reset
+        _indexArray.push_back(255);
+
+        _indexArray.push_back(i);
+        _indexArray.push_back(i + _nShapeSegments);
+    }
+}
+
+void RenderablePrism::updateBufferData() {
+    glBindBuffer(GL_ARRAY_BUFFER, _vboId);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        _vertexArray.size() * sizeof(float),
+        _vertexArray.data(),
+        GL_STREAM_DRAW
+    );
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iboId);
+    glBufferData(
+        GL_ELEMENT_ARRAY_BUFFER,
+        _indexArray.size() * sizeof(uint8_t),
+        _indexArray.data(),
+        GL_STREAM_DRAW
+    );
 }
 
 void RenderablePrism::render(const RenderData& data, RendererTasks&) {
@@ -237,44 +268,16 @@ void RenderablePrism::render(const RenderData& data, RendererTasks&) {
     _shader->setUniform(_uniformCache.color, glm::vec4(_lineColor.value(), _opacity));
 
     // Render
+    glEnable(GL_PRIMITIVE_RESTART);
+    glPrimitiveRestartIndex(255);
     glLineWidth(_lineWidth);
-    bindGL();
+    glBindVertexArray(_vaoId);
 
-    // Base
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        _baseVertexArray.size() * sizeof(float),
-        _baseVertexArray.data(),
-        GL_STREAM_DRAW
-    );
+    glDrawElements(GL_LINE_LOOP, static_cast<GLsizei>(_indexArray.size()), GL_UNSIGNED_BYTE, nullptr);
 
-    glEnableVertexAttribArray(_locVertex);
-    glVertexAttribPointer(_locVertex, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
-
-    glDrawArrays(GL_LINE_LOOP, 0, static_cast<int>(_nShapeSegments));
-
-    // Top
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        _topVertexArray.size() * sizeof(float),
-        _topVertexArray.data(),
-        GL_STREAM_DRAW
-    );
-
-    glDrawArrays(GL_LINE_LOOP, 0, static_cast<int>(_nShapeSegments));
-
-    // Lines
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        _linesVertexArray.size() * sizeof(float),
-        _linesVertexArray.data(),
-        GL_STREAM_DRAW
-    );
-
-    glDrawArrays(GL_LINES, 0, static_cast<int>(2 * _nShapeSegments));
-
-    unbindGL();
+    glBindVertexArray(0);
     global::renderEngine->openglStateCache().resetLineState();
+    glDisable(GL_PRIMITIVE_RESTART);
 
     _shader->deactivate();
 }
@@ -286,6 +289,7 @@ void RenderablePrism::update(const UpdateData&) {
     }
     if (_prismIsDirty) {
         updateVertexData();
+        updateBufferData();
         _prismIsDirty = false;
     }
 }
