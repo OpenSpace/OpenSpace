@@ -68,7 +68,6 @@ private:
         float distToCamera, float fadeInVariable);
     bool isLabelInFrustum(const glm::dmat4& MVMatrix, const glm::dvec3& position) const;
 
-private:
     // Labels Structures
     struct LabelEntry {
         char feature[256];
@@ -99,14 +98,13 @@ private:
     properties::FloatProperty _labelsDistanceEPS;
     properties::OptionProperty _labelAlignmentOption;
 
-private:
     Labels _labels;
 
     // Font
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 
     // Globe
-    globebrowsing::RenderableGlobe* _globe;
+    globebrowsing::RenderableGlobe* _globe = nullptr;
 };
 
 } // namespace openspace
