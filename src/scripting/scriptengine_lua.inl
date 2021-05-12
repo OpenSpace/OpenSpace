@@ -298,8 +298,42 @@ int walkDirectory(lua_State* L) {
  * table that is returned is sorted. The default value for this parameter is "false".
  */
 int walkDirectoryFiles(lua_State* L) {
-    return walkCommon(L, &ghoul::filesystem::Directory::readFiles);
+    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 1, 3 }, "lua::walkCommon");
 
+    const std::string path = ghoul::lua::value<std::string>(L, 1);
+    const bool recursive = nArguments >= 2 ? ghoul::lua::value<bool>(L, 2) : false;
+    const bool sorted = nArguments == 3 ? ghoul::lua::value<bool>(L, 3) : false;
+
+    namespace fs = std::filesystem;
+    std::vector<fs::directory_entry> result;
+    if (fs::is_directory(path)) {
+        if (recursive) {
+            for (fs::directory_entry e : fs::recursive_directory_iterator(path)) {
+                if (e.is_regular_file()) {
+                    result.push_back(e);
+                }
+            }
+        }
+        else {
+            for (fs::directory_entry e : fs::directory_iterator(path)) {
+                if (e.is_regular_file()) {
+                    result.push_back(e);
+                }
+            }
+        }
+
+        if (sorted) {
+            std::sort(result.begin(), result.end());
+        }
+    }
+
+    lua_newtable(L);
+
+    for (int i = 0; i < static_cast<int>(result.size()); ++i) {
+        lua_pushstring(L, result[i].path().string().c_str());
+        lua_rawseti(L, -2, i + 1);
+    }
+    return 1;
 }
 
 /**

@@ -210,7 +210,7 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
         std::filesystem::is_directory(std::filesystem::path(filePath).parent_path()),
         fmt::format(
             "File '{}' exists, but directory '{}' doesn't",
-            absPath(filePath), ghoul::filesystem::File(filePath).directoryName()
+            absPath(filePath), std::filesystem::path(filePath).parent_path().string()
         )
     );
 

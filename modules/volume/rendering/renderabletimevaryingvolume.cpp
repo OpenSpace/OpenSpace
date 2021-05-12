@@ -210,7 +210,6 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
 RenderableTimeVaryingVolume::~RenderableTimeVaryingVolume() {}
 
 void RenderableTimeVaryingVolume::initializeGL() {
-    using RawPath = ghoul::filesystem::Directory::RawPath;
     std::string sequenceDir = absPath(_sourceDirectory);
 
     if (!std::filesystem::is_directory(sequenceDir)) {

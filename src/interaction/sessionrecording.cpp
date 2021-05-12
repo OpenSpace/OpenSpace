@@ -1711,20 +1711,27 @@ std::vector<std::string> SessionRecording::playbackList() const {
     const std::string path = absPath("${RECORDINGS}");
 
     std::vector<std::string> fileList;
-    ghoul::filesystem::Directory currentDir(path);
-    std::vector<std::string> allInputFiles = currentDir.readFiles();
-    for (const std::string& f : allInputFiles) {
-        // Remove path and keep only the filename
-        const std::string filename = f.substr(path.length() + 1, f.length() - path.length() - 1);
-        bool isHidden = false;
+    if (std::filesystem::is_directory(path)) {
+        namespace fs = std::filesystem;
+        for (const fs::directory_entry& e : fs::directory_iterator(path)) {
+            if (!e.is_regular_file()) {
+                continue;
+            }
+
+            // Remove path and keep only the filename
+            const std::string filename = e.path().string().substr(
+                path.length() + 1, e.path().string().length() - path.length() - 1
+            );
+            bool isHidden = false;
 #ifdef WIN32
-        DWORD attributes = GetFileAttributes(f.c_str());
-        isHidden = attributes & FILE_ATTRIBUTE_HIDDEN;
+            DWORD attributes = GetFileAttributes(e.path().string().c_str());
+            isHidden = attributes & FILE_ATTRIBUTE_HIDDEN;
 #else
-        isHidden = filename.rfind(".", 0) != 0;
+            isHidden = filename.rfind(".", 0) != 0;
 #endif // WIN32
-        if (!isHidden) { //Don't add hidden files
-            fileList.push_back(filename);
+            if (!isHidden) { //Don't add hidden files
+                fileList.push_back(filename);
+            }
         }
     }
     return fileList;

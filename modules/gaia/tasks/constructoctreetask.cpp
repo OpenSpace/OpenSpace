@@ -31,6 +31,7 @@
 #include <ghoul/filesystem/directory.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <filesystem>
 #include <fstream>
 #include <thread>
 
@@ -452,8 +453,16 @@ void ConstructOctreeTask::constructOctreeFromFolder(
     //int starsOutside2000 = 0;
     //int starsOutside5000 = 0;
 
-    ghoul::filesystem::Directory currentDir(_inFileOrFolderPath);
-    std::vector<std::string> allInputFiles = currentDir.readFiles();
+    std::vector<std::string> allInputFiles;
+    if (std::filesystem::is_directory(_inFileOrFolderPath)) {
+        namespace fs = std::filesystem;
+        for (const fs::directory_entry& e : fs::directory_iterator(_inFileOrFolderPath)) {
+            if (!e.is_regular_file()) {
+                allInputFiles.push_back(e.path().string());
+            }
+        }
+    }
+    
     std::vector<float> filterValues;
     auto writeThreads = std::vector<std::thread>(8);
 

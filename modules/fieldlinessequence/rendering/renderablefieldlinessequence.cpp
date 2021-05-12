@@ -420,10 +420,14 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
     // the files with the same extension as <inputFileTypeString>
     if (std::filesystem::is_directory(sourceFolderPath)) {
         // Extract all file paths from the provided folder
-        _sourceFiles = ghoul::filesystem::Directory(sourceFolderPath).readFiles(
-            ghoul::filesystem::Directory::Recursive::No,
-            ghoul::filesystem::Directory::Sort::Yes
-        );
+        _sourceFiles.clear();
+        namespace fs = std::filesystem;
+        for (const fs::directory_entry& e : fs::directory_iterator(sourceFolderPath)) {
+            if (e.is_regular_file()) {
+                _sourceFiles.push_back(e.path().string());
+            }
+        }
+        std::sort(_sourceFiles.begin(), _sourceFiles.end());
 
         // Remove all files that don't have <inputFileTypeString> as extension
         _sourceFiles.erase(

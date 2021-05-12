@@ -141,7 +141,6 @@ std::string LabelParser::encode(const std::string& line) const {
 }
 
 bool LabelParser::create() {
-    using RawPath = ghoul::filesystem::Directory::RawPath;
     std::string sequenceDir = absPath(_fileName);
     if (!std::filesystem::is_directory(sequenceDir)) {
         LERROR(fmt::format("Could not load Label Directory '{}'", sequenceDir));

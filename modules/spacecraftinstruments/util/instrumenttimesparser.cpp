@@ -68,7 +68,6 @@ InstrumentTimesParser::InstrumentTimesParser(std::string name, std::string seque
 }
 
 bool InstrumentTimesParser::create() {
-    using RawPath = ghoul::filesystem::Directory::RawPath;
     std::string sequenceDir = absPath(_fileName);
     if (!std::filesystem::is_directory(sequenceDir)) {
         LERROR(fmt::format("Could not load Label Directory '{}'", sequenceDir));

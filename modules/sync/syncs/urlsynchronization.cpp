@@ -310,7 +310,7 @@ std::string UrlSynchronization::directory() {
         "files"
     );
 
-    return absPath(d);
+    return absPath(d.path());
 }
 
 } // namespace openspace

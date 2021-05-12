@@ -441,7 +441,7 @@ std::string AssetLoader::generateAssetPath(const std::string& baseDirectory,
 
 std::shared_ptr<Asset> AssetLoader::getAsset(const std::string& name) {
     ghoul::filesystem::Directory directory = currentDirectory();
-    const std::string path = generateAssetPath(directory, name);
+    const std::string path = generateAssetPath(directory.path(), name);
 
     // Check if asset is already loaded.
     const auto it = _trackedAssets.find(path);
@@ -538,7 +538,7 @@ void AssetLoader::remove(const std::string& identifier) {
 
 std::shared_ptr<Asset> AssetLoader::has(const std::string& identifier) const {
     ghoul::filesystem::Directory directory = currentDirectory();
-    std::string path = generateAssetPath(directory, identifier);
+    std::string path = generateAssetPath(directory.path(), identifier);
 
     const auto it = _trackedAssets.find(path);
     if (it == _trackedAssets.end()) {
@@ -745,7 +745,7 @@ int AssetLoader::existsLua(Asset*) {
     const std::string assetName = luaL_checkstring(*_luaState, 1);
 
     const ghoul::filesystem::Directory directory = currentDirectory();
-    const std::string path = generateAssetPath(directory, assetName);
+    const std::string path = generateAssetPath(directory.path(), assetName);
 
     lua_settop(*_luaState, 0);
     lua_pushboolean(*_luaState, std::filesystem::is_regular_file(path));

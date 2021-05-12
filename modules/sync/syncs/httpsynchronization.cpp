@@ -96,7 +96,7 @@ std::string HttpSynchronization::directory() {
         std::to_string(_version)
     );
 
-    return FileSys.absPath(d);
+    return FileSys.absPath(d.path());
 }
 
 void HttpSynchronization::start() {

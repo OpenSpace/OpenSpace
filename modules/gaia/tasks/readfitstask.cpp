@@ -33,7 +33,7 @@
 #include <ghoul/filesystem/directory.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/fmt.h>
-
+#include <filesystem>
 #include <fstream>
 #include <set>
 #include <optional>
@@ -185,8 +185,16 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
     ConcurrentJobManager<std::vector<std::vector<float>>> jobManager(threadPool);
 
     // Get all files in specified folder.
-    ghoul::filesystem::Directory currentDir(_inFileOrFolderPath);
-    std::vector<std::string> allInputFiles = currentDir.readFiles();
+    std::vector<std::string> allInputFiles;
+    if (std::filesystem::is_directory(_inFileOrFolderPath)) {
+        namespace fs = std::filesystem;
+        for (const fs::directory_entry& e : fs::directory_iterator(_inFileOrFolderPath)) {
+            if (e.is_regular_file()) {
+                allInputFiles.push_back(e.path().string());
+            }
+        }
+    }
+    
     size_t nInputFiles = allInputFiles.size();
     LINFO("Files to read: " + std::to_string(nInputFiles));
 
