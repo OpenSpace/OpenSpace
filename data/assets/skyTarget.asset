@@ -5,7 +5,9 @@ local assetHelper = asset.require('util/asset_helper')
          Identifier = "SkyTarget1",
          Name = "Target",
          FaceCamera = false,
-         BrowserID = "SkyBrowser1"
+         BrowserID = "SkyBrowser1",
+         UseRadiusAzimuthElevation = false,
+         RadiusAzimuthElevation = {1.0, 0.0, 0.0}, -- use for dome
      };
 
 assetHelper.registerScreenSpaceRenderables(asset, { spec })

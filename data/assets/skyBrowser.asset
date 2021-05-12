@@ -7,7 +7,9 @@ local assetHelper = asset.require('util/asset_helper')
          Url = "http://localhost:8000/",
          FaceCamera = false,
          TargetID = "SkyTarget1",
-         CartesianPosition = {-1.0, -0.5, -2.1}
+         CartesianPosition = {-1.0, -0.5, -2.1},
+         UseRadiusAzimuthElevation = false,
+         RadiusAzimuthElevation = {1.0, 0.0, 0.0}, -- use for dome
      };
 
 assetHelper.registerScreenSpaceRenderables(asset, { spec })
