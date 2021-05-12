@@ -48,6 +48,8 @@ class WWTDataHandler;
 class SkyBrowserModule : public OpenSpaceModule {
 public:
     constexpr static const char* Name = "SkyBrowser";
+    constexpr static const int FROM_DIRECTORY = 0;
+    constexpr static const int FROM_URL = 1;
 
     SkyBrowserModule();
     virtual ~SkyBrowserModule() = default;
@@ -60,6 +62,7 @@ public:
     void setSelectedBrowser(ScreenSpaceRenderable* ptr);
     void setSelectedBrowser(int i);
     int getSelectedBrowserIndex();
+    int loadImages(const std::string& root, int readingMode = FROM_URL);
 
     scripting::LuaLibrary luaLibrary() const override;
     //std::vector<documentation::Documentation> documentations() const override;

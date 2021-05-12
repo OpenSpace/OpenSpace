@@ -2,6 +2,7 @@
 #define __OPENSPACE_MODULE_SKYBROWSER___SCREENSPACESKYBROWSER___H__
 
 #include <modules/webbrowser/include/screenspacebrowser.h>
+#include <modules/skybrowser/include/wwtdatahandler.h>
 #include <openspace/properties/stringproperty.h>
 
 namespace openspace {
@@ -24,9 +25,9 @@ namespace openspace {
         ghoul::Dictionary createMessageForLoadingWWTImgColl(const std::string& url) const;
         ghoul::Dictionary createMessageForSettingForegroundWWT(const std::string& name) const;
         ghoul::Dictionary createMessageForSettingForegroundOpacityWWT(double val) const;
-        ghoul::Dictionary createMessageForAddingImageLayerWWT(const std::string& url);
-        ghoul::Dictionary createMessageForRemovingImageLayerWWT(int id) const;
-        ghoul::Dictionary createMessageForSettingOpacityLayerWWT(int id, double opacity) const;
+        ghoul::Dictionary createMessageForAddingImageLayerWWT(ImageData& url);
+        ghoul::Dictionary createMessageForRemovingImageLayerWWT(const std::string& id) const;
+        ghoul::Dictionary createMessageForSettingOpacityLayerWWT(const ImageData& id, double opacity) const;
 
         bool sendMessageToWWT(const ghoul::Dictionary& msg);
         void sendMouseEvent(CefStructBase<CefMouseEventTraits> event, int x, int y) const;
@@ -66,7 +67,7 @@ namespace openspace {
         // For capping the calls to change the zoom from scrolling
         constexpr static const std::chrono::milliseconds TimeUpdateInterval{ 10 };
         std::chrono::system_clock::time_point _lastUpdateTime;
-        int imageId = 0;
+        int _imageId{ 0 };
     };
 }
 

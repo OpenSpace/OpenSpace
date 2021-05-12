@@ -94,7 +94,7 @@ namespace openspace {
     }
 
 
-    int WWTDataHandler::loadAllImagesFromXMLs() {
+    int WWTDataHandler::loadImagesFromLoadedXMLs() {
         for (tinyxml2::XMLDocument* doc : xmls) {
             tinyxml2::XMLElement* root = doc->FirstChildElement();
             std::string collectionName = root->FindAttribute("Name") ? root->FindAttribute("Name")->Value() : "";
@@ -112,6 +112,8 @@ namespace openspace {
             }
             return a.name < b.name;
             });
+        LINFO(std::to_string(nImagesWith3dPositions) + " 3D positions were matched in the speck files!");
+
         return images.size();
     }
 
@@ -129,7 +131,7 @@ namespace openspace {
         while (ptr) {
             // If node is an image or place, load it 
             if (std::string(ptr->Name()) == "ImageSet" || std::string(ptr->Name()) == "Place") {
-                loadImage(ptr, collectionName);
+                loadImageFromXmlNode(ptr, collectionName);
             }
             // If node is another folder, open recursively
             else if (std::string(ptr->Name()) == "Folder") {
@@ -145,38 +147,44 @@ namespace openspace {
         
     }
 
-    int WWTDataHandler::loadImage(tinyxml2::XMLElement* node, std::string collectionName) {
+    int WWTDataHandler::loadImageFromXmlNode(tinyxml2::XMLElement* node, std::string collectionName) {
         // Only load "Sky" type images
         if (std::string(node->FindAttribute("DataSetType")->Value()) != "Sky")
             return -1;
 
-        std::string url;
+        std::string thumbnailUrl;
         std::string credits;
         std::string creditsUrl;
+        std::string imageUrl;
         tinyxml2::XMLElement* imageSet = nullptr;
         // Get url. The thumbnail can be located either in the Place or the ImageSet
         if (std::string(node->Name()) == "ImageSet") {       
-            url = getChildNodeContentFromImageSet(node, "ThumbnailUrl");
+            thumbnailUrl = getChildNodeContentFromImageSet(node, "ThumbnailUrl");
             imageSet = node;
         }
         else if (std::string(node->Name()) == "Place") {
-            url = getURLFromPlace(node);
+            thumbnailUrl = getURLFromPlace(node);
             imageSet = getChildNode(node, "ImageSet");
         }
         else {
             return -1;
         }
-
-        // Only load images that have a thumbnail
-        if (url == "" || !imageSet) {
+        
+        // Only load images that have a thumbnail image url
+        if (thumbnailUrl == "" || !imageSet) {
             return -1;
         }
-        // The credits are always children nodes of ImageSet
+        // Only load images that contain a image url
+        if (!imageSet->FindAttribute("Url")) {
+            return -1;
+        }
+        // The credits and image url are always children nodes of ImageSet
         credits = getChildNodeContentFromImageSet(imageSet, "Credits");
         creditsUrl = getChildNodeContentFromImageSet(imageSet, "CreditsUrl");
+        imageUrl = imageSet->FindAttribute("Url")->Value();
 
         ImageData image{};
-        setImageDataValues(node, credits, creditsUrl, url, collectionName, image);
+        setImageDataValues(node, credits, creditsUrl, thumbnailUrl, collectionName, imageUrl, image);
 
         images.push_back(image);
         // Return index of image in vector
@@ -223,7 +231,13 @@ namespace openspace {
         return imageSet;
     }
 
-    void WWTDataHandler::setImageDataValues(tinyxml2::XMLElement* node, std::string credits, std::string creditsUrl, std::string thumbnail, std::string collectionName, ImageData& img) {
+    void WWTDataHandler::setImageDataValues(tinyxml2::XMLElement* node, 
+                                            std::string credits, 
+                                            std::string creditsUrl, 
+                                            std::string thumbnail, 
+                                            std::string collectionName,
+                                            std::string imageUrl,
+                                            ImageData& img) {
         // Get attributes for the image
         img.name = node->FindAttribute("Name") ? node->FindAttribute("Name")->Value() : "";
         img.hasCoords = node->FindAttribute("RA") && node->FindAttribute("Dec");
@@ -237,14 +251,16 @@ namespace openspace {
         img.zoomLevel = node->FindAttribute("ZoomLevel") ? std::stof(node->FindAttribute("ZoomLevel")->Value()) : 0.f;
         img.credits = credits;
         img.creditsUrl = creditsUrl;
+        img.imageUrl = imageUrl;
         // Look for 3D position in the data loaded from speck files
         auto it = _3dPositions.find(img.name);
         if (it != _3dPositions.end()) {
             img.position3d = it->second;
+            nImagesWith3dPositions++;
         }
     }
     
-    const std::vector<ImageData>& WWTDataHandler::getLoadedImages() const {
+    std::vector<ImageData>& WWTDataHandler::getLoadedImages() {
         return images;
     }
 

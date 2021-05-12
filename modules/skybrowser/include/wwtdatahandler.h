@@ -54,8 +54,10 @@ namespace openspace::speck {
 namespace openspace {
 
 	struct ImageData {
+        static constexpr int NO_ID = -1;
 		std::string name;
 		std::string thumbnailUrl;
+        std::string imageUrl;
 		std::string credits;
 		std::string creditsUrl;
 		glm::dvec2 celestCoords;
@@ -63,6 +65,7 @@ namespace openspace {
 		float zoomLevel;
 		bool hasCoords;
 	    glm::dvec3 position3d;
+        int id{ NO_ID };
 	};
 
 	struct ImageCollection {
@@ -80,20 +83,30 @@ namespace openspace {
 		bool downloadFile(std::string& url, std::string& fileDestination);
 		void loadWTMLCollectionsFromURL(std::string url, std::string fileName);
 		void loadWTMLCollectionsFromDirectory(std::string directory);
-		int loadAllImagesFromXMLs();
+		int loadImagesFromLoadedXMLs();
 
 		const std::vector<ImageCollection>& getAllImageCollectionUrls() const;
-		const std::vector<ImageData>& getLoadedImages() const;
+		std::vector<ImageData>& getLoadedImages();
 		void loadSpeckData(speck::Dataset& dataset);
 
 	private:
-		void loadImagesFromXML(tinyxml2::XMLElement* node, std::string collectionName);
-		int loadImage(tinyxml2::XMLElement* imageSet, std::string collectionName);
-		void setImageDataValues(tinyxml2::XMLElement* node, std::string credits, std::string creditsUrl, std::string thumbnail, std::string collectionName, ImageData& img);
+		void loadImagesFromXML(tinyxml2::XMLElement* node, 
+                                std::string collectionName);
+		int loadImageFromXmlNode(tinyxml2::XMLElement* imageSet, 
+                                std::string collectionName);
+        void setImageDataValues(tinyxml2::XMLElement* node,
+                                std::string credits,
+                                std::string creditsUrl,
+                                std::string thumbnail,
+                                std::string collectionName,
+                                std::string imageUrl,
+                                ImageData& img);
 
-		std::string getChildNodeContentFromImageSet(tinyxml2::XMLElement* imageSet, std::string elementName);
+		std::string getChildNodeContentFromImageSet(tinyxml2::XMLElement* imageSet, 
+                                                    std::string elementName);
 		std::string getURLFromPlace(tinyxml2::XMLElement* place);
-		tinyxml2::XMLElement* getDirectChildNode(tinyxml2::XMLElement* node, std::string name);
+		tinyxml2::XMLElement* getDirectChildNode(tinyxml2::XMLElement* node, 
+                                                 std::string name);
 		tinyxml2::XMLElement* getChildNode(tinyxml2::XMLElement* node, std::string name);
 
 		std::vector<ImageData> images;
@@ -101,6 +114,7 @@ namespace openspace {
 		std::vector<tinyxml2::XMLDocument*> xmls;
 		// 3D position data loaded from speck files
 		std::unordered_map<std::string, glm::dvec3> _3dPositions;
+        int nImagesWith3dPositions = 0;
 	};
 }
 

@@ -2,6 +2,7 @@
 #include <modules/skybrowser/include/screenspaceskytarget.h>
 #include <modules/skybrowser/include/utility.h>
 #include <modules/skybrowser/skybrowsermodule.h>
+#include <modules/skybrowser/include/wwtdatahandler.h>
 #include <modules/webbrowser/include/webkeyboardhandler.h>
 #include <modules/webbrowser/include/browserinstance.h>
 #include <modules/webbrowser/include/screenspacebrowser.h>
@@ -139,6 +140,7 @@ namespace openspace {
     }
 
     bool ScreenSpaceSkyBrowser::initializeGL() {
+
         global::moduleEngine->module<SkyBrowserModule>()->addRenderable(this);
         setConnectedTarget();
         if (_skyTarget) {    
@@ -240,7 +242,6 @@ namespace openspace {
     }
 
     ghoul::Dictionary ScreenSpaceSkyBrowser::createMessageForLoadingWWTImgColl(const std::string& url) const {
-        // https://docs.worldwidetelescope.org/data-guide/1/data-file-formats/collections/sample-blank-collection.wtml
         using namespace std::string_literals;
         ghoul::Dictionary msg;
         msg.setValue("event", "load_image_collection"s);
@@ -259,32 +260,33 @@ namespace openspace {
         return msg;
     }  
     
-    ghoul::Dictionary ScreenSpaceSkyBrowser::createMessageForAddingImageLayerWWT(const std::string& url) {
+    ghoul::Dictionary ScreenSpaceSkyBrowser::createMessageForAddingImageLayerWWT(ImageData& image) {
+        std::string idString = std::to_string(_imageId);
         using namespace std::string_literals;
         ghoul::Dictionary msg;
+        image.id = _imageId;
         msg.setValue("event", "image_layer_create"s);
-        msg.setValue("id", std::to_string(imageId));
-        msg.setValue("name", url);
-        // Update ID to ensure that all ID's are unique
-        imageId++;
-
+        msg.setValue("id", idString);
+        msg.setValue("url", image.imageUrl);
+        _imageId++;
         return msg;
     }
 
-    ghoul::Dictionary ScreenSpaceSkyBrowser::createMessageForRemovingImageLayerWWT(int id) const {
+    ghoul::Dictionary ScreenSpaceSkyBrowser::createMessageForRemovingImageLayerWWT(const std::string& id) const {
         using namespace std::string_literals;
         ghoul::Dictionary msg;
         msg.setValue("event", "image_layer_remove"s);
-        msg.setValue("id", std::to_string(id));
+        msg.setValue("id", id);
 
         return msg;
     }
 
-    ghoul::Dictionary ScreenSpaceSkyBrowser::createMessageForSettingOpacityLayerWWT(int id, double opacity) const {
+    ghoul::Dictionary ScreenSpaceSkyBrowser::createMessageForSettingOpacityLayerWWT(const ImageData& image, double opacity) const {
+        std::string idString = std::to_string(image.id);
         using namespace std::string_literals;
         ghoul::Dictionary msg;
         msg.setValue("event", "image_layer_set"s);
-        msg.setValue("id", std::to_string(id));
+        msg.setValue("id", idString);
         msg.setValue("setting", "opacity"s);
         msg.setValue("value", opacity);
 

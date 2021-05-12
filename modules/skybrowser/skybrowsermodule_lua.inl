@@ -37,40 +37,39 @@ namespace openspace::skybrowser::luascriptfunctions {
 		ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::selectImage");
 		const int i = ghoul::lua::value<int>(L, 1);
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-		ScreenSpaceSkyBrowser* browser = module->getSkyBrowsers()[module->getSelectedBrowserIndex()];
+		ScreenSpaceSkyBrowser* selectedBrowser = module->getSkyBrowsers()[module->getSelectedBrowserIndex()];
+        ScreenSpaceSkyTarget* selectedTarget = selectedBrowser->getSkyTarget();
 		
-		const ImageData& resultImage = module->getWWTDataHandler()->getLoadedImages()[i];
-		// Load image collection, if it isn't loaded already
-        // TODO: Update or remove with new WWT API
-		const std::vector<ImageCollection>& collections = module->getWWTDataHandler()->getAllImageCollectionUrls();
-		auto it = std::find_if(collections.begin(), collections.end(), [&](const ImageCollection& coll) {
-				return coll.name == resultImage.collection;
-			});
-		if (!it->loaded) {
-			browser->sendMessageToWWT(browser->createMessageForLoadingWWTImgColl(it->url));
-		}
-        LINFO("Loading image " + resultImage.name);
-		browser->sendMessageToWWT(browser->createMessageForSettingForegroundWWT(resultImage.name));
-        browser->sendMessageToWWT(browser->createMessageForSettingForegroundOpacityWWT(100));
-		
-		// Only move target if the image has coordinates	 
+		ImageData& resultImage = module->getWWTDataHandler()->getLoadedImages()[i];
+
+        // Load image, if the image has not been loaded yet
+        if (resultImage.id == ImageData::NO_ID) {
+            LINFO("Loading image " + resultImage.name);
+            ghoul::Dictionary msg = selectedBrowser->createMessageForAddingImageLayerWWT(resultImage);
+            selectedBrowser->sendMessageToWWT(msg);
+            selectedBrowser->sendMessageToWWT(selectedBrowser->createMessageForSettingOpacityLayerWWT(resultImage, 1.0));
+        }
+        
+		// If the image has coordinates, move the target
 		if (resultImage.hasCoords) {
             // Animate the target to the image coord position
             // In WWT, the definition of ZoomLevel is: VFOV = ZoomLevel / 6
-            if (browser->getSkyTarget()) {
-                browser->getSkyTarget()->unlock();
-                browser->getSkyTarget()->startAnimation(resultImage.celestCoords, resultImage.zoomLevel / 6);
+            if (selectedTarget) {
+                selectedTarget->unlock();
+                selectedTarget->startAnimation(resultImage.celestCoords, resultImage.zoomLevel / 6);
                 glm::dvec3 imgCoordsOnScreen = J2000SphericalToScreenSpace(resultImage.celestCoords);
                 glm::vec2 windowRatio = global::windowDelegate->currentWindowSize();
                 float r = windowRatio.x / windowRatio.y;
                 // Check if image coordinate is within current FOV
-                if (!(abs(imgCoordsOnScreen.x) < r && abs(imgCoordsOnScreen.y) < 1.f && imgCoordsOnScreen.z < 0)
-                    || imgCoordsOnScreen.z > 0) {
+                bool coordIsWithinView = (abs(imgCoordsOnScreen.x) < r && abs(imgCoordsOnScreen.y) < 1.f && imgCoordsOnScreen.z < 0);
+                bool coordIsBehindCamera = imgCoordsOnScreen.z > 0;
+                // If the coordinate is not in view, rotate camera
+                if (!coordIsWithinView || coordIsBehindCamera) {
                     module->startRotation(resultImage.celestCoords);
                 }
-
             }
 		} 
+        
 		return 0;
 	}
 
@@ -131,20 +130,16 @@ namespace openspace::skybrowser::luascriptfunctions {
         return 0;
     }
 	
-	int followCamera(lua_State* L) {
+	int loadImagesToWWT(lua_State* L) {
 		// Load images from url
-		ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::followCamera");
-        LINFO("Loading images from url");
-		SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-		std::string root = "https://raw.githubusercontent.com/WorldWideTelescope/wwt-web-client/master/assets/webclient-explore-root.wtml";
-        std::string hubble = "http://www.worldwidetelescope.org/wwtweb/catalog.aspx?W=hubble";
+		ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::loadImagesToWWT");
+        SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 
-		module->getWWTDataHandler()->loadWTMLCollectionsFromURL(root, "root");
-		LINFO(std::to_string( module->getWWTDataHandler()->loadAllImagesFromXMLs()));
-
-        for (ScreenSpaceSkyBrowser* browser : module->getSkyBrowsers()) {
-            browser->sendMessageToWWT(browser->createMessageForLoadingWWTImgColl(root));
-        }
+        // Load the collections here because here we know that the browser can execute javascript
+         std::string root = "https://raw.githubusercontent.com/WorldWideTelescope/wwt-web-client/master/assets/webclient-explore-root.wtml";
+         for (ScreenSpaceSkyBrowser* browser : module->getSkyBrowsers()) {
+             browser->sendMessageToWWT(browser->createMessageForLoadingWWTImgColl(root));
+         }
 
 		return 1;
 	}
@@ -152,20 +147,7 @@ namespace openspace::skybrowser::luascriptfunctions {
 	int moveBrowser(lua_State* L) {
 		// Load images from local directory
 		ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::moveBrowser");
-		SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-		module->getWWTDataHandler()->loadWTMLCollectionsFromDirectory(absPath("${MODULE_SKYBROWSER}/WWTimagedata/"));
-		std::string noOfLoadedImgs = std::to_string(module->getWWTDataHandler()->loadAllImagesFromXMLs());
-		LINFO("Loaded " + noOfLoadedImgs + " WorldWide Telescope images.");
-
-		ScreenSpaceSkyBrowser* browser = dynamic_cast<ScreenSpaceSkyBrowser*>(global::renderEngine->screenSpaceRenderable("SkyBrowser1"));
-        // Load all image collection urls
-		//const std::vector<std::string>& imageUrls = module->getWWTDataHandler()->getAllImageCollectionUrls();
-		//for (const std::string url : imageUrls) {
-		//    browser->sendMessageToWWT(browser->createMessageForLoadingWWTImgColl(url));
-		//}
-		std::string root = "https://raw.githubusercontent.com/WorldWideTelescope/wwt-web-client/master/assets/webclient-explore-root.wtml";
-        std::string hubble = "http://www.worldwidetelescope.org/wwtweb/catalog.aspx?W=hubble";
-		browser->sendMessageToWWT(browser->createMessageForLoadingWWTImgColl(hubble));
+		
 		return 1;
 	}
 
@@ -173,22 +155,15 @@ namespace openspace::skybrowser::luascriptfunctions {
 		// Send image list to GUI
 		ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::getListOfImages");
 		SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-        // Load speck files for 3D positions
-        std::filesystem::path globularClusters = absPath("${BASE}/sync/http/digitaluniverse_globularclusters_speck/2/gc.speck");
-        std::filesystem::path openClusters = absPath("${BASE}/sync/http/digitaluniverse_openclusters_speck/2/oc.speck");
 
-        speck::Dataset speckGlobularClusters = speck::loadSpeckFile(globularClusters);
-        speck::Dataset speckOpenClusters = speck::loadSpeckFile(openClusters);
+        std::string root = "https://raw.githubusercontent.com/WorldWideTelescope/wwt-web-client/master/assets/webclient-explore-root.wtml";
+        std::string hubble = "http://www.worldwidetelescope.org/wwtweb/catalog.aspx?W=hubble";
 
-        module->getWWTDataHandler()->loadSpeckData(speckGlobularClusters);
-        module->getWWTDataHandler()->loadSpeckData(speckOpenClusters);
+        module->loadImages(root, SkyBrowserModule::FROM_DIRECTORY);
 
-		// If no data has been loaded yet, load it!
+		// If no data has been loaded yet, download the data from the web!
 		if (module->getWWTDataHandler()->getLoadedImages().size() == 0) {
-            // Read from disc
-			//moveBrowser(L);
-            // Read from URL
-			 followCamera(L);
+            module->loadImages(root, SkyBrowserModule::FROM_URL);
 		}
 	    
         // Create Lua table to send to the GUI
