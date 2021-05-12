@@ -5,6 +5,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <algorithm>
 
 // For loading the speck files
 #include <ghoul/fmt.h>
@@ -284,7 +285,9 @@ namespace openspace {
         img.creditsUrl = creditsUrl;
         img.imageUrl = imageUrl;
         // Look for 3D position in the data loaded from speck files
-        auto it = _3dPositions.find(img.name);
+        std::string str = createSearchableString(img.name);
+        // Look for 3D coordinate
+        auto it = _3dPositions.find(str);
         if (it != _3dPositions.end()) {
             img.position3d = it->second;
             nImagesWith3dPositions++;
@@ -298,11 +301,26 @@ namespace openspace {
     void WWTDataHandler::loadSpeckData(speck::Dataset& dataset) {
         for (speck::Dataset::Entry entry : dataset.entries) {
             if (entry.comment.has_value()) {
-                _3dPositions[entry.comment.value()] = std::move(entry.position);
+                std::string name = createSearchableString(entry.comment.value());
+                _3dPositions[name] = std::move(entry.position);
             }
         }
         LINFO("Loaded speck file with " + std::to_string(_3dPositions.size()) + " entries!");
     }
+
+    std::string WWTDataHandler::createSearchableString(std::string str) {
+        // Remove white spaces and all special characters
+        str.erase(std::remove_if(str.begin(), str.end(), [](char c) {
+            bool isNumberOrLetter = std::isdigit(c) || std::isalpha(c);
+            return !isNumberOrLetter;
+            }),
+            str.end());
+        // Make the word lower case
+        std::transform(str.begin(), str.end(), str.begin(),
+            [](unsigned char c) { return std::tolower(c); });
+        return str;
+    }
+
 }
 
 // Loading of speck files

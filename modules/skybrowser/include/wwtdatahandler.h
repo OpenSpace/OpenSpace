@@ -88,6 +88,7 @@ namespace openspace {
 		const std::vector<ImageCollection>& getAllImageCollectionUrls() const;
 		std::vector<ImageData>& getLoadedImages();
 		void loadSpeckData(speck::Dataset& dataset);
+        std::string createSearchableString(std::string name);
 
 	private:
 		void loadImagesFromXML(tinyxml2::XMLElement* node, 
