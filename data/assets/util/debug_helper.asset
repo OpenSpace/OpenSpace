@@ -1,128 +1,120 @@
 local identifierGeneratorFunction = function (suffix)
-    local nextIndex = 0
-    return function (specification)
-        nextIndex = nextIndex + 1
-        return specification.Identifier or
-            (specification.Parent .. suffix .. nextIndex)
-    end
+  local nextIndex = 0
+  return function (specification)
+    nextIndex = nextIndex + 1
+    return specification.Identifier or
+        (specification.Parent .. suffix .. nextIndex)
+  end
 end
 
 local generateGridIdentifier = identifierGeneratorFunction("Grid")
 
 local addGrid = function (specification)
-    local identifier = specification.Identifier or
-        generateGridIdentifier(specification)
+  local identifier = specification.Identifier or generateGridIdentifier(specification)
 
-    local name = specification.Name
-    local color = specification.Color
-    local parent = specification.Parent
-    local scale = specification.Scale
-    local position = specification.Position
-    local rotation = specification.Rotation
+  local name = specification.Name
+  local color = specification.Color
+  local parent = specification.Parent
+  local scale = specification.Scale
+  local position = specification.Position
+  local rotation = specification.Rotation
 
-    local grid = {
-        Identifier = identifier,
-        Parent = parent,
-        Transform = {
-            Scale = {
-                Type = "StaticScale",
-                Scale = scale;
-            },
-            Translation = {
-                Type = "StaticTranslation",
-                Position = position
-            },
-            Rotation = {
-                Type = "StaticRotation",
-                Rotation = rotation
-            }
-        },
-        Renderable = {
-            Type = "RenderableSphericalGrid",
-            Enabled = true,
-            LineWidth = 2.0,
-            Color = color
-        },
-        GUI = {
-            Name = name,
-            Path = "/Other/Grids"
-        }
+  local grid = {
+    Identifier = identifier,
+    Parent = parent,
+    Transform = {
+      Scale = {
+        Type = "StaticScale",
+        Scale = scale
+      },
+      Translation = {
+        Type = "StaticTranslation",
+        Position = position
+      },
+      Rotation = {
+        Type = "StaticRotation",
+        Rotation = rotation
+      }
+    },
+    Renderable = {
+      Type = "RenderableSphericalGrid",
+      Enabled = true,
+      LineWidth = 2.0,
+      Color = color
+  },
+    GUI = {
+      Name = name,
+      Path = "/Other/Grids"
     }
-    openspace.addSceneGraphNode(grid)
-    return identifier;
+  }
+  openspace.addSceneGraphNode(grid)
+  return identifier;
 end
 
 local generateAxesIdentifier = identifierGeneratorFunction("Axes")
 
 local addCartesianAxes = function (specification)
-    local identifier = specification.Identifier or
-        generateAxesIdentifier(specification)
+  local identifier = specification.Identifier or generateAxesIdentifier(specification)
 
-    local name = specification.Name or specification.Identifier
-    local parent = specification.Parent or "Root"
-    local scale = specification.Scale or 1.0
-    local position = specification.Position or { 0.0, 0.0, 0.0 }
-    local rotation = specification.Rotation or { 0.0, 0.0, 0.0 }
+  local name = specification.Name or specification.Identifier
+  local parent = specification.Parent or "Root"
+  local scale = specification.Scale or 1.0
+  local position = specification.Position or { 0.0, 0.0, 0.0 }
+  local rotation = specification.Rotation or { 0.0, 0.0, 0.0 }
 
-    local axes = {
-        Identifier = identifier,
-        Parent = parent,
-        Transform = {
-            Scale = {
-                Type = "StaticScale",
-                Scale = scale;
-            },
-            Translation = {
-                Type = "StaticTranslation",
-                Position = position
-            },
-            Rotation = {
-                Type = "StaticRotation",
-                Rotation = rotation
-            }
-        },
-        Renderable = {
-            Type = "RenderableCartesianAxes",
-            Enabled = true,
-            XColor = { 1.0, 0.0, 0.0 },
-            YColor = { 0.0, 1.0, 0.0 },
-            ZColor = { 0.0, 0.0, 1.0 }
-        },
-        GUI = {
-            Name = name,
-            Path = "/Other/Coordinate Systems"
-        }
+  local axes = {
+    Identifier = identifier,
+    Parent = parent,
+    Transform = {
+      Scale = {
+        Type = "StaticScale",
+        Scale = scale
+      },
+      Translation = {
+        Type = "StaticTranslation",
+        Position = position
+      },
+      Rotation = {
+        Type = "StaticRotation",
+        Rotation = rotation
+      }
+    },
+    Renderable = {
+      Type = "RenderableCartesianAxes",
+      Enabled = true,
+      XColor = { 1.0, 0.0, 0.0 },
+      YColor = { 0.0, 1.0, 0.0 },
+      ZColor = { 0.0, 0.0, 1.0 }
+    },
+    GUI = {
+      Name = name,
+      Path = "/Other/Coordinate Systems"
     }
-    openspace.addSceneGraphNode(axes)
-    return identifier;
+  }
+  openspace.addSceneGraphNode(axes)
+  return identifier;
 end
 
 
-local registerNode = function(
-    containerAsset,
-    nodeCreationFunction,
-    identifierGeneratorFunction,
-    specification
-)
-    local identifier = specification.Identifier or
-        identifierGeneratorFunction(specification)
+local registerNode = function(containerAsset, nodeCreationFunction, identifierGeneratorFunction, specification)
+  local identifier = specification.Identifier or identifierGeneratorFunction(specification)
 
-    specification.Identifier = identifier
+  specification.Identifier = identifier
 
-    containerAsset.onInitialize(function ()
-        nodeCreationFunction(specification)
-    end)
-    containerAsset.onDeinitialize(function ()
-        openspace.removeSceneGraphNode(identifier)
-    end)
+  containerAsset.onInitialize(function ()
+    nodeCreationFunction(specification)
+  end)
+  containerAsset.onDeinitialize(function ()
+    openspace.removeSceneGraphNode(identifier)
+  end)
 end
 
 local registerGrid = function(gridAsset, specification)
-    registerNode(gridAsset, addGrid, generateGridIdentifier, specification)
+  registerNode(gridAsset, addGrid, generateGridIdentifier, specification)
 end
 
 local registerCartesianAxes = function(axesAsset, specification)
-    registerNode(axesAsset, addCartesianAxes, generateAxesIdentifier, specification)
+  registerNode(axesAsset, addCartesianAxes, generateAxesIdentifier, specification)
 end
 
 asset.export("addGrid", addGrid)
@@ -130,4 +122,3 @@ asset.export("registerGrid", registerGrid)
 
 asset.export("addCartesianAxes", addCartesianAxes)
 asset.export("registerCartesianAxes", registerCartesianAxes)
-

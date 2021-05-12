@@ -26,12 +26,22 @@
 
 #include <ghoul/lua/ghoul_lua.h>
 
-#include <limits>
-#include <sstream>
+namespace openspace::properties {
 
-namespace {
+LongProperty::LongProperty(Property::PropertyInfo info, long value,
+                           long minValue, long maxValue, long stepValue)
+    : NumericalProperty<long>(std::move(info), value, minValue, maxValue, stepValue)
+{}
 
-long fromLuaConversion(lua_State* state, bool& success) {
+std::string LongProperty::className() const {
+    return "LongProperty";
+}
+
+int LongProperty::typeLua() const {
+    return LUA_TNUMBER;
+}
+
+long LongProperty::fromLuaConversion(lua_State* state, bool& success) const {
     success = (lua_isnumber(state, -1) == 1);
     if (success) {
         long val = static_cast<long>(lua_tonumber(state, -1));
@@ -41,32 +51,5 @@ long fromLuaConversion(lua_State* state, bool& success) {
         return 0;
     }
 }
-
-bool toLuaConversion(lua_State* state, long value) {
-    lua_pushnumber(state, static_cast<lua_Number>(value));
-    return true;
-}
-
-bool toStringConversion(std::string& outValue, long inValue) {
-    outValue = std::to_string(inValue);
-    return true;
-}
-
-} // namespace
-
-namespace openspace::properties {
-
-REGISTER_NUMERICALPROPERTY_SOURCE(
-    LongProperty,
-    long,
-    long(0),
-    std::numeric_limits<long>::lowest(),
-    std::numeric_limits<long>::max(),
-    long(1),
-    fromLuaConversion,
-    toLuaConversion,
-    toStringConversion,
-    LUA_TNUMBER
-)
 
 } // namespace openspace::properties

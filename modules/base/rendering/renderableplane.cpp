@@ -91,7 +91,7 @@ namespace {
         // [[codegen::verbatim(BlendModeInfo.description)]]
         std::optional<BlendMode> blendMode;
 
-        // [[codegen::verbatim(BlendModeInfo.description)]]
+        // [[codegen::verbatim(MultiplyColorInfo.description)]]
         std::optional<glm::vec3> multiplyColor [[codegen::color()]];
     };
 #include "renderableplane_codegen.cpp"
@@ -153,9 +153,11 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     }
 
     _multiplyColor = p.multiplyColor.value_or(_multiplyColor);
+    _multiplyColor.setViewOption(properties::Property::ViewOptions::Color);
 
     addProperty(_billboard);
 
+    _size.setViewOption(properties::Property::ViewOptions::Logarithmic);
     addProperty(_size);
     _size.onChange([this](){ _planeIsDirty = true; });
 
@@ -273,6 +275,7 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
 
     glBindVertexArray(_quad);
     glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
 
     if (additiveBlending) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -325,6 +328,7 @@ void RenderablePlane::createPlane() {
         sizeof(GLfloat) * 6,
         reinterpret_cast<void*>(sizeof(GLfloat) * 4)
     );
+    glBindVertexArray(0);
 }
 
 } // namespace openspace

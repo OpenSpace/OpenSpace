@@ -9,17 +9,17 @@ local textures = NewHorizonsModel.NewHorizonsTextures
 local models = NewHorizonsModel.NewHorizonsModels
 
 local Labels = {
-    Identifier = "Labels",
-    Parent = NewHorizonsModel.NewHorizons.Identifier,
-    Renderable = {
-        Type = "RenderableModel",
-        Body = "NEW HORIZONS",
-        GeometryFile = models .. "/Labels.obj",
-        AmbientIntensity = 0.8
-    },
-    GUI = {
-        Path = "/Solar System/Missions/New Horizons"
-    }
+  Identifier = "Labels",
+  Parent = NewHorizonsModel.NewHorizons.Identifier,
+  Renderable = {
+    Type = "RenderableModel",
+    Body = "NEW HORIZONS",
+    GeometryFile = models .. "/Labels.obj",
+    AmbientIntensity = 0.8
+  },
+  GUI = {
+    Path = "/Solar System/Missions/New Horizons"
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Labels })

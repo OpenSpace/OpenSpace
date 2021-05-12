@@ -2,17 +2,17 @@ local mapServiceConfigs = asset.localResource("./../../map_service_configs")
 local globeIdentifier = asset.require("./../../moon").Moon.Identifier
 
 local layer = {
-    Identifier = "UvvisHybrid_Utah",
-    Name = "Uvvis Hybrid [Utah]",
-    FilePath = mapServiceConfigs .. "/Utah/UvvisHybrid.wms",
-    Settings = {
-        Gamma = 0.52,
-        Multiplier = 0.65
-    }
+  Identifier = "UvvisHybrid_Utah",
+  Name = "Uvvis Hybrid [Utah]",
+  FilePath = mapServiceConfigs .. "/Utah/UvvisHybrid.wms",
+  Settings = {
+    Gamma = 0.52,
+    Multiplier = 0.65
+  }
 }
 
 asset.onInitialize(function () 
-    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)

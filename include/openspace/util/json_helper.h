@@ -22,30 +22,47 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___ULONGLONGPROPERTY___H__
-#define __OPENSPACE_CORE___ULONGLONGPROPERTY___H__
+#ifndef __OPENSPACE_CORE___JSON_HELPER___H__
+#define __OPENSPACE_CORE___JSON_HELPER___H__
 
- /**
- * \file ulonglongproperty.h
- *
- * \addtogroup openspace
- * @{
- * \addtogroup properties
- * @{
+#include <string>
 
- * \class ULongLongProperty
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type <code>unsigned long long</code>.
+namespace openspace {
 
- * @} @}
+/**
+ * This function takes a \p text and escapes all necessary characters () that JSON
+ * does not want in its strings.
+ * \param text The text that is to be escaped
+ * \return The same text with all required characteres escaped
  */
+std::string escapedJson(const std::string& text);
 
-#include <openspace/properties/numericalproperty.h>
+/**
+ * This function takes a \p list of text and escapes all necessary characters () that
+ * JSON does not want in its strings.
+ * \param text The list of text that is to be escaped
+ * \return The same text with all required characteres escaped
+ */
+std::string escapedJson(const std::vector<std::string>& list);
 
-namespace openspace::properties {
+/**
+ * Convert the input value to a valid JSON formatted string. Nan and Inf values
+ * are not vald JSON and will be represented by 'null'
+ * \param d The value to format
+ * \return The resulting JSON formatted string
+ */
+std::string formatJsonNumber(double d);
 
-REGISTER_NUMERICALPROPERTY_HEADER(ULongLongProperty, unsigned long long)
+/**
+ * Convert the input value to a valid JSON formatted string
+ * \param value The value to be converted
+ * \return The resulting JSON formatted string
+ */
+template <typename T>
+std::string formatJson(T value);
 
-} // namespace openspace::properties
+} // namespace openspace
 
-#endif // __OPENSPACE_CORE___ULONGLONGPROPERTY___H__
+#include "json_helper.inl"
+
+#endif // __OPENSPACE_CORE___JSON_HELPER___H__

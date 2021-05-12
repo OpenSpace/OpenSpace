@@ -113,7 +113,7 @@ namespace {
     constexpr const char* GlslDeferredcastVsPath =
         "${MODULES}/atmosphere/shaders/atmosphere_deferred_vs.glsl";
 
-    constexpr const float ATM_EPS = 2.f;
+    constexpr const float ATM_EPS = 2000.f;
     constexpr const float KM_TO_M = 1000.f;
 
 
@@ -213,7 +213,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             renderData.camera.sgctInternal.projectionMatrix()
         ) * renderData.camera.combinedViewMatrix();
 
-        const float totalAtmosphere = (_atmosphereRadius + ATM_EPS)* KM_TO_M;
+        const float totalAtmosphere = (scaledRadius + ATM_EPS);
         if (!isAtmosphereInFrustum(MV, tPlanetPosWorld, totalAtmosphere)) {
             program.setUniform(_uniformCache.cullAtmosphere, 1);
         }

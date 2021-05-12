@@ -22,17 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___DMAT4X3PROPERTY___H__
-#define __OPENSPACE_CORE___DMAT4X3PROPERTY___H__
+#version __CONTEXT__
 
-#include <openspace/properties/numericalproperty.h>
+layout(location = 0) in vec3 in_position;
+layout(location = 1) in vec2 in_uv;
+layout(location = 2) in vec4 in_color;
 
-#include <ghoul/glm.h>
+out float depth;
+out vec2 out_uv;
+out vec4 out_color;
 
-namespace openspace::properties {
+uniform mat4 proj;
 
-REGISTER_NUMERICALPROPERTY_HEADER(DMat4x3Property, glm::dmat4x3)
-
-} // namespace openspace::properties
-
-#endif // __OPENSPACE_CORE___DMAT4X3PROPERTY___H__
+void main() {
+    out_uv = in_uv;
+    out_color = in_color;
+    vec4 p = proj * vec4(in_position, 1.0);
+    gl_Position = p;
+    depth = p.w;
+}

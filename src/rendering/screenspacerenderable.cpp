@@ -42,8 +42,8 @@
 #include <variant>
 
 namespace {
-    constexpr const std::array<const char*, 4> UniformNames = {
-        "Alpha", "ModelTransform", "ViewProjectionMatrix", "texture1"
+    constexpr const std::array<const char*, 5> UniformNames = {
+        "MultiplyColor", "Alpha", "ModelTransform", "ViewProjectionMatrix", "texture1"
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
@@ -100,6 +100,12 @@ namespace {
         "An euler rotation (x, y, z) to apply to the plane."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo MultiplyColorInfo = {
+        "MultiplyColor",
+        "Multiply Color",
+        "If set, the plane's texture is multiplied with this color. "
+        "Useful for applying a color grayscale images."
+    };
 
     constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
         "Opacity",
@@ -245,6 +251,9 @@ namespace {
         // [[codegen::verbatim(UsePerspectiveProjectionInfo.description)]]
         std::optional<bool> usePerspectiveProjection;
 
+        // [[codegen::verbatim(MultiplyColorInfo.description)]]
+        std::optional<glm::vec3> multiplyColor [[codegen::color()]];
+
         // [codegen::verbatim(OpacityInfo.description)]]
         std::optional<float> opacity [[codegen::inrange(0.f, 1.f)]];
 
@@ -324,6 +333,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         glm::vec3(glm::pi<float>())
     )
     , _scale(ScaleInfo, 0.25f, 0.f, 2.f)
+    , _multiplyColor(MultiplyColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
     , _delete(DeleteInfo)
 {
@@ -355,8 +365,13 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     });
 
     addProperty(_scale);
+    addProperty(_multiplyColor);
     addProperty(_opacity);
     addProperty(_localRotation);
+
+
+    _multiplyColor = p.multiplyColor.value_or(_multiplyColor);
+    _multiplyColor.setViewOption(properties::Property::ViewOptions::Color);
 
     _enabled = p.enabled.value_or(_enabled);
     _useRadiusAzimuthElevation =
@@ -554,6 +569,7 @@ void ScreenSpaceRenderable::draw(glm::mat4 modelTransform) {
 
     _shader->activate();
 
+    _shader->setUniform(_uniformCache.color, _multiplyColor);
     _shader->setUniform(_uniformCache.alpha, _opacity);
     _shader->setUniform(_uniformCache.modelTransform, modelTransform);
 
@@ -576,8 +592,6 @@ void ScreenSpaceRenderable::draw(glm::mat4 modelTransform) {
     unbindTexture();
 }
 
-void ScreenSpaceRenderable::unbindTexture() {
-}
-
+void ScreenSpaceRenderable::unbindTexture() {}
 
 } // namespace openspace

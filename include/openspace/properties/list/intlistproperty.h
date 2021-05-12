@@ -31,33 +31,20 @@ namespace openspace::properties {
 
 class IntListProperty : public ListProperty<int> {
 public:
-    IntListProperty(Property::PropertyInfo info);
-    IntListProperty(Property::PropertyInfo info, std::vector<int> values);
+    IntListProperty(Property::PropertyInfo info,
+        std::vector<int> values = std::vector<int>());
+
+    std::string className() const override;
+    int typeLua() const override;
 
     using TemplateProperty<std::vector<int>>::operator std::vector<int>;
     using TemplateProperty<std::vector<int>>::operator=;
+
+protected:
+    std::vector<int> fromLuaConversion(lua_State* state, bool& success) const override;
+    void toLuaConversion(lua_State* state) const override;
+    std::string toStringConversion() const override;
 };
-
-template <>
-std::string PropertyDelegate<TemplateProperty<std::vector<int>>>::className();
-
-template <>
-template <>
-std::vector<int> PropertyDelegate<TemplateProperty<std::vector<int>>>::fromLuaValue(
-    lua_State* state, bool& success);
-
-template <>
-template <>
-bool PropertyDelegate<TemplateProperty<std::vector<int>>>::toLuaValue(
-    lua_State* state, const std::vector<int>& value);
-
-template <>
-int PropertyDelegate<TemplateProperty<std::vector<int>>>::typeLua();
-
-template <>
-template <>
-bool PropertyDelegate<TemplateProperty<std::vector<int>>>::toString(
-    std::string& outValue, const std::vector<int>& inValue);
 
 } // namespace openspace::properties
 

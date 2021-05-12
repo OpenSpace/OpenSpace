@@ -25,19 +25,16 @@
 #include <openspace/properties/property.h>
 
 #include <openspace/properties/propertyowner.h>
-
-#include <ghoul/lua/ghoul_lua.h>
-
-#include <algorithm>
-
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/misc/dictionaryjsonformatter.h>
+#include <algorithm>
 
 namespace {
     constexpr const char* MetaDataKeyGroup = "Group";
-    constexpr const char* MetaDataKeyVisibility = "Visibility";
     constexpr const char* MetaDataKeyReadOnly = "isReadOnly";
-
-    constexpr const char* _metaDataKeyViewPrefix = "view";
+    constexpr const char* MetaDataKeyViewOptions = "ViewOptions";
+    constexpr const char* MetaDataKeyVisibility = "Visibility";
 
 } // namespace
 
@@ -46,8 +43,8 @@ namespace openspace::properties {
 Property::OnChangeHandle Property::OnChangeHandleAll =
                                                std::numeric_limits<OnChangeHandle>::max();
 
-const char* Property::ViewOptions::Color = "color";
-const char* Property::ViewOptions::LightPosition = "lightPosition";
+const char* Property::ViewOptions::Color = "Color";
+const char* Property::ViewOptions::Logarithmic = "Logarithmic";
 
 const char* Property::IdentifierKey = "Identifier";
 const char* Property::NameKey = "Name";
@@ -209,14 +206,14 @@ void Property::setReadOnly(bool state) {
 void Property::setViewOption(std::string option, bool value) {
     ghoul::Dictionary d;
     d.setValue(option, value);
-    _metaData.setValue(_metaDataKeyViewPrefix, d);
+    _metaData.setValue(MetaDataKeyViewOptions, d);
 }
 
 bool Property::viewOption(const std::string& option, bool defaultValue) const {
-    if (!_metaData.hasValue<ghoul::Dictionary>(_metaDataKeyViewPrefix)) {
+    if (!_metaData.hasValue<ghoul::Dictionary>(MetaDataKeyViewOptions)) {
         return defaultValue;
     }
-    ghoul::Dictionary d = _metaData.value<ghoul::Dictionary>(_metaDataKeyViewPrefix);
+    ghoul::Dictionary d = _metaData.value<ghoul::Dictionary>(MetaDataKeyViewOptions);
     if (d.hasKey(option)) {
         return d.value<bool>(option);
     }
@@ -357,18 +354,23 @@ std::string Property::generateMetaDataJsonDescription() const {
     if (_metaData.hasValue<bool>(MetaDataKeyReadOnly)) {
         isReadOnly = _metaData.value<bool>(MetaDataKeyReadOnly);
     }
+    std::string isReadOnlyString = (isReadOnly ? "true" : "false");
 
-    std::string gIdent = groupIdentifier();
-    std::string gIdentSan = sanitizeString(gIdent);
+    std::string groupId = groupIdentifier();
+    std::string sanitizedGroupId = sanitizeString(groupId);
+
+    std::string viewOptions = "{}";
+   if (_metaData.hasValue<ghoul::Dictionary>(MetaDataKeyViewOptions)) {
+       viewOptions = ghoul::formatJson(
+           _metaData.value<ghoul::Dictionary>(MetaDataKeyViewOptions)
+       );
+   }
 
     std::string result = "{ ";
-    result +=
-        "\"" + std::string(MetaDataKeyGroup) + "\": \"" + gIdentSan + "\", ";
-    result +=
-        "\"" + std::string(MetaDataKeyVisibility) + "\": \"" + vis + "\", ";
-    result +=
-        "\"" + std::string(MetaDataKeyReadOnly) + "\": " +
-        (isReadOnly ? "true" : "false");
+    result += fmt::format("\"{}\": \"{}\",", MetaDataKeyGroup, sanitizedGroupId);
+    result += fmt::format("\"{}\": \"{}\",", MetaDataKeyVisibility, vis);
+    result += fmt::format("\"{}\": {},", MetaDataKeyReadOnly, isReadOnlyString);
+    result += fmt::format("\"{}\": {}", MetaDataKeyViewOptions, viewOptions);
     result += " }";
     return result;
 }

@@ -22,30 +22,33 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___UCHARPROPERTY___H__
-#define __OPENSPACE_CORE___UCHARPROPERTY___H__
+#include "fragment.glsl"
 
- /**
- * \file ucharproperty.h
- *
- * \addtogroup openspace
- * @{
- * \addtogroup properties
- * @{
+uniform bool hasTexture = false;
+uniform bvec2 shouldFlipTexture = bvec2(false, false);
+uniform sampler2D tex;
+uniform vec4 color = vec4(1.0, 1.0, 1.0, 1.0);
 
- * \class UCharProperty
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type <code>unsigned char</code>.
+in float depth;
+in vec2 out_uv;
+in vec4 out_color;
 
- * @} @}
- */
+Fragment getFragment() {
+    Fragment frag;
 
-#include <openspace/properties/numericalproperty.h>
-
-namespace openspace::properties {
-
-REGISTER_NUMERICALPROPERTY_HEADER(UCharProperty, unsigned char)
-
-} // namespace openspace::properties
-
-#endif // __OPENSPACE_CORE___UCHARPROPERTY___H__
+    if (hasTexture) {
+        vec2 uv = out_uv;
+        if (shouldFlipTexture.x) {
+            uv.x = 1.0 - uv.x;
+        }
+        if (shouldFlipTexture.y) {
+            uv.y = 1.0 - uv.y;
+        }
+        frag.color = out_color * color * texture(tex, uv);
+    }
+    else {
+        frag.color = out_color * color;
+    }
+    frag.depth = depth;
+    return frag;
+}

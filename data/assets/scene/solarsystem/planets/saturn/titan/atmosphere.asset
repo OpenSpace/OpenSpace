@@ -1,0 +1,58 @@
+local transforms = asset.require('./titan')
+local assetHelper = asset.require('util/asset_helper')
+
+local Atmosphere = {
+  Identifier = "TitanAtmosphere",
+  Parent = transforms.Titan.Identifier,
+  Renderable = {
+    Type = "RenderableAtmosphere",
+    -- Atmosphere radius in Km
+    AtmosphereHeight = 2666.0 - 2576.0,
+    PlanetRadius = 2576.0,
+    PlanetAverageGroundReflectance = 0.1,
+    GroundRadianceEmission = 0.9,
+    SunIntensity = 6.9,
+    Rayleigh = {
+      Coefficients = {
+        -- Wavelengths are given in 10^-9m
+        Wavelengths = { 680, 550, 440 },
+        -- Reflection coefficients are given in km^-1
+        Scattering = { 5.349578367831898E-3, 12.65595939366191E-3, 31.331782953393245E-3 },
+      },
+      -- Thickness of atmosphere if its density were uniform, in Km
+      H_R = 20.0
+    },
+    Mie = {
+        Coefficients = {
+          -- Reflection coefficients are given in km^-1
+          Scattering = { 5e-3, 12e-3, 80e-3 },
+          -- Extinction coefficients are a fraction of the Mie coefficients
+          Extinction = { 4.0e-3/0.37, 4.0e-3/0.37, 4.0e-3/0.37 }
+        },
+        -- Height scale (atmosphere thickness for constant density) in Km
+        H_M = 14.85,
+        -- Mie Phase Function Value (G e [-1.0, 1.0]. If G = 1.0, Mie phase function = Rayleigh Phase Function)
+        G = -0.52
+    },
+    Debug = {
+        PreCalculatedTextureScale = 1.0,
+        SaveCalculatedTextures = false
+    }
+  },
+  GUI = {
+    Name = "Titan Atmosphere",
+    Path = "/Solar System/Planets/Saturn/Moons/Titan"
+  }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { Atmosphere })
+
+asset.meta = {
+  Name = "Titan Atmosphere",
+  Version = "1.0",
+  Description = [[ RenderableAtmosphere for Titan.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license",
+  Identifiers = { "TitanAtmosphere" }
+}

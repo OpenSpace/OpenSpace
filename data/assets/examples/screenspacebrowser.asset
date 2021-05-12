@@ -1,10 +1,10 @@
 local assetHelper = asset.require('util/asset_helper')
 
 local spec = {
-    Type = "ScreenSpaceBrowser",
-    Identifier = "ScreenSpaceBrowserExample",
-    Name = "Screen Space Browser Example",
-    Url = "https://www.openspaceproject.com/"
+  Type = "ScreenSpaceBrowser",
+  Identifier = "ScreenSpaceBrowserExample",
+  Name = "Screen Space Browser Example",
+  Url = "https://www.openspaceproject.com/"
 };
 
 assetHelper.registerScreenSpaceRenderables(asset, { spec })

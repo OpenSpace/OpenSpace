@@ -190,9 +190,14 @@ void OpenSpaceEngine::initialize() {
     }
 
     std::string cacheFolder = absPath("${CACHE}");
-    if (global::configuration->usePerSceneCache) {
-        std::string scene = global::configuration->asset;
-        cacheFolder += "-" + ghoul::filesystem::File(scene).baseName();
+    if (global::configuration->usePerProfileCache) {
+        std::string profile = global::configuration->profile;
+        if (profile.empty()) {
+            throw ghoul::RuntimeError(
+                "Unexpected error: Configuration file profile was empty"
+            );
+        }
+        cacheFolder = cacheFolder + "-" + profile;
 
         LINFO(fmt::format("Old cache: {}", absPath("${CACHE}")));
         LINFO(fmt::format("New cache: {}", cacheFolder));
@@ -416,8 +421,6 @@ void OpenSpaceEngine::initializeGL() {
     glbinding::Binding::initialize(global::windowDelegate->openGLProcedureAddress);
     //glbinding::Binding::useCurrentContext();
 
-    rendering::helper::initialize();
-
     LDEBUG("Adding system components");
     // Detect and log OpenCL and OpenGL versions and available devices
     SysCap.addComponent(
@@ -427,7 +430,6 @@ void OpenSpaceEngine::initializeGL() {
         std::make_unique<ghoul::systemcapabilities::OpenGLCapabilitiesComponent>()
     );
 
-    // @BUG:  This will call OpenGL functions, should it should be in the initializeGL
     LDEBUG("Detecting capabilities");
     SysCap.detectCapabilities();
 
@@ -466,6 +468,8 @@ void OpenSpaceEngine::initializeGL() {
             }
         }
     }
+
+    rendering::helper::initialize();
 
     loadFonts();
 
