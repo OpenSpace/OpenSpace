@@ -98,7 +98,10 @@ int main(int argc, char** argv) {
 
         settings.changeHostPassword = defaultChangeHostPassword.str();
     }
-
+    ghoul::logging::LogManager::initialize(
+        ghoul::logging::LogLevel::Debug,
+        ghoul::logging::LogManager::ImmediateFlush::Yes
+    );
     LINFO(fmt::format("Connection password: {}", settings.password));
     LINFO(fmt::format("Host password: {}", settings.changeHostPassword));
 

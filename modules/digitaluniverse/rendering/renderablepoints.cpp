@@ -88,7 +88,7 @@ namespace {
         std::string file;
 
         // Astronomical Object Color (r,g,b)
-        glm::vec3 color;
+        glm::vec3 color [[codegen::color()]];
 
         enum class Unit {
             Meter [[codegen::key("m")]],
@@ -170,6 +170,7 @@ RenderablePoints::RenderablePoints(const ghoul::Dictionary& dictionary)
     }
 
     _pointColor = p.color;
+    _pointColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_pointColor);
 
     if (p.texture.has_value()) {

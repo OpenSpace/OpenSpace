@@ -556,9 +556,6 @@ void FramebufferRenderer::updateDownscaleTextures() {
 }
 
 void FramebufferRenderer::writeDownscaledVolume() {
-    glEnablei(GL_BLEND, 0);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-
     _downscaledVolumeProgram->activate();
 
     ghoul::opengl::TextureUnit downscaledTextureUnit;
@@ -587,7 +584,12 @@ void FramebufferRenderer::writeDownscaledVolume() {
 
 
     glEnablei(GL_BLEND, 0);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
+    // (abock, 2021-04-30) I changed the blend function as the front-to-back blending
+    // didn't work for the milkyway volume and was causing the edges of the milkyway to
+    // disappear
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(GL_ONE, GL_ONE);
 
     glDisable(GL_DEPTH_TEST);
 

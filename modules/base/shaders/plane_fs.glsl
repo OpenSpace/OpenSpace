@@ -33,7 +33,7 @@ uniform sampler2D texture1;
 uniform bool additiveBlending;
 uniform float opacity = 1.0;
 uniform bool mirrorBackside = true;
-
+uniform vec3 multiplyColor;
 
 Fragment getFragment() {
     Fragment frag;
@@ -49,6 +49,8 @@ Fragment getFragment() {
         }
     }
 
+    frag.color.rgb *= multiplyColor;
+
     frag.color.a *= opacity;
     if (frag.color.a == 0.0) {
         discard;
@@ -60,9 +62,9 @@ Fragment getFragment() {
         frag.blend = BLEND_MODE_ADDITIVE;
     }
 
-    // G-Buffer 
+    // G-Buffer
     frag.gPosition  = vs_gPosition;
     frag.gNormal    = vec4(vs_gNormal, 1.0);
-    
+
     return frag;
 }

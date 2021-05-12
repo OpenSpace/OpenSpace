@@ -96,7 +96,7 @@ private:
     properties::BoolProperty _labelsFadeInEnabled;
     properties::BoolProperty _labelsFadeOutEnabled;
     properties::BoolProperty _labelsDisableCullingEnabled;
-    properties::FloatProperty _labelsDistaneEPS;
+    properties::FloatProperty _labelsDistanceEPS;
     properties::OptionProperty _labelAlignmentOption;
 
 private:

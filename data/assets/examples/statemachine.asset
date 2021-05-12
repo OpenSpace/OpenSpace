@@ -1,48 +1,47 @@
 local stateMachineHelper = asset.require('util/state_machine_helper')
 
 states = {
-    {
-        Title = "Highlight EarthTrail",
-        Play = function ()
-            openspace.setPropertyValue("Scene.EarthTrail.Renderable.LineWidth", 10, 1)
-        end,
-        Rewind = function ()
-            openspace.setPropertyValue("Scene.EarthTrail.Renderable.LineWidth", 2, 1)
-        end
-    }, 
-    {
-        Title = "Highlight MarsTrail",
-        Play = function ()
-            openspace.setPropertyValue("Scene.EarthTrail.Renderable.LineWidth", 2, 1)
-            openspace.setPropertyValue("Scene.MarsTrail.Renderable.LineWidth", 10, 1)
-        end,
-        Rewind = function ()
-            openspace.setPropertyValue("Scene.MarsTrail.Renderable.LineWidth", 2, 1)
-            openspace.setPropertyValue("Scene.EarthTrail.Renderable.LineWidth", 10, 1)
-        end
-    }
+  {
+    Title = "Highlight EarthTrail",
+    Play = function ()
+      openspace.setPropertyValue("Scene.EarthTrail.Renderable.LineWidth", 10, 1)
+    end,
+    Rewind = function ()
+      openspace.setPropertyValue("Scene.EarthTrail.Renderable.LineWidth", 2, 1)
+    end
+  }, 
+  {
+    Title = "Highlight MarsTrail",
+    Play = function ()
+      openspace.setPropertyValue("Scene.EarthTrail.Renderable.LineWidth", 2, 1)
+      openspace.setPropertyValue("Scene.MarsTrail.Renderable.LineWidth", 10, 1)
+    end,
+    Rewind = function ()
+      openspace.setPropertyValue("Scene.MarsTrail.Renderable.LineWidth", 2, 1)
+      openspace.setPropertyValue("Scene.EarthTrail.Renderable.LineWidth", 10, 1)
+    end
+  }
 }
 
 local stateMachine
 
 function next() 
-    stateMachine.goToNextState()
+  stateMachine.goToNextState()
 end
 
 function previous()
-    stateMachine.goToPreviousState()
+  stateMachine.goToPreviousState()
 end
 
 asset.onInitialize(function ()
-    stateMachine = stateMachineHelper.createStateMachine(states)
-    openspace.bindKey('RIGHT', 'next()')
-    openspace.bindKey('LEFT', 'previous()')
+  stateMachine = stateMachineHelper.createStateMachine(states)
+  openspace.bindKey('RIGHT', 'next()')
+  openspace.bindKey('LEFT', 'previous()')
 end)
 
 
 asset.onDeinitialize(function ()
-    stateMachine = nil
-    openspace.clearKey('RIGHT')
-    openspace.clearKey('LEFT')
+  stateMachine = nil
+  openspace.clearKey('RIGHT')
+  openspace.clearKey('LEFT')
 end)
-

@@ -78,6 +78,13 @@ namespace {
         "This determines the blending mode that is applied to this plane."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo MultiplyColorInfo = {
+        "MultiplyColor",
+        "Multiply Color",
+        "If set, the plane's texture is multiplied with this color. "
+        "Useful for applying a color grayscale images."
+    };
+
     struct [[codegen::Dictionary(RenderablePlane)]] Parameters {
         // [[codegen::verbatim(BillboardInfo.description)]]
         std::optional<bool> billboard;
@@ -87,13 +94,16 @@ namespace {
 
         // [[codegen::verbatim(SizeInfo.description)]]
         float size;
-        
+
         enum class BlendMode {
             Normal,
             Additive
         };
         // [[codegen::verbatim(BlendModeInfo.description)]]
         std::optional<BlendMode> blendMode;
+
+        // [[codegen::verbatim(BlendModeInfo.description)]]
+        std::optional<glm::vec3> multiplyColor [[codegen::color()]];
     };
 #include "renderableplane_codegen.cpp"
 } // namespace
@@ -112,6 +122,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     , _billboard(BillboardInfo, false)
     , _mirrorBackside(MirrorBacksideInfo, true)
     , _size(SizeInfo, 10.f, 0.f, 1e25f)
+    , _multiplyColor(MultiplyColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
 {
     Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -154,10 +165,16 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
         }
     }
 
+    _multiplyColor = p.multiplyColor.value_or(_multiplyColor);
+    _multiplyColor.setViewOption(properties::Property::ViewOptions::Color);
+
     addProperty(_billboard);
 
+    _size.setViewOption(properties::Property::ViewOptions::Logarithmic);
     addProperty(_size);
     _size.onChange([this](){ _planeIsDirty = true; });
+
+    addProperty(_multiplyColor);
 
     setBoundingSphere(_size);
 }
@@ -252,6 +269,8 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     defer { unbindTexture(); };
 
     _shader->setUniform("texture1", unit);
+
+    _shader->setUniform("multiplyColor", _multiplyColor);
 
     bool usingFramebufferRenderer = global::renderEngine->rendererImplementation() ==
                                     RenderEngine::RendererImplementation::Framebuffer;

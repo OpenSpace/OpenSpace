@@ -58,11 +58,6 @@ namespace {
         openspace::properties::Property::Visibility::Hidden
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BoundingSphereInfo = {
-        "BoundingSphere",
-        "Bounding Sphere",
-        "The size of the bounding sphere radius."
-    };
     struct [[codegen::Dictionary(Renderable)]] Parameters {
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
@@ -76,9 +71,6 @@ namespace {
 
         // [[codegen::verbatim(RenderableTypeInfo.description)]]
         std::optional<std::string> type;
-
-        // [[codegen::verbatim(BoundingSphereInfo.description)]]
-        std::optional<float> boundingSphere;
     };
 #include "renderable_codegen.cpp"
 } // namespace
@@ -120,7 +112,6 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "Renderable" })
     , _enabled(EnabledInfo, true)
     , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
-    , _boundingSphere(BoundingSphereInfo, 0.f, 0.f, 3e10f)
     , _renderableType(RenderableTypeInfo, "Renderable")
 {
     ZoneScoped
@@ -129,7 +120,7 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     registerUpdateRenderBinFromOpacity();
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
-    
+
     if (p.tag.has_value()) {
         if (std::holds_alternative<std::string>(*p.tag)) {
             if (!std::get<std::string>(*p.tag).empty()) {
@@ -154,9 +145,6 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     // set type for UI
     _renderableType = p.type.value_or(_renderableType);
     addProperty(_renderableType);
-
-    _boundingSphere = p.boundingSphere.value_or(_boundingSphere);
-    addProperty(_boundingSphere);
 }
 
 void Renderable::initialize() {}
@@ -179,12 +167,20 @@ double Renderable::boundingSphere() const {
     return _boundingSphere;
 }
 
+void Renderable::setInteractionSphere(double interactionSphere) {
+    _interactionSphere = interactionSphere;
+}
+
+double Renderable::interactionSphere() const {
+    return _interactionSphere;
+}
+
 SurfacePositionHandle Renderable::calculateSurfacePositionHandle(
                                                  const glm::dvec3& targetModelSpace) const
 {
     const glm::dvec3 directionFromCenterToTarget = glm::normalize(targetModelSpace);
     return {
-        directionFromCenterToTarget * boundingSphere(),
+        directionFromCenterToTarget * _parent->interactionSphere(),
         directionFromCenterToTarget,
         0.0
     };
@@ -241,7 +237,9 @@ void Renderable::setRenderBinFromOpacity() {
 
 void Renderable::registerUpdateRenderBinFromOpacity() {
     _opacity.onChange([this](){
-        if (_renderBin != Renderable::RenderBin::PostDeferredTransparent) {
+        if ((_renderBin != Renderable::RenderBin::PostDeferredTransparent) &&
+            (_renderBin != Renderable::RenderBin::Overlay))
+        {
             if (_opacity >= 0.f && _opacity < 1.f) {
                 setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
             }

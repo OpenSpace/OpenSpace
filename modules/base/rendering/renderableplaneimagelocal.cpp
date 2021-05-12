@@ -46,10 +46,10 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderableTypeInfo = {
-       "RenderableType",
-       "RenderableType",
-       "This value specifies if the plane should be rendered in the Background,"
-       "Opaque, Transparent, or Overlay rendering step."
+        "RenderableType",
+        "RenderableType",
+        "This value specifies if the plane should be rendered in the Background,"
+        "Opaque, Transparent, or Overlay rendering step."
     };
 
     struct [[codegen::Dictionary(RenderablePlaneImageLocal)]] Parameters {
@@ -80,6 +80,16 @@ namespace openspace {
 documentation::Documentation RenderablePlaneImageLocal::Documentation() {
     documentation::Documentation doc = codegen::doc<Parameters>();
     doc.id = "base_renderable_plane_image_local";
+
+    // @TODO cleanup
+    // Insert the parents documentation entries until we have a verifier that can deal
+    // with class hierarchy
+    documentation::Documentation parentDoc = RenderablePlane::Documentation();
+    doc.entries.insert(
+        doc.entries.end(),
+        parentDoc.entries.begin(),
+        parentDoc.entries.end()
+    );
     return doc;
 }
 
@@ -95,7 +105,7 @@ RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& di
     _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
 
     addProperty(_texturePath);
-    _texturePath.onChange([this]() {loadTexture(); });
+    _texturePath.onChange([this]() { loadTexture(); });
     _textureFile->setCallback(
         [this](const ghoul::filesystem::File&) { _textureIsDirty = true; }
     );

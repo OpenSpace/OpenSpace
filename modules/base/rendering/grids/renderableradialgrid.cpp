@@ -80,7 +80,7 @@ namespace {
 
     struct [[codegen::Dictionary(RenderableRadialGrid)]] Parameters {
         // [[codegen::verbatim(ColorInfo.description)]]
-        std::optional<glm::vec3> color;
+        std::optional<glm::vec3> color [[codegen::color()]];
 
         // [[codegen::verbatim(GridSegmentsInfo.description)]]
         std::optional<glm::ivec2> gridSegments;
@@ -113,7 +113,7 @@ RenderableRadialGrid::RenderableRadialGrid(const ghoul::Dictionary& dictionary)
     , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
     , _gridSegments(GridSegmentsInfo, glm::ivec2(1), glm::ivec2(1), glm::ivec2(200))
     , _circleSegments(CircleSegmentsInfo, 36, 4, 200)
-    , _lineWidth(LineWidthInfo, 0.5f, 0.f, 20.f)
+    , _lineWidth(LineWidthInfo, 0.5f, 1.f, 20.f)
     , _maxRadius(OuterRadiusInfo, 1.f, 0.f, 20.f)
     , _minRadius(InnerRadiusInfo, 0.f, 0.f, 20.f)
 {

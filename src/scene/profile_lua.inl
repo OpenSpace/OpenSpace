@@ -67,11 +67,14 @@ int saveSettingsToProfile(lua_State* L) {
             utcTime->tm_sec
         );
         std::string newFile = fmt::format("{}_{}", f.fullBaseName(), time);
-        std::string sourcePath =
-            absPath("${PROFILES}") + '/' + global::configuration->profile + ".profile";
-        std::string destPath =
-            absPath("${PROFILES}") + '/' + newFile + ".profile";
-
+        std::string sourcePath = fmt::format("{}/{}.profile",
+            absPath("${USER_PROFILES}"), global::configuration->profile);
+        std::string destPath = fmt::format("{}/{}.profile",
+            absPath("${PROFILES}"), global::configuration->profile);
+        if (!FileSys.fileExists(sourcePath)) {
+            sourcePath = absPath("${USER_PROFILES}")
+                + '/' + global::configuration->profile + ".profile";
+        }
         LINFOC("Profile", fmt::format("Saving a copy of the old profile as {}", newFile));
         std::filesystem::copy(sourcePath, destPath);
         saveFilePath = global::configuration->profile;
@@ -99,8 +102,12 @@ int saveSettingsToProfile(lua_State* L) {
     else if (saveFilePath.find('.') != std::string::npos) {
         return luaL_error(L, "Only provide the filename to save without file extension");
     }
-    const std::string absFilename = absPath("${PROFILES}/" + saveFilePath + ".profile");
 
+    std::string absFilename = fmt::format("{}/{}.profile",
+        absPath("${PROFILES}"), saveFilePath);
+    if (!FileSys.fileExists(absFilename)) {
+        absFilename = absPath("${USER_PROFILES}/" + saveFilePath + ".profile");
+    }
     const bool overwrite = (n == 2) ? ghoul::lua::value<bool>(L, 2) : true;
 
     if (FileSys.fileExists(absFilename) && !overwrite) {

@@ -126,7 +126,7 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
     else {
         _vectorFieldInfo = dictionary.value<ghoul::Dictionary>(KeyVectorField);
     }
-    
+
     if (!dictionary.hasValue<ghoul::Dictionary>(KeyFieldlines)) {
         LERROR(fmt::format("Renderable does not contain a key for '{}'", KeyFieldlines));
     }

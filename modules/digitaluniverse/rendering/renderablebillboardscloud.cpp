@@ -234,7 +234,7 @@ namespace {
         std::optional<std::string> file;
 
         // [[codegen::verbatim(ColorInfo.description)]]
-        glm::vec3 color;
+        glm::vec3 color [[codegen::color()]];
 
         // [[codegen::verbatim(SpriteTextureInfo.description)]]
         std::optional<std::string> texture;
@@ -273,32 +273,32 @@ namespace {
         // The number of sides for the polygon used to represent the astronomical object
         std::optional<int> polygonSides;
 
-        // [[codgen::verbatim(DrawLabelInfo.description)]]
+        // [[codegen::verbatim(DrawLabelInfo.description)]]
         std::optional<bool> drawLabels;
 
-        // [[codgen::verbatim(TextColorInfo.description)]]
-        std::optional<glm::vec3> textColor;
+        // [[codegen::verbatim(TextColorInfo.description)]]
+        std::optional<glm::vec3> textColor [[codegen::color()]];
 
-        // [[codgen::verbatim(TextOpacityInfo.description)]]
+        // [[codegen::verbatim(TextOpacityInfo.description)]]
         std::optional<float> textOpacity;
 
-        // [[codgen::verbatim(TextSizeInfo.description)]]
+        // [[codegen::verbatim(TextSizeInfo.description)]]
         std::optional<float> textSize;
 
         // The path to the label file that contains information about the astronomical
         // objects being rendered
         std::optional<std::string> labelFile;
 
-        // [[codgen::verbatim(LabelMinSizeInfo.description)]]
+        // [[codegen::verbatim(LabelMinSizeInfo.description)]]
         std::optional<float> textMinSize;
 
-        // [[codgen::verbatim(LabelMaxSizeInfo.description)]]
+        // [[codegen::verbatim(LabelMaxSizeInfo.description)]]
         std::optional<float> textMaxSize;
 
-        // [[codgen::verbatim(ColorOptionInfo.description)]]
+        // [[codegen::verbatim(ColorOptionInfo.description)]]
         std::optional<std::vector<std::string>> colorOption;
 
-        // [[codgen::verbatim(SizeOptionInfo.description)]]
+        // [[codegen::verbatim(SizeOptionInfo.description)]]
         std::optional<std::vector<std::string>> sizeOption;
 
         // This value determines the colormap ranges for the color parameters of the
@@ -308,28 +308,28 @@ namespace {
         // Transformation matrix to be applied to each astronomical object
         std::optional<glm::dmat4x4> transformationMatrix;
 
-        // [[codgen::verbatim(FadeInDistancesInfo.description)]]
+        // [[codegen::verbatim(FadeInDistancesInfo.description)]]
         std::optional<glm::dvec2> fadeInDistances;
 
-        // [[codgen::verbatim(DisableFadeInInfo.description)]]
+        // [[codegen::verbatim(DisableFadeInInfo.description)]]
         std::optional<bool> disableFadeIn;
 
-        // [[codgen::verbatim(BillboardMaxSizeInfo.description)]]
+        // [[codegen::verbatim(BillboardMaxSizeInfo.description)]]
         std::optional<float> billboardMaxSize;
 
-        // [[codgen::verbatim(BillboardMinSizeInfo.description)]]
+        // [[codegen::verbatim(BillboardMinSizeInfo.description)]]
         std::optional<float> billboardMinSize;
 
-        // [[codgen::verbatim(CorrectionSizeEndDistanceInfo.description)]]
+        // [[codegen::verbatim(CorrectionSizeEndDistanceInfo.description)]]
         std::optional<float> correctionSizeEndDistance;
 
-        // [[codgen::verbatim(CorrectionSizeFactorInfo.description)]]
+        // [[codegen::verbatim(CorrectionSizeFactorInfo.description)]]
         std::optional<float> correctionSizeFactor;
 
-        // [[codgen::verbatim(PixelSizeControlInfo.description)]]
+        // [[codegen::verbatim(PixelSizeControlInfo.description)]]
         std::optional<bool> enablePixelSizeControl;
 
-        // [[codgen::verbatim(UseLinearFiltering.description)]]
+        // [[codegen::verbatim(UseLinearFiltering.description)]]
         std::optional<bool> useLinearFiltering;
     };
 #include "renderablebillboardscloud_codegen.cpp"
@@ -767,31 +767,6 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data,
                                              const glm::dvec3& orthoUp,
                                              float fadeInVariable)
 {
-    float scale = 0.f;
-    switch (_unit) {
-        case Meter:
-            scale = 1.f;
-            break;
-        case Kilometer:
-            scale = 1e3f;
-            break;
-        case Parsec:
-            scale = static_cast<float>(PARSEC);
-            break;
-        case Kiloparsec:
-            scale = static_cast<float>(1e3 * PARSEC);
-            break;
-        case Megaparsec:
-            scale = static_cast<float>(1e6 * PARSEC);
-            break;
-        case Gigaparsec:
-            scale = static_cast<float>(1e9 * PARSEC);
-            break;
-        case GigalightYears:
-            scale = static_cast<float>(306391534.73091 * PARSEC);
-            break;
-    }
-
     glm::vec4 textColor = glm::vec4(
         glm::vec3(_textColor),
         _textOpacity * fadeInVariable
@@ -813,7 +788,7 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data,
     for (const std::pair<glm::vec3, std::string>& pair : _labelData) {
         //glm::vec3 scaledPos(_transformationMatrix * glm::dvec4(pair.first, 1.0));
         glm::vec3 scaledPos(pair.first);
-        scaledPos *= scale;
+        scaledPos *= unitToMeter(_unit);
         ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
             *_font,
             scaledPos,
@@ -825,36 +800,11 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data,
 }
 
 void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
-    float scale = 0.f;
-    switch (_unit) {
-        case Meter:
-            scale = 1.f;
-            break;
-        case Kilometer:
-            scale = 1e3f;
-            break;
-        case Parsec:
-            scale = static_cast<float>(PARSEC);
-            break;
-        case Kiloparsec:
-            scale = static_cast<float>(1e3 * PARSEC);
-            break;
-        case Megaparsec:
-            scale = static_cast<float>(1e6 * PARSEC);
-            break;
-        case Gigaparsec:
-            scale = static_cast<float>(1e9 * PARSEC);
-            break;
-        case GigalightYears:
-            scale = static_cast<float>(306391534.73091 * PARSEC);
-            break;
-    }
-
     float fadeInVariable = 1.f;
     if (!_disableFadeInDistance) {
         float distCamera = static_cast<float>(glm::length(data.camera.positionVec3()));
         const glm::vec2 fadeRange = _fadeInDistance;
-        const float a = 1.f / ((fadeRange.y - fadeRange.x) * scale);
+        const float a = 1.f / ((fadeRange.y - fadeRange.x) * unitToMeter(_unit));
         const float b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
         const float funcValue = a * distCamera + b;
         fadeInVariable *= funcValue > 1.f ? 1.f : funcValue;
@@ -1488,10 +1438,28 @@ bool RenderableBillboardsCloud::saveCachedFile(const std::string& file) const {
     return fileStream.good();
 }
 
+double RenderableBillboardsCloud::unitToMeter(Unit unit) const {
+    switch (_unit) {
+        case Meter:          return 1.0;
+        case Kilometer:      return 1e3;
+        case Parsec:         return PARSEC;
+        case Kiloparsec:     return 1000 * PARSEC;
+        case Megaparsec:     return 1e6 * PARSEC;
+        case Gigaparsec:     return 1e9 * PARSEC;
+        case GigalightYears: return 306391534.73091 * PARSEC;
+        default:             throw ghoul::MissingCaseException();
+    }
+}
+
 void RenderableBillboardsCloud::createDataSlice() {
     ZoneScoped
 
     _slicedData.clear();
+
+    if (_fullData.empty() || _nValuesPerAstronomicalObject == 0) {
+        return;
+    }
+
     if (_hasColorMapFile) {
         _slicedData.reserve(8 * (_fullData.size() / _nValuesPerAstronomicalObject));
     }
@@ -1511,7 +1479,7 @@ void RenderableBillboardsCloud::createDataSlice() {
         _slicedData.push_back(_fullData[i + 3 + datavarInUse]);
     };
 
-    auto addPosition = [&](const glm::vec4 &pos) {
+    auto addPosition = [&](const glm::vec4& pos) {
         for (int j = 0; j < 4; ++j) {
             _slicedData.push_back(pos[j]);
         }
@@ -1526,17 +1494,24 @@ void RenderableBillboardsCloud::createDataSlice() {
         minColorIdx = colorIdx < minColorIdx ? colorIdx : minColorIdx;
     }
 
+    double maxRadius = 0.0;
+
     float biggestCoord = -1.f;
     for (size_t i = 0; i < _fullData.size(); i += _nValuesPerAstronomicalObject) {
-        glm::dvec4 transformedPos = _transformationMatrix * glm::dvec4(
+        glm::vec3 transformedPos = glm::vec3(_transformationMatrix * glm::vec4(
             _fullData[i + 0],
             _fullData[i + 1],
             _fullData[i + 2],
             1.0
-        );
-        // W-normalization
-        transformedPos /= transformedPos.w;
-        glm::vec4 position(glm::vec3(transformedPos), static_cast<float>(_unit));
+        ));
+        glm::vec4 position(transformedPos, static_cast<float>(_unit));
+
+        const double unitMeter = unitToMeter(_unit);
+        glm::dvec3 p = glm::dvec3(position) * unitMeter;
+        const double r = glm::length(p);
+        if (r > maxRadius) {
+            maxRadius = r;
+        }
 
         if (_hasColorMapFile) {
             for (int j = 0; j < 4; ++j) {
@@ -1618,6 +1593,7 @@ void RenderableBillboardsCloud::createDataSlice() {
             addPosition(position);
         }
     }
+    setBoundingSphere(maxRadius);
     _fadeInDistance.setMaxValue(glm::vec2(10.f * biggestCoord));
 }
 

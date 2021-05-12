@@ -55,7 +55,7 @@ namespace {
     struct [[codegen::Dictionary(DashboardItemDate)]] Parameters {
         // [[codegen::verbatim(FormatStringInfo.description)]]
         std::optional<std::string> formatString;
-        
+
         // [[codegen::verbatim(TimeFormatInfo.description)]]
         std::optional<std::string> timeFormat;
     };

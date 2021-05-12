@@ -179,7 +179,8 @@ namespace {
             // A list of objects that cast light on this atmosphere
             std::vector<CasterElement> casters;
         };
-        // Declares shadow groups, meaning which nodes are considered in shadow calculations
+        // Declares shadow groups, meaning which nodes are considered in shadow
+        // calculations
         std::optional<ShadowGroup> shadowGroup;
 
         // [[codegen::verbatim(AtmosphereHeightInfo.description)]]
@@ -252,18 +253,18 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     , _atmosphereHeight(AtmosphereHeightInfo, 60.f, 0.1f, 99.0f)
     , _groundAverageReflectance(AverageGroundReflectanceInfo, 0.f, 0.f, 1.f)
     , _groundRadianceEmission(GroundRadianceEmittioninfo, 0.f, 0.f, 1.f)
-    , _rayleighHeightScale(RayleighHeightScaleInfo, 0.f, 0.1f, 20.f)
+    , _rayleighHeightScale(RayleighHeightScaleInfo, 0.f, 0.1f, 50.f)
     , _rayleighScatteringCoeff(
         RayleighScatteringCoeffInfo,
         glm::vec3(0.f), glm::vec3(0.00001f), glm::vec3(0.1f)
     )
     , _ozoneEnabled(OzoneLayerInfo, false)
-    , _ozoneHeightScale(OzoneHeightScaleInfo, 0.f, 0.1f, 20.f)
+    , _ozoneHeightScale(OzoneHeightScaleInfo, 0.f, 0.1f, 50.f)
     , _ozoneCoeff(
         OzoneLayerCoeffInfo,
         glm::vec3(0.f), glm::vec3(0.00001f), glm::vec3(0.001f)
     )
-    , _mieHeightScale(MieHeightScaleInfo, 0.f, 0.1f, 20.f)
+    , _mieHeightScale(MieHeightScaleInfo, 0.f, 0.1f, 50.f)
     , _mieScatteringCoeff(
         MieScatteringCoeffInfo,
         glm::vec3(0.004f), glm::vec3(0.00001f), glm::vec3(1.f)
@@ -360,7 +361,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
 
     _mieScatteringExtinctionPropCoefficient.onChange(updateWithCalculation);
     addProperty(_mieScatteringExtinctionPropCoefficient);
-    
+
     if (p.debug.has_value()) {
         _preCalculatedTexturesScale =
             p.debug->preCalculatedTextureScale.value_or(_preCalculatedTexturesScale);
@@ -380,6 +381,8 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         _hardShadowsEnabled.onChange(updateWithoutCalculation);
         addProperty(_hardShadowsEnabled);
     }
+
+    setBoundingSphere(_planetRadius * 1000.0);
 }
 
 void RenderableAtmosphere::deinitializeGL() {
@@ -389,33 +392,12 @@ void RenderableAtmosphere::deinitializeGL() {
 
 void RenderableAtmosphere::initializeGL() {
     _deferredcaster = std::make_unique<AtmosphereDeferredcaster>();
-    _deferredcaster->setAtmosphereRadius(_planetRadius + _atmosphereHeight);
-    _deferredcaster->setPlanetRadius(_planetRadius);
-    _deferredcaster->setPlanetAverageGroundReflectance(_groundAverageReflectance);
-    _deferredcaster->setPlanetGroundRadianceEmittion(_groundRadianceEmission);
-    _deferredcaster->setRayleighHeightScale(_rayleighHeightScale);
-    _deferredcaster->enableOzone(_ozoneEnabled);
-    _deferredcaster->setOzoneHeightScale(_ozoneHeightScale);
-    _deferredcaster->setMieHeightScale(_mieHeightScale);
-    _deferredcaster->setMiePhaseConstant(_miePhaseConstant);
-    _deferredcaster->setSunRadianceIntensity(_sunIntensity);
-    _deferredcaster->setRayleighScatteringCoefficients(_rayleighScatteringCoeff);
-    _deferredcaster->setOzoneExtinctionCoefficients(_ozoneCoeff);
-    _deferredcaster->setMieScatteringCoefficients(_mieScatteringCoeff);
-    _deferredcaster->setMieExtinctionCoefficients(_mieExtinctionCoeff);
-    // TODO: Fix the ellipsoid nature of the renderable globe (JCC)
-    //_deferredcaster->setEllipsoidRadii(_ellipsoid.radii());
-    _deferredcaster->enableSunFollowing(_sunFollowingCameraEnabled);
-
-    _deferredcaster->setPrecalculationTextureScale(_preCalculatedTexturesScale);
-    if (_saveCalculationsToTexture)
-        _deferredcaster->enablePrecalculationTexturesSaving();
+    updateAtmosphereParameters();
 
     if (_shadowEnabled) {
         _deferredcaster->setShadowConfigArray(_shadowConfArray);
         // We no longer need it
         _shadowConfArray.clear();
-        _deferredcaster->setHardShadows(_hardShadowsEnabled);
     }
 
     _deferredcaster->initialize();
@@ -478,7 +460,13 @@ void RenderableAtmosphere::updateAtmosphereParameters() {
     _deferredcaster->setMieScatteringCoefficients(_mieScatteringCoeff);
     _deferredcaster->setMieExtinctionCoefficients(_mieExtinctionCoeff);
     _deferredcaster->enableSunFollowing(_sunFollowingCameraEnabled);
+    // TODO: Fix the ellipsoid nature of the renderable globe (JCC)
     //_deferredcaster->setEllipsoidRadii(_ellipsoid.radii());
+
+    _deferredcaster->setPrecalculationTextureScale(_preCalculatedTexturesScale);
+    if (_saveCalculationsToTexture) {
+        _deferredcaster->enablePrecalculationTexturesSaving();
+    }
 
     if (_shadowEnabled) {
         _deferredcaster->setHardShadows(_hardShadowsEnabled);

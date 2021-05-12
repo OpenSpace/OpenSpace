@@ -36,7 +36,7 @@ public:
 
     virtual void clearGroup() override;
 
-    std::vector<int> fieldlineValue() const;
+    std::set<std::string> fieldlineValue() const;
     void setFieldlineInfo(std::string fieldlineIndexFile, std::string kameleonPath);
     void changeCdf(std::string path);
 

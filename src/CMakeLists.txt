@@ -32,7 +32,6 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/documentation/documentationgenerator.cpp
   ${OPENSPACE_BASE_DIR}/src/documentation/verifier.cpp
   ${OPENSPACE_BASE_DIR}/src/engine/configuration.cpp
-  ${OPENSPACE_BASE_DIR}/src/engine/configuration_doc.inl
   ${OPENSPACE_BASE_DIR}/src/engine/downloadmanager.cpp
   ${OPENSPACE_BASE_DIR}/src/engine/globals.cpp
   ${OPENSPACE_BASE_DIR}/src/engine/globalscallbacks.cpp
@@ -77,45 +76,25 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/properties/propertyowner.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/selectionproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/stringproperty.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/stringlistproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/triggerproperty.cpp
+  ${OPENSPACE_BASE_DIR}/src/properties/list/doublelistproperty.cpp
+  ${OPENSPACE_BASE_DIR}/src/properties/list/intlistproperty.cpp
+  ${OPENSPACE_BASE_DIR}/src/properties/list/stringlistproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat2property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat2x3property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat2x4property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat3x2property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat3property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat3x4property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat4x2property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat4x3property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat4property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/matrix/mat2property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/matrix/mat2x3property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/matrix/mat2x4property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/matrix/mat3x2property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/matrix/mat3property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/matrix/mat3x4property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/matrix/mat4x2property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/matrix/mat4x3property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/matrix/mat4property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/scalar/boolproperty.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/scalar/charproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/scalar/doubleproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/scalar/floatproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/scalar/intproperty.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/scalar/longdoubleproperty.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/scalar/longlongproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/scalar/longproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/scalar/shortproperty.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/scalar/signedcharproperty.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/scalar/ucharproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/scalar/uintproperty.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/scalar/ulonglongproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/scalar/ulongproperty.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/scalar/ushortproperty.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/scalar/wcharproperty.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/vector/bvec2property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/vector/bvec3property.cpp
-  ${OPENSPACE_BASE_DIR}/src/properties/vector/bvec4property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/vector/dvec2property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/vector/dvec3property.cpp
   ${OPENSPACE_BASE_DIR}/src/properties/vector/dvec4property.cpp
@@ -133,6 +112,7 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/rendering/dashboard.cpp
   ${OPENSPACE_BASE_DIR}/src/rendering/dashboard_lua.inl
   ${OPENSPACE_BASE_DIR}/src/rendering/dashboarditem.cpp
+  ${OPENSPACE_BASE_DIR}/src/rendering/dashboardtextitem.cpp
   ${OPENSPACE_BASE_DIR}/src/rendering/framebufferrenderer.cpp
   ${OPENSPACE_BASE_DIR}/src/rendering/deferredcastermanager.cpp
   ${OPENSPACE_BASE_DIR}/src/rendering/helper.cpp
@@ -161,7 +141,6 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/scene/sceneinitializer.cpp
   ${OPENSPACE_BASE_DIR}/src/scene/scenelicensewriter.cpp
   ${OPENSPACE_BASE_DIR}/src/scene/scenegraphnode.cpp
-  ${OPENSPACE_BASE_DIR}/src/scene/scenegraphnode_doc.inl
   ${OPENSPACE_BASE_DIR}/src/scene/timeframe.cpp
   ${OPENSPACE_BASE_DIR}/src/scene/translation.cpp
   ${OPENSPACE_BASE_DIR}/src/scripting/lualibrary.cpp
@@ -177,6 +156,7 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/util/distanceconversion.cpp
   ${OPENSPACE_BASE_DIR}/src/util/factorymanager.cpp
   ${OPENSPACE_BASE_DIR}/src/util/httprequest.cpp
+  ${OPENSPACE_BASE_DIR}/src/util/json_helper.cpp
   ${OPENSPACE_BASE_DIR}/src/util/keys.cpp
   ${OPENSPACE_BASE_DIR}/src/util/openspacemodule.cpp
   ${OPENSPACE_BASE_DIR}/src/util/planegeometry.cpp
@@ -207,6 +187,10 @@ if (APPLE)
   set(OPENSPACE_SOURCE
     ${OPENSPACE_SOURCE}
     ${OPENSPACE_BASE_DIR}/src/interaction/touchbar.mm
+  )
+  set_source_files_properties(
+    ${OPENSPACE_BASE_DIR}/src/interaction/touchbar.mm
+    PROPERTIES SKIP_PRECOMPILE_HEADERS ON
   )
 endif ()
 set(OPENSPACE_HEADER
@@ -257,56 +241,36 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelpeer.h
   ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelserver.h
   ${OPENSPACE_BASE_DIR}/include/openspace/network/messagestructures.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/properties/listproperty.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/properties/listproperty.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/numericalproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/numericalproperty.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/optionproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/propertydelegate.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/propertydelegate.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/propertyowner.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/selectionproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/stringproperty.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/stringlistproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/templateproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/templateproperty.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/triggerproperty.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/properties/list/doublelistproperty.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/properties/list/intlistproperty.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/properties/list/stringlistproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat2property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat2x3property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat2x4property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat3x2property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat3property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat3x4property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat4x2property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat4x3property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat4property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/mat2property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/mat2x3property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/mat2x4property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/mat3x2property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/mat3property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/mat3x4property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/mat4x2property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/mat4x3property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/mat4property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/boolproperty.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/charproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/doubleproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/floatproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/intproperty.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/longdoubleproperty.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/longlongproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/longproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/shortproperty.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/signedcharproperty.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/ucharproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/uintproperty.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/ulonglongproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/ulongproperty.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/ushortproperty.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/wcharproperty.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/bvec2property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/bvec3property.h
-  ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/bvec4property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/dvec2property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/dvec3property.h
   ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/dvec4property.h
@@ -323,6 +287,7 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/abufferrenderer.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/dashboard.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/dashboarditem.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/rendering/dashboardtextitem.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/framebufferrenderer.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/deferredcaster.h
   ${OPENSPACE_BASE_DIR}/include/openspace/rendering/deferredcasterlistener.h
@@ -372,6 +337,8 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/util/factorymanager.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/util/httprequest.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/job.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/util/json_helper.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/util/json_helper.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/util/keys.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/memorymanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/util/mouse.h

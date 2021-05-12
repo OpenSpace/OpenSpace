@@ -151,7 +151,7 @@ namespace {
         std::optional<Unit> unit;
 
         // [[codegen::verbatim(TextColorInfo.description)]]
-        std::optional<glm::vec3> textColor;
+        std::optional<glm::vec3> textColor [[codegen::color()]];
 
         // [[codegen::verbatim(TextOpacityInfo.description)]]
         std::optional<float> textOpacity;
@@ -194,7 +194,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     , _drawLabels(DrawLabelInfo, false)
     , _textMinSize(LabelMinSizeInfo, 8.f, 0.5f, 24.f)
     , _textMaxSize(LabelMaxSizeInfo, 500.f, 0.f, 1000.f)
-    , _lineWidth(LineWidthInfo, 2.f, 0.f, 16.f)
+    , _lineWidth(LineWidthInfo, 2.f, 1.f, 16.f)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

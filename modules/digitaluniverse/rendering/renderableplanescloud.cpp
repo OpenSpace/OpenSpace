@@ -180,7 +180,7 @@ namespace {
         std::optional<float> scaleFactor;
 
         // [[codegen::verbatim(TextColorInfo.description)]]
-        std::optional<glm::vec3> textColor;
+        std::optional<glm::vec3> textColor [[codegen::color()]];
 
         // [[codegen::verbatim(TextOpacityInfo.description)]]
         std::optional<float> textOpacity;
@@ -381,7 +381,7 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     }
 
     _planeMinSize = p.planeMinSize.value_or(_planeMinSize);
-    
+
     if (p.planeMinSize.has_value()) {
         addProperty(_planeMinSize);
     }
@@ -572,35 +572,12 @@ void RenderablePlanesCloud::renderLabels(const RenderData& data,
 }
 
 void RenderablePlanesCloud::render(const RenderData& data, RendererTasks&) {
-    float scale = 0.f;
-    switch (_unit) {
-        case Meter:
-            scale = 1.f;
-            break;
-        case Kilometer:
-            scale = 1e3f;
-            break;
-        case Parsec:
-            scale = static_cast<float>(PARSEC);
-            break;
-        case Kiloparsec:
-            scale = static_cast<float>(1e3 * PARSEC);
-            break;
-        case Megaparsec:
-            scale = static_cast<float>(1e6 * PARSEC);
-            break;
-        case Gigaparsec:
-            scale = static_cast<float>(1e9 * PARSEC);
-            break;
-        case GigalightYears:
-            scale = static_cast<float>(306391534.73091 * PARSEC);
-            break;
-    }
+    const double scale = unitToMeter(_unit);
 
     float fadeInVariable = 1.f;
     if (!_disableFadeInDistance) {
         float distCamera = static_cast<float>(glm::length(data.camera.positionVec3()));
-        distCamera /= scale;
+        distCamera = static_cast<float>(distCamera / scale);
         const glm::vec2 fadeRange = _fadeInDistance;
         //const float a = 1.f / ((fadeRange.y - fadeRange.x) * scale);
         const float a = 1.f / ((fadeRange.y - fadeRange.x));
@@ -1095,15 +1072,36 @@ bool RenderablePlanesCloud::saveCachedFile(const std::string& file) const {
     }
 }
 
+double RenderablePlanesCloud::unitToMeter(Unit unit) const {
+    switch (_unit) {
+        case Meter:          return 1.0;
+        case Kilometer:      return 1e3;
+        case Parsec:         return PARSEC;
+        case Kiloparsec:     return 1000 * PARSEC;
+        case Megaparsec:     return 1e6 * PARSEC;
+        case Gigaparsec:     return 1e9 * PARSEC;
+        case GigalightYears: return 306391534.73091 * PARSEC;
+        default:             throw ghoul::MissingCaseException();
+    }
+}
+
 void RenderablePlanesCloud::createPlanes() {
     if (_dataIsDirty && _hasSpeckFile) {
+        const double scale = unitToMeter(_unit);
+
         LDEBUG("Creating planes...");
         float maxSize = 0.f;
+        double maxRadius = 0.0;
         for (size_t p = 0; p < _fullData.size(); p += _nValuesPerAstronomicalObject) {
             const glm::vec4 transformedPos = glm::vec4(
                 _transformationMatrix *
                 glm::dvec4(_fullData[p + 0], _fullData[p + 1], _fullData[p + 2], 1.0)
             );
+
+            const double r = glm::length(glm::dvec3(transformedPos) * scale);
+            if (r > maxRadius) {
+                maxRadius = r;
+            }
 
             // Plane vectors u and v
             glm::vec4 u = glm::vec4(
@@ -1144,31 +1142,6 @@ void RenderablePlanesCloud::createPlanes() {
             glm::vec4 vertex1 = transformedPos + u + v; // same as 5
             glm::vec4 vertex2 = transformedPos - u + v;
             glm::vec4 vertex4 = transformedPos + u - v;
-
-            float scale = 0.f;
-            switch (_unit) {
-                case Meter:
-                    scale = 1.f;
-                    break;
-                case Kilometer:
-                    scale = 1e3f;
-                    break;
-                case Parsec:
-                    scale = static_cast<float>(PARSEC);
-                    break;
-                case Kiloparsec:
-                    scale = static_cast<float>(1e3 * PARSEC);
-                    break;
-                case Megaparsec:
-                    scale = static_cast<float>(1e6 * PARSEC);
-                    break;
-                case Gigaparsec:
-                    scale = static_cast<float>(1e9 * PARSEC);
-                    break;
-                case GigalightYears:
-                    scale = static_cast<float>(306391534.73091 * PARSEC);
-                    break;
-            }
 
             for (int i = 0; i < 3; ++i) {
                 maxSize = std::max(maxSize, vertex0[i]);
@@ -1252,6 +1225,7 @@ void RenderablePlanesCloud::createPlanes() {
 
         _dataIsDirty = false;
 
+        setBoundingSphere(maxRadius * _scaleFactor);
         _fadeInDistance.setMaxValue(glm::vec2(10.f * maxSize));
     }
 

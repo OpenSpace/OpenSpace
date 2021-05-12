@@ -31,6 +31,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <ghoul/logging/logmanager.h>
+#include <optional>
 #include <string>
 
 namespace {
@@ -56,36 +57,26 @@ namespace {
         "Property to define a custom unit descriptor to use to describe the distance "
         "value. Defaults to the units SI descriptor if not specified."
     };
-}
+
+    struct [[codegen::Dictionary(RenderableDistanceLabel)]] Parameters {
+        // [[codegen::verbatim(NodeLineInfo.description)]]
+        std::string nodeLine;
+
+        // [[codegen::verbatim(DistanceUnitInfo.description)]]
+        std::optional<int> distanceUnit;
+
+        // [[codegen::verbatim(CustomUnitDescriptorInfo.description)]]
+        std::optional<std::string> customUnitDescriptor;
+    };
+#include "renderabledistancelabel_codegen.cpp"
+} // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableDistanceLabel::Documentation() {
-    using namespace documentation;
-    return {
-        "Renderable Distance Label",
-        "vislab_renderable_distance_label",
-        {
-            {
-                NodeLineInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                NodeLineInfo.description
-            },
-            {
-                DistanceUnitInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                DistanceUnitInfo.description
-            },
-            {
-                CustomUnitDescriptorInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                CustomUnitDescriptorInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "vislab_renderable_distance_label";
+    return doc;
 }
 
 RenderableDistanceLabel::RenderableDistanceLabel(const ghoul::Dictionary& dictionary)
@@ -94,27 +85,16 @@ RenderableDistanceLabel::RenderableDistanceLabel(const ghoul::Dictionary& dictio
     , _distanceUnit(DistanceUnitInfo, 1, 0, 11)
     , _customUnitDescriptor(CustomUnitDescriptorInfo)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableDistanceLabel"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    if (dictionary.hasKey(NodeLineInfo.identifier)) {
-        _nodelineId = dictionary.value<std::string>(NodeLineInfo.identifier);
-        addProperty(_nodelineId);
-    }
-    if (dictionary.hasKey(DistanceUnitInfo.identifier)) {
-        _distanceUnit = static_cast<int>(
-            dictionary.value<double>(DistanceUnitInfo.identifier)
-        );
-        addProperty(_distanceUnit);
-    }
-    if (dictionary.hasKey(CustomUnitDescriptorInfo.identifier)) {
-        _customUnitDescriptor =
-            dictionary.value<std::string>(CustomUnitDescriptorInfo.identifier);
-        addProperty(_customUnitDescriptor);
-    }
+    _nodelineId = p.nodeLine;
+    addProperty(_nodelineId);
+
+    _distanceUnit = p.distanceUnit.value_or(_distanceUnit);
+    addProperty(_distanceUnit);
+
+    _customUnitDescriptor = p.customUnitDescriptor.value_or(_customUnitDescriptor);
+    addProperty(_customUnitDescriptor);
 }
 
 void RenderableDistanceLabel::update(const UpdateData&) {

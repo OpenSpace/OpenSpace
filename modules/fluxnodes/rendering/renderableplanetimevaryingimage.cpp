@@ -89,6 +89,7 @@ documentation::Documentation RenderablePlaneTimeVaryingImage::Documentation() {
 RenderablePlaneTimeVaryingImage::RenderablePlaneTimeVaryingImage(
     const ghoul::Dictionary& dictionary)
     : RenderablePlane(dictionary)
+
     , _texturePath(TextureInfo)
 {
     codegen::bake<Parameters>(dictionary);

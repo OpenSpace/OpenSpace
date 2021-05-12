@@ -69,7 +69,7 @@ std::unique_ptr<ccmc::Kameleon> createKameleonObject(const std::string& cdfFileP
  * *NOTE!* The function has only been tested for some BATSRUS and ENLIL and may need to
  *         be updated to work with other models!
  */
-double getTime(ccmc::Kameleon* kameleon) {
+double getTime(ccmc::Kameleon* kameleon, double manualOffset) {
     // Inspiration from 'void KameleonInterpolator::setEphemTime()' which doesn't seem to
     // exist in the version of Kameleon that is included in OpenSpace. Alterations
     // done to fit here.
@@ -159,7 +159,7 @@ double getTime(ccmc::Kameleon* kameleon) {
                      "The current state starts the same time as the sequence!");
         }
 
-    return seqStartDbl + stateStartOffset - 14400;
+        return seqStartDbl + stateStartOffset + manualOffset;
 }
 
 } // namespace openspace::kameleonHelper {

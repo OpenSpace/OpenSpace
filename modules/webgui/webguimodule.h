@@ -27,8 +27,8 @@
 
 #include <openspace/util/openspacemodule.h>
 
-#include <openspace/properties/stringlistproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/list/stringlistproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <ghoul/misc/process.h>

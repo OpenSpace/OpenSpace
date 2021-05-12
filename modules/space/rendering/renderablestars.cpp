@@ -307,7 +307,8 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableStars)]] Parameters {
-        // The path to the SPECK file containing information about the stars being rendered
+        // The path to the SPECK file containing information about the stars being
+        // rendered
         std::filesystem::path speckFile [[codegen::key("File")]];
 
         // [[codegen::verbatim(ColorTextureInfo.description)]]
@@ -336,8 +337,8 @@ namespace {
         // loading. This can be used to trim the dataset's automatic value range
         std::optional<float> staticFilter;
 
-        // This is the value that is used to replace statically filtered values. Setting this
-        // value only makes sense if 'StaticFilter' is 'true', as well
+        // This is the value that is used to replace statically filtered values. Setting
+        // this value only makes sense if 'StaticFilter' is 'true', as well
         std::optional<float> staticFilterReplacement;
 
         // [[codegen::verbatim(MagnitudeExponentInfo.description)]]
@@ -770,8 +771,8 @@ void RenderableStars::loadPSFTexture() {
 
 void RenderableStars::renderPSFToTexture() {
     // Saves current FBO first
-    GLint defaultFBO;
-    defaultFBO = global::renderEngine->openglStateCache().defaultFramebuffer();
+    // GLint defaultFBO;
+    // defaultFBO = global::renderEngine->openglStateCache().defaultFramebuffer();
 
 //    GLint m_viewport[4];
 //    global::renderEngine.openglStateCache().viewPort(m_viewport);
@@ -1485,13 +1486,20 @@ void RenderableStars::createDataSlice(ColorOption option) {
         -std::numeric_limits<float>::max()
     );
 
+    double maxRadius = 0.0;
+
     for (size_t i = 0; i < _fullData.size(); i += _nValuesPerStar) {
-        glm::vec3 position = glm::vec3(
+        glm::dvec3 position = glm::dvec3(
             _fullData[i + 0],
             _fullData[i + 1],
             _fullData[i + 2]
         );
         position *= openspace::distanceconstants::Parsec;
+
+        const double r = glm::length(position);
+        if (r > maxRadius) {
+            maxRadius = r;
+        }
 
         switch (option) {
             case ColorOption::Color:
@@ -1502,7 +1510,11 @@ void RenderableStars::createDataSlice(ColorOption option) {
                     std::array<float, sizeof(ColorVBOLayout) / sizeof(float)> data;
                 } layout;
 
-                layout.value.position = { { position[0], position[1], position[2] } };
+                layout.value.position = { {
+                    static_cast<float>(position[0]),
+                    static_cast<float>(position[1]),
+                    static_cast<float>(position[2])
+                }};
 
                 if (_enableTestGrid) {
                     float sunColor = 0.650f;
@@ -1530,7 +1542,11 @@ void RenderableStars::createDataSlice(ColorOption option) {
                     std::array<float, sizeof(VelocityVBOLayout) / sizeof(float)> data;
                 } layout;
 
-                layout.value.position = { { position[0], position[1], position[2] } };
+                layout.value.position = {{
+                    static_cast<float>(position[0]),
+                    static_cast<float>(position[1]),
+                    static_cast<float>(position[2])
+                }};
 
                 layout.value.value = _fullData[i + _bvColorArrayPos];
                 layout.value.luminance = _fullData[i + _lumArrayPos];
@@ -1555,7 +1571,11 @@ void RenderableStars::createDataSlice(ColorOption option) {
                     std::array<float, sizeof(SpeedVBOLayout) / sizeof(float)> data;
                 } layout;
 
-                layout.value.position = { { position[0], position[1], position[2] } };
+                layout.value.position = {{
+                    static_cast<float>(position[0]),
+                    static_cast<float>(position[1]),
+                    static_cast<float>(position[2])
+                }};
 
                 layout.value.value = _fullData[i + _bvColorArrayPos];
                 layout.value.luminance = _fullData[i + _lumArrayPos];
@@ -1578,7 +1598,11 @@ void RenderableStars::createDataSlice(ColorOption option) {
                     std::array<float, sizeof(OtherDataLayout)> data;
                 } layout = {};
 
-                layout.value.position = { { position[0], position[1], position[2] } };
+                layout.value.position = {{
+                    static_cast<float>(position[0]),
+                    static_cast<float>(position[1]),
+                    static_cast<float>(position[2])
+                }};
 
                 int index = _otherDataOption.value();
                 // plus 3 because of the position
@@ -1611,6 +1635,8 @@ void RenderableStars::createDataSlice(ColorOption option) {
             }
         }
     }
+
+    setBoundingSphere(maxRadius);
 }
 
 } // namespace openspace

@@ -4,68 +4,67 @@ local kernels = asset.require('../mar097').Kernels
 
 
 local Deimos = {
-    Identifier = "Deimos",
-    Parent = transforms.MarsBarycenter.Identifier,
-    Transform = {
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "IAU_DEIMOS",
-            DestinationFrame = "GALACTIC",
-            Kernels = kernels
-        },
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "DEIMOS",
-            Observer = "MARS BARYCENTER",
-            Kernels = kernels
-        }
+  Identifier = "Deimos",
+  Parent = transforms.MarsBarycenter.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "IAU_DEIMOS",
+      DestinationFrame = "GALACTIC",
+      Kernels = kernels
     },
-    Renderable = {
-        Type = "RenderableGlobe",
-        Radii = { 15000, 12200, 11000 },
-        SegmentsPerPatch = 90,
-        Layers = {
-        }
-    },
-    Tag = { "moon_solarSystem", "moon_terrestrial", "moon_mars" },
-    GUI = {
-        Name = "Deimos",
-        Path = "/Solar System/Planets/Mars",
-        Description = [[One of two moons of Mars.]]
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "DEIMOS",
+      Observer = "MARS BARYCENTER",
+      Kernels = kernels
     }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 15000, 12200, 11000 },
+    SegmentsPerPatch = 90,
+    Layers = {}
+  },
+  Tag = { "moon_solarSystem", "moon_terrestrial", "moon_mars" },
+  GUI = {
+    Name = "Deimos",
+    Path = "/Solar System/Planets/Mars",
+    Description = [[One of two moons of Mars.]]
+  }
 }
 
 local DeimosTrail = {
-    Identifier = "DeimosTrail",
-    Parent = transforms.MarsBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailOrbit",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "DEIMOS",
-            Observer = "MARS BARYCENTER"
-        },
-        Color = { 1.0, 0.605, 0.420 },
-        Period = 1.263,
-        Resolution = 1000
+  Identifier = "DeimosTrail",
+  Parent = transforms.MarsBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "DEIMOS",
+      Observer = "MARS BARYCENTER"
     },
-    Tag = { "moonTrail_solarSystem", "moonTrail_terrestrial", "moonTrail_mars" },
-    GUI = {
-        Name = "Deimos Trail",
-        Path = "/Solar System/Planets/Mars",
-        Description = [[Trail for Deimos]]
-    }
+    Color = { 1.0, 0.605, 0.420 },
+    Period = 1.263,
+    Resolution = 1000
+  },
+  Tag = { "moonTrail_solarSystem", "moonTrail_terrestrial", "moonTrail_mars" },
+  GUI = {
+    Name = "Deimos Trail",
+    Path = "/Solar System/Planets/Mars",
+    Description = [[Trail for Deimos]]
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Deimos, DeimosTrail })
 
 
 asset.meta = {
-    Name = "Deimos",
-    Version = "1.0",
-    Description = [[ RenderableGlobe and Trail for Deimos.]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license",
-    Identifiers = {"Deimos", "DeimosTrail"}
+  Name = "Deimos",
+  Version = "1.0",
+  Description = [[ RenderableGlobe and Trail for Deimos.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license",
+  Identifiers = {"Deimos", "DeimosTrail"}
 }

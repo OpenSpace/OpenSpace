@@ -45,12 +45,6 @@
 
 namespace {
     constexpr const char* _loggerCat = "RenderablePlaneProjection";
-    constexpr const char* KeySpacecraft = "Spacecraft";
-    constexpr const char* KeyInstrument = "Instrument";
-    constexpr const char* KeyMoving = "Moving";
-    constexpr const char* KeyTexture = "Texture";
-    constexpr const char* KeyName = "Name";
-    constexpr const char* KeyTarget = "DefaultTarget";
     constexpr const char* GalacticFrame = "GALACTIC";
 
     struct [[codegen::Dictionary(RenderablePlaneProjection)]] Parameters {
@@ -279,7 +273,6 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
         glm::vec3(projection[1]),
         glm::vec3(projection[2]),
         glm::vec3(projection[3])
-
     };
     const GLfloat vertex_data[] = {
         // square of two triangles drawn within fov in target coordinates

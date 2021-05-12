@@ -91,6 +91,7 @@ namespace openspace::fls {
 bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfPath,
                         const std::unordered_map<std::string, 
                                                  std::vector<glm::vec3>>& seedMap,
+                        double manualTimeOffset,
                         const std::string& tracingVar,
                         std::vector<std::string>& extraVars,
                         std::vector<std::string>& extraMagVars)
@@ -106,12 +107,12 @@ bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfP
     );
 
     state.setModel(fls::stringToModel(kameleon->getModelName()));
-    double cdfDoubleTime = kameleonHelper::getTime(kameleon.get());
+    double cdfDoubleTime = kameleonHelper::getTime(kameleon.get(), manualTimeOffset);
     state.setTriggerTime(cdfDoubleTime);
 
     //get time as string.
     std::string cdfStringTime = SpiceManager::ref().dateFromEphemerisTime(cdfDoubleTime,
-        "YYYYMMDDHRMNSC::RND"); //YYYY MM DD HOUR MIN SEC ROUNDED
+        "YYYYMMDDHRMNSC::RND"); //YYYY MM DD HOUR MIN SEC   ROUNDED
 
     // use time as string for picking seedpoints from seedm
     std::vector<glm::vec3> seedPoints = seedMap.at(cdfStringTime);

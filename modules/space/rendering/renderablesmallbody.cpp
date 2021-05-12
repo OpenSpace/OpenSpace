@@ -113,8 +113,8 @@ documentation::Documentation RenderableSmallBody::Documentation() {
 
 RenderableSmallBody::RenderableSmallBody(const ghoul::Dictionary& dictionary)
     : RenderableOrbitalKepler(dictionary)
-    , _upperLimit(UpperLimitInfo, 1000, 1, 1000000)
     , _contiguousMode(ContiguousModeInfo, false)
+    , _upperLimit(UpperLimitInfo, 1000, 1, 1000000)
 {
     codegen::bake<Parameters>(dictionary);
 
@@ -142,7 +142,7 @@ RenderableSmallBody::RenderableSmallBody(const ghoul::Dictionary& dictionary)
     _updateStartRenderIdxSelect = std::function<void()>([this] {
         if (_contiguousMode) {
             if ((_numObjects - _startRenderIdx) < _sizeRender) {
-                _sizeRender = _numObjects - _startRenderIdx;
+                _sizeRender = static_cast<unsigned int>(_numObjects - _startRenderIdx);
             }
             _updateDataBuffersAtNextRender = true;
         }
@@ -150,7 +150,7 @@ RenderableSmallBody::RenderableSmallBody(const ghoul::Dictionary& dictionary)
     _updateRenderSizeSelect = std::function<void()>([this] {
         if (_contiguousMode) {
             if (_sizeRender > (_numObjects - _startRenderIdx)) {
-                _startRenderIdx = _numObjects - _sizeRender;
+                _startRenderIdx = static_cast<unsigned int>(_numObjects - _sizeRender);
             }
             _updateDataBuffersAtNextRender = true;
         }
@@ -221,7 +221,7 @@ void RenderableSmallBody::readDataFile(const std::string& filename) {
         else {
             lineSkipFraction = static_cast<float>(_upperLimit)
                 / static_cast<float>(_numObjects);
-            endElement = _numObjects - 1;
+            endElement = static_cast<unsigned int>(_numObjects - 1);
         }
 
         if (line.compare(expectedHeaderLine) != 0) {

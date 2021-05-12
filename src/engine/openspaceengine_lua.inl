@@ -266,10 +266,14 @@ int removeTag(lua_State* L) {
 * Downloads a file from Lua interpreter
 */
 int downloadFile(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::addTag");
+    int n = ghoul::lua::checkArgumentsAndThrow(L, {2, 3}, "lua::addTag");
 
     const std::string& uri = ghoul::lua::value<std::string>(L, 1);
     const std::string& savePath = ghoul::lua::value<std::string>(L, 2);
+    bool waitForComplete = false;
+    if (n == 3) {
+        waitForComplete = ghoul::lua::value<bool>(L, 3);
+    }
     lua_settop(L, 0);
 
     LINFOC("OpenSpaceEngine", fmt::format("Downloading file from {}", uri));
@@ -281,6 +285,14 @@ int downloadFile(lua_State* L) {
             DownloadManager::FailOnError::Yes,
             5
         );
+
+    if (waitForComplete) {
+        while (!future->isFinished && future->errorMessage.empty() ) {
+            //just wait
+            LTRACEC("OpenSpaceEngine", fmt::format("waiting {}", future->errorMessage));
+        }
+    }
+
     if (!future || !future->isFinished) {
         return ghoul::lua::luaError(
             L,
@@ -294,11 +306,11 @@ int downloadFile(lua_State* L) {
 
 /**
 * \ingroup LuaScripts
-* createSingeColorImage():
+* createSingleColorImage():
 * Creates a one pixel image with a given color and returns the path to the cached file
 */
-int createSingeColorImage(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::createSingeColorImage");
+int createSingleColorImage(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::createSingleColorImage");
 
     const std::string& name = ghoul::lua::value<std::string>(L, 1);
     const ghoul::Dictionary& d = ghoul::lua::value<ghoul::Dictionary>(L, 2);
@@ -306,14 +318,10 @@ int createSingeColorImage(lua_State* L) {
 
     // @TODO (emmbr 2020-12-18) Verify that the input dictionary is a vec3
     // Would like to clean this up with a more direct use of the Verifier in the future
-    using namespace openspace::documentation;
     const std::string& key = "color";
     ghoul::Dictionary colorDict;
     colorDict.setValue(key, d);
-    TestResult res = DoubleVector3Verifier()(colorDict, key);
-
-    // @TODO (emmbr 2020-02-04) A 'ColorVerifier' would be really useful here, to easily
-    // check that we have a vector with values in [0, 1]
+    documentation::TestResult res = documentation::Color3Verifier()(colorDict, key);
 
     if (!res.success) {
         return ghoul::lua::luaError(

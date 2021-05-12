@@ -5,16 +5,16 @@ local colorLayer = asset.require(colorLayersPath .. "/rhea_texture")
 -- Set enabled layers (temporary solution)
 -- @TODO: do this using a boolean that's passed to the 'asset.require' instead 
 asset.onInitialize(function () 
-    openspace.setPropertyValueSingle("Scene.Rhea.Renderable.Layers.ColorLayers." ..
-     colorLayer.layer.Identifier .. ".Enabled", true)
+  openspace.setPropertyValueSingle("Scene.Rhea.Renderable.Layers.ColorLayers." ..
+    colorLayer.layer.Identifier .. ".Enabled", true)
 end)
 
 
 asset.meta = {
-    Name = "Default Rhea Layers",
-    Version = "1.0",
-    Description = [[ Default Rhea layers are: Rhea Texture]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license"
+  Name = "Default Rhea Layers",
+  Version = "1.0",
+  Description = [[ Default Rhea layers are: Rhea Texture]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
 }

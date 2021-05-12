@@ -35,6 +35,8 @@
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
+#include <filesystem>
+#include <optional>
 
 namespace {
     constexpr const char _loggerCat[] = "RenderableDisc";
@@ -63,36 +65,26 @@ namespace {
         "based on the given size and this value should be set between 0 and 1. A value "
         "of 1 results in a full circle and 0.5 a disc with an inner radius of 0.5*size."
     };
+
+    struct [[codegen::Dictionary(RenderableDisc)]] Parameters {
+        // [[codegen::verbatim(TextureInfo.description)]]
+        std::filesystem::path texture;
+
+        // [[codegen::verbatim(SizeInfo.description)]]
+        std::optional<float> size;
+
+        // [[codegen::verbatim(WidthInfo.description)]]
+        std::optional<float> width;
+    };
+#include "renderabledisc_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableDisc::Documentation() {
-    using namespace documentation;
-    return {
-        "Renderable Disc",
-        "renderable_disc",
-        {
-            {
-                TextureInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                TextureInfo.description
-            },
-            {
-                SizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                SizeInfo.description
-            },
-            {
-                WidthInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                WidthInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_renderable_disc";
+    return doc;
 }
 
 RenderableDisc::RenderableDisc(const ghoul::Dictionary& dictionary)
@@ -101,27 +93,21 @@ RenderableDisc::RenderableDisc(const ghoul::Dictionary& dictionary)
     , _size(SizeInfo, 1.f, 0.f, 1e13f)
     , _width(WidthInfo, 0.5f, 0.f, 1.f)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableDisc"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _texturePath = absPath(dictionary.value<std::string>(TextureInfo.identifier));
+    _texturePath = p.texture.string();
     _texturePath.onChange([&]() { _texture->loadFromFile(_texturePath); });
     addProperty(_texturePath);
 
-    if (dictionary.hasKey(SizeInfo.identifier)) {
-        _size = static_cast<float>(dictionary.value<double>(SizeInfo.identifier));
-    }
+    _size.setViewOption(properties::Property::ViewOptions::Logarithmic);
+    _size = p.size.value_or(_size);
     setBoundingSphere(_size);
     _size.onChange([&]() { _planeIsDirty = true; });
     addProperty(_size);
 
-    if (dictionary.hasKey(WidthInfo.identifier)) {
-        _width = static_cast<float>(dictionary.value<double>(WidthInfo.identifier));
-    }
+    _width = p.width.value_or(_width);
     addProperty(_width);
+
     addProperty(_opacity);
 
     setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
@@ -173,7 +159,6 @@ void RenderableDisc::render(const RenderData& data, RendererTasks&) {
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
     );
     _shader->setUniform(_uniformCache.width, _width);
-
     _shader->setUniform(_uniformCache.opacity, _opacity);
 
     ghoul::opengl::TextureUnit unit;

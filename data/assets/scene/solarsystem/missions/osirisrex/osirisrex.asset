@@ -9,9 +9,9 @@ local mission = asset.localResource('osirisrex.mission')
 local missionName
 
 asset.onInitialize(function()
-    missionName = openspace.loadMission(mission)
+  missionName = openspace.loadMission(mission)
 end)
 
 asset.onDeinitialize(function()
-    openspace.unloadMission(missionName)
+  openspace.unloadMission(missionName)
 end)

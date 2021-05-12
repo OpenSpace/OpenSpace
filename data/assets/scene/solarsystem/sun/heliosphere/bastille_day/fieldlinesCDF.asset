@@ -7,7 +7,7 @@ local masVelocityColorTable = transferFunctions .. "/velocity_fieldlines.txt"
 local masDensityColorTable = transferFunctions .. "/density_fieldlines.txt"
 
 local fieldlinesDirectory = 'D:/data/2000_01_01_event/cdf/GM_CDF'
-local fieldlinesDirectory = 'C:/Users/eolsson/Documents/openspace/data/20000101/osfls'
+--local fieldlinesDirectory = 'C:/Users/eolsson/Documents/openspace/data/20000101/osfls'
 --local seedPointDirectory = 'D:/data/2000_01_01_event/seedpoints'
 local seedPointDirectory = 'D:/data/2000_01_01_event/seedpoints/Masha_Kuznetsova_030106_2_data_257970025845'
 
@@ -17,28 +17,33 @@ local earthRadius = 6378137
 
 -- Fieldlies from binaries
 local fieldlines = {
-    Identifier = "MAS_MHD_Fieldlines",
+    Identifier = "Earth_BATSRUS_Fieldlines",
     Parent = transforms.GSMReferenceFrame.Identifier,
     Renderable = {
         Type = "RenderableFieldlinesSequence",
         SourceFolder = fieldlinesDirectory,
-        --SeedPointDirectory = seedPointDirectory,
+        SeedPointDirectory = seedPointDirectory,
         TracingVariable = 'b',
         --OutputFolder = "C:/Users/eolsson/Documents/openspace/data/20000101/osfls/",
         
         -- FlowEnabled = false,
         -- LineWidth = 1.0;
         AlphaBlendlingEnabled = false,
-        InputFileType = "osfls",
+        --InputFileType = "osfls",
+        InputFileType = "CDF",
 
         ColorTablePaths = {
             masDensityColorTable,
             masVelocityColorTable,
         },
-        ColorTableMinMax = {
-            { 0, 1000000 },
+        ColorTableRanges = {
+            { 0, 10 },
             { 100, 2000 }
         },
+        ExtraVariables = {
+            "rho"
+        },
+        ManualTimeOffset = -14400.0,
         LoadAtRuntime = true,
         ScaleToMeters = 1.0,
         SecondsBefore = 24*60*60,

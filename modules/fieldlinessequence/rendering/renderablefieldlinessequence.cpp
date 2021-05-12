@@ -86,6 +86,10 @@ namespace {
     constexpr const char* KeyOutputFolder = "OutputFolder";
     //[INT] Line Width should have a range
     constexpr const char* KeyLineWidth = "LineWidth";
+    // [DOUBLE] If data sets parameter "start_time" differ from start of run, 
+    // "elapsed_time_in_seconds" might be in relation to start of run. 
+    // ManuelTimeOffset will be added to trigger time.
+    constexpr const char* KeyManualTimeOffset = "ManualTimeOffset";
 
     // ------------- POSSIBLE STRING VALUES FOR CORRESPONDING MODFILE KEY ------------- //
     constexpr const char* ValueInputFileTypeCdf = "cdf";
@@ -907,6 +911,14 @@ bool RenderableFieldlinesSequence::getStatesFromCdfFiles(const std::string& outp
         return false;
     }
 
+    
+    double manualTimeOffset;
+    if (_dictionary->hasValue<double>(KeyManualTimeOffset)) {
+        manualTimeOffset = _dictionary->value<double>(KeyManualTimeOffset);
+    }
+    else {
+        manualTimeOffset = 0.0;
+    }
     // Load states into RAM!
     for (const std::string& cdfPath : _sourceFiles) {
         FieldlinesState newState;
@@ -914,6 +926,7 @@ bool RenderableFieldlinesSequence::getStatesFromCdfFiles(const std::string& outp
             newState,
             cdfPath,
             seedsPerFiles,
+            manualTimeOffset,
             tracingVar,
             extraVars,
             extraMagVars

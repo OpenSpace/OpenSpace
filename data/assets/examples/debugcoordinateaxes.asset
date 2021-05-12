@@ -6,18 +6,18 @@ local sunRadius = 6.957E8
 local earthRadius = 6.371E6
 
 debugHelper.registerCartesianAxes(asset, {
-    Parent = transforms.EarthBarycenter.Identifier,
-    Scale = earthRadius * 3.5
+  Parent = transforms.EarthBarycenter.Identifier,
+  Scale = earthRadius * 3.5
 })
 
 debugHelper.registerCartesianAxes(asset, {
-    Parent = transforms.EarthInertial.Identifier,
-    Scale = earthRadius * 2.5
+  Parent = transforms.EarthInertial.Identifier,
+  Scale = earthRadius * 2.5
 })
 
 debugHelper.registerCartesianAxes(asset, {
-    Parent = transforms.EarthIAU.Identifier,
-    Scale = earthRadius * 1.5
+  Parent = transforms.EarthIAU.Identifier,
+  Scale = earthRadius * 1.5
 })
 
 debugHelper.registerCartesianAxes(asset, {

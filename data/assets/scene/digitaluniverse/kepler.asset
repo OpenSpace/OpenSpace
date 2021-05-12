@@ -10,53 +10,53 @@ local textures = asset.syncedResource({
 })
 
 local speck = asset.syncedResource({
-    Name = "Kepler Speck Files",
-    Type = "HttpSynchronization",
-    Identifier = "digitaluniverse_kepler_speck",
-    Version = 2
+  Name = "Kepler Speck Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_kepler_speck",
+  Version = 3
 })
 
 local object = {
-    Identifier = "KeplerPlanetaryCandidates",
-    Renderable = {
-        Type = "RenderableBillboardsCloud",
-        Enabled = false,
-        Color = { 1.0, 1.0, 0.0 },
-        Opacity = 0.99,
-        ScaleFactor = 410.0,
-        File = speck .. "/kepler.speck",
-        Texture = textures .. "/halo.png",
-        CorrectionSizeEndDistance = 15.86,
-        CorrectionSizeFactor = 8.59,
-        Unit = "pc",
-        BillboardMaxSize = 30.0,
-        EnablePixelSizeControl = true
-    },
-    GUI = {
-        Name = "Kepler Planetary Candidates",
-        Path = "/Milky Way/Exoplanets",
-        Description = [[Census: 3,254 stars. DU Version 9.3. <br> The exoplanet candidate
-        stars are likely hosts for exoplanets. These are stars plucked from NASA's Kepler
-        and TESS space telescopes. The Kepler mission was designed to stare at one spot,
-        roughly twelve degrees across, in the constellation Cygnus. By staring at one
-        spot, the spacecraft could monitor over 500,000 stars in that field for subtle
-        variations in brightness.The data included here are the stars that are considered
-        good candidates to host planets. Rather than represent them photo-realistically,
-        with accurate colors, we choose to visualize them as generic, pure yellow stars.
-        (Description from URL) <br><br> Data Reference: NASA Exoplanet Archive
-        (CalTech/NASA)]],
-    }
+  Identifier = "KeplerPlanetaryCandidates",
+  Renderable = {
+    Type = "RenderableBillboardsCloud",
+    Enabled = false,
+    Color = { 1.0, 1.0, 0.0 },
+    Opacity = 0.99,
+    ScaleFactor = 410.0,
+    File = speck .. "/kepler.speck",
+    Texture = textures .. "/halo.png",
+    CorrectionSizeEndDistance = 15.86,
+    CorrectionSizeFactor = 8.59,
+    Unit = "pc",
+    BillboardMaxSize = 30.0,
+    EnablePixelSizeControl = true
+  },
+  GUI = {
+    Name = "Kepler Planetary Candidates",
+    Path = "/Milky Way/Exoplanets",
+    Description = [[Census: 3,254 stars. DU Version 9.3. <br> The exoplanet candidate
+    stars are likely hosts for exoplanets. These are stars plucked from NASA's Kepler
+    and TESS space telescopes. The Kepler mission was designed to stare at one spot,
+    roughly twelve degrees across, in the constellation Cygnus. By staring at one
+    spot, the spacecraft could monitor over 500,000 stars in that field for subtle
+    variations in brightness.The data included here are the stars that are considered
+    good candidates to host planets. Rather than represent them photo-realistically,
+    with accurate colors, we choose to visualize them as generic, pure yellow stars.
+    (Description from URL) <br><br> Data Reference: NASA Exoplanet Archive
+    (CalTech/NASA)]],
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { object })
 
 
 asset.meta = {
-    Name = "Kepler Planetary Candidates",
-    Version = "2.0",
-    Description = [[Digital Universe asset for Kepler Planetary Candidates]],
-    Author = "Brian Abbott, Emily Rice, and Jason No (AMNH)",
-    URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-    License = "AMNH Digital Universe",
-    Identifiers = {"KeplerPlanetaryCandidates"}
+  Name = "Kepler Planetary Candidates",
+  Version = "2.0",
+  Description = [[Digital Universe asset for Kepler Planetary Candidates]],
+  Author = "Brian Abbott, Emily Rice, and Jason No (AMNH)",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe",
+  Identifiers = {"KeplerPlanetaryCandidates"}
 }

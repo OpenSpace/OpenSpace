@@ -37,6 +37,7 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
+#include <optional>
 
 namespace {
     enum Origin {
@@ -72,46 +73,37 @@ namespace {
         "Texture Coordinate Origin",
         "The origin of the texture coorinate system."
     };
+
+    struct [[codegen::Dictionary(RenderableDebugPlane)]] Parameters {
+        // [[codegen::verbatim(TextureInfo.description)]]
+        std::optional<int> texture;
+
+        // [[codegen::verbatim(BillboardInfo.description)]]
+        std::optional<bool> billboard;
+
+        // [[codegen::verbatim(SizeInfo.description)]]
+        std::optional<float> size;
+
+        enum class Origin {
+            LowerLeft,
+            LowerRight,
+            UpperLeft,
+            UpperRight,
+            Center
+        };
+        // [[codegen::verbatim(OriginInfo.description)]]
+        std::optional<Origin> origin;
+    };
+#include "renderabledebugplane_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableDebugPlane::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderableDebugPlane",
-        "debugging_renderable_debugplane",
-        {
-            {
-                TextureInfo.identifier,
-                new IntVerifier,
-                Optional::Yes,
-                TextureInfo.description
-            },
-            {
-                BillboardInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                BillboardInfo.description
-            },
-            {
-                SizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                SizeInfo.description
-            },
-            {
-                OriginInfo.identifier,
-                new StringInListVerifier(
-                    { "LowerLeft", "LowerRight", "UpperLeft", "UpperRight", "Center" }
-                ),
-                Optional::Yes,
-                OriginInfo.description
-            }
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "debugging_renderable_debugplane";
+    return doc;
 }
-
 
 RenderableDebugPlane::RenderableDebugPlane(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
@@ -120,17 +112,19 @@ RenderableDebugPlane::RenderableDebugPlane(const ghoul::Dictionary& dictionary)
     , _size(SizeInfo, 10.f, 0.f, 1e25f)
     , _origin(OriginInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
-    if (dictionary.hasKey(TextureInfo.identifier)) {
-        _texture = static_cast<int>(dictionary.value<double>(TextureInfo.identifier));
-    }
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    if (dictionary.hasKey(SizeInfo.identifier)) {
-        _size = static_cast<float>(dictionary.value<double>(SizeInfo.identifier));
-    }
+    _texture = p.texture.value_or(_texture);
+    addProperty(_texture);
 
-    if (dictionary.hasKey(BillboardInfo.identifier)) {
-        _billboard = dictionary.value<bool>(BillboardInfo.identifier);
-    }
+    _size.setViewOption(properties::Property::ViewOptions::Logarithmic);
+    _size.onChange([this](){ _planeIsDirty = true; });
+    _size = p.size.value_or(_size);
+    setBoundingSphere(_size);
+    addProperty(_size);
+
+    _billboard = p.billboard.value_or(_billboard);
+    addProperty(_billboard);
 
     _origin.addOptions({
         { LowerLeft, "LowerLeft" },
@@ -141,36 +135,30 @@ RenderableDebugPlane::RenderableDebugPlane(const ghoul::Dictionary& dictionary)
     });
     _origin.setValue(Center);
 
-    if (dictionary.hasKey(OriginInfo.identifier)) {
-        const std::string origin = dictionary.value<std::string>(OriginInfo.identifier);
-        if (origin == "LowerLeft") {
-            _origin = LowerLeft;
-        }
-        else if (origin == "LowerRight") {
-            _origin = LowerRight;
-        }
-        else if (origin == "UpperLeft") {
-            _origin = UpperLeft;
-        }
-        else if (origin == "UpperRight") {
-            _origin = UpperRight;
-        }
-        else if (origin == "Center") {
-            _origin = Center;
+    if (p.origin.has_value()) {
+        switch (*p.origin) {
+            case Parameters::Origin::LowerLeft:
+                _origin = LowerLeft;
+                break;
+            case Parameters::Origin::LowerRight:
+                _origin = LowerRight;
+                break;
+            case Parameters::Origin::UpperLeft:
+                _origin = UpperLeft;
+                break;
+            case Parameters::Origin::UpperRight:
+                _origin = UpperRight;
+                break;
+            case Parameters::Origin::Center:
+                _origin = Center;
+                break;
+            default:
+                throw ghoul::MissingCaseException();
         }
     }
     else {
         _origin = Center;
     }
-
-    addProperty(_texture);
-
-    addProperty(_billboard);
-
-    addProperty(_size);
-    _size.onChange([this](){ _planeIsDirty = true; });
-
-    setBoundingSphere(_size);
 }
 
 bool RenderableDebugPlane::isReady() const {

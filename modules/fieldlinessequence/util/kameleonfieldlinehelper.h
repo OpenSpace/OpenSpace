@@ -37,8 +37,8 @@ namespace fls {
 
 bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfPath,
     const std::unordered_map<std::string, std::vector<glm::vec3>>& seedMap, 
-    const std::string& tracingVar, std::vector<std::string>& extraVars, 
-    std::vector<std::string>& extraMagVars);
+    double manualTimeOffset, const std::string& tracingVar, 
+    std::vector<std::string>& extraVars, std::vector<std::string>& extraMagVars);
 
 } // namespace fls
 } // namespace openspace

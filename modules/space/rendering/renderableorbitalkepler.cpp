@@ -242,7 +242,7 @@ namespace {
         std::optional<double> lineWidth;
 
         // [[codegen::verbatim(LineColorInfo.description)]]
-        glm::dvec3 color;
+        glm::dvec3 color [[codegen::color()]];
 
         // [[codegen::verbatim(TrailFadeInfo.description)]]
         std::optional<double> trailFade;
@@ -476,6 +476,14 @@ void RenderableOrbitalKepler::initializeGL() {
     _uniformCache.opacity = _programObject->uniformLocation("opacity");
 
     updateBuffers();
+
+    double maxSemiMajorAxis = 0.0;
+    for (const KeplerParameters& kp : _data) {
+        if (kp.semiMajorAxis > maxSemiMajorAxis) {
+            maxSemiMajorAxis = kp.semiMajorAxis;
+        }
+    }
+    setBoundingSphere(maxSemiMajorAxis * 1000);
 }
 
 void RenderableOrbitalKepler::deinitializeGL() {
