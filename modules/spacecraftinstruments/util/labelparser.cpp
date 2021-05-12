@@ -26,7 +26,6 @@
 
 #include <openspace/util/spicemanager.h>
 #include <ghoul/fmt.h>
-#include <ghoul/filesystem/directory.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>

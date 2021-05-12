@@ -22,7 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/filesystem/directory.h>
 #include <ghoul/filesystem/file.h>
 #include <filesystem>
 

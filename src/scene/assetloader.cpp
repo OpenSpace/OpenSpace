@@ -36,7 +36,6 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/defer.h>
 #include <ghoul/misc/profiling.h>
-#include <filesystem>
 
 #include "assetloader_lua.inl"
 
@@ -440,8 +439,8 @@ std::string AssetLoader::generateAssetPath(const std::string& baseDirectory,
 }
 
 std::shared_ptr<Asset> AssetLoader::getAsset(const std::string& name) {
-    ghoul::filesystem::Directory directory = currentDirectory();
-    const std::string path = generateAssetPath(directory.path(), name);
+    std::filesystem::path directory = currentDirectory();
+    const std::string path = generateAssetPath(directory.string(), name);
 
     // Check if asset is already loaded.
     const auto it = _trackedAssets.find(path);
@@ -509,7 +508,7 @@ void AssetLoader::unrequest(const std::string& identifier) {
     assetUnrequested(parent, asset);
 }
 
-ghoul::filesystem::Directory AssetLoader::currentDirectory() const {
+std::filesystem::path AssetLoader::currentDirectory() const {
     if (_currentAsset->hasAssetFile()) {
         return _currentAsset->assetDirectory();
     }
@@ -537,8 +536,8 @@ void AssetLoader::remove(const std::string& identifier) {
 }
 
 std::shared_ptr<Asset> AssetLoader::has(const std::string& identifier) const {
-    ghoul::filesystem::Directory directory = currentDirectory();
-    std::string path = generateAssetPath(directory.path(), identifier);
+    std::filesystem::path directory = currentDirectory();
+    std::string path = generateAssetPath(directory.string(), identifier);
 
     const auto it = _trackedAssets.find(path);
     if (it == _trackedAssets.end()) {
@@ -744,8 +743,8 @@ int AssetLoader::existsLua(Asset*) {
 
     const std::string assetName = luaL_checkstring(*_luaState, 1);
 
-    const ghoul::filesystem::Directory directory = currentDirectory();
-    const std::string path = generateAssetPath(directory.path(), assetName);
+    const std::filesystem::path directory = currentDirectory();
+    const std::string path = generateAssetPath(directory.string(), assetName);
 
     lua_settop(*_luaState, 0);
     lua_pushboolean(*_luaState, std::filesystem::is_regular_file(path));

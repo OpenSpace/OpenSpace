@@ -303,14 +303,8 @@ bool UrlSynchronization::hasSyncFile() {
 }
 
 std::string UrlSynchronization::directory() {
-    ghoul::filesystem::Directory d(
-        _synchronizationRoot + ghoul::filesystem::FileSystem::PathSeparator +
-        "url" + ghoul::filesystem::FileSystem::PathSeparator +
-        _identifier + ghoul::filesystem::FileSystem::PathSeparator +
-        "files"
-    );
-
-    return absPath(d.path());
+    std::string d = fmt::format("{}/url/{}/files", _synchronizationRoot, _identifier);
+    return absPath(d);
 }
 
 } // namespace openspace

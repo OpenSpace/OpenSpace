@@ -25,7 +25,6 @@
 #include <openspace/util/httprequest.h>
 
 #include <ghoul/fmt.h>
-#include <ghoul/filesystem/directory.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -356,13 +355,12 @@ bool HttpFileDownload::initDownload() {
     }
 
     ghoul::filesystem::File destinationFile = _destination;
-    ghoul::filesystem::Directory d =
-        std::filesystem::path(_destination).parent_path().string();
+    std::filesystem::path d = std::filesystem::path(_destination).parent_path();
 
     {
         std::lock_guard<std::mutex> g(_directoryCreationMutex);
-        if (!std::filesystem::is_directory(d.path())) {
-            std::filesystem::create_directories(d.path());
+        if (!std::filesystem::is_directory(d)) {
+            std::filesystem::create_directories(d);
         }
     }
 

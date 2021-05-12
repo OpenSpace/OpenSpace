@@ -217,10 +217,6 @@ void RenderableTimeVaryingVolume::initializeGL() {
         return;
     }
 
-    using Recursive = ghoul::filesystem::Directory::Recursive;
-    using Sort = ghoul::filesystem::Directory::Sort;
-
-    //std::vector<std::string> sequencePaths;
     namespace fs = std::filesystem;
     for (const fs::directory_entry& e : fs::recursive_directory_iterator(sequenceDir)) {
         if (e.is_regular_file() || e.path().extension() == ".dictionary") {

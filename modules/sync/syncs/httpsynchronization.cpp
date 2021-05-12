@@ -86,17 +86,10 @@ HttpSynchronization::~HttpSynchronization() {
 }
 
 std::string HttpSynchronization::directory() {
-    ghoul::filesystem::Directory d(
-        _synchronizationRoot +
-        ghoul::filesystem::FileSystem::PathSeparator +
-        "http" +
-        ghoul::filesystem::FileSystem::PathSeparator +
-        _identifier +
-        ghoul::filesystem::FileSystem::PathSeparator +
-        std::to_string(_version)
+    std::string d = fmt::format(
+        "{}/http/{}/{}", _synchronizationRoot, _identifier, _version
     );
-
-    return FileSys.absPath(d.path());
+    return absPath(d);
 }
 
 void HttpSynchronization::start() {
