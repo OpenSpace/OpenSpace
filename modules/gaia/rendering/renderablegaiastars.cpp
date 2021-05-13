@@ -463,12 +463,10 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _filePath = absPath(p.file);
-    _dataFile = std::make_unique<File>(_filePath);
-    _dataFile->setCallback(
-        [&](const std::filesystem::path&) { _dataIsDirty = true; }
-    );
+    _dataFile = std::make_unique<File>(_filePath.value());
+    _dataFile->setCallback([this]() { _dataIsDirty = true; });
 
-    _filePath.onChange([&]() { _dataIsDirty = true; });
+    _filePath.onChange([this]() { _dataIsDirty = true; });
     addProperty(_filePath);
 
     _fileReaderOption.addOptions({
@@ -571,19 +569,19 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
 
     _pointSpreadFunctionTexturePath = absPath(p.texture);
     _pointSpreadFunctionTexturePath.onChange(
-        [&](){ _pointSpreadFunctionTextureIsDirty = true; }
+        [this](){ _pointSpreadFunctionTextureIsDirty = true; }
     );
-    _pointSpreadFunctionFile = std::make_unique<File>(_pointSpreadFunctionTexturePath);
+    _pointSpreadFunctionFile = std::make_unique<File>(
+        _pointSpreadFunctionTexturePath.value()
+    );
     _pointSpreadFunctionFile->setCallback(
-        [&](const std::filesystem::path&) { _pointSpreadFunctionTextureIsDirty = true; }
+        [this]() { _pointSpreadFunctionTextureIsDirty = true; }
     );
 
     _colorTexturePath = absPath(p.colorMap);
-    _colorTextureFile = std::make_unique<File>(_colorTexturePath);
-    _colorTexturePath.onChange([&]() { _colorTextureIsDirty = true; });
-    _colorTextureFile->setCallback(
-        [&](const std::filesystem::path&) { _colorTextureIsDirty = true; }
-    );
+    _colorTextureFile = std::make_unique<File>(_colorTexturePath.value());
+    _colorTexturePath.onChange([this]() { _colorTextureIsDirty = true; });
+    _colorTextureFile->setCallback([this]() { _colorTextureIsDirty = true; });
 
     _luminosityMultiplier = p.luminosityMultiplier.value_or(_luminosityMultiplier);
     _magnitudeBoost = p.magnitudeBoost.value_or(_magnitudeBoost);
@@ -2119,12 +2117,10 @@ void RenderableGaiaStars::update(const UpdateData&) {
             );
 
             _pointSpreadFunctionFile = std::make_unique<ghoul::filesystem::File>(
-                _pointSpreadFunctionTexturePath
+                _pointSpreadFunctionTexturePath.value()
             );
             _pointSpreadFunctionFile->setCallback(
-                [&](const std::filesystem::path&) {
-                    _pointSpreadFunctionTextureIsDirty = true;
-                }
+                [this]() { _pointSpreadFunctionTextureIsDirty = true; }
             );
         }
         _pointSpreadFunctionTextureIsDirty = false;
@@ -2145,11 +2141,9 @@ void RenderableGaiaStars::update(const UpdateData&) {
             }
 
             _colorTextureFile = std::make_unique<ghoul::filesystem::File>(
-                _colorTexturePath
+                _colorTexturePath.value()
             );
-            _colorTextureFile->setCallback(
-                [&](const std::filesystem::path&) { _colorTextureIsDirty = true; }
-            );
+            _colorTextureFile->setCallback([this]() { _colorTextureIsDirty = true; });
         }
         _colorTextureIsDirty = false;
     }

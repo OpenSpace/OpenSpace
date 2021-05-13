@@ -134,38 +134,36 @@ DownloadManager::DownloadManager(UseMultipleThreads useMultipleThreads)
 
 std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
                                                                    const std::string& url,
-                                                      const ghoul::filesystem::File& file,
+                                                        const std::filesystem::path& file,
                                                                 OverrideFile overrideFile,
                                                                   FailOnError failOnError,
                                                                 unsigned int timeout_secs,
                                                 DownloadFinishedCallback finishedCallback,
                                                 DownloadProgressCallback progressCallback)
 {
-    if (!overrideFile && std::filesystem::is_regular_file(file.path())) {
+    if (!overrideFile && std::filesystem::is_regular_file(file)) {
         return nullptr;
     }
 
     std::shared_ptr<FileFuture> future = std::make_shared<FileFuture>(
-        std::filesystem::path(file.path()).filename().string()
+        file.filename().string()
     );
     errno = 0;
 #ifdef WIN32
     FILE* fp;
-    errno_t error = fopen_s(&fp, file.path().c_str(), "wb");
+    errno_t error = fopen_s(&fp, file.string().c_str(), "wb");
     if (error != 0) {
-        LERROR(
-            "Could not open/create file:" + file.path() +
-            ". Errno: " + std::to_string(errno)
-        );
+        LERROR(fmt::format(
+            "Could not open/create file: {}. Errno: {}", file.string(), errno
+        ));
     }
 #else
     FILE* fp = fopen(file.path().c_str(), "wb"); // write binary
 #endif // WIN32
     if (!fp) {
-        LERROR(
-            "Could not open/create file:" + file.path() +
-            ". Errno: " + std::to_string(errno)
-        );
+        LERROR(fmt::format(
+            "Could not open/create file: {}. Errno: {}", file.string(), errno
+        ));
     }
 
     auto downloadFunction = [url, failOnError, timeout_secs,

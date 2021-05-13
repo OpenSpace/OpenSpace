@@ -338,7 +338,7 @@ void GlobeLabelsComponent::initializeFonts() {
 
 bool GlobeLabelsComponent::loadLabelsData(const std::string& file) {
     std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-        ghoul::filesystem::File(file),
+        file,
         "GlobeLabelsComponent|" + identifier(),
         ghoul::filesystem::CacheManager::Persistent::Yes
     );

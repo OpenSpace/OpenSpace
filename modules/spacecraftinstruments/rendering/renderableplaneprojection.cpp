@@ -196,9 +196,7 @@ void RenderablePlaneProjection::loadTexture() {
             _texture = std::move(texture);
 
             _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
-            _textureFile->setCallback(
-                [&](const std::filesystem::path&) { _textureIsDirty = true; }
-            );
+            _textureFile->setCallback([this]() { _textureIsDirty = true; });
         }
     }
 }

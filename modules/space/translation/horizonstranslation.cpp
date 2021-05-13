@@ -70,8 +70,10 @@ HorizonsTranslation::HorizonsTranslation()
 
     _horizonsTextFile.onChange([&](){
         requireUpdate();
-        _fileHandle = std::make_unique<ghoul::filesystem::File>(_horizonsTextFile);
-        _fileHandle->setCallback([&](const std::filesystem::path&) {
+        _fileHandle = std::make_unique<ghoul::filesystem::File>(
+            _horizonsTextFile.value()
+        );
+        _fileHandle->setCallback([this]() {
              requireUpdate();
              notifyObservers();
          });

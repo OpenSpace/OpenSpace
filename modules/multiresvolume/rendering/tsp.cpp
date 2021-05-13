@@ -507,7 +507,6 @@ bool TSP::readCache() {
     if (!FileSys.cacheManager())
         return false;
 
-    ghoul::filesystem::File f = _filename;
     std::string cacheFilename = FileSys.cacheManager()->cachedFilename(
         std::filesystem::path(_filename).stem().string(),
         "",
@@ -547,7 +546,6 @@ bool TSP::writeCache() {
         return false;
     }
 
-    ghoul::filesystem::File f = _filename;
     std::string cacheFilename = FileSys.cacheManager()->cachedFilename(
         std::filesystem::path(_filename).stem().string(),
         "",

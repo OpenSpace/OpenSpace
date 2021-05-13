@@ -354,11 +354,10 @@ bool HttpFileDownload::initDownload() {
         return false;
     }
 
-    ghoul::filesystem::File destinationFile = _destination;
     std::filesystem::path d = std::filesystem::path(_destination).parent_path();
 
     {
-        std::lock_guard<std::mutex> g(_directoryCreationMutex);
+        std::lock_guard g(_directoryCreationMutex);
         if (!std::filesystem::is_directory(d)) {
             std::filesystem::create_directories(d);
         }
@@ -392,13 +391,13 @@ bool HttpFileDownload::initDownload() {
             std::string message(Buffer, size);
 
             LERROR(fmt::format(
-                "Cannot open file {}: {}", destinationFile.path(), message)
+                "Cannot open file {}: {}", _destination, message)
             );
 
             return false;
         }
         else {
-            LERROR(fmt::format("Cannot open file {}", destinationFile.path()));
+            LERROR(fmt::format("Cannot open file {}", _destination));
             return false;
         }
 #else
