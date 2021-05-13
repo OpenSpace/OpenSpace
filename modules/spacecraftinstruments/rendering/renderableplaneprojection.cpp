@@ -197,7 +197,7 @@ void RenderablePlaneProjection::loadTexture() {
 
             _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
             _textureFile->setCallback(
-                [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
+                [&](const std::filesystem::path&) { _textureIsDirty = true; }
             );
         }
     }

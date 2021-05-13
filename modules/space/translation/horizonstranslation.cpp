@@ -71,7 +71,7 @@ HorizonsTranslation::HorizonsTranslation()
     _horizonsTextFile.onChange([&](){
         requireUpdate();
         _fileHandle = std::make_unique<ghoul::filesystem::File>(_horizonsTextFile);
-        _fileHandle->setCallback([&](const ghoul::filesystem::File&) {
+        _fileHandle->setCallback([&](const std::filesystem::path&) {
              requireUpdate();
              notifyObservers();
          });

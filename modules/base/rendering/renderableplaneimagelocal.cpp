@@ -107,7 +107,7 @@ RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& di
     addProperty(_texturePath);
     _texturePath.onChange([this]() { loadTexture(); });
     _textureFile->setCallback(
-        [this](const ghoul::filesystem::File&) { _textureIsDirty = true; }
+        [this](const std::filesystem::path&) { _textureIsDirty = true; }
     );
 
     if (p.renderType.has_value()) {
@@ -211,7 +211,7 @@ void RenderablePlaneImageLocal::loadTexture() {
 
         _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
         _textureFile->setCallback(
-            [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
+            [&](const std::filesystem::path&) { _textureIsDirty = true; }
         );
     }
 }

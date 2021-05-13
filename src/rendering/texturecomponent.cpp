@@ -92,7 +92,7 @@ void TextureComponent::loadFromFile(const std::string& path) {
             _textureFile = std::make_unique<ghoul::filesystem::File>(path);
             if (_shouldWatchFile) {
                 _textureFile->setCallback(
-                    [&](const ghoul::filesystem::File&) { _fileIsDirty = true; }
+                    [&](const std::filesystem::path&) { _fileIsDirty = true; }
                 );
             }
 

@@ -464,7 +464,9 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
 
     _filePath = absPath(p.file);
     _dataFile = std::make_unique<File>(_filePath);
-    _dataFile->setCallback([&](const File&) { _dataIsDirty = true; });
+    _dataFile->setCallback(
+        [&](const std::filesystem::path&) { _dataIsDirty = true; }
+    );
 
     _filePath.onChange([&]() { _dataIsDirty = true; });
     addProperty(_filePath);
@@ -573,13 +575,15 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     );
     _pointSpreadFunctionFile = std::make_unique<File>(_pointSpreadFunctionTexturePath);
     _pointSpreadFunctionFile->setCallback(
-        [&](const File&) { _pointSpreadFunctionTextureIsDirty = true; }
+        [&](const std::filesystem::path&) { _pointSpreadFunctionTextureIsDirty = true; }
     );
 
     _colorTexturePath = absPath(p.colorMap);
     _colorTextureFile = std::make_unique<File>(_colorTexturePath);
     _colorTexturePath.onChange([&]() { _colorTextureIsDirty = true; });
-    _colorTextureFile->setCallback([&](const File&) { _colorTextureIsDirty = true; });
+    _colorTextureFile->setCallback(
+        [&](const std::filesystem::path&) { _colorTextureIsDirty = true; }
+    );
 
     _luminosityMultiplier = p.luminosityMultiplier.value_or(_luminosityMultiplier);
     _magnitudeBoost = p.magnitudeBoost.value_or(_magnitudeBoost);
@@ -2118,7 +2122,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 _pointSpreadFunctionTexturePath
             );
             _pointSpreadFunctionFile->setCallback(
-                [&](const ghoul::filesystem::File&) {
+                [&](const std::filesystem::path&) {
                     _pointSpreadFunctionTextureIsDirty = true;
                 }
             );
@@ -2144,7 +2148,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 _colorTexturePath
             );
             _colorTextureFile->setCallback(
-                [&](const ghoul::filesystem::File&) { _colorTextureIsDirty = true; }
+                [&](const std::filesystem::path&) { _colorTextureIsDirty = true; }
             );
         }
         _colorTextureIsDirty = false;

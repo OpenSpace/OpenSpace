@@ -134,7 +134,9 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
     _texturePath.onChange([&]() { loadTexture(); });
     addProperty(_texturePath);
 
-    _textureFile->setCallback([&](const File&) { _textureIsDirty = true; });
+    _textureFile->setCallback(
+        [&](const std::filesystem::path&) { _textureIsDirty = true; }
+    );
 
     _nightFactor = p.nightFactor.value_or(_nightFactor);
     addProperty(_nightFactor);
@@ -251,7 +253,7 @@ void RenderableRings::loadTexture() {
 
             _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
             _textureFile->setCallback(
-                [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
+                [&](const std::filesystem::path&) { _textureIsDirty = true; }
             );
         }
     }

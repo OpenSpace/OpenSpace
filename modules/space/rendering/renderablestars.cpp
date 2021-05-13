@@ -484,7 +484,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     addProperty(_colorOption);
 
     _colorTexturePath.onChange([&] { _colorTextureIsDirty = true; });
-    _colorTextureFile->setCallback([&](const File&) {
+    _colorTextureFile->setCallback([&](const std::filesystem::path&) {
         _colorTextureIsDirty = true;
     });
     addProperty(_colorTexturePath);
@@ -531,7 +531,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     _pointSpreadFunctionTexturePath.onChange([&]() {
         _pointSpreadFunctionTextureIsDirty = true;
     });
-    _pointSpreadFunctionFile->setCallback([&](const File&) {
+    _pointSpreadFunctionFile->setCallback([&](const std::filesystem::path&) {
         _pointSpreadFunctionTextureIsDirty = true;
     });
     _userProvidedTextureOwner.addProperty(_pointSpreadFunctionTexturePath);
@@ -758,11 +758,11 @@ void RenderableStars::loadPSFTexture() {
 
         _pointSpreadFunctionFile = std::make_unique<ghoul::filesystem::File>(
             _pointSpreadFunctionTexturePath
-            );
+        );
         _pointSpreadFunctionFile->setCallback(
-            [&](const ghoul::filesystem::File&) {
-            _pointSpreadFunctionTextureIsDirty = true;
-        }
+            [&](const std::filesystem::path&) {
+                _pointSpreadFunctionTextureIsDirty = true;
+            }
         );
     }
     _pointSpreadFunctionTextureIsDirty = false;
@@ -1175,7 +1175,7 @@ void RenderableStars::update(const UpdateData&) {
                 _colorTexturePath
             );
             _colorTextureFile->setCallback(
-                [&](const ghoul::filesystem::File&) { _colorTextureIsDirty = true; }
+                [&](const std::filesystem::path&) { _colorTextureIsDirty = true; }
             );
         }
         _colorTextureIsDirty = false;

@@ -261,7 +261,9 @@ void RingsComponent::initialize() {
         _textureFile = std::make_unique<File>(_texturePath);
         _texturePath.onChange([&]() { loadTexture(); });
         addProperty(_texturePath);
-        _textureFile->setCallback([&](const File&) { _textureIsDirty = true; });
+        _textureFile->setCallback(
+            [&](const std::filesystem::path&) { _textureIsDirty = true; }
+        );
     }
 
     if (p.textureFwrd.has_value()) {
@@ -269,7 +271,9 @@ void RingsComponent::initialize() {
         _textureFileForwards = std::make_unique<File>(_textureFwrdPath);
         _textureFwrdPath.onChange([&]() { loadTexture(); });
         addProperty(_textureFwrdPath);
-        _textureFileForwards->setCallback([&](const File&) { _textureIsDirty = true; });
+        _textureFileForwards->setCallback(
+            [&](const std::filesystem::path&) { _textureIsDirty = true; }
+        );
     }
 
     if (p.textureBckwrd.has_value()) {
@@ -277,7 +281,9 @@ void RingsComponent::initialize() {
         _textureFileBackwards = std::make_unique<File>(_textureBckwrdPath);
         _textureBckwrdPath.onChange([&]() { loadTexture(); });
         addProperty(_textureBckwrdPath);
-        _textureFileBackwards->setCallback([&](const File&) { _textureIsDirty = true; });
+        _textureFileBackwards->setCallback(
+            [&](const std::filesystem::path&) { _textureIsDirty = true; }
+        );
     }
 
     if (p.textureUnlit.has_value()) {
@@ -285,7 +291,9 @@ void RingsComponent::initialize() {
         _textureFileUnlit = std::make_unique<File>(_textureUnlitPath);
         _textureUnlitPath.onChange([&]() { loadTexture(); });
         addProperty(_textureUnlitPath);
-        _textureFileUnlit->setCallback([&](const File&) { _textureIsDirty = true; });
+        _textureFileUnlit->setCallback(
+            [&](const std::filesystem::path&) { _textureIsDirty = true; }
+        );
     }
 
     if (p.textureColor.has_value()) {
@@ -293,7 +301,9 @@ void RingsComponent::initialize() {
         _textureFileColor = std::make_unique<File>(_textureColorPath);
         _textureColorPath.onChange([&]() { loadTexture(); });
         addProperty(_textureColorPath);
-        _textureFileColor->setCallback([&](const File&) { _textureIsDirty = true; });
+        _textureFileColor->setCallback(
+            [&](const std::filesystem::path&) { _textureIsDirty = true; }
+        );
     }
 
     if (p.textureTransparency.has_value()) {
@@ -301,7 +311,9 @@ void RingsComponent::initialize() {
         _textureFileTransparency = std::make_unique<File>(_textureTransparencyPath);
         _textureTransparencyPath.onChange([&]() { loadTexture(); });
         addProperty(_textureTransparencyPath);
-        _textureFileTransparency->setCallback([&](const File&) { _textureIsDirty = true; });
+        _textureFileTransparency->setCallback(
+            [&](const std::filesystem::path&) { _textureIsDirty = true; }
+        );
     }
 
     _offset = p.offset.value_or(_offset);
@@ -630,7 +642,7 @@ void RingsComponent::loadTexture() {
 
             _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
             _textureFile->setCallback(
-                [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
+                [&](const std::filesystem::path&) { _textureIsDirty = true; }
             );
         }
     }
@@ -658,7 +670,7 @@ void RingsComponent::loadTexture() {
                 _textureFwrdPath
                 );
             _textureFileForwards->setCallback(
-                [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
+                [&](const std::filesystem::path&) { _textureIsDirty = true; }
             );
         }
     }
@@ -686,7 +698,7 @@ void RingsComponent::loadTexture() {
                 _textureBckwrdPath
                 );
             _textureFileBackwards->setCallback(
-                [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
+                [&](const std::filesystem::path&) { _textureIsDirty = true; }
             );
         }
     }
@@ -711,7 +723,7 @@ void RingsComponent::loadTexture() {
 
             _textureFileUnlit = std::make_unique<ghoul::filesystem::File>(_textureUnlitPath);
             _textureFileUnlit->setCallback(
-                [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
+                [&](const std::filesystem::path&) { _textureIsDirty = true; }
             );
         }
     }
@@ -736,7 +748,7 @@ void RingsComponent::loadTexture() {
 
             _textureFileColor = std::make_unique<ghoul::filesystem::File>(_textureColorPath);
             _textureFileColor->setCallback(
-                [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
+                [&](const std::filesystem::path&) { _textureIsDirty = true; }
             );
         }
     }
@@ -765,7 +777,7 @@ void RingsComponent::loadTexture() {
                 _textureTransparencyPath
             );
             _textureFileTransparency->setCallback(
-                [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
+                [&](const std::filesystem::path&) { _textureIsDirty = true; }
             );
         }
     }

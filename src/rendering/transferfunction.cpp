@@ -79,9 +79,7 @@ void TransferFunction::setPath(const std::string& filepath) {
     _filepath = f;
     _file = std::make_unique<ghoul::filesystem::File>(_filepath);
     _needsUpdate = true;
-    _file->setCallback([this](const ghoul::filesystem::File&) {
-        _needsUpdate = true;
-    });
+    _file->setCallback([this](const std::filesystem::path&) { _needsUpdate = true; });
 }
 
 ghoul::opengl::Texture& TransferFunction::texture() {

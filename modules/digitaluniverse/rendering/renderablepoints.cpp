@@ -182,7 +182,7 @@ RenderablePoints::RenderablePoints(const ghoul::Dictionary& dictionary)
 
         _spriteTexturePath.onChange([&] { _spriteTextureIsDirty = true; });
         _spriteTextureFile->setCallback(
-            [&](const ghoul::filesystem::File&) { _spriteTextureIsDirty = true; }
+            [&](const std::filesystem::path&) { _spriteTextureIsDirty = true; }
         );
         addProperty(_spriteTexturePath);
 
@@ -378,7 +378,7 @@ void RenderablePoints::update(const UpdateData&) {
                 _spriteTexturePath
             );
             _spriteTextureFile->setCallback(
-                [&](const ghoul::filesystem::File&) { _spriteTextureIsDirty = true; }
+                [&](const std::filesystem::path&) { _spriteTextureIsDirty = true; }
             );
         }
         _spriteTextureIsDirty = false;
