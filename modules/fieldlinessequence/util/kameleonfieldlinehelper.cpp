@@ -162,8 +162,8 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
     }
 
     // ---------------------------- LOAD TRACING VARIABLE ----------------------------  //
-    if (!kameleon->loadVariable(tracingVar)) {
-        LERROR("Failed to load tracing variable: " + tracingVar);
+    if (!kameleon->loadVariable("b")) {
+        LERROR("Failed to load tracing variable: b");
         return false;
     }
 
@@ -177,17 +177,20 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
 
     // fieldlines = true will trace the magnetic fieldline (b) for every vertex of a 
     // velocity flowline (u) from the seedpoint. false will do vice versa.
-    bool fieldlines = true;
+    //bool fieldlines = true;
     std::string mainTraceVar;
     std::string secondaryTraceVar;
-    if (fieldlines) {
-        mainTraceVar = "u";
-        secondaryTraceVar = "b";
-    }
-    else {
-        mainTraceVar = "b";
-        secondaryTraceVar = "u";
-    }
+    //if (fieldlines) {
+    //    mainTraceVar = "u_perp_b";
+    //    secondaryTraceVar = "b";
+    //}
+    //else {
+    //    mainTraceVar = "b";
+    //    secondaryTraceVar = "u_perp_b";
+    //}
+
+    mainTraceVar = "b";
+    secondaryTraceVar = tracingVar;
 
     LINFO("Tracing field lines!");
     // LOOP  SEED POINTS, TRACE LINES, CONVERT POINTS TO glm::vec3 AND STORE //
@@ -204,22 +207,12 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
 
         //traces with "u" need unidirectioalTrace, while "b" needs bidirectionalTrace
         ccmc::Fieldline fieldline;
-        if (mainTraceVar == "u") {
-            fieldline = tracer.unidirectionalTrace(
-                mainTraceVar,
-                seed.x,
-                seed.y,
-                seed.z
-            );
-        }
-        else {
-            fieldline = tracer.bidirectionalTrace(
-                mainTraceVar,
-                seed.x,
-                seed.y,
-                seed.z
-            );
-        }
+
+        fieldline = tracer.bidirectionalTrace(
+            mainTraceVar,
+            seed.x,
+            seed.y,
+            seed.z);
 
 
         const std::vector<ccmc::Point3f>& positions = fieldline.getPositions();
@@ -245,22 +238,14 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
             //traces with "u" need unidirectioalTrace, while "b" needs bidirectionalTrace
 
             ccmc::Fieldline secondFieldline;
-            if (secondaryTraceVar == "b") {
-                secondFieldline = tracer2.bidirectionalTrace(
-                    secondaryTraceVar,
-                    p.component1,
-                    p.component2,
-                    p.component3
-                );
-            }
-            else {
-                secondFieldline = tracer2.unidirectionalTrace(
-                    secondaryTraceVar,
-                    p.component1,
-                    p.component2,
-                    p.component3
-                );
-            }
+
+            secondFieldline = tracer2.unidirectionalTrace(
+                secondaryTraceVar,
+                p.component1,
+                p.component2,
+                p.component3
+            );
+
 
 
             const std::vector<ccmc::Point3f>& positions2 = secondFieldline.getPositions();

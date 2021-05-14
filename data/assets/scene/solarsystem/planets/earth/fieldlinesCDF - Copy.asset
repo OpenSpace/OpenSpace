@@ -6,23 +6,23 @@ local transferFunctions = asset.localResource("transferfunctions")
 local masVelocityColorTable = transferFunctions .. "/velocity_fieldlines.txt"
 local masDensityColorTable = transferFunctions .. "/density_fieldlines.txt"
 
-local fieldlinesDirectory = 'D:/data/OpenSpace/cdf'
-local seedPointFile = 'D:/data/OpenSpace/seedpoints/mp_position_257532008271_20000101_040000.txt'
+local fieldlinesDirectory = 'D:/OpenSpaceData/CDF'
+local seedPointFile = 'D:/OpenSpaceData/Seedpoints/lines.txt'
 
 --local sunRadius = 6.957E8
 local earthRadius = 6378137
 
 
 -- Fieldlies from binaries
-local fieldlines = {
-    Identifier = "MAS_MHD_Fieldlines",
+local fieldlines2 = {
+    Identifier = "UNIFORM_Fieldlines_copy",
     --wrong Parent = sunTransforms.HNMReferenceFrame.Identifier,
     Parent = transforms.GSMReferenceFrame.Identifier,
     Renderable = {
         Type = "RenderableUniformFieldlines",
         SourceFolder = fieldlinesDirectory,
         SeedPointFile = seedPointFile,
-        TracingVariable = 'b',
+        TracingVariable = 'u',
         
         -- FlowEnabled = false,
         -- LineWidth = 1.0;
@@ -48,7 +48,7 @@ local fieldlines = {
     },
     GUI = {
         Path = "/Solar System/Earth",
-        Name = "Batsrus Uniform Fieldlines"
+        Name = "Uniform Fieldlines"
     },
     Transform = {
         Scale = {
@@ -58,7 +58,7 @@ local fieldlines = {
     }
 } 
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { fieldlines })
+assetHelper.registerSceneGraphNodesAndExport(asset, { fieldlines2 })
 
 asset.meta = {
     Name = "CDF fieldlines files Bastille Day",

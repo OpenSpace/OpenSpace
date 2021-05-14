@@ -421,21 +421,7 @@ void FieldlinesState::appendToExtra(size_t idx, float val) {
 
 void FieldlinesState::moveLine()
 {
-    LDEBUG(fmt::format(
-        "BEFORE: {} {} {}",
-        vertexPositions()[0].x,
-        vertexPositions()[0].y,
-        vertexPositions()[0].z));
-
-    for (glm::vec3& vertex : _vertexPositions) {
-        vertex.x -= 100000.0f;
-    }
-
-    LDEBUG(fmt::format(
-        "AFTER:  {} {} {}",
-        vertexPositions()[0].x,
-        vertexPositions()[0].y,
-        vertexPositions()[0].z));
+    
 }
 
 
