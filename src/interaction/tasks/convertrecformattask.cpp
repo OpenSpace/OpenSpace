@@ -72,7 +72,8 @@ ConvertRecFormatTask::~ConvertRecFormatTask() {
 }
 
 std::string ConvertRecFormatTask::description() {
-    std::string description = "Convert session recording file '" + _inFilePath + "' ";
+    std::string description =
+        fmt::format("Convert session recording file {}", _inFilePath);
     if (_fileFormatType == SessionRecording::DataMode::Ascii) {
         description += "(ascii format) ";
     }
@@ -82,7 +83,7 @@ std::string ConvertRecFormatTask::description() {
     else {
         description += "(UNKNOWN format) ";
     }
-    description += "conversion to file '" + _outFilePath + "'.";
+    description += fmt::format("conversion to file {}.", _outFilePath);
     return description;
 }
 
@@ -104,21 +105,20 @@ void ConvertRecFormatTask::convert() {
         expectedFileExtension_out = SessionRecording::FileExtensionBinary;
     }
 
-    if (!SessionRecording::hasFileExtension(_inFilePath, expectedFileExtension_in)) {
+    if (std::filesystem::path(_inFilePath).extension() != expectedFileExtension_in) {
         LWARNING(fmt::format(
-            "Input filename doesn't have expected {} format file extension",
-            currentFormat)
-        );
+            "Input filename doesn't have expected {} format file extension", currentFormat
+        ));
     }
-    if (SessionRecording::hasFileExtension(_outFilePath, expectedFileExtension_in)) {
+    if (std::filesystem::path(_outFilePath).extension() == expectedFileExtension_in) {
         LERROR(fmt::format(
             "Output filename has {} file extension, but is conversion from {}",
-            currentFormat,
-            currentFormat)
-        );
+            currentFormat, currentFormat
+        ));
         return;
     }
-    else if (!SessionRecording::hasFileExtension(_outFilePath, expectedFileExtension_out))
+    else if (std::filesystem::path(_outFilePath).extension() !=
+             expectedFileExtension_out)
     {
         _outFilePath += expectedFileExtension_out;
     }
@@ -143,7 +143,7 @@ void ConvertRecFormatTask::convert() {
         convertToAscii();
     }
     else {
-        //Add error output for file type not recognized
+        // Add error output for file type not recognized
         LERROR("Session recording file unrecognized format type.");
     }
 }

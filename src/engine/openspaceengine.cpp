@@ -155,9 +155,7 @@ void OpenSpaceEngine::registerPathTokens() {
     // overwrite the default path of the cfg directory
     using T = std::string;
     for (const std::pair<const T, T>& path : global::configuration->pathTokens) {
-        std::string fullKey = ghoul::filesystem::FileSystem::TokenOpeningBraces +
-            path.first +
-            ghoul::filesystem::FileSystem::TokenClosingBraces;
+        std::string fullKey = "${" + path.first + "}";
         LDEBUG(fmt::format("Registering path {}: {}", fullKey, path.second));
 
         const bool overrideBase = (fullKey == "${BASE}");
@@ -351,7 +349,7 @@ void OpenSpaceEngine::initialize() {
     // Set up asset loader
     global::openSpaceEngine->_assetManager = std::make_unique<AssetManager>(
         global::scriptEngine->luaState(),
-        FileSys.absPath("${ASSETS}")
+        absPath("${ASSETS}")
     );
 
     global::scriptEngine->addLibrary(
@@ -1000,19 +998,19 @@ void OpenSpaceEngine::loadFonts() {
     using T = std::string;
     for (const std::pair<const T, T>& font : global::configuration->fonts) {
         std::string key = font.first;
-        std::string fontName = absPath(font.second);
+        std::filesystem::path fontName = absPath(font.second);
 
         if (!std::filesystem::is_regular_file(fontName)) {
-            LERROR(fmt::format("Could not find font '{}' for key '{}'", fontName, key));
+            LERROR(fmt::format("Could not find font {} for key '{}'", fontName, key));
             continue;
         }
 
-        LDEBUG(fmt::format("Registering font '{}' with key '{}'", fontName, key));
+        LDEBUG(fmt::format("Registering font {} with key '{}'", fontName, key));
         bool success = global::fontManager->registerFontPath(key, fontName);
 
         if (!success) {
             LERROR(fmt::format(
-                "Error registering font '{}' with key '{}'", fontName, key
+                "Error registering font {} with key '{}'", fontName, key
             ));
         }
     }

@@ -606,7 +606,7 @@ void parseLuaState(Configuration& configuration) {
 documentation::Documentation Configuration::Documentation = codegen::doc<Parameters>();
 
 std::filesystem::path findConfiguration(const std::string& filename) {
-    std::filesystem::path directory = FileSys.absolutePath("${BIN}");
+    std::filesystem::path directory = absPath("${BIN}");
 
     while (true) {
         std::filesystem::path p = directory / filename;

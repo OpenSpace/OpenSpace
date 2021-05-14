@@ -360,12 +360,11 @@ std::unique_ptr<TileProvider> initTileProvider(TemporalTileProvider& t,
     const size_t numChars = strlen(temporal::UrlTimePlaceholder);
     // @FRAGILE:  This will only find the first instance. Dangerous if that instance is
     // commented out ---abock
-    const std::string timeSpecifiedXml = xmlTemplate.replace(pos, numChars, timekey);
-    std::string gdalDatasetXml = timeSpecifiedXml;
+    std::string xml = xmlTemplate.replace(pos, numChars, timekey);
 
-    FileSys.expandPathTokens(gdalDatasetXml, IgnoredTokens);
+    xml = FileSys.expandPathTokens(std::move(xml), IgnoredTokens).string();
 
-    t.initDict.setValue(KeyFilePath, gdalDatasetXml);
+    t.initDict.setValue(KeyFilePath, xml);
     return std::make_unique<DefaultTileProvider>(t.initDict);
 }
 

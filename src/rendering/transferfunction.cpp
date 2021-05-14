@@ -38,21 +38,7 @@
 
 namespace {
     constexpr const char* _loggerCat = "TransferFunction";
-
-    // @TODO Replace with Filesystem::File extension
-    bool hasExtension(const std::string& filepath, const std::string& extension) {
-        std::string ending = "." + extension;
-        if (filepath.length() > ending.length()) {
-            return (0 == filepath.compare(
-                filepath.length() - ending.length(),
-                ending.length(), ending));
-        }
-        else {
-            return false;
-        }
-    }
 } // namespace
-
 
 namespace openspace {
 
@@ -90,7 +76,7 @@ ghoul::opengl::Texture& TransferFunction::texture() {
 
 void TransferFunction::update() {
     if (_needsUpdate) {
-        if (hasExtension(_filepath, "txt")) {
+        if (std::filesystem::path(_filepath).extension() == ".txt") {
             setTextureFromTxt();
         }
         else {
@@ -110,7 +96,7 @@ void TransferFunction::setCallback(TfChangedCallback callback) {
 
 void TransferFunction::setTextureFromTxt() {
     std::ifstream in;
-    in.open(_filepath.c_str());
+    in.open(_filepath);
 
     if (!in.is_open()) {
         throw ghoul::FileNotFoundError(_filepath);

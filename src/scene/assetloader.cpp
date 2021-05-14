@@ -426,16 +426,16 @@ std::string AssetLoader::generateAssetPath(const std::string& baseDirectory,
             fullAssetPath, fullScenePath, prefix + assetPath, fullAssetPath
         ));
 
-        return FileSys.absPath(fullAssetPath);
+        return absPath(fullAssetPath);
     }
 
     if (fullScenePathExists) {
-        return FileSys.absPath(fullScenePath);
+        return absPath(fullScenePath);
     }
 
     // We don't check whether the file exists here as the error will be more
     // comprehensively logged by Lua either way
-    return FileSys.absPath(fullAssetPath);
+    return absPath(fullAssetPath);
 }
 
 std::shared_ptr<Asset> AssetLoader::getAsset(const std::string& name) {

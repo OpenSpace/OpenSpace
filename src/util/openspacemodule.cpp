@@ -60,13 +60,9 @@ void OpenSpaceModule::initialize(const ghoul::Dictionary& configuration) {
         [](char v) { return static_cast<char>(toupper(v)); }
     );
 
-    std::string moduleToken =
-        ghoul::filesystem::FileSystem::TokenOpeningBraces +
-        std::string(ModuleBaseToken) +
-        upperIdentifier +
-        ghoul::filesystem::FileSystem::TokenClosingBraces;
+    std::string moduleToken = "${" + std::string(ModuleBaseToken) + upperIdentifier + "}";
 
-    std::string path = modulePath();
+    std::filesystem::path path = modulePath();
     LDEBUG(fmt::format("Registering module path {}: {}", moduleToken, path));
     FileSys.registerPathToken(moduleToken, std::move(path));
 
@@ -124,21 +120,22 @@ std::string OpenSpaceModule::modulePath() const {
     );
 
     // First try the internal module directory
-    if (std::filesystem::is_directory(absPath("${MODULES}/" + moduleIdentifier))) {
-        return absPath("${MODULES}/" + moduleIdentifier);
+    std::string path = absPath("${MODULES}/" + moduleIdentifier);
+    if (std::filesystem::is_directory(path)) {
+        return path;
     }
     else { // Otherwise, it might be one of the external directories
         for (const char* dir : ModulePaths) {
-            const std::string& path = std::string(dir) + '/' + moduleIdentifier;
-            if (std::filesystem::is_directory(absPath(path))) {
-                return absPath(path);
+            const std::string& p = std::string(dir) + '/' + moduleIdentifier;
+            if (std::filesystem::is_directory(absPath(p))) {
+                return absPath(p);
             }
         }
     }
 
     // If we got this far, neither the internal module nor any of the external modules fit
     throw ghoul::RuntimeError(
-        "Could not resolve path for module '" + identifier() + "'",
+        fmt::format("Could not resolve path for module {}", identifier()),
         "OpenSpaceModule"
     );
 }
