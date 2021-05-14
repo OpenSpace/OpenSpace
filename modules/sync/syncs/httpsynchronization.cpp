@@ -203,9 +203,9 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
         size_t lastSlash = line.find_last_of('/');
         std::string filename = line.substr(lastSlash + 1);
 
-        std::string fileDestination = directory() +
-            ghoul::filesystem::FileSystem::PathSeparator +
-            filename + TempSuffix;
+        std::string fileDestination = fmt::format(
+            "{}/{}{}", directory(), filename, TempSuffix
+        );
 
         if (sizeData.find(line) != sizeData.end()) {
             LWARNING(fmt::format("{}: Duplicate entries: {}", _identifier, line));

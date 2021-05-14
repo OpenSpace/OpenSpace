@@ -387,10 +387,10 @@ std::string AssetLoader::generateAssetPath(const std::string& baseDirectory,
     PathType pathType = classifyPath(assetPath);
     std::string prefix;
     if (pathType == PathType::RelativeToAsset) {
-        prefix = baseDirectory + ghoul::filesystem::FileSystem::PathSeparator;
+        prefix = baseDirectory + '/';
     }
     else if (pathType == PathType::RelativeToAssetRoot) {
-        prefix = _assetRootDirectory + ghoul::filesystem::FileSystem::PathSeparator;
+        prefix = _assetRootDirectory + '/';
     }
 
     // Construct the full path including the .asset extension
@@ -642,8 +642,7 @@ int AssetLoader::localResourceLua(Asset* asset) {
         ghoul::lua::PopValue::Yes
     );
 
-    const std::string resolvedName =
-        asset->assetDirectory() + ghoul::filesystem::FileSystem::PathSeparator + name;
+    const std::string resolvedName = fmt::format("{}/{}", asset->assetDirectory(), name);
 
     lua_pushstring(*_luaState, resolvedName.c_str());
 

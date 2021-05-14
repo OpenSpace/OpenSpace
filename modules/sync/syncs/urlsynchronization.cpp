@@ -172,8 +172,9 @@ void UrlSynchronization::start() {
                 );
                 _filename = lastPartOfUrl;
             }
-            std::string fileDestination = directory() +
-                ghoul::filesystem::FileSystem::PathSeparator + _filename + TempSuffix;
+            std::string fileDestination = fmt::format(
+                "{}/{}{}", directory(), _filename, TempSuffix
+            );
 
             std::unique_ptr<AsyncHttpFileDownload> download =
                 std::make_unique<AsyncHttpFileDownload>(
