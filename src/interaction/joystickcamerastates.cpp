@@ -194,7 +194,7 @@ void JoystickCameraStates::setAxisMapping(int axis, AxisType mapping,
         global::joystickInputStates->at(axis).isStatic = true;
     }
 
-    _prevAxisValues[axis] = 0.f;
+    _prevAxisValues[axis] = global::joystickInputStates->axis(axis);
 }
 
 JoystickCameraStates::AxisInformation JoystickCameraStates::axisMapping(int axis) const {
