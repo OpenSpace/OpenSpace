@@ -254,7 +254,7 @@ void AsyncHttpDownload::start(HttpRequest::RequestOptions opt) {
         try {
             download(opt);
         }
-        catch (const ghoul::filesystem::FileSystem::FileSystemException& e) {
+        catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.message);
         }
     });
