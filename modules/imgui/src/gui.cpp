@@ -206,8 +206,7 @@ void GUI::deinitialize() {
 void GUI::initializeGL() {
     std::string cachedFile = FileSys.cacheManager()->cachedFilename(
         configurationFile,
-        "",
-        ghoul::filesystem::CacheManager::Persistent::Yes
+        ""
     );
 
     LDEBUG(fmt::format("Using {} as ImGUI cache location", cachedFile));

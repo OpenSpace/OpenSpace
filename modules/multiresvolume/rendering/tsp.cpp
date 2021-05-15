@@ -509,8 +509,7 @@ bool TSP::readCache() {
 
     std::string cacheFilename = FileSys.cacheManager()->cachedFilename(
         std::filesystem::path(_filename).stem().string(),
-        "",
-        ghoul::filesystem::CacheManager::Persistent::Yes
+        ""
     );
 
     std::ifstream file(cacheFilename, std::ios::in | std::ios::binary);
@@ -548,8 +547,7 @@ bool TSP::writeCache() {
 
     std::string cacheFilename = FileSys.cacheManager()->cachedFilename(
         std::filesystem::path(_filename).stem().string(),
-        "",
-        ghoul::filesystem::CacheManager::Persistent::Yes
+        ""
     );
 
     std::ofstream file(cacheFilename, std::ios::out | std::ios::binary);

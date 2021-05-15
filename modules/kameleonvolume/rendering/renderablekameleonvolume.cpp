@@ -334,8 +334,7 @@ void RenderableKameleonVolume::load() {
     }
     std::string cachePath = FileSys.cacheManager()->cachedFilename(
         std::filesystem::path(_sourcePath.value()).stem().string(),
-        cacheSuffix(),
-        ghoul::filesystem::CacheManager::Persistent::Yes
+        cacheSuffix()
     );
     if (std::filesystem::is_regular_file(cachePath)) {
         loadRaw(cachePath);

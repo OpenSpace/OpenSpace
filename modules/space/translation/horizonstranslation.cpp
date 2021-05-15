@@ -120,11 +120,7 @@ void HorizonsTranslation::loadData() {
         return;
     }
 
-    std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-        file,
-        ghoul::filesystem::CacheManager::Persistent::Yes
-    );
-
+    std::string cachedFile = FileSys.cacheManager()->cachedFilename(file);
     bool hasCachedFile = std::filesystem::is_regular_file(cachedFile);
     if (hasCachedFile) {
         LINFO(fmt::format(

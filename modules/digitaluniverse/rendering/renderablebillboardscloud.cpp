@@ -1037,8 +1037,7 @@ bool RenderableBillboardsCloud::loadSpeckData() {
     bool success = true;
     const std::string& cachedFile = FileSys.cacheManager()->cachedFilename(
         _speckFile,
-        "RenderableDUMeshes|" + identifier(),
-        ghoul::filesystem::CacheManager::Persistent::Yes
+        "RenderableDUMeshes|" + identifier()
     );
 
     const bool hasCachedFile = std::filesystem::is_regular_file(cachedFile);
@@ -1077,14 +1076,7 @@ bool RenderableBillboardsCloud::loadLabelData() {
         return true;
     }
     bool success = true;
-    // I disabled the cache as it didn't work on Mac --- abock
-    const std::string& cachedFile = FileSys.cacheManager()->cachedFilename(
-        _labelFile,
-        ghoul::filesystem::CacheManager::Persistent::Yes
-    );
-    if (!_hasSpeckFile && !_hasColorMapFile) {
-        success = true;
-    }
+    const std::string& cachedFile = FileSys.cacheManager()->cachedFilename(_labelFile);
     const bool hasCachedFile = std::filesystem::is_regular_file(cachedFile);
     if (hasCachedFile) {
         LINFO(fmt::format(

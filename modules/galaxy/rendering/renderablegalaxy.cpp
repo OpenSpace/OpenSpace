@@ -322,8 +322,7 @@ void RenderableGalaxy::initialize() {
     _volume = reader.read();
 
     std::string cachedPointsFile = FileSys.cacheManager()->cachedFilename(
-        _pointsFilename,
-        ghoul::filesystem::CacheManager::Persistent::Yes
+        _pointsFilename
     );
     const bool hasCachedFile = std::filesystem::is_regular_file(cachedPointsFile);
     if (hasCachedFile) {

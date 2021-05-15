@@ -382,11 +382,7 @@ void RenderablePoints::update(const UpdateData&) {
 }
 
 bool RenderablePoints::loadData() {
-    std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-        _speckFile,
-        ghoul::filesystem::CacheManager::Persistent::Yes
-    );
-
+    std::string cachedFile = FileSys.cacheManager()->cachedFilename(_speckFile);
     bool hasCachedFile = std::filesystem::is_regular_file(cachedFile);
     if (hasCachedFile) {
         LINFO(fmt::format(

@@ -458,11 +458,9 @@ bool RenderableMultiresVolume::initializeSelector() {
                 std::stringstream cacheName;
                 cacheName << std::filesystem::path(_filename).stem().string() << "_" <<
                     nHistograms << "_errorHistograms";
-                std::string cacheFilename;
-                cacheFilename = FileSys.cacheManager()->cachedFilename(
+                 std::string cacheFilename = FileSys.cacheManager()->cachedFilename(
                     cacheName.str(),
-                    "",
-                    ghoul::filesystem::CacheManager::Persistent::Yes
+                    ""
                 );
                 std::ifstream cacheFile(cacheFilename, std::ios::in | std::ios::binary);
                 if (cacheFile.is_open()) {
@@ -498,11 +496,9 @@ bool RenderableMultiresVolume::initializeSelector() {
                 std::stringstream cacheName;
                 cacheName << std::filesystem::path(_filename).stem().string() << "_" <<
                     nHistograms << "_histograms";
-                std::string cacheFilename;
-                cacheFilename = FileSys.cacheManager()->cachedFilename(
+                 std::string cacheFilename = FileSys.cacheManager()->cachedFilename(
                     cacheName.str(),
-                    "",
-                    ghoul::filesystem::CacheManager::Persistent::Yes
+                    ""
                 );
                 std::ifstream cacheFile(cacheFilename, std::ios::in | std::ios::binary);
                 if (cacheFile.is_open()) {
@@ -529,14 +525,12 @@ bool RenderableMultiresVolume::initializeSelector() {
 
         case Selector::LOCAL:
             if (_localErrorHistogramManager) {
-                std::string cacheFilename;
-                cacheFilename = FileSys.cacheManager()->cachedFilename(
+                 std::string cacheFilename = FileSys.cacheManager()->cachedFilename(
                     fmt::format(
                         "{}_{}_localErrorHistograms",
                         std::filesystem::path(_filename).stem().string(), nHistograms
                     ),
-                    "",
-                    ghoul::filesystem::CacheManager::Persistent::Yes
+                    ""
                 );
                 std::ifstream cacheFile(cacheFilename, std::ios::in | std::ios::binary);
                 if (cacheFile.is_open()) {

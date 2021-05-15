@@ -183,7 +183,7 @@ void RenderableModelProjection::initializeGL() {
 
     _projectionComponent.initializeGL();
 
-    float bs = boundingSphere();
+    double bs = boundingSphere();
     _geometry->initialize();
     setBoundingSphere(bs); // ignore bounding sphere set by geometry.
 }

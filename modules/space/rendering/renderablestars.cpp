@@ -1239,16 +1239,12 @@ void RenderableStars::loadData() {
         return;
     }
 
-    std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-        file,
-        ghoul::filesystem::CacheManager::Persistent::Yes
-    );
-
     _nValuesPerStar = 0;
     _slicedData.clear();
     _fullData.clear();
     _dataNames.clear();
 
+    std::string cachedFile = FileSys.cacheManager()->cachedFilename(file);
     bool hasCachedFile = std::filesystem::is_regular_file(cachedFile);
     if (hasCachedFile) {
         LINFO(fmt::format("Cached file '{}' used for Speck file '{}'",
