@@ -95,8 +95,6 @@
 
 namespace {
     constexpr const char* _loggerCat = "OpenSpaceEngine";
-    constexpr const int CacheVersion = 1;
-
 } // namespace
 
 namespace openspace {
@@ -214,7 +212,7 @@ void OpenSpaceEngine::initialize() {
     }
 
     try {
-        FileSys.createCacheManager(cacheFolder, CacheVersion);
+        FileSys.createCacheManager(cacheFolder);
     }
     catch (const ghoul::RuntimeError& e) {
         LFATAL("Could not create Cache Manager");
