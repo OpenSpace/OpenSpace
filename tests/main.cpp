@@ -55,13 +55,13 @@ int main(int argc, char** argv) {
     // to make it possible to find other files in the same directory.
     FileSys.registerPathToken(
         "${BIN}",
-        std::filesystem::path(argv[0]).parent_path().string(),
+        std::filesystem::path(argv[0]).parent_path(),
         ghoul::filesystem::FileSystem::Override::Yes
     );
 
     std::filesystem::path configFile = configuration::findConfiguration();
     // Register the base path as the directory where 'filename' lives
-    std::string base = configFile.parent_path().string();
+    std::filesystem::path base = configFile.parent_path();
     constexpr const char* BasePathToken = "${BASE}";
     FileSys.registerPathToken(BasePathToken, base);
 

@@ -227,7 +227,9 @@ void RenderableTimeVaryingVolume::initializeGL() {
     // TODO: defer loading of data to later (separate thread or at least not when loading)
     for (std::pair<const double, Timestep>& p : _volumeTimesteps) {
         Timestep& t = p.second;
-        std::string path = fmt::format("{}/{}.rawvolume", _sourceDirectory, t.baseName);
+        std::string path = fmt::format(
+            "{}/{}.rawvolume", _sourceDirectory.value(), t.baseName
+        );
         RawVolumeReader<float> reader(path, t.metadata.dimensions);
         t.rawVolume = reader.read();
 

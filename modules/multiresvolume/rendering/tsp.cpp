@@ -508,7 +508,7 @@ bool TSP::readCache() {
         return false;
 
     std::string cacheFilename = FileSys.cacheManager()->cachedFilename(
-        std::filesystem::path(_filename).stem().string(),
+        std::filesystem::path(_filename).stem(),
         ""
     );
 
@@ -546,7 +546,7 @@ bool TSP::writeCache() {
     }
 
     std::string cacheFilename = FileSys.cacheManager()->cachedFilename(
-        std::filesystem::path(_filename).stem().string(),
+        std::filesystem::path(_filename).stem(),
         ""
     );
 

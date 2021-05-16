@@ -66,7 +66,7 @@ int saveSettingsToProfile(lua_State* L) {
         );
         std::filesystem::path path = global::configuration->profile;
         path.replace_extension();
-        std::string newFile = fmt::format("{}_{}", path, time);
+        std::string newFile = fmt::format("{}_{}", path.string(), time);
         std::string sourcePath = fmt::format("{}/{}.profile",
             absPath("${USER_PROFILES}"), global::configuration->profile);
         std::string destPath = fmt::format("{}/{}.profile",

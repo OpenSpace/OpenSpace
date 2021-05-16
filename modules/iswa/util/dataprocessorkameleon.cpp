@@ -159,11 +159,8 @@ void DataProcessorKameleon::setDimensions(glm::size3_t dimensions) {
 }
 
 void DataProcessorKameleon::initializeKameleonWrapper(std::string path) {
-    std::string extension = std::filesystem::path(absPath(path)).extension().string();
-    if (!extension.empty()) {
-        extension = extension.substr(1);
-    }
-    if (std::filesystem::is_regular_file(absPath(path)) && extension == "cdf") {
+    std::filesystem::path extension = std::filesystem::path(absPath(path)).extension();
+    if (std::filesystem::is_regular_file(absPath(path)) && extension == ".cdf") {
         if (_kw) {
             _kw->close();
         }

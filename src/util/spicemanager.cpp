@@ -245,14 +245,11 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
         throwSpiceError("Kernel loading");
     }
 
-    std::string fileExtension = std::filesystem::path(path).extension().string();
-    if (!fileExtension.empty()) {
-        fileExtension = fileExtension.substr(1);
-    }
-    if (fileExtension == "bc" || fileExtension == "BC") {
+    std::filesystem::path fileExtension = std::filesystem::path(path).extension();
+    if (fileExtension == ".bc" || fileExtension == ".BC") {
         findCkCoverage(path); // binary ck kernel
     }
-    else if (fileExtension == "bsp" || fileExtension == "BSP") {
+    else if (fileExtension == ".bsp" || fileExtension == ".BSP") {
         findSpkCoverage(path); // binary spk kernel
     }
 

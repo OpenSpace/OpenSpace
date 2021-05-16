@@ -333,7 +333,7 @@ void RenderableKameleonVolume::load() {
         return;
     }
     std::string cachePath = FileSys.cacheManager()->cachedFilename(
-        std::filesystem::path(_sourcePath.value()).stem().string(),
+        std::filesystem::path(_sourcePath.value()).stem(),
         cacheSuffix()
     );
     if (std::filesystem::is_regular_file(cachePath)) {
@@ -351,14 +351,8 @@ std::string RenderableKameleonVolume::cacheSuffix() const {
 }
 
 void RenderableKameleonVolume::loadFromPath(const std::string& path) {
-    std::string extension = std::filesystem::path(path).extension().string();
-    std::transform(
-        extension.begin(),
-        extension.end(),
-        extension.begin(),
-        [](char v) { return static_cast<char>(tolower(v)); }
-    );
-    if (extension == ".cdf") {
+    std::filesystem::path extension = std::filesystem::path(path).extension();
+    if (extension == ".cdf" || extension == ".CDF") {
         loadCdf(path);
     }
     else {

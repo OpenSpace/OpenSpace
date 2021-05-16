@@ -1719,17 +1719,15 @@ std::vector<std::string> SessionRecording::playbackList() const {
             }
 
             // Remove path and keep only the filename
-            const std::string filename = e.path().string().substr(
-                path.length() + 1, e.path().string().length() - path.length() - 1
-            );
-            bool isHidden = false;
+            const std::string filename = e.path().filename().string();
 #ifdef WIN32
             DWORD attributes = GetFileAttributes(e.path().string().c_str());
-            isHidden = attributes & FILE_ATTRIBUTE_HIDDEN;
+            bool isHidden = attributes & FILE_ATTRIBUTE_HIDDEN;
 #else
-            isHidden = filename.rfind(".", 0) != 0;
+            bool isHidden = filename.rfind(".", 0) != 0;
 #endif // WIN32
-            if (!isHidden) { //Don't add hidden files
+            if (!isHidden) {
+                // Don't add hidden files
                 fileList.push_back(filename);
             }
         }

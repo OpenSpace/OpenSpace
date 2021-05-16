@@ -184,12 +184,12 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
     ConcurrentJobManager<std::vector<std::vector<float>>> jobManager(threadPool);
 
     // Get all files in specified folder.
-    std::vector<std::string> allInputFiles;
+    std::vector<std::filesystem::path> allInputFiles;
     if (std::filesystem::is_directory(_inFileOrFolderPath)) {
         namespace fs = std::filesystem;
         for (const fs::directory_entry& e : fs::directory_iterator(_inFileOrFolderPath)) {
             if (e.is_regular_file()) {
-                allInputFiles.push_back(e.path().string());
+                allInputFiles.push_back(e.path());
             }
         }
     }
@@ -245,12 +245,12 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
 
     // Divide all files into ReadFilejobs and then delegate them onto several threads!
     while (!allInputFiles.empty()) {
-        std::string fileToRead = allInputFiles.back();
+        std::filesystem::path fileToRead = allInputFiles.back();
         allInputFiles.erase(allInputFiles.end() - 1);
 
         // Add reading of file to jobmanager, which will distribute it to our threadpool.
         auto readFileJob = std::make_shared<gaia::ReadFileJob>(
-            fileToRead,
+            fileToRead.string(),
             _allColumnNames,
             _firstRow,
             _lastRow,

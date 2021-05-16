@@ -154,7 +154,7 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
     errno_t error = fopen_s(&fp, file.string().c_str(), "wb");
     if (error != 0) {
         LERROR(fmt::format(
-            "Could not open/create file: {}. Errno: {}", file.string(), errno
+            "Could not open/create file: {}. Errno: {}", file, errno
         ));
     }
 #else
@@ -162,7 +162,7 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
 #endif // WIN32
     if (!fp) {
         LERROR(fmt::format(
-            "Could not open/create file: {}. Errno: {}", file.string(), errno
+            "Could not open/create file: {}. Errno: {}", file, errno
         ));
     }
 
