@@ -219,7 +219,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
 
     namespace fs = std::filesystem;
     for (const fs::directory_entry& e : fs::recursive_directory_iterator(sequenceDir)) {
-        if (e.is_regular_file() || e.path().extension() == ".dictionary") {
+        if (e.is_regular_file() && e.path().extension() == ".dictionary") {
             loadTimestepMetadata(e.path().string());
         }
     }

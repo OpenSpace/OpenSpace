@@ -478,7 +478,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(
         std::filesystem::path inFilePath = allInputFiles[idx];
         int nStarsInfile = 0;
 
-        LINFO("Reading data file: " + inFilePath.string());
+        LINFO(fmt::format("Reading data file: {}", inFilePath));
 
         std::ifstream inFileStream(inFilePath, std::ifstream::binary);
         if (inFileStream.good()) {

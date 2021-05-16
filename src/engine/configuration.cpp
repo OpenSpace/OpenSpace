@@ -629,10 +629,9 @@ std::filesystem::path findConfiguration(const std::string& filename) {
     }
 }
 
-Configuration loadConfigurationFromFile(const std::string& filename,
+Configuration loadConfigurationFromFile(const std::filesystem::path& filename,
                                         const std::string& overrideScript)
 {
-    ghoul_assert(!filename.empty(), "Filename must not be empty");
     ghoul_assert(std::filesystem::is_regular_file(filename), "File must exist");
 
     Configuration result;
@@ -643,7 +642,7 @@ Configuration loadConfigurationFromFile(const std::string& filename,
     }
 
     // Load the configuration file into the state
-    ghoul::lua::runScriptFile(result.state, filename);
+    ghoul::lua::runScriptFile(result.state, filename.string());
 
     if (!overrideScript.empty()) {
         LDEBUGC("Configuration", "Executing Lua script passed through the commandline:");

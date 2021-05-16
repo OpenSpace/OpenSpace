@@ -1093,24 +1093,27 @@ int main(int argc, char* argv[]) {
     std::string windowConfiguration;
     try {
         // Find configuration
-        std::string configurationFilePath = commandlineArguments.configurationName;
-        if (commandlineArguments.configurationName.empty()) {
-            LDEBUG("Finding configuration");
-            configurationFilePath = configuration::findConfiguration().string();
+        std::filesystem::path configurationFilePath;
+        if (!commandlineArguments.configurationName.empty()) {
+            configurationFilePath = absPath(commandlineArguments.configurationName);
         }
-        configurationFilePath = absPath(configurationFilePath);
+        else {
+            LDEBUG("Finding configuration");
+            configurationFilePath = configuration::findConfiguration();
+        }
 
         if (!std::filesystem::is_regular_file(configurationFilePath)) {
-            LFATALC("main", "Could not find configuration: " + configurationFilePath);
+            LFATALC(
+                "main",
+                fmt::format("Could not find configuration {}", configurationFilePath)
+            );
             exit(EXIT_FAILURE);
         }
-        LINFO(fmt::format("Configuration Path: '{}'", configurationFilePath));
+        LINFO(fmt::format("Configuration Path: {}", configurationFilePath));
 
         // Register the base path as the directory where the configuration file lives
-        std::filesystem::path base =
-            std::filesystem::path(configurationFilePath).parent_path();
-        constexpr const char* BasePathToken = "${BASE}";
-        FileSys.registerPathToken(BasePathToken, base);
+        std::filesystem::path base = configurationFilePath.parent_path();
+        FileSys.registerPathToken("${BASE}", base);
 
         // Loading configuration from disk
         LDEBUG("Loading configuration from disk");

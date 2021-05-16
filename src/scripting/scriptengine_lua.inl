@@ -29,62 +29,6 @@
 
 namespace openspace::luascriptfunctions {
 
-namespace {
-
-// Defining a common walk function that works off a pointer-to-member function
-template <typename Func>
-int walkCommon(lua_State* L, Func func) {
-    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 1, 3 }, "lua::walkCommon");
-
-    std::string path = ghoul::lua::value<std::string>(L, 1);
-
-    std::vector<std::string> result;
-    if (nArguments == 1) {
-        // Only the path was passed
-        result = std::invoke(
-            func,
-            ghoul::filesystem::Directory(path),
-            ghoul::filesystem::Directory::Recursive::No,
-            ghoul::filesystem::Directory::Sort::No
-        );
-    }
-    else if (nArguments == 2) {
-        // The path and the recursive value were passed
-        const bool recursive = ghoul::lua::value<bool>(L, 2);
-        result = std::invoke(
-            func,
-            ghoul::filesystem::Directory(path),
-            ghoul::filesystem::Directory::Recursive(recursive),
-            ghoul::filesystem::Directory::Sort::No
-        );
-    }
-    else if (nArguments == 3) {
-        // All three arguments were passed
-        const bool recursive = ghoul::lua::value<bool>(L, 2);
-        const bool sorted = ghoul::lua::value<bool>(L, 3);
-        result = std::invoke(
-            func,
-            ghoul::filesystem::Directory(path),
-            ghoul::filesystem::Directory::Recursive(recursive),
-            ghoul::filesystem::Directory::Sort(sorted)
-        );
-    }
-
-    lua_settop(L, 0);
-
-    // Copy values into the lua_State
-    lua_newtable(L);
-
-    for (int i = 0; i < static_cast<int>(result.size()); ++i) {
-        lua_pushstring(L, result[i].c_str());
-        lua_rawseti(L, -2, i + 1);
-    }
-
-    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
-    return 1;
-}
-} // namespace
-
 int printInternal(ghoul::logging::LogLevel level, lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::printInternal");
 
@@ -324,7 +268,7 @@ int walkCommon(lua_State* L, std::function<bool(const std::filesystem::path&)> f
  */
 int walkDirectory(lua_State* L) {
     namespace fs = std::filesystem;
-    walkCommon(
+    return walkCommon(
         L,
         [](const fs::path& p) { return fs::is_directory(p) || fs::is_regular_file(p); }
     );
@@ -341,7 +285,7 @@ int walkDirectory(lua_State* L) {
  */
 int walkDirectoryFiles(lua_State* L) {
     namespace fs = std::filesystem;
-    walkCommon(L, [](const fs::path& p) { return fs::is_regular_file(p); });
+    return walkCommon(L, [](const fs::path& p) { return fs::is_regular_file(p); });
 }
 
 /**
@@ -355,7 +299,7 @@ int walkDirectoryFiles(lua_State* L) {
 */
 int walkDirectoryFolder(lua_State* L) {
     namespace fs = std::filesystem;
-    walkCommon(L, [](const fs::path& p) { return fs::is_directory(p); });
+    return walkCommon(L, [](const fs::path& p) { return fs::is_directory(p); });
 }
 
 /**

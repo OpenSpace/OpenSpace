@@ -455,12 +455,12 @@ bool RenderableMultiresVolume::initializeSelector() {
     switch (_selector) {
         case Selector::TF:
             if (_errorHistogramManager) {
-                std::stringstream cacheName;
-                cacheName << std::filesystem::path(_filename).stem().string() << "_" <<
-                    nHistograms << "_errorHistograms";
                  std::string cacheFilename = FileSys.cacheManager()->cachedFilename(
-                    cacheName.str(),
-                    ""
+                     fmt::format(
+                         "{}_{}_errorHistograms",
+                         std::filesystem::path(_filename).stem().string(), nHistograms
+                     ),
+                     ""
                 );
                 std::ifstream cacheFile(cacheFilename, std::ios::in | std::ios::binary);
                 if (cacheFile.is_open()) {
@@ -471,7 +471,7 @@ bool RenderableMultiresVolume::initializeSelector() {
                     );
                     success &= _errorHistogramManager->loadFromFile(cacheFilename);
                 }
-                else if (_errorHistogramsPath != "") {
+                else if (!_errorHistogramsPath.empty()) {
                     // Read histograms from scene data.
                     LINFO(fmt::format(
                         "Loading histograms from scene data: {}", _errorHistogramsPath
@@ -493,11 +493,10 @@ bool RenderableMultiresVolume::initializeSelector() {
 
         case Selector::SIMPLE:
             if (_histogramManager) {
-                std::stringstream cacheName;
-                cacheName << std::filesystem::path(_filename).stem().string() << "_" <<
-                    nHistograms << "_histograms";
-                 std::string cacheFilename = FileSys.cacheManager()->cachedFilename(
-                    cacheName.str(),
+                std::string cacheFilename = FileSys.cacheManager()->cachedFilename(
+                    fmt::format("{}_{}_histogram",
+                        std::filesystem::path(_filename).stem().string(), nHistograms
+                    ),
                     ""
                 );
                 std::ifstream cacheFile(cacheFilename, std::ios::in | std::ios::binary);

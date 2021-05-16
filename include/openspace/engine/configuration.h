@@ -132,7 +132,7 @@ struct Configuration {
 
 std::filesystem::path findConfiguration(const std::string& filename = "openspace.cfg");
 
-Configuration loadConfigurationFromFile(const std::string& filename,
+Configuration loadConfigurationFromFile(const std::filesystem::path& filename,
     const std::string& overrideScript);
 
 } // namespace openspace::configuration
