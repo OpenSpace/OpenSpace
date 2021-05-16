@@ -458,26 +458,29 @@ void NavigationHandler::saveNavigationState(const std::string& filepath,
     }
 
     if (!filepath.empty()) {
-        std::string absolutePath = absPath(filepath);
+        std::filesystem::path absolutePath = absPath(filepath);
         LINFO(fmt::format("Saving camera position: {}", absolutePath));
 
-        std::ofstream ofs(absolutePath.c_str());
+        std::ofstream ofs(absolutePath);
         ofs << "return " << ghoul::formatLua(state.dictionary());
         ofs.close();
     }
 }
 
 void NavigationHandler::loadNavigationState(const std::string& filepath) {
-    const std::string absolutePath = absPath(filepath);
+    const std::filesystem::path absolutePath = absPath(filepath);
     LINFO(fmt::format("Reading camera state from file: {}", absolutePath));
 
     if (!std::filesystem::is_regular_file(absolutePath)) {
-        throw ghoul::FileNotFoundError(absolutePath, "NavigationState");
+        throw ghoul::FileNotFoundError(absolutePath.string(), "NavigationState");
     }
 
     ghoul::Dictionary navigationStateDictionary;
     try {
-        ghoul::lua::loadDictionaryFromFile(absolutePath, navigationStateDictionary);
+        ghoul::lua::loadDictionaryFromFile(
+            absolutePath.string(),
+            navigationStateDictionary
+        );
         openspace::documentation::testSpecificationAndThrow(
             NavigationState::Documentation(),
             navigationStateDictionary,

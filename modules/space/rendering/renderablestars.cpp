@@ -448,7 +448,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     //_shapeTextureFile = std::make_unique<File>(_shapeTexturePath);
 
     if (p.otherDataColorMap.has_value()) {
-        _otherDataColorMapPath = absPath(*p.otherDataColorMap);
+        _otherDataColorMapPath = absPath(*p.otherDataColorMap).string();
     }
 
     _fixedColor.setViewOption(properties::Property::ViewOptions::Color, true);
@@ -524,7 +524,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         _renderingMethodOption = RenderOptionTexture;
     }
 
-    _pointSpreadFunctionTexturePath = absPath(p.texture.string());
+    _pointSpreadFunctionTexturePath = absPath(p.texture.string()).string();
     _pointSpreadFunctionFile = std::make_unique<File>(
         _pointSpreadFunctionTexturePath.value()
     );
@@ -742,7 +742,7 @@ void RenderableStars::loadPSFTexture() {
         std::filesystem::exists(_pointSpreadFunctionTexturePath.value()))
     {
         _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
-            absPath(_pointSpreadFunctionTexturePath)
+            absPath(_pointSpreadFunctionTexturePath).string()
         );
 
         if (_pointSpreadFunctionTexture) {
@@ -1159,7 +1159,7 @@ void RenderableStars::update(const UpdateData&) {
         _colorTexture = nullptr;
         if (_colorTexturePath.value() != "") {
             _colorTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_colorTexturePath)
+                absPath(_colorTexturePath).string()
             );
             if (_colorTexture) {
                 LDEBUG(fmt::format(
@@ -1184,7 +1184,7 @@ void RenderableStars::update(const UpdateData&) {
         _otherDataColorMapTexture = nullptr;
         if (!_otherDataColorMapPath.value().empty()) {
             _otherDataColorMapTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_otherDataColorMapPath)
+                absPath(_otherDataColorMapPath).string()
             );
             if (_otherDataColorMapTexture) {
                 LDEBUG(fmt::format(
@@ -1234,7 +1234,7 @@ void RenderableStars::loadShapeTexture() {
 */
 
 void RenderableStars::loadData() {
-    std::string file = absPath(_speckFile);
+    std::filesystem::path file = absPath(_speckFile);
     if (!std::filesystem::is_regular_file(file)) {
         return;
     }
@@ -1247,7 +1247,7 @@ void RenderableStars::loadData() {
     std::string cachedFile = FileSys.cacheManager()->cachedFilename(file);
     bool hasCachedFile = std::filesystem::is_regular_file(cachedFile);
     if (hasCachedFile) {
-        LINFO(fmt::format("Cached file '{}' used for Speck file '{}'",
+        LINFO(fmt::format("Cached file '{}' used for Speck file {}",
             cachedFile, file
         ));
 
@@ -1262,9 +1262,9 @@ void RenderableStars::loadData() {
         }
     }
     else {
-        LINFO(fmt::format("Cache for Speck file '{}' not found", file));
+        LINFO(fmt::format("Cache for Speck file {} not found", file));
     }
-    LINFO(fmt::format("Loading Speck file '{}'", file));
+    LINFO(fmt::format("Loading Speck file {}", file));
 
     readSpeckFile();
 
@@ -1273,10 +1273,10 @@ void RenderableStars::loadData() {
 }
 
 void RenderableStars::readSpeckFile() {
-    std::string _file = _speckFile;
-    std::ifstream file(_file);
+    std::filesystem::path filename = _speckFile.value();
+    std::ifstream file(filename);
     if (!file.good()) {
-        LERROR(fmt::format("Failed to open Speck file '{}'", _file));
+        LERROR(fmt::format("Failed to open Speck file {}", filename));
         return;
     }
 

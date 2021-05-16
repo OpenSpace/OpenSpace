@@ -166,7 +166,7 @@ void DataProcessorKameleon::initializeKameleonWrapper(std::string path) {
         }
 
         _kwPath = std::move(path);
-        _kw = std::make_shared<KameleonWrapper>(absPath(_kwPath));
+        _kw = std::make_shared<KameleonWrapper>(absPath(_kwPath).string());
     }
 }
 

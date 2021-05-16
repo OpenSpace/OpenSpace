@@ -77,7 +77,7 @@ LuaRotation::LuaRotation()
 LuaRotation::LuaRotation(const ghoul::Dictionary& dictionary) : LuaRotation() {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _luaScriptFile = absPath(p.script);
+    _luaScriptFile = absPath(p.script).string();
 }
 
 glm::dmat3 LuaRotation::matrix(const UpdateData& data) const {

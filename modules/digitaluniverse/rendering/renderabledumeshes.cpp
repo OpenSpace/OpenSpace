@@ -203,7 +203,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
 
-    _speckFile = absPath(p.file);
+    _speckFile = absPath(p.file).string();
     _hasSpeckFile = true;
     _drawElements.onChange([&]() { _hasSpeckFile = !_hasSpeckFile; });
     addProperty(_drawElements);
@@ -257,7 +257,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     addProperty(_drawLabels);
 
     if (p.labelFile.has_value()) {
-        _labelFile = absPath(*p.labelFile);
+        _labelFile = absPath(*p.labelFile).string();
         _hasLabel = true;
 
         _textColor = p.textColor.value_or(_textColor);

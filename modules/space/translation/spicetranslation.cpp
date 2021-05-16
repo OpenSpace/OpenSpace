@@ -114,11 +114,11 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
 
     if (p.kernels.has_value()) {
         if (std::holds_alternative<std::string>(*p.kernels)) {
-            loadKernel(absPath(std::get<std::string>(*p.kernels)));
+            loadKernel(absPath(std::get<std::string>(*p.kernels)).string());
         }
         else {
             for (const std::string& k : std::get<std::vector<std::string>>(*p.kernels)) {
-                loadKernel(absPath(k));
+                loadKernel(absPath(k).string());
             }
         }
     }

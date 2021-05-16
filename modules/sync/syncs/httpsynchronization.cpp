@@ -89,7 +89,7 @@ std::string HttpSynchronization::directory() {
     std::string d = fmt::format(
         "{}/http/{}/{}", _synchronizationRoot, _identifier, _version
     );
-    return absPath(d);
+    return absPath(d).string();
 }
 
 void HttpSynchronization::start() {

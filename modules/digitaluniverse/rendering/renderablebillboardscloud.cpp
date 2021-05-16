@@ -382,7 +382,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     if (p.file.has_value()) {
-        _speckFile = absPath(*p.file);
+        _speckFile = absPath(*p.file).string();
     }
     _hasSpeckFile = p.file.has_value();
 
@@ -439,7 +439,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     }
 
     if (p.texture.has_value()) {
-        _spriteTexturePath = absPath(*p.texture);
+        _spriteTexturePath = absPath(*p.texture).string();
         _spriteTexturePath.onChange([&]() { _spriteTextureIsDirty = true; });
 
         // @TODO (abock, 2021-01-31) I don't know why we only add this property if the
@@ -451,7 +451,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
 
 
     if (p.colorMap.has_value()) {
-        _colorMapFile = absPath(*p.colorMap);
+        _colorMapFile = absPath(*p.colorMap).string();
         _hasColorMapFile = true;
 
         if (p.colorOption.has_value()) {
@@ -518,7 +518,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         _drawLabels = p.drawLabels.value_or(_drawLabels);
         addProperty(_drawLabels);
 
-        _labelFile = absPath(*p.labelFile);
+        _labelFile = absPath(*p.labelFile).string();
         _hasLabel = true;
 
         _textColor = p.textColor.value_or(_textColor);
@@ -1000,7 +1000,7 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
             [path = _spriteTexturePath]() -> std::unique_ptr<ghoul::opengl::Texture> {
                 LINFO(fmt::format("Loaded texture from '{}'", absPath(path)));
                 std::unique_ptr<ghoul::opengl::Texture> t =
-                    ghoul::io::TextureReader::ref().loadTexture(absPath(path));
+                    ghoul::io::TextureReader::ref().loadTexture(absPath(path).string());
                 t->uploadTexture();
                 t->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
                 t->purgeFromRAM();

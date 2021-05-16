@@ -289,7 +289,7 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
         return;
     }
 
-    const bool loadSuccess = loadLabelsData(absPath(p.fileName->string()));
+    const bool loadSuccess = loadLabelsData(absPath(p.fileName->string()).string());
     if (!loadSuccess) {
         return;
     }

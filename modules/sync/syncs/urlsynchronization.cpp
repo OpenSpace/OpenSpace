@@ -305,7 +305,7 @@ bool UrlSynchronization::hasSyncFile() {
 
 std::string UrlSynchronization::directory() {
     std::string d = fmt::format("{}/url/{}/files", _synchronizationRoot, _identifier);
-    return absPath(d);
+    return absPath(d).string();
 }
 
 } // namespace openspace

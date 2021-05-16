@@ -125,7 +125,7 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
     _size.onChange([&]() { _planeIsDirty = true; });
     addProperty(_size);
 
-    _texturePath = absPath(p.texture);
+    _texturePath = absPath(p.texture).string();
     _textureFile = std::make_unique<File>(_texturePath.value());
 
     _offset = p.offset.value_or(_offset);
@@ -236,13 +236,13 @@ void RenderableRings::loadTexture() {
         using namespace ghoul::io;
         using namespace ghoul::opengl;
         std::unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
-            absPath(_texturePath)
+            absPath(_texturePath).string()
         );
 
         if (texture) {
             LDEBUGC(
                 "RenderableRings",
-                fmt::format("Loaded texture from '{}'", absPath(_texturePath))
+                fmt::format("Loaded texture from {}", absPath(_texturePath))
             );
             _texture = std::move(texture);
 

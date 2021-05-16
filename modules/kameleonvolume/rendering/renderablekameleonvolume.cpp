@@ -173,7 +173,7 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     }
 
     if (dictionary.hasValue<std::string>(KeySource)) {
-        _sourcePath = absPath(dictionary.value<std::string>(KeySource));
+        _sourcePath = absPath(dictionary.value<std::string>(KeySource)).string();
     }
 
     if (dictionary.hasValue<std::string>(KeyVariable)) {

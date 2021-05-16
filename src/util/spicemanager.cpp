@@ -214,7 +214,7 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
         )
     );
 
-    std::string path = absPath(std::move(filePath));
+    std::filesystem::path path = absPath(std::move(filePath));
     const auto it = std::find_if(
         _loadedKernels.begin(),
         _loadedKernels.end(),
@@ -236,7 +236,7 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
 
     LINFO(fmt::format("Loading SPICE kernel '{}'", path));
     // Load the kernel
-    furnsh_c(path.c_str());
+    furnsh_c(path.string().c_str());
 
     // Reset the current directory to the previous one
     std::filesystem::current_path(currentDirectory);
@@ -247,15 +247,15 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
 
     std::filesystem::path fileExtension = std::filesystem::path(path).extension();
     if (fileExtension == ".bc" || fileExtension == ".BC") {
-        findCkCoverage(path); // binary ck kernel
+        findCkCoverage(path.string()); // binary ck kernel
     }
     else if (fileExtension == ".bsp" || fileExtension == ".BSP") {
-        findSpkCoverage(path); // binary spk kernel
+        findSpkCoverage(path.string()); // binary spk kernel
     }
 
     KernelHandle kernelId = ++_lastAssignedKernel;
     ghoul_assert(kernelId != 0, fmt::format("Kernel Handle wrapped around to 0"));
-    _loadedKernels.push_back({std::move(path), kernelId, 1});
+    _loadedKernels.push_back({ path.string(), kernelId, 1 });
     return kernelId;
 }
 
@@ -288,7 +288,7 @@ void SpiceManager::unloadKernel(KernelHandle kernelId) {
 void SpiceManager::unloadKernel(std::string filePath) {
     ghoul_assert(!filePath.empty(), "Empty filename");
 
-    std::string path = absPath(std::move(filePath));
+    std::filesystem::path path = absPath(std::move(filePath));
 
     const auto it = std::find_if(
         _loadedKernels.begin(),
@@ -310,7 +310,7 @@ void SpiceManager::unloadKernel(std::string filePath) {
         // If there was only one part interested in the kernel, we can unload it
         if (it->refCount == 1) {
             LINFO(fmt::format("Unloading SPICE kernel '{}'", path));
-            unload_c(path.c_str());
+            unload_c(path.string().c_str());
             _loadedKernels.erase(it);
         }
         else {

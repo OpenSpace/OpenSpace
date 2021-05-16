@@ -295,7 +295,9 @@ void RenderableFieldlinesSequence::initializeGL() {
     // Set a default color table, just in case the (optional) user defined paths are
     // corrupt or not provided!
     _colorTablePaths.push_back(FieldlinesSequenceModule::DefaultTransferFunctionFile);
-    _transferFunction = std::make_unique<TransferFunction>(absPath(_colorTablePaths[0]));
+    _transferFunction = std::make_unique<TransferFunction>(
+        absPath(_colorTablePaths[0]).string()
+    );
 
     // EXTRACT OPTIONAL INFORMATION FROM DICTIONARY
     std::string outputFolderPath;
@@ -476,7 +478,7 @@ void RenderableFieldlinesSequence::extractOptionalInfoFromDictionary(
     if (_dictionary->hasValue<std::string>(KeyOutputFolder)) {
         outputFolderPath = _dictionary->value<std::string>(KeyOutputFolder);
         if (std::filesystem::is_directory(outputFolderPath)) {
-            outputFolderPath = absPath(outputFolderPath);
+            outputFolderPath = absPath(outputFolderPath).string();
         }
         else {
             LERROR(fmt::format(
@@ -921,7 +923,7 @@ bool RenderableFieldlinesSequence::extractCdfInfoFromDictionary(std::string& see
     if (_dictionary->hasValue<std::string>(KeyCdfSeedPointFile)) {
         seedFilePath = _dictionary->value<std::string>(KeyCdfSeedPointFile);
         if (std::filesystem::is_regular_file(seedFilePath)) {
-            seedFilePath = absPath(seedFilePath);
+            seedFilePath = absPath(seedFilePath).string();
         }
         else {
             LERROR(fmt::format(

@@ -41,11 +41,11 @@ namespace {
 
 bool isInitialized = false;
 
-std::string xyuvrgbaVertexFile;
-std::string xyuvrgbaFragmentFile;
+std::filesystem::path xyuvrgbaVertexFile;
+std::filesystem::path xyuvrgbaFragmentFile;
 
-std::string screenFillingVertexFile;
-std::string screenFillingFragmentFile;
+std::filesystem::path screenFillingVertexFile;
+std::filesystem::path screenFillingFragmentFile;
 
 constexpr const char* XyuvrgbaVertexCode = R"(
 #version __CONTEXT__

@@ -79,7 +79,7 @@ LuaTranslation::LuaTranslation()
 
 LuaTranslation::LuaTranslation(const ghoul::Dictionary& dictionary) : LuaTranslation() {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-    _luaScriptFile = absPath(p.script);
+    _luaScriptFile = absPath(p.script).string();
 }
 
 glm::dvec3 LuaTranslation::position(const UpdateData& data) const {

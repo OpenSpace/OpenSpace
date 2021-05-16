@@ -102,7 +102,7 @@ bool BrowserInstance::loadLocalPath(std::string path) {
         return false;
     }
 
-    loadUrl(absPath(std::move(path)));
+    loadUrl(absPath(std::move(path)).string());
     return true;
 }
 

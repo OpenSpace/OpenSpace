@@ -56,7 +56,7 @@ void TransferFunction::setPath(const std::string& filepath) {
     if (_file) {
         _file = nullptr;
     }
-    std::string f = absPath(filepath);
+    std::filesystem::path f = absPath(filepath);
     if (!std::filesystem::is_regular_file(f)) {
         LERROR("Could not find transfer function file.");
         _file = nullptr;
@@ -76,7 +76,7 @@ ghoul::opengl::Texture& TransferFunction::texture() {
 
 void TransferFunction::update() {
     if (_needsUpdate) {
-        if (std::filesystem::path(_filepath).extension() == ".txt") {
+        if (_filepath.extension() == ".txt") {
             setTextureFromTxt();
         }
         else {
@@ -99,7 +99,7 @@ void TransferFunction::setTextureFromTxt() {
     in.open(_filepath);
 
     if (!in.is_open()) {
-        throw ghoul::FileNotFoundError(_filepath);
+        throw ghoul::FileNotFoundError(_filepath.string());
     }
 
     int width = 512;
@@ -204,7 +204,7 @@ void TransferFunction::setTextureFromTxt() {
 }
 
 void TransferFunction::setTextureFromImage() {
-    _texture = ghoul::io::TextureReader::ref().loadTexture(_filepath);
+    _texture = ghoul::io::TextureReader::ref().loadTexture(_filepath.string());
     _texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
 }
 

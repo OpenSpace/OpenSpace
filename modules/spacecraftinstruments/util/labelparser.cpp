@@ -140,9 +140,9 @@ std::string LabelParser::encode(const std::string& line) const {
 }
 
 bool LabelParser::create() {
-    std::string sequenceDir = absPath(_fileName);
+    std::filesystem::path sequenceDir = absPath(_fileName);
     if (!std::filesystem::is_directory(sequenceDir)) {
-        LERROR(fmt::format("Could not load Label Directory '{}'", sequenceDir));
+        LERROR(fmt::format("Could not load Label Directory {}", sequenceDir));
         return false;
     }
 

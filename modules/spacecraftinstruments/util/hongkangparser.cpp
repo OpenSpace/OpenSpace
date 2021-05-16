@@ -203,7 +203,7 @@ bool HongKangParser::create() {
 
                 Image image = {
                     TimeRange(time, time + Exposure),
-                    _defaultCaptureImage,
+                    _defaultCaptureImage.string(),
                     std::move(cameraSpiceID),
                     cameraTarget,
                     true,
@@ -252,7 +252,7 @@ bool HongKangParser::create() {
                         // store individual image
                         Image image = {
                             scanRange,
-                            _defaultCaptureImage,
+                            _defaultCaptureImage.string(),
                             it->second->translations(),
                             cameraTarget,
                             true,

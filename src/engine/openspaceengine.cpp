@@ -185,7 +185,7 @@ void OpenSpaceEngine::initialize() {
         global::versionChecker->requestLatestVersion(versionCheckUrl);
     }
 
-    std::string cacheFolder = absPath("${CACHE}");
+    std::string cacheFolder = absPath("${CACHE}").string();
     if (global::configuration->usePerProfileCache) {
         std::string profile = global::configuration->profile;
         if (profile.empty()) {
@@ -293,11 +293,11 @@ void OpenSpaceEngine::initialize() {
 
     // Convert profile to scene file (if was provided in configuration file)
     if (!global::configuration->profile.empty()) {
-        std::string inputProfilePath = absPath("${PROFILES}");
-        std::string outputScenePath = absPath("${TEMPORARY}");
+        std::string inputProfilePath = absPath("${PROFILES}").string();
+        std::string outputScenePath = absPath("${TEMPORARY}").string();
         std::string inputProfile = inputProfilePath + "/" + global::configuration->profile
             + ".profile";
-        std::string inputUserProfile = absPath("${USER_PROFILES}") + "/" +
+        std::string inputUserProfile = absPath("${USER_PROFILES}").string() + "/" +
             global::configuration->profile + ".profile";
         std::string outputAsset = outputScenePath + "/" + global::configuration->profile
             + ".asset";
@@ -347,7 +347,7 @@ void OpenSpaceEngine::initialize() {
     // Set up asset loader
     global::openSpaceEngine->_assetManager = std::make_unique<AssetManager>(
         global::scriptEngine->luaState(),
-        absPath("${ASSETS}")
+        absPath("${ASSETS}").string()
     );
 
     global::scriptEngine->addLibrary(
@@ -389,7 +389,8 @@ void OpenSpaceEngine::initialize() {
 }
 
 std::string OpenSpaceEngine::generateFilePath(std::string openspaceRelativePath) {
-    std::string path = absPath(openspaceRelativePath);
+    // @TODO (abock, 2021-05-16) This whole function can die, I think
+    std::string path = absPath(openspaceRelativePath).string();
     // Needs to handle either windows (which seems to require double back-slashes)
     // or unix path slashes.
     const std::string search = "\\";
@@ -954,7 +955,7 @@ void OpenSpaceEngine::writeStaticDocumentation() {
 }
 
 void OpenSpaceEngine::createUserDirectoriesIfNecessary() {
-    LTRACE(absPath("${USER}"));
+    LTRACE(absPath("${USER}").string());
 
     if (!std::filesystem::exists(absPath("${USER_ASSETS}"))) {
         std::filesystem::create_directories(absPath("${USER_ASSETS}"));
@@ -975,12 +976,13 @@ void OpenSpaceEngine::runGlobalCustomizationScripts() {
     global::scriptEngine->initializeLuaState(state);
 
     for (const std::string& script : global::configuration->globalCustomizationScripts) {
-        std::string s = absPath(script);
+        std::filesystem::path s = absPath(script);
         if (std::filesystem::is_regular_file(s)) {
             try {
                 LINFO(fmt::format("Running global customization script: {}", s));
-                ghoul::lua::runScriptFile(state, s);
-            } catch (const ghoul::RuntimeError& e) {
+                ghoul::lua::runScriptFile(state, s.string());
+            }
+            catch (const ghoul::RuntimeError& e) {
                 LERRORC(e.component, e.message);
             }
         }
@@ -1040,7 +1042,7 @@ void OpenSpaceEngine::writeSceneDocumentation() {
 
 
 
-        path = absPath(path) + "/";
+        path = absPath(path).string() + '/';
         _documentationJson += "{\"name\":\"Keybindings\",\"identifier\":\"";
         _documentationJson += global::keybindingManager->jsonName() + "\",";
         _documentationJson += "\"data\":";
@@ -1467,8 +1469,8 @@ void OpenSpaceEngine::handleDragDrop(const std::string& file) {
     std::filesystem::path f(file);
 
     ghoul::lua::LuaState s(ghoul::lua::LuaState::IncludeStandardLibrary::Yes);
-    std::string absolutePath = absPath("${SCRIPTS}/drag_drop_handler.lua");
-    int status = luaL_loadfile(s, absolutePath.c_str());
+    std::filesystem::path absolutePath = absPath("${SCRIPTS}/drag_drop_handler.lua");
+    int status = luaL_loadfile(s, absolutePath.string().c_str());
     if (status != LUA_OK) {
         std::string error = lua_tostring(s, -1);
         LERROR(error);

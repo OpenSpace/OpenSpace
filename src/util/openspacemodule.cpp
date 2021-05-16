@@ -120,15 +120,15 @@ std::string OpenSpaceModule::modulePath() const {
     );
 
     // First try the internal module directory
-    std::string path = absPath("${MODULES}/" + moduleIdentifier);
+    std::filesystem::path path = absPath("${MODULES}/" + moduleIdentifier);
     if (std::filesystem::is_directory(path)) {
-        return path;
+        return path.string();
     }
     else { // Otherwise, it might be one of the external directories
         for (const char* dir : ModulePaths) {
             const std::string& p = std::string(dir) + '/' + moduleIdentifier;
             if (std::filesystem::is_directory(absPath(p))) {
-                return absPath(p);
+                return absPath(p).string();
             }
         }
     }

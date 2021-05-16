@@ -413,7 +413,7 @@ std::string IswaManager::parseKWToLuaTable(const CdfInfo& info, const std::strin
 
     std::filesystem::path ext = std::filesystem::path(absPath(info.path)).extension();
     if (ext == ".cdf") {
-        KameleonWrapper kw = KameleonWrapper(absPath(info.path));
+        KameleonWrapper kw = KameleonWrapper(absPath(info.path).string());
 
         std::string parent = kw.parent();
         std::string frame = kw.frame();
@@ -619,7 +619,9 @@ void IswaManager::createKameleonPlane(CdfInfo info, std::string cut) {
         }
     }
     else {
-        LWARNING( absPath(info.path) + " is not a cdf file or can't be found.");
+        LWARNING(
+            fmt::format("{} is not a cdf file or can't be found", absPath(info.path))
+        );
     }
 }
 
@@ -697,10 +699,10 @@ ghoul::Event<>& IswaManager::iswaEvent() {
 }
 
 void IswaManager::addCdfFiles(std::string cdfpath) {
-    cdfpath = absPath(cdfpath);
-    if (std::filesystem::is_regular_file(cdfpath)) {
+    std::filesystem::path cdf = absPath(cdfpath);
+    if (std::filesystem::is_regular_file(cdf)) {
         //std::string basePath = path.substr(0, path.find_last_of("/\\"));
-        std::ifstream jsonFile(cdfpath);
+        std::ifstream jsonFile(cdf);
 
         if (jsonFile.is_open()) {
             json cdfGroups = json::parse(jsonFile);
@@ -739,7 +741,7 @@ void IswaManager::addCdfFiles(std::string cdfpath) {
         }
     }
     else {
-        LWARNING(cdfpath + " is not a cdf file or can't be found.");
+        LWARNING(fmt::format("{} is not a cdf file or can't be found", cdf));
     }
 }
 

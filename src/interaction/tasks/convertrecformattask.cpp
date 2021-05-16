@@ -83,7 +83,7 @@ std::string ConvertRecFormatTask::description() {
     else {
         description += "(UNKNOWN format) ";
     }
-    description += fmt::format("conversion to file {}.", _outFilePath);
+    description += fmt::format("conversion to file {}", _outFilePath);
     return description;
 }
 
@@ -158,8 +158,9 @@ void ConvertRecFormatTask::determineFormatType() {
     if (line.substr(0, SessionRecording::FileHeaderTitle.length())
         != SessionRecording::FileHeaderTitle)
     {
-        LERROR(fmt::format("Session recording file {} does not have expected header.",
-            _inFilePath));
+        LERROR(fmt::format(
+            "Session recording file {} does not have expected header", _inFilePath
+        ));
     }
     else {
         //Read version string and throw it away (and also line feed character at end)
@@ -195,8 +196,7 @@ void ConvertRecFormatTask::convertToAscii() {
         // Check if have reached EOF
         if (!_iFile) {
             LINFO(fmt::format(
-                "Finished converting {} entries from file {}",
-                lineNum - 1, _inFilePath
+                "Finished converting {} entries from file {}", lineNum - 1, _inFilePath
             ));
             fileReadOk = false;
             break;
@@ -257,8 +257,7 @@ void ConvertRecFormatTask::convertToBinary() {
         std::string entryType;
         if (!(iss >> entryType)) {
             LERROR(fmt::format(
-                "Error reading entry type @ line {} of file {}",
-                lineNum, _inFilePath
+                "Error reading entry type @ line {} of file {}", lineNum, _inFilePath
             ));
             break;
         }
@@ -291,8 +290,7 @@ void ConvertRecFormatTask::convertToBinary() {
     }
     _oFile.close();
     LINFO(fmt::format(
-        "Finished converting {} entries from file {}",
-        lineNum, _inFilePath
+        "Finished converting {} entries from file {}", lineNum, _inFilePath
     ));
 }
 

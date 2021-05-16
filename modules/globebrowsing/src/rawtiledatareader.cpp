@@ -487,7 +487,7 @@ void RawTileDataReader::initialize() {
                 CPLCreateXMLElementAndValue(
                     cache,
                     "Path",
-                    absPath(module.wmsCacheLocation()).c_str()
+                    absPath(module.wmsCacheLocation()).string().c_str()
                 );
                 CPLCreateXMLElementAndValue(cache, "Depth", "4");
                 CPLCreateXMLElementAndValue(cache, "Expires", "315576000"); // 10 years

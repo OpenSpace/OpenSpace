@@ -272,7 +272,7 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     addProperty(_opacity);
 
     if (p.file.has_value()) {
-        _speckFile = absPath(*p.file);
+        _speckFile = absPath(*p.file).string();
         _hasSpeckFile = true;
         _drawElements.onChange([&]() { _hasSpeckFile = !_hasSpeckFile; });
         addProperty(_drawElements);
@@ -320,7 +320,7 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     _scaleFactor.onChange([&]() { _dataIsDirty = true; });
 
     if (p.labelFile.has_value()) {
-        _labelFile = absPath(*p.labelFile);
+        _labelFile = absPath(*p.labelFile).string();
         _hasLabel = true;
 
         _textColor = p.textColor.value_or(_textColor);
@@ -368,7 +368,7 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
         }
     }
 
-    _texturesPath = absPath(p.texturePath);
+    _texturesPath = absPath(p.texturePath).string();
 
     _luminosityVar = p.luminosity.value_or(_luminosityVar);
     _sluminosity = p.scaleLuminosity.value_or(_sluminosity);
@@ -841,7 +841,7 @@ bool RenderablePlanesCloud::readSpeckFile() {
             std::string fileName;
             str >> fileName; // texture file name
 
-            std::string fullPath = absPath(_texturesPath + '/' + fileName);
+            std::string fullPath = absPath(_texturesPath + '/' + fileName).string();
             std::string pngPath =
                 std::filesystem::path(fullPath).replace_extension(".png").string();
 

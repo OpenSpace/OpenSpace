@@ -69,21 +69,19 @@ std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromDictionary(
 }
 
 std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromFile(const std::string& path) {
-    std::string absTasksFile = absPath(path);
+    std::filesystem::path absTasksFile = absPath(path);
     if (!std::filesystem::is_regular_file(absTasksFile)) {
-        LERROR(fmt::format(
-            "Could not load tasks file '{}'. File not found", absTasksFile
-        ));
+        LERROR(fmt::format("Could not load tasks file {}. File not found", absTasksFile));
         return std::vector<std::unique_ptr<Task>>();
     }
 
     ghoul::Dictionary tasksDictionary;
     try {
-        ghoul::lua::loadDictionaryFromFile(absTasksFile, tasksDictionary);
+        ghoul::lua::loadDictionaryFromFile(absTasksFile.string(), tasksDictionary);
     }
     catch (const ghoul::RuntimeError& e) {
         LERROR(fmt::format(
-            "Could not load tasks file '{}'. Lua error: {}: {}",
+            "Could not load tasks file {}. Lua error: {}: {}",
             absTasksFile, e.message, e.component
         ));
         return std::vector<std::unique_ptr<Task>>();
@@ -93,10 +91,7 @@ std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromFile(const std::string& 
         return tasksFromDictionary(tasksDictionary);
     }
     catch (const documentation::SpecificationError& e) {
-        LERROR(
-            fmt::format("Could not load tasks file '{}'. {}",
-            absTasksFile, e.what())
-        );
+        LERROR(fmt::format("Could not load tasks file {}. {}", absTasksFile, e.what()));
         for (const documentation::TestResult::Offense& o : e.result.offenses) {
             LERROR(ghoul::to_string(o));
         }

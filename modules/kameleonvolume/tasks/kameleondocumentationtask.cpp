@@ -72,14 +72,14 @@ std::string KameleonDocumentationTask::description() {
 }
 
 void KameleonDocumentationTask::perform(const Task::ProgressCallback & progressCallback) {
-    KameleonVolumeReader reader(_inputPath);
+    KameleonVolumeReader reader(_inputPath.string());
     ghoul::Dictionary kameleonDictionary = reader.readMetaData();
     progressCallback(0.33f);
 
     ghoul::Dictionary dictionary;
     dictionary.setValue("kameleon", std::move(kameleonDictionary));
     dictionary.setValue("version", std::string(OPENSPACE_VERSION_NUMBER));
-    dictionary.setValue("input", _inputPath);
+    dictionary.setValue("input", _inputPath.string());
 
     std::string json = ghoul::formatJson(dictionary);
     progressCallback(0.66f);

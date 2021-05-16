@@ -75,7 +75,7 @@ LuaScale::LuaScale()
 
 LuaScale::LuaScale(const ghoul::Dictionary& dictionary) : LuaScale() {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-    _luaScriptFile = absPath(p.script);
+    _luaScriptFile = absPath(p.script).string();
 }
 
 glm::dvec3 LuaScale::scaleValue(const UpdateData& data) const {

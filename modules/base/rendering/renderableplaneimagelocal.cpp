@@ -101,7 +101,7 @@ RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& di
 
     addProperty(_blendMode);
 
-    _texturePath = absPath(p.texture);
+    _texturePath = absPath(p.texture).string();
     _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
 
     addProperty(_texturePath);
@@ -191,7 +191,7 @@ void RenderablePlaneImageLocal::loadTexture() {
             std::to_string(hash),
             [path = _texturePath]() -> std::unique_ptr<ghoul::opengl::Texture> {
                 std::unique_ptr<ghoul::opengl::Texture> texture =
-                    ghoul::io::TextureReader::ref().loadTexture(absPath(path));
+                    ghoul::io::TextureReader::ref().loadTexture(absPath(path).string());
 
                 LDEBUGC(
                     "RenderablePlaneImageLocal",

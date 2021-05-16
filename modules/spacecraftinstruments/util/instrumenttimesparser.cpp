@@ -67,9 +67,9 @@ InstrumentTimesParser::InstrumentTimesParser(std::string name, std::string seque
 }
 
 bool InstrumentTimesParser::create() {
-    std::string sequenceDir = absPath(_fileName);
+    std::filesystem::path sequenceDir = absPath(_fileName);
     if (!std::filesystem::is_directory(sequenceDir)) {
-        LERROR(fmt::format("Could not load Label Directory '{}'", sequenceDir));
+        LERROR(fmt::format("Could not load Label Directory {}", sequenceDir));
         return false;
     }
 
@@ -78,10 +78,10 @@ bool InstrumentTimesParser::create() {
     for (const std::pair<const K, V>& p : _instrumentFiles) {
         const std::string& instrumentID = p.first;
         for (std::string filename : p.second) {
-            std::string filepath = fmt::format("{}/{}", sequenceDir, std::move(filename));
+            std::filesystem::path filepath = sequenceDir / filename;
 
             if (!std::filesystem::is_regular_file(filepath)) {
-                LERROR(fmt::format("Unable to read file '{}'. Skipping file", filepath));
+                LERROR(fmt::format("Unable to read file {}. Skipping file", filepath));
                 continue;
             }
 
@@ -146,7 +146,7 @@ bool InstrumentTimesParser::create() {
         _targetTimes.begin(),
         _targetTimes.end(),
         [](const std::pair<double, std::string>& a,
-           const std::pair<double, std::string>& b) -> bool
+           const std::pair<double, std::string>& b)
         {
             return a.first < b.first;
         }

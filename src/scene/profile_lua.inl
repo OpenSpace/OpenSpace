@@ -68,11 +68,11 @@ int saveSettingsToProfile(lua_State* L) {
         path.replace_extension();
         std::string newFile = fmt::format("{}_{}", path.string(), time);
         std::string sourcePath = fmt::format("{}/{}.profile",
-            absPath("${USER_PROFILES}"), global::configuration->profile);
+            absPath("${USER_PROFILES}").string(), global::configuration->profile);
         std::string destPath = fmt::format("{}/{}.profile",
-            absPath("${PROFILES}"), global::configuration->profile);
+            absPath("${PROFILES}").string(), global::configuration->profile);
         if (!std::filesystem::is_regular_file(sourcePath)) {
-            sourcePath = absPath("${USER_PROFILES}")
+            sourcePath = absPath("${USER_PROFILES}").string()
                 + '/' + global::configuration->profile + ".profile";
         }
         LINFOC("Profile", fmt::format("Saving a copy of the old profile as {}", newFile));
@@ -104,9 +104,9 @@ int saveSettingsToProfile(lua_State* L) {
     }
 
     std::string absFilename = fmt::format("{}/{}.profile",
-        absPath("${PROFILES}"), saveFilePath);
+        absPath("${PROFILES}").string(), saveFilePath);
     if (!std::filesystem::is_regular_file(absFilename)) {
-        absFilename = absPath("${USER_PROFILES}/" + saveFilePath + ".profile");
+        absFilename = absPath("${USER_PROFILES}/" + saveFilePath + ".profile").string();
     }
     const bool overwrite = (n == 2) ? ghoul::lua::value<bool>(L, 2) : true;
 

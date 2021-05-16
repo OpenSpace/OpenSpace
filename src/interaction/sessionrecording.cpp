@@ -164,11 +164,11 @@ bool SessionRecording::handleRecordingFile(std::string filenameIn) {
         }
     }
 
-    std::string absFilename = absPath("${RECORDINGS}/" + filenameIn);
+    std::filesystem::path absFilename = absPath("${RECORDINGS}/" + filenameIn);
 
     if (std::filesystem::is_regular_file(absFilename)) {
         LERROR(fmt::format(
-            "Unable to start recording; file {} already exists.", absFilename.c_str()
+            "Unable to start recording; file {} already exists.", absFilename
         ));
         return false;
     }
@@ -180,9 +180,7 @@ bool SessionRecording::handleRecordingFile(std::string filenameIn) {
     }
 
     if (!_recordFile.is_open() || !_recordFile.good()) {
-        LERROR(fmt::format(
-            "Unable to open file {} for keyframe recording", absFilename.c_str()
-        ));
+        LERROR(fmt::format("Unable to open file {} for keyframe recording", absFilename));
         return false;
     }
     return true;
@@ -251,14 +249,14 @@ bool SessionRecording::startPlayback(std::string& filename,
         return false;
     }
     std::string absFilename;
-    //Run through conversion in case file is older. Does nothing if the file format
+    // Run through conversion in case file is older. Does nothing if the file format
     // is up-to-date
     filename = convertFile(filename);
     if (std::filesystem::is_regular_file(filename)) {
         absFilename = filename;
     }
     else {
-        absFilename = absPath("${RECORDINGS}/" + filename);
+        absFilename = absPath("${RECORDINGS}/" + filename).string();
     }
 
     if (_state == SessionState::Recording) {
@@ -1708,7 +1706,7 @@ void SessionRecording::removeStateChangeCallback(CallbackHandle handle) {
 }
 
 std::vector<std::string> SessionRecording::playbackList() const {
-    const std::string path = absPath("${RECORDINGS}");
+    const std::filesystem::path path = absPath("${RECORDINGS}");
 
     std::vector<std::string> fileList;
     if (std::filesystem::is_directory(path)) {
@@ -1796,15 +1794,14 @@ void SessionRecording::readFileIntoStringStream(std::string filename,
     if (isPath(filename)) {
         throw ConversionError("Playback filename must not contain path (/) elements");
     }
-    std::string conversionInFilename = absPath("${RECORDINGS}/" + filename);
+    std::filesystem::path conversionInFilename = absPath("${RECORDINGS}/" + filename);
     if (!std::filesystem::is_regular_file(conversionInFilename)) {
         throw ConversionError(fmt::format(
-            "Cannot find the specified playback file '{}' to convert.",
-            conversionInFilename
+            "Cannot find the specified playback file {} to convert", conversionInFilename
         ));
     }
 
-    DataMode mode = readModeFromHeader(conversionInFilename);
+    DataMode mode = readModeFromHeader(conversionInFilename.string());
 
     stream.str("");
     stream.clear();
@@ -2096,7 +2093,7 @@ std::string SessionRecording::determineConversionOutFilename(const std::string f
         filenameSansExtension = filename.substr(0, filename.find_last_of("."));
     }
     filenameSansExtension += "_" + fileFormatVersion() + "-" + targetFileFormatVersion();
-    return absPath("${RECORDINGS}/" + filenameSansExtension + fileExtension);
+    return absPath("${RECORDINGS}/" + filenameSansExtension + fileExtension).string();
 }
 
 bool SessionRecording_legacy_0085::convertScript(std::stringstream& inStream,

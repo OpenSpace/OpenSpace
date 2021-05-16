@@ -462,7 +462,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _filePath = absPath(p.file);
+    _filePath = absPath(p.file).string();
     _dataFile = std::make_unique<File>(_filePath.value());
     _dataFile->setCallback([this]() { _dataIsDirty = true; });
 
@@ -567,7 +567,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     });
     addProperty(_shaderOption);
 
-    _pointSpreadFunctionTexturePath = absPath(p.texture);
+    _pointSpreadFunctionTexturePath = absPath(p.texture).string();
     _pointSpreadFunctionTexturePath.onChange(
         [this](){ _pointSpreadFunctionTextureIsDirty = true; }
     );
@@ -578,7 +578,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
         [this]() { _pointSpreadFunctionTextureIsDirty = true; }
     );
 
-    _colorTexturePath = absPath(p.colorMap);
+    _colorTexturePath = absPath(p.colorMap).string();
     _colorTextureFile = std::make_unique<File>(_colorTexturePath.value());
     _colorTexturePath.onChange([this]() { _colorTextureIsDirty = true; });
     _colorTextureFile->setCallback([this]() { _colorTextureIsDirty = true; });
@@ -1703,10 +1703,10 @@ void RenderableGaiaStars::update(const UpdateData&) {
             }
             case gaia::ShaderOption::Billboard_SSBO:
             case gaia::ShaderOption::Billboard_VBO: {
-                std::string vs = absPath(
+                std::filesystem::path vs = absPath(
                     "${MODULE_GAIA}/shaders/gaia_tonemapping_vs.glsl"
                 );
-                std::string fs = absPath(
+                std::filesystem::path fs = absPath(
                     "${MODULE_GAIA}/shaders/gaia_tonemapping_billboard_fs.glsl"
                 );
                 std::unique_ptr<ghoul::opengl::ProgramObject> programTM =
@@ -2103,12 +2103,12 @@ void RenderableGaiaStars::update(const UpdateData&) {
         _pointSpreadFunctionTexture = nullptr;
         if (!_pointSpreadFunctionTexturePath.value().empty()) {
             _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_pointSpreadFunctionTexturePath)
+                absPath(_pointSpreadFunctionTexturePath).string()
             );
 
             if (_pointSpreadFunctionTexture) {
                 LDEBUG(fmt::format(
-                    "Loaded texture from '{}'", absPath(_pointSpreadFunctionTexturePath)
+                    "Loaded texture from {}", absPath(_pointSpreadFunctionTexturePath)
                ));
                 _pointSpreadFunctionTexture->uploadTexture();
             }
@@ -2131,7 +2131,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
         _colorTexture = nullptr;
         if (!_colorTexturePath.value().empty()) {
             _colorTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_colorTexturePath)
+                absPath(_colorTexturePath).string()
             );
             if (_colorTexture) {
                 LDEBUG(fmt::format(

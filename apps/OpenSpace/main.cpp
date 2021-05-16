@@ -224,9 +224,9 @@ void mainInitFunc(GLFWwindow*) {
     //
     // We save the startup value of the screenshots just in case we want to add a date
     // to them later in the RenderEngine
-    std::string screenshotPath = absPath("${SCREENSHOTS}");
+    std::filesystem::path screenshotPath = absPath("${SCREENSHOTS}");
     FileSys.registerPathToken("${STARTUP_SCREENSHOT}", screenshotPath);
-    Settings::instance().setCapturePath(screenshotPath);
+    Settings::instance().setCapturePath(screenshotPath.string());
 
     LDEBUG("Initializing OpenSpace Engine started");
     global::openSpaceEngine->initialize();
@@ -235,11 +235,11 @@ void mainInitFunc(GLFWwindow*) {
 #ifndef __APPLE__
     // Apparently: "Cocoa: Regular windows do not have icons on macOS"
     {
-        std::string path = absPath("${DATA}/openspace-icon.png");
+        std::filesystem::path path = absPath("${DATA}/openspace-icon.png");
         int x;
         int y;
         int n;
-        unsigned char* data = stbi_load(path.c_str(), &x, &y, &n, 0);
+        unsigned char* data = stbi_load(path.string().c_str(), &x, &y, &n, 0);
 
         GLFWimage icons[1];
         icons[0].pixels = data;
@@ -1118,7 +1118,7 @@ int main(int argc, char* argv[]) {
         // Loading configuration from disk
         LDEBUG("Loading configuration from disk");
         *global::configuration = configuration::loadConfigurationFromFile(
-            configurationFilePath,
+            configurationFilePath.string(),
             commandlineArguments.configurationOverride
         );
 
@@ -1222,7 +1222,7 @@ int main(int argc, char* argv[]) {
     // as well as the configuration file that sgct is supposed to use
     arguments.insert(arguments.begin(), argv[0]);
     arguments.insert(arguments.begin() + 1, "-config");
-    arguments.insert(arguments.begin() + 2, absPath(windowConfiguration));
+    arguments.insert(arguments.begin() + 2, absPath(windowConfiguration).string());
 
     // Need to set this before the creation of the sgct::Engine
 
@@ -1238,7 +1238,7 @@ int main(int argc, char* argv[]) {
     LDEBUG("Creating SGCT Engine");
     std::vector<std::string> arg(argv + 1, argv + argc);
     Configuration config = parseArguments(arg);
-    config::Cluster cluster = loadCluster(absPath(windowConfiguration));
+    config::Cluster cluster = loadCluster(absPath(windowConfiguration).string());
 
     Engine::Callbacks callbacks;
     callbacks.initOpenGL = mainInitFunc;

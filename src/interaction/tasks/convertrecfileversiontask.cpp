@@ -74,7 +74,7 @@ ConvertRecFileVersionTask::~ConvertRecFileVersionTask() {
 
 std::string ConvertRecFileVersionTask::description() {
     std::string description = fmt::format(
-        "Convert file format of session recording file '{}' to current version",
+        "Convert file format of session recording file {} to current version",
         _inFilePath
     );
     return description;

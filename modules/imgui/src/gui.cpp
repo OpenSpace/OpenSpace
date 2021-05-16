@@ -247,9 +247,9 @@ void GUI::initializeGL() {
         io.KeyMap[ImGuiKey_Y] = static_cast<int>(Key::Y);
         io.KeyMap[ImGuiKey_Z] = static_cast<int>(Key::Z);
 
-        io.Fonts->AddFontFromFileTTF(absPath(GuiFont).c_str(), FontSize);
+        io.Fonts->AddFontFromFileTTF(absPath(GuiFont).string().c_str(), FontSize);
         captionFont = io.Fonts->AddFontFromFileTTF(
-            absPath(GuiFont).c_str(),
+            absPath(GuiFont).string().c_str(),
             FontSize * 1.5f
         );
 

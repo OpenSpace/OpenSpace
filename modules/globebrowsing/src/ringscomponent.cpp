@@ -257,7 +257,7 @@ void RingsComponent::initialize() {
     addProperty(_size);
 
     if (p.texture.has_value()) {
-        _texturePath = absPath(p.texture->string());
+        _texturePath = absPath(p.texture->string()).string();
         _textureFile = std::make_unique<File>(_texturePath.value());
         _texturePath.onChange([this]() { loadTexture(); });
         addProperty(_texturePath);
@@ -265,7 +265,7 @@ void RingsComponent::initialize() {
     }
 
     if (p.textureFwrd.has_value()) {
-        _textureFwrdPath = absPath(p.textureFwrd->string());
+        _textureFwrdPath = absPath(p.textureFwrd->string()).string();
         _textureFileForwards = std::make_unique<File>(_textureFwrdPath.value());
         _textureFwrdPath.onChange([this]() { loadTexture(); });
         addProperty(_textureFwrdPath);
@@ -273,7 +273,7 @@ void RingsComponent::initialize() {
     }
 
     if (p.textureBckwrd.has_value()) {
-        _textureBckwrdPath = absPath(p.textureBckwrd->string());
+        _textureBckwrdPath = absPath(p.textureBckwrd->string()).string();
         _textureFileBackwards = std::make_unique<File>(_textureBckwrdPath.value());
         _textureBckwrdPath.onChange([this]() { loadTexture(); });
         addProperty(_textureBckwrdPath);
@@ -281,7 +281,7 @@ void RingsComponent::initialize() {
     }
 
     if (p.textureUnlit.has_value()) {
-        _textureUnlitPath = absPath(p.textureUnlit->string());
+        _textureUnlitPath = absPath(p.textureUnlit->string()).string();
         _textureFileUnlit = std::make_unique<File>(_textureUnlitPath.value());
         _textureUnlitPath.onChange([this]() { loadTexture(); });
         addProperty(_textureUnlitPath);
@@ -289,7 +289,7 @@ void RingsComponent::initialize() {
     }
 
     if (p.textureColor.has_value()) {
-        _textureColorPath = absPath(p.textureColor->string());
+        _textureColorPath = absPath(p.textureColor->string()).string();
         _textureFileColor = std::make_unique<File>(_textureColorPath.value());
         _textureColorPath.onChange([this]() { loadTexture(); });
         addProperty(_textureColorPath);
@@ -297,7 +297,7 @@ void RingsComponent::initialize() {
     }
 
     if (p.textureTransparency.has_value()) {
-        _textureTransparencyPath = absPath(p.textureTransparency->string());
+        _textureTransparencyPath = absPath(p.textureTransparency->string()).string();
         _textureFileTransparency = std::make_unique<File>(
             _textureTransparencyPath.value()
         );
@@ -617,7 +617,7 @@ void RingsComponent::loadTexture() {
     if (!_texturePath.value().empty()) {
 
         std::unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
-            absPath(_texturePath)
+            absPath(_texturePath).string()
         );
 
         if (texture) {
@@ -639,7 +639,7 @@ void RingsComponent::loadTexture() {
 
     if (!_textureFwrdPath.value().empty()) {
         std::unique_ptr<Texture> textureForwards = TextureReader::ref().loadTexture(
-            absPath(_textureFwrdPath)
+            absPath(_textureFwrdPath).string()
         );
 
         if (textureForwards) {
@@ -665,7 +665,7 @@ void RingsComponent::loadTexture() {
 
     if (!_textureBckwrdPath.value().empty()) {
         std::unique_ptr<Texture> textureBackwards = TextureReader::ref().loadTexture(
-            absPath(_textureBckwrdPath)
+            absPath(_textureBckwrdPath).string()
         );
 
         if (textureBackwards) {
@@ -691,7 +691,7 @@ void RingsComponent::loadTexture() {
 
     if (!_textureUnlitPath.value().empty()) {
         std::unique_ptr<Texture> textureUnlit = TextureReader::ref().loadTexture(
-            absPath(_textureUnlitPath)
+            absPath(_textureUnlitPath).string()
         );
 
         if (textureUnlit) {
@@ -716,7 +716,7 @@ void RingsComponent::loadTexture() {
 
     if (!_textureColorPath.value().empty()) {
         std::unique_ptr<Texture> textureColor = TextureReader::ref().loadTexture(
-            absPath(_textureColorPath)
+            absPath(_textureColorPath).string()
         );
 
         if (textureColor) {
@@ -741,7 +741,7 @@ void RingsComponent::loadTexture() {
 
     if (!_textureTransparencyPath.value().empty()) {
         std::unique_ptr<Texture> textureTransparency = TextureReader::ref().loadTexture(
-            absPath(_textureTransparencyPath)
+            absPath(_textureTransparencyPath).string()
         );
 
         if (textureTransparency) {

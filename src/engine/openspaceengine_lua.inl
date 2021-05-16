@@ -193,7 +193,7 @@ int setScreenshotFolder(lua_State* L) {
     std::string arg = ghoul::lua::value<std::string>(L);
     lua_pop(L, 0);
 
-    std::string folder = absPath(arg);
+    std::filesystem::path folder = absPath(arg);
     if (!std::filesystem::exists(folder)) {
         std::filesystem::create_directory(folder);
     }
@@ -204,7 +204,7 @@ int setScreenshotFolder(lua_State* L) {
         ghoul::filesystem::FileSystem::Override::Yes
     );
 
-    global::windowDelegate->setScreenshotFolder(folder);
+    global::windowDelegate->setScreenshotFolder(folder.string());
     return 0;
 }
 

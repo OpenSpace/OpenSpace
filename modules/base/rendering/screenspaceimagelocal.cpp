@@ -96,7 +96,7 @@ ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary
 
     if (p.texturePath.has_value()) {
         if (std::filesystem::is_regular_file(absPath(*p.texturePath))) {
-            _texturePath = absPath(*p.texturePath);
+            _texturePath = absPath(*p.texturePath).string();
         }
         else {
             LWARNINGC(
@@ -116,7 +116,7 @@ bool ScreenSpaceImageLocal::deinitializeGL() {
 void ScreenSpaceImageLocal::update() {
     if (_textureIsDirty && !_texturePath.value().empty()) {
         std::unique_ptr<ghoul::opengl::Texture> texture =
-            ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
+            ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath).string());
 
         if (texture) {
             // Images don't need to start on 4-byte boundaries, for example if the

@@ -171,7 +171,7 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
     , _scaling(ScalingInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(10.f))
 {
     if (dictionary.hasValue<std::string>(KeyDataSource)) {
-        _filename = absPath(dictionary.value<std::string>(KeyDataSource));
+        _filename = absPath(dictionary.value<std::string>(KeyDataSource)).string();
     }
     else {
         LERROR(fmt::format("Node did not contain a valid '{}'", KeyDataSource));
@@ -223,7 +223,7 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
     if (dictionary.hasValue<std::string>(KeyTransferFunction)) {
         _transferFunctionPath = absPath(
             dictionary.value<std::string>(KeyTransferFunction)
-        );
+        ).string();
         _transferFunction = std::make_shared<TransferFunction>(_transferFunctionPath);
     }
     else {
@@ -476,7 +476,9 @@ bool RenderableMultiresVolume::initializeSelector() {
                     LINFO(fmt::format(
                         "Loading histograms from scene data: {}", _errorHistogramsPath
                     ));
-                    success &= _errorHistogramManager->loadFromFile(_errorHistogramsPath);
+                    success &= _errorHistogramManager->loadFromFile(
+                        _errorHistogramsPath.string()
+                    );
                 }
                 else {
                     // Build histograms from tsp file.

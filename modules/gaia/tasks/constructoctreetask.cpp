@@ -295,8 +295,10 @@ ConstructOctreeTask::ConstructOctreeTask(const ghoul::Dictionary& dictionary) {
 }
 
 std::string ConstructOctreeTask::description() {
-    return "Read bin file (or files in folder): " + _inFileOrFolderPath + "\n "
-        "and write octree data file (or files) into: " + _outFileOrFolderPath + "\n";
+    return fmt::format(
+        "Read bin file (or files in folder): {} and write octree data file (or files) "
+        "into: {}", _inFileOrFolderPath, _outFileOrFolderPath
+    );
 }
 
 void ConstructOctreeTask::perform(const Task::ProgressCallback& onProgress) {
@@ -323,7 +325,7 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
 
     _octreeManager->initOctree(0, _maxDist, _maxStarsPerNode);
 
-    LINFO("Reading data file: " + _inFileOrFolderPath);
+    LINFO(fmt::format("Reading data file: {}", _inFileOrFolderPath));
 
     LINFO(fmt::format(
         "MAX DIST: {} - MAX STARS PER NODE: {}",
@@ -404,8 +406,7 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
     }
     else {
         LERROR(fmt::format(
-            "Error opening file '{}' for loading preprocessed file!",
-            _inFileOrFolderPath
+            "Error opening file {} for loading preprocessed file", _inFileOrFolderPath
         ));
     }
     LINFO(fmt::format("{} of {} read stars were filtered", nFilteredStars, nTotalStars));
@@ -413,7 +414,7 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
     // Slice LOD data before writing to files.
     _octreeManager->sliceLodData();
 
-    LINFO("Writing octree to: " + _outFileOrFolderPath);
+    LINFO(fmt::format("Writing octree to: {}", _outFileOrFolderPath));
     std::ofstream outFileStream(_outFileOrFolderPath, std::ofstream::binary);
     if (outFileStream.good()) {
         if (nValues == 0) {
@@ -425,7 +426,7 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
     }
     else {
         LERROR(fmt::format(
-            "Error opening file: {} as output data file.", _outFileOrFolderPath
+            "Error opening file: {} as output data file", _outFileOrFolderPath
         ));
     }
 }
@@ -560,7 +561,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(
         std::thread t(
             &OctreeManager::writeToMultipleFiles,
             _indexOctreeManager,
-            _outFileOrFolderPath,
+            _outFileOrFolderPath.string(),
             idx
         );
         writeThreads[idx] = std::move(t);
@@ -590,17 +591,19 @@ void ConstructOctreeTask::constructOctreeFromFolder(
     //    " - 5000kPc is " + std::to_string(starsOutside5000));
 
     // Write index file of Octree structure.
-    std::string indexFileOutPath = _outFileOrFolderPath + "index.bin";
+    std::filesystem::path indexFileOutPath = fmt::format(
+        "{}/index.bin", _outFileOrFolderPath.string()
+    );
     std::ofstream outFileStream(indexFileOutPath, std::ofstream::binary);
     if (outFileStream.good()) {
-        LINFO("Writing index file!");
+        LINFO("Writing index file");
         _indexOctreeManager->writeToFile(outFileStream, false);
 
         outFileStream.close();
     }
     else {
         LERROR(fmt::format(
-            "Error opening file: {} as index output file.", indexFileOutPath
+            "Error opening file: {} as index output file", indexFileOutPath
         ));
     }
 

@@ -44,7 +44,7 @@ ImageSequencer& ImageSequencer::ref() {
 void ImageSequencer::initialize() {
     ghoul_assert(_instance == nullptr, "Instance already has been initialized");
     _instance = new ImageSequencer;
-    _instance->_defaultCaptureImage = absPath("${DATA}/placeholder.png");
+    _instance->_defaultCaptureImage = absPath("${DATA}/placeholder.png").string();
 }
 
 void ImageSequencer::deinitialize() {

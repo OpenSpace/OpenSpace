@@ -131,7 +131,7 @@ void ReadFitsTask::readSingleFitsFile(const Task::ProgressCallback& progressCall
 
     FitsFileReader fileReader(false);
     std::vector<float> fullData = fileReader.readFitsFile(
-        _inFileOrFolderPath,
+        _inFileOrFolderPath.string(),
         nValuesPerStar,
         _firstRow,
         _lastRow,
@@ -165,7 +165,7 @@ void ReadFitsTask::readSingleFitsFile(const Task::ProgressCallback& progressCall
     }
     else {
         LERROR(fmt::format(
-            "Error opening file: {} as output data file.", _outFileOrFolderPath
+            "Error opening file: {} as output data file", _outFileOrFolderPath
         ));
     }
 }
@@ -301,7 +301,9 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
 int ReadFitsTask::writeOctantToFile(const std::vector<float>& octantData, int index,
                                     std::vector<bool>& isFirstWrite, int nValuesPerStar)
 {
-    std::string outPath = fmt::format("{}octant_{}.bin", _outFileOrFolderPath, index);
+    std::string outPath = fmt::format(
+        "{}octant_{}.bin", _outFileOrFolderPath.string(), index
+    );
     std::ofstream fileStream(outPath, std::ofstream::binary | std::ofstream::app);
     if (fileStream.good()) {
         int32_t nValues = static_cast<int32_t>(octantData.size());

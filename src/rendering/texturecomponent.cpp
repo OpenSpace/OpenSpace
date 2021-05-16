@@ -82,7 +82,7 @@ void TextureComponent::loadFromFile(const std::filesystem::path& path) {
         using namespace ghoul::io;
         using namespace ghoul::opengl;
         std::unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
-            absPath(path.string())
+            absPath(path.string()).string()
         );
 
         if (texture) {

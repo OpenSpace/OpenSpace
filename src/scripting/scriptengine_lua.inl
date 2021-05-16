@@ -147,7 +147,7 @@ int absolutePath(lua_State* L) {
         ghoul::lua::PopValue::Yes
     );
 
-    ghoul::lua::push(L, absPath(path));
+    ghoul::lua::push(L, absPath(path).string());
 
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
@@ -336,10 +336,10 @@ int unzipFile(lua_State* L) {
         "lua::unzipFile"
     );
 
-    std::string source = absPath(
+    std::filesystem::path source = absPath(
         ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::No)
     );
-    std::string dest = absPath(
+    std::filesystem::path dest = absPath(
         ghoul::lua::value<std::string>(L, 2, ghoul::lua::PopValue::No)
     );
 
@@ -350,7 +350,7 @@ int unzipFile(lua_State* L) {
 
     auto onExtractEntry = [](const char*, void*) { return 0; };
     int arg = 2;
-    zip_extract(source.c_str(), dest.c_str(), onExtractEntry, &arg);
+    zip_extract(source.string().c_str(), dest.string().c_str(), onExtractEntry, &arg);
 
     if (deleteSource && std::filesystem::is_regular_file(source)) {
         std::filesystem::remove(source);
@@ -367,14 +367,14 @@ int unzipFile(lua_State* L) {
  */
 int saveLastChangeToProfile(lua_State* L) {
     std::string asset = global::configuration->asset;
-    std::string logFilePath = absPath(global::configuration->scriptLog);
+    std::filesystem::path logFilePath = absPath(global::configuration->scriptLog);
     std::ifstream logfile(logFilePath);
     std::string actualLastLine;
     std::string lastLine;
     std::string line;
     //add check for log file
     if (!logfile.good()) {
-        ghoul::lua::push(L, fmt::format("Could not open scriptlog '{}'", logFilePath));
+        ghoul::lua::push(L, fmt::format("Could not open scriptlog {}", logFilePath));
         printInternal(ghoul::logging::LogLevel::Error, L);
     }
     while (std::getline (logfile,line)) {
@@ -389,21 +389,22 @@ int saveLastChangeToProfile(lua_State* L) {
     }
 
     std::string dataString = "${ASSETS}/";
-    std::string assetPath = absPath(fmt::format("{}{}.scene", dataString, asset));
-    std::string tempAssetPath = absPath(fmt::format("{}{}.scene.tmp", dataString, asset));
+    std::filesystem::path assetPath = absPath(fmt::format(
+        "{}{}.scene", dataString, asset
+    ));
+    std::filesystem::path tempAssetPath = absPath(fmt::format(
+        "{}{}.scene.tmp", dataString, asset
+    ));
     std::string strReplace = "--customizationsend";
     std::string strNew = fmt::format("{}\n{}",actualLastLine, strReplace);
     std::ifstream filein(assetPath);
     std::ofstream fileout(tempAssetPath);
     if (!filein) {
-        ghoul::lua::push(L, fmt::format("Could not open profile '{}'", assetPath));
+        ghoul::lua::push(L, fmt::format("Could not open profile {}", assetPath));
         printInternal(ghoul::logging::LogLevel::Error, L);
     }
     if (!fileout) {
-        ghoul::lua::push(
-            L,
-            fmt::format("Could not open tmp profile '{}'", tempAssetPath)
-        );
+        ghoul::lua::push(L, fmt::format("Could not open tmp profile {}", tempAssetPath));
         printInternal(ghoul::logging::LogLevel::Error, L);
     }
 
@@ -422,10 +423,11 @@ int saveLastChangeToProfile(lua_State* L) {
         if (std::filesystem::is_regular_file(assetPath)) {
             std::filesystem::remove(assetPath);
         }
-        int success = rename(tempAssetPath.c_str(), assetPath.c_str());
+        int success = rename(tempAssetPath.string().c_str(), assetPath.string().c_str());
         if (success != 0) {
-            std::string error = fmt::format("Error renaming file {} to {}",
-            tempAssetPath, assetPath);
+            std::string error = fmt::format(
+                "Error renaming file {} to {}", tempAssetPath, assetPath
+            );
             ghoul::lua::push(L, error);
             printInternal(ghoul::logging::LogLevel::Error, L);
             return -1;

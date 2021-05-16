@@ -172,8 +172,8 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _sourceDirectory = absPath(p.sourceDirectory);
-    _transferFunctionPath = absPath(p.transferFunction);
+    _sourceDirectory = absPath(p.sourceDirectory).string();
+    _transferFunctionPath = absPath(p.transferFunction).string();
     _transferFunction = std::make_shared<openspace::TransferFunction>(
         _transferFunctionPath,
         [](const openspace::TransferFunction&) {}
@@ -210,10 +210,10 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
 RenderableTimeVaryingVolume::~RenderableTimeVaryingVolume() {}
 
 void RenderableTimeVaryingVolume::initializeGL() {
-    std::string sequenceDir = absPath(_sourceDirectory);
+    std::filesystem::path sequenceDir = absPath(_sourceDirectory);
 
     if (!std::filesystem::is_directory(sequenceDir)) {
-        LERROR(fmt::format("Could not load sequence directory '{}'", sequenceDir));
+        LERROR(fmt::format("Could not load sequence directory {}", sequenceDir));
         return;
     }
 
