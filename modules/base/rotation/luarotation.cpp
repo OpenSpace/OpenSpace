@@ -69,10 +69,8 @@ LuaRotation::LuaRotation()
 
     _luaScriptFile.onChange([&]() {
         requireUpdate();
-        _fileHandle = std::make_unique<ghoul::filesystem::File>(_luaScriptFile);
-        _fileHandle->setCallback([&](const ghoul::filesystem::File&) {
-            requireUpdate();
-        });
+        _fileHandle = std::make_unique<ghoul::filesystem::File>(_luaScriptFile.value());
+        _fileHandle->setCallback([this]() { requireUpdate(); });
     });
 }
 

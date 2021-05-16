@@ -95,8 +95,6 @@
 
 namespace {
     constexpr const char* _loggerCat = "OpenSpaceEngine";
-    constexpr const int CacheVersion = 1;
-
 } // namespace
 
 namespace openspace {
@@ -155,9 +153,7 @@ void OpenSpaceEngine::registerPathTokens() {
     // overwrite the default path of the cfg directory
     using T = std::string;
     for (const std::pair<const T, T>& path : global::configuration->pathTokens) {
-        std::string fullKey = ghoul::filesystem::FileSystem::TokenOpeningBraces +
-            path.first +
-            ghoul::filesystem::FileSystem::TokenClosingBraces;
+        std::string fullKey = "${" + path.first + "}";
         LDEBUG(fmt::format("Registering path {}: {}", fullKey, path.second));
 
         const bool overrideBase = (fullKey == "${BASE}");
@@ -210,14 +206,13 @@ void OpenSpaceEngine::initialize() {
 
     // Create directories that doesn't exist
     for (const std::string& token : FileSys.tokens()) {
-        if (!FileSys.directoryExists(token)) {
-            std::string p = absPath(token);
-            FileSys.createDirectory(p, ghoul::filesystem::FileSystem::Recursive::Yes);
+        if (!std::filesystem::is_directory(token)) {
+            std::filesystem::create_directories(absPath(token));
         }
     }
 
     try {
-        FileSys.createCacheManager(cacheFolder, CacheVersion);
+        FileSys.createCacheManager(cacheFolder);
     }
     catch (const ghoul::RuntimeError& e) {
         LFATAL("Could not create Cache Manager");
@@ -307,11 +302,11 @@ void OpenSpaceEngine::initialize() {
         std::string outputAsset = outputScenePath + "/" + global::configuration->profile
             + ".asset";
 
-        if (FileSys.fileExists(inputUserProfile)) {
+        if (std::filesystem::is_regular_file(inputUserProfile)) {
             inputProfile = inputUserProfile;
         }
 
-        if (!FileSys.fileExists(inputProfile)) {
+        if (!std::filesystem::is_regular_file(inputProfile)) {
             LERROR(fmt::format(
                 "Could not load profile '{}': File does not exist", inputProfile)
             );
@@ -352,7 +347,7 @@ void OpenSpaceEngine::initialize() {
     // Set up asset loader
     global::openSpaceEngine->_assetManager = std::make_unique<AssetManager>(
         global::scriptEngine->luaState(),
-        FileSys.absPath("${ASSETS}")
+        absPath("${ASSETS}")
     );
 
     global::scriptEngine->addLibrary(
@@ -962,16 +957,13 @@ void OpenSpaceEngine::createUserDirectoriesIfNecessary() {
     LTRACE(absPath("${USER}"));
 
     if (!std::filesystem::exists(absPath("${USER_ASSETS}"))) {
-        FileSys.createDirectory(absPath("${USER_ASSETS}"),
-            ghoul::filesystem::FileSystem::Recursive::Yes);
+        std::filesystem::create_directories(absPath("${USER_ASSETS}"));
     }
     if (!std::filesystem::exists(absPath("${USER_PROFILES}"))) {
-        FileSys.createDirectory(absPath("${USER_PROFILES}"),
-            ghoul::filesystem::FileSystem::Recursive::Yes);
+        std::filesystem::create_directories(absPath("${USER_PROFILES}"));
     }
     if (!std::filesystem::exists(absPath("${USER_CONFIG}"))) {
-        FileSys.createDirectory(absPath("${USER_CONFIG}"),
-            ghoul::filesystem::FileSystem::Recursive::Yes);
+        std::filesystem::create_directories(absPath("${USER_CONFIG}"));
     }
 }
 
@@ -984,7 +976,7 @@ void OpenSpaceEngine::runGlobalCustomizationScripts() {
 
     for (const std::string& script : global::configuration->globalCustomizationScripts) {
         std::string s = absPath(script);
-        if (FileSys.fileExists(s)) {
+        if (std::filesystem::is_regular_file(s)) {
             try {
                 LINFO(fmt::format("Running global customization script: {}", s));
                 ghoul::lua::runScriptFile(state, s);
@@ -1004,19 +996,19 @@ void OpenSpaceEngine::loadFonts() {
     using T = std::string;
     for (const std::pair<const T, T>& font : global::configuration->fonts) {
         std::string key = font.first;
-        std::string fontName = absPath(font.second);
+        std::filesystem::path fontName = absPath(font.second);
 
-        if (!FileSys.fileExists(fontName)) {
-            LERROR(fmt::format("Could not find font '{}' for key '{}'", fontName, key));
+        if (!std::filesystem::is_regular_file(fontName)) {
+            LERROR(fmt::format("Could not find font {} for key '{}'", fontName, key));
             continue;
         }
 
-        LDEBUG(fmt::format("Registering font '{}' with key '{}'", fontName, key));
+        LDEBUG(fmt::format("Registering font {} with key '{}'", fontName, key));
         bool success = global::fontManager->registerFontPath(key, fontName);
 
         if (!success) {
             LERROR(fmt::format(
-                "Error registering font '{}' with key '{}'", fontName, key
+                "Error registering font {} with key '{}'", fontName, key
             ));
         }
     }

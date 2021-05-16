@@ -34,6 +34,7 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/dictionary.h>
+#include <filesystem>
 #include <fstream>
 #include <numeric>
 #include <memory>
@@ -171,8 +172,9 @@ void UrlSynchronization::start() {
                 );
                 _filename = lastPartOfUrl;
             }
-            std::string fileDestination = directory() +
-                ghoul::filesystem::FileSystem::PathSeparator + _filename + TempSuffix;
+            std::string fileDestination = fmt::format(
+                "{}/{}{}", directory(), _filename, TempSuffix
+            );
 
             std::unique_ptr<AsyncHttpFileDownload> download =
                 std::make_unique<AsyncHttpFileDownload>(
@@ -233,7 +235,9 @@ void UrlSynchronization::start() {
                     tempName.size() - strlen(TempSuffix)
                 );
 
-                FileSys.deleteFile(originalName);
+                if (std::filesystem::is_regular_file(originalName)) {
+                    std::filesystem::remove(originalName);
+                }
                 int success = rename(tempName.c_str(), originalName.c_str());
                 if (success != 0) {
                     LERRORC(
@@ -288,7 +292,7 @@ bool UrlSynchronization::nTotalBytesIsKnown() {
 void UrlSynchronization::createSyncFile() {
     std::string dir = directory();
     std::string filepath = dir + ".ossync";
-    FileSys.createDirectory(dir, ghoul::filesystem::FileSystem::Recursive::Yes);
+    std::filesystem::create_directories(dir);
     std::ofstream syncFile(filepath, std::ofstream::out);
     syncFile << "Synchronized";
     syncFile.close();
@@ -296,17 +300,11 @@ void UrlSynchronization::createSyncFile() {
 
 bool UrlSynchronization::hasSyncFile() {
     const std::string& path = directory() + ".ossync";
-    return FileSys.fileExists(path);
+    return std::filesystem::is_regular_file(path);
 }
 
 std::string UrlSynchronization::directory() {
-    ghoul::filesystem::Directory d(
-        _synchronizationRoot + ghoul::filesystem::FileSystem::PathSeparator +
-        "url" + ghoul::filesystem::FileSystem::PathSeparator +
-        _identifier + ghoul::filesystem::FileSystem::PathSeparator +
-        "files"
-    );
-
+    std::string d = fmt::format("{}/url/{}/files", _synchronizationRoot, _identifier);
     return absPath(d);
 }
 

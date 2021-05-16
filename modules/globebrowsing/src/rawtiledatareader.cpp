@@ -34,6 +34,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
+#include <filesystem>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -450,7 +451,7 @@ void RawTileDataReader::initialize() {
     if (module.isWMSCachingEnabled()) {
         ZoneScopedN("WMS Caching")
         std::string c;
-        if (FileSys.fileExists(_datasetFilePath)) {
+        if (std::filesystem::is_regular_file(_datasetFilePath)) {
             // Only replace the 'content' if the dataset is an XML file and we want to do
             // caching
             std::ifstream t(_datasetFilePath);

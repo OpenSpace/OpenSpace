@@ -31,6 +31,7 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <algorithm>
+#include <filesystem>
 
 namespace openspace {
 
@@ -158,8 +159,8 @@ void DataProcessorKameleon::setDimensions(glm::size3_t dimensions) {
 }
 
 void DataProcessorKameleon::initializeKameleonWrapper(std::string path) {
-    const std::string& extension = ghoul::filesystem::File(absPath(path)).fileExtension();
-    if (FileSys.fileExists(absPath(path)) && extension == "cdf") {
+    std::filesystem::path extension = std::filesystem::path(absPath(path)).extension();
+    if (std::filesystem::is_regular_file(absPath(path)) && extension == ".cdf") {
         if (_kw) {
             _kw->close();
         }

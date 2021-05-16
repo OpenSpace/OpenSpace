@@ -30,6 +30,7 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/luastate.h>
 #include <ghoul/lua/lua_helper.h>
+#include <filesystem>
 
 TEST_CASE("CreateSingleColorImage: Create image and check return value",
           "[createsinglecolorimage]")
@@ -126,7 +127,7 @@ TEST_CASE("CreateSingleColorImage: Check if file was created",
 
     CHECK(res == 1);
     std::string path = ghoul::lua::value<std::string>(L, 1);
-    CHECK(FileSys.fileExists(path));
+    CHECK(std::filesystem::is_regular_file(path));
 }
 
 TEST_CASE("CreateSingleColorImage: Load created image", "[createsinglecolorimage]") {

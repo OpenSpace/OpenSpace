@@ -45,6 +45,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
+#include <filesystem>
 
 namespace {
     constexpr const char* _loggerCat = "RenderableKameleonVolume";
@@ -323,7 +324,7 @@ bool RenderableKameleonVolume::isCachingEnabled() const {
 }
 
 void RenderableKameleonVolume::load() {
-    if (!FileSys.fileExists(ghoul::filesystem::File(_sourcePath))) {
+    if (!std::filesystem::is_regular_file(_sourcePath.value())) {
         LERROR(fmt::format("File '{}' does not exist", _sourcePath.value()));
         return;
     }
@@ -331,13 +332,11 @@ void RenderableKameleonVolume::load() {
         loadFromPath(_sourcePath);
         return;
     }
-    ghoul::filesystem::File sourceFile(_sourcePath);
     std::string cachePath = FileSys.cacheManager()->cachedFilename(
-        sourceFile.baseName(),
-        cacheSuffix(),
-        ghoul::filesystem::CacheManager::Persistent::Yes
+        std::filesystem::path(_sourcePath.value()).stem(),
+        cacheSuffix()
     );
-    if (FileSys.fileExists(cachePath)) {
+    if (std::filesystem::is_regular_file(cachePath)) {
         loadRaw(cachePath);
     }
     else {
@@ -352,15 +351,8 @@ std::string RenderableKameleonVolume::cacheSuffix() const {
 }
 
 void RenderableKameleonVolume::loadFromPath(const std::string& path) {
-    ghoul::filesystem::File file(path);
-    std::string extension = file.fileExtension();
-    std::transform(
-        extension.begin(),
-        extension.end(),
-        extension.begin(),
-        [](char v) { return static_cast<char>(tolower(v)); }
-    );
-    if (extension == "cdf") {
+    std::filesystem::path extension = std::filesystem::path(path).extension();
+    if (extension == ".cdf" || extension == ".CDF") {
         loadCdf(path);
     }
     else {

@@ -38,7 +38,7 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
-
+#include <filesystem>
 
 namespace {
     constexpr const char* _loggerCat = "GUI";
@@ -53,7 +53,7 @@ namespace {
     constexpr const std::array<const char*, 2> UniformNames = { "tex", "ortho" };
 
     void addScreenSpaceRenderableLocal(std::string identifier, std::string texturePath) {
-        if (!FileSys.fileExists(absPath(texturePath))) {
+        if (!std::filesystem::is_regular_file(absPath(texturePath))) {
             LWARNING(fmt::format("Could not find image '{}'", texturePath));
             return;
         }
@@ -206,8 +206,7 @@ void GUI::deinitialize() {
 void GUI::initializeGL() {
     std::string cachedFile = FileSys.cacheManager()->cachedFilename(
         configurationFile,
-        "",
-        ghoul::filesystem::CacheManager::Persistent::Yes
+        ""
     );
 
     LDEBUG(fmt::format("Using {} as ImGUI cache location", cachedFile));

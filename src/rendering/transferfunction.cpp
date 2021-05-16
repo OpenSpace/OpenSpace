@@ -32,26 +32,13 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
 #include <iterator>
+#include <filesystem>
 #include <fstream>
 #include <string>
 
 namespace {
     constexpr const char* _loggerCat = "TransferFunction";
-
-    // @TODO Replace with Filesystem::File extension
-    bool hasExtension(const std::string& filepath, const std::string& extension) {
-        std::string ending = "." + extension;
-        if (filepath.length() > ending.length()) {
-            return (0 == filepath.compare(
-                filepath.length() - ending.length(),
-                ending.length(), ending));
-        }
-        else {
-            return false;
-        }
-    }
 } // namespace
-
 
 namespace openspace {
 
@@ -70,20 +57,15 @@ void TransferFunction::setPath(const std::string& filepath) {
         _file = nullptr;
     }
     std::string f = absPath(filepath);
-    if (!FileSys.fileExists(f)) {
+    if (!std::filesystem::is_regular_file(f)) {
         LERROR("Could not find transfer function file.");
         _file = nullptr;
         return;
     }
     _filepath = f;
-    _file = std::make_unique<ghoul::filesystem::File>(
-        _filepath,
-        ghoul::filesystem::File::RawPath::Yes
-    );
+    _file = std::make_unique<ghoul::filesystem::File>(_filepath);
     _needsUpdate = true;
-    _file->setCallback([this](const ghoul::filesystem::File&) {
-        _needsUpdate = true;
-    });
+    _file->setCallback([this]() { _needsUpdate = true; });
 }
 
 ghoul::opengl::Texture& TransferFunction::texture() {
@@ -94,7 +76,7 @@ ghoul::opengl::Texture& TransferFunction::texture() {
 
 void TransferFunction::update() {
     if (_needsUpdate) {
-        if (hasExtension(_filepath, "txt")) {
+        if (std::filesystem::path(_filepath).extension() == ".txt") {
             setTextureFromTxt();
         }
         else {
@@ -114,7 +96,7 @@ void TransferFunction::setCallback(TfChangedCallback callback) {
 
 void TransferFunction::setTextureFromTxt() {
     std::ifstream in;
-    in.open(_filepath.c_str());
+    in.open(_filepath);
 
     if (!in.is_open()) {
         throw ghoul::FileNotFoundError(_filepath);

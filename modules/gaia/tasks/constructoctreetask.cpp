@@ -28,9 +28,9 @@
 #include <openspace/documentation/verifier.h>
 #include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/filesystem/directory.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <filesystem>
 #include <fstream>
 #include <thread>
 
@@ -452,8 +452,16 @@ void ConstructOctreeTask::constructOctreeFromFolder(
     //int starsOutside2000 = 0;
     //int starsOutside5000 = 0;
 
-    ghoul::filesystem::Directory currentDir(_inFileOrFolderPath);
-    std::vector<std::string> allInputFiles = currentDir.readFiles();
+    std::vector<std::filesystem::path> allInputFiles;
+    if (std::filesystem::is_directory(_inFileOrFolderPath)) {
+        namespace fs = std::filesystem;
+        for (const fs::directory_entry& e : fs::directory_iterator(_inFileOrFolderPath)) {
+            if (!e.is_regular_file()) {
+                allInputFiles.push_back(e.path());
+            }
+        }
+    }
+    
     std::vector<float> filterValues;
     auto writeThreads = std::vector<std::thread>(8);
 
@@ -467,10 +475,10 @@ void ConstructOctreeTask::constructOctreeFromFolder(
     ));
 
     for (size_t idx = 0; idx < allInputFiles.size(); ++idx) {
-        std::string inFilePath = allInputFiles[idx];
+        std::filesystem::path inFilePath = allInputFiles[idx];
         int nStarsInfile = 0;
 
-        LINFO("Reading data file: " + inFilePath);
+        LINFO(fmt::format("Reading data file: {}", inFilePath));
 
         std::ifstream inFileStream(inFilePath, std::ifstream::binary);
         if (inFileStream.good()) {
@@ -528,7 +536,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(
         }
         else {
             LERROR(fmt::format(
-                "Error opening file '{}' for loading preprocessed file!", inFilePath
+                "Error opening file {} for loading preprocessed file!", inFilePath
             ));
         }
 

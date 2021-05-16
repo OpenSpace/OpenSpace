@@ -193,7 +193,7 @@ int setScreenshotFolder(lua_State* L) {
     std::string arg = ghoul::lua::value<std::string>(L);
     lua_pop(L, 0);
 
-    std::string folder = FileSys.absolutePath(arg);
+    std::string folder = absPath(arg);
     if (!std::filesystem::exists(folder)) {
         std::filesystem::create_directory(folder);
     }
@@ -332,13 +332,8 @@ int createSingleColorImage(lua_State* L) {
 
     const glm::dvec3 color = colorDict.value<glm::dvec3>(key);
 
-    const std::string& fileName = FileSys.cacheManager()->cachedFilename(
-        fmt::format("{}.ppm", name),
-        "",
-        ghoul::filesystem::CacheManager::Persistent::Yes
-    );
-
-    const bool hasCachedFile = FileSys.fileExists(fileName);
+    std::string fileName = FileSys.cacheManager()->cachedFilename(name + ".ppm", "");
+    const bool hasCachedFile = std::filesystem::is_regular_file(fileName);
     if (hasCachedFile) {
         LDEBUGC("OpenSpaceEngine", fmt::format("Cached file '{}' used", fileName));
         ghoul::lua::push(L, fileName);

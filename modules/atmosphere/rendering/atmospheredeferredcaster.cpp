@@ -213,7 +213,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             renderData.camera.sgctInternal.projectionMatrix()
         ) * renderData.camera.combinedViewMatrix();
 
-        const float totalAtmosphere = (scaledRadius + ATM_EPS);
+        const double totalAtmosphere = (scaledRadius + ATM_EPS);
         if (!isAtmosphereInFrustum(MV, tPlanetPosWorld, totalAtmosphere)) {
             program.setUniform(_uniformCache.cullAtmosphere, 1);
         }

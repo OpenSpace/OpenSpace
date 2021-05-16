@@ -35,6 +35,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
+#include <filesystem>
 
 namespace {
     constexpr const char* _loggerCat = "CEF BrowserInstance";
@@ -96,7 +97,7 @@ void BrowserInstance::loadUrl(std::string url) {
 }
 
 bool BrowserInstance::loadLocalPath(std::string path) {
-    if (!FileSys.fileExists(path)) {
+    if (!std::filesystem::is_regular_file(path)) {
         LDEBUG(fmt::format("Could not find path `{}`, verify that it is correct.", path));
         return false;
     }

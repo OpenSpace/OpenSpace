@@ -54,6 +54,7 @@
 #include <ghoul/opengl/texture.h>
 #include <algorithm>
 #include <chrono>
+#include <filesystem>
 #include <fstream>
 #include <iterator>
 
@@ -454,14 +455,12 @@ bool RenderableMultiresVolume::initializeSelector() {
     switch (_selector) {
         case Selector::TF:
             if (_errorHistogramManager) {
-                std::stringstream cacheName;
-                ghoul::filesystem::File f = _filename;
-                cacheName << f.baseName() << "_" << nHistograms << "_errorHistograms";
-                std::string cacheFilename;
-                cacheFilename = FileSys.cacheManager()->cachedFilename(
-                    cacheName.str(),
-                    "",
-                    ghoul::filesystem::CacheManager::Persistent::Yes
+                 std::string cacheFilename = FileSys.cacheManager()->cachedFilename(
+                     fmt::format(
+                         "{}_{}_errorHistograms",
+                         std::filesystem::path(_filename).stem().string(), nHistograms
+                     ),
+                     ""
                 );
                 std::ifstream cacheFile(cacheFilename, std::ios::in | std::ios::binary);
                 if (cacheFile.is_open()) {
@@ -472,7 +471,7 @@ bool RenderableMultiresVolume::initializeSelector() {
                     );
                     success &= _errorHistogramManager->loadFromFile(cacheFilename);
                 }
-                else if (_errorHistogramsPath != "") {
+                else if (!_errorHistogramsPath.empty()) {
                     // Read histograms from scene data.
                     LINFO(fmt::format(
                         "Loading histograms from scene data: {}", _errorHistogramsPath
@@ -494,14 +493,11 @@ bool RenderableMultiresVolume::initializeSelector() {
 
         case Selector::SIMPLE:
             if (_histogramManager) {
-                std::stringstream cacheName;
-                ghoul::filesystem::File f = _filename;
-                cacheName << f.baseName() << "_" << nHistograms << "_histograms";
-                std::string cacheFilename;
-                cacheFilename = FileSys.cacheManager()->cachedFilename(
-                    cacheName.str(),
-                    "",
-                    ghoul::filesystem::CacheManager::Persistent::Yes
+                std::string cacheFilename = FileSys.cacheManager()->cachedFilename(
+                    fmt::format("{}_{}_histogram",
+                        std::filesystem::path(_filename).stem().string(), nHistograms
+                    ),
+                    ""
                 );
                 std::ifstream cacheFile(cacheFilename, std::ios::in | std::ios::binary);
                 if (cacheFile.is_open()) {
@@ -528,12 +524,12 @@ bool RenderableMultiresVolume::initializeSelector() {
 
         case Selector::LOCAL:
             if (_localErrorHistogramManager) {
-                ghoul::filesystem::File f = _filename;
-                std::string cacheFilename;
-                cacheFilename = FileSys.cacheManager()->cachedFilename(
-                    fmt::format("{}_{}_localErrorHistograms", f.baseName(), nHistograms),
-                    "",
-                    ghoul::filesystem::CacheManager::Persistent::Yes
+                 std::string cacheFilename = FileSys.cacheManager()->cachedFilename(
+                    fmt::format(
+                        "{}_{}_localErrorHistograms",
+                        std::filesystem::path(_filename).stem().string(), nHistograms
+                    ),
+                    ""
                 );
                 std::ifstream cacheFile(cacheFilename, std::ios::in | std::ios::binary);
                 if (cacheFile.is_open()) {
@@ -628,8 +624,9 @@ void RenderableMultiresVolume::update(const UpdateData& data) {
 
         // Make sure that the directory exists
         ghoul::filesystem::File file(_statsFileName);
-        ghoul::filesystem::Directory directory(file.directoryName());
-        FileSys.createDirectory(directory, ghoul::filesystem::FileSystem::Recursive::Yes);
+        std::filesystem::path directory =
+            std::filesystem::path(_statsFileName).parent_path();
+        std::filesystem::create_directories(directory);
 
         std::ofstream ofs(_statsFileName, std::ofstream::out);
 

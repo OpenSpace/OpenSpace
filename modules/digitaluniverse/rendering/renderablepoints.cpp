@@ -40,6 +40,7 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <array>
+#include <filesystem>
 #include <fstream>
 #include <locale>
 #include <cstdint>
@@ -176,13 +177,11 @@ RenderablePoints::RenderablePoints(const ghoul::Dictionary& dictionary)
     if (p.texture.has_value()) {
         _spriteTexturePath = absPath(*p.texture);
         _spriteTextureFile = std::make_unique<ghoul::filesystem::File>(
-            _spriteTexturePath
+            _spriteTexturePath.value()
         );
 
-        _spriteTexturePath.onChange([&] { _spriteTextureIsDirty = true; });
-        _spriteTextureFile->setCallback(
-            [&](const ghoul::filesystem::File&) { _spriteTextureIsDirty = true; }
-        );
+        _spriteTexturePath.onChange([this]() { _spriteTextureIsDirty = true; });
+        _spriteTextureFile->setCallback([this]() { _spriteTextureIsDirty = true; });
         addProperty(_spriteTexturePath);
 
         _hasSpriteTexture = true;
@@ -374,23 +373,17 @@ void RenderablePoints::update(const UpdateData&) {
             );
 
             _spriteTextureFile = std::make_unique<ghoul::filesystem::File>(
-                _spriteTexturePath
+                _spriteTexturePath.value()
             );
-            _spriteTextureFile->setCallback(
-                [&](const ghoul::filesystem::File&) { _spriteTextureIsDirty = true; }
-            );
+            _spriteTextureFile->setCallback([this]() { _spriteTextureIsDirty = true; });
         }
         _spriteTextureIsDirty = false;
     }
 }
 
 bool RenderablePoints::loadData() {
-    std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-        _speckFile,
-        ghoul::filesystem::CacheManager::Persistent::Yes
-    );
-
-    bool hasCachedFile = FileSys.fileExists(cachedFile);
+    std::string cachedFile = FileSys.cacheManager()->cachedFilename(_speckFile);
+    bool hasCachedFile = std::filesystem::is_regular_file(cachedFile);
     if (hasCachedFile) {
         LINFO(fmt::format(
             "Cached file '{}' used for Speck file '{}'",
@@ -553,7 +546,9 @@ bool RenderablePoints::loadCachedFile(const std::string& file) {
         if (version != CurrentCacheVersion) {
             LINFO("The format of the cached file has changed: deleting old cache");
             fileStream.close();
-            FileSys.deleteFile(file);
+            if (std::filesystem::is_regular_file(file)) {
+                std::filesystem::remove(file);
+            }
             return false;
         }
 

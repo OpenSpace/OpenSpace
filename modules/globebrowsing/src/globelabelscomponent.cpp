@@ -338,12 +338,11 @@ void GlobeLabelsComponent::initializeFonts() {
 
 bool GlobeLabelsComponent::loadLabelsData(const std::string& file) {
     std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-        ghoul::filesystem::File(file),
-        "GlobeLabelsComponent|" + identifier(),
-        ghoul::filesystem::CacheManager::Persistent::Yes
+        file,
+        "GlobeLabelsComponent|" + identifier()
     );
 
-    bool hasCachedFile = FileSys.fileExists(cachedFile);
+    bool hasCachedFile = std::filesystem::is_regular_file(cachedFile);
     if (hasCachedFile) {
         LINFO(fmt::format("Cached file '{}' used for labels file: {}", cachedFile, file));
 
@@ -476,7 +475,9 @@ bool GlobeLabelsComponent::loadCachedFile(const std::string& file) {
     if (version != CurrentCacheVersion) {
         LINFO("The format of the cached file has changed: deleting old cache");
         fileStream.close();
-        FileSys.deleteFile(file);
+        if (std::filesystem::is_regular_file(file)) {
+            std::filesystem::remove(file);
+        }
         return false;
     }
 

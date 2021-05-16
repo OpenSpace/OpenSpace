@@ -47,6 +47,7 @@
 #include <ghoul/glm.h>
 #include <glm/gtx/string_cast.hpp>
 #include <array>
+#include <filesystem>
 #include <fstream>
 #include <cstdint>
 #include <locale>
@@ -1035,12 +1036,11 @@ bool RenderableBillboardsCloud::loadSpeckData() {
     }
     bool success = true;
     const std::string& cachedFile = FileSys.cacheManager()->cachedFilename(
-        ghoul::filesystem::File(_speckFile),
-        "RenderableDUMeshes|" + identifier(),
-        ghoul::filesystem::CacheManager::Persistent::Yes
+        _speckFile,
+        "RenderableDUMeshes|" + identifier()
     );
 
-    const bool hasCachedFile = FileSys.fileExists(cachedFile);
+    const bool hasCachedFile = std::filesystem::is_regular_file(cachedFile);
     if (hasCachedFile) {
         LINFO(fmt::format(
             "Cached file '{}' used for Speck file '{}'",
@@ -1076,15 +1076,8 @@ bool RenderableBillboardsCloud::loadLabelData() {
         return true;
     }
     bool success = true;
-    // I disabled the cache as it didn't work on Mac --- abock
-    const std::string& cachedFile = FileSys.cacheManager()->cachedFilename(
-        ghoul::filesystem::File(_labelFile),
-        ghoul::filesystem::CacheManager::Persistent::Yes
-    );
-    if (!_hasSpeckFile && !_hasColorMapFile) {
-        success = true;
-    }
-    const bool hasCachedFile = FileSys.fileExists(cachedFile);
+    const std::string& cachedFile = FileSys.cacheManager()->cachedFilename(_labelFile);
+    const bool hasCachedFile = std::filesystem::is_regular_file(cachedFile);
     if (hasCachedFile) {
         LINFO(fmt::format(
             "Cached file '{}' used for Label file '{}'",
@@ -1357,7 +1350,9 @@ bool RenderableBillboardsCloud::loadCachedFile(const std::string& file) {
     if (version != CurrentCacheVersion) {
         LINFO("The format of the cached file has changed: deleting old cache");
         fileStream.close();
-        FileSys.deleteFile(file);
+        if (std::filesystem::is_regular_file(file)) {
+            std::filesystem::remove(file);
+        }
         return false;
     }
 

@@ -34,6 +34,7 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/fmt.h>
+#include <filesystem>
 #include <fstream>
 
 namespace {
@@ -153,8 +154,7 @@ bool HongKangParser::create() {
         return true;
     }
 
-    const std::string& extension = ghoul::filesystem::File(_fileName).fileExtension();
-    if (extension != "txt") {
+    if (std::filesystem::path(_fileName).extension() != ".txt") {
         return true;
     }
 

@@ -61,6 +61,7 @@
 #include <Tracy.hpp>
 #include <chrono>
 #include <ctime>
+#include <filesystem>
 #include <memory>
 
 #ifdef WIN32
@@ -1039,7 +1040,7 @@ int main(int argc, char* argv[]) {
     // to make it possible to find other files in the same directory.
     FileSys.registerPathToken(
         "${BIN}",
-        ghoul::filesystem::File(absPath(argv[0])).directoryName(),
+        std::filesystem::path(argv[0]).parent_path(),
         ghoul::filesystem::FileSystem::Override::Yes
     );
 
@@ -1092,23 +1093,27 @@ int main(int argc, char* argv[]) {
     std::string windowConfiguration;
     try {
         // Find configuration
-        std::string configurationFilePath = commandlineArguments.configurationName;
-        if (commandlineArguments.configurationName.empty()) {
+        std::filesystem::path configurationFilePath;
+        if (!commandlineArguments.configurationName.empty()) {
+            configurationFilePath = absPath(commandlineArguments.configurationName);
+        }
+        else {
             LDEBUG("Finding configuration");
             configurationFilePath = configuration::findConfiguration();
         }
-        configurationFilePath = absPath(configurationFilePath);
 
-        if (!FileSys.fileExists(configurationFilePath)) {
-            LFATALC("main", "Could not find configuration: " + configurationFilePath);
+        if (!std::filesystem::is_regular_file(configurationFilePath)) {
+            LFATALC(
+                "main",
+                fmt::format("Could not find configuration {}", configurationFilePath)
+            );
             exit(EXIT_FAILURE);
         }
-        LINFO(fmt::format("Configuration Path: '{}'", configurationFilePath));
+        LINFO(fmt::format("Configuration Path: {}", configurationFilePath));
 
         // Register the base path as the directory where the configuration file lives
-        std::string base = ghoul::filesystem::File(configurationFilePath).directoryName();
-        constexpr const char* BasePathToken = "${BASE}";
-        FileSys.registerPathToken(BasePathToken, base);
+        std::filesystem::path base = configurationFilePath.parent_path();
+        FileSys.registerPathToken("${BASE}", base);
 
         // Loading configuration from disk
         LDEBUG("Loading configuration from disk");

@@ -41,6 +41,7 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <array>
+#include <filesystem>
 #include <fstream>
 #include <optional>
 #include <string>
@@ -842,13 +843,13 @@ bool RenderablePlanesCloud::readSpeckFile() {
 
             std::string fullPath = absPath(_texturesPath + '/' + fileName);
             std::string pngPath =
-                ghoul::filesystem::File(fullPath).fullBaseName() + ".png";
+                std::filesystem::path(fullPath).replace_extension(".png").string();
 
-            if (FileSys.fileExists(fullPath)) {
+            if (std::filesystem::is_regular_file(fullPath)) {
                 _textureFileMap.insert({ textureIndex, fullPath });
 
             }
-            else if (FileSys.fileExists(pngPath)) {
+            else if (std::filesystem::is_regular_file(pngPath)) {
                 _textureFileMap.insert({ textureIndex, pngPath });
             }
             else {
@@ -1015,7 +1016,9 @@ bool RenderablePlanesCloud::loadCachedFile(const std::string& file) {
         if (version != CurrentCacheVersion) {
             LINFO("The format of the cached file has changed: deleting old cache");
             fileStream.close();
-            FileSys.deleteFile(file);
+            if (std::filesystem::is_regular_file(file)) {
+                std::filesystem::remove(file);
+            }
             return false;
         }
 
