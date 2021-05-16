@@ -158,7 +158,7 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
         ));
     }
 #else
-    FILE* fp = fopen(file.path().c_str(), "wb"); // write binary
+    FILE* fp = fopen(file.string().c_str(), "wb"); // write binary
 #endif // WIN32
     if (!fp) {
         LERROR(fmt::format(
