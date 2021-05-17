@@ -40,6 +40,7 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <array>
+#include <filesystem>
 #include <fstream>
 #include <locale>
 #include <cstdint>
@@ -136,7 +137,7 @@ RenderablePoints::RenderablePoints(const ghoul::Dictionary& dictionary)
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
 
-    _speckFile = absPath(p.file);
+    _speckFile = absPath(p.file).string();
 
     if (p.unit.has_value()) {
         switch (*p.unit) {
@@ -173,22 +174,20 @@ RenderablePoints::RenderablePoints(const ghoul::Dictionary& dictionary)
     addProperty(_pointColor);
 
     if (p.texture.has_value()) {
-        _spriteTexturePath = absPath(*p.texture);
+        _spriteTexturePath = absPath(*p.texture).string();
         _spriteTextureFile = std::make_unique<ghoul::filesystem::File>(
-            _spriteTexturePath
+            _spriteTexturePath.value()
         );
 
-        _spriteTexturePath.onChange([&] { _spriteTextureIsDirty = true; });
-        _spriteTextureFile->setCallback(
-            [&](const ghoul::filesystem::File&) { _spriteTextureIsDirty = true; }
-        );
+        _spriteTexturePath.onChange([this]() { _spriteTextureIsDirty = true; });
+        _spriteTextureFile->setCallback([this]() { _spriteTextureIsDirty = true; });
         addProperty(_spriteTexturePath);
 
         _hasSpriteTexture = true;
     }
 
     if (p.colorMap.has_value()) {
-        _colorMapFile = absPath(*p.colorMap);
+        _colorMapFile = absPath(*p.colorMap).string();
         _hasColorMapFile = true;
     }
 
@@ -347,7 +346,7 @@ void RenderablePoints::update(const UpdateData&) {
         _spriteTexture = nullptr;
         if (!_spriteTexturePath.value().empty()) {
             _spriteTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_spriteTexturePath)
+                absPath(_spriteTexturePath).string()
             );
             if (_spriteTexture) {
                 LDEBUG(fmt::format(
@@ -360,11 +359,9 @@ void RenderablePoints::update(const UpdateData&) {
             );
 
             _spriteTextureFile = std::make_unique<ghoul::filesystem::File>(
-                _spriteTexturePath
+                _spriteTexturePath.value()
             );
-            _spriteTextureFile->setCallback(
-                [&](const ghoul::filesystem::File&) { _spriteTextureIsDirty = true; }
-            );
+            _spriteTextureFile->setCallback([this]() { _spriteTextureIsDirty = true; });
         }
         _spriteTextureIsDirty = false;
     }

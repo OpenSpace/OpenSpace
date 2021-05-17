@@ -117,7 +117,7 @@ std::string KameleonVolumeToRawTask::description() {
 }
 
 void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCallback) {
-    KameleonVolumeReader reader(_inputPath);
+    KameleonVolumeReader reader(_inputPath.string());
 
     std::array<std::string, 3> variables = reader.gridVariableNames();
 
@@ -144,7 +144,7 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
 
     progressCallback(0.5f);
 
-    volume::RawVolumeWriter<float> writer(_rawVolumeOutputPath);
+    volume::RawVolumeWriter<float> writer(_rawVolumeOutputPath.string());
     writer.write(*rawVolume);
 
     progressCallback(0.9f);

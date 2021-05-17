@@ -67,7 +67,7 @@ std::string KameleonMetadataToJsonTask::description() {
 }
 
 void KameleonMetadataToJsonTask::perform(const Task::ProgressCallback& progressCallback) {
-    KameleonVolumeReader reader(_inputPath);
+    KameleonVolumeReader reader(_inputPath.string());
     ghoul::Dictionary dictionary = reader.readMetaData();
     progressCallback(0.5f);
 

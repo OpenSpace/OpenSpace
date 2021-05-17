@@ -233,7 +233,7 @@ bool RenderableConstellationBounds::loadVertexFile() {
         return false;
     }
 
-    std::string fileName = absPath(_vertexFilename);
+    std::filesystem::path fileName = absPath(_vertexFilename);
     std::ifstream file;
     file.open(fileName);
     if (!file.good()) {
@@ -273,7 +273,7 @@ bool RenderableConstellationBounds::loadVertexFile() {
             LERRORC(
                 "RenderableConstellationBounds",
                 fmt::format(
-                    "Error reading file '{}' at line #{}", fileName, currentLineNumber
+                    "Error reading file {} at line #{}", fileName, currentLineNumber
                 )
             );
             break;

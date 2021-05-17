@@ -131,7 +131,7 @@ void KameleonPlane::initializeGL() {
     initializeTime();
     createGeometry();
 
-    readFieldlinePaths(absPath(_fieldlineIndexFile));
+    readFieldlinePaths(absPath(_fieldlineIndexFile).string());
 
     if (_group) {
         _dataProcessor = _group->dataProcessor();

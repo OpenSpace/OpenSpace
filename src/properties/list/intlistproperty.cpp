@@ -57,7 +57,7 @@ std::vector<int> IntListProperty::fromLuaConversion(lua_State* state,
     lua_pushnil(state);
     while (lua_next(state, -2) != 0) {
         if (lua_isnumber(state, -1)) {
-            result.emplace_back(lua_tonumber(state, -1));
+            result.emplace_back(static_cast<int>(lua_tonumber(state, -1)));
         }
         else {
             success = false;

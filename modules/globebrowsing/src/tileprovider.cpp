@@ -44,6 +44,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/openglstatecache.h>
+#include <filesystem>
 #include <fstream>
 #include "cpl_minixml.h"
 
@@ -359,12 +360,11 @@ std::unique_ptr<TileProvider> initTileProvider(TemporalTileProvider& t,
     const size_t numChars = strlen(temporal::UrlTimePlaceholder);
     // @FRAGILE:  This will only find the first instance. Dangerous if that instance is
     // commented out ---abock
-    const std::string timeSpecifiedXml = xmlTemplate.replace(pos, numChars, timekey);
-    std::string gdalDatasetXml = timeSpecifiedXml;
+    std::string xml = xmlTemplate.replace(pos, numChars, timekey);
 
-    FileSys.expandPathTokens(gdalDatasetXml, IgnoredTokens);
+    xml = FileSys.expandPathTokens(std::move(xml), IgnoredTokens).string();
 
-    t.initDict.setValue(KeyFilePath, gdalDatasetXml);
+    t.initDict.setValue(KeyFilePath, xml);
     return std::make_unique<DefaultTileProvider>(t.initDict);
 }
 
@@ -513,9 +513,9 @@ bool readFilePath(TemporalTileProvider& t) {
     }
 
     // File path was not a path to a file but a GDAL config or empty
-    ghoul::filesystem::File f(t.filePath);
-    if (FileSys.fileExists(f)) {
-        t.initDict.setValue(temporal::KeyBasePath, f.directoryName());
+    std::filesystem::path f(t.filePath.value());
+    if (std::filesystem::is_regular_file(f)) {
+        t.initDict.setValue(temporal::KeyBasePath, f.parent_path().string());
     }
 
     t.gdalXmlTemplate = consumeTemporalMetaData(t, xml);

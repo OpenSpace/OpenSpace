@@ -99,16 +99,13 @@ namespace {
             std::is_same_v<T, openspace::speck::ColorMap>
         );
 
-        std::string cachePath = FileSys.cacheManager()->cachedFilename(
-            speckPath.string(),
-            ghoul::filesystem::CacheManager::Persistent::Yes
-        );
+        std::string cachePath = FileSys.cacheManager()->cachedFilename(speckPath);
 
         if (std::filesystem::exists(cachePath)) {
             LINFOC(
                 "SpeckLoader",
                 fmt::format(
-                    "Cached file '{}' used for file '{}'", cachePath, speckPath
+                    "Cached file '{}' used for file {}", cachePath, speckPath
                 )
             );
 
@@ -121,7 +118,7 @@ namespace {
                 FileSys.cacheManager()->removeCacheFile(cachePath);
             }
         }
-        LINFOC("SpeckLoader", fmt::format("Loading file '{}'", speckPath));
+        LINFOC("SpeckLoader", fmt::format("Loading file {}", speckPath));
         T dataset = loadSpeckFunction(speckPath, skipAllZeroLines);
 
         if (!dataset.entries.empty()) {
@@ -141,7 +138,7 @@ Dataset loadFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLines) 
 
     std::ifstream file(path);
     if (!file.good()) {
-        throw ghoul::RuntimeError(fmt::format("Failed to open speck file '{}'", path));
+        throw ghoul::RuntimeError(fmt::format("Failed to open speck file {}", path));
     }
 
     Dataset res;
@@ -192,7 +189,7 @@ Dataset loadFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLines) 
             // where <idx> is the data value index where the texture index is stored
             if (res.textureDataIndex != -1) {
                 throw ghoul::RuntimeError(fmt::format(
-                    "Error loading speck file '{}': Texturevar defined twice", path
+                    "Error loading speck file {}: Texturevar defined twice", path
                 ));
             }
 
@@ -211,8 +208,7 @@ Dataset loadFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLines) 
 
             if (res.orientationDataIndex != -1) {
                 throw ghoul::RuntimeError(fmt::format(
-                    "Error loading speck file '{}': Orientation index defined twice",
-                    path
+                    "Error loading speck file {}: Orientation index defined twice", path
                 ));
             }
 
@@ -254,7 +250,7 @@ Dataset loadFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLines) 
             for (const Dataset::Texture& t : res.textures) {
                 if (t.index == texture.index) {
                     throw ghoul::RuntimeError(fmt::format(
-                        "Error loading speck file '{}': Texture index '{}' defined twice",
+                        "Error loading speck file {}: Texture index '{}' defined twice",
                         path, texture.index
                     ));
                 }
@@ -306,7 +302,7 @@ Dataset loadFile(std::filesystem::path path, SkipAllZeroLines skipAllZeroLines) 
         // data section of the file
         if (!std::isdigit(line[0]) && line[0] != '-') {
             throw ghoul::RuntimeError(fmt::format(
-                "Error loading speck file '{}': Header information and datasegment "
+                "Error loading speck file {}: Header information and datasegment "
                 "intermixed", path
             ));
         }

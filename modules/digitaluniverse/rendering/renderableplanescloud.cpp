@@ -42,6 +42,7 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <array>
+#include <filesystem>
 #include <fstream>
 #include <optional>
 #include <string>
@@ -273,7 +274,7 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     addProperty(_opacity);
 
     if (p.file.has_value()) {
-        _speckFile = absPath(*p.file);
+        _speckFile = absPath(*p.file).string();
         _hasSpeckFile = true;
         _drawElements.onChange([&]() { _hasSpeckFile = !_hasSpeckFile; });
         addProperty(_drawElements);
@@ -321,7 +322,7 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     _scaleFactor.onChange([&]() { _dataIsDirty = true; });
 
     if (p.labelFile.has_value()) {
-        _labelFile = absPath(*p.labelFile);
+        _labelFile = absPath(*p.labelFile).string();
         _hasLabel = true;
 
         _textColor = p.textColor.value_or(_textColor);
@@ -369,7 +370,7 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
         }
     }
 
-    _texturesPath = absPath(p.texturePath);
+    _texturesPath = absPath(p.texturePath).string();
 
     _luminosityVar = p.luminosity.value_or(_luminosityVar);
     _sluminosity = p.scaleLuminosity.value_or(_sluminosity);
@@ -395,7 +396,7 @@ bool RenderablePlanesCloud::isReady() const {
 void RenderablePlanesCloud::initialize() {
     ZoneScoped
 
-    if (_hasSpeckFile && FileSys.fileExists(_speckFile)) {
+    if (_hasSpeckFile && std::filesystem::is_regular_file(_speckFile)) {
         _dataset = speck::data::loadFileWithCache(_speckFile);
         if (_dataset.entries.empty()) {
             throw ghoul::RuntimeError("Error loading data");
@@ -612,14 +613,15 @@ void RenderablePlanesCloud::update(const UpdateData&) {
 
 void RenderablePlanesCloud::loadTextures() {
     for (const speck::Dataset::Texture& tex : _dataset.textures) {
-        std::string fullPath = absPath(_texturesPath + '/' + tex.file);
-        std::string pngPath = ghoul::filesystem::File(fullPath).fullBaseName() + ".png";
+        std::filesystem::path fullPath = absPath(_texturesPath + '/' + tex.file);
+        std::filesystem::path pngPath = fullPath;
+        pngPath.replace_extension(".png");
 
-        std::string path;
-        if (FileSys.fileExists(fullPath)) {
+        std::filesystem::path path;
+        if (std::filesystem::is_regular_file(fullPath)) {
             path = fullPath;
         }
-        else if (FileSys.fileExists(pngPath)) {
+        else if (std::filesystem::is_regular_file(pngPath)) {
             path = pngPath;
         }
         else {
@@ -630,7 +632,7 @@ void RenderablePlanesCloud::loadTextures() {
         }
 
         std::unique_ptr<ghoul::opengl::Texture> t =
-            ghoul::io::TextureReader::ref().loadTexture(path);
+            ghoul::io::TextureReader::ref().loadTexture(path.string());
 
         if (t) {
             LINFOC("RenderablePlanesCloud", fmt::format("Loaded texture '{}'", path));
@@ -724,10 +726,10 @@ void RenderablePlanesCloud::createPlanes() {
                 maxSize = std::max(maxSize, vertex4[i]);
             }
 
-            vertex0 *= scale;
-            vertex1 *= scale;
-            vertex2 *= scale;
-            vertex4 *= scale;
+            vertex0 = glm::vec4(glm::dvec4(vertex0) * scale);
+            vertex1 = glm::vec4(glm::dvec4(vertex1) * scale);
+            vertex2 = glm::vec4(glm::dvec4(vertex2) * scale);
+            vertex4 = glm::vec4(glm::dvec4(vertex4) * scale);
 
             const std::array<GLfloat, 36> VertexData = {
                 //  x          y          z       w    s    t

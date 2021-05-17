@@ -371,9 +371,11 @@ RenderEngine::RenderEngine()
             char date[128];
             strftime(date, sizeof(date), "%Y-%m-%d-%H-%M", nowTime);
 
-            std::string newFolder = absPath("${STARTUP_SCREENSHOT}/" + std::string(date));
-            if (!FileSys.directoryExists(newFolder)) {
-                FileSys.createDirectory(newFolder);
+            std::filesystem::path newFolder = absPath(
+                "${STARTUP_SCREENSHOT}/" + std::string(date)
+            );
+            if (!std::filesystem::is_directory(newFolder)) {
+                std::filesystem::create_directory(newFolder);
             }
             FileSys.registerPathToken(
                 "${SCREENSHOTS}",
@@ -390,7 +392,7 @@ RenderEngine::RenderEngine()
                 ghoul::filesystem::FileSystem::Override::Yes
             );
         }
-        global::windowDelegate->setScreenshotFolder(absPath("${SCREENSHOTS}"));
+        global::windowDelegate->setScreenshotFolder(absPath("${SCREENSHOTS}").string());
     });
     addProperty(_screenshotUseDate);
 
@@ -989,8 +991,8 @@ bool RenderEngine::isHdrDisabled() const {
  */
 std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
                                                                   const std::string& name,
-                                                                const std::string& vsPath,
-                                                                       std::string fsPath,
+                                                      const std::filesystem::path& vsPath,
+                                                             std::filesystem::path fsPath,
                                                                    ghoul::Dictionary data)
 {
     ghoul::Dictionary dict = std::move(data);
@@ -1000,7 +1002,7 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     // parameterize the main fragment shader program with specific contents.
     // fsPath should point to a shader file defining a Fragment getFragment() function
     // instead of a void main() setting glFragColor, glFragDepth, etc.
-    dict.setValue("fragmentPath", std::move(fsPath));
+    dict.setValue("fragmentPath", fsPath.string());
 
     using namespace ghoul::opengl;
     std::unique_ptr<ProgramObject> program = ProgramObject::Build(
@@ -1021,9 +1023,9 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
 */
 std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
                                                                   const std::string& name,
-                                                                const std::string& vsPath,
-                                                                       std::string fsPath,
-                                                                const std::string& csPath,
+                                                      const std::filesystem::path& vsPath,
+                                                             std::filesystem::path fsPath,
+                                                      const std::filesystem::path& csPath,
                                                                    ghoul::Dictionary data)
 {
     ghoul::Dictionary dict = std::move(data);
@@ -1032,7 +1034,7 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     // parameterize the main fragment shader program with specific contents.
     // fsPath should point to a shader file defining a Fragment getFragment() function
     // instead of a void main() setting glFragColor, glFragDepth, etc.
-    dict.setValue("fragmentPath", std::move(fsPath));
+    dict.setValue("fragmentPath", fsPath.string());
 
     using namespace ghoul::opengl;
     std::unique_ptr<ProgramObject> program = ProgramObject::Build(
@@ -1101,11 +1103,8 @@ void RenderEngine::takeScreenshot() {
     // screenshot folder everytime we start OpenSpace even when we are not taking any
     // screenshots. So the first time we actually take one, we create the folder:
 
-    if (!FileSys.directoryExists(absPath("${SCREENSHOTS}"))) {
-        FileSys.createDirectory(
-            absPath("${SCREENSHOTS}"),
-            ghoul::filesystem::FileSystem::Recursive::Yes
-        );
+    if (!std::filesystem::is_directory(absPath("${SCREENSHOTS}"))) {
+        std::filesystem::create_directories(absPath("${SCREENSHOTS}"));
     }
 
     _latestScreenshotNumber = global::windowDelegate->takeScreenshot(_applyWarping);

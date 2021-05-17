@@ -82,7 +82,7 @@ ExoplanetsDataPreparationTask::ExoplanetsDataPreparationTask(
 
 std::string ExoplanetsDataPreparationTask::description() {
     return fmt::format(
-        "Extract data about exoplanets from file '{}' and write as bin to '{}'. The data "
+        "Extract data about exoplanets from file {} and write as bin to {}. The data "
         "file should be a csv version of the Planetary Systems Composite Data from the "
         "NASA exoplanets archive (https://exoplanetarchive.ipac.caltech.edu/).",
         _inputDataPath, _outputBinPath
@@ -94,7 +94,7 @@ void ExoplanetsDataPreparationTask::perform(
 {
     std::ifstream inputDataFile(_inputDataPath);
     if (!inputDataFile.good()) {
-        LERROR(fmt::format("Failed to open input file '{}'", _inputDataPath));
+        LERROR(fmt::format("Failed to open input file {}", _inputDataPath));
         return;
     }
 

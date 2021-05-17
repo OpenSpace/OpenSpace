@@ -29,6 +29,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <chrono>
+#include <filesystem>
 
 namespace openspace {
 
@@ -67,7 +68,7 @@ private:
      *
      * \return the absolute path to the file
      */
-    std::string findHelperExecutable();
+    std::filesystem::path findHelperExecutable();
 
     properties::BoolProperty _updateBrowserBetweenRenderables;
     properties::FloatProperty _browserUpdateInterval;
@@ -75,7 +76,7 @@ private:
     std::vector<BrowserInstance*> _browsers;
     std::unique_ptr<EventHandler> _eventHandler;
     std::unique_ptr<CefHost> _cefHost;
-    std::string _webHelperLocation;
+    std::filesystem::path _webHelperLocation;
     bool _enabled = true;
 };
 

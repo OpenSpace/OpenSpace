@@ -285,7 +285,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         }
     }
 
-    std::string file = absPath(p.geometryFile.string());
+    std::string file = absPath(p.geometryFile.string()).string();
     _geometry = ghoul::io::ModelReader::ref().loadModel(
         file,
         ghoul::io::ModelReader::ForceRenderInvisible(_forceRenderInvisible),
