@@ -27,6 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <modules/space/speckloader.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -108,9 +109,6 @@ private:
 
     bool loadData();
     bool readSpeckFile();
-    bool readLabelFile();
-    bool loadCachedFile(const std::string& file);
-    bool saveCachedFile(const std::string& file) const;
 
     bool _hasSpeckFile = false;
     bool _dataIsDirty = true;
@@ -140,7 +138,7 @@ private:
     Unit _unit = Parsec;
 
     std::vector<float> _fullData;
-    std::vector<std::pair<glm::vec3, std::string>> _labelData;
+    speck::Labelset _labelset;
     int _nValuesPerAstronomicalObject = 0;
 
     std::unordered_map<int, glm::vec3> _meshColorMap;
