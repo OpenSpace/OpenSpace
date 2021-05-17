@@ -27,6 +27,36 @@ local JWSTPosition = {
     }
 }
 
+local JWSTBand = {
+    Identifier = "JWSTBand",
+    Parent = JWSTPosition.Identifier,
+    Transform = {
+        Rotation = {
+            Type = "FixedRotation",
+            Attached = "JWSTBand",
+            XAxis = { 1, 0, 0 },
+            XAxisOrthogonal = true,
+            --YAxisInvert = true,
+            ZAxis = sunTransforms.SolarSystemBarycenter.Identifier
+        }
+    },
+    Renderable = {
+        Type = "RenderableSphere",
+        Texture = "C:/Users/ElmQPC/Desktop/Malin/develop/images/jwst/JWST-band.png",
+        Size = 25E9,
+        Segments = 150,
+        DisableFadeInOut = true,
+        Orientation = "Inside",
+        Opacity = 0.1,
+        UseAdditiveBlending = true,
+    },
+    GUI = {
+        Name = "James Webb Space Telescope View Band",
+        Path = "/Solar System/Missions/JWST",
+        Hidden = true,
+    }
+}
+
 local JWSTModel = {
     Identifier = "JWSTModel",
     Parent = JWSTPosition.Identifier,
@@ -117,6 +147,7 @@ local JWSTFov = {
 assetHelper.registerSceneGraphNodesAndExport(asset, {
 	JWSTTrail,
     JWSTPosition,
+    JWSTBand,
     JWSTModel,
     JWSTFov
 })
