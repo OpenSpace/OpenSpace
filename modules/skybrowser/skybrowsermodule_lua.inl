@@ -16,6 +16,7 @@
 #include <sstream>
 #include <modules/skybrowser/include/screenspaceskybrowser.h>
 #include <modules/skybrowser/include/screenspaceskytarget.h>
+#include <modules/skybrowser/include/renderableskybrowser.h>
 #include <modules/base/rendering/screenspaceimagelocal.h>
 #include <modules/base/rendering/renderableplaneimagelocal.h>
 #include <openspace/interaction/navigationhandler.h>

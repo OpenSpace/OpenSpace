@@ -41,6 +41,7 @@ namespace openspace {
 
 class ScreenSpaceSkyBrowser;
 class ScreenSpaceSkyTarget;
+class RenderableSkyBrowser;
 class ScreenSpaceRenderable;
 class WWTDataHandler;
 

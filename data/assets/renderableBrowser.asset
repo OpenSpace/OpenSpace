@@ -1,0 +1,33 @@
+local assetHelper = asset.require("util/asset_helper")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+
+local PARSEC_CONSTANT = 3.0856776E16;
+
+local spec = {
+  Identifier = "RenderableSkyBrowser1",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = {
+        -3.915 * PARSEC_CONSTANT,
+        -150.153 * PARSEC_CONSTANT,
+        -120.706 * PARSEC_CONSTANT
+      }
+    },
+  },
+  Renderable = {
+    Type = "RenderableSkyBrowser",
+    Size = 10.0E11,
+    Origin = "Center",
+    Billboard = true,
+    Url = "http://localhost:8000"
+  },
+  GUI = {
+    Name = "Renderable Sky Browser",
+    Path = "/SkyBrowser",
+  }
+}
+
+local objects = { spec }
+assetHelper.registerSceneGraphNodesAndExport(asset, objects)
