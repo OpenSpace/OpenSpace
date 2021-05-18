@@ -24,8 +24,6 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
-
 in vec3 in_position;
 in vec4 in_bvLumAbsMagAppMag;
 in vec3 in_velocity;

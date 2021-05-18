@@ -365,7 +365,7 @@ namespace {
         std::optional<glm::dvec2> fadeInDistances;
 
         // [[codegen::verbatim(DisableFadeInInfo.description)]]
-        std::optional<bool> distableFadeIn;
+        std::optional<bool> disableFadeIn;
     };
 #include "renderablestars_codegen.cpp"
 }  // namespace
@@ -416,7 +416,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     , _p2Param(P2ParamInfo, 0.138f, 0.f, 1.f)
     , _spencerAlphaConst(AlphaConstInfo, 0.02f, 0.000001f, 5.f)
     , _moffatPSFParamOwner(MoffatPSFParamOwnerInfo)
-    , _FWHMConst(FWHMInfo, 10.4f, -100.f, 1000.f)
+    , _FWHMConst(FWHMInfo, 10.4f, 0.f, 100.f)
     , _moffatBetaConst(BetaInfo, 4.765f, 0.f, 100.f)
     , _renderingMethodOption(
         RenderMethodOptionInfo,

@@ -1,6 +1,6 @@
 local assetHelper = asset.require('util/asset_helper')
 
-local colorLUT = asset.require('./stars_colormap').BvColorLUT
+local colormaps = asset.require('./stars_colormap').ColorMaps
 
 local textures = asset.syncedResource({
   Name = "Stars Textures",
@@ -30,7 +30,8 @@ local stars = {
     File = speck .. "/stars.speck",
     Texture = textures .. "/halo.png",
     --ShapeTexture = textures .. "/disc.png",
-    ColorMap = colorLUT .. "/colorbv.cmap",
+    ColorMap = colormaps .. "/colorbv.cmap",
+    OtherDataColorMap = colormaps .. "/viridis.cmap",
     MagnitudeExponent = 6.2,
     SizeComposition = "Distance Modulus",
     RenderMethod = "Texture Based" -- or PSF
@@ -55,7 +56,7 @@ local sunstar = {
     File = sunspeck .. "/sunstar.speck",
     Texture = textures .. "/halo.png",
     --ShapeTexture = textures .. "/disc.png",
-    ColorMap = colorLUT .. "/colorbv.cmap",
+    ColorMap = colormaps .. "/colorbv.cmap",
     MagnitudeExponent = 6.2,
     SizeComposition = "Distance Modulus",
     RenderMethod = "Texture Based", -- or PSF
