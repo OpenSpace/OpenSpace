@@ -135,7 +135,7 @@ end
 asset.onInitialize(function()
   -- Set the controller to the connected controller
   -- Currently:  XBoxController, PS4Controller or SpaceMouse
-  local controller = SpaceMouse;
+  local controller = XBoxController;
 
   -- Case of XBoxController or PS4Controller
   if(controller.A ~= nil) then

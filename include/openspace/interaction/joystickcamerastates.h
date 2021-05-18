@@ -62,7 +62,8 @@ public:
         AxisNormalize normalize = AxisNormalize::No;
 
         // The axis values can either go back to 0 when the joystick is released or it can
-        // stay at the value it was. The latter is static
+        // stay at the value it was before the joystick was released.
+        // The latter is called a static axis, when the values don't go back to 0.
         bool isStatic = false;
 
         float deadzone = 0.f;
@@ -100,6 +101,8 @@ private:
 
     std::array<AxisInformation, JoystickInputState::MaxAxes> _axisMapping;
 
+    // This array is used to store the old axis values from the previous frame,
+    // it is used to calculate the difference in the values in the case of a static axis
     std::array<float, JoystickInputState::MaxAxes> _prevAxisValues;
 
     struct ButtonInformation {

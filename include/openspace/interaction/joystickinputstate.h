@@ -72,7 +72,8 @@ struct JoystickInputState {
     std::array<float, MaxAxes> axes;
 
     /// The axis values can either go back to 0 when the joystick is released or it can
-    /// stay at the value it was. The latter is static
+    /// stay at the value it was before the joystick was released.
+    /// The latter is called a static axis, when the values don't go back to 0.
     bool isStatic = false;
 
     /// The number of buttons that this joystick possesses
@@ -98,12 +99,6 @@ struct JoystickInputStates : public std::array<JoystickInputState, MaxJoysticks>
      * \pre \p axis must be 0 or positive
      */
     float axis(int axis) const;
-
-    /**
-    * This function checks whether this joystick input has static axis or not
-    * \return If this joystick input has static axis or not
-    */
-    bool isStatic() const;
 
     /**
      * This functions checks whether any connected joystick has its \p button in the
