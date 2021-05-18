@@ -43,7 +43,7 @@ uniform sampler1D otherDataTexture;
 uniform vec2 otherDataRange;
 uniform bool filterOutOfRange;
 
-in vec4 vs_position;
+in vec3 vs_position;
 in vec2 texCoords;
 flat in float ge_bv;
 flat in vec3 ge_velocity;
@@ -102,7 +102,7 @@ Fragment getFragment() {
     Fragment frag;
     frag.color = fullColor;
     frag.depth = gs_screenSpaceDepth;
-    frag.gPosition = vs_position;
+    frag.gPosition = vec4(vs_position, 1.0);
     frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
     frag.disableLDR2HDR = true;
     

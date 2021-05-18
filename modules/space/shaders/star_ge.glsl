@@ -31,10 +31,9 @@ layout(triangle_strip, max_vertices = 4) out;
 
 in vec4 vs_bvLumAbsMagAppMag[];
 in vec3 vs_velocity[];
-in vec4 vs_gPosition[];
 in float vs_speed[];
 
-out vec4 vs_position;
+out vec3 vs_position;
 out vec2 texCoords;
 
 flat out float ge_bv;
@@ -45,9 +44,6 @@ flat out float gs_screenSpaceDepth;
 uniform float magnitudeExponent;
 uniform dvec3 eyePosition;
 uniform dvec3 cameraUp;
-
-// uniform float FWHM;
-// uniform float betaConstant;
 
 uniform int psfParamConf;
 uniform float lumCent;
@@ -134,8 +130,9 @@ double scaleForDistanceModulus(float absMag) {
 }
 
 void main() {
-    vs_position = gl_in[0].gl_Position; // in object space
-    dvec4 dpos  = modelMatrix * dvec4(vs_position); 
+    vec3 pos = gl_in[0].gl_Position.xyz;
+    vs_position = pos; // in object space
+    dvec4 dpos  = modelMatrix * dvec4(pos, 1.0); 
 
     ge_bv = vs_bvLumAbsMagAppMag[0].x;
     ge_velocity = vs_velocity[0];
