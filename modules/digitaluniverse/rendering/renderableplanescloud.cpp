@@ -378,6 +378,10 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     if (p.fadeInDistances.has_value()) {
         _fadeInDistance = *p.fadeInDistances;
         _disableFadeInDistance = false;
+        _fadeInDistance.setViewOption(
+            properties::Property::ViewOptions::MinMaxRange,
+            true
+        );
         addProperty(_fadeInDistance);
         addProperty(_disableFadeInDistance);
     }
