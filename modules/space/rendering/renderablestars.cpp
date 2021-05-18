@@ -48,8 +48,6 @@
 #include <limits>
 #include <type_traits>
 
-#pragma optimize ("", off)
-
 namespace {
     constexpr const char* _loggerCat = "RenderableStars";
 
