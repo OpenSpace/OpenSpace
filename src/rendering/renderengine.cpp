@@ -48,6 +48,7 @@
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/versionchecker.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/io/texture/texturereader.h>

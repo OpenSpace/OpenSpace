@@ -1078,7 +1078,7 @@ int main(int argc, char* argv[]) {
 
     bool showHelp = parser.execute();
     if (showHelp) {
-        parser.displayHelp(std::cout);
+        std::cout << parser.helpText();
         exit(EXIT_SUCCESS);
     }
     // Take an actual copy of the arguments
