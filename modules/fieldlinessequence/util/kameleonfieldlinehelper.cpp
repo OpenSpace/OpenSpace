@@ -205,7 +205,7 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
         tracer.setInnerBoundary(innerBoundaryLimit); // TODO specify in Lua?
 
 
-        //traces with "u" need unidirectioalTrace, while "b" needs bidirectionalTrace
+        //traces with "u" need unidirectionalTrace, while "b" needs bidirectionalTrace
         ccmc::Fieldline fieldline;
 
         fieldline = tracer.bidirectionalTrace(
@@ -213,7 +213,6 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
             seed.x,
             seed.y,
             seed.z);
-
 
         const std::vector<ccmc::Point3f>& positions = fieldline.getPositions();
 
@@ -234,8 +233,9 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
             ccmc::Tracer tracer2(kameleon, interpolator2.get());
             tracer2.setInnerBoundary(innerBoundaryLimit); // TODO specify in Lua?
 
-            //trace every vertex from the main trace with the secondary trace var
-            //traces with "u" need unidirectioalTrace, while "b" needs bidirectionalTrace
+            //trace every vertex of the initally traced line with the secondarytracevar.
+            //traces with "u" or "u_perp_b" need unidirectioalTrace, while "b" needs 
+            //bidirectionalTrace.
 
             ccmc::Fieldline secondFieldline;
 
@@ -245,7 +245,6 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
                 p.component2,
                 p.component3
             );
-
 
 
             const std::vector<ccmc::Point3f>& positions2 = secondFieldline.getPositions();
@@ -260,7 +259,7 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
 
         }
         //add the initial  fieldlines to the state
-        state.addLine(initialFieldline);
+        //state.addLine(initialFieldline);
 
         success |= (nLinePoints > 0);
 

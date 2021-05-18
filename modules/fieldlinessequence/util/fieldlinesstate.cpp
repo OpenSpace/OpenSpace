@@ -419,11 +419,9 @@ void FieldlinesState::appendToExtra(size_t idx, float val) {
     _extraQuantities[idx].push_back(val);
 }
 
-void FieldlinesState::moveLine()
-{
-    
+void FieldlinesState::moveLine() {
+       
 }
-
 
 void FieldlinesState::setExtraQuantityNames(std::vector<std::string> names) {
     _extraQuantityNames = std::move(names);

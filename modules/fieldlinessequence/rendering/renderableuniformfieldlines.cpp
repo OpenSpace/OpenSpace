@@ -1279,12 +1279,34 @@ namespace openspace {
         glBindVertexArray(0);
     }
 
+    void RenderableUniformFieldlines::updateFieldLinesPos() {
+        //linear interpolation
+        //a + t * (b - a)
+
+        std::vector<glm::vec3> a = _states[_activeStateIndex].vertexPositions();
+
+        std::vector<glm::vec3> b = _states[_activeStateIndex + 1].vertexPositions();
+
+    }
+
     void RenderableUniformFieldlines::updateVertexPositionBuffer() {
         glBindVertexArray(_vertexArrayObject);
         glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
 
-        //This could be used to move the fieldlines in real time
         //_states[_activeStateIndex].moveLine();
+
+        //lerp
+        //std::vector<glm::vec3> a = _states[_activeStateIndex].vertexPositions();
+        //std::vector<glm::vec3> b = _states[_activeStateIndex + 1].vertexPositions();
+
+        //Time timeNow = global::timeManager->time();
+
+        //float t = (timeNow.j2000Seconds() - _states[_activeStateIndex].triggerTime()) /
+        //    (_states[_activeStateIndex+1].triggerTime() - 
+        //                                    _states[_activeStateIndex].triggerTime());
+
+
+
         const std::vector<glm::vec3>& vertPos = _states[_activeStateIndex].vertexPositions();
 
         glBufferData(

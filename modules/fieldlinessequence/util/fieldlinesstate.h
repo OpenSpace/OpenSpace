@@ -67,10 +67,8 @@ public:
     void addLine(std::vector<glm::vec3>& line);
     void appendToExtra(size_t idx, float val);
 
-    //if we want to move it in real-time
     void moveLine();
 
-    //cartesianTrace(const std::string& variable, const float& startComponent1, const float& startComponent2, const float& startComponent3, Interpolator* interpolator);
 
 private:
     bool _isMorphable = false;
@@ -82,6 +80,7 @@ private:
     std::vector<GLsizei> _lineCount;
     std::vector<GLint> _lineStart;
     std::vector<glm::vec3> _vertexPositions;
+    std::vector<glm::vec3> _nextStateVertexPositions;
 };
 
 } // namespace openspace

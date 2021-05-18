@@ -225,6 +225,7 @@ namespace openspace {
         // ------------------------- FUNCTIONS USED DURING RUNTIME ------------------------ //
         void readNewState(const std::string& filePath);
         void updateActiveTriggerTimeIndex(double currentTime);
+        void updateFieldLinesPos();
         void updateVertexPositionBuffer();
         void updateVertexColorBuffer();
         void updateVertexMaskingBuffer();
