@@ -39,8 +39,9 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
-//#include <fstream>
-//#include <thread>
+#include <filesystem>
+#include <fstream>
+#include <thread>
 
 namespace {
     constexpr const char* _loggerCat = "RenderableFieldlinesSequence";
@@ -310,7 +311,9 @@ void RenderableFieldlinesSequence::initializeGL() {
     // Set a default color table, just in case the (optional) user defined paths are
     // corrupt or not provided!
     _colorTablePaths.push_back(FieldlinesSequenceModule::DefaultTransferFunctionFile);
-    _transferFunction = std::make_unique<TransferFunction>(absPath(_colorTablePaths[0]));
+    _transferFunction = std::make_unique<TransferFunction>(
+        absPath(_colorTablePaths[0]).string()
+    );
 
     // EXTRACT OPTIONAL INFORMATION FROM DICTIONARY
     std::string outputFolderPath;
@@ -434,13 +437,16 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
 
     // Ensure that the source folder exists and then extract
     // the files with the same extension as <inputFileTypeString>
-    ghoul::filesystem::Directory sourceFolder(sourceFolderPath);
-    if (FileSys.directoryExists(sourceFolder)) {
+    if (std::filesystem::is_directory(sourceFolderPath)) {
         // Extract all file paths from the provided folder
-        _sourceFiles = sourceFolder.readFiles(
-            ghoul::filesystem::Directory::Recursive::No,
-            ghoul::filesystem::Directory::Sort::Yes
-        );
+        _sourceFiles.clear();
+        namespace fs = std::filesystem;
+        for (const fs::directory_entry& e : fs::directory_iterator(sourceFolderPath)) {
+            if (e.is_regular_file()) {
+                _sourceFiles.push_back(e.path().string());
+            }
+        }
+        std::sort(_sourceFiles.begin(), _sourceFiles.end());
 
         // Remove all files that don't have <inputFileTypeString> as extension
         _sourceFiles.erase(
@@ -495,10 +501,9 @@ void RenderableFieldlinesSequence::extractOptionalInfoFromDictionary(
     }
     
     if (_dictionary->hasValue<std::string>(KeyOutputFolder)) {
-        std::string temp = _dictionary->value<std::string>(KeyOutputFolder);
-        ghoul::filesystem::Directory outputFolder(temp);
-        if (FileSys.directoryExists(outputFolder)) {
-            outputFolderPath = absPath(outputFolder);
+        outputFolderPath = _dictionary->value<std::string>(KeyOutputFolder);
+        if (std::filesystem::is_directory(outputFolderPath)) {
+            outputFolderPath = absPath(outputFolderPath).string();
         }
         else {
             LERROR(fmt::format(
@@ -630,8 +635,9 @@ void RenderableFieldlinesSequence::loadOsflsStatesIntoRAM(const std::string& out
         if (newState.loadStateFromOsfls(filePath)) {
             addStateToSequence(newState);
             if (!outputFolder.empty()) {
-                ghoul::filesystem::File tmpFile(filePath);
-                newState.saveStateToJson(outputFolder + tmpFile.baseName());
+                newState.saveStateToJson(
+                    outputFolder + std::filesystem::path(filePath).stem().string()
+                );
             }
         }
         else {
@@ -979,15 +985,13 @@ bool RenderableFieldlinesSequence::extractSeedPointsFromFiles( std::string& path
                                                         std::vector<glm::vec3>>& outMap)
 {
     std::vector<std::string> files;
-
+    std::filesystem::path seedPointDir;
+    
     if (_dictionary->hasValue<std::string>(KeyCdfSeedPointDirectory)) {
         path = _dictionary->value<std::string>(KeyCdfSeedPointDirectory);
-        ghoul::filesystem::Directory seedPointDir(path);
-        if (FileSys.directoryExists(seedPointDir)) {
-            path = absPath(path);
-            files = seedPointDir.readFiles(
-                ghoul::filesystem::Directory::Recursive::No,
-                ghoul::filesystem::Directory::Sort::Yes);
+        if (std::filesystem::is_directory(path)){
+            seedPointDir = absPath(path);
+            path = seedPointDir.string();
         }
         else {
             LERROR(fmt::format(
@@ -1003,12 +1007,19 @@ bool RenderableFieldlinesSequence::extractSeedPointsFromFiles( std::string& path
         return false;
     }
 
-    for (const std::string& seedFilePath : files) {
-
-        if (seedFilePath.find("mp_position") == std::string::npos) {
+    namespace fs = std::filesystem;
+    for (const fs::directory_entry& spFile : fs::directory_iterator(seedPointDir)){
+        std::string seedFilePath = spFile.path().string();
+        if (!spFile.is_regular_file() && seedFilePath.find("mp_position")
+                                                                   == std::string::npos) {
             continue;
         }
-
+        
+        std::ifstream seedFile(spFile);
+        if (!seedFile.good()) {
+            LERROR(fmt::format("Could not open seed points file '{}'", seedFilePath));
+            return false;
+        }
 
         size_t lastIndex = seedFilePath.find_last_of('.');
         std::string name = seedFilePath.substr(0, lastIndex);   // remove file extention
@@ -1016,12 +1027,6 @@ bool RenderableFieldlinesSequence::extractSeedPointsFromFiles( std::string& path
         std::string time = name.substr(dateAndTimeSeperator+1, name.length());
         std::string date = name.substr(dateAndTimeSeperator - 8, 8);    //8 for yyyymmdd
         std::string dateAndTime = date + time;
-
-        std::ifstream seedFile(FileSys.relativePath(seedFilePath));
-        if (!seedFile.good()) {
-            LERROR(fmt::format("Could not open seed points file '{}'", seedFilePath));
-            return false;
-        }
 
         LDEBUG(fmt::format("Reading seed points from file '{}'", seedFilePath));
         std::string line;

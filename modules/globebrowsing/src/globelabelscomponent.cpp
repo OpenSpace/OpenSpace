@@ -193,7 +193,7 @@ namespace {
         std::optional<glm::vec3> labelsColor [[codegen::color()]];
 
         // [[codegen::verbatim(LabelsOpacityInfo.description)]]
-        std::optional<float> labelsOpacity [[codegen::inrange(0.f, 1.0)]];
+        std::optional<float> labelsOpacity [[codegen::inrange(0.f, 1.f)]];
 
         // [[codegen::verbatim(LabelsFadeInStartingDistanceInfo.description)]]
         std::optional<float> fadeInStartingDistance;
@@ -289,7 +289,7 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
         return;
     }
 
-    const bool loadSuccess = loadLabelsData(absPath(p.fileName->string()));
+    const bool loadSuccess = loadLabelsData(absPath(p.fileName->string()).string());
     if (!loadSuccess) {
         return;
     }
@@ -338,12 +338,11 @@ void GlobeLabelsComponent::initializeFonts() {
 
 bool GlobeLabelsComponent::loadLabelsData(const std::string& file) {
     std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-        ghoul::filesystem::File(file),
-        "GlobeLabelsComponent|" + identifier(),
-        ghoul::filesystem::CacheManager::Persistent::Yes
+        file,
+        "GlobeLabelsComponent|" + identifier()
     );
 
-    bool hasCachedFile = FileSys.fileExists(cachedFile);
+    bool hasCachedFile = std::filesystem::is_regular_file(cachedFile);
     if (hasCachedFile) {
         LINFO(fmt::format("Cached file '{}' used for labels file: {}", cachedFile, file));
 
@@ -476,7 +475,9 @@ bool GlobeLabelsComponent::loadCachedFile(const std::string& file) {
     if (version != CurrentCacheVersion) {
         LINFO("The format of the cached file has changed: deleting old cache");
         fileStream.close();
-        FileSys.deleteFile(file);
+        if (std::filesystem::is_regular_file(file)) {
+            std::filesystem::remove(file);
+        }
         return false;
     }
 
@@ -498,8 +499,7 @@ bool GlobeLabelsComponent::saveCachedFile(const std::string& file) const {
         LERROR(fmt::format("Error opening file '{}' for save cache file", file));
         return false;
     }
-    fileStream.write(reinterpret_cast<const char*>(&CurrentCacheVersion),
-        sizeof(int8_t));
+    fileStream.write(reinterpret_cast<const char*>(&CurrentCacheVersion), sizeof(int8_t));
 
     int32_t nValues = static_cast<int32_t>(_labels.labelsArray.size());
     if (nValues == 0) {
@@ -525,11 +525,10 @@ void GlobeLabelsComponent::draw(const RenderData& data) {
                     viewTransform;
     glm::dmat4 mvp = vp * _globe->modelTransform();
 
-    glm::dvec3 globePositionWorld = glm::dvec3(_globe->modelTransform() *
-                                    glm::vec4(0.f, 0.f, 0.f, 1.f));
-    glm::dvec3 cameraToGlobeDistanceWorld = globePositionWorld -
-                                            data.camera.positionVec3();
-    double distanceCameraGlobeWorld = glm::length(cameraToGlobeDistanceWorld);
+    glm::dvec3 globePosWorld =
+        glm::dvec3(_globe->modelTransform() * glm::vec4(0.f, 0.f, 0.f, 1.f));
+    glm::dvec3 camToGlobeDistanceWorld = globePosWorld - data.camera.positionVec3();
+    double distanceCameraGlobeWorld = glm::length(camToGlobeDistanceWorld);
 
     float varyingOpacity = 1.f;
 
@@ -570,8 +569,7 @@ void GlobeLabelsComponent::draw(const RenderData& data) {
 
 void GlobeLabelsComponent::renderLabels(const RenderData& data,
                                         const glm::dmat4& modelViewProjectionMatrix,
-                                        float distToCamera,
-                                        float fadeInVariable
+                                        float distToCamera, float fadeInVariable
 ) {
     glm::vec4 textColor = glm::vec4(
         glm::vec3(_labelsColor),
@@ -736,10 +734,6 @@ bool GlobeLabelsComponent::isLabelInFrustum(const glm::dmat4& MVMatrix,
     else if ((glm::dot(nearNormal, position) + nearDistance) < -Radius) {
         return false;
     }
-    // The far plane testing is disabled because the atm has no depth.
-    /*else if ((glm::dot(farNormal, position) + farDistance) < -Radius) {
-    return false;
-    }*/
 
     return true;
 }

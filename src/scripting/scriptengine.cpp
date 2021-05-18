@@ -34,6 +34,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/profiling.h>
+#include <filesystem>
 #include <fstream>
 
 #include "scriptengine_lua.inl"
@@ -143,7 +144,7 @@ void ScriptEngine::addLibrary(LuaLibrary library) {
             }
         }
 
-        for (const std::string& script : library.scripts) {
+        for (const std::filesystem::path& script : library.scripts) {
             merged.scripts.push_back(script);
         }
 
@@ -211,7 +212,7 @@ bool ScriptEngine::runScriptFile(const std::string& filename) {
         LWARNING("Filename was empty");
         return false;
     }
-    if (!FileSys.fileExists(filename)) {
+    if (!std::filesystem::is_regular_file(filename)) {
         LERROR(fmt::format("Script with name '{}' did not exist", filename));
         return false;
     }
@@ -308,9 +309,9 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
         lua_settable(state, TableOffset);
     }
 
-    for (const std::string& script : library.scripts) {
+    for (const std::filesystem::path& script : library.scripts) {
         // First we run the script to set its values in the current state
-        ghoul::lua::runScriptFile(state, script);
+        ghoul::lua::runScriptFile(state, script.string());
 
         library.documentations.clear();
 
@@ -319,7 +320,7 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
         lua_gettable(state, -2);
         if (lua_isnil(state, -1)) {
             LERROR(fmt::format(
-                "Module '{}' did not provide a documentation in script file '{}'",
+                "Module '{}' did not provide a documentation in script file {}",
                 library.name, script
             ));
         }
@@ -636,7 +637,7 @@ bool ScriptEngine::writeLog(const std::string& script) {
     if (!_logFileExists) {
         // If a ScriptLogFile was specified, generate it now
         if (!global::configuration->scriptLog.empty()) {
-            _logFilename = absPath(global::configuration->scriptLog);
+            _logFilename = absPath(global::configuration->scriptLog).string();
             _logFileExists = true;
 
             LDEBUG(fmt::format(

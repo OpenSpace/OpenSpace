@@ -214,7 +214,7 @@ void ProjectionComponent::initialize(const std::string& identifier,
 
     std::vector<std::string> sequenceSources;
     if (std::holds_alternative<std::string>(sequence)) {
-        sequenceSources.push_back(absPath(std::get<std::string>(sequence)));
+        sequenceSources.push_back(absPath(std::get<std::string>(sequence)).string());
     }
     else {
         ghoul_assert(
@@ -223,7 +223,7 @@ void ProjectionComponent::initialize(const std::string& identifier,
         );
         sequenceSources = std::get<std::vector<std::string>>(sequence);
         for (std::string& s : sequenceSources) {
-            s = absPath(s);
+            s = absPath(s).string();
         }
     }
 
@@ -278,7 +278,7 @@ void ProjectionComponent::initialize(const std::string& identifier,
                     parsers.push_back(
                         std::make_unique<HongKangParser>(
                             identifier,
-                            absPath(*p.eventFile),
+                            absPath(*p.eventFile).string(),
                             _projectorID,
                             translationDictionary,
                             _potentialTargets
@@ -320,7 +320,7 @@ void ProjectionComponent::initialize(const std::string& identifier,
                 parsers.push_back(
                     std::make_unique<InstrumentTimesParser>(
                         identifier,
-                        absPath(*p.timesSequence),
+                        absPath(*p.timesSequence).string(),
                         timesTranslationDictionary
                     )
                 );
@@ -370,7 +370,7 @@ bool ProjectionComponent::initializeGL() {
     using ghoul::io::TextureReader;
 
     unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
-        absPath(placeholderFile)
+        absPath(placeholderFile).string()
     );
     if (texture) {
         texture->uploadTexture();
@@ -941,7 +941,9 @@ std::shared_ptr<ghoul::opengl::Texture> ProjectionComponent::loadProjectionTextu
     }
 
 
-    unique_ptr<Texture> texture = TextureReader::ref().loadTexture(absPath(texturePath));
+    unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
+        absPath(texturePath).string()
+    );
     if (texture) {
         if (texture->format() == Texture::Format::Red) {
             ghoul::opengl::convertTextureFormat(*texture, Texture::Format::RGB);

@@ -322,10 +322,9 @@ void RenderableGalaxy::initialize() {
     _volume = reader.read();
 
     std::string cachedPointsFile = FileSys.cacheManager()->cachedFilename(
-        _pointsFilename,
-        ghoul::filesystem::CacheManager::Persistent::Yes
+        _pointsFilename
     );
-    const bool hasCachedFile = FileSys.fileExists(cachedPointsFile);
+    const bool hasCachedFile = std::filesystem::is_regular_file(cachedPointsFile);
     if (hasCachedFile) {
         LINFO(fmt::format("Cached file '{}' used for galaxy point file '{}'",
             cachedPointsFile, _pointsFilename
@@ -414,13 +413,12 @@ void RenderableGalaxy::initializeGL() {
 
     if (!_pointSpreadFunctionTexturePath.empty()) {
         _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
-            absPath(_pointSpreadFunctionTexturePath)
+            absPath(_pointSpreadFunctionTexturePath).string()
         );
 
         if (_pointSpreadFunctionTexture) {
             LDEBUG(fmt::format(
-                "Loaded texture from '{}'",
-                absPath(_pointSpreadFunctionTexturePath)
+                "Loaded texture from {}", absPath(_pointSpreadFunctionTexturePath)
             ));
             _pointSpreadFunctionTexture->uploadTexture();
         }

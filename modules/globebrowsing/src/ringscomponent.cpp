@@ -257,51 +257,53 @@ void RingsComponent::initialize() {
     addProperty(_size);
 
     if (p.texture.has_value()) {
-        _texturePath = absPath(p.texture->string());
-        _textureFile = std::make_unique<File>(_texturePath);
-        _texturePath.onChange([&]() { loadTexture(); });
+        _texturePath = absPath(p.texture->string()).string();
+        _textureFile = std::make_unique<File>(_texturePath.value());
+        _texturePath.onChange([this]() { loadTexture(); });
         addProperty(_texturePath);
-        _textureFile->setCallback([&](const File&) { _textureIsDirty = true; });
+        _textureFile->setCallback([this]() { _textureIsDirty = true; });
     }
 
     if (p.textureFwrd.has_value()) {
-        _textureFwrdPath = absPath(p.textureFwrd->string());
-        _textureFileForwards = std::make_unique<File>(_textureFwrdPath);
-        _textureFwrdPath.onChange([&]() { loadTexture(); });
+        _textureFwrdPath = absPath(p.textureFwrd->string()).string();
+        _textureFileForwards = std::make_unique<File>(_textureFwrdPath.value());
+        _textureFwrdPath.onChange([this]() { loadTexture(); });
         addProperty(_textureFwrdPath);
-        _textureFileForwards->setCallback([&](const File&) { _textureIsDirty = true; });
+        _textureFileForwards->setCallback([this]() { _textureIsDirty = true; });
     }
 
     if (p.textureBckwrd.has_value()) {
-        _textureBckwrdPath = absPath(p.textureBckwrd->string());
-        _textureFileBackwards = std::make_unique<File>(_textureBckwrdPath);
-        _textureBckwrdPath.onChange([&]() { loadTexture(); });
+        _textureBckwrdPath = absPath(p.textureBckwrd->string()).string();
+        _textureFileBackwards = std::make_unique<File>(_textureBckwrdPath.value());
+        _textureBckwrdPath.onChange([this]() { loadTexture(); });
         addProperty(_textureBckwrdPath);
-        _textureFileBackwards->setCallback([&](const File&) { _textureIsDirty = true; });
+        _textureFileBackwards->setCallback([this]() { _textureIsDirty = true; });
     }
 
     if (p.textureUnlit.has_value()) {
-        _textureUnlitPath = absPath(p.textureUnlit->string());
-        _textureFileUnlit = std::make_unique<File>(_textureUnlitPath);
-        _textureUnlitPath.onChange([&]() { loadTexture(); });
+        _textureUnlitPath = absPath(p.textureUnlit->string()).string();
+        _textureFileUnlit = std::make_unique<File>(_textureUnlitPath.value());
+        _textureUnlitPath.onChange([this]() { loadTexture(); });
         addProperty(_textureUnlitPath);
-        _textureFileUnlit->setCallback([&](const File&) { _textureIsDirty = true; });
+        _textureFileUnlit->setCallback([this]() { _textureIsDirty = true; });
     }
 
     if (p.textureColor.has_value()) {
-        _textureColorPath = absPath(p.textureColor->string());
-        _textureFileColor = std::make_unique<File>(_textureColorPath);
-        _textureColorPath.onChange([&]() { loadTexture(); });
+        _textureColorPath = absPath(p.textureColor->string()).string();
+        _textureFileColor = std::make_unique<File>(_textureColorPath.value());
+        _textureColorPath.onChange([this]() { loadTexture(); });
         addProperty(_textureColorPath);
-        _textureFileColor->setCallback([&](const File&) { _textureIsDirty = true; });
+        _textureFileColor->setCallback([this]() { _textureIsDirty = true; });
     }
 
     if (p.textureTransparency.has_value()) {
-        _textureTransparencyPath = absPath(p.textureTransparency->string());
-        _textureFileTransparency = std::make_unique<File>(_textureTransparencyPath);
-        _textureTransparencyPath.onChange([&]() { loadTexture(); });
+        _textureTransparencyPath = absPath(p.textureTransparency->string()).string();
+        _textureFileTransparency = std::make_unique<File>(
+            _textureTransparencyPath.value()
+        );
+        _textureTransparencyPath.onChange([this]() { loadTexture(); });
         addProperty(_textureTransparencyPath);
-        _textureFileTransparency->setCallback([&](const File&) { _textureIsDirty = true; });
+        _textureFileTransparency->setCallback([this]() { _textureIsDirty = true; });
     }
 
     _offset = p.offset.value_or(_offset);
@@ -615,7 +617,7 @@ void RingsComponent::loadTexture() {
     if (!_texturePath.value().empty()) {
 
         std::unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
-            absPath(_texturePath)
+            absPath(_texturePath).string()
         );
 
         if (texture) {
@@ -628,16 +630,16 @@ void RingsComponent::loadTexture() {
             _texture->uploadTexture();
             _texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
 
-            _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
-            _textureFile->setCallback(
-                [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
+            _textureFile = std::make_unique<ghoul::filesystem::File>(
+                _texturePath.value()
             );
+            _textureFile->setCallback([this]() { _textureIsDirty = true; });
         }
     }
 
     if (!_textureFwrdPath.value().empty()) {
         std::unique_ptr<Texture> textureForwards = TextureReader::ref().loadTexture(
-            absPath(_textureFwrdPath)
+            absPath(_textureFwrdPath).string()
         );
 
         if (textureForwards) {
@@ -655,17 +657,15 @@ void RingsComponent::loadTexture() {
                 ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
 
             _textureFileForwards = std::make_unique<ghoul::filesystem::File>(
-                _textureFwrdPath
-                );
-            _textureFileForwards->setCallback(
-                [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
+                _textureFwrdPath.value()
             );
+            _textureFileForwards->setCallback([this]() { _textureIsDirty = true; });
         }
     }
 
     if (!_textureBckwrdPath.value().empty()) {
         std::unique_ptr<Texture> textureBackwards = TextureReader::ref().loadTexture(
-            absPath(_textureBckwrdPath)
+            absPath(_textureBckwrdPath).string()
         );
 
         if (textureBackwards) {
@@ -683,17 +683,15 @@ void RingsComponent::loadTexture() {
                 ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
 
             _textureFileBackwards = std::make_unique<ghoul::filesystem::File>(
-                _textureBckwrdPath
-                );
-            _textureFileBackwards->setCallback(
-                [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
+                _textureBckwrdPath.value()
             );
+            _textureFileBackwards->setCallback([this]() { _textureIsDirty = true; });
         }
     }
 
     if (!_textureUnlitPath.value().empty()) {
         std::unique_ptr<Texture> textureUnlit = TextureReader::ref().loadTexture(
-            absPath(_textureUnlitPath)
+            absPath(_textureUnlitPath).string()
         );
 
         if (textureUnlit) {
@@ -707,18 +705,18 @@ void RingsComponent::loadTexture() {
             _textureUnlit = std::move(textureUnlit);
 
             _textureUnlit->uploadTexture();
-            _textureUnlit->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+            _textureUnlit->setFilter(Texture::FilterMode::AnisotropicMipMap);
 
-            _textureFileUnlit = std::make_unique<ghoul::filesystem::File>(_textureUnlitPath);
-            _textureFileUnlit->setCallback(
-                [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
+            _textureFileUnlit = std::make_unique<ghoul::filesystem::File>(
+                _textureUnlitPath.value()
             );
+            _textureFileUnlit->setCallback([this]() { _textureIsDirty = true; });
         }
     }
 
     if (!_textureColorPath.value().empty()) {
         std::unique_ptr<Texture> textureColor = TextureReader::ref().loadTexture(
-            absPath(_textureColorPath)
+            absPath(_textureColorPath).string()
         );
 
         if (textureColor) {
@@ -732,18 +730,18 @@ void RingsComponent::loadTexture() {
             _textureColor = std::move(textureColor);
 
             _textureColor->uploadTexture();
-            _textureColor->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+            _textureColor->setFilter(Texture::FilterMode::AnisotropicMipMap);
 
-            _textureFileColor = std::make_unique<ghoul::filesystem::File>(_textureColorPath);
-            _textureFileColor->setCallback(
-                [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
+            _textureFileColor = std::make_unique<ghoul::filesystem::File>(
+                _textureColorPath.value()
             );
+            _textureFileColor->setCallback([this]() { _textureIsDirty = true; });
         }
     }
 
     if (!_textureTransparencyPath.value().empty()) {
         std::unique_ptr<Texture> textureTransparency = TextureReader::ref().loadTexture(
-            absPath(_textureTransparencyPath)
+            absPath(_textureTransparencyPath).string()
         );
 
         if (textureTransparency) {
@@ -762,11 +760,9 @@ void RingsComponent::loadTexture() {
             );
 
             _textureFileTransparency = std::make_unique<ghoul::filesystem::File>(
-                _textureTransparencyPath
+                _textureTransparencyPath.value()
             );
-            _textureFileTransparency->setCallback(
-                [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
-            );
+            _textureFileTransparency->setCallback([this]() { _textureIsDirty = true; });
         }
     }
 

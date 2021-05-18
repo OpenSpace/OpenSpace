@@ -34,6 +34,7 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/triggerproperty.h>
 #include <chrono>
+#include <filesystem>
 
 namespace ghoul {
     namespace fontrendering { class Font; }
@@ -109,12 +110,13 @@ public:
     std::vector<ScreenSpaceRenderable*> screenSpaceRenderables() const;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> buildRenderProgram(
-        const std::string& name, const std::string& vsPath, std::string fsPath,
-        ghoul::Dictionary data = ghoul::Dictionary());
+        const std::string& name, const std::filesystem::path& vsPath,
+        std::filesystem::path fsPath, ghoul::Dictionary data = ghoul::Dictionary());
 
     std::unique_ptr<ghoul::opengl::ProgramObject> buildRenderProgram(
-        const std::string& name, const std::string& vsPath, std::string fsPath,
-        const std::string& csPath, ghoul::Dictionary data = ghoul::Dictionary());
+        const std::string& name, const std::filesystem::path& vsPath,
+        std::filesystem::path fsPath, const std::filesystem::path& csPath,
+        ghoul::Dictionary data = ghoul::Dictionary());
 
     void removeRenderProgram(ghoul::opengl::ProgramObject* program);
 

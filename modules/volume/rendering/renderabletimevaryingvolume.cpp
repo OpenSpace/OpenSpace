@@ -44,6 +44,8 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
+#include <filesystem>
+#include <optional>
 
 namespace {
     constexpr const char* _loggerCat = "RenderableTimeVaryingVolume";
@@ -55,12 +57,6 @@ namespace {
     const char* KeyGridType = "GridType";
     const char* KeyOpacity = "Opacity";
     const char* KeyTransferFunction = "TransferFunction";
-    const char* KeySourceDirectory = "SourceDirectory";
-
-    const char* KeyClipPlanes = "ClipPlanes";
-    const char* KeySecondsBefore = "SecondsBefore";
-    const char* KeySecondsAfter = "SecondsAfter";
-    const char* KeyInvertDataAtZ = "InvertDataAtZ";
 
     const float SecondsInOneDay = 60 * 60 * 24;
     constexpr const float VolumeMaxOpacity = 500;
@@ -137,387 +133,359 @@ namespace {
         "Radius upper bound",
         "" // @TODO Missing documentation
     };
+
+    struct [[codegen::Dictionary(RenderableTimeVaryingVolume)]] Parameters {
+        // Specifies the path to load timesteps from
+        std::string sourceDirectory;
+
+        // Specifies the transfer function file path
+        std::string transferFunction;
+
+        // Specifies the number of seconds to show the the first timestep before its
+        // actual time. The default value is 0
+        std::optional<float> secondsBefore;
+
+        // Specifies the number of seconds to show the the last timestep after its 
+        // actual time
+        float secondsAfter;
+
+        // Specifies if you want to invert the volume data at it z-axis.
+        std::optional<bool> invertDataAtZ;
+
+        std::optional<float> opacity;
+
+
+        std::optional<ghoul::Dictionary> clipPlanes;
+    };
+#include "renderabletimevaryingvolume_codegen.cpp"
 } // namespace
 
 namespace openspace::volume {
 
-    documentation::Documentation RenderableTimeVaryingVolume::Documentation() {
-        using namespace documentation;
-        return {
-            "RenderableTimevaryingVolume",
-            "volume_renderable_timevaryingvolume",
-            {
-                {
-                    KeySourceDirectory,
-                    new StringVerifier,
-                    Optional::No,
-                    "Specifies the path to load timesteps from"
-                },
-                {
-                    KeyTransferFunction,
-                    new StringVerifier,
-                    Optional::No,
-                    "Specifies the transfer function file path"
-                },
-                {
-                    KeySecondsBefore,
-                    new DoubleVerifier,
-                    Optional::Yes,
-                    "Specifies the number of seconds to show the the first timestep before "
-                    "its actual time. The default value is 0."
-                },
-                {
-                    KeySecondsAfter,
-                    new DoubleVerifier,
-                    Optional::No,
-                    "Specifies the number of seconds to show the the last timestep after its "
-                    "actual time"
-                },
-                {
-                    KeyInvertDataAtZ,
-                    new BoolVerifier,
-                    Optional::Yes,
-                    "Specifies if you want to invert the volume data at it z-axis."
-                }
-            }
-        };
+documentation::Documentation RenderableTimeVaryingVolume::Documentation() {
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "volume_renderable_timevaryingvolume";
+    return doc;
+}
+
+RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
+                                                      const ghoul::Dictionary& dictionary)
+    : Renderable(dictionary)
+    , _gridType(GridTypeInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _stepSize(StepSizeInfo, 0.02f, 0.001f, 0.1f)
+    , _opacity(OpacityInfo, 10.0f, 0.f, VolumeMaxOpacity)
+    , _rNormalization(rNormalizationInfo, 0.f, 0.f, 2.f)
+    , _rUpperBound(rUpperBoundInfo, 1.f, 0.f, 2.f)
+    , _secondsBefore(SecondsBeforeInfo, 0.f, 0.01f, SecondsInOneDay)
+    , _secondsAfter(SecondsAfterInfo, 0.f, 0.01f, SecondsInOneDay)
+    , _sourceDirectory(SourceDirectoryInfo)
+    , _transferFunctionPath(TransferFunctionInfo)
+    , _triggerTimeJump(TriggerTimeJumpInfo)
+    , _jumpToTimestep(JumpToTimestepInfo, 0, 0, 256)
+    , _currentTimestep(CurrentTimeStepInfo, 0, 0, 256)
+    , _invertDataAtZ(false)
+{
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    _sourceDirectory = absPath(p.sourceDirectory).string();
+    _transferFunctionPath = absPath(p.transferFunction).string();
+    _transferFunction = std::make_shared<openspace::TransferFunction>(
+        _transferFunctionPath,
+        [](const openspace::TransferFunction&) {}
+    );
+    
+    _invertDataAtZ = p.invertDataAtZ.value_or(_invertDataAtZ);
+
+    _gridType.addOptions({
+        { static_cast<int>(volume::VolumeGridType::Cartesian), "Cartesian grid" },
+        { static_cast<int>(volume::VolumeGridType::Spherical), "Spherical grid" }
+    });
+    _gridType = static_cast<int>(volume::VolumeGridType::Cartesian);
+
+    if (dictionary.hasValue<double>(KeyStepSize)) {
+        _stepSize = static_cast<float>(dictionary.value<double>(KeyStepSize));
+    }
+    
+    if (dictionary.hasValue<double>(KeyOpacity)) {
+        _opacity = static_cast<float>(dictionary.value<double>(KeyOpacity) 
+                 * VolumeMaxOpacity);
     }
 
-    RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
-        const ghoul::Dictionary& dictionary)
-        : Renderable(dictionary)
-        , _gridType(GridTypeInfo, properties::OptionProperty::DisplayType::Dropdown)
-        , _stepSize(StepSizeInfo, 0.02f, 0.001f, 0.1f)
-        , _opacity(OpacityInfo, 10.0f, 0.f, VolumeMaxOpacity)
-        , _rNormalization(rNormalizationInfo, 0.f, 0.f, 2.f)
-        , _rUpperBound(rUpperBoundInfo, 1.f, 0.f, 2.f)
-        , _secondsBefore(SecondsBeforeInfo, 0.f, 0.01f, SecondsInOneDay)
-        , _secondsAfter(SecondsAfterInfo, 0.f, 0.01f, SecondsInOneDay)
-        , _sourceDirectory(SourceDirectoryInfo)
-        , _transferFunctionPath(TransferFunctionInfo)
-        , _triggerTimeJump(TriggerTimeJumpInfo)
-        , _jumpToTimestep(JumpToTimestepInfo, 0, 0, 256)
-        , _currentTimestep(CurrentTimeStepInfo, 0, 0, 256)
-        , _invertDataAtZ(false)
-    {
-        documentation::testSpecificationAndThrow(
-            Documentation(),
-            dictionary,
-            "RenderableTimeVaryingVolume"
+    _secondsBefore = p.secondsBefore.value_or(_secondsBefore);
+    _secondsAfter = p.secondsAfter;
+
+    ghoul::Dictionary clipPlanesDictionary = p.clipPlanes.value_or(ghoul::Dictionary());
+    _clipPlanes = std::make_shared<volume::VolumeClipPlanes>(clipPlanesDictionary);
+    _clipPlanes->setIdentifier("clipPlanes");
+    _clipPlanes->setGuiName("Clip Planes");
+
+    if (dictionary.hasValue<std::string>(KeyGridType)) {
+        VolumeGridType gridType = volume::parseGridType(
+           dictionary.value<std::string>(KeyGridType)
         );
+        _gridType = static_cast<std::underlying_type_t<VolumeGridType>>(gridType);
+    }
+    
+    addProperty(_opacity);
+}
 
-        _sourceDirectory = absPath(dictionary.value<std::string>(KeySourceDirectory));
-        _transferFunctionPath = absPath(dictionary.value<std::string>(KeyTransferFunction));
-        _transferFunction = std::make_shared<openspace::TransferFunction>(
-            _transferFunctionPath,
-            [](const openspace::TransferFunction&) {}
-        );
+RenderableTimeVaryingVolume::~RenderableTimeVaryingVolume() {}
 
-        _gridType.addOptions({
-            { static_cast<int>(volume::VolumeGridType::Cartesian), "Cartesian grid" },
-            { static_cast<int>(volume::VolumeGridType::Spherical), "Spherical grid" }
-            });
-        _gridType = static_cast<int>(volume::VolumeGridType::Cartesian);
+void RenderableTimeVaryingVolume::initializeGL() {
+    std::filesystem::path sequenceDir = absPath(_sourceDirectory);
 
-        if (dictionary.hasValue<double>(KeyStepSize)) {
-            _stepSize = static_cast<float>(dictionary.value<double>(KeyStepSize));
-        }
-
-        if (dictionary.hasValue<double>(KeyOpacity)) {
-            _opacity = static_cast<float>(dictionary.value<double>(KeyOpacity) * VolumeMaxOpacity);
-        }
-
-        if (dictionary.hasValue<double>(KeySecondsBefore)) {
-            _secondsBefore = static_cast<float>(dictionary.value<double>(KeySecondsBefore));
-        }
-        _secondsAfter = static_cast<float>(dictionary.value<double>(KeySecondsAfter));
-
-        if (dictionary.hasKey(static_cast<std::string>(KeyInvertDataAtZ))) {
-            _invertDataAtZ = dictionary.value<bool>(KeyInvertDataAtZ);
-        }
-
-        ghoul::Dictionary clipPlanesDictionary;
-        if (dictionary.hasValue<ghoul::Dictionary>(KeyClipPlanes)) {
-            clipPlanesDictionary = dictionary.value<ghoul::Dictionary>(KeyClipPlanes);
-        }
-        _clipPlanes = std::make_shared<volume::VolumeClipPlanes>(clipPlanesDictionary);
-        _clipPlanes->setIdentifier("clipPlanes");
-        _clipPlanes->setGuiName("Clip Planes");
-
-        if (dictionary.hasValue<std::string>(KeyGridType)) {
-            VolumeGridType gridType = volume::parseGridType(
-                dictionary.value<std::string>(KeyGridType)
-            );
-            _gridType = static_cast<std::underlying_type_t<VolumeGridType>>(gridType);
-        }
-
-        addProperty(_opacity);
+    if (!std::filesystem::is_directory(sequenceDir)) {
+        LERROR(fmt::format("Could not load sequence directory {}", sequenceDir));
+        return;
     }
 
-    RenderableTimeVaryingVolume::~RenderableTimeVaryingVolume() {}
+    namespace fs = std::filesystem;
+    for (const fs::directory_entry& e : fs::recursive_directory_iterator(sequenceDir)) {
+        if (e.is_regular_file() && e.path().extension() == ".dictionary") {
+            loadTimestepMetadata(e.path().string());
+        }
+    }
 
-    void RenderableTimeVaryingVolume::initializeGL() {
-        using RawPath = ghoul::filesystem::Directory::RawPath;
-        ghoul::filesystem::Directory sequenceDir(_sourceDirectory, RawPath::Yes);
+    // TODO: defer loading of data to later (separate thread or at least not when loading)
+    for (std::pair<const double, Timestep>& p : _volumeTimesteps) {
+        Timestep& t = p.second;
+        std::string path = fmt::format(
+            "{}/{}.rawvolume", _sourceDirectory.value(), t.baseName
+        );
+        RawVolumeReader<float> reader(path, t.metadata.dimensions);
+        t.rawVolume = reader.read(_invertDataAtZ);
 
-        if (!FileSys.directoryExists(sequenceDir)) {
-            LERROR(fmt::format("Could not load sequence directory '{}'", sequenceDir.path()));
-            return;
+        float min = t.metadata.minValue;
+        float diff = t.metadata.maxValue - t.metadata.minValue;
+        float* data = t.rawVolume->data();
+        for (size_t i = 0; i < t.rawVolume->nCells(); ++i) {
+            data[i] = glm::clamp((data[i] - min) / diff, 0.f, 1.f);
         }
 
-        using Recursive = ghoul::filesystem::Directory::Recursive;
-        using Sort = ghoul::filesystem::Directory::Sort;
-
-        std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::Yes, Sort::No);
-        for (const std::string& path : sequencePaths) {
-            ghoul::filesystem::File currentFile(path);
-            std::string extension = currentFile.fileExtension();
-            if (extension == "dictionary") {
-                loadTimestepMetadata(path);
-            }
+        t.histogram = std::make_shared<Histogram>(0.f, 1.f, 100);
+        for (size_t i = 0; i < t.rawVolume->nCells(); ++i) {
+            t.histogram->add(data[i]);
         }
+        // TODO: handle normalization properly for different timesteps + transfer function
 
-        // TODO: defer loading of data to later (separate thread or at least not when loading)
-        for (std::pair<const double, Timestep>& p : _volumeTimesteps) {
-            Timestep& t = p.second;
-            std::string path = FileSys.pathByAppendingComponent(
-                _sourceDirectory, t.baseName
-            ) + ".rawvolume";
-            RawVolumeReader<float> reader(path, t.metadata.dimensions);
-            t.rawVolume = reader.read(_invertDataAtZ);
-
-            float min = t.metadata.minValue;
-            float diff = t.metadata.maxValue - min;
-            float* data = t.rawVolume->data();
-            for (size_t i = 0; i < t.rawVolume->nCells(); ++i) {
-                data[i] = glm::clamp((data[i] - min) / diff, 0.f, 1.f);
-            }
-
-            t.histogram = std::make_shared<Histogram>(0.f, 1.f, 100);
-            for (size_t i = 0; i < t.rawVolume->nCells(); ++i) {
-                t.histogram->add(data[i]);
-            }
-
-            // TODO: handle normalization properly for different timesteps + transfer function
-
-            t.texture = std::make_shared<ghoul::opengl::Texture>(
-                t.metadata.dimensions,
-                ghoul::opengl::Texture::Format::Red,
-                GL_RED,
-                GL_FLOAT,
-                ghoul::opengl::Texture::FilterMode::Linear,
-                ghoul::opengl::Texture::WrappingMode::Clamp
-                );
-
-            t.texture->setPixelData(
-                reinterpret_cast<void*>(data),
-                ghoul::opengl::Texture::TakeOwnership::No
-            );
-            t.texture->uploadTexture();
-        }
-
-        _clipPlanes->initialize();
-
-        _raycaster = std::make_unique<volume::BasicVolumeRaycaster>(
-            nullptr,
-            _transferFunction,
-            _clipPlanes
+        t.texture = std::make_shared<ghoul::opengl::Texture>(
+            t.metadata.dimensions,
+            ghoul::opengl::Texture::Format::Red,
+            GL_RED,
+            GL_FLOAT,
+            ghoul::opengl::Texture::FilterMode::Linear,
+            ghoul::opengl::Texture::WrappingMode::Clamp
             );
 
-        _raycaster->initialize();
-        global::raycasterManager->attachRaycaster(*_raycaster.get());
-        onEnabledChange([&](bool enabled) {
-            if (enabled) {
-                global::raycasterManager->attachRaycaster(*_raycaster.get());
-            }
-            else {
-                global::raycasterManager->detachRaycaster(*_raycaster.get());
-            }
-        });
+        t.texture->setPixelData(
+            reinterpret_cast<void*>(data),
+            ghoul::opengl::Texture::TakeOwnership::No
+        );
+        t.texture->uploadTexture();
+    }
 
-        _triggerTimeJump.onChange([this]() { jumpToTimestep(_jumpToTimestep); });
+    _clipPlanes->initialize();
 
-        _jumpToTimestep.onChange([this]() { jumpToTimestep(_jumpToTimestep); });
+    _raycaster = std::make_unique<volume::BasicVolumeRaycaster>(
+        nullptr,
+        _transferFunction,
+        _clipPlanes
+        );
 
-        const int lastTimestep = !_volumeTimesteps.empty() ?
-            static_cast<int>(_volumeTimesteps.size() - 1) :
-            0;
-        _currentTimestep.setMaxValue(lastTimestep);
-        _jumpToTimestep.setMaxValue(lastTimestep);
+    _raycaster->initialize();
+    global::raycasterManager->attachRaycaster(*_raycaster.get());
+    onEnabledChange([&](bool enabled) {
+        if (enabled) {
+            global::raycasterManager->attachRaycaster(*_raycaster.get());
+        }
+        else {
+            global::raycasterManager->detachRaycaster(*_raycaster.get());
+        }
+    });
 
-        addProperty(_stepSize);
-        addProperty(_transferFunctionPath);
-        addProperty(_sourceDirectory);
-        addPropertySubOwner(_clipPlanes.get());
+    _triggerTimeJump.onChange([this]() { jumpToTimestep(_jumpToTimestep); });
 
-        addProperty(_triggerTimeJump);
-        addProperty(_jumpToTimestep);
-        addProperty(_currentTimestep);
-        addProperty(_rNormalization);
-        addProperty(_rUpperBound);
-        addProperty(_gridType);
+    _jumpToTimestep.onChange([this]() { jumpToTimestep(_jumpToTimestep); });
 
+    const int lastTimestep = !_volumeTimesteps.empty() ?
+        static_cast<int>(_volumeTimesteps.size() - 1) :
+        0;
+    _currentTimestep.setMaxValue(lastTimestep);
+    _jumpToTimestep.setMaxValue(lastTimestep);
+
+    addProperty(_stepSize);
+    addProperty(_transferFunctionPath);
+    addProperty(_sourceDirectory);
+    addPropertySubOwner(_clipPlanes.get());
+
+    addProperty(_triggerTimeJump);
+    addProperty(_jumpToTimestep);
+    addProperty(_currentTimestep);
+    addProperty(_rNormalization);
+    addProperty(_rUpperBound);
+    addProperty(_gridType);
+
+    _raycaster->setGridType(static_cast<VolumeGridType>(_gridType.value()));
+    _gridType.onChange([this] {
         _raycaster->setGridType(static_cast<VolumeGridType>(_gridType.value()));
-        _gridType.onChange([this] {
-            _raycaster->setGridType(static_cast<VolumeGridType>(_gridType.value()));
-            });
-
-        _transferFunctionPath.onChange([this] {
-            _transferFunction = std::make_shared<openspace::TransferFunction>(
-                _transferFunctionPath
-            );
-            _raycaster->setTransferFunction(_transferFunction);
         });
+
+    _transferFunctionPath.onChange([this] {
+        _transferFunction = std::make_shared<openspace::TransferFunction>(
+            _transferFunctionPath
+        );
+        _raycaster->setTransferFunction(_transferFunction);
+    });
+}
+
+void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) {
+    RawVolumeMetadata metadata;
+
+    try {
+        ghoul::Dictionary dictionary = ghoul::lua::loadDictionaryFromFile(path);
+        metadata = RawVolumeMetadata::createFromDictionary(dictionary);
+    }
+    catch (...) {
+        return;
     }
 
-    void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) {
-        RawVolumeMetadata metadata;
+    Timestep t;
+    t.metadata = metadata;
+    t.baseName = std::filesystem::path(path).stem().string();
+    t.inRam = false;
+    t.onGpu = false;
 
-        try {
-            ghoul::Dictionary dictionary = ghoul::lua::loadDictionaryFromFile(path);
-            metadata = RawVolumeMetadata::createFromDictionary(dictionary);
-        }
-        catch (...) {
-            return;
-        }
+    _volumeTimesteps[t.metadata.time] = std::move(t);
+}
 
-        Timestep t;
-        t.metadata = metadata;
-        t.baseName = ghoul::filesystem::File(path).baseName();
-        t.inRam = false;
-        t.onGpu = false;
-
-        _volumeTimesteps[t.metadata.time] = std::move(t);
-    }
-
-    RenderableTimeVaryingVolume::Timestep* RenderableTimeVaryingVolume::currentTimestep() {
-        if (_volumeTimesteps.empty()) {
-            return nullptr;
-        }
-        double currentTime = global::timeManager->time().j2000Seconds();
-
-        // Get the first item with time > currentTime
-        auto currentTimestepIt = _volumeTimesteps.upper_bound(currentTime);
-        if (currentTimestepIt == _volumeTimesteps.end()) {
-            // No such timestep was found: show last timestep if it is within the time margin.
-            Timestep* lastTimestep = &(_volumeTimesteps.rbegin()->second);
-            double threshold = lastTimestep->metadata.time +
-                static_cast<double>(_secondsAfter);
-            return currentTime < threshold ? lastTimestep : nullptr;
-        }
-
-        if (currentTimestepIt == _volumeTimesteps.begin()) {
-            // No such timestep was found: show first timestep if it is within the time margin
-            Timestep* firstTimestep = &(_volumeTimesteps.begin()->second);
-            double threshold = firstTimestep->metadata.time -
-                static_cast<double>(_secondsBefore);
-            return currentTime >= threshold ? firstTimestep : nullptr;
-        }
-
-        // Get the last item with time <= currentTime
-        currentTimestepIt--;
-        return &(currentTimestepIt->second);
-    }
-
-    int RenderableTimeVaryingVolume::timestepIndex(
-        const RenderableTimeVaryingVolume::Timestep* t) const
-    {
-        if (!t) {
-            return -1;
-        }
-        int index = 0;
-        for (const std::pair<const double, Timestep>& it : _volumeTimesteps) {
-            if (&(it.second) == t) {
-                return index;
-            }
-            ++index;
-        }
-        return -1;
-    }
-
-    // @TODO Can this be turned into a const ref?
-    RenderableTimeVaryingVolume::Timestep* RenderableTimeVaryingVolume::timestepFromIndex(
-        int target)
-    {
-        if (target < 0) {
-            target = 0;
-        }
-        int index = 0;
-        for (std::pair<const double, Timestep>& it : _volumeTimesteps) {
-            if (index == target) {
-                return &(it.second);
-            }
-            ++index;
-        }
+RenderableTimeVaryingVolume::Timestep* RenderableTimeVaryingVolume::currentTimestep() {
+    if (_volumeTimesteps.empty()) {
         return nullptr;
     }
+    double currentTime = global::timeManager->time().j2000Seconds();
 
-    void RenderableTimeVaryingVolume::jumpToTimestep(int target) {
-        Timestep* t = timestepFromIndex(target);
-        if (t) {
-            global::timeManager->setTimeNextFrame(Time(t->metadata.time));
-        }
+    // Get the first item with time > currentTime
+    auto currentTimestepIt = _volumeTimesteps.upper_bound(currentTime);
+    if (currentTimestepIt == _volumeTimesteps.end()) {
+        // No such timestep was found: show last timestep if it is within the time margin.
+        Timestep* lastTimestep = &(_volumeTimesteps.rbegin()->second);
+        double threshold = lastTimestep->metadata.time +
+            static_cast<double>(_secondsAfter);
+        return currentTime < threshold ? lastTimestep : nullptr;
     }
 
-    void RenderableTimeVaryingVolume::update(const UpdateData&) {
-        _transferFunction->update();
+    if (currentTimestepIt == _volumeTimesteps.begin()) {
+        // No such timestep was found: show first timestep if it is within the time margin
+        Timestep* firstTimestep = &(_volumeTimesteps.begin()->second);
+        double threshold = firstTimestep->metadata.time -
+            static_cast<double>(_secondsBefore);
+        return currentTime >= threshold ? firstTimestep : nullptr;
+    }
 
-        if (_raycaster) {
-            Timestep* t = currentTimestep();
-            _currentTimestep = timestepIndex(t);
+    // Get the last item with time <= currentTime
+    currentTimestepIt--;
+    return &(currentTimestepIt->second);
+}
 
-            // Set scale and translation matrices:
-            // The original data cube is a unit cube centered in 0
-            // ie with lower bound from (-0.5, -0.5, -0.5) and upper bound (0.5, 0.5, 0.5)
-            if (t && t->texture) {
-                if (_raycaster->gridType() == volume::VolumeGridType::Cartesian) {
-                    glm::dvec3 scale = t->metadata.upperDomainBound -
-                        t->metadata.lowerDomainBound;
-                    glm::dvec3 translation =
-                        (t->metadata.lowerDomainBound + t->metadata.upperDomainBound) * 0.5f;
+int RenderableTimeVaryingVolume::timestepIndex(
+                                     const RenderableTimeVaryingVolume::Timestep* t) const
+{
+    if (!t) {
+        return -1;
+    }
+    int index = 0;
+    for (const std::pair<const double, Timestep>& it : _volumeTimesteps) {
+        if (&(it.second) == t) {
+            return index;
+        }
+        ++index;
+    }
+    return -1;
+}
 
-                    glm::dmat4 modelTransform = glm::translate(glm::dmat4(1.0), translation);
-                    glm::dmat4 scaleMatrix = glm::scale(glm::dmat4(1.0), scale);
-                    modelTransform = modelTransform * scaleMatrix;
-                    _raycaster->setModelTransform(glm::mat4(modelTransform));
-                }
-                else {
-                    // The diameter is two times the maximum radius.
-                    // No translation: the sphere is always centered in (0, 0, 0)
-                    _raycaster->setModelTransform(
-                        glm::scale(
-                            glm::dmat4(1.0),
-                            glm::dvec3(2.0 * t->metadata.upperDomainBound[0])
-                        )
-                    );
-                }
-                _raycaster->setVolumeTexture(t->texture);
+// @TODO Can this be turned into a const ref?
+RenderableTimeVaryingVolume::Timestep* RenderableTimeVaryingVolume::timestepFromIndex(
+                                                                               int target)
+{
+    if (target < 0) {
+        target = 0;
+    }
+    int index = 0;
+    for (std::pair<const double, Timestep>& it : _volumeTimesteps) {
+        if (index == target) {
+            return &(it.second);
+        }
+        ++index;
+    }
+    return nullptr;
+}
+
+void RenderableTimeVaryingVolume::jumpToTimestep(int target) {
+    Timestep* t = timestepFromIndex(target);
+    if (t) {
+        global::timeManager->setTimeNextFrame(Time(t->metadata.time));
+    }
+}
+
+void RenderableTimeVaryingVolume::update(const UpdateData&) {
+    _transferFunction->update();
+
+    if (_raycaster) {
+        Timestep* t = currentTimestep();
+        _currentTimestep = timestepIndex(t);
+
+        // Set scale and translation matrices:
+        // The original data cube is a unit cube centered in 0
+        // ie with lower bound from (-0.5, -0.5, -0.5) and upper bound (0.5, 0.5, 0.5)
+        if (t && t->texture) {
+            if (_raycaster->gridType() == volume::VolumeGridType::Cartesian) {
+                glm::dvec3 scale = t->metadata.upperDomainBound -
+                    t->metadata.lowerDomainBound;
+                glm::dvec3 translation =
+                    (t->metadata.lowerDomainBound + t->metadata.upperDomainBound) * 0.5f;
+
+                glm::dmat4 modelTransform = glm::translate(glm::dmat4(1.0), translation);
+                glm::dmat4 scaleMatrix = glm::scale(glm::dmat4(1.0), scale);
+                modelTransform = modelTransform * scaleMatrix;
+                _raycaster->setModelTransform(glm::mat4(modelTransform));
             }
             else {
-                _raycaster->setVolumeTexture(nullptr);
+                // The diameter is two times the maximum radius.
+                // No translation: the sphere is always centered in (0, 0, 0)
+                _raycaster->setModelTransform(
+                    glm::scale(
+                        glm::dmat4(1.0),
+                        glm::dvec3(2.0 * t->metadata.upperDomainBound[0])
+                    )
+                );
             }
-            _raycaster->setStepSize(_stepSize);
-            _raycaster->setOpacity(_opacity);
-            _raycaster->setRNormalization(_rNormalization);
-            _raycaster->setRUpperBound(_rUpperBound);
+            _raycaster->setVolumeTexture(t->texture);
         }
-    }
-
-    void RenderableTimeVaryingVolume::render(const RenderData& data, RendererTasks& tasks) {
-        if (_raycaster && _raycaster->volumeTexture()) {
-            tasks.raycasterTasks.push_back({ _raycaster.get(), data });
+        else {
+            _raycaster->setVolumeTexture(nullptr);
         }
+        _raycaster->setStepSize(_stepSize);
+        _raycaster->setOpacity(_opacity);
+        _raycaster->setRNormalization(_rNormalization);
+        _raycaster->setRUpperBound(_rUpperBound);
     }
+}
 
-    bool RenderableTimeVaryingVolume::isReady() const {
-        return true;
+void RenderableTimeVaryingVolume::render(const RenderData& data, RendererTasks& tasks) {
+    if (_raycaster && _raycaster->volumeTexture()) {
+        tasks.raycasterTasks.push_back({ _raycaster.get(), data });
     }
+}
 
-    void RenderableTimeVaryingVolume::deinitializeGL() {
-        if (_raycaster) {
-            global::raycasterManager->detachRaycaster(*_raycaster.get());
-            _raycaster = nullptr;
-        }
+bool RenderableTimeVaryingVolume::isReady() const {
+    return true;
+}
+
+void RenderableTimeVaryingVolume::deinitializeGL() {
+    if (_raycaster) {
+        global::raycasterManager->detachRaycaster(*_raycaster.get());
+        _raycaster = nullptr;
     }
+}
 
 } // namespace openspace::volume

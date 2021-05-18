@@ -26,12 +26,12 @@
 
 #include <openspace/util/spicemanager.h>
 #include <ghoul/fmt.h>
-#include <ghoul/filesystem/directory.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <filesystem>
 #include <fstream>
 
 namespace {
@@ -140,10 +140,9 @@ std::string LabelParser::encode(const std::string& line) const {
 }
 
 bool LabelParser::create() {
-    using RawPath = ghoul::filesystem::Directory::RawPath;
-    ghoul::filesystem::Directory sequenceDir(_fileName, RawPath::Yes);
-    if (!FileSys.directoryExists(sequenceDir)) {
-        LERROR(fmt::format("Could not load Label Directory '{}'", sequenceDir.path()));
+    std::filesystem::path sequenceDir = absPath(_fileName);
+    if (!std::filesystem::is_directory(sequenceDir)) {
+        LERROR(fmt::format("Could not load Label Directory {}", sequenceDir));
         return false;
     }
 
@@ -151,26 +150,29 @@ bool LabelParser::create() {
     std::string lblName;
 
 
-    using Recursive = ghoul::filesystem::Directory::Recursive;
-    using Sort = ghoul::filesystem::Directory::Sort;
-    std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::Yes, Sort::No);
-    for (const std::string& path : sequencePaths) {
+    namespace fs = std::filesystem;
+    for (const fs::directory_entry& e : fs::recursive_directory_iterator(sequenceDir)) {
+        if (!e.is_regular_file()) {
+            continue;
+        }
+
+        std::string path = e.path().string();
+
         size_t position = path.find_last_of('.') + 1;
         if (position == 0 || position == std::string::npos) {
             continue;
         }
 
-        ghoul::filesystem::File currentFile(path);
-        const std::string& extension = currentFile.fileExtension();
+        std::string extension = std::filesystem::path(path).extension().string();
 
-        if (extension != "lbl" && extension != "LBL") {
+        if (extension != ".lbl" && extension != ".LBL") {
             continue;
         }
 
-        std::ifstream file(currentFile.path());
+        std::ifstream file(path);
 
         if (!file.good()) {
-            LERROR(fmt::format("Failed to open label file '{}'", currentFile.path()));
+            LERROR(fmt::format("Failed to open label file '{}'", path));
             return false;
         }
 
@@ -256,7 +258,7 @@ bool LabelParser::create() {
                 }
                 else{
                     LERROR(fmt::format(
-                        "Label file {} deviates from generic standard", currentFile.path()
+                        "Label file {} deviates from generic standard", path
                     ));
                     LINFO(
                         "Please make sure input data adheres to format from \
@@ -274,7 +276,7 @@ bool LabelParser::create() {
                 std::string p = path.substr(0, path.size() - ("lbl"s).size());
                 for (const std::string& ext : extensions) {
                     std::string imagePath = p + ext;
-                    if (FileSys.fileExists(imagePath)) {
+                    if (std::filesystem::is_regular_file(imagePath)) {
                         std::vector<std::string> spiceInstrument;
                         spiceInstrument.push_back(_instrumentID);
 

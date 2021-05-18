@@ -29,8 +29,8 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/filesystem/directory.h>
 #include <ghoul/misc/dictionary.h>
+#include <filesystem>
 #include <fstream>
 
 namespace {
@@ -67,10 +67,9 @@ InstrumentTimesParser::InstrumentTimesParser(std::string name, std::string seque
 }
 
 bool InstrumentTimesParser::create() {
-    using RawPath = ghoul::filesystem::Directory::RawPath;
-    ghoul::filesystem::Directory sequenceDir(_fileName, RawPath::Yes);
-    if (!FileSys.directoryExists(sequenceDir)) {
-        LERROR(fmt::format("Could not load Label Directory '{}'", sequenceDir.path()));
+    std::filesystem::path sequenceDir = absPath(_fileName);
+    if (!std::filesystem::is_directory(sequenceDir)) {
+        LERROR(fmt::format("Could not load Label Directory {}", sequenceDir));
         return false;
     }
 
@@ -79,13 +78,10 @@ bool InstrumentTimesParser::create() {
     for (const std::pair<const K, V>& p : _instrumentFiles) {
         const std::string& instrumentID = p.first;
         for (std::string filename : p.second) {
-            std::string filepath = FileSys.pathByAppendingComponent(
-                sequenceDir.path(),
-                std::move(filename)
-            );
+            std::filesystem::path filepath = sequenceDir / filename;
 
-            if (!FileSys.fileExists(filepath)) {
-                LERROR(fmt::format("Unable to read file '{}'. Skipping file", filepath));
+            if (!std::filesystem::is_regular_file(filepath)) {
+                LERROR(fmt::format("Unable to read file {}. Skipping file", filepath));
                 continue;
             }
 
@@ -150,7 +146,7 @@ bool InstrumentTimesParser::create() {
         _targetTimes.begin(),
         _targetTimes.end(),
         [](const std::pair<double, std::string>& a,
-           const std::pair<double, std::string>& b) -> bool
+           const std::pair<double, std::string>& b)
         {
             return a.first < b.first;
         }

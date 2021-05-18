@@ -39,7 +39,7 @@ ScriptlogDialog::ScriptlogDialog(QWidget* parent)
     setWindowTitle("Scriptlog");
     createWidgets();
  
-    QFile file(QString::fromStdString(absPath("${LOGS}/scriptLog.txt")));
+    QFile file(QString::fromStdString(absPath("${LOGS}/scriptLog.txt").string()));
     if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QTextStream in(&file);
         while (!in.atEnd()) {
