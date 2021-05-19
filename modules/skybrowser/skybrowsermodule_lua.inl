@@ -332,7 +332,7 @@ namespace openspace::skybrowser::luascriptfunctions {
             //  \|
             glm::dvec3 j2000 = skybrowser::galacticCartesianToJ2000Cartesian(position);
             double adjacent = glm::length(j2000);
-            double opposite = 2 * adjacent * glm::tan(image.fov * 0.5);
+            double opposite = 2 * adjacent * glm::tan(glm::radians(image.fov * 0.5));
 
             // Calculate rotation to make the plane face the solar system barycenter
             glm::dvec3 normal = glm::normalize(-position);
