@@ -497,6 +497,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     _otherDataOption.onChange([&]() { _dataIsDirty = true; });
     addProperty(_otherDataOption);
 
+    _otherDataRange.setViewOption(properties::Property::ViewOptions::MinMaxRange);
     addProperty(_otherDataRange);
 
     addProperty(_otherDataColorMapPath);
@@ -609,6 +610,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         glm::vec2 v = *p.fadeInDistances;
         _fadeInDistance = v;
         _disableFadeInDistance = false;
+        _fadeInDistance.setViewOption(properties::Property::ViewOptions::MinMaxRange);
         addProperty(_fadeInDistance);
         addProperty(_disableFadeInDistance);
     }
