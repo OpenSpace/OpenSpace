@@ -230,7 +230,7 @@ namespace {
             AstronomicalUnit [[codegen::key("au")]],
             Parsec [[codegen::key("pc")]],
             KiloParsec [[codegen::key("Kpc")]],
-            MegaParsec [[codgen::key("Mpc")]],
+            MegaParsec [[codegen::key("Mpc")]],
             GigaParsec [[codegen::key("Gpc")]],
             GigaLightyear [[codegen::key("Gly")]]
         };
