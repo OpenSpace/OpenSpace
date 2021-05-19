@@ -99,7 +99,11 @@ double scaleForLuminositySizeAppBrightness(dvec3 dpos, float bv, float luminance
     float temperature = bvToKelvin(bv);
     float relativeTemperature = SunTemperature / temperature;
     double starRadius = SunRadius * pow(relativeTemperature, 2.0) * sqrt(L_over_Lsun);
-    return (lumCent * (luminance + 5E9) + (radiusCent * starRadius) + (brightnessCent * apparentBrightness * 5E15)) * pow(10.0, magnitudeExponent);
+
+    double scaledLuminance = lumCent * (luminance + 5E9);
+    double scaledStarRadius = radiusCent * starRadius;
+    double scaledBrightness = brightnessCent * apparentBrightness * 5E15;
+    return (scaledLuminance + scaledStarRadius + scaledBrightness) * pow(10.0, magnitudeExponent);
 }
 
 double scaleForAbsoluteMagnitude(float absMagnitude) {
@@ -197,7 +201,7 @@ void main() {
         vec4(cameraViewProjectionMatrix * dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w))
     );
 
-    gs_screenSpaceDepth  = lowerLeft.w;
+    gs_screenSpaceDepth = lowerLeft.w;
 
     // Build primitive    
     gl_Position = lowerLeft;

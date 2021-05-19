@@ -43,7 +43,7 @@ local stars = {
       Vx = "vx",
       Vy = "vy",
       Vz = "vz",
-      Speed = "speed",
+      Speed = "speed"
     }
   },
   GUI = {

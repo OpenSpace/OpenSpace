@@ -136,14 +136,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo MappingAbsMagnitudeInfo = {
         "MappingAbsMagnitude",
-        "Mapping (absolute Magnitude)",
+        "Mapping (absolute magnitude)",
         "The name of the variable in the speck file that is used as the absolute "
         "magnitude variable"
     };
 
     constexpr openspace::properties::Property::PropertyInfo MappingAppMagnitudeInfo = {
         "MappingAppMagnitude",
-        "Mapping (apparent Magnitude)",
+        "Mapping (apparent magnitude)",
         "The name of the variable in the speck file that is used as the apparent "
         "magnitude variable"
     };
@@ -151,21 +151,21 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MappingVxInfo = {
         "MappingVx",
         "Mapping (vx)",
-        "The name of the variable in the speck file that is used as the star velocity in "
+        "The name of the variable in the speck file that is used as the star velocity "
         "along the x-axis"
     };
 
     constexpr openspace::properties::Property::PropertyInfo MappingVyInfo = {
         "MappingVy",
         "Mapping (vy)",
-        "The name of the variable in the speck file that is used as the star velocity in "
+        "The name of the variable in the speck file that is used as the star velocity "
         "along the y-axis"
     };
 
     constexpr openspace::properties::Property::PropertyInfo MappingVzInfo = {
         "MappingVz",
         "Mapping (vz)",
-        "The name of the variable in the speck file that is used as the star velocity in "
+        "The name of the variable in the speck file that is used as the star velocity "
         "along the z-axis"
     };
 

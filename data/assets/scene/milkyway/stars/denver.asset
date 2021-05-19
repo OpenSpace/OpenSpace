@@ -32,7 +32,17 @@ local object = {
     ColorMap = colorLUT .. "/denver_colorbv.cmap",
     MagnitudeExponent = 6.2,
     SizeComposition = "Distance Modulus",
-    RenderMethod = "Texture Based" -- or PSF
+    RenderMethod = "Texture Based", -- or PSF
+    DataMapping = {
+      Bv = "colorb_v",
+      Luminance = "lum",
+      AbsoluteMagnitude = "absmag",
+      ApparentMagnitude = "appmag",
+      Vx = "vx",
+      Vy = "vy",
+      Vz = "vz",
+      Speed = "speed"
+    }
   },
   GUI = {
     Name = "Stars (Denver)",
