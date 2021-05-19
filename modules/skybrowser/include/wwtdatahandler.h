@@ -62,8 +62,9 @@ namespace openspace {
 		std::string creditsUrl;
 		glm::dvec2 celestCoords;
 		std::string collection;
-		float zoomLevel;
-		bool hasCoords;
+		float fov;
+        bool hasCelestCoords{ false };
+        bool has3dCoords{ false };
 	    glm::dvec3 position3d;
         int id{ NO_ID };
 	};

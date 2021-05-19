@@ -2,28 +2,29 @@
 #include <openspace/documentation/documentation.h>
 #include <modules/skybrowser/skybrowsermodule.h>
 #include <modules/skybrowser/include/utility.h>
+#include <modules/skybrowser/include/screenspaceskybrowser.h>
+#include <modules/skybrowser/include/screenspaceskytarget.h>
+#include <modules/skybrowser/include/renderableskybrowser.h>
+#include <modules/base/rendering/screenspaceimagelocal.h>
+#include <modules/base/rendering/renderableplaneimagelocal.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/interaction/navigationhandler.h>
+#include <openspace/util/camera.h>
+#include <openspace/util/distanceconstants.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/fmt.h>
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
-#include <fstream>
-#include <sstream>
-#include <modules/skybrowser/include/screenspaceskybrowser.h>
-#include <modules/skybrowser/include/screenspaceskytarget.h>
-#include <modules/skybrowser/include/renderableskybrowser.h>
-#include <modules/base/rendering/screenspaceimagelocal.h>
-#include <modules/base/rendering/renderableplaneimagelocal.h>
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/util/camera.h>
-#include <thread> 
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtx/vector_angle.hpp>
+#include <fstream>
+#include <sstream>
+#include <thread> 
 #include <limits>
 
 namespace {
@@ -39,36 +40,39 @@ namespace openspace::skybrowser::luascriptfunctions {
 		const int i = ghoul::lua::value<int>(L, 1);
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 		ScreenSpaceSkyBrowser* selectedBrowser = module->getSkyBrowsers()[module->getSelectedBrowserIndex()];
-        ScreenSpaceSkyTarget* selectedTarget = selectedBrowser->getSkyTarget();
-		
-		ImageData& resultImage = module->getWWTDataHandler()->getLoadedImages()[i];
+        if (selectedBrowser) {
+            ScreenSpaceSkyTarget* selectedTarget = selectedBrowser->getSkyTarget();
 
-        // Load image, if the image has not been loaded yet
-        if (resultImage.id == ImageData::NO_ID) {
-            LINFO("Loading image " + resultImage.name);
-            selectedBrowser->sendMessageToWWT(selectedBrowser->createMessageForAddingImageLayerWWT(resultImage));
-            selectedBrowser->sendMessageToWWT(selectedBrowser->createMessageForSettingOpacityLayerWWT(resultImage, 1.0));
-        }
-        
-		// If the image has coordinates, move the target
-		if (resultImage.hasCoords) {
-            // Animate the target to the image coord position
-            // In WWT, the definition of ZoomLevel is: VFOV = ZoomLevel / 6
-            if (selectedTarget) {
-                selectedTarget->unlock();
-                selectedTarget->startAnimation(resultImage.celestCoords, resultImage.zoomLevel / 6);
-                glm::dvec3 imgCoordsOnScreen = J2000SphericalToScreenSpace(resultImage.celestCoords);
-                glm::vec2 windowRatio = global::windowDelegate->currentWindowSize();
-                float r = windowRatio.x / windowRatio.y;
-                // Check if image coordinate is within current FOV
-                bool coordIsWithinView = (abs(imgCoordsOnScreen.x) < r && abs(imgCoordsOnScreen.y) < 1.f && imgCoordsOnScreen.z < 0);
-                bool coordIsBehindCamera = imgCoordsOnScreen.z > 0;
-                // If the coordinate is not in view, rotate camera
-                if (!coordIsWithinView || coordIsBehindCamera) {
-                    module->startRotation(resultImage.celestCoords);
+            ImageData& resultImage = module->getWWTDataHandler()->getLoadedImages()[i];
+
+            // Load image, if the image has not been loaded yet
+            if (resultImage.id == ImageData::NO_ID) {
+                LINFO("Loading image " + resultImage.name);
+                selectedBrowser->addImage(resultImage);
+            }
+
+            // If the image has coordinates, move the target
+            if (resultImage.hasCelestCoords) {
+                // Animate the target to the image coord position
+                if (selectedTarget) {
+                    selectedTarget->unlock();
+                    selectedTarget->startAnimation(resultImage.celestCoords, resultImage.fov);
+                    glm::dvec3 imgCoordsOnScreen = J2000SphericalToScreenSpace(resultImage.celestCoords);
+                    glm::vec2 windowRatio = global::windowDelegate->currentWindowSize();
+                    float r = windowRatio.x / windowRatio.y;
+                    // Check if image coordinate is within current FOV
+                    bool coordIsWithinView = (abs(imgCoordsOnScreen.x) < r && abs(imgCoordsOnScreen.y) < 1.f && imgCoordsOnScreen.z < 0);
+                    bool coordIsBehindCamera = imgCoordsOnScreen.z > 0;
+                    // If the coordinate is not in view, rotate camera
+                    if (!coordIsWithinView || coordIsBehindCamera) {
+                        module->startRotation(resultImage.celestCoords);
+                    }
                 }
             }
-		} 
+        }
+        else {
+            LINFO("No browser selected!");
+        }
         
 		return 0;
 	}
@@ -81,7 +85,7 @@ namespace openspace::skybrowser::luascriptfunctions {
         const ImageData& resultImage = module->getWWTDataHandler()->getLoadedImages()[i];
 
         // Only move and show circle if the image has coordinates
-        if (resultImage.hasCoords) {
+        if (resultImage.hasCelestCoords) {
             // Make circle visible
             ScreenSpaceImageLocal* hoverCircle = dynamic_cast<ScreenSpaceImageLocal*>(global::renderEngine->screenSpaceRenderable("HoverCircle"));
             hoverCircle->property("Enabled")->set(true);
@@ -139,7 +143,7 @@ namespace openspace::skybrowser::luascriptfunctions {
          std::string root = "https://raw.githubusercontent.com/WorldWideTelescope/wwt-web-client/master/assets/webclient-explore-root.wtml";
          for (ScreenSpaceSkyBrowser* browser : module->getSkyBrowsers()) {
              if (!browser->hasLoadedCollections()) {
-                 browser->sendMessageToWWT(browser->createMessageForLoadingWWTImgColl(root));
+                 browser->sendMessageToWWT(wwtmessage::loadCollection(root));
                  browser->setHasLoadedCollections(true);
              }
          }
@@ -167,36 +171,42 @@ namespace openspace::skybrowser::luascriptfunctions {
 
 		for (int i = 0; i < images.size(); i++) {
             std::string name = images[i].name != "" ? images[i].name : "undefined";
-            std::string url = images[i].thumbnailUrl != "" ? images[i].thumbnailUrl : "undefined";
+            std::string thumbnail = images[i].thumbnailUrl != "" ? images[i].thumbnailUrl : "undefined";
             glm::dvec3 cartCoords = skybrowser::sphericalToCartesian(images[i].celestCoords);
             std::vector<double> cartCoordsVec = { cartCoords.x, cartCoords.y, cartCoords.z };
+            glm::dvec3 position = images[i].position3d;
+            std::vector<double> position3d = { position.x, position.y, position.z };
             
             // Index for current ImageData 
             ghoul::lua::push(L, i + 1); 
             lua_newtable(L);
             // Push ("Key", value)
-            ghoul::lua::push(L, "Name", name);
+            ghoul::lua::push(L, "name", name);
             lua_settable(L, -3);
-            ghoul::lua::push(L, "Thumbnail", url);
+            ghoul::lua::push(L, "thumbnail", thumbnail);
             lua_settable(L, -3);
-            ghoul::lua::push(L, "RA", images[i].celestCoords.x);
+            ghoul::lua::push(L, "ra", images[i].celestCoords.x);
             lua_settable(L, -3);
-            ghoul::lua::push(L, "Dec", images[i].celestCoords.y);
+            ghoul::lua::push(L, "dec", images[i].celestCoords.y);
             lua_settable(L, -3);
-            ghoul::lua::push(L, "CartesianDirection", cartCoordsVec);
+            ghoul::lua::push(L, "cartesianDirection", cartCoordsVec);
             lua_settable(L, -3);
-            ghoul::lua::push(L, "HasCoords", images[i].hasCoords);
+            ghoul::lua::push(L, "hasCelestialCoords", images[i].hasCelestCoords);
             lua_settable(L, -3);
-            ghoul::lua::push(L, "Credits", images[i].credits);
+            ghoul::lua::push(L, "credits", images[i].credits);
             lua_settable(L, -3);
-            ghoul::lua::push(L, "CreditsUrl", images[i].creditsUrl);
+            ghoul::lua::push(L, "creditsUrl", images[i].creditsUrl);
             lua_settable(L, -3);
-            ghoul::lua::push(L, "Index", i);
+            ghoul::lua::push(L, "identifier", std::to_string(i));
+            lua_settable(L, -3);
+            ghoul::lua::push(L, "has3dCoords", images[i].has3dCoords);
+            lua_settable(L, -3);
+            ghoul::lua::push(L, "position3d", position3d);
             lua_settable(L, -3);
             // Set table for the current ImageData
             lua_settable(L, -3);    
 		}
-		
+
 		return 1;
 	}
 
@@ -229,15 +239,15 @@ namespace openspace::skybrowser::luascriptfunctions {
         float VFOV = HFOV * (windowRatio.y / windowRatio.x);
         double FOV = std::min(HFOV, VFOV);
         // Push window data
-        ghoul::lua::push(L, "WindowHFOV", FOV);
+        ghoul::lua::push(L, "windowHFOV", FOV);
         lua_settable(L, -3);
-        ghoul::lua::push(L, "CartesianDirection", viewDirCelestVec);
+        ghoul::lua::push(L, "cartesianDirection", viewDirCelestVec);
         lua_settable(L, -3);
-        ghoul::lua::push(L, "RA", sphericalJ2000.x);
+        ghoul::lua::push(L, "ra", sphericalJ2000.x);
         lua_settable(L, -3);
-        ghoul::lua::push(L, "Dec", sphericalJ2000.y);
+        ghoul::lua::push(L, "dec", sphericalJ2000.y);
         lua_settable(L, -3);
-        ghoul::lua::push(L, "SelectedBrowserIndex", module->getSelectedBrowserIndex());
+        ghoul::lua::push(L, "selectedBrowserIndex", module->getSelectedBrowserIndex());
         lua_settable(L, -3);
         // Set table for the current ImageData
         lua_settable(L, -3);
@@ -262,13 +272,13 @@ namespace openspace::skybrowser::luascriptfunctions {
                 // Push ("Key", value)
                 ghoul::lua::push(L, "FOV", browser->fieldOfView());
                 lua_settable(L, -3);
-                ghoul::lua::push(L, "CartesianDirection", celestialCartVec);
+                ghoul::lua::push(L, "cartesianDirection", celestialCartVec);
                 lua_settable(L, -3);
-                ghoul::lua::push(L, "RA", celestialSpherical.x);
+                ghoul::lua::push(L, "ra", celestialSpherical.x);
                 lua_settable(L, -3);
-                ghoul::lua::push(L, "Dec", celestialSpherical.y);
+                ghoul::lua::push(L, "dec", celestialSpherical.y);
                 lua_settable(L, -3);
-                ghoul::lua::push(L, "Color", colorVec);
+                ghoul::lua::push(L, "color", colorVec);
                 lua_settable(L, -3);
 
                 // Set table for the current target
@@ -297,6 +307,81 @@ namespace openspace::skybrowser::luascriptfunctions {
         if (module->getSkyBrowsers().size() < i) {
             module->setSelectedBrowser(i);
         }
+        return 0;
+    }
+
+    int create3dSkyBrowser(lua_State* L) {
+        ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::create3dSkyBrowser");
+        // Image index to place in 3D
+        const int i = ghoul::lua::value<int>(L, 1);
+        SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+        ImageData image = module->getWWTDataHandler()->getLoadedImages()[i];
+
+        // If the image has a 3D position, add it to the scene graph
+        if (image.has3dCoords) {
+            std::string id = "SkyBrowser" + std::to_string(i);
+            glm::dvec3 position = image.position3d * distanceconstants::Parsec;
+            std::string translation = ghoul::to_string(position);
+            std::string guiPath = "/SkyBrowser";
+            
+            // Calculate the size of the plane with trigonometry
+            // Calculate in equatorial coordinate system since the FOV is from Earth
+            //  /|
+            // /_|    Adjacent is the horizontal line, opposite the vertical 
+            // \ |    Calculate for half the triangle first, then multiply with 2
+            //  \|
+            glm::dvec3 j2000 = skybrowser::galacticCartesianToJ2000Cartesian(position);
+            double adjacent = glm::length(j2000);
+            double opposite = 2 * adjacent * glm::tan(image.fov * 0.5);
+
+            // Calculate rotation to make the plane face the solar system barycenter
+            glm::dvec3 normal = glm::normalize(-position);
+            glm::dvec3 newRight = glm::normalize(
+                glm::cross(glm::dvec3(0.0, 0.0, 1.0), normal)
+            );
+            glm::dvec3 newUp = glm::cross(normal, newRight);
+
+            glm::dmat3 originOrientedRotation = glm::dmat3(1.0);
+            originOrientedRotation[0] = newRight;
+            originOrientedRotation[1] = newUp;
+            originOrientedRotation[2] = normal;
+
+
+            const std::string browser = "{"
+                "Identifier = '" + id + "',"
+                "Parent = 'SolarSystemBarycenter',"
+                "Renderable = {"
+                    "Type = 'RenderableSkyBrowser',"
+                    "Size = " + std::to_string(opposite) +","
+                    "Origin = 'Center',"
+                    "Billboard = false,"
+                    "Url = 'http://localhost:8000'" 
+                "},"
+                "Transform = {"
+                    "Translation = {"
+                        "Type = 'StaticTranslation',"
+                        "Position = " + translation + ""
+                    "},"
+                    "Rotation = {"
+                        "Type = 'StaticRotation',"
+                        "Rotation = " + ghoul::to_string(originOrientedRotation) + ""
+                    "}"
+                "},"
+                "GUI = {"
+                    "Name = '" + image.name + "',"
+                    "Path = '" + guiPath + "'"
+                    "}"
+                "}";
+            LINFO(browser);
+            openspace::global::scriptEngine->queueScript(
+                "openspace.addSceneGraphNode(" + browser + ");",
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
+        }
+        else {
+            LINFO("Image has no 3D coordinate!");
+        }
+
         return 0;
     }
 	

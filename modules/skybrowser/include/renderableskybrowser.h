@@ -50,6 +50,10 @@ namespace openspace {
 
         void update(const UpdateData& data) override;
 
+        void executeJavascript(std::string script) const;
+        bool sendMessageToWWT(const ghoul::Dictionary& msg);
+
+
     protected:
 
         properties::Vec2Property _dimensions;

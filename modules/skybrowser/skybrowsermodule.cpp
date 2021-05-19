@@ -34,6 +34,7 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/factorymanager.h>
@@ -139,6 +140,14 @@ namespace openspace {
             {
                 "unlockTarget",
                 &skybrowser::luascriptfunctions::unlockTarget,
+                {},
+                "string or list of strings",
+                "Add one or multiple exoplanet systems to the scene, as specified by the "
+                "input. An input string should be the name of the system host star"
+            },
+            {
+                "create3dSkyBrowser",
+                &skybrowser::luascriptfunctions::create3dSkyBrowser,
                 {},
                 "string or list of strings",
                 "Add one or multiple exoplanet systems to the scene, as specified by the "
@@ -391,6 +400,10 @@ void SkyBrowserModule::addRenderable(ScreenSpaceRenderable* object) {
     }
 }
 
+void SkyBrowserModule::add3dBrowser(SceneGraphNode* node) {
+    browsers3d.push_back(node);
+}
+
 ScreenSpaceSkyBrowser* SkyBrowserModule::to_browser(ScreenSpaceRenderable* ptr) {
     return dynamic_cast<ScreenSpaceSkyBrowser*>(ptr);
 }
@@ -468,9 +481,10 @@ int SkyBrowserModule::loadImages(const std::string& root, const std::string& dir
     dataHandler->loadSpeckData(speckOpenClusters);
 
     int nLoadedImages;
+
     // Read from disc
-    
     bool loadedImages = dataHandler->loadWTMLCollectionsFromDirectory(directory);
+
     // Reading from url if there is no directory
     if (loadedImages) {
         LINFO("Loading images from directory");

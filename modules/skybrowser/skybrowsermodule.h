@@ -44,6 +44,7 @@ class ScreenSpaceSkyTarget;
 class RenderableSkyBrowser;
 class ScreenSpaceRenderable;
 class WWTDataHandler;
+class SceneGraphNode;
 
 
 class SkyBrowserModule : public OpenSpaceModule {
@@ -64,6 +65,7 @@ public:
     void setSelectedBrowser(int i);
     int getSelectedBrowserIndex();
     int loadImages(const std::string& root, const std::string& directory);
+    void add3dBrowser(SceneGraphNode* node);
 
     scripting::LuaLibrary luaLibrary() const override;
     //std::vector<documentation::Documentation> documentations() const override;
@@ -81,6 +83,7 @@ protected:
     // Renderable vector and ptr to where mouse is
     std::vector<ScreenSpaceRenderable*> renderables;
     std::vector<ScreenSpaceSkyBrowser*> browsers;
+    std::vector<SceneGraphNode*> browsers3d;
     ScreenSpaceRenderable* _mouseOnObject;
     // Dragging
     glm::vec2 startDragMousePos;

@@ -272,15 +272,16 @@ namespace openspace {
                                             ImageData& img) {
         // Get attributes for the image
         img.name = node->FindAttribute("Name") ? node->FindAttribute("Name")->Value() : "";
-        img.hasCoords = node->FindAttribute("RA") && node->FindAttribute("Dec");
-        if (img.hasCoords) {
+        img.hasCelestCoords = node->FindAttribute("RA") && node->FindAttribute("Dec");
+        if (img.hasCelestCoords) {
             // The RA from WWT is in the unit hours: to convert to degrees, multiply with 360 (deg) /24 (h) = 15
             img.celestCoords.x = 15.0f * std::stof(node->FindAttribute("RA")->Value());
             img.celestCoords.y = std::stof(node->FindAttribute("Dec")->Value());
         }
         img.collection = collectionName;
         img.thumbnailUrl = thumbnail;
-        img.zoomLevel = node->FindAttribute("ZoomLevel") ? std::stof(node->FindAttribute("ZoomLevel")->Value()) : 0.f;
+        // In WWT, the definition of ZoomLevel is: VFOV = ZoomLevel / 6
+        img.fov = node->FindAttribute("ZoomLevel") ? std::stof(node->FindAttribute("ZoomLevel")->Value()) / 6: 0.f;
         img.credits = credits;
         img.creditsUrl = creditsUrl;
         img.imageUrl = imageUrl;
@@ -290,6 +291,7 @@ namespace openspace {
         auto it = _3dPositions.find(str);
         if (it != _3dPositions.end()) {
             img.position3d = it->second;
+            img.has3dCoords = true;
             nImagesWith3dPositions++;
         }
     }

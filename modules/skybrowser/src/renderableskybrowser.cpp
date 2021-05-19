@@ -6,12 +6,14 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/globals.h>
+#include <ghoul/misc/dictionaryjsonformatter.h> // formatJson
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
-#include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/texture.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/opengl/texture.h>
+
 
 namespace {
 
@@ -112,6 +114,7 @@ namespace openspace {
 
         _browserInstance->initialize();
         _browserInstance->loadUrl(_url);
+        _dimensions = _texture->dimensions();
     }
 
     void RenderableSkyBrowser::deinitializeGL() {
@@ -153,7 +156,6 @@ namespace openspace {
         }
     }
 
-
     void RenderableSkyBrowser::bindTexture() {
         if (_texture) {
             _texture->bind();
@@ -161,5 +163,19 @@ namespace openspace {
         else {
             glBindTexture(GL_TEXTURE_2D, 0);
         }
+    }
+
+    void RenderableSkyBrowser::executeJavascript(std::string script) const {
+        //LINFOC(_loggerCat, "Executing javascript " + script);
+        if (_browserInstance && _browserInstance->getBrowser() && _browserInstance->getBrowser()->GetMainFrame()) {
+            CefRefPtr<CefFrame> frame = _browserInstance->getBrowser()->GetMainFrame();
+            frame->ExecuteJavaScript(script, frame->GetURL(), 0);
+        }
+    }
+
+    bool RenderableSkyBrowser::sendMessageToWWT(const ghoul::Dictionary& msg) {
+        std::string script = "sendMessageToWWT(" + ghoul::formatJson(msg) + ");";
+        executeJavascript(script);
+        return true;
     }
 } // namespace

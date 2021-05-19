@@ -20,17 +20,7 @@ namespace openspace {
 
         // Communication with the webpage and WWT
         void executeJavascript(std::string script) const;
-        ghoul::Dictionary createMessageForMovingWWTCamera(const glm::dvec2 celestCoords, const double fov, const bool moveInstantly = true) const;
-        ghoul::Dictionary createMessageForPausingWWTTime() const;
-        ghoul::Dictionary createMessageForLoadingWWTImgColl(const std::string& url) const;
-        ghoul::Dictionary createMessageForSettingForegroundWWT(const std::string& name) const;
-        ghoul::Dictionary createMessageForSettingForegroundOpacityWWT(double val) const;
-        ghoul::Dictionary createMessageForAddingImageLayerWWT(ImageData& url);
-        ghoul::Dictionary createMessageForRemovingImageLayerWWT(const std::string& id) const;
-        ghoul::Dictionary createMessageForSettingOpacityLayerWWT(const ImageData& id, double opacity) const;
-
         bool sendMessageToWWT(const ghoul::Dictionary& msg);
-        void sendMouseEvent(CefStructBase<CefMouseEventTraits> event, int x, int y) const;
         void WWTfollowCamera();
         float fieldOfView() const;
         void setVerticalFieldOfView(float fov);
@@ -38,6 +28,7 @@ namespace openspace {
         ScreenSpaceSkyTarget* getSkyTarget();
         bool hasLoadedCollections();
         void setHasLoadedCollections(bool isLoaded);
+        void addImage(ImageData& image);
 
         // Translation
         //void translate(glm::vec2 translation);

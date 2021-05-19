@@ -230,113 +230,14 @@ namespace openspace {
         return true;
     }
 
-
-    ghoul::Dictionary ScreenSpaceSkyBrowser::createMessageForMovingWWTCamera(const glm::dvec2 celestCoords, const double fov, const bool moveInstantly) const {
-        using namespace std::string_literals;
-        ghoul::Dictionary msg;
-
-        glm::dvec3 camUpJ2000 = skybrowser::galacticCartesianToJ2000Cartesian(global::navigationHandler->camera()->lookUpVectorWorldSpace());
-        glm::dvec3 camForwardJ2000 = skybrowser::galacticCartesianToJ2000Cartesian(global::navigationHandler->camera()->viewDirectionWorldSpace());     
-        double angle = glm::degrees(atan2(glm::dot(glm::cross(camUpJ2000, skybrowser::NORTH_POLE), camForwardJ2000), glm::dot(skybrowser::NORTH_POLE, camUpJ2000)));
-
-        msg.setValue("event", "center_on_coordinates"s);
-        msg.setValue("ra", celestCoords.x);
-        msg.setValue("dec", celestCoords.y);
-        msg.setValue("fov", fov);
-        msg.setValue("roll", angle);
-        msg.setValue("instant", moveInstantly);
-
-        return msg;
-    }
-
-    ghoul::Dictionary ScreenSpaceSkyBrowser::createMessageForLoadingWWTImgColl(const std::string& url) const {
-        using namespace std::string_literals;
-        ghoul::Dictionary msg;
-        msg.setValue("event", "load_image_collection"s);
-        msg.setValue("url", url);
-        msg.setValue("loadChildFolders", true);
-
-        return msg;
-    }
-
-    ghoul::Dictionary ScreenSpaceSkyBrowser::createMessageForSettingForegroundWWT(const std::string& name) const {
-        using namespace std::string_literals;
-        ghoul::Dictionary msg;
-        msg.setValue("event", "set_foreground_by_name"s);
-        msg.setValue("name", name);
-
-        return msg;
-    }  
-    
-    ghoul::Dictionary ScreenSpaceSkyBrowser::createMessageForAddingImageLayerWWT(ImageData& image) {
-        std::string idString = std::to_string(_imageId);
-        using namespace std::string_literals;
-        ghoul::Dictionary msg;
-        image.id = _imageId;
-        msg.setValue("event", "image_layer_create"s);
-        msg.setValue("id", idString);
-        msg.setValue("url", image.imageUrl);
-        _imageId++;
-        return msg;
-    }
-
-    ghoul::Dictionary ScreenSpaceSkyBrowser::createMessageForRemovingImageLayerWWT(const std::string& id) const {
-        using namespace std::string_literals;
-        ghoul::Dictionary msg;
-        msg.setValue("event", "image_layer_remove"s);
-        msg.setValue("id", id);
-
-        return msg;
-    }
-
-    ghoul::Dictionary ScreenSpaceSkyBrowser::createMessageForSettingOpacityLayerWWT(const ImageData& image, double opacity) const {
-        std::string idString = std::to_string(image.id);
-        using namespace std::string_literals;
-        ghoul::Dictionary msg;
-        msg.setValue("event", "image_layer_set"s);
-        msg.setValue("id", idString);
-        msg.setValue("setting", "opacity"s);
-        msg.setValue("value", opacity);
-
-        return msg;
-    }
-
-    ghoul::Dictionary ScreenSpaceSkyBrowser::createMessageForSettingForegroundOpacityWWT(double val) const {
-        using namespace std::string_literals;
-        ghoul::Dictionary msg;
-        msg.setValue("event", "set_foreground_opacity"s);
-        msg.setValue("value", val);
-
-        return msg;
-    }
-
-    ghoul::Dictionary ScreenSpaceSkyBrowser::createMessageForPausingWWTTime() const {
-
-        using namespace std::string_literals;
-        ghoul::Dictionary msg;
-        msg.setValue("event", "pause_time"s);
-
-        return msg;
-    }
-
-    void ScreenSpaceSkyBrowser::sendMouseEvent(CefStructBase<CefMouseEventTraits> event, int x, int y)  const {
-        //LINFOC(_loggerCat, "Executing javascript " + script);
-        LINFO(std::to_string(_objectSize.x) + "  " + std::to_string(_objectSize.y));
-        if (_browserInstance && _browserInstance->getBrowser() && _browserInstance->getBrowser()->GetHost()) {
-
-            //_browserInstance->getBrowser()->GetHost()->SendMouseWheelEvent(event, x, y);
-            //LINFOC(_loggerCat, "Sending scroll");
-
-        }
-    }
-
     void ScreenSpaceSkyBrowser::WWTfollowCamera() {
 
         // Start a thread to enable user interaction while sending the calls to WWT
         _threadWWTMessages = std::thread([&] {
             while (_camIsSyncedWWT) {
                 if (_skyTarget) {
-                    ghoul::Dictionary message = createMessageForMovingWWTCamera(_skyTarget->getTargetDirectionCelestial(), _vfieldOfView);
+                    glm::dvec2 aim = _skyTarget->getTargetDirectionCelestial();
+                    ghoul::Dictionary message = wwtmessage::moveCamera(aim, _vfieldOfView);
                     sendMessageToWWT(message);
                 }
                 
@@ -413,5 +314,11 @@ namespace openspace {
 
     glm::vec2 ScreenSpaceSkyBrowser::getBrowserPixelDimensions() {
         return _browserDimensions.value();
+    }
+
+    void ScreenSpaceSkyBrowser::addImage(ImageData& image) {
+        sendMessageToWWT(wwtmessage::createImageLayer(image, _imageId));
+        sendMessageToWWT(wwtmessage::setLayerOpacity(image, 1.0));
+        _imageId++;
     }
 }
