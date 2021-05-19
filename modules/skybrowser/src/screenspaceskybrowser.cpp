@@ -321,4 +321,8 @@ namespace openspace {
         sendMessageToWWT(wwtmessage::setLayerOpacity(image, 1.0));
         _imageId++;
     }
+
+    properties::FloatProperty& ScreenSpaceSkyBrowser::getOpacity() {
+        return _opacity;
+    }
 }

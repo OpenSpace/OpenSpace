@@ -61,11 +61,13 @@ public:
     std::vector<ScreenSpaceSkyBrowser*>& getSkyBrowsers();
     void startRotation(glm::dvec2 coordsEnd);
     void rotateCamera(double deltaTime);
+    bool fadeBrowserAndTarget(bool makeTransparent, double fadeTime, double deltaTime);
     void setSelectedBrowser(ScreenSpaceRenderable* ptr);
     void setSelectedBrowser(int i);
     int getSelectedBrowserIndex();
     int loadImages(const std::string& root, const std::string& directory);
     void add3dBrowser(SceneGraphNode* node);
+    bool cameraInSolarSystem();
 
     scripting::LuaLibrary luaLibrary() const override;
     //std::vector<documentation::Documentation> documentations() const override;
@@ -99,7 +101,6 @@ protected:
     bool currentlyDraggingObject;
     // Data handler
     WWTDataHandler* dataHandler; 
-    
     // For animating rotation of camera to look at coordinate
     glm::dvec3 _coordsToAnimateTo;
     glm::dvec3 _coordsStartAnimation;
@@ -107,6 +108,8 @@ protected:
     // For tracking the currently selected browser
     int selectedBrowser{ -1 };
     glm::ivec3 highlightAddition{ 35, 35, 35 };
+    // Mode of browsing
+    bool _cameraInSolarSystem{ -1 };
 };
 
 } // namespace openspace

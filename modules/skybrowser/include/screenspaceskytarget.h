@@ -38,6 +38,7 @@ namespace openspace {
         void setConnectedBrowser();
         void setBorderColor(glm::ivec3 color);
         glm::ivec3 getColor();
+        properties::FloatProperty& getOpacity();
 
         glm::dvec2 getScreenSpaceDimensions();
         glm::dvec2 getUpperRightCornerScreenSpace();

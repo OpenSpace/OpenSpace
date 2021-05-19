@@ -2,7 +2,7 @@ uniform sampler2D texture1;
 uniform float borderWidth;
 uniform vec2 targetDimensions;
 uniform bool showCrosshair;
-uniform vec3 borderColor;
+uniform vec4 borderColor;
 
 
 in vec2 vs_st;
@@ -11,8 +11,8 @@ in vec4 vs_position;
 
 float crossLine(in float _width, in float _coord) {
     float center = 0.5f;
-    float line = smoothstep(center, center+(_width/2) , _coord) - 
-                 smoothstep(center-(_width/2), center, _coord);    
+    float line = smoothstep(center, center+(_width/2) , _coord) -
+                 smoothstep(center-(_width/2), center, _coord);
     return line;
 }
 
@@ -32,12 +32,12 @@ Fragment getFragment() {
     float borderTopRight = step(borderWidth, vs_st.y) * step(borderWidth, (1.0)-vs_st.y);
     vec3 border = vec3(borderBottomLeft*borderTopRight);
 
-    // show crosshair or border 
+    // show crosshair or border
     frag.color = vec4(1,1,1,1);
-    frag.color.rgb = vec3(borderColor / 255);
+    frag.color.rgba = vec4(borderColor);
 
     if(showCrosshair) {
-        frag.color.rgb = vec3(borderColor / 255);
+        frag.color.rgba = vec4(borderColor);
         if(crosshair == vec3(0.0)) {
             frag.color.a = 0.0;
         }
@@ -50,4 +50,3 @@ Fragment getFragment() {
 
     return frag;
 }
-

@@ -3,6 +3,7 @@
 
 #include <modules/webbrowser/include/screenspacebrowser.h>
 #include <modules/skybrowser/include/wwtdatahandler.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/stringproperty.h>
 
 namespace openspace {
@@ -29,6 +30,7 @@ namespace openspace {
         bool hasLoadedCollections();
         void setHasLoadedCollections(bool isLoaded);
         void addImage(ImageData& image);
+        properties::FloatProperty& getOpacity();
 
         // Translation
         //void translate(glm::vec2 translation);

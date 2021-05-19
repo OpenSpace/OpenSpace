@@ -233,7 +233,8 @@ namespace openspace {
         _shader->setUniform(_uniformCache.borderWidth, borderWidth);
         _shader->setUniform(_uniformCache.targetDimensions, targetDim);
         _shader->setUniform(_uniformCache.modelTransform, modelTransform);
-        _shader->setUniform(_uniformCache.borderColor, glm::vec3(_borderColor));
+        glm::vec4 color = { glm::vec3(_borderColor) / 255.f, _opacity.value() };
+        _shader->setUniform(_uniformCache.borderColor, color);
 
         _shader->setUniform(
             _uniformCache.viewProj,
@@ -396,5 +397,7 @@ namespace openspace {
         FOVToAnimateTo = FOVEnd;
         isAnimated = true;
     }
-   
+    properties::FloatProperty& ScreenSpaceSkyTarget::getOpacity() {
+        return _opacity;
+    }
 }

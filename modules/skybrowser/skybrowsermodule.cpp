@@ -37,6 +37,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/scene/scene.h>
+#include <openspace/util/distanceconstants.h>
 #include <openspace/util/factorymanager.h>
 #include "skybrowsermodule_lua.inl"
 #include <ghoul/logging/logmanager.h>
@@ -290,6 +291,7 @@ SkyBrowserModule::SkyBrowserModule()
 
 
                 if (button == MouseButton::Left) {
+                    isRotating = false;
                     startDragMousePos = _mousePosition;
                     startDragObjectPos = _mouseOnObject->getScreenSpacePosition();
 
@@ -344,13 +346,39 @@ SkyBrowserModule::SkyBrowserModule()
     );
 
     global::callback::preSync->emplace_back([this]() {
+        // Disable browser and targets when camera is outside of solar system
+        double solarSystemRadius = 30.0 * distanceconstants::AstronomicalUnit;
+        double cameraSSBDistance = glm::length(
+            global::navigationHandler->camera()->positionVec3());
+        bool _cameraInSolarSystem = cameraSSBDistance < solarSystemRadius;
+        double fadingTime = 2.0;
+        double deltaTime = global::windowDelegate->deltaTime();
+
+        // Fade out or in browser & target
         for (ScreenSpaceSkyBrowser* browser : browsers) {
-            if (browser->getSkyTarget()) {
-                browser->getSkyTarget()->animateToCoord(global::windowDelegate->deltaTime());
+            // If outside solar system and browser is visible
+            if (!_cameraInSolarSystem && browser->isEnabled()) {
+                bool fadingIsFinished = fadeBrowserAndTarget(true, fadingTime, deltaTime);
+
+                if (fadingIsFinished) {
+                    browser->property("Enabled")->set(false);
+                }
+            }
+            // If within solar system and browser is not visible
+            else if (_cameraInSolarSystem && !browser->isEnabled()) {
+                browser->property("Enabled")->set(true);
+            }
+            // If within solar system and browser is visible
+            if (_cameraInSolarSystem && browser->isEnabled()) {
+                fadeBrowserAndTarget(false, fadingTime, deltaTime);
+
+                if (browser->getSkyTarget()) {
+                    browser->getSkyTarget()->animateToCoord(deltaTime);
+                }
             }
         }
         if (isRotating) {
-            rotateCamera(global::windowDelegate->deltaTime());
+            rotateCamera(deltaTime);
         }
     });
 } 
@@ -453,6 +481,42 @@ void SkyBrowserModule::rotateCamera(double deltaTime) {
     }
 }
 
+bool SkyBrowserModule::fadeBrowserAndTarget(bool makeTransparent, double fadeTime, double deltaTime) {
+    float opacityDelta = static_cast<float>(deltaTime / fadeTime);
+    float highTreshold = 0.99f;
+    float lowThreshold = 0.01f;
+    float transparent = 0.0;
+    float opaque = 1.0;
+    if (makeTransparent) {
+        opacityDelta *= -1.f;
+    }
+    bool finished = true;
+    for (ScreenSpaceSkyBrowser* browser : browsers) {
+        // If there is a target, fade it as well. Otherwise, skip
+        ScreenSpaceSkyTarget* target = browser->getSkyTarget();
+        bool targetFinished = true;
+        if (target) {
+            target->getOpacity() = target->getOpacity().value() + opacityDelta;
+            float opacityTarget = abs(target->getOpacity().value());
+            targetFinished = makeTransparent ? opacityTarget < lowThreshold : opacityTarget > highTreshold;
+            if (targetFinished) {
+                target->getOpacity() = makeTransparent ? transparent : opaque;
+            }
+        }
+        // Keep fading the browsers until all are finished
+        browser->getOpacity() = browser->getOpacity().value() + opacityDelta;
+        float opacityBrowser = abs(browser->getOpacity().value());
+        bool browserFinished = makeTransparent ? opacityBrowser < lowThreshold : opacityBrowser > highTreshold;
+        if (browserFinished && targetFinished) {
+            browser->getOpacity() = makeTransparent ? transparent : opaque;
+        }
+        else {
+            finished = false;
+        }
+    }
+    return finished;
+}
+
 void SkyBrowserModule::setSelectedBrowser(ScreenSpaceRenderable* ptr) {
     ScreenSpaceSkyBrowser* browser = to_browser(ptr) ? to_browser(ptr) : to_target(ptr)->getSkyBrowser();
     auto it = std::find(browsers.begin(), browsers.end(), browser);
@@ -498,6 +562,10 @@ int SkyBrowserModule::loadImages(const std::string& root, const std::string& dir
     LINFO("Loaded " + std::to_string(nLoadedImages) + " WorldWide Telescope images.");
    
     return nLoadedImages;
+}
+
+bool SkyBrowserModule::cameraInSolarSystem() {
+    return _cameraInSolarSystem;
 }
 /*
 std::vector<documentation::Documentation> SkyBrowserModule::documentations() const {
