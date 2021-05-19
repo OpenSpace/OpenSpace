@@ -25,8 +25,8 @@
 #ifndef __OPENSPACE_MODULE_BASE___RENDERABLEPRISM___H__
 #define __OPENSPACE_MODULE_BASE___RENDERABLEPRISM___H__
 
-#include <openspace/properties/scalar/floatProperty.h>
-#include <openspace/properties/scalar/intProperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/rendering/renderable.h>
 #include <ghoul/opengl/ghoul_gl.h>

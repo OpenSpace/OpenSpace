@@ -706,6 +706,13 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "Adds an interesting time to the current scene. The first argument is "
                 "the name of the time and the second argument is the time itself in the "
                 "format YYYY-MM-DDThh:mm:ss.uuu"
+            },
+            {
+                "worldPosition",
+                &luascriptfunctions::worldPosition,
+                {},
+                "string",
+                "Returns the worldPosition of the scene graph node with the given string as identifier"
             }
         }
     };
