@@ -109,7 +109,7 @@ protected:
     int selectedBrowser{ -1 };
     glm::ivec3 highlightAddition{ 35, 35, 35 };
     // Mode of browsing
-    bool _cameraInSolarSystem{ -1 };
+    bool _cameraInSolarSystem{ true };
 };
 
 } // namespace openspace

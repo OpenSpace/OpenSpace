@@ -41,8 +41,6 @@ namespace openspace::skybrowser::luascriptfunctions {
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 		ScreenSpaceSkyBrowser* selectedBrowser = module->getSkyBrowsers()[module->getSelectedBrowserIndex()];
         if (selectedBrowser) {
-            ScreenSpaceSkyTarget* selectedTarget = selectedBrowser->getSkyTarget();
-
             ImageData& resultImage = module->getWWTDataHandler()->getLoadedImages()[i];
 
             // Load image, if the image has not been loaded yet
@@ -51,23 +49,22 @@ namespace openspace::skybrowser::luascriptfunctions {
                 selectedBrowser->addImage(resultImage);
             }
 
+            ScreenSpaceSkyTarget* selectedTarget = selectedBrowser->getSkyTarget();
             // If the image has coordinates, move the target
-            if (resultImage.hasCelestCoords) {
+            if (resultImage.hasCelestCoords && selectedTarget) {
                 // Animate the target to the image coord position
-                if (selectedTarget) {
-                    selectedTarget->unlock();
-                    selectedTarget->startAnimation(resultImage.celestCoords, resultImage.fov);
-                    glm::dvec3 imgCoordsOnScreen = J2000SphericalToScreenSpace(resultImage.celestCoords);
-                    glm::vec2 windowRatio = global::windowDelegate->currentWindowSize();
-                    float r = windowRatio.x / windowRatio.y;
-                    // Check if image coordinate is within current FOV
-                    bool coordIsWithinView = (abs(imgCoordsOnScreen.x) < r && abs(imgCoordsOnScreen.y) < 1.f && imgCoordsOnScreen.z < 0);
-                    bool coordIsBehindCamera = imgCoordsOnScreen.z > 0;
-                    // If the coordinate is not in view, rotate camera
-                    if (!coordIsWithinView || coordIsBehindCamera) {
-                        module->startRotation(resultImage.celestCoords);
-                    }
-                }
+                selectedTarget->unlock();
+                selectedTarget->startAnimation(resultImage.celestCoords, resultImage.fov);
+                // Check if image coordinate is within current FOV
+                glm::dvec3 imgCoordsOnScreen = J2000SphericalToScreenSpace(resultImage.celestCoords);
+                glm::vec2 windowRatio = global::windowDelegate->currentWindowSize();
+                float r = windowRatio.x / windowRatio.y;
+                bool coordIsWithinView = (abs(imgCoordsOnScreen.x) < r && abs(imgCoordsOnScreen.y) < 1.f && imgCoordsOnScreen.z < 0);
+                bool coordIsBehindCamera = imgCoordsOnScreen.z > 0;
+                // If the coordinate is not in view, rotate camera
+                if (!coordIsWithinView || coordIsBehindCamera) {
+                    module->startRotation(resultImage.celestCoords);
+                } 
             }
         }
         else {
@@ -248,6 +245,8 @@ namespace openspace::skybrowser::luascriptfunctions {
         ghoul::lua::push(L, "dec", sphericalJ2000.y);
         lua_settable(L, -3);
         ghoul::lua::push(L, "selectedBrowserIndex", module->getSelectedBrowserIndex());
+        lua_settable(L, -3);
+        ghoul::lua::push(L, "cameraInSolarSystem", module->cameraInSolarSystem());
         lua_settable(L, -3);
         // Set table for the current ImageData
         lua_settable(L, -3);
