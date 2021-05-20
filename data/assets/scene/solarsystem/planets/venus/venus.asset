@@ -35,7 +35,6 @@ local Venus = {
       LabelsMaxSize = 1500.0,
       ProximityEnabled = false,
       LabelsFadeInEnabled = true,
-      LabelsFadeInEnabled = true,
       LabelsFadeOutEnabled = true,
       FadeInStartingDistance = 7000000.0,
       FadeOutStartingDistance = 2000000.0,
@@ -61,8 +60,7 @@ local VenusLabel = {
         LabelText = "Venus",
         FontSize = 100.0,
         LabelSize = 8.4,
-        LabelMaxSize = 100.0,
-        LabelMinSize = 1.0,
+        LabelMinMaxSize = { 1.0, 100.0 },
         LabelOrientationOption = "Camera View Direction",
         BlendMode = "Additive"
     },

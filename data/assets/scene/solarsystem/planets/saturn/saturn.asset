@@ -59,8 +59,7 @@ local SaturnLabel = {
     LabelText = "Saturn",
     FontSize = 100.0,
     LabelSize = 8.7,
-    LabelMaxSize = 100.0,
-    LabelMinSize = 1.0,
+    LabelMinMaxSize = { 1.0, 100.0 },
     BlendMode = "Additive",
     LabelOrientationOption = "Camera View Direction"
   },

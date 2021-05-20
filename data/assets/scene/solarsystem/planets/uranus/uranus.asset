@@ -36,8 +36,7 @@ local UranusLabel = {
     LabelText = "Uranus",
     FontSize = 100.0,
     LabelSize = 8.7,
-    LabelMaxSize = 100.0,
-    LabelMinSize = 1.0,
+    LabelMinMaxSize = { 1.0, 100.0 },
     LabelOrientationOption = "Camera View Direction",
     BlendMode = "Additive"
   },
