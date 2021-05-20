@@ -346,10 +346,6 @@ bool SessionRecording::startPlayback(std::string& filename,
                                      KeyframeTimeRef timeMode,
                                      bool forceSimTimeAtStart)
 {
-    if (isPath(filename)) {
-        LERROR("Playback filename must not contain path (/) elements");
-        return false;
-    }
     std::string absFilename;
     //Run through conversion in case file is older. Does nothing if the file format
     // is up-to-date
@@ -2135,9 +2131,6 @@ void SessionRecording::readFileIntoStringStream(std::string filename,
                                                 std::ifstream& inputFstream,
                                                 std::stringstream& stream)
 {
-    if (isPath(filename)) {
-        throw ConversionError("Playback filename must not contain path (/) elements");
-    }
     std::string conversionInFilename = absPath("${RECORDINGS}/" + filename);
     if (!FileSys.fileExists(conversionInFilename)) {
         throw ConversionError(fmt::format(
@@ -2508,7 +2501,9 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
                 "the time since the recording was started (the same relative time "
                 "applies to the playback). When playback starts, the simulation time "
                 "is automatically set to what it was at recording time. The string "
-                "argument is the filename to pull playback keyframes from."
+                "argument is the filename to pull playback keyframes from (the file "
+                "path is relative to the RECORDINGS variable specified in the config "
+                "file)."
             },
             {
                 "startPlaybackApplicationTime",
@@ -2517,7 +2512,9 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
                 "string",
                 "Starts a playback session with keyframe times that are relative to "
                 "application time (seconds since OpenSpace application started). "
-                "The string argument is the filename to pull playback keyframes from."
+                "The string argument is the filename to pull playback keyframes from "
+                "(the file path is relative to the RECORDINGS variable specified in the "
+                "config file)."
             },
             {
                 "startPlaybackRecordedTime",
@@ -2527,7 +2524,8 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
                 "Starts a playback session with keyframe times that are relative to "
                 "the time since the recording was started (the same relative time "
                 "applies to the playback). The string argument is the filename to pull "
-                "playback keyframes from."
+                "playback keyframes from (the file path is relative to the RECORDINGS "
+                "variable specified in the config file)."
             },
             {
                 "startPlaybackSimulationTime",
@@ -2536,7 +2534,8 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
                 "string",
                 "Starts a playback session with keyframe times that are relative to "
                 "the simulated date & time. The string argument is the filename to pull "
-                "playback keyframes from."
+                "playback keyframes from (the file path is relative to the RECORDINGS "
+                "variable specified in the config file)."
             },
             {
                 "stopPlayback",

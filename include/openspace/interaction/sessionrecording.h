@@ -182,7 +182,9 @@ public:
     /**
      * Starts a playback session, which can run in one of three different time modes.
      *
-     * \param filename file containing recorded keyframes to play back
+     * \param filename file containing recorded keyframes to play back. The file path
+     *                 is relative to the base recordings directory specified in the
+     *                 config file by the RECORDINGS variable
      * \param timeMode which of the 3 time modes to use for time reference during
      * \param forceSimTimeAtStart if true simulation time is forced to that of playback
      *        playback: recorded time, application time, or simulation time. See the
@@ -461,6 +463,7 @@ public:
      * \param prop The property being set
      */
     void savePropertyBaseline(properties::Property& prop);
+
     /**
      * Reads header information from a session recording file
      *
