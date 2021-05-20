@@ -70,6 +70,18 @@ public:
         double timeSim;
     };
 
+    /*
+     * Struct for storing a script substring that, if found in a saved script,
+     * will be replaced by its substringReplacement counterpart.
+     */
+    struct ScriptSubstringReplace {
+        std::string substringFound;
+        std::string substringReplacement;
+        ScriptSubstringReplace(std::string found, std::string replace)
+            : substringFound(found)
+            , substringReplacement(replace) {};
+    };
+
     static const size_t FileHeaderVersionLength = 5;
     char FileHeaderVersion[FileHeaderVersionLength+1] = "01.00";
     char TargetConvertVersion[FileHeaderVersionLength+1] = "01.00";
@@ -185,6 +197,22 @@ public:
      * and all keyframes deleted from memory.
      */
     void stopPlayback();
+
+    /**
+     * Returns playback pause status.
+     *
+     * \return \c true if playback is paused
+     */
+    bool isPlaybackPaused();
+
+    /**
+     * Pauses a playback session. This does both the normal pause functionality of
+     * setting simulation delta time to zero, and pausing the progression through the
+     * timeline.
+     *
+     * \param pause if true, then will set playback timeline progression to zero
+     */
+    void setPlaybackPause(bool pause);
 
     /**
      * Enables that rendered frames should be saved during playback
@@ -618,6 +646,9 @@ protected:
     unsigned int findIndexOfLastCameraKeyframeInTimeline();
     bool doesTimelineEntryContainCamera(unsigned int index) const;
     std::vector<std::pair<CallbackHandle, StateChangeCallback>> _stateChangeCallbacks;
+    bool doesStartWithSubstring(const std::string& s, const std::string& matchSubstr);
+    void trimCommandsFromScriptIfFound(std::string& script);
+    void replaceCommandsFromScriptIfFound(std::string& script);
 
     RecordedType getNextKeyframeType();
     RecordedType getPrevKeyframeType();
@@ -666,7 +697,8 @@ protected:
     bool _playbackActive_time = false;
     bool _playbackActive_script = false;
     bool _hasHitEndOfCameraKeyframes = false;
-    bool _playbackStartedPaused = false;
+    bool _playbackPaused = false;
+    bool _playbackPausedWithinDeltaTimePause = false;
     double _playbackPauseOffset = 0.0;
     double _previousTime = 0.0;
 
@@ -682,11 +714,6 @@ protected:
 
     bool _cleanupNeeded = false;
     const std::string scriptReturnPrefix = "return ";
-    std::vector<std::string> scriptsUsingScenegraphNodesNavAccess = {
-        "RetargetAnchor",
-        "Anchor",
-        "Aim"
-    };
 
     std::vector<interaction::KeyframeNavigator::CameraPose> _keyframesCamera;
     std::vector<datamessagestructures::TimeKeyframe> _keyframesTime;
@@ -702,19 +729,35 @@ protected:
         "NavigationHandler.OrbitalNavigator.RetargetAnchor",
         "NavigationHandler.OrbitalNavigator.RetargetAim"
     };
-    //A script that begins with an exact match of any of the strings contained in _scriptRejects will not be recorded
+    //A script that begins with an exact match of any of the strings contained in
+    // _scriptRejects will not be recorded
     const std::vector<std::string> _scriptRejects = {
-        "openspace.sessionRecording",
-        "openspace.scriptScheduler.clear",
-        "openspace.time.interpolatePause",
-        "openspace.time.interpolateTogglePause",
-        "openspace.time.setPause",
-        "openspace.time.togglePause"
+        "openspace.sessionRecording.enableTakeScreenShotDuringPlayback",
+        "openspace.sessionRecording.startPlayback",
+        "openspace.sessionRecording.stopPlayback",
+        "openspace.sessionRecording.startRecording",
+        "openspace.sessionRecording.stopRecording",
+        "openspace.scriptScheduler.clear"
     };
     const std::vector<std::string> _navScriptsUsingNodes = {
-    "RetargetAnchor",
-    "Anchor",
-    "Aim"
+        "RetargetAnchor",
+        "Anchor",
+        "Aim"
+    };
+    //Any script snippet included in this vector will be trimmed from any script
+    // from the script manager, before it is recorded in the session recording file.
+    // The remainder of the script will be retained.
+    const std::vector<std::string> _scriptsToBeTrimmed = {
+        "openspace.sessionRecording.togglePlaybackPause"
+    };
+    //Any script snippet included in this vector will be trimmed from any script
+    // from the script manager, before it is recorded in the session recording file.
+    // The remainder of the script will be retained.
+    const std::vector<ScriptSubstringReplace> _scriptsToBeReplaced = {
+        {
+            "openspace.time.pauseToggleViaKeyboard",
+            "openspace.time.interpolateTogglePause"
+        }
     };
     std::vector<std::string> _loadedNodes;
 

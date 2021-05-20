@@ -236,6 +236,7 @@ bool SessionRecording::startRecording(const std::string& filename) {
             global::timeManager->time().j2000Seconds()
         };
 
+        recordCurrentTimePauseState();
         recordCurrentTimeRate();
         LINFO("Session recording started");
     }
@@ -252,7 +253,7 @@ void SessionRecording::recordCurrentTimePauseState() {
 
 void SessionRecording::recordCurrentTimeRate() {
     std::string initialTimeRateCommand = fmt::format(
-        "openspace.time.setDeltaTime({})", global::timeManager->deltaTime()
+        "openspace.time.setDeltaTime({})", global::timeManager->targetDeltaTime()
     );
     saveScriptKeyframeToPropertiesBaseline(initialTimeRateCommand);
 }
@@ -437,7 +438,7 @@ bool SessionRecording::startPlayback(std::string& filename,
         system_clock::duration::period::den / system_clock::duration::period::num;
     _saveRendering_isFirstFrame = true;
     _playbackPauseOffset = 0.0;
-    _playbackStartedPaused = global::timeManager->isPaused();
+    _playbackPaused = false;
 
     //Set playback flags to true for all modes
     _playbackActive_camera = true;
@@ -480,6 +481,27 @@ bool SessionRecording::startPlayback(std::string& filename,
     _state = SessionState::Playback;
 
     return true;
+}
+
+bool SessionRecording::isPlaybackPaused() {
+    return (_state == SessionState::Playback && _playbackPaused);
+}
+
+void SessionRecording::setPlaybackPause(bool pause) {
+    if (_state == SessionState::Playback) {
+        if (pause && !_playbackPaused) {
+            _playbackPausedWithinDeltaTimePause = global::timeManager->isPaused();
+            if (!_playbackPausedWithinDeltaTimePause) {
+                global::timeManager->setPause(true);
+            }
+        }
+        else if (!pause && _playbackPaused) {
+            if (!_playbackPausedWithinDeltaTimePause) {
+                global::timeManager->setPause(false);
+            }
+        }
+        _playbackPaused = pause;
+    }
 }
 
 bool SessionRecording::findFirstCameraKeyframeInTimeline() {
@@ -588,7 +610,7 @@ void SessionRecording::cleanUpPlayback() {
     _saveRenderingDuringPlayback = false;
     _saveRendering_isFirstFrame = true;
     _playbackPauseOffset = 0.0;
-    _playbackStartedPaused = false;
+    _playbackPaused = false;
 
     _cleanupNeeded = false;
 }
@@ -768,15 +790,16 @@ void SessionRecording::saveTimeKeyframeAscii(Timestamps& times,
 
 void SessionRecording::saveScriptKeyframeToTimeline(std::string script)
 {
-    size_t substringStartIdx = 0;
-    if (script.substr(0, scriptReturnPrefix.length()).compare(scriptReturnPrefix) == 0) {
-        substringStartIdx += scriptReturnPrefix.length();
+    if (doesStartWithSubstring(script, scriptReturnPrefix)) {
+        script = script.substr(scriptReturnPrefix.length());
     }
     for (std::string reject : _scriptRejects) {
-        if (script.substr(substringStartIdx, reject.length()).compare(reject) == 0) {
+        if (doesStartWithSubstring(script, reject)) {
             return;
         }
     }
+    trimCommandsFromScriptIfFound(script);
+    replaceCommandsFromScriptIfFound(script);
     datamessagestructures::ScriptMessage sm
         = _externInteract.generateScriptMessage(script);
 
@@ -784,8 +807,13 @@ void SessionRecording::saveScriptKeyframeToTimeline(std::string script)
     addKeyframe(times, sm._script, _playbackLineNum);
 }
 
-void SessionRecording::saveScriptKeyframeToPropertiesBaseline(std::string script)
+bool SessionRecording::doesStartWithSubstring(const std::string& s,
+                                              const std::string& matchSubstr)
 {
+    return (s.substr(0, matchSubstr.length()).compare(matchSubstr) == 0);
+}
+
+void SessionRecording::saveScriptKeyframeToPropertiesBaseline(std::string script) {
     Timestamps times
         = generateCurrentTimestamp3(global::windowDelegate->applicationTime());
     size_t indexIntoScriptKeyframesFromMainTimeline
@@ -798,6 +826,28 @@ void SessionRecording::saveScriptKeyframeToPropertiesBaseline(std::string script
         times,
         0
     );
+}
+
+void SessionRecording::trimCommandsFromScriptIfFound(std::string& script)
+{
+    for (std::string trimSnippet : _scriptsToBeTrimmed) {
+        auto findIdx = script.find(trimSnippet);
+        if (findIdx != std::string::npos) {
+            auto findClosingParens = script.find_first_of(')', findIdx);
+            script.erase(findIdx, findClosingParens + 1);
+        }
+    }
+}
+
+void SessionRecording::replaceCommandsFromScriptIfFound(std::string& script)
+{
+    for (ScriptSubstringReplace replacementSnippet : _scriptsToBeReplaced) {
+        auto findIdx = script.find(replacementSnippet.substringFound);
+        if (findIdx != std::string::npos) {
+            script.erase(findIdx, replacementSnippet.substringFound.length());
+            script.insert(findIdx, replacementSnippet.substringReplacement);
+        }
+    }
 }
 
 void SessionRecording::saveScriptKeyframeBinary(Timestamps& times,
@@ -849,8 +899,7 @@ void SessionRecording::savePropertyBaseline(properties::Property& prop) {
 
 bool SessionRecording::isPropertyAllowedForBaseline(const std::string& propString) {
     for (std::string reject : _propertyBaselineRejects) {
-        if (propString.substr(0, reject.length()).compare(reject) == 0)
-        {
+        if (doesStartWithSubstring(propString, reject)) {
             return false;
         }
     }
@@ -1076,7 +1125,9 @@ double SessionRecording::fixedDeltaTimeDuringFrameOutput() const {
     }
 }
 
-std::chrono::steady_clock::time_point SessionRecording::currentPlaybackInterpolationTime() const {
+std::chrono::steady_clock::time_point
+SessionRecording::currentPlaybackInterpolationTime() const
+{
     return _saveRenderingCurrentRecordedTime_interpolation;
 }
 
@@ -1182,7 +1233,6 @@ bool SessionRecording::readCameraKeyframeBinary(Timestamps& times,
         ));
         return false;
     }
-    //times.timeOs = kf._timestamp;
 
     if (!file) {
         LINFO(fmt::format(
@@ -1408,8 +1458,7 @@ bool SessionRecording::checkIfScriptUsesScenegraphNode(std::string s) {
             checkForScenegraphNodeAccess_Nav(subj, found);
             if (found.length() > 0) {
                 auto it = std::find(_loadedNodes.begin(), _loadedNodes.end(), found);
-                if (it == _loadedNodes.end())
-                {
+                if (it == _loadedNodes.end()) {
                     LERROR(fmt::format(
                         "Playback file requires scenegraph node '{}', which is "
                         "not currently loaded", found
@@ -1441,12 +1490,14 @@ void SessionRecording::checkForScenegraphNodeAccess_Nav(std::string& s,
 {
     const std::string nextTerm = "NavigationHandler.OrbitalNavigator.";
     auto posNav = s.find(nextTerm);
-    for (std::string accessName : _navScriptsUsingNodes) {
-        if (s.substr(posNav + nextTerm.length()).rfind(accessName) == 0) {
-            std::string postName = s.substr(posNav + nextTerm.length()
-                + accessName.length() + 2);
-            eraseSpacesFromString(postName);
-            result = getNameFromSurroundingQuotes(postName);
+    if (posNav != std::string::npos) {
+        for (std::string accessName : _navScriptsUsingNodes) {
+            if (s.substr(posNav + nextTerm.length()).rfind(accessName) == 0) {
+                std::string postName = s.substr(posNav + nextTerm.length()
+                    + accessName.length() + 2);
+                eraseSpacesFromString(postName);
+                result = getNameFromSurroundingQuotes(postName);
+            }
         }
     }
 }
@@ -1474,8 +1525,7 @@ bool SessionRecording::checkIfInitialFocusNodeIsLoaded(unsigned int camIdx1) {
         std::string startFocusNode
             = _keyframesCamera[_timeline[camIdx1].idxIntoKeyframeTypeArray].focusNode;
         auto it = std::find(_loadedNodes.begin(), _loadedNodes.end(), startFocusNode);
-        if (it == _loadedNodes.end())
-        {
+        if (it == _loadedNodes.end()) {
             LERROR(fmt::format(
                 "Playback file requires scenegraph node '{}', which is "
                 "not currently loaded", startFocusNode
@@ -1671,17 +1721,9 @@ void SessionRecording::moveAheadInTime() {
     using namespace std::chrono;
 
     bool paused = global::timeManager->isPaused();
-    if (paused) {
-        if (_playbackStartedPaused) {
-            return;
-        }
-        else {
-            _playbackPauseOffset
-                += global::windowDelegate->applicationTime() - _previousTime;
-        }
-    }
-    else {
-        _playbackStartedPaused = false;
+    if (_playbackPaused) {
+        _playbackPauseOffset
+            += global::windowDelegate->applicationTime() - _previousTime;
     }
     _previousTime = global::windowDelegate->applicationTime();
 
@@ -2529,6 +2571,28 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
                 "Performs a conversion of the specified file to the most most recent "
                 "file format, creating a copy of the recording file."
             },
+            {
+                "setPlaybackPause",
+                &luascriptfunctions::setPlaybackPause,
+                {},
+                "bool",
+                "Pauses or resumes the playback progression through keyframes"
+            },
+            {
+                "togglePlaybackPause",
+                &luascriptfunctions::togglePlaybackPause,
+                {},
+                "",
+                "Toggles the pause function, i.e. temporarily setting the delta time to 0"
+                " and restoring it afterwards"
+            },
+            {
+               "isPlayingBack",
+                & luascriptfunctions::isPlayingBack,
+                {},
+                "",
+                "Returns true if session recording is currently playing back a recording"
+            }
         }
     };
 }

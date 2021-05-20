@@ -185,4 +185,63 @@ int fileFormatConversion(lua_State* L) {
     return 0;
 }
 
+int setPlaybackPause(lua_State* L) {
+    const int nArguments = lua_gettop(L);
+
+    if (nArguments == 1) {
+        const bool pause = lua_toboolean(L, 1) == 1;
+        global::sessionRecording->setPlaybackPause(pause);
+    }
+    else {
+        lua_settop(L, 0);
+        return luaL_error(
+            L,
+            "bad number of arguments, expected 1, got %i",
+            nArguments
+        );
+    }
+
+    lua_settop(L, 0);
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
+int togglePlaybackPause(lua_State* L) {
+    const int nArguments = lua_gettop(L);
+
+    if (nArguments == 0) {
+        bool isPlaybackPaused = global::sessionRecording->isPlaybackPaused();
+        global::sessionRecording->setPlaybackPause(!isPlaybackPaused);
+    }
+    else {
+        lua_settop(L, 0);
+        return luaL_error(
+            L,
+            "bad number of arguments, expected 0, got %i",
+            nArguments
+        );
+    }
+
+    lua_settop(L, 0);
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
+int isPlayingBack(lua_State* L) {
+    const int nArguments = lua_gettop(L);
+
+    if (nArguments != 0) {
+        lua_settop(L, 0);
+        return luaL_error(
+            L,
+            "bad number of arguments, expected 0, got %i",
+            nArguments
+        );
+    }
+
+    ghoul::lua::push(L, global::sessionRecording->isPlayingBack());
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
+    return 1;
+}
+
 } // namespace openspace::luascriptfunctions
