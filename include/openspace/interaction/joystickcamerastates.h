@@ -63,8 +63,8 @@ public:
 
         // The axis values can either go back to 0 when the joystick is released or it can
         // stay at the value it was before the joystick was released.
-        // The latter is called a static axis, when the values don't go back to 0.
-        bool isStatic = false;
+        // The latter is called a sticky axis, when the values don't go back to 0.
+        bool isSticky = false;
 
         float deadzone = 0.f;
 
@@ -79,7 +79,7 @@ public:
     void setAxisMapping(int axis, AxisType mapping,
         AxisInvert shouldInvert = AxisInvert::No,
         AxisNormalize shouldNormalize = AxisNormalize::No,
-        bool isStatic = false, double sensitivity = 0.0
+        bool isSticky = false, double sensitivity = 0.0
     );
 
     AxisInformation axisMapping(int axis) const;
@@ -102,7 +102,7 @@ private:
     std::array<AxisInformation, JoystickInputState::MaxAxes> _axisMapping;
 
     // This array is used to store the old axis values from the previous frame,
-    // it is used to calculate the difference in the values in the case of a static axis
+    // it is used to calculate the difference in the values in the case of a sticky axis
     std::array<float, JoystickInputState::MaxAxes> _prevAxisValues;
 
     struct ButtonInformation {

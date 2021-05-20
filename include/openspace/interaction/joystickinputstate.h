@@ -73,8 +73,8 @@ struct JoystickInputState {
 
     /// The axis values can either go back to 0 when the joystick is released or it can
     /// stay at the value it was before the joystick was released.
-    /// The latter is called a static axis, when the values don't go back to 0.
-    bool isStatic = false;
+    /// The latter is called a sticky axis, when the values don't go back to 0.
+    bool isSticky = false;
 
     /// The number of buttons that this joystick possesses
     int nButtons = 0;

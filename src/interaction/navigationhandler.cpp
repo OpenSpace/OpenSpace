@@ -493,7 +493,7 @@ void NavigationHandler::setJoystickAxisMapping(int axis,
                                                JoystickCameraStates::AxisType mapping,
                                             JoystickCameraStates::AxisInvert shouldInvert,
                                       JoystickCameraStates::AxisNormalize shouldNormalize,
-                                               bool isStatic,
+                                               bool isSticky,
                                                double sensitivity)
 {
     _orbitalNavigator.joystickStates().setAxisMapping(
@@ -501,7 +501,7 @@ void NavigationHandler::setJoystickAxisMapping(int axis,
         mapping,
         shouldInvert,
         shouldNormalize,
-        isStatic,
+        isSticky,
         sensitivity
     );
 }

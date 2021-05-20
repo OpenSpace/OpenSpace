@@ -55,7 +55,7 @@ void JoystickCameraStates::updateStateFromInput(const InputState& inputState,
         float rawValue = inputState.joystickAxis(i);
         float value = rawValue;
 
-        if (t.isStatic) {
+        if (t.isSticky) {
             value = rawValue - _prevAxisValues[i];
             _prevAxisValues[i] = rawValue;
         }
@@ -72,7 +72,7 @@ void JoystickCameraStates::updateStateFromInput(const InputState& inputState,
             value *= -1.f;
         }
 
-        if (std::fabs(t.sensitivity) > std::numeric_limits<double>().epsilon()) {
+        if (std::abs(t.sensitivity) > std::numeric_limits<double>::epsilon()) {
             value = static_cast<float>(value * t.sensitivity * _sensitivity);
         }
         else {
@@ -179,7 +179,7 @@ void JoystickCameraStates::updateStateFromInput(const InputState& inputState,
 void JoystickCameraStates::setAxisMapping(int axis, AxisType mapping,
                                           AxisInvert shouldInvert,
                                           AxisNormalize shouldNormalize,
-                                          bool isStatic,
+                                          bool isSticky,
                                           double sensitivity)
 {
     ghoul_assert(axis < JoystickInputState::MaxAxes, "axis must be < MaxAxes");
@@ -187,11 +187,11 @@ void JoystickCameraStates::setAxisMapping(int axis, AxisType mapping,
     _axisMapping[axis].type = mapping;
     _axisMapping[axis].invert = shouldInvert;
     _axisMapping[axis].normalize = shouldNormalize;
-    _axisMapping[axis].isStatic = isStatic;
+    _axisMapping[axis].isSticky = isSticky;
     _axisMapping[axis].sensitivity = sensitivity;
 
-    if (isStatic) {
-        global::joystickInputStates->at(axis).isStatic = true;
+    if (isSticky) {
+        global::joystickInputStates->at(axis).isSticky = true;
     }
 
     _prevAxisValues[axis] = global::joystickInputStates->axis(axis);

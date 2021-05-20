@@ -199,7 +199,7 @@ int bindJoystickAxis(lua_State* L) {
 
     const bool shouldInvert = n > 2 ? ghoul::lua::value<bool>(L, 3) : false;
     const bool shouldNormalize = n > 3 ? ghoul::lua::value<bool>(L, 4) : false;
-    const bool isStatic = n > 4 ? ghoul::lua::value<bool>(L, 5) : false;
+    const bool isSticky = n > 4 ? ghoul::lua::value<bool>(L, 5) : false;
     const double sensitivity = n > 5 ? ghoul::lua::value<double>(L, 6) : 0.0;
 
     global::navigationHandler->setJoystickAxisMapping(
@@ -207,7 +207,7 @@ int bindJoystickAxis(lua_State* L) {
         ghoul::from_string<interaction::JoystickCameraStates::AxisType>(axisType),
         interaction::JoystickCameraStates::AxisInvert(shouldInvert),
         interaction::JoystickCameraStates::AxisNormalize(shouldNormalize),
-        isStatic,
+        isSticky,
         sensitivity
     );
 
@@ -227,9 +227,9 @@ int joystickAxis(lua_State* L) {
     lua_settop(L, 0);
     const bool invert = info.invert;
     const bool normalize = info.normalize;
-    const bool isStatic = info.isStatic;
+    const bool isSticky = info.isSticky;
     const float sensitivity = info.sensitivity;
-    ghoul::lua::push(L, ghoul::to_string(info.type), invert, normalize, isStatic, sensitivity);
+    ghoul::lua::push(L, ghoul::to_string(info.type), invert, normalize, isSticky, sensitivity);
 
     ghoul_assert(lua_gettop(L) == 5, "Incorrect number of items left on stack");
     return 5;

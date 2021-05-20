@@ -116,7 +116,7 @@ public:
             JoystickCameraStates::AxisInvert::No,
         JoystickCameraStates::AxisNormalize shouldNormalize =
             JoystickCameraStates::AxisNormalize::No,
-        bool isStatic = false, double sensitivity = 0.0
+        bool isSticky = false, double sensitivity = 0.0
     );
 
     JoystickCameraStates::AxisInformation joystickAxisMapping(int axis) const;
