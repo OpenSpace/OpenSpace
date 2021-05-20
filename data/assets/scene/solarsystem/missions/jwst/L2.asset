@@ -24,9 +24,10 @@ local L2 = {
             Kernels = L2Kernel
         }
     },
+    Tag = { "L2" },
     GUI = {
         Name = "L2",
-        Path = "/Solar System/Missions/JWST",
+        Path = "/Solar System/Missions/JWST/Lagrange points",
     }
 }
 
@@ -45,10 +46,34 @@ local L2Label = {
         BlendMode = "Normal",
         EnableFading = false
     },
+    Tag = { "L2" },
     GUI = {
         Name = "L2 Label",
-        Path = "/Solar System/Missions/JWST",
+        Path = "/Solar System/Missions/JWST/Lagrange points",
         Description = "Main label for L2"
+    }
+}
+
+local L2BigLabel = {
+    Identifier = "L2BigLabel",
+    Parent = L2.Identifier,
+    Renderable = {
+        Enabled = false,
+        Type = "RenderableLabels",
+        LabelText = "L2",
+        FontSize = 20,
+        LabelSize = 7.5,
+        LabelMaxSize = 100.0,
+        LabelMinSize = 1.0,
+        LabelOrientationOption = "Camera View Direction",
+        BlendMode = "Normal",
+        EnableFading = false
+    },
+    Tag = { "lagrange_points" },
+    GUI = {
+        Name = "Large L2 Label",
+        Path = "/Solar System/Missions/JWST/Lagrange points",
+        Description = "Large label for L2"
     }
 }
 
@@ -62,14 +87,16 @@ local L2SunLine = {
         Color = { 0.5, 0.5, 0.5 },
         LineWidth = 2
     },
+    Tag = { "L2" },
     GUI = {
         Name = "Earth to L2 Line",
-        Path = "/Solar System/Missions/JWST",
+        Path = "/Solar System/Missions/JWST/Lagrange points",
     }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     L2,
     L2SunLine,
-    L2Label
+    L2Label,
+    L2BigLabel
 })

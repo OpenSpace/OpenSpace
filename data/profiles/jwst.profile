@@ -59,6 +59,22 @@
       "key": "U",
       "name": "Toggle Hubble Ultra Deep Field",
       "script": "local list = openspace.getProperty('{hudf}.*.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
+    },
+    {
+      "documentation": "Toggle L2 label, point and line",
+      "gui_path": "/JWST",
+      "is_local": false,
+      "key": "2",
+      "name": "Toggle L2",
+      "script": "local list = openspace.getProperty('{L2}.*.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
+    },
+    {
+      "documentation": "Toggle James Webb Space Telecope field of view and view band",
+      "gui_path": "/JWST",
+      "is_local": false,
+      "key": "V",
+      "name": "Toggle JWST field of view and view band",
+      "script": "local list = openspace.getProperty('{fov}.*.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
     }
   ],
   "mark_nodes": [

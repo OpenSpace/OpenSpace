@@ -58,7 +58,7 @@ local HUDFJWSTLine = {
     },
     Tag = { "hudf" },
     GUI = {
-        Name = "JWST to HUDF image line",
+        Name = "James Webb Space Telescope to Hubble Ultra Deep Field line",
         Path = "/Solar System/Missions/JWST",
     }
 }

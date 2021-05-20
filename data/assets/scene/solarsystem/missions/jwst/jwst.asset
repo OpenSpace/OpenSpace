@@ -60,15 +60,17 @@ local JWSTBand = {
         }
     },
     Renderable = {
+        Enabled = false,
         Type = "RenderableSphere",
         Texture = "C:/Users/ElmQPC/Desktop/Malin/develop/images/jwst/JWST-band.png",
-        Size = 25E9,
-        Segments = 150,
+        Size = 9.2E15,
+        Segments = 50,
         DisableFadeInOut = true,
         Orientation = "Inside",
         Opacity = 0.1,
         UseAdditiveBlending = true,
     },
+    Tag = { "fov" },
     GUI = {
         Name = "James Webb Space Telescope View Band",
         Path = "/Solar System/Missions/JWST",
@@ -137,6 +139,7 @@ local JWSTFov = {
     Identifier = "JWSTFov",
     Parent = JWSTModel.Identifier,
     Renderable = {
+        Enabled = false,
         Type = "RenderablePrism",
         Segments = 6,
         Lines = 3,
@@ -145,7 +148,7 @@ local JWSTFov = {
         Color = {
             1.0, 1.0, 1.0
         },
-        Length = 25E9
+        Length = 9.2E15
     },
     Transform = {
         Rotation = {
@@ -155,6 +158,7 @@ local JWSTFov = {
             }
         },
     },
+    Tag = { "fov" },
     GUI = {
         Name = "James Webb Space Telecope Field of View",
         Path = "/Solar System/Missions/JWST",

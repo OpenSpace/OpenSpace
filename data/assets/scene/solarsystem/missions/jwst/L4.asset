@@ -28,7 +28,7 @@ local L4 = {
     Tag = { "lagrange_points" },
     GUI = {
         Name = "L4",
-        Path = "/Solar System/Missions/JWST",
+        Path = "/Solar System/Missions/JWST/Lagrange points",
     }
 }
 
@@ -50,7 +50,7 @@ local L4Label = {
     Tag = { "lagrange_points" },
     GUI = {
         Name = "L4 Label",
-        Path = "/Solar System/Missions/JWST",
+        Path = "/Solar System/Missions/JWST/Lagrange points",
         Description = "Main label for L4"
     }
 }

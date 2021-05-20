@@ -28,7 +28,7 @@ local L1 = {
     Tag = { "lagrange_points" },
     GUI = {
         Name = "L1",
-        Path = "/Solar System/Missions/JWST",
+        Path = "/Solar System/Missions/JWST/Lagrange points",
     }
 }
 
@@ -39,8 +39,8 @@ local L1Label = {
         Enabled = false,
         Type = "RenderableLabels",
         LabelText = "L1",
-        FontSize = 14,
-        LabelSize = 6.4,
+        FontSize = 20,
+        LabelSize = 7.5,
         LabelMaxSize = 100.0,
         LabelMinSize = 1.0,
         LabelOrientationOption = "Camera View Direction",
@@ -50,7 +50,7 @@ local L1Label = {
     Tag = { "lagrange_points" },
     GUI = {
         Name = "L1 Label",
-        Path = "/Solar System/Missions/JWST",
+        Path = "/Solar System/Missions/JWST/Lagrange points",
         Description = "Main label for L1"
     }
 }
