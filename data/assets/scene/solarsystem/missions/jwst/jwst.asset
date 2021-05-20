@@ -27,6 +27,26 @@ local JWSTPosition = {
     }
 }
 
+local JWSTRotation = {
+    Identifier = "JWSTRotation",
+    Parent = JWSTPosition.Identifier,
+    Transform = {
+        Rotation = {
+            Type = "FixedRotation",
+            Attached = "JWSTRotation",
+            XAxis = { 1, 0, 0 },
+            XAxisOrthogonal = true,
+            YAxisInvert = true,
+            YAxis = sunTransforms.SolarSystemBarycenter.Identifier
+        }
+    },
+    GUI = {
+        Name = "James Webb Space Telescope Rotation",
+        Path = "/Solar System/Missions/JWST",
+        Hidden = true,
+    }
+}
+
 local JWSTBand = {
     Identifier = "JWSTBand",
     Parent = JWSTPosition.Identifier,
@@ -36,7 +56,6 @@ local JWSTBand = {
             Attached = "JWSTBand",
             XAxis = { 1, 0, 0 },
             XAxisOrthogonal = true,
-            --YAxisInvert = true,
             ZAxis = sunTransforms.SolarSystemBarycenter.Identifier
         }
     },
@@ -59,15 +78,13 @@ local JWSTBand = {
 
 local JWSTModel = {
     Identifier = "JWSTModel",
-    Parent = JWSTPosition.Identifier,
+    Parent = JWSTRotation.Identifier,
     Transform = {
         Rotation = {
-            Type = "FixedRotation",
-            Attached = "JWSTModel",
-            XAxis = { 0.01, -1.0, 0.56 },
-            XAxisOrthogonal = true,
-            YAxisInvert = true,
-            YAxis = sunTransforms.SolarSystemBarycenter.Identifier
+            Type = "StaticRotation",
+            Rotation = {
+                0, 0, 0
+            }
         }
     },
     Renderable = {
@@ -128,7 +145,7 @@ local JWSTFov = {
         Color = {
             1.0, 1.0, 1.0
         },
-        Length = 30
+        Length = 25E9
     },
     Transform = {
         Rotation = {
@@ -147,6 +164,7 @@ local JWSTFov = {
 assetHelper.registerSceneGraphNodesAndExport(asset, {
 	JWSTTrail,
     JWSTPosition,
+    JWSTRotation,
     JWSTBand,
     JWSTModel,
     JWSTFov
