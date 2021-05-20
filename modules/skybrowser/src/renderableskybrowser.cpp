@@ -109,12 +109,14 @@ namespace openspace {
         _texture = std::make_unique<ghoul::opengl::Texture>(
             glm::uvec3(_dimensions.value(), 1.0f)
             );
-
+        _texture->setDimensions(glm::ivec3(_dimensions.value(), 1));
+        
         _renderHandler->setTexture(*_texture);
-
+        // The browser gets by default the size of the OpenSpace window, so it needs to 
+        // be resized
         _browserInstance->initialize();
         _browserInstance->loadUrl(_url);
-        _dimensions = _texture->dimensions();
+        _browserInstance->reshape(_dimensions.value());
     }
 
     void RenderableSkyBrowser::deinitializeGL() {
@@ -143,7 +145,6 @@ namespace openspace {
     void RenderableSkyBrowser::update(const UpdateData& data) {
         RenderablePlane::update(data);
         _renderHandler->updateTexture();
-        _objectSize = _texture->dimensions();
 
         if (_isUrlDirty) {
             _browserInstance->loadUrl(_url);

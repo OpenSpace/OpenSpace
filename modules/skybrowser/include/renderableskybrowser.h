@@ -53,7 +53,6 @@ namespace openspace {
         void executeJavascript(std::string script) const;
         bool sendMessageToWWT(const ghoul::Dictionary& msg);
 
-
     protected:
 
         properties::Vec2Property _dimensions;
@@ -79,7 +78,6 @@ namespace openspace {
 
         CefRefPtr<WebKeyboardHandler> _keyboardHandler;
 
-        glm::ivec2 _objectSize = glm::ivec2(0);
         bool _isUrlDirty = false;
         bool _isDimensionsDirty = false;
 
