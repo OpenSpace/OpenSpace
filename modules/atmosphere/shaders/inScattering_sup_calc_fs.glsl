@@ -37,12 +37,12 @@ uniform sampler3D deltaJTexture;
 // The integrand here is the f(y) of the trapezoidal rule:
 vec3 integrand(float r, float mu, float muSun, float nu, float dist) {
   // We can calculate r_i by the cosine law: r_i^2=dist^2 + r^2 - 2*r*dist*cos(PI-theta)
-  float r_i     = sqrt(r * r + dist * dist + 2.0f * r * dist * mu);
+  float r_i = sqrt(r * r + dist * dist + 2.0f * r * dist * mu);
   // r_i can be found using the dot product:
   // vec(y_i) dot vec(dist) = cos(theta_i) * ||vec(y_i)|| * ||vec(dist)||
   // But vec(y_i) = vec(x) + vec(dist), also: vec(x) dot vec(dist) = cos(theta) = mu
   // So, cos(theta_i) = mu_i = (r*dist**mu + dist*2)/(r_i*dist)
-  float mu_i    = (r * mu + dist) / r_i;
+  float mu_i = (r * mu + dist) / r_i;
   // muSun_i can also be found by the dot product:
   // cos(sigma_i) = muSun_i = (vec(s) dot vec(y_i))/(||vec(y_i)|| * ||vec(s)||)
   // But vec(y_i) = vec(x) + vec(dist), and vec(x) dot vec(s) = muSun, cos(sigma_i + theta_i) = nu
@@ -52,8 +52,8 @@ vec3 integrand(float r, float mu, float muSun, float nu, float dist) {
 }
 
 vec3 inscatter(float r, float mu, float muSun, float nu) {
-  vec3  inScatteringRadiance   = vec3(0.0f);
-  float dy                     = rayDistance(r, mu) / float(INSCATTER_INTEGRAL_SAMPLES);
+  vec3  inScatteringRadiance = vec3(0.0);
+  float dy = rayDistance(r, mu) / float(INSCATTER_INTEGRAL_SAMPLES);
   vec3  inScatteringRadiance_i = integrand(r, mu, muSun, nu, 0.0);
   
   // In order to solve the integral from equation (11) we use the trapezoidal
@@ -69,7 +69,9 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
 }
 
 void main() {
-  float mu = 0.0f, muSunun = 0.0f, nu = 0.0f;
+  float mu = 0.0;
+  float muSunun = 0.0;
+  float nu = 0.0;
   // Unmapping the variables from texture texels coordinates
   // to mapped coordinates
   unmappingMuMuSunNu(r, dhdH, mu, muSunun, nu);

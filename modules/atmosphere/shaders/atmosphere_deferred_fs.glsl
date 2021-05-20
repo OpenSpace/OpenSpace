@@ -92,11 +92,11 @@ uniform dvec3 sunDirectionObj;
 const uint numberOfShadows = 1;
 
 struct ShadowRenderingStruct {
-        double xu, xp;
-        double rs, rc;
-        dvec3 sourceCasterVec;
-        dvec3 casterPositionVec;
-        bool isShadowing;
+    double xu, xp;
+    double rs, rc;
+    dvec3 sourceCasterVec;
+    dvec3 casterPositionVec;
+    bool isShadowing;
 };
 
 // Eclipse shadow data
@@ -184,15 +184,15 @@ struct dRay {
  */
 bool dAtmosphereIntersection(dvec3 planetPosition, dRay ray, double atmRadius,
                              out bool inside, out double offset, out double maxLength ) {
-    dvec3  l  = planetPosition - ray.origin.xyz;
-    double s  = dot(l, ray.direction.xyz);
+    dvec3 l = planetPosition - ray.origin.xyz;
+    double s = dot(l, ray.direction.xyz);
     double l2 = dot(l, l);
     double r2 = atmRadius * atmRadius; // avoiding surface acne
 
     // Ray origin (eye position) is behind sphere
     if ((s < 0.0) && (l2 > r2)) {
-        inside    = false;
-        offset    = 0.0;
+        inside = false;
+        offset = 0.0;
         maxLength = 0.0;
         return false;
     }
@@ -201,8 +201,8 @@ bool dAtmosphereIntersection(dvec3 planetPosition, dRay ray, double atmRadius,
 
     // Ray misses atmospere
     if (m2 > r2) {
-        inside    = false;
-        offset    = 0.0;
+        inside = false;
+        offset = 0.0;
         maxLength = 0.0;
         return false;
     }
@@ -214,13 +214,13 @@ bool dAtmosphereIntersection(dvec3 planetPosition, dRay ray, double atmRadius,
 
     // If l2 < r2, the ray origin is inside the sphere
     if (l2 > r2) {
-        inside    = false;
-        offset    = s - q;
+        inside = false;
+        offset = s - q;
         maxLength = s + q;
     }
     else {
-        inside    = true;
-        offset    = 0.0;
+        inside = true;
+        offset = 0.0;
         maxLength = s + q;
     }
     
@@ -239,7 +239,8 @@ bool dAtmosphereIntersection(dvec3 planetPosition, dRay ray, double atmRadius,
  */
 void dCalculateRayRenderableGlobe(out dRay ray, 
                                   out dvec4 planetPositionObjectCoords, 
-                                  out dvec4 cameraPositionInObject) {
+                                  out dvec4 cameraPositionInObject)
+{
     dvec4 clipCoords = dvec4(interpolatedNDCPos.xy, 1.0, 1.0);
 
     // Clip to Object Coords
@@ -260,7 +261,7 @@ void dCalculateRayRenderableGlobe(out dRay ray,
     // Ray in object space (in KM)
     ray.origin    = cameraPositionInObject * dvec4(0.001, 0.001, 0.001, 1.0);
     //ray.direction = dvec4(normalize(objectCoords.xyz - cameraPositionInObject.xyz), 0.0);
-    ray.direction = dvec4(normalize((objectCoords.xyz * dvec3(0.001))- ray.origin.xyz), 0.0);
+    ray.direction = dvec4(normalize((objectCoords.xyz * dvec3(0.001)) - ray.origin.xyz), 0.0);
 }
 
 /* 
@@ -287,19 +288,19 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
                        double maxLength, double pixelDepth,
                        vec4 spaceColor, float sunIntensity) {
 
-    const float INTERPOLATION_EPS = 0.004f; // precision const from Brunetton
+    const float INTERPOLATION_EPS = 0.004; // precision const from Brunetton
 
     vec3 radiance;
     
     r  = length(x);
     mu = dot(x, v) / r;
 
-    float mu2           = mu * mu;
-    float r2            = r * r;
-    float nu            = dot(v, s);
-    float muSun         = dot(x, s) / r;
+    float mu2 = mu * mu;
+    float r2 = r * r;
+    float nu = dot(v, s);
+    float muSun = dot(x, s) / r;
     float rayleighPhase = rayleighPhaseFunction(nu);
-    float miePhase      = miePhaseFunction(nu);
+    float miePhase = miePhaseFunction(nu);
       
     // S[L](x,s,v)
     // I.e. the next line has the scattering light for the "infinite" ray passing 
@@ -310,12 +311,12 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
       
     // After removing the initial path from camera pos to top of atmosphere (for an
     // observer in the space) we test if the light ray is hitting the atmosphere
-    vec3  x0     = fragPosObj;
-    float r0     = length(fragPosObj);
-    float invr0  = 1.0/r0;
+    vec3  x0 = fragPosObj;
+    float r0 = length(fragPosObj);
+    float invr0 = 1.0 / r0;
     float muSun0 = dot(fragPosObj, s) * invr0;
     //vec3  x0     = x + float(pixelDepth) * v;      
-    float mu0    = dot(x0, v) * invr0;
+    float mu0 = dot(x0, v) * invr0;
 
     if ((pixelDepth > INTERPOLATION_EPS) && (pixelDepth < maxLength)) {
         t = float(pixelDepth);  
@@ -348,7 +349,7 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
     // cos(PI-thetaH) = dist/r
     // cos(thetaH) = - dist/r
     // muHorizon = -sqrt(r^2-Rg^2)/r = -sqrt(1-(Rg/r)^2)
-    float muHorizon = -sqrt(1.0f - (Rg2 / r2));
+    float muHorizon = -sqrt(1.0 - (Rg2 / r2));
 
     // In order to avoid imprecision problems near horizon,
     // we interpolate between two points: above and below horizon
@@ -356,21 +357,21 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
         // We want an interpolation value close to 1/2, so the
         // contribution of each radiance value is almost the same
         // or it has a heavy weight if from above or below horizon
-        float interpolationValue = ((mu - muHorizon) + INTERPOLATION_EPS) / (2.0f * INTERPOLATION_EPS);
+        float interpolationValue = ((mu - muHorizon) + INTERPOLATION_EPS) / (2.0 * INTERPOLATION_EPS);
 
         //float t2 = t * t;
               
         // Above Horizon
-        mu  = muHorizon - INTERPOLATION_EPS;
+        mu = muHorizon - INTERPOLATION_EPS;
         //r0  = sqrt(r * r + t * t + 2.0f * r * t * mu);
         // From cosine law where t = distance between x and x0
         // r0^2 = r^2 + t^2 - 2 * r * t * cos(PI-theta)
         //r0  = sqrt(r2 + t2 + 2.0f * r * t * mu);
         float halfCossineLaw1 = r2 + (t * t);
-        float halfCossineLaw2 = 2.0f * r * t;
-        r0  = sqrt(halfCossineLaw1 + halfCossineLaw2 * mu);
+        float halfCossineLaw2 = 2.0 * r * t;
+        r0 = sqrt(halfCossineLaw1 + halfCossineLaw2 * mu);
         
-        float invr0 = 1.0/r0;
+        float invr0 = 1.0 / r0;
         // From the dot product: cos(theta0) = (x0 dot v)/(||ro||*||v||)
         // mu0 = ((x + t) dot v) / r0
         // mu0 = (x dot v + t dot v) / r0
@@ -380,13 +381,13 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
         vec4 inScatterAboveX  = texture4D(inscatterTexture, r, mu, muSun, nu);
         vec4 inScatterAboveXs = texture4D(inscatterTexture, r0, mu0, muSun0, nu);
         // Attention for the attenuation.r value applied to the S_Mie
-        vec4 inScatterAbove = max(inScatterAboveX - attenuation.rgbr * inScatterAboveXs, 0.0f);
+        vec4 inScatterAbove = max(inScatterAboveX - attenuation.rgbr * inScatterAboveXs, 0.0);
 
         // Below Horizon
-        mu  = muHorizon + INTERPOLATION_EPS;
+        mu = muHorizon + INTERPOLATION_EPS;
         //r0  = sqrt(r2 + t2 + 2.0f * r * t * mu);
-        r0  = sqrt(halfCossineLaw1 + halfCossineLaw2 * mu);
-        invr0 = 1.0/r0;
+        r0 = sqrt(halfCossineLaw1 + halfCossineLaw2 * mu);
+        invr0 = 1.0 / r0;
         
         mu0 = (r * mu + t) * invr0;
         
@@ -406,11 +407,11 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
     // Hermite interpolation between two values
     // This step is done because imprecision problems happen when the Sun is slightly below
     // the horizon. When this happens, we avoid the Mie scattering contribution.
-    inscatterRadiance.w *= smoothstep(0.0f, 0.02f, muSun);
-    vec3 inscatterMie    = inscatterRadiance.rgb * inscatterRadiance.a / max(inscatterRadiance.r, 1e-4) *
+    inscatterRadiance.w *= smoothstep(0.0, 0.02, muSun);
+    vec3 inscatterMie = inscatterRadiance.rgb * inscatterRadiance.a / max(inscatterRadiance.r, 1e-4) *
       (betaRayleigh.r / betaRayleigh);
       
-    radiance = max(inscatterRadiance.rgb * rayleighPhase + inscatterMie * miePhase, 0.0f);    
+    radiance = max(inscatterRadiance.rgb * rayleighPhase + inscatterMie * miePhase, 0.0);    
     
     // Finally we add the Lsun (all calculations are done with no Lsun so
     // we can change it on the fly with no precomputations)
@@ -452,29 +453,29 @@ vec3 groundColor(vec3 x, float t, vec3 v, vec3 s, float r,
                  vec3 normal, float irradianceFactor,
                  float waterReflectance, float sunIntensity)
 {
-    vec3 reflectedRadiance = vec3(0.0f);
+    vec3 reflectedRadiance = vec3(0.0);
 
     // First we obtain the ray's end point on the surface
-    vec3  x0                 = x + t * v;
-    float r0                 = length(x0);
+    vec3  x0 = x + t * v;
+    float r0 = length(x0);
     // Normal of intersection point.
     // Normal must be normalized.
-    vec3  n                  = normal;
+    vec3 n = normal;
     //vec4 groundReflectance = groundColor * vec4(.37);
-    vec4 groundReflectance   = groundColor * 
+    vec4 groundReflectance = groundColor * 
         vec4(groundRadianceEmittion, groundRadianceEmittion, groundRadianceEmittion, 1.0f);
 
     // L0 is not included in the irradiance texture.
     // We first calculate the light attenuation from the top of the atmosphere
     // to x0.
     float dotNS = dot(n, s);
-    float muSun = max(dotNS, 0.0f);
+    float muSun = max(dotNS, 0.0);
 
     // Is direct Sun light arriving at x0? If not, there is no direct light from Sun (shadowed)
-    vec3  transmittanceL0     = muSun < -sqrt(1.0f - (Rg2 / (r0 * r0))) ? 
-                                vec3(0.0f) : transmittanceLUT(r0, muSun);
+    vec3  transmittanceL0 = muSun < -sqrt(1.0 - (Rg2 / (r0 * r0))) ? 
+                                vec3(0.0) : transmittanceLUT(r0, muSun);
     // E[L*] at x0
-    vec3  irradianceReflected = irradiance(irradianceTexture, r0, muSun) * irradianceFactor;
+    vec3 irradianceReflected = irradiance(irradianceTexture, r0, muSun) * irradianceFactor;
 
     // R[L0] + R[L*]
     // vec3 groundRadiance = (dotNS < -0.2f ? groundReflectance.rgb * 15 : groundReflectance.rgb) *
@@ -483,22 +484,22 @@ vec3 groundColor(vec3 x, float t, vec3 v, vec3 s, float r,
     vec3 groundRadiance;
     vec3 RLStar = (muSun * transmittanceL0 + irradianceReflected) * sunIntensity / M_PI;
     if (dotNS < 0.05f) {
-        groundRadiance = groundReflectance.rgb * mix(30.0f, 1.0f, smoothstep(-1.0f, 0.05f, dotNS)) * RLStar;
+        groundRadiance = groundReflectance.rgb * mix(30.0, 1.0, smoothstep(-1.0, 0.05, dotNS)) * RLStar;
     }
     else {
         groundRadiance = groundReflectance.rgb * RLStar;
     }
 
     // Specular reflection from sun on oceans and rivers  
-    if ((waterReflectance > 0.1f) && /*(dotNS > -0.2f)*/(muSun > 0.0f)) {
-        vec3  h         = normalize(s - v);
+    if ((waterReflectance > 0.1) && /*(dotNS > -0.2f)*/(muSun > 0.0)) {
+        vec3 h = normalize(s - v);
         // Fresnell Schlick's approximation
-        float fresnel   = 0.02f + 0.98f * pow(1.0f - dot(-v, h), 5.0f);
+        float fresnel = 0.02 + 0.98 * pow(1.0f - dot(-v, h), 5.0);
         // Walter BRDF approximation
-        float waterBrdf = fresnel * pow(max(dot(h, n), 0.0f), 150.0f);
+        float waterBrdf = fresnel * pow(max(dot(h, n), 0.0), 150.0);
         // Adding Fresnell and Water BRDFs approximation to the final surface color
         // (After adding the sunRadiance and the attenuation of the Sun through atmosphere)
-        groundRadiance += waterReflectance * max(waterBrdf, 0.0f) * transmittanceL0 * sunIntensity;
+        groundRadiance += waterReflectance * max(waterBrdf, 0.0) * transmittanceL0 * sunIntensity;
     }
     //return groundRadiance;  
     // Finally, we attenuate the surface Radiance from the the point x0 to the camera location.
@@ -527,19 +528,19 @@ vec3 groundColor(vec3 x, float t, vec3 v, vec3 s, float r,
  */
 vec3 sunColor(vec3 x, float t, vec3 v, vec3 s, float r, float mu, float irradianceFactor)
 {
-    vec3 transmittance  = (r <= Rt) ? ( mu < -sqrt(1.0f - Rg2/(r*r)) ? 
-                          vec3(0.0f) : transmittanceLUT(r, mu)) : vec3(1.0f);  
+    vec3 transmittance = (r <= Rt) ? ( mu < -sqrt(1.0 - Rg2/(r*r)) ? 
+                          vec3(0.0) : transmittanceLUT(r, mu)) : vec3(1.0);  
     // JCC: Change this function to a impostor texture with gaussian decay color weighted
     // by tge sunRadiance, transmittance and irradianceColor (11/03/2017)                          
-    float sunFinalColor = smoothstep(cos(M_PI / 500.0f), cos(M_PI / 900.0f), dot(v, s)) * 
-                          sunRadiance * (1.0f - irradianceFactor);
+    float sunFinalColor = smoothstep(cos(M_PI / 500.0), cos(M_PI / 900.0), dot(v, s)) * 
+                          sunRadiance * (1.0 - irradianceFactor);
 
     return transmittance * sunFinalColor;
 }
 
 void main() {
     if (cullAtmosphere == 0) {
-        vec4 atmosphereFinalColor = vec4(0.0f);
+        vec4 atmosphereFinalColor = vec4(0.0);
         int nSamples = 1;
         
         // First we determine if the pixel is complex (different fragments on it)
@@ -554,15 +555,15 @@ void main() {
         // Ray in object space
         dRay ray;
         dvec4 planetPositionObjectCoords = dvec4(0.0);
-        dvec4 cameraPositionInObject     = dvec4(0.0);        
+        dvec4 cameraPositionInObject = dvec4(0.0);        
         
         // Get the ray from camera to atm in object space
         dCalculateRayRenderableGlobe(ray, planetPositionObjectCoords, 
                                     cameraPositionInObject);
         
-        bool  insideATM    = false;
-        double offset      = 0.0;   // in Km
-        double maxLength   = 0.0;   // in Km  
+        bool  insideATM = false;
+        double offset = 0.0;   // in Km
+        double maxLength = 0.0;   // in Km  
 
         bool  intersectATM = false;
 
@@ -609,19 +610,19 @@ void main() {
             float dC = float(length(cameraPositionInObject.xyz));
             float x1 = 1e8;
             if (dC > x1) {
-                pixelDepth     += 1000.0;
-                float alpha     = 1000.0;
-                float beta      = 1000000.0;
-                float x2        = 1e9; 
+                pixelDepth += 1000.0;
+                float alpha = 1000.0;
+                float beta = 1000000.0;
+                float x2 = 1e9; 
                 float diffGreek = beta - alpha;
-                float diffDist  = x2 - x1;
-                float varA      = diffGreek/diffDist;
-                float varB      = (alpha - varA * x1);
-                pixelDepth     += double(varA * dC + varB); 
+                float diffDist = x2 - x1;
+                float varA = diffGreek/diffDist;
+                float varB = (alpha - varA * x1);
+                pixelDepth += double(varA * dC + varB); 
             }
 
             // All calculations are done in Km:
-            pixelDepth                *= 0.001;
+            pixelDepth *= 0.001;
             positionObjectsCoords.xyz *= 0.001;
 
             if (pixelDepth < offset) {
@@ -636,11 +637,11 @@ void main() {
                 // Moving observer from camera location to top atmosphere
                 // If the observer is already inside the atm, offset = 0.0
                 // and no changes at all.
-                vec3  x  = vec3(ray.origin.xyz + t*ray.direction.xyz);
-                float r  = 0.0f;//length(x);
-                vec3  v  = vec3(ray.direction.xyz);
-                float mu = 0.0f;//dot(x, v) / r;
-                vec3  s  = vec3(sunDirectionObj);
+                vec3 x = vec3(ray.origin.xyz + t*ray.direction.xyz);
+                float r = 0.0;//length(x);
+                vec3 v = vec3(ray.direction.xyz);
+                float mu = 0.0;//dot(x, v) / r;
+                vec3 s = vec3(sunDirectionObj);
                 float tF = float(maxLength - t);
 
                 // Because we may move the camera origin to the top of atmosphere 
@@ -648,8 +649,8 @@ void main() {
                 // next comparison with the planet's ground make sense:
                 pixelDepth -= offset;
                 
-                dvec4 onATMPos           = dModelTransformMatrix * dvec4(x * 1000.0, 1.0);
-                vec4 eclipseShadowATM    = calcShadow(shadowDataArray, onATMPos.xyz, false);            
+                dvec4 onATMPos = dModelTransformMatrix * dvec4(x * 1000.0, 1.0);
+                vec4 eclipseShadowATM = calcShadow(shadowDataArray, onATMPos.xyz, false);            
                 float sunIntensityInscatter = sunRadiance * eclipseShadowATM.x;
 
                 float irradianceFactor = 0.0;

@@ -32,16 +32,16 @@ uniform int firstIteraction;
 //uniform float firstIteraction;
 
 // -- Spherical Coordinates Steps. phi e [0,2PI] and theta e [0, PI/2]
-const float stepPhi = (2.0f * M_PI) / float(IRRADIANCE_INTEGRAL_SAMPLES);
-const float stepTheta = M_PI / (2.0f * float(IRRADIANCE_INTEGRAL_SAMPLES));
+const float stepPhi = (2.0 * M_PI) / float(IRRADIANCE_INTEGRAL_SAMPLES);
+const float stepTheta = M_PI / (2.0 * float(IRRADIANCE_INTEGRAL_SAMPLES));
 
 //uniform sampler2D transmittanceTexture;
 uniform sampler3D deltaSRTexture;
 uniform sampler3D deltaSMTexture;
 
 void main() {
-  float r     = 0.0f;
-  float muSun = 0.0f;
+  float r = 0.0;
+  float muSun = 0.0;
   // Unmapping the variables from texture texels coordinates
   // to mapped coordinates
   unmappingRAndMuSunIrradiance(r, muSun);
@@ -49,21 +49,21 @@ void main() {
   // We know that muSun = cos(sigma) = s.z/||s||
   // But, ||s|| = 1, so s.z = muSun. Also,
   // ||s|| = 1, so s.x = sin(sigma) = sqrt(1-muSun^2) and s.y = 0.0f
-  vec3 s = vec3(max(sqrt(1.0f - muSun * muSun), 0.0f), 0.0f, muSun);
+  vec3 s = vec3(max(sqrt(1.0 - muSun * muSun), 0.0), 0.0, muSun);
 
   // In order to solve the integral from equation (15) we use the trapezoidal
   // rule: Integral(f(y)dy)(from a to b) = ((b-a)/2n_steps)*(Sum(f(y_i+1)+f(y_i)))
-  vec3 irradianceE = vec3(0.0f);
+  vec3 irradianceE = vec3(0.0);
   for (int iphi = 0; iphi < IRRADIANCE_INTEGRAL_SAMPLES; ++iphi) {
-    float phi = (float(iphi) + 0.5f) * stepPhi;
+    float phi = (float(iphi) + 0.5) * stepPhi;
     for (int itheta = 0; itheta < IRRADIANCE_INTEGRAL_SAMPLES; ++itheta) {
-      float theta = (float(itheta) + 0.5f) * stepTheta;
+      float theta = (float(itheta) + 0.5) * stepTheta;
       // spherical coordinates: dw = dtheta*dphi*sin(theta)*rho^2
       // rho = 1, we are integrating over a unit sphere
-      float dw    = stepTheta * stepPhi * sin(theta);
+      float dw = stepTheta * stepPhi * sin(theta);
       // w = (cos(phi) * sin(theta) * rho, sin(phi) * sin(theta) * rho, cos(theta) * rho)
-      vec3  w     = vec3(cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta));
-      float nu    = dot(s, w);
+      vec3  w = vec3(cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta));
+      float nu = dot(s, w);
 
       // The first iteraction is different from the others, that's because in the first
       // iteraction all the light arriving are coming from the initial pre-computed

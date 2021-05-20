@@ -38,14 +38,14 @@ uniform sampler3D deltaSMTexture;
 uniform int firstIteraction;
 
 // -- Spherical Coordinates Steps. phi e [0,2PI] and theta e [0, PI]
-const float stepPhi = (2.0f * M_PI) / float(INSCATTER_SPHERICAL_INTEGRAL_SAMPLES);
+const float stepPhi = (2.0 * M_PI) / float(INSCATTER_SPHERICAL_INTEGRAL_SAMPLES);
 const float stepTheta = M_PI / float(INSCATTER_SPHERICAL_INTEGRAL_SAMPLES);
 
 void inscatter(float r, float mu, float muSun, float nu, inout vec3 radianceJ) {
   // Be sure to not get a cosine or height out of bounds
   r     = clamp(r, Rg, Rt);
-  mu    = clamp(mu, -1.0f, 1.0f);
-  muSun = clamp(muSun, -1.0f, 1.0f);
+  mu    = clamp(mu, -1.0, 1.0);
+  muSun = clamp(muSun, -1.0, 1.0);
 
   //  s sigma | theta v
   //   \      |      /
@@ -57,7 +57,7 @@ void inscatter(float r, float mu, float muSun, float nu, inout vec3 radianceJ) {
   //         \|/      cos(ni)    = nu
   float mu2              = mu * mu;
   float muSun2           = muSun * muSun;
-  float sinThetaSinSigma = sqrt(1.0f - mu2) * sqrt(1.0f - muSun2);
+  float sinThetaSinSigma = sqrt(1.0 - mu2) * sqrt(1.0 - muSun2);
   // cos(sigma + theta) = cos(theta)cos(sigma)-sin(theta)sin(sigma)
   // cos(ni) = nu = mu * muSun - sqrt(1.0f - mu*mu)*sqrt(1.0 - muSun*muSun) // sin(theta) = sqrt(1.0 - mu*mu)
   // Now we make sure the angle between vec(s) and vec(v) is in the right range:
@@ -67,8 +67,8 @@ void inscatter(float r, float mu, float muSun, float nu, inout vec3 radianceJ) {
   // theta is the angle between vec(v) and x
   // cos(PI-theta) = d/r
   // -cos(theta) = sqrt(r*r-Rg*Rg)/r
-  float Rg2        = Rg * Rg;
-  float r2         = r * r;
+  float Rg2 = Rg * Rg;
+  float r2 = r * r;
   float cosHorizon = -sqrt(r2 - Rg2)/r;
 
   // Now we get vec(v) and vec(s) from mu, muSun and nu:
@@ -80,7 +80,7 @@ void inscatter(float r, float mu, float muSun, float nu, inout vec3 radianceJ) {
   // sin(PI-theta) = x/||v|| => x = sin(theta) =? x = sqrt(1-mu*mu)
   // cos(PI-theta) = z/||v|| => z = cos(theta) = mu
   // v.y = 0 because ||v|| = 1
-  vec3 v   = vec3(sqrt(1.0 - mu2), 0.0, mu);
+  vec3 v = vec3(sqrt(1.0 - mu2), 0.0, mu);
 
   // To obtain vec(s), we use the following properties:
   // ||vec(s)|| = 1, ||vec(v)|| = 1
@@ -98,12 +98,12 @@ void inscatter(float r, float mu, float muSun, float nu, inout vec3 radianceJ) {
   // In order to integrate over 4PI, we scan the sphere using the spherical coordinates
   // previously defined
   for (int theta_i = 0; theta_i < INSCATTER_SPHERICAL_INTEGRAL_SAMPLES; ++theta_i) {
-    float theta               = (float(theta_i) + 0.5f) * stepTheta;
-    float cosineTheta         = cos(theta);
-    float cosineTheta2        = cosineTheta * cosineTheta;
-    float distanceToGround    = 0.0f;
-    float groundReflectance   = 0.0f;
-    vec3  groundTransmittance = vec3(0.0f);
+    float theta = (float(theta_i) + 0.5) * stepTheta;
+    float cosineTheta = cos(theta);
+    float cosineTheta2 = cosineTheta * cosineTheta;
+    float distanceToGround = 0.0;
+    float groundReflectance = 0.0;
+    vec3  groundTransmittance = vec3(0.0);
     
     // If the ray w can see the ground we must compute the transmittance
     // effect from the starting point x to the ground point in direction -vec(v):
@@ -111,7 +111,7 @@ void inscatter(float r, float mu, float muSun, float nu, inout vec3 radianceJ) {
       // AverageGroundReflectance e [0,1]
       groundReflectance = AverageGroundReflectance / M_PI;
       // From cosine law: Rg*Rg = r*r + distanceToGround*distanceToGround - 2*r*distanceToGround*cos(PI-theta)
-      distanceToGround = -r * cosineTheta - sqrt(r2 * (cosineTheta2 - 1.0f) + Rg2);
+      distanceToGround = -r * cosineTheta - sqrt(r2 * (cosineTheta2 - 1.0) + Rg2);
       //               |
       //               | theta
       //               |
@@ -134,23 +134,23 @@ void inscatter(float r, float mu, float muSun, float nu, inout vec3 radianceJ) {
     }
     //for ( int phi_i = 0; phi_i < 2*INSCATTER_SPHERICAL_INTEGRAL_SAMPLES; ++phi_i ) {
     for (int phi_i = 0; phi_i < INSCATTER_SPHERICAL_INTEGRAL_SAMPLES; ++phi_i) {
-      float phi   = (float(phi_i) + 0.5) * stepPhi;
+      float phi = (float(phi_i) + 0.5) * stepPhi;
       // spherical coordinates: dw = dtheta*dphi*sin(theta)*rho^2
       // rho = 1, we are integrating over a unit sphere
       float dw    = stepTheta * stepPhi * sin(theta);
       // w = (rho*sin(theta)*cos(phi), rho*sin(theta)*sin(phi), rho*cos(theta))
-      float sinPhi   = sin(phi);
+      float sinPhi = sin(phi);
       float sinTheta = sin(theta);
-      float cosPhi   = cos(phi);
-      vec3  w        = vec3(sinTheta * cosPhi, sinTheta * sinPhi, cosineTheta);
+      float cosPhi = cos(phi);
+      vec3 w = vec3(sinTheta * cosPhi, sinTheta * sinPhi, cosineTheta);
 
       // We calculate the Rayleigh and Mie phase function for the new scattering angle:
       // cos(angle between vec(v) and vec(w)), ||v|| = ||w|| = 1
-      float nuWV            = dot(v, w);
+      float nuWV = dot(v, w);
       float phaseRayleighWV = rayleighPhaseFunction(nuWV);
-      float phaseMieWV      = miePhaseFunction(nuWV);
+      float phaseMieWV = miePhaseFunction(nuWV);
       
-      vec3 groundNormal     = (vec3(0.0, 0.0, r) + distanceToGround * w) / Rg;
+      vec3 groundNormal = (vec3(0.0, 0.0, r) + distanceToGround * w) / Rg;
       vec3 groundIrradiance = irradianceLUT(deltaETexture, dot(groundNormal, s), Rg);
 
       // We finally calculate the radiance from the reflected ray from ground (0.0 if not reflected)
@@ -164,12 +164,12 @@ void inscatter(float r, float mu, float muSun, float nu, inout vec3 radianceJ) {
       // single InScattered light. We stored these values in the deltaS textures (Ray and Mie),
       // and in order to avoid problems with the high angle dependency in the phase functions,
       // we don't include the phase functions on those tables (that's why we calculate them now).
-      if ( firstIteraction == 1 ) {        
+      if (firstIteraction == 1) {        
         float phaseRaySW = rayleighPhaseFunction(nuSW);
         float phaseMieSW = miePhaseFunction(nuSW);
         // We can now access the values for the single InScattering in the textures deltaS textures.
-        vec3  singleRay = texture4D(deltaSRTexture, r, w.z, muSun, nuSW).rgb;
-        vec3  singleMie = texture4D(deltaSMTexture, r, w.z, muSun, nuSW).rgb;
+        vec3 singleRay = texture4D(deltaSRTexture, r, w.z, muSun, nuSW).rgb;
+        vec3 singleMie = texture4D(deltaSMTexture, r, w.z, muSun, nuSW).rgb;
 
         // Initial InScattering including the phase functions
         radianceJ1 += singleRay * phaseRaySW + singleMie * phaseMieSW;        
@@ -195,7 +195,7 @@ void main() {
   float mu, muSun, nu;
   // InScattering Radiance to be calculated at
   // different points in the ray path
-  vec3 radianceJ = vec3(0.0f);
+  vec3 radianceJ = vec3(0.0);
 
   // Unmapping the variables from texture texels coordinates
   // to mapped coordinates

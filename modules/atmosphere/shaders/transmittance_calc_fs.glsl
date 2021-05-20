@@ -21,11 +21,11 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+
 #version __CONTEXT__
 
 #include "atmosphere_common.glsl"
 
-//layout(location = 1) out vec4 renderTableColor;
 out vec4 renderTableColor;
 
 //-- Optical depth by integration, from ray starting at point vec(x), i.e,
@@ -36,7 +36,7 @@ out vec4 renderTableColor;
 // H := Thickness of atmosphere if its density were uniform (can be used
 //      for Rayleigh and Mie.
 float opticalDepth(float r, float mu, float H) {    
-  float r2 = r*r;
+  float r2 = r * r;
   // Is ray below horizon? The transmittance table will have only
   // the values for transmittance starting at r (x) until the
   // light ray touches the atmosphere or the ground and only for
@@ -45,9 +45,10 @@ float opticalDepth(float r, float mu, float H) {
   // just inverting the ray direction and starting and ending points.
   
   // cosine law for triangles: y_i^2 = a^2 + b^2 - 2abcos(alpha)
-  float cosZenithHorizon = -sqrt( 1.0f - ( ( Rg * Rg ) / r2 ) );
-  if (mu < cosZenithHorizon)
+  float cosZenithHorizon = -sqrt(1.0 - ((Rg * Rg) / r2));
+  if (mu < cosZenithHorizon) {
     return 1e9;
+  }
 
   // Integrating using the Trapezoidal rule:
   // Integral(f(y)dy)(from a to b) = ((b-a)/2n_steps)*(Sum(f(y_i+1)+f(y_i)))
@@ -56,20 +57,19 @@ float opticalDepth(float r, float mu, float H) {
   // cosine law
   float y_i = exp(-(r - Rg) / H);
   
-  float x_step       = 0.0f;
-  float accumulation = 0.0f;
+  float x_step       = 0.0;
+  float accumulation = 0.0;
   for (int i = 1; i <= TRANSMITTANCE_STEPS; ++i) {
     float x_i = float(i) * deltaStep;
     // cosine law for triangles: y_i^2 = a^2 + b^2 - 2abcos(alpha)
     // In this case, a = r, b = x_i and cos(alpha) = cos(PI-zenithView) = mu
-    float y_ii    = exp(-(sqrt(r2 + x_i * x_i + 2.0 * x_i * r * mu) - Rg) / H);
+    float y_ii = exp(-(sqrt(r2 + x_i * x_i + 2.0 * x_i * r * mu) - Rg) / H);
     accumulation += (y_ii + y_i);
     //x_step = x_i;
     y_i = y_ii;
   }
-  return accumulation * ( b_a / ( 2 * TRANSMITTANCE_STEPS ) );
+  return accumulation * (b_a / (2 * TRANSMITTANCE_STEPS));
 }
-
 
 void main() {
   float r, muSun;    
@@ -79,13 +79,13 @@ void main() {
   
   if (ozoneLayerEnabled) {
     opDepth = betaOzoneExtinction * (0.0000006) * opticalDepth(r, muSun, HO) + 
-    betaMieExtinction * opticalDepth(r, muSun, HM) +
-    betaRayleigh * opticalDepth(r, muSun, HR);
+      betaMieExtinction * opticalDepth(r, muSun, HM) +
+      betaRayleigh * opticalDepth(r, muSun, HR);
   }
   else {
     opDepth = betaMieExtinction * opticalDepth(r, muSun, HM) + 
-    betaRayleigh * opticalDepth(r, muSun, HR);
+      betaRayleigh * opticalDepth(r, muSun, HR);
   }
   
-  renderTableColor = vec4(exp(-opDepth), 0.0f);
+  renderTableColor = vec4(exp(-opDepth), 0.0);
 }

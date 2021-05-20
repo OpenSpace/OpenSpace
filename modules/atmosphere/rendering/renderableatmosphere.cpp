@@ -25,33 +25,10 @@
 #include <modules/atmosphere/rendering/renderableatmosphere.h>
 
 #include <modules/atmosphere/rendering/atmospheredeferredcaster.h>
-#include <modules/space/rendering/planetgeometry.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/deferredcastermanager.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/rendering/renderer.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/util/time.h>
-#include <openspace/util/spicemanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/invariants.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
-#include <glm/gtx/string_cast.hpp>
-#include <fstream>
-#include <memory>
-#include <optional>
-
-#ifdef WIN32
-#define _USE_MATH_DEFINES
-#endif // WIN32
 #include <math.h>
 
 namespace {
@@ -282,9 +259,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         _deferredCasterNeedsUpdate = true;
         _deferredCasterNeedsCalculation = true;
     };
-    auto updateWithoutCalculation = [this]() {
-        _deferredCasterNeedsUpdate = true;
-    };
+    auto updateWithoutCalculation = [this]() { _deferredCasterNeedsUpdate = true; };
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -413,8 +388,8 @@ glm::dmat4 RenderableAtmosphere::computeModelTransformMatrix(
                                                        const TransformData& transformData)
 {
     // scale the planet to appropriate size since the planet is a unit sphere
-    return glm::translate(glm::dmat4(1.0), transformData.translation) * // Translation
-        glm::dmat4(transformData.rotation) *  // Spice rotation
+    return glm::translate(glm::dmat4(1.0), transformData.translation) *
+        glm::dmat4(transformData.rotation) *
         glm::scale(glm::dmat4(1.0), glm::dvec3(transformData.scale));
 }
 
