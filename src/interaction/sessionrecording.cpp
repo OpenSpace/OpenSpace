@@ -193,7 +193,7 @@ bool SessionRecording::startRecording(const std::string& filename) {
         LERROR("Unable to start recording while already in recording mode");
         return false;
     }
-    else if (_state == SessionState::Playback) {
+    else if (_state == SessionState::Playback || _state == SessionState::PlaybackPaused) {
         LERROR("Unable to start recording while in session playback mode");
         return false;
     }
@@ -365,7 +365,7 @@ bool SessionRecording::startPlayback(std::string& filename,
         LERROR("Unable to start playback while in session recording mode");
         return false;
     }
-    else if (_state == SessionState::Playback) {
+    else if (_state == SessionState::Playback || _state == SessionState::PlaybackPaused) {
         LERROR("Unable to start new playback while in session playback mode");
         return false;
     }
@@ -438,7 +438,6 @@ bool SessionRecording::startPlayback(std::string& filename,
         system_clock::duration::period::den / system_clock::duration::period::num;
     _saveRendering_isFirstFrame = true;
     _playbackPauseOffset = 0.0;
-    _playbackPaused = false;
 
     //Set playback flags to true for all modes
     _playbackActive_camera = true;
@@ -484,23 +483,22 @@ bool SessionRecording::startPlayback(std::string& filename,
 }
 
 bool SessionRecording::isPlaybackPaused() {
-    return (_state == SessionState::Playback && _playbackPaused);
+    return (_state == SessionState::PlaybackPaused);
 }
 
 void SessionRecording::setPlaybackPause(bool pause) {
-    if (_state == SessionState::Playback) {
-        if (pause && !_playbackPaused) {
-            _playbackPausedWithinDeltaTimePause = global::timeManager->isPaused();
-            if (!_playbackPausedWithinDeltaTimePause) {
-                global::timeManager->setPause(true);
-            }
+    if (pause && _state == SessionState::Playback) {
+        _playbackPausedWithinDeltaTimePause = global::timeManager->isPaused();
+        if (!_playbackPausedWithinDeltaTimePause) {
+            global::timeManager->setPause(true);
         }
-        else if (!pause && _playbackPaused) {
-            if (!_playbackPausedWithinDeltaTimePause) {
-                global::timeManager->setPause(false);
-            }
+        _state = SessionState::PlaybackPaused;
+    }
+    else if (!pause && _state == SessionState::PlaybackPaused) {
+        if (!_playbackPausedWithinDeltaTimePause) {
+            global::timeManager->setPause(false);
         }
-        _playbackPaused = pause;
+        _state = SessionState::Playback;
     }
 }
 
@@ -560,7 +558,7 @@ void SessionRecording::disableTakeScreenShotDuringPlayback() {
 }
 
 void SessionRecording::stopPlayback() {
-    if (_state == SessionState::Playback) {
+    if (_state == SessionState::Playback || _state == SessionState::PlaybackPaused) {
         _state = SessionState::Idle;
         _cleanupNeeded = true;
         LINFO("Session playback stopped");
@@ -610,7 +608,6 @@ void SessionRecording::cleanUpPlayback() {
     _saveRenderingDuringPlayback = false;
     _saveRendering_isFirstFrame = true;
     _playbackPauseOffset = 0.0;
-    _playbackPaused = false;
 
     _cleanupNeeded = false;
 }
@@ -915,7 +912,7 @@ void SessionRecording::preSynchronization() {
             saveTimeKeyframeToTimeline();
         }
     }
-    else if (_state == SessionState::Playback) {
+    else if (_state == SessionState::Playback || _state == SessionState::PlaybackPaused) {
         moveAheadInTime();
     }
     else if (_cleanupNeeded) {
@@ -960,11 +957,12 @@ bool SessionRecording::isRecording() const {
 }
 
 bool SessionRecording::isPlayingBack() const {
-    return (_state == SessionState::Playback);
+    return (_state == SessionState::Playback || _state == SessionState::PlaybackPaused);
 }
 
 bool SessionRecording::isSavingFramesDuringPlayback() const {
-    return (_state == SessionState::Playback && _saveRenderingDuringPlayback);
+    return ((_state == SessionState::Playback || _state == SessionState::PlaybackPaused)
+            && _saveRenderingDuringPlayback);
 }
 
 SessionRecording::SessionState SessionRecording::state() const {
@@ -1721,7 +1719,7 @@ void SessionRecording::moveAheadInTime() {
     using namespace std::chrono;
 
     bool paused = global::timeManager->isPaused();
-    if (_playbackPaused) {
+    if (_state == SessionState::PlaybackPaused) {
         _playbackPauseOffset
             += global::windowDelegate->applicationTime() - _previousTime;
     }

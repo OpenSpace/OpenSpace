@@ -61,7 +61,8 @@ public:
     enum class SessionState {
         Idle = 0,
         Recording,
-        Playback
+        Playback,
+        PlaybackPaused
     };
 
     struct Timestamps {
@@ -697,7 +698,6 @@ protected:
     bool _playbackActive_time = false;
     bool _playbackActive_script = false;
     bool _hasHitEndOfCameraKeyframes = false;
-    bool _playbackPaused = false;
     bool _playbackPausedWithinDeltaTimePause = false;
     double _playbackPauseOffset = 0.0;
     double _previousTime = 0.0;
