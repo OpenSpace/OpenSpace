@@ -189,11 +189,13 @@ public:
      * \param forceSimTimeAtStart if true simulation time is forced to that of playback
      *        playback: recorded time, application time, or simulation time. See the
      *        LuaLibrary entry for SessionRecording for details on these time modes
+     * \param loop if true then the file will playback in loop mode, continuously
+     *             looping back to the beginning until it is manually stopped
      *
      * \return \c true if recording to file starts without errors
      */
     bool startPlayback(std::string& filename, KeyframeTimeRef timeMode,
-        bool forceSimTimeAtStart);
+        bool forceSimTimeAtStart, bool loop);
 
     /**
      * Used to stop a playback in progress. If open, the playback file will be closed,
@@ -622,6 +624,10 @@ protected:
     bool addKeyframeToTimeline(std::vector<timelineEntry>& timeline, RecordedType type,
             size_t indexIntoTypeKeyframes, Timestamps t3stamps, int lineNum);
 
+    void initializePlayback_time(double now);
+    void initializePlayback_modeFlags();
+    bool initializePlayback_timeline();
+    void initializePlayback_triggerStart();
     void moveAheadInTime();
     void lookForNonCameraKeyframesThatHaveComeDue(double currTime);
     void updateCameraWithOrWithoutNewKeyframes(double currTime);
@@ -702,6 +708,8 @@ protected:
     bool _playbackActive_script = false;
     bool _hasHitEndOfCameraKeyframes = false;
     bool _playbackPausedWithinDeltaTimePause = false;
+    bool _playbackLoopMode = false;
+    bool _playbackForceSimTimeAtStart = false;
     double _playbackPauseOffset = 0.0;
     double _previousTime = 0.0;
 

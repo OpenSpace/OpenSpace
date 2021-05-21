@@ -344,7 +344,8 @@ void SessionRecording::stopRecording() {
 
 bool SessionRecording::startPlayback(std::string& filename,
                                      KeyframeTimeRef timeMode,
-                                     bool forceSimTimeAtStart)
+                                     bool forceSimTimeAtStart,
+                                     bool loop)
 {
     std::string absFilename;
     //Run through conversion in case file is older. Does nothing if the file format
@@ -374,6 +375,7 @@ bool SessionRecording::startPlayback(std::string& filename,
 
     _playbackLineNum = 1;
     _playbackFilename = absFilename;
+    _playbackLoopMode = loop;
 
     // Open in ASCII first
     _playbackFile.open(_playbackFilename, std::ifstream::in);
@@ -422,27 +424,13 @@ bool SessionRecording::startPlayback(std::string& filename,
         cleanUpPlayback();
         return false;
     }
-    //Set time reference mode
-    using namespace std::chrono;
-    double now = global::windowDelegate->applicationTime();
-    _timestampPlaybackStarted_application = now;
-    _timestampPlaybackStarted_simulation = global::timeManager->time().j2000Seconds();
-    _timestampApplicationStarted_simulation = _timestampPlaybackStarted_simulation - now;
-    _playbackTimeReferenceMode = timeMode;
-    _saveRenderingCurrentRecordedTime_interpolation = steady_clock::now();
-    _saveRenderingClockInterpolation_countsPerSec =
-        system_clock::duration::period::den / system_clock::duration::period::num;
     _saveRendering_isFirstFrame = true;
-    _playbackPauseOffset = 0.0;
+    //Set time reference mode
+    _playbackForceSimTimeAtStart = forceSimTimeAtStart;
+    double now = global::windowDelegate->applicationTime();
+    _playbackTimeReferenceMode = timeMode;
+    initializePlayback_time(now);
 
-    //Set playback flags to true for all modes
-    _playbackActive_camera = true;
-    _playbackActive_script = true;
-    if (UsingTimeKeyframes) {
-        _playbackActive_time = true;
-    }
-
-    global::navigationHandler->keyframeNavigator().setTimeReferenceMode(timeMode, now);
     global::scriptScheduler->setTimeReferenceMode(timeMode);
     _loadedNodes.clear();
     populateListofLoadedSceneGraphNodes();
@@ -452,30 +440,69 @@ bool SessionRecording::startPlayback(std::string& filename,
         return false;
     }
 
-    _hasHitEndOfCameraKeyframes = false;
-    if (!findFirstCameraKeyframeInTimeline()) {
+    initializePlayback_modeFlags();
+    if (!initializePlayback_timeline()) {
         cleanUpPlayback();
         return false;
-    }
-    if (forceSimTimeAtStart) {
-        Timestamps times = _timeline[_idxTimeline_cameraFirstInTimeline].t3stamps;
-        global::timeManager->setTimeNextFrame(Time(times.timeSim));
-        _saveRenderingCurrentRecordedTime = times.timeRec;
     }
 
     LINFO(fmt::format(
         "Playback session started: ({:8.3f},0.0,{:13.3f}) with {}/{}/{} entries, "
         "forceTime={}",
         now, _timestampPlaybackStarted_simulation, _keyframesCamera.size(),
-        _keyframesTime.size(), _keyframesScript.size(), (forceSimTimeAtStart ? 1 : 0)
+        _keyframesTime.size(), _keyframesScript.size(),
+        (_playbackForceSimTimeAtStart ? 1 : 0)
     ));
 
+    initializePlayback_triggerStart();
+
+    return true;
+}
+
+void SessionRecording::initializePlayback_time(double now) {
+    using namespace std::chrono;
+    _timestampPlaybackStarted_application = now;
+    _timestampPlaybackStarted_simulation = global::timeManager->time().j2000Seconds();
+    _timestampApplicationStarted_simulation = _timestampPlaybackStarted_simulation - now;
+    _saveRenderingCurrentRecordedTime_interpolation = steady_clock::now();
+    _saveRenderingClockInterpolation_countsPerSec =
+        system_clock::duration::period::den / system_clock::duration::period::num;
+    _playbackPauseOffset = 0.0;
+    global::navigationHandler->keyframeNavigator().setTimeReferenceMode(
+        _playbackTimeReferenceMode, now);
+}
+
+void SessionRecording::initializePlayback_modeFlags() {
+    _playbackActive_camera = true;
+    _playbackActive_script = true;
+    if (UsingTimeKeyframes) {
+        _playbackActive_time = true;
+    }
+    _hasHitEndOfCameraKeyframes = false;
+}
+
+bool SessionRecording::initializePlayback_timeline() {
+    if (!findFirstCameraKeyframeInTimeline()) {
+        return false;
+    }
+    if (_playbackForceSimTimeAtStart) {
+        Timestamps times = _timeline[_idxTimeline_cameraFirstInTimeline].t3stamps;
+        global::timeManager->setTimeNextFrame(Time(times.timeSim));
+        _saveRenderingCurrentRecordedTime = times.timeRec;
+    }
+    _idxTimeline_nonCamera = 0;
+    _idxTime = 0;
+    _idxScript = 0;
+    _idxTimeline_cameraPtrNext = 0;
+    _idxTimeline_cameraPtrPrev = 0;
+    return true;
+}
+
+void SessionRecording::initializePlayback_triggerStart() {
     global::navigationHandler->triggerPlaybackStart();
     global::scriptScheduler->triggerPlaybackStart();
     global::timeManager->triggerPlaybackStart();
     _state = SessionState::Playback;
-
-    return true;
 }
 
 bool SessionRecording::isPlaybackPaused() {
@@ -536,9 +563,19 @@ void SessionRecording::signalPlaybackFinishedForComponent(RecordedType type) {
     }
 
     if (!_playbackActive_camera && !_playbackActive_time && !_playbackActive_script) {
-        _state = SessionState::Idle;
-        _cleanupNeeded = true;
-        LINFO("Playback session finished");
+        if (_playbackLoopMode) {
+            //Loop back to the beginning to replay
+            _saveRenderingDuringPlayback = false;
+            initializePlayback_time(global::windowDelegate->applicationTime());
+            initializePlayback_modeFlags();
+            initializePlayback_timeline();
+            initializePlayback_triggerStart();
+        }
+        else {
+            _state = SessionState::Idle;
+            _cleanupNeeded = true;
+            LINFO("Playback session finished");
+        }
     }
 }
 
@@ -604,6 +641,8 @@ void SessionRecording::cleanUpPlayback() {
     _saveRenderingDuringPlayback = false;
     _saveRendering_isFirstFrame = true;
     _playbackPauseOffset = 0.0;
+    _playbackLoopMode = false;
+    _playbackForceSimTimeAtStart = false;
 
     _cleanupNeeded = false;
 }
@@ -2496,14 +2535,15 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
                 "startPlayback",
                 &luascriptfunctions::startPlaybackDefault,
                 {},
-                "string",
+                "string [, bool]",
                 "Starts a playback session with keyframe times that are relative to "
                 "the time since the recording was started (the same relative time "
                 "applies to the playback). When playback starts, the simulation time "
                 "is automatically set to what it was at recording time. The string "
                 "argument is the filename to pull playback keyframes from (the file "
                 "path is relative to the RECORDINGS variable specified in the config "
-                "file)."
+                "file). If a second input value of true is given, then playback will "
+                "continually loop until it is manually stopped."
             },
             {
                 "startPlaybackApplicationTime",
@@ -2520,12 +2560,14 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
                 "startPlaybackRecordedTime",
                 &luascriptfunctions::startPlaybackRecordedTime,
                 {},
-                "string",
+                "string [, bool]",
                 "Starts a playback session with keyframe times that are relative to "
                 "the time since the recording was started (the same relative time "
                 "applies to the playback). The string argument is the filename to pull "
                 "playback keyframes from (the file path is relative to the RECORDINGS "
-                "variable specified in the config file)."
+                "variable specified in the config file). If a second input value of "
+                "true is given, then playback will continually loop until it is "
+                "manually stopped."
             },
             {
                 "startPlaybackSimulationTime",
