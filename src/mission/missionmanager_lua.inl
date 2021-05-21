@@ -29,16 +29,16 @@ namespace openspace::luascriptfunctions {
 int loadMission(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadMission");
 
-    ghoul::Dictionary dict = ghoul::lua::value<ghoul::Dictionary>(
-        L,
-        1,
-        ghoul::lua::PopValue::Yes
-    );
+    ghoul::Dictionary d;
+    try {
+        ghoul::lua::luaDictionaryFromState(L, d);
+    }
+    catch (const ghoul::lua::LuaFormatException& e) {
+        //LERRORC("addSceneGraphNode", e.what());
+        return ghoul::lua::luaError(L, "Error loading dictionary from lua state");
+    }
 
-    std::string name = global::missionManager->loadMission(
-        absPath(missionFileName).string()
-    );
-    ghoul::lua::push(L, name);
+   global::missionManager->loadMission(d);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;

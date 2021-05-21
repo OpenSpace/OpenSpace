@@ -57,14 +57,9 @@ bool MissionManager::hasCurrentMission() const {
 }
 
 
-std::string MissionManager::loadMission(const std::string& filename) {
-    ghoul_assert(!filename.empty(), "filename must not be empty");
-    ghoul_assert(!FileSys.containsToken(filename), "filename must not contain tokens");
-    ghoul_assert(
-        std::filesystem::is_regular_file(filename),
-        "filename " + filename + " must exist"
-    );
-
+std::string MissionManager::loadMission(Mission mission) {
+    // Changing the values might invalidate the _currentMission iterator
+    std::string currentMission = hasCurrentMission() ? _currentMission->first : "";
     std::string missionName = mission.name();
     _missionMap.insert({ missionName, std::move(mission) });
     if (_missionMap.size() == 1) {
@@ -74,6 +69,8 @@ std::string MissionManager::loadMission(const std::string& filename) {
     if (!currentMission.empty()) {
         setCurrentMission(currentMission);
     }
+
+    return missionName;
 }
 
 void MissionManager::unloadMission(const std::string& missionName) {

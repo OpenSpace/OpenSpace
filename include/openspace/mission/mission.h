@@ -159,7 +159,7 @@ using Mission = MissionPhase;
  * \pre \p filename must not contain tokens
  * \pre \p filename must exist
  */
-//Mission missionFromFile(const std::string& filename);
+Mission missionFromFile(const std::string& filename);
 
 } // namespace openspace
 
