@@ -58,13 +58,6 @@ public:
      */
     virtual void keyPressEvent(QKeyEvent* evt) override;
 
-    /**
-     * Adds scripts to the _scriptEdit from outside dialogs
-     *
-     * \param scripts #std::string scripts to be appended
-     */
-    void appendScriptsToKeybind(const std::string& scripts);
-
 private slots:
     void listItemSelected();
     void listItemAdded();
@@ -75,6 +68,13 @@ private slots:
     void parseSelections();
     void chooseScripts();
     void keySelected(int index);
+
+    /**
+     * Adds scripts to the _scriptEdit from outside dialogs
+     *
+     * \param scripts #std::string scripts to be appended
+     */
+    void appendScriptsToKeybind(std::string scripts);
 
 private:
     void createWidgets();

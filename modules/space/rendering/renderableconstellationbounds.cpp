@@ -31,6 +31,7 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/misc.h>
 #include <ghoul/opengl/programobject.h>
 #include <fstream>
 #include <optional>
@@ -135,18 +136,11 @@ RenderableConstellationBounds::RenderableConstellationBounds(
     addProperty(_constellationSelection);
 
     if (p.constellationSelection.has_value()) {
-        std::vector<properties::SelectionProperty::Option> options =
-            _constellationSelection.options();
+        const std::vector<std::string> options = _constellationSelection.options();
 
-        std::vector<int> selectedIndices;
+        std::set<std::string> selectedNames;
         for (const std::string& s : *p.constellationSelection) {
-            const auto it = std::find_if(
-                options.begin(),
-                options.end(),
-                [&s](const properties::SelectionProperty::Option& o) {
-                    return o.description == s;
-                }
-            );
+            const auto it = std::find(options.begin(), options.end(), s);
             if (it == options.end()) {
                 // The user has specified a constellation name that doesn't exist
                 LWARNINGC(
@@ -155,15 +149,10 @@ RenderableConstellationBounds::RenderableConstellationBounds(
                 );
             }
             else {
-                // If the found the option, we push the index of the found value into the
-                // array
-                selectedIndices.push_back(static_cast<int>(
-                    std::distance(options.begin(), it)
-                ));
+                selectedNames.insert(s);
             }
         }
-
-        _constellationSelection = selectedIndices;
+        _constellationSelection = selectedNames;
     }
 }
 
@@ -244,7 +233,7 @@ bool RenderableConstellationBounds::loadVertexFile() {
         return false;
     }
 
-    std::string fileName = absPath(_vertexFilename);
+    std::filesystem::path fileName = absPath(_vertexFilename);
     std::ifstream file;
     file.open(fileName);
     if (!file.good()) {
@@ -284,7 +273,7 @@ bool RenderableConstellationBounds::loadVertexFile() {
             LERRORC(
                 "RenderableConstellationBounds",
                 fmt::format(
-                    "Error reading file '{}' at line #{}", fileName, currentLineNumber
+                    "Error reading file {} at line #{}", fileName, currentLineNumber
                 )
             );
             break;
@@ -377,7 +366,11 @@ bool RenderableConstellationBounds::loadConstellationFile() {
         }
 
         // Update the constellations full name
-        s >> it->constellationFullName;
+        std::string fullName;
+        std::getline(s, fullName);
+        ghoul::trimWhitespace(fullName);
+        it->constellationFullName = std::move(fullName);
+
         ++index;
     }
 
@@ -385,32 +378,23 @@ bool RenderableConstellationBounds::loadConstellationFile() {
 }
 
 void RenderableConstellationBounds::fillSelectionProperty() {
-    // Each constellation is associated with its position in the array as this is unique
-    // and will be constant during the runtime
     for (int i = 0 ; i < static_cast<int>(_constellationBounds.size()); ++i) {
         const ConstellationBound& bound = _constellationBounds[i];
-        _constellationSelection.addOption( { i, bound.constellationFullName } );
+        _constellationSelection.addOption(bound.constellationFullName);
     }
 }
 
 void RenderableConstellationBounds::selectionPropertyHasChanged() {
-    const std::vector<int>& values = _constellationSelection;
     // If no values are selected (the default), we want to show all constellations
-    if (values.empty()) {
+    if (!_constellationSelection.hasSelected()) {
         for (ConstellationBound& b : _constellationBounds) {
             b.isEnabled = true;
         }
     }
     else {
-        // In the worst case, this algorithm runs with 2 * nConstellations, which is
-        // acceptable as the number of constellations is < 100
-        // First disable all constellations
+        // Enable all constellations that are selected
         for (ConstellationBound& b : _constellationBounds) {
-            b.isEnabled = false;
-        }
-        // then re-enable the ones for which we have indices
-        for (int value : values) {
-            _constellationBounds[value].isEnabled = true;
+            b.isEnabled = _constellationSelection.isSelected(b.constellationFullName);
         }
     }
 }

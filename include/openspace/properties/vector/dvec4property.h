@@ -28,10 +28,25 @@
 #include <openspace/properties/numericalproperty.h>
 
 #include <ghoul/glm.h>
+#include <limits>
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_HEADER(DVec4Property, glm::dvec4)
+class DVec4Property : public NumericalProperty<glm::dvec4> {
+public:
+    DVec4Property(Property::PropertyInfo info, glm::dvec4 value = glm::dvec4(0.0),
+        glm::dvec4 minValue = glm::dvec4(std::numeric_limits<double>::lowest()),
+        glm::dvec4 maxValue = glm::dvec4(std::numeric_limits<double>::max()),
+        glm::dvec4 stepValue = glm::dvec4(0.01));
+
+    std::string className() const override;
+    int typeLua() const override;
+
+    using TemplateProperty<glm::dvec4>::operator=;
+
+protected:
+    glm::dvec4 fromLuaConversion(lua_State* state, bool& success) const override;
+};
 
 } // namespace openspace::properties
 

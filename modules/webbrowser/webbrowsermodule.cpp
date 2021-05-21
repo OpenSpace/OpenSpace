@@ -37,6 +37,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
+#include <filesystem>
 
 namespace {
     constexpr const char* _loggerCat = "WebBrowser";
@@ -115,15 +116,14 @@ void WebBrowserModule::internalDeinitialize() {
     }
 }
 
-std::string WebBrowserModule::findHelperExecutable() {
-    std::string execLocation = absPath("${BIN}/" + std::string(SubprocessPath));
-    if (!FileSys.fileExists(execLocation)) {
+std::filesystem::path WebBrowserModule::findHelperExecutable() {
+    std::filesystem::path execLocation = absPath("${BIN}/" + std::string(SubprocessPath));
+    if (!std::filesystem::is_regular_file(execLocation)) {
         LERROR(fmt::format(
             "Could not find web helper executable at location: {}" , execLocation
         ));
     }
     return execLocation;
-
 }
 
 void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
@@ -146,8 +146,8 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
         return;
     }
 
-    LDEBUG("CEF using web helper executable: " + _webHelperLocation);
-    _cefHost = std::make_unique<CefHost>(_webHelperLocation);
+    LDEBUG(fmt::format("CEF using web helper executable: {}", _webHelperLocation));
+    _cefHost = std::make_unique<CefHost>(_webHelperLocation.string());
     LDEBUG("Starting CEF... done!");
 
     if (dictionary.hasValue<bool>(UpdateBrowserBetweenRenderablesInfo.identifier)) {

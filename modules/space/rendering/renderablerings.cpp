@@ -125,8 +125,8 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
     _size.onChange([&]() { _planeIsDirty = true; });
     addProperty(_size);
 
-    _texturePath = absPath(p.texture);
-    _textureFile = std::make_unique<File>(_texturePath);
+    _texturePath = absPath(p.texture).string();
+    _textureFile = std::make_unique<File>(_texturePath.value());
 
     _offset = p.offset.value_or(_offset);
     addProperty(_offset);
@@ -134,7 +134,7 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
     _texturePath.onChange([&]() { loadTexture(); });
     addProperty(_texturePath);
 
-    _textureFile->setCallback([&](const File&) { _textureIsDirty = true; });
+    _textureFile->setCallback([this]() { _textureIsDirty = true; });
 
     _nightFactor = p.nightFactor.value_or(_nightFactor);
     addProperty(_nightFactor);
@@ -236,23 +236,23 @@ void RenderableRings::loadTexture() {
         using namespace ghoul::io;
         using namespace ghoul::opengl;
         std::unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
-            absPath(_texturePath)
+            absPath(_texturePath).string()
         );
 
         if (texture) {
             LDEBUGC(
                 "RenderableRings",
-                fmt::format("Loaded texture from '{}'", absPath(_texturePath))
+                fmt::format("Loaded texture from {}", absPath(_texturePath))
             );
             _texture = std::move(texture);
 
             _texture->uploadTexture();
             _texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
 
-            _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
-            _textureFile->setCallback(
-                [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
+            _textureFile = std::make_unique<ghoul::filesystem::File>(
+                _texturePath.value()
             );
+            _textureFile->setCallback([this]() { _textureIsDirty = true; });
         }
     }
 }

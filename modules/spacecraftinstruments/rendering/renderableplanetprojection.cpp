@@ -133,7 +133,7 @@ namespace {
         "Clear Projection Buffer",
         "Remove all pending projections from the buffer"
     };
-    
+
     struct [[codegen::Dictionary(RenderablePlanetProjection)]] Parameters {
         // The geometry that is used for rendering this planet
         ghoul::Dictionary geometry [[codegen::reference("space_geometry_planet")]];
@@ -177,7 +177,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     , _addColorTexturePath(AddColorTextureInfo)
     , _heightMapTexturePaths(HeightTexturePathsInfo)
     , _addHeightMapTexturePath(AddHeightTextureInfo)
-    , _heightExaggeration(HeightExaggerationInfo, 1.f, 0.f, 1e6f, 1.f, 3.f)
+    , _heightExaggeration(HeightExaggerationInfo, 1.f, 0.f, 1e6f, 1.f)
     , _meridianShift(MeridianShiftInfo, false)
     , _ambientBrightness(AmbientBrightnessInfo, 0.075f, 0.f, 1.f)
     , _maxProjectionsPerFrame(MaxProjectionsPerFrameInfo, 1, 1, 64)
@@ -219,8 +219,6 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
         }
     });
     addProperty(_addColorTexturePath);
-
-
 
     _heightMapTexturePaths.addOption(0, NoImageText);
     _heightMapTexturePaths.onChange([this]() { _heightMapTextureDirty = true; });
@@ -266,9 +264,10 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     addPropertySubOwner(_geometry.get());
     addPropertySubOwner(_projectionComponent);
 
+    _heightExaggeration.setExponent(3.f);
     _heightExaggeration = p.heightExaggeration.value_or(_heightExaggeration);
     addProperty(_heightExaggeration);
-    
+
     _maxProjectionsPerFrame = p.maxProjectionsPerFrame.value_or(_maxProjectionsPerFrame);
     addProperty(_maxProjectionsPerFrame);
 
@@ -682,7 +681,7 @@ void RenderablePlanetProjection::loadColorTexture() {
     _baseTexture = nullptr;
     if (selectedPath != NoImageText) {
         _baseTexture = ghoul::io::TextureReader::ref().loadTexture(
-            absPath(selectedPath)
+            absPath(selectedPath).string()
         );
         if (_baseTexture) {
             ghoul::opengl::convertTextureFormat(*_baseTexture, Texture::Format::RGB);
@@ -704,7 +703,7 @@ void RenderablePlanetProjection::loadHeightTexture() {
     _heightMapTexture = nullptr;
     if (selectedPath != NoImageText) {
         _heightMapTexture = ghoul::io::TextureReader::ref().loadTexture(
-            absPath(selectedPath)
+            absPath(selectedPath).string()
         );
         if (_heightMapTexture) {
             ghoul::opengl::convertTextureFormat(*_heightMapTexture, Texture::Format::RGB);

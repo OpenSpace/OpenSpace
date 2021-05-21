@@ -71,7 +71,7 @@ RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& di
     _defaultTarget = p.defaultTarget.value_or(_defaultTarget);
 
     if (p.texture.has_value()) {
-        _texturePath = absPath(*p.texture);
+        _texturePath = absPath(*p.texture).string();
         _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
     }
 }
@@ -183,7 +183,7 @@ void RenderablePlaneProjection::loadTexture() {
     if (!_texturePath.empty()) {
         using TR = ghoul::io::TextureReader;
         std::unique_ptr<ghoul::opengl::Texture> texture = TR::ref().loadTexture(
-            absPath(_texturePath)
+            absPath(_texturePath).string()
         );
         if (texture) {
             if (texture->format() == ghoul::opengl::Texture::Format::Red) {
@@ -196,9 +196,7 @@ void RenderablePlaneProjection::loadTexture() {
             _texture = std::move(texture);
 
             _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
-            _textureFile->setCallback(
-                [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
-            );
+            _textureFile->setCallback([this]() { _textureIsDirty = true; });
         }
     }
 }

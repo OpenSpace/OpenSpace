@@ -75,8 +75,6 @@ RenderablePlaneImageOnline::RenderablePlaneImageOnline(
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _texturePath.onChange([this]() { _textureIsDirty = true; });
-    addProperty(_texturePath);
-
     _texturePath = p.url;
     addProperty(_texturePath);
 }

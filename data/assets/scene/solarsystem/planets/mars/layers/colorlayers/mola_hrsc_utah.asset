@@ -2,29 +2,29 @@ local mapServiceConfigs = asset.localResource("./../../map_service_configs")
 local globeIdentifier = asset.require("./../../mars").Mars.Identifier
 
 local layer = {
-    Identifier = "MOLA_HRSC_Utah",
-    Name = "MOLA HRSC [Utah]",
-    FilePath = mapServiceConfigs .. "/Utah/Mola_HRSC.wms",
-    Description = [[ This map layer is colorzied based elevation data from MOLA and HRSC.
-        Compared to MOLA Psuedo Color, this layer has no terrain shading, which is
-        suitable for use when combing with other layers. Data Reference:
-        https://astrogeology.usgs.gov/search/map/Mars/Topography/HRSC_MOLA_Blend/Mars_HRSC_MOLA_BlendDEM_Global_200mp_v2]],
+  Identifier = "MOLA_HRSC_Utah",
+  Name = "MOLA HRSC [Utah]",
+  FilePath = mapServiceConfigs .. "/Utah/Mola_HRSC.wms",
+  Description = [[ This map layer is colorzied based elevation data from MOLA and HRSC.
+    Compared to MOLA Psuedo Color, this layer has no terrain shading, which is
+    suitable for use when combing with other layers. Data Reference:
+    https://astrogeology.usgs.gov/search/map/Mars/Topography/HRSC_MOLA_Blend/Mars_HRSC_MOLA_BlendDEM_Global_200mp_v2]],
 }
 
 asset.onInitialize(function () 
-    openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
 asset.export("layer", layer)
 
 
 asset.meta = {
-    Name = "MOLA HRSC [Utah]",
-    Version = "1.0",
-    Description = [[ Colorzied elevation data for Mars. This map is hosted on the
-        OpenSpace server in Sweden.]],
-    Author = "OpenSpace Team",
-    URL = "http://www.openspaceproject.com",
-    License = "NASA/PDS",
-    Identifiers = {"MOLA_HRSC_Sweden"}
+  Name = "MOLA HRSC [Utah]",
+  Version = "1.0",
+  Description = [[ Colorzied elevation data for Mars. This map is hosted on the
+    OpenSpace server in Sweden.]],
+  Author = "OpenSpace Team",
+  URL = "http://www.openspaceproject.com",
+  License = "NASA/PDS",
+  Identifiers = {"MOLA_HRSC_Sweden"}
 }

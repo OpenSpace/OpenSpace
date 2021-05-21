@@ -5,11 +5,11 @@ asset.require('./minor/other_group')
 
 
 asset.meta = {
-    Name = "Saturn Minor Moons",
-    Version = "1.0",
-    Description = [[ Meta asset containing four moon groups: Gallic, Inuit, Norse and
-        Other]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license"
+  Name = "Saturn Minor Moons",
+  Version = "1.0",
+  Description = [[ Meta asset containing four moon groups: Gallic, Inuit, Norse and
+    Other]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
 }

@@ -35,6 +35,12 @@ namespace openspace::distanceconstants {
     constexpr double LightHour = LightDay / 24;
     constexpr double AstronomicalUnit = 1.495978707E11;
     constexpr double Parsec = 3.0856776E16;
+
+    constexpr double Inch = 0.0254;
+    constexpr double Foot = 0.3048;
+    constexpr double Yard = 0.9144;
+    constexpr double Chain = 20.1168;
+    constexpr double Mile = 1609.344;
 } // openspace::distanceconstants
 
 #endif // __OPENSPACE_CORE___DISTANCECONSTANTS___H__

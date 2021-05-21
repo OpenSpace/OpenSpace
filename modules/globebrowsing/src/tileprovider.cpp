@@ -44,6 +44,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/openglstatecache.h>
+#include <filesystem>
 #include <fstream>
 #include "cpl_minixml.h"
 
@@ -147,6 +148,21 @@ namespace temporal {
         "File Path",
         "This is the path to the XML configuration file that describes the temporal tile "
         "information."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo UseFixedTimeInfo = {
+        "UseFixedTime",
+        "Use Fixed Time",
+        "If this value is enabled, the time-varying timevarying dataset will always use "
+        "the time that is specified in the 'FixedTime' property, rather than using the "
+        "actual time from OpenSpace"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo FixedTimeInfo = {
+        "FixedTime",
+        "Fixed Time",
+        "If the 'UseFixedTime' is enabled, this time will be used instead of the actual "
+        "time taken from OpenSpace for the displayed tiles."
     };
 } // namespace temporal
 
@@ -344,12 +360,11 @@ std::unique_ptr<TileProvider> initTileProvider(TemporalTileProvider& t,
     const size_t numChars = strlen(temporal::UrlTimePlaceholder);
     // @FRAGILE:  This will only find the first instance. Dangerous if that instance is
     // commented out ---abock
-    const std::string timeSpecifiedXml = xmlTemplate.replace(pos, numChars, timekey);
-    std::string gdalDatasetXml = timeSpecifiedXml;
+    std::string xml = xmlTemplate.replace(pos, numChars, timekey);
 
-    FileSys.expandPathTokens(gdalDatasetXml, IgnoredTokens);
+    xml = FileSys.expandPathTokens(std::move(xml), IgnoredTokens).string();
 
-    t.initDict.setValue(KeyFilePath, gdalDatasetXml);
+    t.initDict.setValue(KeyFilePath, xml);
     return std::make_unique<DefaultTileProvider>(t.initDict);
 }
 
@@ -375,16 +390,27 @@ TileProvider* getTileProvider(TemporalTileProvider& t, std::string_view timekey)
 TileProvider* getTileProvider(TemporalTileProvider& t, const Time& time) {
     ZoneScoped
 
-    Time tCopy(time);
-    if (t.timeQuantizer.quantize(tCopy, true)) {
-        char Buffer[22];
-        const int size = timeStringify(t.timeFormat, tCopy, Buffer);
+    if (t.useFixedTime && !t.fixedTime.value().empty()) {
         try {
-            return getTileProvider(t, std::string_view(Buffer, size));
+            return getTileProvider(t, t.fixedTime.value());
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC("TemporalTileProvider", e.message);
             return nullptr;
+        }
+    }
+    else {
+        Time tCopy(time);
+        if (t.timeQuantizer.quantize(tCopy, true)) {
+            char Buffer[22];
+            const int size = timeStringify(t.timeFormat, tCopy, Buffer);
+            try {
+                return getTileProvider(t, std::string_view(Buffer, size));
+            }
+            catch (const ghoul::RuntimeError& e) {
+                LERRORC("TemporalTileProvider", e.message);
+                return nullptr;
+            }
         }
     }
     return nullptr;
@@ -487,9 +513,9 @@ bool readFilePath(TemporalTileProvider& t) {
     }
 
     // File path was not a path to a file but a GDAL config or empty
-    ghoul::filesystem::File f(t.filePath);
-    if (FileSys.fileExists(f)) {
-        t.initDict.setValue(temporal::KeyBasePath, f.directoryName());
+    std::filesystem::path f(t.filePath.value());
+    if (std::filesystem::is_regular_file(f)) {
+        t.initDict.setValue(temporal::KeyBasePath, f.parent_path().string());
     }
 
     t.gdalXmlTemplate = consumeTemporalMetaData(t, xml);
@@ -831,6 +857,8 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
 TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
     : initDict(dictionary)
     , filePath(temporal::FilePathInfo)
+    , useFixedTime(temporal::UseFixedTimeInfo, false)
+    , fixedTime(temporal::FixedTimeInfo)
 {
     ZoneScoped
 
@@ -838,6 +866,16 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
 
     filePath = dictionary.value<std::string>(KeyFilePath);
     addProperty(filePath);
+
+    if (dictionary.hasValue<bool>(temporal::UseFixedTimeInfo.identifier)) {
+        useFixedTime = dictionary.value<bool>(temporal::UseFixedTimeInfo.identifier);
+    }
+    addProperty(useFixedTime);
+    
+    if (dictionary.hasValue<std::string>(temporal::FixedTimeInfo.identifier)) {
+        fixedTime = dictionary.value<std::string>(temporal::FixedTimeInfo.identifier);
+    }
+    addProperty(fixedTime);
 
     successfulInitialization = readFilePath(*this);
 

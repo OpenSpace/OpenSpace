@@ -33,15 +33,13 @@
 #include <QTextStream>
 #include <QVBoxLayout>
 
-ScriptlogDialog::ScriptlogDialog(KeybindingsDialog* bindingDialog,
-                                                 QWidget* parent)
+ScriptlogDialog::ScriptlogDialog(QWidget* parent)
     : QDialog(parent)
-    , _bindingDialog(bindingDialog)
 {
     setWindowTitle("Scriptlog");
     createWidgets();
  
-    QFile file(QString::fromStdString(absPath("${LOGS}/scriptLog.txt")));
+    QFile file(QString::fromStdString(absPath("${LOGS}/scriptLog.txt").string()));
     if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QTextStream in(&file);
         while (!in.atEnd()) {
@@ -93,7 +91,7 @@ void ScriptlogDialog::saveChosenScripts() {
             chosenScripts += "\n";
         }
     }
-    _bindingDialog->appendScriptsToKeybind(chosenScripts);
+    emit scriptsSelected(chosenScripts);
 
     accept();
 }

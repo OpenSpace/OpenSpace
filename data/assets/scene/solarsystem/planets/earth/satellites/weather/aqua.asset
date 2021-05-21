@@ -11,7 +11,6 @@ local tle = satelliteHelper.downloadTLEFile(asset, url, identifier, filename)
 
 
 asset.onInitialize(function ()
-
   local lineElement = satelliteHelper.makeSingleLineElement(tle, filename)
   local period = satelliteHelper.getPeriodFromElement(lineElement)
   local path = tle .. "/" .. filename
@@ -19,7 +18,7 @@ asset.onInitialize(function ()
   local Aqua = {
     Identifier = "Aqua",
     Parent = transforms.EarthInertial.Identifier,
-    BoundingSphere = 30,
+    InteractionSphere = 30,
     Transform = {
       Translation = {
         Type = "TLETranslation",
@@ -29,9 +28,9 @@ asset.onInitialize(function ()
         LineNumber = 1
       },
       Rotation = {
-          Type = "SpiceRotation",
-          SourceFrame = "GALACTIC",
-          DestinationFrame = "J2000",
+        Type = "SpiceRotation",
+        SourceFrame = "GALACTIC",
+        DestinationFrame = "J2000",
       }
     },
     Tag = { "earth_satellite", "Aqua" },
@@ -44,20 +43,20 @@ asset.onInitialize(function ()
     Identifier = identifier .. "_trail",
     Parent = transforms.EarthInertial.Identifier,
     Renderable = {
-        Type = "RenderableTrailOrbit",
-        Translation = {
-          Type = "TLETranslation",
-          Body = identifier,
-          Observer = transforms.EarthInertial.Identifier,
-          File = path,
-          LineNumber = 1,
-          RenderBinMode = "PostDeferredTransparent"
-        },
-        Color = { 0.9, 0.6715, 0.0 },
-        Fade = 1.5,
-        Period = period,
-        Resolution = 320
+      Type = "RenderableTrailOrbit",
+      Translation = {
+        Type = "TLETranslation",
+        Body = identifier,
+        Observer = transforms.EarthInertial.Identifier,
+        File = path,
+        LineNumber = 1,
+        RenderBinMode = "PostDeferredTransparent"
       },
+      Color = { 0.9, 0.6715, 0.0 },
+      Fade = 1.5,
+      Period = period,
+      Resolution = 320
+    },
     Tag = { "earth_satellite", "Aqua" },
     GUI = {
       Name = "Terra Trail",
@@ -70,22 +69,22 @@ asset.onInitialize(function ()
       Parent = Aqua.Identifier,
 
       Renderable = {
-          Enabled = false,
-          Type = "RenderableLabels",
-          LabelText = "SNPP",
-          FontSize = 100.0,
-          LabelSize = 4.0,
-          LabelMaxSize = 100.0,
-          LabelMinSize = 1.0,
-          LabelOrientationOption = "Camera View Direction",
-          BlendMode = "Additive",
-          EnableFading = true,
-          FadeStartUnit = "au",
-          FadeStartDistance = 0.15,
-          FadeStartSpeed = 1.0,
-          FadeEndUnit = "au",
-          FadeEndDistance = 15.0,
-          FadeEndSpeed = 25.0
+        Enabled = false,
+        Type = "RenderableLabels",
+        LabelText = "SNPP",
+        FontSize = 100.0,
+        LabelSize = 4.0,
+        LabelMaxSize = 100.0,
+        LabelMinSize = 1.0,
+        LabelOrientationOption = "Camera View Direction",
+        BlendMode = "Additive",
+        EnableFading = true,
+        FadeStartUnit = "au",
+        FadeStartDistance = 0.15,
+        FadeStartSpeed = 1.0,
+        FadeEndUnit = "au",
+        FadeEndDistance = 15.0,
+        FadeEndSpeed = 25.0
       },
       Tag = { "solarsystem_labels" },
       GUI = {
@@ -111,11 +110,11 @@ end)
 
 
 asset.meta = {
-    Name = "Aqua",
-    Version = "1.0",
-    Description = [[ Trail for Aqua. trail from
-    CELESTRAK. Can be used in conjuntion with Aqua Modis (Temporal) layer for Earth]],
-    Author = "OpenSpace Team",
-    URL = "https://celestrak.com/",
-    License = "NASA"
+  Name = "Aqua",
+  Version = "1.0",
+  Description = [[ Trail for Aqua. trail from
+  CELESTRAK. Can be used in conjuntion with Aqua Modis (Temporal) layer for Earth]],
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.com/",
+  License = "NASA"
 }

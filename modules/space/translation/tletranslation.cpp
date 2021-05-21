@@ -28,6 +28,7 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <chrono>
+#include <filesystem>
 #include <fstream>
 #include <optional>
 #include <vector>
@@ -238,7 +239,7 @@ TLETranslation::TLETranslation(const ghoul::Dictionary& dictionary) {
 }
 
 void TLETranslation::readTLEFile(const std::string& filename, int lineNum) {
-    ghoul_assert(FileSys.fileExists(filename), "The filename must exist");
+    ghoul_assert(std::filesystem::is_regular_file(filename), "The filename must exist");
 
     std::ifstream file;
     file.exceptions(std::ofstream::failbit | std::ofstream::badbit);

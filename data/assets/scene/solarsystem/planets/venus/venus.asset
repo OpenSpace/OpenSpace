@@ -5,51 +5,51 @@ asset.require('./trail')
 local labelsPath = asset.require('./venus_globelabels').LabelsPath
 
 local Venus = {
-    Identifier = "Venus",
-    Parent = transforms.VenusBarycenter.Identifier,
-    Transform = {
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "IAU_VENUS",
-            DestinationFrame = "GALACTIC"
-        },
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "VENUS",
-            Observer = "VENUS BARYCENTER"
-        }
+  Identifier = "Venus",
+  Parent = transforms.VenusBarycenter.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "IAU_VENUS",
+      DestinationFrame = "GALACTIC"
     },
-    Renderable = {
-        Type = "RenderableGlobe",
-        --Radii = { 6051900.0, 6051900.0, 6051800.0 },
-        Radii = { 6051900.0, 6051900.0, 6051900.0 },
-        SegmentsPerPatch = 64,
-        Layers = {},
-        Labels = {
-            Enable = false,
-            FileName = labelsPath .. "/venus.labels",
-            LabelAlignmentOption = "Horizontally", -- or Circularly
-            LabelsFontSize = 40.0,
-            LabelsSize = 10.0,
-            LabelsMinSize = 1.0,
-            LabelsMaxSize = 1500.0,
-            ProximityEnabled = false,
-            LabelsFadeInEnabled = true,
-            LabelsFadeInEnabled = true,
-            LabelsFadeOutEnabled = true,
-            FadeInStartingDistance = 7000000.0,
-            FadeOutStartingDistance = 2000000.0,
-            LabelsForceDomeRendering = true,
-            LabelsDistanceEPS = 4000000.0,
-            LabelsColor = { 1.0, 1.0, 0.0 }
-        }
-    },
-    Tag = { "planet_solarSystem", "planet_terrestrial" },
-    GUI = {
-        Name = "Venus",
-        Path = "/Solar System/Planets/Venus",
-        Description = "Venus globe with labels and map layers."
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "VENUS",
+      Observer = "VENUS BARYCENTER"
     }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    --Radii = { 6051900.0, 6051900.0, 6051800.0 },
+    Radii = { 6051900.0, 6051900.0, 6051900.0 },
+    SegmentsPerPatch = 64,
+    Layers = {},
+    Labels = {
+      Enable = false,
+      FileName = labelsPath .. "/venus.labels",
+      LabelAlignmentOption = "Horizontally", -- or Circularly
+      LabelsFontSize = 40.0,
+      LabelsSize = 10.0,
+      LabelsMinSize = 1.0,
+      LabelsMaxSize = 1500.0,
+      ProximityEnabled = false,
+      LabelsFadeInEnabled = true,
+      LabelsFadeInEnabled = true,
+      LabelsFadeOutEnabled = true,
+      FadeInStartingDistance = 7000000.0,
+      FadeOutStartingDistance = 2000000.0,
+      LabelsForceDomeRendering = true,
+      LabelsDistanceEPS = 4000000.0,
+      LabelsColor = { 1.0, 1.0, 0.0 }
+    }
+  },
+  Tag = { "planet_solarSystem", "planet_terrestrial" },
+  GUI = {
+    Name = "Venus",
+    Path = "/Solar System/Planets/Venus",
+    Description = "Venus globe with labels and map layers."
+  }
 }
 
 local VenusLabel = {

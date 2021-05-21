@@ -25,10 +25,12 @@
 #include "profile/additionalscriptsdialog.h"
 
 #include "profile/line.h"
+#include "profile/scriptlogdialog.h"
 #include <openspace/scene/profile.h>
 #include <QDialogButtonBox>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QPushButton>
 #include <QTextEdit>
 #include <QVBoxLayout>
 
@@ -61,6 +63,13 @@ void AdditionalScriptsDialog::createWidgets() {
     _textScripts->setAcceptRichText(false);
     layout->addWidget(_textScripts, 1);
 
+    _chooseScriptsButton = new QPushButton("Choose Scripts");
+    connect(
+        _chooseScriptsButton, &QPushButton::clicked,
+        this, &AdditionalScriptsDialog::chooseScripts
+    );
+    layout->addWidget(_chooseScriptsButton);
+
     layout->addWidget(new Line);
 
     {
@@ -88,4 +97,14 @@ void AdditionalScriptsDialog::parseScript() {
     }
     _profile.setAdditionalScripts(additionalScripts);
     accept();
+}
+
+void AdditionalScriptsDialog::chooseScripts() {
+    ScriptlogDialog d(this);
+    connect(&d, &ScriptlogDialog::scriptsSelected, this, &AdditionalScriptsDialog::appendScriptsToTextfield);
+    d.exec();
+}
+
+void AdditionalScriptsDialog::appendScriptsToTextfield(std::string scripts) {
+    _textScripts->append(QString::fromStdString(std::move(scripts)));
 }
