@@ -32,34 +32,32 @@
  * Copyright (c) 2008 INRIA
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the copyright holders nor the names of its
- *    contributors may be used to endorse or promote products derived from
- *    this software without specific prior written permission.
+ * Redistribution and use in source and binary forms, with or without modification, are
+ * permitted provided that the following conditions are met:
+ * 1. Redistributions of source code must retain the above copyright notice, this list of
+ *    conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice, this list
+ *    of conditions and the following disclaimer in the documentation and/or other
+ *    materials provided with the distribution.
+ * 3. Neither the name of the copyright holders nor the names of its contributors may be
+ *    used to endorse or promote products derived from this software without specific
+ *    prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
- * THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
+ * THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
+ * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include <modules/atmosphere/rendering/atmospheredeferredcaster.h>
 
 #include <openspace/engine/globals.h>
+#include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/spicemanager.h>
@@ -92,7 +90,7 @@ namespace {
         glBindBuffer(GL_ARRAY_BUFFER, *vbo);
 
         const GLfloat VertexData[] = {
-            //      x      y     z     w
+            //  x      y    z    w
             -size, -size, 0.f, 1.f,
              size,  size, 0.f, 1.f,
             -size,  size, 0.f, 1.f,
@@ -107,44 +105,44 @@ namespace {
         glBindVertexArray(0);
     }
 
-    void saveTextureToPPMFile(GLenum colorBufferAttachment, const std::string& fileName,
-                              const glm::ivec2& size)
+    void saveTextureFile(GLenum colorBufferAttachment,
+                         const std::filesystem::path& fileName, const glm::ivec2& size)
     {
         std::fstream ppmFile;
+        ppmFile.open(fileName, std::fstream::out);
+        if (!ppmFile.is_open()) {
+            return;
+        }
 
-        ppmFile.open(fileName.c_str(), std::fstream::out);
-        if (ppmFile.is_open()) {
-            std::vector<unsigned char> px(size.x * size.y * 3, unsigned char(255));
+        std::vector<unsigned char> px(size.x * size.y * 3, unsigned char(255));
 
-            if (colorBufferAttachment != GL_DEPTH_ATTACHMENT) {
-                glReadBuffer(colorBufferAttachment);
-                glReadPixels(0, 0, size.x, size.y, GL_RGB, GL_UNSIGNED_BYTE, px.data());
+        if (colorBufferAttachment != GL_DEPTH_ATTACHMENT) {
+            glReadBuffer(colorBufferAttachment);
+            glReadPixels(0, 0, size.x, size.y, GL_RGB, GL_UNSIGNED_BYTE, px.data());
+        }
+        else {
+            glReadPixels(
+                0,
+                0,
+                size.x,
+                size.y,
+                GL_DEPTH_COMPONENT,
+                GL_UNSIGNED_BYTE,
+                px.data()
+            );
+        }
+
+        ppmFile << "P3" << '\n' << size.x << " " << size.y << '\n' << "255" << '\n';
+
+        int k = 0;
+        for (int i = 0; i < size.x; i++) {
+            for (int j = 0; j < size.y; j++) {
+                ppmFile << static_cast<unsigned int>(px[k]) << ' '
+                    << static_cast<unsigned int>(px[k + 1]) << ' '
+                    << static_cast<unsigned int>(px[k + 2]) << ' ';
+                k += 3;
             }
-            else {
-                glReadPixels(
-                    0,
-                    0,
-                    size.x,
-                    size.y,
-                    GL_DEPTH_COMPONENT,
-                    GL_UNSIGNED_BYTE,
-                    px.data()
-                );
-            }
-
-            ppmFile << "P3" << '\n' << size.x << " " << size.y << '\n' << "255" << '\n';
-
-            std::cout << "\n\nFILE\n\n";
-            int k = 0;
-            for (int i = 0; i < size.x; i++) {
-                for (int j = 0; j < size.y; j++) {
-                    ppmFile << static_cast<unsigned int>(px[k]) << ' '
-                        << static_cast<unsigned int>(px[k + 1]) << ' '
-                        << static_cast<unsigned int>(px[k + 2]) << ' ';
-                    k += 3;
-                }
-                ppmFile << '\n';
-            }
+            ppmFile << '\n';
         }
     }
 
@@ -152,10 +150,10 @@ namespace {
                                double radius)
     {
         // Frustum Planes
-        glm::dvec3 col1(MVMatrix[0][0], MVMatrix[1][0], MVMatrix[2][0]);
-        glm::dvec3 col2(MVMatrix[0][1], MVMatrix[1][1], MVMatrix[2][1]);
-        glm::dvec3 col3(MVMatrix[0][2], MVMatrix[1][2], MVMatrix[2][2]);
-        glm::dvec3 col4(MVMatrix[0][3], MVMatrix[1][3], MVMatrix[2][3]);
+        glm::dvec3 col1 = glm::dvec3(MVMatrix[0][0], MVMatrix[1][0], MVMatrix[2][0]);
+        glm::dvec3 col2 = glm::dvec3(MVMatrix[0][1], MVMatrix[1][1], MVMatrix[2][1]);
+        glm::dvec3 col3 = glm::dvec3(MVMatrix[0][2], MVMatrix[1][2], MVMatrix[2][2]);
+        glm::dvec3 col4 = glm::dvec3(MVMatrix[0][3], MVMatrix[1][3], MVMatrix[2][3]);
 
         glm::dvec3 leftNormal = col4 + col1;
         glm::dvec3 rightNormal = col4 - col1;
@@ -172,46 +170,38 @@ namespace {
         double nearDistance = MVMatrix[3][3] + MVMatrix[3][2];
 
         // Normalize Planes
-        double invMag = 1.0 / glm::length(leftNormal);
-        leftNormal *= invMag;
-        leftDistance *= invMag;
+        const double invLeftMag = 1.0 / glm::length(leftNormal);
+        leftNormal *= invLeftMag;
+        leftDistance *= invLeftMag;
 
-        invMag = 1.0 / glm::length(rightNormal);
-        rightNormal *= invMag;
-        rightDistance *= invMag;
+        const double invRightMag = 1.0 / glm::length(rightNormal);
+        rightNormal *= invRightMag;
+        rightDistance *= invRightMag;
 
-        invMag = 1.0 / glm::length(bottomNormal);
-        bottomNormal *= invMag;
-        bottomDistance *= invMag;
+        const double invBottomMag = 1.0 / glm::length(bottomNormal);
+        bottomNormal *= invBottomMag;
+        bottomDistance *= invBottomMag;
 
-        invMag = 1.0 / glm::length(topNormal);
-        topNormal *= invMag;
-        topDistance *= invMag;
+        const double invTopMag = 1.0 / glm::length(topNormal);
+        topNormal *= invTopMag;
+        topDistance *= invTopMag;
 
-        invMag = 1.0 / glm::length(nearNormal);
-        nearNormal *= invMag;
-        nearDistance *= invMag;
+        const double invNearMag = 1.0 / glm::length(nearNormal);
+        nearNormal *= invNearMag;
+        nearDistance *= invNearMag;
 
-        invMag = 1.0 / glm::length(farNormal);
-        farNormal *= invMag;
+        const double invFarMag = 1.0 / glm::length(farNormal);
+        farNormal *= invFarMag;
 
-        if ((glm::dot(leftNormal, position) + leftDistance) < -radius) {
+        if (((glm::dot(leftNormal, position) + leftDistance) < -radius) ||
+            ((glm::dot(rightNormal, position) + rightDistance) < -radius) ||
+            ((glm::dot(bottomNormal, position) + bottomDistance) < -radius) ||
+            ((glm::dot(topNormal, position) + topDistance) < -radius) ||
+            ((glm::dot(nearNormal, position) + nearDistance) < -radius))
+            // The far plane testing is disabled because the atm has no depth.
+        {
             return false;
         }
-        else if ((glm::dot(rightNormal, position) + rightDistance) < -radius) {
-            return false;
-        }
-        else if ((glm::dot(bottomNormal, position) + bottomDistance) < -radius) {
-            return false;
-        }
-        else if ((glm::dot(topNormal, position) + topDistance) < -radius) {
-            return false;
-        }
-        else if ((glm::dot(nearNormal, position) + nearDistance) < -radius) {
-            return false;
-        }
-        // The far plane testing is disabled because the atm has no depth.
-
         return true;
     }
 
@@ -220,7 +210,6 @@ namespace {
         glDrawArrays(GL_TRIANGLES, 0, numberOfVertices);
         glBindVertexArray(0);
     }
-
 } // namespace
 
 namespace openspace {
@@ -411,12 +400,8 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                     );
                     casterPos *= KM_TO_M; // converting to meters
 
-                    const std::string source = shadowConf.source.first;
-                    SceneGraphNode* sourceNode =
-                        global::renderEngine->scene()->sceneGraphNode(source);
-                    const std::string caster = shadowConf.caster.first;
-                    SceneGraphNode* casterNode =
-                        global::renderEngine->scene()->sceneGraphNode(caster);
+                    SceneGraphNode* sourceNode = sceneGraphNode(shadowConf.source.first);
+                    SceneGraphNode* casterNode = sceneGraphNode(shadowConf.caster.first);
 
                     if ((sourceNode == nullptr) || (casterNode == nullptr)) {
                         LERRORC(
@@ -959,21 +944,31 @@ void AtmosphereDeferredcaster::createComputationTextures() {
 }
 
 void AtmosphereDeferredcaster::deleteComputationTextures() {
-    // Cleaning up
     glDeleteTextures(1, &_transmittanceTableTexture);
+    _transmittanceTableTexture = 0;
     glDeleteTextures(1, &_irradianceTableTexture);
+    _irradianceTableTexture = 0;
     glDeleteTextures(1, &_inScatteringTableTexture);
+    _inScatteringTableTexture = 0;
     glDeleteTextures(1, &_deltaETableTexture);
+    _deltaETableTexture = 0;
     glDeleteTextures(1, &_deltaSRayleighTableTexture);
+    _deltaSRayleighTableTexture = 0;
     glDeleteTextures(1, &_deltaSMieTableTexture);
+    _deltaSMieTableTexture = 0;
     glDeleteTextures(1, &_deltaJTableTexture);
+    _deltaJTableTexture = 0;
 }
 
 void AtmosphereDeferredcaster::deleteUnusedComputationTextures() {
     glDeleteTextures(1, &_deltaETableTexture);
+    _deltaETableTexture = 0;
     glDeleteTextures(1, &_deltaSRayleighTableTexture);
+    _deltaSRayleighTableTexture = 0;
     glDeleteTextures(1, &_deltaSMieTableTexture);
+    _deltaSMieTableTexture = 0;
     glDeleteTextures(1, &_deltaJTableTexture);
+    _deltaJTableTexture = 0;
 }
 
 void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
@@ -1001,11 +996,11 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
     _transmittanceProgramObject->activate();
     loadAtmosphereDataIntoShaderProgram(*_transmittanceProgramObject);
 
-    static const float black[] = { 0.f, 0.f, 0.f, 0.f };
-    glClearBufferfv(GL_COLOR, 0, black);
+    static const float Black[] = { 0.f, 0.f, 0.f, 0.f };
+    glClearBufferfv(GL_COLOR, 0, Black);
     renderQuadForCalc(quadCalcVAO, vertexSize);
     if (_saveCalculationTextures) {
-        saveTextureToPPMFile(
+        saveTextureFile(
             GL_COLOR_ATTACHMENT0,
             "transmittance_texture.ppm",
             _transmittanceTableSize
@@ -1027,7 +1022,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
     glClear(GL_COLOR_BUFFER_BIT);
     renderQuadForCalc(quadCalcVAO, vertexSize);
     if (_saveCalculationTextures) {
-        saveTextureToPPMFile(
+        saveTextureFile(
             GL_COLOR_ATTACHMENT0,
             "deltaE_table_texture.ppm",
             _deltaETableSize
@@ -1065,12 +1060,12 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
         renderQuadForCalc(quadCalcVAO, vertexSize);
     }
     if (_saveCalculationTextures) {
-        saveTextureToPPMFile(
+        saveTextureFile(
             GL_COLOR_ATTACHMENT0,
             "deltaS_rayleigh_texture.ppm",
             glm::ivec2(_mu_s_samples * _nu_samples, _mu_samples)
         );
-        saveTextureToPPMFile(
+        saveTextureFile(
             GL_COLOR_ATTACHMENT1,
             "deltaS_mie_texture.ppm",
             glm::ivec2(_mu_s_samples * _nu_samples, _mu_samples)
@@ -1099,7 +1094,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
     glClear(GL_COLOR_BUFFER_BIT);
     renderQuadForCalc(quadCalcVAO, vertexSize);
     if (_saveCalculationTextures) {
-        saveTextureToPPMFile(
+        saveTextureFile(
             GL_COLOR_ATTACHMENT0,
             "irradiance_texture.ppm",
             _deltaETableSize
@@ -1129,7 +1124,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
         renderQuadForCalc(quadCalcVAO, vertexSize);
     }
     if (_saveCalculationTextures) {
-        saveTextureToPPMFile(
+        saveTextureFile(
             GL_COLOR_ATTACHMENT0,
             "S_texture.ppm",
             glm::ivec2(_mu_s_samples * _nu_samples, _mu_samples)
@@ -1178,7 +1173,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
             renderQuadForCalc(quadCalcVAO, vertexSize);
         }
         if (_saveCalculationTextures) {
-            saveTextureToPPMFile(
+            saveTextureFile(
                 GL_COLOR_ATTACHMENT0,
                 fmt::format("deltaJ_texture-scattering_order-{}.ppm", scatteringOrder),
                 glm::ivec2(_mu_s_samples * _nu_samples, _mu_samples)
@@ -1222,7 +1217,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
         loadAtmosphereDataIntoShaderProgram(*_irradianceSupTermsProgramObject);
         renderQuadForCalc(quadCalcVAO, vertexSize);
         if (_saveCalculationTextures) {
-            saveTextureToPPMFile(
+            saveTextureFile(
                 GL_COLOR_ATTACHMENT0,
                 fmt::format("deltaE_texture-scattering_order-{}.ppm", scatteringOrder),
                 _deltaETableSize
@@ -1257,7 +1252,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
             renderQuadForCalc(quadCalcVAO, vertexSize);
         }
         if (_saveCalculationTextures) {
-            saveTextureToPPMFile(
+            saveTextureFile(
                 GL_COLOR_ATTACHMENT0,
                 fmt::format("deltaS_texture-scattering_order-{}.ppm", scatteringOrder),
                 glm::ivec2(_mu_s_samples * _nu_samples, _mu_samples)
@@ -1287,7 +1282,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
         loadAtmosphereDataIntoShaderProgram(*_irradianceFinalProgramObject);
         renderQuadForCalc(quadCalcVAO, vertexSize);
         if (_saveCalculationTextures) {
-            saveTextureToPPMFile(
+            saveTextureFile(
                 GL_COLOR_ATTACHMENT0,
                 fmt::format("irradianceTable_order-{}.ppm", scatteringOrder),
                 _deltaETableSize
@@ -1316,7 +1311,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
             renderQuadForCalc(quadCalcVAO, vertexSize);
         }
         if (_saveCalculationTextures) {
-            saveTextureToPPMFile(GL_COLOR_ATTACHMENT0,
+            saveTextureFile(GL_COLOR_ATTACHMENT0,
                 fmt::format("inscatteringTable_order-{}.ppm", scatteringOrder),
                 glm::ivec2(_mu_s_samples * _nu_samples, _mu_samples)
             );
@@ -1341,8 +1336,8 @@ void AtmosphereDeferredcaster::preCalculateAtmosphereParam() {
     GLint defaultFBO;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
 
-    GLint m_viewport[4];
-    global::renderEngine->openglStateCache().viewport(m_viewport);
+    GLint viewport[4];
+    global::renderEngine->openglStateCache().viewport(viewport);
 
     // Creates the FBO for the calculations
     GLuint calcFBO;
@@ -1366,7 +1361,7 @@ void AtmosphereDeferredcaster::preCalculateAtmosphereParam() {
 
     // Restores system state
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-    global::renderEngine->openglStateCache().setViewportState(m_viewport);
+    global::renderEngine->openglStateCache().setViewportState(viewport);
     glDeleteBuffers(1, &quadCalcVBO);
     glDeleteVertexArrays(1, &quadCalcVAO);
     glDeleteFramebuffers(1, &calcFBO);
@@ -1405,16 +1400,27 @@ void AtmosphereDeferredcaster::step3DTexture(ghoul::opengl::ProgramObject& shade
 {
     // See OpenGL redbook 8th Edition page 556 for Layered Rendering
     if (doCalculation) {
-        float earth2 = _atmospherePlanetRadius * _atmospherePlanetRadius;
-        float diff = _atmosphereRadius * _atmosphereRadius - earth2;
-        float ri = static_cast<float>(layer) / static_cast<float>(_r_samples - 1);
-        float ri_2 = ri * ri;
-        float eps = (layer == 0) ? 0.01f : (layer == (_r_samples - 1)) ? -0.001f : 0.f;
-        float r = std::sqrt(earth2 + ri_2 * diff) + eps;
-        float dminG = r - _atmospherePlanetRadius;
-        float dminT = _atmosphereRadius - r;
-        float dh = std::sqrt(r * r - earth2);
-        float dH = dh + std::sqrt(diff);
+        const float earth2 = _atmospherePlanetRadius * _atmospherePlanetRadius;
+        const float diff = _atmosphereRadius * _atmosphereRadius - earth2;
+        const float ri = static_cast<float>(layer) / static_cast<float>(_r_samples - 1);
+        const float eps = [&]() {
+            if (layer == 0) {
+                return 0.01f;
+            }
+            else {
+                if (layer == (_r_samples - 1)) {
+                    return -0.001f;
+                }
+                else {
+                    return 0.f;
+                }
+            }
+        }();
+        const float r = std::sqrt(earth2 + ri * ri * diff) + eps;
+        const float dminG = r - _atmospherePlanetRadius;
+        const float dminT = _atmosphereRadius - r;
+        const float dh = std::sqrt(r * r - earth2);
+        const float dH = dh + std::sqrt(diff);
 
         shaderProg.setUniform("r", r);
         shaderProg.setUniform("dhdH", dminT, dH, dminG, dh);
@@ -1422,7 +1428,5 @@ void AtmosphereDeferredcaster::step3DTexture(ghoul::opengl::ProgramObject& shade
 
     shaderProg.setUniform("layer", layer);
 }
-
-
 
 } // namespace openspace

@@ -43,8 +43,8 @@ const float stepTheta = M_PI / float(INSCATTER_SPHERICAL_INTEGRAL_SAMPLES);
 
 void inscatter(float r, float mu, float muSun, float nu, inout vec3 radianceJ) {
   // Be sure to not get a cosine or height out of bounds
-  r     = clamp(r, Rg, Rt);
-  mu    = clamp(mu, -1.0, 1.0);
+  r = clamp(r, Rg, Rt);
+  mu = clamp(mu, -1.0, 1.0);
   muSun = clamp(muSun, -1.0, 1.0);
 
   //  s sigma | theta v
@@ -55,8 +55,8 @@ void inscatter(float r, float mu, float muSun, float nu, inout vec3 radianceJ) {
   //       \  |  /    cos(theta) = mu
   //        \ | /     cos(sigma) = muSun
   //         \|/      cos(ni)    = nu
-  float mu2              = mu * mu;
-  float muSun2           = muSun * muSun;
+  float mu2 = mu * mu;
+  float muSun2 = muSun * muSun;
   float sinThetaSinSigma = sqrt(1.0 - mu2) * sqrt(1.0 - muSun2);
   // cos(sigma + theta) = cos(theta)cos(sigma)-sin(theta)sin(sigma)
   // cos(ni) = nu = mu * muSun - sqrt(1.0f - mu*mu)*sqrt(1.0 - muSun*muSun) // sin(theta) = sqrt(1.0 - mu*mu)
@@ -103,11 +103,11 @@ void inscatter(float r, float mu, float muSun, float nu, inout vec3 radianceJ) {
     float cosineTheta2 = cosineTheta * cosineTheta;
     float distanceToGround = 0.0;
     float groundReflectance = 0.0;
-    vec3  groundTransmittance = vec3(0.0);
+    vec3 groundTransmittance = vec3(0.0);
     
     // If the ray w can see the ground we must compute the transmittance
     // effect from the starting point x to the ground point in direction -vec(v):
-    if ( cosineTheta < cosHorizon ) { // ray hits ground
+    if (cosineTheta < cosHorizon) { // ray hits ground
       // AverageGroundReflectance e [0,1]
       groundReflectance = AverageGroundReflectance / M_PI;
       // From cosine law: Rg*Rg = r*r + distanceToGround*distanceToGround - 2*r*distanceToGround*cos(PI-theta)
@@ -137,7 +137,7 @@ void inscatter(float r, float mu, float muSun, float nu, inout vec3 radianceJ) {
       float phi = (float(phi_i) + 0.5) * stepPhi;
       // spherical coordinates: dw = dtheta*dphi*sin(theta)*rho^2
       // rho = 1, we are integrating over a unit sphere
-      float dw    = stepTheta * stepPhi * sin(theta);
+      float dw = stepTheta * stepPhi * sin(theta);
       // w = (rho*sin(theta)*cos(phi), rho*sin(theta)*sin(phi), rho*cos(theta))
       float sinPhi = sin(phi);
       float sinTheta = sin(theta);

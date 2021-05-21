@@ -31,7 +31,6 @@ out vec4 renderTarget1;
 uniform float r;
 uniform vec4 dhdH;
 
-//uniform sampler2D transmittanceTexture;
 uniform sampler3D deltaJTexture;
 
 // The integrand here is the f(y) of the trapezoidal rule:
@@ -52,17 +51,17 @@ vec3 integrand(float r, float mu, float muSun, float nu, float dist) {
 }
 
 vec3 inscatter(float r, float mu, float muSun, float nu) {
-  vec3  inScatteringRadiance = vec3(0.0);
+  vec3 inScatteringRadiance = vec3(0.0);
   float dy = rayDistance(r, mu) / float(INSCATTER_INTEGRAL_SAMPLES);
-  vec3  inScatteringRadiance_i = integrand(r, mu, muSun, nu, 0.0);
+  vec3 inScatteringRadiance_i = integrand(r, mu, muSun, nu, 0.0);
   
-  // In order to solve the integral from equation (11) we use the trapezoidal
-  // rule: Integral(f(y)dy)(from a to b) = ((b-a)/2n_steps)*(Sum(f(y_i+1)+f(y_i)))
+  // In order to solve the integral from equation (11) we use the trapezoidal rule:
+  // Integral(f(y)dy)(from a to b) = ((b-a)/2n_steps)*(Sum(f(y_i+1)+f(y_i)))
   // where y_i+1 = y_j
   for (int i = 1; i <= INSCATTER_INTEGRAL_SAMPLES; ++i) {
     float y_j = float(i) * dy;
     vec3 inScatteringRadiance_j = integrand(r, mu, muSun, nu, y_j);
-    inScatteringRadiance  += (inScatteringRadiance_i + inScatteringRadiance_j) / 2.0 * dy;
+    inScatteringRadiance += (inScatteringRadiance_i + inScatteringRadiance_j) / 2.0 * dy;
     inScatteringRadiance_i = inScatteringRadiance_j;
   }
   return inScatteringRadiance;
@@ -72,8 +71,7 @@ void main() {
   float mu = 0.0;
   float muSunun = 0.0;
   float nu = 0.0;
-  // Unmapping the variables from texture texels coordinates
-  // to mapped coordinates
+  // Unmapping the variables from texture texels coordinates to mapped coordinates
   unmappingMuMuSunNu(r, dhdH, mu, muSunun, nu);
   
   // Write to texture deltaSR 

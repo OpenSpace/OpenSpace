@@ -28,21 +28,19 @@
 
 out vec4 renderTableColor;
 
-//-- Optical depth by integration, from ray starting at point vec(x), i.e,
-// height r and angle mu (cosine of vec(v)) until top of atmosphere
-// or planet's ground. --
+// Optical depth by integration, from ray starting at point vec(x), i.e, height r and
+// angle mu (cosine of vec(v)) until top of atmosphere or planet's ground.
 // r := height of starting point vect(x)
 // mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
 // H := Thickness of atmosphere if its density were uniform (can be used
 //      for Rayleigh and Mie.
 float opticalDepth(float r, float mu, float H) {    
   float r2 = r * r;
-  // Is ray below horizon? The transmittance table will have only
-  // the values for transmittance starting at r (x) until the
-  // light ray touches the atmosphere or the ground and only for
-  // view angles v between 0 and pi/2 + eps. That's because we
-  // can calculate the transmittance for angles bigger than pi/2
-  // just inverting the ray direction and starting and ending points.
+  // Is ray below horizon? The transmittance table will have only the values for
+  // transmittance starting at r (x) until the light ray touches the atmosphere or the
+  // ground and only for view angles v between 0 and pi/2 + eps. That's because we can
+  // calculate the transmittance for angles bigger than pi/2 just inverting the ray
+  // direction and starting and ending points.
   
   // cosine law for triangles: y_i^2 = a^2 + b^2 - 2abcos(alpha)
   float cosZenithHorizon = -sqrt(1.0 - ((Rg * Rg) / r2));
@@ -57,7 +55,7 @@ float opticalDepth(float r, float mu, float H) {
   // cosine law
   float y_i = exp(-(r - Rg) / H);
   
-  float x_step       = 0.0;
+  float x_step = 0.0;
   float accumulation = 0.0;
   for (int i = 1; i <= TRANSMITTANCE_STEPS; ++i) {
     float x_i = float(i) * deltaStep;

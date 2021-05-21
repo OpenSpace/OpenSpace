@@ -29,7 +29,6 @@
 out vec4 renderTableColor;
 
 uniform int firstIteraction;
-//uniform float firstIteraction;
 
 // -- Spherical Coordinates Steps. phi e [0,2PI] and theta e [0, PI/2]
 const float stepPhi = (2.0 * M_PI) / float(IRRADIANCE_INTEGRAL_SAMPLES);
@@ -42,8 +41,7 @@ uniform sampler3D deltaSMTexture;
 void main() {
   float r = 0.0;
   float muSun = 0.0;
-  // Unmapping the variables from texture texels coordinates
-  // to mapped coordinates
+  // Unmapping the variables from texture texels coordinates to mapped coordinates
   unmappingRAndMuSunIrradiance(r, muSun);
 
   // We know that muSun = cos(sigma) = s.z/||s||
@@ -51,8 +49,8 @@ void main() {
   // ||s|| = 1, so s.x = sin(sigma) = sqrt(1-muSun^2) and s.y = 0.0f
   vec3 s = vec3(max(sqrt(1.0 - muSun * muSun), 0.0), 0.0, muSun);
 
-  // In order to solve the integral from equation (15) we use the trapezoidal
-  // rule: Integral(f(y)dy)(from a to b) = ((b-a)/2n_steps)*(Sum(f(y_i+1)+f(y_i)))
+  // In order to solve the integral from equation (15) we use the trapezoidal rule:
+  // Integral(f(y)dy)(from a to b) = ((b-a)/2n_steps)*(Sum(f(y_i+1)+f(y_i)))
   vec3 irradianceE = vec3(0.0);
   for (int iphi = 0; iphi < IRRADIANCE_INTEGRAL_SAMPLES; ++iphi) {
     float phi = (float(iphi) + 0.5) * stepPhi;
@@ -67,9 +65,10 @@ void main() {
 
       // The first iteraction is different from the others, that's because in the first
       // iteraction all the light arriving are coming from the initial pre-computed
-      // single scattered light. We stored these values in the deltaS textures (Ray and Mie),
-      // and in order to avoid problems with the high angle dependency in the phase functions,
-      // we don't include the phase functions on those tables (that's why we calculate them now).
+      // single scattered light. We stored these values in the deltaS textures (Ray and
+      // Mie), and in order to avoid problems with the high angle dependency in the phase
+      // functions, we don't include the phase functions on those tables (that's why we
+      // calculate them now).
       if (firstIteraction == 1) {
         float phaseRay = rayleighPhaseFunction(nu);
         float phaseMie = miePhaseFunction(nu);
@@ -79,10 +78,10 @@ void main() {
         irradianceE += (singleRay * phaseRay + singleMie * phaseMie) * w.z * dw;
       }
       else {
-        // On line 10 of the algorithm, the texture table deltaE is updated, so when we are not in the first
-        // iteraction, we are getting the updated result of deltaE (not the single irradiance light but the
-        // accumulated (higher order) irradiance light.
-        // w.z is the cosine(theta) = mu for vec(w) and also vec(w) dot vec(n(xo))
+        // On line 10 of the algorithm, the texture table deltaE is updated, so when we
+        // are not in the first iteraction, we are getting the updated result of deltaE
+        // (not the single irradiance light but the accumulated (higher order) irradiance
+        // light. w.z is the cosine(theta) = mu for vec(w) and also vec(w) dot vec(n(xo))
         irradianceE += texture4D(deltaSRTexture, r, w.z, muSun, nu).rgb * w.z * dw;
       }
     }
