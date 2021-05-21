@@ -113,7 +113,7 @@ private:
     properties::PropertyOwner _userProvidedTextureOwner;
     properties::PropertyOwner _parametersOwner;
     properties::PropertyOwner _moffatMethodOwner;
-    properties::Vec2Property _fadeInDistance;
+    properties::Vec2Property _fadeInDistances;
     properties::BoolProperty _disableFadeInDistance;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;

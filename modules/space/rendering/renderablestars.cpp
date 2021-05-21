@@ -425,7 +425,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     , _userProvidedTextureOwner(UserProvidedTextureOptionInfo)
     , _parametersOwner(ParametersOwnerOptionInfo)
     , _moffatMethodOwner(MoffatMethodOptionInfo)
-    , _fadeInDistance(
+    , _fadeInDistances(
         FadeInDistancesInfo,
         glm::vec2(0.f),
         glm::vec2(0.f),
@@ -608,10 +608,10 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 
     if (p.fadeInDistances.has_value()) {
         glm::vec2 v = *p.fadeInDistances;
-        _fadeInDistance = v;
+        _fadeInDistances = v;
         _disableFadeInDistance = false;
-        _fadeInDistance.setViewOption(properties::Property::ViewOptions::MinMaxRange);
-        addProperty(_fadeInDistance);
+        _fadeInDistances.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+        addProperty(_fadeInDistances);
         addProperty(_disableFadeInDistance);
     }
 }
@@ -916,7 +916,7 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     float fadeInVariable = 1.f;
     if (!_disableFadeInDistance) {
         float distCamera = static_cast<float>(glm::length(data.camera.positionVec3()));
-        const glm::vec2 fadeRange = _fadeInDistance;
+        const glm::vec2 fadeRange = _fadeInDistances;
         const double a = 1.f / ((fadeRange.y - fadeRange.x) * PARSEC);
         const double b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
         const double funcValue = a * distCamera + b;

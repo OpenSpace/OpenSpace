@@ -259,7 +259,7 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     , _textSize(TextSizeInfo, 8.0, 0.5, 24.0)
     , _drawElements(DrawElementsInfo, true)
     , _blendMode(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _fadeInDistance(
+    , _fadeInDistances(
         FadeInDistancesInfo,
         glm::vec2(0.f),
         glm::vec2(0.f),
@@ -376,10 +376,10 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     _sluminosity = p.scaleLuminosity.value_or(_sluminosity);
 
     if (p.fadeInDistances.has_value()) {
-        _fadeInDistance = *p.fadeInDistances;
+        _fadeInDistances = *p.fadeInDistances;
         _disableFadeInDistance = false;
-        _fadeInDistance.setViewOption(properties::Property::ViewOptions::MinMaxRange);
-        addProperty(_fadeInDistance);
+        _fadeInDistances.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+        addProperty(_fadeInDistances);
         addProperty(_disableFadeInDistance);
     }
 
@@ -559,7 +559,7 @@ void RenderablePlanesCloud::render(const RenderData& data, RendererTasks&) {
     if (!_disableFadeInDistance) {
         float distCamera = static_cast<float>(glm::length(data.camera.positionVec3()));
         distCamera = static_cast<float>(distCamera / scale);
-        const glm::vec2 fadeRange = _fadeInDistance;
+        const glm::vec2 fadeRange = _fadeInDistances;
         //const float a = 1.f / ((fadeRange.y - fadeRange.x) * scale);
         const float a = 1.f / ((fadeRange.y - fadeRange.x));
         const float b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
@@ -795,7 +795,7 @@ void RenderablePlanesCloud::createPlanes() {
         _dataIsDirty = false;
 
         setBoundingSphere(maxRadius * _scaleFactor);
-        _fadeInDistance.setMaxValue(glm::vec2(10.f * maxSize));
+        _fadeInDistances.setMaxValue(glm::vec2(10.f * maxSize));
     }
 
     if (_hasLabel && _labelDataIsDirty) {
