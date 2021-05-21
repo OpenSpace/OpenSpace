@@ -687,7 +687,7 @@ void AtmosphereDeferredcaster::loadComputationPrograms() {
             "inScatteringCalcProgram",
             absPath("${MODULE_ATMOSPHERE}/shaders/calculation_vs.glsl"),
             absPath("${MODULE_ATMOSPHERE}/shaders/inScattering_calc_fs.glsl"),
-            absPath("${MODULE_ATMOSPHERE}/shaders/inScattering_calc_gs.glsl")
+            absPath("${MODULE_ATMOSPHERE}/shaders/calculation_gs.glsl")
         );
     }
     _inScatteringProgramObject->setIgnoreUniformLocationError(IgnoreError::Yes);

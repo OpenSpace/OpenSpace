@@ -26,10 +26,9 @@
 
 #include "atmosphere_common.glsl"
 
-out vec4 renderTarget1;
+out vec4 renderTarget;
 
 uniform int layer;
-
 uniform sampler3D deltaSRTexture;
 uniform sampler3D deltaSMTexture;
 
@@ -38,10 +37,10 @@ void main() {
   vec3 rst = vec3(gl_FragCoord.xy, float(layer) + 0.5) /
     vec3(ivec3(SAMPLES_MU_S * SAMPLES_NU, SAMPLES_MU, SAMPLES_R));
   
-  vec4 rayleighInscattering0 = texture(deltaSRTexture, rst);
-  vec4 mieInscattering0 = texture(deltaSMTexture, rst);
+  vec3 rayleighInscattering = texture(deltaSRTexture, rst).rgb;
+  float mieInscattering = texture(deltaSMTexture, rst).r;
   
   // We are using only the red component of the Mie scattering. See the Precomputed
   // Atmosphere Scattering paper for details about the angular precision
-  renderTarget1 = vec4(rayleighInscattering0.rgb, mieInscattering0.r); 
+  renderTarget = vec4(rayleighInscattering, mieInscattering); 
 }

@@ -56,19 +56,19 @@ void integrand(float r, float mu, float muSun, float nu, float y, out vec3 S_R,
   float muSun_i = (nu * y + muSun * r) / ri;
 
   // If the muSun_i is smaller than the angle to horizon (no sun radiance hitting the
-  // point y), we return S_R = S_M = 0.0f.
+  // point y), we return S_R = S_M = 0.0.
   if (muSun_i >= -sqrt(1.0 - Rg * Rg / (ri * ri))) {
     // It's the transmittance from the point y (ri) to the top of atmosphere in direction
     // of the sun (muSun_i) and the transmittance from the observer at x (r) to y (ri).
     vec3 transmittanceY = transmittance(r, mu, y) * transmittance(ri, muSun_i);
     // exp(-h/H)*T(x,v)
     if (ozoneLayerEnabled) {
-      S_R = (exp(-(ri - Rg) / HO) + exp( -(ri - Rg) / HR )) * transmittanceY;
-      S_M = exp( -(ri - Rg) / HM ) * transmittanceY;
+      S_R = (exp(-(ri - Rg) / HO) + exp(-(ri - Rg) / HR)) * transmittanceY;
+      S_M = exp(-(ri - Rg) / HM) * transmittanceY;
     }
     else {
-      S_R = exp( -(ri - Rg) / HR ) * transmittanceY;
-      S_M = exp( -(ri - Rg) / HM ) * transmittanceY;
+      S_R = exp(-(ri - Rg) / HR) * transmittanceY;
+      S_M = exp(-(ri - Rg) / HM) * transmittanceY;
     }
     // The L0 (sun radiance) is added in real-time.
   }
@@ -82,9 +82,9 @@ void inscatter(float r, float mu, float muSun, float nu, out vec3 S_R, out vec3 
   // Integral(f(y)dy)(from a to b) = (b-a)/2n_steps*(Sum(f(y_i+1)+f(y_i)))
   S_R = vec3(0.0);
   S_M = vec3(0.0);
+
   float rayDist = rayDistance(r, mu);
   float dy = rayDist / float(INSCATTER_INTEGRAL_SAMPLES);
-  float yi = 0.0;
   vec3 S_Ri;
   vec3 S_Mi;
   integrand(r, mu, muSun, nu, 0.0, S_Ri, S_Mi);
@@ -95,7 +95,6 @@ void inscatter(float r, float mu, float muSun, float nu, out vec3 S_R, out vec3 
     integrand(r, mu, muSun, nu, yj, S_Rj, S_Mj);
     S_R += (S_Ri + S_Rj);
     S_M += (S_Mi + S_Mj);
-    yi = yj;
     S_Ri = S_Rj;
     S_Mi = S_Mj;
   }
@@ -106,10 +105,10 @@ void inscatter(float r, float mu, float muSun, float nu, out vec3 S_R, out vec3 
 void main() {
   vec3 S_R; // First Order Rayleigh InScattering 
   vec3 S_M; // First Order Mie InScattering
-  float mu, muSun, nu; // parametrization angles
 
   // From the layer interpolation (see C++ code for layer to r) and the textures
   // parameters (uv), we unmapping mu, muSun and nu.
+  float mu, muSun, nu;
   unmappingMuMuSunNu(r, dhdH, mu, muSun, nu);
   
   // Here we calculate the single inScattered light. Because this is a single

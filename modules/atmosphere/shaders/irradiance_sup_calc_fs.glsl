@@ -29,14 +29,12 @@
 out vec4 renderTableColor;
 
 uniform int firstIteraction;
-
-// -- Spherical Coordinates Steps. phi e [0,2PI] and theta e [0, PI/2]
-const float stepPhi = (2.0 * M_PI) / float(IRRADIANCE_INTEGRAL_SAMPLES);
-const float stepTheta = M_PI / (2.0 * float(IRRADIANCE_INTEGRAL_SAMPLES));
-
-//uniform sampler2D transmittanceTexture;
 uniform sampler3D deltaSRTexture;
 uniform sampler3D deltaSMTexture;
+
+// Spherical Coordinates Steps. phi e [0,2PI] and theta e [0, PI/2]
+const float stepPhi = (2.0 * M_PI) / float(IRRADIANCE_INTEGRAL_SAMPLES);
+const float stepTheta = M_PI / (2.0 * float(IRRADIANCE_INTEGRAL_SAMPLES));
 
 void main() {
   float r = 0.0;
@@ -60,7 +58,7 @@ void main() {
       // rho = 1, we are integrating over a unit sphere
       float dw = stepTheta * stepPhi * sin(theta);
       // w = (cos(phi) * sin(theta) * rho, sin(phi) * sin(theta) * rho, cos(theta) * rho)
-      vec3  w = vec3(cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta));
+      vec3 w = vec3(cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta));
       float nu = dot(s, w);
 
       // The first iteraction is different from the others, that's because in the first
@@ -68,7 +66,7 @@ void main() {
       // single scattered light. We stored these values in the deltaS textures (Ray and
       // Mie), and in order to avoid problems with the high angle dependency in the phase
       // functions, we don't include the phase functions on those tables (that's why we
-      // calculate them now).
+      // calculate them now)
       if (firstIteraction == 1) {
         float phaseRay = rayleighPhaseFunction(nu);
         float phaseMie = miePhaseFunction(nu);

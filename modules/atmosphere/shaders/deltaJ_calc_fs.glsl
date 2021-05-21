@@ -41,7 +41,7 @@ uniform int firstIteraction;
 const float stepPhi = (2.0 * M_PI) / float(INSCATTER_SPHERICAL_INTEGRAL_SAMPLES);
 const float stepTheta = M_PI / float(INSCATTER_SPHERICAL_INTEGRAL_SAMPLES);
 
-void inscatter(float r, float mu, float muSun, float nu, out vec3 radianceJ) {
+vec3 inscatter(float r, float mu, float muSun, float nu) {
   // Be sure to not get a cosine or height out of bounds
   r = clamp(r, Rg, Rt);
   mu = clamp(mu, -1.0, 1.0);
@@ -187,26 +187,21 @@ void inscatter(float r, float mu, float muSun, float nu, out vec3 radianceJ) {
 
       // Finally, we add the atmospheric scale height (See: Radiation Transfer on the
       // Atmosphere and Ocean from Thomas and Stamnes, pg 9-10.
-      radianceJ += radianceJ1 * (betaRayleigh * exp(-(r - Rg) / HR) * phaseRayleighWV +
+      return radianceJ1 * (betaRayleigh * exp(-(r - Rg) / HR) * phaseRayleighWV +
         betaMieScattering * exp(-(r - Rg) / HM) * phaseMieWV) * dw;        
     }
   }
 }
 
 void main() {
-  // cosine variables to access deltaS textures
+  // InScattering Radiance to be calculated at different points in the ray path
+  // Unmapping the variables from texture texels coordinates to mapped coordinates
   float mu, muSun, nu;
-  // InScattering Radiance to be calculated at
-  // different points in the ray path
-  vec3 radianceJ = vec3(0.0);
-
-  // Unmapping the variables from texture texels coordinates
-  // to mapped coordinates
   unmappingMuMuSunNu(r, dhdH, mu, muSun, nu);
 
   // Calculate the the light inScattered in direction
   // -vec(v) for the point at height r (vec(y) following Bruneton and Neyret's paper
-  inscatter(r, mu, muSun, nu, radianceJ);
+  vec3 radianceJ = inscatter(r, mu, muSun, nu);
 
   // Write to texture detaJ
   renderTarget = vec4(radianceJ, 1.0);

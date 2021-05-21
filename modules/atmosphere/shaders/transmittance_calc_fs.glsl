@@ -32,8 +32,7 @@ out vec4 renderTableColor;
 // angle mu (cosine of vec(v)) until top of atmosphere or planet's ground.
 // r := height of starting point vect(x)
 // mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
-// H := Thickness of atmosphere if its density were uniform (can be used
-//      for Rayleigh and Mie.
+// H := Thickness of atmosphere if its density were uniform (used for Rayleigh and Mie)
 float opticalDepth(float r, float mu, float H) {    
   float r2 = r * r;
   // Is ray below horizon? The transmittance table will have only the values for
@@ -43,7 +42,7 @@ float opticalDepth(float r, float mu, float H) {
   // direction and starting and ending points.
   
   // cosine law for triangles: y_i^2 = a^2 + b^2 - 2abcos(alpha)
-  float cosZenithHorizon = -sqrt(1.0 - ((Rg * Rg) / r2));
+  float cosZenithHorizon = -sqrt(1.0 - (Rg * Rg / r2));
   if (mu < cosZenithHorizon) {
     return 1e9;
   }
@@ -73,15 +72,13 @@ void main() {
   
   vec3 opDepth = vec3(0.0);
   
+  vec3 ozoneContribution = vec3(0.0);
   if (ozoneLayerEnabled) {
-    opDepth = betaOzoneExtinction * 0.0000006 * opticalDepth(r, muSun, HO) + 
-      betaMieExtinction * opticalDepth(r, muSun, HM) +
-      betaRayleigh * opticalDepth(r, muSun, HR);
+    ozoneContribution = betaOzoneExtinction * 0.0000006 * opticalDepth(r, muSun, HO);
   }
-  else {
-    opDepth = betaMieExtinction * opticalDepth(r, muSun, HM) + 
-      betaRayleigh * opticalDepth(r, muSun, HR);
-  }
+  opDepth = ozoneContribution + 
+    betaMieExtinction * opticalDepth(r, muSun, HM) +
+    betaRayleigh * opticalDepth(r, muSun, HR);
   
   renderTableColor = vec4(exp(-opDepth), 0.0);
 }

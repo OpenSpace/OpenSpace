@@ -26,11 +26,10 @@
 
 #include "atmosphere_common.glsl"
 
-out vec4 renderTarget1;
+out vec4 renderTarget;
 
 uniform float r;
 uniform vec4 dhdH;
-
 uniform sampler3D deltaJTexture;
 
 // The integrand here is the f(y) of the trapezoidal rule:
@@ -75,5 +74,5 @@ void main() {
   unmappingMuMuSunNu(r, dhdH, mu, muSunun, nu);
   
   // Write to texture deltaSR 
-  renderTarget1 = vec4(inscatter(r, mu, muSunun, nu), 1.0);
+  renderTarget = vec4(inscatter(r, mu, muSunun, nu), 1.0);
 }
