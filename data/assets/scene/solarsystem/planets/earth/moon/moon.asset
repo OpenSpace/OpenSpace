@@ -34,7 +34,7 @@ local Moon = {
       }
     },        
     Labels = {
-      Enable = false,
+      Enabled = false,
       FileName = labelsPath .. "/moon.labels",
       LabelAlignmentOption = "Horizontally", -- or Circularly
       LabelsFontSize = 14.0,

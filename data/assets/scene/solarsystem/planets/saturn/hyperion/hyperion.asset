@@ -27,7 +27,7 @@ local Hyperion = {
     Layers = {},
     Labels = {
       -- @TODO (2021-05-21, emmbr26) These labels do not seem to be visible
-      Enable = false,
+      Enabled = false,
       FileName = labelsPath .. "/hyperion.labels",
       LabelAlignmentOption = "Horizontally", -- or Circularly
       LabelsFontSize = 14.0,

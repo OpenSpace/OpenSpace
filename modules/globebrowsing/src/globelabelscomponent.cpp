@@ -61,16 +61,9 @@ namespace {
 
     constexpr int8_t CurrentCacheVersion = 1;
 
-    constexpr openspace::properties::Property::PropertyInfo LabelsInfo = {
-        "Labels",
+    constexpr openspace::properties::Property::PropertyInfo LabelsEnabledInfo = {
+        "Enabled",
         "Labels Enabled",
-        "Enables and disables the rendering of labels on the globe surface from "
-        "the csv label file"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo LabelsEnableInfo = {
-        "Enable",
-        "Enable",
         "Enables and disables labels' rendering."
     };
 
@@ -157,11 +150,8 @@ namespace {
         // The path to the labels file
         std::optional<std::filesystem::path> fileName;
 
-        // [[codegen::verbatim(LabelsInfo.description)]]
-        std::optional<bool> labels;
-
-        // [[codegen::verbatim(LabelsEnableInfo.description)]]
-        std::optional<bool> enable;
+        // [[codegen::verbatim(LabelsEnabledInfo.description)]]
+        std::optional<bool> enabled;
 
         // [[codegen::verbatim(LabelsFontSizeInfo.description)]]
         std::optional<float> labelsFontSize;
@@ -216,7 +206,7 @@ documentation::Documentation GlobeLabelsComponent::Documentation() {
 
 GlobeLabelsComponent::GlobeLabelsComponent()
     : properties::PropertyOwner({ "Labels" })
-    , _labelsEnabled(LabelsInfo, false)
+    , _labelsEnabled(LabelsEnabledInfo, false)
     , _labelsFontSize(LabelsFontSizeInfo, 30, 1, 300)
     , _labelsMinMaxSize(
         LabelsMinMaxSizeInfo,
@@ -287,7 +277,7 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
         return;
     }
 
-    _labelsEnabled = p.enable.value_or(true);
+    _labelsEnabled = p.enabled.value_or(_labelsEnabled);
     _labelsFontSize = p.labelsFontSize.value_or(_labelsFontSize);
     _labelsFontSize.onChange([this]() { initializeFonts(); });
     _labelsSize = p.labelsSize.value_or(_labelsSize);

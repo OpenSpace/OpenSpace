@@ -23,7 +23,7 @@ local Earth = {
       }
     },
     Labels = {
-      Enable = false,
+      Enabled = false,
       FileName = labelsPath .. "/Earth.labels",
       LabelAlignmentOption = "Horizontally", -- or Circularly
       LabelsFontSize = 40.0,
