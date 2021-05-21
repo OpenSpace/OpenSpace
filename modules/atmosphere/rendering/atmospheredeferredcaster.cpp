@@ -64,14 +64,14 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/openglstatecache.h>
-#include <fstream>
 #include <cmath>
+#include <fstream>
 
 namespace {
     constexpr const char* _loggerCat = "AtmosphereDeferredcaster";
 
     constexpr const std::array<const char*, 27> UniformNames = {
-        "cullAtmosphere", "Rg", "Rt", "groundRadianceEmittion", "HR", "betaRayleigh",
+        "cullAtmosphere", "Rg", "Rt", "groundRadianceEmission", "HR", "betaRayleigh",
         "HM", "betaMieExtinction", "mieG", "sunRadiance", "ozoneLayerEnabled", "HO",
         "betaOzoneExtinction", "SAMPLES_R", "SAMPLES_MU", "SAMPLES_MU_S", "SAMPLES_NU",
         "dInverseModelTransformMatrix", "dModelTransformMatrix",
@@ -286,8 +286,8 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             program.setUniform(_uniformCache.Rg, _atmospherePlanetRadius);
             program.setUniform(_uniformCache.Rt, _atmosphereRadius);
             program.setUniform(
-                _uniformCache.groundRadianceEmittion,
-                _planetGroundRadianceEmittion
+                _uniformCache.groundRadianceEmission,
+                _planetGroundRadianceEmission
             );
             program.setUniform(_uniformCache.HR, _rayleighHeightScale);
             program.setUniform(_uniformCache.betaRayleigh, _rayleighScatteringCoeff);
@@ -563,10 +563,10 @@ void AtmosphereDeferredcaster::setPlanetAverageGroundReflectance(
     _planetAverageGroundReflectance = averageGReflectance;
 }
 
-void AtmosphereDeferredcaster::setPlanetGroundRadianceEmittion(
-                                                             float groundRadianceEmittion)
+void AtmosphereDeferredcaster::setPlanetGroundRadianceEmission(
+                                                             float groundRadianceEmission)
 {
-    _planetGroundRadianceEmittion = groundRadianceEmittion;
+    _planetGroundRadianceEmission = groundRadianceEmission;
 }
 
 void AtmosphereDeferredcaster::setRayleighHeightScale(float rayleighHeightScale) {
@@ -653,7 +653,7 @@ void AtmosphereDeferredcaster::loadComputationPrograms() {
     if (!_transmittanceProgramObject) {
         _transmittanceProgramObject = ghoul::opengl::ProgramObject::Build(
             "transmittanceCalcProgram",
-            absPath("${MODULE_ATMOSPHERE}/shaders/transmittance_calc_vs.glsl"),
+            absPath("${MODULE_ATMOSPHERE}/shaders/calculation_vs.glsl"),
             absPath("${MODULE_ATMOSPHERE}/shaders/transmittance_calc_fs.glsl")
         );
     }
@@ -665,7 +665,7 @@ void AtmosphereDeferredcaster::loadComputationPrograms() {
     if (!_irradianceProgramObject) {
         _irradianceProgramObject = ghoul::opengl::ProgramObject::Build(
             "irradianceCalcProgram",
-            absPath("${MODULE_ATMOSPHERE}/shaders/irradiance_calc_vs.glsl"),
+            absPath("${MODULE_ATMOSPHERE}/shaders/calculation_vs.glsl"),
             absPath("${MODULE_ATMOSPHERE}/shaders/irradiance_calc_fs.glsl")
         );
     }
@@ -674,7 +674,7 @@ void AtmosphereDeferredcaster::loadComputationPrograms() {
     if (!_irradianceSupTermsProgramObject) {
         _irradianceSupTermsProgramObject = ghoul::opengl::ProgramObject::Build(
             "irradianceSupTermsCalcProgram",
-            absPath("${MODULE_ATMOSPHERE}/shaders/irradiance_sup_calc_vs.glsl"),
+            absPath("${MODULE_ATMOSPHERE}/shaders/calculation_vs.glsl"),
             absPath("${MODULE_ATMOSPHERE}/shaders/irradiance_sup_calc_fs.glsl")
         );
     }
@@ -685,7 +685,7 @@ void AtmosphereDeferredcaster::loadComputationPrograms() {
     if (!_inScatteringProgramObject) {
         _inScatteringProgramObject = ghoul::opengl::ProgramObject::Build(
             "inScatteringCalcProgram",
-            absPath("${MODULE_ATMOSPHERE}/shaders/inScattering_calc_vs.glsl"),
+            absPath("${MODULE_ATMOSPHERE}/shaders/calculation_vs.glsl"),
             absPath("${MODULE_ATMOSPHERE}/shaders/inScattering_calc_fs.glsl"),
             absPath("${MODULE_ATMOSPHERE}/shaders/inScattering_calc_gs.glsl")
         );
@@ -695,9 +695,9 @@ void AtmosphereDeferredcaster::loadComputationPrograms() {
     if (!_inScatteringSupTermsProgramObject) {
         _inScatteringSupTermsProgramObject = ghoul::opengl::ProgramObject::Build(
             "inScatteringSupTermsCalcProgram",
-            absPath("${MODULE_ATMOSPHERE}/shaders/inScattering_sup_calc_vs.glsl"),
+            absPath("${MODULE_ATMOSPHERE}/shaders/calculation_vs.glsl"),
             absPath("${MODULE_ATMOSPHERE}/shaders/inScattering_sup_calc_fs.glsl"),
-            absPath("${MODULE_ATMOSPHERE}/shaders/inScattering_sup_calc_gs.glsl")
+            absPath("${MODULE_ATMOSPHERE}/shaders/calculation_gs.glsl")
         );
     }
     _inScatteringSupTermsProgramObject->setIgnoreUniformLocationError(IgnoreError::Yes);
@@ -707,7 +707,7 @@ void AtmosphereDeferredcaster::loadComputationPrograms() {
     if (!_deltaEProgramObject) {
         _deltaEProgramObject = ghoul::opengl::ProgramObject::Build(
             "deltaECalcProgram",
-            absPath("${MODULE_ATMOSPHERE}/shaders/deltaE_calc_vs.glsl"),
+            absPath("${MODULE_ATMOSPHERE}/shaders/calculation_vs.glsl"),
             absPath("${MODULE_ATMOSPHERE}/shaders/deltaE_calc_fs.glsl")
         );
     }
@@ -718,7 +718,7 @@ void AtmosphereDeferredcaster::loadComputationPrograms() {
     if (!_irradianceFinalProgramObject) {
         _irradianceFinalProgramObject = ghoul::opengl::ProgramObject::Build(
             "irradianceEFinalProgram",
-            absPath("${MODULE_ATMOSPHERE}/shaders/irradiance_final_vs.glsl"),
+            absPath("${MODULE_ATMOSPHERE}/shaders/calculation_vs.glsl"),
             absPath("${MODULE_ATMOSPHERE}/shaders/irradiance_final_fs.glsl")
         );
     }
@@ -729,9 +729,9 @@ void AtmosphereDeferredcaster::loadComputationPrograms() {
     if (!_deltaSProgramObject) {
         _deltaSProgramObject = ghoul::opengl::ProgramObject::Build(
             "deltaSCalcProgram",
-            absPath("${MODULE_ATMOSPHERE}/shaders/deltaS_calc_vs.glsl"),
+            absPath("${MODULE_ATMOSPHERE}/shaders/calculation_vs.glsl"),
             absPath("${MODULE_ATMOSPHERE}/shaders/deltaS_calc_fs.glsl"),
-            absPath("${MODULE_ATMOSPHERE}/shaders/deltaS_calc_gs.glsl")
+            absPath("${MODULE_ATMOSPHERE}/shaders/calculation_gs.glsl")
         );
     }
     _deltaSProgramObject->setIgnoreUniformLocationError(IgnoreError::Yes);
@@ -739,9 +739,9 @@ void AtmosphereDeferredcaster::loadComputationPrograms() {
     if (!_deltaSSupTermsProgramObject) {
         _deltaSSupTermsProgramObject = ghoul::opengl::ProgramObject::Build(
             "deltaSSUPTermsCalcProgram",
-            absPath("${MODULE_ATMOSPHERE}/shaders/deltaS_sup_calc_vs.glsl"),
+            absPath("${MODULE_ATMOSPHERE}/shaders/calculation_vs.glsl"),
             absPath("${MODULE_ATMOSPHERE}/shaders/deltaS_sup_calc_fs.glsl"),
-            absPath("${MODULE_ATMOSPHERE}/shaders/deltaS_sup_calc_gs.glsl")
+            absPath("${MODULE_ATMOSPHERE}/shaders/calculation_gs.glsl")
         );
     }
     _deltaSSupTermsProgramObject->setIgnoreUniformLocationError(IgnoreError::Yes);
@@ -751,9 +751,9 @@ void AtmosphereDeferredcaster::loadComputationPrograms() {
     if (!_deltaJProgramObject) {
         _deltaJProgramObject = ghoul::opengl::ProgramObject::Build(
             "deltaJCalcProgram",
-            absPath("${MODULE_ATMOSPHERE}/shaders/deltaJ_calc_vs.glsl"),
+            absPath("${MODULE_ATMOSPHERE}/shaders/calculation_vs.glsl"),
             absPath("${MODULE_ATMOSPHERE}/shaders/deltaJ_calc_fs.glsl"),
-            absPath("${MODULE_ATMOSPHERE}/shaders/deltaJ_calc_gs.glsl")
+            absPath("${MODULE_ATMOSPHERE}/shaders/calculation_gs.glsl")
         );
     }
     _deltaJProgramObject->setIgnoreUniformLocationError(IgnoreError::Yes);
@@ -1375,7 +1375,7 @@ void AtmosphereDeferredcaster::loadAtmosphereDataIntoShaderProgram(
     shaderProg.setUniform("Rg", _atmospherePlanetRadius);
     shaderProg.setUniform("Rt", _atmosphereRadius);
     shaderProg.setUniform("AverageGroundReflectance", _planetAverageGroundReflectance);
-    shaderProg.setUniform("groundRadianceEmittion", _planetGroundRadianceEmittion);
+    shaderProg.setUniform("groundRadianceEmission", _planetGroundRadianceEmission);
     shaderProg.setUniform("HR", _rayleighHeightScale);
     shaderProg.setUniform("betaRayleigh", _rayleighScatteringCoeff);
     shaderProg.setUniform("HM", _mieHeightScale);

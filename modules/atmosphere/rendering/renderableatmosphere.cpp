@@ -46,7 +46,7 @@ namespace {
         "phase"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo GroundRadianceEmittioninfo = {
+    constexpr openspace::properties::Property::PropertyInfo GroundRadianceEmissionInfo = {
         "GroundRadianceEmission",
         "Percentage of initial radiance emitted from ground",
         "Multiplier of the ground radiance color during the rendering phase"
@@ -174,7 +174,7 @@ namespace {
         // [[codegen::verbatim(MieScatteringExtinctionPropCoeffInfo.description)]]
         std::optional<float> mieScatteringExtinctionPropCoefficient;
 
-        // [[codegen::verbatim(GroundRadianceEmittioninfo.description)]]
+        // [[codegen::verbatim(GroundRadianceEmissionInfo.description)]]
         float groundRadianceEmission;
 
         struct Rayleigh {
@@ -229,7 +229,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _atmosphereHeight(AtmosphereHeightInfo, 60.f, 0.1f, 99.0f)
     , _groundAverageReflectance(AverageGroundReflectanceInfo, 0.f, 0.f, 1.f)
-    , _groundRadianceEmission(GroundRadianceEmittioninfo, 0.f, 0.f, 1.f)
+    , _groundRadianceEmission(GroundRadianceEmissionInfo, 0.f, 0.f, 1.f)
     , _rayleighHeightScale(RayleighHeightScaleInfo, 0.f, 0.1f, 50.f)
     , _rayleighScatteringCoeff(
         RayleighScatteringCoeffInfo,
@@ -423,7 +423,7 @@ void RenderableAtmosphere::updateAtmosphereParameters() {
     _deferredcaster->setAtmosphereRadius(_planetRadius + _atmosphereHeight);
     _deferredcaster->setPlanetRadius(_planetRadius);
     _deferredcaster->setPlanetAverageGroundReflectance(_groundAverageReflectance);
-    _deferredcaster->setPlanetGroundRadianceEmittion(_groundRadianceEmission);
+    _deferredcaster->setPlanetGroundRadianceEmission(_groundRadianceEmission);
     _deferredcaster->setRayleighHeightScale(_rayleighHeightScale);
     _deferredcaster->enableOzone(_ozoneEnabled);
     _deferredcaster->setOzoneHeightScale(_ozoneHeightScale);

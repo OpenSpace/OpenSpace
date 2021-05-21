@@ -32,29 +32,26 @@
  * Copyright (c) 2008 INRIA
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the copyright holders nor the names of its
- *    contributors may be used to endorse or promote products derived from
- *    this software without specific prior written permission.
+ * Redistribution and use in source and binary forms, with or without modification, are
+ * permitted provided that the following conditions are met:
+ * 1. Redistributions of source code must retain the above copyright notice, this list of
+ *    conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice, this list
+ *    of conditions and the following disclaimer in the documentation and/or other
+ *    materials provided with the distribution.
+ * 3. Neither the name of the copyright holders nor the names of its contributors may be
+ *    used to endorse or promote products derived from this software without specific
+ *    prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
- * THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
+ * THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
+ * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #version __CONTEXT__
@@ -62,9 +59,8 @@
 #include "floatoperations.glsl"
 #include "atmosphere_common.glsl"
 
-out vec4 renderTarget;
-in vec3 interpolatedNDCPos;
 in vec2 texCoord;
+out vec4 renderTarget;
 
 uniform int nAaSamples;
 uniform int cullAtmosphere;
@@ -86,8 +82,7 @@ uniform dvec3 sunDirectionObj;
 /*******************************************************************************
  ***** ALL CALCULATIONS FOR ECLIPSE ARE IN METERS AND IN WORLD SPACE SYSTEM ****
  *******************************************************************************/
-// JCC: Remove and use dictionary to 
-// decides the number of shadows
+// JCC: Remove and use dictionary to decide the number of shadows
 const uint numberOfShadows = 1;
 
 struct ShadowRenderingStruct {
@@ -99,8 +94,7 @@ struct ShadowRenderingStruct {
 };
 
 // Eclipse shadow data
-// JCC: Remove and use dictionary to 
-// decides the number of shadows
+// JCC: Remove and use dictionary to decide the number of shadows
 uniform ShadowRenderingStruct shadowDataArray[numberOfShadows];
 uniform int shadows;
 uniform bool hardShadows;
@@ -126,7 +120,7 @@ float calcShadow(ShadowRenderingStruct shadowInfoArray[numberOfShadows], dvec3 p
   if (length_d < r_u_pi) {
     // umbra
     if (hardShadows) {
-      return ground ? 0.2 : 0.5;
+      return ground  ?  0.2  :  0.5;
     }
     else {
       // butterworth function
@@ -135,12 +129,7 @@ float calcShadow(ShadowRenderingStruct shadowInfoArray[numberOfShadows], dvec3 p
   }
   else if (length_d < r_p_pi) {
     // penumbra
-    if (hardShadows) {
-      return 0.5; 
-    }
-    else {
-      return length_d / r_p_pi;
-    }
+    return hardShadows  ?  0.5  :  length_d / r_p_pi;
   }
   else {
     return 1.0;
@@ -163,7 +152,7 @@ struct Ray {
  *   - ray direction (normalized)
  *   - atmosphere radius
  * Out: true if an intersection happens, false otherwise
- *   - inside: true if the ray origin is inside atmosphere, false otherwise
+ *   - return: true if the ray origin is inside atmosphere, false otherwise
  *   - offset: the initial intersection distance from eye position when the eye is outside
  *             the atmosphere
  *   - maxLength: the second intersection distance from eye position when the eye is
@@ -219,7 +208,8 @@ bool atmosphereIntersection(Ray ray, double atmRadius, out double offset,
  * multiplications wherever is possible.
  */
 Ray calculateRayRenderableGlobe() {
-  dvec4 clipCoords = dvec4(interpolatedNDCPos.xy, 1.0, 1.0);
+  vec2 interpolatedNDCPos = (texCoord - 0.5) * 2.0;
+  dvec4 clipCoords = dvec4(interpolatedNDCPos, 1.0, 1.0);
 
   // Clip to Object Coords
   dvec4 objectCoords = dSgctProjectionToModelTransformMatrix * clipCoords;
@@ -229,7 +219,7 @@ Ray calculateRayRenderableGlobe() {
   // Ray in object space (in KM)
   Ray ray;
   ray.origin = dvec3(dCamPosObj * dvec4(0.001, 0.001, 0.001, 1.0));
-  ray.direction = normalize((objectCoords.xyz * dvec3(0.001)) - ray.origin.xyz);
+  ray.direction = normalize(objectCoords.xyz * dvec3(0.001) - ray.origin);
   return ray;
 }
 
@@ -251,10 +241,10 @@ Ray calculateRayRenderableGlobe() {
  * attenuation := out of transmittance T(x,x0). This will be used later when calculating
  *                the reflectance R[L]
  */
-vec3 inscatterRadiance(vec3 x, inout float t, out float irradianceFactor,
-                       vec3 v, vec3 s, out float r, out float mu, out vec3 attenuation,
-                       vec3 fragPosObj, out bool groundHit, double maxLength,
-                       double pixelDepth, vec4 spaceColor, float sunIntensity)
+vec3 inscatterRadiance(vec3 x, inout float t, out float irradianceFactor, vec3 v, vec3 s,
+                       out float r, out float mu, out vec3 attenuation, vec3 fragPosObj,
+                       out bool groundHit, double maxLength, double pixelDepth,
+                       vec4 spaceColor, float sunIntensity)
 {
   const float INTERPOLATION_EPS = 0.004; // precision const from Brunetton
 
@@ -277,12 +267,10 @@ vec3 inscatterRadiance(vec3 x, inout float t, out float irradianceFactor,
     
   // After removing the initial path from camera pos to top of atmosphere (for an
   // observer in the space) we test if the light ray is hitting the atmosphere
-  vec3 x0 = fragPosObj;
   float r0 = length(fragPosObj);
   float invr0 = 1.0 / r0;
   float muSun0 = dot(fragPosObj, s) * invr0;
-  //vec3  x0     = x + float(pixelDepth) * v;      
-  float mu0 = dot(x0, v) * invr0;
+  float mu0 = dot(fragPosObj, v) * invr0;
 
   if ((pixelDepth > INTERPOLATION_EPS) && (pixelDepth < maxLength)) {
     t = float(pixelDepth);  
@@ -319,8 +307,8 @@ vec3 inscatterRadiance(vec3 x, inout float t, out float irradianceFactor,
   // In order to avoid imprecision problems near horizon, we interpolate between two
   // points: above and below horizon
   if (abs(mu - muHorizon) < INTERPOLATION_EPS) {
-    // We want an interpolation value close to 1/2, so the contribution of each
-    // radiance value is almost the same or it has a heavy weight if from above or
+    // We want an interpolation value close to 1/2, so the contribution of each radiance
+    // value is almost the same or it has a heavy weight if from above or
     // below horizon
     float interpolationValue = (mu - muHorizon + INTERPOLATION_EPS) / (2.0 * INTERPOLATION_EPS);
 
@@ -371,7 +359,7 @@ vec3 inscatterRadiance(vec3 x, inout float t, out float irradianceFactor,
   inscatterRadiance.w *= smoothstep(0.0, 0.02, muSun);
   vec3 inscatterMie =
       inscatterRadiance.rgb * inscatterRadiance.a / max(inscatterRadiance.r, 1e-4) *
-        (betaRayleigh.r / betaRayleigh);
+      (betaRayleigh.r / betaRayleigh);
     
   radiance = max(inscatterRadiance.rgb * rayleighPhase + inscatterMie * miePhase, 0.0);    
   
@@ -402,36 +390,28 @@ vec3 inscatterRadiance(vec3 x, inout float t, out float irradianceFactor,
  *      the atmosphere
  * v := view direction (ray's direction) (normalized)
  * s := Sun direction (normalized)
- * r := ||x|| inside atmosphere (or top of atmosphere). r <= Rt here
  * mu := cosine of the zenith view angle
  * attenuationXtoX0 := transmittance T(x,x0)
  */
-vec3 groundColor(vec3 x, float t, vec3 v, vec3 s, float r, float mu,
-                 vec3 attenuationXtoX0, vec4 groundColor, vec3 normal,
-                 float irradianceFactor, float waterReflectance, float sunIntensity)
+vec3 groundColor(vec3 x, float t, vec3 v, vec3 s, vec3 attenuationXtoX0, vec3 groundColor,
+                 vec3 normal, float irradianceFactor, float waterReflectance,
+                 float sunIntensity)
 {
   vec3 reflectedRadiance = vec3(0.0);
 
   // First we obtain the ray's end point on the surface
-  vec3 x0 = x + t * v;
-  float r0 = length(x0);
-  // Normal of intersection point.
-  // Normal must be normalized.
-  vec3 n = normal;
-  //vec4 groundReflectance = groundColor * vec4(.37);
-  vec4 groundReflectance = groundColor * 
-    vec4(groundRadianceEmittion, groundRadianceEmittion, groundRadianceEmittion, 1.0);
+  float r0 = length(x + t * v);
+
+  vec3 groundReflectance = groundColor * groundRadianceEmission;
 
   // L0 is not included in the irradiance texture.
   // We first calculate the light attenuation from the top of the atmosphere to x0
-  float dotNS = dot(n, s);
+  float dotNS = dot(normal, s);
   float muSun = max(dotNS, 0.0);
 
   // Is direct Sun light arriving at x0? If not, there is no direct light from Sun (shadowed)
   vec3 transmittanceL0 =
-    muSun < -sqrt(1.0 - (Rg2 / (r0 * r0))) ? 
-    vec3(0.0) :
-    transmittanceLUT(r0, muSun);
+    muSun < -sqrt(1.0 - (Rg2 / (r0 * r0)))  ?  vec3(0.0)  :  transmittance(r0, muSun);
 
   // E[L*] at x0
   vec3 irradianceReflected = irradiance(irradianceTexture, r0, muSun) * irradianceFactor;
@@ -440,8 +420,8 @@ vec3 groundColor(vec3 x, float t, vec3 v, vec3 s, float r, float mu,
   vec3 RLStar = (muSun * transmittanceL0 + irradianceReflected) * sunIntensity / M_PI;
   vec3 groundRadiance =
     dotNS < 0.05 ?
-    groundReflectance.rgb * mix(30.0, 1.0, smoothstep(-1.0, 0.05, dotNS)) * RLStar :
-    groundReflectance.rgb * RLStar;
+    groundReflectance * mix(30.0, 1.0, smoothstep(-1.0, 0.05, dotNS)) * RLStar :
+    groundReflectance * RLStar;
 
   // Specular reflection from sun on oceans and rivers  
   if ((waterReflectance > 0.1) && (muSun > 0.0)) {
@@ -449,7 +429,7 @@ vec3 groundColor(vec3 x, float t, vec3 v, vec3 s, float r, float mu,
     // Fresnell Schlick's approximation
     float fresnel = 0.02 + 0.98 * pow(1.0 - dot(-v, h), 5.0);
     // Walter BRDF approximation
-    float waterBrdf = fresnel * pow(max(dot(h, n), 0.0), 150.0);
+    float waterBrdf = fresnel * pow(max(dot(h, normal), 0.0), 150.0);
     // Adding Fresnell and Water BRDFs approximation to the final surface color
     // after adding the sunRadiance and the attenuation of the Sun through atmosphere
     groundRadiance += waterReflectance * max(waterBrdf, 0.0) * transmittanceL0 * sunIntensity;
@@ -464,43 +444,31 @@ vec3 groundColor(vec3 x, float t, vec3 v, vec3 s, float r, float mu,
 
 /* 
  * Calculates the Sun color. The ray is x + tv, v the view direction, s is the sun
- * direction, r and mu the position and zenith cosine angle as in the paper.
- * As for all calculations in the atmosphere, the center of the coordinate system is the
- * planet's center of coordiante system, i.e., the planet's position is (0,0,0).
- * Arguments:
- * x := camera position
- * t := ray displacement variable. Here, differently from the inScatter light calculation,
- *      the position of the camera is already offset (on top of atmosphere) or inside 
- *      the atmosphere
+ * direction, r and mu the position and zenith cosine angle as in the paper. As for all
+ * calculations in the atmosphere, the center of the coordinate system is the planet's
+ * center of coordiante system, i.e., the planet's position is (0,0,0). Arguments:
  * v := view direction (ray's direction) (normalized)
  * s := Sun direction (normalized)
  * r := ||x|| inside atmosphere (or top of atmosphere). r <= Rt here.
  * mu := cosine of the zenith view angle
  * attenuation := transmittance T(x,x0)
  */
-vec3 sunColor(vec3 x, float t, vec3 v, vec3 s, float r, float mu, float irradianceFactor)
-{
-  vec3 transmittance = vec3(1.0);
+vec3 sunColor(vec3 v, vec3 s, float r, float mu, float irradianceFactor) {
+  vec3 tm = vec3(1.0);
   if (r <= Rt) {
-    if (mu < -sqrt(1.0 - Rg2/(r*r))) {
-      transmittance = vec3(0.0);
-    }
-    else {
-      transmittance = transmittanceLUT(r, mu);
-    }
+    tm = mu < -sqrt(1.0 - Rg2 / (r * r))  ?  vec3(0.0)  :  transmittance(r, mu);
   }
   // JCC: Change this function to a impostor texture with gaussian decay color weighted
   // by the sunRadiance, transmittance and irradianceColor (11/03/2017)                          
   float sunFinalColor = smoothstep(cos(M_PI / 500.0), cos(M_PI / 900.0), dot(v, s)) * 
                         sunRadiance * (1.0 - irradianceFactor);
 
-  return transmittance * sunFinalColor;
+  return tm * sunFinalColor;
 }
 
 void main() {
   if (cullAtmosphere == 1) {
-    vec4 bColor = texture(mainColorTexture, texCoord);
-    renderTarget = bColor;
+    renderTarget = texture(mainColorTexture, texCoord);
     return;
   }
 
@@ -515,21 +483,17 @@ void main() {
   
   double offset = 0.0;   // in KM
   double maxLength = 0.0;   // in KM
-
-  bool intersectATM = atmosphereIntersection(ray,  
-    Rt - (ATM_EPSILON * 0.001), offset, maxLength);
-
-  if (!intersectATM) {
+  bool intersect = atmosphereIntersection(ray, Rt - (ATM_EPSILON * 0.001), offset, maxLength);
+  if (!intersect) {
     renderTarget = color;
     return;
   }
 
-  // Now we check is if the atmosphere is occluded, i.e., if the distance to the
-  // pixel in the G-Buffer positions is less than the distance to the atmosphere
-  // then the atmosphere is occluded
-  // Fragments positions into G-Buffer are written in SGCT Eye Space (View plus
-  // Camera Rig Coords) when using their positions later, one must convert them to
-  // the planet's coords
+  // Now we check is if the atmosphere is occluded, i.e., if the distance to the pixel in
+  // the G-Buffer positions is less than the distance to the atmosphere then the
+  // atmosphere is occluded. Fragments positions into G-Buffer are written in SGCT Eye
+  // Space (View plus Camera Rig Coords) when using their positions later, one must
+  // convert them to the planet's coords
 
   //        
   // Get data from G-Buffer
@@ -557,8 +521,7 @@ void main() {
   double pixelDepth = length(dCamPosObj.xyz - positionObjectsCoords.xyz);
   
   // JCC (12/13/2017): Trick to remove floating error in texture.
-  // We see a squared noise on planet's surface when seeing the planet
-  // from far away.
+  // We see a squared noise on planet's surface when seeing the planet from far away
   float dC = float(length(dCamPosObj.xyz));
   const float x1 = 1e8;
   if (dC > x1) {
@@ -589,9 +552,9 @@ void main() {
 
   // Moving observer from camera location to top atmosphere. If the observer is already
   // inside the atm, offset = 0.0 and no changes at all
-  vec3 x = vec3(ray.origin.xyz + t * ray.direction.xyz);
+  vec3 x = vec3(ray.origin + t * ray.direction);
   float r = 0.0; // length(x);
-  vec3 v = vec3(ray.direction.xyz);
+  vec3 v = vec3(ray.direction);
   float mu = 0.0; // dot(x, v) / r;
   vec3 s = vec3(sunDirectionObj);
   float tF = float(maxLength - t);
@@ -601,8 +564,8 @@ void main() {
   // comparison with the planet's ground make sense:
   pixelDepth -= offset;
   
-  dvec4 onATMPos = dModelTransformMatrix * dvec4(x * 1000.0, 1.0);
-  float eclipseShadowATM = calcShadow(shadowDataArray, onATMPos.xyz, false);            
+  dvec3 onATMPos = (dModelTransformMatrix * dvec4(x * 1000.0, 1.0)).xyz;
+  float eclipseShadowATM = calcShadow(shadowDataArray, onATMPos, false);            
   float sunIntensityInscatter = sunRadiance * eclipseShadowATM;
 
   float irradianceFactor = 0.0;
@@ -615,13 +578,13 @@ void main() {
   if (groundHit) {
     float eclipseShadowPlanet = calcShadow(shadowDataArray, positionWorldCoords.xyz, true);
     float sunIntensityGround = sunRadiance * eclipseShadowPlanet;
-    atmColor = groundColor(x, tF, v, s, r, mu, attenuation, color, normal.xyz,
+    atmColor = groundColor(x, tF, v, s, attenuation, color.rgb, normal.xyz,
       irradianceFactor, normal.w, sunIntensityGround);
   }
   else {
     // In order to get better performance, we are not tracing multiple rays per pixel
     // when the ray doesn't intersect the ground
-    atmColor = sunColor(x, tF, v, s, r, mu, irradianceFactor); 
+    atmColor = sunColor(v, s, r, mu, irradianceFactor); 
   } 
   
   // Final Color of ATM plus terrain:

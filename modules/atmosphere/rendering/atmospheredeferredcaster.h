@@ -82,7 +82,7 @@ public:
     void setAtmosphereRadius(float atmRadius);
     void setPlanetRadius(float planetRadius);
     void setPlanetAverageGroundReflectance(float averageGReflectance);
-    void setPlanetGroundRadianceEmittion(float groundRadianceEmittion);
+    void setPlanetGroundRadianceEmission(float groundRadianceEmission);
     void setRayleighHeightScale(float rayleighHeightScale);
     void enableOzone(bool enable);
     void setOzoneHeightScale(float ozoneHeightScale);
@@ -124,7 +124,7 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _deltaSSupTermsProgramObject;
     std::unique_ptr<ghoul::opengl::ProgramObject> _deltaJProgramObject;
 
-    UniformCache(cullAtmosphere, Rg, Rt, groundRadianceEmittion, HR, betaRayleigh, HM,
+    UniformCache(cullAtmosphere, Rg, Rt, groundRadianceEmission, HR, betaRayleigh, HM,
         betaMieExtinction, mieG, sunRadiance, ozoneLayerEnabled, HO, betaOzoneExtinction,
         SAMPLES_R, SAMPLES_MU, SAMPLES_MU_S, SAMPLES_NU, dInverseModelTransformMatrix, 
         dModelTransformMatrix, dSgctProjectionToModelTransformMatrix,
@@ -150,7 +150,7 @@ private:
     float _atmosphereRadius = 0.f;
     float _atmospherePlanetRadius = 0.f;
     float _planetAverageGroundReflectance = 0.f;
-    float _planetGroundRadianceEmittion = 0.f;
+    float _planetGroundRadianceEmission = 0.f;
     float _rayleighHeightScale = 0.f;
     float _ozoneHeightScale = 0.f;
     float _mieHeightScale = 0.f;

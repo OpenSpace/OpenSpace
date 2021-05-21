@@ -58,7 +58,7 @@
 uniform float Rg;
 uniform float Rt;
 uniform float AverageGroundReflectance;
-uniform float groundRadianceEmittion;
+uniform float groundRadianceEmission;
 uniform float HR;
 uniform vec3 betaRayleigh;
 uniform float HO;
@@ -245,19 +245,18 @@ void unmappingMuMuSunNu(float r, vec4 dhdH, out float mu, out float muSun, out f
   nu = -1.0 + floor(fragment.x / float(SAMPLES_MU_S)) / (float(SAMPLES_NU) - 1.0) * 2.0;
 }
 
-
 // Function to access the transmittance texture. Given r and mu, returns the transmittance
 // of a ray starting at vec(x), height r, and direction vec(v), mu, and length until it
 // hits the ground or the top of atmosphere.
 // r := height of starting point vect(x)
 // mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
-vec3 transmittanceLUT(float r, float mu) {
+vec3 transmittance(float r, float mu) {
   // Given the position x (here the altitude r) and the view
   // angle v (here the cosine(v)= mu), we map this
   float u_r = sqrt((r - Rg) * invRtMinusRg);
   //float u_r  = sqrt((r*r - Rg*Rg) / (Rt*Rt - Rg*Rg));
   // See Colliene to understand the different mapping.
-  float u_mu = atan((mu + 0.15) / (1.0 + 0.15) * tan(1.5)) / 1.5;
+  float u_mu = atan((mu + 0.15) / 1.15 * tan(1.5)) / 1.5;
   
   return texture(transmittanceTexture, vec2(u_mu, u_r)).rgb;
 }
@@ -286,10 +285,10 @@ vec3 transmittance(float r, float mu, float d) {
   // Also, let's use the property: T(a,c) = T(a,b)*T(b,c)
   // Because T(a,c) and T(b,c) are already in the table T, T(a,b) = T(a,c)/T(b,c).
   if (mu > 0.0) {
-    return min(transmittanceLUT(r, mu) /  transmittanceLUT(ri, mui), 1.0);
+    return min(transmittance(r, mu) /  transmittance(ri, mui), 1.0);
   }
   else {
-    return min(transmittanceLUT(ri, -mui) / transmittanceLUT(r, -mu), 1.0);
+    return min(transmittance(ri, -mui) / transmittance(r, -mu), 1.0);
   }
 }
 
@@ -340,7 +339,8 @@ vec4 texture4D(sampler3D table, float r, float mu, float muSun, float nu) {
   float u_nu = floor(lerp);
   lerp = lerp - u_nu;
 
-  return texture(table, vec3((u_nu + u_mu_s) * invSamplesNu, u_mu, u_r)) * (1.0 - lerp) +
+  return texture(
+    table, vec3((u_nu + u_mu_s) * invSamplesNu, u_mu, u_r)) * (1.0 - lerp) +
     texture(table, vec3((u_nu + u_mu_s + 1.0) * invSamplesNu, u_mu, u_r)) * lerp;
 }
 

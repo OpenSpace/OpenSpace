@@ -55,7 +55,6 @@ float opticalDepth(float r, float mu, float H) {
   // cosine law
   float y_i = exp(-(r - Rg) / H);
   
-  float x_step = 0.0;
   float accumulation = 0.0;
   for (int i = 1; i <= TRANSMITTANCE_STEPS; ++i) {
     float x_i = float(i) * deltaStep;
@@ -63,10 +62,9 @@ float opticalDepth(float r, float mu, float H) {
     // In this case, a = r, b = x_i and cos(alpha) = cos(PI-zenithView) = mu
     float y_ii = exp(-(sqrt(r2 + x_i * x_i + 2.0 * x_i * r * mu) - Rg) / H);
     accumulation += (y_ii + y_i);
-    //x_step = x_i;
     y_i = y_ii;
   }
-  return accumulation * (b_a / (2 * TRANSMITTANCE_STEPS));
+  return accumulation * (b_a / (2.0 * TRANSMITTANCE_STEPS));
 }
 
 void main() {
@@ -76,7 +74,7 @@ void main() {
   vec3 opDepth = vec3(0.0);
   
   if (ozoneLayerEnabled) {
-    opDepth = betaOzoneExtinction * (0.0000006) * opticalDepth(r, muSun, HO) + 
+    opDepth = betaOzoneExtinction * 0.0000006 * opticalDepth(r, muSun, HO) + 
       betaMieExtinction * opticalDepth(r, muSun, HM) +
       betaRayleigh * opticalDepth(r, muSun, HR);
   }
