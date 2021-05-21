@@ -81,8 +81,8 @@ ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictiona
     setIdentifier(std::move(identifier));
 
     _texturePath.onChange([this]() { _textureIsDirty = true; });
-    addProperty(_texturePath);
     _texturePath = p.url.value_or(_texturePath);
+    addProperty(_texturePath);
 }
 
 ScreenSpaceImageOnline::~ScreenSpaceImageOnline() {} // NOLINT

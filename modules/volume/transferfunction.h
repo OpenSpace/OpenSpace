@@ -38,7 +38,7 @@ public:
     TransferFunction() = default;
     TransferFunction(const std::string& string);
 
-    bool envelopesToLua(lua_State* state);
+    void envelopesToLua(lua_State* state) const;
 
     bool setEnvelopesFromString(const std::string& s);
     bool setEnvelopesFromLua(lua_State* lua);

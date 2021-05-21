@@ -733,18 +733,18 @@ TestResult AndVerifier::operator()(const ghoul::Dictionary& dictionary,
     );
 
     if (success) {
-        TestResult res;
-        res.success = true;
-        return res;
+        TestResult r;
+        r.success = true;
+        return r;
     }
     else {
-        TestResult res;
-        res.success = false;
+        TestResult r;
+        r.success = false;
         TestResult::Offense o;
         o.offender = key;
         o.reason = TestResult::Offense::Reason::Verification;
-        res.offenses.push_back(o);
-        return res;
+        r.offenses.push_back(o);
+        return r;
     }
 }
 
@@ -810,18 +810,18 @@ TestResult OrVerifier::operator()(const ghoul::Dictionary& dictionary,
     );
 
     if (success) {
-        TestResult res;
-        res.success = true;
-        return res;
+        TestResult r;
+        r.success = true;
+        return r;
     }
     else {
-        TestResult res;
-        res.success = false;
+        TestResult r;
+        r.success = false;
         TestResult::Offense o;
         o.offender = key;
         o.reason = TestResult::Offense::Reason::Verification;
-        res.offenses.push_back(o);
-        return res;
+        r.offenses.push_back(o);
+        return r;
     }
 }
 

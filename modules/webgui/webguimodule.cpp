@@ -27,7 +27,7 @@
 #include <modules/server/servermodule.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
-#include <openspace/documentation/documentationgenerator.h>
+#include <openspace/util/json_helper.h>
 #include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -244,9 +244,9 @@ void WebGuiModule::startProcess() {
 
 
 #ifdef _MSC_VER
-    const std::string nodePath = absPath("${MODULE_WEBGUI}/ext/nodejs/node.exe");
+    const std::filesystem::path node = absPath("${MODULE_WEBGUI}/ext/nodejs/node.exe");
 #else
-    const std::string nodePath = absPath("${MODULE_WEBGUI}/ext/nodejs/node");
+    const std::filesystem::path node = absPath("${MODULE_WEBGUI}/ext/nodejs/node");
 #endif
 
     std::string formattedDirectories = "[";
@@ -255,7 +255,7 @@ void WebGuiModule::startProcess() {
     for (size_t i = 0; i < directories.size(); ++i) {
         std::string arg = directories[i];
         if (i & 1) {
-            arg = absPath(arg);
+            arg = absPath(arg).string();
         }
         formattedDirectories += "\\\"" + escapedJson(escapedJson(arg)) + "\\\"";
         if (i != directories.size() - 1) {
@@ -268,8 +268,8 @@ void WebGuiModule::startProcess() {
         "" :
         " --redirect \"" + _defaultEndpoint.value() + "\"";
 
-    const std::string command = "\"" + nodePath + "\" "
-        + "\"" + absPath(_entryPoint.value()) + "\"" +
+    const std::string command = "\"" + node.string() + "\" "
+        + "\"" + absPath(_entryPoint.value()).string() + "\"" +
         " --directories \"" + formattedDirectories + "\"" +
         defaultEndpoint +
         " --http-port \"" + std::to_string(_port.value()) + "\" " +
@@ -279,7 +279,7 @@ void WebGuiModule::startProcess() {
 
     _process = std::make_unique<ghoul::Process>(
         command,
-        absPath("${BIN}"),
+        absPath("${BIN}").string(),
         [](const char* data, size_t n) {
             const std::string str(data, n);
             LDEBUG(fmt::format("Web GUI server output: {}", str));

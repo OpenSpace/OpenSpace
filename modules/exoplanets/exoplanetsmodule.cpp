@@ -199,14 +199,14 @@ ExoplanetsModule::ExoplanetsModule()
 
 std::string ExoplanetsModule::exoplanetsDataPath() const {
     return absPath(
-        fmt::format("{}/{}", _exoplanetsDataFolder, ExoplanetsDataFileName)
-    );
+        fmt::format("{}/{}", _exoplanetsDataFolder.value(), ExoplanetsDataFileName)
+    ).string();
 };
 
 std::string ExoplanetsModule::lookUpTablePath() const {
     return absPath(
         fmt::format("{}/{}", _exoplanetsDataFolder, LookupTableFileName)
-    );
+    ).string();
 };
 
 std::string ExoplanetsModule::bvColormapPath() const {

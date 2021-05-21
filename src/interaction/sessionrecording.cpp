@@ -47,6 +47,7 @@
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
+#include <filesystem>
 #include <iomanip>
 
 #ifdef WIN32
@@ -163,11 +164,11 @@ bool SessionRecording::handleRecordingFile(std::string filenameIn) {
         }
     }
 
-    std::string absFilename = absPath("${RECORDINGS}/" + filenameIn);
+    std::filesystem::path absFilename = absPath("${RECORDINGS}/" + filenameIn);
 
-    if (FileSys.fileExists(absFilename)) {
+    if (std::filesystem::is_regular_file(absFilename)) {
         LERROR(fmt::format(
-            "Unable to start recording; file {} already exists.", absFilename.c_str()
+            "Unable to start recording; file {} already exists.", absFilename
         ));
         return false;
     }
@@ -179,9 +180,7 @@ bool SessionRecording::handleRecordingFile(std::string filenameIn) {
     }
 
     if (!_recordFile.is_open() || !_recordFile.good()) {
-        LERROR(fmt::format(
-            "Unable to open file {} for keyframe recording", absFilename.c_str()
-        ));
+        LERROR(fmt::format("Unable to open file {} for keyframe recording", absFilename));
         return false;
     }
     return true;
@@ -196,11 +195,8 @@ bool SessionRecording::startRecording(const std::string& filename) {
         LERROR("Unable to start recording while in session playback mode");
         return false;
     }
-    if (!FileSys.directoryExists(absPath("${RECORDINGS}"))) {
-        FileSys.createDirectory(
-            absPath("${RECORDINGS}"),
-            ghoul::filesystem::FileSystem::Recursive::Yes
-        );
+    if (!std::filesystem::is_directory(absPath("${RECORDINGS}"))) {
+        std::filesystem::create_directories(absPath("${RECORDINGS}"));
     }
 
     bool recordingFileOK = handleRecordingFile(filename);
@@ -253,14 +249,14 @@ bool SessionRecording::startPlayback(std::string& filename,
         return false;
     }
     std::string absFilename;
-    //Run through conversion in case file is older. Does nothing if the file format
+    // Run through conversion in case file is older. Does nothing if the file format
     // is up-to-date
     filename = convertFile(filename);
-    if (FileSys.fileExists(filename)) {
+    if (std::filesystem::is_regular_file(filename)) {
         absFilename = filename;
     }
     else {
-        absFilename = absPath("${RECORDINGS}/" + filename);
+        absFilename = absPath("${RECORDINGS}/" + filename).string();
     }
 
     if (_state == SessionState::Recording) {
@@ -272,7 +268,7 @@ bool SessionRecording::startPlayback(std::string& filename,
         return false;
     }
 
-    if (!FileSys.fileExists(absFilename)) {
+    if (!std::filesystem::is_regular_file(absFilename)) {
         LERROR("Cannot find the specified playback file.");
         cleanUpPlayback();
         return false;
@@ -1710,23 +1706,28 @@ void SessionRecording::removeStateChangeCallback(CallbackHandle handle) {
 }
 
 std::vector<std::string> SessionRecording::playbackList() const {
-    const std::string path = absPath("${RECORDINGS}");
+    const std::filesystem::path path = absPath("${RECORDINGS}");
 
     std::vector<std::string> fileList;
-    ghoul::filesystem::Directory currentDir(path);
-    std::vector<std::string> allInputFiles = currentDir.readFiles();
-    for (const std::string& f : allInputFiles) {
-        // Remove path and keep only the filename
-        const std::string filename = f.substr(path.length() + 1, f.length() - path.length() - 1);
-        bool isHidden = false;
+    if (std::filesystem::is_directory(path)) {
+        namespace fs = std::filesystem;
+        for (const fs::directory_entry& e : fs::directory_iterator(path)) {
+            if (!e.is_regular_file()) {
+                continue;
+            }
+
+            // Remove path and keep only the filename
+            const std::string filename = e.path().filename().string();
 #ifdef WIN32
-        DWORD attributes = GetFileAttributes(f.c_str());
-        isHidden = attributes & FILE_ATTRIBUTE_HIDDEN;
+            DWORD attributes = GetFileAttributes(e.path().string().c_str());
+            bool isHidden = attributes & FILE_ATTRIBUTE_HIDDEN;
 #else
-        isHidden = filename.rfind(".", 0) != 0;
+            bool isHidden = filename.rfind(".", 0) != 0;
 #endif // WIN32
-        if (!isHidden) { //Don't add hidden files
-            fileList.push_back(filename);
+            if (!isHidden) {
+                // Don't add hidden files
+                fileList.push_back(filename);
+            }
         }
     }
     return fileList;
@@ -1793,15 +1794,14 @@ void SessionRecording::readFileIntoStringStream(std::string filename,
     if (isPath(filename)) {
         throw ConversionError("Playback filename must not contain path (/) elements");
     }
-    std::string conversionInFilename = absPath("${RECORDINGS}/" + filename);
-    if (!FileSys.fileExists(conversionInFilename)) {
+    std::filesystem::path conversionInFilename = absPath("${RECORDINGS}/" + filename);
+    if (!std::filesystem::is_regular_file(conversionInFilename)) {
         throw ConversionError(fmt::format(
-            "Cannot find the specified playback file '{}' to convert.",
-            conversionInFilename
+            "Cannot find the specified playback file {} to convert", conversionInFilename
         ));
     }
 
-    DataMode mode = readModeFromHeader(conversionInFilename);
+    DataMode mode = readModeFromHeader(conversionInFilename.string());
 
     stream.str("");
     stream.clear();
@@ -2093,7 +2093,7 @@ std::string SessionRecording::determineConversionOutFilename(const std::string f
         filenameSansExtension = filename.substr(0, filename.find_last_of("."));
     }
     filenameSansExtension += "_" + fileFormatVersion() + "-" + targetFileFormatVersion();
-    return absPath("${RECORDINGS}/" + filenameSansExtension + fileExtension);
+    return absPath("${RECORDINGS}/" + filenameSansExtension + fileExtension).string();
 }
 
 bool SessionRecording_legacy_0085::convertScript(std::stringstream& inStream,

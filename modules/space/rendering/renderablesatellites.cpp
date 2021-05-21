@@ -41,6 +41,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <chrono>
 #include <math.h>
+#include <filesystem>
 #include <fstream>
 #include <vector>
 
@@ -105,7 +106,7 @@ RenderableSatellites::RenderableSatellites(const ghoul::Dictionary& dictionary)
 }
 
 void RenderableSatellites::readDataFile(const std::string& filename) {
-    if (!FileSys.fileExists(filename)) {
+    if (!std::filesystem::is_regular_file(filename)) {
         throw ghoul::RuntimeError(fmt::format(
             "Satellite TLE file {} does not exist", filename
         ));

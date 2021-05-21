@@ -28,6 +28,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scene/asset.h>
 #include <openspace/scene/assetmanager.h>
+#include <openspace/util/json_helper.h>
 #include <ghoul/fmt.h>
 #include <ghoul/misc/profiling.h>
 #include <sstream>

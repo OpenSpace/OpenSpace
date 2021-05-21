@@ -50,7 +50,9 @@ namespace openspace {
 std::string FieldlinesSequenceModule::DefaultTransferFunctionFile = "";
 
 FieldlinesSequenceModule::FieldlinesSequenceModule() : OpenSpaceModule(Name) {
-    DefaultTransferFunctionFile = absPath("${TEMPORARY}/default_transfer_function.txt");
+    DefaultTransferFunctionFile = absPath(
+        "${TEMPORARY}/default_transfer_function.txt"
+    ).string();
 
     std::ofstream file(DefaultTransferFunctionFile);
     file << DefaultTransferfunctionSource;

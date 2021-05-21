@@ -27,6 +27,8 @@
 
 #include <modules/spacecraftinstruments/util/sequenceparser.h>
 
+#include <filesystem>
+
 namespace openspace {
 
 class HongKangParser : public SequenceParser {
@@ -40,7 +42,7 @@ public:
     std::string findPlaybookSpecifiedTarget(std::string line);
 
 private:
-    std::string _defaultCaptureImage;
+    std::filesystem::path _defaultCaptureImage;
     double _metRef = 299180517;
 
     std::string _name;

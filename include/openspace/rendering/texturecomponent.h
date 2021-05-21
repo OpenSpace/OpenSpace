@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___TEXTURECOMPONENT___H__
 
 #include <ghoul/opengl/texture.h>
+#include <filesystem>
 
 namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl {class Texture; }
@@ -48,7 +49,7 @@ public:
     void uploadToGpu();
 
     // Loads a texture from a file on disk
-    void loadFromFile(const std::string& path);
+    void loadFromFile(const std::filesystem::path& path);
 
     // Function to call in a renderable's update function to make sure
     // the texture is kept up to date

@@ -112,9 +112,9 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    std::string file = absPath(p.geometryFile.string());
+    std::filesystem::path file = absPath(p.geometryFile.string());
     _geometry = ghoul::io::ModelReader::ref().loadModel(
-        file,
+        file.string(),
         ghoul::io::ModelReader::ForceRenderInvisible::No,
         ghoul::io::ModelReader::NotifyInvisibleDropped::Yes
     );
@@ -183,7 +183,7 @@ void RenderableModelProjection::initializeGL() {
 
     _projectionComponent.initializeGL();
 
-    float bs = boundingSphere();
+    double bs = boundingSphere();
     _geometry->initialize();
     setBoundingSphere(bs); // ignore bounding sphere set by geometry.
 }

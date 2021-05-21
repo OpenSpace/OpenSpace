@@ -35,8 +35,10 @@ int loadMission(lua_State* L) {
         ghoul::lua::PopValue::Yes
     );
 
-    Mission mission = Mission(dict);
-    global::missionManager->loadMission(mission);
+    std::string name = global::missionManager->loadMission(
+        absPath(missionFileName).string()
+    );
+    ghoul::lua::push(L, name);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;

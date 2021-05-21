@@ -72,7 +72,10 @@ void ReadSpeckTask::perform(const Task::ProgressCallback& onProgress) {
     int32_t nRenderValues = 0;
 
     FitsFileReader fileReader(false);
-    std::vector<float> fullData = fileReader.readSpeckFile(_inFilePath, nRenderValues);
+    std::vector<float> fullData = fileReader.readSpeckFile(
+        _inFilePath.string(),
+        nRenderValues
+    );
 
     onProgress(0.9f);
 

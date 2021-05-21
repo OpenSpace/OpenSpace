@@ -96,7 +96,7 @@ RenderableDisc::RenderableDisc(const ghoul::Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _texturePath = p.texture.string();
-    _texturePath.onChange([&]() { _texture->loadFromFile(_texturePath); });
+    _texturePath.onChange([&]() { _texture->loadFromFile(_texturePath.value()); });
     addProperty(_texturePath);
 
     _size.setViewOption(properties::Property::ViewOptions::Logarithmic);
@@ -129,7 +129,7 @@ void RenderableDisc::initialize() {
 void RenderableDisc::initializeGL() {
     initializeShader();
 
-    _texture->loadFromFile(_texturePath);
+    _texture->loadFromFile(_texturePath.value());
     _texture->uploadToGpu();
 
     _plane->initialize();

@@ -38,6 +38,7 @@
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
 #include <ghoul/misc/defer.h>
+#include <filesystem>
 #include <fstream>
 
 namespace {
@@ -104,8 +105,9 @@ std::string GenerateRawVolumeTask::description() {
 void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallback) {
     // Spice kernel is required for time conversions.
     // Todo: Make this dependency less hard coded.
-    SpiceManager::KernelHandle kernel =
-        SpiceManager::ref().loadKernel(absPath("${DATA}/assets/spice/naif0012.tls"));
+    SpiceManager::KernelHandle kernel = SpiceManager::ref().loadKernel(
+        absPath("${DATA}/assets/spice/naif0012.tls").string()
+    );
 
     defer {
         SpiceManager::ref().unloadKernel(kernel);
@@ -164,13 +166,12 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
 
     luaL_unref(state, LUA_REGISTRYINDEX, functionReference);
 
-    ghoul::filesystem::File file(_rawVolumeOutputPath);
-    const std::string directory = file.directoryName();
-    if (!FileSys.directoryExists(directory)) {
-        FileSys.createDirectory(directory, ghoul::filesystem::FileSystem::Recursive::Yes);
+    const std::filesystem::path directory = _rawVolumeOutputPath.parent_path();
+    if (!std::filesystem::is_directory(directory)) {
+        std::filesystem::create_directories(directory);
     }
 
-    volume::RawVolumeWriter<float> writer(_rawVolumeOutputPath);
+    volume::RawVolumeWriter<float> writer(_rawVolumeOutputPath.string());
     writer.write(rawVolume);
 
     progressCallback(0.9f);

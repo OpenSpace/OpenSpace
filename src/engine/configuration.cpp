@@ -129,11 +129,11 @@ namespace {
         // shutting down. If ESC is pressed again in this time, the shutdown is aborted
         std::optional<float> shutdownCountdown [[codegen::greater(0.0)]];
 
-        // If this is set to 'true', the name of the scene will be appended to the cache
+        // If this is set to 'true', the name of the profile will be appended to the cache
         // directory, thus not reusing the same directory. This is useful in cases where
-        // the same instance of OpenSpace is run with multiple scenes, but the caches
+        // the same instance of OpenSpace is run with multiple profiles, but the caches
         // should be retained. This value defaults to 'false'
-        std::optional<bool> perSceneCache;
+        std::optional<bool> perProfileCache;
 
         enum class Scaling {
             Window [[codegen::key("window")]],
@@ -388,7 +388,7 @@ void parseLuaState(Configuration& configuration) {
                 throw ghoul::MissingCaseException();
         }
     }
-    c.usePerSceneCache = p.perSceneCache.value_or(c.usePerSceneCache);
+    c.usePerProfileCache = p.perProfileCache.value_or(c.usePerProfileCache);
     c.isRenderingOnMasterDisabled =
         p.disableRenderingOnMaster.value_or(c.isRenderingOnMasterDisabled);
     c.globalRotation = p.globalRotation.value_or(c.globalRotation);
@@ -605,31 +605,23 @@ void parseLuaState(Configuration& configuration) {
 
 documentation::Documentation Configuration::Documentation = codegen::doc<Parameters>();
 
-std::string findConfiguration(const std::string& filename) {
-    using ghoul::filesystem::Directory;
-
-    Directory directory = FileSys.absolutePath("${BIN}");
+std::filesystem::path findConfiguration(const std::string& filename) {
+    std::filesystem::path directory = absPath("${BIN}");
 
     while (true) {
-        std::string fullPath = FileSys.pathByAppendingComponent(
-            directory,
-            filename
-        );
-
-        if (FileSys.fileExists(fullPath)) {
+        std::filesystem::path p = directory / filename;
+        if (std::filesystem::exists(p) && std::filesystem::is_regular_file(p)) {
             // We have found the configuration file and can bail out
-            return fullPath;
+            return p;
         }
 
         // Otherwise, we traverse the directory tree up
-        Directory nextDirectory = directory.parentDirectory(
-            ghoul::filesystem::Directory::AbsolutePath::Yes
-        );
+        std::filesystem::path nextDirectory = directory.parent_path();
 
-        if (directory.path() == nextDirectory.path()) {
+        if (directory == nextDirectory) {
             // We have reached the root of the file system and did not find the file
             throw ghoul::RuntimeError(
-                "Could not find configuration file '" + filename + "'",
+                fmt::format("Could not find configuration file '{}'", filename),
                 "ConfigurationManager"
             );
         }
@@ -637,21 +629,20 @@ std::string findConfiguration(const std::string& filename) {
     }
 }
 
-Configuration loadConfigurationFromFile(const std::string& filename,
+Configuration loadConfigurationFromFile(const std::filesystem::path& filename,
                                         const std::string& overrideScript)
 {
-    ghoul_assert(!filename.empty(), "Filename must not be empty");
-    ghoul_assert(FileSys.fileExists(filename), "File must exist");
+    ghoul_assert(std::filesystem::is_regular_file(filename), "File must exist");
 
     Configuration result;
 
     // If there is an initial config helper file, load it into the state
-    if (FileSys.fileExists(absPath(InitialConfigHelper))) {
-        ghoul::lua::runScriptFile(result.state, absPath(InitialConfigHelper));
+    if (std::filesystem::is_regular_file(absPath(InitialConfigHelper))) {
+        ghoul::lua::runScriptFile(result.state, absPath(InitialConfigHelper).string());
     }
 
     // Load the configuration file into the state
-    ghoul::lua::runScriptFile(result.state, filename);
+    ghoul::lua::runScriptFile(result.state, filename.string());
 
     if (!overrideScript.empty()) {
         LDEBUGC("Configuration", "Executing Lua script passed through the commandline:");

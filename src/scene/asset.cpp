@@ -32,6 +32,7 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/misc/profiling.h>
 #include <algorithm>
+#include <filesystem>
 #include <unordered_set>
 
 namespace openspace {
@@ -673,7 +674,7 @@ bool Asset::hasAssetFile() const {
 }
 
 std::string Asset::assetDirectory() const {
-    return ghoul::filesystem::File(_assetPath).directoryName();
+    return std::filesystem::path(_assetPath).parent_path().string();
 }
 
 const std::string& Asset::assetName() const {

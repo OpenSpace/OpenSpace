@@ -48,6 +48,7 @@
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/versionchecker.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/io/texture/texturereader.h>
@@ -371,9 +372,11 @@ RenderEngine::RenderEngine()
             char date[128];
             strftime(date, sizeof(date), "%Y-%m-%d-%H-%M", nowTime);
 
-            std::string newFolder = absPath("${STARTUP_SCREENSHOT}/" + std::string(date));
-            if (!FileSys.directoryExists(newFolder)) {
-                FileSys.createDirectory(newFolder);
+            std::filesystem::path newFolder = absPath(
+                "${STARTUP_SCREENSHOT}/" + std::string(date)
+            );
+            if (!std::filesystem::is_directory(newFolder)) {
+                std::filesystem::create_directory(newFolder);
             }
             FileSys.registerPathToken(
                 "${SCREENSHOTS}",
@@ -390,7 +393,7 @@ RenderEngine::RenderEngine()
                 ghoul::filesystem::FileSystem::Override::Yes
             );
         }
-        global::windowDelegate->setScreenshotFolder(absPath("${SCREENSHOTS}"));
+        global::windowDelegate->setScreenshotFolder(absPath("${SCREENSHOTS}").string());
     });
     addProperty(_screenshotUseDate);
 
@@ -554,7 +557,10 @@ void RenderEngine::initializeGL() {
     {
         ZoneScopedN("Log")
         LINFO("Initializing Log");
-        std::unique_ptr<ScreenLog> log = std::make_unique<ScreenLog>(ScreenLogTimeToLive);
+        std::unique_ptr<ScreenLog> log = std::make_unique<ScreenLog>(
+            ScreenLogTimeToLive,
+            ghoul::logging::LogLevel::Warning
+        );
         _log = log.get();
         ghoul::logging::LogManager::ref().addLog(std::move(log));
     }
@@ -989,8 +995,8 @@ bool RenderEngine::isHdrDisabled() const {
  */
 std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
                                                                   const std::string& name,
-                                                                const std::string& vsPath,
-                                                                       std::string fsPath,
+                                                      const std::filesystem::path& vsPath,
+                                                             std::filesystem::path fsPath,
                                                                    ghoul::Dictionary data)
 {
     ghoul::Dictionary dict = std::move(data);
@@ -1000,7 +1006,7 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     // parameterize the main fragment shader program with specific contents.
     // fsPath should point to a shader file defining a Fragment getFragment() function
     // instead of a void main() setting glFragColor, glFragDepth, etc.
-    dict.setValue("fragmentPath", std::move(fsPath));
+    dict.setValue("fragmentPath", fsPath.string());
 
     using namespace ghoul::opengl;
     std::unique_ptr<ProgramObject> program = ProgramObject::Build(
@@ -1021,9 +1027,9 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
 */
 std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
                                                                   const std::string& name,
-                                                                const std::string& vsPath,
-                                                                       std::string fsPath,
-                                                                const std::string& csPath,
+                                                      const std::filesystem::path& vsPath,
+                                                             std::filesystem::path fsPath,
+                                                      const std::filesystem::path& csPath,
                                                                    ghoul::Dictionary data)
 {
     ghoul::Dictionary dict = std::move(data);
@@ -1032,7 +1038,7 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     // parameterize the main fragment shader program with specific contents.
     // fsPath should point to a shader file defining a Fragment getFragment() function
     // instead of a void main() setting glFragColor, glFragDepth, etc.
-    dict.setValue("fragmentPath", std::move(fsPath));
+    dict.setValue("fragmentPath", fsPath.string());
 
     using namespace ghoul::opengl;
     std::unique_ptr<ProgramObject> program = ProgramObject::Build(
@@ -1101,11 +1107,8 @@ void RenderEngine::takeScreenshot() {
     // screenshot folder everytime we start OpenSpace even when we are not taking any
     // screenshots. So the first time we actually take one, we create the folder:
 
-    if (!FileSys.directoryExists(absPath("${SCREENSHOTS}"))) {
-        FileSys.createDirectory(
-            absPath("${SCREENSHOTS}"),
-            ghoul::filesystem::FileSystem::Recursive::Yes
-        );
+    if (!std::filesystem::is_directory(absPath("${SCREENSHOTS}"))) {
+        std::filesystem::create_directories(absPath("${SCREENSHOTS}"));
     }
 
     _latestScreenshotNumber = global::windowDelegate->takeScreenshot(_applyWarping);
@@ -1407,32 +1410,29 @@ void RenderEngine::renderScreenLog() {
 
     _log->removeExpiredEntries();
 
-    constexpr const int MaxNumberMessages = 20;
+    constexpr const size_t MaxNumberMessages = 20;
     constexpr const int CategoryLength = 30;
     constexpr const int MessageLength = 280;
     constexpr const std::chrono::seconds FadeTime(5);
 
     const std::vector<ScreenLog::LogEntry>& entries = _log->entries();
-    auto lastEntries =
-        entries.size() > MaxNumberMessages ?
-        std::make_pair(entries.rbegin(), entries.rbegin() + MaxNumberMessages) :
-        std::make_pair(entries.rbegin(), entries.rend());
-
     const glm::ivec2 fontRes = fontResolution();
 
-    size_t nr = 1;
+    size_t nRows = 1;
     const auto now = std::chrono::steady_clock::now();
-    for (auto& it = lastEntries.first; it != lastEntries.second; ++it) {
+    for (size_t i = 1; i <= std::min(MaxNumberMessages, entries.size()); i += 1) {
         ZoneScopedN("Entry")
 
-        std::chrono::duration<double> diff = now - it->timeStamp;
+        const ScreenLog::LogEntry& it = entries[entries.size() - i];
+
+        const std::chrono::duration<double> diff = now - it.timeStamp;
 
         float alpha = 1.f;
-        std::chrono::duration<double> ttf = ScreenLogTimeToLive - FadeTime;
+        const std::chrono::duration<double> ttf = ScreenLogTimeToLive - FadeTime;
         if (diff > ttf) {
-            double d = (diff - ttf).count();
-            float t = static_cast<float>(d) / static_cast<float>(FadeTime.count());
-            float p = 0.8f - t;
+            const double d = (diff - ttf).count();
+            const float t = static_cast<float>(d) / static_cast<float>(FadeTime.count());
+            const float p = 0.8f - t;
             alpha = (p <= 0.f) ? 0.f : pow(p, 0.4f);
         }
 
@@ -1440,8 +1440,8 @@ void RenderEngine::renderScreenLog() {
         if (alpha <= 0.f) {
             break;
         }
-        std::string_view message = std::string_view(it->message).substr(0, MessageLength);
-        nr += std::count(message.begin(), message.end(), '\n');
+        std::string_view message = std::string_view(it.message).substr(0, MessageLength);
+        nRows += std::count(message.begin(), message.end(), '\n');
 
         const glm::vec4 white(0.9f, 0.9f, 0.9f, alpha);
 
@@ -1451,9 +1451,9 @@ void RenderEngine::renderScreenLog() {
             char* end = fmt::format_to(
                 buf.data(),
                 "{:<15} {}{}",
-                it->timeString,
-                std::string_view(it->category).substr(0, CategoryLength),
-                it->category.length() > CategoryLength ? "..." : ""
+                it.timeString,
+                std::string_view(it.category).substr(0, CategoryLength),
+                it.category.length() > CategoryLength ? "..." : ""
             );
             std::string_view text = std::string_view(buf.data(), end - buf.data());
 
@@ -1461,7 +1461,7 @@ void RenderEngine::renderScreenLog() {
                 *_fontLog,
                 glm::vec2(
                     10.f,
-                    _fontLog->pointSize() * nr * 2 + fontRes.y * _verticalLogOffset
+                    _fontLog->pointSize() * nRows * 2 + fontRes.y * _verticalLogOffset
                 ),
                 text,
                 white
@@ -1482,9 +1482,9 @@ void RenderEngine::renderScreenLog() {
                     default:
                         return white;
                 }
-            }(it->level);
+            }(it.level);
 
-            const std::string_view lvl = ghoul::to_string(it->level);
+            const std::string_view lvl = ghoul::to_string(it.level);
             std::fill(buf.begin(), buf.end(), char(0));
             char* end = fmt::format_to(buf.data(), "({})", lvl);
             std::string_view levelText = std::string_view(buf.data(), end - buf.data());
@@ -1492,7 +1492,7 @@ void RenderEngine::renderScreenLog() {
                 *_fontLog,
                 glm::vec2(
                     10 + (30 + 3) * _fontLog->pointSize(),
-                    _fontLog->pointSize() * nr * 2 + fontRes.y * _verticalLogOffset
+                    _fontLog->pointSize() * nRows * 2 + fontRes.y * _verticalLogOffset
                 ),
                 levelText,
                 color
@@ -1503,12 +1503,12 @@ void RenderEngine::renderScreenLog() {
             *_fontLog,
             glm::vec2(
                 10 + 44 * _fontLog->pointSize(),
-                _fontLog->pointSize() * nr * 2 + fontRes.y * _verticalLogOffset
+                _fontLog->pointSize() * nRows * 2 + fontRes.y * _verticalLogOffset
             ),
             message,
             white
         );
-        ++nr;
+        ++nRows;
     }
 }
 

@@ -24,75 +24,32 @@
 
 #include <openspace/properties/vector/vec2property.h>
 
-#include <ghoul/glm.h>
 #include <ghoul/lua/ghoul_lua.h>
-#include <ghoul/misc/misc.h>
-#include <limits>
-#include <sstream>
-
-namespace {
-
-glm::vec2 fromLuaConversion(lua_State* state, bool& success) {
-    glm::vec2 result = glm::vec2(0.f);
-    lua_pushnil(state);
-    for (glm::length_t i = 0; i < ghoul::glm_components<glm::vec2>::value; ++i) {
-        int hasNext = lua_next(state, -2);
-        if (hasNext != 1) {
-            success = false;
-            return glm::vec2(0.f);
-        }
-        if (lua_isnumber(state, -1) != 1) {
-            success = false;
-            return glm::vec2(0.f);
-        }
-        else {
-            result[i] = static_cast<glm::vec2::value_type>(lua_tonumber(state, -1));
-            lua_pop(state, 1);
-        }
-    }
-
-    // The last accessor argument is still on the stack
-    lua_pop(state, 1);
-    success = true;
-    return result;
-}
-
-bool toLuaConversion(lua_State* state, glm::vec2 value) {
-    lua_newtable(state);
-    int number = 1;
-    for (glm::length_t i = 0; i < ghoul::glm_components<glm::vec2>::value; ++i) {
-        lua_pushnumber(state, static_cast<lua_Number>(value[i]));
-        lua_rawseti(state, -2, number);
-        ++number;
-    }
-    return true;
-}
-
-bool toStringConversion(std::string& outValue, glm::vec2 inValue) {
-    outValue = "{";
-    for (glm::length_t i = 0; i < ghoul::glm_components<glm::vec2>::value; ++i) {
-        outValue += std::to_string(inValue[i]) + ",";
-    }
-    outValue.pop_back();
-    outValue += "}";
-    return true;
-}
-
-} // namespace
+#include <ghoul/lua/lua_helper.h>
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_SOURCE(
-    Vec2Property,
-    glm::vec2,
-    glm::vec2(0.f),
-    glm::vec2(std::numeric_limits<float>::lowest()),
-    glm::vec2(std::numeric_limits<float>::max()),
-    glm::vec2(0.01f),
-    fromLuaConversion,
-    toLuaConversion,
-    toStringConversion,
-    LUA_TTABLE
-)
+Vec2Property::Vec2Property(Property::PropertyInfo info, glm::vec2 value,
+                           glm::vec2 minValue, glm::vec2 maxValue, glm::vec2 stepValue)
+    : NumericalProperty<glm::vec2>(
+        std::move(info),
+        std::move(value),
+        std::move(minValue),
+        std::move(maxValue),
+        std::move(stepValue)
+    )
+{}
+
+std::string Vec2Property::className() const {
+    return "Vec2Property";
+}
+
+int Vec2Property::typeLua() const {
+    return LUA_TTABLE;
+}
+
+glm::vec2 Vec2Property::fromLuaConversion(lua_State* state, bool& success) const {
+    return ghoul::lua::tryGetValue<glm::vec2>(state, success);
+}
 
 } // namespace openspace::properties

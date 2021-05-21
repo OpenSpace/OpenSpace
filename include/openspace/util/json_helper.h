@@ -22,17 +22,47 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___DMAT4X3PROPERTY___H__
-#define __OPENSPACE_CORE___DMAT4X3PROPERTY___H__
+#ifndef __OPENSPACE_CORE___JSON_HELPER___H__
+#define __OPENSPACE_CORE___JSON_HELPER___H__
 
-#include <openspace/properties/numericalproperty.h>
+#include <string>
 
-#include <ghoul/glm.h>
+namespace openspace {
 
-namespace openspace::properties {
+/**
+ * This function takes a \p text and escapes all necessary characters () that JSON
+ * does not want in its strings.
+ * \param text The text that is to be escaped
+ * \return The same text with all required characteres escaped
+ */
+std::string escapedJson(const std::string& text);
 
-REGISTER_NUMERICALPROPERTY_HEADER(DMat4x3Property, glm::dmat4x3)
+/**
+ * This function takes a \p list of text and escapes all necessary characters () that
+ * JSON does not want in its strings.
+ * \param text The list of text that is to be escaped
+ * \return The same text with all required characteres escaped
+ */
+std::string escapedJson(const std::vector<std::string>& list);
 
-} // namespace openspace::properties
+/**
+ * Convert the input value to a valid JSON formatted string. Nan and Inf values
+ * are not vald JSON and will be represented by 'null'
+ * \param d The value to format
+ * \return The resulting JSON formatted string
+ */
+std::string formatJsonNumber(double d);
 
-#endif // __OPENSPACE_CORE___DMAT4X3PROPERTY___H__
+/**
+ * Convert the input value to a valid JSON formatted string
+ * \param value The value to be converted
+ * \return The resulting JSON formatted string
+ */
+template <typename T>
+std::string formatJson(T value);
+
+} // namespace openspace
+
+#include "json_helper.inl"
+
+#endif // __OPENSPACE_CORE___JSON_HELPER___H__

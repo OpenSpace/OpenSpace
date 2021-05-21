@@ -33,6 +33,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
+#include <filesystem>
 #include <fstream>
 
 namespace {
@@ -69,8 +70,10 @@ HorizonsTranslation::HorizonsTranslation()
 
     _horizonsTextFile.onChange([&](){
         requireUpdate();
-        _fileHandle = std::make_unique<ghoul::filesystem::File>(_horizonsTextFile);
-        _fileHandle->setCallback([&](const ghoul::filesystem::File&) {
+        _fileHandle = std::make_unique<ghoul::filesystem::File>(
+            _horizonsTextFile.value()
+        );
+        _fileHandle->setCallback([this]() {
              requireUpdate();
              notifyObservers();
          });
@@ -82,7 +85,7 @@ HorizonsTranslation::HorizonsTranslation(const ghoul::Dictionary& dictionary)
     : HorizonsTranslation()
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-    _horizonsTextFile = absPath(p.horizonsTextFile);
+    _horizonsTextFile = absPath(p.horizonsTextFile).string();
 }
 
 glm::dvec3 HorizonsTranslation::position(const UpdateData& data) const {
@@ -113,16 +116,12 @@ glm::dvec3 HorizonsTranslation::position(const UpdateData& data) const {
 
 void HorizonsTranslation::loadData() {
     std::string file = _horizonsTextFile;
-    if (!FileSys.fileExists(absPath(file))) {
+    if (!std::filesystem::is_regular_file(absPath(file))) {
         return;
     }
 
-    std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-        file,
-        ghoul::filesystem::CacheManager::Persistent::Yes
-    );
-
-    bool hasCachedFile = FileSys.fileExists(cachedFile);
+    std::string cachedFile = FileSys.cacheManager()->cachedFilename(file);
+    bool hasCachedFile = std::filesystem::is_regular_file(cachedFile);
     if (hasCachedFile) {
         LINFO(fmt::format(
             "Cached file '{}' used for Horizon file '{}'", cachedFile, file
