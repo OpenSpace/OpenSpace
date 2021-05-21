@@ -44,7 +44,7 @@
 #include <ghoul/opengl/texture.h>
 #include <cmath> // For atan2
 #include <glm/gtx/string_cast.hpp> // For printing glm data
-
+#include <algorithm>
 #include <fstream>    
 
 
@@ -147,8 +147,40 @@ namespace openspace {
                 "input. An input string should be the name of the system host star"
             },
             {
+                "createTargetBrowserPair",
+                &skybrowser::luascriptfunctions::createTargetBrowserPair,
+                {},
+                "string or list of strings",
+                "Add one or multiple exoplanet systems to the scene, as specified by the "
+                "input. An input string should be the name of the system host star"
+            }, 
+             {
+                "removeTargetBrowserPair",
+                &skybrowser::luascriptfunctions::removeTargetBrowserPair,
+                {},
+                "string or list of strings",
+                "Add one or multiple exoplanet systems to the scene, as specified by the "
+                "input. An input string should be the name of the system host star"
+            },
+            {
                 "create3dSkyBrowser",
                 &skybrowser::luascriptfunctions::create3dSkyBrowser,
+                {},
+                "string or list of strings",
+                "Add one or multiple exoplanet systems to the scene, as specified by the "
+                "input. An input string should be the name of the system host star"
+            }, 
+            {
+                "remove3dSkyBrowser",
+                &skybrowser::luascriptfunctions::remove3dSkyBrowser,
+                {},
+                "string or list of strings",
+                "Add one or multiple exoplanet systems to the scene, as specified by the "
+                "input. An input string should be the name of the system host star"
+            }, 
+            {
+                "setOpacityOfImageLayer",
+                &skybrowser::luascriptfunctions::setOpacityOfImageLayer,
                 {},
                 "string or list of strings",
                 "Add one or multiple exoplanet systems to the scene, as specified by the "
@@ -238,7 +270,7 @@ SkyBrowserModule::SkyBrowserModule()
 
                 // Find and save what mouse is currently hovering on
                 auto currentlyOnObject = std::find_if(renderables.begin(), renderables.end(), [&](ScreenSpaceRenderable* obj) {
-                    return obj->coordIsInsideCornersScreenSpace(_mousePosition);
+                    return (obj->coordIsInsideCornersScreenSpace(_mousePosition) && obj->isEnabled());
                     });
                 _mouseOnObject = currentlyOnObject != renderables.end() ? *currentlyOnObject : nullptr;
 
@@ -355,7 +387,8 @@ SkyBrowserModule::SkyBrowserModule()
         double deltaTime = global::windowDelegate->deltaTime();
 
         // Fade out or in browser & target
-        for (ScreenSpaceSkyBrowser* browser : browsers) {
+        for (std::pair<std::string, ScreenSpaceSkyBrowser*> pair : browsers) {
+            ScreenSpaceSkyBrowser* browser = pair.second;
             // If outside solar system and browser is visible
             if (!_cameraInSolarSystem && browser->isEnabled()) {
                 bool fadingIsFinished = fadeBrowserAndTarget(true, fadingTime, deltaTime);
@@ -423,13 +456,173 @@ void SkyBrowserModule::addRenderable(ScreenSpaceRenderable* object) {
     renderables.push_back(object);
     // Sort on z coordinate, objects closer to camera are in beginning of list
     std::sort(renderables.begin(), renderables.end());
-    if (to_browser(object)) {
-        browsers.push_back(to_browser(object));
+    ScreenSpaceSkyBrowser* browser = to_browser(object);
+    if (browser) {
+        browsers[browser->identifier()] = browser;
     }
 }
 
-void SkyBrowserModule::add3dBrowser(SceneGraphNode* node) {
+bool SkyBrowserModule::browserIdExists(std::string id) {
+    // If the id doesn't exist, return false
+    if (browsers.find(id) == browsers.end()) {
+        return false;
+    }
+    return true;
+}
+
+void SkyBrowserModule::createTargetBrowserPair() {
+    int noOfPairs = getSkyBrowsers().size() + 1;
+    std::string nameBrowser = "Sky Browser " + std::to_string(noOfPairs);
+    std::string nameTarget = "Sky Target " + std::to_string(noOfPairs);
+    std::string idBrowser = "SkyBrowser" + std::to_string(noOfPairs);
+    std::string idTarget = "SkyTarget" + std::to_string(noOfPairs);
+    glm::vec3 positionBrowser = { -1.0f, -0.5f, -2.1f };
+    std::string guiPath = "/SkyBrowser";
+
+    const std::string browser = "{"
+            "Identifier = '" + idBrowser + "',"
+            "Type = 'ScreenSpaceSkyBrowser',"
+            "Name = '" + nameBrowser + "',"
+            "Url = 'http://localhost:8000/',"
+            "FaceCamera = false,"
+            "TargetID = '" + idTarget + "',"
+            "CartesianPosition = " + ghoul::to_string(positionBrowser) + ","
+        "}";
+    const std::string target = "{"
+            "Identifier = '" + idTarget + "',"
+            "Type = 'ScreenSpaceSkyTarget',"
+            "Name = '" + nameTarget + "',"
+            "FaceCamera = false,"
+            "BrowserID = '" + idBrowser + "',"
+        "}";
+
+    openspace::global::scriptEngine->queueScript(
+        "openspace.addScreenSpaceRenderable(" + browser + ");",
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
+
+    openspace::global::scriptEngine->queueScript(
+        "openspace.addScreenSpaceRenderable(" + target + ");",
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
+}
+
+void SkyBrowserModule::removeTargetBrowserPair(std::string& browserId) {
+    if (!browserIdExists(browserId)) return;
+
+    ScreenSpaceSkyBrowser* browser = browsers[browserId];
+
+    // Find corresponding target
+    std::string targetId{ "" };
+    bool hasTarget = browser->getSkyTarget();
+    if (hasTarget) {
+        std::string targetId = browser->getSkyTarget()->identifier();
+
+        openspace::global::scriptEngine->queueScript(
+            "openspace.removeScreenSpaceRenderable('" + targetId + "');",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    }
+    // Remove pointer to the renderable from browsers vector
+    browsers.erase(browserId);
+
+    // Remove pointer to the renderable from screenspace renderable vector
+    renderables.erase(std::remove_if(std::begin(renderables), std::end(renderables),
+        [&](ScreenSpaceRenderable* renderable) {
+            bool foundBrowser = renderable->identifier() == browserId;
+            if (hasTarget) {
+                bool foundTarget = renderable->identifier() == targetId;
+                return foundBrowser || foundTarget;
+            }
+            else {
+                return foundBrowser;
+            } 
+        }));
+    // Remove from engine
+    openspace::global::scriptEngine->queueScript(
+        "openspace.removeScreenSpaceRenderable('" + browserId + "');",
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
+    
+    
+}
+
+void SkyBrowserModule::create3dBrowser(ImageData& image) {
+    std::string id = "SkyBrowser3d" + std::to_string(browsers3d.size()+1);
+    glm::dvec3 position = image.position3d * distanceconstants::Parsec;
+    std::string translation = ghoul::to_string(position);
+    std::string guiPath = "/SkyBrowser";
+
+    // Calculate the size of the plane with trigonometry
+    // Calculate in equatorial coordinate system since the FOV is from Earth
+    //  /|
+    // /_|    Adjacent is the horizontal line, opposite the vertical 
+    // \ |    Calculate for half the triangle first, then multiply with 2
+    //  \|
+    glm::dvec3 j2000 = skybrowser::galacticCartesianToJ2000Cartesian(position);
+    double adjacent = glm::length(j2000);
+    double opposite = 2 * adjacent * glm::tan(glm::radians(image.fov * 0.5));
+
+    // Calculate rotation to make the plane face the solar system barycenter
+    glm::dvec3 normal = glm::normalize(-position);
+    glm::dvec3 newRight = glm::normalize(
+        glm::cross(glm::dvec3(0.0, 0.0, 1.0), normal)
+    );
+    glm::dvec3 newUp = glm::cross(normal, newRight);
+
+    glm::dmat3 originOrientedRotation = glm::dmat3(1.0);
+    originOrientedRotation[0] = newRight;
+    originOrientedRotation[1] = newUp;
+    originOrientedRotation[2] = normal;
+
+
+    const std::string browser = "{"
+        "Identifier = '" + id + "',"
+        "Parent = 'SolarSystemBarycenter',"
+        "Renderable = {"
+        "Type = 'RenderableSkyBrowser',"
+        "Size = " + std::to_string(opposite) + ","
+        "Origin = 'Center',"
+        "Billboard = false,"
+        "Url = 'http://localhost:8000'"
+        "},"
+            "Transform = {"
+            "Translation = {"
+            "Type = 'StaticTranslation',"
+            "Position = " + translation + ""
+        "},"
+            "Rotation = {"
+            "Type = 'StaticRotation',"
+            "Rotation = " + ghoul::to_string(originOrientedRotation) + ""
+            "}"
+        "},"
+        "GUI = {"
+        "Name = '" + image.name + "',"
+        "Path = '" + guiPath + "'"
+        "}"
+        "}";
+    LINFO(browser);
+    openspace::global::scriptEngine->queueScript(
+        "openspace.addSceneGraphNode(" + browser + ");",
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
+}
+
+void SkyBrowserModule::add3dBrowser(RenderableSkyBrowser* node) {
     browsers3d.push_back(node);
+}
+
+void SkyBrowserModule::remove3dBrowser(std::string& id) {
+    // Remove pointer to the renderable from module vector
+    browsers3d.erase(std::remove_if(std::begin(browsers3d), std::end(browsers3d), 
+        [&](RenderableSkyBrowser* browser) {
+            return browser->identifier() == id;
+        }));
+
+    openspace::global::scriptEngine->queueScript(
+        "openspace.removeSceneGraphNode(" + id + ");",
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
 }
 
 ScreenSpaceSkyBrowser* SkyBrowserModule::to_browser(ScreenSpaceRenderable* ptr) {
@@ -443,7 +636,7 @@ WWTDataHandler* SkyBrowserModule::getWWTDataHandler() {
     return dataHandler;
 }
 
-std::vector<ScreenSpaceSkyBrowser*>& SkyBrowserModule::getSkyBrowsers() {
+std::map<std::string, ScreenSpaceSkyBrowser*>& SkyBrowserModule::getSkyBrowsers() {
     return browsers;
 }
 
@@ -491,7 +684,8 @@ bool SkyBrowserModule::fadeBrowserAndTarget(bool makeTransparent, double fadeTim
         opacityDelta *= -1.f;
     }
     bool finished = true;
-    for (ScreenSpaceSkyBrowser* browser : browsers) {
+    for (std::pair <std::string, ScreenSpaceSkyBrowser*> idAndBrowser : browsers) {
+        ScreenSpaceSkyBrowser* browser = idAndBrowser.second;
         // If there is a target, fade it as well. Otherwise, skip
         ScreenSpaceSkyTarget* target = browser->getSkyTarget();
         bool targetFinished = true;
@@ -519,16 +713,14 @@ bool SkyBrowserModule::fadeBrowserAndTarget(bool makeTransparent, double fadeTim
 
 void SkyBrowserModule::setSelectedBrowser(ScreenSpaceRenderable* ptr) {
     ScreenSpaceSkyBrowser* browser = to_browser(ptr) ? to_browser(ptr) : to_target(ptr)->getSkyBrowser();
-    auto it = std::find(browsers.begin(), browsers.end(), browser);
-    // Get index
-    selectedBrowser = std::distance(browsers.begin(), it);
+    selectedBrowser = browser->identifier();
 }
 
-void SkyBrowserModule::setSelectedBrowser(int i) {
-    selectedBrowser = i;
+void SkyBrowserModule::setSelectedBrowser(std::string id) {
+    selectedBrowser = id;
 }
 
-int SkyBrowserModule::getSelectedBrowserIndex() {
+std::string SkyBrowserModule::selectedBrowserId() {
     return selectedBrowser;
 }
 

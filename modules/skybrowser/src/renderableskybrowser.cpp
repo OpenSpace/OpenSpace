@@ -1,4 +1,5 @@
 #include <modules/skybrowser/include/renderableskybrowser.h>
+#include <modules/skybrowser/skybrowsermodule.h>
 #include <modules/webbrowser/webbrowsermodule.h>
 #include <modules/webbrowser/include/webkeyboardhandler.h>
 #include <modules/webbrowser/include/browserinstance.h>
@@ -117,6 +118,9 @@ namespace openspace {
         _browserInstance->initialize();
         _browserInstance->loadUrl(_url);
         _browserInstance->reshape(_dimensions.value());
+        // Add pointer to module
+        SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+        module->add3dBrowser(this);
     }
 
     void RenderableSkyBrowser::deinitializeGL() {

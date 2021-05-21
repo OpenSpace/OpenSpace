@@ -13,7 +13,7 @@ namespace openspace {
     {
     public:
         ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary);
-        virtual ~ScreenSpaceSkyBrowser() = default;
+        virtual ~ScreenSpaceSkyBrowser();
 
         bool initializeGL() override;
         bool deinitializeGL() override;

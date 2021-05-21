@@ -32,7 +32,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <thread>
-
+#include <string>
 
 #include <iostream>
 #include <fstream>
@@ -45,6 +45,7 @@ class RenderableSkyBrowser;
 class ScreenSpaceRenderable;
 class WWTDataHandler;
 class SceneGraphNode;
+class ImageData;
 
 
 class SkyBrowserModule : public OpenSpaceModule {
@@ -58,16 +59,21 @@ public:
     glm::vec2 getMousePositionInScreenSpaceCoords(glm::vec2& mousePos);
     void addRenderable(ScreenSpaceRenderable* object);
     WWTDataHandler* getWWTDataHandler();
-    std::vector<ScreenSpaceSkyBrowser*>& getSkyBrowsers();
+    std::map<std::string, ScreenSpaceSkyBrowser*>& getSkyBrowsers();
     void startRotation(glm::dvec2 coordsEnd);
     void rotateCamera(double deltaTime);
     bool fadeBrowserAndTarget(bool makeTransparent, double fadeTime, double deltaTime);
     void setSelectedBrowser(ScreenSpaceRenderable* ptr);
-    void setSelectedBrowser(int i);
-    int getSelectedBrowserIndex();
+    void setSelectedBrowser(std::string id);
+    bool browserIdExists(std::string id);
+    std::string selectedBrowserId();
     int loadImages(const std::string& root, const std::string& directory);
-    void add3dBrowser(SceneGraphNode* node);
+    void add3dBrowser(RenderableSkyBrowser* node);
+    void remove3dBrowser(std::string& id);
     bool cameraInSolarSystem();
+    void createTargetBrowserPair();
+    void removeTargetBrowserPair(std::string& browserId);
+    void create3dBrowser(ImageData& image);
 
     scripting::LuaLibrary luaLibrary() const override;
     //std::vector<documentation::Documentation> documentations() const override;
@@ -82,10 +88,13 @@ protected:
 
     bool shouldInitialize;
 
-    // Renderable vector and ptr to where mouse is
+    // The browsers and targets
     std::vector<ScreenSpaceRenderable*> renderables;
-    std::vector<ScreenSpaceSkyBrowser*> browsers;
-    std::vector<SceneGraphNode*> browsers3d;
+    // Only the browsers
+    std::map<std::string, ScreenSpaceSkyBrowser*> browsers;
+    // 3D browsers
+    std::vector<RenderableSkyBrowser*> browsers3d;
+    // Pointer to what mouse is currently on
     ScreenSpaceRenderable* _mouseOnObject;
     // Dragging
     glm::vec2 startDragMousePos;
@@ -106,7 +115,7 @@ protected:
     glm::dvec3 _coordsStartAnimation;
     bool isRotating = false;
     // For tracking the currently selected browser
-    int selectedBrowser{ -1 };
+    std::string selectedBrowser;
     glm::ivec3 highlightAddition{ 35, 35, 35 };
     // Mode of browsing
     bool _cameraInSolarSystem{ true };

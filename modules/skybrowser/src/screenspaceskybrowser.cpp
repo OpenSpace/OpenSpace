@@ -139,6 +139,15 @@ namespace openspace {
         });
     }
 
+    ScreenSpaceSkyBrowser::~ScreenSpaceSkyBrowser() {
+        // Set flag to false so the thread can exit
+        _camIsSyncedWWT = false;
+        if (_threadWWTMessages.joinable()) {
+            _threadWWTMessages.join();
+            LINFO("Joined thread");
+        }
+    }
+
     bool ScreenSpaceSkyBrowser::initializeGL() {
 
         global::moduleEngine->module<SkyBrowserModule>()->addRenderable(this);
