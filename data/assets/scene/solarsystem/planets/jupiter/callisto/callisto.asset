@@ -33,14 +33,10 @@ local Callisto = {
       LabelAlignmentOption = "Horizontally", -- or Circularly
       LabelsFontSize = 40.0,
       LabelsSize = 10.5,
-      LabelsMinSize = 1.0,
-      LabelsMaxSize = 1500.0,
-      ProximityEnabled = false,
+      LabelsMinMaxSize = { 1.0, 100.0 },
       LabelsFadeInEnabled = true,
       LabelsFadeOutEnabled = true,
-      FadeInStartingDistance = 15000000.0,
-      FadeOutStartingDistance = 5000000.0,
-      LabelsForceDomeRendering = true,
+      FadeDistances = { 5000000.0, 15000000.0 },
       LabelsDistanceEPS = 1350000.0,
       LabelsColor = { 1.0, 1.0, 0.0 }
     }

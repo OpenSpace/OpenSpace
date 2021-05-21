@@ -29,14 +29,9 @@ local Mercury = {
       LabelAlignmentOption = "Horizontally", -- or Circularly
       LabelsFontSize = 22.0,
       LabelsSize = 10.0,
-      LabelsMinSize = 1.0,
-      LabelsMaxSize = 1500.0,
-      ProximityEnabled = false,
       LabelsFadeInEnabled = true,
       LabelsFadeOutEnabled = true,
-      FadeInStartingDistance = 5000000.0,
-      FadeOutStartingDistance = 1800000.0,
-      LabelsForceDomeRendering = true,
+      FadeDistances = { 1800000.0, 5000000.0 },
       LabelsDistanceEPS = 1500000.0,
       LabelsColor = { 1.0, 1.0, 0.0 }
     }

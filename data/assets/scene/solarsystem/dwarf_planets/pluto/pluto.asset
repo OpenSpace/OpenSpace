@@ -32,14 +32,9 @@ local Pluto = {
       LabelAlignmentOption = "Horizontally", -- or Circularly
       LabelsFontSize = 28.0,
       LabelsSize = 8.0,
-      LabelsMinSize = 1.0,
-      LabelsMaxSize = 1500.0,
-      ProximityEnabled = false,
       LabelsFadeInEnabled = true,
       LabelsFadeOutEnabled = true,
-      FadeInStartingDistance = 4000000.0,
-      FadeOutStartingDistance = 650000.0,
-      LabelsForceDomeRendering = true,
+      FadeDistances = { 650000.0, 4000000.0 },
       LabelsDistanceEPS = 500000.0,
       LabelsColor = { 1.0, 1.0, 0.0 }
     }

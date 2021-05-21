@@ -31,6 +31,8 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/vector/ivec2property.h>
+#include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/glm.h>
@@ -84,14 +86,14 @@ private:
 
     properties::BoolProperty _labelsEnabled;
     properties::FloatProperty _labelsFontSize;
-    properties::IntProperty _labelsMaxSize;
-    properties::IntProperty _labelsMinSize;
+    properties::IVec2Property _labelsMinMaxSize;
+
     properties::FloatProperty _labelsSize;
     properties::FloatProperty _labelsMinHeight;
     properties::Vec3Property _labelsColor;
     properties::FloatProperty _labelsOpacity;
-    properties::FloatProperty _labelsFadeInDist;
-    properties::FloatProperty _labelsFadeOutDist;
+    properties::Vec2Property _labelsFadeDistances;
+
     properties::BoolProperty _labelsFadeInEnabled;
     properties::BoolProperty _labelsFadeOutEnabled;
     properties::BoolProperty _labelsDisableCullingEnabled;

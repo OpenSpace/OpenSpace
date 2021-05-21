@@ -28,14 +28,9 @@ local Mars = {
       LabelAlignmentOption = "Horizontally", -- or Circularly
       LabelsFontSize = 14.0,
       LabelsSize = 9.0,
-      LabelsMinSize = 1.0,
-      LabelsMaxSize = 1500.0,
-      ProximityEnabled = false,
       LabelsFadeInEnabled = true,
       LabelsFadeOutEnabled = true,
-      FadeInStartingDistance = 2000000.0,
-      FadeOutStartingDistance = 750000.0,
-      LabelsForceDomeRendering = true,
+      FadeDistances = { 750000.0, 2000000.0 },
       LabelsDistanceEPS = 2500000.0,
       LabelsColor = { 1.0, 1.0, 0.0 }
     }

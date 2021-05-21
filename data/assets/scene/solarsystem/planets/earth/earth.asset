@@ -28,14 +28,9 @@ local Earth = {
       LabelAlignmentOption = "Horizontally", -- or Circularly
       LabelsFontSize = 40.0,
       LabelsSize = 4.0,
-      LabelsMinSize = 1.0,
-      LabelsMaxSize = 1500.0,
-      ProximityEnabled = false,
       LabelsFadeInEnabled = true,
       LabelsFadeOutEnabled = true,
-      FadeInStartingDistance = 300000.0,
-      FadeOutStartingDistance = 10000.0,
-      LabelsForceDomeRendering = true,
+      LabelsFadeDistances = { 10000.0, 300000.0 },
       LabelsDistanceEPS = 1500000.0,
       LabelsColor = { 1.0, 0.0, 0.0 }
     }

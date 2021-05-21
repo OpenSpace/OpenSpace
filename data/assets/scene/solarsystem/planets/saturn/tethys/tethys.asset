@@ -31,14 +31,9 @@ local Tethys = {
       LabelAlignmentOption = "Horizontally", -- or Circularly
       LabelsFontSize = 24.0,
       LabelsSize = 8.0,
-      LabelsMinSize = 1.0,
-      LabelsMaxSize = 1500.0,
-      ProximityEnabled = false,
       LabelsFadeInEnabled = true,
       LabelsFadeOutEnabled = true,
-      FadeInStartingDistance = 1500000.0,
-      FadeOutStartingDistance = 500000.0,
-      LabelsForceDomeRendering = true,
+      FadeDistances = { 500000.0, 1500000.0 },
       LabelsDistanceEPS = 200000.0,
       LabelsColor = { 1.0, 1.0, 0.0 }
     }

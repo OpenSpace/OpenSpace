@@ -33,14 +33,9 @@ local Io = {
       LabelAlignmentOption = "Horizontally", -- or Circularly
       LabelsFontSize = 40.0,
       LabelsSize = 10.0,
-      LabelsMinSize = 1.0,
-      LabelsMaxSize = 1500.0,
-      ProximityEnabled = false,
       LabelsFadeInEnabled = true,
       LabelsFadeOutEnabled = true,
-      FadeInStartingDistance = 8500000.0,
-      FadeOutStartingDistance = 4000000.0,
-      LabelsForceDomeRendering = true,
+      FadeDistances = { 4000000.0, 8500000.0 },
       LabelsDistanceEPS = 1000000.0,
       LabelsColor = { 1.0, 1.0, 0.0 }
     }

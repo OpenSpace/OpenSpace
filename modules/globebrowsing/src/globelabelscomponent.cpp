@@ -71,7 +71,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LabelsEnableInfo = {
         "Enable",
         "Enable",
-        "Enables and disables labels' rendering from the asset file."
+        "Enables and disables labels' rendering."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LabelsFontSizeInfo = {
@@ -80,82 +80,72 @@ namespace {
         "Font size for the rendering labels. This is different fromt text size."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LabelsMaxSizeInfo = {
-        "LabelsMaxSize",
-        "Labels Maximum Text Size",
-        "Maximum label size"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo LabelsMinSizeInfo = {
-        "LabelsMinSize",
-        "Labels Minimum Text Size",
-        "Minimum label size"
+    constexpr openspace::properties::Property::PropertyInfo LabelsMinMaxSizeInfo = {
+        "LabelsMinMaxSize",
+        "Labels Min/Max Text Size",
+        "Minimum and maximum label size, in pixels."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LabelsSizeInfo = {
         "LabelsSize",
         "Labels Size",
-        "Labels Size"
+        "This value affects the size scale of the labels."
     };
 
+    // @TODO (2021-05-21) The usage of this property is quite unintuitive, as it affects
+    // both where the fading starts and ends as well as offsets the labels' positions.
+    // Should be made more intuitive and then properly documented
     constexpr openspace::properties::Property::PropertyInfo LabelsMinHeightInfo = {
         "LabelsMinHeight",
         "Labels Minimum Height",
-        "Labels Minimum Height"
+        "Labels minimum height."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LabelsColorInfo = {
         "LabelsColor",
         "Labels Color",
-        "Labels Color"
+        "The text color of the labels."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LabelsOpacityInfo = {
         "LabelsOpacity",
         "Labels Opacity",
-        "Labels Opacity"
+        "The opacity of the labels."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        LabelsFadeInStartingDistanceInfo =
-    {
-        "FadeInStartingDistance",
-        "Fade In Starting Distance for Labels",
-        "Fade In Starting Distance for Labels"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo
-        LabelsFadeOutStartingDistanceInfo =
-    {
-        "FadeOutStartingDistance",
-        "Fade Out Starting Distance for Labels",
-        "Fade Out Starting Distance for Labels"
+    constexpr openspace::properties::Property::PropertyInfo LabelsFadeDistancesInfo = {
+        "FadeDistances",
+        "Fade Distances for Labels",
+        "The distances above the globe's surface at which the labels start faing in or "
+        "out, given in meters."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LabelsFadeInEnabledInfo = {
         "LabelsFadeInEnabled",
-        "Labels fade In enabled",
-        "Labels fade In enabled"
+        "Labels Fade In Enabled",
+        "Sets whether the labels fade in when approaching the globe from a distance. If "
+        "false, no fading happens and the labels immediately has full opacity."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LabelsFadeOutEnabledInfo = {
         "LabelsFadeOutEnabled",
-        "Labels fade Out enabled",
-        "Labels fade Out enabled"
+        "Labels Fade Out Enabled",
+        "Sets whether the labels fade out when approaching the surface of the globe. If "
+        "false, no fading happens and the labels stays in full opacity."
     };
 
     constexpr openspace::properties::Property::PropertyInfo
         LabelsDisableCullingEnabledInfo =
     {
         "LabelsDisableCullingEnabled",
-        "Labels culling disabled",
-        "Labels culling disabled"
+        "Labels Culling Disabled",
+        "Labels culling disabled."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LabelsDistanceEPSInfo = {
         "LabelsDistanceEPS",
-        "Labels culling distance from globe's center",
-        "Labels culling distance from globe's center"
+        "Labels Culling Distance",
+        "Labels culling distance from globe's center."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LabelAlignmentOptionInfo = {
@@ -177,11 +167,8 @@ namespace {
         // [[codegen::verbatim(LabelsFontSizeInfo.description)]]
         std::optional<float> labelsFontSize;
 
-        // [[codegen::verbatim(LabelsMinSizeInfo.description)]]
-        std::optional<int> labelsMinSize;
-
-        // [[codegen::verbatim(LabelsMaxSizeInfo.description)]]
-        std::optional<int> labelsMaxSize;
+        // [[codegen::verbatim(LabelsMinMaxSizeInfo.description)]]
+        std::optional<glm::ivec2> labelsMinMaxSize;
 
         // [[codegen::verbatim(LabelsSizeInfo.description)]]
         std::optional<float> labelsSize;
@@ -195,11 +182,8 @@ namespace {
         // [[codegen::verbatim(LabelsOpacityInfo.description)]]
         std::optional<float> labelsOpacity [[codegen::inrange(0.f, 1.f)]];
 
-        // [[codegen::verbatim(LabelsFadeInStartingDistanceInfo.description)]]
-        std::optional<float> fadeInStartingDistance;
-
-        // [[codegen::verbatim(LabelsFadeOutStartingDistanceInfo.description)]]
-        std::optional<float> fadeOutStartingDistance;
+        // [[codegen::verbatim(LabelsFadeDistancesInfo.description)]]
+        std::optional<glm::vec2> fadeDistances;
 
         // [[codegen::verbatim(LabelsFadeInEnabledInfo.description)]]
         std::optional<bool> labelsFadeInEnabled;
@@ -235,8 +219,12 @@ GlobeLabelsComponent::GlobeLabelsComponent()
     : properties::PropertyOwner({ "Labels" })
     , _labelsEnabled(LabelsInfo, false)
     , _labelsFontSize(LabelsFontSizeInfo, 30, 1, 300)
-    , _labelsMaxSize(LabelsMaxSizeInfo, 300, 10, 1000)
-    , _labelsMinSize(LabelsMinSizeInfo, 4, 1, 100)
+    , _labelsMinMaxSize(
+        LabelsMinMaxSizeInfo,
+        glm::ivec2(1, 1000),
+        glm::ivec2(1),
+        glm::ivec2(1000)
+    )
     , _labelsSize(LabelsSizeInfo, 2.5, 0, 30)
     , _labelsMinHeight(LabelsMinHeightInfo, 100.0, 0.0, 10000.0)
     , _labelsColor(
@@ -246,8 +234,12 @@ GlobeLabelsComponent::GlobeLabelsComponent()
         glm::vec3(1.f)
     )
     , _labelsOpacity(LabelsOpacityInfo, 1.f, 0.f, 1.f)
-    , _labelsFadeInDist(LabelsFadeInStartingDistanceInfo, 1e6, 1e3, 1e8)
-    , _labelsFadeOutDist(LabelsFadeOutStartingDistanceInfo, 1e4, 1, 1e7)
+    , _labelsFadeDistances(
+        LabelsFadeDistancesInfo,
+        glm::vec2(1e4, 1e6),
+        glm::vec2(1.f),
+        glm::vec2(1e8)
+    )
     , _labelsFadeInEnabled(LabelsFadeInEnabledInfo, false)
     , _labelsFadeOutEnabled(LabelsFadeOutEnabledInfo, false)
     , _labelsDisableCullingEnabled(LabelsDisableCullingEnabledInfo, false)
@@ -260,15 +252,17 @@ GlobeLabelsComponent::GlobeLabelsComponent()
     addProperty(_labelsEnabled);
     addProperty(_labelsFontSize);
     addProperty(_labelsSize);
-    addProperty(_labelsMinHeight);
-    _labelsColor.setViewOption(properties::Property::ViewOptions::Color);
+    _labelsMinMaxSize.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+    addProperty(_labelsMinMaxSize);
     addProperty(_labelsColor);
     addProperty(_labelsOpacity);
-    addProperty(_labelsFadeInDist);
-    addProperty(_labelsFadeOutDist);
-    addProperty(_labelsMinSize);
+    _labelsFadeDistances.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+    _labelsFadeDistances.setExponent(3.f);
+    addProperty(_labelsFadeDistances);
     addProperty(_labelsFadeInEnabled);
     addProperty(_labelsFadeOutEnabled);
+    addProperty(_labelsMinHeight);
+    _labelsColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_labelsDisableCullingEnabled);
     addProperty(_labelsDistanceEPS);
 
@@ -302,11 +296,9 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
     _labelsColor = p.labelsColor.value_or(_labelsColor);
     _labelsOpacity = p.labelsOpacity.value_or(_labelsOpacity);
     _labelsFadeInEnabled = p.labelsFadeInEnabled.value_or(_labelsFadeInEnabled);
-    _labelsFadeInDist = p.fadeInStartingDistance.value_or(_labelsFadeInDist);
     _labelsFadeOutEnabled = p.labelsFadeOutEnabled.value_or(_labelsFadeOutEnabled);
-    _labelsFadeOutDist = p.fadeOutStartingDistance.value_or(_labelsFadeOutDist);
-    _labelsMinSize = p.labelsMinSize.value_or(_labelsMinSize);
-    _labelsMaxSize = p.labelsMaxSize.value_or(_labelsMaxSize);
+    _labelsFadeDistances = p.fadeDistances.value_or(_labelsFadeDistances);
+    _labelsMinMaxSize = p.labelsMinMaxSize.value_or(_labelsMinMaxSize);
     _labelsDisableCullingEnabled =
         p.labelsDisableCullingEnabled.value_or(_labelsDisableCullingEnabled);
     _labelsDistanceEPS = p.labelsDistanceEPS.value_or(_labelsDistanceEPS);
@@ -527,18 +519,17 @@ void GlobeLabelsComponent::draw(const RenderData& data) {
 
     glm::dvec3 globePosWorld =
         glm::dvec3(_globe->modelTransform() * glm::vec4(0.f, 0.f, 0.f, 1.f));
-    glm::dvec3 camToGlobeDistanceWorld = globePosWorld - data.camera.positionVec3();
-    double distanceCameraGlobeWorld = glm::length(camToGlobeDistanceWorld);
+    glm::dvec3 cameraToGlobeWorld = globePosWorld - data.camera.positionVec3();
+    double distanceCameraGlobeWorld = glm::length(cameraToGlobeWorld);
 
     float varyingOpacity = 1.f;
 
-    double averageRadius = (
-        _globe->ellipsoid().radii().x + _globe->ellipsoid().radii().y +
-        _globe->ellipsoid().radii().z
-    ) / 3.0;
+    const glm::dvec3 globeRadii = _globe->ellipsoid().radii();
+    double averageRadius = (globeRadii.x + globeRadii.y + globeRadii.z) / 3.0;
+
     if (_labelsFadeInEnabled) {
         glm::dvec2 fadeRange = glm::dvec2(averageRadius + _labelsMinHeight);
-        fadeRange.x += _labelsFadeInDist;
+        fadeRange.x += _labelsFadeDistances.value().y;
         double a = 1.0 / (fadeRange.y - fadeRange.x);
         double b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
         double funcValue = a * distanceCameraGlobeWorld + b;
@@ -553,7 +544,7 @@ void GlobeLabelsComponent::draw(const RenderData& data) {
         glm::dvec2 fadeRange = glm::dvec2(
             averageRadius + _labelsMinHeight + LabelFadeOutLimitAltitudeMeters
         );
-        fadeRange.x += _labelsFadeOutDist;
+        fadeRange.x += _labelsFadeDistances.value().x;
         double a = 1.0 / (fadeRange.x - fadeRange.y);
         double b = -(fadeRange.y / (fadeRange.x - fadeRange.y));
         double funcValue = a * distanceCameraGlobeWorld + b;
@@ -637,8 +628,8 @@ void GlobeLabelsComponent::renderLabels(const RenderData& data,
             ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
             labelInfo.orthoRight = orthoRight;
             labelInfo.orthoUp = orthoUp;
-            labelInfo.minSize = _labelsMinSize;
-            labelInfo.maxSize = _labelsMaxSize;
+            labelInfo.minSize = _labelsMinMaxSize.value().x;
+            labelInfo.maxSize = _labelsMinMaxSize.value().y;
             labelInfo.cameraPos = data.camera.positionVec3();
             labelInfo.cameraLookUp = data.camera.lookUpVectorWorldSpace();
             labelInfo.renderType = 0;
@@ -670,7 +661,6 @@ void GlobeLabelsComponent::renderLabels(const RenderData& data,
 bool GlobeLabelsComponent::isLabelInFrustum(const glm::dmat4& MVMatrix,
                                             const glm::dvec3& position) const
 {
-
     // Frustum Planes
     glm::dvec3 col1(MVMatrix[0][0], MVMatrix[1][0], MVMatrix[2][0]);
     glm::dvec3 col2(MVMatrix[0][1], MVMatrix[1][1], MVMatrix[2][1]);

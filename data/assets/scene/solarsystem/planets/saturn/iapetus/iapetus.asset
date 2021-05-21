@@ -31,14 +31,9 @@ local Iapetus = {
       LabelAlignmentOption = "Horizontally", -- or Circularly
       LabelsFontSize = 30.0,
       LabelsSize = 8.0,
-      LabelsMinSize = 1.0,
-      LabelsMaxSize = 1500.0,
-      ProximityEnabled = false,
       LabelsFadeInEnabled = true,
       LabelsFadeOutEnabled = true,
-      FadeInStartingDistance = 3500000.0,
-      FadeOutStartingDistance = 600000.0,
-      LabelsForceDomeRendering = true,
+      FadeDistances = { 600000.0, 3500000.0 },
       LabelsDistanceEPS = 250000.0,
       LabelsColor = { 1.0, 1.0, 0.0 }
     }

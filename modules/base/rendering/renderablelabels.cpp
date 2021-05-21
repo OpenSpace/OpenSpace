@@ -87,13 +87,13 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font Size",
-        "The font size (in pt) for the labels."
+        "The font size (in pt) for the label."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LabelSizeInfo = {
         "LabelSize",
         "Label Size",
-        "The label size (in pixels) for the labels."
+        "This value affects the size scale of the label."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LabelTextInfo = {
@@ -105,7 +105,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LabelMinMaxSizeInfo = {
         "LabelMinMaxSize",
         "Label Min and Max Size",
-        "The minimum and maximum size (in pixels) of the labels."
+        "The minimum and maximum size (in pixels) of the label."
     };
 
     constexpr openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
