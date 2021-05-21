@@ -212,11 +212,9 @@ namespace openspace::skybrowser::luascriptfunctions {
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 
         lua_newtable(L);
-        int index = 1;
         
         // Add the window data for OpenSpace
-        ghoul::lua::push(L, index);
-        index++;
+        ghoul::lua::push(L, "OpenSpace");
         lua_newtable(L);
         // Get the view direction of the screen in cartesian J2000 coordinates
         glm::dvec3 camPos = global::navigationHandler->camera()->positionVec3();
@@ -265,8 +263,7 @@ namespace openspace::skybrowser::luascriptfunctions {
                 glm::ivec3 color = browser->_borderColor.value();
                 std::vector<int> colorVec = { color.r, color.g, color.b };
 
-                ghoul::lua::push(L, index);
-                index++;
+                ghoul::lua::push(L, id);
                 lua_newtable(L);
                 // Push ("Key", value)
                 ghoul::lua::push(L, "id", id);
