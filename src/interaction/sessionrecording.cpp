@@ -47,6 +47,7 @@
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
+#include <algorithm>
 #include <filesystem>
 #include <iomanip>
 
@@ -1532,7 +1533,7 @@ void SessionRecording::checkForScenegraphNodeAccess_Nav(std::string& s,
 }
 
 void SessionRecording::eraseSpacesFromString(std::string& s) {
-    s.erase(std::remove_if(s.begin(), s.end(), std::isspace), s.end());
+    s.erase(std::remove_if(s.begin(), s.end(), ::isspace), s.end());
 }
 
 std::string SessionRecording::getNameFromSurroundingQuotes(std::string& s) {
