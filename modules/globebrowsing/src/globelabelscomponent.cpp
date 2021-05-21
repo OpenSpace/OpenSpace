@@ -92,13 +92,11 @@ namespace {
         "This value affects the size scale of the labels."
     };
 
-    // @TODO (2021-05-21) The usage of this property is quite unintuitive, as it affects
-    // both where the fading starts and ends as well as offsets the labels' positions.
-    // Should be made more intuitive and then properly documented
-    constexpr openspace::properties::Property::PropertyInfo LabelsMinHeightInfo = {
-        "LabelsMinHeight",
-        "Labels Minimum Height",
-        "Labels minimum height."
+    constexpr openspace::properties::Property::PropertyInfo LabelsHeightOffsetInfo = {
+        "LabelsHeightOffset",
+        "Labels Height Offset",
+        "This value moves the label away from the globe surface by the specified "
+        "distance (in meters)."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LabelsColorInfo = {
@@ -116,8 +114,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LabelsFadeDistancesInfo = {
         "FadeDistances",
         "Fade Distances for Labels",
-        "The distances above the globe's surface at which the labels start faing in or "
-        "out, given in meters."
+        "The distances above the globe's surface at which the labels start fading in or "
+        "out, given in meters. The final distances are also adjusted by the specified "
+        "height offset."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LabelsFadeInEnabledInfo = {
@@ -173,7 +172,7 @@ namespace {
         // [[codegen::verbatim(LabelsSizeInfo.description)]]
         std::optional<float> labelsSize;
 
-        // [[codegen::verbatim(LabelsMinHeightInfo.description)]]
+        // [[codegen::verbatim(LabelsHeightOffsetInfo.description)]]
         std::optional<float> labelsMinHeight;
 
         // [[codegen::verbatim(LabelsColorInfo.description)]]
@@ -226,7 +225,7 @@ GlobeLabelsComponent::GlobeLabelsComponent()
         glm::ivec2(1000)
     )
     , _labelsSize(LabelsSizeInfo, 2.5, 0, 30)
-    , _labelsMinHeight(LabelsMinHeightInfo, 100.0, 0.0, 10000.0)
+    , _labelsHeightOffset(LabelsHeightOffsetInfo, 100.0, 0.0, 10000.0)
     , _labelsColor(
         LabelsColorInfo,
         glm::vec3(1.f, 1.f, 0.f),
@@ -261,7 +260,7 @@ GlobeLabelsComponent::GlobeLabelsComponent()
     addProperty(_labelsFadeDistances);
     addProperty(_labelsFadeInEnabled);
     addProperty(_labelsFadeOutEnabled);
-    addProperty(_labelsMinHeight);
+    addProperty(_labelsHeightOffset);
     _labelsColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_labelsDisableCullingEnabled);
     addProperty(_labelsDistanceEPS);
@@ -292,7 +291,7 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
     _labelsFontSize = p.labelsFontSize.value_or(_labelsFontSize);
     _labelsFontSize.onChange([this]() { initializeFonts(); });
     _labelsSize = p.labelsSize.value_or(_labelsSize);
-    _labelsMinHeight = p.labelsMinHeight.value_or(_labelsMinHeight);
+    _labelsHeightOffset = p.labelsMinHeight.value_or(_labelsHeightOffset);
     _labelsColor = p.labelsColor.value_or(_labelsColor);
     _labelsOpacity = p.labelsOpacity.value_or(_labelsOpacity);
     _labelsFadeInEnabled = p.labelsFadeInEnabled.value_or(_labelsFadeInEnabled);
@@ -528,7 +527,7 @@ void GlobeLabelsComponent::draw(const RenderData& data) {
     double averageRadius = (globeRadii.x + globeRadii.y + globeRadii.z) / 3.0;
 
     if (_labelsFadeInEnabled) {
-        glm::dvec2 fadeRange = glm::dvec2(averageRadius + _labelsMinHeight);
+        glm::dvec2 fadeRange = glm::dvec2(averageRadius + _labelsHeightOffset);
         fadeRange.x += _labelsFadeDistances.value().y;
         double a = 1.0 / (fadeRange.y - fadeRange.x);
         double b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
@@ -542,7 +541,7 @@ void GlobeLabelsComponent::draw(const RenderData& data) {
 
     if (_labelsFadeOutEnabled) {
         glm::dvec2 fadeRange = glm::dvec2(
-            averageRadius + _labelsMinHeight + LabelFadeOutLimitAltitudeMeters
+            averageRadius + _labelsHeightOffset + LabelFadeOutLimitAltitudeMeters
         );
         fadeRange.x += _labelsFadeDistances.value().x;
         double a = 1.0 / (fadeRange.x - fadeRange.y);
@@ -623,7 +622,8 @@ void GlobeLabelsComponent::renderLabels(const RenderData& data,
                 orthoUp = glm::normalize(glm::cross(labelNormalObj, orthoRight));
             }
 
-            position += _labelsMinHeight;
+            // Move the position along the normal. Note that position is in model space
+            position += _labelsHeightOffset.value() * glm::normalize(position);
 
             ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
             labelInfo.orthoRight = orthoRight;

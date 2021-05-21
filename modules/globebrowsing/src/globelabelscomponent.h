@@ -86,14 +86,14 @@ private:
 
     properties::BoolProperty _labelsEnabled;
     properties::FloatProperty _labelsFontSize;
-    properties::IVec2Property _labelsMinMaxSize;
-
     properties::FloatProperty _labelsSize;
-    properties::FloatProperty _labelsMinHeight;
+    properties::IVec2Property _labelsMinMaxSize;
+    properties::FloatProperty _labelsHeightOffset;
+
     properties::Vec3Property _labelsColor;
     properties::FloatProperty _labelsOpacity;
-    properties::Vec2Property _labelsFadeDistances;
 
+    properties::Vec2Property _labelsFadeDistances;
     properties::BoolProperty _labelsFadeInEnabled;
     properties::BoolProperty _labelsFadeOutEnabled;
     properties::BoolProperty _labelsDisableCullingEnabled;
