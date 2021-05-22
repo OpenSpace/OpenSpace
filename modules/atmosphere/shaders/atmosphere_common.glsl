@@ -135,7 +135,7 @@ vec3 irradiance(sampler2D sampler, float r, float muSun) {
 //================================================//
 // In the following shaders r (altitude) is the length of vector/position x in the
 // atmosphere (or on the top of it when considering an observer in space), where the light
-// is comming from the opposite direction of the view direction, here the vector v or
+// is coming from the opposite direction of the view direction, here the vector v or
 // viewDirection. Rg is the planet radius and Rt the atmosphere radius.
 
 // Calculate the distance of the ray starting at x (height r) until the planet's ground
@@ -148,10 +148,12 @@ float rayDistance(float r, float mu) {
   // one we are looking for, otherwise we may be passing through the ground
   
   // cosine law
-  float atmRadiusEps = Rt + ATM_EPSILON;
-  float rayDistanceAtmosphere = -r * mu +
-    sqrt(r * r * (mu * mu - 1.0) + atmRadiusEps * atmRadiusEps); 
-  float delta = r * r * (mu * mu - 1.0) + Rg * Rg;
+  float atmRadiusEps2 = (Rt + ATM_EPSILON) * (Rt + ATM_EPSILON);
+  float mu2 = mu * mu;
+  float r2 = r * r;
+  float rg2 = Rg * Rg;
+  float rayDistanceAtmosphere = -r * mu + sqrt(r2 * (mu2 - 1.0) + atmRadiusEps2); 
+  float delta = r2 * (mu2 - 1.0) + rg2;
 
   // Ray may be hitting ground
   if (delta >= 0.0) {
@@ -212,11 +214,10 @@ void unmappingMuMuSunNu(float r, vec4 dhdH, out float mu, out float muSun, out f
 // r := height of starting point vect(x)
 // mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
 vec3 transmittance(float r, float mu) {
-  // Given the position x (here the altitude r) and the view
-  // angle v (here the cosine(v)= mu), we map this
+  // Given the position x (here the altitude r) and the view angle v
+  // (here the cosine(v)= mu), we map this
   float u_r = sqrt((r - Rg) * invRtMinusRg);
-  //float u_r  = sqrt((r*r - Rg*Rg) / (Rt*Rt - Rg*Rg));
-  // See Colliene to understand the different mapping.
+  // See Colliene to understand the mapping
   float u_mu = atan((mu + 0.15) / 1.15 * tan(1.5)) / 1.5;
   
   return texture(transmittanceTexture, vec2(u_mu, u_r)).rgb;
@@ -261,7 +262,8 @@ float rayleighPhaseFunction(float mu) {
 }
 
 // Calculates Mie phase function given the scattering cosine angle mu
-// mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
+// mu   := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v)) / r
+// mieG := mie phase function value
 float miePhaseFunction(float mu, float mieG) {
   float mieG2 = mieG * mieG;
   return 0.1193662072 * (1.0 - mieG2) *

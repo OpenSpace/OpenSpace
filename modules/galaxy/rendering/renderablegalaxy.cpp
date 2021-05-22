@@ -58,12 +58,12 @@ namespace {
     constexpr const char* _loggerCat = "Renderable Galaxy";
 
     constexpr const std::array<const char*, 4> UniformNamesPoints = {
-        "modelMatrix", "cameraViewProjectionMatrix", "eyePosition",
+        "modelMatrix", "viewProjectionMatrix", "eyePosition",
         "opacityCoefficient"
     };
 
     constexpr const std::array<const char*, 5> UniformNamesBillboards = {
-        "modelMatrix", "cameraViewProjectionMatrix",
+        "modelMatrix", "viewProjectionMatrix",
         "cameraUp", "eyePosition", "psfTexture"
     };
 

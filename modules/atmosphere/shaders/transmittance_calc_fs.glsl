@@ -80,13 +80,11 @@ void main() {
   // One must remember that mu is defined from 0 to PI/2 + epsilon
   float muSun = -0.15 + tan(1.5 * u_mu) / tan(1.5) * 1.15;
 
-  vec3 opDepth = vec3(0.0);
-  
   vec3 ozoneContribution = vec3(0.0);
   if (ozoneLayerEnabled) {
     ozoneContribution = betaOzoneExtinction * 0.0000006 * opticalDepth(r, muSun, HO);
   }
-  opDepth = ozoneContribution + 
+  vec3 opDepth = ozoneContribution + 
     betaMieExtinction * opticalDepth(r, muSun, HM) +
     betaRayleigh * opticalDepth(r, muSun, HR);
   

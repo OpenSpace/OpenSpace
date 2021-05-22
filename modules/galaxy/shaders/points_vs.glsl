@@ -34,7 +34,7 @@ out vec3 vs_color;
 out float vs_screenSpaceDepth;
 out float vs_starBrightness;
 
-uniform dmat4 cameraViewProjectionMatrix;
+uniform dmat4 viewProjectionMatrix;
 uniform dmat4 modelMatrix;
 uniform dvec3 eyePosition;
 
@@ -45,13 +45,13 @@ void main() {
 	dvec4 dpos = dvec4(vs_position);
 
 	double distanceToStar = length((dpos.xyz - eyePosition));
-	vs_starBrightness = clamp(float(8000*PARSEC/distanceToStar), 0.0, 1.0);
+	vs_starBrightness = clamp(float(8000 * PARSEC / distanceToStar), 0.0, 1.0);
 
 	dpos.xyz *= 8.0;
 	dpos = modelMatrix * dpos;
 	dpos /= PARSEC;
 
-	vec4 positionScreenSpace = z_normalization(vec4(cameraViewProjectionMatrix * dpos));
+	vec4 positionScreenSpace = z_normalization(vec4(viewProjectionMatrix * dpos));
 	vs_color = in_color;
 	vs_screenSpaceDepth = positionScreenSpace.w;
 	gl_Position = positionScreenSpace;
