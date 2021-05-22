@@ -149,7 +149,7 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
       // cos(angle between vec(v) and vec(w)), ||v|| = ||w|| = 1
       float nuWV = dot(v, w);
       float phaseRayleighWV = rayleighPhaseFunction(nuWV);
-      float phaseMieWV = miePhaseFunction(nuWV);
+      float phaseMieWV = miePhaseFunction(nuWV, mieG);
       
       vec3 groundNormal = (vec3(0.0, 0.0, r) + distanceToGround * w) / Rg;
       vec3 groundIrradiance = irradianceLUT(deltaETexture, dot(groundNormal, s), Rg);
@@ -168,7 +168,7 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
       // include the phase functions on those tables (that's why we calculate them now).
       if (firstIteraction == 1) {        
         float phaseRaySW = rayleighPhaseFunction(nuSW);
-        float phaseMieSW = miePhaseFunction(nuSW);
+        float phaseMieSW = miePhaseFunction(nuSW, mieG);
         // We can now access the values for the single InScattering in the textures deltaS textures.
         vec3 singleRay = texture4D(deltaSRTexture, r, w.z, muSun, nuSW).rgb;
         vec3 singleMie = texture4D(deltaSMTexture, r, w.z, muSun, nuSW).rgb;

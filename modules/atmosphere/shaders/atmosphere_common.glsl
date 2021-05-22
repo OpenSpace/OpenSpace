@@ -163,45 +163,6 @@ float rayDistance(float r, float mu) {
   return rayDistanceAtmosphere;
 }
 
-// Given the window's fragment coordinates, for a defined viewport, gives back the
-// interpolated r e [Rg, Rt] and mu e [-1, 1]
-// r := height of starting point vect(x)
-// mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
-void unmappingRAndMu(out float r, out float mu) {
-  float u_mu  = gl_FragCoord.x / float(TRANSMITTANCE.x);
-  float u_r = gl_FragCoord.y / float(TRANSMITTANCE.y);
-  
-  // In the paper u_r^2 = (r^2-Rg^2)/(Rt^2-Rg^2)
-  // So, extracting r from u_r in the above equation:
-  r = Rg + (u_r * u_r) * RtMinusRg;
-  
-  // In the paper the Bruneton suggest mu = dot(v,x)/||x|| with ||v|| = 1.0
-  // Later he proposes u_mu = (1-exp(-3mu-0.6))/(1-exp(-3.6))
-  // But the below one is better. See Colliene.
-  // One must remember that mu is defined from 0 to PI/2 + epsillon. 
-  mu = -0.15 + tan(1.5 * u_mu) / tan(1.5) * 1.15;
-}
-
-// Given the windows's fragment coordinates, for a defined view port, gives back the
-// interpolated r e [Rg, Rt] and muSun e [-1, 1]
-// r := height of starting point vect(x)
-// muSun := cosine of the zeith angle of vec(s). Or muSun = (vec(s) * vec(v))
-void unmappingRAndMuSun(out float r, out float muSun) {
-  // See Bruneton and Colliene to understand the mapping.
-  muSun = -0.2 + (gl_FragCoord.x - 0.5) / (float(OTHER_TEXTURES.x) - 1.0) * 1.2;
-  r = Rg + (gl_FragCoord.y - 0.5) / (float(OTHER_TEXTURES.y) ) * RtMinusRg;
-}
-
-// Given the windows's fragment coordinates, for a defined view port, gives back the
-// interpolated r e [Rg, Rt] and muSun e [-1, 1] for the Irradiance deltaE texture table
-// r := height of starting point vect(x)
-// muSun := cosine of the zeith angle of vec(s). Or muSun = (vec(s) * vec(v))
-void unmappingRAndMuSunIrradiance(out float r, out float muSun) {
-  // See Bruneton and Colliene to understand the mapping.
-  muSun = -0.2 + (gl_FragCoord.x - 0.5) / (float(SKY.x) - 1.0) * 1.2;
-  r = Rg + (gl_FragCoord.y - 0.5) / (float(SKY.y) - 1.0) * RtMinusRg;
-}
-
 // Given the windows's fragment coordinates, for a defined view port, gives back the
 // interpolated r e [Rg, Rt] and mu, muSun amd nu e [-1, 1]
 // r := height of starting point vect(x)
@@ -212,7 +173,7 @@ void unmappingRAndMuSunIrradiance(out float r, out float muSun) {
 //         (see paper), dhdH.z stores dminG := r - Rg and dhdH.w stores dh (see paper)
 void unmappingMuMuSunNu(float r, vec4 dhdH, out float mu, out float muSun, out float nu) {
   // Window coordinates of pixel (uncentering also)
-  vec2 fragment = gl_FragCoord.xy - vec2(0.5, 0.5);
+  vec2 fragment = gl_FragCoord.xy - vec2(0.5);
 
   // Pre-calculations
   float r2  = r * r;
@@ -301,14 +262,7 @@ float rayleighPhaseFunction(float mu) {
 
 // Calculates Mie phase function given the scattering cosine angle mu
 // mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
-float miePhaseFunction(float mu) {
-  //return (3.0f / (8.0f * M_PI)) * 
-  //      ( ( (1.0f - (mieG * mieG) ) * (1.0f + mu * mu) ) / 
-  //      ( (2.0f + mieG * mieG) *
-  //        pow(1.0f + mieG * mieG - 2.0f * mieG * mu, 3.0f/2.0f) ) );
-  // return 1.5f * 1.0f / (4.0f * M_PI) * (1.0f - mieG * mieG) *
-  //   pow(1.0f + (mieG * mieG) - 2.0f * mieG * mu, -3.0f/2.0f) * (1.0f + mu * mu) / (2.0f + mieG*mieG);
-
+float miePhaseFunction(float mu, float mieG) {
   float mieG2 = mieG * mieG;
   return 0.1193662072 * (1.0 - mieG2) *
     pow(1.0 + mieG2 - 2.0 * mieG * mu, -1.5) * (1.0 + mu * mu) / (2.0 + mieG2);

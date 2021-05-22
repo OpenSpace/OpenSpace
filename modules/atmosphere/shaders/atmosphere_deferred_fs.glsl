@@ -257,7 +257,7 @@ vec3 inscatterRadiance(vec3 x, inout float t, out float irradianceFactor, vec3 v
   float nu = dot(v, s);
   float muSun = dot(x, s) / r;
   float rayleighPhase = rayleighPhaseFunction(nu);
-  float miePhase = miePhaseFunction(nu);
+  float miePhase = miePhaseFunction(nu, mieG);
     
   // S[L](x,s,v)
   // I.e. the next line has the scattering light for the "infinite" ray passing through

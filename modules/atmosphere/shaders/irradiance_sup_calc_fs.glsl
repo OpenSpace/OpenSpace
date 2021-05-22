@@ -37,10 +37,9 @@ const float stepPhi = (2.0 * M_PI) / float(IRRADIANCE_INTEGRAL_SAMPLES);
 const float stepTheta = M_PI / (2.0 * float(IRRADIANCE_INTEGRAL_SAMPLES));
 
 void main() {
-  float r = 0.0;
-  float muSun = 0.0;
-  // Unmapping the variables from texture texels coordinates to mapped coordinates
-  unmappingRAndMuSunIrradiance(r, muSun);
+    // See Bruneton and Colliene to understand the mapping.
+  float muSun = -0.2 + (gl_FragCoord.x - 0.5) / (float(SKY.x) - 1.0) * 1.2;
+  float r = Rg + (gl_FragCoord.y - 0.5) / (float(SKY.y) - 1.0) * RtMinusRg;
 
   // We know that muSun = cos(sigma) = s.z/||s||
   // But, ||s|| = 1, so s.z = muSun. Also,
@@ -69,7 +68,7 @@ void main() {
       // calculate them now)
       if (firstIteraction == 1) {
         float phaseRay = rayleighPhaseFunction(nu);
-        float phaseMie = miePhaseFunction(nu);
+        float phaseMie = miePhaseFunction(nu, mieG);
         vec3 singleRay = texture4D(deltaSRTexture, r, w.z, muSun, nu).rgb;
         vec3 singleMie = texture4D(deltaSMTexture, r, w.z, muSun, nu).rgb;
         // w.z is the cosine(theta) = mu for vec(w) and also vec(w) dot vec(n(xo))

@@ -68,11 +68,11 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
 
 void main() {
   float mu = 0.0;
-  float muSunun = 0.0;
+  float muSun = 0.0;
   float nu = 0.0;
   // Unmapping the variables from texture texels coordinates to mapped coordinates
-  unmappingMuMuSunNu(r, dhdH, mu, muSunun, nu);
+  unmappingMuMuSunNu(r, dhdH, mu, muSun, nu);
   
   // Write to texture deltaSR 
-  renderTarget = vec4(inscatter(r, mu, muSunun, nu), 1.0);
+  renderTarget = vec4(inscatter(r, mu, muSun, nu), 1.0);
 }

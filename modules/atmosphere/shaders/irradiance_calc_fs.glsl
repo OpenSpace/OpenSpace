@@ -29,9 +29,11 @@
 out vec4 renderTableColor;
 
 void main() {
-  float muSun, r;
-  unmappingRAndMuSun(r, muSun);
-  // We are calculating the Irradiance for L0, i.e., only the radiance comming from Sun
+    // See Bruneton and Colliene to understand the mapping
+  float muSun = -0.2 + (gl_FragCoord.x - 0.5) / (float(OTHER_TEXTURES.x) - 1.0) * 1.2;
+  float r = Rg + (gl_FragCoord.y - 0.5) / (float(OTHER_TEXTURES.y) ) * RtMinusRg;
+
+  // We are calculating the Irradiance for L0, i.e., only the radiance coming from Sun
   // direction is accounted:
   // E[L0](x,s) = L0*dot(w,n) or 0 (if v!=s or the sun is occluded).
   // Because we consider the Planet as a perfect sphere and we are considering only single

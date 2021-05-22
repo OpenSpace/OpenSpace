@@ -67,9 +67,19 @@ float opticalDepth(float r, float mu, float H) {
 }
 
 void main() {
-  float r, muSun;    
-  unmappingRAndMu(r, muSun);
+  float u_mu  = gl_FragCoord.x / float(TRANSMITTANCE.x);
+  float u_r = gl_FragCoord.y / float(TRANSMITTANCE.y);
   
+  // In the paper u_r^2 = (r^2-Rg^2)/(Rt^2-Rg^2)
+  // So, extracting r from u_r in the above equation:
+  float r = Rg + (u_r * u_r) * RtMinusRg;
+  
+  // In the paper the Bruneton suggest mu = dot(v,x)/||x|| with ||v|| = 1.0
+  // Later he proposes u_mu = (1-exp(-3mu-0.6))/(1-exp(-3.6))
+  // But the below one is better. See Colliene.
+  // One must remember that mu is defined from 0 to PI/2 + epsilon
+  float muSun = -0.15 + tan(1.5 * u_mu) / tan(1.5) * 1.15;
+
   vec3 opDepth = vec3(0.0);
   
   vec3 ozoneContribution = vec3(0.0);
