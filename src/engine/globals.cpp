@@ -32,6 +32,7 @@
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/helpmanager.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/joystickinputstate.h>
@@ -90,6 +91,7 @@ namespace {
         sizeof(VirtualPropertyManager) +
         sizeof(WindowDelegate) +
         sizeof(configuration::Configuration) +
+        sizeof(interaction::HelpManager) +
         sizeof(interaction::InteractionMonitor) +
         sizeof(interaction::WebsocketInputStates) +
         sizeof(interaction::KeybindingManager) +
@@ -297,6 +299,14 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
+    helpManager = new (currentPos) interaction::HelpManager;
+    ghoul_assert(helpManager, "No helpManager");
+    currentPos += sizeof(interaction::HelpManager);
+#else // ^^^ WIN32 / !WIN32 vvv
+    helpManager = new interaction::HelpManager;
+#endif // WIN32
+
+#ifdef WIN32
     keybindingManager = new (currentPos) interaction::KeybindingManager;
     ghoul_assert(keybindingManager, "No keybindingManager");
     currentPos += sizeof(interaction::KeybindingManager);
@@ -431,6 +441,13 @@ void destroy() {
     rootPropertyOwner->~PropertyOwner();
 #else // ^^^ WIN32 / !WIN32 vvv
     delete rootPropertyOwner;
+#endif // WIN32
+
+    LDEBUGC("Globals", "Destroying 'HelpManager'");
+#ifdef WIN32
+    helpManager->~HelpManager();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete helpManager;
 #endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'ShortcutManager'");

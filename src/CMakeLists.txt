@@ -43,6 +43,8 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/engine/syncengine.cpp
   ${OPENSPACE_BASE_DIR}/src/engine/virtualpropertymanager.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/camerainteractionstates.cpp
+  ${OPENSPACE_BASE_DIR}/src/interaction/helpmanager.cpp
+  ${OPENSPACE_BASE_DIR}/src/interaction/helpmanager_lua.inl
   ${OPENSPACE_BASE_DIR}/src/interaction/interactionmonitor.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/inputstate.cpp
   ${OPENSPACE_BASE_DIR}/src/interaction/joystickinputstate.cpp
@@ -215,6 +217,7 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/delayedvariable.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/delayedvariable.inl
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/camerainteractionstates.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/interaction/helpmanager.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/inputstate.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interactionmonitor.h
   ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interpolator.h
