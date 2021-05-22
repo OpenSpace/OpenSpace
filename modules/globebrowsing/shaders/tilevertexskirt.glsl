@@ -31,14 +31,14 @@ uniform int xSegments;
 uniform float skirtLength;
 
 bool tileVertexIsSkirtVertex() {
-    int vertexIDx = gl_VertexID % (xSegments + 3);
-    int vertexIDy = gl_VertexID / (xSegments + 3);
-    return vertexIDx == 0 || vertexIDy == 0 ||
-        vertexIDx == (xSegments + 2) || vertexIDy == (xSegments + 2);
+  int vertexIDx = gl_VertexID % (xSegments + 3);
+  int vertexIDy = gl_VertexID / (xSegments + 3);
+  return vertexIDx == 0 || vertexIDy == 0 ||
+         vertexIDx == (xSegments + 2) || vertexIDy == (xSegments + 2);
 }
 
 float getTileVertexSkirtLength() {
-    return tileVertexIsSkirtVertex() ? skirtLength : 0.0;
+  return tileVertexIsSkirtVertex() ? skirtLength : 0.0;
 }
 
 #endif // TILE_VERTEX_SKIRT_HGLSL

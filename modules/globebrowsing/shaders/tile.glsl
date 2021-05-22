@@ -22,30 +22,57 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef TEXTURETILE_HGLSL
+#define TEXTURETILE_HGLSL
 
-out vec2 texCoord;
+struct TileDepthTransform {
+  float depthScale;
+  float depthOffset;
+};
 
-const vec3 posData[6] = vec3[] (
-    vec3(1.0, -0.5, 0.0),
-    vec3(0.5, -0.5, 0.0),
-    vec3(0.5, -1.0, 0.0),
-    vec3(1.0, -1.0, 0.0),
-    vec3(1.0, -0.5, 0.0),
-    vec3(0.5, -1.0, 0.0)
-);
+struct TileUvTransform {
+  vec2 uvOffset;
+  vec2 uvScale;
+};
 
-const vec2 texData[6] = vec2[] (
-    vec2(1.0, 1.0),
-    vec2(0.0, 1.0),
-    vec2(0.0, 0.0),
-    vec2(1.0, 0.0),
-    vec2(1.0, 1.0),
-    vec2(0.0, 0.0)
+struct ChunkTile {
+  sampler2D textureSampler;
+  TileUvTransform uvTransform;
+};
 
-);
+struct PixelPadding {
+  ivec2 startOffset;
+  ivec2 sizeDifference;
+};
 
-void main() {
-    texCoord = texData[gl_VertexID];
-    gl_Position = vec4(posData[gl_VertexID], 1.0);
-}
+struct ChunkTilePile {
+  ChunkTile chunkTile0;
+  ChunkTile chunkTile1;
+  ChunkTile chunkTile2;
+};
+
+struct LayerSettings {
+  float opacity;
+  float gamma;
+  float multiplier;
+  float offset;
+  float valueBlending;
+};
+
+struct LayerAdjustment {
+  vec3 chromaKeyColor;
+  float chromaKeyTolerance;
+};
+
+struct Layer {
+  ChunkTilePile pile;
+  TileDepthTransform depthTransform;
+  LayerSettings settings;
+  LayerAdjustment adjustment;
+  PixelPadding padding;
+  
+  // Other layer type properties stuff
+  vec3 color;
+};
+
+#endif // TEXTURETILE_HGLSL
