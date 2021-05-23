@@ -51,60 +51,60 @@ flat in float ge_speed;
 flat in float gs_screenSpaceDepth;
 
 vec4 bv2rgb(float bv) {
-    // BV is [-0.4,2.0]
-    float t = (bv + 0.4) / (2.0 + 0.4);
-    return texture(colorTexture, t);
+  // BV is [-0.4,2.0]
+  float t = (bv + 0.4) / (2.0 + 0.4);
+  return texture(colorTexture, t);
 }
 
 bool isOtherDataValueInRange() {
-    float t = (ge_bv - otherDataRange.x) / (otherDataRange.y - otherDataRange.x);
-    return t >= 0.0 && t <= 1.0;
+  float t = (ge_bv - otherDataRange.x) / (otherDataRange.y - otherDataRange.x);
+  return t >= 0.0 && t <= 1.0;
 }
 vec4 otherDataValue() {
-    float t = (ge_bv - otherDataRange.x) / (otherDataRange.y - otherDataRange.x);
-    t = clamp(t, 0.0, 1.0);
-    return texture(otherDataTexture, t);
+  float t = (ge_bv - otherDataRange.x) / (otherDataRange.y - otherDataRange.x);
+  t = clamp(t, 0.0, 1.0);
+  return texture(otherDataTexture, t);
 }
 
 Fragment getFragment() {
-    vec4 color = vec4(0.0);
-    switch (colorOption) {
-        case ColorOptionColor: 
-            color = bv2rgb(ge_bv);
-            break;
-        case ColorOptionVelocity:
-            color = vec4(abs(ge_velocity), 0.5);
-            break;
-        case ColorOptionSpeed:
-            // @TODO Include a transfer function here ---abock
-            color = vec4(vec3(ge_speed), 0.5);
-            break;
-        case ColorOptionOtherData:
-            if (filterOutOfRange && !isOtherDataValueInRange()) {
-                discard;
-            }
-            else {
-                color = otherDataValue();
-            }
-            break;
-        case ColorOptionFixedColor:
-            color = vec4(fixedColor, 1.0);
-            break;
-    }
-
-    vec4 textureColor = texture(psfTexture, texCoords);
-    vec4 fullColor = vec4(color.rgb, textureColor.a * alphaValue);
-    
-    if (fullColor.a < 0.001) {
+  vec4 color = vec4(0.0);
+  switch (colorOption) {
+    case ColorOptionColor: 
+      color = bv2rgb(ge_bv);
+      break;
+    case ColorOptionVelocity:
+      color = vec4(abs(ge_velocity), 0.5);
+      break;
+    case ColorOptionSpeed:
+      // @TODO Include a transfer function here ---abock
+      color = vec4(vec3(ge_speed), 0.5);
+      break;
+    case ColorOptionOtherData:
+      if (filterOutOfRange && !isOtherDataValueInRange()) {
         discard;
-    }
+      }
+      else {
+        color = otherDataValue();
+      }
+      break;
+    case ColorOptionFixedColor:
+      color = vec4(fixedColor, 1.0);
+      break;
+  }
 
-    Fragment frag;
-    frag.color = fullColor;
-    frag.depth = gs_screenSpaceDepth;
-    frag.gPosition = vec4(vs_position, 1.0);
-    frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
-    frag.disableLDR2HDR = true;
-    
-    return frag;
+  vec4 textureColor = texture(psfTexture, texCoords);
+  vec4 fullColor = vec4(color.rgb, textureColor.a * alphaValue);
+  
+  if (fullColor.a < 0.001) {
+    discard;
+  }
+
+  Fragment frag;
+  frag.color = fullColor;
+  frag.depth = gs_screenSpaceDepth;
+  frag.gPosition = vec4(vs_position, 1.0);
+  frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
+  frag.disableLDR2HDR = true;
+  
+  return frag;
 }

@@ -26,8 +26,7 @@
 
 out vec4 renderTableColor;
 
-in vec2 psfCoords;
-in vec2 texturesCoords;
+in vec2 vs_uv;
 
 uniform int psfTextureSize;
 uniform int convolvedfTextureSize;
@@ -35,42 +34,19 @@ uniform sampler2D psfTexture;
 uniform sampler2D shapeTexture;
 
 void main() {
-    float fullColor = 0.0;
-    
-    // Kernel Center
-    //vec2 psfTextureCoords = vec2((float(psfTextureSize)/2.0 + 1.0) / float(psfTextureSize));
-    // fullColor += texture2D(shapeTexture, texturesCoords) * 
-    //             texture2D(psfTexture, psfTextureCoords);
-
-    float maxConvSize = float(psfTextureSize);
-    float convStep = 1.0 / maxConvSize;
-    float textureStep = 1.0 / float(convolvedfTextureSize);
-    for (float i = 0.0, ii = 0.0; i < maxConvSize; i += convStep, ii += textureStep) {
-        for (float j = 0.0, jj = 0.0; j < maxConvSize; j += convStep, jj += textureStep) {
-            vec2 newTexCoords = texturesCoords;
-            newTexCoords.x = i < 0.5 ? texturesCoords.x - ii : texturesCoords.x + ii;
-            newTexCoords.y = j < 0.5 ? texturesCoords.y - jj : texturesCoords.y + jj;
-            newTexCoords.x = newTexCoords.x > 1.0 ? 1.0 : newTexCoords.x < 0.0 ? 0.0 : newTexCoords.x;
-            newTexCoords.y = newTexCoords.y > 1.0 ? 1.0 : newTexCoords.y < 0.0 ? 0.0 : newTexCoords.y;
-            fullColor += texture2D(shapeTexture, newTexCoords).x * 
-                texture2D(psfTexture, vec2(i, j)).x;
-        }
+  float fullColor = 0.0;
+  
+  float maxConvSize = float(psfTextureSize);
+  float convStep = 1.0 / maxConvSize;
+  float textureStep = 1.0 / float(convolvedfTextureSize);
+  for (float i = 0.0, ii = 0.0; i < maxConvSize; i += convStep, ii += textureStep) {
+    for (float j = 0.0, jj = 0.0; j < maxConvSize; j += convStep, jj += textureStep) {
+      vec2 uv = vs_uv;
+      uv.x = clamp(i < 0.5 ? vs_uv.x - ii : vs_uv.x + ii, 0.0, 1.0);
+      uv.y = clamp(j < 0.5 ? vs_uv.y - jj : vs_uv.y + jj, 0.0, 1.0);
+      fullColor += texture(shapeTexture, uv).x * texture(psfTexture, vec2(i, j)).x;
     }
+  }
 
-    /*
-     vec2 onePixel = vec2(1.0, 1.0) /  float(psfTextureSize);
-    vec4 fullColor =
-     texture2D(shapeTexture, texturesCoords + onePixel * vec2(-1, -1)) * texture2D(psfTexture, vec2(i, j)) +
-     texture2D(shapeTexture, texturesCoords + onePixel * vec2( 0, -1)) * texture2D(psfTexture, vec2(i, j)) +
-     texture2D(shapeTexture, texturesCoords + onePixel * vec2( 1, -1)) * texture2D(psfTexture, vec2(i, j)) +
-     texture2D(shapeTexture, texturesCoords + onePixel * vec2(-1,  0)) * texture2D(psfTexture, vec2(i, j)) +
-     texture2D(shapeTexture, texturesCoords + onePixel * vec2( 0,  0)) * texture2D(psfTexture, vec2(i, j)) +
-     texture2D(shapeTexture, texturesCoords + onePixel * vec2( 1,  0)) * texture2D(psfTexture, vec2(i, j)) +
-     texture2D(shapeTexture, texturesCoords + onePixel * vec2(-1,  1)) * texture2D(psfTexture, vec2(i, j)) +
-     texture2D(shapeTexture, texturesCoords + onePixel * vec2( 0,  1)) * texture2D(psfTexture, vec2(i, j)) +
-     texture2D(shapeTexture, texturesCoords + onePixel * vec2( 1,  1)) * texture2D(psfTexture, vec2(i, j));
-     */
-
-
-    renderTableColor = vec4(fullColor/40.0);
+  renderTableColor = vec4(fullColor / 40.0);
 }
