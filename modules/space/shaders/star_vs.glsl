@@ -24,8 +24,6 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
-
 in vec3 in_position;
 in vec4 in_bvLumAbsMagAppMag;
 in vec3 in_velocity;
@@ -37,8 +35,8 @@ out float vs_speed;
 
 void main() {
     vs_bvLumAbsMagAppMag = in_bvLumAbsMagAppMag;
-    vs_velocity          = in_velocity;
-    vs_speed             = in_speed;
+    vs_velocity = in_velocity;
+    vs_speed = in_speed;
 
     gl_Position = vec4(in_position, 1.0);
 }
