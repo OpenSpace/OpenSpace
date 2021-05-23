@@ -52,11 +52,11 @@ void ImageSequencer::deinitialize() {
     _instance = nullptr;
 }
 
-bool ImageSequencer::isReady() {
+bool ImageSequencer::isReady() const {
     return _hasData;
 }
 
-std::pair<double, std::string> ImageSequencer::nextTarget(double time) {
+std::pair<double, std::string> ImageSequencer::nextTarget(double time) const {
     const auto it = std::lower_bound(
         _targetTimes.begin(),
         _targetTimes.end(),
@@ -72,7 +72,7 @@ std::pair<double, std::string> ImageSequencer::nextTarget(double time) {
     }
 }
 
-std::pair<double, std::string> ImageSequencer::currentTarget(double time) {
+std::pair<double, std::string> ImageSequencer::currentTarget(double time) const {
     const auto it = std::lower_bound(
         _targetTimes.begin(),
         _targetTimes.end(),
@@ -90,7 +90,7 @@ std::pair<double, std::string> ImageSequencer::currentTarget(double time) {
 
 std::pair<double, std::vector<std::string>> ImageSequencer::incidentTargetList(
                                                                               double time,
-                                                                              int range)
+                                                                          int range) const
 {
     std::pair<double, std::vector<std::string>> incidentTargets;
 
@@ -128,7 +128,7 @@ double ImageSequencer::intervalLength(double time) {
     return _intervalLength;
 }
 
-double ImageSequencer::nextCaptureTime(double currentTime) {
+double ImageSequencer::nextCaptureTime(double currentTime) const {
     const auto it = std::lower_bound(
         _captureProgression.begin(),
         _captureProgression.end(),
@@ -177,7 +177,7 @@ std::vector<std::pair<std::string, bool>> ImageSequencer::activeInstruments(doub
             }
         }
     }
-    // return entire map, seen in GUI.
+    // return entire map, seen in GUI
     return _switchingMap;
 }
 
@@ -240,10 +240,9 @@ bool ImageSequencer::imagePaths(std::vector<Image>& captures,
         return false;
     }
 
-
     // for readability we store the iterators
     auto begin = _subsetMap[projectee]._subset.begin();
-    auto end   = _subsetMap[projectee]._subset.end();
+    auto end = _subsetMap[projectee]._subset.end();
 
     // create temporary storage
     std::vector<Image> captureTimes;
@@ -351,12 +350,12 @@ void ImageSequencer::runSequenceParser(SequenceParser& parser) {
     // get new data
     std::map<std::string, std::unique_ptr<Decoder>>& translations =
         parser.translations();
-    std::map<std::string, ImageSubset>& imageData = parser.getSubsetMap();
+    std::map<std::string, ImageSubset>& imageData = parser.subsetMap();
     const std::vector<std::pair<std::string, TimeRange>>& instrumentTimes =
-        parser.getInstrumentTimes();
+        parser.instrumentTimes();
     const std::vector<std::pair<double, std::string>>& targetTimes =
-        parser.getTargetTimes();
-    const std::vector<double>& captureProgression = parser.getCaptureProgression();
+        parser.targetTimes();
+    const std::vector<double>& captureProgression = parser.captureProgression();
 
     // check for sanity
     if (imageData.empty() || instrumentTimes.empty() || captureProgression.empty()) {
@@ -425,11 +424,7 @@ void ImageSequencer::runSequenceParser(SequenceParser& parser) {
         instrumentTimes.begin(),
         instrumentTimes.end()
     );
-    _targetTimes.insert(
-        _targetTimes.end(),
-        targetTimes.begin(),
-        targetTimes.end()
-    );
+    _targetTimes.insert(_targetTimes.end(), targetTimes.begin(), targetTimes.end());
     _captureProgression.insert(
         _captureProgression.end(),
         captureProgression.begin(),

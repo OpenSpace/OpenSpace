@@ -25,14 +25,13 @@
 #include <modules/spacecraftinstruments/rendering/renderableshadowcylinder.h>
 
 #include <modules/spacecraftinstruments/spacecraftinstrumentsmodule.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/opengl/programobject.h>
-#include <optional>
 
 namespace {
     constexpr const char* ProgramName = "ShadowCylinderProgram";
@@ -179,7 +178,6 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
     _shadowColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_shadowColor);
 
-
     _terminatorType.addOptions({
         { static_cast<int>(SpiceManager::TerminatorType::Umbral), "Umbral" },
         { static_cast<int>(SpiceManager::TerminatorType::Penumbral), "Penumbral" }
@@ -321,9 +319,7 @@ void RenderableShadowCylinder::createCylinder(double time) {
         res.terminatorPoints.begin(),
         res.terminatorPoints.end(),
         std::back_inserter(terminatorPoints),
-        [](const glm::dvec3& p) {
-            return p * 1000.0;
-        }
+        [](const glm::dvec3& p) { return p * 1000.0; }
     );
 
     double lt;
@@ -364,7 +360,7 @@ void RenderableShadowCylinder::createCylinder(double time) {
         GL_ARRAY_BUFFER,
         0,
         _vertices.size() * sizeof(CylinderVBOLayout),
-        &_vertices[0]
+        _vertices.data()
     );
 
     glEnableVertexAttribArray(0);

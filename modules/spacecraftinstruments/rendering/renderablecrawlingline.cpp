@@ -162,7 +162,7 @@ void RenderableCrawlingLine::render(const RenderData& data, RendererTasks&) {
 
     glLineWidth(2.f);
 
-    _program->setUniform("_alpha", alpha);
+    _program->setUniform("alpha", alpha);
 
     glBindVertexArray(_vao);
 

@@ -54,9 +54,10 @@ class SequenceParser;
 class ImageSequencer {
 public:
     /**
-     * Singelton instantiation
+     * Singleton instantiation
      */
     static ImageSequencer* _instance;
+
     /**
      * Returns the reference to the singleton ImageSequencer object that must have been
      * initialized by a call to the initialize method earlier.
@@ -64,18 +65,21 @@ public:
      * \return The ImageSequencer singleton
      */
     static ImageSequencer& ref();
+
     /**
      * Initializer that initializes the static member.
      */
     static void initialize();
+
     /**
      * Deinitializes that deinitializes the static member.
      */
     static void deinitialize();
+
     /**
      * Returns true if sequencer has been loaded with data.
      */
-    bool isReady();
+    bool isReady() const;
 
     /**
      * Runs parser and recieves the datastructures filled by it.
@@ -86,24 +90,24 @@ public:
     /**
      * Retrieves the next upcoming target in time.
      */
-    std::pair<double, std::string> nextTarget(double time);
+    std::pair<double, std::string> nextTarget(double time) const;
 
     /**
      * Retrieves the most current target in time.
      */
-    std::pair<double, std::string> currentTarget(double time);
+    std::pair<double, std::string> currentTarget(double time) const;
 
     /**
      * Retrieves current target and (in the list) adjacent targets, the number to retrieve
      * is user set
      */
     std::pair<double, std::vector<std::string>> incidentTargetList(double time,
-                                                                   int range = 2);
+        int range = 2) const;
 
     /**
      * Retrieves the next upcoming time of image capture.
      */
-    double nextCaptureTime(double time);
+    double nextCaptureTime(double time) const;
 
     /**
      * Retrieves the time interval length between the current time and an upcoming
@@ -118,8 +122,8 @@ public:
     std::vector<std::pair<std::string, bool>> activeInstruments(double time);
 
     /**
-     * Retrieves the relevant data from a specific subset based on the what instance
-     * makes the request. If an instance is not registered in the class then the singleton
+     * Retrieves the relevant data from a specific subset based on the what instance makes
+     * the request. If an instance is not registered in the class then the singleton
      * returns false and no projections will occur.
      */
     bool imagePaths(std::vector<Image>& captures, const std::string& projectee,
@@ -142,32 +146,32 @@ private:
 
     /**
      * _fileTranslation handles any types of ambiguities between the data and
-     * spice/openspace -calls. This map is composed of a key that is a string in
-     * the data to be translated and a Decoder that holds the corresponding
-     * translation provided through a modfile.
+     * spice/openspace -calls. This map is composed of a key that is a string in the data
+     * to be translated and a Decoder that holds the corresponding translation provided
+     * through a modfile.
      * \see Decoder
      * \see (projection mod files)
      */
     std::map<std::string, std::unique_ptr<Decoder>> _fileTranslation;
 
     /**
-     * This is the main container of image data. The key is the target name,
-     * the value is a subset of images.
+     * This is the main container of image data. The key is the target name, the value is
+     * a subset of images.
      * \see SequenceParser
      */
     std::map<std::string, ImageSubset> _subsetMap;
 
     /**
-     * In order for the simulation to know when to turn on/off any instrument within
-     * all instruments in the spacecraft payload, the key is the data-file given
-     * instrument name.
+     * In order for the simulation to know when to turn on/off any instrument within all
+     * instruments in the spacecraft payload, the key is the data-file given instrument
+     * name.
      */
     std::vector<std::pair<std::string, bool>> _switchingMap;
 
     /**
      * This datastructure holds the specific times when the spacecraft switches from
-     * observing one inertial body to the next. This happens a lot in such missions
-     * and the coupling of target with specific time is usually therefore not 1:1.
+     * observing one inertial body to the next. This happens a lot in such missions and
+     * the coupling of target with specific time is usually therefore not 1:1.
      */
     std::vector<std::pair<double, std::string>> _targetTimes;
 

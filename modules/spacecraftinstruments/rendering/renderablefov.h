@@ -67,7 +67,6 @@ private:
     std::pair<std::string,bool> determineTarget(double time);
 
     void updateGPU();
-    void insertPoint(std::vector<float>& arr, glm::vec4 p, glm::vec4 c);
 
     glm::vec3 squareColor(float t) const {
         return _colors.active.value() * t + _colors.square.value() * (1 - t);
@@ -85,8 +84,6 @@ private:
         bool isInFov);
 
     glm::dvec3 orthogonalProjection(const glm::dvec3& vecFov, double time,
-        const std::string& target) const;
-    glm::dvec3 checkForIntercept(const glm::dvec3& ray, double time,
         const std::string& target) const;
 
     // properties

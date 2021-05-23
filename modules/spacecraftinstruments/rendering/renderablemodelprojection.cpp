@@ -55,9 +55,9 @@ namespace {
     constexpr const char* DestinationFrame = "GALACTIC";
 
     constexpr const std::array<const char*, 7> MainUniformNames = {
-        "_performShading", "directionToSunViewSpace", "modelViewTransform",
-        "projectionTransform", "_projectionFading", "baseTexture", "projectionTexture"
-    };
+        "performShading", "directionToSunViewSpace", "modelViewTransform",
+        "projectionTransform", "projectionFading", "baseTexture", "projectionTexture"
+    }; // _projectionFading not needed
 
     constexpr const std::array<const char*, 5> FboUniformNames = {
         "projectionTexture", "needShadowMap", "ProjectorMatrix", "ModelTransform",
@@ -120,11 +120,7 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     );
 
     addPropertySubOwner(_projectionComponent);
-
-    _projectionComponent.initialize(
-        identifier(),
-        p.projection
-    );
+    _projectionComponent.initialize(identifier(), p.projection);
 
     double boundingSphereRadius = p.boundingSphereRadius.value_or(1.0e9);
     setBoundingSphere(boundingSphereRadius);
@@ -307,18 +303,17 @@ void RenderableModelProjection::update(const UpdateData& data) {
     const double integrateFromTime = data.previousFrameTime.j2000Seconds();
 
     // Only project new images if time changed since last update.
-    if (time > integrateFromTime) {
-        if (ImageSequencer::ref().isReady()) {
-            if (_projectionComponent.doesPerformProjection()) {
-                _shouldCapture = ImageSequencer::ref().imagePaths(
-                    _imageTimes,
-                    _projectionComponent.projecteeId(),
-                    _projectionComponent.instrumentId(),
-                    time,
-                    integrateFromTime
-                );
-            }
-        }
+    if (time > integrateFromTime &&
+        ImageSequencer::ref().isReady() &&
+        _projectionComponent.doesPerformProjection())
+    {
+        _shouldCapture = ImageSequencer::ref().imagePaths(
+            _imageTimes,
+            _projectionComponent.projecteeId(),
+            _projectionComponent.instrumentId(),
+            time,
+            integrateFromTime
+        );
     }
 
     glm::dmat3 stateMatrix = data.modelTransform.rotation;
