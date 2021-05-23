@@ -42,11 +42,12 @@ namespace webbrowser {
     extern std::chrono::time_point<std::chrono::high_resolution_clock> latestCall;
     extern CefHost* cefHost;
     void update();
-}
+} // namespace webbrowser
 
 class WebBrowserModule : public OpenSpaceModule {
 public:
     static constexpr const char* Name = "WebBrowser";
+
     WebBrowserModule();
     virtual ~WebBrowserModule() = default;
 
