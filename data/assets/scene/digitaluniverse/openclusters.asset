@@ -31,7 +31,7 @@ local object = {
     LabelFile = speck .. "/oc.label",
     ScaleFactor = 405.75,
     TextSize = 15.5,
-    TextMinMaxSize = { 4.5, 30.0 },
+    TextMinMaxSize = { 4, 30 },
     BillboardMinMaxSize = { 0.0, 604.0 },
     EnablePixelSizeControl = true
   },

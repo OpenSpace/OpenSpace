@@ -281,7 +281,7 @@ namespace {
         std::optional<std::string> labelFile;
 
         // [[codegen::verbatim(LabelMinMaxSizeInfo.description)]]
-        std::optional<glm::vec2> textMinMaxSize;
+        std::optional<glm::ivec2> textMinMaxSize;
 
         // [[codegen::verbatim(ColorOptionInfo.description)]]
         std::optional<std::vector<std::string>> colorOption;
@@ -338,9 +338,9 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _textSize(TextSizeInfo, 8.f, 0.5f, 24.f)
     , _textMinMaxSize(
         LabelMinMaxSizeInfo,
-        glm::vec2(8.f, 20.f),
-        glm::vec2(0.5f),
-        glm::vec2(100.f)
+        glm::ivec2(8, 20),
+        glm::ivec2(0),
+        glm::ivec2(100)
     )
     , _drawElements(DrawElementsInfo, true)
     , _drawLabels(DrawLabelInfo, false)

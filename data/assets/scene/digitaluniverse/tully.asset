@@ -36,7 +36,7 @@ local tullyPoints = {
     Unit = "Mpc",
     TextColor = { 0.7, 0.7, 0.7 },
     TextSize = 19.36,
-    TextMinMaxSize = { 8.2, 20.0 },
+    TextMinMaxSize = { 8, 20 },
     TransformationMatrix = {
       -0.7357425748,    0.67726129641,  0.0,           0.0,
       -0.074553778365, -0.080991471307, 0.9939225904,  0.0,

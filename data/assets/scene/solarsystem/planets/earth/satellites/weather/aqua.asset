@@ -74,7 +74,7 @@ asset.onInitialize(function ()
         LabelText = "Aqua",
         FontSize = 100.0,
         LabelSize = 4.0,
-        LabelMinMaxSize = { 1.0, 100.0 },
+        LabelMinMaxSize = { 1, 100 },
         LabelOrientationOption = "Camera View Direction",
         BlendMode = "Additive",
         EnableFading = true,

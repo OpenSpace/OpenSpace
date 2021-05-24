@@ -22,7 +22,7 @@ local object = {
     Unit = "Mpc",
     TextColor = { 0.296, 0.629, 1.0 },
     TextSize = 20.9,
-    TextMinMaxSize = { 8.0, 20.0 }
+    TextMinMaxSize = { 8, 20 }
   },
   GUI = {
     Name = "Voids",

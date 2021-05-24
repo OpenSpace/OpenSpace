@@ -179,7 +179,7 @@ namespace {
         std::optional<float> labelSize;
 
         // [[codegen::verbatim(LabelMinMaxSizeInfo.description)]]
-        std::optional<glm::vec2> labelMinMaxSize;
+        std::optional<glm::ivec2> labelMinMaxSize;
 
         // [[codegen::verbatim(EnableFadingEffectInfo.description)]]
         std::optional<bool> enableFading;
@@ -233,9 +233,9 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
     , _fontSize(FontSizeInfo, 50.f, 1.f, 100.f)
     , _labelMinMaxSize(
         LabelMinMaxSizeInfo,
-        glm::vec2(8.f, 20.f),
-        glm::vec2(0.5f),
-        glm::vec2(100.f)
+        glm::ivec2(8, 20),
+        glm::ivec2(0),
+        glm::ivec2(100)
     )
     , _enableFadingEffect(EnableFadingEffectInfo, false)
     , _labelText(LabelTextInfo, "")
@@ -483,16 +483,16 @@ void RenderableLabels::renderLabels(const RenderData& data,
 
     ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
 
-    labelInfo.orthoRight       = orthoRight;
-    labelInfo.orthoUp          = orthoUp;
-    labelInfo.minSize          = static_cast<int>(_labelMinMaxSize.value().x);
-    labelInfo.maxSize          = static_cast<int>(_labelMinMaxSize.value().y);
-    labelInfo.cameraPos        = data.camera.positionVec3();
-    labelInfo.cameraLookUp     = data.camera.lookUpVectorWorldSpace();
-    labelInfo.renderType       = _labelOrientationOption;
-    labelInfo.mvpMatrix        = modelViewProjectionMatrix;
-    labelInfo.scale            = powf(10.f, _labelSize);
-    labelInfo.enableDepth      = true;
+    labelInfo.orthoRight = orthoRight;
+    labelInfo.orthoUp = orthoUp;
+    labelInfo.minSize = _labelMinMaxSize.value().x;
+    labelInfo.maxSize = _labelMinMaxSize.value().y;
+    labelInfo.cameraPos = data.camera.positionVec3();
+    labelInfo.cameraLookUp = data.camera.lookUpVectorWorldSpace();
+    labelInfo.renderType = _labelOrientationOption;
+    labelInfo.mvpMatrix = modelViewProjectionMatrix;
+    labelInfo.scale = powf(10.f, _labelSize);
+    labelInfo.enableDepth = true;
     labelInfo.enableFalseDepth = false;
 
     // We don't use spice rotation and scale

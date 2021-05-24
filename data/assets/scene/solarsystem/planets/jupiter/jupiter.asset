@@ -45,7 +45,7 @@ local JupiterLabel = {
     LabelText = "Jupiter",
     FontSize = 100.0,
     LabelSize = 8.6,
-    LabelMinMaxSize = { 1.0, 100.0 },
+    LabelMinMaxSize = { 1, 100 },
     LabelOrientationOption = "Camera View Direction",
     BlendMode = "Additive"
   },

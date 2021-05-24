@@ -35,7 +35,7 @@ local object = {
     CorrectionSizeEndDistance = 20.65,
     CorrectionSizeFactor = 10.41,
     TextSize = 14.8,
-    TextMinMaxSize = { 10.0, 50.0 },
+    TextMinMaxSize = { 10, 50 },
     EnablePixelSizeControl = true
   },
   GUI = {

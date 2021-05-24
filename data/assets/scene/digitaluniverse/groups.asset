@@ -21,7 +21,7 @@ local object = {
     Unit = "Mpc",
     TextColor = { 0.1, 0.6, 0.2 },
     TextSize = 21.5,
-    TextMinMaxSize = { 8.0, 20.0 },
+    TextMinMaxSize = { 8, 20 },
     DrawLabels = true,
     TransformationMatrix = {
       -0.7357425748,    0.67726129641,  0.0,           0.0,

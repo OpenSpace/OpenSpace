@@ -27,10 +27,10 @@ local object = {
     File = speck .. "/abell.speck",
     Texture = textures .. "/point3A.png",
     LabelFile = speck .. "/abell.label",
+    Unit = "Mpc",
     TextColor = { 0.0, 0.8, 0.0 },
     TextSize = 22,
-    TextMinMaxSize = { 10.0, 15.0 },
-    Unit = "Mpc",
+    TextMinMaxSize = { 10, 15 },
     TransformationMatrix = {
       -0.7357425748,    0.67726129641,  0.0,           0.0,
       -0.074553778365, -0.080991471307, 0.9939225904,  0.0,

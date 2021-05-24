@@ -33,7 +33,7 @@ local object = {
     TextColor = { 0.3, 0.3, 1.0 },
     ScaleFactor = 465,
     TextSize = 18.3,
-    TextMinMaxSize = { 7.3, 20.0 },
+    TextMinMaxSize = { 7, 20 },
     BillboardMinMaxSize = { 0.0, 20.0 },
     EnablePixelSizeControl = true
   },

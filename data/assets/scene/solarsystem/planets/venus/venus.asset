@@ -55,7 +55,7 @@ local VenusLabel = {
         LabelText = "Venus",
         FontSize = 100.0,
         LabelSize = 8.4,
-        LabelMinMaxSize = { 1.0, 100.0 },
+        LabelMinMaxSize = { 1, 100 },
         LabelOrientationOption = "Camera View Direction",
         BlendMode = "Additive"
     },

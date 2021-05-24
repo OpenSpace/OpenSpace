@@ -21,7 +21,7 @@ local object = {
     TextColor = { 0.4, 0.4, 0.4 },
     DrawLabels = true,
     TextSize = 14.7,
-    TextMinMaxSize = { 6.0, 30.0 }
+    TextMinMaxSize = { 6, 30 }
   },
   GUI = {
     Name = "Stars Labels",

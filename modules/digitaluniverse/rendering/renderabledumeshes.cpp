@@ -157,7 +157,7 @@ namespace {
         std::optional<std::string> labelFile;
 
         // [[codegen::verbatim(LabelMinMaxSizeInfo.description)]]
-        std::optional<glm::vec2> textMinMaxSize;
+        std::optional<glm::ivec2> textMinMaxSize;
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
@@ -185,9 +185,9 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     , _drawLabels(DrawLabelInfo, false)
     , _textMinMaxSize(
         LabelMinMaxSizeInfo,
-        glm::vec2(8.f, 500.f),
-        glm::vec2(0.f),
-        glm::vec2(1000.f)
+        glm::ivec2(8, 500),
+        glm::ivec2(0),
+        glm::ivec2(1000)
     )
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 16.f)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
@@ -412,8 +412,8 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
     ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
     labelInfo.orthoRight = orthoRight;
     labelInfo.orthoUp = orthoUp;
-    labelInfo.minSize = static_cast<int>(_textMinMaxSize.value().x);
-    labelInfo.maxSize = static_cast<int>(_textMinMaxSize.value().y);
+    labelInfo.minSize = _textMinMaxSize.value().x;
+    labelInfo.maxSize = _textMinMaxSize.value().y;
     labelInfo.cameraPos = data.camera.positionVec3();
     labelInfo.cameraLookUp = data.camera.lookUpVectorWorldSpace();
     labelInfo.renderType = _renderOption;

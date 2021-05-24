@@ -31,6 +31,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 
@@ -104,7 +105,7 @@ private:
     properties::Vec3Property _labelColor;
     properties::FloatProperty _fontSize;
     properties::FloatProperty _labelSize;
-    properties::Vec2Property _labelMinMaxSize;
+    properties::IVec2Property _labelMinMaxSize;
 
     properties::StringProperty _labelText;
 

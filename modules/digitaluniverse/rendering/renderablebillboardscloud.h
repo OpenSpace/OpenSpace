@@ -33,6 +33,7 @@
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
@@ -111,7 +112,7 @@ private:
     properties::Vec3Property _textColor;
     properties::FloatProperty _textOpacity;
     properties::FloatProperty _textSize;
-    properties::Vec2Property _textMinMaxSize;
+    properties::IVec2Property _textMinMaxSize;
     properties::BoolProperty _drawElements;
     properties::BoolProperty _drawLabels;
     properties::BoolProperty _pixelSizeControl;

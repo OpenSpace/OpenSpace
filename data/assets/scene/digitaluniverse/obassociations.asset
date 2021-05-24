@@ -35,8 +35,8 @@ local object = {
     TextColor = { 0.4, 0.5, 1.0 },
     ScaleFactor = 390.0,
     TextSize = 16.24,
-    TextMinMaxSize = { 4.50, 25.0 },
-    BillboardMinMaxSize = {0.0, 450.0 },
+    TextMinMaxSize = { 4, 25 },
+    BillboardMinMaxSize = { 0.0, 450.0 },
     EnablePixelSizeControl = true
   },
   GUI = {

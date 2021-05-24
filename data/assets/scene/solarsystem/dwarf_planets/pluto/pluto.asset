@@ -54,7 +54,7 @@ local PlutoLabel = {
     LabelText = "Pluto",
     FontSize = 100.0,
     LabelSize = 8.9,
-    LabelMinMaxSize = { 1.0, 100.0 },
+    LabelMinMaxSize = { 1, 100 },
     BlendMode = "Additive",
     LabelOrientationOption = "Camera View Direction"
   },
