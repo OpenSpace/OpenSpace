@@ -9,7 +9,7 @@ local assetHelper = asset.require('util/asset_helper')
       RadiusAzimuthElevation = {1.0, 0.0, 0.0}, -- use for dome
       Scale= 0.015,
       Enabled = false,
-      TexturePath = "D:/Ylvas/OpenSpace/data/assets/circle.png",
+      TexturePath = "${BASE}/data/assets/circle.png",
       CartesianPosition =  { 0, 0, -2.1 },
   };
 assetHelper.registerScreenSpaceRenderables(asset, { spec })
