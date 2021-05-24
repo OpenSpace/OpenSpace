@@ -92,47 +92,46 @@ bool InstrumentTimesParser::create() {
             TimeRange instrumentActiveTimeRange;
             bool successfulRead = true;
             while (std::getline(inFile, line)) {
-                if (std::regex_match(line, matches, _pattern)) {
-                    if (matches.size() != 3) {
-                        LERROR(
-                            "Bad event data formatting. Must \
-                            have regex 3 matches (source string, start time, stop time)."
-                        );
-                        successfulRead = false;
-                        break;
-                    }
-
-                    TimeRange captureTimeRange;
-                    try { // parse date strings
-                        std::string start = matches[1].str();
-                        std::string stop = matches[2].str();
-                        captureTimeRange.start =
-                            SpiceManager::ref().ephemerisTimeFromDate(start);
-                        captureTimeRange.end =
-                            SpiceManager::ref().ephemerisTimeFromDate(stop);
-                    }
-                    catch (const SpiceManager::SpiceException& e) {
-                        LERROR(e.what());
-                        successfulRead = false;
-                        break;
-                    }
-
-                    instrumentActiveTimeRange.include(captureTimeRange);
-
-                    //_instrumentTimes.push_back({ instrumentID, timeRange });
-                    _targetTimes.emplace_back(captureTimeRange.start, _target);
-                    _captureProgression.push_back(captureTimeRange.start);
-
-                    Image image = {
-                        captureTimeRange,
-                        std::string(),
-                        { instrumentID },
-                        _target,
-                        true,
-                        false
-                    };
-                    _subsetMap[_target]._subset.push_back(std::move(image));
+                if (!std::regex_match(line, matches, _pattern)) {
+                    continue;
                 }
+
+                if (matches.size() != 3) {
+                    LERROR(
+                        "Bad event data formatting. Must have regex 3 matches "
+                        "(source string, start time, stop time)"
+                    );
+                    successfulRead = false;
+                    break;
+                }
+
+                TimeRange tr;
+                try { // parse date strings
+                    std::string start = matches[1].str();
+                    std::string stop = matches[2].str();
+                    tr.start = SpiceManager::ref().ephemerisTimeFromDate(start);
+                    tr.end = SpiceManager::ref().ephemerisTimeFromDate(stop);
+                }
+                catch (const SpiceManager::SpiceException& e) {
+                    LERROR(e.what());
+                    successfulRead = false;
+                    break;
+                }
+
+                instrumentActiveTimeRange.include(tr);
+
+                _targetTimes.emplace_back(tr.start, _target);
+                _captureProgression.push_back(tr.start);
+
+                Image image = {
+                    tr,
+                    std::string(),
+                    { instrumentID },
+                    _target,
+                    true,
+                    false
+                };
+                _subsetMap[_target]._subset.push_back(std::move(image));
             }
             if (successfulRead){
                 _subsetMap[_target]._range.include(instrumentActiveTimeRange);

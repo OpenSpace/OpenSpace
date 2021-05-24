@@ -26,9 +26,13 @@
 
 #include <ghoul/misc/dictionary.h>
 
+namespace {
+    std::string Type = "TARGET";
+} // namespace
+
 namespace openspace {
 
-TargetDecoder::TargetDecoder(const ghoul::Dictionary& dictionary) : _type("TARGET") {
+TargetDecoder::TargetDecoder(const ghoul::Dictionary& dictionary) {
     _names.resize(dictionary.size());
     for (size_t i = 0; i < _names.size(); ++i) {
         std::string key = std::to_string(i + 1);
@@ -39,7 +43,7 @@ TargetDecoder::TargetDecoder(const ghoul::Dictionary& dictionary) : _type("TARGE
 }
 
 const std::string& TargetDecoder::decoderType() const {
-    return _type;
+    return Type;
 }
 
 const std::vector<std::string>& TargetDecoder::translations() const {

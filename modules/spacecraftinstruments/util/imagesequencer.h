@@ -49,7 +49,6 @@ class SequenceParser;
 *
 * \see SequenceParser
 * \see ImageSequencer::runSequenceParser(SequenceParser* parser)
-* std::map<std::string, bool>
 */
 class ImageSequencer {
 public:
@@ -105,6 +104,11 @@ public:
         int range = 2) const;
 
     /**
+     * Retrieves the time of the previous image capture.
+     */
+    double prevCaptureTime(double time) const;
+
+    /**
      * Retrieves the next upcoming time of image capture.
      */
     double nextCaptureTime(double time) const;
@@ -126,31 +130,29 @@ public:
      * the request. If an instance is not registered in the class then the singleton
      * returns false and no projections will occur.
      */
-    bool imagePaths(std::vector<Image>& captures, const std::string& projectee,
-        const std::string& instrumentRequest, double time, double sinceTime);
+    std::vector<Image> imagePaths(const std::string& projectee,
+        const std::string& instrument, double time, double sinceTime);
 
     /**
-     * returns true if instrumentID is within a capture range.
+     * Returns true if instrumentID is within a capture range.
      */
-    bool isInstrumentActive(double time, const std::string& instrumentID);
+    bool isInstrumentActive(double time, const std::string& instrumentID) const;
 
     float instrumentActiveTime(double time, const std::string& instrumentID) const;
 
     /**
-     * returns latest captured image
+     * Returns latest captured image
      */
-    Image latestImageForInstrument(const std::string& instrumentID);
+    Image latestImageForInstrument(const std::string& instrumentID) const;
 
 private:
     void sortData();
 
     /**
-     * _fileTranslation handles any types of ambiguities between the data and
-     * spice/openspace -calls. This map is composed of a key that is a string in the data
-     * to be translated and a Decoder that holds the corresponding translation provided
-     * through a modfile.
+     * This handles any types of ambiguities between the data and SPICE calls. This map is 
+     * composed of a key that is a string in the data to be translated and a Decoder that
+     * holds the corresponding translation provided through as asset.
      * \see Decoder
-     * \see (projection mod files)
      */
     std::map<std::string, std::unique_ptr<Decoder>> _fileTranslation;
 
@@ -188,12 +190,15 @@ private:
 
     // time between current simulation time and an upcoming capture
     double _intervalLength = 0.0;
+    
     // next consecutive capture in time
     double _nextCapture = 0.0;
+    
     // default capture image
     std::string _defaultCaptureImage;
 
     std::map<std::string, Image> _latestImages;
+   
     // if no data, no run
     bool _hasData = false;
 };

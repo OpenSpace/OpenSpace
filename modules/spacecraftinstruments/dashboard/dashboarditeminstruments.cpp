@@ -150,7 +150,7 @@ DashboardItemInstruments::DashboardItemInstruments(const ghoul::Dictionary& dict
 
     _font = global::fontManager->font(_fontName, _fontSize);
 }
-
+#pragma optimize ("", off)
 void DashboardItemInstruments::render(glm::vec2& penPosition) {
     ZoneScoped
 
@@ -166,8 +166,17 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
     glm::vec4 targetColor(0.f, 0.75f, 1.f, 1.f);
 
     double remaining = sequencer.nextCaptureTime(currentTime) - currentTime;
+    auto a = sequencer.intervalLength(currentTime);
     const float t = static_cast<float>(
-        1.0 - remaining / sequencer.intervalLength(currentTime)
+        1.0 - remaining / a
+    );
+
+    auto b = sequencer.prevCaptureTime(currentTime);
+    auto c = sequencer.nextCaptureTime(currentTime);
+    auto d = c - b;
+    auto e = d - currentTime;
+    double t2 = static_cast<float>(
+        1.0 - remaining / e
     );
 
     if (remaining > 0) {

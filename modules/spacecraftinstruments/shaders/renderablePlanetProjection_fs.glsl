@@ -34,7 +34,6 @@ layout (location = 1) out vec4 stencil;
 uniform sampler2D projectionTexture;
 uniform mat4 ProjectorMatrix;
 uniform mat4 ModelTransform;
-uniform vec2 scalingValue;
 uniform vec3 radius;
 uniform int segments;
 uniform vec3 boresight;
@@ -64,7 +63,7 @@ void main() {
 
   vec4 vertex = uvToModel(uv, radius, segments);
 
-  vec4 raw_pos = psc_to_meter(vertex, scalingValue);
+  vec4 raw_pos = psc_to_meter(vertex, vec2(1.0, 0.0));
   vec4 projected = ProjectorMatrix * ModelTransform * raw_pos;
 
   projected.x /= projected.w;

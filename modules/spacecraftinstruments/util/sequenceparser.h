@@ -26,8 +26,8 @@
 #define __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___SEQUENCEPARSER___H__
 
 #include <modules/spacecraftinstruments/util/decoder.h>
-#include <openspace/util/timerange.h>
 #include <modules/spacecraftinstruments/util/image.h>
+#include <openspace/util/timerange.h>
 #include <map>
 #include <memory>
 #include <string>

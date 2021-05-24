@@ -41,6 +41,7 @@ ImageSequencer& ImageSequencer::ref() {
     ghoul_assert(_instance != nullptr, "Instance has not been initialized");
     return *_instance;
 }
+
 void ImageSequencer::initialize() {
     ghoul_assert(_instance == nullptr, "Instance already has been initialized");
     _instance = new ImageSequencer;
@@ -80,7 +81,7 @@ std::pair<double, std::string> ImageSequencer::currentTarget(double time) const 
         [](const std::pair<double, std::string>& a, double b) { return a.first < b; }
     );
 
-    if (it != _targetTimes.end() && it != _targetTimes.begin()){
+    if (it != _targetTimes.end() && it != _targetTimes.begin()) {
         return *std::prev(it);
     }
     else {
@@ -101,12 +102,12 @@ std::pair<double, std::vector<std::string>> ImageSequencer::incidentTargetList(
         [](const std::pair<double, std::string>& a, double b) { return a.first < b; }
     );
 
-    if (it != _targetTimes.end() && it != _targetTimes.begin()){
+    if (it != _targetTimes.end() && it != _targetTimes.begin()) {
         // move the iterator to the first element of the range
         std::advance(it, -(range + 1));
 
         // now extract incident range
-        for (int i = 0; i < 2 * range + 1; i++){
+        for (int i = 0; i < 2 * range + 1; i++) {
             incidentTargets.first = it->first;
             incidentTargets.second.push_back(it->second);
             it++;
@@ -128,11 +129,25 @@ double ImageSequencer::intervalLength(double time) {
     return _intervalLength;
 }
 
-double ImageSequencer::nextCaptureTime(double currentTime) const {
+double ImageSequencer::prevCaptureTime(double time) const {
     const auto it = std::lower_bound(
         _captureProgression.begin(),
         _captureProgression.end(),
-        currentTime
+        time
+    );
+    if (it != _captureProgression.end() && it != _captureProgression.begin()) {
+        return *std::prev(it);
+    }
+    else {
+        return 0.0;
+    }
+}
+
+double ImageSequencer::nextCaptureTime(double time) const {
+    const auto it = std::lower_bound(
+        _captureProgression.begin(),
+        _captureProgression.end(),
+        time
     );
     if (it != _captureProgression.end()) {
         return *it;
@@ -142,10 +157,10 @@ double ImageSequencer::nextCaptureTime(double currentTime) const {
     }
 }
 
-Image ImageSequencer::latestImageForInstrument(const std::string& instrumentID) {
+Image ImageSequencer::latestImageForInstrument(const std::string& instrumentID) const {
     const auto it = _latestImages.find(instrumentID);
     if (it != _latestImages.end()) {
-        return _latestImages[instrumentID];
+        return _latestImages.at(instrumentID);
     }
     else {
         return Image();
@@ -181,19 +196,21 @@ std::vector<std::pair<std::string, bool>> ImageSequencer::activeInstruments(doub
     return _switchingMap;
 }
 
-bool ImageSequencer::isInstrumentActive(double time, const std::string& instrumentID) {
+bool ImageSequencer::isInstrumentActive(double time,
+                                        const std::string& instrumentID) const
+{
     for (const std::pair<std::string, TimeRange>& i : _instrumentTimes) {
-        //check if this instrument is in range
-        if (i.second.includes(time)) {
-            //if so, then get the corresponding spiceID
-            const std::vector<std::string>& ids =
-                _fileTranslation[i.first]->translations();
-            //check which specific subinstrument is firing
-            for (const std::string& s : ids) {
-                if (s == instrumentID) {
-                    return true;
-                }
-            }
+        // check if this instrument is in range
+        if (!i.second.includes(time)) {
+            continue;
+        }
+
+        // if so, then get the corresponding spiceID
+        const std::vector<std::string>& is = _fileTranslation.at(i.first)->translations();
+        // check which specific subinstrument is firing
+        const auto it = std::find(is.begin(), is.end(), instrumentID);
+        if (it != is.end()) {
+            return true;
         }
     }
     return false;
@@ -203,41 +220,39 @@ float ImageSequencer::instrumentActiveTime(double time,
                                            const std::string& instrumentID) const
 {
     for (const std::pair<std::string, TimeRange>& i : _instrumentTimes) {
-        //check if this instrument is in range
-        if (i.second.includes(time)){
-            //if so, then get the corresponding spiceID
-            const std::vector<std::string>& ids =
-                _fileTranslation.at(i.first)->translations();
+        // check if this instrument is in range
+        if (!i.second.includes(time)) {
+            continue;
+        }
+        // if so, then get the corresponding spiceID
+        const std::vector<std::string>& is = _fileTranslation.at(i.first)->translations();
 
-            // check which specific subinstrument is firing
-            for (const std::string& s : ids) {
-                if (s == instrumentID) {
-                    return static_cast<float>(
-                        (time - i.second.start) / (i.second.end - i.second.start)
-                    );
-                }
-            }
+        // check which specific subinstrument is firing
+        const auto it = std::find(is.begin(), is.end(), instrumentID);
+        if (it != is.end()) {
+            return static_cast<float>(
+                (time - i.second.start) / (i.second.end - i.second.start)
+            );
         }
     }
     return -1.f;
 }
 
-bool ImageSequencer::imagePaths(std::vector<Image>& captures,
-                                const std::string& projectee,
-                                const std::string& instrumentRequest,
-                                double time, double sinceTime)
+std::vector<Image> ImageSequencer::imagePaths(const std::string& projectee,
+                                              const std::string& instrument, double time,
+                                              double sinceTime)
 {
     // TODO: Check how this works with time jumps
 
     // check if this instance is either in range or
     // a valid candidate to recieve data
 
-    const bool instrumentActive = isInstrumentActive(time, instrumentRequest);
+    const bool instrumentActive = isInstrumentActive(time, instrument);
     const bool hasCurrentTime = _subsetMap[projectee]._range.includes(time);
     const bool hasSinceTime = _subsetMap[projectee]._range.includes(sinceTime);
 
     if (!instrumentActive || (!hasCurrentTime && !hasSinceTime)) {
-        return false;
+        return std::vector<Image>();
     }
 
     // for readability we store the iterators
@@ -245,7 +260,7 @@ bool ImageSequencer::imagePaths(std::vector<Image>& captures,
     auto end = _subsetMap[projectee]._subset.end();
 
     // create temporary storage
-    std::vector<Image> captureTimes;
+    std::vector<Image> captures;
     // what to look for
     Image findPrevious, findCurrent;
     findPrevious.timeRange.start = sinceTime;
@@ -258,48 +273,41 @@ bool ImageSequencer::imagePaths(std::vector<Image>& captures,
     auto curr = std::lower_bound(begin, end, findCurrent , compareTime);
     auto prev = std::lower_bound(begin, end, findPrevious, compareTime);
 
-    if (curr == begin || curr == end || prev == begin || prev == end || prev >= curr) {
-        return false;
-    }
-
-    if (curr->timeRange.start < prev->timeRange.start) {
-        return false;
+    if (curr == begin || curr == end || prev == begin || prev == end || prev >= curr ||
+        curr->timeRange.start < prev->timeRange.start)
+    {
+        return std::vector<Image>();
     }
 
     std::copy_if(
         prev,
         curr,
-        back_inserter(captureTimes),
-        [instrumentRequest](const Image& i) {
-            return i.activeInstruments[0] == instrumentRequest;
-        }
+        back_inserter(captures),
+        [instrument](const Image& i) { return i.activeInstruments[0] == instrument; }
     );
 
-    captures = captureTimes;
     if (!captures.empty()) {
         _latestImages[captures.back().activeInstruments.front()] = captures.back();
     }
 
     std::vector<int> toDelete;
     for (auto it = captures.begin(); it != captures.end(); ++it) {
-        if (it->isPlaceholder) {
-            double beforeDist = std::numeric_limits<double>::max();
-            if (it != captures.begin()) {
-                beforeDist = std::abs(
-                    std::prev(it)->timeRange.start - it->timeRange.start
-                );
-            }
+        if (!it->isPlaceholder) {
+            continue;
+        }
 
-            double nextDist = std::numeric_limits<double>::max();
-            if (it != captures.end() - 1) {
-                nextDist = std::abs(
-                    std::next(it)->timeRange.start - it->timeRange.start
-                );
-            }
+        double beforeDist = std::numeric_limits<double>::max();
+        if (it != captures.begin()) {
+            beforeDist = std::abs(std::prev(it)->timeRange.start - it->timeRange.start);
+        }
 
-            if (beforeDist < 1.0 || nextDist < 1.0) {
-                toDelete.push_back(static_cast<int>(std::distance(captures.begin(), it)));
-            }
+        double nextDist = std::numeric_limits<double>::max();
+        if (it != captures.end() - 1) {
+            nextDist = std::abs(std::next(it)->timeRange.start - it->timeRange.start);
+        }
+
+        if (beforeDist < 1.0 || nextDist < 1.0) {
+            toDelete.push_back(static_cast<int>(std::distance(captures.begin(), it)));
         }
     }
 
@@ -310,7 +318,7 @@ bool ImageSequencer::imagePaths(std::vector<Image>& captures,
         captures.erase(captures.begin() + v);
     }
 
-    return true;
+    return captures;
 }
 
 void ImageSequencer::sortData() {
@@ -347,14 +355,11 @@ void ImageSequencer::sortData() {
 }
 
 void ImageSequencer::runSequenceParser(SequenceParser& parser) {
-    // get new data
-    std::map<std::string, std::unique_ptr<Decoder>>& translations =
-        parser.translations();
+    std::map<std::string, std::unique_ptr<Decoder>>& translations = parser.translations();
     std::map<std::string, ImageSubset>& imageData = parser.subsetMap();
     const std::vector<std::pair<std::string, TimeRange>>& instrumentTimes =
         parser.instrumentTimes();
-    const std::vector<std::pair<double, std::string>>& targetTimes =
-        parser.targetTimes();
+    const std::vector<std::pair<double, std::string>>& targetTimes = parser.targetTimes();
     const std::vector<double>& captureProgression = parser.captureProgression();
 
     // check for sanity
@@ -381,11 +386,9 @@ void ImageSequencer::runSequenceParser(SequenceParser& parser) {
 
         // simple search function
         double min = 10;
-        auto findMin = [&](const std::vector<Image>& vector) -> double {
-            for (size_t i = 1; i < vector.size(); ++i) {
-                double e = std::abs(
-                    vector[i].timeRange.start - vector[i - 1].timeRange.start
-                );
+        auto findMin = [&](const std::vector<Image>& vec) -> double {
+            for (size_t i = 1; i < vec.size(); ++i) {
+                double e = std::abs(vec[i].timeRange.start - vec[i - 1].timeRange.start);
                 min = std::min(e, min);
             }
             return min;
@@ -393,7 +396,6 @@ void ImageSequencer::runSequenceParser(SequenceParser& parser) {
 
         // find the smallest separation of images in time
         double epsilon;
-        //epsilon = findMin(source);
         epsilon = findMin(destination);
         // set epsilon as 1% smaller than min
         epsilon -= min * 0.01;
@@ -408,8 +410,7 @@ void ImageSequencer::runSequenceParser(SequenceParser& parser) {
                 }
             }
         }
-        // pad image data with predictions (ie - where no actual images,
-        // add placeholder)
+        // pad image data with predictions (ie - where no actual images, add placeholder)
         _subsetMap[key]._subset.insert(
             _subsetMap[key]._subset.end(),
             source.begin(),
