@@ -914,4 +914,16 @@ int worldPosition(lua_State* L) {
     return 1;
 }
 
+int worldRotation(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::worldRotation");
+
+    std::string identifier = ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::Yes);
+
+    glm::dmat3 rot = global::renderEngine->scene()->sceneGraphNode(identifier)->worldRotationMatrix();
+    ghoul::lua::push(L, rot);
+
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
+    return 1;
+}
+
 }  // namespace openspace::luascriptfunctions
