@@ -5,6 +5,7 @@
 #include <modules/skybrowser/include/wwtdatahandler.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <deque>
 
 namespace openspace {
     class ScreenSpaceSkyTarget;
@@ -29,8 +30,10 @@ namespace openspace {
         ScreenSpaceSkyTarget* getSkyTarget();
         bool hasLoadedCollections();
         void setHasLoadedCollections(bool isLoaded);
-        void addImage(ImageData& image);
         properties::FloatProperty& getOpacity();
+        std::deque<int>& selectedImages();
+        void addSelectedImage(ImageData& image, int i);
+        void removeSelectedImage(ImageData& image, int i);
 
         // Translation
         //void translate(glm::vec2 translation);
@@ -64,6 +67,7 @@ namespace openspace {
         std::chrono::system_clock::time_point _lastUpdateTime;
         int _imageId{ 0 };
         bool _hasLoadedCollections{ false };
+        std::deque<int> _selectedImages;
     };
 }
 

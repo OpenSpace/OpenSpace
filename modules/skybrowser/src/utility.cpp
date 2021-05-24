@@ -152,11 +152,12 @@ namespace openspace::wwtmessage {
         return msg;
     }
 
-    ghoul::Dictionary removeImageLayer(const std::string& id) {
+    ghoul::Dictionary removeImageLayer(ImageData& image) {
         using namespace std::string_literals;
         ghoul::Dictionary msg;
         msg.setValue("event", "image_layer_remove"s);
-        msg.setValue("id", id);
+        msg.setValue("id", std::to_string(image.id));
+        image.id = ImageData::NO_ID;
 
         return msg;
     }

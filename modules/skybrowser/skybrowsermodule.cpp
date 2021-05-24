@@ -105,6 +105,14 @@ namespace openspace {
                 "string or list of strings",
                 "Add one or multiple exoplanet systems to the scene, as specified by the "
                 "input. An input string should be the name of the system host star"
+            }, 
+            {
+                "removeSelectedImageInBrowser",
+                &skybrowser::luascriptfunctions::removeSelectedImageInBrowser,
+                {},
+                "string or list of strings",
+                "Add one or multiple exoplanet systems to the scene, as specified by the "
+                "input. An input string should be the name of the system host star"
             },
             {
                 "adjustCamera",

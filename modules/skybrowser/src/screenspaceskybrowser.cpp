@@ -325,13 +325,32 @@ namespace openspace {
         return _browserDimensions.value();
     }
 
-    void ScreenSpaceSkyBrowser::addImage(ImageData& image) {
+    properties::FloatProperty& ScreenSpaceSkyBrowser::getOpacity() {
+        return _opacity;
+    }
+
+    std::deque<int>& ScreenSpaceSkyBrowser::selectedImages() {
+        return _selectedImages;
+    }
+
+    void ScreenSpaceSkyBrowser::addSelectedImage(ImageData& image, int i) {
         sendMessageToWWT(wwtmessage::createImageLayer(image, _imageId));
         sendMessageToWWT(wwtmessage::setLayerOpacity(image, 1.0));
         _imageId++;
+        // Ensure there are no duplicates
+        auto it = std::find(std::begin(_selectedImages), std::end(_selectedImages), i);
+        if (it == std::end(_selectedImages)) {
+            // Push newly selected image to front
+            _selectedImages.push_front(i);
+        }
     }
 
-    properties::FloatProperty& ScreenSpaceSkyBrowser::getOpacity() {
-        return _opacity;
+    void ScreenSpaceSkyBrowser::removeSelectedImage(ImageData& image, int i) {
+        sendMessageToWWT(wwtmessage::removeImageLayer(image));
+        // Remove from selected list
+        auto it = std::find(std::begin(_selectedImages), std::end(_selectedImages), i);
+        if (it != std::end(_selectedImages)) {
+            _selectedImages.erase(it);
+        }
     }
 }

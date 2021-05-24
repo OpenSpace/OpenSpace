@@ -45,7 +45,7 @@ namespace openspace {
         ghoul::Dictionary loadCollection(const std::string& url);
         ghoul::Dictionary setForeground(const std::string& name);
         ghoul::Dictionary createImageLayer(ImageData& image, int id = 0);
-        ghoul::Dictionary removeImageLayer(const std::string& id);
+        ghoul::Dictionary removeImageLayer(ImageData& image);
         ghoul::Dictionary setLayerOpacity(const ImageData& image,
             double opacity);
         ghoul::Dictionary setForegroundOpacity(double val);

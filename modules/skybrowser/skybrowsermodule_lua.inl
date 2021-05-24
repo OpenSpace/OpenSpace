@@ -46,7 +46,7 @@ namespace openspace::skybrowser::luascriptfunctions {
             // Load image, if the image has not been loaded yet
             if (resultImage.id == ImageData::NO_ID) {
                 LINFO("Loading image " + resultImage.name);
-                selectedBrowser->addImage(resultImage);
+                selectedBrowser->addSelectedImage(resultImage, i);
             }
 
             ScreenSpaceSkyTarget* selectedTarget = selectedBrowser->getSkyTarget();
@@ -224,6 +224,7 @@ namespace openspace::skybrowser::luascriptfunctions {
         glm::dvec2 sphericalJ2000 = skybrowser::cartesianToSpherical(cartesianJ2000);
         // Convert to vector so ghoul can read it
         std::vector<double> viewDirCelestVec = { cartesianJ2000.x, cartesianJ2000.y, cartesianJ2000.z };
+       
         
 
         // Calculate the smallest FOV of vertical and horizontal
@@ -253,6 +254,12 @@ namespace openspace::skybrowser::luascriptfunctions {
         for (std::pair<std::string, ScreenSpaceSkyBrowser*> pair : browsers) {
             ScreenSpaceSkyBrowser* browser = pair.second;
             std::string id = pair.first;
+            // Convert deque to vector so ghoul can read it
+            std::vector<int> selectedImagesVector;
+            std::deque<int> selectedImages = browser->selectedImages();
+            std::for_each(selectedImages.begin(), selectedImages.end(), [&](int index) {
+                selectedImagesVector.push_back(index);
+                });
             // Only add browsers that have an initialized target
             ScreenSpaceSkyTarget* target = browser->getSkyTarget();
             if (target) {
@@ -272,6 +279,8 @@ namespace openspace::skybrowser::luascriptfunctions {
                 lua_settable(L, -3);
                 ghoul::lua::push(L, "FOV", browser->fieldOfView());
                 lua_settable(L, -3);
+                ghoul::lua::push(L, "selectedImages", selectedImagesVector);
+                lua_settable(L, -3);
                 ghoul::lua::push(L, "cartesianDirection", celestialCartVec);
                 lua_settable(L, -3);
                 ghoul::lua::push(L, "ra", celestialSpherical.x);
@@ -280,7 +289,7 @@ namespace openspace::skybrowser::luascriptfunctions {
                 lua_settable(L, -3);
                 ghoul::lua::push(L, "color", colorVec);
                 lua_settable(L, -3);
-
+              
                 // Set table for the current target
                 lua_settable(L, -3);
             }
@@ -369,6 +378,21 @@ namespace openspace::skybrowser::luascriptfunctions {
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>(); 
         module->remove3dBrowser(id);
         
+        return 0;
+    }
+
+    int removeSelectedImageInBrowser(lua_State* L) {
+        ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::removeSelectedImageInBrowser");
+        // Image index
+        const int i = ghoul::lua::value<int>(L, 1);
+        const std::string browserId = ghoul::lua::value<std::string>(L, 2);
+        // Get browser
+        SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+        ScreenSpaceSkyBrowser* browser = module->getSkyBrowsers()[browserId];
+        ImageData& resultImage = module->getWWTDataHandler()->getLoadedImages()[i];
+        // Remove image
+        browser->removeSelectedImage(resultImage, i);
+
         return 0;
     }
 	
