@@ -50,7 +50,9 @@ set(HEADER_FILES
   rendering/renderableplane.h
   rendering/renderableplaneimagelocal.h
   rendering/renderableplaneimageonline.h
+  rendering/renderableplanetimevaryingimage.h
   rendering/renderablesphere.h
+  rendering/renderabletimevaryingsphere.h
   rendering/renderabletrail.h
   rendering/renderabletrailorbit.h
   rendering/renderabletrailtrajectory.h
@@ -101,7 +103,9 @@ set(SOURCE_FILES
   rendering/renderableplane.cpp
   rendering/renderableplaneimagelocal.cpp
   rendering/renderableplaneimageonline.cpp
+  rendering/renderableplanetimevaryingimage.cpp
   rendering/renderablesphere.cpp
+  rendering/renderabletimevaryingsphere.cpp
   rendering/renderabletrail.cpp
   rendering/renderabletrailorbit.cpp
   rendering/renderabletrailtrajectory.cpp

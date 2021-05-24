@@ -43,6 +43,11 @@ namespace openspace {
 class Sphere;
 struct RenderData;
 struct UpdateData;
+struct FileData {
+    std::string path;
+    double time;
+    std::unique_ptr<ghoul::opengl::Texture> texture;
+};
 
 namespace documentation { struct Documentation; }
 
@@ -62,7 +67,7 @@ public:
 
 private:
     void loadTexture();
-    void extractTriggerTimesFromFileNames();
+    double extractTriggerTimeFromFileName(const std::string& filePath);
     bool extractMandatoryInfoFromDictionary();
     void updateActiveTriggerTimeIndex(double currenttime);
     void computeSequenceEndTime();
@@ -70,14 +75,14 @@ private:
     // Estimated end of sequence.
     double _sequenceEndTime;
     bool _needsUpdate = false;
-    std::vector<std::string> _sourceFiles;
-    std::vector<double> _startTimes;
+    //std::vector<std::string> _sourceFiles;
+    //std::vector<double> _startTimes;
+    std::vector<FileData> _files;
     int _activeTriggerTimeIndex = 0;
     // Number of states in the sequence
-    size_t _nStates = 274;
     bool _isLoadingTexture = false;
 
-    properties::StringProperty _texturePath;
+    properties::StringProperty _textureSourcePath;
     properties::OptionProperty _orientation;
 
     properties::FloatProperty _size;
@@ -95,7 +100,7 @@ private:
     //std::unique_ptr<ghoul::opengl::Texture> _texture;
     ghoul::opengl::Texture* _texture = nullptr;
     std::unique_ptr<ghoul::filesystem::File> _textureFile;
-    std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textureFiles;
+    //std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textureFiles;
     std::unique_ptr<Sphere> _sphere;
 
     UniformCache(opacity, modelViewProjection, modelViewRotation, colorTexture,

@@ -21,7 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
-#include <modules/fluxnodes/rendering/renderablefluxnodes.h>
+#include <modules/space/rendering/renderablefluxnodes.h>
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
@@ -46,12 +46,10 @@
 #include <openspace/json.h>
 #include <openspace/query/query.h>
 #include <sys/stat.h>
-#pragma
+#include <optional>
 
 // This is a call to use the nlohmann json file
 using json = nlohmann::json;
-
-#pragma optimize("", off)
 
 namespace {
     // log category
@@ -386,6 +384,11 @@ namespace {
         return tmp;
     }
 
+    struct [[codegen::Dictionary(RenderableFluxNodes)]] Parameters {
+        // path to source folder with the 3 binary files in it
+    };
+#include "renderablefluxnodes_codegen.cpp"
+
     // Changed everything from dvec3 to vec3
     glm::vec3 sphericalToCartesianCoord(glm::vec3 position) {
         glm::vec3 cartesianPosition = glm::vec3();
@@ -402,6 +405,13 @@ namespace {
 } //namespace
 
 namespace openspace {
+
+documentation::Documentation RenderableFluxNodes::Documentation() {
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_renderable_flux_nodes";
+    return doc;
+}
+
 using namespace properties;
 RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
 
@@ -530,8 +540,8 @@ void RenderableFluxNodes::initializeGL() {
     // Setup shader program
     _shaderProgram = global::renderEngine->buildRenderProgram(
         "Fluxnodes",
-        absPath("${MODULE_FLUXNODES}/shaders/fluxnodes_vs.glsl"),
-        absPath("${MODULE_FLUXNODES}/shaders/fluxnodes_fs.glsl")
+        absPath("${MODULE_SPACE}/shaders/fluxnodes_vs.glsl"),
+        absPath("${MODULE_SPACE}/shaders/fluxnodes_fs.glsl")
     );
 
     _uniformCache.streamColor = _shaderProgram->uniformLocation("streamColor");
@@ -557,10 +567,10 @@ void RenderableFluxNodes::initializeGL() {
         // Set a default color table, just in case the (optional) user defined paths are
         // corrupt or not provided!
         //_colorTablePaths.push_back(FieldlinesSequenceModule::DefaultTransferFunctionFile);
-        _transferFunction = std::make_unique<TransferFunction>(absPath(_colorTablePaths[0]));
-        _transferFunctionCMR = std::make_unique<TransferFunction>(absPath(_colorTablePaths[1]));
-        _transferFunctionEarth = std::make_unique<TransferFunction>(absPath(_colorTablePaths[2]));  // what if not in order?
-        _transferFunctionFlow = std::make_unique<TransferFunction>(absPath(_colorTablePaths[3]));
+        _transferFunction = std::make_unique<TransferFunction>(absPath(_colorTablePaths[0]).string());
+        _transferFunctionCMR = std::make_unique<TransferFunction>(absPath(_colorTablePaths[1]).string());
+        _transferFunctionEarth = std::make_unique<TransferFunction>(absPath(_colorTablePaths[2]).string());  // what if not in order?
+        _transferFunctionFlow = std::make_unique<TransferFunction>(absPath(_colorTablePaths[3]).string());
         //_transferFunctionIlluminance = std::make_unique<TransferFunction>(absPath(_colorTablePaths[4]));
         //_transferFunctionIlluminance2 = std::make_unique<TransferFunction>(absPath(_colorTablePaths[5]));
     }
@@ -627,7 +637,7 @@ void RenderableFluxNodes::loadNodeData() {
     }
     //if the files doesn't exist we create them, this is just so that we then can 
     // cache the actual binary files
-    if (!FileSys.fileExists(_file)) {
+    if (!std::filesystem::is_regular_file(_file)) {
         std::ofstream fileStream(_file, std::ofstream::binary);
         std::ofstream fileStream2(_file2, std::ofstream::binary);
         std::ofstream fileStream3(_file3, std::ofstream::binary);
@@ -646,12 +656,9 @@ void RenderableFluxNodes::loadNodeData() {
         );
     }
 
-    std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-        _file,
-        ghoul::filesystem::CacheManager::Persistent::Yes
-    );
+    std::string cachedFile = FileSys.cacheManager()->cachedFilename(_file);
      //Check if we have a cached binary file for the data
-    bool hasCachedFile = FileSys.fileExists(cachedFile);
+    bool hasCachedFile = std::filesystem::is_regular_file(cachedFile);
 
     if (hasCachedFile) {
         LINFO(fmt::format("Cached file '{}' used for Speck file '{}'",
@@ -783,10 +790,7 @@ void RenderableFluxNodes::writeCachedFile() const {
         _file2 = "StreamnodesCacheColor_emin03";
         _file3 = "StreamnodesCacheRadius_emin03";
     }
-    std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-        _file,
-        ghoul::filesystem::CacheManager::Persistent::Yes
-    );
+    std::string cachedFile = FileSys.cacheManager()->cachedFilename(_file);
     std::ofstream fileStream(cachedFile, std::ofstream::binary);
 
     if (!fileStream.good()) {
@@ -801,16 +805,10 @@ void RenderableFluxNodes::writeCachedFile() const {
         sizeof(int8_t)
     );
         
-    std::string cachedFile2 = FileSys.cacheManager()->cachedFilename(
-        _file2,
-        ghoul::filesystem::CacheManager::Persistent::Yes
-    );
+    std::string cachedFile2 = FileSys.cacheManager()->cachedFilename(_file2);
     std::ofstream fileStream2(cachedFile2, std::ofstream::binary);
 
-    std::string cachedFile3 = FileSys.cacheManager()->cachedFilename(
-        _file3,
-        ghoul::filesystem::CacheManager::Persistent::Yes
-    );
+    std::string cachedFile3 = FileSys.cacheManager()->cachedFilename(_file3);
     std::ofstream fileStream3(cachedFile3, std::ofstream::binary);
 
     int32_t nValues = static_cast<int32_t>(_vertexRadius.size());
@@ -961,7 +959,8 @@ bool RenderableFluxNodes::extractMandatoryInfoFromDictionary()
     //    return false;
     //}
     if (!_dictionary->hasValue<std::string>(KeyBinarySourceFolder)) {
-        LERROR(fmt::format("{}: The field {} is missing", _identifier, KeyBinarySourceFolder));
+        LERROR(fmt::format("{}: The field {} is missing", _identifier, 
+                                            KeyBinarySourceFolder));
         return false;
     }
     //constexpr const char temp = '\';
@@ -971,13 +970,19 @@ bool RenderableFluxNodes::extractMandatoryInfoFromDictionary()
         _dictionary->value<std::string>(KeyBinarySourceFolder);
     _binarySourceFilePath = binarySourceFolderPath;
     LDEBUG(binarySourceFolderPath);
-    ghoul::filesystem::Directory binarySourceFolder(binarySourceFolderPath);
-    if (FileSys.directoryExists(binarySourceFolder)) {
+
+    if (std::filesystem::is_directory(binarySourceFolderPath)) {
         // Extract all file paths from the provided folder
-        _binarySourceFiles = binarySourceFolder.readFiles(
-            ghoul::filesystem::Directory::Recursive::No,
-            ghoul::filesystem::Directory::Sort::Yes
-        );
+        _binarySourceFiles.clear();
+        namespace fs = std::filesystem;
+        for (const fs::directory_entry& e : fs::directory_iterator(
+                                                                binarySourceFolderPath)) {
+            if (e.is_regular_file()) {
+                _binarySourceFiles.push_back(e.path().string());
+            }
+        }
+        std::sort(_binarySourceFiles.begin(), _binarySourceFiles.end());
+
         // Ensure that there are available and valid source files left
         if (_binarySourceFiles.empty()) {
             LERROR(fmt::format(
@@ -1023,43 +1028,6 @@ bool RenderableFluxNodes::extractMandatoryInfoFromDictionary()
     //    return false;
     //}
 
-    return true;
-}
-
-bool RenderableFluxNodes::extractJsonInfoFromDictionary(fls::Model& model) {
-    std::string modelStr;
-    if (_dictionary->hasValue<std::string>(KeySimulationModel)) {
-        modelStr = _dictionary->value<std::string>(KeySimulationModel);
-        std::transform(
-            modelStr.begin(),
-            modelStr.end(),
-            modelStr.begin(),
-            [](char c) { return static_cast<char>(::tolower(c)); }
-        );
-        model = fls::stringToModel(modelStr);
-    }
-    else {
-        LERROR(fmt::format(
-            "{}: Must specify '{}'", _identifier, KeySimulationModel
-            ));
-        return false;
-    }
-
-    if (_dictionary->hasValue<std::string>(KeyLineWidth)) {
-        _pLineWidth = stringToFloat(_dictionary->value<std::string>(KeyLineWidth));
-    }
-    if (_dictionary->hasValue<std::string>(KeyThresholdRadius)) {
-        _pThresholdFlux = stringToFloat(_dictionary->value<std::string>(KeyThresholdRadius));
-    }
-    if (_dictionary->hasValue<std::string>(KeyJsonScalingFactor)) {
-        _scalingFactor = stringToFloat(_dictionary->value<std::string>(KeyJsonScalingFactor));
-    }
-    else {
-        LWARNING(fmt::format(
-            "{}: Does not provide scalingFactor. Assumes coordinates are in meters",
-            _identifier
-            ));
-    }
     return true;
 }
 

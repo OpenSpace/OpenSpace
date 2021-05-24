@@ -36,7 +36,7 @@
 #include <ghoul/opengl/texture.h>
 #include <fstream>
 #include <optional>
-
+#pragma optimize ("", off)
 namespace {
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",

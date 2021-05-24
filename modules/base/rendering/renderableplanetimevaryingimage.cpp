@@ -21,8 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
-
-#include <modules/fluxnodes/rendering/renderableplanetimevaryingimage.h>
+#include <modules/base/rendering/renderableplanetimevaryingimage.h>
 #include <modules/base/basemodule.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
@@ -92,29 +91,21 @@ RenderablePlaneTimeVaryingImage::RenderablePlaneTimeVaryingImage(
 
     , _texturePath(TextureInfo)
 {
-    codegen::bake<Parameters>(dictionary);
-
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderablePlaneTimeVaryingImage"
-    );
-
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    
     addProperty(_blendMode);
-
-    _texturePath = absPath(dictionary.value<std::string>(TextureInfo.identifier));
-    _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
+    
+    _texturePath = absPath(p.texture).string();
+    _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
 
     addProperty(_texturePath);
     _texturePath.onChange([this]() {loadTexture(); });
     _textureFile->setCallback(
-        [this](const ghoul::filesystem::File&) { _textureIsDirty = true; }
+        [this]() { _textureIsDirty = true; }
     );
 
-    if (dictionary.hasKey(RenderableTypeInfo.identifier)) {
-        std::string renderType = dictionary.value<std::string>(
-            RenderableTypeInfo.identifier
-            );
+    if (p.renderableType.has_value()) {
+        std::string renderType = *p.renderableType;
         if (renderType == "Background") {
             setRenderBin(Renderable::RenderBin::Background);
         }
@@ -140,14 +131,14 @@ RenderablePlaneTimeVaryingImage::RenderablePlaneTimeVaryingImage(
 
         if (_isLoadingLazily) {
             _enabled.onChange([this]() {
-                if (!_enabled) {
-                    BaseModule::TextureManager.release(_texture);
-                    _texture = nullptr;
-                }
                 if (_enabled) {
                     _textureIsDirty = true;
                 }
-                });
+                else {
+                    BaseModule::TextureManager.release(_texture);
+                    _texture = nullptr;
+                }
+            });
         }
     }
 }
@@ -178,8 +169,8 @@ void RenderablePlaneTimeVaryingImage::initializeGL() {
 
     for (int i = 0; i < _sourceFiles.size(); ++i) {
 
-        _textureFiles[i] = ghoul::io::TextureReader::ref().loadTexture
-        (absPath(_sourceFiles[i]));
+        _textureFiles[i] = ghoul::io::TextureReader::ref().loadTexture(
+                                                       absPath(_sourceFiles[i]).string());
         _textureFiles[i]->setInternalFormat(GL_COMPRESSED_RGBA);
         _textureFiles[i]->uploadTexture();
         _textureFiles[i]->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
@@ -192,13 +183,18 @@ bool RenderablePlaneTimeVaryingImage::extractMandatoryInfoFromDictionary()
 {
     // Ensure that the source folder exists and then extract
     // the files with the same extension as <inputFileTypeString>
-    ghoul::filesystem::Directory sourceFolder(_texturePath);
-    if (FileSys.directoryExists(sourceFolder)) {
+    namespace fs = std::filesystem;
+    fs::path sourceFolder = _texturePath.value();
+    if (std::filesystem::is_directory(sourceFolder)) {
         // Extract all file paths from the provided folder
-        _sourceFiles = sourceFolder.readFiles(
-            ghoul::filesystem::Directory::Recursive::No,
-            ghoul::filesystem::Directory::Sort::Yes
-        );
+        _sourceFiles.clear();
+        namespace fs = std::filesystem;
+        for (const fs::directory_entry& e : fs::directory_iterator(sourceFolder)) {
+            if (e.is_regular_file()) {
+                _sourceFiles.push_back(e.path().string());
+            }
+        }
+        std::sort(_sourceFiles.begin(), _sourceFiles.end());
         // Ensure that there are available and valid source files left
         if (_sourceFiles.empty()) {
             LERROR(fmt::format(

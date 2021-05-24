@@ -53,6 +53,8 @@ public:
     void update(const UpdateData& data) override;
     void updateActiveTriggerTimeIndex(double currentTime);
 
+    static documentation::Documentation Documentation();
+
 private:
     std::vector<GLsizei> _lineCount;
     std::vector<GLint> _lineStart;
@@ -308,6 +310,7 @@ private:
     properties::BoolProperty _pPulseEnabled;
     properties::BoolProperty _pGaussianPulseEnabled;
     properties::BoolProperty _pPulseAlways;
+    properties::FloatProperty _scaleFactor;
 
     //properties::FloatProperty _pTestChange;
 
@@ -322,7 +325,6 @@ private:
     // --------------------- FUNCTIONS USED DURING INITIALIZATION --------------------- //    
     bool extractMandatoryInfoFromDictionary();
     void definePropertyCallbackFunctions();
-    bool extractJsonInfoFromDictionary(fls::Model& model);
     std::vector<std::string> LoadJsonfile(std::string filepath);
                                                 //void extractTriggerTimesFromFileNames();
     void populateStartTimes();
@@ -349,6 +351,5 @@ private:
     //std::unique_ptr<ghoul::opengl::Texture> _spriteTexture;
     //std::unique_ptr<ghoul::filesystem::File> _spriteTextureFile;
 
-    properties::FloatProperty _scaleFactor;
 };
 }

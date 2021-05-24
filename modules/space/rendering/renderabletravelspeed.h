@@ -22,8 +22,8 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_FLUXNODES___RENDERABLETRAVELSPEED___H__
-#define __OPENSPACE_MODULE_FLUXNODES___RENDERABLETRAVELSPEED___H__
+#ifndef __OPENSPACE_MODULE_SPACE___RENDERABLETRAVELSPEED___H__
+#define __OPENSPACE_MODULE_SPACE___RENDERABLETRAVELSPEED___H__
 
 #include <openspace/rendering/renderable.h>
 #include <openspace/properties/vector/vec3property.h>
@@ -90,4 +90,4 @@ private:
     UniformCache(lineColor, opacity) _uniformCache;
 };
 } // namespace
-#endif //__OPENSPACE_MODULE_FLUXNODES___RENDERABLETRAVELSPEED___H__
+#endif //__OPENSPACE_MODULE_SPACE___RENDERABLETRAVELSPEED___H__

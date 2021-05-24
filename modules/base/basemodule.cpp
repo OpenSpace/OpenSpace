@@ -51,6 +51,8 @@
 #include <modules/base/rendering/renderabletrailtrajectory.h>
 #include <modules/base/rendering/renderableplaneimagelocal.h>
 #include <modules/base/rendering/renderableplaneimageonline.h>
+#include <modules/base/rendering/renderableplanetimevaryingimage.h>
+#include <modules/base/rendering/renderabletimevaryingsphere.h>
 #include <modules/base/rendering/screenspacedashboard.h>
 #include <modules/base/rendering/screenspaceimagelocal.h>
 #include <modules/base/rendering/screenspaceimageonline.h>
@@ -131,6 +133,8 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderableNodeLine>("RenderableNodeLine");
     fRenderable->registerClass<RenderablePlaneImageLocal>("RenderablePlaneImageLocal");
     fRenderable->registerClass<RenderablePlaneImageOnline>("RenderablePlaneImageOnline");
+    fRenderable->registerClass<RenderablePlaneTimeVaryingImage>("RenderablePlaneTimeVaryingImage");
+    fRenderable->registerClass<RenderableTimeVaryingSphere>("RenderableTimeVaryingSphere");
     fRenderable->registerClass<RenderableRadialGrid>("RenderableRadialGrid");
     fRenderable->registerClass<RenderableSphere>("RenderableSphere");
     fRenderable->registerClass<RenderableSphericalGrid>("RenderableSphericalGrid");
@@ -199,10 +203,12 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         RenderablePlane::Documentation(),
         RenderablePlaneImageLocal::Documentation(),
         RenderablePlaneImageOnline::Documentation(),
+        RenderablePlaneTimeVaryingImage::Documentation(),
         RenderableRadialGrid::Documentation(),
         RenderableDisc::Documentation(),
         RenderableSphere::Documentation(),
         RenderableSphericalGrid::Documentation(),
+        RenderableTimeVaryingSphere::Documentation(),
         RenderableTrailOrbit::Documentation(),
         RenderableTrailTrajectory::Documentation(),
 

@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/fluxnodes/rendering/renderabletimevaryingsphere.h>
+#include <modules/base/rendering/renderabletimevaryingsphere.h>
 
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
@@ -39,6 +39,8 @@
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/misc/crc32.h>
+#include <filesystem>
+#include <optional>
 
 namespace {
     constexpr const char* ProgramName = "Sphere";
@@ -54,12 +56,12 @@ namespace {
         Both
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
-        "Texture",
-        "Texture",
-        "This value specifies an image that is loaded from disk and is used as a texture "
-        "that is applied to this sphere. This image is expected to be an equirectangular "
-        "projection."
+    constexpr openspace::properties::Property::PropertyInfo TextureSourceInfo = {
+        "TextureSource",
+        "TextureSource",
+        "This value specifies a directory of images that are loaded from disk and is used"
+        "as a texture that is applied to this sphere. The images are expected to be an"
+        "equirectangular projection."
     };
 
     constexpr openspace::properties::Property::PropertyInfo MirrorTextureInfo = {
@@ -118,84 +120,57 @@ namespace {
         "Sets the current sphere rendering as a background rendering type",
         "Enables/Disables background rendering."
     };
+
+    struct [[codegen::Dictionary(RenerableTimeVaryingSphere)]] Parameters {
+        // [[codegen::verbatim(SizeInfo.description)]]
+        float size;
+
+        // [[codegen::verbatim(SegmentsInfo.description)]]
+        int segments;
+
+        // [[codegen::verbatim(TextureSourceInfo.description)]]
+        std::string textureSource;
+
+        enum class Orientation {
+            Outside,
+            Inside,
+            Both
+        };
+
+        // [[codegen::verbatim(OrientationInfo.description)]]
+        std::optional<Orientation> orientation;
+
+        // [[codegen::verbatim(UseAdditiveBlendingInfo.description)]]
+        std::optional<bool> useAdditiveBlending;
+
+        // [[codegen::verbatim(MirrorTextureInfo.description)]]
+        std::optional<bool> mirrorTexture;
+
+        // [[codegen::verbatim(FadeOutThresholdInfo.description)]]
+        std::optional<float> fadeOutThreshold [[codegen::inrange(0.0, 1.0)]];
+
+        // [[codegen::verbatim(FadeInThresholdInfo.description)]]
+        std::optional<float> fadeInThreshold;
+
+        // [[codegen::verbatim(DisableFadeInOutInfo.description)]]
+        std::optional<bool> disableFadeInOut;
+
+        // [[codegen::verbatim(BackgroundInfo.description)]]
+        std::optional<bool> background;
+    };
+#include "renderabletimevaryingsphere_codegen.cpp"
 } // namespace
 
 namespace openspace {
-
 documentation::Documentation RenderableTimeVaryingSphere::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderableTimeVaryingSphere",
-        "base_renderable_sphere",
-        {
-            {
-                SizeInfo.identifier,
-                new DoubleVerifier,
-                Optional::No,
-                SizeInfo.description
-            },
-            {
-                SegmentsInfo.identifier,
-                new IntVerifier,
-                Optional::No,
-                SegmentsInfo.description
-            },
-            {
-                TextureInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                TextureInfo.description
-            },
-            {
-                OrientationInfo.identifier,
-                new StringInListVerifier({ "Inside", "Outside", "Both" }),
-                Optional::Yes,
-                OrientationInfo.description
-            },
-            {
-                UseAdditiveBlendingInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                UseAdditiveBlendingInfo.description
-            },
-            {
-                MirrorTextureInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                MirrorTextureInfo.description
-            },
-            {
-                FadeOutThresholdInfo.identifier,
-                new DoubleInRangeVerifier(0.0, 1.0),
-                Optional::Yes,
-                FadeOutThresholdInfo.description
-            },
-            {
-                FadeInThresholdInfo.identifier,
-                new DoubleVerifier,
-                Optional::Yes,
-                FadeInThresholdInfo.description
-            },
-            {
-                DisableFadeInOutInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                DisableFadeInOutInfo.description
-            },
-            {
-                BackgroundInfo.identifier,
-                new BoolVerifier,
-                Optional::Yes,
-                BackgroundInfo.description
-            },
-        }
-    };
+    documentation::Documentation doc = codegen::doc<Parameters>();
+    doc.id = "base_renderable_time_varying_sphere";
+    return doc;
 }
-
 
 RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _texturePath(TextureInfo)
+    , _textureSourcePath(TextureSourceInfo)
     , _orientation(OrientationInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _size(SizeInfo, 1.f, 0.f, 1e35f)
     , _segments(SegmentsInfo, 8, 4, 1000)
@@ -206,18 +181,14 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(const ghoul::Dictionary
     , _fadeInThreshold(FadeInThresholdInfo, -1.f, 0.f, 1.f)
     , _fadeOutThreshold(FadeOutThresholdInfo, -1.f, 0.f, 1.f)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableTimeVaryingSphere"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
 
-    _size = static_cast<float>(dictionary.value<double>(SizeInfo.identifier));
-    _segments = static_cast<int>(dictionary.value<double>(SegmentsInfo.identifier));
-    _texturePath = absPath(dictionary.value<std::string>(TextureInfo.identifier));
+    _size = p.size;
+    _segments = p.segments;
+    _textureSourcePath = p.textureSource;
 
     _orientation.addOptions({
         { static_cast<int>(Orientation::Outside), "Outside" },
@@ -225,19 +196,19 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(const ghoul::Dictionary
         { static_cast<int>(Orientation::Both), "Both" }
     });
 
-    if (dictionary.hasKey(OrientationInfo.identifier)) {
-        const std::string& v = dictionary.value<std::string>(OrientationInfo.identifier);
-        if (v == "Inside") {
-            _orientation = static_cast<int>(Orientation::Inside);
-        }
-        else if (v == "Outside") {
-            _orientation = static_cast<int>(Orientation::Outside);
-        }
-        else if (v == "Both") {
-            _orientation = static_cast<int>(Orientation::Both);
-        }
-        else {
-            throw ghoul::MissingCaseException();
+    if (p.orientation.has_value()) {
+        switch (*p.orientation) {
+            case Parameters::Orientation::Inside:
+                _orientation = static_cast<int>(Orientation::Inside);
+                break;
+            case Parameters::Orientation::Outside:
+                _orientation = static_cast<int>(Orientation::Outside);
+                break;
+            case Parameters::Orientation::Both:
+                _orientation = static_cast<int>(Orientation::Both);
+                break;
+            default:
+                throw ghoul::MissingCaseException();
         }
     }
     else {
@@ -245,58 +216,53 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(const ghoul::Dictionary
     }
     addProperty(_orientation);
 
+    _size.setViewOption(properties::Property::ViewOptions::Logarithmic);
+    _size.onChange([this]() {
+        setBoundingSphere(_size);
+        _sphereIsDirty = true;
+    });
     addProperty(_size);
-    _size.onChange([this]() { _sphereIsDirty = true; });
 
     addProperty(_segments);
     _segments.onChange([this]() { _sphereIsDirty = true; });
 
-    addProperty(_texturePath);
-    _texturePath.onChange([this]() { loadTexture(); });
+    addProperty(_textureSourcePath);
+    _textureSourcePath.onChange([this]() { loadTexture(); });
 
     addProperty(_mirrorTexture);
     addProperty(_useAdditiveBlending);
 
+    _mirrorTexture = p.mirrorTexture.value_or(_mirrorTexture);
+    _useAdditiveBlending = p.useAdditiveBlending.value_or(_useAdditiveBlending);
 
-    if (dictionary.hasKey(MirrorTextureInfo.identifier)) {
-       _mirrorTexture = dictionary.value<bool>(MirrorTextureInfo.identifier);
-    }
-    if (dictionary.hasKey(UseAdditiveBlendingInfo.identifier)) {
-        _useAdditiveBlending = dictionary.value<bool>(UseAdditiveBlendingInfo.identifier);
-
-        if (_useAdditiveBlending) {
-            setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
-        }
+    if (_useAdditiveBlending) {
+        setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
     }
 
-    if (dictionary.hasKey(FadeOutThresholdInfo.identifier)) {
-        _fadeOutThreshold = static_cast<float>(
-            dictionary.value<double>(FadeOutThresholdInfo.identifier)
-        );
+    bool hasGivenFadeOut = p.fadeOutThreshold.has_value();
+    if (hasGivenFadeOut) {
+        _fadeOutThreshold = *p.fadeOutThreshold;
         addProperty(_fadeOutThreshold);
     }
 
-    if (dictionary.hasKey(FadeInThresholdInfo.identifier)) {
-        _fadeInThreshold = static_cast<float>(
-            dictionary.value<double>(FadeInThresholdInfo.identifier)
-        );
+    bool hasGivenFadeIn = p.fadeInThreshold.has_value();
+    if (hasGivenFadeIn) {
+        _fadeInThreshold = *p.fadeInThreshold;
         addProperty(_fadeInThreshold);
     }
 
-    if (dictionary.hasKey(FadeOutThresholdInfo.identifier) ||
-        dictionary.hasKey(FadeInThresholdInfo.identifier)) {
-        _disableFadeInDistance.set(false);
+    if (hasGivenFadeIn || hasGivenFadeOut) {
+        _disableFadeInDistance = false;
         addProperty(_disableFadeInDistance);
     }
 
-    if (dictionary.hasKey(BackgroundInfo.identifier)) {
-        _backgroundRendering = dictionary.value<bool>(BackgroundInfo.identifier);
+    _backgroundRendering = p.background.value_or(_backgroundRendering);
 
-        if (_backgroundRendering) {
-            setRenderBin(Renderable::RenderBin::Background);
-        }
+    if (_backgroundRendering) {
+        setRenderBin(Renderable::RenderBin::Background);
     }
 
+    setBoundingSphere(_size);
     setRenderBinFromOpacity();
 }
 
@@ -323,18 +289,19 @@ void RenderableTimeVaryingSphere::initializeGL() {
     if (!extractMandatoryInfoFromDictionary()) {
         return;
     }
-    extractTriggerTimesFromFileNames();
     computeSequenceEndTime();
-    _textureFiles.resize(_sourceFiles.size());
-    for (int i = 0; i < _sourceFiles.size(); ++i) {
+    //_textureFiles.resize(_sourceFiles.size());
+    for (int i = 0; i < _files.size(); ++i) {
 
-       _textureFiles[i] = ghoul::io::TextureReader::ref().loadTexture(absPath(_sourceFiles[i]));
+       //_textureFiles[i] = ghoul::io::TextureReader::ref().loadTexture(
+       //                                                absPath(_sourceFiles[i]).string());
+       _files[i].texture = ghoul::io::TextureReader::ref().loadTexture(_files[i].path);
 
-       _textureFiles[i]->setInternalFormat(GL_COMPRESSED_RGBA);
-       _textureFiles[i]->uploadTexture();
-       _textureFiles[i]->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+       _files[i].texture->setInternalFormat(GL_COMPRESSED_RGBA);
+       _files[i].texture->uploadTexture();
+       _files[i].texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
        //_textureFiles[i]->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-       _textureFiles[i]->purgeFromRAM();
+       _files[i].texture->purgeFromRAM();
     }
 
     loadTexture();
@@ -349,7 +316,7 @@ void RenderableTimeVaryingSphere::deinitializeGL() {
             global::renderEngine->removeRenderProgram(p);
         }
     );
-    _textureFiles.clear();
+    _files.clear();
     _shader = nullptr;
 }
 
@@ -485,33 +452,53 @@ void RenderableTimeVaryingSphere::render(const RenderData& data, RendererTasks&)
 bool RenderableTimeVaryingSphere::extractMandatoryInfoFromDictionary()
 {
     // Ensure that the source folder exists and then extract
-   // the files with the same extension as <inputFileTypeString>
-    ghoul::filesystem::Directory sourceFolder(_texturePath);
-    if (FileSys.directoryExists(sourceFolder)) {
+    // the files with the same extension as <inputFileTypeString>
+    namespace fs = std::filesystem;
+    fs::path sourceFolder = absPath(_textureSourcePath);
+    if (std::filesystem::is_directory(sourceFolder)) {
         // Extract all file paths from the provided folder
-        _sourceFiles = sourceFolder.readFiles(
-            ghoul::filesystem::Directory::Recursive::No,
-            ghoul::filesystem::Directory::Sort::Yes
-        );
+        _files.clear();
+        //_sourceFiles.clear();
+        namespace fs = std::filesystem;
+        for (const fs::directory_entry& e : fs::directory_iterator(sourceFolder)) {
+            if (e.is_regular_file()) {
+               
+                std::string filePath = e.path().string();
+                double time = extractTriggerTimeFromFileName(filePath);
+                std::unique_ptr<ghoul::opengl::Texture> t =
+                    ghoul::io::TextureReader::ref().loadTexture(filePath);
+
+                t.get()->setInternalFormat(GL_COMPRESSED_RGBA);
+                t.get()->uploadTexture();
+                t.get()->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+                t.get()->purgeFromRAM();
+
+                _files.push_back({ filePath, time, std::move(t) });
+            }
+        }
+
+        std::sort(_files.begin(), _files.end(), [](const FileData& a, const FileData& b) {
+            return a.time > b.time;
+        });
         // Ensure that there are available and valid source files left
-        if (_sourceFiles.empty()) {
+        /*if (_files.empty()) {
             LERROR(fmt::format(
                 "{}: {} contains no {} files",
-                _identifier, _texturePath, "extension"
+                _identifier, _textureSourcePath, "extension"
             ));
             return false;
-        }
+        }*/
     }
     else {
         LERROR(fmt::format(
             "{}: FieldlinesSequence {} is not a valid directory",
             _identifier,
-            _texturePath
+            _textureSourcePath
         ));
         return false;
     }
-    _nStates = _sourceFiles.size();
-    LDEBUG("returning true");
+
+    LDEBUG("returning true in extractMandatoryInfoFromDictionary");
     return true;
 }
 void RenderableTimeVaryingSphere::update(const UpdateData& data) {
@@ -523,7 +510,7 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
         ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
     }
     const double currentTime = data.time.j2000Seconds();
-    const bool isInInterval = (currentTime >= _startTimes[0]) &&
+    const bool isInInterval = (currentTime >= _files[0].time) &&
         (currentTime < _sequenceEndTime);
     //const bool isInInterval = true;
     if (isInInterval) {
@@ -532,11 +519,11 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
             // true => Previous frame was not within the sequence interval
             //_activeTriggerTimeIndex < 0 ||
             // true => We stepped back to a time represented by another state
-            currentTime < _startTimes[_activeTriggerTimeIndex] ||
+            currentTime < _files[_activeTriggerTimeIndex].time ||
             // true => We stepped forward to a time represented by another state
-            (nextIdx < _nStates && currentTime >= _startTimes[nextIdx]))
+            (nextIdx < _files.size() && currentTime >= _files[nextIdx].time))
         {
-            updateActiveTriggerTimeIndex(currentTime);
+            updateActiveTriggerTimeIndex(currentTime); 
             //LDEBUG("Vi borde uppdatera1");
 
             // _mustLoadNewStateFromDisk = true;
@@ -561,37 +548,41 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
 }
 // Extract J2000 time from file names
   // Requires files to be named as such: 'YYYY-MM-DDTHH-MM-SS-XXX.json'
-void RenderableTimeVaryingSphere::extractTriggerTimesFromFileNames() {
+double RenderableTimeVaryingSphere::extractTriggerTimeFromFileName(const std::string& filePath) {
     // number of  characters in filename (excluding '.json')
     constexpr const int FilenameSize = 23;
     // size(".json")
     constexpr const int ExtSize = 4;
 
-    for (const std::string& filePath : _sourceFiles) {
-        LDEBUG("filepath " + filePath);
-        const size_t strLength = filePath.size();
-        // Extract the filename from the path (without extension)
-        std::string timeString = filePath.substr(
-            strLength - FilenameSize - ExtSize,
-            FilenameSize - 1
-        );
-        // Ensure the separators are correct
-        timeString.replace(4, 1, "-");
-        timeString.replace(7, 1, "-");
-        timeString.replace(13, 1, ":");
-        timeString.replace(16, 1, ":");
-        timeString.replace(19, 1, ".");
-        const double triggerTime = Time::convertTime(timeString);
-        LDEBUG("timestring " + timeString);
-        _startTimes.push_back(triggerTime);
-    }
+    LDEBUG("filepath " + filePath);
+    const size_t strLength = filePath.size();
+    // Extract the filename from the path (without extension)
+    std::string timeString = filePath.substr(
+        strLength - FilenameSize - ExtSize,
+        FilenameSize - 1
+    );
+    // Ensure the separators are correct
+    timeString.replace(4, 1, "-");
+    timeString.replace(7, 1, "-");
+    timeString.replace(13, 1, ":");
+    timeString.replace(16, 1, ":");
+    timeString.replace(19, 1, ".");
+
+    LDEBUG("timestring " + timeString);
+    return Time::convertTime(timeString);
+    
 }
+
 void RenderableTimeVaryingSphere::updateActiveTriggerTimeIndex(double currentTime) {
-    auto iter = std::upper_bound(_startTimes.begin(), _startTimes.end(), currentTime);
-    if (iter != _startTimes.end()) {
-        if (iter != _startTimes.begin()) {
+
+    auto iter = std::upper_bound(_files.begin(), _files.end(), currentTime,
+        [](double value, const FileData& f) {
+            return value < f.time;
+        });
+    if (iter != _files.end()) {
+        if (iter != _files.begin()) {
             _activeTriggerTimeIndex = static_cast<int>(
-                std::distance(_startTimes.begin(), iter)
+                std::distance(_files.begin(), iter)
                 ) - 1;
         }
         else {
@@ -599,15 +590,16 @@ void RenderableTimeVaryingSphere::updateActiveTriggerTimeIndex(double currentTim
         }
     }
     else {
-        _activeTriggerTimeIndex = static_cast<int>(_nStates) - 1;
+        _activeTriggerTimeIndex = static_cast<int>(_files.size()) - 1;
     }
 }
+
 void RenderableTimeVaryingSphere::computeSequenceEndTime() {
-    if (_nStates > 1) {
-        const double lastTriggerTime = _startTimes[_nStates - 1];
-        const double sequenceDuration = lastTriggerTime - _startTimes[0];
+    if (_files.size() > 1) {
+        const double lastTriggerTime = _files[_files.size() - 1].time;
+        const double sequenceDuration = lastTriggerTime - _files[0].time;
         const double averageStateDuration = sequenceDuration /
-            (static_cast<double>(_nStates) - 1.0);
+            (static_cast<double>(_files.size()) - 1.0);
         _sequenceEndTime = lastTriggerTime + averageStateDuration;
     }
     else {
@@ -615,13 +607,14 @@ void RenderableTimeVaryingSphere::computeSequenceEndTime() {
         _sequenceEndTime = DBL_MAX;
     }
 }
+
 void RenderableTimeVaryingSphere::loadTexture() {
     if (_activeTriggerTimeIndex != -1) {
        // ghoul::opengl::Texture* t = _texture;
        // std::unique_ptr<ghoul::opengl::Texture> texture =
         //    ghoul::io::TextureReader::ref().loadTexture(_sourceFiles[_activeTriggerTimeIndex]);
      //   unsigned int hash = ghoul::hashCRC32File(_sourceFiles[_activeTriggerTimeIndex]);
-        _texture = _textureFiles[_activeTriggerTimeIndex].get();
+        _texture = _files[_activeTriggerTimeIndex].texture.get();
         /*
         if (texture) {
             LDEBUGC(
