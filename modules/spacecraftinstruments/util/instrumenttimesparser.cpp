@@ -24,6 +24,7 @@
 
 #include <modules/spacecraftinstruments/util/instrumenttimesparser.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/util/spicemanager.h>
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
@@ -36,10 +37,16 @@
 namespace {
     constexpr const char* _loggerCat = "InstrumentTimesParser";
 
-    constexpr const char* KeyTargetBody = "Target.Body";
+    constexpr const char* KeyTargetBody = "Target";
     constexpr const char* KeyInstruments = "Instruments";
     constexpr const char* KeyInstrument = "Instrument";
     constexpr const char* KeyInstrumentFiles = "Files";
+
+    struct [[codegen::Dictionary(InstrumentTimesParser)]] Parameters {
+        std::string target;
+        std::map<std::string, ghoul::Dictionary> instruments;
+    };
+#include "instrumenttimesparser_codegen.cpp"
 } // namespace
 
 namespace openspace {
@@ -50,18 +57,16 @@ InstrumentTimesParser::InstrumentTimesParser(std::string name, std::string seque
     , _name(std::move(name))
     , _fileName(std::move(sequenceSource))
 {
+    const Parameters p = codegen::bake<Parameters>(inputDict);
 
-    _target = inputDict.value<std::string>(KeyTargetBody);
-    ghoul::Dictionary instruments = inputDict.value<ghoul::Dictionary>(KeyInstruments);
-
-    for (std::string_view key : instruments.keys()) {
-        ghoul::Dictionary instrument = instruments.value<ghoul::Dictionary>(key);
-        ghoul::Dictionary files = instrument.value<ghoul::Dictionary>(KeyInstrumentFiles);
-        _fileTranslation[std::string(key)] =
-            Decoder::createFromDictionary(instrument, KeyInstrument);
+    _target = p.target;
+    for (const std::pair<const std::string, ghoul::Dictionary>& ps : p.instruments) {
+        ghoul::Dictionary files = ps.second.value<ghoul::Dictionary>(KeyInstrumentFiles);
+        _fileTranslation[ps.first] =
+            Decoder::createFromDictionary(ps.second, KeyInstrument);
         for (size_t i = 0; i < files.size(); i++) {
             std::string filename = files.value<std::string>(std::to_string(i + 1));
-            _instrumentFiles[std::string(key)].push_back(std::move(filename));
+            _instrumentFiles[ps.first].push_back(std::move(filename));
         }
     }
 }

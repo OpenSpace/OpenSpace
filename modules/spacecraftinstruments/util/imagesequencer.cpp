@@ -89,46 +89,6 @@ std::pair<double, std::string> ImageSequencer::currentTarget(double time) const 
     }
 }
 
-std::pair<double, std::vector<std::string>> ImageSequencer::incidentTargetList(
-                                                                              double time,
-                                                                          int range) const
-{
-    std::pair<double, std::vector<std::string>> incidentTargets;
-
-    auto it = std::lower_bound(
-        _targetTimes.begin(),
-        _targetTimes.end(),
-        time,
-        [](const std::pair<double, std::string>& a, double b) { return a.first < b; }
-    );
-
-    if (it != _targetTimes.end() && it != _targetTimes.begin()) {
-        // move the iterator to the first element of the range
-        std::advance(it, -(range + 1));
-
-        // now extract incident range
-        for (int i = 0; i < 2 * range + 1; i++) {
-            incidentTargets.first = it->first;
-            incidentTargets.second.push_back(it->second);
-            it++;
-            if (it == _targetTimes.end()) {
-                break;
-            }
-        }
-    }
-
-    return incidentTargets;
-}
-
-double ImageSequencer::intervalLength(double time) {
-    const double upcoming = nextCaptureTime(time);
-    if (_nextCapture != upcoming) {
-        _nextCapture = upcoming;
-        _intervalLength = upcoming - time;
-    }
-    return _intervalLength;
-}
-
 double ImageSequencer::prevCaptureTime(double time) const {
     const auto it = std::lower_bound(
         _captureProgression.begin(),
@@ -196,8 +156,7 @@ std::vector<std::pair<std::string, bool>> ImageSequencer::activeInstruments(doub
     return _switchingMap;
 }
 
-bool ImageSequencer::isInstrumentActive(double time,
-                                        const std::string& instrumentID) const
+bool ImageSequencer::isInstrumentActive(double time, const std::string& instrument) const
 {
     for (const std::pair<std::string, TimeRange>& i : _instrumentTimes) {
         // check if this instrument is in range
@@ -208,7 +167,7 @@ bool ImageSequencer::isInstrumentActive(double time,
         // if so, then get the corresponding spiceID
         const std::vector<std::string>& is = _fileTranslation.at(i.first)->translations();
         // check which specific subinstrument is firing
-        const auto it = std::find(is.begin(), is.end(), instrumentID);
+        const auto it = std::find(is.begin(), is.end(), instrument);
         if (it != is.end()) {
             return true;
         }
@@ -291,7 +250,7 @@ std::vector<Image> ImageSequencer::imagePaths(const std::string& projectee,
     }
 
     std::vector<int> toDelete;
-    for (auto it = captures.begin(); it != captures.end(); ++it) {
+    for (std::vector<Image>::iterator it = captures.begin(); it != captures.end(); ++it) {
         if (!it->isPlaceholder) {
             continue;
         }
@@ -312,8 +271,8 @@ std::vector<Image> ImageSequencer::imagePaths(const std::string& projectee,
     }
 
     for (size_t i = 0; i < toDelete.size(); ++i) {
-        // We have to subtract i here as we already have deleted i value
-        // before this and we need to adjust the location
+        // We have to subtract i here as we already have deleted i value before this and
+        // we need to adjust the location
         int v = toDelete[i] - static_cast<int>(i);
         captures.erase(captures.begin() + v);
     }

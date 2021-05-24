@@ -140,9 +140,7 @@ void RenderablePlaneProjection::render(const RenderData& data, RendererTasks&) {
 
 void RenderablePlaneProjection::update(const UpdateData& data) {
     const double time = data.time.j2000Seconds();
-    const Image& img = openspace::ImageSequencer::ref().latestImageForInstrument(
-        _instrument
-    );
+    const Image& img = ImageSequencer::ref().latestImageForInstrument(_instrument);
 
     if (img.path.empty()) {
         return;
@@ -161,7 +159,7 @@ void RenderablePlaneProjection::update(const UpdateData& data) {
     if (_moving || _planeIsDirty) {
         updatePlane(img, time);
     }
-    else if (timePast > DBL_EPSILON) {
+    else if (timePast > std::numeric_limits<double>::epsilon()) {
         _previousTime = img.timeRange.start;
         updatePlane(img, img.timeRange.start);
     }
@@ -233,7 +231,7 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
     // The apparent position, CN+S, makes image align best with target
 
     glm::vec3 projection[4];
-    std::fill(std::begin(projection), std::end(projection), glm::vec3(0.0));
+    std::fill(std::begin(projection), std::end(projection), glm::vec3(0.f));
     for (size_t j = 0; j < bounds.size(); ++j) {
         bounds[j] = SpiceManager::ref().frameTransformationMatrix(
             frame,

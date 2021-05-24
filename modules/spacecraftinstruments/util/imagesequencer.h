@@ -38,18 +38,18 @@ class Time;
 class SequenceParser;
 
 /**
-* The ImageSequencer singleton main function is to manage the timekeeping and distribution
-* of large image data-sets across all openspace renderable instances, both for past and
-* future unmanned-spacecraft missions. To load the instance with data the client must
-* provide a parser inherited from the abstract base class SequenceParser. Hence, there is
-* no restriction imposed on data input, whether its data in the form of existing images or
-* in the form of a planned observation schedule. Notably, in order for the sequencer to
-* function the client must provide or write a parser that fills the ImageSequencers
-* private members.
-*
-* \see SequenceParser
-* \see ImageSequencer::runSequenceParser(SequenceParser* parser)
-*/
+ * The ImageSequencer singleton function is to manage the timekeeping and distribution of
+ * large image data-sets across all openspace renderable instances, both for past and
+ * future unmanned-spacecraft missions. To load the instance with data the client must
+ * provide a parser inherited from the abstract base class SequenceParser. Hence, there is
+ * no restriction imposed on data input, whether its data in the form of existing images or
+ * in the form of a planned observation schedule. Notably, in order for the sequencer to
+ * function the client must provide or write a parser that fills the ImageSequencers
+ * private members.
+ *
+ * \see SequenceParser
+ * \see ImageSequencer::runSequenceParser(SequenceParser* parser)
+ */
 class ImageSequencer {
 public:
     /**
@@ -97,13 +97,6 @@ public:
     std::pair<double, std::string> currentTarget(double time) const;
 
     /**
-     * Retrieves current target and (in the list) adjacent targets, the number to retrieve
-     * is user set
-     */
-    std::pair<double, std::vector<std::string>> incidentTargetList(double time,
-        int range = 2) const;
-
-    /**
      * Retrieves the time of the previous image capture.
      */
     double prevCaptureTime(double time) const;
@@ -112,12 +105,6 @@ public:
      * Retrieves the next upcoming time of image capture.
      */
     double nextCaptureTime(double time) const;
-
-    /**
-     * Retrieves the time interval length between the current time and an upcoming
-     * capture.
-     */
-    double intervalLength(double time);
 
     /**
      * Returns a vector with key instrument names whose value indicate whether an
@@ -136,7 +123,7 @@ public:
     /**
      * Returns true if instrumentID is within a capture range.
      */
-    bool isInstrumentActive(double time, const std::string& instrumentID) const;
+    bool isInstrumentActive(double time, const std::string& instrument) const;
 
     float instrumentActiveTime(double time, const std::string& instrumentID) const;
 

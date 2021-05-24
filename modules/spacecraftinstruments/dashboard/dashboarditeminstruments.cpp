@@ -39,22 +39,6 @@
 #include <chrono>
 
 namespace {
-    constexpr const char* KeyFontMono = "Mono";
-    constexpr const float DefaultFontSize = 10.f;
-
-    constexpr openspace::properties::Property::PropertyInfo FontNameInfo = {
-        "FontName",
-        "Font Name",
-        "This value is the name of the font that is used. It can either refer to an "
-        "internal name registered previously, or it can refer to a path that is used."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
-        "FontSize",
-        "Font Size",
-        "This value determines the size of the font that is used to render the date."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo ActiveColorInfo = {
         "ActiveColor",
         "Active Color",
@@ -89,12 +73,6 @@ namespace {
     }
 
     struct [[codegen::Dictionary(DashboardItemInstruments)]] Parameters {
-        // [[codegen::verbatim(FontNameInfo.description)]]
-        std::optional<std::string> fontName;
-
-        // [[codegen::verbatim(FontSizeInfo.description)]]
-        std::optional<float> fontSize;
-
         // [[codegen::verbatim(ActiveColorInfo.description)]]
         std::optional<glm::dvec3> activeColor [[codegen::color()]];
 
@@ -113,9 +91,7 @@ documentation::Documentation DashboardItemInstruments::Documentation() {
 }
 
 DashboardItemInstruments::DashboardItemInstruments(const ghoul::Dictionary& dictionary)
-    : DashboardItem(dictionary)
-    , _fontName(FontNameInfo, KeyFontMono)
-    , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
+    : DashboardTextItem(dictionary)
     , _activeColor(
         ActiveColorInfo,
         glm::vec3(0.6f, 1.f, 0.f),
@@ -127,30 +103,15 @@ DashboardItemInstruments::DashboardItemInstruments(const ghoul::Dictionary& dict
         glm::vec3(0.f),
         glm::vec3(1.f)
     )
-    , _font(global::fontManager->font(KeyFontMono, 10))
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-
-    _fontName = p.fontName.value_or(_fontName);
-    _fontName.onChange([this]() {
-        _font = global::fontManager->font(_fontName, _fontSize);
-    });
-    addProperty(_fontName);
-
-    _fontSize = p.fontSize.value_or(_fontSize);
-    _fontSize.onChange([this]() {
-        _font = global::fontManager->font(_fontName, _fontSize);
-    });
-    addProperty(_fontSize);
 
     _activeColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_activeColor);
     _activeFlash.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_activeFlash);
-
-    _font = global::fontManager->font(_fontName, _fontSize);
 }
-#pragma optimize ("", off)
+
 void DashboardItemInstruments::render(glm::vec2& penPosition) {
     ZoneScoped
 
@@ -163,23 +124,14 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
 
     penPosition.y -= 25.f;
 
-    glm::vec4 targetColor(0.f, 0.75f, 1.f, 1.f);
+    constexpr const glm::vec4 targetColor(0.f, 0.75f, 1.f, 1.f);
 
+    double previous = sequencer.prevCaptureTime(currentTime);
+    double next = sequencer.nextCaptureTime(currentTime);
     double remaining = sequencer.nextCaptureTime(currentTime) - currentTime;
-    auto a = sequencer.intervalLength(currentTime);
-    const float t = static_cast<float>(
-        1.0 - remaining / a
-    );
+    const float t = static_cast<float>(1.0 - remaining / (next - previous));
 
-    auto b = sequencer.prevCaptureTime(currentTime);
-    auto c = sequencer.nextCaptureTime(currentTime);
-    auto d = c - b;
-    auto e = d - currentTime;
-    double t2 = static_cast<float>(
-        1.0 - remaining / e
-    );
-
-    if (remaining > 0) {
+    if (remaining > 0.0) {
         RenderFont(
             *_font,
             penPosition,
@@ -244,8 +196,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
         *_font,
         penPosition,
         fmt::format(
-            "Next image: [{:02d}:{:02d}:{:02d}]",
-            tlh.count(), tlm.count(), tls.count()
+            "Next image: [{:02d}:{:02d}:{:02d}]", tlh.count(), tlm.count(), tls.count()
         ),
         targetColor,
         ghoul::fontrendering::CrDirection::Down
@@ -256,7 +207,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
     const std::vector<std::pair<std::string, bool>>& activeMap =
         sequencer.activeInstruments(currentTime);
 
-    glm::vec4 firing(0.58f - t, 1.f - t, 1.f - t, 1.f);
+    glm::vec4 firing = glm::vec4(0.58f - t, 1.f - t, 1.f - t, 1.f);
 
     RenderFont(
         *_font,
@@ -295,7 +246,6 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
 
 glm::vec2 DashboardItemInstruments::size() const {
     glm::vec2 size = glm::vec2(0.f);
-    //return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
     double currentTime = global::timeManager->time().j2000Seconds();
 
     if (!ImageSequencer::ref().isReady()) {
@@ -303,24 +253,20 @@ glm::vec2 DashboardItemInstruments::size() const {
     }
     ImageSequencer& sequencer = ImageSequencer::ref();
 
-    const double remaining = sequencer.nextCaptureTime(currentTime) - currentTime;
-    const float t = static_cast<float>(
-        1.0 - remaining / sequencer.intervalLength(currentTime)
-    );
+    double previous = sequencer.prevCaptureTime(currentTime);
+    double next = sequencer.nextCaptureTime(currentTime);
+    double remaining = sequencer.nextCaptureTime(currentTime) - currentTime;
+    const float t = static_cast<float>(1.0 - remaining / (next - previous));
 
     const std::string& str = SpiceManager::ref().dateFromEphemerisTime(
         sequencer.nextCaptureTime(currentTime),
         "YYYY MON DD HR:MN:SC"
     );
 
-
-    if (remaining > 0) {
+    if (remaining > 0.0) {
         std::string progress = progressToStr(25, t);
 
-        size = addToBoundingbox(
-            size,
-            _font->boundingBox("Next instrument activity:")
-        );
+        size = addToBoundingbox(size, _font->boundingBox("Next instrument activity:"));
 
         size = addToBoundingbox(
             size,
@@ -331,9 +277,7 @@ glm::vec2 DashboardItemInstruments::size() const {
 
         size = addToBoundingbox(
             size,
-            _font->boundingBox(
-                fmt::format("Data acquisition time: {}", str)
-            )
+            _font->boundingBox(fmt::format("Data acquisition time: {}", str))
         );
     }
     std::pair<double, std::string> nextTarget = sequencer.nextTarget(currentTime);
@@ -377,10 +321,7 @@ glm::vec2 DashboardItemInstruments::size() const {
 
     size.y += _font->height();
 
-    size = addToBoundingbox(
-        size,
-        _font->boundingBox("Active Instruments:")
-    );
+    size = addToBoundingbox(size, _font->boundingBox("Active Instruments:"));
     return size;
 }
 

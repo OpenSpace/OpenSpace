@@ -36,7 +36,7 @@
 
 namespace {
     constexpr const char* _loggerCat = "LabelParser";
-    constexpr const char* keySpecs   = "Read";
+    constexpr const char* keySpecs = "Read";
     constexpr const char* keyConvert = "Convert";
 } // namespace
 
@@ -44,8 +44,7 @@ namespace openspace {
 
 LabelParser::LabelParser(std::string name, std::string fileName,
                          const ghoul::Dictionary& dictionary)
-    : _name(std::move(name))
-    , _fileName(std::move(fileName))
+    : _fileName(std::move(fileName))
 {
     // get the different instrument types
     // for each decoder (assuming might have more if hong makes changes)
@@ -121,7 +120,6 @@ std::string LabelParser::decode(const std::string& line) {
         if (value != std::string::npos) {
             std::string toTranslate = line.substr(value);
             return _fileTranslation[toTranslate]->translations()[0];
-
         }
     }
     return "";
@@ -146,10 +144,7 @@ bool LabelParser::create() {
         return false;
     }
 
-    std::string previousTarget;
     std::string lblName;
-
-
     namespace fs = std::filesystem;
     for (const fs::directory_entry& e : fs::recursive_directory_iterator(sequenceDir)) {
         if (!e.is_regular_file()) {
@@ -163,8 +158,7 @@ bool LabelParser::create() {
             continue;
         }
 
-        std::string extension = std::filesystem::path(path).extension().string();
-
+        std::filesystem::path extension = std::filesystem::path(path).extension();
         if (extension != ".lbl" && extension != ".LBL") {
             continue;
         }
@@ -179,8 +173,6 @@ bool LabelParser::create() {
         int count = 0;
 
         // open up label files
-        //TimeRange instrumentRange;
-
         double startTime = 0.0;
         double stopTime = 0.0;
         std::string line;
@@ -193,14 +185,14 @@ bool LabelParser::create() {
 
             std::string read = line.substr(0, line.find_first_of('='));
 
-            _detectorType = "CAMERA"; //default value
+            _detectorType = "CAMERA"; // default value
 
             constexpr const char* ErrorMsg =
                 "Unrecognized '{}' in line {} in file {}. The 'Convert' table must "
                 "contain the identity tranformation for all values encountered in the "
                 "label files, for example: ROSETTA = {{ \"ROSETTA\" }}";
 
-            /* Add more  */
+            // Add more
             if (read == "TARGET_NAME") {
                 _target = decode(line);
                 if (_target.empty()) {
@@ -237,7 +229,7 @@ bool LabelParser::create() {
                 startTime = SpiceManager::ref().ephemerisTimeFromDate(start);
                 count++;
 
-                getline(file, line);
+                std::getline(file, line);
                 line.erase(std::remove(line.begin(), line.end(), '"'), line.end());
                 line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
                 line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
@@ -319,20 +311,23 @@ bool LabelParser::create() {
         }
     );
 
+    std::string previousTarget;
     for (const Image& image : tmp) {
-        if (previousTarget != image.target) {
-            previousTarget = image.target;
-            _targetTimes.emplace_back(image.timeRange.start , image.target);
-            std::sort(
-                _targetTimes.begin(),
-                _targetTimes.end(),
-                [](const std::pair<double, std::string> &a,
-                   const std::pair<double, std::string> &b) -> bool
-                {
-                    return a.first < b.first;
-                }
-            );
+        if (previousTarget == image.target) {
+            continue;
         }
+
+        previousTarget = image.target;
+        _targetTimes.emplace_back(image.timeRange.start , image.target);
+        std::sort(
+            _targetTimes.begin(),
+            _targetTimes.end(),
+            [](const std::pair<double, std::string>& a,
+               const std::pair<double, std::string>& b) -> bool
+            {
+                return a.first < b.first;
+            }
+        );
     }
 
     for (const std::pair<const std::string, ImageSubset>& target : _subsetMap) {

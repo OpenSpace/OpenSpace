@@ -33,7 +33,6 @@ namespace openspace {
 
 class HongKangParser : public SequenceParser {
 public:
-    HongKangParser();
     HongKangParser(std::string name, std::string fileName, std::string spacecraft,
         const ghoul::Dictionary& translationDictionary,
         std::vector<std::string> potentialTargets);

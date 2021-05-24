@@ -64,23 +64,11 @@ private:
     // the potential targets are returns the first name of the target that is in field of
     // view, the previous target, or the closest target to the space craft. The second
     // return value is whether the target is currently in the field of view
-    std::pair<std::string,bool> determineTarget(double time);
+    std::pair<std::string, bool> determineTarget(double time);
 
     void updateGPU();
 
-    glm::vec3 squareColor(float t) const {
-        return _colors.active.value() * t + _colors.square.value() * (1 - t);
-    }
-
-    glm::vec3 endColor(float t) const {
-        return _colors.active.value() * t + _colors.intersectionEnd.value() * (1 - t);
-    }
-
-    glm::vec3 fovColor(float t) const {
-        return _colors.active.value() * t + _colors.targetInFieldOfView.value() * (1 - t);
-    }
-
-    void computeIntercepts(const UpdateData& data, const std::string& target,
+    void computeIntercepts(double time, const std::string& target,
         bool isInFov);
 
     glm::dvec3 orthogonalProjection(const glm::dvec3& vecFov, double time,
@@ -88,20 +76,13 @@ private:
 
     // properties
     properties::FloatProperty _lineWidth;
-    properties::BoolProperty _drawSolid;
     properties::DoubleProperty _standOffDistance;
     ghoul::opengl::ProgramObject* _program = nullptr;
     UniformCache(modelViewProjection, defaultColorStart, defaultColorEnd, activeColor,
         targetInFieldOfViewColor, intersectionStartColor, intersectionEndColor,
         squareColor, interpolation) _uniformCache;
 
-    // instance variables
-    bool _rebuild = false;
-
     bool _simplifyBounds = false;
-
-    //std::vector<float> _fovBounds;
-    //std::vector<float> _fovPlane;
 
     std::string _previousTarget;
     bool _drawFOV = false;
