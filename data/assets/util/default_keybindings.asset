@@ -36,7 +36,7 @@ local Keybindings = {
   {
     Key = "SPACE",
     Name = "Toggle Pause (Interpolated)",
-    Command = "openspace.time.interpolateTogglePause()",
+    Command = "openspace.time.pauseToggleViaKeyboard()",
     Documentation = "Smoothly starts and stops the simulation time.",
     GuiPath = "/Simulation Speed",
     Local = true

@@ -266,6 +266,15 @@ scripting::LuaLibrary Time::luaLibrary() {
                 "interpolation is done over the specified number of seconds."
             },
             {
+                "pauseToggleViaKeyboard",
+                &luascriptfunctions::time_pauseToggleViaKeyboard,
+                {},
+                "",
+                "Toggles the pause function from a keypress. This function behaves like"
+                " interpolateTogglePause during normal mode, and behaves like"
+                " sessionRecording.pausePlayback when playing-back a recording."
+            },
+            {
                 "currentTime",
                 &luascriptfunctions::time_currentTime,
                 {},

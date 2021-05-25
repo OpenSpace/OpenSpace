@@ -24,6 +24,7 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/interaction/sessionrecording.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/timeconversion.h>
 
@@ -379,6 +380,44 @@ int time_interpolateTogglePause(lua_State* L) {
     return 0;
 }
 
+/**
+* \ingroup LuaScripts
+* time_pauseToggleViaKeyboard():
+* This allows for a keypress (via keybinding) to have dual functionality. In normal
+* operational mode it will behave just like time_interpolateTogglePause, but
+* during playback of a session recording it will pause the playback without manipulating
+* the delta time.
+*/
+int time_pauseToggleViaKeyboard(lua_State* L) {
+    const int nArguments = lua_gettop(L);
+
+    if (nArguments == 0) {
+        if (global::sessionRecording->isPlayingBack()) {
+            bool isPlaybackPaused = global::sessionRecording->isPlaybackPaused();
+            global::sessionRecording->setPlaybackPause(!isPlaybackPaused);
+        }
+        else {
+            const bool pause = !global::timeManager->isPaused();
+            global::timeManager->interpolatePause(pause,
+                pause ?
+                global::timeManager->defaultPauseInterpolationDuration() :
+                global::timeManager->defaultUnpauseInterpolationDuration()
+            );
+        }
+    }
+    else {
+        lua_settop(L, 0);
+        return luaL_error(
+            L,
+            "bad number of arguments, expected 0 or 1, got %i",
+            nArguments
+        );
+    }
+
+    lua_settop(L, 0);
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
 
 /**
  * \ingroup LuaScripts
