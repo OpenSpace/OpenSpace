@@ -122,6 +122,7 @@ int startPlayback(lua_State* L, interaction::KeyframeTimeRef timeMode,
 
 int startPlaybackDefault(lua_State* L) {
     using interaction::KeyframeNavigator;
+    ghoul::lua::checkArgumentsAndThrow(L, {1, 2}, "lua::startPlaybackDefault");
     return startPlayback(L,
         interaction::KeyframeTimeRef::Relative_recordedStart, true);
 }
@@ -135,6 +136,7 @@ int startPlaybackApplicationTime(lua_State* L) {
 
 int startPlaybackRecordedTime(lua_State* L) {
     using interaction::KeyframeNavigator;
+    ghoul::lua::checkArgumentsAndThrow(L, {1, 2}, "lua::startPlaybackRecordedTime");
     return startPlayback(L,
         interaction::KeyframeTimeRef::Relative_recordedStart, false);
 }
