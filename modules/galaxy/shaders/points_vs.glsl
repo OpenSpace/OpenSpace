@@ -44,8 +44,8 @@ void main() {
 	vs_position = vec4(in_position, 1.0);
 	dvec4 dpos = dvec4(vs_position);
 
-	double distanceToStar = length((dpos.xyz - eyePosition));
-	vs_starBrightness = clamp(float(8000 * PARSEC / distanceToStar), 0.0, 1.0);
+	double distanceToStar = length(dpos.xyz - eyePosition);
+	vs_starBrightness = clamp(float(8000.0 * PARSEC / distanceToStar), 0.0, 1.0);
 
 	dpos.xyz *= 8.0;
 	dpos = modelMatrix * dpos;

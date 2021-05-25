@@ -224,7 +224,7 @@ void WebGuiModule::notifyEndpointListeners(const std::string& endpoint, bool exi
         it.second(endpoint, exists);
     }
 }
-#pragma optimize ("", off)
+
 void WebGuiModule::startProcess() {
     ZoneScoped
 

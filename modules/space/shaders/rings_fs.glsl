@@ -55,7 +55,7 @@ Fragment getFragment() {
   // textureOffset.x -> 0
   // textureOffset.y -> 1
   float texCoord = (radius - textureOffset.x) / (textureOffset.y - textureOffset.x);
-  if (texCoord < 0.f || texCoord > 1.f) {
+  if (texCoord < 0.0 || texCoord > 1.0) {
     discard;
   }
       

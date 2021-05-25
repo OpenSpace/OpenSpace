@@ -56,8 +56,8 @@ void main() {
   else if (psfMethod == PsfMethodMoffat) {
     // Moffat
     float r = sqrt((psfCoords.y * psfCoords.y + psfCoords.x * psfCoords.x)) * 90.0;
-    float alpha = FWHM / (2.f * sqrt(pow(2.0, 1.0 / betaConstant) - 1));
-    float moffat = pow(1.f + (r/alpha) * (r/alpha), -betaConstant);
+    float alpha = FWHM / (2.0 * sqrt(pow(2.0, 1.0 / betaConstant) - 1.0));
+    float moffat = pow(1.0 + (r/alpha) * (r/alpha), -betaConstant);
     fullColor = vec4(moffat);
   }
   

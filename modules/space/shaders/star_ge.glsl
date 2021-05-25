@@ -71,7 +71,7 @@ const float SunRadius = 6.957E8; // meters
 
 float bvToKelvin(float bv) {
   float tmp = 0.92 * bv;
-  return 4600 * (1.f / (tmp + 1.7) + 1.f / (tmp + 0.62));
+  return 4600 * (1.0 / (tmp + 1.7) + 1.0 / (tmp + 0.62));
 }
 
 double scaleForApparentBrightness(dvec3 dpos, float luminance) {
@@ -121,7 +121,7 @@ double scaleForApparentMagnitude(dvec3 dpos, float absMag) {
   //scaleMultiply = (30.623 - appMag) * pow(10.0, magnitudeExponent + 7.0);// * 
   //float(distanceToStarInMeters/distanceToCenterInMeters);
     
-  return (-appMag + 50.f) * pow(10.0, magnitudeExponent + 7.5f);
+  return (-appMag + 50.0) * pow(10.0, magnitudeExponent + 7.5);
   // return log(35.f + appMag) *  pow(10.0, magnitudeExponent + 6.5f);
   // return exp((35.f - appMag) * 0.2) * pow(10.0, magnitudeExponent + 2.5f);
   // return appMag * pow(10.0, magnitudeExponent + 8.5f);
