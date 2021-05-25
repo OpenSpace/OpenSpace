@@ -49,13 +49,9 @@
 
 namespace {
     constexpr const char* _loggerCat = "RenderableTimeVaryingVolume";
-} // namespace
-
-namespace {
 
     const char* KeyStepSize = "StepSize";
     const char* KeyGridType = "GridType";
-    const char* KeyTransferFunction = "TransferFunction";
 
     const float SecondsInOneDay = 60 * 60 * 24;
     constexpr const float VolumeMaxOpacity = 500;

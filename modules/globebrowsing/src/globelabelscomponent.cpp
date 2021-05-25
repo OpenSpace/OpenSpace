@@ -51,7 +51,6 @@ namespace {
     constexpr const char* _loggerCat = "GlobeLabels";
 
     constexpr const double LabelFadeOutLimitAltitudeMeters = 25000.0;
-    constexpr const double RangeAngularCoefConst = 0.8;
     constexpr const float MinOpacityValueConst = 0.009f;
 
     enum LabelRenderingAlignmentType {

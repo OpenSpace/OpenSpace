@@ -114,7 +114,10 @@ namespace {
             return;
         }
 
-        std::vector<unsigned char> px(size.x * size.y * 3, unsigned char(255));
+        std::vector<unsigned char> px(
+            size.x * size.y * 3,
+            static_cast<unsigned char>(255)
+        );
 
         if (colorBufferAttachment != GL_DEPTH_ATTACHMENT) {
             glReadBuffer(colorBufferAttachment);

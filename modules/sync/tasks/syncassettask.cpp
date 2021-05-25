@@ -44,7 +44,6 @@
 #include <thread>
 
 namespace {
-    constexpr const char* KeyAsset = "Asset";
     constexpr std::chrono::milliseconds ProgressPollInterval(200);
 
     struct [[codegen::Dictionary(SyncAssetTask)]] Parameters {

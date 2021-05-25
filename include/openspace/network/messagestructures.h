@@ -53,9 +53,9 @@ struct CameraKeyframe {
         bool&& followNodeRot, float&& scale)
         : _position(pos)
         , _rotation(rot)
+        , _followNodeRotation(followNodeRot)
         , _focusNode(focusNode)
         , _scale(scale)
-        , _followNodeRotation(followNodeRot)
     {}
 
     glm::dvec3 _position = glm::dvec3(0.0);

@@ -37,8 +37,6 @@
 namespace {
     constexpr const char* _loggerCat = "InstrumentTimesParser";
 
-    constexpr const char* KeyTargetBody = "Target";
-    constexpr const char* KeyInstruments = "Instruments";
     constexpr const char* KeyInstrument = "Instrument";
     constexpr const char* KeyInstrumentFiles = "Files";
 

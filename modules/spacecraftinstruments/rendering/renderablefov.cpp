@@ -56,13 +56,6 @@ namespace {
         "corners of the field of view."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DrawSolidInfo = {
-        "SolidDraw",
-        "Solid Draw",
-        "This value determines whether the field of view should be rendered as a solid "
-        "or as lines only."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo StandoffDistanceInfo = {
         "StandOffDistance",
         "Standoff Distance Factor",

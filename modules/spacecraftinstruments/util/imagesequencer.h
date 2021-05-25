@@ -175,12 +175,6 @@ private:
      */
     std::vector<double> _captureProgression;
 
-    // time between current simulation time and an upcoming capture
-    double _intervalLength = 0.0;
-    
-    // next consecutive capture in time
-    double _nextCapture = 0.0;
-    
     // default capture image
     std::string _defaultCaptureImage;
 

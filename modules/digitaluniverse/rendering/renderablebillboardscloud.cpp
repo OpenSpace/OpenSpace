@@ -67,7 +67,6 @@ namespace {
         "hasColorMap", "enabledRectSizeControl", "hasDvarScaling"
     };
 
-    constexpr int8_t CurrentCacheVersion = 1;
     constexpr double PARSEC = 0.308567756E17;
 
     constexpr const int RenderOptionViewDirection = 0;

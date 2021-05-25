@@ -126,7 +126,6 @@ void main() {
 
 } // namespace
 
-#pragma optimize ("", off)
 namespace openspace::rendering::helper {
 
 namespace detail {

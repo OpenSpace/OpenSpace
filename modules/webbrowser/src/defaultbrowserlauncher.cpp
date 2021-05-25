@@ -33,7 +33,7 @@
 namespace openspace {
 
 bool DefaultBrowserLauncher::OnBeforePopup(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>,
-                                           const CefString& targetUrl, const CefString&,
+                                           const CefString&, const CefString&,
                                            CefLifeSpanHandler::WindowOpenDisposition,
                                            bool, const CefPopupFeatures&, CefWindowInfo&,
                                            CefRefPtr<CefClient>&, CefBrowserSettings&,
