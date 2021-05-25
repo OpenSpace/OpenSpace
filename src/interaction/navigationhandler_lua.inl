@@ -228,8 +228,15 @@ int joystickAxis(lua_State* L) {
     const bool invert = info.invert;
     const bool normalize = info.normalize;
     const bool isSticky = info.isSticky;
-    const float sensitivity = info.sensitivity;
-    ghoul::lua::push(L, ghoul::to_string(info.type), invert, normalize, isSticky, sensitivity);
+    const double sensitivity = info.sensitivity;
+    ghoul::lua::push(
+        L,
+        ghoul::to_string(info.type),
+        invert,
+        normalize,
+        isSticky,
+        sensitivity
+    );
 
     ghoul_assert(lua_gettop(L) == 5, "Incorrect number of items left on stack");
     return 5;
@@ -268,8 +275,8 @@ int bindJoystickButton(lua_State* L) {
     );
 
     const int button = ghoul::lua::value<int>(L, 1);
-    const std::string& command = ghoul::lua::value<std::string>(L, 2);
-    const std::string& documentation = ghoul::lua::value<std::string>(L, 3);
+    std::string command = ghoul::lua::value<std::string>(L, 2);
+    std::string documentation = ghoul::lua::value<std::string>(L, 3);
 
     interaction::JoystickAction action = interaction::JoystickAction::Press;
     if (n >= 4) {
@@ -282,10 +289,10 @@ int bindJoystickButton(lua_State* L) {
 
     global::navigationHandler->bindJoystickButtonCommand(
         button,
-        std::move(command),
+        command,
         action,
         interaction::JoystickCameraStates::ButtonCommandRemote(isRemote),
-        std::move(documentation)
+        documentation
     );
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");

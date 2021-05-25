@@ -192,7 +192,7 @@ TileTextureInitData TileTextureInitData::operator=(const TileTextureInitData& rh
     return rhs;
 }
 
-TileTextureInitData TileTextureInitData::operator=(TileTextureInitData&& rhs) {
+TileTextureInitData TileTextureInitData::operator=(TileTextureInitData&& rhs) noexcept {
     if (this == &rhs) {
         return *this;
     }

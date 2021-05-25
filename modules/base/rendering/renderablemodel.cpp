@@ -203,13 +203,13 @@ namespace {
         std::optional<AnimationMode> animationMode;
 
         // [[codegen::verbatim(AmbientIntensityInfo.description)]]
-        std::optional<double> ambientIntensity;
+        std::optional<float> ambientIntensity;
 
         // [[codegen::verbatim(DiffuseIntensityInfo.description)]]
-        std::optional<double> diffuseIntensity;
+        std::optional<float> diffuseIntensity;
 
         // [[codegen::verbatim(SpecularIntensityInfo.description)]]
-        std::optional<double> specularIntensity;
+        std::optional<float> specularIntensity;
 
         // [[codegen::verbatim(ShadingInfo.description)]]
         std::optional<bool> performShading;
@@ -385,7 +385,9 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
                     throw ghoul::MissingCaseException();
             }
 
-            _geometry->setTimeScale(convertTime(1.0, timeUnit, TimeUnit::Second));
+            _geometry->setTimeScale(static_cast<float>(
+                convertTime(1.0, timeUnit, TimeUnit::Second))
+            );
         }
         else {
             throw ghoul::MissingCaseException();

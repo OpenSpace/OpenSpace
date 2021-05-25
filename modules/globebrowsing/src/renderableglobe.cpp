@@ -727,7 +727,10 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
                 // Render from light source point of view
                 renderChunks(lightRenderData, rendererTask, {}, true);
                 if (_hasRings && _ringsComponent.isEnabled()) {
-                    _ringsComponent.draw(lightRenderData, RingsComponent::GeometryOnly);
+                    _ringsComponent.draw(
+                        lightRenderData,
+                        RingsComponent::RenderPass::GeometryOnly
+                    );
                 }
 
                 glEnable(GL_BLEND);
@@ -739,7 +742,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
                 if (_hasRings && _ringsComponent.isEnabled()) {
                     _ringsComponent.draw(
                         data,
-                        RingsComponent::GeometryAndShading,
+                        RingsComponent::RenderPass::GeometryAndShading,
                         _shadowComponent.shadowMapData()
                     );
                 }
@@ -747,7 +750,10 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
             else {
                 renderChunks(data, rendererTask);
                 if (_hasRings && _ringsComponent.isEnabled()) {
-                    _ringsComponent.draw(data, RingsComponent::GeometryAndShading);
+                    _ringsComponent.draw(
+                        data,
+                        RingsComponent::RenderPass::GeometryAndShading
+                    );
                 }
             }
         }

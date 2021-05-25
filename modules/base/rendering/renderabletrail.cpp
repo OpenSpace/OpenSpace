@@ -432,10 +432,10 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     }
 
-    const bool renderLines = (_appearance.renderingModes == RenderingModeLines) |
+    const bool renderLines = (_appearance.renderingModes == RenderingModeLines) ||
                              (_appearance.renderingModes == RenderingModeLinesPoints);
 
-    const bool renderPoints = (_appearance.renderingModes == RenderingModePoints) |
+    const bool renderPoints = (_appearance.renderingModes == RenderingModePoints) ||
                               (_appearance.renderingModes == RenderingModeLinesPoints);
 
     if (renderLines) {
