@@ -98,8 +98,9 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableSmallBody::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "space_renderablesmallbody";
+    documentation::Documentation doc = codegen::doc<Parameters>(
+        "space_renderablesmallbody"
+    );
 
     // Insert the parents documentation entries until we have a verifier that can deal
     // with class hierarchy

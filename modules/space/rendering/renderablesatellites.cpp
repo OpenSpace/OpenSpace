@@ -64,8 +64,9 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableSatellites::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "space_renderablesatellites";
+    documentation::Documentation doc = codegen::doc<Parameters>(
+        "space_renderablesatellites"
+    );
 
     // Insert the parents documentation entries until we have a verifier that can deal
     // with class hierarchy

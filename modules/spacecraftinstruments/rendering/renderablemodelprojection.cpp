@@ -90,9 +90,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableModelProjection::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "newhorizons_renderable_modelprojection";
-    return doc;
+    return codegen::doc<Parameters>("newhorizons_renderable_modelprojection");
 }
 
 RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& dictionary)

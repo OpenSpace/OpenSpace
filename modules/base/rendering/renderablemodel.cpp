@@ -242,9 +242,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableModel::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_renderable_model";
-    return doc;
+    return codegen::doc<Parameters>("base_renderable_model");
 }
 
 RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)

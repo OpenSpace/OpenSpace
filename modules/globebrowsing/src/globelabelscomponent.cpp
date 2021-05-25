@@ -225,9 +225,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation GlobeLabelsComponent::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "globebrowsing_globelabelscomponent";
-    return doc;
+    return codegen::doc<Parameters>("globebrowsing_globelabelscomponent");
 }
 
 GlobeLabelsComponent::GlobeLabelsComponent()

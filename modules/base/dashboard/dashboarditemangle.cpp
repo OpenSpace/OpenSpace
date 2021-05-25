@@ -112,9 +112,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DashboardItemAngle::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_dashboarditem_angle";
-    return doc;
+    return codegen::doc<Parameters>("base_dashboarditem_angle");
 }
 
 DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)

@@ -146,9 +146,7 @@ namespace {
 namespace openspace::volume {
 
 documentation::Documentation RenderableTimeVaryingVolume::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "volume_renderable_timevaryingvolume";
-    return doc;
+    return codegen::doc<Parameters>("volume_renderable_timevaryingvolume");
 }
 
 RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(

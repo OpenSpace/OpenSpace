@@ -180,9 +180,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableDUMeshes::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "digitaluniverse_renderabledumeshes";
-    return doc;
+    return codegen::doc<Parameters>("digitaluniverse_renderabledumeshes");
 }
 
 RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)

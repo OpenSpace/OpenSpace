@@ -414,9 +414,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableGaiaStars::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "gaiamission_renderablegaiastars";
-    return doc;
+    return codegen::doc<Parameters>("gaiamission_renderablegaiastars");
 }
 
 RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)

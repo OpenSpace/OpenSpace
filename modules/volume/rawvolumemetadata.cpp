@@ -143,9 +143,7 @@ ghoul::Dictionary RawVolumeMetadata::dictionary() {
 }
 
 documentation::Documentation RawVolumeMetadata::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "volume_rawvolumemetadata";
-    return doc;
+    return codegen::doc<Parameters>("volume_rawvolumemetadata");
 }
 
 } // namespace openspace::volume

@@ -185,9 +185,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableFov::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "newhorizons_renderable_fieldofview";
-    return doc;
+    return codegen::doc<Parameters>("newhorizons_renderable_fieldofview");
 }
 
 RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)

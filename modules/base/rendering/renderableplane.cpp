@@ -100,9 +100,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderablePlane::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_renderable_plane";
-    return doc;
+    return codegen::doc<Parameters>("base_renderable_plane");
 }
 
 RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)

@@ -225,9 +225,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation TLETranslation::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "space_transform_tle";
-    return doc;
+    return codegen::doc<Parameters>("space_transform_tle");
 }
 
 TLETranslation::TLETranslation(const ghoul::Dictionary& dictionary) {

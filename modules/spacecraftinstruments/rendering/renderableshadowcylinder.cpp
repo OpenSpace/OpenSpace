@@ -143,9 +143,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableShadowCylinder::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "newhorizons_renderable_shadowcylinder";
-    return doc;
+    return codegen::doc<Parameters>("newhorizons_renderable_shadowcylinder");
 }
 
 RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dictionary)

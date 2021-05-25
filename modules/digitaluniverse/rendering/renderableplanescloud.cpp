@@ -246,9 +246,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderablePlanesCloud::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "digitaluniverse_RenderablePlanesCloud";
-    return doc;
+    return codegen::doc<Parameters>("digitaluniverse_RenderablePlanesCloud");
 }
 
 RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary)

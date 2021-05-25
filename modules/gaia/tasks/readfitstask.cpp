@@ -337,9 +337,7 @@ int ReadFitsTask::writeOctantToFile(const std::vector<float>& octantData, int in
 }
 
 documentation::Documentation ReadFitsTask::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "gaiamission_fitsfiletorawdata";
-    return doc;
+    return codegen::doc<Parameters>("gaiamission_fitsfiletorawdata");
 }
 
 } // namespace openspace

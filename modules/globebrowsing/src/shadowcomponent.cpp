@@ -155,9 +155,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation ShadowComponent::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "globebrowsing_shadows_component";
-    return doc;
+    return codegen::doc<Parameters>("globebrowsing_shadows_component");
 }
 
 ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)

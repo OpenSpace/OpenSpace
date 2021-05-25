@@ -561,9 +561,7 @@ std::vector<std::string> NavigationHandler::joystickButtonCommand(int button) co
 }
 
 documentation::Documentation NavigationHandler::NavigationState::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "core_navigation_state";
-    return doc;
+    return codegen::doc<Parameters>("core_navigation_state");
 }
 
 scripting::LuaLibrary NavigationHandler::luaLibrary() {

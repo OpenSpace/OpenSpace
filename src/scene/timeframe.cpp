@@ -47,9 +47,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation TimeFrame::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "core_time_frame";
-    return doc;
+    return codegen::doc<Parameters>("core_time_frame");
 }
 
 ghoul::mm_unique_ptr<TimeFrame> TimeFrame::createFromDictionary(

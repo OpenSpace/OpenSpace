@@ -96,8 +96,9 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableHabitableZone::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "space_renderablehabitablezone";
+    documentation::Documentation doc = codegen::doc<Parameters>(
+        "space_renderablehabitablezone"
+    );
 
     // @TODO cleanup
     // Insert the parents documentation entries until we have a verifier that can deal

@@ -490,9 +490,7 @@ Chunk::Chunk(const TileIndex& ti)
 {}
 
 documentation::Documentation RenderableGlobe::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "globebrowsing_renderableglobe";
-    return doc;
+    return codegen::doc<Parameters>("globebrowsing_renderableglobe");
 }
 
 RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)

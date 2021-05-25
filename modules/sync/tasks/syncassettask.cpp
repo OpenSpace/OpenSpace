@@ -56,9 +56,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation SyncAssetTask::documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "sync_asset_task";
-    return doc;
+    return codegen::doc<Parameters>("sync_asset_task");
 }
 
 SyncAssetTask::SyncAssetTask(const ghoul::Dictionary& dictionary) {

@@ -89,9 +89,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation LogFactoryDocumentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "core_logfactory";
-    return doc;
+    return codegen::doc<Parameters>("core_logfactory");
 }
 
 std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictionary) {

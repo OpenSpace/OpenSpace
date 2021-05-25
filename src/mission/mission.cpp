@@ -56,9 +56,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation MissionPhase::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "core_mission_mission";
-    return doc;
+    return codegen::doc<Parameters>("core_mission_mission");
 }
 
 MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {

@@ -78,9 +78,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation UrlSynchronization::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "sync_synchronization_url";
-    return doc;
+    return codegen::doc<Parameters>("sync_synchronization_url");
 }
 
 UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dict,

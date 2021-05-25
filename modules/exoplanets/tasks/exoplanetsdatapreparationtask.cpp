@@ -63,9 +63,7 @@ namespace {
 namespace openspace::exoplanets {
 
 documentation::Documentation ExoplanetsDataPreparationTask::documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "exoplanets_data_preparation_task";
-    return doc;
+    return codegen::doc<Parameters>("exoplanets_data_preparation_task");
 }
 
 ExoplanetsDataPreparationTask::ExoplanetsDataPreparationTask(

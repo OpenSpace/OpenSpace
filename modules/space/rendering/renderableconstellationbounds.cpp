@@ -99,11 +99,8 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableConstellationBounds::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "space_renderable_constellationbounds";
-    return doc;
-} // namespace
-
+    return codegen::doc<Parameters>("space_renderable_constellationbounds");
+}
 
 RenderableConstellationBounds::RenderableConstellationBounds(
     const ghoul::Dictionary& dictionary)

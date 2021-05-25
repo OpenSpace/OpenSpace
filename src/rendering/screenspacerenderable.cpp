@@ -268,9 +268,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation ScreenSpaceRenderable::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "core_screenspacerenderable";
-    return doc;
+    return codegen::doc<Parameters>("core_screenspacerenderable");
 }
 
 std::unique_ptr<ScreenSpaceRenderable> ScreenSpaceRenderable::createFromDictionary(

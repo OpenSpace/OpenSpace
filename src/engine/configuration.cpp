@@ -348,7 +348,7 @@ void parseLuaState(Configuration& configuration) {
 
     // We go through all of the entries and lift them from global scope into the table on
     // the stack so that we can create a ghoul::Dictionary from this new table
-    documentation::Documentation doc = codegen::doc<Parameters>();
+    documentation::Documentation doc = codegen::doc<Parameters>("core_configuration");
     for (const documentation::DocumentationEntry& e : doc.entries) {
         lua_pushstring(s, e.key.c_str());
         lua_getglobal(s, e.key.c_str());
@@ -603,7 +603,8 @@ void parseLuaState(Configuration& configuration) {
     c.bypassLauncher = p.bypassLauncher.value_or(c.bypassLauncher);
 }
 
-documentation::Documentation Configuration::Documentation = codegen::doc<Parameters>();
+documentation::Documentation Configuration::Documentation =
+    codegen::doc<Parameters>("core_configuration");
 
 std::filesystem::path findConfiguration(const std::string& filename) {
     std::filesystem::path directory = absPath("${BIN}");

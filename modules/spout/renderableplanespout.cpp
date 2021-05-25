@@ -66,9 +66,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderablePlaneSpout::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "spout_screenspace_spout";
-    return doc;
+    return codegen::doc<Parameters>("spout_screenspace_spout");
 }
 
 RenderablePlaneSpout::RenderablePlaneSpout(const ghoul::Dictionary& dictionary)

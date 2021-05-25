@@ -220,9 +220,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableAtmosphere::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "atmosphere_renderable_atmosphere";
-    return doc;
+    return codegen::doc<Parameters>("atmosphere_renderable_atmosphere");
 }
 
 RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)

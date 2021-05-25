@@ -162,9 +162,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderablePlanetProjection::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "newhorizons_renderable_planetprojection";
-    return doc;
+    return codegen::doc<Parameters>("newhorizons_renderable_planetprojection");
 }
 
 RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& dict)

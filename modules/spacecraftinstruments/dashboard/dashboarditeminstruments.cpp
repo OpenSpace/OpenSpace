@@ -85,9 +85,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DashboardItemInstruments::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "spacecraftinstruments_dashboarditem_instuments";
-    return doc;
+    return codegen::doc<Parameters>("spacecraftinstruments_dashboarditem_instuments");
 }
 
 DashboardItemInstruments::DashboardItemInstruments(const ghoul::Dictionary& dictionary)

@@ -162,9 +162,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation ProjectionComponent::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "newhorizons_projectioncomponent";
-    return doc;
+    return codegen::doc<Parameters>("newhorizons_projectioncomponent");
 }
 
 ProjectionComponent::ProjectionComponent()

@@ -338,9 +338,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableBillboardsCloud::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "digitaluniverse_RenderableBillboardsCloud";
-    return doc;
+    return codegen::doc<Parameters>("digitaluniverse_RenderableBillboardsCloud");
 }
 
 RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& dictionary)
