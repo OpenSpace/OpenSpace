@@ -557,10 +557,7 @@ void RenderEngine::initializeGL() {
     {
         ZoneScopedN("Log")
         LINFO("Initializing Log");
-        std::unique_ptr<ScreenLog> log = std::make_unique<ScreenLog>(
-            ScreenLogTimeToLive,
-            ghoul::logging::LogLevel::Warning
-        );
+        std::unique_ptr<ScreenLog> log = std::make_unique<ScreenLog>(ScreenLogTimeToLive);
         _log = log.get();
         ghoul::logging::LogManager::ref().addLog(std::move(log));
     }

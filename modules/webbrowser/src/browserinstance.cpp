@@ -98,7 +98,7 @@ void BrowserInstance::loadUrl(std::string url) {
 
 bool BrowserInstance::loadLocalPath(std::string path) {
     if (!std::filesystem::is_regular_file(path)) {
-        LDEBUG(fmt::format("Could not find path `{}`, verify that it is correct.", path));
+        LDEBUG(fmt::format("Could not find path '{}', verify that it is correct", path));
         return false;
     }
 
@@ -143,18 +143,17 @@ bool BrowserInstance::sendKeyEvent(const CefKeyEvent& event) {
 
 bool BrowserInstance::sendMouseClickEvent(const CefMouseEvent& event,
                                           CefBrowserHost::MouseButtonType button,
-                                          bool mouseUp,
-                                          int clickCount)
+                                          bool mouseUp, int clickCount)
 {
     _browser->GetHost()->SendMouseClickEvent(event, button, mouseUp, clickCount);
-    return hasContent(event.x, event.y);
+    return hasContent(glm::ivec2(event.x, event.y));
 }
 
 #ifdef WIN32
 void BrowserInstance::sendTouchEvent(const CefTouchEvent& event) const{
     _browser->GetHost()->SendTouchEvent(event);
 }
-#endif
+#endif // WIN32
 
 bool BrowserInstance::sendMouseMoveEvent(const CefMouseEvent& event) {
     constexpr const bool DidNotLeaveWindow = false;
@@ -167,7 +166,7 @@ bool BrowserInstance::sendMouseWheelEvent(const CefMouseEvent& event,
                                           const glm::ivec2& delta)
 {
     _browser->GetHost()->SendMouseWheelEvent(event, delta.x, delta.y);
-    return hasContent(event.x, event.y);
+    return hasContent(glm::ivec2(event.x, event.y));
 }
 
 void BrowserInstance::setZoom(float ratio) {
@@ -175,7 +174,7 @@ void BrowserInstance::setZoom(float ratio) {
 
     // Zooming in CEF is non-linear according to this:
     // https://www.magpcss.org/ceforum/viewtopic.php?f=6&t=11491
-    _zoomLevel = glm::log(static_cast<double>(ratio * dpiScaling))/glm::log(1.2);
+    _zoomLevel = glm::log(ratio * dpiScaling) / glm::log(1.2);
     _browser->GetHost()->SetZoomLevel(_zoomLevel);
 }
 
@@ -189,8 +188,8 @@ void BrowserInstance::selectAll() {
     }
 }
 
-bool BrowserInstance::hasContent(int x, int y) {
-    return _renderHandler->hasContent(x, y);
+bool BrowserInstance::hasContent(const glm::ivec2& pos) const {
+    return _renderHandler->hasContent(pos.x, pos.y);
 }
 
 } // namespace openspace
