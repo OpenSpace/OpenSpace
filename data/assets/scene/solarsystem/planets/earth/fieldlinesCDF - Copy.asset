@@ -48,7 +48,7 @@ local fieldlines2 = {
     },
     GUI = {
         Path = "/Solar System/Earth",
-        Name = "Uniform Fieldlines"
+        Name = "Uniform Fieldlines U"
     },
     Transform = {
         Scale = {

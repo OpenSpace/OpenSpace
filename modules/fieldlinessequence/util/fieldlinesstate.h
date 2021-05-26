@@ -39,6 +39,8 @@ public:
     void convertLatLonToCartesian(float scale = 1.f);
     void scalePositions(float scale);
 
+    void scaleflowline(float scale);
+
     bool loadStateFromOsfls(const std::string& pathToOsflsFile);
     void saveStateToOsfls(const std::string& pathToOsflsFile);
 
@@ -56,6 +58,10 @@ public:
     double triggerTime() const;
     const std::vector<glm::vec3>& vertexPositions() const;
 
+    const std::vector<std::vector<glm::vec3>>& vertexPaths() const;
+
+    const std::vector<std::vector<glm::vec3>>& vertexVelocities() const;
+
     // Special getter. Returns extraQuantities[index].
     std::vector<float> extraQuantity(size_t index, bool& isSuccesful) const;
 
@@ -69,6 +75,10 @@ public:
 
     void moveLine();
 
+    void addVertexPath(std::vector<glm::vec3> path);
+
+    void addVertexVelocities(std::vector<glm::vec3> path);
+
 
 private:
     bool _isMorphable = false;
@@ -80,7 +90,9 @@ private:
     std::vector<GLsizei> _lineCount;
     std::vector<GLint> _lineStart;
     std::vector<glm::vec3> _vertexPositions;
-    std::vector<glm::vec3> _nextStateVertexPositions;
+
+    std::vector< std::vector<glm::vec3> > _vertexPaths;
+    std::vector< std::vector<glm::vec3> > _vertexVelocities;
 };
 
 } // namespace openspace

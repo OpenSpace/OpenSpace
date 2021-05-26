@@ -61,6 +61,14 @@ void FieldlinesState::scalePositions(float scale) {
     }
 }
 
+void FieldlinesState::scaleflowline(float scale) {
+    for (std::vector<glm::vec3>& i : _vertexPaths) {
+        for (glm::vec3& j : i) {
+            j *= scale;
+        }
+    }
+}
+
 bool FieldlinesState::loadStateFromOsfls(const std::string& pathToOsflsFile) {
     std::ifstream ifs(pathToOsflsFile, std::ifstream::binary);
     if (!ifs.is_open()) {
@@ -420,7 +428,31 @@ void FieldlinesState::appendToExtra(size_t idx, float val) {
 }
 
 void FieldlinesState::moveLine() {
-       
+    unsigned i = 0;
+    for (glm::vec3& vertex : _vertexPositions) {
+
+        if (_vertexPaths[i].empty()) continue;
+
+        if ( 30000.0f > glm::length(vertex - _vertexPaths[i][1])) {
+            _vertexPaths[i].erase(_vertexPaths[i].begin());
+            if (_vertexPaths[i].empty()) continue;
+        }
+
+        glm::vec3 dir = _vertexPaths[i][1] - vertex;
+        dir = glm::normalize(dir);
+
+        vertex += dir*30000.0f;
+
+        i++;
+    }
+}
+
+void FieldlinesState::addVertexPath(std::vector<glm::vec3> path) {
+    _vertexPaths.push_back(path);
+}
+
+void FieldlinesState::addVertexVelocities(std::vector<glm::vec3> velocities) {
+    _vertexVelocities.push_back(velocities);
 }
 
 void FieldlinesState::setExtraQuantityNames(std::vector<std::string> names) {
@@ -459,5 +491,15 @@ double FieldlinesState::triggerTime() const {
 const std::vector<glm::vec3>& FieldlinesState::vertexPositions() const {
     return _vertexPositions;
 }
+
+const std::vector< std::vector<glm::vec3> >& FieldlinesState::vertexPaths() const {
+    return _vertexPaths;
+}
+
+const std::vector< std::vector<glm::vec3> >& FieldlinesState::vertexVelocities() const {
+    return _vertexVelocities;
+}
+
+
 
 } // namespace openspace

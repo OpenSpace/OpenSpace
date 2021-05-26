@@ -911,11 +911,16 @@ namespace openspace {
                 extraMagVars
             );
 
+            std::vector< std::vector<glm::vec3> > vels = newState.vertexVelocities();
+
+            std::vector< std::vector<glm::vec3> > verts = newState.vertexPaths();
+
             if (isSuccessful) {
                 addStateToSequence(newState);
                 if (!outputFolder.empty()) {
                     newState.saveStateToOsfls(outputFolder);
                 }
+
             }
         }
         return true;
@@ -1206,6 +1211,8 @@ namespace openspace {
             _needsUpdate = false;
         }
 
+        updateVertexPositionBuffer();
+
         if (_mustLoadNewStateFromDisk) {
             if (!_isLoadingStateFromDisk && !_newStateIsReady) {
                 _isLoadingStateFromDisk = true;
@@ -1223,7 +1230,7 @@ namespace openspace {
                 _states[0] = std::move(*_newState);
             }
 
-            updateVertexPositionBuffer();
+            //updateVertexPositionBuffer();
 
             if (_states[_activeStateIndex].nExtraQuantities() > 0) {
                 _shouldUpdateColorBuffer = true;
@@ -1280,12 +1287,6 @@ namespace openspace {
     }
 
     void RenderableUniformFieldlines::updateFieldLinesPos() {
-        //linear interpolation
-        //a + t * (b - a)
-
-        std::vector<glm::vec3> a = _states[_activeStateIndex].vertexPositions();
-
-        std::vector<glm::vec3> b = _states[_activeStateIndex + 1].vertexPositions();
 
     }
 
@@ -1293,19 +1294,7 @@ namespace openspace {
         glBindVertexArray(_vertexArrayObject);
         glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
 
-        //_states[_activeStateIndex].moveLine();
-
-        //lerp
-        //std::vector<glm::vec3> a = _states[_activeStateIndex].vertexPositions();
-        //std::vector<glm::vec3> b = _states[_activeStateIndex + 1].vertexPositions();
-
-        //Time timeNow = global::timeManager->time();
-
-        //float t = (timeNow.j2000Seconds() - _states[_activeStateIndex].triggerTime()) /
-        //    (_states[_activeStateIndex+1].triggerTime() - 
-        //                                    _states[_activeStateIndex].triggerTime());
-
-
+        _states[_activeStateIndex].moveLine();
 
         const std::vector<glm::vec3>& vertPos = _states[_activeStateIndex].vertexPositions();
 

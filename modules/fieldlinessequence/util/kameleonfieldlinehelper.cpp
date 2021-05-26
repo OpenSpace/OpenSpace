@@ -116,6 +116,7 @@ namespace openspace::fls {
             switch (state.model()) {
             case fls::Model::Batsrus:
                 state.scalePositions(fls::ReToMeter);
+                state.scaleflowline(fls::ReToMeter);
                 break;
             case fls::Model::Enlil:
                 state.convertLatLonToCartesian(fls::AuToMeter);
@@ -203,29 +204,25 @@ namespace openspace::fls {
             const std::vector<ccmc::Point3f>& positions = fieldline.getPositions();
 
             const size_t nLinePoints = positions.size();
-            std::vector<glm::vec3> initialFieldline;
+            std::vector<glm::vec3> line;
 
             std::vector<glm::vec3> vertices;
-            std::vector<glm::vec3> flowline;
 
             for (const ccmc::Point3f& p : positions) {
                 //vertices.emplace_back(p.component1, p.component2, p.component3);
 
                 //add vertices to initial fieldline so it can be rendered as well
-                initialFieldline.emplace_back(p.component1, p.component2, p.component3);
+                line.emplace_back(p.component1, p.component2, p.component3);
 
                 std::unique_ptr<ccmc::Interpolator> interpolator2 =
                     std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
                 ccmc::Tracer tracer2(kameleon, interpolator2.get());
                 tracer2.setInnerBoundary(innerBoundaryLimit); // TODO specify in Lua?
 
-                //trace every vertex of the initally traced line with the secondarytracevar.
                 //traces with "u" or "u_perp_b" need unidirectioalTrace, while "b" needs 
                 //bidirectionalTrace.
-
-                ccmc::Fieldline secondFieldline;
-
-                secondFieldline = tracer2.unidirectionalTrace(
+                ccmc::Fieldline flowLine;
+                flowLine = tracer2.unidirectionalTrace(
                     secondaryTraceVar,
                     p.component1,
                     p.component2,
@@ -233,19 +230,23 @@ namespace openspace::fls {
 
                 );
 
-                const std::vector<ccmc::Point3f>& positions2 = secondFieldline.getPositions();
+                const std::vector<ccmc::Point3f>& positions2 = flowLine.getPositions();
 
+                //bool first = true;
                 for (const ccmc::Point3f& p2 : positions2) {
-
+                    //skip the first vertex
+                    //if (first) {
+                    //    first = false;
+                    //    continue;
+                    //}
                     vertices.emplace_back(p2.component1, p2.component2, p2.component3);
-
                 }
-                state.addLine(vertices);
+                state.addVertexPath(vertices);
                 vertices.clear();
 
             }
-            //add the initial  fieldlines to the state
-            state.addLine(initialFieldline);
+            //add the initial fieldlines to the state
+            state.addLine(line);
 
             success |= (nLinePoints > 0);
 
@@ -286,7 +287,33 @@ namespace openspace::fls {
         std::unique_ptr<ccmc::Interpolator> interpolator =
             std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
 
-        // ------ Extract all the extraQuantities from kameleon and store in state! ------ //
+        if (state.extraQuantityNames()[nXtraScalars] == "u_perp_b") {
+
+            for (const std::vector<glm::vec3> i : state.vertexPaths()) {
+                std::vector<glm::vec3> velocities;
+                for (const glm::vec3 p : i) {
+                    //compute u_perp_b with variables u and b
+                    //normalized b vector
+                    const glm::vec3 normBVec = glm::normalize(glm::vec3(
+                        interpolator->interpolate("bx", p.x, p.y, p.z),
+                        interpolator->interpolate("by", p.x, p.y, p.z),
+                        interpolator->interpolate("bz", p.x, p.y, p.z)));
+
+                    const glm::vec3 uVec = glm::vec3(
+                        interpolator->interpolate("ux", p.x, p.y, p.z),
+                        interpolator->interpolate("uy", p.x, p.y, p.z),
+                        interpolator->interpolate("uz", p.x, p.y, p.z));
+
+                    float u_dot_b = glm::dot(normBVec, uVec);
+
+                    glm::vec3 u_perp_b = uVec - (normBVec * u_dot_b);
+                    velocities.push_back(u_perp_b);
+                }
+                state.addVertexVelocities(velocities);
+            }
+        }
+        
+        // ------ Extract all the extraQuantities from kameleon and store in state! //
         for (const glm::vec3& p : state.vertexPositions()) {
             // Load the scalars!
             for (size_t i = 0; i < nXtraScalars; i++) {
@@ -307,62 +334,35 @@ namespace openspace::fls {
                 state.appendToExtra(i, val);
             }
 
-            // Calculate and store the magnitudes!
-            //compute u_perp_b with variables u and b
+            for (size_t i = 0; i < nXtraMagnitudes; ++i) {
+                const size_t idx = i * 3;
 
-            if (state.extraQuantityNames()[nXtraScalars] == "u_perp_b") {
+                const float x =
+                    interpolator->interpolate(extraMagVars[idx], p.x, p.y, p.z);
+                const float y =
+                    interpolator->interpolate(extraMagVars[idx + 1], p.x, p.y, p.z);
+                const float z =
+                    interpolator->interpolate(extraMagVars[idx + 2], p.x, p.y, p.z);
+                float val;
+                // When looking at the current's magnitude in Batsrus, CCMC staff are
+                // only interested in the magnitude parallel to the magnetic field
+                if (state.extraQuantityNames()[nXtraScalars + i] == JParallelB) {
+                    const glm::vec3 normMagnetic = glm::normalize(glm::vec3(
+                        interpolator->interpolate("bx", p.x, p.y, p.z),
+                        interpolator->interpolate("by", p.x, p.y, p.z),
+                        interpolator->interpolate("bz", p.x, p.y, p.z)));
+                    // Magnitude of the part of the current vector that's parallel to
+                    // the magnetic field vector!
+                    val = glm::dot(glm::vec3(x, y, z), normMagnetic);
 
-                //normalized b vector
-                const glm::vec3 normBVec = glm::normalize(glm::vec3(
-                    interpolator->interpolate("bx", p.x, p.y, p.z),
-                    interpolator->interpolate("by", p.x, p.y, p.z),
-                    interpolator->interpolate("bz", p.x, p.y, p.z)));
-
-                const glm::vec3 uVec = glm::vec3(
-                    interpolator->interpolate("ux", p.x, p.y, p.z),
-                    interpolator->interpolate("uy", p.x, p.y, p.z),
-                    interpolator->interpolate("uz", p.x, p.y, p.z));
-
-                float u_dot_b = glm::dot(normBVec, uVec);
-
-                glm::vec3 u_perp_b = uVec - (normBVec * u_dot_b);
-
-                float val = glm::length(u_perp_b);
-
-                state.appendToExtra(nXtraScalars, val);
-            }
-            else {
-                for (size_t i = 0; i < nXtraMagnitudes; ++i) {
-                    const size_t idx = i * 3;
-
-                    const float x =
-                        interpolator->interpolate(extraMagVars[idx], p.x, p.y, p.z);
-                    const float y =
-                        interpolator->interpolate(extraMagVars[idx + 1], p.x, p.y, p.z);
-                    const float z =
-                        interpolator->interpolate(extraMagVars[idx + 2], p.x, p.y, p.z);
-                    float val;
-                    // When looking at the current's magnitude in Batsrus, CCMC staff are
-                    // only interested in the magnitude parallel to the magnetic field
-                    if (state.extraQuantityNames()[nXtraScalars + i] == JParallelB) {
-                        const glm::vec3 normMagnetic = glm::normalize(glm::vec3(
-                            interpolator->interpolate("bx", p.x, p.y, p.z),
-                            interpolator->interpolate("by", p.x, p.y, p.z),
-                            interpolator->interpolate("bz", p.x, p.y, p.z)));
-                        // Magnitude of the part of the current vector that's parallel to
-                        // the magnetic field vector!
-                        val = glm::dot(glm::vec3(x, y, z), normMagnetic);
-
-                    }
-                    else {
-                        val = std::sqrt(x * x + y * y + z * z);
-                    }
-                    state.appendToExtra(i + nXtraScalars, val);
                 }
+                else {
+                    val = std::sqrt(x * x + y * y + z * z);
+                }
+                state.appendToExtra(i + nXtraScalars, val);
             }
-
-
         }
+        
     }
 #endif // OPENSPACE_MODULE_KAMELEON_ENABLED
 
