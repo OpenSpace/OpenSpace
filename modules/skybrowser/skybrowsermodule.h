@@ -60,10 +60,11 @@ public:
     void addRenderable(ScreenSpaceRenderable* object);
     WWTDataHandler* getWWTDataHandler();
     std::map<std::string, ScreenSpaceSkyBrowser*>& getSkyBrowsers();
+    std::vector<ScreenSpaceRenderable*>& getBrowsersAndTargets();
     void startRotation(glm::dvec2 coordsEnd);
     void rotateCamera(double deltaTime);
     bool fadeBrowserAndTarget(bool makeTransparent, double fadeTime, double deltaTime);
-    void setSelectedBrowser(ScreenSpaceRenderable* ptr);
+    void setSelectedBrowser(ScreenSpaceSkyBrowser* ptr);
     void setSelectedBrowser(std::string id);
     bool browserIdExists(std::string id);
     std::string selectedBrowserId();
@@ -85,8 +86,6 @@ protected:
     // Using snake case on these casting functions to make them similar to eg std::to_string
     ScreenSpaceSkyBrowser* to_browser(ScreenSpaceRenderable* ptr);
     ScreenSpaceSkyTarget* to_target(ScreenSpaceRenderable* ptr);
-
-    bool shouldInitialize;
 
     // The browsers and targets
     std::vector<ScreenSpaceRenderable*> renderables;

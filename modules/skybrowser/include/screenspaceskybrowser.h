@@ -19,6 +19,8 @@ namespace openspace {
         bool initializeGL() override;
         bool deinitializeGL() override;
         bool setConnectedTarget();
+        void initializeBrowser();
+        void setIdInBrowser();
 
         // Communication with the webpage and WWT
         void executeJavascript(std::string script) const;

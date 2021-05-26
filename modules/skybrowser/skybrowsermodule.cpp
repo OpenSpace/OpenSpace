@@ -193,6 +193,38 @@ namespace openspace {
                 "string or list of strings",
                 "Add one or multiple exoplanet systems to the scene, as specified by the "
                 "input. An input string should be the name of the system host star"
+            },   
+            {
+                "sendOutIdsToBrowsers",
+                &skybrowser::luascriptfunctions::sendOutIdsToBrowsers,
+                {},
+                "string or list of strings",
+                "Add one or multiple exoplanet systems to the scene, as specified by the "
+                "input. An input string should be the name of the system host star"
+            },
+            {
+                "initializeBrowserAndTarget",
+                &skybrowser::luascriptfunctions::initializeBrowserAndTarget,
+                {},
+                "string or list of strings",
+                "Add one or multiple exoplanet systems to the scene, as specified by the "
+                "input. An input string should be the name of the system host star"
+            },  
+            {
+                "connectBrowserTarget",
+                &skybrowser::luascriptfunctions::connectBrowserTarget,
+                {},
+                "string or list of strings",
+                "Add one or multiple exoplanet systems to the scene, as specified by the "
+                "input. An input string should be the name of the system host star"
+            },
+           {
+                "addToSkyBrowserModule",
+                &skybrowser::luascriptfunctions::addToSkyBrowserModule,
+                {},
+                "string or list of strings",
+                "Add one or multiple exoplanet systems to the scene, as specified by the "
+                "input. An input string should be the name of the system host star"
             },
         };
 
@@ -206,23 +238,10 @@ SkyBrowserModule::SkyBrowserModule()
     , currentlyResizingBrowser(false)
     , currentlyDraggingObject(false)
     , resizeVector(0.f, 0.f)
-    , shouldInitialize(true)
     , changeViewWithinBrowser(false)
 {
     global::callback::mousePosition->emplace_back(
         [&](double x, double y) {    
-            // Quick fix to make all renderables find its corresponding partner
-            if (shouldInitialize) {
-                std::for_each(renderables.begin(), renderables.end(), [&](ScreenSpaceRenderable* obj) {
-                    if (to_target(obj)) {
-                        to_target(obj)->setConnectedBrowser();
-                    }
-                    else if (to_browser(obj)) {
-                        to_browser(obj)->setConnectedTarget();
-                    }
-                    });
-                shouldInitialize = false;
-            }
             
             glm::vec2 pos = glm::vec2(static_cast<float>(x), static_cast<float>(y));
             _mousePosition = getMousePositionInScreenSpaceCoords(pos);
@@ -278,7 +297,7 @@ SkyBrowserModule::SkyBrowserModule()
 
                 // Find and save what mouse is currently hovering on
                 auto currentlyOnObject = std::find_if(renderables.begin(), renderables.end(), [&](ScreenSpaceRenderable* obj) {
-                    return (obj->coordIsInsideCornersScreenSpace(_mousePosition) && obj->isEnabled());
+                    return obj && (obj->coordIsInsideCornersScreenSpace(_mousePosition) && obj->isEnabled());
                     });
                 _mouseOnObject = currentlyOnObject != renderables.end() ? *currentlyOnObject : nullptr;
 
@@ -327,8 +346,14 @@ SkyBrowserModule::SkyBrowserModule()
             if (_mouseOnObject && action == MouseAction::Press) {
 
                 // Get the currently selected browser
-                setSelectedBrowser(_mouseOnObject);
+                if (to_browser(_mouseOnObject)) {
+                    setSelectedBrowser(to_browser(_mouseOnObject));
+                }
+                else if (to_target(_mouseOnObject) && 
+                         to_target(_mouseOnObject)->getSkyBrowser()) {
 
+                    setSelectedBrowser(to_target(_mouseOnObject)->getSkyBrowser());
+                }
 
                 if (button == MouseButton::Left) {
                     isRotating = false;
@@ -513,6 +538,26 @@ void SkyBrowserModule::createTargetBrowserPair() {
         "openspace.addScreenSpaceRenderable(" + target + ");",
         scripting::ScriptEngine::RemoteScripting::Yes
     );
+
+    openspace::global::scriptEngine->queueScript(
+        "openspace.skybrowser.addToSkyBrowserModule(" + idTarget + ");",
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
+
+    openspace::global::scriptEngine->queueScript(
+        "openspace.skybrowser.addToSkyBrowserModule(" + idBrowser + ");",
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
+
+    openspace::global::scriptEngine->queueScript(
+        "openspace.skybrowser.connectBrowserTarget(" + idBrowser + ");",
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
+
+    openspace::global::scriptEngine->queueScript(
+        "openspace.skybrowser.connectBrowserTarget(" + idTarget + ");",
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
 }
 
 void SkyBrowserModule::removeTargetBrowserPair(std::string& browserId) {
@@ -524,7 +569,7 @@ void SkyBrowserModule::removeTargetBrowserPair(std::string& browserId) {
     std::string targetId{ "" };
     bool hasTarget = browser->getSkyTarget();
     if (hasTarget) {
-        std::string targetId = browser->getSkyTarget()->identifier();
+        targetId = browser->getSkyTarget()->identifier();
 
         openspace::global::scriptEngine->queueScript(
             "openspace.removeScreenSpaceRenderable('" + targetId + "');",
@@ -648,6 +693,10 @@ std::map<std::string, ScreenSpaceSkyBrowser*>& SkyBrowserModule::getSkyBrowsers(
     return browsers;
 }
 
+std::vector<ScreenSpaceRenderable*>& SkyBrowserModule::getBrowsersAndTargets() {
+    return renderables;
+}
+
 void SkyBrowserModule::startRotation(glm::dvec2 coordsEnd) {
     
     // Save coordinates to rotate to in galactic world coordinates
@@ -719,9 +768,10 @@ bool SkyBrowserModule::fadeBrowserAndTarget(bool makeTransparent, double fadeTim
     return finished;
 }
 
-void SkyBrowserModule::setSelectedBrowser(ScreenSpaceRenderable* ptr) {
-    ScreenSpaceSkyBrowser* browser = to_browser(ptr) ? to_browser(ptr) : to_target(ptr)->getSkyBrowser();
-    selectedBrowser = browser->identifier();
+void SkyBrowserModule::setSelectedBrowser(ScreenSpaceSkyBrowser* browser) {
+    if (browser) {
+        selectedBrowser = browser->identifier();
+    }
 }
 
 void SkyBrowserModule::setSelectedBrowser(std::string id) {

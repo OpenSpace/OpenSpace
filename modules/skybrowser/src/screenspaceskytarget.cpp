@@ -79,6 +79,7 @@ namespace openspace {
         , _skyBrowserID(BrowserIDInfo)
         , _showCrosshairThreshold(CrosshairThresholdInfo, 2.f, 1.f, 70.f)
         , _borderColor(220, 220, 220)
+        , _skyBrowser(nullptr)
     {
         // Handle target dimension property
         const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -129,10 +130,13 @@ namespace openspace {
         }
     }
 
-    void ScreenSpaceSkyTarget::setConnectedBrowser() {
+    bool ScreenSpaceSkyTarget::setConnectedBrowser() {
         _skyBrowser = dynamic_cast<ScreenSpaceSkyBrowser*>(global::renderEngine->screenSpaceRenderable(_skyBrowserID.value()));
+        return _skyBrowser;
+    }
+
+    void ScreenSpaceSkyTarget::initializeWithBrowser() {
         if (_skyBrowser) {
-            _skyBrowser->setBorderColor(_skyBrowser->getColor());
             _borderColor = _skyBrowser->getColor();
             updateFOV(_skyBrowser->_vfieldOfView.value());
             _targetDimensions = _skyBrowser->getBrowserPixelDimensions();
@@ -144,9 +148,6 @@ namespace openspace {
     }
 
     bool ScreenSpaceSkyTarget::initializeGL() {
-        global::moduleEngine->module<SkyBrowserModule>()->addRenderable(this);
-
-        setConnectedBrowser();
 
         glGenVertexArrays(1, &_vertexArray);
         glGenBuffers(1, &_vertexBuffer);

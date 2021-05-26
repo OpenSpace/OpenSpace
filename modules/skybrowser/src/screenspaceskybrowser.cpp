@@ -93,10 +93,7 @@ namespace openspace {
         const Parameters p = codegen::bake<Parameters>(dictionary);
         _browserDimensions = p.browserDimensions.value_or(_browserDimensions);
         _browserDimensions.onChange([&]() { 
-            if (!_skyTarget) {
-                setConnectedTarget();
-            }
-            else {
+            if(_skyTarget) {
                 glm::vec2 dim = getBrowserPixelDimensions();
                 _skyTarget->setDimensions(dim);
             }
@@ -149,16 +146,21 @@ namespace openspace {
     }
 
     bool ScreenSpaceSkyBrowser::initializeGL() {
-
-        global::moduleEngine->module<SkyBrowserModule>()->addRenderable(this);
-        setConnectedTarget();
-        if (_skyTarget) {    
-            _skyTarget->setDimensions(getBrowserPixelDimensions());
-        }
-
-        WWTfollowCamera();
-
         return ScreenSpaceBrowser::initializeGL();
+    }
+
+    void ScreenSpaceSkyBrowser::setIdInBrowser() {
+        // Send ID to it's browser
+        executeJavascript("setId('" + identifier() + "')");
+    }
+
+    void ScreenSpaceSkyBrowser::initializeBrowser() {
+        // Set border color
+        setBorderColor(_borderColor.value());
+        // Connect to target
+        setConnectedTarget();
+        // Track target
+        WWTfollowCamera();
     }
 
     bool ScreenSpaceSkyBrowser::deinitializeGL() {
@@ -172,14 +174,8 @@ namespace openspace {
     }   
 
     bool ScreenSpaceSkyBrowser::setConnectedTarget() {
-        setBorderColor(_borderColor.value());
         _skyTarget = dynamic_cast<ScreenSpaceSkyTarget*>(global::renderEngine->screenSpaceRenderable(_skyTargetID.value()));
-        if (_skyTarget) {
-            _skyTarget->setBorderColor(_borderColor.value());
-            _skyTarget->updateFOV(_vfieldOfView.value());
-            _skyTarget->setDimensions(getBrowserPixelDimensions());
-        }
-        return _skyTarget != nullptr;
+        return _skyTarget;
     }
 
     ScreenSpaceSkyTarget* ScreenSpaceSkyBrowser::getSkyTarget() {

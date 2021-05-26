@@ -130,13 +130,16 @@ namespace openspace::skybrowser::luascriptfunctions {
 	
 	int loadImagesToWWT(lua_State* L) {
 		// Load images from url
-		ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::loadImagesToWWT");
+		ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadImagesToWWT");
+        const std::string id = ghoul::lua::value<std::string>(L, 1);
+        LINFO("Connection established to WorldWide Telescope application in " + id);
+        LINFO("Loading image collections to " + id);
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
 
         // Load the collections here because here we know that the browser can execute javascript
          std::string root = "https://raw.githubusercontent.com/WorldWideTelescope/wwt-web-client/master/assets/webclient-explore-root.wtml";
-         for (std::pair<std::string,ScreenSpaceSkyBrowser*> pair : module->getSkyBrowsers()) {
-             ScreenSpaceSkyBrowser* browser = pair.second;
+         if (module->browserIdExists(id)) {
+             ScreenSpaceSkyBrowser* browser = module->getSkyBrowsers()[id];
              if (!browser->hasLoadedCollections()) {
                  browser->sendMessageToWWT(wwtmessage::loadCollection(root));
                  browser->setHasLoadedCollections(true);
@@ -145,6 +148,72 @@ namespace openspace::skybrowser::luascriptfunctions {
 
 		return 0;
 	}
+
+    int sendOutIdsToBrowsers(lua_State* L) {
+        // This is called when the sky_browser website is connected to OpenSpace
+        ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::sendOutIdsToBrowsers");
+
+        // Send out ID's to the browsers
+        SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+        std::map<std::string, ScreenSpaceSkyBrowser*> browsers = module->getSkyBrowsers();
+        for (std::pair<std::string, ScreenSpaceSkyBrowser*> pair : browsers) {
+            pair.second->setIdInBrowser();
+        }
+
+        return 0;
+    }
+
+    int connectBrowserTarget(lua_State* L) {
+        // In order to connect, the target and browsers must have been loaded into the 
+        // module. This is to ensure that the renderables have been found 
+
+        ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::connectBrowserTarget");
+        const std::string id = ghoul::lua::value<std::string>(L, 1);
+
+        // Find the screenspace renderable that has the id
+        SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+        std::vector<ScreenSpaceRenderable*> renderables = module->getBrowsersAndTargets();
+        auto found = std::find_if(std::begin(renderables), std::end(renderables), 
+            [&](ScreenSpaceRenderable* renderable) {
+                return renderable && id == renderable->identifier();
+            });
+        if (dynamic_cast<ScreenSpaceSkyBrowser*>(*found)) {
+            ScreenSpaceSkyBrowser* browser = dynamic_cast<ScreenSpaceSkyBrowser*>(*found);
+            browser->setConnectedTarget();
+        }
+        else if (dynamic_cast<ScreenSpaceSkyTarget*>(*found)) {
+            ScreenSpaceSkyTarget* target = dynamic_cast<ScreenSpaceSkyTarget*>(*found);
+            target->setConnectedBrowser();
+        }
+        return 0;
+    }
+
+    int initializeBrowserAndTarget(lua_State* L) {
+        // Initialize browser with ID and its corresponding target
+        ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::initializeBrowserAndTarget");
+        const std::string id = ghoul::lua::value<std::string>(L, 1);
+        SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+        if (module->browserIdExists(id)) {
+            module->getSkyBrowsers()[id]->initializeBrowser();
+            ScreenSpaceSkyTarget* target = module->getSkyBrowsers()[id]->getSkyTarget();
+            if (target) {
+                target->initializeWithBrowser();
+            }
+        }
+
+        return 0;
+    }
+    
+    int addToSkyBrowserModule(lua_State* L) {
+        ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::addToSkyBrowserModule");
+        const std::string id = ghoul::lua::value<std::string>(L, 1);
+        LINFO("Add to sky browser module id " + id);
+        ScreenSpaceRenderable* object = global::renderEngine->screenSpaceRenderable(id);
+        SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+        module->addRenderable(object);
+
+        return 0;
+    }
 
 	int getListOfImages(lua_State* L) {
 		// Send image list to GUI

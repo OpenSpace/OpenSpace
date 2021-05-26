@@ -27,6 +27,8 @@ namespace openspace {
         void render() override;
         void createShaders();
 
+        void initializeWithBrowser();
+
         void setBrowser(ScreenSpaceSkyBrowser* browser);
         ScreenSpaceSkyBrowser* getSkyBrowser();
 
@@ -35,7 +37,7 @@ namespace openspace {
 
         glm::dvec3 getTargetDirectionGalactic();
         glm::dvec2 getScreenSpacePosition();
-        void setConnectedBrowser();
+        bool setConnectedBrowser();
         void setBorderColor(glm::ivec3 color);
         glm::ivec3 getColor();
         properties::FloatProperty& getOpacity();

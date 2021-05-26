@@ -1,0 +1,42 @@
+local assetHelper = asset.require('util/asset_helper')
+
+local targetId= "SkyTarget0"
+local browserId = "SkyBrowser0"
+
+local browser = {
+   Type = "ScreenSpaceSkyBrowser",
+   Identifier = browserId,
+   Name = "SkyBrowser",
+   Url = "http://localhost:8000/",
+   FaceCamera = false,
+   TargetID = targetId,
+   CartesianPosition = {-1.0, -0.5, -2.1},
+   UseRadiusAzimuthElevation = false,
+   RadiusAzimuthElevation = {1.0, 0.0, 0.0}, -- use for dome
+};
+
+local target = {
+   Type = "ScreenSpaceSkyTarget",
+   Identifier = targetId,
+   Name = "Target",
+   FaceCamera = false,
+   BrowserID = browserId,
+   UseRadiusAzimuthElevation = false,
+   RadiusAzimuthElevation = {1.0, 0.0, 0.0}, -- use for dome
+};
+
+asset.onInitialize(function ()
+ openspace.addScreenSpaceRenderable(browser)
+ openspace.addScreenSpaceRenderable(target)
+ openspace.skybrowser.addToSkyBrowserModule(browserId)
+ openspace.skybrowser.addToSkyBrowserModule(targetId)
+ openspace.skybrowser.connectBrowserTarget(browserId)
+ openspace.skybrowser.connectBrowserTarget(targetId)
+end)
+
+asset.onDeinitialize(function ()
+    openspace.removeScreenSpaceRenderable(browserId)
+    openspace.removeScreenSpaceRenderable(targetId)
+end)
+
+asset.export("browser", {browser, target})
