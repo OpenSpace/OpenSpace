@@ -140,7 +140,7 @@ asset.onInitialize(function ()
   for _, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)
   end
-  openspace.setPropertyValueSingle("Scene.ISSparentNode.Rotation.yAxisInvertObject", true)
+  openspace.setPropertyValueSingle("Scene.ISSModel.Rotation.yAxisInvertObject", true)
 
 end)
 
