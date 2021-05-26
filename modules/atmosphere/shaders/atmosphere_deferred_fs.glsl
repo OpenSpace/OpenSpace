@@ -76,6 +76,9 @@ uniform dmat4 dModelTransformMatrix;
 uniform dmat4 dSGCTViewToWorldMatrix;
 uniform dmat4 dSgctProjectionToModelTransformMatrix;
 
+uniform vec4 viewport;
+uniform vec2 resolution;
+
 uniform dvec4 dCamPosObj;
 uniform dvec3 sunDirectionObj;
 
@@ -207,8 +210,8 @@ bool atmosphereIntersection(Ray ray, double atmRadius, out double offset,
  * NDC from the interpolated positions from the screen quad. This method avoids matrices
  * multiplications wherever is possible.
  */
-Ray calculateRayRenderableGlobe() {
-  vec2 interpolatedNDCPos = (texCoord - 0.5) * 2.0;
+Ray calculateRayRenderableGlobe(vec2 st) {
+  vec2 interpolatedNDCPos = (st - 0.5) * 2.0;
   dvec4 clipCoords = dvec4(interpolatedNDCPos, 1.0, 1.0);
 
   // Clip to Object Coords
@@ -467,8 +470,19 @@ vec3 sunColor(vec3 v, vec3 s, float r, float mu, float irradianceFactor) {
 }
 
 void main() {
+  // Modify the texCoord based on the Viewport and Resolution. This modification is
+  // necessary in case of side-by-side stereo as we only want to access the part of the
+  // feeding texture that we are currently responsible for.  Otherwise we would map the
+  // entire feeding texture into our half of the result texture, leading to a doubling
+  // of the "missing" half.  If you don't believe me, load a configuration file with the
+  // side_by_side stereo mode enabled, disable FXAA, and remove this modification.
+  // The same calculation is done in the FXAA shader and the HDR resolving
+  vec2 st = texCoord;
+  st.x = st.x / (resolution.x / viewport[2]) + (viewport[0] / resolution.x);
+  st.y = st.y / (resolution.y / viewport[3]) + (viewport[1] / resolution.y);
+
   if (cullAtmosphere == 1) {
-    renderTarget = texture(mainColorTexture, texCoord);
+    renderTarget = texture(mainColorTexture, st);
     return;
   }
 
@@ -476,10 +490,10 @@ void main() {
   int nSamples = 1;
   
   // Color from G-Buffer
-  vec4 color = texture(mainColorTexture, texCoord);
+  vec4 color = texture(mainColorTexture, st);
   
   // Get the ray from camera to atm in object space
-  Ray ray = calculateRayRenderableGlobe();
+  Ray ray = calculateRayRenderableGlobe(texCoord);
   
   double offset = 0.0;   // in KM
   double maxLength = 0.0;   // in KM
@@ -499,7 +513,7 @@ void main() {
   // Get data from G-Buffer
 
   // Normal is stored in SGCT View Space and transformed to the current object space
-  vec4 normalViewSpaceAndWaterReflectance = texture(mainNormalTexture, texCoord);
+  vec4 normalViewSpaceAndWaterReflectance = texture(mainNormalTexture, st);
   dvec4 normalViewSpace = vec4(normalViewSpaceAndWaterReflectance.xyz, 0.0);
   dvec4 normalWorldSpace = dSGCTViewToWorldMatrix * normalViewSpace;
   vec4 normal = vec4(dInverseModelTransformMatrix * normalWorldSpace);
@@ -507,7 +521,7 @@ void main() {
   normal.w = normalViewSpaceAndWaterReflectance.w;
 
   // Data in the mainPositionTexture are written in view space (view plus camera rig)
-  vec4 position = texture(mainPositionTexture, texCoord);
+  vec4 position = texture(mainPositionTexture, st);
 
   // OS Eye to World coords                
   dvec4 positionWorldCoords = dSGCTViewToWorldMatrix * position;

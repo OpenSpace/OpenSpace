@@ -75,13 +75,13 @@ namespace {
 
     constexpr const glm::vec4 PosBufferClearVal = { 1e32, 1e32, 1e32, 1.f };
 
-    constexpr const std::array<const char*, 7> HDRUniformNames = {
+    constexpr const std::array<const char*, 9> HDRUniformNames = {
         "hdrFeedingTexture", "blackoutFactor", "hdrExposure", "gamma",
-        "Hue", "Saturation", "Value"
+        "Hue", "Saturation", "Value", "Viewport", "Resolution"
     };
 
-    constexpr const std::array<const char*, 2> FXAAUniformNames = {
-        "renderedTexture", "inverseScreenSize"
+    constexpr const std::array<const char*, 4> FXAAUniformNames = {
+        "renderedTexture", "inverseScreenSize", "Viewport", "Resolution"
     };
 
     constexpr const std::array<const char*, 2> DownscaledVolumeUniformNames = {
@@ -447,7 +447,7 @@ void FramebufferRenderer::deferredcastersChanged(Deferredcaster&,
     _dirtyDeferredcastData = true;
 }
 
-void FramebufferRenderer::applyTMO(float blackoutFactor) {
+void FramebufferRenderer::applyTMO(float blackoutFactor, GLint viewport[4]) {
     ZoneScoped
     TracyGpuZone("applyTMO")
 
@@ -468,6 +468,14 @@ void FramebufferRenderer::applyTMO(float blackoutFactor) {
     _hdrFilteringProgram->setUniform(_hdrUniformCache.Hue, _hue);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.Saturation, _saturation);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.Value, _value);
+    _hdrFilteringProgram->setUniform(
+        _hdrUniformCache.Viewport,
+        static_cast<float>(viewport[0]),
+        static_cast<float>(viewport[1]),
+        static_cast<float>(viewport[2]),
+        static_cast<float>(viewport[3])
+    );
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.Resolution, glm::vec2(_resolution));
 
     glDepthMask(false);
     glDisable(GL_DEPTH_TEST);
@@ -482,7 +490,7 @@ void FramebufferRenderer::applyTMO(float blackoutFactor) {
     _hdrFilteringProgram->deactivate();
 }
 
-void FramebufferRenderer::applyFXAA() {
+void FramebufferRenderer::applyFXAA(GLint viewport[4]) {
     _fxaaProgram->activate();
 
     ghoul::opengl::TextureUnit renderedTextureUnit;
@@ -497,8 +505,16 @@ void FramebufferRenderer::applyFXAA() {
         renderedTextureUnit
     );
 
-    glm::vec2 inverseScreenSize(1.f/_resolution.x, 1.f/_resolution.y);
+    glm::vec2 inverseScreenSize = glm::vec2(1.f / _resolution.x, 1.f / _resolution.y);
     _fxaaProgram->setUniform(_fxaaUniformCache.inverseScreenSize, inverseScreenSize);
+    _fxaaProgram->setUniform(
+        _fxaaUniformCache.Viewport,
+        static_cast<float>(viewport[0]),
+        static_cast<float>(viewport[1]),
+        static_cast<float>(viewport[2]),
+        static_cast<float>(viewport[3])
+    );
+    _fxaaProgram->setUniform(_fxaaUniformCache.Resolution, glm::vec2(_resolution));
 
     glDepthMask(false);
     glDisable(GL_DEPTH_TEST);
@@ -1103,8 +1119,14 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
     global::renderEngine->openglStateCache().setDefaultFramebuffer(_defaultFBO);
 
+    //global::renderEngine->openglStateCache().loadCurrentGLState();
+
     GLint viewport[4] = { 0 };
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    global::renderEngine->openglStateCache().setViewportState(viewport);
+
     global::renderEngine->openglStateCache().viewport(viewport);
+
 
     // Reset Render Pipeline State
     global::renderEngine->openglStateCache().resetCachedStates();
@@ -1120,8 +1142,8 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         ZoneScopedN("Deferred G-Buffer")
         TracyGpuZone("Deferred G-Buffer")
 
-        GLint vp[4] = {viewport[0], viewport[1], _resolution.x, _resolution.y};
-        global::renderEngine->openglStateCache().setViewportState(vp);
+        //GLint vp[4] = {viewport[0], viewport[1], _resolution.x, _resolution.y};
+        //global::renderEngine->openglStateCache().setViewportState(vp);
 
         glBindFramebuffer(GL_FRAMEBUFFER, _gBuffers.framebuffer);
         glDrawBuffers(3, ColorAttachmentArray);
@@ -1165,20 +1187,20 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     {
         TracyGpuZone("Raycaster Tasks")
         GLDebugGroup group("Raycaster Tasks");
-        performRaycasterTasks(tasks.raycasterTasks);
+        performRaycasterTasks(tasks.raycasterTasks, viewport);
     }
 
     if (!tasks.deferredcasterTasks.empty()) {
         TracyGpuZone("Deferred Caster Tasks")
         GLDebugGroup group("Deferred Caster Tasks");
 
-        // We use ping pong rendering in order to be able to
-        // render to the same final buffer, multiple
-        // deferred tasks at same time (e.g. more than 1 ATM being seen at once)
+        // We use ping pong rendering in order to be able to render multiple deferred
+        // tasks at same time (e.g. more than 1 ATM being seen at once) to the same final
+        // buffer
         glBindFramebuffer(GL_FRAMEBUFFER, _pingPongBuffers.framebuffer);
         glDrawBuffers(1, &ColorAttachmentArray[_pingPongIndex]);
 
-        performDeferredTasks(tasks.deferredcasterTasks);
+        performDeferredTasks(tasks.deferredcasterTasks, viewport);
     }
 
     glDrawBuffers(1, &ColorAttachmentArray[_pingPongIndex]);
@@ -1222,18 +1244,20 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         TracyGpuZone("Apply TMO")
         GLDebugGroup group("Apply TMO");
 
-        applyTMO(blackoutFactor);
+        applyTMO(blackoutFactor, viewport);
     }
 
     if (_enableFXAA) {
         TracyGpuZone("Apply FXAA")
         GLDebugGroup group("Apply FXAA");
         glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
-        applyFXAA();
+        applyFXAA(viewport);
     }
 }
 
-void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>& tasks) {
+void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>& tasks,
+                                                GLint viewport[4])
+{
     ZoneScoped
 
     for (const RaycasterTask& raycasterTask : tasks) {
@@ -1367,7 +1391,8 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
 }
 
 void FramebufferRenderer::performDeferredTasks(
-                                             const std::vector<DeferredcasterTask>& tasks)
+                                             const std::vector<DeferredcasterTask>& tasks,
+                                                                        GLint viewport[4])
 {
     ZoneScoped
 
@@ -1399,6 +1424,16 @@ void FramebufferRenderer::performDeferredTasks(
                 "mainColorTexture",
                 mainDColorTextureUnit
             );
+
+            deferredcastProgram->setUniform(
+                "viewport",
+                static_cast<float>(viewport[0]),
+                static_cast<float>(viewport[1]),
+                static_cast<float>(viewport[2]),
+                static_cast<float>(viewport[3])
+            );
+            deferredcastProgram->setUniform("resolution", glm::vec2(_resolution));
+
 
             ghoul::opengl::TextureUnit mainPositionTextureUnit;
             mainPositionTextureUnit.activate();
