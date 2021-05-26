@@ -13,8 +13,8 @@ local L2 = {
         RenderableType = "Opaque",
         Billboard = true,
         Size = 400E4,
-        Texture = "C:/Users/ElmQPC/Desktop/Malin/develop/OpenSpace/sync/http/dot_image/1/circle-128.png",
-        BlendMode = "Normal"
+        Texture = "C:/Users/ElmQPC/Desktop/Malin/develop/images/jwst/circle.png",
+        BlendMode = "Additive"
     },
     Transform = {
         Translation = {
@@ -27,6 +27,33 @@ local L2 = {
     Tag = { "L2" },
     GUI = {
         Name = "L2",
+        Path = "/Solar System/Missions/JWST/Lagrange points",
+    }
+}
+
+local L2Big = {
+    Identifier = "L2Big",
+    Parent = transforms.SolarSystemBarycenter.Identifier,
+    Renderable = {
+        Enabled = false,
+        Type = "RenderablePlaneImageLocal",
+        RenderableType = "Opaque",
+        Billboard = true,
+        Size = 700E5,
+        Texture = "C:/Users/ElmQPC/Desktop/Malin/develop/images/jwst/circle.png",
+        BlendMode = "Additive"
+    },
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "392", -- L2
+            Observer = "SUN",
+            Kernels = L2Kernel
+        }
+    },
+    Tag = { "lagrange_points" },
+    GUI = {
+        Name = "Large L2",
         Path = "/Solar System/Missions/JWST/Lagrange points",
     }
 }
@@ -96,6 +123,7 @@ local L2SunLine = {
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     L2,
+    L2Big,
     L2SunLine,
     L2Label,
     L2BigLabel

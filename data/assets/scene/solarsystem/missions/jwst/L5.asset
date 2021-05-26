@@ -14,8 +14,8 @@ local L5 = {
         RenderableType = "Opaque",
         Billboard = true,
         Size = 800E6,
-        Texture = "C:/Users/ElmQPC/Desktop/Malin/develop/OpenSpace/sync/http/dot_image/1/circle-128.png",
-        BlendMode = "Normal"
+        Texture = "C:/Users/ElmQPC/Desktop/Malin/develop/images/jwst/circle.png",
+        BlendMode = "Additive"
     },
     Transform = {
         Translation = {

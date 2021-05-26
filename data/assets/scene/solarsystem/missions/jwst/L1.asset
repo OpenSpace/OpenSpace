@@ -13,9 +13,9 @@ local L1 = {
         Type = "RenderablePlaneImageLocal",
         RenderableType = "Opaque",
         Billboard = true,
-        Size = 400E4,
-        Texture = "C:/Users/ElmQPC/Desktop/Malin/develop/OpenSpace/sync/http/dot_image/1/circle-128.png",
-        BlendMode = "Normal"
+        Size = 700E5,
+        Texture = "C:/Users/ElmQPC/Desktop/Malin/develop/images/jwst/circle.png",
+        BlendMode = "Additive"
     },
     Transform = {
         Translation = {
