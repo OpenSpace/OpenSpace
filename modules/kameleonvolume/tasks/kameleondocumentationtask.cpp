@@ -52,9 +52,7 @@ namespace {
 namespace openspace::kameleonvolume {
 
 documentation::Documentation KameleonDocumentationTask::documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "kameleon_documentation_task";
-    return doc;
+    return codegen::doc<Parameters>("kameleon_documentation_task");
 }
 
 KameleonDocumentationTask::KameleonDocumentationTask(const ghoul::Dictionary& dictionary)

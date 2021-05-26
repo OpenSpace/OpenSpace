@@ -45,9 +45,9 @@
 namespace {
     constexpr const char* ProgramName = "Plane";
 
-    enum BlendMode {
-        BlendModeNormal = 0,
-        BlendModeAdditive
+    enum class BlendMode {
+        Normal = 0,
+        Additive
     };
 
     constexpr openspace::properties::Property::PropertyInfo BillboardInfo = {
@@ -111,9 +111,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderablePlane::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_renderable_plane";
-    return doc;
+    return codegen::doc<Parameters>("base_renderable_plane");
 }
 
 RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
@@ -134,15 +132,15 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     _mirrorBackside = p.mirrorBackside.value_or(_mirrorBackside);
 
     _blendMode.addOptions({
-        { BlendModeNormal, "Normal" },
-        { BlendModeAdditive, "Additive"}
+        { static_cast<int>(BlendMode::Normal), "Normal" },
+        { static_cast<int>(BlendMode::Additive), "Additive"}
     });
     _blendMode.onChange([&]() {
         switch (_blendMode) {
-            case BlendModeNormal:
+            case static_cast<int>(BlendMode::Normal):
                 setRenderBinFromOpacity();
                 break;
-            case BlendModeAdditive:
+            case static_cast<int>(BlendMode::Additive):
                 setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
                 break;
             default:
@@ -151,17 +149,17 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     });
 
     _opacity.onChange([&]() {
-        if (_blendMode == BlendModeNormal) {
+        if (_blendMode == static_cast<int>(BlendMode::Normal)) {
             setRenderBinFromOpacity();
         }
     });
 
     if (p.blendMode.has_value()) {
         if (*p.blendMode == Parameters::BlendMode::Normal) {
-            _blendMode = BlendModeNormal;
+            _blendMode = static_cast<int>(BlendMode::Normal);
         }
         else if (*p.blendMode == Parameters::BlendMode::Additive) {
-            _blendMode = BlendModeAdditive;
+            _blendMode = static_cast<int>(BlendMode::Additive);
         }
     }
 
@@ -279,10 +277,14 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
                                 RenderEngine::RendererImplementation::ABuffer;
 
     if (usingABufferRenderer) {
-        _shader->setUniform("additiveBlending", _blendMode == BlendModeAdditive);
+        _shader->setUniform(
+            "additiveBlending",
+            _blendMode == static_cast<int>(BlendMode::Additive)
+        );
     }
 
-    bool additiveBlending = (_blendMode == BlendModeAdditive) && usingFramebufferRenderer;
+    bool additiveBlending =
+        (_blendMode == static_cast<int>(BlendMode::Additive)) && usingFramebufferRenderer;
     if (additiveBlending) {
         glDepthMask(false);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);

@@ -84,9 +84,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation SpiceTranslation::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "space_translation_spicetranslation";
-    return doc;
+    return codegen::doc<Parameters>("space_translation_spicetranslation");
 }
 
 SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)

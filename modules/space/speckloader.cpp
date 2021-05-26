@@ -421,7 +421,7 @@ std::optional<Dataset> loadCachedFile(std::filesystem::path path) {
     uint64_t nEntries;
     file.read(reinterpret_cast<char*>(&nEntries), sizeof(uint64_t));
     result.entries.reserve(nEntries);
-    for (int i = 0; i < nEntries; i += 1) {
+    for (uint64_t i = 0; i < nEntries; i += 1) {
         Dataset::Entry e;
         file.read(reinterpret_cast<char*>(&e.position.x), sizeof(float));
         file.read(reinterpret_cast<char*>(&e.position.y), sizeof(float));
@@ -797,7 +797,7 @@ ColorMap loadFile(std::filesystem::path path, SkipAllZeroLines) {
         }
     }
 
-    if (nColorLines != res.entries.size()) {
+    if (nColorLines != static_cast<int>(res.entries.size())) {
         LWARNINGC("SpeckLoader", fmt::format(
             "While loading color map, the expected number of color values '{}' was "
             "different from the actual number of color values '{}'",

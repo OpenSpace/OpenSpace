@@ -120,6 +120,61 @@ namespace {
         "to its color. The texture is used as a one dimensional lookup function."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo MappingBvInfo = {
+        "MappingBV",
+        "Mapping (bv-color)",
+        "The name of the variable in the speck file that is used as the b-v color "
+        "variable"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MappingLuminanceInfo = {
+        "MappingLuminance",
+        "Mapping (luminance)",
+        "The name of the variable in the speck file that is used as the luminance "
+        "variable"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MappingAbsMagnitudeInfo = {
+        "MappingAbsMagnitude",
+        "Mapping (absolute magnitude)",
+        "The name of the variable in the speck file that is used as the absolute "
+        "magnitude variable"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MappingAppMagnitudeInfo = {
+        "MappingAppMagnitude",
+        "Mapping (apparent magnitude)",
+        "The name of the variable in the speck file that is used as the apparent "
+        "magnitude variable"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MappingVxInfo = {
+        "MappingVx",
+        "Mapping (vx)",
+        "The name of the variable in the speck file that is used as the star velocity "
+        "along the x-axis"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MappingVyInfo = {
+        "MappingVy",
+        "Mapping (vy)",
+        "The name of the variable in the speck file that is used as the star velocity "
+        "along the y-axis"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MappingVzInfo = {
+        "MappingVz",
+        "Mapping (vz)",
+        "The name of the variable in the speck file that is used as the star velocity "
+        "along the z-axis"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MappingSpeedInfo = {
+        "MappingSpeed",
+        "Mapping (speed)",
+        "The name of the variable in the speck file that is used as the speed"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo ColorOptionInfo = {
         "ColorOption",
         "Color Option",
@@ -361,11 +416,33 @@ namespace {
         // [[codegen::verbatim(SizeCompositionOptionInfo.description)]]
         std::optional<SizeComposition> sizeComposition;
 
+        struct DataMapping {
+            // [[codegen::verbatim(MappingBvInfo.description)]]
+            std::optional<std::string> bv;
+            // [[codegen::verbatim(MappingLuminanceInfo.description)]]
+            std::optional<std::string> luminance;
+            // [[codegen::verbatim(MappingAbsMagnitudeInfo.description)]]
+            std::optional<std::string> absoluteMagnitude;
+            // [[codegen::verbatim(MappingAppMagnitudeInfo.description)]]
+            std::optional<std::string> apparentMagnitude;
+            // [[codegen::verbatim(MappingVxInfo.description)]]
+            std::optional<std::string> vx;
+            // [[codegen::verbatim(MappingVyInfo.description)]]
+            std::optional<std::string> vy;
+            // [[codegen::verbatim(MappingVzInfo.description)]]
+            std::optional<std::string> vz;
+            // [[codegen::verbatim(MappingSpeedInfo.description)]]
+            std::optional<std::string> speed;
+        };
+        // The mappings between data values and the variable names specified in the speck
+        // file
+        DataMapping dataMapping;
+
         // [[codegen::verbatim(FadeInDistancesInfo.description)]]
         std::optional<glm::dvec2> fadeInDistances;
 
         // [[codegen::verbatim(DisableFadeInInfo.description)]]
-        std::optional<bool> distableFadeIn;
+        std::optional<bool> disableFadeIn;
     };
 #include "renderablestars_codegen.cpp"
 }  // namespace
@@ -373,9 +450,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableStars::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "space_renderablestars";
-    return doc;
+    return codegen::doc<Parameters>("space_renderablestars");
 }
 
 RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
@@ -383,6 +458,17 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     , _speckFile(SpeckFileInfo)
     , _colorTexturePath(ColorTextureInfo)
     //, _shapeTexturePath(ShapeTextureInfo)
+    , _dataMappingContainer({ "DataMapping", "Data Mapping" })
+    , _dataMapping{
+        properties::StringProperty(MappingBvInfo),
+        properties::StringProperty(MappingLuminanceInfo),
+        properties::StringProperty(MappingAbsMagnitudeInfo),
+        properties::StringProperty(MappingAppMagnitudeInfo),
+        properties::StringProperty(MappingVxInfo),
+        properties::StringProperty(MappingVyInfo),
+        properties::StringProperty(MappingVzInfo),
+        properties::StringProperty(MappingSpeedInfo)
+    }
     , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _otherDataOption(
         OtherDataOptionInfo,
@@ -416,7 +502,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     , _p2Param(P2ParamInfo, 0.138f, 0.f, 1.f)
     , _spencerAlphaConst(AlphaConstInfo, 0.02f, 0.000001f, 5.f)
     , _moffatPSFParamOwner(MoffatPSFParamOwnerInfo)
-    , _FWHMConst(FWHMInfo, 10.4f, -100.f, 1000.f)
+    , _FWHMConst(FWHMInfo, 10.4f, 0.f, 100.f)
     , _moffatBetaConst(BetaInfo, 4.765f, 0.f, 100.f)
     , _renderingMethodOption(
         RenderMethodOptionInfo,
@@ -439,6 +525,40 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
+
+    _dataMapping.bvColor = p.dataMapping.bv.value_or("");
+    _dataMapping.bvColor.onChange([this]() { _dataIsDirty = true; });
+    _dataMappingContainer.addProperty(_dataMapping.bvColor);
+    
+    _dataMapping.luminance = p.dataMapping.luminance.value_or("");
+    _dataMapping.luminance.onChange([this]() { _dataIsDirty = true; });
+    _dataMappingContainer.addProperty(_dataMapping.luminance);
+    
+    _dataMapping.absoluteMagnitude = p.dataMapping.absoluteMagnitude.value_or("");
+    _dataMapping.absoluteMagnitude.onChange([this]() { _dataIsDirty = true; });
+    _dataMappingContainer.addProperty(_dataMapping.absoluteMagnitude);
+    
+    _dataMapping.apparentMagnitude = p.dataMapping.apparentMagnitude.value_or("");
+    _dataMapping.apparentMagnitude.onChange([this]() { _dataIsDirty = true; });
+    _dataMappingContainer.addProperty(_dataMapping.apparentMagnitude);
+    
+    _dataMapping.vx = p.dataMapping.vx.value_or("");
+    _dataMapping.vx.onChange([this]() { _dataIsDirty = true; });
+    _dataMappingContainer.addProperty(_dataMapping.vx);
+    
+    _dataMapping.vy = p.dataMapping.vy.value_or("");
+    _dataMapping.vy.onChange([this]() { _dataIsDirty = true; });
+    _dataMappingContainer.addProperty(_dataMapping.vy);
+    
+    _dataMapping.vz = p.dataMapping.vz.value_or("");
+    _dataMapping.vz.onChange([this]() { _dataIsDirty = true; });
+    _dataMappingContainer.addProperty(_dataMapping.vz);
+    
+    _dataMapping.speed = p.dataMapping.speed.value_or("");
+    _dataMapping.speed.onChange([this]() { _dataIsDirty = true; });
+    _dataMappingContainer.addProperty(_dataMapping.speed);
+    
+    addPropertySubOwner(_dataMappingContainer);
 
     _speckFile = p.speckFile.string();
     _speckFile.onChange([&]() { _speckFileIsDirty = true; });
@@ -1212,14 +1332,20 @@ void RenderableStars::loadData() {
 }
 
 std::vector<float> RenderableStars::createDataSlice(ColorOption option) {
-    const int bvIdx = std::max(_dataset.index("colorb_v"), 0);
-    const int lumIdx = std::max(_dataset.index("lum"), 0);
-    const int absMagIdx = std::max(_dataset.index("absmag"), 0);
-    const int appMagIdx = std::max(_dataset.index("appmag"), 0);
-    const int vxIdx = std::max(_dataset.index("vx"), 0);
-    const int vyIdx = std::max(_dataset.index("vy"), 0);
-    const int vzIdx = std::max(_dataset.index("vz"), 0);
-    const int speedIdx = std::max(_dataset.index("speed"), 0);
+    const int bvIdx = std::max(_dataset.index(_dataMapping.bvColor.value()), 0);
+    const int lumIdx = std::max(_dataset.index(_dataMapping.luminance.value()), 0);
+    const int absMagIdx = std::max(
+        _dataset.index(_dataMapping.absoluteMagnitude.value()),
+        0
+    );
+    const int appMagIdx = std::max(
+        _dataset.index(_dataMapping.apparentMagnitude.value()),
+        0
+    );
+    const int vxIdx = std::max(_dataset.index(_dataMapping.vx.value()), 0);
+    const int vyIdx = std::max(_dataset.index(_dataMapping.vy.value()), 0);
+    const int vzIdx = std::max(_dataset.index(_dataMapping.vz.value()), 0);
+    const int speedIdx = std::max(_dataset.index(_dataMapping.speed.value()), 0);
 
     _otherDataRange = glm::vec2(
         std::numeric_limits<float>::max(),

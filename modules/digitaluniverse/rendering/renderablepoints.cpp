@@ -116,9 +116,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderablePoints::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "digitaluniverse_renderablepoints";
-    return doc;
+    return codegen::doc<Parameters>("digitaluniverse_renderablepoints");
 }
 
 RenderablePoints::RenderablePoints(const ghoul::Dictionary& dictionary)

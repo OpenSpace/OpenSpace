@@ -88,7 +88,6 @@ private:
     properties::BoolProperty _enableAnimation;
 
     properties::FloatProperty _ambientIntensity;
-
     properties::FloatProperty _diffuseIntensity;
     properties::FloatProperty _specularIntensity;
 

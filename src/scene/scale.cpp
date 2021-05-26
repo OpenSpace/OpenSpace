@@ -47,9 +47,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation Scale::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "core_transform_scaling";
-    return doc;
+    return codegen::doc<Parameters>("core_transform_scaling");
 }
 
 ghoul::mm_unique_ptr<Scale> Scale::createFromDictionary(

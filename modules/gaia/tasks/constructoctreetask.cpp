@@ -653,9 +653,7 @@ bool ConstructOctreeTask::filterStar(const glm::vec2& range, float filterValue,
 }
 
 documentation::Documentation ConstructOctreeTask::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "gaiamission_constructoctreefrombin";
-    return doc;
+    return codegen::doc<Parameters>("gaiamission_constructoctreefrombin");
 }
 
 } // namespace openspace

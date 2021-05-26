@@ -68,9 +68,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation TimeFrameInterval::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_time_frame_interval";
-    return doc;
+    return codegen::doc<Parameters>("base_time_frame_interval");
 }
 
 bool TimeFrameInterval::isActive(const Time& time) const {

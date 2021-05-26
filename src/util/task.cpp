@@ -43,9 +43,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation Task::documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "core_task";
-    return doc;
+    return codegen::doc<Parameters>("core_task");
 }
 
 std::unique_ptr<Task> Task::createFromDictionary(const ghoul::Dictionary& dictionary) {

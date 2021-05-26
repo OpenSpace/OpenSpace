@@ -38,13 +38,13 @@ BooleanType(SkipAllZeroLines);
 
 struct Dataset {
     struct Variable {
-        int index;
+        int index = -1;
         std::string name;
     };
     std::vector<Variable> variables;
 
     struct Texture {
-        int index;
+        int index = -1;
         std::string file;
     };
     std::vector<Texture> textures;

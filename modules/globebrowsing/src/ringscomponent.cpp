@@ -55,13 +55,13 @@ namespace {
     constexpr const char* _loggerCat = "RingsComponent";
 
     constexpr const std::array<const char*, 9> UniformNames = {
-        "modelViewProjectionMatrix", "textureOffset", "colorFilterValue", "_nightFactor",
+        "modelViewProjectionMatrix", "textureOffset", "colorFilterValue", "nightFactor",
         "sunPosition", "ringTexture", "shadowMatrix", "shadowMapTexture",
         "zFightingPercentage"
     };
 
     constexpr const std::array<const char*, 15> UniformNamesAdvancedRings = {
-        "modelViewProjectionMatrix", "textureOffset", "colorFilterValue", "_nightFactor",
+        "modelViewProjectionMatrix", "textureOffset", "colorFilterValue", "nightFactor",
         "sunPosition", "sunPositionObj", "camPositionObj", "ringTextureFwrd",
         "ringTextureBckwrd", "ringTextureUnlit", "ringTextureColor",
         "ringTextureTransparency", "shadowMatrix", "shadowMapTexture", "zFightingPercentage"
@@ -200,9 +200,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RingsComponent::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "globebrowsing_rings_component";
-    return doc;
+    return codegen::doc<Parameters>("globebrowsing_rings_component");
 }
 
 RingsComponent::RingsComponent(const ghoul::Dictionary& dictionary)
@@ -382,14 +380,13 @@ void RingsComponent::deinitializeGL() {
     _geometryOnlyShader = nullptr;
 }
 
-void RingsComponent::draw(const RenderData& data,
-                          const RingsComponent::RenderPass renderPass,
+void RingsComponent::draw(const RenderData& data, RenderPass renderPass,
                           const ShadowComponent::ShadowMapData& shadowData)
 {
-    if (renderPass == GeometryAndShading) {
+    if (renderPass == RenderPass::GeometryAndShading) {
         _shader->activate();
     }
-    else if (renderPass == GeometryOnly) {
+    else if (renderPass == RenderPass::GeometryOnly) {
         _geometryOnlyShader->activate();
     }
 
@@ -408,7 +405,7 @@ void RingsComponent::draw(const RenderData& data,
     ghoul::opengl::TextureUnit ringTextureUnlitUnit;
     ghoul::opengl::TextureUnit ringTextureColorUnit;
     ghoul::opengl::TextureUnit ringTextureTransparencyUnit;
-    if (renderPass == GeometryAndShading) {
+    if (renderPass == RenderPass::GeometryAndShading) {
         if (_isAdvancedTextureEnabled) {
             _shader->setUniform(
                 _uniformCacheAdvancedRings.modelViewProjectionMatrix,
@@ -542,7 +539,7 @@ void RingsComponent::draw(const RenderData& data,
         glEnablei(GL_BLEND, 0);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
-    else if (renderPass == GeometryOnly) {
+    else if (renderPass == RenderPass::GeometryOnly) {
         _geometryOnlyShader->setUniform(
             _geomUniformCache.modelViewProjectionMatrix,
             modelViewProjectionTransform
@@ -568,12 +565,11 @@ void RingsComponent::draw(const RenderData& data,
 
     glEnable(GL_CULL_FACE);
 
-    if (renderPass == GeometryAndShading) {
+    if (renderPass == RenderPass::GeometryAndShading) {
         _shader->deactivate();
         global::renderEngine->openglStateCache().resetBlendState();
-        //global::renderEngine->openglStateCache().resetDepthState();
     }
-    else if (renderPass == GeometryOnly) {
+    else if (renderPass == RenderPass::GeometryOnly) {
         _geometryOnlyShader->deactivate();
     }
 }

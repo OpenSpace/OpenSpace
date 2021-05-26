@@ -88,11 +88,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderablePlaneTimeVaryingImage::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_renderable_plane_time_varying_image";
-    return doc;
-
-    //return codegen::doc<Parameters>("base_renderable_plane_time_varying_image");
+    return codegen::doc<Parameters>("base_renderable_plane_time_varying_image");
 }
 
 RenderablePlaneTimeVaryingImage::RenderablePlaneTimeVaryingImage(

@@ -67,7 +67,6 @@ namespace {
         "hasColorMap", "enabledRectSizeControl", "hasDvarScaling"
     };
 
-    constexpr int8_t CurrentCacheVersion = 1;
     constexpr double PARSEC = 0.308567756E17;
 
     constexpr const int RenderOptionViewDirection = 0;
@@ -339,9 +338,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableBillboardsCloud::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "digitaluniverse_RenderableBillboardsCloud";
-    return doc;
+    return codegen::doc<Parameters>("digitaluniverse_RenderableBillboardsCloud");
 }
 
 RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& dictionary)

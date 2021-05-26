@@ -64,9 +64,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation ScreenSpaceSpout::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "spout_screenspace_spout";
-    return doc;
+    return codegen::doc<Parameters>("spout_screenspace_spout");
 }
 
 ScreenSpaceSpout::ScreenSpaceSpout(const ghoul::Dictionary& dictionary)

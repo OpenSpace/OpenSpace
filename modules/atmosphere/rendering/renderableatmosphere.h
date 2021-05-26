@@ -33,9 +33,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/util/updatestructures.h>
-
 #include <ghoul/opengl/textureunit.h>
-
 #include <memory>
 #include <string>
 #include <vector>
@@ -55,16 +53,6 @@ struct TransformData;
 struct ShadowConfiguration {
     std::pair<std::string, double> source;
     std::pair<std::string, double> caster;
-};
-
-struct ShadowRenderingStruct {
-    double xu = 0.0;
-    double xp = 0.0;
-    double rs = 0.0;
-    double rc = 0.0;
-    glm::dvec3 sourceCasterVec = glm::dvec3(0.0);
-    glm::dvec3 casterPositionVec = glm::dvec3(0.0);
-    bool isShadowing = false;
 };
 
 namespace documentation { struct Documentation; }

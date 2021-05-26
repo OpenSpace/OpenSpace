@@ -204,7 +204,7 @@ namespace {
         // mu = G*M_earth
         double period = std::chrono::seconds(std::chrono::hours(24)).count() / meanMotion;
 
-        const double pisq = glm::pi<double>() * glm::pi<double>();
+        constexpr const double pisq = glm::pi<double>() * glm::pi<double>();
         double semiMajorAxis = pow((muEarth * period*period) / (4 * pisq), 1.0 / 3.0);
 
         // We need the semi major axis in km instead of m
@@ -225,9 +225,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation TLETranslation::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "space_transform_tle";
-    return doc;
+    return codegen::doc<Parameters>("space_transform_tle");
 }
 
 TLETranslation::TLETranslation(const ghoul::Dictionary& dictionary) {

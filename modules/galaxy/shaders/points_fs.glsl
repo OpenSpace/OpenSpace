@@ -33,20 +33,23 @@ in float vs_starBrightness;
 uniform float opacityCoefficient;
 
 Fragment getFragment() {
-    Fragment frag;
+  Fragment frag;
 
-    float multipliedOpacityCoefficient = opacityCoefficient*opacityCoefficient;
-    vec3 extinction = exp(vec3(0.6, 0.2, 0.3) - vs_color);
+  float multipliedOpacityCoefficient = opacityCoefficient * opacityCoefficient;
+  vec3 extinction = exp(vec3(0.6, 0.2, 0.3) - vs_color);
 
-    // We use the star brightness as the alpha value here to dim the stars as the camera
-    // moves further away.  Otherwise they would occlude the main milkway image even though
-    // they themselves nolonger have any color contribution left
-    vec4 fullColor = vec4(vs_color*extinction*vs_starBrightness*multipliedOpacityCoefficient, vs_starBrightness);
-    frag.color = fullColor;
+  // We use the star brightness as the alpha value here to dim the stars as the camera
+  // moves further away.  Otherwise they would occlude the main milkway image even though
+  // they themselves nolonger have any color contribution left
+  vec4 fullColor = vec4(
+    vs_color * extinction * vs_starBrightness * multipliedOpacityCoefficient,
+    vs_starBrightness
+  );
+  frag.color = fullColor;
 
-    frag.depth = vs_screenSpaceDepth;
-    frag.gPosition = vs_position;
-    frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
+  frag.depth = vs_screenSpaceDepth;
+  frag.gPosition = vs_position;
+  frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
 
-    return frag;
+  return frag;
 }

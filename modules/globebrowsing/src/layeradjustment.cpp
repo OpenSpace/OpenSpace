@@ -70,9 +70,7 @@ namespace {
 namespace openspace::globebrowsing {
 
 documentation::Documentation LayerAdjustment::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "globebrowsing_layeradjustment";
-    return doc;
+    return codegen::doc<Parameters>("globebrowsing_layeradjustment");
 }
 
 LayerAdjustment::LayerAdjustment()

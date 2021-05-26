@@ -117,9 +117,7 @@ namespace openspace {
     using namespace properties;
 
 documentation::Documentation RenderableTravelSpeed::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_renderable_renderabletravelspeed";
-    return doc;
+    return codegen::doc<Parameters>("base_renderable_renderabletravelspeed");
 }
 
 RenderableTravelSpeed::RenderableTravelSpeed(const ghoul::Dictionary& dictionary)

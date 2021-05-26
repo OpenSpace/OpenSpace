@@ -84,6 +84,18 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _colorTexture;
     std::unique_ptr<ghoul::filesystem::File> _colorTextureFile;
 
+    properties::PropertyOwner _dataMappingContainer;
+    struct {
+        properties::StringProperty bvColor;
+        properties::StringProperty luminance;
+        properties::StringProperty absoluteMagnitude;
+        properties::StringProperty apparentMagnitude;
+        properties::StringProperty vx;
+        properties::StringProperty vy;
+        properties::StringProperty vz;
+        properties::StringProperty speed;
+    } _dataMapping;
+
     properties::OptionProperty _colorOption;
     properties::OptionProperty _otherDataOption;
     properties::StringProperty _otherDataColorMapPath;

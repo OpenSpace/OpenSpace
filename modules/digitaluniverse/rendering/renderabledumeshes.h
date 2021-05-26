@@ -139,7 +139,6 @@ private:
 
     std::vector<float> _fullData;
     speck::Labelset _labelset;
-    int _nValuesPerAstronomicalObject = 0;
 
     std::unordered_map<int, glm::vec3> _meshColorMap;
     std::unordered_map<int, RenderingMesh> _renderingMeshesMap;

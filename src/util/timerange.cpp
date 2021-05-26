@@ -44,9 +44,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation TimeRange::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "core_util_timerange";
-    return doc;
+    return codegen::doc<Parameters>("core_util_timerange");
 }
 
 TimeRange::TimeRange(double startTime, double endTime)

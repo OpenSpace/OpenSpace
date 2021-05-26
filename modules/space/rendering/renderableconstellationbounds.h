@@ -66,7 +66,7 @@ private:
     struct ConstellationBound {
         std::string constellationAbbreviation; ///< The abbreviation of the constellation
         std::string constellationFullName;
-        bool isEnabled;
+        bool isEnabled = false;
         GLsizei startIndex; ///< The index of the first vertex describing the bounds
         GLsizei nVertices; ///< The number of vertices describing the bounds
     };

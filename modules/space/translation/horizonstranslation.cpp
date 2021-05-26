@@ -58,9 +58,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation HorizonsTranslation::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_transform_translation_horizons";
-    return doc;
+    return codegen::doc<Parameters>("base_transform_translation_horizons");
 }
 
 HorizonsTranslation::HorizonsTranslation()

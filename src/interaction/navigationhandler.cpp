@@ -496,13 +496,17 @@ void NavigationHandler::loadNavigationState(const std::string& filepath) {
 void NavigationHandler::setJoystickAxisMapping(int axis,
                                                JoystickCameraStates::AxisType mapping,
                                             JoystickCameraStates::AxisInvert shouldInvert,
-                                      JoystickCameraStates::AxisNormalize shouldNormalize)
+                                      JoystickCameraStates::AxisNormalize shouldNormalize,
+                                               bool isSticky,
+                                               double sensitivity)
 {
     _orbitalNavigator.joystickStates().setAxisMapping(
         axis,
         mapping,
         shouldInvert,
-        shouldNormalize
+        shouldNormalize,
+        isSticky,
+        sensitivity
     );
 }
 
@@ -557,9 +561,7 @@ std::vector<std::string> NavigationHandler::joystickButtonCommand(int button) co
 }
 
 documentation::Documentation NavigationHandler::NavigationState::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "core_navigation_state";
-    return doc;
+    return codegen::doc<Parameters>("core_navigation_state");
 }
 
 scripting::LuaLibrary NavigationHandler::luaLibrary() {

@@ -59,7 +59,6 @@ namespace {
     constexpr const int RenderOptionViewDirection = 0;
     constexpr const int RenderOptionPositionNormal = 1;
 
-    constexpr const int8_t CurrentCacheVersion = 1;
     constexpr const double PARSEC = 0.308567756E17;
 
     constexpr openspace::properties::Property::PropertyInfo TextColorInfo = {
@@ -181,9 +180,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableDUMeshes::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "digitaluniverse_renderabledumeshes";
-    return doc;
+    return codegen::doc<Parameters>("digitaluniverse_renderabledumeshes");
 }
 
 RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)

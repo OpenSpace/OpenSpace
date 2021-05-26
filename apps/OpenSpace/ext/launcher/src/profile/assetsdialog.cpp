@@ -63,7 +63,7 @@ namespace {
         int startIndex = 0;
         std::string token = "${USER_ASSETS}/";
         if (path.find(token) == 0) {
-            startIndex = token.length();
+            startIndex = static_cast<int>(token.length());
         }
         const size_t slash = path.find_first_of('/', startIndex);
         const bool endOfPath = (slash == std::string::npos);

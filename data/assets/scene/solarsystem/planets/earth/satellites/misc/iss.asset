@@ -46,12 +46,12 @@ local initializeAndAddNodes = function()
   }
 
   local parentNode = {
-     Identifier = "ISSparentNode",
+     Identifier = "ISSModel",
       Parent = iss.Identifier,
       Transform = {
         Rotation = {
           Type = "FixedRotation",
-          Attached = "ISSparentNode",
+          Attached = "ISSModel",
           XAxis = { 0.01, -1.0, 0.56 },
           XAxisOrthogonal = true,
           YAxis = transforms.EarthInertial.Identifier
@@ -73,9 +73,8 @@ local initializeAndAddNodes = function()
         DisableFaceCulling = true
       },
       GUI = {
-        Name = "ISSparentNode",
-        Path = "/Solar System/Planets/Earth/Satellites/ISS",
-        Hidden = true,
+        Name = "ISS Model",
+        Path = "/Solar System/Planets/Earth/Satellites/ISS"
       }
   }
 
@@ -141,7 +140,7 @@ asset.onInitialize(function ()
   for _, node in ipairs(nodes) do
     openspace.addSceneGraphNode(node)
   end
-  openspace.setPropertyValueSingle("Scene.ISSparentNode.Rotation.yAxisInvertObject", true)
+  openspace.setPropertyValueSingle("Scene.ISSModel.Rotation.yAxisInvertObject", true)
 
 end)
 

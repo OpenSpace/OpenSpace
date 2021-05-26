@@ -52,8 +52,9 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderablePlaneImageOnline::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_renderable_plane_image_online";
+    documentation::Documentation doc = codegen::doc<Parameters>(
+        "base_renderable_plane_image_online"
+    );
 
     // @TODO cleanup
     // Insert the parents documentation entries until we have a verifier that can deal

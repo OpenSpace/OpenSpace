@@ -162,9 +162,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableSphere::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_renderable_sphere";
-    return doc;
+    return codegen::doc<Parameters>("base_renderable_sphere");
 }
 
 RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
