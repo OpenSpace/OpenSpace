@@ -312,7 +312,9 @@ void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
         std::string& str = extraScalarVars[i];
         bool success = kameleon->doesVariableExist(str) && kameleon->loadVariable(str);
         if (!success &&
-            (model == fls::Model::Batsrus && (str == TAsPOverRho || str == "T")))
+            (model == fls::Model::Batsrus && 
+                (str == TAsPOverRho || str == "T" || str == "t"))
+            )
         {
             LDEBUG("BATSRUS doesn't contain variable T for temperature. Trying to "
                    "calculate it using the ideal gas law: T = pressure/density");

@@ -43,7 +43,7 @@
 #include <optional>
 
 namespace {
-    constexpr const char* ProgramName = "Sphere";
+    constexpr const char* ProgramName = "Timevarying Sphere";
     constexpr const char* _loggerCat = "RenderableTimeVaryingSphere";
     constexpr const std::array<const char*, 5> UniformNames = {
         "opacity", "modelViewProjection", "modelViewRotation", "colorTexture",
@@ -168,7 +168,8 @@ documentation::Documentation RenderableTimeVaryingSphere::Documentation() {
     return doc;
 }
 
-RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(const ghoul::Dictionary& dictionary)
+RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
+    const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _textureSourcePath(TextureSourceInfo)
     , _orientation(OrientationInfo, properties::OptionProperty::DisplayType::Dropdown)
@@ -290,19 +291,6 @@ void RenderableTimeVaryingSphere::initializeGL() {
         return;
     }
     computeSequenceEndTime();
-    //_textureFiles.resize(_sourceFiles.size());
-    for (int i = 0; i < _files.size(); ++i) {
-
-       //_textureFiles[i] = ghoul::io::TextureReader::ref().loadTexture(
-       //                                                absPath(_sourceFiles[i]).string());
-       _files[i].texture = ghoul::io::TextureReader::ref().loadTexture(_files[i].path);
-
-       _files[i].texture->setInternalFormat(GL_COMPRESSED_RGBA);
-       _files[i].texture->uploadTexture();
-       _files[i].texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-       //_textureFiles[i]->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-       _files[i].texture->purgeFromRAM();
-    }
 
     loadTexture();
 }
@@ -355,7 +343,8 @@ void RenderableTimeVaryingSphere::render(const RenderData& data, RendererTasks&)
             const float startLogFadeDistance = glm::log(_size * _fadeInThreshold);
             const float stopLogFadeDistance = startLogFadeDistance + 1.f;
 
-            if (logDistCamera > startLogFadeDistance && logDistCamera < stopLogFadeDistance) {
+            if (logDistCamera > startLogFadeDistance &&
+                logDistCamera < stopLogFadeDistance) {
                 const float fadeFactor = glm::clamp(
                     (logDistCamera - startLogFadeDistance) /
                     (stopLogFadeDistance - startLogFadeDistance),
@@ -376,7 +365,8 @@ void RenderableTimeVaryingSphere::render(const RenderData& data, RendererTasks&)
             const float startLogFadeDistance = glm::log(_size * _fadeOutThreshold);
             const float stopLogFadeDistance = startLogFadeDistance + 1.f;
 
-            if (logDistCamera > startLogFadeDistance && logDistCamera < stopLogFadeDistance) {
+            if (logDistCamera > startLogFadeDistance && 
+                logDistCamera < stopLogFadeDistance) {
                 const float fadeFactor = glm::clamp(
                     (logDistCamera - startLogFadeDistance) /
                     (stopLogFadeDistance - startLogFadeDistance),
@@ -478,16 +468,16 @@ bool RenderableTimeVaryingSphere::extractMandatoryInfoFromDictionary()
         }
 
         std::sort(_files.begin(), _files.end(), [](const FileData& a, const FileData& b) {
-            return a.time > b.time;
+            return a.time < b.time;
         });
         // Ensure that there are available and valid source files left
-        /*if (_files.empty()) {
+        if (_files.empty()) {
             LERROR(fmt::format(
                 "{}: {} contains no {} files",
                 _identifier, _textureSourcePath, "extension"
             ));
             return false;
-        }*/
+        }
     }
     else {
         LERROR(fmt::format(
@@ -524,17 +514,14 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
             (nextIdx < _files.size() && currentTime >= _files[nextIdx].time))
         {
             updateActiveTriggerTimeIndex(currentTime); 
-            //LDEBUG("Vi borde uppdatera1");
 
             // _mustLoadNewStateFromDisk = true;
-            //LDEBUG("vi borde uppdatera");
             _needsUpdate = true;
 
         } // else {we're still in same state as previous frame (no changes needed)}
     }
     else {
         //not in interval => set everything to false
-    //LDEBUG("not in interval");
         _activeTriggerTimeIndex = 0;
         _needsUpdate = false;
     }
@@ -546,12 +533,14 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
         _sphereIsDirty = false;
     }
 }
-// Extract J2000 time from file names
-  // Requires files to be named as such: 'YYYY-MM-DDTHH-MM-SS-XXX.json'
-double RenderableTimeVaryingSphere::extractTriggerTimeFromFileName(const std::string& filePath) {
-    // number of  characters in filename (excluding '.json')
+    // Extract J2000 time from file names
+    // Requires files to be named as such: 'YYYY-MM-DDTHH-MM-SS-XXX.png'
+double RenderableTimeVaryingSphere::extractTriggerTimeFromFileName(
+    const std::string& filePath) {
+
+    // number of  characters in filename (excluding '.png')
     constexpr const int FilenameSize = 23;
-    // size(".json")
+    // size(".png")
     constexpr const int ExtSize = 4;
 
     LDEBUG("filepath " + filePath);
@@ -609,52 +598,9 @@ void RenderableTimeVaryingSphere::computeSequenceEndTime() {
 }
 
 void RenderableTimeVaryingSphere::loadTexture() {
-    if (_activeTriggerTimeIndex != -1) {
-       // ghoul::opengl::Texture* t = _texture;
-       // std::unique_ptr<ghoul::opengl::Texture> texture =
-        //    ghoul::io::TextureReader::ref().loadTexture(_sourceFiles[_activeTriggerTimeIndex]);
-     //   unsigned int hash = ghoul::hashCRC32File(_sourceFiles[_activeTriggerTimeIndex]);
+    if (_activeTriggerTimeIndex != -1) { 
         _texture = _files[_activeTriggerTimeIndex].texture.get();
-        /*
-        if (texture) {
-            LDEBUGC(
-                "RenderableTimeVaryingSphere",
-                fmt::format("Loaded texture from '{}'", absPath(_sourceFiles[_activeTriggerTimeIndex]))
-            );
-            texture->uploadTexture();
-            texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-            //_texture = std::move(texture);
-            texture->purgeFromRAM();
-        }*/
-        /*
-        _texture = BaseModule::TextureManager.request(
-            std::to_string(hash),
-            [path = _sourceFiles[_activeTriggerTimeIndex]]()->std::unique_ptr<ghoul::opengl::Texture> {
-            std::unique_ptr<ghoul::opengl::Texture> texture =
-                ghoul::io::TextureReader::ref().loadTexture(absPath(path));
 
-            //LDEBUGC(
-            //    "RenderableTimeVaryingSphere",
-              //  fmt::format("Loaded texture from '{}'", absPath(path))
-           // );
-            texture->uploadTexture();
-            texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-            texture->purgeFromRAM();
-
-            
-            return texture;
-        }
-        );
-        */
-
-
-       // BaseModule::TextureManager.release(t);
-        /*
-        _textureFile = std::make_unique<ghoul::filesystem::File>(_sourceFiles[_activeTriggerTimeIndex]);
-        _textureFile->setCallback(
-            [&](const ghoul::filesystem::File&) { _sphereIsDirty = true; }
-        );
-        */
         _isLoadingTexture = false;
     }
 }

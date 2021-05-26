@@ -43,7 +43,7 @@ local fieldlines = {
         ExtraVariables = {
             "rho",
             "p",
-            "t"
+            "T = p/rho"
         },
         ManualTimeOffset = -14400.0,
         LoadAtRuntime = true,

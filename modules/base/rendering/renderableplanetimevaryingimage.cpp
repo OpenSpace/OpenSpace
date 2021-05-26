@@ -50,9 +50,9 @@ namespace {
         "that is applied to this plane. This image has to be square."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RenderableTypeInfo = {
-       "RenderableType",
-       "RenderableType",
+    constexpr openspace::properties::Property::PropertyInfo RenderTypeInfo = {
+       "RenderType",
+       "RenderType",
        "This value specifies if the plane should be rendered in the Background,"
        "Opaque, Transparent, or Overlay rendering step."
     };
@@ -62,8 +62,16 @@ namespace {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string texture;
 
-        // [[codegen::verbatim(RenderableTypeInfo.description)]]
-        std::optional<std::string> renderableType;
+        enum class RenderType {
+            Background,
+            Opaque,
+            PreDeferredTransparency,
+            PostDeferredTransparency,
+            Overlay
+        };
+
+        // [[codegen::verbatim(RenderTypeInfo.description)]]
+        std::optional<RenderType> renderType [[codegen::key("RenderType")]];
 
         //KeyLazyLoading,   // TODO, might be useful for potential realtime streaming
         //    new BoolVerifier,
@@ -83,6 +91,8 @@ documentation::Documentation RenderablePlaneTimeVaryingImage::Documentation() {
     documentation::Documentation doc = codegen::doc<Parameters>();
     doc.id = "base_renderable_plane_time_varying_image";
     return doc;
+
+    //return codegen::doc<Parameters>("base_renderable_plane_time_varying_image");
 }
 
 RenderablePlaneTimeVaryingImage::RenderablePlaneTimeVaryingImage(
@@ -104,22 +114,23 @@ RenderablePlaneTimeVaryingImage::RenderablePlaneTimeVaryingImage(
         [this]() { _textureIsDirty = true; }
     );
 
-    if (p.renderableType.has_value()) {
-        std::string renderType = *p.renderableType;
-        if (renderType == "Background") {
+    if (p.renderType.has_value()) {
+        switch (*p.renderType) {
+        case Parameters::RenderType::Background:
             setRenderBin(Renderable::RenderBin::Background);
-        }
-        else if (renderType == "Opaque") {
+            break;
+        case Parameters::RenderType::Opaque:
             setRenderBin(Renderable::RenderBin::Opaque);
-        }
-        else if (renderType == "PreDeferredTransparent") {
+            break;
+        case Parameters::RenderType::PreDeferredTransparency:
             setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
-        }
-        else if (renderType == "PostDeferredTransparent") {
+            break;
+        case Parameters::RenderType::PostDeferredTransparency:
             setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
-        }
-        else if (renderType == "Overlay") {
+            break;
+        case Parameters::RenderType::Overlay:
             setRenderBin(Renderable::RenderBin::Overlay);
+            break;
         }
     }
     else {
