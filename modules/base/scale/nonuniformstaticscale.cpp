@@ -45,9 +45,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation NonUniformStaticScale::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_scale_nonuniformstatic";
-    return doc;
+    return codegen::doc<Parameters>("base_scale_nonuniformstatic");
 }
 
 glm::dvec3 NonUniformStaticScale::scaleValue(const UpdateData&) const {

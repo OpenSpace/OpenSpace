@@ -29,7 +29,7 @@
 #include <openspace/interaction/sessionrecording.h>
 
 #include <ghoul/glm.h>
-
+#include <filesystem>
 #include <string>
 
 namespace openspace::interaction {
@@ -52,8 +52,8 @@ private:
     void convertToBinary();
     void determineFormatType();
     std::string addFileSuffix(const std::string& filePath, const std::string& suffix);
-    std::string _inFilePath;
-    std::string  _outFilePath;
+    std::filesystem::path _inFilePath;
+    std::filesystem::path _outFilePath;
     std::ifstream _iFile;
     std::ofstream _oFile;
     SessionRecording::DataMode _fileFormatType;

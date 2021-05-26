@@ -32,6 +32,7 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <algorithm>
+#include <filesystem>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -40,11 +41,11 @@ namespace {
 
 bool isInitialized = false;
 
-std::string xyuvrgbaVertexFile;
-std::string xyuvrgbaFragmentFile;
+std::filesystem::path xyuvrgbaVertexFile;
+std::filesystem::path xyuvrgbaFragmentFile;
 
-std::string screenFillingVertexFile;
-std::string screenFillingFragmentFile;
+std::filesystem::path screenFillingVertexFile;
+std::filesystem::path screenFillingFragmentFile;
 
 constexpr const char* XyuvrgbaVertexCode = R"(
 #version __CONTEXT__
@@ -125,7 +126,6 @@ void main() {
 
 } // namespace
 
-#pragma optimize ("", off)
 namespace openspace::rendering::helper {
 
 namespace detail {
@@ -295,18 +295,18 @@ void deinitialize() {
     ghoul_assert(isInitialized, "Rendering Helper not initialized");
 
     if (!xyuvrgbaVertexFile.empty()) {
-        FileSys.deleteFile(xyuvrgbaVertexFile);
+        std::filesystem::remove(xyuvrgbaVertexFile);
     }
     if (!xyuvrgbaFragmentFile.empty()) {
-        FileSys.deleteFile(xyuvrgbaFragmentFile);
+        std::filesystem::remove(xyuvrgbaFragmentFile);
     }
     shaders.xyuvrgba.program = nullptr;
 
     if (!screenFillingVertexFile.empty()) {
-        FileSys.deleteFile(screenFillingVertexFile);
+        std::filesystem::remove(screenFillingVertexFile);
     }
     if (!screenFillingFragmentFile.empty()) {
-        FileSys.deleteFile(screenFillingVertexFile);
+        std::filesystem::remove(screenFillingVertexFile);
     }
     shaders.screenfilling.program = nullptr;
 

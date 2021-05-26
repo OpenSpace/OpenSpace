@@ -194,6 +194,9 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
             // value change if the types agree
             foundMatching = true;
 
+            if (global::sessionRecording->isRecording()) {
+                global::sessionRecording->savePropertyBaseline(*prop);
+            }
             if (interpolationDuration == 0.0) {
                 global::renderEngine->scene()->removePropertyInterpolation(prop);
                 prop->setLuaValue(L);
@@ -265,6 +268,9 @@ int setPropertyCall_single(properties::Property& prop, const std::string& uri,
         );
     }
     else {
+        if (global::sessionRecording->isRecording()) {
+            global::sessionRecording->savePropertyBaseline(prop);
+        }
         if (duration == 0.0) {
             global::renderEngine->scene()->removePropertyInterpolation(&prop);
             prop.setLuaValue(L);

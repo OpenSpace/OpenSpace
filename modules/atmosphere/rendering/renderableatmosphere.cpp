@@ -25,33 +25,10 @@
 #include <modules/atmosphere/rendering/renderableatmosphere.h>
 
 #include <modules/atmosphere/rendering/atmospheredeferredcaster.h>
-#include <modules/space/rendering/planetgeometry.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/deferredcastermanager.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/rendering/renderer.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/util/time.h>
-#include <openspace/util/spicemanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/invariants.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
-#include <glm/gtx/string_cast.hpp>
-#include <fstream>
-#include <memory>
-#include <optional>
-
-#ifdef WIN32
-#define _USE_MATH_DEFINES
-#endif // WIN32
 #include <math.h>
 
 namespace {
@@ -69,7 +46,7 @@ namespace {
         "phase"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo GroundRadianceEmittioninfo = {
+    constexpr openspace::properties::Property::PropertyInfo GroundRadianceEmissionInfo = {
         "GroundRadianceEmission",
         "Percentage of initial radiance emitted from ground",
         "Multiplier of the ground radiance color during the rendering phase"
@@ -197,7 +174,7 @@ namespace {
         // [[codegen::verbatim(MieScatteringExtinctionPropCoeffInfo.description)]]
         std::optional<float> mieScatteringExtinctionPropCoefficient;
 
-        // [[codegen::verbatim(GroundRadianceEmittioninfo.description)]]
+        // [[codegen::verbatim(GroundRadianceEmissionInfo.description)]]
         float groundRadianceEmission;
 
         struct Rayleigh {
@@ -243,16 +220,14 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableAtmosphere::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "atmosphere_renderable_atmosphere";
-    return doc;
+    return codegen::doc<Parameters>("atmosphere_renderable_atmosphere");
 }
 
 RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _atmosphereHeight(AtmosphereHeightInfo, 60.f, 0.1f, 99.0f)
     , _groundAverageReflectance(AverageGroundReflectanceInfo, 0.f, 0.f, 1.f)
-    , _groundRadianceEmission(GroundRadianceEmittioninfo, 0.f, 0.f, 1.f)
+    , _groundRadianceEmission(GroundRadianceEmissionInfo, 0.f, 0.f, 1.f)
     , _rayleighHeightScale(RayleighHeightScaleInfo, 0.f, 0.1f, 50.f)
     , _rayleighScatteringCoeff(
         RayleighScatteringCoeffInfo,
@@ -282,9 +257,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         _deferredCasterNeedsUpdate = true;
         _deferredCasterNeedsCalculation = true;
     };
-    auto updateWithoutCalculation = [this]() {
-        _deferredCasterNeedsUpdate = true;
-    };
+    auto updateWithoutCalculation = [this]() { _deferredCasterNeedsUpdate = true; };
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -413,8 +386,8 @@ glm::dmat4 RenderableAtmosphere::computeModelTransformMatrix(
                                                        const TransformData& transformData)
 {
     // scale the planet to appropriate size since the planet is a unit sphere
-    return glm::translate(glm::dmat4(1.0), transformData.translation) * // Translation
-        glm::dmat4(transformData.rotation) *  // Spice rotation
+    return glm::translate(glm::dmat4(1.0), transformData.translation) *
+        glm::dmat4(transformData.rotation) *
         glm::scale(glm::dmat4(1.0), glm::dvec3(transformData.scale));
 }
 
@@ -448,7 +421,7 @@ void RenderableAtmosphere::updateAtmosphereParameters() {
     _deferredcaster->setAtmosphereRadius(_planetRadius + _atmosphereHeight);
     _deferredcaster->setPlanetRadius(_planetRadius);
     _deferredcaster->setPlanetAverageGroundReflectance(_groundAverageReflectance);
-    _deferredcaster->setPlanetGroundRadianceEmittion(_groundRadianceEmission);
+    _deferredcaster->setPlanetGroundRadianceEmission(_groundRadianceEmission);
     _deferredcaster->setRayleighHeightScale(_rayleighHeightScale);
     _deferredcaster->enableOzone(_ozoneEnabled);
     _deferredcaster->setOzoneHeightScale(_ozoneHeightScale);

@@ -181,9 +181,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableTrail::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_renderable_renderabletrail";
-    return doc;
+    return codegen::doc<Parameters>("base_renderable_renderabletrail");
 }
 
 RenderableTrail::Appearance::Appearance()
@@ -432,10 +430,10 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     }
 
-    const bool renderLines = (_appearance.renderingModes == RenderingModeLines) |
+    const bool renderLines = (_appearance.renderingModes == RenderingModeLines) ||
                              (_appearance.renderingModes == RenderingModeLinesPoints);
 
-    const bool renderPoints = (_appearance.renderingModes == RenderingModePoints) |
+    const bool renderPoints = (_appearance.renderingModes == RenderingModePoints) ||
                               (_appearance.renderingModes == RenderingModeLinesPoints);
 
     if (renderLines) {

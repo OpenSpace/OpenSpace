@@ -44,17 +44,14 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
+#include <filesystem>
 #include <optional>
 
 namespace {
     constexpr const char* _loggerCat = "RenderableTimeVaryingVolume";
-} // namespace
-
-namespace {
 
     const char* KeyStepSize = "StepSize";
     const char* KeyGridType = "GridType";
-    const char* KeyTransferFunction = "TransferFunction";
 
     const float SecondsInOneDay = 60 * 60 * 24;
     constexpr const float VolumeMaxOpacity = 500;
@@ -149,9 +146,7 @@ namespace {
 namespace openspace::volume {
 
 documentation::Documentation RenderableTimeVaryingVolume::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "volume_renderable_timevaryingvolume";
-    return doc;
+    return codegen::doc<Parameters>("volume_renderable_timevaryingvolume");
 }
 
 RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
@@ -171,8 +166,8 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _sourceDirectory = absPath(p.sourceDirectory);
-    _transferFunctionPath = absPath(p.transferFunction);
+    _sourceDirectory = absPath(p.sourceDirectory).string();
+    _transferFunctionPath = absPath(p.transferFunction).string();
     _transferFunction = std::make_shared<openspace::TransferFunction>(
         _transferFunctionPath,
         [](const openspace::TransferFunction&) {}
@@ -209,32 +204,26 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
 RenderableTimeVaryingVolume::~RenderableTimeVaryingVolume() {}
 
 void RenderableTimeVaryingVolume::initializeGL() {
-    using RawPath = ghoul::filesystem::Directory::RawPath;
-    ghoul::filesystem::Directory sequenceDir(_sourceDirectory, RawPath::Yes);
+    std::filesystem::path sequenceDir = absPath(_sourceDirectory);
 
-    if (!FileSys.directoryExists(sequenceDir)) {
-        LERROR(fmt::format("Could not load sequence directory '{}'", sequenceDir.path()));
+    if (!std::filesystem::is_directory(sequenceDir)) {
+        LERROR(fmt::format("Could not load sequence directory {}", sequenceDir));
         return;
     }
 
-    using Recursive = ghoul::filesystem::Directory::Recursive;
-    using Sort = ghoul::filesystem::Directory::Sort;
-
-    std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::Yes, Sort::No);
-    for (const std::string& path : sequencePaths) {
-        ghoul::filesystem::File currentFile(path);
-        std::string extension = currentFile.fileExtension();
-        if (extension == "dictionary") {
-            loadTimestepMetadata(path);
+    namespace fs = std::filesystem;
+    for (const fs::directory_entry& e : fs::recursive_directory_iterator(sequenceDir)) {
+        if (e.is_regular_file() && e.path().extension() == ".dictionary") {
+            loadTimestepMetadata(e.path().string());
         }
     }
 
     // TODO: defer loading of data to later (separate thread or at least not when loading)
     for (std::pair<const double, Timestep>& p : _volumeTimesteps) {
         Timestep& t = p.second;
-        std::string path = FileSys.pathByAppendingComponent(
-            _sourceDirectory, t.baseName
-        ) + ".rawvolume";
+        std::string path = fmt::format(
+            "{}/{}.rawvolume", _sourceDirectory.value(), t.baseName
+        );
         RawVolumeReader<float> reader(path, t.metadata.dimensions);
         t.rawVolume = reader.read();
 
@@ -334,7 +323,7 @@ void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) 
 
     Timestep t;
     t.metadata = metadata;
-    t.baseName = ghoul::filesystem::File(path).baseName();
+    t.baseName = std::filesystem::path(path).stem().string();
     t.inRam = false;
     t.onGpu = false;
 

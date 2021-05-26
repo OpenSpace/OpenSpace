@@ -47,7 +47,7 @@ namespace {
 
     int loadLSKKernel() {
         int kernelID = openspace::SpiceManager::ref().loadKernel(
-            absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+            absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
         );
         REQUIRE(kernelID == 1);
         return kernelID;

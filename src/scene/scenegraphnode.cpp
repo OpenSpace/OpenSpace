@@ -401,9 +401,7 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
 }
 
 documentation::Documentation SceneGraphNode::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "core_scene_node";
-    return doc;
+    return codegen::doc<Parameters>("core_scene_node");
 }
 
 ghoul::opengl::ProgramObject* SceneGraphNode::_debugSphereProgram = nullptr;

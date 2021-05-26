@@ -21,11 +21,19 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
-
+ 
 #version __CONTEXT__
 
-layout(location = 0) in vec3 in_position;
+uniform int layer;
+
+layout (triangles) in;
+layout (triangle_strip, max_vertices = 3) out;
 
 void main() {
-    gl_Position = vec4(in_position, 1.0);
+  for (int n = 0; n < gl_in.length(); ++n) {
+    gl_Position = gl_in[n].gl_Position;
+    gl_Layer = layer;
+    EmitVertex();
+  }
+  EndPrimitive();
 }

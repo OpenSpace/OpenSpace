@@ -348,7 +348,7 @@ void parseLuaState(Configuration& configuration) {
 
     // We go through all of the entries and lift them from global scope into the table on
     // the stack so that we can create a ghoul::Dictionary from this new table
-    documentation::Documentation doc = codegen::doc<Parameters>();
+    documentation::Documentation doc = codegen::doc<Parameters>("core_configuration");
     for (const documentation::DocumentationEntry& e : doc.entries) {
         lua_pushstring(s, e.key.c_str());
         lua_getglobal(s, e.key.c_str());
@@ -603,33 +603,26 @@ void parseLuaState(Configuration& configuration) {
     c.bypassLauncher = p.bypassLauncher.value_or(c.bypassLauncher);
 }
 
-documentation::Documentation Configuration::Documentation = codegen::doc<Parameters>();
+documentation::Documentation Configuration::Documentation =
+    codegen::doc<Parameters>("core_configuration");
 
-std::string findConfiguration(const std::string& filename) {
-    using ghoul::filesystem::Directory;
-
-    Directory directory = FileSys.absolutePath("${BIN}");
+std::filesystem::path findConfiguration(const std::string& filename) {
+    std::filesystem::path directory = absPath("${BIN}");
 
     while (true) {
-        std::string fullPath = FileSys.pathByAppendingComponent(
-            directory,
-            filename
-        );
-
-        if (FileSys.fileExists(fullPath)) {
+        std::filesystem::path p = directory / filename;
+        if (std::filesystem::exists(p) && std::filesystem::is_regular_file(p)) {
             // We have found the configuration file and can bail out
-            return fullPath;
+            return p;
         }
 
         // Otherwise, we traverse the directory tree up
-        Directory nextDirectory = directory.parentDirectory(
-            ghoul::filesystem::Directory::AbsolutePath::Yes
-        );
+        std::filesystem::path nextDirectory = directory.parent_path();
 
-        if (directory.path() == nextDirectory.path()) {
+        if (directory == nextDirectory) {
             // We have reached the root of the file system and did not find the file
             throw ghoul::RuntimeError(
-                "Could not find configuration file '" + filename + "'",
+                fmt::format("Could not find configuration file '{}'", filename),
                 "ConfigurationManager"
             );
         }
@@ -637,21 +630,20 @@ std::string findConfiguration(const std::string& filename) {
     }
 }
 
-Configuration loadConfigurationFromFile(const std::string& filename,
+Configuration loadConfigurationFromFile(const std::filesystem::path& filename,
                                         const std::string& overrideScript)
 {
-    ghoul_assert(!filename.empty(), "Filename must not be empty");
-    ghoul_assert(FileSys.fileExists(filename), "File must exist");
+    ghoul_assert(std::filesystem::is_regular_file(filename), "File must exist");
 
     Configuration result;
 
     // If there is an initial config helper file, load it into the state
-    if (FileSys.fileExists(absPath(InitialConfigHelper))) {
-        ghoul::lua::runScriptFile(result.state, absPath(InitialConfigHelper));
+    if (std::filesystem::is_regular_file(absPath(InitialConfigHelper))) {
+        ghoul::lua::runScriptFile(result.state, absPath(InitialConfigHelper).string());
     }
 
     // Load the configuration file into the state
-    ghoul::lua::runScriptFile(result.state, filename);
+    ghoul::lua::runScriptFile(result.state, filename.string());
 
     if (!overrideScript.empty()) {
         LDEBUGC("Configuration", "Executing Lua script passed through the commandline:");

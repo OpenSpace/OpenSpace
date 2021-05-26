@@ -109,7 +109,7 @@ protected:
     properties::TriggerProperty _delete;
 
     glm::ivec2 _objectSize = glm::ivec2(0);
-    UniformCache(color, alpha, modelTransform, viewProj, texture) _uniformCache;
+    UniformCache(color, opacity, mvp, texture) _uniformCache;
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 };
 

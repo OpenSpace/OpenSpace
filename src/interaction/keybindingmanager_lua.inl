@@ -40,7 +40,7 @@ int bindKey(lua_State* L) {
     int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 2, 5 }, "lua::bindKey");
 
     const std::string& key = ghoul::lua::value<std::string>(L, 1);
-    const std::string& command = ghoul::lua::value<std::string>(L, 2);
+    std::string command = ghoul::lua::value<std::string>(L, 2);
 
     if (command.empty()) {
         lua_settop(L, 0);
@@ -85,7 +85,7 @@ int bindKeyLocal(lua_State* L) {
     int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 2, 5 }, "lua::bindKeyLocal");
 
     const std::string& key = ghoul::lua::value<std::string>(L, 1);
-    const std::string& command = ghoul::lua::value<std::string>(L, 2);
+    std::string command = ghoul::lua::value<std::string>(L, 2);
 
     if (command.empty()) {
         return ghoul::lua::luaError(L, "Command string is empty");

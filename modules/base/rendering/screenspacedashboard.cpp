@@ -128,9 +128,7 @@ int removeDashboardItemsFromScreenSpace(lua_State* L) {
 } // namespace luascriptfunctions
 
 documentation::Documentation ScreenSpaceDashboard::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_screenspace_dashboard";
-    return doc;
+    return codegen::doc<Parameters>("base_screenspace_dashboard");
 }
 
 ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)

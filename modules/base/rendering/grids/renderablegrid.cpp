@@ -82,9 +82,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableGrid::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_renderable_grid";
-    return doc;
+    return codegen::doc<Parameters>("base_renderable_grid");
 }
 
 RenderableGrid::RenderableGrid(const ghoul::Dictionary& dictionary)

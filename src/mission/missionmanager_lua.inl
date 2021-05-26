@@ -38,7 +38,9 @@ int loadMission(lua_State* L) {
         return ghoul::lua::luaError(L, "Filepath is empty");
     }
 
-    std::string name = global::missionManager->loadMission(absPath(missionFileName));
+    std::string name = global::missionManager->loadMission(
+        absPath(missionFileName).string()
+    );
     ghoul::lua::push(L, name);
 
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");

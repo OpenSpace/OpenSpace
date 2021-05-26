@@ -129,8 +129,9 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableTrailOrbit::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_renderable_renderabletrailorbit";
+    documentation::Documentation doc = codegen::doc<Parameters>(
+        "base_renderable_renderabletrailorbit"
+    );
 
     // Insert the parents documentation entries until we have a verifier that can deal
     // with class hierarchy

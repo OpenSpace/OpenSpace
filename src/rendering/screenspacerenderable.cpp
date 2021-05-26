@@ -42,8 +42,8 @@
 #include <variant>
 
 namespace {
-    constexpr const std::array<const char*, 5> UniformNames = {
-        "MultiplyColor", "Alpha", "ModelTransform", "ViewProjectionMatrix", "texture1"
+    constexpr const std::array<const char*, 4> UniformNames = {
+        "color", "opacity", "mvpMatrix", "tex"
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
@@ -268,9 +268,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation ScreenSpaceRenderable::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "core_screenspacerenderable";
-    return doc;
+    return codegen::doc<Parameters>("core_screenspacerenderable");
 }
 
 std::unique_ptr<ScreenSpaceRenderable> ScreenSpaceRenderable::createFromDictionary(
@@ -570,12 +568,10 @@ void ScreenSpaceRenderable::draw(glm::mat4 modelTransform) {
     _shader->activate();
 
     _shader->setUniform(_uniformCache.color, _multiplyColor);
-    _shader->setUniform(_uniformCache.alpha, _opacity);
-    _shader->setUniform(_uniformCache.modelTransform, modelTransform);
-
+    _shader->setUniform(_uniformCache.opacity, _opacity);
     _shader->setUniform(
-        _uniformCache.viewProj,
-        global::renderEngine->scene()->camera()->viewProjectionMatrix()
+        _uniformCache.mvp,
+        global::renderEngine->scene()->camera()->viewProjectionMatrix() * modelTransform
     );
 
     ghoul::opengl::TextureUnit unit;

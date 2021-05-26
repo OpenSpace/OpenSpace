@@ -73,9 +73,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation SpiceRotation::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "space_transform_rotation_spice";
-    return doc;
+    return codegen::doc<Parameters>("space_transform_rotation_spice");
 }
 
 SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)

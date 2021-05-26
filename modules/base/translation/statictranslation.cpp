@@ -45,9 +45,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation StaticTranslation::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_transform_translation_static";
-    return doc;
+    return codegen::doc<Parameters>("base_transform_translation_static");
 }
 
 StaticTranslation::StaticTranslation()

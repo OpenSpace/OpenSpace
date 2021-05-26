@@ -46,9 +46,7 @@ namespace {
 namespace openspace::kameleonvolume {
 
 documentation::Documentation KameleonMetadataToJsonTask::documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "kameleon_metadata_to_json_task";
-    return doc;
+    return codegen::doc<Parameters>("kameleon_metadata_to_json_task");
 }
 
 KameleonMetadataToJsonTask::KameleonMetadataToJsonTask(
@@ -67,7 +65,7 @@ std::string KameleonMetadataToJsonTask::description() {
 }
 
 void KameleonMetadataToJsonTask::perform(const Task::ProgressCallback& progressCallback) {
-    KameleonVolumeReader reader(_inputPath);
+    KameleonVolumeReader reader(_inputPath.string());
     ghoul::Dictionary dictionary = reader.readMetaData();
     progressCallback(0.5f);
 

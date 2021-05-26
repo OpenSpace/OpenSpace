@@ -217,13 +217,13 @@ namespace {
         std::optional<AnimationMode> animationMode;
 
         // [[codegen::verbatim(AmbientIntensityInfo.description)]]
-        std::optional<double> ambientIntensity;
+        std::optional<float> ambientIntensity;
 
         // [[codegen::verbatim(DiffuseIntensityInfo.description)]]
-        std::optional<double> diffuseIntensity;
+        std::optional<float> diffuseIntensity;
 
         // [[codegen::verbatim(SpecularIntensityInfo.description)]]
-        std::optional<double> specularIntensity;
+        std::optional<float> specularIntensity;
 
         // [[codegen::verbatim(ShadingInfo.description)]]
         std::optional<bool> performShading;
@@ -256,9 +256,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableModel::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_renderable_model";
-    return doc;
+    return codegen::doc<Parameters>("base_renderable_model");
 }
 
 RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
@@ -276,8 +274,8 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         glm::dmat3(1.0)
     )
     , _rotationVec(RotationVecInfo, glm::dvec3(0.0), glm::dvec3(0.0), glm::dvec3(360.0))
-    , _enableOpacityBlending(EnableOpacityBlendingInfo, false)
     , _disableDepthTest(DisableDepthTestInfo, false)
+    , _enableOpacityBlending(EnableOpacityBlendingInfo, false)
     , _blendingFuncOption(
         BlendingOptionInfo,
         properties::OptionProperty::DisplayType::Dropdown
@@ -299,7 +297,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         }
     }
 
-    std::string file = absPath(p.geometryFile.string());
+    std::string file = absPath(p.geometryFile.string()).string();
     _geometry = ghoul::io::ModelReader::ref().loadModel(
         file,
         ghoul::io::ModelReader::ForceRenderInvisible(_forceRenderInvisible),
@@ -428,7 +426,9 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
                     throw ghoul::MissingCaseException();
             }
 
-            _geometry->setTimeScale(convertTime(1.0, timeUnit, TimeUnit::Second));
+            _geometry->setTimeScale(static_cast<float>(
+                convertTime(1.0, timeUnit, TimeUnit::Second))
+            );
         }
         else {
             throw ghoul::MissingCaseException();

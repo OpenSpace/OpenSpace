@@ -42,9 +42,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation TimelineTranslation::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_transform_translation_keyframe";
-    return doc;
+    return codegen::doc<Parameters>("base_transform_translation_keyframe");
 }
 
 TimelineTranslation::TimelineTranslation(const ghoul::Dictionary& dictionary) {

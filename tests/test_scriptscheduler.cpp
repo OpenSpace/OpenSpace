@@ -34,7 +34,7 @@
 TEST_CASE("ScriptScheduler: Simple Forward", "[scriptscheduler]") {
     openspace::SpiceManager::initialize();
     openspace::SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
     );
 
     using namespace openspace::scripting;
@@ -66,7 +66,7 @@ TEST_CASE("ScriptScheduler: Simple Forward", "[scriptscheduler]") {
 TEST_CASE("ScriptScheduler: Multiple Forward Single Jump", "[scriptscheduler]") {
     openspace::SpiceManager::initialize();
     openspace::SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
     );
 
     using namespace openspace::scripting;
@@ -107,7 +107,7 @@ TEST_CASE("ScriptScheduler: Multiple Forward Single Jump", "[scriptscheduler]") 
 TEST_CASE("ScriptScheduler: Multiple Forward Ordering", "[scriptscheduler]") {
     openspace::SpiceManager::initialize();
     openspace::SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
     );
 
     using namespace openspace::scripting;
@@ -146,7 +146,7 @@ TEST_CASE("ScriptScheduler: Multiple Forward Ordering", "[scriptscheduler]") {
 TEST_CASE("ScriptScheduler: Simple Backward", "[scriptscheduler]") {
     openspace::SpiceManager::initialize();
     openspace::SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
     );
 
     using namespace openspace::scripting;
@@ -178,7 +178,7 @@ TEST_CASE("ScriptScheduler: Simple Backward", "[scriptscheduler]") {
 TEST_CASE("ScriptScheduler: Multiple Backward Single Jump", "[scriptscheduler]") {
     openspace::SpiceManager::initialize();
     openspace::SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
     );
 
     using namespace openspace::scripting;
@@ -220,7 +220,7 @@ TEST_CASE("ScriptScheduler: Multiple Backward Single Jump", "[scriptscheduler]")
 TEST_CASE("ScriptScheduler: Multiple Backward Ordering", "[scriptscheduler]") {
     openspace::SpiceManager::initialize();
     openspace::SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
     );
 
     using namespace openspace::scripting;
@@ -259,7 +259,7 @@ TEST_CASE("ScriptScheduler: Multiple Backward Ordering", "[scriptscheduler]") {
 TEST_CASE("ScriptScheduler: Empty", "[scriptscheduler]") {
     openspace::SpiceManager::initialize();
     openspace::SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
     );
 
     using namespace openspace::scripting;
@@ -289,7 +289,7 @@ TEST_CASE("ScriptScheduler: Empty", "[scriptscheduler]") {
 TEST_CASE("ScriptScheduler: Forward Backwards", "[scriptscheduler]") {
     openspace::SpiceManager::initialize();
     openspace::SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
     );
 
     using namespace openspace::scripting;
@@ -335,7 +335,7 @@ TEST_CASE("ScriptScheduler: Forward Backwards", "[scriptscheduler]") {
 TEST_CASE("ScriptScheduler: Rewind", "[scriptscheduler]") {
     openspace::SpiceManager::initialize();
     openspace::SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
     );
 
     using namespace openspace::scripting;
@@ -375,7 +375,7 @@ TEST_CASE("ScriptScheduler: Rewind", "[scriptscheduler]") {
 TEST_CASE("ScriptScheduler: CurrentTime", "[scriptscheduler]") {
     openspace::SpiceManager::initialize();
     openspace::SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
     );
 
     using namespace openspace::scripting;
@@ -397,7 +397,7 @@ TEST_CASE("ScriptScheduler: CurrentTime", "[scriptscheduler]") {
 TEST_CASE("ScriptScheduler: All Scripts", "[scriptscheduler]") {
     openspace::SpiceManager::initialize();
     openspace::SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
     );
 
     using namespace openspace::scripting;
@@ -439,7 +439,7 @@ TEST_CASE("ScriptScheduler: All Scripts", "[scriptscheduler]") {
 TEST_CASE("ScriptScheduler: Jump Equal", "[scriptscheduler]") {
     openspace::SpiceManager::initialize();
     openspace::SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
     );
 
     using namespace openspace::scripting;
@@ -477,7 +477,7 @@ TEST_CASE("ScriptScheduler: Jump Equal", "[scriptscheduler]") {
 TEST_CASE("ScriptScheduler: Same Time", "[scriptscheduler]") {
     openspace::SpiceManager::initialize();
     openspace::SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
     );
 
     using namespace openspace::scripting;
@@ -508,7 +508,7 @@ TEST_CASE("ScriptScheduler: Same Time", "[scriptscheduler]") {
 TEST_CASE("ScriptScheduler: Multi Inner Jump", "[scriptscheduler]") {
     openspace::SpiceManager::initialize();
     openspace::SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
     );
 
     using namespace openspace::scripting;
@@ -548,7 +548,7 @@ TEST_CASE(
 {
     openspace::SpiceManager::initialize();
     openspace::SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
     );
 
     using namespace openspace::scripting;
@@ -588,7 +588,7 @@ TEST_CASE("ScriptScheduler: Multiple Forward Ordering Multiple Load" "[scriptsch
 {
     openspace::SpiceManager::initialize();
     openspace::SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
     );
 
     using namespace openspace::scripting;
@@ -626,7 +626,7 @@ TEST_CASE(
 {
     openspace::SpiceManager::initialize();
     openspace::SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
     );
 
     using namespace openspace::scripting;
@@ -667,7 +667,7 @@ TEST_CASE(
 {
     openspace::SpiceManager::initialize();
     openspace::SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
     );
 
     using namespace openspace::scripting;
@@ -704,7 +704,7 @@ TEST_CASE(
 TEST_CASE("ScriptScheduler: Forward Backwards Multiple Load", "[scriptscheduler]") {
     openspace::SpiceManager::initialize();
     openspace::SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
     );
 
     using namespace openspace::scripting;
@@ -746,7 +746,7 @@ TEST_CASE("ScriptScheduler: Forward Backwards Multiple Load", "[scriptscheduler]
 TEST_CASE("ScriptScheduler: Rewind Multiple Load", "[scriptscheduler]") {
     openspace::SpiceManager::initialize();
     openspace::SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
     );
 
     using namespace openspace::scripting;
@@ -782,7 +782,7 @@ TEST_CASE("ScriptScheduler: Rewind Multiple Load", "[scriptscheduler]") {
 TEST_CASE("ScriptScheduler: All Scripts Multiple Load", "[scriptscheduler]") {
     openspace::SpiceManager::initialize();
     openspace::SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
     );
 
     using namespace openspace::scripting;
@@ -820,7 +820,7 @@ TEST_CASE("ScriptScheduler: All Scripts Multiple Load", "[scriptscheduler]") {
 TEST_CASE("ScriptScheduler: All Scripts Mixed Load", "[scriptscheduler]") {
     openspace::SpiceManager::initialize();
     openspace::SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
     );
 
     using namespace openspace::scripting;
