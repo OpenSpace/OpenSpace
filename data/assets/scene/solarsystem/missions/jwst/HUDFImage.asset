@@ -3,6 +3,13 @@ local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
 local jwstTransforms = asset.require('scene/solarsystem/missions/jwst/jwst')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 
+local image = asset.syncedResource({
+    Name = "HUDF image",
+    Type = "HttpSynchronization",
+    Identifier = "hudf_image",
+    Version = 1
+})
+
 local PARSEC_CONSTANT = 3.0856776E16;
 
 -- ra = 3h32m38.92s
@@ -41,7 +48,7 @@ local HUDFImage = {
     },
     UsePerspectiveProjection = false,
     Opacity = 1.0,
-    TexturePath = "C:/Users/ElmQPC/Desktop/Malin/develop/images/Hubble_ultra_deep_field.jpg",
+    TexturePath = image .. "/Hubble_ultra_deep_field.jpg",
     Tag = { "hudf" },
 }
 

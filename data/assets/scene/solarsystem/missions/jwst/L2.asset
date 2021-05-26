@@ -1,9 +1,7 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('scene/solarsystem/sun/transforms')
-
-local L2Kernel = {
-    "C:/Users/ElmQPC/Desktop/Malin/develop/OpenSpace/sync/http/L2_kernels/1/L2_de431.bsp"
-}
+local circle = asset.require('scene/solarsystem/missions/jwst/circle').circle
+local kernels = asset.require('scene/solarsystem/missions/jwst/Lagrange_kernels').kernels
 
 local L2 = {
     Identifier = "L2",
@@ -13,7 +11,7 @@ local L2 = {
         RenderableType = "Opaque",
         Billboard = true,
         Size = 400E4,
-        Texture = "C:/Users/ElmQPC/Desktop/Malin/develop/images/jwst/circle.png",
+        Texture = circle .. "/circle.png",
         BlendMode = "Additive"
     },
     Transform = {
@@ -21,7 +19,7 @@ local L2 = {
             Type = "SpiceTranslation",
             Target = "392", -- L2
             Observer = "SUN",
-            Kernels = L2Kernel
+            Kernels = kernels .. "/L2_de431.bsp"
         }
     },
     Tag = { "L2" },
@@ -31,8 +29,8 @@ local L2 = {
     }
 }
 
-local L2Big = {
-    Identifier = "L2Big",
+local L2Large = {
+    Identifier = "L2Large",
     Parent = transforms.SolarSystemBarycenter.Identifier,
     Renderable = {
         Enabled = false,
@@ -48,7 +46,7 @@ local L2Big = {
             Type = "SpiceTranslation",
             Target = "392", -- L2
             Observer = "SUN",
-            Kernels = L2Kernel
+            Kernels = kernels .. "/L2_de431.bsp"
         }
     },
     Tag = { "lagrange_points" },
@@ -81,8 +79,8 @@ local L2Label = {
     }
 }
 
-local L2BigLabel = {
-    Identifier = "L2BigLabel",
+local L2LargeLabel = {
+    Identifier = "L2LargeLabel",
     Parent = L2.Identifier,
     Renderable = {
         Enabled = false,
@@ -123,8 +121,8 @@ local L2SunLine = {
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     L2,
-    L2Big,
+    L2Large,
     L2SunLine,
     L2Label,
-    L2BigLabel
+    L2LargeLabel
 })

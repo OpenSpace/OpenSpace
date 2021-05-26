@@ -5,9 +5,26 @@ asset.require("spice/base")
 asset.require('scene/solarsystem/missions/jwst/Lagrange_points')
 local transforms = asset.require('scene/solarsystem/missions/jwst/L2')
 
-local JWSTKernel = {
-    "C:/Users/ElmQPC/Desktop/Malin/develop/OpenSpace/sync/http/JWST_kernels/1/jwst_horizons_20200101_20240101_v01.bsp"
-}
+local JWSTKernel = asset.syncedResource({
+    Name = "JWST Kernel",
+    Type = "HttpSynchronization",
+    Identifier = "jwst_kernels",
+    Version = 1
+})
+
+local model = asset.syncedResource({
+    Name = "JWST Model",
+    Type = "HttpSynchronization",
+    Identifier = "jwst_model",
+    Version = 1
+})
+
+local band = asset.syncedResource({
+    Name = "JWST band texture",
+    Type = "HttpSynchronization",
+    Identifier = "jwst_band_texture",
+    Version = 1
+})
 
 local JWSTPosition = {
     Identifier = "JWSTPosition",
@@ -17,7 +34,7 @@ local JWSTPosition = {
             Type = "SpiceTranslation",
             Target = "JWST", 
             Observer = "392", -- L2
-            Kernels = JWSTKernel
+            Kernels = JWSTKernel .. "/jwst_horizons_20200101_20240101_v01.bsp"
         },
     },
     GUI = {
@@ -62,7 +79,7 @@ local JWSTBand = {
     Renderable = {
         Enabled = false,
         Type = "RenderableSphere",
-        Texture = "C:/Users/ElmQPC/Desktop/Malin/develop/images/jwst/JWST-band.png",
+        Texture = band .. "/JWST-band.png",
         Size = 9.2E15,
         Segments = 50,
         DisableFadeInOut = true,
@@ -91,11 +108,11 @@ local JWSTModel = {
     },
     Renderable = {
         Type = "RenderableModel",
-        GeometryFile = "C:/Users/ElmQPC/Desktop/Malin/develop/WIP/data/JWST_model/3/JWSTFBX.fbx",
+        GeometryFile = model .. "/JWSTFBX.osmodel",
         ModelScale = "Foot",
         InvertModelScale = true,
         EnableAnimation = true,
-        AnimationStartTime = "2021 10 31 00:00:00",
+        AnimationStartTime = "2021 10 31 00:00:00", --TODO: Update theese when the new animation is finished
         AnimationMode = "BounceFromStart",
         LightSources = {
             {
@@ -123,7 +140,7 @@ local JWSTTrail = {
             Type = "SpiceTranslation",
             Target = "JWST", 
             Observer = "392", -- L2
-            Kernels = JWSTKernel
+            Kernels = JWSTKernel .. "/jwst_horizons_20200101_20240101_v01.bsp"
         },
         Color = { 0.9, 0.9, 0.0 },
 		Period = 91.3105,

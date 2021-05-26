@@ -1,9 +1,7 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('scene/solarsystem/sun/transforms')
-
-local L1Kernel = {
-    "C:/Users/ElmQPC/Desktop/Malin/develop/WIP/data/Lagrangian_Kernels/L1_de431.bsp"
-}
+local circle = asset.require('scene/solarsystem/missions/jwst/circle').circle
+local kernels = asset.require('scene/solarsystem/missions/jwst/Lagrange_kernels').kernels
 
 local L1 = {
     Identifier = "L1",
@@ -14,7 +12,7 @@ local L1 = {
         RenderableType = "Opaque",
         Billboard = true,
         Size = 700E5,
-        Texture = "C:/Users/ElmQPC/Desktop/Malin/develop/images/jwst/circle.png",
+        Texture = circle .. "/circle.png",
         BlendMode = "Additive"
     },
     Transform = {
@@ -22,7 +20,7 @@ local L1 = {
             Type = "SpiceTranslation",
             Target = "391", -- L1
             Observer = "SUN",
-            Kernels = L1Kernel
+            Kernels = kernels .. "/L1_de431.bsp"
         }
     },
     Tag = { "lagrange_points" },
