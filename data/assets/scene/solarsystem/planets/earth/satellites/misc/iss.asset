@@ -104,6 +104,7 @@ local initializeAndAddNodes = function()
     }
   }
 
+  -- @TODO (emmbr, 2021-05-27) add to scene when label rendering issues have been fixed
   local IssLabel = {
     Identifier = "IssLabel",
     Parent = iss.Identifier,

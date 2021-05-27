@@ -59,15 +59,16 @@ asset.onInitialize(function ()
     },
     Tag = { "earth_satellite", "Aqua" },
     GUI = {
-      Name = "Terra Trail",
+      Name = "Aqua Trail",
       Path = "/Solar System/Planets/Earth/Satellites/Aqua"
     }
   }
 
+  -- @TODO (emmbr, 2021-05-27) this label is not visible. Too large fade distances?
+  -- Might also be affected by the rendering issues for labels
   local AquaLabel = {
     Identifier = "AquaLabel",
     Parent = Aqua.Identifier,
-
     Renderable = {
       Enabled = false,
       Type = "RenderableLabels",

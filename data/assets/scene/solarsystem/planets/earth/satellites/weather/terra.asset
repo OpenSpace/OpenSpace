@@ -66,10 +66,11 @@ asset.onInitialize(function ()
     }
   }
 
+  -- @TODO (emmbr, 2021-05-27) this label is not visible. Too large fade distances?
+  -- Might also be affected by the rendering issues for labels
   local TerraLabel = {
     Identifier = "TerraLabel",
     Parent = Terra.Identifier,
-
     Renderable = {
       Enabled = false,
       Type = "RenderableLabels",
