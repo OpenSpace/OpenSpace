@@ -56,12 +56,12 @@ local SaturnLabel = {
   Renderable = {
     Enabled = false,
     Type = "RenderableLabels",
-    LabelText = "Saturn",
+    Text = "Saturn",
     FontSize = 100.0,
-    LabelSize = 8.7,
-    LabelMinMaxSize = { 1, 100 },
+    Size = 8.7,
+    MinMaxSize = { 1, 100 },
     BlendMode = "Additive",
-    LabelOrientationOption = "Camera View Direction"
+    OrientationOption = "Camera View Direction"
   },
   Tag = { "solarsystem_labels" },
   GUI = {

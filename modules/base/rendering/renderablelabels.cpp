@@ -78,9 +78,9 @@ namespace {
         "This determines the blending mode that is applied to the renderable."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LabelColorInfo = {
-        "LabelColor",
-        "Label Color",
+    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+        "Color",
+        "Color",
         "The label text color."
     };
 
@@ -90,21 +90,21 @@ namespace {
         "The font size (in points) for the label."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LabelSizeInfo = {
-        "LabelSize",
-        "Label Size",
+    constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
+        "Size",
+        "Size",
         "This value affects the size scale of the label."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LabelTextInfo = {
-        "LabelText",
-        "Label Text",
+    constexpr openspace::properties::Property::PropertyInfo TextInfo = {
+        "Text",
+        "Text",
         "The text that will be displayed on screen."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LabelMinMaxSizeInfo = {
-        "LabelMinMaxSize",
-        "Label Min and Max Size",
+    constexpr openspace::properties::Property::PropertyInfo MinMaxSizeInfo = {
+        "MinMaxSize",
+        "Min and Max Size",
         "The minimum and maximum size (in pixels) of the label."
     };
 
@@ -114,9 +114,9 @@ namespace {
         "Transformation matrix to be applied to the label."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LabelOrientationOptionInfo = {
-        "LabelOrientationOption",
-        "Label Orientation Option",
+    constexpr openspace::properties::Property::PropertyInfo OrientationOptionInfo = {
+        "OrientationOption",
+        "Orientation Option",
         "Label orientation rendering mode."
     };
 
@@ -163,23 +163,23 @@ namespace {
             PositionNormal [[codegen::key("Camera Position Normal")]]
         };
 
-        // [[codegen::verbatim(LabelOrientationOptionInfo.description)]]
-        std::optional<Orientation> labelOrientationOption;
+        // [[codegen::verbatim(OrientationOptionInfo.description)]]
+        std::optional<Orientation> orientationOption;
 
-        // [[codegen::verbatim(LabelColorInfo.description)]]
-        std::optional<glm::vec3> labelColor [[codegen::color()]];
+        // [[codegen::verbatim(ColorInfo.description)]]
+        std::optional<glm::vec3> color [[codegen::color()]];
 
-        // [[codegen::verbatim(LabelTextInfo.description)]]
-        std::optional<std::string> labelText;
+        // [[codegen::verbatim(TextInfo.description)]]
+        std::optional<std::string> text;
 
         // [[codegen::verbatim(FontSizeInfo.description)]]
         std::optional<float> fontSize;
 
-        // [[codegen::verbatim(LabelSizeInfo.description)]]
-        std::optional<float> labelSize;
+        // [[codegen::verbatim(SizeInfo.description)]]
+        std::optional<float> size;
 
-        // [[codegen::verbatim(LabelMinMaxSizeInfo.description)]]
-        std::optional<glm::ivec2> labelMinMaxSize;
+        // [[codegen::verbatim(MinMaxSizeInfo.description)]]
+        std::optional<glm::ivec2> minMaxSize;
 
         // [[codegen::verbatim(EnableFadingEffectInfo.description)]]
         std::optional<bool> enableFading;
@@ -223,26 +223,16 @@ documentation::Documentation RenderableLabels::Documentation() {
 RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _blendMode(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _labelColor(
-        LabelColorInfo,
-        glm::vec3(1.f, 1.f, 1.f),
-        glm::vec3(0.f),
-        glm::vec3(1.f)
-    )
-    , _labelSize(LabelSizeInfo, 8.f, 0.5f, 30.f)
+    , _color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _size(SizeInfo, 8.f, 0.5f, 30.f)
     , _fontSize(FontSizeInfo, 50.f, 1.f, 100.f)
-    , _labelMinMaxSize(
-        LabelMinMaxSizeInfo,
-        glm::ivec2(8, 20),
-        glm::ivec2(0),
-        glm::ivec2(100)
-    )
+    , _minMaxSize(MinMaxSizeInfo, glm::ivec2(8, 20), glm::ivec2(0), glm::ivec2(100))
     , _enableFadingEffect(EnableFadingEffectInfo, false)
-    , _labelText(LabelTextInfo, "")
+    , _text(TextInfo, "")
     , _fadeDistances(FadeDistancesInfo, glm::vec2(1.f), glm::vec2(0.f), glm::vec2(100.f))
     , _fadeWidths(FadeWidthsInfo, glm::vec2(1.f), glm::vec2(0.f), glm::vec2(100.f))
-    , _labelOrientationOption(
-        LabelOrientationOptionInfo,
+    , _orientationOption(
+        OrientationOptionInfo,
         properties::OptionProperty::DisplayType::Dropdown
     )
     , _fadeUnitOption(
@@ -285,28 +275,28 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
 
     addProperty(_blendMode);
 
-    _labelOrientationOption.addOption(ViewDirection, "Camera View Direction");
-    _labelOrientationOption.addOption(NormalDirection, "Camera Position Normal");
+    _orientationOption.addOption(ViewDirection, "Camera View Direction");
+    _orientationOption.addOption(NormalDirection, "Camera Position Normal");
 
-    _labelOrientationOption = NormalDirection;
-    if (p.labelOrientationOption.has_value()) {
-        switch (*p.labelOrientationOption) {
+    _orientationOption = NormalDirection;
+    if (p.orientationOption.has_value()) {
+        switch (*p.orientationOption) {
             case Parameters::Orientation::ViewDirection:
-                _labelOrientationOption = ViewDirection;
+                _orientationOption = ViewDirection;
                 break;
             case Parameters::Orientation::PositionNormal:
-                _labelOrientationOption = NormalDirection;
+                _orientationOption = NormalDirection;
                 break;
         }
     }
-    addProperty(_labelOrientationOption);
+    addProperty(_orientationOption);
 
-    _labelText = p.labelText.value_or(_labelText);
-    addProperty(_labelText);
+    _text = p.text.value_or(_text);
+    addProperty(_text);
 
-    _labelColor = p.labelColor.value_or(_labelColor);
-    _labelColor.setViewOption(properties::Property::ViewOptions::Color);
-    addProperty(_labelColor);
+    _color = p.color.value_or(_color);
+    _color.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_color);
 
     _fontSize = p.fontSize.value_or(_fontSize);
     _fontSize.onChange([&]() {
@@ -319,12 +309,12 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
     });
     addProperty(_fontSize);
 
-    _labelSize = p.labelSize.value_or(_labelSize);
-    addProperty(_labelSize);
+    _size = p.size.value_or(_size);
+    addProperty(_size);
 
-    _labelMinMaxSize = p.labelMinMaxSize.value_or(_labelMinMaxSize);
-    _labelMinMaxSize.setViewOption(properties::Property::ViewOptions::MinMaxRange);
-    addProperty(_labelMinMaxSize);
+    _minMaxSize = p.minMaxSize.value_or(_minMaxSize);
+    _minMaxSize.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+    addProperty(_minMaxSize);
 
     _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);
 
@@ -468,7 +458,7 @@ void RenderableLabels::render(const RenderData& data, RendererTasks&) {
 
 
 void RenderableLabels::setLabelText(const std::string & newText) {
-    _labelText = newText;
+    _text = newText;
 }
 
 void RenderableLabels::renderLabels(const RenderData& data,
@@ -476,7 +466,7 @@ void RenderableLabels::renderLabels(const RenderData& data,
                                     const glm::dvec3& orthoRight,
                                     const glm::dvec3& orthoUp, float fadeInVariable)
 {
-    glm::vec4 textColor = glm::vec4(glm::vec3(_labelColor), 1.f);
+    glm::vec4 textColor = glm::vec4(glm::vec3(_color), 1.f);
 
     textColor.a *= fadeInVariable;
     textColor.a *= _opacity;
@@ -485,13 +475,13 @@ void RenderableLabels::renderLabels(const RenderData& data,
 
     labelInfo.orthoRight = orthoRight;
     labelInfo.orthoUp = orthoUp;
-    labelInfo.minSize = _labelMinMaxSize.value().x;
-    labelInfo.maxSize = _labelMinMaxSize.value().y;
+    labelInfo.minSize = _minMaxSize.value().x;
+    labelInfo.maxSize = _minMaxSize.value().y;
     labelInfo.cameraPos = data.camera.positionVec3();
     labelInfo.cameraLookUp = data.camera.lookUpVectorWorldSpace();
-    labelInfo.renderType = _labelOrientationOption;
+    labelInfo.renderType = _orientationOption;
     labelInfo.mvpMatrix = modelViewProjectionMatrix;
-    labelInfo.scale = powf(10.f, _labelSize);
+    labelInfo.scale = powf(10.f, _size);
     labelInfo.enableDepth = true;
     labelInfo.enableFalseDepth = false;
 
@@ -503,7 +493,7 @@ void RenderableLabels::renderLabels(const RenderData& data,
     ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
         *_font,
         transformedPos,
-        _labelText.value(),
+        _text.value(),
         textColor,
         labelInfo
     );

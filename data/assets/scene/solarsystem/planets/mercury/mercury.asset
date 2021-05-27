@@ -26,14 +26,14 @@ local Mercury = {
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "/Mercury.labels",
-      LabelAlignmentOption = "Horizontally", -- or Circularly
-      LabelsFontSize = 22.0,
-      LabelsSize = 10.0,
-      LabelsFadeInEnabled = true,
-      LabelsFadeOutEnabled = true,
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 22.0,
+      Size = 10.0,
+      FadeInEnabled = true,
+      FadeOutEnabled = true,
       FadeDistances = { 1800000.0, 5000000.0 },
-      LabelsDistanceEPS = 1500000.0,
-      LabelsColor = { 1.0, 1.0, 0.0 }
+      DistanceEPS = 1500000.0,
+      Color = { 1.0, 1.0, 0.0 }
     }
   },
   Tag = { "planet_solarSystem", "planet_terrestrial" },
@@ -48,11 +48,11 @@ local MercuryLabel = {
   Renderable = {
     Enabled = false,
     Type = "RenderableLabels",
-    LabelText = "Mercury",
+    Text = "Mercury",
     FontSize = 100.0,
-    LabelSize = 8.3,
-    LabelMinMaxSize = { 1, 100 },
-    LabelOrientationOption = "Camera View Direction",
+    Size = 8.3,
+    MinMaxSize = { 1, 100 },
+    OrientationOption = "Camera View Direction",
     BlendMode = "Additive"
   },
   Tag = { "solarsystem_labels" },

@@ -102,19 +102,19 @@ private:
 
     float computeFadeFactor(float distanceNodeToCamera) const;
 
-    properties::Vec3Property _labelColor;
+    properties::Vec3Property _color;
     properties::FloatProperty _fontSize;
-    properties::FloatProperty _labelSize;
-    properties::IVec2Property _labelMinMaxSize;
+    properties::FloatProperty _size;
+    properties::IVec2Property _minMaxSize;
 
-    properties::StringProperty _labelText;
+    properties::StringProperty _text;
 
     properties::BoolProperty _enableFadingEffect;
     properties::Vec2Property _fadeWidths;
     properties::Vec2Property _fadeDistances;
     properties::OptionProperty _fadeUnitOption;
 
-    properties::OptionProperty _labelOrientationOption;
+    properties::OptionProperty _orientationOption;
 
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 

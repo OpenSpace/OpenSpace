@@ -36,14 +36,14 @@ local Moon = {
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "/moon.labels",
-      LabelAlignmentOption = "Horizontally", -- or Circularly
-      LabelsFontSize = 14.0,
-      LabelsSize = 8.0,
-      LabelsFadeInEnabled = true,
-      LabelsFadeOutEnabled = true,
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 14.0,
+      Size = 8.0,
+      FadeInEnabled = true,
+      FadeOutEnabled = true,
       FadeDistances = { 100000.0, 500000.0 },
-      LabelsDistanceEPS = 1350000.0,
-      LabelsColor = { 1.0, 1.0, 0.0 }
+      DistanceEPS = 1350000.0,
+      Color = { 1.0, 1.0, 0.0 }
     }
   },
   GUI = {

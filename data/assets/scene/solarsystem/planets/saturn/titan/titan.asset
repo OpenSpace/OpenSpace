@@ -28,14 +28,14 @@ local Titan = {
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "/titan.labels",
-      LabelAlignmentOption = "Horizontally", -- or Circularly
-      LabelsFontSize = 14.0,
-      LabelsSize = 10.0,
-      LabelsFadeInEnabled = true,
-      LabelsFadeOutEnabled = true,
+      AlignmentOption = "Horizontally", -- or Circularly
+      FontSize = 14.0,
+      Size = 10.0,
+      FadeInEnabled = true,
+      FadeOutEnabled = true,
       FadeDistances = { 6000000.0, 7500000.0 },
-      LabelsDistanceEPS = 1350000.0,
-      LabelsColor = { 1.0, 1.0, 0.0 }
+      DistanceEPS = 1350000.0,
+      Color = { 1.0, 1.0, 0.0 }
     }
   },
   Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },

@@ -33,11 +33,11 @@ local UranusLabel = {
   Renderable = {
     Enabled = false,
     Type = "RenderableLabels",
-    LabelText = "Uranus",
+    Text = "Uranus",
     FontSize = 100.0,
-    LabelSize = 8.7,
-    LabelMinMaxSize = { 1, 100 },
-    LabelOrientationOption = "Camera View Direction",
+    Size = 8.7,
+    MinMaxSize = { 1, 100 },
+    OrientationOption = "Camera View Direction",
     BlendMode = "Additive"
   },
   Tag = { "solarsystem_labels" },
