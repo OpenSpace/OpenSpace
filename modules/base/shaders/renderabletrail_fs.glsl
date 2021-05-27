@@ -28,11 +28,15 @@ in float vs_positionDepth;
 in vec4 vs_gPosition;
 in float fade;
 noperspective in vec2 mathLine;
+in vec4 vs_positionNDC;
 
 uniform vec3 color;
 uniform int renderPhase;
 uniform float opacity = 1.0;
 uniform float lineWidth;
+
+uniform vec4 viewport;
+uniform vec2 resolution;
 
 // Fragile! Keep in sync with RenderableTrail::render::RenderPhase 
 #define RenderPhaseLines 0
@@ -61,18 +65,52 @@ Fragment getFragment() {
         frag.color.a = transparencyCorrection;
     }
 
-    double distanceCenter = length(mathLine - vec2(gl_FragCoord.xy));
+    // We can't expect a viewport of the form (0, 0, res.x, res.y) used to convert the
+    // window coordinates from gl_FragCoord into [0, 1] coordinates, so we need to use
+    // this more complicated method that is also used in the FXAA and HDR rendering steps
+    vec2 xy = vec2(gl_FragCoord.xy);
+    xy.x = xy.x / (resolution.x / viewport[2]) + (viewport[0] / resolution.x);
+    xy.y = xy.y / (resolution.y / viewport[3]) + (viewport[1] / resolution.y);
+
+    double distanceCenter = length(mathLine - xy);
     double dLW = double(lineWidth);
-    float blendFactor = 20;
+    const float blendFactor = 20;
     
     if (distanceCenter > dLW) {
-        frag.color.a = 0.0;
+        // frag.color.rg = vec2(0.0, 0.0);
+        // frag.color.a = 0.0;
+        // frag.color.rg = vec2(1.0);
         //discard;
     }
     else {
         frag.color.a *= pow(float((dLW - distanceCenter) / dLW), blendFactor);
-        // if (frag.color.a < 0.4)
-        //     discard;
+        // frag.color.a = 1.0;
+    }
+
+    frag.color.a += frag.color.r / 100000000.0;
+
+    const int Type = 2;
+
+    if (Type == 0) {
+        frag.color.r = float((dLW - distanceCenter) / dLW);
+    }
+    else {
+        frag.color.r -= 10000000.0;
+    }
+
+    if (Type == 1) {
+        // frag.color.g = float(dLW - distanceCenter);
+        frag.color.g = (xy.x / resolution.x) * 2.0;
+    }
+    else {
+        frag.color.g -= 10000000.0;
+    }
+
+    if (Type == 2) {
+        frag.color.b = float(distanceCenter);
+    }
+    else {
+        frag.color.b -= 10000000.0;
     }
 
     frag.gPosition = vs_gPosition;

@@ -32,6 +32,7 @@ out float vs_positionDepth;
 out vec4 vs_gPosition;
 out float fade;
 noperspective out vec2 mathLine;
+out vec4 vs_positionNDC;
 
 uniform dmat4 modelViewTransform;
 uniform mat4 projectionTransform;
@@ -43,13 +44,12 @@ uniform int vertexSortingMethod;
 uniform int pointSize;
 uniform int stride;
 
-uniform ivec2 resolution;
+uniform vec2 resolution;
 
 // Fragile! Keep in sync with RenderableTrail::render
 #define VERTEX_SORTING_NEWESTFIRST 0
 #define VERTEX_SORTING_OLDESTFIRST 1
 #define VERTEX_SORTING_NOSORTING 2
-
 
 void main() {
     int modId = gl_VertexID;
@@ -76,7 +76,7 @@ void main() {
 
     vs_gPosition = vec4(modelViewTransform * dvec4(in_point_position, 1));
     vec4 vs_positionClipSpace = projectionTransform * vs_gPosition;
-    vec4 vs_positionNDC = vs_positionClipSpace / vs_positionClipSpace.w;
+    vs_positionNDC = vs_positionClipSpace / vs_positionClipSpace.w;
     vs_positionDepth = vs_positionClipSpace.w;
     
     gl_PointSize = (stride == 1 || int(modId) % stride == 0) ? 
@@ -84,4 +84,5 @@ void main() {
     gl_Position  = z_normalization(vs_positionClipSpace);
 
     mathLine = 0.5 * (vs_positionNDC.xy + vec2(1.0)) * vec2(resolution);
+    // mathLine = 0.5 * (vs_positionNDC.xy + vec2(1.0));
 }
