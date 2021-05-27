@@ -87,7 +87,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font Size",
-        "The font size (in pt) for the label."
+        "The font size (in points) for the label."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LabelSizeInfo = {

@@ -135,6 +135,7 @@ RenderableHabitableZone::RenderableHabitableZone(const ghoul::Dictionary& dictio
     // The user should not be able to change this property. It's just used to communicate
     // the different rendering that happens outside of this interval
     addProperty(_kopparapuTeffInterval);
+    _kopparapuTeffInterval.setViewOption(properties::Property::ViewOptions::MinMaxRange);
     _kopparapuTeffInterval.setReadOnly(true);
 
     // Make parent's size related properties read only. We want to set them based on the

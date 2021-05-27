@@ -222,11 +222,9 @@ void RenderableRadialGrid::update(const UpdateData&) {
     // Circles
     const int nRadialSegments = _gridSegments.value()[0];
     const float fnCircles = static_cast<float>(nRadialSegments);
-    //const float deltaRadius = (_maxRadius - _minRadius) / fnCircles;
     const float deltaRadius = (outerRadius - innerRadius) / fnCircles;
 
-
-    const bool hasInnerRadius = innerRadius > 0;
+    const bool hasInnerRadius = innerRadius > 0.f;
     const int nCircles = hasInnerRadius ? nRadialSegments : nRadialSegments + 1;
 
     _circles.clear();
