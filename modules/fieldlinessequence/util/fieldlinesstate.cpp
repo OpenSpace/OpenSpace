@@ -427,22 +427,22 @@ void FieldlinesState::appendToExtra(size_t idx, float val) {
     _extraQuantities[idx].push_back(val);
 }
 
-void FieldlinesState::moveLine() {
+void FieldlinesState::moveLine(double dt) {
     unsigned i = 0;
     for (glm::vec3& vertex : _vertexPositions) {
 
         if (_vertexPaths[i].empty()) continue;
 
-        if ( 30000.0f > glm::length(vertex - _vertexPaths[i][1])) {
+        if ( 10000.0f > glm::length(vertex - _vertexPaths[i][1])) {
             _vertexPaths[i].erase(_vertexPaths[i].begin());
+            _vertexVelocities[i].erase(_vertexVelocities[i].begin());
             if (_vertexPaths[i].empty()) continue;
         }
 
-        glm::vec3 dir = _vertexPaths[i][1] - vertex;
-        dir = glm::normalize(dir);
+        glm::vec3 direction = _vertexPaths[i][1] - vertex;
+        direction = glm::normalize(direction);
 
-        vertex += dir*30000.0f;
-
+        vertex += (direction*_vertexVelocities[i][0]) * (float)dt;
         i++;
     }
 }
@@ -451,7 +451,7 @@ void FieldlinesState::addVertexPath(std::vector<glm::vec3> path) {
     _vertexPaths.push_back(path);
 }
 
-void FieldlinesState::addVertexVelocities(std::vector<glm::vec3> velocities) {
+void FieldlinesState::addVertexVelocities(std::vector<float> velocities) {
     _vertexVelocities.push_back(velocities);
 }
 
@@ -496,7 +496,7 @@ const std::vector< std::vector<glm::vec3> >& FieldlinesState::vertexPaths() cons
     return _vertexPaths;
 }
 
-const std::vector< std::vector<glm::vec3> >& FieldlinesState::vertexVelocities() const {
+const std::vector< std::vector<float> >& FieldlinesState::vertexVelocities() const {
     return _vertexVelocities;
 }
 

@@ -290,7 +290,7 @@ namespace openspace::fls {
         if (state.extraQuantityNames()[nXtraScalars] == "u_perp_b") {
 
             for (const std::vector<glm::vec3> i : state.vertexPaths()) {
-                std::vector<glm::vec3> velocities;
+                std::vector<float> velocities;
                 for (const glm::vec3 p : i) {
                     //compute u_perp_b with variables u and b
                     //normalized b vector
@@ -306,8 +306,11 @@ namespace openspace::fls {
 
                     float u_dot_b = glm::dot(normBVec, uVec);
 
-                    glm::vec3 u_perp_b = uVec - (normBVec * u_dot_b);
-                    velocities.push_back(u_perp_b);
+                    glm::vec3 u_perp_b = (uVec - (normBVec * u_dot_b))*1000.0f;
+
+                    float magnitude = glm::length(u_perp_b);
+
+                    velocities.push_back(magnitude);
                 }
                 state.addVertexVelocities(velocities);
             }

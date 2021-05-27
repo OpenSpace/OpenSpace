@@ -60,7 +60,7 @@ public:
 
     const std::vector<std::vector<glm::vec3>>& vertexPaths() const;
 
-    const std::vector<std::vector<glm::vec3>>& vertexVelocities() const;
+    const std::vector<std::vector<float>>& vertexVelocities() const;
 
     // Special getter. Returns extraQuantities[index].
     std::vector<float> extraQuantity(size_t index, bool& isSuccesful) const;
@@ -73,11 +73,11 @@ public:
     void addLine(std::vector<glm::vec3>& line);
     void appendToExtra(size_t idx, float val);
 
-    void moveLine();
+    void moveLine( double dt);
 
     void addVertexPath(std::vector<glm::vec3> path);
 
-    void addVertexVelocities(std::vector<glm::vec3> path);
+    void addVertexVelocities(std::vector<float> path);
 
 
 private:
@@ -92,7 +92,7 @@ private:
     std::vector<glm::vec3> _vertexPositions;
 
     std::vector< std::vector<glm::vec3> > _vertexPaths;
-    std::vector< std::vector<glm::vec3> > _vertexVelocities;
+    std::vector< std::vector<float> > _vertexVelocities;
 };
 
 } // namespace openspace
