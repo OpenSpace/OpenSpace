@@ -10,12 +10,12 @@ local image = asset.syncedResource({
     Version = 1
 })
 
-local PARSEC_CONSTANT = 3.0856776E16;
+local DISTANCE = 9.2E15;
 
 -- ra = 3h32m38.92s
 -- dec = -27d47m29.37s
 -- fov = 0.0516666667 degrees
--- distance = 1 pc (set to an arbitrary distance)
+-- distance = 9.2E15 m (set to size of view sphere)
 local HUDFPosition = {
     Identifier = "HUDFPosition",
     Parent = transforms.EarthInertial.Identifier,
@@ -23,9 +23,9 @@ local HUDFPosition = {
         Translation = {
             Type = "StaticTranslation",
             Position = {
-                0.53039024 * PARSEC_CONSTANT,
-                0.70802069 * PARSEC_CONSTANT,
-                -0.46625412 * PARSEC_CONSTANT
+                0.53039024 * DISTANCE,
+                0.70802069 * DISTANCE,
+                -0.46625412 * DISTANCE
             }
         }
     },

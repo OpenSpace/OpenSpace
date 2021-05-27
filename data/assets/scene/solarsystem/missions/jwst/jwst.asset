@@ -12,6 +12,13 @@ local JWSTKernel = asset.syncedResource({
     Version = 1
 })
 
+local JWSTHorizons = asset.syncedResource({
+    Name = "JWST Horizons",
+    Type = "HttpSynchronization",
+    Identifier = "jwst_horizons",
+    Version = 1
+})
+
 local model = asset.syncedResource({
     Name = "JWST Model",
     Type = "HttpSynchronization",
@@ -98,6 +105,11 @@ local JWSTBand = {
 local JWSTModel = {
     Identifier = "JWSTModel",
     Parent = JWSTRotation.Identifier,
+    TimeFrame = {
+        Type = "TimeFrameInterval",
+        Start = "2020 JAN 01",
+        End = "2024 JAN 01"
+    },
     Transform = {
         Rotation = {
             Type = "StaticRotation",
@@ -112,8 +124,8 @@ local JWSTModel = {
         ModelScale = "Foot",
         InvertModelScale = true,
         EnableAnimation = true,
-        AnimationStartTime = "2021 10 31 00:00:00", --TODO: Update theese when the new animation is finished
-        AnimationMode = "BounceFromStart",
+        AnimationStartTime = "2018 10 01 15:00:00", --TODO: Update theese when the new animation is finished
+        AnimationMode = "Once",
         LightSources = {
             {
                 Type = "SceneGraphLightSource",
@@ -204,12 +216,95 @@ local JWSTFov = {
     }
 }
 
+-- Launch
+local JWSTLaunchPosition = {
+    Identifier = "JWSTLaunchPosition",
+    Parent = transforms.L2.Identifier,
+    Transform = {
+        Translation = {
+            Type = "HorizonsTranslation",
+            HorizonsTextFile = JWSTHorizons .. "/horizons_jwst_launch.dat",
+        },
+    },
+    GUI = {
+        Name = "James Webb Space Telescope Launch Position",
+        Path = "/Solar System/Missions/JWST",
+        Hidden = true,
+    }
+}
+
+local JWSTLaunchModel = {
+    Identifier = "JWSTLaunchModel",
+    Parent = JWSTLaunchPosition.Identifier,
+    TimeFrame = {
+        Type = "TimeFrameInterval",
+        Start = "2018 OCT 01 13:18",
+        End = "2019 OCT 01"
+    },
+    Transform = {
+        Rotation = {
+            Type = "FixedRotation",
+            Attached = "JWSTRotation",
+            XAxis = { 1, 0, 0 },
+            XAxisOrthogonal = true,
+            YAxisInvert = true,
+            YAxis = sunTransforms.SolarSystemBarycenter.Identifier
+        }
+    },
+    Renderable = {
+        Type = "RenderableModel",
+        GeometryFile = model .. "/JWSTFBX.osmodel",
+        ModelScale = "Foot",
+        InvertModelScale = true,
+        EnableAnimation = true,
+        AnimationStartTime = "2018 10 01 15:00:00", --TODO: Update theese when the new animation is finished
+        AnimationMode = "Once",
+        LightSources = {
+            {
+                Type = "SceneGraphLightSource",
+                Identifier = "Sun",
+                Node = sunTransforms.SolarSystemBarycenter.Identifier,
+                Intensity = 1.0
+            }
+        },
+        PerformShading = true,
+        DisableFaceCulling = true
+    },
+    GUI = {
+        Name = "James Webb Space Telecope Launch Model",
+        Path = "/Solar System/Missions/JWST",
+    }
+}
+
+local JWSTLaunchTrail = {
+    Identifier = "JWSTLaunchTrail",
+    Parent = transforms.L2.Identifier,
+    Renderable = {
+        Type = "RenderableTrailTrajectory",
+        Translation = {
+            Type = "HorizonsTranslation",
+            HorizonsTextFile = JWSTHorizons .. "/horizons_jwst_launch.dat",
+        },
+        Color = { 0.9, 0.9, 0.0 },
+        StartTime = "2018 OCT 01 13:18",
+        EndTime = "2019 OCT 01",
+        SampleInterval = 600
+    },
+    GUI = {
+        Name = "James Webb Space Telescope Launch Trail",
+        Path = "/Solar System/Missions/JWST"
+    }
+}
+
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     JWSTTrail,
     JWSTSunTrail,
+    JWSTLaunchTrail,
     JWSTPosition,
+    JWSTLaunchPosition,
     JWSTRotation,
     JWSTBand,
     JWSTModel,
+    JWSTLaunchModel,
     JWSTFov
 })
