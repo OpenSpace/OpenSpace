@@ -492,7 +492,8 @@ void RenderableFluxNodes::definePropertyCallbackFunctions() {
     _pGoesEnergyBins.onChange([this] {
         if (_pGoesEnergyBins.option().value == 1) {  // 1 == Emin03 == Mev > 100
             if (_shouldreadBinariesDirectly) {
-                bool success = loadBinaryfilesDirectly(""); // empty string == emin03 for default
+                // empty string == emin03 for default
+                bool success = loadBinaryfilesDirectly(""); 
                 if (success) return;
             }                         
         }
@@ -504,7 +505,8 @@ void RenderableFluxNodes::definePropertyCallbackFunctions() {
         }
         //Should never occur. Emin01 = >10 MeV. Emin03 = >100 Mev
         else {  
-            throw ghoul::RuntimeError("Error: Unknown EnergyBin. Supports 0=Emin01 and 1=Emin03");
+            throw ghoul::RuntimeError(
+                "Error: Unknown EnergyBin. Supports 0=Emin01 and 1=Emin03");
             return;
         }
      });
@@ -544,7 +546,8 @@ void RenderableFluxNodes::initializeGL() {
 
     _uniformCache.streamColor = _shaderProgram->uniformLocation("streamColor");
     _uniformCache.nodeSize = _shaderProgram->uniformLocation("nodeSize");
-    _uniformCache.nodeSizeLargerFlux = _shaderProgram->uniformLocation("nodeSizeLargerFlux");
+    _uniformCache.nodeSizeLargerFlux = 
+                                    _shaderProgram->uniformLocation("nodeSizeLargerFlux");
     _uniformCache.thresholdFlux = _shaderProgram->uniformLocation("thresholdFlux");
 
     ghoul::opengl::updateUniformLocations(*_shaderProgram, _uniformCache, UniformNames);
@@ -564,13 +567,21 @@ void RenderableFluxNodes::initializeGL() {
         }
         // Set a default color table, just in case the (optional) user defined paths are
         // corrupt or not provided!
-        //_colorTablePaths.push_back(FieldlinesSequenceModule::DefaultTransferFunctionFile);
-        _transferFunction = std::make_unique<TransferFunction>(absPath(_colorTablePaths[0]).string());
-        _transferFunctionCMR = std::make_unique<TransferFunction>(absPath(_colorTablePaths[1]).string());
-        _transferFunctionEarth = std::make_unique<TransferFunction>(absPath(_colorTablePaths[2]).string());  // what if not in order?
-        _transferFunctionFlow = std::make_unique<TransferFunction>(absPath(_colorTablePaths[3]).string());
-        //_transferFunctionIlluminance = std::make_unique<TransferFunction>(absPath(_colorTablePaths[4]));
-        //_transferFunctionIlluminance2 = std::make_unique<TransferFunction>(absPath(_colorTablePaths[5]));
+        //_colorTablePaths.push_back(
+            // FieldlinesSequenceModule::DefaultTransferFunctionFile);
+        // what if not in order?
+        _transferFunction = 
+            std::make_unique<TransferFunction>(absPath(_colorTablePaths[0]).string());
+        _transferFunctionCMR = 
+            std::make_unique<TransferFunction>(absPath(_colorTablePaths[1]).string());
+        _transferFunctionEarth = 
+            std::make_unique<TransferFunction>(absPath(_colorTablePaths[2]).string());  
+        _transferFunctionFlow = 
+            std::make_unique<TransferFunction>(absPath(_colorTablePaths[3]).string());
+        //_transferFunctionIlluminance = 
+        // std::make_unique<TransferFunction>(absPath(_colorTablePaths[4]));
+        //_transferFunctionIlluminance2 = 
+        //std::make_unique<TransferFunction>(absPath(_colorTablePaths[5]));
     }
 
     // EXTRACT OPTIONAL INFORMATION FROM DICTIONARY
@@ -701,7 +712,9 @@ void RenderableFluxNodes::createStreamnumberVector() {
 }
 
 bool RenderableFluxNodes::loadFilesIntoRam() {
-    LDEBUG("Did not find cached file, loading in data and converting only for this run, this step wont be needed next time you run Openspace ");
+    LDEBUG("Did not find cached file," 
+        "loading in data and converting only for this run,"
+        "this step wont be needed next time you run Openspace ");
     // Loop through all the files dependent on how many states we would like to read in
     for (size_t j = 0; j < _nStates; ++j) {
             
@@ -828,13 +841,10 @@ void RenderableFluxNodes::writeCachedFile() const {
     }
 }
 
-bool RenderableFluxNodes::loadBinaryfilesDirectly(const std::string& energybin) { // on init
+bool RenderableFluxNodes::loadBinaryfilesDirectly(const std::string& energybin) {
     constexpr const float AuToMeter = 149597870700.f;  // Astronomical Units
 
     LDEBUG("Loading in binary files directly from sync folder");
-    //std::string _file = _binarySourceFilePath  + "\\StreamnodesCachePositionv3" + energybin;
-    //std::string _file2 = _binarySourceFilePath + "\\StreamnodesCacheColorv3" + energybin;
-    //std::string _file3 = _binarySourceFilePath + "\\StreamnodesCacheRadiusv3" + energybin;
 
     std::string _file = _binarySourceFilePath + "\\positions" + energybin;
     std::string _file2 = _binarySourceFilePath + "\\fluxes" + energybin;
@@ -931,7 +941,7 @@ bool RenderableFluxNodes::extractMandatoryInfoFromDictionary()
     // ------------------- EXTRACT MANDATORY VALUES FROM DICTIONARY ------------------- //
     //std::string inputFileTypeString;
     //if (!_dictionary->hasValue<std::string>(KeyInputFileType)) {
-    //    LERROR(fmt::format("{}: The field {} is missing", _identifier, KeyInputFileType));
+    //  LERROR(fmt::format("{}: The field {} is missing", _identifier, KeyInputFileType));
     //}
     //else {
     //    // Verify that the input type is corrects
@@ -953,7 +963,7 @@ bool RenderableFluxNodes::extractMandatoryInfoFromDictionary()
     //_colorTableRanges.push_back(glm::vec2(0, 1));   
 
     //if (!_dictionary->hasValue<std::string>(KeySourceFolder)) {
-    //    LERROR(fmt::format("{}: The field {} is missing", _identifier, KeySourceFolder));
+    //   LERROR(fmt::format("{}: The field {} is missing", _identifier, KeySourceFolder));
     //    return false;
     //}
     if (!_dictionary->hasValue<std::string>(KeyBinarySourceFolder)) {
@@ -1095,18 +1105,24 @@ void RenderableFluxNodes::setupProperties() {
     _pScalingmethod.addOption(static_cast<int>(ScalingMethod::Flux), "Flux");
     _pScalingmethod.addOption(static_cast<int>(ScalingMethod::RFlux), "Radius * Flux");
     _pScalingmethod.addOption(static_cast<int>(ScalingMethod::R2Flux), "Radius^2 * Flux");
-    _pScalingmethod.addOption(static_cast<int>(ScalingMethod::log10RFlux), "log10(r) * Flux");
+    _pScalingmethod.addOption(
+        static_cast<int>(ScalingMethod::log10RFlux), "log10(r) * Flux");
     _pScalingmethod.addOption(static_cast<int>(ScalingMethod::lnRFlux), "ln(r) * Flux");
         
     _pNodeskipMethod.addOption(static_cast<int>(NodeSkipMethod::Uniform), "Uniform");
     _pNodeskipMethod.addOption(static_cast<int>(NodeSkipMethod::Flux), "Flux");
     _pNodeskipMethod.addOption(static_cast<int>(NodeSkipMethod::Radius), "Radius");
-    _pNodeskipMethod.addOption(static_cast<int>(NodeSkipMethod::Streamnumber), "Streamnumber");
+    _pNodeskipMethod.addOption(
+        static_cast<int>(NodeSkipMethod::Streamnumber), "Streamnumber");
 
-    _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Sizescaling), "SizeScaling");
-    _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Colortables), "ColorTables");
-    _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Sizeandcolor), "Sizescaling and colortables");
-    _pEnhancemethod.addOption(static_cast<int>(EnhanceMethod::Illuminance), "Illuminance");
+    _pEnhancemethod.addOption(
+        static_cast<int>(EnhanceMethod::Sizescaling), "SizeScaling");
+    _pEnhancemethod.addOption(
+        static_cast<int>(EnhanceMethod::Colortables), "ColorTables");
+    _pEnhancemethod.addOption(
+        static_cast<int>(EnhanceMethod::Sizeandcolor), "Sizescaling and colortables");
+    _pEnhancemethod.addOption(
+        static_cast<int>(EnhanceMethod::Illuminance), "Illuminance");
 
     _pCameraPerspectiveGroup.addProperty(_pCameraPerspectiveEnabled);
     _pCameraPerspectiveGroup.addProperty(_pPerspectiveDistanceFactor);
