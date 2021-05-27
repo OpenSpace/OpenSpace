@@ -1,5 +1,5 @@
 local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('../../planets/earth/transforms')
+local transforms = asset.require('../transforms')
 
 --local fieldlinesDirectory = "C:/Users/elono/Documents/OpenSpace/data/earthMagnetoSphere"
 local fieldlinesDirectory = asset.syncedResource({
@@ -9,7 +9,6 @@ local fieldlinesDirectory = asset.syncedResource({
     Version = 1
 })
 
---local sunRadius = 6.957E8
 local earthRadius = 6378137
 
 -- Fieldlies from binaries
@@ -21,7 +20,7 @@ local earthMagnetosphere = {
         Type = "RenderableFieldlinesSequence",
         SourceFolder = fieldlinesDirectory,
         -- FlowEnabled = false,
-        LineWidth = 3.0,
+        LineWidth = 2.0,
         AlphaBlendlingEnabled = false,
         InputFileType = "osfls",    -- openspace Field lines Sequence
         --ColorTablePaths = {
@@ -32,8 +31,8 @@ local earthMagnetosphere = {
         --    { 0, 1000000 },
         --    { 100, 2000 }
         --},
-        --maskingEnabled = true,
-        --MaskingRanges = {0.0, 0.0}, -- this seem to map it to an int =0 which correspond to the topology=closed (fieldlines)
+        MaskingEnabled = true,
+        MaskingRanges = {{0.0, 0.0}}, -- this seem to map it to an int =0 which correspond to the topology=closed (fieldlines)
         LoadAtRuntime = true,
         ScaleToMeters = 1.0,
         SecondsBefore = 24*60*60*365*100,
@@ -44,7 +43,7 @@ local earthMagnetosphere = {
         }
     },
     GUI = {
-        Path = "/Solar System/Planets/Earth",
+        Path = "/Solar System/Planets/Earth/Magnetosphere",
         Name = "Magnetosphere"
     },
     --Transform = {

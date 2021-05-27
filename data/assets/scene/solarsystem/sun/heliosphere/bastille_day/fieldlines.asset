@@ -13,7 +13,6 @@ local fieldlinesDirectory = asset.syncedResource({
     Version = 2
 })
 
-
 local sunRadius = 6.957E8
 
 -- Fieldlies from binaries

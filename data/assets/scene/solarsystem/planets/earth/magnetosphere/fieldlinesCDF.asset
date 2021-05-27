@@ -2,18 +2,14 @@ local assetHelper = asset.require('util/asset_helper')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
 
-local transferFunctions = asset.localResource("transferfunctions")
+local transferFunctions = asset.localResource("../../../sun/heliosphere/bastille_day/transferfunctions")
 local masVelocityColorTable = transferFunctions .. "/velocity_fieldlines.txt"
 local masDensityColorTable = transferFunctions .. "/density_fieldlines.txt"
 
 local fieldlinesDirectory = 'D:/data/2000_01_01_event/cdf'
---local fieldlinesDirectory = 'C:/Users/eolsson/Documents/openspace/data/20000101/osfls'
---local seedPointDirectory = 'D:/data/2000_01_01_event/seedpoints'
 local seedPointDirectory = 'D:/data/2000_01_01_event/seedpoints'
 
---local sunRadius = 6.957E8
 local earthRadius = 6378137
-
 
 -- Fieldlies from binaries
 local fieldlines = {
@@ -43,7 +39,7 @@ local fieldlines = {
         ExtraVariables = {
             "rho",
             "p",
-            "T = p/rho"
+            "T"
         },
         ManualTimeOffset = -14400.0,
         LoadAtRuntime = true,
@@ -56,8 +52,8 @@ local fieldlines = {
         }
     },
     GUI = {
-        Path = "/Solar System/Heliosphere",
-        Name = "Batsrus Fieldlines"
+        Path = "/Solar System/Planets/Earth/Magnetosphere",
+        Name = "Fieldlines 2000-01-01"
     },
     Transform = {
         Scale = {
