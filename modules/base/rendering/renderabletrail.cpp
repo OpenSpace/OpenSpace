@@ -38,6 +38,8 @@
 #include <cmath>
 #include <optional>
 
+#pragma optimize ("", off)
+
 namespace {
     constexpr const char* ProgramName = "EphemerisProgram";
     constexpr const char* KeyTranslation = "Translation";

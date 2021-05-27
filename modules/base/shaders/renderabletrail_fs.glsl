@@ -39,11 +39,10 @@ uniform vec4 viewport;
 uniform vec2 resolution;
 
 // Fragile! Keep in sync with RenderableTrail::render::RenderPhase 
-#define RenderPhaseLines 0
-#define RenderPhasePoints 1
+const int RenderPhaseLines = 0;
+const int RenderPhasePoints = 1;
 
-#define Delta 0.25
-
+const float Delta = 0.25;
 
 Fragment getFragment() {
     Fragment frag;
@@ -68,16 +67,25 @@ Fragment getFragment() {
     // We can't expect a viewport of the form (0, 0, res.x, res.y) used to convert the
     // window coordinates from gl_FragCoord into [0, 1] coordinates, so we need to use
     // this more complicated method that is also used in the FXAA and HDR rendering steps
-    vec2 xy = vec2(gl_FragCoord.xy);
-    xy.x = xy.x / (resolution.x / viewport[2]) + (viewport[0] / resolution.x);
-    xy.y = xy.y / (resolution.y / viewport[3]) + (viewport[1] / resolution.y);
+    dvec2 xy = dvec2(gl_FragCoord.xy);
+    xy.x /= resolution.x;
+    xy.y /= resolution.y;
 
-    double distanceCenter = length(mathLine - xy);
-    double dLW = double(lineWidth);
-    const float blendFactor = 20;
+    dvec2 ml = mathLine;
+    // xy.x = xy.x / (resolution.x / viewport[2]) + (viewport[0] / resolution.x);
+    // xy.y = xy.y / (resolution.y / viewport[3]) + (viewport[1] / resolution.y);
+
+    xy -= viewport.xy / resolution;
+    xy *= resolution / viewport.zw;
+// xy -= vec2(0.5, 0.0);
+// xy *= vec2(2.0, 1.0);
+
+    double distanceCenter = length(ml - xy);
+    double dLW = double(lineWidth / 500.0);
+    const float blendFactor = 30.0;
     
     if (distanceCenter > dLW) {
-        // frag.color.rg = vec2(0.0, 0.0);
+        // frag.color = vec4(1.0);
         // frag.color.a = 0.0;
         // frag.color.rg = vec2(1.0);
         //discard;
@@ -87,20 +95,32 @@ Fragment getFragment() {
         // frag.color.a = 1.0;
     }
 
+    // frag.color.rg = xy / resolution;
+    // frag.color.rg = (vs_positionNDC.xy + vec2(1.0)) / vec2(2.0);
+    // frag.color.b *= 0.0000000001;
+
+    // frag.color.rg = abs(xy - ml);
+    // frag.color.rg = xy;
+    // frag.color.rg = xy * vec2(2.0, 1.0);
+    // frag.color.rg = ml;
+
+
+#if 0
     frag.color.a += frag.color.r / 100000000.0;
 
-    const int Type = 2;
+    const int Type = 1;
 
     if (Type == 0) {
-        frag.color.r = float((dLW - distanceCenter) / dLW);
+        frag.color.r = (float((dLW - distanceCenter) / dLW));
     }
     else {
         frag.color.r -= 10000000.0;
     }
 
     if (Type == 1) {
+        frag.color.g = ml.x - xy.x;
         // frag.color.g = float(dLW - distanceCenter);
-        frag.color.g = (xy.x / resolution.x) * 2.0;
+        // frag.color.g = (xy.x / resolution.x) * 2.0;
     }
     else {
         frag.color.g -= 10000000.0;
@@ -108,10 +128,12 @@ Fragment getFragment() {
 
     if (Type == 2) {
         frag.color.b = float(distanceCenter);
+        // frag.color.a = 1.0;
     }
     else {
         frag.color.b -= 10000000.0;
     }
+#endif
 
     frag.gPosition = vs_gPosition;
     
