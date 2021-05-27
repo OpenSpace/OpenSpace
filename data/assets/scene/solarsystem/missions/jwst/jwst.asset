@@ -45,7 +45,7 @@ local JWSTPosition = {
         },
     },
     GUI = {
-        Name = "James Webb Space Telescope Position",
+        Name = "JWST Position",
         Path = "/Solar System/Missions/JWST",
         Hidden = true,
     }
@@ -65,7 +65,7 @@ local JWSTRotation = {
         }
     },
     GUI = {
-        Name = "James Webb Space Telescope Rotation",
+        Name = "JWST Rotation",
         Path = "/Solar System/Missions/JWST",
         Hidden = true,
     }
@@ -96,7 +96,7 @@ local JWSTBand = {
     },
     Tag = { "fov" },
     GUI = {
-        Name = "James Webb Space Telescope View Band",
+        Name = "JWST View Band",
         Path = "/Solar System/Missions/JWST",
         Hidden = true,
     }
@@ -138,7 +138,7 @@ local JWSTModel = {
         DisableFaceCulling = true
     },
     GUI = {
-        Name = "James Webb Space Telecope",
+        Name = "James Webb Space Telescope",
         Path = "/Solar System/Missions/JWST",
     }
 }
@@ -159,7 +159,7 @@ local JWSTTrail = {
         Resolution = 100
     },
     GUI = {
-        Name = "James Webb Space Telescope Trail",
+        Name = "JWST Trail",
         Path = "/Solar System/Missions/JWST"
     }
 }
@@ -181,7 +181,7 @@ local JWSTSunTrail = {
         Resolution = 1000
     },
     GUI = {
-        Name = "James Webb Space Telescope Sun Trail",
+        Name = "JWST Sun Trail",
         Path = "/Solar System/Missions/JWST"
     }
 }
@@ -211,7 +211,7 @@ local JWSTFov = {
     },
     Tag = { "fov" },
     GUI = {
-        Name = "James Webb Space Telecope Field of View",
+        Name = "JWST Field of View",
         Path = "/Solar System/Missions/JWST",
     }
 }
@@ -227,7 +227,7 @@ local JWSTLaunchPosition = {
         },
     },
     GUI = {
-        Name = "James Webb Space Telescope Launch Position",
+        Name = "JWST Launch Position",
         Path = "/Solar System/Missions/JWST",
         Hidden = true,
     }
@@ -271,7 +271,7 @@ local JWSTLaunchModel = {
         DisableFaceCulling = true
     },
     GUI = {
-        Name = "James Webb Space Telecope Launch Model",
+        Name = "JWST Launch Model",
         Path = "/Solar System/Missions/JWST",
     }
 }
@@ -296,7 +296,7 @@ local JWSTLaunchTrail = {
         SampleInterval = 600
     },
     GUI = {
-        Name = "James Webb Space Telescope Launch Trail",
+        Name = "JWST Launch Trail",
         Path = "/Solar System/Missions/JWST"
     }
 }

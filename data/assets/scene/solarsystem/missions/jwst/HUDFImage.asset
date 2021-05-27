@@ -30,7 +30,7 @@ local HUDFPosition = {
         }
     },
     GUI = {
-        Name = "Hubble Ultra Deep field Position",
+        Name = "Hubble Ultra Deep field",
         Path = "/Solar System/Missions/JWST",
         Hidden = true
     }
@@ -65,7 +65,7 @@ local HUDFJWSTLine = {
     },
     Tag = { "hudf" },
     GUI = {
-        Name = "James Webb Space Telescope to Hubble Ultra Deep Field line",
+        Name = "JWST to HUDF Line",
         Path = "/Solar System/Missions/JWST",
     }
 }
