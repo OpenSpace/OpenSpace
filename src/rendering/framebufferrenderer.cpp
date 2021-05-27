@@ -46,7 +46,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
-
+#pragma optimize ("", off)
 namespace {
     constexpr const char* _loggerCat = "FramebufferRenderer";
 
@@ -84,8 +84,9 @@ namespace {
         "renderedTexture", "inverseScreenSize", "Viewport", "Resolution"
     };
 
-    constexpr const std::array<const char*, 2> DownscaledVolumeUniformNames = {
-        "downscaledRenderedVolume", "downscaledRenderedVolumeDepth"
+    constexpr const std::array<const char*, 4> DownscaledVolumeUniformNames = {
+        "downscaledRenderedVolume", "downscaledRenderedVolumeDepth", "viewport",
+        "resolution"
     };
 
     constexpr const char* ExitFragmentShaderPath =
@@ -548,8 +549,8 @@ void FramebufferRenderer::updateDownscaleTextures() {
     );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    float volumeBorderColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, volumeBorderColor);
+    constexpr const float VolumeBorderColor[] = { 0.f, 0.f, 0.f, 1.0f };
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, VolumeBorderColor);
 
     glBindTexture(GL_TEXTURE_2D, _downscaleVolumeRendering.depthbuffer);
     glTexImage2D(
@@ -571,7 +572,7 @@ void FramebufferRenderer::updateDownscaleTextures() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 }
 
-void FramebufferRenderer::writeDownscaledVolume() {
+void FramebufferRenderer::writeDownscaledVolume(GLint viewport[4]) {
     _downscaledVolumeProgram->activate();
 
     ghoul::opengl::TextureUnit downscaledTextureUnit;
@@ -596,6 +597,18 @@ void FramebufferRenderer::writeDownscaledVolume() {
     _downscaledVolumeProgram->setUniform(
         _writeDownscaledVolumeUniformCache.downscaledRenderedVolumeDepth,
         downscaledDepthUnit
+    );
+
+    _downscaledVolumeProgram->setUniform(
+        _writeDownscaledVolumeUniformCache.viewport,
+        static_cast<float>(viewport[0]),
+        static_cast<float>(viewport[1]),
+        static_cast<float>(viewport[2]),
+        static_cast<float>(viewport[3])
+    );
+    _downscaledVolumeProgram->setUniform(
+        _writeDownscaledVolumeUniformCache.resolution,
+        glm::vec2(_resolution)
     );
 
 
@@ -1125,8 +1138,6 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     glGetIntegerv(GL_VIEWPORT, viewport);
     global::renderEngine->openglStateCache().setViewportState(viewport);
 
-    global::renderEngine->openglStateCache().viewport(viewport);
-
 
     // Reset Render Pipeline State
     global::renderEngine->openglStateCache().resetCachedStates();
@@ -1281,8 +1292,8 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
             glBindFramebuffer(GL_FRAMEBUFFER, _downscaleVolumeRendering.framebuffer);
             const float s = raycaster->downscaleRender();
             GLint newVP[4] = {
-                viewport[0],
-                viewport[1],
+                viewport[0] * s,
+                viewport[1] * s,
                 static_cast<GLsizei>(viewport[2] * s),
                 static_cast<GLsizei>(viewport[3] * s)
             };
@@ -1385,7 +1396,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
         if (raycaster->downscaleRender() < 1.f) {
             global::renderEngine->openglStateCache().setViewportState(viewport);
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _gBuffers.framebuffer);
-            writeDownscaledVolume();
+            writeDownscaledVolume(viewport);
         }
     }
 }

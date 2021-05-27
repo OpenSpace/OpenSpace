@@ -115,7 +115,7 @@ private:
     void applyFXAA(GLint viewport[4]);
     void updateDownscaleTextures();
     void updateExitVolumeTextures();
-    void writeDownscaledVolume();
+    void writeDownscaledVolume(GLint viewport[4]);
 
     std::map<VolumeRaycaster*, RaycastData> _raycastData;
     RaycasterProgObjMap _exitPrograms;
@@ -134,8 +134,8 @@ private:
         Hue, Saturation, Value, Viewport, Resolution) _hdrUniformCache;
     UniformCache(renderedTexture, inverseScreenSize, Viewport,
         Resolution) _fxaaUniformCache;
-    UniformCache(downscaledRenderedVolume, downscaledRenderedVolumeDepth)
-        _writeDownscaledVolumeUniformCache;
+    UniformCache(downscaledRenderedVolume, downscaledRenderedVolumeDepth, viewport,
+        resolution) _writeDownscaledVolumeUniformCache;
 
     GLint _defaultFBO;
     GLuint _screenQuad;
