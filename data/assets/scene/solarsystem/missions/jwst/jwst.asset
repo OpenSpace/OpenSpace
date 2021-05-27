@@ -279,6 +279,11 @@ local JWSTLaunchModel = {
 local JWSTLaunchTrail = {
     Identifier = "JWSTLaunchTrail",
     Parent = transforms.L2.Identifier,
+    TimeFrame = {
+        Type = "TimeFrameInterval",
+        Start = "2018 OCT 01 13:18",
+        End = "2019 OCT 01"
+    },
     Renderable = {
         Type = "RenderableTrailTrajectory",
         Translation = {
