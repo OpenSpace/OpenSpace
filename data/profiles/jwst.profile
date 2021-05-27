@@ -4,7 +4,8 @@
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/satellites/satellites",
     "scene/solarsystem/missions/jwst/jwst",
-    "scene/solarsystem/missions/jwst/HUDFImage"
+    "scene/solarsystem/missions/jwst/HUDFImage",
+    "scene/digitaluniverse/hdf"
   ],
   "camera": {
     "altitude": 17000000.0,

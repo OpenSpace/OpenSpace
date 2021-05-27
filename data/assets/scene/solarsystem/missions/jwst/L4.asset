@@ -1,6 +1,6 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('scene/solarsystem/sun/transforms')
-local circle = asset.require('scene/solarsystem/missions/jwst/circle').circle
+local circle = asset.require('util/circle').circle
 local kernels = asset.require('scene/solarsystem/missions/jwst/Lagrange_kernels').kernels
 
 local L4 = {
