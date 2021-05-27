@@ -84,7 +84,7 @@ local JWSTBand = {
         Segments = 50,
         DisableFadeInOut = true,
         Orientation = "Inside",
-        Opacity = 0.1,
+        Opacity = 0.05,
         UseAdditiveBlending = true,
     },
     Tag = { "fov" },
@@ -143,11 +143,33 @@ local JWSTTrail = {
             Kernels = JWSTKernel .. "/jwst_horizons_20200101_20240101_v01.bsp"
         },
         Color = { 0.9, 0.9, 0.0 },
-		Period = 91.3105,
+        Period = 91.3105,
         Resolution = 100
     },
     GUI = {
         Name = "James Webb Space Telescope Trail",
+        Path = "/Solar System/Missions/JWST"
+    }
+}
+
+local JWSTSunTrail = {
+    Identifier = "JWSTSunTrail",
+    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+    Renderable = {
+        Enabled = false,
+        Type = "RenderableTrailOrbit",
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "JWST",
+            Observer = "SUN",
+            Kernels = JWSTKernel .. "/jwst_horizons_20200101_20240101_v01.bsp"
+        },
+        Color = { 0.0, 0.9, 0.9 },
+        Period = 365.242,
+        Resolution = 1000
+    },
+    GUI = {
+        Name = "James Webb Space Telescope Sun Trail",
         Path = "/Solar System/Missions/JWST"
     }
 }
@@ -183,7 +205,8 @@ local JWSTFov = {
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
-	JWSTTrail,
+    JWSTTrail,
+    JWSTSunTrail,
     JWSTPosition,
     JWSTRotation,
     JWSTBand,
