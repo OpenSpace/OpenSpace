@@ -38,7 +38,7 @@ local L2Large = {
         RenderableType = "Opaque",
         Billboard = true,
         Size = 700E5,
-        Texture = "C:/Users/ElmQPC/Desktop/Malin/develop/images/jwst/circle.png",
+        Texture = circle .. "/circle.png",
         BlendMode = "Additive"
     },
     Transform = {

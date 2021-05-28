@@ -81,7 +81,7 @@ namespace {
         "The length of the prism in meters."
     };
 
-    // Generate a vertices around the unit circle on the XY-plane
+    // Generate vertices around the unit circle on the XY-plane
     void getUnitCircleVertices(std::vector<float>& vertices, int sectorCount) {
         float sectorStep = 2 * M_PI / sectorCount;
         float sectorAngle;  // in radians
@@ -130,7 +130,6 @@ RenderablePrism::RenderablePrism(const ghoul::Dictionary& dictionary)
     , _lineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
     , _lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _length(LengthInfo, 20.f, 1.f, 3.0e12f)
-
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

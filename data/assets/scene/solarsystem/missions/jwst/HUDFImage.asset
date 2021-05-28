@@ -14,7 +14,6 @@ local DISTANCE = 9.2E15;
 
 -- ra = 3h32m38.92s
 -- dec = -27d47m29.37s
--- fov = 0.0516666667 degrees
 -- distance = 9.2E15 m (set to size of view sphere)
 local HUDFPosition = {
     Identifier = "HUDFPosition",
