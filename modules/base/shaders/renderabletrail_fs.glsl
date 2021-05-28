@@ -27,7 +27,7 @@
 in float vs_positionDepth;
 in vec4 vs_gPosition;
 in float fade;
-in vec2 mathLine;
+noperspective in vec2 mathLine;
 
 uniform vec3 color;
 uniform int renderPhase;
@@ -67,26 +67,30 @@ Fragment getFragment() {
     // window coordinates from gl_FragCoord into [0, 1] coordinates, so we need to use
     // this more complicated method that is also used in the FXAA and HDR rendering steps
     vec2 xy = vec2(gl_FragCoord.xy);
+    xy -= viewport.xy;
+    // xy *= resolution / viewport.zw;
 
     vec2 ml = mathLine;
-    xy -= viewport.xy;
-    xy *= resolution / viewport.zw;
 
     double distanceCenter = length(ml - xy);
     double dLW = double(lineWidth);
     const float blendFactor = 20.0;
     
     if (distanceCenter > dLW) {
-        frag.color.a = 0.0;
+        frag.color.a = 1.0;
     }
     else {
         frag.color.a *= pow(float((dLW - distanceCenter) / dLW), blendFactor);
+        // frag.color.a = 0.0;
     }
 
     // frag.color.rg = vec2(abs(xy - ml)) * 1;
+    // frag.color.rg = gl_FragCoord.xy / resolution;
+    // frag.color.rg = (gl_FragCoord.xy - viewport.xy) / resolution;
     // frag.color.rg = xy;
     // frag.color.rg = xy * vec2(2.0, 1.0);
-    // frag.color.rg = ml;
+    // frag.color.rg = ml  / resolution;
+    // frag.color.b *= 0.00000001;
 
 
 #if 0

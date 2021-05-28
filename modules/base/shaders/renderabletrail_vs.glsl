@@ -31,7 +31,7 @@ layout(location = 0) in vec3 in_point_position;
 out float vs_positionDepth;
 out vec4 vs_gPosition;
 out float fade;
-out vec2 mathLine;
+noperspective out vec2 mathLine;
 
 uniform dmat4 modelViewTransform;
 uniform mat4 projectionTransform;
@@ -83,7 +83,7 @@ void main() {
                     float(pointSize) : float(pointSize) / 2;
     gl_Position  = z_normalization(vs_positionClipSpace);
 
-    mathLine = 0.5 * (vs_positionNDC.xy + vec2(1.0)) * resolution;
+    mathLine = 0.5 * (vs_positionNDC.xy + vec2(1.0)) * viewport.zw;
     // mathLine = vs_positionNDC.xy;
     // mathLine = 0.5 * (vs_positionNDC.xy + vec2(1.0));
 }
