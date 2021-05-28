@@ -43,10 +43,11 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/textureunit.h>
+#include <glm/gtc/type_ptr.hpp>
 #include <fstream>
 #include <string>
 #include <vector>
-#pragma optimize ("", off)
+
 namespace {
     constexpr const char* _loggerCat = "FramebufferRenderer";
 
@@ -448,7 +449,7 @@ void FramebufferRenderer::deferredcastersChanged(Deferredcaster&,
     _dirtyDeferredcastData = true;
 }
 
-void FramebufferRenderer::applyTMO(float blackoutFactor, GLint viewport[4]) {
+void FramebufferRenderer::applyTMO(float blackoutFactor, const glm::ivec4& viewport) {
     ZoneScoped
     TracyGpuZone("applyTMO")
 
@@ -469,13 +470,7 @@ void FramebufferRenderer::applyTMO(float blackoutFactor, GLint viewport[4]) {
     _hdrFilteringProgram->setUniform(_hdrUniformCache.Hue, _hue);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.Saturation, _saturation);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.Value, _value);
-    _hdrFilteringProgram->setUniform(
-        _hdrUniformCache.Viewport,
-        static_cast<float>(viewport[0]),
-        static_cast<float>(viewport[1]),
-        static_cast<float>(viewport[2]),
-        static_cast<float>(viewport[3])
-    );
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.Viewport, glm::vec4(viewport));
     _hdrFilteringProgram->setUniform(_hdrUniformCache.Resolution, glm::vec2(_resolution));
 
     glDepthMask(false);
@@ -491,7 +486,7 @@ void FramebufferRenderer::applyTMO(float blackoutFactor, GLint viewport[4]) {
     _hdrFilteringProgram->deactivate();
 }
 
-void FramebufferRenderer::applyFXAA(GLint viewport[4]) {
+void FramebufferRenderer::applyFXAA(const glm::ivec4& viewport) {
     _fxaaProgram->activate();
 
     ghoul::opengl::TextureUnit renderedTextureUnit;
@@ -508,13 +503,7 @@ void FramebufferRenderer::applyFXAA(GLint viewport[4]) {
 
     glm::vec2 inverseScreenSize = glm::vec2(1.f / _resolution.x, 1.f / _resolution.y);
     _fxaaProgram->setUniform(_fxaaUniformCache.inverseScreenSize, inverseScreenSize);
-    _fxaaProgram->setUniform(
-        _fxaaUniformCache.Viewport,
-        static_cast<float>(viewport[0]),
-        static_cast<float>(viewport[1]),
-        static_cast<float>(viewport[2]),
-        static_cast<float>(viewport[3])
-    );
+    _fxaaProgram->setUniform(_fxaaUniformCache.Viewport, glm::vec4(viewport));
     _fxaaProgram->setUniform(_fxaaUniformCache.Resolution, glm::vec2(_resolution));
 
     glDepthMask(false);
@@ -549,7 +538,7 @@ void FramebufferRenderer::updateDownscaleTextures() {
     );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    constexpr const float VolumeBorderColor[] = { 0.f, 0.f, 0.f, 1.0f };
+    constexpr const float VolumeBorderColor[] = { 0.f, 0.f, 0.f, 1.f };
     glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, VolumeBorderColor);
 
     glBindTexture(GL_TEXTURE_2D, _downscaleVolumeRendering.depthbuffer);
@@ -572,7 +561,7 @@ void FramebufferRenderer::updateDownscaleTextures() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 }
 
-void FramebufferRenderer::writeDownscaledVolume(GLint viewport[4]) {
+void FramebufferRenderer::writeDownscaledVolume(const glm::ivec4& viewport) {
     _downscaledVolumeProgram->activate();
 
     ghoul::opengl::TextureUnit downscaledTextureUnit;
@@ -1132,12 +1121,10 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
     global::renderEngine->openglStateCache().setDefaultFramebuffer(_defaultFBO);
 
-    //global::renderEngine->openglStateCache().loadCurrentGLState();
-
-    GLint viewport[4] = { 0 };
-    glGetIntegerv(GL_VIEWPORT, viewport);
-    global::renderEngine->openglStateCache().setViewportState(viewport);
-
+    GLint vp[4] = { 0 };
+    glGetIntegerv(GL_VIEWPORT, vp);
+    global::renderEngine->openglStateCache().setViewportState(vp);
+    glm::ivec4 viewport = glm::ivec4(vp[0], vp[1], vp[2], vp[3]);
 
     // Reset Render Pipeline State
     global::renderEngine->openglStateCache().resetCachedStates();
@@ -1152,9 +1139,6 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         // deferred g-buffer
         ZoneScopedN("Deferred G-Buffer")
         TracyGpuZone("Deferred G-Buffer")
-
-        //GLint vp[4] = {viewport[0], viewport[1], _resolution.x, _resolution.y};
-        //global::renderEngine->openglStateCache().setViewportState(vp);
 
         glBindFramebuffer(GL_FRAMEBUFFER, _gBuffers.framebuffer);
         glDrawBuffers(3, ColorAttachmentArray);
@@ -1255,7 +1239,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         TracyGpuZone("Apply TMO")
         GLDebugGroup group("Apply TMO");
 
-        applyTMO(blackoutFactor, viewport);
+        applyTMO(blackoutFactor, glm::ivec4(viewport[0], viewport[1], viewport[2], viewport[3]));
     }
 
     if (_enableFXAA) {
@@ -1267,7 +1251,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 }
 
 void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>& tasks,
-                                                GLint viewport[4])
+                                                const glm::ivec4& viewport)
 {
     ZoneScoped
 
@@ -1278,8 +1262,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
 
         glBindFramebuffer(GL_FRAMEBUFFER, _exitFramebuffer);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        GLint viewport[4] = { 0 };
-        global::renderEngine->openglStateCache().viewport(viewport);
+        //global::renderEngine->openglStateCache().viewport(glm::value_ptr(viewport));
 
         ghoul::opengl::ProgramObject* exitProgram = _exitPrograms[raycaster].get();
         if (exitProgram) {
@@ -1394,7 +1377,9 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
         }
 
         if (raycaster->downscaleRender() < 1.f) {
-            global::renderEngine->openglStateCache().setViewportState(viewport);
+            global::renderEngine->openglStateCache().setViewportState(
+                glm::value_ptr(viewport)
+            );
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _gBuffers.framebuffer);
             writeDownscaledVolume(viewport);
         }
@@ -1403,7 +1388,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
 
 void FramebufferRenderer::performDeferredTasks(
                                              const std::vector<DeferredcasterTask>& tasks,
-                                                                        GLint viewport[4])
+                                                               const glm::ivec4& viewport)
 {
     ZoneScoped
 

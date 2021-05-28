@@ -84,9 +84,9 @@ public:
 
     void update() override;
     void performRaycasterTasks(const std::vector<RaycasterTask>& tasks,
-        GLint viewport[4]);
+        const glm::ivec4& viewport);
     void performDeferredTasks(const std::vector<DeferredcasterTask>& tasks,
-        GLint viewport[4]);
+        const glm::ivec4& viewport);
     void render(Scene* scene, Camera* camera, float blackoutFactor) override;
 
     /**
@@ -111,11 +111,11 @@ private:
     >;
 
     void resolveMSAA(float blackoutFactor);
-    void applyTMO(float blackoutFactor, GLint viewport[4]);
-    void applyFXAA(GLint viewport[4]);
+    void applyTMO(float blackoutFactor, const glm::ivec4& viewport);
+    void applyFXAA(const glm::ivec4& viewport);
     void updateDownscaleTextures();
     void updateExitVolumeTextures();
-    void writeDownscaledVolume(GLint viewport[4]);
+    void writeDownscaledVolume(const glm::ivec4& viewport);
 
     std::map<VolumeRaycaster*, RaycastData> _raycastData;
     RaycasterProgObjMap _exitPrograms;

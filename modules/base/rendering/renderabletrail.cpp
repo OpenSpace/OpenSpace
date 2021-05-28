@@ -51,10 +51,10 @@ namespace {
         "renderPhase"
     };
 #else
-    constexpr const std::array<const char*, 15> UniformNames = {
+    constexpr const std::array<const char*, 14> UniformNames = {
         "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
         "lineFade", "vertexSortingMethod", "idOffset", "nVertices", "stride", "pointSize",
-        "renderPhase", "resolution", "viewport", "lineWidth"
+        "renderPhase", "viewport", "lineWidth"
     };
 #endif
 
@@ -343,7 +343,6 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
     glm::ivec2 resolution = global::renderEngine->renderingResolution();
     GLint viewport[4];
     global::renderEngine->openglStateCache().viewport(viewport);
-    _programObject->setUniform(_uniformCache.resolution, glm::vec2(resolution));
     _programObject->setUniform(
         _uniformCache.viewport,
         static_cast<float>(viewport[0]),
@@ -355,7 +354,7 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
         _uniformCache.lineWidth,
         std::ceil((2.f * 1.f + _appearance.lineWidth) * std::sqrt(2.f))
     );
-#endif
+#endif // !defined(__APPLE__)
 
     if (renderPoints) {
         // The stride parameter determines the distance between larger points and

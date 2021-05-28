@@ -35,7 +35,6 @@ uniform float opacity = 1.0;
 uniform float lineWidth;
 
 uniform vec4 viewport;
-uniform vec2 resolution;
 
 // Fragile! Keep in sync with RenderableTrail::render::RenderPhase 
 const int RenderPhaseLines = 0;
@@ -68,60 +67,17 @@ Fragment getFragment() {
     // this more complicated method that is also used in the FXAA and HDR rendering steps
     vec2 xy = vec2(gl_FragCoord.xy);
     xy -= viewport.xy;
-    // xy *= resolution / viewport.zw;
 
-    vec2 ml = mathLine;
-
-    double distanceCenter = length(ml - xy);
+    double distanceCenter = length(mathLine - xy);
     double dLW = double(lineWidth);
     const float blendFactor = 20.0;
     
     if (distanceCenter > dLW) {
-        frag.color.a = 1.0;
+        frag.color.a = 0.0;
     }
     else {
         frag.color.a *= pow(float((dLW - distanceCenter) / dLW), blendFactor);
-        // frag.color.a = 0.0;
     }
-
-    // frag.color.rg = vec2(abs(xy - ml)) * 1;
-    // frag.color.rg = gl_FragCoord.xy / resolution;
-    // frag.color.rg = (gl_FragCoord.xy - viewport.xy) / resolution;
-    // frag.color.rg = xy;
-    // frag.color.rg = xy * vec2(2.0, 1.0);
-    // frag.color.rg = ml  / resolution;
-    // frag.color.b *= 0.00000001;
-
-
-#if 0
-    frag.color.a += frag.color.r / 100000000.0;
-
-    const int Type = 2;
-
-    if (Type == 0) {
-        frag.color.r = (float((dLW - distanceCenter) / dLW));
-    }
-    else {
-        frag.color.r -= 10000000.0;
-    }
-
-    if (Type == 1) {
-        frag.color.g = float(ml.x - xy.x);
-        // frag.color.g = float(dLW - distanceCenter);
-        // frag.color.g = (xy.x / resolution.x) * 2.0;
-    }
-    else {
-        frag.color.g -= 10000000.0;
-    }
-
-    if (Type == 2) {
-        frag.color.b = float(distanceCenter);
-        // frag.color.a = 1.0;
-    }
-    else {
-        frag.color.b -= 10000000.0;
-    }
-#endif
 
     frag.gPosition = vs_gPosition;
     

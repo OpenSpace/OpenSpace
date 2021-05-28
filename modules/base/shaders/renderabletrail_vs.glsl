@@ -44,7 +44,6 @@ uniform int pointSize;
 uniform int stride;
 
 uniform vec4 viewport;
-uniform vec2 resolution;
 
 // Fragile! Keep in sync with RenderableTrail::render
 #define VERTEX_SORTING_NEWESTFIRST 0
@@ -84,6 +83,4 @@ void main() {
     gl_Position  = z_normalization(vs_positionClipSpace);
 
     mathLine = 0.5 * (vs_positionNDC.xy + vec2(1.0)) * viewport.zw;
-    // mathLine = vs_positionNDC.xy;
-    // mathLine = 0.5 * (vs_positionNDC.xy + vec2(1.0));
 }
