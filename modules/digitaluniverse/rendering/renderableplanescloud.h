@@ -115,7 +115,7 @@ private:
     properties::FloatProperty _textSize;
     properties::BoolProperty _drawElements;
     properties::OptionProperty _blendMode;
-    properties::Vec2Property _fadeInDistance;
+    properties::Vec2Property _fadeInDistances;
     properties::BoolProperty _disableFadeInDistance;
     properties::FloatProperty _planeMinSize;
     properties::OptionProperty _renderOption;

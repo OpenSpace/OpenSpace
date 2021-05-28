@@ -25,6 +25,7 @@
 #include <openspace/util/json_helper.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <glm/ext/matrix_common.hpp>
+#include <cmath>
 
 namespace openspace::properties {
 
@@ -88,6 +89,7 @@ float NumericalProperty<T>::exponent() const {
 
 template <typename T>
 void NumericalProperty<T>::setExponent(float exponent) {
+    ghoul_assert(std::abs(exponent) > 0.f, "Exponent for property input cannot be zero");
     _exponent = exponent;
 }
 

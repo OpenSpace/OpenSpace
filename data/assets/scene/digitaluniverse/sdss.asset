@@ -30,16 +30,12 @@ local object = {
     ColorRange = { { 0.0, 0.075 }, { 1.0, 50.0 } },
     Texture = textures .. "/point3A.png",
     Unit = "Mpc",
-    -- Fade in value in the same unit as "Unit"
-    FadeInDistances = { 220.0, 650.0 },
-    BillboardMaxSize = 50.0,
-    BillboardMinSize = 0.0,
+    FadeInDistances = { 220.0, 650.0 }, -- Fade in value in the same unit as "Unit"
+    BillboardMinMaxSize = { 0.0, 5.5 },
     CorrectionSizeEndDistance = 20.65,
     CorrectionSizeFactor = 10.41,
     TextSize = 14.8,
-    TextMinSize = 10.0,
-    TextMaxSize = 50.0,
-    BillboardMaxSize = 5.5,
+    TextMinMaxSize = { 10, 50 },
     EnablePixelSizeControl = true
   },
   GUI = {
