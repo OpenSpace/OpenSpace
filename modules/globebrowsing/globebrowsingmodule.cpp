@@ -124,12 +124,16 @@ namespace {
             int iDataset = -1;
             std::array<char, 256> IdentifierBuffer;
             std::fill(IdentifierBuffer.begin(), IdentifierBuffer.end(), '\0');
-            sscanf(
+            int ret = sscanf(
                 subDatasets[i],
                 "SUBDATASET_%i_%256[^=]",
                 &iDataset,
                 IdentifierBuffer.data()
             );
+            if (ret != 2) {
+                LERROR("Error parsing dataset");
+                continue;
+            }
 
 
             if (iDataset != currentLayerNumber) {
@@ -453,6 +457,8 @@ std::vector<documentation::Documentation> GlobeBrowsingModule::documentations() 
         globebrowsing::Layer::Documentation(),
         globebrowsing::LayerAdjustment::Documentation(),
         globebrowsing::LayerManager::Documentation(),
+        globebrowsing::GlobeTranslation::Documentation(),
+        globebrowsing::RenderableGlobe::Documentation(),
         GlobeLabelsComponent::Documentation(),
         RingsComponent::Documentation(),
         ShadowComponent::Documentation()

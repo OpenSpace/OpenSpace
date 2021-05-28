@@ -5,61 +5,62 @@ local kernels = asset.require('../kernels').PlutoKernels
 
 
 local Nix = {
-    Identifier = "Nix",
-    Parent = transforms.PlutoBarycenter.Identifier,
-    Transform = {
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "NIX",
-            Observer = "PLUTO BARYCENTER"
-        }
-    },
-    Renderable = {
-        Type = "RenderableGlobe",
-        Radii = { 0.45E5, 0.45E5, 0.45E5 },
-        SegmentsPerPatch = 64,
-        Layers = {}
-    },
-    Tag = { "moon_solarSystem", "moon_dwarf", "moon_pluto" },
-    GUI = {
-        Path = "/Solar System/Dwarf Planets/Pluto"
+  Identifier = "Nix",
+  Parent = transforms.PlutoBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "NIX",
+      Observer = "PLUTO BARYCENTER"
     }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 0.45E5, 0.45E5, 0.45E5 },
+    SegmentsPerPatch = 64,
+    Layers = {}
+  },
+  Tag = { "moon_solarSystem", "moon_dwarf", "moon_pluto" },
+  GUI = {
+    Path = "/Solar System/Dwarf Planets/Pluto"
+  }
 }
 
 local NixTrail = {
-    Identifier = "NixTrail",
-    Parent = transforms.PlutoBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailOrbit",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "NIX",
-            Observer = "PLUTO BARYCENTER",
-        },
-        Color = { 0.00, 0.62, 1.00 },
-        Period = 24.85463,
-        Resolution = 1000
+  Identifier = "NixTrail",
+  Parent = transforms.PlutoBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "NIX",
+      Observer = "PLUTO BARYCENTER",
     },
-    Tag = { 
-        "moonTrail_solarSystem", 
-        "moonTrail_dwarf", 
-        "moonTrail_pluto", 
-        "moonTrail_minor" },
-    GUI = {
-        Name = "Nix Trail",
-        Path = "/Solar System/Dwarf Planets/Pluto"
-    }
+    Color = { 0.00, 0.62, 1.00 },
+    Period = 24.85463,
+    Resolution = 1000
+  },
+  Tag = { 
+    "moonTrail_solarSystem", 
+    "moonTrail_dwarf", 
+    "moonTrail_pluto", 
+    "moonTrail_minor"
+  },
+  GUI = {
+    Name = "Nix Trail",
+    Path = "/Solar System/Dwarf Planets/Pluto"
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Nix, NixTrail })
 
 
 asset.meta = {
-    Name = "Nix",
-    Version = "1.0",
-    Description = [[ Globe and trail for Pluto's moon Nix. Data from
+  Name = "Nix",
+  Version = "1.0",
+  Description = [[ Globe and trail for Pluto's moon Nix. Data from
     NASA Spice (see base spice asset)]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license"
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
 }

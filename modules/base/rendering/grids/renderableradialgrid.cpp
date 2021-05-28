@@ -103,9 +103,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableRadialGrid::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_renderable_radialgrid";
-    return doc;
+    return codegen::doc<Parameters>("base_renderable_radialgrid");
 }
 
 RenderableRadialGrid::RenderableRadialGrid(const ghoul::Dictionary& dictionary)
@@ -113,7 +111,7 @@ RenderableRadialGrid::RenderableRadialGrid(const ghoul::Dictionary& dictionary)
     , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
     , _gridSegments(GridSegmentsInfo, glm::ivec2(1), glm::ivec2(1), glm::ivec2(200))
     , _circleSegments(CircleSegmentsInfo, 36, 4, 200)
-    , _lineWidth(LineWidthInfo, 0.5f, 0.f, 20.f)
+    , _lineWidth(LineWidthInfo, 0.5f, 1.f, 20.f)
     , _maxRadius(OuterRadiusInfo, 1.f, 0.f, 20.f)
     , _minRadius(InnerRadiusInfo, 0.f, 0.f, 20.f)
 {

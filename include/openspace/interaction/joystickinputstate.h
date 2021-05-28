@@ -71,6 +71,11 @@ struct JoystickInputState {
     /// \c nAxes values are defined values, the rest are undefined
     std::array<float, MaxAxes> axes;
 
+    /// The axis values can either go back to 0 when the joystick is released or it can
+    /// stay at the value it was before the joystick was released.
+    /// The latter is called a sticky axis, when the values don't go back to 0.
+    bool isSticky = false;
+
     /// The number of buttons that this joystick possesses
     int nButtons = 0;
     /// The status of each button. Only the first \c nButtons values are defined, the rest

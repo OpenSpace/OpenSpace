@@ -1,6 +1,6 @@
 return {
-    {
-        Type = "ConvertRecFileVersionTask",
-        InputFilePath = "../../recordings/test-libcurl-certificate.osrec"
-    }
+  {
+    Type = "ConvertRecFileVersionTask",
+    InputFilePath = "../../recordings/test-libcurl-certificate.osrec"
+  }
 }

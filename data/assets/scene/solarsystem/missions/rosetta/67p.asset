@@ -4,146 +4,146 @@ local transforms = asset.require('scene/solarsystem/sun/transforms')
 
 
 local textures = asset.syncedResource({
-    Name = "67P Textures",
-    Type = "HttpSynchronization",
-    Identifier = "67p_textures",
-    Version = 2
+  Name = "67P Textures",
+  Type = "HttpSynchronization",
+  Identifier = "67p_textures",
+  Version = 2
 })
 
 local models = asset.syncedResource({
-    Name = "67P Models",
-    Type = "HttpSynchronization",
-    Identifier = "67p_models",
-    Version = 1
+  Name = "67P Models",
+  Type = "HttpSynchronization",
+  Identifier = "67p_models",
+  Version = 1
 })
 
 local images = asset.syncedResource({
-    Name = "Rosetta Images",
-    Type = "HttpSynchronization",
-    Identifier = "rosettaimages",
-    Version = 2
+  Name = "Rosetta Images",
+  Type = "HttpSynchronization",
+  Identifier = "rosettaimages",
+  Version = 2
 })
 
 local imagesDestination = images .. "/images"
 
 local Barycenter = {
-    Identifier = "67PBarycenter",
-    Parent = transforms.SolarSystemBarycenter.Identifier,
-    Transform = {
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "CHURYUMOV-GERASIMENKO",
-            Observer = "SUN"
-        }
-    },
-    GUI = {
-        Name = "67P Barycenter",
-        Path = "/Solar System/Comets/67P Churymov-Gerasimenko"
+  Identifier = "67PBarycenter",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "CHURYUMOV-GERASIMENKO",
+      Observer = "SUN"
     }
+  },
+  GUI = {
+    Name = "67P Barycenter",
+    Path = "/Solar System/Comets/67P Churymov-Gerasimenko"
+  }
 }
 
 local Comet67P = {
-    Identifier = "67P",
-    Parent = Barycenter.Identifier,
-    Transform = {
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "67P/C-G_CK",
-            DestinationFrame = "GALACTIC"
-        }
-    },
-    Renderable = {
-        Type = "RenderableModelProjection",
-        GeometryFile = models .. "/67P_rotated_5_130.obj",
-        Projection = {
-            Sequence   = { imagesDestination },
-            SequenceType = "image-sequence",
-            Observer   = "ROSETTA",
-            Target     = "CHURYUMOV-GERASIMENKO",
-            Aberration = "NONE",
-            TextureMap = true,
-            ShadowMap = true,
+  Identifier = "67P",
+  Parent = Barycenter.Identifier,
+  Transform = {
+      Rotation = {
+          Type = "SpiceRotation",
+          SourceFrame = "67P/C-G_CK",
+          DestinationFrame = "GALACTIC"
+      }
+  },
+  Renderable = {
+      Type = "RenderableModelProjection",
+      GeometryFile = models .. "/67P_rotated_5_130.obj",
+      Projection = {
+        Sequence   = { imagesDestination },
+        SequenceType = "image-sequence",
+        Observer   = "ROSETTA",
+        Target     = "CHURYUMOV-GERASIMENKO",
+        Aberration = "NONE",
+        TextureMap = true,
+        ShadowMap = true,
 
-            DataInputTranslation = {
-                Instrument = {
-                    NAVCAM = {
-                        DetectorType  = "Camera",
-                        Spice  = { "ROS_NAVCAM-A" }
-                    },
-                },
-                Target = { 
-                    Read  = {
-                        "TARGET_NAME",
-                        "INSTRUMENT_HOST_NAME",
-                        "INSTRUMENT_ID",
-                        "START_TIME",
-                        "STOP_TIME"
-                    },
-                    Convert = {
-                        CHURYUMOV = { "CHURYUMOV-GERASIMENKO" },
-                        ROSETTA = { "ROSETTA" },
-                        ["ROSETTA-ORBITER"] = { "ROSETTA" },
-                        CHURYUMOVGERASIMENKO11969R1 = { "CHURYUMOV-GERASIMENKO" },
-                        CHURYUMOVGERASIMENKO = { "CHURYUMOV-GERASIMENKO" },
-                        ["CHURYUMOV-GERASIMENKO1(1969R1)"] = { "CHURYUMOV-GERASIMENKO" },
-                        CALIBRATION = { "CALIBRATION" },
-                        ALPHALYR = { "ALPHALYR" },
-                        ZETACAS = { "ZETACAS" }
-                    }
-                }
-            },
-
-            Instrument = {
-                Name       = "ROS_NAVCAM-A",
-                Method     = "ELLIPSOID",
-                Aberration = "NONE",
-                Fovy       = 5.00,
-                Aspect     = 1
+        DataInputTranslation = {
+          Instrument = {
+            NAVCAM = {
+              DetectorType  = "Camera",
+              Spice  = { "ROS_NAVCAM-A" }
             }
+          },
+          Target = { 
+            Read  = {
+              "TARGET_NAME",
+              "INSTRUMENT_HOST_NAME",
+              "INSTRUMENT_ID",
+              "START_TIME",
+              "STOP_TIME"
+            },
+            Convert = {
+              CHURYUMOV = { "CHURYUMOV-GERASIMENKO" },
+              ROSETTA = { "ROSETTA" },
+              ["ROSETTA-ORBITER"] = { "ROSETTA" },
+              CHURYUMOVGERASIMENKO11969R1 = { "CHURYUMOV-GERASIMENKO" },
+              CHURYUMOVGERASIMENKO = { "CHURYUMOV-GERASIMENKO" },
+              ["CHURYUMOV-GERASIMENKO1(1969R1)"] = { "CHURYUMOV-GERASIMENKO" },
+              CALIBRATION = { "CALIBRATION" },
+              ALPHALYR = { "ALPHALYR" },
+              ZETACAS = { "ZETACAS" }
+            }
+          }
         },
 
-        BoundingSphereRadius = 5000.0
+        Instrument = {
+          Name       = "ROS_NAVCAM-A",
+          Method     = "ELLIPSOID",
+          Aberration = "NONE",
+          Fovy       = 5.00,
+          Aspect     = 1
+        }
     },
-    GUI = {
-        Name = "67P Churymov-Gerasimenko",
-        Path = "/Solar System/Comets/67P Churymov-Gerasimenko"
-    }
+
+    BoundingSphereRadius = 5000.0
+  },
+  GUI = {
+    Name = "67P Churymov-Gerasimenko",
+    Path = "/Solar System/Comets/67P Churymov-Gerasimenko"
+  }
 }
 
 local Trail67P = {
-    Identifier = "67PTrail",
-    Parent = transforms.SolarSystemBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderableTrailTrajectory",
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "CHURYUMOV-GERASIMENKO",
-            Observer = "SUN"
-        },
-        Color = { 0.1, 0.9, 0.2 },
-        StartTime = "2014 JAN 01 00:00:00.000",
-        EndTime = "2017 JAN 01 00:00:00.000",
-        SampleInterval = 3600
+  Identifier = "67PTrail",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "CHURYUMOV-GERASIMENKO",
+      Observer = "SUN"
     },
-    GUI = {
-        Name = "67P Trail",
-        Path = "/Solar System/Comets/67P Churymov-Gerasimenko"
-    }
+    Color = { 0.1, 0.9, 0.2 },
+    StartTime = "2014 JAN 01 00:00:00.000",
+    EndTime = "2017 JAN 01 00:00:00.000",
+    SampleInterval = 3600
+  },
+  GUI = {
+    Name = "67P Trail",
+    Path = "/Solar System/Comets/67P Churymov-Gerasimenko"
+  }
 }
 
 asset.onInitialize(function()
-    if not openspace.directoryExists(imagesDestination) then
-        openspace.printInfo("Extracting Rosetta images")
-        openspace.unzipFile(images .. "/images_v1_v2.zip", imagesDestination, true)
-    end
+  if not openspace.directoryExists(imagesDestination) then
+    openspace.printInfo("Extracting Rosetta images")
+    openspace.unzipFile(images .. "/images_v1_v2.zip", imagesDestination, true)
+  end
 end)
 
 
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
-    Barycenter,
-    Comet67P,
-    Trail67P
+  Barycenter,
+  Comet67P,
+  Trail67P
 })
 
 asset.export("Barycenter", Barycenter)

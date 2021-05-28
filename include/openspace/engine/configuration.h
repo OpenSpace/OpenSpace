@@ -27,6 +27,7 @@
 
 #include <ghoul/lua/luastate.h>
 #include <ghoul/misc/dictionary.h>
+#include <filesystem>
 #include <map>
 #include <string>
 #include <vector>
@@ -85,7 +86,7 @@ struct Configuration {
     bool shouldUseScreenshotDate = false;
 
     std::string onScreenTextScaling = "window";
-    bool usePerSceneCache = false;
+    bool usePerProfileCache = false;
 
     bool isRenderingOnMasterDisabled = false;
     glm::dvec3 globalRotation = glm::dvec3(0.0);
@@ -129,9 +130,9 @@ struct Configuration {
     ghoul::lua::LuaState state;
 };
 
-std::string findConfiguration(const std::string& filename = "openspace.cfg");
+std::filesystem::path findConfiguration(const std::string& filename = "openspace.cfg");
 
-Configuration loadConfigurationFromFile(const std::string& filename,
+Configuration loadConfigurationFromFile(const std::filesystem::path& filename,
     const std::string& overrideScript);
 
 } // namespace openspace::configuration

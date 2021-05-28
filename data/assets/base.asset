@@ -67,7 +67,7 @@ asset.require('scene/digitaluniverse/voids')
 asset.require('customization/globebrowsing')
 
 asset.onInitialize(function ()
-    openspace.globebrowsing.loadWMSServersFromFile(
-        openspace.absPath("${DATA}/globebrowsing_servers.lua")
-    )
+  openspace.globebrowsing.loadWMSServersFromFile(
+    openspace.absPath("${DATA}/globebrowsing_servers.lua")
+  )
 end)

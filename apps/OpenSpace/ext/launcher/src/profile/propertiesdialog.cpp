@@ -302,9 +302,6 @@ void PropertiesDialog::listItemRemove() {
 }
 
 void PropertiesDialog::transitionToEditMode() {
-    _list->setDisabled(true);
-    _addButton->setDisabled(true);
-    _removeButton->setDisabled(true);
     _saveButton->setDisabled(true);
     _cancelButton->setDisabled(true);
     _buttonBox->setDisabled(true);

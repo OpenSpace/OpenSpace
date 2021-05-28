@@ -33,6 +33,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
+#include <filesystem>
 #include <optional>
 
 namespace {
@@ -83,9 +84,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation SpiceTranslation::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "space_translation_spicetranslation";
-    return doc;
+    return codegen::doc<Parameters>("space_translation_spicetranslation");
 }
 
 SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
@@ -97,7 +96,7 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     auto loadKernel = [](const std::string& kernel) {
-        if (!FileSys.fileExists(kernel)) {
+        if (!std::filesystem::is_regular_file(kernel)) {
             throw SpiceManager::SpiceException(fmt::format(
                 "Kernel '{}' does not exist", kernel
             ));
@@ -113,11 +112,11 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
 
     if (p.kernels.has_value()) {
         if (std::holds_alternative<std::string>(*p.kernels)) {
-            loadKernel(absPath(std::get<std::string>(*p.kernels)));
+            loadKernel(absPath(std::get<std::string>(*p.kernels)).string());
         }
         else {
             for (const std::string& k : std::get<std::vector<std::string>>(*p.kernels)) {
-                loadKernel(absPath(k));
+                loadKernel(absPath(k).string());
             }
         }
     }

@@ -13,79 +13,79 @@ local parentSpice = "NEPTUNE BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_neptune", "moon_irregular_prograde" }
 local trailColor = { 0.2, 0.5, 0.75 }
 local trailTags = { 
-    "moonTrail_solarSystem",
-    "moonTrail_giants",
-    "moonTrail_neptune",
-    "moonTrail_minor"
+  "moonTrail_solarSystem",
+  "moonTrail_giants",
+  "moonTrail_neptune",
+  "moonTrail_minor"
 }
 
 local irregularProgradeMoons = {
-    {
-        Identifier = "Halimede",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "HALIMEDE",
-        Radii = { 62000, 62000, 62000 },
-        Tags = tags,
-        TrailTags = trailTags,
-        GUI = {
-            Path = "/Solar System/Planets/Neptune/Moons/Irregular Prograde Moons"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 1879.08,
-        Kernels = kernel086
+  {
+    Identifier = "Halimede",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
     },
-    {
-        Identifier = "Psamathe",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "PSAMATHE",
-        Radii = { 40000, 40000, 40000 },
-        Tags = tags,
-        TrailTags = trailTags,
-        GUI = {
-            Path = "/Solar System/Planets/Neptune/Moons/Irregular Prograde Moons"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 9074.3,
-        Kernels = kernel086
+    Spice = "HALIMEDE",
+    Radii = { 62000, 62000, 62000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Neptune/Moons/Irregular Prograde Moons"
     },
-    {
-        Identifier = "Neso",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "NESO",
-        Radii = { 60000, 60000, 60000 },
-        Tags = tags,
-        TrailTags = trailTags,
-        GUI = {
-            Path = "/Solar System/Planets/Neptune/Moons/Irregular Prograde Moons"
+    TrailColor = trailColor,
+    OrbitPeriod = 1879.08,
+    Kernels = kernel086
+  },
+  {
+    Identifier = "Psamathe",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
     },
-        TrailColor = trailColor,
-        OrbitPeriod = 9740.73,
-        Kernels = kernel086
-    }
+    Spice = "PSAMATHE",
+    Radii = { 40000, 40000, 40000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Neptune/Moons/Irregular Prograde Moons"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 9074.3,
+    Kernels = kernel086
+  },
+  {
+    Identifier = "Neso",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "NESO",
+    Radii = { 60000, 60000, 60000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Path = "/Solar System/Planets/Neptune/Moons/Irregular Prograde Moons"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 9740.73,
+    Kernels = kernel086
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(
-    asset,
-    proceduralGlobes.createGlobes(irregularProgradeMoons)
+  asset,
+  proceduralGlobes.createGlobes(irregularProgradeMoons)
 )
 
 
 asset.meta = {
-    Name = "Neptune Irregular Prograde Moons",
-    Version = "1.0",
-    Description = [[ Procedural Globe asset containing Neptune' irregular prograde
-        moons: Halimede, Psamathe and Neso. Blank globes and SPICE trails are generated for
-        each moon.]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license"
+  Name = "Neptune Irregular Prograde Moons",
+  Version = "1.0",
+  Description = [[ Procedural Globe asset containing Neptune' irregular prograde
+    moons: Halimede, Psamathe and Neso. Blank globes and SPICE trails are generated for
+    each moon.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
 }

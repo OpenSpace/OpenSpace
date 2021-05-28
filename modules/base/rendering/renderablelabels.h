@@ -123,7 +123,6 @@ private:
 
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 
-    std::string _speckFile;
     std::string _colorMapFile;
     std::string _labelFile;
     std::string _colorOptionString;

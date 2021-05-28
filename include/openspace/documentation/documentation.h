@@ -93,7 +93,7 @@ struct TestResult {
 
 
     /// Is \c true if the TestResult is positive, \c false otherwise
-    bool success;
+    bool success = false;
     /// Contains a list of offenses that were found in the test. Is empty if
     /// TestResult::Success is \c true
     std::vector<Offense> offenses;

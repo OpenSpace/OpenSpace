@@ -6,18 +6,18 @@ local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 local RenderablePlaneImageOnline = {
-    Identifier = "RenderablePlaneImageOnline",
-    Parent = transforms.SolarSystemBarycenter.Identifier,
-    Renderable = {
-        Type = "RenderablePlaneImageOnline",
-        Size = 3.0E11,
-        Origin = "Center",
-        Billboard = true,
-        URL = "http://data.openspaceproject.com/examples/renderableplaneimageonline.jpg"
-    },
-    GUI = {
-        Path = "/Examples"
-    }
+  Identifier = "RenderablePlaneImageOnline",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 3.0E11,
+    Origin = "Center",
+    Billboard = true,
+    URL = "http://data.openspaceproject.com/examples/renderableplaneimageonline.jpg"
+  },
+  GUI = {
+    Path = "/Examples"
+  }
 }
 
 

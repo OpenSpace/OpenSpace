@@ -83,9 +83,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DashboardItemVelocity::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_dashboarditem_velocity";
-    return doc;
+    return codegen::doc<Parameters>("base_dashboarditem_velocity");
 }
 
 DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary)
@@ -133,7 +131,7 @@ void DashboardItemVelocity::render(glm::vec2& penPosition) {
     }
     else {
         const DistanceUnit unit = static_cast<DistanceUnit>(_requestedUnit.value());
-        const double convertedD = convertDistance(speedPerSecond, unit);
+        const double convertedD = convertMeters(speedPerSecond, unit);
         dist = { convertedD, nameForDistanceUnit(unit, convertedD != 1.0) };
     }
 
@@ -159,7 +157,7 @@ glm::vec2 DashboardItemVelocity::size() const {
     }
     else {
         DistanceUnit unit = static_cast<DistanceUnit>(_requestedUnit.value());
-        double convertedD = convertDistance(d, unit);
+        double convertedD = convertMeters(d, unit);
         dist = { convertedD, nameForDistanceUnit(unit, convertedD != 1.0) };
     }
 

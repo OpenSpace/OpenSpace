@@ -10,172 +10,172 @@ local parentSpice = "JUPITER BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_other" }
 local trailColor = { 0.4, 0.3, 0.01 }
 local trailTags = {
-    "moonTrail_solarSystem",
-    "moonTrail_giants",
-    "moonTrail_jupiter",
-    "moonTrail_minor"
+  "moonTrail_solarSystem",
+  "moonTrail_giants",
+  "moonTrail_jupiter",
+  "moonTrail_minor"
 }
 
 local otherGroups = {
-    {
-        Identifier = "S2003J12",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "55066",
-        Radii = { 1000, 1000, 1000 },
-        Tags = tags,
-        TrailTags = trailTags,
-        GUI = {
-            Name = "S/2003 J 12",
-            Path = "/Solar System/Planets/Jupiter/Moons/Other Groups"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 482.69,
-        Kernels = kernel
+  {
+    Identifier = "S2003J12",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
     },
-    {
-        Identifier = "S/2003J3",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "55061",
-        Radii = { 2000, 2000, 2000 },
-        Tags = tags,
-        TrailTags = trailTags,
-        GUI = {
-            Name = "S/2003 J 3",
-            Path = "/Solar System/Planets/Jupiter/Moons/Other Groups"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 561.52,
-        Kernels = kernel
+    Spice = "55066",
+    Radii = { 1000, 1000, 1000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2003 J 12",
+      Path = "/Solar System/Planets/Jupiter/Moons/Other Groups"
     },
-    {
-        Identifier = "S2011J1",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "55074",
-        Radii = { 1000, 1000, 1000 },
-        Tags = tags,
-        TrailTags = trailTags,
-        GUI = {
-            Name = "S/2011 J 1",
-            Path = "/Solar System/Planets/Jupiter/Moons/Other Groups"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 582.22,
-        Kernels = kernel
+    TrailColor = trailColor,
+    OrbitPeriod = 482.69,
+    Kernels = kernel
+  },
+  {
+    Identifier = "S/2003J3",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
     },
-    {
-        Identifier = "S2003J19",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "55070",
-        Radii = { 2000, 2000, 2000 },
-        Tags = tags,
-        TrailTags = trailTags,
-        GUI = {
-            Name = "S/2003 J 19",
-            Path = "/Solar System/Planets/Jupiter/Moons/Other Groups"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 699.12,
-        Kernels = kernel
+    Spice = "55061",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2003 J 3",
+      Path = "/Solar System/Planets/Jupiter/Moons/Other Groups"
     },
-    {
-        Identifier = "S2003J10",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "55065",
-        Radii = { 2000, 2000, 2000 },
-        Tags = tags,
-        TrailTags = trailTags,
-        GUI = {
-            Name = "S/2003 J 10",
-            Path = "/Solar System/Planets/Jupiter/Moons/Other Groups"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 700.13,
-        Kernels = kernel
+    TrailColor = trailColor,
+    OrbitPeriod = 561.52,
+    Kernels = kernel
+  },
+  {
+    Identifier = "S2011J1",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
     },
-    {
-        Identifier = "S2003J23",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "55071",
-        Radii = { 2000, 2000, 2000 },
-        Tags = tags,
-        TrailTags = trailTags,
-        GUI = {
-            Name = "S/2003 J 23",
-            Path = "/Solar System/Planets/Jupiter/Moons/Other Groups"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 700.54,
-        Kernels = kernel
+    Spice = "55074",
+    Radii = { 1000, 1000, 1000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2011 J 1",
+      Path = "/Solar System/Planets/Jupiter/Moons/Other Groups"
     },
-    {
-        Identifier = "S2003J9",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "55064",
-        Radii = { 2000, 2000, 2000 },
-        Tags = tags,
-        TrailTags = trailTags,
-        GUI = {
-            Name = "S/2003 J 9",
-            Path = "/Solar System/Planets/Jupiter/Moons/Other Groups"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 752.84,
-        Kernels = kernel
+    TrailColor = trailColor,
+    OrbitPeriod = 582.22,
+    Kernels = kernel
+  },
+  {
+    Identifier = "S2003J19",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
     },
-    {
-        Identifier = "S2003J2",
-        Parent = {
-            Identifier = parentIdentifier,
-            Spice = parentSpice
-        },
-        Spice = "55060",
-        Radii = { 2000, 2000, 2000 },
-        Tags = tags,
-        TrailTags = trailTags,
-        GUI = {
-            Name = "S/2003 J 2",
-            Path = "/Solar System/Planets/Jupiter/Moons/Other Groups"
-        },
-        TrailColor = trailColor,
-        OrbitPeriod = 981.55,
-        Kernels = kernel
-    }
+    Spice = "55070",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2003 J 19",
+      Path = "/Solar System/Planets/Jupiter/Moons/Other Groups"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 699.12,
+    Kernels = kernel
+  },
+  {
+    Identifier = "S2003J10",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "55065",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2003 J 10",
+      Path = "/Solar System/Planets/Jupiter/Moons/Other Groups"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 700.13,
+    Kernels = kernel
+  },
+  {
+    Identifier = "S2003J23",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "55071",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2003 J 23",
+      Path = "/Solar System/Planets/Jupiter/Moons/Other Groups"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 700.54,
+    Kernels = kernel
+  },
+  {
+    Identifier = "S2003J9",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "55064",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2003 J 9",
+      Path = "/Solar System/Planets/Jupiter/Moons/Other Groups"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 752.84,
+    Kernels = kernel
+  },
+  {
+    Identifier = "S2003J2",
+    Parent = {
+      Identifier = parentIdentifier,
+      Spice = parentSpice
+    },
+    Spice = "55060",
+    Radii = { 2000, 2000, 2000 },
+    Tags = tags,
+    TrailTags = trailTags,
+    GUI = {
+      Name = "S/2003 J 2",
+      Path = "/Solar System/Planets/Jupiter/Moons/Other Groups"
+    },
+    TrailColor = trailColor,
+    OrbitPeriod = 981.55,
+    Kernels = kernel
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(
-    asset,
-    proceduralGlobes.createGlobes(otherGroups)
+  asset,
+  proceduralGlobes.createGlobes(otherGroups)
 )
 
 
 asset.meta = {
-    Name = "Jupiter Pasiphae Other Moons",
-    Version = "1.0",
-    Description = [[ Procedural Globe asset containing Jupiter's Other Group
-        moons: S2003J12, S/2003J3, S2011J1, S2003J19, S2003J10, S2003J23, S2003J9,
-        and S2003J2. Blank globes and SPICE trails are generated for each moon.]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license"
+  Name = "Jupiter Pasiphae Other Moons",
+  Version = "1.0",
+  Description = [[ Procedural Globe asset containing Jupiter's Other Group
+    moons: S2003J12, S/2003J3, S2011J1, S2003J19, S2003J10, S2003J23, S2003J9,
+    and S2003J2. Blank globes and SPICE trails are generated for each moon.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
 }

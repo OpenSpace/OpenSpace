@@ -3,47 +3,57 @@ local assetHelper = asset.require('util/asset_helper')
 
 
 local textures = asset.syncedResource({
-    Name = "Stars Textures",
-    Type = "HttpSynchronization",
-    Identifier = "stars_textures",
-    Version = 1
+  Name = "Stars Textures",
+  Type = "HttpSynchronization",
+  Identifier = "stars_textures",
+  Version = 1
 })
 
 local speck = asset.syncedResource({
-    Name = "Galah Speck Files",
-    Type = "HttpSynchronization",
-    Identifier = "gaia_galah",
-    Version = 1
+  Name = "Galah Speck Files",
+  Type = "HttpSynchronization",
+  Identifier = "gaia_galah",
+  Version = 1
 })
 
 local colorLUT = asset.syncedResource({
-    Name = "Stars Color Table",
-    Type = "HttpSynchronization",
-    Identifier = "stars_colormap",
-    Version = 2
+  Name = "Stars Color Table",
+  Type = "HttpSynchronization",
+  Identifier = "stars_colormap",
+  Version = 2
 })
 
 local gaia_abundance_galah = {
-    Identifier = "Gaia Abundance Galah",
-    Renderable = {
-        Type = "RenderableStars",
-        Enabled = false,
-        File = speck .. "/GaiaAbundGalah.speck",
-        Texture = textures .. "/halo.png",
-        -- ShapeTexture = textures .. "/disc.png",
-        MagnitudeExponent = 6.2,
-        SizeComposition = "Distance Modulus",
-        RenderMethod = "Texture Based",
-        ColorOption = "Other Data",
-        OtherData = "FeH",
-        ColorMap = colorLUT .. "/colorbv.cmap",
-        OtherDataColorMap = colorLUT .. "/viridis.cmap",
-        StaticFilter = -9999,
-        StaticFilterReplacement = 0.0
-    },
-    GUI = {
-        Path = "/Milky Way/Gaia"
+  Identifier = "Gaia Abundance Galah",
+  Renderable = {
+    Type = "RenderableStars",
+    Enabled = false,
+    File = speck .. "/GaiaAbundGalah.speck",
+    Texture = textures .. "/halo.png",
+    -- ShapeTexture = textures .. "/disc.png",
+    MagnitudeExponent = 6.2,
+    SizeComposition = "Distance Modulus",
+    RenderMethod = "Texture Based",
+    ColorOption = "Other Data",
+    OtherData = "FeH",
+    ColorMap = colorLUT .. "/colorbv.cmap",
+    OtherDataColorMap = colorLUT .. "/viridis.cmap",
+    StaticFilter = -9999,
+    StaticFilterReplacement = 0.0,
+    DataMapping = {
+      Bv = "colorb_v",
+      Luminance = "lum",
+      AbsoluteMagnitude = "absmag",
+      ApparentMagnitude = "appmag",
+      Vx = "vx",
+      Vy = "vy",
+      Vz = "vz",
+      Speed = "speed"
     }
+  },
+  GUI = {
+    Path = "/Milky Way/Gaia"
+  }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { gaia_abundance_galah })

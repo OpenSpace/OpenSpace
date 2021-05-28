@@ -35,10 +35,12 @@ public:
     /**
      * Constructor for ScriptlogDialog class
      *
-     * \param bindingDialog keybindingDialog that openend this window.
      * \param parent Pointer to parent Qt widget
      */
-    ScriptlogDialog(KeybindingsDialog* bindingDialog, QWidget* parent);
+    ScriptlogDialog(QWidget* parent);
+
+signals:
+    void scriptsSelected(std::string script);
 
 private slots:
     void saveChosenScripts();
@@ -46,7 +48,6 @@ private slots:
 private:
     void createWidgets();
 
-    KeybindingsDialog* _bindingDialog = nullptr;
     QListWidget* _scriptlogList = nullptr;
 };
 

@@ -1,8 +1,8 @@
 local Kernels = asset.syncedResource({
-    Name = "Mars Spice Kernels",
-    Type = "HttpSynchronization",
-    Identifier = "mars_kernels",
-    Version = 1
+  Name = "Mars Spice Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "mars_kernels",
+  Version = 1
 })
 
 asset.export("Kernels", Kernels .. '/mar097.bsp')
