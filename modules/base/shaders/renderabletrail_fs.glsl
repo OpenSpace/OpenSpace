@@ -27,8 +27,7 @@
 in float vs_positionDepth;
 in vec4 vs_gPosition;
 in float fade;
-noperspective in vec2 mathLine;
-in vec4 vs_positionNDC;
+in vec2 mathLine;
 
 uniform vec3 color;
 uniform int renderPhase;
@@ -67,39 +66,24 @@ Fragment getFragment() {
     // We can't expect a viewport of the form (0, 0, res.x, res.y) used to convert the
     // window coordinates from gl_FragCoord into [0, 1] coordinates, so we need to use
     // this more complicated method that is also used in the FXAA and HDR rendering steps
-    dvec2 xy = dvec2(gl_FragCoord.xy);
-    xy.x /= resolution.x;
-    xy.y /= resolution.y;
+    vec2 xy = vec2(gl_FragCoord.xy);
 
-    dvec2 ml = mathLine;
-    // xy.x = xy.x / (resolution.x / viewport[2]) + (viewport[0] / resolution.x);
-    // xy.y = xy.y / (resolution.y / viewport[3]) + (viewport[1] / resolution.y);
-
-    xy -= viewport.xy / resolution;
+    vec2 ml = mathLine;
+    xy -= viewport.xy;
     xy *= resolution / viewport.zw;
-// xy -= vec2(0.5, 0.0);
-// xy *= vec2(2.0, 1.0);
 
     double distanceCenter = length(ml - xy);
-    double dLW = double(lineWidth / 500.0);
-    const float blendFactor = 30.0;
+    double dLW = double(lineWidth);
+    const float blendFactor = 20.0;
     
     if (distanceCenter > dLW) {
-        // frag.color = vec4(1.0);
-        // frag.color.a = 0.0;
-        // frag.color.rg = vec2(1.0);
-        //discard;
+        frag.color.a = 0.0;
     }
     else {
         frag.color.a *= pow(float((dLW - distanceCenter) / dLW), blendFactor);
-        // frag.color.a = 1.0;
     }
 
-    // frag.color.rg = xy / resolution;
-    // frag.color.rg = (vs_positionNDC.xy + vec2(1.0)) / vec2(2.0);
-    // frag.color.b *= 0.0000000001;
-
-    // frag.color.rg = abs(xy - ml);
+    // frag.color.rg = vec2(abs(xy - ml)) * 1;
     // frag.color.rg = xy;
     // frag.color.rg = xy * vec2(2.0, 1.0);
     // frag.color.rg = ml;
@@ -108,7 +92,7 @@ Fragment getFragment() {
 #if 0
     frag.color.a += frag.color.r / 100000000.0;
 
-    const int Type = 1;
+    const int Type = 2;
 
     if (Type == 0) {
         frag.color.r = (float((dLW - distanceCenter) / dLW));
@@ -118,7 +102,7 @@ Fragment getFragment() {
     }
 
     if (Type == 1) {
-        frag.color.g = ml.x - xy.x;
+        frag.color.g = float(ml.x - xy.x);
         // frag.color.g = float(dLW - distanceCenter);
         // frag.color.g = (xy.x / resolution.x) * 2.0;
     }
