@@ -1275,10 +1275,10 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
             glBindFramebuffer(GL_FRAMEBUFFER, _downscaleVolumeRendering.framebuffer);
             const float s = raycaster->downscaleRender();
             GLint newVP[4] = {
-                viewport[0] * s,
-                viewport[1] * s,
-                static_cast<GLsizei>(viewport[2] * s),
-                static_cast<GLsizei>(viewport[3] * s)
+                static_cast<GLint>(viewport[0] * s),
+                static_cast<GLint>(viewport[1] * s),
+                static_cast<GLint>(viewport[2] * s),
+                static_cast<GLint>(viewport[3] * s)
             };
             global::renderEngine->openglStateCache().setViewportState(newVP);
 
