@@ -1,13 +1,7 @@
 local assetHelper = asset.require('util/asset_helper')
 
 local colormaps = asset.require('./stars_colormap').ColorMaps
-
-local textures = asset.syncedResource({
-  Name = "Stars Textures",
-  Type = "HttpSynchronization",
-  Identifier = "stars_textures",
-  Version = 1
-})
+local textures = asset.require('./stars_textures').textures
 
 local speck = asset.syncedResource({
   Name = "Stars Speck Files",
