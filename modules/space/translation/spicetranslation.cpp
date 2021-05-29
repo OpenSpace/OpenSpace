@@ -65,9 +65,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FixedDateInfo = {
         "FixedDate",
         "Fixed Date",
-        "A time to lock the position to."
+        "A time to lock the position to. Setting this to an empty string will "
+        "unlock the time and return to position based on current simulation time."
     };
-
 
     struct [[codegen::Dictionary(SpiceTranslation)]] Parameters {
         // [[codegen::verbatim(TargetInfo.description)]]
@@ -132,10 +132,6 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
         }
     }
 
-    if (p.fixedDate.has_value()) {
-        _fixedEphemerisTime = SpiceManager::ref().ephemerisTimeFromDate(*p.fixedDate);
-    }
-
     _target.onChange([this]() {
         _cachedTarget = _target;
         requireUpdate();
@@ -158,14 +154,19 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
     addProperty(_frame);
 
     _fixedDate.onChange([this]() {
-        _fixedEphemerisTime = SpiceManager::ref().ephemerisTimeFromDate(_fixedDate);
+        if (_fixedDate.value().empty()) {
+            _fixedEphemerisTime = std::nullopt;
+        }
+        else {
+            _fixedEphemerisTime = SpiceManager::ref().ephemerisTimeFromDate(_fixedDate);
+        }
     });
+    _fixedDate = p.fixedDate.value_or(_fixedDate);
     addProperty(_fixedDate);
 
     _target = p.target;
     _observer = p.observer;
     _frame = p.frame.value_or(_frame);
-    _fixedDate = p.fixedDate.value_or("");
 }
 
 glm::dvec3 SpiceTranslation::position(const UpdateData& data) const {

@@ -60,7 +60,6 @@ local legDeployTime = "2018 NOV 26 19:43:06.68" -- entry + 243s
 local landerSeperationTime = "2018 NOV 26 19:44:51.68" -- entry + 348s
 local touchdownTime = "2018 NOV 26 19:45:32.68" -- entry + 389s
 local panelDeployTime = "2018 NOV 26 19:45:33.68" -- entry + 390s
-local foreverTime = "2018 NOV 26 20:17:50.68" -- entry + 2327s
 
 local kernelTouchdownTime = "2018 NOV 26 19:45:32.3"
 local spiceRotationEndTime = "2018 NOV 26 19:51:39"
@@ -632,7 +631,6 @@ local Insight_Legs_Deployed_tex = {
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = legDeployTime,
-    End = foreverTime
   },
   GUI = {
     Hidden = true,
@@ -653,7 +651,6 @@ local Insight_Legs_Deployed_AO06 = {
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = legDeployTime,
-    End = foreverTime
   },
   GUI = {
     Hidden = true,
@@ -722,7 +719,6 @@ local Insight_Panels_Deployed_tex = {
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = panelDeployTime,
-    End = foreverTime
   },
   GUI = {
     Hidden = true,
@@ -743,7 +739,6 @@ local Insight_Panels_Deployed_tex2 = {
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = panelDeployTime,
-    End = foreverTime
   },
   GUI = {
     Hidden = true,
@@ -764,7 +759,6 @@ local Insight_Panels_Deployed_AO06 = {
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = panelDeployTime,
-    End = foreverTime
   },
   GUI = {
     Hidden = true,

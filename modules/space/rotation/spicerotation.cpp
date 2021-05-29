@@ -55,7 +55,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FixedDateInfo = {
         "FixedDate",
         "Fixed Date",
-        "A time to lock the roation to."
+        "A time to lock the rotation to. Setting this to an empty string will "
+        "unlock the time and return to rotation based on current simulation time."
     };
 
     struct [[codegen::Dictionary(SpiceRotation)]] Parameters {
@@ -107,10 +108,15 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
         }
     }
 
-    if (p.fixedDate.has_value()) {
-        _fixedEphemerisTime = SpiceManager::ref().ephemerisTimeFromDate(*p.fixedDate);
-    }
-    _fixedDate = p.fixedDate.value_or("");
+    _fixedDate.onChange([this]() {
+        if (_fixedDate.value().empty()) {
+            _fixedEphemerisTime = std::nullopt;
+        }
+        else {
+            _fixedEphemerisTime = SpiceManager::ref().ephemerisTimeFromDate(_fixedDate);
+        }
+    });
+    _fixedDate = p.fixedDate.value_or(_fixedDate);
     addProperty(_fixedDate);
 
     if (dictionary.hasKey(TimeFrameInfo.identifier)) {
@@ -128,9 +134,7 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
 
     _sourceFrame.onChange([this]() { requireUpdate(); });
     _destinationFrame.onChange([this]() { requireUpdate(); });
-    _fixedDate.onChange([this]() {
-        _fixedEphemerisTime = SpiceManager::ref().ephemerisTimeFromDate(_fixedDate);
-    });
+
 }
 
 glm::dmat3 SpiceRotation::matrix(const UpdateData& data) const {

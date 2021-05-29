@@ -264,7 +264,6 @@ int rotationMatrix(lua_State* L) {
     ghoul::lua::push(L, 1, rotationMatrix);
 
     return 1;
-
 }
 
 /**
