@@ -1,7 +1,7 @@
 local assetHelper = asset.require("util/asset_helper")
 
-local colorLUT = asset.require('./stars_colormap').ColorMaps
-local textures = asset.require('./stars_textures').textures
+local colorLUT = asset.require('scene/digitaluniverse/stars_colormap').ColorMaps
+local textures = asset.require('scene/digitaluniverse/stars_textures').textures
 
 -- Download a preprocessed binary octree of Radial Velocity subset values per star (preprocessed into 8 binary files).
 local starsFolder = asset.syncedResource({
