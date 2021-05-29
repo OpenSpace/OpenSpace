@@ -52,6 +52,12 @@ namespace {
         "The time frame in which the spice kernels are valid."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo FixedDateInfo = {
+        "FixedDate",
+        "Fixed Date",
+        "A time to lock the roation to."
+    };
+
     struct [[codegen::Dictionary(SpiceRotation)]] Parameters {
         // [[codegen::verbatim(SourceInfo.description)]]
         std::string sourceFrame
@@ -66,6 +72,10 @@ namespace {
         // [[codegen::verbatim(TimeFrameInfo.description)]]
         std::optional<ghoul::Dictionary> timeFrame
             [[codegen::reference("core_time_frame")]];
+
+        // [[codegen::verbatim(FixedDateInfo.description)]]
+        std::optional<std::string> fixedDate
+            [[codegen::annotation("A time to lock the rotation to")]];
     };
 #include "spicerotation_codegen.cpp"
 } // namespace
@@ -79,6 +89,7 @@ documentation::Documentation SpiceRotation::Documentation() {
 SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
     : _sourceFrame(SourceInfo)
     , _destinationFrame(DestinationInfo)
+    , _fixedDate(FixedDateInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -96,6 +107,12 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
         }
     }
 
+    if (p.fixedDate.has_value()) {
+        _fixedEphemerisTime = SpiceManager::ref().ephemerisTimeFromDate(*p.fixedDate);
+    }
+    _fixedDate = p.fixedDate.value_or("");
+    addProperty(_fixedDate);
+
     if (dictionary.hasKey(TimeFrameInfo.identifier)) {
         ghoul::Dictionary timeFrameDictionary =
             dictionary.value<ghoul::Dictionary>(TimeFrameInfo.identifier);
@@ -111,16 +128,23 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
 
     _sourceFrame.onChange([this]() { requireUpdate(); });
     _destinationFrame.onChange([this]() { requireUpdate(); });
+    _fixedDate.onChange([this]() {
+        _fixedEphemerisTime = SpiceManager::ref().ephemerisTimeFromDate(_fixedDate);
+    });
 }
 
 glm::dmat3 SpiceRotation::matrix(const UpdateData& data) const {
     if (_timeFrame && !_timeFrame->isActive(data.time)) {
         return glm::dmat3(1.0);
     }
+    double time = data.time.j2000Seconds();
+    if (_fixedEphemerisTime.has_value()) {
+        time = *_fixedEphemerisTime;
+    }
     return SpiceManager::ref().positionTransformMatrix(
         _sourceFrame,
         _destinationFrame,
-        data.time.j2000Seconds()
+        time
     );
 }
 

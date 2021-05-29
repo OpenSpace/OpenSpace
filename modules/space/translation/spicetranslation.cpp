@@ -62,6 +62,13 @@ namespace {
         "should be retrieved. The default value is GALACTIC."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo FixedDateInfo = {
+        "FixedDate",
+        "Fixed Date",
+        "A time to lock the position to."
+    };
+
+
     struct [[codegen::Dictionary(SpiceTranslation)]] Parameters {
         // [[codegen::verbatim(TargetInfo.description)]]
         std::string target
@@ -73,6 +80,9 @@ namespace {
 
         std::optional<std::string> frame
             [[codegen::annotation("A valid SPICE NAIF name for a reference frame")]];
+
+        std::optional<std::string> fixedDate
+            [[codegen::annotation("A date to lock the position to")]];
 
         // A single kernel or list of kernels that this SpiceTranslation depends on. All
         // provided kernels will be loaded before any other operation is performed
@@ -92,6 +102,7 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
     , _observer(ObserverInfo)
     , _frame(FrameInfo, DefaultReferenceFrame)
     , _cachedFrame(DefaultReferenceFrame)
+    , _fixedDate(FixedDateInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -121,6 +132,10 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
         }
     }
 
+    if (p.fixedDate.has_value()) {
+        _fixedEphemerisTime = SpiceManager::ref().ephemerisTimeFromDate(*p.fixedDate);
+    }
+
     _target.onChange([this]() {
         _cachedTarget = _target;
         requireUpdate();
@@ -142,19 +157,30 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
     });
     addProperty(_frame);
 
+    _fixedDate.onChange([this]() {
+        _fixedEphemerisTime = SpiceManager::ref().ephemerisTimeFromDate(_fixedDate);
+    });
+    addProperty(_fixedDate);
+
     _target = p.target;
     _observer = p.observer;
     _frame = p.frame.value_or(_frame);
+    _fixedDate = p.fixedDate.value_or("");
 }
 
 glm::dvec3 SpiceTranslation::position(const UpdateData& data) const {
     double lightTime = 0.0;
+
+    double time = data.time.j2000Seconds();
+    if (_fixedEphemerisTime.has_value()) {
+        time = *_fixedEphemerisTime;
+    }
     return SpiceManager::ref().targetPosition(
         _cachedTarget,
         _cachedObserver,
         _cachedFrame,
         {},
-        data.time.j2000Seconds(),
+        time,
         lightTime
     ) * 1000.0;
 }
