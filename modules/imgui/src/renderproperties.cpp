@@ -390,7 +390,7 @@ void renderDoubleProperty(properties::Property* prop, const std::string& ownerNa
         min,
         max,
         "%.5f",
-        p->exponent()
+        ImGuiSliderFlags_Logarithmic
     );
     if (showTooltip) {
         renderTooltip(prop, tooltipDelay);
@@ -545,7 +545,7 @@ void renderFloatProperty(Property* prop, const std::string& ownerName,
         min,
         max,
         "%.5f",
-        p->exponent()
+        ImGuiSliderFlags_Logarithmic
     );
     if (showTooltip) {
         renderTooltip(prop, tooltipDelay);
@@ -577,7 +577,7 @@ void renderVec2Property(Property* prop, const std::string& ownerName,
         min,
         max,
         "%.5f",
-        p->exponent()
+        ImGuiSliderFlags_Logarithmic
     );
     if (showTooltip) {
         renderTooltip(prop, tooltipDelay);
@@ -621,7 +621,7 @@ void renderVec3Property(Property* prop, const std::string& ownerName,
             min,
             max,
             "%.5f",
-            p->exponent()
+            ImGuiSliderFlags_Logarithmic
         );
     }
     if (showTooltip) {
@@ -666,7 +666,7 @@ void renderVec4Property(Property* prop, const std::string& ownerName,
             min,
             max,
             "%.5f",
-            p->exponent()
+            ImGuiSliderFlags_Logarithmic
         );
     }
     if (showTooltip) {
@@ -702,7 +702,7 @@ void renderDVec2Property(Property* prop, const std::string& ownerName,
         min,
         max,
         "%.5f",
-        p->exponent()
+        ImGuiSliderFlags_Logarithmic
     );
     if (showTooltip) {
         renderTooltip(prop, tooltipDelay);
@@ -738,7 +738,7 @@ void renderDVec3Property(Property* prop, const std::string& ownerName,
         min,
         max,
         "%.5f",
-        p->exponent()
+        ImGuiSliderFlags_Logarithmic
     );
     if (showTooltip) {
         renderTooltip(prop, tooltipDelay);
@@ -774,7 +774,7 @@ void renderDVec4Property(Property* prop, const std::string& ownerName,
         min,
         max,
         "%.5f",
-        p->exponent()
+        ImGuiSliderFlags_Logarithmic
     );
     if (showTooltip) {
         renderTooltip(prop, tooltipDelay);
@@ -822,7 +822,7 @@ void renderDMat2Property(Property* prop, const std::string& ownerName,
         min,
         max,
         "%.5f",
-        p->exponent()
+        ImGuiSliderFlags_Logarithmic
     );
     changed |= ImGui::SliderFloat2(
         "[1]",
@@ -830,7 +830,7 @@ void renderDMat2Property(Property* prop, const std::string& ownerName,
         min,
         max,
         "%.5f",
-        p->exponent()
+        ImGuiSliderFlags_Logarithmic
     );
 
     if (showTooltip) {
@@ -881,7 +881,7 @@ void renderDMat3Property(Property* prop, const std::string& ownerName,
         min,
         max,
         "%.5f",
-        p->exponent()
+        ImGuiSliderFlags_Logarithmic
     );
     changed |= ImGui::SliderFloat3(
         "[1]",
@@ -889,7 +889,7 @@ void renderDMat3Property(Property* prop, const std::string& ownerName,
         min,
         max,
         "%.5f",
-        p->exponent()
+        ImGuiSliderFlags_Logarithmic
     );
     changed |= ImGui::SliderFloat3(
         "[2]",
@@ -897,7 +897,7 @@ void renderDMat3Property(Property* prop, const std::string& ownerName,
         min,
         max,
         "%.5f",
-        p->exponent()
+        ImGuiSliderFlags_Logarithmic
     );
 
     if (showTooltip) {
@@ -950,7 +950,7 @@ void renderDMat4Property(Property* prop, const std::string& ownerName,
         min,
         max,
         "%.5f",
-        p->exponent()
+        ImGuiSliderFlags_Logarithmic
     );
     changed |= ImGui::SliderFloat4(
         "[1]",
@@ -958,7 +958,7 @@ void renderDMat4Property(Property* prop, const std::string& ownerName,
         min,
         max,
         "%.5f",
-        p->exponent()
+        ImGuiSliderFlags_Logarithmic
     );
     changed |= ImGui::SliderFloat4(
         "[2]",
@@ -966,7 +966,7 @@ void renderDMat4Property(Property* prop, const std::string& ownerName,
         min,
         max,
         "%.5f",
-        p->exponent()
+        ImGuiSliderFlags_Logarithmic
     );
     changed |= ImGui::SliderFloat4(
         "[3]",
@@ -974,7 +974,7 @@ void renderDMat4Property(Property* prop, const std::string& ownerName,
         min,
         max,
         "%.5f",
-        p->exponent()
+        ImGuiSliderFlags_Logarithmic
     );
 
     if (showTooltip) {
