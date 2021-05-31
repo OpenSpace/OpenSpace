@@ -24,7 +24,7 @@ local PlutoKeplerianTrail = {
         Resolution = 1000,
         Enabled = false
     },
-    Tag = { "planetTrail_solarSystem", "planetTrail_dwarf" },
+    Tag = { "planetTrail_dwarf" },
     GUI = {
         Name = "Pluto Keplerian Trail",
         Path = "/Solar System/Dwarf Planets/Pluto",
