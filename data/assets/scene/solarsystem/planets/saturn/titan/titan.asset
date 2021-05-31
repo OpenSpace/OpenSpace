@@ -29,11 +29,11 @@ local Titan = {
       Enabled = false,
       FileName = labelsPath .. "/titan.labels",
       AlignmentOption = "Horizontally", -- or Circularly
-      FontSize = 14.0,
-      Size = 10.0,
+      FontSize = 20.0,
+      Size = 9.6,
       FadeInEnabled = true,
       FadeOutEnabled = true,
-      FadeDistances = { 6000000.0, 7500000.0 },
+      FadeDistances = { 5000000.0, 7500000.0 },
       DistanceEPS = 1350000.0,
       Color = { 1.0, 1.0, 0.0 }
     }
