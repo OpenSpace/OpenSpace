@@ -37,12 +37,11 @@ local L5Label = {
   Renderable = {
     Enabled = false,
     Type = "RenderableLabels",
-    LabelText = "L5",
+    Text = "L5",
     FontSize = 20,
-    LabelSize = 8.5,
-    LabelMaxSize = 100.0,
-    LabelMinSize = 1.0,
-    LabelOrientationOption = "Camera View Direction",
+    Size = 8.5,
+    MinMaxSize = { 1.0, 100.0 },
+    OrientationOption = "Camera View Direction",
     BlendMode = "Normal",
     EnableFading = false
   },

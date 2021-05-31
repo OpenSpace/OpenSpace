@@ -140,7 +140,7 @@ RenderablePrism::RenderablePrism(const ghoul::Dictionary& dictionary)
     _nLines = p.lines.value_or(_nShapeSegments);
     addProperty(_nLines);
 
-    _radius.setViewOption(properties::Property::ViewOptions::Logarithmic);
+    _radius.setExponent(10.f);
     _radius.onChange([&]() { _prismIsDirty = true; });
     _radius = p.radius.value_or(_radius);
     addProperty(_radius);
@@ -152,7 +152,7 @@ RenderablePrism::RenderablePrism(const ghoul::Dictionary& dictionary)
     _lineColor = p.color.value_or(_lineColor);
     addProperty(_lineColor);
 
-    _length.setViewOption(properties::Property::ViewOptions::Logarithmic);
+    _length.setExponent(12.f);
     _length.onChange([&]() { _prismIsDirty = true; });
     _length = p.length.value_or(_length);
     addProperty(_length);
