@@ -22,42 +22,27 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEMODEL___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLEMODEL___H__
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEPRISM___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLEPRISM___H__
 
 #include <openspace/rendering/renderable.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/matrix/dmat4property.h>
-#include <openspace/properties/matrix/mat3property.h>
-#include <openspace/properties/scalar/boolproperty.h>
+
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <openspace/util/distanceconversion.h>
-#include <ghoul/misc/managedmemoryuniqueptr.h>
-#include <ghoul/io/model/modelreader.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
-#include <memory>
+#include <ghoul/glm.h>
 
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
-
-namespace ghoul::modelgeometry { class ModelGeometry; }
+namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
-struct RenderData;
-struct UpdateData;
-class LightSource;
-
 namespace documentation { struct Documentation; }
 
-class RenderableModel : public Renderable {
+class RenderablePrism : public Renderable {
 public:
-    RenderableModel(const ghoul::Dictionary& dictionary);
-    ~RenderableModel() = default;
+    RenderablePrism(const ghoul::Dictionary& dictionary);
 
     void initialize() override;
     void initializeGL() override;
@@ -71,51 +56,28 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    enum class AnimationMode {
-        Once = 0,
-        LoopFromStart,
-        LoopInfinitely,
-        BounceFromStart,
-        BounceInfinitely
-    };
+    void updateVertexData();
+    void updateBufferData();
 
-    std::unique_ptr<ghoul::modelgeometry::ModelGeometry> _geometry;
-    double _modelScale = 1.0;
-    bool _invertModelScale = false;
-    bool _forceRenderInvisible = false;
-    bool _notifyInvisibleDropped = true;
-    std::string _animationStart;
-    AnimationMode _animationMode = AnimationMode::Once;
-    properties::BoolProperty _enableAnimation;
+    // Properties
+    properties::IntProperty _nShapeSegments;
+    properties::IntProperty _nLines;
+    properties::FloatProperty _radius;
+    properties::FloatProperty _lineWidth;
+    properties::Vec3Property _lineColor;
+    properties::FloatProperty _length;
+    UniformCache(modelViewProjection, color) _uniformCache;
 
-    properties::FloatProperty _ambientIntensity;
-    properties::FloatProperty _diffuseIntensity;
-    properties::FloatProperty _specularIntensity;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+    GLuint _vaoId = 0;
+    GLuint _vboId = 0;
+    GLuint _iboId = 0;
+    std::vector<float> _vertexArray;
+    std::vector<uint8_t> _indexArray;
 
-    properties::BoolProperty _performShading;
-    properties::BoolProperty _disableFaceCulling;
-    properties::DMat4Property _modelTransform;
-    properties::Vec3Property _rotationVec;
-
-    properties::BoolProperty _disableDepthTest;
-    properties::BoolProperty _enableOpacityBlending;
-    properties::OptionProperty _blendingFuncOption;
-
-    ghoul::opengl::ProgramObject* _program = nullptr;
-    UniformCache(opacity, nLightSources, lightDirectionsViewSpace, lightIntensities,
-        modelViewTransform, normalTransform, projectionTransform,
-        performShading, ambientIntensity, diffuseIntensity,
-        specularIntensity, opacityBlending) _uniformCache;
-
-    std::vector<std::unique_ptr<LightSource>> _lightSources;
-
-    // Buffers for uniform uploading
-    std::vector<float> _lightIntensitiesBuffer;
-    std::vector<glm::vec3> _lightDirectionsViewSpaceBuffer;
-
-    properties::PropertyOwner _lightSourcePropertyOwner;
+    bool _prismIsDirty = false;
 };
 
-}  // namespace openspace
+} // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLEMODEL___H__
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLEPRISM___H__
