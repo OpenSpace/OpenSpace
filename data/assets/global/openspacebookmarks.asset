@@ -15,7 +15,7 @@ local bookmarksCSV = asset.syncedResource({
 local nodes = {}
 
 asset.onInitialize(function ()
-  nodes = bookmarkHelper.getBookmarks('OpenSpace Bookmarks', bookmarksCSV .. '/bookmarks.csv.txt')
+  nodes = bookmarkHelper.getBookmarks('OpenSpace Bookmarks', bookmarksCSV .. '/bookmarks.csv')
   for _, n in ipairs(nodes) do
     openspace.addSceneGraphNode(n);
   end

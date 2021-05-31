@@ -4,6 +4,7 @@ local CreateFocusNodes = false
 local AddMarsLayers = true
 local AddMoonLayers = true
 local AddMercuryLayers = true
+local DataFolder = openspace.absPath('${BASE}/../OpenSpaceData')
 ----------------------------------------
 
 -- If you add layers for different planets than listed here, be sure to add an
@@ -25,11 +26,11 @@ local vrt_folders = {
     -- example:   'C:/OpenSpace/GlobeBrowsingData/Mars/CTX'
 
     -- We recommend using this folder for CTX
-    openspace.absPath('${BASE}/../OpenSpaceData/Mars/CTX'),
+    DataFolder .. '/Mars/CTX',
     -- if not and you have a custom path for CTX layers, enter it below
     '',
     -- We recommend using this folder for HiRISE
-    openspace.absPath('${BASE}/../OpenSpaceData/Mars/HiRISE'),
+    DataFolder .. '/Mars/HiRISE',
     -- if not and you have a custom path for HiRISE layers, enter it below
     ''
   },
@@ -39,8 +40,8 @@ local vrt_folders = {
     -- if areas overlap, images from the lower results will overwrite the images from former
     -- results
     -- example:  'C:/OpenSpace/GlobeBrowsingData/Moon'
-    openspace.absPath('${BASE}/../OpenSpaceData/Moon'),
-    openspace.absPath('${BASE}/../OpenSpaceData/Apollo'),
+    DataFolder .. '/Moon',
+    DataFolder .. '/Apollo',
     ''
   },
   Mercury = {
@@ -49,7 +50,7 @@ local vrt_folders = {
     -- if areas overlap, images from the lower results will overwrite the images from former
     -- results
     -- example:  'C:/OpenSpace/GlobeBrowsingData/Mercury'
-    openspace.absPath('${BASE}/../OpenSpaceData/Mercury'),
+    DataFolder .. '/Mercury',
     ''
   }
 }

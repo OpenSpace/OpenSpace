@@ -116,7 +116,7 @@ local VoyagerTrailCruiseEarthJupiter = {
       Kernels = Kernels
     },
     Color = { 0.70, 0.50, 0.20 },
-    StartTime = "1977 SEP 05",
+    StartTime = "1977-AUG-20 16:07:06.535",
     EndTime = "1979 JUL 06",
     SampleInterval = 669 * 2  -- 669 is the number of days between the Start and End time
   },

@@ -71,9 +71,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation TimeDependentScale::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_scale_timedependent";
-    return doc;
+    return codegen::doc<Parameters>("base_scale_timedependent");
 }
 
 TimeDependentScale::TimeDependentScale(const ghoul::Dictionary& dictionary)

@@ -95,8 +95,6 @@
 
 namespace {
     constexpr const char* _loggerCat = "OpenSpaceEngine";
-    constexpr const int CacheVersion = 1;
-
 } // namespace
 
 namespace openspace {
@@ -155,9 +153,7 @@ void OpenSpaceEngine::registerPathTokens() {
     // overwrite the default path of the cfg directory
     using T = std::string;
     for (const std::pair<const T, T>& path : global::configuration->pathTokens) {
-        std::string fullKey = ghoul::filesystem::FileSystem::TokenOpeningBraces +
-            path.first +
-            ghoul::filesystem::FileSystem::TokenClosingBraces;
+        std::string fullKey = "${" + path.first + "}";
         LDEBUG(fmt::format("Registering path {}: {}", fullKey, path.second));
 
         const bool overrideBase = (fullKey == "${BASE}");
@@ -189,7 +185,7 @@ void OpenSpaceEngine::initialize() {
         global::versionChecker->requestLatestVersion(versionCheckUrl);
     }
 
-    std::string cacheFolder = absPath("${CACHE}");
+    std::string cacheFolder = absPath("${CACHE}").string();
     if (global::configuration->usePerProfileCache) {
         std::string profile = global::configuration->profile;
         if (profile.empty()) {
@@ -210,14 +206,13 @@ void OpenSpaceEngine::initialize() {
 
     // Create directories that doesn't exist
     for (const std::string& token : FileSys.tokens()) {
-        if (!FileSys.directoryExists(token)) {
-            std::string p = absPath(token);
-            FileSys.createDirectory(p, ghoul::filesystem::FileSystem::Recursive::Yes);
+        if (!std::filesystem::is_directory(token)) {
+            std::filesystem::create_directories(absPath(token));
         }
     }
 
     try {
-        FileSys.createCacheManager(cacheFolder, CacheVersion);
+        FileSys.createCacheManager(cacheFolder);
     }
     catch (const ghoul::RuntimeError& e) {
         LFATAL("Could not create Cache Manager");
@@ -298,20 +293,20 @@ void OpenSpaceEngine::initialize() {
 
     // Convert profile to scene file (if was provided in configuration file)
     if (!global::configuration->profile.empty()) {
-        std::string inputProfilePath = absPath("${PROFILES}");
-        std::string outputScenePath = absPath("${TEMPORARY}");
+        std::string inputProfilePath = absPath("${PROFILES}").string();
+        std::string outputScenePath = absPath("${TEMPORARY}").string();
         std::string inputProfile = inputProfilePath + "/" + global::configuration->profile
             + ".profile";
-        std::string inputUserProfile = absPath("${USER_PROFILES}") + "/" +
+        std::string inputUserProfile = absPath("${USER_PROFILES}").string() + "/" +
             global::configuration->profile + ".profile";
         std::string outputAsset = outputScenePath + "/" + global::configuration->profile
             + ".asset";
 
-        if (FileSys.fileExists(inputUserProfile)) {
+        if (std::filesystem::is_regular_file(inputUserProfile)) {
             inputProfile = inputUserProfile;
         }
 
-        if (!FileSys.fileExists(inputProfile)) {
+        if (!std::filesystem::is_regular_file(inputProfile)) {
             LERROR(fmt::format(
                 "Could not load profile '{}': File does not exist", inputProfile)
             );
@@ -352,7 +347,7 @@ void OpenSpaceEngine::initialize() {
     // Set up asset loader
     global::openSpaceEngine->_assetManager = std::make_unique<AssetManager>(
         global::scriptEngine->luaState(),
-        FileSys.absPath("${ASSETS}")
+        absPath("${ASSETS}").string()
     );
 
     global::scriptEngine->addLibrary(
@@ -394,7 +389,8 @@ void OpenSpaceEngine::initialize() {
 }
 
 std::string OpenSpaceEngine::generateFilePath(std::string openspaceRelativePath) {
-    std::string path = absPath(openspaceRelativePath);
+    // @TODO (abock, 2021-05-16) This whole function can die, I think
+    std::string path = absPath(openspaceRelativePath).string();
     // Needs to handle either windows (which seems to require double back-slashes)
     // or unix path slashes.
     const std::string search = "\\";
@@ -959,19 +955,16 @@ void OpenSpaceEngine::writeStaticDocumentation() {
 }
 
 void OpenSpaceEngine::createUserDirectoriesIfNecessary() {
-    LTRACE(absPath("${USER}"));
+    LTRACE(absPath("${USER}").string());
 
     if (!std::filesystem::exists(absPath("${USER_ASSETS}"))) {
-        FileSys.createDirectory(absPath("${USER_ASSETS}"),
-            ghoul::filesystem::FileSystem::Recursive::Yes);
+        std::filesystem::create_directories(absPath("${USER_ASSETS}"));
     }
     if (!std::filesystem::exists(absPath("${USER_PROFILES}"))) {
-        FileSys.createDirectory(absPath("${USER_PROFILES}"),
-            ghoul::filesystem::FileSystem::Recursive::Yes);
+        std::filesystem::create_directories(absPath("${USER_PROFILES}"));
     }
     if (!std::filesystem::exists(absPath("${USER_CONFIG}"))) {
-        FileSys.createDirectory(absPath("${USER_CONFIG}"),
-            ghoul::filesystem::FileSystem::Recursive::Yes);
+        std::filesystem::create_directories(absPath("${USER_CONFIG}"));
     }
 }
 
@@ -983,12 +976,13 @@ void OpenSpaceEngine::runGlobalCustomizationScripts() {
     global::scriptEngine->initializeLuaState(state);
 
     for (const std::string& script : global::configuration->globalCustomizationScripts) {
-        std::string s = absPath(script);
-        if (FileSys.fileExists(s)) {
+        std::filesystem::path s = absPath(script);
+        if (std::filesystem::is_regular_file(s)) {
             try {
                 LINFO(fmt::format("Running global customization script: {}", s));
-                ghoul::lua::runScriptFile(state, s);
-            } catch (const ghoul::RuntimeError& e) {
+                ghoul::lua::runScriptFile(state, s.string());
+            }
+            catch (const ghoul::RuntimeError& e) {
                 LERRORC(e.component, e.message);
             }
         }
@@ -1004,19 +998,19 @@ void OpenSpaceEngine::loadFonts() {
     using T = std::string;
     for (const std::pair<const T, T>& font : global::configuration->fonts) {
         std::string key = font.first;
-        std::string fontName = absPath(font.second);
+        std::filesystem::path fontName = absPath(font.second);
 
-        if (!FileSys.fileExists(fontName)) {
-            LERROR(fmt::format("Could not find font '{}' for key '{}'", fontName, key));
+        if (!std::filesystem::is_regular_file(fontName)) {
+            LERROR(fmt::format("Could not find font {} for key '{}'", fontName, key));
             continue;
         }
 
-        LDEBUG(fmt::format("Registering font '{}' with key '{}'", fontName, key));
+        LDEBUG(fmt::format("Registering font {} with key '{}'", fontName, key));
         bool success = global::fontManager->registerFontPath(key, fontName);
 
         if (!success) {
             LERROR(fmt::format(
-                "Error registering font '{}' with key '{}'", fontName, key
+                "Error registering font {} with key '{}'", fontName, key
             ));
         }
     }
@@ -1048,7 +1042,7 @@ void OpenSpaceEngine::writeSceneDocumentation() {
 
 
 
-        path = absPath(path) + "/";
+        path = absPath(path).string() + '/';
         _documentationJson += "{\"name\":\"Keybindings\",\"identifier\":\"";
         _documentationJson += global::keybindingManager->jsonName() + "\",";
         _documentationJson += "\"data\":";
@@ -1475,8 +1469,8 @@ void OpenSpaceEngine::handleDragDrop(const std::string& file) {
     std::filesystem::path f(file);
 
     ghoul::lua::LuaState s(ghoul::lua::LuaState::IncludeStandardLibrary::Yes);
-    std::string absolutePath = absPath("${SCRIPTS}/drag_drop_handler.lua");
-    int status = luaL_loadfile(s, absolutePath.c_str());
+    std::filesystem::path absolutePath = absPath("${SCRIPTS}/drag_drop_handler.lua");
+    int status = luaL_loadfile(s, absolutePath.string().c_str());
     if (status != LUA_OK) {
         std::string error = lua_tostring(s, -1);
         LERROR(error);

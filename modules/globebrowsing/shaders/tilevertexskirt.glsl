@@ -22,10 +22,23 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef TILE_VERTEX_SKIRT_HGLSL
+#define TILE_VERTEX_SKIRT_HGLSL
 
-layout(location = 0) in vec3 in_position;
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-void main() {
-    gl_Position = vec4(in_position, 1.0);
+uniform int xSegments;
+uniform float skirtLength;
+
+bool tileVertexIsSkirtVertex() {
+  int vertexIDx = gl_VertexID % (xSegments + 3);
+  int vertexIDy = gl_VertexID / (xSegments + 3);
+  return vertexIDx == 0 || vertexIDy == 0 ||
+         vertexIDx == (xSegments + 2) || vertexIDy == (xSegments + 2);
 }
+
+float getTileVertexSkirtLength() {
+  return tileVertexIsSkirtVertex() ? skirtLength : 0.0;
+}
+
+#endif // TILE_VERTEX_SKIRT_HGLSL

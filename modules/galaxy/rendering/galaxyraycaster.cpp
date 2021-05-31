@@ -58,7 +58,7 @@ void GalaxyRaycaster::initialize() {
 void GalaxyRaycaster::renderEntryPoints(const RenderData& data,
                                         ghoul::opengl::ProgramObject& program)
 {
-    program.setUniform("modelViewTransform", glm::mat4(modelViewTransform(data)));
+    program.setUniform("modelViewTransform", modelViewTransform(data));
     program.setUniform("projectionTransform", data.camera.projectionMatrix());
 
     // Cull back face
@@ -73,7 +73,7 @@ void GalaxyRaycaster::renderExitPoints(const RenderData& data,
                                        ghoul::opengl::ProgramObject& program)
 {
     // Uniforms
-    program.setUniform("modelViewTransform", glm::mat4(modelViewTransform(data)));
+    program.setUniform("modelViewTransform", modelViewTransform(data));
     program.setUniform("projectionTransform", data.camera.projectionMatrix());
 
     // Cull front face

@@ -48,9 +48,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation Rotation::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "core_transform_rotation";
-    return doc;
+    return codegen::doc<Parameters>("core_transform_rotation");
 }
 
 ghoul::mm_unique_ptr<Rotation> Rotation::createFromDictionary(

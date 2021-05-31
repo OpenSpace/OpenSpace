@@ -276,7 +276,7 @@ void DataCygnet::readTransferFunctions(std::string tfPath) {
     if (tfFile.is_open()) {
         std::string line;
         while (getline(tfFile, line)) {
-            tfs.emplace_back(absPath(line));
+            tfs.emplace_back(absPath(line).string());
         }
 
         tfFile.close();

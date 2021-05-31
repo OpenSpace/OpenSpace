@@ -42,12 +42,11 @@ local JupiterLabel = {
   Renderable = {
     Enabled = false,
     Type = "RenderableLabels",
-    LabelText = "Jupiter",
+    Text = "Jupiter",
     FontSize = 100.0,
-    LabelSize = 8.6,
-    LabelMaxSize = 100.0,
-    LabelMinSize = 1.0,
-    LabelOrientationOption = "Camera View Direction",
+    Size = 8.6,
+    MinMaxSize = { 1, 100 },
+    OrientationOption = "Camera View Direction",
     BlendMode = "Additive"
   },
   Tag = { "solarsystem_labels" },

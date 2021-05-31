@@ -31,16 +31,11 @@
 #include <modules/spacecraftinstruments/rendering/renderableplaneprojection.h>
 #include <modules/spacecraftinstruments/rendering/renderableplanetprojection.h>
 #include <modules/spacecraftinstruments/rendering/renderableshadowcylinder.h>
-#include <modules/spacecraftinstruments/util/decoder.h>
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
 #include <modules/spacecraftinstruments/util/instrumentdecoder.h>
 #include <modules/spacecraftinstruments/util/targetdecoder.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
 
@@ -102,7 +97,7 @@ bool SpacecraftInstrumentsModule::addFrame(std::string body, std::string frame) 
         return false;
     }
     else {
-        _frameByBody.emplace_back(body, frame);
+        _frameByBody.emplace_back(std::move(body), std::move(frame));
         return true;
     }
 }

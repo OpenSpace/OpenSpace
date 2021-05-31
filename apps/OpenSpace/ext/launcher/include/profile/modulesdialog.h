@@ -82,7 +82,7 @@ private:
     QLineEdit* _loadedEdit = nullptr;
     QLabel* _notLoadedLabel = nullptr;
     QLineEdit* _notLoadedEdit = nullptr;
-    
+
     QPushButton* _buttonAdd = nullptr;
     QPushButton* _buttonRemove = nullptr;
     QPushButton* _buttonSave = nullptr;

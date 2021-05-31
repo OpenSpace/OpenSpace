@@ -45,9 +45,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation StaticTranslation::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_transform_translation_static";
-    return doc;
+    return codegen::doc<Parameters>("base_transform_translation_static");
 }
 
 StaticTranslation::StaticTranslation()
@@ -58,7 +56,7 @@ StaticTranslation::StaticTranslation()
         glm::dvec3(std::numeric_limits<double>::max())
     )
 {
-    _position.setViewOption(properties::Property::ViewOptions::Logarithmic);
+    _position.setExponent(20.f);
     addProperty(_position);
 
     _position.onChange([this]() {

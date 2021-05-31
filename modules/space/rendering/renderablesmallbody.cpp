@@ -41,6 +41,7 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/logging/logmanager.h>
 #include <chrono>
+#include <filesystem>
 #include <fstream>
 #include <math.h>
 #include <vector>
@@ -97,8 +98,9 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableSmallBody::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "space_renderablesmallbody";
+    documentation::Documentation doc = codegen::doc<Parameters>(
+        "space_renderablesmallbody"
+    );
 
     // Insert the parents documentation entries until we have a verifier that can deal
     // with class hierarchy
@@ -172,7 +174,7 @@ RenderableSmallBody::RenderableSmallBody(const ghoul::Dictionary& dictionary)
 }
 
 void RenderableSmallBody::readDataFile(const std::string& filename) {
-    if (!FileSys.fileExists(filename)) {
+    if (!std::filesystem::is_regular_file(filename)) {
         throw ghoul::RuntimeError(fmt::format(
             "JPL SBDB file {} does not exist.", filename
         ));

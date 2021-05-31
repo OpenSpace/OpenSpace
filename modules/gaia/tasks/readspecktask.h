@@ -27,6 +27,7 @@
 
 #include <openspace/util/task.h>
 
+#include <filesystem>
 #include <string>
 
 namespace openspace {
@@ -43,8 +44,8 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    std::string _inFilePath;
-    std::string _outFilePath;
+    std::filesystem::path _inFilePath;
+    std::filesystem::path _outFilePath;
 };
 
 } // namespace openspace

@@ -104,9 +104,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableNodeLine::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_renderable_renderablenodeline";
-    return doc;
+    return codegen::doc<Parameters>("base_renderable_renderablenodeline");
 }
 
 RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
