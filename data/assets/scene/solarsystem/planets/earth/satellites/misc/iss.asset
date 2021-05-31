@@ -107,12 +107,11 @@ local initializeAndAddNodes = function()
   local IssLabel = {
     Identifier = "IssLabel",
     Parent = iss.Identifier,
-
     Renderable = {
       Enabled = false,
       Type = "RenderableLabels",
       Text = "ISS",
-      FontSize = 100.0,
+      FontSize = 70.0,
       Size = 3.4,
       MinMaxSize = { 1, 100 },
       OrientationOption = "Camera View Direction",
