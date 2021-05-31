@@ -976,14 +976,6 @@ std::string setWindowConfigPresetForGui(const std::string labelFromCfgFile,
     }
     else {
         preset = config.windowConfiguration;
-        if (preset.find('/') != std::string::npos) {
-            preset.erase(0, preset.find_last_of('/') + 1);
-        }
-        if (preset.length() >= xmlExt.length()) {
-            if (preset.substr(preset.length() - xmlExt.length()) == xmlExt) {
-                preset = preset.substr(0, preset.length() - xmlExt.length());
-            }
-        }
     }
     return preset;
 }
@@ -1005,7 +997,14 @@ std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTC
             }
         }
         else {
-            config += xmlExt;
+            if ( (config.length() >= xmlExt.length())
+                && (0 == config.compare(config.length() - xmlExt.length(), xmlExt.length(), xmlExt)) ) {
+                //user customzied sgct config
+            }
+            else {
+                config += xmlExt;
+            }
+
         }
         global::configuration->windowConfiguration = config;
     }

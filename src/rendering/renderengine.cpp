@@ -253,7 +253,6 @@ namespace {
     };
 } // namespace
 
-
 namespace openspace {
 
 RenderEngine::RenderEngine()

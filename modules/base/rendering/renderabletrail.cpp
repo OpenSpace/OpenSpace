@@ -33,6 +33,7 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <cmath>
 #include <optional>
@@ -51,7 +52,7 @@ namespace {
     constexpr const std::array<const char*, 14> UniformNames = {
         "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
         "lineFade", "vertexSortingMethod", "idOffset", "nVertices", "stride", "pointSize",
-        "renderPhase", "resolution", "lineWidth"
+        "renderPhase", "viewport", "lineWidth"
     };
 #endif
 
@@ -338,12 +339,20 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
 
 #if !defined(__APPLE__)
     glm::ivec2 resolution = global::renderEngine->renderingResolution();
-    _programObject->setUniform(_uniformCache.resolution, resolution);
+    GLint viewport[4];
+    global::renderEngine->openglStateCache().viewport(viewport);
+    _programObject->setUniform(
+        _uniformCache.viewport,
+        static_cast<float>(viewport[0]),
+        static_cast<float>(viewport[1]),
+        static_cast<float>(viewport[2]),
+        static_cast<float>(viewport[3])
+    );
     _programObject->setUniform(
         _uniformCache.lineWidth,
         std::ceil((2.f * 1.f + _appearance.lineWidth) * std::sqrt(2.f))
     );
-#endif
+#endif // !defined(__APPLE__)
 
     if (renderPoints) {
         // The stride parameter determines the distance between larger points and

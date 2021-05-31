@@ -17,11 +17,11 @@ local object = {
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
     LabelFile = speck .. "/galclust.label",
+    Unit = "Mpc",
     TextColor = { 1.0, 0.44, 0.0 },
     DrawLabels = true,
     TextSize = 22,
-    TextMinSize = 8.0,
-    Unit = "Mpc",
+    TextMinMaxSize = { 8, 20 },
     TransformationMatrix = {
       -0.7357425748,    0.67726129641,  0.0,           0.0,
       -0.074553778365, -0.080991471307, 0.9939225904,  0.0,

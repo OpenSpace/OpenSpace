@@ -517,7 +517,6 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     _renderOption.onChange([&]() { _buffersAreDirty = true; });
     addProperty(_renderOption);
 
-#ifndef __APPLE__
     _shaderOption.addOptions({
         { gaia::ShaderOption::Point_SSBO, "Point_SSBO" },
         { gaia::ShaderOption::Point_VBO, "Point_VBO" },
@@ -525,35 +524,35 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
         { gaia::ShaderOption::Billboard_VBO, "Billboard_VBO" },
         { gaia::ShaderOption::Billboard_SSBO_noFBO, "Billboard_SSBO_noFBO" }
     });
-#else // __APPLE__
-    _shaderOption.addOptions({
-        { gaia::ShaderOption::Point_VBO, "Point_VBO" },
-        { gaia::ShaderOption::Billboard_VBO, "Billboard_VBO" },
-    });
-#endif // __APPLE__
 
     if (p.shaderOption.has_value()) {
         switch (*p.shaderOption) {
             case Parameters::ShaderOption::PointSSBO:
                 _shaderOption = gaia::ShaderOption::Point_SSBO;
+#ifdef __APPLE__
+                LWARNING("Shader option unsupported, changing to Point VBO");
+                _shaderOption = gaia::ShaderOption::Point_VBO;
+#endif // __APPLE__
                 break;
             case Parameters::ShaderOption::PointVBO:
-#ifdef __APPLE__
-                throw ghoul::RuntimeError("Shader option is not supported on MacOS");
-#endif // __APPLE__
                 _shaderOption = gaia::ShaderOption::Point_VBO;
                 break;
             case Parameters::ShaderOption::BillboardSSBO:
                 _shaderOption = gaia::ShaderOption::Billboard_SSBO;
+#ifdef __APPLE__
+                LWARNING("Shader option unsupported, changing to Point VBO");
+                _shaderOption = gaia::ShaderOption::Point_VBO;
+#endif // __APPLE__
                 break;
             case Parameters::ShaderOption::BillboardVBO:
-#ifdef __APPLE__
-                throw ghoul::RuntimeError("Shader option is not supported on MacOS");
-#endif // __APPLE__
                 _shaderOption = gaia::ShaderOption::Billboard_VBO;
                 break;
             case Parameters::ShaderOption::BillboardSSBONoFBO:
                 _shaderOption = gaia::ShaderOption::Billboard_SSBO_noFBO;
+#ifdef __APPLE__
+                LWARNING("Shader option unsupported, changing to Point VBO");
+                _shaderOption = gaia::ShaderOption::Point_VBO;
+#endif // __APPLE__
                 break;
             default:
                 throw ghoul::MissingCaseException();
