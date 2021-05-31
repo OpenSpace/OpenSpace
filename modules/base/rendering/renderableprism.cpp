@@ -215,9 +215,9 @@ void RenderablePrism::updateVertexData() {
     for (int i = 0; i < 2; ++i) {
         float h = i * _length; // z value, 0 to _length
 
-        for (int j = 0, k = 0; j < _nShapeSegments && k < unitVertices.size(); ++j) {
-            float ux = unitVertices[k++];
-            float uy = unitVertices[k++];
+        for (int j = 0, k = 0; j < _nShapeSegments && k < unitVertices.size(); ++j, k += 2) {
+            float ux = unitVertices[k];
+            float uy = unitVertices[k + 1];
 
             _vertexArray.push_back(ux * _radius); // x
             _vertexArray.push_back(uy * _radius); // y
@@ -239,9 +239,9 @@ void RenderablePrism::updateVertexData() {
         _vertexArray.push_back(_length);
     }
     else {
-        for (int j = 0, k = 0; j < _nLines && k < unitVerticesLines.size(); ++j) {
-            float ux = unitVerticesLines[k++];
-            float uy = unitVerticesLines[k++];
+        for (int j = 0, k = 0; j < _nLines && k < unitVerticesLines.size(); ++j, k += 2) {
+            float ux = unitVerticesLines[k];
+            float uy = unitVerticesLines[k + 1];
 
             // Base
             _vertexArray.push_back(ux * _radius); // x
@@ -270,12 +270,12 @@ void RenderablePrism::updateVertexData() {
     }
 
     // Indices for connecting lines
-    for (int i = 0, k = 0; i < _nLines; ++i) {
+    for (int i = 0, k = 0; i < _nLines; ++i, k += 2) {
         // Reset
         _indexArray.push_back(255);
 
-        _indexArray.push_back(2 * _nShapeSegments + k++);
-        _indexArray.push_back(2 * _nShapeSegments + k++);
+        _indexArray.push_back(2 * _nShapeSegments + k);
+        _indexArray.push_back(2 * _nShapeSegments + k + 1);
     }
 }
 
