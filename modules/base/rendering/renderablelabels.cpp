@@ -309,6 +309,10 @@ RenderableLabels::RenderableLabels(const ghoul::Dictionary& dictionary)
     });
     addProperty(_fontSize);
 
+    // @TODO (emmbr, 2021-05-31): Temporarily set as read only, to avoid errors from font
+    // rendering/loading
+    _fontSize.setReadOnly(true);
+
     _size = p.size.value_or(_size);
     addProperty(_size);
 

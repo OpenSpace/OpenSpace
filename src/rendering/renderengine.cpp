@@ -55,6 +55,7 @@
 #include <ghoul/io/texture/texturereadercmap.h>
 #include <ghoul/io/model/modelreader.h>
 #include <ghoul/io/model/modelreaderassimp.h>
+#include <ghoul/io/model/modelreaderbinary.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringconversion.h>
@@ -478,6 +479,10 @@ void RenderEngine::initialize() {
 
     ghoul::io::ModelReader::ref().addReader(
         std::make_unique<ghoul::io::ModelReaderAssimp>()
+    );
+
+    ghoul::io::ModelReader::ref().addReader(
+        std::make_unique<ghoul::io::ModelReaderBinary>()
     );
 
     _versionString = OPENSPACE_VERSION_STRING_FULL;

@@ -265,6 +265,11 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
     _enabled = p.enabled.value_or(_enabled);
     _fontSize = p.fontSize.value_or(_fontSize);
     _fontSize.onChange([this]() { initializeFonts(); });
+
+    // @TODO (emmbr, 2021-05-31): Temporarily set as read only, to avoid errors from font
+    // rendering (avoid filling font atlas)
+    _fontSize.setReadOnly(true);
+
     _size = p.size.value_or(_size);
     _heightOffset = p.heightOffset.value_or(_heightOffset);
     _color = p.color.value_or(_color);
@@ -273,8 +278,7 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
     _fadeOutEnabled = p.fadeOutEnabled.value_or(_fadeOutEnabled);
     _fadeDistances = p.fadeDistances.value_or(_fadeDistances);
     _minMaxSize = p.minMaxSize.value_or(_minMaxSize);
-    _disableCulling =
-        p.disableCulling.value_or(_disableCulling);
+    _disableCulling = p.disableCulling.value_or(_disableCulling);
     _distanceEPS = p.distanceEPS.value_or(_distanceEPS);
 
     if (p.alignmentOption.has_value()) {
@@ -298,7 +302,7 @@ void GlobeLabelsComponent::initializeFonts() {
         "Mono",
         static_cast<float>(_fontSize),
         ghoul::fontrendering::FontManager::Outline::Yes,
-        ghoul::fontrendering::FontManager::LoadGlyphs::No
+        ghoul::fontrendering::FontManager::LoadGlyphs::Yes
     );
 }
 
