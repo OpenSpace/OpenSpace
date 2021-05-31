@@ -21,7 +21,7 @@ local PlutoTrailBarycentric = {
   GUI = {
     Name = "Pluto Barycentric Trail",
     Path = "/Solar System/Dwarf Planets/Pluto",
-    Description = [[Orbit of Pluto around it's Barrycenter.]]
+    Description = [[Orbit of Pluto around it's Barycenter.]]
   }
 }
 
