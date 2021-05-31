@@ -32,8 +32,6 @@ local imagesA = asset.syncedResource({
     Version = 1
 })
 
-local BENNU_BODY = "2101955"
-
 local Bennu = {
     Identifier = "Bennu",
     Parent = transforms.BennuBarycenter.Identifier,
