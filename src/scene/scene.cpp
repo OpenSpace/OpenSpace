@@ -723,14 +723,14 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 &luascriptfunctions::worldPosition,
                 {},
                 "string",
-                "Returns the worldPosition of the scene graph node with the given string as identifier"
+                "Returns the world position of the scene graph node with the given string as identifier"
             },
             {
                 "worldRotation",
                 & luascriptfunctions::worldRotation,
                 {},
                 "string",
-                "Returns the worldRotation of the scene graph node with the given string as identifier"
+                "Returns the world rotation matrix of the scene graph node with the given string as identifier"
             }
         }
     };

@@ -25,10 +25,11 @@
 #ifndef __OPENSPACE_MODULE_BASE___RENDERABLEPRISM___H__
 #define __OPENSPACE_MODULE_BASE___RENDERABLEPRISM___H__
 
+#include <openspace/rendering/renderable.h>
+
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <openspace/rendering/renderable.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <ghoul/glm.h>
@@ -55,10 +56,8 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    void initializeShader();
     void updateVertexData();
     void updateBufferData();
-    void updateUniformLocations();
 
     // Properties
     properties::IntProperty _nShapeSegments;
@@ -70,7 +69,6 @@ private:
     UniformCache(modelViewProjection, color) _uniformCache;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-    const GLuint _locVertex = 0;
     GLuint _vaoId = 0;
     GLuint _vboId = 0;
     GLuint _iboId = 0;

@@ -51,7 +51,7 @@
       "is_local": false,
       "key": "P",
       "name": "Toggle Lagrangian points",
-      "script": "local list = openspace.getProperty('{lagrange_points}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
+      "script": "local list = openspace.getProperty('{lagrange_points_earth}.Renderable.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
     },
     {
       "documentation": "Toggle Hubble Ultra Deep Field image and line towards its coordinate",
@@ -59,7 +59,7 @@
       "is_local": false,
       "key": "U",
       "name": "Toggle Hubble Ultra Deep Field",
-      "script": "local list = openspace.getProperty('{hudf}.*.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
+      "script": "local list = openspace.getProperty('{mission_jwst_hudf}.*.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
     },
     {
       "documentation": "Toggle L2 label, point and line",
@@ -67,7 +67,7 @@
       "is_local": false,
       "key": "O",
       "name": "Toggle L2",
-      "script": "local list = openspace.getProperty('{L2}.*.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
+      "script": "local list = openspace.getProperty('{lagrange_points_earth_l2_small}.*.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
     },
     {
       "documentation": "Toggle James Webb Space Telecope field of view and view band",
@@ -75,7 +75,7 @@
       "is_local": false,
       "key": "V",
       "name": "Toggle JWST field of view and view band",
-      "script": "local list = openspace.getProperty('{fov}.*.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
+      "script": "local list = openspace.getProperty('{mission_jwst_fov}.*.Enabled'); for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end"
     }
   ],
   "mark_nodes": [
@@ -88,9 +88,9 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "James Webb Space Telecope Profile. Adds the James Webb Space Telecope model with an estimated trajectery.",
+    "description": "James Webb Space Telescope Profile. Adds the James Webb Space Telescope model with an estimated trajectery.",
     "license": "MIT License",
-    "name": "JWST",
+    "name": "James Webb Space Telescope",
     "url": "https://www.openspaceproject.com",
     "version": "1.0"
   },

@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#define _USE_MATH_DEFINES
-
 #include <modules/base/rendering/renderableprism.h>
 
 #include <openspace/documentation/documentation.h>
@@ -35,7 +33,6 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
-#include <math.h>
 #include <optional>
 
 namespace {
@@ -82,15 +79,17 @@ namespace {
     };
 
     // Generate vertices around the unit circle on the XY-plane
-    void getUnitCircleVertices(std::vector<float>& vertices, int sectorCount) {
-        float sectorStep = 2 * M_PI / sectorCount;
-        float sectorAngle;  // in radians
+    std::vector<float> unitCircleVertices(int sectorCount) {
+        std::vector<float> vertices;
+        vertices.reserve(2 * sectorCount);
+        float sectorStep = glm::two_pi<float>() / sectorCount;
 
         for (int i = 0; i < sectorCount; ++i) {
-            sectorAngle = i * sectorStep;
+            float sectorAngle = i * sectorStep;
             vertices.push_back(cos(sectorAngle)); // x
             vertices.push_back(sin(sectorAngle)); // y
         }
+        return vertices;
     }
 
     struct [[codegen::Dictionary(RenderablePrism)]] Parameters {
@@ -133,28 +132,31 @@ RenderablePrism::RenderablePrism(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _radius.setViewOption(properties::Property::ViewOptions::Logarithmic);
-    _lineColor.setViewOption(properties::Property::ViewOptions::Color);
-    _length.setViewOption(properties::Property::ViewOptions::Logarithmic);
-
     _nShapeSegments.onChange([&]() { _prismIsDirty = true; });
-    _nLines.onChange([&]() { _prismIsDirty = true; });
-    _radius.onChange([&]() { _prismIsDirty = true; });
-    _length.onChange([&]() { _prismIsDirty = true; });
-
     _nShapeSegments = p.segments;
-    _nLines = p.lines.value_or(_nShapeSegments);
-    _radius = p.radius.value_or(_radius);
-    _lineWidth = p.lineWidth.value_or(_lineWidth);
-    _lineColor = p.color.value_or(_lineColor);
-    _length = p.length.value_or(_length);
-
     addProperty(_nShapeSegments);
+
+    _nLines.onChange([&]() { _prismIsDirty = true; });
+    _nLines = p.lines.value_or(_nShapeSegments);
     addProperty(_nLines);
+
+    _radius.setViewOption(properties::Property::ViewOptions::Logarithmic);
+    _radius.onChange([&]() { _prismIsDirty = true; });
+    _radius = p.radius.value_or(_radius);
     addProperty(_radius);
+
+    _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
+
+    _lineColor.setViewOption(properties::Property::ViewOptions::Color);
+    _lineColor = p.color.value_or(_lineColor);
     addProperty(_lineColor);
+
+    _length.setViewOption(properties::Property::ViewOptions::Logarithmic);
+    _length.onChange([&]() { _prismIsDirty = true; });
+    _length = p.length.value_or(_length);
     addProperty(_length);
+
     addProperty(_opacity);
 }
 
@@ -167,7 +169,11 @@ void RenderablePrism::initialize() {
 }
 
 void RenderablePrism::initializeGL() {
-    initializeShader();
+    _shader = global::renderEngine->buildRenderProgram(
+        "PrismProgram",
+        absPath("${MODULE_BASE}/shaders/prism_vs.glsl"),
+        absPath("${MODULE_BASE}/shaders/prism_fs.glsl")
+    );
     ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
 
     glGenVertexArrays(1, &_vaoId);
@@ -178,8 +184,8 @@ void RenderablePrism::initializeGL() {
 
     updateBufferData();
 
-    glEnableVertexAttribArray(_locVertex);
-    glVertexAttribPointer(_locVertex, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
     glBindVertexArray(0);
 }
 
@@ -202,12 +208,8 @@ void RenderablePrism::updateVertexData() {
     _indexArray.clear();
 
     // Get unit circle vertices on the XY-plane
-    std::vector<float> unitVertices;
-    std::vector<float> unitVerticesLines;
-    unitVertices.reserve(2 * _nShapeSegments);
-    unitVerticesLines.reserve(2 * _nLines);
-    getUnitCircleVertices(unitVertices, _nShapeSegments);
-    getUnitCircleVertices(unitVerticesLines, _nLines);
+    std::vector<float> unitVertices = unitCircleVertices(_nShapeSegments);
+    std::vector<float> unitVerticesLines = unitCircleVertices(_nLines);
 
     // Put base and top shape vertices into array
     for (int i = 0; i < 2; ++i) {
@@ -223,7 +225,7 @@ void RenderablePrism::updateVertexData() {
         }
     }
 
-    // Put the vertices for the connecting lines  into array
+    // Put the vertices for the connecting lines into array
     if (_nLines == 1) {
         // In the case of just one line then connect the center points instead
         // Center for base shape
@@ -254,6 +256,7 @@ void RenderablePrism::updateVertexData() {
     }
 
     // Indices for Base shape
+    ghoul_assert(_nShapeSegments.value <= std::numeric_limit<uint8_t>::max(), "Too many shape segments")
     for (uint8_t i = 0; i < _nShapeSegments; ++i) {
         _indexArray.push_back(i);
     }
@@ -329,26 +332,13 @@ void RenderablePrism::render(const RenderData& data, RendererTasks&) {
 void RenderablePrism::update(const UpdateData&) {
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
-        updateUniformLocations();
+        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
     }
     if (_prismIsDirty) {
         updateVertexData();
         updateBufferData();
         _prismIsDirty = false;
     }
-}
-
-void RenderablePrism::initializeShader() {
-    _shader = global::renderEngine->buildRenderProgram(
-        "PrismProgram",
-        absPath("${MODULE_BASE}/shaders/prism_vs.glsl"),
-        absPath("${MODULE_BASE}/shaders/prism_fs.glsl")
-    );
-    updateUniformLocations();
-}
-
-void RenderablePrism::updateUniformLocations() {
-   ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
 }
 
 } // namespace openspace
