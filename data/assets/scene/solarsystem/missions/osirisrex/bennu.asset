@@ -47,6 +47,7 @@ local Bennu = {
         }
     },
     Renderable = {
+        Enabled = false,
         Type = "RenderableModel",
         Body = BENNU_BODY,
         GeometryFile = models .. "/Bennu_v20_200k.stl",
@@ -67,7 +68,7 @@ local BennuProjection = {
         },
     },
     Renderable = {
-		Enabled = false,
+        Enabled = true,
         Type = "RenderableModelProjection",
         Body = BENNU_BODY,
         GeometryFile = models .. "/BennuTextured.obj",
