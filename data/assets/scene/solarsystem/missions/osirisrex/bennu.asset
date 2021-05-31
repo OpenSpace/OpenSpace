@@ -2,8 +2,6 @@ local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 
-
-
 local textures = asset.syncedResource({
     Name = "Bennu Textures",
     Type = "HttpSynchronization",
@@ -18,16 +16,23 @@ local models = asset.syncedResource({
     Version = 1
 })
 
+local BENNU_BODY = "2101955"
+
 local images = asset.syncedResource({
-    Name = "Bennu Images",
+    Name = "Bennu Images Approach",
     Type = "HttpSynchronization",
     Identifier = "osirisrex_bennu_images_approach",
     Version = 1
 })
 
+local imagesA = asset.syncedResource({
+    Name = "Bennu Images A",
+    Type = "HttpSynchronization",
+    Identifier = "osirisrex_bennu_images_orbit_a",
+    Version = 1
+})
 
 local BENNU_BODY = "2101955"
-
 
 local Bennu = {
     Identifier = "Bennu",
@@ -38,17 +43,43 @@ local Bennu = {
             SourceFrame = "IAU_BENNU",
             DestinationFrame = "GALACTIC"
         },
+        Scale = {
+            Type = "StaticScale",
+            Scale = 1000.0
+        }
     },
     Renderable = {
+        Type = "RenderableModel",
+        Body = BENNU_BODY,
+        GeometryFile = models .. "/Bennu_v20_200k.stl",
+    },
+    GUI = {
+        Path = "/Solar System/Asteroid"
+    }
+}
+
+local BennuProjection = {
+    Identifier = "BennuProjection",
+    Parent = transforms.BennuBarycenter.Identifier,
+    Transform = {
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "IAU_BENNU",
+            DestinationFrame = "GALACTIC"
+        },
+    },
+    Renderable = {
+		Enabled = false,
         Type = "RenderableModelProjection",
         Body = BENNU_BODY,
         GeometryFile = models .. "/BennuTextured.obj",
         Projection = {
-            Sequence   = { images },
+            Sequence   = { images, imagesA },
             SequenceType = "image-sequence",
             Observer   = "OSIRIS-REX",
             Target     = BENNU_BODY,
             Aberration = "NONE",
+            TextureMap = true,
             DataInputTranslation = {
                 Instruments = {
                     ORX_OCAMS_POLYCAM = {
@@ -106,8 +137,6 @@ local BennuTrail = {
         Name = "Bennu Trail",
         Path = "/Solar System/Asteroid"
     }
-
 }
 
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { Bennu, BennuTrail })
+assetHelper.registerSceneGraphNodesAndExport(asset, { Bennu, BennuProjection, BennuTrail })
