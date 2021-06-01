@@ -230,12 +230,13 @@ scripting::LuaLibrary KeybindingManager::luaLibrary() {
                 "bindKey",
                 &luascriptfunctions::bindKey,
                 {},
-                "string, string [, string]",
+                "string, string [, string, string, string]",
                 "Binds a key by name to a lua string command to execute both locally "
                 "and to broadcast to clients if this is the host of a parallel session. "
                 "The first argument is the key, the second argument is the Lua command "
                 "that is to be executed, and the optional third argument is a human "
-                "readable description of the command for documentation purposes."
+                "readable description of the command for documentation purposes. The"
+                "fourth is the GUI name and fifth is the GUI path, both optional."
             },
             {
                 "bindKeyLocal",
