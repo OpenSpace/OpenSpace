@@ -34,6 +34,7 @@
 #include <modules/globebrowsing/src/tiletextureinitdata.h>
 #include <modules/globebrowsing/src/timequantizer.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <unordered_map>
 
@@ -174,6 +175,8 @@ struct TemporalTileProvider : public TileProvider {
 
     ghoul::Dictionary initDict;
     properties::StringProperty filePath;
+    properties::BoolProperty useFixedTime;
+    properties::StringProperty fixedTime;
     std::string gdalXmlTemplate;
 
     std::unordered_map<TimeKey, std::unique_ptr<TileProvider>> tileProviderMap;

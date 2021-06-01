@@ -30,10 +30,9 @@
 
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/filesystem/directory.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/fmt.h>
-
+#include <filesystem>
 #include <fstream>
 #include <set>
 #include <optional>
@@ -132,7 +131,7 @@ void ReadFitsTask::readSingleFitsFile(const Task::ProgressCallback& progressCall
 
     FitsFileReader fileReader(false);
     std::vector<float> fullData = fileReader.readFitsFile(
-        _inFileOrFolderPath,
+        _inFileOrFolderPath.string(),
         nValuesPerStar,
         _firstRow,
         _lastRow,
@@ -166,7 +165,7 @@ void ReadFitsTask::readSingleFitsFile(const Task::ProgressCallback& progressCall
     }
     else {
         LERROR(fmt::format(
-            "Error opening file: {} as output data file.", _outFileOrFolderPath
+            "Error opening file: {} as output data file", _outFileOrFolderPath
         ));
     }
 }
@@ -185,8 +184,16 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
     ConcurrentJobManager<std::vector<std::vector<float>>> jobManager(threadPool);
 
     // Get all files in specified folder.
-    ghoul::filesystem::Directory currentDir(_inFileOrFolderPath);
-    std::vector<std::string> allInputFiles = currentDir.readFiles();
+    std::vector<std::filesystem::path> allInputFiles;
+    if (std::filesystem::is_directory(_inFileOrFolderPath)) {
+        namespace fs = std::filesystem;
+        for (const fs::directory_entry& e : fs::directory_iterator(_inFileOrFolderPath)) {
+            if (e.is_regular_file()) {
+                allInputFiles.push_back(e.path());
+            }
+        }
+    }
+    
     size_t nInputFiles = allInputFiles.size();
     LINFO("Files to read: " + std::to_string(nInputFiles));
 
@@ -238,12 +245,12 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
 
     // Divide all files into ReadFilejobs and then delegate them onto several threads!
     while (!allInputFiles.empty()) {
-        std::string fileToRead = allInputFiles.back();
+        std::filesystem::path fileToRead = allInputFiles.back();
         allInputFiles.erase(allInputFiles.end() - 1);
 
         // Add reading of file to jobmanager, which will distribute it to our threadpool.
         auto readFileJob = std::make_shared<gaia::ReadFileJob>(
-            fileToRead,
+            fileToRead.string(),
             _allColumnNames,
             _firstRow,
             _lastRow,
@@ -294,7 +301,9 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
 int ReadFitsTask::writeOctantToFile(const std::vector<float>& octantData, int index,
                                     std::vector<bool>& isFirstWrite, int nValuesPerStar)
 {
-    std::string outPath = fmt::format("{}octant_{}.bin", _outFileOrFolderPath, index);
+    std::string outPath = fmt::format(
+        "{}octant_{}.bin", _outFileOrFolderPath.string(), index
+    );
     std::ofstream fileStream(outPath, std::ofstream::binary | std::ofstream::app);
     if (fileStream.good()) {
         int32_t nValues = static_cast<int32_t>(octantData.size());
@@ -328,9 +337,7 @@ int ReadFitsTask::writeOctantToFile(const std::vector<float>& octantData, int in
 }
 
 documentation::Documentation ReadFitsTask::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "gaiamission_fitsfiletorawdata";
-    return doc;
+    return codegen::doc<Parameters>("gaiamission_fitsfiletorawdata");
 }
 
 } // namespace openspace

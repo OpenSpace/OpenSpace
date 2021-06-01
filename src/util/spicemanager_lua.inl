@@ -25,6 +25,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <openspace/engine/globals.h>
 #include <ghoul/logging/logmanager.h>
+#include <filesystem>
 
 namespace openspace::luascriptfunctions {
 
@@ -51,7 +52,7 @@ int loadKernel(lua_State* L) {
         1,
         ghoul::lua::PopValue::Yes
     );
-    if (!FileSys.fileExists(argument)) {
+    if (!std::filesystem::is_regular_file(argument)) {
         return ghoul::lua::luaError(
             L,
             fmt::format("Kernel file '{}' did not exist", argument)

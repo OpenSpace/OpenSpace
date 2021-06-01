@@ -98,9 +98,7 @@ namespace {
 namespace openspace::globebrowsing {
 
 documentation::Documentation GlobeTranslation::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "space_translation_globetranslation";
-    return doc;
+    return codegen::doc<Parameters>("space_translation_globetranslation");
 }
 
 GlobeTranslation::GlobeTranslation(const ghoul::Dictionary& dictionary)

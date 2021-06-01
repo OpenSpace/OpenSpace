@@ -44,6 +44,7 @@
 #include <ghoul/opengl/textureunit.h>
 #include <array>
 #include <cstdint>
+#include <filesystem>
 #include <fstream>
 #include <optional>
 
@@ -58,7 +59,6 @@ namespace {
     constexpr const int RenderOptionViewDirection = 0;
     constexpr const int RenderOptionPositionNormal = 1;
 
-    constexpr const int8_t CurrentCacheVersion = 1;
     constexpr const double PARSEC = 0.308567756E17;
 
     constexpr openspace::properties::Property::PropertyInfo TextColorInfo = {
@@ -180,9 +180,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableDUMeshes::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "digitaluniverse_renderabledumeshes";
-    return doc;
+    return codegen::doc<Parameters>("digitaluniverse_renderabledumeshes");
 }
 
 RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
@@ -194,7 +192,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     , _drawLabels(DrawLabelInfo, false)
     , _textMinSize(LabelMinSizeInfo, 8.f, 0.5f, 24.f)
     , _textMaxSize(LabelMaxSizeInfo, 500.f, 0.f, 1000.f)
-    , _lineWidth(LineWidthInfo, 2.f, 0.f, 16.f)
+    , _lineWidth(LineWidthInfo, 2.f, 1.f, 16.f)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -202,7 +200,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     addProperty(_opacity);
     registerUpdateRenderBinFromOpacity();
 
-    _speckFile = absPath(p.file);
+    _speckFile = absPath(p.file).string();
     _hasSpeckFile = true;
     _drawElements.onChange([&]() { _hasSpeckFile = !_hasSpeckFile; });
     addProperty(_drawElements);
@@ -256,7 +254,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     addProperty(_drawLabels);
 
     if (p.labelFile.has_value()) {
-        _labelFile = absPath(*p.labelFile);
+        _labelFile = absPath(*p.labelFile).string();
         _hasLabel = true;
 
         _textColor = p.textColor.value_or(_textColor);
@@ -288,7 +286,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
 
 bool RenderableDUMeshes::isReady() const {
     return (_program != nullptr) &&
-        (!_renderingMeshesMap.empty() || (!_labelData.empty()));
+        (!_renderingMeshesMap.empty() || (!_labelset.entries.empty()));
 }
 
 void RenderableDUMeshes::initializeGL() {
@@ -431,13 +429,13 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
 
     glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), _textOpacity);
 
-    for (const std::pair<glm::vec3, std::string>& pair : _labelData) {
-        glm::vec3 scaledPos(pair.first);
+    for (const speck::Labelset::Entry& e : _labelset.entries) {
+        glm::vec3 scaledPos(e.position);
         scaledPos *= scale;
         ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
             *_font,
             scaledPos,
-            pair.second,
+            e.text,
             textColor,
             labelInfo
         );
@@ -494,31 +492,7 @@ void RenderableDUMeshes::update(const UpdateData&) {
 bool RenderableDUMeshes::loadData() {
     bool success = false;
     if (_hasSpeckFile) {
-        // I disabled the cache as it didn't work on Mac --- abock
-        // std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-        //     _speckFile,
-        //     ghoul::filesystem::CacheManager::Persistent::Yes
-        // );
-
-        // bool hasCachedFile = FileSys.fileExists(cachedFile);
-        // if (hasCachedFile) {
-        //     LINFO(
-        //         "Cached file '" << cachedFile <<
-        //         "' used for Speck file '" << _speckFile << "'"
-        //     );
-
-        //     success = loadCachedFile(cachedFile);
-        //     if (!success) {
-        //         FileSys.cacheManager()->removeCacheFile(_speckFile);
-        //         // Intentional fall-through to the 'else' to generate the cache
-        //         // file for the next run
-        //     }
-        // }
-        // else
-        // {
-        //     LINFO("Cache for Speck file '" << _speckFile << "' not found");
         LINFO(fmt::format("Loading Speck file '{}'", _speckFile));
-
         success = readSpeckFile();
         if (!success) {
             return false;
@@ -527,35 +501,7 @@ bool RenderableDUMeshes::loadData() {
 
     std::string labelFile = _labelFile;
     if (!labelFile.empty()) {
-        // I disabled the cache as it didn't work on Mac --- abock
-        // std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-        //     labelFile,
-        //     ghoul::filesystem::CacheManager::Persistent::Yes
-        // );
-        // bool hasCachedFile = FileSys.fileExists(cachedFile);
-        // if (hasCachedFile) {
-        //     LINFO(
-        //         "Cached file '" << cachedFile << "' used for Label file '" <<
-        //         labelFile << "'"
-        //     );
-
-        //     success &= loadCachedFile(cachedFile);
-        //     if (!success) {
-        //         FileSys.cacheManager()->removeCacheFile(labelFile);
-        //         // Intentional fall-through to the 'else' to generate the cache
-        //         // file for the next run
-        //     }
-        // }
-        // else {
-        //     LINFO("Cache for Label file '" << labelFile << "' not found");
-        LINFO(fmt::format("Loading Label file '{}'", labelFile));
-
-        success &= readLabelFile();
-        if (!success) {
-            return false;
-        }
-
-        // }
+        _labelset = speck::label::loadFileWithCache(_labelFile);
     }
 
     return success;
@@ -686,158 +632,6 @@ bool RenderableDUMeshes::readSpeckFile() {
     }
 
     return true;
-}
-
-bool RenderableDUMeshes::readLabelFile() {
-    std::ifstream file(_labelFile);
-    if (!file.good()) {
-        LERROR(fmt::format("Failed to open Label file '{}'", _labelFile));
-        return false;
-    }
-
-    // The beginning of the speck file has a header that either contains comments
-    // (signaled by a preceding '#') or information about the structure of the file
-    // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
-    std::string line;
-    while (true) {
-        std::streampos position = file.tellg();
-        std::getline(file, line);
-
-        // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r
-        if (!line.empty() && line.back() == '\r') {
-            line = line.substr(0, line.length() - 1);
-        }
-
-
-        if (line.empty() || line[0] == '#') {
-            continue;
-        }
-
-        if (line.substr(0, 9) != "textcolor") {
-            // we read a line that doesn't belong to the header, so we have to jump back
-            // before the beginning of the current line
-            file.seekg(position);
-            continue;
-        }
-
-        if (line.substr(0, 9) == "textcolor") {
-            // textcolor lines are structured as follows:
-            // textcolor # description
-            // where # is color text defined in configuration file
-            std::stringstream str(line);
-
-            // TODO: handle cases of labels with different colors
-            break;
-        }
-    }
-
-    do {
-        std::vector<float> values(_nValuesPerAstronomicalObject);
-
-        std::getline(file, line);
-
-        // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r
-        if (!line.empty() && line.back() == '\r') {
-            line = line.substr(0, line.length() - 1);
-        }
-
-        if (line.empty()) {
-            continue;
-        }
-
-        std::stringstream str(line);
-
-        glm::vec3 position = glm::vec3(0.f);
-        for (int j = 0; j < 3; ++j) {
-            str >> position[j];
-        }
-
-        std::string dummy;
-        str >> dummy; // text keyword
-
-        std::string label;
-        str >> label;
-        dummy.clear();
-
-        while (str >> dummy) {
-            label += " " + dummy;
-            dummy.clear();
-        }
-
-        _labelData.emplace_back(std::make_pair(position, label));
-
-    } while (!file.eof());
-
-    return true;
-}
-
-bool RenderableDUMeshes::loadCachedFile(const std::string& file) {
-    std::ifstream fileStream(file, std::ifstream::binary);
-    if (!fileStream.good()) {
-        LERROR(fmt::format("Error opening file '{}' for loading cache file", file));
-        return false;
-    }
-
-    int8_t version = 0;
-    fileStream.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
-    if (version != CurrentCacheVersion) {
-        LINFO("The format of the cached file has changed: deleting old cache");
-        fileStream.close();
-        FileSys.deleteFile(file);
-        return false;
-    }
-
-    int32_t nValues = 0;
-    fileStream.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
-    fileStream.read(
-        reinterpret_cast<char*>(&_nValuesPerAstronomicalObject),
-        sizeof(int32_t)
-    );
-
-    _fullData.resize(nValues);
-    fileStream.read(
-        reinterpret_cast<char*>(&_fullData[0]),
-        nValues * sizeof(_fullData[0])
-    );
-
-    bool success = fileStream.good();
-    return success;
-}
-
-bool RenderableDUMeshes::saveCachedFile(const std::string& file) const {
-    std::ofstream fileStream(file, std::ofstream::binary);
-    if (!fileStream.good()) {
-        LERROR(fmt::format("Error opening file '{}' for save cache file", file));
-        return false;
-    }
-
-    fileStream.write(
-        reinterpret_cast<const char*>(&CurrentCacheVersion),
-        sizeof(int8_t)
-    );
-
-    const int32_t nValues = static_cast<int32_t>(_fullData.size());
-    if (nValues == 0) {
-        LERROR("Error writing cache: No values were loaded");
-        return false;
-    }
-    fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
-
-    const int32_t nValuesPerAstronomicalObject = static_cast<int32_t>(
-        _nValuesPerAstronomicalObject
-    );
-    fileStream.write(
-        reinterpret_cast<const char*>(&nValuesPerAstronomicalObject),
-        sizeof(int32_t)
-    );
-
-    const size_t nBytes = nValues * sizeof(_fullData[0]);
-    fileStream.write(reinterpret_cast<const char*>(&_fullData[0]), nBytes);
-
-    const bool success = fileStream.good();
-    return success;
 }
 
 void RenderableDUMeshes::createMeshes() {

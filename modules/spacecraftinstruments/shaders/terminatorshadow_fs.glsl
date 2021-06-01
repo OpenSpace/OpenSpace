@@ -22,18 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
 
-in vec4 vs_positionScreenSpace;
 in vec3 vs_color;
+in float vs_depth;
 
 uniform float opacity;
 
 Fragment getFragment() {
-    Fragment frag;
-    frag.color = vec4(vs_color, opacity);
-    frag.depth = vs_positionScreenSpace.w;
-
-    return frag;
+  Fragment frag;
+  frag.color = vec4(vs_color, opacity);
+  frag.depth = vs_depth;
+  return frag;
 }

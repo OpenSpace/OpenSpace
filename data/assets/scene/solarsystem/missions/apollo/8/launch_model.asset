@@ -7,66 +7,66 @@ local models = asset.require('scene/solarsystem/missions/apollo/csm_model').mode
 local apolloSpiceId = "-908"
 
 local Apollo8Launch = {
-    Identifier = "Apollo8Launch",
-    Parent = earth_transforms.EarthIAU.Identifier,
-    TimeFrame = {
-        Type = "TimeFrameInterval",
-        Start = "1968 DEC 21",
-        End = "1968 DEC 28"
-    },
-    Transform = {
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = apolloSpiceId,
-            Observer = "EARTH",
-            Frame = "IAU_EARTH",
-            Kernels = kernels
-        },
-    },
-    GUI = {
-        Name = "Apollo 8 Launch Capsule",
-        Path = "/Solar System/Missions/Apollo"
+  Identifier = "Apollo8Launch",
+  Parent = earth_transforms.EarthIAU.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "1968 DEC 21",
+    End = "1968 DEC 28"
+  },
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = apolloSpiceId,
+      Observer = "EARTH",
+      Frame = "IAU_EARTH",
+      Kernels = kernels
     }
+  },
+  GUI = {
+    Name = "Apollo 8 Launch Capsule",
+    Path = "/Solar System/Missions/Apollo"
+  }
 }
 
 local Apollo8LaunchModel = {
-    Identifier = "Apollo8LaunchModel",
-    Parent = Apollo8Launch.Identifier,
-    TimeFrame = {
-        Type = "TimeFrameInterval",
-        Start = "1968 DEC 21",
-        End = "1968 DEC 22"
+  Identifier = "Apollo8LaunchModel",
+  Parent = Apollo8Launch.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "1968 DEC 21",
+    End = "1968 DEC 22"
+  },
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      -- The scale of the model is in cm; OpenSpace is in m
+      Scale = 0.01
     },
-    Transform = {
-        Scale = {
-            Type = "StaticScale",
-            -- The scale of the model is in cm; OpenSpace is in m
-            Scale = 0.01
-        },
-        Rotation = {
-            Type = "StaticRotation",
-            Rotation = {0.0, 0.0, -3.1415 / 2}
-        }
-    },
-    Renderable = {
-        Type = "RenderableModel",
-        GeometryFile = models .. "/ApolloCSM.fbx",
-        LightSources = {
-            {
-                Type = "SceneGraphLightSource",
-                Identifier = "Sun",
-                Node = sun_transforms.SolarSystemBarycenter.Identifier,
-                Intensity = 1.0
-            }
-        },
-        PerformShading = true,
-        DisableFaceCulling = true
-    },
-    GUI = {
-        Hidden = true,
-        Name = "Apollo 8 Launch Model",
-        Path = "/Solar System/Missions/Apollo/8"
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = {0.0, 0.0, -3.1415 / 2}
     }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = models .. "/ApolloCSM.fbx",
+    LightSources = {
+      {
+        Type = "SceneGraphLightSource",
+        Identifier = "Sun",
+        Node = sun_transforms.SolarSystemBarycenter.Identifier,
+        Intensity = 1.0
+      }
+    },
+    PerformShading = true,
+    DisableFaceCulling = true
+  },
+  GUI = {
+    Hidden = true,
+    Name = "Apollo 8 Launch Model",
+    Path = "/Solar System/Missions/Apollo/8"
+  }
 }
 
 local list = { Apollo8Launch, Apollo8LaunchModel }

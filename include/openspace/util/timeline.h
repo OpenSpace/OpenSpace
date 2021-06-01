@@ -47,8 +47,8 @@ struct Keyframe : public KeyframeBase {
     Keyframe(size_t i, double t, T d);
 
     Keyframe(Keyframe const&) = default;
-    Keyframe(Keyframe&&) = default;
-    Keyframe& operator=(Keyframe&&) = default;
+    Keyframe(Keyframe&&) noexcept = default;
+    Keyframe& operator=(Keyframe&&) noexcept = default;
     Keyframe& operator=(Keyframe const&) = default;
     T data;
 };

@@ -155,9 +155,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation ShadowComponent::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "globebrowsing_shadows_component";
-    return doc;
+    return codegen::doc<Parameters>("globebrowsing_shadows_component");
 }
 
 ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
@@ -355,33 +353,6 @@ void ShadowComponent::end() {
 
     if (_blendIsEnabled) {
         glEnable(GL_BLEND);
-    }
-
-    if (_viewDepthMap) {
-        if (!_renderDMProgram) {
-            _renderDMProgram = global::renderEngine->buildRenderProgram(
-                "ShadowMappingDebuggingProgram",
-                absPath("${MODULE_GLOBEBROWSING}/shaders/smviewer_vs.glsl"),
-                absPath("${MODULE_GLOBEBROWSING}/shaders/smviewer_fs.glsl")
-            );
-        }
-
-        if (!_quadVAO) {
-            glGenVertexArrays(1, &_quadVAO);
-        }
-
-        _renderDMProgram->activate();
-
-        ghoul::opengl::TextureUnit shadowMapUnit;
-        shadowMapUnit.activate();
-        glBindTexture(GL_TEXTURE_2D, _shadowDepthTexture);
-
-        _renderDMProgram->setUniform("shadowMapTexture", shadowMapUnit);
-
-        glBindVertexArray(_quadVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-
-        _renderDMProgram->deactivate();
     }
 }
 
@@ -617,10 +588,6 @@ bool ShadowComponent::isEnabled() const {
 
 ShadowComponent::ShadowMapData ShadowComponent::shadowMapData() const {
     return _shadowData;
-}
-
-void ShadowComponent::setViewDepthMap(bool enable) {
-    _viewDepthMap = enable;
 }
 
 GLuint ShadowComponent::dDepthTexture() const {

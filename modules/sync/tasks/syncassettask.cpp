@@ -37,43 +37,31 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/luastate.h>
 
-#include <string>
-#include <fstream>
 #include <chrono>
-
+#include <filesystem>
+#include <fstream>
+#include <string>
 #include <thread>
 
 namespace {
-    constexpr const char* KeyAsset = "Asset";
     constexpr std::chrono::milliseconds ProgressPollInterval(200);
+
+    struct [[codegen::Dictionary(SyncAssetTask)]] Parameters {
+        // The asset file to sync
+        std::filesystem::path asset;
+    };
+#include "syncassettask_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation SyncAssetTask::documentation() {
-    using namespace documentation;
-    return {
-        "SyncAssetTask",
-        "sync_asset_task",
-        {
-            {
-                KeyAsset,
-                new StringAnnotationVerifier("A file path to an asset"),
-                Optional::No,
-                "The asset file to sync"
-            }
-        }
-    };
+    return codegen::doc<Parameters>("sync_asset_task");
 }
 
 SyncAssetTask::SyncAssetTask(const ghoul::Dictionary& dictionary) {
-    documentation::testSpecificationAndThrow(
-        documentation(),
-        dictionary,
-        "SyncAssetTask"
-    );
-
-    _asset = dictionary.value<std::string>(KeyAsset);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    _asset = p.asset.string();
 }
 
 std::string SyncAssetTask::description() {

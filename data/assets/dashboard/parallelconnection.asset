@@ -1,13 +1,13 @@
 local item = {
-    Type = "DashboardItemParallelConnection",
-    Identifier = "ParallelConnection",
-    GuiName = "Parallel Connection"
+  Type = "DashboardItemParallelConnection",
+  Identifier = "ParallelConnection",
+  GuiName = "Parallel Connection"
 }
 
 asset.onInitialize(function()
-    openspace.dashboard.addDashboardItem(item)
+  openspace.dashboard.addDashboardItem(item)
 end)
 
 asset.onDeinitialize(function()
-    openspace.dashboard.removeDashboardItem(item.Identifier)
+  openspace.dashboard.removeDashboardItem(item.Identifier)
 end)

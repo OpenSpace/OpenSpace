@@ -55,6 +55,14 @@ void renderStringProperty(properties::Property* prop, const std::string& ownerNa
     IsRegularProperty isRegular = IsRegularProperty::Yes,
     ShowToolTip showTooltip = ShowToolTip::Yes, double tooltipDelay = 1.0);
 
+void renderIntListProperty(properties::Property* prop, const std::string& ownerName,
+    IsRegularProperty isRegular = IsRegularProperty::Yes,
+    ShowToolTip showTooltip = ShowToolTip::Yes, double tooltipDelay = 1.0);
+
+void renderDoubleListProperty(properties::Property* prop, const std::string& ownerName,
+    IsRegularProperty isRegular = IsRegularProperty::Yes,
+    ShowToolTip showTooltip = ShowToolTip::Yes, double tooltipDelay = 1.0);
+
 void renderStringListProperty(properties::Property* prop, const std::string& ownerName,
     IsRegularProperty isRegular = IsRegularProperty::Yes,
     ShowToolTip showTooltip = ShowToolTip::Yes, double tooltipDelay = 1.0);

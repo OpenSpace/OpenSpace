@@ -40,7 +40,7 @@
 #include <optional>
 
 namespace {
-    constexpr const char _loggerCat[] = "RenderableHabitableZone";
+    constexpr const char* _loggerCat = "RenderableHabitableZone";
 
     constexpr const std::array<const char*, 6> UniformNames = {
         "modelViewProjectionTransform", "opacity", "width", "transferFunctionTexture",
@@ -96,8 +96,9 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableHabitableZone::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "space_renderablehabitablezone";
+    documentation::Documentation doc = codegen::doc<Parameters>(
+        "space_renderablehabitablezone"
+    );
 
     // @TODO cleanup
     // Insert the parents documentation entries until we have a verifier that can deal
@@ -143,6 +144,7 @@ RenderableHabitableZone::RenderableHabitableZone(const ghoul::Dictionary& dictio
     _width.setReadOnly(true);
 
     computeZone();
+    setBoundingSphere(_size);
 }
 
 void RenderableHabitableZone::render(const RenderData& data, RendererTasks&) {

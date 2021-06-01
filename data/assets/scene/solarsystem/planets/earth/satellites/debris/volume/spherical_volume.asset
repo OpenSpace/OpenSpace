@@ -10,28 +10,28 @@ local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local maxApogee = 10946320;
 
 local volume = {
-    Identifier = "DebrisVolume - Spherical",
-    Parent = transforms.EarthInertial.Identifier,
-    Renderable = {
-        Type = "RenderableTimeVaryingVolume",
-        SourceDirectory = asset.localResource("generated"),
-        TransferFunction = asset.localResource("transferfunction.txt"),
-        StepSize = 0.01,
-        MinValue = 0,
-        MaxValue = 1,
-        GridType = "Spherical",
-        SecondsBefore = 50*365*24*60*60,
-        SecondsAfter = 50*365*24*60*60
-    },
-    GUI = {
-        Path = "/Volumes"
-    },
-    Transform = {
-        Scale = {
-            Type = "StaticScale",   
-            Scale = maxApogee    --do not multiply this. That will not show real representation.
-        }
+  Identifier = "DebrisVolume - Spherical",
+  Parent = transforms.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableTimeVaryingVolume",
+    SourceDirectory = asset.localResource("generated"),
+    TransferFunction = asset.localResource("transferfunction.txt"),
+    StepSize = 0.01,
+    MinValue = 0,
+    MaxValue = 1,
+    GridType = "Spherical",
+    SecondsBefore = 50*365*24*60*60,
+    SecondsAfter = 50*365*24*60*60
+  },
+  GUI = {
+    Path = "/Volumes"
+  },
+  Transform = {
+    Scale = {
+      Type = "StaticScale",   
+      Scale = maxApogee    --do not multiply this. That will not show real representation.
     }
+  }
 }
 
 local objects = { volume }

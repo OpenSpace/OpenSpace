@@ -29,6 +29,7 @@
 #include <openspace/engine/globals.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <filesystem>
 #include <iomanip>
 #include <ghoul/logging/logmanager.h>
 
@@ -56,8 +57,8 @@ ConvertRecFileVersionTask::ConvertRecFileVersionTask(const ghoul::Dictionary& di
         _inFilename = _inFilename.substr(idx + 1);
     }
 
-    ghoul_assert(FileSys.fileExists(_inFilePath), "The filename must exist");
-    if (!FileSys.fileExists(_inFilePath)) {
+    ghoul_assert(std::filesystem::is_regular_file(_inFilePath), "The file must exist");
+    if (!std::filesystem::is_regular_file(_inFilePath)) {
         LERROR(fmt::format("Failed to load session recording file: {}", _inFilePath));
     }
     else {
@@ -72,8 +73,10 @@ ConvertRecFileVersionTask::~ConvertRecFileVersionTask() {
 }
 
 std::string ConvertRecFileVersionTask::description() {
-    std::string description = "Convert file format of session recording file '"
-        + _inFilePath + "' to current version.";
+    std::string description = fmt::format(
+        "Convert file format of session recording file {} to current version",
+        _inFilePath
+    );
     return description;
 }
 

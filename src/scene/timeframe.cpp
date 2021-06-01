@@ -35,44 +35,28 @@
 #include <ghoul/misc/templatefactory.h>
 
 namespace {
-    constexpr const char* KeyType = "Type";
+    struct [[codegen::Dictionary(TimeFrame)]] Parameters {
+        // The type of the time frame that is described in this element. The available
+        // types of scaling depend on the configuration of the application and can be
+        // written to disk on application startup into the FactoryDocumentation
+        std::string type [[codegen::annotation("Must name a valid TimeFrame type")]];
+    };
+#include "timeframe_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation TimeFrame::Documentation() {
-    using namespace openspace::documentation;
-
-    return {
-        "Time Frame",
-        "core_time_frame",
-        {
-            {
-                KeyType,
-                new StringAnnotationVerifier("Must name a valid TimeFrame type"),
-                Optional::No,
-                "The type of the time frame that is described in this element. "
-                "The available types of scaling depend on the configuration "
-                "of the application and can be written to disk on "
-                "application startup into the FactoryDocumentation."
-            }
-        }
-    };
+    return codegen::doc<Parameters>("core_time_frame");
 }
 
 ghoul::mm_unique_ptr<TimeFrame> TimeFrame::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
-    documentation::testSpecificationAndThrow(Documentation(), dictionary, "TimeFrame");
-
-    const std::string timeFrameType = dictionary.value<std::string>(KeyType);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     auto factory = FactoryManager::ref().factory<TimeFrame>();
-    TimeFrame* result = factory->create(
-        timeFrameType,
-        dictionary/*,
-        &global::memoryManager.PersistentMemory*/
-    );
+    TimeFrame* result = factory->create(p.type, dictionary);
     result->setIdentifier("TimeFrame");
     return ghoul::mm_unique_ptr<TimeFrame>(result);
 }

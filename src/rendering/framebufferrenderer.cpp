@@ -556,9 +556,6 @@ void FramebufferRenderer::updateDownscaleTextures() {
 }
 
 void FramebufferRenderer::writeDownscaledVolume() {
-    glEnablei(GL_BLEND, 0);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-
     _downscaledVolumeProgram->activate();
 
     ghoul::opengl::TextureUnit downscaledTextureUnit;
@@ -587,7 +584,12 @@ void FramebufferRenderer::writeDownscaledVolume() {
 
 
     glEnablei(GL_BLEND, 0);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
+    // (abock, 2021-04-30) I changed the blend function as the front-to-back blending
+    // didn't work for the milkyway volume and was causing the edges of the milkyway to
+    // disappear
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(GL_ONE, GL_ONE);
 
     glDisable(GL_DEPTH_TEST);
 
@@ -1022,18 +1024,18 @@ void FramebufferRenderer::updateDeferredcastData() {
     for (Deferredcaster* caster : deferredcasters) {
         DeferredcastData data = { nextId++, "HELPER" };
 
-        std::string vsPath = caster->deferredcastVSPath();
-        std::string fsPath = caster->deferredcastFSPath();
-        std::string deferredShaderPath = caster->deferredcastPath();
+        std::filesystem::path vsPath = caster->deferredcastVSPath();
+        std::filesystem::path fsPath = caster->deferredcastFSPath();
+        std::filesystem::path deferredShaderPath = caster->deferredcastPath();
 
         ghoul::Dictionary dict;
         dict.setValue("rendererData", _rendererData);
         //dict.setValue("fragmentPath", fsPath);
         dict.setValue("id", data.id);
-        std::string helperPath = caster->helperPath();
+        std::filesystem::path helperPath = caster->helperPath();
         ghoul::Dictionary helpersDict;
         if (!helperPath.empty()) {
-            helpersDict.setValue("0", helperPath);
+            helpersDict.setValue("0", helperPath.string());
         }
         dict.setValue("helperPaths", helpersDict);
 
@@ -1042,8 +1044,8 @@ void FramebufferRenderer::updateDeferredcastData() {
         try {
             _deferredcastPrograms[caster] = ghoul::opengl::ProgramObject::Build(
                 "Deferred " + std::to_string(data.id) + " raycast",
-                absPath(vsPath),
-                absPath(deferredShaderPath),
+                vsPath,
+                deferredShaderPath,
                 dict
             );
 
