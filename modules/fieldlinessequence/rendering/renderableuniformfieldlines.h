@@ -226,7 +226,6 @@ namespace openspace {
         void readNewState(const std::string& filePath);
         void updateFieldlinePos(const double t1, const double t0);
         void updateActiveTriggerTimeIndex(double currentTime);
-        void updateFieldLinesPos();
         void updateVertexPositionBuffer();
         void updateVertexColorBuffer();
         void updateVertexMaskingBuffer();

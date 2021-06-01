@@ -351,7 +351,7 @@ void FieldlinesState::saveStateToJson(const std::string& absPath) {
 
     std::string_view timeStr = Time(_triggerTime).ISO8601();
     const size_t nLines = _lineStart.size();
-    // const size_t nPoints      = _vertexPositions.size();
+    // const size_t nPoints = _vertexPositions.size();
     const size_t nExtras = _extraQuantities.size();
 
     size_t pointIndex = 0;
@@ -433,7 +433,7 @@ void FieldlinesState::moveLine(double dt) {
 
         if (_vertexPaths[i].empty()) continue;
 
-        if ( 10000.0f > glm::length(vertex - _vertexPaths[i][1])) {
+        if ( 25000.0f > glm::length(vertex - _vertexPaths[i][1])) {
             _vertexPaths[i].erase(_vertexPaths[i].begin());
             _vertexVelocities[i].erase(_vertexVelocities[i].begin());
             if (_vertexPaths[i].empty()) continue;

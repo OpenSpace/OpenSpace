@@ -912,6 +912,14 @@ namespace openspace {
             );
 
             std::vector< std::vector<float> > vels = newState.vertexVelocities();
+            std::vector<float> maxVels;
+            for (auto velocity : vels) {
+                float it = *std::max_element(std::begin(velocity), std::end(velocity));
+                maxVels.push_back(it);
+            }
+            float maxVel = *std::max_element(std::begin(maxVels), std::end(maxVels));
+
+            LINFO(fmt::format("MaxVel: {}", maxVel));
 
             std::vector< std::vector<glm::vec3> > verts = newState.vertexPaths();
 
@@ -941,7 +949,7 @@ namespace openspace {
             }
             else {
                 LERROR(fmt::format(
-                    "{}: The specified seed poitn file: '{}' does not exist",
+                    "{}: The specified seed point file: '{}' does not exist",
                     _identifier, seedFilePath
                 ));
                 return false;
@@ -1201,9 +1209,6 @@ namespace openspace {
                 }
             } // else {we're still in same state as previous frame (no changes needed)}
 
-            //To update vertex positions every frame
-            //updateVertexPositionBuffer();
-
         }
         else {
             // Not in interval => set everything to false
@@ -1257,7 +1262,9 @@ namespace openspace {
 
     void RenderableUniformFieldlines::updateFieldlinePos(const double t1, const double t0) {
         const double dt = t1 - t0;
-        _states[_activeStateIndex].moveLine(dt);
+        //do nothing if time in openspace is paused
+        if(dt > DBL_EPSILON) _states[_activeStateIndex].moveLine(dt);
+        
     }
 
 
@@ -1297,8 +1304,6 @@ namespace openspace {
     void RenderableUniformFieldlines::updateVertexPositionBuffer() {
         glBindVertexArray(_vertexArrayObject);
         glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-
-        //_states[_activeStateIndex].moveLine();
 
         const std::vector<glm::vec3>& vertPos = _states[_activeStateIndex].vertexPositions();
 

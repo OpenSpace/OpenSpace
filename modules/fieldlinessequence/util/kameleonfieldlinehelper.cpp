@@ -54,6 +54,7 @@ namespace {
     constexpr const char* TAsPOverRho = "T = p/rho";
     constexpr const char* JParallelB = "Current: mag(J||B)";
     constexpr const char* UPerpB = "u_perp_b";
+    constexpr const char* U = "u";
     // [nPa]/[amu/cm^3] * ToKelvin => Temperature in Kelvin
     constexpr const float ToKelvin = 72429735.6984f;
 } // namespace
@@ -159,13 +160,13 @@ namespace openspace::fls {
             return false;
         }
 
-        // ---------------------------- LOAD TRACING VARIABLE ----------------------------  //
+        // ---------------------------- LOAD TRACING VARIABLE --------------------------//
         if (!kameleon->loadVariable("b")) {
             LERROR("Failed to load tracing variable: b");
             return false;
         }
 
-        // ---------------------------- LOAD TRACING VARIABLE ----------------------------  //
+        // ---------------------------- LOAD TRACING VARIABLE --------------------------//
         if (!kameleon->loadVariable("u")) {
             LERROR("Failed to load tracing variable: u");
             return false;
@@ -227,7 +228,6 @@ namespace openspace::fls {
                     p.component1,
                     p.component2,
                     p.component3
-
                 );
 
                 const std::vector<ccmc::Point3f>& positions2 = flowLine.getPositions();
@@ -306,9 +306,28 @@ namespace openspace::fls {
 
                     float u_dot_b = glm::dot(normBVec, uVec);
 
+                    //multiply by 1000 since the data is in km/s and openspace uses m/s
                     glm::vec3 u_perp_b = (uVec - (normBVec * u_dot_b))*1000.0f;
 
                     float magnitude = glm::length(u_perp_b);
+
+                    velocities.push_back(magnitude);
+                }
+                state.addVertexVelocities(velocities);
+            }
+        }
+        else if (state.extraQuantityNames()[nXtraScalars] == "u") {
+
+            for (const std::vector<glm::vec3> i : state.vertexPaths()) {
+                std::vector<float> velocities;
+                for (const glm::vec3 p : i) {
+
+                    const glm::vec3 uVec = glm::vec3(
+                        interpolator->interpolate("ux", p.x, p.y, p.z),
+                        interpolator->interpolate("uy", p.x, p.y, p.z),
+                        interpolator->interpolate("uz", p.x, p.y, p.z));
+                    //multiply by 1000 since the data is in km/s and openspace uses m/s
+                    float magnitude = glm::length(uVec*1000.0f);
 
                     velocities.push_back(magnitude);
                 }
@@ -442,6 +461,17 @@ namespace openspace::fls {
                         kameleon->loadVariable("bz");
 
                     if (success) name = UPerpB;
+                }
+                else if (s1 == "ux" && s2 == "uy" && s3 == "uz") {
+                    success = kameleon->doesVariableExist("ux") &&
+                        kameleon->doesVariableExist("uy") &&
+                        kameleon->doesVariableExist("uz") &&
+                        kameleon->loadVariable("ux") &&
+                        kameleon->loadVariable("uy") &&
+                        kameleon->loadVariable("uz");
+
+
+                    if (success) name = U;
                 }
                 else {
                     success = kameleon->doesVariableExist(s1) &&
