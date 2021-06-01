@@ -12,12 +12,12 @@ local JWSTKernel = asset.syncedResource({
   Version = 1
 })
 
-local JWSTHorizons = asset.syncedResource({
+--[[local JWSTHorizons = asset.syncedResource({
   Name = "JWST Horizons",
   Type = "HttpSynchronization",
   Identifier = "jwst_horizons",
   Version = 1
-})
+})]]--
 
 local model = asset.syncedResource({
   Name = "JWST Model",
@@ -96,7 +96,7 @@ local JWSTBand = {
   },
   Tag = { "mission_jwst_fov" },
   GUI = {
-    Name = "JWST View Band",
+    Name = "JWST Safe Viewing Band",
     Path = "/Solar System/Missions/JWST"
   }
 }
@@ -204,8 +204,8 @@ local JWSTFov = {
   }
 }
 
--- Launch
-local JWSTLaunchPosition = {
+-- Launch, coming soon
+--[[local JWSTLaunchPosition = {
   Identifier = "JWSTLaunchPosition",
   Parent = transforms.L2.Identifier,
   Transform = {
@@ -288,17 +288,17 @@ local JWSTLaunchTrail = {
     Name = "JWST Launch Trail",
     Path = "/Solar System/Missions/JWST"
   }
-}
+}]]--
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
   JWSTTrail,
   JWSTSunTrail,
-  JWSTLaunchTrail,
+  --JWSTLaunchTrail,
   JWSTPosition,
-  JWSTLaunchPosition,
+  --JWSTLaunchPosition,
   JWSTRotation,
   JWSTBand,
   JWSTModel,
-  JWSTLaunchModel,
+  --JWSTLaunchModel,
   JWSTFov
 })
