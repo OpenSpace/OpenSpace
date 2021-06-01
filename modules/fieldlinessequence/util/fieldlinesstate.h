@@ -91,6 +91,8 @@ private:
     std::vector<GLint> _lineStart;
     std::vector<glm::vec3> _vertexPositions;
 
+
+    std::vector<size_t>_vertexIndex;
     std::vector< std::vector<glm::vec3> > _vertexPaths;
     std::vector< std::vector<float> > _vertexVelocities;
 };

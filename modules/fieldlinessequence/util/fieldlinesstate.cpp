@@ -428,27 +428,44 @@ void FieldlinesState::appendToExtra(size_t idx, float val) {
 }
 
 void FieldlinesState::moveLine(double dt) {
+    bool forward;
+    if (dt > DBL_EPSILON) forward = true;
+    else forward = false;
+
     unsigned i = 0;
     for (glm::vec3& vertex : _vertexPositions) {
 
-        if (_vertexPaths[i].empty()) continue;
+        if (forward) {
 
-        if ( 25000.0f > glm::length(vertex - _vertexPaths[i][1])) {
-            _vertexPaths[i].erase(_vertexPaths[i].begin());
-            _vertexVelocities[i].erase(_vertexVelocities[i].begin());
-            if (_vertexPaths[i].empty()) continue;
+            if (25000.0f > glm::length(vertex - _vertexPaths[i][_vertexIndex[i] + 1])) {
+                _vertexIndex[i]++;
+            }
+
+            glm::vec3 direction = _vertexPaths[i][_vertexIndex[i] + 1] - vertex;
+            direction = glm::normalize(direction);
+
+            vertex += (direction * _vertexVelocities[i][_vertexIndex[i]]) * (float)dt;
+        }
+        else {
+            if (_vertexIndex[i] == 0) continue;
+            if (25000.0f > glm::length(vertex - _vertexPaths[i][_vertexIndex[i] - 1])) {
+                _vertexIndex[i]--;
+            }
+
+            glm::vec3 direction = _vertexPaths[i][_vertexIndex[i] - 1] - vertex;
+            direction = glm::normalize(-direction);
+
+            vertex += (direction * _vertexVelocities[i][_vertexIndex[i]-1]) * (float)dt;
         }
 
-        glm::vec3 direction = _vertexPaths[i][1] - vertex;
-        direction = glm::normalize(direction);
-
-        vertex += (direction*_vertexVelocities[i][0]) * (float)dt;
+       
         i++;
     }
 }
 
 void FieldlinesState::addVertexPath(std::vector<glm::vec3> path) {
     _vertexPaths.push_back(path);
+    _vertexIndex.push_back(0);
 }
 
 void FieldlinesState::addVertexVelocities(std::vector<float> velocities) {

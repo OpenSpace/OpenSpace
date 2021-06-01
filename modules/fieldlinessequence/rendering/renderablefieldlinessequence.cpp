@@ -1265,7 +1265,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
 void RenderableFieldlinesSequence::updateFieldlinePos(const double t1, const double t0) {
     const double dt = t1 - t0;
     //do nothing if time in openspace is paused
-    if (dt > DBL_EPSILON) _states[_activeStateIndex].moveLine(dt);
+    if (abs(dt) > DBL_EPSILON) _states[_activeStateIndex].moveLine(dt);
 
 }
 

@@ -232,13 +232,8 @@ namespace openspace::fls {
 
                 const std::vector<ccmc::Point3f>& positions2 = flowLine.getPositions();
 
-                //bool first = true;
                 for (const ccmc::Point3f& p2 : positions2) {
-                    //skip the first vertex
-                    //if (first) {
-                    //    first = false;
-                    //    continue;
-                    //}
+
                     vertices.emplace_back(p2.component1, p2.component2, p2.component3);
                 }
                 state.addVertexPath(vertices);
@@ -315,6 +310,7 @@ namespace openspace::fls {
                 }
                 state.addVertexVelocities(velocities);
             }
+
         }
         else if (state.extraQuantityNames()[nXtraScalars] == "u") {
 
