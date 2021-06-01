@@ -64,7 +64,6 @@ void FieldlinesSequenceModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul_assert(factory, "No renderable factory existed");
 
     factory->registerClass<RenderableFieldlinesSequence>("RenderableFieldlinesSequence");
-    factory->registerClass<RenderableUniformFieldlines>("RenderableUniformFieldlines");
 
 }
 

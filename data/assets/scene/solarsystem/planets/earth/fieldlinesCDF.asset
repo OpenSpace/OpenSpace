@@ -15,11 +15,11 @@ local earthRadius = 6378137
 
 -- Fieldlies from binaries
 local fieldlines2 = {
-    Identifier = "UNIFORM_Fieldlines",
+    Identifier = "Fieldlines",
     --wrong Parent = sunTransforms.HNMReferenceFrame.Identifier,
     Parent = transforms.GSMReferenceFrame.Identifier,
     Renderable = {
-        Type = "RenderableUniformFieldlines",
+        Type = "RenderableFieldlinesSequence",
         SourceFolder = fieldlinesDirectory,
         SeedPointFile = seedPointFile,
         TracingVariable = 'u_perp_b',
