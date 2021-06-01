@@ -436,9 +436,16 @@ void FieldlinesState::moveLine(double dt) {
     for (glm::vec3& vertex : _vertexPositions) {
 
         if (forward) {
+            //check if vertex is at the end
+            if (_vertexIndex[i] == _vertexPaths[i].size()-1) continue;
 
-            if (25000.0f > glm::length(vertex - _vertexPaths[i][_vertexIndex[i] + 1])) {
+            //size of the radius depends on the framerate
+            float vertexRadius = _vertexVelocities[i][_vertexIndex[i]] * float(dt);
+
+            if (vertexRadius > abs(glm::length(vertex - _vertexPaths[i][_vertexIndex[i] + 1]))) {
                 _vertexIndex[i]++;
+                //check if at end after increasing index
+                if (_vertexIndex[i] == _vertexPaths[i].size() - 1) continue;
             }
 
             glm::vec3 direction = _vertexPaths[i][_vertexIndex[i] + 1] - vertex;
@@ -448,14 +455,19 @@ void FieldlinesState::moveLine(double dt) {
         }
         else {
             if (_vertexIndex[i] == 0) continue;
-            if (25000.0f > glm::length(vertex - _vertexPaths[i][_vertexIndex[i] - 1])) {
+
+            //size of the radius depends on the framerate and velocity
+            float vertexRadius = abs(_vertexVelocities[i][_vertexIndex[i]] * float(dt));
+
+            if (vertexRadius > abs(glm::length(vertex - _vertexPaths[i][_vertexIndex[i]]))) {
                 _vertexIndex[i]--;
+                if (_vertexIndex[i] == 0) continue;
             }
 
-            glm::vec3 direction = _vertexPaths[i][_vertexIndex[i] - 1] - vertex;
+            glm::vec3 direction = _vertexPaths[i][_vertexIndex[i]] - vertex;
             direction = glm::normalize(-direction);
 
-            vertex += (direction * _vertexVelocities[i][_vertexIndex[i]-1]) * (float)dt;
+            vertex += (direction * _vertexVelocities[i][_vertexIndex[i]]) * (float)dt;
         }
 
        
