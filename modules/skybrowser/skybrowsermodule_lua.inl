@@ -259,7 +259,7 @@ namespace openspace::skybrowser::luascriptfunctions {
             SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(id);
             if (node) {
                 // Add to module
-                module->add3dBrowser(node);
+                module->set3dBrowser(node);
             }
         }
         
@@ -475,13 +475,7 @@ namespace openspace::skybrowser::luascriptfunctions {
             }
         }
         else if (!module->cameraInSolarSystem() && id3dBrowser == id) {
-            std::string cameraAim = "NavigationHandler.OrbitalNavigator.Aim";
-            openspace::global::scriptEngine->queueScript(
-                "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', Nil)"
-                "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', '" + idNode3dBrowser + "')"
-                "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')",
-                scripting::ScriptEngine::RemoteScripting::Yes
-            );
+            module->lookAt3dBrowser();
         }
 
 		return 0;

@@ -653,24 +653,12 @@ void SkyBrowserModule::place3dBrowser(ImageData& image) {
             "openspace.setPropertyValueSingle('" + rotationUri + "', " + ghoul::to_string(rotation) + ");",
             scripting::ScriptEngine::RemoteScripting::Yes
         );
-
-        // Target camera on the 3D sky browser
-        openspace::global::scriptEngine->queueScript(
-            "openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.RetargetAnchor\", nil)",
-            scripting::ScriptEngine::RemoteScripting::Yes
-        ); 
-        openspace::global::scriptEngine->queueScript(
-            "openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Anchor\", '" + id + "')",
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
-        openspace::global::scriptEngine->queueScript(
-            "openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Aim\", '')",
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
+        lookAt3dBrowser();
+   
     }
 }
 
-void SkyBrowserModule::add3dBrowser(SceneGraphNode* node) {
+void SkyBrowserModule::set3dBrowser(SceneGraphNode* node) {
     _browser3d = node;
 }
 
@@ -695,6 +683,23 @@ std::vector<ScreenSpaceRenderable*>& SkyBrowserModule::getBrowsersAndTargets() {
 
 SceneGraphNode* SkyBrowserModule::get3dBrowser() {
     return _browser3d;
+}
+
+void SkyBrowserModule::lookAt3dBrowser() {
+    std::string id = _browser3d->identifier();
+    // Target camera on the 3D sky browser
+    openspace::global::scriptEngine->queueScript(
+        "openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.RetargetAnchor\", nil)",
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
+    openspace::global::scriptEngine->queueScript(
+        "openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Anchor\", '" + id + "')",
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
+    openspace::global::scriptEngine->queueScript(
+        "openspace.setPropertyValueSingle(\"NavigationHandler.OrbitalNavigator.Aim\", '')",
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
 }
 
 void SkyBrowserModule::startRotation(glm::dvec2 coordsEnd) {

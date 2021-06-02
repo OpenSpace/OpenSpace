@@ -70,11 +70,12 @@ public:
     bool browserIdExists(std::string id);
     std::string selectedBrowserId();
     int loadImages(const std::string& root, const std::string& directory);
-    void add3dBrowser(SceneGraphNode* node);
+    void set3dBrowser(SceneGraphNode* node);
     bool cameraInSolarSystem();
     void createTargetBrowserPair();
     void removeTargetBrowserPair(std::string& browserId);
     void place3dBrowser(ImageData& image);
+    void lookAt3dBrowser();
 
     scripting::LuaLibrary luaLibrary() const override;
     //std::vector<documentation::Documentation> documentations() const override;
