@@ -61,6 +61,7 @@ public:
     WWTDataHandler* getWWTDataHandler();
     std::map<std::string, ScreenSpaceSkyBrowser*>& getSkyBrowsers();
     std::vector<ScreenSpaceRenderable*>& getBrowsersAndTargets();
+    SceneGraphNode* get3dBrowser();
     void startRotation(glm::dvec2 coordsEnd);
     void rotateCamera(double deltaTime);
     bool fadeBrowserAndTarget(bool makeTransparent, double fadeTime, double deltaTime);
@@ -69,12 +70,11 @@ public:
     bool browserIdExists(std::string id);
     std::string selectedBrowserId();
     int loadImages(const std::string& root, const std::string& directory);
-    void add3dBrowser(RenderableSkyBrowser* node);
-    void remove3dBrowser(std::string& id);
+    void add3dBrowser(SceneGraphNode* node);
     bool cameraInSolarSystem();
     void createTargetBrowserPair();
     void removeTargetBrowserPair(std::string& browserId);
-    void create3dBrowser(ImageData& image);
+    void place3dBrowser(ImageData& image);
 
     scripting::LuaLibrary luaLibrary() const override;
     //std::vector<documentation::Documentation> documentations() const override;
@@ -91,8 +91,8 @@ protected:
     std::vector<ScreenSpaceRenderable*> renderables;
     // Only the browsers
     std::map<std::string, ScreenSpaceSkyBrowser*> browsers;
-    // 3D browsers
-    std::vector<RenderableSkyBrowser*> browsers3d;
+    // 3D browser
+    SceneGraphNode* _browser3d;
     // Pointer to what mouse is currently on
     ScreenSpaceRenderable* _mouseOnObject;
     // Dragging

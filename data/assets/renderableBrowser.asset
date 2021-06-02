@@ -2,9 +2,10 @@ local assetHelper = asset.require("util/asset_helper")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 local PARSEC_CONSTANT = 3.0856776E16;
+local browserId = "SkyBrowser3D";
 
-local spec = {
-  Identifier = "RenderableSkyBrowser1",
+local browser = {
+  Identifier = browserId,
   Parent = transforms.SolarSystemBarycenter.Identifier,
   Transform = {
     Translation = {
@@ -13,21 +14,36 @@ local spec = {
         -3.915 * PARSEC_CONSTANT,
         -150.153 * PARSEC_CONSTANT,
         -120.706 * PARSEC_CONSTANT
-      }
+      },
     },
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = {0.0, 0.0, 0.0}
+    }
   },
   Renderable = {
+    Identifier = "SkyBrowser3DRenderable",
     Type = "RenderableSkyBrowser",
     Size = 10.0E11,
     Origin = "Center",
-    Billboard = true,
-    Url = "http://localhost:8000"
+    Billboard = false,
+    Url = "http://localhost:8000",
+    Opacity = 0.99
   },
   GUI = {
-    Name = "Renderable Sky Browser",
+    Name = "Sky Browser 3D",
     Path = "/SkyBrowser",
   }
 }
 
-local objects = { spec }
-assetHelper.registerSceneGraphNodesAndExport(asset, objects)
+asset.onInitialize(function ()
+   openspace.addSceneGraphNode(browser)
+   openspace.skybrowser.addToSkyBrowserModule(browserId)
+end)
+
+asset.onDeinitialize(function ()
+    openspace.removeScreenSpaceRenderable(browserId)
+    openspace.removeScreenSpaceRenderable(targetId)
+end)
+
+asset.export("browser", {browser})

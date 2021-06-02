@@ -67,7 +67,6 @@ namespace openspace {
         // For capping the calls to change the zoom from scrolling
         constexpr static const std::chrono::milliseconds TimeUpdateInterval{ 10 };
         std::chrono::system_clock::time_point _lastUpdateTime;
-        int _imageId{ 0 };
         bool _hasLoadedCollections{ false };
         std::deque<int> _selectedImages;
     };

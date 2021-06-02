@@ -54,7 +54,6 @@ namespace openspace::speck {
 namespace openspace {
 
 	struct ImageData {
-        static constexpr int NO_ID = -1;
 		std::string name;
 		std::string thumbnailUrl;
         std::string imageUrl;
@@ -66,7 +65,6 @@ namespace openspace {
         bool hasCelestCoords{ false };
         bool has3dCoords{ false };
 	    glm::dvec3 position3d;
-        int id{ NO_ID };
 	};
 
 	struct ImageCollection {

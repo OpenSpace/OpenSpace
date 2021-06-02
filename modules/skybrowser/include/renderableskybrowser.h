@@ -6,6 +6,7 @@
 #include <modules/webbrowser/include/webrenderhandler.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/triggerproperty.h>
+#include <deque>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -36,6 +37,7 @@ namespace openspace {
     class BrowserInstance;
     class RenderHandler;
     class WebKeyboardHandler;
+    class ImageData;
 
     class RenderableSkyBrowser : public RenderablePlane
     {
@@ -52,12 +54,20 @@ namespace openspace {
 
         void executeJavascript(std::string script) const;
         bool sendMessageToWWT(const ghoul::Dictionary& msg);
+        void connectToWwt();
+        void stopConnectingToWwt();
+        void displayImage(ImageData& image, int i);
+        void removeSelectedImage(ImageData& image, int i);
+        void setIdInBrowser(std::string id);
+        float fieldOfView() const;
+        std::deque<int>& selectedImages();
 
     protected:
 
         properties::Vec2Property _dimensions;
         std::unique_ptr<BrowserInstance> _browserInstance;
         std::unique_ptr<ghoul::opengl::Texture> _texture;
+       
 
     private:
         class ScreenSpaceRenderHandler : public WebRenderHandler {
@@ -80,7 +90,12 @@ namespace openspace {
 
         bool _isUrlDirty = false;
         bool _isDimensionsDirty = false;
+        
+        float _fov;
+        bool _connectToWwt;
+        std::thread _threadWwtMessages;
 
+        std::deque<int> _selectedImages;
     };
 }
 

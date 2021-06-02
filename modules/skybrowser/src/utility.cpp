@@ -90,25 +90,26 @@ namespace openspace::skybrowser {
         // Transform galactic coord to screen space
         return galacticToScreenSpace(imageCoordsGalacticCartesian);
     }
-}
 
-// WWT messages
-namespace openspace::wwtmessage {
-    // WWT messages
-    ghoul::Dictionary moveCamera(const glm::dvec2 celestCoords, const double fov, const bool moveInstantly) {
-        using namespace std::string_literals;
-        ghoul::Dictionary msg;
-
-        // Calculate roll between up vector of camera and J2000 equatorial north
-        glm::dvec3 upVector = global::navigationHandler->camera()->lookUpVectorWorldSpace();
-        glm::dvec3 viewVector = global::navigationHandler->camera()->viewDirectionWorldSpace();
-        glm::dvec3 camUpJ2000 = skybrowser::galacticCartesianToJ2000Cartesian(upVector);
-        glm::dvec3 camForwardJ2000 = skybrowser::galacticCartesianToJ2000Cartesian(viewVector);
+    double calculateRoll(glm::dvec3 upWorld, glm::dvec3 forwardWorld) {
+        glm::dvec3 camUpJ2000 = skybrowser::galacticCartesianToJ2000Cartesian(upWorld);
+        glm::dvec3 camForwardJ2000 = skybrowser::galacticCartesianToJ2000Cartesian(forwardWorld);
 
         glm::dvec3 crossUpNorth = glm::cross(camUpJ2000, skybrowser::NORTH_POLE);
         double dotNorthUp = glm::dot(skybrowser::NORTH_POLE, camUpJ2000);
         double dotCrossUpNorthForward = glm::dot(crossUpNorth, camForwardJ2000);
         double roll = glm::degrees(atan2(dotCrossUpNorthForward, dotNorthUp));
+        return roll;
+    }
+}
+
+// WWT messages
+namespace openspace::wwtmessage {
+    // WWT messages
+    ghoul::Dictionary moveCamera(const glm::dvec2 celestCoords, const double fov, 
+                                 const double roll, const bool moveInstantly) {
+        using namespace std::string_literals;
+        ghoul::Dictionary msg;
 
         // Create message
         msg.setValue("event", "center_on_coordinates"s);
@@ -140,34 +141,29 @@ namespace openspace::wwtmessage {
         return msg;
     }
 
-    ghoul::Dictionary createImageLayer(ImageData& image, int id) {
-        std::string idString = std::to_string(id);
-        image.id = id;
-
+    ghoul::Dictionary createImageLayer(const std::string& imageUrl, const std::string& id) {
         using namespace std::string_literals;
         ghoul::Dictionary msg;
         msg.setValue("event", "image_layer_create"s);
-        msg.setValue("id", idString);
-        msg.setValue("url", image.imageUrl);
+        msg.setValue("id", id);
+        msg.setValue("url", imageUrl);
         return msg;
     }
 
-    ghoul::Dictionary removeImageLayer(ImageData& image) {
+    ghoul::Dictionary removeImageLayer(const std::string& imageId) {
         using namespace std::string_literals;
         ghoul::Dictionary msg;
         msg.setValue("event", "image_layer_remove"s);
-        msg.setValue("id", std::to_string(image.id));
-        image.id = ImageData::NO_ID;
+        msg.setValue("id", imageId);
 
         return msg;
     }
 
-    ghoul::Dictionary setLayerOpacity(const ImageData& image, double opacity) {
-        std::string idString = std::to_string(image.id);
+    ghoul::Dictionary setLayerOpacity(const std::string& imageId, double opacity) {
         using namespace std::string_literals;
         ghoul::Dictionary msg;
         msg.setValue("event", "image_layer_set"s);
-        msg.setValue("id", idString);
+        msg.setValue("id", imageId);
         msg.setValue("setting", "opacity"s);
         msg.setValue("value", opacity);
 

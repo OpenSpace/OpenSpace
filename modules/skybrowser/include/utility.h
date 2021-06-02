@@ -37,17 +37,17 @@ namespace openspace {
         glm::dvec3 J2000SphericalToScreenSpace(glm::dvec2 coords);
         glm::dvec3 J2000CartesianToScreenSpace(glm::dvec3 coords);
         glm::dvec3 galacticToScreenSpace(glm::dvec3 galacticCoord);
+        double calculateRoll(glm::dvec3 upWorld, glm::dvec3 forwardWorld);
     }
     namespace wwtmessage {
         // WWT messages
         ghoul::Dictionary moveCamera(const glm::dvec2 celestCoords,
-            const double fov, const bool moveInstantly = true);
+            const double fov, const double roll, const bool moveInstantly = true);
         ghoul::Dictionary loadCollection(const std::string& url);
         ghoul::Dictionary setForeground(const std::string& name);
-        ghoul::Dictionary createImageLayer(ImageData& image, int id = 0);
-        ghoul::Dictionary removeImageLayer(ImageData& image);
-        ghoul::Dictionary setLayerOpacity(const ImageData& image,
-            double opacity);
+        ghoul::Dictionary createImageLayer(const std::string& imageUrl, const std::string& id);
+        ghoul::Dictionary removeImageLayer(const std::string& imageId);
+        ghoul::Dictionary setLayerOpacity(const std::string& imageId, double opacity);
         ghoul::Dictionary setForegroundOpacity(double val);
     }
 }

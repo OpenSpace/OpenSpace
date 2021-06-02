@@ -89,6 +89,7 @@ namespace openspace {
         while (glm::length(_borderColor.value()) < 222) {
             _borderColor = glm::ivec3(rand() % 256, rand() % 256, rand() % 256);
         }
+
         // Handle target dimension property
         const Parameters p = codegen::bake<Parameters>(dictionary);
         _browserDimensions = p.browserDimensions.value_or(_browserDimensions);
@@ -242,7 +243,11 @@ namespace openspace {
             while (_camIsSyncedWWT) {
                 if (_skyTarget) {
                     glm::dvec2 aim = _skyTarget->getTargetDirectionCelestial();
-                    ghoul::Dictionary message = wwtmessage::moveCamera(aim, _vfieldOfView);
+                    // Calculate roll between up vector of camera and J2000 equatorial north
+                    glm::dvec3 upVector = global::navigationHandler->camera()->lookUpVectorWorldSpace();
+                    glm::dvec3 viewVector = global::navigationHandler->camera()->viewDirectionWorldSpace();
+                    double roll = skybrowser::calculateRoll(upVector, viewVector);
+                    ghoul::Dictionary message = wwtmessage::moveCamera(aim, _vfieldOfView, roll);
                     sendMessageToWWT(message);
                 }
                 
@@ -330,23 +335,23 @@ namespace openspace {
     }
 
     void ScreenSpaceSkyBrowser::addSelectedImage(ImageData& image, int i) {
-        sendMessageToWWT(wwtmessage::createImageLayer(image, _imageId));
-        sendMessageToWWT(wwtmessage::setLayerOpacity(image, 1.0));
-        _imageId++;
         // Ensure there are no duplicates
         auto it = std::find(std::begin(_selectedImages), std::end(_selectedImages), i);
         if (it == std::end(_selectedImages)) {
             // Push newly selected image to front
             _selectedImages.push_front(i);
+            // Index of image is used as layer ID as it is unique in the image data set
+            sendMessageToWWT(wwtmessage::createImageLayer(image.imageUrl, std::to_string(i)));
+            sendMessageToWWT(wwtmessage::setLayerOpacity(std::to_string(i), 1.0));
         }
     }
 
     void ScreenSpaceSkyBrowser::removeSelectedImage(ImageData& image, int i) {
-        sendMessageToWWT(wwtmessage::removeImageLayer(image));
         // Remove from selected list
         auto it = std::find(std::begin(_selectedImages), std::end(_selectedImages), i);
         if (it != std::end(_selectedImages)) {
             _selectedImages.erase(it);
+            sendMessageToWWT(wwtmessage::removeImageLayer(std::to_string(i)));
         }
     }
 }
