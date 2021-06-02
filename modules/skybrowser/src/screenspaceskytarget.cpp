@@ -38,8 +38,8 @@ namespace {
         "Set the dimensions of the SkyTarget according to the SkyBrowser ratio "
     };
 
-    constexpr const std::array<const char*, 7> UniformNames = {
-        "ModelTransform", "ViewProjectionMatrix", "texture1", "showCrosshair", "borderWidth", "targetDimensions", "borderColor"
+    constexpr const std::array<const char*, 8> UniformNames = {
+        "ModelTransform", "ViewProjectionMatrix", "texture1", "showCrosshair", "showCrosshairInTarget", "borderWidth", "targetDimensions", "borderColor"
     };
 
     constexpr const openspace::properties::Property::PropertyInfo BrowserIDInfo =
@@ -77,7 +77,7 @@ namespace openspace {
         : ScreenSpaceRenderable(dictionary)
         , _targetDimensions(TargetDimensionInfo, glm::ivec2(1000.f), glm::ivec2(0.f), glm::ivec2(6000.f))
         , _skyBrowserID(BrowserIDInfo)
-        , _showCrosshairThreshold(CrosshairThresholdInfo, 2.f, 1.f, 70.f)
+        , _showCrosshairThreshold(CrosshairThresholdInfo, 0.6f, 0.1f, 70.f)
         , _borderColor(220, 220, 220)
         , _skyBrowser(nullptr)
     {
@@ -222,15 +222,19 @@ namespace openspace {
         glDisable(GL_CULL_FACE);
        
         glm::mat4 modelTransform = globalRotationMatrix() * translationMatrix() * localRotationMatrix() * scaleMatrix();
-        float borderWidth = 0.002f/_scale.value();
+        float borderWidth = 0.0016f/_scale.value();
+        float showCrosshairInTargetThreshold = 2.f; // show crosshair and target when browser FOV < 2 degrees
         glm::vec2 targetDim;
         bool showCrosshair;
+        bool showCrosshairInTarget;
         _targetDimensions.value() == glm::vec2(0) ? targetDim = glm::vec2(1) : targetDim = _targetDimensions.value();
         _shader->activate();
 
+        _fieldOfView < showCrosshairInTargetThreshold && _fieldOfView > _showCrosshairThreshold ? showCrosshairInTarget = true : showCrosshairInTarget = false;
         _fieldOfView < _showCrosshairThreshold ? showCrosshair = true : showCrosshair = false;
 
         _shader->setUniform(_uniformCache.showCrosshair, showCrosshair);
+        _shader->setUniform(_uniformCache.showCrosshairInTarget, showCrosshairInTarget);
         _shader->setUniform(_uniformCache.borderWidth, borderWidth);
         _shader->setUniform(_uniformCache.targetDimensions, targetDim);
         _shader->setUniform(_uniformCache.modelTransform, modelTransform);
