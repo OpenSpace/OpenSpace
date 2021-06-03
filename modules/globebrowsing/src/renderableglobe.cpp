@@ -567,7 +567,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
             for (const Parameters::ShadowGroup::Caster& caster : p.shadowGroup->casters) {
                 Ellipsoid::ShadowConfiguration sc;
                 sc.source = std::pair<std::string, double>(source.name, source.radius);
-                sc.caster = std::pair<std::string, double>(source.name, source.radius);
+                sc.caster = std::pair<std::string, double>(caster.name, caster.radius);
                 shadowConfArray.push_back(sc);
             }
         }
