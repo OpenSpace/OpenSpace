@@ -67,7 +67,7 @@ namespace {
         "than using the mouse interaction."
     };
 
-    struct [[codegen::Dictionary(NavigationHandler)]] Parameters {
+    struct [[codegen::Dictionary(NavigationState)]] Parameters {
         // The identifier of the anchor node
         std::string anchor;
 
