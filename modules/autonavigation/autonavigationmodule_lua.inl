@@ -39,6 +39,10 @@
 #include <ghoul/logging/logmanager.h>
 #include <glm/gtx/vector_angle.hpp>
 
+namespace {
+    constexpr const char* _loggerCat = "AutoNavigation";
+} // namespace
+
 namespace openspace::autonavigation::luascriptfunctions {
 
 const double Epsilon = 1e-12;
@@ -261,26 +265,25 @@ int generatePath(lua_State* L) {
 int generatePathFromFile(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::generatePathFromFile");
 
-    const std::string& filepath = ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::Yes);
+    const std::string& filepath =
+        ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::Yes);
 
     if (filepath.empty()) {
-        return ghoul::lua::luaError(L, "filepath string is empty");
+        return ghoul::lua::luaError(L, "Filepath string is empty");
     }
 
-    const std::string absolutePath = absPath(filepath);
+    const std::filesystem::path file = absPath(filepath);
 
-    LINFOC("AutoNavigationModule", fmt::format(
-        "Reading path instructions from file: {}", absolutePath
-    ));
+    LINFO(fmt::format("Reading path instructions from file: {}", file));
 
-    if (!FileSys.fileExists(absolutePath)) {
-        throw ghoul::FileNotFoundError(absolutePath, "PathSpecification");
+    if (!std::filesystem::is_regular_file(file)) {
+        throw ghoul::FileNotFoundError(file.string(), "PathSpecification");
     }
 
     // Try to read the dictionary
     ghoul::Dictionary dictionary;
     try {
-        ghoul::lua::loadDictionaryFromFile(absolutePath, dictionary);
+        ghoul::lua::loadDictionaryFromFile(file.string(), dictionary);
         openspace::documentation::testSpecificationAndThrow(
             PathSpecification::Documentation(),
             dictionary,
@@ -297,7 +300,7 @@ int generatePathFromFile(lua_State* L) {
 
     if (spec.instructions()->empty()) {
         return ghoul::lua::luaError(
-            L, fmt::format("No instructions for camera path generation were provided.")
+            L, fmt::format("No instructions for camera path generation were provided")
         );
     }
 
