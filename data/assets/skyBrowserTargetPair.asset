@@ -32,6 +32,7 @@ asset.onInitialize(function ()
  openspace.skybrowser.addToSkyBrowserModule(targetId)
  openspace.skybrowser.connectBrowserTarget(browserId)
  openspace.skybrowser.connectBrowserTarget(targetId)
+ openspace.skybrowser.setSelectedBrowser(browserId)
 end)
 
 asset.onDeinitialize(function ()

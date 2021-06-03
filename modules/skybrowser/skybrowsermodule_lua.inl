@@ -410,6 +410,8 @@ namespace openspace::skybrowser::luascriptfunctions {
                     lua_settable(L, -3);
                     ghoul::lua::push(L, "color", colorVec);
                     lua_settable(L, -3);
+                    ghoul::lua::push(L, "isLocked", target->isLocked());
+                    lua_settable(L, -3);
               
                     // Set table for the current target
                     lua_settable(L, -3);

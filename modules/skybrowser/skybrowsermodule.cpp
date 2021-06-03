@@ -499,7 +499,7 @@ void SkyBrowserModule::addRenderable(ScreenSpaceRenderable* object) {
     // Sort on z coordinate, objects closer to camera are in beginning of list
     std::sort(renderables.begin(), renderables.end());
     ScreenSpaceSkyBrowser* browser = to_browser(object);
-    if (browser) {
+    if (browser) {      
         browsers[browser->identifier()] = browser;
     }
 }

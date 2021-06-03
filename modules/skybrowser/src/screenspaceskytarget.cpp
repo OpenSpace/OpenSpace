@@ -308,26 +308,30 @@ namespace openspace {
     }
 
     void ScreenSpaceSkyTarget::unlock() {
-        isLocked = false;
+        _isLocked = false;
         if (_lockTargetThread.joinable()) {
             _lockTargetThread.join();
         }
     }
 
     void ScreenSpaceSkyTarget::lock() {
-        if (isLocked) {
+        if (_isLocked) {
             unlock();
         }
-        isLocked = true;
+        _isLocked = true;
         lockedCelestialCoords = getTargetDirectionCelestial();
 
         // Start a thread to enable user interactions while locking target
         _lockTargetThread = std::thread([&] {
-            while (isLocked) {
+            while (_isLocked) {
                 glm::vec3 imageCoordsScreenSpace = skybrowser::J2000SphericalToScreenSpace(lockedCelestialCoords);
                 _cartesianPosition = imageCoordsScreenSpace;
             }
         });
+    }
+
+    bool ScreenSpaceSkyTarget::isLocked() {
+        return _isLocked;
     }
 
     glm::dvec2 ScreenSpaceSkyTarget::getTargetDirectionCelestial() {
@@ -360,7 +364,7 @@ namespace openspace {
             else {
                 // Set the exact target position and lock target when it first arrives
                 // to the position
-                if (!isLocked) {
+                if (!_isLocked) {
                     _cartesianPosition = skybrowser::J2000CartesianToScreenSpace(_coordsToAnimateTo);
                     lock();
                 }
