@@ -78,9 +78,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DashboardItemGlobeLocation::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "globebrowsing_dashboarditem_globelocation";
-    return doc;
+    return codegen::doc<Parameters>("globebrowsing_dashboarditem_globelocation");
 }
 
 DashboardItemGlobeLocation::DashboardItemGlobeLocation(

@@ -62,7 +62,7 @@ local Apollo8Model = {
   },
   Renderable = {
     Type = "RenderableModel",
-    GeometryFile = models .. "/ApolloCSM.fbx",
+    GeometryFile = models .. "/ApolloCSM.osmodel",
     LightSources = {
       {
         Type = "SceneGraphLightSource",

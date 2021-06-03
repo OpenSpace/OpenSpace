@@ -32,6 +32,7 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureconversion.h>
+#include <filesystem>
 #include <optional>
 
 namespace {
@@ -57,9 +58,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation ScreenSpaceImageLocal::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_screenspace_image_local";
-    return doc;
+    return codegen::doc<Parameters>("base_screenspace_image_local");
 }
 
 ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary)
@@ -81,7 +80,7 @@ ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary
     setIdentifier(identifier);
 
     _texturePath.onChange([this]() {
-        if (!FileSys.fileExists(FileSys.absolutePath(_texturePath))) {
+        if (!std::filesystem::is_regular_file(absPath(_texturePath))) {
             LWARNINGC(
                 "ScreenSpaceImageLocal",
                 fmt::format("Image {} did not exist for {}", _texturePath, _identifier)
@@ -94,8 +93,8 @@ ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary
     addProperty(_texturePath);
 
     if (p.texturePath.has_value()) {
-        if (FileSys.fileExists(FileSys.absolutePath(*p.texturePath))) {
-            _texturePath = FileSys.absolutePath(*p.texturePath);
+        if (std::filesystem::is_regular_file(absPath(*p.texturePath))) {
+            _texturePath = absPath(*p.texturePath).string();
         }
         else {
             LWARNINGC(
@@ -115,7 +114,7 @@ bool ScreenSpaceImageLocal::deinitializeGL() {
 void ScreenSpaceImageLocal::update() {
     if (_textureIsDirty && !_texturePath.value().empty()) {
         std::unique_ptr<ghoul::opengl::Texture> texture =
-            ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
+            ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath).string());
 
         if (texture) {
             // Images don't need to start on 4-byte boundaries, for example if the

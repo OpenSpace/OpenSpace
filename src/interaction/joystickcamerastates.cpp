@@ -52,8 +52,13 @@ void JoystickCameraStates::updateStateFromInput(const InputState& inputState,
             continue;
         }
 
-        bool hasValue = true;
-        float value = inputState.joystickAxis(i);
+        float rawValue = inputState.joystickAxis(i);
+        float value = rawValue;
+
+        if (t.isSticky) {
+            value = rawValue - _prevAxisValues[i];
+            _prevAxisValues[i] = rawValue;
+        }
 
         if (std::fabs(value) <= t.deadzone) {
             continue;
@@ -67,49 +72,55 @@ void JoystickCameraStates::updateStateFromInput(const InputState& inputState,
             value *= -1.f;
         }
 
-        value = static_cast<float>(value * _sensitivity);
+        if (std::abs(t.sensitivity) > std::numeric_limits<double>::epsilon()) {
+            value = static_cast<float>(value * t.sensitivity * _sensitivity);
+        }
+        else {
+            value = static_cast<float>(value * _sensitivity);
+        }
 
         switch (t.type) {
             case AxisType::None:
                 break;
             case AxisType::OrbitX:
-                globalRotation.first = hasValue;
+                globalRotation.first = true;
                 globalRotation.second.x = value;
                 break;
             case AxisType::OrbitY:
-                globalRotation.first = hasValue;
+                globalRotation.first = true;
                 globalRotation.second.y = value;
                 break;
+            case AxisType::Zoom:
             case AxisType::ZoomIn:
-                zoom.first = hasValue;
+                zoom.first = true;
                 zoom.second += value;
                 break;
             case AxisType::ZoomOut:
-                zoom.first = hasValue;
+                zoom.first = true;
                 zoom.second -= value;
                 break;
             case AxisType::LocalRollX:
-                localRoll.first = hasValue;
+                localRoll.first = true;
                 localRoll.second.x = value;
                 break;
             case AxisType::LocalRollY:
-                localRoll.first = hasValue;
+                localRoll.first = true;
                 localRoll.second.y = value;
                 break;
             case AxisType::GlobalRollX:
-                globalRoll.first = hasValue;
+                globalRoll.first = true;
                 globalRoll.second.x = value;
                 break;
             case AxisType::GlobalRollY:
-                globalRoll.first = hasValue;
+                globalRoll.first = true;
                 globalRoll.second.y = value;
                 break;
             case AxisType::PanX:
-                localRotation.first = hasValue;
+                localRotation.first = true;
                 localRotation.second.x = value;
                 break;
             case AxisType::PanY:
-                localRotation.first = hasValue;
+                localRotation.first = true;
                 localRotation.second.y = value;
                 break;
         }
@@ -167,13 +178,23 @@ void JoystickCameraStates::updateStateFromInput(const InputState& inputState,
 
 void JoystickCameraStates::setAxisMapping(int axis, AxisType mapping,
                                           AxisInvert shouldInvert,
-                                          AxisNormalize shouldNormalize)
+                                          AxisNormalize shouldNormalize,
+                                          bool isSticky,
+                                          double sensitivity)
 {
     ghoul_assert(axis < JoystickInputState::MaxAxes, "axis must be < MaxAxes");
 
     _axisMapping[axis].type = mapping;
     _axisMapping[axis].invert = shouldInvert;
     _axisMapping[axis].normalize = shouldNormalize;
+    _axisMapping[axis].isSticky = isSticky;
+    _axisMapping[axis].sensitivity = sensitivity;
+
+    if (isSticky) {
+        global::joystickInputStates->at(axis).isSticky = true;
+    }
+
+    _prevAxisValues[axis] = global::joystickInputStates->axis(axis);
 }
 
 JoystickCameraStates::AxisInformation JoystickCameraStates::axisMapping(int axis) const {

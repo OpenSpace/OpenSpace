@@ -29,26 +29,32 @@
 #include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/dictionaryjsonformatter.h>
+#include <filesystem>
 #include <fstream>
 
 namespace {
-    constexpr const char* KeyInput = "Input";
-    constexpr const char* KeyOutput = "Output";
+    struct [[codegen::Dictionary(KameleonMetadataToJsonTask)]] Parameters {
+        // The CDF file to extract data from
+        std::filesystem::path input;
+
+        // The JSON file to export data into
+        std::string output [[codegen::annotation("A valid filepath")]];
+    };
+#include "kameleonmetadatatojsontask_codegen.cpp"
 } // namespace
 
 namespace openspace::kameleonvolume {
 
+documentation::Documentation KameleonMetadataToJsonTask::documentation() {
+    return codegen::doc<Parameters>("kameleon_metadata_to_json_task");
+}
+
 KameleonMetadataToJsonTask::KameleonMetadataToJsonTask(
                                                       const ghoul::Dictionary& dictionary)
 {
-    openspace::documentation::testSpecificationAndThrow(
-        documentation(),
-        dictionary,
-        "KameleonMetadataToJsonTask"
-    );
-
-    _inputPath = absPath(dictionary.value<std::string>(KeyInput));
-    _outputPath = absPath(dictionary.value<std::string>(KeyOutput));
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    _inputPath = absPath(p.input.string());
+    _outputPath = absPath(p.output);
 }
 
 std::string KameleonMetadataToJsonTask::description() {
@@ -59,7 +65,7 @@ std::string KameleonMetadataToJsonTask::description() {
 }
 
 void KameleonMetadataToJsonTask::perform(const Task::ProgressCallback& progressCallback) {
-    KameleonVolumeReader reader(_inputPath);
+    KameleonVolumeReader reader(_inputPath.string());
     ghoul::Dictionary dictionary = reader.readMetaData();
     progressCallback(0.5f);
 
@@ -67,28 +73,6 @@ void KameleonMetadataToJsonTask::perform(const Task::ProgressCallback& progressC
     std::ofstream output(_outputPath);
     output << std::move(json);
     progressCallback(1.0f);
-}
-
-documentation::Documentation KameleonMetadataToJsonTask::documentation() {
-    using namespace documentation;
-    return {
-        "KameleonMetadataToJsonTask",
-        "kameleon_metadata_to_json_task",
-        {
-            {
-                KeyInput,
-                new StringAnnotationVerifier("A file path to a cdf file"),
-                Optional::No,
-                "The cdf file to extract data from"
-            },
-            {
-                KeyOutput,
-                new StringAnnotationVerifier("A valid filepath"),
-                Optional::No,
-                "The JSON file to export data into"
-            }
-        }
-    };
 }
 
 } // namespace openspace::kameleonvolume

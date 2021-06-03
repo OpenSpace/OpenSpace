@@ -46,7 +46,7 @@ namespace {
     };
 
     constexpr const openspace::properties::Property::PropertyInfo XAxisTypeInfo = {
-        "xAxis-Type",
+        "xAxisType",
         "xAxis: Specification Type",
         "This value specifies how this axis is being specified, that is whether it is "
         "referencing another object, specifying an absolute vector, or whether it is "
@@ -55,7 +55,7 @@ namespace {
     };
 
     constexpr const openspace::properties::Property::PropertyInfo YAxisTypeInfo = {
-        "yAxis-Type",
+        "yAxisType",
         "yAxis: Specification Type",
         "This value specifies how this axis is being specified, that is whether it is "
         "referencing another object, specifying an absolute vector, or whether it is "
@@ -64,7 +64,7 @@ namespace {
     };
 
     constexpr const openspace::properties::Property::PropertyInfo ZAxisTypeInfo = {
-        "zAxis-Type",
+        "zAxisType",
         "zAxis: Specification Type",
         "This value specifies how this axis is being specified, that is whether it is "
         "referencing another object, specifying an absolute vector, or whether it is "
@@ -73,7 +73,7 @@ namespace {
     };
 
     constexpr const openspace::properties::Property::PropertyInfo XAxisObjectInfo = {
-        "xAxis-Object",
+        "xAxisObject",
         "xAxis: Focus Object",
         "This is the object that the axis will focus on. This object must name an "
         "existing scene graph node in the currently loaded scene and the rotation will "
@@ -81,7 +81,7 @@ namespace {
     };
 
     constexpr const openspace::properties::Property::PropertyInfo YAxisObjectInfo = {
-        "yAxis-Object",
+        "yAxisObject",
         "yAxis: Focus Object",
         "This is the object that the axis will focus on. This object must name an "
         "existing scene graph node in the currently loaded scene and the rotation will "
@@ -89,7 +89,7 @@ namespace {
     };
 
     constexpr const openspace::properties::Property::PropertyInfo ZAxisObjectInfo = {
-        "zAxis-Object",
+        "zAxisObject",
         "zAxis: Focus Object",
         "This is the object that the axis will focus on. This object must name an "
         "existing scene graph node in the currently loaded scene and the rotation will "
@@ -98,7 +98,7 @@ namespace {
 
     constexpr const openspace::properties::Property::PropertyInfo XAxisInvertObjectInfo =
     {
-        "xAxis-InvertObject",
+        "xAxisInvertObject",
         "xAxis: Invert Object Point Direction",
         "If this value is set to 'true', and the type is set to 'Object', the inverse of "
         "the pointing direction is used, causing the object to point away from the "
@@ -107,7 +107,7 @@ namespace {
 
     constexpr const openspace::properties::Property::PropertyInfo YAxisInvertObjectInfo =
     {
-        "yAxis-InvertObject",
+        "yAxisInvertObject",
         "yAxis: Invert Object Point Direction",
         "If this value is set to 'true', and the type is set to 'Object', the inverse of "
         "the pointing direction is used, causing the object to point away from the "
@@ -116,7 +116,7 @@ namespace {
 
     constexpr const openspace::properties::Property::PropertyInfo ZAxisInvertObjectInfo =
     {
-        "zAxis-InvertObject",
+        "zAxisInvertObject",
         "zAxis: Invert Object Point Direction",
         "If this value is set to 'true', and the type is set to 'Object', the inverse of "
         "the pointing direction is used, causing the object to point away from the "
@@ -124,21 +124,21 @@ namespace {
     };
 
     constexpr const openspace::properties::Property::PropertyInfo XAxisVectorInfo = {
-        "xAxis-Vector",
+        "xAxisVector",
         "xAxis: Direction vector",
         "This value specifies a static direction vector that is used for a fixed "
         "rotation."
     };
 
     constexpr const openspace::properties::Property::PropertyInfo YAxisVectorInfo = {
-        "yAxis-Vector",
+        "yAxisVector",
         "yAxis: Direction vector",
         "This value specifies a static direction vector that is used for a fixed "
         "rotation."
     };
 
     constexpr const openspace::properties::Property::PropertyInfo ZAxisVectorInfo = {
-        "zAxis-Vector",
+        "zAxisVector",
         "zAxis: Direction vector",
         "This value specifies a static direction vector that is used for a fixed "
         "rotation."
@@ -147,7 +147,7 @@ namespace {
     constexpr const openspace::properties::Property::PropertyInfo
     XAxisOrthogonalVectorInfo =
     {
-        "xAxis-Orthogonal",
+        "xAxisOrthogonal",
         "xAxis: Vector is orthogonal",
         "This value determines whether the vector specified is used directly, or whether "
         "it is used together with another non-coordinate system completion vector to "
@@ -157,7 +157,7 @@ namespace {
     constexpr const openspace::properties::Property::PropertyInfo
     YAxisOrthogonalVectorInfo =
     {
-        "yAxis-Orthogonal",
+        "yAxisOrthogonal",
         "yAxis: Vector is orthogonal",
         "This value determines whether the vector specified is used directly, or whether "
         "it is used together with another non-coordinate system completion vector to "
@@ -167,7 +167,7 @@ namespace {
     constexpr const openspace::properties::Property::PropertyInfo
     ZAxisOrthogonalVectorInfo =
     {
-        "zAxis-Orthogonal",
+        "zAxisOrthogonal",
         "zAxis: Vector is orthogonal",
         "This value determines whether the vector specified is used directly, or whether "
         "it is used together with another non-coordinate system completion vector to "
@@ -194,7 +194,7 @@ namespace {
         std::optional<bool> xAxisOrthogonal;
 
         // [[codegen::verbatim(XAxisInvertObjectInfo.description)]]
-        std::optional<bool> xAxisInvert [[codegen::key("xAxis - InvertObject")]];
+        std::optional<bool> xAxisInvert;
 
         // This value specifies the direction of the new Y axis. If this value is not
         // specified, it will be computed by completing a right handed coordinate system
@@ -207,7 +207,7 @@ namespace {
         std::optional<bool> yAxisOrthogonal;
 
         // [[codegen::verbatim(YAxisInvertObjectInfo.description)]]
-        std::optional<bool> yAxisInvert [[codegen::key("yAxis - InvertObject")]];
+        std::optional<bool> yAxisInvert;
 
         // This value specifies the direction of the new Z axis. If this value is not
         // specified, it will be computed by completing a right handed coordinate system
@@ -220,7 +220,7 @@ namespace {
         std::optional<bool> zAxisOrthogonal;
 
         // [[codegen::verbatim(ZAxisInvertObjectInfo.description)]]
-        std::optional<bool> zAxisInvert [[codegen::key("zAxis - InvertObject")]];
+        std::optional<bool> zAxisInvert;
 
         // [[codegen::verbatim(AttachedInfo.description)]]
         std::optional<std::string> attached;
@@ -231,9 +231,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation FixedRotation::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_transform_rotation_fixed";
-    return doc;
+    return codegen::doc<Parameters>("base_transform_rotation_fixed");
 }
 
 FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)

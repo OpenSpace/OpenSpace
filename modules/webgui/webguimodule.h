@@ -33,8 +33,8 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <ghoul/misc/process.h>
 #include <memory>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 namespace openspace {
 

@@ -50,7 +50,7 @@ public:
 
     void initialize(const std::string& identifier, const ghoul::Dictionary& dictionary);
     bool initializeGL();
-    bool deinitialize();
+    void deinitialize();
 
     bool isReady() const;
 

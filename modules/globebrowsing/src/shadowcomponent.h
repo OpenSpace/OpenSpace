@@ -77,8 +77,6 @@ public:
 
     ShadowComponent::ShadowMapData shadowMapData() const;
 
-    void setViewDepthMap(bool enable);
-
     GLuint dDepthTexture() const;
 
 private:
@@ -137,9 +135,6 @@ private:
 
     // DEBUG
     bool _executeDepthTextureSave = false;
-    bool _viewDepthMap = false;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _renderDMProgram;
-    GLuint _quadVAO = 0u;
 };
 
 } // namespace openspace

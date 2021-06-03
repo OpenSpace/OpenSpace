@@ -46,9 +46,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation Translation::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "core_transform_translation";
-    return doc;
+    return codegen::doc<Parameters>("core_transform_translation");
 }
 
 ghoul::mm_unique_ptr<Translation> Translation::createFromDictionary(

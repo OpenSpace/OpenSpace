@@ -40,7 +40,7 @@ namespace openspace {
 
 struct TimeKeyframeData {
     Time time;
-    double delta;
+    double delta = 0.0;
     bool pause = false;
     bool jump = false;
 };

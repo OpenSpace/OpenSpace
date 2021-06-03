@@ -27,10 +27,12 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <modules/space/speckloader.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
@@ -108,9 +110,6 @@ private:
 
     bool loadData();
     bool readSpeckFile();
-    bool readLabelFile();
-    bool loadCachedFile(const std::string& file);
-    bool saveCachedFile(const std::string& file) const;
 
     bool _hasSpeckFile = false;
     bool _dataIsDirty = true;
@@ -122,8 +121,7 @@ private:
     properties::FloatProperty _textSize;
     properties::BoolProperty _drawElements;
     properties::BoolProperty _drawLabels;
-    properties::FloatProperty _textMinSize;
-    properties::FloatProperty _textMaxSize;
+    properties::IVec2Property _textMinMaxSize;
     properties::FloatProperty _lineWidth;
 
     // DEBUG:
@@ -140,8 +138,7 @@ private:
     Unit _unit = Parsec;
 
     std::vector<float> _fullData;
-    std::vector<std::pair<glm::vec3, std::string>> _labelData;
-    int _nValuesPerAstronomicalObject = 0;
+    speck::Labelset _labelset;
 
     std::unordered_map<int, glm::vec3> _meshColorMap;
     std::unordered_map<int, RenderingMesh> _renderingMeshesMap;

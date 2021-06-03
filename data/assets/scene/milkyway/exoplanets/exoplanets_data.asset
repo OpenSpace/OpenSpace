@@ -1,4 +1,4 @@
-local bvColorLUT = asset.require('scene/digitaluniverse/stars_colormap').BvColorLUT
+local colormaps = asset.require('scene/digitaluniverse/stars_colormap').ColorMaps
 
 local DataPath = asset.syncedResource({
   Name = "Exoplanet Data Files",
@@ -15,7 +15,7 @@ asset.onInitialize(function ()
 
   p = "Modules.Exoplanets.BvColormap";
   if (openspace.getPropertyValue(p) == "") then
-    openspace.setPropertyValueSingle(p, bvColorLUT .. "/colorbv.cmap")
+    openspace.setPropertyValueSingle(p, colormaps .. "/colorbv.cmap")
   end
 end)
 

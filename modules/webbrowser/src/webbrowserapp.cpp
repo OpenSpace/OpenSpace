@@ -23,7 +23,6 @@
  ****************************************************************************************/
 
 #include "include/webbrowserapp.h"
-//#include <modules/webbrowser/include/webbrowserapp.h>
 
 namespace openspace {
 
