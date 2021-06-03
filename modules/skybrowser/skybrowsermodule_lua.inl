@@ -573,8 +573,8 @@ namespace openspace::skybrowser::luascriptfunctions {
         return 0;
     }
 
-    int create3dSkyBrowser(lua_State* L) {
-        ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::create3dSkyBrowser");
+    int place3dSkyBrowser(lua_State* L) {
+        ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::place3dSkyBrowser");
         // Image index to place in 3D
         const int i = ghoul::lua::value<int>(L, 1);
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();

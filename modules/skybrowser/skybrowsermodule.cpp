@@ -171,8 +171,8 @@ namespace openspace {
                 "input. An input string should be the name of the system host star"
             },
             {
-                "create3dSkyBrowser",
-                &skybrowser::luascriptfunctions::create3dSkyBrowser,
+                "place3dSkyBrowser",
+                &skybrowser::luascriptfunctions::place3dSkyBrowser,
                 {},
                 "string or list of strings",
                 "Add one or multiple exoplanet systems to the scene, as specified by the "
