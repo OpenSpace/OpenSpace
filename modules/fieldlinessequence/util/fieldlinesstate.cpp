@@ -434,15 +434,16 @@ void FieldlinesState::moveLine(double dt) {
 
     unsigned i = 0;
     for (glm::vec3& vertex : _vertexPositions) {
-
         if (forward) {
-            //check if vertex is at the end
+            //check if vertex is at the end of its path
             if (_vertexIndex[i] == _vertexPaths[i].size()-1) continue;
 
-            //size of the radius depends on the framerate
+            //size of the radius depends on the dt
             float vertexRadius = _vertexVelocities[i][_vertexIndex[i]] * float(dt);
 
-            if (vertexRadius > abs(glm::length(vertex - _vertexPaths[i][_vertexIndex[i] + 1]))) {
+            if (vertexRadius > abs(
+                glm::length(vertex - _vertexPaths[i][_vertexIndex[i]+1])
+            )) {
                 _vertexIndex[i]++;
                 //check if at end after increasing index
                 if (_vertexIndex[i] == _vertexPaths[i].size() - 1) continue;
@@ -450,27 +451,26 @@ void FieldlinesState::moveLine(double dt) {
 
             glm::vec3 direction = _vertexPaths[i][_vertexIndex[i] + 1] - vertex;
             direction = glm::normalize(direction);
-
             vertex += (direction * _vertexVelocities[i][_vertexIndex[i]]) * (float)dt;
         }
         else {
+            //the inital position, end condition
             if (_vertexIndex[i] == 0) continue;
 
-            //size of the radius depends on the framerate and velocity
+            //size of the radius depends on dt
             float vertexRadius = abs(_vertexVelocities[i][_vertexIndex[i]] * float(dt));
 
-            if (vertexRadius > abs(glm::length(vertex - _vertexPaths[i][_vertexIndex[i]]))) {
+            if (vertexRadius > abs(
+                                glm::length(vertex - _vertexPaths[i][_vertexIndex[i]]))) {
                 _vertexIndex[i]--;
                 if (_vertexIndex[i] == 0) continue;
             }
 
             glm::vec3 direction = _vertexPaths[i][_vertexIndex[i]] - vertex;
+            //negative direction since the fieldline is reversing
             direction = glm::normalize(-direction);
-
             vertex += (direction * _vertexVelocities[i][_vertexIndex[i]]) * (float)dt;
         }
-
-       
         i++;
     }
 }
