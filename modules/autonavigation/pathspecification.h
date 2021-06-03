@@ -33,26 +33,18 @@
 
 namespace openspace::autonavigation {
 
-class PathSpecification {
+struct PathSpecification {
     using NavigationState = interaction::NavigationHandler::NavigationState;
 
-public:
     PathSpecification() = default;
     PathSpecification(const ghoul::Dictionary& dictionary);
     PathSpecification(const Instruction instruction);
 
     static documentation::Documentation Documentation();
 
-    const std::vector<Instruction>& instructions() const;
-    const bool stopAtTargets() const;
-    const bool stopAtTargetsSpecified() const;
-    const NavigationState& startState() const;
-    const bool hasStartState() const;
-
-private:
-    std::vector<Instruction> _instructions;
-    std::optional<bool> _stopAtTargets;
-    std::optional<NavigationState> _startState;
+    std::vector<Instruction> instructions;
+    std::optional<bool> stopAtTargets;
+    std::optional<NavigationState> startState;
 };
 
 } // namespace openspace::autonavigation

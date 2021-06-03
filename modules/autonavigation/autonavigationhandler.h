@@ -51,10 +51,13 @@ public:
     // Accessors
     Camera* camera() const;
     const SceneGraphNode* anchor() const;
-    bool hasFinished() const;
     const std::vector<SceneGraphNode*>& relevantNodes() const;
     int integrationResolutionPerFrame() const;
     double speedScale() const;
+
+    const PathSegment& currentSegment() const;
+    bool noCurrentPath() const;
+    bool hasFinished() const;
 
     void updateCamera(double deltaTime);
     void createPath(PathSpecification& spec);
@@ -85,16 +88,18 @@ private:
 
     std::vector<SceneGraphNode*> findRelevantNodes();
 
-    // this list essentially represents the camera path
-    std::vector<std::unique_ptr<PathSegment>> _pathSegments;
-
     struct StopDetails {
         bool shouldStop;
         std::optional<double> duration;
         AtNodeNavigator::Behavior behavior;
     };
 
-    std::vector<StopDetails> _stops; // 1 between every segment
+    struct Path {
+        std::vector<PathSegment> segments;
+        std::vector<StopDetails> stops; // 1 between every segment
+    };
+
+    Path _currentPath;
 
     AtNodeNavigator _atNodeNavigator; // responsible for navigation during stops
     StopDetails* _activeStop = nullptr;

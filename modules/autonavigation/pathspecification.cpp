@@ -44,12 +44,9 @@ namespace {
             [[codegen::reference("core_navigation_state")]];
     };
 #include "pathspecification_codegen.cpp"
-
 } // namespace
 
 namespace openspace::autonavigation {
-
-using NavigationState = interaction::NavigationHandler::NavigationState;
 
 documentation::Documentation PathSpecification::Documentation() {
     return codegen::doc<Parameters>("autonavigation_pathspecification");
@@ -58,11 +55,11 @@ documentation::Documentation PathSpecification::Documentation() {
 PathSpecification::PathSpecification(const ghoul::Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    const std::vector<ghoul::Dictionary> instructions = p.instructions;
+    const std::vector<ghoul::Dictionary> instructionDicts = p.instructions;
     int counter = 1; 
-    for (const ghoul::Dictionary& dict : instructions) {
+    for (const ghoul::Dictionary& dict : instructionDicts) {
         try {
-            _instructions.push_back(Instruction(dict));
+            instructions.push_back(Instruction(dict));
         }
         catch (ghoul::RuntimeError& e) {
             LERROR(fmt::format("Failed reading instruction {}: {}", counter, e.message));
@@ -70,35 +67,15 @@ PathSpecification::PathSpecification(const ghoul::Dictionary& dictionary) {
         counter++;
     }
 
-    _stopAtTargets = p.stopAtTargets;
+    stopAtTargets = p.stopAtTargets;
 
     if (p.startState.has_value()) {
-        _startState = NavigationState(p.startState.value());
+        startState = NavigationState(p.startState.value());
     }
 }
 
 PathSpecification::PathSpecification(const Instruction instruction) {
-    _instructions.push_back(instruction);
-}
-
-const std::vector<Instruction>& PathSpecification::instructions() const {
-    return _instructions;
-}
-
-const bool PathSpecification::stopAtTargets() const {
-    return _stopAtTargets.value();
-}
-
-const bool PathSpecification::stopAtTargetsSpecified() const {
-    return _stopAtTargets.has_value();
-}
-
-const NavigationState& PathSpecification::startState() const {
-    return _startState.value();
-}
-
-const bool PathSpecification::hasStartState() const {
-    return _startState.has_value();
+    instructions.push_back(instruction);
 }
 
 } // namespace openspace::autonavigation

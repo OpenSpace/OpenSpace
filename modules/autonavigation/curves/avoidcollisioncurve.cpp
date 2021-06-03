@@ -120,7 +120,7 @@ glm::dvec3 AvoidCollisionCurve::interpolate(double u) {
 
     std::vector<double>::iterator segmentEndIt =
         std::lower_bound(_parameterIntervals.begin(), _parameterIntervals.end(), u);
-    unsigned int index = (segmentEndIt - 1) - _parameterIntervals.begin();
+    unsigned int index = static_cast<int>((segmentEndIt - 1) - _parameterIntervals.begin());
 
     double segmentStart = _parameterIntervals[index];
     double segmentDuration = (_parameterIntervals[index + 1] - _parameterIntervals[index]);
@@ -144,7 +144,7 @@ void AvoidCollisionCurve::removeCollisions(int step) {
         return;
     }
 
-    const int nSegments = _points.size() - 3;
+    const int nSegments = static_cast<int>( _points.size() - 3);
     for (int i = 0; i < nSegments; ++i) {
         const glm::dvec3 lineStart = _points[i + 1];
         const glm::dvec3 lineEnd = _points[i + 2];

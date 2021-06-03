@@ -253,7 +253,7 @@ int generatePath(lua_State* L) {
     ghoul::lua::luaDictionaryFromState(L, dictionary);
     PathSpecification spec(dictionary);
 
-    if (spec.instructions().empty()) {
+    if (spec.instructions.empty()) {
         lua_settop(L, 0);
         return ghoul::lua::luaError(
             L, fmt::format("No instructions for camera path generation were provided.")
@@ -304,7 +304,7 @@ int generatePathFromFile(lua_State* L) {
 
     PathSpecification spec(dictionary);
 
-    if (spec.instructions().empty()) {
+    if (spec.instructions.empty()) {
         return ghoul::lua::luaError(
             L, fmt::format("No instructions for camera path generation were provided")
         );
