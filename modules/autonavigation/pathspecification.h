@@ -39,23 +39,18 @@ class PathSpecification {
 public:
     PathSpecification() = default;
     PathSpecification(const ghoul::Dictionary& dictionary);
-    PathSpecification(const TargetNodeInstruction instruction);
+    PathSpecification(const Instruction instruction);
 
     static documentation::Documentation Documentation();
 
-    // Accessors
-    const std::vector<std::unique_ptr<Instruction>>* instructions() const;
-    Instruction* instruction(int i) const;
+    const std::vector<Instruction>& instructions() const;
     const bool stopAtTargets() const;
     const bool stopAtTargetsSpecified() const;
     const NavigationState& startState() const;
     const bool hasStartState() const;
 
 private:
-    void tryReadInstruction(int index, const std::string& type,
-        const ghoul::Dictionary& dictionary);
-
-    std::vector<std::unique_ptr<Instruction>> _instructions;
+    std::vector<Instruction> _instructions;
     std::optional<bool> _stopAtTargets;
     std::optional<NavigationState> _startState;
 };

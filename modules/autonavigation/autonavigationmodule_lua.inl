@@ -134,7 +134,9 @@ int goTo(lua_State* L) {
         return ghoul::lua::luaError(L, "Unknown node name: " + nodeIdentifier);
     }
 
+    using namespace std::string_literals;
     ghoul::Dictionary insDict;
+    insDict.setValue("Type", "Node"s);
     insDict.setValue("Target", nodeIdentifier);
 
     if (nArguments > 1) {
@@ -144,7 +146,7 @@ int goTo(lua_State* L) {
         }
     }
 
-    PathSpecification spec = PathSpecification(TargetNodeInstruction{insDict});
+    PathSpecification spec = PathSpecification(Instruction{ insDict });
 
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
     module->AutoNavigationHandler().createPath(spec);
@@ -166,7 +168,9 @@ int goToHeight(lua_State* L) {
 
     double height = ghoul::lua::value<double>(L, 2);
 
+    using namespace std::string_literals;
     ghoul::Dictionary insDict;
+    insDict.setValue("Type", "Node"s);
     insDict.setValue("Target", nodeIdentifier);
     insDict.setValue("Height", height);
 
@@ -177,7 +181,7 @@ int goToHeight(lua_State* L) {
         }
     }
 
-    PathSpecification spec = PathSpecification(TargetNodeInstruction{ insDict });
+    PathSpecification spec = PathSpecification(Instruction{ insDict });
 
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
     module->AutoNavigationHandler().createPath(spec);
@@ -219,7 +223,9 @@ int goToGeo(lua_State* L) {
         altitude
     );
 
+    using namespace std::string_literals;
     ghoul::Dictionary insDict;
+    insDict.setValue("Type", "Node"s);
     insDict.setValue("Target", nodeIdentifier);
     insDict.setValue("Position", positionModelCoords);
 
@@ -230,7 +236,7 @@ int goToGeo(lua_State* L) {
         }
     }
 
-    PathSpecification spec = PathSpecification(TargetNodeInstruction{ insDict });
+    PathSpecification spec = PathSpecification(Instruction{ insDict });
 
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
     module->AutoNavigationHandler().createPath(spec);
@@ -247,7 +253,7 @@ int generatePath(lua_State* L) {
     ghoul::lua::luaDictionaryFromState(L, dictionary);
     PathSpecification spec(dictionary);
 
-    if (spec.instructions()->empty()) {
+    if (spec.instructions().empty()) {
         lua_settop(L, 0);
         return ghoul::lua::luaError(
             L, fmt::format("No instructions for camera path generation were provided.")
@@ -298,7 +304,7 @@ int generatePathFromFile(lua_State* L) {
 
     PathSpecification spec(dictionary);
 
-    if (spec.instructions()->empty()) {
+    if (spec.instructions().empty()) {
         return ghoul::lua::luaError(
             L, fmt::format("No instructions for camera path generation were provided")
         );

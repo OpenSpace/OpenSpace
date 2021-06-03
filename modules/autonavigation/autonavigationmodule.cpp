@@ -59,7 +59,8 @@ double AutoNavigationModule::minValidBoundingSphere() const {
 
 std::vector<documentation::Documentation> AutoNavigationModule::documentations() const {
     return {
-        // TODO: call documentation methods for the other classes in this module
+        autonavigation::Instruction::Documentation(),
+        autonavigation::PathSpecification::Documentation()
     };
 }
 

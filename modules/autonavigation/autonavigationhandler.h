@@ -77,11 +77,11 @@ private:
 
     void applyStopBehaviour(double deltaTime);
 
-    void addSegment(const Instruction* ins, int index);
-    void addStopDetails(const Instruction* ins);
+    void addSegment(const Instruction& ins, int index);
+    void addStopDetails(const Instruction& ins);
 
     SceneGraphNode* findNodeNearTarget(const SceneGraphNode* node);
-    Waypoint computeDefaultWaypoint(const TargetNodeInstruction* ins);
+    Waypoint computeDefaultWaypoint(const Instruction& ins);
 
     std::vector<SceneGraphNode*> findRelevantNodes();
 

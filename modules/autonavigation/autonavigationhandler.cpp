@@ -273,17 +273,17 @@ void AutoNavigationHandler::createPath(PathSpecification& spec) {
         LINFO("Property for stop at targets per default was overridden by path specification.");
     }
 
-    const int nInstructions = static_cast<int>(spec.instructions()->size());
+    const std::vector<Instruction>& instructions = spec.instructions();
+    const int nInstructions = static_cast<int>(instructions.size());
 
     for (int i = 0; i < nInstructions; i++) {
-        const Instruction* instruction = spec.instruction(i);
-        if (instruction) {
-            addSegment(instruction, i);
+        const Instruction& instruction = instructions[i];
 
-            // Add info about stops between segments
-            if (i < nInstructions - 1) {
-                addStopDetails(instruction);
-            }
+        addSegment(instruction, i);
+
+        // Add info about stops between segments
+        if (i < nInstructions - 1) {
+            addStopDetails(instruction);
         }
     }
 
@@ -522,20 +522,17 @@ void AutoNavigationHandler::applyStopBehaviour(double deltaTime) {
     }
 }
 
-void AutoNavigationHandler::addSegment(const Instruction* ins, int index) {
+void AutoNavigationHandler::addSegment(const Instruction& ins, int index) {
     // TODO: Improve how curve types are handled
     const int curveType = _defaultCurveOption;
 
-    std::vector<Waypoint> waypoints = ins->waypoints();
+    std::vector<Waypoint> waypoints = ins.waypoints();
     Waypoint waypointToAdd;
 
     if (waypoints.size() == 0) {
-        const TargetNodeInstruction* targetNodeIns =
-            dynamic_cast<const TargetNodeInstruction*>(ins);
-
-        if (targetNodeIns) {
+        if (ins.type == Instruction::Type::Node) {
             // TODO: allow curves to compute default waypoint instead
-            waypointToAdd = computeDefaultWaypoint(targetNodeIns);
+            waypointToAdd = computeDefaultWaypoint(ins);
         }
         else {
             LWARNING(fmt::format(
@@ -555,26 +552,26 @@ void AutoNavigationHandler::addSegment(const Instruction* ins, int index) {
         lastWayPoint(),
         waypointToAdd,
         CurveType(curveType),
-        ins->duration
+        ins.duration
     ));
 }
 
-void AutoNavigationHandler::addStopDetails(const Instruction* ins) {
+void AutoNavigationHandler::addStopDetails(const Instruction& ins) {
     StopDetails stopEntry;
     stopEntry.shouldStop = _stopAtTargetsPerDefault.value();
 
-    if (ins->stopAtTarget.has_value()) {
-        stopEntry.shouldStop = ins->stopAtTarget.value();
+    if (ins.stopAtTarget.has_value()) {
+        stopEntry.shouldStop = ins.stopAtTarget.value();
     }
 
     if (stopEntry.shouldStop) {
-        stopEntry.duration = ins->stopDuration;
+        stopEntry.duration = ins.stopDuration;
 
         std::string anchorIdentifier = lastWayPoint().nodeDetails.identifier;
         stopEntry.behavior = AtNodeNavigator::Behavior(_defaultStopBehavior.value());
 
-        if (ins->stopBehavior.has_value()) {
-            std::string behaviorString = ins->stopBehavior.value();
+        if (ins.stopBehavior.has_value()) {
+            std::string behaviorString = ins.stopBehavior.value();
 
             // This is a bit ugly, since it relies on the OptionProperty::Option and
             // AtNodeNavigator::Behavior being implicitly converted to the same int value.
@@ -634,10 +631,10 @@ SceneGraphNode* AutoNavigationHandler::findNodeNearTarget(const SceneGraphNode* 
 
 // OBS! The desired default waypoint may vary between curve types.
 // TODO: let the curves update the default position if no exact position is required
-Waypoint AutoNavigationHandler::computeDefaultWaypoint(const TargetNodeInstruction* ins) {
-    const SceneGraphNode* targetNode = sceneGraphNode(ins->nodeIdentifier);
+Waypoint AutoNavigationHandler::computeDefaultWaypoint(const Instruction& ins) {
+    const SceneGraphNode* targetNode = sceneGraphNode(ins.nodeIdentifier);
     if (!targetNode) {
-        LERROR(fmt::format("Could not find target node '{}'", ins->nodeIdentifier));
+        LERROR(fmt::format("Could not find target node '{}'", ins.nodeIdentifier));
         return Waypoint();
     }
 
@@ -677,15 +674,13 @@ Waypoint AutoNavigationHandler::computeDefaultWaypoint(const TargetNodeInstructi
 
     const double radius = WaypointNodeDetails::findValidBoundingSphere(targetNode);
     const double defaultHeight = 2.0 * radius;
-
-    const bool hasHeight = ins->height.has_value();
-    const double height = hasHeight ? ins->height.value() : defaultHeight;
+    const double height = ins.height.has_value() ? ins.height.value() : defaultHeight;
 
     const glm::dvec3 targetPos = nodePos + stepDirection * (radius + height);
 
     // Up direction
     glm::dvec3 up = camera()->lookUpVectorWorldSpace();
-    if (ins->setUpDirectionFromTarget()) {
+    if (ins.useTargetUpDirection) {
         // @TODO (emmbr 2020-11-17) For now, this is hardcoded to look good for Earth, 
         // which is where it matters the most. A better solution would be to make each 
         // sgn aware of its own 'up' and query 
@@ -696,7 +691,7 @@ Waypoint AutoNavigationHandler::computeDefaultWaypoint(const TargetNodeInstructi
     const glm::dvec3 lookAtPos = targetNode->worldPosition();
     const glm::dquat targetRot = helpers::lookAtQuaternion(targetPos, lookAtPos, up);
 
-    return Waypoint{ targetPos, targetRot, ins->nodeIdentifier };
+    return Waypoint{ targetPos, targetRot, ins.nodeIdentifier };
 }
 
 std::vector<SceneGraphNode*> AutoNavigationHandler::findRelevantNodes() {
