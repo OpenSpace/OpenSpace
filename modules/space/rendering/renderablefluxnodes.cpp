@@ -407,7 +407,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableFluxNodes::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_flux_nodes");
+    return codegen::doc<Parameters>("space_renderable_flux_nodes");
 }
 
 using namespace properties;

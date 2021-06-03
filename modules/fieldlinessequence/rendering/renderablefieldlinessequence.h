@@ -44,7 +44,7 @@ namespace openspace {
 class RenderableFieldlinesSequence : public Renderable {
 public:
     RenderableFieldlinesSequence(const ghoul::Dictionary& dictionary);
-
+    void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
 
@@ -52,6 +52,8 @@ public:
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
+
+    static documentation::Documentation Documentation();
 
 private:
     // ------------------------------------- ENUMS -------------------------------------//
@@ -63,7 +65,18 @@ private:
 
     // ------------------------------------ STRINGS ------------------------------------//
     std::string _identifier;                               // Name of the Node!
-
+    // "cdf", "osfls" or "json"
+    std::string _inputFileTypeString;
+    // cdf, osfls or json
+    SourceFileType _inputFileType;
+    // Output folder path in case of file conversion
+    std::string _outputFolderPath;
+    // which tracing vaiable to trace. 'b' for fieldline is default
+    std::string _tracingVariable;
+    // path to directory with seed point files
+    std::string _seedPointDirectory;
+    // optional except when using json input
+    std::string _modelStr;
     // ------------------------------------- FLAGS -------------------------------------//
     // Used for 'runtime-states'. True when loading a new state from disk on another
     // thread.
@@ -93,6 +106,8 @@ private:
     int _activeStateIndex = -1;
     // Active index of _startTimes
     int _activeTriggerTimeIndex = -1;
+    // Manual time offset
+    double _manualTimeOffset = 0.0;
     // Number of states in the sequence
     size_t _nStates = 0;
     // In setup it is used to scale JSON coordinates. During runtime it is used to scale
@@ -130,6 +145,8 @@ private:
     // Stores the provided source file paths if using 'runtime-states', else emptied after
     // initialization
     std::vector<std::string> _sourceFiles;
+    // Extra variables such as rho, p or t
+    std::vector<std::string> _extraVars;
     // Contains the _triggerTimes for all FieldlineStates in the sequence
     std::vector<double> _startTimes;
     // Stores the FieldlineStates
@@ -195,8 +212,6 @@ private:
     /// Line width for the line rendering part
     properties::FloatProperty _pLineWidth;
 
-// Button which sets camera focus to parent node of the renderable
-    properties::TriggerProperty _pFocusOnOriginBtn;
     // Button which executes a time jump to start of sequence
     properties::TriggerProperty _pJumpToStartBtn;
 
@@ -204,20 +219,15 @@ private:
     void addStateToSequence(FieldlinesState& STATE);
     void computeSequenceEndTime();
     void definePropertyCallbackFunctions();
-    bool extractCdfInfoFromDictionary(std::string& tracingVar,
-        std::vector<std::string>& extraVars);
-    bool extractJsonInfoFromDictionary(fls::Model& model);
-    void extractMagnitudeVarsFromStrings(std::vector<std::string>& extraVars,
-        std::vector<std::string>& extraMagVars);
-    bool extractMandatoryInfoFromDictionary(SourceFileType& sourceFileType);
-    void extractOptionalInfoFromDictionary(std::string& outputFolderPath);
-    void extractOsflsInfoFromDictionary();
-    bool extractSeedPointsFromFiles(std::string& path,
-        std::unordered_map<std::string, std::vector<glm::vec3>>& outVec);
+    //bool extractCdfInfoFromDictionary();
+    fls::Model extractJsonInfoFromDictionary();
+    void extractMagnitudeVarsFromStrings(std::vector<std::string>& extraMagVars);
+    //bool extractMandatoryInfoFromDictionary(std::string sourceFolderPath);
+    std::unordered_map<std::string, std::vector<glm::vec3>> extractSeedPointsFromFiles();
     void extractTriggerTimesFromFileNames();
-    bool loadJsonStatesIntoRAM(const std::string& outputFolder);
-    void loadOsflsStatesIntoRAM(const std::string& outputFolder);
-    bool getStatesFromCdfFiles(const std::string& outputFolder);
+    bool loadJsonStatesIntoRAM();
+    void loadOsflsStatesIntoRAM();
+    bool getStatesFromCdfFiles();
     void setModelDependentConstants();
     void setupProperties();
     bool prepareForOsflsStreaming();

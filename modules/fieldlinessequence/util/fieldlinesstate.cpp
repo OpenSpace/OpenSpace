@@ -60,7 +60,7 @@ void FieldlinesState::scalePositions(float scale) {
         p *= scale;
     }
 }
-
+#pragma optimize("", off)
 bool FieldlinesState::loadStateFromOsfls(const std::string& pathToOsflsFile) {
     std::ifstream ifs(pathToOsflsFile, std::ifstream::binary);
     if (!ifs.is_open()) {

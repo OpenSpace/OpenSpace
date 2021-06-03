@@ -42,7 +42,6 @@ local fieldlines = {
             "T"
         },
         ManualTimeOffset = -14400.0,
-        LoadAtRuntime = true,
         ScaleToMeters = 1.0,
         SecondsBefore = 24*60*60,
         SecondsAfter = 24*60*60,
