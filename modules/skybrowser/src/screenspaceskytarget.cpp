@@ -362,10 +362,10 @@ namespace openspace {
                 _coordsStartAnimation = glm::normalize(newDir);
             }
             else {
-                // Set the exact target position and lock target when it first arrives
-                // to the position
-                if (!_isLocked) {
-                    _cartesianPosition = skybrowser::J2000CartesianToScreenSpace(_coordsToAnimateTo);
+                // Set the exact target position 
+                _cartesianPosition = skybrowser::J2000CartesianToScreenSpace(_coordsToAnimateTo);
+                // Lock target when it first arrives to the position
+                if (!_isLocked && _lockAfterwards) {
                     lock();
                 }
                 // When target is in position, animate the FOV until it has finished
@@ -378,7 +378,8 @@ namespace openspace {
 
     bool ScreenSpaceSkyTarget::animateFOV(float endFOV, float deltaTime) {
         if (!_skyBrowser) {
-            ScreenSpaceSkyBrowser* browser = dynamic_cast<ScreenSpaceSkyBrowser*>(global::renderEngine->screenSpaceRenderable(_skyBrowserID.value()));
+            ScreenSpaceSkyBrowser* browser = dynamic_cast<ScreenSpaceSkyBrowser*>(
+                global::renderEngine->screenSpaceRenderable(_skyBrowserID.value()));
             setBrowser(browser);
         }
         if (_skyBrowser) {
@@ -398,13 +399,16 @@ namespace openspace {
         return true;     
     }
 
-    void ScreenSpaceSkyTarget::startAnimation(glm::dvec2 coordsEnd, float FOVEnd) {
+    void ScreenSpaceSkyTarget::startAnimation(glm::dvec2 coordsEnd, float FOVEnd,
+        bool lockAfterwards) {
         // Save the Cartesian celestial coordinates for animation
         // to make sure wrap around works
         _coordsToAnimateTo = glm::normalize(skybrowser::sphericalToCartesian(coordsEnd));
-        _coordsStartAnimation = glm::normalize(skybrowser::sphericalToCartesian(getTargetDirectionCelestial()));
+        _coordsStartAnimation = glm::normalize(skybrowser::sphericalToCartesian(
+            getTargetDirectionCelestial()));
         FOVToAnimateTo = FOVEnd;
         isAnimated = true;
+        _lockAfterwards = lockAfterwards;
     }
     properties::FloatProperty& ScreenSpaceSkyTarget::getOpacity() {
         return _opacity;

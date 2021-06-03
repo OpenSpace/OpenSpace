@@ -337,11 +337,7 @@ namespace openspace::skybrowser::luascriptfunctions {
         // Add the window data for OpenSpace
         ghoul::lua::push(L, "OpenSpace");
         lua_newtable(L);
-        // Get the view direction of the screen in cartesian J2000 coordinates
-        glm::dvec3 camPos = global::navigationHandler->camera()->positionVec3();
-        constexpr double infinity = std::numeric_limits<float>::max();
-        glm::dvec3 galCoord = camPos + (infinity * global::navigationHandler->camera()->viewDirectionWorldSpace());
-        glm::dvec3 cartesianJ2000 = skybrowser::galacticCartesianToJ2000Cartesian(galCoord);
+        glm::dvec3 cartesianJ2000 = skybrowser::cameraDirectionJ2000Cartesian();
         glm::dvec2 sphericalJ2000 = skybrowser::cartesianToSpherical(cartesianJ2000);
         // Convert to vector so ghoul can read it
         std::vector<double> viewDirCelestVec = { cartesianJ2000.x, cartesianJ2000.y, cartesianJ2000.z };
@@ -523,6 +519,28 @@ namespace openspace::skybrowser::luascriptfunctions {
             browser3d->sendMessageToWWT(message);
         }
 
+        return 0;
+    }
+
+    int centerTargetOnScreen(lua_State* L) {
+        ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::centerTargetOnScreen");
+        const std::string id = ghoul::lua::value<std::string>(L, 1);
+        SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+        if (module->browserIdExists(id)) {
+            ScreenSpaceSkyBrowser* browser = module->getSkyBrowsers()[id];
+            if (browser && browser->getSkyTarget()) {
+                // Animate the target to the center of the screen
+                browser->getSkyTarget()->unlock();
+                // Get camera direction in celestial spherical coordinates
+                glm::dvec3 viewDirection = skybrowser::cameraDirectionJ2000Cartesian();
+                glm::dvec2 centerOfScreen = skybrowser::cartesianToSpherical(
+                    viewDirection);
+                // Keep the current fov
+                float fov = browser->fieldOfView();
+                browser->getSkyTarget()->startAnimation(centerOfScreen, fov, false);
+                browser->getSkyTarget()->unlock();
+            }
+        }
         return 0;
     }
 

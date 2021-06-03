@@ -38,6 +38,7 @@ namespace openspace {
         glm::dvec3 J2000CartesianToScreenSpace(glm::dvec3 coords);
         glm::dvec3 galacticToScreenSpace(glm::dvec3 galacticCoord);
         double calculateRoll(glm::dvec3 upWorld, glm::dvec3 forwardWorld);
+        glm::dvec3 cameraDirectionJ2000Cartesian();
     }
     namespace wwtmessage {
         // WWT messages

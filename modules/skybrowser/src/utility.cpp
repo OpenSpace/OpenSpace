@@ -101,6 +101,15 @@ namespace openspace::skybrowser {
         double roll = glm::degrees(atan2(dotCrossUpNorthForward, dotNorthUp));
         return roll;
     }
+
+    glm::dvec3 cameraDirectionJ2000Cartesian() {
+        // Get the view direction of the screen in cartesian J2000 coordinates
+        glm::dvec3 camPos = global::navigationHandler->camera()->positionVec3();
+        constexpr double infinity = std::numeric_limits<float>::max();
+        glm::dvec3 galCoord = camPos + (infinity * global::navigationHandler->camera()->viewDirectionWorldSpace());
+        glm::dvec3 cartesianJ2000 = skybrowser::galacticCartesianToJ2000Cartesian(galCoord);
+        return cartesianJ2000;
+    }
 }
 
 // WWT messages

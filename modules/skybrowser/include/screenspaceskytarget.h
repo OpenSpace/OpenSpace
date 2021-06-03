@@ -51,7 +51,7 @@ namespace openspace {
         void lock();
         bool isLocked();
         void animateToCoord(double deltaTime);
-        void startAnimation(glm::dvec2 coordsEnd, float FOVEnd);
+        void startAnimation(glm::dvec2 coordsEnd, float FOVEnd, bool lockAfterwards = true);
         bool animateFOV(float endFOV, float deltaTime);
 
         glm::mat4 scaleMatrix() override;
@@ -82,7 +82,7 @@ namespace openspace {
         glm::dvec3 _coordsStartAnimation;
         double animationTime = 1.0;
         float FOVToAnimateTo;
-        float currentFOV;
+        bool _lockAfterwards;
     };
 }
 
