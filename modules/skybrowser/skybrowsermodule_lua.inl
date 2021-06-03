@@ -95,7 +95,7 @@ namespace openspace::skybrowser::luascriptfunctions {
         const ImageData& resultImage = module->getWWTDataHandler()->getLoadedImages()[i];
 
         // Only move and show circle if the image has coordinates
-        if (resultImage.hasCelestCoords) {
+        if (resultImage.hasCelestCoords && module->cameraInSolarSystem()) {
             // Make circle visible
             ScreenSpaceImageLocal* hoverCircle = dynamic_cast<ScreenSpaceImageLocal*>(global::renderEngine->screenSpaceRenderable("HoverCircle"));
             hoverCircle->property("Enabled")->set(true);
@@ -110,7 +110,9 @@ namespace openspace::skybrowser::luascriptfunctions {
     int disableHoverCircle(lua_State* L) {
         ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::disableHoverCircle");
         ScreenSpaceImageLocal* hoverCircle = dynamic_cast<ScreenSpaceImageLocal*>(global::renderEngine->screenSpaceRenderable("HoverCircle"));
-        hoverCircle->property("Enabled")->set(false);
+        if (hoverCircle->isEnabled()) {
+            hoverCircle->property("Enabled")->set(false);
+        }
         
         return 0;
     }
