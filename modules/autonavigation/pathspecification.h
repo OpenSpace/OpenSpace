@@ -43,7 +43,6 @@ struct PathSpecification {
     static documentation::Documentation Documentation();
 
     std::vector<Instruction> instructions;
-    std::optional<bool> stopAtTargets;
     std::optional<NavigationState> startState;
 };
 

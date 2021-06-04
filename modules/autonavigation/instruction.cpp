@@ -64,18 +64,6 @@ namespace {
         // of this path segment.
         std::optional<ghoul::Dictionary> navigationState 
             [[codegen::reference("core_navigation_state")]];
-
-        // If true, a pause will be added after the path segment that this instruction 
-        // translates into. 
-        std::optional<bool> stopAtTarget;
-
-        struct StopDetails {
-            std::optional<float> duration; 
-            std::optional<std::string> behavior;
-        };
-        // Furter details on any stop in the path that will happen after this path 
-        // segment. Can specify the duration and pause behavior.
-        std::optional<StopDetails> stopDetails;
     };
 #include "instruction_codegen.cpp"
 } // namespace
@@ -90,12 +78,6 @@ Instruction::Instruction(const ghoul::Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     duration = p.duration;
-    stopAtTarget = p.stopAtTarget;
-
-    if (p.stopDetails.has_value()) {
-        stopDuration = p.stopDetails.value().duration;
-        stopBehavior = p.stopDetails.value().behavior;
-    }
 
     switch (p.type) {
         case Parameters::Type::NavigationState: {

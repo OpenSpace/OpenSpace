@@ -46,11 +46,6 @@ struct Instruction {
     Type type;
 
     std::optional<double> duration;
-    std::optional<bool> stopAtTarget;
-
-    // Only relevant is stopAtTarget true
-    std::optional<double> stopDuration;
-    std::optional<std::string> stopBehavior;
 
     // Node details
     std::string nodeIdentifier;

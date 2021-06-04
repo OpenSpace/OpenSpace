@@ -120,10 +120,16 @@ namespace openspace::autonavigation {
 
 AutoNavigationHandler::AutoNavigationHandler()
     : properties::PropertyOwner({ "AutoNavigationHandler" })
-    , _defaultCurveOption(DefaultCurveOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _defaultCurveOption(
+        DefaultCurveOptionInfo, 
+        properties::OptionProperty::DisplayType::Dropdown
+    )
     , _includeRoll(IncludeRollInfo, false)
     , _stopAtTargetsPerDefault(StopAtTargetsPerDefaultInfo, false)
-    , _defaultStopBehavior(DefaultStopBehaviorInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _defaultStopBehavior(
+        DefaultStopBehaviorInfo, 
+        properties::OptionProperty::DisplayType::Dropdown
+    )
     , _applyStopBehaviorWhenIdle(ApplyStopBehaviorWhenIdleInfo, false)
     , _relevantNodeTags(RelevantNodeTagsInfo)
     , _defaultPositionOffsetAngle(DefaultPositionOffsetAngleInfo, 30.f, -90.f, 90.f)
@@ -149,6 +155,11 @@ AutoNavigationHandler::AutoNavigationHandler()
         { AtNodeNavigator::Behavior::Orbit, "Orbit" }
     });
     _defaultStopBehavior = AtNodeNavigator::Behavior::None;
+    _defaultStopBehavior.onChange([this]() {
+        _atNodeNavigator.setBehavior(
+            AtNodeNavigator::Behavior(_defaultStopBehavior.value())
+        );
+    });
     addProperty(_defaultStopBehavior);
 
     addProperty(_applyStopBehaviorWhenIdle);
@@ -210,20 +221,11 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
     ghoul_assert(camera() != nullptr, "Camera must not be nullptr");
 
     if (!_isPlaying || _currentPath.segments.empty()) {
-        // for testing, apply at node behavior when idle
+        // For testing, apply at node behavior when idle
+        // @TODO: Determine how this should work instead
         if (_applyStopBehaviorWhenIdle) {
-            if (_atNodeNavigator.behavior() != _defaultStopBehavior.value()) {
-                _atNodeNavigator.setBehavior(
-                    AtNodeNavigator::Behavior(_defaultStopBehavior.value())
-                );
-            }
             _atNodeNavigator.updateCamera(deltaTime);
         }
-        return;
-    }
-
-    if (_activeStop) {
-        applyStopBehaviour(deltaTime);
         return;
     }
 
@@ -262,11 +264,6 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
             _isPlaying = false;
             return;
         }
-
-        if (_currentPath.stops[index].shouldStop) {
-            pauseAtTarget(index);
-            return;
-        }
     }
 }
 
@@ -276,22 +273,12 @@ void AutoNavigationHandler::createPath(PathSpecification& spec) {
     // TODO: do this in some initialize function instead
     _relevantNodes = findRelevantNodes();
 
-    if (spec.stopAtTargets.has_value()) {
-        _stopAtTargetsPerDefault = spec.stopAtTargets.value();
-        LINFO("Property for stop at targets per default was overridden by path specification.");
-    }
-
     const std::vector<Instruction>& instructions = spec.instructions;
     const int nInstructions = static_cast<int>(instructions.size());
 
     for (int i = 0; i < nInstructions; i++) {
         const Instruction& instruction = instructions[i];
         addSegment(instruction, i);
-
-        // Add info about stops between segments
-        if (i < nInstructions - 1) {
-            addStopDetails(instruction);
-        }
     }
 
     ghoul_assert(
@@ -314,7 +301,6 @@ void AutoNavigationHandler::createPath(PathSpecification& spec) {
 void AutoNavigationHandler::clearPath() {
     LINFO("Clearing path...");
     _currentPath.segments.clear();
-    _currentPath.stops.clear();
     _currentSegmentIndex = 0;
 }
 
@@ -332,7 +318,6 @@ void AutoNavigationHandler::startPath() {
 
     LINFO("Starting path...");
     _isPlaying = true;
-    _activeStop = nullptr;
 }
 
 void AutoNavigationHandler::continuePath() {
@@ -341,7 +326,7 @@ void AutoNavigationHandler::continuePath() {
         return;
     }
 
-    if (_isPlaying && !_activeStop) {
+    if (_isPlaying) {
         LERROR("Cannot resume a path that is already playing");
         return;
     }
@@ -350,7 +335,6 @@ void AutoNavigationHandler::continuePath() {
 
     // recompute start camera state for the upcoming path segment,
     _currentPath.segments[_currentSegmentIndex].setStartPoint(wayPointFromCamera());
-    _activeStop = nullptr;
 }
 
 void AutoNavigationHandler::abortPath() {
@@ -487,48 +471,6 @@ void AutoNavigationHandler::removeRollRotation(CameraPose& pose, double deltaTim
     pose.rotation = rollFreeRotation;
 }
 
-void AutoNavigationHandler::pauseAtTarget(int i) {
-    if (!_isPlaying || _activeStop) {
-        LERROR("Cannot pause a path that isn't playing");
-        return;
-    }
-
-    if (i < 0 || i > _currentPath.stops.size() - 1) {
-        LERROR("Invalid target number: " + std::to_string(i));
-        return;
-    }
-
-    _activeStop = &_currentPath.stops[i];
-
-    if (!_activeStop) return;
-
-    _atNodeNavigator.setBehavior(_activeStop->behavior);
-
-    bool hasDuration = _activeStop->duration.has_value();
-
-    std::string infoString = hasDuration ?
-        fmt::format("{} seconds", _activeStop->duration.value()) : "until continued";
-
-    LINFO(fmt::format("Paused path at target {} / {} ({})",
-        _currentSegmentIndex,
-        _currentPath.segments.size(),
-        infoString
-    ));
-
-    _progressedTimeInStop = 0.0;
-}
-
-void AutoNavigationHandler::applyStopBehaviour(double deltaTime) {
-    _progressedTimeInStop += deltaTime;
-    _atNodeNavigator.updateCamera(deltaTime);
-
-    if (!_activeStop->duration.has_value()) return;
-
-    if (_progressedTimeInStop >= _activeStop->duration.value()) {
-        continuePath();
-    }
-}
-
 void AutoNavigationHandler::addSegment(const Instruction& ins, int index) {
     // TODO: Improve how curve types are handled
     const int curveType = _defaultCurveOption;
@@ -560,50 +502,6 @@ void AutoNavigationHandler::addSegment(const Instruction& ins, int index) {
         CurveType(curveType),
         ins.duration
     ));
-}
-
-void AutoNavigationHandler::addStopDetails(const Instruction& ins) {
-    StopDetails stopEntry;
-    stopEntry.shouldStop = _stopAtTargetsPerDefault.value();
-
-    if (ins.stopAtTarget.has_value()) {
-        stopEntry.shouldStop = ins.stopAtTarget.value();
-    }
-
-    if (stopEntry.shouldStop) {
-        stopEntry.duration = ins.stopDuration;
-
-        std::string anchorIdentifier = lastWayPoint().nodeDetails.identifier;
-        stopEntry.behavior = AtNodeNavigator::Behavior(_defaultStopBehavior.value());
-
-        if (ins.stopBehavior.has_value()) {
-            std::string behaviorString = ins.stopBehavior.value();
-
-            // This is a bit ugly, since it relies on the OptionProperty::Option and
-            // AtNodeNavigator::Behavior being implicitly converted to the same int value.
-            // TODO: Come up with a nicer solution (this get to work for now...)
-
-            using Option = properties::OptionProperty::Option;
-            std::vector<Option> options = _defaultStopBehavior.options();
-            std::vector<Option>::iterator foundIt = std::find_if(
-                options.begin(),
-                options.end(),
-                [&](Option& o) { return o.description == behaviorString; }
-            );
-
-            if (foundIt != options.end()) {
-                stopEntry.behavior = AtNodeNavigator::Behavior((*foundIt).value);
-            }
-            else {
-                LERROR(fmt::format(
-                    "Stop behaviour '{}' is not a valid option. Using default behaviour.",
-                    behaviorString
-                ));
-            }
-        }
-    }
-
-    _currentPath.stops.push_back(stopEntry);
 }
 
 // Test if the node lies within a given proximity radius of any relevant node in the scene

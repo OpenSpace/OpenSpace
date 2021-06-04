@@ -76,33 +76,21 @@ private:
     Waypoint wayPointFromCamera();
     Waypoint lastWayPoint();
     void removeRollRotation(CameraPose& pose, double deltaTime);
-    void pauseAtTarget(int i);
-
-    void applyStopBehaviour(double deltaTime);
 
     void addSegment(const Instruction& ins, int index);
-    void addStopDetails(const Instruction& ins);
 
     SceneGraphNode* findNodeNearTarget(const SceneGraphNode* node);
     Waypoint computeDefaultWaypoint(const Instruction& ins);
 
     std::vector<SceneGraphNode*> findRelevantNodes();
 
-    struct StopDetails {
-        bool shouldStop;
-        std::optional<double> duration;
-        AtNodeNavigator::Behavior behavior;
-    };
-
     struct Path {
         std::vector<PathSegment> segments;
-        std::vector<StopDetails> stops; // 1 between every segment
     };
 
     Path _currentPath;
 
     AtNodeNavigator _atNodeNavigator; // responsible for navigation during stops
-    StopDetails* _activeStop = nullptr;
     double _progressedTimeInStop = 0.0;
 
     bool _isPlaying = false;

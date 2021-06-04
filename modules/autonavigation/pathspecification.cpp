@@ -36,9 +36,6 @@ namespace {
         std::vector<ghoul::Dictionary> instructions 
             [[codegen::reference("autonavigation_pathinstruction")]];
 
-        // Decides whether the path should be paused when reaching an intermediate target 
-        std::optional<bool> stopAtTargets;
-
         // A navigation state that determines the start state for the camera path
         std::optional<ghoul::Dictionary> startState 
             [[codegen::reference("core_navigation_state")]];
@@ -66,8 +63,6 @@ PathSpecification::PathSpecification(const ghoul::Dictionary& dictionary) {
         }
         counter++;
     }
-
-    stopAtTargets = p.stopAtTargets;
 
     if (p.startState.has_value()) {
         startState = NavigationState(p.startState.value());
