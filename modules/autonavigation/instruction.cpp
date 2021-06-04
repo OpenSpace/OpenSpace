@@ -61,8 +61,12 @@ namespace {
         std::optional<bool> useTargetUpDirection;
 
         // (NavigationState): A navigation state that will be the target
-        // of this path segment.
+        // of this path segment
         std::optional<ghoul::Dictionary> navigationState 
+            [[codegen::reference("core_navigation_state")]];
+
+        // A navigation state that determines the start state for the camera path
+        std::optional<ghoul::Dictionary> startState
             [[codegen::reference("core_navigation_state")]];
     };
 #include "instruction_codegen.cpp"

@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/autonavigation/pathsegment.h>
+#include <modules/autonavigation/path.h>
 
 #include <modules/autonavigation/autonavigationmodule.h>
 #include <modules/autonavigation/helperfunctions.h>
@@ -37,18 +37,17 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "PathSegment";
-
+    constexpr const char* _loggerCat = "Path";
     const double Epsilon = 1E-7;
 } // namespace
 
 namespace openspace::autonavigation {
 
-PathSegment::PathSegment(Waypoint start, Waypoint end, CurveType type,
-                         std::optional<double> duration)
+Path::Path(Waypoint start, Waypoint end, CurveType type,
+           std::optional<double> duration)
     : _start(start), _end(end), _curveType(type)
 {
-    initCurve();
+    initializePath();
 
     if (duration.has_value()) {
         _duration = duration.value();
@@ -61,26 +60,25 @@ PathSegment::PathSegment(Waypoint start, Waypoint end, CurveType type,
     }
 }
 
-void PathSegment::setStartPoint(Waypoint cs) {
+void Path::setStartPoint(Waypoint cs) {
     _start = std::move(cs);
-    initCurve();
+    initializePath();
     // TODO later: maybe recompute duration as well...
 }
 
-const Waypoint PathSegment::startPoint() const { return _start; }
+const Waypoint Path::startPoint() const { return _start; }
 
-const Waypoint PathSegment::endPoint() const { return _end; }
+const Waypoint Path::endPoint() const { return _end; }
 
-const double PathSegment::duration() const { return _duration; }
+const double Path::duration() const { return _duration; }
 
-const double PathSegment::pathLength() const { return _curve->length(); }
+const double Path::pathLength() const { return _curve->length(); }
 
-// TODO: remove function for debugging
-const std::vector<glm::dvec3> PathSegment::controlPoints() const {
+const std::vector<glm::dvec3> Path::controlPoints() const {
     return _curve->points();
 }
 
-CameraPose PathSegment::traversePath(double dt) {
+CameraPose Path::traversePath(double dt) {
     if (!_curve || !_rotationInterpolator || !_speedFunction) {
         // TODO: handle better (abort path somehow)
         return _start.pose;
@@ -103,20 +101,20 @@ CameraPose PathSegment::traversePath(double dt) {
     return interpolatedPose(_traveledDistance);
 }
 
-std::string PathSegment::currentAnchor() const {
+std::string Path::currentAnchor() const {
     bool pastHalfway = (_traveledDistance / pathLength()) > 0.5;
     return (pastHalfway) ? _end.nodeDetails.identifier : _start.nodeDetails.identifier;
 }
 
-bool PathSegment::hasReachedEnd() const {
+bool Path::hasReachedEnd() const {
     return (_traveledDistance / pathLength()) >= 1.0;
 }
 
-double PathSegment::speedAtTime(double time) const {
+double Path::speedAtTime(double time) const {
     return _speedFunction->scaledValue(time, _duration, pathLength());
 }
 
-CameraPose PathSegment::interpolatedPose(double distance) const {
+CameraPose Path::interpolatedPose(double distance) const {
     double u = distance / pathLength();
     CameraPose cs;
     cs.position = _curve->positionAt(u);
@@ -124,7 +122,7 @@ CameraPose PathSegment::interpolatedPose(double distance) const {
     return cs;
 }
 
-void PathSegment::initCurve() {
+void Path::initializePath() {
     _curve.reset();
 
     switch (_curveType)

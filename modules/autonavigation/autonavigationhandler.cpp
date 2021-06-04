@@ -26,7 +26,6 @@
 
 #include <modules/autonavigation/helperfunctions.h>
 #include <modules/autonavigation/instruction.h>
-#include <modules/autonavigation/pathspecification.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/navigationhandler.h>
@@ -125,8 +124,7 @@ AutoNavigationHandler::AutoNavigationHandler()
         properties::OptionProperty::DisplayType::Dropdown
     )
     , _includeRoll(IncludeRollInfo, false)
-    , _stopAtTargetsPerDefault(StopAtTargetsPerDefaultInfo, false)
-    , _defaultStopBehavior(
+    , _stopBehavior(
         DefaultStopBehaviorInfo, 
         properties::OptionProperty::DisplayType::Dropdown
     )
@@ -147,20 +145,19 @@ AutoNavigationHandler::AutoNavigationHandler()
     addProperty(_defaultCurveOption);
 
     addProperty(_includeRoll);
-    addProperty(_stopAtTargetsPerDefault);
 
     // Must be listed in the same order as in enum definition
-    _defaultStopBehavior.addOptions({
+    _stopBehavior.addOptions({
         { AtNodeNavigator::Behavior::None, "None" },
         { AtNodeNavigator::Behavior::Orbit, "Orbit" }
     });
-    _defaultStopBehavior = AtNodeNavigator::Behavior::None;
-    _defaultStopBehavior.onChange([this]() {
+    _stopBehavior = AtNodeNavigator::Behavior::None;
+    _stopBehavior.onChange([this]() {
         _atNodeNavigator.setBehavior(
-            AtNodeNavigator::Behavior(_defaultStopBehavior.value())
+            AtNodeNavigator::Behavior(_stopBehavior.value())
         );
     });
-    addProperty(_defaultStopBehavior);
+    addProperty(_stopBehavior);
 
     addProperty(_applyStopBehaviorWhenIdle);
 
@@ -200,12 +197,8 @@ double AutoNavigationHandler::speedScale() const {
     return _speedScale;
 }
 
-const PathSegment& AutoNavigationHandler::currentSegment() const {
-    return _currentPath.segments[_currentSegmentIndex];
-}
-
 bool AutoNavigationHandler::noCurrentPath() const {
-    return _currentPath.segments.empty();
+    return _currentPath == nullptr;
 }
 
 bool AutoNavigationHandler::hasFinished() const {
@@ -213,14 +206,17 @@ bool AutoNavigationHandler::hasFinished() const {
         return true;
     }
 
-    const int lastIndex = static_cast<int>(_currentPath.segments.size()) - 1;
-    return _currentSegmentIndex > lastIndex;
+    return _currentPath->hasReachedEnd();
 }
 
 void AutoNavigationHandler::updateCamera(double deltaTime) {
     ghoul_assert(camera() != nullptr, "Camera must not be nullptr");
 
-    if (!_isPlaying || _currentPath.segments.empty()) {
+    if (noCurrentPath()) {
+        return;
+    }
+
+    if (!_isPlaying) {
         // For testing, apply at node behavior when idle
         // @TODO: Determine how this should work instead
         if (_applyStopBehaviorWhenIdle) {
@@ -235,10 +231,8 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
         LINFO("Cannot start simulation time during camera motion");
     }
 
-    PathSegment& currentSegment = _currentPath.segments[_currentSegmentIndex];
-
-    CameraPose newPose = currentSegment.traversePath(deltaTime);
-    const std::string newAnchor = currentSegment.currentAnchor();
+    CameraPose newPose = _currentPath->traversePath(deltaTime);
+    const std::string newAnchor = _currentPath->currentAnchor();
 
     // Set anchor node in orbitalNavigator, to render visible nodes and add activate
     // navigation when we reach the end.
@@ -254,65 +248,70 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
     camera()->setPositionVec3(newPose.position);
     camera()->setRotation(newPose.rotation);
 
-    const int index = _currentSegmentIndex;
-
-    if (currentSegment.hasReachedEnd()) {
-        _currentSegmentIndex++;
-
-        if (hasFinished()) {
-            LINFO("Reached end of path.");
-            _isPlaying = false;
-            return;
-        }
+    // TODO: make this work again
+    if (_currentPath->hasReachedEnd()) {
+        LINFO("Reached end of path");
+        _isPlaying = false;
+        return;
     }
 }
 
-void AutoNavigationHandler::createPath(PathSpecification& spec) {
+void AutoNavigationHandler::createPath(Instruction& instruction) {
     clearPath();
 
     // TODO: do this in some initialize function instead
     _relevantNodes = findRelevantNodes();
 
-    const std::vector<Instruction>& instructions = spec.instructions;
-    const int nInstructions = static_cast<int>(instructions.size());
+    // TODO: Improve how curve types are handled
+    const int curveType = _defaultCurveOption;
 
-    for (int i = 0; i < nInstructions; i++) {
-        const Instruction& instruction = instructions[i];
-        addSegment(instruction, i);
+    std::vector<Waypoint> waypoints = instruction.waypoints();
+    Waypoint waypointToAdd;
+
+    if (waypoints.empty()) {
+        if (instruction.type == Instruction::Type::Node) {
+            // TODO: allow curves to compute default waypoint instead
+            waypointToAdd = computeDefaultWaypoint(instruction);
+        }
+        else {
+            LWARNING("No path was created from instruction. Failed creating waypoints");
+            return;
+        }
+    }
+    else {
+        // TODO: allow for an instruction to represent a list of waypoints
+        waypointToAdd = waypoints[0];
     }
 
-    ghoul_assert(
-        _currentPath.stops.size() == (_currentPath.segments.size() - 1),
-        "Must have exactly one stop entry between every segment."
+    bool hasStartState = instruction.startState.has_value();
+    Waypoint startState = hasStartState ? Waypoint(instruction.startState.value()) 
+        : waypointFromCamera();
+
+    _currentPath = std::make_unique<Path>(
+        startState,
+        waypointToAdd,
+        CurveType(curveType),
+        instruction.duration
     );
 
-    // Check if we have a specified start navigation state. If so, update first segment
-    if (spec.startState.has_value() && _currentPath.segments.size() > 0) {
-        Waypoint startState{ spec.startState.value() };
-        _currentPath.segments[0].setStartPoint(startState);
-    }
-
-    LINFO(fmt::format(
-        "Succefully generated camera path with {} segments.", _currentPath.segments.size()
-    ));
+    LINFO("Successfully generated camera path");
     startPath();
 }
 
 void AutoNavigationHandler::clearPath() {
     LINFO("Clearing path...");
-    _currentPath.segments.clear();
-    _currentSegmentIndex = 0;
+    _currentPath = nullptr;
 }
 
 void AutoNavigationHandler::startPath() {
     if (noCurrentPath()) {
-        LERROR("Cannot start an empty path.");
+        LERROR("There is no path to start");
         return;
     }
 
     //OBS! Until we can handle simulation time: early out if not paused
     if (!global::timeManager->isPaused()) {
-        LERROR("Simulation time must be paused to run a camera path.");
+        LERROR("Simulation time must be paused to run a camera path");
         return;
     }
 
@@ -320,52 +319,48 @@ void AutoNavigationHandler::startPath() {
     _isPlaying = true;
 }
 
-void AutoNavigationHandler::continuePath() {
-    if (hasFinished()) {
-        LERROR("No path to resume (path is empty or has finished).");
-        return;
-    }
-
-    if (_isPlaying) {
-        LERROR("Cannot resume a path that is already playing");
-        return;
-    }
-
-    LINFO("Continuing path...");
-
-    // recompute start camera state for the upcoming path segment,
-    _currentPath.segments[_currentSegmentIndex].setStartPoint(wayPointFromCamera());
-}
+//void AutoNavigationHandler::continuePath() {
+//    if (hasFinished()) {
+//        LERROR("No path to resume (path is empty or has finished).");
+//        return;
+//    }
+//
+//    if (_isPlaying) {
+//        LERROR("Cannot resume a path that is already playing");
+//        return;
+//    }
+//
+//    LINFO("Continuing path...");
+//
+//    // recompute start camera state for the upcoming path segment,
+//    _currentPath.segments[_currentSegmentIndex].setStartPoint(wayPointFromCamera());
+//}
 
 void AutoNavigationHandler::abortPath() {
     if (!_isPlaying) {
-        LWARNING("No camera path is playing.");
+        LWARNING("No camera path is playing");
         return;
     }
     _isPlaying = false;
-    LINFO("Aborted camera path.");
+    LINFO("Aborted camera path");
 }
 
 // TODO: remove when not needed
 // Created for debugging
 std::vector<glm::dvec3> AutoNavigationHandler::curvePositions(int nPerSegment) {
-    std::vector<glm::dvec3> positions;
-
     if (noCurrentPath()) {
         LERROR("There is no current path to sample points from.");
-        return positions;
+        return {};
     }
 
+    std::vector<glm::dvec3> positions;
     const double du = 1.0 / nPerSegment;
-
-    for (const PathSegment& p : _currentPath.segments) {
-        const double length = p.pathLength();
-        for (double u = 0.0; u < 1.0; u += du) {
-            glm::dvec3 position = p.interpolatedPose(u * length).position;
-            positions.push_back(position);
-        }
-        positions.push_back(p.endPoint().position());
+    const double length = _currentPath->pathLength();
+    for (double u = 0.0; u < 1.0; u += du) {
+        glm::dvec3 position = _currentPath->interpolatedPose(u * length).position;
+        positions.push_back(position);
     }
+    positions.push_back(_currentPath->endPoint().position());
 
     return positions;
 }
@@ -373,23 +368,20 @@ std::vector<glm::dvec3> AutoNavigationHandler::curvePositions(int nPerSegment) {
 // TODO: remove when not needed
 // Created for debugging
 std::vector<glm::dquat> AutoNavigationHandler::curveOrientations(int nPerSegment) {
-    std::vector<glm::dquat> orientations;
-
     if (noCurrentPath()) {
         LERROR("There is no current path to sample points from.");
-        return orientations;
+        return {};
     }
 
+    std::vector<glm::dquat> orientations;
     const double du = 1.0 / nPerSegment;
-
-    for (const PathSegment& p : _currentPath.segments) {
-        const double length = p.pathLength();
-        for (double u = 0.0; u <= 1.0; u += du) {
-            const glm::dquat orientation = p.interpolatedPose(u * length).rotation;
-            orientations.push_back(orientation);
-        }
-        orientations.push_back(p.endPoint().rotation());
+    const double length = _currentPath->pathLength();
+    for (double u = 0.0; u <= 1.0; u += du) {
+        const glm::dquat orientation = 
+            _currentPath->interpolatedPose(u * length).rotation;
+        orientations.push_back(orientation);
     }
+    orientations.push_back(_currentPath->endPoint().rotation());
 
     return orientations;
 }
@@ -398,30 +390,26 @@ std::vector<glm::dquat> AutoNavigationHandler::curveOrientations(int nPerSegment
 // TODO: remove when not needed or combined into pose version
 // Created for debugging
 std::vector<glm::dvec3> AutoNavigationHandler::curveViewDirections(int nPerSegment) {
-    std::vector<glm::dvec3> viewDirections;
-
     if (noCurrentPath()) {
         LERROR("There is no current path to sample points from.");
-        return viewDirections;
+        return {};
     }
 
+    std::vector<glm::dvec3> viewDirections;
     const double du = 1.0 / nPerSegment;
-
-    for (const PathSegment& p : _currentPath.segments) {
-        for (double u = 0.0; u < 1.0; u += du) {
-            const glm::dquat orientation = p.interpolatedPose(u).rotation;
-            const glm::dvec3 direction = glm::normalize(
-                orientation * glm::dvec3(0.0, 0.0, -1.0)
-            );
-            viewDirections.push_back(direction);
-        }
-
-        const glm::dquat orientation = p.interpolatedPose(1.0).rotation;
+    for (double u = 0.0; u < 1.0; u += du) {
+        const glm::dquat orientation = _currentPath->interpolatedPose(u).rotation;
         const glm::dvec3 direction = glm::normalize(
             orientation * glm::dvec3(0.0, 0.0, -1.0)
         );
         viewDirections.push_back(direction);
     }
+
+    const glm::dquat orientation = _currentPath->interpolatedPose(1.0).rotation;
+    const glm::dvec3 direction = glm::normalize(
+        orientation * glm::dvec3(0.0, 0.0, -1.0)
+    );
+    viewDirections.push_back(direction);
 
     return viewDirections;
 }
@@ -429,30 +417,23 @@ std::vector<glm::dvec3> AutoNavigationHandler::curveViewDirections(int nPerSegme
 // TODO: remove when not needed
 // Created for debugging
 std::vector<glm::dvec3> AutoNavigationHandler::controlPoints() {
-    std::vector<glm::dvec3> points;
-
     if (noCurrentPath()) {
         LERROR("There is no current path to sample points from.");
-        return points;
+        return {};
     }
 
-    for (const PathSegment&p : _currentPath.segments) {
-        const std::vector<glm::dvec3> curvePoints = p.controlPoints();
-        points.insert(points.end(), curvePoints.begin(), curvePoints.end());
-    }
+    std::vector<glm::dvec3> points;
+    const std::vector<glm::dvec3> curvePoints = _currentPath->controlPoints();
+    points.insert(points.end(), curvePoints.begin(), curvePoints.end());
 
     return points;
 }
 
-Waypoint AutoNavigationHandler::wayPointFromCamera() {
+Waypoint AutoNavigationHandler::waypointFromCamera() {
     const glm::dvec3 pos = camera()->positionVec3();
     const glm::dquat rot = camera()->rotationQuaternion();
     const std::string node = global::navigationHandler->anchorNode()->identifier();
     return Waypoint{ pos, rot, node };
-}
-
-Waypoint AutoNavigationHandler::lastWayPoint() {
-    return noCurrentPath() ? wayPointFromCamera() : _currentPath.segments.back().endPoint();
 }
 
 void AutoNavigationHandler::removeRollRotation(CameraPose& pose, double deltaTime) {
@@ -469,39 +450,6 @@ void AutoNavigationHandler::removeRollRotation(CameraPose& pose, double deltaTim
         camera()->lookUpVectorWorldSpace()
     );
     pose.rotation = rollFreeRotation;
-}
-
-void AutoNavigationHandler::addSegment(const Instruction& ins, int index) {
-    // TODO: Improve how curve types are handled
-    const int curveType = _defaultCurveOption;
-
-    std::vector<Waypoint> waypoints = ins.waypoints();
-    Waypoint waypointToAdd;
-
-    if (waypoints.empty()) {
-        if (ins.type == Instruction::Type::Node) {
-            // TODO: allow curves to compute default waypoint instead
-            waypointToAdd = computeDefaultWaypoint(ins);
-        }
-        else {
-            LWARNING(fmt::format(
-                "No path segment was created from instruction {}. "
-                "No waypoints could be created.", index
-            ));
-            return;
-        }
-    }
-    else {
-        // TODO: allow for an instruction to represent a list of waypoints
-        waypointToAdd = waypoints[0];
-    }
-
-    _currentPath.segments.push_back(PathSegment(
-        lastWayPoint(),
-        waypointToAdd,
-        CurveType(curveType),
-        ins.duration
-    ));
 }
 
 // Test if the node lies within a given proximity radius of any relevant node in the scene
@@ -547,7 +495,7 @@ Waypoint AutoNavigationHandler::computeDefaultWaypoint(const Instruction& ins) {
     const glm::dvec3 nodePos = targetNode->worldPosition();
     const glm::dvec3 sunPos = glm::dvec3(0.0, 0.0, 0.0);
     const SceneGraphNode* closeNode = findNodeNearTarget(targetNode);
-    const glm::dvec3 prevPos = lastWayPoint().position();
+    const glm::dvec3 prevPos = waypointFromCamera().position();
 
     // Position
     glm::dvec3 stepDirection;

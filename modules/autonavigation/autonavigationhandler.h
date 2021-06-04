@@ -26,7 +26,7 @@
 #define __OPENSPACE_MODULE___AUTONAVIGATIONHANDLER___H__
 
 #include <modules/autonavigation/atnodenavigator.h>
-#include <modules/autonavigation/pathsegment.h>
+#include <modules/autonavigation/path.h>
 #include <openspace/properties/list/stringlistproperty.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/propertyowner.h>
@@ -41,7 +41,6 @@ namespace openspace::autonavigation {
 struct Waypoint;
 struct Instruction;
 struct TargetNodeInstruction;
-class PathSpecification;
 
 class AutoNavigationHandler : public properties::PropertyOwner {
 public:
@@ -55,16 +54,17 @@ public:
     int integrationResolutionPerFrame() const;
     double speedScale() const;
 
-    const PathSegment& currentSegment() const;
     bool noCurrentPath() const;
     bool hasFinished() const;
 
     void updateCamera(double deltaTime);
-    void createPath(PathSpecification& spec);
+    void createPath(Instruction& spec);
     void clearPath();
     void startPath();
-    void continuePath();
     void abortPath();
+
+    // TODO: allow option to pause during a path and then change this to continue playing
+    //void continuePath();
 
     // TODO: remove functions for debugging
     std::vector<glm::dvec3> curvePositions(int nPerSegment);
@@ -74,38 +74,29 @@ public:
 
 private:
     Waypoint wayPointFromCamera();
-    Waypoint lastWayPoint();
     void removeRollRotation(CameraPose& pose, double deltaTime);
 
-    void addSegment(const Instruction& ins, int index);
+    void addSegment(const Instruction& ins);
 
     SceneGraphNode* findNodeNearTarget(const SceneGraphNode* node);
     Waypoint computeDefaultWaypoint(const Instruction& ins);
 
     std::vector<SceneGraphNode*> findRelevantNodes();
 
-    struct Path {
-        std::vector<PathSegment> segments;
-    };
-
-    Path _currentPath;
+    std::unique_ptr<Path> _currentPath = nullptr;
 
     AtNodeNavigator _atNodeNavigator; // responsible for navigation during stops
-    double _progressedTimeInStop = 0.0;
-
     bool _isPlaying = false;
-    unsigned int _currentSegmentIndex = 0;
 
     std::vector<SceneGraphNode*> _relevantNodes;
 
     properties::OptionProperty _defaultCurveOption;
     properties::BoolProperty _includeRoll;
-    properties::BoolProperty _stopAtTargetsPerDefault;
-    properties::OptionProperty _defaultStopBehavior;
 
     // for testing pause behaviors.
     // TODO: remove later, if it causes problems with regular navigation
     properties::BoolProperty _applyStopBehaviorWhenIdle;
+    properties::OptionProperty _stopBehavior;
 
     properties::StringListProperty _relevantNodeTags;
     properties::FloatProperty _defaultPositionOffsetAngle;

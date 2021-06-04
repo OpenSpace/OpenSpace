@@ -32,6 +32,8 @@
 namespace openspace::autonavigation {
 
 struct Instruction {
+    using NavigationState = interaction::NavigationHandler::NavigationState;
+
     enum class Type {
         Node,
         NavigationState
@@ -46,6 +48,7 @@ struct Instruction {
     Type type;
 
     std::optional<double> duration;
+    std::optional<NavigationState> startState;
 
     // Node details
     std::string nodeIdentifier;
@@ -54,7 +57,7 @@ struct Instruction {
     bool useTargetUpDirection;
 
     // Navigation state details
-    interaction::NavigationHandler::NavigationState navigationState;
+    NavigationState navigationState;
 
     std::vector<Waypoint> _waypoints;
 };

@@ -59,8 +59,7 @@ double AutoNavigationModule::minValidBoundingSphere() const {
 
 std::vector<documentation::Documentation> AutoNavigationModule::documentations() const {
     return {
-        autonavigation::Instruction::Documentation(),
-        autonavigation::PathSpecification::Documentation()
+        autonavigation::Instruction::Documentation()
     };
 }
 
@@ -78,13 +77,13 @@ scripting::LuaLibrary AutoNavigationModule::luaLibrary() const {
             "",
             "Returns true if a camera path is currently running, and false otherwise."
         },
-        {
-            "continuePath",
-            &autonavigation::luascriptfunctions::continuePath,
-            {},
-            "",
-            "Continue playing a paused camera path."
-        },
+        //{
+        //    "continuePath",
+        //    &autonavigation::luascriptfunctions::continuePath,
+        //    {},
+        //    "",
+        //    "Continue playing a paused camera path."
+        //},
         {
             "stopPath",
             &autonavigation::luascriptfunctions::stopPath,
@@ -130,14 +129,6 @@ scripting::LuaLibrary AutoNavigationModule::luaLibrary() const {
             {},
             "table",
             "Generate the path as described by the lua table input argument. "
-        },
-        {
-            "generatePathFromFile",
-            &autonavigation::luascriptfunctions::generatePathFromFile,
-            {},
-            "string",
-            "Read an input file with lua instructions and use those to generate a camera "
-            "path. "
         },
         {
             "getPathPositions",

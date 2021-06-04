@@ -22,55 +22,58 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/autonavigation/pathspecification.h>
+#ifndef __OPENSPACE_MODULE___PATHSEGMENT___H__
+#define __OPENSPACE_MODULE___PATHSEGMENT___H__
 
-#include <modules/autonavigation/instruction.h>
-#include <openspace/documentation/verifier.h>
-#include <ghoul/logging/logmanager.h>
-
-namespace {
-    constexpr const char* _loggerCat = "PathSpecification";
-
-    struct [[codegen::Dictionary(PathSpecification)]] Parameters {
-        // A list of path instructions
-        std::vector<ghoul::Dictionary> instructions 
-            [[codegen::reference("autonavigation_pathinstruction")]];
-
-        // A navigation state that determines the start state for the camera path
-        std::optional<ghoul::Dictionary> startState 
-            [[codegen::reference("core_navigation_state")]];
-    };
-#include "pathspecification_codegen.cpp"
-} // namespace
+#include <modules/autonavigation/pathcurve.h>
+#include <modules/autonavigation/rotationinterpolator.h>
+#include <modules/autonavigation/speedfunction.h>
+#include <modules/autonavigation/waypoint.h>
+#include <ghoul/glm.h>
+#include <vector>
 
 namespace openspace::autonavigation {
 
-documentation::Documentation PathSpecification::Documentation() {
-    return codegen::doc<Parameters>("autonavigation_pathspecification");
-}
+class Path {
+public:
+    Path(Waypoint start, Waypoint end, CurveType type,
+        std::optional<double> duration = std::nullopt);
 
-PathSpecification::PathSpecification(const ghoul::Dictionary& dictionary) {
-    const Parameters p = codegen::bake<Parameters>(dictionary);
+    // TODO: add a constructor that takes an instruction and curve type?
 
-    const std::vector<ghoul::Dictionary> instructionDicts = p.instructions;
-    int counter = 1; 
-    for (const ghoul::Dictionary& dict : instructionDicts) {
-        try {
-            instructions.push_back(Instruction(dict));
-        }
-        catch (ghoul::RuntimeError& e) {
-            LERROR(fmt::format("Failed reading instruction {}: {}", counter, e.message));
-        }
-        counter++;
-    }
+    void setStartPoint(Waypoint wp);
 
-    if (p.startState.has_value()) {
-        startState = NavigationState(p.startState.value());
-    }
-}
+    const Waypoint startPoint() const;
+    const Waypoint endPoint() const;
+    const double duration() const;
+    const double pathLength() const;
 
-PathSpecification::PathSpecification(const Instruction instruction) {
-    instructions.push_back(instruction);
-}
+    const std::vector<glm::dvec3> controlPoints() const;
+
+    CameraPose traversePath(double dt);
+    std::string currentAnchor() const;
+    bool hasReachedEnd() const;
+
+    double speedAtTime(double time) const;
+    CameraPose interpolatedPose(double distance) const;
+
+private:
+    void initializePath();
+
+    Waypoint _start;
+    Waypoint _end;
+    double _duration;
+    CurveType _curveType;
+
+    std::unique_ptr<SpeedFunction> _speedFunction;
+    std::unique_ptr<RotationInterpolator> _rotationInterpolator;
+    std::unique_ptr<PathCurve> _curve;
+
+    // Playback variables
+    double _traveledDistance = 0.0;
+    double _progressedTime = 0.0; // Time since playback started
+};
 
 } // namespace openspace::autonavigation
+
+#endif // __OPENSPACE_MODULE___PATHSEGMENT___H__

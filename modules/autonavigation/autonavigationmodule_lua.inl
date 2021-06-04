@@ -23,7 +23,6 @@
  ****************************************************************************************/
 
 #include <modules/autonavigation/instruction.h>
-#include <modules/autonavigation/pathspecification.h>
 #include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/engine/globals.h>
@@ -58,15 +57,15 @@ int isFlying(lua_State* L) {
     return 1;
 }
 
-int continuePath(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::continuePath");
-
-    AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-    module->AutoNavigationHandler().continuePath();
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
-}
+//int continuePath(lua_State* L) {
+//    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::continuePath");
+//
+//    AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
+//    module->AutoNavigationHandler().continuePath();
+//
+//    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+//    return 0;
+//}
 
 int stopPath(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::stopPath");
@@ -146,10 +145,10 @@ int goTo(lua_State* L) {
         }
     }
 
-    PathSpecification spec = PathSpecification(Instruction{ insDict });
+    Instruction instruction(insDict);
 
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-    module->AutoNavigationHandler().createPath(spec);
+    module->AutoNavigationHandler().createPath(instruction);
 
     lua_settop(L, 0);
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
@@ -181,10 +180,10 @@ int goToHeight(lua_State* L) {
         }
     }
 
-    PathSpecification spec = PathSpecification(Instruction{ insDict });
+    Instruction instruction(insDict);
 
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-    module->AutoNavigationHandler().createPath(spec);
+    module->AutoNavigationHandler().createPath(instruction);
 
     lua_settop(L, 0);
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
@@ -236,10 +235,10 @@ int goToGeo(lua_State* L) {
         }
     }
 
-    PathSpecification spec = PathSpecification(Instruction{ insDict });
+    Instruction instruction(insDict);
 
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-    module->AutoNavigationHandler().createPath(spec);
+    module->AutoNavigationHandler().createPath(instruction);
 
     lua_settop(L, 0);
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
@@ -251,70 +250,12 @@ int generatePath(lua_State* L) {
 
     ghoul::Dictionary dictionary;
     ghoul::lua::luaDictionaryFromState(L, dictionary);
-    PathSpecification spec(dictionary);
-
-    if (spec.instructions.empty()) {
-        lua_settop(L, 0);
-        return ghoul::lua::luaError(
-            L, fmt::format("No instructions for camera path generation were provided.")
-        );
-    }
+    Instruction instruction(dictionary);
 
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-    module->AutoNavigationHandler().createPath(spec);
+    module->AutoNavigationHandler().createPath(instruction);
 
     lua_settop(L, 0);
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
-}
-
-int generatePathFromFile(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::generatePathFromFile");
-
-    const std::string& filepath =
-        ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::Yes);
-
-    if (filepath.empty()) {
-        return ghoul::lua::luaError(L, "Filepath string is empty");
-    }
-
-    const std::filesystem::path file = absPath(filepath);
-
-    LINFO(fmt::format("Reading path instructions from file: {}", file));
-
-    if (!std::filesystem::is_regular_file(file)) {
-        throw ghoul::FileNotFoundError(file.string(), "PathSpecification");
-    }
-
-    // Try to read the dictionary
-    ghoul::Dictionary dictionary;
-    try {
-        ghoul::lua::loadDictionaryFromFile(file.string(), dictionary);
-        openspace::documentation::testSpecificationAndThrow(
-            PathSpecification::Documentation(),
-            dictionary,
-            "PathSpecification"
-        );
-    }
-    catch (ghoul::RuntimeError& e) {
-        return ghoul::lua::luaError(
-            L, fmt::format("Unable to read dictionary from file: {}", e.message)
-        );
-    }
-
-    PathSpecification spec(dictionary);
-
-    if (spec.instructions.empty()) {
-        return ghoul::lua::luaError(
-            L, fmt::format("No instructions for camera path generation were provided")
-        );
-    }
-
-    LINFOC("AutoNavigationModule", "Reading succeeded. Creating path");
-
-    AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-    module->AutoNavigationHandler().createPath(spec);
-
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
