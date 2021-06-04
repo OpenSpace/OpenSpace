@@ -575,7 +575,6 @@ void RenderableModel::initializeGL() {
 
     _geometry->initialize();
     _geometry->calculateBoundingRadius();
-    setBoundingSphere(_geometry->boundingRadius() * _modelScale);
 }
 
 void RenderableModel::deinitializeGL() {
@@ -716,6 +715,10 @@ void RenderableModel::update(const UpdateData& data) {
         _program->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
     }
+
+    setBoundingSphere(_geometry->boundingRadius() * _modelScale *
+        glm::compMax(data.modelTransform.scale)
+    );
 
     if (_geometry->hasAnimation() && !_animationStart.empty()) {
         double relativeTime;
