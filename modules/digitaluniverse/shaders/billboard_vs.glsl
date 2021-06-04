@@ -34,7 +34,7 @@ flat out vec4 colorMap;
 flat out float dvarScaling;
 
 void main() {
-    colorMap    = in_colormap;
-    dvarScaling = in_dvarScaling;
-    gl_Position = in_position;
+  colorMap = in_colormap;
+  dvarScaling = in_dvarScaling;
+  gl_Position = in_position;
 }

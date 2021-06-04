@@ -24,75 +24,33 @@
 
 #include <openspace/properties/vector/ivec2property.h>
 
-#include <ghoul/glm.h>
 #include <ghoul/lua/ghoul_lua.h>
-#include <ghoul/misc/misc.h>
-#include <limits>
-#include <sstream>
-
-namespace {
-
-glm::ivec2 fromLuaConversion(lua_State* state, bool& success) {
-    glm::ivec2 result = glm::ivec2(0);
-    lua_pushnil(state);
-    for (glm::length_t i = 0; i < ghoul::glm_components<glm::ivec2>::value; ++i) {
-        int hasNext = lua_next(state, -2);
-        if (hasNext != 1) {
-            success = false;
-            return glm::ivec2(0);
-        }
-        if (lua_isnumber(state, -1) != 1) {
-            success = false;
-            return glm::ivec2(0);
-        }
-        else {
-            result[i] = static_cast<glm::ivec2::value_type>(lua_tonumber(state, -1));
-            lua_pop(state, 1);
-        }
-    }
-
-    // The last accessor argument is still on the stack
-    lua_pop(state, 1);
-    success = true;
-    return result;
-}
-
-bool toLuaConversion(lua_State* state, glm::ivec2 value) {
-    lua_newtable(state);
-    int number = 1;
-    for (glm::length_t i = 0; i < ghoul::glm_components<glm::ivec2>::value; ++i) {
-        lua_pushnumber(state, static_cast<lua_Number>(value[i]));
-        lua_rawseti(state, -2, number);
-        ++number;
-    }
-    return true;
-}
-
-bool toStringConversion(std::string& outValue, glm::ivec2 inValue) {
-    outValue = "{";
-    for (glm::length_t i = 0; i < ghoul::glm_components<glm::ivec2>::value; ++i) {
-        outValue += std::to_string(inValue[i]) + ",";
-    }
-    outValue.pop_back();
-    outValue += "}";
-    return true;
-}
-
-} // namespace
+#include <ghoul/lua/lua_helper.h>
 
 namespace openspace::properties {
 
-REGISTER_NUMERICALPROPERTY_SOURCE(
-    IVec2Property,
-    glm::ivec2,
-    glm::ivec2(0),
-    glm::ivec2(std::numeric_limits<int>::lowest()),
-    glm::ivec2(std::numeric_limits<int>::max()),
-    glm::ivec2(1),
-    fromLuaConversion,
-    toLuaConversion,
-    toStringConversion,
-    LUA_TTABLE
-)
+IVec2Property::IVec2Property(Property::PropertyInfo info, glm::ivec2 value,
+                             glm::ivec2 minValue, glm::ivec2 maxValue,
+                             glm::ivec2 stepValue)
+    : NumericalProperty<glm::ivec2>(
+        std::move(info),
+        std::move(value),
+        std::move(minValue),
+        std::move(maxValue),
+        std::move(stepValue)
+    )
+{}
+
+std::string IVec2Property::className() const {
+    return "IVec2Property";
+}
+
+int IVec2Property::typeLua() const {
+    return LUA_TTABLE;
+}
+
+glm::ivec2 IVec2Property::fromLuaConversion(lua_State* state, bool& success) const {
+    return ghoul::lua::tryGetValue<glm::ivec2>(state, success);
+}
 
 } // namespace openspace::properties

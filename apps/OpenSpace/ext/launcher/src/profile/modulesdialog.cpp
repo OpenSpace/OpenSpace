@@ -297,9 +297,6 @@ void ModulesDialog::listItemRemove() {
 }
 
 void ModulesDialog::transitionToEditMode() {
-    _list->setDisabled(true);
-    _buttonAdd->setDisabled(true);
-    _buttonRemove->setDisabled(true);
     _buttonSave->setDisabled(true);
     _buttonCancel->setDisabled(true);
     _buttonBox->setDisabled(true);

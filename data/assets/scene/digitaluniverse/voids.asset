@@ -19,10 +19,10 @@ local object = {
     Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
     LabelFile = speck .. "/voids.label",
+    Unit = "Mpc",
     TextColor = { 0.296, 0.629, 1.0 },
     TextSize = 20.9,
-    TextMinSize = 8.0,
-    Unit = "Mpc"
+    TextMinMaxSize = { 8, 20 }
   },
   GUI = {
     Name = "Voids",

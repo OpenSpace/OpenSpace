@@ -19,7 +19,17 @@ local OrionClusterStars = {
     ColorMap = sync .. "/colorbv.cmap",
     MagnitudeExponent = 5.02,
     SizeComposition = "Distance Modulus",
-    RenderMethod = "Texture Based"
+    RenderMethod = "Texture Based",
+    DataMapping = {
+      Bv = "colorb_v",
+      Luminance = "lum",
+      AbsoluteMagnitude = "absmag",
+      ApparentMagnitude = "appmag",
+      Vx = "vx",
+      Vy = "vy",
+      Vz = "vz",
+      Speed = "speed"
+    }
   },
   GUI = {
     Name = "Orion Nebula Star Cluster",

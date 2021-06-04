@@ -27,6 +27,7 @@
 #include <openspace/openspace.h>
 #include <openspace/documentation/core_registration.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/util/json_helper.h>
 #include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/profiling.h>
@@ -48,7 +49,7 @@ DocumentationEngine* DocumentationEngine::_instance = nullptr;
 DocumentationEngine::DuplicateDocumentationException::DuplicateDocumentationException(
                                                                         Documentation doc)
     : ghoul::RuntimeError(fmt::format(
-        "Duplicate Documentation with name '{}' and id '{}'",doc.name, doc.id
+        "Duplicate Documentation with name '{}' and id '{}'", doc.name, doc.id
     ))
     , documentation(std::move(doc))
 {}

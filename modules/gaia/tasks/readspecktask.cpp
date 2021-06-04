@@ -49,9 +49,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation ReadSpeckTask::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "gaiamission_speckfiletorawdata";
-    return doc;
+    return codegen::doc<Parameters>("gaiamission_speckfiletorawdata");
 }
 
 ReadSpeckTask::ReadSpeckTask(const ghoul::Dictionary& dictionary) {
@@ -72,7 +70,10 @@ void ReadSpeckTask::perform(const Task::ProgressCallback& onProgress) {
     int32_t nRenderValues = 0;
 
     FitsFileReader fileReader(false);
-    std::vector<float> fullData = fileReader.readSpeckFile(_inFilePath, nRenderValues);
+    std::vector<float> fullData = fileReader.readSpeckFile(
+        _inFilePath.string(),
+        nRenderValues
+    );
 
     onProgress(0.9f);
 

@@ -20,7 +20,8 @@ local PlutoTrailBarycentric = {
   Tag = { "planetTrail_solarSystem", "planetTrail_dwarf" },
   GUI = {
     Name = "Pluto Barycentric Trail",
-    Path = "/Solar System/Dwarf Planets/Pluto"
+    Path = "/Solar System/Dwarf Planets/Pluto",
+    Description = [[Orbit of Pluto around it's Barycenter.]]
   }
 }
 
@@ -34,5 +35,6 @@ asset.meta = {
     NASA Spice (see base spice asset)]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license"
+  License = "MIT license",
+  Identifiers = {"PlutoBarycentricTrail"}
 }

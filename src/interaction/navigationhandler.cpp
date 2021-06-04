@@ -39,6 +39,7 @@
 #include <ghoul/misc/dictionaryluaformatter.h>
 #include <ghoul/misc/profiling.h>
 #include <glm/gtx/vector_angle.hpp>
+#include <filesystem>
 #include <fstream>
 
 namespace {
@@ -66,7 +67,7 @@ namespace {
         "than using the mouse interaction."
     };
 
-    struct [[codegen::Dictionary(NavigationHandler)]] Parameters {
+    struct [[codegen::Dictionary(NavigationState)]] Parameters {
         // The identifier of the anchor node
         std::string anchor;
 
@@ -457,26 +458,29 @@ void NavigationHandler::saveNavigationState(const std::string& filepath,
     }
 
     if (!filepath.empty()) {
-        std::string absolutePath = absPath(filepath);
+        std::filesystem::path absolutePath = absPath(filepath);
         LINFO(fmt::format("Saving camera position: {}", absolutePath));
 
-        std::ofstream ofs(absolutePath.c_str());
+        std::ofstream ofs(absolutePath);
         ofs << "return " << ghoul::formatLua(state.dictionary());
         ofs.close();
     }
 }
 
 void NavigationHandler::loadNavigationState(const std::string& filepath) {
-    const std::string absolutePath = absPath(filepath);
+    const std::filesystem::path absolutePath = absPath(filepath);
     LINFO(fmt::format("Reading camera state from file: {}", absolutePath));
 
-    if (!FileSys.fileExists(absolutePath)) {
-        throw ghoul::FileNotFoundError(absolutePath, "NavigationState");
+    if (!std::filesystem::is_regular_file(absolutePath)) {
+        throw ghoul::FileNotFoundError(absolutePath.string(), "NavigationState");
     }
 
     ghoul::Dictionary navigationStateDictionary;
     try {
-        ghoul::lua::loadDictionaryFromFile(absolutePath, navigationStateDictionary);
+        ghoul::lua::loadDictionaryFromFile(
+            absolutePath.string(),
+            navigationStateDictionary
+        );
         openspace::documentation::testSpecificationAndThrow(
             NavigationState::Documentation(),
             navigationStateDictionary,
@@ -492,13 +496,17 @@ void NavigationHandler::loadNavigationState(const std::string& filepath) {
 void NavigationHandler::setJoystickAxisMapping(int axis,
                                                JoystickCameraStates::AxisType mapping,
                                             JoystickCameraStates::AxisInvert shouldInvert,
-                                      JoystickCameraStates::AxisNormalize shouldNormalize)
+                                      JoystickCameraStates::AxisNormalize shouldNormalize,
+                                               bool isSticky,
+                                               double sensitivity)
 {
     _orbitalNavigator.joystickStates().setAxisMapping(
         axis,
         mapping,
         shouldInvert,
-        shouldNormalize
+        shouldNormalize,
+        isSticky,
+        sensitivity
     );
 }
 
@@ -553,9 +561,7 @@ std::vector<std::string> NavigationHandler::joystickButtonCommand(int button) co
 }
 
 documentation::Documentation NavigationHandler::NavigationState::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "core_navigation_state";
-    return doc;
+    return codegen::doc<Parameters>("core_navigation_state");
 }
 
 scripting::LuaLibrary NavigationHandler::luaLibrary() {

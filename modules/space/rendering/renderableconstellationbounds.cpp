@@ -99,11 +99,8 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableConstellationBounds::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "space_renderable_constellationbounds";
-    return doc;
-} // namespace
-
+    return codegen::doc<Parameters>("space_renderable_constellationbounds");
+}
 
 RenderableConstellationBounds::RenderableConstellationBounds(
     const ghoul::Dictionary& dictionary)
@@ -233,7 +230,7 @@ bool RenderableConstellationBounds::loadVertexFile() {
         return false;
     }
 
-    std::string fileName = absPath(_vertexFilename);
+    std::filesystem::path fileName = absPath(_vertexFilename);
     std::ifstream file;
     file.open(fileName);
     if (!file.good()) {
@@ -273,7 +270,7 @@ bool RenderableConstellationBounds::loadVertexFile() {
             LERRORC(
                 "RenderableConstellationBounds",
                 fmt::format(
-                    "Error reading file '{}' at line #{}", fileName, currentLineNumber
+                    "Error reading file {} at line #{}", fileName, currentLineNumber
                 )
             );
             break;

@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/properties/property.h>
+
 #include <openspace/properties/propertyowner.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
@@ -34,7 +35,6 @@ namespace {
     constexpr const char* MetaDataKeyReadOnly = "isReadOnly";
     constexpr const char* MetaDataKeyViewOptions = "ViewOptions";
     constexpr const char* MetaDataKeyVisibility = "Visibility";
-
 } // namespace
 
 namespace openspace::properties {
@@ -43,7 +43,7 @@ Property::OnChangeHandle Property::OnChangeHandleAll =
                                                std::numeric_limits<OnChangeHandle>::max();
 
 const char* Property::ViewOptions::Color = "Color";
-const char* Property::ViewOptions::Logarithmic = "Logarithmic";
+const char* Property::ViewOptions::MinMaxRange = "MinMaxRange";
 
 const char* Property::IdentifierKey = "Identifier";
 const char* Property::NameKey = "Name";
@@ -52,7 +52,6 @@ const char* Property::DescriptionKey = "Description";
 const char* Property::JsonValueKey = "Value";
 const char* Property::MetaDataKey = "MetaData";
 const char* Property::AdditionalDataKey = "AdditionalData";
-
 
 
 std::string sanitizeString(const std::string& s) {

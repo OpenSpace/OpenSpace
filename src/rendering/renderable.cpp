@@ -78,9 +78,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation Renderable::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "renderable";
-    return doc;
+    return codegen::doc<Parameters>("renderable");
 }
 
 ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(

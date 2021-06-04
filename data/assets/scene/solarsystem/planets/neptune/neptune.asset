@@ -33,12 +33,11 @@ local NeptuneLabel = {
   Renderable = {
     Enabled = false,
     Type = "RenderableLabels",
-    LabelText = "Neptune",
-    FontSize = 100.0,
-    LabelSize = 8.8,
-    LabelMaxSize = 100.0,
-    LabelMinSize = 1.0,
-    LabelOrientationOption = "Camera View Direction",
+    Text = "Neptune",
+    FontSize = 70.0,
+    Size = 8.96,
+    MinMaxSize = { 1, 100 },
+    OrientationOption = "Camera View Direction",
     BlendMode = "Additive"
   },
   Tag = { "solarsystem_labels" },

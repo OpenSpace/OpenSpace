@@ -176,7 +176,7 @@ void LuaScriptTopic::handleJson(const nlohmann::json& json) {
     }
 }
 
-void LuaScriptTopic::runScript(const std::string& script, bool shouldReturn) {
+void LuaScriptTopic::runScript(std::string script, bool shouldReturn) {
     scripting::ScriptEngine::ScriptCallback callback;
     if (shouldReturn) {
         callback = [this](ghoul::Dictionary data) {

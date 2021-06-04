@@ -32,20 +32,11 @@ namespace openspace::properties {
 template <typename T>
 class NumericalProperty : public TemplateProperty<T> {
 public:
-    NumericalProperty(Property::PropertyInfo info);
-    NumericalProperty(Property::PropertyInfo info, T value);
     NumericalProperty(Property::PropertyInfo info, T value, T minimumValue,
-        T maximumValue);
-    NumericalProperty(Property::PropertyInfo info, T value, T minimumValue,
-        T maximumValue, T steppingValue);
-    NumericalProperty(Property::PropertyInfo info, T value, T minimumValue,
-        T maximumValue, T steppingValue, float exponent);
+        T maximumValue, T steppingValue, float exponent = 1.f);
 
-    bool getLuaValue(lua_State* state) const override;
-    bool setLuaValue(lua_State* state) override;
-    int typeLua() const override;
-
-    bool getStringValue(std::string& value) const override;
+    virtual std::string className() const override = 0;
+    virtual int typeLua() const override = 0;
 
     T minValue() const;
     void setMinValue(T value);
@@ -59,8 +50,6 @@ public:
     float exponent() const;
     void setExponent(float exponent);
 
-    virtual std::string className() const override;
-
     std::string jsonValue() const override;
 
     using TemplateProperty<T>::operator=;
@@ -71,12 +60,15 @@ public:
     void interpolateValue(float t,
         ghoul::EasingFunc<float> easingFunc = nullptr) override;
 
-
 protected:
     static const std::string MinimumValueKey;
     static const std::string MaximumValueKey;
     static const std::string SteppingValueKey;
     static const std::string ExponentValueKey;
+
+    virtual T fromLuaConversion(lua_State* state, bool& success) const override = 0;
+    virtual void toLuaConversion(lua_State* state) const override;
+    virtual std::string toStringConversion() const override;
 
     std::string generateAdditionalJsonDescription() const override;
 

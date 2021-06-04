@@ -216,7 +216,7 @@
     "license": "MIT License",
     "name": "New Horizons",
     "url": "https://www.openspaceproject.com",
-    "version": "1.0"
+    "version": "1.1"
   },
   "properties": [
     {
@@ -233,6 +233,11 @@
       "name": "Scene.PlutoBarycenterTrail.Renderable.Enabled",
       "type": "setPropertyValue",
       "value": "false"
+    },
+    {
+      "name": "Scene.PlutoProjection.Renderable.ColorTexturePaths",
+      "type": "setPropertyValue",
+      "value": "1.000000"
     }
   ],
   "time": {

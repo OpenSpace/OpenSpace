@@ -23,7 +23,9 @@ local PlutoBarycenterTrail = {
   Tag = { "planetTrail_solarSystem", "planetTrail_dwarf" },
   GUI = {
     Name = "Pluto Barycenter Trail",
-    Path = "/Solar System/Dwarf Planets/Pluto"
+    Path = "/Solar System/Dwarf Planets/Pluto",
+    Description = [[Precise trail of Pluto from NASA SPICE data. Not
+    containing full orbit.]]
   }
 }
 

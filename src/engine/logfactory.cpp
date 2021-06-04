@@ -89,15 +89,13 @@ namespace {
 namespace openspace {
 
 documentation::Documentation LogFactoryDocumentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "core_logfactory";
-    return doc;
+    return codegen::doc<Parameters>("core_logfactory");
 }
 
 std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    std::string filename = absPath(p.file);
+    std::filesystem::path filename = absPath(p.file);
     bool append = p.append.value_or(true);
     bool timeStamp = p.timeStamping.value_or(true);
     bool dateStamp = p.dateStamping.value_or(true);
@@ -129,11 +127,14 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
     switch (p.type) {
         case Parameters::Type::Html:
         {
-            std::vector<std::string> cssFiles{ absPath(BootstrapPath), absPath(CssPath) };
-            std::vector<std::string> jsFiles{ absPath(JsPath) };
+            std::vector<std::string> cssFiles{
+                absPath(BootstrapPath).string(),
+                absPath(CssPath).string()
+            };
+            std::vector<std::string> jsFiles{ absPath(JsPath).string() };
 
             return std::make_unique<ghoul::logging::HTMLLog>(
-                filename,
+                filename.string(),
                 ghoul::logging::TextLog::Append(append),
                 ghoul::logging::Log::TimeStamping(timeStamp),
                 ghoul::logging::Log::DateStamping(dateStamp),
@@ -146,7 +147,7 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
         }
         case Parameters::Type::Text:
             return std::make_unique<ghoul::logging::TextLog>(
-                filename,
+                filename.string(),
                 ghoul::logging::TextLog::Append(append),
                 ghoul::logging::Log::TimeStamping(timeStamp),
                 ghoul::logging::Log::DateStamping(dateStamp),

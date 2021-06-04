@@ -65,11 +65,10 @@ CefRefPtr<CefKeyboardHandler> BrowserClient::GetKeyboardHandler() {
     return _keyboardHandler;
 }
 
-bool BrowserClient::NoContextMenuHandler::RunContextMenu(
-                                                     CefRefPtr<CefBrowser>,
-                                                     CefRefPtr<CefFrame>,
-                                                     CefRefPtr<CefContextMenuParams>,
-                                                     CefRefPtr<CefMenuModel>,
+bool BrowserClient::NoContextMenuHandler::RunContextMenu(CefRefPtr<CefBrowser>,
+                                                         CefRefPtr<CefFrame>,
+                                                         CefRefPtr<CefContextMenuParams>,
+                                                         CefRefPtr<CefMenuModel>,
                                                      CefRefPtr<CefRunContextMenuCallback>)
 {
     // Disable the context menu.
