@@ -32,6 +32,7 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
 #include <algorithm>
+#include <filesystem>
 
 #include <openspace/modulepath.h>
 
@@ -59,13 +60,9 @@ void OpenSpaceModule::initialize(const ghoul::Dictionary& configuration) {
         [](char v) { return static_cast<char>(toupper(v)); }
     );
 
-    std::string moduleToken =
-        ghoul::filesystem::FileSystem::TokenOpeningBraces +
-        std::string(ModuleBaseToken) +
-        upperIdentifier +
-        ghoul::filesystem::FileSystem::TokenClosingBraces;
+    std::string moduleToken = "${" + std::string(ModuleBaseToken) + upperIdentifier + "}";
 
-    std::string path = modulePath();
+    std::filesystem::path path = modulePath();
     LDEBUG(fmt::format("Registering module path {}: {}", moduleToken, path));
     FileSys.registerPathToken(moduleToken, std::move(path));
 
@@ -123,21 +120,22 @@ std::string OpenSpaceModule::modulePath() const {
     );
 
     // First try the internal module directory
-    if (FileSys.directoryExists(absPath("${MODULES}/" + moduleIdentifier))) {
-        return absPath("${MODULES}/" + moduleIdentifier);
+    std::filesystem::path path = absPath("${MODULES}/" + moduleIdentifier);
+    if (std::filesystem::is_directory(path)) {
+        return path.string();
     }
     else { // Otherwise, it might be one of the external directories
         for (const char* dir : ModulePaths) {
-            const std::string& path = std::string(dir) + '/' + moduleIdentifier;
-            if (FileSys.directoryExists(absPath(path))) {
-                return absPath(path);
+            const std::string& p = std::string(dir) + '/' + moduleIdentifier;
+            if (std::filesystem::is_directory(absPath(p))) {
+                return absPath(p).string();
             }
         }
     }
 
     // If we got this far, neither the internal module nor any of the external modules fit
     throw ghoul::RuntimeError(
-        "Could not resolve path for module '" + identifier() + "'",
+        fmt::format("Could not resolve path for module {}", identifier()),
         "OpenSpaceModule"
     );
 }

@@ -123,9 +123,6 @@ private:
 
     struct {
         properties::BoolProperty showChunkEdges;
-        properties::BoolProperty showChunkBounds;
-        properties::BoolProperty showHeightResolution;
-        properties::BoolProperty showHeightIntensities;
         properties::BoolProperty levelByProjectedAreaElseDistance;
         properties::BoolProperty resetTileProviders;
         properties::IntProperty  modelSpaceRenderingCutoffLevel;
@@ -142,7 +139,6 @@ private:
         properties::IntProperty   nShadowSamples;
         properties::FloatProperty targetLodScaleFactor;
         properties::FloatProperty currentLodScaleFactor;
-        properties::FloatProperty cameraMinHeight;
         properties::FloatProperty orenNayarRoughness;
         properties::IntProperty   nActiveLayers;
     } _generalProperties;

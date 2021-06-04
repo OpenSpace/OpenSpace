@@ -3,8 +3,8 @@ local heightLayersPath = "./layers/heightlayers"
 local overlaysPath = "./layers/overlays"
     
 -- Color layer
-asset.require(colorLayersPath .. "/moc_wa_color_utah") -- TODO: fallback
-local colorLayer = asset.require(colorLayersPath .. "/moc_wa_color_liu") -- TODO: fallback
+local colorLayer = asset.require(colorLayersPath .. "/moc_wa_color_utah") -- TODO: fallback
+asset.require(colorLayersPath .. "/moc_wa_color_liu") -- TODO: fallback
 asset.require(colorLayersPath .. "/viking_mdim_utah") 
 asset.require(colorLayersPath .. "/viking_mdim_sweden") 
 asset.require(colorLayersPath .. "/mola_pseudo_color_utah") 
@@ -22,8 +22,9 @@ asset.require(colorLayersPath .. "/hirise")
 asset.require(colorLayersPath .. "/hirisels")
 
 -- Height layers
-local heightLayer = asset.require(heightLayersPath .. "/mola_europe")
+asset.require(heightLayersPath .. "/mola_europe")
 asset.require(heightLayersPath .. "/mola_utah")
+local heightLayer = asset.require(heightLayersPath .. "/MDEM200M")
 asset.require(heightLayersPath .. "/hirisels")
 
 -- Overlays

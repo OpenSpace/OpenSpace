@@ -58,12 +58,12 @@ namespace {
     constexpr const char* _loggerCat = "Renderable Galaxy";
 
     constexpr const std::array<const char*, 4> UniformNamesPoints = {
-        "modelMatrix", "cameraViewProjectionMatrix", "eyePosition",
+        "modelMatrix", "viewProjectionMatrix", "eyePosition",
         "opacityCoefficient"
     };
 
     constexpr const std::array<const char*, 5> UniformNamesBillboards = {
-        "modelMatrix", "cameraViewProjectionMatrix",
+        "modelMatrix", "viewProjectionMatrix",
         "cameraUp", "eyePosition", "psfTexture"
     };
 
@@ -161,10 +161,10 @@ namespace {
             std::filesystem::path filename;
             glm::ivec3 dimensions;
             glm::vec3 size;
-            
+
             // [[codegen::verbatim(NumberOfRayCastingStepsInfo.description)]]
             std::optional<float> steps;
-            
+
             // [[codegen::verbatim(DownscaleVolumeRenderingInfo.description)]]
             std::optional<float> downscale;
         };
@@ -227,7 +227,7 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _volumeRenderingEnabled(VolumeRenderingEnabledInfo, true)
     , _starRenderingEnabled(StarRenderingEnabledInfo, true)
-    , _stepSize(StepSizeInfo, 0.01f, 0.0005f, 0.05f, 0.001f)
+    , _stepSize(StepSizeInfo, 0.01f, 0.001f, 0.05f, 0.001f)
     , _absorptionMultiply(AbsorptionMultiplyInfo, 40.f, 0.0f, 200.0f)
     , _emissionMultiply(EmissionMultiplyInfo, 200.f, 0.0f, 1000.0f)
     , _starRenderingMethod(
@@ -322,10 +322,9 @@ void RenderableGalaxy::initialize() {
     _volume = reader.read();
 
     std::string cachedPointsFile = FileSys.cacheManager()->cachedFilename(
-        _pointsFilename,
-        ghoul::filesystem::CacheManager::Persistent::Yes
+        _pointsFilename
     );
-    const bool hasCachedFile = FileSys.fileExists(cachedPointsFile);
+    const bool hasCachedFile = std::filesystem::is_regular_file(cachedPointsFile);
     if (hasCachedFile) {
         LINFO(fmt::format("Cached file '{}' used for galaxy point file '{}'",
             cachedPointsFile, _pointsFilename
@@ -414,13 +413,12 @@ void RenderableGalaxy::initializeGL() {
 
     if (!_pointSpreadFunctionTexturePath.empty()) {
         _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
-            absPath(_pointSpreadFunctionTexturePath)
+            absPath(_pointSpreadFunctionTexturePath).string()
         );
 
         if (_pointSpreadFunctionTexture) {
             LDEBUG(fmt::format(
-                "Loaded texture from '{}'",
-                absPath(_pointSpreadFunctionTexturePath)
+                "Loaded texture from {}", absPath(_pointSpreadFunctionTexturePath)
             ));
             _pointSpreadFunctionTexture->uploadTexture();
         }

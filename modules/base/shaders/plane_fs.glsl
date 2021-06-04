@@ -24,10 +24,10 @@
 
 #include "fragment.glsl"
 
-in float vs_screenSpaceDepth;
-in vec2 vs_st;
 in vec4 vs_gPosition;
 in vec3 vs_gNormal;
+in float vs_screenSpaceDepth;
+in vec2 vs_st;
 
 uniform sampler2D texture1;
 uniform bool additiveBlending;
@@ -57,8 +57,8 @@ Fragment getFragment() {
     }
 
     // G-Buffer
-    frag.gPosition  = vs_gPosition;
-    frag.gNormal    = vec4(vs_gNormal, 1.0);
+    frag.gPosition = vs_gPosition;
+    frag.gNormal = vec4(vs_gNormal, 1.0);
 
     return frag;
 }

@@ -24,95 +24,33 @@
 
 #include <openspace/properties/matrix/mat2property.h>
 
-#include <ghoul/misc/misc.h>
-
-#include <limits>
-#include <sstream>
-#include <vector>
-
-namespace {
-
-glm::mat2x2 fromLuaConversion(lua_State* state, bool& success) {
-    glm::mat2x2 result = glm::mat2x2(1.f);
-    lua_pushnil(state);
-    int number = 1;
-    for (glm::length_t i = 0; i < glm::mat2x2::row_type::length(); ++i) {
-        for (glm::length_t j = 0; j < glm::mat2x2::col_type::length(); ++j) {
-            int hasNext = lua_next(state, -2);
-            if (hasNext != 1) {
-                success = false;
-                return glm::mat2x2(1.f);
-            }
-            if (lua_isnumber(state, -1) != 1) {
-                success = false;
-                return glm::mat2x2(1.f);
-            }
-            else {
-                result[i][j] = static_cast<glm::mat2x2::value_type>(
-                    lua_tonumber(state, -1)
-                );
-                lua_pop(state, 1);
-                ++number;
-            }
-        }
-    }
-    // The last accessor argument and the table are still on the stack
-    lua_pop(state, 1);
-    success = true;
-    return result;
-}
-
-bool toLuaConversion(lua_State* state, glm::mat2x2 value) {
-    lua_newtable(state);
-    int number = 1;
-    for (glm::length_t i = 0; i < glm::mat2x2::row_type::length(); ++i) {
-        for (glm::length_t j = 0; j < glm::mat2x2::col_type::length(); ++j) {
-            lua_pushnumber(state, static_cast<lua_Number>(value[i][j]));
-            lua_rawseti(state, -2, number);
-            ++number;
-        }
-    }
-    return true;
-}
-
-bool toStringConversion(std::string& outValue, glm::mat2x2 inValue) {
-    outValue = "[";
-    for (glm::length_t i = 0; i < glm::mat2x2::row_type::length(); ++i) {
-        for (glm::length_t j = 0; j < glm::mat2x2::col_type::length(); ++j) {
-            outValue += std::to_string(inValue[i][j]) + ",";
-        }
-    }
-    outValue.pop_back();
-    outValue += "]";
-    return true;
-}
-
-} // namespace
+#include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/lua/lua_helper.h>
 
 namespace openspace::properties {
 
-using nl = std::numeric_limits<float>;
+Mat2Property::Mat2Property(Property::PropertyInfo info, glm::mat2x2 value,
+                           glm::mat2x2 minValue, glm::mat2x2 maxValue,
+                           glm::mat2x2 stepValue)
+    : NumericalProperty<glm::mat2x2>(
+        std::move(info),
+        std::move(value),
+        std::move(minValue),
+        std::move(maxValue),
+        std::move(stepValue)
+    )
+{}
 
-REGISTER_NUMERICALPROPERTY_SOURCE(
-    Mat2Property,
-    glm::mat2x2,
-    glm::mat2x2(1.f),
-    glm::mat2x2(
-        nl::lowest(), nl::lowest(),
-        nl::lowest(), nl::lowest()
-    ),
-    glm::mat2x2(
-        nl::max(), nl::max(),
-        nl::max(), nl::max()
-    ),
-    glm::mat2x2(
-        0.01f, 0.01f,
-        0.01f, 0.01f
-    ),
-    fromLuaConversion,
-    toLuaConversion,
-    toStringConversion,
-    LUA_TTABLE
-)
+std::string Mat2Property::className() const {
+    return "Mat2Property";
+}
+
+int Mat2Property::typeLua() const {
+    return LUA_TTABLE;
+}
+
+glm::mat2x2 Mat2Property::fromLuaConversion(lua_State* state, bool& success) const {
+    return ghoul::lua::tryGetValue<glm::mat2x2>(state, success);
+}
 
 }  // namespace openspace::properties

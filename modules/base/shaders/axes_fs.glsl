@@ -35,7 +35,7 @@ uniform vec3 zColor;
 Fragment getFragment() {
     Fragment frag;
 
-    vec3 colorComponents = step(0.01f, vs_positionModelSpace);
+    vec3 colorComponents = step(0.01, vs_positionModelSpace);
 
     frag.color.rgb = colorComponents.x * xColor +
         colorComponents.y * yColor +

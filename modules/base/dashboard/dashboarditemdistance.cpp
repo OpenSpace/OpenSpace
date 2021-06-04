@@ -140,9 +140,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DashboardItemDistance::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_dashboarditem_distance";
-    return doc;
+    return codegen::doc<Parameters>("base_dashboarditem_distance");
 }
 
 DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary)

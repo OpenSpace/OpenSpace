@@ -194,6 +194,9 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
             // value change if the types agree
             foundMatching = true;
 
+            if (global::sessionRecording->isRecording()) {
+                global::sessionRecording->savePropertyBaseline(*prop);
+            }
             if (interpolationDuration == 0.0) {
                 global::renderEngine->scene()->removePropertyInterpolation(prop);
                 prop->setLuaValue(L);
@@ -265,6 +268,9 @@ int setPropertyCall_single(properties::Property& prop, const std::string& uri,
         );
     }
     else {
+        if (global::sessionRecording->isRecording()) {
+            global::sessionRecording->savePropertyBaseline(prop);
+        }
         if (duration == 0.0) {
             global::renderEngine->scene()->removePropertyInterpolation(&prop);
             prop.setLuaValue(L);
@@ -900,6 +906,46 @@ int addInterestingTime(lua_State* L) {
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
+}
+
+int worldPosition(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::worldPosition");
+
+    std::string identifier = ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::Yes);
+    SceneGraphNode* node = sceneGraphNode(identifier);
+
+    if (!node) {
+        return ghoul::lua::luaError(
+            L,
+            fmt::format("Did not find a match for identifier: {} ", identifier)
+        );
+    }
+
+    glm::dvec3 pos = node->worldPosition();
+    ghoul::lua::push(L, pos);
+
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
+    return 1;
+}
+
+int worldRotation(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::worldRotation");
+
+    std::string identifier = ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::Yes);
+    SceneGraphNode* node = sceneGraphNode(identifier);
+
+    if (!node) {
+        return ghoul::lua::luaError(
+            L,
+            fmt::format("Did not find a match for identifier: {} ", identifier)
+        );
+    }
+
+    glm::dmat3 rot = node->worldRotationMatrix();
+    ghoul::lua::push(L, rot);
+
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
+    return 1;
 }
 
 }  // namespace openspace::luascriptfunctions

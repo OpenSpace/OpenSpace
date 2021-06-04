@@ -25,6 +25,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <openspace/engine/globals.h>
 #include <ghoul/logging/logmanager.h>
+#include <filesystem>
 
 namespace openspace::luascriptfunctions {
 
@@ -51,7 +52,7 @@ int loadKernel(lua_State* L) {
         1,
         ghoul::lua::PopValue::Yes
     );
-    if (!FileSys.fileExists(argument)) {
+    if (!std::filesystem::is_regular_file(argument)) {
         return ghoul::lua::luaError(
             L,
             fmt::format("Kernel file '{}' did not exist", argument)
@@ -226,6 +227,78 @@ int ckCoverage(lua_State* L) {
     std::string argument = ghoul::lua::value<std::string>(L, 1);
     bool printValues = isBool ? ghoul::lua::value<bool>(L, 2) : false;
     buildLuaCoverageStack(L, SpiceManager::ref().ckCoverage(argument), printValues);
+
+    return 1;
+}
+
+/**
+ * rotationMatrix({string, string, string}):
+ * Returns the rotationMatrix for a given body in a frame of reference
+ * at a specific time.
+ */
+int rotationMatrix(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::rotationMatrix");
+
+    const bool isString = (lua_isstring(L, 1) == 1) &&
+        (lua_isstring(L, 2) == 1) && (lua_isstring(L, 3) == 1);
+
+    if (!isString) {
+        LERRORC(
+            "rotationMatrix",
+            fmt::format(
+                "{}: Expected argument of type 'string' for all three agruments",
+                ghoul::lua::errorLocation(L)
+            )
+        );
+        lua_settop(L, 0);
+        ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+        return 0;
+    }
+
+    std::string body = ghoul::lua::value<std::string>(L, 1);
+    std::string frame = ghoul::lua::value<std::string>(L, 2);
+    std::string date = ghoul::lua::value<std::string>(L, 3);
+    const double ephemerisTime = SpiceManager::ref().ephemerisTimeFromDate(date);
+    glm::dmat3 rotationMatrix = SpiceManager::ref().frameTransformationMatrix
+    (body, frame, ephemerisTime);
+    ghoul::lua::push(L, 1, rotationMatrix);
+
+    return 1;
+}
+
+/**
+ * position({string, string, string, string}):
+ * Returns the position for a given body relative to another body, 
+ * in a given frame of reference, at a specific time.
+ */
+int position(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 4, "lua::position");
+
+    const bool isString = (lua_isstring(L, 1) == 1) &&
+        (lua_isstring(L, 2) == 1) &&
+        (lua_isstring(L, 3) == 1) &&
+        (lua_isstring(L, 4) == 1);
+
+    if (!isString) {
+        LERRORC(
+            "position",
+            fmt::format(
+                "{}: Expected argument of type 'string' for all four agruments",
+                ghoul::lua::errorLocation(L)
+            )
+        );
+        lua_settop(L, 0);
+        ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+        return 0;
+    }
+
+    std::string target = ghoul::lua::value<std::string>(L, 1);
+    std::string observer = ghoul::lua::value<std::string>(L, 2);
+    std::string frame = ghoul::lua::value<std::string>(L, 3);
+    std::string date = ghoul::lua::value<std::string>(L, 4);
+    const double ephemerisTime = SpiceManager::ref().ephemerisTimeFromDate(date);
+    glm::dvec3 postion = SpiceManager::ref().targetPosition(target, observer, frame, {}, ephemerisTime);
+    ghoul::lua::push(L, 1, postion);
 
     return 1;
 }

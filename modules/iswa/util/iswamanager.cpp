@@ -42,6 +42,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/constexpr.h>
+#include <filesystem>
 #include <fstream>
 
 #include "iswamanager_lua.inl"
@@ -410,10 +411,9 @@ std::string IswaManager::parseKWToLuaTable(const CdfInfo& info, const std::strin
         return "";
     }
 
-    const std::string& extension =
-        ghoul::filesystem::File(absPath(info.path)).fileExtension();
-    if (extension == "cdf") {
-        KameleonWrapper kw = KameleonWrapper(absPath(info.path));
+    std::filesystem::path ext = std::filesystem::path(absPath(info.path)).extension();
+    if (ext == ".cdf") {
+        KameleonWrapper kw = KameleonWrapper(absPath(info.path).string());
 
         std::string parent = kw.parent();
         std::string frame = kw.frame();
@@ -587,10 +587,8 @@ void IswaManager::createSphere(MetadataFuture& data) {
 }
 
 void IswaManager::createKameleonPlane(CdfInfo info, std::string cut) {
-    const std::string& extension = ghoul::filesystem::File(
-        absPath(info.path)
-    ).fileExtension();
-    if (FileSys.fileExists(absPath(info.path)) && extension == "cdf") {
+    std::filesystem::path ext = std::filesystem::path(absPath(info.path)).extension();
+    if (std::filesystem::is_regular_file(absPath(info.path)) && ext == ".cdf") {
         if (!info.group.empty()) {
             std::string type = typeid(KameleonPlane).name();
             registerGroup(info.group, type);
@@ -621,16 +619,17 @@ void IswaManager::createKameleonPlane(CdfInfo info, std::string cut) {
         }
     }
     else {
-        LWARNING( absPath(info.path) + " is not a cdf file or can't be found.");
+        LWARNING(
+            fmt::format("{} is not a cdf file or can't be found", absPath(info.path))
+        );
     }
 }
 
 void IswaManager::createFieldline(std::string name, std::string cdfPath,
                                   std::string seedPath)
 {
-    const std::string& ext = ghoul::filesystem::File(absPath(cdfPath)).fileExtension();
-
-    if (FileSys.fileExists(absPath(cdfPath)) && ext == "cdf") {
+    std::filesystem::path ext = std::filesystem::path(absPath(cdfPath)).extension();
+    if (std::filesystem::is_regular_file(absPath(cdfPath)) && ext == ".cdf") {
         std::string luaTable = "{"
             "Name = '" + name + "',"
             "Parent = 'Earth',"
@@ -700,10 +699,10 @@ ghoul::Event<>& IswaManager::iswaEvent() {
 }
 
 void IswaManager::addCdfFiles(std::string cdfpath) {
-    cdfpath = absPath(cdfpath);
-    if (FileSys.fileExists(cdfpath)) {
+    std::filesystem::path cdf = absPath(cdfpath);
+    if (std::filesystem::is_regular_file(cdf)) {
         //std::string basePath = path.substr(0, path.find_last_of("/\\"));
-        std::ifstream jsonFile(cdfpath);
+        std::ifstream jsonFile(cdf);
 
         if (jsonFile.is_open()) {
             json cdfGroups = json::parse(jsonFile);
@@ -742,7 +741,7 @@ void IswaManager::addCdfFiles(std::string cdfpath) {
         }
     }
     else {
-        LWARNING(cdfpath + " is not a cdf file or can't be found.");
+        LWARNING(fmt::format("{} is not a cdf file or can't be found", cdf));
     }
 }
 

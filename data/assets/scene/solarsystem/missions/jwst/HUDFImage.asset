@@ -1,0 +1,77 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local jwstTransforms = asset.require('scene/solarsystem/missions/jwst/jwst')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+
+local image = asset.syncedResource({
+  Name = "HUDF image",
+  Type = "HttpSynchronization",
+  Identifier = "hudf_image",
+  Version = 1
+})
+
+local DISTANCE = 9.2E15;
+
+-- ra = 3h32m38.92s
+-- dec = -27d47m29.37s
+-- distance = 9.2E15 m (set to size of view sphere)
+local HUDFPosition = {
+  Identifier = "HUDFPosition",
+  Parent = transforms.EarthInertial.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = {
+        0.53039024 * DISTANCE,
+        0.70802069 * DISTANCE,
+        -0.46625412 * DISTANCE
+      }
+    }
+  },
+  GUI = {
+    Name = "Hubble Ultra Deep field",
+    Path = "/Solar System/Missions/JWST",
+    Hidden = true
+  }
+}
+
+local HUDFImage = {
+  Identifier = "HUDFImage",
+  Enabled = false,
+  Type = "ScreenSpaceImageLocal",
+  Name = "Hubble Ultra Deep field",
+  UseRadiusAzimuthElevation = true,
+  FaceCamera = false,
+  RadiusAzimuthElevation = { 200.0, 0.5, 0.15 },
+  UsePerspectiveProjection = false,
+  Opacity = 1.0,
+  TexturePath = image .. "/Hubble_ultra_deep_field.jpg",
+  Tag = { "mission_jwst_hudf" },
+}
+
+local HUDFJWSTLine = {
+  Identifier = "HUDFJWSTLine",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Enabled = false,
+    Type = "RenderableNodeLine",
+    StartNode = HUDFPosition.Identifier,
+    EndNode = jwstTransforms.JWSTPosition.Identifier,
+    Color = { 0.5, 0.5, 0.5 },
+    LineWidth = 2
+  },
+  Tag = { "mission_jwst_hudf" },
+  GUI = {
+    Name = "JWST to HUDF Line",
+    Path = "/Solar System/Missions/JWST",
+  }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { HUDFPosition, HUDFImage, HUDFJWSTLine })
+
+asset.onInitialize(function()
+  openspace.addScreenSpaceRenderable(HUDFImage)
+end)
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(HUDFImage.Identifier)
+end)

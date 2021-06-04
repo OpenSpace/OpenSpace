@@ -1,26 +1,14 @@
 local assetHelper = asset.require('util/asset_helper')
 
+local colorLUT = asset.require('scene/digitaluniverse/stars_colormap').ColorMaps
+local textures = asset.require('scene/digitaluniverse/stars_textures').textures
 
-
-local textures = asset.syncedResource({
-  Name = "Stars Textures",
-  Type = "HttpSynchronization",
-  Identifier = "stars_textures",
-  Version = 1
-})
 
 local speck = asset.syncedResource({
   Name = "Apogee Speck Files",
   Type = "HttpSynchronization",
   Identifier = "gaia_apogee",
   Version = 1
-})
-
-local colorLUT = asset.syncedResource({
-  Name = "Stars Color Table",
-  Type = "HttpSynchronization",
-  Identifier = "stars_colormap",
-  Version = 2
 })
 
 local gaia_abundance_apogee = {
@@ -39,7 +27,17 @@ local gaia_abundance_apogee = {
     ColorMap = colorLUT .. "/colorbv.cmap",
     OtherDataColorMap = colorLUT .. "/viridis.cmap",
     StaticFilter = -9999,
-    StaticFilterReplacement = 0.0
+    StaticFilterReplacement = 0.0,
+    DataMapping = {
+      Bv = "colorb_v",
+      Luminance = "lum",
+      AbsoluteMagnitude = "absmag",
+      ApparentMagnitude = "appmag",
+      Vx = "vx",
+      Vy = "vy",
+      Vz = "vz",
+      Speed = "speed"
+    }
   },
   GUI = {
     Path = "/Milky Way/Gaia"

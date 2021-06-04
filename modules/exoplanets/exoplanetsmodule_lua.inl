@@ -429,7 +429,7 @@ void createExoplanetSystem(const std::string& starName) {
         "Renderable = {"
             "Type = 'RenderableRadialGrid',"
             "Enabled = " + isCircleEnabledString + ","
-            "OuterRadius = " + std::to_string(AU) + ","
+            "Radii = { 0.0, 1.0 },"
             "CircleSegments = 64,"
             "LineWidth = 2.0,"
         "},"
@@ -437,6 +437,10 @@ void createExoplanetSystem(const std::string& starName) {
             "Rotation = {"
                 "Type = 'StaticRotation',"
                 "Rotation = " + ghoul::to_string(meanOrbitPlaneRotationMatrix) + ""
+            "},"
+            "Scale = {"
+                "Type = 'StaticScale',"
+                "Scale = " + std::to_string(AU) + ""
             "}"
         "},"
         "GUI = {"
@@ -512,7 +516,7 @@ void createExoplanetSystem(const std::string& starName) {
             // the luminosity of a star is proportional to: (radius^2)*(temperature^4)
             // Maybe a better option would be to compute the size based on the aboslute
             // magnitude or star luminosity, but for now this looks good enough.
-            float size = 59.f * radiusInMeter;
+            double size = 59.0 * radiusInMeter;
             if (hasTeff) {
                 constexpr const float sunTeff = 5780.f;
                 size *= std::pow(system.starData.teff / sunTeff, 2.0);

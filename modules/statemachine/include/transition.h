@@ -30,6 +30,8 @@
 
 namespace openspace {
 
+namespace documentation { struct Documentation; }
+
 class Transition {
 public:
     Transition(const ghoul::Dictionary& dictionary);
@@ -38,6 +40,8 @@ public:
     std::string from() const;
     std::string to() const; 
     void performAction() const;
+
+    static documentation::Documentation Documentation();
 
 private:
     std::string _from;

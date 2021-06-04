@@ -31,6 +31,8 @@
 
 namespace openspace {
 
+namespace documentation { struct Documentation; }
+
 class StateMachine {
 public:
     StateMachine(const ghoul::Dictionary& dictionary);
@@ -42,6 +44,8 @@ public:
     void transitionTo(const std::string newState);
     bool canGoTo(const std::string state) const;
     void setState(State& newState);
+
+    static documentation::Documentation Documentation();
 
 private:
     State* _currentState = nullptr;

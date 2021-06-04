@@ -35,41 +35,29 @@
 #include <ghoul/misc/templatefactory.h>
 
 namespace {
-    constexpr const char* KeyType = "Type";
+    struct [[codegen::Dictionary(Scale)]] Parameters {
+        // The type of the scaling that is described in this element. The available types
+        // of scaling depend on the configuration of the application and can be written to
+        // disk on application startup into the FactoryDocumentation
+        std::string type [[codegen::annotation("Must name a valid Scale type")]];
+    };
+#include "scale_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation Scale::Documentation() {
-    using namespace openspace::documentation;
-
-    return {
-        "Transformation Scaling",
-        "core_transform_scaling",
-        {
-            {
-                KeyType,
-                new StringAnnotationVerifier("Must name a valid Scale type"),
-                Optional::No,
-                "The type of the scaling that is described in this element. "
-                "The available types of scaling depend on the configuration "
-                "of the application and can be written to disk on "
-                "application startup into the FactoryDocumentation."
-            }
-        }
-    };
+    return codegen::doc<Parameters>("core_transform_scaling");
 }
 
 ghoul::mm_unique_ptr<Scale> Scale::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
-    documentation::testSpecificationAndThrow(Documentation(), dictionary, "Scale");
-
-    std::string scaleType = dictionary.value<std::string>(KeyType);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     auto factory = FactoryManager::ref().factory<Scale>();
     Scale* result = factory->create(
-        scaleType,
+        p.type,
         dictionary,
         &global::memoryManager->PersistentMemory
     );

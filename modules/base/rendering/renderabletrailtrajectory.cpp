@@ -105,8 +105,9 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableTrailTrajectory::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "base_renderable_renderabletrailtrajectory";
+    documentation::Documentation doc = codegen::doc<Parameters>(
+        "base_renderable_renderabletrailtrajectory"
+    );
 
     // @TODO cleanup
     // Insert the parents documentation entries until we have a verifier that can deal

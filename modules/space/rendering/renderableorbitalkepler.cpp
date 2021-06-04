@@ -262,9 +262,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableOrbitalKepler::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "space_renderableorbitalkepler";
-    return doc;
+    return codegen::doc<Parameters>("space_renderableorbitalkepler");
 }
 
 double RenderableOrbitalKepler::calculateSemiMajorAxis(double meanMotion) const {

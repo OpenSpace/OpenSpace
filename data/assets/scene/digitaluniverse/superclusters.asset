@@ -27,13 +27,13 @@ local object = {
     File = speck .. "/superclust.speck",
     Texture = textures .. "/point3A.png",
     LabelFile = speck .. "/superclust.label",
+    Unit = "Mpc",
     TextColor = { 0.9, 0.9, 0.9 },
     ScaleFactor = 531.0,
     TextSize = 22.44,
-    TextMinSize = 8.0,
-    Unit = "Mpc",
+    TextMinMaxSize = { 8, 20 },
     DrawLabels = true,
-    --BillboardMaxSize = 7.2,
+    --BillboardMinMaxSize = { 0.0, 7.2 },
     EnablePixelSizeControl = true
   },
   GUI = {

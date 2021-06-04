@@ -3,7 +3,7 @@ local globeIdentifier = asset.require("./../../callisto").Callisto.Identifier
 
 local layer = {
   Identifier = "Texture",
-  FilePath = texturesPath .. "/callisto.jpg",
+  FilePath = texturesPath .. "/callisto_os.tif",
 }
 
 asset.onInitialize(function () 
@@ -15,8 +15,8 @@ asset.export("layer", layer)
 
 asset.meta = {
   Name = "Callisto Texutre",
-  Version = "1.0",
-  Description = [[ Default jpg texture for Callisto]],
+  Version = "2.0",
+  Description = [[ Default texture for Callisto]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license",

@@ -414,9 +414,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableGaiaStars::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "gaiamission_renderablegaiastars";
-    return doc;
+    return codegen::doc<Parameters>("gaiamission_renderablegaiastars");
 }
 
 RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
@@ -462,11 +460,11 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _filePath = absPath(p.file);
-    _dataFile = std::make_unique<File>(_filePath);
-    _dataFile->setCallback([&](const File&) { _dataIsDirty = true; });
+    _filePath = absPath(p.file).string();
+    _dataFile = std::make_unique<File>(_filePath.value());
+    _dataFile->setCallback([this]() { _dataIsDirty = true; });
 
-    _filePath.onChange([&]() { _dataIsDirty = true; });
+    _filePath.onChange([this]() { _dataIsDirty = true; });
     addProperty(_filePath);
 
     _fileReaderOption.addOptions({
@@ -519,7 +517,6 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     _renderOption.onChange([&]() { _buffersAreDirty = true; });
     addProperty(_renderOption);
 
-#ifndef __APPLE__
     _shaderOption.addOptions({
         { gaia::ShaderOption::Point_SSBO, "Point_SSBO" },
         { gaia::ShaderOption::Point_VBO, "Point_VBO" },
@@ -527,35 +524,35 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
         { gaia::ShaderOption::Billboard_VBO, "Billboard_VBO" },
         { gaia::ShaderOption::Billboard_SSBO_noFBO, "Billboard_SSBO_noFBO" }
     });
-#else // __APPLE__
-    _shaderOption.addOptions({
-        { gaia::ShaderOption::Point_VBO, "Point_VBO" },
-        { gaia::ShaderOption::Billboard_VBO, "Billboard_VBO" },
-    });
-#endif // __APPLE__
 
     if (p.shaderOption.has_value()) {
         switch (*p.shaderOption) {
             case Parameters::ShaderOption::PointSSBO:
                 _shaderOption = gaia::ShaderOption::Point_SSBO;
+#ifdef __APPLE__
+                LWARNING("Shader option unsupported, changing to Point VBO");
+                _shaderOption = gaia::ShaderOption::Point_VBO;
+#endif // __APPLE__
                 break;
             case Parameters::ShaderOption::PointVBO:
-#ifdef __APPLE__
-                throw ghoul::RuntimeError("Shader option is not supported on MacOS");
-#endif // __APPLE__
                 _shaderOption = gaia::ShaderOption::Point_VBO;
                 break;
             case Parameters::ShaderOption::BillboardSSBO:
                 _shaderOption = gaia::ShaderOption::Billboard_SSBO;
+#ifdef __APPLE__
+                LWARNING("Shader option unsupported, changing to Point VBO");
+                _shaderOption = gaia::ShaderOption::Point_VBO;
+#endif // __APPLE__
                 break;
             case Parameters::ShaderOption::BillboardVBO:
-#ifdef __APPLE__
-                throw ghoul::RuntimeError("Shader option is not supported on MacOS");
-#endif // __APPLE__
                 _shaderOption = gaia::ShaderOption::Billboard_VBO;
                 break;
             case Parameters::ShaderOption::BillboardSSBONoFBO:
                 _shaderOption = gaia::ShaderOption::Billboard_SSBO_noFBO;
+#ifdef __APPLE__
+                LWARNING("Shader option unsupported, changing to Point VBO");
+                _shaderOption = gaia::ShaderOption::Point_VBO;
+#endif // __APPLE__
                 break;
             default:
                 throw ghoul::MissingCaseException();
@@ -567,19 +564,21 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     });
     addProperty(_shaderOption);
 
-    _pointSpreadFunctionTexturePath = absPath(p.texture);
+    _pointSpreadFunctionTexturePath = absPath(p.texture).string();
     _pointSpreadFunctionTexturePath.onChange(
-        [&](){ _pointSpreadFunctionTextureIsDirty = true; }
+        [this](){ _pointSpreadFunctionTextureIsDirty = true; }
     );
-    _pointSpreadFunctionFile = std::make_unique<File>(_pointSpreadFunctionTexturePath);
+    _pointSpreadFunctionFile = std::make_unique<File>(
+        _pointSpreadFunctionTexturePath.value()
+    );
     _pointSpreadFunctionFile->setCallback(
-        [&](const File&) { _pointSpreadFunctionTextureIsDirty = true; }
+        [this]() { _pointSpreadFunctionTextureIsDirty = true; }
     );
 
-    _colorTexturePath = absPath(p.colorMap);
-    _colorTextureFile = std::make_unique<File>(_colorTexturePath);
-    _colorTexturePath.onChange([&]() { _colorTextureIsDirty = true; });
-    _colorTextureFile->setCallback([&](const File&) { _colorTextureIsDirty = true; });
+    _colorTexturePath = absPath(p.colorMap).string();
+    _colorTextureFile = std::make_unique<File>(_colorTexturePath.value());
+    _colorTexturePath.onChange([this]() { _colorTextureIsDirty = true; });
+    _colorTextureFile->setCallback([this]() { _colorTextureIsDirty = true; });
 
     _luminosityMultiplier = p.luminosityMultiplier.value_or(_luminosityMultiplier);
     _magnitudeBoost = p.magnitudeBoost.value_or(_magnitudeBoost);
@@ -1701,10 +1700,10 @@ void RenderableGaiaStars::update(const UpdateData&) {
             }
             case gaia::ShaderOption::Billboard_SSBO:
             case gaia::ShaderOption::Billboard_VBO: {
-                std::string vs = absPath(
+                std::filesystem::path vs = absPath(
                     "${MODULE_GAIA}/shaders/gaia_tonemapping_vs.glsl"
                 );
-                std::string fs = absPath(
+                std::filesystem::path fs = absPath(
                     "${MODULE_GAIA}/shaders/gaia_tonemapping_billboard_fs.glsl"
                 );
                 std::unique_ptr<ghoul::opengl::ProgramObject> programTM =
@@ -2101,12 +2100,12 @@ void RenderableGaiaStars::update(const UpdateData&) {
         _pointSpreadFunctionTexture = nullptr;
         if (!_pointSpreadFunctionTexturePath.value().empty()) {
             _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_pointSpreadFunctionTexturePath)
+                absPath(_pointSpreadFunctionTexturePath).string()
             );
 
             if (_pointSpreadFunctionTexture) {
                 LDEBUG(fmt::format(
-                    "Loaded texture from '{}'", absPath(_pointSpreadFunctionTexturePath)
+                    "Loaded texture from {}", absPath(_pointSpreadFunctionTexturePath)
                ));
                 _pointSpreadFunctionTexture->uploadTexture();
             }
@@ -2115,12 +2114,10 @@ void RenderableGaiaStars::update(const UpdateData&) {
             );
 
             _pointSpreadFunctionFile = std::make_unique<ghoul::filesystem::File>(
-                _pointSpreadFunctionTexturePath
+                _pointSpreadFunctionTexturePath.value()
             );
             _pointSpreadFunctionFile->setCallback(
-                [&](const ghoul::filesystem::File&) {
-                    _pointSpreadFunctionTextureIsDirty = true;
-                }
+                [this]() { _pointSpreadFunctionTextureIsDirty = true; }
             );
         }
         _pointSpreadFunctionTextureIsDirty = false;
@@ -2131,7 +2128,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
         _colorTexture = nullptr;
         if (!_colorTexturePath.value().empty()) {
             _colorTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_colorTexturePath)
+                absPath(_colorTexturePath).string()
             );
             if (_colorTexture) {
                 LDEBUG(fmt::format(
@@ -2141,11 +2138,9 @@ void RenderableGaiaStars::update(const UpdateData&) {
             }
 
             _colorTextureFile = std::make_unique<ghoul::filesystem::File>(
-                _colorTexturePath
+                _colorTexturePath.value()
             );
-            _colorTextureFile->setCallback(
-                [&](const ghoul::filesystem::File&) { _colorTextureIsDirty = true; }
-            );
+            _colorTextureFile->setCallback([this]() { _colorTextureIsDirty = true; });
         }
         _colorTextureIsDirty = false;
     }

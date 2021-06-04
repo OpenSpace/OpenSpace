@@ -306,7 +306,6 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
             LDEBUG(fmt::format(
                 "Successfully created ephemeris for '{}'", result->identifier()
             ));
-            result->addPropertySubOwner(result->_transform.translation.get());
         }
 
         if (p.transform->rotation.has_value()) {
@@ -326,7 +325,6 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
             LDEBUG(fmt::format(
                 "Successfully created rotation for '{}'", result->identifier()
             ));
-            result->addPropertySubOwner(result->_transform.rotation.get());
         }
 
         if (p.transform->scale.has_value()) {
@@ -344,9 +342,12 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
             LDEBUG(fmt::format(
                 "Successfully created scale for '{}'", result->identifier()
             ));
-            result->addPropertySubOwner(result->_transform.scale.get());
         }
     }
+    result->addPropertySubOwner(result->_transform.translation.get());
+    result->addPropertySubOwner(result->_transform.rotation.get());
+    result->addPropertySubOwner(result->_transform.scale.get());
+
 
     if (p.timeFrame.has_value()) {
         result->_timeFrame = TimeFrame::createFromDictionary(*p.timeFrame);
@@ -400,9 +401,7 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
 }
 
 documentation::Documentation SceneGraphNode::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>();
-    doc.id = "core_scene_node";
-    return doc;
+    return codegen::doc<Parameters>("core_scene_node");
 }
 
 ghoul::opengl::ProgramObject* SceneGraphNode::_debugSphereProgram = nullptr;
@@ -425,7 +424,7 @@ SceneGraphNode::SceneGraphNode()
         )
     }
     , _boundingSphere(BoundingSphereInfo, -1.0, -1.0, 1e12)
-    , _interactionSphere(InteractionSphereInfo, -1.0, -1.0, -1.0, 1e12)
+    , _interactionSphere(InteractionSphereInfo, -1.0, -1.0, 1e12)
     , _computeScreenSpaceValues(ComputeScreenSpaceInfo, false)
     , _screenSpacePosition(ScreenSpacePositionInfo, glm::ivec2(-1, -1))
     , _screenVisibility(ScreenVisibilityInfo, false)
@@ -448,6 +447,7 @@ SceneGraphNode::SceneGraphNode()
             _overrideBoundingSphere = std::nullopt;
         }
     });
+    _boundingSphere.setExponent(10.f);
     addProperty(_boundingSphere);
     _interactionSphere.onChange([this]() {
         if (_interactionSphere >= 0.0) {
@@ -457,6 +457,7 @@ SceneGraphNode::SceneGraphNode()
             _overrideInteractionSphere = std::nullopt;
         }
         });
+    _interactionSphere.setExponent(10.f);
     addProperty(_interactionSphere);
     addProperty(_showDebugSphere);
 }

@@ -49,9 +49,7 @@ public:
 
     scripting::LuaLibrary luaLibrary() const override;
 
-protected:
-    void internalInitialize(const ghoul::Dictionary& dictionary) override;
-    void internalDeinitialize() override;
+    std::vector<documentation::Documentation> documentations() const override;
 
 private:
     std::unique_ptr<StateMachine> _machine = nullptr;

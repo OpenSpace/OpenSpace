@@ -25,8 +25,10 @@
 #ifndef __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSDATAPREPARATIONTASK___H__
 #define __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSDATAPREPARATIONTASK___H__
 
-#include <openspace/properties/vector/vec3property.h>
 #include <openspace/util/task.h>
+
+#include <openspace/properties/vector/vec3property.h>
+#include <filesystem>
 #include <string>
 
 namespace openspace::exoplanets {
@@ -39,11 +41,11 @@ public:
     static documentation::Documentation documentation();
 
 private:
-    std::string _inputDataPath;
-    std::string _inputSpeckPath;
-    std::string _outputBinPath;
-    std::string _outputLutPath;
-    std::string _teffToBvFilePath;
+    std::filesystem::path _inputDataPath;
+    std::filesystem::path _inputSpeckPath;
+    std::filesystem::path _outputBinPath;
+    std::filesystem::path _outputLutPath;
+    std::filesystem::path _teffToBvFilePath;
 
     glm::vec3 starPosition(const std::string& starName);
 
