@@ -36,135 +36,134 @@
 namespace {
     constexpr const char* _loggerCat = "PathInstruction";
 
-    constexpr const char* KeyDuration = "Duration";
-    constexpr const char* KeyStopAtTarget = "StopAtTarget";
-    constexpr const char* KeyStopDetails = "StopDetails";
-    constexpr const char* KeyBehavior = "Behavior";
+    struct [[codegen::Dictionary(Instruction)]] Parameters {
+        enum class Type {
+            Node,
+            NavigationState
+        };
+        Type type;
 
-    constexpr const char* KeyTarget = "Target";
-    constexpr const char* KeyPosition = "Position";
-    constexpr const char* KeyHeight = "Height";
-    constexpr const char* KeyUseTargetUpDirection = "UseTargetUpDirection";
+        // The desired duration traversing the specified path segment should take
+        std::optional<float> duration;
 
-    constexpr const char* KeyNavigationState = "NavigationState";
+        // (Node): The target node of the camera path. Not optional for 'Node' instructions
+        std::optional<std::string> target;
+
+        // (Node): An optional position in relation to the target node, in model 
+        // coordinates (meters)
+        std::optional<glm::dvec3> position;
+
+        // (Node): An optional height in relation to the target node, in meters
+        std::optional<double> height;
+
+        // (Node): If true, the up direction of the node is taken into account when 
+        // computing the wayopoint for this instruction
+        std::optional<bool> useTargetUpDirection;
+
+        // (NavigationState): A navigation state that will be the target
+        // of this path segment.
+        std::optional<ghoul::Dictionary> navigationState 
+            [[codegen::reference("core_navigation_state")]];
+
+        // If true, a pause will be added after the path segment that this instruction 
+        // translates into. 
+        std::optional<bool> stopAtTarget;
+
+        struct StopDetails {
+            std::optional<float> duration; 
+            std::optional<std::string> behavior;
+        };
+        // Furter details on any stop in the path that will happen after this path 
+        // segment. Can specify the duration and pause behavior.
+        std::optional<StopDetails> stopDetails;
+    };
+#include "instruction_codegen.cpp"
 } // namespace
 
 namespace openspace::autonavigation {
 
+documentation::Documentation Instruction::Documentation() {
+    return codegen::doc<Parameters>("autonavigation_pathinstruction");
+}
+
 Instruction::Instruction(const ghoul::Dictionary& dictionary) {
-    if (dictionary.hasValue<double>(KeyDuration)) {
-        duration = dictionary.value<double>(KeyDuration);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    duration = p.duration;
+    stopAtTarget = p.stopAtTarget;
+
+    if (p.stopDetails.has_value()) {
+        stopDuration = p.stopDetails.value().duration;
+        stopBehavior = p.stopDetails.value().behavior;
     }
 
-    // TODO: include info about pauses/stops
-    if (dictionary.hasValue<bool>(KeyStopAtTarget)) {
-        stopAtTarget = dictionary.value<bool>(KeyStopAtTarget);
-    }
+    switch (p.type) {
+        case Parameters::Type::NavigationState: {
+            type = Type::NavigationState;
 
-    if (dictionary.hasValue<ghoul::Dictionary>(KeyStopDetails)) {
-        ghoul::Dictionary stopDictionary =
-            dictionary.value<ghoul::Dictionary>(KeyStopDetails);
+            if (!p.navigationState.has_value()) {
+                throw ghoul::RuntimeError("A navigation state is required");
+            }
 
-        if (stopDictionary.hasValue<double>(KeyDuration)) {
-            stopDuration = stopDictionary.value<double>(KeyDuration);
+            using NavigationState = interaction::NavigationHandler::NavigationState;
+            navigationState = NavigationState(p.navigationState.value());
+            _waypoints = { Waypoint(navigationState) };
+            break;
         }
+        case Parameters::Type::Node: {
+            type = Type::Node;
 
-        if (stopDictionary.hasValue<std::string>(KeyBehavior)) {
-            stopBehavior = stopDictionary.value<std::string>(KeyBehavior);
+            if (!p.target.has_value()) {
+                throw ghoul::RuntimeError("A target node is required");
+            }
+
+            nodeIdentifier = p.target.value();
+            const SceneGraphNode* targetNode = sceneGraphNode(nodeIdentifier);
+
+            if (!targetNode) {
+                throw ghoul::RuntimeError(fmt::format(
+                    "Could not find target node '{}'", nodeIdentifier
+                ));
+            }
+
+            position = p.position;
+            height = p.height;
+            useTargetUpDirection = p.useTargetUpDirection.value_or(false);
+
+            if (position.has_value()) {
+                // Note that the anchor and reference frame is our targetnode.
+                // The position in instruction is given is relative coordinates.
+                glm::dvec3 targetPos = targetNode->worldPosition() +
+                    targetNode->worldRotationMatrix() * position.value();
+
+                Camera* camera = global::navigationHandler->camera();
+                glm::dvec3 up = camera->lookUpVectorWorldSpace();
+
+                if (useTargetUpDirection) {
+                    // @TODO (emmbr 2020-11-17) For now, this is hardcoded to look good for Earth, 
+                    // which is where it matters the most. A better solution would be to make each 
+                    // sgn aware of its own 'up' and query 
+                    up = targetNode->worldRotationMatrix() * glm::dvec3(0.0, 0.0, 1.0);
+                }
+
+                const glm::dvec3 lookAtPos = targetNode->worldPosition();
+                const glm::dquat targetRot = helpers::lookAtQuaternion(targetPos, lookAtPos, up);
+
+                Waypoint wp{ targetPos, targetRot, nodeIdentifier };
+                _waypoints = { wp };
+            }
+            break;
+        }
+        default: {
+            LERROR(fmt::format("Uknown instruciton type: {}", p.type));
+            throw ghoul::MissingCaseException();
+            break;
         }
     }
 }
 
-Instruction::~Instruction() {}
-
-TargetNodeInstruction::TargetNodeInstruction(const ghoul::Dictionary& dictionary)
-    : Instruction(dictionary)
-{
-    if (!dictionary.hasValue<std::string>(KeyTarget)) {
-        throw ghoul::RuntimeError(
-            "A camera path instruction requires a target node, to go to or use as reference frame."
-        );
-    }
-
-    nodeIdentifier = dictionary.value<std::string>(KeyTarget);
-
-    if (!sceneGraphNode(nodeIdentifier)) {
-        throw ghoul::RuntimeError(fmt::format("Could not find target node '{}'", nodeIdentifier));
-    }
-
-    if (dictionary.hasValue<glm::dvec3>(KeyPosition)) {
-        position = dictionary.value<glm::dvec3>(KeyPosition);
-    }
-
-    if (dictionary.hasValue<double>(KeyHeight)) {
-        height = dictionary.value<double>(KeyHeight);
-    }
-
-    if (dictionary.hasValue<bool>(KeyUseTargetUpDirection)) {
-        useTargetUpDirection = dictionary.value<bool>(KeyUseTargetUpDirection);
-    }
-}
-
-std::vector<Waypoint> TargetNodeInstruction::waypoints() const {
-    const SceneGraphNode* targetNode = sceneGraphNode(nodeIdentifier);
-    if (!targetNode) {
-        LERROR(fmt::format("Could not find target node '{}'", nodeIdentifier));
-        return std::vector<Waypoint>();
-    }
-
-    glm::dvec3 targetPos;
-    if (position.has_value()) {
-        // Note that the anchor and reference frame is our targetnode.
-        // The position in instruction is given is relative coordinates.
-        targetPos = targetNode->worldPosition() +
-            targetNode->worldRotationMatrix() * position.value();
-
-        Camera* camera = global::navigationHandler->camera();
-
-        glm::dvec3 up = camera->lookUpVectorWorldSpace();
-        if (setUpDirectionFromTarget()) {
-            // @TODO (emmbr 2020-11-17) For now, this is hardcoded to look good for Earth, 
-            // which is where it matters the most. A better solution would be to make each 
-            // sgn aware of its own 'up' and query 
-            up = targetNode->worldRotationMatrix() * glm::dvec3(0.0, 0.0, 1.0);
-        }
-
-        const glm::dvec3 lookAtPos = targetNode->worldPosition();
-        const glm::dquat targetRot = helpers::lookAtQuaternion(targetPos, lookAtPos, up);
-
-        Waypoint wp{ targetPos, targetRot, nodeIdentifier };
-        return std::vector<Waypoint>({ wp });
-    }
-
-    return std::vector<Waypoint>();
-}
-
-bool TargetNodeInstruction::setUpDirectionFromTarget() const {
-    if (!useTargetUpDirection.has_value()) {
-        return false;
-    }
-    return useTargetUpDirection.value();
-}
-
-NavigationStateInstruction::NavigationStateInstruction(
-    const ghoul::Dictionary& dictionary): Instruction(dictionary)
-{
-    if (dictionary.hasValue<ghoul::Dictionary>(KeyNavigationState)) {
-        auto navStateDict = dictionary.value<ghoul::Dictionary>(KeyNavigationState);
-
-        openspace::documentation::testSpecificationAndThrow(
-            NavigationState::Documentation(),
-            navStateDict,
-            "NavigationState"
-        );
-
-        navigationState = NavigationState(navStateDict);
-    }
-}
-
-std::vector<Waypoint> NavigationStateInstruction::waypoints() const {
-    Waypoint wp{ navigationState };
-    return std::vector<Waypoint>({ wp });
+std::vector<Waypoint> Instruction::waypoints() const {
+    return _waypoints;
 }
 
 } // namespace openspace::autonavigation

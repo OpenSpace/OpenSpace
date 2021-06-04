@@ -31,8 +31,6 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "AutoNavigationModule";
-
     constexpr const openspace::properties::Property::PropertyInfo MinBoundingSphereInfo = {
         "MinimalValidBoundingSphere",
         "Minimal Valid Bounding Sphere",
@@ -48,7 +46,6 @@ AutoNavigationModule::AutoNavigationModule()
     _minValidBoundingSphere(MinBoundingSphereInfo, 10.0, 1.0, 3e10)
 {
     addPropertySubOwner(_autoNavigationHandler);
-
     addProperty(_minValidBoundingSphere);
 }
 
@@ -62,7 +59,8 @@ double AutoNavigationModule::minValidBoundingSphere() const {
 
 std::vector<documentation::Documentation> AutoNavigationModule::documentations() const {
     return {
-        // TODO: call documentation methods for the other classes in this module
+        autonavigation::Instruction::Documentation(),
+        autonavigation::PathSpecification::Documentation()
     };
 }
 

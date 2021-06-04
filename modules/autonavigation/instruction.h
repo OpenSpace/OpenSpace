@@ -32,52 +32,37 @@
 namespace openspace::autonavigation {
 
 struct Instruction {
-    Instruction() = default;
+    enum class Type {
+        Node,
+        NavigationState
+    };
+
     Instruction(const ghoul::Dictionary& dictionary);
-    virtual ~Instruction();
 
-    virtual std::vector<Waypoint> waypoints() const = 0;
+    std::vector<Waypoint> waypoints() const;
 
-    // TODO
-    //static documentation::Documentation Documentation();
+    static documentation::Documentation Documentation();
+
+    Type type;
 
     std::optional<double> duration;
-
     std::optional<bool> stopAtTarget;
 
-    // only relevant is stopAtTarget true
+    // Only relevant is stopAtTarget true
     std::optional<double> stopDuration;
     std::optional<std::string> stopBehavior;
-};
 
-struct TargetNodeInstruction : public Instruction {
-    TargetNodeInstruction(const ghoul::Dictionary& dictionary);
-
-    std::vector<Waypoint> waypoints() const override;
-    bool setUpDirectionFromTarget() const;
-
-    // TODO
-    //static documentation::Documentation Documentation();
-
+    // Node details
     std::string nodeIdentifier;
-    std::optional<glm::dvec3> position; // relative to target node (model space)
+    std::optional<glm::dvec3> position;
     std::optional<double> height;
-    std::optional<bool> useTargetUpDirection;
+    bool useTargetUpDirection;
+
+    // Navigation state details
+    interaction::NavigationHandler::NavigationState navigationState;
+
+    std::vector<Waypoint> _waypoints;
 };
-
-struct NavigationStateInstruction : public Instruction {
-    using NavigationState = interaction::NavigationHandler::NavigationState;
-
-    NavigationStateInstruction(const ghoul::Dictionary& dictionary);
-
-    std::vector<Waypoint> waypoints() const override;
-
-    // TODO
-    //static documentation::Documentation Documentation();
-
-    NavigationState navigationState;
-};
-
 
 } // namespace openspace::autonavigation
 

@@ -39,14 +39,10 @@ public:
     PathSegment(Waypoint start, Waypoint end, CurveType type,
         std::optional<double> duration = std::nullopt);
 
-    ~PathSegment() = default;
+    void setStartPoint(Waypoint wp);
 
-    // Mutators
-    void setStart(Waypoint wp);
-
-    // Accessors
-    const Waypoint start() const;
-    const Waypoint end() const;
+    const Waypoint startPoint() const;
+    const Waypoint endPoint() const;
     const double duration() const;
     const double pathLength() const;
 

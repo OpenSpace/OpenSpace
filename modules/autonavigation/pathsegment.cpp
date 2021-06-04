@@ -61,15 +61,15 @@ PathSegment::PathSegment(Waypoint start, Waypoint end, CurveType type,
     }
 }
 
-void PathSegment::setStart(Waypoint cs) {
+void PathSegment::setStartPoint(Waypoint cs) {
     _start = std::move(cs);
     initCurve();
     // TODO later: maybe recompute duration as well...
 }
 
-const Waypoint PathSegment::start() const { return _start; }
+const Waypoint PathSegment::startPoint() const { return _start; }
 
-const Waypoint PathSegment::end() const { return _end; }
+const Waypoint PathSegment::endPoint() const { return _end; }
 
 const double PathSegment::duration() const { return _duration; }
 
