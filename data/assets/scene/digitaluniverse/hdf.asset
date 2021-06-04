@@ -28,7 +28,7 @@ local object = {
     ColorOption = { "redshift", "proximity" },
     ColorRange = { { 0.0, 0.075 }, { 1.0, 25.0 } },
     Unit = "Mpc",
-    ScaleFactor = 520.0,
+    ScaleFactor = 505.0,
     BillboardMaxSize = 4.7,
     EnablePixelSizeControl = true
   },
