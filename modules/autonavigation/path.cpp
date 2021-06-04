@@ -49,6 +49,8 @@ Path::Path(Waypoint start, Waypoint end, CurveType type,
 {
     initializePath();
 
+    _speedFunction = SpeedFunction(SpeedFunction::Type::DampenedQuintic);
+
     if (duration.has_value()) {
         _duration = duration.value();
     }
@@ -79,7 +81,7 @@ const std::vector<glm::dvec3> Path::controlPoints() const {
 }
 
 CameraPose Path::traversePath(double dt) {
-    if (!_curve || !_rotationInterpolator || !_speedFunction) {
+    if (!_curve || !_rotationInterpolator) {
         // TODO: handle better (abort path somehow)
         return _start.pose;
     }
@@ -111,7 +113,7 @@ bool Path::hasReachedEnd() const {
 }
 
 double Path::speedAtTime(double time) const {
-    return _speedFunction->scaledValue(time, _duration, pathLength());
+    return _speedFunction.scaledValue(time, _duration, pathLength());
 }
 
 CameraPose Path::interpolatedPose(double distance) const {
@@ -125,44 +127,37 @@ CameraPose Path::interpolatedPose(double distance) const {
 void Path::initializePath() {
     _curve.reset();
 
-    switch (_curveType)
-    {
-    case CurveType::AvoidCollision:
-        _curve = std::make_unique<AvoidCollisionCurve>(_start, _end);
-        _rotationInterpolator = std::make_unique<EasedSlerpInterpolator>(
-            _start.rotation(),
-            _end.rotation()
-        );
-        _speedFunction = std::make_unique<QuinticDampenedSpeed>();
-        break;
-
-    case CurveType::Linear:
-        _curve = std::make_unique<LinearCurve>(_start, _end);
-        _rotationInterpolator = std::make_unique<EasedSlerpInterpolator>(
-            _start.rotation(),
-            _end.rotation()
-        );
-        _speedFunction = std::make_unique<QuinticDampenedSpeed>();
-        break;
-
-    case CurveType::ZoomOutOverview:
-        _curve = std::make_unique<ZoomOutOverviewCurve>(_start, _end);
-        _rotationInterpolator = std::make_unique<LookAtInterpolator>(
-            _start.rotation(),
-            _end.rotation(),
-            _start.node()->worldPosition(),
-            _end.node()->worldPosition(),
-            _curve.get()
-        );
-        _speedFunction = std::make_unique<QuinticDampenedSpeed>();
-        break;
-
-    default:
-        LERROR("Could not create curve. Type does not exist!");
-        return;
+    switch (_curveType) {
+        case CurveType::AvoidCollision:
+            _curve = std::make_unique<AvoidCollisionCurve>(_start, _end);
+            _rotationInterpolator = std::make_unique<EasedSlerpInterpolator>(
+                _start.rotation(),
+                _end.rotation()
+            );
+            break;
+        case CurveType::Linear:
+            _curve = std::make_unique<LinearCurve>(_start, _end);
+            _rotationInterpolator = std::make_unique<EasedSlerpInterpolator>(
+                _start.rotation(),
+                _end.rotation()
+            );
+            break;
+        case CurveType::ZoomOutOverview:
+            _curve = std::make_unique<ZoomOutOverviewCurve>(_start, _end);
+            _rotationInterpolator = std::make_unique<LookAtInterpolator>(
+                _start.rotation(),
+                _end.rotation(),
+                _start.node()->worldPosition(),
+                _end.node()->worldPosition(),
+                _curve.get()
+            );
+            break;
+        default:
+            LERROR("Could not create curve. Type does not exist!");
+            return;
     }
 
-    if (!_curve || !_rotationInterpolator || !_speedFunction) {
+    if (!_curve || !_rotationInterpolator) {
         LERROR("Curve type has not been properly initialized.");
         return;
     }

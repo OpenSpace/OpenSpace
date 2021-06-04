@@ -65,7 +65,7 @@ private:
     double _duration;
     CurveType _curveType;
 
-    std::unique_ptr<SpeedFunction> _speedFunction;
+    SpeedFunction _speedFunction;
     std::unique_ptr<RotationInterpolator> _rotationInterpolator;
     std::unique_ptr<PathCurve> _curve;
 

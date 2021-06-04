@@ -35,6 +35,10 @@ namespace {
 
 namespace openspace::autonavigation {
 
+SpeedFunction::SpeedFunction(Type type) : _type(type) {
+    initializeIntegratedSum();
+}
+
 SpeedFunction::~SpeedFunction() {}
 
 /*
@@ -49,7 +53,7 @@ double SpeedFunction::scaledValue(double time, double duration, double pathLengt
     return (pathLength * this->value(t)) / (duration * _integratedSum);
 }
 
-void SpeedFunction::initIntegratedSum() {
+void SpeedFunction::initializeIntegratedSum() {
     const int steps = 100;
     _integratedSum = helpers::simpsonsRule(
         0.0,
@@ -59,54 +63,36 @@ void SpeedFunction::initIntegratedSum() {
     );
 }
 
-SexticDampenedSpeed::SexticDampenedSpeed() {
-    initIntegratedSum();
-}
-
-double SexticDampenedSpeed::value(double t) const {
+double SpeedFunction::value(double t) const {
     ghoul_assert(t >= 0.0 && t <= 1.0, "Variable t out of range [0,1]");
 
     const double tPeak = 0.5;
     double speed = 0.0;
 
-    // accelerate
+    auto applyEasingFunction = [this](double tScaled) {
+        switch (_type) {
+            case Type::DampenedQuintic:
+                return ghoul::cubicEaseInOut(ghoul::quadraticEaseInOut(tScaled));
+                break;
+            case Type::DampenedSextic:
+                return ghoul::cubicEaseInOut(ghoul::cubicEaseInOut(tScaled));
+            default: 
+                throw ghoul::MissingCaseException();
+        }
+    };
+
+    // Accelerate
     if (t <= tPeak) {
         double tScaled = t / tPeak;
-        speed = ghoul::cubicEaseInOut(ghoul::cubicEaseInOut(tScaled));
+        speed = applyEasingFunction(tScaled);
     }
-    // deaccelerate
+    // Deccelerate
     else if (t <= 1.0) {
         double tScaled = (t - tPeak) / (1.0 - tPeak);
-        speed = 1.0 - ghoul::cubicEaseInOut(ghoul::cubicEaseInOut(tScaled));
+        speed = 1.0 - applyEasingFunction(tScaled);
     }
 
-    // avoid zero speed
-    speed += 0.00001; // TODO: Minimal speed should depend on size of visible object/node
-    return speed;
-}
-
-QuinticDampenedSpeed::QuinticDampenedSpeed() {
-    initIntegratedSum();
-}
-
-double QuinticDampenedSpeed::value(double t) const {
-    ghoul_assert(t >= 0.0 && t <= 1.0, "Variable t out of range [0,1]");
-
-    const double tPeak = 0.5;
-    double speed = 0.0;
-
-    // accelerate
-    if (t <= tPeak) {
-        double tScaled = t / tPeak;
-        speed = ghoul::cubicEaseInOut(ghoul::quadraticEaseInOut(tScaled));
-    }
-    // deaccelerate
-    else if (t <= 1.0) {
-        double tScaled = (t - tPeak) / (1.0 - tPeak);
-        speed = 1.0 - ghoul::cubicEaseInOut(ghoul::quadraticEaseInOut(tScaled));
-    }
-
-    // avoid zero speed
+    // Avoid zero speed
     speed += 0.00001; // TODO: Minimal speed should depend on size of visible object/node
     return speed;
 }
