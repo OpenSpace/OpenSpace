@@ -62,21 +62,15 @@ Path::Path(Waypoint start, Waypoint end, CurveType type,
     }
 }
 
-void Path::setStartPoint(Waypoint cs) {
-    _start = std::move(cs);
-    initializePath();
-    // TODO later: maybe recompute duration as well...
-}
+Waypoint Path::startPoint() const { return _start; }
 
-const Waypoint Path::startPoint() const { return _start; }
+Waypoint Path::endPoint() const { return _end; }
 
-const Waypoint Path::endPoint() const { return _end; }
+double Path::duration() const { return _duration; }
 
-const double Path::duration() const { return _duration; }
+double Path::pathLength() const { return _curve->length(); }
 
-const double Path::pathLength() const { return _curve->length(); }
-
-const std::vector<glm::dvec3> Path::controlPoints() const {
+std::vector<glm::dvec3> Path::controlPoints() const {
     return _curve->points();
 }
 
@@ -154,12 +148,8 @@ void Path::initializePath() {
             break;
         default:
             LERROR("Could not create curve. Type does not exist!");
+            throw ghoul::MissingCaseException();
             return;
-    }
-
-    if (!_curve || !_rotationInterpolator) {
-        LERROR("Curve type has not been properly initialized.");
-        return;
     }
 }
 

@@ -41,23 +41,21 @@ public:
 
     // TODO: add a constructor that takes an instruction and curve type?
 
-    void setStartPoint(Waypoint wp);
+    Waypoint startPoint() const;
+    Waypoint endPoint() const;
+    double duration() const;
+    double pathLength() const;
 
-    const Waypoint startPoint() const;
-    const Waypoint endPoint() const;
-    const double duration() const;
-    const double pathLength() const;
-
-    const std::vector<glm::dvec3> controlPoints() const;
+    std::vector<glm::dvec3> controlPoints() const;
 
     CameraPose traversePath(double dt);
     std::string currentAnchor() const;
     bool hasReachedEnd() const;
 
-    double speedAtTime(double time) const;
     CameraPose interpolatedPose(double distance) const;
 
 private:
+    double speedAtTime(double time) const;
     void initializePath();
 
     Waypoint _start;
