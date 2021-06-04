@@ -24,29 +24,39 @@
 
 #include <modules/statemachine/include/state.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
 
 namespace {
-    constexpr const char* StateNameKey = "Identifier";
-    constexpr const char* EnterFunctionKey = "Enter";
-    constexpr const char* ExitFunctionKey = "Exit";
+    struct [[codegen::Dictionary(State)]] Parameters {
+        // A string that will be used to identify the state. Cannot be the same as 
+        // any other state in the machine
+        std::string identifier;
+
+        // A string containing a Lua script that will be executed when the state 
+        // is entered, i.e on a transition from another state
+        std::string enter;
+
+        // A string containing a Lua script that will be executed when the state 
+        // is exited, i.e on a transition to another state
+        std::string exit;
+    };
+#include "state_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
+documentation::Documentation State::Documentation() {
+    return codegen::doc<Parameters>("statemachine_state");
+}
+
 State::State(const ghoul::Dictionary& dictionary) {
-    if (dictionary.hasKey(StateNameKey)) {
-        _name = dictionary.value<std::string>(StateNameKey);
-    }
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    if (dictionary.hasKey(EnterFunctionKey)) {
-        _enter = dictionary.value<std::string>(EnterFunctionKey);
-    }
-
-    if (dictionary.hasKey(ExitFunctionKey)) {
-        _exit = dictionary.value<std::string>(ExitFunctionKey);
-    }
+    _name = p.identifier;
+    _enter = p.enter;
+    _exit = p.exit;
 
     _isIdle = true;
 }

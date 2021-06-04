@@ -24,44 +24,39 @@
 
 #include "modules/statemachine/include/statemachine.h"
 
+#include <openspace/documentation/documentation.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {
     constexpr const char* _loggerCat = "StateMachine";
 
-    constexpr const char* StatesKey = "States";
-    constexpr const char* TransitionsKey = "Transitions";
+    struct [[codegen::Dictionary(StateMachine)]] Parameters {
+        // A list of states 
+        std::vector<ghoul::Dictionary> states 
+            [[codegen::reference("statemachine_state")]];
+
+        // A list of transitions between the different states
+        std::vector<ghoul::Dictionary> transitions 
+            [[codegen::reference("statemachine_transition")]];
+    };
+#include "statemachine_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
-StateMachine::StateMachine(const ghoul::Dictionary& dictionary) {
-    // States
-    if (dictionary.hasKey(StatesKey)) {
-        ghoul::Dictionary statesDictionary =
-            dictionary.value<ghoul::Dictionary>(StatesKey);
+documentation::Documentation StateMachine::Documentation() {
+    return codegen::doc<Parameters>("statemachine_statemachine");
+}
 
-        for (unsigned int i = 1; i <= statesDictionary.size(); ++i) {
-            if (statesDictionary.hasKey(std::to_string(i))) {
-                ghoul::Dictionary state =
-                    statesDictionary.value<ghoul::Dictionary>(std::to_string(i));
-                _states.push_back(State(state));
-            }
-        }
+StateMachine::StateMachine(const ghoul::Dictionary& dictionary) {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    for (const ghoul::Dictionary& s : p.states) {
+        _states.push_back(State(s));
     }
 
-    // Transitions
-    if (dictionary.hasKey(TransitionsKey)) {
-        ghoul::Dictionary transitionsDictionary =
-            dictionary.value<ghoul::Dictionary>(TransitionsKey);
-
-        for (unsigned int i = 1; i <= transitionsDictionary.size(); ++i) {
-            if (transitionsDictionary.hasKey(std::to_string(i))) {
-                ghoul::Dictionary transition =
-                    transitionsDictionary.value<ghoul::Dictionary>(std::to_string(i));
-                _transitions.push_back(Transition(transition));
-            }
-        }
+    for (const ghoul::Dictionary& t : p.transitions) {
+        _transitions.push_back(Transition(t));
     }
 }
 
@@ -96,7 +91,6 @@ bool StateMachine::isIdle() const {
 
 void StateMachine::transitionTo(const std::string newState) {
     int stateIndex = findState(newState);
-
     if (stateIndex == -1) {
         LWARNING(fmt::format(
             "Attempting to transition to undefined state '{}'", newState

@@ -24,9 +24,14 @@
 
 #include <modules/statemachine/statemachinemodule.h>
 
-#include <ghoul/logging/logmanager.h>
-#include <modules/statemachine/statemachinemodule_lua.inl>
+#include <modules/statemachine/include/state.h>
+#include <modules/statemachine/include/statemachine.h>
+#include <modules/statemachine/include/transition.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/scripting/lualibrary.h>
+#include <ghoul/logging/logmanager.h>
+
+#include "statemachinemodule_lua.inl"
 
 namespace {
     constexpr const char* _loggerCat = "StateMachine";
@@ -87,14 +92,6 @@ bool StateMachineModule::canGoTo(const std::string state) const {
     return _machine->canGoTo(state);
 }
 
-void StateMachineModule::internalInitialize(const ghoul::Dictionary& dictionary) {
-
-}
-
-void StateMachineModule::internalDeinitialize() {
-
-}
-
 scripting::LuaLibrary StateMachineModule::luaLibrary() const {
     scripting::LuaLibrary res;
     res.name = "statemachine";
@@ -103,22 +100,27 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
             "createStateMachine",
             &luascriptfunctions::createStateMachine,
             {},
-            "list of tables",
-            "List of tables describing the states and transitions for the state machine."
+            "table",
+            "Creates a state machine from a table describing the states and "
+            "transitions. See StateMachine documentation for details. "
         },
         {
             "goTo",
             &luascriptfunctions::goTo,
             {},
-            "String",
-            "String name of State to go to."
+            "string",
+            "Triggers a transition from the current state to th state with the given "
+            "identifier. Requires that the specified string corresponds to an existing "
+            "state, and that a transition between the two states exists."
         },
         {
             "setInitialState",
             &luascriptfunctions::setInitialState,
             {},
-            "String",
-            "String name of the first state to set and enter into."
+            "string",
+            "Immediately sets the current state to the state with to the given name, if"
+            "it exists. Must always be done after creating a state machine, before any "
+            "transitions can take place."
         },
         {
             "currentState",
@@ -138,12 +140,20 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
             "canGoTo",
             &luascriptfunctions::canGoTo,
             {},
-            "String",
+            "string",
             "Returns true if there is a defined transition between the current state and "
             "the given string name of a state, otherwise false"
         },
     };
     return res;
+}
+
+std::vector<documentation::Documentation> StateMachineModule::documentations() const {
+    return {
+        State::Documentation(),
+        StateMachine::Documentation(),
+        Transition::Documentation()
+    };
 }
 
 } // namespace openspace

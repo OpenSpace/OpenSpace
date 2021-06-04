@@ -30,6 +30,8 @@
 
 namespace openspace {
 
+namespace documentation { struct Documentation; }
+
 class State {
 public:
     State(const ghoul::Dictionary& dictionary);
@@ -41,6 +43,8 @@ public:
     void exit();
     bool isIdle() const;
     std::string name() const;
+
+    static documentation::Documentation Documentation();
 
 private:
     bool _isIdle;

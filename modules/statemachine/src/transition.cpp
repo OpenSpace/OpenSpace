@@ -24,29 +24,37 @@
 
 #include <modules/statemachine/include/transition.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
 
 namespace {
-    constexpr const char* FromStateKey = "From";
-    constexpr const char* ToStateKey = "To";
-    constexpr const char* ActionFunctionKey = "Action";
+    struct [[codegen::Dictionary(Transition)]] Parameters {
+        // The identifier of the state that can trigger the transition
+        std::string from;
+
+        // The identifier of the state that the state machine will move to after the
+        // transition
+        std::string to;
+
+        // A string containing a Lua script that will be executed when the transition 
+        // is triggered
+        std::string action;
+    };
+#include "transition_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
+documentation::Documentation Transition::Documentation() {
+    return codegen::doc<Parameters>("statemachine_transition");
+}
+
 Transition::Transition(const ghoul::Dictionary& dictionary) {
-    if (dictionary.hasKey(FromStateKey)) {
-        _from = dictionary.value<std::string>(FromStateKey);
-    }
-
-    if (dictionary.hasKey(ToStateKey)) {
-        _to = dictionary.value<std::string>(ToStateKey);
-    }
-
-    if (dictionary.hasKey(ActionFunctionKey)) {
-        _action = dictionary.value<std::string>(ActionFunctionKey);
-    }
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    _from = p.from;
+    _to = p.to;
+    _action = p.action;
 }
 
 std::string Transition::from() const {
