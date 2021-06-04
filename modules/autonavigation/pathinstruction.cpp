@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/autonavigation/instruction.h>
+#include <modules/autonavigation/pathinstruction.h>
 
 #include <modules/autonavigation/helperfunctions.h>
 #include <openspace/documentation/verifier.h>
@@ -69,16 +69,16 @@ namespace {
         std::optional<ghoul::Dictionary> startState
             [[codegen::reference("core_navigation_state")]];
     };
-#include "instruction_codegen.cpp"
+#include "pathinstruction_codegen.cpp"
 } // namespace
 
 namespace openspace::autonavigation {
 
-documentation::Documentation Instruction::Documentation() {
+documentation::Documentation PathInstruction::Documentation() {
     return codegen::doc<Parameters>("autonavigation_pathinstruction");
 }
 
-Instruction::Instruction(const ghoul::Dictionary& dictionary) {
+PathInstruction::PathInstruction(const ghoul::Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     duration = p.duration;
@@ -91,7 +91,6 @@ Instruction::Instruction(const ghoul::Dictionary& dictionary) {
                 throw ghoul::RuntimeError("A navigation state is required");
             }
 
-            using NavigationState = interaction::NavigationHandler::NavigationState;
             navigationState = NavigationState(p.navigationState.value());
             _waypoints = { Waypoint(navigationState) };
             break;
@@ -148,7 +147,7 @@ Instruction::Instruction(const ghoul::Dictionary& dictionary) {
     }
 }
 
-std::vector<Waypoint> Instruction::waypoints() const {
+std::vector<Waypoint> PathInstruction::waypoints() const {
     return _waypoints;
 }
 

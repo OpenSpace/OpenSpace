@@ -29,9 +29,9 @@ set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/autonavigationhandler.h
   ${CMAKE_CURRENT_SOURCE_DIR}/autonavigationmodule.h
   ${CMAKE_CURRENT_SOURCE_DIR}/helperfunctions.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/instruction.h
   ${CMAKE_CURRENT_SOURCE_DIR}/path.h
   ${CMAKE_CURRENT_SOURCE_DIR}/pathcurve.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/pathinstruction.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rotationinterpolator.h
   ${CMAKE_CURRENT_SOURCE_DIR}/speedfunction.h
   ${CMAKE_CURRENT_SOURCE_DIR}/waypoint.h
@@ -46,9 +46,9 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/autonavigationmodule.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/autonavigationmodule_lua.inl
   ${CMAKE_CURRENT_SOURCE_DIR}/helperfunctions.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/instruction.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/path.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/pathcurve.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/pathinstruction.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rotationinterpolator.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/speedfunction.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/waypoint.cpp

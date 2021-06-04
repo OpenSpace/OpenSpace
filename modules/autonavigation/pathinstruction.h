@@ -31,7 +31,7 @@
 
 namespace openspace::autonavigation {
 
-struct Instruction {
+struct PathInstruction {
     using NavigationState = interaction::NavigationHandler::NavigationState;
 
     enum class Type {
@@ -39,7 +39,7 @@ struct Instruction {
         NavigationState
     };
 
-    Instruction(const ghoul::Dictionary& dictionary);
+    PathInstruction(const ghoul::Dictionary& dictionary);
 
     std::vector<Waypoint> waypoints() const;
 

@@ -25,7 +25,7 @@
 #include <modules/autonavigation/autonavigationhandler.h>
 
 #include <modules/autonavigation/helperfunctions.h>
-#include <modules/autonavigation/instruction.h>
+#include <modules/autonavigation/pathinstruction.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/navigationhandler.h>
@@ -256,7 +256,7 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
     }
 }
 
-void AutoNavigationHandler::createPath(Instruction& instruction) {
+void AutoNavigationHandler::createPath(PathInstruction& instruction) {
     clearPath();
 
     // TODO: do this in some initialize function instead
@@ -269,7 +269,7 @@ void AutoNavigationHandler::createPath(Instruction& instruction) {
     Waypoint waypointToAdd;
 
     if (waypoints.empty()) {
-        if (instruction.type == Instruction::Type::Node) {
+        if (instruction.type == PathInstruction::Type::Node) {
             // TODO: allow curves to compute default waypoint instead
             waypointToAdd = computeDefaultWaypoint(instruction);
         }
@@ -484,7 +484,7 @@ SceneGraphNode* AutoNavigationHandler::findNodeNearTarget(const SceneGraphNode* 
 
 // OBS! The desired default waypoint may vary between curve types.
 // TODO: let the curves update the default position if no exact position is required
-Waypoint AutoNavigationHandler::computeDefaultWaypoint(const Instruction& ins) {
+Waypoint AutoNavigationHandler::computeDefaultWaypoint(const PathInstruction& ins) {
     const SceneGraphNode* targetNode = sceneGraphNode(ins.nodeIdentifier);
     if (!targetNode) {
         LERROR(fmt::format("Could not find target node '{}'", ins.nodeIdentifier));

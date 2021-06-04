@@ -59,7 +59,7 @@ double AutoNavigationModule::minValidBoundingSphere() const {
 
 std::vector<documentation::Documentation> AutoNavigationModule::documentations() const {
     return {
-        autonavigation::Instruction::Documentation()
+        autonavigation::PathInstruction::Documentation()
     };
 }
 

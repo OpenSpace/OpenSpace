@@ -39,7 +39,7 @@ namespace openspace {
 namespace openspace::autonavigation {
 
 struct Waypoint;
-struct Instruction;
+struct PathInstruction;
 struct TargetNodeInstruction;
 
 class AutoNavigationHandler : public properties::PropertyOwner {
@@ -58,7 +58,7 @@ public:
     bool hasFinished() const;
 
     void updateCamera(double deltaTime);
-    void createPath(Instruction& spec);
+    void createPath(PathInstruction& spec);
     void clearPath();
     void startPath();
     void abortPath();
@@ -73,13 +73,13 @@ public:
     std::vector<glm::dvec3> controlPoints();
 
 private:
-    Waypoint wayPointFromCamera();
+    Waypoint waypointFromCamera();
     void removeRollRotation(CameraPose& pose, double deltaTime);
 
-    void addSegment(const Instruction& ins);
+    void addSegment(const PathInstruction& ins);
 
     SceneGraphNode* findNodeNearTarget(const SceneGraphNode* node);
-    Waypoint computeDefaultWaypoint(const Instruction& ins);
+    Waypoint computeDefaultWaypoint(const PathInstruction& ins);
 
     std::vector<SceneGraphNode*> findRelevantNodes();
 
