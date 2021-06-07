@@ -23,10 +23,6 @@ local Bennu = {
       SourceFrame = "IAU_BENNU",
       DestinationFrame = "GALACTIC"
     },
-    Scale = {
-      Type = "StaticScale",
-      Scale = 1.0
-    }
   },
   Renderable = {
     Enabled = false,
