@@ -40,7 +40,6 @@ namespace openspace::autonavigation {
 
 struct Waypoint;
 struct PathInstruction;
-struct TargetNodeInstruction;
 
 class AutoNavigationHandler : public properties::PropertyOwner {
 public:
@@ -51,7 +50,6 @@ public:
     Camera* camera() const;
     const SceneGraphNode* anchor() const;
     const std::vector<SceneGraphNode*>& relevantNodes() const;
-    int integrationResolutionPerFrame() const;
     double speedScale() const;
 
     bool noCurrentPath() const;
@@ -76,8 +74,6 @@ private:
     Waypoint waypointFromCamera();
     void removeRollRotation(CameraPose& pose, double deltaTime);
 
-    void addSegment(const PathInstruction& ins);
-
     SceneGraphNode* findNodeNearTarget(const SceneGraphNode* node);
     Waypoint computeDefaultWaypoint(const PathInstruction& ins);
 
@@ -85,13 +81,14 @@ private:
 
     std::unique_ptr<Path> _currentPath = nullptr;
 
-    AtNodeNavigator _atNodeNavigator; // responsible for navigation during stops
+    AtNodeNavigator _atNodeNavigator;
     bool _isPlaying = false;
 
     std::vector<SceneGraphNode*> _relevantNodes;
 
     properties::OptionProperty _defaultCurveOption;
     properties::BoolProperty _includeRoll;
+    properties::FloatProperty _speedScale;
 
     // for testing pause behaviors.
     // TODO: remove later, if it causes problems with regular navigation
@@ -99,10 +96,6 @@ private:
     properties::OptionProperty _stopBehavior;
 
     properties::StringListProperty _relevantNodeTags;
-    properties::FloatProperty _defaultPositionOffsetAngle;
-    properties::BoolProperty _pickClosestTargetPosition;
-    properties::IntProperty _integrationResolutionPerFrame;
-    properties::FloatProperty _speedScale;
 };
 
 } // namespace openspace::autonavigation

@@ -85,14 +85,12 @@ std::vector<glm::dvec3> Path::controlPoints() const {
 }
 
 CameraPose Path::traversePath(double dt) {
-    AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-    AutoNavigationHandler& handler = module->AutoNavigationHandler();
-    const int nSteps = handler.integrationResolutionPerFrame();
+    const int resolution = 50;
 
     double displacement = helpers::simpsonsRule(
         _progressedTime,
         _progressedTime + dt,
-        nSteps,
+        resolution,
         [this](double t) { return speedAtTime(t); }
     );
 

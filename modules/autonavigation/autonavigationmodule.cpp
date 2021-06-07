@@ -34,8 +34,9 @@ namespace {
     constexpr const openspace::properties::Property::PropertyInfo MinBoundingSphereInfo = {
         "MinimalValidBoundingSphere",
         "Minimal Valid Bounding Sphere",
-        "The minimal allowed value for a bounding sphere. Used for computation of target "
-        "positions and path generation, to avoid issues when there is no bounding sphere."
+        "The minimal allowed value for a bounding sphere, in meters. Used for "
+        "computation of target positions and path generation, to avoid issues when "
+        "there is no bounding sphere."
     };
 } // namespace
 

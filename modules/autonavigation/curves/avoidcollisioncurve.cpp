@@ -104,7 +104,7 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
     // Create extra points to avoid collision
     removeCollisions();
 
-    _nSegments = _points.size() - 3;
+    _nSegments = static_cast<int>(_points.size() - 3);
 
     initParameterIntervals();
 }

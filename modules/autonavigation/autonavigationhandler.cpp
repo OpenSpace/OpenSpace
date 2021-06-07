@@ -56,14 +56,6 @@ namespace {
         "If disabled, roll is removed from the interpolation of camera orientation."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo StopAtTargetsPerDefaultInfo = {
-        "StopAtTargetsPerDefault",
-        "Stop At Targets Per Default",
-        "Applied during path creation. If enabled, stops are automatically added "
-        "between the path segments. The user must then choose to continue the path "
-        "after reaching a target"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo DefaultStopBehaviorInfo = {
         "DefaultStopBehavior",
         "Default Stop Behavior",
@@ -83,28 +75,6 @@ namespace {
         "Relevant Node Tags",
         "List of tags for the nodes that are relevant for path creation, for example "
         "when avoiding collisions."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo DefaultPositionOffsetAngleInfo = {
-        "DefaultPositionOffsetAngle",
-        "Default Position Offset Angle",
-        "Used for creating a default position at a target node. The angle (in degrees) "
-        "specifies the deviation from the line connecting the target node and the sun, "
-        "in the direction of the camera position at the start of the path."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo PickClosestTargetPosInfo = {
-        "PickClosestTargetPosition",
-        "Pick Closest Target Position",
-        "If this flag is set to two the target position for a node based motion is "
-        "computed along the line from the previous camera position."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo IntegrationResolutionInfo = {
-        "IntegrationResolution",
-        "Path Integration Resolution",
-        "The number of steps used to integrate along the spline curve every frame. A "
-        "larger number increases the precision, at the cost of reduced efficiency."
     };
 
     constexpr openspace::properties::Property::PropertyInfo SpeedScaleInfo = {
@@ -130,9 +100,6 @@ AutoNavigationHandler::AutoNavigationHandler()
     )
     , _applyStopBehaviorWhenIdle(ApplyStopBehaviorWhenIdleInfo, false)
     , _relevantNodeTags(RelevantNodeTagsInfo)
-    , _defaultPositionOffsetAngle(DefaultPositionOffsetAngleInfo, 30.f, -90.f, 90.f)
-    , _pickClosestTargetPosition(PickClosestTargetPosInfo, false)
-    , _integrationResolutionPerFrame(IntegrationResolutionInfo, 100, 10, 500)
     , _speedScale(SpeedScaleInfo, 1.f, 0.01f, 2.f)
 {
     addPropertySubOwner(_atNodeNavigator);
@@ -145,6 +112,9 @@ AutoNavigationHandler::AutoNavigationHandler()
     addProperty(_defaultCurveOption);
 
     addProperty(_includeRoll);
+    addProperty(_speedScale);
+
+    addProperty(_applyStopBehaviorWhenIdle);
 
     // Must be listed in the same order as in enum definition
     _stopBehavior.addOptions({
@@ -159,8 +129,6 @@ AutoNavigationHandler::AutoNavigationHandler()
     });
     addProperty(_stopBehavior);
 
-    addProperty(_applyStopBehaviorWhenIdle);
-
     // Add the relevant tags
     _relevantNodeTags = std::vector<std::string>{
         "planet_solarSystem",
@@ -168,11 +136,6 @@ AutoNavigationHandler::AutoNavigationHandler()
     };;
     _relevantNodeTags.onChange([this]() { _relevantNodes = findRelevantNodes(); });
     addProperty(_relevantNodeTags);
-
-    addProperty(_defaultPositionOffsetAngle);
-    addProperty(_pickClosestTargetPosition);
-    addProperty(_integrationResolutionPerFrame);
-    addProperty(_speedScale);
 }
 
 AutoNavigationHandler::~AutoNavigationHandler() {} // NOLINT
@@ -187,10 +150,6 @@ const SceneGraphNode* AutoNavigationHandler::anchor() const {
 
 const std::vector<SceneGraphNode*>& AutoNavigationHandler::relevantNodes() const {
     return _relevantNodes;
-}
-
-int AutoNavigationHandler::integrationResolutionPerFrame() const {
-    return _integrationResolutionPerFrame;
 }
 
 double AutoNavigationHandler::speedScale() const {
@@ -212,16 +171,16 @@ bool AutoNavigationHandler::hasFinished() const {
 void AutoNavigationHandler::updateCamera(double deltaTime) {
     ghoul_assert(camera() != nullptr, "Camera must not be nullptr");
 
-    if (noCurrentPath()) {
-        return;
-    }
-
     if (!_isPlaying) {
         // For testing, apply at node behavior when idle
         // @TODO: Determine how this should work instead
         if (_applyStopBehaviorWhenIdle) {
             _atNodeNavigator.updateCamera(deltaTime);
         }
+        return;
+    }
+
+    if (noCurrentPath()) {
         return;
     }
 
@@ -331,9 +290,7 @@ void AutoNavigationHandler::startPath() {
 //    }
 //
 //    LINFO("Continuing path...");
-//
-//    // recompute start camera state for the upcoming path segment,
-//    _currentPath.segments[_currentSegmentIndex].setStartPoint(wayPointFromCamera());
+//    _isPlaying = true;
 //}
 
 void AutoNavigationHandler::abortPath() {
@@ -509,17 +466,15 @@ Waypoint AutoNavigationHandler::computeDefaultWaypoint(const PathInstruction& in
         // the solar system, and not stay in the orbital plane
         stepDirection = glm::dvec3(0.0, 0.0, 1.0);
     }
-    else if (_pickClosestTargetPosition) {
-        stepDirection = glm::normalize(prevPos - nodePos);
-    }
     else {
         // Go to a point that is being lit up by the sun, slightly offsetted from sun
         // direction
         const glm::dvec3 targetToPrev = prevPos - nodePos;
         const glm::dvec3 targetToSun = sunPos - nodePos;
 
+        constexpr const float defaultPositionOffsetAngle = -30.f; // degrees
+        constexpr const float angle = glm::radians(defaultPositionOffsetAngle);
         const glm::dvec3 axis = glm::normalize(glm::cross(targetToPrev, targetToSun));
-        const float angle = glm::radians(-1.f * _defaultPositionOffsetAngle);
         const glm::dquat offsetRotation = angleAxis(static_cast<double>(angle), axis);
 
         stepDirection = glm::normalize(offsetRotation * targetToSun);
