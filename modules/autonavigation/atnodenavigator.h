@@ -45,7 +45,7 @@ public:
     AtNodeNavigator();
     ~AtNodeNavigator();
 
-    const Behavior behavior() const;
+    Behavior behavior() const;
     void setBehavior(Behavior behavior);
 
     void updateCamera(double deltaTime);

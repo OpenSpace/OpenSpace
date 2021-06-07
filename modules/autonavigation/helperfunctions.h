@@ -40,6 +40,8 @@ namespace openspace::autonavigation::helpers {
 
     glm::dquat lookAtQuaternion(glm::dvec3 eye, glm::dvec3 center, glm::dvec3 up);
 
+    glm::dvec3 viewDirection(const glm::dquat& q);
+
     bool lineSphereIntersection(glm::dvec3 linePoint1, glm::dvec3 linePoint2,
         glm::dvec3 sphereCenter, double spehereRadius, glm::dvec3& intersectionPoint);
 

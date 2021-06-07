@@ -38,7 +38,6 @@
 
 namespace {
     constexpr const char* _loggerCat = "Path";
-    const double Epsilon = 1E-7;
 } // namespace
 
 namespace openspace::autonavigation {
@@ -47,7 +46,36 @@ Path::Path(Waypoint start, Waypoint end, CurveType type,
            std::optional<double> duration)
     : _start(start), _end(end), _curveType(type)
 {
-    initializePath();
+    switch (_curveType) {
+        case CurveType::AvoidCollision:
+            _curve = std::make_unique<AvoidCollisionCurve>(_start, _end);
+            _rotationInterpolator = std::make_unique<EasedSlerpInterpolator>(
+                _start.rotation(),
+                _end.rotation()
+            );
+            break;
+        case CurveType::Linear:
+            _curve = std::make_unique<LinearCurve>(_start, _end);
+            _rotationInterpolator = std::make_unique<EasedSlerpInterpolator>(
+                _start.rotation(),
+                _end.rotation()
+            );
+            break;
+        case CurveType::ZoomOutOverview:
+            _curve = std::make_unique<ZoomOutOverviewCurve>(_start, _end);
+            _rotationInterpolator = std::make_unique<LookAtInterpolator>(
+                _start.rotation(),
+                _end.rotation(),
+                _start.node()->worldPosition(),
+                _end.node()->worldPosition(),
+                _curve.get()
+            );
+            break;
+        default:
+            LERROR("Could not create curve. Type does not exist!");
+            throw ghoul::MissingCaseException();
+            return;
+    }
 
     _speedFunction = SpeedFunction(SpeedFunction::Type::DampenedQuintic);
 
@@ -116,41 +144,6 @@ CameraPose Path::interpolatedPose(double distance) const {
     cs.position = _curve->positionAt(u);
     cs.rotation = _rotationInterpolator->interpolate(u);
     return cs;
-}
-
-void Path::initializePath() {
-    _curve.reset();
-
-    switch (_curveType) {
-        case CurveType::AvoidCollision:
-            _curve = std::make_unique<AvoidCollisionCurve>(_start, _end);
-            _rotationInterpolator = std::make_unique<EasedSlerpInterpolator>(
-                _start.rotation(),
-                _end.rotation()
-            );
-            break;
-        case CurveType::Linear:
-            _curve = std::make_unique<LinearCurve>(_start, _end);
-            _rotationInterpolator = std::make_unique<EasedSlerpInterpolator>(
-                _start.rotation(),
-                _end.rotation()
-            );
-            break;
-        case CurveType::ZoomOutOverview:
-            _curve = std::make_unique<ZoomOutOverviewCurve>(_start, _end);
-            _rotationInterpolator = std::make_unique<LookAtInterpolator>(
-                _start.rotation(),
-                _end.rotation(),
-                _start.node()->worldPosition(),
-                _end.node()->worldPosition(),
-                _curve.get()
-            );
-            break;
-        default:
-            LERROR("Could not create curve. Type does not exist!");
-            throw ghoul::MissingCaseException();
-            return;
-    }
 }
 
 } // namespace openspace::autonavigation

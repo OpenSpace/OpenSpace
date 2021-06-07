@@ -37,8 +37,6 @@
 namespace {
     constexpr const char* _loggerCat = "AtNodeNavigator";
 
-    const double Epsilon = 1E-7;
-
     constexpr const openspace::properties::Property::PropertyInfo OrbitSpeedFactorInfo = {
         "OrbitSpeedFactor",
         "Orbit Speed Factor",
@@ -58,7 +56,7 @@ AtNodeNavigator::AtNodeNavigator()
 
 AtNodeNavigator::~AtNodeNavigator() {} // NOLINT
 
-const AtNodeNavigator::Behavior AtNodeNavigator::behavior() const {
+AtNodeNavigator::Behavior AtNodeNavigator::behavior() const {
     return _behavior;
 }
 

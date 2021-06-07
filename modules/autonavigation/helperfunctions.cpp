@@ -45,6 +45,10 @@ namespace openspace::autonavigation::helpers {
         return glm::normalize(glm::inverse(glm::quat_cast(lookAtMat)));
     }
 
+    glm::dvec3 viewDirection(const glm::dquat& q) {
+        return glm::normalize(q * glm::dvec3(0.0, 0.0, -1.0));
+    };
+
     /*
      * Calculate the intersection of a line and a sphere
      * The line segment is defined from p1 to p2

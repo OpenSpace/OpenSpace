@@ -56,7 +56,6 @@ public:
 
 private:
     double speedAtTime(double time) const;
-    void initializePath();
 
     Waypoint _start;
     Waypoint _end;
