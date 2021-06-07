@@ -38,7 +38,6 @@
 
 namespace {
     constexpr const char* _loggerCat = "ZoomOutOverviewCurve";
-
 } // namespace
 
 namespace openspace::autonavigation {
@@ -48,9 +47,9 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
     const double startNodeRadius = start.nodeDetails.validBoundingSphere;
     const double endNodeRadius = end.nodeDetails.validBoundingSphere;
 
-    const double endsTangetLengthFactor = 2.0;
-    const double startTangentLength = endsTangetLengthFactor * startNodeRadius;
-    const double endTangentLength = endsTangetLengthFactor * endNodeRadius;
+    const double endTangentsLengthFactor = 2.0;
+    const double startTangentLength = endTangentsLengthFactor * startNodeRadius;
+    const double endTangentLength = endTangentsLengthFactor * endNodeRadius;
 
     const glm::dvec3 startNodePos = start.node()->worldPosition();
     const glm::dvec3 endNodePos = end.node()->worldPosition();

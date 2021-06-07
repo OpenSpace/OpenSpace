@@ -55,6 +55,8 @@ namespace openspace::autonavigation::helpers {
 
 namespace openspace::autonavigation::interpolation {
 
+    glm::dquat easedSlerp(const glm::dquat q1, const glm::dquat q2, double t);
+
     // TODO: make all these into template functions.
     // Alternatively, add cubicBezier interpolation in ghoul and only use
     // ghoul's interpolator methods

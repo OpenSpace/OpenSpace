@@ -26,11 +26,8 @@
 #define __OPENSPACE_MODULE___PATHSEGMENT___H__
 
 #include <modules/autonavigation/pathcurve.h>
-#include <modules/autonavigation/rotationinterpolator.h>
 #include <modules/autonavigation/speedfunction.h>
 #include <modules/autonavigation/waypoint.h>
-#include <ghoul/glm.h>
-#include <vector>
 
 namespace openspace::autonavigation {
 
@@ -56,6 +53,7 @@ public:
 
 private:
     double speedAtTime(double time) const;
+    glm::dquat interpolateRotation(double u) const;
 
     Waypoint _start;
     Waypoint _end;
@@ -63,7 +61,6 @@ private:
     CurveType _curveType;
 
     SpeedFunction _speedFunction;
-    std::unique_ptr<RotationInterpolator> _rotationInterpolator;
     std::unique_ptr<PathCurve> _curve;
 
     // Playback variables

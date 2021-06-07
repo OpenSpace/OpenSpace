@@ -27,7 +27,6 @@
 #include <modules/autonavigation/autonavigationmodule.h>
 #include <modules/autonavigation/helperfunctions.h>
 #include <modules/autonavigation/pathcurve.h>
-#include <modules/autonavigation/rotationinterpolator.h>
 #include <modules/autonavigation/speedfunction.h>
 #include <modules/autonavigation/curves/avoidcollisioncurve.h>
 #include <modules/autonavigation/curves/zoomoutoverviewcurve.h>
@@ -35,6 +34,7 @@
 #include <openspace/engine/moduleengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/interpolator.h>
 
 namespace {
     constexpr const char* _loggerCat = "Path";
@@ -49,45 +49,27 @@ Path::Path(Waypoint start, Waypoint end, CurveType type,
     switch (_curveType) {
         case CurveType::AvoidCollision:
             _curve = std::make_unique<AvoidCollisionCurve>(_start, _end);
-            _rotationInterpolator = std::make_unique<EasedSlerpInterpolator>(
-                _start.rotation(),
-                _end.rotation()
-            );
             break;
         case CurveType::Linear:
             _curve = std::make_unique<LinearCurve>(_start, _end);
-            _rotationInterpolator = std::make_unique<EasedSlerpInterpolator>(
-                _start.rotation(),
-                _end.rotation()
-            );
             break;
         case CurveType::ZoomOutOverview:
             _curve = std::make_unique<ZoomOutOverviewCurve>(_start, _end);
-            _rotationInterpolator = std::make_unique<LookAtInterpolator>(
-                _start.rotation(),
-                _end.rotation(),
-                _start.node()->worldPosition(),
-                _end.node()->worldPosition(),
-                _curve.get()
-            );
             break;
         default:
             LERROR("Could not create curve. Type does not exist!");
             throw ghoul::MissingCaseException();
-            return;
     }
 
     _speedFunction = SpeedFunction(SpeedFunction::Type::DampenedQuintic);
 
-    if (duration.has_value()) {
-        _duration = duration.value();
-    }
-    else {
-        _duration = std::log(pathLength());
-
+    const auto defaultDuration = [](double pathlength) {
         auto module = global::moduleEngine->module<AutoNavigationModule>();
-        _duration /= module->AutoNavigationHandler().speedScale();
-    }
+        const double speedScale = module->AutoNavigationHandler().speedScale();
+        return std::log(pathlength) / speedScale;
+    };
+
+    _duration = duration.value_or(defaultDuration(pathLength()));
 }
 
 Waypoint Path::startPoint() const { return _start; }
@@ -103,11 +85,6 @@ std::vector<glm::dvec3> Path::controlPoints() const {
 }
 
 CameraPose Path::traversePath(double dt) {
-    if (!_curve || !_rotationInterpolator) {
-        // TODO: handle better (abort path somehow)
-        return _start.pose;
-    }
-
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
     AutoNavigationHandler& handler = module->AutoNavigationHandler();
     const int nSteps = handler.integrationResolutionPerFrame();
@@ -142,8 +119,63 @@ CameraPose Path::interpolatedPose(double distance) const {
     double u = distance / pathLength();
     CameraPose cs;
     cs.position = _curve->positionAt(u);
-    cs.rotation = _rotationInterpolator->interpolate(u);
+    cs.rotation = interpolateRotation(u);
     return cs;
+}
+
+glm::dquat Path::interpolateRotation(double u) const {
+    switch (_curveType) {
+        case CurveType::AvoidCollision:
+        case CurveType::Linear:
+            return interpolation::easedSlerp(_start.rotation(), _end.rotation(), u);
+        case CurveType::ZoomOutOverview:
+        {
+            const double u1 = 0.2;
+            const double u2 = 0.8;
+
+            const glm::dvec3 startPos = _curve->positionAt(0.0);
+            const glm::dvec3 endPos = _curve->positionAt(1.0);
+            const glm::dvec3 startNodePos = _start.node()->worldPosition();
+            const glm::dvec3 endNodePos = _end.node()->worldPosition();
+
+            glm::dvec3 lookAtPos;
+            if (u < u1) {
+                // Compute a position in front of the camera at the start orientation
+                const double inFrontDistance = glm::distance(startPos, startNodePos);
+                const glm::dvec3 viewDir = helpers::viewDirection(_start.rotation());
+                const glm::dvec3 inFrontOfStart = startPos + inFrontDistance * viewDir;
+
+                double uScaled = ghoul::cubicEaseInOut(u / u1);
+                lookAtPos = 
+                    ghoul::interpolateLinear(uScaled, inFrontOfStart, startNodePos);
+            }
+            else if (u <= u2) {
+                double uScaled = ghoul::cubicEaseInOut((u - u1) / (u2 - u1));
+                lookAtPos = ghoul::interpolateLinear(uScaled, startNodePos, endNodePos);
+            }
+            else if (u2 < u) {
+                // Compute a position in front of the camera at the end orientation
+                const double inFrontDistance = glm::distance(endPos, endNodePos);
+                const glm::dvec3 viewDir = helpers::viewDirection(_end.rotation());
+                const glm::dvec3 inFrontOfEnd = endPos + inFrontDistance * viewDir;
+
+                double uScaled = ghoul::cubicEaseInOut((u - u2) / (1.0 - u2));
+                lookAtPos = ghoul::interpolateLinear(uScaled, endNodePos, inFrontOfEnd);
+            }
+
+            // Handle up vector separately
+            glm::dvec3 startUp = _start.rotation() * glm::dvec3(0.0, 1.0, 0.0);
+            glm::dvec3 endUp = _end.rotation() * glm::dvec3(0.0, 1.0, 0.0);
+
+            double uUp = helpers::shiftAndScale(u, u1, u2);
+            uUp = ghoul::sineEaseInOut(uUp);
+            glm::dvec3 up = ghoul::interpolateLinear(uUp, startUp, endUp);
+
+            return helpers::lookAtQuaternion(_curve->positionAt(u), lookAtPos, up);
+        }
+        default:
+            throw ghoul::MissingCaseException();
+    }
 }
 
 } // namespace openspace::autonavigation

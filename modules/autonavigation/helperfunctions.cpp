@@ -24,6 +24,7 @@
 
 #include <modules/autonavigation/helperfunctions.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/easing.h>
 
 namespace {
     constexpr const char* _loggerCat = "Helpers";
@@ -79,7 +80,7 @@ namespace openspace::autonavigation::helpers {
         }
         else {
             // only care about the first intersection point if we have two
-            double t = (-b - std::sqrt(intersectionTest)) / (2.0 *a);
+            const double t = (-b - std::sqrt(intersectionTest)) / (2.0 *a);
 
             if (t <= Epsilon || t >= abs(1.0 - Epsilon)) return false;
 
@@ -89,20 +90,18 @@ namespace openspace::autonavigation::helpers {
     }
 
     bool isPointInsideSphere(const glm::dvec3& p, const glm::dvec3& c, double r) {
-        glm::dvec3 v = c - p;
-        long double squaredDistance = v.x * v.x + v.y * v.y + v.z * v.z;
-        long double squaredRadius = r * r;
-        if (squaredDistance <= squaredRadius) {
-            return true;
-        }
-        return false;
+        const glm::dvec3 v = c - p;
+        const long double squaredDistance = v.x * v.x + v.y * v.y + v.z * v.z;
+        const long double squaredRadius = r * r;
+
+        return (squaredDistance <= squaredRadius);
     }
 
     double simpsonsRule(double t0, double t1, int n, std::function<double(double)> f) {
-        double h = (t1 - t0) / static_cast<double>(n);
+        const double h = (t1 - t0) / static_cast<double>(n);
+        const double endpoints = f(t0) + f(t1);
         double times4 = 0.0;
         double times2 = 0.0;
-        double endpoints = f(t0) + f(t1);
 
         // weight 4
         for (int i = 1; i < n; i += 2) {
@@ -153,6 +152,12 @@ namespace openspace::autonavigation::helpers {
 } // helpers
 
 namespace openspace::autonavigation::interpolation {
+
+    glm::dquat easedSlerp(const glm::dquat q1, const glm::dquat q2, double t) {
+        double tScaled = helpers::shiftAndScale(t, 0.1, 0.9);
+        tScaled = ghoul::sineEaseInOut(tScaled);
+        return glm::slerp(q1, q2, tScaled);
+    }
 
     // Based on implementation by Mika Rantanen
     // https://qroph.github.io/2018/07/30/smooth-paths-using-catmull-rom-splines.html
@@ -225,10 +230,19 @@ namespace openspace::autonavigation::interpolation {
     glm::dvec3 piecewiseCubicBezier(double t, const std::vector<glm::dvec3>& points,
                                     const std::vector<double>& tKnots)
     {
-        ghoul_assert(points.size() > 4, "Minimum of four control points needed for interpolation!");
-        ghoul_assert((points.size() - 1) % 3 == 0, "A vector containing 3n + 1 control points must be provided!");
+        ghoul_assert(
+            points.size() > 4, 
+            "Minimum of four control points needed for interpolation"
+        );
+        ghoul_assert(
+            (points.size() - 1) % 3 == 0, 
+            "A vector containing 3n + 1 control points must be provided"
+        );
         int nrSegments = (points.size() - 1) / 3;
-        ghoul_assert(nrSegments == (tKnots.size() - 1), "Number of interval times must match number of segments");
+        ghoul_assert(
+            rSegments == (tKnots.size() - 1), 
+            "Number of interval times must match number of segments"
+        );
 
         if (t <= 0.0) return points.front();
         if (t >= 1.0) return points.back();
