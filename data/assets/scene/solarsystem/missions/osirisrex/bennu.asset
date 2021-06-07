@@ -5,6 +5,15 @@ local models = asset.require('./models').models
 
 local BENNU_BODY = "2101955"
 
+local LightSources = {
+  {
+    Type = "SceneGraphLightSource",
+    Identifier = "Sun",
+    Node = sunTransforms.SolarSystemBarycenter.Identifier,
+    Intensity = 1.0
+  },
+}
+
 local Bennu = {
   Identifier = "Bennu",
   Parent = transforms.BennuBarycenter.Identifier,
@@ -16,39 +25,20 @@ local Bennu = {
     },
     Scale = {
       Type = "StaticScale",
-      Scale = 1000.0
+      Scale = 1.0
     }
   },
   Renderable = {
     Enabled = false,
     Type = "RenderableModel",
     Body = BENNU_BODY,
-    GeometryFile = models .. "/Bennu_v20_200k.stl",
+    GeometryFile = models .. "/Bennu_v20_200k_an.obj",
+    LightSources = LightSources,
+    SpecularIntensity = 0.0
   },
   GUI = {
     Path = "/Solar System/Asteroid"
   }
 }
 
-local BennuTrail = {
-  Identifier = "BennuTrail",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
-  Renderable = {
-    Type = "RenderableTrailTrajectory",
-    Translation = {
-      Type = "SpiceTranslation",
-      Target = BENNU_BODY,
-      Observer = "SUN"
-    },
-    Color = { 0.4, 0.0, 0.7 },
-    StartTime = "2015 JAN 01 00:00:00.000",
-    EndTime = "2023 MAY 31 00:00:00.000",
-    SampleInterval = 3600
-  },
-  GUI = {
-    Name = "Bennu Trail",
-    Path = "/Solar System/Asteroid"
-  }
-}
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { Bennu, BennuTrail })
+assetHelper.registerSceneGraphNodesAndExport(asset, {Bennu})
