@@ -50,6 +50,7 @@ namespace openspace {
         ghoul::Dictionary removeImageLayer(const std::string& imageId);
         ghoul::Dictionary setLayerOpacity(const std::string& imageId, double opacity);
         ghoul::Dictionary setForegroundOpacity(double val);
+        ghoul::Dictionary setLayerOrder(const std::string& id, int order);
     }
 }
 

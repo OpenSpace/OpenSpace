@@ -142,6 +142,30 @@ namespace openspace::skybrowser::luascriptfunctions {
         }
         return 0;
     }
+
+
+    int setImageLayerOrder(lua_State* L) {
+        ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::setImageLayerOrder");
+        const std::string browserId = ghoul::lua::value<std::string>(L, 1);
+        const int i = ghoul::lua::value<int>(L, 2);
+        int order = ghoul::lua::value<int>(L, 3);
+        SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+        ghoul::Dictionary message = wwtmessage::setLayerOrder(std::to_string(i), order);
+
+        if (module->browserIdExists(browserId)) {
+            ScreenSpaceSkyBrowser* browser = module->getSkyBrowsers()[browserId];
+            browser->sendMessageToWWT(message);
+            browser->setImageLayerOrder(i, order);
+        }
+        else if (module->get3dBrowser() != nullptr) {
+            RenderableSkyBrowser* browser3d = dynamic_cast<RenderableSkyBrowser*>(
+                module->get3dBrowser()->renderable());
+            browser3d->sendMessageToWWT(message);
+            browser3d->setImageLayerOrder(i, order);
+        }
+
+        return 0;
+    }
 	
 	int loadImagesToWWT(lua_State* L) {
 		// Load images from url
@@ -346,9 +370,9 @@ namespace openspace::skybrowser::luascriptfunctions {
        
         
         // Calculate the smallest FOV of vertical and horizontal
-        float HFOV = global::windowDelegate->getHorizFieldOfView();
-        glm::vec2 windowRatio = global::windowDelegate->currentWindowSize();
-        float VFOV = HFOV * (windowRatio.y / windowRatio.x);
+        double HFOV = global::windowDelegate->getHorizFieldOfView();
+        glm::dvec2 windowRatio = global::windowDelegate->currentWindowSize();
+        double VFOV = HFOV * (windowRatio.y / windowRatio.x);
         double FOV = std::min(HFOV, VFOV);
         // Push window data
         ghoul::lua::push(L, "windowHFOV", FOV);
@@ -509,7 +533,6 @@ namespace openspace::skybrowser::luascriptfunctions {
         const int i = ghoul::lua::value<int>(L, 2);
         double opacity = ghoul::lua::value<double>(L, 3);
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-        ImageData& image = module->getWWTDataHandler()->getLoadedImages()[i];
         ghoul::Dictionary message = wwtmessage::setLayerOpacity(std::to_string(i), opacity);
 
         if (module->browserIdExists(browserId)) {    

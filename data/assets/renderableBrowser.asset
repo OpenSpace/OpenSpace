@@ -3,6 +3,7 @@ local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 local PARSEC_CONSTANT = 3.0856776E16;
 local browserId = "SkyBrowser3D";
+local url = "https://data.openspaceproject.com/dist/skybrowser/page/";
 
 local browser = {
   Identifier = browserId,
@@ -27,7 +28,7 @@ local browser = {
     Size = 10.0E11,
     Origin = "Center",
     Billboard = false,
-    Url = "http://localhost:8000",
+    Url = url,
     Opacity = 0.99
   },
   GUI = {

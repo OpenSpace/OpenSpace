@@ -249,4 +249,13 @@ namespace openspace {
         return _selectedImages;
     }
 
+    void RenderableSkyBrowser::setImageLayerOrder(int i, int order) {
+        // Remove from selected list
+        auto it = std::find(std::begin(_selectedImages), std::end(_selectedImages), i);
+        if (it != std::end(_selectedImages)) {
+            _selectedImages.erase(it);
+            _selectedImages.insert(std::begin(_selectedImages) + order, i);
+        }
+    }
+
 } // namespace

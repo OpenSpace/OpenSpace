@@ -233,6 +233,14 @@ namespace openspace {
                 "string or list of strings",
                 "Add one or multiple exoplanet systems to the scene, as specified by the "
                 "input. An input string should be the name of the system host star"
+            }, 
+            {
+                "setImageLayerOrder",
+                &skybrowser::luascriptfunctions::setImageLayerOrder,
+                {},
+                "string or list of strings",
+                "Add one or multiple exoplanet systems to the scene, as specified by the "
+                "input. An input string should be the name of the system host star"
             },
         };
 
@@ -338,11 +346,11 @@ SkyBrowserModule::SkyBrowserModule()
             
             // If mouse is on browser or target, apply zoom
             if (to_browser(_mouseOnObject)) {
-                to_browser(_mouseOnObject)->scrollZoom(scroll);
+                to_browser(_mouseOnObject)->scrollZoom(static_cast<float>(scroll));
                 return true;
             }
             else if (to_target(_mouseOnObject) && to_target(_mouseOnObject)->getSkyBrowser()) {
-                to_target(_mouseOnObject)->getSkyBrowser()->scrollZoom(scroll);
+                to_target(_mouseOnObject)->getSkyBrowser()->scrollZoom(static_cast<float>(scroll));
             }
             
             return false;
@@ -521,19 +529,20 @@ bool SkyBrowserModule::browserIdExists(std::string id) {
 }
 
 void SkyBrowserModule::createTargetBrowserPair() {
-    int noOfPairs = getSkyBrowsers().size() + 1;
+    int noOfPairs = static_cast<int>(getSkyBrowsers().size()) + 1;
     std::string nameBrowser = "Sky Browser " + std::to_string(noOfPairs);
     std::string nameTarget = "Sky Target " + std::to_string(noOfPairs);
     std::string idBrowser = "SkyBrowser" + std::to_string(noOfPairs);
     std::string idTarget = "SkyTarget" + std::to_string(noOfPairs);
     glm::vec3 positionBrowser = { -1.0f, -0.5f, -2.1f };
     std::string guiPath = "/SkyBrowser";
+    std::string url = "https://data.openspaceproject.com/dist/skybrowser/page/";
 
     const std::string browser = "{"
             "Identifier = '" + idBrowser + "',"
             "Type = 'ScreenSpaceSkyBrowser',"
             "Name = '" + nameBrowser + "',"
-            "Url = 'http://localhost:8000/',"
+            "Url = '"+ url +"',"
             "FaceCamera = false,"
             "TargetID = '" + idTarget + "',"
             "CartesianPosition = " + ghoul::to_string(positionBrowser) + ","
@@ -587,11 +596,6 @@ void SkyBrowserModule::removeTargetBrowserPair(std::string& browserId) {
     bool hasTarget = browser->getSkyTarget();
     if (hasTarget) {
         targetId = browser->getSkyTarget()->identifier();
-
-        openspace::global::scriptEngine->queueScript(
-            "openspace.removeScreenSpaceRenderable('" + targetId + "');",
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
     }
     // Remove pointer to the renderable from browsers vector
     browsers.erase(browserId);
@@ -599,22 +603,30 @@ void SkyBrowserModule::removeTargetBrowserPair(std::string& browserId) {
     // Remove pointer to the renderable from screenspace renderable vector
     renderables.erase(std::remove_if(std::begin(renderables), std::end(renderables),
         [&](ScreenSpaceRenderable* renderable) {
-            bool foundBrowser = renderable->identifier() == browserId;
-            if (hasTarget) {
-                bool foundTarget = renderable->identifier() == targetId;
-                return foundBrowser || foundTarget;
+            if (renderable->identifier() == browserId) {
+                return true;
+            }
+            else if (renderable->identifier() == targetId) {
+                return true;
             }
             else {
-                return foundBrowser;
-            } 
-        }));
+                return false;
+            }
+        }), std::end(renderables));
     // Remove from engine
     openspace::global::scriptEngine->queueScript(
         "openspace.removeScreenSpaceRenderable('" + browserId + "');",
         scripting::ScriptEngine::RemoteScripting::Yes
     );
-    
-    
+
+    if (hasTarget) {
+        openspace::global::scriptEngine->queueScript(
+            "openspace.removeScreenSpaceRenderable('" + targetId + "');",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    }
+
+    _mouseOnObject = nullptr;
 }
 
 void SkyBrowserModule::place3dBrowser(ImageData& image) {
