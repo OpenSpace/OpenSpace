@@ -41,6 +41,8 @@ public:
 
     void scaleflowline(float scale);
 
+    void computeTimes();
+
     bool loadStateFromOsfls(const std::string& pathToOsflsFile);
     void saveStateToOsfls(const std::string& pathToOsflsFile);
 
@@ -61,6 +63,8 @@ public:
     const std::vector<std::vector<glm::vec3>>& vertexPaths() const;
 
     const std::vector<std::vector<float>>& vertexVelocities() const;
+
+    const std::vector<std::vector<float>>& vertexTimes() const;
 
     // Special getter. Returns extraQuantities[index].
     std::vector<float> extraQuantity(size_t index, bool& isSuccesful) const;
@@ -91,10 +95,12 @@ private:
     std::vector<GLint> _lineStart;
     std::vector<glm::vec3> _vertexPositions;
 
-
     std::vector<size_t>_vertexIndex;
+    std::vector<float>_timeSinceLastVertex;
     std::vector< std::vector<glm::vec3> > _vertexPaths;
     std::vector< std::vector<float> > _vertexVelocities;
+    std::vector< std::vector<float> > _vertexTimes;
+
 };
 
 } // namespace openspace

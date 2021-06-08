@@ -69,6 +69,8 @@ void FieldlinesState::scaleflowline(float scale) {
     }
 }
 
+
+
 bool FieldlinesState::loadStateFromOsfls(const std::string& pathToOsflsFile) {
     std::ifstream ifs(pathToOsflsFile, std::ifstream::binary);
     if (!ifs.is_open()) {
@@ -427,6 +429,10 @@ void FieldlinesState::appendToExtra(size_t idx, float val) {
     _extraQuantities[idx].push_back(val);
 }
 
+glm::vec3 lerp(glm::vec3 a, glm::vec3 b, float t) {
+    return a * (1.f - t) + b * t;
+}
+
 void FieldlinesState::moveLine(double dt) {
     bool forward;
     if (dt > DBL_EPSILON) forward = true;
@@ -434,42 +440,45 @@ void FieldlinesState::moveLine(double dt) {
 
     unsigned i = 0;
     for (glm::vec3& vertex : _vertexPositions) {
+        _timeSinceLastVertex[i] += float(dt);
         if (forward) {
             //check if vertex is at the end of its path
-            if (_vertexIndex[i] == _vertexPaths[i].size()-1) continue;
-
-            //size of the radius depends on the dt
-            float vertexRadius = _vertexVelocities[i][_vertexIndex[i]] * float(dt);
-
-            if (vertexRadius > abs(
-                glm::length(vertex - _vertexPaths[i][_vertexIndex[i]+1])
-            )) {
+            if (_vertexIndex[i] == _vertexPaths[i].size() - 1) continue;
+            
+            //next index
+            if (_timeSinceLastVertex[i] > _vertexTimes[i][_vertexIndex[i]]) {
+                _timeSinceLastVertex[i] -= _vertexTimes[i][_vertexIndex[i]];
                 _vertexIndex[i]++;
                 //check if at end after increasing index
                 if (_vertexIndex[i] == _vertexPaths[i].size() - 1) continue;
             }
 
-            glm::vec3 direction = _vertexPaths[i][_vertexIndex[i] + 1] - vertex;
-            direction = glm::normalize(direction);
-            vertex += (direction * _vertexVelocities[i][_vertexIndex[i]]) * (float)dt;
+            //linear interpolation
+            float t = _timeSinceLastVertex[i] / _vertexTimes[i][_vertexIndex[i]];
+            glm::vec3 a = _vertexPaths[i][_vertexIndex[i]];
+            glm::vec3 b = _vertexPaths[i][_vertexIndex[i] + 1];
+
+            vertex = lerp(a, b, t);             
         }
         else {
             //the inital position, end condition
             if (_vertexIndex[i] == 0) continue;
 
-            //size of the radius depends on dt
-            float vertexRadius = abs(_vertexVelocities[i][_vertexIndex[i]] * float(dt));
-
-            if (vertexRadius > abs(
-                                glm::length(vertex - _vertexPaths[i][_vertexIndex[i]]))) {
+            //next index
+            if (_timeSinceLastVertex[i] < FLT_EPSILON) {
                 _vertexIndex[i]--;
+                _timeSinceLastVertex[i] += _vertexTimes[i][_vertexIndex[i]];
+
+                //check if at end after increasing index
                 if (_vertexIndex[i] == 0) continue;
             }
 
-            glm::vec3 direction = _vertexPaths[i][_vertexIndex[i]] - vertex;
-            //negative direction since the fieldline is reversing
-            direction = glm::normalize(-direction);
-            vertex += (direction * _vertexVelocities[i][_vertexIndex[i]]) * (float)dt;
+            //linear interpolation
+            float t = _timeSinceLastVertex[i] / _vertexTimes[i][_vertexIndex[i]];
+            glm::vec3 a = _vertexPaths[i][_vertexIndex[i]];
+            glm::vec3 b = _vertexPaths[i][_vertexIndex[i]+1];
+
+            vertex = lerp(a, b, t);
         }
         i++;
     }
@@ -478,10 +487,31 @@ void FieldlinesState::moveLine(double dt) {
 void FieldlinesState::addVertexPath(std::vector<glm::vec3> path) {
     _vertexPaths.push_back(path);
     _vertexIndex.push_back(0);
+    _timeSinceLastVertex.push_back(0.0f);
 }
 
 void FieldlinesState::addVertexVelocities(std::vector<float> velocities) {
     _vertexVelocities.push_back(velocities);
+}
+
+void FieldlinesState::computeTimes() {
+    unsigned i = 0;
+
+    for (std::vector<glm::vec3>& vec : _vertexPaths) {
+        std::vector<float> times;
+        for (size_t j = 0; j < vec.size() - 2; j++) {
+
+            //distance to next vertex point in trajectory (path)
+            float d = glm::length(vec[j + 1] - vec[j]);
+
+            //time to next vertex = distance / velocity
+            float time = d / _vertexVelocities[i][j];
+
+            times.push_back(time);
+        }
+        _vertexTimes.push_back(times);
+        i++;
+    }
 }
 
 void FieldlinesState::setExtraQuantityNames(std::vector<std::string> names) {
@@ -527,6 +557,10 @@ const std::vector< std::vector<glm::vec3> >& FieldlinesState::vertexPaths() cons
 
 const std::vector< std::vector<float> >& FieldlinesState::vertexVelocities() const {
     return _vertexVelocities;
+}
+
+const std::vector< std::vector<float> >& FieldlinesState::vertexTimes() const {
+    return _vertexTimes;
 }
 
 

@@ -930,6 +930,8 @@ bool RenderableFieldlinesSequence::getStatesFromCdfFiles(const std::string& outp
 
         std::vector< std::vector<glm::vec3> > verts = newState.vertexPaths();
 
+        std::vector< std::vector<float> > times = newState.vertexTimes();
+
         if (isSuccessful) {
             addStateToSequence(newState);
             if (!outputFolder.empty()) {

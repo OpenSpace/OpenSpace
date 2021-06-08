@@ -118,6 +118,7 @@ namespace openspace::fls {
             case fls::Model::Batsrus:
                 state.scalePositions(fls::ReToMeter);
                 state.scaleflowline(fls::ReToMeter);
+                state.computeTimes();
                 break;
             case fls::Model::Enlil:
                 state.convertLatLonToCartesian(fls::AuToMeter);
