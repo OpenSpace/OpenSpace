@@ -385,16 +385,17 @@ void AutoNavigationHandler::orbitAnchorNode(double deltaTime) {
 
     const glm::dvec3 prevPosition = camera()->positionVec3();
     const glm::dquat prevRotation = camera()->rotationQuaternion();
+    const glm::dvec3 nodeCenter = anchor()->worldPosition(); 
 
-    const glm::dvec3 up = camera()->lookUpVectorWorldSpace();
     const double speedFactor = 0.1 * _orbitSpeedFactor;
 
-    glm::dvec3 nodeCenter = anchor()->worldPosition();
-    double orbitRadius = glm::distance(prevPosition, nodeCenter);
-    double distanceToSurface = orbitRadius - anchor()->boundingSphere();
-    double orbitSpeed = distanceToSurface * speedFactor;
+    // Compute orbit speed based on factor and distance to surface
+    const double orbitRadius = glm::distance(prevPosition, nodeCenter);
+    const double distanceToSurface = orbitRadius - anchor()->boundingSphere();
+    const double orbitSpeed = distanceToSurface * speedFactor;
 
-    // compute a new position along the orbit
+    // Compute a new position along the orbit
+    const glm::dvec3 up = camera()->lookUpVectorWorldSpace();
     const glm::dquat lookAtNodeRotation = helpers::lookAtQuaternion(
         prevPosition,
         nodeCenter,
@@ -405,13 +406,13 @@ void AutoNavigationHandler::orbitAnchorNode(double deltaTime) {
 
     glm::dvec3 newPosition = prevPosition + orbitSpeed * deltaTime * rightOrbitTangent;
 
-    // adjust for numerical error
+    // Adjust for numerical error - make sure we stay at the same height
     const glm::dvec3 nodeToNewPos = newPosition - nodeCenter;
-    const double nodeToPrevPosDistance = glm::distance(prevPosition, nodeCenter);
-    const double distanceDiff = glm::length(nodeToNewPos) - nodeToPrevPosDistance;
-    newPosition -= distanceDiff * glm::normalize(nodeToNewPos);
+    const double targetHeight = glm::distance(prevPosition, nodeCenter);
+    const double heightDiff = glm::length(nodeToNewPos) - targetHeight;
+    newPosition -= heightDiff * glm::normalize(nodeToNewPos);
 
-    // rotate with the orbit, but keep relative orientation with regards to the anchor
+    // Rotate along the orbit, but keep relative orientation with regards to the anchor
     const glm::dquat localRotation = glm::inverse(lookAtNodeRotation) * prevRotation;
     const glm::dquat newLookAtRotation =
         helpers::lookAtQuaternion(newPosition, nodeCenter, up);
