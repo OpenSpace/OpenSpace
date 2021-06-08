@@ -39,7 +39,6 @@ namespace {
     constexpr const char* _loggerCat = "PathInstruction";
     constexpr const float Epsilon = 1e-5f;
 
-
     struct [[codegen::Dictionary(Instruction)]] Parameters {
         enum class Type {
             Node,
@@ -85,31 +84,27 @@ documentation::Documentation PathInstruction::Documentation() {
 PathInstruction::PathInstruction(const ghoul::Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    duration = p.duration;
+    _duration = p.duration;
 
     bool hasStart = p.startState.has_value();
-    startPoint = hasStart ? Waypoint(p.startState.value()) : waypointFromCamera();
+    _startPoint = hasStart ? Waypoint(p.startState.value()) : waypointFromCamera();
 
     switch (p.type) {
         case Parameters::Type::NavigationState: {
-            type = Type::NavigationState;
-
             if (!p.navigationState.has_value()) {
                 throw ghoul::RuntimeError("A navigation state is required");
             }
 
-            navigationState = NavigationState(p.navigationState.value());
-            waypoints = { Waypoint(navigationState) };
+            NavigationState navigationState = NavigationState(p.navigationState.value());
+            _waypoints = { Waypoint(navigationState) };
             break;
         }
         case Parameters::Type::Node: {
-            type = Type::Node;
-
             if (!p.target.has_value()) {
                 throw ghoul::RuntimeError("A target node is required");
             }
 
-            nodeIdentifier = p.target.value();
+            std::string nodeIdentifier = p.target.value();
             const SceneGraphNode* targetNode = sceneGraphNode(nodeIdentifier);
 
             if (!targetNode) {
@@ -118,10 +113,14 @@ PathInstruction::PathInstruction(const ghoul::Dictionary& dictionary) {
                 ));
             }
 
-            position = p.position;
-            height = p.height;
-            useTargetUpDirection = p.useTargetUpDirection.value_or(false);
-            waypoints = { computeDefaultWaypoint() };
+            NodeInfo info {
+                nodeIdentifier,
+                p.position,
+                p.height,
+                p.useTargetUpDirection.value_or(false)
+            };
+
+            _waypoints = { computeDefaultWaypoint(info) };
             break;
         }
         default: {
@@ -130,6 +129,18 @@ PathInstruction::PathInstruction(const ghoul::Dictionary& dictionary) {
             break;
         }
     }
+}
+
+Waypoint PathInstruction::startPoint() const {
+    return _startPoint;
+}
+
+std::vector<Waypoint> PathInstruction::waypoints() const {
+    return _waypoints;
+}
+
+std::optional<double> PathInstruction::duration() const {
+    return _duration;
 }
 
 Waypoint PathInstruction::waypointFromCamera() const {
@@ -142,19 +153,19 @@ Waypoint PathInstruction::waypointFromCamera() const {
 
 // OBS! The desired default waypoint may vary between curve types.
 // TODO: let the curves update the default position if no exact position is required
-Waypoint PathInstruction::computeDefaultWaypoint() const {
-    const SceneGraphNode* targetNode = sceneGraphNode(nodeIdentifier);
+Waypoint PathInstruction::computeDefaultWaypoint(const NodeInfo& info) const {
+    const SceneGraphNode* targetNode = sceneGraphNode(info.identifier);
     if (!targetNode) {
-        LERROR(fmt::format("Could not find target node '{}'", nodeIdentifier));
+        LERROR(fmt::format("Could not find target node '{}'", info.identifier));
         return Waypoint();
     }
 
     glm::dvec3 targetPos;
-    if (position.has_value()) {
+    if (info.position.has_value()) {
         // Note that the anchor and reference frame is our targetnode.
         // The position in instruction is given is relative coordinates
         targetPos = targetNode->worldPosition() +
-            targetNode->worldRotationMatrix() * position.value();
+            targetNode->worldRotationMatrix() * info.position.value();
     }
     else {
         const glm::dvec3 nodePos = targetNode->worldPosition();
@@ -175,7 +186,7 @@ Waypoint PathInstruction::computeDefaultWaypoint() const {
         else {
             // Go to a point that is being lit up by the sun, slightly offsetted from sun
             // direction
-            const glm::dvec3 prevPos = startPoint.position();
+            const glm::dvec3 prevPos = _startPoint.position();
             const glm::dvec3 targetToPrev = prevPos - nodePos;
             const glm::dvec3 targetToSun = sunPos - nodePos;
 
@@ -189,25 +200,23 @@ Waypoint PathInstruction::computeDefaultWaypoint() const {
 
         const double radius = Waypoint::findValidBoundingSphere(targetNode);
         const double defaultHeight = 2.0 * radius;
-        const double targetHeight = height.value_or(defaultHeight);
+        const double height = info.height.value_or(defaultHeight);
 
-        targetPos = nodePos + stepDirection * (radius + targetHeight);
+        targetPos = nodePos + stepDirection * (radius + height);
     }
 
-    // Up direction
     glm::dvec3 up = global::navigationHandler->camera()->lookUpVectorWorldSpace();
-    if (useTargetUpDirection) {
+    if (info.useTargetUpDirection) {
         // @TODO (emmbr 2020-11-17) For now, this is hardcoded to look good for Earth, 
         // which is where it matters the most. A better solution would be to make each 
         // sgn aware of its own 'up' and query 
         up = targetNode->worldRotationMatrix() * glm::dvec3(0.0, 0.0, 1.0);
     }
 
-    // Rotation
     const glm::dvec3 lookAtPos = targetNode->worldPosition();
     const glm::dquat targetRot = helpers::lookAtQuaternion(targetPos, lookAtPos, up);
 
-    return Waypoint(targetPos, targetRot, nodeIdentifier);
+    return Waypoint(targetPos, targetRot, info.identifier);
 }
 
 // Test if the node lies within a given proximity radius of any relevant node in the scene

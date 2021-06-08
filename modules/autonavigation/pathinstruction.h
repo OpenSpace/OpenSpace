@@ -31,36 +31,33 @@
 
 namespace openspace::autonavigation {
 
-struct PathInstruction {
+class PathInstruction {
+public:
     using NavigationState = interaction::NavigationHandler::NavigationState;
-
-    enum class Type {
-        Node,
-        NavigationState
-    };
 
     PathInstruction(const ghoul::Dictionary& dictionary);
 
+    Waypoint startPoint() const;
+    std::vector<Waypoint> waypoints() const;
+    std::optional<double> duration() const;
+
     static documentation::Documentation Documentation();
 
+private:
+    struct NodeInfo {
+        std::string identifier;
+        std::optional<glm::dvec3> position;
+        std::optional<double> height;
+        bool useTargetUpDirection;
+    };
+
     Waypoint waypointFromCamera() const;
-    Waypoint computeDefaultWaypoint() const;
+    Waypoint computeDefaultWaypoint(const NodeInfo& info) const;
     SceneGraphNode* findNodeNearTarget(const SceneGraphNode* node) const;
 
-    Type type;
-
-    // Node details
-    std::string nodeIdentifier;
-    std::optional<glm::dvec3> position;
-    std::optional<double> height;
-    bool useTargetUpDirection;
-
-    // Navigation state details
-    NavigationState navigationState;
-
-    std::optional<double> duration;
-    Waypoint startPoint;
-    std::vector<Waypoint> waypoints;
+    Waypoint _startPoint;
+    std::vector<Waypoint> _waypoints;
+    std::optional<double> _duration;
 };
 
 } // namespace openspace::autonavigation

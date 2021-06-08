@@ -27,7 +27,6 @@
 #include <modules/autonavigation/helperfunctions.h>
 #include <modules/autonavigation/pathinstruction.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
@@ -45,27 +44,28 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DefaultCurveOptionInfo = {
         "DefaultCurveOption",
         "Default Curve Option",
-        "The defualt curve type chosen when generating a path, if none is specified."
+        "The defualt curve type chosen when generating a path, if none is specified"
     };
 
     constexpr openspace::properties::Property::PropertyInfo IncludeRollInfo = {
         "IncludeRoll",
         "Include Roll",
-        "If disabled, roll is removed from the interpolation of camera orientation."
+        "If disabled, roll is removed from the interpolation of camera orientation"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DefaultStopBehaviorInfo = {
-        "DefaultStopBehavior",
-        "Default Stop Behavior",
-        "The default camera behavior that is applied when the camera reaches and stops "
-        "at a target."
+    constexpr openspace::properties::Property::PropertyInfo StopBehaviorInfo = {
+        "StopBehavior",
+        "Stop Behavior",
+        "A camera motion behavior that is applied when no path is being played"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ApplyStopBehaviorWhenIdleInfo = {
+    constexpr openspace::properties::Property::PropertyInfo 
+        ApplyStopBehaviorWhenIdleInfo = 
+    {
         "ApplyStopBehaviorWhenIdle",
         "Apply Stop Behavior When Idle",
-        "If enabled, the camera is controlled using the default stop behavior even when"
-        "no path is playing."
+        "If enabled, the camera is controlled using the set stop behavior when"
+        "no path is playing"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SpeedScaleInfo = {
@@ -74,6 +74,11 @@ namespace {
         "Scale factor that affects the default speed for a camera path."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo OrbitSpeedFactorInfo = {
+        "OrbitSpeedFactor",
+        "Orbit Speed Factor",
+        "Controls the speed of the orbiting around an anchor."
+    };
 } // namespace
 
 namespace openspace::autonavigation {
@@ -86,14 +91,13 @@ AutoNavigationHandler::AutoNavigationHandler()
     )
     , _includeRoll(IncludeRollInfo, false)
     , _stopBehavior(
-        DefaultStopBehaviorInfo, 
+        StopBehaviorInfo, 
         properties::OptionProperty::DisplayType::Dropdown
     )
     , _applyStopBehaviorWhenIdle(ApplyStopBehaviorWhenIdleInfo, false)
     , _speedScale(SpeedScaleInfo, 1.f, 0.01f, 2.f)
+    , _orbitSpeedFactor(OrbitSpeedFactorInfo, 0.5, 0.0, 20.0)
 {
-    addPropertySubOwner(_atNodeNavigator);
-
     _defaultCurveOption.addOptions({
         { CurveType::AvoidCollision, "AvoidCollision" },
         { CurveType::Linear, "Linear" },
@@ -108,16 +112,13 @@ AutoNavigationHandler::AutoNavigationHandler()
 
     // Must be listed in the same order as in enum definition
     _stopBehavior.addOptions({
-        { AtNodeNavigator::Behavior::None, "None" },
-        { AtNodeNavigator::Behavior::Orbit, "Orbit" }
+        { StopBehavior::None, "None" },
+        { StopBehavior::Orbit, "Orbit" }
     });
-    _stopBehavior = AtNodeNavigator::Behavior::None;
-    _stopBehavior.onChange([this]() {
-        _atNodeNavigator.setBehavior(
-            AtNodeNavigator::Behavior(_stopBehavior.value())
-        );
-    });
+    _stopBehavior = StopBehavior::None;
     addProperty(_stopBehavior);
+
+    addProperty(_orbitSpeedFactor);
 }
 
 AutoNavigationHandler::~AutoNavigationHandler() {} // NOLINT
@@ -150,10 +151,9 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
     ghoul_assert(camera() != nullptr, "Camera must not be nullptr");
 
     if (!_isPlaying) {
-        // For testing, apply at node behavior when idle
-        // @TODO: Determine how this should work instead
+        // TODO: Determine how this should work
         if (_applyStopBehaviorWhenIdle) {
-            _atNodeNavigator.updateCamera(deltaTime);
+            applyStopBehavior(deltaTime);
         }
         return;
     }
@@ -199,7 +199,7 @@ void AutoNavigationHandler::createPath(PathInstruction& instruction) {
     // TODO: Improve how curve types are handled
     const int curveType = _defaultCurveOption;
 
-    std::vector<Waypoint> waypoints = instruction.waypoints;
+    std::vector<Waypoint> waypoints = instruction.waypoints();
     Waypoint waypointToAdd;
 
     if (waypoints.empty()) {
@@ -212,10 +212,10 @@ void AutoNavigationHandler::createPath(PathInstruction& instruction) {
     }
 
     _currentPath = std::make_unique<Path>(
-        instruction.startPoint,
+        instruction.startPoint(),
         waypointToAdd,
         CurveType(curveType),
-        instruction.duration
+        instruction.duration()
     );
 
     LINFO("Successfully generated camera path");
@@ -365,6 +365,61 @@ void AutoNavigationHandler::removeRollRotation(CameraPose& pose, double deltaTim
         camera()->lookUpVectorWorldSpace()
     );
     pose.rotation = rollFreeRotation;
+}
+
+void AutoNavigationHandler::applyStopBehavior(double deltaTime) {
+    switch (_stopBehavior) {
+        case StopBehavior::None:
+            // Do nothing
+            break;
+        case StopBehavior::Orbit:
+            orbitAnchorNode(deltaTime);
+            break;
+        default:
+            throw ghoul::MissingCaseException();
+    }
+}
+
+void AutoNavigationHandler::orbitAnchorNode(double deltaTime) {
+    ghoul_assert(anchor() != nullptr, "Node to orbit must be set!");
+
+    const glm::dvec3 prevPosition = camera()->positionVec3();
+    const glm::dquat prevRotation = camera()->rotationQuaternion();
+
+    const glm::dvec3 up = camera()->lookUpVectorWorldSpace();
+    const double speedFactor = 0.1 * _orbitSpeedFactor;
+
+    glm::dvec3 nodeCenter = anchor()->worldPosition();
+    double orbitRadius = glm::distance(prevPosition, nodeCenter);
+    double distanceToSurface = orbitRadius - anchor()->boundingSphere();
+    double orbitSpeed = distanceToSurface * speedFactor;
+
+    // compute a new position along the orbit
+    const glm::dquat lookAtNodeRotation = helpers::lookAtQuaternion(
+        prevPosition,
+        nodeCenter,
+        up
+    );
+    const glm::dvec3 targetForward = lookAtNodeRotation * glm::dvec3(0.0, 0.0, -1.0);
+    const glm::dvec3 rightOrbitTangent = glm::normalize(glm::cross(targetForward, up));
+
+    glm::dvec3 newPosition = prevPosition + orbitSpeed * deltaTime * rightOrbitTangent;
+
+    // adjust for numerical error
+    const glm::dvec3 nodeToNewPos = newPosition - nodeCenter;
+    const double nodeToPrevPosDistance = glm::distance(prevPosition, nodeCenter);
+    const double distanceDiff = glm::length(nodeToNewPos) - nodeToPrevPosDistance;
+    newPosition -= distanceDiff * glm::normalize(nodeToNewPos);
+
+    // rotate with the orbit, but keep relative orientation with regards to the anchor
+    const glm::dquat localRotation = glm::inverse(lookAtNodeRotation) * prevRotation;
+    const glm::dquat newLookAtRotation =
+        helpers::lookAtQuaternion(newPosition, nodeCenter, up);
+
+    const glm::dquat newRotation = newLookAtRotation * localRotation;
+
+    camera()->setPositionVec3(newPosition);
+    camera()->setRotation(newRotation);
 }
 
 } // namespace openspace::autonavigation

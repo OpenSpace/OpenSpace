@@ -25,7 +25,6 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/atnodenavigator.h
   ${CMAKE_CURRENT_SOURCE_DIR}/autonavigationhandler.h
   ${CMAKE_CURRENT_SOURCE_DIR}/autonavigationmodule.h
   ${CMAKE_CURRENT_SOURCE_DIR}/helperfunctions.h
@@ -40,7 +39,6 @@ set(HEADER_FILES
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/atnodenavigator.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/autonavigationhandler.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/autonavigationmodule.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/autonavigationmodule_lua.inl

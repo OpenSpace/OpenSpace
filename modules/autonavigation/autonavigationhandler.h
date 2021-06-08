@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_MODULE___AUTONAVIGATIONHANDLER___H__
 #define __OPENSPACE_MODULE___AUTONAVIGATIONHANDLER___H__
 
-#include <modules/autonavigation/atnodenavigator.h>
 #include <modules/autonavigation/path.h>
 #include <openspace/properties/list/stringlistproperty.h>
 #include <openspace/properties/optionproperty.h>
@@ -43,6 +42,11 @@ struct PathInstruction;
 
 class AutoNavigationHandler : public properties::PropertyOwner {
 public:
+    enum StopBehavior {
+        None = 0,
+        Orbit
+    };
+
     AutoNavigationHandler();
     ~AutoNavigationHandler();
 
@@ -71,15 +75,17 @@ public:
 
 private:
     void removeRollRotation(CameraPose& pose, double deltaTime);
+    void applyStopBehavior(double deltaTime);
+
+    void orbitAnchorNode(double deltaTime);
 
     std::unique_ptr<Path> _currentPath = nullptr;
-
-    AtNodeNavigator _atNodeNavigator;
     bool _isPlaying = false;
 
     properties::OptionProperty _defaultCurveOption;
     properties::BoolProperty _includeRoll;
     properties::FloatProperty _speedScale;
+    properties::FloatProperty _orbitSpeedFactor;
 
     // for testing pause behaviors.
     // TODO: remove later, if it causes problems with regular navigation
