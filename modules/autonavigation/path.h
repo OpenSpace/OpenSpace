@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE___PATHSEGMENT___H__
-#define __OPENSPACE_MODULE___PATHSEGMENT___H__
+#ifndef __OPENSPACE_MODULE_AUTONAVIGATION___PATH___H__
+#define __OPENSPACE_MODULE_AUTONAVIGATION___PATH___H__
 
 #include <modules/autonavigation/pathcurve.h>
 #include <modules/autonavigation/speedfunction.h>
@@ -76,4 +76,4 @@ private:
 
 } // namespace openspace::autonavigation
 
-#endif // __OPENSPACE_MODULE___PATHSEGMENT___H__
+#endif // __OPENSPACE_MODULE_AUTONAVIGATION___PATH___H__

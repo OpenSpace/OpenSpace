@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE___EASINGFUNCTIONS___H__
-#define __OPENSPACE_MODULE___EASINGFUNCTIONS___H__
+#ifndef __OPENSPACE_MODULE_AUTONAVIGATION___HELPERFUNCTIONS___H__
+#define __OPENSPACE_MODULE_AUTONAVIGATION___HELPERFUNCTIONS___H__
 
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
@@ -51,7 +51,7 @@ namespace openspace::autonavigation::helpers {
 
     double fivePointGaussianQuadrature(double t0, double t1,
         std::function<double(double)> f);
-} // namespace
+} // namespace openspace::autonavigation::helpers
 
 namespace openspace::autonavigation::interpolation {
 
@@ -79,5 +79,5 @@ namespace openspace::autonavigation::interpolation {
     glm::dvec3 piecewiseLinear(double t, const std::vector<glm::dvec3>& points,
         const std::vector<double>& tKnots);
 
-} // namespace
-#endif
+} // namespace openspace::autonavigation::interpolation 
+#endif // __OPENSPACE_MODULE_AUTONAVIGATION___HELPERFUNCTIONS___H__

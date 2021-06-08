@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE___AUTONAVIGATIONHANDLER___H__
-#define __OPENSPACE_MODULE___AUTONAVIGATIONHANDLER___H__
+#ifndef __OPENSPACE_MODULE_AUTONAVIGATION___AUTONAVIGATIONHANDLER___H__
+#define __OPENSPACE_MODULE_AUTONAVIGATION___AUTONAVIGATIONHANDLER___H__
 
 #include <modules/autonavigation/path.h>
 #include <openspace/properties/list/stringlistproperty.h>
@@ -92,4 +92,4 @@ private:
 
 } // namespace openspace::autonavigation
 
-#endif // __OPENSPACE_MODULE___AUTONAVIGATIONHANDLER___H__
+#endif // __OPENSPACE_MODULE_AUTONAVIGATION___AUTONAVIGATIONHANDLER___H__
