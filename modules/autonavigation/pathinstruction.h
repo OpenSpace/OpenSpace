@@ -41,8 +41,6 @@ struct PathInstruction {
 
     PathInstruction(const ghoul::Dictionary& dictionary);
 
-    std::vector<Waypoint> waypoints() const;
-
     static documentation::Documentation Documentation();
 
     Type type;
@@ -59,7 +57,7 @@ struct PathInstruction {
     // Navigation state details
     NavigationState navigationState;
 
-    std::vector<Waypoint> _waypoints;
+    std::vector<Waypoint> waypoints;
 };
 
 } // namespace openspace::autonavigation

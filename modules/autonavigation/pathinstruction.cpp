@@ -92,7 +92,7 @@ PathInstruction::PathInstruction(const ghoul::Dictionary& dictionary) {
             }
 
             navigationState = NavigationState(p.navigationState.value());
-            _waypoints = { Waypoint(navigationState) };
+            waypoints = { Waypoint(navigationState) };
             break;
         }
         case Parameters::Type::Node: {
@@ -135,7 +135,7 @@ PathInstruction::PathInstruction(const ghoul::Dictionary& dictionary) {
                 const glm::dquat targetRot = helpers::lookAtQuaternion(targetPos, lookAtPos, up);
 
                 Waypoint wp{ targetPos, targetRot, nodeIdentifier };
-                _waypoints = { wp };
+                waypoints = { wp };
             }
             break;
         }
@@ -147,8 +147,5 @@ PathInstruction::PathInstruction(const ghoul::Dictionary& dictionary) {
     }
 }
 
-std::vector<Waypoint> PathInstruction::waypoints() const {
-    return _waypoints;
-}
 
 } // namespace openspace::autonavigation

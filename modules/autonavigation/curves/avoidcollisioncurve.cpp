@@ -54,8 +54,8 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
 
     const glm::dvec3 startNodeCenter = start.node()->worldPosition();
     const glm::dvec3 endNodeCenter = end.node()->worldPosition();
-    const double startNodeRadius = start.nodeDetails.validBoundingSphere;
-    const double endNodeRadius = end.nodeDetails.validBoundingSphere;
+    const double startNodeRadius = start.validBoundingSphere;
+    const double endNodeRadius = end.validBoundingSphere;
     const glm::dvec3 startViewDir = start.rotation() * glm::dvec3(0.0, 0.0, -1.0);
 
     // Add control points for a catmull-rom spline, first and last will not be intersected

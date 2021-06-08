@@ -102,7 +102,7 @@ CameraPose Path::traversePath(double dt) {
 
 std::string Path::currentAnchor() const {
     bool pastHalfway = (_traveledDistance / pathLength()) > 0.5;
-    return (pastHalfway) ? _end.nodeDetails.identifier : _start.nodeDetails.identifier;
+    return (pastHalfway) ? _end.nodeIdentifier : _start.nodeIdentifier;
 }
 
 bool Path::hasReachedEnd() const {

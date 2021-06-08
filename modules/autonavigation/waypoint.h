@@ -27,7 +27,6 @@
 
 #include <openspace/interaction/navigationhandler.h>
 #include <ghoul/glm.h>
-#include <vector>
 
 namespace openspace::autonavigation {
 
@@ -36,32 +35,24 @@ struct CameraPose {
     glm::dquat rotation;
 };
 
-// The waypoint node is the anchor or target node.
-struct WaypointNodeDetails {
-    WaypointNodeDetails() = default;
-    WaypointNodeDetails(const std::string& nodeIdentifier);
-
-    static double findValidBoundingSphere(const SceneGraphNode* node);
-
-    std::string identifier;
-    double validBoundingSphere = 0.0; // to be able to handle nodes with faulty bounding spheres
-};
-
 struct Waypoint {
     using NavigationState = interaction::NavigationHandler::NavigationState;
 
-    // TODO: create waypoints from a dictionary
+    // TODO: create waypoints from a dictionary and skip instructions?
 
     Waypoint() = default;
     Waypoint(const glm::dvec3& pos, const glm::dquat& rot, const std::string& ref);
     Waypoint(const NavigationState& ns);
+
+    static double findValidBoundingSphere(const SceneGraphNode* node);
 
     glm::dvec3 position() const;
     glm::dquat rotation() const;
     SceneGraphNode* node() const;
 
     CameraPose pose;
-    WaypointNodeDetails nodeDetails;
+    std::string nodeIdentifier;
+    double validBoundingSphere = 0.0; // to be able to handle nodes with faulty bounding spheres
 };
 
 } // namespace openspace::autonavigation

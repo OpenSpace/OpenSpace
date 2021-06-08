@@ -44,8 +44,8 @@ namespace openspace::autonavigation {
 
 // Go far out to get a view of both tagets, aimed to match lookAt orientation
 ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint& end) {
-    const double startNodeRadius = start.nodeDetails.validBoundingSphere;
-    const double endNodeRadius = end.nodeDetails.validBoundingSphere;
+    const double startNodeRadius = start.validBoundingSphere;
+    const double endNodeRadius = end.validBoundingSphere;
 
     const double endTangentsLengthFactor = 2.0;
     const double startTangentLength = endTangentsLengthFactor * startNodeRadius;
@@ -60,8 +60,8 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
     _points.push_back(start.position());
     _points.push_back(start.position() + startTangentLength * startTangentDir);
 
-    const std::string& startNode = start.nodeDetails.identifier;
-    const std::string& endNode = end.nodeDetails.identifier;
+    const std::string& startNode = start.nodeIdentifier;
+    const std::string& endNode = end.nodeIdentifier;
 
     // Zoom out
     if (startNode != endNode) {
@@ -92,10 +92,12 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
 }
 
 glm::dvec3 ZoomOutOverviewCurve::interpolate(double u) {
-    if (u <= 0.0)
+    if (u <= 0.0) {
         return _points[0];
-    if (u > 1.0)
+    }
+    if (u > 1.0) {
         return _points.back();
+    }
 
     return interpolation::piecewiseCubicBezier(u, _points, _parameterIntervals);
 }

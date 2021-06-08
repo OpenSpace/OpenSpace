@@ -37,58 +37,18 @@ namespace {
 
 namespace openspace::autonavigation {
 
-WaypointNodeDetails::WaypointNodeDetails(const std::string& nodeIdentifier) {
+Waypoint::Waypoint(const glm::dvec3& pos, const glm::dquat& rot, const std::string& ref)
+    : nodeIdentifier(ref)
+{
+    pose.position = pos;
+    pose.rotation = rot;
+
     const SceneGraphNode* node = sceneGraphNode(nodeIdentifier);
     if (!node) {
         LERROR(fmt::format("Could not find node '{}'.", nodeIdentifier));
         return;
     }
-
-    identifier = nodeIdentifier;
     validBoundingSphere = findValidBoundingSphere(node);
-}
-
-double WaypointNodeDetails::findValidBoundingSphere(const SceneGraphNode* node) {
-    double bs = static_cast<double>(node->boundingSphere());
-    const double minValidBoundingSphere =
-        global::moduleEngine->module<AutoNavigationModule>()->minValidBoundingSphere();
-
-    if (bs < minValidBoundingSphere) {
-        // If the bs of the target is too small, try to find a good value in a child node.
-        // Only check the closest children, to avoid deep traversal in the scene graph.
-        // Also, the possibility to find a bounding sphere represents the visual size of
-        // the target well is higher for these nodes.
-        for (SceneGraphNode* child : node->children()) {
-            bs = static_cast<double>(child->boundingSphere());
-            if (bs > minValidBoundingSphere) {
-                LWARNING(fmt::format(
-                    "The scene graph node '{}' has no, or a very small, bounding sphere. "
-                    "Using bounding sphere of child node '{}' in computations.",
-                    node->identifier(),
-                    child->identifier()
-                ));
-
-                return bs;
-            }
-        }
-
-        LWARNING(fmt::format(
-            "The scene graph node '{}' has no, or a very small, bounding sphere. Using "
-            "minimal value. This might lead to unexpected results.",
-            node->identifier())
-        );
-
-        bs = minValidBoundingSphere;
-    }
-
-    return bs;
-}
-
-Waypoint::Waypoint(const glm::dvec3& pos, const glm::dquat& rot, const std::string& ref)
-    : nodeDetails(ref)
-{
-    pose.position = pos;
-    pose.rotation = rot;
 }
 
 Waypoint::Waypoint(const NavigationState& ns) {
@@ -128,7 +88,14 @@ Waypoint::Waypoint(const NavigationState& ns) {
 
     pose.rotation = neutralCameraRotation * yawRotation * pitchRotation;
 
-    nodeDetails = WaypointNodeDetails{ ns.anchor };
+    nodeIdentifier = ns.anchor;
+
+    const SceneGraphNode* node = sceneGraphNode(nodeIdentifier);
+    if (!node) {
+        LERROR(fmt::format("Could not find node '{}'.", nodeIdentifier));
+        return;
+    }
+    validBoundingSphere = findValidBoundingSphere(node);
 }
 
 glm::dvec3 Waypoint::position() const {
@@ -140,7 +107,43 @@ glm::dquat Waypoint::rotation() const {
 }
 
 SceneGraphNode* Waypoint::node() const {
-    return sceneGraphNode(nodeDetails.identifier);
+    return sceneGraphNode(nodeIdentifier);
+}
+
+double Waypoint::findValidBoundingSphere(const SceneGraphNode* node) {
+    double bs = static_cast<double>(node->boundingSphere());
+    const double minValidBoundingSphere =
+        global::moduleEngine->module<AutoNavigationModule>()->minValidBoundingSphere();
+
+    if (bs < minValidBoundingSphere) {
+        // If the bs of the target is too small, try to find a good value in a child node.
+        // Only check the closest children, to avoid deep traversal in the scene graph.
+        // Also, the possibility to find a bounding sphere represents the visual size of
+        // the target well is higher for these nodes.
+        for (SceneGraphNode* child : node->children()) {
+            bs = static_cast<double>(child->boundingSphere());
+            if (bs > minValidBoundingSphere) {
+                LWARNING(fmt::format(
+                    "The scene graph node '{}' has no, or a very small, bounding sphere. "
+                    "Using bounding sphere of child node '{}' in computations.",
+                    node->identifier(),
+                    child->identifier()
+                ));
+
+                return bs;
+            }
+        }
+
+        LWARNING(fmt::format(
+            "The scene graph node '{}' has no, or a very small, bounding sphere. Using "
+            "minimal value. This might lead to unexpected results.",
+            node->identifier())
+        );
+
+        bs = minValidBoundingSphere;
+    }
+
+    return bs;
 }
 
 } // namespace openspace::autonavigation

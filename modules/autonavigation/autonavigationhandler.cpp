@@ -224,7 +224,7 @@ void AutoNavigationHandler::createPath(PathInstruction& instruction) {
     // TODO: Improve how curve types are handled
     const int curveType = _defaultCurveOption;
 
-    std::vector<Waypoint> waypoints = instruction.waypoints();
+    std::vector<Waypoint> waypoints = instruction.waypoints;
     Waypoint waypointToAdd;
 
     if (waypoints.empty()) {
@@ -411,14 +411,15 @@ void AutoNavigationHandler::removeRollRotation(CameraPose& pose, double deltaTim
 
 // Test if the node lies within a given proximity radius of any relevant node in the scene
 SceneGraphNode* AutoNavigationHandler::findNodeNearTarget(const SceneGraphNode* node) {
-    glm::dvec3 nodePos = node->worldPosition();
-    std::string nodeId = node->identifier();
+    const glm::dvec3 nodePos = node->worldPosition();
+    const std::string nodeId = node->identifier();
 
     const float proximityRadiusFactor = 3.f;
 
     for (SceneGraphNode* n : _relevantNodes) {
-        if (n->identifier() == nodeId)
+        if (n->identifier() == nodeId) {
             continue;
+        }
 
         float bs = static_cast<float>(n->boundingSphere());
         float proximityRadius = proximityRadiusFactor * bs;
@@ -480,7 +481,7 @@ Waypoint AutoNavigationHandler::computeDefaultWaypoint(const PathInstruction& in
         stepDirection = glm::normalize(offsetRotation * targetToSun);
     }
 
-    const double radius = WaypointNodeDetails::findValidBoundingSphere(targetNode);
+    const double radius = Waypoint::findValidBoundingSphere(targetNode);
     const double defaultHeight = 2.0 * radius;
     const double height = ins.height.has_value() ? ins.height.value() : defaultHeight;
 
@@ -499,7 +500,7 @@ Waypoint AutoNavigationHandler::computeDefaultWaypoint(const PathInstruction& in
     const glm::dvec3 lookAtPos = targetNode->worldPosition();
     const glm::dquat targetRot = helpers::lookAtQuaternion(targetPos, lookAtPos, up);
 
-    return Waypoint{ targetPos, targetRot, ins.nodeIdentifier };
+    return Waypoint(targetPos, targetRot, ins.nodeIdentifier);
 }
 
 std::vector<SceneGraphNode*> AutoNavigationHandler::findRelevantNodes() {
@@ -508,8 +509,9 @@ std::vector<SceneGraphNode*> AutoNavigationHandler::findRelevantNodes() {
 
     const std::vector<std::string> relevantTags = _relevantNodeTags;
 
-    if (allNodes.empty() || relevantTags.empty())
-        return std::vector<SceneGraphNode*>{};
+    if (allNodes.empty() || relevantTags.empty()) {
+        return std::vector<SceneGraphNode*>();
+    }
 
     auto isRelevant = [&](const SceneGraphNode* node) {
         const std::vector<std::string> tags = node->tags();
@@ -528,7 +530,7 @@ std::vector<SceneGraphNode*> AutoNavigationHandler::findRelevantNodes() {
         return node->renderable() && (node->boundingSphere() > 0.0);
     };
 
-    std::vector<SceneGraphNode*> resultingNodes{};
+    std::vector<SceneGraphNode*> resultingNodes;
     std::copy_if(
         allNodes.begin(),
         allNodes.end(),
