@@ -48,7 +48,7 @@ public:
 protected:
     void initParameterIntervals();
 
-    double approximatedDerivative(double u, double h = 1E-7);
+    double approximatedDerivative(double u, double h = 0.0001);
     double arcLength(double limit = 1.0);
     double arcLength(double lowerLimit, double upperLimit);
 
