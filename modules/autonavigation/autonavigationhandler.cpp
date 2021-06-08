@@ -29,8 +29,6 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/navigationhandler.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
 #include <openspace/util/camera.h>
@@ -70,13 +68,6 @@ namespace {
         "no path is playing."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RelevantNodeTagsInfo = {
-        "RelevantNodeTags",
-        "Relevant Node Tags",
-        "List of tags for the nodes that are relevant for path creation, for example "
-        "when avoiding collisions."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo SpeedScaleInfo = {
         "SpeedScale",
         "Speed Scale",
@@ -99,7 +90,6 @@ AutoNavigationHandler::AutoNavigationHandler()
         properties::OptionProperty::DisplayType::Dropdown
     )
     , _applyStopBehaviorWhenIdle(ApplyStopBehaviorWhenIdleInfo, false)
-    , _relevantNodeTags(RelevantNodeTagsInfo)
     , _speedScale(SpeedScaleInfo, 1.f, 0.01f, 2.f)
 {
     addPropertySubOwner(_atNodeNavigator);
@@ -128,14 +118,6 @@ AutoNavigationHandler::AutoNavigationHandler()
         );
     });
     addProperty(_stopBehavior);
-
-    // Add the relevant tags
-    _relevantNodeTags = std::vector<std::string>{
-        "planet_solarSystem",
-        "moon_solarSystem"
-    };;
-    _relevantNodeTags.onChange([this]() { _relevantNodes = findRelevantNodes(); });
-    addProperty(_relevantNodeTags);
 }
 
 AutoNavigationHandler::~AutoNavigationHandler() {} // NOLINT
@@ -146,10 +128,6 @@ Camera* AutoNavigationHandler::camera() const {
 
 const SceneGraphNode* AutoNavigationHandler::anchor() const {
     return global::navigationHandler->anchorNode();
-}
-
-const std::vector<SceneGraphNode*>& AutoNavigationHandler::relevantNodes() const {
-    return _relevantNodes;
 }
 
 double AutoNavigationHandler::speedScale() const {
@@ -218,9 +196,6 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
 void AutoNavigationHandler::createPath(PathInstruction& instruction) {
     clearPath();
 
-    // TODO: do this in some initialize function instead
-    _relevantNodes = findRelevantNodes();
-
     // TODO: Improve how curve types are handled
     const int curveType = _defaultCurveOption;
 
@@ -228,26 +203,16 @@ void AutoNavigationHandler::createPath(PathInstruction& instruction) {
     Waypoint waypointToAdd;
 
     if (waypoints.empty()) {
-        if (instruction.type == PathInstruction::Type::Node) {
-            // TODO: allow curves to compute default waypoint instead
-            waypointToAdd = computeDefaultWaypoint(instruction);
-        }
-        else {
-            LWARNING("No path was created from instruction. Failed creating waypoints");
-            return;
-        }
+        LWARNING("No path was created from instruction. Failed creating waypoints");
+        return;
     }
     else {
         // TODO: allow for an instruction to represent a list of waypoints
         waypointToAdd = waypoints[0];
     }
 
-    bool hasStartState = instruction.startState.has_value();
-    Waypoint startState = hasStartState ? Waypoint(instruction.startState.value()) 
-        : waypointFromCamera();
-
     _currentPath = std::make_unique<Path>(
-        startState,
+        instruction.startPoint,
         waypointToAdd,
         CurveType(curveType),
         instruction.duration
@@ -304,14 +269,14 @@ void AutoNavigationHandler::abortPath() {
 
 // TODO: remove when not needed
 // Created for debugging
-std::vector<glm::dvec3> AutoNavigationHandler::curvePositions(int nPerSegment) {
+std::vector<glm::dvec3> AutoNavigationHandler::curvePositions(int nSteps) const {
     if (noCurrentPath()) {
         LERROR("There is no current path to sample points from.");
         return {};
     }
 
     std::vector<glm::dvec3> positions;
-    const double du = 1.0 / nPerSegment;
+    const double du = 1.0 / nSteps;
     const double length = _currentPath->pathLength();
     for (double u = 0.0; u < 1.0; u += du) {
         glm::dvec3 position = _currentPath->interpolatedPose(u * length).position;
@@ -324,14 +289,14 @@ std::vector<glm::dvec3> AutoNavigationHandler::curvePositions(int nPerSegment) {
 
 // TODO: remove when not needed
 // Created for debugging
-std::vector<glm::dquat> AutoNavigationHandler::curveOrientations(int nPerSegment) {
+std::vector<glm::dquat> AutoNavigationHandler::curveOrientations(int nSteps) const {
     if (noCurrentPath()) {
         LERROR("There is no current path to sample points from.");
         return {};
     }
 
     std::vector<glm::dquat> orientations;
-    const double du = 1.0 / nPerSegment;
+    const double du = 1.0 / nSteps;
     const double length = _currentPath->pathLength();
     for (double u = 0.0; u <= 1.0; u += du) {
         const glm::dquat orientation = 
@@ -346,14 +311,14 @@ std::vector<glm::dquat> AutoNavigationHandler::curveOrientations(int nPerSegment
 
 // TODO: remove when not needed or combined into pose version
 // Created for debugging
-std::vector<glm::dvec3> AutoNavigationHandler::curveViewDirections(int nPerSegment) {
+std::vector<glm::dvec3> AutoNavigationHandler::curveViewDirections(int nSteps) const {
     if (noCurrentPath()) {
         LERROR("There is no current path to sample points from.");
         return {};
     }
 
     std::vector<glm::dvec3> viewDirections;
-    const double du = 1.0 / nPerSegment;
+    const double du = 1.0 / nSteps;
     for (double u = 0.0; u < 1.0; u += du) {
         const glm::dquat orientation = _currentPath->interpolatedPose(u).rotation;
         const glm::dvec3 direction = glm::normalize(
@@ -373,7 +338,7 @@ std::vector<glm::dvec3> AutoNavigationHandler::curveViewDirections(int nPerSegme
 
 // TODO: remove when not needed
 // Created for debugging
-std::vector<glm::dvec3> AutoNavigationHandler::controlPoints() {
+std::vector<glm::dvec3> AutoNavigationHandler::controlPoints() const {
     if (noCurrentPath()) {
         LERROR("There is no current path to sample points from.");
         return {};
@@ -384,13 +349,6 @@ std::vector<glm::dvec3> AutoNavigationHandler::controlPoints() {
     points.insert(points.end(), curvePoints.begin(), curvePoints.end());
 
     return points;
-}
-
-Waypoint AutoNavigationHandler::waypointFromCamera() {
-    const glm::dvec3 pos = camera()->positionVec3();
-    const glm::dquat rot = camera()->rotationQuaternion();
-    const std::string node = global::navigationHandler->anchorNode()->identifier();
-    return Waypoint{ pos, rot, node };
 }
 
 void AutoNavigationHandler::removeRollRotation(CameraPose& pose, double deltaTime) {
@@ -407,138 +365,6 @@ void AutoNavigationHandler::removeRollRotation(CameraPose& pose, double deltaTim
         camera()->lookUpVectorWorldSpace()
     );
     pose.rotation = rollFreeRotation;
-}
-
-// Test if the node lies within a given proximity radius of any relevant node in the scene
-SceneGraphNode* AutoNavigationHandler::findNodeNearTarget(const SceneGraphNode* node) {
-    const glm::dvec3 nodePos = node->worldPosition();
-    const std::string nodeId = node->identifier();
-
-    const float proximityRadiusFactor = 3.f;
-
-    for (SceneGraphNode* n : _relevantNodes) {
-        if (n->identifier() == nodeId) {
-            continue;
-        }
-
-        float bs = static_cast<float>(n->boundingSphere());
-        float proximityRadius = proximityRadiusFactor * bs;
-        const glm::dmat4 invModelTransform = glm::inverse(n->modelTransform());
-        const glm::dvec3 posInModelCoords = invModelTransform * glm::dvec4(nodePos, 1.0);
-
-        bool isClose = helpers::isPointInsideSphere(
-            posInModelCoords,
-            glm::dvec3(0.0, 0.0, 0.0),
-            proximityRadius
-        );
-
-        if (isClose) {
-            return n;
-        }
-    }
-
-    return nullptr;
-}
-
-// OBS! The desired default waypoint may vary between curve types.
-// TODO: let the curves update the default position if no exact position is required
-Waypoint AutoNavigationHandler::computeDefaultWaypoint(const PathInstruction& ins) {
-    const SceneGraphNode* targetNode = sceneGraphNode(ins.nodeIdentifier);
-    if (!targetNode) {
-        LERROR(fmt::format("Could not find target node '{}'", ins.nodeIdentifier));
-        return Waypoint();
-    }
-
-    const float epsilon = 1e-5f;
-    const glm::dvec3 nodePos = targetNode->worldPosition();
-    const glm::dvec3 sunPos = glm::dvec3(0.0, 0.0, 0.0);
-    const SceneGraphNode* closeNode = findNodeNearTarget(targetNode);
-    const glm::dvec3 prevPos = waypointFromCamera().position();
-
-    // Position
-    glm::dvec3 stepDirection;
-    if (closeNode) {
-        // If the node is close to another node in the scene, make sure that the
-        // position is set to minimize risk of collision
-        stepDirection = glm::normalize(nodePos - closeNode->worldPosition());
-    }
-    else if (glm::length(sunPos - nodePos) < epsilon) {
-        // Special case for when the target is the Sun. Assumption: want an overview of
-        // the solar system, and not stay in the orbital plane
-        stepDirection = glm::dvec3(0.0, 0.0, 1.0);
-    }
-    else {
-        // Go to a point that is being lit up by the sun, slightly offsetted from sun
-        // direction
-        const glm::dvec3 targetToPrev = prevPos - nodePos;
-        const glm::dvec3 targetToSun = sunPos - nodePos;
-
-        constexpr const float defaultPositionOffsetAngle = -30.f; // degrees
-        constexpr const float angle = glm::radians(defaultPositionOffsetAngle);
-        const glm::dvec3 axis = glm::normalize(glm::cross(targetToPrev, targetToSun));
-        const glm::dquat offsetRotation = angleAxis(static_cast<double>(angle), axis);
-
-        stepDirection = glm::normalize(offsetRotation * targetToSun);
-    }
-
-    const double radius = Waypoint::findValidBoundingSphere(targetNode);
-    const double defaultHeight = 2.0 * radius;
-    const double height = ins.height.has_value() ? ins.height.value() : defaultHeight;
-
-    const glm::dvec3 targetPos = nodePos + stepDirection * (radius + height);
-
-    // Up direction
-    glm::dvec3 up = camera()->lookUpVectorWorldSpace();
-    if (ins.useTargetUpDirection) {
-        // @TODO (emmbr 2020-11-17) For now, this is hardcoded to look good for Earth, 
-        // which is where it matters the most. A better solution would be to make each 
-        // sgn aware of its own 'up' and query 
-        up = targetNode->worldRotationMatrix() * glm::dvec3(0.0, 0.0, 1.0);
-    }
-
-    // Rotation
-    const glm::dvec3 lookAtPos = targetNode->worldPosition();
-    const glm::dquat targetRot = helpers::lookAtQuaternion(targetPos, lookAtPos, up);
-
-    return Waypoint(targetPos, targetRot, ins.nodeIdentifier);
-}
-
-std::vector<SceneGraphNode*> AutoNavigationHandler::findRelevantNodes() {
-    const std::vector<SceneGraphNode*>& allNodes =
-        global::renderEngine->scene()->allSceneGraphNodes();
-
-    const std::vector<std::string> relevantTags = _relevantNodeTags;
-
-    if (allNodes.empty() || relevantTags.empty()) {
-        return std::vector<SceneGraphNode*>();
-    }
-
-    auto isRelevant = [&](const SceneGraphNode* node) {
-        const std::vector<std::string> tags = node->tags();
-        auto result = std::find_first_of(
-            relevantTags.begin(),
-            relevantTags.end(),
-            tags.begin(),
-            tags.end()
-        );
-
-        // does not match any tags => not interesting
-        if (result == relevantTags.end()) {
-            return false;
-        }
-
-        return node->renderable() && (node->boundingSphere() > 0.0);
-    };
-
-    std::vector<SceneGraphNode*> resultingNodes;
-    std::copy_if(
-        allNodes.begin(),
-        allNodes.end(),
-        std::back_inserter(resultingNodes),
-        isRelevant
-    );
-
-    return resultingNodes;
 }
 
 } // namespace openspace::autonavigation

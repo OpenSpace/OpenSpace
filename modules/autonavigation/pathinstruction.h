@@ -43,10 +43,11 @@ struct PathInstruction {
 
     static documentation::Documentation Documentation();
 
-    Type type;
+    Waypoint waypointFromCamera() const;
+    Waypoint computeDefaultWaypoint() const;
+    SceneGraphNode* findNodeNearTarget(const SceneGraphNode* node) const;
 
-    std::optional<double> duration;
-    std::optional<NavigationState> startState;
+    Type type;
 
     // Node details
     std::string nodeIdentifier;
@@ -57,6 +58,8 @@ struct PathInstruction {
     // Navigation state details
     NavigationState navigationState;
 
+    std::optional<double> duration;
+    Waypoint startPoint;
     std::vector<Waypoint> waypoints;
 };
 

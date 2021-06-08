@@ -38,7 +38,7 @@ namespace openspace {
 
 namespace openspace::autonavigation {
 
-struct Waypoint;
+//struct Waypoint;
 struct PathInstruction;
 
 class AutoNavigationHandler : public properties::PropertyOwner {
@@ -49,7 +49,6 @@ public:
     // Accessors
     Camera* camera() const;
     const SceneGraphNode* anchor() const;
-    const std::vector<SceneGraphNode*>& relevantNodes() const;
     double speedScale() const;
 
     bool noCurrentPath() const;
@@ -65,26 +64,18 @@ public:
     //void continuePath();
 
     // TODO: remove functions for debugging
-    std::vector<glm::dvec3> curvePositions(int nPerSegment);
-    std::vector<glm::dquat> curveOrientations(int nPerSegment);
-    std::vector<glm::dvec3> curveViewDirections(int nPerSegment);
-    std::vector<glm::dvec3> controlPoints();
+    std::vector<glm::dvec3> curvePositions(int nSteps) const;
+    std::vector<glm::dquat> curveOrientations(int nSteps) const;
+    std::vector<glm::dvec3> curveViewDirections(int nSteps) const;
+    std::vector<glm::dvec3> controlPoints() const;
 
 private:
-    Waypoint waypointFromCamera();
     void removeRollRotation(CameraPose& pose, double deltaTime);
-
-    SceneGraphNode* findNodeNearTarget(const SceneGraphNode* node);
-    Waypoint computeDefaultWaypoint(const PathInstruction& ins);
-
-    std::vector<SceneGraphNode*> findRelevantNodes();
 
     std::unique_ptr<Path> _currentPath = nullptr;
 
     AtNodeNavigator _atNodeNavigator;
     bool _isPlaying = false;
-
-    std::vector<SceneGraphNode*> _relevantNodes;
 
     properties::OptionProperty _defaultCurveOption;
     properties::BoolProperty _includeRoll;
@@ -94,8 +85,6 @@ private:
     // TODO: remove later, if it causes problems with regular navigation
     properties::BoolProperty _applyStopBehaviorWhenIdle;
     properties::OptionProperty _stopBehavior;
-
-    properties::StringListProperty _relevantNodeTags;
 };
 
 } // namespace openspace::autonavigation

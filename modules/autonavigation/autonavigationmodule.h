@@ -41,16 +41,21 @@ public:
 
     autonavigation::AutoNavigationHandler& AutoNavigationHandler();
     double minValidBoundingSphere() const;
+    const std::vector<SceneGraphNode*>& relevantNodes() const;
 
     std::vector<documentation::Documentation> documentations() const override;
     scripting::LuaLibrary luaLibrary() const override;
 
 private:
     void internalInitialize(const ghoul::Dictionary&) override;
+    void findRelevantNodes();
 
     autonavigation::AutoNavigationHandler _autoNavigationHandler;
 
     properties::DoubleProperty _minValidBoundingSphere;
+    properties::StringListProperty _relevantNodeTags;
+
+    std::vector<SceneGraphNode*> _relevantNodes;
 };
 
 } // namespace openspace

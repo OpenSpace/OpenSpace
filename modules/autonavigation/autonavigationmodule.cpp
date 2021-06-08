@@ -28,6 +28,8 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scene.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {
@@ -38,16 +40,33 @@ namespace {
         "computation of target positions and path generation, to avoid issues when "
         "there is no bounding sphere."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo RelevantNodeTagsInfo = {
+        "RelevantNodeTags",
+        "Relevant Node Tags",
+        "List of tags for the nodes that are relevant for path creation, for example "
+        "when avoiding collisions."
+    };
 } // namespace
 
 namespace openspace {
 
 AutoNavigationModule::AutoNavigationModule()
-    : OpenSpaceModule(Name),
-    _minValidBoundingSphere(MinBoundingSphereInfo, 10.0, 1.0, 3e10)
+    : OpenSpaceModule(Name)
+    , _minValidBoundingSphere(MinBoundingSphereInfo, 10.0, 1.0, 3e10)
+    , _relevantNodeTags(RelevantNodeTagsInfo)
+
 {
     addPropertySubOwner(_autoNavigationHandler);
     addProperty(_minValidBoundingSphere);
+
+    // Add the relevant tags
+    _relevantNodeTags = std::vector<std::string>{
+        "planet_solarSystem",
+        "moon_solarSystem"
+    };;
+    _relevantNodeTags.onChange([this]() { findRelevantNodes(); });
+    addProperty(_relevantNodeTags);
 }
 
 autonavigation::AutoNavigationHandler& AutoNavigationModule::AutoNavigationHandler() {
@@ -57,6 +76,50 @@ autonavigation::AutoNavigationHandler& AutoNavigationModule::AutoNavigationHandl
 double AutoNavigationModule::minValidBoundingSphere() const {
     return _minValidBoundingSphere;
 }
+
+const std::vector<SceneGraphNode*>& AutoNavigationModule::relevantNodes() const {
+    return _relevantNodes;
+}
+
+void AutoNavigationModule::findRelevantNodes() {
+    const std::vector<SceneGraphNode*>& allNodes =
+        global::renderEngine->scene()->allSceneGraphNodes();
+
+    const std::vector<std::string> relevantTags = _relevantNodeTags;
+
+    if (allNodes.empty() || relevantTags.empty()) {
+        _relevantNodes = std::vector<SceneGraphNode*>();
+        return;
+    }
+
+    auto isRelevant = [&](const SceneGraphNode* node) {
+        const std::vector<std::string> tags = node->tags();
+        auto result = std::find_first_of(
+            relevantTags.begin(),
+            relevantTags.end(),
+            tags.begin(),
+            tags.end()
+        );
+
+        // does not match any tags => not interesting
+        if (result == relevantTags.end()) {
+            return false;
+        }
+
+        return node->renderable() && (node->boundingSphere() > 0.0);
+    };
+
+    std::vector<SceneGraphNode*> resultingNodes;
+    std::copy_if(
+        allNodes.begin(),
+        allNodes.end(),
+        std::back_inserter(resultingNodes),
+        isRelevant
+    );
+
+    _relevantNodes = resultingNodes;
+}
+
 
 std::vector<documentation::Documentation> AutoNavigationModule::documentations() const {
     return {

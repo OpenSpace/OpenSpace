@@ -24,9 +24,11 @@
 
 #include <modules/autonavigation/pathinstruction.h>
 
+#include <modules/autonavigation/autonavigationmodule.h>
 #include <modules/autonavigation/helperfunctions.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
@@ -35,6 +37,8 @@
 
 namespace {
     constexpr const char* _loggerCat = "PathInstruction";
+    constexpr const float Epsilon = 1e-5f;
+
 
     struct [[codegen::Dictionary(Instruction)]] Parameters {
         enum class Type {
@@ -83,6 +87,9 @@ PathInstruction::PathInstruction(const ghoul::Dictionary& dictionary) {
 
     duration = p.duration;
 
+    bool hasStart = p.startState.has_value();
+    startPoint = hasStart ? Waypoint(p.startState.value()) : waypointFromCamera();
+
     switch (p.type) {
         case Parameters::Type::NavigationState: {
             type = Type::NavigationState;
@@ -114,29 +121,7 @@ PathInstruction::PathInstruction(const ghoul::Dictionary& dictionary) {
             position = p.position;
             height = p.height;
             useTargetUpDirection = p.useTargetUpDirection.value_or(false);
-
-            if (position.has_value()) {
-                // Note that the anchor and reference frame is our targetnode.
-                // The position in instruction is given is relative coordinates.
-                glm::dvec3 targetPos = targetNode->worldPosition() +
-                    targetNode->worldRotationMatrix() * position.value();
-
-                Camera* camera = global::navigationHandler->camera();
-                glm::dvec3 up = camera->lookUpVectorWorldSpace();
-
-                if (useTargetUpDirection) {
-                    // @TODO (emmbr 2020-11-17) For now, this is hardcoded to look good for Earth, 
-                    // which is where it matters the most. A better solution would be to make each 
-                    // sgn aware of its own 'up' and query 
-                    up = targetNode->worldRotationMatrix() * glm::dvec3(0.0, 0.0, 1.0);
-                }
-
-                const glm::dvec3 lookAtPos = targetNode->worldPosition();
-                const glm::dquat targetRot = helpers::lookAtQuaternion(targetPos, lookAtPos, up);
-
-                Waypoint wp{ targetPos, targetRot, nodeIdentifier };
-                waypoints = { wp };
-            }
+            waypoints = { computeDefaultWaypoint() };
             break;
         }
         default: {
@@ -147,5 +132,113 @@ PathInstruction::PathInstruction(const ghoul::Dictionary& dictionary) {
     }
 }
 
+Waypoint PathInstruction::waypointFromCamera() const {
+    Camera* camera = global::navigationHandler->camera();
+    const glm::dvec3 pos = camera->positionVec3();
+    const glm::dquat rot = camera->rotationQuaternion();
+    const std::string node = global::navigationHandler->anchorNode()->identifier();
+    return Waypoint{ pos, rot, node };
+}
+
+// OBS! The desired default waypoint may vary between curve types.
+// TODO: let the curves update the default position if no exact position is required
+Waypoint PathInstruction::computeDefaultWaypoint() const {
+    const SceneGraphNode* targetNode = sceneGraphNode(nodeIdentifier);
+    if (!targetNode) {
+        LERROR(fmt::format("Could not find target node '{}'", nodeIdentifier));
+        return Waypoint();
+    }
+
+    glm::dvec3 targetPos;
+    if (position.has_value()) {
+        // Note that the anchor and reference frame is our targetnode.
+        // The position in instruction is given is relative coordinates
+        targetPos = targetNode->worldPosition() +
+            targetNode->worldRotationMatrix() * position.value();
+    }
+    else {
+        const glm::dvec3 nodePos = targetNode->worldPosition();
+        const glm::dvec3 sunPos = glm::dvec3(0.0, 0.0, 0.0);
+        const SceneGraphNode* closeNode = findNodeNearTarget(targetNode);
+
+        glm::dvec3 stepDirection;
+        if (closeNode) {
+            // If the node is close to another node in the scene, make sure that the
+            // position is set to minimize risk of collision
+            stepDirection = glm::normalize(nodePos - closeNode->worldPosition());
+        }
+        else if (glm::length(sunPos - nodePos) < Epsilon) {
+            // Special case for when the target is the Sun. Assumption: want an overview of
+            // the solar system, and not stay in the orbital plane
+            stepDirection = glm::dvec3(0.0, 0.0, 1.0);
+        }
+        else {
+            // Go to a point that is being lit up by the sun, slightly offsetted from sun
+            // direction
+            const glm::dvec3 prevPos = startPoint.position();
+            const glm::dvec3 targetToPrev = prevPos - nodePos;
+            const glm::dvec3 targetToSun = sunPos - nodePos;
+
+            constexpr const float defaultPositionOffsetAngle = -30.f; // degrees
+            constexpr const float angle = glm::radians(defaultPositionOffsetAngle);
+            const glm::dvec3 axis = glm::normalize(glm::cross(targetToPrev, targetToSun));
+            const glm::dquat offsetRotation = angleAxis(static_cast<double>(angle), axis);
+
+            stepDirection = glm::normalize(offsetRotation * targetToSun);
+        }
+
+        const double radius = Waypoint::findValidBoundingSphere(targetNode);
+        const double defaultHeight = 2.0 * radius;
+        const double targetHeight = height.value_or(defaultHeight);
+
+        targetPos = nodePos + stepDirection * (radius + targetHeight);
+    }
+
+    // Up direction
+    glm::dvec3 up = global::navigationHandler->camera()->lookUpVectorWorldSpace();
+    if (useTargetUpDirection) {
+        // @TODO (emmbr 2020-11-17) For now, this is hardcoded to look good for Earth, 
+        // which is where it matters the most. A better solution would be to make each 
+        // sgn aware of its own 'up' and query 
+        up = targetNode->worldRotationMatrix() * glm::dvec3(0.0, 0.0, 1.0);
+    }
+
+    // Rotation
+    const glm::dvec3 lookAtPos = targetNode->worldPosition();
+    const glm::dquat targetRot = helpers::lookAtQuaternion(targetPos, lookAtPos, up);
+
+    return Waypoint(targetPos, targetRot, nodeIdentifier);
+}
+
+// Test if the node lies within a given proximity radius of any relevant node in the scene
+SceneGraphNode* PathInstruction::findNodeNearTarget(const SceneGraphNode* node) const {
+    const std::vector<SceneGraphNode*>& relevantNodes =
+        global::moduleEngine->module<AutoNavigationModule>()->relevantNodes();
+
+    for (SceneGraphNode* n : relevantNodes) {
+        if (n->identifier() == node->identifier()) {
+            continue;
+        }
+
+        constexpr const float proximityRadiusFactor = 3.f;
+
+        const float bs = static_cast<float>(n->boundingSphere());
+        const float proximityRadius = proximityRadiusFactor * bs;
+        const glm::dvec3 posInModelCoords = 
+            glm::inverse(n->modelTransform()) * glm::dvec4(node->worldPosition(), 1.0);
+
+        bool isClose = helpers::isPointInsideSphere(
+            posInModelCoords,
+            glm::dvec3(0.0, 0.0, 0.0),
+            proximityRadius
+        );
+
+        if (isClose) {
+            return n;
+        }
+    }
+
+    return nullptr;
+}
 
 } // namespace openspace::autonavigation
