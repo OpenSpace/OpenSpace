@@ -29,13 +29,10 @@
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/query/query.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/logging/logmanager.h>
-#include <glm/gtx/vector_angle.hpp>
 #include <glm/gtx/quaternion.hpp>
-#include <algorithm>
 #include <vector>
 
 namespace {
