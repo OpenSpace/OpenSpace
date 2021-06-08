@@ -31,12 +31,6 @@
 
 namespace openspace::autonavigation {
 
-enum CurveType {
-    AvoidCollision,
-    Linear,
-    ZoomOutOverview
-};
-
 class PathCurve {
 public:
     virtual ~PathCurve() = 0;

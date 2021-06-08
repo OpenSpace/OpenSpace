@@ -77,6 +77,8 @@ namespace {
 
 namespace openspace::autonavigation {
 
+using NavigationState = interaction::NavigationHandler::NavigationState;
+
 documentation::Documentation PathInstruction::Documentation() {
     return codegen::doc<Parameters>("autonavigation_pathinstruction");
 }

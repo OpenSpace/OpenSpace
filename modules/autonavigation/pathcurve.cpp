@@ -34,7 +34,6 @@
 
 namespace {
     constexpr const char* _loggerCat = "PathCurve";
-    const double Epsilon = 1E-7;
 } // namespace
 
 namespace openspace::autonavigation {
@@ -56,7 +55,7 @@ glm::dvec3 PathCurve::positionAt(double relativeLength) {
 // Input s is a length value, in the range [0, _length]
 // Returns curve parameter in range [0, 1]
 double PathCurve::curveParameter(double s) {
-    if (s <= Epsilon) return 0.0;
+    if (s <= 0.0) return 0.0;
     if (s >= _totalLength) return 1.0;
 
     unsigned int segmentIndex;

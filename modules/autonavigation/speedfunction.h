@@ -27,7 +27,7 @@
 
 namespace openspace::autonavigation {
 
-// The speed function describing the shape of the speed curve. Values in [0,1].
+// The speed function describing the shape of the speed curve. Values in [0,1]
 class SpeedFunction {
 public:
     enum class Type {

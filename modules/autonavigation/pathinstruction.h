@@ -26,15 +26,12 @@
 #define __OPENSPACE_MODULE___PATHINSTRUCTION___H__
 
 #include <modules/autonavigation/waypoint.h>
-#include <openspace/interaction/navigationhandler.h>
 #include <optional>
 
 namespace openspace::autonavigation {
 
 class PathInstruction {
 public:
-    using NavigationState = interaction::NavigationHandler::NavigationState;
-
     PathInstruction(const ghoul::Dictionary& dictionary);
 
     Waypoint startPoint() const;

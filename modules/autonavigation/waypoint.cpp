@@ -45,23 +45,26 @@ Waypoint::Waypoint(const glm::dvec3& pos, const glm::dquat& rot, const std::stri
 
     const SceneGraphNode* node = sceneGraphNode(nodeIdentifier);
     if (!node) {
-        LERROR(fmt::format("Could not find node '{}'.", nodeIdentifier));
+        LERROR(fmt::format("Could not find node '{}'", nodeIdentifier));
         return;
     }
     validBoundingSphere = findValidBoundingSphere(node);
 }
 
 Waypoint::Waypoint(const NavigationState& ns) {
-    // OBS! The following code is exactly the same as used in
+    // OBS! The following code to get the position and rotation is exactly the same as in
     // NavigationHandler::applyNavigationState. Should probably be made into a function.
     // TODO: make that function
     const SceneGraphNode* referenceFrame = sceneGraphNode(ns.referenceFrame);
-    const SceneGraphNode* anchorNode = sceneGraphNode(ns.anchor); // The anchor is also the target
+    const SceneGraphNode* anchorNode = sceneGraphNode(ns.anchor); 
 
     if (!anchorNode) {
-        LERROR(fmt::format("Could not find node '{}' to target.", ns.anchor));
+        LERROR(fmt::format("Could not find node '{}' to target", ns.anchor));
         return;
     }
+
+    nodeIdentifier = ns.anchor;
+    validBoundingSphere = findValidBoundingSphere(anchorNode);
 
     const glm::dvec3 anchorWorldPosition = anchorNode->worldPosition();
     const glm::dmat3 referenceFrameTransform = referenceFrame->worldRotationMatrix();
@@ -87,15 +90,6 @@ Waypoint::Waypoint(const NavigationState& ns) {
     glm::dquat yawRotation = glm::angleAxis(ns.yaw, glm::dvec3(0.f, -1.f, 0.f));
 
     pose.rotation = neutralCameraRotation * yawRotation * pitchRotation;
-
-    nodeIdentifier = ns.anchor;
-
-    const SceneGraphNode* node = sceneGraphNode(nodeIdentifier);
-    if (!node) {
-        LERROR(fmt::format("Could not find node '{}'.", nodeIdentifier));
-        return;
-    }
-    validBoundingSphere = findValidBoundingSphere(node);
 }
 
 glm::dvec3 Waypoint::position() const {

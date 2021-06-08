@@ -45,6 +45,7 @@ namespace {
         "DefaultCurveOption",
         "Default Curve Option",
         "The defualt curve type chosen when generating a path, if none is specified"
+        // TODO: right now there is no way to specify a type for a single path
     };
 
     constexpr openspace::properties::Property::PropertyInfo IncludeRollInfo = {
@@ -64,7 +65,7 @@ namespace {
     {
         "ApplyStopBehaviorWhenIdle",
         "Apply Stop Behavior When Idle",
-        "If enabled, the camera is controlled using the set stop behavior when"
+        "If enabled, the camera is controlled using the set stop behavior when "
         "no path is playing"
     };
 
@@ -99,9 +100,9 @@ AutoNavigationHandler::AutoNavigationHandler()
     , _orbitSpeedFactor(OrbitSpeedFactorInfo, 0.5, 0.0, 20.0)
 {
     _defaultCurveOption.addOptions({
-        { CurveType::AvoidCollision, "AvoidCollision" },
-        { CurveType::Linear, "Linear" },
-        { CurveType::ZoomOutOverview, "ZoomOutOverview"}
+        { Path::CurveType::AvoidCollision, "AvoidCollision" },
+        { Path::CurveType::Linear, "Linear" },
+        { Path::CurveType::ZoomOutOverview, "ZoomOutOverview"}
     });
     addProperty(_defaultCurveOption);
 
@@ -196,9 +197,6 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
 void AutoNavigationHandler::createPath(PathInstruction& instruction) {
     clearPath();
 
-    // TODO: Improve how curve types are handled
-    const int curveType = _defaultCurveOption;
-
     std::vector<Waypoint> waypoints = instruction.waypoints();
     Waypoint waypointToAdd;
 
@@ -211,10 +209,13 @@ void AutoNavigationHandler::createPath(PathInstruction& instruction) {
         waypointToAdd = waypoints[0];
     }
 
+    // TODO: Improve how curve types are handled
+    const int curveType = _defaultCurveOption;
+
     _currentPath = std::make_unique<Path>(
         instruction.startPoint(),
         waypointToAdd,
-        CurveType(curveType),
+        Path::CurveType(curveType),
         instruction.duration()
     );
 

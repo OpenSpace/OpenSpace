@@ -33,6 +33,12 @@ namespace openspace::autonavigation {
 
 class Path {
 public:
+    enum CurveType {
+        AvoidCollision,
+        Linear,
+        ZoomOutOverview
+    };
+
     Path(Waypoint start, Waypoint end, CurveType type,
         std::optional<double> duration = std::nullopt);
 

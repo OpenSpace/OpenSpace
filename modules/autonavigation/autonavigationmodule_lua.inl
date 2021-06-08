@@ -40,11 +40,10 @@
 
 namespace {
     constexpr const char* _loggerCat = "AutoNavigation";
+    constexpr const double Epsilon = 1e-12;
 } // namespace
 
 namespace openspace::autonavigation::luascriptfunctions {
-
-const double Epsilon = 1e-12;
 
 int isFlying(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::isFlying");

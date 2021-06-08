@@ -37,8 +37,7 @@ namespace openspace {
 
 namespace openspace::autonavigation {
 
-//struct Waypoint;
-struct PathInstruction;
+class PathInstruction;
 
 class AutoNavigationHandler : public properties::PropertyOwner {
 public:
@@ -87,8 +86,6 @@ private:
     properties::FloatProperty _speedScale;
     properties::FloatProperty _orbitSpeedFactor;
 
-    // for testing pause behaviors.
-    // TODO: remove later, if it causes problems with regular navigation
     properties::BoolProperty _applyStopBehaviorWhenIdle;
     properties::OptionProperty _stopBehavior;
 };

@@ -55,12 +55,10 @@ AutoNavigationModule::AutoNavigationModule()
     : OpenSpaceModule(Name)
     , _minValidBoundingSphere(MinBoundingSphereInfo, 10.0, 1.0, 3e10)
     , _relevantNodeTags(RelevantNodeTagsInfo)
-
 {
     addPropertySubOwner(_autoNavigationHandler);
     addProperty(_minValidBoundingSphere);
 
-    // Add the relevant tags
     _relevantNodeTags = std::vector<std::string>{
         "planet_solarSystem",
         "moon_solarSystem"

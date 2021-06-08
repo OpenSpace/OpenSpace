@@ -39,11 +39,10 @@
 namespace {
     constexpr const char* _loggerCat = "AvoidCollisionCurve";
 
-    const double CloseToNodeThresholdFactor = 5.0;
-    const double AvoidCollisionDistanceFactor = 3.0;
-    const double CollisionBufferSizeFactor = 1.0;
-    const int MaxAvoidCollisionSteps = 10;
-
+    constexpr const double CloseToNodeThresholdFactor = 5.0;
+    constexpr const double AvoidCollisionDistanceFactor = 3.0;
+    constexpr const double CollisionBufferSizeFactor = 1.0;
+    constexpr const int MaxAvoidCollisionSteps = 10;
 } // namespace
 
 namespace openspace::autonavigation {
