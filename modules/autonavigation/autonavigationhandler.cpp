@@ -133,12 +133,12 @@ double AutoNavigationHandler::speedScale() const {
     return _speedScale;
 }
 
-bool AutoNavigationHandler::noCurrentPath() const {
-    return _currentPath == nullptr;
+bool AutoNavigationHandler::hasCurrentPath() const {
+    return _currentPath != nullptr;
 }
 
 bool AutoNavigationHandler::hasFinished() const {
-    if (noCurrentPath()) {
+    if (!hasCurrentPath()) {
         return true;
     }
 
@@ -150,13 +150,13 @@ void AutoNavigationHandler::updateCamera(double deltaTime) {
 
     if (!_isPlaying) {
         // TODO: Determine how this should work
-        if (_applyStopBehaviorWhenIdle) {
+        if (hasFinished() && _applyStopBehaviorWhenIdle) {
             applyStopBehavior(deltaTime);
         }
         return;
     }
 
-    if (noCurrentPath()) {
+    if (!hasCurrentPath()) {
         return;
     }
 
@@ -217,7 +217,6 @@ void AutoNavigationHandler::createPath(PathInstruction& instruction) {
     );
 
     LINFO("Successfully generated camera path");
-    startPath();
 }
 
 void AutoNavigationHandler::clearPath() {
@@ -226,7 +225,7 @@ void AutoNavigationHandler::clearPath() {
 }
 
 void AutoNavigationHandler::startPath() {
-    if (noCurrentPath()) {
+    if (!hasCurrentPath()) {
         LERROR("There is no path to start");
         return;
     }
@@ -241,21 +240,6 @@ void AutoNavigationHandler::startPath() {
     _isPlaying = true;
 }
 
-//void AutoNavigationHandler::continuePath() {
-//    if (hasFinished()) {
-//        LERROR("No path to resume (path is empty or has finished).");
-//        return;
-//    }
-//
-//    if (_isPlaying) {
-//        LERROR("Cannot resume a path that is already playing");
-//        return;
-//    }
-//
-//    LINFO("Continuing path...");
-//    _isPlaying = true;
-//}
-
 void AutoNavigationHandler::abortPath() {
     if (!_isPlaying) {
         LWARNING("No camera path is playing");
@@ -265,10 +249,40 @@ void AutoNavigationHandler::abortPath() {
     LINFO("Aborted camera path");
 }
 
+void AutoNavigationHandler::pausePath() {
+    if (hasFinished()) {
+        LERROR("No path to pause (path is empty or has finished).");
+        return;
+    }
+
+    if (!_isPlaying) {
+        LERROR("Cannot pause a path that is not playing");
+        return;
+    }
+
+    LINFO("Path paused");
+    _isPlaying = false;
+}
+
+void AutoNavigationHandler::continuePath() {
+    if (hasFinished()) {
+        LERROR("No path to resume (path is empty or has finished).");
+        return;
+    }
+
+    if (_isPlaying) {
+        LERROR("Cannot resume a path that is already playing");
+        return;
+    }
+
+    LINFO("Continuing path...");
+    _isPlaying = true;
+}
+
 // TODO: remove when not needed
 // Created for debugging
 std::vector<glm::dvec3> AutoNavigationHandler::curvePositions(int nSteps) const {
-    if (noCurrentPath()) {
+    if (!hasCurrentPath()) {
         LERROR("There is no current path to sample points from.");
         return {};
     }
@@ -288,7 +302,7 @@ std::vector<glm::dvec3> AutoNavigationHandler::curvePositions(int nSteps) const 
 // TODO: remove when not needed
 // Created for debugging
 std::vector<glm::dquat> AutoNavigationHandler::curveOrientations(int nSteps) const {
-    if (noCurrentPath()) {
+    if (!hasCurrentPath()) {
         LERROR("There is no current path to sample points from.");
         return {};
     }
@@ -310,7 +324,7 @@ std::vector<glm::dquat> AutoNavigationHandler::curveOrientations(int nSteps) con
 // TODO: remove when not needed or combined into pose version
 // Created for debugging
 std::vector<glm::dvec3> AutoNavigationHandler::curveViewDirections(int nSteps) const {
-    if (noCurrentPath()) {
+    if (!hasCurrentPath()) {
         LERROR("There is no current path to sample points from.");
         return {};
     }
@@ -337,7 +351,7 @@ std::vector<glm::dvec3> AutoNavigationHandler::curveViewDirections(int nSteps) c
 // TODO: remove when not needed
 // Created for debugging
 std::vector<glm::dvec3> AutoNavigationHandler::controlPoints() const {
-    if (noCurrentPath()) {
+    if (!hasCurrentPath()) {
         LERROR("There is no current path to sample points from.");
         return {};
     }

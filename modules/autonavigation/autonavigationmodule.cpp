@@ -144,13 +144,20 @@ scripting::LuaLibrary AutoNavigationModule::luaLibrary() const {
             "",
             "Returns true if a camera path is currently running, and false otherwise."
         },
-        //{
-        //    "continuePath",
-        //    &autonavigation::luascriptfunctions::continuePath,
-        //    {},
-        //    "",
-        //    "Continue playing a paused camera path."
-        //},
+        {
+            "continuePath",
+            &autonavigation::luascriptfunctions::continuePath,
+            {},
+            "",
+            "Continue playing a paused camera path."
+        },
+        {
+            "pausePath",
+            &autonavigation::luascriptfunctions::pausePath,
+            {},
+            "",
+            "Pause a playing camera path."
+        },
         {
             "stopPath",
             &autonavigation::luascriptfunctions::stopPath,

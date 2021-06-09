@@ -54,7 +54,7 @@ public:
     const SceneGraphNode* anchor() const;
     double speedScale() const;
 
-    bool noCurrentPath() const;
+    bool hasCurrentPath() const;
     bool hasFinished() const;
 
     void updateCamera(double deltaTime);
@@ -62,9 +62,8 @@ public:
     void clearPath();
     void startPath();
     void abortPath();
-
-    // TODO: allow option to pause during a path and then change this to continue playing
-    //void continuePath();
+    void pausePath();
+    void continuePath();
 
     // TODO: remove functions for debugging
     std::vector<glm::dvec3> curvePositions(int nSteps) const;

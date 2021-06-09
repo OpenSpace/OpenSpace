@@ -56,15 +56,25 @@ int isFlying(lua_State* L) {
     return 1;
 }
 
-//int continuePath(lua_State* L) {
-//    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::continuePath");
-//
-//    AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
-//    module->AutoNavigationHandler().continuePath();
-//
-//    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-//    return 0;
-//}
+int continuePath(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::continuePath");
+
+    AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
+    module->AutoNavigationHandler().continuePath();
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
+int pausePath(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::pausePath");
+
+    AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
+    module->AutoNavigationHandler().pausePath();
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
 
 int stopPath(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::stopPath");
@@ -149,6 +159,10 @@ int goTo(lua_State* L) {
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
     module->AutoNavigationHandler().createPath(instruction);
 
+    if (module->AutoNavigationHandler().hasCurrentPath()) {
+        module->AutoNavigationHandler().startPath();
+    }
+
     lua_settop(L, 0);
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -183,6 +197,10 @@ int goToHeight(lua_State* L) {
 
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
     module->AutoNavigationHandler().createPath(instruction);
+
+    if (module->AutoNavigationHandler().hasCurrentPath()) {
+        module->AutoNavigationHandler().startPath();
+    }
 
     lua_settop(L, 0);
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
@@ -239,6 +257,10 @@ int goToGeo(lua_State* L) {
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
     module->AutoNavigationHandler().createPath(instruction);
 
+    if (module->AutoNavigationHandler().hasCurrentPath()) {
+        module->AutoNavigationHandler().startPath();
+    }
+
     lua_settop(L, 0);
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -253,6 +275,10 @@ int generatePath(lua_State* L) {
 
     AutoNavigationModule* module = global::moduleEngine->module<AutoNavigationModule>();
     module->AutoNavigationHandler().createPath(instruction);
+
+    if (module->AutoNavigationHandler().hasCurrentPath()) {
+        module->AutoNavigationHandler().startPath();
+    }
 
     lua_settop(L, 0);
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
