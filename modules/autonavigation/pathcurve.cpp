@@ -45,8 +45,8 @@ const double PathCurve::length() const {
     return _totalLength;
 }
 
-glm::dvec3 PathCurve::positionAt(double length) {
-    const double u = curveParameter(length);
+glm::dvec3 PathCurve::positionAt(double relativeDistance) {
+    const double u = curveParameter(relativeDistance * _totalLength);
     return interpolate(u);
 }
 

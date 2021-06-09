@@ -116,7 +116,7 @@ double Path::speedAtTime(double time) const {
 CameraPose Path::interpolatedPose(double distance) const {
     const double relativeDistance = distance / pathLength();
     CameraPose cs;
-    cs.position = _curve->positionAt(distance);
+    cs.position = _curve->positionAt(relativeDistance);
     cs.rotation = interpolateRotation(relativeDistance);
     return cs;
 }
@@ -151,7 +151,7 @@ glm::dquat Path::interpolateRotation(double t) const {
                 const double tScaled = ghoul::cubicEaseInOut((t - t1) / (t2 - t1));
                 lookAtPos = ghoul::interpolateLinear(tScaled, startNodePos, endNodePos);
             }
-            else if (t2 < t) {
+            else if (t > t2) {
                 // Compute a position in front of the camera at the end orientation
                 const double inFrontDistance = glm::distance(endPos, endNodePos);
                 const glm::dvec3 viewDir = helpers::viewDirection(_end.rotation());

@@ -36,7 +36,7 @@ public:
     virtual ~PathCurve() = 0;
 
     const double length() const;
-    glm::dvec3 positionAt(double length);
+    glm::dvec3 positionAt(double relativeDistance);
 
     // Compute curve parameter u that matches the input arc length s
     double curveParameter(double s);
