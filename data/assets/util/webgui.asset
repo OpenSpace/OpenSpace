@@ -3,7 +3,7 @@ asset.require('./static_server')
 local guiCustomization = asset.require('customization/gui')
 
 -- Select which commit hashes to use for the frontend and backend
-local frontendHash = "391f8d3ed74e598a0e8a1b16016324d8f747e18d"
+local frontendHash = "55adb23d5f564e407b8778101ab52bf9b1d79149"
 local dataProvider = "data.openspaceproject.com/files/webgui"
 
 local frontend = asset.syncedResource({
@@ -66,7 +66,7 @@ asset.onDeinitialize(function ()
     end
   end
   -- @TODO(maci, 2019-08-23) setting this value on exit was causing the server to restart
-  -- on macos, which in turn, stopped the application from exiting. 
+  -- on macos, which in turn, stopped the application from exiting.
   -- need to address in webguimodule.cpp
   --openspace.setPropertyValueSingle("Modules.WebGui.Directories", newDirectories)
 end)
