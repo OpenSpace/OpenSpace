@@ -114,22 +114,22 @@ double Path::speedAtTime(double time) const {
 }
 
 CameraPose Path::interpolatedPose(double distance) const {
-    double u = distance / pathLength();
+    const double relativeDistance = distance / pathLength();
     CameraPose cs;
-    cs.position = _curve->positionAt(u);
-    cs.rotation = interpolateRotation(u);
+    cs.position = _curve->positionAt(distance);
+    cs.rotation = interpolateRotation(relativeDistance);
     return cs;
 }
 
-glm::dquat Path::interpolateRotation(double u) const {
+glm::dquat Path::interpolateRotation(double t) const {
     switch (_curveType) {
         case CurveType::AvoidCollision:
         case CurveType::Linear:
-            return interpolation::easedSlerp(_start.rotation(), _end.rotation(), u);
+            return interpolation::easedSlerp(_start.rotation(), _end.rotation(), t);
         case CurveType::ZoomOutOverview:
         {
-            const double u1 = 0.2;
-            const double u2 = 0.8;
+            const double t1 = 0.2;
+            const double t2 = 0.8;
 
             const glm::dvec3 startPos = _curve->positionAt(0.0);
             const glm::dvec3 endPos = _curve->positionAt(1.0);
@@ -137,39 +137,39 @@ glm::dquat Path::interpolateRotation(double u) const {
             const glm::dvec3 endNodePos = _end.node()->worldPosition();
 
             glm::dvec3 lookAtPos;
-            if (u < u1) {
+            if (t < t1) {
                 // Compute a position in front of the camera at the start orientation
                 const double inFrontDistance = glm::distance(startPos, startNodePos);
                 const glm::dvec3 viewDir = helpers::viewDirection(_start.rotation());
                 const glm::dvec3 inFrontOfStart = startPos + inFrontDistance * viewDir;
 
-                double uScaled = ghoul::cubicEaseInOut(u / u1);
+                const double tScaled = ghoul::cubicEaseInOut(t / t1);
                 lookAtPos = 
-                    ghoul::interpolateLinear(uScaled, inFrontOfStart, startNodePos);
+                    ghoul::interpolateLinear(tScaled, inFrontOfStart, startNodePos);
             }
-            else if (u <= u2) {
-                double uScaled = ghoul::cubicEaseInOut((u - u1) / (u2 - u1));
-                lookAtPos = ghoul::interpolateLinear(uScaled, startNodePos, endNodePos);
+            else if (t <= t2) {
+                const double tScaled = ghoul::cubicEaseInOut((t - t1) / (t2 - t1));
+                lookAtPos = ghoul::interpolateLinear(tScaled, startNodePos, endNodePos);
             }
-            else if (u2 < u) {
+            else if (t2 < t) {
                 // Compute a position in front of the camera at the end orientation
                 const double inFrontDistance = glm::distance(endPos, endNodePos);
                 const glm::dvec3 viewDir = helpers::viewDirection(_end.rotation());
                 const glm::dvec3 inFrontOfEnd = endPos + inFrontDistance * viewDir;
 
-                double uScaled = ghoul::cubicEaseInOut((u - u2) / (1.0 - u2));
-                lookAtPos = ghoul::interpolateLinear(uScaled, endNodePos, inFrontOfEnd);
+                const double tScaled = ghoul::cubicEaseInOut((t - t2) / (1.0 - t2));
+                lookAtPos = ghoul::interpolateLinear(tScaled, endNodePos, inFrontOfEnd);
             }
 
             // Handle up vector separately
             glm::dvec3 startUp = _start.rotation() * glm::dvec3(0.0, 1.0, 0.0);
             glm::dvec3 endUp = _end.rotation() * glm::dvec3(0.0, 1.0, 0.0);
 
-            double uUp = helpers::shiftAndScale(u, u1, u2);
-            uUp = ghoul::sineEaseInOut(uUp);
-            glm::dvec3 up = ghoul::interpolateLinear(uUp, startUp, endUp);
+            double tUp = helpers::shiftAndScale(t, t1, t2);
+            tUp = ghoul::sineEaseInOut(tUp);
+            glm::dvec3 up = ghoul::interpolateLinear(tUp, startUp, endUp);
 
-            return helpers::lookAtQuaternion(_curve->positionAt(u), lookAtPos, up);
+            return helpers::lookAtQuaternion(_curve->positionAt(t), lookAtPos, up);
         }
         default:
             throw ghoul::MissingCaseException();

@@ -45,8 +45,8 @@ const double PathCurve::length() const {
     return _totalLength;
 }
 
-glm::dvec3 PathCurve::positionAt(double relativeLength) {
-    double u = curveParameter(relativeLength * _totalLength);
+glm::dvec3 PathCurve::positionAt(double length) {
+    const double u = curveParameter(length);
     return interpolate(u);
 }
 
@@ -58,7 +58,7 @@ double PathCurve::curveParameter(double s) {
     if (s >= _totalLength) return 1.0;
 
     unsigned int segmentIndex = 1;
-    while (s > _arcLengthSums[segmentIndex]) {
+    while (s > _lengthSums[segmentIndex]) {
         segmentIndex++;
     }
 
@@ -93,7 +93,7 @@ void PathCurve::initializeParameterData() {
     ghoul_assert(_nSegments > 0, "Cannot have a curve with zero segments!");
 
     _curveParameterSteps.clear();
-    _arcLengthSums.clear();
+    _lengthSums.clear();
     _parameterSamples.clear();
 
     // Evenly space out parameter intervals
@@ -106,22 +106,22 @@ void PathCurve::initializeParameterData() {
     _curveParameterSteps.push_back(1.0);
 
     // Arc lengths
-    _arcLengthSums.reserve(_nSegments + 1);
-    _arcLengthSums.push_back(0.0);
+    _lengthSums.reserve(_nSegments + 1);
+    _lengthSums.push_back(0.0);
     for (unsigned int i = 1; i <= _nSegments; i++) {
         double u = _curveParameterSteps[i];
         double uPrev = _curveParameterSteps[i - 1];
         double length = arcLength(uPrev, u);
-        _arcLengthSums.push_back(_arcLengthSums[i - 1] + length);
+        _lengthSums.push_back(_lengthSums[i - 1] + length);
     }
-    _totalLength = _arcLengthSums.back();
+    _totalLength = _lengthSums.back();
 
     // Compute a map of arc lengths s and curve parameters u, for reparameterization
     _parameterSamples.reserve(NrSamplesPerSegment * _nSegments + 1);
     const double uStep = 1.0 / (_nSegments * NrSamplesPerSegment);
     for (unsigned int i = 0; i < _nSegments; i++) {
         double uStart = _curveParameterSteps[i];
-        double sStart = _arcLengthSums[i];
+        double sStart = _lengthSums[i];
         for (int j = 0; j < NrSamplesPerSegment; ++j) {
             double u = uStart + j * uStep;
             double s = sStart + arcLength(uStart, u);

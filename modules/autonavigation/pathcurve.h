@@ -36,7 +36,7 @@ public:
     virtual ~PathCurve() = 0;
 
     const double length() const;
-    glm::dvec3 positionAt(double relativeLength);
+    glm::dvec3 positionAt(double length);
 
     // Compute curve parameter u that matches the input arc length s
     double curveParameter(double s);
@@ -58,7 +58,7 @@ protected:
     unsigned int _nSegments;
 
     std::vector<double> _curveParameterSteps; // per segment
-    std::vector<double> _arcLengthSums; // per segment
+    std::vector<double> _lengthSums; // per segment
     double _totalLength;
 
     struct ParameterPair {
