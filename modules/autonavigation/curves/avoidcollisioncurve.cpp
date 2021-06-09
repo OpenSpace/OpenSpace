@@ -105,7 +105,7 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
 
     _nSegments = static_cast<int>(_points.size() - 3);
 
-    initParameterIntervals();
+    initializeParameterData();
 }
 
 // Interpolate a list of control points and knot times
@@ -118,11 +118,11 @@ glm::dvec3 AvoidCollisionCurve::interpolate(double u) {
     }
 
     std::vector<double>::iterator segmentEndIt =
-        std::lower_bound(_parameterIntervals.begin(), _parameterIntervals.end(), u);
-    unsigned int index = static_cast<int>((segmentEndIt - 1) - _parameterIntervals.begin());
+        std::lower_bound(_curveParameterSteps.begin(), _curveParameterSteps.end(), u);
+    unsigned int index = static_cast<int>((segmentEndIt - 1) - _curveParameterSteps.begin());
 
-    double segmentStart = _parameterIntervals[index];
-    double segmentDuration = (_parameterIntervals[index + 1] - _parameterIntervals[index]);
+    double segmentStart = _curveParameterSteps[index];
+    double segmentDuration = (_curveParameterSteps[index + 1] - _curveParameterSteps[index]);
     double uSegment = (u - segmentStart) / segmentDuration;
 
     return interpolation::catmullRom(

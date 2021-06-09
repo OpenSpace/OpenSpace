@@ -38,7 +38,7 @@ public:
     const double length() const;
     glm::dvec3 positionAt(double relativeLength);
 
-    // Compute curve parameter that matches the input arc length s
+    // Compute curve parameter u that matches the input arc length s
     double curveParameter(double s);
 
     virtual glm::dvec3 interpolate(double u) = 0;
@@ -46,7 +46,9 @@ public:
     std::vector<glm::dvec3> points();
 
 protected:
-    void initParameterIntervals();
+    // Precompute information related to the pspline parameters, that are
+    // needed for arc length reparameterization
+    void initializeParameterData();
 
     double approximatedDerivative(double u, double h = 0.0001);
     double arcLength(double limit = 1.0);
@@ -55,10 +57,16 @@ protected:
     std::vector<glm::dvec3> _points;
     unsigned int _nSegments;
 
-    std::vector<double> _parameterIntervals;
-    std::vector<double> _lengths;
-    std::vector<double> _lengthSums;
+    std::vector<double> _curveParameterSteps; // per segment
+    std::vector<double> _arcLengthSums; // per segment
     double _totalLength;
+
+    struct ParameterPair {
+        double u; // curve parameter
+        double s; // arc length parameter
+    };
+
+    std::vector<ParameterPair> _parameterSamples;
 };
 
 class LinearCurve : public PathCurve {

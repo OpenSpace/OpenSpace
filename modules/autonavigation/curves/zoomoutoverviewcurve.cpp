@@ -88,7 +88,7 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
 
     _nSegments = (unsigned int)std::floor((_points.size() - 1) / 3.0);
 
-    initParameterIntervals();
+    initializeParameterData();
 }
 
 glm::dvec3 ZoomOutOverviewCurve::interpolate(double u) {
@@ -99,7 +99,7 @@ glm::dvec3 ZoomOutOverviewCurve::interpolate(double u) {
         return _points.back();
     }
 
-    return interpolation::piecewiseCubicBezier(u, _points, _parameterIntervals);
+    return interpolation::piecewiseCubicBezier(u, _points, _curveParameterSteps);
 }
 
 } // namespace openspace::autonavigation
