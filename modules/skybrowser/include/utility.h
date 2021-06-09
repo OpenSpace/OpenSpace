@@ -46,11 +46,11 @@ namespace openspace {
             const double fov, const double roll, const bool moveInstantly = true);
         ghoul::Dictionary loadCollection(const std::string& url);
         ghoul::Dictionary setForeground(const std::string& name);
-        ghoul::Dictionary createImageLayer(const std::string& imageUrl, const std::string& id);
-        ghoul::Dictionary removeImageLayer(const std::string& imageId);
-        ghoul::Dictionary setLayerOpacity(const std::string& imageId, double opacity);
+        ghoul::Dictionary createImageLayer(const std::string& id, const std::string& url);
+        ghoul::Dictionary removeImageLayer(const std::string& id);
+        ghoul::Dictionary setLayerOpacity(const std::string& id, double opacity);
         ghoul::Dictionary setForegroundOpacity(double val);
-        ghoul::Dictionary setLayerOrder(const std::string& id, int order);
+        ghoul::Dictionary setLayerOrder(const std::string& id, int order, int version);
     }
 }
 

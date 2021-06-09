@@ -61,7 +61,7 @@ namespace openspace {
         void setIdInBrowser(std::string id);
         float fieldOfView() const;
         std::deque<int>& selectedImages();
-        void setImageLayerOrder(int i, int order);
+        void setImageLayerOrder(int i, int order, int version);
 
     protected:
 

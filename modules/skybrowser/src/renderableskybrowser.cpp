@@ -197,7 +197,7 @@ namespace openspace {
             // Push newly selected image to front
             _selectedImages.push_front(i);
             // Create image layer and center WWT app on the image
-            sendMessageToWWT(wwtmessage::createImageLayer(image.imageUrl, std::to_string(i))); 
+            sendMessageToWWT(wwtmessage::createImageLayer(std::to_string(i), image.imageUrl));
             LINFO("Image has been loaded to " + identifier());
         }
     }
@@ -249,13 +249,23 @@ namespace openspace {
         return _selectedImages;
     }
 
-    void RenderableSkyBrowser::setImageLayerOrder(int i, int order) {
+    void RenderableSkyBrowser::setImageLayerOrder(int i, int order, int version) {
         // Remove from selected list
-        auto it = std::find(std::begin(_selectedImages), std::end(_selectedImages), i);
-        if (it != std::end(_selectedImages)) {
-            _selectedImages.erase(it);
-            _selectedImages.insert(std::begin(_selectedImages) + order, i);
+        auto current = std::find(std::begin(_selectedImages), std::end(_selectedImages), i);
+        auto target = std::begin(_selectedImages) + order;
+
+        // Make sure the image was found in the list
+        if (current != std::end(_selectedImages) && target != std::end(_selectedImages)) {
+            // Swap the two images
+            std::iter_swap(current, target);
         }
+
+        int reverseOrder = _selectedImages.size() - order - 1;
+        ghoul::Dictionary message = wwtmessage::setLayerOrder(std::to_string(i),
+            reverseOrder, version);
+        sendMessageToWWT(message);
     }
+
+    
 
 } // namespace

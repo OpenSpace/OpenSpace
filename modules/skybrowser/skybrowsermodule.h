@@ -76,6 +76,7 @@ public:
     void removeTargetBrowserPair(std::string& browserId);
     void place3dBrowser(ImageData& image);
     void lookAt3dBrowser();
+    int getAndIncrementLayerOrder();
 
     scripting::LuaLibrary luaLibrary() const override;
     //std::vector<documentation::Documentation> documentations() const override;
@@ -116,9 +117,10 @@ protected:
     bool isRotating = false;
     // For tracking the currently selected browser
     std::string selectedBrowser;
-    glm::ivec3 highlightAddition{ 35, 35, 35 };
+    glm::ivec3 highlightAddition;
     // Mode of browsing
-    bool _cameraInSolarSystem{ true };
+    bool _cameraInSolarSystem;
+    int _layerOrderCounter;
 };
 
 } // namespace openspace

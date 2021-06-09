@@ -256,6 +256,9 @@ SkyBrowserModule::SkyBrowserModule()
     , resizeVector(0.f, 0.f)
     , changeViewWithinBrowser(false)
     , _browser3d(nullptr)
+    , _layerOrderCounter(0)
+    , _cameraInSolarSystem(true)
+    , highlightAddition(35, 35, 35)
 {
     global::callback::mousePosition->emplace_back(
         [&](double x, double y) {    
@@ -511,6 +514,10 @@ glm::vec2 SkyBrowserModule::getMousePositionInScreenSpaceCoords(glm::vec2& mouse
     // Transform pixel coordinates to screen space coordinates [-1,1][-ratio, ratio]
     screenSpacePos /= (0.5f*size.y);
     return screenSpacePos;
+}
+
+int SkyBrowserModule::getAndIncrementLayerOrder() {
+    return _layerOrderCounter++;
 }
 
 void SkyBrowserModule::addRenderable(ScreenSpaceRenderable* object) {

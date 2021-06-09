@@ -150,18 +150,17 @@ namespace openspace::skybrowser::luascriptfunctions {
         const int i = ghoul::lua::value<int>(L, 2);
         int order = ghoul::lua::value<int>(L, 3);
         SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-        ghoul::Dictionary message = wwtmessage::setLayerOrder(std::to_string(i), order);
+        int version = module->getAndIncrementLayerOrder();
 
         if (module->browserIdExists(browserId)) {
             ScreenSpaceSkyBrowser* browser = module->getSkyBrowsers()[browserId];
-            browser->sendMessageToWWT(message);
-            browser->setImageLayerOrder(i, order);
+            
+            browser->setImageLayerOrder(i, order, version);
         }
         else if (module->get3dBrowser() != nullptr) {
             RenderableSkyBrowser* browser3d = dynamic_cast<RenderableSkyBrowser*>(
                 module->get3dBrowser()->renderable());
-            browser3d->sendMessageToWWT(message);
-            browser3d->setImageLayerOrder(i, order);
+            browser3d->setImageLayerOrder(i, order, version);
         }
 
         return 0;

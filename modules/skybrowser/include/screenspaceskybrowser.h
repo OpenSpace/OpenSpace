@@ -36,7 +36,7 @@ namespace openspace {
         std::deque<int>& selectedImages();
         void addSelectedImage(ImageData& image, int i);
         void removeSelectedImage(ImageData& image, int i);
-        void setImageLayerOrder(int i, int order);
+        void setImageLayerOrder(int i, int order, int version);
 
         // Translation
         //void translate(glm::vec2 translation);

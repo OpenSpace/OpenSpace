@@ -150,12 +150,12 @@ namespace openspace::wwtmessage {
         return msg;
     }
 
-    ghoul::Dictionary createImageLayer(const std::string& imageUrl, const std::string& id) {
+    ghoul::Dictionary createImageLayer(const std::string& id, const std::string& url) {
         using namespace std::string_literals;
         ghoul::Dictionary msg;
         msg.setValue("event", "image_layer_create"s);
         msg.setValue("id", id);
-        msg.setValue("url", imageUrl);
+        msg.setValue("url", url);
         msg.setValue("mode", "preloaded"s);
         msg.setValue("goto", false);
 
@@ -191,7 +191,7 @@ namespace openspace::wwtmessage {
         return msg;
     }
 
-    ghoul::Dictionary setLayerOrder(const std::string& id, int order) {
+    ghoul::Dictionary setLayerOrder(const std::string& id, int order, int version) {
         // The lower the layer order, the more towards the back the image is placed
         // 0 is the background
         using namespace std::string_literals;
@@ -199,6 +199,7 @@ namespace openspace::wwtmessage {
         msg.setValue("event", "image_layer_order"s);
         msg.setValue("id", id);
         msg.setValue("order", order);
+        msg.setValue("version", version);
 
         return msg;
     }
