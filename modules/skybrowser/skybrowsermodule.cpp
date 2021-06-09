@@ -474,8 +474,11 @@ SkyBrowserModule::SkyBrowserModule()
     });
 } 
 
-void SkyBrowserModule::internalDeinitialize() {
+SkyBrowserModule::~SkyBrowserModule() {
     delete dataHandler;
+}
+
+void SkyBrowserModule::internalDeinitialize() {
 }
 
 void SkyBrowserModule::internalInitialize(const ghoul::Dictionary& dict) {

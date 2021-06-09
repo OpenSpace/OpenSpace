@@ -39,7 +39,7 @@ namespace {
     };
 
     constexpr const std::array<const char*, 8> UniformNames = {
-        "ModelTransform", "ViewProjectionMatrix", "texture1", "showCrosshair", "showCrosshairInTarget", "borderWidth", "targetDimensions", "borderColor"
+        "ModelTransform", "ViewProjectionMatrix", "texture", "showCrosshair", "showCrosshairInTarget", "borderWidth", "targetDimensions", "borderColor"
     };
 
     constexpr const openspace::properties::Property::PropertyInfo BrowserIDInfo =

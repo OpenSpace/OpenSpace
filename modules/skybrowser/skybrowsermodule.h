@@ -55,7 +55,7 @@ public:
     constexpr static const int FROM_URL = 1;
 
     SkyBrowserModule();
-    virtual ~SkyBrowserModule() = default;
+    virtual ~SkyBrowserModule();
     glm::vec2 getMousePositionInScreenSpaceCoords(glm::vec2& mousePos);
     void addRenderable(ScreenSpaceRenderable* object);
     WWTDataHandler* getWWTDataHandler();

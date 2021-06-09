@@ -1,4 +1,4 @@
-uniform sampler2D texture1;
+uniform sampler2D texture;
 uniform float borderWidth;
 uniform vec2 targetDimensions;
 uniform bool showCrosshair;
@@ -34,8 +34,8 @@ Fragment getFragment() {
     float border_crosshair_bl = step(borderWidth*ratio*4, vs_st.x) * step(borderWidth*ratio*4, (1.0)-vs_st.x);
     float border_crosshair_tr = step(borderWidth*4, vs_st.y) * step(borderWidth*4, (1.0)-vs_st.y);
     vec3 crosshair_small = vec3(border_crosshair_bl*border_crosshair_tr);
-    
-    vec3 crosshair_inside_border = vec3(crossLine(crosshair_small.x * crosshair_border_linewidth, (vs_st).x) 
+
+    vec3 crosshair_inside_border = vec3(crossLine(crosshair_small.x * crosshair_border_linewidth, (vs_st).x)
     + crossLine(crosshair_small.y * crosshair_border_linewidth, (vs_st).y));
     vec3 crosshair_and_border =  (1.0 - border) + crosshair_inside_border;
 
