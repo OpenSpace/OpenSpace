@@ -41,7 +41,7 @@ public:
 
     autonavigation::AutoNavigationHandler& AutoNavigationHandler();
     double minValidBoundingSphere() const;
-    const std::vector<SceneGraphNode*>& relevantNodes() const;
+    const std::vector<SceneGraphNode*>& relevantNodes();
 
     std::vector<documentation::Documentation> documentations() const override;
     scripting::LuaLibrary luaLibrary() const override;
@@ -56,6 +56,7 @@ private:
     properties::StringListProperty _relevantNodeTags;
 
     std::vector<SceneGraphNode*> _relevantNodes;
+    bool _hasInitializedRelevantNodes = false;
 };
 
 } // namespace openspace

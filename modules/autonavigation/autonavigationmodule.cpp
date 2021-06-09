@@ -75,7 +75,12 @@ double AutoNavigationModule::minValidBoundingSphere() const {
     return _minValidBoundingSphere;
 }
 
-const std::vector<SceneGraphNode*>& AutoNavigationModule::relevantNodes() const {
+const std::vector<SceneGraphNode*>& AutoNavigationModule::relevantNodes() {
+    if (!_hasInitializedRelevantNodes) {
+        findRelevantNodes();
+        _hasInitializedRelevantNodes = true;
+    }
+
     return _relevantNodes;
 }
 

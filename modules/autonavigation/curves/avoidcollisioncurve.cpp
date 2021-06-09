@@ -208,7 +208,8 @@ void AvoidCollisionCurve::removeCollisions(int step) {
 
                 _points.insert(_points.begin() + i + 2, extraKnot);
 
-                removeCollisions(++step);
+                step++;
+                removeCollisions(step);
                 break;
             }
         }
