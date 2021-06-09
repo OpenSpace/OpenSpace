@@ -26,22 +26,34 @@
 
 namespace openspace {
 
+// Convert Equatorial coordinates ICRS right ascension and declination (a, d)
+// into Galactic coordinates (l, b)
 glm::dvec3 icrsToGalacticCartesian(float ra, float dec, double distance) {
-    // Convert to Galactic Coordinates from ICRS right ascension and declination
-    // https://gea.esac.esa.int/archive/documentation/GDR2/Data_processing/
-    // chap_cu3ast/sec_cu3ast_intro/ssec_cu3ast_intro_tansforms.html#SSS1
-    const glm::dmat3 conversionMatrix = glm::dmat3({
-        -0.0548755604162154,  0.4941094278755837, -0.8676661490190047, // col 0
-        -0.8734370902348850, -0.4448296299600112, -0.1980763734312015, // col 1
-        -0.4838350155487132,  0.7469822444972189,  0.4559837761750669  // col 2
-    });
+    // Reference:
+    // https://www.atnf.csiro.au/people/Tobias.Westmeier/tools_coords.php,
 
-    glm::dvec3 rICRS = glm::dvec3(
-        cos(glm::radians(ra)) * cos(glm::radians(dec)),
-        sin(glm::radians(ra)) * cos(glm::radians(dec)),
-        sin(glm::radians(dec))
+    // (Ra, Dec) -> (a, d)
+    float a = glm::radians(ra);
+    float d = glm::radians(dec);
+
+    // J2000 Galactic reference frame
+    constexpr float a0 = glm::radians(192.8595f); // Equatorial coordinates of the Galactic north pole
+    constexpr float d0 = glm::radians(27.1284f);
+    constexpr float l0 = glm::radians(122.9320f); // Galactic longitude of the equatorial north pole
+
+    // Convert to galactic reference frame
+    float l = l0 - atan2(
+        cos(d) * sin(a - a0),
+        sin(d) * cos(d0) - cos(d) * sin(d0) * cos(a - a0)
     );
-    glm::dvec3 rGalactic = conversionMatrix * rICRS; // on the unit sphere
+    float b = asin(sin(d) * sin(d0) + cos(d) * cos(d0) * cos(a - a0));
+
+    // Convert to cartesian
+    glm::dvec3 rGalactic = glm::dvec3(
+        cos(b) * cos(l),
+        cos(b) * sin(l),
+        sin(b)
+    );
 
     return distance * rGalactic;
 }
