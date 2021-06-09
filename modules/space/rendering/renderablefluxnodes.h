@@ -47,11 +47,10 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-        bool isReady() const override;
+    bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
-    void updateActiveTriggerTimeIndex(double currentTime);
 
     static documentation::Documentation Documentation();
 
@@ -92,7 +91,7 @@ private:
         filterLower, filterUpper, scalingMode, colorTableRange, domainLimZ, nodeSkip,
         nodeSkipDefault, nodeSkipEarth, nodeSkipMethod, nodeSkipFluxThreshold, 
         nodeSkipRadiusThreshold, fluxColorAlpha, fluxColorAlphaIlluminance, earthPos,
-        distanceThreshold, activeStreamNumber, enhanceMethod, flowColor, usingParticles,
+        distanceThreshold, enhanceMethod, flowColor, usingParticles, //activeStreamNumber
         usingInterestingStreams, particleSize, particleSpacing, particleSpeed)
         _uniformCache;
     UniformCache(time, flowColoring, maxNodeDistanceSize, usingCameraPerspective,
@@ -102,8 +101,7 @@ private:
         _uniformCache2;
 
     // ------------------------------------ STRINGS ------------------------------------//
-    // Name of the Node
-    std::string _identifier;    
+    std::string _binarySourceFolderPath;
     // ------------------------------------- FLAGS -------------------------------------//
     // Used for 'runtime-states'. True when loading a new state from disk on another
     // thread.
@@ -161,13 +159,9 @@ private:
     GLuint _vertexindexBuffer = 0;
     // OpenGL Vertex Buffer Object containing the stream number for every node. 
     GLuint _vertexStreamNumberBuffer = 0;
-    // OpenGL Vertex Buffer Object containing the stream number for every node. 
-    //GLuint _arrow = 0;
-
 
     // ----------------------------------- POINTERS ------------------------------------//
     // The Lua-Modfile-Dictionary used during initialization
-    std::unique_ptr<ghoul::Dictionary> _dictionary;
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
 
     // Transfer function used to color lines when _pColorMethod is set to BY_FLUX_VALUE
@@ -277,7 +271,7 @@ private:
     //_pDefaultNodeSkip and _pAmountofNodes
     properties::FloatProperty _pRadiusNodeSkipThreshold;
     //The active stream that we want to look at
-    properties::IntProperty _pActiveStreamNumber;
+    //properties::IntProperty _pActiveStreamNumber;
 
     //Misaligned index for fieldlines vs Fluxnodes
     properties::IntProperty _pMisalignedIndex;
@@ -312,37 +306,29 @@ private:
     properties::BoolProperty _pPulseAlways;
     properties::FloatProperty _scaleFactor;
 
-    //properties::FloatProperty _pTestChange;
-
     // initialization
-    std::vector<std::string> _sourceFiles;
     std::vector<std::string> _binarySourceFiles;
-    // binary files sourcefolder
-    std::string _binarySourceFilePath;
-    // meta data file
-    std::string _metaTimeSteps;
 
     // --------------------- FUNCTIONS USED DURING INITIALIZATION --------------------- //    
-    bool extractMandatoryInfoFromDictionary();
     void definePropertyCallbackFunctions();
-    std::vector<std::string> LoadJsonfile(std::string filepath);
-                                                //void extractTriggerTimesFromFileNames();
+    //std::vector<std::string> LoadJsonfile(std::string filepath);
     void populateStartTimes();
     void computeSequenceEndTime();
     void setModelDependentConstants();
     void setupProperties();
+    void updateActiveTriggerTimeIndex(double currentTime);
 
-    void writeCachedFile() const;
+    //void writeCachedFile() const;
     //bool readCachedFile(const std::string& file, const std::string& energybin);
-    bool loadFilesIntoRam();
+    //bool loadFilesIntoRam();
     void loadNodeData();
-    void createStreamnumberVector();
+    //void createStreamnumberVector();
     bool loadBinaryfilesDirectly(const std::string& energybin);
     // ------------------------- FUNCTIONS USED DURING RUNTIME ------------------------ //
     void updatePositionBuffer();
     void updateVertexColorBuffer();
     void updateVertexFilteringBuffer();
-    void updateVertexStreamNumberBuffer();
+    //void updateVertexStreamNumberBuffer();
     //void updateArrow();
 
     // ----------------------TEMPORARY VARIABLES ------------------

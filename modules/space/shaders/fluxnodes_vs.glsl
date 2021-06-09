@@ -76,7 +76,7 @@ uniform float   fluxColorAlpha;
 uniform float   fluxColorAlphaIlluminance;
 uniform vec3    earthPos;
 uniform float   distanceThreshold;
-uniform int     activeStreamNumber;
+// uniform int     activeStreamNumber;
 uniform bool    firstRender;
 uniform int     enhanceMethod;
 uniform double  time;
@@ -127,8 +127,8 @@ in float rValue;
 //in int nodeIndex;
 // The vertex streamnumber of every node. Location must correspond to 
 // VaStreamnumber in renderableFluxNodes.h
-layout(location = 3)
-in int Streamnumber;
+// layout(location = 3)
+// in int Streamnumber;
 layout(location = 4) 
 in vec2 in_st;
 
@@ -142,7 +142,7 @@ const int uniformColor     = 1;
 const int uniformskip = 0;
 const int fluxSkip = 1;
 const int radiusSkip = 2;
-const int streamNumberSkip = 3;
+// const int streamNumberSkip = 3;
 
 const int fluxMode = 0;
 const int RFlux = 1;
@@ -217,13 +217,12 @@ bool CheckvertexIndex(){
             return true;
         }
     }
-    else if(nodeSkipMethod == streamNumberSkip){
-        
-    if(Streamnumber == activeStreamNumber){
-        //vs_color = vec4(0);
-        return true;
-        }
-    }
+    // else if(nodeSkipMethod == streamNumberSkip){
+    //     if(Streamnumber == activeStreamNumber){
+    //         //vs_color = vec4(0);
+    //         return true;
+    //     }
+    // }
     return false;
 }
 //todo fix gl_VertexID
@@ -371,12 +370,12 @@ void main() {
         //float interestingStreams[10] = float[](339, 340, 350, 351, 352, 353, 362, 363, 364, 365);
         //float interestingStreams[20] = float[](326, 327, 328, 329, 338, 339, 340, 341, 350, 351, 352, 353, 362, 363, 364, 365, 374, 375, 376, 377);
 
-        for(int i = 0; i < interestingStreams.length(); i++){
-            if(Streamnumber == interestingStreams[i] && CheckvertexIndex()){
-                vec4 fluxColor3 = getTransferFunctionColor(colorTable);
-                vs_color = vec4(fluxColor3.xyz, 1*fluxColorAlpha);
-            }
-        }
+        // for(int i = 0; i < interestingStreams.length(); i++){
+        //     if(Streamnumber == interestingStreams[i] && CheckvertexIndex()){
+        //         vec4 fluxColor3 = getTransferFunctionColor(colorTable);
+        //         vs_color = vec4(fluxColor3.xyz, 1*fluxColorAlpha);
+        //     }
+        // }
     }
 
     if(usingParticles && isParticle() && rValue > 0.f){
