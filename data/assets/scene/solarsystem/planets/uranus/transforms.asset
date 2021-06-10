@@ -22,14 +22,33 @@ local UranusBarycenter = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { UranusBarycenter })
+local UranusCenter = {
+  Identifier = "UranusCenter",
+  Parent = UranusBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "URANUS",
+      Observer = "URANUS BARYCENTER"
+    }
+  },
+  GUI = {
+    Name = "Uranus Center",
+    Path = "/Solar System/Planets/Uranus",
+    Hidden = true,
+    Description = [[ Uranus Center position]],
+  }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { UranusBarycenter, UranusCenter })
 
 
 asset.meta = {
   Name = "Uranus Transforms",
   Version = "1.0",
-  Description = [[ Uranus Barycenter transform]],
+  Description = [[ Uranus Barycenter and Center transform]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license"
+  License = "MIT license",
+  Identifiers = {"UranusBarycenter", "UranusCenter"}
 }

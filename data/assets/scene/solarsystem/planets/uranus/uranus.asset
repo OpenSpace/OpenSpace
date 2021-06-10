@@ -5,7 +5,7 @@ asset.require('./trail')
 
 local Uranus = {
   Identifier = "Uranus",
-  Parent = transforms.UranusBarycenter.Identifier,
+  Parent = transforms.UranusCenter.Identifier,
   Transform = {
     Rotation = {
       Type = "SpiceRotation",

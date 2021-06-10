@@ -5,7 +5,7 @@ asset.require('./trail')
 
 local Neptune = {
   Identifier = "Neptune",
-  Parent = transforms.NeptuneBarycenter.Identifier,
+  Parent = transforms.NeptuneCenter.Identifier,
   Transform = {
     Rotation = {
       Type = "SpiceRotation",

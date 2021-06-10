@@ -7,7 +7,7 @@ asset.require('./trail')
 
 local Mercury = {
   Identifier = "Mercury",
-  Parent = transforms.MercuryBarycenter.Identifier,
+  Parent = transforms.MercuryCenter.Identifier,
   Transform = {
     Rotation = {
       Type = "SpiceRotation",

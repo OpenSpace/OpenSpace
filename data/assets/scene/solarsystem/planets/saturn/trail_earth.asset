@@ -12,7 +12,7 @@ local SaturnTrailEarth = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SATURN BARYCENTER",
+      Target = "SATURN",
       Observer = "EARTH"
     },
     Color = { 1.0, 0.5, 0.2 },

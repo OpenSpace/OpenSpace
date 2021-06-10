@@ -9,7 +9,7 @@ local marsRadii = { 3396190.0, 3396190.0, 3396190.0 }
 
 local Mars = {
   Identifier = "Mars",
-  Parent = transforms.MarsBarycenter.Identifier,
+  Parent = transforms.MarsCenter.Identifier,
   Transform = {
     Rotation = {
       Type = "SpiceRotation",

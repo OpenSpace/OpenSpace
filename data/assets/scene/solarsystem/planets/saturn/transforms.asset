@@ -20,15 +20,33 @@ local SaturnBarycenter = {
   }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { SaturnBarycenter })
+local SaturnCenter = {
+  Identifier = "SaturnCenter",
+  Parent = SaturnBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "SATURN",
+      Observer = "SATURN BARYCENTER"
+    }
+  },
+  GUI = {
+    Name = "Saturn Center",
+    Path = "/Solar System/Planets/Saturn",
+    Hidden = true,
+    Description = [[ Saturn Center position]]
+  }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { SaturnBarycenter, SaturnCenter })
 
 
 asset.meta = {
   Name = "Saturn Transforms",
   Version = "1.0",
-  Description = [[ Saturn Barycenter transform]],
+  Description = [[ Saturn Barycenter and Center transform]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license",
-  Identifiers = {"SaturnBarycenter"}
+  Identifiers = {"SaturnBarycenter", "SaturnCenter"}
 }
