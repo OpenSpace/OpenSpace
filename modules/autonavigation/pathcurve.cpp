@@ -50,7 +50,9 @@ glm::dvec3 PathCurve::positionAt(double relativeDistance) {
     return interpolate(u);
 }
 
-// Compute the curve parameter from an arc length value
+// Compute the curve parameter from an arc length value, using a combination of
+// Newton's method and bisection. Source:
+// https://www.geometrictools.com/Documentation/MovingAlongCurveSpecifiedSpeed.pdf
 // Input s is a length value, in the range [0, _totalLength]
 // Returns curve parameter in range [0, 1]
 double PathCurve::curveParameter(double s) {
@@ -65,6 +67,11 @@ double PathCurve::curveParameter(double s) {
     const int startIndex = (segmentIndex - 1) * NrSamplesPerSegment;
     const int endIndex = segmentIndex * NrSamplesPerSegment + 1;
 
+    const double segmentS = s - _lengthSums[segmentIndex - 1];
+    const double uMin = _curveParameterSteps[segmentIndex - 1];
+    const double uMax = _curveParameterSteps[segmentIndex];
+
+    // Use samples to find an initial guess for Newton's method
     // Find first sample with s larger than input s
     auto sampleIterator = std::upper_bound(
         _parameterSamples.begin() + startIndex,
@@ -79,10 +86,42 @@ double PathCurve::curveParameter(double s) {
     const ParameterPair& prevSample = *(sampleIterator - 1);
     const double uPrev = prevSample.u;
     const double sPrev = prevSample.s;
-
-    // Linearly interpolate between samples
     const double slope = (sample.u - uPrev) / (sample.s - sPrev);
-    return uPrev + slope * (s - sPrev);
+    double u =  uPrev + slope * (s - sPrev);
+
+    constexpr const int maxIterations = 50;
+
+    // Initialize root bounding limits for bisection
+    double lower = uMin;
+    double upper = uMax;
+
+    for (int i = 0; i < maxIterations; ++i) {
+        double F = arcLength(uMin, u) - segmentS;
+
+        // The error we tolerate, in meters. Note that distances are very large
+        constexpr const double tolerance = 0.005;
+        if (std::abs(F) <= tolerance) {
+            return u;
+        }
+
+        // Generate a candidate for Newton's method
+        double dfdu = approximatedDerivative(u); // > 0
+        double uCandidate = u - F / dfdu;
+
+        // Update root-bounding interval and test candidate
+        if (F > 0) {  // => candidate < u <= upper
+            upper = u;
+            u = (uCandidate <= lower) ? (upper + lower) / 2.0 : uCandidate;
+        }
+        else { // F < 0 => lower <= u < candidate
+            lower = u;
+            u = (uCandidate >= upper) ? (upper + lower) / 2.0 : uCandidate;
+        }
+    }
+
+    // No root was found based on the number of iterations and tolerance. However, it is
+    // safe to report the last computed u value, since it is within the segment interval
+    return u;
 }
 
 std::vector<glm::dvec3> PathCurve::points() {
