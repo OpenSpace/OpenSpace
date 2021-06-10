@@ -918,19 +918,19 @@ bool RenderableFieldlinesSequence::getStatesFromCdfFiles(const std::string& outp
         );
 
 
-        std::vector< std::vector<float> > vels = newState.vertexVelocities();
-        std::vector<float> maxVels;
-        for (auto velocity : vels) {
-            float it = *std::max_element(std::begin(velocity), std::end(velocity));
-            maxVels.push_back(it);
-        }
-        float maxVel = *std::max_element(std::begin(maxVels), std::end(maxVels));
+        //std::vector< std::vector<float> > vels = newState.vertexVelocities();
+        //std::vector<float> maxVels;
+        //for (auto velocity : vels) {
+        //    float it = *std::max_element(std::begin(velocity), std::end(velocity));
+        //    maxVels.push_back(it);
+        //}
+        //float maxVel = *std::max_element(std::begin(maxVels), std::end(maxVels));
 
-        LINFO(fmt::format("MaxVel: {}", maxVel));
+        //LINFO(fmt::format("MaxVel: {}", maxVel));
 
-        std::vector< std::vector<glm::vec3> > verts = newState.vertexPaths();
+        //std::vector< std::vector<glm::vec3> > verts = newState.vertexPaths();
 
-        std::vector< std::vector<float> > times = newState.vertexTimes();
+        //std::vector< std::vector<float> > times = newState.vertexTimes();
 
         if (isSuccessful) {
             addStateToSequence(newState);

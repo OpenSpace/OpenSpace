@@ -148,7 +148,7 @@ namespace openspace::fls {
 
         switch (state.model()) {
         case fls::Model::Batsrus:
-            innerBoundaryLimit = 2.5f;  // TODO specify in Lua?
+            innerBoundaryLimit = 1.0f;  // TODO specify in Lua?
             break;
         case fls::Model::Enlil:
             innerBoundaryLimit = 0.11f; // TODO specify in Lua?
@@ -193,7 +193,6 @@ namespace openspace::fls {
             ccmc::Tracer tracer(kameleon, interpolator.get());
             tracer.setInnerBoundary(innerBoundaryLimit); // TODO specify in Lua?
 
-
             //traces with "u" need unidirectionalTrace, while "b" needs bidirectionalTrace
             ccmc::Fieldline fieldline;
 
@@ -203,14 +202,20 @@ namespace openspace::fls {
                 seed.y,
                 seed.z);
 
-            const std::vector<ccmc::Point3f>& positions = fieldline.getPositions();
+            std::vector<ccmc::Point3f> positions = fieldline.getPositions();
+
+            //remove the last two vertices since they seem to be at the edge
+            //of the boundary. This should be fixed in the tracer later.
+
+            positions.pop_back();
+            positions.pop_back();
+            positions.erase(positions.begin());
 
             const size_t nLinePoints = positions.size();
             std::vector<glm::vec3> line;
 
-            std::vector<glm::vec3> vertices;
-
             for (const ccmc::Point3f& p : positions) {
+                std::vector<glm::vec3> vertices;
                 //vertices.emplace_back(p.component1, p.component2, p.component3);
 
                 //add vertices to initial fieldline so it can be rendered as well
@@ -238,7 +243,7 @@ namespace openspace::fls {
                     vertices.emplace_back(p2.component1, p2.component2, p2.component3);
                 }
                 state.addVertexPath(vertices);
-                vertices.clear();
+                //state.addLine(vertices);
 
             }
             //add the initial fieldlines to the state

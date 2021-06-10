@@ -433,45 +433,78 @@ glm::vec3 lerp(glm::vec3 a, glm::vec3 b, float t) {
     return a * (1.f - t) + b * t;
 }
 
+
+
 void FieldlinesState::moveLine(double dt) {
     bool forward;
-    if (dt > DBL_EPSILON) forward = true;
-    else forward = false;
+    if (dt > DBL_EPSILON) {
+        forward = true;
+        atStart = false;
+    }
+    else {
+        forward = false;
+        atEnd = false;
+    }
+
+    bool vertexEnd = false;
+    bool vertexStart = false;
 
     unsigned i = 0;
     for (glm::vec3& vertex : _vertexPositions) {
+
         _timeSinceLastVertex[i] += float(dt);
         if (forward) {
-            //check if vertex is at the end of its path
-            if (_vertexIndex[i] == _vertexPaths[i].size() - 1) continue;
-            
-            //next index
-            if (_timeSinceLastVertex[i] > _vertexTimes[i][_vertexIndex[i]]) {
+
+            //if a vertex has reached its last vertex in the path line, stop updating the
+            //field line positions
+            if (atEnd) break;
+
+            while (_timeSinceLastVertex[i] > _vertexTimes[i][_vertexIndex[i]]) {
                 _timeSinceLastVertex[i] -= _vertexTimes[i][_vertexIndex[i]];
                 _vertexIndex[i]++;
+
                 //check if at end after increasing index
-                if (_vertexIndex[i] == _vertexPaths[i].size() - 1) continue;
+                
+                //size - 10 as a margin to avoid bugs
+                if (_vertexIndex[i] == _vertexPaths[i].size() - 10) {
+                    //vertex = _vertexPaths[i][_vertexIndex[i]];
+                    vertexEnd = true;
+                    break;
+                }
             }
 
             //linear interpolation
+            
+            //normalize t to [0,1]
             float t = _timeSinceLastVertex[i] / _vertexTimes[i][_vertexIndex[i]];
             glm::vec3 a = _vertexPaths[i][_vertexIndex[i]];
-            glm::vec3 b = _vertexPaths[i][_vertexIndex[i] + 1];
+            glm::vec3 b = _vertexPaths[i][_vertexIndex[i]+1];
 
-            vertex = lerp(a, b, t);             
+            vertex = lerp(a, b, t);
+
         }
         else {
+
+            if (atStart) break;
+
             //the inital position, end condition
             if (_vertexIndex[i] == 0) continue;
 
-            //next index
-            if (_timeSinceLastVertex[i] < FLT_EPSILON) {
+            bool stop = false;
+            while (_timeSinceLastVertex[i] < FLT_EPSILON) {
                 _vertexIndex[i]--;
                 _timeSinceLastVertex[i] += _vertexTimes[i][_vertexIndex[i]];
 
-                //check if at end after increasing index
-                if (_vertexIndex[i] == 0) continue;
+                //check if at end after decreasing index and updating timeSinceLastVertex
+                if (_vertexIndex[i] == 0 && _timeSinceLastVertex[i] < FLT_EPSILON) {
+                    vertex = _vertexPaths[i][0];
+                    vertexStart = true;
+                    stop = true;
+                    break;
+                }
             }
+
+            if (stop) continue;
 
             //linear interpolation
             float t = _timeSinceLastVertex[i] / _vertexTimes[i][_vertexIndex[i]];
@@ -482,6 +515,9 @@ void FieldlinesState::moveLine(double dt) {
         }
         i++;
     }
+
+    if (vertexEnd) atEnd = true;
+    if (vertexStart) atStart = true;
 }
 
 void FieldlinesState::addVertexPath(std::vector<glm::vec3> path) {
@@ -499,6 +535,7 @@ void FieldlinesState::computeTimes() {
 
     for (std::vector<glm::vec3>& vec : _vertexPaths) {
         std::vector<float> times;
+
         for (size_t j = 0; j < vec.size() - 2; j++) {
 
             //distance to next vertex point in trajectory (path)

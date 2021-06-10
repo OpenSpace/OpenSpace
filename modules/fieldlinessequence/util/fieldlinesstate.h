@@ -89,6 +89,9 @@ private:
     double _triggerTime = -1.0;
     fls::Model _model;
 
+    bool atEnd = false;
+    bool atStart = false;
+
     std::vector<std::vector<float>> _extraQuantities;
     std::vector<std::string> _extraQuantityNames;
     std::vector<GLsizei> _lineCount;
