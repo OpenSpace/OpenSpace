@@ -20,7 +20,7 @@ local L1 = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "391", -- L1
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = kernels .. "/L1_de431.bsp"
     }
   },

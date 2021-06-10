@@ -12,7 +12,7 @@ local PlutoBarycenter = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "PLUTO BARYCENTER",
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = kernels
     }
   },

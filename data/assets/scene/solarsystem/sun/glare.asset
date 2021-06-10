@@ -21,7 +21,7 @@ local SunGlare = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SUN",
+      Target = "SSB",
       Observer = "SSB"
     }
   },

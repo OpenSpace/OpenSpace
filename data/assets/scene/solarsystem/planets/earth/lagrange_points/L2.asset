@@ -19,7 +19,7 @@ local L2Small = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "392", -- L2
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = kernels .. "/L2_de431.bsp"
     }
   },
@@ -46,7 +46,7 @@ local L2 = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "392", -- L2
-      Observer = "SUN",
+      Observer = "SSB",
       Kernels = kernels .. "/L2_de431.bsp"
     }
   },

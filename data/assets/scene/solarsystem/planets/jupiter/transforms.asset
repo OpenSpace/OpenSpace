@@ -11,7 +11,7 @@ local JupiterBarycenter = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "JUPITER BARYCENTER",
-      Observer = "SUN"
+      Observer = "SSB"
     }
   },
   GUI = {

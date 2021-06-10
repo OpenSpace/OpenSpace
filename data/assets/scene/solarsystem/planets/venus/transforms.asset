@@ -9,7 +9,7 @@ local VenusBarycenter = {
     Translation = {
       Type = "SpiceTranslation",
       Target = "VENUS BARYCENTER",
-      Observer = "SUN"
+      Observer = "SSB"
     }
   },
   GUI = {

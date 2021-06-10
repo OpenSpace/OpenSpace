@@ -348,7 +348,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             double lt;
             glm::dvec3 sunPosWorld = SpiceManager::ref().targetPosition(
                 "SUN",
-                "SUN",
+                "SSB",
                 "GALACTIC",
                 {},
                 _time,
@@ -386,7 +386,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                     // Getting source and caster:
                     glm::dvec3 sourcePos = SpiceManager::ref().targetPosition(
                         shadowConf.source.first,
-                        "SUN",
+                        "SSB",
                         "GALACTIC",
                         {},
                         _time,
@@ -395,7 +395,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                     sourcePos *= KM_TO_M; // converting to meters
                     glm::dvec3 casterPos = SpiceManager::ref().targetPosition(
                         shadowConf.caster.first,
-                        "SUN",
+                        "SSB",
                         "GALACTIC",
                         {},
                         _time,
