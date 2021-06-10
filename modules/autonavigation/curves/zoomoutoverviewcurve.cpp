@@ -58,6 +58,7 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
 
     // Start by going outwards
     _points.push_back(start.position());
+    _points.push_back(start.position());
     _points.push_back(start.position() + startTangentLength * startTangentDir);
 
     const std::string& startNode = start.nodeIdentifier;
@@ -85,21 +86,37 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
 
     _points.push_back(end.position() + endTangentLength * endTangentDir);
     _points.push_back(end.position());
+    _points.push_back(end.position());
 
-    _nSegments = (unsigned int)std::floor((_points.size() - 1) / 3.0);
+    _nSegments = static_cast<int>(_points.size() - 3);
 
     initializeParameterData();
 }
 
 glm::dvec3 ZoomOutOverviewCurve::interpolate(double u) {
     if (u <= 0.0) {
-        return _points[0];
+        return _points[1];
     }
     if (u > 1.0) {
-        return _points.back();
+        return *(_points.end() - 2);
     }
 
-    return interpolation::piecewiseCubicBezier(u, _points, _curveParameterSteps);
+    std::vector<double>::iterator segmentEndIt =
+        std::lower_bound(_curveParameterSteps.begin(), _curveParameterSteps.end(), u);
+    unsigned int index = static_cast<int>((segmentEndIt - 1) - _curveParameterSteps.begin());
+
+    double segmentStart = _curveParameterSteps[index];
+    double segmentDuration = (_curveParameterSteps[index + 1] - _curveParameterSteps[index]);
+    double uSegment = (u - segmentStart) / segmentDuration;
+
+    return interpolation::catmullRom(
+        uSegment,
+        _points[index],
+        _points[index + 1],
+        _points[index + 2],
+        _points[index + 3],
+        1.0
+    );
 }
 
 } // namespace openspace::autonavigation
