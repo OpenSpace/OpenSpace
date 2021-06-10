@@ -41,13 +41,14 @@ public:
     // Compute curve parameter u that matches the input arc length s
     double curveParameter(double s);
 
-    virtual glm::dvec3 interpolate(double u) = 0;
+    virtual glm::dvec3 interpolate(double u);
 
     std::vector<glm::dvec3> points();
 
 protected:
     // Precompute information related to the pspline parameters, that are
-    // needed for arc length reparameterization
+    // needed for arc length reparameterization. Must be called after 
+    // control point creation
     void initializeParameterData();
 
     double approximatedDerivative(double u, double h = 0.0001);
@@ -72,7 +73,6 @@ protected:
 class LinearCurve : public PathCurve {
 public:
     LinearCurve(const Waypoint& start, const Waypoint& end);
-    glm::dvec3 interpolate(double u);
 };
 
 } // namespace openspace::autonavigation

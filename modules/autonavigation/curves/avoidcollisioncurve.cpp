@@ -103,36 +103,7 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
     // Create extra points to avoid collision
     removeCollisions();
 
-    _nSegments = static_cast<int>(_points.size() - 3);
-
     initializeParameterData();
-}
-
-// Interpolate a list of control points and knot times
-glm::dvec3 AvoidCollisionCurve::interpolate(double u) {
-    if (u <= 0.0) {
-        return _points[1];
-    }
-    if (u > 1.0) {
-        return *(_points.end() - 2);
-    }
-
-    std::vector<double>::iterator segmentEndIt =
-        std::lower_bound(_curveParameterSteps.begin(), _curveParameterSteps.end(), u);
-    unsigned int index = static_cast<int>((segmentEndIt - 1) - _curveParameterSteps.begin());
-
-    double segmentStart = _curveParameterSteps[index];
-    double segmentDuration = (_curveParameterSteps[index + 1] - _curveParameterSteps[index]);
-    double uSegment = (u - segmentStart) / segmentDuration;
-
-    return interpolation::catmullRom(
-        uSegment,
-        _points[index],
-        _points[index + 1],
-        _points[index + 2],
-        _points[index + 3],
-        1.0
-    );
 }
 
 // Try to reduce the risk of collision by approximating the curve with linear segments.

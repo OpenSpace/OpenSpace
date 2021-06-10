@@ -66,7 +66,7 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
 
     // Zoom out
     if (startNode != endNode) {
-        // TODO: set a smarter orthogonal direction
+        // TODO: set a smarter orthogonal direction, to avoid making a big detour
         glm::dvec3 startNodeToEndNode = endNodePos - startNodePos;
         glm::dvec3 parallell = glm::proj(startNodeToStartPos, startNodeToEndNode);
         glm::dvec3 orthogonal = normalize(startNodeToStartPos - parallell);
@@ -74,10 +74,7 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
         glm::dvec3 extraKnot = startNodePos + 0.5 * startNodeToEndNode
             + 1.5 * glm::length(startNodeToEndNode) * orthogonal;
 
-        const double midTangentLengthFactor = 0.3;
-        _points.push_back(extraKnot - midTangentLengthFactor * startNodeToEndNode);
         _points.push_back(extraKnot);
-        _points.push_back(extraKnot + midTangentLengthFactor * startNodeToEndNode);
     }
 
     // Closing in on end node
@@ -88,35 +85,7 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
     _points.push_back(end.position());
     _points.push_back(end.position());
 
-    _nSegments = static_cast<int>(_points.size() - 3);
-
     initializeParameterData();
-}
-
-glm::dvec3 ZoomOutOverviewCurve::interpolate(double u) {
-    if (u <= 0.0) {
-        return _points[1];
-    }
-    if (u > 1.0) {
-        return *(_points.end() - 2);
-    }
-
-    std::vector<double>::iterator segmentEndIt =
-        std::lower_bound(_curveParameterSteps.begin(), _curveParameterSteps.end(), u);
-    unsigned int index = static_cast<int>((segmentEndIt - 1) - _curveParameterSteps.begin());
-
-    double segmentStart = _curveParameterSteps[index];
-    double segmentDuration = (_curveParameterSteps[index + 1] - _curveParameterSteps[index]);
-    double uSegment = (u - segmentStart) / segmentDuration;
-
-    return interpolation::catmullRom(
-        uSegment,
-        _points[index],
-        _points[index + 1],
-        _points[index + 2],
-        _points[index + 3],
-        1.0
-    );
 }
 
 } // namespace openspace::autonavigation

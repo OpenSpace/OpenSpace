@@ -34,7 +34,6 @@ struct WayPoint;
 class ZoomOutOverviewCurve : public PathCurve {
 public:
     ZoomOutOverviewCurve(const Waypoint& start, const Waypoint& end);
-    glm::dvec3 interpolate(double u);
 };
 
 } // namespace openspace::autonavigation

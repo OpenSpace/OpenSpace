@@ -129,6 +129,8 @@ std::vector<glm::dvec3> PathCurve::points() {
 }
 
 void PathCurve::initializeParameterData() {
+    _nSegments = static_cast<int>(_points.size() - 3);
+
     ghoul_assert(_nSegments > 0, "Cannot have a curve with zero segments!");
 
     _curveParameterSteps.clear();
@@ -192,16 +194,40 @@ double PathCurve::arcLength(double lowerLimit, double upperLimit) {
     );
 }
 
-LinearCurve::LinearCurve(const Waypoint& start, const Waypoint& end) {
-    _points.push_back(start.position());
-    _points.push_back(end.position());
-    _nSegments = 1;
-    initializeParameterData();
+glm::dvec3 PathCurve::interpolate(double u) {
+    ghoul_assert(u >= 0 && u <= 1.0, "Interpolation variable out of range [0, 1]");
+
+    if (u <= 0.0) {
+        return _points[1];
+    }
+    if (u > 1.0) {
+        return *(_points.end() - 2);
+    }
+
+    std::vector<double>::iterator segmentEndIt =
+        std::lower_bound(_curveParameterSteps.begin(), _curveParameterSteps.end(), u);
+    unsigned int index = static_cast<int>((segmentEndIt - 1) - _curveParameterSteps.begin());
+
+    double segmentStart = _curveParameterSteps[index];
+    double segmentDuration = (_curveParameterSteps[index + 1] - _curveParameterSteps[index]);
+    double uSegment = (u - segmentStart) / segmentDuration;
+
+    return interpolation::catmullRom(
+        uSegment,
+        _points[index],
+        _points[index + 1],
+        _points[index + 2],
+        _points[index + 3],
+        1.0
+    );
 }
 
-glm::dvec3 LinearCurve::interpolate(double u) {
-    ghoul_assert(u >= 0 && u <= 1.0, "Interpolation variable out of range [0, 1]");
-    return interpolation::linear(u, _points[0], _points[1]);
+LinearCurve::LinearCurve(const Waypoint& start, const Waypoint& end) {
+    _points.push_back(start.position());
+    _points.push_back(start.position());
+    _points.push_back(end.position());
+    _points.push_back(end.position());
+    initializeParameterData();
 }
 
 } // namespace openspace::autonavigation

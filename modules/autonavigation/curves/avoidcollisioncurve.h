@@ -34,7 +34,6 @@ struct WayPoint;
 class AvoidCollisionCurve : public PathCurve {
 public:
     AvoidCollisionCurve(const Waypoint& start, const Waypoint& end);
-    glm::dvec3 interpolate(double u);
 
 private:
     void removeCollisions(int step = 0);
