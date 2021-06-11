@@ -20,33 +20,15 @@ local VenusBarycenter = {
   }
 }
 
-local VenusCenter = {
-  Identifier = "VenusCenter",
-  Parent = VenusBarycenter.Identifier,
-  Transform = {
-    Translation = {
-      Type = "SpiceTranslation",
-      Target = "VENUS",
-      Observer = "VENUS BARYCENTER"
-    }
-  },
-  GUI = {
-    Name = "Venus Center",
-    Path = "/Solar System/Planets/Venus",
-    Hidden = true,
-    Description = "Position for Venus Center"
-  }
-}
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { VenusBarycenter, VenusCenter })
+assetHelper.registerSceneGraphNodesAndExport(asset, { VenusBarycenter })
 
 
 asset.meta = {
   Name = "Venus Transforms",
   Version = "1.0",
-  Description = [[ Spice translation for Venus Barycenter and Center]],
+  Description = [[ Spice translation for Venus Barycenter ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license",
-  Identifiers = {"VenusBarycenter", "VenusCenter"}
+  Identifiers = {"VenusBarycenter"}
 }

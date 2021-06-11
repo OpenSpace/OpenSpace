@@ -7,8 +7,13 @@ local texturesPath = asset.require("./saturn_textures").TexturesPath
 
 local Saturn = {
   Identifier = "Saturn",
-  Parent = transforms.SaturnCenter.Identifier,
+  Parent = transforms.SaturnBarycenter.Identifier,
   Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "SATURN",
+      Observer = "SATURN BARYCENTER"
+    },
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_SATURN",

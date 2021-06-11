@@ -20,33 +20,15 @@ local MarsBarycenter = {
   }
 }
 
-local MarsCenter = {
-  Identifier = "MarsCenter",
-  Parent = MarsBarycenter.Identifier,
-  Transform = {
-    Translation = {
-      Type = "SpiceTranslation",
-      Target = "MARS",
-      Observer = "MARS BARYCENTER"
-    }
-  },
-  GUI = {
-    Name = "Mars Center",
-    Path = "/Solar System/Planets/Mars",
-    Hidden = true,
-    Description = [[ SPICE Translation for targeting Mars Center]],
-  }
-}
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { MarsBarycenter, MarsCenter })
+assetHelper.registerSceneGraphNodesAndExport(asset, { MarsBarycenter })
 
 
 asset.meta = {
   Name = "Mars Transforms",
   Version = "1.0",
-  Description = [[ Transforms with positions for Mars.]],
+  Description = [[ Transform with position for Mars.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license",
-  Identifiers = {"MarsBarycenter", "MarsCenter"}
+  Identifiers = {"MarsBarycenter"}
 }

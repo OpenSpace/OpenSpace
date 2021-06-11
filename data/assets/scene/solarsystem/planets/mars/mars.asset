@@ -9,8 +9,13 @@ local marsRadii = { 3396190.0, 3396190.0, 3396190.0 }
 
 local Mars = {
   Identifier = "Mars",
-  Parent = transforms.MarsCenter.Identifier,
+  Parent = transforms.MarsBarycenter.Identifier,
   Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "MARS",
+      Observer = "MARS BARYCENTER"
+    },
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_MARS",

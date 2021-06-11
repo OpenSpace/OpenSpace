@@ -5,8 +5,13 @@ asset.require('./trail')
 
 local Jupiter = {
   Identifier = "Jupiter",
-  Parent = transforms.JupiterCenter.Identifier,
+  Parent = transforms.JupiterBarycenter.Identifier,
   Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "JUPITER",
+      Observer = "JUPITER BARYCENTER"
+    },
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "IAU_JUPITER",

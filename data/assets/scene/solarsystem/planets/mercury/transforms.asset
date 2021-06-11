@@ -20,33 +20,15 @@ local MercuryBarycenter = {
   }
 }
 
-local MercuryCenter = {
-  Identifier = "MercuryCenter",
-  Parent = MercuryBarycenter.Identifier,
-  Transform = {
-    Translation = {
-      Type = "SpiceTranslation",
-      Target = "MERCURY",
-      Observer = "MERCURY BARYCENTER"
-    }
-  },
-  GUI = {
-    Name = "Mercury Center",
-    Path = "/Solar System/Planets/Mercury",
-    Hidden = true,
-    Description = [[ Mercury Center position]],
-  }
-}
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { MercuryBarycenter, MercuryCenter })
+assetHelper.registerSceneGraphNodesAndExport(asset, { MercuryBarycenter })
 
 
 asset.meta = {
   Name = "Mercury Transforms",
   Version = "1.0",
-  Description = [[ Mercury Barycenter and Center transform]],
+  Description = [[ Mercury Barycenter transform]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license",
-  Identifiers = {"MercuryBarycenter", "MercuryCenter"}
+  Identifiers = {"MercuryBarycenter"}
 }
