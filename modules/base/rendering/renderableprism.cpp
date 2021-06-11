@@ -329,7 +329,7 @@ void RenderablePrism::render(const RenderData& data, RendererTasks&) {
     _shader->deactivate();
 }
 
-void RenderablePrism::update(const UpdateData&) {
+void RenderablePrism::update(const UpdateData& data) {
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
@@ -337,6 +337,7 @@ void RenderablePrism::update(const UpdateData&) {
     if (_prismIsDirty) {
         updateVertexData();
         updateBufferData();
+        setBoundingSphere(_length * glm::compMax(data.modelTransform.scale));
         _prismIsDirty = false;
     }
 }
