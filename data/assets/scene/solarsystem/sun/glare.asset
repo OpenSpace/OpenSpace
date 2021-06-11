@@ -18,13 +18,6 @@ local SunGlare = {
     Opacity = 0.65,
     RenderableType = "PreDeferredTransparency"
   },
-  Transform = {
-    Translation = {
-      Type = "SpiceTranslation",
-      Target = "SSB",
-      Observer = "SSB"
-    }
-  },
   GUI = {
     Name = "Sun Glare",
     Path = "/Solar System/Sun",

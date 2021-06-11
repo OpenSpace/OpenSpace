@@ -37,7 +37,7 @@ local LightSources = {
     Node = sunTransforms.SolarSystemBarycenter.Identifier,
     Intensity = 1.0
   },
-{
+  {
     Identifier = "Camera",
     Type = "CameraLightSource",
     Intensity = 0.5

@@ -682,7 +682,7 @@ void AtmosphereDeferredcaster::loadComputationPrograms() {
         );
     }
     _irradianceSupTermsProgramObject->setIgnoreUniformLocationError(IgnoreError::Yes);
-    
+
     //
     // InScattering S
     if (!_inScatteringProgramObject) {
