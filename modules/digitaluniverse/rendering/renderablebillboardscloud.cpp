@@ -1024,9 +1024,14 @@ std::vector<float> RenderableBillboardsCloud::createDataSlice() {
     float minColorIdx = std::numeric_limits<float>::max();
     float maxColorIdx = -std::numeric_limits<float>::max();
     for (const speck::Dataset::Entry& e : _dataset.entries) {
-        float color = e.data[colorMapInUse];
-        minColorIdx = std::min(color, minColorIdx);
-        maxColorIdx = std::max(color, maxColorIdx);
+        if (e.data.size() > 0) {
+            float color = e.data[colorMapInUse];
+            minColorIdx = std::min(color, minColorIdx);
+            maxColorIdx = std::max(color, maxColorIdx);
+        } else {
+            minColorIdx = 0;
+            maxColorIdx = 0;
+        }
     }
 
     double maxRadius = 0.0;

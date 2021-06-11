@@ -683,7 +683,7 @@ glm::dmat3 SpiceManager::frameTransformationMatrix(const std::string& from,
     ghoul_assert(!to.empty(), "To must not be empty");
 
     // get rotation matrix from frame A - frame B
-    glm::dmat3 transform;
+    glm::dmat3 transform = glm::dmat3(1.0);
     pxform_c(
         from.c_str(),
         to.c_str(),
@@ -856,7 +856,7 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& sourceFrame,
     ghoul_assert(!sourceFrame.empty(), "sourceFrame must not be empty");
     ghoul_assert(!destinationFrame.empty(), "destinationFrame must not be empty");
 
-    glm::dmat3 result;
+    glm::dmat3 result = glm::dmat3(1.0);
     pxform_c(
         sourceFrame.c_str(),
         destinationFrame.c_str(),
@@ -888,7 +888,7 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& sourceFrame,
     ghoul_assert(!sourceFrame.empty(), "sourceFrame must not be empty");
     ghoul_assert(!destinationFrame.empty(), "destinationFrame must not be empty");
 
-    glm::dmat3 result;
+    glm::dmat3 result = glm::dmat3(1.0);
 
     pxfrm2_c(
         sourceFrame.c_str(),
