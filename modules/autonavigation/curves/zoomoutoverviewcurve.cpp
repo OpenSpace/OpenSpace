@@ -53,34 +53,47 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
 
     const glm::dvec3 startNodePos = start.node()->worldPosition();
     const glm::dvec3 endNodePos = end.node()->worldPosition();
-    const glm::dvec3 startNodeToStartPos = start.position() - startNodePos;
-    const glm::dvec3 startTangentDir = normalize(startNodeToStartPos);
+    const glm::dvec3 startTangentDir = normalize(start.position() - startNodePos);
+    const glm::dvec3 endTangentDir = normalize(end.position() - endNodePos);
 
     // Start by going outwards
     _points.push_back(start.position());
     _points.push_back(start.position());
     _points.push_back(start.position() + startTangentLength * startTangentDir);
 
-    const std::string& startNode = start.nodeIdentifier;
-    const std::string& endNode = end.nodeIdentifier;
-
     // Zoom out
-    if (startNode != endNode) {
-        // TODO: set a smarter orthogonal direction, to avoid making a big detour
-        glm::dvec3 startNodeToEndNode = endNodePos - startNodePos;
-        glm::dvec3 parallell = glm::proj(startNodeToStartPos, startNodeToEndNode);
-        glm::dvec3 orthogonal = normalize(startNodeToStartPos - parallell);
+    if (start.nodeIdentifier != end.nodeIdentifier) {
+        const glm::dvec3 n1 = startTangentDir;
+        const glm::dvec3 n2 = endTangentDir;
 
-        glm::dvec3 extraKnot = startNodePos + 0.5 * startNodeToEndNode
-            + 1.5 * glm::length(startNodeToEndNode) * orthogonal;
+        // Decide the step direction for the "overview point" based on the directions
+        // at the start and end of the path, to try to get a nice curve shape
+        glm::dvec3 goodStepDirection;
+        if (glm::dot(n1, n2) < 0.0) { 
+            // Facing in different directions => step in direction of the cross product
+            goodStepDirection = glm::normalize(glm::cross(-n1, n2));
+        }
+        else {
+            goodStepDirection = glm::normalize(n1 + n2);
+        }
+
+        // Find a direction that is orthogonal to the line between the start and end position
+        const glm::dvec3 startPosToEndPos = end.position() - start.position();
+        const glm::dvec3 outwardStepVector = 
+            0.5 * glm::length(startPosToEndPos) * goodStepDirection;
+
+        const glm::dvec3 projectedVec = glm::proj(outwardStepVector, startPosToEndPos);
+        const glm::dvec3 orthogonalComponent = outwardStepVector - projectedVec;
+        const glm::dvec3 stepDirection = glm::normalize(orthogonalComponent);
+        
+        // Step half-way along the line between the position and then orthogonally
+        const glm::dvec3 extraKnot = start.position() + 0.5 * startPosToEndPos
+            + 1.5 * glm::length(startPosToEndPos) * stepDirection;
 
         _points.push_back(extraKnot);
     }
 
     // Closing in on end node
-    const glm::dvec3 endNodeToEndPos = end.position() - endNodePos;
-    const glm::dvec3 endTangentDir = normalize(endNodeToEndPos);
-
     _points.push_back(end.position() + endTangentLength * endTangentDir);
     _points.push_back(end.position());
     _points.push_back(end.position());
