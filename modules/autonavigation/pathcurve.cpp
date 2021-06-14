@@ -197,7 +197,7 @@ double PathCurve::arcLength(double lowerLimit, double upperLimit) {
 glm::dvec3 PathCurve::interpolate(double u) {
     ghoul_assert(u >= 0 && u <= 1.0, "Interpolation variable out of range [0, 1]");
 
-    if (u <= 0.0) {
+    if (u < 0.0) {
         return _points[1];
     }
     if (u > 1.0) {
@@ -206,10 +206,12 @@ glm::dvec3 PathCurve::interpolate(double u) {
 
     std::vector<double>::iterator segmentEndIt =
         std::lower_bound(_curveParameterSteps.begin(), _curveParameterSteps.end(), u);
-    unsigned int index = static_cast<int>((segmentEndIt - 1) - _curveParameterSteps.begin());
+
+    const int index = 
+        static_cast<int>((segmentEndIt - 1) - _curveParameterSteps.begin());
 
     double segmentStart = _curveParameterSteps[index];
-    double segmentDuration = (_curveParameterSteps[index + 1] - _curveParameterSteps[index]);
+    double segmentDuration = (_curveParameterSteps[index + 1] - segmentStart);
     double uSegment = (u - segmentStart) / segmentDuration;
 
     return interpolation::catmullRom(
@@ -218,7 +220,7 @@ glm::dvec3 PathCurve::interpolate(double u) {
         _points[index + 1],
         _points[index + 2],
         _points[index + 3],
-        1.0
+        1.0 // chordal version
     );
 }
 
